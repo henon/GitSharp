@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30428</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Gitty.Core</RootNamespace>
+    <AssemblyName>Gitty.Core</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkSubset>
+    </TargetFrameworkSubset>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CompleteAttribute.cs" />
+    <Compile Include="Exceptions\CorruptObjectException.cs" />
+    <Compile Include="Exceptions\FileLockedException.cs" />
+    <Compile Include="Exceptions\IncorrectObjectTypeException.cs" />
+    <Compile Include="Exceptions\ObjectWritingException.cs" />
+    <Compile Include="Exceptions\RevisionSyntaxException.cs" />
+    <Compile Include="Exceptions\SymlinksNotSupportedException.cs" />
+    <Compile Include="Extensions\IntExtensions.cs" />
+    <Compile Include="Lib\AbstractIndexTreeVisitor.cs" />
+    <Compile Include="Lib\AnyObjectId.cs" />
+    <Compile Include="Lib\BinaryDelta.cs" />
+    <Compile Include="Lib\ByteWindow.cs" />
+    <Compile Include="Lib\Commit.cs" />
+    <Compile Include="Lib\CoreConfig.cs" />
+    <Compile Include="Lib\DeltaOfsPackedObjectLoader.cs" />
+    <Compile Include="Lib\DeltaPackedObjectLoader.cs" />
+    <Compile Include="Lib\DeltaRefPackedObjectLoader.cs" />
+    <Compile Include="Lib\FileMode.cs" />
+    <Compile Include="Lib\FileTreeEntry.cs" />
+    <Compile Include="Lib\ForceModified.cs" />
+    <Compile Include="Lib\GitException.cs" />
+    <Compile Include="Lib\GitIndex.cs" />
+    <Compile Include="Lib\IndexDiff.cs" />
+    <Compile Include="Lib\IndexTreeVisitor.cs" />
+    <Compile Include="Lib\IndexTreeWalker.cs" />
+    <Compile Include="Lib\InflaterCache.cs" />
+    <Compile Include="Lib\LockFile.cs" />
+    <Compile Include="Lib\MutableObjectId.cs" />
+    <Compile Include="Lib\NullProgressMonitor.cs" />
+    <Compile Include="Lib\ObjectId.cs" />
+    <Compile Include="Lib\ObjectIdMap.cs" />
+    <Compile Include="Lib\ObjectLoader.cs" />
+    <Compile Include="Lib\ObjectType.cs" />
+    <Compile Include="Lib\ObjectWriter.cs" />
+    <Compile Include="Lib\PackedObjectLoader.cs" />
+    <Compile Include="Lib\PackFile.cs" />
+    <Compile Include="Lib\PackIndex.cs" />
+    <Compile Include="Lib\PackIndexV1.cs" />
+    <Compile Include="Lib\PackIndexV2.cs" />
+    <Compile Include="Lib\PackIndexWriter.cs" />
+    <Compile Include="Lib\PackReverseIndex.cs" />
+    <Compile Include="Lib\PersonIdent.cs" />
+    <Compile Include="Lib\ProgressMonitor.cs" />
+    <Compile Include="Lib\Ref.cs" />
+    <Compile Include="Lib\RefDatabase.cs" />
+    <Compile Include="Lib\RefLogWriter.cs" />
+    <Compile Include="Lib\RefUpdate.cs" />
+    <Compile Include="Lib\Repository.cs" />
+    <Compile Include="Lib\RepositoryConfig.cs" />
+    <Compile Include="Lib\RepositoryState.cs" />
+    <Compile Include="Lib\SymlinkTreeEntry.cs" />
+    <Compile Include="Lib\Tag.cs" />
+    <Compile Include="Lib\TextProgressMonitor.cs" />
+    <Compile Include="Lib\Tree.cs" />
+    <Compile Include="Lib\TreeEntry.cs" />
+    <Compile Include="Lib\Treeish.cs" />
+    <Compile Include="Lib\TreeVisitor.cs" />
+    <Compile Include="Lib\TreeVisitorWithCurrentDirectory.cs" />
+    <Compile Include="Lib\UnpackedObjectCache.cs" />
+    <Compile Include="Lib\UnpackedObjectLoader.cs" />
+    <Compile Include="Lib\WholePackedObjectLoader.cs" />
+    <Compile Include="Lib\WindowCursor.cs" />
+    <Compile Include="Lib\WindowedFile.cs" />
+    <Compile Include="Lib\WriteTree.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\BufferedReader.cs" />
+    <Compile Include="Util\Collections.cs" />
+    <Compile Include="Util\Hex.cs" />
+    <Compile Include="Util\NestedDictionary.cs" />
+    <Compile Include="Util\Numbers.cs" />
+    <Compile Include="Util\PathUtil.cs" />
+    <Compile Include="Util\WeakReference.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\External\SharpZipLib\ICSharpCode.SharpZLib.csproj">
+      <Project>{0E7413FF-EB9E-4714-ACF2-BE3A6A7B2FFD}</Project>
+      <Name>ICSharpCode.SharpZLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -8,8 +8,8 @@
     <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Gitty.Core</RootNamespace>
-    <AssemblyName>Gitty.Core</AssemblyName>
+    <RootNamespace>Gitty.Lib.CSharp</RootNamespace>
+    <AssemblyName>Gitty.Lib.CSharp</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkSubset>
@@ -131,4 +131,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetDir)$(TargetName).* $(SolutionDir)Gitty\$(OutDir)</PostBuildEvent>
+  </PropertyGroup>
 </Project>

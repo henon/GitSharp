@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com> 
  *
  * All rights reserved.
  *

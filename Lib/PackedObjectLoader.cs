@@ -99,9 +99,9 @@ namespace Gitty.Lib
          *         compressed data checksum; false if raw-data copying needs
          *         uncompressing and compressing data
          */
-        public bool SupportsFastCopyRawData()
+        public bool SupportsFastCopyRawData
         {
-            return pack.SupportsFastCopyRawData();
+            get { return pack.SupportsFastCopyRawData; }
         }
 
         /**

@@ -47,6 +47,7 @@ using ICSharpCode.SharpZipLib.Checksums;
 
 namespace Gitty.Lib
 {
+    [Complete]
 	public class PackFile : IEnumerable<PackIndex.MutableEntry>
 	{
 		public sealed class Constants
@@ -74,10 +75,7 @@ namespace Gitty.Lib
 		public PackFile(Repository parentRepo, FileInfo idxFile, FileInfo packFile)
 		{
 			pack = new WindowedFile(packFile);
-			pack.OnOpen = delegate()
-			{
-				ReadPackHeader();
-			};
+			pack.OnOpen = ReadPackHeader;
 
 			try
 			{
@@ -164,9 +162,9 @@ namespace Gitty.Lib
 		 * 
 		 * @return number of objects in index of this pack, likewise in this pack
 		 */
-		long GetObjectCount()
+		long ObjectCount
 		{
-			return idx.ObjectCount;
+            get { return idx.ObjectCount; }
 		}
 
 		/**
@@ -245,9 +243,9 @@ namespace Gitty.Lib
 			}
 		}
 
-		public bool SupportsFastCopyRawData()
+		public bool SupportsFastCopyRawData
 		{
-			return idx.HasCRC32Support();
+            get { return idx.HasCRC32Support(); }
 		}
 
 
@@ -331,7 +329,7 @@ namespace Gitty.Lib
 
 		private long FindEndOffset(long startOffset)
 		{
-			long maxOffset = pack.Length - ObjectId.Constants.ObjectIdLength;
+			long maxOffset = pack.Length - AnyObjectId.Constants.ObjectIdLength;
 			return GetReverseIdx().findNextOffset(startOffset, maxOffset);
 		}
 
@@ -344,7 +342,20 @@ namespace Gitty.Lib
 
 		#region IEnumerable<MutableEntry> Members
 
-		public IEnumerator<PackIndex.MutableEntry> GetEnumerator()
+        /**
+	     * Provide iterator over entries in associated pack index, that should also
+	     * exist in this pack file. Objects returned by such iterator are mutable
+	     * during iteration.
+	     * <p>
+	     * Iterator returns objects in SHA-1 lexicographical order.
+	     * </p>
+	     * 
+	     * @return iterator over entries of associated pack index
+	     * 
+	     * @see PackIndex#iterator()
+	     */
+
+        public IEnumerator<PackIndex.MutableEntry> GetEnumerator()
 		{
 			return idx.GetEnumerator();
 		}

@@ -64,7 +64,7 @@ namespace Gitty.Lib
 
             idxHeader = new long[256]; // really unsigned 32-bit...
             for (int k = 0; k < idxHeader.Length; k++)
-                idxHeader[k] = NB.decodeUInt32(fanoutTable, k * 4);
+                idxHeader[k] = NB.DecodeUInt32(fanoutTable, k * 4);
             idxdata = new byte[idxHeader.Length][];
             for (int k = 0; k < idxHeader.Length; k++)
             {
@@ -101,7 +101,6 @@ namespace Gitty.Lib
                 }
                 return n64;
             }
-            protected set { throw new NotSupportedException(); }
         }
 
         public override ObjectId GetObjectId(long nthPosition)
@@ -192,7 +191,7 @@ namespace Gitty.Lib
 
                     if (levelTwo < _index.idxdata[levelOne].Length)
                     {
-                        long offset = NB.decodeUInt32(_index.idxdata[levelOne], levelTwo);
+                        long offset = NB.DecodeUInt32(_index.idxdata[levelOne], levelTwo);
                         Current.Offset = offset;
                         Current.FromRaw(_index.idxdata[levelOne], levelTwo + 4);
                         levelTwo += AnyObjectId.Constants.ObjectIdLength + 4;

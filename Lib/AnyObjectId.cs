@@ -171,6 +171,28 @@ namespace Gitty.Lib
             return NB.CompareUInt32(W5, NB.DecodeInt32(bs, p + 16));
         }
 
+        public int CompareTo(int[] bs, int p)
+        {
+            int cmp = NB.CompareUInt32(W1, bs[p]);
+            if (cmp != 0)
+                return cmp;
+
+            cmp = NB.CompareUInt32(W2, bs[p + 1]);
+            if (cmp != 0)
+                return cmp;
+
+            cmp = NB.CompareUInt32(W3, bs[p + 2]);
+            if (cmp != 0)
+                return cmp;
+
+            cmp = NB.CompareUInt32(W4, bs[p + 3]);
+            if (cmp != 0)
+                return cmp;
+
+            return NB.CompareUInt32(W5, bs[p + 4]);
+        }
+
+
         #endregion
 
         #region IComparable Members

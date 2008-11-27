@@ -49,6 +49,7 @@
     <Compile Include="Exceptions\CorruptObjectException.cs" />
     <Compile Include="Exceptions\FileLockedException.cs" />
     <Compile Include="Exceptions\IncorrectObjectTypeException.cs" />
+    <Compile Include="Exceptions\MissingObjectException.cs" />
     <Compile Include="Exceptions\ObjectWritingException.cs" />
     <Compile Include="Exceptions\RevisionSyntaxException.cs" />
     <Compile Include="Exceptions\SymlinksNotSupportedException.cs" />

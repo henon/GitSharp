@@ -169,7 +169,7 @@ namespace Gitty.Lib
          * @return number of objects in this index using a 64 bit offset; that is an
          *         object positioned after the 2 GB position within the file.
          */
-        public abstract long Offset64Count { get; protected set; }
+        public abstract long Offset64Count { get; }
 
         /**
          * Get ObjectId for the n-th object entry returned by {@link #iterator()}.

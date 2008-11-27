@@ -269,13 +269,13 @@ namespace Gitty.Lib
 			position += Constants.PackSignature.Length;
 
 			pack.ReadFully(position, intbuf, curs);
-			vers = NB.decodeUInt32(intbuf, 0);
+			vers = NB.DecodeUInt32(intbuf, 0);
 			if (vers != 2 && vers != 3)
 				throw new IOException("Unsupported pack version " + vers + ".");
 			position += 4;
 
 			pack.ReadFully(position, intbuf, curs);
-			long objectCnt = NB.decodeUInt32(intbuf, 0);
+			long objectCnt = NB.DecodeUInt32(intbuf, 0);
 			if (idx.ObjectCount != objectCnt)
 				throw new IOException("Pack index"
 						+ " object count mismatch; expected " + objectCnt

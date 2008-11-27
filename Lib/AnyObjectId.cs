@@ -148,7 +148,28 @@ namespace Gitty.Lib
 
         }
 
+        public int CompareTo(byte[] bs, int p)
+        {
+            int cmp;
 
+            cmp = NB.CompareUInt32(W1, NB.DecodeInt32(bs, p));
+            if (cmp != 0)
+                return cmp;
+
+            cmp = NB.CompareUInt32(W2, NB.DecodeInt32(bs, p + 4));
+            if (cmp != 0)
+                return cmp;
+
+            cmp = NB.CompareUInt32(W3, NB.DecodeInt32(bs, p + 8));
+            if (cmp != 0)
+                return cmp;
+
+            cmp = NB.CompareUInt32(W4, NB.DecodeInt32(bs, p + 12));
+            if (cmp != 0)
+                return cmp;
+
+            return NB.CompareUInt32(W5, NB.DecodeInt32(bs, p + 16));
+        }
 
         #endregion
 

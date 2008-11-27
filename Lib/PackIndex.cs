@@ -290,16 +290,16 @@ namespace Gitty.Lib
 
         protected abstract class EntriesIterator : IEnumerator<MutableEntry>
         {
-            protected MutableEntry _objectId = new MutableEntry();
-
             protected long returnedNumber = 0;
+
+            protected EntriesIterator()
+            {
+                Current = new MutableEntry();
+            }
 
             #region IEnumerator<MutableEntry> Members
 
-            public MutableEntry Current
-            {
-                get { return _objectId; }
-            }
+            public MutableEntry Current { get; protected set; }
 
             #endregion
 
@@ -315,7 +315,7 @@ namespace Gitty.Lib
 
             object System.Collections.IEnumerator.Current
             {
-                get { return _objectId; }
+                get { return Current; }
             }
 
             public abstract bool MoveNext();

@@ -235,5 +235,21 @@ namespace Gitty.Lib
 		{
 			throw new NotImplementedException();
 		}
+
+        internal int MemberCount
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+	    internal TreeEntry[] Members
+	    {
+	        get
+	        {
+	            throw new NotImplementedException();
+	        }
+	    }
 	}
 }

@@ -102,6 +102,7 @@
     <Compile Include="Lib\Tree.cs" />
     <Compile Include="Lib\TreeEntry.cs" />
     <Compile Include="Lib\Treeish.cs" />
+    <Compile Include="Lib\TreeIterator.cs" />
     <Compile Include="Lib\TreeVisitor.cs" />
     <Compile Include="Lib\TreeVisitorWithCurrentDirectory.cs" />
     <Compile Include="Lib\UnpackedObjectCache.cs" />

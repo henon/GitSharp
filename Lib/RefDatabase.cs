@@ -64,9 +64,7 @@ namespace Gitty.Lib
 
         private DirectoryInfo _gitDir;
         private DirectoryInfo _refsDir;
-        private DirectoryInfo _packedRefsDir;
-
-        private FileInfo packedRefsFile;
+        private FileInfo _packedRefsFile;
 
         private Dictionary<String, CachedRef> looseRefs;
         private Dictionary<String, Ref> packedRefs;
@@ -81,7 +79,7 @@ namespace Gitty.Lib
             this.Repository = repo;
             _gitDir = repo.Directory;
             _refsDir = PathUtil.CombineDirectoryPath(_gitDir, "refs");
-            _packedRefsDir = PathUtil.CombineDirectoryPath(_gitDir, "packed-refs");
+            _packedRefsFile = PathUtil.CombineFilePath(_gitDir, "packed-refs");
             ClearCache();
         }
 
@@ -348,8 +346,8 @@ namespace Gitty.Lib
 
         private void RefreshPackedRefs()
         {
-            DateTime currTime = packedRefsFile.LastWriteTime;
-            long currLen = currTime == DateTime.MinValue ? 0 : packedRefsFile.Length;
+            DateTime currTime = _packedRefsFile.LastWriteTime;
+            long currLen = currTime == DateTime.MinValue ? 0 : _packedRefsFile.Length;
             if (currTime == packedRefsLastModified && currLen == packedRefsLength)
                 return;
             if (currTime == DateTime.MinValue)
@@ -363,7 +361,7 @@ namespace Gitty.Lib
             Dictionary<String, Ref> newPackedRefs = new Dictionary<String, Ref>();
             try
             {
-                BufferedReader b = OpenReader(packedRefsFile);
+                BufferedReader b = OpenReader(_packedRefsFile);
                 try
                 {
                     String p;

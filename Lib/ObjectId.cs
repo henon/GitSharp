@@ -55,7 +55,7 @@ namespace Gitty.Lib
         static ObjectId()
         {
             ZeroId = new ObjectId(0, 0, 0, 0, 0);
-            ZeroIdString = ZeroIdString.ToString();
+            ZeroIdString = ZeroId.ToString();
         }
 
 

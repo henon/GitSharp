@@ -85,6 +85,11 @@ namespace Gitty.Lib
         private RefDatabase _refs;
         private List<PackFile> _packs;
 
+	public Repository (string gitDirectory) : this (new DirectoryInfo (gitDirectory))
+	{
+	    
+	}
+	    
         /**
          * Construct a representation of a Git repository.
          * 

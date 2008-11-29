@@ -96,7 +96,15 @@ namespace Gitty.Lib
 
         public static RepositoryConfig OpenUserConfig()
         {
-            return new RepositoryConfig(null, new FileInfo(Path.Combine(Environment.GetEnvironmentVariable( "USERPROFILE"), ".gitconfig")));
+	    string bd;
+
+	    int p = (int) Environment.OSVersion.Platform;
+	    if (p == (int) PlatformID.Unix || p == (int) PlatformID.MacOSX || p == 128)
+		bd = Environment.GetFolderPath (Environment.SpecialFolder.Personal);
+	    else
+		bd = Environment.GetEnvironmentVariable( "USERPROFILE");
+	    
+            return new RepositoryConfig(null, new FileInfo(Path.Combine(bd, ".gitconfig")));
         }
 
 

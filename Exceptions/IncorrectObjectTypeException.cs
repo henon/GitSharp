@@ -56,11 +56,11 @@ namespace Gitty.Exceptions
         //
 
         public IncorrectObjectTypeException(ObjectId id, ObjectType type) 
-            : base (string.Format("Object {0} is not a {1}.", id.ToString(),type))
+            : base (string.Format("Object {0} is not a {1}.", id,type))
         { 
 
         }
-        public IncorrectObjectTypeException(ObjectId id, ObjectType type, Exception inner) : base(string.Format("Object {0} is not a {1}.", id.ToString(), type), inner) { }
+        public IncorrectObjectTypeException(ObjectId id, ObjectType type, Exception inner) : base(string.Format("Object {0} is not a {1}.", id, type), inner) { }
         protected IncorrectObjectTypeException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)

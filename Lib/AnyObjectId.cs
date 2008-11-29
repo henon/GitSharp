@@ -48,7 +48,11 @@ namespace Gitty.Lib
 {
     [Complete]
     public abstract class AnyObjectId 
-        : IComparable<ObjectId>, IComparable
+	    :
+#if !__MonoCS__
+	    IComparable<ObjectId>,
+#endif
+	    IComparable
     {
         internal class Constants
         {

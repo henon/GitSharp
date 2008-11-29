@@ -218,9 +218,10 @@ namespace Gitty.Lib
 					crc.Update(buf, 0, read);
 					headerCnt -= toRead;
 				}
-#warning I had to comment this out to get it to compile. We need to figure out what we can use instead of a CheckedOutputStream
-				/* CheckedOutputStream crcOut = new CheckedOutputStream(stream, crc);
-				pack.CopyToStream(dataOffset, buf, cnt, crcOut, curs); */
+
+				
+				CheckedOutputStream crcOut = new CheckedOutputStream(stream, crc);
+				pack.CopyToStream(dataOffset, buf, cnt, crcOut, curs);
 				long computed = crc.Value;
 
 				ObjectId id;

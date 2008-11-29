@@ -325,11 +325,29 @@ namespace Gitty.Lib
             #endregion
         }
 
-
-
         internal static PackIndex Open(FileInfo idxFile)
         {
-            throw new NotImplementedException();
-        }
+	    try {
+		using (FileStream fs = idxFile.OpenRead ()){
+		    byte [] hdr = new byte [8];
+		    int n = fs.Read (hdr, 0, hdr.Length);
+		    if (n != hdr.Length)
+			throw new IOException ("The PackIndex is a partial file (" + idxFile.FullName + ")");
+
+		    if (IsTOC (hdr)){
+			int v = NB.DecodeInt32 (hdr, 4);
+			switch (v){
+			case 2:
+			    return new PackIndexV2 (fs);
+			default:
+			    throw new IOException ("Unsupported pack index version " + v);
+			}
+		    }
+		    return new PackIndexV1 (fs, hdr);
+		}
+	    } catch (IOException io){
+		throw new IOException ("Unable to read pack index: " + idxFile.FullName);
+	    }
+	}
     }
 }

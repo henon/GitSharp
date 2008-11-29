@@ -113,6 +113,7 @@
     <Compile Include="Lib\WriteTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\BufferedReader.cs" />
+    <Compile Include="Util\CheckedOutputStream.cs" />
     <Compile Include="Util\Collections.cs" />
     <Compile Include="Util\Hex.cs" />
     <Compile Include="Util\NestedDictionary.cs" />

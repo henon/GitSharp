@@ -96,7 +96,6 @@ namespace Gitty.Util
             r <<= Nibble;
 
             r |= __hexCharToValue[bs[offset + 6]];
-            r <<= Nibble;
 
             int last = __hexCharToValue[bs[offset + 7]];
             if (r < 0 || last < 0)

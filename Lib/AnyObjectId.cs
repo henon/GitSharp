@@ -120,8 +120,8 @@ namespace Gitty.Lib
 
         public int GetFirstByte()
         {
-            //same as W1 >>> 24 in java
-            return  (byte)((W1 & 0xf000) >> 24);
+            // W1 >>> 24 in java
+            return  (byte)(W1 >> 24);
         }
 
         #region IComparable<ObjectId> Members

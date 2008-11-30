@@ -55,8 +55,6 @@ namespace Gitty.Lib
 
         private byte[][] idxdata;
 
-        private long objectCnt;
-
         public PackIndexV1(Stream fd, byte[] hdr)
         {
             var fanoutTable = new byte[IDX_HDR_LEN];
@@ -80,7 +78,7 @@ namespace Gitty.Lib
                 idxdata[k] = new byte[n * (AnyObjectId.Constants.ObjectIdLength + 4)];
                 NB.ReadFully(fd, idxdata[k], 0, idxdata[k].Length);
             }
-            objectCnt = idxHeader[255];
+            ObjectCount = idxHeader[255];
         }
 
         public override IEnumerator<PackIndex.MutableEntry> GetEnumerator()

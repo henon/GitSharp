@@ -38,9 +38,10 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
+using Gitty.Exceptions;
+using Gitty.Util;
 
 namespace Gitty.Lib
 {
@@ -50,7 +51,7 @@ namespace Gitty.Lib
           public static readonly string TagsPrefix = "refs/tags";
       }
 
-	private Repository objdb;
+      public Repository Repository { get; protected set; }
 
 	
 
@@ -67,7 +68,7 @@ namespace Gitty.Lib
 	 * @param db
 	 */
 	public Tag( Repository db) {
-		objdb = db;
+		Repository = db;
 	}
 
 	/**
@@ -80,10 +81,10 @@ namespace Gitty.Lib
 	 * @param raw data of an annotated tag.
 	 */
 	public Tag(Repository db, ObjectId id, String refName, byte[] raw) {
-		objdb = db;
+		Repository = db;
 		if (raw != null) {
 			TagId = id;
-			this.Id = ObjectId.FromString(raw, 7);
+			Id = ObjectId.FromString(raw, 7);
 		} else
 			Id = id;
 		if (refName != null && refName.StartsWith("refs/tags/"))
@@ -95,119 +96,121 @@ namespace Gitty.Lib
 	/**
 	 * @return tagger of a annotated tag or null
 	 */
-    private PersonIdent _author;
+    private PersonIdent author;
 	public PersonIdent Author {
         get
         {
             decode();
-            return _author;
+            return author;
         }
         set
         {
-            _author = value;
+            author = value;
         }
 	}
 
 	/**
 	 * @return comment of an annotated tag, or null
 	 */
-    private String _message;
+    private String message;
 	public String Message {
         get
         {
             decode();
-            return _message;
+            return message;
         }
         set
         {
-            _message = value;
+            message = value;
         }
 	}
 
-	private void decode() {
-        throw new NotImplementedException();
-		// FIXME: handle I/O errors
-        //if (raw != null) {
-        //    try {
-        //        BufferedReader br = new BufferedReader(new InputStreamReader(
-        //                new ByteArrayInputStream(raw)));
-        //        String n = br.readLine();
-        //        if (n == null || !n.startsWith("object ")) {
-        //            throw new CorruptObjectException(tagId, "no object");
-        //        }
-        //        objId = Id.fromString(n.substring(7));
-        //        n = br.readLine();
-        //        if (n == null || !n.startsWith("type ")) {
-        //            throw new CorruptObjectException(tagId, "no type");
-        //        }
-        //        type = n.substring("type ".length());
-        //        n = br.readLine();
+    private void decode()
+    {
+        // FIXME: handle I/O errors
+        if (raw == null) return;
 
-        //        if (n == null || !n.startsWith("tag ")) {
-        //            throw new CorruptObjectException(tagId, "no tag name");
-        //        }
-        //        tag = n.substring("tag ".length());
-        //        n = br.readLine();
+        using (var br = new StreamReader(new MemoryStream(raw)))
+        {
+            String n = br.ReadLine();
+            if (n == null || !n.StartsWith("object "))
+            {
+                throw new CorruptObjectException(TagId, "no object");
+            }
+            Id = ObjectId.FromString(n.Substring(7));
+            n = br.ReadLine();
+            if (n == null || !n.StartsWith("type "))
+            {
+                throw new CorruptObjectException(TagId, "no type");
+            }
+            TagType = n.Substring("type ".Length);
+            n = br.ReadLine();
 
-        //        // We should see a "tagger" header here, but some repos have tags
-        //        // without it.
-        //        if (n == null)
-        //            throw new CorruptObjectException(tagId, "no tagger header");
+            if (n == null || !n.StartsWith("tag "))
+            {
+                throw new CorruptObjectException(TagId, "no tag name");
+            }
+            TagName = n.Substring("tag ".Length);
+            n = br.ReadLine();
 
-        //        if (n.length()>0)
-        //            if (n.startsWith("tagger "))
-        //                tagger = new PersonIdent(n.substring("tagger ".length()));
-        //            else
-        //                throw new CorruptObjectException(tagId, "no tagger/bad header");
+            // We should see a "tagger" header here, but some repos have tags
+            // without it.
+            if (n == null)
+                throw new CorruptObjectException(TagId, "no tagger header");
 
-        //        // Message should start with an empty line, but
-        //        StringBuffer tempMessage = new StringBuffer();
-        //        char[] readBuf = new char[2048];
-        //        int readLen;
-        //        while ((readLen = br.read(readBuf)) > 0) {
-        //            tempMessage.append(readBuf, 0, readLen);
-        //        }
-        //        message = tempMessage.toString();
-        //        if (message.startsWith("\n"))
-        //            message = message.substring(1);
-        //    } catch (IOException e) {
-        //        e.printStackTrace();
-        //    } finally {
-        //        raw = null;
-        //    }
-        //}
-	}
+            if (n.Length > 0)
+                if (n.StartsWith("tagger "))
+                    Tagger = new PersonIdent(n.Substring("tagger ".Length));
+                else
+                    throw new CorruptObjectException(TagId, "no tagger/bad header");
 
-	
-	/**
+            // Message should start with an empty line, but
+            StringBuilder tempMessage = new StringBuilder();
+            char[] readBuf = new char[2048];
+            int readLen;
+            int readIndex = 0;
+            while ((readLen = br.Read(readBuf, readIndex, readBuf.Length)) > 0)
+            {
+                //readIndex += readLen;
+                tempMessage.Append(readBuf, 0, readLen);
+            }
+            message = tempMessage.ToString();
+            if (message.StartsWith("\n"))
+                message = message.Substring(1);
+        }
+
+        raw = null;
+    }
+
+
+      /**
 	 * Store a tag.
 	 * If author, message or type is set make the tag an annotated tag.
 	 *
 	 * @throws IOException
 	 */
-	public void Create(){ //renamed from Tag
-		if (this.TagId != null)
-			throw new InvalidOperationException("exists " + this.TagId);
+	public void Save(){ //renamed from Tag
+		if (TagId != null)
+			throw new InvalidOperationException("exists " + TagId);
 		ObjectId id;
-		RefUpdate ru;
 
-		if (_author!=null || _message!=null || _tagType!=null) {
-			ObjectId tagid = new ObjectWriter(objdb).WriteTag(this);
-			this.TagId = tagid;
+	    if (author!=null || message!=null || tagType!=null) {
+			ObjectId tagid = new ObjectWriter(Repository).WriteTag(this);
+			TagId = tagid;
 			id = tagid;
 		} else {
-			id = this.Id;
+			id = Id;
 		}
 
-		ru = objdb.UpdateRef(Constants.TagsPrefix  + "/" + this.TagName);
+		RefUpdate ru = Repository.UpdateRef(Constants.TagsPrefix  + "/" + TagName);
 		ru.SetNewObjectId(id);
-		ru.SetRefLogMessage("tagged " + this.TagName, false);
+		ru.SetRefLogMessage("tagged " + TagName, false);
 		if (ru.ForceUpdate() == RefUpdate.Result.LockFailure)
-			throw new GitException("Unable to lock tag " + this.TagName);
+			throw new ObjectWritingException("Unable to lock tag " + TagName);
 	}
 
 	public String toString() {
-		return "tag[" + this.TagName + this.TagType + this.Id + " " + this.Author + "]";
+		return "tag[" + TagName + TagType + Id + " " + Author + "]";
 	}
 
     public ObjectId TagId { get; set; }
@@ -219,12 +222,11 @@ namespace Gitty.Lib
 	public PersonIdent Tagger{
         get
         {
-            decode();
-            return _author;
+            return Author;
         }
         set
         {
-            this._author = value;
+            Author = value;
         }
 	}
 
@@ -232,16 +234,16 @@ namespace Gitty.Lib
 	/**
 	 * @return tag target type
 	 */
-    private String _tagType;
+    private String tagType;
 	public String TagType {
         get
         {
             decode();
-            return _tagType;
+            return tagType;
         }
         set
         {
-            this._tagType = value;
+            tagType = value;
         }
 	}
 

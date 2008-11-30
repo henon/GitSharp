@@ -65,5 +65,10 @@ namespace Gitty.Lib
         {
             throw new NotImplementedException();
         }
+
+        internal ObjectId WriteCommit(Commit t)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

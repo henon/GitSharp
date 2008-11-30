@@ -210,7 +210,7 @@ namespace Gitty.Lib
             int levelOne = objId.GetFirstByte();
             int levelTwo = BinarySearchLevelTwo(objId, levelOne);
             if (levelTwo == -1)
-                throw new MissingObjectException(objId.Copy(), "unknown");
+                throw new MissingObjectException(objId.Copy(), ObjectType.Unknown);
             return NB.DecodeUInt32(crc32[levelOne], levelTwo << 2);
         }
 

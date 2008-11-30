@@ -59,7 +59,7 @@ namespace Gitty.Lib.CSharp.Exceptions
          * @param id SHA-1
          * @param type object type
          */
-        public MissingObjectException(ObjectId id, String type)
+        public MissingObjectException(ObjectId id, ObjectType type)
             : base("Missing " + type + " " + id)
         {
         }

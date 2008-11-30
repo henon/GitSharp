@@ -51,6 +51,7 @@ namespace Gitty.Lib
         Tag = 4,
         ObjectType5 = 5,
 		OFSDelta = 6,
-		RefDelta = 7
+		RefDelta = 7,
+        Unknown = 255
     }
 }

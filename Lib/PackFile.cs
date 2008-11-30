@@ -332,7 +332,7 @@ namespace Gitty.Lib
 		private long FindEndOffset(long startOffset)
 		{
 			long maxOffset = pack.Length - AnyObjectId.Constants.ObjectIdLength;
-			return GetReverseIdx().findNextOffset(startOffset, maxOffset);
+			return GetReverseIdx().FindNextOffset(startOffset, maxOffset);
 		}
 
 		private PackReverseIndex GetReverseIdx()

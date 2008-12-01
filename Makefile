@@ -67,6 +67,7 @@ SOURCES = \
 	Lib/WindowedFile.cs				\
 	Lib/WriteTree.cs				\
 	Properties/AssemblyInfo.cs			\
+	Transport/PackedObjectInfo.cs  \
 	Util/BufferedReader.cs				\
 	Util/Collections.cs				\
 	Util/CheckedOutputStream.cs			\
@@ -85,4 +86,4 @@ test.exe: Gitty.Lib.CSharp.dll
 	$(CSC) -r:Gitty.Lib.CSharp.dll -debug test.cs
 
 clean: 
-	rm -f *.dll *.mdb
+	rm -f *.dll *.mdb *.exe

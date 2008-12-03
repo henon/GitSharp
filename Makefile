@@ -85,5 +85,8 @@ Gitty.Lib.CSharp.dll: $(SOURCES)
 test.exe: Gitty.Lib.CSharp.dll
 	$(CSC) -r:Gitty.Lib.CSharp.dll -debug test.cs
 
+run: test.exe
+	mono test.exe
+
 clean: 
 	rm -f *.dll *.mdb *.exe

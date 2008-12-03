@@ -1,0 +1,10 @@
+2008-12-02  Miguel de Icaza  <miguel@novell.com>
+
+	* Lib/ByteArrayWindow.cs: Implement the functionality for
+	ByteArrayWindow, do not derive from ByteWindow which is a design
+	in the original Java implementation to use two different backends
+	for storage.
+
+	We could achieve the same in a cleaner way than the original
+	implementation if we choose to do so using an interface. 
+

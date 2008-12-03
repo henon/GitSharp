@@ -1,5 +1,15 @@
 2008-12-03  Miguel de Icaza  <miguel@novell.com>
 
+	* test.cs: make the sample program dump all the refs.
+
+	* Lib/Repository.cs: Expose GetAllRefs.
+
+	* Lib/RefDatabase.cs (ReadOneLooseRef): Do not crash if the
+	refName is not present in the looseKeys.
+
+	(RefreshPackedRefs): If the packed-refs file does not exist, do
+	not try to continue, it would otherwise crash.
+
 	* Lib/WindowedFile.cs: Implement another file from the original
 	Java implementation.
 

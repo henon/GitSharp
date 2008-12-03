@@ -202,8 +202,9 @@ namespace Gitty.Lib
 
         private void ReadOneLooseRef(Dictionary<string, Ref> avail, string refName, FileSystemInfo ent)
         {
-            CachedRef reff = looseRefs[refName];
-            if (reff != null)
+            CachedRef reff;
+
+	    if (looseRefs.TryGetValue (refName, out reff) && reff != null)
             {
                 if (reff.LastModified == ent.LastWriteTime)
                 {
@@ -346,6 +347,9 @@ namespace Gitty.Lib
 
         private void RefreshPackedRefs()
         {
+	    if (!_packedRefsFile.Exists)
+		return;
+	    
             DateTime currTime = _packedRefsFile.LastWriteTime;
             long currLen = currTime == DateTime.MinValue ? 0 : _packedRefsFile.Length;
             if (currTime == packedRefsLastModified && currLen == packedRefsLength)

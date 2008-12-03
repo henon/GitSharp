@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
@@ -901,6 +901,11 @@ namespace Gitty.Lib
             return RepositoryState.Safe;
         }
 
+	public Dictionary<string, Ref> GetAllRefs ()
+	{
+	    return _refs.GetAllRefs ();
+	}
+	
         /**
          * Check validty of a ref name. It must not contain character that has
          * a special meaning in a Git object reference expression. Some other

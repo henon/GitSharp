@@ -45,59 +45,15 @@ using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace Gitty.Lib {
 
-	//
-	// Implement ByteArrayWindow directly, there is no need for the ByteWindow class
-	// which is only used to provide two storage facilities in the original
-	// implementation.   If we want two implementation, we could use interfaces
-	// instead
-	//
-	public class ByteArrayWindow {
-		WindowedFile provider;
-		long start;
-		int id;
-
-		public long End { get; set; }
-		
-		public ByteArrayWindow (WindowedFile provider, long pos, int id, byte [] storage)
-		{
-			this.provider = provider;
-			this.start = pos;
-			End = this.start + storage.Length;
-			this.id = id;
-		}
-
-		public bool Contains (WindowedFile neededFile, long neededPos)
-		{
-			return provider == neededFile && start <= neededPos && neededPos < End;
-		}
-
-		public int Copy (byte [] source, long pos, byte [] dstbuf, int dstoff, int cnt)
-		{
-			long real_pos = pos - start;
-			
-			int n = (int) Math.Min (source.Length - real_pos, cnt);
-
-			Array.Copy (source, real_pos, dstbuf, dstoff, n);
-
-			return n;
-		}
-
-		public int Inflate (byte [] source, long pos, byte [] dstbuf, int dstoff, Inflater inf)
-		{
-			int real_pos = checked ((int)(pos - start));
-
-			while (!inf.IsFinished){
-				if (inf.IsNeedingInput){
-					inf.SetInput (source, real_pos, source.Length - real_pos);
-					break;
-				}
-				dstoff += inf.Inflate (dstbuf, dstoff, dstbuf.Length - dstoff);
-			}
-
-			while (!inf.IsFinished && !inf.IsNeedingInput){
-				dstoff += inf.Inflate (dstbuf, dstoff, dstbuf.Length - dstoff);
-			}
-			return dstoff;
-		}
+    public class WindowCache {
+	public static void Get (WindowCursor cursor, WindowedFile wp, long position)
+	{
+	    throw new NotImplementedException ();
 	}
+
+	public static void Purge (WindowedFile wp)
+	{
+	}
+	
+    }
 }

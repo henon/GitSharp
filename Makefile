@@ -13,7 +13,7 @@ SOURCES = \
 	Lib/AbstractIndexTreeVisitor.cs			\
 	Lib/AnyObjectId.cs				\
 	Lib/BinaryDelta.cs				\
-	Lib/ByteWindow.cs				\
+	Lib/ByteArrayWindow.cs				\
 	Lib/Commit.cs					\
 	Lib/CoreConfig.cs				\
 	Lib/DeltaOfsPackedObjectLoader.cs		\
@@ -63,6 +63,7 @@ SOURCES = \
 	Lib/UnpackedObjectCache.cs			\
 	Lib/UnpackedObjectLoader.cs			\
 	Lib/WholePackedObjectLoader.cs			\
+	Lib/WindowCache.cs				\
 	Lib/WindowCursor.cs				\
 	Lib/WindowedFile.cs				\
 	Lib/WriteTree.cs				\

@@ -40,16 +40,54 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace Gitty.Lib
 {
     public class WindowCursor
     {
-		internal byte[] tempId = new byte[ObjectId.Constants.ObjectIdLength];
+	internal byte[] tempId = new byte[ObjectId.Constants.ObjectIdLength];
 
-        internal void Release()
+	public ByteArrayWindow Window { get; set; }
+	public byte [] Handle { get; set; }
+	
+        public void Release()
         {
-            throw new NotImplementedException();
+	    Window = null;
+	    Handle = null;
         }
+
+	public int Copy (WindowedFile provider, long position, byte [] dstbuf, int dstoff, int cnt)
+	{
+	    long length = provider.Length;
+
+	    int need = cnt;
+	    while (need > 0 && position < length){
+		Pin (provider, position);
+		int r = Window.Copy (Handle, position, dstbuf, dstoff, need);
+		position += r;
+		dstoff += r;
+		need -= r;
+	    }
+	    return cnt - need;
+	}
+
+	public int Inflate (WindowedFile provider, long position, byte [] dstbuf, int dstoff, Inflater inf)
+	{
+	    for (;;){
+		Pin (provider, position);
+		dstoff = Window.Inflate (Handle, position, dstbuf, dstoff, inf);
+		if (inf.IsFinished)
+		    return dstoff;
+		position = Window.End;
+	    }
+	}
+
+	void Pin (WindowedFile provider, long position)
+	{
+	    ByteArrayWindow w = Window;
+	    if (w == null || !w.Contains (provider, position))
+		WindowCache.Get (this, provider, position);
+	}
     }
 }

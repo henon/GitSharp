@@ -41,58 +41,75 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.IO;
+using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace Gitty.Lib
 {
     public class WindowedFile
     {
+	FileInfo fPath;
+	FileStream fs;
+	
         public WindowedFile(FileInfo packFile)
         {
-
+	    fPath = packFile;
+	    Length = Int64.MaxValue;
         }
+
         public ThreadStart OnOpen { get; set; }
+
+	public string Name {
+	    get {
+		return fPath.FullName;
+	    }
+	}
+	
+        public long Length { get; internal set; } 
 
         internal void Close()
         {
-            throw new NotImplementedException();
+	    WindowCache.Purge (this);
         }
 
         internal void ReadCompressed(long position, byte[] dstbuf, WindowCursor curs)
-        {
-            throw new NotImplementedException();
+	{
+	    Inflater inf = InflaterCache.GetInflater ();
+	    try {
+		if (curs.Inflate (this, position, dstbuf, 0, inf) != dstbuf.Length)
+		    throw new IOException ("Short compressed stream at " + position);
+	    } finally {
+		InflaterCache.Release (inf);
+	    }
         }
 
-        internal void CopyToStream(long dataOffset, byte[] buf, int cnt, Stream stream, WindowCursor curs)
+        internal void CopyToStream (long position, byte[] buf, int cnt, Stream outStream, WindowCursor curs)
         {
-            throw new NotImplementedException();
+	    while (cnt > 0){
+		int toRead = (int) Math.Min (cnt, buf.Length);
+		int read = Read (position, buf, 0, toRead, curs);
+		if (read != toRead)
+		    throw new IOException ("End of File");
+		position += read;
+		cnt -= read;
+		outStream.Write (buf, 0, read);
+	    }
         }
 
-        internal void ReadFully(long position, byte[] intbuf, WindowCursor curs)
+        internal void ReadFully(long position, byte[] dstbuf, WindowCursor curs)
         {
-            throw new NotImplementedException();
+	    if (Read (position, dstbuf, 0, dstbuf.Length, curs) != dstbuf.Length)
+		throw new IOException("EOF");
         }
 
-        internal int Read(long objectOffset, byte[] buf, int p, int toRead, WindowCursor curs)
+        internal int Read (long position, byte[] dstbuf, int dstoff, int cnt, WindowCursor curs)
         {
-            throw new NotImplementedException();
+	    return curs.Copy (this, position, dstbuf, dstoff, cnt);
         }
 
-        internal int Length
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
 
-		internal int Read(long position, byte[] sig, WindowCursor curs)
-		{
-			throw new NotImplementedException();
-		}
-
-		internal string Name
-		{
-			get { throw new NotImplementedException(); }
-		}
+	internal int Read (long position, byte[] dstbuf, WindowCursor curs)
+	{
+	    return Read (position, dstbuf, 0, dstbuf.Length, curs);
 	}
+    }
 }

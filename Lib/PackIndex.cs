@@ -53,23 +53,23 @@ namespace Gitty.Lib
 
 
         /**
- * Open an existing pack <code>.idx</code> file for reading.
- * <p>
- * The format of the file will be automatically detected and a proper access
- * implementation for that format will be constructed and returned to the
- * caller. The file may or may not be held open by the returned instance.
- * </p>
- * 
- * @param idxFile
- *            existing pack .idx to read.
- * @return access implementation for the requested file.
- * @throws FileNotFoundException
- *             the file does not exist.
- * @throws IOException
- *             the file exists but could not be read due to security errors,
- *             unrecognized data version, or unexpected data corruption.
- */
-        public static PackIndex open(FileInfo idxFile)
+	 * Open an existing pack <code>.idx</code> file for reading.
+	 * <p>
+	 * The format of the file will be automatically detected and a proper access
+	 * implementation for that format will be constructed and returned to the
+	 * caller. The file may or may not be held open by the returned instance.
+	 * </p>
+	 * 
+	 * @param idxFile
+	 *            existing pack .idx to read.
+	 * @return access implementation for the requested file.
+	 * @throws FileNotFoundException
+	 *             the file does not exist.
+	 * @throws IOException
+	 *             the file exists but could not be read due to security errors,
+	 *             unrecognized data version, or unexpected data corruption.
+	 */
+	public static PackIndex open(FileInfo idxFile)
         {
             
             FileStream fd = idxFile.OpenRead();

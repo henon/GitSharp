@@ -50,16 +50,6 @@ namespace Gitty.Lib
     [Complete]
     public class RefDatabase
     {
-
-        public class Constants
-        {
-            public readonly static Encoding Encoding = Encoding.UTF8;
-            public readonly static string RefsSlash = "refs/";
-            public readonly static string TagsSlash = Tag.Constants.TagsPrefix + "/";
-            public readonly static string HeadsSlash = Repository.Constants.HeadsPrefix + "/";
-            public readonly static string[] RefSearchPaths = { "", RefsSlash, TagsSlash, HeadsSlash, Repository.Constants.RemotesPrefix + "/" };
-        }
-
         public Repository Repository { get; private set; }
 
         private DirectoryInfo _gitDir;
@@ -169,7 +159,7 @@ namespace Gitty.Lib
             Dictionary<String, Ref> avail = new Dictionary<String, Ref>();
             ReadPackedRefs(avail);
             ReadLooseRefs(avail, Constants.RefsSlash, _refsDir);
-            ReadOneLooseRef(avail, Repository.Constants.Head, PathUtil.CombineFilePath(_gitDir, Repository.Constants.Head));
+            ReadOneLooseRef(avail, Constants.Head, PathUtil.CombineFilePath(_gitDir, Constants.Head));
             return avail;
         }
 
@@ -381,7 +371,7 @@ namespace Gitty.Lib
                                 throw new IOException("Peeled line before ref.");
 
                             ObjectId id = ObjectId.FromString(p.Substring(1));
-                            last = new Ref(Ref.Storage.Packed, last.Name, last.ObjectId, id);
+                            last = new Ref(Ref.Storage.Packed, last.Name, last.Name, last.ObjectId, id, true);
                             newPackedRefs.Add(last.Name, last);
                             continue;
                         }
@@ -415,6 +405,31 @@ namespace Gitty.Lib
             }
         }
 
+	internal Ref Peel (Ref dref)
+	{
+	    if (dref.Peeled)
+		return dref;
+
+	    ObjectId peeled = null;
+	    try {
+		object target = Repository.MapObject (dref.ObjectId, dref.Name);
+
+		while (target is Tag){
+		    Tag tag = (Tag) target;
+		    peeled = tag.Id;
+
+		    if (tag.TagType == Constants.TypeTag)
+			target = Repository.MapObject (tag.Id, dref.Name);
+		    else
+			break;
+		}
+	    } catch (IOException){
+		// Ignore a read error.  Callers will also get the same error
+		// if they try to use the result of getPeeledObjectId.
+	    }
+	    return new Ref (dref.StorageFormat, dref.Name, dref.ObjectId, peeled, true);
+	}
+	
         private string ReadLine(FileInfo file)
         {
             using (BufferedReader br = OpenReader(file))

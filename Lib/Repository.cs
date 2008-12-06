@@ -73,15 +73,6 @@ namespace Gitty.Lib
      */
     public class Repository
     {
-
-        public sealed class Constants
-        {
-            public static readonly string HeadsPrefix = "refs/heads";
-            public static readonly string RemotesPrefix = "refs/remotes";
-            public static readonly string Head = "HEAD";
-            public static readonly string Master = "master";
-        }
-
         private RefDatabase _refs;
         private List<PackFile> _packs;
 
@@ -904,6 +895,16 @@ namespace Gitty.Lib
 	public Dictionary<string, Ref> GetAllRefs ()
 	{
 	    return _refs.GetAllRefs ();
+	}
+
+	public Dictionary<string, Ref> GetTags ()
+	{
+	    return _refs.GetTags ();
+	}
+
+	public Ref Peel (Ref pRef)
+	{
+	    return _refs.Peel (pRef);
 	}
 	
         /**

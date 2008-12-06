@@ -69,27 +69,42 @@ namespace Gitty.Lib
             }
         }
 
-        public Ref(Storage storage, string refName, ObjectId id )
-        {
-            this.StorageFormat = storage;
-            this.Name = refName;
-            this.ObjectId = id;
+	public Ref(Storage storage, string origName, string refName, ObjectId id)
+	    : this (storage, origName, refName, id, null, false)
+	{
         }
 
-        public Ref(Storage storage, string refName, ObjectId id, ObjectId peeledObjectId)
-            : this(storage, refName, id)
+	public Ref(Storage storage, string refName, ObjectId id)
+	    : this (storage, refName, refName, id, null, false)
+	{
+	}
+	
+	public Ref(Storage storage, string refName, ObjectId id, ObjectId peeledObjectId, bool peeled)
+            : this (storage, refName, refName, id, peeledObjectId, peeled)
+	
+	{
+	}
+	
+        public Ref(Storage storage, string origName, string refName, ObjectId id, ObjectId peeledObjectId, bool peeled)
         {
-            this.PeeledObjectId = peeledObjectId;
+	    StorageFormat = storage;
+	    OriginalName = origName;
+	    Name = refName;
+	    ObjectId = id;
+            PeeledObjectId = peeledObjectId;
+	    Peeled = peeled;
         }
 
         public string Name { get; private set; }
+	public string OriginalName { get; private set; }
         public Storage StorageFormat { get; private set; }
         public ObjectId ObjectId { get; private set; }
         public ObjectId PeeledObjectId { get; private set; }
+	public bool Peeled { get; private set; }
 
         public override string ToString()
         {
-            return "Ref[" + Name + "=" + this.ObjectId.ToString() + "]";
+            return "Ref[" + (OriginalName == Name ? "" : "(" + OriginalName + ")") + Name + "=" + this.ObjectId.ToString() + "]";
         }
     }
 }

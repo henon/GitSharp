@@ -15,6 +15,7 @@ SOURCES = \
 	Lib/BinaryDelta.cs				\
 	Lib/ByteArrayWindow.cs				\
 	Lib/Commit.cs					\
+	Lib/Constants.cs				\
 	Lib/CoreConfig.cs				\
 	Lib/DeltaOfsPackedObjectLoader.cs		\
 	Lib/DeltaPackedObjectLoader.cs			\
@@ -83,7 +84,7 @@ all: Gitty.Lib.CSharp.dll test.exe
 Gitty.Lib.CSharp.dll: $(SOURCES)
 	$(CSC) $(SOURCES) -out:Gitty.Lib.CSharp.dll -debug -target:library -r:ICSharpCode.SharpZipLib
 
-test.exe: Gitty.Lib.CSharp.dll
+test.exe: Gitty.Lib.CSharp.dll test.cs
 	$(CSC) -r:Gitty.Lib.CSharp.dll -debug test.cs
 
 run: test.exe

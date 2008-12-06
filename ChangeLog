@@ -1,3 +1,15 @@
+2008-12-06  Miguel de Icaza  <miguel@novell.com>
+
+	* Lib/*: Align some API doc comments, add some API docs.
+
+	* Lib/RefDatabase.cs (Peel): Implement.
+
+	* Lib/Constants.cs: Put all the constants here (not sure where
+	some new constants should have gone). 
+
+	* Lib/Ref.cs: Update to support `Peeled' property and
+	`OriginalName' from newer eGits.
+
 2008-12-03  Miguel de Icaza  <miguel@novell.com>
 
 	* test.cs: make the sample program dump all the refs.

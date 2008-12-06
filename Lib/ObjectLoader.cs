@@ -77,10 +77,10 @@ namespace Gitty.Lib
             }
         }
 		
-		// I'm not entirely sure how Java's protected works, but it seems
-		// this method was callable from a class that didn't inherit from this one,
-		// so instead I've marked this as internal for now, though I think
-		// public would probably be better - NR
+	// I'm not entirely sure how Java's protected works, but it seems
+	// this method was callable from a class that didn't inherit from this one,
+	// so instead I've marked this as internal for now, though I think
+	// public would probably be better - NR
         internal bool HasComputedId  
         {
             get

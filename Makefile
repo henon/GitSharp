@@ -14,6 +14,7 @@ SOURCES = \
 	Lib/AnyObjectId.cs				\
 	Lib/BinaryDelta.cs				\
 	Lib/ByteArrayWindow.cs				\
+	Lib/Codec.cs					\
 	Lib/Commit.cs					\
 	Lib/Constants.cs				\
 	Lib/CoreConfig.cs				\
@@ -77,6 +78,7 @@ SOURCES = \
 	Util/NestedDictionary.cs			\
 	Util/Numbers.cs					\
 	Util/PathUtil.cs				\
+	Util/RawParseUtils.cs				\
 	Util/WeakReference.cs	
 
 all: Gitty.Lib.CSharp.dll test.exe

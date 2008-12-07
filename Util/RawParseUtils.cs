@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+/*
+ * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
  *
@@ -35,23 +35,41 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+namespace Gitty.Lib {
+	
+    public static class RawParseUtils {
+	
+	public static int ParseBase10 (byte [] b, ref int ptr)
+	{
+	    int r = 0;
+	    int sign = 1;
 
-namespace Gitty.Lib
-{
-    public enum ObjectType
-    {
-        Bad = -1, 
-        Extension = 0,
-        Commit = 1,
-        Tree = 2,
-        Blob = 3,
-        Tag = 4,
-        ObjectType5 = 5,
-	OffsetDelta = 6,
-	ReferenceDelta = 7,
-	Unknown = 255
+	    try {
+		int sz = b.Length;
+		while (ptr < sz && b [ptr] == ' ')
+		    ptr++;
+
+		if (ptr >= sz)
+		    return 0;
+
+		if (b [ptr] == '-'){
+		    sign = -1;
+		    ptr++;
+		} else if (b [ptr] == '+')
+		    ptr++;
+
+		while (ptr < sz){
+		    byte d = b [ptr];
+		    if ((d < (byte) '0') | (d > (byte) '9'))
+			break;
+		    r = r * 10 + (d - (byte) '0');
+		    ptr++;
+		}
+	    } catch (IndexOutOfRangeException) {
+		// Not a valid digit
+	    }
+
+	    return sign * r;
+	}
     }
 }

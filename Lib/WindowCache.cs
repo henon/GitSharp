@@ -46,9 +46,28 @@ using ICSharpCode.SharpZipLib.Zip.Compression;
 namespace Gitty.Lib {
 
     public class WindowCache {
+	const int KB = 1024;
+	const int MB = 1024 * 1024;
+	
+	static int MaxByteCount = 10 * MB;
+	static int WindowSize = 8 * 1024;
+	static int WindowSizeShift = 13;
+	static ByteArrayWindow [] windows;
+
+	static WindowCache ()
+	{
+	    windows = new ByteArrayWindow [MaxByteCount / WindowSize];
+	}
+	
 	public static void Get (WindowCursor cursor, WindowedFile wp, long position)
 	{
-	    throw new NotImplementedException ();
+	    Console.WriteLine ("Requesting to load from {0} at {1} from {2}", wp, position, Environment.StackTrace);
+
+	    long id = (position >> WindowSizeShift);
+
+	    wp.CacheOpen ();
+	    wp.LoadWindow (cursor, (int) id, position, 8192);
+	    Console.Error.WriteLine ("WindowCache.Get: This is incomplete and will likely fail");
 	}
 
 	public static void Purge (WindowedFile wp)

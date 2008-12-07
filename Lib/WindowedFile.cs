@@ -49,11 +49,11 @@ namespace Gitty.Lib
     {
 	FileInfo fPath;
 	FileStream fs;
-	
+
         public WindowedFile(FileInfo packFile)
         {
 	    fPath = packFile;
-	    Length = Int64.MaxValue;
+	    Length = -1;
         }
 
         public ThreadStart OnOpen { get; set; }
@@ -69,6 +69,7 @@ namespace Gitty.Lib
         internal void Close()
         {
 	    WindowCache.Purge (this);
+	    Length = -1;
         }
 
         internal void ReadCompressed(long position, byte[] dstbuf, WindowCursor curs)
@@ -110,6 +111,42 @@ namespace Gitty.Lib
 	internal int Read (long position, byte[] dstbuf, WindowCursor curs)
 	{
 	    return Read (position, dstbuf, 0, dstbuf.Length, curs);
+	}
+
+	internal void CacheOpen ()
+	{
+	    fs = fPath.OpenRead ();
+	    Length = fPath.Length;
+	    try {
+		OnOpen ();
+	    } catch {
+		CacheClose ();
+		throw;
+	    }
+	}
+
+	void CacheClose ()
+	{
+	    try {
+		fs.Close ();
+	    } catch {}
+	    fs = null;
+	    Length = -1;
+	}
+	    
+	internal void LoadWindow (WindowCursor curs, int windowId, long pos, int windowSize)
+	{
+	    byte [] b = new byte [windowSize];
+
+	    fs.Position = pos;
+	    fs.Read (b, 0, b.Length);
+	    curs.Window = new ByteArrayWindow (this, pos, windowId, b);
+	    curs.Handle = b;
+	}
+	
+	public override string ToString ()
+	{
+	    return "WindowedFile[" + Name + "]";
 	}
     }
 }

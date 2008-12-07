@@ -58,7 +58,9 @@
     <Compile Include="Lib\AnyObjectId.cs" />
     <Compile Include="Lib\BinaryDelta.cs" />
     <Compile Include="Lib\ByteWindow.cs" />
+    <Compile Include="Lib\Codec.cs" />
     <Compile Include="Lib\Commit.cs" />
+    <Compile Include="Lib\Constants.cs" />
     <Compile Include="Lib\CoreConfig.cs" />
     <Compile Include="Lib\DeltaOfsPackedObjectLoader.cs" />
     <Compile Include="Lib\DeltaPackedObjectLoader.cs" />
@@ -119,6 +121,7 @@
     <Compile Include="Util\NestedDictionary.cs" />
     <Compile Include="Util\Numbers.cs" />
     <Compile Include="Util\PathUtil.cs" />
+    <Compile Include="Util\RawParseUtils.cs" />
     <Compile Include="Util\WeakReference.cs" />
   </ItemGroup>
   <ItemGroup>

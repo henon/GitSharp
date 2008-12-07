@@ -42,7 +42,7 @@ using System.Text;
 
 namespace Gitty.Lib
 {
-        public sealed class Constants {
+        public static class Constants {
 		/// <summary>
 		///   Prefix for branch refs
 		/// </summary>
@@ -67,8 +67,39 @@ namespace Gitty.Lib
 		///   Annotated tags store a pointer to any other object, and an additional
 		///   message. It is most commonly used to record a stable release of the
 		///   project.
-		/// </summary>
+		/// </remarks>
 		public static readonly string TypeTag = "tag";
+
+		/// <summary>
+		///    Text string that identifies an object as tree.
+		/// <summary>
+		/// <remarks>
+ 		/// Trees attach object ids (hashes) to names and file
+		/// modes. The normal use for a tree is to store a
+		/// version of a directory and its contents.
+		/// </remarks>
+		public static readonly string TypeTree = "tree";
+
+		/// <summary>
+		///    Text string that identifies an object as a blob
+		/// <summary>
+		/// <remarks>
+		/// Blobs store whole file revisions. They are used
+		/// for any user file, as well as for symlinks. Blobs
+		/// form the bulk of any project's storage space.
+		/// </remarks>
+		public static readonly string TypeBlob = "blob";
+
+		/// <summary>
+		///    Text string that identifies an object as a commit.
+		/// <summary>
+		/// <remarks>
+		/// Commits connect trees into a string of project
+		/// histories, where each commit is an assertion that
+		/// the best way to continue is to use this other tree
+		/// (set of files).
+		/// </remarks>
+		public static readonly string TypeCommit = "commit";
  
 		public static readonly Encoding Encoding = Encoding.UTF8;
 
@@ -81,5 +112,11 @@ namespace Gitty.Lib
 		public static readonly string HeadsSlash = HeadsPrefix + "/";
 
 		public static readonly string[] RefSearchPaths = { "", RefsSlash, TagsSlash, HeadsSlash, RemotesPrefix + "/" };
-       }
+		
+		public static readonly byte [] EncodedTypeCommit = new byte [] { (byte) 'c', (byte) 'o', (byte) 'm', (byte) 'm', (byte) 'i', (byte) 't' };
+		public static readonly byte [] EncodedTypeTree   = new byte [] { (byte) 't', (byte) 'r', (byte) 'e', (byte) 'e' };
+		public static readonly byte [] EncodedTypeBlob   = new byte [] { (byte) 'b', (byte) 'l', (byte) 'o', (byte) 'b' };
+		public static readonly byte [] EncodedTypeTag    = new byte [] { (byte) 't', (byte) 'a', (byte) 'g' };
+
+	}
 }

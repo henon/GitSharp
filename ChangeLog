@@ -1,5 +1,10 @@
 2008-12-06  Miguel de Icaza  <miguel@novell.com>
 
+	* Lib/Constants.cs: Add a handful of extra contants.
+
+	* Lib/Codec.cs: Put here the coding/encoding routines that were
+	originally in egit's lib/Constants.java class
+
 	* Lib/*: Align some API doc comments, add some API docs.
 
 	* Lib/RefDatabase.cs (Peel): Implement.

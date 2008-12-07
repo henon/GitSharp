@@ -307,7 +307,7 @@ namespace Gitty.Lib
 				case ObjectType.Blob:
 				case ObjectType.Tag:
 					return new WholePackedObjectLoader(curs, this, pos, objOffset, (ObjectType)typeCode, (int)dataSize);
-				case ObjectType.OFSDelta:
+				case ObjectType.OffsetDelta:
 					pack.ReadFully(pos, ib, curs);
 					p = 0;
 					c = ib[p++] & 0xff;
@@ -320,7 +320,7 @@ namespace Gitty.Lib
 						ofs += (c & 127);
 					}
 					return new DeltaOfsPackedObjectLoader(curs, this, pos + p, objOffset, (int)dataSize, objOffset - ofs);
-				case ObjectType.RefDelta:
+				case ObjectType.ReferenceDelta:
 					pack.ReadFully(pos, ib, curs);
 					return new DeltaRefPackedObjectLoader(curs, this, pos + ib.Length, objOffset, (int)dataSize, ObjectId.FromRaw(ib));
 

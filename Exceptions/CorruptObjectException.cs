@@ -59,9 +59,7 @@ namespace Gitty.Exceptions
         public CorruptObjectException(ObjectId id, string message) : base(string.Format("Object {0} is corrupt: {1}",id,message)) { }
         public CorruptObjectException(string message) : base(message) { }
         public CorruptObjectException(ObjectId id, string message, Exception inner) : base(string.Format("Object {0} is corrupt: {1}", id, message), inner) { }
-        protected CorruptObjectException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context)
+        protected CorruptObjectException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
     }
 }

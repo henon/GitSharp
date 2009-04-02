@@ -44,7 +44,6 @@ using System.Text;
 using System.IO;
 using Gitty.Core.Exceptions;
 using Gitty.Core.Util;
-using ICSharpCode.SharpZipLib.Checksums;
 
 namespace Gitty.Core
 {

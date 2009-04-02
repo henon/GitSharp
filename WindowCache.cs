@@ -41,7 +41,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Gitty.Core.Util;
-using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace Gitty.Core {
 

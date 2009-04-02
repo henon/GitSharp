@@ -42,7 +42,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ICSharpCode.SharpZipLib.Zip.Compression;
+using System.IO.Compression;
 
 namespace Gitty.Core
 {
@@ -51,7 +51,7 @@ namespace Gitty.Core
     {
         public class Constants
         {
-            public static readonly int DefaultCompression = Deflater.DEFAULT_COMPRESSION;
+            public static readonly int DefaultCompression = 0;
         }
 
         public int PackIndexVersion { get; private set; }

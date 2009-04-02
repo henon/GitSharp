@@ -74,7 +74,7 @@ namespace Gitty.Core
     public class Repository
     {
         private RefDatabase _refs;
-        private List<PackFile> _packs;
+        //private List<PackFile> _packs;
 
 	public Repository (string gitDirectory) : this (new DirectoryInfo (gitDirectory))
 	{
@@ -98,7 +98,7 @@ namespace Gitty.Core
 
             this.Config = new RepositoryConfig(this);
             _refs = new RefDatabase(this);
-            _packs = new List<PackFile>();
+            //_packs = new List<PackFile>();
 
             bool isExisting = _objectsDirs[0].Exists;
             if (isExisting)
@@ -116,8 +116,8 @@ namespace Gitty.Core
             {
                 this.Config.Create();
             }
-            if (isExisting)
-                ScanForPacks();
+            //if (isExisting)
+            //    ScanForPacks();
         }
 
 
@@ -157,68 +157,68 @@ namespace Gitty.Core
          */
         public bool HasObject(AnyObjectId objectId)
         {
-            int k = this._packs.Count;
-            if (k > 0)
-            {
-                do
-                {
-                    if (this._packs[--k].HasObject(objectId))
-                        return true;
-                } while (k > 0);
-            }
+            //int k = this._packs.Count;
+            //if (k > 0)
+            //{
+            //    do
+            //    {
+            //        if (this._packs[--k].HasObject(objectId))
+            //            return true;
+            //    } while (k > 0);
+            //}
             return ToFile(objectId).Exists;
         }
 
 
         #region private methods
-        /**
-	     * Scan the object dirs, including alternates for packs
-	     * to use.
-	     */
-        public void ScanForPacks()
-        {
-            List<PackFile> p = new List<PackFile>();
-            for (int i = 0; i < _objectsDirs.Count; ++i)
-                ScanForPacks(new DirectoryInfo(Path.Combine(_objectsDirs[i].FullName, "pack")), p);
+        ///**
+        // * Scan the object dirs, including alternates for packs
+        // * to use.
+        // */
+        //public void ScanForPacks()
+        //{
+        //    List<PackFile> p = new List<PackFile>();
+        //    for (int i = 0; i < _objectsDirs.Count; ++i)
+        //        ScanForPacks(new DirectoryInfo(Path.Combine(_objectsDirs[i].FullName, "pack")), p);
 
-            _packs = p;
+        //    _packs = p;
 
-        }
+        //}
 
-        private void ScanForPacks(DirectoryInfo packDir, List<PackFile> packList)
-        {
-            // Must match "pack-[0-9a-f]{40}.idx" to be an index.
-            IEnumerable<FileInfo> idxList =
-                packDir.GetFiles().Where(
-                    file => file.Name.Length == 49 && file.Name.EndsWith(".idx") && file.Name.StartsWith("pack-"));
+        //private void ScanForPacks(DirectoryInfo packDir, List<PackFile> packList)
+        //{
+        //    // Must match "pack-[0-9a-f]{40}.idx" to be an index.
+        //    IEnumerable<FileInfo> idxList =
+        //        packDir.GetFiles().Where(
+        //            file => file.Name.Length == 49 && file.Name.EndsWith(".idx") && file.Name.StartsWith("pack-"));
 
-            if (idxList == null) return;
-            foreach (FileInfo indexName in idxList)
-            {
-                String n = indexName.FullName.Substring(0, indexName.FullName.Length - 4);
-                FileInfo idxFile = new FileInfo(n + ".idx");
-                FileInfo packFile = new FileInfo(n + ".pack");
+        //    if (idxList == null) return;
+        //    foreach (FileInfo indexName in idxList)
+        //    {
+        //        String n = indexName.FullName.Substring(0, indexName.FullName.Length - 4);
+        //        FileInfo idxFile = new FileInfo(n + ".idx");
+        //        FileInfo packFile = new FileInfo(n + ".pack");
 
-                if (!packFile.Exists)
-                {
-                    // Sometimes C Git's http fetch transport leaves a
-                    // .idx file behind and does not download the .pack.
-                    // We have to skip over such useless indexes.
-                    //
-                    continue;
-                }
+        //        if (!packFile.Exists)
+        //        {
+        //            // Sometimes C Git's http fetch transport leaves a
+        //            // .idx file behind and does not download the .pack.
+        //            // We have to skip over such useless indexes.
+        //            //
+        //            continue;
+        //        }
 
-                try
-                {
-                    packList.Add(new PackFile(this, idxFile, packFile));
-                }
-                catch (IOException)
-                {
-                    // Whoops. That's not a pack!
-                    //
-                }
-            }
-        }
+        //        try
+        //        {
+        //            packList.Add(new PackFile(this, idxFile, packFile));
+        //        }
+        //        catch (IOException)
+        //        {
+        //            // Whoops. That's not a pack!
+        //            //
+        //        }
+        //    }
+        //}
 
         private List<DirectoryInfo> ReadObjectsDirs(string objectsDir, ref List<DirectoryInfo> ret)
         {
@@ -280,108 +280,114 @@ namespace Gitty.Core
             }
             return new FileInfo(PathUtil.Combine(_objectsDirs[0].FullName, d, f));
         }
-        /**
-         * @param id
-         *            SHA-1 of an object.
-         * 
-         * @return a {@link ObjectLoader} for accessing the data of the named
-         *         object, or null if the object does not exist.
-         * @throws IOException
-         */
-        public ObjectLoader OpenObject(AnyObjectId id)
-        {
-            return OpenObject(new WindowCursor(), id);
-        }
 
-        /**
-         * @param curs
-         *            temporary working space associated with the calling thread.
-         * @param id
-         *            SHA-1 of an object.
-         * 
-         * @return a {@link ObjectLoader} for accessing the data of the named
-         *         object, or null if the object does not exist.
-         * @throws IOException
-         */
-        public ObjectLoader OpenObject(WindowCursor windowCursor, AnyObjectId id)
-        {
-            int k = _packs.Count;
-            if (k > 0)
-            {
-                do
-                {
-                    try
-                    {
-                        ObjectLoader ol = _packs[--k].Get(windowCursor, id);
-                        if (ol != null)
-                            return ol;
-                    }
-                    catch (IOException)
-                    {
-                        try
-                        {
-                            windowCursor.Release();
-                            GC.Collect();
-                            ObjectLoader ol = _packs[k].Get(windowCursor, id);
-                            if (ol != null)
-                                return ol;
-                        }
-                        catch (IOException)
-                        {
+#warning commented out to get compiled
 
-                        }
-                    }
-                } while (k > 0);
-            }
-            try
-            {
-                return new UnpackedObjectLoader(this, id.ToObjectId());
-            }
-            catch (FileNotFoundException)
-            {
-                return null;
-            }
-        }
-        /**
-         * Open object in all packs containing specified object.
-         *
-         * @param objectId
-         *            id of object to search for
-         * @param curs
-         *            temporary working space associated with the calling thread.
-         * @return collection of loaders for this object, from all packs containing
-         *         this object
-         * @throws IOException
-         */
-        public ICollection<PackedObjectLoader> OpenObjectInAllPacks(AnyObjectId objectId, WindowCursor cursor)
-        {
-            ICollection<PackedObjectLoader> result = new LinkedList<PackedObjectLoader>();
-            OpenObjectInAllPacks(objectId, result, cursor);
-            return result;
-        }
+        ///**
+        // * @param id
+        // *            SHA-1 of an object.
+        // * 
+        // * @return a {@link ObjectLoader} for accessing the data of the named
+        // *         object, or null if the object does not exist.
+        // * @throws IOException
+        // */
+        //public ObjectLoader OpenObject(AnyObjectId id)
+        //{
+        //    return OpenObject(new WindowCursor(), id);
+        //}
 
-        /**
-	     * Open object in all packs containing specified object.
-	     *
-	     * @param objectId
-	     *            id of object to search for
-	     * @param resultLoaders
-	     *            result collection of loaders for this object, filled with
-	     *            loaders from all packs containing specified object
-	     * @param curs
-	     *            temporary working space associated with the calling thread.
-	     * @throws IOException
-	     */
 
-        private void OpenObjectInAllPacks(AnyObjectId objectId, ICollection<PackedObjectLoader> resultLoaders, WindowCursor cursor)
-        {
-            foreach (PackFile pack in _packs)
-            {
-                PackedObjectLoader loader = pack.Get(cursor, objectId);
-                if (loader != null)
-                    resultLoaders.Add(loader);
-            }
-        }
+        ///**
+        // * @param curs
+        // *            temporary working space associated with the calling thread.
+        // * @param id
+        // *            SHA-1 of an object.
+        // * 
+        // * @return a {@link ObjectLoader} for accessing the data of the named
+        // *         object, or null if the object does not exist.
+        // * @throws IOException
+        // */
+        //public ObjectLoader OpenObject(WindowCursor windowCursor, AnyObjectId id)
+        //{
+        //    int k = _packs.Count;
+        //    if (k > 0)
+        //    {
+        //        do
+        //        {
+        //            try
+        //            {
+        //                ObjectLoader ol = _packs[--k].Get(windowCursor, id);
+        //                if (ol != null)
+        //                    return ol;
+        //            }
+        //            catch (IOException)
+        //            {
+        //                try
+        //                {
+        //                    windowCursor.Release();
+        //                    GC.Collect();
+        //                    ObjectLoader ol = _packs[k].Get(windowCursor, id);
+        //                    if (ol != null)
+        //                        return ol;
+        //                }
+        //                catch (IOException)
+        //                {
+
+        //                }
+        //            }
+        //        } while (k > 0);
+        //    }
+        //    try
+        //    {
+        //        return new UnpackedObjectLoader(this, id.ToObjectId());
+        //    }
+        //    catch (FileNotFoundException)
+        //    {
+        //        return null;
+        //    }
+        //}
+
+
+        ///**
+        // * Open object in all packs containing specified object.
+        // *
+        // * @param objectId
+        // *            id of object to search for
+        // * @param curs
+        // *            temporary working space associated with the calling thread.
+        // * @return collection of loaders for this object, from all packs containing
+        // *         this object
+        // * @throws IOException
+        // */
+        //public ICollection<PackedObjectLoader> OpenObjectInAllPacks(AnyObjectId objectId, WindowCursor cursor)
+        //{
+        //    ICollection<PackedObjectLoader> result = new LinkedList<PackedObjectLoader>();
+        //    OpenObjectInAllPacks(objectId, result, cursor);
+        //    return result;
+        //}
+
+        ///**
+        // * Open object in all packs containing specified object.
+        // *
+        // * @param objectId
+        // *            id of object to search for
+        // * @param resultLoaders
+        // *            result collection of loaders for this object, filled with
+        // *            loaders from all packs containing specified object
+        // * @param curs
+        // *            temporary working space associated with the calling thread.
+        // * @throws IOException
+        // */
+
+        //private void OpenObjectInAllPacks(AnyObjectId objectId, ICollection<PackedObjectLoader> resultLoaders, WindowCursor cursor)
+        //{
+        //    foreach (PackFile pack in _packs)
+        //    {
+        //        PackedObjectLoader loader = pack.Get(cursor, objectId);
+        //        if (loader != null)
+        //            resultLoaders.Add(loader);
+        //    }
+        //}
 
 
         /**
@@ -509,6 +515,11 @@ namespace Gitty.Core
                     return MapTree(ObjectId.FromString(raw, 5));
             }
             throw new IncorrectObjectTypeException(id, ObjectType.Tree);
+        }
+
+        public ObjectLoader OpenObject(ObjectId id)
+        {
+            throw new NotImplementedException();
         }
 
         private Tag MakeTag(ObjectId id, string refName, byte[] raw)
@@ -778,42 +789,42 @@ namespace Gitty.Core
          */
         public void Close()
         {
-            ClosePacks();
+            //ClosePacks();
         }
 
-        private void ClosePacks()
-        {
-            foreach (PackFile pack in _packs)
-                pack.Close();
+        //private void ClosePacks()
+        //{
+        //    foreach (PackFile pack in _packs)
+        //        pack.Close();
 
-            _packs = new List<PackFile>();
-        }
-        /**
-         * Add a single existing pack to the list of available pack files.
-         * 
-         * @param pack
-         *            path of the pack file to open.
-         * @param idx
-         *            path of the corresponding index file.
-         * @throws IOException
-         *             index file could not be opened, read, or is not recognized as
-         *             a Git pack file index.
-         */
-        public void OpenPack(FileInfo pack, FileInfo idx)
-        {
-            String p = pack.Name;
-            String i = idx.Name;
-            if (p.Length != 50 || !p.StartsWith("pack-") || !p.EndsWith(".pack"))
-                throw new ArgumentException("Not a valid pack " + pack);
-            if (i.Length != 49 || !i.StartsWith("pack-") || !i.EndsWith(".idx"))
-                throw new ArgumentException("Not a valid pack " + idx);
-            if (!p.Substring(0, 45).Equals(i.Substring(0, 45)))
-                throw new ArgumentException("Pack " + pack
-                        + "does not match index " + idx);
+        //    _packs = new List<PackFile>();
+        //}
+        ///**
+        // * Add a single existing pack to the list of available pack files.
+        // * 
+        // * @param pack
+        // *            path of the pack file to open.
+        // * @param idx
+        // *            path of the corresponding index file.
+        // * @throws IOException
+        // *             index file could not be opened, read, or is not recognized as
+        // *             a Git pack file index.
+        // */
+        //public void OpenPack(FileInfo pack, FileInfo idx)
+        //{
+        //    String p = pack.Name;
+        //    String i = idx.Name;
+        //    if (p.Length != 50 || !p.StartsWith("pack-") || !p.EndsWith(".pack"))
+        //        throw new ArgumentException("Not a valid pack " + pack);
+        //    if (i.Length != 49 || !i.StartsWith("pack-") || !i.EndsWith(".idx"))
+        //        throw new ArgumentException("Not a valid pack " + idx);
+        //    if (!p.Substring(0, 45).Equals(i.Substring(0, 45)))
+        //        throw new ArgumentException("Pack " + pack
+        //                + "does not match index " + idx);
 
-            _packs.Add(new PackFile(this, idx, pack));
+        //    _packs.Add(new PackFile(this, idx, pack));
 
-        }
+        //}
         /**
          * Writes a symref (e.g. HEAD) to disk
          *

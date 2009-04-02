@@ -33,10 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, PublicKeyToken=null">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\External\ICSharpCode.SharpZipLib.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -57,14 +53,10 @@
     <Compile Include="AbstractIndexTreeVisitor.cs" />
     <Compile Include="AnyObjectId.cs" />
     <Compile Include="BinaryDelta.cs" />
-    <Compile Include="ByteWindow.cs" />
     <Compile Include="Codec.cs" />
     <Compile Include="Commit.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="CoreConfig.cs" />
-    <Compile Include="DeltaOfsPackedObjectLoader.cs" />
-    <Compile Include="DeltaPackedObjectLoader.cs" />
-    <Compile Include="DeltaRefPackedObjectLoader.cs" />
     <Compile Include="FileMode.cs" />
     <Compile Include="FileTreeEntry.cs" />
     <Compile Include="ForceModified.cs" />
@@ -73,7 +65,6 @@
     <Compile Include="IndexDiff.cs" />
     <Compile Include="IndexTreeVisitor.cs" />
     <Compile Include="IndexTreeWalker.cs" />
-    <Compile Include="InflaterCache.cs" />
     <Compile Include="LockFile.cs" />
     <Compile Include="MutableObjectId.cs" />
     <Compile Include="NullProgressMonitor.cs" />
@@ -82,8 +73,6 @@
     <Compile Include="ObjectLoader.cs" />
     <Compile Include="ObjectType.cs" />
     <Compile Include="ObjectWriter.cs" />
-    <Compile Include="PackedObjectLoader.cs" />
-    <Compile Include="PackFile.cs" />
     <Compile Include="PackIndex.cs" />
     <Compile Include="PackIndexV1.cs" />
     <Compile Include="PackIndexV2.cs" />
@@ -107,28 +96,21 @@
     <Compile Include="TreeIterator.cs" />
     <Compile Include="TreeVisitor.cs" />
     <Compile Include="TreeVisitorWithCurrentDirectory.cs" />
-    <Compile Include="UnpackedObjectCache.cs" />
-    <Compile Include="UnpackedObjectLoader.cs" />
-    <Compile Include="WholePackedObjectLoader.cs" />
-    <Compile Include="WindowCursor.cs" />
-    <Compile Include="WindowedFile.cs" />
+    <Compile Include="Util\WeakReference.cs" />
     <Compile Include="WriteTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\BufferedReader.cs" />
-    <Compile Include="Util\CheckedOutputStream.cs" />
     <Compile Include="Util\Collections.cs" />
     <Compile Include="Util\Hex.cs" />
     <Compile Include="Util\NestedDictionary.cs" />
     <Compile Include="Util\Numbers.cs" />
     <Compile Include="Util\PathUtil.cs" />
     <Compile Include="Util\RawParseUtils.cs" />
-    <Compile Include="Util\WeakReference.cs" />
-    <Compile Include="ByteArrayWindow.cs" />
-    <Compile Include="WindowCache.cs" />
     <Compile Include="test.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>

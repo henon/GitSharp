@@ -38,78 +38,85 @@ using System;
 using System.IO;
 using ICSharpCode.SharpZipLib.Checksums;
 
-namespace Gitty.Core {
+namespace Gitty.Core
+{
 
-	public class CheckedOutputStream : System.IO.Stream {
-		Stream under;
-		Crc32 crc;
-		
-		// Stream configuration: read-only, non-seeking stream
-		public override bool CanRead  { get { return false; } }
-		public override bool CanSeek  { get { return false; } }
-		public override bool CanWrite { get { return true; } }
+    public class CheckedOutputStream : System.IO.Stream
+    {
+        Stream under;
+        Crc32 crc;
 
-		public CheckedOutputStream (Stream under, Crc32 crc)
-		{
-			this.under = under;
-			this.crc = crc;
-		}
-		
-		public override void Flush ()
-		{
-			under.Flush ();
-		}
+        // Stream configuration: read-only, non-seeking stream
+        public override bool CanRead { get { return false; } }
+        public override bool CanSeek { get { return false; } }
+        public override bool CanWrite { get { return true; } }
 
-		public override int Read (byte [] buffer, int offset, int count)
-		{
-			throw new InvalidOperationException ();
-		}
+        public CheckedOutputStream(Stream under, Crc32 crc)
+        {
+            this.under = under;
+            this.crc = crc;
+        }
 
-		public override long Seek (long offset, SeekOrigin origin)
-		{
-			throw new InvalidOperationException ();
-		}
+        public override void Flush()
+        {
+            under.Flush();
+        }
 
-		public override void SetLength (long value)
-		{
-			throw new InvalidOperationException ();
-		}
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            throw new InvalidOperationException();
+        }
 
-		public override void Write (byte [] buffer, int offset, int count)
-		{
-			if (buffer == null)
-				throw new ArgumentNullException ("buffer");
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            throw new InvalidOperationException();
+        }
 
-			if (offset < 0)
-                                throw new ArgumentOutOfRangeException ("offset", "< 0");
+        public override void SetLength(long value)
+        {
+            throw new InvalidOperationException();
+        }
 
-                        if (count < 0)
-                                throw new ArgumentOutOfRangeException ("count", "< 0");
-			
-                        // ordered to avoid possible integer overflow
-                        if (offset > buffer.Length - count)
-                                throw new ArgumentException ("Reading would overrun buffer");
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException("buffer");
 
-			for (int i = 0; i < count; i++)
-				crc.Update (buffer [i+offset]);
+            if (offset < 0)
+                throw new ArgumentOutOfRangeException("offset", "< 0");
 
-			under.Write (buffer, offset, count);
-		}
+            if (count < 0)
+                throw new ArgumentOutOfRangeException("count", "< 0");
 
-		public override long Length {
-			get {
-				return under.Length;
-			}
-		}
+            // ordered to avoid possible integer overflow
+            if (offset > buffer.Length - count)
+                throw new ArgumentException("Reading would overrun buffer");
 
-		public override long Position {
-			get {
-				return under.Position;
-			}
+            for (int i = 0; i < count; i++)
+                crc.Update(buffer[i + offset]);
 
-			set {
-				throw new InvalidOperationException ();
-			}
-		}
-	}
+            under.Write(buffer, offset, count);
+        }
+
+        public override long Length
+        {
+            get
+            {
+                return under.Length;
+            }
+        }
+
+        public override long Position
+        {
+            get
+            {
+                return under.Position;
+            }
+
+            set
+            {
+                throw new InvalidOperationException();
+            }
+        }
+    }
 }

@@ -52,8 +52,8 @@ namespace Gitty.Core.Util
     public sealed class NestedDictionary<K, V> : NestedDictionaryBase<K, V, NestedDictionary<K, V>>
     {
 
-        #region Operator Overloads 
-        
+        #region Operator Overloads
+
         public static implicit operator NestedDictionary<K, V>(V value)
         {
             NestedDictionary<K, V> d = new NestedDictionary<K, V>();
@@ -91,7 +91,7 @@ namespace Gitty.Core.Util
     public sealed class NestedSortedDictionary<K, V> : NestedDictionaryBase<K, V, NestedSortedDictionary<K, V>>
     {
 
-        #region Operator Overloads 
+        #region Operator Overloads
 
         public static implicit operator NestedSortedDictionary<K, V>(V value)
         {
@@ -102,7 +102,7 @@ namespace Gitty.Core.Util
 
         #endregion
 
-        #region Protected Methods 
+        #region Protected Methods
 
         protected override IDictionary<K, NestedSortedDictionary<K, V>> CreateDictionary()
         {
@@ -124,7 +124,7 @@ namespace Gitty.Core.Util
         where D : NestedDictionaryBase<K, V, D>, new()
     {
 
-        #region Constructors 
+        #region Constructors
 
         public NestedDictionaryBase()
         {
@@ -137,7 +137,7 @@ namespace Gitty.Core.Util
 
         #endregion
 
-        #region Operator Overloads 
+        #region Operator Overloads
 
         public static implicit operator NestedDictionaryBase<K, V, D>(V value)
         {
@@ -149,11 +149,11 @@ namespace Gitty.Core.Util
         public static explicit operator V(NestedDictionaryBase<K, V, D> d)
         {
             return d.As<V>();
-        }  
+        }
 
         #endregion
 
-        #region Protected Methods 
+        #region Protected Methods
 
         protected virtual IDictionary<K, D> CreateDictionary()
         {
@@ -162,13 +162,13 @@ namespace Gitty.Core.Util
 
         #endregion
 
-        #region Public Methods 
+        #region Public Methods
 
         public virtual D[] ToArray()
         {
             List<D> array = new List<D>();
 
-            foreach (KeyValuePair<K,D> kvp in this)
+            foreach (KeyValuePair<K, D> kvp in this)
             {
                 array.Add(kvp.Value);
             }
@@ -208,7 +208,7 @@ namespace Gitty.Core.Util
 
         #endregion
 
-        #region IDictionary<K, D> Members 
+        #region IDictionary<K, D> Members
 
         void IDictionary<K, D>.Add(K key, D value)
         {
@@ -248,7 +248,7 @@ namespace Gitty.Core.Util
 
                 if (!this.TryGetValue(key, out value))
                     return this.Add(key);
-                
+
                 return value;
             }
             set
@@ -259,7 +259,7 @@ namespace Gitty.Core.Util
 
         #endregion
 
-        #region ICollection<KeyValuePair<K, V>> Members 
+        #region ICollection<KeyValuePair<K, V>> Members
 
         public void Add(KeyValuePair<K, D> item)
         {
@@ -298,7 +298,7 @@ namespace Gitty.Core.Util
 
         #endregion
 
-        #region IEnumerable<KeyValuePair<K, V>> Members 
+        #region IEnumerable<KeyValuePair<K, V>> Members
 
         public IEnumerator<KeyValuePair<K, D>> GetEnumerator()
         {
@@ -307,7 +307,7 @@ namespace Gitty.Core.Util
 
         #endregion
 
-        #region IEnumerable Members 
+        #region IEnumerable Members
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
@@ -316,8 +316,8 @@ namespace Gitty.Core.Util
 
         #endregion
 
-        #region Properties 
-        
+        #region Properties
+
         private IDictionary<K, D> _dictionary;
         protected virtual IDictionary<K, D> Dictionary
         {
@@ -339,7 +339,7 @@ namespace Gitty.Core.Util
 
         #endregion
 
-        #region IXmlSerializable Members 
+        #region IXmlSerializable Members
 
         public System.Xml.Schema.XmlSchema GetSchema()
         {

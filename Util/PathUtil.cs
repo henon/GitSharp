@@ -52,7 +52,7 @@ namespace Gitty.Core.Util
                 throw new ArgumentException("Must have at least two paths", "paths");
 
             string path = paths[0];
-            for (int i = 0; i < paths.Length; ++i )
+            for (int i = 0; i < paths.Length; ++i)
             {
                 path = Path.Combine(path, paths[i]);
             }
@@ -70,6 +70,6 @@ namespace Gitty.Core.Util
             return new FileInfo(Path.Combine(path.FullName, filename));
         }
 
-       
+
     }
 }

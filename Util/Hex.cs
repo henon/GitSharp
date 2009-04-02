@@ -51,12 +51,12 @@ namespace Gitty.Core.Util
         public static int Nibble = 4;
         static Hex()
         {
-            __valueToHexChar = new char[] {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+            __valueToHexChar = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
             __valueToHexByte = new byte[__valueToHexChar.Length];
             for (int i = 0; i < __valueToHexChar.Length; i++)
                 __valueToHexByte[i] = (byte)__valueToHexChar[i];
 
-                __hexCharToValue = new byte['f' + 1];
+            __hexCharToValue = new byte['f' + 1];
             for (int i = 0; i < __hexCharToValue.Length; i++)
                 __hexCharToValue[i] = byte.MaxValue;
             for (char i = '0'; i <= '9'; i++)
@@ -118,7 +118,8 @@ namespace Gitty.Core.Util
         }
 
 
-        public static void FillHexCharArray(char[] dest, int offset, int value){
+        public static void FillHexCharArray(char[] dest, int offset, int value)
+        {
             int curOffset = offset + 7;
             while (curOffset >= offset && value != 0)
             {

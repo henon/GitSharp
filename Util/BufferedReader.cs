@@ -61,7 +61,7 @@ namespace Gitty.Core.Util
         public BufferedReader(Stream stream)
             : this(new StreamReader(stream))
         {
-            
+
         }
 
         public BufferedReader(string filename)
@@ -76,7 +76,7 @@ namespace Gitty.Core.Util
 
         }
 
-        public BufferedReader(TextReader reader, int bufferSize)            
+        public BufferedReader(TextReader reader, int bufferSize)
         {
             if (reader == null) throw new ArgumentNullException("reader");
             if (bufferSize < 0) throw new ArgumentOutOfRangeException("bufferSize");

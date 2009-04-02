@@ -35,41 +35,49 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 using System;
-namespace Gitty.Core {
-	
-    public static class RawParseUtils {
-	
-	public static int ParseBase10 (byte [] b, ref int ptr)
-	{
-	    int r = 0;
-	    int sign = 1;
+namespace Gitty.Core
+{
 
-	    try {
-		int sz = b.Length;
-		while (ptr < sz && b [ptr] == ' ')
-		    ptr++;
+    public static class RawParseUtils
+    {
 
-		if (ptr >= sz)
-		    return 0;
+        public static int ParseBase10(byte[] b, ref int ptr)
+        {
+            int r = 0;
+            int sign = 1;
 
-		if (b [ptr] == '-'){
-		    sign = -1;
-		    ptr++;
-		} else if (b [ptr] == '+')
-		    ptr++;
+            try
+            {
+                int sz = b.Length;
+                while (ptr < sz && b[ptr] == ' ')
+                    ptr++;
 
-		while (ptr < sz){
-		    byte d = b [ptr];
-		    if ((d < (byte) '0') | (d > (byte) '9'))
-			break;
-		    r = r * 10 + (d - (byte) '0');
-		    ptr++;
-		}
-	    } catch (IndexOutOfRangeException) {
-		// Not a valid digit
-	    }
+                if (ptr >= sz)
+                    return 0;
 
-	    return sign * r;
-	}
+                if (b[ptr] == '-')
+                {
+                    sign = -1;
+                    ptr++;
+                }
+                else if (b[ptr] == '+')
+                    ptr++;
+
+                while (ptr < sz)
+                {
+                    byte d = b[ptr];
+                    if ((d < (byte)'0') | (d > (byte)'9'))
+                        break;
+                    r = r * 10 + (d - (byte)'0');
+                    ptr++;
+                }
+            }
+            catch (IndexOutOfRangeException)
+            {
+                // Not a valid digit
+            }
+
+            return sign * r;
+        }
     }
 }

@@ -44,7 +44,7 @@ namespace Gitty.Core.Util
 {
     public sealed class Collections
     {
-        public static void AddOrInsert<K,V>(Dictionary<K,V> dict,K key, V value)            
+        public static void AddOrInsert<K, V>(Dictionary<K, V> dict, K key, V value)
         {
             if (dict.ContainsKey(key))
                 dict[key] = value;

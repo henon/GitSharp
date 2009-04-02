@@ -55,9 +55,9 @@ namespace Gitty.Core.Exceptions
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
         //
 
-        public IncorrectObjectTypeException(ObjectId id, ObjectType type) 
-            : base (string.Format("Object {0} is not a {1}.", id,type))
-        { 
+        public IncorrectObjectTypeException(ObjectId id, ObjectType type)
+            : base(string.Format("Object {0} is not a {1}.", id, type))
+        {
 
         }
         public IncorrectObjectTypeException(ObjectId id, ObjectType type, Exception inner) : base(string.Format("Object {0} is not a {1}.", id, type), inner) { }

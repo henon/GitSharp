@@ -40,10 +40,10 @@
 using System;
 using System.IO;
 using System.Text;
-using Gitty.Exceptions;
-using Gitty.Util;
+using Gitty.Core.Exceptions;
+using Gitty.Core.Util;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
   public class Tag {
       public Repository Repository { get; protected set; }

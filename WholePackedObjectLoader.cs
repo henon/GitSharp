@@ -40,9 +40,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Exceptions;
+using Gitty.Core.Exceptions;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     [Complete]
     public class WholePackedObjectLoader : PackedObjectLoader

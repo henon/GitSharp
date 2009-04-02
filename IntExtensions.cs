@@ -39,7 +39,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Gitty.Extensions
+namespace Gitty.Core
 {
     public static class IntExtensions
     {

@@ -40,7 +40,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
         public static class Constants {
 		/// <summary>

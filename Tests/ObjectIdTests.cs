@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using Gitty.Core;
 
-namespace Gitty.Lib.CSharp.Tests
+namespace Gitty.Core.Tests
 {
     [TestFixture]
     public class ObjectIdTests

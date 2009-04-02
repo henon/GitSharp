@@ -37,10 +37,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using Gitty.Exceptions;
+using Gitty.Core.Exceptions;
 using System;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     internal static class Codec {
 

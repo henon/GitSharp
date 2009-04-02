@@ -42,7 +42,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     public class RefUpdate
     {

@@ -42,10 +42,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ICSharpCode.SharpZipLib.Zip.Compression;
-using Gitty.Exceptions;
+using Gitty.Core.Exceptions;
 using System.IO;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     public class UnpackedObjectLoader : ObjectLoader 
     {

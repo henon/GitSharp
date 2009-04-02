@@ -42,11 +42,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Exceptions;
-using Gitty.Lib.CSharp.Exceptions;
+using Gitty.Core.Exceptions;
+using Gitty.Core.CSharp.Exceptions;
 using System.IO;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     public class Commit : Treeish
     {

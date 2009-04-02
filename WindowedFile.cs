@@ -43,7 +43,7 @@ using System.Threading;
 using System.IO;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     public class WindowedFile
     {

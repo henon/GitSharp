@@ -81,13 +81,13 @@ SOURCES = \
 	Util/RawParseUtils.cs				\
 	Util/WeakReference.cs	
 
-all: Gitty.Lib.CSharp.dll test.exe
+all: Gitty.Core.CSharp.dll test.exe
 
-Gitty.Lib.CSharp.dll: $(SOURCES)
-	$(CSC) $(SOURCES) -out:Gitty.Lib.CSharp.dll -debug -target:library -r:ICSharpCode.SharpZipLib
+Gitty.Core.CSharp.dll: $(SOURCES)
+	$(CSC) $(SOURCES) -out:Gitty.Core.CSharp.dll -debug -target:library -r:ICSharpCode.SharpZipLib
 
-test.exe: Gitty.Lib.CSharp.dll test.cs
-	$(CSC) -r:Gitty.Lib.CSharp.dll -debug test.cs
+test.exe: Gitty.Core.CSharp.dll test.cs
+	$(CSC) -r:Gitty.Core.CSharp.dll -debug test.cs
 
 run: test.exe
 	mono --debug test.exe

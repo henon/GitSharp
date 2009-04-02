@@ -40,9 +40,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Util;
+using Gitty.Core.Util;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     [Complete]
     public class MutableObjectId : AnyObjectId

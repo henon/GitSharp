@@ -38,7 +38,7 @@ using System;
 using System.IO;
 using ICSharpCode.SharpZipLib.Checksums;
 
-namespace Gitty.Lib {
+namespace Gitty.Core {
 
 	public class CheckedOutputStream : System.IO.Stream {
 		Stream under;

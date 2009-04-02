@@ -41,9 +41,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Lib;
+using Gitty.Core;
 
-namespace Gitty.Exceptions
+namespace Gitty.Core.Exceptions
 {
     [global::System.Serializable]
     public class IncorrectObjectTypeException : Exception

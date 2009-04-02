@@ -40,7 +40,7 @@
 using System;
 using System.IO;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     [Complete]
     public abstract class PackedObjectLoader : ObjectLoader

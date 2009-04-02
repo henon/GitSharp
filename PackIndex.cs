@@ -42,10 +42,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using Gitty.Extensions;
-using Gitty.Util;
+using Gitty.Core.Util;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     [Complete]
     public abstract class PackIndex : IEnumerable<PackIndex.MutableEntry>

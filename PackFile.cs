@@ -42,11 +42,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using Gitty.Exceptions;
-using Gitty.Util;
+using Gitty.Core.Exceptions;
+using Gitty.Core.Util;
 using ICSharpCode.SharpZipLib.Checksums;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     [Complete]
 	public class PackFile : IEnumerable<PackIndex.MutableEntry>

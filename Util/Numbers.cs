@@ -41,9 +41,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using Gitty.Extensions;
 
-namespace Gitty.Util
+namespace Gitty.Core.Util
 {
     internal class NB
     {

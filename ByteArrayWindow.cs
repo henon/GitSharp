@@ -40,10 +40,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Util;
+using Gitty.Core.Util;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace Gitty.Lib {
+namespace Gitty.Core {
 
 	//
 	// Implement ByteArrayWindow directly, there is no need for the ByteWindow class

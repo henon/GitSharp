@@ -41,10 +41,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using Gitty.Lib.CSharp.Exceptions;
-using Gitty.Util;
+using Gitty.Core.CSharp.Exceptions;
+using Gitty.Core.Util;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     /** Support for the pack index v2 format. */
     [Complete]

@@ -35,7 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 using System;
-namespace Gitty.Lib {
+namespace Gitty.Core {
 	
     public static class RawParseUtils {
 	

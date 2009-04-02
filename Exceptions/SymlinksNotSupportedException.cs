@@ -42,7 +42,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Gitty.Exceptions
+namespace Gitty.Core.Exceptions
 {
     [global::System.Serializable]
     public class SymlinksNotSupportedException : IOException

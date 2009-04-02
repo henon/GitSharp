@@ -42,7 +42,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Gitty.Util
+namespace Gitty.Core.Util
 {
     public sealed class PathUtil
     {

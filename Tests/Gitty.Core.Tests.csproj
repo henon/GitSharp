@@ -8,8 +8,8 @@
     <ProjectGuid>{37052DA4-F6A9-47D0-94AA-96F4A7E0462C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Gitty.Lib.CSharp.Tests</RootNamespace>
-    <AssemblyName>Gitty.Lib.CSharp.Tests</AssemblyName>
+    <RootNamespace>Gitty.Core.Tests</RootNamespace>
+    <AssemblyName>Gitty.Core.Tests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -47,7 +47,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Gitty.Core.csproj">
       <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
-      <Name>Gitty.Lib.CSharp</Name>
+      <Name>Gitty.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

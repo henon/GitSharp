@@ -45,9 +45,9 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
-using Gitty.Util;
+using Gitty.Core.Util;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     [Complete]
     public class RepositoryConfig

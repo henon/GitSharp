@@ -42,10 +42,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using Gitty.Util;
-using Gitty.Exceptions;
+using Gitty.Core.Util;
+using Gitty.Core.Exceptions;
 
-namespace Gitty.Lib
+namespace Gitty.Core
 {
     [Complete]
     public class LockFile

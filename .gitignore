@@ -5,3 +5,5 @@ test.exe
 test.exe.mdb
 bin
 obj
+*.user
+*.suo

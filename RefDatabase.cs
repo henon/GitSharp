@@ -194,7 +194,7 @@ namespace Gitty.Core
         {
             CachedRef reff;
 
-	    if (looseRefs.TryGetValue (refName, out reff) && reff != null)
+            if (looseRefs.TryGetValue(refName, out reff) && reff != null)
             {
                 if (reff.LastModified == ent.LastWriteTime)
                 {
@@ -311,8 +311,7 @@ namespace Gitty.Core
             {
                 if (depth >= 5)
                 {
-                    throw new IOException("Exceeded maximum ref depth of " + depth
-                            + " at " + name + ".  Circular reference?");
+                    throw new IOException("Exceeded maximum ref depth of " + depth + " at " + name + ".  Circular reference?");
                 }
 
                 String target = line.Substring("ref: ".Length);
@@ -337,9 +336,9 @@ namespace Gitty.Core
 
         private void RefreshPackedRefs()
         {
-	    if (!_packedRefsFile.Exists)
-		return;
-	    
+            if (!_packedRefsFile.Exists)
+                return;
+
             DateTime currTime = _packedRefsFile.LastWriteTime;
             long currLen = currTime == DateTime.MinValue ? 0 : _packedRefsFile.Length;
             if (currTime == packedRefsLastModified && currLen == packedRefsLength)
@@ -405,31 +404,35 @@ namespace Gitty.Core
             }
         }
 
-	internal Ref Peel (Ref dref)
-	{
-	    if (dref.Peeled)
-		return dref;
+        internal Ref Peel(Ref dref)
+        {
+            if (dref.Peeled)
+                return dref;
 
-	    ObjectId peeled = null;
-	    try {
-		object target = Repository.MapObject (dref.ObjectId, dref.Name);
+            ObjectId peeled = null;
+            try
+            {
+                object target = Repository.MapObject(dref.ObjectId, dref.Name);
 
-		while (target is Tag){
-		    Tag tag = (Tag) target;
-		    peeled = tag.Id;
+                while (target is Tag)
+                {
+                    Tag tag = (Tag)target;
+                    peeled = tag.Id;
 
-		    if (tag.TagType == Constants.TypeTag)
-			target = Repository.MapObject (tag.Id, dref.Name);
-		    else
-			break;
-		}
-	    } catch (IOException){
-		// Ignore a read error.  Callers will also get the same error
-		// if they try to use the result of getPeeledObjectId.
-	    }
-	    return new Ref (dref.StorageFormat, dref.Name, dref.ObjectId, peeled, true);
-	}
-	
+                    if (tag.TagType == Constants.TypeTag)
+                        target = Repository.MapObject(tag.Id, dref.Name);
+                    else
+                        break;
+                }
+            }
+            catch (IOException)
+            {
+                // Ignore a read error.  Callers will also get the same error
+                // if they try to use the result of getPeeledObjectId.
+            }
+            return new Ref(dref.StorageFormat, dref.Name, dref.ObjectId, peeled, true);
+        }
+
         private string ReadLine(FileInfo file)
         {
             using (BufferedReader br = OpenReader(file))

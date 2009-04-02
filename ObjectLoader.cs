@@ -89,8 +89,8 @@ namespace Gitty.Core
             }
         }
 
-        public abstract ObjectType ObjectType { get; }
-        public abstract long Size { get;  }
+        public virtual ObjectType ObjectType { get; protected set; }
+        public virtual long Size { get; protected set; }
         public abstract byte[] Bytes { get; }
         public abstract byte[] CachedBytes { get;  }
         public abstract ObjectType RawType { get; }

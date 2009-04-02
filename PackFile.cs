@@ -54,7 +54,8 @@ namespace Gitty.Core
 		{
 			public static readonly string PackSignature = "PACK";
 		}
-		private WindowedFile pack;
+
+		private FileStream pack;
 
 		private PackIndex idx;
 

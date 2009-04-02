@@ -43,144 +43,165 @@ using System.Linq;
 using System.Text;
 using Gitty.Core.Exceptions;
 using System.IO;
+using System.IO.Compression;
+using Gitty.Core.Util;
 
 namespace Gitty.Core
 {
-    public class UnpackedObjectLoader : ObjectLoader 
+    public class UnpackedObjectLoader : ObjectLoader
     {
-	long objectSize;
-	byte [] bytes;
-	ObjectType objectType;
-	
+        
+
         public UnpackedObjectLoader(Repository repo, ObjectId objectId)
-		: this (ReadCompressed (repo, objectId), objectId)
+            : this(ReadCompressed(repo, objectId), objectId)
         {
         }
 
-	public UnpackedObjectLoader (byte [] compressed) : this (compressed, null)
-	{
-	}
-	
-	public UnpackedObjectLoader (byte [] compressed, ObjectId id)
-	{
-	    Id = id;
-	    // Try to determine if this is a legacy format loose object or
-	    // a new style loose object. The legacy format was completely
-	    // compressed with zlib so the first byte must be 0x78 (15-bit
-	    // window size, deflated) and the first 16 bit word must be
-	    // evenly divisible by 31. Otherwise its a new style loose
-	    // object.
-	    //
-	    Inflater inflater = InflaterCache.GetInflater ();
-	    try {
-		int fb = compressed [0] & 0xff;
-		
-		if (fb == 0x78 && (((fb << 8) | compressed [1] & 0xff) % 31) == 0) {
-		    inflater.SetInput (compressed);
-		    byte[] hdr = new byte [64];
-		    int avail = 0;
-
-		    while (!inflater.IsFinished && avail < hdr.Length){
-			try {
-			    avail += inflater.Inflate (hdr, avail, hdr.Length - avail);
-			} catch (Exception inn) {
-			    throw new CorruptObjectException(id, "bad stream", inn);
-			}
-		    }
-		    
-		    if (avail < 5)
-			throw new CorruptObjectException(id, "no header");
-
-		    int p = 0;
-		    objectType = Codec.DecodeTypeString (id, hdr, (byte) ' ', ref p);
-		    objectSize = RawParseUtils.ParseBase10 (hdr, ref p);
-		    if (objectSize < 0)
-			throw new CorruptObjectException(id, "negative size");
-		    if (hdr [p++] != 0)
-			throw new CorruptObjectException(id, "garbage after size");
-		    bytes = new byte [objectSize];
-		    if (p < avail)
-			Array.Copy (hdr, p, bytes, 0, avail - p);
-		    Decompress (id, inflater, avail - p);
-		} else {
-		    int p = 0;
-		    int c = compressed [p++] & 0xff;
-		    ObjectType typeCode = (ObjectType) ((c >> 4) & 7);
-		    int size = c & 15;
-		    int shift = 4;
-		    while ((c & 0x80) != 0) {
-			c = compressed[p++] & 0xff;
-			size += (c & 0x7f) << shift;
-			shift += 7;
-		    }
-		    
-		    switch (typeCode) {
-		    case ObjectType.Commit:
-		    case ObjectType.Tree:
-		    case ObjectType.Blob:
-		    case ObjectType.Tag:
-			objectType = typeCode;
-			break;
-		    default:
-			throw new CorruptObjectException(id, "invalid type");
-		    }
-		    
-		    objectSize = size;
-		    bytes = new byte[objectSize];
-		    inflater.SetInput (compressed, p, compressed.Length - p);
-		    Decompress (id, inflater, 0);
-		}
-	    } finally {
-		InflaterCache.Release(inflater);
-	    }
-	}
-
-	void Decompress (ObjectId id, Inflater inf, int p)
-	{
-	    try {
-		while (!inf.IsFinished){
-		    p += inf.Inflate (bytes, p, (int) objectSize - p);
-		}
-	    } catch (Exception e) {
-		throw new CorruptObjectException (id, "bad stream", e);
-	    }
-	    if (p != objectSize)
-		throw new CorruptObjectException (id, "Invalid Length");
-	}
-	    
-	static byte [] ReadCompressed (Repository db, ObjectId id)
-	{
-	    byte [] compressed;
-	    
-	    using (FileStream objStream = db.ToFile (id).OpenRead ()){
-		compressed = new byte [objStream.Length];
-		objStream.Read (compressed, 0, (int) objStream.Length);
-	    }
-	    return compressed;
-	}
-	
-        public override ObjectType ObjectType {
-	    get { return objectType; }
-	}
-	
-        public override long Size {
-	    get  { return objectSize; }
-	}
-
-        public override byte[] Bytes {
-	    get { return bytes; }
+        public UnpackedObjectLoader(byte[] compressed)
+            : this(compressed, null)
+        {
         }
 
-        public override byte[] CachedBytes {
-            get { return bytes; } 
+        public UnpackedObjectLoader(byte[] compressed, ObjectId id)
+        {
+            Id = id;
+            // Try to determine if this is a legacy format loose object or
+            // a new style loose object. The legacy format was completely
+            // compressed with zlib so the first byte must be 0x78 (15-bit
+            // window size, deflated) and the first 16 bit word must be
+            // evenly divisible by 31. Otherwise its a new style loose
+            // object.
+            //
+            var stream = new MemoryStream(compressed);
+            var deflate = new DeflateStream(stream, CompressionMode.Decompress);
+            using(deflate)
+            {
+                int fb = stream.ReadByte() & 0xff;
+
+                if (fb == 0x78 && (((fb << 8) | stream.ReadByte() & 0xff) % 31) == 0)
+                {
+                    var header = new byte[64];
+                    int avail = 0;
+                    int bytesIn = -1;
+                    while (bytesIn != 0 && avail < header.Length)
+                    {
+                        try
+                        {
+                            bytesIn = deflate.Read(header, avail, header.Length - avail);
+                            avail += bytesIn;
+                        }
+                        catch (Exception inn)
+                        {
+                            throw new CorruptObjectException(id, "bad stream", inn);
+                        }
+                    }
+
+                    if (avail < 5)
+                        throw new CorruptObjectException(id, "no header");
+
+                    int p = 0;
+                    this.ObjectType = Codec.DecodeTypeString(id, header, (byte)' ', ref p);
+                    this.Size = RawParseUtils.ParseBase10(header, ref p);
+
+                    if (this.Size < 0)
+                        throw new CorruptObjectException(id, "negative size");
+
+                    if (header[p++] != 0)
+                        throw new CorruptObjectException(id, "garbage after size");
+
+                    _bytes = new byte[this.Size];
+
+                    if (p < avail)
+                        Array.Copy(header, p, _bytes, 0, avail - p);
+
+                    Decompress(id, deflate, avail - p);
+                }
+                else
+                {
+                    throw new NotSupportedException("Compression type not supported");
+                    //int p = 0;
+                    //int c = compressed[p++] & 0xff;
+                    //ObjectType typeCode = (ObjectType)((c >> 4) & 7);
+                    //int size = c & 15;
+                    //int shift = 4;
+                    //while ((c & 0x80) != 0)
+                    //{
+                    //    c = compressed[p++] & 0xff;
+                    //    size += (c & 0x7f) << shift;
+                    //    shift += 7;
+                    //}
+
+                    //switch (typeCode)
+                    //{
+                    //    case ObjectType.Commit:
+                    //    case ObjectType.Tree:
+                    //    case ObjectType.Blob:
+                    //    case ObjectType.Tag:
+                    //        objectType = typeCode;
+                    //        break;
+                    //    default:
+                    //        throw new CorruptObjectException(id, "invalid type");
+                    //}
+
+                    //this.Size = size;
+                    //bytes = new byte[this.Size];
+                    //inflater.SetInput(compressed, p, compressed.Length - p);
+                    //Decompress(id, inflater, 0);
+                }
+            }            
         }
 
-        public override ObjectType RawType {
-            get { return objectType; }
+        private void Decompress(ObjectId id, DeflateStream inf, int p)
+        {
+            try
+            {
+                var bytesRead = -1;
+
+                while (bytesRead != 0)
+                {
+                    bytesRead = inf.Read(_bytes, p, (int)this.Size - p);
+                    p += bytesRead;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new CorruptObjectException(id, "bad stream", e);
+            }
+            if (p != this.Size)
+                throw new CorruptObjectException(id, "Invalid Length");
         }
 
-        public override long RawSize {
-            get { return objectSize; }
+        static byte[] ReadCompressed(Repository db, ObjectId id)
+        {
+            byte[] compressed;
+
+            using (FileStream objStream = db.ToFile(id).OpenRead())
+            {
+                compressed = new byte[objStream.Length];
+                objStream.Read(compressed, 0, (int)objStream.Length);
+            }
+            return compressed;
+        }
+
+        private byte[] _bytes;
+        public override byte[] Bytes
+        {
+            get { return _bytes; }
+        }
+
+        public override byte[] CachedBytes
+        {
+            get { return _bytes; }
+        }
+
+        public override ObjectType RawType
+        {
+            get { return this.ObjectType; }
+        }
+
+        public override long RawSize
+        {
+            get { return this.Size; }
         }
     }
 }

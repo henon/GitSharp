@@ -62,6 +62,11 @@ namespace Gitty.Core
         
         public static bool operator ==(AnyObjectId a, AnyObjectId b)
         {
+            if ((object)a == null)
+                return (object)b == null;
+            else if ((object)b == null)
+                return false;
+
             return (a.W2 == b.W2) &&
                    (a.W3 == b.W3) &&
                    (a.W4 == b.W4) &&

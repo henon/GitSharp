@@ -76,11 +76,19 @@ namespace Gitty.Core
         private RefDatabase _refs;
         //private List<PackFile> _packs;
 
-	public Repository (string gitDirectory) : this (new DirectoryInfo (gitDirectory))
-	{
-	    
-	}
-	    
+        public Repository(string gitDirectory)
+            : this(Find(gitDirectory))
+        {
+
+        }
+
+        public Repository()
+            : this(Find("."))
+        {
+        }
+
+        
+
         /**
          * Construct a representation of a Git repository.
          * 
@@ -283,18 +291,26 @@ namespace Gitty.Core
 
 #warning commented out to get compiled
 
-        ///**
-        // * @param id
-        // *            SHA-1 of an object.
-        // * 
-        // * @return a {@link ObjectLoader} for accessing the data of the named
-        // *         object, or null if the object does not exist.
-        // * @throws IOException
-        // */
-        //public ObjectLoader OpenObject(AnyObjectId id)
-        //{
-        //    return OpenObject(new WindowCursor(), id);
-        //}
+        /**
+         * @param id
+         *            SHA-1 of an object.
+         * 
+         * @return a {@link ObjectLoader} for accessing the data of the named
+         *         object, or null if the object does not exist.
+         * @throws IOException
+         */
+        public ObjectLoader OpenObject(AnyObjectId id)
+        {
+            try
+            {
+                return new UnpackedObjectLoader(this, id.ToObjectId());
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
+            //return OpenObject(new WindowCursor(), id);
+        }
 
 
         ///**
@@ -515,11 +531,6 @@ namespace Gitty.Core
                     return MapTree(ObjectId.FromString(raw, 5));
             }
             throw new IncorrectObjectTypeException(id, ObjectType.Tree);
-        }
-
-        public ObjectLoader OpenObject(ObjectId id)
-        {
-            throw new NotImplementedException();
         }
 
         private Tag MakeTag(ObjectId id, string refName, byte[] raw)
@@ -881,12 +892,13 @@ namespace Gitty.Core
          * @param f File whose path shall be stripp off it's workdir
          * @return normalized repository relative path
          */
-        public static String stripWorkDir(FileSystemInfo wd, FileSystemInfo f)
+        public static String StripWorkDir(FileSystemInfo wd, FileSystemInfo f)
         {
             String relName = f.FullName.Substring(wd.FullName.Length + 1);
             relName = relName.Replace(Path.PathSeparator, '/');
             return relName;
         }
+
         /**
          * @return an important state
          */
@@ -903,21 +915,43 @@ namespace Gitty.Core
             return RepositoryState.Safe;
         }
 
-	public Dictionary<string, Ref> GetAllRefs ()
-	{
-	    return _refs.GetAllRefs ();
-	}
+        public Dictionary<string, Ref> GetAllRefs()
+        {
+            return _refs.GetAllRefs();
+        }
 
-	public Dictionary<string, Ref> GetTags ()
-	{
-	    return _refs.GetTags ();
-	}
+        public Dictionary<string, Ref> GetTags()
+        {
+            return _refs.GetTags();
+        }
 
-	public Ref Peel (Ref pRef)
-	{
-	    return _refs.Peel (pRef);
-	}
-	
+        public Ref Peel(Ref pRef)
+        {
+            return _refs.Peel(pRef);
+        }
+
+        public static DirectoryInfo Find(string directory)
+        {
+            return Find(new DirectoryInfo(directory));
+        }
+
+        public static DirectoryInfo Find(DirectoryInfo directory)
+        {
+            var name = directory.FullName;
+            if (name.EndsWith(".git"))
+                return directory;
+
+            var subDirectories = directory.GetDirectories(".git");
+            if (subDirectories.Length > 0)
+                return subDirectories[0];
+
+            if (directory.Parent == null)
+                return null;
+
+            return Find(directory.Parent);
+        }
+
+
         /**
          * Check validty of a ref name. It must not contain character that has
          * a special meaning in a Git object reference expression. Some other

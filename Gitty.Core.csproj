@@ -96,6 +96,7 @@
     <Compile Include="TreeIterator.cs" />
     <Compile Include="TreeVisitor.cs" />
     <Compile Include="TreeVisitorWithCurrentDirectory.cs" />
+    <Compile Include="UnpackedObjectLoader.cs" />
     <Compile Include="Util\WeakReference.cs" />
     <Compile Include="WriteTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -305,7 +305,7 @@
   <Class Name="Gitty.Core.Repository" Collapsed="true">
     <Position X="32.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AQgAABERQgCAgCEEAAAjABCEAASgCMAAAAEgCBSgAAA=</HashCode>
+      <HashCode>AQgAABERQgCAgCEEAAAjABCAAASoCMAAAAEgCBSkAAA=</HashCode>
       <FileName>Repository.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -446,6 +446,13 @@
       <FileName>TreeIterator.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Gitty.Core.UnpackedObjectLoader" Collapsed="true">
+    <Position X="16.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAABAAAAAAKAAAAAAAAAAAAAAAAIQQAAAAA=</HashCode>
+      <FileName>UnpackedObjectLoader.cs</FileName>
+    </TypeIdentifier>
   </Class>
   <Interface Name="Gitty.Core.IndexTreeVisitor" Collapsed="true">
     <Position X="24" Y="7.75" Width="1.5" />

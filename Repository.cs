@@ -73,7 +73,7 @@ namespace Gitty.Core
      */
     public class Repository
     {
-        private RefDatabase _refs;
+        private RefDatabase _refDb;
         //private List<PackFile> _packs;
 
         /**
@@ -92,7 +92,7 @@ namespace Gitty.Core
             _objectsDirs = ReadObjectsDirs(Path.Combine(gitDirectory.FullName, "objects"), ref _objectsDirs);
 
             this.Config = new RepositoryConfig(this);
-            _refs = new RefDatabase(this);
+            _refDb = new RefDatabase(this);
             //_packs = new List<PackFile>();
 
             bool isExisting = _objectsDirs[0].Exists;
@@ -128,7 +128,7 @@ namespace Gitty.Core
                 throw new GitException("Unable to create repository. Directory already exists.");
 
             this.Directory.Create();
-            this._refs.Create();
+            this._refDb.Create();
 
             this._objectsDirs[0].Create();
             new DirectoryInfo(Path.Combine(this._objectsDirs[0].FullName, "pack")).Create();
@@ -139,7 +139,7 @@ namespace Gitty.Core
 
             string master = Constants.RefsHeads + Constants.Master;
 
-            this._refs.Link(Constants.Head, master);
+            this._refDb.Link(Constants.Head, master);
 
             this.Config.Create();
             this.Config.Save();
@@ -573,7 +573,7 @@ namespace Gitty.Core
          */
         public RefUpdate UpdateRef(String refName)
         {
-            return _refs.NewUpdate(refName);
+            return _refDb.NewUpdate(refName);
         }
 
 
@@ -780,7 +780,7 @@ namespace Gitty.Core
         {
             if (ObjectId.IsId(revstr))
                 return ObjectId.FromString(revstr);
-            Ref r = _refs.ReadRef(revstr);
+            Ref r = _refDb.ReadRef(revstr);
             return r != null ? r.ObjectId : null;
         }
         /**
@@ -833,7 +833,7 @@ namespace Gitty.Core
          */
         public void WriteSymref(String name, String target)
         {
-            _refs.Link(name, target);
+            _refDb.Link(name, target);
         }
 
         private GitIndex _index;
@@ -861,7 +861,7 @@ namespace Gitty.Core
         /** Clean up stale caches */
         public void RefreshFromDisk()
         {
-            _refs.ClearCache();
+            _refDb.ClearCache();
         }
 
         static byte[] GitInternalSlash(byte[] bytes)
@@ -890,32 +890,78 @@ namespace Gitty.Core
         /**
          * @return an important state
          */
-        public RepositoryState GetRespositoryState()
+        public RepositoryState RespositoryState
         {
-            if (WorkingDirectory.GetFiles(".dotest").Length > 0)
-                return RepositoryState.Rebasing;
-            if (WorkingDirectory.GetFiles(".dotest-merge").Length > 0)
-                return RepositoryState.RebasingInteractive;
-            if (WorkingDirectory.GetFiles("MERGE_HEAD").Length > 0)
-                return RepositoryState.Merging;
-            if (WorkingDirectory.GetFiles("BISECT_LOG").Length > 0)
-                return RepositoryState.Bisecting;
-            return RepositoryState.Safe;
+            get
+            {
+                if (WorkingDirectory.GetFiles(".dotest").Length > 0)
+                    return RepositoryState.Rebasing;
+                if (WorkingDirectory.GetFiles(".dotest-merge").Length > 0)
+                    return RepositoryState.RebasingInteractive;
+                if (WorkingDirectory.GetFiles("MERGE_HEAD").Length > 0)
+                    return RepositoryState.Merging;
+                if (WorkingDirectory.GetFiles("BISECT_LOG").Length > 0)
+                    return RepositoryState.Bisecting;
+                return RepositoryState.Safe;
+            }
         }
 
-        public Dictionary<string, Ref> GetAllRefs()
+        public void ReloadRefs()
         {
-            return _refs.GetAllRefs();
+            _refs = null;
+            _tags = null;
+            _branches = null;
+            _remoteBranches = null;
         }
 
-        public Dictionary<string, Ref> GetTags()
+        private Dictionary<string, Ref> _refs;
+        public Dictionary<string, Ref> Refs
         {
-            return _refs.GetTags();
+            get
+            {
+                if (_refs == null)
+                    _refs = _refDb.GetAllRefs();
+                return _refs;
+            }
+        }
+
+        private Dictionary<string, Ref> _tags;
+        public Dictionary<string, Ref> Tags
+        {
+            get
+            {
+                if (_tags == null)
+                    _tags = _refDb.GetTags();
+                return _tags;
+            }
+
+        }
+
+        private Dictionary<string, Ref> _branches;
+        public Dictionary<string, Ref> Branches
+        {
+            get
+            {
+                if (_branches == null)
+                    _branches = _refDb.GetBranches();
+                return _branches;
+            }
+        }
+
+        private Dictionary<string, Ref> _remoteBranches;
+        public Dictionary<string, Ref> RemoteBranches
+        {
+            get
+            {
+                if (_remoteBranches == null)
+                    _remoteBranches = _refDb.GetRemotes();
+                return _remoteBranches;
+            }
         }
 
         public Ref Peel(Ref pRef)
         {
-            return _refs.Peel(pRef);
+            return _refDb.Peel(pRef);
         }
 
         public static Repository Open(string directory)

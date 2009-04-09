@@ -9,7 +9,7 @@ class X {
 		var repo = Repository.Open(new DirectoryInfo ("/cvs/egit/.git"));
 
 		Console.WriteLine ("Refs:");
-		var refs = repo.GetAllRefs ();
+        var refs = repo.Refs;
 		foreach (var k in refs){
 			Console.WriteLine ("  {0} -> {1}", k.Key, k.Value);
 		}

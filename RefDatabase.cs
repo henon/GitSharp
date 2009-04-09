@@ -152,9 +152,31 @@ namespace Gitty.Core
             return tags;
         }
 
+        public Dictionary<String, Ref> GetBranches()
+        {
+            var branches = new Dictionary<String, Ref>();
+            foreach (Ref r in ReadRefs().Values)
+            {
+                if (r.Name.StartsWith(Constants.RefsHeads))
+                    branches.Add(r.Name.Substring(Constants.RefsTags.Length), r);
+            }
+            return branches;
+        }
+
+        public Dictionary<String, Ref> GetRemotes()
+        {
+            var remotes = new Dictionary<String, Ref>();
+            foreach (Ref r in ReadRefs().Values)
+            {
+                if (r.Name.StartsWith(Constants.RefsRemotes))
+                    remotes.Add(r.Name.Substring(Constants.RefsRemotes.Length), r);
+            }
+            return remotes;
+        }
+
         private Dictionary<string, Ref> ReadRefs()
         {
-            Dictionary<String, Ref> avail = new Dictionary<String, Ref>();
+            var avail = new Dictionary<String, Ref>();
             ReadPackedRefs(avail);
             ReadLooseRefs(avail, Constants.Refs, _refsDir);
             ReadOneLooseRef(avail, Constants.Head, PathUtil.CombineFilePath(_gitDir, Constants.Head));

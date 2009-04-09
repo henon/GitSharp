@@ -43,15 +43,15 @@ namespace Gitty.Core
 {
     public enum ObjectType
     {
-        Bad = -1, 
+        Bad = -1,
         Extension = 0,
         Commit = 1,
         Tree = 2,
         Blob = 3,
         Tag = 4,
         ObjectType5 = 5,
-	OffsetDelta = 6,
-	ReferenceDelta = 7,
-	Unknown = 255
+        OffsetDelta = 6,
+        ReferenceDelta = 7,
+        Unknown = 255
     }
 }

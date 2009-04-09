@@ -76,19 +76,6 @@ namespace Gitty.Core
         private RefDatabase _refs;
         //private List<PackFile> _packs;
 
-        public Repository(string gitDirectory)
-            : this(Find(gitDirectory))
-        {
-
-        }
-
-        public Repository()
-            : this(Find("."))
-        {
-        }
-
-        
-
         /**
          * Construct a representation of a Git repository.
          * 
@@ -98,7 +85,7 @@ namespace Gitty.Core
          *             the repository appears to already exist but cannot be
          *             accessed.
          */
-        public Repository(DirectoryInfo gitDirectory)
+        private Repository(DirectoryInfo gitDirectory)
         {
             this.Directory = gitDirectory;
             _objectsDirs = new List<DirectoryInfo>();
@@ -301,6 +288,7 @@ namespace Gitty.Core
          */
         public ObjectLoader OpenObject(AnyObjectId id)
         {
+            if (id == null) return null;
             try
             {
                 return new UnpackedObjectLoader(this, id.ToObjectId());
@@ -930,25 +918,25 @@ namespace Gitty.Core
             return _refs.Peel(pRef);
         }
 
-        public static DirectoryInfo Find(string directory)
+        public static Repository Open(string directory)
         {
-            return Find(new DirectoryInfo(directory));
+            return Open(new DirectoryInfo(directory));
         }
 
-        public static DirectoryInfo Find(DirectoryInfo directory)
+        public static Repository Open(DirectoryInfo directory)
         {
             var name = directory.FullName;
             if (name.EndsWith(".git"))
-                return directory;
+                return new Repository(directory);
 
             var subDirectories = directory.GetDirectories(".git");
             if (subDirectories.Length > 0)
-                return subDirectories[0];
+                return new Repository(subDirectories[0]);
 
             if (directory.Parent == null)
                 return null;
 
-            return Find(directory.Parent);
+            return Open(directory.Parent);
         }
 
 
@@ -998,6 +986,11 @@ namespace Gitty.Core
                 p = c;
             }
             return true;
+        }
+
+        public object OpenCommit(ObjectId id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -6,7 +6,7 @@ class X {
 
 	static void Main (string [] args)
 	{
-		var repo = new Repository (new DirectoryInfo ("/cvs/egit/.git"));
+		var repo = Repository.Open(new DirectoryInfo ("/cvs/egit/.git"));
 
 		Console.WriteLine ("Refs:");
 		var refs = repo.GetAllRefs ();

@@ -137,7 +137,7 @@ namespace Gitty.Core
             new DirectoryInfo(Path.Combine(this.Directory.FullName, "branches")).Create();
             new DirectoryInfo(Path.Combine(this.Directory.FullName, "remote")).Create();
 
-            string master = Constants.HeadsPrefix + "/" + Constants.Master;
+            string master = Constants.RefsHeads + Constants.Master;
 
             this._refs.Link(Constants.Head, master);
 

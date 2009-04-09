@@ -42,89 +42,97 @@ using System;
 
 namespace Gitty.Core
 {
-    internal static class Codec {
+    internal static class Codec
+    {
 
-	public static ObjectType DecodeTypeString (ObjectId id, byte [] typeString, byte endMark, ref int offset)
-	{
-	    try {
-		switch (typeString [offset]){
-		case (byte) 'b':
-		    if (typeString [offset + 1] != (byte) 'l' ||
-			typeString [offset + 2] != (byte) 'o' ||
-			typeString [offset + 3] != (byte) 'b' ||
-			typeString [offset + 4] != endMark)
-			break;
-		    offset += 5;
-		    return ObjectType.Blob;
+        public static ObjectType DecodeTypeString(ObjectId id, byte[] typeString, byte endMark, ref int offset)
+        {
+            try
+            {
+                switch (typeString[offset])
+                {
+                    case (byte)'b':
+                        if (typeString[offset + 1] != (byte)'l' ||
+                        typeString[offset + 2] != (byte)'o' ||
+                        typeString[offset + 3] != (byte)'b' ||
+                        typeString[offset + 4] != endMark)
+                            break;
+                        offset += 5;
+                        return ObjectType.Blob;
 
-		case (byte) 'c':
-		    if (typeString [offset + 1] != (byte) 'o' || typeString [offset + 2] != (byte) 'm' ||
-			typeString [offset + 3] != (byte) 'm' || typeString [offset + 4] != (byte) 'i' ||
-			typeString [offset + 5] != (byte) 't' || typeString [offset + 6] != endMark)
-			break;
-		    offset += 7;
-		    return ObjectType.Commit;
+                    case (byte)'c':
+                        if (typeString[offset + 1] != (byte)'o' || typeString[offset + 2] != (byte)'m' ||
+                        typeString[offset + 3] != (byte)'m' || typeString[offset + 4] != (byte)'i' ||
+                        typeString[offset + 5] != (byte)'t' || typeString[offset + 6] != endMark)
+                            break;
+                        offset += 7;
+                        return ObjectType.Commit;
 
-		case (byte) 't':
-		    switch (typeString [offset + 1]){
-		    case (byte) 'a':
-			if (typeString [offset + 2] != (byte) 'g' || typeString [offset + 2] != endMark)
-			    throw new CorruptObjectException (id, "invalid type");
-			offset += 4;
-			return ObjectType.Tag;
-			
-		    case (byte) 'r':
-			if (typeString [offset + 2] != (byte) 'e' || typeString [offset + 3] != (byte) 'e' || typeString [offset + 4] != endMark)
-			    throw new CorruptObjectException (id, "invalid type");
-			offset += 5;
-			return ObjectType.Tree;
-			
-		    }
-		    break;
-		}
-	    } catch (IndexOutOfRangeException) {
-	    }
-	    throw new CorruptObjectException (id, "invalid type");
-	}
+                    case (byte)'t':
+                        switch (typeString[offset + 1])
+                        {
+                            case (byte)'a':
+                                if (typeString[offset + 2] != (byte)'g' || typeString[offset + 2] != endMark)
+                                    throw new CorruptObjectException(id, "invalid type");
+                                offset += 4;
+                                return ObjectType.Tag;
 
-	public static string TypeString (ObjectType objectType)
-	{
-	    switch (objectType){
-	    case ObjectType.Commit:
-		return Constants.TypeCommit;
-		
-	    case ObjectType.Tree:
-		return Constants.TypeTree;
-		
-	    case ObjectType.Blob:
-		return Constants.TypeBlob;
-		
-	    case ObjectType.Tag:
-		return Constants.TypeTag;
-		
-	    default:
-		throw new ArgumentException ("objectType", "Bad object type passed");
-	    }
-	}
-	
-	public static byte [] EncodedTypeString (ObjectType objectType)
-	{
-	    switch (objectType){
-	    case ObjectType.Commit:
-		return Constants.EncodedTypeCommit;
-		
-	    case ObjectType.Tree:
-		return Constants.EncodedTypeTree;
-		
-	    case ObjectType.Blob:
-		return Constants.EncodedTypeBlob;
-		
-	    case ObjectType.Tag:
-		return Constants.EncodedTypeTag;
-		
-	    default:
-		throw new ArgumentException ("objectType", "Bad object type passed");
-	    }
-	}
+                            case (byte)'r':
+                                if (typeString[offset + 2] != (byte)'e' || typeString[offset + 3] != (byte)'e' || typeString[offset + 4] != endMark)
+                                    throw new CorruptObjectException(id, "invalid type");
+                                offset += 5;
+                                return ObjectType.Tree;
+
+                        }
+                        break;
+                }
+            }
+            catch (IndexOutOfRangeException)
+            {
+            }
+            throw new CorruptObjectException(id, "invalid type");
+        }
+
+        public static string TypeString(ObjectType objectType)
+        {
+            switch (objectType)
+            {
+                case ObjectType.Commit:
+                    return Constants.ObjectTypes.Commit;
+
+                case ObjectType.Tree:
+                    return Constants.ObjectTypes.Tree;
+
+                case ObjectType.Blob:
+                    return Constants.ObjectTypes.Blob;
+
+                case ObjectType.Tag:
+                    return Constants.ObjectTypes.Tag;
+
+                default:
+                    throw new ArgumentException("objectType", "Bad object type passed");
+            }
+        }
+
+        public static byte[] EncodedTypeString(ObjectType objectType)
+        {
+            switch (objectType)
+            {
+                case ObjectType.Commit:
+                    return Constants.ObjectTypes.EncodedCommit;
+
+                case ObjectType.Tree:
+                    return Constants.ObjectTypes.EncodedTree;
+
+                case ObjectType.Blob:
+                    return Constants.ObjectTypes.EncodedBlob;
+
+                case ObjectType.Tag:
+                    return Constants.ObjectTypes.EncodedTag;
+
+                default:
+                    throw new ArgumentException("objectType", "Bad object type passed");
+            }
+        }
     }
 }

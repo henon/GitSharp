@@ -87,7 +87,8 @@ namespace Gitty.Core
         public static ObjectId FromString(string s)
         {
             if (s.Length != Constants.StringLength)
-                throw new ArgumentException("Invalid id: " + s);
+                return null;
+
             return FromHexString(ASCIIEncoding.ASCII.GetBytes(s), 0);
         }
 

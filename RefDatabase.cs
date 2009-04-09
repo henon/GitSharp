@@ -62,8 +62,6 @@ namespace Gitty.Core
         private DateTime packedRefsLastModified;
         private long packedRefsLength;
 
-        private string[] refSearchPaths = { "" };
-
         public RefDatabase(Repository repo)
         {
             this.Repository = repo;
@@ -129,9 +127,9 @@ namespace Gitty.Core
         public Ref ReadRef(String partialName)
         {
             RefreshPackedRefs();
-            for (int k = 0; k < refSearchPaths.Length; k++)
+            foreach (var searchPath in Constants.RefSearchPaths)
             {
-                Ref r = ReadRefBasic(refSearchPaths[k] + partialName, 0);
+                Ref r = ReadRefBasic(searchPath + partialName, 0);
                 if (r != null && r.ObjectId != null)
                     return r;
             }
@@ -148,8 +146,8 @@ namespace Gitty.Core
             Dictionary<String, Ref> tags = new Dictionary<String, Ref>();
             foreach (Ref r in ReadRefs().Values)
             {
-                if (r.Name.StartsWith(Constants.TagsSlash))
-                    tags.Add(r.Name.Substring(Constants.TagsSlash.Length), r);
+                if (r.Name.StartsWith(Constants.RefsTags))
+                    tags.Add(r.Name.Substring(Constants.RefsTags.Length), r);
             }
             return tags;
         }
@@ -158,7 +156,7 @@ namespace Gitty.Core
         {
             Dictionary<String, Ref> avail = new Dictionary<String, Ref>();
             ReadPackedRefs(avail);
-            ReadLooseRefs(avail, Constants.RefsSlash, _refsDir);
+            ReadLooseRefs(avail, Constants.Refs, _refsDir);
             ReadOneLooseRef(avail, Constants.Head, PathUtil.CombineFilePath(_gitDir, Constants.Head));
             return avail;
         }
@@ -265,8 +263,8 @@ namespace Gitty.Core
 
         private FileInfo FileForRef(string name)
         {
-            if (name.StartsWith(Constants.RefsSlash))
-                return PathUtil.CombineFilePath(_refsDir, name.Substring(Constants.RefsSlash.Length));
+            if (name.StartsWith(Constants.Refs))
+                return PathUtil.CombineFilePath(_refsDir, name.Substring(Constants.Refs.Length));
             return PathUtil.CombineFilePath(_gitDir, name);
         }
 
@@ -275,14 +273,13 @@ namespace Gitty.Core
             // Prefer loose ref to packed ref as the loose
             // file can be more up-to-date than a packed one.
             //
-            CachedRef reff = looseRefs[name];
             FileInfo loose = FileForRef(name);
             DateTime mtime = loose.LastWriteTime;
 
-            if (reff != null)
+            if (looseRefs.ContainsKey(name))
             {
-                if (reff.LastModified == mtime)
-                    return reff;
+                if (looseRefs[name].LastModified == mtime)
+                    return looseRefs[name];
                 looseRefs.Remove(name);
             }
 
@@ -291,28 +288,18 @@ namespace Gitty.Core
                 // If last modified is 0 the file does not exist.
                 // Try packed cache.
                 //
-                return packedRefs[name];
+                return (packedRefs.ContainsKey(name)) ? packedRefs[name] : null;
             }
 
-            String line;
-            try
-            {
-                line = ReadLine(loose);
-            }
-            catch (FileNotFoundException)
-            {
-                return packedRefs[name];
-            }
+            var line = ReadLine(loose);
 
-            if (line == null || line.Length == 0)
+            if (string.IsNullOrEmpty(line))
                 return new Ref(Ref.Storage.Loose, name, null);
 
             if (line.StartsWith("ref: "))
             {
                 if (depth >= 5)
-                {
                     throw new IOException("Exceeded maximum ref depth of " + depth + " at " + name + ".  Circular reference?");
-                }
 
                 String target = line.Substring("ref: ".Length);
                 Ref r = ReadRefBasic(target, depth + 1);
@@ -329,7 +316,7 @@ namespace Gitty.Core
                 throw new IOException("Not a ref: " + name + ": " + line);
             }
 
-            reff = new CachedRef(Ref.Storage.Loose, name, id, mtime);
+            var reff = new CachedRef(Ref.Storage.Loose, name, id, mtime);
             looseRefs.Add(name, reff);
             return reff;
         }
@@ -354,8 +341,7 @@ namespace Gitty.Core
             Dictionary<String, Ref> newPackedRefs = new Dictionary<String, Ref>();
             try
             {
-                BufferedReader b = OpenReader(_packedRefsFile);
-                try
+                using(var b = OpenReader(_packedRefsFile))
                 {
                     String p;
                     Ref last = null;
@@ -381,10 +367,6 @@ namespace Gitty.Core
                         last = new Ref(Ref.Storage.Packed, name, id2);
                         newPackedRefs.Add(last.Name, last);
                     }
-                }
-                finally
-                {
-                    b.Close();
                 }
                 packedRefsLastModified = currTime;
                 packedRefsLength = currLen;
@@ -419,7 +401,7 @@ namespace Gitty.Core
                     Tag tag = (Tag)target;
                     peeled = tag.Id;
 
-                    if (tag.TagType == Constants.TypeTag)
+                    if (tag.TagType == Constants.ObjectTypes.Tag)
                         target = Repository.MapObject(tag.Id, dref.Name);
                     else
                         break;

@@ -51,60 +51,8 @@ namespace Gitty.Core
     {
 
 
-        /**
-	 * Open an existing pack <code>.idx</code> file for reading.
-	 * <p>
-	 * The format of the file will be automatically detected and a proper access
-	 * implementation for that format will be constructed and returned to the
-	 * caller. The file may or may not be held open by the returned instance.
-	 * </p>
-	 * 
-	 * @param idxFile
-	 *            existing pack .idx to read.
-	 * @return access implementation for the requested file.
-	 * @throws FileNotFoundException
-	 *             the file does not exist.
-	 * @throws IOException
-	 *             the file exists but could not be read due to security errors,
-	 *             unrecognized data version, or unexpected data corruption.
-	 */
-	public static PackIndex open(FileInfo idxFile)
-        {
-            
-            FileStream fd = idxFile.OpenRead();
-            try
-            {
-                byte[] hdr = new byte[8];
-                NB.ReadFully(fd, hdr, 0, hdr.Length);
-                if (IsTOC(hdr))
-                {
-                    int v = NB.DecodeInt32(hdr, 4);
-                    switch (v)
-                    {
-                        case 2:
-                            return new PackIndexV2(fd);
-                        default:
-                            throw new IOException("Unsupported pack index version " + v);
-                    }
-                }
-                return new PackIndexV1(fd, hdr);
-            }
-            catch (IOException ioe)
-            {
-                throw new IOException("Unreadable pack index: " + idxFile.FullName, ioe);;
-            }
-            finally
-            {
-                try
-                {
-                    fd.Close();
-                }
-                catch (IOException)
-                {
-                    // ignore
-                }
-            }
-        }
+        
+        
 
         private static bool IsTOC(byte[] h)
         {
@@ -324,29 +272,45 @@ namespace Gitty.Core
             #endregion
         }
 
-        internal static PackIndex Open(FileInfo idxFile)
+        /// <summary>
+        /// Open an existing pack <code>.idx</code> file for reading..
+        /// <p>
+        /// The format of the file will be automatically detected and a proper access
+        /// implementation for that format will be constructed and returned to the
+        /// caller. The file may or may not be held open by the returned instance.
+        /// </p>
+        /// </summary>
+        /// <param name="idxFile">existing pack .idx to read.</param>
+        /// <returns></returns>
+        public static PackIndex Open(FileInfo idxFile)
         {
-	    try {
-		using (FileStream fs = idxFile.OpenRead ()){
-		    byte [] hdr = new byte [8];
-		    int n = fs.Read (hdr, 0, hdr.Length);
-		    if (n != hdr.Length)
-			throw new IOException ("The PackIndex is a partial file (" + idxFile.FullName + ")");
+            try
+            {
+                using (FileStream fs = idxFile.OpenRead())
+                {
+                    byte[] hdr = new byte[8];
+                    int n = fs.Read(hdr, 0, hdr.Length);
+                    if (n != hdr.Length)
+                        throw new IOException("The PackIndex is a partial file (" + idxFile.FullName + ")");
 
-		    if (IsTOC (hdr)){
-			int v = NB.DecodeInt32 (hdr, 4);
-			switch (v){
-			case 2:
-			    return new PackIndexV2 (fs);
-			default:
-			    throw new IOException ("Unsupported pack index version " + v);
-			}
-		    }
-		    return new PackIndexV1 (fs, hdr);
-		}
-	    } catch (IOException io){
-		throw new IOException ("Unable to read pack index: " + idxFile.FullName);
-	    }
-	}
+                    if (IsTOC(hdr))
+                    {
+                        int v = NB.DecodeInt32(hdr, 4);
+                        switch (v)
+                        {
+                            case 2:
+                                return new PackIndexV2(fs);
+                            default:
+                                throw new IOException("Unsupported pack index version " + v);
+                        }
+                    }
+                    return new PackIndexV1(fs, hdr);
+                }
+            }
+            catch (IOException io)
+            {
+                throw new IOException("Unable to read pack index: " + idxFile.FullName);
+            }
+        }
     }
 }

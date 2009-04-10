@@ -55,7 +55,7 @@ namespace Gitty.Core
 			public static readonly string PackSignature = "PACK";
 		}
 
-		private FileStream pack;
+		private FileStream _stream;
 
 		private PackIndex idx;
 
@@ -74,9 +74,10 @@ namespace Gitty.Core
 		 *             the index file cannot be accessed at this time.
 		 */
 		public PackFile(Repository parentRepo, FileInfo idxFile, FileInfo packFile)
-		{
-			pack = new WindowedFile(packFile);
-			pack.OnOpen = ReadPackHeader;
+        {
+#warning commented for compiling
+            //pack = new WindowedFile(packFile);
+			//pack.OnOpen = ReadPackHeader;
 
 			try
 			{
@@ -87,11 +88,11 @@ namespace Gitty.Core
 				throw ioe;
 			}
 		}
-
-		PackedObjectLoader ResolveBase(WindowCursor curs, long ofs)
-		{
-			return Reader(curs, ofs);
-		}
+#warning commented for compiling
+        //PackedObjectLoader ResolveBase(WindowCursor curs, long ofs)
+        //{
+        //    return Reader(curs, ofs);
+        //}
 
 		/**
 		 * Determine if an object is contained within the pack file.
@@ -109,50 +110,51 @@ namespace Gitty.Core
 			return idx.HasObject(id);
 		}
 
-		/**
-		 * Get an object from this pack.
-		 * 
-		 * @param id
-		 *            the object to obtain from the pack. Must not be null.
-		 * @return the object loader for the requested object if it is contained in
-		 *         this pack; null if the object was not found.
-		 * @throws IOException
-		 *             the pack file or the index could not be read.
-		 */
-		public PackedObjectLoader Get(AnyObjectId id)
-		{
-			return Get(new WindowCursor(), id);
-		}
-
-		/**
-		 * Get an object from this pack.
-		 * 
-		 * @param curs
-		 *            temporary working space associated with the calling thread.
-		 * @param id
-		 *            the object to obtain from the pack. Must not be null.
-		 * @return the object loader for the requested object if it is contained in
-		 *         this pack; null if the object was not found.
-		 * @throws IOException
-		 *             the pack file or the index could not be read.
-		 */
-		public PackedObjectLoader Get(WindowCursor curs, AnyObjectId id)
-		{
-			long offset = idx.FindOffset(id);
-			if (offset == -1)
-				return null;
-			PackedObjectLoader objReader = Reader(curs, offset);
-			objReader.Id = id.ToObjectId();
-			return objReader;
-		}
+#warning commented for compiling
+        ///**
+        // * Get an object from this pack.
+        // * 
+        // * @param id
+        // *            the object to obtain from the pack. Must not be null.
+        // * @return the object loader for the requested object if it is contained in
+        // *         this pack; null if the object was not found.
+        // * @throws IOException
+        // *             the pack file or the index could not be read.
+        // */
+        //public PackedObjectLoader Get(AnyObjectId id)
+        //{
+        //    return Get(new WindowCursor(), id);
+        //}
+        //
+        ///**
+        // * Get an object from this pack.
+        // * 
+        // * @param curs
+        // *            temporary working space associated with the calling thread.
+        // * @param id
+        // *            the object to obtain from the pack. Must not be null.
+        // * @return the object loader for the requested object if it is contained in
+        // *         this pack; null if the object was not found.
+        // * @throws IOException
+        // *             the pack file or the index could not be read.
+        // */
+        //public PackedObjectLoader Get(WindowCursor curs, AnyObjectId id)
+        //{
+        //    long offset = idx.FindOffset(id);
+        //    if (offset == -1)
+        //        return null;
+        //    PackedObjectLoader objReader = Reader(curs, offset);
+        //    objReader.Id = id.ToObjectId();
+        //    return objReader;
+        //}
 
 		/**
 		 * Close the resources utilized by this repository
 		 */
 		public void Close()
 		{
-			UnpackedObjectCache.Purge(pack);
-			pack.Close();
+            #warning TODO: UnpackedObjectCache.Purge(pack);
+			_stream.Close();
 		}
 
 
@@ -181,157 +183,155 @@ namespace Gitty.Core
 			return GetReverseIdx().FindObject(offset);
 		}
 
-		public UnpackedObjectCache.Entry ReadCache(long position)
-		{
-			return UnpackedObjectCache.Get(pack, position);
-		}
-
 		public void SaveCache(long position, byte[] data, ObjectType type)
 		{
-			UnpackedObjectCache.Store(pack, position, data, type);
-		}
+#warning TODO: UnpackedObjectCache.Store(pack, position, data, type);
+        }
 
-		public byte[] Decompress(long position, int totalSize, WindowCursor curs)
-		{
-			byte[] dstbuf = new byte[totalSize];
-			pack.ReadCompressed(position, dstbuf, curs);
-			return dstbuf;
-		}
+#warning commented for compiling
+        //public byte[] Decompress(long position, int totalSize, WindowCursor curs)
+        //{
+        //    byte[] dstbuf = new byte[totalSize];
+        //    pack.ReadCompressed(position, dstbuf, curs);
+        //    return dstbuf;
+        //}
 
-		public void CopyRawData(PackedObjectLoader loader, Stream stream, byte[] buf)
-		{
-			long objectOffset = loader.objectOffset;
-			long dataOffset = loader.DataOffset;
-			int cnt = (int)(FindEndOffset(objectOffset) - dataOffset);
-			WindowCursor curs = loader.curs;
+        public void CopyRawData(PackedObjectLoader loader, Stream stream, byte[] buf)
+        {
+            throw new NotImplementedException();
+        //    long objectOffset = loader.objectOffset;
+        //    long dataOffset = loader.DataOffset;
+        //    int cnt = (int)(FindEndOffset(objectOffset) - dataOffset);
+        //    WindowCursor curs = loader.curs;
 
-			if (idx.HasCRC32Support())
-			{
-				Crc32 crc = new Crc32();
-				int headerCnt = (int)(dataOffset - objectOffset);
-				while (headerCnt > 0)
-				{
-					int toRead = Math.Min(headerCnt, buf.Length);
-					int read = pack.Read(objectOffset, buf, 0, toRead, curs);
-					if (read != toRead)
-						throw new EndOfStreamException();
-					crc.Update(buf, 0, read);
-					headerCnt -= toRead;
-				}
+        //    if (idx.HasCRC32Support())
+        //    {
+        //        Crc32 crc = new Crc32();
+        //        int headerCnt = (int)(dataOffset - objectOffset);
+        //        while (headerCnt > 0)
+        //        {
+        //            int toRead = Math.Min(headerCnt, buf.Length);
+        //            int read = pack.Read(objectOffset, buf, 0, toRead, curs);
+        //            if (read != toRead)
+        //                throw new EndOfStreamException();
+        //            crc.Update(buf, 0, read);
+        //            headerCnt -= toRead;
+        //        }
 
 				
-				CheckedOutputStream crcOut = new CheckedOutputStream(stream, crc);
-				pack.CopyToStream(dataOffset, buf, cnt, crcOut, curs);
-				long computed = crc.Value;
+        //        CheckedOutputStream crcOut = new CheckedOutputStream(stream, crc);
+        //        pack.CopyToStream(dataOffset, buf, cnt, crcOut, curs);
+        //        long computed = crc.Value;
 
-				ObjectId id;
-				if (loader.HasComputedId)
-					id = loader.Id;
-				else
-					id = FindObjectForOffset(objectOffset);
-				long expected = idx.FindCRC32(id);
-				if (computed != expected)
-					throw new CorruptObjectException(id,
-							"Possible data corruption - CRC32 of raw pack data (object offset "
-									+ objectOffset
-									+ ") mismatch CRC32 from pack index");
-			}
-			else
-			{
-				pack.CopyToStream(dataOffset, buf, cnt, stream, curs);
+        //        ObjectId id;
+        //        if (loader.HasComputedId)
+        //            id = loader.Id;
+        //        else
+        //            id = FindObjectForOffset(objectOffset);
+        //        long expected = idx.FindCRC32(id);
+        //        if (computed != expected)
+        //            throw new CorruptObjectException(id,
+        //                    "Possible data corruption - CRC32 of raw pack data (object offset "
+        //                            + objectOffset
+        //                            + ") mismatch CRC32 from pack index");
+        //    }
+        //    else
+        //    {
+        //        pack.CopyToStream(dataOffset, buf, cnt, stream, curs);
 
-				// read to verify against Adler32 zlib checksum
-				//loader.CachedBytes;
-			}
-		}
+        //        // read to verify against Adler32 zlib checksum
+        //        //loader.CachedBytes;
+        //    }
+        }
 
 		public bool SupportsFastCopyRawData
 		{
             get { return idx.HasCRC32Support(); }
-		}
+        }
 
+#warning commented for compiling
+        //private void ReadPackHeader()
+        //{
+        //    WindowCursor curs = new WindowCursor();
+        //    long position = 0;
+        //    byte[] sig = new byte[Constants.PackSignature.Length];
+        //    byte[] intbuf = new byte[4];
+        //    long vers;
 
-		private void ReadPackHeader()
-		{
-			WindowCursor curs = new WindowCursor();
-			long position = 0;
-			byte[] sig = new byte[Constants.PackSignature.Length];
-			byte[] intbuf = new byte[4];
-			long vers;
+        //    if (_stream.Read(position, sig, curs) != Constants.PackSignature.Length)
+        //        throw new IOException("Not a PACK file.");
+        //    for (int k = 0; k < Constants.PackSignature.Length; k++)
+        //    {
+        //        if (sig[k] != Constants.PackSignature[k])
+        //            throw new IOException("Not a PACK file.");
+        //    }
+        //    position += Constants.PackSignature.Length;
 
-			if (pack.Read(position, sig, curs) != Constants.PackSignature.Length)
-				throw new IOException("Not a PACK file.");
-			for (int k = 0; k < Constants.PackSignature.Length; k++)
-			{
-				if (sig[k] != Constants.PackSignature[k])
-					throw new IOException("Not a PACK file.");
-			}
-			position += Constants.PackSignature.Length;
+        //    _stream.ReadFully(position, intbuf, curs);
+        //    vers = NB.DecodeUInt32(intbuf, 0);
+        //    if (vers != 2 && vers != 3)
+        //        throw new IOException("Unsupported pack version " + vers + ".");
+        //    position += 4;
 
-			pack.ReadFully(position, intbuf, curs);
-			vers = NB.DecodeUInt32(intbuf, 0);
-			if (vers != 2 && vers != 3)
-				throw new IOException("Unsupported pack version " + vers + ".");
-			position += 4;
+        //    _stream.ReadFully(position, intbuf, curs);
+        //    long objectCnt = NB.DecodeUInt32(intbuf, 0);
+        //    if (idx.ObjectCount != objectCnt)
+        //        throw new IOException("Pack index"
+        //                + " object count mismatch; expected " + objectCnt
+        //                + " found " + idx.ObjectCount + ": " + _stream.Name);
+        //}
 
-			pack.ReadFully(position, intbuf, curs);
-			long objectCnt = NB.DecodeUInt32(intbuf, 0);
-			if (idx.ObjectCount != objectCnt)
-				throw new IOException("Pack index"
-						+ " object count mismatch; expected " + objectCnt
-						+ " found " + idx.ObjectCount + ": " + pack.Name);
-		}
+#warning commented for compiling
+        //private PackedObjectLoader Reader(WindowCursor curs, long objOffset)
+        //{
+        //    long pos = objOffset;
+        //    int p = 0;
+        //    byte[] ib = curs.tempId;
+        //    pack.ReadFully(pos, ib, curs);
+        //    int c = ib[p++] & 0xff;
+        //    int typeCode = (c >> 4) & 7;
+        //    long dataSize = c & 15;
+        //    int shift = 4;
+        //    while ((c & 0x80) != 0)
+        //    {
+        //        c = ib[p++] & 0xff;
+        //        dataSize += (c & 0x7f) << shift;
+        //        shift += 7;
+        //    }
+        //    pos += p;
 
-		private PackedObjectLoader Reader(WindowCursor curs, long objOffset)
-		{
-			long pos = objOffset;
-			int p = 0;
-			byte[] ib = curs.tempId;
-			pack.ReadFully(pos, ib, curs);
-			int c = ib[p++] & 0xff;
-			int typeCode = (c >> 4) & 7;
-			long dataSize = c & 15;
-			int shift = 4;
-			while ((c & 0x80) != 0)
-			{
-				c = ib[p++] & 0xff;
-				dataSize += (c & 0x7f) << shift;
-				shift += 7;
-			}
-			pos += p;
+        //    switch ((ObjectType)typeCode)
+        //    {
+        //        case ObjectType.Commit:
+        //        case ObjectType.Tree:
+        //        case ObjectType.Blob:
+        //        case ObjectType.Tag:
+        //            return new WholePackedObjectLoader(curs, this, pos, objOffset, (ObjectType)typeCode, (int)dataSize);
+        //        case ObjectType.OffsetDelta:
+        //            pack.ReadFully(pos, ib, curs);
+        //            p = 0;
+        //            c = ib[p++] & 0xff;
+        //            long ofs = c & 127;
+        //            while ((c & 128) != 0)
+        //            {
+        //                ofs += 1;
+        //                c = ib[p++] & 0xff;
+        //                ofs <<= 7;
+        //                ofs += (c & 127);
+        //            }
+        //            return new DeltaOfsPackedObjectLoader(curs, this, pos + p, objOffset, (int)dataSize, objOffset - ofs);
+        //        case ObjectType.ReferenceDelta:
+        //            pack.ReadFully(pos, ib, curs);
+        //            return new DeltaRefPackedObjectLoader(curs, this, pos + ib.Length, objOffset, (int)dataSize, ObjectId.FromRaw(ib));
 
-			switch ((ObjectType)typeCode)
-			{
-				case ObjectType.Commit:
-				case ObjectType.Tree:
-				case ObjectType.Blob:
-				case ObjectType.Tag:
-					return new WholePackedObjectLoader(curs, this, pos, objOffset, (ObjectType)typeCode, (int)dataSize);
-				case ObjectType.OffsetDelta:
-					pack.ReadFully(pos, ib, curs);
-					p = 0;
-					c = ib[p++] & 0xff;
-					long ofs = c & 127;
-					while ((c & 128) != 0)
-					{
-						ofs += 1;
-						c = ib[p++] & 0xff;
-						ofs <<= 7;
-						ofs += (c & 127);
-					}
-					return new DeltaOfsPackedObjectLoader(curs, this, pos + p, objOffset, (int)dataSize, objOffset - ofs);
-				case ObjectType.ReferenceDelta:
-					pack.ReadFully(pos, ib, curs);
-					return new DeltaRefPackedObjectLoader(curs, this, pos + ib.Length, objOffset, (int)dataSize, ObjectId.FromRaw(ib));
-
-				default:
-					throw new IOException("Unknown object type " + typeCode + ".");
-			}
-		}
+        //        default:
+        //            throw new IOException("Unknown object type " + typeCode + ".");
+        //    }
+        //}
 
 		private long FindEndOffset(long startOffset)
 		{
-			long maxOffset = pack.Length - AnyObjectId.Constants.ObjectIdLength;
+			long maxOffset = _stream.Length - AnyObjectId.Constants.ObjectIdLength;
 			return GetReverseIdx().FindNextOffset(startOffset, maxOffset);
 		}
 

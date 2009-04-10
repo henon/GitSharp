@@ -73,6 +73,8 @@
     <Compile Include="ObjectLoader.cs" />
     <Compile Include="ObjectType.cs" />
     <Compile Include="ObjectWriter.cs" />
+    <Compile Include="PackedObjectLoader.cs" />
+    <Compile Include="PackFile.cs" />
     <Compile Include="PackIndex.cs" />
     <Compile Include="PackIndexV1.cs" />
     <Compile Include="PackIndexV2.cs" />

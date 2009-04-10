@@ -53,6 +53,39 @@
       <Name>Gitty.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="sample.git\COMMIT_EDITMSG" />
+    <None Include="sample.git\config" />
+    <None Include="sample.git\description" />
+    <None Include="sample.git\HEAD" />
+    <None Include="sample.git\hooks\applypatch-msg.sample" />
+    <None Include="sample.git\hooks\commit-msg.sample" />
+    <None Include="sample.git\hooks\post-commit.sample" />
+    <None Include="sample.git\hooks\post-receive.sample" />
+    <None Include="sample.git\hooks\post-update.sample" />
+    <None Include="sample.git\hooks\pre-applypatch.sample" />
+    <None Include="sample.git\hooks\pre-commit.sample" />
+    <None Include="sample.git\hooks\pre-rebase.sample" />
+    <None Include="sample.git\hooks\prepare-commit-msg.sample" />
+    <None Include="sample.git\hooks\update.sample" />
+    <None Include="sample.git\index" />
+    <None Include="sample.git\info\exclude" />
+    <None Include="sample.git\info\refs" />
+    <None Include="sample.git\logs\HEAD" />
+    <None Include="sample.git\logs\refs\heads\first" />
+    <None Include="sample.git\logs\refs\heads\master" />
+    <None Include="sample.git\objects\3f\a4c1907a23c8c345ba65bd9bc17336b012259b" />
+    <None Include="sample.git\objects\66\d7e337f35ff98d6bddd7e730655080454c3fdd" />
+    <None Include="sample.git\objects\a1\3973bc29346193c4a023fc83cc5b0645784262" />
+    <None Include="sample.git\objects\info\packs" />
+    <None Include="sample.git\objects\pack\pack-845b2ba3349cc201321e752b01c5ada8102a9a08.idx" />
+    <None Include="sample.git\objects\pack\pack-845b2ba3349cc201321e752b01c5ada8102a9a08.pack" />
+    <None Include="sample.git\packed-refs" />
+    <None Include="sample.git\refs\heads\master" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="sample.git\refs\tags\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

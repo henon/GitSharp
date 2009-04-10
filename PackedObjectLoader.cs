@@ -47,14 +47,14 @@ namespace Gitty.Core
     {
         protected PackFile pack;
 
-        internal WindowCursor curs;
+        //internal WindowCursor curs;
 
         internal long objectOffset;
 
 
-        public PackedObjectLoader(WindowCursor c, PackFile pr, long dataOffset, long objectOffset)
+        public PackedObjectLoader(PackFile pr, long dataOffset, long objectOffset)
         {
-            this.curs = c;
+            //this.curs = c;
             this.pack = pr;
             this.DataOffset = dataOffset;
             this.objectOffset = objectOffset;

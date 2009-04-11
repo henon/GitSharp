@@ -72,7 +72,7 @@ namespace Gitty.Core
         public RepositoryConfig(Repository repo)
             : this(OpenUserConfig(), new FileInfo(Path.Combine(repo.Directory.FullName, "config")))
         {
-         
+
         }
 
         public RepositoryConfig(RepositoryConfig baseConfig, FileInfo configFile)
@@ -96,14 +96,14 @@ namespace Gitty.Core
 
         public static RepositoryConfig OpenUserConfig()
         {
-	    string bd;
+            string bd;
 
-	    int p = (int) Environment.OSVersion.Platform;
-	    if (p == (int) PlatformID.Unix || p == 6 /* MacOSX */ || p == 128)
-		bd = Environment.GetFolderPath (Environment.SpecialFolder.Personal);
-	    else
-		bd = Environment.GetEnvironmentVariable( "USERPROFILE");
-	    
+            int p = (int)Environment.OSVersion.Platform;
+            if (p == (int)PlatformID.Unix || p == 6 /* MacOSX */ || p == 128)
+                bd = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            else
+                bd = Environment.GetEnvironmentVariable("USERPROFILE");
+
             return new RepositoryConfig(null, new FileInfo(Path.Combine(bd, ".gitconfig")));
         }
 
@@ -268,7 +268,7 @@ namespace Gitty.Core
                         quote = !quote;
                         continue;
                     }
-                    value.Append((char) c);
+                    value.Append((char)c);
                 }
             }
             return value.Length > 0 ? value.ToString() : null;
@@ -432,6 +432,7 @@ namespace Gitty.Core
                             last = e;
 
                         e = new Entry();
+                        //r.Unmark();
                     }
                     else if (e.Suffix != null)
                     {
@@ -646,7 +647,7 @@ namespace Gitty.Core
                 }
                 catch (Exception)
                 {
-                    #warning should log this "(warning) failed to delete tmp config file: " + tmp)
+#warning should log this "(warning) failed to delete tmp config file: " + tmp)
                 }
             }
 
@@ -762,16 +763,16 @@ namespace Gitty.Core
         }
 
 
-        public void SetString(string section, string subsection, string name, string value) 
+        public void SetString(string section, string subsection, string name, string value)
         {
             List<string> list = new List<string>();
             list.Add(value);
-		    SetStringList(section, subsection, name, list);
+            SetStringList(section, subsection, name, list);
         }
 
-        public void UnsetString(string section, string subsection, string name) 
+        public void UnsetString(string section, string subsection, string name)
         {
-		    SetStringList(section, subsection, name, new List<string>());
+            SetStringList(section, subsection, name, new List<string>());
         }
 
         public void SetStringList(string section, string subsection, string name, List<string> values)
@@ -897,7 +898,7 @@ namespace Gitty.Core
                     // Oh well. No sense in complaining about it.
                     //
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     Debugger.Break();
                 }
@@ -916,7 +917,7 @@ namespace Gitty.Core
             {
                 return null;
             }
-            
+
         }
 
         private string GetRawString(string section, string subsection, string name)
@@ -939,7 +940,8 @@ namespace Gitty.Core
         #endregion
 
 
-        class Entry {
+        class Entry
+        {
             public string Prefix { get; set; }
             public string Base { get; set; }
             public string ExtendedBase { get; set; }
@@ -947,20 +949,22 @@ namespace Gitty.Core
             public string Value { get; set; }
             public string Suffix { get; set; }
 
-		    public bool Match(String aBase, String aExtendedBase, String aName) {
-			    return eq(this.Base, aBase) 
+            public bool Match(String aBase, String aExtendedBase, String aName)
+            {
+                return eq(this.Base, aBase)
                     && eq(this.ExtendedBase, aExtendedBase)
-					&& eq(this.Name, aName);
-		    }
+                    && eq(this.Name, aName);
+            }
 
-		    private static bool eq(String a, String b) {
-			    if (a == b)
-				    return true;
-			    if (a == null || b == null)
-				    return false;
-			    return a.Equals(b);
-		    }
-	    }
+            private static bool eq(String a, String b)
+            {
+                if (a == b)
+                    return true;
+                if (a == null || b == null)
+                    return false;
+                return a.Equals(b);
+            }
+        }
 
 
     }

@@ -89,7 +89,7 @@ namespace Gitty.Core.Util
             this._readPosition = 0;
             this._eofPosition = -1;
             this._markLevel = 0;
-            this._marks = new int[32];
+            this._marks = new int[256];
         }
 
         public char CurrentChar
@@ -261,7 +261,7 @@ namespace Gitty.Core.Util
         /// </summary>        
         public void Mark()
         {
-            if (_markLevel == 32) throw new InvalidOperationException("Cannot create more then 32 marks deep.");
+            if (_markLevel == _marks.Length) throw new InvalidOperationException(string.Format("Cannot create more then {0} marks deep.", this._marks.Length));
             this._marks[this._markLevel] = this._bufferPosition;
             this._markLevel++;
         }
@@ -289,6 +289,12 @@ namespace Gitty.Core.Util
         {
             Unmark();
             this._bufferPosition = this._marks[this._markLevel];
+        }
+
+        public override void Close()
+        {
+            Ensure.That(this._markLevel == 0);
+            base.Close();
         }
 
         public class Marker : IDisposable

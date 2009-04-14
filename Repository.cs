@@ -912,6 +912,18 @@ namespace Gitty.Core
             _tags = null;
             _branches = null;
             _remoteBranches = null;
+            _head = null;
+        }
+
+        private Ref _head;
+        public Ref Head
+        {
+            get
+            {
+                if (_head == null)
+                    _head = _refDb.ReadRef("HEAD");
+                return _head;
+            }
         }
 
         private Dictionary<string, Ref> _refs;

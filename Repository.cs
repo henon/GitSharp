@@ -76,18 +76,25 @@ namespace Gitty.Core
         private RefDatabase _refDb;
         //private List<PackFile> _packs;
 
-        /**
-         * Construct a representation of a Git repository.
-         * 
-         * @param d
-         *            GIT_DIR (the location of the repository metadata).
-         * @throws IOException
-         *             the repository appears to already exist but cannot be
-         *             accessed.
-         */
-        private Repository(DirectoryInfo gitDirectory)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Repository"/> class. Assumes parent directory is the working directory.
+        /// </summary>
+        /// <param name="gitDirectory">The git directory.</param>
+        public Repository(DirectoryInfo gitDirectory)
+            : this(gitDirectory, gitDirectory.Parent)
+        {
+
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Repository"/> class.
+        /// </summary>
+        /// <param name="gitDirectory">The git directory.</param>
+        /// <param name="workingDirectory">The working directory.</param>
+        public Repository(DirectoryInfo gitDirectory, DirectoryInfo workingDirectory)
         {
             this.Directory = gitDirectory;
+            this.WorkingDirectory = workingDirectory;
             _objectsDirs = new List<DirectoryInfo>();
             _objectsDirs = ReadObjectsDirs(Path.Combine(gitDirectory.FullName, "objects"), ref _objectsDirs);
 
@@ -242,13 +249,7 @@ namespace Gitty.Core
         }
 
         public DirectoryInfo Directory { get; private set; }
-        public DirectoryInfo WorkingDirectory
-        {
-            get
-            {
-                return this.Directory.Parent;
-            }
-        }
+        public DirectoryInfo WorkingDirectory { get; private set; }
         public RepositoryConfig Config { get; private set; }
         #endregion
         /**

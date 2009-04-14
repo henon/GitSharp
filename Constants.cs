@@ -107,14 +107,11 @@ namespace Gitty.Core
 
         public static readonly Encoding Encoding = Encoding.UTF8;
 
-        public static readonly string Refs = "refs" + Path.DirectorySeparatorChar;
-        public static readonly string RefsTags = Refs + "tags" + Path.DirectorySeparatorChar;
-        public static readonly string RefsHeads = Refs + "heads" + Path.DirectorySeparatorChar;
-        public static readonly string RefsRemotes = Refs + "remotes" + Path.DirectorySeparatorChar;
+        public static readonly string Refs = "refs/";
+        public static readonly string RefsTags = Refs + "tags/";
+        public static readonly string RefsHeads = Refs + "heads/";
+        public static readonly string RefsRemotes = Refs + "remotes/";
 
         public static readonly string[] RefSearchPaths = { "", Refs, RefsTags, RefsHeads, RefsRemotes };
-
-       
-
     }
 }

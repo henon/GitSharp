@@ -194,19 +194,17 @@ namespace Gitty.Core
 
         private void ReadLooseRefs(Dictionary<string, Ref> avail, string prefix, DirectoryInfo dir)
         {
-
-            FileSystemInfo[] entries = dir.GetFileSystemInfos();
-            if (entries == null)
+            var entries = dir.GetFileSystemInfos();
+            if (entries.Length == 0)
                 return;
 
             foreach (FileSystemInfo ent in entries)
             {
-                String entName = ent.Name;
-                if (".".Equals(entName) || "..".Equals(entName))
-                    continue;
-                ReadOneLooseRef(avail, prefix + entName, ent);
+                if(ent is DirectoryInfo)
+                    ReadLooseRefs(avail, prefix + ent.Name, (DirectoryInfo)ent);
+                else
+                    ReadOneLooseRef(avail, prefix + "/" + ent.Name, ent);
             }
-
 
         }
 
@@ -224,50 +222,23 @@ namespace Gitty.Core
                 looseRefs.Remove(refName);
             }
 
-            // Recurse into the directory.
-            //
-            if ((ent.Attributes | FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                ReadLooseRefs(avail, refName + "/", new DirectoryInfo(ent.FullName));
-                return;
-            }
-
             // Assume its a valid loose reference we need to cache.
             //
             try
             {
-                FileStream inn = new FileStream(ent.FullName, System.IO.FileMode.Open);
-                try
+
+                using (var reader = new StreamReader(ent.FullName))
                 {
-                    ObjectId id;
-                    try
-                    {
-                        byte[] str = new byte[ObjectId.Constants.ObjectIdLength * 2];
-                        NB.ReadFully(inn, str, 0, str.Length);
-                        id = ObjectId.FromString(str, 0);
-                    }
-                    catch (EndOfStreamException)
-                    {
-                        // Its below the minimum length needed. It could
-                        // be a symbolic reference.
-                        //
+                    var str = reader.ReadToEnd().Trim();                    
+                    var id = ObjectId.FromString(str);
+
+                    if (id == null)
                         return;
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        // It is not a well-formed ObjectId. It may be
-                        // a symbolic reference ("ref: ").
-                        //
-                        return;
-                    }
 
                     reff = new CachedRef(Ref.Storage.Loose, refName, id, ent.LastWriteTime);
-                    looseRefs.Add(reff.Name, reff);
-                    avail.Add(reff.Name, reff);
-                }
-                finally
-                {
-                    inn.Close();
+
+                    looseRefs.AddOrReplace(reff.Name, reff);
+                    avail.AddOrReplace(reff.Name, reff);
                 }
             }
             catch (FileNotFoundException)
@@ -408,6 +379,11 @@ namespace Gitty.Core
             }
         }
 
+        /// <summary>
+        /// Returns the object that this object points to if this is a commit.
+        /// </summary>
+        /// <param name="dref">The ref.</param>
+        /// <returns></returns>
         internal Ref Peel(Ref dref)
         {
             if (dref.Peeled)

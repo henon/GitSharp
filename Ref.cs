@@ -86,12 +86,13 @@ namespace Gitty.Core
 
         public Ref(Storage storage, string origName, string refName, ObjectId id, ObjectId peeledObjectId, bool peeled)
         {
-            StorageFormat = storage;
-            OriginalName = origName;
-            Name = refName;
-            ObjectId = id;
-            PeeledObjectId = peeledObjectId;
-            Peeled = peeled;
+            this.StorageFormat = storage;
+            this.OriginalName = origName;
+            this.Name = refName;
+            this.ObjectId = id;
+            this.PeeledObjectId = peeledObjectId;
+            this.Peeled = peeled;
+            this.Detached = this.OriginalName != this.Name;
         }
 
         public string Name { get; private set; }
@@ -100,6 +101,8 @@ namespace Gitty.Core
         public ObjectId ObjectId { get; private set; }
         public ObjectId PeeledObjectId { get; private set; }
         public bool Peeled { get; private set; }
+
+        public bool Detached { get; private set; }
 
         public override string ToString()
         {

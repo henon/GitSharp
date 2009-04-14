@@ -41,7 +41,7 @@ using System.Text;
 
 namespace Gitty.Core
 {
-    public static class IntExtensions
+    public static class Extensions
     {
         public static long UnsignedRightShift(this long n, int s)  //Overloaded function where n is a long
         {
@@ -63,6 +63,42 @@ namespace Gitty.Core
             else
             {
                 return (n >> s) + (2 << ~s);
+            }
+        }
+
+        /// <summary>
+        /// Adds or replaces the a value based on a key.
+        /// </summary>
+        /// <typeparam name="K"></typeparam>
+        /// <typeparam name="V"></typeparam>
+        /// <param name="dict">The dict.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        public static void AddOrReplace<K, V>(this Dictionary<K,V> dict, K key, V value)
+        {
+            if (dict.ContainsKey(key))
+                dict[key] = value;
+            else
+                dict.Add(key, value);
+        }
+
+        /// <summary>
+        /// Returns a value from a dictionary or the values default
+        /// </summary>
+        /// <typeparam name="K">Key Type</typeparam>
+        /// <typeparam name="V">Value Type</typeparam>
+        /// <param name="dict">dictionary to search</param>
+        /// <param name="key">Key to search for</param>
+        /// <returns>default(V) or item if Key is found</returns>
+        public static V GetValue<K, V>(this Dictionary<K, V> dict, K key)
+        {
+            try
+            {
+                return dict[key];
+            }
+            catch (Exception)
+            {
+                return default(V);
             }
         }
     }

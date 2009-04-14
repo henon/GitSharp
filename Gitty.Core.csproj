@@ -50,7 +50,7 @@
     <Compile Include="Exceptions\ObjectWritingException.cs" />
     <Compile Include="Exceptions\RevisionSyntaxException.cs" />
     <Compile Include="Exceptions\SymlinksNotSupportedException.cs" />
-    <Compile Include="IntExtensions.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="AbstractIndexTreeVisitor.cs" />
     <Compile Include="AnyObjectId.cs" />
     <Compile Include="BinaryDelta.cs" />
@@ -104,7 +104,6 @@
     <Compile Include="WriteTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\BufferedReader.cs" />
-    <Compile Include="Util\Collections.cs" />
     <Compile Include="Util\Hex.cs" />
     <Compile Include="Util\NestedDictionary.cs" />
     <Compile Include="Util\Numbers.cs" />
@@ -116,9 +115,6 @@
     <None Include="app.config" />
     <None Include="ClassDiagram.cd" />
     <None Include="Makefile" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Extensions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

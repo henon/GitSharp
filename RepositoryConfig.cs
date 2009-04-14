@@ -544,17 +544,17 @@ namespace Gitty.Core
                 {
                     String n = e.Name.ToLower();
                     String key = group + "." + n;
-                    Object o = Collections.GetValue(_byName, key);
+                    Object o = _byName.GetValue(key);
                     if (o == null)
                     {
-                        Collections.AddOrInsert(_byName, key, e);
+                        _byName.AddOrReplace(key, e);
                     }
                     else if (o is Entry)
                     {
                         List<Entry> l = new List<Entry>();
                         l.Add((Entry)o);
                         l.Add(e);
-                        Collections.AddOrInsert(_byName, key, l);
+                        _byName.AddOrReplace(key, l);
                     }
                     else if (o is List<Entry>)
                     {
@@ -788,9 +788,9 @@ namespace Gitty.Core
             if (values.Count == 0)
                 _byName.Remove(key);
             else if (values.Count == 1)
-                Collections.AddOrInsert(_byName, key, values[0]);
+                _byName.AddOrReplace(key, values[0]);
             else
-                Collections.AddOrInsert(_byName, key, new List<String>(values));
+                _byName.AddOrReplace(key, new List<String>(values));
 
             int entryIndex = 0;
             int valueIndex = 0;

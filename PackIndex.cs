@@ -200,7 +200,7 @@ namespace Gitty.Core
          *
          * @return true if CRC32 is stored, false otherwise
          */
-        public abstract bool HasCRC32Support();
+        public abstract bool HasCRC32Support { get; }
 
         public class MutableEntry : MutableObjectId
         {

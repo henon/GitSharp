@@ -56,37 +56,39 @@ namespace Gitty.Core
 		}
 
 		private FileStream _stream;
-
-		private PackIndex idx;
+        private long _packLastModified;
 
 		private PackReverseIndex reverseIdx;
+
+        private FileInfo _indexFile;
+        private PackIndex _index;
+        public PackIndex Index
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (_index == null)
+                        _index = PackIndex.Open(_indexFile);
+
+                    return _index;
+                }
+            }
+        }
 
 		/**
 		 * Construct a reader for an existing, pre-indexed packfile.
 		 * 
-		 * @param parentRepo
-		 *            Git repository holding this pack file
 		 * @param idxFile
 		 *            path of the <code>.idx</code> file listing the contents.
 		 * @param packFile
 		 *            path of the <code>.pack</code> file holding the data.
-		 * @throws IOException
-		 *             the index file cannot be accessed at this time.
 		 */
-		public PackFile(Repository parentRepo, FileInfo idxFile, FileInfo packFile)
+		public PackFile(FileInfo idxFile, FileInfo packFile)
         {
 #warning commented for compiling
-            //pack = new WindowedFile(packFile);
-			//pack.OnOpen = ReadPackHeader;
-
-			try
-			{
-				idx = PackIndex.Open(idxFile);
-			}
-			catch (IOException ioe)
-			{
-				throw ioe;
-			}
+            this._indexFile = idxFile;
+            this._packLastModified = packFile.LastWriteTime.Ticks;
 		}
 #warning commented for compiling
         //PackedObjectLoader ResolveBase(WindowCursor curs, long ofs)
@@ -107,7 +109,7 @@ namespace Gitty.Core
 		 */
 		public bool HasObject(AnyObjectId id)
 		{
-			return idx.HasObject(id);
+            return Index.HasObject(id);
 		}
 
 #warning commented for compiling
@@ -121,10 +123,11 @@ namespace Gitty.Core
         // * @throws IOException
         // *             the pack file or the index could not be read.
         // */
-        //public PackedObjectLoader Get(AnyObjectId id)
-        //{
-        //    return Get(new WindowCursor(), id);
-        //}
+        public PackedObjectLoader Get(AnyObjectId id)
+        {
+            throw new NotImplementedException();
+            //return Get(new WindowCursor(), id);
+        }
         //
         ///**
         // * Get an object from this pack.
@@ -140,7 +143,7 @@ namespace Gitty.Core
         // */
         //public PackedObjectLoader Get(WindowCursor curs, AnyObjectId id)
         //{
-        //    long offset = idx.FindOffset(id);
+        //    long offset = Index.FindOffset(id);
         //    if (offset == -1)
         //        return null;
         //    PackedObjectLoader objReader = Reader(curs, offset);
@@ -165,9 +168,9 @@ namespace Gitty.Core
 		 * 
 		 * @return number of objects in index of this pack, likewise in this pack
 		 */
-		long ObjectCount
+		public long ObjectCount
 		{
-            get { return idx.ObjectCount; }
+            get { return Index.ObjectCount; }
 		}
 
 		/**
@@ -246,7 +249,7 @@ namespace Gitty.Core
 
 		public bool SupportsFastCopyRawData
 		{
-            get { return idx.HasCRC32Support(); }
+            get { return Index.HasCRC32Support; }
         }
 
 #warning commented for compiling
@@ -338,7 +341,7 @@ namespace Gitty.Core
 		private PackReverseIndex GetReverseIdx()
 		{
 			if (reverseIdx == null)
-				reverseIdx = new PackReverseIndex(idx);
+				reverseIdx = new PackReverseIndex(this.Index);
 			return reverseIdx;
 		}
 
@@ -359,7 +362,7 @@ namespace Gitty.Core
 
         public IEnumerator<PackIndex.MutableEntry> GetEnumerator()
 		{
-			return idx.GetEnumerator();
+			return Index.GetEnumerator();
 		}
 
 		#endregion
@@ -368,7 +371,7 @@ namespace Gitty.Core
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 		{
-			return idx.GetEnumerator();
+			return Index.GetEnumerator();
 		}
 
 		#endregion

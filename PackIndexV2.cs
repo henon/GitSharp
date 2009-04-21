@@ -214,9 +214,12 @@ namespace Gitty.Core
             return NB.DecodeUInt32(crc32[levelOne], levelTwo << 2);
         }
 
-        public override bool HasCRC32Support()
+        public override bool HasCRC32Support
         {
-            return true;
+            get
+            {
+                return true;
+            }
         }
 
         private int BinarySearchLevelTwo(AnyObjectId objId, int levelOne)
@@ -265,8 +268,7 @@ namespace Gitty.Core
                     if (levelTwo < _index.names[levelOne].Length)
                     {
                         Current.FromRaw(_index.names[levelOne], levelTwo);
-                        int arrayIdx = levelTwo / (AnyObjectId.Constants.ObjectIdLength / 4)
-                                * 4;
+                        int arrayIdx = levelTwo / (AnyObjectId.Constants.ObjectIdLength / 4) * 4;
                         long offset = NB.DecodeUInt32(_index.offset32[levelOne], arrayIdx);
                         if ((offset & IS_O64) != 0)
                         {

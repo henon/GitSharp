@@ -162,9 +162,12 @@ namespace Gitty.Core
             throw new NotSupportedException();
         }
 
-        public override bool HasCRC32Support()
+        public override bool HasCRC32Support
         {
-            return false;
+            get
+            {
+                return false;
+            }
         }
 
         private class IndexV1Enumerator : EntriesIterator

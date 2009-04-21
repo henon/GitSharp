@@ -86,9 +86,10 @@ namespace Gitty.Core
 		 */
 		public PackFile(FileInfo idxFile, FileInfo packFile)
         {
-#warning commented for compiling
             this._indexFile = idxFile;
             this._packLastModified = packFile.LastWriteTime.Ticks;
+            _stream = packFile.Open(System.IO.FileMode.Open);
+            ReadPackHeader();
 		}
 #warning commented for compiling
         //PackedObjectLoader ResolveBase(WindowCursor curs, long ofs)
@@ -253,36 +254,24 @@ namespace Gitty.Core
         }
 
 #warning commented for compiling
-        //private void ReadPackHeader()
-        //{
-        //    WindowCursor curs = new WindowCursor();
-        //    long position = 0;
-        //    byte[] sig = new byte[Constants.PackSignature.Length];
-        //    byte[] intbuf = new byte[4];
-        //    long vers;
+        private void ReadPackHeader()
+        {
+            var reader = new BinaryReader(_stream);
 
-        //    if (_stream.Read(position, sig, curs) != Constants.PackSignature.Length)
-        //        throw new IOException("Not a PACK file.");
-        //    for (int k = 0; k < Constants.PackSignature.Length; k++)
-        //    {
-        //        if (sig[k] != Constants.PackSignature[k])
-        //            throw new IOException("Not a PACK file.");
-        //    }
-        //    position += Constants.PackSignature.Length;
+            var sig = reader.ReadBytes(Constants.PackSignature.Length);
 
-        //    _stream.ReadFully(position, intbuf, curs);
-        //    vers = NB.DecodeUInt32(intbuf, 0);
-        //    if (vers != 2 && vers != 3)
-        //        throw new IOException("Unsupported pack version " + vers + ".");
-        //    position += 4;
-
-        //    _stream.ReadFully(position, intbuf, curs);
-        //    long objectCnt = NB.DecodeUInt32(intbuf, 0);
-        //    if (idx.ObjectCount != objectCnt)
-        //        throw new IOException("Pack index"
-        //                + " object count mismatch; expected " + objectCnt
-        //                + " found " + idx.ObjectCount + ": " + _stream.Name);
-        //}
+            for (int k = 0; k < Constants.PackSignature.Length; k++)
+                if (sig[k] != Constants.PackSignature[k])
+                    throw new IOException("Not a PACK file.");
+            
+            var vers = reader.ReadUInt32();
+            if (vers != 2 && vers != 3)
+                throw new IOException("Unsupported pack version " + vers + ".");
+            
+            long objectCnt = reader.ReadUInt32();
+            if (Index.ObjectCount != objectCnt)
+                throw new IOException("Pack index object count mismatch; expected " + objectCnt + " found " + Index.ObjectCount + ": " + _stream.Name);
+        }
 
 #warning commented for compiling
         //private PackedObjectLoader Reader(WindowCursor curs, long objOffset)

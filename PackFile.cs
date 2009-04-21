@@ -44,6 +44,7 @@ using System.Text;
 using System.IO;
 using Gitty.Core.Exceptions;
 using Gitty.Core.Util;
+using System.IO.Compression;
 
 namespace Gitty.Core
 {
@@ -187,18 +188,14 @@ namespace Gitty.Core
 			return GetReverseIdx().FindObject(offset);
 		}
 
-		public void SaveCache(long position, byte[] data, ObjectType type)
-		{
-#warning TODO: UnpackedObjectCache.Store(pack, position, data, type);
+        public byte[] Decompress(long position, int totalSize)
+        {
+            byte[] dstbuf = new byte[totalSize];
+            _stream.Seek(position, SeekOrigin.Begin);
+            var deflate = new DeflateStream(_stream, CompressionMode.Decompress);
+            deflate.Read(dstbuf, 0, dstbuf.Length);
+            return dstbuf;
         }
-
-#warning commented for compiling
-        //public byte[] Decompress(long position, int totalSize, WindowCursor curs)
-        //{
-        //    byte[] dstbuf = new byte[totalSize];
-        //    pack.ReadCompressed(position, dstbuf, curs);
-        //    return dstbuf;
-        //}
 
         public void CopyRawData(PackedObjectLoader loader, Stream stream, byte[] buf)
         {

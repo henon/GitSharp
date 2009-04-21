@@ -47,11 +47,9 @@ namespace Gitty.Core
     [Complete]
     public class WholePackedObjectLoader : PackedObjectLoader
     {
-        public WholePackedObjectLoader(WindowCursor curs, PackFile pr,
-                long dataOffset, long objectOffset, ObjectType type, int size)
-            : base(curs, pr, dataOffset, objectOffset)
+        public WholePackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, ObjectType type, int size)
+            : base(pr, dataOffset, objectOffset)
         {
-
             this._objectType = type;
             this._objectSize = size;
         }
@@ -65,24 +63,10 @@ namespace Gitty.Core
         {
             get
             {
-                if (this.ObjectType != ObjectType.Commit)
-                {
-                    UnpackedObjectCache.Entry cache = pack.ReadCache(this.DataOffset);
-                    if (cache != null)
-                    {
-                        curs.Release();
-                        return cache.Data;
-                    }
-                }
-
                 try
                 {
                     // might not should be down converting this.Size
-                    byte[] data = pack.Decompress(this.DataOffset, (int)this.Size, curs);
-                    curs.Release();
-                    if (this.ObjectType != ObjectType.Commit)
-                        pack.SaveCache(this.DataOffset, data, this.ObjectType);
-                    return data;
+                    return pack.Decompress(this.DataOffset, (int)this.Size);
                 }
                 catch (FormatException fe)
                 {

@@ -104,6 +104,7 @@
     <Compile Include="TreeVisitorWithCurrentDirectory.cs" />
     <Compile Include="UnpackedObjectLoader.cs" />
     <Compile Include="Util\WeakReference.cs" />
+    <Compile Include="WholePackedObjectLoader.cs" />
     <Compile Include="WriteTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\BufferedReader.cs" />

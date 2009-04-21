@@ -93,7 +93,7 @@ namespace Gitty.Core
             return (this == id);
         }
 
-        public void CopyTo(StreamWriter w)
+        public void CopyTo(BinaryWriter w)
         {
             w.Write(ToHexByteArray());
         }

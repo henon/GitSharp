@@ -239,7 +239,7 @@ namespace Gitty.Core
             RequireLock();
             try
             {
-                StreamWriter b = new StreamWriter(os);
+                var b = new BinaryWriter(os);
                 id.CopyTo(b);
                 b.Write('\n');
                 b.Flush();

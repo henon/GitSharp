@@ -38,6 +38,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace Gitty.Core
 {
@@ -100,6 +101,11 @@ namespace Gitty.Core
             {
                 return default(V);
             }
+        }
+
+        public static void Write(this BinaryWriter writer, ObjectId o)
+        {
+            o.CopyTo(writer);
         }
     }
 }

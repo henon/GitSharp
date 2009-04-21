@@ -3,15 +3,8 @@
   <Class Name="Gitty.Core.Util.BufferedReader" Collapsed="true">
     <Position X="13.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAEAAAAgACAMBAACAAIQDAAgAACAQAAAAYSAgwAAIAA=</HashCode>
+      <HashCode>AAEAAAAgACAMBAACAAIQDAAgAACAQAAAAYSAgwCAIAA=</HashCode>
       <FileName>Util\BufferedReader.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Gitty.Core.Util.Collections" Collapsed="true">
-    <Position X="17" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAA=</HashCode>
-      <FileName>Util\Collections.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Gitty.Core.Util.Hex" Collapsed="true">
@@ -112,7 +105,7 @@
   <Class Name="Gitty.Core.Constants" Collapsed="true">
     <Position X="34.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAIAAAACEAIhAICCgAAAAQAAhAIAAAEAIUAAAAAAAAA=</HashCode>
+      <HashCode>AAAABAAABAAAAICAAgAAAAAAgBAAAAAAAEAAAAAAAAA=</HashCode>
       <FileName>Constants.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -173,11 +166,11 @@
       <FileName>IndexTreeWalker.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.IntExtensions" Collapsed="true">
+  <Class Name="Gitty.Core.Extensions" Collapsed="true">
     <Position X="31" Y="2.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>IntExtensions.cs</FileName>
+      <HashCode>AABAAAAAIAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Extensions.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Gitty.Core.LockFile" Collapsed="true">
@@ -234,7 +227,7 @@
   <Class Name="Gitty.Core.PackIndex" Collapsed="true">
     <Position X="20.5" Y="7.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>ACAAAEEAAAAgIBAAACAAAAAAAAAAAAAAAAAQAAgAgQg=</HashCode>
+      <HashCode>ACAAAEEAAAAgIBAAAAAAAAAAAAAAAAAAAAAQAAgAgQg=</HashCode>
       <FileName>PackIndex.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -284,7 +277,7 @@
   <Class Name="Gitty.Core.RefDatabase" Collapsed="true">
     <Position X="27.5" Y="4.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>goBIBAKAQACAIAAAAAAQAACAAAAYAEAEAAQASQBQECQ=</HashCode>
+      <HashCode>goBIhAKAQACAIAAAAAAQAACAAAAYAEAEAAwASQAQECQ=</HashCode>
       <FileName>RefDatabase.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -305,7 +298,7 @@
   <Class Name="Gitty.Core.Repository" Collapsed="true">
     <Position X="32.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AQgAABERQgCAgCEEAAAjABCAAASoCMAAAAEgCBSkAAA=</HashCode>
+      <HashCode>AYgAEBEQA4CAoCEEAAAjABAAABSgCMAAIAEgCBSkCAA=</HashCode>
       <FileName>Repository.cs</FileName>
     </TypeIdentifier>
   </Class>

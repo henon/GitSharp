@@ -41,7 +41,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Gitty.Lib.CSharp.Transport
+namespace Gitty.Core.Transport
 {
     /**
      * Description of an object stored in a pack file, including offset.

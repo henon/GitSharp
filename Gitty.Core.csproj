@@ -80,6 +80,8 @@
     <Compile Include="PackIndexV1.cs" />
     <Compile Include="PackIndexV2.cs" />
     <Compile Include="PackIndexWriter.cs" />
+    <Compile Include="PackIndexWriterV1.cs" />
+    <Compile Include="PackIndexWriterV2.cs" />
     <Compile Include="PackReverseIndex.cs" />
     <Compile Include="PersonIdent.cs" />
     <Compile Include="ProgressMonitor.cs" />
@@ -93,6 +95,7 @@
     <Compile Include="SymlinkTreeEntry.cs" />
     <Compile Include="Tag.cs" />
     <Compile Include="TextProgressMonitor.cs" />
+    <Compile Include="Transport\PackedObjectInfo.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="TreeEntry.cs" />
     <Compile Include="Treeish.cs" />

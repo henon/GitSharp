@@ -108,6 +108,8 @@
     <Compile Include="TreeVisitor.cs" />
     <Compile Include="TreeVisitorWithCurrentDirectory.cs" />
     <Compile Include="UnpackedObjectLoader.cs" />
+    <Compile Include="Util\CheckedOutputStream.cs" />
+    <Compile Include="Util\CRC32.cs" />
     <Compile Include="Util\WeakReference.cs" />
     <Compile Include="WholePackedObjectLoader.cs" />
     <Compile Include="WriteTree.cs" />

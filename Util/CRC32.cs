@@ -102,7 +102,7 @@ public class Crc32
     {
         get
         {
-            return _value ^= 0xffffffff;
+            return _value ^ 0xffffffff;
         }
     }
 
@@ -115,6 +115,12 @@ public class Crc32
     {
         _value = 0xffffffff;
     }
+
+    public void Update(uint value)
+    {
+        _value = CrcTable[(_value ^ value) & 0xFF] ^ (_value >> 8);
+    }
+
 
     public void Update(byte value)
     {

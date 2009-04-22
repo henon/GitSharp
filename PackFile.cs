@@ -59,9 +59,7 @@ namespace Gitty.Core
 		private FileStream _stream;
         private long _packLastModified;
 
-		private PackReverseIndex reverseIdx;
-
-        private FileInfo _indexFile;
+		private FileInfo _indexFile;
         private PackIndex _index;
         public PackIndex Index
         {
@@ -167,7 +165,7 @@ namespace Gitty.Core
 		 */
 		ObjectId FindObjectForOffset(long offset)
 		{
-			return GetReverseIdx().FindObject(offset);
+			return ReverseIndex.FindObject(offset);
 		}
 
         public byte[] Decompress(long position, long totalSize)
@@ -179,52 +177,61 @@ namespace Gitty.Core
             return dstbuf;
         }
 
-        public void CopyRawData(PackedObjectLoader loader, Stream stream, byte[] buf)
+        internal void CopyRawData(PackedObjectLoader loader, Stream stream)
         {
-            throw new NotImplementedException();
-        //    long objectOffset = loader.objectOffset;
-        //    long dataOffset = loader.DataOffset;
-        //    int cnt = (int)(FindEndOffset(objectOffset) - dataOffset);
-        //    WindowCursor curs = loader.curs;
+            long objectOffset = loader.objectOffset;
+            long dataOffset = loader.DataOffset;
+            int cnt = (int)(FindEndOffset(objectOffset) - dataOffset);
 
-        //    if (idx.HasCRC32Support())
-        //    {
-        //        Crc32 crc = new Crc32();
-        //        int headerCnt = (int)(dataOffset - objectOffset);
-        //        while (headerCnt > 0)
-        //        {
-        //            int toRead = Math.Min(headerCnt, buf.Length);
-        //            int read = pack.Read(objectOffset, buf, 0, toRead, curs);
-        //            if (read != toRead)
-        //                throw new EndOfStreamException();
-        //            crc.Update(buf, 0, read);
-        //            headerCnt -= toRead;
-        //        }
+            if (this.Index.HasCRC32Support)
+            {
+                Crc32 crc = new Crc32();
+                int headerCnt = (int)(dataOffset - objectOffset);
+                _stream.Seek(objectOffset, SeekOrigin.Begin);
+                var reader = new BinaryReader(_stream);
+                var header = reader.ReadBytes(headerCnt);
+                crc.Update(header);
 
-				
-        //        CheckedOutputStream crcOut = new CheckedOutputStream(stream, crc);
-        //        pack.CopyToStream(dataOffset, buf, cnt, crcOut, curs);
-        //        long computed = crc.Value;
+                var output = new CheckedOutputStream(stream, crc);
+                
+                CopyToStream(dataOffset, cnt, output);
+                
+                long computed = crc.Value;
 
-        //        ObjectId id;
-        //        if (loader.HasComputedId)
-        //            id = loader.Id;
-        //        else
-        //            id = FindObjectForOffset(objectOffset);
-        //        long expected = idx.FindCRC32(id);
-        //        if (computed != expected)
-        //            throw new CorruptObjectException(id,
-        //                    "Possible data corruption - CRC32 of raw pack data (object offset "
-        //                            + objectOffset
-        //                            + ") mismatch CRC32 from pack index");
-        //    }
-        //    else
-        //    {
-        //        pack.CopyToStream(dataOffset, buf, cnt, stream, curs);
+                ObjectId id = FindObjectForOffset(objectOffset);
+                long expected = Index.FindCRC32(id);
+                if (computed != expected)
+                    throw new CorruptObjectException("Object at " + dataOffset + " in " + File.FullName + " has bad zlib stream");
+            }
+            else
+            {
+                try
+                {
+                    VerifyCompressed(dataOffset);
+                }
+                catch (FormatException fe)
+                {
+                    throw new CorruptObjectException("Object at " + dataOffset + " in " + File.FullName + " has bad zlib stream", fe);
+                }
+                
+                CopyToStream(dataOffset, cnt, stream);
+            }
+        }
 
-        //        // read to verify against Adler32 zlib checksum
-        //        //loader.CachedBytes;
-        //    }
+        private void CopyToStream(long dataOffset, int count, Stream stream)
+        {
+            _stream.Seek(dataOffset, SeekOrigin.Begin);
+            var data = new byte[count];
+            var bytesRead = _stream.Read(data, 0, data.Length);
+            stream.Write(data, 0, bytesRead);
+        }
+
+        public void VerifyCompressed(long dataOffset)
+        {
+#warning TODO: Implement this
+            //_stream.Seek(dataOffset, SeekOrigin.Begin);
+            //var deflate = new DeflateStream(_stream, CompressionMode.Decompress);
+            
         }
 
 		public bool SupportsFastCopyRawData
@@ -301,14 +308,18 @@ namespace Gitty.Core
 		private long FindEndOffset(long startOffset)
 		{
 			long maxOffset = _stream.Length - AnyObjectId.Constants.ObjectIdLength;
-			return GetReverseIdx().FindNextOffset(startOffset, maxOffset);
+			return ReverseIndex.FindNextOffset(startOffset, maxOffset);
 		}
 
-		private PackReverseIndex GetReverseIdx()
+        private PackReverseIndex _reverseIndex;
+		private PackReverseIndex ReverseIndex
 		{
-			if (reverseIdx == null)
-				reverseIdx = new PackReverseIndex(this.Index);
-			return reverseIdx;
+            get
+            {
+                if (_reverseIndex == null)
+                    _reverseIndex = new PackReverseIndex(this.Index);
+                return _reverseIndex;
+            }
 		}
 
 		#region IEnumerable<MutableEntry> Members

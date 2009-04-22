@@ -74,15 +74,12 @@ namespace Gitty.Core
          *
          * @param out
          *            output stream when data is copied. No buffering is guaranteed.
-         * @param buf
-         *            temporary buffer used during copying. Recommended size is at
-         *            least few kB.
          * @throws IOException
          *             when the object cannot be read.
          */
-        public void CopyRawData(Stream o, byte[] buf)
+        public void CopyRawData(Stream o)
         {
-            pack.CopyRawData(this, o, buf);
+            pack.CopyRawData(this, o);
         }
 
         /**

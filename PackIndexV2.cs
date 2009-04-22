@@ -108,7 +108,7 @@ namespace Gitty.Core
 
                 long nameLen = bucketCnt * AnyObjectId.Constants.ObjectIdLength;
                 if (nameLen > int.MaxValue)
-                    throw new IOException("Index file is too large for jgit");
+                    throw new IOException("Index file is too large for gitty");
 
                 int intNameLen = (int)nameLen;
                 byte[] raw = new byte[intNameLen];
@@ -279,13 +279,11 @@ namespace Gitty.Core
 
                         levelTwo += AnyObjectId.Constants.ObjectIdLength / 4;
                         returnedNumber++;
+                        return true;
                     }
-                    else
-                    {
-                        levelTwo = 0;
-                    }
+                   levelTwo = 0;
                 }
-                throw new InvalidOperationException();
+                return false;                
             }
 
             public override void Reset()

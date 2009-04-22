@@ -91,8 +91,7 @@ namespace Gitty.Core
             if (offset > buffer.Length - count)
                 throw new ArgumentException("Reading would overrun buffer");
 
-            for (int i = 0; i < count; i++)
-                crc.Update(buffer[i + offset]);
+            crc.Update(buffer);
 
             under.Write(buffer, offset, count);
         }

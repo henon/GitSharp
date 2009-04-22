@@ -117,18 +117,18 @@ namespace Gitty.Core
 
         public FileInfo File { get; private set; }
 
-        ///**
-        // * Get an object from this pack.
-        // * 
-        // * @param curs
-        // *            temporary working space associated with the calling thread.
-        // * @param id
-        // *            the object to obtain from the pack. Must not be null.
-        // * @return the object loader for the requested object if it is contained in
-        // *         this pack; null if the object was not found.
-        // * @throws IOException
-        // *             the pack file or the index could not be read.
-        // */
+        /**
+         * Get an object from this pack.
+         * 
+         * @param curs
+         *            temporary working space associated with the calling thread.
+         * @param id
+         *            the object to obtain from the pack. Must not be null.
+         * @return the object loader for the requested object if it is contained in
+         *         this pack; null if the object was not found.
+         * @throws IOException
+         *             the pack file or the index could not be read.
+         */
         public PackedObjectLoader Get(AnyObjectId id)
         {
             long offset = Index.FindOffset(id);
@@ -251,53 +251,51 @@ namespace Gitty.Core
                 throw new IOException("Pack index object count mismatch; expected " + objectCnt + " found " + Index.ObjectCount + ": " + _stream.Name);
         }
 
-#warning commented for compiling
         private PackedObjectLoader Reader(long objOffset)
         {
-            throw new NotImplementedException();
-        //    long pos = objOffset;
-        //    int p = 0;
-        //    byte[] ib = curs.tempId;
-        //    pack.ReadFully(pos, ib, curs);
-        //    int c = ib[p++] & 0xff;
-        //    int typeCode = (c >> 4) & 7;
-        //    long dataSize = c & 15;
-        //    int shift = 4;
-        //    while ((c & 0x80) != 0)
-        //    {
-        //        c = ib[p++] & 0xff;
-        //        dataSize += (c & 0x7f) << shift;
-        //        shift += 7;
-        //    }
-        //    pos += p;
+            var reader = new BinaryReader(_stream);
+            long pos = objOffset;
+            int p = 0;
+            byte[] ib = reader.ReadBytes(ObjectId.Constants.ObjectIdLength);
+            int c = ib[p++] & 0xff;
+            int typeCode = (c >> 4) & 7;
+            long dataSize = c & 15;
+            int shift = 4;
+            while ((c & 0x80) != 0)
+            {
+                c = ib[p++] & 0xff;
+                dataSize += (c & 0x7f) << shift;
+                shift += 7;
+            }
+            pos += p;
 
-        //    switch ((ObjectType)typeCode)
-        //    {
-        //        case ObjectType.Commit:
-        //        case ObjectType.Tree:
-        //        case ObjectType.Blob:
-        //        case ObjectType.Tag:
-        //            return new WholePackedObjectLoader(curs, this, pos, objOffset, (ObjectType)typeCode, (int)dataSize);
-        //        case ObjectType.OffsetDelta:
-        //            pack.ReadFully(pos, ib, curs);
-        //            p = 0;
-        //            c = ib[p++] & 0xff;
-        //            long ofs = c & 127;
-        //            while ((c & 128) != 0)
-        //            {
-        //                ofs += 1;
-        //                c = ib[p++] & 0xff;
-        //                ofs <<= 7;
-        //                ofs += (c & 127);
-        //            }
-        //            return new DeltaOfsPackedObjectLoader(curs, this, pos + p, objOffset, (int)dataSize, objOffset - ofs);
-        //        case ObjectType.ReferenceDelta:
-        //            pack.ReadFully(pos, ib, curs);
-        //            return new DeltaRefPackedObjectLoader(curs, this, pos + ib.Length, objOffset, (int)dataSize, ObjectId.FromRaw(ib));
+            switch ((ObjectType)typeCode)
+            {
+                case ObjectType.Commit:
+                case ObjectType.Tree:
+                case ObjectType.Blob:
+                case ObjectType.Tag:
+                    return new WholePackedObjectLoader(this, pos, objOffset, (ObjectType)typeCode, (int)dataSize);
+                case ObjectType.OffsetDelta:
+                    ib = reader.ReadBytes(ObjectId.Constants.ObjectIdLength);
+                    p = 0;
+                    c = ib[p++] & 0xff;
+                    long ofs = c & 127;
+                    while ((c & 0x80) != 0)
+                    {
+                        ofs += 1;
+                        c = ib[p++] & 0xff;
+                        ofs <<= 7;
+                        ofs += (c & 127);
+                    }
+                    return new DeltaOfsPackedObjectLoader(this, pos + p, objOffset, (int)dataSize, objOffset - ofs);
+                case ObjectType.ReferenceDelta:
+                    ib = reader.ReadBytes(ObjectId.Constants.ObjectIdLength);
+                    return new DeltaRefPackedObjectLoader(this, pos + ib.Length, objOffset, (int)dataSize, ObjectId.FromRaw(ib));
 
-        //        default:
-        //            throw new IOException("Unknown object type " + typeCode + ".");
-        //    }
+                default:
+                    throw new IOException("Unknown object type " + typeCode + ".");
+            }
         }
 
 		private long FindEndOffset(long startOffset)

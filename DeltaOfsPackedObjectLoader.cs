@@ -45,13 +45,26 @@ using System.Text;
 
 namespace Gitty.Core
 {
-	class DeltaOfsPackedObjectLoader : DeltaPackedObjectLoader
+	public class DeltaOfsPackedObjectLoader : DeltaPackedObjectLoader
 	{
-		public DeltaOfsPackedObjectLoader(WindowCursor curs, PackFile pr, long dataOffset,
-			long objectOffset, int deltaSz, long baseValue)
-			: base(curs, pr, dataOffset, objectOffset, deltaSz)
+        private long deltaBase;
+
+		public DeltaOfsPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz, long baseOffset)
+			: base(pr, dataOffset, objectOffset, deltaSz)
 		{
-			throw new NotImplementedException();
+            this.deltaBase = baseOffset;
+            this.RawType = ObjectType.OffsetDelta;
 		}
+
+        protected override PackedObjectLoader GetBaseLoader()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ObjectId GetDeltaBase()
+        {
+            throw new NotImplementedException();
+        }
+
 	}
 }

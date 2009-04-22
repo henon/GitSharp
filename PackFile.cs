@@ -93,11 +93,11 @@ namespace Gitty.Core
             _stream = this.File.Open(System.IO.FileMode.Open);
             ReadPackHeader();
 		}
-#warning commented for compiling
-        //PackedObjectLoader ResolveBase(WindowCursor curs, long ofs)
-        //{
-        //    return Reader(curs, ofs);
-        //}
+
+        internal PackedObjectLoader ResolveBase(long offset)
+        {
+            return Reader(offset);
+        }
 
 		/**
 		 * Determine if an object is contained within the pack file.
@@ -117,23 +117,6 @@ namespace Gitty.Core
 
         public FileInfo File { get; private set; }
 
-#warning commented for compiling
-        ///**
-        // * Get an object from this pack.
-        // * 
-        // * @param id
-        // *            the object to obtain from the pack. Must not be null.
-        // * @return the object loader for the requested object if it is contained in
-        // *         this pack; null if the object was not found.
-        // * @throws IOException
-        // *             the pack file or the index could not be read.
-        // */
-        public PackedObjectLoader Get(AnyObjectId id)
-        {
-            throw new NotImplementedException();
-            //return Get(new WindowCursor(), id);
-        }
-        //
         ///**
         // * Get an object from this pack.
         // * 
@@ -146,15 +129,11 @@ namespace Gitty.Core
         // * @throws IOException
         // *             the pack file or the index could not be read.
         // */
-        //public PackedObjectLoader Get(WindowCursor curs, AnyObjectId id)
-        //{
-        //    long offset = Index.FindOffset(id);
-        //    if (offset == -1)
-        //        return null;
-        //    PackedObjectLoader objReader = Reader(curs, offset);
-        //    objReader.Id = id.ToObjectId();
-        //    return objReader;
-        //}
+        public PackedObjectLoader Get(AnyObjectId id)
+        {
+            long offset = Index.FindOffset(id);
+            return (offset == -1) ? null : Reader(offset);
+        }
 
 		/**
 		 * Close the resources utilized by this repository
@@ -273,8 +252,9 @@ namespace Gitty.Core
         }
 
 #warning commented for compiling
-        //private PackedObjectLoader Reader(WindowCursor curs, long objOffset)
-        //{
+        private PackedObjectLoader Reader(long objOffset)
+        {
+            throw new NotImplementedException();
         //    long pos = objOffset;
         //    int p = 0;
         //    byte[] ib = curs.tempId;
@@ -318,7 +298,7 @@ namespace Gitty.Core
         //        default:
         //            throw new IOException("Unknown object type " + typeCode + ".");
         //    }
-        //}
+        }
 
 		private long FindEndOffset(long startOffset)
 		{

@@ -191,7 +191,7 @@ namespace Gitty.Core
 			return GetReverseIdx().FindObject(offset);
 		}
 
-        public byte[] Decompress(long position, int totalSize)
+        public byte[] Decompress(long position, long totalSize)
         {
             byte[] dstbuf = new byte[totalSize];
             _stream.Seek(position, SeekOrigin.Begin);

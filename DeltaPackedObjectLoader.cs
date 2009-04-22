@@ -41,35 +41,66 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Gitty.Core.Exceptions;
 
 namespace Gitty.Core
 {
 	public abstract class DeltaPackedObjectLoader : PackedObjectLoader
 	{
-		public DeltaPackedObjectLoader(WindowCursor curs, PackFile pr, long dataOffset, long objectOffset, int deltaSz)
-			: base(curs, pr, dataOffset, objectOffset)
+        private bool objectLoaded = false;
+
+		public DeltaPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz)
+			: base(pr, dataOffset, objectOffset)
 		{
-			throw new NotImplementedException();
+            this.ObjectType = (ObjectType)-1;
+            this.RawSize = deltaSz;
 		}
 
-		public override ObjectId GetDeltaBase()
-		{
-			throw new NotImplementedException();
-		}
 
-		public override byte[] CachedBytes
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public override ObjectType ObjectType
+        {
+            get
+            {
+                if (!objectLoaded)
+                {
+                    var temp = this.CachedBytes;
+                }
+                return base.ObjectType;
+            }
+        }
 
-		public override ObjectType RawType
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public override long Size
+        {
+            get
+            {
+                if (!objectLoaded)
+                {
+                    var temp = this.CachedBytes;
+                }
+                return base.Size;
+            }
+        }
 
-		public override long RawSize
-		{
-			get { throw new NotImplementedException(); }
-		}
+        public override byte[] CachedBytes
+        {
+            get
+            {
+                try
+                {
+                    PackedObjectLoader baseLoader = GetBaseLoader();
+                    byte[] data = BinaryDelta.Apply(baseLoader.CachedBytes, pack.Decompress(this.DataOffset, this.RawSize));
+                    this.ObjectType = baseLoader.ObjectType;
+                    this.Size = data.Length;
+                    return data;
+                }
+                catch (FormatException fe)
+                {
+                    throw new CorruptObjectException("Object at " + this.DataOffset + " in "
+                            + pack.File.FullName + " has bad zlib stream", fe);
+                }
+            }
+        }
+
+        protected abstract PackedObjectLoader GetBaseLoader();
 	}
 }

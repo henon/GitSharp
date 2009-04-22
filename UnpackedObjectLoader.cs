@@ -64,7 +64,6 @@ namespace Gitty.Core
 
         public UnpackedObjectLoader(byte[] compressed, ObjectId id)
         {
-            Id = id;
             // Try to determine if this is a legacy format loose object or
             // a new style loose object. The legacy format was completely
             // compressed with zlib so the first byte must be 0x78 (15-bit
@@ -72,14 +71,15 @@ namespace Gitty.Core
             // evenly divisible by 31. Otherwise its a new style loose
             // object.
             //
-            var stream = new MemoryStream(compressed);
-            var deflate = new DeflateStream(stream, CompressionMode.Decompress);
-            using(deflate)
-            {
-                int fb = stream.ReadByte() & 0xff;
+            
+   
+                int fb = compressed[0] & 0xff;
 
-                if (fb == 0x78 && (((fb << 8) | stream.ReadByte() & 0xff) % 31) == 0)
+                if (fb == 0x78 && (((fb << 8) | compressed[1] & 0xff) % 31) == 0)
                 {
+                    var old = new MemoryStream(compressed, 2, compressed.Length -2);
+                    var deflate = new DeflateStream(old, CompressionMode.Decompress);
+
                     var header = new byte[64];
                     int avail = 0;
                     int bytesIn = -1;
@@ -109,46 +109,46 @@ namespace Gitty.Core
                     if (header[p++] != 0)
                         throw new CorruptObjectException(id, "garbage after size");
 
-                    _bytes = new byte[this.Size];
+                    this.CachedBytes = new byte[this.Size];
 
                     if (p < avail)
-                        Array.Copy(header, p, _bytes, 0, avail - p);
+                        Array.Copy(header, p, this.CachedBytes, 0, avail - p);
 
                     Decompress(id, deflate, avail - p);
                 }
                 else
                 {
-                    throw new NotSupportedException("Compression type not supported");
-                    //int p = 0;
-                    //int c = compressed[p++] & 0xff;
-                    //ObjectType typeCode = (ObjectType)((c >> 4) & 7);
-                    //int size = c & 15;
-                    //int shift = 4;
-                    //while ((c & 0x80) != 0)
-                    //{
-                    //    c = compressed[p++] & 0xff;
-                    //    size += (c & 0x7f) << shift;
-                    //    shift += 7;
-                    //}
+                    int p = 0;
+                    int c = compressed[p++] & 0xff;
+                    ObjectType typeCode = (ObjectType)((c >> 4) & 7);
+                    int size = c & 15;
+                    int shift = 4;
+                    while ((c & 0x80) != 0)
+                    {
+                        c = compressed[p++] & 0xff;
+                        size += (c & 0x7f) << shift;
+                        shift += 7;
+                    }
 
-                    //switch (typeCode)
-                    //{
-                    //    case ObjectType.Commit:
-                    //    case ObjectType.Tree:
-                    //    case ObjectType.Blob:
-                    //    case ObjectType.Tag:
-                    //        objectType = typeCode;
-                    //        break;
-                    //    default:
-                    //        throw new CorruptObjectException(id, "invalid type");
-                    //}
+                    switch (typeCode)
+                    {
+                        case ObjectType.Commit:
+                        case ObjectType.Tree:
+                        case ObjectType.Blob:
+                        case ObjectType.Tag:
+                            this.ObjectType = typeCode;
+                            break;
+                        default:
+                            throw new CorruptObjectException(id, "invalid type");
+                    }
 
-                    //this.Size = size;
-                    //bytes = new byte[this.Size];
-                    //inflater.SetInput(compressed, p, compressed.Length - p);
-                    //Decompress(id, inflater, 0);
+                    this.Size = size;
+                    this.CachedBytes = new byte[this.Size];
+                    
+                    var newstream = new MemoryStream(compressed, p, compressed.Length - p);
+                    Decompress(id, new DeflateStream(newstream, CompressionMode.Decompress), 0);
                 }
-            }            
+            
         }
 
         private void Decompress(ObjectId id, DeflateStream inf, int p)
@@ -159,7 +159,7 @@ namespace Gitty.Core
 
                 while (bytesRead != 0)
                 {
-                    bytesRead = inf.Read(_bytes, p, (int)this.Size - p);
+                    bytesRead = inf.Read(this.CachedBytes, p, (int)this.Size - p);
                     p += bytesRead;
                 }
             }
@@ -181,17 +181,6 @@ namespace Gitty.Core
                 objStream.Read(compressed, 0, (int)objStream.Length);
             }
             return compressed;
-        }
-
-        private byte[] _bytes;
-        public override byte[] Bytes
-        {
-            get { return _bytes; }
-        }
-
-        public override byte[] CachedBytes
-        {
-            get { return _bytes; }
         }
 
         public override ObjectType RawType

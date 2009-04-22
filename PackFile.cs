@@ -89,7 +89,8 @@ namespace Gitty.Core
         {
             this._indexFile = idxFile;
             this._packLastModified = packFile.LastWriteTime.Ticks;
-            _stream = packFile.Open(System.IO.FileMode.Open);
+            this.File = packFile;
+            _stream = this.File.Open(System.IO.FileMode.Open);
             ReadPackHeader();
 		}
 #warning commented for compiling
@@ -113,6 +114,8 @@ namespace Gitty.Core
 		{
             return Index.HasObject(id);
 		}
+
+        public FileInfo File { get; private set; }
 
 #warning commented for compiling
         ///**
@@ -250,7 +253,6 @@ namespace Gitty.Core
             get { return Index.HasCRC32Support; }
         }
 
-#warning commented for compiling
         private void ReadPackHeader()
         {
             var reader = new BinaryReader(_stream);

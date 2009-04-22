@@ -65,16 +65,6 @@ namespace Gitty.Core
          */
         public long DataOffset { get; protected set; }
 
-        public override byte[] Bytes
-        {
-            get
-            {
-                byte[] data = this.CachedBytes;
-                byte[] copy = new byte[data.Length];
-                Array.Copy(data, 0, copy, 0, data.Length);
-                return data;
-            }
-        }
         /**
          * Copy raw object representation from storage to provided output stream.
          * <p>
@@ -112,24 +102,6 @@ namespace Gitty.Core
          *             when delta base cannot read.
          */
         public abstract ObjectId GetDeltaBase();
-
-        protected ObjectType _objectType;
-        public override ObjectType ObjectType
-        {
-            get
-            {
-                return _objectType;
-            }
-        }
-
-        protected long _objectSize;
-        public override long Size
-        {
-            get
-            {
-                return _objectSize;
-            }
-        }
 
     }
 }

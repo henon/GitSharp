@@ -50,8 +50,8 @@ namespace Gitty.Core
         public WholePackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, ObjectType type, int size)
             : base(pr, dataOffset, objectOffset)
         {
-            this._objectType = type;
-            this._objectSize = size;
+            this.ObjectType = type;
+            this.Size = size;
         }
 
         public override ObjectId GetDeltaBase()
@@ -70,9 +70,9 @@ namespace Gitty.Core
                 }
                 catch (FormatException fe)
                 {
-                    throw new CorruptObjectException(this.Id, "bad stream", fe);
+                    throw new CorruptObjectException("Object at " + this.DataOffset + " in "
+                    + pack.File.FullName + " has bad zlib stream", fe);
                 }
-
             }
         }
 

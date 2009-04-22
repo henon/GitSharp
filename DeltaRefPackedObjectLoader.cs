@@ -41,16 +41,33 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Gitty.Core.CSharp.Exceptions;
 
 namespace Gitty.Core
 {
-	class DeltaRefPackedObjectLoader : DeltaPackedObjectLoader
-	{
-		public DeltaRefPackedObjectLoader(WindowCursor curs, PackFile pr, long dataOffset, 
-			long objectOffset, int deltaSz, ObjectId idBase) 
-			: base(curs, pr, dataOffset, objectOffset, deltaSz)
-		{
-			throw new NotImplementedException();
-		}
-	}
+    public class DeltaRefPackedObjectLoader : DeltaPackedObjectLoader
+    {
+
+        private ObjectId deltaBase;
+
+        public DeltaRefPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz, ObjectId baseId)
+            : base(pr, dataOffset, objectOffset, deltaSz)
+        {
+            deltaBase = baseId;
+            this.RawType = ObjectType.ReferenceDelta;
+        }
+
+        protected override PackedObjectLoader GetBaseLoader()
+        {
+            PackedObjectLoader or = pack.Get(deltaBase);
+            if (or == null)
+                throw new MissingObjectException(deltaBase, ObjectType.DeltaBase);
+            return or;
+        }
+
+        public override ObjectId GetDeltaBase()
+        {
+            return deltaBase;
+        }
+    }
 }

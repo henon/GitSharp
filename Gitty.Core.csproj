@@ -45,6 +45,7 @@
     <Compile Include="DeltaPackedObjectLoader.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DeltaRefPackedObjectLoader.cs" />
     <Compile Include="Ensure.cs" />
     <Compile Include="Exceptions\CorruptObjectException.cs" />
     <Compile Include="Exceptions\FileLockedException.cs" />

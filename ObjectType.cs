@@ -52,6 +52,7 @@ namespace Gitty.Core
         ObjectType5 = 5,
         OffsetDelta = 6,
         ReferenceDelta = 7,
+        DeltaBase = 254,
         Unknown = 255
     }
 }

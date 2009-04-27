@@ -865,7 +865,7 @@ namespace Gitty.Core
             _refDb.ClearCache();
         }
 
-        static byte[] GitInternalSlash(byte[] bytes)
+        internal static byte[] GitInternalSlash(byte[] bytes)
         {
             if (Path.PathSeparator == '/')
                 return bytes;

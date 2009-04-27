@@ -138,47 +138,41 @@ namespace Gitty.Core
         #region Treeish Members
 
         private ObjectId treeId;
-        private Tree tree;
-        public ObjectId GetTreeId()
+        
+        public ObjectId TreeId
         {
-            return treeId;
-        }
-
-        /**
-         * Set the tree id for this commit object
-         *
-         * @param id
-         */
-        public void setTreeId(ObjectId id)
-        {
-            if (treeId == null || !treeId.Equals(id))
+            get
             {
-                tree = null;
+                return treeId;
             }
-            treeId = id;
-        }
-
-        public Tree GetTree()
-        {
-            if (tree == null)
+            set
             {
-                tree = Repository.MapTree(GetTreeId());
-                if (tree == null)
-                    throw new MissingObjectException(GetTreeId(), ObjectType.Tree);
+                if (treeId == null || !treeId.Equals(value))
+                {
+                    treeEntry = null;
+                }
+                treeId = value;
             }
-            return tree;
         }
 
-
-        /**
-         * Set the tree object for this commit
-         * @see #setTreeId
-         * @param t the Tree object
-         */
-        public void SetTree(Tree t)
+        private Tree treeEntry;
+        public Tree TreeEntry
         {
-            treeId = t.GetTreeId();
-            tree = t;
+            get
+            {
+                if (treeEntry == null)
+                {
+                    treeEntry = Repository.MapTree(this.TreeId);
+                    if (treeEntry == null)
+                        throw new MissingObjectException(this.TreeId, ObjectType.Tree);
+                }
+                return treeEntry;
+            }
+            set
+            {
+                treeId = value.TreeId;
+                treeEntry = value;
+            }
         }
 
         #endregion

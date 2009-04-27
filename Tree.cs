@@ -191,7 +191,7 @@ namespace Gitty.Core
 			{
 				int mid = (low + high) / 2;
 				int cmp = CompareNames(entries[mid].NameUTF8, nameUTF8, 
-					nameStart, nameEnd, TreeEntry.lastChar(entries[mid]), nameUTF8last);
+					nameStart, nameEnd, Gitty.Core.TreeEntry.LastChar(entries[mid]), nameUTF8last);
 
 				if (cmp < 0)
 					low = mid + 1;
@@ -215,14 +215,20 @@ namespace Gitty.Core
 		}
 
 		#region Treeish Members
-		public ObjectId GetTreeId()
+		public ObjectId TreeId
 		{
-			return Id;
+            get
+            {
+                return Id;
+            }
 		}
 
-		public Tree GetTree()
+		public Tree TreeEntry
 		{
-			return this;
+            get
+            {
+                return this;
+            }
 		}
 		#endregion
 

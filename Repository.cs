@@ -669,7 +669,7 @@ namespace Gitty.Core
                                                 oref = MapObject(refId, null);
                                             }
                                             if (oref is Treeish)
-                                                refId = ((Treeish)oref).GetTreeId();
+                                                refId = ((Treeish)oref).TreeId;
                                             else
                                                 throw new IncorrectObjectTypeException(refId, ObjectType.Tree);
                                         }

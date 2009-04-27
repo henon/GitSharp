@@ -129,14 +129,14 @@ namespace Gitty.Core
 			TreeEntry t = o as TreeEntry;
 			
 			if (t != null)
-                return Tree.CompareNames(NameUTF8, t.NameUTF8, lastChar(this), lastChar(t));
+                return Tree.CompareNames(NameUTF8, t.NameUTF8, LastChar(this), LastChar(t));
             return -1;
         }
 
         #endregion
 
 
-        public static int lastChar(TreeEntry treeEntry)
+        public static int LastChar(TreeEntry treeEntry)
         {
             if (treeEntry is FileTreeEntry)
                 return '\0';
@@ -183,6 +183,14 @@ namespace Gitty.Core
                 StringBuilder r = new StringBuilder();
                 AppendFullName(r);
                 return r.ToString();
+            }
+        }
+
+        public byte[] FullNameUTF8
+        {
+            get
+            {
+                return Encoding.UTF8.GetBytes(this.FullName);
             }
         }
 

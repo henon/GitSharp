@@ -47,7 +47,7 @@ namespace Gitty.Core
     [Complete]
     public interface Treeish
     {
-        ObjectId GetTreeId();
-        Tree GetTree();
+        ObjectId TreeId{ get; }
+        Tree TreeEntry{ get; }
     }
 }

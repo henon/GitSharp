@@ -41,7 +41,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Core.CSharp.Exceptions;
+using Gitty.Core.Exceptions;
 
 namespace Gitty.Core
 {

@@ -44,7 +44,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Gitty.Core.CSharp.Exceptions
+namespace Gitty.Core.Exceptions
 {
     /**
   * An expected object is missing.

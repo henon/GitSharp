@@ -43,7 +43,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Gitty.Core.Exceptions;
-using Gitty.Core.CSharp.Exceptions;
 using System.IO;
 
 namespace Gitty.Core

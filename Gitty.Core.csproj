@@ -49,6 +49,7 @@
     <Compile Include="DeltaRefPackedObjectLoader.cs" />
     <Compile Include="Ensure.cs" />
     <Compile Include="Exceptions\CorruptObjectException.cs" />
+    <Compile Include="Exceptions\EntryExistsException.cs" />
     <Compile Include="Exceptions\FileLockedException.cs" />
     <Compile Include="Exceptions\IncorrectObjectTypeException.cs" />
     <Compile Include="Exceptions\MissingObjectException.cs" />

@@ -107,5 +107,48 @@ namespace Gitty.Core
         {
             o.CopyTo(writer);
         }
+
+        private static string alphaNumeric = "abcdefghijklmnopqrstuvwxyz0123456789";
+        public static FileInfo CreateTempFile(this DirectoryInfo d, string prefix)
+        {
+            return CreateTempFile(d, prefix, null);
+        }
+
+        public static FileInfo CreateTempFile(this DirectoryInfo d, string prefix, string suffix)
+        {
+            var name = "";
+            var rnd = new Random((int)DateTime.Now.Ticks);
+            if (!string.IsNullOrEmpty(prefix))
+                name += prefix;
+
+            var i = 8;
+            while (i-- > 0)
+                name += alphaNumeric[rnd.Next(alphaNumeric.Length - 1)];
+
+            if (suffix == null)
+                name += ".tmp";
+            else
+                name += suffix;
+
+            return new FileInfo(Path.Combine(d.FullName, name));
+        }
+
+        public static bool RenameTo(this FileInfo file, string newPath)
+        {
+            try
+            {
+                file.MoveTo(newPath);
+                return true;
+            }
+            catch (IOException) { }
+            catch (ArgumentNullException) { }
+            catch (ArgumentException) { }
+            catch (System.Security.SecurityException) { }
+            catch (UnauthorizedAccessException) { }
+            catch (NotSupportedException) { }
+
+            return false;
+
+        }
     }
 }

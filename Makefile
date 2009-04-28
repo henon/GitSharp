@@ -51,6 +51,7 @@ SOURCES =  \
 	ProgressMonitor.cs \
 	Properties/AssemblyInfo.cs \
 	Ref.cs \
+	RefComparer.cs \
 	RefDatabase.cs \
 	RefLogWriter.cs \
 	RefUpdate.cs \

@@ -92,6 +92,7 @@
     <Compile Include="PersonIdent.cs" />
     <Compile Include="ProgressMonitor.cs" />
     <Compile Include="Ref.cs" />
+    <Compile Include="RefComparer.cs" />
     <Compile Include="RefDatabase.cs" />
     <Compile Include="RefLogWriter.cs" />
     <Compile Include="RefUpdate.cs" />

@@ -163,7 +163,7 @@ namespace Gitty.Core
 		 *            start offset of object to find
 		 * @return object id for this offset, or null if no object was found
 		 */
-		ObjectId FindObjectForOffset(long offset)
+		public ObjectId FindObjectForOffset(long offset)
 		{
 			return ReverseIndex.FindObject(offset);
 		}

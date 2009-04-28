@@ -42,6 +42,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Gitty.Core.Exceptions;
 
 namespace Gitty.Core
 {
@@ -58,12 +59,15 @@ namespace Gitty.Core
 
         protected override PackedObjectLoader GetBaseLoader()
         {
-            throw new NotImplementedException();
+            return pack.ResolveBase(deltaBase);
         }
 
         public override ObjectId GetDeltaBase()
         {
-            throw new NotImplementedException();
+            ObjectId id = pack.FindObjectForOffset(deltaBase);
+			if (id == null)
+				throw new CorruptObjectException("Offset-written delta base for object not found in a pack");
+			return id;
         }
 
 	}

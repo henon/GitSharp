@@ -307,7 +307,7 @@ namespace Gitty.Core
                     return new PackIndexV1(fs, hdr);
                 }
             }
-            catch (IOException io)
+            catch (IOException)
             {
                 throw new IOException("Unable to read pack index: " + idxFile.FullName);
             }

@@ -898,7 +898,7 @@ namespace Gitty.Core
                     // Oh well. No sense in complaining about it.
                     //
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Debugger.Break();
                 }

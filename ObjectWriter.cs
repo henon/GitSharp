@@ -39,36 +39,185 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using ObjectWritingException = Gitty.Core.Exceptions.ObjectWritingException;
 
 namespace Gitty.Core
 {
     public class ObjectWriter
     {
+		private static byte[] htree = Encoding.ASCII.GetBytes("tree");
+
+		private static byte[] hparent = Encoding.ASCII.GetBytes("parent");
+	
+		private static byte[] hauthor = Encoding.ASCII.GetBytes("author");
+	
+		private static byte[] hcommitter = Encoding.ASCII.GetBytes("committer");
+	
+		private static byte[] hencoding = Encoding.ASCII.GetBytes("encoding");
+	
+		private Repository r;
+	
+		private byte[] buf;
+	
+		private SHA1CryptoServiceProvider md;
+		
         public ObjectWriter(Repository repo)
         {
-            throw new NotImplementedException();
+            this.r = repo;
+			buf = new byte[8192];
+			md = new SHA1CryptoServiceProvider();			
+        }
+		
+		public ObjectId WriteBlob(byte[] b)
+		{
+			return WriteBlob(b.Length, new MemoryStream(b));
+		}
+		
+		public ObjectId WriteBlob(FileInfo fileInfo)
+        {
+        	using(var input = fileInfo.OpenRead())
+			{
+				return WriteBlob(fileInfo.Length, input);
+			}
+        }
+		
+		public ObjectId WriteBlob(long len, Stream input)
+		{
+			return WriteObject(ObjectType.Blob, len, input, true);
+		}
+
+		public ObjectId WriteTree(Tree t)
+        {
+			var m = new MemoryStream();
+            var o = new BinaryWriter(m);
+			TreeEntry[] items = t.Members;
+			for (int k = 0; k < items.Length; k++) {
+				 TreeEntry e = items[k];
+				 ObjectId id = e.Id;
+	
+				if (id == null)
+					throw new ObjectWritingException("Object at path \""
+							+ e.FullName + "\" does not have an id assigned."
+							+ "  All object ids must be assigned prior"
+							+ " to writing a tree.");
+	
+				e.Mode.CopyTo(o);
+				o.Write((byte)' ');
+				o.Write(e.NameUTF8);
+				o.Write((byte)0);
+				id.CopyTo(m);
+			}
+			return WriteCanonicalTree(m.ToArray());
+		}
+		
+		public ObjectId WriteCanonicalTree(byte[] buffer)
+		{
+			return WriteTree(buffer.Length, new MemoryStream(buffer));
+		}
+		
+		private ObjectId WriteTree(long len, Stream input)
+		{
+			return WriteObject(ObjectType.Tree, len, input, true);
+		}
+		
+		public ObjectId WriteCommit(Commit c)
+        {
+#warning TODO: handle encoding
+			var os = new MemoryStream();
+			var w = new BinaryWriter(os);
+			var sw = new StreamWriter(os);
+			
+			w.Write(htree);
+			w.Write(' ');
+			c.TreeId.CopyTo(os);
+			w.Write('\n');
+	
+			ObjectId[] ps = c.ParentIds;
+			for (int i=0; i<ps.Length; ++i) {
+				w.Write(hparent);
+				w.Write(' ');
+				ps[i].CopyTo(os);
+				w.Write('\n');
+			}
+	
+			w.Write(hauthor);
+			w.Write(' ');
+			sw.Write(c.Author.ToExternalString());
+			w.Write('\n');
+	
+			w.Write(hcommitter);
+			w.Write(' ');
+			sw.Write(c.Committer.ToExternalString());
+			
+			w.Write('\n');
+	
+			w.Write('\n');
+			sw.Write(c.Message);
+			
+			return WriteCommit(os.ToArray());
+        }
+		
+		private ObjectId WriteTag(byte[] b)
+		{
+			return WriteTag(b.Length, new MemoryStream(b));
+		}
+		
+        public ObjectId WriteTag(Tag tag)
+        {
+            var stream = new MemoryStream();
+			var w = new BinaryWriter(stream);
+			var sw = new StreamWriter(stream);
+			
+			sw.Write("object ");
+			tag.Id.CopyTo(stream);
+			w.Write('\n');
+	
+			sw.Write("type ");
+			w.Write(tag.TagType);
+			w.Write('\n');
+	
+			sw.Write("tag ");
+			tag.TagId.CopyTo(stream);
+			w.Write('\n');
+	
+			sw.Write("tagger ");
+			sw.Write(tag.Author.ToExternalString());
+			w.Write('\n');
+	
+			w.Write('\n');
+			sw.Write(tag.Message);
+			w.Close();
+	
+			return WriteTag(stream.ToArray());
         }
 
-        internal ObjectId WriteTag(Tag tag)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal ObjectId WriteBlob(System.IO.FileInfo fileInfo)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal ObjectId WriteTree(Tree t)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal ObjectId WriteCommit(Commit t)
-        {
-            throw new NotImplementedException();
-        }
+        private ObjectId WriteCommit(byte[] b)
+		{
+			return WriteCommit(b.Length, new MemoryStream(b));
+		}
+		
+		private ObjectId WriteCommit( long len, Stream input)
+		{
+			return WriteObject(ObjectType.Commit, len, input, true);
+		}
+		
+		private ObjectId WriteTag(long len, Stream input)
+		{
+			return WriteObject(ObjectType.Tag, len, input, true);
+		}
+        
+		public ObjectId ComputeBlobSha1(long length, Stream input)
+		{
+			return WriteObject(ObjectType.Blob, length, input, false);
+		}
+		
+		private ObjectId WriteObject(ObjectType type, long len, Stream input, bool store) 
+		{
+			throw new NotImplementedException();
+		}
     }
 }

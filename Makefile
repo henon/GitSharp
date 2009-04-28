@@ -73,6 +73,7 @@ SOURCES =  \
 	Util/CheckedOutputStream.cs \
 	Util/CRC32.cs \
 	Util/Hex.cs \
+	Util/MessageDigest.cs \
 	Util/NestedDictionary.cs \
 	Util/Numbers.cs \
 	Util/PathUtil.cs \

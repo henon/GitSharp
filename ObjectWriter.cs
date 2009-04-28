@@ -105,7 +105,7 @@ namespace Gitty.Core
 							+ "  All object ids must be assigned prior"
 							+ " to writing a tree.");
 	
-				e.Mode.CopyTo(o);
+				e.Mode.CopyTo(m);
 				o.Write((byte)' ');
 				o.Write(e.NameUTF8);
 				o.Write((byte)0);

@@ -128,9 +128,9 @@ namespace Gitty.Core
             );
         }
 
-        public void CopyTo(StreamWriter writer)
+        public void CopyTo(Stream stream)
         {
-            writer.Write(_octalBytes);
-        }
+			new BinaryWriter(stream).Write(_octalBytes);            
+        }		
     }
 }

@@ -28,7 +28,7 @@ namespace Gitty.Core
         private void WriteObjectNames()
         {
             foreach (PackedObjectInfo oe in entries)
-                _stream.Write(oe);
+                _stream.BaseStream.Write(oe);
         }
 
         private void WriteCRCs()

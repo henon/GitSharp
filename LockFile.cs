@@ -240,7 +240,7 @@ namespace Gitty.Core
             try
             {
                 var b = new BinaryWriter(os);
-                id.CopyTo(b);
+                id.CopyTo(os);
                 b.Write('\n');
                 b.Flush();
                 fLck.Release();

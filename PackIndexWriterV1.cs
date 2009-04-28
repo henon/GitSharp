@@ -33,7 +33,7 @@ namespace Gitty.Core
                 if (!CanStore(oe))
                     throw new IOException("Pack too large for index version 1");
                 _stream.Write((int)oe.Offset);
-                _stream.Write(oe);
+				_stream.BaseStream.Write(oe);
             }
 
             WriteChecksumFooter();

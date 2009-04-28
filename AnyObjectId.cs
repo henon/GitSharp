@@ -93,9 +93,9 @@ namespace Gitty.Core
             return (this == id);
         }
 
-        public void CopyTo(BinaryWriter w)
+        public void CopyTo(Stream s)
         {
-            w.Write(ToHexByteArray());
+			new BinaryWriter(s).Write(ToHexByteArray());
         }
 
         private byte[] ToHexByteArray()

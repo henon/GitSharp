@@ -103,7 +103,7 @@ namespace Gitty.Core
             }
         }
 
-        public static void Write(this BinaryWriter writer, ObjectId o)
+        public static void Write(this Stream writer, ObjectId o)
         {
             o.CopyTo(writer);
         }

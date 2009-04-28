@@ -190,9 +190,9 @@ namespace Gitty.Core
 	  }
 	  
 	  RefUpdate ru = Repository.UpdateRef(Constants.RefsTags + TagName);
-	  ru.SetNewObjectId(id);
+	  ru.NewObjectId = id;
 	  ru.SetRefLogMessage("tagged " + TagName, false);
-	  if (ru.ForceUpdate() == RefUpdate.Result.LockFailure)
+	  if (ru.ForceUpdate() == RefUpdate.RefUpdateResult.LockFailure)
 	      throw new ObjectWritingException("Unable to lock tag " + TagName);
       }
       

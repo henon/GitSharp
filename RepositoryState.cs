@@ -46,9 +46,11 @@ namespace Gitty.Core
     [Complete]
     public sealed class RepositoryState
     {
+        public readonly static RepositoryState Apply = new RepositoryState(false, false, true, "Apply mailbox");
         public readonly static RepositoryState Safe = new RepositoryState(true, true, true, "Normal");
         public readonly static RepositoryState Merging = new RepositoryState(false, false, false, "Conflicts");
         public readonly static RepositoryState Rebasing = new RepositoryState(false, false, true, "Rebase/Apply mailbox");
+        public readonly static RepositoryState RebasingRebasing = new RepositoryState(false, false, true, "Rebase");
         public readonly static RepositoryState RebasingMerge = new RepositoryState(false, false, true, "Rebase w/merge");
         public readonly static RepositoryState RebasingInteractive = new RepositoryState(false, false, true, "Rebase interactive");
         public readonly static RepositoryState Bisecting = new RepositoryState(true, false, false, "Bisecting");

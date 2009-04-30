@@ -56,6 +56,7 @@ SOURCES =  \
 	RefLogWriter.cs \
 	RefUpdate.cs \
 	Repository.cs \
+	RepositoryChangedEventArgs.cs \
 	RepositoryConfig.cs \
 	RepositoryState.cs \
 	SymlinkTreeEntry.cs \

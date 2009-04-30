@@ -122,6 +122,24 @@ namespace Gitty.Core
             //    ScanForPacks();
         }
 
+		#region events
+		
+		public event EventHandler<RefsChangedEventArgs> RefsChanged;
+		protected void OnRefsChanged()
+		{
+			var handler = this.RefsChanged;
+			if(handler != null)
+				handler(this, new RefsChangedEventArgs(this));
+		}
+		
+		public event EventHandler<IndexChangedEventArgs> IndexChanged;
+		protected void OnIndexChanged()
+		{
+			var handler = this.IndexChanged;
+			if(handler != null)
+				handler(this, new IndexChangedEventArgs(this));
+		}
+		#endregion
 
         /**
          * Create a new Git repository initializing the necessary files and

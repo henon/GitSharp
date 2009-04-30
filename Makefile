@@ -54,6 +54,7 @@ SOURCES =  \
 	RefComparer.cs \
 	RefDatabase.cs \
 	RefLogWriter.cs \
+	RefsChangedEventArgs.cs \
 	RefUpdate.cs \
 	Repository.cs \
 	RepositoryChangedEventArgs.cs \

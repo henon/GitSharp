@@ -85,10 +85,11 @@ SOURCES =  \
 all: Gitty.Core.dll test.exe
 
 Gitty.Core.dll: $(SOURCES)
-	$(CSC) $(SOURCES) -out:Gitty.Core.dll -debug -target:library
+	mkdir -p bin/Debug
+	$(CSC) $(SOURCES) -out:bin/Debug/Gitty.Core.dll -debug -target:library
 
 test.exe: Gitty.Core.dll test.cs
-	$(CSC) -r:Gitty.Core.dll -debug test.cs
+	$(CSC) -r:bin/Debug/Gitty.Core.dll -debug test.cs
 
 run: test.exe
 	mono --debug test.exe

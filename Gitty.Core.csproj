@@ -126,6 +126,7 @@
     <Compile Include="test.cs" />
     <Compile Include="RepositoryChangedEventArgs.cs" />
     <Compile Include="RefsChangedEventArgs.cs" />
+    <Compile Include="IndexChangedEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

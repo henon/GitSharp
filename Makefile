@@ -27,6 +27,7 @@ SOURCES =  \
 	ForceModified.cs \
 	GitException.cs \
 	GitIndex.cs \
+	IndexChangedEventArgs.cs \
 	IndexDiff.cs \
 	IndexTreeVisitor.cs \
 	IndexTreeWalker.cs \

@@ -46,19 +46,19 @@ using System.IO;
 namespace Gitty.Core
 {
     [Complete]
-    public abstract class AnyObjectId 
-	    :
+    public abstract class AnyObjectId
+        :
 #if !__MonoCS__
-	    IComparable<ObjectId>,
+ IComparable<ObjectId>,
 #endif
-	    IComparable
+ IComparable
     {
         internal class Constants
         {
             public static readonly int ObjectIdLength = 20;
             public static readonly int StringLength = ObjectIdLength * 2;
         }
-        
+
         
         public static bool operator ==(AnyObjectId a, AnyObjectId b)
         {
@@ -79,23 +79,19 @@ namespace Gitty.Core
             return !(a == b);
         }
 
-        public bool Equals(ObjectId obj)
+        public virtual bool Equals(AnyObjectId obj)
         {
-            return (obj != null) ? Equals((object)obj) : false;
+            return (obj != null) ? Equals(this, obj) : false;
         }
 
         public override bool Equals(object obj)
         {
-            AnyObjectId id = obj as AnyObjectId;
-            if (obj == null)
-                return false;
-
-            return (this == id);
+            return Equals(((AnyObjectId)obj));
         }
 
         public void CopyTo(Stream s)
         {
-			new BinaryWriter(s).Write(ToHexByteArray());
+            new BinaryWriter(s).Write(ToHexByteArray());
         }
 
         private byte[] ToHexByteArray()
@@ -125,7 +121,7 @@ namespace Gitty.Core
         public int GetFirstByte()
         {
             // W1 >>> 24 in java
-            return  (byte)(W1 >> 24);
+            return (byte)(W1 >> 24);
         }
 
         #region IComparable<ObjectId> Members
@@ -134,7 +130,7 @@ namespace Gitty.Core
         {
             if (this == other)
                 return 0;
-            
+
             int cmp;
 
             cmp = NB.CompareUInt32(W1, other.W1);
@@ -238,7 +234,7 @@ namespace Gitty.Core
         public ObjectId Copy() {
             if (this.GetType() == typeof(ObjectId))
                 return (ObjectId)this;
-            return new ObjectId(this);            
+            return new ObjectId(this);
         }
 
         public abstract ObjectId ToObjectId();

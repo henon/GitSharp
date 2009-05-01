@@ -79,6 +79,46 @@ namespace Gitty.Core
         {
             return i != null ? i.ToString() : ZeroIdString;
         }
+
+        /**
+	     * Compare to object identifier byte sequences for equality.
+	     * 
+	     * @param firstBuffer
+	     *            the first buffer to compare against. Must have at least 20
+	     *            bytes from position ai through the end of the buffer.
+	     * @param fi
+	     *            first offset within firstBuffer to begin testing.
+	     * @param secondBuffer
+	     *            the second buffer to compare against. Must have at least 2
+	     *            bytes from position bi through the end of the buffer.
+	     * @param si
+	     *            first offset within secondBuffer to begin testing.
+	     * @return true if the two identifiers are the same.
+	     */
+        public static bool Equals(byte[] firstBuffer, int fi, byte[] secondBuffer, int si)
+        {
+            return firstBuffer[fi] == secondBuffer[si]
+                    && firstBuffer[fi + 1] == secondBuffer[si + 1]
+                    && firstBuffer[fi + 2] == secondBuffer[si + 2]
+                    && firstBuffer[fi + 3] == secondBuffer[si + 3]
+                    && firstBuffer[fi + 4] == secondBuffer[si + 4]
+                    && firstBuffer[fi + 5] == secondBuffer[si + 5]
+                    && firstBuffer[fi + 6] == secondBuffer[si + 6]
+                    && firstBuffer[fi + 7] == secondBuffer[si + 7]
+                    && firstBuffer[fi + 8] == secondBuffer[si + 8]
+                    && firstBuffer[fi + 9] == secondBuffer[si + 9]
+                    && firstBuffer[fi + 10] == secondBuffer[si + 10]
+                    && firstBuffer[fi + 11] == secondBuffer[si + 11]
+                    && firstBuffer[fi + 12] == secondBuffer[si + 12]
+                    && firstBuffer[fi + 13] == secondBuffer[si + 13]
+                    && firstBuffer[fi + 14] == secondBuffer[si + 14]
+                    && firstBuffer[fi + 15] == secondBuffer[si + 15]
+                    && firstBuffer[fi + 16] == secondBuffer[si + 16]
+                    && firstBuffer[fi + 17] == secondBuffer[si + 17]
+                    && firstBuffer[fi + 18] == secondBuffer[si + 18]
+                    && firstBuffer[fi + 19] == secondBuffer[si + 19];
+        }
+
         public static ObjectId FromString(byte[] bs, int offset)
         {
             return FromHexString(bs, offset);

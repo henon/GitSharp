@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -59,7 +60,7 @@ namespace Gitty.Core
             public static readonly int StringLength = ObjectIdLength * 2;
         }
 
-        
+
         public static bool operator ==(AnyObjectId a, AnyObjectId b)
         {
             if ((object)a == null)
@@ -81,7 +82,7 @@ namespace Gitty.Core
 
         public virtual bool Equals(AnyObjectId obj)
         {
-            return (obj != null) ? Equals(this, obj) : false;
+            return (obj != null) ? this == obj : false;
         }
 
         public override bool Equals(object obj)
@@ -231,7 +232,8 @@ namespace Gitty.Core
             return new string(ToHexCharArray());
         }
 
-        public ObjectId Copy() {
+        public ObjectId Copy()
+        {
             if (this.GetType() == typeof(ObjectId))
                 return (ObjectId)this;
             return new ObjectId(this);

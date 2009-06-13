@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="TestGUI.TestRunner"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    MinHeight="500" MinWidth="700">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="7*" />
+        </Grid.ColumnDefinitions>
+        <TreeView Name="m_treeview" Grid.Column="0"  >
+            <TreeViewItem Header="All assemblies" IsExpanded="True"></TreeViewItem>
+        </TreeView>
+        <GridSplitter Width="5" BorderThickness="1" BorderBrush="DarkGray" />
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="5"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <DockPanel Grid.Row="0">
+                <DockPanel DockPanel.Dock="Top">
+                    <Button Name="m_button_run" Width="50">Run</Button>
+                    <ProgressBar Name="m_progressbar"></ProgressBar>
+                </DockPanel>
+                <TextBox Name="m_textbox1" DockPanel.Dock="Bottom">Status</TextBox>
+            </DockPanel>
+            <GridSplitter Grid.Row="1" BorderThickness="1" BorderBrush="DarkGray" HorizontalAlignment="Stretch" ResizeDirection="Rows" ShowsPreview="False" ResizeBehavior="PreviousAndNext"/>
+            <TextBox Name="m_textbox2" Grid.Row="2" >Backtrace</TextBox>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -89,6 +89,13 @@ namespace Gitty.Core
         public Repository Repository { get; private set; }
         public FileInfo ConfigFile { get; private set; }
 
+        /**
+         * Overrides the default system reader by a custom one.
+         * @param newSystemReader new system reader
+         * [henon] Needed by test suite
+         */
+        public static ISystemReader SystemReader { set; get; }
+
         #endregion
 
 

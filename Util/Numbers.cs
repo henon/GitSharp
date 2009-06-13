@@ -131,5 +131,37 @@ namespace Gitty.Core.Util
             return (DecodeUInt32(intbuf, offset) << 32)
                    | DecodeUInt32(intbuf, offset + 4);
         }
+
+        // [henon] constants for DecimalToBase
+        const int base10 = 10;
+        static readonly char[] cHexa = new char[] { 'A', 'B', 'C', 'D', 'E', 'F' };
+        static readonly int[] iHexaNumeric = new int[] { 10, 11, 12, 13, 14, 15 };
+        static readonly int[] iHexaIndices = new int[] { 0, 1, 2, 3, 4, 5 };
+        const int asciiDiff = 48;
+
+        /// <summary>
+        /// Convert decimal to any base
+        /// </summary>
+        /// <param name="iDec">the decimal</param>
+        /// <param name="numbase">the base of the output</param>
+        /// <returns>a string representation of the base number</returns>
+        public static string DecimalToBase(int iDec, int numbase)
+        {
+            string strBin = "";
+            int[] result = new int[32];
+            int MaxBit = 32;
+            for (; iDec > 0; iDec /= numbase)
+            {
+                int rem = iDec % numbase;
+                result[--MaxBit] = rem;
+            }
+            for (int i = 0; i < result.Length; i++)
+                if ((int)result.GetValue(i) >= base10)
+                    strBin += cHexa[(int)result.GetValue(i) % base10];
+                else
+                    strBin += result.GetValue(i);
+            strBin = strBin.TrimStart(new char[] { '0' });
+            return strBin;
+        }
     }
 }

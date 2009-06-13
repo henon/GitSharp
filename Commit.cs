@@ -3,6 +3,7 @@
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -180,6 +181,27 @@ namespace Gitty.Core
         public ObjectId[] ParentIds { get; set; }
         public Encoding Encoding { get; set; }
         public Repository Repository { get; protected set; }
+
+        // Returns all ancestor-commits of this commit
+        public IEnumerable<Commit> Ancestors
+        {
+            get
+            {
+                var ancestors = new Dictionary<ObjectId, Commit>();
+                CollectAncestorIdsRecursive(this, ancestors);
+                return ancestors.Values.ToArray();
+            }
+        }
+
+        private static void CollectAncestorIdsRecursive(Commit commit, Dictionary<ObjectId,Commit> ancestors)
+        {
+            foreach (var parent in commit.ParentIds.Where(id => !ancestors.ContainsKey(id)).Select(id => commit.Repository.OpenCommit(id)))
+            {
+                var parent_commit = parent as Commit;
+                ancestors[parent_commit.CommitId] = parent_commit;
+                CollectAncestorIdsRecursive(parent_commit, ancestors);
+            }
+        }
 
         private string message;
         public string Message

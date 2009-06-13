@@ -1,0 +1,155 @@
+#!/bin/bash -ex
+
+export GIT_COMMITTER_NAME="A U Thor"
+export GIT_AUTHOR_NAME="A U Thor"
+export GIT_COMMITTER_EMAIL="a.u.thor@example.com"
+export GIT_AUTHOR_EMAIL="a.u.thor@example.com"
+
+test_tick () {
+	# from git/t/test-lib.sh
+	if test -z "${test_tick+set}"
+        then
+                test_tick=1112911993
+        else
+                test_tick=$(($test_tick + 60))
+        fi
+        GIT_COMMITTER_DATE="$test_tick -0700"
+        GIT_AUTHOR_DATE="$test_tick -0700"
+        export GIT_COMMITTER_DATE GIT_AUTHOR_DATE
+}
+
+git_commit () {
+	test_tick
+	git commit "$@"
+}
+
+git_merge () {
+	test_tick
+	git merge "$@"
+
+}
+
+test_tick
+rm -rf .git *.txt ?
+git init
+echo "On master" >>master.txt
+git add master.txt
+git_commit -a -m "On master"
+
+echo "On master" >>master.txt
+git_commit -a -m "On master again"
+
+git checkout -b a 6c8b137b1c652731597c89668f417b8695f28dd7
+mkdir a
+
+echo a1 >>a/a1.txt
+git add a/a1.txt
+git_commit -a -m "First a/a1"
+
+echo a2 >>a/a2.txt
+git add a/a2.txt
+git_commit -a -m "First a/a2"
+
+git merge master
+
+echo a1 >>a/a1.txt
+git add a/a1.txt
+git_commit -a -m "Second a/a1"
+git branch pa
+
+echo a2 >>a/a2.txt
+git add a/a2.txt
+git_commit -a -m "Second a/a2"
+
+git checkout -b b 58be4659bb571194ed4562d04b359d26216f526e
+
+mkdir b
+echo b1 >>b/b1.txt
+git add b/b1.txt
+git_commit -a -m "First b/b1"
+
+echo b2 >>b/b2.txt
+git add b/b2.txt
+git_commit -a -m "First b/b2"
+
+git merge a
+
+echo b1 >>b/b1.txt
+git add b/b1.txt
+git_commit -a -m "Second b/b1"
+
+echo b2 >>b/b2.txt
+git add b/b2.txt
+git_commit -a -m "Second b/b2"
+
+rm -rf a b c master.txt
+mkdir c
+rm -f ./git/index
+echo ref: refs/heads/c >.git/HEAD
+
+echo c1 >>c/c1.txt
+git add c/c1.txt
+git_commit -a -m "First c/c1, no parent"
+
+echo c2 >>c/c2.txt
+git add c/c2.txt
+git_commit -a -m "First c/c2"
+
+git_merge a
+
+echo c1 >>c/c1.txt
+git add c/c2.txt
+git_commit -a -m "Second c/c1"
+
+echo c2 >>c/c2.txt
+git add c/c2.txt
+git_commit -a -m "Second c/c2"
+
+git_merge b
+
+git checkout -b d a
+
+echo "a1" >>a/a1
+git add a/a1
+git_commit -a -m "Third a/a1"
+
+git checkout -b e a
+
+echo "a1" >>a/a1
+git add a/a1
+git_commit -a -m "Fourth a/a1"
+
+git checkout master
+
+git_merge c d e
+
+git repack -d
+
+git tag A a
+git tag -a -m "An annotated tag" B a^
+
+git repack -d
+
+Bnth=B
+for nth in 2nd 3rd 4th 5th 6th 7th 8th 9th 10th; do
+	git tag -a -m "An $nth level annotated tag" "B$nth" "$Bnth"
+	Bnth="B$nth"
+done
+
+git repack -d
+
+git checkout -b f a
+mkdir f
+echo "an eff" >f/f
+git add f/f
+git commit -m "An eff"
+git checkout -b g a
+mkdir f
+echo "an F" >f/f
+git add f/f
+git commit -m "An F"
+git repack -d
+git pack-refs --all
+
+
+gitk --all master

@@ -2,6 +2,7 @@
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -49,17 +50,30 @@ namespace Gitty.Core
     public class FileMode
     {
 
-        public static readonly FileMode Tree = new FileMode(0040000, ObjectType.Tree, modeBits => (modeBits & 0170000) == 0040000);
+        // [henon] c# does not support octal literals, so every number starting with 0 has to be converted to decimal!
+        // frequently used octal literals and their decimal counterparts:
+        // decimal ... octal
+        // 33188 ... 0100644
+        // 33261 ... 0100755
+        // 61440 ... 0170000
+        // 16384 ... 0040000
+        // 32768 ... 0100000
+        // 40960 ... 0120000
+        // 57344 ... 0160000
+        // 73 ... 0111
 
-        public static readonly FileMode Symlink = new FileMode(0120000, ObjectType.Blob, modeBits => (modeBits & 0170000) == 0120000);
+        public static readonly FileMode Tree = new FileMode(16384, ObjectType.Tree, modeBits => (modeBits & 61440) == 16384);
 
-        public static readonly FileMode RegularFile = new FileMode(0100644, ObjectType.Blob, modeBits => (modeBits & 0170000) == 0100000 && (modeBits & 0111) == 0);
+        public static readonly FileMode Symlink = new FileMode(40960, ObjectType.Blob, modeBits => (modeBits & 61440) == 40960);
 
-        public static readonly FileMode ExecutableFile = new FileMode(0100755, ObjectType.Blob, modeBits => (modeBits & 0170000) == 0100000 && (modeBits & 0111) != 0);
+        public static readonly FileMode RegularFile = new FileMode(33188, ObjectType.Blob, modeBits => (modeBits & 61440) == 32768 && (modeBits & 73) == 0);
 
-        public static readonly FileMode GitLink = new FileMode(0160000, ObjectType.Commit, modeBits => (modeBits & 0170000) == 0160000);
+        public static readonly FileMode ExecutableFile = new FileMode(33261, ObjectType.Blob, modeBits => (modeBits & 61440) == 32768 && (modeBits & 73) != 0);
 
-        public static readonly FileMode Missing = new FileMode(0000000, ObjectType.Bad, modeBits => modeBits == 0);
+        public static readonly FileMode GitLink = new FileMode(57344, ObjectType.Commit, modeBits => (modeBits & 61440) == 57344);
+
+        public static readonly FileMode Missing = new FileMode(0, ObjectType.Bad, modeBits => modeBits == 0);
+
 
         private byte[] _octalBytes;
 
@@ -105,21 +119,21 @@ namespace Gitty.Core
 
         public static FileMode FromBits(int bits)
         {
-            switch (bits & 0170000)
+            switch (bits & 61440) // octal 0170000
             {
-                case 0000000:
+                case 0:
                     if (bits == 0)
                         return Missing;
                     break;
-                case 0040000:
+                case 16384: // octal 0040000
                     return Tree;
-                case 0100000:
-                    if ((bits & 0111) != 0)
+                case 32768: // octal 0100000
+                    if ((bits & 73) != 0) // octal 0111
                         return ExecutableFile;
                     return RegularFile;
-                case 0120000:
+                case 40960: // octal 0120000
                     return Symlink;
-                case 0160000:
+                case 57344: // octal 0160000
                     return GitLink;
             }
 

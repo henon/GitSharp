@@ -41,6 +41,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Gitty.Core.Util;
 
 namespace Gitty.Core
 {
@@ -158,7 +159,7 @@ namespace Gitty.Core
             }
             else
             {
-                String tzHoursStr = str.Substring(sp + 1, sp + 4).Trim();
+                String tzHoursStr = str.Slice(sp + 1, sp + 4).Trim();
                 int tzHours;
                 if (tzHoursStr[0] == '+')
                 {
@@ -169,12 +170,12 @@ namespace Gitty.Core
                     tzHours = int.Parse(tzHoursStr);
                 }
                 int tzMins = int.Parse(str.Substring(sp + 4).Trim());
-                _whenTicks = long.Parse(str.Substring(gt + 1, sp).Trim()) * 1000;
+                _whenTicks = long.Parse(str.Slice(gt + 1, sp).Trim()) * 1000;
                 _tzOffset = TimeSpan.FromMinutes(tzHours * 60 + tzMins);
             }
 
-            this.Name = str.Substring(0, lt).Trim ();
-            this.EmailAddress = str.Substring(lt + 1, gt).Trim ();
+            this.Name = str.Slice(0, lt).Trim ();
+            this.EmailAddress = str.Slice(lt + 1, gt).Trim ();
         }
 
         public override int GetHashCode()

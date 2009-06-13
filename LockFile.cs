@@ -2,6 +2,7 @@
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -308,7 +309,16 @@ namespace Gitty.Core
 
             public void Release()
             {
+                if (this.Locked == false)
+                    return;
+                try
+                {
                 this.FileStream.Unlock(0, this.FileStream.Length);
+                }
+                catch (IOException)
+                {
+                    // unlocking went wrong
+                }
                 this.Locked = false;
             }
 

@@ -215,7 +215,7 @@ namespace Gitty.Core
                 else if (cmp == 0)
                     return mid;
                 else
-                    return high = mid;
+                    high = mid;
 
             } while (low < high);
             return -(low + 1);
@@ -262,6 +262,7 @@ namespace Gitty.Core
             for (slash = offset; slash < s.Length && s[slash] != '/'; slash++)
             {
                 // search for path component terminator
+                // [henon] body is empty by intention!
             }
 
             EnsureLoaded();

@@ -4,6 +4,7 @@
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Thad Hughes <thadh@thad.corp.google.com>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -94,29 +95,26 @@ namespace Gitty.Core
          * @param newSystemReader new system reader
          * [henon] Needed by test suite
          */
-        public static ISystemReader SystemReader { set; get; }
+        public static ISystemReader SystemReader = new DefaultSystemReader();
+
 
         #endregion
 
 
         #region static methods
 
+        /**
+	     * Obtain a new configuration instance for ~/.gitconfig.
+	     *
+	     * @return a new configuration instance to read the user's global
+	     *         configuration file from their home directory.
+	     */
         public static RepositoryConfig OpenUserConfig()
         {
-            string bd;
-
-            int p = (int)Environment.OSVersion.Platform;
-            if (p == (int)PlatformID.Unix || p == 6 /* MacOSX */ || p == 128)
-                bd = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            else
-                bd = Environment.GetEnvironmentVariable("USERPROFILE");
-
-            return new RepositoryConfig(null, new FileInfo(Path.Combine(bd, ".gitconfig")));
+            return SystemReader.openUserConfig();
         }
 
-
-
-        private static String ReadName(BufferedReader r)
+        private static string ReadName(BufferedReader r)
         {
             StringBuilder name = new StringBuilder();
 
@@ -337,7 +335,7 @@ namespace Gitty.Core
             return Base.ToString();
         }
 
-        private static String EscapeValue(string x)
+        private static string EscapeValue(string x)
         {
             bool inquote = false;
             int lineStart = 0;
@@ -514,8 +512,7 @@ namespace Gitty.Core
             Entry e;
 
             Clear();
-            _readFile = true;
-
+            // _readFile = true; // [henon] this was is actually a silently ignored bug of the java implementation
             e = new Entry();
             e.Base = "core";
             Add(e);
@@ -533,6 +530,7 @@ namespace Gitty.Core
             Add(e);
 
             this.Core = new CoreConfig(this);
+            _readFile = true; 
         }
 
         private void Add(Entry e)
@@ -541,7 +539,7 @@ namespace Gitty.Core
             if (e.Base != null)
             {
 
-                String group = e.Base.ToLower();
+                string group = e.Base.ToLower();
                 if (e.ExtendedBase != null)
                 {
                     group += "." + e.ExtendedBase;
@@ -549,8 +547,8 @@ namespace Gitty.Core
 
                 if (e.Name != null)
                 {
-                    String n = e.Name.ToLower();
-                    String key = group + "." + n;
+                    string n = e.Name.ToLower();
+                    string key = group + "." + n;
                     Object o = _byName.GetValue(key);
                     if (o == null)
                     {
@@ -646,7 +644,7 @@ namespace Gitty.Core
                     }
                 }
             }
-            if (tmp.Exists)
+            if (File.Exists( tmp.FullName + ".lock"))
             {
                 try
                 {
@@ -749,7 +747,7 @@ namespace Gitty.Core
             if (o is List<Entry>)
             {
                 List<Entry> lst = (List<Entry>)o;
-                String[] r = new String[lst.Count];
+                string[] r = new string[lst.Count];
                 for (int i = 0; i < r.Length; i++)
                 {
                     string val = ((Entry)lst[i]).Value;
@@ -760,13 +758,13 @@ namespace Gitty.Core
             else if (o is Entry)
             {
                 string val = ((Entry)o).Value;
-                return new String[] { Constants.MagicEmptyValue.Equals(val) ? "" : val };
+                return new string[] { Constants.MagicEmptyValue.Equals(val) ? "" : val };
             }
 
             if (this.BaseConfig != null)
                 return this.BaseConfig.GetStringList(section, subsection, name);
 
-            return new String[0];
+            return new string[0];
         }
 
 
@@ -786,7 +784,7 @@ namespace Gitty.Core
         {
             // Update our parsed cache of values for future reference.
             //
-            String key = section.ToLower();
+            string key = section.ToLower();
             if (subsection != null)
                 key += "." + subsection.ToLower();
 
@@ -797,7 +795,7 @@ namespace Gitty.Core
             else if (values.Count == 1)
                 _byName.AddOrReplace(key, values[0]);
             else
-                _byName.AddOrReplace(key, new List<String>(values));
+                _byName.AddOrReplace(key, new List<string>(values));
 
             int entryIndex = 0;
             int valueIndex = 0;
@@ -870,7 +868,7 @@ namespace Gitty.Core
 
         #region helper methods
 
-        private int findSectionEnd(String section, String subsection)
+        private int findSectionEnd(string section, string subsection)
         {
             for (int i = 0; i < _entries.Count; i++)
             {
@@ -905,13 +903,14 @@ namespace Gitty.Core
                     // Oh well. No sense in complaining about it.
                     //
                 }
-                catch (Exception)
+                catch (IOException e)
                 {
-                    Debugger.Break();
+                //    Debugger.Break();
+                    Console.WriteLine(e.Message);
                 }
             }
 
-            String ss;
+            string ss;
             if (subsection != null)
                 ss = "." + subsection.ToLower();
             else
@@ -956,14 +955,14 @@ namespace Gitty.Core
             public string Value { get; set; }
             public string Suffix { get; set; }
 
-            public bool Match(String aBase, String aExtendedBase, String aName)
+            public bool Match(string aBase, string aExtendedBase, string aName)
             {
                 return eq(this.Base, aBase)
                     && eq(this.ExtendedBase, aExtendedBase)
                     && eq(this.Name, aName);
             }
 
-            private static bool eq(String a, String b)
+            private static bool eq(string a, string b)
             {
                 if (a == b)
                     return true;
@@ -972,6 +971,33 @@ namespace Gitty.Core
                 return a.Equals(b);
             }
         }
+
+        // default system reader gets the values from the system
+        private class DefaultSystemReader : ISystemReader
+        {
+            public string getenv(string variable)
+            {
+                return Environment.GetEnvironmentVariable(variable);
+            }
+            public string getProperty(string key)
+            {
+                //[java] return  System.getProperty(key);
+                throw new NotImplementedException();
+            }
+            public RepositoryConfig openUserConfig()
+            {
+                string bd;
+
+                int p = (int)Environment.OSVersion.Platform;
+                if (p == (int)PlatformID.Unix || p == 6 /* MacOSX */ || p == 128)
+                    bd = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                else
+                    bd = Environment.GetEnvironmentVariable("USERPROFILE");
+
+                return new RepositoryConfig(null, new FileInfo(Path.Combine(bd, ".gitconfig")));
+            }
+        }
+
 
 
     }

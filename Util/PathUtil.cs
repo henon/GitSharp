@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -70,6 +71,31 @@ namespace Gitty.Core.Util
             return new FileInfo(Path.Combine(path.FullName, filename));
         }
 
+        /// <summary>
+        /// Delete file without complaining about readonly status
+        /// </summary>
+        /// <param name="path"></param>
+        public static void DeleteFile(FileInfo path)
+        {
+            DeleteFile(path.FullName);
+        }
 
+        /// <summary>
+        /// Delete file without complaining about readonly status
+        /// </summary>
+        /// <param name="path"></param>
+        public static void DeleteFile(string path)
+        {
+            //Check the file actually exists
+            if (File.Exists(path))
+            {
+                //If its readonly set it back to normal
+                //Need to "AND" it as it can also be archive, hidden etc 
+                if ((File.GetAttributes(path) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                    File.SetAttributes(path, FileAttributes.Normal);
+                //Delete the file
+                File.Delete(path);
+            }
+        }
     }
 }

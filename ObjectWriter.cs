@@ -2,6 +2,7 @@
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -217,11 +218,14 @@ namespace Gitty.Core
 
         public ObjectId ComputeBlobSha1(long length, Stream input)
         {
+
             return WriteObject(ObjectType.Blob, length, input, false);
         }
 
         private ObjectId WriteObject(ObjectType type, long len, Stream input, bool store)
         {
+            // [henon] here is room for improvement. for computation only (store==false) the try-finally can be eliminated and also a whole lot of if !=null checks.
+            // [henon] but first, we need to get this working!!
             FileInfo t;
             DeflateStream deflateStream;
             FileStream fileStream;
@@ -248,7 +252,7 @@ namespace Gitty.Core
             {
                 byte[] header;
                 int n;
-                
+
                 header = Codec.EncodedTypeString(type);
                 md.Update(header);
                 if (deflateStream != null)
@@ -267,8 +271,7 @@ namespace Gitty.Core
                 if (deflateStream != null)
                     deflateStream.WriteByte((byte)0);
 
-                while (len > 0
-                        && (n = input.Read(buf, 0, (int)Math.Min(len, buf.Length))) > 0)
+                while (len > 0 && (n = input.Read(buf, 0, (int)Math.Min(len, buf.Length))) > 0)
                 {
                     md.Update(buf, 0, n);
                     if (deflateStream != null)
@@ -277,8 +280,7 @@ namespace Gitty.Core
                 }
 
                 if (len != 0)
-                    throw new IOException("Input did not match supplied length. "
-                            + len + " bytes are missing.");
+                    throw new IOException("Input did not match supplied length. " + len + " bytes are missing.");
 
                 if (deflateStream != null)
                 {
@@ -299,7 +301,7 @@ namespace Gitty.Core
                     }
                     finally
                     {
-                        t.Delete();
+                        PathUtil.DeleteFile(t);
                     }
                 }
             }
@@ -312,7 +314,7 @@ namespace Gitty.Core
                 // Object is already in the repository so remove
                 // the temporary file.
                 //
-                t.Delete();
+                PathUtil.DeleteFile(t);
             }
             else
             {
@@ -333,7 +335,7 @@ namespace Gitty.Core
                             // either. We really don't know what went wrong, so
                             // fail.
                             //
-                            t.Delete();
+                            PathUtil.DeleteFile(t);
                             throw new ObjectWritingException("Unable to create new object: " + o);
                         }
                     }

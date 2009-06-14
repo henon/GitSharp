@@ -133,8 +133,6 @@ namespace Gitty.Core.Tests
             //WindowCache.reconfigure(c);
         }
 
-        Thread shutdownhook;
-
         [SetUp]
         public virtual void setUp()
         {
@@ -145,11 +143,11 @@ namespace Gitty.Core.Tests
             trash = new DirectoryInfo(trashParent + "/trash" + DateTime.Now.Ticks + "." + (testcount++));
             trash_git = new DirectoryInfo(trash + "/.git");
 
-            
+
 
             var userGitConfigFile = new FileInfo(trash_git + "/usergitconfig").FullName;
             var userGitConfig = new RepositoryConfig(null, new FileInfo(userGitConfigFile));
-            fakeSystemReader.setUserGitConfig(userGitConfig);
+            fakeSystemReader.setUserGitConfig(userGitConfig); 
 
             db = new Repository(trash_git);
             db.Create();
@@ -161,7 +159,7 @@ namespace Gitty.Core.Tests
 				"pack-546ff360fe3488adb20860ce3436a2d6373d2796",
 				"pack-e6d07037cbcf13376308a0a995d1fa48f8f76aaa",
 				"pack-3280af9c07ee18a87705ef50b0cc4cd20266cf12"
-		};
+		    };
             DirectoryInfo packDir = new DirectoryInfo(db.ObjectsDirectory + "/pack");
 
             foreach (var packname in packs)
@@ -178,6 +176,7 @@ namespace Gitty.Core.Tests
             fakeSystemReader.values[Constants.GIT_AUTHOR_EMAIL_KEY] = Constants.GIT_AUTHOR_EMAIL_KEY;
             fakeSystemReader.values[Constants.GIT_COMMITTER_NAME_KEY] = Constants.GIT_COMMITTER_NAME_KEY;
             fakeSystemReader.values[Constants.GIT_COMMITTER_EMAIL_KEY] = Constants.GIT_COMMITTER_EMAIL_KEY;
+
         }
 
 
@@ -198,18 +197,25 @@ namespace Gitty.Core.Tests
 
         protected static bool recursiveDelete(DirectoryInfo dir, bool silent, string name, bool failOnError)
         {
-            Debug.Assert(!(silent && failOnError));
-            if (!dir.Exists)
-                return silent;
-            FileInfo[] ls = dir.GetFiles();
-            DirectoryInfo[] subdirs = dir.GetDirectories();
-            if (ls != null)
-                foreach (var e in ls)
-                    e.Delete();
-            if (subdirs != null)
-                foreach (var e in subdirs)
-                    silent = recursiveDelete(e, silent, name, failOnError);
-            dir.Delete();
+            try
+            {
+                Debug.Assert(!(silent && failOnError));
+                if (!dir.Exists)
+                    return silent;
+                FileInfo[] ls = dir.GetFiles();
+                DirectoryInfo[] subdirs = dir.GetDirectories();
+                if (ls != null)
+                    foreach (var e in ls)
+                        PathUtil.DeleteFile(e);
+                if (subdirs != null)
+                    foreach (var e in subdirs)
+                        silent = recursiveDelete(e, silent, name, failOnError);
+                dir.Delete();
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine(name + ": " + e.Message);
+            }
             return silent;
         }
 
@@ -244,25 +250,26 @@ namespace Gitty.Core.Tests
         private List<Repository> repositoriesToClose = new List<Repository>();
 
         [TearDown]
-        public void tearDown()  {
-		db.Close();
-		foreach (var r in repositoriesToClose)
-			r.Close();
+        public void tearDown()
+        {
+            db.Close();
+            foreach (var r in repositoriesToClose)
+                r.Close();
 
-		// Since memory mapping is controlled by the GC we need to
-		// tell it this is a good time to clean up and unlock
-		// memory mapped files.
-		if (packedGitMMAP)
-			System.GC.Collect();
+            // Since memory mapping is controlled by the GC we need to
+            // tell it this is a good time to clean up and unlock
+            // memory mapped files.
+            if (packedGitMMAP)
+                System.GC.Collect();
 
-		  string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
-		recursiveDelete(trash, false, name, true);
-		foreach (var r in repositoriesToClose)
-			recursiveDelete(r.WorkingDirectory, false, name, true);
-		repositoriesToClose.Clear();
+            string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
+            recursiveDelete(trash, false, name, true);
+            foreach (var r in repositoriesToClose)
+                recursiveDelete(r.WorkingDirectory, false, name, true);
+            repositoriesToClose.Clear();
 
-		//super.tearDown();
-	}
+            //super.tearDown();
+        }
 
 #if false
 	protected File writeTrashFile( string name,  string data)
@@ -294,31 +301,26 @@ namespace Gitty.Core.Tests
 		}
 	}
 
-
-
-
-	/**
-	 * Helper for creating extra empty repos
-	 *
-	 * @return a new empty git repository for testing purposes
-	 *
-	 * @throws IOException
-	 */
-	protected Repository createNewEmptyRepo() throws IOException {
-		 File newTestRepo = new File(trashParent, "new"
-				+ System.currentTimeMillis() + "." + (testcount++) + "/.git");
-		assertFalse(newTestRepo.exists());
-		 Repository newRepo = new Repository(newTestRepo);
-		newRepo.create();
-		 string name = getClass().getName() + "." + getName();
-		shutDownCleanups.add(new Runnable() {
-			public void run() {
-				recursiveDelete(newTestRepo, false, name, false);
-			}
-		});
-		repositoriesToClose.add(newRepo);
-		return newRepo;
 #endif
+
+
+        /**
+	     * Helper for creating extra empty repos
+	     *
+	     * @return a new empty git repository for testing purposes
+	     *
+	     * @throws IOException
+	     */
+        protected Repository createNewEmptyRepo()
+        {
+            var newTestRepo = new DirectoryInfo(trashParent + "/new" + DateTime.Now.Ticks + "." + (testcount++) + "/.git");
+            Assert.IsFalse(newTestRepo.Exists);
+            var newRepo = new Repository(newTestRepo);
+            newRepo.Create();
+            string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
+            repositoriesToClose.Add(newRepo);
+            return newRepo;
+        }
     }
 
 }

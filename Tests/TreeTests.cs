@@ -117,104 +117,101 @@ namespace Gitty.Core.Tests
         {
             Tree t = new Tree(db);
             Assert.IsTrue(t.IsLoaded);
-            Assert.IsTrue( t.IsModified);
-            Assert.IsTrue( t.Parent == null);
+            Assert.IsTrue(t.IsModified);
+            Assert.IsTrue(t.Parent == null);
             Assert.IsTrue(t.IsRoot);
-            Assert.IsTrue( t.Name == null);
-            Assert.IsTrue( t.NameUTF8 == null);
-            Assert.IsTrue( t.Members != null);
-            Assert.IsTrue( t.Members.Length == 0);
-            Assert.AreEqual( "", t.FullName);
-            Assert.IsTrue( t.Id == null);
-            Assert.IsTrue( t.TreeEntry == t);
-            Assert.IsTrue( t.Repository == db);
-            Assert.IsTrue( t.findTreeMember("foo") == null);
-            Assert.IsTrue( t.FindBlobMember("foo") == null);
+            Assert.IsTrue(t.Name == null);
+            Assert.IsTrue(t.NameUTF8 == null);
+            Assert.IsTrue(t.Members != null);
+            Assert.IsTrue(t.Members.Length == 0);
+            Assert.AreEqual("", t.FullName);
+            Assert.IsTrue(t.Id == null);
+            Assert.IsTrue(t.TreeEntry == t);
+            Assert.IsTrue(t.Repository == db);
+            Assert.IsTrue(t.findTreeMember("foo") == null);
+            Assert.IsTrue(t.FindBlobMember("foo") == null);
         }
-#if false
+
         [Test]
         public void test002_addFile()
         {
             Tree t = new Tree(db);
-            t.setId(SOME_FAKE_ID);
-            Assert.IsTrue("has id", t.getId() != null);
-            Assert.IsFalse("not modified", t.isModified());
+            t.Id = SOME_FAKE_ID;
+            Assert.IsTrue(t.Id != null);
+            Assert.IsFalse(t.IsModified);
 
             String n = "bob";
-            FileTreeEntry f = t.addFile(n);
-            Assert.IsNotNull("have file", f);
-            Assert.AreEqual("name matches", n, f.getName());
-            Assert.AreEqual("name matches", f.getName(), new String(f.getNameUTF8(),
-                    "UTF-8"));
-            Assert.AreEqual("full name matches", n, f.getFullName());
-            Assert.IsTrue("no id", f.getId() == null);
-            Assert.IsTrue("is modified", t.isModified());
-            Assert.IsTrue("has no id", t.getId() == null);
-            Assert.IsTrue("found bob", t.findBlobMember(f.getName()) == f);
+            FileTreeEntry f = t.AddFile(n);
+            Assert.IsNotNull(f);
+            Assert.AreEqual(n, f.Name);
+            Assert.AreEqual(f.Name, Encoding.UTF8.GetString(f.NameUTF8));
+            Assert.AreEqual(n, f.FullName);
+            Assert.IsTrue(f.Id == null);
+            Assert.IsTrue(t.IsModified);
+            Assert.IsTrue(t.Id == null);
+            Assert.IsTrue(t.FindBlobMember(f.Name) == f);
 
-            TreeEntry[] i = t.members();
-            Assert.IsNotNull("members array not null", i);
-            Assert.IsTrue("iterator is not empty", i != null && i.length > 0);
-            Assert.IsTrue("iterator returns file", i != null && i[0] == f);
-            Assert.IsTrue("iterator is empty", i != null && i.length == 1);
+            TreeEntry[] i = t.Members;
+            Assert.IsNotNull(i);
+            Assert.IsTrue(i != null && i.Length > 0);
+            Assert.IsTrue(i != null && i[0] == f);
+            Assert.IsTrue(i != null && i.Length == 1);
         }
+
 
         [Test]
         public void test004_addTree()
         {
             Tree t = new Tree(db);
-            t.setId(SOME_FAKE_ID);
-            Assert.IsTrue("has id", t.getId() != null);
-            Assert.IsFalse("not modified", t.isModified());
+            t.Id = SOME_FAKE_ID;
+            Assert.IsTrue(t.Id != null);
+            Assert.IsFalse(t.IsModified);
 
             String n = "bob";
-            Tree f = t.addTree(n);
-            Assert.IsNotNull("have tree", f);
-            Assert.AreEqual("name matches", n, f.getName());
-            Assert.AreEqual("name matches", f.getName(), new String(f.getNameUTF8(),
-                    "UTF-8"));
-            Assert.AreEqual("full name matches", n, f.getFullName());
-            Assert.IsTrue("no id", f.getId() == null);
-            Assert.IsTrue("parent matches", f.getParent() == t);
-            Assert.IsTrue("repository matches", f.getRepository() == db);
-            Assert.IsTrue("isLoaded", f.isLoaded());
-            Assert.IsFalse("has items", f.members().length > 0);
-            Assert.IsFalse("is root", f.isRoot());
-            Assert.IsTrue("tree is self", f.getTree() == f);
-            Assert.IsTrue("parent is modified", t.isModified());
-            Assert.IsTrue("parent has no id", t.getId() == null);
-            Assert.IsTrue("found bob child", t.findTreeMember(f.getName()) == f);
+            Tree f = t.AddTree(n);
+            Assert.IsNotNull(f);
+            Assert.AreEqual(n, f.Name);
+            Assert.AreEqual(f.Name, Encoding.UTF8.GetString(f.NameUTF8));
+            Assert.AreEqual(n, f.FullName);
+            Assert.IsTrue(f.Id == null);
+            Assert.IsTrue(f.Parent == t);
+            Assert.IsTrue(f.Repository == db);
+            Assert.IsTrue(f.IsLoaded);
+            Assert.IsFalse(f.Members.Length > 0);
+            Assert.IsFalse(f.IsRoot);
+            Assert.IsTrue(f.TreeEntry == f);
+            Assert.IsTrue(t.IsModified);
+            Assert.IsTrue(t.Id == null);
+            Assert.IsTrue(t.findTreeMember(f.Name) == f);
 
-            TreeEntry[] i = t.members();
-            Assert.IsTrue("iterator is not empty", i.length > 0);
-            Assert.IsTrue("iterator returns file", i[0] == f);
-            Assert.IsTrue("iterator is empty", i.length == 1);
+            TreeEntry[] i = t.Members;
+            Assert.IsTrue(i.Length > 0);
+            Assert.IsTrue(i[0] == f);
+            Assert.IsTrue(i.Length == 1);
         }
 
         [Test]
         public void test005_addRecursiveFile()
         {
             Tree t = new Tree(db);
-            FileTreeEntry f = t.addFile("a/b/c");
-            Assert.IsNotNull("created f", f);
-            Assert.AreEqual("c", f.getName());
-            Assert.AreEqual("b", f.getParent().getName());
-            Assert.AreEqual("a", f.getParent().getParent().getName());
-            Assert.IsTrue("t is great-grandparent", t == f.getParent().getParent()
-                    .getParent());
+            FileTreeEntry f = t.AddFile("a/b/c");
+            Assert.IsNotNull(f);
+            Assert.AreEqual(f.Name, "c");
+            Assert.AreEqual(f.Parent.Name, "b");
+            Assert.AreEqual(f.Parent.Parent.Name, "a");
+            Assert.IsTrue(t == f.Parent.Parent.Parent, "t is great-grandparent");
         }
 
         [Test]
         public void test005_addRecursiveTree()
         {
             Tree t = new Tree(db);
-            Tree f = t.addTree("a/b/c");
-            Assert.IsNotNull("created f", f);
-            Assert.AreEqual("c", f.getName());
-            Assert.AreEqual("b", f.getParent().getName());
-            Assert.AreEqual("a", f.getParent().getParent().getName());
-            Assert.IsTrue("t is great-grandparent", t == f.getParent().getParent()
-                    .getParent());
+            Tree f = t.AddTree("a/b/c");
+            Assert.IsNotNull(f);
+            Assert.AreEqual(f.Name, "c");
+            Assert.AreEqual(f.Parent.Name, "b");
+            Assert.AreEqual(f.Parent.Parent.Name, "a");
+            Assert.IsTrue(t == f.Parent.Parent.Parent, "t is great-grandparent");
         }
 
         [Test]
@@ -222,76 +219,75 @@ namespace Gitty.Core.Tests
         {
             Tree t = new Tree(db);
 
-            Tree e = t.addTree("e");
-            Assert.IsNotNull("have e", e);
-            Assert.IsTrue("e.parent == t", e.getParent() == t);
-            Tree f = t.addTree("f");
-            Assert.IsNotNull("have f", f);
-            Assert.IsTrue("f.parent == t", f.getParent() == t);
-            Tree g = f.addTree("g");
-            Assert.IsNotNull("have g", g);
-            Assert.IsTrue("g.parent == f", g.getParent() == f);
-            Tree h = g.addTree("h");
-            Assert.IsNotNull("have h", h);
-            Assert.IsTrue("h.parent = g", h.getParent() == g);
+            Tree e = t.AddTree("e");
+            Assert.IsNotNull(e);
+            Assert.IsTrue(e.Parent == t);
+            Tree f = t.AddTree("f");
+            Assert.IsNotNull(f);
+            Assert.IsTrue(f.Parent == t);
+            Tree g = f.AddTree("g");
+            Assert.IsNotNull(g);
+            Assert.IsTrue(g.Parent == f);
+            Tree h = g.AddTree("h");
+            Assert.IsNotNull(h);
+            Assert.IsTrue(h.Parent == g);
 
-            h.setId(SOME_FAKE_ID);
-            Assert.IsTrue("h not modified", !h.isModified());
-            g.setId(SOME_FAKE_ID);
-            Assert.IsTrue("g not modified", !g.isModified());
-            f.setId(SOME_FAKE_ID);
-            Assert.IsTrue("f not modified", !f.isModified());
-            e.setId(SOME_FAKE_ID);
-            Assert.IsTrue("e not modified", !e.isModified());
-            t.setId(SOME_FAKE_ID);
-            Assert.IsTrue("t not modified.", !t.isModified());
+            h.Id = (SOME_FAKE_ID);
+            Assert.IsTrue(!h.IsModified);
+            g.Id = (SOME_FAKE_ID);
+            Assert.IsTrue(!g.IsModified);
+            f.Id = (SOME_FAKE_ID);
+            Assert.IsTrue(!f.IsModified);
+            e.Id = (SOME_FAKE_ID);
+            Assert.IsTrue(!e.IsModified);
+            t.Id = SOME_FAKE_ID;
+            Assert.IsTrue(!t.IsModified);
 
-            Assert.AreEqual("full path of h ok", "f/g/h", h.getFullName());
-            Assert.IsTrue("Can find h", t.findTreeMember(h.getFullName()) == h);
-            Assert.IsTrue("Can't find f/z", t.findBlobMember("f/z") == null);
-            Assert.IsTrue("Can't find y/z", t.findBlobMember("y/z") == null);
+            Assert.AreEqual("f/g/h", h.FullName);
+            Assert.IsTrue(t.findTreeMember(h.FullName) == h);
+            Assert.IsTrue(t.FindBlobMember("f/z") == null);
+            Assert.IsTrue(t.FindBlobMember("y/z") == null);
 
-            FileTreeEntry i = h.addFile("i");
+            FileTreeEntry i = h.AddFile("i");
             Assert.IsNotNull(i);
-            Assert.AreEqual("full path of i ok", "f/g/h/i", i.getFullName());
-            Assert.IsTrue("Can find i", t.findBlobMember(i.getFullName()) == i);
-            Assert.IsTrue("h modified", h.isModified());
-            Assert.IsTrue("g modified", g.isModified());
-            Assert.IsTrue("f modified", f.isModified());
-            Assert.IsTrue("e not modified", !e.isModified());
-            Assert.IsTrue("t modified", t.isModified());
+            Assert.AreEqual("f/g/h/i", i.FullName);
+            Assert.IsTrue(t.FindBlobMember(i.FullName) == i);
+            Assert.IsTrue(h.IsModified);
+            Assert.IsTrue(g.IsModified);
+            Assert.IsTrue(f.IsModified);
+            Assert.IsTrue(!e.IsModified);
+            Assert.IsTrue(t.IsModified);
 
-            Assert.IsTrue("h no id", h.getId() == null);
-            Assert.IsTrue("g no id", g.getId() == null);
-            Assert.IsTrue("f no id", f.getId() == null);
-            Assert.IsTrue("e has id", e.getId() != null);
-            Assert.IsTrue("t no id", t.getId() == null);
+            Assert.IsTrue(h.Id == null);
+            Assert.IsTrue(g.Id == null);
+            Assert.IsTrue(f.Id == null);
+            Assert.IsTrue(e.Id != null);
+            Assert.IsTrue(t.Id == null);
         }
 
         [Test]
         public void test007_manyFileLookup()
         {
             Tree t = new Tree(db);
-            List<FileTreeEntry> files = new ArrayList<FileTreeEntry>(26 * 26);
+            var files = new List<FileTreeEntry>(26 * 26);
             for (char level1 = 'a'; level1 <= 'z'; level1++)
             {
                 for (char level2 = 'a'; level2 <= 'z'; level2++)
                 {
                     String n = "." + level1 + level2 + "9";
-                    FileTreeEntry f = t.addFile(n);
-                    Assert.IsNotNull("File " + n + " added.", f);
-                    Assert.AreEqual(n, f.getName());
-                    files.add(f);
+                    FileTreeEntry f = t.AddFile(n);
+                    Assert.IsNotNull(f, "File " + n + " added.");
+                    Assert.AreEqual(n, f.Name);
+                    files.Add(f);
                 }
             }
-            Assert.AreEqual(files.size(), t.memberCount());
-            TreeEntry[] ents = t.members();
+            Assert.AreEqual(files.Count, t.MemberCount);
+            TreeEntry[] ents = t.Members;
             Assert.IsNotNull(ents);
-            Assert.AreEqual(files.size(), ents.length);
-            for (int k = 0; k < ents.length; k++)
+            Assert.AreEqual(files.Count, ents.Length);
+            for (int k = 0; k < ents.Length; k++)
             {
-                Assert.IsTrue("File " + files.get(k).getName()
-                        + " is at " + k + ".", files.get(k) == ents[k]);
+                Assert.IsTrue(files[k] == ents[k], "File " + files[k].Name + " is at " + k + ".");
             }
         }
 
@@ -299,19 +295,19 @@ namespace Gitty.Core.Tests
         public void test008_SubtreeInternalSorting()
         {
             Tree t = new Tree(db);
-            FileTreeEntry e0 = t.addFile("a-b");
-            FileTreeEntry e1 = t.addFile("a-");
-            FileTreeEntry e2 = t.addFile("a=b");
-            Tree e3 = t.addTree("a");
-            FileTreeEntry e4 = t.addFile("a=");
+            FileTreeEntry e0 = t.AddFile("a-b");
+            FileTreeEntry e1 = t.AddFile("a-");
+            FileTreeEntry e2 = t.AddFile("a=b");
+            Tree e3 = t.AddTree("a");
+            FileTreeEntry e4 = t.AddFile("a=");
 
-            TreeEntry[] ents = t.members();
+            TreeEntry[] ents = t.Members;
             Assert.AreSame(e1, ents[0]);
             Assert.AreSame(e0, ents[1]);
             Assert.AreSame(e3, ents[2]);
             Assert.AreSame(e4, ents[3]);
             Assert.AreSame(e2, ents[4]);
         }
-#endif
+
     }
 }

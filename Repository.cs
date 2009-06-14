@@ -3,6 +3,7 @@
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -883,9 +884,14 @@ namespace Gitty.Core
             _refDb.ClearCache();
         }
 
+        /// <summary>
+        /// Replaces any windows director separators (backslash) with /
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
         internal static byte[] GitInternalSlash(byte[] bytes)
         {
-            if (Path.PathSeparator == '/')
+            if (Path.DirectorySeparatorChar == '/') // [henon] DirectorySeparatorChar == \
                 return bytes;
             for (int i = 0; i < bytes.Length; ++i)
                 if (bytes[i] == Path.PathSeparator)

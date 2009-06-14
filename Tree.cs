@@ -3,6 +3,7 @@
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -73,14 +74,14 @@ namespace Gitty.Core
         public Tree(Tree parent, byte[] nameUTF8)
             : base(parent, null, nameUTF8)
         {
-            _db = Repository;
+            _db = parent.Repository;
             _contents = EmptyTree;
         }
 
         public Tree(Tree parent, ObjectId id, byte[] nameUTF8)
             : base(parent, id, nameUTF8)
         {
-            _db = Repository;
+            _db = parent.Repository;
         }
         #endregion
 
@@ -135,7 +136,7 @@ namespace Gitty.Core
             int j = 0;
             int k = 0;
 
-            for (j = 0; j < a.Length && k < nameEnd; j++, k++)
+            for (j = 0, k = nameStart; j < a.Length && k < nameEnd; j++, k++)
             {
                 int aj = a[j] & 0xff;
                 int bk = nameUTF8[k] & 0xff;
@@ -197,8 +198,7 @@ namespace Gitty.Core
             return n;
         }
 
-        private static int BinarySearch(
-            TreeEntry[] entries, byte[] nameUTF8, int nameUTF8last, int nameStart, int nameEnd)
+        private static int BinarySearch(TreeEntry[] entries, byte[] nameUTF8, int nameUTF8last, int nameStart, int nameEnd)
         {
             if (entries.Length == 0)
                 return -1;
@@ -535,6 +535,7 @@ namespace Gitty.Core
             for (slash = offset; slash < s.Length && s[slash] != '/'; slash++)
             {
                 // search for path component terminator
+                // [henon] body is intentionally empty!
             }
 
             EnsureLoaded();
@@ -544,8 +545,7 @@ namespace Gitty.Core
             {
                 TreeEntry r = _contents[p];
                 if (slash < s.Length - 1)
-                    return r is Tree ? ((Tree)r).FindMember(s, slast, slash + 1)
-                            : null;
+                    return r is Tree ? ((Tree)r).FindMember(s, slast, slash + 1) : null;
                 return r;
             }
             return null;

@@ -147,7 +147,7 @@ namespace Gitty.Core.Tests
 
             var userGitConfigFile = new FileInfo(trash_git + "/usergitconfig").FullName;
             var userGitConfig = new RepositoryConfig(null, new FileInfo(userGitConfigFile));
-            fakeSystemReader.setUserGitConfig(userGitConfig); 
+            fakeSystemReader.setUserGitConfig(userGitConfig);
 
             db = new Repository(trash_git);
             db.Create();
@@ -271,46 +271,37 @@ namespace Gitty.Core.Tests
             //super.tearDown();
         }
 
-#if false
-	protected File writeTrashFile( string name,  string data)
- {
-		File tf = new File(trash, name);
-		File tfp = tf.getParentFile();
-		if (!tfp.exists() && !tf.getParentFile().mkdirs())
-			throw new Error("Could not create directory " + tf.getParentFile());
-		 OutputStreamWriter fw = new OutputStreamWriter(
-				new FileOutputStream(tf), "UTF-8");
-		try {
-			fw.write(data);
-		} finally {
-			fw.close();
-		}
-		return tf;
-	}
 
-	protected static void checkFile(File f,  string checkData)
- {
-		Reader r = new InputStreamReader(new FileInputStream(f), "ISO-8859-1");
-		try {
-			char[] data = new char[(int) f.length()];
-			if (f.length() !=  r.read(data))
-				throw new IOException("Internal error reading file data from "+f);
-			assertEquals(checkData, new string(data));
-		} finally {
-			r.close();
-		}
-	}
+        protected FileInfo writeTrashFile(string name, string data)
+        {
+            var tf = new FileInfo(trash + "/" + name);
+            var tfp = tf.Directory;
+            if (!tfp.Exists)
+            {
+                tfp.Create();
+                if (!tfp.Exists)
+                    throw new IOException("Could not create directory " + tfp.FullName);
+            }
+            File.WriteAllText(tf.FullName, data, Encoding.UTF8);
+            return tf;
+        }
 
-#endif
+        protected static void checkFile(FileInfo f, string checkData)
+        {
+            var readData = File.ReadAllText(f.FullName, Encoding.GetEncoding("ISO-8859-1"));
+            if (f.Length != readData.Length)
+                throw new IOException("Internal error reading file data from " + f);
+            Assert.AreEqual(checkData, readData);
+        }
 
 
         /**
-	     * Helper for creating extra empty repos
-	     *
-	     * @return a new empty git repository for testing purposes
-	     *
-	     * @throws IOException
-	     */
+         * Helper for creating extra empty repos
+         *
+         * @return a new empty git repository for testing purposes
+         *
+         * @throws IOException
+         */
         protected Repository createNewEmptyRepo()
         {
             var newTestRepo = new DirectoryInfo(trashParent + "/new" + DateTime.Now.Ticks + "." + (testcount++) + "/.git");

@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -44,7 +45,7 @@ using System.IO;
 
 namespace Gitty.Core.Util
 {
-    internal class NB
+    public class NB // [henon] need public for testsuite
     {
         /**
          * Convert sequence of 4 bytes (network byte order) into unsigned value.
@@ -145,7 +146,7 @@ namespace Gitty.Core.Util
         /// <param name="iDec">the decimal</param>
         /// <param name="numbase">the base of the output</param>
         /// <returns>a string representation of the base number</returns>
-        public static string DecimalToBase(int iDec, int numbase)
+        public static string DecimalToBase(int iDec, int numbase) // [henon] needed to output octal numbers
         {
             string strBin = "";
             int[] result = new int[32];
@@ -163,5 +164,28 @@ namespace Gitty.Core.Util
             strBin = strBin.TrimStart(new char[] { '0' });
             return strBin;
         }
+
+
+        /**
+         * Convert sequence of 4 bytes (network byte order) into unsigned value.
+         * 
+         * @param intbuf
+         *            buffer to acquire the 4 bytes of data from.
+         * @param offset
+         *            position within the buffer to begin reading from. This
+         *            position and the next 3 bytes after it (for a total of 4
+         *            bytes) will be read.
+         * @return unsigned integer value that matches the 32 bits read.
+         */
+        public static long decodeUInt32(byte[] intbuf, int offset)
+        {
+            int low = (intbuf[offset + 1] & 0xff) << 8;
+            low |= (intbuf[offset + 2] & 0xff);
+            low <<= 8;
+
+            low |= (intbuf[offset + 3] & 0xff);
+            return ((long)(intbuf[offset] & 0xff)) << 24 | low;
+        }
+
     }
 }

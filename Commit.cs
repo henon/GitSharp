@@ -319,7 +319,7 @@ namespace Gitty.Core
          *
          * @throws IOException
          */
-        public void Save()
+        public void Save() // [henon] was Commit() in java, but c# won't allow it
         {
             if (CommitId != null)
                 throw new InvalidOperationException("exists " + CommitId);

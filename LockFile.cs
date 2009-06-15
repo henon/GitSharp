@@ -45,6 +45,7 @@ using System.Text;
 using System.IO;
 using Gitty.Core.Util;
 using Gitty.Core.Exceptions;
+using System.Diagnostics;
 
 namespace Gitty.Core
 {
@@ -60,7 +61,7 @@ namespace Gitty.Core
 
         private bool haveLock;
 
-        
+
         public DateTime CommitLastModified { get; private set; }
         public bool NeedStatInformation { get; set; }
 
@@ -81,7 +82,7 @@ namespace Gitty.Core
                 haveLock = true;
                 os = lockFile.Create();
 
-                fLck = FileLock.TryLock(os);
+                fLck = FileLock.TryLock(os, lockFile);
                 if (fLck == null)
                 {
                     // We cannot use unlock() here as this file is not
@@ -209,10 +210,10 @@ namespace Gitty.Core
                 }
                 catch (Exception)
                 {
-                    
+
                 }
             }
-           
+
             Unlock();
             return false;
         }
@@ -275,35 +276,42 @@ namespace Gitty.Core
             throw new NotSupportedException();
         }
 
+
+        /// <summary>
+        /// Wraps a FileStream and tracks its locking status
+        /// </summary>
         public class FileLock : IDisposable
         {
             public FileStream FileStream { get; private set; }
             public bool Locked { get; private set; }
+            public string File { get; private set; }
 
-            private FileLock(FileStream fs)
+            private FileLock(FileStream fs, string file)
             {
+                this.File = file;
                 this.FileStream = fs;
                 this.FileStream.Lock(0, fs.Length);
                 this.Locked = true;
             }
 
-            public static FileLock TryLock(FileStream fs)
+            public static FileLock TryLock(FileStream fs, FileInfo file)
             {
                 try
                 {
-                    return new FileLock(fs);
+                    return new FileLock(fs, file.FullName);
                 }
-                catch (IOException)
+                catch (IOException e)
                 {
-
+                    Debug.WriteLine("Could not lock "+file.FullName);
+                    Debug.WriteLine(e.Message);
                     return null;
                 }
             }
 
-            #region IDisposable Members
-
             public void Dispose()
             {
+                if (this.Locked == false)
+                    return;
                 this.Release();
             }
 
@@ -313,17 +321,29 @@ namespace Gitty.Core
                     return;
                 try
                 {
-                this.FileStream.Unlock(0, this.FileStream.Length);
+                    this.FileStream.Unlock(0, this.FileStream.Length);
+#if DEBUG
+                    GC.SuppressFinalize(this); // [henon] disarm lock-release checker
+#endif
                 }
                 catch (IOException)
                 {
                     // unlocking went wrong
+                    Debug.WriteLine(GetType().Name + ": tried to unlock an unlocked filelock "+File);
                 }
                 this.Locked = false;
+                Dispose();
             }
 
-            #endregion
+#if DEBUG
+            // [henon] this implements a debug mode warning if the filelock has not been disposed properly
+            ~FileLock()
+            {
+                Debug.WriteLine(GetType().Name + " has not been properly disposed: " + File);
+            }
+#endif
+
         }
-        
+
     }
 }

@@ -46,6 +46,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using NUnit.Framework;
+using Gitty.Core.Tests.Util;
 
 namespace Gitty.Core.Tests
 {
@@ -132,120 +133,29 @@ namespace Gitty.Core.Tests
         }
 
         [Test]
-        public void test004_CheckNewConfig()
-        {
-            RepositoryConfig c = db.Config;
-            Assert.IsNotNull(c);
-            Assert.AreEqual("0", c.GetString("core", null, "repositoryformatversion"));
-            Assert.AreEqual("0", c.GetString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
-            Assert.AreEqual("true", c.GetString("core", null, "filemode"));
-            Assert.AreEqual("true", c.GetString("cOrE", null, "fIlEModE"));
-            Assert.IsNull(c.GetString("notavalue", null, "reallyNotAValue"));
-            c.Load();
-        }
-
-
-        [Test]
-        public void test005_ReadSimpleConfig()
-        {
-            RepositoryConfig c = db.Config;
-            Assert.IsNotNull(c);
-            c.Load();
-            Assert.AreEqual("0", c.GetString("core", null, "repositoryformatversion"));
-            Assert.AreEqual("0", c.GetString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
-            Assert.AreEqual("true", c.GetString("core", null, "filemode"));
-            Assert.AreEqual("true", c.GetString("cOrE", null, "fIlEModE"));
-            Assert.IsNull(c.GetString("notavalue", null, "reallyNotAValue"));
-        }
-#if false
-        [Test]
-        public void test006_ReadUglyConfig()
-        {
-            RepositoryConfig c = db.getConfig();
-            DirectoryInfo cfg = new DirectoryInfo(db.getDirectory(), "config");
-            FileWriter pw = new FileWriter(cfg);
-            String configStr = "  [core];comment\n\tfilemode = yes\n"
-                   + "[user]\n"
-                   + "  email = A U Thor <thor@example.com> # Just an example...\n"
-                   + " name = \"A  Thor \\\\ \\\"\\t \"\n"
-                   + "    defaultCheckInComment = a many line\\n\\\ncomment\\n\\\n"
-                   + " to test\n";
-            pw.write(configStr);
-            pw.close();
-            c.Load();
-            Assert.AreEqual("yes", c.GetString("core", null, "filemode"));
-            Assert.AreEqual("A U Thor <thor@example.com>", c
-                    .GetString("user", null, "email"));
-            Assert.AreEqual("A  Thor \\ \"\t ", c.GetString("user", null, "name"));
-            Assert.AreEqual("a many line\ncomment\n to test", c.GetString("user",
-                    null, "defaultCheckInComment"));
-            c.save();
-            FileReader fr = new FileReader(cfg);
-            char[] cbuf = new char[configStr.Length()];
-            fr.read(cbuf);
-            fr.close();
-            Assert.AreEqual(configStr, new String(cbuf));
-        }
-
-        [Test]
-        public void test007_Open()
-        {
-            Repository db2 = new Repository(db.getDirectory());
-            Assert.AreEqual(db.getDirectory(), db2.getDirectory());
-            Assert.AreEqual(db.getObjectsDirectory(), db2.getObjectsDirectory());
-            assertNotSame(db.getConfig(), db2.getConfig());
-        }
-
-        [Test]
-        public void test008_FailOnWrongVersion()
-        {
-            DirectoryInfo cfg = new DirectoryInfo(db.getDirectory(), "config");
-            FileWriter pw = new FileWriter(cfg);
-            String badvers = "ihopethisisneveraversion";
-            String configStr = "[core]\n" + "\trepositoryFormatVersion="
-                   + badvers + "\n";
-            pw.write(configStr);
-            pw.close();
-
-            try
-            {
-                new Repository(db.getDirectory());
-                fail("incorrectly opened a bad repository");
-            }
-            catch (IOException ioe)
-            {
-                Assert.IsTrue(ioe.getMessage().indexOf("format") > 0);
-                Assert.IsTrue(ioe.getMessage().indexOf(badvers) > 0);
-            }
-        }
-
-        [Test]
         public void test009_CreateCommitOldFormat()
         {
             writeTrashFile(".git/config", "[core]\n" + "legacyHeaders=1\n");
-            db.getConfig().Load();
+            db.Config.Load();
 
             Tree t = new Tree(db);
-            FileTreeEntry f = t.addFile("i-am-a-file");
-            writeTrashFile(f.getName(), "and this is the data in me\n");
+            FileTreeEntry f = t.AddFile("i-am-a-file");
+            writeTrashFile(f.Name, "and this is the data in me\n");
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
-            Assert.AreEqual(ObjectId.fromString("00b1f73724f493096d1ffa0b0f1f1482dbb8c936"),
-                    t.getTreeId());
+            Assert.AreEqual(ObjectId.FromString("00b1f73724f493096d1ffa0b0f1f1482dbb8c936"),                    t.TreeId);
 
             Commit c = new Commit(db);
-            c.setAuthor(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
-            c.setCommitter(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
-            c.setMessage("A Commit\n");
-            c.setTree(t);
-            Assert.AreEqual(t.getTreeId(), c.getTreeId());
-            c.commit();
-            ObjectId cmtid = ObjectId.fromString(
-                   "803aec4aba175e8ab1d666873c984c0308179099");
-            Assert.AreEqual(cmtid, c.getCommitId());
+            c.Author = (new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4 * 60)));
+            c.Committer = (new PersonIdent(jcommitter, 1154236443000L, new TimeSpan(-4 * 60)));
+            c.Message = ("A Commit\n");
+            c.TreeEntry = (t);
+            Assert.AreEqual(t.TreeId, c.TreeId);
+            c.Save();
+            ObjectId cmtid = ObjectId.FromString("803aec4aba175e8ab1d666873c984c0308179099");
+            Assert.AreEqual(cmtid, c.CommitId);
 
             // Verify the commit we just wrote is in the correct format.
-            XInputStream xis = new XInputStream(new FileInputStream(db
-                   .toFile(cmtid)));
+            XInputStream xis = new XInputStream(new FileStream(db.ToFile(cmtid).FullName, System.IO.FileMode.Open));
             try
             {
                 Assert.AreEqual(0x78, xis.readUInt8());
@@ -254,28 +164,29 @@ namespace Gitty.Core.Tests
             }
             finally
             {
-                xis.close();
+                xis.Close();
             }
 
             // Verify we can read it.
-            Commit c2 = db.mapCommit(cmtid);
+            Commit c2 = db.MapCommit(cmtid.ToString());
             Assert.IsNotNull(c2);
-            Assert.AreEqual(c.getMessage(), c2.getMessage());
-            Assert.AreEqual(c.getTreeId(), c2.getTreeId());
-            Assert.AreEqual(c.getAuthor(), c2.getAuthor());
-            Assert.AreEqual(c.getCommitter(), c2.getCommitter());
+            Assert.AreEqual(c.Message, c2.Message);
+            Assert.AreEqual(c.TreeId, c2.TreeId);
+            Assert.AreEqual(c.Author, c2.Author);
+            Assert.AreEqual(c.Committer, c2.Committer);
         }
 
+#if false
         [Test]
         public void test012_SubtreeExternalSorting()
         {
             ObjectId emptyBlob = new ObjectWriter(db).writeBlob(new byte[0]);
             Tree t = new Tree(db);
-            FileTreeEntry e0 = t.addFile("a-");
-            FileTreeEntry e1 = t.addFile("a-b");
-            FileTreeEntry e2 = t.addFile("a/b");
-            FileTreeEntry e3 = t.addFile("a=");
-            FileTreeEntry e4 = t.addFile("a=b");
+            FileTreeEntry e0 = t.AddFile("a-");
+            FileTreeEntry e1 = t.AddFile("a-b");
+            FileTreeEntry e2 = t.AddFile("a/b");
+            FileTreeEntry e3 = t.AddFile("a=");
+            FileTreeEntry e4 = t.AddFile("a=b");
 
             e0.Id=(emptyBlob);
             e1.Id=(emptyBlob);
@@ -284,7 +195,7 @@ namespace Gitty.Core.Tests
             e4.Id=(emptyBlob);
 
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
-            Assert.AreEqual(ObjectId.fromString("b47a8f0a4190f7572e11212769090523e23eb1ea"),
+            Assert.AreEqual(ObjectId.FromString("b47a8f0a4190f7572e11212769090523e23eb1ea"),
                     t.Id);
         }
 
@@ -296,15 +207,15 @@ namespace Gitty.Core.Tests
             t.setObjId(emptyId);
             t.setType("blob");
             t.setTag("test020");
-            t.setAuthor(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
-            t.setMessage("test020 tagged\n");
+            t.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            t.Message=("test020 tagged\n");
             t.tag();
             Assert.AreEqual("6759556b09fbb4fd8ae5e315134481cc25d46954", t.getTagId().ToString());
 
             Tag mapTag = db.mapTag("test020");
             Assert.AreEqual("blob", mapTag.getType());
-            Assert.AreEqual("test020 tagged\n", mapTag.getMessage());
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag.getAuthor());
+            Assert.AreEqual("test020 tagged\n", mapTag.Message);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag.Author);
             Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag.getObjId().ToString());
         }
 
@@ -314,7 +225,7 @@ namespace Gitty.Core.Tests
             test020_createBlobTag();
             Tag t = new Tag(db);
             t.setTag("test020b");
-            t.setObjId(ObjectId.fromString("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"));
+            t.setObjId(ObjectId.FromString("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"));
             t.tag();
 
             Tag mapTag = db.mapTag("test020b");
@@ -334,15 +245,15 @@ namespace Gitty.Core.Tests
             t.setObjId(almostEmptyTreeId);
             t.setType("tree");
             t.setTag("test021");
-            t.setAuthor(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
-            t.setMessage("test021 tagged\n");
+            t.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            t.Message=("test021 tagged\n");
             t.tag();
             Assert.AreEqual("b0517bc8dbe2096b419d42424cd7030733f4abe5", t.getTagId().ToString());
 
             Tag mapTag = db.mapTag("test021");
             Assert.AreEqual("tree", mapTag.getType());
-            Assert.AreEqual("test021 tagged\n", mapTag.getMessage());
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag.getAuthor());
+            Assert.AreEqual("test021 tagged\n", mapTag.Message);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag.Author);
             Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", mapTag.getObjId().ToString());
         }
 
@@ -354,24 +265,24 @@ namespace Gitty.Core.Tests
             almostEmptyTree.addEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).writeTree(almostEmptyTree);
             Commit almostEmptyCommit = new Commit(db);
-            almostEmptyCommit.setAuthor(new PersonIdent(jauthor, 1154236443000L, -2 * 60)); // not exactly the same
-            almostEmptyCommit.setCommitter(new PersonIdent(jauthor, 1154236443000L, -2 * 60));
-            almostEmptyCommit.setMessage("test022\n");
+            almostEmptyCommit.Author=(new PersonIdent(jauthor, 1154236443000L, -2 * 60)); // not exactly the same
+            almostEmptyCommit.Committer=(new PersonIdent(jauthor, 1154236443000L, -2 * 60));
+            almostEmptyCommit.Message=("test022\n");
             almostEmptyCommit.setTreeId(almostEmptyTreeId);
             ObjectId almostEmptyCommitId = new ObjectWriter(db).writeCommit(almostEmptyCommit);
             Tag t = new Tag(db);
             t.setObjId(almostEmptyCommitId);
             t.setType("commit");
             t.setTag("test022");
-            t.setAuthor(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
-            t.setMessage("test022 tagged\n");
+            t.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            t.Message=("test022 tagged\n");
             t.tag();
             Assert.AreEqual("0ce2ebdb36076ef0b38adbe077a07d43b43e3807", t.getTagId().ToString());
 
             Tag mapTag = db.mapTag("test022");
             Assert.AreEqual("commit", mapTag.getType());
-            Assert.AreEqual("test022 tagged\n", mapTag.getMessage());
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag.getAuthor());
+            Assert.AreEqual("test022 tagged\n", mapTag.Message);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag.Author);
             Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag.getObjId().ToString());
         }
 
@@ -384,10 +295,10 @@ namespace Gitty.Core.Tests
             ObjectId almostEmptyTreeId = new ObjectWriter(db).writeTree(almostEmptyTree);
             Commit commit = new Commit(db);
             commit.setTreeId(almostEmptyTreeId);
-            commit.setAuthor(new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295000L, 60));
-            commit.setCommitter(new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295000L, 60));
+            commit.Author=(new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295000L, 60));
+            commit.Committer=(new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295000L, 60));
             commit.setEncoding("UTF-8");
-            commit.setMessage("\u00dcbergeeks");
+            commit.Message=("\u00dcbergeeks");
             ObjectId cid = new ObjectWriter(db).writeCommit(commit);
             Assert.AreEqual("4680908112778718f37e686cbebcc912730b3154", cid.ToString());
         }
@@ -401,10 +312,10 @@ namespace Gitty.Core.Tests
             ObjectId almostEmptyTreeId = new ObjectWriter(db).writeTree(almostEmptyTree);
             Commit commit = new Commit(db);
             commit.setTreeId(almostEmptyTreeId);
-            commit.setAuthor(new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295000L, 60));
-            commit.setCommitter(new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295000L, 60));
+            commit.Author=(new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295000L, 60));
+            commit.Committer=(new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295000L, 60));
             commit.setEncoding("ISO-8859-1");
-            commit.setMessage("\u00dcbergeeks");
+            commit.Message=("\u00dcbergeeks");
             ObjectId cid = new ObjectWriter(db).writeCommit(commit);
             Assert.AreEqual("2979b39d385014b33287054b87f77bcb3ecb5ebf", cid.ToString());
         }
@@ -416,16 +327,16 @@ namespace Gitty.Core.Tests
             test021_createTreeTag();
             test022_createCommitTag();
 
-            if (!new DirectoryInfo(db.getDirectory(), "refs/tags/test020").delete()) throw new Error("Cannot delete unpacked tag");
-            if (!new DirectoryInfo(db.getDirectory(), "refs/tags/test021").delete()) throw new Error("Cannot delete unpacked tag");
-            if (!new DirectoryInfo(db.getDirectory(), "refs/tags/test022").delete()) throw new Error("Cannot delete unpacked tag");
+            if (!new DirectoryInfo(db.Directory, "refs/tags/test020").delete()) throw new Error("Cannot delete unpacked tag");
+            if (!new DirectoryInfo(db.Directory, "refs/tags/test021").delete()) throw new Error("Cannot delete unpacked tag");
+            if (!new DirectoryInfo(db.Directory, "refs/tags/test022").delete()) throw new Error("Cannot delete unpacked tag");
 
             // We cannot resolve it now, since we have no ref
             Tag mapTag20missing = db.mapTag("test020");
             Assert.IsNull(mapTag20missing);
 
             // Construct packed refs file
-            PrintWriter w = new PrintWriter(new FileWriter(new DirectoryInfo(db.getDirectory(), "packed-refs")));
+            PrintWriter w = new PrintWriter(new FileWriter(new DirectoryInfo(db.Directory, "packed-refs")));
             w.println("# packed-refs with: peeled");
             w.println("6759556b09fbb4fd8ae5e315134481cc25d46954 refs/tags/test020");
             w.println("^e69de29bb2d1d6434b8b29ae775ad8c2e48c5391");
@@ -438,20 +349,20 @@ namespace Gitty.Core.Tests
             Tag mapTag20 = db.mapTag("test020");
             Assert.IsNotNull("have tag test020", mapTag20);
             Assert.AreEqual("blob", mapTag20.getType());
-            Assert.AreEqual("test020 tagged\n", mapTag20.getMessage());
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag20.getAuthor());
+            Assert.AreEqual("test020 tagged\n", mapTag20.Message);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag20.Author);
             Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag20.getObjId().ToString());
 
             Tag mapTag21 = db.mapTag("test021");
             Assert.AreEqual("tree", mapTag21.getType());
-            Assert.AreEqual("test021 tagged\n", mapTag21.getMessage());
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag21.getAuthor());
+            Assert.AreEqual("test021 tagged\n", mapTag21.Message);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag21.Author);
             Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", mapTag21.getObjId().ToString());
 
             Tag mapTag22 = db.mapTag("test022");
             Assert.AreEqual("commit", mapTag22.getType());
-            Assert.AreEqual("test022 tagged\n", mapTag22.getMessage());
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag22.getAuthor());
+            Assert.AreEqual("test022 tagged\n", mapTag22.Message);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag22.Author);
             Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag22.getObjId().ToString());
         }
 
@@ -460,98 +371,98 @@ namespace Gitty.Core.Tests
         [Test]
         public void test026_CreateCommitMultipleparents()
         {
-            db.getConfig().Load();
+            db.Config.Load();
 
             Tree t = new Tree(db);
-            FileTreeEntry f = t.addFile("i-am-a-file");
-            writeTrashFile(f.getName(), "and this is the data in me\n");
+            FileTreeEntry f = t.AddFile("i-am-a-file");
+            writeTrashFile(f.Name, "and this is the data in me\n");
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
-            Assert.AreEqual(ObjectId.fromString("00b1f73724f493096d1ffa0b0f1f1482dbb8c936"),
-                    t.getTreeId());
+            Assert.AreEqual(ObjectId.FromString("00b1f73724f493096d1ffa0b0f1f1482dbb8c936"),
+                    t.TreeId);
 
             Commit c1 = new Commit(db);
-            c1.setAuthor(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
-            c1.setCommitter(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
-            c1.setMessage("A Commit\n");
-            c1.setTree(t);
-            Assert.AreEqual(t.getTreeId(), c1.getTreeId());
+            c1.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            c1.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
+            c1.Message=("A Commit\n");
+            c1.TreeEntry=(t);
+            Assert.AreEqual(t.TreeId, c1.TreeId);
             c1.commit();
-            ObjectId cmtid1 = ObjectId.fromString(
+            ObjectId cmtid1 = ObjectId.FromString(
                    "803aec4aba175e8ab1d666873c984c0308179099");
-            Assert.AreEqual(cmtid1, c1.getCommitId());
+            Assert.AreEqual(cmtid1, c1.CommitId);
 
             Commit c2 = new Commit(db);
-            c2.setAuthor(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
-            c2.setCommitter(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
-            c2.setMessage("A Commit 2\n");
-            c2.setTree(t);
-            Assert.AreEqual(t.getTreeId(), c2.getTreeId());
-            c2.setParentIds(new ObjectId[] { c1.getCommitId() });
+            c2.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            c2.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
+            c2.Message=("A Commit 2\n");
+            c2.TreeEntry=(t);
+            Assert.AreEqual(t.TreeId, c2.TreeId);
+            c2.setParentIds(new ObjectId[] { c1.CommitId });
             c2.commit();
-            ObjectId cmtid2 = ObjectId.fromString(
+            ObjectId cmtid2 = ObjectId.FromString(
                    "95d068687c91c5c044fb8c77c5154d5247901553");
-            Assert.AreEqual(cmtid2, c2.getCommitId());
+            Assert.AreEqual(cmtid2, c2.CommitId);
 
-            Commit rm2 = db.mapCommit(cmtid2);
-            assertNotSame(c2, rm2); // assert the parsed objects is not from the cache
-            Assert.AreEqual(c2.getAuthor(), rm2.getAuthor());
-            Assert.AreEqual(c2.getCommitId(), rm2.getCommitId());
-            Assert.AreEqual(c2.getMessage(), rm2.getMessage());
-            Assert.AreEqual(c2.getTree().getTreeId(), rm2.getTree().getTreeId());
+            Commit rm2 = db.MapCommit(cmtid2);
+            Assert.AreNotSame(c2, rm2); // assert the parsed objects is not from the cache
+            Assert.AreEqual(c2.Author, rm2.Author);
+            Assert.AreEqual(c2.CommitId, rm2.CommitId);
+            Assert.AreEqual(c2.Message, rm2.Message);
+            Assert.AreEqual(c2.getTree().TreeId, rm2.getTree().TreeId);
             Assert.AreEqual(1, rm2.getParentIds().Length);
-            Assert.AreEqual(c1.getCommitId(), rm2.getParentIds()[0]);
+            Assert.AreEqual(c1.CommitId, rm2.getParentIds()[0]);
 
             Commit c3 = new Commit(db);
-            c3.setAuthor(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
-            c3.setCommitter(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
-            c3.setMessage("A Commit 3\n");
-            c3.setTree(t);
-            Assert.AreEqual(t.getTreeId(), c3.getTreeId());
-            c3.setParentIds(new ObjectId[] { c1.getCommitId(), c2.getCommitId() });
+            c3.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            c3.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
+            c3.Message=("A Commit 3\n");
+            c3.TreeEntry=(t);
+            Assert.AreEqual(t.TreeId, c3.TreeId);
+            c3.setParentIds(new ObjectId[] { c1.CommitId, c2.CommitId });
             c3.commit();
-            ObjectId cmtid3 = ObjectId.fromString(
+            ObjectId cmtid3 = ObjectId.FromString(
                    "ce6e1ce48fbeeb15a83f628dc8dc2debefa066f4");
-            Assert.AreEqual(cmtid3, c3.getCommitId());
+            Assert.AreEqual(cmtid3, c3.CommitId);
 
-            Commit rm3 = db.mapCommit(cmtid3);
-            assertNotSame(c3, rm3); // assert the parsed objects is not from the cache
-            Assert.AreEqual(c3.getAuthor(), rm3.getAuthor());
-            Assert.AreEqual(c3.getCommitId(), rm3.getCommitId());
-            Assert.AreEqual(c3.getMessage(), rm3.getMessage());
-            Assert.AreEqual(c3.getTree().getTreeId(), rm3.getTree().getTreeId());
+            Commit rm3 = db.MapCommit(cmtid3);
+            Assert.AreNotSame(c3, rm3); // assert the parsed objects is not from the cache
+            Assert.AreEqual(c3.Author, rm3.Author);
+            Assert.AreEqual(c3.CommitId, rm3.CommitId);
+            Assert.AreEqual(c3.Message, rm3.Message);
+            Assert.AreEqual(c3.getTree().TreeId, rm3.getTree().TreeId);
             Assert.AreEqual(2, rm3.getParentIds().Length);
-            Assert.AreEqual(c1.getCommitId(), rm3.getParentIds()[0]);
-            Assert.AreEqual(c2.getCommitId(), rm3.getParentIds()[1]);
+            Assert.AreEqual(c1.CommitId, rm3.getParentIds()[0]);
+            Assert.AreEqual(c2.CommitId, rm3.getParentIds()[1]);
 
             Commit c4 = new Commit(db);
-            c4.setAuthor(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
-            c4.setCommitter(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
-            c4.setMessage("A Commit 4\n");
-            c4.setTree(t);
-            Assert.AreEqual(t.getTreeId(), c3.getTreeId());
-            c4.setParentIds(new ObjectId[] { c1.getCommitId(), c2.getCommitId(), c3.getCommitId() });
+            c4.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            c4.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
+            c4.Message=("A Commit 4\n");
+            c4.TreeEntry=(t);
+            Assert.AreEqual(t.TreeId, c3.TreeId);
+            c4.setParentIds(new ObjectId[] { c1.CommitId, c2.CommitId, c3.CommitId });
             c4.commit();
-            ObjectId cmtid4 = ObjectId.fromString(
+            ObjectId cmtid4 = ObjectId.FromString(
                    "d1fca9fe3fef54e5212eb67902c8ed3e79736e27");
-            Assert.AreEqual(cmtid4, c4.getCommitId());
+            Assert.AreEqual(cmtid4, c4.CommitId);
 
-            Commit rm4 = db.mapCommit(cmtid4);
-            assertNotSame(c4, rm3); // assert the parsed objects is not from the cache
-            Assert.AreEqual(c4.getAuthor(), rm4.getAuthor());
-            Assert.AreEqual(c4.getCommitId(), rm4.getCommitId());
-            Assert.AreEqual(c4.getMessage(), rm4.getMessage());
-            Assert.AreEqual(c4.getTree().getTreeId(), rm4.getTree().getTreeId());
+            Commit rm4 = db.MapCommit(cmtid4);
+            Assert.AreNotSame(c4, rm3); // assert the parsed objects is not from the cache
+            Assert.AreEqual(c4.Author, rm4.Author);
+            Assert.AreEqual(c4.CommitId, rm4.CommitId);
+            Assert.AreEqual(c4.Message, rm4.Message);
+            Assert.AreEqual(c4.getTree().TreeId, rm4.getTree().TreeId);
             Assert.AreEqual(3, rm4.getParentIds().Length);
-            Assert.AreEqual(c1.getCommitId(), rm4.getParentIds()[0]);
-            Assert.AreEqual(c2.getCommitId(), rm4.getParentIds()[1]);
-            Assert.AreEqual(c3.getCommitId(), rm4.getParentIds()[2]);
+            Assert.AreEqual(c1.CommitId, rm4.getParentIds()[0]);
+            Assert.AreEqual(c2.CommitId, rm4.getParentIds()[1]);
+            Assert.AreEqual(c3.CommitId, rm4.getParentIds()[2]);
         }
 
         [Test]
         public void test027_UnpackedRefHigherPriorityThanPacked()
         {
-            PrintWriter writer = new PrintWriter(new FileWriter(new DirectoryInfo(db.getDirectory(), "refs/heads/a")));
-            String unpackedId = "7f822839a2fe9760f386cbbbcb3f92c5fe81def7";
+            PrintWriter writer = new PrintWriter(new FileWriter(new DirectoryInfo(db.Directory, "refs/heads/a")));
+            string unpackedId = "7f822839a2fe9760f386cbbbcb3f92c5fe81def7";
             writer.println(unpackedId);
             writer.close();
 
@@ -569,30 +480,30 @@ namespace Gitty.Core.Tests
             Assert.AreEqual("7f822839a2fe9760f386cbbbcb3f92c5fe81def7", resolve.ToString());
 
             RefUpdate lockRef = db.updateRef("HEAD");
-            ObjectId newId = ObjectId.fromString("07f822839a2fe9760f386cbbbcb3f92c5fe81def");
+            ObjectId newId = ObjectId.FromString("07f822839a2fe9760f386cbbbcb3f92c5fe81def");
             lockRef.setNewObjectId(newId);
             Assert.AreEqual(RefUpdate.Result.FORCED, lockRef.forceUpdate());
 
-            Assert.IsTrue(new DirectoryInfo(db.getDirectory(), "refs/heads/foobar").exists());
+            Assert.IsTrue(new DirectoryInfo(db.Directory, "refs/heads/foobar").exists());
             Assert.AreEqual(newId, db.resolve("refs/heads/foobar"));
 
             // Again. The ref already exists
             RefUpdate lockRef2 = db.updateRef("HEAD");
-            ObjectId newId2 = ObjectId.fromString("7f822839a2fe9760f386cbbbcb3f92c5fe81def7");
+            ObjectId newId2 = ObjectId.FromString("7f822839a2fe9760f386cbbbcb3f92c5fe81def7");
             lockRef2.setNewObjectId(newId2);
             Assert.AreEqual(RefUpdate.Result.FORCED, lockRef2.forceUpdate());
 
-            Assert.IsTrue(new DirectoryInfo(db.getDirectory(), "refs/heads/foobar").exists());
+            Assert.IsTrue(new DirectoryInfo(db.Directory, "refs/heads/foobar").exists());
             Assert.AreEqual(newId2, db.resolve("refs/heads/foobar"));
         }
 
         [Test]
         public void test029_mapObject()
         {
-            Assert.AreEqual(new byte[0].GetType(), db.mapObject(ObjectId.fromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"), null).GetType());
-            Assert.AreEqual(typeof(Commit), db.mapObject(ObjectId.fromString("540a36d136cf413e4b064c2b0e0a4db60f77feab"), null).GetType());
-            Assert.AreEqual(typeof(Tree), db.mapObject(ObjectId.fromString("aabf2ffaec9b497f0950352b3e582d73035c2035"), null).GetType());
-            Assert.AreEqual(typeof(Tag), db.mapObject(ObjectId.fromString("17768080a2318cd89bba4c8b87834401e2095703"), null).GetType());
+            Assert.AreEqual(new byte[0].GetType(), db.mapObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"), null).GetType());
+            Assert.AreEqual(typeof(Commit), db.mapObject(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab"), null).GetType());
+            Assert.AreEqual(typeof(Tree), db.mapObject(ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"), null).GetType());
+            Assert.AreEqual(typeof(Tag), db.mapObject(ObjectId.FromString("17768080a2318cd89bba4c8b87834401e2095703"), null).GetType());
 
         }
 #endif

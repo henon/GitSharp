@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2009, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -34,83 +34,79 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
  */
+
+
+using Gitty.Core.Util;
+
+
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.IO;
+using Gitty.Core.Util;
 
-namespace Gitty.Core.Util
+namespace Gitty.Core.Tests.Util
 {
-    internal class MessageDigest : ICloneable
+    internal class XInputStream
     {
-        private MemoryStream _stream;
+        private byte[] intbuf = new byte[8];
 
-        public MessageDigest()
+        FileStream _filestream;
+
+        internal XInputStream(FileStream s)
         {
-            this.Reset();
+            _filestream = s;
         }
 
-        private MessageDigest(byte[] buffer)
+        internal byte[] readFully(int len)
         {
-            _stream = new MemoryStream(buffer, true);
+            byte[] b = new byte[len];
+            _filestream.Read(b, 0, len);
+            return b;
         }
 
-        #region ICloneable Members
-
-        public object Clone()
+        internal void readFully(byte[] b, int o, int len)
         {
-            return new MessageDigest(this._stream.ToArray());
+            int r;
+            while (len > 0 && (r = _filestream.Read(b, o, len)) > 0)
+            {
+                o += r;
+                len -= r;
+            }
+            if (len > 0)
+                throw new EndOfStreamException();
         }
 
-        #endregion
-
-        public byte[] Digest()
+        internal int readUInt8()
         {
-            return new SHA1Managed().ComputeHash(_stream.ToArray());
+            byte[] b = new byte[_filestream.Length];
+            int r = _filestream.Read(b, 0, (int)_filestream.Length);
+            if (r < 0)
+                throw new EndOfStreamException();
+            return r;
         }
 
-        public byte[] Digest(byte[] input)
+        internal long readUInt32()
         {
-            return new SHA1Managed().ComputeHash(input);
+            readFully(intbuf, 0, 4);
+            return NB.decodeUInt32(intbuf, 0);
         }
 
-        public void Reset()
+        internal void Close()
         {
-            _stream = new MemoryStream();
+            _filestream.Close();
         }
 
-        public void Update(byte input)
+        internal long Length
         {
-            _stream.WriteByte(input);
+            get
+            {
+                return _filestream.Length;
+            }
         }
-
-        public void Update(byte[] input)
-        {
-            _stream.Write(input, 0, input.Length);
-        }
-
-        public void Update(byte[] input, int index, int count)
-        {
-            _stream.Write(input, index, count);
-        }
-
-
-        //public static MessageDigest GetInstance(string algorithm)
-        //{
-        //    return new MessageDigest();
-        //    //switch (algorithm.ToLower())
-        //    //{
-        //    //    case "sha1":
-        //    //        return new MessageDigest(new SHA1CryptoServiceProvider());
-        //    //    default:
-        //    //        throw new NotSupportedException(string.Format("The requested algorithm \"{0}\" is not supported.", algorithm));
-        //    //        break;
-        //    //}
-        //}
     }
+
 }

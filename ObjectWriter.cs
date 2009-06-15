@@ -72,8 +72,7 @@ namespace Gitty.Core
         {
             this.r = repo;
             buf = new byte[8192];
-
-            md = MessageDigest.GetInstance("SHA1");
+            md = new MessageDigest(); // [henon] Sha1 hash digest generator
         }
 
         public ObjectId WriteBlob(byte[] b)
@@ -218,7 +217,6 @@ namespace Gitty.Core
 
         public ObjectId ComputeBlobSha1(long length, Stream input)
         {
-
             return WriteObject(ObjectType.Blob, length, input, false);
         }
 
@@ -243,6 +241,9 @@ namespace Gitty.Core
             }
 
             md.Reset();
+#if DEBUG
+
+#endif
             if (store)
                 deflateStream = new DeflateStream(fileStream, CompressionMode.Compress);
             else

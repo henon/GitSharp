@@ -142,7 +142,7 @@ namespace Gitty.Core.Tests
             FileTreeEntry f = t.AddFile("i-am-a-file");
             writeTrashFile(f.Name, "and this is the data in me\n");
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
-            Assert.AreEqual(ObjectId.FromString("00b1f73724f493096d1ffa0b0f1f1482dbb8c936"),                    t.TreeId);
+            Assert.AreEqual(ObjectId.FromString("00b1f73724f493096d1ffa0b0f1f1482dbb8c936"), t.TreeId);
 
             Commit c = new Commit(db);
             c.Author = (new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4 * 60)));
@@ -176,11 +176,11 @@ namespace Gitty.Core.Tests
             Assert.AreEqual(c.Committer, c2.Committer);
         }
 
-#if false
+
         [Test]
         public void test012_SubtreeExternalSorting()
         {
-            ObjectId emptyBlob = new ObjectWriter(db).writeBlob(new byte[0]);
+            ObjectId emptyBlob = new ObjectWriter(db).WriteBlob(new byte[0]);
             Tree t = new Tree(db);
             FileTreeEntry e0 = t.AddFile("a-");
             FileTreeEntry e1 = t.AddFile("a-b");
@@ -188,35 +188,35 @@ namespace Gitty.Core.Tests
             FileTreeEntry e3 = t.AddFile("a=");
             FileTreeEntry e4 = t.AddFile("a=b");
 
-            e0.Id=(emptyBlob);
-            e1.Id=(emptyBlob);
-            e2.Id=(emptyBlob);
-            e3.Id=(emptyBlob);
-            e4.Id=(emptyBlob);
+            e0.Id = (emptyBlob);
+            e1.Id = (emptyBlob);
+            e2.Id = (emptyBlob);
+            e3.Id = (emptyBlob);
+            e4.Id = (emptyBlob);
 
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
-            Assert.AreEqual(ObjectId.FromString("b47a8f0a4190f7572e11212769090523e23eb1ea"),
-                    t.Id);
+            Assert.AreEqual(ObjectId.FromString("b47a8f0a4190f7572e11212769090523e23eb1ea"), t.Id);
         }
+
 
         [Test]
         public void test020_createBlobTag()
         {
-            ObjectId emptyId = new ObjectWriter(db).writeBlob(new byte[0]);
+            ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             Tag t = new Tag(db);
-            t.setObjId(emptyId);
-            t.setType("blob");
-            t.setTag("test020");
-            t.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            t.Id=(emptyId);
+            t.TagType=("blob");
+            t.TagName=("test020");
+            t.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4 * 60)));
             t.Message=("test020 tagged\n");
-            t.tag();
-            Assert.AreEqual("6759556b09fbb4fd8ae5e315134481cc25d46954", t.getTagId().ToString());
+            t.Save();
+            Assert.AreEqual("6759556b09fbb4fd8ae5e315134481cc25d46954", t.TagId.ToString());
 
-            Tag mapTag = db.mapTag("test020");
-            Assert.AreEqual("blob", mapTag.getType());
-            Assert.AreEqual("test020 tagged\n", mapTag.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag.Author);
-            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag.getObjId().ToString());
+            Tag MapTag = db.MapTag("test020");
+            Assert.AreEqual("blob", MapTag.TagType);
+            Assert.AreEqual("test020 tagged\n", MapTag.Message);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan( -4 * 60)), MapTag.Author);
+            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", MapTag.Id.ToString());
         }
 
         [Test]
@@ -224,43 +224,43 @@ namespace Gitty.Core.Tests
         {
             test020_createBlobTag();
             Tag t = new Tag(db);
-            t.setTag("test020b");
-            t.setObjId(ObjectId.FromString("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"));
-            t.tag();
+            t.TagName=("test020b");
+            t.Id=(ObjectId.FromString("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"));
+            t.Save();
 
-            Tag mapTag = db.mapTag("test020b");
-            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag.getObjId().ToString());
+            Tag MapTag = db.MapTag("test020b");
+            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", MapTag.Id.ToString());
 
             // We do not repeat the plain tag test for other object types
         }
-
+#if false
         [Test]
         public void test021_createTreeTag()
         {
-            ObjectId emptyId = new ObjectWriter(db).writeBlob(new byte[0]);
+            ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             Tree almostEmptyTree = new Tree(db);
             almostEmptyTree.addEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).writeTree(almostEmptyTree);
             Tag t = new Tag(db);
-            t.setObjId(almostEmptyTreeId);
-            t.setType("tree");
-            t.setTag("test021");
+            t.Id=(almostEmptyTreeId);
+            t.TagType=("tree");
+            t.TagName=("test021");
             t.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
             t.Message=("test021 tagged\n");
             t.tag();
             Assert.AreEqual("b0517bc8dbe2096b419d42424cd7030733f4abe5", t.getTagId().ToString());
 
-            Tag mapTag = db.mapTag("test021");
-            Assert.AreEqual("tree", mapTag.getType());
-            Assert.AreEqual("test021 tagged\n", mapTag.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag.Author);
-            Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", mapTag.getObjId().ToString());
+            Tag MapTag = db.MapTag("test021");
+            Assert.AreEqual("tree", MapTag.TagType);
+            Assert.AreEqual("test021 tagged\n", MapTag.Message);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), MapTag.Author);
+            Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", MapTag.Id.ToString());
         }
 
         [Test]
         public void test022_createCommitTag()
         {
-            ObjectId emptyId = new ObjectWriter(db).writeBlob(new byte[0]);
+            ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             Tree almostEmptyTree = new Tree(db);
             almostEmptyTree.addEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).writeTree(almostEmptyTree);
@@ -271,25 +271,25 @@ namespace Gitty.Core.Tests
             almostEmptyCommit.setTreeId(almostEmptyTreeId);
             ObjectId almostEmptyCommitId = new ObjectWriter(db).writeCommit(almostEmptyCommit);
             Tag t = new Tag(db);
-            t.setObjId(almostEmptyCommitId);
-            t.setType("commit");
-            t.setTag("test022");
+            t.Id=(almostEmptyCommitId);
+            t.TagType=("commit");
+            t.TagName=("test022");
             t.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
             t.Message=("test022 tagged\n");
             t.tag();
             Assert.AreEqual("0ce2ebdb36076ef0b38adbe077a07d43b43e3807", t.getTagId().ToString());
 
-            Tag mapTag = db.mapTag("test022");
-            Assert.AreEqual("commit", mapTag.getType());
-            Assert.AreEqual("test022 tagged\n", mapTag.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag.Author);
-            Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag.getObjId().ToString());
+            Tag MapTag = db.MapTag("test022");
+            Assert.AreEqual("commit", MapTag.TagType);
+            Assert.AreEqual("test022 tagged\n", MapTag.Message);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), MapTag.Author);
+            Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", MapTag.Id.ToString());
         }
 
         [Test]
         public void test023_createCommitNonAnullii()
         {
-            ObjectId emptyId = new ObjectWriter(db).writeBlob(new byte[0]);
+            ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             Tree almostEmptyTree = new Tree(db);
             almostEmptyTree.addEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).writeTree(almostEmptyTree);
@@ -306,7 +306,7 @@ namespace Gitty.Core.Tests
         [Test]
         public void test024_createCommitNonAscii()
         {
-            ObjectId emptyId = new ObjectWriter(db).writeBlob(new byte[0]);
+            ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             Tree almostEmptyTree = new Tree(db);
             almostEmptyTree.addEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).writeTree(almostEmptyTree);
@@ -332,7 +332,7 @@ namespace Gitty.Core.Tests
             if (!new DirectoryInfo(db.Directory, "refs/tags/test022").delete()) throw new Error("Cannot delete unpacked tag");
 
             // We cannot resolve it now, since we have no ref
-            Tag mapTag20missing = db.mapTag("test020");
+            Tag mapTag20missing = db.MapTag("test020");
             Assert.IsNull(mapTag20missing);
 
             // Construct packed refs file
@@ -346,24 +346,24 @@ namespace Gitty.Core.Tests
             w.println("^b5d3b45a96b340441f5abb9080411705c51cc86c");
             w.close();
 
-            Tag mapTag20 = db.mapTag("test020");
+            Tag mapTag20 = db.MapTag("test020");
             Assert.IsNotNull("have tag test020", mapTag20);
-            Assert.AreEqual("blob", mapTag20.getType());
+            Assert.AreEqual("blob", mapTag20.TagType);
             Assert.AreEqual("test020 tagged\n", mapTag20.Message);
             Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag20.Author);
-            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag20.getObjId().ToString());
+            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag20.Id.ToString());
 
-            Tag mapTag21 = db.mapTag("test021");
-            Assert.AreEqual("tree", mapTag21.getType());
+            Tag mapTag21 = db.MapTag("test021");
+            Assert.AreEqual("tree", mapTag21.TagType);
             Assert.AreEqual("test021 tagged\n", mapTag21.Message);
             Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag21.Author);
-            Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", mapTag21.getObjId().ToString());
+            Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", mapTag21.Id.ToString());
 
-            Tag mapTag22 = db.mapTag("test022");
-            Assert.AreEqual("commit", mapTag22.getType());
+            Tag mapTag22 = db.MapTag("test022");
+            Assert.AreEqual("commit", mapTag22.TagType);
             Assert.AreEqual("test022 tagged\n", mapTag22.Message);
             Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag22.Author);
-            Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag22.getObjId().ToString());
+            Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag22.Id.ToString());
         }
 
 

@@ -186,7 +186,7 @@ namespace Gitty.Core
             w.Write('\n');
 
             sw.Write("tag ");
-            tag.TagId.CopyTo(stream);
+             sw.Write(tag.TagName);
             w.Write('\n');
 
             sw.Write("tagger ");

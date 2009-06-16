@@ -150,7 +150,7 @@ namespace Gitty.Core
             }
         }
 
-        protected ObjectId(int new_1, int new_2, int new_3, int new_4, int new_5)
+        internal ObjectId(int new_1, int new_2, int new_3, int new_4, int new_5)
         {
             this.W1 = new_1;
             this.W2 = new_2;

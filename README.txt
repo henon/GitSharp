@@ -1,8 +1,7 @@
 == Git# ==
 
 Git# is released under the BSD license. It is derived from the Java version jgit.
-Please refer to the LICENSE.txt files for the complete licenses 
-within each package, and please refer to the individual source file 
+Please refer to the LICENSE.txt files for the complete license, and please refer to the individual source file 
 header to determine which license covers it.
 
 

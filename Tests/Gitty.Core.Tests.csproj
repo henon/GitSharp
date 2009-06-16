@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbbreviatedIdTests.cs" />
     <Compile Include="ConfigTests.cs" />
     <Compile Include="Util\XInputStream.cs" />
     <Compile Include="WriteTests.cs" />
@@ -53,9 +54,8 @@
     <Compile Include="PackIndexTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RefDatabaseTests.cs" />
-    <Compile Include="Util\Crc32Tests.cs" />
-    <Compile Include="RepositoryTestCase.cs" />
-    <Compile Include="TestUtils.cs" />
+    <Compile Include="Crc32Tests.cs" />
+    <Compile Include="Util\RepositoryTestCase.cs" />
     <Compile Include="TreeTests.cs" />
   </ItemGroup>
   <ItemGroup>

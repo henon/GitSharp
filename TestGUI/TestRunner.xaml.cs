@@ -153,20 +153,27 @@ namespace TestGUI
             return item;
         }
 
+        int m_failed_count, m_ok_count, m_not_run_count;
+
         private void PresentSummary(TreeViewItem item)
         {
             m_textbox2.Text = "";
             var testcase = item.Tag as TestcaseView;
             if (testcase == null) // present summary
             {
-
+                ClearStats();
                 StringBuilder s = new StringBuilder("Summary for " + item.Header.ToString() + ":\n\n");
+                var stat_pos = s.Length;
                 foreach (var i in item.IterateDown())
                 {
                     var treeitem = i as TreeViewItem;
                     if (treeitem.Tag is TestcaseView)
+                    {
                         s.AppendLine(StatusMessage(treeitem.Tag as TestcaseView));
+                        UpdateStats(treeitem.Tag as TestcaseView);
+                    }
                 }
+                s.Insert(stat_pos, "  " + m_ok_count + " passed  |  " + m_failed_count + " failed  |  " + m_not_run_count + " not run  |  " + (m_ok_count + m_failed_count + m_not_run_count) + " total tests\n\n");
                 m_textbox1.Text = s.ToString();
                 return;
             }
@@ -182,6 +189,24 @@ namespace TestGUI
                 m_textbox2.Text = s;
                 Console.WriteLine(s);
             }
+        }
+
+        private void UpdateStats(TestcaseView testcaseView)
+        {
+            if (testcaseView.IsExecuted)
+                if (testcaseView.Failed)
+                    m_failed_count += 1;
+                else
+                    m_ok_count += 1;
+            else
+                m_not_run_count += 1;
+        }
+
+        private void ClearStats()
+        {
+            m_ok_count = 0;
+            m_failed_count = 0;
+            m_not_run_count = 0;
         }
 
         private string StatusMessage(TestcaseView testcase)

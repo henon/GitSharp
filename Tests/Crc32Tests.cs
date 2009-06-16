@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 
-namespace Gitty.Core.Tests.Util
+namespace Gitty.Core.Tests
 {
     [TestFixture]
     public class Crc32Tests

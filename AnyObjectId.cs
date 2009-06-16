@@ -121,8 +121,7 @@ namespace Gitty.Core
 
         public int GetFirstByte()
         {
-            // W1 >>> 24 in java
-            return (byte)(W1 >> 24);
+            return (byte)(((uint)W1) >> 24); // W1 >>> 24 in java
         }
 
         #region IComparable<ObjectId> Members
@@ -210,6 +209,17 @@ namespace Gitty.Core
 
         #endregion
 
+        /**
+	     * Tests if this ObjectId starts with the given abbreviation.
+	     *
+	     * @param abbr
+	     *            the abbreviation.
+	     * @return true if this ObjectId begins with the abbreviation; else false.
+	     */
+        public bool startsWith(AbbreviatedObjectId abbr)
+        {
+            return abbr.prefixCompare(this) == 0;
+        }
 
         private char[] ToHexCharArray()
         {
@@ -240,7 +250,6 @@ namespace Gitty.Core
         }
 
         public abstract ObjectId ToObjectId();
-
 
     }
 }

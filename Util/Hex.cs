@@ -107,11 +107,12 @@ namespace Gitty.Core.Util
 
         public static void FillHexByteArray(byte[] dest, int offset, int value)
         {
+            uint uvalue = (uint)value;
             int curOffset = offset + 7;
-            while (curOffset >= offset && value != 0)
+            while (curOffset >= offset && uvalue != 0)
             {
-                dest[curOffset--] = __valueToHexByte[value & 0xf];
-                value >>= Nibble;
+                dest[curOffset--] = __valueToHexByte[uvalue & 0xf];
+                uvalue >>= Nibble;
             }
             while (curOffset >= offset)
                 dest[curOffset--] = __valueToHexByte[0];
@@ -120,11 +121,12 @@ namespace Gitty.Core.Util
 
         public static void FillHexCharArray(char[] dest, int offset, int value)
         {
+            uint uvalue = (uint)value;
             int curOffset = offset + 7;
-            while (curOffset >= offset && value != 0)
+            while (curOffset >= offset && uvalue != 0)
             {
-                dest[curOffset--] = __valueToHexChar[value & 0xf];
-                value >>= Nibble;
+                dest[curOffset--] = __valueToHexChar[uvalue & 0xf];
+                uvalue >>= Nibble;
             }
             while (curOffset >= offset)
                 dest[curOffset--] = '0';

@@ -43,7 +43,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     [Complete]
     public class TextProgressMonitor : ProgressMonitor

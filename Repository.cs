@@ -44,10 +44,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using Gitty.Core.Util;
-using Gitty.Core.Exceptions;
+using GitSharp.Util;
+using GitSharp.Exceptions;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     /**
      * Represents a Git repository. A repository holds all objects and refs used for

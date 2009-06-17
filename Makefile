@@ -86,14 +86,14 @@ SOURCES =  \
 	WholePackedObjectLoader.cs \
 	WriteTree.cs
 
-all: Gitty.Core.dll test.exe
+all: GitSharp.dll test.exe
 
-Gitty.Core.dll: $(SOURCES)
+GitSharp.dll: $(SOURCES)
 	mkdir -p bin/Debug
-	$(CSC) $(SOURCES) -out:bin/Debug/Gitty.Core.dll -debug -target:library
+	$(CSC) $(SOURCES) -out:bin/Debug/GitSharp.dll -debug -target:library
 
-test.exe: Gitty.Core.dll test.cs
-	$(CSC) -r:bin/Debug/Gitty.Core.dll -debug test.cs
+test.exe: GitSharp.dll test.cs
+	$(CSC) -r:bin/Debug/GitSharp.dll -debug test.cs
 
 run: test.exe
 	mono --debug test.exe

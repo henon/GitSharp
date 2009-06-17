@@ -38,9 +38,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 using System;
-using Gitty.Core.Util;
+using GitSharp.Util;
 
-namespace Gitty.Core
+namespace GitSharp
 {
 
     public static class RawParseUtils

@@ -40,9 +40,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Core.Exceptions;
+using GitSharp.Exceptions;
 
-namespace Gitty.Core
+namespace GitSharp
 {
 
     /**
@@ -92,7 +92,7 @@ namespace Gitty.Core
             long n64 = index.Offset64Count;
             long n32 = cnt - n64;
             if (n32 > int.MaxValue || n64 > int.MaxValue || cnt > 0xffffffffL)
-                throw new ArgumentException("Huge indexes are not supported by gitty, yet");
+                throw new ArgumentException("Huge indexes are not supported, yet");
 
             offsets32 = new int[(int)n32];
             offsets64 = new long[(int)n64];

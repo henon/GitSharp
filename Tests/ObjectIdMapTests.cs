@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 
-namespace Gitty.Core.Tests
+namespace GitSharp.Tests
 {
     [TestFixture]
     public class ObjectIdMapTests

@@ -41,9 +41,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Core;
+using GitSharp;
 
-namespace Gitty.Core.Exceptions
+namespace GitSharp.Exceptions
 {
     [global::System.Serializable]
     public class IncorrectObjectTypeException : Exception

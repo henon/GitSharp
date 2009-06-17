@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Gitty.Core")]
+[assembly: AssemblyTitle("GitSharp")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Pelco")]
-[assembly: AssemblyProduct("Gitty.Core")]
+[assembly: AssemblyProduct("GitSharp")]
 [assembly: AssemblyCopyright("Copyright © Pelco 2008")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

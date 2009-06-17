@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Gitty.Core.Exceptions
+namespace GitSharp.Exceptions
 {
     public class EntryExistsException : Exception
     {

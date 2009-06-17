@@ -15,7 +15,7 @@ using System.Reflection;
 using NUnit.Framework;
 using System.IO;
 
-namespace TestGUI
+namespace GitSharp.TestGUI
 {
     /// <summary>
     /// Interaction logic for Frontend.xaml

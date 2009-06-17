@@ -42,7 +42,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Gitty.Core.Exceptions
+namespace GitSharp.Exceptions
 {
     [global::System.Serializable]
     public class RevisionSyntaxException : IOException

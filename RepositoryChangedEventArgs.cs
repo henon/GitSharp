@@ -38,7 +38,7 @@
 
 using System;
 
-namespace Gitty.Core
+namespace GitSharp
 {
 	
 	

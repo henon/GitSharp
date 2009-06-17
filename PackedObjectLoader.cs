@@ -40,7 +40,7 @@
 using System;
 using System.IO;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     [Complete]
     public abstract class PackedObjectLoader : ObjectLoader

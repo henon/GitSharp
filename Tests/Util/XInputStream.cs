@@ -37,7 +37,7 @@
  */
 
 
-using Gitty.Core.Util;
+using GitSharp.Util;
 
 
 
@@ -46,9 +46,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using Gitty.Core.Util;
+using GitSharp.Util;
 
-namespace Gitty.Core.Tests.Util
+namespace GitSharp.Tests.Util
 {
     internal class XInputStream
     {

@@ -44,7 +44,7 @@ using System.Text;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     [Complete]
     public abstract class ObjectLoader

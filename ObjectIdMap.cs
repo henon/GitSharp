@@ -45,7 +45,7 @@ using System.Reflection;
 using System.Security;
 using System.Text;
 
-namespace Gitty.Core
+namespace GitSharp
 {
 
     /**

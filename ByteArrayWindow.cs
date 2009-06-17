@@ -40,10 +40,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Core.Util;
+using GitSharp.Util;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace Gitty.Core
+namespace GitSharp
 {
 
     //

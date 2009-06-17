@@ -41,12 +41,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Core.Exceptions;
+using GitSharp.Exceptions;
 using System.IO;
 using System.IO.Compression;
-using Gitty.Core.Util;
+using GitSharp.Util;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     public class UnpackedObjectLoader : ObjectLoader
     {

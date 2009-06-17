@@ -44,7 +44,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     public class IndexTreeWalker
     {

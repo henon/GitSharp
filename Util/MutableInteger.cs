@@ -42,7 +42,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Gitty.Core.Util
+namespace GitSharp.Util
 {
     /** A boxed integer that can be modified. */
     public class MutableInteger

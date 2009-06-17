@@ -43,7 +43,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     public class TreeIterator : IEnumerator<TreeEntry>
     {

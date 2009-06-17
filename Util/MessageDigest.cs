@@ -44,7 +44,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.IO;
 
-namespace Gitty.Core.Util
+namespace GitSharp.Util
 {
     internal class MessageDigest : ICloneable
     {

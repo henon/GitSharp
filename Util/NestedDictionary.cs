@@ -41,7 +41,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace Gitty.Core.Util
+namespace GitSharp.Util
 {
 
     /// <summary>

@@ -46,9 +46,9 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using NUnit.Framework;
-using Gitty.Core.Tests.Util;
+using GitSharp.Tests.Util;
 
-namespace Gitty.Core.Tests
+namespace GitSharp.Tests
 {
     [TestFixture]
     public class WriteTests : RepositoryTestCase // [henon] was BasicTests but I think this name is better

@@ -40,9 +40,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Core.Exceptions;
+using GitSharp.Exceptions;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     [Complete]
     public class WholePackedObjectLoader : PackedObjectLoader

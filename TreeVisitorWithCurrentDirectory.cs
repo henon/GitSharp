@@ -44,7 +44,7 @@ using System.Text;
 using System.IO;
 using System.Collections;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     [Complete]
     public abstract class TreeVisitorWithCurrentDirectory : TreeVisitor

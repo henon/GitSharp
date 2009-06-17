@@ -37,7 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using Gitty.Core;
+using GitSharp;
 
 using System;
 using System.Collections.Generic;
@@ -45,11 +45,11 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using NUnit.Framework;
-using Gitty.Core.Util;
+using GitSharp.Util;
 using System.Diagnostics;
 using System.Threading;
 
-namespace Gitty.Core.Tests
+namespace GitSharp.Tests
 {
 
     /**

@@ -1,4 +1,4 @@
-﻿<Application x:Class="TestGUI.App"
+﻿<Application x:Class="GitSharp.TestGUI.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     StartupUri="Browser.xaml">

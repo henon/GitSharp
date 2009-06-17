@@ -11,12 +11,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Gitty.Core;
-using Gitty.Core.Tests;
+using GitSharp;
+using GitSharp.Tests;
 using System.Collections.ObjectModel;
 using System.Reflection;
 
-namespace TestGUI
+namespace GitSharp.TestGUI
 {
 
     public partial class Browser : Window
@@ -26,7 +26,7 @@ namespace TestGUI
             InitializeComponent();
             var testrunner = new TestRunner();
             m_unit_tests.Content = testrunner;
-            testrunner.AddAssembly(Assembly.Load("Gitty.Core.Tests"));
+            testrunner.AddAssembly(Assembly.Load("GitSharp.Tests"));
 
             m_list.SelectionChanged += (o, args) => SelectCommit(m_list.SelectedItem as Commit);
         }

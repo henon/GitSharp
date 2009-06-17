@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Gitty.Lib.CSharp.Tests")]
+[assembly: AssemblyTitle("GitSharp.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("The Automaters")]
-[assembly: AssemblyProduct("Gitty.Lib.CSharp.Tests")]
-[assembly: AssemblyCopyright("Copyright © The Automaters 2008")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("GitSharp.Tests")]
+[assembly: AssemblyCopyright("Copyright © 2009, The GitSharp Team")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

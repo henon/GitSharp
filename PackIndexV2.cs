@@ -41,10 +41,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using Gitty.Core.Util;
-using Gitty.Core.Exceptions;
+using GitSharp.Util;
+using GitSharp.Exceptions;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     /** Support for the pack index v2 format. */
     [Complete]
@@ -108,7 +108,7 @@ namespace Gitty.Core
 
                 long nameLen = bucketCnt * AnyObjectId.Constants.ObjectIdLength;
                 if (nameLen > int.MaxValue)
-                    throw new IOException("Index file is too large for gitty");
+                    throw new IOException("Index file is too large");
 
                 int intNameLen = (int)nameLen;
                 byte[] raw = new byte[intNameLen];

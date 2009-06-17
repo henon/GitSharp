@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gitty.Core", "Gitty.Core.csproj", "{C46EDD61-C202-465A-93F1-ADE20A83BB59}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp", "GitSharp.csproj", "{C46EDD61-C202-465A-93F1-ADE20A83BB59}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGUI", "TestGUI\TestGUI.csproj", "{4B53BA11-1ADE-44E7-AC0F-7748D5701C25}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.TestGUI", "TestGUI\GitSharp.TestGUI.csproj", "{4B53BA11-1ADE-44E7-AC0F-7748D5701C25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gitty.Core.Tests", "Tests\Gitty.Core.Tests.csproj", "{37052DA4-F6A9-47D0-94AA-96F4A7E0462C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.Tests", "Tests\GitSharp.Tests.csproj", "{37052DA4-F6A9-47D0-94AA-96F4A7E0462C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -44,7 +44,7 @@ using System.Text;
 using System;
 using System.IO;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     public static class Constants
     {

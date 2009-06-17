@@ -40,7 +40,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Gitty.Core.Util
+namespace GitSharp.Util
 {
     public class WeakReference<T> : System.WeakReference
     {

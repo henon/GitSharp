@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Gitty.Core;
+using GitSharp;
 
 class X {
 

@@ -40,10 +40,10 @@
 using System;
 using System.IO;
 using System.Text;
-using Gitty.Core.Exceptions;
-using Gitty.Core.Util;
+using GitSharp.Exceptions;
+using GitSharp.Util;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     public class Tag
     {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Reflection;
 using System.Diagnostics;
 
-namespace TestGUI
+namespace GitSharp.TestGUI
 {
     internal class TestcaseView
     {

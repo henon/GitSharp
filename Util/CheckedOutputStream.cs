@@ -37,7 +37,7 @@
 using System;
 using System.IO;
 
-namespace Gitty.Core
+namespace GitSharp
 {
 
     public class CheckedOutputStream : System.IO.Stream

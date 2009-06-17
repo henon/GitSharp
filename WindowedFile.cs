@@ -42,7 +42,7 @@ using System.Text;
 using System.Threading;
 using System.IO;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     public class WindowedFile
     {

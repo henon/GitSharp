@@ -42,9 +42,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using Gitty.Core;
+using GitSharp;
 
-namespace Gitty.Core.Tests
+namespace GitSharp.Tests
 {
     [TestFixture]
     public class ObjectIdTests

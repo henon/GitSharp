@@ -45,7 +45,7 @@ using System.Text;
 using NUnit.Framework;
 using System.IO;
 
-namespace Gitty.Core.Tests
+namespace GitSharp.Tests
 {
     [TestFixture]
    public class ConfigTests : RepositoryTestCase

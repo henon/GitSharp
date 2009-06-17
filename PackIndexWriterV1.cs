@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Core.Transport;
+using GitSharp.Transport;
 using System.IO;
-using Gitty.Core.Util;
+using GitSharp.Util;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     public class PackIndexWriterV1 : PackIndexWriter
     {

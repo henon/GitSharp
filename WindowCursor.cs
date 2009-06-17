@@ -42,7 +42,7 @@ using System.Linq;
 using System.Text;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     public class WindowCursor
     {

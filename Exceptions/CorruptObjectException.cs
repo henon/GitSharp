@@ -41,10 +41,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Core;
+using GitSharp;
 using System.IO;
 
-namespace Gitty.Core.Exceptions
+namespace GitSharp.Exceptions
 {
     [global::System.Serializable]
     public class CorruptObjectException : IOException

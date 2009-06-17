@@ -1,34 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="Gitty.Core.Util.BufferedReader" Collapsed="true">
+  <Class Name="GitSharp.Util.BufferedReader" Collapsed="true">
     <Position X="13.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAEAAAAgACAMBAACAAIQDAAgAACAQAAAAYSAgwCAIAA=</HashCode>
       <FileName>Util\BufferedReader.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Util.Hex" Collapsed="true">
+  <Class Name="GitSharp.Util.Hex" Collapsed="true">
     <Position X="13.5" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAEAAAAgABBAAAAAAAAAAAAAAAAAgAiAAAAAgAAAAA=</HashCode>
       <FileName>Util\Hex.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Util.NestedDictionary&lt;K, V&gt;" Collapsed="true">
+  <Class Name="GitSharp.Util.NestedDictionary&lt;K, V&gt;" Collapsed="true">
     <Position X="11" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAABAAAAAAAAAAADAAAABAAAAAAAA=</HashCode>
       <FileName>Util\NestedDictionary.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Util.NestedSortedDictionary&lt;K, V&gt;" Collapsed="true">
+  <Class Name="GitSharp.Util.NestedSortedDictionary&lt;K, V&gt;" Collapsed="true">
     <Position X="8.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAEABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Util\NestedDictionary.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Util.NestedDictionaryBase&lt;K, V, D&gt;" Collapsed="true">
+  <Class Name="GitSharp.Util.NestedDictionaryBase&lt;K, V, D&gt;" Collapsed="true">
     <Position X="10" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>CDIBAAFAAAAERBAQCAAABAQCAABARAAAAAAggABUIAA=</HashCode>
@@ -36,35 +36,35 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Gitty.Core.Util.NB" Collapsed="true">
+  <Class Name="GitSharp.Util.NB" Collapsed="true">
     <Position X="15.25" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAQAACAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAACAEAA=</HashCode>
       <FileName>Util\Numbers.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Util.PathUtil" Collapsed="true">
+  <Class Name="GitSharp.Util.PathUtil" Collapsed="true">
     <Position X="17" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAQAAAAAAACAAAAAAAAAAAAAAAAABAAAAAAA=</HashCode>
       <FileName>Util\PathUtil.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Util.WeakReference&lt;T&gt;" Collapsed="true">
+  <Class Name="GitSharp.Util.WeakReference&lt;T&gt;" Collapsed="true">
     <Position X="15.25" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Util\WeakReference.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.RawParseUtils" Collapsed="true">
+  <Class Name="GitSharp.RawParseUtils" Collapsed="true">
     <Position X="13.5" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Util\RawParseUtils.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.AbstractIndexTreeVisitor" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="GitSharp.AbstractIndexTreeVisitor" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="24" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AACAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAhAAAAAABI=</HashCode>
@@ -72,7 +72,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="Gitty.Core.AnyObjectId" Collapsed="true">
+  <Class Name="GitSharp.AnyObjectId" Collapsed="true">
     <Position X="12.5" Y="9.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAQAAEAAAAAAAQEgAAACAAAAgAARIABJAAAAgAAIiA=</HashCode>
@@ -80,21 +80,21 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Gitty.Core.BinaryDelta" Collapsed="true">
+  <Class Name="GitSharp.BinaryDelta" Collapsed="true">
     <Position X="25.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>BinaryDelta.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Codec" Collapsed="true">
+  <Class Name="GitSharp.Codec" Collapsed="true">
     <Position X="29.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AgAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAA=</HashCode>
       <FileName>Codec.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Commit" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="GitSharp.Commit" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="31" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAABIpIQAAoAAAEgAAAAIIggAAAAAAAAgAAYAAAACA=</HashCode>
@@ -102,35 +102,35 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="Gitty.Core.Constants" Collapsed="true">
+  <Class Name="GitSharp.Constants" Collapsed="true">
     <Position X="34.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAABAAABAAAAICAAgAAAAAAgBAAAAAAAEAAAAAAAAA=</HashCode>
       <FileName>Constants.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.CoreConfig" Collapsed="true">
+  <Class Name="GitSharp.CoreConfig" Collapsed="true">
     <Position X="24" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAICAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>CoreConfig.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.FileMode" Collapsed="true">
+  <Class Name="GitSharp.FileMode" Collapsed="true">
     <Position X="29.25" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAIQCAAAADgAAAAABBAABAAAAAAIAAQAAAIAA=</HashCode>
       <FileName>FileMode.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.FileTreeEntry" Collapsed="true">
+  <Class Name="GitSharp.FileTreeEntry" Collapsed="true">
     <Position X="8.75" Y="8.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AIAAAAAAAIAAAAAEAgAAAAAAAAQAAAAEAAAAAAAAAIA=</HashCode>
       <FileName>FileTreeEntry.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.ForceModified" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="GitSharp.ForceModified" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="31" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAggAAAAAAAAAAAAAAAAAAAAAAABAAgAAAAAA=</HashCode>
@@ -138,56 +138,56 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="Gitty.Core.GitException" Collapsed="true">
+  <Class Name="GitSharp.GitException" Collapsed="true">
     <Position X="32.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>GitException.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.GitIndex" Collapsed="true">
+  <Class Name="GitSharp.GitIndex" Collapsed="true">
     <Position X="34.5" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAIAAAAAAAAIAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>GitIndex.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.IndexDiff" Collapsed="true">
+  <Class Name="GitSharp.IndexDiff" Collapsed="true">
     <Position X="25.75" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAICAAAEAABBAgAEAAAAAAAAAAAAAEAAgAAAA=</HashCode>
       <FileName>IndexDiff.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.IndexTreeWalker" Collapsed="true">
+  <Class Name="GitSharp.IndexTreeWalker" Collapsed="true">
     <Position X="27.5" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
       <FileName>IndexTreeWalker.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Extensions" Collapsed="true">
+  <Class Name="GitSharp.Extensions" Collapsed="true">
     <Position X="31" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AABAAAAAIAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
       <FileName>Extensions.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.LockFile" Collapsed="true">
+  <Class Name="GitSharp.LockFile" Collapsed="true">
     <Position X="32.75" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>gAAQAEAAQIAAAAAAgBAABAAAAAAgIAAAAAkQgAEAAAA=</HashCode>
       <FileName>LockFile.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.MutableObjectId" Collapsed="true">
+  <Class Name="GitSharp.MutableObjectId" Collapsed="true">
     <Position X="11.25" Y="10.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AEAAAAAAAAAAAAAAEAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
       <FileName>MutableObjectId.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.NullProgressMonitor" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="GitSharp.NullProgressMonitor" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="24" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAQAAAAAACAAAAAAAIAAAAEAAAAAAAAAAAAAIAAAAAA=</HashCode>
@@ -195,14 +195,14 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="Gitty.Core.ObjectId" Collapsed="true">
+  <Class Name="GitSharp.ObjectId" Collapsed="true">
     <Position X="13.5" Y="10.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AEAAAAAAAAAAAIAEEAAAAAAEAAAAAAAhAAAAAAAAAAA=</HashCode>
       <FileName>ObjectId.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.ObjectIdMap&lt;V&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="GitSharp.ObjectIdMap&lt;V&gt;" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="25.75" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>CAIAAAAAAAAEABAQCAAABAQAAAEAAAEEAAAgAABQIAA=</HashCode>
@@ -210,21 +210,21 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="Gitty.Core.ObjectLoader" Collapsed="true">
+  <Class Name="GitSharp.ObjectLoader" Collapsed="true">
     <Position X="14.75" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAACAAAAAAABgAAAAAJAAAAAAIAAAAAAAIAIQAAAAAA=</HashCode>
       <FileName>ObjectLoader.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.ObjectWriter" Collapsed="true">
+  <Class Name="GitSharp.ObjectWriter" Collapsed="true">
     <Position X="27.5" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAgAAAAgAABAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
       <FileName>ObjectWriter.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.PackIndex" Collapsed="true">
+  <Class Name="GitSharp.PackIndex" Collapsed="true">
     <Position X="20.5" Y="7.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>ACAAAEEAAAAgIBAAAAAAAAAAAAAAAAAAAAAQAAgAgQg=</HashCode>
@@ -232,105 +232,105 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Gitty.Core.PackIndexV1" Collapsed="true">
+  <Class Name="GitSharp.PackIndexV1" Collapsed="true">
     <Position X="19.25" Y="8.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAEAAgBAgABAAAAAAAAAAAAAAAAAAAAAACAgAgQg=</HashCode>
       <FileName>PackIndexV1.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.PackIndexV2" Collapsed="true">
+  <Class Name="GitSharp.PackIndexV2" Collapsed="true">
     <Position X="21.5" Y="8.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAECAAAAgABAAAAIAKAAAAIAIAAAAAAAEAAgQgYg=</HashCode>
       <FileName>PackIndexV2.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.PackIndexWriter" Collapsed="true">
+  <Class Name="GitSharp.PackIndexWriter" Collapsed="true">
     <Position X="32.75" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>PackIndexWriter.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.PackReverseIndex" Collapsed="true">
+  <Class Name="GitSharp.PackReverseIndex" Collapsed="true">
     <Position X="34.5" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAGAQAAAAAAAAAAAAAAAAAAAAAAAAAIBAABAAI=</HashCode>
       <FileName>PackReverseIndex.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.PersonIdent" Collapsed="true">
+  <Class Name="GitSharp.PersonIdent" Collapsed="true">
     <Position X="24" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAEAACIAABAEgAAAAAUAAAAAAIAAAAAAAgAAAAA=</HashCode>
       <FileName>PersonIdent.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Ref" Collapsed="true">
+  <Class Name="GitSharp.Ref" Collapsed="true">
     <Position X="25.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>QAAEAQAAAAAAAAAEAAAAAAQAAAAAAAAAAAAAAEBAAAA=</HashCode>
       <FileName>Ref.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.RefDatabase" Collapsed="true">
+  <Class Name="GitSharp.RefDatabase" Collapsed="true">
     <Position X="27.5" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>goBIhAKAQACAIAAAAAAQAACAAAAYAEAEAAwASQAQECQ=</HashCode>
       <FileName>RefDatabase.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.RefLogWriter" Collapsed="true">
+  <Class Name="GitSharp.RefLogWriter" Collapsed="true">
     <Position X="29.25" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAg=</HashCode>
       <FileName>RefLogWriter.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.RefUpdate" Collapsed="true">
+  <Class Name="GitSharp.RefUpdate" Collapsed="true">
     <Position X="31" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAQAA=</HashCode>
       <FileName>RefUpdate.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Repository" Collapsed="true">
+  <Class Name="GitSharp.Repository" Collapsed="true">
     <Position X="32.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AYgAEBEQA4CAoCEEAAAjABAAABSgCMAAIAEgCBSkCAA=</HashCode>
       <FileName>Repository.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.RepositoryConfig" Collapsed="true">
+  <Class Name="GitSharp.RepositoryConfig" Collapsed="true">
     <Position X="34.5" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAIAgIIQCAAAAAcEAEAghAAAAAAAAGwgAJgAAADAQAA=</HashCode>
       <FileName>RepositoryConfig.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.RepositoryState" Collapsed="true">
+  <Class Name="GitSharp.RepositoryState" Collapsed="true">
     <Position X="24" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAEAJAAAQAgCAAAAAAAAAAAAAAABQAAAAAAIABAAAA=</HashCode>
       <FileName>RepositoryState.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.SymlinkTreeEntry" Collapsed="true">
+  <Class Name="GitSharp.SymlinkTreeEntry" Collapsed="true">
     <Position X="11" Y="6.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AIAAAAAAAIAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>SymlinkTreeEntry.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Tag" Collapsed="true">
+  <Class Name="GitSharp.Tag" Collapsed="true">
     <Position X="29.25" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAACAIIIAAAAAAAEgIAAAKAAAAAAAABAAIAAIAAACCE=</HashCode>
       <FileName>Tag.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.TextProgressMonitor" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="GitSharp.TextProgressMonitor" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="31" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAQEAAAAACAAAAgAAIAAAQEAABAAAAAAUAAAIAAAAIA=</HashCode>
@@ -338,7 +338,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="Gitty.Core.Tree" Collapsed="true">
+  <Class Name="GitSharp.Tree" Collapsed="true">
     <Position X="11" Y="8" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AIgAxAIAAIAAAAABAAQAAAQgAKAAAAAAARAEAAAAAAA=</HashCode>
@@ -346,7 +346,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Gitty.Core.TreeEntry" Collapsed="true">
+  <Class Name="GitSharp.TreeEntry" Collapsed="true">
     <Position X="9.25" Y="4.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AIACASIAAIAGAIUBAABAQAQAAAEAAAAAAggCCAAAgAA=</HashCode>
@@ -354,7 +354,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Gitty.Core.TreeVisitorWithCurrentDirectory" Collapsed="true">
+  <Class Name="GitSharp.TreeVisitorWithCurrentDirectory" Collapsed="true">
     <Position X="16.25" Y="9.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAggAAAAAAAAAEAAAAAAAAAIAAQBAAgAAAAAA=</HashCode>
@@ -362,7 +362,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Gitty.Core.WriteTree" Collapsed="true">
+  <Class Name="GitSharp.WriteTree" Collapsed="true">
     <Position X="16.25" Y="10.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAggAAAAAAAAAAAAAAAAAQAAAAABAAAAAAAAA=</HashCode>
@@ -376,49 +376,49 @@
       <FileName>CompleteAttribute.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Exceptions.CorruptObjectException" Collapsed="true">
+  <Class Name="GitSharp.Exceptions.CorruptObjectException" Collapsed="true">
     <Position X="25.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Exceptions\CorruptObjectException.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Exceptions.FileLockedException" Collapsed="true">
+  <Class Name="GitSharp.Exceptions.FileLockedException" Collapsed="true">
     <Position X="27.5" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Exceptions\FileLockedException.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Exceptions.IncorrectObjectTypeException" Collapsed="true">
+  <Class Name="GitSharp.Exceptions.IncorrectObjectTypeException" Collapsed="true">
     <Position X="24" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Exceptions\IncorrectObjectTypeException.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Exceptions.ObjectWritingException" Collapsed="true">
+  <Class Name="GitSharp.Exceptions.ObjectWritingException" Collapsed="true">
     <Position X="29.25" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Exceptions\ObjectWritingException.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Exceptions.RevisionSyntaxException" Collapsed="true">
+  <Class Name="GitSharp.Exceptions.RevisionSyntaxException" Collapsed="true">
     <Position X="25.75" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAEAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Exceptions\RevisionSyntaxException.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.Exceptions.SymlinksNotSupportedException" Collapsed="true">
+  <Class Name="GitSharp.Exceptions.SymlinksNotSupportedException" Collapsed="true">
     <Position X="27.5" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Exceptions\SymlinksNotSupportedException.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.CSharp.Exceptions.MissingObjectException" Collapsed="true">
+  <Class Name="GitSharp.CSharp.Exceptions.MissingObjectException" Collapsed="true">
     <Position X="34.5" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
@@ -432,7 +432,7 @@
       <FileName>test.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Gitty.Core.CSharp.Lib.TreeIterator" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="GitSharp.CSharp.Lib.TreeIterator" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="32.75" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAABCABACCABAAAgACABQAAAAAAAAAAIAAAAAABAAA=</HashCode>
@@ -440,42 +440,42 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="Gitty.Core.UnpackedObjectLoader" Collapsed="true">
+  <Class Name="GitSharp.UnpackedObjectLoader" Collapsed="true">
     <Position X="16.25" Y="4.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAABAAAABAAAAAAKAAAAAAAAAAAAAAAAIQQAAAAA=</HashCode>
       <FileName>UnpackedObjectLoader.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Interface Name="Gitty.Core.IndexTreeVisitor" Collapsed="true">
+  <Interface Name="GitSharp.IndexTreeVisitor" Collapsed="true">
     <Position X="24" Y="7.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAA=</HashCode>
       <FileName>IndexTreeVisitor.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Gitty.Core.ProgressMonitor" Collapsed="true">
+  <Interface Name="GitSharp.ProgressMonitor" Collapsed="true">
     <Position X="25.75" Y="7.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAQAAAAAACAAAAAAAIAAAAEAAAAAAAAAAAAAIAAAAAA=</HashCode>
       <FileName>ProgressMonitor.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Gitty.Core.Treeish" Collapsed="true">
+  <Interface Name="GitSharp.Treeish" Collapsed="true">
     <Position X="27.5" Y="7.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAABAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Treeish.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Gitty.Core.TreeVisitor" Collapsed="true">
+  <Interface Name="GitSharp.TreeVisitor" Collapsed="true">
     <Position X="29.25" Y="7.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAggAAAAAAAAAAAAAAAAAAAAAAABAAgAAAAAA=</HashCode>
       <FileName>TreeVisitor.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Enum Name="Gitty.Core.ObjectType" Collapsed="true">
+  <Enum Name="GitSharp.ObjectType" Collapsed="true">
     <Position X="24" Y="8.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AEAgAEAAAAigAAAAAAAAAAAACAAAAQAEAAAAAAAAABA=</HashCode>

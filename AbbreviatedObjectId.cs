@@ -36,14 +36,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using Gitty.Core.Util;
+using GitSharp.Util;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Gitty.Core
+namespace GitSharp
 {
 
     /**

@@ -37,10 +37,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using Gitty.Core.Exceptions;
+using GitSharp.Exceptions;
 using System;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     internal static class Codec
     {

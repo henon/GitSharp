@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using Gitty.Core.Transport;
+using GitSharp.Transport;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     public class PackIndexWriterV2 : PackIndexWriter
     {

@@ -42,10 +42,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using Gitty.Core;
-using Gitty.Core.Util;
+using GitSharp;
+using GitSharp.Util;
 
-namespace Gitty.Core.Tests
+namespace GitSharp.Tests
 {
     [TestFixture]
     public class TreeTests : RepositoryTestCase

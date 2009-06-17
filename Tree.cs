@@ -43,9 +43,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gitty.Core.Exceptions;
+using GitSharp.Exceptions;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     public class Tree : TreeEntry, Treeish
     {
@@ -208,7 +208,7 @@ namespace Gitty.Core
             {
                 int mid = (low + high) / 2;
                 int cmp = CompareNames(entries[mid].NameUTF8, nameUTF8,
-                    nameStart, nameEnd, Gitty.Core.TreeEntry.LastChar(entries[mid]), nameUTF8last);
+                    nameStart, nameEnd, GitSharp.TreeEntry.LastChar(entries[mid]), nameUTF8last);
 
                 if (cmp < 0)
                     low = mid + 1;
@@ -251,7 +251,7 @@ namespace Gitty.Core
 
         public FileTreeEntry AddFile(string name)
         {
-            return AddFile(Gitty.Core.Repository.GitInternalSlash(Encoding.UTF8.GetBytes(name)), 0);
+            return AddFile(GitSharp.Repository.GitInternalSlash(Encoding.UTF8.GetBytes(name)), 0);
         }
 
         public FileTreeEntry AddFile(byte[] s, int offset)
@@ -429,7 +429,7 @@ namespace Gitty.Core
         internal void RemoveEntry(TreeEntry e)
         {
             TreeEntry[] c = _contents;
-            int p = BinarySearch(c, e.NameUTF8, Gitty.Core.TreeEntry.LastChar(e), 0, e.NameUTF8.Length);
+            int p = BinarySearch(c, e.NameUTF8, GitSharp.TreeEntry.LastChar(e), 0, e.NameUTF8.Length);
             if (p >= 0)
             {
                 TreeEntry[] n = new TreeEntry[c.Length - 1];
@@ -447,7 +447,7 @@ namespace Gitty.Core
             int p;
 
             EnsureLoaded();
-            p = BinarySearch(_contents, e.NameUTF8, Gitty.Core.TreeEntry.LastChar(e), 0, e.NameUTF8.Length);
+            p = BinarySearch(_contents, e.NameUTF8, GitSharp.TreeEntry.LastChar(e), 0, e.NameUTF8.Length);
             if (p < 0)
             {
                 e.AttachParent(this);

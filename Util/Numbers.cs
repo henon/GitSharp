@@ -43,7 +43,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Gitty.Core.Util
+namespace GitSharp.Util
 {
     public class NB // [henon] need public for testsuite
     {

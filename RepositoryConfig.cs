@@ -46,9 +46,9 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
-using Gitty.Core.Util;
+using GitSharp.Util;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     [Complete]
     public class RepositoryConfig

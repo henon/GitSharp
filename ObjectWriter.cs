@@ -44,11 +44,11 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using ObjectWritingException = Gitty.Core.Exceptions.ObjectWritingException;
+using ObjectWritingException = GitSharp.Exceptions.ObjectWritingException;
 using System.IO.Compression;
-using Gitty.Core.Util;
+using GitSharp.Util;
 
-namespace Gitty.Core
+namespace GitSharp
 {
     public class ObjectWriter
     {

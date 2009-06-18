@@ -37,17 +37,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
 using NUnit.Framework;
-using GitSharp.Util;
 using System.Diagnostics;
 using System.Threading;
+using GitSharp;
+using GitSharp.Util;
 
 namespace GitSharp.Tests
 {

@@ -104,7 +104,7 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GitSharp.csproj">
+    <ProjectReference Include="..\GitSharp\GitSharp.csproj">
       <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
       <Name>GitSharp</Name>
     </ProjectReference>

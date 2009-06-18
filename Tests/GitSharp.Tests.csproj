@@ -59,12 +59,6 @@
     <Compile Include="TreeTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GitSharp.csproj">
-      <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
-      <Name>GitSharp</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="sample\README">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -237,6 +231,12 @@
     <None Include="Resources\packed-refs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GitSharp\GitSharp.csproj">
+      <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
+      <Name>GitSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

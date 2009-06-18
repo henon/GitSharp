@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("GitSharp")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Pelco")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("GitSharp")]
-[assembly: AssemblyCopyright("Copyright © Pelco 2008")]
+[assembly: AssemblyCopyright("Copyright © 2009 The GitSharp Team")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,7 +1,7 @@
 ﻿/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -46,24 +46,62 @@ using System.Security.Cryptography;
 
 namespace GitSharp
 {
-    [Complete]
+    /**
+    * Base class for a set of loaders for different representations of Git objects.
+    * New loaders are constructed for every object.
+    */
     public abstract class ObjectLoader
     {
-        public virtual ObjectType ObjectType { get; protected set; }
-        public virtual long Size { get; protected set; }
-        public byte[] Bytes
-        {
-            get
-            {
-                var data = this.CachedBytes;
-                var copy = new byte[data.Length];
-                Array.Copy(data, copy, data.Length);
-                return copy;
-            }
-        }
-        public virtual byte[] CachedBytes { get; protected set; }
-        public virtual ObjectType RawType { get; protected set; }
-        public virtual long RawSize { get; protected set; }
+        /**
+         * @return Git in pack object type, see {@link Constants}.
+         */
+        public abstract int getType();
 
+        /**
+         * @return size of object in bytes
+         */
+        public abstract long getSize();
+
+        /**
+         * Obtain a copy of the bytes of this object.
+         * <p>
+         * Unlike {@link #getCachedBytes()} this method returns an array that might
+         * be modified by the caller.
+         * 
+         * @return the bytes of this object.
+         */
+        public byte[] getBytes()
+        {
+            byte[] data = getCachedBytes();
+            byte[] copy = new byte[data.Length];
+            Array.Copy(data, 0, copy, 0, data.Length);
+            return copy;
+        }
+
+        /**
+         * Obtain a reference to the (possibly cached) bytes of this object.
+         * <p>
+         * This method offers direct access to the internal caches, potentially
+         * saving on data copies between the internal cache and higher level code.
+         * Callers who receive this reference <b>must not</b> modify its contents.
+         * Changes (if made) will affect the cache but not the repository itself.
+         * 
+         * @return the cached bytes of this object. Do not modify it.
+         */
+        public abstract byte[] getCachedBytes();
+
+        /**
+         * @return raw object type from object header, as stored in storage (pack,
+         *         loose file). This may be different from {@link #getType()} result
+         *         for packs (see {@link Constants}).
+         */
+        public abstract int getRawType();
+
+        /**
+         * @return raw size of object from object header (pack, loose file).
+         *         Interpretation of this value depends on {@link #getRawType()}.
+         */
+        public abstract long getRawSize();
     }
+
 }

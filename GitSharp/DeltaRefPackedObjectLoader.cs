@@ -1,7 +1,7 @@
 ﻿/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -45,27 +45,33 @@ using GitSharp.Exceptions;
 
 namespace GitSharp
 {
+    /** Reads a deltified object which uses an {@link ObjectId} to find its base. */
     public class DeltaRefPackedObjectLoader : DeltaPackedObjectLoader
     {
-
         private ObjectId deltaBase;
 
-        public DeltaRefPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz, ObjectId baseId)
+        public DeltaRefPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz, ObjectId @base)
             : base(pr, dataOffset, objectOffset, deltaSz)
         {
-            deltaBase = baseId;
-            this.RawType = ObjectType.ReferenceDelta;
+            deltaBase = @base;
         }
 
-        protected override PackedObjectLoader GetBaseLoader()
+        public override PackedObjectLoader getBaseLoader(WindowCursor curs)
         {
-            PackedObjectLoader or = pack.Get(deltaBase);
+            PackedObjectLoader or = pack.Get(curs, deltaBase);
             if (or == null)
-                throw new MissingObjectException(deltaBase, ObjectType.DeltaBase);
+                throw new MissingObjectException(deltaBase, "delta base");
             return or;
         }
 
-        public override ObjectId GetDeltaBase()
+
+        public override int getRawType()
+        {
+            return Constants.OBJ_REF_DELTA;
+        }
+
+
+        public override ObjectId getDeltaBase()
         {
             return deltaBase;
         }

@@ -45,7 +45,9 @@
   <ItemGroup>
     <Compile Include="AbbreviatedIdTests.cs" />
     <Compile Include="ConfigTests.cs" />
+    <Compile Include="PackReaderTests.cs" />
     <Compile Include="Util\XInputStream.cs" />
+    <Compile Include="VariousUtilityTests.cs" />
     <Compile Include="WriteTests.cs" />
     <Compile Include="ObjectCheckerTests.cs" />
     <Compile Include="ObjectIdMapTests.cs" />

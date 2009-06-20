@@ -18,8 +18,8 @@ class X {
 
 		ObjectLoader ol = repo.OpenObject (heads_master.ObjectId);
 
-		Console.WriteLine ("ObjectType: {0}", ol.ObjectType);
-		Console.WriteLine ("      Size: {0}", ol.Size);
-		Console.WriteLine ("   RawSize: {0}", ol.RawSize);
+		//Console.WriteLine ("ObjectType: {0}", ol.getObjectType());
+		Console.WriteLine ("      Size: {0}", ol.getSize());
+		Console.WriteLine ("   RawSize: {0}", ol.getRawSize());
 	}
 }

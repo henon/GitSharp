@@ -138,7 +138,7 @@ namespace GitSharp
         #region Treeish Members
 
         private ObjectId treeId;
-        
+
         public ObjectId TreeId
         {
             get
@@ -180,6 +180,13 @@ namespace GitSharp
         public ObjectId CommitId { get; set; }
         public ObjectId[] ParentIds { get; set; }
         public Encoding Encoding { get; set; }
+
+        // [henon] remove later
+        public void setEncoding(string name)
+        {
+            Encoding = Encoding.GetEncoding(name);
+        }
+
         public Repository Repository { get; protected set; }
 
         // Returns all ancestor-commits of this commit
@@ -193,7 +200,7 @@ namespace GitSharp
             }
         }
 
-        private static void CollectAncestorIdsRecursive(Commit commit, Dictionary<ObjectId,Commit> ancestors)
+        private static void CollectAncestorIdsRecursive(Commit commit, Dictionary<ObjectId, Commit> ancestors)
         {
             foreach (var parent in commit.ParentIds.Where(id => !ancestors.ContainsKey(id)).Select(id => commit.Repository.OpenCommit(id)))
             {

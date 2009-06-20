@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -41,18 +41,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GitSharp.Util;
+using System.IO;
+using ICSharpCode.SharpZipLib.Zip.Compression;
+using GitSharp.Exceptions;
+using System.Runtime.CompilerServices;
 
 namespace GitSharp
 {
-    [Complete]
+
     public class UnpackedObjectCache
     {
+        private static int CACHE_SZ = 1024;
 
-        private static int CACHE_SZ = 256;
+        private static WeakReference<Entry> DEAD;
 
-        private static int MB = 1024 * 1024;
-
-        private static WeakReference<Entry> Dead;
+        private static int hash(long position)
+        {
+            return (int)((uint)(((int)position) << 22) >> 22);
+        }
 
         private static int maxByteCount;
 
@@ -66,81 +72,69 @@ namespace GitSharp
 
         static UnpackedObjectCache()
         {
-
-            Dead = new WeakReference<Entry>(null);
-            maxByteCount = 10 * MB;
+            DEAD = new WeakReference<Entry>(null);
+            maxByteCount = new WindowCacheConfig().getDeltaBaseCacheLimit();
 
             cache = new Slot[CACHE_SZ];
             for (int i = 0; i < CACHE_SZ; i++)
                 cache[i] = new Slot();
-
         }
 
-
-        private static int Hash(WindowedFile pack, long position)
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static void reconfigure(WindowCacheConfig cfg)
         {
-            int h = pack.GetHashCode() + (int)position;
-            h += h >> 16;
-            h += h >> 8;
-            return h % CACHE_SZ;
-        }
-        static void Reconfigure(int dbLimit)
-        {
-            lock (typeof(UnpackedObjectCache))
+            int dbLimit = cfg.getDeltaBaseCacheLimit();
+            if (maxByteCount != dbLimit)
             {
-                if (maxByteCount != dbLimit)
+                maxByteCount = dbLimit;
+                releaseMemory();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static Entry get(PackFile pack, long position)
+        {
+            Slot e = cache[hash(position)];
+            if (e.provider == pack && e.position == position)
+            {
+                Entry buf = e.data.get();
+                if (buf != null)
                 {
-                    maxByteCount = dbLimit;
-                    ReleaseMemory();
+                    moveToHead(e);
+                    return buf;
                 }
             }
+            return null;
         }
-        public static Entry Get(WindowedFile pack, long position)
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static void store(PackFile pack, long position,
+                 byte[] data, int objectType)
         {
-            lock (typeof(UnpackedObjectCache))
-            {
-                Slot e = cache[Hash(pack, position)];
-                if (e.provider == pack && e.position == position)
-                {
-                    Entry buf = e.data.Target;
-                    if (buf != null)
-                    {
-                        MoveToHead(e);
-                        return buf;
-                    }
-                }
-                return null;
-            }
+            if (data.Length > maxByteCount)
+                return; // Too large to cache.
+
+            Slot e = cache[hash(position)];
+            clearEntry(e);
+
+            openByteCount += data.Length;
+            releaseMemory();
+
+            e.provider = pack;
+            e.position = position;
+            e.sz = data.Length;
+            e.data = new WeakReference<Entry>(new Entry(data, objectType));
+            moveToHead(e);
         }
 
-        public static void Store(WindowedFile pack, long position, byte[] data, ObjectType objectType)
-        {
-            lock (typeof(UnpackedObjectCache))
-            {
-                if (data.Length > maxByteCount)
-                    return; // Too large to cache.
-
-                Slot e = cache[Hash(pack, position)];
-                ClearEntry(e);
-
-                openByteCount += data.Length;
-                ReleaseMemory();
-
-                e.provider = pack;
-                e.position = position;
-                e.data = new WeakReference<Entry>(new Entry(data, objectType));
-                MoveToHead(e);
-            }
-        }
-
-        private static void ReleaseMemory()
+        private static void releaseMemory()
         {
             while (openByteCount > maxByteCount && lruTail != null)
             {
                 Slot currOldest = lruTail;
                 Slot nextOldest = currOldest.lruPrev;
 
-                ClearEntry(currOldest);
+                clearEntry(currOldest);
                 currOldest.lruPrev = null;
                 currOldest.lruNext = null;
 
@@ -152,24 +146,22 @@ namespace GitSharp
             }
         }
 
-        public static void Purge(WindowedFile file)
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static void purge(PackFile file)
         {
-            lock (typeof(UnpackedObjectCache))
+            foreach (Slot e in cache)
             {
-                foreach (Slot e in cache)
+                if (e.provider == file)
                 {
-                    if (e.provider == file)
-                    {
-                        ClearEntry(e);
-                        Unlink(e);
-                    }
+                    clearEntry(e);
+                    unlink(e);
                 }
             }
         }
 
-        private static void MoveToHead(Slot e)
+        private static void moveToHead(Slot e)
         {
-            Unlink(e);
+            unlink(e);
             e.lruPrev = null;
             e.lruNext = lruHead;
             if (lruHead != null)
@@ -179,7 +171,7 @@ namespace GitSharp
             lruHead = e;
         }
 
-        private static void Unlink(Slot e)
+        private static void unlink(Slot e)
         {
             Slot prev = e.lruPrev;
             Slot next = e.lruNext;
@@ -189,30 +181,25 @@ namespace GitSharp
                 next.lruPrev = prev;
         }
 
-        private static void ClearEntry(Slot e)
+        private static void clearEntry(Slot e)
         {
-            Entry old = e.data.Target;
-            if (old != null)
-                openByteCount -= old.Data.Length;
+            openByteCount -= e.sz;
             e.provider = null;
-            e.data = Dead;
+            e.data = DEAD;
+            e.sz = 0;
         }
 
-        private UnpackedObjectCache()
-        {
-            throw new InvalidOperationException();
-        }
+
         public class Entry
         {
-            public byte[] Data { get; private set; }
+            public byte[] data;
 
-            public ObjectType Type { get; private set; }
+            public int type;
 
-
-            public Entry(byte[] data, ObjectType type)
+            public Entry(byte[] aData, int aType)
             {
-                this.Data = data;
-                this.Type = type;
+                data = aData;
+                type = aType;
             }
         }
 
@@ -222,11 +209,13 @@ namespace GitSharp
 
             public Slot lruNext;
 
-            public WindowedFile provider;
+            public PackFile provider;
 
             public long position;
 
-            public WeakReference<Entry> data = Dead;
+            public int sz;
+
+            public WeakReference<Entry> data = DEAD;
         }
     }
 }

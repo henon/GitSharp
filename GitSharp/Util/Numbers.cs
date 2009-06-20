@@ -116,6 +116,36 @@ namespace GitSharp.Util
             }
         }
 
+        	/**
+	 * Read the entire byte array into memory, or throw an exception.
+	 *
+	 * @param fd
+	 *            file to read the data from.
+	 * @param pos
+	 *            position to read from the file at.
+	 * @param dst
+	 *            buffer that must be fully populated, [off, off+len).
+	 * @param off
+	 *            position within the buffer to start writing to.
+	 * @param len
+	 *            number of bytes that must be read.
+	 * @throws EOFException
+	 *             the stream ended before dst was fully populated.
+	 * @throws IOException
+	 *             there was an error reading from the stream.
+	 */
+	public static void ReadFully( Stream fd, long pos, byte[] dst, int off, int len)  {
+		while (len > 0) {
+            fd.Position = pos;
+            int r = fd.Read(dst, off, len);
+            if (r <= 0)
+				throw new EndOfStreamException("Short read of block.");
+			pos += r;
+			off += r;
+			len -= r;
+		}
+	}
+
         /**
          * Convert sequence of 8 bytes (network byte order) into unsigned value.
          * 

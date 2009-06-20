@@ -1,7 +1,7 @@
 ﻿/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -46,155 +46,143 @@ using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace GitSharp
 {
-    abstract class ByteWindow<T> : WeakReference<T> {
-	readonly WindowedFile provider;
-
-	readonly int id;
-
-	readonly int size;
-
-	int lastAccessed;
-
-	readonly long start;
-
-	readonly long end;
-
-	/**
-	 * Constructor for ByteWindow.
-	 * 
-	 * @param o
-	 *            the WindowedFile providing data access
-	 * @param pos
-	 *            the position in the file the data comes from.
-	 * @param d
-	 *            an id provided by the WindowedFile. See
-	 *            {@link WindowCache#get(WindowCursor, WindowedFile, long)}.
-	 * @param ref
-	 *            the object value required to perform data access.
-	 * @param sz
-	 *            the total number of bytes in this window.
-	 */
-	
-	ByteWindow(WindowedFile o, long pos, int d, T refT, int sz) 
-//        : base(refT, (ReferenceQueue<T>) WindowCache.clearedWindowQueue)
-        : base (refT)
+    /**
+     * A window of data currently stored within a cache.
+     * <p>
+     * All bytes in the window can be assumed to be "immediately available", that is
+     * they are very likely already in memory, unless the operating system's memory
+     * is very low and has paged part of this process out to disk. Therefore copying
+     * bytes from a window is very inexpensive.
+     * </p>
+     */
+    abstract internal class ByteWindow
     {
-        throw new NotImplementedException("the above constructor is not right because .net has no equivelent to SoftReferences");
+        internal PackFile pack;
 
-		provider = o;
-		size = sz;
-		id = d;
-		start = pos;
-		end = start + size;
-	}
+        internal long start;
 
-	bool Contains(WindowedFile neededFile, long neededPos) 
-    {
-		return provider == neededFile && start <= neededPos && neededPos < end;
-	}
+        internal long end;
 
-	/**
-	 * Copy bytes from the window to a caller supplied buffer.
-	 * 
-	 * @param ref
-	 *            the object value required to perform data access.
-	 * @param pos
-	 *            offset within the file to start copying from.
-	 * @param dstbuf
-	 *            destination buffer to copy into.
-	 * @param dstoff
-	 *            offset within <code>dstbuf</code> to start copying into.
-	 * @param cnt
-	 *            number of bytes to copy. This value may exceed the number of
-	 *            bytes remaining in the window starting at offset
-	 *            <code>pos</code>.
-	 * @return number of bytes actually copied; this may be less than
-	 *         <code>cnt</code> if <code>cnt</code> exceeded the number of
-	 *         bytes available.
-	 */
-	int Copy(T refT, long pos, byte[] dstbuf, int dstoff, int cnt) 
-    {
-		return Copy(refT, (int) (pos - start), dstbuf, dstoff, cnt);
-	}
+        internal ByteWindow(PackFile p, long s, long n)
+        {
+            pack = p;
+            start = s;
+            end = start + n;
+        }
 
-	/**
-	 * Copy bytes from the window to a caller supplied buffer.
-	 * 
-	 * @param ref
-	 *            the object value required to perform data access.
-	 * @param pos
-	 *            offset within the window to start copying from.
-	 * @param dstbuf
-	 *            destination buffer to copy into.
-	 * @param dstoff
-	 *            offset within <code>dstbuf</code> to start copying into.
-	 * @param cnt
-	 *            number of bytes to copy. This value may exceed the number of
-	 *            bytes remaining in the window starting at offset
-	 *            <code>pos</code>.
-	 * @return number of bytes actually copied; this may be less than
-	 *         <code>cnt</code> if <code>cnt</code> exceeded the number of
-	 *         bytes available.
-	 */
-	public abstract int Copy(T refT, int pos, byte[] dstbuf, int dstoff, int cnt);
+        internal int size()
+        {
+            return (int)(end - start);
+        }
 
-	/**
-	 * Pump bytes into the supplied inflater as input.
-	 * 
-	 * @param ref
-	 *            the object value required to perform data access.
-	 * @param pos
-	 *            offset within the window to start supplying input from.
-	 * @param dstbuf
-	 *            destination buffer the inflater should output decompressed
-	 *            data to.
-	 * @param dstoff
-	 *            current offset within <code>dstbuf</code> to inflate into.
-	 * @param inf
-	 *            the inflater to feed input to. The caller is responsible for
-	 *            initializing the inflater as multiple windows may need to
-	 *            supply data to the same inflater to completely decompress
-	 *            something.
-	 * @return updated <code>dstoff</code> based on the number of bytes
-	 *         successfully copied into <code>dstbuf</code> by
-	 *         <code>inf</code>. If the inflater is not yet finished then
-	 *         another window's data must still be supplied as input to finish
-	 *         decompression.
-	 * @throws DataFormatException
-	 *             the inflater encountered an invalid chunk of data. Data
-	 *             stream corruption is likely.
-	 */
-	int Inflate(T refT, long pos, byte[] dstbuf, int dstoff, Inflater inf)
-    {
-		return Inflate(refT, (int) (pos - start), dstbuf, dstoff, inf);
-	}
+        internal bool contains(PackFile neededFile, long neededPos)
+        {
+            return pack == neededFile && start <= neededPos && neededPos < end;
+        }
 
-	/**
-	 * Pump bytes into the supplied inflater as input.
-	 * 
-	 * @param ref
-	 *            the object value required to perform data access.
-	 * @param pos
-	 *            offset within the window to start supplying input from.
-	 * @param dstbuf
-	 *            destination buffer the inflater should output decompressed
-	 *            data to.
-	 * @param dstoff
-	 *            current offset within <code>dstbuf</code> to inflate into.
-	 * @param inf
-	 *            the inflater to feed input to. The caller is responsible for
-	 *            initializing the inflater as multiple windows may need to
-	 *            supply data to the same inflater to completely decompress
-	 *            something.
-	 * @return updated <code>dstoff</code> based on the number of bytes
-	 *         successfully copied into <code>dstbuf</code> by
-	 *         <code>inf</code>. If the inflater is not yet finished then
-	 *         another window's data must still be supplied as input to finish
-	 *         decompression.
-	 * @throws DataFormatException
-	 *             the inflater encountered an invalid chunk of data. Data
-	 *             stream corruption is likely.
-	 */
-	public abstract int Inflate(T refT, int pos, byte[] dstbuf, int dstoff, Inflater inf);
-}
+        /**
+         * Copy bytes from the window to a caller supplied buffer.
+         * 
+         * @param pos
+         *            offset within the file to start copying from.
+         * @param dstbuf
+         *            destination buffer to copy into.
+         * @param dstoff
+         *            offset within <code>dstbuf</code> to start copying into.
+         * @param cnt
+         *            number of bytes to copy. This value may exceed the number of
+         *            bytes remaining in the window starting at offset
+         *            <code>pos</code>.
+         * @return number of bytes actually copied; this may be less than
+         *         <code>cnt</code> if <code>cnt</code> exceeded the number of
+         *         bytes available.
+         */
+        internal int copy(long pos, byte[] dstbuf, int dstoff, int cnt)
+        {
+            return copy((int)(pos - start), dstbuf, dstoff, cnt);
+        }
+
+        /**
+         * Copy bytes from the window to a caller supplied buffer.
+         * 
+         * @param pos
+         *            offset within the window to start copying from.
+         * @param dstbuf
+         *            destination buffer to copy into.
+         * @param dstoff
+         *            offset within <code>dstbuf</code> to start copying into.
+         * @param cnt
+         *            number of bytes to copy. This value may exceed the number of
+         *            bytes remaining in the window starting at offset
+         *            <code>pos</code>.
+         * @return number of bytes actually copied; this may be less than
+         *         <code>cnt</code> if <code>cnt</code> exceeded the number of
+         *         bytes available.
+         */
+        internal abstract int copy(int pos, byte[] dstbuf, int dstoff, int cnt);
+
+        /**
+         * Pump bytes into the supplied inflater as input.
+         * 
+         * @param pos
+         *            offset within the file to start supplying input from.
+         * @param dstbuf
+         *            destination buffer the inflater should output decompressed
+         *            data to.
+         * @param dstoff
+         *            current offset within <code>dstbuf</code> to inflate into.
+         * @param inf
+         *            the inflater to feed input to. The caller is responsible for
+         *            initializing the inflater as multiple windows may need to
+         *            supply data to the same inflater to completely decompress
+         *            something.
+         * @return updated <code>dstoff</code> based on the number of bytes
+         *         successfully copied into <code>dstbuf</code> by
+         *         <code>inf</code>. If the inflater is not yet finished then
+         *         another window's data must still be supplied as input to finish
+         *         decompression.
+         * @
+         *             the inflater encountered an invalid chunk of data. Data
+         *             stream corruption is likely.
+         */
+        internal int inflate(long pos, byte[] dstbuf, int dstoff, Inflater inf)
+        {
+            return inflate((int)(pos - start), dstbuf, dstoff, inf);
+        }
+
+        /**
+         * Pump bytes into the supplied inflater as input.
+         * 
+         * @param pos
+         *            offset within the window to start supplying input from.
+         * @param dstbuf
+         *            destination buffer the inflater should output decompressed
+         *            data to.
+         * @param dstoff
+         *            current offset within <code>dstbuf</code> to inflate into.
+         * @param inf
+         *            the inflater to feed input to. The caller is responsible for
+         *            initializing the inflater as multiple windows may need to
+         *            supply data to the same inflater to completely decompress
+         *            something.
+         * @return updated <code>dstoff</code> based on the number of bytes
+         *         successfully copied into <code>dstbuf</code> by
+         *         <code>inf</code>. If the inflater is not yet finished then
+         *         another window's data must still be supplied as input to finish
+         *         decompression.
+         * @
+         *             the inflater encountered an invalid chunk of data. Data
+         *             stream corruption is likely.
+         */
+        internal abstract int inflate(int pos, byte[] dstbuf, int dstoff, Inflater inf);
+
+        internal static byte[] verifyGarbageBuffer = new byte[2048];
+
+        internal void inflateVerify(long pos, Inflater inf)
+        {
+            inflateVerify((int)(pos - start), inf);
+        }
+
+        internal abstract void inflateVerify(int pos, Inflater inf);
+    }
 }

@@ -77,6 +77,8 @@ namespace GitSharp
         private RefDatabase _refDb;
         //private List<PackFile> _packs;
 
+        private ObjectDirectory objectDatabase;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Repository"/> class. Assumes parent directory is the working directory.
         /// </summary>
@@ -123,24 +125,24 @@ namespace GitSharp
             //    ScanForPacks();
         }
 
-		#region events
-		
-		public event EventHandler<RefsChangedEventArgs> RefsChanged;
-		protected void OnRefsChanged()
-		{
-			var handler = this.RefsChanged;
-			if(handler != null)
-				handler(this, new RefsChangedEventArgs(this));
-		}
-		
-		public event EventHandler<IndexChangedEventArgs> IndexChanged;
-		protected void OnIndexChanged()
-		{
-			var handler = this.IndexChanged;
-			if(handler != null)
-				handler(this, new IndexChangedEventArgs(this));
-		}
-		#endregion
+        #region events
+
+        public event EventHandler<RefsChangedEventArgs> RefsChanged;
+        protected void OnRefsChanged()
+        {
+            var handler = this.RefsChanged;
+            if (handler != null)
+                handler(this, new RefsChangedEventArgs(this));
+        }
+
+        public event EventHandler<IndexChangedEventArgs> IndexChanged;
+        protected void OnIndexChanged()
+        {
+            var handler = this.IndexChanged;
+            if (handler != null)
+                handler(this, new IndexChangedEventArgs(this));
+        }
+        #endregion
 
         /**
          * Create a new Git repository initializing the necessary files and
@@ -296,7 +298,6 @@ namespace GitSharp
             return new FileInfo(PathUtil.Combine(_objectsDirs[0].FullName, d, f));
         }
 
-#warning commented out to get compiled
 
         /**
          * @param id
@@ -308,68 +309,32 @@ namespace GitSharp
          */
         public ObjectLoader OpenObject(AnyObjectId id)
         {
-            if (id == null) return null;
+            WindowCursor wc = new WindowCursor();
             try
             {
-                return new UnpackedObjectLoader(this, id.ToObjectId());
+                return openObject(wc, id);
             }
-            catch (FileNotFoundException)
+            finally
             {
-                return null;
+                wc.release();
             }
-            //return OpenObject(new WindowCursor(), id);
         }
 
 
-        ///**
-        // * @param curs
-        // *            temporary working space associated with the calling thread.
-        // * @param id
-        // *            SHA-1 of an object.
-        // * 
-        // * @return a {@link ObjectLoader} for accessing the data of the named
-        // *         object, or null if the object does not exist.
-        // * @throws IOException
-        // */
-        //public ObjectLoader OpenObject(WindowCursor windowCursor, AnyObjectId id)
-        //{
-        //    int k = _packs.Count;
-        //    if (k > 0)
-        //    {
-        //        do
-        //        {
-        //            try
-        //            {
-        //                ObjectLoader ol = _packs[--k].Get(windowCursor, id);
-        //                if (ol != null)
-        //                    return ol;
-        //            }
-        //            catch (IOException)
-        //            {
-        //                try
-        //                {
-        //                    windowCursor.Release();
-        //                    GC.Collect();
-        //                    ObjectLoader ol = _packs[k].Get(windowCursor, id);
-        //                    if (ol != null)
-        //                        return ol;
-        //                }
-        //                catch (IOException)
-        //                {
-
-        //                }
-        //            }
-        //        } while (k > 0);
-        //    }
-        //    try
-        //    {
-        //        return new UnpackedObjectLoader(this, id.ToObjectId());
-        //    }
-        //    catch (FileNotFoundException)
-        //    {
-        //        return null;
-        //    }
-        //}
+        /**
+         * @param curs
+         *            temporary working space associated with the calling thread.
+         * @param id
+         *            SHA-1 of an object.
+         * 
+         * @return a {@link ObjectLoader} for accessing the data of the named
+         *         object, or null if the object does not exist.
+         * @throws IOException
+         */
+        public ObjectLoader openObject(WindowCursor curs, AnyObjectId id)
+        {
+            return objectDatabase.openObject(curs, id);
+        }
 
 
         ///**
@@ -425,11 +390,11 @@ namespace GitSharp
             return OpenObject(id);
         }
         /**
-	     * @param id
-	     *            SHA'1 of a tree
-	     * @return an {@link ObjectLoader} for accessing the data of a named tree
-	     * @throws IOException
-	     */
+         * @param id
+         *            SHA'1 of a tree
+         * @return an {@link ObjectLoader} for accessing the data of a named tree
+         * @throws IOException
+         */
         public ObjectLoader OpenTree(ObjectId id)
         {
             return OpenObject(id);
@@ -456,30 +421,30 @@ namespace GitSharp
          * @return Commit or null
          * @throws IOException for I/O error or unexpected object type.
          */
-        private Commit MapCommit(ObjectId id)
+        public Commit MapCommit(ObjectId id)
         {
             ObjectLoader or = OpenObject(id);
             if (or == null)
                 return null;
-            byte[] raw = or.Bytes;
-            if (ObjectType.Commit == or.ObjectType)
+            byte[] raw = or.getBytes();
+            if (Constants.OBJ_COMMIT == or.getType())
                 return new Commit(this, id, raw);
             throw new IncorrectObjectTypeException(id, ObjectType.Commit);
         }
         /**
-	     * Access any type of Git object by id and
-	     *
-	     * @param id
-	     *            SHA-1 of object to read
-	     * @param refName optional, only relevant for simple tags
-	     * @return The Git object if found or null
-	     * @throws IOException
-	     */
+         * Access any type of Git object by id and
+         *
+         * @param id
+         *            SHA-1 of object to read
+         * @param refName optional, only relevant for simple tags
+         * @return The Git object if found or null
+         * @throws IOException
+         */
         public object MapObject(ObjectId id, string refName)
         {
             ObjectLoader or = OpenObject(id);
-            byte[] raw = or.Bytes;
-            switch (or.ObjectType)
+            byte[] raw = or.getBytes();
+            switch ((ObjectType)(or.getType()))
             {
                 case ObjectType.Tree:
                     return MakeTree(id, raw);
@@ -530,8 +495,8 @@ namespace GitSharp
             ObjectLoader or = OpenObject(id);
             if (or == null)
                 return null;
-            byte[] raw = or.Bytes;
-            switch (or.ObjectType)
+            byte[] raw = or.getBytes();
+            switch (((ObjectType)or.getType()))
             {
                 case ObjectType.Tree:
                     return new Tree(this, id, raw);
@@ -574,8 +539,8 @@ namespace GitSharp
             ObjectLoader or = OpenObject(id);
             if (or == null)
                 return null;
-            byte[] raw = or.Bytes;
-            if (ObjectType.Tag == or.ObjectType)
+            byte[] raw = or.getBytes();
+            if (ObjectType.Tag == (ObjectType)or.getType())
                 return new Tag(this, id, refName, raw);
             return new Tag(this, id, refName, null);
         }

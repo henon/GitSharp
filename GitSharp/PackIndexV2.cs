@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -47,7 +48,6 @@ using GitSharp.Exceptions;
 namespace GitSharp
 {
     /** Support for the pack index v2 format. */
-    [Complete]
     public class PackIndexV2 : PackIndex
     {
 
@@ -150,6 +150,8 @@ namespace GitSharp
             {
                 offset64 = NO_BYTES;
             }
+            _packChecksum = new byte[20];
+            NB.ReadFully(fd, _packChecksum, 0, _packChecksum.Length);
         }
 
         public override IEnumerator<PackIndex.MutableEntry> GetEnumerator()

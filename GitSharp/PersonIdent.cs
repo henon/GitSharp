@@ -129,12 +129,28 @@ namespace GitSharp
             this._tzOffset = tz;
         }
 
+        public PersonIdent(string name, string emailAddress, long when, int offset_in_minutes)
+        {
+            this.Name = name;
+            this.EmailAddress = emailAddress;
+            this._whenTicks = when;
+            this._tzOffset = new TimeSpan(0, offset_in_minutes, 0);
+        }
+
         public PersonIdent(PersonIdent pi, long when, TimeSpan tz)
         {
             this.Name = pi.Name;
             this.EmailAddress = pi.EmailAddress;
             this._whenTicks = when;
             this._tzOffset = tz;
+        }
+
+        public PersonIdent(PersonIdent pi, long when, int offset_in_minutes)
+        {
+            this.Name = pi.Name;
+            this.EmailAddress = pi.EmailAddress;
+            this._whenTicks = when;
+            this._tzOffset = new TimeSpan(0, offset_in_minutes, 0); ;
         }
 
         public PersonIdent(string str)

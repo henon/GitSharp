@@ -63,5 +63,10 @@ namespace GitSharp.Exceptions
             : base("Missing " + type + " " + id)
         {
         }
+
+        public MissingObjectException(ObjectId id, string type)
+            : base("Missing " + type + " " + id)
+        {
+        }
     }
 }

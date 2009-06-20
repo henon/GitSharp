@@ -67,5 +67,10 @@ namespace GitSharp.Util
             }
         }
 
+        public T get()
+        {
+            return Target;
+        }
+
     }
 }

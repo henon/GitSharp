@@ -38,6 +38,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 using System;
+using System.Linq;
 using GitSharp.Util;
 
 namespace GitSharp
@@ -59,6 +60,27 @@ namespace GitSharp
          * @return ptr + src.Length if b[ptr..src.Length] == src; else -1.
          */
         public static int match(char[] b, int ptr, char[] src)
+        {
+            if (ptr + src.Length > b.Length)
+                return -1;
+            for (int i = 0; i < src.Length; i++, ptr++)
+                if (b[ptr] != src[i])
+                    return -1;
+            return ptr;
+        }
+
+        /**
+          * Determine if b[ptr] matches src.
+          *
+          * @param b
+          *            the buffer to scan.
+          * @param ptr
+          *            first position within b, this should match src[0].
+          * @param src
+          *            the buffer to test for equality with b.
+          * @return ptr + src.Length if b[ptr..src.Length] == src; else -1.
+          */
+        public static int match(byte[] b, int ptr, byte[] src)
         {
             if (ptr + src.Length > b.Length)
                 return -1;
@@ -134,63 +156,6 @@ namespace GitSharp
 #endif
 
         /**
-	 * Parse a base 10 numeric from a sequence of ASCII digits into an int.
-	 * <p>
-	 * Digit sequences can begin with an optional run of spaces before the
-	 * sequence, and may start with a '+' or a '-' to indicate sign position.
-	 * Any other characters will cause the method to stop and return the current
-	 * result to the caller.
-	 * 
-	 * @param b
-	 *            buffer to scan.
-	 * @param ptr
-	 *            position within buffer to start parsing digits at.
-	 * @param ptrResult
-	 *            optional location to return the new ptr value through. If null
-	 *            the ptr value will be discarded.
-	 * @return the value at this location; 0 if the location is not a valid
-	 *         numeric.
-	 */
-        public static int ParseBase10(byte[] b, ref int ptr)
-        {
-            int r = 0;
-            int sign = 1;
-
-            try
-            {
-                int sz = b.Length;
-                while (ptr < sz && b[ptr] == ' ')
-                    ptr++;
-
-                if (ptr >= sz)
-                    return 0;
-
-                if (b[ptr] == '-')
-                {
-                    sign = -1;
-                    ptr++;
-                }
-                else if (b[ptr] == '+')
-                    ptr++;
-
-                while (ptr < sz)
-                {
-                    byte d = b[ptr];
-                    if ((d < (byte)'0') | (d > (byte)'9'))
-                        break;
-                    r = r * 10 + (d - (byte)'0');
-                    ptr++;
-                }
-            }
-            catch (IndexOutOfRangeException)
-            {
-                // Not a valid digit
-            }
-
-            return sign * r;
-        }
-
-        /**
          * Parse a base 10 numeric from a sequence of ASCII digits into an int.
          * <p>
          * Digit sequences can begin with an optional run of spaces before the
@@ -208,7 +173,7 @@ namespace GitSharp
          * @return the value at this location; 0 if the location is not a valid
          *         numeric.
          */
-        public static int parseBase10(char[] b, int ptr, MutableInteger ptrResult) // [henon] too complicated to replace all calls to this method with [kevin]'s changed method because that would require too many changes in the logic. can be done later
+        public static int parseBase10(char[] b, int ptr, MutableInteger ptrResult)
         {
             int r = 0;
             int sign = 0;
@@ -237,6 +202,65 @@ namespace GitSharp
                     if ((d < '0') || (d > '9'))
                         break;
                     r = r * 10 + ((byte)d - (byte)'0');
+                    ptr++;
+                }
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                // Not a valid digit.
+            }
+            if (ptrResult != null)
+                ptrResult.value = ptr;
+            return sign < 0 ? -r : r;
+        }
+
+        /**
+         * Parse a base 10 numeric from a sequence of ASCII digits into an int.
+         * <p>
+         * Digit sequences can begin with an optional run of spaces before the
+         * sequence, and may start with a '+' or a '-' to indicate sign position.
+         * Any other characters will cause the method to stop and return the current
+         * result to the caller.
+         * 
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position within buffer to start parsing digits at.
+         * @param ptrResult
+         *            optional location to return the new ptr value through. If null
+         *            the ptr value will be discarded.
+         * @return the value at this location; 0 if the location is not a valid
+         *         numeric.
+         */
+        public static int parseBase10(byte[] b, int ptr, MutableInteger ptrResult)
+        {
+            int r = 0;
+            int sign = 0;
+            try
+            {
+                int sz = b.Length;
+                while (ptr < sz && b[ptr] == ' ')
+                    ptr++;
+                if (ptr >= sz)
+                    return 0;
+
+                switch (b[ptr])
+                {
+                    case ((byte)'-'):
+                        sign = -1;
+                        ptr++;
+                        break;
+                    case ((byte)'+'):
+                        ptr++;
+                        break;
+                }
+
+                while (ptr < sz)
+                {
+                    byte d = b[ptr];
+                    if ((d < (byte)'0') || (d > (byte)'9'))
+                        break;
+                    r = r * 10 + (d - (byte)'0');
                     ptr++;
                 }
             }

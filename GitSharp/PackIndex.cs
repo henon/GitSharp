@@ -2,6 +2,7 @@
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -46,13 +47,31 @@ using GitSharp.Util;
 
 namespace GitSharp
 {
-    [Complete]
+
+    /**
+     * Access path to locate objects by {@link ObjectId} in a {@link PackFile}.
+     * <p>
+     * Indexes are strictly redundant information in that we can rebuild all of the
+     * data held in the index file from the on disk representation of the pack file
+     * itself, but it is faster to access for random requests because data is stored
+     * by ObjectId.
+     * </p>
+     */
     public abstract class PackIndex : IEnumerable<PackIndex.MutableEntry>
     {
 
 
-        
-        
+
+        /** Footer checksum applied on the bottom of the pack file. */
+        protected byte[] _packChecksum;
+
+        public byte[] packChecksum
+        {
+            get
+            {
+                return _packChecksum;
+            }
+        }
 
         private static bool IsTOC(byte[] h)
         {

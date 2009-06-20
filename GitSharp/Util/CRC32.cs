@@ -137,4 +137,9 @@ public class Crc32
     {
         this.Update(values, 0, values.Length);
     }
+
+    internal void update(byte buf, int p, int toRead)
+    {
+        throw new NotImplementedException();
+    }
 }

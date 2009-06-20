@@ -1,8 +1,5 @@
 ﻿/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyrigth (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -42,26 +39,45 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using GitSharp;
-using System.IO;
+using System.Diagnostics;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Util
 {
-    [global::System.Serializable]
-    public class CorruptObjectException : IOException
+    public static class Int32Extensions
     {
-        //
-        // For guidelines regarding the creation of new exception types, see
-        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
-        // and
-        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
-        //
+        /// <summary>
+        /// computes the number of 1 bits in the two's complement binary representation of the integer
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public static int BitCount(this int n)
+        {
+            int i = n;
+            int count = 0;
+            while (i != 0)
+            {
+                count++;
+                i &= (i - 1);
+            }
+            return count;
+        }
 
-        public CorruptObjectException(AnyObjectId id, string message) : base(string.Format("Object {0} is corrupt: {1}", id, message)) { }
-        public CorruptObjectException(string message) : base(message) { }
-        public CorruptObjectException(string message, Exception inner) : base(message, inner) { }
-        public CorruptObjectException(AnyObjectId id, string message, Exception inner) : base(string.Format("Object {0} is corrupt: {1}", id, message), inner) { }
-        protected CorruptObjectException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
-            : base(info, context) { }
+        /// <summary>
+        /// computes the number of 0 bits to the right of the first 1
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public static int NumberOfTrailingZeros(this int n)
+        {
+            Debug.Assert(n != 0);
+            uint i = (uint)n;
+            int zeros = 0;
+            while ((i & 1) == 0)
+            {
+                zeros++;
+                i >>= 1;
+            }
+            return zeros;
+        }
     }
 }

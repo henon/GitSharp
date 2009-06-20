@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -41,55 +41,73 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GitSharp.Exceptions;
+using System.IO;
 
 namespace GitSharp
 {
-    [Complete]
+    /** Reader for a non-delta (just deflated) object in a pack file. */
     public class WholePackedObjectLoader : PackedObjectLoader
     {
-        public WholePackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, ObjectType type, int size)
+        private static int OBJ_COMMIT = Constants.OBJ_COMMIT;
+
+        public WholePackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int type, int size)
             : base(pr, dataOffset, objectOffset)
         {
-            this.ObjectType = type;
-            this.Size = size;
+            objectType = type;
+            objectSize = size;
         }
 
-        public override ObjectId GetDeltaBase()
+
+        public override void materialize(WindowCursor curs)
+        {
+            if (cachedBytes != null)
+            {
+                return;
+            }
+
+            if (objectType != OBJ_COMMIT)
+            {
+                UnpackedObjectCache.Entry cache = pack.readCache(dataOffset);
+                if (cache != null)
+                {
+                    curs.release();
+                    cachedBytes = cache.data;
+                    return;
+                }
+            }
+
+            try
+            {
+                cachedBytes = pack.decompress(dataOffset, objectSize, curs);
+                curs.release();
+                if (objectType != OBJ_COMMIT)
+                    pack.saveCache(dataOffset, cachedBytes, objectType);
+            }
+            catch (IOException dfe)
+            {
+                CorruptObjectException coe;
+                coe = new CorruptObjectException("Object at " + dataOffset + " in "
+                        + pack.File.FullName + " has bad zlib stream", dfe);
+                throw coe;
+            }
+        }
+
+
+        public override int getRawType()
+        {
+            return objectType;
+        }
+
+
+        public override long getRawSize()
+        {
+            return objectSize;
+        }
+
+
+        public override ObjectId getDeltaBase()
         {
             return null;
-        }
-
-        public override byte[] CachedBytes
-        {
-            get
-            {
-                try
-                {
-                    // might not should be down converting this.Size
-                    return pack.Decompress(this.DataOffset, (int)this.Size);
-                }
-                catch (FormatException fe)
-                {
-                    throw new CorruptObjectException("Object at " + this.DataOffset + " in "
-                    + pack.File.FullName + " has bad zlib stream", fe);
-                }
-            }
-        }
-
-        public override ObjectType RawType
-        {
-            get
-            {
-                return this.ObjectType;
-            }
-        }
-
-        public override long RawSize
-        {
-            get
-            {
-                return this.Size;
-            }
         }
     }
 }

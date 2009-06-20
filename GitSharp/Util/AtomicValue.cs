@@ -1,7 +1,5 @@
-/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+﻿/*
+ * Copyrigth (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -41,64 +39,35 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using GitSharp.Util;
-using ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace GitSharp
+namespace GitSharp.Util
 {
-
-    /**
-     * A {@link ByteWindow} with an underlying byte array for storage.
-     */
-    internal class ByteArrayWindow : ByteWindow
+    public class AtomicValue<T>
     {
-        private byte[] array;
+        T value;
 
-        internal ByteArrayWindow(PackFile pack, long o, byte[] b)
-            : base(pack, o, b.Length)
+        public AtomicValue(T init)
         {
-            array = b;
+            value = init;
         }
 
-
-        internal override int copy(int p, byte[] b, int o, int n)
+        public bool compareAndSet(T expect, T update)
         {
-            n = Math.Min(array.Length - p, n);
-            Array.Copy(array, p, b, o, n);
-            return n;
-        }
-
-
-        internal override int inflate(int pos, byte[] b, int o, Inflater inf)
-        {
-            while (!inf.IsFinished)
+            lock (this)
             {
-                if (inf.IsNeedingInput)
+                if (value.Equals( expect))
                 {
-                    inf.SetInput(array, pos, array.Length - pos);
-                    break;
+                    value = update;
+                    return true;
                 }
-                o += inf.Inflate(b, o, b.Length - o);
+                return false;
             }
-            while (!inf.IsFinished && !inf.IsNeedingInput)
-                o += inf.Inflate(b, o, b.Length - o);
-            return o;
         }
 
-
-        internal override void inflateVerify(int pos, Inflater inf)
+        public T get()
         {
-            while (!inf.IsFinished)
-            {
-                if (inf.IsNeedingInput)
-                {
-                    inf.SetInput(array, pos, array.Length - pos);
-                    break;
-                }
-                inf.Inflate(verifyGarbageBuffer, 0, verifyGarbageBuffer.Length);
-            }
-            while (!inf.IsFinished && !inf.IsNeedingInput)
-                inf.Inflate(verifyGarbageBuffer, 0, verifyGarbageBuffer.Length);
+            return value;
         }
+
     }
 }

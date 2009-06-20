@@ -33,15 +33,26 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\extern\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\extern\FileMap\Winterdom.IO.FileMap.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbbreviatedObjectId.cs" />
+    <Compile Include="ByteArrayWindow.cs" />
+    <Compile Include="ByteBufferWindow.cs" />
+    <Compile Include="ByteWindow.cs" />
     <Compile Include="CompleteAttribute.cs" />
     <Compile Include="DeltaOfsPackedObjectLoader.cs" />
     <Compile Include="DeltaPackedObjectLoader.cs">
@@ -53,11 +64,17 @@
     <Compile Include="Exceptions\EntryExistsException.cs" />
     <Compile Include="Exceptions\FileLockedException.cs" />
     <Compile Include="Exceptions\IncorrectObjectTypeException.cs" />
+    <Compile Include="Exceptions\InvalidPackException.cs" />
     <Compile Include="Exceptions\MissingObjectException.cs" />
     <Compile Include="Exceptions\ObjectWritingException.cs" />
+    <Compile Include="Exceptions\PackMismatchException.cs" />
     <Compile Include="Exceptions\RevisionSyntaxException.cs" />
     <Compile Include="Exceptions\SymlinksNotSupportedException.cs" />
-    <Compile Include="Extensions.cs" />
+    <Compile Include="ObjectDatabase.cs" />
+    <Compile Include="ObjectDirectory.cs" />
+    <Compile Include="UnpackedObjectCache.cs" />
+    <Compile Include="Util\AtomicReference.cs" />
+    <Compile Include="Util\Extensions.cs" />
     <Compile Include="AbstractIndexTreeVisitor.cs" />
     <Compile Include="AnyObjectId.cs" />
     <Compile Include="BinaryDelta.cs" />
@@ -73,6 +90,7 @@
     <Compile Include="IndexDiff.cs" />
     <Compile Include="IndexTreeVisitor.cs" />
     <Compile Include="IndexTreeWalker.cs" />
+    <Compile Include="InflaterCache.cs" />
     <Compile Include="LockFile.cs" />
     <Compile Include="MutableObjectId.cs" />
     <Compile Include="NullProgressMonitor.cs" />
@@ -82,6 +100,7 @@
     <Compile Include="ObjectLoader.cs" />
     <Compile Include="ObjectType.cs" />
     <Compile Include="ObjectWriter.cs" />
+    <Compile Include="OffsetCache.cs" />
     <Compile Include="PackedObjectLoader.cs" />
     <Compile Include="PackFile.cs" />
     <Compile Include="PackIndex.cs" />
@@ -112,6 +131,10 @@
     <Compile Include="TreeVisitor.cs" />
     <Compile Include="TreeVisitorWithCurrentDirectory.cs" />
     <Compile Include="UnpackedObjectLoader.cs" />
+    <Compile Include="Util\AtomicReferenceArray.cs" />
+    <Compile Include="Util\AtomicValue.cs" />
+    <Compile Include="Util\FS.cs" />
+    <Compile Include="Util\Int32.cs" />
     <Compile Include="Util\ISystemReader.cs" />
     <Compile Include="Util\MutableInteger.cs" />
     <Compile Include="Util\String.cs" />
@@ -120,6 +143,9 @@
     <Compile Include="Util\MessageDigest.cs" />
     <Compile Include="Util\WeakReference.cs" />
     <Compile Include="WholePackedObjectLoader.cs" />
+    <Compile Include="WindowCachConfig.cs" />
+    <Compile Include="WindowCache.cs" />
+    <Compile Include="WindowCursor.cs" />
     <Compile Include="WriteTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\BufferedReader.cs" />

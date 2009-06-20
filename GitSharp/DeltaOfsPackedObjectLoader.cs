@@ -2,7 +2,7 @@
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -46,29 +46,35 @@ using GitSharp.Exceptions;
 
 namespace GitSharp
 {
-	public class DeltaOfsPackedObjectLoader : DeltaPackedObjectLoader
-	{
+    class DeltaOfsPackedObjectLoader : DeltaPackedObjectLoader
+    {
         private long deltaBase;
 
-		public DeltaOfsPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz, long baseOffset)
-			: base(pr, dataOffset, objectOffset, deltaSz)
-		{
-            this.deltaBase = baseOffset;
-            this.RawType = ObjectType.OffsetDelta;
-		}
-
-        protected override PackedObjectLoader GetBaseLoader()
+        public DeltaOfsPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz, long @base)
+            : base(pr, dataOffset, objectOffset, deltaSz)
         {
-            return pack.ResolveBase(deltaBase);
+            deltaBase = @base;
         }
 
-        public override ObjectId GetDeltaBase()
+        public override PackedObjectLoader getBaseLoader(WindowCursor curs)
+        {
+            return pack.ResolveBase(curs, deltaBase);
+        }
+
+        public override int getRawType()
+        {
+            return Constants.OBJ_OFS_DELTA;
+        }
+
+
+        public override ObjectId getDeltaBase()
         {
             ObjectId id = pack.FindObjectForOffset(deltaBase);
-			if (id == null)
-				throw new CorruptObjectException("Offset-written delta base for object not found in a pack");
-			return id;
+            if (id == null)
+                throw new CorruptObjectException(
+                        "Offset-written delta base for object not found in a pack");
+            return id;
         }
+    }
 
-	}
 }

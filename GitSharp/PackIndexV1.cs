@@ -2,6 +2,7 @@
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -79,6 +80,9 @@ namespace GitSharp
                 NB.ReadFully(fd, idxdata[k], 0, idxdata[k].Length);
             }
             ObjectCount = idxHeader[255];
+
+            _packChecksum = new byte[20];
+            NB.ReadFully(fd, _packChecksum, 0, _packChecksum.Length);
         }
 
         public override IEnumerator<PackIndex.MutableEntry> GetEnumerator()

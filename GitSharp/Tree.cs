@@ -339,7 +339,7 @@ namespace GitSharp
             ObjectLoader or = _db.OpenTree(this.Id);
             if (or == null)
                 throw new MissingObjectException(this.Id, ObjectType.Tree);
-            ReadTree(or.Bytes);
+            ReadTree(or.getBytes());
         }
 
         private void ReadTree(byte[] raw)

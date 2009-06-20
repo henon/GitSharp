@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -41,23 +42,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ICSharpCode.SharpZipLib.Zip.Compression;
+using System.Runtime.CompilerServices;
 
 namespace GitSharp
 {
-    [Complete]
+
     public class InflaterCache
     {
 
         private static int SZ = 4;
-        
+
         private static Inflater[] inflaterCache;
 
         private static int openInflaterCount;
 
-        static InflaterCache()
+        private InflaterCache()
         {
             inflaterCache = new Inflater[SZ];
         }
+
+        public static InflaterCache Instance
+        {
+            get
+            {
+                if (m_instance != null)
+                    m_instance = new InflaterCache();
+                return m_instance;
+            }
+        }
+        private static InflaterCache m_instance;
 
         /**
          * Obtain an Inflater for decompression.
@@ -67,18 +80,22 @@ namespace GitSharp
          * 
          * @return an available inflater. Never null.
          */
-        public static Inflater GetInflater()
+        public Inflater get()
         {
-            lock (typeof(InflaterCache))
+            Inflater r = getImpl();
+            return r != null ? r : new Inflater(false);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private Inflater getImpl()
+        {
+            if (openInflaterCount > 0)
             {
-                if (openInflaterCount > 0)
-                {
-                    Inflater r = inflaterCache[--openInflaterCount];
-                    inflaterCache[openInflaterCount] = null;
-                    return r;
-                }
-                return new Inflater(false);
+                Inflater r = inflaterCache[--openInflaterCount];
+                inflaterCache[openInflaterCount] = null;
+                return r;
             }
+            return null;
         }
 
         /**
@@ -88,25 +105,26 @@ namespace GitSharp
          *            the inflater to return. May be null, in which case this method
          *            does nothing.
          */
-        public static void Release(Inflater i)
+        public void release(Inflater i)
         {
-            if (i == null)
-                return;
-            
-            i.Reset();
-
-            lock (typeof(InflaterCache))
+            if (i != null)
             {
-                if (openInflaterCount == SZ)
-                    return;
-                else
-                    inflaterCache[openInflaterCount++] = i;
+                i.Reset();
+                if (releaseImpl(i))
+                    ; //i.end();
             }
         }
-        
-        private InflaterCache()
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private static bool releaseImpl(Inflater i)
         {
-            throw new InvalidOperationException();
+            if (openInflaterCount < SZ)
+            {
+                inflaterCache[openInflaterCount++] = i;
+                return false;
+            }
+            return true;
         }
+
     }
 }

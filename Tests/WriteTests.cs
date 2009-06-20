@@ -145,8 +145,8 @@ namespace GitSharp.Tests
             Assert.AreEqual(ObjectId.FromString("00b1f73724f493096d1ffa0b0f1f1482dbb8c936"), t.TreeId);
 
             Commit c = new Commit(db);
-            c.Author = (new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4 * 60)));
-            c.Committer = (new PersonIdent(jcommitter, 1154236443000L, new TimeSpan(-4 * 60)));
+            c.Author = (new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
+            c.Committer = (new PersonIdent(jcommitter, 1154236443000L, new TimeSpan(-4, 0, 0)));
             c.Message = ("A Commit\n");
             c.TreeEntry = (t);
             Assert.AreEqual(t.TreeId, c.TreeId);
@@ -207,7 +207,7 @@ namespace GitSharp.Tests
             t.Id=(emptyId);
             t.TagType=("blob");
             t.TagName=("test020");
-            t.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4 * 60)));
+            t.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
             t.Message=("test020 tagged\n");
             t.Save();
             Assert.AreEqual("6759556b09fbb4fd8ae5e315134481cc25d46954", t.TagId.ToString());
@@ -233,27 +233,27 @@ namespace GitSharp.Tests
 
             // We do not repeat the plain tag test for other object types
         }
-#if false
+
         [Test]
         public void test021_createTreeTag()
         {
             ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             Tree almostEmptyTree = new Tree(db);
-            almostEmptyTree.addEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
-            ObjectId almostEmptyTreeId = new ObjectWriter(db).writeTree(almostEmptyTree);
+            almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Encoding.ASCII.GetBytes("empty"), false));
+            ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
             Tag t = new Tag(db);
             t.Id=(almostEmptyTreeId);
             t.TagType=("tree");
             t.TagName=("test021");
-            t.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            t.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
             t.Message=("test021 tagged\n");
-            t.tag();
-            Assert.AreEqual("b0517bc8dbe2096b419d42424cd7030733f4abe5", t.getTagId().ToString());
+            t.Save();
+            Assert.AreEqual("b0517bc8dbe2096b419d42424cd7030733f4abe5", t.TagId.ToString());
 
             Tag MapTag = db.MapTag("test021");
             Assert.AreEqual("tree", MapTag.TagType);
             Assert.AreEqual("test021 tagged\n", MapTag.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), MapTag.Author);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)), MapTag.Author);
             Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", MapTag.Id.ToString());
         }
 
@@ -262,27 +262,27 @@ namespace GitSharp.Tests
         {
             ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             Tree almostEmptyTree = new Tree(db);
-            almostEmptyTree.addEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
-            ObjectId almostEmptyTreeId = new ObjectWriter(db).writeTree(almostEmptyTree);
+            almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Encoding.ASCII.GetBytes( "empty"), false));
+            ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
             Commit almostEmptyCommit = new Commit(db);
-            almostEmptyCommit.Author=(new PersonIdent(jauthor, 1154236443000L, -2 * 60)); // not exactly the same
-            almostEmptyCommit.Committer=(new PersonIdent(jauthor, 1154236443000L, -2 * 60));
+            almostEmptyCommit.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-2, 0, 0))); // not exactly the same
+            almostEmptyCommit.Committer=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-2, 0, 0)));
             almostEmptyCommit.Message=("test022\n");
-            almostEmptyCommit.setTreeId(almostEmptyTreeId);
-            ObjectId almostEmptyCommitId = new ObjectWriter(db).writeCommit(almostEmptyCommit);
+            almostEmptyCommit.TreeId=(almostEmptyTreeId);
+            ObjectId almostEmptyCommitId = new ObjectWriter(db).WriteCommit(almostEmptyCommit);
             Tag t = new Tag(db);
             t.Id=(almostEmptyCommitId);
             t.TagType=("commit");
             t.TagName=("test022");
-            t.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            t.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
             t.Message=("test022 tagged\n");
-            t.tag();
-            Assert.AreEqual("0ce2ebdb36076ef0b38adbe077a07d43b43e3807", t.getTagId().ToString());
+            t.Save();
+            Assert.AreEqual("0ce2ebdb36076ef0b38adbe077a07d43b43e3807", t.TagId.ToString());
 
             Tag MapTag = db.MapTag("test022");
             Assert.AreEqual("commit", MapTag.TagType);
             Assert.AreEqual("test022 tagged\n", MapTag.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), MapTag.Author);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)), MapTag.Author);
             Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", MapTag.Id.ToString());
         }
 
@@ -291,15 +291,15 @@ namespace GitSharp.Tests
         {
             ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             Tree almostEmptyTree = new Tree(db);
-            almostEmptyTree.addEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
-            ObjectId almostEmptyTreeId = new ObjectWriter(db).writeTree(almostEmptyTree);
+            almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Encoding.ASCII.GetBytes( "empty"), false));
+            ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
             Commit commit = new Commit(db);
-            commit.setTreeId(almostEmptyTreeId);
+            commit.TreeId=(almostEmptyTreeId);
             commit.Author=(new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295000L, 60));
             commit.Committer=(new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295000L, 60));
             commit.setEncoding("UTF-8");
             commit.Message=("\u00dcbergeeks");
-            ObjectId cid = new ObjectWriter(db).writeCommit(commit);
+            ObjectId cid = new ObjectWriter(db).WriteCommit(commit);
             Assert.AreEqual("4680908112778718f37e686cbebcc912730b3154", cid.ToString());
         }
 
@@ -308,15 +308,15 @@ namespace GitSharp.Tests
         {
             ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             Tree almostEmptyTree = new Tree(db);
-            almostEmptyTree.addEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
-            ObjectId almostEmptyTreeId = new ObjectWriter(db).writeTree(almostEmptyTree);
+            almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Encoding.ASCII.GetBytes( "empty"), false));
+            ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
             Commit commit = new Commit(db);
-            commit.setTreeId(almostEmptyTreeId);
+            commit.TreeId=(almostEmptyTreeId);
             commit.Author=(new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295000L, 60));
             commit.Committer=(new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295000L, 60));
             commit.setEncoding("ISO-8859-1");
             commit.Message=("\u00dcbergeeks");
-            ObjectId cid = new ObjectWriter(db).writeCommit(commit);
+            ObjectId cid = new ObjectWriter(db).WriteCommit(commit);
             Assert.AreEqual("2979b39d385014b33287054b87f77bcb3ecb5ebf", cid.ToString());
         }
 
@@ -327,42 +327,45 @@ namespace GitSharp.Tests
             test021_createTreeTag();
             test022_createCommitTag();
 
-            if (!new DirectoryInfo(db.Directory, "refs/tags/test020").delete()) throw new Error("Cannot delete unpacked tag");
-            if (!new DirectoryInfo(db.Directory, "refs/tags/test021").delete()) throw new Error("Cannot delete unpacked tag");
-            if (!new DirectoryInfo(db.Directory, "refs/tags/test022").delete()) throw new Error("Cannot delete unpacked tag");
+            new DirectoryInfo(db.Directory.FullName+ "/refs/tags/test020").Delete();
+            if (new DirectoryInfo(db.Directory.FullName + "/refs/tags/test020").Exists) throw new IOException("Cannot delete unpacked tag");
+            new DirectoryInfo(db.Directory.FullName + "/refs/tags/test021").Delete();
+            if (new DirectoryInfo(db.Directory.FullName + "/refs/tags/test021").Exists) throw new IOException("Cannot delete unpacked tag");
+            new DirectoryInfo(db.Directory.FullName + "/refs/tags/test022").Delete();
+            if (new DirectoryInfo(db.Directory.FullName + "/refs/tags/test022").Exists) throw new IOException("Cannot delete unpacked tag");
 
-            // We cannot resolve it now, since we have no ref
+            // We cannot Resolve it now, since we have no ref
             Tag mapTag20missing = db.MapTag("test020");
             Assert.IsNull(mapTag20missing);
 
             // Construct packed refs file
-            PrintWriter w = new PrintWriter(new FileWriter(new DirectoryInfo(db.Directory, "packed-refs")));
-            w.println("# packed-refs with: peeled");
-            w.println("6759556b09fbb4fd8ae5e315134481cc25d46954 refs/tags/test020");
-            w.println("^e69de29bb2d1d6434b8b29ae775ad8c2e48c5391");
-            w.println("b0517bc8dbe2096b419d42424cd7030733f4abe5 refs/tags/test021");
-            w.println("^417c01c8795a35b8e835113a85a5c0c1c77f67fb");
-            w.println("0ce2ebdb36076ef0b38adbe077a07d43b43e3807 refs/tags/test022");
-            w.println("^b5d3b45a96b340441f5abb9080411705c51cc86c");
-            w.close();
+            var w = new StreamWriter(new FileStream(db.Directory.FullName+ "/packed-refs", System.IO.FileMode.CreateNew));
+            w.WriteLine("# packed-refs with: peeled");
+            w.WriteLine("6759556b09fbb4fd8ae5e315134481cc25d46954 refs/tags/test020");
+            w.WriteLine("^e69de29bb2d1d6434b8b29ae775ad8c2e48c5391");
+            w.WriteLine("b0517bc8dbe2096b419d42424cd7030733f4abe5 refs/tags/test021");
+            w.WriteLine("^417c01c8795a35b8e835113a85a5c0c1c77f67fb");
+            w.WriteLine("0ce2ebdb36076ef0b38adbe077a07d43b43e3807 refs/tags/test022");
+            w.WriteLine("^b5d3b45a96b340441f5abb9080411705c51cc86c");
+            w.Close();
 
             Tag mapTag20 = db.MapTag("test020");
-            Assert.IsNotNull("have tag test020", mapTag20);
+            Assert.IsNotNull( mapTag20);
             Assert.AreEqual("blob", mapTag20.TagType);
             Assert.AreEqual("test020 tagged\n", mapTag20.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag20.Author);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)), mapTag20.Author);
             Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag20.Id.ToString());
 
             Tag mapTag21 = db.MapTag("test021");
             Assert.AreEqual("tree", mapTag21.TagType);
             Assert.AreEqual("test021 tagged\n", mapTag21.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag21.Author);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)), mapTag21.Author);
             Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", mapTag21.Id.ToString());
 
             Tag mapTag22 = db.MapTag("test022");
             Assert.AreEqual("commit", mapTag22.TagType);
             Assert.AreEqual("test022 tagged\n", mapTag22.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag22.Author);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)), mapTag22.Author);
             Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag22.Id.ToString());
         }
 
@@ -381,24 +384,24 @@ namespace GitSharp.Tests
                     t.TreeId);
 
             Commit c1 = new Commit(db);
-            c1.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            c1.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
             c1.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
             c1.Message=("A Commit\n");
             c1.TreeEntry=(t);
             Assert.AreEqual(t.TreeId, c1.TreeId);
-            c1.commit();
+            c1.Save();
             ObjectId cmtid1 = ObjectId.FromString(
                    "803aec4aba175e8ab1d666873c984c0308179099");
             Assert.AreEqual(cmtid1, c1.CommitId);
 
             Commit c2 = new Commit(db);
-            c2.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            c2.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
             c2.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
             c2.Message=("A Commit 2\n");
             c2.TreeEntry=(t);
             Assert.AreEqual(t.TreeId, c2.TreeId);
-            c2.setParentIds(new ObjectId[] { c1.CommitId });
-            c2.commit();
+            c2.ParentIds=(new ObjectId[] { c1.CommitId });
+            c2.Save();
             ObjectId cmtid2 = ObjectId.FromString(
                    "95d068687c91c5c044fb8c77c5154d5247901553");
             Assert.AreEqual(cmtid2, c2.CommitId);
@@ -408,18 +411,18 @@ namespace GitSharp.Tests
             Assert.AreEqual(c2.Author, rm2.Author);
             Assert.AreEqual(c2.CommitId, rm2.CommitId);
             Assert.AreEqual(c2.Message, rm2.Message);
-            Assert.AreEqual(c2.getTree().TreeId, rm2.getTree().TreeId);
-            Assert.AreEqual(1, rm2.getParentIds().Length);
-            Assert.AreEqual(c1.CommitId, rm2.getParentIds()[0]);
+            Assert.AreEqual(c2.TreeEntry.TreeId, rm2.TreeEntry.TreeId);
+            Assert.AreEqual(1, rm2.ParentIds.Length);
+            Assert.AreEqual(c1.CommitId, rm2.ParentIds[0]);
 
             Commit c3 = new Commit(db);
-            c3.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            c3.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
             c3.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
             c3.Message=("A Commit 3\n");
             c3.TreeEntry=(t);
             Assert.AreEqual(t.TreeId, c3.TreeId);
-            c3.setParentIds(new ObjectId[] { c1.CommitId, c2.CommitId });
-            c3.commit();
+            c3.ParentIds=(new ObjectId[] { c1.CommitId, c2.CommitId });
+            c3.Save();
             ObjectId cmtid3 = ObjectId.FromString(
                    "ce6e1ce48fbeeb15a83f628dc8dc2debefa066f4");
             Assert.AreEqual(cmtid3, c3.CommitId);
@@ -429,19 +432,19 @@ namespace GitSharp.Tests
             Assert.AreEqual(c3.Author, rm3.Author);
             Assert.AreEqual(c3.CommitId, rm3.CommitId);
             Assert.AreEqual(c3.Message, rm3.Message);
-            Assert.AreEqual(c3.getTree().TreeId, rm3.getTree().TreeId);
-            Assert.AreEqual(2, rm3.getParentIds().Length);
-            Assert.AreEqual(c1.CommitId, rm3.getParentIds()[0]);
-            Assert.AreEqual(c2.CommitId, rm3.getParentIds()[1]);
+            Assert.AreEqual(c3.TreeEntry.TreeId, rm3.TreeEntry.TreeId);
+            Assert.AreEqual(2, rm3.ParentIds.Length);
+            Assert.AreEqual(c1.CommitId, rm3.ParentIds[0]);
+            Assert.AreEqual(c2.CommitId, rm3.ParentIds[1]);
 
             Commit c4 = new Commit(db);
-            c4.Author=(new PersonIdent(jauthor, 1154236443000L, -4 * 60));
+            c4.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
             c4.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
             c4.Message=("A Commit 4\n");
             c4.TreeEntry=(t);
             Assert.AreEqual(t.TreeId, c3.TreeId);
-            c4.setParentIds(new ObjectId[] { c1.CommitId, c2.CommitId, c3.CommitId });
-            c4.commit();
+            c4.ParentIds=(new ObjectId[] { c1.CommitId, c2.CommitId, c3.CommitId });
+            c4.Save();
             ObjectId cmtid4 = ObjectId.FromString(
                    "d1fca9fe3fef54e5212eb67902c8ed3e79736e27");
             Assert.AreEqual(cmtid4, c4.CommitId);
@@ -451,22 +454,22 @@ namespace GitSharp.Tests
             Assert.AreEqual(c4.Author, rm4.Author);
             Assert.AreEqual(c4.CommitId, rm4.CommitId);
             Assert.AreEqual(c4.Message, rm4.Message);
-            Assert.AreEqual(c4.getTree().TreeId, rm4.getTree().TreeId);
-            Assert.AreEqual(3, rm4.getParentIds().Length);
-            Assert.AreEqual(c1.CommitId, rm4.getParentIds()[0]);
-            Assert.AreEqual(c2.CommitId, rm4.getParentIds()[1]);
-            Assert.AreEqual(c3.CommitId, rm4.getParentIds()[2]);
+            Assert.AreEqual(c4.TreeEntry.TreeId, rm4.TreeEntry.TreeId);
+            Assert.AreEqual(3, rm4.ParentIds.Length);
+            Assert.AreEqual(c1.CommitId, rm4.ParentIds[0]);
+            Assert.AreEqual(c2.CommitId, rm4.ParentIds[1]);
+            Assert.AreEqual(c3.CommitId, rm4.ParentIds[2]);
         }
 
         [Test]
         public void test027_UnpackedRefHigherPriorityThanPacked()
         {
-            PrintWriter writer = new PrintWriter(new FileWriter(new DirectoryInfo(db.Directory, "refs/heads/a")));
+            var writer = new StreamWriter(new FileStream(db.Directory.FullName + "/refs/heads/a", System.IO.FileMode.CreateNew));
             string unpackedId = "7f822839a2fe9760f386cbbbcb3f92c5fe81def7";
-            writer.println(unpackedId);
-            writer.close();
+            writer.WriteLine(unpackedId);
+            writer.Close();
 
-            ObjectId resolved = db.resolve("refs/heads/a");
+            ObjectId resolved = db.Resolve("refs/heads/a");
             Assert.AreEqual(unpackedId, resolved.ToString());
         }
 
@@ -476,36 +479,36 @@ namespace GitSharp.Tests
             writeTrashFile(".git/packed-refs", "7f822839a2fe9760f386cbbbcb3f92c5fe81def7 refs/heads/foobar");
             writeTrashFile(".git/HEAD", "ref: refs/heads/foobar\n");
 
-            ObjectId resolve = db.resolve("HEAD");
-            Assert.AreEqual("7f822839a2fe9760f386cbbbcb3f92c5fe81def7", resolve.ToString());
+            ObjectId Resolve = db.Resolve("HEAD");
+            Assert.AreEqual("7f822839a2fe9760f386cbbbcb3f92c5fe81def7", Resolve.ToString());
 
-            RefUpdate lockRef = db.updateRef("HEAD");
+            RefUpdate lockRef = db.UpdateRef("HEAD");
             ObjectId newId = ObjectId.FromString("07f822839a2fe9760f386cbbbcb3f92c5fe81def");
-            lockRef.setNewObjectId(newId);
-            Assert.AreEqual(RefUpdate.Result.FORCED, lockRef.forceUpdate());
+            lockRef.NewObjectId=(newId);
+            Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, lockRef.ForceUpdate());
 
-            Assert.IsTrue(new DirectoryInfo(db.Directory, "refs/heads/foobar").exists());
-            Assert.AreEqual(newId, db.resolve("refs/heads/foobar"));
+            Assert.IsTrue(new DirectoryInfo(db.Directory.FullName+ "/refs/heads/foobar").Exists);
+            Assert.AreEqual(newId, db.Resolve("refs/heads/foobar"));
 
             // Again. The ref already exists
-            RefUpdate lockRef2 = db.updateRef("HEAD");
+            RefUpdate lockRef2 = db.UpdateRef("HEAD");
             ObjectId newId2 = ObjectId.FromString("7f822839a2fe9760f386cbbbcb3f92c5fe81def7");
-            lockRef2.setNewObjectId(newId2);
-            Assert.AreEqual(RefUpdate.Result.FORCED, lockRef2.forceUpdate());
+            lockRef2.NewObjectId=(newId2);
+            Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, lockRef2.ForceUpdate());
 
-            Assert.IsTrue(new DirectoryInfo(db.Directory, "refs/heads/foobar").exists());
-            Assert.AreEqual(newId2, db.resolve("refs/heads/foobar"));
+            Assert.IsTrue(new DirectoryInfo(db.Directory.FullName + "refs/heads/foobar").Exists);
+            Assert.AreEqual(newId2, db.Resolve("refs/heads/foobar"));
         }
 
         [Test]
         public void test029_mapObject()
         {
-            Assert.AreEqual(new byte[0].GetType(), db.mapObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"), null).GetType());
-            Assert.AreEqual(typeof(Commit), db.mapObject(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab"), null).GetType());
-            Assert.AreEqual(typeof(Tree), db.mapObject(ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"), null).GetType());
-            Assert.AreEqual(typeof(Tag), db.mapObject(ObjectId.FromString("17768080a2318cd89bba4c8b87834401e2095703"), null).GetType());
+            Assert.AreEqual(new byte[0].GetType(), db.MapObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"), null).GetType());
+            Assert.AreEqual(typeof(Commit), db.MapObject(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab"), null).GetType());
+            Assert.AreEqual(typeof(Tree), db.MapObject(ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"), null).GetType());
+            Assert.AreEqual(typeof(Tag), db.MapObject(ObjectId.FromString("17768080a2318cd89bba4c8b87834401e2095703"), null).GetType());
 
         }
-#endif
+
     }
 }

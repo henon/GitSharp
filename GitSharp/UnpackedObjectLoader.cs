@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -45,24 +45,68 @@ using GitSharp.Exceptions;
 using System.IO;
 using System.IO.Compression;
 using GitSharp.Util;
+using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace GitSharp
 {
+    /**
+     * Loose object loader. This class loads an object not stored in a pack.
+     */
     public class UnpackedObjectLoader : ObjectLoader
     {
-        
+        private int objectType;
 
-        public UnpackedObjectLoader(Repository repo, ObjectId objectId)
-            : this(ReadCompressed(repo, objectId), objectId)
+        private int objectSize;
+
+        private byte[] bytes;
+
+        /**
+         * Construct an ObjectLoader to read from the file.
+         *
+         * @param path
+         *            location of the loose object to read.
+         * @param id
+         *            expected identity of the object being loaded, if known.
+         * @throws FileNotFoundException
+         *             the loose object file does not exist.
+         * @
+         *             the loose object file exists, but is corrupt.
+         */
+        public UnpackedObjectLoader(FileInfo path, AnyObjectId id)
+            :
+            this(readCompressed(path), id)
+        { }
+
+        private static byte[] readCompressed(FileInfo path)
         {
+            var @in = new FileStream(path.FullName, System.IO.FileMode.Open);
+            try
+            {
+                byte[] compressed = new byte[(int)@in.Length];
+                NB.ReadFully(@in, compressed, 0, compressed.Length);
+                return compressed;
+            }
+            finally
+            {
+                @in.Close();
+            }
         }
 
+        /**
+         * Construct an ObjectLoader from a loose object's compressed form.
+         *
+         * @param compressed
+         *            entire content of the loose object file.
+         * @ 
+         *             The compressed data supplied does not match the format for a
+         *             valid loose object.
+         */
         public UnpackedObjectLoader(byte[] compressed)
             : this(compressed, null)
         {
         }
 
-        public UnpackedObjectLoader(byte[] compressed, ObjectId id)
+        private UnpackedObjectLoader(byte[] compressed, AnyObjectId id)
         {
             // Try to determine if this is a legacy format loose object or
             // a new style loose object. The legacy format was completely
@@ -71,56 +115,48 @@ namespace GitSharp
             // evenly divisible by 31. Otherwise its a new style loose
             // object.
             //
-            
-   
+            Inflater inflater = InflaterCache.Instance.get();
+            try
+            {
                 int fb = compressed[0] & 0xff;
-
                 if (fb == 0x78 && (((fb << 8) | compressed[1] & 0xff) % 31) == 0)
                 {
-                    var old = new MemoryStream(compressed, 2, compressed.Length -2);
-                    var deflate = new DeflateStream(old, CompressionMode.Decompress);
-
-                    var header = new byte[64];
+                    inflater.SetInput(compressed);
+                    byte[] hdr = new byte[64];
                     int avail = 0;
-                    int bytesIn = -1;
-                    while (bytesIn != 0 && avail < header.Length)
-                    {
+                    while (!inflater.IsFinished && avail < hdr.Length)
                         try
                         {
-                            bytesIn = deflate.Read(header, avail, header.Length - avail);
-                            avail += bytesIn;
+                            avail += inflater.Inflate(hdr, avail, hdr.Length
+                                    - avail);
                         }
-                        catch (Exception inn)
+                        catch (IOException dfe)
                         {
-                            throw new CorruptObjectException(id, "bad stream", inn);
+                            CorruptObjectException coe;
+                            coe = new CorruptObjectException(id, "bad stream", dfe);
+                            //inflater.end();
+                            throw coe;
                         }
-                    }
-
                     if (avail < 5)
                         throw new CorruptObjectException(id, "no header");
 
-                    int p = 0;
-                    this.ObjectType = Codec.DecodeTypeString(id, header, (byte)' ', ref p);
-                    this.Size = RawParseUtils.ParseBase10(header, ref p);
-
-                    if (this.Size < 0)
+                    MutableInteger p = new MutableInteger();
+                    objectType = Constants.decodeTypeString(id, hdr, (byte)' ', p);
+                    objectSize = RawParseUtils.parseBase10(hdr, p.value, p);
+                    if (objectSize < 0)
                         throw new CorruptObjectException(id, "negative size");
-
-                    if (header[p++] != 0)
+                    if (hdr[p.value++] != 0)
                         throw new CorruptObjectException(id, "garbage after size");
-
-                    this.CachedBytes = new byte[this.Size];
-
-                    if (p < avail)
-                        Array.Copy(header, p, this.CachedBytes, 0, avail - p);
-
-                    Decompress(id, deflate, avail - p);
+                    bytes = new byte[objectSize];
+                    if (p.value < avail)
+                        Array.Copy(hdr, p.value, bytes, 0, avail - p.value);
+                    decompress(id, inflater, avail - p.value);
                 }
                 else
                 {
                     int p = 0;
                     int c = compressed[p++] & 0xff;
-                    ObjectType typeCode = (ObjectType)((c >> 4) & 7);
+                    int typeCode = (c >> 4) & 7;
                     int size = c & 15;
                     int shift = 4;
                     while ((c & 0x80) != 0)
@@ -132,65 +168,72 @@ namespace GitSharp
 
                     switch (typeCode)
                     {
-                        case ObjectType.Commit:
-                        case ObjectType.Tree:
-                        case ObjectType.Blob:
-                        case ObjectType.Tag:
-                            this.ObjectType = typeCode;
+                        case Constants.OBJ_COMMIT:
+                        case Constants.OBJ_TREE:
+                        case Constants.OBJ_BLOB:
+                        case Constants.OBJ_TAG:
+                            objectType = typeCode;
                             break;
                         default:
                             throw new CorruptObjectException(id, "invalid type");
                     }
 
-                    this.Size = size;
-                    this.CachedBytes = new byte[this.Size];
-                    
-                    var newstream = new MemoryStream(compressed, p, compressed.Length - p);
-                    Decompress(id, new DeflateStream(newstream, CompressionMode.Decompress), 0);
+                    objectSize = size;
+                    bytes = new byte[objectSize];
+                    inflater.SetInput(compressed, p, compressed.Length - p);
+                    decompress(id, inflater, 0);
                 }
-            
+            }
+            finally
+            {
+                InflaterCache.Instance.release(inflater);
+            }
         }
 
-        private void Decompress(ObjectId id, DeflateStream inf, int p)
+        private void decompress(AnyObjectId id, Inflater inf, int p)
         {
             try
             {
-                var bytesRead = -1;
-
-                while (bytesRead != 0)
-                {
-                    bytesRead = inf.Read(this.CachedBytes, p, (int)this.Size - p);
-                    p += bytesRead;
-                }
+                while (!inf.IsFinished)
+                    p += inf.Inflate(bytes, p, objectSize - p);
             }
-            catch (Exception e)
+            catch (IOException dfe)
             {
-                throw new CorruptObjectException(id, "bad stream", e);
+                CorruptObjectException coe;
+                coe = new CorruptObjectException(id, "bad stream", dfe);
+                throw coe;
             }
-            if (p != this.Size)
-                throw new CorruptObjectException(id, "Invalid Length");
+            if (p != objectSize)
+                throw new CorruptObjectException(id, "incorrect length");
         }
 
-        static byte[] ReadCompressed(Repository db, ObjectId id)
-        {
-            byte[] compressed;
 
-            using (FileStream objStream = db.ToFile(id).OpenRead())
-            {
-                compressed = new byte[objStream.Length];
-                objStream.Read(compressed, 0, (int)objStream.Length);
-            }
-            return compressed;
+        public override int getType()
+        {
+            return objectType;
         }
 
-        public override ObjectType RawType
+
+        public override long getSize()
         {
-            get { return this.ObjectType; }
+            return objectSize;
         }
 
-        public override long RawSize
+
+        public override byte[] getCachedBytes()
         {
-            get { return this.Size; }
+            return bytes;
+        }
+
+        public override int getRawType()
+        {
+            return objectType;
+        }
+
+
+        public override long getRawSize()
+        {
+            return objectSize;
         }
     }
 }

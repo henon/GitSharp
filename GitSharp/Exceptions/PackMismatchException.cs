@@ -1,7 +1,5 @@
 ﻿/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -42,13 +40,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using GitSharp;
 using System.IO;
 
 namespace GitSharp.Exceptions
 {
     [global::System.Serializable]
-    public class CorruptObjectException : IOException
+    public class PackMismatchException : IOException
     {
         //
         // For guidelines regarding the creation of new exception types, see
@@ -57,11 +54,11 @@ namespace GitSharp.Exceptions
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
         //
 
-        public CorruptObjectException(AnyObjectId id, string message) : base(string.Format("Object {0} is corrupt: {1}", id, message)) { }
-        public CorruptObjectException(string message) : base(message) { }
-        public CorruptObjectException(string message, Exception inner) : base(message, inner) { }
-        public CorruptObjectException(AnyObjectId id, string message, Exception inner) : base(string.Format("Object {0} is corrupt: {1}", id, message), inner) { }
-        protected CorruptObjectException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+        public PackMismatchException(ObjectId id, string message) : base(string.Format("Object {0} is corrupt: {1}", id, message)) { }
+        public PackMismatchException(string message) : base(message) { }
+        public PackMismatchException(string message, Exception inner) : base(message, inner) { }
+        public PackMismatchException(ObjectId id, string message, Exception inner) : base(string.Format("Object {0} is corrupt: {1}", id, message), inner) { }
+        protected PackMismatchException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
     }
 }

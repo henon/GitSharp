@@ -43,6 +43,8 @@ using System.Globalization;
 using System.Text;
 using System;
 using System.IO;
+using GitSharp.Util;
+using GitSharp.Exceptions;
 
 namespace GitSharp
 {
@@ -160,13 +162,13 @@ namespace GitSharp
         public static string TYPE_TAG = "tag";
 
 
-	private static  byte[] ENCODED_TYPE_COMMIT = encodeASCII(TYPE_COMMIT);
+        private static byte[] ENCODED_TYPE_COMMIT = encodeASCII(TYPE_COMMIT);
 
-	private static  byte[] ENCODED_TYPE_BLOB = encodeASCII(TYPE_BLOB);
+        private static byte[] ENCODED_TYPE_BLOB = encodeASCII(TYPE_BLOB);
 
-	private static  byte[] ENCODED_TYPE_TREE = encodeASCII(TYPE_TREE);
+        private static byte[] ENCODED_TYPE_TREE = encodeASCII(TYPE_TREE);
 
-	private static  byte[] ENCODED_TYPE_TAG = encodeASCII(TYPE_TAG);
+        private static byte[] ENCODED_TYPE_TAG = encodeASCII(TYPE_TAG);
 
         /** An unknown or invalid object type code. */
         public const int OBJ_BAD = -1;
@@ -336,162 +338,175 @@ namespace GitSharp
 					+ HASH_FUNCTION + " not available.", nsae);
 		}
 	}
+#endif
 
-	/**
+
+        /**
 	 * Convert an OBJ_* type constant to a TYPE_* type constant.
 	 *
 	 * @param typeCode the type code, from a pack representation.
 	 * @return the canonical string name of this type.
 	 */
-	public static string typeString( int typeCode) {
-		switch (typeCode) {
-		case OBJ_COMMIT:
-			return TYPE_COMMIT;
-		case OBJ_TREE:
-			return TYPE_TREE;
-		case OBJ_BLOB:
-			return TYPE_BLOB;
-		case OBJ_TAG:
-			return TYPE_TAG;
-		default:
-			throw new IllegalArgumentException("Bad object type: " + typeCode);
-		}
-	}
+        public static string typeString(int typeCode)
+        {
+            switch (typeCode)
+            {
+                case OBJ_COMMIT:
+                    return TYPE_COMMIT;
+                case OBJ_TREE:
+                    return TYPE_TREE;
+                case OBJ_BLOB:
+                    return TYPE_BLOB;
+                case OBJ_TAG:
+                    return TYPE_TAG;
+                default:
+                    throw new ArgumentException("Bad object type: " + typeCode);
+            }
+        }
 
-	/**
-	 * Convert an OBJ_* type constant to an ASCII encoded string constant.
-	 * <p>
-	 * The ASCII encoded string is often the canonical representation of
-	 * the type within a loose object header, or within a tag header.
-	 *
-	 * @param typeCode the type code, from a pack representation.
-	 * @return the canonical ASCII encoded name of this type.
-	 */
-	public static byte[] encodedTypeString( int typeCode) {
-		switch (typeCode) {
-		case OBJ_COMMIT:
-			return ENCODED_TYPE_COMMIT;
-		case OBJ_TREE:
-			return ENCODED_TYPE_TREE;
-		case OBJ_BLOB:
-			return ENCODED_TYPE_BLOB;
-		case OBJ_TAG:
-			return ENCODED_TYPE_TAG;
-		default:
-			throw new IllegalArgumentException("Bad object type: " + typeCode);
-		}
-	}
+        /**
+         * Convert an OBJ_* type constant to an ASCII encoded string constant.
+         * <p>
+         * The ASCII encoded string is often the canonical representation of
+         * the type within a loose object header, or within a tag header.
+         *
+         * @param typeCode the type code, from a pack representation.
+         * @return the canonical ASCII encoded name of this type.
+         */
+        public static byte[] encodedTypeString(int typeCode)
+        {
+            switch (typeCode)
+            {
+                case OBJ_COMMIT:
+                    return ENCODED_TYPE_COMMIT;
+                case OBJ_TREE:
+                    return ENCODED_TYPE_TREE;
+                case OBJ_BLOB:
+                    return ENCODED_TYPE_BLOB;
+                case OBJ_TAG:
+                    return ENCODED_TYPE_TAG;
+                default:
+                    throw new ArgumentException("Bad object type: " + typeCode);
+            }
+        }
 
-	/**
-	 * Parse an encoded type string into a type constant.
-	 * 
-	 * @param id
-	 *            object id this type string came from; may be null if that is
-	 *            not known at the time the parse is occurring.
-	 * @param typeString
-	 *            string version of the type code.
-	 * @param endMark
-	 *            character immediately following the type string. Usually ' '
-	 *            (space) or '\n' (line feed).
-	 * @param offset
-	 *            position within <code>typeString</code> where the parse
-	 *            should start. Updated with the new position (just past
-	 *            <code>endMark</code> when the parse is successful.
-	 * @return a type code constant (one of {@link #OBJ_BLOB},
-	 *         {@link #OBJ_COMMIT}, {@link #OBJ_TAG}, {@link #OBJ_TREE}.
-	 * @throws CorruptObjectException
-	 *             there is no valid type identified by <code>typeString</code>.
-	 */
-	public static int decodeTypeString( AnyObjectId id,
-			 byte[] typeString,  byte endMark,
-			 MutableInteger offset) throws CorruptObjectException {
-		try {
-			int position = offset.value;
-			switch (typeString[position]) {
-			case 'b':
-				if (typeString[position + 1] != 'l'
-						|| typeString[position + 2] != 'o'
-						|| typeString[position + 3] != 'b'
-						|| typeString[position + 4] != endMark)
-					throw new CorruptObjectException(id, "invalid type");
-				offset.value = position + 5;
-				return Constants.OBJ_BLOB;
+        /**
+         * Parse an encoded type string into a type constant.
+         * 
+         * @param id
+         *            object id this type string came from; may be null if that is
+         *            not known at the time the parse is occurring.
+         * @param typeString
+         *            string version of the type code.
+         * @param endMark
+         *            character immediately following the type string. Usually ' '
+         *            (space) or '\n' (line feed).
+         * @param offset
+         *            position within <code>typeString</code> where the parse
+         *            should start. Updated with the new position (just past
+         *            <code>endMark</code> when the parse is successful.
+         * @return a type code constant (one of {@link #OBJ_BLOB},
+         *         {@link #OBJ_COMMIT}, {@link #OBJ_TAG}, {@link #OBJ_TREE}.
+         * @throws CorruptObjectException
+         *             there is no valid type identified by <code>typeString</code>.
+         */
+        public static int decodeTypeString(AnyObjectId id, byte[] typeString, byte endMark, MutableInteger offset)
+        {
+            try
+            {
+                int position = offset.value;
+                switch (typeString[position])
+                {
+                    case (byte)'b':
+                        if (typeString[position + 1] != (byte)'l'
+                            || typeString[position + 2] != (byte)'o'
+                            || typeString[position + 3] != (byte)'b'
+                            || typeString[position + 4] != endMark)
+                            throw new CorruptObjectException(id, "invalid type");
+                        offset.value = position + 5;
+                        return Constants.OBJ_BLOB;
 
-			case 'c':
-				if (typeString[position + 1] != 'o'
-						|| typeString[position + 2] != 'm'
-						|| typeString[position + 3] != 'm'
-						|| typeString[position + 4] != 'i'
-						|| typeString[position + 5] != 't'
-						|| typeString[position + 6] != endMark)
-					throw new CorruptObjectException(id, "invalid type");
-				offset.value = position + 7;
-				return Constants.OBJ_COMMIT;
+                    case (byte)'c':
+                        if (typeString[position + 1] != (byte)'o'
+                                || typeString[position + 2] != (byte)'m'
+                                || typeString[position + 3] != (byte)'m'
+                                || typeString[position + 4] != (byte)'i'
+                                || typeString[position + 5] != (byte)'t'
+                                || typeString[position + 6] != endMark)
+                            throw new CorruptObjectException(id, "invalid type");
+                        offset.value = position + 7;
+                        return Constants.OBJ_COMMIT;
 
-			case 't':
-				switch (typeString[position + 1]) {
-				case 'a':
-					if (typeString[position + 2] != 'g'
-							|| typeString[position + 3] != endMark)
-						throw new CorruptObjectException(id, "invalid type");
-					offset.value = position + 4;
-					return Constants.OBJ_TAG;
+                    case (byte)'t':
+                        switch (typeString[position + 1])
+                        {
+                            case (byte)'a':
+                                if (typeString[position + 2] != (byte)'g'
+                                    || typeString[position + 3] != endMark)
+                                    throw new CorruptObjectException(id, "invalid type");
+                                offset.value = position + 4;
+                                return Constants.OBJ_TAG;
 
-				case 'r':
-					if (typeString[position + 2] != 'e'
-							|| typeString[position + 3] != 'e'
-							|| typeString[position + 4] != endMark)
-						throw new CorruptObjectException(id, "invalid type");
-					offset.value = position + 5;
-					return Constants.OBJ_TREE;
+                            case (byte)'r':
+                                if (typeString[position + 2] != (byte)'e'
+                                        || typeString[position + 3] != (byte)'e'
+                                        || typeString[position + 4] != endMark)
+                                    throw new CorruptObjectException(id, "invalid type");
+                                offset.value = position + 5;
+                                return Constants.OBJ_TREE;
 
-				default:
-					throw new CorruptObjectException(id, "invalid type");
-				}
+                            default:
+                                throw new CorruptObjectException(id, "invalid type");
+                        }
 
-			default:
-				throw new CorruptObjectException(id, "invalid type");
-			}
-		} catch (ArrayIndexOutOfBoundsException bad) {
-			throw new CorruptObjectException(id, "invalid type");
-		}
-	}
+                    default:
+                        throw new CorruptObjectException(id, "invalid type");
+                }
+            }
+            catch (IndexOutOfRangeException bad)
+            {
+                throw new CorruptObjectException(id, "invalid type");
+            }
+        }
 
-	/**
-	 * Convert an integer into its decimal representation.
-	 * 
-	 * @param s
-	 *            the integer to convert.
-	 * @return a decimal representation of the input integer. The returned array
-	 *         is the smallest array that will hold the value.
-	 */
-	public static byte[] encodeASCII( long s) {
-		return encodeASCII(Long.toString(s));
-	}
-#endif
+        /**
+         * Convert an integer into its decimal representation.
+         * 
+         * @param s
+         *            the integer to convert.
+         * @return a decimal representation of the input integer. The returned array
+         *         is the smallest array that will hold the value.
+         */
+        public static byte[] encodeASCII(long s)
+        {
+            return encodeASCII(Convert.ToString(s));
+        }
 
-	/**
-	 * Convert a string to US-ASCII encoding.
-	 * 
-	 * @param s
-	 *            the string to convert. Must not contain any characters over
-	 *            127 (outside of 7-bit ASCII).
-	 * @return a byte array of the same length as the input string, holding the
-	 *         same characters, in the same order.
-	 * @throws IllegalArgumentException
-	 *             the input string contains one or more characters outside of
-	 *             the 7-bit ASCII character space.
-	 */
-	public static byte[] encodeASCII( string s) {
-		 byte[] r = new byte[s.Length];
-		for (int k = r.Length - 1; k >= 0; k--) {
-			 char c = s[k];
-			if (c > 127)
-				throw new ArgumentException("Not ASCII string: " + s);
-			r[k] = (byte) c;
-		}
-		return r;
-	}
+
+        /**
+         * Convert a string to US-ASCII encoding.
+         * 
+         * @param s
+         *            the string to convert. Must not contain any characters over
+         *            127 (outside of 7-bit ASCII).
+         * @return a byte array of the same length as the input string, holding the
+         *         same characters, in the same order.
+         * @throws ArgumentException
+         *             the input string contains one or more characters outside of
+         *             the 7-bit ASCII character space.
+         */
+        public static byte[] encodeASCII(string s)
+        {
+            byte[] r = new byte[s.Length];
+            for (int k = r.Length - 1; k >= 0; k--)
+            {
+                char c = s[k];
+                if (c > 127)
+                    throw new ArgumentException("Not ASCII string: " + s);
+                r[k] = (byte)c;
+            }
+            return r;
+        }
 
 #if false
 	/**

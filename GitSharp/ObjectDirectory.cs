@@ -278,14 +278,17 @@ namespace GitSharp
         }
 
 
-        public override ObjectLoader openObject2(WindowCursor curs,
-                 string objectName, AnyObjectId objectId)
+        public override ObjectLoader openObject2(WindowCursor curs, string objectName, AnyObjectId objectId)
         {
             try
             {
                 return new UnpackedObjectLoader(fileFor(objectName), objectId);
             }
-            catch (FileNotFoundException noFile)
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
+            catch (DirectoryNotFoundException)
             {
                 return null;
             }
@@ -398,8 +401,9 @@ namespace GitSharp
                 string @base = indexName.Slice(0, indexName.Length - 4);
                 string packName = @base + ".pack";
 
-                PackFile oldPack = forReuse[packName];
-                    forReuse.Remove(packName);
+                PackFile oldPack = null;
+                forReuse.TryGetValue(packName, out oldPack);
+                forReuse.Remove(packName);
                 if (oldPack != null)
                 {
                     list.Add(oldPack);
@@ -466,17 +470,9 @@ namespace GitSharp
         private string[] listPackIdx()
         {
             packDirectoryLastModified = packDirectory.LastAccessTime.Ticks;
-            throw new NotImplementedException();
-#if false
-		 string[] idxList = packDirectory.list(new FilenameFilter() {
-			public bool accept( DirectoryInfo baseDir,  string n) {
-				// Must match "pack-[0-9a-f]{40}.idx" to be an index.
-				return n.Length == 49 && n.EndsWith(".idx")
-						&& n.StartsWith("pack-");
-			}
-		});
-            return idxList != null ? idxList : "";
-#endif
+            // Must match "pack-[0-9a-f]{40}.idx" to be an index.
+            string[] idxList = packDirectory.GetFiles().Select(file => file.Name).Where(n => n.Length == 49 && n.EndsWith(".idx") && n.StartsWith("pack-")).ToArray();
+            return idxList;  // idxList != null ? idxList : "";
         }
 
 

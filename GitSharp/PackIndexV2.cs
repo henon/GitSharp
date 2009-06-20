@@ -227,13 +227,13 @@ namespace GitSharp
         private int BinarySearchLevelTwo(AnyObjectId objId, int levelOne)
         {
             int[] data = names[levelOne];
-            int high = offset32[levelOne].Length >> 2;
+            int high = (int)((uint)(offset32[levelOne].Length) >> 2);
             if (high == 0)
                 return -1;
             int low = 0;
             do
             {
-                int mid = (low + high) >> 1;
+                int mid = (int)((uint)(low + high) >> 1);
                 int mid4 = mid << 2;
                 int cmp;
 

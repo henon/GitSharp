@@ -45,8 +45,53 @@ using System.IO;
 
 namespace GitSharp.Util
 {
-    public class NB // [henon] need public for testsuite
+    public static class NB // [henon] need public for testsuite
     {
+
+        /**
+         * Compare a 32 bit unsigned integer stored in a 32 bit signed integer.
+         * <p>
+         * This function performs an unsigned compare operation, even though Java
+         * does not natively support unsigned integer values. Negative numbers are
+         * treated as larger than positive ones.
+         * 
+         * @param a
+         *            the first value to compare.
+         * @param b
+         *            the second value to compare.
+         * @return < 0 if a < b; 0 if a == b; > 0 if a > b.
+         */
+        public static int compareUInt32(int a, int b)
+        {
+            int cmp = (int)(((uint)a >> 1) - ((uint)b >> 1));
+            if (cmp != 0)
+                return cmp;
+            return (a & 1) - (b & 1);
+        }
+
+        public static int CompareUInt32(int a, int b)
+        {
+            return compareUInt32(a, b);
+        }
+
+        /**
+         * Convert sequence of 2 bytes (network byte order) into unsigned value.
+         *
+         * @param intbuf
+         *            buffer to acquire the 2 bytes of data from.
+         * @param offset
+         *            position within the buffer to begin reading from. This
+         *            position and the next byte after it (for a total of 2 bytes)
+         *            will be read.
+         * @return unsigned integer value that matches the 16 bits read.
+         */
+        public static int decodeUInt16(byte[] intbuf, int offset)
+        {
+            int r = (intbuf[offset] & 0xff) << 8;
+            return r | (intbuf[offset + 1] & 0xff);
+        }
+
+
         /**
          * Convert sequence of 4 bytes (network byte order) into unsigned value.
          * 
@@ -58,17 +103,20 @@ namespace GitSharp.Util
          *            bytes) will be read.
          * @return unsigned integer value that matches the 32 bits read.
          */
+        public static long decodeUInt32(byte[] intbuf, int offset)
+        {
+            int low = (intbuf[offset + 1] & 0xff) << 8;
+            low |= (intbuf[offset + 2] & 0xff);
+            low <<= 8;
+
+            low |= (intbuf[offset + 3] & 0xff);
+            return ((long)(intbuf[offset] & 0xff)) << 24 | low;
+        }
+
+
         public static long DecodeUInt32(byte[] intbuf, int offset)
         {
-            long low = (intbuf[offset + 1] & 0xff);
-            low <<= 8;
-
-            low |= (byte)(intbuf[offset + 2] & 0xff);
-            low <<= 8;
-
-            low |= (byte)(intbuf[offset + 3] & 0xff);
-
-            return ((long)(intbuf[offset] & 0xff) << 24) | low;
+            return decodeUInt32(intbuf, offset);
         }
 
         /**
@@ -82,7 +130,7 @@ namespace GitSharp.Util
          *            bytes) will be read.
          * @return signed integer value that matches the 32 bits read.
          */
-        public static int DecodeInt32(byte[] intbuf, int offset)
+        public static int decodeInt32(byte[] intbuf, int offset)
         {
             int r = intbuf[offset] << 8;
 
@@ -90,17 +138,15 @@ namespace GitSharp.Util
             r <<= 8;
 
             r |= intbuf[offset + 2] & 0xff;
+
             return (r << 8) | (intbuf[offset + 3] & 0xff);
         }
 
-        internal static int CompareUInt32(int a, int b)
+        public static int DecodeInt32(byte[] intbuf, int offset)
         {
-            int cmp = a.UnsignedRightShift(1) - b.UnsignedRightShift(1);
-
-            if (cmp != 0)
-                return cmp;
-            return (a & 1) - (b & 1);
+            return decodeInt32(intbuf, offset);
         }
+
 
 
 
@@ -116,35 +162,37 @@ namespace GitSharp.Util
             }
         }
 
-        	/**
-	 * Read the entire byte array into memory, or throw an exception.
-	 *
-	 * @param fd
-	 *            file to read the data from.
-	 * @param pos
-	 *            position to read from the file at.
-	 * @param dst
-	 *            buffer that must be fully populated, [off, off+len).
-	 * @param off
-	 *            position within the buffer to start writing to.
-	 * @param len
-	 *            number of bytes that must be read.
-	 * @throws EOFException
-	 *             the stream ended before dst was fully populated.
-	 * @throws IOException
-	 *             there was an error reading from the stream.
-	 */
-	public static void ReadFully( Stream fd, long pos, byte[] dst, int off, int len)  {
-		while (len > 0) {
-            fd.Position = pos;
-            int r = fd.Read(dst, off, len);
-            if (r <= 0)
-				throw new EndOfStreamException("Short read of block.");
-			pos += r;
-			off += r;
-			len -= r;
-		}
-	}
+        /**
+         * Read the entire byte array into memory, or throw an exception.
+         *
+         * @param fd
+         *            file to read the data from.
+         * @param pos
+         *            position to read from the file at.
+         * @param dst
+         *            buffer that must be fully populated, [off, off+len).
+         * @param off
+         *            position within the buffer to start writing to.
+         * @param len
+         *            number of bytes that must be read.
+         * @throws EOFException
+         *             the stream ended before dst was fully populated.
+         * @throws IOException
+         *             there was an error reading from the stream.
+         */
+        public static void ReadFully(Stream fd, long pos, byte[] dst, int off, int len)
+        {
+            while (len > 0)
+            {
+                fd.Position = pos;
+                int r = fd.Read(dst, off, len);
+                if (r <= 0)
+                    throw new EndOfStreamException("Short read of block.");
+                pos += r;
+                off += r;
+                len -= r;
+            }
+        }
 
         /**
          * Convert sequence of 8 bytes (network byte order) into unsigned value.
@@ -157,6 +205,11 @@ namespace GitSharp.Util
          *            bytes) will be read.
          * @return unsigned integer value that matches the 64 bits read.
          */
+        public static long decodeUInt64(byte[] intbuf, int offset)
+        {
+            return DecodeUInt64(intbuf, offset);
+        }
+
         public static long DecodeUInt64(byte[] intbuf, int offset)
         {
             return (DecodeUInt32(intbuf, offset) << 32)
@@ -196,26 +249,91 @@ namespace GitSharp.Util
         }
 
 
-        /**
-         * Convert sequence of 4 bytes (network byte order) into unsigned value.
-         * 
-         * @param intbuf
-         *            buffer to acquire the 4 bytes of data from.
-         * @param offset
-         *            position within the buffer to begin reading from. This
-         *            position and the next 3 bytes after it (for a total of 4
-         *            bytes) will be read.
-         * @return unsigned integer value that matches the 32 bits read.
-         */
-        public static long decodeUInt32(byte[] intbuf, int offset)
-        {
-            int low = (intbuf[offset + 1] & 0xff) << 8;
-            low |= (intbuf[offset + 2] & 0xff);
-            low <<= 8;
 
-            low |= (intbuf[offset + 3] & 0xff);
-            return ((long)(intbuf[offset] & 0xff)) << 24 | low;
+        /**
+         * Write a 16 bit integer as a sequence of 2 bytes (network byte order).
+         *
+         * @param intbuf
+         *            buffer to write the 2 bytes of data into.
+         * @param offset
+         *            position within the buffer to begin writing to. This position
+         *            and the next byte after it (for a total of 2 bytes) will be
+         *            replaced.
+         * @param v
+         *            the value to write.
+         */
+        public static void encodeInt16(byte[] intbuf, int offset, int v)
+        {
+            intbuf[offset + 1] = (byte)v;
+            v >>= 8; // >>>
+
+            intbuf[offset] = (byte)v;
         }
+
+        /**
+ * Write a 32 bit integer as a sequence of 4 bytes (network byte order).
+ * 
+ * @param intbuf
+ *            buffer to write the 4 bytes of data into.
+ * @param offset
+ *            position within the buffer to begin writing to. This position
+ *            and the next 3 bytes after it (for a total of 4 bytes) will be
+ *            replaced.
+ * @param v
+ *            the value to write.
+ */
+        public static void encodeInt32(byte[] intbuf, int offset, int v)
+        {
+            intbuf[offset + 3] = (byte)v;
+            v >>= 8;
+
+            intbuf[offset + 2] = (byte)v;
+            v >>= 8;
+
+            intbuf[offset + 1] = (byte)v;
+            v >>= 8;
+
+            intbuf[offset] = (byte)v;
+        }
+
+        /**
+         * Write a 64 bit integer as a sequence of 8 bytes (network byte order).
+         *
+         * @param intbuf
+         *            buffer to write the 48bytes of data into.
+         * @param offset
+         *            position within the buffer to begin writing to. This position
+         *            and the next 7 bytes after it (for a total of 8 bytes) will be
+         *            replaced.
+         * @param v
+         *            the value to write.
+         */
+        public static void encodeInt64(byte[] intbuf, int offset, long v)
+        {
+            intbuf[offset + 7] = (byte)v;
+            v >>= 8;
+
+            intbuf[offset + 6] = (byte)v;
+            v >>= 8;
+
+            intbuf[offset + 5] = (byte)v;
+            v >>= 8;
+
+            intbuf[offset + 4] = (byte)v;
+            v >>= 8;
+
+            intbuf[offset + 3] = (byte)v;
+            v >>= 8;
+
+            intbuf[offset + 2] = (byte)v;
+            v >>= 8;
+
+            intbuf[offset + 1] = (byte)v;
+            v >>= 8;
+
+            intbuf[offset] = (byte)v;
+        }
+
 
     }
 }

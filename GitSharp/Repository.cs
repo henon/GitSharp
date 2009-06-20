@@ -98,6 +98,7 @@ namespace GitSharp
         {
             this.Directory = gitDirectory;
             this.WorkingDirectory = workingDirectory;
+            objectDatabase = new ObjectDirectory(FS.resolve(gitDirectory, "objects"));
             _objectsDirs = new List<DirectoryInfo>();
             _objectsDirs = ReadObjectsDirs(Path.Combine(gitDirectory.FullName, "objects"), ref _objectsDirs);
 

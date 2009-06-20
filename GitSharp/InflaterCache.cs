@@ -65,7 +65,7 @@ namespace GitSharp
         {
             get
             {
-                if (m_instance != null)
+                if (m_instance == null)
                     m_instance = new InflaterCache();
                 return m_instance;
             }

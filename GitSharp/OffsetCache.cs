@@ -453,8 +453,9 @@ namespace GitSharp
         private void gc()
         {
             R r;
-            while ((r = (R)queue.Dequeue()) != null)
+            while (queue.Count > 0)
             {
+                r = (R)queue.Dequeue();
                 // Sun's Java 5 and 6 implementation have a bug where a Reference
                 // can be enqueued and dequeued twice on the same reference queue
                 // due to a race condition within Queue.enqueue(Reference).

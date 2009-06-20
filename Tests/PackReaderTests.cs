@@ -49,12 +49,14 @@ using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
+    [TestFixture]
     public class PackReaderTests : RepositoryTestCase
     {
         private static string PACK_NAME = "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f";
-        private static string TEST_PACK = "Resources/"+ PACK_NAME + ".pack";
-        private static string TEST_IDX = "Resources/"+PACK_NAME + ".idx";
+        private static string TEST_PACK = "Resources/" + PACK_NAME + ".pack";
+        private static string TEST_IDX = "Resources/" + PACK_NAME + ".idx";
 
+        [Test]
         public void test003_lookupCompressedObject()
         {
             PackFile pr;
@@ -71,18 +73,20 @@ namespace GitSharp.Tests
             pr.Close();
         }
 
-        public void test004_lookupDeltifiedObject() {
-		 ObjectId id;
-		 ObjectLoader or;
+        [Test]
+        public void test004_lookupDeltifiedObject()
+        {
+            ObjectId id;
+            ObjectLoader or;
 
-		id = ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259");
-		or = db.OpenObject(id);
-		Assert.IsNotNull(or);
-		Assert.IsTrue(or is PackedObjectLoader);
-		Assert.AreEqual(Constants.OBJ_BLOB, or.getType());
-		Assert.AreEqual(18009, or.getSize());
-		Assert.AreEqual(537, ((PackedObjectLoader) or).getDataOffset());
-	}
+            id = ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259");
+            or = db.OpenObject(id);
+            Assert.IsNotNull(or);
+            Assert.IsTrue(or is PackedObjectLoader);
+            Assert.AreEqual(Constants.OBJ_BLOB, or.getType());
+            Assert.AreEqual(18009, or.getSize());
+            Assert.AreEqual(537, ((PackedObjectLoader)or).getDataOffset());
+        }
 
 #if todopack 
         // [henon] what is todopack anyway?

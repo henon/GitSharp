@@ -47,6 +47,7 @@
     <Compile Include="ConfigTests.cs" />
     <Compile Include="NBTests.cs" />
     <Compile Include="PackReaderTests.cs" />
+    <Compile Include="Util\PackIndexTestCase.cs" />
     <Compile Include="Util\XInputStream.cs" />
     <Compile Include="VariousUtilityTests.cs" />
     <Compile Include="WriteTests.cs" />

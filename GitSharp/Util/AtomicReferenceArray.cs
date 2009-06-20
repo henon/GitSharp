@@ -59,7 +59,7 @@ namespace GitSharp.Util
         public bool compareAndSet(int slot, T expect, T update)
         {
             lock(this) {
-                if (array[slot].Equals(expect))
+                if ((array[slot] == null && expect==null) || (array[slot] != null && array[slot].Equals(expect)))
                 {
                     array[slot] = update;
                     return true;

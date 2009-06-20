@@ -425,7 +425,7 @@ namespace GitSharp
             if (length < pos + size)
                 size = (int)(length - pos);
             byte[] buf = new byte[size];
-            NB.ReadFully(new FileStream(packFile.FullName, System.IO.FileMode.Open), pos, buf, 0, size);
+            NB.ReadFully(fd, pos, buf, 0, size);
             return new ByteArrayWindow(this, pos, buf);
         }
 

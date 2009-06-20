@@ -60,12 +60,7 @@ namespace GitSharp.Util
         {
             lock (this)
             {
-                if (reference!=null && reference.Equals( expected))
-                {
-                    reference = update;
-                    return true;
-                }
-                else if (reference == null && expected == null)
+                if((reference == null && expected == null) || (reference!=null && reference.Equals( expected)))
                 {
                     reference = update;
                     return true;

@@ -38,13 +38,12 @@
                             <ListView.View>
                                 <GridView>
                                     <GridView.Columns>
-                                        <GridViewColumn Header="SHA" DisplayMemberBinding="{Binding Path=SHA}" />
+                                        <GridViewColumn Header="SHA" DisplayMemberBinding="{Binding Path=CommitId}" />
                                         <GridViewColumn Header="Message" DisplayMemberBinding="{Binding Path=Message}"/>
-                                        <GridViewColumn Header="Committer" DisplayMemberBinding="{Binding Path=Committer}"/>
-                                        <GridViewColumn Header="CommitedDate" DisplayMemberBinding="{Binding Path=CommittedDate}"/>
-                                        <GridViewColumn Header="Author" DisplayMemberBinding="{Binding Path=Author}"/>
-                                        <GridViewColumn Header="AuthoredDate" DisplayMemberBinding="{Binding Path=AuthoredDate}"/>
-                                        <GridViewColumn Header="Size" DisplayMemberBinding="{Binding Path=Size}" />
+                                        <GridViewColumn Header="Committer" DisplayMemberBinding="{Binding Path=Committer.Name}"/>
+                                        <GridViewColumn Header="CommitedDate" DisplayMemberBinding="{Binding Path=Committer.When}"/>
+                                        <GridViewColumn Header="Author" DisplayMemberBinding="{Binding Path=Author.Name}"/>
+                                        <GridViewColumn Header="AuthoredDate" DisplayMemberBinding="{Binding Path=Author.When}"/>
                                     </GridView.Columns>
                                 </GridView>
                             </ListView.View>

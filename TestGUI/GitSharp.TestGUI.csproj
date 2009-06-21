@@ -62,7 +62,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="TestRunner.xaml">
+    <Page Include="TestRunner\TestRunner.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -89,9 +89,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="TestcaseView.cs" />
-    <Compile Include="TestFixtureView.cs" />
-    <Compile Include="TestRunner.xaml.cs" />
+    <Compile Include="TestRunner\TestcaseView.cs" />
+    <Compile Include="TestRunner\TestFixtureView.cs" />
+    <Compile Include="TestRunner\TestRunner.xaml.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

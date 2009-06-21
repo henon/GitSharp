@@ -48,24 +48,26 @@ namespace GitSharp
     {
         public sealed class Storage
         {
-            public static readonly Storage New = new Storage(true, false);
-            public static readonly Storage Loose = new Storage(true, false);
-            public static readonly Storage Packed = new Storage(false, true);
-            public static readonly Storage LoosePacked = new Storage(true, true);
-            public static readonly Storage Network = new Storage(false, false);
+            public static readonly Storage New = new Storage("New", true, false);
+            public static readonly Storage Loose = new Storage("Loose", true, false);
+            public static readonly Storage Packed = new Storage("Packed", false, true);
+            public static readonly Storage LoosePacked = new Storage("LoosePacked", true, true);
+            public static readonly Storage Network = new Storage("Network", false, false);
 
             public bool IsLoose { get; private set; }
             public bool IsPacked { get; private set; }
+            public string Name { get; private set; }
 
-            private Storage(bool loose, bool packed)
+            private Storage(string name, bool loose, bool packed)
             {
+                this.Name = name;
                 this.IsLoose = loose;
                 this.IsPacked = packed;
             }
 
             static Storage()
             {
-                Loose = new Storage(true, false);
+                Loose = new Storage("Loose", true, false);
             }
         }
 

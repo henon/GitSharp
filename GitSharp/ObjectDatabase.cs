@@ -210,9 +210,10 @@ namespace GitSharp
          *         object, or null if the object does not exist.
          * @
          */
-        public virtual ObjectLoader openObject(WindowCursor curs,
-                 AnyObjectId objectId)
+        public virtual ObjectLoader openObject(WindowCursor curs, AnyObjectId objectId)
         {
+            if (objectId == null)
+                return null;
             ObjectLoader ldr;
 
             ldr = openObjectImpl1(curs, objectId);

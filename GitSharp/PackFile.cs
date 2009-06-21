@@ -186,6 +186,8 @@ namespace GitSharp
          */
         public PackedObjectLoader Get(WindowCursor curs, AnyObjectId id)
         {
+            if (id == null)
+                return null;
             long offset = idx().FindOffset(id);
             return 0 < offset ? reader(curs, offset) : null;
         }

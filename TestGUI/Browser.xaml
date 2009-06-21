@@ -25,7 +25,7 @@
             </StackPanel>
         </DataTemplate>-->
     </Window.Resources>
-    <TabControl>
+    <TabControl  SelectedIndex="1">
         <TabItem Header="Unit tests" Name="m_unit_tests">
 
         </TabItem>
@@ -43,11 +43,6 @@
                     <!--<Label Margin="10,0,0,0">Select a commit. Differences to the previous commit are highlited in red.</Label>-->
                 </StackPanel>
                 <TabControl SelectedIndex="0">
-
-                    <!--repository-->
-                    <!--<TabItem Header="Repository" IsSelected="True">
-
-            </TabItem>-->
 
                     <!--commit browser-->
                     <TabItem Header="Browser">
@@ -70,47 +65,24 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!--tags and branches-->
-                                <TabControl SelectedIndex="0">
+                                <DockPanel Margin="0">
+                                    <TextBlock DockPanel.Dock="Top" Background="Silver" Name="m_refs_title">Branches and Tags</TextBlock>
+                                    <ListView Name="m_refs" DockPanel.Dock="Top">
+                                        <ListView.View>
+                                            <GridView>
+                                                <GridView.Columns>
+                                                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Path=Name}"/>
+                                                    <GridViewColumn Header="SHA" DisplayMemberBinding="{Binding Path=ObjectId}"/>
+                                                    <!--<GridViewColumn Header="Pointing to" DisplayMemberBinding="{Binding Path=PeeledObjectId}"/>-->
+                                                    <GridViewColumn Header="OriginalName" DisplayMemberBinding="{Binding Path=OriginalName}"/>
+                                                    <GridViewColumn Header="Detached" DisplayMemberBinding="{Binding Path=Detached}"/>
+                                                    <GridViewColumn Header="Storage" DisplayMemberBinding="{Binding Path=StorageFormat.Name}"/>
+                                                </GridView.Columns>
+                                            </GridView>
+                                        </ListView.View>
+                                    </ListView>
 
-
-                                    <!--branches-->
-                                    <TabItem Header="Branches" Padding="5,0">
-                                        <DockPanel Margin="0">
-                                            <!--<TextBlock DockPanel.Dock="Top" Background="Silver">Branches:</TextBlock>-->
-                                            <ListView Name="m_branches" DockPanel.Dock="Top">
-                                                <ListView.View>
-                                                    <GridView>
-                                                        <GridView.Columns>
-                                                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Path=Name}"/>
-                                                            <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path=Path}"/>
-                                                            <GridViewColumn Header="Commit" DisplayMemberBinding="{Binding Path=Commit}"/>
-                                                            <GridViewColumn Header="SHA" DisplayMemberBinding="{Binding Path=SHA}"/>
-                                                        </GridView.Columns>
-                                                    </GridView>
-                                                </ListView.View>
-                                            </ListView>
-                                        </DockPanel>
-                                    </TabItem>
-                                    <TabItem Header="Tags" Padding="5,0">
-                                        <!--tags-->
-                                        <DockPanel Grid.Row="1">
-                                            <!--<TextBlock DockPanel.Dock="Top" Background="Silver">Tags:</TextBlock>-->
-                                            <ListView Name="m_tags" DockPanel.Dock="Top">
-                                                <ListView.View>
-                                                    <GridView>
-                                                        <GridView.Columns>
-                                                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Path=TagName}"/>
-                                                            <GridViewColumn Header="SHA" DisplayMemberBinding="{Binding Path=Id}"/>
-                                                            <GridViewColumn Header="Message" DisplayMemberBinding="{Binding Path=Message}"/>
-                                                            <GridViewColumn Header="Author" DisplayMemberBinding="{Binding Path=Author}"/>
-                                                            <GridViewColumn Header="Tagger" DisplayMemberBinding="{Binding Path=Tagger}"/>
-                                                        </GridView.Columns>
-                                                    </GridView>
-                                                </ListView.View>
-                                            </ListView>
-                                        </DockPanel>
-                                    </TabItem>
-                                </TabControl>
+                                </DockPanel>
 
                                 <!--commits-->
                                 <DockPanel Grid.Column="2">

@@ -28,7 +28,7 @@ namespace GitSharp.TestGUI
 
             m_commits.SelectionChanged += (o, args) => SelectCommit(m_commits.SelectedItem as Commit);
             //m_branches.SelectionChanged += (o, args) => SelectBranch(m_branches.SelectedItem as Branch);
-            m_tags.SelectionChanged += (o, args) => SelectTag(m_tags.SelectedItem as Tag);
+            m_refs.SelectionChanged += (o, args) => SelectRef(m_refs.SelectedItem as Ref);
             m_tree.SelectedItemChanged += (o, args) => SelectObject(m_tree.SelectedValue as TreeEntry);
             //m_config_tree.SelectedItemChanged += (o, args) => SelectConfiguration(m_config_tree.SelectedItem);
         }
@@ -40,12 +40,27 @@ namespace GitSharp.TestGUI
             testrunner.AddAssembly(Assembly.Load("GitSharp.Tests"));
         }
 
+        Repository m_repository;
+
+        // load
+        private void OnLoadRepository(object sender, RoutedEventArgs e)
+        {
+            var url = m_url_textbox.Text;
+            var repo = Repository.Open(url);
+            var head = repo.OpenCommit(repo.Head.ObjectId) as Commit;
+            m_repository = repo;
+            var tags = repo.Tags.Values.Select(@ref => repo.MapTag(@ref.Name, @ref.ObjectId));
+            //var branches = repo.Branches.Values.Select(@ref => repo.MapCommit(@ref.ObjectId));
+            m_refs.ItemsSource = repo.Refs.Values;
+            DisplayCommit(head, "HEAD");
+            ReloadConfiguration();
+        }
+
         private void SelectObject(TreeEntry node)
         {
             if (node.IsBlob)
             {
                 //var blob = node as Blob;
-
                 var text = Encoding.UTF8.GetString(m_repository.OpenBlob(node.Id).getBytes()); // TODO: better interface for blobs
                 m_object.Document.Blocks.Clear();
                 var p = new Paragraph();
@@ -59,29 +74,31 @@ namespace GitSharp.TestGUI
             }
         }
 
-
-        Repository m_repository;
-
-
-        // load
-        private void OnLoadRepository(object sender, RoutedEventArgs e)
-        {
-            var url = m_url_textbox.Text;
-            var repo = Repository.Open(url);
-            var head = repo.OpenCommit(repo.Head.ObjectId) as Commit;
-            m_repository = repo;
-            m_branches.ItemsSource = repo.Branches;
-            m_tags.ItemsSource = repo.Tags.Values.Select(@ref => repo.MapTag(@ref.Name, @ref.ObjectId)).ToArray();
-            DisplayCommit(head, "HEAD");
-            ReloadConfiguration();
-        }
-
-
         private void SelectBranch(object branch)
         {
             if (branch == null)
                 return;
             //DisplayCommit(branch.Commit, "Branch "+branch.Name);
+        }
+
+        private void SelectRef(Ref r)
+        {
+            if (r == null)
+                return;
+            var commit = m_repository.MapCommit(r.ObjectId);
+            if (commit != null)
+            {
+                DisplayCommit(commit, "Commit history of " + r.Name);
+                return;
+            }
+            var tag = m_repository.MapTag(r.Name, r.ObjectId);
+            if (tag != null)
+            {
+                var tagged_commit = m_repository.MapCommit(tag.TagId);
+                DisplayCommit(tagged_commit, "Commit history of " + tag.TagName);
+                return;
+            }
+            // todo show tagged trees and blobs
         }
 
         private void SelectTag(Tag tag)

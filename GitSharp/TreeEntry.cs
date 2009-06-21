@@ -2,6 +2,7 @@
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -44,7 +45,6 @@ using System.Text;
 
 namespace GitSharp
 {
-    [Complete]
     public abstract class TreeEntry : IComparable
     {
         public static int MODIFIED_ONLY = 1 << 0;
@@ -69,8 +69,6 @@ namespace GitSharp
             this.Parent.RemoveEntry(this);
             DetachParent();
         }
-
-
 
         public void DetachParent()
         {
@@ -220,6 +218,39 @@ namespace GitSharp
         public abstract void Accept(TreeVisitor tv, int flags);
 
         public abstract FileMode Mode { get; }
+
+
+        public bool IsBlob
+        {
+            get
+            {
+                return this.Mode.ObjectType == ObjectType.Blob;
+            }
+        }
+
+        public bool IsCommit
+        {
+            get
+            {
+                return this.Mode.ObjectType == ObjectType.Commit;
+            }
+        }
+
+        public bool IsTag
+        {
+            get
+            {
+                return this.Mode.ObjectType == ObjectType.Tag;
+            }
+        }
+
+        public bool IsTree
+        {
+            get
+            {
+                return this.Mode.ObjectType == ObjectType.Tree;
+            }
+        }
 
     }
 }

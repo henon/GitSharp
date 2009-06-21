@@ -71,7 +71,7 @@ namespace GitSharp.TestGUI
             var head = repo.OpenCommit(repo.Head.ObjectId) as Commit;
             m_repository = repo;
             m_branches.ItemsSource = repo.Branches;
-            m_tags.ItemsSource = repo.Tags.Values; //.Select(@ref => repo.o;
+            m_tags.ItemsSource = repo.Tags.Values.Select(@ref => repo.MapTag(@ref.Name, @ref.ObjectId)).ToArray();
             DisplayCommit(head, "HEAD");
             ReloadConfiguration();
         }

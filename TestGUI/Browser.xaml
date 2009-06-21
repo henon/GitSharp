@@ -29,7 +29,7 @@
         <TabItem Header="Unit tests" Name="m_unit_tests">
 
         </TabItem>
-        <TabItem Header="Browser">
+        <TabItem Header="Demo Browser">
             <DockPanel>
                 <Menu  DockPanel.Dock="Top">
                     <MenuItem Header="Repository">
@@ -99,14 +99,11 @@
                                                 <ListView.View>
                                                     <GridView>
                                                         <GridView.Columns>
-                                                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Path=Name}"/>
-                                                            <GridViewColumn Header="SHA" DisplayMemberBinding="{Binding Path=SHA}"/>
-                                                            <GridViewColumn Header="Size" DisplayMemberBinding="{Binding Path=Size}"/>
-                                                            <GridViewColumn Header="Path" DisplayMemberBinding="{Binding Path=Path}"/>
-                                                            <GridViewColumn Header="Annotated" DisplayMemberBinding="{Binding Path=IsAnnotated}"/>
-                                                            <GridViewColumn Header="Date" DisplayMemberBinding="{Binding Path=TagDate}"/>
-                                                            <GridViewColumn Header="Tagger" DisplayMemberBinding="{Binding Path=Tagger}"/>
+                                                            <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Path=TagName}"/>
+                                                            <GridViewColumn Header="SHA" DisplayMemberBinding="{Binding Path=Id}"/>
                                                             <GridViewColumn Header="Message" DisplayMemberBinding="{Binding Path=Message}"/>
+                                                            <GridViewColumn Header="Author" DisplayMemberBinding="{Binding Path=Author}"/>
+                                                            <GridViewColumn Header="Tagger" DisplayMemberBinding="{Binding Path=Tagger}"/>
                                                         </GridView.Columns>
                                                     </GridView>
                                                 </ListView.View>

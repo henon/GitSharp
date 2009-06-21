@@ -183,8 +183,8 @@ namespace GitSharp
          *
          * @throws IOException
          */
-        public void Save()
-        { //renamed from Tag
+        public void Save()  //renamed from Tag
+        {
             if (TagId != null)
                 throw new InvalidOperationException("exists " + TagId);
             ObjectId id;

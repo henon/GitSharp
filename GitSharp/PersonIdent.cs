@@ -47,26 +47,25 @@ namespace GitSharp
 {
     public class PersonIdent
     {
-        public static readonly long EPOCH_TICKS = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
-
         public string Name { get; private set; }
         public string EmailAddress { get; private set; }
 
-        public long _whenTicks;
-        public DateTimeOffset When {
-            get { return new DateTimeOffset(_whenTicks, _tzOffset); }
+        public DateTimeOffset When
+        {
+            get { return when_time; }
         }
+        private DateTimeOffset when_time = DateTimeOffset.Now;
+
         /// <summary>
         /// TimeZone offset in minutes
         /// </summary>
-        private TimeSpan _tzOffset;
         public TimeZoneInfo TimeZone
         {
             get
             {
                 foreach (TimeZoneInfo tzi in System.TimeZoneInfo.GetSystemTimeZones())
                 {
-                    if (tzi.BaseUtcOffset == _tzOffset)
+                    if (tzi.BaseUtcOffset == when_time.Offset)
                         return tzi;
                 }
                 return null;
@@ -78,79 +77,41 @@ namespace GitSharp
             RepositoryConfig config = repo.Config;
             String username = config.GetString("user", null, "name");
             String email = config.GetString("user", null, "email");
-             
             this.Name = username;
             this.EmailAddress = email;
-            DateTimeOffset n = DateTimeOffset.Now;
-            this._whenTicks = n.Ticks;
-            this._tzOffset = n.Offset;            
+            this.when_time = DateTimeOffset.Now;
         }
 
-        public PersonIdent(PersonIdent pi)
-            : this(pi.Name, pi.EmailAddress)
-        {
-            
-        }
+        public PersonIdent(PersonIdent pi) : this(pi.Name, pi.EmailAddress) { }
 
-        public PersonIdent(string name, string emailAddress)
-            : this(name, emailAddress, DateTime.Now, TimeZoneInfo.Local)
-        {
+        public PersonIdent(string name, string emailAddress) : this(name, emailAddress, DateTimeOffset.Now) { }
 
-        }
-
-        public PersonIdent(PersonIdent pi, DateTime when, TimeZoneInfo tz)
-            : this(pi.Name, pi.EmailAddress, when, tz)
-        {
-
-        }
-
-        public PersonIdent(PersonIdent pi, DateTime when)
+        public PersonIdent(PersonIdent pi, DateTimeOffset when)
         {
             this.Name = pi.Name;
             this.EmailAddress = pi.EmailAddress;
-            this._whenTicks = when.Ticks;
-            this._tzOffset = pi._tzOffset;
-
+            this.when_time = when;
         }
 
-        public PersonIdent(string name, string emailAddress, DateTime when, TimeZoneInfo tz)
+        public PersonIdent(string name, string emailAddress, DateTimeOffset when)
         {
             this.Name = name;
             this.EmailAddress = emailAddress;
-            this._whenTicks = when.Ticks;
-            this._tzOffset = tz.GetUtcOffset(when);
+            this.when_time = when;
         }
 
-        public PersonIdent(string name, string emailAddress, long when, TimeSpan tz)
+        public PersonIdent(string name, string emailAddress, long git_time, int offset_in_minutes)
         {
             this.Name = name;
             this.EmailAddress = emailAddress;
-            this._whenTicks = when;
-            this._tzOffset = tz;
+            this.when_time = git_time.GitTimeToDateTimeOffset((long)offset_in_minutes);
         }
 
-        public PersonIdent(string name, string emailAddress, long when, int offset_in_minutes)
-        {
-            this.Name = name;
-            this.EmailAddress = emailAddress;
-            this._whenTicks = when;
-            this._tzOffset = new TimeSpan(0, offset_in_minutes, 0);
-        }
-
-        public PersonIdent(PersonIdent pi, long when, TimeSpan tz)
+        public PersonIdent(PersonIdent pi, long git_time, int offset_in_minutes)
         {
             this.Name = pi.Name;
             this.EmailAddress = pi.EmailAddress;
-            this._whenTicks = when;
-            this._tzOffset = tz;
-        }
-
-        public PersonIdent(PersonIdent pi, long when, int offset_in_minutes)
-        {
-            this.Name = pi.Name;
-            this.EmailAddress = pi.EmailAddress;
-            this._whenTicks = when;
-            this._tzOffset = new TimeSpan(0, offset_in_minutes, 0); ;
+            this.when_time = git_time.GitTimeToDateTimeOffset((long)offset_in_minutes);
         }
 
         public PersonIdent(string str)
@@ -170,8 +131,7 @@ namespace GitSharp
             int sp = str.IndexOf(' ', gt + 2);
             if (sp == -1)
             {
-                _whenTicks = 0;
-                _tzOffset = TimeSpan.Zero;
+                when_time = new DateTimeOffset(0, TimeSpan.Zero);
             }
             else
             {
@@ -186,19 +146,17 @@ namespace GitSharp
                     tzHours = int.Parse(tzHoursStr);
                 }
                 int tzMins = int.Parse(str.Substring(sp + 4).Trim());
-                var s = str.Slice(gt + 1, sp);
-                _whenTicks = EPOCH_TICKS +  long.Parse(str.Slice(gt + 1, sp).Trim()) * 10000000;
-                _tzOffset = TimeSpan.FromMinutes(tzHours * 60 + tzMins);
-                _whenTicks += _tzOffset.Ticks;
+                long gittime = long.Parse(str.Slice(gt + 1, sp).Trim());
+                this.when_time = gittime.GitTimeToDateTimeOffset(tzHours * 60 + tzMins);
             }
 
-            this.Name = str.Slice(0, lt).Trim ();
-            this.EmailAddress = str.Slice(lt + 1, gt).Trim ();
+            this.Name = str.Slice(0, lt).Trim();
+            this.EmailAddress = str.Slice(lt + 1, gt).Trim();
         }
 
         public override int GetHashCode()
         {
-            return this.EmailAddress.GetHashCode() ^ (int)_whenTicks;
+            return this.EmailAddress.GetHashCode() ^ (int)when_time.ToGitInternalTime();
         }
 
         public override bool Equals(object o)
@@ -207,15 +165,15 @@ namespace GitSharp
             if (p == null)
                 return false;
 
-            return this.Name == p.Name 
-                && this.EmailAddress == p.EmailAddress 
-                && _whenTicks == p._whenTicks;
+            return this.Name == p.Name
+                && this.EmailAddress == p.EmailAddress
+                && when_time.ToGitInternalTime() == p.when_time.ToGitInternalTime();
         }
 
         public string ToExternalString()
         {
             StringBuilder r = new StringBuilder();
-            int offset = (int)(_tzOffset.Ticks / TimeSpan.TicksPerMinute);
+            int offset = (int)when_time.Offset.TotalMinutes;
             char sign;
             int offsetHours;
             int offsetMins;
@@ -237,7 +195,7 @@ namespace GitSharp
             r.Append(" <");
             r.Append(EmailAddress);
             r.Append("> ");
-            r.Append(_whenTicks / 1000);
+            r.Append(when_time.ToGitInternalTime());
             r.Append(' ');
             r.Append(sign);
             if (offsetHours < 10)

@@ -74,6 +74,7 @@
     <Compile Include="ObjectDirectory.cs" />
     <Compile Include="UnpackedObjectCache.cs" />
     <Compile Include="Util\AtomicReference.cs" />
+    <Compile Include="Util\DateTime.cs" />
     <Compile Include="Util\Extensions.cs" />
     <Compile Include="AbstractIndexTreeVisitor.cs" />
     <Compile Include="AnyObjectId.cs" />

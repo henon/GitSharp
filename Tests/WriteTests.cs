@@ -145,8 +145,8 @@ namespace GitSharp.Tests
             Assert.AreEqual(ObjectId.FromString("00b1f73724f493096d1ffa0b0f1f1482dbb8c936"), t.TreeId);
 
             Commit c = new Commit(db);
-            c.Author = (new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
-            c.Committer = (new PersonIdent(jcommitter, 1154236443000L, new TimeSpan(-4, 0, 0)));
+            c.Author = (new PersonIdent(jauthor, 1154236443L, -4*60));
+            c.Committer = (new PersonIdent(jcommitter, 1154236443L, -4*60));
             c.Message = ("A Commit\n");
             c.TreeEntry = (t);
             Assert.AreEqual(t.TreeId, c.TreeId);
@@ -207,7 +207,7 @@ namespace GitSharp.Tests
             t.Id=(emptyId);
             t.TagType=("blob");
             t.TagName=("test020");
-            t.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
+            t.Author=(new PersonIdent(jauthor, 1154236443L, -4*60));
             t.Message=("test020 tagged\n");
             t.Save();
             Assert.AreEqual("6759556b09fbb4fd8ae5e315134481cc25d46954", t.TagId.ToString());
@@ -215,7 +215,7 @@ namespace GitSharp.Tests
             Tag MapTag = db.MapTag("test020");
             Assert.AreEqual("blob", MapTag.TagType);
             Assert.AreEqual("test020 tagged\n", MapTag.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan( -4 * 60)), MapTag.Author);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443L, -4 * 60), MapTag.Author);
             Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", MapTag.Id.ToString());
         }
 
@@ -245,7 +245,7 @@ namespace GitSharp.Tests
             t.Id=(almostEmptyTreeId);
             t.TagType=("tree");
             t.TagName=("test021");
-            t.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
+            t.Author=(new PersonIdent(jauthor, 1154236443L, -4*60));
             t.Message=("test021 tagged\n");
             t.Save();
             Assert.AreEqual("b0517bc8dbe2096b419d42424cd7030733f4abe5", t.TagId.ToString());
@@ -253,7 +253,7 @@ namespace GitSharp.Tests
             Tag MapTag = db.MapTag("test021");
             Assert.AreEqual("tree", MapTag.TagType);
             Assert.AreEqual("test021 tagged\n", MapTag.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)), MapTag.Author);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443L, -4*60), MapTag.Author);
             Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", MapTag.Id.ToString());
         }
 
@@ -265,8 +265,8 @@ namespace GitSharp.Tests
             almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Encoding.ASCII.GetBytes( "empty"), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
             Commit almostEmptyCommit = new Commit(db);
-            almostEmptyCommit.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-2, 0, 0))); // not exactly the same
-            almostEmptyCommit.Committer=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-2, 0, 0)));
+            almostEmptyCommit.Author=(new PersonIdent(jauthor, 1154236443L,-2*60)); // not exactly the same
+            almostEmptyCommit.Committer=(new PersonIdent(jauthor, 1154236443L,-2*60));
             almostEmptyCommit.Message=("test022\n");
             almostEmptyCommit.TreeId=(almostEmptyTreeId);
             ObjectId almostEmptyCommitId = new ObjectWriter(db).WriteCommit(almostEmptyCommit);
@@ -274,7 +274,7 @@ namespace GitSharp.Tests
             t.Id=(almostEmptyCommitId);
             t.TagType=("commit");
             t.TagName=("test022");
-            t.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
+            t.Author=(new PersonIdent(jauthor, 1154236443L, -4*60));
             t.Message=("test022 tagged\n");
             t.Save();
             Assert.AreEqual("0ce2ebdb36076ef0b38adbe077a07d43b43e3807", t.TagId.ToString());
@@ -282,7 +282,7 @@ namespace GitSharp.Tests
             Tag MapTag = db.MapTag("test022");
             Assert.AreEqual("commit", MapTag.TagType);
             Assert.AreEqual("test022 tagged\n", MapTag.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)), MapTag.Author);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443L, -4*60), MapTag.Author);
             Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", MapTag.Id.ToString());
         }
 
@@ -295,8 +295,8 @@ namespace GitSharp.Tests
             ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
             Commit commit = new Commit(db);
             commit.TreeId=(almostEmptyTreeId);
-            commit.Author=(new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295000L, 60));
-            commit.Committer=(new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295000L, 60));
+            commit.Author=(new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295L, 60));
+            commit.Committer=(new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295L, 60));
             commit.setEncoding("UTF-8");
             commit.Message=("\u00dcbergeeks");
             ObjectId cid = new ObjectWriter(db).WriteCommit(commit);
@@ -312,8 +312,8 @@ namespace GitSharp.Tests
             ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
             Commit commit = new Commit(db);
             commit.TreeId=(almostEmptyTreeId);
-            commit.Author=(new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295000L, 60));
-            commit.Committer=(new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295000L, 60));
+            commit.Author=(new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295L, 60));
+            commit.Committer=(new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295L, 60));
             commit.setEncoding("ISO-8859-1");
             commit.Message=("\u00dcbergeeks");
             ObjectId cid = new ObjectWriter(db).WriteCommit(commit);
@@ -353,19 +353,19 @@ namespace GitSharp.Tests
             Assert.IsNotNull( mapTag20);
             Assert.AreEqual("blob", mapTag20.TagType);
             Assert.AreEqual("test020 tagged\n", mapTag20.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)), mapTag20.Author);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443L, -4*60), mapTag20.Author);
             Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag20.Id.ToString());
 
             Tag mapTag21 = db.MapTag("test021");
             Assert.AreEqual("tree", mapTag21.TagType);
             Assert.AreEqual("test021 tagged\n", mapTag21.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)), mapTag21.Author);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443L, -4*60), mapTag21.Author);
             Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", mapTag21.Id.ToString());
 
             Tag mapTag22 = db.MapTag("test022");
             Assert.AreEqual("commit", mapTag22.TagType);
             Assert.AreEqual("test022 tagged\n", mapTag22.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)), mapTag22.Author);
+            Assert.AreEqual(new PersonIdent(jauthor, 1154236443L, -4*60), mapTag22.Author);
             Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag22.Id.ToString());
         }
 
@@ -384,8 +384,8 @@ namespace GitSharp.Tests
                     t.TreeId);
 
             Commit c1 = new Commit(db);
-            c1.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
-            c1.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
+            c1.Author=(new PersonIdent(jauthor, 1154236443L, -4*60));
+            c1.Committer=(new PersonIdent(jcommitter, 1154236443L, -4 * 60));
             c1.Message=("A Commit\n");
             c1.TreeEntry=(t);
             Assert.AreEqual(t.TreeId, c1.TreeId);
@@ -395,8 +395,8 @@ namespace GitSharp.Tests
             Assert.AreEqual(cmtid1, c1.CommitId);
 
             Commit c2 = new Commit(db);
-            c2.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
-            c2.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
+            c2.Author=(new PersonIdent(jauthor, 1154236443L, -4*60));
+            c2.Committer=(new PersonIdent(jcommitter, 1154236443L, -4 * 60));
             c2.Message=("A Commit 2\n");
             c2.TreeEntry=(t);
             Assert.AreEqual(t.TreeId, c2.TreeId);
@@ -416,8 +416,8 @@ namespace GitSharp.Tests
             Assert.AreEqual(c1.CommitId, rm2.ParentIds[0]);
 
             Commit c3 = new Commit(db);
-            c3.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
-            c3.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
+            c3.Author=(new PersonIdent(jauthor, 1154236443L, -4*60));
+            c3.Committer=(new PersonIdent(jcommitter, 1154236443L, -4 * 60));
             c3.Message=("A Commit 3\n");
             c3.TreeEntry=(t);
             Assert.AreEqual(t.TreeId, c3.TreeId);
@@ -438,8 +438,8 @@ namespace GitSharp.Tests
             Assert.AreEqual(c2.CommitId, rm3.ParentIds[1]);
 
             Commit c4 = new Commit(db);
-            c4.Author=(new PersonIdent(jauthor, 1154236443000L, new TimeSpan(-4, 0, 0)));
-            c4.Committer=(new PersonIdent(jcommitter, 1154236443000L, -4 * 60));
+            c4.Author=(new PersonIdent(jauthor, 1154236443L, -4*60));
+            c4.Committer=(new PersonIdent(jcommitter, 1154236443L, -4 * 60));
             c4.Message=("A Commit 4\n");
             c4.TreeEntry=(t);
             Assert.AreEqual(t.TreeId, c3.TreeId);

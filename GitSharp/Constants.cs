@@ -40,6 +40,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System;
 using System.IO;
@@ -272,7 +273,7 @@ namespace GitSharp
         public static string CHARACTER_ENCODING = "UTF-8";
 
         /** Native character encoding for commit messages, file names... */
-        //public static  Charset CHARSET; // [henon] TODO replace by Encoding? 
+        public static Encoding CHARSET = Encoding.GetEncoding(CHARACTER_ENCODING);
 
 
         /** Default main branch name */
@@ -320,33 +321,34 @@ namespace GitSharp
         /** Beginning of the common "Signed-off-by: " commit message line */
         public static string SIGNED_OFF_BY_TAG = "Signed-off-by: ";
 
-#if false
-	/**
-	 * Create a new digest function for objects.
-	 * 
-	 * @return a new digest object.
-	 * @throws RuntimeException
-	 *             this Java virtual machine does not support the required hash
-	 *             function. Very unlikely given that JGit uses a hash function
-	 *             that is in the Java reference specification.
-	 */
-	public static MessageDigest newMessageDigest() {
-		try {
-			return MessageDigest.getInstance(HASH_FUNCTION);
-		} catch (NoSuchAlgorithmException nsae) {
-			throw new RuntimeException("Required hash function "
-					+ HASH_FUNCTION + " not available.", nsae);
-		}
-	}
-#endif
+
+        /**
+         * Create a new digest function for objects.
+         * 
+         * @return a new digest object.
+         * @throws RuntimeException
+         *             this Java virtual machine does not support the required hash
+         *             function. Very unlikely given that JGit uses a hash function
+         *             that is in the Java reference specification.
+         */
+        internal static MessageDigest newMessageDigest()
+        {
+            //try {
+            //    return MessageDigest.getInstance(HASH_FUNCTION);
+            //} catch (NoSuchAlgorithmException nsae) {
+            //    throw new RuntimeException("Required hash function "
+            //            + HASH_FUNCTION + " not available.", nsae);
+            //}
+            return new MessageDigest();
+        }
 
 
         /**
-	 * Convert an OBJ_* type constant to a TYPE_* type constant.
-	 *
-	 * @param typeCode the type code, from a pack representation.
-	 * @return the canonical string name of this type.
-	 */
+         * Convert an OBJ_* type constant to a TYPE_* type constant.
+         *
+         * @param typeCode the type code, from a pack representation.
+         * @return the canonical string name of this type.
+         */
         public static string typeString(int typeCode)
         {
             switch (typeCode)
@@ -508,36 +510,34 @@ namespace GitSharp
             return r;
         }
 
-#if false
-	/**
-	 * Convert a string to a byte array in the standard character encoding.
-	 *
-	 * @param str
-	 *            the string to convert. May contain any Unicode characters.
-	 * @return a byte array representing the requested string, encoded using the
-	 *         default character encoding (UTF-8).
-	 * @see #CHARACTER_ENCODING
-	 */
-	public static byte[] encode( string str) {
-		 ByteBuffer bb = Constants.CHARSET.encode(str);
-		 int len = bb.limit();
-		if (bb.hasArray() && bb.arrayOffset() == 0) {
-			 byte[] arr = bb.array();
-			if (arr.length == len)
-				return arr;
-		}
 
-		 byte[] arr = new byte[len];
-		bb.get(arr);
-		return arr;
-	}
+        /**
+         * Convert a string to a byte array in the standard character encoding.
+         *
+         * @param str
+         *            the string to convert. May contain any Unicode characters.
+         * @return a byte array representing the requested string, encoded using the
+         *         default character encoding (UTF-8).
+         * @see #CHARACTER_ENCODING
+         */
+        public static byte[] encode(string str)
+        {
+            //ByteBuffer bb = Constants.CHARSET.encode(str);
+            //int len = bb.limit();
+            //if (bb.hasArray() && bb.arrayOffset() == 0)
+            //{
+            //    byte[] arr = bb.array();
+            //    if (arr.length == len)
+            //        return arr;
+            //}
 
-	static {
-		if (OBJECT_ID_LENGTH != newMessageDigest().getDigestLength())
-			throw new LinkageError("Incorrect OBJECT_ID_LENGTH.");
-		CHARSET = Charset.forName(CHARACTER_ENCODING);
-	}
-#endif
+            //byte[] arr = new byte[len];
+            //bb.get(arr);
+            //return arr;
+
+            return  CHARSET.GetBytes(str);
+        }
+
 
     }
 }

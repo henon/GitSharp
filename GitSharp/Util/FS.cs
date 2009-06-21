@@ -157,7 +157,7 @@ namespace GitSharp.Util
             DirectoryInfo abspn = new DirectoryInfo(name);
             if (abspn.Exists)
                 return abspn;
-            return new DirectoryInfo(dir + "/" + name);
+            return new DirectoryInfo(dir.FullName + "/" + name);
         }
 
         /**

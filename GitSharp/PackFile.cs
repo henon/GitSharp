@@ -383,7 +383,7 @@ namespace GitSharp
             {
                 if (invalid)
                     throw new PackInvalidException(packFile.FullName);
-                fd = new FileStream(packFile.FullName, System.IO.FileMode.Open);
+                fd = new FileStream(packFile.FullName, System.IO.FileMode.Open, FileAccess.Read);
                 length = packFile.Length;
                 onOpenPack();
             }

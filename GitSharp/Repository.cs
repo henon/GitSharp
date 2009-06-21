@@ -1037,9 +1037,9 @@ namespace GitSharp
             return true;
         }
 
-        public object OpenCommit(ObjectId id)
+        public Commit OpenCommit(ObjectId id)
         {
-            throw new NotImplementedException();
+            return MapCommit(id);
         }
     }
 }

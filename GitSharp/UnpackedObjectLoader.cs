@@ -79,7 +79,7 @@ namespace GitSharp
 
         private static byte[] readCompressed(FileInfo path)
         {
-            var @in = new FileStream(path.FullName, System.IO.FileMode.Open);
+            var @in = new FileStream(path.FullName, System.IO.FileMode.Open, FileAccess.Read);
             try
             {
                 byte[] compressed = new byte[(int)@in.Length];

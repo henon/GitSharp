@@ -45,9 +45,9 @@ using GitSharp.Util;
 
 namespace GitSharp
 {
-    [Complete]
     public class PersonIdent
     {
+        public static readonly long EPOCH_TICKS = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
 
         public string Name { get; private set; }
         public string EmailAddress { get; private set; }
@@ -186,8 +186,10 @@ namespace GitSharp
                     tzHours = int.Parse(tzHoursStr);
                 }
                 int tzMins = int.Parse(str.Substring(sp + 4).Trim());
-                _whenTicks = long.Parse(str.Slice(gt + 1, sp).Trim()) * 1000;
+                var s = str.Slice(gt + 1, sp);
+                _whenTicks = EPOCH_TICKS +  long.Parse(str.Slice(gt + 1, sp).Trim()) * 10000000;
                 _tzOffset = TimeSpan.FromMinutes(tzHours * 60 + tzMins);
+                _whenTicks += _tzOffset.Ticks;
             }
 
             this.Name = str.Slice(0, lt).Trim ();
@@ -253,17 +255,7 @@ namespace GitSharp
 
         public override string ToString()
         {
-            StringBuilder r = new StringBuilder();
-
-            r.Append("PersonIdent[");
-            r.Append(Name);
-            r.Append(", ");
-            r.Append(EmailAddress);
-            r.Append(", ");
-            r.Append(new DateTimeOffset(_whenTicks, _tzOffset));
-            r.Append("]");
-
-            return r.ToString();
+            return Name + "<" + EmailAddress + "> " + When;
         }
     }
 }

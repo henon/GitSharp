@@ -50,6 +50,7 @@
     <Compile Include="PackIndexV1Tests.cs" />
     <Compile Include="PackIntexV2Tests.cs" />
     <Compile Include="PackReaderTests.cs" />
+    <Compile Include="ParseRefTests.cs" />
     <Compile Include="Util\PackIndexTestCase.cs" />
     <Compile Include="Util\XInputStream.cs" />
     <Compile Include="VariousUtilityTests.cs" />

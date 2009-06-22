@@ -350,7 +350,8 @@ namespace GitSharp
 
                             ObjectId id = ObjectId.FromString(p.Substring(1));
                             last = new Ref(Ref.Storage.Packed, last.Name, last.Name, last.ObjectId, id, true);
-                            newPackedRefs.Add(last.Name, last);
+                            if (!newPackedRefs.ContainsKey(last.Name))
+                                newPackedRefs[last.Name]=last; // [henon] <--- sometimes the same tag exits twice for some reason (i.e. a tag referencing itself) ... so we silently ignore the problem. hope this is the expected behavior
                             continue;
                         }
 

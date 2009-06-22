@@ -15,6 +15,7 @@ using GitSharp;
 using System.Collections.ObjectModel;
 using Microsoft.Win32;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace GitSharp.TestGUI
 {
@@ -85,20 +86,35 @@ namespace GitSharp.TestGUI
         {
             if (r == null)
                 return;
-            var commit = m_repository.MapCommit(r.ObjectId);
-            if (commit != null)
+            var obj = m_repository.OpenObject(r.ObjectId);
+            if (obj.getType() == Constants.OBJ_COMMIT)
             {
-                DisplayCommit(commit, "Commit history of " + r.Name);
+                DisplayCommit(m_repository.MapCommit(r.ObjectId), "Commit history of " + r.Name);
                 return;
             }
-            var tag = m_repository.MapTag(r.Name, r.ObjectId);
-            if (tag != null)
+            else if (obj.getType() == Constants.OBJ_TAG)
             {
+                var tag = m_repository.MapTag(r.Name, r.ObjectId);
+                if (tag.TagId == r.ObjectId) // it sometimes happens to have self referencing tags
+                {
+                    return;
+                }
                 var tagged_commit = m_repository.MapCommit(tag.TagId);
                 DisplayCommit(tagged_commit, "Commit history of " + tag.TagName);
                 return;
             }
-            // todo show tagged trees and blobs
+            else if (obj.getType() == Constants.OBJ_TREE)
+            {
+                // hmm, display somehow
+            }
+            else if (obj.getType() == Constants.OBJ_BLOB)
+            {
+                // hmm, display somehow
+            }
+            else
+            {
+                Debug.Fail("don't know how to display this object: "+obj.ToString());
+            }
         }
 
         private void SelectTag(Tag tag)

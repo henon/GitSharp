@@ -202,14 +202,15 @@ namespace GitSharp
                         Current.FromRaw(_index.idxdata[levelOne], levelTwo + 4);
                         levelTwo += AnyObjectId.Constants.ObjectIdLength + 4;
                         returnedNumber++;
+                        return true;
                     }
                     else
                     {
                         levelTwo = 0;
                     }
                 }
-
-                throw new InvalidOperationException();
+                return false;
+                //throw new InvalidOperationException();
             }
 
 

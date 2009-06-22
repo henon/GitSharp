@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -42,65 +42,44 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using GitSharp.Util;
+using GitSharp;
+using GitSharp.Exceptions;
+using NUnit.Framework;
+using GitSharp.Tests.Util;
 
-namespace GitSharp.Tests.Util
+namespace GitSharp.Tests
 {
-    internal class XInputStream
+    [TestFixture]
+    public class PackIndexV1Test : PackIndexTestCase
     {
-        private byte[] intbuf = new byte[8];
 
-        FileStream _filestream;
-
-        internal XInputStream(FileStream s)
+        public override FileInfo getFileForPack34be9032()
         {
-            _filestream = s;
+            return new FileInfo("Resources/pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.idx");
         }
 
-        internal byte[] readFully(int len)
+
+        public override FileInfo getFileForPackdf2982f28()
         {
-            byte[] b = new byte[len];
-            _filestream.Read(b, 0, len);
-            return b;
+            return new FileInfo("Resources/pack-df2982f284bbabb6bdb59ee3fcc6eb0983e20371.idx");
         }
 
-        internal void readFully(byte[] b, int o, int len)
+        /**
+         * Verify CRC32 - V1 should not index anything.
+         *
+         */
+        [Test]
+        public override void testCRC32()
         {
-            int r;
-            while (len > 0 && (r = _filestream.Read(b, o, len)) > 0)
+            Assert.IsFalse(smallIdx.HasCRC32Support);
+            try
             {
-                o += r;
-                len -= r;
+                smallIdx.FindCRC32(ObjectId.FromString("4b825dc642cb6eb9a060e54bf8d69288fbee4904"));
+                Assert.Fail("index V1 shouldn't support CRC");
             }
-            if (len > 0)
-                throw new EndOfStreamException();
-        }
-
-        internal int readUInt8()
-        {
-            byte[] b = new byte[_filestream.Length];
-            int r = _filestream.Read(b, 0, (int)_filestream.Length);
-            if (r < 0)
-                throw new EndOfStreamException();
-            return r;
-        }
-
-        internal long readUInt32()
-        {
-            readFully(intbuf, 0, 4);
-            return NB.decodeUInt32(intbuf, 0);
-        }
-
-        internal void Close()
-        {
-            _filestream.Close();
-        }
-
-        internal long Length
-        {
-            get
+            catch (NotSupportedException)
             {
-                return _filestream.Length;
+                // expected
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿<Window x:Class="GitSharp.TestGUI.Browser"
+﻿<Window x:Class="GitSharp.Demo.Browser"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:g="clr-namespace:GitSharp;assembly=GitSharp"
@@ -25,11 +25,6 @@
             </StackPanel>
         </DataTemplate>-->
     </Window.Resources>
-    <TabControl  SelectedIndex="1">
-        <TabItem Header="Unit tests" Name="m_unit_tests">
-
-        </TabItem>
-        <TabItem Header="Demo Browser">
             <DockPanel>
                 <Menu  DockPanel.Dock="Top">
                     <MenuItem Header="Repository">
@@ -170,6 +165,4 @@
                 </TabControl>
             </DockPanel>
 
-        </TabItem>
-    </TabControl>
 </Window>

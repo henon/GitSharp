@@ -78,6 +78,7 @@
     <None Include="Resources\all_packed_objects.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Resource Include="README.txt" />
     <Content Include="sample.git\COMMIT_EDITMSG">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

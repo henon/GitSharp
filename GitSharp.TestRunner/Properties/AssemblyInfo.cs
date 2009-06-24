@@ -7,11 +7,11 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TestGUI")]
+[assembly: AssemblyTitle("GitSharp.TestRunner")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("eqqon")]
-[assembly: AssemblyProduct("TestGUI")]
+[assembly: AssemblyProduct("GitSharp.TestRunner")]
 [assembly: AssemblyCopyright("Copyright © eqqon 2009")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

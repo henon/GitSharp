@@ -15,12 +15,9 @@ using System.Reflection;
 using NUnit.Framework;
 using System.IO;
 
-namespace GitSharp.TestGUI
+namespace GitSharp.TestRunner
 {
-    /// <summary>
-    /// Interaction logic for Frontend.xaml
-    /// </summary>
-    public partial class TestRunner : UserControl
+     public partial class TestRunner : UserControl
     {
         public TestRunner()
         {

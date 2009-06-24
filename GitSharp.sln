@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.TestGUI", "TestGUI\GitSharp.TestGUI.csproj", "{4B53BA11-1ADE-44E7-AC0F-7748D5701C25}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.Demo", "Demo\GitSharp.Demo.csproj", "{4B53BA11-1ADE-44E7-AC0F-7748D5701C25}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C46EDD61-C202-465A-93F1-ADE20A83BB59} = {C46EDD61-C202-465A-93F1-ADE20A83BB59}
 	EndProjectSection
@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.Tests", "Tests\Git
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp", "GitSharp\GitSharp.csproj", "{C46EDD61-C202-465A-93F1-ADE20A83BB59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.TestRunner", "GitSharp.TestRunner\GitSharp.TestRunner.csproj", "{6E76C9D7-F95E-4978-8DD2-07471792E7AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,10 @@ Global
 		{C46EDD61-C202-465A-93F1-ADE20A83BB59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C46EDD61-C202-465A-93F1-ADE20A83BB59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C46EDD61-C202-465A-93F1-ADE20A83BB59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E76C9D7-F95E-4978-8DD2-07471792E7AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E76C9D7-F95E-4978-8DD2-07471792E7AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E76C9D7-F95E-4978-8DD2-07471792E7AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E76C9D7-F95E-4978-8DD2-07471792E7AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

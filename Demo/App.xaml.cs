@@ -5,7 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 
-namespace GitSharp.TestGUI
+namespace GitSharp.TestRunner
 {
     /// <summary>
     /// Interaction logic for App.xaml

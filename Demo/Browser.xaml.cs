@@ -17,7 +17,7 @@ using Microsoft.Win32;
 using System.Reflection;
 using System.Diagnostics;
 
-namespace GitSharp.TestGUI
+namespace GitSharp.Demo
 {
 
     public partial class Browser : Window
@@ -25,8 +25,6 @@ namespace GitSharp.TestGUI
         public Browser()
         {
             InitializeComponent();
-            InitTestRunner();
-
             m_commits.SelectionChanged += (o, args) => SelectCommit(m_commits.SelectedItem as Commit);
             //m_branches.SelectionChanged += (o, args) => SelectBranch(m_branches.SelectedItem as Branch);
             m_refs.SelectionChanged += (o, args) => SelectRef(m_refs.SelectedItem as Ref);
@@ -34,12 +32,6 @@ namespace GitSharp.TestGUI
             //m_config_tree.SelectedItemChanged += (o, args) => SelectConfiguration(m_config_tree.SelectedItem);
         }
 
-        private void InitTestRunner()
-        {
-            var testrunner = new TestRunner();
-            m_unit_tests.Content = testrunner;
-            testrunner.AddAssembly(Assembly.Load("GitSharp.Tests"));
-        }
 
         Repository m_repository;
 

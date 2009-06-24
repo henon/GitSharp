@@ -14,11 +14,16 @@ using System.Windows.Shapes;
 using System.Reflection;
 using NUnit.Framework;
 using System.IO;
+using System.Threading;
+using System.Windows.Threading;
 
 namespace GitSharp.TestRunner
 {
-     public partial class TestRunner : UserControl
+    public partial class TestRunner : UserControl
     {
+        #region --> Initialization
+
+
         public TestRunner()
         {
             InitializeComponent();
@@ -26,16 +31,17 @@ namespace GitSharp.TestRunner
             {
                 var item = m_treeview.SelectedItem as TreeViewItem;
                 if (item == null)
-                    return;
-                RunAll(item);
-                PresentSummary(item);
+                    item = m_treeview.Items[0] as TreeViewItem;
+                m_button_run.IsEnabled = false;
+                StartBackgroundRunner(item);
+                //PresentSummary(item);
             };
             Init();
         }
         //ImageSource red_icon = new BitmapImage().FromFile(Directory.GetCurrentDirectory() + @"./Resources/offline.png");
         //ImageSource green_icon = new BitmapImage().FromFile(Directory.GetCurrentDirectory() + @"./Resources/online.png");
 
-        public void Init()
+        private void Init()
         {
             var item = m_treeview.Items[0] as TreeViewItem;
             {
@@ -50,12 +56,24 @@ namespace GitSharp.TestRunner
                 assemblies.Add(Assembly.Load(name));
             foreach (Assembly assembly in assemblies)
                 Analyze(assembly, item.Items);
-        }
+            UpdateTree();
+        } 
 
+
+        #endregion
+
+        /// <summary>
+        /// Add assemblies containing unit tests to be run by the testrunner.
+        /// </summary>
+        /// <param name="assembly"></param>
         public void AddAssembly(Assembly assembly)
         {
             Analyze(assembly, (m_treeview.Items[0] as TreeViewItem).Items);
+            UpdateTree();
         }
+
+        #region --> Assembly analization
+
 
         private void Analyze(Assembly assembly, ItemCollection collection)
         {
@@ -121,7 +139,7 @@ namespace GitSharp.TestRunner
 
             var item = new TreeViewItem();
             item.Header = testcase.TestMethod.Name;
-            item.FontWeight = FontWeights.Bold;
+            //item.FontWeight = FontWeights.Bold;
             item.Tag = testcase;
             item.ContextMenu = InitContextMenu(item);
             item.PreviewMouseDown += (o, args) => PresentSummary(item);
@@ -150,41 +168,179 @@ namespace GitSharp.TestRunner
             return item;
         }
 
+        private ContextMenu InitContextMenu(TreeViewItem item)
+        {
+            var menu = new ContextMenu();
+            var item1 = new MenuItem();
+            {
+                menu.Items.Add(item1);
+                item1.Header = "Run";
+                item1.Click += (o, args) =>
+                {
+                    StartBackgroundRunner(item);
+                    PresentSummary(item);
+                };
+            }
+            var item2 = new MenuItem();
+            {
+                menu.Items.Add(item2);
+                item2.Header = "Expand all";
+                item2.Click += (o, args) => item.ExpandDownRecursive();
+            } return menu;
+        } 
+
+
+        #endregion
+
+        #region --> Run mechanics
+
+
+        private bool m_stop_background_runner = false;
+
+        private void StartBackgroundRunner(TreeViewItem item)
+        {
+            m_stop_background_runner = false;
+            var cases = new List<TestcaseView>();
+            UpdateTree();
+            CollectAll(item, cases);
+            ThreadPool.QueueUserWorkItem(new WaitCallback(x =>
+            {
+                RunAll(cases, item);
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => m_button_run.IsEnabled = true));
+            }));
+        }
+
+        private void CollectAll(TreeViewItem item, List<TestcaseView> testcases)
+        {
+            if (item == null || testcases == null)
+                return;
+            if (item.Tag is TestcaseView)
+            {
+                var testcase = item.Tag as TestcaseView;
+                testcase.Reset();
+                testcases.Add(testcase);
+            }
+            else
+                foreach (var child in item.Items)
+                    CollectAll(child as TreeViewItem, testcases);
+        }
+
+        private void RunAll(List<TestcaseView> testcases, TreeViewItem toplevel_item)
+        {
+            foreach (var testcase in testcases)
+            {
+                if (m_stop_background_runner)
+                    return;
+                if (testcase == null)
+                    continue;
+                Run(testcase);
+                PresentSummary(toplevel_item);
+            }
+        }
+
+        private void Run(TestcaseView testcase)
+        {
+            if (m_stop_background_runner)
+                return;
+            //item.Foreground = Brushes.Black; // Colors.Black;
+            //m_textbox1.Text = "Running ... " + testcase.ToString();
+            //m_textbox2.Text = "";
+            testcase.Run();
+        } 
+
+
+        #endregion
+
+        #region --> Presentation of results
+
+
         int m_failed_count, m_ok_count, m_not_run_count;
 
         private void PresentSummary(TreeViewItem item)
         {
-            m_textbox2.Text = "";
-            var testcase = item.Tag as TestcaseView;
-            if (testcase == null) // present summary
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
             {
-                ClearStats();
-                StringBuilder s = new StringBuilder("Summary for " + item.Header.ToString() + ":\n\n");
-                var stat_pos = s.Length;
-                foreach (var i in item.IterateDown())
+                m_textbox2.Text = "";
+                var testcase = item.Tag as TestcaseView;
+                if (testcase == null) // present summary
                 {
-                    var treeitem = i as TreeViewItem;
-                    if (treeitem.Tag is TestcaseView)
+                    ClearStats();
+                    m_summary_label.Text = "Summary for " + item.Header.ToString();
+                    StringBuilder s = new StringBuilder("\n");
+                    var stat_pos = s.Length;
+                    foreach (var i in item.IterateDown())
                     {
-                        s.AppendLine(StatusMessage(treeitem.Tag as TestcaseView));
-                        UpdateStats(treeitem.Tag as TestcaseView);
+                        var treeitem = i as TreeViewItem;
+                        if (treeitem.Tag is TestcaseView)
+                        {
+                            s.AppendLine(StatusMessage(treeitem.Tag as TestcaseView));
+                            UpdateStats(treeitem.Tag as TestcaseView);
+                        }
+                        UpdateItem(treeitem);
                     }
+                    var total = (m_ok_count + m_failed_count + m_not_run_count);
+                    s.Insert(stat_pos, "  " + m_failed_count + " failed  |  " + m_ok_count + " passed  |  " + m_not_run_count + " not run  |  " + total + " total tests\n\n");
+                    m_textbox1.Text = s.ToString();
+                    m_progressbar.Maximum = (double)total;
+                    m_progressbar.Value = (double)(m_failed_count + m_ok_count);
+                    return;
                 }
-                s.Insert(stat_pos, "  " + m_ok_count + " passed  |  " + m_failed_count + " failed  |  " + m_not_run_count + " not run  |  " + (m_ok_count + m_failed_count + m_not_run_count) + " total tests\n\n");
-                m_textbox1.Text = s.ToString();
-                return;
+                m_textbox1.Text = StatusMessage(testcase);
+                string backtrace = testcase.Exception.PrettyPrint();
+                m_textbox2.Text = backtrace;
+                UpdateItem(item);
+                m_progressbar.Value = 0;
+                Console.WriteLine(backtrace);
+            }));
+        }
+
+        private void UpdateItem(TreeViewItem item)
+        {
+            bool is_executed = false, is_failed = false;
+            if (item.Tag is TestcaseView)
+            {
+                var testcase = item.Tag as TestcaseView;
+                is_executed = testcase.IsExecuted;
+                is_failed = testcase.Failed;
             }
-            m_textbox1.Text = StatusMessage(testcase);
-            if (testcase.Failed)
+            else if (item.Tag is TestFixtureView)
+            {
+                var fixture = item.Tag as TestFixtureView;
+                is_executed = fixture.AreAllExecuted;
+                is_failed = fixture.HasAnyFailures;
+            }
+            if (is_failed)
             {
                 item.ExpandUpRecursive();
+                item.BringIntoView();
                 //((item.Header as StackPanel).Children[0] as Image).Source = red_icon;
                 //(item.Header as TextBlock).
                 item.Foreground = Brushes.Red;
+                //m_textbox2.Text = testcase.Exception.PrettyPrint();
                 //m_textbox1.Text = testcase.ToString() + " --> FAILED:\n\n" + testcase.Exception.Message;
-                string s = testcase.Exception.PrettyPrint();
-                m_textbox2.Text = s;
-                Console.WriteLine(s);
+                //string s = testcase.Exception.PrettyPrint();
+            }
+            else if (is_executed)
+            {
+                item.Foreground = Brushes.Black;
+            }
+            else
+                item.Foreground = Brushes.DarkGray;
+
+        }
+
+        private void UpdateTree()
+        {
+            foreach (var i in (m_treeview.Items[0] as TreeViewItem).IterateDown())
+            {
+                var treeitem = i as TreeViewItem;
+                if (treeitem.Tag is TestcaseView)
+                    (treeitem.Tag as TestcaseView).Reset();
+            }
+            foreach (var i in (m_treeview.Items[0] as TreeViewItem).IterateDown())
+            {
+                var treeitem = i as TreeViewItem;
+                UpdateItem(treeitem);
             }
         }
 
@@ -214,57 +370,33 @@ namespace GitSharp.TestRunner
                 return "*** " + testcase.ToString() + " --> FAILED:\n\n" + testcase.Exception.Message;
             else
                 return testcase.ToString() + " --> OK";
-        }
+        } 
 
-        private ContextMenu InitContextMenu(TreeViewItem item)
+
+        #endregion
+
+        #region --> Event handling
+
+
+        private void OnStopButton(object sender, RoutedEventArgs e)
         {
-            var menu = new ContextMenu();
-            var item1 = new MenuItem();
-            {
-                menu.Items.Add(item1);
-                item1.Header = "Run";
-                item1.Click += (o, args) =>
-                {
-                    RunAll(item);
-                    PresentSummary(item);
-                };
-            }
-            var item2 = new MenuItem();
-            {
-                menu.Items.Add(item2);
-                item2.Header = "Expand all";
-                item2.Click += (o, args) => item.ExpandDownRecursive();
-            } return menu;
+            m_stop_background_runner = true;
+            m_button_run.IsEnabled = true;
         }
 
-        private void RunAll(TreeViewItem item)
-        {
-            if (item == null)
-                return;
-            if (item.Tag is TestcaseView)
-                Run(item.Tag as TestcaseView, item);
-            else
-                foreach (var child in item.Items)
-                    RunAll(child as TreeViewItem);
-        }
 
-        private void Run(TestcaseView testcase, TreeViewItem item)
-        {
-            item.Foreground = Brushes.Black; // Colors.Black;
-            m_textbox1.Text = "Running ... " + testcase.ToString();
-            m_textbox2.Text = "";
-            testcase.Run();
-
-            PresentSummary(item);
-        }
-
+        #endregion
     }
+
+    #region Utilities
 
 
     public static class ExceptionExtension
     {
         public static string PrettyPrint(this Exception exception)
         {
+            if (exception == null)
+                return "";
             m_string_builder = new StringBuilder();
             PrintRecursive(exception, "");
             return m_string_builder.ToString();
@@ -355,4 +487,7 @@ namespace GitSharp.TestRunner
             }
         }
     }
+
+
+    #endregion
 }

@@ -13,6 +13,7 @@ namespace GitSharp.TestRunner
         {
             Type = t;
             TestMethod = m;
+            Reset();
         }
 
         public Type Type
@@ -55,7 +56,7 @@ namespace GitSharp.TestRunner
         public Exception Exception
         {
             get;
-            internal set;
+            private set;
         }
 
         public bool Failed
@@ -63,7 +64,7 @@ namespace GitSharp.TestRunner
             get { return Exception != null; }
         }
 
-        public bool IsExecuted { get; set; }
+        public bool IsExecuted { get; private set; }
 
         public void Run()
         {
@@ -87,6 +88,12 @@ namespace GitSharp.TestRunner
         public override string ToString()
         {
             return Type.Name + "." + TestMethod.Name;
+        }
+
+        internal void Reset()
+        {
+            Exception = null;
+            IsExecuted = false;
         }
     }
 }

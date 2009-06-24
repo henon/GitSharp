@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.Tests", "Tests\Git
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp", "GitSharp\GitSharp.csproj", "{C46EDD61-C202-465A-93F1-ADE20A83BB59}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.TestRunner", "GitSharp.TestRunner\GitSharp.TestRunner.csproj", "{6E76C9D7-F95E-4978-8DD2-07471792E7AA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.TestRunner", "TestRunner\GitSharp.TestRunner.csproj", "{6E76C9D7-F95E-4978-8DD2-07471792E7AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

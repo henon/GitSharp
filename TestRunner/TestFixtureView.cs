@@ -41,6 +41,22 @@ namespace GitSharp.TestRunner
             }
         }
 
+        public bool AreAllExecuted
+        {
+            get
+            {
+                return !Tests.Any(t => !t.IsExecuted);
+            }
+        }
+
+        public bool HasAnyFailures
+        {
+            get
+            {
+                return Tests.Any(t => t.Failed);
+            }
+        }
+
         public static object CreateInstance(Type type, params object[] args)
         {
             Debug.Assert(type != null, "type cannot be null!!!!");

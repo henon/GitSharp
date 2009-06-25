@@ -281,7 +281,7 @@ namespace GitSharp.Tests
                 if (!tfp.Exists)
                     throw new IOException("Could not create directory " + tfp.FullName);
             }
-            File.WriteAllText(tf.FullName, data, Encoding.UTF8);
+            File.WriteAllText(tf.FullName, data, Encoding.Default);
             return tf;
         }
 

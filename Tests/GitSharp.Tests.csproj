@@ -240,6 +240,18 @@
     <None Include="Resources\packed-refs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Resources\single_file_commit\16c0beaf7523eb3ef5df45bd42dd4fc6343de864">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\single_file_commit\917c130bd4fa5bf2df0c399dc1b03401860aa448">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\single_file_commit\95ea6a6859af6791464bd8b6de76ad5a6f9fad81">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\single_file_commit\i-am-a-file">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GitSharp\GitSharp.csproj">

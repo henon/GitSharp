@@ -198,5 +198,6 @@ namespace GitSharp
         {
             return new ObjectId(intbuffer[offset], intbuffer[offset + 1], intbuffer[offset + 2], intbuffer[offset + 3], intbuffer[offset + 4]);
         }
+
     }
 }

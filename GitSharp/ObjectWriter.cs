@@ -45,8 +45,9 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using ObjectWritingException = GitSharp.Exceptions.ObjectWritingException;
-using System.IO.Compression;
 using GitSharp.Util;
+using ICSharpCode.SharpZipLib.Zip.Compression;
+using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
 namespace GitSharp
 {
@@ -68,11 +69,14 @@ namespace GitSharp
 
         private MessageDigest md;
 
+        private Deflater def;
+
         public ObjectWriter(Repository repo)
         {
             this.r = repo;
             buf = new byte[8192];
             md = new MessageDigest(); // [henon] Sha1 hash digest generator
+            def = new Deflater(r.Config.Core.Compression);
         }
 
         public ObjectId WriteBlob(byte[] b)
@@ -113,7 +117,7 @@ namespace GitSharp
                 o.Write((byte)' ');
                 o.Write(e.NameUTF8);
                 o.Write((byte)0);
-                id.CopyTo(m);
+                id.copyRawTo(m);
             }
             return WriteCanonicalTree(m.ToArray());
         }
@@ -225,7 +229,7 @@ namespace GitSharp
             // [henon] here is room for improvement. for computation only (store==false) the try-finally can be eliminated and also a whole lot of if !=null checks.
             // [henon] but first, we need to get this working!!
             FileInfo t;
-            DeflateStream deflateStream;
+            DeflaterOutputStream deflateStream;
             FileStream fileStream;
             ObjectId id = null;
 
@@ -241,11 +245,11 @@ namespace GitSharp
             }
 
             md.Reset();
-#if DEBUG
-
-#endif
             if (store)
-                deflateStream = new DeflateStream(fileStream, CompressionMode.Compress);
+            {
+                def.Reset();
+                deflateStream = new DeflaterOutputStream(fileStream, def);
+            }
             else
                 deflateStream = null;
 

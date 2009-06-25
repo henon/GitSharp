@@ -94,7 +94,7 @@ namespace GitSharp
 
                 while (mode != 0)
                 {
-                    tmp[--p] = (byte)('0' + (mode & 07));
+                    tmp[--p] = (byte)((byte)'0' + (mode & 07));
                     mode >>= 3;
                 }
 

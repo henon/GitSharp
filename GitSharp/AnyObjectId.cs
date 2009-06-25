@@ -95,6 +95,18 @@ namespace GitSharp
             new BinaryWriter(s).Write(ToHexByteArray());
         }
 
+
+        internal void copyRawTo(Stream s)
+        {
+            var buf = new byte[20];
+            NB.encodeInt32(buf, 0, W1);
+            NB.encodeInt32(buf, 4, W2);
+            NB.encodeInt32(buf, 8, W3);
+            NB.encodeInt32(buf, 12, W4);
+            NB.encodeInt32(buf, 16, W5);
+            s.Write(buf, 0, 20);
+        }
+
         private byte[] ToHexByteArray()
         {
             byte[] dst = new byte[Constants.StringLength];

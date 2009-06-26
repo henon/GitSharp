@@ -420,8 +420,9 @@ namespace GitSharp.Tests
             commit.Author = (new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295L, 60));
             commit.Committer = (new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295L, 60));
             commit.setEncoding("ISO-8859-1");
-            commit.Message = ("\u00dcbergeeks");
+            commit.Message = "\u00dcbergeeks";
             ObjectId cid = new ObjectWriter(db).WriteCommit(commit);
+            var s = new Inspector(db).Inspect(cid);
             Assert.AreEqual("2979b39d385014b33287054b87f77bcb3ecb5ebf", cid.ToString());
         }
 

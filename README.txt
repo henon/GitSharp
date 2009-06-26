@@ -1,11 +1,18 @@
-== Git# ==
+== Git# --> Git for .NET ==
+... a native Windows version of the fast & free open source version control system
+
+Git# is the most advanced C# implementation of git for Windows and the .NET framework. 
+It is aimed to be fully compatible to the original git for linux and can be used as stand 
+alone command line application (potentially replacing msysGit) or as library for windows 
+applications such as gui frontends or plugins for IDEs.
 
 Git# is released under the BSD license. It is derived from the Java version jgit.
-Please refer to the LICENSE.txt files for the complete license, and please refer to the individual source file 
-header to determine which license covers it.
+Please refer to the LICENSE.txt files for the complete license, and please refer to the 
+individual source file header to determine who contributed.
 
+For more info check out the Git# website at http://www.eqqon.com/index.php/GitSharp
 
-== WARNINGS / CAVEATS              ==
+== WARNINGS / CAVEATS   ==
 
 - Symbolic links are not supported because Windows does not directly support them.
   Such links could be damaged.
@@ -17,7 +24,7 @@ header to determine which license covers it.
   make sure your projects and workspaces are configured to save files
   with Unix (LF) line endings.
 
-== Features                ==
+== Features ==
 
     * Read loose and packed commits, trees, blobs, including
       deltafied objects.
@@ -25,10 +32,6 @@ header to determine which license covers it.
     * Read objects from shared repositories
 
     * Write loose commits, trees, blobs.
-
-    * Write blobs from local files or Java InputStreams.
-
-    * Read blobs as Java InputStreams.
 
     * Copy trees to local directory, or local directory to a tree.
 
@@ -38,24 +41,24 @@ header to determine which license covers it.
 
     * Create a new repository.
 
-    * Read and write refs, including walking through symrefs.
+    * Read and write refs, including walking through symrefs. (not ported yet)
 
-    * Read, update and write the Git index.
+    * Read, update and write the Git index. (updating and writing not ported yet)
 
-    * Checkout in dirty working directory if trivial.
+    * Checkout in dirty working directory if trivial. (not ported yet)
 
     * Walk the history from a given set of commits looking for commits
       introducing changes in files under a specified path.
 
-    * Object transport
+    * Object transport  (not ported yet)
       Fetch via ssh, git, http, Amazon S3 and bundles.
-      Push via ssh, git and Amazon S3. JGit does not yet deltify
+      Push via ssh, git and Amazon S3. Git# does not yet deltify
       the pushed packs so they may be a lot larger than C Git packs.
 
-== Missing Features                ==
+== Missing Features ==
 
-There are a lot of missing features. You need the real Git for this.
-For some operations it may just be the preferred solution also. There
+There are a lot of missing features in jgit and thus also in Git#. You need the real Git 
+for those. For some operations it may just be the preferred solution also. There
 are not just a command line, there is e.g. git-gui that makes committing
 partial files simple.
 
@@ -76,25 +79,19 @@ partial files simple.
 - submodule support
   Submodules are not supported or even recognized.
 
-== Support                         ==
+== Support ==
 
-  Post question, comments or patches to meinrad.recheis@gmail.com.
+  Post question, comments or patches to the official Git# mailing list at 
+  http://groups.google.com/group/gitsharp/.
 
 
-== Contributing                    ==
+== Contributing ==
 
-  Fork the source at github and start coding. We will pull your commits regularly.
-  However, feedback and bug reports are also contributions.
+  Feel free to fork the source at github and start coding. We will pull your commits regularly.
+  However, feedback and bug reports or linking to the website from your blog are also 
+  contributions.
 
-  Short how-to:
-   - Make small logical changes.
-   - Provide a meaningful commit message.
-
-   - Include your Signed-Off-By line to note you agree with the
-     Developer's Certificate of Origin (see below).
-   - Make sure all code is under the proper license (BSD)
-
-== About GIT                       ==
+== About GIT itself ==
 
 More information about GIT, its repository format, and the canonical
 C based implementation can be obtained from the GIT websites:
@@ -103,3 +100,5 @@ C based implementation can be obtained from the GIT websites:
   http://www.kernel.org/pub/software/scm/git/
   http://www.kernel.org/pub/software/scm/git/docs/
 
+More information about the Java implemetation which Git# stems from:
+  http://git.or.cz/gitwiki/EclipsePlugin

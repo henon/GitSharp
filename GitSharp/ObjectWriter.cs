@@ -139,7 +139,7 @@ namespace GitSharp
                 encoding = Constants.CHARSET;
             var os = new MemoryStream();
             var w = new BinaryWriter(os);
-            var sw = new StreamWriter(os);
+            var sw = new StreamWriter(os, encoding);
 
             w.Write(htree);
             w.Write(' ');
@@ -179,6 +179,9 @@ namespace GitSharp
 
             w.Write('\n');
             //w.Flush();
+            //var encoding_writer = new StreamWriter(os, encoding);
+            //encoding_writer.Write(c.Message);
+            //encoding_writer.Flush();
             sw.Write(c.Message);
             sw.Flush();
             return WriteCommit(os.ToArray());

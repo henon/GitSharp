@@ -205,7 +205,7 @@ namespace GitSharp
                     ptr++;
                 }
             }
-            catch (IndexOutOfRangeException e)
+            catch (IndexOutOfRangeException)
             {
                 // Not a valid digit.
             }
@@ -264,7 +264,7 @@ namespace GitSharp
                     ptr++;
                 }
             }
-            catch (IndexOutOfRangeException e)
+            catch (IndexOutOfRangeException)
             {
                 // Not a valid digit.
             }

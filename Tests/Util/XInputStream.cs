@@ -46,7 +46,7 @@ using GitSharp.Util;
 
 namespace GitSharp.Tests.Util
 {
-    internal class XInputStream
+    internal class XInputStream : IDisposable
     {
         private byte[] intbuf = new byte[8];
 
@@ -103,6 +103,19 @@ namespace GitSharp.Tests.Util
                 return _filestream.Length;
             }
         }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            if (_filestream != null)
+            {
+                _filestream.Close();
+                _filestream = null;
+            }
+        }
+
+        #endregion
     }
 
 }

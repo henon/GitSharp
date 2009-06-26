@@ -134,7 +134,9 @@ namespace GitSharp
 
         public ObjectId WriteCommit(Commit c)
         {
-#warning TODO: handle encoding
+            Encoding encoding = c.Encoding;
+            if (encoding == null)
+                encoding = Constants.CHARSET;
             var os = new MemoryStream();
             var w = new BinaryWriter(os);
             var sw = new StreamWriter(os);
@@ -155,18 +157,30 @@ namespace GitSharp
 
             w.Write(hauthor);
             w.Write(' ');
+            //w.Flush();
             sw.Write(c.Author.ToExternalString());
+            sw.Flush();
             w.Write('\n');
 
             w.Write(hcommitter);
             w.Write(' ');
+            //w.Flush();
             sw.Write(c.Committer.ToExternalString());
-
+            sw.Flush();
             w.Write('\n');
 
+            if (encoding != Encoding.UTF8)
+            {
+                w.Write(hencoding);
+                w.Write(' ');
+                w.Write(Constants.encodeASCII(encoding.HeaderName.ToUpper()));
+                w.Write('\n');
+            }
+
             w.Write('\n');
+            //w.Flush();
             sw.Write(c.Message);
-
+            sw.Flush();
             return WriteCommit(os.ToArray());
         }
 
@@ -190,7 +204,7 @@ namespace GitSharp
             w.Write('\n');
 
             sw.Write("tag ");
-             sw.Write(tag.TagName);
+            sw.Write(tag.TagName);
             w.Write('\n');
 
             sw.Write("tagger ");

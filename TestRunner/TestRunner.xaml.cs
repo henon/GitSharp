@@ -72,7 +72,7 @@ namespace GitSharp.TestRunner
             UpdateTree();
         }
 
-        #region --> Assembly analization
+        #region --> Assembly analyzation
 
 
         private void Analyze(Assembly assembly, ItemCollection collection)

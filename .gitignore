@@ -8,4 +8,5 @@ obj
 *.user
 *.suo
 *.bak
+*.sln.cache
 _ReSharper*

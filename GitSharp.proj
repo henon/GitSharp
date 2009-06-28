@@ -1,0 +1,24 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="3.5">
+	<UsingTask AssemblyFile="$(MSBuildProjectDirectory)\extern\Gallio.MSBuildTasks.dll" TaskName="Gallio" />
+	<Target Name="Clean">
+		<MSBuild Projects="GitSharp.sln" StopOnFirstFailure="true" Properties="$(BuildConfigProp)" BuildInParallel="true" Targets="Clean"/>
+	</Target>
+  <Target Name="Build">
+		<MSBuild Projects="GitSharp.sln" StopOnFirstFailure="true" Properties="$(BuildConfigProp)" BuildInParallel="true" Targets="Rebuild"/>
+	</Target>
+	<Target Name="SetRelease">
+		<PropertyGroup>
+			<BuildConfig>Release</BuildConfig>
+			<BuildConfigProp>Configuration=$(BuildConfig)</BuildConfigProp>
+		</PropertyGroup>
+	</Target>
+  <Target Name="Test" DependsOnTargets="Build">
+  	<ItemGroup>
+  		<TestAssemblies Include="$(MSBuildProjectDirectory)\Tests\bin\Debug\GitSharp.Tests.dll"/>
+  	</ItemGroup>
+    <Gallio IgnoreFailures="true" PluginDirectories="$(MSBuildProjectDirectory)\extern" Files="@(TestAssemblies)">
+      <Output TaskParameter="ExitCode" PropertyName="ExitCode"/>
+    </Gallio>
+    <Error Text="Tests execution failed" Condition="'$(ExitCode)' != 0" />
+  </Target>	
+</Project>

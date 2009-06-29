@@ -224,7 +224,7 @@ namespace GitSharp
 
         #region IEnumerator<TreeEntry> Members
 
-        public TreeEntry Current{ get; protected set; }
+        public TreeEntry Current{ get; internal set; }
 
         #endregion
 

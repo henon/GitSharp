@@ -47,7 +47,7 @@ namespace GitSharp
 {
     public class Tag
     {
-        public Repository Repository { get; protected set; }
+        public Repository Repository { get; internal set; }
         private byte[] raw;
 
         /**
@@ -69,7 +69,7 @@ namespace GitSharp
          * @param refName tag name or null
          * @param raw data of an annotated tag.
          */
-        public Tag(Repository db, ObjectId id, String refName, byte[] raw)
+        public Tag(Repository db, ObjectId id, string refName, byte[] raw)
         {
             Repository = db;
             if (raw != null)
@@ -105,8 +105,8 @@ namespace GitSharp
         /**
          * @return comment of an annotated tag, or null
          */
-        private String message;
-        public String Message
+        private string message;
+        public string Message
         {
             get
             {
@@ -126,7 +126,7 @@ namespace GitSharp
 
             using (var br = new StreamReader(new MemoryStream(raw)))
             {
-                String n = br.ReadLine();
+                string n = br.ReadLine();
                 if (n == null || !n.StartsWith("object "))
                 {
                     throw new CorruptObjectException(TagId, "no object");
@@ -181,7 +181,7 @@ namespace GitSharp
          * Store a tag.
          * If author, message or type is set make the tag an annotated tag.
          *
-         * @throws IOException
+         * @
          */
         public void Save()  //renamed from Tag
         {
@@ -207,7 +207,7 @@ namespace GitSharp
                 throw new ObjectWritingException("Unable to lock tag " + TagName);
         }
 
-        public override String ToString()
+        public override string ToString()
         {
             return "tag[" + TagName + TagType + Id + " " + Author + "]";
         }
@@ -227,8 +227,8 @@ namespace GitSharp
         /**
          * @return tag target type
          */
-        String tagType;
-        public String TagType
+        string tagType;
+        public string TagType
         {
             get
             {

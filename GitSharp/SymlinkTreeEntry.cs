@@ -70,7 +70,7 @@ namespace GitSharp
             tv.VisitSymlink(this);
         }
 
-        public override String ToString()
+        public override string ToString()
         {
             StringBuilder r = new StringBuilder();
             r.Append(ObjectId.ToString(this.Id));

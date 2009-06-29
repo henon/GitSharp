@@ -55,7 +55,7 @@ namespace GitSharp
  * @param treeEntry
  * @param indexEntry
  * @param file
- * @throws IOException
+ * @
  */
         void VisitEntry(TreeEntry treeEntry, GitIndex.Entry indexEntry, FileInfo file);
 
@@ -66,7 +66,7 @@ namespace GitSharp
          * @param auxEntry
          * @param indexEntry
          * @param file
-         * @throws IOException
+         * @
          */
         void VisitEntry(TreeEntry treeEntry, TreeEntry auxEntry, GitIndex.Entry indexEntry, FileInfo file);
 
@@ -76,9 +76,9 @@ namespace GitSharp
          * @param tree
          * @param auxTree
          * @param curDir
-         * @throws IOException
+         * @
          */
-        void FinishVisitTree(Tree tree, Tree auxTree, String curDir);
+        void FinishVisitTree(Tree tree, Tree auxTree, string curDir);
 
         /**
          * Invoked after handling all child nodes of a tree, during two way merge.
@@ -86,8 +86,8 @@ namespace GitSharp
          * @param tree
          * @param i
          * @param curDir
-         * @throws IOException
+         * @
          */
-        void FinishVisitTree(Tree tree, int i, String curDir);
+        void FinishVisitTree(Tree tree, int i, string curDir);
     }
 }

@@ -119,8 +119,8 @@ namespace GitSharp
             }
             else
             {
-                String twstr = _totalWork.ToString();
-                String cmpstr = cmp.ToString();
+                string twstr = _totalWork.ToString();
+                string cmpstr = cmp.ToString();
                 while (cmpstr.Length < twstr.Length)
                     cmpstr = " " + cmpstr;
                 int pcnt = (cmp * 100 / _totalWork);

@@ -56,7 +56,7 @@ namespace GitSharp
     /**
      * Least frequently used cache for objects specified by PackFile positions.
      * <p>
-     * This cache maps a <code>({@link PackFile},position)</code> tuple to an Object.
+     * This cache maps a <code>({@link PackFile},position)</code> tuple to an object.
      * <p>
      * This cache is suitable for objects that are "relative expensive" to compute
      * from the underlying PackFile, given some known position in that file.
@@ -74,7 +74,7 @@ namespace GitSharp
      * overhead that typically doesn't yield a corresponding benefit to the
      * application.
      * <p>
-     * This cache implements a loose LRU policy by randomly picking a window
+     * This cache : a loose LRU policy by randomly picking a window
      * comprised of roughly 10% of the cache, and evicting the oldest accessed entry
      * within that window.
      * <p>
@@ -87,7 +87,7 @@ namespace GitSharp
      * invocations is also fixed in size.
      * <p>
      * The key tuple is passed through to methods as a pair of parameters rather
-     * than as a single Object, thus reducing the transient memory allocations of
+     * than as a single object, thus reducing the transient memory allocations of
      * callers. It is more efficient to avoid the allocation, as we can't be 100%
      * sure that a JIT would be able to stack-allocate a key tuple.
      * <p>
@@ -96,7 +96,7 @@ namespace GitSharp
      * <li>{@link #load(PackFile, long)} is invoked by at most one thread at a time
      * for a given <code>(PackFile,position)</code> tuple.</li>
      * <li>For every <code>load()</code> invocation there is exactly one
-     * {@link #createRef(PackFile, long, Object)} invocation to wrap a SoftReference
+     * {@link #createRef(PackFile, long, object)} invocation to wrap a SoftReference
      * around the cached entity.</li>
      * <li>For every Reference created by <code>createRef()</code> there will be
      * exactly one call to {@link #clear(Ref)} to cleanup any resources associated
@@ -104,9 +104,9 @@ namespace GitSharp
      * </ul>
      * <p>
      * Therefore, it is safe to perform resource accounting increments during the
-     * {@link #load(PackFile, long)} or {@link #createRef(PackFile, long, Object)}
+     * {@link #load(PackFile, long)} or {@link #createRef(PackFile, long, object)}
      * methods, and matching decrements during {@link #clear(Ref)}. Implementors may
-     * need to override {@link #createRef(PackFile, long, Object)} in order to embed
+     * need to override {@link #createRef(PackFile, long, object)} in order to embed
      * additional accounting information into an implementation specific
      * {@link OffsetCache.Ref} subclass, as the cached entity may have already been
      * evicted by the JRE's garbage collector.
@@ -129,8 +129,8 @@ namespace GitSharp
     {
         private static Random rng = new Random();
 
-        /** Queue that {@link #createRef(PackFile, long, Object)} must use. */
-        protected Queue queue;
+        /** Queue that {@link #createRef(PackFile, long, object)} must use. */
+        internal Queue queue;
 
         /** Number of entries in {@link #table}. */
         private int tableSize;
@@ -422,7 +422,7 @@ namespace GitSharp
          * <p>
          * This method is invoked exactly once for the combined
          * {@link #load(PackFile, long)} and
-         * {@link #createRef(PackFile, long, Object)} invocation pair that was used
+         * {@link #createRef(PackFile, long, object)} invocation pair that was used
          * to construct and insert an object into the cache.
          *
          * @param @ref
@@ -439,7 +439,7 @@ namespace GitSharp
          * <p>
          * By default this method returns false. Implementors may override to
          * consult with the accounting updated by {@link #load(PackFile, long)},
-         * {@link #createRef(PackFile, long, Object)} and {@link #clear(Ref)}.
+         * {@link #createRef(PackFile, long, object)} and {@link #clear(Ref)}.
          *
          * @return true if the cache is still over-limit and requires eviction of
          *         more entries.

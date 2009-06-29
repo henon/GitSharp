@@ -53,13 +53,13 @@ namespace GitSharp
 
         private DirectoryInfo currentDirectory;
 
-        protected TreeVisitorWithCurrentDirectory(DirectoryInfo rootDirectory)
+        internal TreeVisitorWithCurrentDirectory(DirectoryInfo rootDirectory)
         {
             stack = new Stack<DirectoryInfo>(16);
             currentDirectory = rootDirectory;
         }
 
-        protected DirectoryInfo GetCurrentDirectory()
+        internal DirectoryInfo GetCurrentDirectory()
         {
             return currentDirectory;
         }

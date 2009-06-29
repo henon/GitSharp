@@ -67,7 +67,7 @@ namespace GitSharp.Exceptions
 
 
         public RevisionSyntaxException(string message, Exception inner) : base(message, inner) { }
-        protected RevisionSyntaxException(
+        internal RevisionSyntaxException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }

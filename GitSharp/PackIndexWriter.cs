@@ -74,7 +74,7 @@ namespace GitSharp
 	 *            will be examined until a format can be conclusively selected.
 	 * @return a new writer to output an index file of the requested format to
 	 *         the supplied stream.
-	 * @throws IllegalArgumentException
+	 * @throws ArgumentException
 	 *             no recognized pack index version can support the supplied
 	 *             objects. This is likely a bug in the implementation.
 	 */
@@ -112,7 +112,7 @@ namespace GitSharp
      *            this formatted version will be written.
      * @return a new writer to output an index file of the requested format to
      *         the supplied stream.
-     * @throws IllegalArgumentException
+     * @throws ArgumentException
      *             the version requested is not supported by this
      *             implementation.
      */
@@ -130,16 +130,16 @@ namespace GitSharp
         }
 
         /** The index data stream we are responsible for creating. */
-        protected readonly BinaryWriter _stream;
+        internal readonly BinaryWriter _stream;
 
         /** A temporary buffer for use during IO to {link #out}. */
-        protected byte[] tmp = new byte[4 + ObjectId.Constants.ObjectIdLength];
+        internal byte[] tmp = new byte[4 + ObjectId.ObjectIdLength];
 
         /** The entries this writer must pack. */
-        protected List<PackedObjectInfo> entries;
+        internal List<PackedObjectInfo> entries;
 
         /** SHA-1 checksum for the entire pack data. */
-        protected byte[] packChecksum;
+        internal byte[] packChecksum;
 
         /**
 	     * Create a new writer instance.
@@ -148,7 +148,7 @@ namespace GitSharp
 	     *            the stream this instance outputs to. If not already buffered
 	     *            it will be automatically wrapped in a buffered stream.
 	     */
-        protected PackIndexWriter(Stream stream)
+        internal PackIndexWriter(Stream stream)
         {
             _stream = new BinaryWriter(stream);
         }
@@ -167,7 +167,7 @@ namespace GitSharp
          * @param packDataChecksum
          *            checksum signature of the entire pack data content. This is
          *            traditionally the last 20 bytes of the pack file's own stream.
-         * @throws IOException
+         * @
          *             an error occurred while writing to the output stream, or this
          *             index format cannot store the object data supplied.
          */
@@ -186,7 +186,7 @@ namespace GitSharp
          *
          * <pre>
          * writeFanOutTable();
-         * for (final PackedObjectInfo po : entries)
+         * for ( PackedObjectInfo po : entries)
          * 	writeOneEntry(po);
          * writeChecksumFooter();
          * </pre>
@@ -197,11 +197,11 @@ namespace GitSharp
          * the {@link #entries} collection may be iterated over more than once if
          * necessary. Implementors therefore have complete control over the data.
          *
-         * @throws IOException
+         * @
          *             an error occurred while writing to the output stream, or this
          *             index format cannot store the object data supplied.
          */
-        protected abstract void WriteInternal();
+        internal abstract void WriteInternal();
 
         /**
          * Output the version 2 (and later) TOC header, with version number.
@@ -213,10 +213,10 @@ namespace GitSharp
          *
          * @param version
          *            version number of this index format being written.
-         * @throws IOException
+         * @
          *             an error occurred while writing to the output stream.
          */
-        protected void WriteTOC(int version)
+        internal void WriteTOC(int version)
         {
             _stream.Write(TOC);
             _stream.Write(version);
@@ -230,10 +230,10 @@ namespace GitSharp
 	     * whose {@link ObjectId#getFirstByte()} matches the count's position in the
 	     * fan-out table.
 	     *
-	     * @throws IOException
+	     * @
 	     *             an error occurred while writing to the output stream.
 	     */
-	    protected void WriteFanOutTable() 
+	    internal void WriteFanOutTable() 
         {
 		    int[] fanout = new int[256];
 		    foreach (PackedObjectInfo po in entries)
@@ -257,10 +257,10 @@ namespace GitSharp
 	     * the pack data checksum above.</li>
 	     * </ol>
 	     *
-	     * @throws IOException
+	     * @
 	     *             an error occurred while writing to the output stream.
 	     */
-	    protected void WriteChecksumFooter() {
+	    internal void WriteChecksumFooter() {
 		    _stream.Write(packChecksum);
             var sha = new SHA1CryptoServiceProvider();
             var hash = sha.ComputeHash(_stream.BaseStream);

@@ -72,10 +72,9 @@ namespace GitSharp
         private MemoryMappedFile fd_map;
         private FileStream fd;
 
-        long length;
         public long Length
         {
-            get { return length; }
+            get; private set;
         }
 
         private int activeWindows;
@@ -109,7 +108,7 @@ namespace GitSharp
             // value in WindowCache.hash(), without doing the multiply there.
             //
             hash = this.GetHashCode() * 31;
-            this.length = long.MaxValue;
+            this.Length = long.MaxValue;
             //ReadPackHeader();
         }
 
@@ -295,7 +294,7 @@ namespace GitSharp
                 ObjectId id = FindObjectForOffset(objectOffset);
                 long expected = idx().FindCRC32(id);
                 if (computed != expected)
-                    throw new CorruptObjectException("Object at " + dataOffset + " in " + File.FullName + " has bad zlib stream");
+                    throw new CorruptObjectException("object at " + dataOffset + " in " + File.FullName + " has bad zlib stream");
             }
             else
             {
@@ -305,7 +304,7 @@ namespace GitSharp
                 }
                 catch (Exception fe) // [henon] was DataFormatException
                 {
-                    throw new CorruptObjectException("Object at " + dataOffset + " in " + File.FullName + " has bad zlib stream", fe);
+                    throw new CorruptObjectException("object at " + dataOffset + " in " + File.FullName + " has bad zlib stream", fe);
                 }
                 copyToStream(dataOffset, buf, cnt, @out, curs);
             }
@@ -386,7 +385,7 @@ namespace GitSharp
                 if (invalid)
                     throw new PackInvalidException(packFile.FullName);
                 fd = new FileStream(packFile.FullName, System.IO.FileMode.Open, FileAccess.Read);
-                length = packFile.Length;
+                Length = packFile.Length;
                 onOpenPack();
             }
             catch (Exception re)
@@ -424,8 +423,8 @@ namespace GitSharp
 
         internal ByteArrayWindow read(long pos, int size)
         {
-            if (length < pos + size)
-                size = (int)(length - pos);
+            if (Length < pos + size)
+                size = (int)(Length - pos);
             byte[] buf = new byte[size];
             NB.ReadFully(fd, pos, buf, 0, size);
             return new ByteArrayWindow(this, pos, buf);
@@ -433,8 +432,8 @@ namespace GitSharp
 
         internal ByteWindow mmap(long pos, int size)
         {
-            if (length < pos + size)
-                size = (int)(length - pos);
+            if (Length < pos + size)
+                size = (int)(Length - pos);
             Stream map;
             try
             {
@@ -457,11 +456,11 @@ namespace GitSharp
         }
 
         // [henon] copied from dotgit:
-        //private Stream GetPackStream(int packFileOffset, int length, ref int viewOffset)
+        //private Stream GetPackStream(int packFileOffset, int Length, ref int viewOffset)
         //{
         //    int dwFileMapStart = (packFileOffset / (int)_systemInfo.dwAllocationGranularity) * (int)_systemInfo.dwAllocationGranularity;
-        //    int dwMapViewSize = (packFileOffset % (int)_systemInfo.dwAllocationGranularity) + length;
-        //    int dwFileMapSize = packFileOffset + length;
+        //    int dwMapViewSize = (packFileOffset % (int)_systemInfo.dwAllocationGranularity) + Length;
+        //    int dwFileMapSize = packFileOffset + Length;
         //    viewOffset = packFileOffset - dwFileMapStart;
         //    return fd.MapView(MapAccess.FileMapRead, dwFileMapStart, dwMapViewSize);
         //}
@@ -485,7 +484,7 @@ namespace GitSharp
                         + " index " + idx.ObjectCount
                         + ": " + File.FullName);
 
-            NB.ReadFully(fd, length - 20, buf, 0, 20);
+            NB.ReadFully(fd, Length - 20, buf, 0, 20);
             if (!Enumerable.SequenceEqual(buf, packChecksum))
                 throw new PackMismatchException("Pack checksum mismatch:"
                         + " pack " + ObjectId.FromRaw(buf).ToString()
@@ -517,7 +516,7 @@ namespace GitSharp
         {
             long pos = objOffset;
             int p = 0;
-            byte[] ib = curs.tempId; // reader.ReadBytes(ObjectId.Constants.ObjectIdLength);
+            byte[] ib = curs.tempId; // reader.ReadBytes(ObjectId.ObjectIdLength);
             readFully(pos, ib, 0, 20, curs);
             int c = ib[p++] & 0xff;
             int typeCode = (c >> 4) & 7;
@@ -562,7 +561,7 @@ namespace GitSharp
 
         private long findEndOffset(long startOffset)
         {
-            long maxOffset = length - 20;
+            long maxOffset = Length - 20;
             return getReverseIdx().FindNextOffset(startOffset, maxOffset);
         }
 

@@ -336,7 +336,7 @@ namespace GitSharp
             }
 
 #if DEBUG
-            // [henon] this implements a debug mode warning if the filelock has not been disposed properly
+            // [henon] this : a debug mode warning if the filelock has not been disposed properly
             ~FileLock()
             {
                 Debug.WriteLine(GetType().Name + " has not been properly disposed: " + File);

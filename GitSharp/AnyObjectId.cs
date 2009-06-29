@@ -54,11 +54,9 @@ namespace GitSharp
 #endif
  IComparable
     {
-        internal class Constants
-        {
-            public static readonly int ObjectIdLength = 20;
-            public static readonly int StringLength = ObjectIdLength * 2;
-        }
+
+        public static readonly int ObjectIdLength = 20;
+        public static readonly int StringLength = ObjectIdLength * 2;
 
 
         public static bool operator ==(AnyObjectId a, AnyObjectId b)
@@ -109,7 +107,7 @@ namespace GitSharp
 
         private byte[] ToHexByteArray()
         {
-            byte[] dst = new byte[Constants.StringLength];
+            byte[] dst = new byte[StringLength];
 
             Hex.FillHexByteArray(dst, 0, W1);
             Hex.FillHexByteArray(dst, 8, W2);
@@ -235,7 +233,7 @@ namespace GitSharp
 
         private char[] ToHexCharArray()
         {
-            char[] dest = new char[Constants.StringLength];
+            char[] dest = new char[StringLength];
             ToHexCharArray(dest);
             return dest;
         }

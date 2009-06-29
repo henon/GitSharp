@@ -51,7 +51,7 @@ namespace GitSharp
         {
             int deltaPtr = 0;
 
-            // Length of the base object (a variable length int).
+            // Length of the base object (a variable Length int).
             //
             int baseLen = 0;
             int c, shift = 0;
@@ -62,9 +62,9 @@ namespace GitSharp
                 shift += 7;
             } while ((c & 0x80) != 0);
             if (baseData.Length != baseLen)
-                throw new ArgumentException("baseData length incorrect");
+                throw new ArgumentException("baseData Length incorrect");
 
-            // Length of the resulting object (a variable length int).
+            // Length of the resulting object (a variable Length int).
             //
             int resLen = 0;
             shift = 0;
@@ -84,7 +84,7 @@ namespace GitSharp
                 {
                     // Determine the segment of the base which should
                     // be copied into the output. The segment is given
-                    // as an offset and a length.
+                    // as an offset and a Length.
                     //
                     int copyOffset = 0;
                     if ((cmd & 0x01) != 0)

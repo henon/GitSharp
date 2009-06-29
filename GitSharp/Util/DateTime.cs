@@ -59,6 +59,17 @@ namespace GitSharp.Util
         }
 
         /// <summary>
+        /// Calculates the git time from a DateTimeOffset instance.
+        /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        public static long ToGitInternalTime(this DateTime time)
+        {
+            return new DateTimeOffset(time, TimeSpan.Zero).ToGitInternalTime();
+        }
+
+        /// <summary>
         /// Calculates the DateTimeOffset of a given git time and time zone offset in minutes.
         /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
         /// </summary>

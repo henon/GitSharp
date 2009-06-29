@@ -56,8 +56,8 @@ namespace GitSharp
         private DirectoryInfo _refsDir;
         private FileInfo _packedRefsFile;
 
-        private Dictionary<String, CachedRef> looseRefs;
-        private Dictionary<String, Ref> packedRefs;
+        private Dictionary<string, CachedRef> looseRefs;
+        private Dictionary<string, Ref> packedRefs;
 
         private DateTime packedRefsLastModified;
         private long packedRefsLength;
@@ -73,8 +73,8 @@ namespace GitSharp
 
         public void ClearCache()
         {
-            looseRefs = new Dictionary<String, CachedRef>();
-            packedRefs = new Dictionary<String, Ref>();
+            looseRefs = new Dictionary<string, CachedRef>();
+            packedRefs = new Dictionary<string, Ref>();
             packedRefsLastModified = DateTime.MinValue;
             packedRefsLength = 0;
         }
@@ -100,7 +100,7 @@ namespace GitSharp
             return new RefUpdate(this, r, FileForRef(r.Name));
         }
 
-        public void Stored(String name, ObjectId id, DateTime time)
+        public void Stored(string name, ObjectId id, DateTime time)
         {
             looseRefs.Add(name, new CachedRef(Ref.Storage.Loose, name, id, time));
         }
@@ -124,7 +124,7 @@ namespace GitSharp
         }
 
 
-        public Ref ReadRef(String partialName)
+        public Ref ReadRef(string partialName)
         {
             RefreshPackedRefs();
             foreach (var searchPath in Constants.RefSearchPaths)
@@ -141,9 +141,9 @@ namespace GitSharp
             return ReadRefs();
         }
 
-        public Dictionary<String, Ref> GetTags()
+        public Dictionary<string, Ref> GetTags()
         {
-            Dictionary<String, Ref> tags = new Dictionary<String, Ref>();
+            Dictionary<string, Ref> tags = new Dictionary<string, Ref>();
             foreach (Ref r in ReadRefs().Values)
             {
                 if (r.Name.StartsWith(Constants.RefsTags))
@@ -152,9 +152,9 @@ namespace GitSharp
             return tags;
         }
 
-        public Dictionary<String, Ref> GetBranches()
+        public Dictionary<string, Ref> GetBranches()
         {
-            var branches = new Dictionary<String, Ref>();
+            var branches = new Dictionary<string, Ref>();
             foreach (Ref r in ReadRefs().Values)
             {
                 if (r.Name.StartsWith(Constants.RefsHeads))
@@ -163,9 +163,9 @@ namespace GitSharp
             return branches;
         }
 
-        public Dictionary<String, Ref> GetRemotes()
+        public Dictionary<string, Ref> GetRemotes()
         {
-            var remotes = new Dictionary<String, Ref>();
+            var remotes = new Dictionary<string, Ref>();
             foreach (Ref r in ReadRefs().Values)
             {
                 if (r.Name.StartsWith(Constants.RefsRemotes))
@@ -176,7 +176,7 @@ namespace GitSharp
 
         private Dictionary<string, Ref> ReadRefs()
         {
-            var avail = new Dictionary<String, Ref>();
+            var avail = new Dictionary<string, Ref>();
             ReadPackedRefs(avail);
             ReadLooseRefs(avail, Constants.Refs, _refsDir);
             ReadOneLooseRef(avail, Constants.Head, PathUtil.CombineFilePath(_gitDir, Constants.Head));
@@ -294,7 +294,7 @@ namespace GitSharp
                 if (depth >= 5)
                     throw new IOException("Exceeded maximum ref depth of " + depth + " at " + name + ".  Circular reference?");
 
-                String target = line.Substring("ref: ".Length);
+                string target = line.Substring("ref: ".Length);
                 Ref r = ReadRefBasic(target, depth + 1);
                 return r != null ? r : new Ref(Ref.Storage.Loose, target, null);
             }
@@ -327,16 +327,16 @@ namespace GitSharp
             {
                 packedRefsLastModified = DateTime.MinValue;
                 packedRefsLength = 0;
-                packedRefs = new Dictionary<String, Ref>();
+                packedRefs = new Dictionary<string, Ref>();
                 return;
             }
 
-            Dictionary<String, Ref> newPackedRefs = new Dictionary<String, Ref>();
+            Dictionary<string, Ref> newPackedRefs = new Dictionary<string, Ref>();
             try
             {
                 using(var b = OpenReader(_packedRefsFile))
                 {
-                    String p;
+                    string p;
                     Ref last = null;
                     while ((p = b.ReadLine()) != null)
                     {
@@ -357,7 +357,7 @@ namespace GitSharp
 
                         int sp = p.IndexOf(' ');
                         ObjectId id2 = ObjectId.FromString(p.Substring(0, sp));
-                        String name = p.Substring(sp + 1);
+                        string name = p.Substring(sp + 1);
                         last = new Ref(Ref.Storage.Packed, name, id2);
                         newPackedRefs.Add(last.Name, last);
                     }
@@ -431,7 +431,7 @@ namespace GitSharp
         {
             public DateTime LastModified { get; private set; }
 
-            public CachedRef(Storage st, String refName, ObjectId id, DateTime mtime)
+            public CachedRef(Storage st, string refName, ObjectId id, DateTime mtime)
                 : base(st, refName, id)
             {
                 this.LastModified = mtime;

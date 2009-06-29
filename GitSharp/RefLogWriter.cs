@@ -64,9 +64,9 @@ namespace GitSharp
          * @param refName
          *            full ref name         
          */
-        public static void WriteReflog(Repository repo, ObjectId oldCommit, ObjectId commit, String message, String refName)
+        public static void WriteReflog(Repository repo, ObjectId oldCommit, ObjectId commit, string message, string refName)
         {
-            String entry = BuildReflogString(repo, oldCommit, commit, message);
+            string entry = BuildReflogString(repo, oldCommit, commit, message);
 
             DirectoryInfo directory = repo.Directory;
 
@@ -88,16 +88,16 @@ namespace GitSharp
             writer.Close();
         }
 
-        private static String BuildReflogString(Repository repo, ObjectId oldCommit, ObjectId commit, String message)
+        private static string BuildReflogString(Repository repo, ObjectId oldCommit, ObjectId commit, string message)
         {
             PersonIdent me = new PersonIdent(repo);
-            String initial = "";
+            string initial = "";
             if (oldCommit == null)
             {
                 oldCommit = ObjectId.ZeroId;
                 initial = " (initial)";
             }
-            String s = oldCommit.ToString() + " " + commit.ToString() + " "
+            string s = oldCommit.ToString() + " " + commit.ToString() + " "
                     + me.ToExternalString() + "\t" + message + initial;
             return s;
         }

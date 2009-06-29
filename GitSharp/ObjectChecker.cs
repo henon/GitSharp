@@ -133,7 +133,7 @@ namespace GitSharp
             try
             {
                 tempId.FromString(Encoding.ASCII.GetBytes(raw), ptr);
-                return ptr + AnyObjectId.Constants.StringLength;
+                return ptr + AnyObjectId.StringLength;
             }
             catch (ArgumentException)
             {
@@ -340,7 +340,7 @@ namespace GitSharp
                         throw new CorruptObjectException("name contains '/'");
                 }
                 if (thisNameB + 1 == ptr)
-                    throw new CorruptObjectException("zero length name");
+                    throw new CorruptObjectException("zero Length name");
                 if (raw[thisNameB] == '.')
                 {
                     int nameLen = (ptr - 1) - thisNameB;

@@ -54,11 +54,11 @@ namespace GitSharp.Exceptions
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
         //
 
-        public PackMismatchException(ObjectId id, string message) : base(string.Format("Object {0} is corrupt: {1}", id, message)) { }
+        public PackMismatchException(ObjectId id, string message) : base(string.Format("object {0} is corrupt: {1}", id, message)) { }
         public PackMismatchException(string message) : base(message) { }
         public PackMismatchException(string message, Exception inner) : base(message, inner) { }
-        public PackMismatchException(ObjectId id, string message, Exception inner) : base(string.Format("Object {0} is corrupt: {1}", id, message), inner) { }
-        protected PackMismatchException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+        public PackMismatchException(ObjectId id, string message, Exception inner) : base(string.Format("object {0} is corrupt: {1}", id, message), inner) { }
+        internal PackMismatchException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
     }
 }

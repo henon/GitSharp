@@ -44,7 +44,7 @@ namespace GitSharp
 	
 	public class RepositoryChangedEventArgs : EventArgs
 	{
-		public Repository Repository { get; protected set;}
+		public Repository Repository { get; internal set;}
 		
 		public RepositoryChangedEventArgs(Repository repository)
 		{

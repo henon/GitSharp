@@ -39,6 +39,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
@@ -52,8 +53,8 @@ namespace GitSharp.Tests
         [Test]
         public void GitTimeToDateTimeOffset()
         {
-            Assert.AreEqual("21.06.2009 15:04:53 +02:00", 1245589493L.GitTimeToDateTimeOffset(2 * 60).ToString());
-            Assert.AreEqual("29.04.2009 18:41:17 -07:00", 1241055677L.GitTimeToDateTimeOffset(-7 * 60).ToString());
+            Assert.AreEqual("06/21/2009 15:04:53 +02:00", 1245589493L.GitTimeToDateTimeOffset(2 * 60).ToString(CultureInfo.InvariantCulture));
+            Assert.AreEqual("04/29/2009 18:41:17 -07:00", 1241055677L.GitTimeToDateTimeOffset(-7 * 60).ToString(CultureInfo.InvariantCulture));
             Assert.AreEqual(new DateTimeOffset(2009, 06, 21, 15, 04, 53, new TimeSpan(2, 0, 0)).ToGitInternalTime(), 1245589493L);
             Assert.AreEqual(new DateTimeOffset(2009, 04, 29, 18, 41, 17, new TimeSpan(-7, 0, 0)).ToGitInternalTime(), 1241055677L);
         }

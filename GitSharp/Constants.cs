@@ -120,7 +120,7 @@ namespace GitSharp
         public static readonly string[] RefSearchPaths = { "", Refs, RefsTags, RefsHeads, RefsRemotes };
 
         /** Hash function used natively by Git for all objects. */
-        private static string HASH_FUNCTION = "SHA-1";
+        //private static string HASH_FUNCTION = "SHA-1"; // [henon] we don't use it anyway
 
         /** Length of an object hash. */
         public static int OBJECT_ID_LENGTH = 20;
@@ -465,7 +465,7 @@ namespace GitSharp
                         throw new CorruptObjectException(id, "invalid type");
                 }
             }
-            catch (IndexOutOfRangeException bad)
+            catch (IndexOutOfRangeException)
             {
                 throw new CorruptObjectException(id, "invalid type");
             }

@@ -110,9 +110,8 @@ namespace GitSharp
             if (i != null)
             {
                 i.Reset();
-                if (releaseImpl(i))
-                    ; //i.end();
-            }
+                releaseImpl(i);
+             }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

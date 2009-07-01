@@ -412,7 +412,7 @@ namespace GitSharp
                 {
                     fd.Close();
                 }
-                catch (IOException err)
+                catch (IOException)
                 {
                     // Ignore a close event. We had it open only for reading.
                     // There should not be errors related to network buffers

@@ -135,7 +135,7 @@ namespace GitSharp
                 tempId.FromString(Encoding.ASCII.GetBytes(raw), ptr);
                 return ptr + AnyObjectId.Constants.StringLength;
             }
-            catch (ArgumentException e) // [henon] replaced IllegalArgumentException 
+            catch (ArgumentException)
             {
                 return -1;
             }

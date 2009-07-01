@@ -104,7 +104,7 @@ namespace GitSharp
                 int e = hexUInt32(bs, ptr + 32, end);
                 return new AbbreviatedObjectId(end - ptr, a, b, c, d, e);
             }
-            catch (IndexOutOfRangeException e1)
+            catch (IndexOutOfRangeException)
             {
                 string str = Encoding.GetEncoding("US-ASCII").GetString(bs, ptr, end - ptr);
                 throw new ArgumentException("Invalid id: " + str);

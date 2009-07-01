@@ -383,7 +383,7 @@ namespace GitSharp
                         {
                             r = loadAlternates();
                         }
-                        catch (IOException e)
+                        catch (IOException)
                         {
                             r = NO_ALTERNATES;
                         }

@@ -139,7 +139,11 @@ namespace GitSharp
                 encoding = Constants.CHARSET;
             var os = new MemoryStream();
             var w = new BinaryWriter(os);
-            var sw = new StreamWriter(os, encoding);
+            StreamWriter sw;
+            if (encoding != Constants.CHARSET)
+                sw = new StreamWriter(os, encoding);
+            else
+                sw = new StreamWriter(os);
 
             w.Write(htree);
             w.Write(' ');

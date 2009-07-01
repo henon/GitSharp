@@ -40,6 +40,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace GitSharp.TreeWalk.Filter
 {
@@ -102,7 +103,7 @@ namespace GitSharp.TreeWalk.Filter
          */
         public static TreeFilter create(IEnumerable<TreeFilter> list)
         {
-            if (list.size() < 2)
+            if (list.Count() < 2)
                 throw new ArgumentException("At least two filters needed.");
             TreeFilter[] subfilters = list.ToArray();
             if (subfilters.Length == 2)
@@ -116,7 +117,7 @@ namespace GitSharp.TreeWalk.Filter
 
             private TreeFilter b;
 
-            Binary(TreeFilter one, TreeFilter two)
+            public Binary(TreeFilter one, TreeFilter two)
             {
                 a = one;
                 b = two;
@@ -147,7 +148,7 @@ namespace GitSharp.TreeWalk.Filter
         {
             private TreeFilter[] subfilters;
 
-            List(TreeFilter[] list)
+            public List(TreeFilter[] list)
             {
                 subfilters = list;
             }

@@ -276,7 +276,7 @@ namespace GitSharp.TreeWalk
             return pathCompare(p, p.mode);
         }
 
-        int pathCompare(AbstractTreeIterator p, int pMode)
+        public int pathCompare(AbstractTreeIterator p, int pMode)
         {
             byte[] a = path;
             byte[] b = p.path;

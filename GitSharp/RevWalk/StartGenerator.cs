@@ -38,6 +38,7 @@
 
 using System;
 using GitSharp.RevWalk.Filter;
+using GitSharp.TreeWalk.Filter;
 
 namespace GitSharp.RevWalk
 {
@@ -81,8 +82,7 @@ namespace GitSharp.RevWalk
                 // use the bulk of the generator pipeline.
                 //
                 if (tf != TreeFilter.ALL)
-                    throw new IllegalStateException("Cannot combine TreeFilter "
-                            + tf + " with RevFilter " + rf + ".");
+                    throw new InvalidOperationException("Cannot combine TreeFilter " + tf + " with RevFilter " + rf + ".");
 
                 MergeBaseGenerator mbg = new MergeBaseGenerator(w);
                 walker.pending = mbg;

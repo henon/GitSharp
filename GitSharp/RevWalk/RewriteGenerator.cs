@@ -69,7 +69,7 @@ namespace GitSharp.RevWalk
 
         private Generator source;
 
-        RewriteGenerator(Generator s)
+        public RewriteGenerator(Generator s)
         {
             source = s;
         }

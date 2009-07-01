@@ -90,6 +90,34 @@ namespace GitSharp
         /** Header "tagger " */
         public static char[] tagger = "tagger ".ToCharArray();
 
+        /** Header "tree " */
+        public static byte[] tree_bytes = Encoding.ASCII.GetBytes("tree ");
+
+        /** Header "parent " */
+        public static byte[] parent_bytes = Encoding.ASCII.GetBytes("parent ");
+
+        /** Header "author " */
+        public static byte[] author_bytes = Encoding.ASCII.GetBytes("author ");
+
+        /** Header "committer " */
+        public static byte[] committer_bytes = Encoding.ASCII.GetBytes("committer ");
+
+        /** Header "encoding " */
+        public static byte[] encoding_bytes = Encoding.ASCII.GetBytes("encoding ");
+
+        /** Header "object " */
+        public static byte[] @object_bytes = Encoding.ASCII.GetBytes("object ");
+
+        /** Header "type " */
+        public static byte[] type_bytes = Encoding.ASCII.GetBytes("type ");
+
+        /** Header "tag " */
+        public static byte[] tag_bytes = Encoding.ASCII.GetBytes("tag ");
+
+        /** Header "tagger " */
+        public static byte[] tagger_bytes = Encoding.ASCII.GetBytes("tagger ");
+
+
         private MutableObjectId tempId = new MutableObjectId();
 
         private MutableInteger ptrout = new MutableInteger();

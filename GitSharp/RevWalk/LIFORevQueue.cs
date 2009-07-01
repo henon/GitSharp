@@ -36,6 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Text;
 namespace GitSharp.RevWalk
 {
 
@@ -46,12 +47,11 @@ namespace GitSharp.RevWalk
         private Block head;
 
         /** Create an empty LIFO queue. */
-        public LIFORevQueue()
+        public LIFORevQueue() : base()
         {
-            base();
         }
 
-        LIFORevQueue(Generator s) : base(s) { }
+        public LIFORevQueue(Generator s) : base(s) { }
 
         public override void add(RevCommit c)
         {

@@ -2,6 +2,7 @@
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -44,10 +45,10 @@ using System.Text;
 using System.IO;
 using GitSharp.Util;
 using GitSharp.Exceptions;
+using System.Runtime.CompilerServices;
 
 namespace GitSharp
 {
-    [Complete]
     public class RefDatabase
     {
         public Repository Repository { get; private set; }
@@ -56,11 +57,19 @@ namespace GitSharp
         private DirectoryInfo _refsDir;
         private FileInfo _packedRefsFile;
 
-        private Dictionary<string, CachedRef> looseRefs;
+        private Dictionary<string, Ref> looseRefs;
+        private Dictionary<string, DateTime> looseRefsMTime;
         private Dictionary<string, Ref> packedRefs;
+        private Dictionary<string, string> looseSymRefs;
 
         private DateTime packedRefsLastModified;
         private long packedRefsLength;
+
+        public int lastRefModification;
+
+        public int lastNotifiedRefModification;
+
+        private int refModificationCounter;
 
         public RefDatabase(Repository repo)
         {
@@ -71,9 +80,12 @@ namespace GitSharp
             ClearCache();
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void ClearCache()
         {
             looseRefs = new Dictionary<string, CachedRef>();
+            looseRefsMTime = new Dictionary<string, DateTime>();
+            looseSymRefs = new Dictionary<string, string>();
             packedRefs = new Dictionary<string, Ref>();
             packedRefsLastModified = DateTime.MinValue;
             packedRefsLength = 0;
@@ -88,41 +100,72 @@ namespace GitSharp
 
         public ObjectId IdOf(string name)
         {
+            refreshPackedRefs();
             Ref r = ReadRefBasic(name, 0);
             return (r != null) ? r.ObjectId : null;
         }
 
+        /**
+         * Create a command to update, create or delete a ref in this repository.
+         * 
+         * @param name
+         *            name of the ref the caller wants to modify.
+         * @return an update command. The caller must finish populating this command
+         *         and then invoke one of the update methods to actually make a
+         *         change.
+         * @throws IOException
+         *             a symbolic ref was passed in and could not be resolved back
+         *             to the base ref, as the symbolic ref could not be read.
+         */
         public RefUpdate NewUpdate(string name)
         {
+            RefreshPackedRefs();
             Ref r = ReadRefBasic(name, 0);
             if (r == null)
                 r = new Ref(Ref.Storage.New, name, null);
             return new RefUpdate(this, r, FileForRef(r.Name));
         }
 
-        public void Stored(string name, ObjectId id, DateTime time)
+        //public void Stored(string name, ObjectId id, DateTime time)
+        //{
+        //    looseRefs.Add(name, new CachedRef(Ref.Storage.Loose, name, id, time));
+        //}
+
+        public void stored(String origName, String name, ObjectId id, DateTime time)
         {
-            looseRefs.Add(name, new CachedRef(Ref.Storage.Loose, name, id, time));
+            lock (this)
+            {
+                looseRefs[name] = new Ref(Ref.Storage.Loose, origName, name, id);
+                looseRefsMTime[name] = time;
+                setModified();
+            }
+            db.fireRefsMaybeChanged();
         }
 
+        /**
+         * Writes a symref (e.g. HEAD) to disk
+         * 
+         * @param name
+         *            symref name
+         * @param target
+         *            pointed to ref
+         * @throws IOException
+         */
         public void Link(string name, string target)
         {
             byte[] content = Constants.Encoding.GetBytes("ref: " + target + "\n");
-            LockFile lck = new LockFile(FileForRef(name));
-            if (!lck.Lock())
-                throw new ObjectWritingException("Unable to lock " + name);
-            try
+            lockAndWriteFile(fileForRef(name), content);
+            lock (this)
             {
-                lck.Write(content);
+                setModified();
             }
-            catch (IOException ioe)
-            {
-                throw new ObjectWritingException("Unable to write " + name, ioe);
-            }
-            if (!lck.Commit())
-                throw new ObjectWritingException("Unable to write " + name);
+            db.fireRefsMaybeChanged();
         }
 
+        private void setModified()
+        {
+            lastRefModification = refModificationCounter++;
+        }
 
         public Ref ReadRef(string partialName)
         {
@@ -136,11 +179,18 @@ namespace GitSharp
             return null;
         }
 
+        /**
+         * @return all known refs (heads, tags, remotes).
+         */
         public Dictionary<string, Ref> GetAllRefs()
         {
             return ReadRefs();
         }
 
+        /**
+         * @return all tags; key is short tag name ("v1.0") and value of the entry
+         *         contains the ref with the full tag name ("refs/tags/v1.0").
+         */
         public Dictionary<string, Ref> GetTags()
         {
             Dictionary<string, Ref> tags = new Dictionary<string, Ref>();
@@ -152,37 +202,26 @@ namespace GitSharp
             return tags;
         }
 
-        public Dictionary<string, Ref> GetBranches()
-        {
-            var branches = new Dictionary<string, Ref>();
-            foreach (Ref r in ReadRefs().Values)
-            {
-                if (r.Name.StartsWith(Constants.RefsHeads))
-                    branches.Add(r.Name.Substring(Constants.RefsTags.Length), r);
-            }
-            return branches;
-        }
-
-        public Dictionary<string, Ref> GetRemotes()
-        {
-            var remotes = new Dictionary<string, Ref>();
-            foreach (Ref r in ReadRefs().Values)
-            {
-                if (r.Name.StartsWith(Constants.RefsRemotes))
-                    remotes.Add(r.Name.Substring(Constants.RefsRemotes.Length), r);
-            }
-            return remotes;
-        }
-
         private Dictionary<string, Ref> ReadRefs()
         {
             var avail = new Dictionary<string, Ref>();
             ReadPackedRefs(avail);
             ReadLooseRefs(avail, Constants.Refs, _refsDir);
-            ReadOneLooseRef(avail, Constants.Head, PathUtil.CombineFilePath(_gitDir, Constants.Head));
+            try
+            {
+                Ref r = readRefBasic(Constants.HEAD, 0);
+                if (r != null && r.getObjectId() != null)
+                    avail.put(Constants.HEAD, r);
+            }
+            catch (IOException e)
+            {
+                // ignore here
+            }
+            db.fireRefsMaybeChanged();
             return avail;
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         private void ReadPackedRefs(Dictionary<string, Ref> avail)
         {
             RefreshPackedRefs();
@@ -200,184 +239,23 @@ namespace GitSharp
 
             foreach (FileSystemInfo ent in entries)
             {
-                if(ent is DirectoryInfo)
-                    ReadLooseRefs(avail, prefix + ent.Name, (DirectoryInfo)ent);
-                else
-                    ReadOneLooseRef(avail, prefix + "/" + ent.Name, ent);
+			 String entName = ent.Name;
+			if (".".Equals(entName) || "..".Equals(entName))
+				continue;
+			if (ent is DirectoryInfo) {
+				ReadLooseRefs(avail, prefix + entName + "/", ent);
+			} else {
+				try {
+					 Ref @ref = readRefBasic(prefix + entName, 0);
+					if (@ref != null)
+						avail[@ref.OriginalName, @ref);
+				} catch (IOException) {
+					continue;
+				}
+			}
+
             }
 
-        }
-
-        private void ReadOneLooseRef(Dictionary<string, Ref> avail, string refName, FileSystemInfo ent)
-        {
-            CachedRef reff;
-
-            if (looseRefs.TryGetValue(refName, out reff) && reff != null)
-            {
-                if (reff.LastModified == ent.LastWriteTime)
-                {
-                    avail.Add(reff.Name, reff);
-                    return;
-                }
-                looseRefs.Remove(refName);
-            }
-
-            // Assume its a valid loose reference we need to cache.
-            //
-            try
-            {
-
-                using (var reader = new StreamReader(ent.FullName))
-                {
-                    var str = reader.ReadToEnd().Trim();                    
-                    var id = ObjectId.FromString(str);
-
-                    if (id == null)
-                        return;
-
-                    reff = new CachedRef(Ref.Storage.Loose, refName, id, ent.LastWriteTime);
-
-                    looseRefs.AddOrReplace(reff.Name, reff);
-                    avail.AddOrReplace(reff.Name, reff);
-                }
-            }
-            catch (FileNotFoundException)
-            {
-                // Deleted while we were reading? Its gone now!
-                //
-            }
-            catch (IOException err)
-            {
-                // Whoops.
-                //
-                throw new GitException("Cannot read ref " + ent, err);
-            }
-        }
-
-        private FileInfo FileForRef(string name)
-        {
-            if (name.StartsWith(Constants.Refs))
-                return PathUtil.CombineFilePath(_refsDir, name.Substring(Constants.Refs.Length));
-            return PathUtil.CombineFilePath(_gitDir, name);
-        }
-
-        private Ref ReadRefBasic(string name, int depth)
-        {
-            // Prefer loose ref to packed ref as the loose
-            // file can be more up-to-date than a packed one.
-            //
-            FileInfo loose = FileForRef(name);
-            DateTime mtime = loose.LastWriteTime;
-
-            if (looseRefs.ContainsKey(name))
-            {
-                if (looseRefs[name].LastModified == mtime)
-                    return looseRefs[name];
-                looseRefs.Remove(name);
-            }
-
-            if (!loose.Exists)
-            {
-                // If last modified is 0 the file does not exist.
-                // Try packed cache.
-                //
-                return (packedRefs.ContainsKey(name)) ? packedRefs[name] : null;
-            }
-
-            var line = ReadLine(loose);
-
-            if (string.IsNullOrEmpty(line))
-                return new Ref(Ref.Storage.Loose, name, null);
-
-            if (line.StartsWith("ref: "))
-            {
-                if (depth >= 5)
-                    throw new IOException("Exceeded maximum ref depth of " + depth + " at " + name + ".  Circular reference?");
-
-                string target = line.Substring("ref: ".Length);
-                Ref r = ReadRefBasic(target, depth + 1);
-                return r != null ? r : new Ref(Ref.Storage.Loose, target, null);
-            }
-
-            ObjectId id;
-            try
-            {
-                id = ObjectId.FromString(line);
-            }
-            catch (ArgumentException)
-            {
-                throw new IOException("Not a ref: " + name + ": " + line);
-            }
-
-            var reff = new CachedRef(Ref.Storage.Loose, name, id, mtime);
-            looseRefs.Add(name, reff);
-            return reff;
-        }
-
-        private void RefreshPackedRefs()
-        {
-            if (!_packedRefsFile.Exists)
-                return;
-
-            DateTime currTime = _packedRefsFile.LastWriteTime;
-            long currLen = currTime == DateTime.MinValue ? 0 : _packedRefsFile.Length;
-            if (currTime == packedRefsLastModified && currLen == packedRefsLength)
-                return;
-            if (currTime == DateTime.MinValue)
-            {
-                packedRefsLastModified = DateTime.MinValue;
-                packedRefsLength = 0;
-                packedRefs = new Dictionary<string, Ref>();
-                return;
-            }
-
-            Dictionary<string, Ref> newPackedRefs = new Dictionary<string, Ref>();
-            try
-            {
-                using(var b = OpenReader(_packedRefsFile))
-                {
-                    string p;
-                    Ref last = null;
-                    while ((p = b.ReadLine()) != null)
-                    {
-                        if (p[0] == '#')
-                            continue;
-
-                        if (p[0] == '^')
-                        {
-                            if (last == null)
-                                throw new IOException("Peeled line before ref.");
-
-                            ObjectId id = ObjectId.FromString(p.Substring(1));
-                            last = new Ref(Ref.Storage.Packed, last.Name, last.Name, last.ObjectId, id, true);
-                            if (!newPackedRefs.ContainsKey(last.Name))
-                                newPackedRefs[last.Name]=last; // [henon] <--- sometimes the same tag exits twice for some reason (i.e. a tag referencing itself) ... so we silently ignore the problem. hope this is the expected behavior
-                            continue;
-                        }
-
-                        int sp = p.IndexOf(' ');
-                        ObjectId id2 = ObjectId.FromString(p.Substring(0, sp));
-                        string name = p.Substring(sp + 1);
-                        last = new Ref(Ref.Storage.Packed, name, id2);
-                        newPackedRefs.Add(last.Name, last);
-                    }
-                }
-                packedRefsLastModified = currTime;
-                packedRefsLength = currLen;
-                packedRefs = newPackedRefs;
-            }
-            catch (FileNotFoundException)
-            {
-                // Ignore it and leave the new map empty.
-                //
-                packedRefsLastModified = DateTime.MinValue;
-                packedRefsLength = 0;
-                packedRefs = newPackedRefs;
-            }
-            catch (IOException e)
-            {
-                throw new GitException("Cannot read packed refs", e);
-            }
         }
 
         /// <summary>
@@ -414,6 +292,234 @@ namespace GitSharp
             return new Ref(dref.StorageFormat, dref.Name, dref.ObjectId, peeled, true);
         }
 
+        private FileInfo FileForRef(string name)
+        {
+            if (name.StartsWith(Constants.Refs))
+                return PathUtil.CombineFilePath(_refsDir, name.Substring(Constants.Refs.Length));
+            return PathUtil.CombineFilePath(_gitDir, name);
+        }
+
+        private Ref ReadRefBasic(string name, int depth)
+        {
+            return ReadRefBasic(name, name, depth);
+        }
+
+        private Ref ReadRefBasic(String origName, string name, int depth)
+        {
+            // Prefer loose ref to packed ref as the loose
+            // file can be more up-to-date than a packed one.
+            //
+            FileInfo loose = FileForRef(name);
+            DateTime mtime = loose.LastWriteTime;
+
+            if (looseRefs.ContainsKey(name))
+            {
+                var @ref = looseRefs[name];
+                DateTime cachedlastModified = looseRefsMTime[name];
+                if (cachedlastModified != null && cachedlastModified == mtime)
+                {
+                    if (packedRefs.ContainsKey(origName))
+                        return new Ref(GitSharp.Ref.Storage.LoosePacked, origName, @ref.ObjectId, @ref.PeeledObjectId, @ref.IsPeeled);
+                    else
+                        return @ref;
+                }
+                looseRefs.remove(origName);
+                looseRefsMTime.remove(origName);
+            }
+
+            if (!loose.Exists)
+            {
+                // File does not exist.
+                // Try packed cache.
+                //
+                @ref = packedRefs.TryGetValue(name, out @ref);
+                if (@ref != null)
+                    if (!@ref.OriginalName.Equals(origName))
+                        @ref = new Ref(GitSharp.Ref.Storage.LoosePacked, origName, name, @ref.ObjectId);
+                return @ref;
+            }
+
+            String line = null;
+            try
+            {
+                DateTime cachedlastModified = DateTime.MinValue;
+                looseRefsMTime.TryGetValue(name, out cachedlastModified);
+                if (cachedlastModified != null && cachedlastModified == mtime)
+                {
+                    looseSymRefs.TryGetValue(name, out line);
+                }
+                if (line == null)
+                {
+                    line = ReadLine(loose);
+                    looseRefsMTime[name] = mtime;
+                    looseSymRefs[name] = line;
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                return packedRefs[name];
+            }
+
+            if (line == null || line.Length == 0)
+            {
+                looseRefs.Remove(origName);
+                looseRefsMTime.Remove(origName);
+                return new Ref(Ref.Storage.Loose, origName, name, null);
+            }
+
+            if (line.StartsWith("ref: "))
+            {
+                if (depth >= 5)
+                    throw new IOException("Exceeded maximum ref depth of " + depth + " at " + name + ".  Circular reference?");
+
+                string target = line.Substring("ref: ".Length);
+                Ref r = ReadRefBasic(target, depth + 1);
+                var cachedMtime = DateTime.MinValue;
+                looseRefsMTime.TryGetValue(name);
+                if (cachedMtime != null && cachedMtime != mtime)
+                    setModified();
+                looseRefsMTime.put(name, mtime);
+                if (r == null)
+                    return new Ref(Ref.Storage.LOOSE, origName, target, null);
+                if (!origName.equals(r.getName()))
+                    r = new Ref(Ref.Storage.LOOSE_PACKED, origName, r.getName(), r.getObjectId(), r.getPeeledObjectId(), true);
+                return r;
+            }
+
+            setModified();
+
+            ObjectId id;
+            try
+            {
+                id = ObjectId.FromString(line);
+            }
+            catch (ArgumentException)
+            {
+                throw new IOException("Not a ref: " + name + ": " + line);
+            }
+
+            Storage storage;
+            if (packedRefs.containsKey(name))
+                storage = Ref.Storage.LOOSE_PACKED;
+            else
+                storage = Ref.Storage.LOOSE;
+            @ref = new Ref(storage, name, id);
+            looseRefs.put(name, @ref);
+            looseRefsMTime.put(name, mtime);
+
+            if (!origName.equals(name))
+            {
+                @ref = new Ref(Ref.Storage.LOOSE, origName, name, id);
+                looseRefs.put(origName, @ref);
+            }
+
+            return @ref;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void RefreshPackedRefs()
+        {
+            if (!_packedRefsFile.Exists)
+                return;
+
+            DateTime currTime = _packedRefsFile.LastWriteTime;
+            long currLen = currTime == DateTime.MinValue ? 0 : _packedRefsFile.Length;
+            if (currTime == packedRefsLastModified && currLen == packedRefsLength)
+                return;
+            if (currTime == DateTime.MinValue)
+            {
+                packedRefsLastModified = DateTime.MinValue;
+                packedRefsLength = 0;
+                packedRefs = new Dictionary<string, Ref>();
+                return;
+            }
+
+            Dictionary<string, Ref> newPackedRefs = new Dictionary<string, Ref>();
+            try
+            {
+                using (var b = OpenReader(_packedRefsFile))
+                {
+                    string p;
+                    Ref last = null;
+                    while ((p = b.ReadLine()) != null)
+                    {
+                        if (p[0] == '#')
+                            continue;
+
+                        if (p[0] == '^')
+                        {
+                            if (last == null)
+                                throw new IOException("Peeled line before ref.");
+
+                            ObjectId id = ObjectId.FromString(p.Substring(1));
+                            last = new Ref(Ref.Storage.Packed, last.Name, last.Name, last.ObjectId, id, true);
+                            if (!newPackedRefs.ContainsKey(last.Name))
+                                newPackedRefs[last.Name] = last; // [henon] <--- sometimes the same tag exits twice for some reason (i.e. a tag referencing itself) ... so we silently ignore the problem. hope this is the expected behavior
+                            continue;
+                        }
+
+                        int sp = p.IndexOf(' ');
+                        ObjectId id2 = ObjectId.FromString(p.Substring(0, sp));
+                        string name = p.Substring(sp + 1);
+                        last = new Ref(Ref.Storage.Packed, name, id2);
+                        newPackedRefs.Add(last.Name, last);
+                    }
+                }
+                packedRefsLastModified = currTime;
+                packedRefsLength = currLen;
+                packedRefs = newPackedRefs;
+            }
+            catch (FileNotFoundException)
+            {
+                // Ignore it and leave the new map empty.
+                //
+                packedRefsLastModified = DateTime.MinValue;
+                packedRefsLength = 0;
+                packedRefs = newPackedRefs;
+            }
+            catch (IOException e)
+            {
+                throw new GitException("Cannot read packed refs", e);
+            }
+        }
+
+
+        private void lockAndWriteFile(File file, byte[] content)
+        {
+            String name = file.getName();
+            LockFile lck = new LockFile(file);
+            if (!lck.Lock())
+                throw new ObjectWritingException("Unable to lock " + name);
+            try
+            {
+                lck.Write(content);
+            }
+            catch (IOException ioe)
+            {
+                throw new ObjectWritingException("Unable to write " + name, ioe);
+            }
+            if (!lck.Commit())
+                throw new ObjectWritingException("Unable to write " + name);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        void removePackedRef(String name)
+        {
+            packedRefs.remove(name);
+            writePackedRefs();
+        }
+
+        private void writePackedRefs()
+        {
+#error get this straight
+            //new RefWriter(packedRefs.values()) {
+            //    @Override
+            //    protected void writeFile(String name, byte[] content) throws IOException {
+            //        lockAndWriteFile(new File(db.getDirectory(), name), content);
+            //    }
+            //}.writePackedRefs();
+        }
+
         private string ReadLine(FileInfo file)
         {
             using (BufferedReader br = OpenReader(file))
@@ -437,6 +543,30 @@ namespace GitSharp
                 this.LastModified = mtime;
             }
         }
+
+
+        public Dictionary<string, Ref> GetBranches()
+        {
+            var branches = new Dictionary<string, Ref>();
+            foreach (Ref r in ReadRefs().Values)
+            {
+                if (r.Name.StartsWith(Constants.RefsHeads))
+                    branches.Add(r.Name.Substring(Constants.RefsTags.Length), r);
+            }
+            return branches;
+        }
+
+        public Dictionary<string, Ref> GetRemotes()
+        {
+            var remotes = new Dictionary<string, Ref>();
+            foreach (Ref r in ReadRefs().Values)
+            {
+                if (r.Name.StartsWith(Constants.RefsRemotes))
+                    remotes.Add(r.Name.Substring(Constants.RefsRemotes.Length), r);
+            }
+            return remotes;
+        }
+
 
     }
 }

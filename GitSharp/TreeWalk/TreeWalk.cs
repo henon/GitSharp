@@ -139,7 +139,7 @@ namespace GitSharp.TreeWalk
 
         private TreeFilter filter;
 
-        AbstractTreeIterator[] trees;
+        public AbstractTreeIterator[] trees;
 
         private bool recursive;
 
@@ -151,7 +151,7 @@ namespace GitSharp.TreeWalk
 
         private bool postChildren;
 
-        AbstractTreeIterator currentHead;
+        public AbstractTreeIterator currentHead;
 
         /**
          * Create a new tree walker for a given repository.

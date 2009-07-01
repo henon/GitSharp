@@ -274,7 +274,6 @@ namespace GitSharp
             return sign < 0 ? -r : r;
         }
 
-#if false
         /**
 	 * Parse a base 10 numeric from a sequence of ASCII digits into a long.
 	 * <p>
@@ -307,18 +306,18 @@ namespace GitSharp
 
                 switch (b[ptr])
                 {
-                    case '-':
+                    case (byte)'-':
                         sign = -1;
                         ptr++;
                         break;
-                    case '+':
+                    case (byte)'+':
                         ptr++;
                         break;
                 }
 
                 while (ptr < sz)
                 {
-                    byte v = digits[b[ptr]];
+                    int v = b[ptr]-(byte)'0';
                     if (v < 0)
                         break;
                     r = (r * 10) + v;
@@ -353,7 +352,6 @@ namespace GitSharp
             int tzHours = v / 100;
             return tzHours * 60 + tzMins;
         } 
-#endif
 
         /**
 	     * Locate the first position after a given character.
@@ -504,7 +502,7 @@ namespace GitSharp
                 ptr += 46; // skip the "tree ..." line.
             while (ptr < sz && b[ptr] == (byte)'p')
                 ptr += 48; // skip this parent.
-            return match(b, ptr, author);
+            return match(b, ptr, ObjectChecker.author_bytes);
         }
 
         /**
@@ -529,7 +527,7 @@ namespace GitSharp
                 ptr += 48; // skip this parent.
             if (ptr < sz && b[ptr] == (byte)'a')
                 ptr = nextLF(b, ptr);
-            return match(b, ptr, committer);
+            return match(b, ptr, ObjectChecker.committer_bytes);
         }
 
         /**
@@ -554,7 +552,7 @@ namespace GitSharp
             {
                 if (b[ptr] == (byte)'\n')
                     return -1;
-                int m = match(b, ptr, tagger);
+                int m = match(b, ptr, ObjectChecker.tagger_bytes);
                 if (m >= 0)
                     return m;
                 ptr = nextLF(b, ptr);
@@ -586,7 +584,7 @@ namespace GitSharp
                     break;
                 ptr = nextLF(b, ptr);
             }
-            return match(b, ptr, encoding);
+            return match(b, ptr, ObjectChecker.encoding_bytes);
         }
 
         /**

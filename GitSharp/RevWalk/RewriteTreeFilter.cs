@@ -68,7 +68,7 @@ namespace GitSharp.RevWalk
 
         private TreeWalk.TreeWalk pathFilter;
 
-        RewriteTreeFilter(RevWalk walker, TreeFilter t)
+        public RewriteTreeFilter(RevWalk walker, TreeFilter t)
         {
             pathFilter = new TreeWalk.TreeWalk(walker.db);
             pathFilter.setFilter(t);
@@ -144,8 +144,8 @@ namespace GitSharp.RevWalk
             // it does not contribute changes to us. Such a parent may be an
             // uninteresting side branch.
             //
-            int[] chgs = new int[nParents];
-            int[] adds = new int[nParents];
+            int[] chgs_ = new int[nParents];
+            int[] adds_ = new int[nParents];
             while (tw.next())
             {
                 int myMode = tw.getRawMode(nParents);
@@ -155,9 +155,9 @@ namespace GitSharp.RevWalk
                     if (myMode == pMode && tw.idEqual(i, nParents))
                         continue;
 
-                    chgs[i]++;
+                    chgs_[i]++;
                     if (pMode == 0 && myMode != 0)
-                        adds[i]++;
+                        adds_[i]++;
                 }
             }
 
@@ -165,7 +165,7 @@ namespace GitSharp.RevWalk
             bool diff = false;
             for (int i = 0; i < nParents; i++)
             {
-                if (chgs[i] == 0)
+                if (chgs_[i] == 0)
                 {
                     // No changes, so our tree is effectively the same as
                     // this parent tree. We pass the buck to only this one
@@ -188,7 +188,7 @@ namespace GitSharp.RevWalk
                     return false;
                 }
 
-                if (chgs[i] == adds[i])
+                if (chgs_[i] == adds_[i])
                 {
                     // All of the differences from this parent were because we
                     // added files that they did not have. This parent is our

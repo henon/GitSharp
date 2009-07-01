@@ -53,7 +53,7 @@ namespace GitSharp.RevWalk
      */
     class DelayRevQueue : Generator
     {
-        private static int OVER_SCAN = PendingGenerator.OVER_SCAN;
+        public static int OVER_SCAN = PendingGenerator.OVER_SCAN;
 
         private Generator pending;
 
@@ -61,7 +61,7 @@ namespace GitSharp.RevWalk
 
         private int size;
 
-        DelayRevQueue(Generator g)
+        public DelayRevQueue(Generator g)
         {
             pending = g;
             delay = new FIFORevQueue();
@@ -83,11 +83,11 @@ namespace GitSharp.RevWalk
                 size++;
             }
 
-            RevCommit c = delay.next();
-            if (c == null)
+            RevCommit cc = delay.next();
+            if (cc == null)
                 return null;
             size--;
-            return c;
+            return cc;
         }
     }
 }

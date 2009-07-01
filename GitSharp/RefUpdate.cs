@@ -43,6 +43,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using GitSharp.RevWalk;
+using GitSharp.Exceptions;
 
 namespace GitSharp
 {
@@ -134,7 +135,7 @@ namespace GitSharp
         /** Should the Result value be appended to {@link #refLogMessage}. */
         private bool refLogIncludeResult;
 
-        /** If non-null, the value {@link #oldValue} must have to continue. */
+        /** If non-null, the value {@link #OldObjectId} must have to continue. */
         private ObjectId expValue;
 
         private Ref _ref;
@@ -238,7 +239,7 @@ namespace GitSharp
          */
         public RefUpdateResult Update()
         {
-            return update(new RevWalk(db.Repository));
+            return update(new RevWalk.RevWalk(db.Repository));
         }
 
         /**
@@ -258,11 +259,11 @@ namespace GitSharp
             RequireCanDoUpdate();
             try
             {
-                return result = updateImpl(walk, new UpdateStore());
+                return Result = updateImpl(walk, new UpdateStore());
             }
             catch (IOException x)
             {
-                result = RefUpdateResult.IOFailure;
+                Result = RefUpdateResult.IOFailure;
                 throw;
             }
         }
@@ -278,30 +279,30 @@ namespace GitSharp
                 return RefUpdateResult.LockFailure;
             try
             {
-                oldValue = db.IdOf(Name);
+                OldObjectId = db.IdOf(Name);
                 if (expValue != null)
                 {
                     ObjectId o;
-                    o = oldValue != null ? oldValue : ObjectId.ZeroId;
+                    o = OldObjectId != null ? OldObjectId : ObjectId.ZeroId;
                     if (!expValue.Equals(o))
                         return RefUpdateResult.LockFailure;
                 }
-                if (oldValue == null)
-                    return store.store(@lock, RefUpdateResult.New);
+                if (OldObjectId == null)
+                    return store.Store(@lock, RefUpdateResult.New);
 
                 newObj = safeParse(walk, newValue);
-                oldObj = safeParse(walk, oldValue);
+                oldObj = safeParse(walk, OldObjectId);
                 if (newObj == oldObj)
-                    return store.store(@lock, RefUpdateResult.NoChange);
+                    return store.Store(@lock, RefUpdateResult.NoChange);
 
                 if (newObj is RevCommit && oldObj is RevCommit)
                 {
                     if (walk.isMergedInto((RevCommit)oldObj, (RevCommit)newObj))
-                        return store.store(@lock, RefUpdateResult.FastForward);
+                        return store.Store(@lock, RefUpdateResult.FastForward);
                 }
 
-                if (isForceUpdate())
-                    return store.store(@lock, RefUpdateResult.Forced);
+                if (IsForceUpdate)
+                    return store.Store(@lock, RefUpdateResult.Forced);
                 return RefUpdateResult.Rejected;
             }
             finally
@@ -325,7 +326,7 @@ namespace GitSharp
          */
         public RefUpdateResult Delete()
         {
-            return Delete(new RevWalk(db.getRepository()));
+            return Delete(new RevWalk.RevWalk(db.Repository));
         }
 
         /**
@@ -339,21 +340,21 @@ namespace GitSharp
          */
         public RefUpdateResult Delete(RevWalk.RevWalk walk)
         {
-            if (getName().startsWith(Constants.R_HEADS))
+            if (Name.StartsWith(Constants.R_HEADS))
             {
-                Ref head = db.readRef(Constants.HEAD);
-                if (head != null && getName().Equals(head.getName()))
-                    return result = RefUpdateResult.RejectedCurrentBranch;
+                Ref head = db.ReadRef(Constants.HEAD);
+                if (head != null && Name.Equals(head.Name))
+                    return Result = RefUpdateResult.RejectedCurrentBranch;
             }
 
             try
             {
-                return result = updateImpl(walk, new DeleteStore());
+                return Result = updateImpl(walk, new DeleteStore());
             }
             catch (IOException x)
             {
-                result = RefUpdateResult.IOFailure;
-                throw x;
+                Result = RefUpdateResult.IOFailure;
+                throw;
             }
         }
 
@@ -363,7 +364,7 @@ namespace GitSharp
             {
                 return id != null ? rw.parseAny(id) : null;
             }
-            catch (MissingObjectException e)
+            catch (MissingObjectException)
             {
                 // We can expect some objects to be missing, like if we are
                 // trying to force a deletion of a branch and the object it
@@ -378,9 +379,9 @@ namespace GitSharp
         {
             if (status == RefUpdateResult.NoChange)
                 return status;
-            @lock.setNeedStatInformation(true);
-            @lock.write(newValue);
-            string msg = getRefLogMessage();
+            @lock.NeedStatInformation=(true);
+            @lock.Write(newValue);
+            string msg = GetRefLogMessage();
             if (msg != null && refLogIncludeResult)
             {
                 if (status == RefUpdateResult.Forced)
@@ -390,10 +391,10 @@ namespace GitSharp
                 else if (status == RefUpdateResult.New)
                     msg += ": created";
             }
-            RefLogWriter.Append(this, msg);
+            RefLogWriter.append(this, msg);
             if (!@lock.Commit())
                 return RefUpdateResult.LockFailure;
-            db.stored(this._ref.getOrigName(), _ref.getName(), newValue, @lock.getCommitLastModified());
+            db.Stored(this._ref.OriginalName, _ref.Name, newValue, @lock.CommitLastModified);
             return status;
         }
 

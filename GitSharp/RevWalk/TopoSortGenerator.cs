@@ -62,7 +62,7 @@ namespace GitSharp.RevWalk
          * @throws IncorrectObjectTypeException
          * @
          */
-        TopoSortGenerator(Generator s)
+        public TopoSortGenerator(Generator s)
         {
             pending = new FIFORevQueue();
             _outputType = s.outputType() | SORT_TOPO;

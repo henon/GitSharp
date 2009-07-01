@@ -77,13 +77,13 @@ namespace GitSharp.RevWalk
 
         private int recarryMask;
 
-        MergeBaseGenerator(RevWalk w)
+        public MergeBaseGenerator(RevWalk w)
         {
             walker = w;
             pending = new DateRevQueue();
         }
 
-        void init(AbstractRevQueue p)
+        public void init(AbstractRevQueue p)
         {
             try
             {

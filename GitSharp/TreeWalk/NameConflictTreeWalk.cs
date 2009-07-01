@@ -86,8 +86,8 @@ namespace GitSharp.TreeWalk
          *            the repository the walker will obtain data from.
          */
         public NameConflictTreeWalk(Repository repo)
+            : base(repo)
         {
-            base(repo);
         }
 
         public override AbstractTreeIterator min()
@@ -197,7 +197,7 @@ namespace GitSharp.TreeWalk
 
         private static bool isTree(AbstractTreeIterator p)
         {
-            return FileMode.TREE.Equals(p.mode);
+            return FileMode.Tree.Equals(p.mode);
         }
 
         private bool skipEntry(AbstractTreeIterator minRef)

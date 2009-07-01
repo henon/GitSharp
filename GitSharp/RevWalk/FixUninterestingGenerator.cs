@@ -53,7 +53,7 @@ namespace GitSharp.RevWalk
     {
         private Generator pending;
 
-        FixUninterestingGenerator(Generator g)
+        public FixUninterestingGenerator(Generator g)
         {
             pending = g;
         }

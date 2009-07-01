@@ -53,11 +53,11 @@ namespace GitSharp.RevWalk
      */
     public class PendingGenerator : Generator
     {
-        private static int PARSED = RevWalk.PARSED;
+        public static int PARSED = RevWalk.PARSED;
 
-        private static int SEEN = RevWalk.SEEN;
+        public static int SEEN = RevWalk.SEEN;
 
-        private static int UNINTERESTING = RevWalk.UNINTERESTING;
+        public static int UNINTERESTING = RevWalk.UNINTERESTING;
 
         /**
          * Number of additional commits to scan after we think we are done.
@@ -67,7 +67,7 @@ namespace GitSharp.RevWalk
          * constant to 1 additional commit due to the use of a pre-increment
          * operator when accessing the value.
          */
-        static int OVER_SCAN = 5 + 1;
+        public static int OVER_SCAN = 5 + 1;
 
         /** A commit near the end of time, to initialize {@link #last} with. */
         private static RevCommit INIT_LAST;
@@ -95,11 +95,11 @@ namespace GitSharp.RevWalk
          * Only relevant if there are {@link #UNINTERESTING} commits in the
          * {@link #pending} queue.
          */
-        private int overScan = OVER_SCAN;
+        public int overScan = OVER_SCAN;
 
-        bool canDispose;
+        public bool canDispose;
 
-        PendingGenerator(RevWalk w, DateRevQueue p,
+        public PendingGenerator(RevWalk w, DateRevQueue p,
                  RevFilter f, int @out)
         {
             walker = w;

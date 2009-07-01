@@ -45,12 +45,12 @@ namespace GitSharp.RevWalk
         internal BlockFreeList free;
 
         /** Create an empty revision queue. */
-        internal BlockRevQueue()
+        public BlockRevQueue()
         {
             free = new BlockFreeList();
         }
 
-        BlockRevQueue(Generator s)
+        public BlockRevQueue(Generator s)
         {
             free = new BlockFreeList();
             _outputType = s.outputType();

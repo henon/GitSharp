@@ -368,7 +368,7 @@ namespace GitSharp
                         throw new CorruptObjectException("name contains '/'");
                 }
                 if (thisNameB + 1 == ptr)
-                    throw new CorruptObjectException("zero Length name");
+                    throw new CorruptObjectException("zero length name");
                 if (raw[thisNameB] == '.')
                 {
                     int nameLen = (ptr - 1) - thisNameB;

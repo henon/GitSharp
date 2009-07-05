@@ -259,7 +259,7 @@ namespace GitSharp
             RequireCanDoUpdate();
             try
             {
-                return Result = updateImpl(walk, new UpdateStore());
+                return Result = updateImpl(walk, new UpdateStore(this));
             }
             catch (IOException x)
             {
@@ -349,7 +349,7 @@ namespace GitSharp
 
             try
             {
-                return Result = updateImpl(walk, new DeleteStore());
+                return Result = updateImpl(walk, new DeleteStore(this));
             }
             catch (IOException x)
             {
@@ -394,45 +394,55 @@ namespace GitSharp
             RefLogWriter.append(this, msg);
             if (!@lock.Commit())
                 return RefUpdateResult.LockFailure;
-            db.Stored(this._ref.OriginalName, _ref.Name, newValue, @lock.CommitLastModified);
+            db.stored(this._ref.OriginalName, _ref.Name, newValue, @lock.CommitLastModified);
             return status;
         }
 
         private abstract class StoreBase
         {
+            protected RefUpdate ref_update;
+
+            public StoreBase(RefUpdate ref_update)
+            {
+                this.ref_update = ref_update;
+            }
+
             public abstract RefUpdateResult Store(LockFile lockFile, RefUpdateResult status);
         }
 
         private class UpdateStore : StoreBase
         {
+            public UpdateStore(RefUpdate ref_update) : base(ref_update) { }
+
             public override RefUpdateResult Store(LockFile lockFile, RefUpdateResult status)
             {
-                return UpdateStore(lockFile, status);
+                return ref_update.updateStore(lockFile, status);
             }
         }
 
         private class DeleteStore : StoreBase
         {
+            public DeleteStore(RefUpdate ref_update) : base(ref_update) { }
 
             public override RefUpdateResult Store(LockFile @lock, RefUpdateResult status)
             {
-                Storage storage = _ref.getStorage();
-                if (storage == Storage.NEW)
+                GitSharp.Ref.Storage storage = ref_update._ref.StorageFormat;
+                if (storage == GitSharp.Ref.Storage.New)
                     return status;
-                if (storage.isPacked())
-                    db.removePackedRef(_ref.getName());
+                if (storage.IsPacked)
+                    ref_update.db.removePackedRef(ref_update._ref.Name);
 
-                int levels = count(_ref.getName(), '/') - 2;
+                int levels = Count(ref_update._ref.Name, '/') - 2;
 
                 // Delete logs _before_ unlocking
-                DirectoryInfo gitDir = db.Repository.Directory;
+                DirectoryInfo gitDir = ref_update.db.Repository.Directory;
                 DirectoryInfo logDir = new DirectoryInfo(gitDir+"/"+ Constants.LOGS);
-                deleteFileAndEmptyDir(new FileInfo(logDir + "/"+ _ref.Name), levels);
+                deleteFileAndEmptyDir(new FileInfo(logDir + "/" + ref_update._ref.Name), levels);
 
                 // We have to unlock before (maybe) deleting the parent directories
                 @lock.Unlock();
-                if (storage.isLoose())
-                    deleteFileAndEmptyDir(looseFile, levels);
+                if (storage.IsLoose)
+                    deleteFileAndEmptyDir(ref_update.looseFile, levels);
                 return status;
             }
 
@@ -440,9 +450,10 @@ namespace GitSharp
             {
                 if (file.Exists)
                 {
-                    if (!file.Delete())
+                    file.Delete();
+                    if (file.Exists)
                         throw new IOException("File cannot be deleted: " + file);
-                    deleteEmptyDir(file.getParentFile(), depth);
+                    deleteEmptyDir(file.Directory, depth);
                 }
             }
 
@@ -450,7 +461,8 @@ namespace GitSharp
             {
                 for (; depth > 0 && dir != null; depth--)
                 {
-                    if (!dir.Delete())
+                    dir.Delete();
+                    if (dir.Exists)
                         break;
                     dir = dir.Parent;
                 }

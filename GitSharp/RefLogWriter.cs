@@ -51,7 +51,7 @@ namespace GitSharp
 
     public class RefLogWriter
     {
-        static void append(RefUpdate u, String msg)
+       public static void append(RefUpdate u, String msg)
         {
             ObjectId oldId = u.OldObjectId;
             ObjectId newId = u.NewObjectId;
@@ -152,7 +152,6 @@ namespace GitSharp
                     + me.ToExternalString() + "\t" + message + initial;
             return s;
         }
-
     }
 
 }

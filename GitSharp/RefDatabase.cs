@@ -83,7 +83,7 @@ namespace GitSharp
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void ClearCache()
         {
-            looseRefs = new Dictionary<string, CachedRef>();
+            looseRefs = new Dictionary<string, Ref>();
             looseRefsMTime = new Dictionary<string, DateTime>();
             looseSymRefs = new Dictionary<string, string>();
             packedRefs = new Dictionary<string, Ref>();
@@ -100,7 +100,7 @@ namespace GitSharp
 
         public ObjectId IdOf(string name)
         {
-            refreshPackedRefs();
+            RefreshPackedRefs();
             Ref r = ReadRefBasic(name, 0);
             return (r != null) ? r.ObjectId : null;
         }
@@ -139,7 +139,7 @@ namespace GitSharp
                 looseRefsMTime[name] = time;
                 setModified();
             }
-            db.fireRefsMaybeChanged();
+            this.Repository.fireRefsMaybeChanged();
         }
 
         /**
@@ -154,12 +154,12 @@ namespace GitSharp
         public void Link(string name, string target)
         {
             byte[] content = Constants.Encoding.GetBytes("ref: " + target + "\n");
-            lockAndWriteFile(fileForRef(name), content);
+            lockAndWriteFile(FileForRef(name), content);
             lock (this)
             {
                 setModified();
             }
-            db.fireRefsMaybeChanged();
+            this.Repository.fireRefsMaybeChanged();
         }
 
         private void setModified()
@@ -209,15 +209,15 @@ namespace GitSharp
             ReadLooseRefs(avail, Constants.Refs, _refsDir);
             try
             {
-                Ref r = readRefBasic(Constants.HEAD, 0);
-                if (r != null && r.getObjectId() != null)
-                    avail.put(Constants.HEAD, r);
+                Ref r = ReadRefBasic(Constants.HEAD, 0);
+                if (r != null && r.ObjectId != null)
+                    avail[Constants.HEAD]= r;
             }
             catch (IOException e)
             {
                 // ignore here
             }
-            db.fireRefsMaybeChanged();
+            this.Repository.fireRefsMaybeChanged();
             return avail;
         }
 
@@ -243,12 +243,12 @@ namespace GitSharp
 			if (".".Equals(entName) || "..".Equals(entName))
 				continue;
 			if (ent is DirectoryInfo) {
-				ReadLooseRefs(avail, prefix + entName + "/", ent);
+				ReadLooseRefs(avail, prefix + entName + "/", ent as DirectoryInfo);
 			} else {
 				try {
-					 Ref @ref = readRefBasic(prefix + entName, 0);
+					 Ref @ref = ReadRefBasic(prefix + entName, 0);
 					if (@ref != null)
-						avail[@ref.OriginalName, @ref);
+						avail[@ref.OriginalName]=@ref;
 				} catch (IOException) {
 					continue;
 				}
@@ -311,20 +311,21 @@ namespace GitSharp
             //
             FileInfo loose = FileForRef(name);
             DateTime mtime = loose.LastWriteTime;
+            Ref @ref = null;
 
             if (looseRefs.ContainsKey(name))
             {
-                var @ref = looseRefs[name];
+                @ref = looseRefs[name];
                 DateTime cachedlastModified = looseRefsMTime[name];
                 if (cachedlastModified != null && cachedlastModified == mtime)
                 {
                     if (packedRefs.ContainsKey(origName))
-                        return new Ref(GitSharp.Ref.Storage.LoosePacked, origName, @ref.ObjectId, @ref.PeeledObjectId, @ref.IsPeeled);
+                        return new Ref(GitSharp.Ref.Storage.LoosePacked, origName, @ref.ObjectId, @ref.PeeledObjectId, @ref.Peeled);
                     else
                         return @ref;
                 }
-                looseRefs.remove(origName);
-                looseRefsMTime.remove(origName);
+                looseRefs.Remove(origName);
+                looseRefsMTime.Remove(origName);
             }
 
             if (!loose.Exists)
@@ -332,7 +333,7 @@ namespace GitSharp
                 // File does not exist.
                 // Try packed cache.
                 //
-                @ref = packedRefs.TryGetValue(name, out @ref);
+                packedRefs.TryGetValue(name, out @ref);
                 if (@ref != null)
                     if (!@ref.OriginalName.Equals(origName))
                         @ref = new Ref(GitSharp.Ref.Storage.LoosePacked, origName, name, @ref.ObjectId);
@@ -375,14 +376,14 @@ namespace GitSharp
                 string target = line.Substring("ref: ".Length);
                 Ref r = ReadRefBasic(target, depth + 1);
                 var cachedMtime = DateTime.MinValue;
-                looseRefsMTime.TryGetValue(name);
+                looseRefsMTime.TryGetValue(name, out cachedMtime);
                 if (cachedMtime != null && cachedMtime != mtime)
                     setModified();
-                looseRefsMTime.put(name, mtime);
+                looseRefsMTime[name]=mtime;
                 if (r == null)
-                    return new Ref(Ref.Storage.LOOSE, origName, target, null);
-                if (!origName.equals(r.getName()))
-                    r = new Ref(Ref.Storage.LOOSE_PACKED, origName, r.getName(), r.getObjectId(), r.getPeeledObjectId(), true);
+                    return new Ref(Ref.Storage.Loose, origName, target, null);
+                if (!origName.Equals(r.Name))
+                    r = new Ref(Ref.Storage.LoosePacked, origName, r.Name, r.ObjectId, r.PeeledObjectId, true);
                 return r;
             }
 
@@ -398,19 +399,19 @@ namespace GitSharp
                 throw new IOException("Not a ref: " + name + ": " + line);
             }
 
-            Storage storage;
-            if (packedRefs.containsKey(name))
-                storage = Ref.Storage.LOOSE_PACKED;
+            GitSharp.Ref.Storage storage;
+            if (packedRefs.ContainsKey(name))
+                storage = Ref.Storage.LoosePacked;
             else
-                storage = Ref.Storage.LOOSE;
+                storage = Ref.Storage.Loose;
             @ref = new Ref(storage, name, id);
-            looseRefs.put(name, @ref);
-            looseRefsMTime.put(name, mtime);
+            looseRefs[name]= @ref;
+            looseRefsMTime[name]= mtime;
 
-            if (!origName.equals(name))
+            if (!origName.Equals(name))
             {
-                @ref = new Ref(Ref.Storage.LOOSE, origName, name, id);
-                looseRefs.put(origName, @ref);
+                @ref = new Ref(Ref.Storage.Loose, origName, name, id);
+                looseRefs[origName]= @ref;
             }
 
             return @ref;
@@ -484,9 +485,9 @@ namespace GitSharp
         }
 
 
-        private void lockAndWriteFile(File file, byte[] content)
+        private void lockAndWriteFile(FileInfo file, byte[] content)
         {
-            String name = file.getName();
+            String name = file.Name;
             LockFile lck = new LockFile(file);
             if (!lck.Lock())
                 throw new ObjectWritingException("Unable to lock " + name);
@@ -503,21 +504,29 @@ namespace GitSharp
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        void removePackedRef(String name)
+        public void removePackedRef(String name)
         {
-            packedRefs.remove(name);
+            packedRefs.Remove(name);
             writePackedRefs();
         }
 
         private void writePackedRefs()
         {
-#error get this straight
-            //new RefWriter(packedRefs.values()) {
-            //    @Override
-            //    protected void writeFile(String name, byte[] content) throws IOException {
-            //        lockAndWriteFile(new File(db.getDirectory(), name), content);
-            //    }
-            //}.writePackedRefs();
+            new ExtendedRefWriter(packedRefs.Values, this).writePackedRefs();
+        }
+
+        private class ExtendedRefWriter : RefWriter
+        {
+             RefDatabase ref_db;
+             public ExtendedRefWriter(IEnumerable<Ref> refs, RefDatabase db) : base(refs)
+             {
+                this.ref_db=db;
+            }
+
+            protected override void writeFile(string name, byte[] content)
+            {
+                ref_db.lockAndWriteFile(new FileInfo(ref_db.Repository.Directory+"/"+ name), content);
+            }
         }
 
         private string ReadLine(FileInfo file)

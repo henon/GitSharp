@@ -1041,5 +1041,11 @@ namespace GitSharp
         {
             return MapCommit(id);
         }
+
+        
+        internal void fireRefsMaybeChanged() // [henon] todo: remove later
+        {
+            OnRefsChanged();
+        }
     }
 }

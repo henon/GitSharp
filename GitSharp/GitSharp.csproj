@@ -210,6 +210,8 @@
     <Compile Include="Exceptions\RevWalkException.cs" />
     <Compile Include="Exceptions\StopWalkException.cs" />
     <Compile Include="ObjectIdSubclassMap.cs" />
+    <Compile Include="RefComparator.cs" />
+    <Compile Include="RefWriter.cs" />
     <Compile Include="TreeWalk\AbstractTreeIterator.cs" />
     <Compile Include="TreeWalk\CanonicalTreeParser.cs" />
     <Compile Include="TreeWalk\EmptyTreeIterator.cs" />

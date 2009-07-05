@@ -53,7 +53,7 @@ namespace GitSharp.Tests
         public void testEmpty_FromByteArray()
         {
             AbbreviatedObjectId i;
-            i = AbbreviatedObjectId.fromString(new byte[] { }, 0, 0);
+            i = AbbreviatedObjectId.FromString(new byte[] { }, 0, 0);
             Assert.IsNotNull(i);
             Assert.AreEqual(0, i.Length);
             Assert.IsFalse(i.isComplete());
@@ -63,7 +63,7 @@ namespace GitSharp.Tests
         [Test]
         public void testEmpty_FromString()
         {
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString("");
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString("");
             Assert.IsNotNull(i);
             Assert.AreEqual(0, i.Length);
             Assert.IsFalse(i.isComplete());
@@ -75,13 +75,13 @@ namespace GitSharp.Tests
         {
             String s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             byte[] b = Constants.encodeASCII(s);
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(b, 0, b.Length);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(b, 0, b.Length);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsTrue(i.isComplete());
             Assert.AreEqual(s, i.name());
 
-            ObjectId f = i.toObjectId();
+            ObjectId f = i.ToObjectId();
             Assert.IsNotNull(f);
             Assert.AreEqual(ObjectId.FromString(s), f);
             Assert.AreEqual(f.GetHashCode(), i.GetHashCode());
@@ -91,13 +91,13 @@ namespace GitSharp.Tests
         public void testFull_FromString()
         {
             String s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsTrue(i.isComplete());
             Assert.AreEqual(s, i.name());
 
-            ObjectId f = i.toObjectId();
+            ObjectId f = i.ToObjectId();
             Assert.IsNotNull(f);
             Assert.AreEqual(ObjectId.FromString(s), f);
             Assert.AreEqual(f.GetHashCode(), i.GetHashCode());
@@ -107,144 +107,144 @@ namespace GitSharp.Tests
         public void test1_FromString()
         {
             String s = "7";
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsFalse(i.isComplete());
             Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.toObjectId());
+            Assert.IsNull(i.ToObjectId());
         }
 
         [Test]
         public void test2_FromString()
         {
             String s = "7b";
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsFalse(i.isComplete());
             Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.toObjectId());
+            Assert.IsNull(i.ToObjectId());
         }
 
         [Test]
         public void test3_FromString()
         {
             String s = "7b6";
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsFalse(i.isComplete());
             Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.toObjectId());
+            Assert.IsNull(i.ToObjectId());
         }
 
         [Test]
         public void test4_FromString()
         {
             String s = "7b6e";
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsFalse(i.isComplete());
             Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.toObjectId());
+            Assert.IsNull(i.ToObjectId());
         }
 
         [Test]
         public void test5_FromString()
         {
             String s = "7b6e8";
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsFalse(i.isComplete());
             Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.toObjectId());
+            Assert.IsNull(i.ToObjectId());
         }
 
         [Test]
         public void test6_FromString()
         {
             String s = "7b6e80";
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsFalse(i.isComplete());
             Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.toObjectId());
+            Assert.IsNull(i.ToObjectId());
         }
 
         [Test]
         public void test7_FromString()
         {
             String s = "7b6e806";
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsFalse(i.isComplete());
             Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.toObjectId());
+            Assert.IsNull(i.ToObjectId());
         }
 
         [Test]
         public void test8_FromString()
         {
             String s = "7b6e8067";
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsFalse(i.isComplete());
             Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.toObjectId());
+            Assert.IsNull(i.ToObjectId());
         }
 
         [Test]
         public void test9_FromString()
         {
             String s = "7b6e8067e";
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsFalse(i.isComplete());
             Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.toObjectId());
+            Assert.IsNull(i.ToObjectId());
         }
 
         [Test]
         public void test17_FromString()
         {
             String s = "7b6e8067ec96acef9";
-            AbbreviatedObjectId i = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
             Assert.IsFalse(i.isComplete());
             Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.toObjectId());
+            Assert.IsNull(i.ToObjectId());
         }
 
         [Test]
         public void testEquals_Short()
         {
             String s = "7b6e8067";
-            AbbreviatedObjectId a = AbbreviatedObjectId.fromString(s);
-            AbbreviatedObjectId b = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId a = AbbreviatedObjectId.FromString(s);
+            AbbreviatedObjectId b = AbbreviatedObjectId.FromString(s);
             Assert.AreNotSame(a, b);
             Assert.IsTrue(a.GetHashCode() == b.GetHashCode());
-            Assert.IsTrue(a.equals(b));
-            Assert.IsTrue(b.equals(a));
+            Assert.IsTrue(a.Equals(b));
+            Assert.IsTrue(b.Equals(a));
         }
 
         [Test]
         public void testEquals_Full()
         {
             String s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
-            AbbreviatedObjectId a = AbbreviatedObjectId.fromString(s);
-            AbbreviatedObjectId b = AbbreviatedObjectId.fromString(s);
+            AbbreviatedObjectId a = AbbreviatedObjectId.FromString(s);
+            AbbreviatedObjectId b = AbbreviatedObjectId.FromString(s);
             Assert.AreNotSame(a, b);
             Assert.IsTrue(a.GetHashCode() == b.GetHashCode());
-            Assert.IsTrue(a.equals(b));
-            Assert.IsTrue(b.equals(a));
+            Assert.IsTrue(a.Equals(b));
+            Assert.IsTrue(b.Equals(a));
         }
 
         [Test]
@@ -252,10 +252,10 @@ namespace GitSharp.Tests
         {
             String sa = "7b6e8067";
             String sb = "7b6e806e";
-            AbbreviatedObjectId a = AbbreviatedObjectId.fromString(sa);
-            AbbreviatedObjectId b = AbbreviatedObjectId.fromString(sb);
-            Assert.IsFalse(a.equals(b));
-            Assert.IsFalse(b.equals(a));
+            AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
+            AbbreviatedObjectId b = AbbreviatedObjectId.FromString(sb);
+            Assert.IsFalse(a.Equals(b));
+            Assert.IsFalse(b.Equals(a));
         }
 
         [Test]
@@ -263,17 +263,17 @@ namespace GitSharp.Tests
         {
             String sa = "7b6e8067abcd";
             String sb = "7b6e8067";
-            AbbreviatedObjectId a = AbbreviatedObjectId.fromString(sa);
-            AbbreviatedObjectId b = AbbreviatedObjectId.fromString(sb);
-            Assert.IsFalse(a.equals(b));
-            Assert.IsFalse(b.equals(a));
+            AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
+            AbbreviatedObjectId b = AbbreviatedObjectId.FromString(sb);
+            Assert.IsFalse(a.Equals(b));
+            Assert.IsFalse(b.Equals(a));
         }
 
         [Test]
         public void testPrefixCompare_Full()
         {
             String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
-            AbbreviatedObjectId a = AbbreviatedObjectId.fromString(s1);
+            AbbreviatedObjectId a = AbbreviatedObjectId.FromString(s1);
             ObjectId i1 = ObjectId.FromString(s1);
             Assert.AreEqual(0, a.prefixCompare(i1));
             Assert.IsTrue(i1.startsWith(a));
@@ -293,7 +293,7 @@ namespace GitSharp.Tests
         public void testPrefixCompare_1()
         {
             String sa = "7";
-            AbbreviatedObjectId a = AbbreviatedObjectId.fromString(sa);
+            AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
 
             String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
@@ -315,7 +315,7 @@ namespace GitSharp.Tests
         public void testPrefixCompare_7()
         {
             String sa = "7b6e806";
-            AbbreviatedObjectId a = AbbreviatedObjectId.fromString(sa);
+            AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
 
             String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
@@ -337,7 +337,7 @@ namespace GitSharp.Tests
         public void testPrefixCompare_8()
         {
             String sa = "7b6e8067";
-            AbbreviatedObjectId a = AbbreviatedObjectId.fromString(sa);
+            AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
 
             String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
@@ -359,7 +359,7 @@ namespace GitSharp.Tests
         public void testPrefixCompare_9()
         {
             String sa = "7b6e8067e";
-            AbbreviatedObjectId a = AbbreviatedObjectId.fromString(sa);
+            AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
 
             String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
@@ -381,7 +381,7 @@ namespace GitSharp.Tests
         public void testPrefixCompare_17()
         {
             String sa = "7b6e8067ec96acef9";
-            AbbreviatedObjectId a = AbbreviatedObjectId.fromString(sa);
+            AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
 
             String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);

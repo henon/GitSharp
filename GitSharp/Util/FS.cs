@@ -75,7 +75,7 @@ namespace GitSharp.Util
          */
         public static bool supportsExecute()
         {
-            throw new NotImplementedException();
+            return false; // windows does not support executable file flag
         }
 
         /**
@@ -90,7 +90,7 @@ namespace GitSharp.Util
          */
         public static bool canExecute(FileInfo f)
         {
-            throw new NotImplementedException();
+            return false; // windows does not support executable file flag
         }
 
         /**
@@ -108,7 +108,7 @@ namespace GitSharp.Util
          */
         public static bool setExecute(FileInfo f, bool canExec)
         {
-            throw new NotImplementedException();
+            return false; // windows does not support executable file flag
         }
 
         /**
@@ -129,7 +129,7 @@ namespace GitSharp.Util
          * @return the translated path. <code>new File(dir,name)</code> if this
          *         platform does not require path name translation.
          */
-        public static DirectoryInfo resolve(DirectoryInfo dir, String name)
+        public static DirectoryInfo resolve(DirectoryInfo dir, string name)
         {
             return resolveImpl(dir, name);
         }
@@ -152,7 +152,7 @@ namespace GitSharp.Util
          * @return the translated path. <code>new File(dir,name)</code> if this
          *         platform does not require path name translation.
          */
-        private static DirectoryInfo resolveImpl(DirectoryInfo dir, String name)
+        private static DirectoryInfo resolveImpl(DirectoryInfo dir, string name)
         {
             DirectoryInfo abspn = new DirectoryInfo(name);
             if (abspn.Exists)
@@ -189,13 +189,13 @@ namespace GitSharp.Util
         private static DirectoryInfo userHomeImpl()
         {
             throw new NotImplementedException();
-            //String home = AccessController
-            //        .doPrivileged(new PrivilegedAction<String>() {
-            //            public String run() {
+            //string home = AccessController
+            //        .doPrivileged(new PrivilegedAction<string>() {
+            //            public string run() {
             //                return System.getProperty("user.home");
             //            }
             //        });
-            //if (home == null || home.length() == 0)
+            //if (home == null || home.Length() == 0)
             //    return null;
             //return new File(home).getAbsoluteFile();
         }

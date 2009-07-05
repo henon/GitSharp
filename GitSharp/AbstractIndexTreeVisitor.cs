@@ -50,10 +50,10 @@ namespace GitSharp
     public class AbstractIndexTreeVisitor : IndexTreeVisitor
     {
 
-        public delegate void FinishVisitTreeDelegate(Tree tree, Tree auxTree, String curDir);
+        public delegate void FinishVisitTreeDelegate(Tree tree, Tree auxTree, string curDir);
         public FinishVisitTreeDelegate FinishVisitTree { get; set; }
 
-        public delegate void FinishVisitTreeByIndexDelegate(Tree tree, int i, String curDir);
+        public delegate void FinishVisitTreeByIndexDelegate(Tree tree, int i, string curDir);
         public FinishVisitTreeByIndexDelegate FinishVisitTreeByIndex { get; set; }
         
         public delegate void VisitEntryDelegate(TreeEntry treeEntry, GitIndex.Entry indexEntry, FileInfo file);

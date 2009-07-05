@@ -79,5 +79,19 @@ namespace GitSharp.Util
             }
             return zeros;
         }
+
+        /// <summary>
+        /// Returns the number of zero bits preceding the highest-order ("leftmost") one-bit in the two's complement 
+        /// binary representation of the specified int value. Returns 32 if the specified value has no one-bits in its two's 
+        /// complement representation, in other words if it is equal to zero.
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public static int LowestOneBit(this int n)
+        {
+            if (n == 0)
+                return 0;
+            return 1 << NumberOfTrailingZeros(n);
+        }
     }
 }

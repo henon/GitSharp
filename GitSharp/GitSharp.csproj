@@ -164,6 +164,72 @@
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="RevWalk\AbstractRevQueue.cs" />
+    <Compile Include="RevWalk\BlockObjQueue.cs" />
+    <Compile Include="RevWalk\BlockRevQueue.cs" />
+    <Compile Include="RevWalk\BoundaryGenerator.cs" />
+    <Compile Include="RevWalk\DateRevQueue.cs" />
+    <Compile Include="RevWalk\DelayRevQueue.cs" />
+    <Compile Include="RevWalk\EndGenerator.cs" />
+    <Compile Include="RevWalk\FIFORevQueue.cs" />
+    <Compile Include="RevWalk\Filter\AndRevFilter.cs" />
+    <Compile Include="RevWalk\Filter\AuthorRevFilter.cs" />
+    <Compile Include="RevWalk\Filter\CommitterRevFilter.cs" />
+    <Compile Include="RevWalk\Filter\CommitTimeRevFilter.cs" />
+    <Compile Include="RevWalk\Filter\MessageRevFilter.cs" />
+    <Compile Include="RevWalk\Filter\NotRevFilter.cs" />
+    <Compile Include="RevWalk\Filter\OrRevFilter.cs" />
+    <Compile Include="RevWalk\Filter\PatternMatchRevFilter.cs" />
+    <Compile Include="RevWalk\Filter\RevFilter.cs" />
+    <Compile Include="RevWalk\Filter\RevFlagFilter.cs" />
+    <Compile Include="RevWalk\Filter\SubStringRevFilter.cs" />
+    <Compile Include="RevWalk\FixUninterestingGenerator.cs" />
+    <Compile Include="RevWalk\Generator.cs" />
+    <Compile Include="RevWalk\LIFORevQueue.cs" />
+    <Compile Include="RevWalk\MergeBaseGenerator.cs" />
+    <Compile Include="RevWalk\ObjectWalk.cs" />
+    <Compile Include="RevWalk\PendingGenerator.cs" />
+    <Compile Include="RevWalk\RevBlob.cs" />
+    <Compile Include="RevWalk\RevCommit.cs" />
+    <Compile Include="RevWalk\RevCommitList.cs" />
+    <Compile Include="RevWalk\RevFlag.cs" />
+    <Compile Include="RevWalk\RevFlagSet.cs" />
+    <Compile Include="RevWalk\RevObject.cs" />
+    <Compile Include="RevWalk\RevObjectList.cs" />
+    <Compile Include="RevWalk\RevSort.cs" />
+    <Compile Include="RevWalk\RevTag.cs" />
+    <Compile Include="RevWalk\RevTree.cs" />
+    <Compile Include="RevWalk\RevWalk.cs" />
+    <Compile Include="RevWalk\RewriteGenerator.cs" />
+    <Compile Include="RevWalk\RewriteTreeFilter.cs" />
+    <Compile Include="RevWalk\StartGenerator.cs" />
+    <Compile Include="RevWalk\TopoSortGenerator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Exceptions\RevWalkException.cs" />
+    <Compile Include="Exceptions\StopWalkException.cs" />
+    <Compile Include="ObjectIdSubclassMap.cs" />
+    <Compile Include="RefComparator.cs" />
+    <Compile Include="RefWriter.cs" />
+    <Compile Include="TreeWalk\AbstractTreeIterator.cs" />
+    <Compile Include="TreeWalk\CanonicalTreeParser.cs" />
+    <Compile Include="TreeWalk\EmptyTreeIterator.cs" />
+    <Compile Include="TreeWalk\FileTreeIterator.cs" />
+    <Compile Include="TreeWalk\Filter\AndTreeFilter.cs" />
+    <Compile Include="TreeWalk\Filter\NotTreeFilter.cs" />
+    <Compile Include="TreeWalk\Filter\OrTreeFilter.cs" />
+    <Compile Include="TreeWalk\Filter\PathFilter.cs" />
+    <Compile Include="TreeWalk\Filter\PathFilterGroup.cs" />
+    <Compile Include="TreeWalk\Filter\TreeFilter.cs" />
+    <Compile Include="TreeWalk\NameConflictTreeWalk.cs" />
+    <Compile Include="TreeWalk\TreeWalk.cs" />
+    <Compile Include="TreeWalk\WorkingTreeIterator.cs" />
+    <Compile Include="Util\ICharSequence.cs" />
+    <Compile Include="Util\ListIterator.cs" />
+    <Compile Include="Util\RawCharSequence.cs" />
+    <Compile Include="Util\RawSubstringPattern.cs" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

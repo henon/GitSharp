@@ -61,7 +61,7 @@ namespace GitSharp
 
         public static bool IsId(string id)
         {
-            if (id.Length != 2 * Constants.ObjectIdLength)
+            if (id.Length != 2 * ObjectIdLength)
                 return false;
 
             try
@@ -126,7 +126,7 @@ namespace GitSharp
 
         public static ObjectId FromString(string s)
         {
-            if (s.Length != Constants.StringLength)
+            if (s.Length != StringLength)
                 return null;
 
             return FromHexString(ASCIIEncoding.ASCII.GetBytes(s), 0);
@@ -145,7 +145,7 @@ namespace GitSharp
             }
             catch (IndexOutOfRangeException)
             {
-                string s = new string(Encoding.ASCII.GetChars(bs, offset, Constants.StringLength));
+                string s = new string(Encoding.ASCII.GetChars(bs, offset, StringLength));
                 throw new ArgumentException("Invalid id: " + s, "bs");
             }
         }

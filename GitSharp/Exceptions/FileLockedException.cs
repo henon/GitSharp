@@ -19,7 +19,7 @@ namespace GitSharp.Exceptions
         public FileLockedException() { }
         public FileLockedException(string message) : base(message) { }
         public FileLockedException(string message, Exception inner) : base(message, inner) { }
-        protected FileLockedException(
+        internal FileLockedException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }

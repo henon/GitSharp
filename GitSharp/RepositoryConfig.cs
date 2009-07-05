@@ -549,7 +549,7 @@ namespace GitSharp
                 {
                     string n = e.Name.ToLower();
                     string key = group + "." + n;
-                    Object o = _byName.GetValue(key);
+                    object o = _byName.GetValue(key);
                     if (o == null)
                     {
                         _byName.AddOrReplace(key, e);
@@ -721,7 +721,7 @@ namespace GitSharp
             else if ("no".Equals(n) || "false".Equals(n) || "0".Equals(n))
                 return false;
             else
-                throw new ArgumentException(string.Format("Invalid boolean value: {0}.{1} = {2}", section, name, n));
+                throw new ArgumentException(string.Format("Invalid bool value: {0}.{1} = {2}", section, name, n));
 
         }
 
@@ -743,7 +743,7 @@ namespace GitSharp
 
         public string[] GetStringList(string section, string subsection, string name)
         {
-            Object o = GetRawEntry(section, subsection, name);
+            object o = GetRawEntry(section, subsection, name);
             if (o is List<Entry>)
             {
                 List<Entry> lst = (List<Entry>)o;

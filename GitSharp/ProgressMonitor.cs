@@ -48,7 +48,7 @@ namespace GitSharp
     public interface ProgressMonitor
     {
         void Start(int totalTasks);
-        void BeginTask(String title, int totalWork);
+        void BeginTask(string title, int totalWork);
         void Update(int completed);
         void EndTask();
 

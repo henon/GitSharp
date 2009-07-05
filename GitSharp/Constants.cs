@@ -491,7 +491,7 @@ namespace GitSharp
          * @param s
          *            the string to convert. Must not contain any characters over
          *            127 (outside of 7-bit ASCII).
-         * @return a byte array of the same length as the input string, holding the
+         * @return a byte array of the same Length as the input string, holding the
          *         same characters, in the same order.
          * @throws ArgumentException
          *             the input string contains one or more characters outside of
@@ -527,7 +527,7 @@ namespace GitSharp
             //if (bb.hasArray() && bb.arrayOffset() == 0)
             //{
             //    byte[] arr = bb.array();
-            //    if (arr.length == len)
+            //    if (arr.Length == len)
             //        return arr;
             //}
 

@@ -57,13 +57,13 @@ namespace GitSharp.Util
          * @param variable system variable to read
          * @return value of the system variable
          */
-        string getenv(String variable); // [henon] todo: rename later
+        string getenv(string variable); // [henon] todo: rename later
 
         /**
          * @param key of the system property to read
          * @return value of the system property
          */
-        string getProperty(String key);  // [henon] todo: rename later
+        string getProperty(string key);  // [henon] todo: rename later
 
         /**
          * @return the git configuration found in the user home

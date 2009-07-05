@@ -86,7 +86,7 @@ namespace GitSharp
             offset32 = new byte[FANOUT][];
             crc32 = new byte[FANOUT][];
 
-            // Object name table. The size we can permit per fan-out bucket
+            // object name table. The size we can permit per fan-out bucket
             // is limited to Java's 2 GB per byte array limitation. That is
             // no more than 107,374,182 objects per fan-out.
             //
@@ -106,7 +106,7 @@ namespace GitSharp
                     continue;
                 }
 
-                long nameLen = bucketCnt * AnyObjectId.Constants.ObjectIdLength;
+                long nameLen = bucketCnt * AnyObjectId.ObjectIdLength;
                 if (nameLen > int.MaxValue)
                     throw new IOException("Index file is too large");
 
@@ -159,7 +159,7 @@ namespace GitSharp
             return new EntriesEnumeratorV2(this);
         }
 
-        public override long ObjectCount{get;protected set;}
+        public override long ObjectCount{get;internal set;}
 
         public override long Offset64Count
         {
@@ -270,7 +270,7 @@ namespace GitSharp
                     if (levelTwo < _index.names[levelOne].Length)
                     {
                         Current.FromRaw(_index.names[levelOne], levelTwo);
-                        int arrayIdx = levelTwo / (AnyObjectId.Constants.ObjectIdLength / 4) * 4;
+                        int arrayIdx = levelTwo / (AnyObjectId.ObjectIdLength / 4) * 4;
                         long offset = NB.DecodeUInt32(_index.offset32[levelOne], arrayIdx);
                         if ((offset & IS_O64) != 0)
                         {
@@ -279,7 +279,7 @@ namespace GitSharp
                         }
                         Current.Offset = offset;
 
-                        levelTwo += AnyObjectId.Constants.ObjectIdLength / 4;
+                        levelTwo += AnyObjectId.ObjectIdLength / 4;
                         returnedNumber++;
                         return true;
                     }

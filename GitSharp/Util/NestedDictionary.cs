@@ -104,7 +104,7 @@ namespace GitSharp.Util
 
         #region Protected Methods
 
-        protected override IDictionary<K, NestedSortedDictionary<K, V>> CreateDictionary()
+        internal override IDictionary<K, NestedSortedDictionary<K, V>> CreateDictionary()
         {
             return new SortedDictionary<K, NestedSortedDictionary<K, V>>();
         }
@@ -155,7 +155,7 @@ namespace GitSharp.Util
 
         #region Protected Methods
 
-        protected virtual IDictionary<K, D> CreateDictionary()
+        internal virtual IDictionary<K, D> CreateDictionary()
         {
             return new Dictionary<K, D>();
         }
@@ -178,7 +178,7 @@ namespace GitSharp.Util
         public virtual T As<T>()
         {
             if (!(_value is T))
-                throw new InvalidOperationException(String.Format("Object is not of type {0}", typeof(T).ToString()));
+                throw new InvalidOperationException(string.Format("object is not of type {0}", typeof(T).ToString()));
 
             return (T)(object)_value;
         }
@@ -319,7 +319,7 @@ namespace GitSharp.Util
         #region Properties
 
         private IDictionary<K, D> _dictionary;
-        protected virtual IDictionary<K, D> Dictionary
+        internal virtual IDictionary<K, D> Dictionary
         {
             get
             {

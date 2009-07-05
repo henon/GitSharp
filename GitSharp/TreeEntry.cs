@@ -96,7 +96,7 @@ namespace GitSharp
         }
 
 
-        public void Rename(String n)
+        public void Rename(string n)
         {
             Rename(Encoding.ASCII.GetBytes(n));
         }
@@ -195,7 +195,7 @@ namespace GitSharp
         private void AppendFullName(StringBuilder r)
         {
             TreeEntry p = this.Parent;
-            String n = this.Name;
+            string n = this.Name;
             if (p != null)
             {
                 p.AppendFullName(r);

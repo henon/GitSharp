@@ -63,7 +63,7 @@ namespace GitSharp
 
 
         /** Footer checksum applied on the bottom of the pack file. */
-        protected byte[] _packChecksum;
+        internal byte[] _packChecksum;
 
         public byte[] packChecksum
         {
@@ -128,7 +128,7 @@ namespace GitSharp
 	 * @return number of objects in this index, and likewise in the associated
 	 *         pack that this index was generated from.
 	 */
-        public abstract long ObjectCount { get; protected set; }
+        public abstract long ObjectCount { get; internal set; }
 
         /**
          * Obtain the total number of objects needing 64 bit offsets.
@@ -148,7 +148,7 @@ namespace GitSharp
          * int curPosition = 0;
          * while (eItr.hasNext() &amp;&amp; curPosition++ &lt; nthPosition)
          * 	eItr.next();
-         * ObjectId result = eItr.next().toObjectId();
+         * ObjectId result = eItr.next().ToObjectId();
          * </pre>
          *
          * @param nthPosition
@@ -169,7 +169,7 @@ namespace GitSharp
          * int curPosition = 0;
          * while (eItr.hasNext() &amp;&amp; curPosition++ &lt; nthPosition)
          * 	eItr.next();
-         * ObjectId result = eItr.next().toObjectId();
+         * ObjectId result = eItr.next().ToObjectId();
          * </pre>
          *
          * @param nthPosition
@@ -208,7 +208,7 @@ namespace GitSharp
          * @return CRC32 checksum of specified object (at 32 less significant bits)
          * @throws MissingObjectException
          *             when requested ObjectId was not found in this index
-         * @throws UnsupportedOperationException
+         * @throws InvalidOperationException
          *             when this index doesn't support CRC32 checksum
          */
         public abstract long FindCRC32(AnyObjectId objId);
@@ -224,7 +224,7 @@ namespace GitSharp
         public class MutableEntry : MutableObjectId
         {
             /**
-             * Empty constructor. Object fields should be filled in later.
+             * Empty constructor. object fields should be filled in later.
              */
             public MutableEntry()
                 : base()
@@ -255,18 +255,18 @@ namespace GitSharp
             }
         }
 
-        protected abstract class EntriesIterator : IEnumerator<MutableEntry>
+        internal abstract class EntriesIterator : IEnumerator<MutableEntry>
         {
-            protected long returnedNumber = 0;
+            internal long returnedNumber = 0;
 
-            protected EntriesIterator()
+            internal EntriesIterator()
             {
                 Current = new MutableEntry();
             }
 
             #region IEnumerator<MutableEntry> Members
 
-            public MutableEntry Current { get; protected set; }
+            public MutableEntry Current { get; internal set; }
 
             #endregion
 

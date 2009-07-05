@@ -54,11 +54,9 @@ namespace GitSharp
 #endif
  IComparable
     {
-        internal class Constants
-        {
-            public static readonly int ObjectIdLength = 20;
-            public static readonly int StringLength = ObjectIdLength * 2;
-        }
+
+        public static readonly int ObjectIdLength = 20;
+        public static readonly int StringLength = ObjectIdLength * 2;
 
 
         public static bool operator ==(AnyObjectId a, AnyObjectId b)
@@ -95,6 +93,22 @@ namespace GitSharp
             new BinaryWriter(s).Write(ToHexByteArray());
         }
 
+        /**
+         * Copy this ObjectId to a StringBuilder in hex format.
+         *
+         * @param tmp
+         *            temporary char array to buffer construct into before writing.
+         *            Must be at least large enough to hold 2 digits for each byte
+         *            of object id (40 characters or larger).
+         * @param w
+         *            the string to append onto.
+         */
+        public void CopyTo(char[] tmp, StringBuilder w)
+        {
+            ToHexCharArray(tmp);
+            w.Append(tmp, 0, StringLength);
+        }
+
 
         internal void copyRawTo(Stream s)
         {
@@ -109,7 +123,7 @@ namespace GitSharp
 
         private byte[] ToHexByteArray()
         {
-            byte[] dst = new byte[Constants.StringLength];
+            byte[] dst = new byte[StringLength];
 
             Hex.FillHexByteArray(dst, 0, W1);
             Hex.FillHexByteArray(dst, 8, W2);
@@ -235,7 +249,7 @@ namespace GitSharp
 
         private char[] ToHexCharArray()
         {
-            char[] dest = new char[Constants.StringLength];
+            char[] dest = new char[StringLength];
             ToHexCharArray(dest);
             return dest;
         }

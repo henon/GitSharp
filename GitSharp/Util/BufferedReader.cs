@@ -112,7 +112,7 @@ namespace GitSharp.Util
             int begin = this._marks[this._markLevel - 1];
             int end = this._bufferPosition;
 
-            return new String(this._buffer, begin, end - begin);
+            return new string(this._buffer, begin, end - begin);
         }
 
         /// <summary>
@@ -143,6 +143,7 @@ namespace GitSharp.Util
 
             return this._buffer[this._bufferPosition];
         }
+
         protected override void Dispose(bool disposing)
         {
             _reader.Dispose();

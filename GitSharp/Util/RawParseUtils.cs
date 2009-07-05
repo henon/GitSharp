@@ -40,6 +40,7 @@
 using System;
 using System.Linq;
 using GitSharp.Util;
+using System.Text;
 
 namespace GitSharp
 {
@@ -125,7 +126,7 @@ namespace GitSharp
 	 * tmp[--ptr] = ' ';
 	 * ptr = RawParseUtils.formatBase10(tmp, ptr, 18);
 	 * tmp[--ptr] = 0;
-	 *  String str = new String(tmp, ptr, tmp.Length - ptr);
+	 *  string str = new string(tmp, ptr, tmp.Length - ptr);
 	 * </pre>
 	 * 
 	 * @param b
@@ -273,7 +274,6 @@ namespace GitSharp
             return sign < 0 ? -r : r;
         }
 
-#if false
         /**
 	 * Parse a base 10 numeric from a sequence of ASCII digits into a long.
 	 * <p>
@@ -306,18 +306,18 @@ namespace GitSharp
 
                 switch (b[ptr])
                 {
-                    case '-':
+                    case (byte)'-':
                         sign = -1;
                         ptr++;
                         break;
-                    case '+':
+                    case (byte)'+':
                         ptr++;
                         break;
                 }
 
                 while (ptr < sz)
                 {
-                    byte v = digits[b[ptr]];
+                    int v = b[ptr]-(byte)'0';
                     if (v < 0)
                         break;
                     r = (r * 10) + v;
@@ -352,20 +352,30 @@ namespace GitSharp
             int tzHours = v / 100;
             return tzHours * 60 + tzMins;
         } 
-#endif
 
         /**
-	 * Locate the first position after a given character.
-	 * 
-	 * @param b
-	 *            buffer to scan.
-	 * @param ptr
-	 *            position within buffer to start looking for chrA at.
-	 * @param chrA
-	 *            character to find.
-	 * @return new position just after chrA.
-	 */
+	     * Locate the first position after a given character.
+	     * 
+	     * @param b
+	     *            buffer to scan.
+	     * @param ptr
+	     *            position within buffer to start looking for chrA at.
+	     * @param chrA
+	     *            character to find.
+	     * @return new position just after chrA.
+	     */
         public static int next(char[] b, int ptr, char chrA)
+        {
+            int sz = b.Length;
+            while (ptr < sz)
+            {
+                if (b[ptr++] == chrA)
+                    return ptr;
+            }
+            return ptr;
+        }
+
+        public static int next(byte[] b, int ptr, byte chrA)
         {
             int sz = b.Length;
             while (ptr < sz)
@@ -390,6 +400,11 @@ namespace GitSharp
         public static int nextLF(char[] b, int ptr)
         {
             return next(b, ptr, '\n');
+        }
+
+        public static int nextLF(byte[] b, int ptr)
+        {
+            return next(b, ptr, (byte)'\n');
         }
 
         /**
@@ -417,420 +432,464 @@ namespace GitSharp
             return ptr;
         }
 
+        public static int nextLF(byte[] b, int ptr, byte chrA)
+        {
+            int sz = b.Length;
+            while (ptr < sz)
+            {
+                byte c = b[ptr++];
+                if (c == chrA || c == (byte)'\n')
+                    return ptr;
+            }
+            return ptr;
+        }
+
 #if false
-			/**
-	 * Index the region between <code>[ptr, end)</code> to find line starts.
-	 * <p>
-	 * The returned list is 1 indexed. Index 0 contains
-	 * {@link Integer#MIN_VALUE} to pad the list out.
-	 * <p>
-	 * Using a 1 indexed list means that line numbers can be directly accessed
-	 * from the list, so <code>list.get(1)</code> (aka get line 1) returns
-	 * <code>ptr</code>.
-	 * <p>
-	 * The last element (index <code>map.size()-1</code>) always contains
-	 * <code>end</code>.
-	 *
-	 * @param buf
-	 *            buffer to scan.
-	 * @param ptr
-	 *            position within the buffer corresponding to the first byte of
-	 *            line 1.
-	 * @param end
-	 *            1 past the end of the content within <code>buf</code>.
-	 * @return a line map indexing the start position of each line.
-	 */
-	public static  IntList lineMap( byte[] buf, int ptr, int end) {
-		// Experimentally derived from multiple source repositories
-		// the average number of bytes/line is 36. Its a rough guess
-		// to initially size our map close to the target.
-		//
-		 IntList map = new IntList((end - ptr) / 36);
-		map.fillTo(1, Integer.MIN_VALUE);
-		for (; ptr < end; ptr = nextLF(buf, ptr))
-			map.add(ptr);
-		map.add(end);
-		return map;
-	}
-
-	/**
-	 * Locate the "author " header line data.
-	 * 
-	 * @param b
-	 *            buffer to scan.
-	 * @param ptr
-	 *            position in buffer to start the scan at. Most callers should
-	 *            pass 0 to ensure the scan starts from the beginning of the
-	 *            commit buffer and does not accidentally look at message body.
-	 * @return position just after the space in "author ", so the first
-	 *         character of the author's name. If no author header can be
-	 *         located -1 is returned.
-	 */
-	public static  int author( byte[] b, int ptr) {
-		 int sz = b.Length;
-		if (ptr == 0)
-			ptr += 46; // skip the "tree ..." line.
-		while (ptr < sz && b[ptr] == 'p')
-			ptr += 48; // skip this parent.
-		return match(b, ptr, author);
-	}
-
-	/**
-	 * Locate the "committer " header line data.
-	 * 
-	 * @param b
-	 *            buffer to scan.
-	 * @param ptr
-	 *            position in buffer to start the scan at. Most callers should
-	 *            pass 0 to ensure the scan starts from the beginning of the
-	 *            commit buffer and does not accidentally look at message body.
-	 * @return position just after the space in "committer ", so the first
-	 *         character of the committer's name. If no committer header can be
-	 *         located -1 is returned.
-	 */
-	public static  int committer( byte[] b, int ptr) {
-		 int sz = b.Length;
-		if (ptr == 0)
-			ptr += 46; // skip the "tree ..." line.
-		while (ptr < sz && b[ptr] == 'p')
-			ptr += 48; // skip this parent.
-		if (ptr < sz && b[ptr] == 'a')
-			ptr = nextLF(b, ptr);
-		return match(b, ptr, committer);
-	}
-
-	/**
-	 * Locate the "tagger " header line data.
-	 *
-	 * @param b
-	 *            buffer to scan.
-	 * @param ptr
-	 *            position in buffer to start the scan at. Most callers should
-	 *            pass 0 to ensure the scan starts from the beginning of the tag
-	 *            buffer and does not accidentally look at message body.
-	 * @return position just after the space in "tagger ", so the first
-	 *         character of the tagger's name. If no tagger header can be
-	 *         located -1 is returned.
-	 */
-	public static  int tagger( byte[] b, int ptr) {
-		 int sz = b.Length;
-		if (ptr == 0)
-			ptr += 48; // skip the "object ..." line.
-		while (ptr < sz) {
-			if (b[ptr] == '\n')
-				return -1;
-			 int m = match(b, ptr, tagger);
-			if (m >= 0)
-				return m;
-			ptr = nextLF(b, ptr);
-		}
-		return -1;
-	}
-
-	/**
-	 * Locate the "encoding " header line.
-	 * 
-	 * @param b
-	 *            buffer to scan.
-	 * @param ptr
-	 *            position in buffer to start the scan at. Most callers should
-	 *            pass 0 to ensure the scan starts from the beginning of the
-	 *            buffer and does not accidentally look at the message body.
-	 * @return position just after the space in "encoding ", so the first
-	 *         character of the encoding's name. If no encoding header can be
-	 *         located -1 is returned (and UTF-8 should be assumed).
-	 */
-	public static  int encoding( byte[] b, int ptr) {
-		 int sz = b.Length;
-		while (ptr < sz) {
-			if (b[ptr] == '\n')
-				return -1;
-			if (b[ptr] == 'e')
-				break;
-			ptr = nextLF(b, ptr);
-		}
-		return match(b, ptr, encoding);
-	}
-
-	/**
-	 * Parse the "encoding " header into a character set reference.
-	 * <p>
-	 * Locates the "encoding " header (if present) by first calling
-	 * {@link #encoding(byte[], int)} and then returns the proper character set
-	 * to apply to this buffer to evaluate its contents as character data.
-	 * <p>
-	 * If no encoding header is present, {@link Constants#CHARSET} is assumed.
-	 * 
-	 * @param b
-	 *            buffer to scan.
-	 * @return the Java character set representation. Never null.
-	 */
-	public static Charset parseEncoding( byte[] b) {
-		 int enc = encoding(b, 0);
-		if (enc < 0)
-			return Constants.CHARSET;
-		 int lf = nextLF(b, enc);
-		return Charset.forName(decode(Constants.CHARSET, b, enc, lf - 1));
-	}
-
-	/**
-	 * Parse a name line (e.g. author, committer, tagger) into a PersonIdent.
-	 * <p>
-	 * When passing in a value for <code>nameB</code> callers should use the
-	 * return value of {@link #author(byte[], int)} or
-	 * {@link #committer(byte[], int)}, as these methods provide the proper
-	 * position within the buffer.
-	 * 
-	 * @param raw
-	 *            the buffer to parse character data from.
-	 * @param nameB
-	 *            first position of the identity information. This should be the
-	 *            first position after the space which delimits the header field
-	 *            name (e.g. "author" or "committer") from the rest of the
-	 *            identity line.
-	 * @return the parsed identity. Never null.
-	 */
-	public static PersonIdent parsePersonIdent( byte[] raw,  int nameB) {
-		 Charset cs = parseEncoding(raw);
-		 int emailB = nextLF(raw, nameB, '<');
-		 int emailE = nextLF(raw, emailB, '>');
-
-		 String name = decode(cs, raw, nameB, emailB - 2);
-		 String email = decode(cs, raw, emailB, emailE - 1);
-
-		 MutableInteger ptrout = new MutableInteger();
-		 long when = parseLongBase10(raw, emailE + 1, ptrout);
-		 int tz = parseTimeZoneOffset(raw, ptrout.value);
-
-		return new PersonIdent(name, email, when * 1000L, tz);
-	}
-
-	/**
-	 * Decode a buffer under UTF-8, if possible.
-	 *
-	 * If the byte stream cannot be decoded that way, the platform default is tried
-	 * and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
-	 * 
-	 * @param buffer
-	 *            buffer to pull raw bytes from.
-	 * @return a string representation of the range <code>[start,end)</code>,
-	 *         after decoding the region through the specified character set.
-	 */
-	public static String decode( byte[] buffer) {
-		return decode(Constants.CHARSET, buffer, 0, buffer.Length);
-    }
-
-	/**
-	 * Decode a buffer under the specified character set if possible.
-	 *
-	 * If the byte stream cannot be decoded that way, the platform default is tried
-	 * and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
-	 * 
-	 * @param cs
-	 *            character set to use when decoding the buffer.
-	 * @param buffer
-	 *            buffer to pull raw bytes from.
-	 * @return a string representation of the range <code>[start,end)</code>,
-	 *         after decoding the region through the specified character set.
-	 */
-	public static String decode( Charset cs,  byte[] buffer) {
-		return decode(cs, buffer, 0, buffer.Length);
-	}
-
-	/**
-	 * Decode a region of the buffer under the specified character set if possible.
-	 *
-	 * If the byte stream cannot be decoded that way, the platform default is tried
-	 * and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
-	 * 
-	 * @param cs
-	 *            character set to use when decoding the buffer.
-	 * @param buffer
-	 *            buffer to pull raw bytes from.
-	 * @param start
-	 *            first position within the buffer to take data from.
-	 * @param end
-	 *            one position past the last location within the buffer to take
-	 *            data from.
-	 * @return a string representation of the range <code>[start,end)</code>,
-	 *         after decoding the region through the specified character set.
-	 */
-	public static String decode( Charset cs,  byte[] buffer,
-			 int start,  int end) {
-		try {
-			return decodeNoFallback(cs, buffer, start, end);
-		} catch (CharacterCodingException e) {
-			// Fall back to an ISO-8859-1 style encoding. At least all of
-			// the bytes will be present in the output.
-			//
-			return extractBinaryString(buffer, start, end);
-		}
-	}
-
-	/**
-	 * Decode a region of the buffer under the specified character set if
-	 * possible.
-	 *
-	 * If the byte stream cannot be decoded that way, the platform default is
-	 * tried and if that too fails, an exception is thrown.
-	 *
-	 * @param cs
-	 *            character set to use when decoding the buffer.
-	 * @param buffer
-	 *            buffer to pull raw bytes from.
-	 * @param start
-	 *            first position within the buffer to take data from.
-	 * @param end
-	 *            one position past the last location within the buffer to take
-	 *            data from.
-	 * @return a string representation of the range <code>[start,end)</code>,
-	 *         after decoding the region through the specified character set.
-	 * @throws CharacterCodingException
-	 *             the input is not in any of the tested character sets.
-	 */
-	public static String decodeNoFallback( Charset cs,
-			 byte[] buffer,  int start,  int end)
-			throws CharacterCodingException {
-		 ByteBuffer b = ByteBuffer.wrap(buffer, start, end - start);
-		b.mark();
-
-		// Try our built-in favorite. The assumption here is that
-		// decoding will fail if the data is not actually encoded
-		// using that encoder.
-		//
-		try {
-			return decode(b, Constants.CHARSET);
-		} catch (CharacterCodingException e) {
-			b.reset();
-		}
-
-		if (!cs.equals(Constants.CHARSET)) {
-			// Try the suggested encoding, it might be right since it was
-			// provided by the caller.
-			//
-			try {
-				return decode(b, cs);
-			} catch (CharacterCodingException e) {
-				b.reset();
-			}
-		}
-
-		// Try the default character set. A small group of people
-		// might actually use the same (or very similar) locale.
-		//
-		 Charset defcs = Charset.defaultCharset();
-		if (!defcs.equals(cs) && !defcs.equals(Constants.CHARSET)) {
-			try {
-				return decode(b, defcs);
-			} catch (CharacterCodingException e) {
-				b.reset();
-			}
-		}
-
-		throw new CharacterCodingException();
-	}
-
-	/**
-	 * Decode a region of the buffer under the ISO-8859-1 encoding.
-	 *
-	 * Each byte is treated as a single character in the 8859-1 character
-	 * encoding, performing a raw binary->char conversion.
-	 *
-	 * @param buffer
-	 *            buffer to pull raw bytes from.
-	 * @param start
-	 *            first position within the buffer to take data from.
-	 * @param end
-	 *            one position past the last location within the buffer to take
-	 *            data from.
-	 * @return a string representation of the range <code>[start,end)</code>.
-	 */
-	public static String extractBinaryString( byte[] buffer,
-			 int start,  int end) {
-		 StringBuilder r = new StringBuilder(end - start);
-		for (int i = start; i < end; i++)
-			r.append((char) (buffer[i] & 0xff));
-		return r.toString();
-	}
-
-	private static String decode( ByteBuffer b,  Charset charset)
-			throws CharacterCodingException {
-		 CharsetDecoder d = charset.newDecoder();
-		d.onMalformedInput(CodingErrorAction.REPORT);
-		d.onUnmappableCharacter(CodingErrorAction.REPORT);
-		return d.decode(b).toString();
-	}
-
-	/**
-	 * Locate the position of the commit message body.
-	 * 
-	 * @param b
-	 *            buffer to scan.
-	 * @param ptr
-	 *            position in buffer to start the scan at. Most callers should
-	 *            pass 0 to ensure the scan starts from the beginning of the
-	 *            commit buffer.
-	 * @return position of the user's message buffer.
-	 */
-	public static  int commitMessage( byte[] b, int ptr) {
-		 int sz = b.Length;
-		if (ptr == 0)
-			ptr += 46; // skip the "tree ..." line.
-		while (ptr < sz && b[ptr] == 'p')
-			ptr += 48; // skip this parent.
-
-		// Skip any remaining header lines, ignoring what their actual
-		// header line type is. This is identical to the logic for a tag.
-		//
-		return tagMessage(b, ptr);
-	}
-
-	/**
-	 * Locate the position of the tag message body.
-	 *
-	 * @param b
-	 *            buffer to scan.
-	 * @param ptr
-	 *            position in buffer to start the scan at. Most callers should
-	 *            pass 0 to ensure the scan starts from the beginning of the tag
-	 *            buffer.
-	 * @return position of the user's message buffer.
-	 */
-	public static  int tagMessage( byte[] b, int ptr) {
-		 int sz = b.Length;
-		if (ptr == 0)
-			ptr += 48; // skip the "object ..." line.
-		while (ptr < sz && b[ptr] != '\n')
-			ptr = nextLF(b, ptr);
-		if (ptr < sz && b[ptr] == '\n')
-			return ptr + 1;
-		return -1;
-	}
-
-	/**
-	 * Locate the end of a paragraph.
-	 * <p>
-	 * A paragraph is ended by two consecutive LF bytes.
-	 * 
-	 * @param b
-	 *            buffer to scan.
-	 * @param start
-	 *            position in buffer to start the scan at. Most callers will
-	 *            want to pass the first position of the commit message (as
-	 *            found by {@link #commitMessage(byte[], int)}.
-	 * @return position of the LF at the end of the paragraph;
-	 *         <code>b.Length</code> if no paragraph end could be located.
-	 */
-	public static  int endOfParagraph( byte[] b,  int start) {
-		int ptr = start;
-		 int sz = b.Length;
-		while (ptr < sz && b[ptr] != '\n')
-			ptr = nextLF(b, ptr);
-		while (0 < ptr && start < ptr && b[ptr - 1] == '\n')
-			ptr--;
-		return ptr;
-	}  
+        /**
+ * Index the region between <code>[ptr, end)</code> to find line starts.
+ * <p>
+ * The returned list is 1 indexed. Index 0 contains
+ * {@link Integer#MIN_VALUE} to pad the list out.
+ * <p>
+ * Using a 1 indexed list means that line numbers can be directly accessed
+ * from the list, so <code>list.get(1)</code> (aka get line 1) returns
+ * <code>ptr</code>.
+ * <p>
+ * The last element (index <code>map.size()-1</code>) always contains
+ * <code>end</code>.
+ *
+ * @param buf
+ *            buffer to scan.
+ * @param ptr
+ *            position within the buffer corresponding to the first byte of
+ *            line 1.
+ * @param end
+ *            1 past the end of the content within <code>buf</code>.
+ * @return a line map indexing the start position of each line.
+ */
+        public static IntList lineMap(byte[] buf, int ptr, int end)
+        {
+            // Experimentally derived from multiple source repositories
+            // the average number of bytes/line is 36. Its a rough guess
+            // to initially size our map close to the target.
+            //
+            IntList map = new IntList((end - ptr) / 36);
+            map.fillTo(1, Integer.MIN_VALUE);
+            for (; ptr < end; ptr = nextLF(buf, ptr))
+                map.add(ptr);
+            map.add(end);
+            return map;
+        }
 #endif
+
+        /**
+         * Locate the "author " header line data.
+         * 
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position in buffer to start the scan at. Most callers should
+         *            pass 0 to ensure the scan starts from the beginning of the
+         *            commit buffer and does not accidentally look at message body.
+         * @return position just after the space in "author ", so the first
+         *         character of the author's name. If no author header can be
+         *         located -1 is returned.
+         */
+        public static int author(byte[] b, int ptr)
+        {
+            int sz = b.Length;
+            if (ptr == 0)
+                ptr += 46; // skip the "tree ..." line.
+            while (ptr < sz && b[ptr] == (byte)'p')
+                ptr += 48; // skip this parent.
+            return match(b, ptr, ObjectChecker.author_bytes);
+        }
+
+        /**
+         * Locate the "committer " header line data.
+         * 
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position in buffer to start the scan at. Most callers should
+         *            pass 0 to ensure the scan starts from the beginning of the
+         *            commit buffer and does not accidentally look at message body.
+         * @return position just after the space in "committer ", so the first
+         *         character of the committer's name. If no committer header can be
+         *         located -1 is returned.
+         */
+        public static int committer(byte[] b, int ptr)
+        {
+            int sz = b.Length;
+            if (ptr == 0)
+                ptr += 46; // skip the "tree ..." line.
+            while (ptr < sz && b[ptr] == (byte)'p')
+                ptr += 48; // skip this parent.
+            if (ptr < sz && b[ptr] == (byte)'a')
+                ptr = nextLF(b, ptr);
+            return match(b, ptr, ObjectChecker.committer_bytes);
+        }
+
+        /**
+         * Locate the "tagger " header line data.
+         *
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position in buffer to start the scan at. Most callers should
+         *            pass 0 to ensure the scan starts from the beginning of the tag
+         *            buffer and does not accidentally look at message body.
+         * @return position just after the space in "tagger ", so the first
+         *         character of the tagger's name. If no tagger header can be
+         *         located -1 is returned.
+         */
+        public static int tagger(byte[] b, int ptr)
+        {
+            int sz = b.Length;
+            if (ptr == 0)
+                ptr += 48; // skip the "object ..." line.
+            while (ptr < sz)
+            {
+                if (b[ptr] == (byte)'\n')
+                    return -1;
+                int m = match(b, ptr, ObjectChecker.tagger_bytes);
+                if (m >= 0)
+                    return m;
+                ptr = nextLF(b, ptr);
+            }
+            return -1;
+        }
+
+        /**
+         * Locate the "encoding " header line.
+         * 
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position in buffer to start the scan at. Most callers should
+         *            pass 0 to ensure the scan starts from the beginning of the
+         *            buffer and does not accidentally look at the message body.
+         * @return position just after the space in "encoding ", so the first
+         *         character of the encoding's name. If no encoding header can be
+         *         located -1 is returned (and UTF-8 should be assumed).
+         */
+        public static int encoding(byte[] b, int ptr)
+        {
+            int sz = b.Length;
+            while (ptr < sz)
+            {
+                if (b[ptr] == '\n')
+                    return -1;
+                if (b[ptr] == 'e')
+                    break;
+                ptr = nextLF(b, ptr);
+            }
+            return match(b, ptr, ObjectChecker.encoding_bytes);
+        }
+
+        /**
+         * Parse the "encoding " header into a character set reference.
+         * <p>
+         * Locates the "encoding " header (if present) by first calling
+         * {@link #encoding(byte[], int)} and then returns the proper character set
+         * to apply to this buffer to evaluate its contents as character data.
+         * <p>
+         * If no encoding header is present, {@link Constants#CHARSET} is assumed.
+         * 
+         * @param b
+         *            buffer to scan.
+         * @return the Java character set representation. Never null.
+         */
+        public static Encoding parseEncoding(byte[] b)
+        {
+            int enc = encoding(b, 0);
+            if (enc < 0)
+                return Constants.CHARSET;
+            int lf = nextLF(b, enc);
+            return Encoding.GetEncoding(decode(Constants.CHARSET, b, enc, lf - 1));
+        }
+
+        /**
+         * Parse a name line (e.g. author, committer, tagger) into a PersonIdent.
+         * <p>
+         * When passing in a value for <code>nameB</code> callers should use the
+         * return value of {@link #author(byte[], int)} or
+         * {@link #committer(byte[], int)}, as these methods provide the proper
+         * position within the buffer.
+         * 
+         * @param raw
+         *            the buffer to parse character data from.
+         * @param nameB
+         *            first position of the identity information. This should be the
+         *            first position after the space which delimits the header field
+         *            name (e.g. "author" or "committer") from the rest of the
+         *            identity line.
+         * @return the parsed identity. Never null.
+         */
+        public static PersonIdent parsePersonIdent(byte[] raw, int nameB)
+        {
+            Encoding cs = parseEncoding(raw);
+            int emailB = nextLF(raw, nameB, (byte)'<');
+            int emailE = nextLF(raw, emailB, (byte)'>');
+
+            string name = decode(cs, raw, nameB, emailB - 2);
+            string email = decode(cs, raw, emailB, emailE - 1);
+
+            MutableInteger ptrout = new MutableInteger();
+            long when = parseLongBase10(raw, emailE + 1, ptrout);
+            int tz = parseTimeZoneOffset(raw, ptrout.value);
+
+            return new PersonIdent(name, email, when, tz);
+        }
+
+
+        /**
+     * Decode a buffer under UTF-8, if possible.
+     *
+     * If the byte stream cannot be decoded that way, the platform default is tried
+     * and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
+     * 
+     * @param buffer
+     *            buffer to pull raw bytes from.
+     * @return a string representation of the range <code>[start,end)</code>,
+     *         after decoding the region through the specified character set.
+     */
+        public static string decode(byte[] buffer)
+        {
+            return decode(Constants.CHARSET, buffer, 0, buffer.Length);
+        }
+
+        /**
+         * Decode a buffer under the specified character set if possible.
+         *
+         * If the byte stream cannot be decoded that way, the platform default is tried
+         * and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
+         * 
+         * @param cs
+         *            character set to use when decoding the buffer.
+         * @param buffer
+         *            buffer to pull raw bytes from.
+         * @return a string representation of the range <code>[start,end)</code>,
+         *         after decoding the region through the specified character set.
+         */
+        public static string decode(Encoding cs, byte[] buffer)
+        {
+            return decode(cs, buffer, 0, buffer.Length);
+        }
+
+        /**
+         * Decode a region of the buffer under the specified character set if possible.
+         *
+         * If the byte stream cannot be decoded that way, the platform default is tried
+         * and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
+         * 
+         * @param cs
+         *            character set to use when decoding the buffer.
+         * @param buffer
+         *            buffer to pull raw bytes from.
+         * @param start
+         *            first position within the buffer to take data from.
+         * @param end
+         *            one position past the last location within the buffer to take
+         *            data from.
+         * @return a string representation of the range <code>[start,end)</code>,
+         *         after decoding the region through the specified character set.
+         */
+        public static string decode(Encoding cs, byte[] buffer, int start, int end)
+        {
+            try
+            {
+                return decodeNoFallback(cs, buffer, start, end);
+            }
+            catch (EncoderFallbackException e)
+            {
+                // Fall back to an ISO-8859-1 style encoding. At least all of
+                // the bytes will be present in the output.
+                //
+                return extractBinaryString(buffer, start, end);
+            }
+        }
+
+        /**
+         * Decode a region of the buffer under the specified character set if
+         * possible.
+         *
+         * If the byte stream cannot be decoded that way, the platform default is
+         * tried and if that too fails, an exception is thrown.
+         *
+         * @param cs
+         *            character set to use when decoding the buffer.
+         * @param buffer
+         *            buffer to pull raw bytes from.
+         * @param start
+         *            first position within the buffer to take data from.
+         * @param end
+         *            one position past the last location within the buffer to take
+         *            data from.
+         * @return a string representation of the range <code>[start,end)</code>,
+         *         after decoding the region through the specified character set.
+         * @throws CharacterCodingException
+         *             the input is not in any of the tested character sets.
+         */
+        public static string decodeNoFallback(Encoding cs, byte[] buffer, int start, int end)
+        {
+            // ByteBuffer b = ByteBuffer.wrap(buffer, start, end - start);
+            //b.mark();
+            var b = buffer;
+
+            // Try our built-in favorite. The assumption here is that
+            // decoding will fail if the data is not actually encoded
+            // using that encoder.
+            //
+            try
+            {
+                return decode(b, Constants.CHARSET);
+            }
+            catch (EncoderFallbackException e)
+            {
+                //b.reset();
+            }
+
+            if (cs != Constants.CHARSET)
+            {
+                // Try the suggested encoding, it might be right since it was
+                // provided by the caller.
+                //
+                try
+                {
+                    return decode(b, cs);
+                }
+                catch (EncoderFallbackException e)
+                {
+                    //b.reset();
+                }
+            }
+
+            // Try the default character set. A small group of people
+            // might actually use the same (or very similar) locale.
+            //
+
+            if (Encoding.Default != cs && Encoding.Default != Constants.CHARSET) // [henon] actually this can not happen because   Encoding.Default == Constants.CHARSET by definition
+            {
+                try
+                {
+                    return decode(b, Encoding.Default);
+                }
+                catch (EncoderFallbackException e)
+                {
+                    //b.reset();
+                }
+            }
+
+            throw new EncoderFallbackException("decoding failed with encoding: " + cs.HeaderName);
+        }
+
+        /**
+         * Decode a region of the buffer under the ISO-8859-1 encoding.
+         *
+         * Each byte is treated as a single character in the 8859-1 character
+         * encoding, performing a raw binary->char conversion.
+         *
+         * @param buffer
+         *            buffer to pull raw bytes from.
+         * @param start
+         *            first position within the buffer to take data from.
+         * @param end
+         *            one position past the last location within the buffer to take
+         *            data from.
+         * @return a string representation of the range <code>[start,end)</code>.
+         */
+        public static string extractBinaryString(byte[] buffer, int start, int end)
+        {
+            StringBuilder r = new StringBuilder(end - start);
+            for (int i = start; i < end; i++)
+                r.Append((char)(buffer[i] & 0xff));
+            return r.ToString();
+        }
+
+        private static string decode(byte[] b, Encoding charset)
+        {
+            // CharsetDecoder d = charset.newDecoder();
+            //d.onMalformedInput(CodingErrorAction.REPORT);
+            //d.onUnmappableCharacter(CodingErrorAction.REPORT);
+            //return d.decode(b).ToString();
+            return charset.GetString(b);
+        }
+
+
+        /**
+        * Locate the position of the commit message body.
+        * 
+        * @param b
+        *            buffer to scan.
+        * @param ptr
+        *            position in buffer to start the scan at. Most callers should
+        *            pass 0 to ensure the scan starts from the beginning of the
+        *            commit buffer.
+        * @return position of the user's message buffer.
+        */
+        public static int commitMessage(byte[] b, int ptr)
+        {
+            int sz = b.Length;
+            if (ptr == 0)
+                ptr += 46; // skip the "tree ..." line.
+            while (ptr < sz && b[ptr] == (byte)'p')
+                ptr += 48; // skip this parent.
+
+            // Skip any remaining header lines, ignoring what their actual
+            // header line type is. This is identical to the logic for a tag.
+            //
+            return tagMessage(b, ptr);
+        }
+
+        /**
+         * Locate the position of the tag message body.
+         *
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position in buffer to start the scan at. Most callers should
+         *            pass 0 to ensure the scan starts from the beginning of the tag
+         *            buffer.
+         * @return position of the user's message buffer.
+         */
+        public static int tagMessage(byte[] b, int ptr)
+        {
+            int sz = b.Length;
+            if (ptr == 0)
+                ptr += 48; // skip the "object ..." line.
+            while (ptr < sz && b[ptr] != (byte)'\n')
+                ptr = nextLF(b, ptr);
+            if (ptr < sz && b[ptr] == (byte)'\n')
+                return ptr + 1;
+            return -1;
+        }
+
+        /**
+         * Locate the end of a paragraph.
+         * <p>
+         * A paragraph is ended by two consecutive LF bytes.
+         * 
+         * @param b
+         *            buffer to scan.
+         * @param start
+         *            position in buffer to start the scan at. Most callers will
+         *            want to pass the first position of the commit message (as
+         *            found by {@link #commitMessage(byte[], int)}.
+         * @return position of the LF at the end of the paragraph;
+         *         <code>b.Length</code> if no paragraph end could be located.
+         */
+        public static int endOfParagraph(byte[] b, int start)
+        {
+            int ptr = start;
+            int sz = b.Length;
+            while (ptr < sz && b[ptr] != (byte)'\n')
+                ptr = nextLF(b, ptr);
+            while (0 < ptr && start < ptr && b[ptr - 1] == (byte)'\n')
+                ptr--;
+            return ptr;
+        }
+
     }
 
 }

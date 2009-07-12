@@ -242,6 +242,11 @@ namespace GitSharp
             return update(new RevWalk.RevWalk(db.Repository));
         }
 
+        public RefUpdateResult Update(RevWalk.RevWalk walk)
+        {
+            return update(walk);
+        }
+
         /**
          * Gracefully update the ref to the new value.
          * <p>

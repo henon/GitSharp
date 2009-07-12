@@ -138,6 +138,20 @@ namespace GitSharp
             return (int)this.W2;
         }
 
+        public AbbreviatedObjectId Abbreviate(Repository repo)
+        {
+            return Abbreviate(repo, 8);
+        }
+
+        public AbbreviatedObjectId Abbreviate(Repository repo, int len)
+        {
+            int a = AbbreviatedObjectId.Mask(len, 1, W1);
+            int b = AbbreviatedObjectId.Mask(len, 2, W2);
+            int c = AbbreviatedObjectId.Mask(len, 3, W3);
+            int d = AbbreviatedObjectId.Mask(len, 4, W4);
+            int e = AbbreviatedObjectId.Mask(len, 5, W5);
+            return new AbbreviatedObjectId(len, a, b, c, d, e);
+        }
 
         public int W1 { get; set; }
         public int W2 { get; set; }

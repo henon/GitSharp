@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -212,6 +212,11 @@
     <Compile Include="ObjectIdSubclassMap.cs" />
     <Compile Include="RefComparator.cs" />
     <Compile Include="RefWriter.cs" />
+    <Compile Include="Transport\RefSpec.cs" />
+    <Compile Include="Transport\RemoteConfig.cs" />
+    <Compile Include="Transport\TagOpt.cs" />
+    <Compile Include="Transport\Transport.cs" />
+    <Compile Include="Transport\URIish.cs" />
     <Compile Include="TreeWalk\AbstractTreeIterator.cs" />
     <Compile Include="TreeWalk\CanonicalTreeParser.cs" />
     <Compile Include="TreeWalk\EmptyTreeIterator.cs" />

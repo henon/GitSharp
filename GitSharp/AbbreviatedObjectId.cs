@@ -129,7 +129,7 @@ namespace GitSharp
             return r << (8 - n) * 4;
         }
 
-        static int mask(int nibbles, int word, int v)
+        public static int Mask(int nibbles, int word, int v)
         {
 
             int b = (word - 1) * 8;
@@ -164,7 +164,7 @@ namespace GitSharp
 
         int w5;
 
-        AbbreviatedObjectId(int n, int new_1, int new_2, int new_3, int new_4, int new_5)
+        public AbbreviatedObjectId(int n, int new_1, int new_2, int new_3, int new_4, int new_5)
         {
             nibbles = n;
             w1 = new_1;
@@ -231,7 +231,7 @@ namespace GitSharp
 
         private int mask(int word, int v)
         {
-            return mask(nibbles, word, v);
+            return Mask(nibbles, word, v);
         }
 
 

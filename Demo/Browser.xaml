@@ -145,7 +145,7 @@
 
                                 <!--config tree-->
                                 <DockPanel  Grid.Column="0">
-                                    <TextBlock DockPanel.Dock="Top" Background="Silver">Confgiuration</TextBlock>
+                                    <TextBlock DockPanel.Dock="Top" Background="Silver">Configuration</TextBlock>
                                     <TreeView Name="m_config_tree">
 
                                     </TreeView>

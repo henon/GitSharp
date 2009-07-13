@@ -730,7 +730,7 @@ namespace GitSharp
                         }
                         string distnum = new string(rev, i + 1, l - i - 1);
                         int dist = int.Parse(distnum);
-                        while (dist >= 0)
+                        while (dist > 0)
                         {
                             refId = ((Commit)oref).ParentIds[0];
                             oref = MapCommit(refId);

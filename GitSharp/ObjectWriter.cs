@@ -108,7 +108,7 @@ namespace GitSharp
                 ObjectId id = e.Id;
 
                 if (id == null)
-                    throw new ObjectWritingException("Object at path \""
+                    throw new ObjectWritingException("object at path \""
                             + e.FullName + "\" does not have an id assigned."
                             + "  All object ids must be assigned prior"
                             + " to writing a tree.");
@@ -139,7 +139,11 @@ namespace GitSharp
                 encoding = Constants.CHARSET;
             var os = new MemoryStream();
             var w = new BinaryWriter(os);
-            var sw = new StreamWriter(os, encoding);
+            StreamWriter sw;
+            if (encoding != Constants.CHARSET)
+                sw = new StreamWriter(os, encoding);
+            else
+                sw = new StreamWriter(os);
 
             w.Write(htree);
             w.Write(' ');
@@ -236,9 +240,9 @@ namespace GitSharp
             return WriteObject(ObjectType.Tag, len, input, true);
         }
 
-        public ObjectId ComputeBlobSha1(long length, Stream input)
+        public ObjectId ComputeBlobSha1(long Length, Stream input)
         {
-            return WriteObject(ObjectType.Blob, length, input, false);
+            return WriteObject(ObjectType.Blob, Length, input, false);
         }
 
         private ObjectId WriteObject(ObjectType type, long len, Stream input, bool store)
@@ -302,7 +306,7 @@ namespace GitSharp
                 }
 
                 if (len != 0)
-                    throw new IOException("Input did not match supplied length. " + len + " bytes are missing.");
+                    throw new IOException("Input did not match supplied Length. " + len + " bytes are missing.");
 
                 if (deflateStream != null)
                 {
@@ -333,7 +337,7 @@ namespace GitSharp
 
             if (r.HasObject(id))
             {
-                // Object is already in the repository so remove
+                // object is already in the repository so remove
                 // the temporary file.
                 //
                 PathUtil.DeleteFile(t);

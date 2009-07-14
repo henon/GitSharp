@@ -127,9 +127,9 @@ public class Crc32
         _value = (_value >> 8) ^ CrcTable[(_value & 0xff) ^ value];
     }
 
-    public void Update(byte[] values, int offset, int length)
+    public void Update(byte[] values, int offset, int Length)
     {
-        for (int i = offset; i < offset + length; i++)
+        for (int i = offset; i < offset + Length; i++)
             this.Update(values[i]);
     }
 

@@ -354,7 +354,7 @@ namespace GitSharp
                 while (rawPtr < rawSize && raw[rawPtr] != 0)
                     rawPtr++;
                 rawPtr++;
-                rawPtr += ObjectId.Constants.ObjectIdLength;
+                rawPtr += ObjectId.ObjectIdLength;
                 nextIndex++;
             }
 
@@ -386,7 +386,7 @@ namespace GitSharp
                 rawPtr += nameLen + 1;
 
                 ObjectId id = ObjectId.FromRaw(raw, rawPtr);
-                rawPtr += ObjectId.Constants.ObjectIdLength;
+                rawPtr += ObjectId.ObjectIdLength;
 
                 TreeEntry ent;
                 if (FileMode.RegularFile.Equals(mode))
@@ -515,7 +515,7 @@ namespace GitSharp
          * @param path
          * @return true if a blob or symlink with the specified name can be found
          *         under this tree.
-         * @throws IOException
+         * @
          */
         public bool ExistsBlob(string path)
         {
@@ -558,7 +558,7 @@ namespace GitSharp
          *            blob name
          * @return a {@link TreeEntry} representing an object with the specified
          *         relative path.
-         * @throws IOException
+         * @
          */
         public TreeEntry FindBlobMember(string s)
         {
@@ -570,7 +570,7 @@ namespace GitSharp
         /**
          * @param s Tree Name
          * @return a Tree with the name s or null
-         * @throws IOException
+         * @
          */
         public TreeEntry findTreeMember(string s)
         {

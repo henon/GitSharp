@@ -129,7 +129,7 @@ namespace GitSharp
         #region events
 
         public event EventHandler<RefsChangedEventArgs> RefsChanged;
-        protected void OnRefsChanged()
+        internal void OnRefsChanged()
         {
             var handler = this.RefsChanged;
             if (handler != null)
@@ -137,7 +137,7 @@ namespace GitSharp
         }
 
         public event EventHandler<IndexChangedEventArgs> IndexChanged;
-        protected void OnIndexChanged()
+        internal void OnIndexChanged()
         {
             var handler = this.IndexChanged;
             if (handler != null)
@@ -149,7 +149,7 @@ namespace GitSharp
          * Create a new Git repository initializing the necessary files and
          * directories.
          *
-         * @throws IOException
+         * @
          */
         public void Create()
         {
@@ -219,7 +219,7 @@ namespace GitSharp
         //    if (idxList == null) return;
         //    foreach (FileInfo indexName in idxList)
         //    {
-        //        String n = indexName.FullName.Substring(0, indexName.FullName.Length - 4);
+        //        string n = indexName.FullName.Substring(0, indexName.FullName.Length - 4);
         //        FileInfo idxFile = new FileInfo(n + ".idx");
         //        FileInfo packFile = new FileInfo(n + ".pack");
 
@@ -252,7 +252,7 @@ namespace GitSharp
             {
                 using (StreamReader reader = altFile.OpenText())
                 {
-                    for (String alt = reader.ReadLine(); alt != null; alt = reader.ReadLine())
+                    for (string alt = reader.ReadLine(); alt != null; alt = reader.ReadLine())
                     {
                         ReadObjectsDirs(Path.Combine(objectsDir, alt), ref ret);
                     }
@@ -306,7 +306,7 @@ namespace GitSharp
          * 
          * @return a {@link ObjectLoader} for accessing the data of the named
          *         object, or null if the object does not exist.
-         * @throws IOException
+         * @
          */
         public ObjectLoader OpenObject(AnyObjectId id)
         {
@@ -330,7 +330,7 @@ namespace GitSharp
          * 
          * @return a {@link ObjectLoader} for accessing the data of the named
          *         object, or null if the object does not exist.
-         * @throws IOException
+         * @
          */
         public ObjectLoader openObject(WindowCursor curs, AnyObjectId id)
         {
@@ -347,7 +347,7 @@ namespace GitSharp
         // *            temporary working space associated with the calling thread.
         // * @return collection of loaders for this object, from all packs containing
         // *         this object
-        // * @throws IOException
+        // * @
         // */
         //public ICollection<PackedObjectLoader> OpenObjectInAllPacks(AnyObjectId objectId, WindowCursor cursor)
         //{
@@ -366,7 +366,7 @@ namespace GitSharp
         // *            loaders from all packs containing specified object
         // * @param curs
         // *            temporary working space associated with the calling thread.
-        // * @throws IOException
+        // * @
         // */
 
         //private void OpenObjectInAllPacks(AnyObjectId objectId, ICollection<PackedObjectLoader> resultLoaders, WindowCursor cursor)
@@ -384,7 +384,7 @@ namespace GitSharp
          * @param id
          *            SHA'1 of a blob
          * @return an {@link ObjectLoader} for accessing the data of a named blob
-         * @throws IOException
+         * @
          */
         public ObjectLoader OpenBlob(ObjectId id)
         {
@@ -394,7 +394,7 @@ namespace GitSharp
          * @param id
          *            SHA'1 of a tree
          * @return an {@link ObjectLoader} for accessing the data of a named tree
-         * @throws IOException
+         * @
          */
         public ObjectLoader OpenTree(ObjectId id)
         {
@@ -407,9 +407,9 @@ namespace GitSharp
          *
          * @param revstr a reference to a git commit object
          * @return a Commit named by the specified string
-         * @throws IOException for I/O error or unexpected object type.
+         * @ for I/O error or unexpected object type.
          *
-         * @see #resolve(String)
+         * @see #resolve(string)
          */
         public Commit MapCommit(string resolveString)
         {
@@ -420,7 +420,7 @@ namespace GitSharp
          * Access a Commit by SHA'1 id.
          * @param id
          * @return Commit or null
-         * @throws IOException for I/O error or unexpected object type.
+         * @ for I/O error or unexpected object type.
          */
         public Commit MapCommit(ObjectId id)
         {
@@ -439,7 +439,7 @@ namespace GitSharp
          *            SHA-1 of object to read
          * @param refName optional, only relevant for simple tags
          * @return The Git object if found or null
-         * @throws IOException
+         * @
          */
         public object MapObject(ObjectId id, string refName)
         {
@@ -476,9 +476,9 @@ namespace GitSharp
          *
          * @param revstr a reference to a git commit object
          * @return a Tree named by the specified string
-         * @throws IOException
+         * @
          *
-         * @see #resolve(String)
+         * @see #resolve(string)
          */
         public Tree MapTree(string revstr)
         {
@@ -489,7 +489,7 @@ namespace GitSharp
          * Access a Tree by SHA'1 id.
          * @param id
          * @return Tree or null
-         * @throws IOException for I/O error or unexpected object type.
+         * @ for I/O error or unexpected object type.
          */
         public Tree MapTree(ObjectId id)
         {
@@ -521,9 +521,9 @@ namespace GitSharp
          *
          * @param revstr
          * @return a Tag or null
-         * @throws IOException on I/O error or unexpected type
+         * @ on I/O error or unexpected type
          */
-        public Tag MapTag(String revstr)
+        public Tag MapTag(string revstr)
         {
             ObjectId id = Resolve(revstr);
             return id != null ? MapTag(revstr, id) : null;
@@ -533,9 +533,9 @@ namespace GitSharp
          * @param refName
          * @param id
          * @return Commit or null
-         * @throws IOException for I/O error or unexpected object type.
+         * @ for I/O error or unexpected object type.
          */
-        public Tag MapTag(String refName, ObjectId id)
+        public Tag MapTag(string refName, ObjectId id)
         {
             ObjectLoader or = OpenObject(id);
             if (or == null)
@@ -553,11 +553,11 @@ namespace GitSharp
          * @return an update command. The caller must finish populating this command
          *         and then invoke one of the update methods to actually make a
          *         change.
-         * @throws IOException
+         * @
          *             a symbolic ref was passed in and could not be resolved back
          *             to the base ref, as the symbolic ref could not be read.
          */
-        public RefUpdate UpdateRef(String refName)
+        public RefUpdate UpdateRef(string refName)
         {
             return _refDb.NewUpdate(refName);
         }
@@ -585,12 +585,12 @@ namespace GitSharp
          *
          * @param revstr A git object references expression
          * @return an ObjectId or null if revstr can't be resolved to any ObjectId
-         * @throws IOException on serious errors
+         * @ on serious errors
          */
         public ObjectId Resolve(string revstr)
         {
             char[] rev = revstr.ToCharArray();
-            Object oref = null;
+            object oref = null;
             ObjectId refId = null;
             for (int i = 0; i < rev.Length; ++i)
             {
@@ -599,7 +599,7 @@ namespace GitSharp
                     case '^':
                         if (refId == null)
                         {
-                            String refstr = new String(rev, 0, i);
+                            string refstr = new string(rev, 0, i);
                             refId = ResolveSimple(refstr);
                             if (refId == null)
                                 return null;
@@ -627,7 +627,7 @@ namespace GitSharp
                                         if (!Char.IsDigit(rev[j]))
                                             break;
                                     }
-                                    String parentnum = new String(rev, i + 1, j - i - 1);
+                                    string parentnum = new string(rev, i + 1, j - i - 1);
                                     int pnum = int.Parse(parentnum);
                                     if (pnum != 0)
                                         refId = ((Commit)oref).ParentIds[pnum - 1];
@@ -635,11 +635,11 @@ namespace GitSharp
                                     break;
                                 case '{':
                                     int k;
-                                    String item = null;
+                                    string item = null;
                                     for (k = i + 2; k < rev.Length; ++k)
                                     {
                                         if (rev[k] != '}') continue;
-                                        item = new String(rev, i + 2, k - i - 2);
+                                        item = new string(rev, i + 2, k - i - 2);
                                         break;
                                     }
                                     i = k;
@@ -718,7 +718,7 @@ namespace GitSharp
                     case '~':
                         if (oref == null)
                         {
-                            String refstr = new String(rev, 0, i);
+                            string refstr = new string(rev, 0, i);
                             refId = ResolveSimple(refstr);
                             oref = MapCommit(refId);
                         }
@@ -728,9 +728,9 @@ namespace GitSharp
                             if (!Char.IsDigit(rev[l]))
                                 break;
                         }
-                        String distnum = new String(rev, i + 1, l - i - 1);
+                        string distnum = new string(rev, i + 1, l - i - 1);
                         int dist = int.Parse(distnum);
-                        while (dist >= 0)
+                        while (dist > 0)
                         {
                             refId = ((Commit)oref).ParentIds[0];
                             oref = MapCommit(refId);
@@ -740,11 +740,11 @@ namespace GitSharp
                         break;
                     case '@':
                         int m;
-                        String time = null;
+                        string time = null;
                         for (m = i + 2; m < rev.Length; ++m)
                         {
                             if (rev[m] != '}') continue;
-                            time = new String(rev, i + 2, m - i - 2);
+                            time = new string(rev, i + 2, m - i - 2);
                             break;
                         }
                         if (time != null)
@@ -791,14 +791,14 @@ namespace GitSharp
         // *            path of the pack file to open.
         // * @param idx
         // *            path of the corresponding index file.
-        // * @throws IOException
+        // * @
         // *             index file could not be opened, read, or is not recognized as
         // *             a Git pack file index.
         // */
         //public void OpenPack(FileInfo pack, FileInfo idx)
         //{
-        //    String p = pack.Name;
-        //    String i = idx.Name;
+        //    string p = pack.Name;
+        //    string i = idx.Name;
         //    if (p.Length != 50 || !p.StartsWith("pack-") || !p.EndsWith(".pack"))
         //        throw new ArgumentException("Not a valid pack " + pack);
         //    if (i.Length != 49 || !i.StartsWith("pack-") || !i.EndsWith(".idx"))
@@ -815,9 +815,9 @@ namespace GitSharp
          *
          * @param name symref name
          * @param target pointed to ref
-         * @throws IOException
+         * @
          */
-        public void WriteSymref(String name, String target)
+        public void WriteSymref(string name, string target)
         {
             _refDb.Link(name, target);
         }
@@ -825,7 +825,7 @@ namespace GitSharp
         private GitIndex _index;
         /**
          * @return a representation of the index associated with this repo
-         * @throws IOException
+         * @
          */
         public GitIndex Index
         {
@@ -865,15 +865,15 @@ namespace GitSharp
             return bytes;
         }
         /**
-         * String work dir and return normalized repository path
+         * string work dir and return normalized repository path
          *
          * @param wd Work dir
          * @param f File whose path shall be stripp off it's workdir
          * @return normalized repository relative path
          */
-        public static String StripWorkDir(FileSystemInfo wd, FileSystemInfo f)
+        public static string StripWorkDir(FileSystemInfo wd, FileSystemInfo f)
         {
-            String relName = f.FullName.Substring(wd.FullName.Length + 1);
+            string relName = f.FullName.Substring(wd.FullName.Length + 1);
             relName = relName.Replace(Path.PathSeparator, '/');
             return relName;
         }
@@ -998,7 +998,7 @@ namespace GitSharp
          *
          * @return true if refName is a valid ref name
          */
-        public static bool IsValidRefName(String refName)
+        public static bool IsValidRefName(string refName)
         {
             int len = refName.Length;
             char p = '\0';
@@ -1040,6 +1040,12 @@ namespace GitSharp
         public Commit OpenCommit(ObjectId id)
         {
             return MapCommit(id);
+        }
+
+        
+        internal void fireRefsMaybeChanged() // [henon] todo: remove later
+        {
+            OnRefsChanged();
         }
     }
 }

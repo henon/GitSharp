@@ -177,7 +177,7 @@ namespace GitSharp.Util
          *            number of bytes that must be read.
          * @throws EOFException
          *             the stream ended before dst was fully populated.
-         * @throws IOException
+         * @
          *             there was an error reading from the stream.
          */
         public static void ReadFully(Stream fd, long pos, byte[] dst, int off, int len)

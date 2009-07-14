@@ -3,6 +3,7 @@
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2006, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -47,9 +48,59 @@ using GitSharp.Util;
 
 namespace GitSharp
 {
-    [Complete]
+
     public class RefLogWriter
     {
+       public static void append(RefUpdate u, String msg)
+        {
+            ObjectId oldId = u.OldObjectId;
+            ObjectId newId = u.NewObjectId;
+            Repository db = u.Repository;
+            PersonIdent ident = u.RefLogIdent;
+
+            appendOneRecord(oldId, newId, ident, msg, db, u.Name);
+        }
+
+        private static void appendOneRecord(ObjectId oldId, ObjectId newId, PersonIdent ident, String msg, Repository db, String refName)
+        {
+            if (ident == null)
+                ident = new PersonIdent(db);
+            else
+                ident = new PersonIdent(ident);
+
+            StringBuilder r = new StringBuilder();
+            r.Append(ObjectId.ToString(oldId));
+            r.Append(' ');
+            r.Append(ObjectId.ToString(newId));
+            r.Append(' ');
+            r.Append(ident.ToExternalString());
+            r.Append('\t');
+            r.Append(msg);
+            r.Append('\n');
+
+            byte[] rec = Constants.encode(r.ToString());
+            var logdir = new DirectoryInfo(db.Directory + "/" + Constants.LOGS);
+            var reflog = new DirectoryInfo(logdir + "/" + refName);
+            var refdir = reflog.Parent;
+
+            refdir.Create();
+            if (!refdir.Exists)
+                throw new IOException("Cannot create directory " + refdir);
+
+            using (var @out = new FileStream(reflog.FullName, System.IO.FileMode.OpenOrCreate, FileAccess.Write))
+            {
+                try
+                {
+                    @out.Write(rec, 0, rec.Length);
+                }
+                finally
+                {
+                    @out.Close();
+                }
+            }
+        }
+
+
         /**
          * Writes reflog entry for ref specified by refName
          * 
@@ -64,9 +115,9 @@ namespace GitSharp
          * @param refName
          *            full ref name         
          */
-        public static void WriteReflog(Repository repo, ObjectId oldCommit, ObjectId commit, String message, String refName)
+        public static void WriteReflog(Repository repo, ObjectId oldCommit, ObjectId commit, string message, string refName)
         {
-            String entry = BuildReflogString(repo, oldCommit, commit, message);
+            string entry = BuildReflogString(repo, oldCommit, commit, message);
 
             DirectoryInfo directory = repo.Directory;
 
@@ -88,20 +139,19 @@ namespace GitSharp
             writer.Close();
         }
 
-        private static String BuildReflogString(Repository repo, ObjectId oldCommit, ObjectId commit, String message)
+        private static string BuildReflogString(Repository repo, ObjectId oldCommit, ObjectId commit, string message)
         {
             PersonIdent me = new PersonIdent(repo);
-            String initial = "";
+            string initial = "";
             if (oldCommit == null)
             {
                 oldCommit = ObjectId.ZeroId;
                 initial = " (initial)";
             }
-            String s = oldCommit.ToString() + " " + commit.ToString() + " "
+            string s = oldCommit.ToString() + " " + commit.ToString() + " "
                     + me.ToExternalString() + "\t" + message + initial;
             return s;
         }
-
     }
 
 }

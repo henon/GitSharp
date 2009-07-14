@@ -120,7 +120,7 @@ namespace GitSharp
         public static readonly string[] RefSearchPaths = { "", Refs, RefsTags, RefsHeads, RefsRemotes };
 
         /** Hash function used natively by Git for all objects. */
-        private static string HASH_FUNCTION = "SHA-1";
+        //private static string HASH_FUNCTION = "SHA-1"; // [henon] we don't use it anyway
 
         /** Length of an object hash. */
         public static int OBJECT_ID_LENGTH = 20;
@@ -465,7 +465,7 @@ namespace GitSharp
                         throw new CorruptObjectException(id, "invalid type");
                 }
             }
-            catch (IndexOutOfRangeException bad)
+            catch (IndexOutOfRangeException)
             {
                 throw new CorruptObjectException(id, "invalid type");
             }
@@ -491,7 +491,7 @@ namespace GitSharp
          * @param s
          *            the string to convert. Must not contain any characters over
          *            127 (outside of 7-bit ASCII).
-         * @return a byte array of the same length as the input string, holding the
+         * @return a byte array of the same Length as the input string, holding the
          *         same characters, in the same order.
          * @throws ArgumentException
          *             the input string contains one or more characters outside of
@@ -527,7 +527,7 @@ namespace GitSharp
             //if (bb.hasArray() && bb.arrayOffset() == 0)
             //{
             //    byte[] arr = bb.array();
-            //    if (arr.length == len)
+            //    if (arr.Length == len)
             //        return arr;
             //}
 

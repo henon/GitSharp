@@ -71,9 +71,9 @@ namespace GitSharp
          *            the Length of the string).
          * @return the converted object id.
          */
-        public static AbbreviatedObjectId fromString(byte[] buf, int offset, int end)
+        public static AbbreviatedObjectId FromString(byte[] buf, int offset, int end)
         {
-            if (end - offset > AnyObjectId.Constants.StringLength)
+            if (end - offset > AnyObjectId.StringLength)
                 throw new ArgumentException("Invalid id");
             return fromHexString(buf, offset, end);
         }
@@ -85,9 +85,9 @@ namespace GitSharp
          *            the string to read from. Must be &lt;= 40 characters.
          * @return the converted object id.
          */
-        public static AbbreviatedObjectId fromString(string str)
+        public static AbbreviatedObjectId FromString(string str)
         {
-            if (str.Length > AnyObjectId.Constants.StringLength)
+            if (str.Length > AnyObjectId.StringLength)
                 throw new ArgumentException("Invalid id: " + str);
             byte[] b = Constants.encodeASCII(str);
             return fromHexString(b, 0, b.Length);
@@ -104,7 +104,7 @@ namespace GitSharp
                 int e = hexUInt32(bs, ptr + 32, end);
                 return new AbbreviatedObjectId(end - ptr, a, b, c, d, e);
             }
-            catch (IndexOutOfRangeException e1)
+            catch (IndexOutOfRangeException)
             {
                 string str = Encoding.GetEncoding("US-ASCII").GetString(bs, ptr, end - ptr);
                 throw new ArgumentException("Invalid id: " + str);
@@ -129,7 +129,7 @@ namespace GitSharp
             return r << (8 - n) * 4;
         }
 
-        static int mask(int nibbles, int word, int v)
+        public static int Mask(int nibbles, int word, int v)
         {
 
             int b = (word - 1) * 8;
@@ -164,7 +164,7 @@ namespace GitSharp
 
         int w5;
 
-        AbbreviatedObjectId(int n, int new_1, int new_2, int new_3, int new_4, int new_5)
+        public AbbreviatedObjectId(int n, int new_1, int new_2, int new_3, int new_4, int new_5)
         {
             nibbles = n;
             w1 = new_1;
@@ -186,11 +186,11 @@ namespace GitSharp
         /** @return true if this ObjectId is actually a complete id. */
         public bool isComplete()
         {
-            return Length == AnyObjectId.Constants.ObjectIdLength * 2;
+            return Length == AnyObjectId.ObjectIdLength * 2;
         }
 
         /** @return a complete ObjectId; null if {@link #isComplete()} is false */
-        public ObjectId toObjectId()
+        public ObjectId ToObjectId()
         {
             return isComplete() ? new ObjectId(w1, w2, w3, w4, w5) : null;
         }
@@ -231,7 +231,7 @@ namespace GitSharp
 
         private int mask(int word, int v)
         {
-            return mask(nibbles, word, v);
+            return Mask(nibbles, word, v);
         }
 
 
@@ -241,7 +241,7 @@ namespace GitSharp
         }
 
 
-        public bool equals(Object o)
+        public bool Equals(object o)
         {
             if (o is AbbreviatedObjectId)
             {
@@ -257,7 +257,7 @@ namespace GitSharp
          */
         public string name()
         {
-            char[] b = new char[AnyObjectId.Constants.StringLength];
+            char[] b = new char[AnyObjectId.StringLength];
 
             Hex.FillHexCharArray(b, 0, w1);
             if (nibbles <= 8)
@@ -280,7 +280,7 @@ namespace GitSharp
         }
 
 
-        public string toString()
+        public string ToString()
         {
             return "AbbreviatedObjectId[" + name() + "]";
         }

@@ -159,7 +159,7 @@ namespace GitSharp
             return tryAgain1() && hasObject1(objectId);
         }
 
-        private bool hasObjectImpl2(String objectId)
+        private bool hasObjectImpl2(string objectId)
         {
             if (hasObject2(objectId))
             {
@@ -191,7 +191,7 @@ namespace GitSharp
          *            identity of the object to test for existence of.
          * @return true if the specified object is stored in this database.
          */
-        public virtual bool hasObject2(String objectName)
+        public virtual bool hasObject2(string objectName)
         {
             // Assume the search took place during hasObject1.
             return false;
@@ -260,7 +260,7 @@ namespace GitSharp
         }
 
         private ObjectLoader openObjectImpl2(WindowCursor curs,
-                 String objectName, AnyObjectId objectId)
+                 string objectName, AnyObjectId objectId)
         {
             ObjectLoader ldr;
 
@@ -307,7 +307,7 @@ namespace GitSharp
          *         object, or null if the object does not exist.
          * @
          */
-        public virtual ObjectLoader openObject2(WindowCursor curs, String objectName,
+        public virtual ObjectLoader openObject2(WindowCursor curs, string objectName,
                 AnyObjectId objectId)
         {
             // Assume the search took place during openObject1.
@@ -383,7 +383,7 @@ namespace GitSharp
                         {
                             r = loadAlternates();
                         }
-                        catch (IOException e)
+                        catch (IOException)
                         {
                             r = NO_ALTERNATES;
                         }

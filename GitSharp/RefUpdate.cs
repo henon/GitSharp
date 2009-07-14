@@ -42,6 +42,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using GitSharp.RevWalk;
+using GitSharp.Exceptions;
 
 namespace GitSharp
 {
@@ -50,11 +52,11 @@ namespace GitSharp
         public enum RefUpdateResult
         {
             /// <summary>
-            /// The ref update/delete has not been attempted by the caller.
+            /// The ref update/Delete has not been attempted by the caller.
             /// </summary>
             NotAttempted,
             /// <summary>
-            /// The ref could not be locked for update/delete.
+            /// The ref could not be locked for update/Delete.
             /// This is generally a transient failure and is usually caused by
             /// another process trying to access the ref at the same time as this
             /// process was trying to update it. It is possible a future operation
@@ -65,11 +67,11 @@ namespace GitSharp
             /// Same value already stored.
             /// 
             /// Both the old value and the new value are identical. No change was
-            /// necessary for an update. For delete the branch is removed.
+            /// necessary for an update. For Delete the branch is removed.
             /// </summary>
             NoChange,
             /// <summary>
-            /// The ref was created locally for an update, but ignored for delete.
+            /// The ref was created locally for an update, but ignored for Delete.
             /// <p>
             /// The ref did not exist when the update started, but it was created
             /// successfully with the new value.
@@ -96,12 +98,12 @@ namespace GitSharp
             /// <p>
             /// The tracking ref already existed but its old value was not fully
             /// merged into the new value. The configuration did not allow a forced
-            /// update/delete to take place, so ref still contains the old value. No
+            /// update/Delete to take place, so ref still contains the old value. No
             /// previous history was lost.
             /// </summary>
             Rejected,
             /// <summary>
-            /// Rejected because trying to delete the current branch.
+            /// Rejected because trying to Delete the current branch.
             /// <p>
             /// Has no meaning for update.
             /// </summary>
@@ -128,12 +130,12 @@ namespace GitSharp
         private ObjectId newValue;
 
         /** Message the caller wants included in the reflog. */
-        private String refLogMessage;
+        private string refLogMessage;
 
         /** Should the Result value be appended to {@link #refLogMessage}. */
         private bool refLogIncludeResult;
 
-        /** If non-null, the value {@link #oldValue} must have to continue. */
+        /** If non-null, the value {@link #OldObjectId} must have to continue. */
         private ObjectId expValue;
 
         private Ref _ref;
@@ -232,22 +234,19 @@ namespace GitSharp
          * </pre>
          * 
          * @return the result status of the update.
-         * @throws IOException
+         * @
          *             an unexpected IO error occurred while writing changes.
          */
         public RefUpdateResult Update()
         {
-            throw new NotImplementedException();
-            //return Update(new RevWalk(db.Repository));
+            return update(new RevWalk.RevWalk(db.Repository));
         }
 
-
-        public RefUpdateResult Delete()
+        public RefUpdateResult Update(RevWalk.RevWalk walk)
         {
-            throw new NotImplementedException();
+            return update(walk);
         }
 
-#if false
         /**
          * Gracefully update the ref to the new value.
          * <p>
@@ -257,24 +256,24 @@ namespace GitSharp
          *            a RevWalk instance this update command can borrow to perform
          *            the merge test. The walk will be reset to perform the test.
          * @return the result status of the update.
-         * @throws IOException
+         * @
          *             an unexpected IO error occurred while writing changes.
          */
-        public RefUpdateResult update(RevWalk walk)
+        public RefUpdateResult update(RevWalk.RevWalk walk)
         {
             RequireCanDoUpdate();
             try
             {
-                return result = updateImpl(walk, new UpdateStore());
+                return Result = updateImpl(walk, new UpdateStore(this));
             }
             catch (IOException x)
             {
-                result = RefUpdateResult.IOFailure;
+                Result = RefUpdateResult.IOFailure;
                 throw;
             }
         }
 
-        private RefUpdateResult updateImpl(RevWalk walk, Store store)
+        private RefUpdateResult updateImpl(RevWalk.RevWalk walk, StoreBase store)
         {
             LockFile @lock;
             RevObject newObj;
@@ -285,30 +284,30 @@ namespace GitSharp
                 return RefUpdateResult.LockFailure;
             try
             {
-                oldValue = db.IdOf(Name);
+                OldObjectId = db.IdOf(Name);
                 if (expValue != null)
                 {
                     ObjectId o;
-                    o = oldValue != null ? oldValue : ObjectId.ZeroId;
-                    if (!expValue.equals(o))
+                    o = OldObjectId != null ? OldObjectId : ObjectId.ZeroId;
+                    if (!expValue.Equals(o))
                         return RefUpdateResult.LockFailure;
                 }
-                if (oldValue == null)
-                    return store.store(@lock, RefUpdateResult.New);
+                if (OldObjectId == null)
+                    return store.Store(@lock, RefUpdateResult.New);
 
                 newObj = safeParse(walk, newValue);
-                oldObj = safeParse(walk, oldValue);
+                oldObj = safeParse(walk, OldObjectId);
                 if (newObj == oldObj)
-                    return store.store(@lock, RefUpdateResult.NoChange);
+                    return store.Store(@lock, RefUpdateResult.NoChange);
 
                 if (newObj is RevCommit && oldObj is RevCommit)
                 {
                     if (walk.isMergedInto((RevCommit)oldObj, (RevCommit)newObj))
-                        return store.store(@lock, RefUpdateResult.FastForward);
+                        return store.Store(@lock, RefUpdateResult.FastForward);
                 }
 
-                if (isForceUpdate())
-                    return store.store(@lock, RefUpdateResult.Forced);
+                if (IsForceUpdate)
+                    return store.Store(@lock, RefUpdateResult.Forced);
                 return RefUpdateResult.Rejected;
             }
             finally
@@ -316,18 +315,162 @@ namespace GitSharp
                 @lock.Unlock();
             }
         }
-#endif
+
+
+        /**
+         * Delete the ref.
+         * <p>
+         * This is the same as:
+         * 
+         * <pre>
+         * return Delete(new RevWalk(repository));
+         * </pre>
+         * 
+         * @return the result status of the Delete.
+         * @
+         */
+        public RefUpdateResult Delete()
+        {
+            return Delete(new RevWalk.RevWalk(db.Repository));
+        }
+
+        /**
+         * Delete the ref.
+         * 
+         * @param walk
+         *            a RevWalk instance this Delete command can borrow to perform
+         *            the merge test. The walk will be reset to perform the test.
+         * @return the result status of the Delete.
+         * @
+         */
+        public RefUpdateResult Delete(RevWalk.RevWalk walk)
+        {
+            if (Name.StartsWith(Constants.R_HEADS))
+            {
+                Ref head = db.ReadRef(Constants.HEAD);
+                if (head != null && Name.Equals(head.Name))
+                    return Result = RefUpdateResult.RejectedCurrentBranch;
+            }
+
+            try
+            {
+                return Result = updateImpl(walk, new DeleteStore(this));
+            }
+            catch (IOException x)
+            {
+                Result = RefUpdateResult.IOFailure;
+                throw;
+            }
+        }
+
+        private static RevObject safeParse(RevWalk.RevWalk rw, AnyObjectId id)
+        {
+            try
+            {
+                return id != null ? rw.parseAny(id) : null;
+            }
+            catch (MissingObjectException)
+            {
+                // We can expect some objects to be missing, like if we are
+                // trying to force a deletion of a branch and the object it
+                // points to has been pruned from the database due to freak
+                // corruption accidents (it happens with 'git new-work-dir').
+                //
+                return null;
+            }
+        }
+
+        private RefUpdateResult updateStore(LockFile @lock, RefUpdateResult status)
+        {
+            if (status == RefUpdateResult.NoChange)
+                return status;
+            @lock.NeedStatInformation=(true);
+            @lock.Write(newValue);
+            string msg = GetRefLogMessage();
+            if (msg != null && refLogIncludeResult)
+            {
+                if (status == RefUpdateResult.Forced)
+                    msg += ": forced-update";
+                else if (status == RefUpdateResult.FastForward)
+                    msg += ": fast forward";
+                else if (status == RefUpdateResult.New)
+                    msg += ": created";
+            }
+            RefLogWriter.append(this, msg);
+            if (!@lock.Commit())
+                return RefUpdateResult.LockFailure;
+            db.stored(this._ref.OriginalName, _ref.Name, newValue, @lock.CommitLastModified);
+            return status;
+        }
 
         private abstract class StoreBase
         {
+            protected RefUpdate ref_update;
+
+            public StoreBase(RefUpdate ref_update)
+            {
+                this.ref_update = ref_update;
+            }
+
             public abstract RefUpdateResult Store(LockFile lockFile, RefUpdateResult status);
         }
 
         private class UpdateStore : StoreBase
         {
+            public UpdateStore(RefUpdate ref_update) : base(ref_update) { }
+
             public override RefUpdateResult Store(LockFile lockFile, RefUpdateResult status)
             {
-                throw new NotImplementedException();
+                return ref_update.updateStore(lockFile, status);
+            }
+        }
+
+        private class DeleteStore : StoreBase
+        {
+            public DeleteStore(RefUpdate ref_update) : base(ref_update) { }
+
+            public override RefUpdateResult Store(LockFile @lock, RefUpdateResult status)
+            {
+                GitSharp.Ref.Storage storage = ref_update._ref.StorageFormat;
+                if (storage == GitSharp.Ref.Storage.New)
+                    return status;
+                if (storage.IsPacked)
+                    ref_update.db.removePackedRef(ref_update._ref.Name);
+
+                int levels = Count(ref_update._ref.Name, '/') - 2;
+
+                // Delete logs _before_ unlocking
+                DirectoryInfo gitDir = ref_update.db.Repository.Directory;
+                DirectoryInfo logDir = new DirectoryInfo(gitDir+"/"+ Constants.LOGS);
+                deleteFileAndEmptyDir(new FileInfo(logDir + "/" + ref_update._ref.Name), levels);
+
+                // We have to unlock before (maybe) deleting the parent directories
+                @lock.Unlock();
+                if (storage.IsLoose)
+                    deleteFileAndEmptyDir(ref_update.looseFile, levels);
+                return status;
+            }
+
+            private void deleteFileAndEmptyDir(FileInfo file, int depth)
+            {
+                if (file.Exists)
+                {
+                    file.Delete();
+                    if (file.Exists)
+                        throw new IOException("File cannot be deleted: " + file);
+                    deleteEmptyDir(file.Directory, depth);
+                }
+            }
+
+            private void deleteEmptyDir(DirectoryInfo dir, int depth)
+            {
+                for (; depth > 0 && dir != null; depth--)
+                {
+                    dir.Delete();
+                    if (dir.Exists)
+                        break;
+                    dir = dir.Parent;
+                }
             }
         }
 

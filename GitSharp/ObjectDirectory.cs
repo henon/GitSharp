@@ -187,7 +187,7 @@ namespace GitSharp
                         return true;
                     }
                 }
-                catch (IOException e)
+                catch (IOException)
                 {
                     // The hasObject call should have only touched the index,
                     // so any failure here indicates the index is unreadable
@@ -218,14 +218,14 @@ namespace GitSharp
                             return ldr;
                         }
                     }
-                    catch (PackMismatchException e)
+                    catch (PackMismatchException)
                     {
                         // Pack was modified; refresh the entire pack list.
                         //
                         pList = scanPacks(pList);
                         goto SEARCH;
                     }
-                    catch (IOException e)
+                    catch (IOException)
                     {
                         // Assume the pack is corrupted.
                         //
@@ -253,14 +253,14 @@ namespace GitSharp
                             @out.Add(ldr);
                         }
                     }
-                    catch (PackMismatchException e)
+                    catch (PackMismatchException)
                     {
                         // Pack was modified; refresh the entire pack list.
                         //
                         pList = scanPacks(pList);
                         goto SEARCH;
                     }
-                    catch (IOException e)
+                    catch (IOException)
                     {
                         // Assume the pack is corrupted.
                         //

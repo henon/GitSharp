@@ -290,7 +290,7 @@ namespace GitSharp
             {
                 this.File = file;
                 this.FileStream = fs;
-                this.FileStream.Lock(0, fs.Length);
+                this.FileStream.Lock(0, long.MaxValue);
                 this.Locked = true;
             }
 
@@ -321,7 +321,7 @@ namespace GitSharp
                     return;
                 try
                 {
-                    this.FileStream.Unlock(0, this.FileStream.Length);
+                    this.FileStream.Unlock(0, long.MaxValue);
 #if DEBUG
                     GC.SuppressFinalize(this); // [henon] disarm lock-release checker
 #endif
@@ -330,13 +330,14 @@ namespace GitSharp
                 {
                     // unlocking went wrong
                     Debug.WriteLine(GetType().Name + ": tried to unlock an unlocked filelock "+File);
+                    throw;
                 }
                 this.Locked = false;
                 Dispose();
             }
 
 #if DEBUG
-            // [henon] this implements a debug mode warning if the filelock has not been disposed properly
+            // [henon] this : a debug mode warning if the filelock has not been disposed properly
             ~FileLock()
             {
                 Debug.WriteLine(GetType().Name + " has not been properly disposed: " + File);

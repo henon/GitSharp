@@ -58,7 +58,7 @@ namespace GitSharp.Exceptions
         public ObjectWritingException() { }
         public ObjectWritingException(string message) : base(message) { }
         public ObjectWritingException(string message, Exception inner) : base(message, inner) { }
-        protected ObjectWritingException(
+        internal ObjectWritingException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }

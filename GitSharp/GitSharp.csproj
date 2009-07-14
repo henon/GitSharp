@@ -208,6 +208,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DirectoryCache\DirCache.cs" />
+    <Compile Include="DirectoryCache\DirCacheEntry.cs" />
     <Compile Include="Diff\Edit.cs" />
     <Compile Include="Diff\EditList.cs" />
     <Compile Include="Diff\RawText.cs" />

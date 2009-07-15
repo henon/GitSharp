@@ -96,7 +96,7 @@ namespace GitSharp
             catch (IOException dfe)
             {
                 CorruptObjectException coe;
-                coe = new CorruptObjectException("Object at " + dataOffset + " in "
+                coe = new CorruptObjectException("object at " + dataOffset + " in "
                         + pack.File.FullName + " has bad zlib stream", dfe);
                 throw coe;
             }

@@ -75,8 +75,8 @@ namespace GitSharp
         public PersonIdent(Repository repo)
         {
             RepositoryConfig config = repo.Config;
-            String username = config.GetString("user", null, "name");
-            String email = config.GetString("user", null, "email");
+            string username = config.GetString("user", null, "name");
+            string email = config.GetString("user", null, "email");
             this.Name = username;
             this.EmailAddress = email;
             this.when_time = DateTimeOffset.Now;
@@ -135,7 +135,7 @@ namespace GitSharp
             }
             else
             {
-                String tzHoursStr = str.Slice(sp + 1, sp + 4).Trim();
+                string tzHoursStr = str.Slice(sp + 1, sp + 4).Trim();
                 int tzHours;
                 if (tzHoursStr[0] == '+')
                 {

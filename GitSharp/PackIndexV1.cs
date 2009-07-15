@@ -76,7 +76,7 @@ namespace GitSharp
 
                 if (n <= 0) continue;
 
-                idxdata[k] = new byte[n * (AnyObjectId.Constants.ObjectIdLength + 4)];
+                idxdata[k] = new byte[n * (AnyObjectId.ObjectIdLength + 4)];
                 NB.ReadFully(fd, idxdata[k], 0, idxdata[k].Length);
             }
             ObjectCount = idxHeader[255];
@@ -90,7 +90,7 @@ namespace GitSharp
             return new IndexV1Enumerator(this);
         }
 
-        public override long ObjectCount { get; protected set; }
+        public override long ObjectCount { get; internal set; }
 
         public override long Offset64Count
         {
@@ -128,7 +128,7 @@ namespace GitSharp
 
             lbase = levelOne > 0 ? idxHeader[levelOne - 1] : 0;
             int p = (int)(nthPosition - lbase);
-            int dataIdx = ((4 + AnyObjectId.Constants.ObjectIdLength) * p) + 4;
+            int dataIdx = ((4 + AnyObjectId.ObjectIdLength) * p) + 4;
             return ObjectId.FromRaw(idxdata[levelOne], dataIdx);
         }
 
@@ -138,12 +138,12 @@ namespace GitSharp
             byte[] data = idxdata[levelOne];
             if (data == null)
                 return -1;
-            int high = data.Length / (4 + AnyObjectId.Constants.ObjectIdLength);
+            int high = data.Length / (4 + AnyObjectId.ObjectIdLength);
             int low = 0;
             do
             {
                 int mid = (low + high) / 2;
-                int pos = ((4 + AnyObjectId.Constants.ObjectIdLength) * mid) + 4;
+                int pos = ((4 + AnyObjectId.ObjectIdLength) * mid) + 4;
                 int cmp = objId.CompareTo(data, pos);
                 if (cmp < 0)
                     high = mid;
@@ -200,7 +200,7 @@ namespace GitSharp
                         long offset = NB.DecodeUInt32(_index.idxdata[levelOne], levelTwo);
                         Current.Offset = offset;
                         Current.FromRaw(_index.idxdata[levelOne], levelTwo + 4);
-                        levelTwo += AnyObjectId.Constants.ObjectIdLength + 4;
+                        levelTwo += AnyObjectId.ObjectIdLength + 4;
                         returnedNumber++;
                         return true;
                     }

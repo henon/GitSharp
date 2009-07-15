@@ -245,23 +245,18 @@ namespace GitSharp
                             case '\n':
                                 continue;
                             case 't':
-                                r.Read();
                                 value.Append('\t');
                                 continue;
                             case 'b':
-                                r.Read();
                                 value.Append('\b');
                                 continue;
                             case 'n':
-                                r.Read();
                                 value.Append('\n');
                                 continue;
                             case '\\':
-                                r.Read();
                                 value.Append('\\');
                                 continue;
                             case '"':
-                                r.Read();
                                 value.Append('"');
                                 continue;
                             default:
@@ -409,6 +404,20 @@ namespace GitSharp
             _byName = new Dictionary<string, object>();
         }
 
+        public List<string> GetSubsections(string section)
+        {
+            List<string> result = new List<string>();
+
+            foreach (Entry e in _entries)
+            {
+                if (section.Equals(e.Base, StringComparison.InvariantCultureIgnoreCase) && e.ExtendedBase != null)
+                    result.Add(e.ExtendedBase);
+            }
+            if (BaseConfig != null)
+                result.AddRange(BaseConfig.GetSubsections(section));
+            return result;
+        }
+
         public void Load()
         {
             Clear();
@@ -530,7 +539,7 @@ namespace GitSharp
             Add(e);
 
             this.Core = new CoreConfig(this);
-            _readFile = true; 
+            _readFile = true;
         }
 
         private void Add(Entry e)
@@ -549,7 +558,7 @@ namespace GitSharp
                 {
                     string n = e.Name.ToLower();
                     string key = group + "." + n;
-                    Object o = _byName.GetValue(key);
+                    object o = _byName.GetValue(key);
                     if (o == null)
                     {
                         _byName.AddOrReplace(key, e);
@@ -644,7 +653,7 @@ namespace GitSharp
                     }
                 }
             }
-            if (File.Exists( tmp.FullName + ".lock"))
+            if (File.Exists(tmp.FullName + ".lock"))
             {
                 try
                 {
@@ -721,7 +730,7 @@ namespace GitSharp
             else if ("no".Equals(n) || "false".Equals(n) || "0".Equals(n))
                 return false;
             else
-                throw new ArgumentException(string.Format("Invalid boolean value: {0}.{1} = {2}", section, name, n));
+                throw new ArgumentException(string.Format("Invalid bool value: {0}.{1} = {2}", section, name, n));
 
         }
 
@@ -743,7 +752,7 @@ namespace GitSharp
 
         public string[] GetStringList(string section, string subsection, string name)
         {
-            Object o = GetRawEntry(section, subsection, name);
+            object o = GetRawEntry(section, subsection, name);
             if (o is List<Entry>)
             {
                 List<Entry> lst = (List<Entry>)o;
@@ -778,6 +787,11 @@ namespace GitSharp
         public void UnsetString(string section, string subsection, string name)
         {
             SetStringList(section, subsection, name, new List<string>());
+        }
+
+        public void SetBoolean(string section, string subsection, string name, bool value)
+        {
+            SetString(section, subsection, name, value ? "true" : "false");
         }
 
         public void SetStringList(string section, string subsection, string name, List<string> values)
@@ -905,7 +919,7 @@ namespace GitSharp
                 }
                 catch (IOException e)
                 {
-                //    Debugger.Break();
+                    //    Debugger.Break();
                     Console.WriteLine(e.Message);
                 }
             }

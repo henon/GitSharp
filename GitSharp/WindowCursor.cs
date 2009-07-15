@@ -73,15 +73,15 @@ namespace GitSharp
          * @return number of bytes actually copied; this may be less than
          *         <code>cnt</code> if <code>cnt</code> exceeded the number of
          *         bytes available.
-         * @throws IOException
+         * @
          *             this cursor does not match the provider or id and the proper
          *             window could not be acquired through the provider's cache.
          */
         public int copy(PackFile pack, long position, byte[] dstbuf, int dstoff, int cnt)
         {
-            long length = pack.Length;
+            long Length = pack.Length;
             int need = cnt;
-            while (need > 0 && position < length)
+            while (need > 0 && position < Length)
             {
                 pin(pack, position);
                 int r = window.copy(position, dstbuf, dstoff, need);
@@ -107,7 +107,7 @@ namespace GitSharp
          *            current offset within <code>dstbuf</code> to inflate into.
          * @return updated <code>dstoff</code> based on the number of bytes
          *         successfully inflated into <code>dstbuf</code>.
-         * @throws IOException
+         * @
          *             this cursor does not match the provider or id and the proper
          *             window could not be acquired through the provider's cache.
          * @throws DataFormatException

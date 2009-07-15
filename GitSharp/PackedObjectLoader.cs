@@ -82,7 +82,7 @@ namespace GitSharp
          *
          * @param curs
          *            temporary thread storage during data access.
-         * @throws IOException
+         * @
          *             the object cannot be read.
          */
         public abstract void materialize(WindowCursor curs);
@@ -133,7 +133,7 @@ namespace GitSharp
          * }
          * </pre>
          *
-         * @throws IOException
+         * @
          *             this loader contains stale information and cannot be used.
          *             The most likely cause is the underlying pack file has been
          *             deleted, and the object has moved to another pack file.
@@ -157,7 +157,7 @@ namespace GitSharp
          *            least few kB.
          * @param curs
          *            temporary thread storage during data access.
-         * @throws IOException
+         * @
          *             when the object cannot be read.
          * @see #beginCopyRawData()
          */
@@ -176,7 +176,7 @@ namespace GitSharp
          * @return true if this loader is capable of fast raw-data copying basing on
          *         compressed data checksum; false if raw-data copying needs
          *         uncompressing and compressing data
-         * @throws IOException
+         * @
          *             the index file format cannot be determined.
          */
         public bool supportsFastCopyRawData()
@@ -187,7 +187,7 @@ namespace GitSharp
         /**
          * @return id of delta base object for this object representation. null if
          *         object is not stored as delta.
-         * @throws IOException
+         * @
          *             when delta base cannot read.
          */
         public abstract ObjectId getDeltaBase();

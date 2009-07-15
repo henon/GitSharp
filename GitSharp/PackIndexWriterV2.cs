@@ -14,7 +14,7 @@ namespace GitSharp
         {
         }
 
-        protected override void WriteInternal()
+        internal override void WriteInternal()
         {
             WriteTOC(2);
             WriteFanOutTable();

@@ -57,11 +57,11 @@ namespace GitSharp.Exceptions
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
         //
 
-        public CorruptObjectException(AnyObjectId id, string message) : base(string.Format("Object {0} is corrupt: {1}", id, message)) { }
+        public CorruptObjectException(AnyObjectId id, string message) : base(string.Format("object {0} is corrupt: {1}", id, message)) { }
         public CorruptObjectException(string message) : base(message) { }
         public CorruptObjectException(string message, Exception inner) : base(message, inner) { }
-        public CorruptObjectException(AnyObjectId id, string message, Exception inner) : base(string.Format("Object {0} is corrupt: {1}", id, message), inner) { }
-        protected CorruptObjectException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
+        public CorruptObjectException(AnyObjectId id, string message, Exception inner) : base(string.Format("object {0} is corrupt: {1}", id, message), inner) { }
+        internal CorruptObjectException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
     }
 }

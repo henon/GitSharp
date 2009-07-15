@@ -187,7 +187,7 @@ namespace GitSharp
             Encoding = Encoding.GetEncoding(name);
         }
 
-        public Repository Repository { get; protected set; }
+        public Repository Repository { get; internal set; }
 
         // Returns all ancestor-commits of this commit
         public IEnumerable<Commit> Ancestors
@@ -258,7 +258,7 @@ namespace GitSharp
 
             using (var reader = new StreamReader(new MemoryStream(raw)))
             {
-                String n = reader.ReadLine();
+                string n = reader.ReadLine();
                 if (n == null || !n.StartsWith("tree "))
                 {
                     throw new CorruptObjectException(CommitId, "no tree");
@@ -271,13 +271,13 @@ namespace GitSharp
                 {
                     throw new CorruptObjectException(CommitId, "no author");
                 }
-                String rawAuthor = n.Substring("author ".Length);
+                string rawAuthor = n.Substring("author ".Length);
                 n = reader.ReadLine();
                 if (n == null || !n.StartsWith("committer "))
                 {
                     throw new CorruptObjectException(CommitId, "no committer");
                 }
-                String rawCommitter = n.Substring("committer ".Length);
+                string rawCommitter = n.Substring("committer ".Length);
                 n = reader.ReadLine();
 
                 if (n != null && n.StartsWith("encoding"))
@@ -296,16 +296,16 @@ namespace GitSharp
                 {
                     // TODO: this isn't reliable so we need to guess the encoding from the actual content
                     throw new NotSupportedException("Custom Encoding is not currently supported.");
-                    //author = new PersonIdent(new String(this.Encoding.GetBytes(rawAuthor), this.Encoding));
-                    //committer = new PersonIdent(new String(rawCommitter.getBytes(), encoding.name()));
-                    //message = new String(readBuf, msgstart, readBuf.Length - msgstart, encoding.name());
+                    //author = new PersonIdent(new string(this.Encoding.GetBytes(rawAuthor), this.Encoding));
+                    //committer = new PersonIdent(new string(rawCommitter.getBytes(), encoding.name()));
+                    //message = new string(readBuf, msgstart, readBuf.Length - msgstart, encoding.name());
                 }
                 else
                 {
                     // TODO: use config setting / platform / ascii / iso-latin
                     author = new PersonIdent(rawAuthor);
                     committer = new PersonIdent(rawCommitter);
-                    //message = new String(readBuf, msgstart, readBuf.Length - msgstart);
+                    //message = new string(readBuf, msgstart, readBuf.Length - msgstart);
                     message = reader.ReadToEnd();
                 }
             }
@@ -324,7 +324,7 @@ namespace GitSharp
         /**
          * Persist this commit object
          *
-         * @throws IOException
+         * @
          */
         public void Save() // [henon] was Commit() in java, but c# won't allow it
         {

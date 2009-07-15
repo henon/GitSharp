@@ -204,7 +204,7 @@ namespace GitSharp
                 throw coe;
             }
             if (p != objectSize)
-                throw new CorruptObjectException(id, "incorrect length");
+                throw new CorruptObjectException(id, "incorrect Length");
         }
 
 

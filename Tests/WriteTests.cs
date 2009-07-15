@@ -240,14 +240,17 @@ namespace GitSharp.Tests
         {
             writeTrashFile(".git/config", "[core]\n" + "legacyHeaders=1\n");
             db.Config.Load();
+            Assert.AreEqual(db.Config.GetBoolean("core", "legacyHeaders", false), true);
 
             Tree t = new Tree(db);
             FileTreeEntry f = t.AddFile("i-am-a-file");
             writeTrashFile(f.Name, "and this is the data in me\n");
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
 
+            var s = new Inspector(db).Inspect(t.Id);
+
             Assert.AreEqual(ObjectId.FromString("00b1f73724f493096d1ffa0b0f1f1482dbb8c936"), t.Id);
-            //new ObjectChecker().checkBlob(Encoding.UTF8.GetString(db.OpenObject(t.TreeId).getBytes()).ToCharArray());
+            
 
             Commit c = new Commit(db);
             c.Author = (new PersonIdent(jauthor, 1154236443L, -4 * 60));
@@ -256,6 +259,9 @@ namespace GitSharp.Tests
             c.TreeEntry = (t);
             Assert.AreEqual(t.TreeId, c.TreeId);
             c.Save();
+
+            var s_c = new Inspector(db).Inspect(c.CommitId);
+
             ObjectId cmtid = ObjectId.FromString("803aec4aba175e8ab1d666873c984c0308179099");
             Assert.AreEqual(cmtid, c.CommitId);
 

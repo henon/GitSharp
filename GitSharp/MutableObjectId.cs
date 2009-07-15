@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -44,7 +45,7 @@ using GitSharp.Util;
 
 namespace GitSharp
 {
-    [Complete]
+
     public class MutableObjectId : AnyObjectId
     {
 
@@ -61,6 +62,16 @@ namespace GitSharp
             this.W3 = src.W3;
             this.W4 = src.W4;
             this.W5 = src.W5;
+        }
+
+        /** Make this id match {@link ObjectId#zeroId()}. */
+        public void Clear()
+        {
+            W1 = 0;
+            W2 = 0;
+            W3 = 0;
+            W4 = 0;
+            W5 = 0;
         }
 
         public void FromRaw(byte[] bs)
@@ -96,9 +107,9 @@ namespace GitSharp
             FromHexString(buf, offset);
         }
 
-        public void FromString(String str)
+        public void FromString(string str)
         {
-            if (str.Length != Constants.StringLength)
+            if (str.Length != StringLength)
                 throw new ArgumentException("Invalid id: " + str);
             FromHexString(Encoding.ASCII.GetBytes(str), 0);
         }
@@ -117,7 +128,7 @@ namespace GitSharp
             {
                 try
                 {
-                    String str = new string(Encoding.ASCII.GetChars(bs, p, Constants.StringLength));
+                    string str = new string(Encoding.ASCII.GetChars(bs, p, StringLength));
                     throw new ArgumentException("Invalid id: " + str);
                 }
                 catch (Exception)

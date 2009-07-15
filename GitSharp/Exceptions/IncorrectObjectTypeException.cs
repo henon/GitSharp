@@ -2,6 +2,7 @@
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -56,12 +57,24 @@ namespace GitSharp.Exceptions
         //
 
         public IncorrectObjectTypeException(ObjectId id, ObjectType type)
-            : base(string.Format("Object {0} is not a {1}.", id, type))
+            : base(string.Format("object {0} is not a {1}.", id, type))
         {
 
         }
-        public IncorrectObjectTypeException(ObjectId id, ObjectType type, Exception inner) : base(string.Format("Object {0} is not a {1}.", id, type), inner) { }
-        protected IncorrectObjectTypeException(
+        public IncorrectObjectTypeException(ObjectId id, ObjectType type, Exception inner) : base(string.Format("object {0} is not a {1}.", id, type), inner) { }
+        public IncorrectObjectTypeException(ObjectId id, int type)
+            : base(string.Format("object {0} is not a {1}.", id, (ObjectType)type))
+        {
+
+        }
+        public IncorrectObjectTypeException(ObjectId id, string type, Exception inner) : base(string.Format("object {0} is not a {1}.", id, type), inner) { }
+        public IncorrectObjectTypeException(ObjectId id, string type)
+            : base(string.Format("object {0} is not a {1}.", id, type))
+        {
+
+        }
+        public IncorrectObjectTypeException(ObjectId id, int type, Exception inner) : base(string.Format("object {0} is not a {1}.", id, (ObjectType)type), inner) { }
+        internal IncorrectObjectTypeException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }

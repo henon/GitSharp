@@ -161,7 +161,7 @@ namespace GitSharp
          *             when the object cannot be read.
          * @see #beginCopyRawData()
          */
-        public void copyRawData(Stream @out, byte[] buf, WindowCursor curs)
+        public void copyRawData<T>(T @out, byte[] buf, WindowCursor curs) where T : Stream
         {
             pack.copyRawData(this, @out, buf, curs);
         }

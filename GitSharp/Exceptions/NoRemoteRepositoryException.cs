@@ -1,7 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,49 +35,19 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Collections.Generic;
-using GitSharp.Exceptions;
+using GitSharp.Transport;
 
-namespace GitSharp.Transport
+namespace GitSharp.Exceptions
 {
-    public abstract class BaseConnection : IConnection
+
+    public class NoRemoteRepositoryException : TransportException
     {
-        private Dictionary<string, Ref> advertisedRefs = new Dictionary<string, Ref>();
-        private bool startedOperation;
+        private const long serialVersionUID = 1L;
 
-        public Dictionary<string, Ref> RefsMap
+        public NoRemoteRepositoryException(URIish uri, string s)
+            : base(uri, s)
         {
-            get
-            {
-                return advertisedRefs;
-            }
-        }
-
-        public List<Ref> Refs
-        {
-            get
-            {
-                return new List<Ref>(advertisedRefs.Values);
-            }
-        }
-
-        public Ref GetRef(string name)
-        {
-            return advertisedRefs[name];
-        }
-
-        public abstract void Close();
-
-        protected void available(Dictionary<string, Ref> all)
-        {
-            advertisedRefs = all;
-        }
-
-        protected void markStartedOperation()
-        {
-            if (startedOperation)
-                throw new TransportException("Only one operation call per connection is supported.");
-            startedOperation = true;
+            
         }
     }
 

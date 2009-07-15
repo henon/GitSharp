@@ -130,6 +130,9 @@ namespace GitSharp.Transport
         protected Repository local;
         protected URIish uri;
 
+        public Repository Local { get { return local; }}
+        public URIish URI { get { return uri; }}
+
         private string _optionUploadPack = RemoteConfig.DEFAULT_UPLOAD_PACK;
         public string OptionUploadPack
         {

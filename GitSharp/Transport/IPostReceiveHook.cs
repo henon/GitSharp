@@ -1,7 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
+ * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
  *
@@ -38,49 +36,25 @@
  */
 
 using System.Collections.Generic;
-using GitSharp.Exceptions;
 
 namespace GitSharp.Transport
 {
-    public abstract class BaseConnection : IConnection
+
+    internal class NULLReceiveHook : IPostReceiveHook
     {
-        private Dictionary<string, Ref> advertisedRefs = new Dictionary<string, Ref>();
-        private bool startedOperation;
-
-        public Dictionary<string, Ref> RefsMap
+        public void OnPostReceive(ReceivePack rp, List<ReceiveCommand> commands)
         {
-            get
-            {
-                return advertisedRefs;
-            }
         }
+    }
 
-        public List<Ref> Refs
-        {
-            get
-            {
-                return new List<Ref>(advertisedRefs.Values);
-            }
-        }
+    public static class PostReceiveHook
+    {
+        public static IPostReceiveHook NULL = new NULLReceiveHook();    
+    }
 
-        public Ref GetRef(string name)
-        {
-            return advertisedRefs[name];
-        }
-
-        public abstract void Close();
-
-        protected void available(Dictionary<string, Ref> all)
-        {
-            advertisedRefs = all;
-        }
-
-        protected void markStartedOperation()
-        {
-            if (startedOperation)
-                throw new TransportException("Only one operation call per connection is supported.");
-            startedOperation = true;
-        }
+    public interface IPostReceiveHook
+    {
+        void OnPostReceive(ReceivePack rp, List<ReceiveCommand> commands);
     }
 
 }

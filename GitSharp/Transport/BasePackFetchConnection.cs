@@ -1,7 +1,6 @@
 ﻿/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,50 +36,36 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Collections.Generic;
-using GitSharp.Exceptions;
+using GitSharp.RevWalk;
 
 namespace GitSharp.Transport
 {
-    public abstract class BaseConnection : IConnection
+    // [caytchen] TODO: finish (BasePackConnection!)
+    public class BasePackFetchConnection : BasePackConnection, IFetchConnection
     {
-        private Dictionary<string, Ref> advertisedRefs = new Dictionary<string, Ref>();
-        private bool startedOperation;
+        private const int MAX_HAVES = 256;
+        protected const int MIN_CLIENT_BUFFER = 2*32*46 + 8;
+        public const string OPTION_INCLUDE_TAG = "include-tag";
+        public const string OPTION_MULTI_ACK = "multi_ack"; // [caytchen] TODO: this correct?
+        public const string OPTION_THIN_PACK = "thin-pack";
+        public const string OPTION_SIDE_BAND = "side-band";
+        public const string OPTION_SIDE_BAND_64K = "side-band-64k";
+        public const string OPTION_OFS_DELTA = "ofs-delta";
+        public const string OPTION_SHALLOW = "shallow";
+        public const string OPTION_NO_PROGRESS = "no-progress";
 
-        public Dictionary<string, Ref> RefsMap
-        {
-            get
-            {
-                return advertisedRefs;
-            }
-        }
-
-        public List<Ref> Refs
-        {
-            get
-            {
-                return new List<Ref>(advertisedRefs.Values);
-            }
-        }
-
-        public Ref GetRef(string name)
-        {
-            return advertisedRefs[name];
-        }
-
-        public abstract void Close();
-
-        protected void available(Dictionary<string, Ref> all)
-        {
-            advertisedRefs = all;
-        }
-
-        protected void markStartedOperation()
-        {
-            if (startedOperation)
-                throw new TransportException("Only one operation call per connection is supported.");
-            startedOperation = true;
-        }
+        private RevWalk.RevWalk walk;
+        private RevCommitList<RevCommit> reachableCommits;
+        public readonly RevFlag REACHABLE;
+        public readonly RevFlag COMMON;
+        public readonly RevFlag ADVERTISED;
+        private bool multiAck;
+        private bool thinPack;
+        private bool sideband;
+        private bool includeTags;
+        private bool allowOfsDelta;
+        private string lockMessage;
+        private PackLock packLock;
     }
 
 }

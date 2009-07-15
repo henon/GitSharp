@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2009, Google Inc.
+ * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  *
  * All rights reserved.
  *
@@ -35,49 +36,45 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.IO;
+using GitSharp.Util;
 
-namespace GitSharp.Transport
+namespace GitSharp
 {
 
-    public class SideBandOutputStream : Stream
+    public class PackOutputStream : Stream
     {
-        public const int CH_DATA = SideBandInputStream.CH_DATA;
-        public const int CH_PROGRESS = SideBandInputStream.CH_PROGRESS;
-        public const int CH_ERROR = SideBandInputStream.CH_ERROR;
-        public const int SMALL_BUF = 1000;
-        public const int MAX_BUF = 65520;
-        public const int HDR_SIZE = 5;
+        private readonly Stream stream;
+        private readonly Crc32 crc = new Crc32();
+        private readonly MessageDigest md = Constants.newMessageDigest();
+        private long count;
 
-        private readonly int channel;
-        private readonly PacketLineOut pckOut;
-
-        public SideBandOutputStream(int chan, PacketLineOut outPLO)
+        public PackOutputStream(Stream stream)
         {
-            channel = chan;
-            pckOut = outPLO;
-        }
-
-        public override void Flush()
-        {
-            if (channel != CH_DATA)
-                pckOut.Flush();
+            this.stream = stream;
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            pckOut.WriteChannelPacket(channel, buffer, offset, count);
+            stream.Write(buffer, offset, count);
+            crc.Update(buffer, offset, count);
+            md.Update(buffer, offset, count);
+            this.count += count;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotSupportedException();
+            throw new System.NotImplementedException();
         }
 
         public override void SetLength(long value)
         {
-            throw new NotSupportedException();
+            throw new System.NotImplementedException();
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            throw new System.NotImplementedException();
         }
 
         public override bool CanRead
@@ -95,26 +92,42 @@ namespace GitSharp.Transport
             get { return false; }
         }
 
-        public override long Length
-        {
-            get { throw new NotSupportedException(); }
-        }
-
         public override long Position
         {
             get
             {
-                throw new NotSupportedException();
+                throw new System.NotImplementedException();
             }
             set
             {
-                throw new NotSupportedException();
+                throw new System.NotImplementedException();
             }
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
+        public override void Flush()
         {
-            throw new NotSupportedException();
+            stream.Flush();    
+        }
+
+        public override long Length
+        {
+            get { return count; }
+        }
+
+        public int getCRC32()
+        {
+            // [caytchen] TODO: REVISIT: C# seperates signed/unsigned, all ported code doesn't seem to resemble this CRC-wise
+            return (int)crc.Value;
+        }
+
+        public void resetCRC32()
+        {
+            crc.Reset();
+        }
+
+        public byte[] getDigest()
+        {
+            return md.Digest();
         }
     }
 

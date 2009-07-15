@@ -78,12 +78,12 @@ namespace GitSharp
 	 *             no recognized pack index version can support the supplied
 	 *             objects. This is likely a bug in the implementation.
 	 */
-        public static PackIndexWriter CreateOldestPossible(Stream dst, List<PackedObjectInfo> objs)
+        public static PackIndexWriter CreateOldestPossible<T>(Stream dst, List<T> objs) where T : PackedObjectInfo
         {
             int version = 1;
         LOOP:
 
-            foreach (PackedObjectInfo oe in objs)
+            foreach (T oe in objs)
             {
                 switch (version)
                 {
@@ -171,7 +171,7 @@ namespace GitSharp
          *             an error occurred while writing to the output stream, or this
          *             index format cannot store the object data supplied.
          */
-        public void Write(List<PackedObjectInfo> toStore, byte[] packDataChecksum)
+        public void Write<T>(List<T> toStore, byte[] packDataChecksum) where T : PackedObjectInfo
         {
             entries = toStore;
             packChecksum = packDataChecksum;

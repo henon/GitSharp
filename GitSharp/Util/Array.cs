@@ -1,7 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
+ * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,49 +35,29 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Collections.Generic;
-using GitSharp.Exceptions;
+using System;
 
-namespace GitSharp.Transport
+namespace GitSharp.Util
 {
-    public abstract class BaseConnection : IConnection
+
+    public static class ArrayExtension
     {
-        private Dictionary<string, Ref> advertisedRefs = new Dictionary<string, Ref>();
-        private bool startedOperation;
-
-        public Dictionary<string, Ref> RefsMap
+        public static bool ArrayEquals<T>(this T[] a, T[] b)
         {
-            get
+            if (a.Length != b.Length) return false;
+            for (int i = 0; i < a.Length; i++)
             {
-                return advertisedRefs;
+                if (!a[i].Equals(b[i])) return false;
             }
+            return true;
         }
 
-        public List<Ref> Refs
+        public static void ArrayCopy<T>(this T[] from, int foff, T[] to, int toff, int cnt)
         {
-            get
+            for (int i = 0; i < cnt; i++)
             {
-                return new List<Ref>(advertisedRefs.Values);
+                to[i + toff] = from[i + foff];
             }
-        }
-
-        public Ref GetRef(string name)
-        {
-            return advertisedRefs[name];
-        }
-
-        public abstract void Close();
-
-        protected void available(Dictionary<string, Ref> all)
-        {
-            advertisedRefs = all;
-        }
-
-        protected void markStartedOperation()
-        {
-            if (startedOperation)
-                throw new TransportException("Only one operation call per connection is supported.");
-            startedOperation = true;
         }
     }
 

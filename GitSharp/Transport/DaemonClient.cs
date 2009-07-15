@@ -1,7 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
+ * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
  *
@@ -37,49 +35,41 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Collections.Generic;
-using GitSharp.Exceptions;
+using System.IO;
+using System.Net;
+using GitSharp.Util;
 
 namespace GitSharp.Transport
 {
-    public abstract class BaseConnection : IConnection
+
+    public class DaemonClient
     {
-        private Dictionary<string, Ref> advertisedRefs = new Dictionary<string, Ref>();
-        private bool startedOperation;
+        public Daemon Daemon { get; private set; }
+        public EndPoint Peer { get; set; }
+        public Stream Stream { get; private set; }
 
-        public Dictionary<string, Ref> RefsMap
+        public DaemonClient(Daemon d)
         {
-            get
+            Daemon = d;
+        }
+
+        public void Execute(Stream inout)
+        {
+            Stream = inout;
+            string cmd = new PacketLineIn(inout).ReadStringNoLF();
+            if (string.IsNullOrEmpty(cmd))
+                return;
+
+            int nul = cmd.IndexOf('\0');
+            if (nul >= 0)
             {
-                return advertisedRefs;
+                cmd = cmd.Slice(0, nul);
             }
-        }
 
-        public List<Ref> Refs
-        {
-            get
-            {
-                return new List<Ref>(advertisedRefs.Values);
-            }
-        }
-
-        public Ref GetRef(string name)
-        {
-            return advertisedRefs[name];
-        }
-
-        public abstract void Close();
-
-        protected void available(Dictionary<string, Ref> all)
-        {
-            advertisedRefs = all;
-        }
-
-        protected void markStartedOperation()
-        {
-            if (startedOperation)
-                throw new TransportException("Only one operation call per connection is supported.");
-            startedOperation = true;
+            DaemonService srv = Daemon.MatchService(cmd);
+            if (srv == null)
+                return;
+            srv.Execute(this, cmd);
         }
     }
 

@@ -271,7 +271,7 @@ namespace GitSharp
             return dstbuf;
         }
 
-        internal void copyRawData(PackedObjectLoader loader, Stream @out, byte[] buf, WindowCursor curs)
+        internal void copyRawData<T>(PackedObjectLoader loader, T @out, byte[] buf, WindowCursor curs) where T : Stream
         {
             long objectOffset = loader.objectOffset;
             long dataOffset = loader.getDataOffset();

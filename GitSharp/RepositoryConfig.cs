@@ -245,23 +245,18 @@ namespace GitSharp
                             case '\n':
                                 continue;
                             case 't':
-                                r.Read();
                                 value.Append('\t');
                                 continue;
                             case 'b':
-                                r.Read();
                                 value.Append('\b');
                                 continue;
                             case 'n':
-                                r.Read();
                                 value.Append('\n');
                                 continue;
                             case '\\':
-                                r.Read();
                                 value.Append('\\');
                                 continue;
                             case '"':
-                                r.Read();
                                 value.Append('"');
                                 continue;
                             default:

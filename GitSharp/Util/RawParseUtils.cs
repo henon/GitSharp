@@ -444,8 +444,7 @@ namespace GitSharp
             return ptr;
         }
 
-#if false
-        /**
+/**
  * Index the region between <code>[ptr, end)</code> to find line starts.
  * <p>
  * The returned list is 1 indexed. Index 0 contains
@@ -474,13 +473,12 @@ namespace GitSharp
             // to initially size our map close to the target.
             //
             IntList map = new IntList((end - ptr) / 36);
-            map.fillTo(1, Integer.MIN_VALUE);
+            map.fillTo(1, int.MinValue);
             for (; ptr < end; ptr = nextLF(buf, ptr))
                 map.add(ptr);
             map.add(end);
             return map;
         }
-#endif
 
         /**
          * Locate the "author " header line data.

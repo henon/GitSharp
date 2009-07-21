@@ -239,6 +239,7 @@
     <Compile Include="TreeWalk\TreeWalk.cs" />
     <Compile Include="TreeWalk\WorkingTreeIterator.cs" />
     <Compile Include="Util\ICharSequence.cs" />
+    <Compile Include="Util\IntList.cs" />
     <Compile Include="Util\ListIterator.cs" />
     <Compile Include="Util\RawCharSequence.cs" />
     <Compile Include="Util\RawSubstringPattern.cs" />

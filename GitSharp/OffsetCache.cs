@@ -475,7 +475,7 @@ namespace GitSharp
                     Entry<V> e1 = table.get(s);
                     for (Entry<V> n = e1; n != null; n = n.next)
                     {
-                        if (n.@ref == r)
+                        if (n.@ref.Equals(r))
                         {
                             n.dead = true;
                             found = true;

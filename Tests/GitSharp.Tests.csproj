@@ -48,7 +48,7 @@
     <Compile Include="EncodingTests.cs" />
     <Compile Include="NBTests.cs" />
     <Compile Include="PackIndexV1Tests.cs" />
-    <Compile Include="PackIntexV2Tests.cs" />
+    <Compile Include="PackIndexV2Tests.cs" />
     <Compile Include="PackReaderTests.cs" />
     <Compile Include="ParseRefTests.cs" />
     <Compile Include="Util\PackIndexTestCase.cs" />

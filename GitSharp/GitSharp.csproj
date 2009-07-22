@@ -207,6 +207,9 @@
     <Compile Include="RevWalk\TopoSortGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Diff\Edit.cs" />
+    <Compile Include="Diff\RawText.cs" />
+    <Compile Include="Diff\Sequence.cs" />
     <Compile Include="Exceptions\RevWalkException.cs" />
     <Compile Include="Exceptions\StopWalkException.cs" />
     <Compile Include="Exceptions\TransportException.cs" />

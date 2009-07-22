@@ -207,7 +207,9 @@
     <Compile Include="RevWalk\TopoSortGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DirectoryCache\BaseDirCacheEditor.cs" />
     <Compile Include="DirectoryCache\DirCache.cs" />
+    <Compile Include="DirectoryCache\DirCacheBuilder.cs" />
     <Compile Include="DirectoryCache\DirCacheEntry.cs" />
     <Compile Include="Diff\Edit.cs" />
     <Compile Include="Diff\EditList.cs" />

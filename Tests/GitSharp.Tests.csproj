@@ -52,6 +52,8 @@
     <Compile Include="PackReaderTests.cs" />
     <Compile Include="ParseRefTests.cs" />
     <Compile Include="Util\PackIndexTestCase.cs" />
+    <Compile Include="Util\RawParseUtils_LineMapTest.cs" />
+    <Compile Include="Util\RawParseUtils_MatchTest.cs" />
     <Compile Include="Util\XInputStream.cs" />
     <Compile Include="VariousUtilityTests.cs" />
     <Compile Include="WriteTests.cs" />

@@ -216,7 +216,7 @@ namespace GitSharp.TreeWalk
             {
                 path[pathOffset - 1] = (byte)'/';
             }
-            catch (IndexOutOfRangeException e)
+            catch (IndexOutOfRangeException)
             {
                 growPath(p.pathLen);
                 path[pathOffset - 1] = (byte)'/';

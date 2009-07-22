@@ -241,7 +241,7 @@ namespace GitSharp
         }
 
 
-        public bool Equals(object o)
+        public override bool Equals(object o)
         {
             if (o is AbbreviatedObjectId)
             {
@@ -280,7 +280,7 @@ namespace GitSharp
         }
 
 
-        public string ToString()
+        public override string ToString()
         {
             return "AbbreviatedObjectId[" + name() + "]";
         }

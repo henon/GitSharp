@@ -213,7 +213,7 @@ namespace GitSharp
                 if (r != null && r.ObjectId != null)
                     avail[Constants.HEAD]= r;
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 // ignore here
             }

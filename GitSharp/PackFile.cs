@@ -89,8 +89,6 @@ namespace GitSharp
 
         private PackIndex loadedIdx;
 
-        private PackReverseIndex reverseIdx;
-
         /**
          * Construct a reader for an existing, pre-indexed packfile.
          * 
@@ -201,7 +199,6 @@ namespace GitSharp
             lock (this)
             {
                 loadedIdx = null;
-                reverseIdx = null;
             }
         }
 

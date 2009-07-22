@@ -325,7 +325,7 @@ namespace GitSharp
                     ptr++;
                 }
             }
-            catch (IndexOutOfRangeException e)
+            catch (IndexOutOfRangeException)
             {
                 // Not a valid digit.
             }
@@ -700,7 +700,7 @@ namespace GitSharp
             {
                 return decodeNoFallback(cs, buffer, start, end);
             }
-            catch (EncoderFallbackException e)
+            catch (EncoderFallbackException)
             {
                 // Fall back to an ISO-8859-1 style encoding. At least all of
                 // the bytes will be present in the output.
@@ -744,7 +744,7 @@ namespace GitSharp
             {
                 return decode(b, Constants.CHARSET);
             }
-            catch (EncoderFallbackException e)
+            catch (EncoderFallbackException)
             {
                 //b.reset();
             }
@@ -758,7 +758,7 @@ namespace GitSharp
                 {
                     return decode(b, cs);
                 }
-                catch (EncoderFallbackException e)
+                catch (EncoderFallbackException)
                 {
                     //b.reset();
                 }
@@ -774,7 +774,7 @@ namespace GitSharp
                 {
                     return decode(b, Encoding.Default);
                 }
-                catch (EncoderFallbackException e)
+                catch (EncoderFallbackException)
                 {
                     //b.reset();
                 }

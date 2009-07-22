@@ -364,7 +364,7 @@ namespace GitSharp.TreeWalk
                 {
                     path[tmp] = c;
                 }
-                catch (IndexOutOfRangeException e)
+                catch (IndexOutOfRangeException)
                 {
                     growPath(tmp);
                     path[tmp] = c;

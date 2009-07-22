@@ -190,7 +190,7 @@ namespace GitSharp.RevWalk
             {
                 applyFlag(RevFilter.NONE, flag, rangeBegin, rangeEnd);
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 // Never happen. The filter we use does not throw any
                 // exceptions, for any reason.

@@ -396,12 +396,11 @@ namespace GitSharp.TreeWalk
 
             public void encodeName(Encoding enc)
             {
-                byte[] b;
                 try
                 {
                     encodedName = enc.GetBytes(getName());
                 }
-                catch (EncoderFallbackException e)
+                catch (EncoderFallbackException)
                 {
                     // This should so never happen.
                     throw new Exception("Unencodeable file: " + getName());

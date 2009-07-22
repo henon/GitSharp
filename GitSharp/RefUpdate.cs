@@ -266,7 +266,7 @@ namespace GitSharp
             {
                 return Result = updateImpl(walk, new UpdateStore(this));
             }
-            catch (IOException x)
+            catch (IOException)
             {
                 Result = RefUpdateResult.IOFailure;
                 throw;
@@ -356,7 +356,7 @@ namespace GitSharp
             {
                 return Result = updateImpl(walk, new DeleteStore(this));
             }
-            catch (IOException x)
+            catch (IOException)
             {
                 Result = RefUpdateResult.IOFailure;
                 throw;

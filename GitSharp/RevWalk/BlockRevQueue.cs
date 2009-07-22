@@ -78,7 +78,7 @@ namespace GitSharp.RevWalk
          * @param q
          *            the other queue we will steal entries from.
          */
-        public void shareFreeList(BlockRevQueue q)
+        public override void shareFreeList(BlockRevQueue q)
         {
             free = q.free;
         }

@@ -176,7 +176,7 @@ namespace GitSharp.RevWalk
                         c.dispose();
                 }
             }
-            catch (StopWalkException swe)
+            catch (StopWalkException)
             {
                 walker.curs.release();
                 pending.clear();

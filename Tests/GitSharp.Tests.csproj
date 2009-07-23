@@ -45,6 +45,9 @@
   <ItemGroup>
     <Compile Include="AbbreviatedIdTests.cs" />
     <Compile Include="ConfigTests.cs" />
+    <Compile Include="Diff\EditListTest.cs" />
+    <Compile Include="Diff\EditTest.cs" />
+    <Compile Include="Diff\RawTextTest.cs" />
     <Compile Include="EncodingTests.cs" />
     <Compile Include="NBTests.cs" />
     <Compile Include="PackIndexV1Tests.cs" />

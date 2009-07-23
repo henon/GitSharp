@@ -51,12 +51,12 @@ namespace GitSharp.Tests
 		    EditList l = new EditList();
 		    Assert.AreEqual(0, l.size());
 		    Assert.IsTrue(l.isEmpty());
-		    Assert.AreEqual("EditList[]", l.toString());
+		    Assert.AreEqual("EditList[]", l.ToString());
 
-		    Assert.IsTrue(l.equals(l));
-		    Assert.IsTrue(l.equals(new EditList()));
-		    Assert.IsFalse(l.equals(""));
-		    Assert.AreEqual(l.hashCode(), new EditList().hashCode());
+		    Assert.IsTrue(l.Equals(l));
+		    Assert.IsTrue(l.Equals(new EditList()));
+		    Assert.IsFalse(l.Equals(""));
+            Assert.AreEqual(l.GetHashCode(), new EditList().GetHashCode());
 	    }
 
         [Test]
@@ -68,16 +68,19 @@ namespace GitSharp.Tests
 		    Assert.AreEqual(1, l.size());
 		    Assert.IsFalse(l.isEmpty());
 		    Assert.AreSame(e, l.get(0));
-		    Assert.AreSame(e, l.GetEnumerator().Current);
+            IEnumerator i = l.GetEnumerator();
+            i.Reset();
+            i.MoveNext();
+		    Assert.AreSame(e, i.Current);
 
-		    Assert.IsTrue(l.equals(l));
-		    Assert.IsFalse(l.equals(new EditList()));
+		    Assert.IsTrue(l.Equals(l));
+		    Assert.IsFalse(l.Equals(new EditList()));
 
 		    EditList l2 = new EditList();
 		    l2.Add(e);
-		    Assert.IsTrue(l.equals(l2));
-		    Assert.IsTrue(l2.equals(l));
-		    Assert.AreEqual(l.hashCode(), l2.hashCode());
+		    Assert.IsTrue(l.Equals(l2));
+		    Assert.IsTrue(l2.Equals(l));
+		    Assert.AreEqual(l.GetHashCode(), l2.GetHashCode());
 	    }
 
         [Test]
@@ -93,18 +96,21 @@ namespace GitSharp.Tests
 		    Assert.AreSame(e2, l.get(1));
 
 		    IEnumerator i = l.GetEnumerator();
+            i.Reset();
+            i.MoveNext();
 		    Assert.AreSame(e1, i.Current);
+            i.MoveNext();
 		    Assert.AreSame(e2, i.Current);
 
-		    Assert.IsTrue(l.equals(l));
-		    Assert.IsFalse(l.equals(new EditList()));
+		    Assert.IsTrue(l.Equals(l));
+		    Assert.IsFalse(l.Equals(new EditList()));
 
 		    EditList l2 = new EditList();
 		    l2.Add(e1);
 		    l2.Add(e2);
-		    Assert.IsTrue(l.equals(l2));
-		    Assert.IsTrue(l2.equals(l));
-		    Assert.AreEqual(l.hashCode(), l2.hashCode());
+		    Assert.IsTrue(l.Equals(l2));
+		    Assert.IsTrue(l2.Equals(l));
+		    Assert.AreEqual(l.GetHashCode(), l2.GetHashCode());
 	    }
 
         [Test]

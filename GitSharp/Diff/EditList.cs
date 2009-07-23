@@ -43,56 +43,53 @@ using System.Collections.Generic;
 namespace GitSharp.Diff
 {
     /** Specialized list of {@link Edit}s in a document. */
-    public class EditList : List<Edit>
+    public class EditList : ArrayList
     {
-	    private List<Edit> container;
-
-	    /** Create a new, empty edit list. */
-	    public EditList()
-        {
-            container = new List<Edit>();
-	    }
-
 	    public int size()
         {
-		    return container.Count;
+		    return this.Count;
         }
 
 	    public Edit get(int index)
         {
-            return (Edit)container[index];
+            return (Edit)this[index];
 	    }
 
 	    public Edit set(int index, Edit element)
         {
-		    return container[index] = element;
+            Edit retval = (Edit)this[index];
+            this[index] = element;
+            return retval;
 	    }
 
-	    public void add(int index, Edit element)
+	    public void Add(int index, Edit element)
         {
-		    container.Insert(index, element);
+		    this.Insert(index, element);
 	    }
 
 	    public void remove(int index)
         {
-		    container.RemoveAt(index);
+		    this.RemoveAt(index);
 	    }
 
 	    public int hashCode()
         {
-		    return container.GetHashCode();
+		    return this.GetHashCode();
 	    }
 
-	    public bool equals(Object o)
+	    public override String ToString()
         {
-		    if (o is EditList)
-			    return container.Equals(((EditList) o).container);
-		    return false;
-	    }
-
-	    public String toString()
-        {
-		    return "EditList" + container.ToString();
+            /* Unfortunately, C#'s List does not implement ToString the same
+             * way Java's ArrayList does. It simply inherits from the base class
+             * object. This means that ToString returns the string identifier of
+             * the type.
+             * Until a better solution is found, I'm implementing ToString myself.
+             */
+            string retval = "EditList[";
+            foreach (Edit e in this)
+                retval = retval + e.ToString();
+            retval = retval + "]";
+            return retval;
 	    }
 
         /* This method did not exist in the original Java code.
@@ -101,7 +98,40 @@ namespace GitSharp.Diff
          */
         public bool isEmpty()
         {
-            return (container.Count == 0);
+            return (this.Count == 0);
+        }
+
+        private bool isEqual(EditList o)
+        {
+            if (this.Count != ((EditList)o).Count)
+                return false;
+
+            for (int i = 0; i < this.Count; i++)
+                if (!this[i].Equals(((EditList)o)[i]))
+                    return false;
+
+            return true;
+        }
+
+        private bool isEqual(string s)
+        {
+            return this.ToString().Equals(s);
+        }
+
+        public override bool Equals(object o)
+        {
+            if (o is EditList)
+                return this.isEqual((EditList)o);
+
+            if (o is string)
+                return this.isEqual((string)o);
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ToString().GetHashCode();
         }
     }
 }

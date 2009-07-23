@@ -208,6 +208,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Diff\Edit.cs" />
+    <Compile Include="Diff\EditList.cs" />
     <Compile Include="Diff\RawText.cs" />
     <Compile Include="Diff\Sequence.cs" />
     <Compile Include="Exceptions\RevWalkException.cs" />

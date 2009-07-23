@@ -79,28 +79,28 @@ namespace GitSharp.Tests
 	    public void testType_Insert()
         {
 		    Edit e = new Edit(1, 1, 1, 2);
-		    Assert.AreSame(Edit.Type.INSERT, e.getType());
+		    Assert.AreEqual(Edit.Type.INSERT, e.getType());
 	    }
 
         [Test]
 	    public void testType_Delete()
         {
 		    Edit e = new Edit(1, 2, 1, 1);
-		    Assert.AreSame(Edit.Type.DELETE, e.getType());
+            Assert.AreEqual(Edit.Type.DELETE, e.getType());
 	    }
 
         [Test]
 	    public void testType_Replace()
         {
 		    Edit e = new Edit(1, 2, 1, 4);
-		    Assert.AreSame(Edit.Type.REPLACE, e.getType());
+            Assert.AreEqual(Edit.Type.REPLACE, e.getType());
 	    }
 
         [Test]
 	    public void testType_Empty() 
         {
-		    Assert.AreSame(Edit.Type.EMPTY, new Edit(1, 1, 2, 2).getType());
-		    Assert.AreSame(Edit.Type.EMPTY, new Edit(1, 2).getType());
+            Assert.AreEqual(Edit.Type.EMPTY, new Edit(1, 1, 2, 2).getType());
+		    Assert.AreEqual(Edit.Type.EMPTY, new Edit(1, 2).getType());
 	    }
 
         [Test]

@@ -107,7 +107,7 @@ namespace GitSharp.Tests
 	    public void testToString()
         {
 		    Edit e = new Edit(1, 2, 1, 4);
-		    Assert.AreEqual("REPLACE(1-2,1-4)", e.toString());
+		    Assert.AreEqual("REPLACE(1-2,1-4)", e.ToString());
 	    }
 
         [Test]

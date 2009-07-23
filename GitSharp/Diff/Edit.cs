@@ -171,9 +171,14 @@ namespace GitSharp.Diff
 		    endB = sEnd;
 	    }
 
+        public override int GetHashCode()
+        {
+ 	        return beginA ^ endA;
+        }
+
 	    public int hashCode()
         {
-		    return beginA ^ endA;
+		    return this.GetHashCode();
 	    }
 
         public override bool Equals(Object o)
@@ -187,7 +192,7 @@ namespace GitSharp.Diff
 		    return false;
 	    }
 
-	    public String toString() {
+	    public override String ToString() {
 		    Type t = getType();
 		    return t + "(" + beginA + "-" + endA + "," + beginB + "-" + endB + ")";
 	    }

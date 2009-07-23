@@ -176,7 +176,7 @@ namespace GitSharp.Diff
 		    return beginA ^ endA;
 	    }
 
-	    public bool equals(Object o)
+        public override bool Equals(Object o)
         {
 		    if (o is Edit)
             {

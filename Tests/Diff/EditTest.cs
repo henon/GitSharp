@@ -116,35 +116,35 @@ namespace GitSharp.Tests
 		    Edit e1 = new Edit(1, 2, 3, 4);
 		    Edit e2 = new Edit(1, 2, 3, 4);
 
-		    Assert.IsTrue(e1.equals(e1));
-		    Assert.IsTrue(e1.equals(e2));
-		    Assert.IsTrue(e2.equals(e1));
+		    Assert.IsTrue(e1.Equals(e1));
+		    Assert.IsTrue(e1.Equals(e2));
+		    Assert.IsTrue(e2.Equals(e1));
 		    Assert.AreEqual(e1.hashCode(), e2.hashCode());
-		    Assert.IsFalse(e1.equals(""));
+		    Assert.IsFalse(e1.Equals(""));
 	    }
 
         [Test]
 	    public void testNotEquals1()
         {
-		    Assert.IsFalse(new Edit(1, 2, 3, 4).equals(new Edit(0, 2, 3, 4)));
+		    Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(0, 2, 3, 4)));
 	    }
 
         [Test]
 	    public void testNotEquals2()
         {
-		    Assert.IsFalse(new Edit(1, 2, 3, 4).equals(new Edit(1, 0, 3, 4)));
+		    Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(1, 0, 3, 4)));
 	    }
 
         [Test]
 	    public void testNotEquals3()
         {
-		    Assert.IsFalse(new Edit(1, 2, 3, 4).equals(new Edit(1, 2, 0, 4)));
+		    Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(1, 2, 0, 4)));
 	    }
 
         [Test]
 	    public void testNotEquals4()
         {
-		    Assert.IsFalse(new Edit(1, 2, 3, 4).equals(new Edit(1, 2, 3, 0)));
+		    Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(1, 2, 3, 0)));
 	    }
 
         [Test]

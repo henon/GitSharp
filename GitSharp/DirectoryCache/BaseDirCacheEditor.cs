@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -49,7 +50,7 @@ namespace GitSharp.DirectoryCache
      * The different update strategies extend this class to provide their own unique
      * services to applications.
      */
-    abstract class BaseDirCacheEditor
+    public abstract class BaseDirCacheEditor
     {
         /** The cache instance this editor updates during {@link #finish()}. */
         protected DirCache cache;

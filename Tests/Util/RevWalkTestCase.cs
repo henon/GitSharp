@@ -42,6 +42,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GitSharp.RevWalk;
+using GitSharp.DirectoryCache;
 
 namespace GitSharp.Tests.Util
 {
@@ -65,9 +66,9 @@ namespace GitSharp.Tests.Util
             nowTick = 1236977987L;
         }
 
-        protected RevWalk createRevWalk()
+        protected RevWalk.RevWalk createRevWalk()
         {
-            return new RevWalk(db);
+            return new RevWalk.RevWalk(db);
         }
 
         protected void tick(int secDelta)

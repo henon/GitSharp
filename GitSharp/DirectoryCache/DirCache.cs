@@ -41,6 +41,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using GitSharp.Util;
+using GitSharp.Exceptions;
 
 namespace GitSharp.DirectoryCache
 {
@@ -354,9 +356,9 @@ namespace GitSharp.DirectoryCache
             tree = null;
         }
 
-        private void readFrom(FileInputStream inStream)
+        private void readFrom(FileStream inStream)
         {
-            BufferedInputStream @in = new BufferedInputStream(inStream);
+            var @in = new StreamReader(inStream);
             MessageDigest md = Constants.newMessageDigest();
 
             // Read the index header and verify we understand it.
@@ -510,7 +512,7 @@ namespace GitSharp.DirectoryCache
             }
         }
 
-        private void writeTo(OutputStream os)
+        private void writeTo(FileStream os)
         {
             MessageDigest foot = Constants.newMessageDigest();
             DigestOutputStream dos = new DigestOutputStream(os, foot);
@@ -521,7 +523,7 @@ namespace GitSharp.DirectoryCache
             System.arraycopy(SIG_DIRC, 0, tmp, 0, SIG_DIRC.length);
             NB.encodeInt32(tmp, 4, /* version */2);
             NB.encodeInt32(tmp, 8, entryCnt);
-            dos.write(tmp, 0, 12);
+            dos.Write(tmp, 0, 12);
 
             // Write the individual file entries.
             //

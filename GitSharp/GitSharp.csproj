@@ -33,10 +33,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Gallio, Version=3.0.6.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL" />
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\extern\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
+    <Reference Include="MbUnit, Version=3.0.6.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -210,7 +212,9 @@
     <Compile Include="DirectoryCache\BaseDirCacheEditor.cs" />
     <Compile Include="DirectoryCache\DirCache.cs" />
     <Compile Include="DirectoryCache\DirCacheBuilder.cs" />
+    <Compile Include="DirectoryCache\DirCacheEditor.cs" />
     <Compile Include="DirectoryCache\DirCacheEntry.cs" />
+    <Compile Include="DirectoryCache\DirCacheTree.cs" />
     <Compile Include="Diff\Edit.cs" />
     <Compile Include="Diff\EditList.cs" />
     <Compile Include="Diff\RawText.cs" />
@@ -275,7 +279,7 @@
     <Compile Include="TreeWalk\NameConflictTreeWalk.cs" />
     <Compile Include="TreeWalk\TreeWalk.cs" />
     <Compile Include="TreeWalk\WorkingTreeIterator.cs" />
-    <Compile Include="Util\Array.cs" />
+    <Compile Include="Util\DigestOutputStream.cs" />    <Compile Include="Util\Array.cs" />
     <Compile Include="Util\IListUtil.cs" />
     <Compile Include="Util\ICharSequence.cs" />
     <Compile Include="Util\IntList.cs" />

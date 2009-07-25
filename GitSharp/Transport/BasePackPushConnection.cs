@@ -75,7 +75,7 @@ namespace GitSharp.Transport
         {
             try
             {
-                transport.openFetch().close();
+                transport.openFetch().Close();
             }
             catch (NotSupportedException)
             {}
@@ -127,9 +127,9 @@ namespace GitSharp.Transport
                 Ref advertisedRef = GetRef(rru.RemoteName);
                 ObjectId oldId = (advertisedRef == null ? ObjectId.ZeroId : advertisedRef.ObjectId);
                 // [caytchen] TODO: ObjectId Name!
-                sb.Append(oldId.name());
+                sb.Append(oldId.ToString());
                 sb.Append(' ');
-                sb.Append(rru.NewObjectId.name());
+                sb.Append(rru.NewObjectId.ToString());
                 sb.Append(' ');
                 sb.Append(rru.RemoteName);
                 if (!sentCommand)
@@ -143,7 +143,7 @@ namespace GitSharp.Transport
                                  ? RemoteRefUpdate.UpdateStatus.AWAITING_REPORT
                                  : RemoteRefUpdate.UpdateStatus.OK;
                 if (!rru.IsDelete)
-                    writePack = true;
+                    shouldWritePack = true;
             }
 
             if (monitor.IsCancelled)

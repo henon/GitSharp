@@ -78,8 +78,8 @@ namespace GitSharp.Transport
             Stream stream = dc.Stream;
             string name = "anonymous";
             string email = name + "@" + host;
-            rp.SetRefLogIdent(new PersonIdent(name, email));
-            rp.Receive(stream, null);
+            rp.setRefLogIdent(new PersonIdent(name, email));
+            rp.receive(stream, null);
         }
     }
 
@@ -128,7 +128,7 @@ namespace GitSharp.Transport
             Exports.Add(name, db);
         }
 
-        public void ExportDirectory(FileInfo dir)
+        public void ExportDirectory(DirectoryInfo dir)
         {
             ExportBase.Add(dir);
         }

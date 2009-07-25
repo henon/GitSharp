@@ -173,7 +173,8 @@ namespace GitSharp
          */
         public void Write<T>(List<T> toStore, byte[] packDataChecksum) where T : PackedObjectInfo
         {
-            entries = toStore;
+            entries = new List<PackedObjectInfo>();
+            foreach (T e in toStore) entries.Add(e);
             packChecksum = packDataChecksum;
             WriteInternal();
             _stream.Flush();

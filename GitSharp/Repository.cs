@@ -380,7 +380,7 @@ namespace GitSharp
         // * @
         // */
 
-        private void openObjectInAllPacks(AnyObjectId objectId, List<PackedObjectLoader> resultLoaders, WindowCursor curs)
+        public void openObjectInAllPacks(AnyObjectId objectId, List<PackedObjectLoader> resultLoaders, WindowCursor curs)
         {
             objectDatabase.openObjectInAllPacks(resultLoaders, curs, objectId);
         }

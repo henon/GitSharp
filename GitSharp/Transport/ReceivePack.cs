@@ -41,6 +41,7 @@ using System.IO;
 using System.Text;
 using GitSharp.Exceptions;
 using GitSharp.RevWalk;
+using GitSharp.Util;
 
 namespace GitSharp.Transport
 {
@@ -155,6 +156,305 @@ namespace GitSharp.Transport
         public List<ReceiveCommand> getAllCommands()
         {
             return commands;
+        }
+
+        public ReceivePack(Repository into)
+        {
+            db = into;
+            walk = new RevWalk.RevWalk(db);
+
+            RepositoryConfig cfg = db.Config;
+            checkReceivedObjects = cfg.GetBoolean("receive", "fsckobjects", false);
+            allowCreates = true;
+            allowDeletes = !cfg.GetBoolean("receive", "denydeletes", false);
+            allowNonFastForwards = !cfg.GetBoolean("receive", "denynonfastforwards", false);
+            allowOfsDelta = cfg.GetBoolean("repack", "usedeltabaseoffset", true);
+            preReceive = PreReceiveHook.NULL;
+            postReceive = PostReceiveHook.NULL;
+        }
+
+        public void receive(Stream stream, Stream messages)
+        {
+            try
+            {
+                raw = stream;
+
+                pckIn = new PacketLineIn(raw);
+                pckOut = new PacketLineOut(raw);
+
+                if (messages != null)
+                {
+                    msgs = new StreamWriter(messages);
+                }
+
+                enabledCapabilities = new List<string>();
+                commands = new List<ReceiveCommand>();
+
+                service();
+            }
+            finally
+            {
+                try
+                {
+                    if (msgs != null)
+                        msgs.Flush();
+                }
+                finally
+                {
+                    unlockPack();
+                    raw = null;
+                    pckIn = null;
+                    pckOut = null;
+                    msgs = null;
+                    refs = null;
+                    enabledCapabilities = null;
+                    commands = null;
+                }
+            }
+        }
+
+        private void service()
+        {
+            sendAdvertisedRefs();
+            recvCommands();
+            if (!commands.isEmpty())
+            {
+                enableCapabilities();
+
+                if (needPack())
+                {
+                    try
+                    {
+                        receivePack();
+                        if (isCheckReceivedObjects())
+                            checkConnectivity();
+                        unpackError = null;
+                    }
+                    catch (IOException err)
+                    {
+                        unpackError = err;
+                    }
+                    catch (Exception err)
+                    {
+                        unpackError = err;
+                    }
+                }
+
+                if (unpackError == null)
+                {
+                    validateCommands();
+                    executeCommands();
+                }
+                unlockPack();
+
+                if (reportStatus)
+                {
+                    sendStatusReport(true, new ServiceReporter(pckOut));
+                    pckOut.End();
+                }
+                else if (msgs != null)
+                {
+                    sendStatusReport(false, new MessagesReporter(msgs.BaseStream));
+                    msgs.Flush();
+                }
+
+                postReceive.OnPostReceive(this, filterCommands(ReceiveCommand.Result.OK));
+            }
+        }
+
+        private void recvCommands()
+        {
+            for (;;)
+            {
+                string line;
+                try
+                {
+                    line = pckIn.ReadStringNoLF();
+                }
+                catch (EndOfStreamException eof)
+                {
+                    if (commands.isEmpty())
+                    {
+                        return;
+                    }
+                    throw eof;
+                }
+
+                if (commands.isEmpty())
+                {
+                    int nul = line.IndexOf('\0');
+                    if (nul >= 0)
+                    {
+                        foreach (string c in line.Substring(nul + 1).Split(' '))
+                        {
+                            enabledCapabilities.Add(c);
+                        }
+                        line = line.Slice(0, nul);
+                    }
+                }
+
+                if (line.Length == 0)
+                    break;
+                if (line.Length < 83)
+                {
+                    string m = "error: invalid protocol: wanted 'old new ref'";
+                    sendError(m);
+                    throw new PackProtocolException(m);
+                }
+
+                ObjectId oldId = ObjectId.FromString(line.Slice(0, 40));
+                ObjectId newId = ObjectId.FromString(line.Slice(41, 81));
+                string name = line.Substring(82);
+                ReceiveCommand cmd = new ReceiveCommand(oldId, newId, name);
+                cmd.setRef(refs[cmd.getRefName()]);
+                commands.Add(cmd);
+            }
+        }
+
+        private void receivePack()
+        {
+            IndexPack ip = IndexPack.create(db, raw);
+            ip.setFixThin(true);
+            ip.setObjectChecking(isCheckReceivedObjects());
+            ip.index(new NullProgressMonitor());
+
+            // [caytchen] TODO: reflect gitsharp
+            string lockMsg = "jgit receive-pack";
+            if (getRefLogIdent() != null)
+                lockMsg += " from " + getRefLogIdent().ToExternalString();
+            packLock = ip.renameAndOpenPack(lockMsg);
+        }
+
+        private void sendStatusReport(bool forClient, Reporter rout)
+        {
+            if (unpackError != null)
+            {
+                rout.sendString("unpack error " + unpackError.Message);
+                if (forClient)
+                {
+                    foreach (ReceiveCommand cmd in commands)
+                    {
+                        rout.sendString("ng " + cmd.getRefName() + " n/a (unpacker error)");
+                    }
+                }
+
+                return;
+            }
+
+            if (forClient)
+                rout.sendString("unpack ok");
+            foreach (ReceiveCommand cmd in commands)
+            {
+                if (cmd.getResult() == ReceiveCommand.Result.OK)
+                {
+                    if (forClient)
+                        rout.sendString("ok " + cmd.getRefName());
+                    continue;
+                }
+
+                StringBuilder r = new StringBuilder();
+                r.Append("ng ");
+                r.Append(cmd.getRefName());
+                r.Append(" ");
+
+                switch (cmd.getResult())
+                {
+                    case ReceiveCommand.Result.NOT_ATTEMPTED:
+                        r.Append("server bug; ref not processed");
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_NOCREATE:
+                        r.Append("creation prohibited");
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_NODELETE:
+                        r.Append("deletion prohibited");
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_NONFASTFORWARD:
+                        r.Append("non-fast forward");
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_CURRENT_BRANCH:
+                        r.Append("branch is currently checked out");
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_MISSING_OBJECT:
+                        if (cmd.getMessage() == null)
+                            r.Append("missing object(s)");
+                        else if (cmd.getMessage().Length == 2 * Constants.OBJECT_ID_LENGTH)
+                            r.Append("object " + cmd.getMessage() + " missing");
+                        else
+                            r.Append(cmd.getMessage());
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_OTHER_REASON:
+                        if (cmd.getMessage() == null)
+                            r.Append("unspecified reason");
+                        else
+                            r.Append(cmd.getMessage());
+                        break;
+
+                    case ReceiveCommand.Result.LOCK_FAILURE:
+                        r.Append("failed to lock");
+                        break;
+
+                    case ReceiveCommand.Result.OK:
+                        // We shouldn't have reached this case (see 'ok' case above).
+                        continue;
+                }
+
+                rout.sendString(r.ToString());
+            }
+        }
+
+        private void sendAdvertisedRefs()
+        {
+            refs = db.Refs;
+
+            StringBuilder m = new StringBuilder(100);
+            char[] idtmp = new char[2 * Constants.OBJECT_ID_LENGTH];
+            IEnumerator<Ref> i = RefComparator.Sort(refs.Values).GetEnumerator();
+            {
+                if (i.MoveNext())
+                {
+                    Ref r = i.Current;
+                    format(m, idtmp, r.ObjectId, r.OriginalName);
+                }
+                else
+                {
+                    format(m, idtmp, ObjectId.ZeroId, "capabilities^^{}");
+                }
+                m.Append('\0');
+                m.Append(' ');
+                m.Append(CAPABILITY_DELETE_REFS);
+                m.Append(' ');
+                m.Append(CAPABILITY_REPORT_STATUS);
+                if (allowOfsDelta)
+                {
+                    m.Append(' ');
+                    m.Append(CAPABILITY_OFS_DELTA);
+                }
+                m.Append(' ');
+                writeAdvertisedRef(m);
+            }
+
+            while (i.MoveNext())
+            {
+                Ref r = i.Current;
+                format(m, idtmp, r.ObjectId, r.Name);
+                writeAdvertisedRef(m);
+            }
+            pckOut.End();
+        }
+
+        private void executeCommands()
+        {
+            preReceive.onPreReceive(this, filterCommands(ReceiveCommand.Result.NOT_ATTEMPTED));
+            foreach (ReceiveCommand cmd in filterCommands(ReceiveCommand.Result.NOT_ATTEMPTED))
+            {
+                execute(cmd);
+            }
         }
 
         public void sendError(string what)
@@ -336,6 +636,40 @@ namespace GitSharp.Transport
             }
         }
 
+        private void execute(ReceiveCommand cmd)
+        {
+            try
+            {
+                RefUpdate ru = db.UpdateRef(cmd.getRefName());
+                ru.RefLogIdent = getRefLogIdent();
+                switch (cmd.getType())
+                {
+                    case ReceiveCommand.Type.DELETE:
+                        if (!ObjectId.ZeroId.Equals(cmd.getOldId()))
+                        {
+                            ru.ExpectedOldObjectId = cmd.getOldId();
+                        }
+                        ru.IsForceUpdate = true;
+                        status(cmd, ru.Delete(walk));
+                        break;
+
+                    case ReceiveCommand.Type.CREATE:
+                    case ReceiveCommand.Type.UPDATE:
+                    case ReceiveCommand.Type.UPDATE_NONFASTFORWARD:
+                        ru.IsForceUpdate = isAllowNonFastForwards();
+                        ru.ExpectedOldObjectId = cmd.getOldId();
+                        ru.NewObjectId = cmd.getNewId();
+                        ru.SetRefLogMessage("push", true);
+                        status(cmd, ru.Update(walk));
+                        break;
+                }
+            }
+            catch (IOException err)
+            {
+                cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, "lock error: " + err.Message);
+            }
+        }
+
         private List<ReceiveCommand> filterCommands(ReceiveCommand.Result want)
         {
             List<ReceiveCommand> r = new List<ReceiveCommand>(commands.Count);
@@ -347,9 +681,74 @@ namespace GitSharp.Transport
             return r;
         }
 
+        private void status(ReceiveCommand cmd, RefUpdate.RefUpdateResult result)
+        {
+            switch (result)
+            {
+                case RefUpdate.RefUpdateResult.NotAttempted:
+                    cmd.setResult(ReceiveCommand.Result.NOT_ATTEMPTED);
+                    break;
+
+                case RefUpdate.RefUpdateResult.LockFailure:
+                case RefUpdate.RefUpdateResult.IOFailure:
+                    cmd.setResult(ReceiveCommand.Result.LOCK_FAILURE);
+                    break;
+
+                case RefUpdate.RefUpdateResult.NoChange:
+                case RefUpdate.RefUpdateResult.New:
+                case RefUpdate.RefUpdateResult.Forced:
+                case RefUpdate.RefUpdateResult.FastForward:
+                    cmd.setResult(ReceiveCommand.Result.OK);
+                    break;
+
+                case RefUpdate.RefUpdateResult.Rejected:
+                    cmd.setResult(ReceiveCommand.Result.REJECTED_NONFASTFORWARD);
+                    break;
+
+                case RefUpdate.RefUpdateResult.RejectedCurrentBranch:
+                    cmd.setResult(ReceiveCommand.Result.REJECTED_CURRENT_BRANCH);
+                    break;
+
+                default:
+                    cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, result.ToString());
+                    break;
+            }
+        }
+
         private abstract class Reporter
         {
             public abstract void sendString(string s);
+        }
+
+        private class ServiceReporter : Reporter
+        {
+            private readonly PacketLineOut pckOut;
+
+            public ServiceReporter(PacketLineOut pck)
+            {
+                pckOut = pck;
+            }
+
+            public override void sendString(string s)
+            {
+                pckOut.WriteString(s + "\n");
+            }
+        }
+
+        private class MessagesReporter : Reporter
+        {
+            private readonly Stream stream;
+
+            public MessagesReporter(Stream ms)
+            {
+                stream = ms;
+            }
+
+            public override void sendString(string s)
+            {
+                byte[] data = Constants.Encoding.GetBytes(s);
+                stream.Write(data, 0, data.Length);
+            }
         }
     }
 

@@ -280,7 +280,9 @@
     <Compile Include="TreeWalk\NameConflictTreeWalk.cs" />
     <Compile Include="TreeWalk\TreeWalk.cs" />
     <Compile Include="TreeWalk\WorkingTreeIterator.cs" />
-    <Compile Include="Util\DigestOutputStream.cs" />    <Compile Include="Util\Array.cs" />
+    <Compile Include="Util\Arrays.cs" />
+    <Compile Include="Util\DigestOutputStream.cs" />
+    <Compile Include="Util\Array.cs" />
     <Compile Include="Util\IListUtil.cs" />
     <Compile Include="Util\ICharSequence.cs" />
     <Compile Include="Util\IntList.cs" />

@@ -224,6 +224,7 @@
     <Compile Include="Transport\BaseConnection.cs" />
     <Compile Include="Transport\BasePackConnection.cs" />
     <Compile Include="Transport\BasePackFetchConnection.cs" />
+    <Compile Include="Transport\BasePackPushConnection.cs" />
     <Compile Include="Transport\Daemon.cs" />
     <Compile Include="Transport\DaemonClient.cs" />
     <Compile Include="Transport\DaemonService.cs" />
@@ -233,6 +234,7 @@
     <Compile Include="Transport\IFetchConnection.cs" />
     <Compile Include="Transport\IConnection.cs" />
     <Compile Include="Transport\IndexPack.cs" />
+    <Compile Include="Transport\IPreReceiveHook.cs" />
     <Compile Include="Transport\IPushConnection.cs" />
     <Compile Include="Transport\IPackTransport.cs" />
     <Compile Include="Transport\OperationResult.cs" />
@@ -242,6 +244,7 @@
     <Compile Include="PackOutputStream.cs" />
     <Compile Include="Transport\PushResult.cs" />
     <Compile Include="Transport\ReceiveCommand.cs" />
+    <Compile Include="Transport\ReceivePack.cs" />
     <Compile Include="Transport\RefSpec.cs" />
     <Compile Include="Transport\RemoteConfig.cs" />
     <Compile Include="Transport\RemoteRefUpdate.cs" />
@@ -269,6 +272,7 @@
     <Compile Include="TreeWalk\TreeWalk.cs" />
     <Compile Include="TreeWalk\WorkingTreeIterator.cs" />
     <Compile Include="Util\Array.cs" />
+    <Compile Include="Util\IListUtil.cs" />
     <Compile Include="Util\ICharSequence.cs" />
     <Compile Include="Util\IntList.cs" />
     <Compile Include="Util\ListIterator.cs" />

@@ -386,7 +386,6 @@ namespace GitSharp
 
         private void searchForReuse(List<PackedObjectLoader> reuseLoaders, ObjectToPack otp)
         {
-            // [caytchen] TODO: OpenObjectInAllPacks for Repository.. seems Rep. is missing packs handling?
             db.openObjectInAllPacks(otp, reuseLoaders, windowCursor);
             if (reuseDeltas)
                 selectDeltaReuseForObject(otp, reuseLoaders);

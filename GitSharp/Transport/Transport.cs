@@ -39,6 +39,7 @@
 
 using System;
 using System.Collections.Generic;
+using GitSharp.Util;
 
 namespace GitSharp.Transport
 {
@@ -51,7 +52,7 @@ namespace GitSharp.Transport
  * implementation is responsible for the details associated with establishing
  * the network connection(s) necessary for the copy, as well as actually
  * shuffling data back and forth.
- * <p>
+ * </p>
  * Transport instances and the connections they create are not thread-safe.
  * Callers must ensure a transport is accessed by only one thread at a time.
  */
@@ -66,6 +67,20 @@ namespace GitSharp.Transport
             return Open(local, cfg);
         }
 
+        public static List<Transport> openAll(Repository local, string remote)
+        {
+            RemoteConfig cfg = new RemoteConfig(local.Config, remote);
+            List<URIish> uris = cfg.URIs;
+            if (uris.isEmpty())
+            {
+                List<Transport> transports = new List<Transport>(1);
+                transports.Add(Open(local, new URIish(remote)));
+                return transports;
+            }
+
+            return openAll(local, cfg);
+        }
+
         public static Transport Open(Repository local, RemoteConfig cfg)
         {
             if (cfg.URIs.Count == 0)
@@ -74,6 +89,19 @@ namespace GitSharp.Transport
             Transport tn = Open(local, cfg.URIs[0]);
             tn.ApplyConfig(cfg);
             return tn;
+        }
+
+        public static List<Transport> openAll(Repository local, RemoteConfig cfg)
+        {
+            List<URIish> uris = cfg.URIs;
+            List<Transport> tranports = new List<Transport>(uris.Count);
+            foreach (URIish uri in uris)
+            {
+                Transport tn = Open(local, uri);
+                tn.ApplyConfig(cfg);
+                tranports.Add(tn);
+            }
+            return tranports;
         }
 
         /**
@@ -249,5 +277,10 @@ namespace GitSharp.Transport
             OptionReceivePack = cfg.ReceivePack;
             push = cfg.Push;
         }
+
+        public abstract IFetchConnection openFetch();
+        public abstract IPushConnection openPush();
+        public abstract void close();
+
     }
 }

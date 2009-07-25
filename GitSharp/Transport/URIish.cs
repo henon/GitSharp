@@ -43,11 +43,11 @@ using System.Text.RegularExpressions;
 namespace GitSharp.Transport
 {
     /**
- * This URI like construct used for referencing Git archives over the net, as
- * well as locally stored archives. The most important difference compared to
- * RFC 2396 URI's is that no URI encoding/decoding ever takes place. A space or
- * any special character is written as-is.
- */
+     * This URI like construct used for referencing Git archives over the net, as
+     * well as locally stored archives. The most important difference compared to
+     * RFC 2396 URI's is that no URI encoding/decoding ever takes place. A space or
+     * any special character is written as-is.
+     */
     public class URIish
     {
         private static readonly Regex FULL_URI =
@@ -64,11 +64,11 @@ namespace GitSharp.Transport
         public string Host { get; private set; }
 
         /**
- * Construct a URIish from a standard URL.
- *
- * @param u
- *            the source URL to convert from.
- */
+         * Construct a URIish from a standard URL.
+         *
+         * @param u
+         *            the source URL to convert from.
+         */
         public URIish(Uri u)
         {
             Scheme = u.Scheme;
@@ -86,23 +86,30 @@ namespace GitSharp.Transport
         }
 
         /**
- * Parse and construct an {@link URIish} from a string
- * 
- * @param s
- * @throws URISyntaxException
- */
+         * Parse and construct an {@link URIish} from a string
+         * 
+         * @param s
+         * @throws URISyntaxException
+         */
         public URIish(string s)
         {
             s = s.Replace('\\', '/');
             Match matcher = FULL_URI.Match(s);
+            Port = -1;
             if (matcher.Success)
             {
                 Scheme = matcher.Groups[1].Value;
+                Scheme = Scheme == string.Empty ? null : Scheme;
                 User = matcher.Groups[2].Value;
+                User = User == string.Empty ? null : User;
                 Pass = matcher.Groups[3].Value;
+                Pass = Pass == string.Empty ? null : Pass;
                 Host = matcher.Groups[4].Value;
+                Host = Host == string.Empty ? null : Host;
                 if (matcher.Groups[5].Success)
+                {
                     Port = int.Parse(matcher.Groups[5].Value);
+                }
                 Path = matcher.Groups[6].Value;
                 if (Path.Length >= 3 && Path[0] == '/' && Path[2] == ':' && (Path[1] >= 'A' && Path[1] <= 'Z' || Path[1] >= 'a' && Path[1] <= 'z'))
                     Path = Path.Substring(1);
@@ -113,8 +120,11 @@ namespace GitSharp.Transport
                 if (matcher.Success)
                 {
                     User = matcher.Groups[1].Value;
+                    User = User == string.Empty ? null : User;
                     Host = matcher.Groups[2].Value;
+                    Host = Host == string.Empty ? null : Host;
                     Path = matcher.Groups[3].Value;
+                    Path = Path == string.Empty ? null : Path;
                 }
                 else
                 {
@@ -140,8 +150,8 @@ namespace GitSharp.Transport
         }
 
         /**
- * @return true if this URI references a repository on another system.
- */
+         * @return true if this URI references a repository on another system.
+         */
         public bool IsRemote
         {
             get
@@ -151,72 +161,72 @@ namespace GitSharp.Transport
         }
 
         /**
- * Return a new URI matching this one, but with a different host.
- * 
- * @param n
- *            the new value for host.
- * @return a new URI with the updated value.
- */
+         * Return a new URI matching this one, but with a different host.
+         * 
+         * @param n
+         *            the new value for host.
+         * @return a new URI with the updated value.
+         */
         public URIish SetHost(string n)
         {
             return new URIish(this) { Host = n };
         }
 
         /**
- * Return a new URI matching this one, but with a different scheme.
- * 
- * @param n
- *            the new value for scheme.
- * @return a new URI with the updated value.
- */
+         * Return a new URI matching this one, but with a different scheme.
+         * 
+         * @param n
+         *            the new value for scheme.
+         * @return a new URI with the updated value.
+         */
         public URIish SetScheme(string n)
         {
             return new URIish(this) { Scheme = n };
         }
 
         /**
- * Return a new URI matching this one, but with a different path.
- * 
- * @param n
- *            the new value for path.
- * @return a new URI with the updated value.
- */
+         * Return a new URI matching this one, but with a different path.
+         * 
+         * @param n
+         *            the new value for path.
+         * @return a new URI with the updated value.
+         */
         public URIish SetPath(string n)
         {
             return new URIish(this) { Path = n };
         }
 
         /**
- * Return a new URI matching this one, but with a different user.
- * 
- * @param n
- *            the new value for user.
- * @return a new URI with the updated value.
- */
+         * Return a new URI matching this one, but with a different user.
+         * 
+         * @param n
+         *            the new value for user.
+         * @return a new URI with the updated value.
+         */
         public URIish SetUser(string n)
         {
             return new URIish(this) { User = n };
         }
 
         /**
- * Return a new URI matching this one, but with a different password.
- * 
- * @param n
- *            the new value for password.
- * @return a new URI with the updated value.
- */
+         * Return a new URI matching this one, but with a different password.
+         * 
+         * @param n
+         *            the new value for password.
+         * @return a new URI with the updated value.
+         */
         public URIish SetPass(string n)
         {
             return new URIish(this) { Pass = n };
         }
 
         /**
- * Return a new URI matching this one, but with a different port.
- * 
- * @param n
- *            the new value for port.
- * @return a new URI with the updated value.
- */
+         * Return a new URI matching this one, but with a different port.
+         * 
+         * @param n
+         *            the new value for port.
+         * @return a new URI with the updated value.
+         */
         public URIish SetPort(int n)
         {
             return new URIish(this) { Port = (n > 0 ? n : -1) };
@@ -263,10 +273,10 @@ namespace GitSharp.Transport
         }
 
         /**
- * Obtain the string form of the URI, with the password included.
- *
- * @return the URI, including its password field, if any.
- */
+         * Obtain the string form of the URI, with the password included.
+         *
+         * @return the URI, including its password field, if any.
+         */
         public string ToPrivateString()
         {
             return format(true);

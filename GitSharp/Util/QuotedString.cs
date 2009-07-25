@@ -139,7 +139,7 @@ namespace GitSharp.Util
 				    switch (in_str[i]) {
 				    case '\'':
 				    case '!':
-					    r.Append(in_str, start, i);
+					    r.Append(in_str, start, i - start);
 					    r.Append('\'');
 					    r.Append('\\');
 					    r.Append(in_str[i]);
@@ -148,7 +148,8 @@ namespace GitSharp.Util
 					    break;
 				    }
 			    }
-			    r.Append(in_str, start, i);
+
+                r.Append(in_str, start, i - start);
 			    r.Append('\'');
 			    return r.ToString();
 		    }

@@ -177,7 +177,7 @@ namespace GitSharp.Tests
         [Test]
 	    public void testQuote_OctalAll()
         {
-		    assertQuote("\\001", "\\1");
+		    assertQuote("\\001", new string((char)1,1));
 		    assertQuote("\\176", "~");
 		    assertQuote("\\303\\277", "\u00ff"); // \u00ff in UTF-8
 	    }

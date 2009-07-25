@@ -213,14 +213,14 @@ namespace GitSharp.Util
 	    /** Quoting style that obeys the rules Git applies to file names */
 	    public sealed class GitPathStyle : QuotedString
         {
-		    private static readonly byte[] quote_m;
+		    private static readonly int[] quote_m;
 		    
             static GitPathStyle()
             {
-                quote_m = new byte[128];
+                quote_m = new int[128];
                 for (int i = 0; i < quote_m.Length; i++)
                 {
-                    quote_m[i] = byte.MaxValue;
+                    quote_m[i] = -1;
                 }
 
 			    for (int i = '0'; i <= '9'; i++)
@@ -239,15 +239,15 @@ namespace GitSharp.Util
                 quote_m['_'] = 0;
                 quote_m['^'] = 0;
 
-                quote_m['\u0007'] = (byte)'a';
-                quote_m['\b'] = (byte)'b';
-                quote_m['\f'] = (byte)'f';
-                quote_m['\n'] = (byte)'n';
-                quote_m['\r'] = (byte)'r';
-                quote_m['\t'] = (byte)'t';
-                quote_m['\u000B'] = (byte)'v';
-                quote_m['\\'] = (byte)'\\';
-                quote_m['"'] = (byte)'"';
+                quote_m['\u0007'] = (int)'a';
+                quote_m['\b'] = (int)'b';
+                quote_m['\f'] = (int)'f';
+                quote_m['\n'] = (int)'n';
+                quote_m['\r'] = (int)'r';
+                quote_m['\t'] = (int)'t';
+                quote_m['\u000B'] = (int)'v';
+                quote_m['\\'] = (int)'\\';
+                quote_m['"'] = (int)'"';
 		    }
 
 		    public override String quote(String instr)
@@ -262,7 +262,7 @@ namespace GitSharp.Util
 				    int c = in_str[i] & 0xff;
                     if (c < quote_m.Length)
                     {
-                        byte style = quote_m[c];
+                        int style = quote_m[c];
 					    if (style == 0) {
 						    r.Append((char) c);
 						    continue;

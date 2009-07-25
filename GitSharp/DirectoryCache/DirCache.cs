@@ -61,35 +61,33 @@ namespace GitSharp.DirectoryCache
      */
     public class DirCache
     {
-        private static byte[] SIG_DIRC = { 'D', 'I', 'R', 'C' };
+        private static byte[] SIG_DIRC = { (byte)'D', (byte)'I', (byte)'R', (byte)'C' };
 
-        private static int EXT_TREE = 0x54524545 /* 'TREE' */;
+        private const int EXT_TREE = 0x54524545 /* 'TREE' */;
 
-        private static int INFO_LEN = DirCacheEntry.INFO_LEN;
+        private const int INFO_LEN = DirCacheEntry.INFO_LEN;
 
         private static DirCacheEntry[] NO_ENTRIES = { };
 
-        //static  Comparator<DirCacheEntry> ENT_CMP = new Comparator<DirCacheEntry>() {
-        //    public int compare( DirCacheEntry o1,  DirCacheEntry o2) {
-        //         int cr = cmp(o1, o2);
-        //        if (cr != 0)
-        //            return cr;
-        //        return o1.getStage() - o2.getStage();
-        //    }
-        //};
+        public static Comparison<DirCacheEntry> ENT_CMP = (o1, o2) =>
+        {
+            int cr = cmp(o1, o2);
+            if (cr != 0)
+                return cr;
+            return o1.getStage() - o2.getStage();
+        };
 
         public static int cmp(DirCacheEntry a, DirCacheEntry b)
         {
-            return cmp(a.path, a.path.length, b);
+            return cmp(a.path, a.path.Length, b);
         }
 
         public static int cmp(byte[] aPath, int aLen, DirCacheEntry b)
         {
-            return cmp(aPath, aLen, b.path, b.path.length);
+            return cmp(aPath, aLen, b.path, b.path.Length);
         }
 
-        static int cmp(byte[] aPath, int aLen, byte[] bPath,
-                 int bLen)
+        public static int cmp(byte[] aPath, int aLen, byte[] bPath, int bLen)
         {
             for (int cPos = 0; cPos < aLen && cPos < bLen; cPos++)
             {
@@ -129,7 +127,7 @@ namespace GitSharp.DirectoryCache
          *             the index file is using a format or extension that this
          *             library does not support.
          */
-        public static DirCache read(File indexLocation)
+        public static DirCache read(FileInfo indexLocation)
         {
             DirCache c = new DirCache(indexLocation);
             c.read();
@@ -155,7 +153,7 @@ namespace GitSharp.DirectoryCache
          */
         public static DirCache read(Repository db)
         {
-            return read(new File(db.getDirectory(), "index"));
+            return read(new FileInfo(db.Directory + "index"));
         }
 
         /**
@@ -177,7 +175,7 @@ namespace GitSharp.DirectoryCache
          *             the index file is using a format or extension that this
          *             library does not support.
          */
-        public static DirCache Lock(File indexLocation)
+        public static DirCache Lock(FileInfo indexLocation)
         {
             DirCache c = new DirCache(indexLocation);
             if (!c.Lock())
@@ -187,22 +185,11 @@ namespace GitSharp.DirectoryCache
             {
                 c.read();
             }
-            catch (IOException e)
+            catch (Exception e)
             {
                 c.unlock();
                 throw e;
             }
-            catch (RuntimeException e)
-            {
-                c.unlock();
-                throw e;
-            }
-            catch (Error e)
-            {
-                c.unlock();
-                throw e;
-            }
-
             return c;
         }
 
@@ -226,14 +213,14 @@ namespace GitSharp.DirectoryCache
          */
         public static DirCache Lock(Repository db)
         {
-            return Lock(new File(db.getDirectory(), "index"));
+            return Lock(new FileInfo(db.Directory + "index"));
         }
 
         /** Location of the current version of the index file. */
-        private File liveFile;
+        private FileInfo liveFile;
 
         /** Modification time of the file at the last read/write we did. */
-        private long lastModified;
+        private DateTime lastModified;
 
         /** Individual file index entries, sorted by path name. */
         private DirCacheEntry[] sortedEntries;
@@ -256,7 +243,7 @@ namespace GitSharp.DirectoryCache
          * @param indexLocation
          *            location of the index file on disk.
          */
-        public DirCache(File indexLocation)
+        public DirCache(FileInfo indexLocation)
         {
             liveFile = indexLocation;
             clear();
@@ -288,7 +275,7 @@ namespace GitSharp.DirectoryCache
             return new DirCacheEditor(this, entryCnt + 16);
         }
 
-        void replace(DirCacheEntry[] e, int cnt)
+        public void replace(DirCacheEntry[] e, int cnt)
         {
             sortedEntries = e;
             entryCnt = cnt;
@@ -313,13 +300,13 @@ namespace GitSharp.DirectoryCache
         {
             if (liveFile == null)
                 throw new IOException("DirCache does not have a backing file");
-            if (!liveFile.exists())
+            if (!liveFile.Exists)
                 clear();
-            else if (liveFile.lastModified() != lastModified)
+            else if (liveFile.LastAccessTime != lastModified)
             {
                 try
                 {
-                    FileInputStream inStream = new FileInputStream(liveFile);
+                    var inStream = new FileStream(liveFile.FullName, System.IO.FileMode.Open, FileAccess.Read);
                     try
                     {
                         clear();
@@ -329,7 +316,7 @@ namespace GitSharp.DirectoryCache
                     {
                         try
                         {
-                            inStream.close();
+                            inStream.Close();
                         }
                         catch (IOException err2)
                         {
@@ -350,7 +337,7 @@ namespace GitSharp.DirectoryCache
         /** Empty this index, removing all entries. */
         public void clear()
         {
-            lastModified = 0;
+            lastModified = DateTime.MinValue;
             sortedEntries = NO_ENTRIES;
             entryCnt = 0;
             tree = null;
@@ -364,8 +351,8 @@ namespace GitSharp.DirectoryCache
             // Read the index header and verify we understand it.
             //
             byte[] hdr = new byte[20];
-            NB.readFully(@in, hdr, 0, 12);
-            md.update(hdr, 0, 12);
+            NB.ReadFully(inStream, hdr, 0, 12);
+            md.Update(hdr, 0, 12);
             if (!is_DIRC(hdr))
                 throw new CorruptObjectException("Not a DIRC file.");
             int ver = NB.decodeInt32(hdr, 4);
@@ -380,43 +367,43 @@ namespace GitSharp.DirectoryCache
             byte[] infos = new byte[INFO_LEN * entryCnt];
             sortedEntries = new DirCacheEntry[entryCnt];
             for (int i = 0; i < entryCnt; i++)
-                sortedEntries[i] = new DirCacheEntry(infos, i * INFO_LEN, @in, md);
-            lastModified = liveFile.lastModified();
+                sortedEntries[i] = new DirCacheEntry(infos, i * INFO_LEN, inStream, md);
+            lastModified = liveFile.LastAccessTime;
 
             // After the file entries are index extensions, and then a footer.
             //
             for (; ; )
             {
-                @in.mark(21);
-                NB.readFully(@in, hdr, 0, 20);
-                if (@in.read() < 0)
+                var pos = inStream.Position;
+                NB.ReadFully(inStream, hdr, 0, 20);
+                if (@in.Read() < 0)
                 {
                     // No extensions present; the file ended where we expected.
                     //
                     break;
                 }
-                @in.reset();
+                inStream.Seek(pos, SeekOrigin.Begin);
 
                 switch (NB.decodeInt32(hdr, 0))
                 {
                     case EXT_TREE:
                         {
                             byte[] raw = new byte[NB.decodeInt32(hdr, 4)];
-                            md.update(hdr, 0, 8);
-                            NB.skipFully(@in, 8);
-                            NB.readFully(@in, raw, 0, raw.length);
-                            md.update(raw, 0, raw.length);
+                            md.Update(hdr, 0, 8);
+                            NB.skipFully(inStream, 8);
+                            NB.ReadFully(inStream, raw, 0, raw.Length);
+                            md.Update(raw, 0, raw.Length);
                             tree = new DirCacheTree(raw, new MutableInteger(), null);
                             break;
                         }
                     default:
-                        if (hdr[0] >= 'A' && hdr[0] <= 'Z')
+                        if (hdr[0] >= (byte)'A' && hdr[0] <= (byte)'Z')
                         {
                             // The extension is optional and is here only as
                             // a performance optimization. Since we do not
                             // understand it, we can safely skip past it.
                             //
-                            NB.skipFully(@in, NB.decodeUInt32(hdr, 4));
+                            NB.skipFully(inStream, NB.decodeUInt32(hdr, 4));
                         }
                         else
                         {
@@ -425,15 +412,15 @@ namespace GitSharp.DirectoryCache
                             // Since we did not trap it above we must abort.
                             //
                             throw new CorruptObjectException("DIRC extension '"
-                                    + Constants.CHARSET.decode(
-                                            ByteBuffer.wrap(hdr, 0, 4)).toString()
+                                    + Constants.CHARSET.GetString(hdr.Take(4).ToArray())
                                     + "' not supported by this version.");
                         }
+                        break;
                 }
             }
 
-            byte[] exp = md.digest();
-            if (!Arrays.equals(exp, hdr))
+            byte[] exp = md.Digest();
+            if (!Enumerable.Equals(exp, hdr))
             {
                 throw new CorruptObjectException("DIRC checksum mismatch");
             }
@@ -441,9 +428,9 @@ namespace GitSharp.DirectoryCache
 
         private static bool is_DIRC(byte[] hdr)
         {
-            if (hdr.length < SIG_DIRC.length)
+            if (hdr.Length < SIG_DIRC.Length)
                 return false;
-            for (int i = 0; i < SIG_DIRC.length; i++)
+            for (int i = 0; i < SIG_DIRC.Length; i++)
                 if (hdr[i] != SIG_DIRC[i])
                     return false;
             return true;
@@ -465,7 +452,7 @@ namespace GitSharp.DirectoryCache
             LockFile tmp = new LockFile(liveFile);
             if (tmp.Lock())
             {
-                tmp.setNeedStatInformation(true);
+                tmp.NeedStatInformation=true;
                 myLock = tmp;
                 return true;
             }
@@ -493,26 +480,16 @@ namespace GitSharp.DirectoryCache
             requireLocked(tmp);
             try
             {
-                writeTo(new BufferedOutputStream(tmp.getOutputStream()));
+                writeTo(tmp.GetOutputStream());
             }
-            catch (IOException err)
+            catch (Exception err)
             {
-                tmp.unlock();
-                throw err;
-            }
-            catch (RuntimeException err)
-            {
-                tmp.unlock();
-                throw err;
-            }
-            catch (Error err)
-            {
-                tmp.unlock();
+                tmp.Unlock();
                 throw err;
             }
         }
 
-        private void writeTo(FileStream os)
+        private void writeTo(Stream os)
         {
             MessageDigest foot = Constants.newMessageDigest();
             DigestOutputStream dos = new DigestOutputStream(os, foot);
@@ -520,14 +497,14 @@ namespace GitSharp.DirectoryCache
             // Write the header.
             //
             byte[] tmp = new byte[128];
-            System.arraycopy(SIG_DIRC, 0, tmp, 0, SIG_DIRC.length);
+            Array.Copy(SIG_DIRC, 0, tmp, 0, SIG_DIRC.Length);
             NB.encodeInt32(tmp, 4, /* version */2);
             NB.encodeInt32(tmp, 8, entryCnt);
             dos.Write(tmp, 0, 12);
 
             // Write the individual file entries.
             //
-            if (lastModified <= 0)
+            if (lastModified == DateTime.MinValue)
             {
                 // Write a new index, as no entries require smudging.
                 //
@@ -536,8 +513,8 @@ namespace GitSharp.DirectoryCache
             }
             else
             {
-                int smudge_s = (int)(lastModified / 1000);
-                int smudge_ns = ((int)(lastModified % 1000)) * 1000000;
+                int smudge_s = (int)(lastModified.ToGitInternalTime());
+                int smudge_ns = (int)(lastModified.Millisecond * 1000000); // [henon] <--- this could be done with much more precision in C# since DateTime has 100 nanosec ticks
                 for (int i = 0; i < entryCnt; i++)
                 {
                     DirCacheEntry e = sortedEntries[i];
@@ -554,7 +531,7 @@ namespace GitSharp.DirectoryCache
                 bb.close();
 
                 NB.encodeInt32(tmp, 0, EXT_TREE);
-                NB.encodeInt32(tmp, 4, (int)bb.length());
+                NB.encodeInt32(tmp, 4, (int)bb.Length());
                 dos.write(tmp, 0, 8);
                 bb.writeTo(dos, null);
             }
@@ -571,7 +548,7 @@ namespace GitSharp.DirectoryCache
          * @return true if the commit was successful and the file contains the new
          *         data; false if the commit failed and the file remains with the
          *         old data.
-         * @throws IllegalStateException
+         * @throws InvalidOperationException
          *             the lock is not held.
          */
         public bool commit()
@@ -588,10 +565,10 @@ namespace GitSharp.DirectoryCache
         private void requireLocked(LockFile tmp)
         {
             if (liveFile == null)
-                throw new IllegalStateException("DirCache is not locked");
+                throw new InvalidOperationException("DirCache is not locked");
             if (tmp == null)
-                throw new IllegalStateException("DirCache "
-                        + liveFile.getAbsolutePath() + " not locked.");
+                throw new InvalidOperationException("DirCache "
+                        + liveFile.FullName + " not locked.");
         }
 
         /**
@@ -605,7 +582,7 @@ namespace GitSharp.DirectoryCache
             if (tmp != null)
             {
                 myLock = null;
-                tmp.unlock();
+                tmp.Unlock();
             }
         }
 
@@ -630,22 +607,22 @@ namespace GitSharp.DirectoryCache
             if (entryCnt == 0)
                 return -1;
             byte[] p = Constants.encode(path);
-            return findEntry(p, p.length);
+            return findEntry(p, p.Length);
         }
 
-        int findEntry(byte[] p, int pLen)
+        public int findEntry(byte[] p, int pLen)
         {
             int low = 0;
             int high = entryCnt;
             do
             {
                 int mid = (int)(((uint)(low + high)) >> 1);
-                int cmp = cmp(p, pLen, sortedEntries[mid]);
+                int cmp = DirCache.cmp(p, pLen, sortedEntries[mid]);
                 if (cmp < 0)
                     high = mid;
                 else if (cmp == 0)
                 {
-                    while (mid > 0 && cmp(p, pLen, sortedEntries[mid - 1]) == 0)
+                    while (mid > 0 && DirCache.cmp(p, pLen, sortedEntries[mid - 1]) == 0)
                         mid--;
                     return mid;
                 }
@@ -681,7 +658,7 @@ namespace GitSharp.DirectoryCache
             return nextIdx;
         }
 
-        int nextEntry(byte[] p, int pLen, int nextIdx)
+        public int nextEntry(byte[] p, int pLen, int nextIdx)
         {
             while (nextIdx < entryCnt)
             {
@@ -743,26 +720,25 @@ namespace GitSharp.DirectoryCache
          *            the subtree path to get all entries within.
          * @return all entries recursively contained within the subtree.
          */
-        public DirCacheEntry[] getEntriesWithin(String path)
+        public DirCacheEntry[] getEntriesWithin(string path)
         {
-            if (!path.endsWith("/"))
+            if (!path.EndsWith("/"))
                 path += "/";
             byte[] p = Constants.encode(path);
-            int pLen = p.length;
+            int pLen = p.Length;
 
             int eIdx = findEntry(p, pLen);
             if (eIdx < 0)
                 eIdx = -(eIdx + 1);
             int lastIdx = nextEntry(p, pLen, eIdx);
             DirCacheEntry[] r = new DirCacheEntry[lastIdx - eIdx];
-            System.arraycopy(sortedEntries, eIdx, r, 0, r.length);
+            Array.Copy(sortedEntries, eIdx, r, 0, r.Length);
             return r;
         }
 
-        void toArray(int i, DirCacheEntry[] dst, int off,
-                 int cnt)
+        public void toArray(int i, DirCacheEntry[] dst, int off, int cnt)
         {
-            System.arraycopy(sortedEntries, i, dst, off, cnt);
+            Array.Copy(sortedEntries, i, dst, off, cnt);
         }
 
         /**

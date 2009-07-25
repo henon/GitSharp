@@ -66,7 +66,7 @@ namespace GitSharp.DirectoryCache
         {
             byte[] a = o1.path;
             byte[] b = o2.path;
-            return DirCache.cmp(a, a.length, b, b.length);
+            return DirCache.cmp(a, a.Length, b, b.Length);
         };
 
         private List<PathEdit> edits;
@@ -80,7 +80,7 @@ namespace GitSharp.DirectoryCache
          *            estimated number of entries the editor will have upon
          *            completion. This sizes the initial entry table.
          */
-        protected DirCacheEditor(DirCache dc, int ecnt)
+        public DirCacheEditor(DirCache dc, int ecnt)
             : base(dc, ecnt)
         {
             edits = new List<PathEdit>();
@@ -98,25 +98,25 @@ namespace GitSharp.DirectoryCache
          */
         public void add(PathEdit edit)
         {
-            edits.add(edit);
+            edits.Add(edit);
         }
 
         public override bool commit()
         {
-            if (edits.isEmpty())
+            if (edits.Count == 0) // isEmpty()
             {
                 // No changes? Don't rewrite the index.
                 //
                 cache.unlock();
                 return true;
             }
-            return super.commit();
+            return base.commit();
         }
 
-        public void finish()
+        public override void finish()
         {
-            if (!edits.isEmpty())
-            {
+            if (edits.Count > 0) // !edits.isEmpty()
+            { 
                 applyEdits();
                 replace();
             }
@@ -130,11 +130,11 @@ namespace GitSharp.DirectoryCache
             int lastIdx = 0;
             foreach (PathEdit e in edits)
             {
-                int eIdx = cache.findEntry(e.path, e.path.length);
-                boolean missing = eIdx < 0;
+                int eIdx = cache.findEntry(e.path, e.path.Length);
+                bool missing = eIdx < 0;
                 if (eIdx < 0)
                     eIdx = -(eIdx + 1);
-                int cnt = Math.min(eIdx, maxIdx) - lastIdx;
+                int cnt = Math.Min(eIdx, maxIdx) - lastIdx;
                 if (cnt > 0)
                     fastKeep(lastIdx, cnt);
                 lastIdx = missing ? eIdx : cache.nextEntry(eIdx);
@@ -143,7 +143,7 @@ namespace GitSharp.DirectoryCache
                     continue;
                 if (e is DeleteTree)
                 {
-                    lastIdx = cache.nextEntry(e.path, e.path.length, eIdx);
+                    lastIdx = cache.nextEntry(e.path, e.path.Length, eIdx);
                     continue;
                 }
 
@@ -156,9 +156,9 @@ namespace GitSharp.DirectoryCache
                 fastAdd(ent);
             }
 
-            int cnt = maxIdx - lastIdx;
-            if (cnt > 0)
-                fastKeep(lastIdx, cnt);
+            int count = maxIdx - lastIdx;
+            if (count > 0)
+                fastKeep(lastIdx, count);
         }
 
         /**
@@ -172,7 +172,7 @@ namespace GitSharp.DirectoryCache
          */
         public abstract class PathEdit
         {
-            byte[] path;
+            public byte[] path;
 
             /**
              * Create a new update command by path name.
@@ -244,9 +244,9 @@ namespace GitSharp.DirectoryCache
             {
             }
 
-            public void apply(DirCacheEntry ent)
+            public override void apply(DirCacheEntry ent)
             {
-                throw new InvalidOperationException("No apply in delete");
+                throw new NotSupportedException("No apply in delete");
             }
         }
 
@@ -273,13 +273,13 @@ namespace GitSharp.DirectoryCache
              *            only the subtree's contents are matched by the command.
              */
             public DeleteTree(String entryPath)
-                : base(entryPath.endsWith("/") ? entryPath : entryPath + "/")
+                : base(entryPath.EndsWith("/") ? entryPath : entryPath + "/")
             {
             }
 
-            public void apply(DirCacheEntry ent)
+            public override void apply(DirCacheEntry ent)
             {
-                throw new UnsupportedOperationException("No apply in delete");
+                throw new NotSupportedException("No apply in delete");
             }
         }
     }

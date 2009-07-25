@@ -48,6 +48,7 @@ using MbUnit.Framework;
 using MbUnit.Framework.ContractVerifiers;
 using System.IO;
 using GitSharp.Util;
+using GitSharp.Exceptions;
 
 namespace GitSharp.DirectoryCache
 {
@@ -76,8 +77,8 @@ namespace GitSharp.DirectoryCache
         {
             byte[] a = o1.encodedName;
             byte[] b = o2.encodedName;
-            int aLen = a.length;
-            int bLen = b.length;
+            int aLen = a.Length;
+            int bLen = b.Length;
             int cPos;
             for (cPos = 0; cPos < aLen && cPos < bLen; cPos++)
             {
@@ -122,7 +123,7 @@ namespace GitSharp.DirectoryCache
         {
             parent = myParent;
             encodedName = new byte[pathLen];
-            System.arraycopy(path, pathOff, encodedName, 0, pathLen);
+            Array.Copy(path, pathOff, encodedName, 0, pathLen);
             children = NO_CHILDREN;
             childCnt = 0;
             entrySpan = -1;
@@ -133,48 +134,48 @@ namespace GitSharp.DirectoryCache
         {
             parent = myParent;
 
-            int ptr = RawParseUtils.next(@in, off.value, '\0');
+            int ptr = RawParseUtils.next(@in, off.value, (byte)'\0');
             int nameLen = ptr - off.value - 1;
             if (nameLen > 0)
             {
                 encodedName = new byte[nameLen];
-                System.arraycopy(@in, off.value, encodedName, 0, nameLen);
+                Array.Copy(@in, off.value, encodedName, 0, nameLen);
             }
             else
                 encodedName = NO_NAME;
 
             entrySpan = RawParseUtils.parseBase10(@in, ptr, off);
             int subcnt = RawParseUtils.parseBase10(@in, off.value, off);
-            off.value = RawParseUtils.next(@in, off.value, '\n');
+            off.value = RawParseUtils.next(@in, off.value, (byte)'\n');
 
             if (entrySpan >= 0)
             {
                 // Valid trees have a positive entry count and an id of a
                 // tree object that should exist in the object database.
                 //
-                id = ObjectId.fromRaw(@in, off.value);
+                id = ObjectId.FromRaw(@in, off.value);
                 off.value += Constants.OBJECT_ID_LENGTH;
             }
 
             if (subcnt > 0)
             {
-                boolean alreadySorted = true;
+                bool alreadySorted = true;
                 children = new DirCacheTree[subcnt];
                 for (int i = 0; i < subcnt; i++)
                 {
                     children[i] = new DirCacheTree(@in, off, this);
 
                     // C Git's ordering differs from our own; it prefers to
-                    // sort by length first. This sometimes produces a sort
+                    // sort by Length first. This sometimes produces a sort
                     // we do not desire. On the other hand it may have been
                     // created by us, and be sorted the way we want.
                     //
                     if (alreadySorted && i > 0
-                            && TREE_CMP.compare(children[i - 1], children[i]) > 0)
+                            && TREE_CMP(children[i - 1], children[i]) > 0)
                         alreadySorted = false;
                 }
                 if (!alreadySorted)
-                    Arrays.sort(children, 0, subcnt, TREE_CMP);
+                    Array.Sort(children, TREE_CMP);
             }
             else
             {
@@ -185,21 +186,21 @@ namespace GitSharp.DirectoryCache
             childCnt = subcnt;
         }
 
-        public void write(byte[] tmp, Stream os)
+        public void write(byte[] tmp, DigestOutputStream os)
         {
-            int ptr = tmp.length;
-            tmp[--ptr] = '\n';
+            int ptr = tmp.Length;
+            tmp[--ptr] = (byte)'\n';
             ptr = RawParseUtils.formatBase10(tmp, ptr, childCnt);
-            tmp[--ptr] = ' ';
+            tmp[--ptr] = (byte)' ';
             ptr = RawParseUtils.formatBase10(tmp, ptr, isValid() ? entrySpan : -1);
             tmp[--ptr] = 0;
 
-            os.write(encodedName);
-            os.write(tmp, ptr, tmp.length - ptr);
+            os.Write(encodedName);
+            os.Write(tmp, ptr, tmp.Length - ptr);
             if (isValid())
             {
                 id.copyRawTo(tmp, 0);
-                os.write(tmp, 0, Constants.OBJECT_ID_LENGTH);
+                os.Write(tmp, 0, Constants.OBJECT_ID_LENGTH);
             }
             for (int i = 0; i < childCnt; i++)
                 children[i].write(tmp, os);
@@ -274,8 +275,7 @@ namespace GitSharp.DirectoryCache
          */
         public String getNameString()
         {
-            ByteBuffer bb = ByteBuffer.wrap(encodedName);
-            return Constants.CHARSET.decode(bb).toString();
+            return Constants.CHARSET.GetString(encodedName);
         }
 
         /**
@@ -294,7 +294,7 @@ namespace GitSharp.DirectoryCache
         {
             StringBuilder r = new StringBuilder();
             appendName(r);
-            return r.toString();
+            return r.ToString();
         }
 
         /**
@@ -338,12 +338,12 @@ namespace GitSharp.DirectoryCache
                     if (childIdx < childCnt)
                     {
                         DirCacheTree st = children[childIdx];
-                        if (st.contains(ep, pathOffset, ep.length))
+                        if (st.contains(ep, pathOffset, ep.Length))
                         {
-                            FileMode.TREE.copyTo(@out);
-                            @out.write(' ');
-                            @out.write(st.encodedName);
-                            @out.write(0);
+                            FileMode.Tree.CopyTo(@out);
+                            @out.Write(new byte[] { (byte)' ' }, 0, 1);
+                            @out.Write(st.encodedName, 0, st.encodedName.Length);
+                            @out.Write(new byte[] { (byte)0 }, 0, 1);
                             st.id.copyRawTo(@out);
 
                             entryIdx += st.entrySpan;
@@ -352,15 +352,15 @@ namespace GitSharp.DirectoryCache
                         }
                     }
 
-                    e.getFileMode().copyTo(@out);
-                    @out.write(' ');
-                    @out.write(ep, pathOffset, ep.length - pathOffset);
-                    @out.write(0);
-                    @out.write(e.idBuffer(), e.idOffset(), OBJECT_ID_LENGTH);
+                    e.getFileMode().CopyTo(@out);
+                    @out.Write(new byte[] { (byte)' ' }, 0, 1);
+                    @out.Write(ep, pathOffset, ep.Length - pathOffset);
+                    @out.Write(new byte[] { 0 }, 0, 1);
+                    @out.Write(e.idBuffer(), e.idOffset(), Constants.OBJECT_ID_LENGTH);
                     entryIdx++;
                 }
 
-                id = ow.writeCanonicalTree(@out.ToArray());
+                id = ow.WriteCanonicalTree(@out.ToArray());
             }
             return id;
         }
@@ -382,14 +382,14 @@ namespace GitSharp.DirectoryCache
                 if (childIdx < childCnt)
                 {
                     DirCacheTree st = children[childIdx];
-                    if (st.contains(ep, pathOffset, ep.length))
+                    if (st.contains(ep, pathOffset, ep.Length))
                     {
                         int stOffset = pathOffset + st.nameLength() + 1;
                         st.writeTree(cache, entryIdx, stOffset, ow);
 
-                        size += FileMode.TREE.copyToLength();
+                        size += FileMode.Tree.copyToLength();
                         size += st.nameLength();
-                        size += OBJECT_ID_LENGTH + 2;
+                        size += Constants.OBJECT_ID_LENGTH + 2;
 
                         entryIdx += st.entrySpan;
                         childIdx++;
@@ -398,12 +398,12 @@ namespace GitSharp.DirectoryCache
                 }
 
                 FileMode mode = e.getFileMode();
-                if (mode.getObjectType() == Constants.OBJ_BAD)
+                if ((int)mode.ObjectType == Constants.OBJ_BAD)
                     throw new UnmergedPathException(e);
 
                 size += mode.copyToLength();
-                size += ep.length - pathOffset;
-                size += OBJECT_ID_LENGTH + 2;
+                size += ep.Length - pathOffset;
+                size += Constants.OBJECT_ID_LENGTH + 2;
                 entryIdx++;
             }
 
@@ -415,25 +415,25 @@ namespace GitSharp.DirectoryCache
             if (parent != null)
             {
                 parent.appendName(r);
-                r.append(getNameString());
-                r.append('/');
+                r.Append(getNameString());
+                r.Append('/');
             }
             else if (nameLength() > 0)
             {
-                r.append(getNameString());
-                r.append('/');
+                r.Append(getNameString());
+                r.Append('/');
             }
         }
 
         public int nameLength()
         {
-            return encodedName.length;
+            return encodedName.Length;
         }
 
         public bool contains(byte[] a, int aOff, int aLen)
         {
             byte[] e = encodedName;
-            int eLen = e.length;
+            int eLen = e.Length;
             for (int eOff = 0; eOff < eLen && aOff < aLen; eOff++, aOff++)
                 if (e[eOff] != a[aOff])
                     return false;
@@ -536,7 +536,7 @@ namespace GitSharp.DirectoryCache
                 // as the current cache entry is after our own name.
                 //
                 DirCacheTree[] dct = new DirCacheTree[stIdx];
-                System.arraycopy(children, 0, dct, 0, stIdx);
+                Array.Copy(children, 0, dct, 0, stIdx);
                 children = dct;
             }
         }
@@ -544,22 +544,22 @@ namespace GitSharp.DirectoryCache
         private void insertChild(int stIdx, DirCacheTree st)
         {
             DirCacheTree[] c = children;
-            if (childCnt + 1 <= c.length)
+            if (childCnt + 1 <= c.Length)
             {
                 if (stIdx < childCnt)
-                    System.arraycopy(c, stIdx, c, stIdx + 1, childCnt - stIdx);
+                    Array.Copy(c, stIdx, c, stIdx + 1, childCnt - stIdx);
                 c[stIdx] = st;
                 childCnt++;
                 return;
             }
 
-            int n = c.length;
+            int n = c.Length;
             DirCacheTree[] a = new DirCacheTree[n + 1];
             if (stIdx > 0)
-                System.arraycopy(c, 0, a, 0, stIdx);
+                Array.Copy(c, 0, a, 0, stIdx);
             a[stIdx] = st;
             if (stIdx < n)
-                System.arraycopy(c, stIdx, a, stIdx + 1, n - stIdx);
+                Array.Copy(c, stIdx, a, stIdx + 1, n - stIdx);
             children = a;
             childCnt++;
         }
@@ -568,13 +568,13 @@ namespace GitSharp.DirectoryCache
         {
             int n = --childCnt;
             if (stIdx < n)
-                System.arraycopy(children, stIdx + 1, children, stIdx, n - stIdx);
+                Array.Copy(children, stIdx + 1, children, stIdx, n - stIdx);
             children[n] = null;
         }
 
         public static bool peq(byte[] a, byte[] b, int aLen)
         {
-            if (b.length < aLen)
+            if (b.Length < aLen)
                 return false;
             for (aLen--; aLen >= 0; aLen--)
                 if (a[aLen] != b[aLen])
@@ -587,8 +587,8 @@ namespace GitSharp.DirectoryCache
             if (ct == null)
                 return -1;
             byte[] b = ct.encodedName;
-            int aLen = a.length;
-            int bLen = b.length;
+            int aLen = a.Length;
+            int bLen = b.Length;
             int bPos = 0;
             for (; aPos < aLen && bPos < bLen; aPos++, bPos++)
             {
@@ -603,7 +603,7 @@ namespace GitSharp.DirectoryCache
 
         private static int slash(byte[] a, int aPos)
         {
-            int aLen = a.length;
+            int aLen = a.Length;
             for (; aPos < aLen; aPos++)
                 if (a[aPos] == '/')
                     return aPos;

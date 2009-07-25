@@ -107,10 +107,10 @@ namespace GitSharp.DirectoryCache
          */
         protected void fastAdd(DirCacheEntry newEntry)
         {
-            if (entries.length == entryCnt)
+            if (entries.Length == entryCnt)
             {
                 DirCacheEntry[] n = new DirCacheEntry[(entryCnt + 16) * 3 / 2];
-                System.arraycopy(entries, 0, n, 0, entryCnt);
+                Array.Copy(entries, 0, n, 0, entryCnt);
                 entries = n;
             }
             entries[entryCnt++] = newEntry;
@@ -138,12 +138,12 @@ namespace GitSharp.DirectoryCache
          */
         protected void fastKeep(int pos, int cnt)
         {
-            if (entryCnt + cnt > entries.length)
+            if (entryCnt + cnt > entries.Length)
             {
                 int m1 = (entryCnt + 16) * 3 / 2;
                 int m2 = entryCnt + cnt;
-                DirCacheEntry[] n = new DirCacheEntry[Math.max(m1, m2)];
-                System.arraycopy(entries, 0, n, 0, entryCnt);
+                DirCacheEntry[] n = new DirCacheEntry[Math.Max(m1, m2)];
+                Array.Copy(entries, 0, n, 0, entryCnt);
                 entries = n;
             }
 
@@ -174,10 +174,10 @@ namespace GitSharp.DirectoryCache
          */
         protected void replace()
         {
-            if (entryCnt < entries.length / 2)
+            if (entryCnt < entries.Length / 2)
             {
                 DirCacheEntry[] n = new DirCacheEntry[entryCnt];
-                System.arraycopy(entries, 0, n, 0, entryCnt);
+                Array.Copy(entries, 0, n, 0, entryCnt);
                 entries = n;
             }
             cache.replace(entries, entryCnt);
@@ -200,7 +200,7 @@ namespace GitSharp.DirectoryCache
          *             the output file could not be created. The caller no longer
          *             holds the lock.
          */
-        public bool commit()
+        public virtual bool commit()
         {
             finish();
             cache.write();

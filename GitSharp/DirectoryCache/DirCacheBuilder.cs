@@ -73,7 +73,7 @@ namespace GitSharp.DirectoryCache
          *            estimated number of entries the builder will have upon
          *            completion. This sizes the initial entry table.
          */
-        protected DirCacheBuilder(DirCache dc, int ecnt)
+        public DirCacheBuilder(DirCache dc, int ecnt)
             : base(dc, ecnt)
         {
         }
@@ -153,13 +153,12 @@ namespace GitSharp.DirectoryCache
          */
         public void addTree(byte[] pathPrefix, int stage, Repository db, AnyObjectId tree)
         {
-            TreeWalk.TreeWalk tw = new TreeWalk(db);
+            var tw = new TreeWalk.TreeWalk(db);
             tw.reset();
-            WindowCursor curs = new WindowCursor();
+            var curs = new WindowCursor();
             try
             {
-                tw.addTree(new CanonicalTreeParser(pathPrefix, db, tree
-                        .toObjectId(), curs));
+                tw.addTree(new CanonicalTreeParser(pathPrefix, db, tree.ToObjectId(), curs));
             }
             finally
             {
@@ -181,13 +180,13 @@ namespace GitSharp.DirectoryCache
             DirCacheEntry e = new DirCacheEntry(tw.getRawPath(), stage);
             AbstractTreeIterator i;
 
-            i = tw.getTree(0, typeof(AbstractTreeIterator));
+            i = tw.getTree<AbstractTreeIterator>(0, typeof(AbstractTreeIterator));
             e.setFileMode(tw.getFileMode(0));
             e.setObjectIdFromRaw(i.idBuffer(), i.idOffset());
             return e;
         }
 
-        public void finish()
+        public override void finish()
         {
             if (!sorted)
                 resort();
@@ -196,7 +195,7 @@ namespace GitSharp.DirectoryCache
 
         private void beforeAdd(DirCacheEntry newEntry)
         {
-            if (FileMode.TREE.equals(newEntry.getRawMode()))
+            if (FileMode.Tree.Equals(newEntry.getRawMode()))
                 throw bad(newEntry, "Adding subtree not allowed");
             if (sorted && entryCnt > 0)
             {
@@ -229,7 +228,7 @@ namespace GitSharp.DirectoryCache
 
         private void resort()
         {
-            Array.Sort(entries, 0, entryCnt, DirCache.ENT_CMP);
+            Array.Sort(entries, DirCache.ENT_CMP);
 
             for (int entryIdx = 1; entryIdx < entryCnt; entryIdx++)
             {

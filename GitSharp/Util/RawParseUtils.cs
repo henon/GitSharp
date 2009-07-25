@@ -736,7 +736,7 @@ namespace GitSharp
             //b.mark();
             byte[] b = new byte[end - start];
             for (int i = 0; i < end - start; i++)
-                b[i] = buffer[i];
+                b[i] = buffer[start + i];
 
             // Try our built-in favorite. The assumption here is that
             // decoding will fail if the data is not actually encoded

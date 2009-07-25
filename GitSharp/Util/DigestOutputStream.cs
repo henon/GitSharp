@@ -47,18 +47,71 @@ namespace GitSharp.Util
     /// <summary>
     /// A light version of a std Java class that updates a hash while writing bytes to a stream.
     /// </summary>
-    public class DigestOutputStream
+    public class DigestOutputStream : Stream
     {
-        FileStream m_stream;
+        Stream m_stream;
         MessageDigest m_digest;
 
-        public DigestOutputStream(MessageDigest digest, FileStream stream)
+        public DigestOutputStream(Stream stream, MessageDigest digest)
+            : base()
         {
             m_digest = digest;
             m_stream = stream;
         }
 
-        public void Write(byte[] bytes, int offset, int count)
+        public override bool CanRead
+        {
+            get { return m_stream.CanRead; }
+        }
+
+        public override bool CanSeek
+        {
+            get { return m_stream.CanSeek; }
+        }
+
+        public override bool CanWrite
+        {
+            get { return m_stream.CanWrite; }
+        }
+
+        public override void Flush()
+        {
+            m_stream.Flush();
+        }
+
+        public override long Length
+        {
+            get { return m_stream.Length; }
+        }
+
+        public override long Position
+        {
+            get
+            {
+                return m_stream.Position;
+            }
+            set
+            {
+                m_stream.Position = value;
+            }
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            return m_stream.Read(buffer, offset, count);
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            return m_stream.Seek(offset, origin);
+        }
+
+        public override void SetLength(long value)
+        {
+            m_stream.SetLength(value);
+        }
+
+        public override void Write(byte[] bytes, int offset, int count)
         {
             m_digest.Update(bytes, offset, count);
             m_stream.Write(bytes, offset, count);

@@ -734,7 +734,9 @@ namespace GitSharp
         {
             // ByteBuffer b = ByteBuffer.wrap(buffer, start, end - start);
             //b.mark();
-            var b = buffer;
+            byte[] b = new byte[end - start];
+            for (int i = 0; i < end - start; i++)
+                b[i] = buffer[i];
 
             // Try our built-in favorite. The assumption here is that
             // decoding will fail if the data is not actually encoded

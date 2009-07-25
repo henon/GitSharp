@@ -56,6 +56,7 @@
     <Compile Include="ParseRefTests.cs" />
     <Compile Include="Util\IntListTest.cs" />
     <Compile Include="Util\PackIndexTestCase.cs" />
+    <Compile Include="Util\QuotedStringBourneUserPathStyleTest.cs" />
     <Compile Include="Util\RawParseUtils_LineMapTest.cs" />
     <Compile Include="Util\RawParseUtils_MatchTest.cs" />
     <Compile Include="Util\XInputStream.cs" />

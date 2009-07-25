@@ -224,6 +224,7 @@
     <Compile Include="Exceptions\RevWalkException.cs" />
     <Compile Include="Exceptions\StopWalkException.cs" />
     <Compile Include="Exceptions\TransportException.cs" />
+    <Compile Include="Exceptions\UnmergedPathException.cs" />
     <Compile Include="ObjectIdSubclassMap.cs" />
     <Compile Include="PackLock.cs" />
     <Compile Include="PackWriter.cs" />

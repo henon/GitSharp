@@ -1,7 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
+ * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
  *
@@ -37,50 +35,42 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Collections.Generic;
-using GitSharp.Exceptions;
-
 namespace GitSharp.Transport
 {
-    public abstract class BaseConnection : IConnection
+
+    public abstract class DaemonService
     {
-        private Dictionary<string, Ref> advertisedRefs = new Dictionary<string, Ref>();
-        private bool startedOperation;
+        public string Command { get; private set; }
+        public string Config { get; private set; }
+        public bool Enabled { get; set; }
+        public bool Overridable { get; set; }
 
-        public Dictionary<string, Ref> RefsMap
+        public DaemonService(string cmdName, string cfgName)
         {
-            get
-            {
-                return advertisedRefs;
-            }
+            Command = cmdName.StartsWith("git-") ? cmdName : "git-" + cmdName;
+            Config = cfgName;
+            Overridable = true;
         }
 
-        public List<Ref> Refs
+        public bool Handles(string commandLine)
         {
-            get
-            {
-                return new List<Ref>(advertisedRefs.Values);
-            }
+            return Command.Length + 1 < commandLine.Length && commandLine[Command.Length] == ' ' &&
+                   commandLine.StartsWith(Command);
         }
 
-        public Ref GetRef(string name)
+        public void Execute(DaemonClient client, string commandLine)
         {
-            return advertisedRefs[name];
+            string name = commandLine.Substring(Command.Length + 1);
+            Repository db = client.Daemon.OpenRepository(name);
+            if (db == null) return;
+            bool on = Enabled;
+            if (Overridable)
+                on = db.Config.GetBoolean("daemon", Config, on);
+            if (on)
+                Execute(client, db);
         }
 
-        public abstract void Close();
-
-        protected void available(Dictionary<string, Ref> all)
-        {
-            advertisedRefs = all;
-        }
-
-        protected void markStartedOperation()
-        {
-            if (startedOperation)
-                throw new TransportException("Only one operation call per connection is supported.");
-            startedOperation = true;
-        }
+        public abstract void Execute(DaemonClient client, Repository db);
     }
 
 }

@@ -121,6 +121,15 @@ namespace GitSharp
             s.Write(buf, 0, 20);
         }
 
+        internal void copyRawTo(byte[] buf, int off)
+        {
+            NB.encodeInt32(buf, 0 + off, W1);
+            NB.encodeInt32(buf, 4 + off, W2);
+            NB.encodeInt32(buf, 8 + off, W3);
+            NB.encodeInt32(buf, 12 + off, W4);
+            NB.encodeInt32(buf, 16 + off, W5);
+        }
+
         private byte[] ToHexByteArray()
         {
             byte[] dst = new byte[StringLength];

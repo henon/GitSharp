@@ -3,6 +3,7 @@
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
  * Copyrigth (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
  * All rights reserved.
  *
@@ -88,8 +89,6 @@ namespace GitSharp
         private byte[] packChecksum;
 
         private PackIndex loadedIdx;
-
-        private PackReverseIndex reverseIdx;
 
         /**
          * Construct a reader for an existing, pre-indexed packfile.
@@ -201,7 +200,6 @@ namespace GitSharp
             lock (this)
             {
                 loadedIdx = null;
-                reverseIdx = null;
             }
         }
 
@@ -271,7 +269,7 @@ namespace GitSharp
             return dstbuf;
         }
 
-        internal void copyRawData(PackedObjectLoader loader, Stream @out, byte[] buf, WindowCursor curs)
+        internal void copyRawData<T>(PackedObjectLoader loader, T @out, byte[] buf, WindowCursor curs) where T : Stream
         {
             long objectOffset = loader.objectOffset;
             long dataOffset = loader.getDataOffset();

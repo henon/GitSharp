@@ -299,6 +299,10 @@ namespace GitSharp
             return new FileInfo(PathUtil.Combine(_objectsDirs[0].FullName, d, f));
         }
 
+        public ObjectLoader OpenObject(WindowCursor curs, AnyObjectId id)
+        {
+            return openObject(curs, id);
+        }
 
         /**
          * @param id
@@ -356,6 +360,13 @@ namespace GitSharp
         //    return result;
         //}
 
+        public List<PackedObjectLoader> openObjectInAllPacks(AnyObjectId objectId, WindowCursor curs)
+        {
+            List<PackedObjectLoader> result = new List<PackedObjectLoader>();
+            openObjectInAllPacks(objectId, result, curs);
+            return result;
+        }
+
         ///**
         // * Open object in all packs containing specified object.
         // *
@@ -368,6 +379,11 @@ namespace GitSharp
         // *            temporary working space associated with the calling thread.
         // * @
         // */
+
+        public void openObjectInAllPacks(AnyObjectId objectId, List<PackedObjectLoader> resultLoaders, WindowCursor curs)
+        {
+            objectDatabase.openObjectInAllPacks(resultLoaders, curs, objectId);
+        }
 
         //private void OpenObjectInAllPacks(AnyObjectId objectId, ICollection<PackedObjectLoader> resultLoaders, WindowCursor cursor)
         //{
@@ -795,6 +811,12 @@ namespace GitSharp
         // *             index file could not be opened, read, or is not recognized as
         // *             a Git pack file index.
         // */
+
+        public void openPack(FileInfo pack, FileInfo idx)
+        {
+            objectDatabase.openPack(pack, idx);
+        }
+        
         //public void OpenPack(FileInfo pack, FileInfo idx)
         //{
         //    string p = pack.Name;

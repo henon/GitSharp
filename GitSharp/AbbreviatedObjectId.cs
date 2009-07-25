@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
  * All rights reserved.
  *
@@ -241,7 +242,7 @@ namespace GitSharp
         }
 
 
-        public bool Equals(object o)
+        public override bool Equals(object o)
         {
             if (o is AbbreviatedObjectId)
             {
@@ -280,7 +281,7 @@ namespace GitSharp
         }
 
 
-        public string ToString()
+        public override string ToString()
         {
             return "AbbreviatedObjectId[" + name() + "]";
         }

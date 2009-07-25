@@ -53,13 +53,11 @@ namespace GitSharp.Tests
     [TestFixture]
     public class PackIndexV2Tests : PackIndexTestCase
     {
-        [Test]
         public override FileInfo getFileForPack34be9032()
         {
             return new FileInfo("Resources/pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.idxV2");
         }
 
-        [Test]
         public override FileInfo getFileForPackdf2982f28()
         {
             return new FileInfo("Resources/pack-df2982f284bbabb6bdb59ee3fcc6eb0983e20371.idxV2");

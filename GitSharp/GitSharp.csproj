@@ -229,6 +229,7 @@
     <Compile Include="ObjectIdSubclassMap.cs" />
     <Compile Include="PackLock.cs" />
     <Compile Include="PackWriter.cs" />
+    <Compile Include="Patch\FileHeader.cs" />
     <Compile Include="RefComparator.cs" />
     <Compile Include="RefWriter.cs" />
     <Compile Include="Transport\BaseConnection.cs" />

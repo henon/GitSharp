@@ -58,6 +58,7 @@
     <Compile Include="Transport\URIishTests.cs" />
     <Compile Include="Util\PackIndexTestCase.cs" />
     <Compile Include="Util\QuotedStringBourneUserPathStyleTest.cs" />
+    <Compile Include="Util\QuotedStringGitPathStyleTest.cs" />
     <Compile Include="Util\RawParseUtils_LineMapTest.cs" />
     <Compile Include="Util\RawParseUtils_MatchTest.cs" />
     <Compile Include="Util\TemporaryBufferTest.cs" />

@@ -312,6 +312,14 @@ namespace GitSharp
             Hex.FillHexCharArray(dest, 32, W5);
         }
 
+        public string Name
+        {
+            get
+            {
+                return new string(ToHexCharArray());
+            }
+        }
+
         public override string ToString()
         {
             return new string(ToHexCharArray());

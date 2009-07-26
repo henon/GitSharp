@@ -54,7 +54,9 @@
     <Compile Include="PackIndexV2Tests.cs" />
     <Compile Include="PackReaderTests.cs" />
     <Compile Include="ParseRefTests.cs" />
+    <Compile Include="Transport\IndexPackTests.cs" />
     <Compile Include="Transport\RefSpecTests.cs" />
+    <Compile Include="Transport\RemoteConfigTests.cs" />
     <Compile Include="Util\IntListTest.cs" />
     <Compile Include="Transport\URIishTests.cs" />
     <Compile Include="Util\PackIndexTestCase.cs" />

@@ -420,7 +420,7 @@ namespace GitSharp.DirectoryCache
             }
 
             byte[] exp = md.Digest();
-            if (!Enumerable.Equals(exp, hdr))
+            if (!exp.SequenceEqual( hdr))
             {
                 throw new CorruptObjectException("DIRC checksum mismatch");
             }

@@ -449,7 +449,6 @@ namespace GitSharp.Transport
                 crc.Reset();
                 packOut.BaseStream.Seek(end, SeekOrigin.Begin);
                 writeWhole(def, typeCode, data);
-                // [caytchen] TODO: missing constructor..
                 oe = new PackedObjectInfo(end, (int) crc.Value, baseId);
                 entries[entryCount++] = oe;
                 end = packOut.BaseStream.Position;
@@ -698,7 +697,6 @@ namespace GitSharp.Transport
                 }
             }
 
-            // [caytchen] TODO: OpenObject for repo
             ObjectLoader ldr = repo.OpenObject(readCurs, id);
             if (ldr != null)
             {
@@ -965,8 +963,7 @@ namespace GitSharp.Transport
                 d.Update(oeBytes);
             }
 
-            // [caytchen] TODO: ObjectId is missing Name!
-            string name = ObjectId.FromRaw(d.Digest()).ToString();
+            string name = ObjectId.FromRaw(d.Digest()).Name;
             DirectoryInfo packDir = new DirectoryInfo(Path.Combine(repo.ObjectsDirectory.ToString(), "pack"));
             FileInfo finalPack = new FileInfo(Path.Combine(packDir.ToString(), "pack-" + name + ".pack"));
             FileInfo finalIdx = new FileInfo(Path.Combine(packDir.ToString(), "pack-" + name + ".idx"));

@@ -1,7 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
  *
@@ -37,19 +35,32 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
+
 namespace GitSharp.Transport
 {
 
-   /**
-     * Marker interface for transports that supports fetching from a git bundle
-     * (sneaker-net object transport).
-     * <p>
-     * Push support for a bundle is complex, as one does not have a peer to
-     * communicate with to decide what the peer already knows. So push is not
-     * supported by the bundle transport.
-     */
-    public interface TransportBundle : IPackTransport
+    public abstract class BaseFetchConnection : BaseConnection, IFetchConnection
     {
+        public void Fetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        {
+            markStartedOperation();
+            doFetch(monitor, want, have);
+        }
+
+        public bool DidFetchIncludeTags
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public abstract bool DidFetchTestConnectivity { get; }
+        public abstract List<PackLock> PackLocks { get; }
+        public abstract void SetPackLockMessage(string message);
+
+        protected abstract void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have);
     }
 
 }

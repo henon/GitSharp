@@ -211,6 +211,7 @@
     <Compile Include="Diff\EditList.cs" />
     <Compile Include="Diff\RawText.cs" />
     <Compile Include="Diff\Sequence.cs" />
+    <Compile Include="Exceptions\MissingBundlePrerequisiteException.cs" />
     <Compile Include="Exceptions\NoRemoteRepositoryException.cs" />
     <Compile Include="Exceptions\PackProtocolException.cs" />
     <Compile Include="Exceptions\RevWalkException.cs" />
@@ -222,9 +223,11 @@
     <Compile Include="RefComparator.cs" />
     <Compile Include="RefWriter.cs" />
     <Compile Include="Transport\BaseConnection.cs" />
+    <Compile Include="Transport\BaseFetchConnection.cs" />
     <Compile Include="Transport\BasePackConnection.cs" />
     <Compile Include="Transport\BasePackFetchConnection.cs" />
     <Compile Include="Transport\BasePackPushConnection.cs" />
+    <Compile Include="Transport\BundleFetchConnection.cs" />
     <Compile Include="Transport\Daemon.cs" />
     <Compile Include="Transport\DaemonClient.cs" />
     <Compile Include="Transport\DaemonService.cs" />
@@ -255,6 +258,7 @@
     <Compile Include="Transport\TrackingRefUpdate.cs" />
     <Compile Include="Transport\Transport.cs" />
     <Compile Include="Transport\TransportBundle.cs" />
+    <Compile Include="Transport\TransportBundleFile.cs" />
     <Compile Include="Transport\UploadPack.cs" />
     <Compile Include="Transport\URIish.cs" />
     <Compile Include="Transport\IWalkTransport.cs" />

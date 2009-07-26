@@ -36,14 +36,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
 using GitSharp;
 using GitSharp.Diff;
 using GitSharp.Util;
-using System.Runtime.InteropServices;
-using System.Text;
-using System;
-using System.IO;
-using System.Collections.Generic;
 
 namespace GitSharp.Patch
 {
@@ -51,40 +51,40 @@ namespace GitSharp.Patch
     public class FileHeader
     {
 	    /** Magical file name used for file adds or deletes. */
-	    public static const String DEV_NULL = "/dev/null";
+	    public static readonly string DEV_NULL = "/dev/null";
 
-	    private static const byte[] OLD_MODE = Constants.encodeASCII("old mode ");
+        private static readonly byte[] OLD_MODE = Constants.encodeASCII("old mode ");
 
-	    private static const byte[] NEW_MODE = Constants.encodeASCII("new mode ");
+        private static readonly byte[] NEW_MODE = Constants.encodeASCII("new mode ");
 
-	    static const byte[] DELETED_FILE_MODE = Constants.encodeASCII("deleted file mode ");
+        public static readonly byte[] DELETED_FILE_MODE = Constants.encodeASCII("deleted file mode ");
 
-	    static const byte[] NEW_FILE_MODE = Constants.encodeASCII("new file mode ");
+        public static readonly byte[] NEW_FILE_MODE = Constants.encodeASCII("new file mode ");
 
-	    private static const byte[] COPY_FROM = Constants.encodeASCII("copy from ");
+        private static readonly byte[] COPY_FROM = Constants.encodeASCII("copy from ");
 
-	    private static const byte[] COPY_TO = Constants.encodeASCII("copy to ");
+        private static readonly byte[] COPY_TO = Constants.encodeASCII("copy to ");
 
-	    private static const byte[] RENAME_OLD = Constants.encodeASCII("rename old ");
+        private static readonly byte[] RENAME_OLD = Constants.encodeASCII("rename old ");
 
-	    private static const byte[] RENAME_NEW = Constants.encodeASCII("rename new ");
+        private static readonly byte[] RENAME_NEW = Constants.encodeASCII("rename new ");
 
-	    private static const byte[] RENAME_FROM = Constants.encodeASCII("rename from ");
+        private static readonly byte[] RENAME_FROM = Constants.encodeASCII("rename from ");
 
-	    private static const byte[] RENAME_TO = Constants.encodeASCII("rename to ");
+        private static readonly byte[] RENAME_TO = Constants.encodeASCII("rename to ");
 
-	    private static const byte[] SIMILARITY_INDEX = Constants.encodeASCII("similarity index ");
+        private static readonly byte[] SIMILARITY_INDEX = Constants.encodeASCII("similarity index ");
 
-	    private static const byte[] DISSIMILARITY_INDEX = Constants.encodeASCII("dissimilarity index ");
+        private static readonly byte[] DISSIMILARITY_INDEX = Constants.encodeASCII("dissimilarity index ");
 
-	    static const byte[] INDEX = Constants.encodeASCII("index ");
+        public static readonly byte[] INDEX = Constants.encodeASCII("index ");
 
-	    static const byte[] OLD_NAME = Constants.encodeASCII("--- ");
+        public static readonly byte[] OLD_NAME = Constants.encodeASCII("--- ");
 
-	    static const byte[] NEW_NAME = Constants.encodeASCII("+++ ");
+        public static readonly byte[] NEW_NAME = Constants.encodeASCII("+++ ");
 
 	    /** General type of change a single file-level patch describes. */
-	    public static enum ChangeType {
+	    public enum ChangeType {
 		    /** Add a new file to the project */
 		    ADD,
 
@@ -102,7 +102,7 @@ namespace GitSharp.Patch
 	    }
 
 	    /** Type of patch used by this file. */
-	    public static enum PatchType {
+	    public enum PatchType {
 		    /** A traditional unified diff style patch of a text file. */
 		    UNIFIED,
 
@@ -114,13 +114,13 @@ namespace GitSharp.Patch
 	    }
 
 	    /** Buffer holding the patch data for this file. */
-	    readonly byte[] buf;
+	    public readonly byte[] buf;
 
 	    /** Offset within {@link #buf} to the "diff ..." line. */
-	    readonly int startOffset;
+	    public readonly int startOffset;
 
 	    /** Position 1 past the end of this file within {@link #buf}. */
-	    int endOffset;
+	    public int endOffset;
 
 	    /** File name of the old (pre-image). */
 	    private String oldName;
@@ -147,18 +147,18 @@ namespace GitSharp.Patch
 	    protected AbbreviatedObjectId newId;
 
 	    /** Type of patch used to modify this file */
-	    PatchType patchType;
+        public PatchType patchType;
 
 	    /** The hunks of this file */
 	    private List<HunkHeader> hunks;
 
 	    /** If {@link #patchType} is {@link PatchType#GIT_BINARY}, the new image */
-	    BinaryHunk forwardBinaryHunk;
+	    public BinaryHunk forwardBinaryHunk;
 
 	    /** If {@link #patchType} is {@link PatchType#GIT_BINARY}, the old image */
-	    BinaryHunk reverseBinaryHunk;
+	    public BinaryHunk reverseBinaryHunk;
 
-	    FileHeader(byte[] b, int offset)
+	    public FileHeader(byte[] b, int offset)
         {
 		    buf = b;
 		    startOffset = offset;
@@ -166,7 +166,7 @@ namespace GitSharp.Patch
 		    patchType = PatchType.UNIFIED;
 	    }
 
-	    int getParentCount()
+	    public int getParentCount()
         {
 		    return 1;
 	    }
@@ -216,7 +216,7 @@ namespace GitSharp.Patch
 		    return getScriptText(new Encoding[] { oldCharset, newCharset });
 	    }
 
-	    String getScriptText(Encoding[] charsetGuess)
+	    public String getScriptText(Encoding[] charsetGuess)
         {
 		    if (getHunks().Count == 0)
             {
@@ -297,7 +297,7 @@ namespace GitSharp.Patch
 				    Encoding cs = csGuess != null ? csGuess[i] : null;
 				    if (cs == null)
 					    cs = Constants.CHARSET;
-				    r[i] = RawParseUtils.decode(cs, tmp[i].toByteArray());
+				    r[i] = RawParseUtils.decode(cs, tmp[i].ToArray());
 			    }
 			    return r;
 		    }
@@ -422,7 +422,7 @@ namespace GitSharp.Patch
 		    return hunks;
 	    }
 
-	    void addHunk(HunkHeader h)
+        public void addHunk(HunkHeader h)
         {
 		    if (h.getFileHeader() != this)
                 throw new ArgumentException("Hunk belongs to another file");
@@ -431,7 +431,7 @@ namespace GitSharp.Patch
 		    hunks.Add(h);
 	    }
 
-	    HunkHeader newHunkHeader(int offset)
+	    public HunkHeader newHunkHeader(int offset)
         {
 		    return new HunkHeader(this, offset);
 	    }
@@ -466,7 +466,7 @@ namespace GitSharp.Patch
 	     *            one past the last position to parse.
 	     * @return first character after the LF at the end of the line; -1 on error.
 	     */
-	    int parseGitFileName(int ptr, int end)
+	    public int parseGitFileName(int ptr, int end)
         {
 		    int eol = RawParseUtils.nextLF(buf, ptr);
 		    int bol = ptr;
@@ -510,7 +510,7 @@ namespace GitSharp.Patch
 					    if (buf[sp - 2] != '"') {
 						    return eol;
 					    }
-					    oldName = QuotedString.GIT_PATH.dequote(buf, bol, sp - 1);
+					    oldName = QuotedString.GitPathStyle.GIT_PATH.dequote(buf, bol, sp - 1);
 					    oldName = p1(oldName);
 				    } else {
 					    oldName = RawParseUtils.decode(Constants.CHARSET, buf, aStart, sp - 1);
@@ -528,7 +528,7 @@ namespace GitSharp.Patch
 		    return eol;
 	    }
 
-	    int parseGitHeaders(int ptr, int end)
+	    public int parseGitHeaders(int ptr, int end)
         {
 		    while (ptr < end)
             {
@@ -633,28 +633,28 @@ namespace GitSharp.Patch
 		    return ptr;
 	    }
 
-	    void parseOldName(int ptr, int eol)
+	    public void parseOldName(int ptr, int eol)
         {
 		    oldName = p1(parseName(oldName, ptr + OLD_NAME.Length, eol));
 		    if (oldName == DEV_NULL)
 			    changeType = ChangeType.ADD;
 	    }
 
-	    void parseNewName(int ptr, int eol)
+        public void parseNewName(int ptr, int eol)
         {
 		    newName = p1(parseName(newName, ptr + NEW_NAME.Length, eol));
 		    if (newName == DEV_NULL)
 			    changeType = ChangeType.DELETE;
 	    }
 
-	    void parseNewFileMode(int ptr, int eol)
+        public void parseNewFileMode(int ptr, int eol)
         {
 		    oldMode = FileMode.Missing;
 		    newMode = parseFileMode(ptr + NEW_FILE_MODE.Length, eol);
 		    changeType = ChangeType.ADD;
 	    }
 
-	    int parseTraditionalHeaders(int ptr, int end)
+	    public int parseTraditionalHeaders(int ptr, int end)
         {
 		    while (ptr < end)
             {
@@ -696,7 +696,7 @@ namespace GitSharp.Patch
             {
 			    // New style GNU diff format
 			    //
-			    r = QuotedString.GIT_PATH.dequote(buf, ptr, end - 1);
+			    r = QuotedString.GitPathStyle.GIT_PATH.dequote(buf, ptr, end - 1);
 		    }
             else
             {
@@ -721,7 +721,7 @@ namespace GitSharp.Patch
 		    return s > 0 ? r.Substring(s + 1) : r;
 	    }
 
-	    FileMode parseFileMode(int ptr, int end)
+	    public FileMode parseFileMode(int ptr, int end)
         {
 		    int tmp = 0;
 		    while (ptr < end - 1) {
@@ -731,7 +731,7 @@ namespace GitSharp.Patch
 		    return FileMode.FromBits(tmp);
 	    }
 
-	    void parseIndexLine(int ptr, int end)
+        public void parseIndexLine(int ptr, int end)
         {
 		    // "index $asha1..$bsha1[ $mode]" where $asha1 and $bsha1
 		    // can be unique abbreviations
@@ -777,7 +777,7 @@ namespace GitSharp.Patch
 	     *         for a 3 way-merge returns 3. If this is not a hunk header, 0 is
 	     *         returned instead.
 	     */
-	    static int isHunkHdr(byte[] buf, int start, int end)
+	    public static int isHunkHdr(byte[] buf, int start, int end)
         {
 		    int ptr = start;
 		    while (ptr < end && buf[ptr] == '@')

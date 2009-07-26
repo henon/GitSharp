@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 2009, Google Inc.
  * Copyrigth (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
  * All rights reserved.
  *
@@ -475,7 +476,7 @@ namespace GitSharp
                     Entry<V> e1 = table.get(s);
                     for (Entry<V> n = e1; n != null; n = n.next)
                     {
-                        if (n.@ref == r)
+                        if (n.@ref.Equals(r))
                         {
                             n.dead = true;
                             found = true;
@@ -526,13 +527,13 @@ namespace GitSharp
             return n == top.next ? top : new Entry<V>(n, top.@ref);
         }
 
-        private class Entry<V>
+        private class Entry<T>
         {
             /** Next entry in the hash table's chain list. */
-            public Entry<V> next;
+            public Entry<T> next;
 
             /** The referenced object. */
-            public Ref<V> @ref;
+            public Ref<T> @ref;
 
             /**
              * Marked true when @ref.get() returns null and the @ref is dead.
@@ -543,7 +544,7 @@ namespace GitSharp
              */
             public volatile bool dead;
 
-            public Entry(Entry<V> n, Ref<V> r)
+            public Entry(Entry<T> n, Ref<T> r)
             {
                 next = n;
                 @ref = r;
@@ -562,7 +563,7 @@ namespace GitSharp
          * @param <V>
          *            type of the cached object.
          */
-        internal class Ref<V> : System.WeakReference
+        internal class Ref<T> : System.WeakReference
         {
             public PackFile pack;
 
@@ -574,7 +575,7 @@ namespace GitSharp
 
             private Queue queue;
 
-            public Ref(PackFile pack, long position, V v, Queue queue) : base(v)
+            public Ref(PackFile pack, long position, T v, Queue queue) : base(v)
             {
                 this.queue = queue;
                 this.pack = pack;
@@ -598,9 +599,9 @@ namespace GitSharp
                 return true;
             }
 
-            public V get()
+            public T get()
             {
-                return (V)Target;
+                return (T)Target;
             }
         }
 

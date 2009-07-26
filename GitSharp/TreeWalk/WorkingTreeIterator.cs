@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
  * All rights reserved.
  *
@@ -396,12 +397,11 @@ namespace GitSharp.TreeWalk
 
             public void encodeName(Encoding enc)
             {
-                byte[] b;
                 try
                 {
                     encodedName = enc.GetBytes(getName());
                 }
-                catch (EncoderFallbackException e)
+                catch (EncoderFallbackException)
                 {
                     // This should so never happen.
                     throw new Exception("Unencodeable file: " + getName());

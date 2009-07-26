@@ -2,6 +2,7 @@
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  * 
  *
  * All rights reserved.
@@ -324,7 +325,7 @@ namespace GitSharp
                     ptr++;
                 }
             }
-            catch (IndexOutOfRangeException e)
+            catch (IndexOutOfRangeException)
             {
                 // Not a valid digit.
             }
@@ -444,8 +445,7 @@ namespace GitSharp
             return ptr;
         }
 
-#if false
-        /**
+/**
  * Index the region between <code>[ptr, end)</code> to find line starts.
  * <p>
  * The returned list is 1 indexed. Index 0 contains
@@ -474,13 +474,12 @@ namespace GitSharp
             // to initially size our map close to the target.
             //
             IntList map = new IntList((end - ptr) / 36);
-            map.fillTo(1, Integer.MIN_VALUE);
+            map.fillTo(1, int.MinValue);
             for (; ptr < end; ptr = nextLF(buf, ptr))
                 map.add(ptr);
             map.add(end);
             return map;
         }
-#endif
 
         /**
          * Locate the "author " header line data.
@@ -701,7 +700,7 @@ namespace GitSharp
             {
                 return decodeNoFallback(cs, buffer, start, end);
             }
-            catch (EncoderFallbackException e)
+            catch (EncoderFallbackException)
             {
                 // Fall back to an ISO-8859-1 style encoding. At least all of
                 // the bytes will be present in the output.
@@ -735,7 +734,9 @@ namespace GitSharp
         {
             // ByteBuffer b = ByteBuffer.wrap(buffer, start, end - start);
             //b.mark();
-            var b = buffer;
+            byte[] b = new byte[end - start];
+            for (int i = 0; i < end - start; i++)
+                b[i] = buffer[start + i];
 
             // Try our built-in favorite. The assumption here is that
             // decoding will fail if the data is not actually encoded
@@ -745,7 +746,7 @@ namespace GitSharp
             {
                 return decode(b, Constants.CHARSET);
             }
-            catch (EncoderFallbackException e)
+            catch (EncoderFallbackException)
             {
                 //b.reset();
             }
@@ -759,7 +760,7 @@ namespace GitSharp
                 {
                     return decode(b, cs);
                 }
-                catch (EncoderFallbackException e)
+                catch (EncoderFallbackException)
                 {
                     //b.reset();
                 }
@@ -775,7 +776,7 @@ namespace GitSharp
                 {
                     return decode(b, Encoding.Default);
                 }
-                catch (EncoderFallbackException e)
+                catch (EncoderFallbackException)
                 {
                     //b.reset();
                 }

@@ -195,6 +195,34 @@ namespace GitSharp.Util
         }
 
         /**
+          * Skip an entire region of an input stream.
+          * <p>
+          * The input stream's position is moved forward by the number of requested
+          * bytes, discarding them from the input. This method does not return until
+          * the exact number of bytes requested has been skipped.
+          *
+          * @param fd
+          *            the stream to skip bytes from.
+          * @param toSkip
+          *            total number of bytes to be discarded. Must be >= 0.
+          * @throws EOFException
+          *             the stream ended before the requested number of bytes were
+          *             skipped.
+          * @throws IOException
+          *             there was an error reading from the stream.
+          */
+        public static void skipFully(Stream fd, long toSkip)
+        {
+            while (toSkip > 0)
+            {
+                long r = fd.Seek(toSkip, SeekOrigin.Current);
+                if (r <= 0)
+                    throw new EndOfStreamException("Short skip of block");
+                toSkip -= r;
+            }
+        }
+
+        /**
          * Convert sequence of 8 bytes (network byte order) into unsigned value.
          * 
          * @param intbuf

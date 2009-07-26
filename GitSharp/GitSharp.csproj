@@ -207,6 +207,10 @@
     <Compile Include="RevWalk\TopoSortGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Diff\Edit.cs" />
+    <Compile Include="Diff\EditList.cs" />
+    <Compile Include="Diff\RawText.cs" />
+    <Compile Include="Diff\Sequence.cs" />
     <Compile Include="Exceptions\NoRemoteRepositoryException.cs" />
     <Compile Include="Exceptions\PackProtocolException.cs" />
     <Compile Include="Exceptions\RevWalkException.cs" />
@@ -270,9 +274,12 @@
     <Compile Include="Util\Array.cs" />
     <Compile Include="Util\IListUtil.cs" />
     <Compile Include="Util\ICharSequence.cs" />
+    <Compile Include="Util\IntList.cs" />
     <Compile Include="Util\ListIterator.cs" />
+    <Compile Include="Util\QuotedString.cs" />
     <Compile Include="Util\RawCharSequence.cs" />
     <Compile Include="Util\RawSubstringPattern.cs" />
+    <Compile Include="Util\TemporaryBuffer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

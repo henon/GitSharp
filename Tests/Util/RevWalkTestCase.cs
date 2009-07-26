@@ -43,6 +43,9 @@ using System.Linq;
 using System.Text;
 using GitSharp.RevWalk;
 using GitSharp.DirectoryCache;
+using GitSharp.TreeWalk.Filter;
+using NUnit.Framework;
+using GitSharp.Util;
 
 namespace GitSharp.Tests.Util
 {
@@ -62,7 +65,7 @@ namespace GitSharp.Tests.Util
             base.setUp();
             ow = new ObjectWriter(db);
             rw = createRevWalk();
-            emptyTree = rw.parseTree(ow.writeTree(new Tree(db)));
+            emptyTree = rw.parseTree(ow.WriteTree(new Tree(db)));
             nowTick = 1236977987L;
         }
 
@@ -78,13 +81,13 @@ namespace GitSharp.Tests.Util
 
         protected RevBlob blob(String content)
         {
-            return rw.lookupBlob(ow.writeBlob(content.getBytes(Constants.CHARACTER_ENCODING)));
+            return rw.lookupBlob(ow.WriteBlob(Constants.CHARSET.GetBytes(content)));
         }
 
         protected DirCacheEntry file(String path, RevBlob blob)
         {
             DirCacheEntry e = new DirCacheEntry(path);
-            e.setFileMode(FileMode.REGULAR_FILE);
+            e.setFileMode(FileMode.RegularFile);
             e.setObjectId(blob);
             return e;
         }
@@ -101,22 +104,21 @@ namespace GitSharp.Tests.Util
 
         protected RevObject get(RevTree tree, String path)
         {
-            TreeWalk tw = new TreeWalk(db);
-            tw.setFilter(PathFilterGroup.createFromStrings(Collections
-                    .singleton(path)));
+            var tw = new TreeWalk.TreeWalk(db);
+            tw.setFilter(PathFilterGroup.createFromStrings(new string[] { path }));
             tw.reset(tree);
             while (tw.next())
             {
-                if (tw.isSubtree() && !path.equals(tw.getPathString()))
+                if (tw.isSubtree() && !path.Equals(tw.getPathString()))
                 {
                     tw.enterSubtree();
                     continue;
                 }
                 ObjectId entid = tw.getObjectId(0);
                 FileMode entmode = tw.getFileMode(0);
-                return rw.lookupAny(entid, entmode.getObjectType());
+                return rw.lookupAny(entid, (int)entmode.ObjectType);
             }
-            fail("Can't find " + path + " in tree " + tree.name());
+            Assert.Fail("Can't find " + path + " in tree " + tree.Name);
             return null; // never reached.
         }
 
@@ -139,23 +141,23 @@ namespace GitSharp.Tests.Util
         {
             tick(secDelta);
             Commit c = new Commit(db);
-            c.setTreeId(tree);
-            c.setParentIds(parents);
-            c.setAuthor(new PersonIdent(jauthor, new Date(nowTick)));
-            c.setCommitter(new PersonIdent(jcommitter, new Date(nowTick)));
-            c.setMessage("");
-            return rw.lookupCommit(ow.writeCommit(c));
+            c.TreeId=(tree);
+            c.ParentIds=(parents);
+            c.Author=(new PersonIdent(jauthor, nowTick.GitTimeToDateTimeOffset(0))); // [henon] offset?
+            c.Committer=(new PersonIdent(jcommitter, nowTick.GitTimeToDateTimeOffset(0)));
+            c.Message=("");
+            return rw.lookupCommit(ow.WriteCommit(c));
         }
 
         protected RevTag tag(String name, RevObject dst)
         {
             Tag t = new Tag(db);
-            t.setType(Constants.typeString(dst.getType()));
-            t.setObjId(dst.toObjectId());
-            t.setTag(name);
-            t.setTagger(new PersonIdent(jcommitter, new Date(nowTick)));
-            t.setMessage("");
-            return (RevTag)rw.lookupAny(ow.writeTag(t), Constants.OBJ_TAG);
+            t.TagType=(Constants.typeString(dst.getType()));
+            t.Id=(dst.ToObjectId());
+            t.TagName=(name);
+            t.Tagger=(new PersonIdent(jcommitter, nowTick.GitTimeToDateTimeOffset(0)));
+            t.Message=("");
+            return (RevTag)rw.lookupAny(ow.WriteTag(t), Constants.OBJ_TAG);
         }
 
         protected T parse<T>(T t)
@@ -177,7 +179,7 @@ namespace GitSharp.Tests.Util
 
         protected void assertCommit(RevCommit exp, RevCommit act)
         {
-            assertSame(exp, act);
+            Assert.AreSame(exp, act);
         }
     }
 }

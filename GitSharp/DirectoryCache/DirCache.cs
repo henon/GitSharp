@@ -531,13 +531,13 @@ namespace GitSharp.DirectoryCache
                 bb.close();
 
                 NB.encodeInt32(tmp, 0, EXT_TREE);
-                NB.encodeInt32(tmp, 4, (int)bb.Length());
-                dos.write(tmp, 0, 8);
+                NB.encodeInt32(tmp, 4, (int)bb.Length);
+                dos.Write(tmp, 0, 8);
                 bb.writeTo(dos, null);
             }
-
-            os.write(foot.digest());
-            os.close();
+            var hash = foot.Digest();
+            os.Write(hash, 0, hash.Length);
+            os.Close();
         }
 
         /**
@@ -556,9 +556,9 @@ namespace GitSharp.DirectoryCache
             LockFile tmp = myLock;
             requireLocked(tmp);
             myLock = null;
-            if (!tmp.commit())
+            if (!tmp.Commit())
                 return false;
-            lastModified = tmp.getCommitLastModified();
+            lastModified = tmp.CommitLastModified;
             return true;
         }
 

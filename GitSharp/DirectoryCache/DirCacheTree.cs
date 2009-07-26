@@ -186,7 +186,7 @@ namespace GitSharp.DirectoryCache
             childCnt = subcnt;
         }
 
-        public void write(byte[] tmp, DigestOutputStream os)
+        public void write(byte[] tmp, Stream os)
         {
             int ptr = tmp.Length;
             tmp[--ptr] = (byte)'\n';
@@ -195,7 +195,7 @@ namespace GitSharp.DirectoryCache
             ptr = RawParseUtils.formatBase10(tmp, ptr, isValid() ? entrySpan : -1);
             tmp[--ptr] = 0;
 
-            os.Write(encodedName);
+            os.Write(encodedName, 0, encodedName.Length);
             os.Write(tmp, ptr, tmp.Length - ptr);
             if (isValid())
             {

@@ -72,8 +72,7 @@ namespace GitSharp.Transport
                 name = SourceName;
             }
 
-            // [caytchen] TODO: ObjectId lacks Name
-            sw.Write(NewValue.ToString());
+            sw.Write(NewValue.Name);
             sw.Write('\t');
             if (NotForMerge)
                 sw.Write("not-for-merge");

@@ -315,7 +315,7 @@ namespace GitSharp.Util
                 {
                     int cnt;
                     byte[] buf = new byte[Block.SZ];
-                    while ((cnt = @in.Read(buf, 0, buf.Length)) >= 0)
+                    while ((cnt = @in.Read(buf, 0, buf.Length)) > 0)
                     {
                         os.Write(buf, 0, cnt);
                         pm.Update(cnt / 1024);

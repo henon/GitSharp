@@ -41,8 +41,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
 using GitSharp.Util;
+using NUnit.Framework;
 using System.IO;
 
 namespace GitSharp.Tests.Util
@@ -122,7 +122,7 @@ namespace GitSharp.Tests.Util
                     byte[] r = b.ToArray();
                     Assert.NotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
                     MemoryStream o = new MemoryStream();
@@ -130,7 +130,7 @@ namespace GitSharp.Tests.Util
                     o.Close();
                     byte[] r = o.ToArray();
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
             }
             finally
@@ -156,7 +156,7 @@ namespace GitSharp.Tests.Util
                     byte[] r = b.ToArray();
                     Assert.NotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
                     MemoryStream o = new MemoryStream();
@@ -164,7 +164,7 @@ namespace GitSharp.Tests.Util
                     o.Close();
                     byte[] r = o.ToArray();
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
             }
             finally
@@ -189,7 +189,7 @@ namespace GitSharp.Tests.Util
                     byte[] r = b.ToArray();
                     Assert.NotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
                     MemoryStream o = new MemoryStream();
@@ -197,7 +197,7 @@ namespace GitSharp.Tests.Util
                     o.Close();
                     byte[] r = o.ToArray();
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
             }
             finally
@@ -215,8 +215,9 @@ namespace GitSharp.Tests.Util
             try
             {
                 var @in = new MemoryStream(test);
-                var inReader = new StreamReader(@in);
-                b.write(inReader.Read());
+                // [caytchen] StreamReader buffers data after the very first read, thus advancing the Position in the underlying stream - causing this test to fail
+                //var inReader = new StreamReader(@in);
+                b.write(@in.ReadByte());
                 b.copy(@in);
                 b.close();
                 Assert.AreEqual(test.Length, b.Length);
@@ -224,7 +225,7 @@ namespace GitSharp.Tests.Util
                     byte[] r = b.ToArray();
                     Assert.NotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
                     MemoryStream o = new MemoryStream();
@@ -232,7 +233,7 @@ namespace GitSharp.Tests.Util
                     o.Close();
                     byte[] r = o.ToArray();
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
             }
             finally
@@ -255,7 +256,7 @@ namespace GitSharp.Tests.Util
                     byte[] r = b.ToArray();
                     Assert.NotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
                     MemoryStream o = new MemoryStream();
@@ -263,7 +264,7 @@ namespace GitSharp.Tests.Util
                     o.Close();
                     byte[] r = o.ToArray();
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
             }
             finally
@@ -288,7 +289,7 @@ namespace GitSharp.Tests.Util
                     byte[] r = b.ToArray();
                     Assert.NotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
                     MemoryStream o = new MemoryStream();
@@ -296,7 +297,7 @@ namespace GitSharp.Tests.Util
                     o.Close();
                     byte[] r = o.ToArray();
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
             }
             finally
@@ -321,7 +322,7 @@ namespace GitSharp.Tests.Util
                     byte[] r = b.ToArray();
                     Assert.NotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
                     MemoryStream o = new MemoryStream();
@@ -329,7 +330,7 @@ namespace GitSharp.Tests.Util
                     o.Close();
                     byte[] r = o.ToArray();
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
             }
             finally
@@ -357,7 +358,7 @@ namespace GitSharp.Tests.Util
                     byte[] r = b.ToArray();
                     Assert.NotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
                     MemoryStream o = new MemoryStream();
@@ -365,7 +366,7 @@ namespace GitSharp.Tests.Util
                     o.Close();
                     byte[] r = o.ToArray();
                     Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(test, r));
+                    Assert.IsTrue(test.SequenceEqual(r));
                 }
             }
             finally
@@ -426,7 +427,7 @@ namespace GitSharp.Tests.Util
                     byte[] r = b.ToArray();
                     Assert.NotNull(r);
                     Assert.AreEqual(expect.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(expect, r));
+                    Assert.IsTrue(expect.SequenceEqual(r));
                 }
                 {
                     MemoryStream o = new MemoryStream();
@@ -434,7 +435,7 @@ namespace GitSharp.Tests.Util
                     o.Close();
                     byte[] r = o.ToArray();
                     Assert.AreEqual(expect.Length, r.Length);
-                    Assert.IsTrue(Enumerable.Equals(expect, r));
+                    Assert.IsTrue(expect.SequenceEqual(r));
                 }
             }
             finally

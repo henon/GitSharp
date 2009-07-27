@@ -194,7 +194,7 @@ namespace GitSharp.Patch
 		    Edit inEdit = null;
 
             bool break_scan = false;
-		    for (; (c < endOffset) && (!break_scan); c = RawParseUtils.nextLF(buf, c)) {
+		    for (; c < endOffset; c = RawParseUtils.nextLF(buf, c)) {
 			    switch (buf[c]) {
 			    case (byte)' ':
 			    case (byte)'\n':
@@ -228,6 +228,8 @@ namespace GitSharp.Patch
 				    break_scan = true;
                     break;
 			    }
+                if (break_scan)
+                    break;
 		    }
 		    return r;
 	    }
@@ -260,7 +262,7 @@ namespace GitSharp.Patch
 		    old.nAdded = 0;
 
             bool break_scan = false;
-		    for (; (c < end) && (!break_scan); last = c, c = RawParseUtils.nextLF(buf, c))
+		    for (; c < end; last = c, c = RawParseUtils.nextLF(buf, c))
             {
 			    switch (buf[c])
                 {
@@ -284,6 +286,8 @@ namespace GitSharp.Patch
                     break_scan = true;
 				    break;
 			    }
+                if (break_scan)
+                    break;
 		    }
 
 		    if (last < end && nContext + old.nDeleted - 1 == old.lineCount
@@ -341,7 +345,7 @@ namespace GitSharp.Patch
 		    outStream[0].write(buf, ptr, eol - ptr);
 
             bool break_scan = false;
-		    for (ptr = eol; (ptr < endOffset) && (!break_scan); ptr = eol)
+		    for (ptr = eol; ptr < endOffset; ptr = eol)
             {
 			    eol = RawParseUtils.nextLF(buf, ptr);
 			    switch (buf[ptr]) {
@@ -361,6 +365,8 @@ namespace GitSharp.Patch
 				    break_scan = true;
                     break;
 			    }
+                if (break_scan)
+                    break;
 		    }
 	    }
 
@@ -374,7 +380,7 @@ namespace GitSharp.Patch
 		    copyLine(sb, text, offsets, 0);
 
             bool break_scan = false;
-		    for (ptr = eol; (ptr < endOffset) && (!break_scan); ptr = eol)
+		    for (ptr = eol; ptr < endOffset; ptr = eol)
             {
 			    eol = RawParseUtils.nextLF(buf, ptr);
 			    switch (buf[ptr]) {
@@ -394,6 +400,8 @@ namespace GitSharp.Patch
                     break_scan = true;
 				    break;
 			    }
+                if (break_scan)
+                    break;
 		    }
 	    }
 

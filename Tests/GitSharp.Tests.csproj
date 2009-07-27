@@ -81,6 +81,7 @@
     <Compile Include="Crc32Tests.cs" />
     <Compile Include="Util\RepositoryTestCase.cs" />
     <Compile Include="TreeTests.cs" />
+	<Compile Include="Patch\EditListTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="sample\README">

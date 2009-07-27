@@ -1,0 +1,33 @@
+diff --git a/org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java b/org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java
+index da7e704..34ce04a 100644
+--- a/org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java
++++ b/org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java
+@@ -109,4 +109,11 @@ assertTrue(Arrays.equals(values.toArray(), repositoryConfig
+        .getStringList("my", null, "somename")));
+    checkFile(cfgFile, "[my]\n\tsomename = value1\n\tsomename = value2\n");
+  }
++
++ public void test006_readCaseInsensitive() throws IOException {
++   final File path = writeTrashFile("config_001", "[Foo]\nBar\n");
++   RepositoryConfig repositoryConfig = new RepositoryConfig(null, path);
++   assertEquals(true, repositoryConfig.getBoolean("foo", null, "bar", false));
++   assertEquals("", repositoryConfig.getString("foo", null, "bar"));
++ }
+ }
+I AM NOT HERE
+diff --git a/org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java b/org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java
+index 45c2f8a..3291bba 100644
+--- a/org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java
++++ b/org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java
+@@ -236,9 +236,9 @@ protected boolean getBoolean(final String section, String subsection,
+      return defaultValue;
+ 
+    n = n.toLowerCase();
+-   if (MAGIC_EMPTY_VALUE.equals(n) || "yes".equals(n) || "true".equals(n) || "1".equals(n)) {
++   if (MAGIC_EMPTY_VALUE.equals(n) || "yes".equalsIgnoreCase(n) || "true".equalsIgnoreCase(n) || "1".equals(n)) {
+      return true;
+-   } else if ("no".equals(n) || "false".equals(n) || "0".equals(n)) {
++   } else if ("no".equalsIgnoreCase(n) || "false".equalsIgnoreCase(n) || "0".equalsIgnoreCase(n)) {
+      return false;
+    } else {
+      throw new IllegalArgumentException("Invalid boolean value: "

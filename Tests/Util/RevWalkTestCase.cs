@@ -60,7 +60,7 @@ namespace GitSharp.Tests.Util
 
         protected RevWalk.RevWalk rw;
 
-        public void setUp()
+        public override void setUp()
         {
             base.setUp();
             ow = new ObjectWriter(db);

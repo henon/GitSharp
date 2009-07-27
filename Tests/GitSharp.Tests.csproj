@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{37052DA4-F6A9-47D0-94AA-96F4A7E0462C}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -54,10 +54,13 @@
     <Compile Include="PackIndexV2Tests.cs" />
     <Compile Include="PackReaderTests.cs" />
     <Compile Include="ParseRefTests.cs" />
+    <Compile Include="Transport\IndexPackTests.cs" />
     <Compile Include="Transport\RefSpecTests.cs" />
+    <Compile Include="Transport\RemoteConfigTests.cs" />
     <Compile Include="Util\IntListTest.cs" />
     <Compile Include="Transport\URIishTests.cs" />
     <Compile Include="Util\PackIndexTestCase.cs" />
+    <Compile Include="Util\RevWalkTestCase.cs" />
     <Compile Include="Util\QuotedStringBourneStyleTest.cs" />
     <Compile Include="Util\QuotedStringBourneUserPathStyleTest.cs" />
     <Compile Include="Util\QuotedStringGitPathStyleTest.cs" />

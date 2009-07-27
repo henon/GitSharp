@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -33,10 +33,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Gallio, Version=3.0.6.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL" />
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\extern\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
+    <Reference Include="MbUnit, Version=3.0.6.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -207,24 +209,41 @@
     <Compile Include="RevWalk\TopoSortGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DirectoryCache\BaseDirCacheEditor.cs" />
+    <Compile Include="DirectoryCache\DirCache.cs" />
+    <Compile Include="DirectoryCache\DirCacheBuilder.cs" />
+    <Compile Include="DirectoryCache\DirCacheEditor.cs" />
+    <Compile Include="DirectoryCache\DirCacheEntry.cs" />
+    <Compile Include="DirectoryCache\DirCacheTree.cs" />
     <Compile Include="Diff\Edit.cs" />
     <Compile Include="Diff\EditList.cs" />
     <Compile Include="Diff\RawText.cs" />
     <Compile Include="Diff\Sequence.cs" />
+    <Compile Include="Exceptions\MissingBundlePrerequisiteException.cs" />
     <Compile Include="Exceptions\NoRemoteRepositoryException.cs" />
     <Compile Include="Exceptions\PackProtocolException.cs" />
     <Compile Include="Exceptions\RevWalkException.cs" />
     <Compile Include="Exceptions\StopWalkException.cs" />
     <Compile Include="Exceptions\TransportException.cs" />
+    <Compile Include="Exceptions\UnmergedPathException.cs" />
     <Compile Include="ObjectIdSubclassMap.cs" />
     <Compile Include="PackLock.cs" />
     <Compile Include="PackWriter.cs" />
+    <Compile Include="Patch\BinaryHunk.cs" />
+    <Compile Include="Patch\CombinedFileHeader.cs" />
+    <Compile Include="Patch\CombinedHunkHeader.cs" />
+    <Compile Include="Patch\FileHeader.cs" />
+    <Compile Include="Patch\FormatError.cs" />
+    <Compile Include="Patch\HunkHeader.cs" />
+    <Compile Include="Patch\Patch.cs" />
     <Compile Include="RefComparator.cs" />
     <Compile Include="RefWriter.cs" />
     <Compile Include="Transport\BaseConnection.cs" />
+    <Compile Include="Transport\BaseFetchConnection.cs" />
     <Compile Include="Transport\BasePackConnection.cs" />
     <Compile Include="Transport\BasePackFetchConnection.cs" />
     <Compile Include="Transport\BasePackPushConnection.cs" />
+    <Compile Include="Transport\BundleFetchConnection.cs" />
     <Compile Include="Transport\Daemon.cs" />
     <Compile Include="Transport\DaemonClient.cs" />
     <Compile Include="Transport\DaemonService.cs" />
@@ -255,6 +274,7 @@
     <Compile Include="Transport\TrackingRefUpdate.cs" />
     <Compile Include="Transport\Transport.cs" />
     <Compile Include="Transport\TransportBundle.cs" />
+    <Compile Include="Transport\TransportBundleFile.cs" />
     <Compile Include="Transport\UploadPack.cs" />
     <Compile Include="Transport\URIish.cs" />
     <Compile Include="Transport\IWalkTransport.cs" />
@@ -271,6 +291,8 @@
     <Compile Include="TreeWalk\NameConflictTreeWalk.cs" />
     <Compile Include="TreeWalk\TreeWalk.cs" />
     <Compile Include="TreeWalk\WorkingTreeIterator.cs" />
+    <Compile Include="Util\Arrays.cs" />
+    <Compile Include="Util\DigestOutputStream.cs" />
     <Compile Include="Util\Array.cs" />
     <Compile Include="Util\IListUtil.cs" />
     <Compile Include="Util\ICharSequence.cs" />

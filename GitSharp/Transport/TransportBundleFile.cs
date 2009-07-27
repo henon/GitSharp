@@ -35,55 +35,68 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
+using GitSharp.Exceptions;
 
 namespace GitSharp.Transport
 {
-
-    public class FetchHeadRecord
+    public class TransportBundleFile : Transport, TransportBundle
     {
-        public ObjectId NewValue { get; private set; }
-        public bool NotForMerge { get; private set; }
-        public string SourceName { get; private set; }
-        public URIish SourceURI { get; private set; }
-
-        public void Write(StringWriter sw)
+        private static FileInfo resolve(DirectoryInfo @base, string path)
         {
-            string type;
-            string name;
-            if (SourceName.StartsWith(Constants.R_HEADS))
+            FileInfo file = new FileInfo(path);
+            if (!file.Exists)
             {
-                type = "branch";
-                name = SourceName.Substring(Constants.R_HEADS.Length);
+                file = new FileInfo(Path.Combine(@base.FullName, path));
             }
-            else if (SourceName.StartsWith(Constants.R_TAGS))
+            return file;
+        }
+        
+        public static bool CanHandle(URIish uri)
+        {
+            if (uri.Host != null || uri.Port > 0 || uri.User != null || uri.Pass != null || uri.Path == null)
+                return false;
+
+            if ("file".Equals(uri.Scheme) || uri.Scheme == null)
             {
-                type = "tag";
-                name = SourceName.Substring(Constants.R_TAGS.Length);
-            }
-            else if (SourceName.StartsWith(Constants.R_REMOTES))
-            {
-                type = "remote branch";
-                name = SourceName.Substring(Constants.R_REMOTES.Length);
-            }
-            else
-            {
-                type = "";
-                name = SourceName;
+                FileInfo file = resolve(new DirectoryInfo("."), uri.Path);
+                return file.Name.EndsWith(".bundle");
             }
 
-            sw.Write(NewValue.Name);
-            sw.Write('\t');
-            if (NotForMerge)
-                sw.Write("not-for-merge");
-            sw.Write('\t');
-            sw.Write(type);
-            sw.Write(" '");
-            sw.Write(name);
-            sw.Write("' of ");
-            sw.Write(SourceURI);
-            sw.WriteLine();
+            return false;
+        }
+
+        private readonly FileInfo bundle;
+
+        public TransportBundleFile(Repository local, URIish uri)
+            : base(local, uri)
+        {
+            bundle = resolve(new DirectoryInfo("."), uri.Path);
+        }
+
+        public override IFetchConnection openFetch()
+        {
+            Stream src;
+            try
+            {
+                src = bundle.Open(System.IO.FileMode.Open, FileAccess.Read);
+            }
+            catch (FileNotFoundException)
+            {
+                throw new TransportException(uri, "not found");
+            }
+
+            return new BundleFetchConnection(this, src);
+        }
+
+        public override IPushConnection openPush()
+        {
+            throw new NotSupportedException("Push is not supported for bundle transport");
+        }
+
+        public override void close()
+        {
         }
     }
-
 }

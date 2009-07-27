@@ -1,6 +1,4 @@
 ﻿/*
- * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
@@ -37,19 +35,29 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.Transport
+using System.Collections.Generic;
+using System.Text;
+using GitSharp.Transport;
+
+namespace GitSharp.Exceptions
 {
-
-   /**
-     * Marker interface for transports that supports fetching from a git bundle
-     * (sneaker-net object transport).
-     * <p>
-     * Push support for a bundle is complex, as one does not have a peer to
-     * communicate with to decide what the peer already knows. So push is not
-     * supported by the bundle transport.
-     */
-    public interface TransportBundle : IPackTransport
+    public class MissingBundlePrerequisiteException : TransportException
     {
-    }
+        private static string format(List<ObjectId> ids)
+        {
+            StringBuilder r = new StringBuilder();
+            r.Append("missing prerequisite commits:");
+            foreach (ObjectId p in ids)
+            {
+                r.Append("\n  ");
+                r.Append(p.Name);
+            }
+            return r.ToString();
+        }
 
+        public MissingBundlePrerequisiteException(URIish uri, List<ObjectId> ids)
+        : base(uri, format(ids))
+        {
+        }
+    }
 }

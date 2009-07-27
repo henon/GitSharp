@@ -1,0 +1,67 @@
+From ce9b593ddf2530613f6da9d7f7e4a5ff93da8b36 Mon Sep 17 00:00:00 2001
+From: Robin Rosenberg <robin.rosenberg@dewire.com>
+Date: Mon, 13 Oct 2008 00:50:59 +0200
+Subject: [PATCH] git config file is case insensitive
+
+Keys are now always compared with ignore case rules.
+
+Signed-off-by: Robin Rosenberg <robin.rosenberg@dewire.com>
+Signed-off-by: Shawn O. Pearce <spearce@spearce.org>
+---
+ .../org/spearce/jgit/lib/RepositoryConfigTest.java |    7 +++++++
+ .../src/org/spearce/jgit/lib/RepositoryConfig.java |    8 ++++----
+ 2 files changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java b/org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java
+index da7e704..34ce04a 100644
+--- a/org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java
++++ b/org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java
+@@ -109,4 +109,11 @@ assertTrue(Arrays.equals(values.toArray(), repositoryConfig
+ 				.getStringList("my", null, "somename")));
+ 		checkFile(cfgFile, "[my]\n\tsomename = value1\n\tsomename = value2\n");
+ 	}
++
++	public void test006_readCaseInsensitive() throws IOException {
++		final File path = writeTrashFile("config_001", "[Foo]\nBar\n");
++		RepositoryConfig repositoryConfig = new RepositoryConfig(null, path);
++		assertEquals(true, repositoryConfig.getBoolean("foo", null, "bar", false));
++		assertEquals("", repositoryConfig.getString("foo", null, "bar"));
++	}
+ }
+diff --git a/org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java b/org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java
+index 45c2f8a..3291bba 100644
+--- a/org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java
++++ b/org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java
+@@ -236,9 +236,9 @@ protected boolean getBoolean(final String section, String subsection,
+ 			return defaultValue;
+ 
+ 		n = n.toLowerCase();
+-		if (MAGIC_EMPTY_VALUE.equals(n) || "yes".equals(n) || "true".equals(n) || "1".equals(n)) {
++		if (MAGIC_EMPTY_VALUE.equals(n) || "yes".equalsIgnoreCase(n) || "true".equalsIgnoreCase(n) || "1".equals(n)) {
+ 			return true;
+-		} else if ("no".equals(n) || "false".equals(n) || "0".equals(n)) {
++		} else if ("no".equalsIgnoreCase(n) || "false".equalsIgnoreCase(n) || "0".equalsIgnoreCase(n)) {
+ 			return false;
+ 		} else {
+ 			throw new IllegalArgumentException("Invalid boolean value: "
+@@ -300,7 +300,7 @@ public String getString(final String section, String subsection, final String na
+ 		final Set<String> result = new HashSet<String>();
+ 
+ 		for (final Entry e : entries) {
+-			if (section.equals(e.base) && e.extendedBase != null)
++			if (section.equalsIgnoreCase(e.base) && e.extendedBase != null)
+ 				result.add(e.extendedBase);
+ 		}
+ 		if (baseConfig != null)
+@@ -954,7 +954,7 @@ private static boolean eq(final String a, final String b) {
+ 				return true;
+ 			if (a == null || b == null)
+ 				return false;
+-			return a.equals(b);
++			return a.equalsIgnoreCase(b);
+ 		}
+ 	}
+ }
+-- 
+1.6.1.rc2.299.gead4c
+

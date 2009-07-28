@@ -414,7 +414,7 @@ namespace GitSharp.Patch
 			    end = s.Length;
 		    else
 			    end++;
-		    sb.Append(s, start, end);
+		    sb.Append(s, start, end - start);
 		    offsets[fileIdx] = end;
 	    }
 

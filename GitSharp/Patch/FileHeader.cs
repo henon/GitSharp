@@ -245,7 +245,7 @@ namespace GitSharp.Patch
                 {
 				    return RawParseUtils.decodeNoFallback(cs, buf, startOffset, endOffset);
 			    }
-                catch (EncoderFallbackException cee)
+                catch (EncoderFallbackException)
                 {
 				    // Try the much slower, more-memory intensive version which
 				    // can handle a character set conversion patch.
@@ -780,13 +780,13 @@ namespace GitSharp.Patch
 	    public static int isHunkHdr(byte[] buf, int start, int end)
         {
 		    int ptr = start;
-		    while (ptr < end && buf[ptr] == '@')
+		    while ((ptr < end) && (buf[ptr] == '@'))
 			    ptr++;
-		    if (ptr - start < 2)
+		    if ((ptr - start) < 2)
 			    return 0;
-		    if (ptr == end || buf[ptr++] != ' ')
+		    if ((ptr == end) || (buf[ptr++] != ' '))
 			    return 0;
-		    if (ptr == end || buf[ptr++] != '-')
+		    if ((ptr == end) || (buf[ptr++] != '-'))
 			    return 0;
 		    return (ptr - 3) - start;
 	    }

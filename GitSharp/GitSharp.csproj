@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -33,19 +33,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Gallio, Version=3.0.6.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL" />
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, PublicKeyToken=null">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\extern\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
-    <Reference Include="MbUnit, Version=3.0.6.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5, processorArchitecture=MSIL">
+    <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\extern\FileMap\Winterdom.IO.FileMap.dll</HintPath>
     </Reference>
@@ -162,11 +160,6 @@
     <Compile Include="RepositoryChangedEventArgs.cs" />
     <Compile Include="RefsChangedEventArgs.cs" />
     <Compile Include="IndexChangedEventArgs.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="RevWalk\AbstractRevQueue.cs" />
     <Compile Include="RevWalk\BlockObjQueue.cs" />
     <Compile Include="RevWalk\BlockRevQueue.cs" />
@@ -207,8 +200,6 @@
     <Compile Include="RevWalk\RewriteTreeFilter.cs" />
     <Compile Include="RevWalk\StartGenerator.cs" />
     <Compile Include="RevWalk\TopoSortGenerator.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="DirectoryCache\BaseDirCacheEditor.cs" />
     <Compile Include="DirectoryCache\DirCache.cs" />
     <Compile Include="DirectoryCache\DirCacheBuilder.cs" />
@@ -303,6 +294,9 @@
     <Compile Include="Util\RawSubstringPattern.cs" />
     <Compile Include="Util\TemporaryBuffer.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -318,7 +312,7 @@
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile" ExecuteTargetName="run">
+        <MonoDevelop.Autotools.MakefileInfo RelativeMakefileName="Makefile" ExecuteTargetName="run">
           <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />

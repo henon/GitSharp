@@ -57,7 +57,7 @@
     <Compile Include="DirectoryCache\DirCacheLargePathTest.cs" />
     <Compile Include="DirectoryCache\DirCacheTreeTest.cs" />
     <Compile Include="EncodingTests.cs" />
-    <Compile Include="NBTests.cs" />
+    <Compile Include="Util\NBTests.cs" />
     <Compile Include="PackIndexV1Tests.cs" />
     <Compile Include="PackIndexV2Tests.cs" />
     <Compile Include="PackReaderTests.cs" />
@@ -103,7 +103,7 @@
     <Compile Include="Util\TemporaryBufferTest.cs" />
     <Compile Include="Util\TestRng.cs" />
     <Compile Include="Util\XInputStream.cs" />
-    <Compile Include="VariousUtilityTests.cs" />
+    <Compile Include="Util\VariousUtilityTests.cs" />
     <Compile Include="WriteTests.cs" />
     <Compile Include="ObjectCheckerTests.cs" />
     <Compile Include="ObjectIdMapTests.cs" />

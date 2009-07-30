@@ -48,6 +48,14 @@
     <Compile Include="Diff\EditListTest.cs" />
     <Compile Include="Diff\EditTest.cs" />
     <Compile Include="Diff\RawTextTest.cs" />
+    <Compile Include="DirectoryCache\DirCacheBasicTest.cs" />
+    <Compile Include="DirectoryCache\DirCacheBuilderIteratorTest.cs" />
+    <Compile Include="DirectoryCache\DirCacheBuilderTest.cs" />
+    <Compile Include="DirectoryCache\DirCacheCGitCompatabilityTest.cs" />
+    <Compile Include="DirectoryCache\DirCacheFindTest.cs" />
+    <Compile Include="DirectoryCache\DirCacheIteratorTest.cs" />
+    <Compile Include="DirectoryCache\DirCacheLargePathTest.cs" />
+    <Compile Include="DirectoryCache\DirCacheTreeTest.cs" />
     <Compile Include="EncodingTests.cs" />
     <Compile Include="NBTests.cs" />
     <Compile Include="PackIndexV1Tests.cs" />
@@ -81,7 +89,7 @@
     <Compile Include="Crc32Tests.cs" />
     <Compile Include="Util\RepositoryTestCase.cs" />
     <Compile Include="TreeTests.cs" />
-	<Compile Include="Patch\EditListTest.cs" />
+    <Compile Include="Patch\EditListTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="sample\README">

@@ -58,9 +58,10 @@ namespace GitSharp.Tests.Util
 
         protected long nowTick; // [henon] this are seconds in git internal time representaiton
 
-        protected RevWalk.RevWalk rw;
+        protected GitSharp.RevWalk.RevWalk rw;
 
-        public void setUp()
+        [SetUp]
+        public override void setUp()
         {
             base.setUp();
             ow = new ObjectWriter(db);
@@ -69,9 +70,9 @@ namespace GitSharp.Tests.Util
             nowTick = 1236977987L;
         }
 
-        protected RevWalk.RevWalk createRevWalk()
+        protected GitSharp.RevWalk.RevWalk createRevWalk()
         {
-            return new RevWalk.RevWalk(db);
+            return new GitSharp.RevWalk.RevWalk(db);
         }
 
         protected void tick(int secDelta)

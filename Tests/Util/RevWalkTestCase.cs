@@ -58,8 +58,9 @@ namespace GitSharp.Tests.Util
 
         protected long nowTick; // [henon] this are seconds in git internal time representaiton
 
-        protected RevWalk.RevWalk rw;
+        protected GitSharp.RevWalk.RevWalk rw;
 
+        [SetUp]
         public override void setUp()
         {
             base.setUp();
@@ -69,9 +70,9 @@ namespace GitSharp.Tests.Util
             nowTick = 1236977987L;
         }
 
-        protected RevWalk.RevWalk createRevWalk()
+        protected GitSharp.RevWalk.RevWalk createRevWalk()
         {
-            return new RevWalk.RevWalk(db);
+            return new GitSharp.RevWalk.RevWalk(db);
         }
 
         protected void tick(int secDelta)
@@ -104,7 +105,7 @@ namespace GitSharp.Tests.Util
 
         protected RevObject get(RevTree tree, String path)
         {
-            var tw = new TreeWalk.TreeWalk(db);
+            var tw = new GitSharp.TreeWalk.TreeWalk(db);
             tw.setFilter(PathFilterGroup.createFromStrings(new string[] { path }));
             tw.reset(tree);
             while (tw.next())

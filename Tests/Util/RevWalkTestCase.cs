@@ -105,7 +105,7 @@ namespace GitSharp.Tests.Util
 
         protected RevObject get(RevTree tree, String path)
         {
-            var tw = new TreeWalk.TreeWalk(db);
+            var tw = new GitSharp.TreeWalk.TreeWalk(db);
             tw.setFilter(PathFilterGroup.createFromStrings(new string[] { path }));
             tw.reset(tree);
             while (tw.next())

@@ -81,6 +81,16 @@
     <Compile Include="Transport\IndexPackTests.cs" />
     <Compile Include="Transport\RefSpecTests.cs" />
     <Compile Include="Transport\RemoteConfigTests.cs" />
+    <Compile Include="TreeWalk\AbstractTreeIteratorTest.cs" />
+    <Compile Include="TreeWalk\CanonicalTreeParserTest.cs" />
+    <Compile Include="TreeWalk\EmptyTreeIteratorTest.cs" />
+    <Compile Include="TreeWalk\FileTreeIteratorTest.cs" />
+    <Compile Include="TreeWalk\Filter\AlwaysCloneTreeFilter.cs" />
+    <Compile Include="TreeWalk\Filter\NotTreeFilterTest.cs" />
+    <Compile Include="TreeWalk\Filter\TreeFilterTest.cs" />
+    <Compile Include="TreeWalk\NameConflictTreeWalkTest.cs" />
+    <Compile Include="TreeWalk\PostOrderTreeWalkTest.cs" />
+    <Compile Include="TreeWalk\TreeWalkBasicDiffTest.cs" />
     <Compile Include="Util\IntListTest.cs" />
     <Compile Include="Transport\URIishTests.cs" />
     <Compile Include="Util\PackIndexTestCase.cs" />

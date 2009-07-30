@@ -117,7 +117,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.AreEqual(exp, fh.getScriptText(new Encoding[] { csNew, csOld, csNew }));
 	    }
 
-	    private GitSharp.Patch.Patch parseTestPatchFile()
+	    public GitSharp.Patch.Patch parseTestPatchFile()
         {
             string patchFile = (new StackFrame(1, true)).GetMethod().Name + ".patch";
             Stream inStream = new FileStream(PATCHS_DIR + patchFile, System.IO.FileMode.Open);

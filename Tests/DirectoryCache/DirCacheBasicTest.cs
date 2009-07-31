@@ -35,154 +35,174 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using NUnit.Framework;
+using System.IO;
+using GitSharp.DirectoryCache;
 
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
+
     [TestFixture]
     public class DirCacheBasicTest : RepositoryTestCase
     {
 
-#if false
-	public void testReadMissing_RealIndex() throws Exception {
-		final File idx = new File(db.getDirectory(), "index");
-		assertFalse(idx.exists());
+        [Test]
+        public void testReadMissing_RealIndex()
+        {
+            FileInfo idx = new FileInfo(db.Directory + "index");
+            Assert.False(idx.Exists);
 
-		final DirCache dc = DirCache.read(db);
-		assertNotNull(dc);
-		assertEquals(0, dc.getEntryCount());
-	}
+            DirCache dc = DirCache.read(db);
+            Assert.NotNull(dc);
+            Assert.AreEqual(0, dc.getEntryCount());
+        }
 
-	public void testReadMissing_TempIndex() throws Exception {
-		final File idx = new File(db.getDirectory(), "tmp_index");
-		assertFalse(idx.exists());
+        [Test]
+        public void testReadMissing_TempIndex()
+        {
+            FileInfo idx = new FileInfo(db.Directory + "tmp_index");
+            Assert.False(idx.Exists);
 
-		final DirCache dc = DirCache.read(idx);
-		assertNotNull(dc);
-		assertEquals(0, dc.getEntryCount());
-	}
+            DirCache dc = DirCache.read(idx);
+            Assert.NotNull(dc);
+            Assert.AreEqual(0, dc.getEntryCount());
+        }
 
-	public void testLockMissing_RealIndex() throws Exception {
-		final File idx = new File(db.getDirectory(), "index");
-		final File lck = new File(db.getDirectory(), "index.lock");
-		assertFalse(idx.exists());
-		assertFalse(lck.exists());
+        [Test]
+        public void testLockMissing_RealIndex()
+        {
+            FileInfo idx = new FileInfo(db.Directory + "index");
+            FileInfo lck = new FileInfo(db.Directory + "index.Lock");
+            Assert.False(idx.Exists);
+            Assert.False(lck.Exists);
 
-		final DirCache dc = DirCache.lock(db);
-		assertNotNull(dc);
-		assertFalse(idx.exists());
-		assertTrue(lck.exists());
-		assertEquals(0, dc.getEntryCount());
+            DirCache dc = DirCache.Lock(db);
+            Assert.NotNull(dc);
+            Assert.False(idx.Exists);
+            Assert.IsTrue(lck.Exists);
+            Assert.AreEqual(0, dc.getEntryCount());
 
-		dc.unlock();
-		assertFalse(idx.exists());
-		assertFalse(lck.exists());
-	}
+            dc.unlock();
+            Assert.False(idx.Exists);
+            Assert.False(lck.Exists);
+        }
 
-	public void testLockMissing_TempIndex() throws Exception {
-		final File idx = new File(db.getDirectory(), "tmp_index");
-		final File lck = new File(db.getDirectory(), "tmp_index.lock");
-		assertFalse(idx.exists());
-		assertFalse(lck.exists());
+        [Test]
+        public void testLockMissing_TempIndex()
+        {
+            FileInfo idx = new FileInfo(db.Directory + "tmp_index");
+            FileInfo lck = new FileInfo(db.Directory + "tmp_index.Lock");
+            Assert.False(idx.Exists);
+            Assert.False(lck.Exists);
 
-		final DirCache dc = DirCache.lock(idx);
-		assertNotNull(dc);
-		assertFalse(idx.exists());
-		assertTrue(lck.exists());
-		assertEquals(0, dc.getEntryCount());
+            DirCache dc = DirCache.Lock(idx);
+            Assert.NotNull(dc);
+            Assert.False(idx.Exists);
+            Assert.IsTrue(lck.Exists);
+            Assert.AreEqual(0, dc.getEntryCount());
 
-		dc.unlock();
-		assertFalse(idx.exists());
-		assertFalse(lck.exists());
-	}
+            dc.unlock();
+            Assert.False(idx.Exists);
+            Assert.False(lck.Exists);
+        }
 
-	public void testWriteEmptyUnlock_RealIndex() throws Exception {
-		final File idx = new File(db.getDirectory(), "index");
-		final File lck = new File(db.getDirectory(), "index.lock");
-		assertFalse(idx.exists());
-		assertFalse(lck.exists());
+        [Test]
+        public void testWriteEmptyUnlock_RealIndex()
+        {
+            FileInfo idx = new FileInfo(db.Directory + "index");
+            FileInfo lck = new FileInfo(db.Directory + "index.Lock");
+            Assert.False(idx.Exists);
+            Assert.False(lck.Exists);
 
-		final DirCache dc = DirCache.lock(db);
-		assertEquals(0, lck.length());
-		dc.write();
-		assertEquals(12 + 20, lck.length());
+            DirCache dc = DirCache.Lock(db);
+            Assert.AreEqual(0, lck.Length);
+            dc.write();
+            Assert.AreEqual(12 + 20, lck.Length);
 
-		dc.unlock();
-		assertFalse(idx.exists());
-		assertFalse(lck.exists());
-	}
+            dc.unlock();
+            Assert.False(idx.Exists);
+            Assert.False(lck.Exists);
+        }
 
-	public void testWriteEmptyCommit_RealIndex() throws Exception {
-		final File idx = new File(db.getDirectory(), "index");
-		final File lck = new File(db.getDirectory(), "index.lock");
-		assertFalse(idx.exists());
-		assertFalse(lck.exists());
+        [Test]
+        public void testWriteEmptyCommit_RealIndex()
+        {
+            FileInfo idx = new FileInfo(db.Directory + "index");
+            FileInfo lck = new FileInfo(db.Directory + "index.Lock");
+            Assert.False(idx.Exists);
+            Assert.False(lck.Exists);
 
-		final DirCache dc = DirCache.lock(db);
-		assertEquals(0, lck.length());
-		dc.write();
-		assertEquals(12 + 20, lck.length());
+            DirCache dc = DirCache.Lock(db);
+            Assert.AreEqual(0, lck.Length);
+            dc.write();
+            Assert.AreEqual(12 + 20, lck.Length);
 
-		assertTrue(dc.commit());
-		assertTrue(idx.exists());
-		assertFalse(lck.exists());
-		assertEquals(12 + 20, idx.length());
-	}
+            Assert.IsTrue(dc.commit());
+            Assert.IsTrue(idx.Exists);
+            Assert.False(lck.Exists);
+            Assert.AreEqual(12 + 20, idx.Length);
+        }
 
-	public void testWriteEmptyReadEmpty_RealIndex() throws Exception {
-		final File idx = new File(db.getDirectory(), "index");
-		final File lck = new File(db.getDirectory(), "index.lock");
-		assertFalse(idx.exists());
-		assertFalse(lck.exists());
-		{
-			final DirCache dc = DirCache.lock(db);
-			dc.write();
-			assertTrue(dc.commit());
-			assertTrue(idx.exists());
-		}
-		{
-			final DirCache dc = DirCache.read(db);
-			assertEquals(0, dc.getEntryCount());
-		}
-	}
+        [Test]
+        public void testWriteEmptyReadEmpty_RealIndex()
+        {
+            FileInfo idx = new FileInfo(db.Directory + "index");
+            FileInfo lck = new FileInfo(db.Directory + "index.Lock");
+            Assert.False(idx.Exists);
+            Assert.False(lck.Exists);
+            {
+                DirCache dc = DirCache.Lock(db);
+                dc.write();
+                Assert.IsTrue(dc.commit());
+                Assert.IsTrue(idx.Exists);
+            }
+            {
+                DirCache dc = DirCache.read(db);
+                Assert.AreEqual(0, dc.getEntryCount());
+            }
+        }
 
-	public void testWriteEmptyLockEmpty_RealIndex() throws Exception {
-		final File idx = new File(db.getDirectory(), "index");
-		final File lck = new File(db.getDirectory(), "index.lock");
-		assertFalse(idx.exists());
-		assertFalse(lck.exists());
-		{
-			final DirCache dc = DirCache.lock(db);
-			dc.write();
-			assertTrue(dc.commit());
-			assertTrue(idx.exists());
-		}
-		{
-			final DirCache dc = DirCache.lock(db);
-			assertEquals(0, dc.getEntryCount());
-			assertTrue(idx.exists());
-			assertTrue(lck.exists());
-			dc.unlock();
-		}
-	}
+        [Test]
+        public void testWriteEmptyLockEmpty_RealIndex()
+        {
+            FileInfo idx = new FileInfo(db.Directory + "index");
+            FileInfo lck = new FileInfo(db.Directory + "index.Lock");
+            Assert.False(idx.Exists);
+            Assert.False(lck.Exists);
+            {
+                DirCache dc = DirCache.Lock(db);
+                dc.write();
+                Assert.IsTrue(dc.commit());
+                Assert.IsTrue(idx.Exists);
+            }
+            {
+                DirCache dc = DirCache.Lock(db);
+                Assert.AreEqual(0, dc.getEntryCount());
+                Assert.IsTrue(idx.Exists);
+                Assert.IsTrue(lck.Exists);
+                dc.unlock();
+            }
+        }
 
-	public void testBuildThenClear() throws Exception {
-		final DirCache dc = DirCache.read(db);
+        [Test]
+        public void testBuildThenClear()
+        {
+            DirCache dc = DirCache.read(db);
 
-		final String[] paths = { "a.", "a.b", "a/b", "a0b" };
-		final DirCacheEntry[] ents = new DirCacheEntry[paths.length];
-		for (int i = 0; i < paths.length; i++)
-			ents[i] = new DirCacheEntry(paths[i]);
+            string[] paths = { "a.", "a.b", "a/b", "a0b" };
+            DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
+            for (int i = 0; i < paths.Length; i++)
+                ents[i] = new DirCacheEntry(paths[i]);
 
-		final DirCacheBuilder b = dc.builder();
-		for (int i = 0; i < ents.length; i++)
-			b.add(ents[i]);
-		b.finish();
+            DirCacheBuilder b = dc.builder();
+            for (int i = 0; i < ents.Length; i++)
+                b.add(ents[i]);
+            b.finish();
 
-		assertEquals(paths.length, dc.getEntryCount());
-		dc.clear();
-		assertEquals(0, dc.getEntryCount());
-	}
-#endif
+            Assert.AreEqual(paths.Length, dc.getEntryCount());
+            dc.clear();
+            Assert.AreEqual(0, dc.getEntryCount());
+        }
+
     }
 }

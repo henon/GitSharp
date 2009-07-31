@@ -4,7 +4,7 @@
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
- * without modification, are permitted provided that the following
+ * with@out modification, are permitted provided that the following
  * conditions are met:
  *
  * - Redistributions of source code must retain the above copyright
@@ -17,7 +17,7 @@
  *
  * - Neither the name of the Git Development Community nor the
  *   names of its contributors may be used to endorse or promote
- *   products derived from this software without specific prior
+ *   products derived from this software with@out specific prior
  *   written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
@@ -36,243 +36,269 @@
  */
 
 using GitSharp.TreeWalk;
+using System.Linq;
 namespace GitSharp.Tests.TreeWalk
 {
 
     using NUnit.Framework;
+    using System.IO;
+    using System.Text;
     [TestFixture]
     public class CanonicalTreeParserTest
     {
-#if false
-	private final CanonicalTreeParser ctp = new CanonicalTreeParser();
 
-	private final FileMode m644 = FileMode.REGULAR_FILE;
+        private CanonicalTreeParser ctp = new CanonicalTreeParser();
 
-	private final FileMode mt = FileMode.TREE;
+        private GitSharp.FileMode m644 = GitSharp.FileMode.RegularFile;
 
-	private final ObjectId hash_a = ObjectId
-			.fromString("6b9c715d21d5486e59083fb6071566aa6ecd4d42");
+        private GitSharp.FileMode mt = GitSharp.FileMode.Tree;
 
-	private final ObjectId hash_foo = ObjectId
-			.fromString("a213e8e25bb2442326e86cbfb9ef56319f482869");
+        private ObjectId hash_a = ObjectId.FromString("6b9c715d21d5486e59083fb6071566aa6ecd4d42");
 
-	private final ObjectId hash_sometree = ObjectId
-			.fromString("daf4bdb0d7bb24319810fe0e73aa317663448c93");
+        private ObjectId hash_foo = ObjectId.FromString("a213e8e25bb2442326e86cbfb9ef56319f482869");
 
-	private byte[] tree1;
+        private ObjectId hash_sometree = ObjectId.FromString("daf4bdb0d7bb24319810fe0e73aa317663448c93");
 
-	private byte[] tree2;
+        private byte[] tree1;
 
-	private byte[] tree3;
+        private byte[] tree2;
 
-	public void setUp() throws Exception {
-		super.setUp();
+        private byte[] tree3;
 
-		tree1 = mkree(entry(m644, "a", hash_a));
-		tree2 = mkree(entry(m644, "a", hash_a), entry(m644, "foo", hash_foo));
-		tree3 = mkree(entry(m644, "a", hash_a), entry(mt, "b_sometree",
-				hash_sometree), entry(m644, "foo", hash_foo));
-	}
+        [SetUp]
+        public void setUp()
+        {
+            tree1 = mkree(entry(m644, "a", hash_a));
+            tree2 = mkree(entry(m644, "a", hash_a), entry(m644, "foo", hash_foo));
+            tree3 = mkree(entry(m644, "a", hash_a), entry(mt, "b_sometree", hash_sometree), entry(m644, "foo", hash_foo));
+        }
 
-	private static byte[] mkree(final byte[]... data) throws Exception {
-		final ByteArrayOutputStream out = new ByteArrayOutputStream();
-		for (final byte[] e : data)
-			out.write(e);
-		return out.toByteArray();
-	}
+        private static byte[] mkree(params byte[][] data)
+        {
+            var @out = new MemoryStream();
+            foreach (byte[] e in data)
+                @out.Write(e, 0, e.Length);
+            return @out.ToArray();
+        }
 
-	private static byte[] entry(final FileMode mode, final String name,
-			final ObjectId id) throws Exception {
-		final ByteArrayOutputStream out = new ByteArrayOutputStream();
-		mode.copyTo(out);
-		out.write(' ');
-		out.write(Constants.encode(name));
-		out.write(0);
-		id.copyRawTo(out);
-		return out.toByteArray();
-	}
+        private static byte[] entry(GitSharp.FileMode mode, string name, ObjectId id)
+        {
+            var @out = new MemoryStream();
+            mode.CopyTo(@out);
+            @out.WriteByte((byte)' ');
+            var bytes = Constants.encode(name);
+            @out.Write(bytes, 0, bytes.Length);
+            @out.WriteByte((byte)0);
+            id.copyRawTo(@out);
+            return @out.ToArray();
+        }
 
-	private String path() {
-		return RawParseUtils.decode(Constants.CHARSET, ctp.path,
-				ctp.pathOffset, ctp.pathLen);
-	}
+        private string path()
+        {
+            return RawParseUtils.decode(Constants.CHARSET, ctp.path, ctp.pathOffset, ctp.pathLen);
+        }
 
-	public void testEmptyTree_AtEOF() throws Exception {
-		ctp.reset(new byte[0]);
-		assertTrue(ctp.eof());
-	}
+        [Test]
+        public void testEmptyTree_AtEOF()
+        {
+            ctp.reset(new byte[0]);
+            Assert.IsTrue(ctp.eof());
+        }
 
-	public void testOneEntry_Forward() throws Exception {
-		ctp.reset(tree1);
+        [Test]
+        public void testOneEntry_Forward()
+        {
+            ctp.reset(tree1);
 
-		assertTrue(ctp.first());
-		assertFalse(ctp.eof());
-		assertEquals(m644.getBits(), ctp.mode);
-		assertEquals("a", path());
-		assertEquals(hash_a, ctp.getEntryObjectId());
+            Assert.IsTrue(ctp.first());
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(m644.Bits, ctp.mode);
+            Assert.AreEqual("a", path());
+            Assert.AreEqual(hash_a, ctp.getEntryObjectId());
 
-		ctp.next(1);
-		assertFalse(ctp.first());
-		assertTrue(ctp.eof());
-	}
+            ctp.next(1);
+            Assert.IsFalse(ctp.first());
+            Assert.IsTrue(ctp.eof());
+        }
 
-	public void testTwoEntries_ForwardOneAtATime() throws Exception {
-		ctp.reset(tree2);
+        [Test]
+        public void testTwoEntries_ForwardOneAtATime()
+        {
+            ctp.reset(tree2);
 
-		assertTrue(ctp.first());
-		assertFalse(ctp.eof());
-		assertEquals(m644.getBits(), ctp.mode);
-		assertEquals("a", path());
-		assertEquals(hash_a, ctp.getEntryObjectId());
+            Assert.IsTrue(ctp.first());
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(m644.Bits, ctp.mode);
+            Assert.AreEqual("a", path());
+            Assert.AreEqual(hash_a, ctp.getEntryObjectId());
 
-		ctp.next(1);
-		assertFalse(ctp.eof());
-		assertEquals(m644.getBits(), ctp.mode);
-		assertEquals("foo", path());
-		assertEquals(hash_foo, ctp.getEntryObjectId());
+            ctp.next(1);
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(m644.Bits, ctp.mode);
+            Assert.AreEqual("foo", path());
+            Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
 
-		ctp.next(1);
-		assertFalse(ctp.first());
-		assertTrue(ctp.eof());
-	}
+            ctp.next(1);
+            Assert.IsFalse(ctp.first());
+            Assert.IsTrue(ctp.eof());
+        }
 
-	public void testOneEntry_Seek1IsEOF() throws Exception {
-		ctp.reset(tree1);
-		ctp.next(1);
-		assertTrue(ctp.eof());
-	}
+        [Test]
+        public void testOneEntry_Seek1IsEOF()
+        {
+            ctp.reset(tree1);
+            ctp.next(1);
+            Assert.IsTrue(ctp.eof());
+        }
 
-	public void testTwoEntries_Seek2IsEOF() throws Exception {
-		ctp.reset(tree2);
-		ctp.next(2);
-		assertTrue(ctp.eof());
-	}
+        [Test]
+        public void testTwoEntries_Seek2IsEOF()
+        {
+            ctp.reset(tree2);
+            ctp.next(2);
+            Assert.IsTrue(ctp.eof());
+        }
 
-	public void testThreeEntries_Seek3IsEOF() throws Exception {
-		ctp.reset(tree3);
-		ctp.next(3);
-		assertTrue(ctp.eof());
-	}
+        [Test]
+        public void testThreeEntries_Seek3IsEOF()
+        {
+            ctp.reset(tree3);
+            ctp.next(3);
+            Assert.IsTrue(ctp.eof());
+        }
 
-	public void testThreeEntries_Seek2() throws Exception {
-		ctp.reset(tree3);
+        [Test]
+        public void testThreeEntries_Seek2()
+        {
+            ctp.reset(tree3);
 
-		ctp.next(2);
-		assertFalse(ctp.eof());
-		assertFalse(ctp.eof());
-		assertEquals(m644.getBits(), ctp.mode);
-		assertEquals("foo", path());
-		assertEquals(hash_foo, ctp.getEntryObjectId());
+            ctp.next(2);
+            Assert.IsFalse(ctp.eof());
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(m644.Bits, ctp.mode);
+            Assert.AreEqual("foo", path());
+            Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
 
-		ctp.next(1);
-		assertTrue(ctp.eof());
-	}
+            ctp.next(1);
+            Assert.IsTrue(ctp.eof());
+        }
 
-	public void testOneEntry_Backwards() throws Exception {
-		ctp.reset(tree1);
-		ctp.next(1);
-		assertFalse(ctp.first());
-		assertTrue(ctp.eof());
+        [Test]
+        public void testOneEntry_Backwards()
+        {
+            ctp.reset(tree1);
+            ctp.next(1);
+            Assert.IsFalse(ctp.first());
+            Assert.IsTrue(ctp.eof());
 
-		ctp.back(1);
-		assertTrue(ctp.first());
-		assertFalse(ctp.eof());
-		assertEquals(m644.getBits(), ctp.mode);
-		assertEquals("a", path());
-		assertEquals(hash_a, ctp.getEntryObjectId());
-	}
+            ctp.back(1);
+            Assert.IsTrue(ctp.first());
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(m644.Bits, ctp.mode);
+            Assert.AreEqual("a", path());
+            Assert.AreEqual(hash_a, ctp.getEntryObjectId());
+        }
 
-	public void testTwoEntries_BackwardsOneAtATime() throws Exception {
-		ctp.reset(tree2);
-		ctp.next(2);
-		assertTrue(ctp.eof());
+        [Test]
+        public void testTwoEntries_BackwardsOneAtATime()
+        {
+            ctp.reset(tree2);
+            ctp.next(2);
+            Assert.IsTrue(ctp.eof());
 
-		ctp.back(1);
-		assertFalse(ctp.eof());
-		assertEquals(m644.getBits(), ctp.mode);
-		assertEquals("foo", path());
-		assertEquals(hash_foo, ctp.getEntryObjectId());
+            ctp.back(1);
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(m644.Bits, ctp.mode);
+            Assert.AreEqual("foo", path());
+            Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
 
-		ctp.back(1);
-		assertFalse(ctp.eof());
-		assertEquals(m644.getBits(), ctp.mode);
-		assertEquals("a", path());
-		assertEquals(hash_a, ctp.getEntryObjectId());
-	}
+            ctp.back(1);
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(m644.Bits, ctp.mode);
+            Assert.AreEqual("a", path());
+            Assert.AreEqual(hash_a, ctp.getEntryObjectId());
+        }
 
-	public void testTwoEntries_BackwardsTwo() throws Exception {
-		ctp.reset(tree2);
-		ctp.next(2);
-		assertTrue(ctp.eof());
+        [Test]
+        public void testTwoEntries_BackwardsTwo()
+        {
+            ctp.reset(tree2);
+            ctp.next(2);
+            Assert.IsTrue(ctp.eof());
 
-		ctp.back(2);
-		assertFalse(ctp.eof());
-		assertEquals(m644.getBits(), ctp.mode);
-		assertEquals("a", path());
-		assertEquals(hash_a, ctp.getEntryObjectId());
+            ctp.back(2);
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(m644.Bits, ctp.mode);
+            Assert.AreEqual("a", path());
+            Assert.AreEqual(hash_a, ctp.getEntryObjectId());
 
-		ctp.next(1);
-		assertFalse(ctp.eof());
-		assertEquals(m644.getBits(), ctp.mode);
-		assertEquals("foo", path());
-		assertEquals(hash_foo, ctp.getEntryObjectId());
+            ctp.next(1);
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(m644.Bits, ctp.mode);
+            Assert.AreEqual("foo", path());
+            Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
 
-		ctp.next(1);
-		assertTrue(ctp.eof());
-	}
+            ctp.next(1);
+            Assert.IsTrue(ctp.eof());
+        }
 
-	public void testThreeEntries_BackwardsTwo() throws Exception {
-		ctp.reset(tree3);
-		ctp.next(3);
-		assertTrue(ctp.eof());
+        [Test]
+        public void testThreeEntries_BackwardsTwo()
+        {
+            ctp.reset(tree3);
+            ctp.next(3);
+            Assert.IsTrue(ctp.eof());
 
-		ctp.back(2);
-		assertFalse(ctp.eof());
-		assertEquals(mt.getBits(), ctp.mode);
-		assertEquals("b_sometree", path());
-		assertEquals(hash_sometree, ctp.getEntryObjectId());
+            ctp.back(2);
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(mt.Bits, ctp.mode);
+            Assert.AreEqual("b_sometree", path());
+            Assert.AreEqual(hash_sometree, ctp.getEntryObjectId());
 
-		ctp.next(1);
-		assertFalse(ctp.eof());
-		assertEquals(m644.getBits(), ctp.mode);
-		assertEquals("foo", path());
-		assertEquals(hash_foo, ctp.getEntryObjectId());
+            ctp.next(1);
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(m644.Bits, ctp.mode);
+            Assert.AreEqual("foo", path());
+            Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
 
-		ctp.next(1);
-		assertTrue(ctp.eof());
-	}
+            ctp.next(1);
+            Assert.IsTrue(ctp.eof());
+        }
 
-	public void testBackwards_ConfusingPathName() throws Exception {
-		final String aVeryConfusingName = "confusing 644 entry 755 and others";
-		ctp.reset(mkree(entry(m644, "a", hash_a), entry(mt, aVeryConfusingName,
-				hash_sometree), entry(m644, "foo", hash_foo)));
-		ctp.next(3);
-		assertTrue(ctp.eof());
+        [Test]
+        public void testBackwards_ConfusingPathName()
+        {
+            string aVeryConfusingName = "confusing 644 entry 755 and others";
+            ctp.reset(mkree(entry(m644, "a", hash_a), entry(mt, aVeryConfusingName,
+                    hash_sometree), entry(m644, "foo", hash_foo)));
+            ctp.next(3);
+            Assert.IsTrue(ctp.eof());
 
-		ctp.back(2);
-		assertFalse(ctp.eof());
-		assertEquals(mt.getBits(), ctp.mode);
-		assertEquals(aVeryConfusingName, path());
-		assertEquals(hash_sometree, ctp.getEntryObjectId());
+            ctp.back(2);
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(mt.Bits, ctp.mode);
+            Assert.AreEqual(aVeryConfusingName, path());
+            Assert.AreEqual(hash_sometree, ctp.getEntryObjectId());
 
-		ctp.back(1);
-		assertFalse(ctp.eof());
-		assertEquals(m644.getBits(), ctp.mode);
-		assertEquals("a", path());
-		assertEquals(hash_a, ctp.getEntryObjectId());
-	}
+            ctp.back(1);
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(m644.Bits, ctp.mode);
+            Assert.AreEqual("a", path());
+            Assert.AreEqual(hash_a, ctp.getEntryObjectId());
+        }
 
-	public void testFreakingHugePathName() throws Exception {
-		final int n = AbstractTreeIterator.DEFAULT_PATH_SIZE * 4;
-		final StringBuilder b = new StringBuilder(n);
-		for (int i = 0; i < n; i++)
-			b.append('q');
-		final String name = b.toString();
-		ctp.reset(entry(m644, name, hash_a));
-		assertFalse(ctp.eof());
-		assertEquals(name, RawParseUtils.decode(Constants.CHARSET, ctp.path,
-				ctp.pathOffset, ctp.pathLen));
-	}
-#endif
+        [Test]
+        public void testFreakingHugePathName()
+        {
+            int n = AbstractTreeIterator.DEFAULT_PATH_SIZE * 4;
+            StringBuilder b = new StringBuilder(n);
+            for (int i = 0; i < n; i++)
+                b.Append('q');
+            string name = b.ToString();
+            ctp.reset(entry(m644, name, hash_a));
+            Assert.IsFalse(ctp.eof());
+            Assert.AreEqual(name, RawParseUtils.decode(Constants.CHARSET, ctp.path,
+                    ctp.pathOffset, ctp.pathLen));
+        }
     }
 }

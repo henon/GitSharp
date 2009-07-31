@@ -44,48 +44,59 @@ namespace GitSharp.Tests.TreeWalk
     [TestFixture]
     public class NotTreeFilterTest : RepositoryTestCase
     {
-#if false
-	public void testWrap() throws Exception {
-		final TreeWalk tw = new TreeWalk(db);
-		final TreeFilter a = TreeFilter.ALL;
-		final TreeFilter n = NotTreeFilter.create(a);
-		assertNotNull(n);
-		assertTrue(a.include(tw));
-		assertFalse(n.include(tw));
-	}
 
-	public void testNegateIsUnwrap() throws Exception {
-		final TreeFilter a = PathFilter.create("a/b");
-		final TreeFilter n = NotTreeFilter.create(a);
-		assertSame(a, n.negate());
-	}
+        [Test]
+        public void testWrap()
+        {
+            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+            TreeFilter a = TreeFilter.ALL;
+            TreeFilter n = NotTreeFilter.create(a);
+            Assert.NotNull(n);
+            Assert.IsTrue(a.include(tw));
+            Assert.IsFalse(n.include(tw));
+        }
 
-	public void testShouldBeRecursive_ALL() throws Exception {
-		final TreeFilter a = TreeFilter.ALL;
-		final TreeFilter n = NotTreeFilter.create(a);
-		assertEquals(a.shouldBeRecursive(), n.shouldBeRecursive());
-	}
+        [Test]
+        public void testNegateIsUnwrap()
+        {
+            TreeFilter a = PathFilter.create("a/b");
+            TreeFilter n = NotTreeFilter.create(a);
+            Assert.AreSame(a, n.negate());
+        }
 
-	public void testShouldBeRecursive_PathFilter() throws Exception {
-		final TreeFilter a = PathFilter.create("a/b");
-		assertTrue(a.shouldBeRecursive());
-		final TreeFilter n = NotTreeFilter.create(a);
-		assertTrue(n.shouldBeRecursive());
-	}
+        [Test]
+        public void testShouldBeRecursive_ALL()
+        {
+            TreeFilter a = TreeFilter.ALL;
+            TreeFilter n = NotTreeFilter.create(a);
+            Assert.AreEqual(a.shouldBeRecursive(), n.shouldBeRecursive());
+        }
 
-	public void testCloneIsDeepClone() throws Exception {
-		final TreeFilter a = new AlwaysCloneTreeFilter();
-		assertNotSame(a, a.clone());
-		final TreeFilter n = NotTreeFilter.create(a);
-		assertNotSame(n, n.clone());
-	}
+        [Test]
+        public void testShouldBeRecursive_PathFilter()
+        {
+            TreeFilter a = PathFilter.create("a/b");
+            Assert.IsTrue(a.shouldBeRecursive());
+            TreeFilter n = NotTreeFilter.create(a);
+            Assert.IsTrue(n.shouldBeRecursive());
+        }
 
-	public void testCloneIsSparseWhenPossible() throws Exception {
-		final TreeFilter a = TreeFilter.ALL;
-		assertSame(a, a.clone());
-		final TreeFilter n = NotTreeFilter.create(a);
-		assertSame(n, n.clone());
-	}
-#endif
+        [Test]
+        public void testCloneIsDeepClone()
+        {
+            TreeFilter a = new AlwaysCloneTreeFilter();
+            Assert.AreNotSame(a, a.Clone());
+            TreeFilter n = NotTreeFilter.create(a);
+            Assert.AreNotSame(n, n.Clone());
+        }
+
+        [Test]
+        public void testCloneIsSparseWhenPossible()
+        {
+            TreeFilter a = TreeFilter.ALL;
+            Assert.AreSame(a, a.Clone());
+            TreeFilter n = NotTreeFilter.create(a);
+            Assert.AreSame(n, n.Clone());
+        }
     }
 }

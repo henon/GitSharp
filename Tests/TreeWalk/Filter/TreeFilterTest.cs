@@ -44,37 +44,51 @@ namespace GitSharp.Tests.TreeWalk
     [TestFixture]
     public class TreeFilterTest : RepositoryTestCase
     {
-#if false
-	public void testALL_IncludesAnything() {
-		 GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
-		assertTrue(TreeFilter.ALL.include(tw));
-	}
 
-	public void testALL_ShouldNotBeRecursive() {
-		assertFalse(TreeFilter.ALL.shouldBeRecursive());
-	}
+        [Test]
+        public void testALL_IncludesAnything()
+        {
+            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+            Assert.IsTrue(TreeFilter.ALL.include(tw));
+        }
 
-	public void testALL_IdentityClone() {
-		assertSame(TreeFilter.ALL, TreeFilter.ALL.clone());
-	}
+        [Test]
+        public void testALL_ShouldNotBeRecursive()
+        {
+            Assert.IsFalse(TreeFilter.ALL.shouldBeRecursive());
+        }
 
-	public void testNotALL_IncludesNothing() {
-		 GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
-		assertFalse(TreeFilter.ALL.negate().include(tw));
-	}
+        [Test]
+        public void testALL_IdentityClone()
+        {
+            Assert.AreSame(TreeFilter.ALL, TreeFilter.ALL.Clone());
+        }
 
-	public void testANY_DIFF_IncludesSingleTreeCase() {
-		 GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
-		assertTrue(TreeFilter.ANY_DIFF.include(tw));
-	}
+        [Test]
+        public void testNotALL_IncludesNothing()
+        {
+            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+            Assert.IsFalse(TreeFilter.ALL.negate().include(tw));
+        }
 
-	public void testANY_DIFF_ShouldNotBeRecursive() {
-		assertFalse(TreeFilter.ANY_DIFF.shouldBeRecursive());
-	}
+        [Test]
+        public void testANY_DIFF_IncludesSingleTreeCase()
+        {
+            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+            Assert.IsTrue(TreeFilter.ANY_DIFF.include(tw));
+        }
 
-	public void testANY_DIFF_IdentityClone() {
-		assertSame(TreeFilter.ANY_DIFF, TreeFilter.ANY_DIFF.clone());
-	}
-#endif
+        [Test]
+        public void testANY_DIFF_ShouldNotBeRecursive()
+        {
+            Assert.IsFalse(TreeFilter.ANY_DIFF.shouldBeRecursive());
+        }
+
+        [Test]
+        public void testANY_DIFF_IdentityClone()
+        {
+            Assert.AreSame(TreeFilter.ANY_DIFF, TreeFilter.ANY_DIFF.Clone());
+        }
+
     }
 }

@@ -47,6 +47,8 @@ namespace GitSharp.Tests.RevWalk
     // full history and non-full history for a path, something we
     // don't quite yet have a distiction for in JGit.
     //
+    using NUnit.Framework;
+    [TestFixture]
     public class RevWalkPathFilter6012Test : RevWalkTestCase
     {
 #if false

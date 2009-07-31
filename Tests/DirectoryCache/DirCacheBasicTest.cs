@@ -35,10 +35,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 namespace GitSharp.Tests.DirectoryCache
 {
-
-
+    using NUnit.Framework;
+    [TestFixture]
     public class DirCacheBasicTest : RepositoryTestCase
     {
 

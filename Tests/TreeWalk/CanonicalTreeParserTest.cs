@@ -39,7 +39,8 @@ using GitSharp.TreeWalk;
 namespace GitSharp.Tests.TreeWalk
 {
 
-
+    using NUnit.Framework;
+    [TestFixture]
     public class CanonicalTreeParserTest
     {
 #if false

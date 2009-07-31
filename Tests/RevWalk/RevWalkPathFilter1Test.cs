@@ -40,7 +40,8 @@ using GitSharp.RevWalk;
 namespace GitSharp.Tests.RevWalk
 {
 
-
+    using NUnit.Framework;
+    [TestFixture]
     public class RevWalkPathFilter1Test : RevWalkTestCase
     {
 #if false

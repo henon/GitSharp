@@ -40,7 +40,8 @@ using GitSharp.TreeWalk;
 using GitSharp.TreeWalk.Filter;
 namespace GitSharp.Tests.TreeWalk
 {
-
+    using NUnit.Framework;
+    [TestFixture]
     public class NotTreeFilterTest : RepositoryTestCase
     {
 #if false

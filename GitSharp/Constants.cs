@@ -522,20 +522,17 @@ namespace GitSharp
          */
         public static byte[] encode(string str)
         {
-            //ByteBuffer bb = Constants.CHARSET.encode(str);
-            //int len = bb.limit();
-            //if (bb.hasArray() && bb.arrayOffset() == 0)
-            //{
-            //    byte[] arr = bb.array();
-            //    if (arr.Length == len)
-            //        return arr;
-            //}
+            byte[] origin_bytes = new byte[str.Length];
 
-            //byte[] arr = new byte[len];
-            //bb.get(arr);
-            //return arr;
+            for (int i = 0; i < str.Length; i++)
+            {
+                origin_bytes[i] = (byte)str.ToCharArray()[i];
+			}
 
-            return  CHARSET.GetBytes(str);
+            // Note that the two following lines are unnecessary, and we could
+            // have just returned origin_bytes.
+            string decoded = Encoding.GetString(origin_bytes);
+            return Encoding.GetBytes(decoded);
         }
 
 

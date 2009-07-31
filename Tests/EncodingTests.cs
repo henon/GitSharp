@@ -96,6 +96,7 @@ namespace GitSharp.Tests
         [Test]
         public void testEncode_Unicode()
         {
+            String orig_src = "Ūnĭcōde̽";
             String src = Encoding.UTF8.GetString(Encoding.Default.GetBytes("ÅªnÄ­cÅdeÌ½"));
             byte[] exp = { (byte) 0xC5, (byte) 0xAA, 0x6E, (byte) 0xC4,
                 (byte) 0xAD, 0x63, (byte) 0xC5, (byte) 0x8D, 0x64, 0x65,
@@ -103,7 +104,7 @@ namespace GitSharp.Tests
 
             byte[] res = Constants.encode(src);
             Assert.IsTrue(Enumerable.SequenceEqual(exp, res));
-            Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
+            Assert.AreEqual(orig_src, Encoding.UTF8.GetString(res, 0, res.Length));
         }
     }
 

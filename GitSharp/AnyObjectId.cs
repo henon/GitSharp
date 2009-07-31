@@ -110,7 +110,7 @@ namespace GitSharp
         }
 
 
-        internal void copyRawTo(Stream s)
+        public void copyRawTo(Stream s)
         {
             var buf = new byte[20];
             NB.encodeInt32(buf, 0, W1);

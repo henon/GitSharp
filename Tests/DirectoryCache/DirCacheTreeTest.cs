@@ -37,7 +37,8 @@
 
 namespace GitSharp.Tests.DirectoryCache
 {
-
+    using NUnit.Framework;
+    [TestFixture]
     public class DirCacheTreeTest : RepositoryTestCase
     {
 #if false

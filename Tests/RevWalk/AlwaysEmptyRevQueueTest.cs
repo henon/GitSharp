@@ -38,7 +38,8 @@
 using GitSharp.Tests.Util;
 namespace GitSharp.Tests.RevWalk
 {
-
+    using NUnit.Framework;
+    [TestFixture]
     public class AlwaysEmptyRevQueueTest : RevWalkTestCase
     {
 #if false

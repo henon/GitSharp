@@ -39,7 +39,8 @@ using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
 namespace GitSharp.Tests.RevWalk
 {
-
+    using NUnit.Framework;
+    [TestFixture]
     public abstract class RevQueueTestCase<T> : RevWalkTestCase
         where T : AbstractRevQueue
     {

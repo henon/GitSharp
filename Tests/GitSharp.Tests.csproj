@@ -44,7 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbbreviatedIdTests.cs" />
+    <Compile Include="ConcurrentRepackTest.cs" />
     <Compile Include="ConfigTests.cs" />
+    <Compile Include="Diff\DiffFormatterReflowTest.cs" />
     <Compile Include="Diff\EditListTest.cs" />
     <Compile Include="Diff\EditTest.cs" />
     <Compile Include="Diff\RawTextTest.cs" />
@@ -57,7 +59,32 @@
     <Compile Include="DirectoryCache\DirCacheLargePathTest.cs" />
     <Compile Include="DirectoryCache\DirCacheTreeTest.cs" />
     <Compile Include="EncodingTests.cs" />
-    <Compile Include="NBTests.cs" />
+    <Compile Include="FileNameMatch\FileNameMatcherTest.cs" />
+    <Compile Include="IndexDiffTest.cs" />
+    <Compile Include="IndexTests.cs" />
+    <Compile Include="IndexTreeWalkerTest.cs" />
+    <Compile Include="Merge\CherryPickTest.cs" />
+    <Compile Include="Merge\SimpleMergeTest.cs" />
+    <Compile Include="PackReverseIndexTest.cs" />
+    <Compile Include="PackWriterTest.cs" />
+    <Compile Include="Patch\FileHeaderTest.cs" />
+    <Compile Include="Patch\GetTextTest.cs" />
+    <Compile Include="Patch\PatchCcErrorTest.cs" />
+    <Compile Include="Patch\PatchCcTest.cs" />
+    <Compile Include="Patch\PatchErrorTest.cs" />
+    <Compile Include="Patch\PatchTest.cs" />
+    <Compile Include="ReadTreeTest.cs" />
+    <Compile Include="RefTest.cs" />
+    <Compile Include="RefUpdateTest.cs" />
+    <Compile Include="Transport\BundleWriterTest.cs" />
+    <Compile Include="Transport\LongMapTest.cs" />
+    <Compile Include="Transport\OpenSshConfigTest.cs" />
+    <Compile Include="Transport\PushProcessTest.cs" />
+    <Compile Include="Transport\TransportTest.cs" />
+    <Compile Include="TreeIteratorLeafOnlyTest.cs" />
+    <Compile Include="TreeIteratorPostOrderTest.cs" />
+    <Compile Include="TreeIteratorPreOrderTest.cs" />
+    <Compile Include="Util\NBTests.cs" />
     <Compile Include="PackIndexV1Tests.cs" />
     <Compile Include="PackIndexV2Tests.cs" />
     <Compile Include="PackReaderTests.cs" />
@@ -106,7 +133,11 @@
     <Compile Include="Util\TemporaryBufferTest.cs" />
     <Compile Include="Util\TestRng.cs" />
     <Compile Include="Util\XInputStream.cs" />
-    <Compile Include="VariousUtilityTests.cs" />
+    <Compile Include="Util\VariousUtilityTests.cs" />
+    <Compile Include="ValidRefNameTest.cs" />
+    <Compile Include="WindowCacheGetTest.cs" />
+    <Compile Include="WindowCacheReconfigureTest.cs" />
+    <Compile Include="WorkDirCheckoutTest.cs" />
     <Compile Include="WriteTests.cs" />
     <Compile Include="ObjectCheckerTests.cs" />
     <Compile Include="ObjectIdMapTests.cs" />

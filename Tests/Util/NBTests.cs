@@ -48,7 +48,7 @@ using System.Linq;
 using System.Text;
 using GitSharp.Util;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Util
 {
     [TestFixture]
     public class NBTest

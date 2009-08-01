@@ -5,7 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using GitSharp.Util;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Util
 {
     [TestFixture]
     public class VariousUtilityTests

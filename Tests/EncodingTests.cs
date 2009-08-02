@@ -103,7 +103,7 @@ namespace GitSharp.Tests
 
             byte[] res = Constants.encode(src);
             Assert.IsTrue(Enumerable.SequenceEqual(exp, res));
-            Assert.AreEqual(orig_src, Encoding.UTF8.GetString(res, 0, res.Length));
+            Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
         }
     }
 

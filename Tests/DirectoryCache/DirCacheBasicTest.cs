@@ -50,10 +50,10 @@ namespace GitSharp.Tests.DirectoryCache
         public void testReadMissing_RealIndex()
         {
             FileInfo idx = new FileInfo(db.Directory + "index");
-            Assert.False(idx.Exists);
+            Assert.IsFalse(idx.Exists);
 
             DirCache dc = DirCache.read(db);
-            Assert.NotNull(dc);
+            Assert.IsNotNull(dc);
             Assert.AreEqual(0, dc.getEntryCount());
         }
 
@@ -61,10 +61,10 @@ namespace GitSharp.Tests.DirectoryCache
         public void testReadMissing_TempIndex()
         {
             FileInfo idx = new FileInfo(db.Directory + "tmp_index");
-            Assert.False(idx.Exists);
+            Assert.IsFalse(idx.Exists);
 
             DirCache dc = DirCache.read(idx);
-            Assert.NotNull(dc);
+            Assert.IsNotNull(dc);
             Assert.AreEqual(0, dc.getEntryCount());
         }
 
@@ -73,18 +73,18 @@ namespace GitSharp.Tests.DirectoryCache
         {
             FileInfo idx = new FileInfo(db.Directory + "index");
             FileInfo lck = new FileInfo(db.Directory + "index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(idx.Exists);
+            Assert.IsFalse(lck.Exists);
 
             DirCache dc = DirCache.Lock(db);
-            Assert.NotNull(dc);
-            Assert.False(idx.Exists);
+            Assert.IsNotNull(dc);
+            Assert.IsFalse(idx.Exists);
             Assert.IsTrue(lck.Exists);
             Assert.AreEqual(0, dc.getEntryCount());
 
             dc.unlock();
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(idx.Exists);
+            Assert.IsFalse(lck.Exists);
         }
 
         [Test]
@@ -92,18 +92,18 @@ namespace GitSharp.Tests.DirectoryCache
         {
             FileInfo idx = new FileInfo(db.Directory + "tmp_index");
             FileInfo lck = new FileInfo(db.Directory + "tmp_index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(idx.Exists);
+            Assert.IsFalse(lck.Exists);
 
             DirCache dc = DirCache.Lock(idx);
-            Assert.NotNull(dc);
-            Assert.False(idx.Exists);
+            Assert.IsNotNull(dc);
+            Assert.IsFalse(idx.Exists);
             Assert.IsTrue(lck.Exists);
             Assert.AreEqual(0, dc.getEntryCount());
 
             dc.unlock();
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(idx.Exists);
+            Assert.IsFalse(lck.Exists);
         }
 
         [Test]
@@ -111,8 +111,8 @@ namespace GitSharp.Tests.DirectoryCache
         {
             FileInfo idx = new FileInfo(db.Directory + "index");
             FileInfo lck = new FileInfo(db.Directory + "index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(idx.Exists);
+            Assert.IsFalse(lck.Exists);
 
             DirCache dc = DirCache.Lock(db);
             Assert.AreEqual(0, lck.Length);
@@ -120,8 +120,8 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.AreEqual(12 + 20, lck.Length);
 
             dc.unlock();
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(idx.Exists);
+            Assert.IsFalse(lck.Exists);
         }
 
         [Test]
@@ -129,8 +129,8 @@ namespace GitSharp.Tests.DirectoryCache
         {
             FileInfo idx = new FileInfo(db.Directory + "index");
             FileInfo lck = new FileInfo(db.Directory + "index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(idx.Exists);
+            Assert.IsFalse(lck.Exists);
 
             DirCache dc = DirCache.Lock(db);
             Assert.AreEqual(0, lck.Length);
@@ -139,7 +139,7 @@ namespace GitSharp.Tests.DirectoryCache
 
             Assert.IsTrue(dc.commit());
             Assert.IsTrue(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(lck.Exists);
             Assert.AreEqual(12 + 20, idx.Length);
         }
 
@@ -148,8 +148,8 @@ namespace GitSharp.Tests.DirectoryCache
         {
             FileInfo idx = new FileInfo(db.Directory + "index");
             FileInfo lck = new FileInfo(db.Directory + "index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(idx.Exists);
+            Assert.IsFalse(lck.Exists);
             {
                 DirCache dc = DirCache.Lock(db);
                 dc.write();
@@ -167,8 +167,8 @@ namespace GitSharp.Tests.DirectoryCache
         {
             FileInfo idx = new FileInfo(db.Directory + "index");
             FileInfo lck = new FileInfo(db.Directory + "index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(idx.Exists);
+            Assert.IsFalse(lck.Exists);
             {
                 DirCache dc = DirCache.Lock(db);
                 dc.write();

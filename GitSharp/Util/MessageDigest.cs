@@ -46,7 +46,7 @@ using System.IO;
 
 namespace GitSharp.Util
 {
-    internal class MessageDigest : ICloneable
+    public class MessageDigest : ICloneable
     {
         private MemoryStream _stream;
 

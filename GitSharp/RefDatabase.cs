@@ -3,6 +3,7 @@
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
  * All rights reserved.
  *
@@ -213,7 +214,7 @@ namespace GitSharp
                 if (r != null && r.ObjectId != null)
                     avail[Constants.HEAD]= r;
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 // ignore here
             }

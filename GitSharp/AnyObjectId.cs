@@ -110,7 +110,7 @@ namespace GitSharp
         }
 
 
-        internal void copyRawTo(Stream s)
+        public void copyRawTo(Stream s)
         {
             var buf = new byte[20];
             NB.encodeInt32(buf, 0, W1);
@@ -119,6 +119,41 @@ namespace GitSharp
             NB.encodeInt32(buf, 12, W4);
             NB.encodeInt32(buf, 16, W5);
             s.Write(buf, 0, 20);
+        }
+
+
+        /**
+         * Copy this ObjectId to a byte array.
+         * 
+         * @param b
+         *            the buffer to copy to.
+         * @param o
+         *            the offset within b to write at.
+         */
+        public void copyRawTo(byte[] buf, int off)
+        {
+            NB.encodeInt32(buf, 0 + off, W1);
+            NB.encodeInt32(buf, 4 + off, W2);
+            NB.encodeInt32(buf, 8 + off, W3);
+            NB.encodeInt32(buf, 12 + off, W4);
+            NB.encodeInt32(buf, 16 + off, W5);
+        }
+
+        /**
+         * Copy this ObjectId to an int array.
+         *
+         * @param b
+         *            the buffer to copy to.
+         * @param o
+         *            the offset within b to write at.
+         */
+        public void copyRawTo(int[] b, int o)
+        {
+            b[o] = W1;
+            b[o + 1] = W2;
+            b[o + 2] = W3;
+            b[o + 3] = W4;
+            b[o + 4] = W5;
         }
 
         private byte[] ToHexByteArray()
@@ -138,6 +173,20 @@ namespace GitSharp
             return (int)this.W2;
         }
 
+        public AbbreviatedObjectId Abbreviate(Repository repo)
+        {
+            return Abbreviate(repo, 8);
+        }
+
+        public AbbreviatedObjectId Abbreviate(Repository repo, int len)
+        {
+            int a = AbbreviatedObjectId.Mask(len, 1, W1);
+            int b = AbbreviatedObjectId.Mask(len, 2, W2);
+            int c = AbbreviatedObjectId.Mask(len, 3, W3);
+            int d = AbbreviatedObjectId.Mask(len, 4, W4);
+            int e = AbbreviatedObjectId.Mask(len, 5, W5);
+            return new AbbreviatedObjectId(len, a, b, c, d, e);
+        }
 
         public int W1 { get; set; }
         public int W2 { get; set; }
@@ -261,6 +310,14 @@ namespace GitSharp
             Hex.FillHexCharArray(dest, 16, W3);
             Hex.FillHexCharArray(dest, 24, W4);
             Hex.FillHexCharArray(dest, 32, W5);
+        }
+
+        public string Name
+        {
+            get
+            {
+                return new string(ToHexCharArray());
+            }
         }
 
         public override string ToString()

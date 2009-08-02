@@ -122,6 +122,11 @@ namespace GitSharp
 
         private MutableInteger ptrout = new MutableInteger();
 
+        public void check(int objType, byte[] raw)
+        {
+            check(objType, Constants.Encoding.GetChars(raw));
+        }
+
         /**
          * Check an object for parsing errors.
          *

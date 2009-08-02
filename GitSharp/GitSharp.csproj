@@ -1,9 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -33,7 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, PublicKeyToken=null">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\extern\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -43,7 +43,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5, processorArchitecture=MSIL">
+    <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\extern\FileMap\Winterdom.IO.FileMap.dll</HintPath>
     </Reference>
@@ -160,11 +160,6 @@
     <Compile Include="RepositoryChangedEventArgs.cs" />
     <Compile Include="RefsChangedEventArgs.cs" />
     <Compile Include="IndexChangedEventArgs.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="RevWalk\AbstractRevQueue.cs" />
     <Compile Include="RevWalk\BlockObjQueue.cs" />
     <Compile Include="RevWalk\BlockRevQueue.cs" />
@@ -205,13 +200,75 @@
     <Compile Include="RevWalk\RewriteTreeFilter.cs" />
     <Compile Include="RevWalk\StartGenerator.cs" />
     <Compile Include="RevWalk\TopoSortGenerator.cs" />
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="DirectoryCache\BaseDirCacheEditor.cs" />
+    <Compile Include="DirectoryCache\DirCache.cs" />
+    <Compile Include="DirectoryCache\DirCacheBuilder.cs" />
+    <Compile Include="DirectoryCache\DirCacheEditor.cs" />
+    <Compile Include="DirectoryCache\DirCacheEntry.cs" />
+    <Compile Include="DirectoryCache\DirCacheTree.cs" />
+    <Compile Include="Diff\Edit.cs" />
+    <Compile Include="Diff\EditList.cs" />
+    <Compile Include="Diff\RawText.cs" />
+    <Compile Include="Diff\Sequence.cs" />
+    <Compile Include="Exceptions\MissingBundlePrerequisiteException.cs" />
+    <Compile Include="Exceptions\NoRemoteRepositoryException.cs" />
+    <Compile Include="Exceptions\PackProtocolException.cs" />
     <Compile Include="Exceptions\RevWalkException.cs" />
     <Compile Include="Exceptions\StopWalkException.cs" />
+    <Compile Include="Exceptions\TransportException.cs" />
+    <Compile Include="Exceptions\UnmergedPathException.cs" />
     <Compile Include="ObjectIdSubclassMap.cs" />
+    <Compile Include="PackLock.cs" />
+    <Compile Include="PackWriter.cs" />
+    <Compile Include="Patch\BinaryHunk.cs" />
+    <Compile Include="Patch\CombinedFileHeader.cs" />
+    <Compile Include="Patch\CombinedHunkHeader.cs" />
+    <Compile Include="Patch\FileHeader.cs" />
+    <Compile Include="Patch\FormatError.cs" />
+    <Compile Include="Patch\HunkHeader.cs" />
+    <Compile Include="Patch\Patch.cs" />
     <Compile Include="RefComparator.cs" />
     <Compile Include="RefWriter.cs" />
+    <Compile Include="Transport\BaseConnection.cs" />
+    <Compile Include="Transport\BaseFetchConnection.cs" />
+    <Compile Include="Transport\BasePackConnection.cs" />
+    <Compile Include="Transport\BasePackFetchConnection.cs" />
+    <Compile Include="Transport\BasePackPushConnection.cs" />
+    <Compile Include="Transport\BundleFetchConnection.cs" />
+    <Compile Include="Transport\Daemon.cs" />
+    <Compile Include="Transport\DaemonClient.cs" />
+    <Compile Include="Transport\DaemonService.cs" />
+    <Compile Include="Transport\FetchHeadRecord.cs" />
+    <Compile Include="Transport\FetchResult.cs" />
+    <Compile Include="Transport\HttpTransport.cs" />
+    <Compile Include="Transport\IFetchConnection.cs" />
+    <Compile Include="Transport\IConnection.cs" />
+    <Compile Include="Transport\IndexPack.cs" />
+    <Compile Include="Transport\IPreReceiveHook.cs" />
+    <Compile Include="Transport\IPushConnection.cs" />
+    <Compile Include="Transport\IPackTransport.cs" />
+    <Compile Include="Transport\OperationResult.cs" />
+    <Compile Include="Transport\PacketLineIn.cs" />
+    <Compile Include="Transport\PacketLineOut.cs" />
+    <Compile Include="Transport\IPostReceiveHook.cs" />
+    <Compile Include="PackOutputStream.cs" />
+    <Compile Include="Transport\PushResult.cs" />
+    <Compile Include="Transport\ReceiveCommand.cs" />
+    <Compile Include="Transport\ReceivePack.cs" />
+    <Compile Include="Transport\RefSpec.cs" />
+    <Compile Include="Transport\RemoteConfig.cs" />
+    <Compile Include="Transport\RemoteRefUpdate.cs" />
+    <Compile Include="Transport\SideBandInputStream.cs" />
+    <Compile Include="Transport\SideBandOutputStream.cs" />
+    <Compile Include="Transport\TagOpt.cs" />
+    <Compile Include="Transport\TcpTransport.cs" />
+    <Compile Include="Transport\TrackingRefUpdate.cs" />
+    <Compile Include="Transport\Transport.cs" />
+    <Compile Include="Transport\TransportBundle.cs" />
+    <Compile Include="Transport\TransportBundleFile.cs" />
+    <Compile Include="Transport\UploadPack.cs" />
+    <Compile Include="Transport\URIish.cs" />
+    <Compile Include="Transport\IWalkTransport.cs" />
     <Compile Include="TreeWalk\AbstractTreeIterator.cs" />
     <Compile Include="TreeWalk\CanonicalTreeParser.cs" />
     <Compile Include="TreeWalk\EmptyTreeIterator.cs" />
@@ -225,10 +282,20 @@
     <Compile Include="TreeWalk\NameConflictTreeWalk.cs" />
     <Compile Include="TreeWalk\TreeWalk.cs" />
     <Compile Include="TreeWalk\WorkingTreeIterator.cs" />
+    <Compile Include="Util\Arrays.cs" />
+    <Compile Include="Util\DigestOutputStream.cs" />
+    <Compile Include="Util\Array.cs" />
+    <Compile Include="Util\IListUtil.cs" />
     <Compile Include="Util\ICharSequence.cs" />
+    <Compile Include="Util\IntList.cs" />
     <Compile Include="Util\ListIterator.cs" />
+    <Compile Include="Util\QuotedString.cs" />
     <Compile Include="Util\RawCharSequence.cs" />
     <Compile Include="Util\RawSubstringPattern.cs" />
+    <Compile Include="Util\TemporaryBuffer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -245,7 +312,7 @@
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile" ExecuteTargetName="run">
+        <MonoDevelop.Autotools.MakefileInfo RelativeMakefileName="Makefile" ExecuteTargetName="run">
           <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />

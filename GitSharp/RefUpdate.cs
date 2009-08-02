@@ -2,6 +2,7 @@
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
  * All rights reserved.
  *
@@ -242,6 +243,11 @@ namespace GitSharp
             return update(new RevWalk.RevWalk(db.Repository));
         }
 
+        public RefUpdateResult Update(RevWalk.RevWalk walk)
+        {
+            return update(walk);
+        }
+
         /**
          * Gracefully update the ref to the new value.
          * <p>
@@ -261,7 +267,7 @@ namespace GitSharp
             {
                 return Result = updateImpl(walk, new UpdateStore(this));
             }
-            catch (IOException x)
+            catch (IOException)
             {
                 Result = RefUpdateResult.IOFailure;
                 throw;
@@ -351,7 +357,7 @@ namespace GitSharp
             {
                 return Result = updateImpl(walk, new DeleteStore(this));
             }
-            catch (IOException x)
+            catch (IOException)
             {
                 Result = RefUpdateResult.IOFailure;
                 throw;

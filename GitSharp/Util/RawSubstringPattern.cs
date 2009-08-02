@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
  * All rights reserved.
  *
@@ -100,7 +101,6 @@ namespace GitSharp.Util
 
             for (; matchPos < maxPos; matchPos++)
             {
-            OUTER:
                 if (neq(first, text[matchPos]))
                 {
                     while (++matchPos < maxPos && neq(first, text[matchPos]))
@@ -112,11 +112,17 @@ namespace GitSharp.Util
                 }
 
                 int si = ++matchPos;
+
+                bool outer_continue = false;
                 for (int j = 1; j < needleLen; j++, si++)
                 {
                     if (neq(needle[j], text[si]))
-                        goto OUTER; // [henon] continue OUTER; in java
+                        outer_continue = true;
                 }
+
+                if (outer_continue)
+                    continue;
+
                 return matchPos - 1;
             }
             return -1;

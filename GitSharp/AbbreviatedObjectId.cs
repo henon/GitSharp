@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
  * All rights reserved.
  *
@@ -129,7 +130,7 @@ namespace GitSharp
             return r << (8 - n) * 4;
         }
 
-        static int mask(int nibbles, int word, int v)
+        public static int Mask(int nibbles, int word, int v)
         {
 
             int b = (word - 1) * 8;
@@ -164,7 +165,7 @@ namespace GitSharp
 
         int w5;
 
-        AbbreviatedObjectId(int n, int new_1, int new_2, int new_3, int new_4, int new_5)
+        public AbbreviatedObjectId(int n, int new_1, int new_2, int new_3, int new_4, int new_5)
         {
             nibbles = n;
             w1 = new_1;
@@ -231,7 +232,7 @@ namespace GitSharp
 
         private int mask(int word, int v)
         {
-            return mask(nibbles, word, v);
+            return Mask(nibbles, word, v);
         }
 
 
@@ -241,7 +242,7 @@ namespace GitSharp
         }
 
 
-        public bool Equals(object o)
+        public override bool Equals(object o)
         {
             if (o is AbbreviatedObjectId)
             {
@@ -280,7 +281,7 @@ namespace GitSharp
         }
 
 
-        public string ToString()
+        public override string ToString()
         {
             return "AbbreviatedObjectId[" + name() + "]";
         }

@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
  * All rights reserved.
  *
@@ -88,7 +89,7 @@ namespace GitSharp.TreeWalk
         private int ptr;
 
         /** Create a new iterator with no parent. */
-        internal WorkingTreeIterator()
+        public WorkingTreeIterator()
             : base()
         {
 
@@ -110,7 +111,7 @@ namespace GitSharp.TreeWalk
          *            root of the repository. A trailing slash ('/') is
          *            automatically appended if the prefix does not end in '/'.
          */
-        internal WorkingTreeIterator(string prefix)
+        public WorkingTreeIterator(string prefix)
             : base(prefix)
         {
 
@@ -123,7 +124,7 @@ namespace GitSharp.TreeWalk
          * @param p
          *            parent tree iterator.
          */
-        internal WorkingTreeIterator(WorkingTreeIterator p) :
+        public WorkingTreeIterator(WorkingTreeIterator p) :
             base(p)
         {
             nameEncoder = p.nameEncoder;
@@ -396,12 +397,11 @@ namespace GitSharp.TreeWalk
 
             public void encodeName(Encoding enc)
             {
-                byte[] b;
                 try
                 {
                     encodedName = enc.GetBytes(getName());
                 }
-                catch (EncoderFallbackException e)
+                catch (EncoderFallbackException)
                 {
                     // This should so never happen.
                     throw new Exception("Unencodeable file: " + getName());

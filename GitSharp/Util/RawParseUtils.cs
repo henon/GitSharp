@@ -2,6 +2,7 @@
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  * 
  *
  * All rights reserved.
@@ -102,59 +103,62 @@ namespace GitSharp
         //        digits[i] = (byte)(i - '0');
         //}
 
-#if false
 
-	private static  byte[] base10byte = { '0', '1', '2', '3', '4', '5',	'6', '7', '8', '9' };
 
-	/**
-	 * Format a base 10 numeric into a temporary buffer.
-	 * <p>
-	 * Formatting is performed backwards. The method starts at offset
-	 * <code>o-1</code> and ends at <code>o-1-digits</code>, where
-	 * <code>digits</code> is the number of positions necessary to store the
-	 * base 10 value.
-	 * <p>
-	 * The argument and return values from this method make it easy to chain
-	 * writing, for example:
-	 * </p>
-	 * 
-	 * <pre>
-	 *  byte[] tmp = new byte[64];
-	 * int ptr = tmp.Length;
-	 * tmp[--ptr] = '\n';
-	 * ptr = RawParseUtils.formatBase10(tmp, ptr, 32);
-	 * tmp[--ptr] = ' ';
-	 * ptr = RawParseUtils.formatBase10(tmp, ptr, 18);
-	 * tmp[--ptr] = 0;
-	 *  string str = new string(tmp, ptr, tmp.Length - ptr);
-	 * </pre>
-	 * 
-	 * @param b
-	 *            buffer to write into.
-	 * @param o
-	 *            one offset past the location where writing will begin; writing
-	 *            proceeds towards lower index values.
-	 * @param value
-	 *            the value to store.
-	 * @return the new offset value <code>o</code>. This is the position of
-	 *         the last byte written. Additional writing should start at one
-	 *         position earlier.
-	 */
-	public static int formatBase10( byte[] b, int o, int value) {
-		if (value == 0) {
-			b[--o] = '0';
-			return o;
-		}
-		 bool isneg = value < 0;
-		while (value != 0) {
-			b[--o] = base10byte[value % 10];
-			value /= 10;
-		}
-		if (isneg)
-			b[--o] = '-';
-		return o;
-	}  
-#endif
+        private static byte[] base10byte = { (byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5', (byte)'6', (byte)'7', (byte)'8', (byte)'9' };
+
+        /**
+         * Format a base 10 numeric into a temporary buffer.
+         * <p>
+         * Formatting is performed backwards. The method starts at offset
+         * <code>o-1</code> and ends at <code>o-1-digits</code>, where
+         * <code>digits</code> is the number of positions necessary to store the
+         * base 10 value.
+         * <p>
+         * The argument and return values from this method make it easy to chain
+         * writing, for example:
+         * </p>
+         * 
+         * <pre>
+         *  byte[] tmp = new byte[64];
+         * int ptr = tmp.Length;
+         * tmp[--ptr] = '\n';
+         * ptr = RawParseUtils.formatBase10(tmp, ptr, 32);
+         * tmp[--ptr] = ' ';
+         * ptr = RawParseUtils.formatBase10(tmp, ptr, 18);
+         * tmp[--ptr] = 0;
+         *  string str = new string(tmp, ptr, tmp.Length - ptr);
+         * </pre>
+         * 
+         * @param b
+         *            buffer to write into.
+         * @param o
+         *            one offset past the location where writing will begin; writing
+         *            proceeds towards lower index values.
+         * @param value
+         *            the value to store.
+         * @return the new offset value <code>o</code>. This is the position of
+         *         the last byte written. Additional writing should start at one
+         *         position earlier.
+         */
+        public static int formatBase10(byte[] b, int o, int value)
+        {
+            if (value == 0)
+            {
+                b[--o] = (byte)'0';
+                return o;
+            }
+            bool isneg = value < 0;
+            while (value != 0)
+            {
+                b[--o] = base10byte[value % 10];
+                value /= 10;
+            }
+            if (isneg)
+                b[--o] = (byte)'-';
+            return o;
+        }
+
 
         /**
          * Parse a base 10 numeric from a sequence of ASCII digits into an int.
@@ -275,23 +279,23 @@ namespace GitSharp
         }
 
         /**
-	 * Parse a base 10 numeric from a sequence of ASCII digits into a long.
-	 * <p>
-	 * Digit sequences can begin with an optional run of spaces before the
-	 * sequence, and may start with a '+' or a '-' to indicate sign position.
-	 * Any other characters will cause the method to stop and return the current
-	 * result to the caller.
-	 * 
-	 * @param b
-	 *            buffer to scan.
-	 * @param ptr
-	 *            position within buffer to start parsing digits at.
-	 * @param ptrResult
-	 *            optional location to return the new ptr value through. If null
-	 *            the ptr value will be discarded.
-	 * @return the value at this location; 0 if the location is not a valid
-	 *         numeric.
-	 */
+     * Parse a base 10 numeric from a sequence of ASCII digits into a long.
+     * <p>
+     * Digit sequences can begin with an optional run of spaces before the
+     * sequence, and may start with a '+' or a '-' to indicate sign position.
+     * Any other characters will cause the method to stop and return the current
+     * result to the caller.
+     * 
+     * @param b
+     *            buffer to scan.
+     * @param ptr
+     *            position within buffer to start parsing digits at.
+     * @param ptrResult
+     *            optional location to return the new ptr value through. If null
+     *            the ptr value will be discarded.
+     * @return the value at this location; 0 if the location is not a valid
+     *         numeric.
+     */
         public static long parseLongBase10(byte[] b, int ptr, MutableInteger ptrResult)
         {
             long r = 0;
@@ -317,14 +321,14 @@ namespace GitSharp
 
                 while (ptr < sz)
                 {
-                    int v = b[ptr]-(byte)'0';
+                    int v = b[ptr] - (byte)'0';
                     if (v < 0)
                         break;
                     r = (r * 10) + v;
                     ptr++;
                 }
             }
-            catch (IndexOutOfRangeException e)
+            catch (IndexOutOfRangeException)
             {
                 // Not a valid digit.
             }
@@ -351,19 +355,19 @@ namespace GitSharp
             int tzMins = v % 100;
             int tzHours = v / 100;
             return tzHours * 60 + tzMins;
-        } 
+        }
 
         /**
-	     * Locate the first position after a given character.
-	     * 
-	     * @param b
-	     *            buffer to scan.
-	     * @param ptr
-	     *            position within buffer to start looking for chrA at.
-	     * @param chrA
-	     *            character to find.
-	     * @return new position just after chrA.
-	     */
+         * Locate the first position after a given character.
+         * 
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position within buffer to start looking for chrA at.
+         * @param chrA
+         *            character to find.
+         * @return new position just after chrA.
+         */
         public static int next(char[] b, int ptr, char chrA)
         {
             int sz = b.Length;
@@ -444,8 +448,7 @@ namespace GitSharp
             return ptr;
         }
 
-#if false
-        /**
+/**
  * Index the region between <code>[ptr, end)</code> to find line starts.
  * <p>
  * The returned list is 1 indexed. Index 0 contains
@@ -474,13 +477,12 @@ namespace GitSharp
             // to initially size our map close to the target.
             //
             IntList map = new IntList((end - ptr) / 36);
-            map.fillTo(1, Integer.MIN_VALUE);
+            map.fillTo(1, int.MinValue);
             for (; ptr < end; ptr = nextLF(buf, ptr))
                 map.add(ptr);
             map.add(end);
             return map;
         }
-#endif
 
         /**
          * Locate the "author " header line data.
@@ -701,7 +703,7 @@ namespace GitSharp
             {
                 return decodeNoFallback(cs, buffer, start, end);
             }
-            catch (EncoderFallbackException e)
+            catch (EncoderFallbackException)
             {
                 // Fall back to an ISO-8859-1 style encoding. At least all of
                 // the bytes will be present in the output.
@@ -735,7 +737,9 @@ namespace GitSharp
         {
             // ByteBuffer b = ByteBuffer.wrap(buffer, start, end - start);
             //b.mark();
-            var b = buffer;
+            byte[] b = new byte[end - start];
+            for (int i = 0; i < end - start; i++)
+                b[i] = buffer[start + i];
 
             // Try our built-in favorite. The assumption here is that
             // decoding will fail if the data is not actually encoded
@@ -745,7 +749,7 @@ namespace GitSharp
             {
                 return decode(b, Constants.CHARSET);
             }
-            catch (EncoderFallbackException e)
+            catch (EncoderFallbackException)
             {
                 //b.reset();
             }
@@ -759,7 +763,7 @@ namespace GitSharp
                 {
                     return decode(b, cs);
                 }
-                catch (EncoderFallbackException e)
+                catch (EncoderFallbackException)
                 {
                     //b.reset();
                 }
@@ -775,7 +779,7 @@ namespace GitSharp
                 {
                     return decode(b, Encoding.Default);
                 }
-                catch (EncoderFallbackException e)
+                catch (EncoderFallbackException)
                 {
                     //b.reset();
                 }

@@ -404,6 +404,20 @@ namespace GitSharp
             _byName = new Dictionary<string, object>();
         }
 
+        public List<string> GetSubsections(string section)
+        {
+            List<string> result = new List<string>();
+
+            foreach (Entry e in _entries)
+            {
+                if (section.Equals(e.Base, StringComparison.InvariantCultureIgnoreCase) && e.ExtendedBase != null)
+                    result.Add(e.ExtendedBase);
+            }
+            if (BaseConfig != null)
+                result.AddRange(BaseConfig.GetSubsections(section));
+            return result;
+        }
+
         public void Load()
         {
             Clear();
@@ -525,7 +539,7 @@ namespace GitSharp
             Add(e);
 
             this.Core = new CoreConfig(this);
-            _readFile = true; 
+            _readFile = true;
         }
 
         private void Add(Entry e)
@@ -639,7 +653,7 @@ namespace GitSharp
                     }
                 }
             }
-            if (File.Exists( tmp.FullName + ".lock"))
+            if (File.Exists(tmp.FullName + ".lock"))
             {
                 try
                 {
@@ -775,6 +789,11 @@ namespace GitSharp
             SetStringList(section, subsection, name, new List<string>());
         }
 
+        public void SetBoolean(string section, string subsection, string name, bool value)
+        {
+            SetString(section, subsection, name, value ? "true" : "false");
+        }
+
         public void SetStringList(string section, string subsection, string name, List<string> values)
         {
             // Update our parsed cache of values for future reference.
@@ -900,7 +919,7 @@ namespace GitSharp
                 }
                 catch (IOException e)
                 {
-                //    Debugger.Break();
+                    //    Debugger.Break();
                     Console.WriteLine(e.Message);
                 }
             }

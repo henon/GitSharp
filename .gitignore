@@ -1,8 +1,4 @@
-Gitty.Lib.CSharp.dll
-Gitty.Lib.CSharp.dll.mdb
 *~
-test.exe
-test.exe.mdb
 bin
 obj
 *.user
@@ -10,3 +6,4 @@ obj
 *.bak
 *.sln.cache
 _ReSharper*
+Reports

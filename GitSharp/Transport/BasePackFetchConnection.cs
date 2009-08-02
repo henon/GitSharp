@@ -51,7 +51,7 @@ namespace GitSharp.Transport
         private const int MAX_HAVES = 256;
         protected const int MIN_CLIENT_BUFFER = 2*32*46 + 8;
         public const string OPTION_INCLUDE_TAG = "include-tag";
-        public const string OPTION_MULTI_ACK = "multi_ack"; // [caytchen] TODO: this correct?
+        public const string OPTION_MULTI_ACK = "multi_ack";
         public const string OPTION_THIN_PACK = "thin-pack";
         public const string OPTION_SIDE_BAND = "side-band";
         public const string OPTION_SIDE_BAND_64K = "side-band-64k";
@@ -252,8 +252,7 @@ namespace GitSharp.Transport
 
                 StringBuilder line = new StringBuilder(46);
                 line.Append("want ");
-                // [caytchen] TODO: ObjectId has no name!
-                line.Append(r.ObjectId.ToString());
+                line.Append(r.ObjectId.Name);
                 if (first)
                 {
                     line.Append(enableCapabilities());
@@ -300,8 +299,7 @@ namespace GitSharp.Transport
                 RevCommit c = walk.next();
                 if (c == null) break;
 
-                // [caytchen] TODO: objectid missing name!
-                pckOut.WriteString("have " + c.getId().ToString() + "\n");
+                pckOut.WriteString("have " + c.getId().Name + "\n");
                 havesSent++;
                 havesSinceLastContinue++;
 

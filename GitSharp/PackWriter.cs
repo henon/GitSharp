@@ -565,22 +565,22 @@ namespace GitSharp
 
                 ObjectToPack deltaBase = otp.DeltaBase;
                 long offsetDiff = otp.Offset - deltaBase.Offset;
-                int pos = buf.Length - 1;
-                buf[pos] = (byte) (offsetDiff & 0x7F);
+                int local_pos = buf.Length - 1;
+                buf[local_pos] = (byte) (offsetDiff & 0x7F);
                 while ((offsetDiff >>= 7) > 0)
                 {
-                    buf[--pos] = (byte) (0x80 | (--offsetDiff & 0x7F));
+                    buf[--local_pos] = (byte) (0x80 | (--offsetDiff & 0x7F));
                 }
 
-                this.pos.Write(buf, pos, buf.Length - pos);
+                this.pos.Write(buf, local_pos, buf.Length - local_pos);
             }
             else
             {
                 writeObjectHeader(Constants.OBJ_REF_DELTA, reuse.getRawSize());
                 otp.DeltaBaseId.copyRawTo(buf, 0);
-                pos.Write(buf, 0, Constants.OBJECT_ID_LENGTH);
+                this.pos.Write(buf, 0, Constants.OBJECT_ID_LENGTH);
             }
-            reuse.copyRawData(pos, buf, windowCursor);
+            reuse.copyRawData(this.pos, buf, windowCursor);
         }
 
         private void writeObjectHeader(int objectType, long dataLength)

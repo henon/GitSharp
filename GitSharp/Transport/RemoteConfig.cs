@@ -136,7 +136,29 @@ namespace GitSharp.Transport
 
         public void Update(RepositoryConfig rc)
         {
+            List<string> vlst = new List<string>();
 
+            vlst.Clear();
+            foreach (URIish u in URIs)
+            {
+                vlst.Add(u.ToPrivateString());
+            }
+            rc.SetStringList(SECTION, Name, KEY_URL, vlst);
+
+            vlst.Clear();
+            foreach (RefSpec u in Fetch)
+                vlst.Add(u.ToString());
+            rc.SetStringList(SECTION, Name, KEY_FETCH, vlst);
+
+            vlst.Clear();
+            foreach (RefSpec u in Push)
+                vlst.Add(u.ToString());
+            rc.SetStringList(SECTION, Name, KEY_PUSH, vlst);
+
+            set(rc, KEY_UPLOADPACK, UploadPack, DEFAULT_UPLOAD_PACK);
+            set(rc, KEY_RECEIVEPACK, ReceivePack, DEFAULT_RECEIVE_PACK);
+            set(rc, KEY_TAGOPT, TagOpt.Option, TagOpt.AUTO_FOLLOW.Option);
+            set(rc, KEY_MIRROR, Mirror, DEFAULT_MIRROR);
         }
 
         private void set(RepositoryConfig rc, string key, string currentValue, string defaultValue)

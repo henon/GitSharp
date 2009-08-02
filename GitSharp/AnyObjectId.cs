@@ -110,7 +110,7 @@ namespace GitSharp
         }
 
 
-        internal void copyRawTo(Stream s)
+        public void copyRawTo(Stream s)
         {
             var buf = new byte[20];
             NB.encodeInt32(buf, 0, W1);
@@ -121,13 +121,39 @@ namespace GitSharp
             s.Write(buf, 0, 20);
         }
 
-        internal void copyRawTo(byte[] buf, int off)
+
+        /**
+         * Copy this ObjectId to a byte array.
+         * 
+         * @param b
+         *            the buffer to copy to.
+         * @param o
+         *            the offset within b to write at.
+         */
+        public void copyRawTo(byte[] buf, int off)
         {
             NB.encodeInt32(buf, 0 + off, W1);
             NB.encodeInt32(buf, 4 + off, W2);
             NB.encodeInt32(buf, 8 + off, W3);
             NB.encodeInt32(buf, 12 + off, W4);
             NB.encodeInt32(buf, 16 + off, W5);
+        }
+
+        /**
+         * Copy this ObjectId to an int array.
+         *
+         * @param b
+         *            the buffer to copy to.
+         * @param o
+         *            the offset within b to write at.
+         */
+        public void copyRawTo(int[] b, int o)
+        {
+            b[o] = W1;
+            b[o + 1] = W2;
+            b[o + 2] = W3;
+            b[o + 3] = W4;
+            b[o + 4] = W5;
         }
 
         private byte[] ToHexByteArray()
@@ -284,6 +310,14 @@ namespace GitSharp
             Hex.FillHexCharArray(dest, 16, W3);
             Hex.FillHexCharArray(dest, 24, W4);
             Hex.FillHexCharArray(dest, 32, W5);
+        }
+
+        public string Name
+        {
+            get
+            {
+                return new string(ToHexCharArray());
+            }
         }
 
         public override string ToString()

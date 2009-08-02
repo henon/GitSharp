@@ -1,0 +1,12 @@
+commit 740709ece2412856c0c3eabd4dc4a4cf115b0de6
+Merge: 5c19b43... 13a2c0d...
+Author: Shawn O. Pearce <sop@google.com>
+Date:   Fri Dec 12 13:26:52 2008 -0800
+
+    Merge branch 'b' into d
+
+diff --cc a
+index 7898192,2e65efe..0000000
+deleted file mode 100644,100644
+--- a/a
++++ /dev/null

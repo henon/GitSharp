@@ -48,12 +48,8 @@ namespace GitSharp.Transport
      * communicate with to decide what the peer already knows. So push is not
      * supported by the bundle transport.
      */
-    public abstract class TransportBundle : IPackTransport
+    public interface TransportBundle : IPackTransport
     {
-        /**
-         * Bundle Signature
-         */
-        public const string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
     }
 
 }

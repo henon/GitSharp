@@ -126,10 +126,9 @@ namespace GitSharp.Transport
                 StringBuilder sb = new StringBuilder();
                 Ref advertisedRef = GetRef(rru.RemoteName);
                 ObjectId oldId = (advertisedRef == null ? ObjectId.ZeroId : advertisedRef.ObjectId);
-                // [caytchen] TODO: ObjectId Name!
-                sb.Append(oldId.ToString());
+                sb.Append(oldId.Name);
                 sb.Append(' ');
-                sb.Append(rru.NewObjectId.ToString());
+                sb.Append(rru.NewObjectId.Name);
                 sb.Append(' ');
                 sb.Append(rru.RemoteName);
                 if (!sentCommand)

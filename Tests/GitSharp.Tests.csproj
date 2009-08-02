@@ -89,8 +89,6 @@
     <Compile Include="PackIndexV2Tests.cs" />
     <Compile Include="PackReaderTests.cs" />
     <Compile Include="ParseRefTests.cs" />
-    <Compile Include="Patch\FileHeaderTest.cs" />
-    <Compile Include="Patch\GetTextTest.cs" />
     <Compile Include="RevWalk\AlwaysEmptyRevQueueTest.cs" />
     <Compile Include="RevWalk\DateRevQueueTest.cs" />
     <Compile Include="RevWalk\FIFORevQueueTest.cs" />
@@ -107,7 +105,6 @@
     <Compile Include="RevWalk\RevWalkPathFilter1Test.cs" />
     <Compile Include="RevWalk\RevWalkPathFilter6012Test.cs" />
     <Compile Include="RevWalk\RevWalkSortTest.cs" />
-    <Compile Include="Patch\PatchCcErrorTest.cs" />
     <Compile Include="Transport\IndexPackTests.cs" />
     <Compile Include="Transport\RefSpecTests.cs" />
     <Compile Include="Transport\RemoteConfigTests.cs" />

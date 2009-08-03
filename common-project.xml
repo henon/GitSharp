@@ -221,6 +221,7 @@
 			<call target="common.find-nunit" unless="${property::exists('nunit.found')}" />
 
 			<echo message="Running tests in '${project::get-name()}'" />
+			<mkdir dir="${testresults.dir}" failonerror="false"/>
 
 			<property name="nunitcommandline" value="${project::get-name()}.dll /xml:${testresults.dir}/${project::get-name()}.dll-results.xml /config:${build.dir}/${project::get-name()}.dll.config /nologo /noshadow ${common.testrunner.args}" />
 			<if test="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}">

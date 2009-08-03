@@ -183,7 +183,6 @@
 		<property name="current.build.defines" value="${current.build.defines},DOTNET2SP1" if="${dotnet.SPlevel == '1'}" />
 		<property name="link.sdkdoc.version" value="SDK_v2_0" />
 		<property name="merge.targetplatform" value="v2" />
-		<property name="csc.keyfile" value="/keyfile:${key.file}" />
 		<!-- If DevEnvDir exists, we grab it, otherwise we try if the default location (if it exists) -->
 		<if test="${environment::variable-exists('DevEnvDir')}">
 			<property name="dev.env.dir" value="${environment::get-variable('DevEnvDir')}" />
@@ -203,7 +202,6 @@
 		<property name="current.build.defines" value="${build.defines},NET,DOTNET35" />
 		<property name="link.sdkdoc.version" value="SDK_v3_5" />
 		<property name="merge.targetplatform" value="v3" />
-		<property name="csc.keyfile" value="/keyfile:${key.file}" />
 		<!-- If DevEnvDir exists, we grab it, otherwise we try if the default location (if it exists) -->
 		<if test="${environment::variable-exists('DevEnvDir')}">
 			<property name="dev.env.dir" value="${environment::get-variable('DevEnvDir')}" />
@@ -223,7 +221,6 @@
 		<property name="current.build.defines" value="${build.defines},SILVERLIGHT" />
 		<property name="link.sdkdoc.version" value="MsdnOnline" />
 		<property name="build.warnaserrors" value="false" />
-		<property name="csc.keyfile" value="/keyfile:${key.file}" />
 		<property name="build.msbuild" value="false" overwrite="false" />
 	</target>
 
@@ -251,8 +248,6 @@
 		<property name="link.sdkdoc.version" value="MsdnOnline" />
 		<property name="gacutil.file" value="gacutil" />
 		<property name="build.warnaserrors" value="false" />
-		<property name="csc.keyfile" value="-keyfile:${key.file}" />
-
 		<property name="build.msbuild"	value="false" overwrite="false" />
 	</target>
 

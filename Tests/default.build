@@ -2,12 +2,15 @@
 	<include buildfile="../common-project.xml" />
 	
 	<property name="root.dir" value="."/>
+	<property name="common.testrunner.enabled" value="true"/>
 	
 	<target name="build" depends="common.init">
 		<assemblyfileset id="project.references">
 			<include name="../extern/nunit.framework.dll" />
 			<include name="../GitSharp/build/${nant.settings.currentframework}/${project.config}/*.dll" />
 		</assemblyfileset>
+		<call target="common.copy-references"/>
 		<call target="common.compile-dll"/>
+		<call target="common.run-tests"/>
 	</target>
 </project>

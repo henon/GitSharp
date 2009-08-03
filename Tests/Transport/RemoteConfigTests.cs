@@ -74,10 +74,10 @@ namespace GitSharp.Tests.Transport
             RefSpec spec;
 
             Assert.AreEqual("spearce", rc.Name);
-            Assert.NotNull(allURIs);
-            Assert.NotNull(rc.Fetch);
-            Assert.NotNull(rc.Push);
-            Assert.NotNull(rc.TagOpt);
+            Assert.IsNotNull(allURIs);
+            Assert.IsNotNull(rc.Fetch);
+            Assert.IsNotNull(rc.Push);
+            Assert.IsNotNull(rc.TagOpt);
             Assert.AreSame(TagOpt.AUTO_FOLLOW, rc.TagOpt);
 
             Assert.AreEqual(1, allURIs.Count);
@@ -85,8 +85,8 @@ namespace GitSharp.Tests.Transport
 
             Assert.AreEqual(1, rc.Fetch.Count);
             spec = rc.Fetch[0];
-            Assert.True(spec.Force);
-            Assert.True(spec.Wildcard);
+            Assert.IsTrue(spec.Force);
+            Assert.IsTrue(spec.Wildcard);
             Assert.AreEqual("refs/heads/*", spec.Source);
             Assert.AreEqual("refs/remotes/spearce/*", spec.Destination);
 
@@ -128,9 +128,9 @@ namespace GitSharp.Tests.Transport
             RefSpec spec;
 
             Assert.AreEqual("spearce", rc.Name);
-            Assert.NotNull(allURIs);
-            Assert.NotNull(rc.Fetch);
-            Assert.NotNull(rc.Push);
+            Assert.IsNotNull(allURIs);
+            Assert.IsNotNull(rc.Fetch);
+            Assert.IsNotNull(rc.Push);
 
             Assert.AreEqual(1, allURIs.Count);
             Assert.AreEqual("http://www.spearce.org/egit.git", allURIs[0].ToString());
@@ -138,14 +138,14 @@ namespace GitSharp.Tests.Transport
             Assert.AreEqual(2, rc.Fetch.Count);
 
             spec = rc.Fetch[0];
-            Assert.True(spec.Force);
-            Assert.True(spec.Wildcard);
+            Assert.IsTrue(spec.Force);
+            Assert.IsTrue(spec.Wildcard);
             Assert.AreEqual("refs/heads/*", spec.Source);
             Assert.AreEqual("refs/heads/*", spec.Destination);
 
             spec = rc.Fetch[1];
-            Assert.False(spec.Force);
-            Assert.True(spec.Wildcard);
+            Assert.IsFalse(spec.Force);
+            Assert.IsTrue(spec.Wildcard);
             Assert.AreEqual("refs/tags/*", spec.Source);
             Assert.AreEqual("refs/tags/*", spec.Destination);
 
@@ -166,9 +166,9 @@ namespace GitSharp.Tests.Transport
             RefSpec spec;
 
             Assert.AreEqual("backup", rc.Name);
-            Assert.NotNull(allURIs);
-            Assert.NotNull(rc.Fetch);
-            Assert.NotNull(rc.Push);
+            Assert.IsNotNull(allURIs);
+            Assert.IsNotNull(rc.Fetch);
+            Assert.IsNotNull(rc.Push);
 
             Assert.AreEqual(2, allURIs.Count);
             Assert.AreEqual("http://www.spearce.org/egit.git", allURIs[0].ToString());
@@ -178,14 +178,14 @@ namespace GitSharp.Tests.Transport
 
             Assert.AreEqual(2, rc.Push.Count);
             spec = rc.Push[0];
-            Assert.True(spec.Force);
-            Assert.True(spec.Wildcard);
+            Assert.IsTrue(spec.Force);
+            Assert.IsTrue(spec.Wildcard);
             Assert.AreEqual("refs/heads/*", spec.Source);
             Assert.AreEqual("refs/heads/*", spec.Destination);
 
             spec = rc.Push[1];
-            Assert.False(spec.Force);
-            Assert.True(spec.Wildcard);
+            Assert.IsFalse(spec.Force);
+            Assert.IsTrue(spec.Wildcard);
             Assert.AreEqual("refs/tags/*", spec.Source);
             Assert.AreEqual("refs/tags/*", spec.Destination);
         }
@@ -204,17 +204,17 @@ namespace GitSharp.Tests.Transport
             RefSpec spec;
 
             Assert.AreEqual("example", rc.Name);
-            Assert.NotNull(allURIs);
-            Assert.NotNull(rc.Fetch);
-            Assert.NotNull(rc.Push);
+            Assert.IsNotNull(allURIs);
+            Assert.IsNotNull(rc.Fetch);
+            Assert.IsNotNull(rc.Push);
 
             Assert.AreEqual(1, allURIs.Count);
             Assert.AreEqual("user@example.com:egit.git", allURIs[0].ToString());
 
             Assert.AreEqual(1, rc.Fetch.Count);
             spec = rc.Fetch[0];
-            Assert.True(spec.Force);
-            Assert.True(spec.Wildcard);
+            Assert.IsTrue(spec.Force);
+            Assert.IsTrue(spec.Wildcard);
             Assert.AreEqual("refs/heads/*", spec.Source);
             Assert.AreEqual("refs/remotes/example/*", spec.Destination);
             
@@ -246,11 +246,11 @@ namespace GitSharp.Tests.Transport
             RemoteConfig rc = new RemoteConfig(db.Config, "backup");
             Assert.AreEqual(0, rc.URIs.Count);
 
-            Assert.True(rc.AddURI(uri));
+            Assert.IsTrue(rc.AddURI(uri));
             Assert.AreEqual(1, rc.URIs.Count);
             Assert.AreSame(uri, rc.URIs[0]);
 
-            Assert.False(rc.AddURI(new URIish(uri.ToString())));
+            Assert.IsFalse(rc.AddURI(new URIish(uri.ToString())));
             Assert.AreEqual(1, rc.URIs.Count);
         }
 
@@ -263,16 +263,16 @@ namespace GitSharp.Tests.Transport
             URIish b = new URIish("/another/dir");
             URIish c = new URIish("/more/dirs");
             RemoteConfig rc = new RemoteConfig(db.Config, "backup");
-            Assert.True(rc.AddURI(a));
-            Assert.True(rc.AddURI(b));
-            Assert.True(rc.AddURI(c));
+            Assert.IsTrue(rc.AddURI(a));
+            Assert.IsTrue(rc.AddURI(b));
+            Assert.IsTrue(rc.AddURI(c));
 
             Assert.AreEqual(3, rc.URIs.Count);
             Assert.AreSame(a, rc.URIs[0]);
             Assert.AreSame(b, rc.URIs[1]);
             Assert.AreEqual(c, rc.URIs[2]);
 
-            Assert.True(rc.RemoveURI(a));
+            Assert.IsTrue(rc.RemoveURI(a));
             Assert.AreSame(b, rc.URIs[0]);
             Assert.AreSame(c, rc.URIs[1]);
         }
@@ -286,16 +286,16 @@ namespace GitSharp.Tests.Transport
             URIish b = new URIish("/another/dir");
             URIish c = new URIish("/more/dirs");
             RemoteConfig rc = new RemoteConfig(db.Config, "backup");
-            Assert.True(rc.AddURI(a));
-            Assert.True(rc.AddURI(b));
-            Assert.True(rc.AddURI(c));
+            Assert.IsTrue(rc.AddURI(a));
+            Assert.IsTrue(rc.AddURI(b));
+            Assert.IsTrue(rc.AddURI(c));
 
             Assert.AreEqual(3, rc.URIs.Count);
             Assert.AreSame(a, rc.URIs[0]);
             Assert.AreSame(b, rc.URIs[1]);
             Assert.AreEqual(c, rc.URIs[2]);
 
-            Assert.True(rc.RemoveURI(b));
+            Assert.IsTrue(rc.RemoveURI(b));
             Assert.AreEqual(2, rc.URIs.Count);
             Assert.AreSame(a, rc.URIs[0]);
             Assert.AreSame(c, rc.URIs[1]);
@@ -310,16 +310,16 @@ namespace GitSharp.Tests.Transport
             URIish b = new URIish("/another/dir");
             URIish c = new URIish("/more/dirs");
             RemoteConfig rc = new RemoteConfig(db.Config, "backup");
-            Assert.True(rc.AddURI(a));
-            Assert.True(rc.AddURI(b));
-            Assert.True(rc.AddURI(c));
+            Assert.IsTrue(rc.AddURI(a));
+            Assert.IsTrue(rc.AddURI(b));
+            Assert.IsTrue(rc.AddURI(c));
 
             Assert.AreEqual(3, rc.URIs.Count);
             Assert.AreSame(a, rc.URIs[0]);
             Assert.AreSame(b, rc.URIs[1]);
             Assert.AreEqual(c, rc.URIs[2]);
 
-            Assert.True(rc.RemoveURI(c));
+            Assert.IsTrue(rc.RemoveURI(c));
             Assert.AreEqual(2, rc.URIs.Count);
             Assert.AreSame(a, rc.URIs[0]);
             Assert.AreSame(b, rc.URIs[1]);
@@ -332,12 +332,12 @@ namespace GitSharp.Tests.Transport
 
             URIish a = new URIish("/some/dir");
             RemoteConfig rc = new RemoteConfig(db.Config, "backup");
-            Assert.True(rc.AddURI(a));
+            Assert.IsTrue(rc.AddURI(a));
 
             Assert.AreEqual(1, rc.URIs.Count);
             Assert.AreSame(a, rc.URIs[0]);
 
-            Assert.True(rc.RemoveURI(a));
+            Assert.IsTrue(rc.RemoveURI(a));
             Assert.AreEqual(0, rc.URIs.Count);
         }
 

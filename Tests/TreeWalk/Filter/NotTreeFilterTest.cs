@@ -51,7 +51,7 @@ namespace GitSharp.Tests.TreeWalk
             GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
             TreeFilter a = TreeFilter.ALL;
             TreeFilter n = NotTreeFilter.create(a);
-            Assert.NotNull(n);
+            Assert.IsNotNull(n);
             Assert.IsTrue(a.include(tw));
             Assert.IsFalse(n.include(tw));
         }

@@ -531,11 +531,15 @@ namespace GitSharp
             //        return arr;
             //}
 
-            //byte[] arr = new byte[len];
-            //bb.get(arr);
-            //return arr;
+            for (int i = 0; i < str.Length; i++)
+            {
+                origin_bytes[i] = (byte)str.ToCharArray()[i];
+			}
 
-            return  CHARSET.GetBytes(str);
+            // Note that the two following lines are unnecessary, and we could
+            // have just returned origin_bytes.
+            string decoded = Encoding.GetString(origin_bytes);
+            return Encoding.GetBytes(decoded);
         }
 
 

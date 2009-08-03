@@ -3,6 +3,7 @@
 	
 	<property name="root.dir" value="."/>
 	<property name="common.testrunner.enabled" value="true"/>
+	<property name="build.warnaserrors" value="false"/>
 	
 	<target name="build" depends="common.init">
 		<assemblyfileset id="project.references">

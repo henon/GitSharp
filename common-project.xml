@@ -151,7 +151,7 @@
 				<items refid="project.references" />
 			</in>
 			<do>
-				<copy file="${reference}" todir="${bin.dir}" overwrite="${build.rebuild}" />
+				<copy file="${reference}" todir="${build.dir}" overwrite="${build.rebuild}" />
 			</do>
 		</foreach>
 	</target>

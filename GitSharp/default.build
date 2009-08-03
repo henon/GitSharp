@@ -2,16 +2,13 @@
 	<include buildfile="../common-project.xml" />
 	
 	<property name="root.dir" value="."/>
-	
-	<target name="set-project-refs">
-		<assemblyfileset id="project.references" basedir="../extern">
+		
+	<target name="build" depends="common.init">
+		<fileset id="project.references" basedir="../extern">
 			<include name="ICSharpCode.SharpZipLib.dll" />
 			<include name="FileMap/Winterdom.IO.FileMap.dll" />
-		</assemblyfileset>
-	</target>
-	
-	<target name="build" depends="common.init">
-		<call target="set-project-refs"/>
+		</fileset>
+		<call target="common.copy-references"/>
 		<call target="common.compile-dll"/>
 	</target>
 </project>

@@ -42,88 +42,111 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
+using GitSharp.Exceptions;
+using NDesk.Options;
 
+// [henon] ported from org.spearce.jgit.pgm\src\org\spearce\jgit\pgm
 namespace GitSharp.CLI
 {
     /** Command line entry point. */
     public class Program
     {
+        private static OptionSet options;
 
-#if false
-	//@Option(name = "--help", usage = "display this help text", aliases = { "-h" })
-	private bool help;
+        //@Option(name = "--help", usage = "display this help text", aliases = { "-h" })
+        private static bool help;
 
-	//@Option(name = "--show-stack-trace", usage = "display the Java stack trace on exceptions")
-	private bool showStackTrace;
+        //@Option(name = "--show-stack-trace", usage = "display the Java stack trace on exceptions")
+        private static bool showStackTrace;
 
-	//@Option(name = "--git-dir", metaVar = "GIT_DIR", usage = "set the git repository to operate on")
-	private File gitdir;
+        //@Option(name = "--git-dir", metaVar = "GIT_DIR", usage = "set the git repository to operate on")
+        private static DirectoryInfo gitdir;
 
-	//@Argument(index = 0, metaVar = "command", required = true, handler = SubcommandHandler.class)
-	private TextBuiltin subcommand;
-
-	//@Argument(index = 1, metaVar = "ARG")
-	private List<String> arguments = new ArrayList<String>();
+#if missing_reference
+        //@Argument(index = 0, metaVar = "command", required = true, handler = SubcommandHandler.class)
+        private static TextBuiltin subcommand;
 #endif
+
+        //@Argument(index = 1, metaVar = "ARG")
+        private List<String> arguments = new List<String>();
 
         /**
-	 * Execute the command line.
-	 * 
-	 * @param argv
-	 *            arguments.
-	 */
+	     * Execute the command line.
+	     * 
+	     * @param argv
+	     *            arguments.
+	     */
         public static void Main(string[] args)
         {
-#if false
-		 var me = new Main();
-		try {
-			AwtAuthenticator.install();
-			HttpSupport.configureHttpProxy();
-			me.execute(argv);
-		} catch (Die err) {
-			System.err.println("fatal: " + err.getMessage());
-			if (me.showStackTrace)
-				err.printStackTrace();
-			System.exit(128);
-		} catch (Exception err) {
-			if (!me.showStackTrace && err.getCause() != null
-					&& err instanceof TransportException)
-				System.err.println("fatal: " + err.getCause().getMessage());
+            options = new OptionSet()
+            {
+                { "help|h", "display this help text", v => ShowHelp() },
+                { "show-stack-trace", "display the C# stack trace on exceptions", v => showStackTrace=true },
+                { "git-dir", "set the git repository to operate on", v => gitdir=new DirectoryInfo(v) },
+            };
+            try
+            {
+                //			AwtAuthenticator.install();
+                //HttpSupport.configureHttpProxy();
+                execute(args);
+            }
+            catch (Die err)
+            {
+                Console.Error.WriteLine("fatal: " + err.Message);
+                if (showStackTrace)
+                    err.printStackTrace();
+                Exit(128);
+            }
+            catch (Exception err)
+            {
+                if (!showStackTrace && err.InnerException != null
+                        && err is TransportException)
+                    Console.Error.WriteLine("fatal: " + err.InnerException.Message);
 
-			if (err.getClass().getName().startsWith("org.spearce.jgit.errors.")) {
-				System.err.println("fatal: " + err.getMessage());
-				if (me.showStackTrace)
-					err.printStackTrace();
-				System.exit(128);
-			}
-			err.printStackTrace();
-			System.exit(1);
-		}
-#endif
+                if (err.GetType().Name.StartsWith("GitSharp.Exceptions."))
+                {
+                    Console.Error.WriteLine("fatal: " + err.Message);
+                    if (showStackTrace)
+                        err.printStackTrace();
+                    Exit(128);
+                }
+                err.printStackTrace();
+                Exit(1);
+            }
+
         }
 
-#if false
-	private void execute( String[] argv) {
-		 CmdLineParser clp = new CmdLineParser(this);
-		try {
-			clp.parseArgument(argv);
-		} catch (CmdLineException err) {
-			if (argv.length > 0 && !help) {
-				System.err.println("fatal: " + err.getMessage());
-				System.exit(1);
-			}
-		}
+        private static void execute(string[] argv)
+        {
+            try
+            {
+                options.Parse(argv);
+            }
+            catch (OptionException err)
+            {
+                if (argv.Length > 0 && !help)
+                {
+                    Console.Error.WriteLine("fatal: " + err.Message);
+                    Exit(1);
+                }
+            }
 
-		if (argv.length == 0 || help) {
-			 String ex = clp.printExample(ExampleMode.ALL);
-			System.err.println("jgit" + ex + " command [ARG ...]");
-			if (help) {
-				System.err.println();
-				clp.printUsage(System.err);
-				System.err.println();
-			} else if (subcommand == null) {
-				System.err.println();
-				System.err.println("The most commonly used commands are:");
+            if (argv.Length == 0 || help)
+            {
+                Console.Error.Write("usage: git ");
+                Console.Error.Write(string.Join( " ",options.Select(o => "[--" + string.Join("|-", o.Names) + "]").ToArray()));
+                Console.Error.WriteLine("\nCOMMAND [ARGS]\n\nThe most commonly used git commands are:\nTODO ...");
+                if (help)
+                {
+                    ShowHelp();
+                }
+#if ported
+                else if (subcommand == null)
+                {
+                    Console.Error.WriteLine();
+                    Console.Error.WriteLine("The most commonly used commands are:");
+
 				 CommandRef[] common = CommandCatalog.common();
 				int width = 0;
 				for ( CommandRef c : common)
@@ -136,20 +159,26 @@ namespace GitSharp.CLI
 					for (int i = c.getName().length(); i < width; i++)
 						System.err.print(' ');
 					System.err.print(c.getUsage());
-					System.err.println();
+					Console.Error.WriteLine();
 				}
-				System.err.println();
-			}
-			System.exit(1);
-		}
+                    Console.Error.WriteLine();
+                }
+#endif
+                Console.Error.Write(@"
+                
+See 'git help COMMAND' for more information on a specific command.
+");
+                Exit(1);
+            }
 
+#if ported
 		 TextBuiltin cmd = subcommand;
 		if (cmd.requiresRepository()) {
 			if (gitdir == null)
 				gitdir = findGitDir();
 			if (gitdir == null || !gitdir.isDirectory()) {
-				System.err.println("error: can't find git directory");
-				System.exit(1);
+				Console.Error.WriteLine("error: can't find git directory");
+				Exit(1);
 			}
 			cmd.init(new Repository(gitdir), gitdir);
 		} else {
@@ -161,19 +190,44 @@ namespace GitSharp.CLI
 			if (cmd.out != null)
 				cmd.out.flush();
 		}
-	}
-
-	private static File findGitDir() {
-		File current = new File(".").getAbsoluteFile();
-		while (current != null) {
-			 File gitDir = new File(current, ".git");
-			if (gitDir.isDirectory())
-				return gitDir;
-			current = current.getParentFile();
-		}
-		return null;
-	}
 #endif
+            Exit(0);
+        }
+
+        private static void ShowHelp()
+        {
+            help = true;
+            Console.Error.WriteLine();
+            options.WriteOptionDescriptions(Console.Error);
+            Console.Error.WriteLine();
+        }
+
+        private static DirectoryInfo findGitDir()
+        {
+            DirectoryInfo current = new DirectoryInfo(".");
+            while (current != null)
+            {
+                DirectoryInfo gitDir = new DirectoryInfo(current + ".git");
+                if (gitDir.Exists)
+                    return gitDir;
+                current = current.Parent;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Wait for Enter key if in DEBUG mode
+        /// </summary>
+        /// <param name="exit_code"></param>
+        static void Exit(int exit_code)
+        {
+#if DEBUG
+            Console.WriteLine("\n\nrunning in DEBUG mode, press any key to exit.");
+            Console.In.ReadLine();
+#endif
+            Environment.Exit(exit_code);
+        }
+
     }
 
 }

@@ -46,12 +46,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Die.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GitSharp\GitSharp.csproj">
+      <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
+      <Name>GitSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

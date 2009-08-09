@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Command line interface for GitSharp")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("The Git Development Community")]
-[assembly: AssemblyProduct("GitSharp.Shell")]
+[assembly: AssemblyProduct("GitSharp.CLI")]
 [assembly: AssemblyCopyright("Copyright © 2009 The Git Development Community")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

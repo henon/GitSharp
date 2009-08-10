@@ -1,0 +1,17 @@
+<project name="GitSharp" default="build" xmlns="http://nant.sf.net/release/0.85/nant.xsd">
+	<include buildfile="common-project.xml" />
+	
+	<property name="root.dir" value="."/>
+	
+	<fileset id="buildfiles.all">
+		<!-- Files have to be in dependency order -->
+		<include name="GitSharp/default.build" />
+		<include name="Tests/default.build"/>
+	</fileset>	
+	
+	<target name="build">
+		<nant target="build">
+			<buildfiles refid="buildfiles.all" />
+		</nant>
+	</target>
+</project>

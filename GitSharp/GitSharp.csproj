@@ -33,7 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, PublicKeyToken=null">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\extern\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -43,7 +43,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5, processorArchitecture=MSIL">
+    <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\extern\FileMap\Winterdom.IO.FileMap.dll</HintPath>
     </Reference>
@@ -62,6 +62,7 @@
     <Compile Include="Ensure.cs" />
     <Compile Include="Exceptions\CorruptObjectException.cs" />
     <Compile Include="Exceptions\EntryExistsException.cs" />
+    <Compile Include="Exceptions\Exception.cs" />
     <Compile Include="Exceptions\FileLockedException.cs" />
     <Compile Include="Exceptions\IncorrectObjectTypeException.cs" />
     <Compile Include="Exceptions\InvalidPackException.cs" />
@@ -160,11 +161,6 @@
     <Compile Include="RepositoryChangedEventArgs.cs" />
     <Compile Include="RefsChangedEventArgs.cs" />
     <Compile Include="IndexChangedEventArgs.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="RevWalk\AbstractRevQueue.cs" />
     <Compile Include="RevWalk\BlockObjQueue.cs" />
     <Compile Include="RevWalk\BlockRevQueue.cs" />
@@ -205,8 +201,12 @@
     <Compile Include="RevWalk\RewriteTreeFilter.cs" />
     <Compile Include="RevWalk\StartGenerator.cs" />
     <Compile Include="RevWalk\TopoSortGenerator.cs" />
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="DirectoryCache\BaseDirCacheEditor.cs" />
+    <Compile Include="DirectoryCache\DirCache.cs" />
+    <Compile Include="DirectoryCache\DirCacheBuilder.cs" />
+    <Compile Include="DirectoryCache\DirCacheEditor.cs" />
+    <Compile Include="DirectoryCache\DirCacheEntry.cs" />
+    <Compile Include="DirectoryCache\DirCacheTree.cs" />
     <Compile Include="Diff\Edit.cs" />
     <Compile Include="Diff\EditList.cs" />
     <Compile Include="Diff\RawText.cs" />
@@ -217,9 +217,17 @@
     <Compile Include="Exceptions\RevWalkException.cs" />
     <Compile Include="Exceptions\StopWalkException.cs" />
     <Compile Include="Exceptions\TransportException.cs" />
+    <Compile Include="Exceptions\UnmergedPathException.cs" />
     <Compile Include="ObjectIdSubclassMap.cs" />
     <Compile Include="PackLock.cs" />
     <Compile Include="PackWriter.cs" />
+    <Compile Include="Patch\BinaryHunk.cs" />
+    <Compile Include="Patch\CombinedFileHeader.cs" />
+    <Compile Include="Patch\CombinedHunkHeader.cs" />
+    <Compile Include="Patch\FileHeader.cs" />
+    <Compile Include="Patch\FormatError.cs" />
+    <Compile Include="Patch\HunkHeader.cs" />
+    <Compile Include="Patch\Patch.cs" />
     <Compile Include="RefComparator.cs" />
     <Compile Include="RefWriter.cs" />
     <Compile Include="Transport\BaseConnection.cs" />
@@ -275,6 +283,8 @@
     <Compile Include="TreeWalk\NameConflictTreeWalk.cs" />
     <Compile Include="TreeWalk\TreeWalk.cs" />
     <Compile Include="TreeWalk\WorkingTreeIterator.cs" />
+    <Compile Include="Util\Arrays.cs" />
+    <Compile Include="Util\DigestOutputStream.cs" />
     <Compile Include="Util\Array.cs" />
     <Compile Include="Util\IListUtil.cs" />
     <Compile Include="Util\ICharSequence.cs" />
@@ -284,6 +294,9 @@
     <Compile Include="Util\RawCharSequence.cs" />
     <Compile Include="Util\RawSubstringPattern.cs" />
     <Compile Include="Util\TemporaryBuffer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -300,7 +313,7 @@
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile" ExecuteTargetName="run">
+        <MonoDevelop.Autotools.MakefileInfo RelativeMakefileName="Makefile" ExecuteTargetName="run">
           <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
           <ResourcesVar />

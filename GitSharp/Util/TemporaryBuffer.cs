@@ -56,7 +56,7 @@ namespace GitSharp.Util
      * The content of this buffered stream may be sent to another OutputStream only
      * after this stream has been properly closed by {@link #close()}.
      */
-    public class TemporaryBuffer // [henon] was derived from OutputStream. not yet sure from what to derive in C#
+    public class TemporaryBuffer : Stream
     {
         public static int DEFAULT_IN_CORE_LIMIT = 1024 * 1024;
 
@@ -229,7 +229,7 @@ namespace GitSharp.Util
          *
          * @return total length of the buffer, in bytes.
          */
-        public long Length
+        public override long Length
         {
             get
             {
@@ -371,5 +371,57 @@ namespace GitSharp.Util
             }
         }
 
+
+        public override bool CanRead
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override bool CanSeek
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override bool CanWrite
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override void Flush()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override long Position
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void SetLength(long value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            write(buffer, offset, count);
+        }
     }
 }

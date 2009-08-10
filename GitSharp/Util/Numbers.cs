@@ -194,23 +194,24 @@ namespace GitSharp.Util
             }
         }
 
+
         /**
-          * Skip an entire region of an input stream.
-          * <p>
-          * The input stream's position is moved forward by the number of requested
-          * bytes, discarding them from the input. This method does not return until
-          * the exact number of bytes requested has been skipped.
-          *
-          * @param fd
-          *            the stream to skip bytes from.
-          * @param toSkip
-          *            total number of bytes to be discarded. Must be >= 0.
-          * @throws EOFException
-          *             the stream ended before the requested number of bytes were
-          *             skipped.
-          * @throws IOException
-          *             there was an error reading from the stream.
-          */
+         * Skip an entire region of an input stream.
+         * <p>
+         * The input stream's position is moved forward by the number of requested
+         * bytes, discarding them from the input. This method does not return until
+         * the exact number of bytes requested has been skipped.
+         *
+         * @param fd
+         *            the stream to skip bytes from.
+         * @param toSkip
+         *            total number of bytes to be discarded. Must be >= 0.
+         * @throws EOFException
+         *             the stream ended before the requested number of bytes were
+         *             skipped.
+         * @throws IOException
+         *             there was an error reading from the stream.
+         */
         public static void skipFully(Stream fd, long toSkip)
         {
             while (toSkip > 0)
@@ -299,17 +300,17 @@ namespace GitSharp.Util
         }
 
         /**
- * Write a 32 bit integer as a sequence of 4 bytes (network byte order).
- * 
- * @param intbuf
- *            buffer to write the 4 bytes of data into.
- * @param offset
- *            position within the buffer to begin writing to. This position
- *            and the next 3 bytes after it (for a total of 4 bytes) will be
- *            replaced.
- * @param v
- *            the value to write.
- */
+         * Write a 32 bit integer as a sequence of 4 bytes (network byte order).
+         * 
+         * @param intbuf
+         *            buffer to write the 4 bytes of data into.
+         * @param offset
+         *            position within the buffer to begin writing to. This position
+         *            and the next 3 bytes after it (for a total of 4 bytes) will be
+         *            replaced.
+         * @param v
+         *            the value to write.
+         */
         public static void encodeInt32(byte[] intbuf, int offset, int v)
         {
             intbuf[offset + 3] = (byte)v;

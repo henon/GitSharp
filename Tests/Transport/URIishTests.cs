@@ -86,8 +86,8 @@ namespace GitSharp.Tests.Transport
         {
             const string str = "\\\\some\\place";
             URIish u = new URIish(str);
-            Assert.Null(u.Scheme);
-            Assert.False(u.IsRemote);
+            Assert.IsNull(u.Scheme);
+            Assert.IsFalse(u.IsRemote);
             Assert.AreEqual("//some/place", u.Path);
             Assert.AreEqual("//some/place", u.ToString());
             Assert.AreEqual(u, new URIish(str));
@@ -99,7 +99,7 @@ namespace GitSharp.Tests.Transport
             const string str = "file:///home/m y";
             URIish u = new URIish(str);
             Assert.AreEqual("file", u.Scheme);
-            Assert.False(u.IsRemote);
+            Assert.IsFalse(u.IsRemote);
             Assert.AreEqual("/home/m y", u.Path);
             Assert.AreEqual(str, u.ToString());
             Assert.AreEqual(u, new URIish(str));
@@ -111,7 +111,7 @@ namespace GitSharp.Tests.Transport
             const string str = "file:///D:/m y";
             URIish u = new URIish(str);
             Assert.AreEqual("file", u.Scheme);
-            Assert.False(u.IsRemote);
+            Assert.IsFalse(u.IsRemote);
             Assert.AreEqual("D:/m y", u.Path);
             Assert.AreEqual(str, u.ToString());
             Assert.AreEqual(u, new URIish(str));
@@ -123,7 +123,7 @@ namespace GitSharp.Tests.Transport
             const string str = "git://example.com/home/m y";
             URIish u = new URIish(str);
             Assert.AreEqual("git", u.Scheme);
-            Assert.True(u.IsRemote);
+            Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("example.com", u.Host);
             Assert.AreEqual("/home/m y", u.Path);
             Assert.AreEqual(str, u.ToString());
@@ -136,7 +136,7 @@ namespace GitSharp.Tests.Transport
             const string str = "git://example.com:333/home/m y";
             URIish u = new URIish(str);
             Assert.AreEqual("git", u.Scheme);
-            Assert.True(u.IsRemote);
+            Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("example.com", u.Host);
             Assert.AreEqual("/home/m y", u.Path);
             Assert.AreEqual(333, u.Port);
@@ -150,7 +150,7 @@ namespace GitSharp.Tests.Transport
             const string str = "git://example.com:338/D:/m y";
             URIish u = new URIish(str);
             Assert.AreEqual("git", u.Scheme);
-            Assert.True(u.IsRemote);
+            Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("D:/m y", u.Path);
             Assert.AreEqual(338, u.Port);
             Assert.AreEqual("example.com", u.Host);
@@ -164,7 +164,7 @@ namespace GitSharp.Tests.Transport
             const string str = "git://example.com/D:/m y";
             URIish u = new URIish(str);
             Assert.AreEqual("git", u.Scheme);
-            Assert.True(u.IsRemote);
+            Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("D:/m y", u.Path);
             Assert.AreEqual(-1, u.Port);
             Assert.AreEqual("example.com", u.Host);
@@ -177,8 +177,8 @@ namespace GitSharp.Tests.Transport
         {
             const string str = "example.com:some/p ath";
             URIish u = new URIish(str);
-            Assert.Null(u.Scheme);
-            Assert.True(u.IsRemote);
+            Assert.IsNull(u.Scheme);
+            Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("some/p ath", u.Path);
             Assert.AreEqual("example.com", u.Host);
             Assert.AreEqual(-1, u.Port);
@@ -191,8 +191,8 @@ namespace GitSharp.Tests.Transport
         {
             const string str = "user@example.com:some/p ath";
             URIish u = new URIish(str);
-            Assert.Null(u.Scheme);
-            Assert.True(u.IsRemote);
+            Assert.IsNull(u.Scheme);
+            Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("some/p ath", u.Path);
             Assert.AreEqual("user", u.User);
             Assert.AreEqual("example.com", u.Host);
@@ -207,7 +207,7 @@ namespace GitSharp.Tests.Transport
             const string str = "git+ssh://example.com/some/p ath";
             URIish u = new URIish(str);
             Assert.AreEqual("git+ssh", u.Scheme);
-            Assert.True(u.IsRemote);
+            Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("/some/p ath", u.Path);
             Assert.AreEqual("example.com", u.Host);
             Assert.AreEqual(-1, u.Port);
@@ -221,7 +221,7 @@ namespace GitSharp.Tests.Transport
             const string str = "ssh+git://example.com/some/p ath";
             URIish u = new URIish(str);
             Assert.AreEqual("ssh+git", u.Scheme);
-            Assert.True(u.IsRemote);
+            Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("/some/p ath", u.Path);
             Assert.AreEqual("example.com", u.Host);
             Assert.AreEqual(-1, u.Port);
@@ -235,7 +235,7 @@ namespace GitSharp.Tests.Transport
             const string str = "ssh://example.com/some/p ath";
             URIish u = new URIish(str);
             Assert.AreEqual("ssh", u.Scheme);
-            Assert.True(u.IsRemote);
+            Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("/some/p ath", u.Path);
             Assert.AreEqual("example.com", u.Host);
             Assert.AreEqual(-1, u.Port);
@@ -249,11 +249,11 @@ namespace GitSharp.Tests.Transport
             const string str = "ssh://user@example.com:33/some/p ath";
             URIish u = new URIish(str);
             Assert.AreEqual("ssh", u.Scheme);
-            Assert.True(u.IsRemote);
+            Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("/some/p ath", u.Path);
             Assert.AreEqual("example.com", u.Host);
             Assert.AreEqual("user", u.User);
-            Assert.Null(u.Pass);
+            Assert.IsNull(u.Pass);
             Assert.AreEqual(33, u.Port);
             Assert.AreEqual(str, u.ToPrivateString());
             Assert.AreEqual(u, new URIish(str));
@@ -265,7 +265,7 @@ namespace GitSharp.Tests.Transport
             const string str = "ssh://user:pass@example.com:33/some/p ath";
             URIish u = new URIish(str);
             Assert.AreEqual("ssh", u.Scheme);
-            Assert.True(u.IsRemote);
+            Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("/some/p ath", u.Path);
             Assert.AreEqual("example.com", u.Host);
             Assert.AreEqual("user", u.User);

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -70,14 +70,14 @@ namespace GitSharp.Tests.Transport
                 pack.index(new TextProgressMonitor());
                 PackFile file = new PackFile(idxFile, tmpPackFile);
 
-                Assert.True(file.HasObject(ObjectId.FromString("4b825dc642cb6eb9a060e54bf8d69288fbee4904")));
-                Assert.True(file.HasObject(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab")));
-                Assert.True(file.HasObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259")));
-                Assert.True(file.HasObject(ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")));
-                Assert.True(file.HasObject(ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7")));
-                Assert.True(file.HasObject(ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327")));
-                Assert.True(file.HasObject(ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035")));
-                Assert.True(file.HasObject(ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("4b825dc642cb6eb9a060e54bf8d69288fbee4904")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799")));
             }
             finally
             {
@@ -102,20 +102,20 @@ namespace GitSharp.Tests.Transport
 
                 IndexPack pack = new IndexPack(db, @is, tmppack);
                 pack.index(new TextProgressMonitor());
-                PackFile file = new PackFile(idxFile, tmpPackFile); 
-                
-                Assert.True(file.HasObject(ObjectId.FromString("02ba32d3649e510002c21651936b7077aa75ffa9")));
-                Assert.True(file.HasObject(ObjectId.FromString("0966a434eb1a025db6b71485ab63a3bfbea520b6")));
-                Assert.True(file.HasObject(ObjectId.FromString("09efc7e59a839528ac7bda9fa020dc9101278680")));
-                Assert.True(file.HasObject(ObjectId.FromString("0a3d7772488b6b106fb62813c4d6d627918d9181")));
-                Assert.True(file.HasObject(ObjectId.FromString("1004d0d7ac26fbf63050a234c9b88a46075719d3")));
-                Assert.True(file.HasObject(ObjectId.FromString("10da5895682013006950e7da534b705252b03be6")));
-                Assert.True(file.HasObject(ObjectId.FromString("1203b03dc816ccbb67773f28b3c19318654b0bc8")));
-                Assert.True(file.HasObject(ObjectId.FromString("15fae9e651043de0fd1deef588aa3fbf5a7a41c6")));
-                Assert.True(file.HasObject(ObjectId.FromString("16f9ec009e5568c435f473ba3a1df732d49ce8c3")));
-                Assert.True(file.HasObject(ObjectId.FromString("1fd7d579fb6ae3fe942dc09c2c783443d04cf21e")));
-                Assert.True(file.HasObject(ObjectId.FromString("20a8ade77639491ea0bd667bf95de8abf3a434c8")));
-                Assert.True(file.HasObject(ObjectId.FromString("2675188fd86978d5bc4d7211698b2118ae3bf658")));
+                PackFile file = new PackFile(idxFile, tmpPackFile);
+
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("02ba32d3649e510002c21651936b7077aa75ffa9")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("0966a434eb1a025db6b71485ab63a3bfbea520b6")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("09efc7e59a839528ac7bda9fa020dc9101278680")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("0a3d7772488b6b106fb62813c4d6d627918d9181")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("1004d0d7ac26fbf63050a234c9b88a46075719d3")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("10da5895682013006950e7da534b705252b03be6")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("1203b03dc816ccbb67773f28b3c19318654b0bc8")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("15fae9e651043de0fd1deef588aa3fbf5a7a41c6")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("16f9ec009e5568c435f473ba3a1df732d49ce8c3")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("1fd7d579fb6ae3fe942dc09c2c783443d04cf21e")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("20a8ade77639491ea0bd667bf95de8abf3a434c8")));
+                Assert.IsTrue(file.HasObject(ObjectId.FromString("2675188fd86978d5bc4d7211698b2118ae3bf658")));
                 // and lots more...
             }
             finally

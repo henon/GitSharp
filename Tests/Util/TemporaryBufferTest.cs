@@ -64,7 +64,7 @@ namespace GitSharp.Tests.Util
                 b.close();
                 Assert.AreEqual(0, b.Length);
                 byte[] r = b.ToArray();
-                Assert.NotNull(r);
+                Assert.IsNotNull(r);
                 Assert.AreEqual(0, r.Length);
             }
             finally
@@ -85,7 +85,7 @@ namespace GitSharp.Tests.Util
                 Assert.AreEqual(1, b.Length);
                 {
                     byte[] r = b.ToArray();
-                    Assert.NotNull(r);
+                    Assert.IsNotNull(r);
                     Assert.AreEqual(1, r.Length);
                     Assert.AreEqual(test, r[0]);
                 }
@@ -120,7 +120,7 @@ namespace GitSharp.Tests.Util
                 Assert.AreEqual(test.Length, b.Length);
                 {
                     byte[] r = b.ToArray();
-                    Assert.NotNull(r);
+                    Assert.IsNotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -154,7 +154,7 @@ namespace GitSharp.Tests.Util
                 Assert.AreEqual(test.Length, b.Length);
                 {
                     byte[] r = b.ToArray();
-                    Assert.NotNull(r);
+                    Assert.IsNotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -187,7 +187,7 @@ namespace GitSharp.Tests.Util
                 Assert.AreEqual(test.Length, b.Length);
                 {
                     byte[] r = b.ToArray();
-                    Assert.NotNull(r);
+                    Assert.IsNotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -223,7 +223,7 @@ namespace GitSharp.Tests.Util
                 Assert.AreEqual(test.Length, b.Length);
                 {
                     byte[] r = b.ToArray();
-                    Assert.NotNull(r);
+                    Assert.IsNotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -254,7 +254,7 @@ namespace GitSharp.Tests.Util
                 Assert.AreEqual(test.Length, b.Length);
                 {
                     byte[] r = b.ToArray();
-                    Assert.NotNull(r);
+                    Assert.IsNotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -287,7 +287,7 @@ namespace GitSharp.Tests.Util
                 Assert.AreEqual(test.Length, b.Length);
                 {
                     byte[] r = b.ToArray();
-                    Assert.NotNull(r);
+                    Assert.IsNotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -320,7 +320,7 @@ namespace GitSharp.Tests.Util
                 Assert.AreEqual(test.Length, b.Length);
                 {
                     byte[] r = b.ToArray();
-                    Assert.NotNull(r);
+                    Assert.IsNotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -356,7 +356,7 @@ namespace GitSharp.Tests.Util
                 Assert.AreEqual(test.Length, b.Length);
                 {
                     byte[] r = b.ToArray();
-                    Assert.NotNull(r);
+                    Assert.IsNotNull(r);
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -425,7 +425,7 @@ namespace GitSharp.Tests.Util
                 Assert.AreEqual(expect.Length, b.Length);
                 {
                     byte[] r = b.ToArray();
-                    Assert.NotNull(r);
+                    Assert.IsNotNull(r);
                     Assert.AreEqual(expect.Length, r.Length);
                     Assert.IsTrue(expect.SequenceEqual(r));
                 }

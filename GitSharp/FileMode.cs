@@ -46,7 +46,7 @@ using System.IO;
 
 namespace GitSharp
 {
-    [Complete]
+
     public class FileMode
     {
 
@@ -144,7 +144,15 @@ namespace GitSharp
 
         public void CopyTo(Stream stream)
         {
-			new BinaryWriter(stream).Write(_octalBytes);            
-        }		
+            new BinaryWriter(stream).Write(_octalBytes);
+        }
+
+        /**
+         * @return the number of bytes written by {@link #copyTo(OutputStream)}.
+         */
+        public int copyToLength()
+        {
+            return _octalBytes.Length;
+        }
     }
 }

@@ -1,0 +1,20 @@
+From 1beb3ec1fe68ff18b0287396096442e12c34787a Mon Sep 17 00:00:00 2001
+From: Shawn O. Pearce <sop@google.com>
+Date: Fri, 12 Dec 2008 12:29:45 -0800
+Subject: [PATCH] make c and add lf
+
+---
+ a |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/a b/a
+index 2e65efe..f2ad6c7 100644
+--- a/a
++++ b/a
+@@ -1 +1 @@
+-a
+\ No newline at end of file
++c
+-- 
+1.6.1.rc2.306.ge5d5e
+

@@ -136,6 +136,7 @@
     <Compile Include="Util\AtomicReferenceArray.cs" />
     <Compile Include="Util\AtomicValue.cs" />
     <Compile Include="Util\FS.cs" />
+    <Compile Include="Util\GenericComparer.cs" />
     <Compile Include="Util\Inspect.cs" />
     <Compile Include="Util\Int32.cs" />
     <Compile Include="Util\ISystemReader.cs" />

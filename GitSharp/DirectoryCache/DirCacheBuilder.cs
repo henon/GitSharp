@@ -42,6 +42,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GitSharp.TreeWalk;
+using GitSharp.Util;
 
 namespace GitSharp.DirectoryCache
 {
@@ -228,7 +229,7 @@ namespace GitSharp.DirectoryCache
 
         private void resort()
         {
-            Array.Sort(entries, DirCache.ENT_CMP);
+            Array.Sort(entries, 0, entryCnt, new GenericComparer<DirCacheEntry>(DirCache.ENT_CMP));
 
             for (int entryIdx = 1; entryIdx < entryCnt; entryIdx++)
             {

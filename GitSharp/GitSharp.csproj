@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -71,6 +71,12 @@
     <Compile Include="Exceptions\PackMismatchException.cs" />
     <Compile Include="Exceptions\RevisionSyntaxException.cs" />
     <Compile Include="Exceptions\SymlinksNotSupportedException.cs" />
+    <Compile Include="Merge\Merger.cs" />
+    <Compile Include="Merge\MergeStrategy.cs" />
+    <Compile Include="Merge\StrategyOneSided.cs" />
+    <Compile Include="Merge\StrategySimpleTwoWayInCore.cs" />
+    <Compile Include="Merge\ThreeWayMerger.cs" />
+    <Compile Include="Merge\ThreeWayMergeStrategy.cs" />
     <Compile Include="ObjectDatabase.cs" />
     <Compile Include="ObjectDirectory.cs" />
     <Compile Include="UnpackedObjectCache.cs" />

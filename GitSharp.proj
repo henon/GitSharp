@@ -16,7 +16,7 @@
   	<ItemGroup>
   		<TestAssemblies Include="$(MSBuildProjectDirectory)\Tests\bin\Debug\GitSharp.Tests.dll"/>
   	</ItemGroup>
-    <Gallio IgnoreFailures="true" PluginDirectories="$(MSBuildProjectDirectory)\extern" Files="@(TestAssemblies)">
+    <Gallio IgnoreFailures="true" PluginDirectories="$(MSBuildProjectDirectory)\extern" Assemblies="@(TestAssemblies)">
       <Output TaskParameter="ExitCode" PropertyName="ExitCode"/>
     </Gallio>
     <Error Text="Tests execution failed" Condition="'$(ExitCode)' != 0" />

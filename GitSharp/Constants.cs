@@ -512,7 +512,7 @@ namespace GitSharp
 
 
         /**
-         * Convert a string to a byte array in the standard character encoding.
+         * Convert a string to a byte array in UTF-8 character encoding.
          *
          * @param str
          *            the string to convert. May contain any Unicode characters.
@@ -522,17 +522,7 @@ namespace GitSharp
          */
         public static byte[] encode(string str)
         {
-            byte[] origin_bytes = new byte[str.Length];
-
-            for (int i = 0; i < str.Length; i++)
-            {
-                origin_bytes[i] = (byte)str.ToCharArray()[i];
-			}
-
-            // Note that the two following lines are unnecessary, and we could
-            // have just returned origin_bytes.
-            string decoded = Encoding.GetString(origin_bytes);
-            return Encoding.GetBytes(decoded);
+            return CHARSET.GetBytes(str);
         }
 
 

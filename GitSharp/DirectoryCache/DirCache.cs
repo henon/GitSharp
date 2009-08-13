@@ -153,7 +153,7 @@ namespace GitSharp.DirectoryCache
          */
         public static DirCache read(Repository db)
         {
-            return read(new FileInfo(db.Directory + "index"));
+            return read(new FileInfo(db.Directory + "/index"));
         }
 
         /**
@@ -213,7 +213,7 @@ namespace GitSharp.DirectoryCache
          */
         public static DirCache Lock(Repository db)
         {
-            return Lock(new FileInfo(db.Directory + "index"));
+            return Lock(new FileInfo(db.Directory + "/index"));
         }
 
         /** Location of the current version of the index file. */

@@ -438,9 +438,8 @@ namespace GitSharp.Transport
 
                 packOut = new BufferedStream(new SideBandOutputStream(SideBandOutputStream.CH_DATA, pckOut), bufsz);
 
-                // [caytchen] TODO: SideBandProgressMonitor
-                /*if (progress)
-                    pm = new SideBandProgressMonitor(pckOut);*/
+                if (progress)
+                    pm = new SideBandProgressMonitor(pckOut);
             }
 
             PackWriter pw;

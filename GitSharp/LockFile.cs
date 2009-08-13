@@ -271,9 +271,111 @@ namespace GitSharp
                 this.CommitLastModified = lockFile.LastWriteTime;
         }
 
+        /**
+         * Obtain the direct output stream for this lock.
+         * <p>
+         * The stream may only be accessed once, and only after {@link #lock()} has
+         * been successfully invoked and returned true. Callers must close the
+         * stream prior to calling {@link #commit()} to commit the change.
+         * 
+         * @return a stream to write to the new file. The stream is unbuffered.
+         */
         public Stream GetOutputStream()
         {
-            throw new NotSupportedException();
+            RequireLock();
+            return new LockFileOutputStream(this);
+        }
+
+        public class LockFileOutputStream : Stream
+        {
+            private LockFile m_lock_file;
+            public LockFileOutputStream(LockFile lockfile)
+            {
+                m_lock_file = lockfile;
+            }
+
+            public override void Write(byte[] b, int o, int n)
+            {
+                m_lock_file.os.Write(b, o, n);
+            }
+
+            public void write(byte[] b)
+            {
+                m_lock_file.os.Write(b, 0, b.Length);
+            }
+
+            public void write(int b)
+            {
+                m_lock_file.os.WriteByte((byte)b);
+            }
+
+            public override void Flush()
+            {
+                m_lock_file.os.Flush();
+            }
+
+            public override void Close()
+            {
+                try
+                {
+                    m_lock_file.os.Flush();
+                    m_lock_file.fLck.Release();
+                    m_lock_file.os.Close();
+                    m_lock_file.os = null;
+                }
+                catch (Exception ioe)
+                {
+                    m_lock_file.Unlock();
+                    throw ioe;
+                }
+            }
+
+            public override bool CanRead
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public override bool CanSeek
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public override bool CanWrite
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public override long Length
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public override long Position
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+                set
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void SetLength(long value)
+            {
+                throw new NotImplementedException();
+            }
         }
 
 
@@ -302,7 +404,7 @@ namespace GitSharp
                 }
                 catch (IOException e)
                 {
-                    Debug.WriteLine("Could not lock "+file.FullName);
+                    Debug.WriteLine("Could not lock " + file.FullName);
                     Debug.WriteLine(e.Message);
                     return null;
                 }
@@ -329,7 +431,7 @@ namespace GitSharp
                 catch (IOException)
                 {
                     // unlocking went wrong
-                    Debug.WriteLine(GetType().Name + ": tried to unlock an unlocked filelock "+File);
+                    Debug.WriteLine(GetType().Name + ": tried to unlock an unlocked filelock " + File);
                     throw;
                 }
                 this.Locked = false;

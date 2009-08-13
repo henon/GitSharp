@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -102,8 +102,8 @@ namespace GitSharp.Tests.Transport
 
                 IndexPack pack = new IndexPack(db, @is, tmppack);
                 pack.index(new TextProgressMonitor());
-                PackFile file = new PackFile(idxFile, tmpPackFile); 
-                
+                PackFile file = new PackFile(idxFile, tmpPackFile);
+
                 Assert.IsTrue(file.HasObject(ObjectId.FromString("02ba32d3649e510002c21651936b7077aa75ffa9")));
                 Assert.IsTrue(file.HasObject(ObjectId.FromString("0966a434eb1a025db6b71485ab63a3bfbea520b6")));
                 Assert.IsTrue(file.HasObject(ObjectId.FromString("09efc7e59a839528ac7bda9fa020dc9101278680")));

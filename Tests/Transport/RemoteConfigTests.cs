@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -217,7 +217,7 @@ namespace GitSharp.Tests.Transport
             Assert.IsTrue(spec.Wildcard);
             Assert.AreEqual("refs/heads/*", spec.Source);
             Assert.AreEqual("refs/remotes/example/*", spec.Destination);
-            
+
             Assert.AreEqual(0, rc.Push.Count);
 
             Assert.AreEqual("/path/to/git/git-upload-pack", rc.UploadPack);

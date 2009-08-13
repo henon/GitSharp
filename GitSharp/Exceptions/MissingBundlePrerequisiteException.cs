@@ -1,5 +1,4 @@
-﻿/*
- * Copyright (C) 2008, Google Inc.
+﻿/* Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
  *
@@ -34,6 +33,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 
 using System.Collections.Generic;
 using System.Text;

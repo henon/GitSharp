@@ -52,21 +52,21 @@ namespace GitSharp.Merge
     public abstract class MergeStrategy
     {
         /** Simple strategy that sets the output tree to the first input tree. */
-	    public static readonly MergeStrategy OURS = new StrategyOneSided("ours", 0);
+	    public static readonly MergeStrategy Ours = new StrategyOneSided("ours", 0);
 
 	    /** Simple strategy that sets the output tree to the second input tree. */
-	    public static readonly MergeStrategy THEIRS = new StrategyOneSided("theirs", 1);
+	    public static readonly MergeStrategy Theirs = new StrategyOneSided("theirs", 1);
 
 	    /** Simple strategy to merge paths, without simultaneous edits. */
-	    public static readonly ThreeWayMergeStrategy SIMPLE_TWO_WAY_IN_CORE = new StrategySimpleTwoWayInCore();
+	    public static readonly ThreeWayMergeStrategy SimpleTwoWayInCore = new StrategySimpleTwoWayInCore();
 
-        private static readonly Dictionary<String, MergeStrategy> STRATEGIES = new Dictionary<String, MergeStrategy>();
+        private static readonly Dictionary<String, MergeStrategy> Strategies = new Dictionary<String, MergeStrategy>();
 
 	    static MergeStrategy()
         {
-		    register(OURS);
-		    register(THEIRS);
-		    register(SIMPLE_TWO_WAY_IN_CORE);
+		    Register(Ours);
+		    Register(Theirs);
+		    Register(SimpleTwoWayInCore);
 	    }
 
 	    /**
@@ -77,8 +77,9 @@ namespace GitSharp.Merge
 	     * @throws IllegalArgumentException
 	     *             a strategy by the same name has already been registered.
 	     */
-	    public static void register(MergeStrategy imp) {
-		    register(imp.getName(), imp);
+	    public static void Register(MergeStrategy imp) 
+        {
+		    Register(imp.GetName(), imp);
 	    }
 
 	    /**
@@ -92,12 +93,12 @@ namespace GitSharp.Merge
 	     *             a strategy by the same name has already been registered.
 	     */
         [MethodImpl(MethodImplOptions.Synchronized)]
-	    public static void register(String name, MergeStrategy imp) 
+	    public static void Register(String name, MergeStrategy imp) 
         {
-		    if (STRATEGIES.ContainsKey(name))
-			    throw new ArgumentException("Merge strategy \"" + name
-					    + "\" already exists as a default strategy");
-		    STRATEGIES.Add(name, imp);
+		    if (Strategies.ContainsKey(name))
+			    throw new ArgumentException("Merge strategy \"" + name + "\" already exists as a default strategy");
+
+		    Strategies.Add(name, imp);
 	    }
 
 	    /**
@@ -108,9 +109,9 @@ namespace GitSharp.Merge
 	     * @return the strategy instance; null if no strategy matches the name.
 	     */
         [MethodImpl(MethodImplOptions.Synchronized)]
-	    public static MergeStrategy get(String name) 
+	    public static MergeStrategy Get(String name) 
         {
-		    return STRATEGIES[name];
+		    return Strategies[name];
 	    }
 
 	    /**
@@ -121,15 +122,13 @@ namespace GitSharp.Merge
 	     *         necessary to obtain a reasonable ordering.
 	     */
         [MethodImpl(MethodImplOptions.Synchronized)]
-	    public static MergeStrategy[] get() 
+	    public static MergeStrategy[] Get() 
         {
-		    MergeStrategy[] r = new MergeStrategy[STRATEGIES.Count];
-		    r = STRATEGIES.Values.ToArray();
-		    return r;
+            return Strategies.Values.ToArray();
 	    }
 
 	    /** @return default name of this strategy implementation. */
-	    public abstract String getName();
+	    public abstract String GetName();
 
 	    /**
 	     * Create a new merge instance.
@@ -139,6 +138,6 @@ namespace GitSharp.Merge
 	     *            write results back to.
 	     * @return the new merge instance which implements this strategy.
 	     */
-	    public abstract Merger newMerger(Repository db);
+	    public abstract Merger NewMerger(Repository db);
     }
 }

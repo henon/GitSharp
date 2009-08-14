@@ -50,21 +50,21 @@ namespace GitSharp.Merge
     public abstract class Merger
     {
         /** The repository this merger operates on. */
-	    protected readonly Repository db;
+	    protected readonly Repository Db;
 
 	    /** A RevWalk for computing merge bases, or listing incoming commits. */
-        protected readonly RevWalk.RevWalk walk;
+        protected readonly RevWalk.RevWalk Walk;
 
-	    private ObjectWriter writer;
+	    private ObjectWriter _writer;
 
 	    /** The original objects supplied in the merge; this can be any tree-ish. */
-	    protected RevObject[] sourceObjects;
+	    protected RevObject[] SourceObjects;
 
 	    /** If {@link #sourceObjects}[i] is a commit, this is the commit. */
-	    protected RevCommit[] sourceCommits;
+	    protected RevCommit[] SourceCommits;
 
 	    /** The trees matching every entry in {@link #sourceObjects}. */
-	    protected RevTree[] sourceTrees;
+	    protected RevTree[] SourceTrees;
 
         /**
 	     * Create a new merge instance for a repository.
@@ -74,26 +74,26 @@ namespace GitSharp.Merge
 	     */
 	    protected Merger(Repository local) 
         {
-		    db = local;
-            walk = new RevWalk.RevWalk(db);
+		    Db = local;
+            Walk = new RevWalk.RevWalk(Db);
 	    }
 
         /**
 	     * @return the repository this merger operates on.
 	     */
-	    public Repository getRepository() 
+	    public Repository GetRepository() 
         {
-		    return db;
+		    return Db;
 	    }
 
 	    /**
 	     * @return an object writer to create objects in {@link #getRepository()}.
 	     */
-	    public ObjectWriter getObjectWriter() 
+	    public ObjectWriter GetObjectWriter() 
         {
-		    if (writer == null)
-			    writer = new ObjectWriter(getRepository());
-		    return writer;
+		    if (_writer == null)
+			    _writer = new ObjectWriter(GetRepository());
+		    return _writer;
 	    }
 
 	    /**
@@ -115,30 +115,30 @@ namespace GitSharp.Merge
 	     *             one or more sources could not be read, or outputs could not
 	     *             be written to the Repository.
 	     */
-	    public virtual bool merge(AnyObjectId[] tips)
+	    public virtual bool Merge(AnyObjectId[] tips)
         {
-		    sourceObjects = new RevObject[tips.Length];
+		    SourceObjects = new RevObject[tips.Length];
 		    for (int i = 0; i < tips.Length; i++)
-			    sourceObjects[i] = walk.parseAny(tips[i]);
+			    SourceObjects[i] = Walk.parseAny(tips[i]);
 
-		    sourceCommits = new RevCommit[sourceObjects.Length];
-		    for (int i = 0; i < sourceObjects.Length; i++) 
+		    SourceCommits = new RevCommit[SourceObjects.Length];
+		    for (int i = 0; i < SourceObjects.Length; i++) 
             {
 			    try 
                 {
-				    sourceCommits[i] = walk.parseCommit(sourceObjects[i]);
+				    SourceCommits[i] = Walk.parseCommit(SourceObjects[i]);
 			    } 
-                catch (IncorrectObjectTypeException err) 
+                catch (IncorrectObjectTypeException) 
                 {
-				    sourceCommits[i] = null;
+				    SourceCommits[i] = null;
 			    }
 		    }
 
-		    sourceTrees = new RevTree[sourceObjects.Length];
-		    for (int i = 0; i < sourceObjects.Length; i++)
-			    sourceTrees[i] = walk.parseTree(sourceObjects[i]);
+		    SourceTrees = new RevTree[SourceObjects.Length];
+		    for (int i = 0; i < SourceObjects.Length; i++)
+			    SourceTrees[i] = Walk.parseTree(SourceObjects[i]);
 
-		    return mergeImpl();
+		    return MergeImpl();
 	    }
 
 	    /**
@@ -154,30 +154,30 @@ namespace GitSharp.Merge
 	     * @throws IOException
 	     *             objects are missing or multiple merge bases were found.
 	     */
-	    protected AbstractTreeIterator mergeBase(int aIdx, int bIdx)
+	    protected AbstractTreeIterator MergeBase(int aIdx, int bIdx)
         {
-		    if (sourceCommits[aIdx] == null)
-			    throw new IncorrectObjectTypeException(sourceObjects[aIdx],
+		    if (SourceCommits[aIdx] == null)
+			    throw new IncorrectObjectTypeException(SourceObjects[aIdx],
 					    Constants.TYPE_COMMIT);
-		    if (sourceCommits[bIdx] == null)
-			    throw new IncorrectObjectTypeException(sourceObjects[bIdx],
+		    if (SourceCommits[bIdx] == null)
+			    throw new IncorrectObjectTypeException(SourceObjects[bIdx],
 					    Constants.TYPE_COMMIT);
 
-		    walk.reset();
-		    walk.setRevFilter(RevFilter.MERGE_BASE);
-		    walk.markStart(sourceCommits[aIdx]);
-		    walk.markStart(sourceCommits[bIdx]);
-		    RevCommit base1 = walk.next();
+		    Walk.reset();
+		    Walk.setRevFilter(RevFilter.MERGE_BASE);
+		    Walk.markStart(SourceCommits[aIdx]);
+		    Walk.markStart(SourceCommits[bIdx]);
+		    RevCommit base1 = Walk.next();
 		    if (base1 == null)
 			    return new EmptyTreeIterator();
-		    RevCommit base2 = walk.next();
+		    RevCommit base2 = Walk.next();
 		    if (base2 != null) {
 			    throw new IOException("Multiple merge bases for:" + "\n  "
-					    + sourceCommits[aIdx].Name + "\n  "
-					    + sourceCommits[bIdx].Name + "found:" + "\n  "
+					    + SourceCommits[aIdx].Name + "\n  "
+					    + SourceCommits[bIdx].Name + "found:" + "\n  "
 					    + base1.Name + "\n  " + base2.Name);
 		    }
-		    return openTree(base1.getTree());
+		    return OpenTree(base1.getTree());
 	    }
 
 	    /**
@@ -191,12 +191,12 @@ namespace GitSharp.Merge
 	     * @throws IOException
 	     *             the tree object is not found or cannot be read.
 	     */
-	    protected AbstractTreeIterator openTree(AnyObjectId treeId)
+	    protected AbstractTreeIterator OpenTree(AnyObjectId treeId)
         {
 		    WindowCursor curs = new WindowCursor();
 		    try 
             {
-			    return new CanonicalTreeParser(null, db, treeId, curs);
+			    return new CanonicalTreeParser(null, Db, treeId, curs);
 		    } 
             finally 
             {
@@ -221,11 +221,11 @@ namespace GitSharp.Merge
 	     *             one or more sources could not be read, or outputs could not
 	     *             be written to the Repository.
 	     */
-	    protected abstract bool mergeImpl();
+	    protected abstract bool MergeImpl();
 
 	    /**
 	     * @return resulting tree, if {@link #merge(AnyObjectId[])} returned true.
 	     */
-	    public abstract ObjectId getResultTreeId();
+	    public abstract ObjectId GetResultTreeId();
     }
 }

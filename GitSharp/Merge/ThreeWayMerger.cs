@@ -44,7 +44,7 @@ namespace GitSharp.Merge
     /** A merge of 2 trees, using a common base ancestor tree. */
     public abstract class ThreeWayMerger : Merger
     {
-        private RevTree baseTree;
+        private RevTree _baseTree;
 
 	    /**
 	     * Create a new merge instance for a repository.
@@ -70,15 +70,15 @@ namespace GitSharp.Merge
 	     * @throws IOException
 	     *             the object could not be read.
 	     */
-	    public void setBase(AnyObjectId id)
+	    public void SetBase(AnyObjectId id)
         {
 		    if (id != null) 
             {
-			    baseTree = walk.parseTree(id);
+			    _baseTree = Walk.parseTree(id);
 		    } 
             else 
             {
-			    baseTree = null;
+			    _baseTree = null;
 		    }
 	    }
 
@@ -102,16 +102,14 @@ namespace GitSharp.Merge
 	     *             one or more sources could not be read, or outputs could not
 	     *             be written to the Repository.
 	     */
-	    public bool merge(AnyObjectId a, AnyObjectId b)
+	    public bool Merge(AnyObjectId a, AnyObjectId b)
         {
-		    return merge(new AnyObjectId[] { a, b });
+		    return Merge(new[] { a, b });
 	    }
 
-	    public override bool merge(AnyObjectId[] tips)
+	    public override bool Merge(AnyObjectId[] tips)
         {
-		    if (tips.Length != 2)
-			    return false;
-		    return base.merge(tips);
+            return tips.Length != 2 ? false : base.Merge(tips);
 	    }
 
 	    /**
@@ -121,11 +119,9 @@ namespace GitSharp.Merge
 	     *         merge base of the two input commits.
 	     * @throws IOException
 	     */
-	    protected AbstractTreeIterator mergeBase()
-        {
-		    if (baseTree != null)
-			    return openTree(baseTree);
-		    return mergeBase(0, 1);
+	    protected AbstractTreeIterator MergeBase()
+	    {
+	        return _baseTree != null ? OpenTree(_baseTree) : MergeBase(0, 1);
 	    }
     }
 }

@@ -42,7 +42,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Patch
 {
     [TestFixture]
     public class PatchErrorTest

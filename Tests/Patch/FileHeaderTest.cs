@@ -36,16 +36,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Diff;
 using GitSharp.Patch;
 using NUnit.Framework;
-using System.IO;
-using System.Reflection;
 
 namespace GitSharp.Tests.Patch
 {
     [TestFixture]
-    public class FileHeaderTest
+    public class FileHeaderTest : BasePatchTest
     {
         [Test]
 	    public void testParseGitFileName_Empty()

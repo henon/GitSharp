@@ -35,14 +35,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.IO;
 using GitSharp.Patch;
 using NUnit.Framework;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Patch
 {
 	[TestFixture]
-	public class PatchTest
+	public class PatchTest : BasePatchTest
 	{
 		[Test]
 		public void testEmpty()
@@ -55,7 +54,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testParse_ConfigCaseInsensitive()
 		{
-			GitSharp.Patch.Patch p = parseTestPatchFile("testParse_ConfigCaseInsensitive");
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_ConfigCaseInsensitive.patch");
 			Assert.AreEqual(2, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().Count == 0);
 
@@ -152,7 +151,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testParse_NoBinary()
 		{
-			GitSharp.Patch.Patch p = parseTestPatchFile("testParse_NoBinary");
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_NoBinary.patch");
 			Assert.AreEqual(5, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().Count == 0);
 
@@ -192,7 +191,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testParse_GitBinaryLiteral()
 		{
-			GitSharp.Patch.Patch p = parseTestPatchFile("testParse_GitBinaryLiteral");
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_GitBinaryLiteral.patch");
 			int[] binsizes = { 359, 393, 372, 404 };
 			Assert.AreEqual(5, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().Count == 0);
@@ -242,7 +241,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testParse_GitBinaryDelta()
 		{
-			GitSharp.Patch.Patch p = parseTestPatchFile("testParse_GitBinaryDelta");
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_GitBinaryDelta.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().Count == 0);
 
@@ -281,7 +280,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testParse_FixNoNewline()
 		{
-			GitSharp.Patch.Patch p = parseTestPatchFile("testParse_FixNoNewline");
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_FixNoNewline.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().Count == 0);
 
@@ -317,9 +316,9 @@ namespace GitSharp.Tests
 		[Test]
 		public void testParse_AddNoNewline()
 		{
-			GitSharp.Patch.Patch p = parseTestPatchFile("testParse_AddNoNewline");
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_AddNoNewline.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
-			Assert.IsTrue(p.getErrors().Count == 0);
+			Assert.IsTrue(p.getErrors().Count == 0, GetAllErrorsFromPatch(p));
 
 			FileHeader f = p.getFiles()[0];
 
@@ -347,33 +346,6 @@ namespace GitSharp.Tests
 				Assert.AreEqual(f.getOldId(), h.getOldImage().getId());
 
 				Assert.AreEqual(367, h.endOffset);
-			}
-		}
-
-		private GitSharp.Patch.Patch parseTestPatchFile(string patchFileName)
-		{
-			string patchFile = string.Format("GitSharp.Tests.Patch.{0}.patch", patchFileName);
-
-			Stream @in = GetType().Assembly.GetManifestResourceStream(patchFile);
-
-			if (@in == null)
-			{
-				Assert.Fail("No " + patchFile + " test vector");
-				return null; // Never happens
-			}
-
-			using (@in)
-			{
-				try
-				{
-					GitSharp.Patch.Patch p = new GitSharp.Patch.Patch();
-					p.parse(@in);
-					return p;
-				}
-				finally
-				{
-					@in.Close();
-				}
 			}
 		}
 	}

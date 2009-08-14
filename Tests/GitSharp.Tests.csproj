@@ -67,6 +67,7 @@
     <Compile Include="Merge\SimpleMergeTest.cs" />
     <Compile Include="PackReverseIndexTest.cs" />
     <Compile Include="PackWriterTest.cs" />
+    <Compile Include="Patch\BasePatchTest.cs" />
     <Compile Include="Patch\FileHeaderTest.cs" />
     <Compile Include="Patch\GetTextTest.cs" />
     <Compile Include="Patch\PatchCcErrorTest.cs" />
@@ -262,27 +263,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Patch\testEditList_Types.patch" />
-    <EmbeddedResource Include="Patch\testError_BodyTooLong.patch" />
-    <EmbeddedResource Include="Patch\testError_CcTruncatedOld.patch" />
-    <EmbeddedResource Include="Patch\testError_DisconnectedHunk.patch" />
-    <EmbeddedResource Include="Patch\testError_GarbageBetweenFiles.patch" />
-    <EmbeddedResource Include="Patch\testError_GitBinaryNoForwardHunk.patch" />
-    <EmbeddedResource Include="Patch\testError_TruncatedNew.patch" />
-    <EmbeddedResource Include="Patch\testError_TruncatedOld.patch" />
-    <EmbeddedResource Include="Patch\testGetText_BothISO88591.patch" />
-    <EmbeddedResource Include="Patch\testGetText_Convert.patch" />
-    <EmbeddedResource Include="Patch\testGetText_DiffCc.patch" />
-    <EmbeddedResource Include="Patch\testGetText_NoBinary.patch" />
-    <EmbeddedResource Include="Patch\testParse_AddNoNewline.patch" />
-    <EmbeddedResource Include="Patch\testParse_CcDeleteFile.patch" />
-    <EmbeddedResource Include="Patch\testParse_CcNewFile.patch" />
-    <EmbeddedResource Include="Patch\testParse_ConfigCaseInsensitive.patch" />
-    <EmbeddedResource Include="Patch\testParse_FixNoNewline.patch" />
-    <EmbeddedResource Include="Patch\testParse_GitBinaryDelta.patch" />
-    <EmbeddedResource Include="Patch\testParse_GitBinaryLiteral.patch" />
-    <EmbeddedResource Include="Patch\testParse_NoBinary.patch" />
-    <EmbeddedResource Include="Patch\testParse_OneFileCc.patch" />
     <None Include="Resources\create-second-pack">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

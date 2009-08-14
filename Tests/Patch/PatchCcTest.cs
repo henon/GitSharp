@@ -42,10 +42,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Patch
 {
     [TestFixture]
-    public class PatchCcTest
+    public class PatchCcTest : BasePatchTest
     {
 #if false
 	public void testParse_OneFileCc() throws IOException {

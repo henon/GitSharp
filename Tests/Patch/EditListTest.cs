@@ -39,16 +39,12 @@
 using GitSharp.Diff;
 using GitSharp.Patch;
 using NUnit.Framework;
-using System.IO;
-using System.Reflection;
 
 namespace GitSharp.Tests.Patch
 {
     [TestFixture]
-    public class EditListTest
+    public class EditListTest : BasePatchTest
     {
-        private readonly string PATCHS_DIR = "../../../Tests/Patch/Resources/";
-
         [Test]
 	    public void testHunkHeader()
         {
@@ -85,26 +81,6 @@ namespace GitSharp.Tests.Patch
             Assert.AreEqual(new Edit(3 - 1, 3 - 1, 3 - 1, 4 - 1), e.get(0));
             Assert.AreEqual(new Edit(17 - 1, 19 - 1, 18 - 1, 18 - 1), e.get(1));
             Assert.AreEqual(new Edit(23 - 1, 25 - 1, 22 - 1, 28 - 1), e.get(2));
-	    }
-
-	    private GitSharp.Patch.Patch parseTestPatchFile(string patchFile)
-        {
-            Stream inStream = new FileStream(patchFile,System.IO.FileMode.Open);
-		    if (inStream == null)
-            {
-			    Assert.Fail("No " + patchFile + " test vector");
-			    return null; // Never happens
-		    }
-		    try
-            {
-                GitSharp.Patch.Patch p = new GitSharp.Patch.Patch();
-			    p.parse(inStream);
-			    return p;
-		    }
-            finally
-            {
-			    inStream.Close();
-		    }
 	    }
     }
 }

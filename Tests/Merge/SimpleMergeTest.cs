@@ -371,13 +371,11 @@ namespace GitSharp.Tests.Merge
 		    Assert.IsFalse(merge);
 	    }
 
-        [Test]
         private void AssertCorrectId(DirCache treeT, GitSharp.TreeWalk.TreeWalk tw) 
         {
 		    Assert.AreEqual(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
 	    }
 
-        [Test]
 	    private ObjectId Commit(ObjectWriter ow, DirCache treeB, ObjectId[] parentIds)
         {
 		    Commit c = new Commit(db);
@@ -389,13 +387,11 @@ namespace GitSharp.Tests.Merge
 		    return ow.WriteCommit(c);
 	    }
         
-        [Test]
 	    private DirCacheEntry MakeEntry(String path, FileMode mode)
         {
 		    return MakeEntry(path, mode, path);
 	    }
 
-        [Test]
 	    private DirCacheEntry MakeEntry(String path, FileMode mode, String content)
         {
 		    DirCacheEntry ent = new DirCacheEntry(path);

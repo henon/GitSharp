@@ -49,9 +49,9 @@ namespace GitSharp.Merge
      */
     public class StrategyOneSided : MergeStrategy
     {
-        private readonly String strategyName;
+        private readonly String _strategyName;
 
-	    private readonly int treeIndex;
+	    private readonly int _treeIndex;
 
 	    /**
 	     * Create a new merge strategy to select a specific input tree.
@@ -61,36 +61,38 @@ namespace GitSharp.Merge
 	     * @param index
 	     *            the position of the input tree to accept as the result.
 	     */
-	    public StrategyOneSided(String name, int index) {
-		    strategyName = name;
-		    treeIndex = index;
+	    public StrategyOneSided(String name, int index) 
+        {
+		    _strategyName = name;
+		    _treeIndex = index;
 	    }
 
-	    public override String getName() {
-		    return strategyName;
+	    public override String GetName() {
+		    return _strategyName;
 	    }
 
-	    public override Merger newMerger(Repository db) {
-		    return new OneSide(db, treeIndex);
+	    public override Merger NewMerger(Repository db) 
+        {
+		    return new OneSide(db, _treeIndex);
 	    }
 
 	    public class OneSide : Merger 
         {
-		    private readonly int treeIndex;
+		    private readonly int _treeIndex;
 
 		    public OneSide(Repository local, int index) : base(local)
             {
-			    treeIndex = index;
+			    _treeIndex = index;
 		    }
 
-		    protected override bool mergeImpl()
+		    protected override bool MergeImpl()
             {
-			    return treeIndex < sourceTrees.Length;
+			    return _treeIndex < SourceTrees.Length;
 		    }
 
-		    public override ObjectId getResultTreeId()
+		    public override ObjectId GetResultTreeId()
             {
-			    return sourceTrees[treeIndex];
+			    return SourceTrees[_treeIndex];
 		    }
 	    }
     }

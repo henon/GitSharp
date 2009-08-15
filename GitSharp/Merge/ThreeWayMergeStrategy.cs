@@ -41,6 +41,6 @@ namespace GitSharp.Merge
     /** A merge strategy to merge 2 trees, using a common base ancestor tree. */
     public abstract class ThreeWayMergeStrategy : MergeStrategy
     {
-        public override abstract Merger newMerger(Repository db);
+        public override abstract Merger NewMerger(Repository db);
     }
 }

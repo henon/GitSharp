@@ -181,16 +181,7 @@ namespace GitSharp
          */
         public bool HasObject(AnyObjectId objectId)
         {
-            //int k = this._packs.Count;
-            //if (k > 0)
-            //{
-            //    do
-            //    {
-            //        if (this._packs[--k].HasObject(objectId))
-            //            return true;
-            //    } while (k > 0);
-            //}
-            return ToFile(objectId).Exists;
+            return objectDatabase.hasObject(objectId);
         }
 
 

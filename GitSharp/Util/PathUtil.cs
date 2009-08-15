@@ -86,16 +86,11 @@ namespace GitSharp.Util
         /// <param name="path"></param>
         public static void DeleteFile(string path)
         {
-            //Check the file actually exists
-            if (File.Exists(path))
-            {
-                //If its readonly set it back to normal
-                //Need to "AND" it as it can also be archive, hidden etc 
-                if ((File.GetAttributes(path) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
-                    File.SetAttributes(path, FileAttributes.Normal);
-                //Delete the file
-                File.Delete(path);
-            }
+            var file = new FileInfo(path);
+            if (!file.Exists) return;
+
+            file.IsReadOnly = false;
+            file.Delete();
         }
     }
 }

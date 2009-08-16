@@ -39,6 +39,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using GitSharp.Exceptions;
 using GitSharp.Util;
 
 namespace GitSharp.Transport
@@ -258,8 +260,8 @@ namespace GitSharp.Transport
             set;
         }
 
-        private List<RefSpec> fetch = new List<RefSpec>();
-        private List<RefSpec> push = new List<RefSpec>();
+        private List<RefSpec> fetchSpecs = new List<RefSpec>();
+        private List<RefSpec> pushSpecs = new List<RefSpec>();
 
         protected Transport(Repository local, URIish uri)
         {
@@ -272,15 +274,108 @@ namespace GitSharp.Transport
         public void ApplyConfig(RemoteConfig cfg)
         {
             OptionUploadPack = cfg.UploadPack;
-            fetch = cfg.Fetch;
+            fetchSpecs = cfg.Fetch;
             TagOpt = cfg.TagOpt;
             OptionReceivePack = cfg.ReceivePack;
-            push = cfg.Push;
+            pushSpecs = cfg.Push;
         }
 
         public abstract IFetchConnection openFetch();
         public abstract IPushConnection openPush();
         public abstract void close();
+
+        public FetchResult fetch(ProgressMonitor monitor, List<RefSpec> toFetch)
+        {
+            if (toFetch == null || toFetch.Count == 0)
+            {
+                if (fetchSpecs.Count == 0)
+                    throw new TransportException("Nothing to fetch.");
+                toFetch = fetchSpecs;
+            }
+            else if (fetchSpecs.Count != 0)
+            {
+                List<RefSpec> tmp = new List<RefSpec>(toFetch);
+                foreach (RefSpec requested in toFetch)
+                {
+                    string reqSrc = requested.Source;
+                    foreach (RefSpec configured in fetchSpecs)
+                    {
+                        string cfgSrc = configured.Source;
+                        string cfgDst = configured.Destination;
+                        if (cfgSrc.Equals(reqSrc) && cfgDst != null)
+                        {
+                            tmp.Add(configured);
+                            break;
+                        }
+                    }
+                }
+                toFetch = tmp;
+            }
+
+            FetchResult result = new FetchResult();
+            new FetchProcess(this, toFetch).execute(monitor, result);
+            return result;
+        }
+
+        public PushResult push(ProgressMonitor monitor, List<RemoteRefUpdate> toPush)
+        {
+            if (toPush == null || toPush.Count == 0)
+            {
+                try
+                {
+                    toPush = findRemoteRefUpdatesFor(pushSpecs);
+                }
+                catch (IOException e)
+                {
+                    throw new TransportException("Problem with resolving push ref specs locally: " + e.Message, e);
+                }
+
+                if (toPush.Count == 0)
+                    throw new TransportException("Nothing to push");
+            }
+            PushProcess pushProcess = new PushProcess(this, toPush);
+            return pushProcess.execute(monitor);
+        }
+
+        public List<RemoteRefUpdate> findRemoteRefUpdatesFor(List<RefSpec> specs)
+        {
+            return findRemoteRefUpdatesFor(local, specs, fetchSpecs);
+        }
+
+        public static List<RemoteRefUpdate> findRemoteRefUpdatesFor(Repository db, List<RefSpec> specs, List<RefSpec> fetchSpecs)
+        {
+            if (fetchSpecs == null)
+                fetchSpecs = new List<RefSpec>();
+            List<RemoteRefUpdate> result = new List<RemoteRefUpdate>();
+            List<RefSpec> procRefs = expandPushWildcardsFor(db, specs);
+
+            foreach (RefSpec spec in procRefs)
+            {
+                string srcSpec = spec.Source;
+                Ref srcRef = db.Refs[srcSpec];
+                if (srcRef != null)
+                    srcSpec = srcRef.Name;
+
+                string destSpec = spec.Destination;
+                if (destSpec == null)
+                {
+                    destSpec = srcSpec;
+                }
+
+                if (srcRef != null && !destSpec.StartsWith(Constants.R_REFS))
+                {
+                    string n = srcRef.Name;
+                    int kindEnd = n.IndexOf('/', Constants.R_REFS.Length);
+                    destSpec = n.Slice(0, kindEnd + 1) + destSpec;
+                }
+
+                bool forceUpdate = spec.Force;
+                string localName = findTrackingRefName(destSpec, fetchSpecs);
+                RemoteRefUpdate rru = new RemoteRefUpdate(db, srcSpec, destSpec, forceUpdate, localName, null);
+                result.Add(rru);
+            }
+            return result;
+        }
 
     }
 }

@@ -42,10 +42,17 @@ namespace GitSharp.Transport
 
     public class FetchHeadRecord
     {
-        public ObjectId NewValue { get; private set; }
-        public bool NotForMerge { get; private set; }
-        public string SourceName { get; private set; }
-        public URIish SourceURI { get; private set; }
+        public ObjectId NewValue { get; set; }
+        public bool NotForMerge { get; set; }
+        public string SourceName { get; set; }
+        public URIish SourceURI { get; set; }
+
+        public void Write(StreamWriter sw)
+        {
+            StringWriter w = new StringWriter();
+            Write(w);
+            sw.Write(w.ToString());
+        }
 
         public void Write(StringWriter sw)
         {

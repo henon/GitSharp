@@ -83,7 +83,7 @@ namespace GitSharp.RevWalk
 
         public override bool Equals(object o)
         {
-            return this == (RevObject)o;
+            return this == (o as RevObject);
         }
 
         /**

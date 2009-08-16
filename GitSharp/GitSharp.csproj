@@ -80,6 +80,8 @@
     <Compile Include="ObjectDatabase.cs" />
     <Compile Include="ObjectDirectory.cs" />
     <None Include="Transport\DefaultSshSessionFactory.cs" />
+    <Compile Include="Transport\BundleWriter.cs" />
+    <Compile Include="Transport\PushProcess.cs" />
     <Compile Include="Transport\SideBandProgressMonitor.cs" />
     <None Include="Transport\SshConfigSessionFactory.cs" />
     <None Include="Transport\SshSessionFactory.cs" />

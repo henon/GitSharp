@@ -122,7 +122,7 @@ namespace GitSharp.Transport
             }
         }
 
-        protected void updateTrackingRef(RevWalk.RevWalk walk)
+        public void updateTrackingRef(RevWalk.RevWalk walk)
         {
             if (IsDelete)
                 TrackingRefUpdate.Delete(walk);

@@ -109,6 +109,12 @@ namespace GitSharp
             w.Append(tmp, 0, StringLength);
         }
 
+        public void CopyTo(char[] tmp, StreamWriter w)
+        {
+            ToHexCharArray(tmp);
+            w.Write(tmp, 0, StringLength);
+        }
+
 
         public void copyRawTo(Stream s)
         {

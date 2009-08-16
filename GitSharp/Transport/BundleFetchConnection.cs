@@ -48,7 +48,7 @@ namespace GitSharp.Transport
 
     public class BundleFetchConnection : BaseFetchConnection
     {
-        private const string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
+        public const string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
 
         private readonly Transport transport;
         private Stream bin;

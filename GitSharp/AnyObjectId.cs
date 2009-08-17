@@ -93,16 +93,15 @@ namespace GitSharp
             new BinaryWriter(s).Write(ToHexByteArray());
         }
 
-        /**
-         * Copy this ObjectId to a StringBuilder in hex format.
-         *
-         * @param tmp
-         *            temporary char array to buffer construct into before writing.
-         *            Must be at least large enough to hold 2 digits for each byte
-         *            of object id (40 characters or larger).
-         * @param w
-         *            the string to append onto.
-         */
+        /// <summary>
+        /// Copy this ObjectId to a StringBuilder in hex format.
+        /// </summary>
+        /// <param name="tmp">
+        /// temporary char array to buffer construct into before writing.
+        /// Must be at least large enough to hold 2 digits for each byte
+        /// of object id (40 characters or larger).
+        /// </param>
+        /// <param name="w">the string to append onto.</param>
         public void CopyTo(char[] tmp, StringBuilder w)
         {
             ToHexCharArray(tmp);

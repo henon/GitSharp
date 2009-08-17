@@ -160,8 +160,8 @@ namespace GitSharp.Transport
         protected Repository local;
         protected URIish uri;
 
-        public Repository Local { get { return local; }}
-        public URIish URI { get { return uri; }}
+        public Repository Local { get { return local; } }
+        public URIish Uri { get { return uri; } }
 
         private string _optionUploadPack = RemoteConfig.DEFAULT_UPLOAD_PACK;
         public string OptionUploadPack
@@ -284,7 +284,7 @@ namespace GitSharp.Transport
         public abstract IPushConnection openPush();
         public abstract void close();
 
-        public FetchResult fetch(ProgressMonitor monitor, List<RefSpec> toFetch)
+        public FetchResult fetch(IProgressMonitor monitor, List<RefSpec> toFetch)
         {
             if (toFetch == null || toFetch.Count == 0)
             {
@@ -317,7 +317,7 @@ namespace GitSharp.Transport
             return result;
         }
 
-        public PushResult push(ProgressMonitor monitor, List<RemoteRefUpdate> toPush)
+        public PushResult push(IProgressMonitor monitor, List<RemoteRefUpdate> toPush)
         {
             if (toPush == null || toPush.Count == 0)
             {

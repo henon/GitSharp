@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
+ * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
  *
@@ -33,94 +33,131 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using GitSharp.Exceptions;
 using GitSharp.RevWalk;
 
 namespace GitSharp.Transport
 {
-
-    public class PushProcess
+    /// <summary>
+    /// Class performing push operation on remote repository.
+    /// </summary>
+    /// <seealso cref= Transport.push(IProgressMonitor, Collection)</seealso>
+    internal class PushProcess
     {
-        public const string PROGRESS_OPENING_CONNECTION = "Opening connection";
+        /// <summary> Task name for <seealso cref="IProgressMonitor"/> used during opening connection.  </summary>
+        internal const string PROGRESS_OPENING_CONNECTION = "Opening connection";
 
-        private readonly Transport transport;
-        private IPushConnection connection;
-        private readonly Dictionary<string, RemoteRefUpdate> toPush;
-        private readonly RevWalk.RevWalk walker;
+        /// <summary> Transport used to perform this operation.  </summary>
+        private readonly Transport _transport;
 
-        public PushProcess(Transport transport, List<RemoteRefUpdate> toPush)
+        /// <summary> Push operation connection created to perform this operation  </summary>
+        private IPushConnection _connection;
+
+        /// <summary> Refs to update on remote side.  </summary>
+        private readonly IDictionary<string, RemoteRefUpdate> _toPush;
+
+        /// <summary> Revision walker for checking some updates properties.  </summary>
+        private readonly RevWalk.RevWalk _walker;
+
+        ///	 <summary> * Create process for specified transport and refs updates specification.
+        ///	 * </summary>
+        ///	 * <param name="transport">
+        ///	 *            transport between remote and local repository, used to create
+        ///	 *            connection. </param>
+        ///	 * <param name="toPush">
+        ///	 *            specification of refs updates (and local tracking branches). </param>
+        ///	 * <exception cref="TransportException"> </exception>
+        internal PushProcess(Transport transport, IEnumerable<RemoteRefUpdate> toPush)
         {
-            walker = new RevWalk.RevWalk(transport.Local);
-            this.transport = transport;
+            _walker = new RevWalk.RevWalk(transport.Local);
+            _transport = transport;
+            _toPush = new Dictionary<string, RemoteRefUpdate>();
             foreach (RemoteRefUpdate rru in toPush)
             {
-                if (this.toPush.ContainsKey(rru.RemoteName))
+                if (_toPush.ContainsKey(rru.RemoteName))
                 {
                     throw new TransportException("Duplicate remote ref update is illegal. Affected remote name: " + rru.RemoteName);
                 }
-                else
-                {
-                    this.toPush.Add(rru.RemoteName, rru);
-                }
+
+                _toPush.Add(rru.RemoteName, rru);
             }
         }
 
-        public PushResult execute(ProgressMonitor monitor)
+        ///	 <summary> * Perform push operation between local and remote repository - set remote
+        ///	 * refs appropriately, send needed objects and update local tracking refs.
+        ///	 * <p>
+        ///	 * When <seealso cref="Transport#isDryRun()"/> is true, result of this operation is
+        ///	 * just estimation of real operation result, no real action is performed.
+        ///	 * </summary>
+        ///	 * <param name="monitor">
+        ///	 *            progress monitor used for feedback about operation. </param>
+        ///	 * <returns> result of push operation with complete status description. </returns>
+        ///	 * <exception cref="NotSupportedException">
+        ///	 *             when push operation is not supported by provided transport. </exception>
+        ///	 * <exception cref="TransportException">
+        ///	 *             when some error occurred during operation, like I/O, protocol
+        ///	 *             error, or local database consistency error. </exception>
+        internal virtual PushResult execute(IProgressMonitor monitor)
         {
-            monitor.BeginTask(PROGRESS_OPENING_CONNECTION, -1);
-            connection = transport.openPush();
+            // [ammachado] TODO: IProgressMonitor.UNKNOWN constant!
+            monitor.BeginTask(PROGRESS_OPENING_CONNECTION, 0);
+            _connection = _transport.openPush();
+
             try
             {
                 monitor.EndTask();
 
-                Dictionary<string, RemoteRefUpdate> preprocessed = prepareRemoteUpdates();
-                if (transport.DryRun)
+                IDictionary<string, RemoteRefUpdate> preprocessed = prepareRemoteUpdates();
+                if (_transport.DryRun)
+                {
                     modifyUpdatesForDryRun();
+                }
                 else if (preprocessed.Count != 0)
-                    connection.Push(monitor, preprocessed);
+                {
+                    _connection.Push(monitor, preprocessed);
+                }
             }
             finally
             {
-                connection.Close();
+                _connection.Close();
             }
-            if (!transport.DryRun)
+
+            if (!_transport.DryRun)
+            {
                 updateTrackingRefs();
+            }
+
             return prepareOperationResult();
         }
 
-        private Dictionary<string, RemoteRefUpdate> prepareRemoteUpdates()
+        private IDictionary<string, RemoteRefUpdate> prepareRemoteUpdates()
         {
-            Dictionary<string, RemoteRefUpdate> result = new Dictionary<string, RemoteRefUpdate>();
-            foreach (RemoteRefUpdate rru in toPush.Values)
+            IDictionary<string, RemoteRefUpdate> result = new Dictionary<string, RemoteRefUpdate>();
+            foreach (RemoteRefUpdate rru in _toPush.Values)
             {
-                Ref advertisedRef = connection.GetRef(rru.RemoteName);
+                Ref advertisedRef = _connection.Refs.Find(x => x.Name == rru.RemoteName);
                 ObjectId advertisedOld = (advertisedRef == null ? ObjectId.ZeroId : advertisedRef.ObjectId);
 
                 if (rru.NewObjectId.Equals(advertisedOld))
                 {
-                    if (rru.IsDelete)
-                    {
-                        rru.Status = RemoteRefUpdate.UpdateStatus.NON_EXISTING;
-                    }
-                    else
-                    {
-                        rru.Status = RemoteRefUpdate.UpdateStatus.UP_TO_DATE;
-                    }
-
+                    rru.Status = rru.IsDelete ? RemoteRefUpdate.UpdateStatus.NON_EXISTING : RemoteRefUpdate.UpdateStatus.UP_TO_DATE;
                     continue;
                 }
 
+                // caller has explicitly specified expected old object id, while it
+                // has been changed in the mean time - reject
                 if (rru.IsExpectingOldObjectId && !rru.ExpectedOldObjectId.Equals(advertisedOld))
                 {
                     rru.Status = RemoteRefUpdate.UpdateStatus.REJECTED_REMOTE_CHANGED;
                     continue;
                 }
 
+                // create ref (hasn't existed on remote side) and delete ref
+                // are always fast-forward commands, feasible at this level
                 if (advertisedOld.Equals(ObjectId.ZeroId) || rru.IsDelete)
                 {
                     rru.FastForward = true;
@@ -128,60 +165,68 @@ namespace GitSharp.Transport
                     continue;
                 }
 
+                // check for fast-forward:
+                // - both old and new ref must point to commits, AND
+                // - both of them must be known for us, exist in repository, AND
+                // - old commit must be ancestor of new commit
                 bool fastForward = true;
                 try
                 {
-                    RevObject oldRev = walker.parseAny(advertisedOld);
-                    RevObject newRev = walker.parseAny(rru.NewObjectId);
-                    if (!(oldRev is RevCommit) || !(newRev is RevCommit) ||
-                        !walker.isMergedInto((RevCommit) oldRev, (RevCommit) newRev))
+                    RevObject oldRev = _walker.parseAny(advertisedOld);
+                    RevObject newRev = _walker.parseAny(rru.NewObjectId);
+                    if (!(oldRev is RevCommit) || !(newRev is RevCommit) || !_walker.isMergedInto((RevCommit)oldRev, (RevCommit)newRev))
                         fastForward = false;
                 }
                 catch (MissingObjectException)
                 {
                     fastForward = false;
                 }
-                catch (Exception e)
+                catch (Exception x)
                 {
-                    throw new TransportException(transport.URI,
-                                                 "reading objects from local repository failed: " + e.Message, e);
+                    throw new TransportException(_transport.Uri, "reading objects from local repository failed: " + x.Message, x);
                 }
-
                 rru.FastForward = fastForward;
                 if (!fastForward && !rru.ForceUpdate)
+                {
                     rru.Status = RemoteRefUpdate.UpdateStatus.REJECTED_NONFASTFORWARD;
+                }
                 else
                 {
                     result.Add(rru.RemoteName, rru);
                 }
             }
-
             return result;
         }
 
         private void modifyUpdatesForDryRun()
         {
-            foreach (RemoteRefUpdate rru in toPush.Values)
+            foreach (RemoteRefUpdate rru in _toPush.Values)
             {
                 if (rru.Status == RemoteRefUpdate.UpdateStatus.NOT_ATTEMPTED)
+                {
                     rru.Status = RemoteRefUpdate.UpdateStatus.OK;
+                }
             }
         }
 
         private void updateTrackingRefs()
         {
-            foreach (RemoteRefUpdate rru in toPush.Values)
+            foreach (RemoteRefUpdate rru in _toPush.Values)
             {
                 RemoteRefUpdate.UpdateStatus status = rru.Status;
                 if (rru.HasTrackingRefUpdate && (status == RemoteRefUpdate.UpdateStatus.UP_TO_DATE || status == RemoteRefUpdate.UpdateStatus.OK))
                 {
+                    // update local tracking branch only when there is a chance that
+                    // it has changed; this is possible for:
+                    // -updated (OK) status,
+                    // -up to date (UP_TO_DATE) status
                     try
                     {
-                        rru.updateTrackingRef(walker);
+                        rru.updateTrackingRef(_walker);
                     }
-                    catch (IOException)
+                    catch (System.IO.IOException)
                     {
-                        
+                        // ignore as RefUpdate has stored I/O error status
                     }
                 }
             }
@@ -190,18 +235,18 @@ namespace GitSharp.Transport
         private PushResult prepareOperationResult()
         {
             PushResult result = new PushResult();
-            result.SetAdvertisedRefs(transport.URI, connection.RefsMap);
-            result.SetRemoteUpdates(toPush);
+            result.SetAdvertisedRefs(_transport.Uri, _connection.RefsMap);
+            result.SetRemoteUpdates(_toPush);
 
-            foreach (RemoteRefUpdate rru in toPush.Values)
+            foreach (RemoteRefUpdate rru in _toPush.Values)
             {
                 TrackingRefUpdate tru = rru.TrackingRefUpdate;
                 if (tru != null)
+                {
                     result.Add(tru);
+                }
             }
-
             return result;
         }
     }
-
 }

@@ -160,7 +160,7 @@ namespace GitSharp.Patch
 	    }
 
 	    /** @return information about the old image mentioned in this hunk. */
-	    public OldImage getOldImage()
+	    public virtual OldImage getOldImage()
         {
 		    return old;
 	    }
@@ -194,6 +194,7 @@ namespace GitSharp.Patch
 		    Edit inEdit = null;
 
             bool break_scan = false;
+
 		    for (; c < endOffset; c = RawParseUtils.nextLF(buf, c)) {
 			    switch (buf[c]) {
 			    case (byte)' ':
@@ -228,13 +229,14 @@ namespace GitSharp.Patch
 				    break_scan = true;
                     break;
 			    }
+
                 if (break_scan)
                     break;
 		    }
 		    return r;
 	    }
 
-	    public void parseHeader()
+	    public virtual void parseHeader()
         {
 		    // Parse "@@ -236,9 +236,9 @@ protected boolean"
 		    //
@@ -254,7 +256,7 @@ namespace GitSharp.Patch
 			    newLineCount = 1;
 	    }
 
-	    public int parseBody(Patch script, int end) {
+	    public virtual int parseBody(Patch script, int end) {
 		    byte[] buf = file.buf;
 		    int c = RawParseUtils.nextLF(buf, startOffset), last = c;
 
@@ -370,7 +372,7 @@ namespace GitSharp.Patch
 		    }
 	    }
 
-	    public void extractFileLines(StringBuilder sb, string[] text, int[] offsets)
+	    public virtual void extractFileLines(StringBuilder sb, string[] text, int[] offsets)
         {
 		    byte[] buf = file.buf;
 		    int ptr = startOffset;

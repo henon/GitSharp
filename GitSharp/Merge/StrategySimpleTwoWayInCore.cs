@@ -56,138 +56,141 @@ namespace GitSharp.Merge
      */
     public class StrategySimpleTwoWayInCore : ThreeWayMergeStrategy
     {
-	    public override String GetName() 
+        public override String GetName()
         {
-		    return "simple-two-way-in-core";
-	    }
+            return "simple-two-way-in-core";
+        }
 
-	    public override Merger NewMerger(Repository db) 
+        public override Merger NewMerger(Repository db)
         {
-		    return new InCoreMerger(db);
-	    }
+            return new InCoreMerger(db);
+        }
 
-	    private class InCoreMerger : ThreeWayMerger 
+        private class InCoreMerger : ThreeWayMerger
         {
-		    private const int Base = 0;
+            private const int Base = 0;
 
-		    private const int Ours = 1;
+            private const int Ours = 1;
 
-		    private const int Theirs = 2;
+            private const int Theirs = 2;
 
-		    private readonly NameConflictTreeWalk _tw;
+            private readonly NameConflictTreeWalk _tw;
 
-		    private readonly DirCache _cache;
+            private readonly DirCache _cache;
 
-		    private DirCacheBuilder _builder;
+            private DirCacheBuilder _builder;
 
-		    private ObjectId _resultTree;
+            private ObjectId _resultTree;
 
-		    public InCoreMerger(Repository local) : base(local)
+            public InCoreMerger(Repository local)
+                : base(local)
             {
-			    _tw = new NameConflictTreeWalk(Db);
-			    _cache = DirCache.newInCore();
-		    }
+                _tw = new NameConflictTreeWalk(Db);
+                _cache = DirCache.newInCore();
+            }
 
-		    protected override bool MergeImpl()
+            protected override bool MergeImpl()
             {
-			    _tw.reset();
-			    _tw.addTree(MergeBase());
-			    _tw.addTree(SourceTrees[0]);
-			    _tw.addTree(SourceTrees[1]);
+                _tw.reset();
+                _tw.addTree(MergeBase());
+                _tw.addTree(SourceTrees[0]);
+                _tw.addTree(SourceTrees[1]);
 
-			    bool hasConflict = false;
-			    _builder = _cache.builder();
-			    while (_tw.next()) 
+                bool hasConflict = false;
+                _builder = _cache.builder();
+                while (_tw.next())
                 {
-				    int modeO = _tw.getRawMode(Ours);
-				    int modeT = _tw.getRawMode(Theirs);
-				    if (modeO == modeT && _tw.idEqual(Ours, Theirs)) 
+                    int modeO = _tw.getRawMode(Ours);
+                    int modeT = _tw.getRawMode(Theirs);
+                    if (modeO == modeT && _tw.idEqual(Ours, Theirs))
                     {
-					    Add(Ours, DirCacheEntry.STAGE_0);
-					    continue;
-				    }
+                        Add(Ours, DirCacheEntry.STAGE_0);
+                        continue;
+                    }
 
-				    int modeB = _tw.getRawMode(Base);
-				    if (modeB == modeO && _tw.idEqual(Base, Ours))
-					    Add(Theirs, DirCacheEntry.STAGE_0);
-				    else if (modeB == modeT && _tw.idEqual(Base, Theirs))
-					    Add(Ours, DirCacheEntry.STAGE_0);
-				    else if (_tw.isSubtree()) 
+                    int modeB = _tw.getRawMode(Base);
+                    if (modeB == modeO && _tw.idEqual(Base, Ours))
+                        Add(Theirs, DirCacheEntry.STAGE_0);
+                    else if (modeB == modeT && _tw.idEqual(Base, Theirs))
+                        Add(Ours, DirCacheEntry.STAGE_0);
+                    else if (_tw.isSubtree())
                     {
-					    if (NonTree(modeB)) 
+                        if (NonTree(modeB))
                         {
-						    Add(Base, DirCacheEntry.STAGE_1);
-						    hasConflict = true;
-					    }
-					    if (NonTree(modeO)) 
+                            Add(Base, DirCacheEntry.STAGE_1);
+                            hasConflict = true;
+                        }
+                        if (NonTree(modeO))
                         {
-						    Add(Ours, DirCacheEntry.STAGE_2);
-						    hasConflict = true;
-					    }
-					    if (NonTree(modeT)) 
+                            Add(Ours, DirCacheEntry.STAGE_2);
+                            hasConflict = true;
+                        }
+                        if (NonTree(modeT))
                         {
-						    Add(Theirs, DirCacheEntry.STAGE_3);
-						    hasConflict = true;
-					    }
-					    _tw.enterSubtree();
-				    } 
-                    else 
+                            Add(Theirs, DirCacheEntry.STAGE_3);
+                            hasConflict = true;
+                        }
+                        _tw.enterSubtree();
+                    }
+                    else
                     {
-					    Add(Base, DirCacheEntry.STAGE_1);
-					    Add(Ours, DirCacheEntry.STAGE_2);
-					    Add(Theirs, DirCacheEntry.STAGE_3);
-					    hasConflict = true;
-				    }
-			    }
-			    _builder.finish();
-			    _builder = null;
+                        Add(Base, DirCacheEntry.STAGE_1);
+                        Add(Ours, DirCacheEntry.STAGE_2);
+                        Add(Theirs, DirCacheEntry.STAGE_3);
+                        hasConflict = true;
+                    }
+                }
+                _builder.finish();
+                _builder = null;
 
-			    if (hasConflict)
-				    return false;
-			    try {
-				    _resultTree = _cache.writeTree(GetObjectWriter());
-				    return true;
-			    } catch (UnmergedPathException) 
+                if (hasConflict)
+                    return false;
+                try
                 {
-				    _resultTree = null;
-				    return false;
-			    }
-		    }
-
-		    private static bool NonTree(int mode) 
-            {
-			    return mode != 0 && !FileMode.Tree.Equals(mode);
-		    }
-
-		    private void Add(int tree, int stage)
-            {
-			    AbstractTreeIterator i = GetTree(tree);
-			    if (i != null) 
+                    _resultTree = _cache.writeTree(GetObjectWriter());
+                    return true;
+                }
+                catch (UnmergedPathException)
                 {
-				    if (FileMode.Tree.Equals(_tw.getRawMode(tree))) 
+                    _resultTree = null;
+                    return false;
+                }
+            }
+
+            private static bool NonTree(int mode)
+            {
+                return mode != 0 && !FileMode.Tree.Equals(mode);
+            }
+
+            private void Add(int tree, int stage)
+            {
+                AbstractTreeIterator i = GetTree(tree);
+                if (i != null)
+                {
+                    if (FileMode.Tree.Equals(_tw.getRawMode(tree)))
                     {
-					    _builder.addTree(_tw.getRawPath(), stage, Db, _tw
-							    .getObjectId(tree));
-				    } 
-                    else 
+                        _builder.addTree(_tw.getRawPath(), stage, Db, _tw
+                                .getObjectId(tree));
+                    }
+                    else
                     {
                         DirCacheEntry e = new DirCacheEntry(_tw.getRawPath(), stage);
-					    e.setObjectIdFromRaw(i.idBuffer(), i.idOffset());
-					    e.setFileMode(_tw.getFileMode(tree));
-					    _builder.add(e);
-				    }
-			    }
-		    }
+                        e.setObjectIdFromRaw(i.idBuffer(), i.idOffset());
+                        e.setFileMode(_tw.getFileMode(tree));
+                        _builder.add(e);
+                    }
+                }
+            }
 
-		    private AbstractTreeIterator GetTree(int tree) 
+            private AbstractTreeIterator GetTree(int tree)
             {
                 return _tw.getTree<AbstractTreeIterator>(tree, typeof(AbstractTreeIterator));
-		    }
+            }
 
-		    public override ObjectId GetResultTreeId() 
+            public override ObjectId GetResultTreeId()
             {
-			    return _resultTree;
-		    }
-	    }
+                return _resultTree;
+            }
+        }
     }
 }

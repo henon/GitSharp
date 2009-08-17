@@ -36,6 +36,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+
 using System;
 using System.Net.Sockets;
 using GitSharp.Exceptions;
@@ -88,22 +90,6 @@ namespace GitSharp.Transport
             {
                 throw new TransportException(e.Message, e.InnerException ?? e);
             }
-        }
-
-        public override void close()
-        {
-            if (sock != null)
-            {
-                try
-                {
-                    sch.releaseSession(sock);
-                }
-                finally
-                {
-                    sock = null;
-                }
-            }
-        }
+	}
     }
-
 }

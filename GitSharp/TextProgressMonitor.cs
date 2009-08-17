@@ -46,7 +46,7 @@ using System.IO;
 namespace GitSharp
 {
     [Complete]
-    public class TextProgressMonitor : ProgressMonitor
+    public class TextProgressMonitor : IProgressMonitor
     {
         private DateTime _taskBeganAt;
         private string _message;
@@ -66,7 +66,7 @@ namespace GitSharp
             _taskBeganAt = DateTime.Now;
         }
 
-        #region ProgressMonitor Members
+        #region IProgressMonitor Members
 
         public void Start(int totalTasks)
         {

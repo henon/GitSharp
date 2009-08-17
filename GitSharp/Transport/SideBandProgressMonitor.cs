@@ -42,7 +42,7 @@ using System.Text;
 namespace GitSharp.Transport
 {
 
-    public class SideBandProgressMonitor : ProgressMonitor
+    public class SideBandProgressMonitor : IProgressMonitor
     {
         private readonly StreamWriter writer;
         private bool output;

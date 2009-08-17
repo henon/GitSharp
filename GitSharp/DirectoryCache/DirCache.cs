@@ -318,13 +318,13 @@ namespace GitSharp.DirectoryCache
                         {
                             inStream.Close();
                         }
-                        catch (IOException err2)
+                        catch (IOException)
                         {
                             // Ignore any close failures.
                         }
                     }
                 }
-                catch (FileNotFoundException fnfe)
+                catch (FileNotFoundException)
                 {
                     // Someone must have deleted it between our exists test
                     // and actually opening the path. That's fine, its empty.

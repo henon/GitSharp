@@ -56,7 +56,7 @@ namespace GitSharp.Transport
 
         private readonly PacketLineIn pckIn;
         private readonly Stream ins;
-        private readonly ProgressMonitor monitor;
+        private readonly IProgressMonitor monitor;
         private string progressBuffer = "";
         private string currentTask;
         private int lastCnt;
@@ -64,7 +64,7 @@ namespace GitSharp.Transport
         private int channel;
         private int available;
 
-        public SideBandInputStream(PacketLineIn aPckIn, Stream aIns, ProgressMonitor aProgress)
+        public SideBandInputStream(PacketLineIn aPckIn, Stream aIns, IProgressMonitor aProgress)
         {
             pckIn = aPckIn;
             ins = aIns;

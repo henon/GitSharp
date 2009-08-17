@@ -164,7 +164,7 @@ namespace GitSharp.Patch
 		    patchType = PatchType.UNIFIED;
 	    }
 
-	    public int getParentCount()
+	    public virtual int getParentCount()
         {
 		    return 1;
 	    }
@@ -200,21 +200,29 @@ namespace GitSharp.Patch
 		    return getScriptText(null, null);
 	    }
 
-	    /**
-	     * Convert the patch script for this file into a string.
-	     *
-	     * @param oldCharset
-	     *            hint character set to decode the old lines with.
-	     * @param newCharset
-	     *            hint character set to decode the new lines with.
-	     * @return the patch script, as a Unicode string.
-	     */
-	    public String getScriptText(Encoding oldCharset, Encoding newCharset)
+        /// <summary>
+        ///Convert the patch script for this file into a string.
+        /// </summary>
+        /// <param name="oldCharset">hint character set to decode the old lines with.</param>
+        /// <param name="newCharset">hint character set to decode the new lines with.</param>
+        /// <returns>the patch script, as a Unicode string.</returns>
+	    public virtual String getScriptText(Encoding oldCharset, Encoding newCharset)
         {
 		    return getScriptText(new Encoding[] { oldCharset, newCharset });
 	    }
 
-	    public String getScriptText(Encoding[] charsetGuess)
+        /// <summary>
+        /// Convert the patch script for this file into a string.
+        /// </summary>
+        /// <param name="charsetGuess">
+        /// optional array to suggest the character set to use when
+        /// decoding each file's line. If supplied the array must have a
+        /// length of <code>{@link #getParentCount()} + 1</code>
+        /// representing the old revision character sets and the new
+        /// revision character set.
+        /// </param>
+        /// <returns>the patch script, as a Unicode string.</returns>
+	    public virtual String getScriptText(Encoding[] charsetGuess)
         {
 		    if (getHunks().Count == 0)
             {
@@ -353,7 +361,7 @@ namespace GitSharp.Patch
 	    }
 
 	    /** @return the old file mode, if described in the patch */
-	    public FileMode getOldMode()
+	    public virtual FileMode getOldMode()
         {
 		    return oldMode;
 	    }
@@ -385,7 +393,7 @@ namespace GitSharp.Patch
 	     *
 	     * @return the object id; null if there is no index line
 	     */
-	    public AbbreviatedObjectId getOldId()
+	    public virtual AbbreviatedObjectId getOldId()
         {
 		    return oldId;
 	    }
@@ -429,7 +437,7 @@ namespace GitSharp.Patch
 		    hunks.Add(h);
 	    }
 
-	    public HunkHeader newHunkHeader(int offset)
+	    public virtual HunkHeader newHunkHeader(int offset)
         {
 		    return new HunkHeader(this, offset);
 	    }
@@ -526,7 +534,7 @@ namespace GitSharp.Patch
 		    return eol;
 	    }
 
-	    public int parseGitHeaders(int ptr, int end)
+	    public virtual int parseGitHeaders(int ptr, int end)
         {
 		    while (ptr < end)
             {
@@ -645,7 +653,7 @@ namespace GitSharp.Patch
 			    changeType = ChangeType.DELETE;
 	    }
 
-        public void parseNewFileMode(int ptr, int eol)
+        public virtual void parseNewFileMode(int ptr, int eol)
         {
 		    oldMode = FileMode.Missing;
 		    newMode = parseFileMode(ptr + NEW_FILE_MODE.Length, eol);
@@ -661,17 +669,15 @@ namespace GitSharp.Patch
                 {
 				    // First hunk header; break out and parse them later.
 				    break;
-
                 }
-                else if (RawParseUtils.match(buf, ptr, OLD_NAME) >= 0)
+
+                if (RawParseUtils.match(buf, ptr, OLD_NAME) >= 0)
                 {
 				    parseOldName(ptr, eol);
-
                 }
                 else if (RawParseUtils.match(buf, ptr, NEW_NAME) >= 0)
                 {
 				    parseNewName(ptr, eol);
-
 			    }
                 else
                 {
@@ -681,6 +687,7 @@ namespace GitSharp.Patch
 
 			    ptr = eol;
 		    }
+
 		    return ptr;
 	    }
 
@@ -729,7 +736,7 @@ namespace GitSharp.Patch
 		    return FileMode.FromBits(tmp);
 	    }
 
-        public void parseIndexLine(int ptr, int end)
+        public virtual void parseIndexLine(int ptr, int end)
         {
 		    // "index $asha1..$bsha1[ $mode]" where $asha1 and $bsha1
 		    // can be unique abbreviations

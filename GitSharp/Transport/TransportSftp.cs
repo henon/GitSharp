@@ -1,7 +1,7 @@
 ﻿/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
+ * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,36 +37,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp
+namespace GitSharp.Transport
 {
-    [Complete]
-    public class NullProgressMonitor : IProgressMonitor 
+    public class TransportSftp : SshTransport, IWalkTransport
     {
-        public static readonly NullProgressMonitor Instance = new NullProgressMonitor();
-
-        #region IProgressMonitor Members
-
-        public void Start(int totalTasks)
+        public static bool canHandle(URIish uri)
         {
+            return uri.IsRemote && "sftp".Equals(uri.Scheme);
         }
 
-        public void BeginTask(string title, int totalWork)
+        public TransportSftp(Repository local, URIish uri)
+            : base(local, uri)
         {
         }
-
-        public void Update(int completed)
-        {
-        }
-
-        public void EndTask()
-        {
-        }
-
-        public bool IsCancelled
-        {
-            get { return false; }
-        }
-
-        #endregion
     }
 }

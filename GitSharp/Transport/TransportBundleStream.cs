@@ -1,5 +1,7 @@
 ﻿/*
- * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
+ * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  *
  * All rights reserved.
  *
@@ -41,54 +43,77 @@ using GitSharp.Exceptions;
 
 namespace GitSharp.Transport
 {
-
-    public class TransportBundleStream : Transport, TransportBundle
+    /// <summary>
+    /// Single shot fetch from a streamed Git bundle.
+    /// 
+    /// The bundle is read from an unbuffered input stream, which limits the
+    /// transport to opening at most one FetchConnection before needing to recreate
+    /// the transport instance.
+    /// </summary>
+    public class TransportBundleStream : Transport, ITransportBundle
     {
-        private Stream src;
+        private Stream _inputStream;
 
-        public TransportBundleStream(Repository db, URIish uri, Stream @in)
-            : base(db, uri)
+        /// <summary>
+        /// Create a new transport to fetch objects from a streamed bundle.
+        /// 
+        /// The stream can be unbuffered (buffering is automatically provided
+        /// internally to smooth out short reads) and unpositionable (the stream is
+        /// read from only once, sequentially).
+        /// 
+        /// When the FetchConnection or the this instance is closed the supplied
+        /// input stream is also automatically closed. This frees callers from
+        /// needing to keep track of the supplied stream.
+        /// </summary>
+        /// <param name="local">repository the fetched objects will be loaded into.</param>
+        /// <param name="uri">
+        /// symbolic name of the source of the stream. The URI can
+        /// reference a non-existent resource. It is used only for
+        /// exception reporting.
+        /// </param>
+        /// <param name="inputStream">the stream to read the bundle from.</param>
+        public TransportBundleStream(Repository local, URIish uri, Stream inputStream) 
+            : base(local, uri)
         {
-            src = @in;
+            _inputStream = inputStream;
         }
 
         public override IFetchConnection openFetch()
         {
-            if (src == null)
-                throw new TransportException(uri, "Only one fetch supported or null stream passed");
+            if (_inputStream == null)
+                throw new TransportException(Uri, "Only one fetch supported");
             try
             {
-                return new BundleFetchConnection(this, src);
+                return new BundleFetchConnection(this, _inputStream);
             }
             finally
             {
-                src = null;
+                _inputStream = null;
             }
         }
 
         public override IPushConnection openPush()
         {
-            throw new NotSupportedException("Push is not supported for bundle transport");
+            throw new InvalidOperationException("Push is not supported for bundle transport");
         }
 
         public override void close()
         {
-            if (src != null)
+            if (_inputStream != null)
             {
                 try
                 {
-                    src.Close();
+                    _inputStream.Close();
                 }
                 catch (IOException)
                 {
-                    
+                    // Ignore a close error.
                 }
                 finally
                 {
-                    src = null;
+                    _inputStream = null;
                 }
-            }
+            };
         }
     }
-
 }

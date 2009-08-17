@@ -42,6 +42,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.IO;
@@ -792,6 +793,11 @@ namespace GitSharp
         public void SetBoolean(string section, string subsection, string name, bool value)
         {
             SetString(section, subsection, name, value ? "true" : "false");
+        }
+
+        public void SetInt(string section, string subsection, string name, int value)
+        {
+            SetString(section, subsection, name, value.ToString(CultureInfo.InvariantCulture));
         }
 
         public void SetStringList(string section, string subsection, string name, List<string> values)

@@ -39,17 +39,13 @@ using System.Collections.Generic;
 
 namespace GitSharp.Transport
 {
-
     public class PushResult : OperationResult
     {
-        private Dictionary<string, RemoteRefUpdate> remoteUpdates = new Dictionary<string, RemoteRefUpdate>();
+        private IDictionary<string, RemoteRefUpdate> remoteUpdates = new Dictionary<string, RemoteRefUpdate>();
 
         public List<RemoteRefUpdate> RemoteUpdates
         {
-            get
-            {
-                return new List<RemoteRefUpdate>(remoteUpdates.Values);
-            }
+            get { return new List<RemoteRefUpdate>(remoteUpdates.Values); }
         }
 
         public RemoteRefUpdate GetRemoteUpdate(string refName)
@@ -57,10 +53,9 @@ namespace GitSharp.Transport
             return remoteUpdates[refName];
         }
 
-        public void SetRemoteUpdates(Dictionary<string, RemoteRefUpdate> remoteUpdates)
+        public void SetRemoteUpdates(IDictionary<string, RemoteRefUpdate> remoteUpdates)
         {
             this.remoteUpdates = remoteUpdates;
         }
     }
-
 }

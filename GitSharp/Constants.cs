@@ -52,6 +52,8 @@ namespace GitSharp
     public static class Constants
     {
 
+        public static string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
+
         /// <summary>
         ///   Special name for the "HEAD" symbolic ref
         /// </summary>

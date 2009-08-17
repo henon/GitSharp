@@ -45,7 +45,6 @@ using GitSharp.Util;
 
 namespace GitSharp.Transport
 {
-
     public class BundleFetchConnection : BaseFetchConnection
     {
         private const string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
@@ -67,8 +66,9 @@ namespace GitSharp.Transport
                     case 2:
                         readBundleV2();
                         break;
+
                     default:
-                        throw new TransportException(transport.URI, "not a bundle");
+                        throw new TransportException(transport.Uri, "not a bundle");
                 }
             }
             catch (TransportException err)
@@ -79,7 +79,7 @@ namespace GitSharp.Transport
             catch (IOException err)
             {
                 Close();
-                throw new TransportException(transport.URI, err.Message, err);
+                throw new TransportException(transport.Uri, err.Message, err);
             }
         }
 
@@ -88,7 +88,7 @@ namespace GitSharp.Transport
             string rev = readLine(new byte[1024]);
             if (V2_BUNDLE_SIGNATURE.Equals(rev))
                 return 2;
-            throw new TransportException(transport.URI, "not a bundle");
+            throw new TransportException(transport.Uri, "not a bundle");
         }
 
         private void readBundleV2()
@@ -121,7 +121,7 @@ namespace GitSharp.Transport
 
         private PackProtocolException duplicateAdvertisement(string name)
         {
-            return new PackProtocolException(transport.URI, "duplicate advertisement of " + name);
+            return new PackProtocolException(transport.Uri, "duplicate advertisement of " + name);
         }
 
         private string readLine(byte[] hdrbuf)
@@ -146,7 +146,7 @@ namespace GitSharp.Transport
             }
         }
 
-        protected override void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        protected override void doFetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
         {
             verifyPrerequisites();
             try
@@ -158,7 +158,7 @@ namespace GitSharp.Transport
             catch (IOException err)
             {
                 Close();
-                throw new TransportException(transport.URI, err.Message, err);
+                throw new TransportException(transport.Uri, err.Message, err);
             }
         }
 
@@ -202,18 +202,18 @@ namespace GitSharp.Transport
                         commits.Add(c);
                     }
                 }
-                catch (MissingObjectException notFound)
+                catch (MissingObjectException)
                 {
                     missing.Add(p);
                 }
                 catch (IOException err)
                 {
-                    throw new TransportException(transport.URI, "Cannot read commit " + p.Name, err);
+                    throw new TransportException(transport.Uri, "Cannot read commit " + p.Name, err);
                 }
             }
 
             if (!missing.isEmpty())
-                throw new MissingBundlePrerequisiteException(transport.URI, missing);
+                throw new MissingBundlePrerequisiteException(transport.Uri, missing);
 
             foreach (Ref r in transport.Local.Refs.Values)
             {
@@ -221,9 +221,8 @@ namespace GitSharp.Transport
                 {
                     rw.markStart(rw.parseCommit(r.ObjectId));
                 }
-                catch (IOException readError)
+                catch (IOException)
                 {
-                    
                 }
             }
 
@@ -243,7 +242,7 @@ namespace GitSharp.Transport
             }
             catch (IOException err)
             {
-                throw new TransportException(transport.URI, "Cannot read object", err);
+                throw new TransportException(transport.Uri, "Cannot read object", err);
             }
 
             if (remaining > 0)
@@ -253,7 +252,7 @@ namespace GitSharp.Transport
                     if (!o.has(SEEN))
                         missing.Add(o);
                 }
-                throw new MissingBundlePrerequisiteException(transport.URI, missing);
+                throw new MissingBundlePrerequisiteException(transport.Uri, missing);
             }
         }
 

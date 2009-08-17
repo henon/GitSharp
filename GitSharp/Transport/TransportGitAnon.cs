@@ -1,7 +1,7 @@
 ﻿/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
+ * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,36 +37,35 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp
+using System;
+
+namespace GitSharp.Transport
 {
-    [Complete]
-    public class NullProgressMonitor : IProgressMonitor 
+    public class TransportGitAnon : TcpTransport, IPackTransport
     {
-        public static readonly NullProgressMonitor Instance = new NullProgressMonitor();
+        public static bool canHandle(URIish uri)
+        {
+            return "git".Equals(uri.Scheme);
+        }
 
-        #region IProgressMonitor Members
-
-        public void Start(int totalTasks)
+        public TransportGitAnon(Repository local, URIish uri)
+            : base(local, uri)
         {
         }
 
-        public void BeginTask(string title, int totalWork)
+        public override IFetchConnection openFetch()
         {
+            throw new NotImplementedException();
         }
 
-        public void Update(int completed)
+        public override IPushConnection openPush()
         {
+            throw new NotImplementedException();
         }
 
-        public void EndTask()
+        public override void close()
         {
+            throw new NotImplementedException();
         }
-
-        public bool IsCancelled
-        {
-            get { return false; }
-        }
-
-        #endregion
     }
 }

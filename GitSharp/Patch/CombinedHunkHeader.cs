@@ -81,12 +81,12 @@ namespace GitSharp.Patch
 		    }
 	    }
 
-	    public CombinedFileHeader getFileHeader()
+	    public new CombinedFileHeader getFileHeader()
         {
 		    return (CombinedFileHeader) base.getFileHeader();
 	    }
 
-	    public OldImage getOldImage()
+	    public override OldImage getOldImage()
         {
 		    return getOldImage(0);
 	    }
@@ -103,7 +103,7 @@ namespace GitSharp.Patch
 		    return old[nthParent];
 	    }
 
-	    public void parseHeader()
+	    public override void parseHeader()
         {
 		    // Parse "@@@ -55,12 -163,13 +163,15 @@@ protected boolean"
 		    //
@@ -126,7 +126,7 @@ namespace GitSharp.Patch
 			    newLineCount = 1;
 	    }
 
-	    public int parseBody(Patch script, int end)
+	    public override int parseBody(Patch script, int end)
         {
 		    byte[] buf = file.buf;
 		    int c = RawParseUtils.nextLF(buf, startOffset);
@@ -234,7 +234,8 @@ namespace GitSharp.Patch
 		    //
 		    outStream[0].Write(buf, ptr, eol - ptr);
 
-		    SCAN: for (ptr = eol; ptr < endOffset; ptr = eol) {
+		    //SCAN: 
+            for (ptr = eol; ptr < endOffset; ptr = eol) {
 			    eol = RawParseUtils.nextLF(buf, ptr);
 
 			    if (eol - ptr < old.Length + 1) {
@@ -282,9 +283,11 @@ namespace GitSharp.Patch
                         break_scan = true;
 					    break;
 				    }
+
                     if (break_scan)
                         break;
 			    }
+
                 if (break_scan)
                         break;
 
@@ -297,7 +300,7 @@ namespace GitSharp.Patch
 		    }
 	    }
 
-	    void extractFileLines(StringBuilder sb, string[] text, int[] offsets)
+	    public override void extractFileLines(StringBuilder sb, string[] text, int[] offsets)
         {
 		    byte[] buf = file.buf;
 		    int ptr = startOffset;

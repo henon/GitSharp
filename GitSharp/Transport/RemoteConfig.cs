@@ -52,12 +52,14 @@ namespace GitSharp.Transport
     {
         private const string SECTION = "remote";
         private const string KEY_URL = "url";
+        private const string KEY_PUSHURL = "pushurl";
         private const string KEY_FETCH = "fetch";
         private const string KEY_PUSH = "push";
         private const string KEY_UPLOADPACK = "uploadpack";
         private const string KEY_RECEIVEPACK = "receivepack";
         private const string KEY_TAGOPT = "tagopt";
         private const string KEY_MIRROR = "mirror";
+        private const string KEY_TIMEOUT = "timeout";
         private const bool DEFAULT_MIRROR = false;
 
         /** Default value for {@link #getUploadPack()} if not specified. */
@@ -94,24 +96,28 @@ namespace GitSharp.Transport
 
         public string Name { get; private set; }
         public List<URIish> URIs { get; private set; }
+        public List<URIish> PushURIs { get; private set; }
         public List<RefSpec> Fetch { get; private set; }
         public List<RefSpec> Push { get; private set; }
         public string UploadPack { get; private set; }
         public string ReceivePack { get; private set; }
         public TagOpt TagOpt { get; private set; }
         public bool Mirror { get; set; }
+        public int Timeout { get; set; }
 
         public RemoteConfig(RepositoryConfig rc, string remoteName)
         {
             Name = remoteName;
 
-            string[] vlst;
-            string val;
-
-            vlst = rc.GetStringList(SECTION, Name, KEY_URL);
+            string[] vlst = rc.GetStringList(SECTION, Name, KEY_URL);
             URIs = new List<URIish>(vlst.Length);
             foreach (string s in vlst)
                 URIs.Add(new URIish(s));
+
+            vlst = rc.GetStringList(SECTION, Name, KEY_PUSHURL);
+            URIs = new List<URIish>(vlst.Length);
+            foreach (string s in vlst)
+                PushURIs.Add(new URIish(s));
 
             vlst = rc.GetStringList(SECTION, Name, KEY_FETCH);
             Fetch = new List<RefSpec>(vlst.Length);
@@ -123,7 +129,7 @@ namespace GitSharp.Transport
             foreach (string s in vlst)
                 Push.Add(new RefSpec(s));
 
-            val = rc.GetString(SECTION, Name, KEY_UPLOADPACK) ?? DEFAULT_UPLOAD_PACK;
+            string val = rc.GetString(SECTION, Name, KEY_UPLOADPACK) ?? DEFAULT_UPLOAD_PACK;
             UploadPack = val;
 
             val = rc.GetString(SECTION, Name, KEY_RECEIVEPACK) ?? DEFAULT_RECEIVE_PACK;
@@ -132,6 +138,7 @@ namespace GitSharp.Transport
             val = rc.GetString(SECTION, Name, KEY_TAGOPT);
             TagOpt = TagOpt.fromOption(val);
             Mirror = rc.GetBoolean(SECTION, Name, KEY_MIRROR, DEFAULT_MIRROR);
+            Timeout = rc.GetInt(SECTION, Name, KEY_TIMEOUT, 0);
         }
 
         public void Update(RepositoryConfig rc)
@@ -144,6 +151,13 @@ namespace GitSharp.Transport
                 vlst.Add(u.ToPrivateString());
             }
             rc.SetStringList(SECTION, Name, KEY_URL, vlst);
+
+            vlst.Clear();
+            foreach (URIish u in PushURIs)
+            {
+                vlst.Add(u.ToPrivateString());
+            }
+            rc.SetStringList(SECTION, Name, KEY_PUSHURL, vlst);
 
             vlst.Clear();
             foreach (RefSpec u in Fetch)
@@ -159,6 +173,7 @@ namespace GitSharp.Transport
             set(rc, KEY_RECEIVEPACK, ReceivePack, DEFAULT_RECEIVE_PACK);
             set(rc, KEY_TAGOPT, TagOpt.Option, TagOpt.AUTO_FOLLOW.Option);
             set(rc, KEY_MIRROR, Mirror, DEFAULT_MIRROR);
+            set(rc, KEY_TIMEOUT, Timeout, 0);
         }
 
         private void set(RepositoryConfig rc, string key, string currentValue, string defaultValue)
@@ -177,6 +192,14 @@ namespace GitSharp.Transport
                 rc.SetBoolean(SECTION, Name, key, currentValue);
         }
 
+        private void set(RepositoryConfig rc, string key, int currentValue, int defaultValue)
+        {
+            if (defaultValue == currentValue)
+                unset(rc, key);
+            else
+                rc.SetInt(SECTION, Name, key, currentValue);
+        }
+
         private void unset(RepositoryConfig rc, string key)
         {
             rc.UnsetString(SECTION, Name, key);
@@ -187,6 +210,14 @@ namespace GitSharp.Transport
             if (URIs.Contains(toAdd))
                 return false;
             URIs.Add(toAdd);
+            return true;
+        }
+
+        public bool AddPushURI(URIish toAdd)
+        {
+            if (PushURIs.Contains(toAdd))
+                return false;
+            PushURIs.Add(toAdd);
             return true;
         }
 

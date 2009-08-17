@@ -39,12 +39,8 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using GitSharp.Util;
-using GitSharp.Exceptions;
 using System.Diagnostics;
 
 namespace GitSharp
@@ -52,14 +48,11 @@ namespace GitSharp
     [Complete]
     public class LockFile
     {
-        private FileInfo refFile;
-        private FileInfo lockFile;
-
-        private FileStream os;
-
-        private FileLock fLck;
-
-        private bool haveLock;
+        private FileInfo _refFile;
+        private FileInfo _lockFile;
+        private FileStream _os;
+        private FileLock _fLck;
+        private bool _haveLock;
 
 
         public DateTime CommitLastModified { get; private set; }
@@ -67,38 +60,39 @@ namespace GitSharp
 
         public LockFile(FileInfo file)
         {
-            refFile = file;
-            lockFile = PathUtil.CombineFilePath(refFile.Directory, refFile.Name + ".lock");
+            _refFile = file;
+            _lockFile = PathUtil.CombineFilePath(_refFile.Directory, _refFile.Name + ".lock");
         }
 
         public bool Lock()
         {
-            lockFile.Directory.Create();
-            if (lockFile.Exists)
+            _lockFile.Directory.Create();
+            if (_lockFile.Exists)
+            {
                 return false;
+            }
 
             try
             {
-                haveLock = true;
-                os = lockFile.Create();
+                _haveLock = true;
+                _os = _lockFile.Create();
 
-                fLck = FileLock.TryLock(os, lockFile);
-                if (fLck == null)
+                _fLck = FileLock.TryLock(_os, _lockFile);
+                if (_fLck == null)
                 {
                     // We cannot use unlock() here as this file is not
                     // held by us, but we thought we created it. We must
                     // not delete it, as it belongs to some other process.
-                    //
-                    haveLock = false;
+                    _haveLock = false;
                     try
                     {
-                        os.Close();
+                        _os.Close();
                     }
                     catch (Exception)
                     {
                         // Fail by returning haveLck = false.
                     }
-                    os = null;
+                    _os = null;
                 }
             }
             catch (Exception)
@@ -107,14 +101,18 @@ namespace GitSharp
                 throw;
             }
 
-            return haveLock;
+            return _haveLock;
         }
 
         public bool LockForAppend()
         {
             if (!Lock())
+            {
                 return false;
+            }
+
             CopyCurrentContent();
+
             return true;
         }
 
@@ -124,13 +122,13 @@ namespace GitSharp
             RequireLock();
             try
             {
-                FileStream fis = refFile.OpenRead();
+                FileStream fis = _refFile.OpenRead();
                 try
                 {
                     byte[] buf = new byte[2048];
                     int r;
                     while ((r = fis.Read(buf, 0, buf.Length)) >= 0)
-                        os.Write(buf, 0, r);
+                        _os.Write(buf, 0, r);
                 }
                 finally
                 {
@@ -147,65 +145,64 @@ namespace GitSharp
             {
                 Unlock();
                 throw;
-
             }
         }
 
         public void Unlock()
         {
-            if (os != null)
+            if (_os != null)
             {
-                if (fLck != null)
+                if (_fLck != null)
                 {
                     try
                     {
-                        fLck.Release();
+                        _fLck.Release();
                     }
                     catch (IOException)
                     {
                         // Huh?
                     }
-                    fLck = null;
+                    _fLck = null;
                 }
                 try
                 {
-                    os.Close();
+                    _os.Close();
                 }
                 catch (IOException)
                 {
                     // Ignore this
                 }
-                os = null;
+                _os = null;
             }
 
-            if (haveLock)
+            if (_haveLock)
             {
-                haveLock = false;
-                lockFile.Delete();
+                _haveLock = false;
+                _lockFile.Delete();
             }
         }
 
         public bool Commit()
         {
-            if (os != null)
+            if (_os != null)
             {
                 Unlock();
-                throw new InvalidOperationException("Lock on " + refFile + " not closed.");
+                throw new InvalidOperationException("Lock on " + _refFile + " not closed.");
             }
 
             SaveStatInformation();
             try
             {
-                lockFile.MoveTo(refFile.FullName);
+                _lockFile.MoveTo(_refFile.FullName);
                 return true;
             }
             catch (Exception)
             {
                 try
                 {
-                    if (refFile.Exists) refFile.Delete();
+                    if (_refFile.Exists) _refFile.Delete();
 
-                    lockFile.MoveTo(refFile.FullName);
+                    _lockFile.MoveTo(_refFile.FullName);
                     return true;
                 }
                 catch (Exception)
@@ -223,11 +220,11 @@ namespace GitSharp
             RequireLock();
             try
             {
-                os.Write(content, 0, content.Length);
-                os.Flush();
-                fLck.Release();
-                os.Close();
-                os = null;
+                _os.Write(content, 0, content.Length);
+                _os.Flush();
+                _fLck.Release();
+                _os.Close();
+                _os = null;
             }
             catch (Exception)
             {
@@ -241,13 +238,13 @@ namespace GitSharp
             RequireLock();
             try
             {
-                var b = new BinaryWriter(os);
-                id.CopyTo(os);
+                var b = new BinaryWriter(_os);
+                id.CopyTo(_os);
                 b.Write('\n');
                 b.Flush();
-                fLck.Release();
+                _fLck.Release();
                 b.Close();
-                os = null;
+                _os = null;
             }
             catch (Exception)
             {
@@ -258,22 +255,24 @@ namespace GitSharp
 
         private void RequireLock()
         {
-            if (os == null)
+            if (_os == null)
             {
                 Unlock();
-                throw new InvalidOperationException("Lock on " + refFile + " not held.");
+                throw new InvalidOperationException("Lock on " + _refFile + " not held.");
             }
         }
 
         private void SaveStatInformation()
         {
-            if (this.NeedStatInformation)
-                this.CommitLastModified = lockFile.LastWriteTime;
+            if (NeedStatInformation)
+            {
+                CommitLastModified = _lockFile.LastWriteTime;
+            }
         }
 
         /**
          * Obtain the direct output stream for this lock.
-         * <p>
+         *
          * The stream may only be accessed once, and only after {@link #lock()} has
          * been successfully invoked and returned true. Callers must close the
          * stream prior to calling {@link #commit()} to commit the change.
@@ -296,37 +295,37 @@ namespace GitSharp
 
             public override void Write(byte[] b, int o, int n)
             {
-                m_lock_file.os.Write(b, o, n);
+                m_lock_file._os.Write(b, o, n);
             }
 
             public void write(byte[] b)
             {
-                m_lock_file.os.Write(b, 0, b.Length);
+                m_lock_file._os.Write(b, 0, b.Length);
             }
 
             public void write(int b)
             {
-                m_lock_file.os.WriteByte((byte)b);
+                m_lock_file._os.WriteByte((byte)b);
             }
 
             public override void Flush()
             {
-                m_lock_file.os.Flush();
+                m_lock_file._os.Flush();
             }
 
             public override void Close()
             {
                 try
                 {
-                    m_lock_file.os.Flush();
-                    m_lock_file.fLck.Release();
-                    m_lock_file.os.Close();
-                    m_lock_file.os = null;
+                    m_lock_file._os.Flush();
+                    m_lock_file._fLck.Release();
+                    m_lock_file._os.Close();
+                    m_lock_file._os = null;
                 }
-                catch (Exception ioe)
+                catch (Exception)
                 {
                     m_lock_file.Unlock();
-                    throw ioe;
+                    throw;
                 }
             }
 
@@ -390,10 +389,10 @@ namespace GitSharp
 
             private FileLock(FileStream fs, string file)
             {
-                this.File = file;
-                this.FileStream = fs;
-                this.FileStream.Lock(0, long.MaxValue);
-                this.Locked = true;
+                File = file;
+                FileStream = fs;
+                FileStream.Lock(0, long.MaxValue);
+                Locked = true;
             }
 
             public static FileLock TryLock(FileStream fs, FileInfo file)
@@ -412,18 +411,22 @@ namespace GitSharp
 
             public void Dispose()
             {
-                if (this.Locked == false)
+                if (Locked == false)
+                {
                     return;
-                this.Release();
+                }
+                Release();
             }
 
             public void Release()
             {
-                if (this.Locked == false)
+                if (Locked == false)
+                {
                     return;
+                }
                 try
                 {
-                    this.FileStream.Unlock(0, long.MaxValue);
+                    FileStream.Unlock(0, long.MaxValue);
 #if DEBUG
                     GC.SuppressFinalize(this); // [henon] disarm lock-release checker
 #endif
@@ -434,7 +437,7 @@ namespace GitSharp
                     Debug.WriteLine(GetType().Name + ": tried to unlock an unlocked filelock " + File);
                     throw;
                 }
-                this.Locked = false;
+                Locked = false;
                 Dispose();
             }
 
@@ -445,7 +448,6 @@ namespace GitSharp
                 Debug.WriteLine(GetType().Name + " has not been properly disposed: " + File);
             }
 #endif
-
         }
 
     }

@@ -45,7 +45,7 @@ using System.Text;
 namespace GitSharp
 {
     [Complete]
-    public interface ProgressMonitor
+    public interface IProgressMonitor
     {
         void Start(int totalTasks);
         void BeginTask(string title, int totalWork);

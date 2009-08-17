@@ -1,7 +1,7 @@
 ﻿/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
+ * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
  *
@@ -37,36 +37,17 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp
+namespace GitSharp.Transport
 {
-    [Complete]
-    public class NullProgressMonitor : IProgressMonitor 
+    /// <summary>
+    /// Marker interface for transports that supports fetching from a git bundle
+    /// (sneaker-net object transport).
+    /// 
+    /// Push support for a bundle is complex, as one does not have a peer to
+    /// communicate with to decide what the peer already knows. So push is not
+    /// supported by the bundle transport.
+    /// </summary>
+    public interface ITransportBundle : IPackTransport
     {
-        public static readonly NullProgressMonitor Instance = new NullProgressMonitor();
-
-        #region IProgressMonitor Members
-
-        public void Start(int totalTasks)
-        {
-        }
-
-        public void BeginTask(string title, int totalWork)
-        {
-        }
-
-        public void Update(int completed)
-        {
-        }
-
-        public void EndTask()
-        {
-        }
-
-        public bool IsCancelled
-        {
-            get { return false; }
-        }
-
-        #endregion
     }
 }

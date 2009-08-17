@@ -1,7 +1,7 @@
 ﻿/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
+ * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,36 +37,41 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp
+using System;
+
+namespace GitSharp.Transport
 {
-    [Complete]
-    public class NullProgressMonitor : IProgressMonitor 
+    public class TransportAmazonS3 : HttpTransport
     {
-        public static readonly NullProgressMonitor Instance = new NullProgressMonitor();
+        private static string S3_SCHEME = "amazon-s3";
 
-        #region IProgressMonitor Members
+	    public static bool canHandle(URIish uri)
+        {
+		    if (!uri.IsRemote)
+		    {
+		        return false;
+		    }
 
-        public void Start(int totalTasks)
+		    return S3_SCHEME == uri.Scheme;
+	    }
+
+        public TransportAmazonS3(Repository local, URIish uri) : base(local, uri)
         {
         }
 
-        public void BeginTask(string title, int totalWork)
+        public override IFetchConnection openFetch()
         {
+            throw new NotImplementedException();
         }
 
-        public void Update(int completed)
+        public override IPushConnection openPush()
         {
+            throw new NotImplementedException();
         }
 
-        public void EndTask()
+        public override void close()
         {
+            throw new NotImplementedException();
         }
-
-        public bool IsCancelled
-        {
-            get { return false; }
-        }
-
-        #endregion
     }
 }

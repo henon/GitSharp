@@ -39,18 +39,26 @@ using System.IO;
 
 namespace GitSharp.Transport
 {
-
     public class FetchHeadRecord
     {
+        public FetchHeadRecord(ObjectId newValue, bool notForMerge, string sourceName, URIish sourceUri)
+        {
+            NewValue = newValue;
+            NotForMerge = notForMerge;
+            SourceName = sourceName;
+            SourceURI = sourceUri;
+        }
+
         public ObjectId NewValue { get; private set; }
         public bool NotForMerge { get; private set; }
         public string SourceName { get; private set; }
         public URIish SourceURI { get; private set; }
 
-        public void Write(StringWriter sw)
+        public void Write(TextWriter sw)
         {
             string type;
             string name;
+
             if (SourceName.StartsWith(Constants.R_HEADS))
             {
                 type = "branch";
@@ -68,14 +76,18 @@ namespace GitSharp.Transport
             }
             else
             {
-                type = "";
+                type = string.Empty;
                 name = SourceName;
             }
 
             sw.Write(NewValue.Name);
             sw.Write('\t');
+
             if (NotForMerge)
+            {
                 sw.Write("not-for-merge");
+            }
+
             sw.Write('\t');
             sw.Write(type);
             sw.Write(" '");
@@ -85,5 +97,4 @@ namespace GitSharp.Transport
             sw.WriteLine();
         }
     }
-
 }

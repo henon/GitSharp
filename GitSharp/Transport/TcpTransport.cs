@@ -60,5 +60,4 @@ namespace GitSharp.Transport
         {
         }
     }
-
 }

@@ -69,13 +69,13 @@ namespace GitSharp.Patch
         //}
 
         /** @return number of ancestor revisions mentioned in this diff. */
-        public int getParentCount()
+        public override int getParentCount()
         {
             return oldIds.Length;
         }
 
         /** @return get the file mode of the first parent. */
-        public FileMode getOldMode()
+        public override FileMode getOldMode()
         {
             return getOldMode(0);
         }
@@ -93,7 +93,7 @@ namespace GitSharp.Patch
         }
 
         /** @return get the object id of the first parent. */
-        public AbbreviatedObjectId getOldId()
+        public override AbbreviatedObjectId getOldId()
         {
             return getOldId(0);
         }
@@ -110,7 +110,7 @@ namespace GitSharp.Patch
             return oldIds[nthParent];
         }
 
-        public string getScriptText(Encoding ocs, Encoding ncs)
+        public override string getScriptText(Encoding ocs, Encoding ncs)
         {
             Encoding[] cs = new Encoding[getParentCount() + 1];
             for (int i = 0; i < cs.Length; i++)
@@ -118,24 +118,8 @@ namespace GitSharp.Patch
             cs[getParentCount()] = ncs;
             return getScriptText(cs);
         }
-
-        /**
-         * Convert the patch script for this file into a string.
-         *
-         * @param charsetGuess
-         *            optional array to suggest the character set to use when
-         *            decoding each file's line. If supplied the array must have a
-         *            length of <code>{@link #getParentCount()} + 1</code>
-         *            representing the old revision character sets and the new
-         *            revision character set.
-         * @return the patch script, as a Unicode string.
-         */
-        public string getScriptText(Encoding[] charsetGuess)
-        {
-            return base.getScriptText(charsetGuess);
-        }
-
-        public int parseGitHeaders(int ptr, int end)
+        
+        public override int parseGitHeaders(int ptr, int end)
         {
             while (ptr < end)
             {
@@ -146,7 +130,8 @@ namespace GitSharp.Patch
                     break;
 
                 }
-                else if (RawParseUtils.match(buf, ptr, OLD_NAME) >= 0)
+                
+                if (RawParseUtils.match(buf, ptr, OLD_NAME) >= 0)
                 {
                     parseOldName(ptr, eol);
 
@@ -187,7 +172,7 @@ namespace GitSharp.Patch
             return ptr;
         }
 
-        protected void parseIndexLine(int ptr, int eol)
+        public override void parseIndexLine(int ptr, int eol)
         {
             // "index $asha1,$bsha1..$csha1"
             //
@@ -209,14 +194,14 @@ namespace GitSharp.Patch
             oldModes = new FileMode[oldIds.Length];
         }
 
-        protected void parseNewFileMode(int ptr, int eol)
+        public override void parseNewFileMode(int ptr, int eol)
         {
             for (int i = 0; i < oldModes.Length; i++)
                 oldModes[i] = FileMode.Missing;
             base.parseNewFileMode(ptr, eol);
         }
 
-        public HunkHeader newHunkHeader(int offset)
+        public override HunkHeader newHunkHeader(int offset)
         {
             return new CombinedHunkHeader(this, offset);
         }

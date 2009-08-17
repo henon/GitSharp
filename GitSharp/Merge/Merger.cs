@@ -128,7 +128,7 @@ namespace GitSharp.Merge
                 {
 				    sourceCommits[i] = walk.parseCommit(sourceObjects[i]);
 			    } 
-                catch (IncorrectObjectTypeException err) 
+                catch (IncorrectObjectTypeException) 
                 {
 				    sourceCommits[i] = null;
 			    }

@@ -1,7 +1,7 @@
 ﻿/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
+ * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,36 +37,48 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp
+using System;
+using System.IO;
+using GitSharp.Util;
+
+namespace GitSharp.Transport
 {
-    [Complete]
-    public class NullProgressMonitor : IProgressMonitor 
+    public class TransportLocal : Transport, IPackTransport
     {
-        public static readonly NullProgressMonitor Instance = new NullProgressMonitor();
+        private const string PWD = ".";
 
-        #region IProgressMonitor Members
-
-        public void Start(int totalTasks)
+        public TransportLocal(Repository local, URIish uri) : base(local, uri)
         {
         }
 
-        public void BeginTask(string title, int totalWork)
+        public static bool canHandle(URIish uri)
         {
+            if (uri.Host != null || uri.Port > 0 || uri.User != null || uri.Pass != null || uri.Path == null)
+            {
+                return false;
+            }
+
+            if ("file".Equals(uri.Scheme) || uri.Scheme == null)
+            {
+                return FS.resolve(new DirectoryInfo(PWD), uri.Path).Exists;
+            }
+
+            return false;
         }
 
-        public void Update(int completed)
+        public override IFetchConnection openFetch()
         {
+            throw new NotImplementedException();
         }
 
-        public void EndTask()
+        public override IPushConnection openPush()
         {
+            throw new NotImplementedException();
         }
 
-        public bool IsCancelled
+        public override void close()
         {
-            get { return false; }
+            throw new NotImplementedException();
         }
-
-        #endregion
     }
 }

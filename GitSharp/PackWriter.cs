@@ -188,8 +188,8 @@ namespace GitSharp
         private readonly Repository db;
         private PackOutputStream pos;
         private readonly Deflater deflater;
-        private readonly ProgressMonitor initMonitor;
-        private readonly ProgressMonitor writeMonitor;
+        private readonly IProgressMonitor initMonitor;
+        private readonly IProgressMonitor writeMonitor;
         private readonly byte[] buf = new byte[16384]; // 16 KB
         private readonly WindowCursor windowCursor = new WindowCursor();
         private List<ObjectToPack> sortedByName;
@@ -201,13 +201,13 @@ namespace GitSharp
         private int outputVersion;
         private bool ignoreMissingUninteresting = true;
 
-        public PackWriter(Repository repo, ProgressMonitor monitor)
+        public PackWriter(Repository repo, IProgressMonitor monitor)
             : this(repo, monitor, monitor)
         {
             
         }
 
-        public PackWriter(Repository repo, ProgressMonitor imonitor, ProgressMonitor wmonitor)
+        public PackWriter(Repository repo, IProgressMonitor imonitor, IProgressMonitor wmonitor)
         {
             db = repo;
             initMonitor = imonitor;
@@ -296,7 +296,7 @@ namespace GitSharp
             }
         }
 
-        public void preparePack<T>(List<T> interestingObjects, List<T> uninterestingObjects) where T: ObjectId
+        public void preparePack<T>(IEnumerable<T> interestingObjects, IEnumerable<T> uninterestingObjects) where T : ObjectId
         {
             ObjectWalk walker = setUpWalker(interestingObjects, uninterestingObjects);
             findObjectsToPack(walker);
@@ -604,7 +604,7 @@ namespace GitSharp
             pos.Write(packcsum, 0, packcsum.Length);
         }
 
-        private ObjectWalk setUpWalker<T>(List<T> interestingObjects, List<T> uninterestingObjects) where T : ObjectId
+        private ObjectWalk setUpWalker<T>(IEnumerable<T> interestingObjects, IEnumerable<T> uninterestingObjects) where T : ObjectId
         {
             ObjectWalk walker = new ObjectWalk(db);
             walker.sort(RevSort.Strategy.TOPO);
@@ -641,7 +641,7 @@ namespace GitSharp
 
         private void findObjectsToPack(ObjectWalk walker)
         {
-            // [caytchen] TODO: ProgressMonitor.UNKNOWN constant!
+            // [caytchen] TODO: IProgressMonitor.UNKNOWN constant!
             initMonitor.BeginTask(COUNTING_OBJECTS_PROGRESS, -1);
             RevObject o;
 

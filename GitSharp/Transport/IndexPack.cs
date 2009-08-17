@@ -196,7 +196,7 @@ namespace GitSharp.Transport
             setObjectChecker(on ? new ObjectChecker() : null);
         }
 
-        public void index(ProgressMonitor progress)
+        public void index(IProgressMonitor progress)
         {
             progress.Start(2);
             try
@@ -277,11 +277,11 @@ namespace GitSharp.Transport
                     dstPack.Delete();
                 if (dstIdx != null)
                     dstIdx.Delete();
-                throw err;
+                throw;
             }
         }
 
-        private void resolveDeltas(ProgressMonitor progress)
+        private void resolveDeltas(IProgressMonitor progress)
         {
             progress.BeginTask(PROGRESS_RESOLVE_DELTA, deltaCount);
             int last = entryCount;
@@ -418,7 +418,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private void fixThinPack(ProgressMonitor progress)
+        private void fixThinPack(IProgressMonitor progress)
         {
             growEntries();
 

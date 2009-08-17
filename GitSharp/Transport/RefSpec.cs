@@ -69,6 +69,13 @@ namespace GitSharp.Transport
             Destination = null;
         }
 
+        public RefSpec(string source, string destination)
+            : this()
+        {
+            Source = source;
+            Destination = destination;
+        }
+
         public RefSpec(string spec)
         {
             string s = spec;
@@ -125,17 +132,24 @@ namespace GitSharp.Transport
         {
             RefSpec r = new RefSpec(this);
             r.Destination = destination;
+
             if (IsWildcard(r.Destination) && r.Source == null)
+            {
                 throw new ArgumentException("Source is not a wildcard.");
+            }
             if (IsWildcard(r.Source) != IsWildcard(r.Destination))
+            {
                 throw new ArgumentException("Source/Destination must match.");
+            }
             return r;
         }
 
         public RefSpec SetSourceDestination(string source, string destination)
         {
             if (IsWildcard(source) != IsWildcard(destination))
+            {
                 throw new ArgumentException("Source/Destination must match.");
+            }
 
             return new RefSpec(this) { Wildcard = IsWildcard(source), Source = source, Destination = destination };
         }
@@ -202,7 +216,9 @@ namespace GitSharp.Transport
         {
             if (s == null) return false;
             if (Wildcard)
+            {
                 return refName.StartsWith(s.Slice(0, s.Length - 1));
+            }
             return refName.Equals(s);
         }
 

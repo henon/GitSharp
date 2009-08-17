@@ -153,7 +153,7 @@ namespace GitSharp.Merge
 			    try {
 				    resultTree = cache.writeTree(getObjectWriter());
 				    return true;
-			    } catch (UnmergedPathException upe) {
+			    } catch (UnmergedPathException) {
 				    resultTree = null;
 				    return false;
 			    }

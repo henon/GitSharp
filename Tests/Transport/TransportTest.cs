@@ -42,7 +42,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Transport
 {
     [TestFixture]
     public class TransportTest : RepositoryTestCase

@@ -35,109 +35,134 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
-
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
+using GitSharp.Exceptions;
+using GitSharp.RevWalk;
+using GitSharp.Transport;
+using NUnit.Framework;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Transport
 {
     [TestFixture]
     public class BundleWriterTest : RepositoryTestCase
     {
-#if false
-	public void testWrite0() throws Exception {
-		// Create a tiny bundle, (well one of) the first commits only
-		final byte[] bundle = makeBundle("refs/heads/firstcommit",
-				"42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", null);
+        #region Test methods
 
-		// Then we clone a new repo from that bundle and do a simple test. This
-		// makes sure
-		// we could read the bundle we created.
-		Repository newRepo = createNewEmptyRepo();
-		FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
-		Ref advertisedRef = fetchResult
-				.getAdvertisedRef("refs/heads/firstcommit");
+        #region testWrite0
 
-		// We expect firstcommit to appear by id
-		assertEquals("42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", advertisedRef
-				.getObjectId().name());
-		// ..and by name as the bundle created a new ref
-		assertEquals("42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", newRepo
-				.resolve("refs/heads/firstcommit").name());
-	}
+        [Test]
+        public void testWrite0()
+        {
+            // Create a tiny bundle, (well one of) the first commits only
+            byte[] bundle = makeBundle("refs/heads/firstcommit", "42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", null);
 
-	/**
-	 * Incremental bundle test
-	 * 
-	 * @throws Exception
-	 */
-	public void testWrite1() throws Exception {
-		byte[] bundle;
+            // Then we clone a new repo from that bundle and do a simple test. This
+            // makes sure
+            // we could read the bundle we created.
+            Repository newRepo = createNewEmptyRepo();
+            FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
+            Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/firstcommit");
 
-		// Create a small bundle, an early commit
-		bundle = makeBundle("refs/heads/aa", db.resolve("a").name(), null);
+            // We expect firstcommit to appear by id
+            Assert.AreEqual("42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", advertisedRef.ObjectId.Name);
+            // ..and by name as the bundle created a new ref
+            Assert.AreEqual("42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", newRepo.Resolve(("refs/heads/firstcommit")).Name);
+        }
 
-		// Then we clone a new repo from that bundle and do a simple test. This
-		// makes sure
-		// we could read the bundle we created.
-		Repository newRepo = createNewEmptyRepo();
-		FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
-		Ref advertisedRef = fetchResult.getAdvertisedRef("refs/heads/aa");
+        #endregion
 
-		assertEquals(db.resolve("a").name(), advertisedRef.getObjectId().name());
-		assertEquals(db.resolve("a").name(), newRepo.resolve("refs/heads/aa")
-				.name());
-		assertNull(newRepo.resolve("refs/heads/a"));
+        /**
+         * Incremental bundle test
+         * 
+         * @throws Exception
+         */
 
-		// Next an incremental bundle
-		bundle = makeBundle("refs/heads/cc", db.resolve("c").name(),
-				new RevWalk(db).parseCommit(db.resolve("a").toObjectId()));
-		fetchResult = fetchFromBundle(newRepo, bundle);
-		advertisedRef = fetchResult.getAdvertisedRef("refs/heads/cc");
-		assertEquals(db.resolve("c").name(), advertisedRef.getObjectId().name());
-		assertEquals(db.resolve("c").name(), newRepo.resolve("refs/heads/cc")
-				.name());
-		assertNull(newRepo.resolve("refs/heads/c"));
-		assertNull(newRepo.resolve("refs/heads/a")); // still unknown
+        #region testWrite1
 
-		try {
-			// Check that we actually needed the first bundle
-			Repository newRepo2 = createNewEmptyRepo();
-			fetchResult = fetchFromBundle(newRepo2, bundle);
-			fail("We should not be able to fetch from bundle with prerequisites that are not fulfilled");
-		} catch (MissingBundlePrerequisiteException e) {
-			assertTrue(e.getMessage()
-					.indexOf(db.resolve("refs/heads/a").name()) >= 0);
-		}
-	}
+        [Test]
+        public void testWrite1()
+        {
+            byte[] bundle;
 
-	private FetchResult fetchFromBundle(final Repository newRepo,
-			final byte[] bundle) throws URISyntaxException,
-			NotSupportedException, TransportException {
-		final URIish uri = new URIish("in-memory://");
-		final ByteArrayInputStream in = new ByteArrayInputStream(bundle);
-		final RefSpec rs = new RefSpec("refs/heads/*:refs/heads/*");
-		final Set<RefSpec> refs = Collections.singleton(rs);
-		return new TransportBundleStream(newRepo, uri, in).fetch(
-				NullProgressMonitor.INSTANCE, refs);
-	}
+            // Create a small bundle, an early commit
+            bundle = makeBundle("refs/heads/aa", db.Resolve("a").Name, null);
 
-	private byte[] makeBundle(final String name,
-			final String anObjectToInclude, final RevCommit assume)
-			throws FileNotFoundException, IOException {
-		final BundleWriter bw;
+            // Then we clone a new repo from that bundle and do a simple test. This
+            // makes sure
+            // we could read the bundle we created.
+            Repository newRepo = createNewEmptyRepo();
+            FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
+            Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/aa");
 
-		bw = new BundleWriter(db, NullProgressMonitor.INSTANCE);
-		bw.include(name, ObjectId.fromString(anObjectToInclude));
-		if (assume != null)
-			bw.assume(assume);
-		final ByteArrayOutputStream out = new ByteArrayOutputStream();
-		bw.writeBundle(out);
-		return out.toByteArray();
-	}
-#endif
+            Assert.AreEqual(db.Resolve("a").Name, advertisedRef.ObjectId.Name);
+            Assert.AreEqual(db.Resolve("a").Name, newRepo.Resolve("refs/heads/aa").Name);
+            Assert.IsNull(newRepo.Resolve("refs/heads/a"));
+
+            // Next an incremental bundle
+            bundle = makeBundle(
+                    "refs/heads/cc",
+                    db.Resolve("c").Name,
+                    new GitSharp.RevWalk.RevWalk(db).parseCommit(db.Resolve("a").ToObjectId()));
+
+            fetchResult = fetchFromBundle(newRepo, bundle);
+            advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/cc");
+            Assert.AreEqual(db.Resolve("c").Name, advertisedRef.ObjectId.Name);
+            Assert.AreEqual(db.Resolve("c").Name, newRepo.Resolve("refs/heads/cc").Name);
+            Assert.IsNull(newRepo.Resolve("refs/heads/c"));
+            Assert.IsNull(newRepo.Resolve("refs/heads/a")); // still unknown
+
+            try
+            {
+                // Check that we actually needed the first bundle
+                Repository newRepo2 = createNewEmptyRepo();
+                fetchResult = fetchFromBundle(newRepo2, bundle);
+                Assert.Fail("We should not be able to fetch from bundle with prerequisites that are not fulfilled");
+            }
+            catch (MissingBundlePrerequisiteException e)
+            {
+                Assert.IsTrue(e.Message.IndexOf(db.Resolve("refs/heads/a").Name) >= 0);
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Other methods
+
+        #region fetchFromBundle
+
+        private FetchResult fetchFromBundle(Repository newRepo, byte[] bundle)
+        {
+            var uri = new URIish("in-memory://");
+            var @in = new MemoryStream(bundle);
+            var rs = new RefSpec("refs/heads/*:refs/heads/*");
+            var refs = new HashSet<RefSpec>(Enumerable.Repeat(rs, 1));
+            return new TransportBundleStream(newRepo, uri, @in).fetch(NullProgressMonitor.Instance, refs);
+        }
+
+        #endregion
+
+        #region makeBundle
+
+        private byte[] makeBundle(String name, String anObjectToInclude, RevCommit assume)
+        {
+            BundleWriter bw = new BundleWriter(db, NullProgressMonitor.Instance);
+            bw.include(name, ObjectId.FromString(anObjectToInclude));
+            if (assume != null)
+            {
+                bw.assume(assume);
+            }
+            var @out = new MemoryStream();
+            bw.writeBundle(@out);
+            return @out.ToArray();
+        }
+
+        #endregion
+
+        #endregion
     }
 }

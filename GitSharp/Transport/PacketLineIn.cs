@@ -84,7 +84,7 @@ namespace GitSharp.Transport
             lenbuffer = new byte[4];
         }
 
-        public Stream sideband(ProgressMonitor pm)
+        public Stream sideband(IProgressMonitor pm)
         {
             return new SideBandInputStream(this, ins, pm);
         }

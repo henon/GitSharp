@@ -114,28 +114,28 @@ namespace GitSharp.Transport
 		    _packWriter.Thin = exc.Count > 0;
 		    _packWriter.preparePack(inc, exc);
 
-            StreamWriter w = new StreamWriter(os);
+            BinaryWriter w = new BinaryWriter(os);
 
-		    w.Write(Constants.V2_BUNDLE_SIGNATURE);
+		    w.Write(Constants.V2_BUNDLE_SIGNATURE.ToCharArray());
             w.Write('\n');
 
 		    foreach (RevCommit a in _assume) 
             {
                 w.Write('-');
-			    a.CopyTo(w.BaseStream);
+			    a.CopyTo(w);
 			    if (a.getRawBuffer() != null)
                 {
                     w.Write(' ');
-                    w.Write(a.getShortMessage());
+                    w.Write(a.getShortMessage().ToCharArray());
 			    }
                 w.Write('\n');
 		    }
 
             foreach(var entry in _include)
             {
-                entry.Value.CopyTo(w.BaseStream);
+                entry.Value.CopyTo(w);
                 w.Write(' ');
-                w.Write(entry.Key);
+                w.Write(entry.Key.ToCharArray());
                 w.Write('\n');
             }
 

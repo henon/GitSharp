@@ -138,16 +138,11 @@ namespace GitSharp
             if (encoding == null)
                 encoding = Constants.CHARSET;
             var os = new MemoryStream();
-            var w = new BinaryWriter(os);
-            StreamWriter sw;
-            if (encoding != Constants.CHARSET)
-                sw = new StreamWriter(os, encoding);
-            else
-                sw = new StreamWriter(os);
+            var w = new BinaryWriter(os, encoding);
 
             w.Write(htree);
             w.Write(' ');
-            c.TreeId.CopyTo(os);
+            c.TreeId.CopyTo(w);
             w.Write('\n');
 
             ObjectId[] ps = c.ParentIds;
@@ -155,22 +150,18 @@ namespace GitSharp
             {
                 w.Write(hparent);
                 w.Write(' ');
-                ps[i].CopyTo(os);
+                ps[i].CopyTo(w);
                 w.Write('\n');
             }
 
             w.Write(hauthor);
             w.Write(' ');
-            //w.Flush();
-            sw.Write(c.Author.ToExternalString());
-            sw.Flush();
+            w.Write(c.Author.ToExternalString().ToCharArray());
             w.Write('\n');
 
             w.Write(hcommitter);
             w.Write(' ');
-            //w.Flush();
-            sw.Write(c.Committer.ToExternalString());
-            sw.Flush();
+            w.Write(c.Committer.ToExternalString().ToCharArray());
             w.Write('\n');
 
             if (encoding != Encoding.UTF8)
@@ -182,12 +173,7 @@ namespace GitSharp
             }
 
             w.Write('\n');
-            //w.Flush();
-            //var encoding_writer = new StreamWriter(os, encoding);
-            //encoding_writer.Write(c.Message);
-            //encoding_writer.Flush();
-            sw.Write(c.Message);
-            sw.Flush();
+            w.Write(c.Message.ToCharArray());
             return WriteCommit(os.ToArray());
         }
 
@@ -200,26 +186,25 @@ namespace GitSharp
         {
             var stream = new MemoryStream();
             var w = new BinaryWriter(stream);
-            var sw = new StreamWriter(stream);
 
-            sw.Write("object ");
-            tag.Id.CopyTo(stream);
+            w.Write("object ".ToCharArray());
+            tag.Id.CopyTo(w);
             w.Write('\n');
 
-            sw.Write("type ");
-            w.Write(tag.TagType);
+            w.Write("type ".ToCharArray());
+            w.Write(tag.TagType.ToCharArray());
             w.Write('\n');
 
-            sw.Write("tag ");
-            sw.Write(tag.TagName);
+            w.Write("tag ".ToCharArray());
+            w.Write(tag.TagName.ToCharArray());
             w.Write('\n');
 
-            sw.Write("tagger ");
-            sw.Write(tag.Author.ToExternalString());
+            w.Write("tagger ".ToCharArray());
+            w.Write(tag.Author.ToExternalString().ToCharArray());
             w.Write('\n');
 
             w.Write('\n');
-            sw.Write(tag.Message);
+            w.Write(tag.Message.ToCharArray());
             w.Close();
 
             return WriteTag(stream.ToArray());

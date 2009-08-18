@@ -239,7 +239,7 @@ namespace GitSharp
             try
             {
                 var b = new BinaryWriter(_os);
-                id.CopyTo(_os);
+                id.CopyTo(b);
                 b.Write('\n');
                 b.Flush();
                 _fLck.Release();

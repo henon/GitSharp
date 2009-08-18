@@ -88,9 +88,9 @@ namespace GitSharp
             return Equals(((AnyObjectId)obj));
         }
 
-        public void CopyTo(Stream s)
+        public void CopyTo(BinaryWriter s)
         {
-            new BinaryWriter(s).Write(ToHexByteArray());
+            s.Write(ToHexByteArray());
         }
 
         /// <summary>

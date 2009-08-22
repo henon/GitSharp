@@ -253,7 +253,8 @@ namespace GitSharp.Util
         const int asciiDiff = 48;
 
         /// <summary>
-        /// Convert decimal to any base
+        /// This function takes two arguments; the integer value to be converted and the base value (2, 8, or 16) 
+        /// to which the number is converted to.
         /// </summary>
         /// <param name="iDec">the decimal</param>
         /// <param name="numbase">the base of the output</param>
@@ -277,7 +278,34 @@ namespace GitSharp.Util
             return strBin;
         }
 
-
+        /// <summary>
+        /// This function takes two arguments; a string value representing the binary, octal, or hexadecimal 
+        /// value and the corresponding integer base value respective to the first argument. For instance, 
+        /// if you pass the first argument value "1101", then the second argument should take the value "2".
+        /// </summary>
+        /// <param name="sBase">the string in base sBase notation</param>
+        /// <param name="numbase">the base to convert from</param>
+        /// <returns>decimal</returns>
+        public static int BaseToDecimal(string sBase, int numbase)
+        {
+            int dec = 0;
+            int b;
+            int iProduct = 1;
+            string sHexa = "";
+            if (numbase > base10)
+                for (int i = 0; i < cHexa.Length; i++)
+                    sHexa += cHexa.GetValue(i).ToString();
+            for (int i = sBase.Length - 1; i >= 0; i--, iProduct *= numbase)
+            {
+                string sValue = sBase[i].ToString();
+                if (sValue.IndexOfAny(cHexa) >= 0)
+                    b = iHexaNumeric[sHexa.IndexOf(sBase[i])];
+                else
+                    b = (int)sBase[i] - asciiDiff;
+                dec += (b * iProduct);
+            }
+            return dec;
+        }
 
         /**
          * Write a 16 bit integer as a sequence of 2 bytes (network byte order).

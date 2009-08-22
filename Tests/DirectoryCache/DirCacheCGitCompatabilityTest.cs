@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -38,167 +39,183 @@
 namespace GitSharp.Tests.DirectoryCache
 {
     using NUnit.Framework;
+    using System.Collections.Generic;
+    using GitSharp.DirectoryCache;
+    using TreeWalk = GitSharp.TreeWalk.TreeWalk;
+    using System.Text;
+    using GitSharp.Util;
+
     [TestFixture]
     public class DirCacheCGitCompatabilityTest : RepositoryTestCase
     {
-#if false
-	private final File index = pathOf("gitgit.index");
 
-	public void testReadIndex_LsFiles() throws Exception {
-		final Map<String, CGitIndexRecord> ls = readLsFiles();
-		final DirCache dc = new DirCache(index);
-		assertEquals(0, dc.getEntryCount());
-		dc.read();
-		assertEquals(ls.size(), dc.getEntryCount());
-		{
-			final Iterator<CGitIndexRecord> rItr = ls.values().iterator();
-			for (int i = 0; rItr.hasNext(); i++)
-				assertEqual(rItr.next(), dc.getEntry(i));
-		}
-	}
+        private System.IO.FileInfo index = new System.IO.FileInfo("Resources/gitgit.index");
 
-	public void testTreeWalk_LsFiles() throws Exception {
-		final Map<String, CGitIndexRecord> ls = readLsFiles();
-		final DirCache dc = new DirCache(index);
-		assertEquals(0, dc.getEntryCount());
-		dc.read();
-		assertEquals(ls.size(), dc.getEntryCount());
-		{
-			final Iterator<CGitIndexRecord> rItr = ls.values().iterator();
-			final TreeWalk tw = new TreeWalk(db);
-			tw.reset();
-			tw.setRecursive(true);
-			tw.addTree(new DirCacheIterator(dc));
-			while (rItr.hasNext()) {
-				final DirCacheIterator dcItr;
+        [Test]
+        public void testReadIndex_LsFiles()
+        {
+            Dictionary<string, CGitIndexRecord> ls = readLsFiles();
+            DirCache dc = new DirCache(index);
+            Assert.AreEqual(0, dc.getEntryCount());
+            dc.read();
+            Assert.AreEqual(ls.Count, dc.getEntryCount());
+            int i = 0;
+            foreach (var val in ls.Values)
+            {
+                i++;
+                Assert.AreEqual(val, dc.getEntry(i));
+            }
+        }
 
-				assertTrue(tw.next());
-				dcItr = tw.getTree(0, DirCacheIterator.class);
-				assertNotNull(dcItr);
+        [Test]
+        public void testTreeWalk_LsFiles()
+        {
+            Dictionary<string, CGitIndexRecord> ls = readLsFiles();
+            DirCache dc = new DirCache(index);
+            Assert.AreEqual(0, dc.getEntryCount());
+            dc.read();
+            Assert.AreEqual(ls.Count, dc.getEntryCount());
+            {
+                var rItr = ls.Values.GetEnumerator();
+                TreeWalk tw = new TreeWalk(db);
+                tw.reset();
+                tw.setRecursive(true);
+                tw.addTree(new DirCacheIterator(dc));
+                while (rItr.MoveNext())
+                {
+                    Assert.IsTrue(tw.next());
+                    var dcItr = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
+                    Assert.IsNotNull(dcItr);
+                    AssertAreEqual(rItr.Current, dcItr.getDirCacheEntry());
+                }
+            }
+        }
 
-				assertEqual(rItr.next(), dcItr.getDirCacheEntry());
-			}
-		}
-	}
+        private static void AssertAreEqual(CGitIndexRecord c, DirCacheEntry j)
+        {
+            Assert.IsNotNull(c);
+            Assert.IsNotNull(j);
 
-	private static void assertEqual(final CGitIndexRecord c,
-			final DirCacheEntry j) {
-		assertNotNull(c);
-		assertNotNull(j);
+            Assert.AreEqual(c.path, j.getPathString());
+            Assert.AreEqual(c.id, j.getObjectId());
+            Assert.AreEqual(c.mode, j.getRawMode());
+            Assert.AreEqual(c.stage, j.getStage());
+        }
 
-		assertEquals(c.path, j.getPathString());
-		assertEquals(c.id, j.getObjectId());
-		assertEquals(c.mode, j.getRawMode());
-		assertEquals(c.stage, j.getStage());
-	}
+        [Test]
+        public void testReadIndex_DirCacheTree()
+        {
+            Dictionary<string, CGitIndexRecord> cList = readLsFiles();
+            Dictionary<string, CGitLsTreeRecord> cTree = readLsTree();
+            DirCache dc = new DirCache(index);
+            Assert.AreEqual(0, dc.getEntryCount());
+            dc.read();
+            Assert.AreEqual(cList.Count, dc.getEntryCount());
 
-	public void testReadIndex_DirCacheTree() throws Exception {
-		final Map<String, CGitIndexRecord> cList = readLsFiles();
-		final Map<String, CGitLsTreeRecord> cTree = readLsTree();
-		final DirCache dc = new DirCache(index);
-		assertEquals(0, dc.getEntryCount());
-		dc.read();
-		assertEquals(cList.size(), dc.getEntryCount());
+            DirCacheTree jTree = dc.getCacheTree(false);
+            Assert.IsNotNull(jTree);
+            Assert.AreEqual("", jTree.getNameString());
+            Assert.AreEqual("", jTree.getPathString());
+            Assert.IsTrue(jTree.isValid());
+            Assert.AreEqual(ObjectId
+                    .FromString("698dd0b8d0c299f080559a1cffc7fe029479a408"), jTree
+                    .getObjectId());
+            Assert.AreEqual(cList.Count, jTree.getEntrySpan());
 
-		final DirCacheTree jTree = dc.getCacheTree(false);
-		assertNotNull(jTree);
-		assertEquals("", jTree.getNameString());
-		assertEquals("", jTree.getPathString());
-		assertTrue(jTree.isValid());
-		assertEquals(ObjectId
-				.fromString("698dd0b8d0c299f080559a1cffc7fe029479a408"), jTree
-				.getObjectId());
-		assertEquals(cList.size(), jTree.getEntrySpan());
+            List<CGitLsTreeRecord> subtrees = new List<CGitLsTreeRecord>();
+            foreach (CGitLsTreeRecord r in cTree.Values)
+            {
+                if (FileMode.Tree.Equals(r.mode))
+                    subtrees.Add(r);
+            }
+            Assert.AreEqual(subtrees.Count, jTree.getChildCount());
 
-		final ArrayList<CGitLsTreeRecord> subtrees = new ArrayList<CGitLsTreeRecord>();
-		for (final CGitLsTreeRecord r : cTree.values()) {
-			if (FileMode.TREE.equals(r.mode))
-				subtrees.add(r);
-		}
-		assertEquals(subtrees.size(), jTree.getChildCount());
+            for (int i = 0; i < jTree.getChildCount(); i++)
+            {
+                DirCacheTree sj = jTree.getChild(i);
+                CGitLsTreeRecord sc = subtrees[i];
+                Assert.AreEqual(sc.path, sj.getNameString());
+                Assert.AreEqual(sc.path + "/", sj.getPathString());
+                Assert.IsTrue(sj.isValid());
+                Assert.AreEqual(sc.id, sj.getObjectId());
+            }
+        }
 
-		for (int i = 0; i < jTree.getChildCount(); i++) {
-			final DirCacheTree sj = jTree.getChild(i);
-			final CGitLsTreeRecord sc = subtrees.get(i);
-			assertEquals(sc.path, sj.getNameString());
-			assertEquals(sc.path + "/", sj.getPathString());
-			assertTrue(sj.isValid());
-			assertEquals(sc.id, sj.getObjectId());
-		}
-	}
+        private System.IO.FileInfo pathOf(string name)
+        {
+            return new System.IO.FileInfo( name);
+        }
 
-	private File pathOf(final String name) {
-		return JGitTestUtil.getTestResourceFile(name);
-	}
+        private Dictionary<string, CGitIndexRecord> readLsFiles()
+        {
+            Dictionary<string, CGitIndexRecord> r = new Dictionary<string, CGitIndexRecord>();
+            using (var br = new System.IO.StreamReader(new System.IO.FileStream("Resources/gitgit.lsfiles", System.IO.FileMode.Open, System.IO.FileAccess.Read), Encoding.UTF8))
+            {
+                string line;
+                while ((line = br.ReadLine()) != null)
+                {
+                    CGitIndexRecord cr = new CGitIndexRecord(line);
+                    r[cr.path]= cr;
+                }
+            }
+            return r;
+        }
 
-	private Map<String, CGitIndexRecord> readLsFiles() throws Exception {
-		final LinkedHashMap<String, CGitIndexRecord> r = new LinkedHashMap<String, CGitIndexRecord>();
-		final BufferedReader br = new BufferedReader(new InputStreamReader(
-				new FileInputStream(pathOf("gitgit.lsfiles")), "UTF-8"));
-		try {
-			String line;
-			while ((line = br.readLine()) != null) {
-				final CGitIndexRecord cr = new CGitIndexRecord(line);
-				r.put(cr.path, cr);
-			}
-		} finally {
-			br.close();
-		}
-		return r;
-	}
+        private Dictionary<string, CGitLsTreeRecord> readLsTree()
+        {
+            Dictionary<string, CGitLsTreeRecord> r = new Dictionary<string, CGitLsTreeRecord>();
+            using (var br = new System.IO.StreamReader(new System.IO.FileStream("Resources/gitgit.lstree", System.IO.FileMode.Open, System.IO.FileAccess.Read), Encoding.UTF8))
+            {
+                string line;
+                while ((line = br.ReadLine()) != null)
+                {
+                    CGitLsTreeRecord cr = new CGitLsTreeRecord(line);
+                    r[cr.path]= cr;
+                }
+            }
+            return r;
+        }
 
-	private Map<String, CGitLsTreeRecord> readLsTree() throws Exception {
-		final LinkedHashMap<String, CGitLsTreeRecord> r = new LinkedHashMap<String, CGitLsTreeRecord>();
-		final BufferedReader br = new BufferedReader(new InputStreamReader(
-				new FileInputStream(pathOf("gitgit.lstree")), "UTF-8"));
-		try {
-			String line;
-			while ((line = br.readLine()) != null) {
-				final CGitLsTreeRecord cr = new CGitLsTreeRecord(line);
-				r.put(cr.path, cr);
-			}
-		} finally {
-			br.close();
-		}
-		return r;
-	}
+        private class CGitIndexRecord
+        {
+            public int mode;
 
-	private static class CGitIndexRecord {
-		final int mode;
+            public ObjectId id;
 
-		final ObjectId id;
+            public int stage;
 
-		final int stage;
+            public string path;
 
-		final String path;
+            public CGitIndexRecord(string line)
+            {
+                int tab = line.IndexOf('\t');
+                int sp1 = line.IndexOf(' ');
+                int sp2 = line.IndexOf(' ', sp1 + 1);
+                mode = NB.BaseToDecimal(line.Slice(0, sp1), 8);
+                id = ObjectId.FromString(line.Slice(sp1 + 1, sp2));
+                stage = int.Parse(line.Slice(sp2 + 1, tab));
+                path = line.Substring(tab + 1);
+            }
+        }
 
-		CGitIndexRecord(final String line) {
-			final int tab = line.indexOf('\t');
-			final int sp1 = line.indexOf(' ');
-			final int sp2 = line.indexOf(' ', sp1 + 1);
-			mode = Integer.parseInt(line.substring(0, sp1), 8);
-			id = ObjectId.fromString(line.substring(sp1 + 1, sp2));
-			stage = Integer.parseInt(line.substring(sp2 + 1, tab));
-			path = line.substring(tab + 1);
-		}
-	}
+        private class CGitLsTreeRecord
+        {
+            public int mode;
 
-	private static class CGitLsTreeRecord {
-		final int mode;
+            public ObjectId id;
 
-		final ObjectId id;
+            public string path;
 
-		final String path;
+            public CGitLsTreeRecord(string line)
+            {
+                int tab = line.IndexOf('\t');
+                int sp1 = line.IndexOf(' ');
+                int sp2 = line.IndexOf(' ', sp1 + 1);
+                mode = NB.BaseToDecimal(line.Slice(0, sp1), 8);
+                id = ObjectId.FromString(line.Slice(sp2 + 1, tab));
+                path = line.Substring(tab + 1);
+            }
+        }
 
-		CGitLsTreeRecord(final String line) {
-			final int tab = line.indexOf('\t');
-			final int sp1 = line.indexOf(' ');
-			final int sp2 = line.indexOf(' ', sp1 + 1);
-			mode = Integer.parseInt(line.substring(0, sp1), 8);
-			id = ObjectId.fromString(line.substring(sp2 + 1, tab));
-			path = line.substring(tab + 1);
-		}
-	}
-#endif
     }
 }

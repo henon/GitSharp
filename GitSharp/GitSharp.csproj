@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -62,17 +62,27 @@
     <Compile Include="DirectoryCache\DirCacheBuildIterator.cs" />
     <Compile Include="DirectoryCache\DirCacheIterator.cs" />
     <Compile Include="Ensure.cs" />
+    <Compile Include="Exceptions\NoClosingBracketException.cs" />
     <Compile Include="Exceptions\CorruptObjectException.cs" />
     <Compile Include="Exceptions\EntryExistsException.cs" />
     <Compile Include="Exceptions\Exception.cs" />
     <Compile Include="Exceptions\FileLockedException.cs" />
     <Compile Include="Exceptions\IncorrectObjectTypeException.cs" />
     <Compile Include="Exceptions\InvalidPackException.cs" />
+    <Compile Include="Exceptions\InvalidPatternException.cs" />
     <Compile Include="Exceptions\MissingObjectException.cs" />
     <Compile Include="Exceptions\ObjectWritingException.cs" />
     <Compile Include="Exceptions\PackMismatchException.cs" />
     <Compile Include="Exceptions\RevisionSyntaxException.cs" />
     <Compile Include="Exceptions\SymlinksNotSupportedException.cs" />
+    <Compile Include="FnMatch\AbstractHead.cs" />
+    <Compile Include="FnMatch\CharacterHead.cs" />
+    <Compile Include="FnMatch\FileNameMatcher.cs" />
+    <Compile Include="FnMatch\GroupHead.cs" />
+    <Compile Include="FnMatch\IHead.cs" />
+    <Compile Include="FnMatch\LastHead.cs" />
+    <Compile Include="FnMatch\RestrictedWildCardHead.cs" />
+    <Compile Include="FnMatch\WildCardHead.cs" />
     <Compile Include="Merge\Merger.cs" />
     <Compile Include="Merge\MergeStrategy.cs" />
     <Compile Include="Merge\StrategyOneSided.cs" />

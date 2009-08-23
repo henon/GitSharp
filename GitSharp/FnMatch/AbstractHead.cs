@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2008, Florian Köberle <florianskarten@web.de>
+ * Copyright (C) 2009, Adriano Machado <adriano.m.machado@hotmail.com>
  *
  * All rights reserved.
  *
@@ -37,18 +38,48 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
 
-namespace GitSharp.Util
+namespace GitSharp.FnMatch
 {
-    public static class StringExtension
+    internal abstract class AbstractHead : IHead
     {
-        // this is a helper to easily replace all occurences of the incompatible string.Substring method in ported java code
-        public static string Slice(this string longstring, int index1, int index2)
+        private IList<IHead> _newHeads;
+
+        private readonly bool _star;
+
+        protected internal abstract bool matches(char c);
+
+        protected AbstractHead(bool star)
         {
-            return index2 - index1 > 0 ? longstring.Substring(index1, index2 - index1) : string.Empty;
+            _star = star;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="newHeads">A list of <seealso cref="IHead"/>s which will not be modified.</param>
+        public void setNewHeads(IList<IHead> newHeads)
+        {
+            if (_newHeads != null)
+            {
+                throw new InvalidOperationException("Property is already non null");
+            }
+            
+            _newHeads = newHeads;
+        }
+
+        public virtual IList<IHead> GetNextHeads(char c)
+        {
+            if (matches(c))
+            {
+                return _newHeads;
+            }
+            
+            return FileNameMatcher.EmptyHeadList;
+        }
+
+        internal virtual bool IsStar
+        {
+            get { return _star; }
         }
     }
 }

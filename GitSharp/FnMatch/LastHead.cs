@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2008, Florian Köberle <florianskarten@web.de>
+ * Copyright (C) 2009, Adriano Machado <adriano.m.machado@hotmail.com>
  *
  * All rights reserved.
  *
@@ -35,20 +36,24 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
 
-namespace GitSharp.Util
+namespace GitSharp.FnMatch
 {
-    public static class StringExtension
+    internal sealed class LastHead : IHead
     {
-        // this is a helper to easily replace all occurences of the incompatible string.Substring method in ported java code
-        public static string Slice(this string longstring, int index1, int index2)
+        internal static readonly IHead Instance = new LastHead();
+
+        ///	<summary>
+        /// Don't call this constructor, use <seealso cref="LastHead.Instance"/>
+        /// </summary>
+        private LastHead()
         {
-            return index2 - index1 > 0 ? longstring.Substring(index1, index2 - index1) : string.Empty;
+        }
+
+        public IList<IHead> GetNextHeads(char c)
+        {
+            return FileNameMatcher.EmptyHeadList;
         }
     }
 }

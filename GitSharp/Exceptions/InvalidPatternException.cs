@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2008, Florian Köberle <florianskarten@web.de>
+ * Copyright (C) 2009, Adriano Machado <adriano.m.machado@hotmail.com>
  *
  * All rights reserved.
  *
@@ -36,19 +37,48 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
+using System.Runtime.Serialization;
 
-namespace GitSharp.Util
+namespace GitSharp.Exceptions
 {
-    public static class StringExtension
+    [Serializable]
+    public class InvalidPatternException : Exception
     {
-        // this is a helper to easily replace all occurences of the incompatible string.Substring method in ported java code
-        public static string Slice(this string longstring, int index1, int index2)
+        private readonly string _pattern;
+        //
+        // For guidelines regarding the creation of new exception types, see
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
+        // and
+        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
+        //
+
+        public InvalidPatternException(string pattern)
         {
-            return index2 - index1 > 0 ? longstring.Substring(index1, index2 - index1) : string.Empty;
+            _pattern = pattern;
+        }
+
+        public InvalidPatternException(string message, string pattern)
+            : base(message)
+        {
+            _pattern = pattern;
+        }
+
+        public InvalidPatternException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+
+        protected InvalidPatternException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        ///	<returns>
+        /// The invalid pattern.
+        /// </returns>
+        public virtual string Pattern
+        {
+            get { return _pattern; }
         }
     }
 }

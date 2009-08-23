@@ -59,7 +59,7 @@
     <Compile Include="DirectoryCache\DirCacheLargePathTest.cs" />
     <Compile Include="DirectoryCache\DirCacheTreeTest.cs" />
     <Compile Include="EncodingTests.cs" />
-    <Compile Include="FileNameMatcher\FileNameMatcherTest.cs" />
+    <Compile Include="FnMatch\FileNameMatcherTest.cs" />
     <Compile Include="IndexDiffTest.cs" />
     <Compile Include="IndexTests.cs" />
     <Compile Include="IndexTreeWalkerTest.cs" />

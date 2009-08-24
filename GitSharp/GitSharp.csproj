@@ -106,6 +106,9 @@
     <Compile Include="Transport\TransportLocal.cs" />
     <None Include="Transport\TransportSftp.cs" />
     <Compile Include="Transport\WalkEncryption.cs" />
+    <Compile Include="Transport\WalkFetchConnection.cs" />
+    <Compile Include="Transport\WalkPushConnection.cs" />
+    <Compile Include="Transport\WalkRemoteObjectDatabase.cs" />
     <Compile Include="UnpackedObjectCache.cs" />
     <Compile Include="Util\AtomicReference.cs" />
     <Compile Include="Util\DateTime.cs" />
@@ -168,6 +171,7 @@
     <Compile Include="UnpackedObjectLoader.cs" />
     <Compile Include="Util\AtomicReferenceArray.cs" />
     <Compile Include="Util\AtomicValue.cs" />
+    <Compile Include="Util\FileStream.cs" />
     <Compile Include="Util\FS.cs" />
     <Compile Include="Util\GenericComparer.cs" />
     <Compile Include="Util\Inspect.cs" />

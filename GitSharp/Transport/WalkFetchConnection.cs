@@ -247,7 +247,7 @@ namespace GitSharp.Transport
                             continue;
 
                         default:
-                            if (FileMode.GitLink.Equals(mode))
+                            if (FileMode.GitLink.Equals(sType))
                                 continue;
                             treeWalk.getObjectId(idBuffer, 0);
                             throw new CorruptObjectException("Invalid mode " + mode + " for " + idBuffer.Name + " " +
@@ -699,7 +699,7 @@ namespace GitSharp.Transport
                         }
 
                     default:
-                        if (FileMode.GitLink.Equals(mode))
+                        if (FileMode.GitLink.Equals(sType))
                             continue;
                         treeWalk.getObjectId(idBuffer, 0);
                         throw new CorruptObjectException("Invalid mode " + mode + " for " + idBuffer.Name + " " +

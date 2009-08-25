@@ -1,5 +1,7 @@
 ﻿/*
- * Copyright (C) 2009, Google Inc.
+ * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
+ * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Jonas Fonseca <fonseca@diku.dk>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -38,42 +40,31 @@
 
 
 
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace GitSharp.Exceptions
-{
-    /** Indicates a text string is not a valid Git style configuration. */
-    public class ConfigInvalidException : Exception
+{/**
+ * An exception thrown when a gitlink entry is found and cannot be
+ * handled.
+ */
+    public class GitlinksNotSupportedException : IOException
     {
-        private static long serialVersionUID = 1L;
+        //private static  long serialVersionUID = 1L;
 
         /**
-         * Construct an invalid configuration error.
+         * Construct a GitlinksNotSupportedException for the specified link
          *
-         * @param message
-         *            why the configuration is invalid.
+         * @param s name of link in tree or workdir
          */
-        public ConfigInvalidException(string message)
-            : base(message)
+        public GitlinksNotSupportedException(string s)
+            : base(s)
         {
-
-        }
-
-        /**
-         * Construct an invalid configuration error.
-         *
-         * @param message
-         *            why the configuration is invalid.
-         * @param cause
-         *            root cause of the error.
-         */
-        public ConfigInvalidException(string message, Exception inner_exception)
-            : base(message, inner_exception)
-        {
-
         }
     }
+
 }

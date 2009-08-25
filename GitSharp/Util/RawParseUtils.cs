@@ -48,7 +48,44 @@ namespace GitSharp
 
     public static class RawParseUtils
     {
+        private static readonly byte[] digits10 = gen10();
+        private static readonly byte[] digits16 = gen16();
 
+        private static byte[] gen10()
+        {
+            byte[] ret = new byte['9' + 1];
+            for (char i = '0'; i <= '9'; i++)
+                ret[i] = (byte) (i - '0');
+            return ret;
+        }
+
+        private static byte[] gen16()
+        {
+            byte[] ret = new byte['f' + 1];
+            for (char i = '0'; i <= '9'; i++)
+                ret[i] = (byte) (i - '0');
+            for (char i = 'a'; i <= 'f'; i++)
+                ret[i] = (byte) ((i - 'a') + 10);
+            for (char i = 'A'; i <= 'F'; i++)
+                ret[i] = (byte) ((i - 'A') + 10);
+            return ret;
+        }
+
+        public static int parseHexInt16(byte[] bs, int p)
+        {
+            int r = digits16[bs[p]] << 4;
+
+            r |= digits16[bs[p + 1]];
+            r <<= 4;
+
+            r |= digits16[bs[p + 2]];
+            r <<= 4;
+
+            r |= digits16[bs[p + 3]];
+            if (r < 0)
+                throw new IndexOutOfRangeException();
+            return r;
+        }
 
         /**
          * Determine if b[ptr] matches src.

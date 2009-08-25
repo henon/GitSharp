@@ -159,7 +159,6 @@ namespace GitSharp.Tests.Transport
             init("0004");
             string act = pckIn.ReadString();
             Assert.AreEqual("", act);
-            Assert.AreNotEqual("", act);
             assertEOF();
         }
 
@@ -175,8 +174,8 @@ namespace GitSharp.Tests.Transport
         public void testReadStringRaw1()
         {
             init("0005a0006bc");
-            Assert.AreEqual("a", pckIn.ReadStringNoLF());
-            Assert.AreEqual("bc", pckIn.ReadStringNoLF());
+            Assert.AreEqual("a", pckIn.ReadStringRaw());
+            Assert.AreEqual("bc", pckIn.ReadStringRaw());
             assertEOF();
         }
 
@@ -184,7 +183,7 @@ namespace GitSharp.Tests.Transport
         public void testReadStringRaw2()
         {
             init("0031want fcfcfb1fd94829c1a1704f894fc111d14770d34e");
-            string act = pckIn.ReadStringNoLF();
+            string act = pckIn.ReadStringRaw();
             Assert.AreEqual("want fcfcfb1fd94829c1a1704f894fc111d14770d34e", act);
             assertEOF();
         }
@@ -193,7 +192,7 @@ namespace GitSharp.Tests.Transport
         public void testReadStringRaw3()
         {
             init("0004");
-            string act = pckIn.ReadStringNoLF();
+            string act = pckIn.ReadStringRaw();
             Assert.AreEqual("", act);
             assertEOF();
         }
@@ -204,7 +203,7 @@ namespace GitSharp.Tests.Transport
             init("HELO");
             try
             {
-                pckIn.ReadStringNoLF();
+                pckIn.ReadStringRaw();
                 Assert.Fail("incorrectly accepted invalid packet header");
             }
             catch (IOException e)
@@ -217,7 +216,7 @@ namespace GitSharp.Tests.Transport
         public void testReadStringRaw_End()
         {
             init("0000");
-            Assert.AreEqual("", pckIn.ReadStringNoLF());
+            Assert.AreEqual("", pckIn.ReadStringRaw());
             assertEOF();
         }
 

@@ -269,7 +269,7 @@ namespace GitSharp.Transport
                 string line;
                 try
                 {
-                    line = pckIn.ReadStringNoLF();
+                    line = pckIn.ReadStringRaw();
                 }
                 catch (EndOfStreamException eof)
                 {

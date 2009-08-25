@@ -46,6 +46,13 @@ using GitSharp;
 
 namespace GitSharp.Exceptions
 {
+
+    /**
+     * An inconsistency with respect to handling different object types.
+     *
+     * This most likely signals a programming error rather than a corrupt
+     * object database.
+     */
     [global::System.Serializable]
     public class IncorrectObjectTypeException : Exception
     {
@@ -62,13 +69,32 @@ namespace GitSharp.Exceptions
 
         }
         public IncorrectObjectTypeException(ObjectId id, ObjectType type, Exception inner) : base(string.Format("object {0} is not a {1}.", id, type), inner) { }
+
+        /**
+         * Construct and IncorrectObjectTypeException for the specified object id.
+         *
+         * Provide the type to make it easier to track down the problem.
+         *
+         * @param id SHA-1
+         * @param type object type
+         */
         public IncorrectObjectTypeException(ObjectId id, int type)
             : base(string.Format("object {0} is not a {1}.", id, (ObjectType)type))
         {
 
         }
+
+
         public IncorrectObjectTypeException(ObjectId id, string type, Exception inner) : base(string.Format("object {0} is not a {1}.", id, type), inner) { }
-        public IncorrectObjectTypeException(ObjectId id, string type)
+
+        /**
+         * Construct and IncorrectObjectTypeException for the specified object id.
+         *
+         * Provide the type to make it easier to track down the problem.
+         *
+         * @param id SHA-1
+         * @param type object type
+         */        public IncorrectObjectTypeException(ObjectId id, string type)
             : base(string.Format("object {0} is not a {1}.", id, type))
         {
 
@@ -78,5 +104,6 @@ namespace GitSharp.Exceptions
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
+
     }
 }

@@ -1,7 +1,8 @@
 ﻿/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Jonas Fonseca <fonseca@diku.dk>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -38,48 +39,47 @@
  */
 
 
+
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 
 namespace GitSharp.Exceptions
 {
     /**
-  * An expected object is missing.
-  */
-    public class MissingObjectException : IOException
+     * Thrown when an invalid object id is passed in as an argument.
+     */
+    public class InvalidObjectIdException : ArgumentException
     {
+        //private static final long serialVersionUID = 1L;
 
         /**
-         * Construct a MissingObjectException for the specified object id.
-         * Expected type is reported to simplify tracking down the problem.
+         * Create exception with bytes of the invalid object id.
          *
-         * @param id SHA-1
-         * @param type object type
+         * @param bytes containing the invalid id.
+         * @param offset in the byte array where the error occurred.
+         * @param length of the sequence of invalid bytes.
          */
-        public MissingObjectException(ObjectId id, ObjectType type)
-            : base("Missing " + type + " " + id)
+        public InvalidObjectIdException(byte[] bytes, int offset, int length)
+            : base("Invalid id" + asAscii(bytes, offset, length))
         {
         }
 
-        public MissingObjectException(ObjectId id, string type)
-            : base("Missing " + type + " " + id)
+        private static String asAscii(byte[] bytes, int offset, int length)
         {
-        }
-
-
-        /**
-         * Construct a MissingObjectException for the specified object id.
-         * Expected type is reported to simplify tracking down the problem.
-         *
-         * @param id SHA-1
-         * @param type object type
-         */
-        public MissingObjectException(ObjectId id, int type)
-            : this(id, Constants.typeString(type))
-        {
+            try
+            {
+                return ": " + Encoding.ASCII.GetString(bytes, offset, length);
+            }
+            catch (DecoderFallbackException e2)
+            {
+                return "";
+            }
+            catch (IndexOutOfRangeException e2)
+            {
+                return "";
+            }
         }
     }
 }

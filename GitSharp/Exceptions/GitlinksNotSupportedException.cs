@@ -1,7 +1,8 @@
 ﻿/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Jonas Fonseca <fonseca@diku.dk>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -38,48 +39,32 @@
  */
 
 
+
+
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace GitSharp.Exceptions
-{
-    /**
-  * An expected object is missing.
-  */
-    public class MissingObjectException : IOException
+{/**
+ * An exception thrown when a gitlink entry is found and cannot be
+ * handled.
+ */
+    public class GitlinksNotSupportedException : IOException
     {
+        //private static  long serialVersionUID = 1L;
 
         /**
-         * Construct a MissingObjectException for the specified object id.
-         * Expected type is reported to simplify tracking down the problem.
+         * Construct a GitlinksNotSupportedException for the specified link
          *
-         * @param id SHA-1
-         * @param type object type
+         * @param s name of link in tree or workdir
          */
-        public MissingObjectException(ObjectId id, ObjectType type)
-            : base("Missing " + type + " " + id)
-        {
-        }
-
-        public MissingObjectException(ObjectId id, string type)
-            : base("Missing " + type + " " + id)
-        {
-        }
-
-
-        /**
-         * Construct a MissingObjectException for the specified object id.
-         * Expected type is reported to simplify tracking down the problem.
-         *
-         * @param id SHA-1
-         * @param type object type
-         */
-        public MissingObjectException(ObjectId id, int type)
-            : this(id, Constants.typeString(type))
+        public GitlinksNotSupportedException(string s)
+            : base(s)
         {
         }
     }
+
 }

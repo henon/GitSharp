@@ -1,7 +1,6 @@
 ﻿/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Google Inc.
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -38,47 +37,39 @@
  */
 
 
+
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace GitSharp.Exceptions
 {
-    /**
-  * An expected object is missing.
-  */
-    public class MissingObjectException : IOException
+    /** Indicates a local repository does not exist. */
+    public class RepositoryNotFoundException : TransportException
     {
+        //private static  long serialVersionUID = 1L;
 
         /**
-         * Construct a MissingObjectException for the specified object id.
-         * Expected type is reported to simplify tracking down the problem.
+         * Constructs an exception indicating a local repository does not exist.
          *
-         * @param id SHA-1
-         * @param type object type
+         * @param location
+         *            description of the repository not found, usually file path.
          */
-        public MissingObjectException(ObjectId id, ObjectType type)
-            : base("Missing " + type + " " + id)
+        public RepositoryNotFoundException(FileInfo location)
+            : this(location.FullName)
         {
         }
 
-        public MissingObjectException(ObjectId id, string type)
-            : base("Missing " + type + " " + id)
-        {
-        }
-
-
         /**
-         * Construct a MissingObjectException for the specified object id.
-         * Expected type is reported to simplify tracking down the problem.
+         * Constructs an exception indicating a local repository does not exist.
          *
-         * @param id SHA-1
-         * @param type object type
+         * @param location
+         *            description of the repository not found, usually file path.
          */
-        public MissingObjectException(ObjectId id, int type)
-            : this(id, Constants.typeString(type))
+        public RepositoryNotFoundException(string location)
+            : base("repository not found: " + location)
         {
         }
     }

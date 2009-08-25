@@ -1,7 +1,6 @@
 ﻿/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Google Inc.
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -38,48 +37,43 @@
  */
 
 
+
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 
 namespace GitSharp.Exceptions
 {
-    /**
-  * An expected object is missing.
-  */
-    public class MissingObjectException : IOException
+    /** Indicates a text string is not a valid Git style configuration. */
+    public class ConfigInvalidException : Exception
     {
+        private static long serialVersionUID = 1L;
 
         /**
-         * Construct a MissingObjectException for the specified object id.
-         * Expected type is reported to simplify tracking down the problem.
+         * Construct an invalid configuration error.
          *
-         * @param id SHA-1
-         * @param type object type
+         * @param message
+         *            why the configuration is invalid.
          */
-        public MissingObjectException(ObjectId id, ObjectType type)
-            : base("Missing " + type + " " + id)
+        public ConfigInvalidException(string message)
+            : base(message)
         {
-        }
 
-        public MissingObjectException(ObjectId id, string type)
-            : base("Missing " + type + " " + id)
-        {
         }
-
 
         /**
-         * Construct a MissingObjectException for the specified object id.
-         * Expected type is reported to simplify tracking down the problem.
+         * Construct an invalid configuration error.
          *
-         * @param id SHA-1
-         * @param type object type
+         * @param message
+         *            why the configuration is invalid.
+         * @param cause
+         *            root cause of the error.
          */
-        public MissingObjectException(ObjectId id, int type)
-            : this(id, Constants.typeString(type))
+        public ConfigInvalidException(string message, Exception inner_exception)
+            : base(message, inner_exception)
         {
+
         }
     }
 }

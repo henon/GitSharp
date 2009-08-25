@@ -76,6 +76,7 @@
     <Compile Include="Exceptions\MissingObjectException.cs" />
     <Compile Include="Exceptions\ObjectWritingException.cs" />
     <Compile Include="Exceptions\PackMismatchException.cs" />
+    <Compile Include="Exceptions\RepositoryNotFoundException.cs" />
     <Compile Include="Exceptions\RevisionSyntaxException.cs" />
     <Compile Include="Exceptions\SymlinksNotSupportedException.cs" />
     <Compile Include="FnMatch\AbstractHead.cs" />

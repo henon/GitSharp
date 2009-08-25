@@ -332,7 +332,7 @@ namespace GitSharp.Transport
 				ow.checkConnectivity();
 				return true;
 			}
-			catch (MissingObjectException e)
+			catch (MissingObjectException)
 			{
 				return false;
 			}

@@ -158,7 +158,7 @@ namespace GitSharp.Transport
                     sr.Close();
                 }
             }
-            catch (FileNotFoundException notPacked)
+            catch (FileNotFoundException)
             {
                 
             }

@@ -81,6 +81,7 @@
     <Compile Include="Transport\LongMapTest.cs" />
     <Compile Include="Transport\OpenSshConfigTest.cs" />
     <Compile Include="Transport\PacketLineInTest.cs" />
+    <Compile Include="Transport\PacketLineOutTest.cs" />
     <Compile Include="Transport\PushProcessTest.cs" />
     <Compile Include="Transport\TransportTest.cs" />
     <Compile Include="TreeIteratorLeafOnlyTest.cs" />

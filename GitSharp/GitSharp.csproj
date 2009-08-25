@@ -64,6 +64,7 @@
     <Compile Include="Ensure.cs" />
     <Compile Include="Exceptions\ConfigInvalidException.cs" />
     <Compile Include="Exceptions\GitlinksNotSupportedException.cs" />
+    <Compile Include="Exceptions\InvalidObjectIdException.cs" />
     <Compile Include="Exceptions\NoClosingBracketException.cs" />
     <Compile Include="Exceptions\CorruptObjectException.cs" />
     <Compile Include="Exceptions\EntryExistsException.cs" />

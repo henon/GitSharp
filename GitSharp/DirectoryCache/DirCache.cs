@@ -773,7 +773,7 @@ namespace GitSharp.DirectoryCache
          * @throws UnmergedPathException
          *             one or more paths contain higher-order stages (stage > 0),
          *             which cannot be stored in a tree object.
-         * @
+         * @throws  IOException
          *             an unexpected error occurred writing to the object store.
          */
         public ObjectId writeTree(ObjectWriter ow)

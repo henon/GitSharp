@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.Transport;
 using NUnit.Framework;
 
 using System;
@@ -47,362 +48,265 @@ namespace GitSharp.Tests.Transport
     [TestFixture]
     public class PushProcessTest : RepositoryTestCase
     {
-#if false
-	private PushProcess process;
+        private PushProcess process;
+        private MockTransport transport;
+        private List<RemoteRefUpdate> refUpdates;
+        private List<Ref> advertisedRefs;
+        private RemoteRefUpdate.UpdateStatus connectionUpdateStatus;
 
-	private MockTransport transport;
+        private class MockTransport : GitSharp.Transport.Transport
+        {
+            private readonly List<Ref> advertised;
+            private RemoteRefUpdate.UpdateStatus status;
 
-	private HashSet<RemoteRefUpdate> refUpdates;
+            public MockTransport(Repository local, URIish uri, List<Ref> advertisedRefs, ref RemoteRefUpdate.UpdateStatus status)
+                : base(local, uri)
+            {
+                advertised = advertisedRefs;
+                this.status = status;
+            }
 
-	private HashSet<Ref> advertisedRefs;
+            public override IFetchConnection openFetch()
+            {
+                throw new NotSupportedException("mock");
+            }
 
-	private Status connectionUpdateStatus;
+            public override IPushConnection openPush()
+            {
+                return new MockPushConnection(advertised, ref status);
+            }
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		transport = new MockTransport(db, new URIish());
-		refUpdates = new HashSet<RemoteRefUpdate>();
-		advertisedRefs = new HashSet<Ref>();
-		connectionUpdateStatus = Status.OK;
-	}
+            public override void close()
+            {
+            }
+        }
 
-	/**
-	 * Test for fast-forward remote update.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateFastForward() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"2c349335b7f797072cf729c4f3bb0914ecb6dec9",
-				"refs/heads/master", false, null, null);
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
-		testOneUpdateStatus(rru, ref, Status.OK, true);
-	}
+        private class MockPushConnection : BaseConnection, IPushConnection
+        {
+            private RemoteRefUpdate.UpdateStatus connectionUpdateStatus;
 
-	/**
-	 * Test for non fast-forward remote update, when remote object is not known
-	 * to local repository.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateNonFastForwardUnknownObject() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"2c349335b7f797072cf729c4f3bb0914ecb6dec9",
-				"refs/heads/master", false, null, null);
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("0000000000000000000000000000000000000001"));
-		testOneUpdateStatus(rru, ref, Status.REJECTED_NONFASTFORWARD, null);
-	}
+            public MockPushConnection(IEnumerable<Ref> advertisedRefs, ref RemoteRefUpdate.UpdateStatus status)
+            {
+                Dictionary<string, Ref> refsMap = new Dictionary<string, Ref>();
+                foreach (Ref r in advertisedRefs)
+                    refsMap.Add(r.Name, r);
+                available(refsMap);
+                connectionUpdateStatus = status;
+            }
 
-	/**
-	 * Test for non fast-forward remote update, when remote object is known to
-	 * local repository, but it is not an ancestor of new object.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateNonFastForward() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
-				"refs/heads/master", false, null, null);
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
-		testOneUpdateStatus(rru, ref, Status.REJECTED_NONFASTFORWARD, null);
-	}
+            public override void Close()
+            {
+            }
 
-	/**
-	 * Test for non fast-forward remote update, when force update flag is set.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateNonFastForwardForced() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
-				"refs/heads/master", true, null, null);
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
-		testOneUpdateStatus(rru, ref, Status.OK, false);
-	}
+            public void Push(IProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refsToUpdate)
+            {
+                foreach (RemoteRefUpdate rru in refsToUpdate.Values)
+                {
+                    Assert.AreEqual(RemoteRefUpdate.UpdateStatus.NOT_ATTEMPTED, rru.Status);
+                    rru.Status = connectionUpdateStatus;
+                }
+            }
+        }
 
-	/**
-	 * Test for remote ref creation.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateCreateRef() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
-				"refs/heads/master", false, null, null);
-		testOneUpdateStatus(rru, null, Status.OK, true);
-	}
+        public override void setUp()
+        {
+            base.setUp();
+            advertisedRefs = new List<Ref>();
+            transport = new MockTransport(db, new URIish(), advertisedRefs, ref connectionUpdateStatus);
+            refUpdates = new List<RemoteRefUpdate>();
+            connectionUpdateStatus = RemoteRefUpdate.UpdateStatus.OK;
+        }
 
-	/**
-	 * Test for remote ref deletion.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateDelete() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db, null,
-				"refs/heads/master", false, null, null);
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
-		testOneUpdateStatus(rru, ref, Status.OK, true);
-	}
+        private PushResult testOneUpdateStatus(RemoteRefUpdate rru, Ref advertisedRef, RemoteRefUpdate.UpdateStatus expectedStatus, bool checkFastForward, bool fastForward)
+        {
+            refUpdates.Add(rru);
+            if (advertisedRef != null)
+                advertisedRefs.Add(advertisedRef);
+            PushResult result = executePush();
+            Assert.AreEqual(expectedStatus, rru.Status);
+            if (checkFastForward)
+                Assert.AreEqual(fastForward, rru.FastForward);
+            return result;
+        }
 
-	/**
-	 * Test for remote ref deletion (try), when that ref doesn't exist on remote
-	 * repo.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateDeleteNonExisting() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db, null,
-				"refs/heads/master", false, null, null);
-		testOneUpdateStatus(rru, null, Status.NON_EXISTING, null);
-	}
+        private PushResult executePush()
+        {
+            process = new PushProcess(transport, refUpdates);
+            return process.execute(new TextProgressMonitor());
+        }
 
-	/**
-	 * Test for remote ref update, when it is already up to date.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateUpToDate() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"2c349335b7f797072cf729c4f3bb0914ecb6dec9",
-				"refs/heads/master", false, null, null);
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
-		testOneUpdateStatus(rru, ref, Status.UP_TO_DATE, null);
-	}
+        [Test]
+        public void testUpdateFastForward()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
+                                                      "refs/heads/master", false, null, null);
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, true, true);
+        }
 
-	/**
-	 * Test for remote ref update with expected remote object.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateExpectedRemote() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"2c349335b7f797072cf729c4f3bb0914ecb6dec9",
-				"refs/heads/master", false, null, ObjectId
-						.fromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
-		testOneUpdateStatus(rru, ref, Status.OK, true);
-	}
+        [Test]
+        public void testUpdateNonFastForwardUnknownObject()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
+                                                      "refs/heads/master", false, null, null);
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("0000000000000000000000000000000000000001"));
+            testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_NONFASTFORWARD, false, false);
+        }
 
-	/**
-	 * Test for remote ref update with expected old object set, when old object
-	 * is not that expected one.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateUnexpectedRemote() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"2c349335b7f797072cf729c4f3bb0914ecb6dec9",
-				"refs/heads/master", false, null, ObjectId
-						.fromString("0000000000000000000000000000000000000001"));
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
-		testOneUpdateStatus(rru, ref, Status.REJECTED_REMOTE_CHANGED, null);
-	}
+        [Test]
+        public void testUpdateNonFastForward()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
+                                                      "refs/heads/master", false, null, null);
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_NONFASTFORWARD, false, false);
+        }
 
-	/**
-	 * Test for remote ref update with expected old object set, when old object
-	 * is not that expected one and force update flag is set (which should have
-	 * lower priority) - shouldn't change behavior.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateUnexpectedRemoteVsForce() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"2c349335b7f797072cf729c4f3bb0914ecb6dec9",
-				"refs/heads/master", true, null, ObjectId
-						.fromString("0000000000000000000000000000000000000001"));
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
-		testOneUpdateStatus(rru, ref, Status.REJECTED_REMOTE_CHANGED, null);
-	}
+        [Test]
+        public void testUpdateNonFastForwardForced()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
+                                          "refs/heads/master", true, null, null);
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, true, false);
+        }
 
-	/**
-	 * Test for remote ref update, when connection rejects update.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateRejectedByConnection() throws IOException {
-		connectionUpdateStatus = Status.REJECTED_OTHER_REASON;
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"2c349335b7f797072cf729c4f3bb0914ecb6dec9",
-				"refs/heads/master", false, null, null);
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
-		testOneUpdateStatus(rru, ref, Status.REJECTED_OTHER_REASON, null);
-	}
+        [Test]
+        public void testUpdateCreateRef()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
+                              "refs/heads/master", false, null, null);
+            testOneUpdateStatus(rru, null, RemoteRefUpdate.UpdateStatus.OK, true, true);
+        }
+        
+        [Test]
+        public void testUpdateDelete()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, null, "refs/heads/master", false, null, null);
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, true, true);
+        }
 
-	/**
-	 * Test for remote refs updates with mixed cases that shouldn't depend on
-	 * each other.
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateMixedCases() throws IOException {
-		final RemoteRefUpdate rruOk = new RemoteRefUpdate(db, null,
-				"refs/heads/master", false, null, null);
-		final Ref refToChange = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
-		final RemoteRefUpdate rruReject = new RemoteRefUpdate(db, null,
-				"refs/heads/nonexisting", false, null, null);
-		refUpdates.add(rruOk);
-		refUpdates.add(rruReject);
-		advertisedRefs.add(refToChange);
-		executePush();
-		assertEquals(Status.OK, rruOk.getStatus());
-		assertEquals(true, rruOk.isFastForward());
-		assertEquals(Status.NON_EXISTING, rruReject.getStatus());
-	}
+        [Test]
+        public void testUpdateDeleteNonExisting()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, null, "refs/heads/master", false, null, null);
+            testOneUpdateStatus(rru, null, RemoteRefUpdate.UpdateStatus.NON_EXISTING, false, false);
+        }
 
-	/**
-	 * Test for local tracking ref update.
-	 *
-	 * @throws IOException
-	 */
-	public void testTrackingRefUpdateEnabled() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"2c349335b7f797072cf729c4f3bb0914ecb6dec9",
-				"refs/heads/master", false, "refs/remotes/test/master", null);
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
-		refUpdates.add(rru);
-		advertisedRefs.add(ref);
-		final PushResult result = executePush();
-		final TrackingRefUpdate tru = result
-				.getTrackingRefUpdate("refs/remotes/test/master");
-		assertNotNull(tru);
-		assertEquals("refs/remotes/test/master", tru.getLocalName());
-		assertEquals(Result.NEW, tru.getResult());
-	}
+        [Test]
+        public void testUpdateUpToDate()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9", "refs/heads/master", false, null, null);
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.UP_TO_DATE, false, false);
+        }
 
-	/**
-	 * Test for local tracking ref update disabled.
-	 *
-	 * @throws IOException
-	 */
-	public void testTrackingRefUpdateDisabled() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"2c349335b7f797072cf729c4f3bb0914ecb6dec9",
-				"refs/heads/master", false, null, null);
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
-		refUpdates.add(rru);
-		advertisedRefs.add(ref);
-		final PushResult result = executePush();
-		assertTrue(result.getTrackingRefUpdates().isEmpty());
-	}
+        [Test]
+        public void testUpdateExpectedRemote()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
+                                                      "refs/heads/master", false, null,
+                                                      ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, true, true);
+        }
 
-	/**
-	 * Test for local tracking ref update when remote update has failed.
-	 *
-	 * @throws IOException
-	 */
-	public void testTrackingRefUpdateOnReject() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
-				"refs/heads/master", false, null, null);
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
-		final PushResult result = testOneUpdateStatus(rru, ref,
-				Status.REJECTED_NONFASTFORWARD, null);
-		assertTrue(result.getTrackingRefUpdates().isEmpty());
-	}
+        [Test]
+        public void testUpdateUnexpectedRemote()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
+                                                      "refs/heads/master", false, null,
+                                                      ObjectId.FromString("0000000000000000000000000000000000000001"));
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_REMOTE_CHANGED, false, false);
+        }
 
-	/**
-	 * Test for push operation result - that contains expected elements.
-	 *
-	 * @throws IOException
-	 */
-	public void testPushResult() throws IOException {
-		final RemoteRefUpdate rru = new RemoteRefUpdate(db,
-				"2c349335b7f797072cf729c4f3bb0914ecb6dec9",
-				"refs/heads/master", false, "refs/remotes/test/master", null);
-		final Ref ref = new Ref(Ref.Storage.LOOSE, "refs/heads/master",
-				ObjectId.fromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
-		refUpdates.add(rru);
-		advertisedRefs.add(ref);
-		final PushResult result = executePush();
-		assertEquals(1, result.getTrackingRefUpdates().size());
-		assertEquals(1, result.getAdvertisedRefs().size());
-		assertEquals(1, result.getRemoteUpdates().size());
-		assertNotNull(result.getTrackingRefUpdate("refs/remotes/test/master"));
-		assertNotNull(result.getAdvertisedRef("refs/heads/master"));
-		assertNotNull(result.getRemoteUpdate("refs/heads/master"));
-	}
+        [Test]
+        public void testUpdateUnexpectedRemoteVsForce()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
+                                          "refs/heads/master", true, null,
+                                          ObjectId.FromString("0000000000000000000000000000000000000001"));
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_REMOTE_CHANGED, false, false);
+        }
 
-	private PushResult testOneUpdateStatus(final RemoteRefUpdate rru,
-			final Ref advertisedRef, final Status expectedStatus,
-			Boolean fastForward) throws NotSupportedException,
-			TransportException {
-		refUpdates.add(rru);
-		if (advertisedRef != null)
-			advertisedRefs.add(advertisedRef);
-		final PushResult result = executePush();
-		assertEquals(expectedStatus, rru.getStatus());
-		if (fastForward != null)
-			assertEquals(fastForward.booleanValue(), rru.isFastForward());
-		return result;
-	}
+        [Test]
+        public void testUpdateRejectedByConnection()
+        {
+            connectionUpdateStatus = RemoteRefUpdate.UpdateStatus.REJECTED_OTHER_REASON;
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
+                                                      "refs/heads/master", false, null, null);
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_OTHER_REASON, false, false);
+        }
 
-	private PushResult executePush() throws NotSupportedException,
-			TransportException {
-		process = new PushProcess(transport, refUpdates);
-		return process.execute(new TextProgressMonitor());
-	}
+        [Test]
+        public void testUpdateMixedCases()
+        {
+            RemoteRefUpdate rruOk = new RemoteRefUpdate(db, null, "refs/heads/master", false, null, null);
+            Ref refToChange = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            RemoteRefUpdate rruReject = new RemoteRefUpdate(db, null, "refs/heads/nonexisting", false, null, null);
+            refUpdates.Add(rruOk);
+            refUpdates.Add(rruReject);
+            advertisedRefs.Add(refToChange);
+            executePush();
+            Assert.AreEqual(RemoteRefUpdate.UpdateStatus.OK, rruOk.Status);
+            Assert.AreEqual(true, rruOk.FastForward);
+            Assert.AreEqual(RemoteRefUpdate.UpdateStatus.NON_EXISTING, rruReject.Status);
+        }
 
-	private class MockTransport extends Transport {
-		MockTransport(Repository local, URIish uri) {
-			super(local, uri);
-		}
+        [Test]
+        public void testTrackingRefUpdateEnabled()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9", "refs/heads/master", false, "refs/remotes/test/master", null);
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            refUpdates.Add(rru);
+            advertisedRefs.Add(@ref);
+            PushResult result = executePush();
+            TrackingRefUpdate tru = result.GetTrackingRefUpdate("refs/remotes/test/master");
+            Assert.AreNotEqual(null, tru);
+            Assert.AreEqual("refs/remotes/test/master", tru.LocalName);
+            Assert.AreEqual(RefUpdate.RefUpdateResult.New, tru.Result);
+        }
 
-		@Override
-		public FetchConnection openFetch() throws NotSupportedException,
-				TransportException {
-			throw new NotSupportedException("mock");
-		}
+        [Test]
+        public void testTrackingRefUpdateDisabled()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9", "refs/heads/master", false, null, null);
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            refUpdates.Add(rru);
+            advertisedRefs.Add(@ref);
+            PushResult result = executePush();
+            Assert.IsTrue(result.TrackingRefUpdates.Count == 0);
+        }
 
-		@Override
-		public PushConnection openPush() throws NotSupportedException,
-				TransportException {
-			return new MockPushConnection();
-		}
+        [Test]
+        public void testTrackingRefUpdateOnReject()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "ac7e7e44c1885efb472ad54a78327d66bfc4ecef", "refs/heads/master", false, null, null);
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            PushResult result = testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_NONFASTFORWARD,
+                                                    false, false);
+            Assert.IsTrue(result.TrackingRefUpdates.Count == 0);
+        }
 
-		@Override
-		public void close() {
-			// nothing here
-		}
-	}
-
-	private class MockPushConnection extends BaseConnection implements
-			PushConnection {
-		MockPushConnection() {
-			final Map<String, Ref> refsMap = new HashMap<String, Ref>();
-			for (final Ref r : advertisedRefs)
-				refsMap.put(r.getName(), r);
-			available(refsMap);
-		}
-
-		@Override
-		public void close() {
-			// nothing here
-		}
-
-		public void push(ProgressMonitor monitor,
-				Map<String, RemoteRefUpdate> refsToUpdate)
-				throws TransportException {
-			for (final RemoteRefUpdate rru : refsToUpdate.values()) {
-				assertEquals(Status.NOT_ATTEMPTED, rru.getStatus());
-				rru.setStatus(connectionUpdateStatus);
-			}
-		}
-	}
-#endif
+        [Test]
+        public void testPushResult()
+        {
+            RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
+                                                      "refs/heads/master", false, "refs/remotes/test/master", null);
+            Ref @ref = new Ref(Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            refUpdates.Add(rru);
+            advertisedRefs.Add(@ref);
+            PushResult result = executePush();
+            Assert.AreEqual(1, result.TrackingRefUpdates.Count);
+            Assert.AreEqual(1, result.AdvertisedRefs.Count);
+            Assert.AreEqual(1, result.RemoteUpdates.Count);
+            Assert.AreNotEqual(null, result.GetTrackingRefUpdate("refs/remotes/test/master"));
+            Assert.AreNotEqual(null, result.GetAdvertisedRef("refs/heads/master"));
+            Assert.AreNotEqual(null, result.GetRemoteUpdate("refs/heads/master"));
+        }
     }
 }

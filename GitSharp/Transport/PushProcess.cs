@@ -46,7 +46,7 @@ namespace GitSharp.Transport
     /// Class performing push operation on remote repository.
     /// </summary>
     /// <seealso cref= Transport.push(IProgressMonitor, Collection)</seealso>
-    internal class PushProcess
+    public class PushProcess
     {
         /// <summary> Task name for <seealso cref="IProgressMonitor"/> used during opening connection.  </summary>
         internal const string PROGRESS_OPENING_CONNECTION = "Opening connection";
@@ -71,7 +71,7 @@ namespace GitSharp.Transport
         ///	 * <param name="toPush">
         ///	 *            specification of refs updates (and local tracking branches). </param>
         ///	 * <exception cref="TransportException"> </exception>
-        internal PushProcess(Transport transport, IEnumerable<RemoteRefUpdate> toPush)
+        public PushProcess(Transport transport, IEnumerable<RemoteRefUpdate> toPush)
         {
             _walker = new RevWalk.RevWalk(transport.Local);
             _transport = transport;
@@ -101,10 +101,10 @@ namespace GitSharp.Transport
         ///	 * <exception cref="TransportException">
         ///	 *             when some error occurred during operation, like I/O, protocol
         ///	 *             error, or local database consistency error. </exception>
-        internal virtual PushResult execute(IProgressMonitor monitor)
+        public virtual PushResult execute(IProgressMonitor monitor)
         {
             // [ammachado] TODO: IProgressMonitor.UNKNOWN constant!
-            monitor.BeginTask(PROGRESS_OPENING_CONNECTION, 0);
+            monitor.BeginTask(PROGRESS_OPENING_CONNECTION, -1);
             _connection = _transport.openPush();
 
             try

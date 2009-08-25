@@ -116,7 +116,7 @@ namespace GitSharp.DirectoryCache
             entrySpan = -1;
         }
 
-        private DirCacheTree(DirCacheTree myParent, byte[] path,                 int pathOff, int pathLen)
+        private DirCacheTree(DirCacheTree myParent, byte[] path, int pathOff, int pathLen)
         {
             parent = myParent;
             encodedName = new byte[pathLen];
@@ -396,7 +396,8 @@ namespace GitSharp.DirectoryCache
 
                 FileMode mode = e.getFileMode();
                 if ((int)mode.ObjectType == Constants.OBJ_BAD)
-                    throw new UnmergedPathException(e);
+                    throw new InvalidOperationException("Entry \"" + e.getPathString() + "\" has incorrect mode set up.");
+
 
                 size += mode.copyToLength();
                 size += ep.Length - pathOffset;

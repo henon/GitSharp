@@ -1,7 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
+ * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,49 +35,41 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Collections.Generic;
-using GitSharp.Exceptions;
+/* Note: jgit has implemented its own FileStream in WalkRemoteObjectDatabase */
 
-namespace GitSharp.Transport
+using System.IO;
+
+namespace GitSharp.Util
 {
-    public abstract class BaseConnection : IConnection
+
+    public static class FileStreamExtensions
     {
-        private Dictionary<string, Ref> advertisedRefs = new Dictionary<string, Ref>();
-        private bool startedOperation;
-
-        public Dictionary<string, Ref> RefsMap
+        public static byte[] toArray(this Stream stream)
         {
-            get
+            try
             {
-                return advertisedRefs;
-            }
-        }
+                // Note: if we can seek, it's likely we have a length
+                if (stream.CanSeek)
+                {
+                    if (stream.Length >= 0)
+                    {
+                        byte[] r = new byte[stream.Length];
+                        NB.ReadFully(stream, r, 0, r.Length);
+                        return r;
+                    }
+                }
 
-        public List<Ref> Refs
-        {
-            get
+                MemoryStream m = new MemoryStream();
+                byte[] buf = new byte[2048];
+                int n;
+                while ((n = stream.Read(buf, 0, buf.Length)) > 0)
+                    m.Write(buf, 0, n);
+                return m.ToArray();
+            }
+            finally
             {
-                return new List<Ref>(advertisedRefs.Values);
+                stream.Close();
             }
-        }
-
-        public Ref GetRef(string name)
-        {
-            return advertisedRefs[name];
-        }
-
-        public abstract void Close();
-
-        public void available(Dictionary<string, Ref> all)
-        {
-            advertisedRefs = all;
-        }
-
-        protected void markStartedOperation()
-        {
-            if (startedOperation)
-                throw new TransportException("Only one operation call per connection is supported.");
-            startedOperation = true;
         }
     }
 

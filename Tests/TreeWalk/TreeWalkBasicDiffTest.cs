@@ -35,83 +35,80 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.TreeWalk;
+using System;
+using GitSharp.TreeWalk.Filter;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.TreeWalk
 {
-
-    using NUnit.Framework;
-    [TestFixture]
-    public class TreeWalkBasicDiffTest : RepositoryTestCase
-    {
-#if false
-	public void testMissingSubtree_DetectFileAdded_FileModified()
-			throws Exception {
-		final ObjectWriter ow = new ObjectWriter(db);
-		final ObjectId aFileId = ow.writeBlob("a".getBytes());
-		final ObjectId bFileId = ow.writeBlob("b".getBytes());
-		final ObjectId cFileId1 = ow.writeBlob("c-1".getBytes());
-		final ObjectId cFileId2 = ow.writeBlob("c-2".getBytes());
-
-		// Create sub-a/empty, sub-c/empty = hello.
-		final ObjectId oldTree;
+	[TestFixture]
+	public class TreeWalkBasicDiffTest : RepositoryTestCase
+	{
+		[Test]
+		public void testMissingSubtree_DetectFileAdded_FileModified()
 		{
-			final Tree root = new Tree(db);
-			{
-				final Tree subA = root.addTree("sub-a");
-				subA.addFile("empty").setId(aFileId);
-				subA.setId(ow.writeTree(subA));
-			}
-			{
-				final Tree subC = root.addTree("sub-c");
-				subC.addFile("empty").setId(cFileId1);
-				subC.setId(ow.writeTree(subC));
-			}
-			oldTree = ow.writeTree(root);
+			ObjectWriter ow = new ObjectWriter(db);
+			ObjectId aFileId = ow.WriteBlob(Constants.CHARSET.GetBytes("a"));
+			ObjectId bFileId = ow.WriteBlob(Constants.CHARSET.GetBytes("b"));
+			ObjectId cFileId1 = ow.WriteBlob(Constants.CHARSET.GetBytes("c-1"));
+			ObjectId cFileId2 = ow.WriteBlob(Constants.CHARSET.GetBytes("c-2"));
+
+			// Create sub-a/empty, sub-c/empty = hello.
+			Func<ObjectId> oldTree = () =>
+			                         	{
+			                         		Tree root = new Tree(db);
+
+			                         		Tree subA = root.AddTree("sub-a");
+			                         		subA.AddFile("empty").Id = aFileId;
+			                         		subA.Id = ow.WriteTree(subA);
+
+			                         		Tree subC = root.AddTree("sub-c");
+			                         		subC.AddFile("empty").Id = cFileId1;
+			                         		subC.Id = ow.WriteTree(subC);
+
+			                         		return ow.WriteTree(root);
+			                         	};
+
+			// Create sub-a/empty, sub-b/empty, sub-c/empty.
+			Func<ObjectId> newTree = () =>
+			                         	{
+			                         		Tree root = new Tree(db);
+
+			                         		Tree subA = root.AddTree("sub-a");
+			                         		subA.AddFile("empty").Id = aFileId;
+			                         		subA.Id = ow.WriteTree(subA);
+
+			                         		Tree subB = root.AddTree("sub-b");
+			                         		subB.AddFile("empty").Id = bFileId;
+			                         		subB.Id = ow.WriteTree(subB);
+
+			                         		Tree subC = root.AddTree("sub-c");
+			                         		subC.AddFile("empty").Id = cFileId2;
+			                         		subC.Id = ow.WriteTree(subC);
+
+			                         		return ow.WriteTree(root);
+			                         	};
+
+			GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+			tw.reset(new ObjectId[] { oldTree.Invoke(), newTree.Invoke() });
+			tw.setRecursive(true);
+			tw.setFilter(TreeFilter.ANY_DIFF);
+
+			Assert.IsTrue(tw.next());
+			Assert.AreEqual("sub-b/empty", tw.getPathString());
+			Assert.AreEqual(FileMode.Missing, tw.getFileMode(0));
+			Assert.AreEqual(FileMode.RegularFile, tw.getFileMode(1));
+			Assert.AreEqual(ObjectId.ZeroId, tw.getObjectId(0));
+			Assert.AreEqual(bFileId, tw.getObjectId(1));
+
+			Assert.IsTrue(tw.next());
+			Assert.AreEqual("sub-c/empty", tw.getPathString());
+			Assert.AreEqual(FileMode.RegularFile, tw.getFileMode(0));
+			Assert.AreEqual(FileMode.RegularFile, tw.getFileMode(1));
+			Assert.AreEqual(cFileId1, tw.getObjectId(0));
+			Assert.AreEqual(cFileId2, tw.getObjectId(1));
+
+			Assert.IsTrue(tw.next());
 		}
-
-		// Create sub-a/empty, sub-b/empty, sub-c/empty.
-		final ObjectId newTree;
-		{
-			final Tree root = new Tree(db);
-			{
-				final Tree subA = root.addTree("sub-a");
-				subA.addFile("empty").setId(aFileId);
-				subA.setId(ow.writeTree(subA));
-			}
-			{
-				final Tree subB = root.addTree("sub-b");
-				subB.addFile("empty").setId(bFileId);
-				subB.setId(ow.writeTree(subB));
-			}
-			{
-				final Tree subC = root.addTree("sub-c");
-				subC.addFile("empty").setId(cFileId2);
-				subC.setId(ow.writeTree(subC));
-			}
-			newTree = ow.writeTree(root);
-		}
-
-		final TreeWalk tw = new TreeWalk(db);
-		tw.reset(new ObjectId[] { oldTree, newTree });
-		tw.setRecursive(true);
-		tw.setFilter(TreeFilter.ANY_DIFF);
-
-		assertTrue(tw.next());
-		assertEquals("sub-b/empty", tw.getPathString());
-		assertEquals(FileMode.MISSING, tw.getFileMode(0));
-		assertEquals(FileMode.REGULAR_FILE, tw.getFileMode(1));
-		assertEquals(ObjectId.zeroId(), tw.getObjectId(0));
-		assertEquals(bFileId, tw.getObjectId(1));
-
-		assertTrue(tw.next());
-		assertEquals("sub-c/empty", tw.getPathString());
-		assertEquals(FileMode.REGULAR_FILE, tw.getFileMode(0));
-		assertEquals(FileMode.REGULAR_FILE, tw.getFileMode(1));
-		assertEquals(cFileId1, tw.getObjectId(0));
-		assertEquals(cFileId2, tw.getObjectId(1));
-
-		assertFalse(tw.next());
 	}
-#endif
-    }
 }

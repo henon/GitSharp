@@ -123,7 +123,7 @@ namespace GitSharp
             UnpackedObjectCache.reconfigure(cfg);
         }
 
-        static WindowCache getInstance()
+        internal static WindowCache getInstance()
         {
             return cache;
         }
@@ -181,16 +181,15 @@ namespace GitSharp
                 throw new ArgumentException("Window size must be < limit");
         }
 
-        int getOpenFiles()
+        public int getOpenFiles()
         {
             return openFiles.get();
         }
 
-        int getOpenBytes()
+        public int getOpenBytes()
         {
             return openBytes.get();
         }
-
 
         internal override int hash(int packHash, long off)
         {

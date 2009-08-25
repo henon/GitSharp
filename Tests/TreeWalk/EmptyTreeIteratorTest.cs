@@ -36,76 +36,99 @@
  */
 
 using GitSharp.TreeWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.TreeWalk
 {
+	[TestFixture]
+	public class EmptyTreeIteratorTest : RepositoryTestCase
+	{
+		[Test]
+		public virtual void testAtEOF()
+		{
+			EmptyTreeIterator etp = new EmptyTreeIterator();
+			Assert.IsTrue(etp.first());
+			Assert.IsTrue(etp.eof());
+		}
 
-    using NUnit.Framework;
-    [TestFixture]
-    public class EmptyTreeIteratorTest : RepositoryTestCase
-    {
-#if false
-	public void testAtEOF() throws Exception {
-		final EmptyTreeIterator etp = new EmptyTreeIterator();
-		assertTrue(etp.first());
-		assertTrue(etp.eof());
-	}
+		[Test]
+		public virtual void testCreateSubtreeIterator()
+		{
+			EmptyTreeIterator etp = new EmptyTreeIterator();
+			AbstractTreeIterator sub = etp.createSubtreeIterator(db);
+			Assert.IsNotNull(sub);
+			Assert.IsTrue(sub.first());
+			Assert.IsTrue(sub.eof());
+			Assert.IsTrue(sub is EmptyTreeIterator);
+		}
 
-	public void testCreateSubtreeIterator() throws Exception {
-		final EmptyTreeIterator etp = new EmptyTreeIterator();
-		final AbstractTreeIterator sub = etp.createSubtreeIterator(db);
-		assertNotNull(sub);
-		assertTrue(sub.first());
-		assertTrue(sub.eof());
-		assertTrue(sub instanceof EmptyTreeIterator);
-	}
+		[Test]
+		public virtual void testEntryObjectId()
+		{
+			EmptyTreeIterator etp = new EmptyTreeIterator();
+			Assert.AreSame(ObjectId.ZeroId, etp.getEntryObjectId());
+			Assert.IsNotNull(etp.idBuffer());
+			Assert.AreEqual(0, etp.idOffset());
+			Assert.AreEqual(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
+		}
 
-	public void testEntryObjectId() throws Exception {
-		final EmptyTreeIterator etp = new EmptyTreeIterator();
-		assertSame(ObjectId.zeroId(), etp.getEntryObjectId());
-		assertNotNull(etp.idBuffer());
-		assertEquals(0, etp.idOffset());
-		assertEquals(ObjectId.zeroId(), ObjectId.fromRaw(etp.idBuffer()));
-	}
+		[Test]
+		public virtual void testNextDoesNothing()
+		{
+			EmptyTreeIterator etp = new EmptyTreeIterator();
+			etp.next(1);
+			Assert.IsTrue(etp.first());
+			Assert.IsTrue(etp.eof());
+			Assert.AreEqual(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
 
-	public void testNextDoesNothing() throws Exception {
-		final EmptyTreeIterator etp = new EmptyTreeIterator();
-		etp.next(1);
-		assertTrue(etp.first());
-		assertTrue(etp.eof());
-		assertEquals(ObjectId.zeroId(), ObjectId.fromRaw(etp.idBuffer()));
+			etp.next(1);
+			Assert.IsTrue(etp.first());
+			Assert.IsTrue(etp.eof());
+			Assert.AreEqual(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
+		}
 
-		etp.next(1);
-		assertTrue(etp.first());
-		assertTrue(etp.eof());
-		assertEquals(ObjectId.zeroId(), ObjectId.fromRaw(etp.idBuffer()));
-	}
+		[Test]
+		public virtual void testBackDoesNothing()
+		{
+			EmptyTreeIterator etp = new EmptyTreeIterator();
+			etp.back(1);
+			Assert.IsTrue(etp.first());
+			Assert.IsTrue(etp.eof());
+			Assert.AreEqual(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
 
-	public void testBackDoesNothing() throws Exception {
-		final EmptyTreeIterator etp = new EmptyTreeIterator();
-		etp.back(1);
-		assertTrue(etp.first());
-		assertTrue(etp.eof());
-		assertEquals(ObjectId.zeroId(), ObjectId.fromRaw(etp.idBuffer()));
+			etp.back(1);
+			Assert.IsTrue(etp.first());
+			Assert.IsTrue(etp.eof());
+			Assert.AreEqual(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
+		}
 
-		etp.back(1);
-		assertTrue(etp.first());
-		assertTrue(etp.eof());
-		assertEquals(ObjectId.zeroId(), ObjectId.fromRaw(etp.idBuffer()));
-	}
+		[Test]
+		public virtual void testStopWalkCallsParent()
+		{
+			bool[] called = new bool[1];
+			Assert.IsFalse(called[0]);
 
-	public void testStopWalkCallsParent() throws Exception {
-		final boolean called[] = new boolean[1];
-		assertFalse(called[0]);
+			// [ammachado]: Anonymous inner classes are not convertable to .NET:
+			EmptyTreeIterator parent = new AnonymousTreeIterator(called);
 
-		final EmptyTreeIterator parent = new EmptyTreeIterator() {
-			@Override
-			public void stopWalk() {
+
+			parent.createSubtreeIterator(db).stopWalk();
+			Assert.IsTrue(called[0]);
+		}
+
+		class AnonymousTreeIterator : EmptyTreeIterator
+		{
+			private readonly bool[] called;
+
+			public AnonymousTreeIterator(bool[] called)
+			{
+				this.called = called;
+			}
+
+			public override void stopWalk()
+			{
 				called[0] = true;
 			}
-		};
-		parent.createSubtreeIterator(db).stopWalk();
-		assertTrue(called[0]);
+		}
 	}
-#endif
-    }
 }

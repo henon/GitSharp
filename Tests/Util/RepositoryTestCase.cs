@@ -270,7 +270,6 @@ namespace GitSharp.Tests
             //super.tearDown();
         }
 
-
         protected FileInfo writeTrashFile(string name, string data)
         {
             var tf = new FileInfo(trash + "/" + name);

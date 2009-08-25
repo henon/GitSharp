@@ -35,149 +35,161 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.TreeWalk;
+using System.IO;
+using GitSharp.DirectoryCache;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.TreeWalk
 {
-
-    using NUnit.Framework;
-    [TestFixture]
-    public class PostOrderTreeWalkTest : RepositoryTestCase
-    {
-#if false
-	public void testInitialize_NoPostOrder() throws Exception {
-		final TreeWalk tw = new TreeWalk(db);
-		assertFalse(tw.isPostOrderTraversal());
-	}
-
-	public void testInitialize_TogglePostOrder() throws Exception {
-		final TreeWalk tw = new TreeWalk(db);
-		assertFalse(tw.isPostOrderTraversal());
-		tw.setPostOrderTraversal(true);
-		assertTrue(tw.isPostOrderTraversal());
-		tw.setPostOrderTraversal(false);
-		assertFalse(tw.isPostOrderTraversal());
-	}
-
-	public void testResetDoesNotAffectPostOrder() throws Exception {
-		final TreeWalk tw = new TreeWalk(db);
-		tw.setPostOrderTraversal(true);
-		assertTrue(tw.isPostOrderTraversal());
-		tw.reset();
-		assertTrue(tw.isPostOrderTraversal());
-
-		tw.setPostOrderTraversal(false);
-		assertFalse(tw.isPostOrderTraversal());
-		tw.reset();
-		assertFalse(tw.isPostOrderTraversal());
-	}
-
-	public void testNoPostOrder() throws Exception {
-		final DirCache tree = DirCache.read(db);
+	[TestFixture]
+	public class PostOrderTreeWalkTest : RepositoryTestCase
+	{
+		[Test]
+		public void testInitialize_NoPostOrder()
 		{
-			final DirCacheBuilder b = tree.builder();
-
-			b.add(makeFile("a"));
-			b.add(makeFile("b/c"));
-			b.add(makeFile("b/d"));
-			b.add(makeFile("q"));
-
-			b.finish();
-			assertEquals(4, tree.getEntryCount());
+			GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+			Assert.IsFalse(tw.isPostOrderTraversal());
 		}
 
-		final TreeWalk tw = new TreeWalk(db);
-		tw.reset();
-		tw.setPostOrderTraversal(false);
-		tw.addTree(new DirCacheIterator(tree));
-
-		assertModes("a", REGULAR_FILE, tw);
-		assertModes("b", TREE, tw);
-		assertTrue(tw.isSubtree());
-		assertFalse(tw.isPostChildren());
-		tw.enterSubtree();
-		assertModes("b/c", REGULAR_FILE, tw);
-		assertModes("b/d", REGULAR_FILE, tw);
-		assertModes("q", REGULAR_FILE, tw);
-	}
-
-	public void testWithPostOrder_EnterSubtree() throws Exception {
-		final DirCache tree = DirCache.read(db);
+		[Test]
+		public void testInitialize_TogglePostOrder()
 		{
-			final DirCacheBuilder b = tree.builder();
-
-			b.add(makeFile("a"));
-			b.add(makeFile("b/c"));
-			b.add(makeFile("b/d"));
-			b.add(makeFile("q"));
-
-			b.finish();
-			assertEquals(4, tree.getEntryCount());
+			GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+			Assert.IsFalse(tw.isPostOrderTraversal());
+			tw.setPostOrderTraversal(true);
+			Assert.IsTrue(tw.isPostOrderTraversal());
+			tw.setPostOrderTraversal(false);
+			Assert.IsFalse(tw.isPostOrderTraversal());
 		}
 
-		final TreeWalk tw = new TreeWalk(db);
-		tw.reset();
-		tw.setPostOrderTraversal(true);
-		tw.addTree(new DirCacheIterator(tree));
-
-		assertModes("a", REGULAR_FILE, tw);
-
-		assertModes("b", TREE, tw);
-		assertTrue(tw.isSubtree());
-		assertFalse(tw.isPostChildren());
-		tw.enterSubtree();
-		assertModes("b/c", REGULAR_FILE, tw);
-		assertModes("b/d", REGULAR_FILE, tw);
-
-		assertModes("b", TREE, tw);
-		assertTrue(tw.isSubtree());
-		assertTrue(tw.isPostChildren());
-
-		assertModes("q", REGULAR_FILE, tw);
-	}
-
-	public void testWithPostOrder_NoEnterSubtree() throws Exception {
-		final DirCache tree = DirCache.read(db);
+		[Test]
+		public void testResetDoesNotAffectPostOrder()
 		{
-			final DirCacheBuilder b = tree.builder();
+			GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+			tw.setPostOrderTraversal(true);
+			Assert.IsTrue(tw.isPostOrderTraversal());
+			tw.reset();
+			Assert.IsTrue(tw.isPostOrderTraversal());
 
-			b.add(makeFile("a"));
-			b.add(makeFile("b/c"));
-			b.add(makeFile("b/d"));
-			b.add(makeFile("q"));
-
-			b.finish();
-			assertEquals(4, tree.getEntryCount());
+			tw.setPostOrderTraversal(false);
+			Assert.IsFalse(tw.isPostOrderTraversal());
+			tw.reset();
+			Assert.IsFalse(tw.isPostOrderTraversal());
 		}
 
-		final TreeWalk tw = new TreeWalk(db);
-		tw.reset();
-		tw.setPostOrderTraversal(true);
-		tw.addTree(new DirCacheIterator(tree));
+		[Test]
+		public void testNoPostOrder()
+		{
+			DirCache tree = DirCache.read(db);
+			{
+				DirCacheBuilder b = tree.builder();
 
-		assertModes("a", REGULAR_FILE, tw);
+				b.add(makeFile("a"));
+				b.add(makeFile("b/c"));
+				b.add(makeFile("b/d"));
+				b.add(makeFile("q"));
 
-		assertModes("b", TREE, tw);
-		assertTrue(tw.isSubtree());
-		assertFalse(tw.isPostChildren());
+				b.finish();
+				Assert.AreEqual(4, tree.getEntryCount());
+			}
 
-		assertModes("q", REGULAR_FILE, tw);
+			GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+			tw.reset();
+			tw.setPostOrderTraversal(false);
+			tw.addTree(new DirCacheIterator(tree));
+
+			assertModes("a", FileMode.RegularFile, tw);
+			assertModes("b", FileMode.Tree, tw);
+			Assert.IsTrue(tw.isSubtree());
+			Assert.IsFalse(tw.isPostChildren());
+			tw.enterSubtree();
+			assertModes("b/c", FileMode.RegularFile, tw);
+			assertModes("b/d", FileMode.RegularFile, tw);
+			assertModes("q", FileMode.RegularFile, tw);
+		}
+
+		[Test]
+		public void testWithPostOrder_EnterSubtree()
+		{
+			DirCache tree = DirCache.read(db);
+			{
+				DirCacheBuilder b = tree.builder();
+
+				b.add(makeFile("a"));
+				b.add(makeFile("b/c"));
+				b.add(makeFile("b/d"));
+				b.add(makeFile("q"));
+
+				b.finish();
+				Assert.AreEqual(4, tree.getEntryCount());
+			}
+
+			GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+			tw.reset();
+			tw.setPostOrderTraversal(true);
+			tw.addTree(new DirCacheIterator(tree));
+
+			assertModes("a", FileMode.RegularFile, tw);
+
+			assertModes("b", FileMode.Tree, tw);
+			Assert.IsTrue(tw.isSubtree());
+			Assert.IsFalse(tw.isPostChildren());
+			tw.enterSubtree();
+			assertModes("b/c", FileMode.RegularFile, tw);
+			assertModes("b/d", FileMode.RegularFile, tw);
+
+			assertModes("b", FileMode.Tree, tw);
+			Assert.IsTrue(tw.isSubtree());
+			Assert.IsTrue(tw.isPostChildren());
+
+			assertModes("q", FileMode.RegularFile, tw);
+		}
+
+		[Test]
+		public void testWithPostOrder_NoEnterSubtree()
+		{
+			DirCache tree = DirCache.read(db);
+			{
+				DirCacheBuilder b = tree.builder();
+
+				b.add(makeFile("a"));
+				b.add(makeFile("b/c"));
+				b.add(makeFile("b/d"));
+				b.add(makeFile("q"));
+
+				b.finish();
+				Assert.AreEqual(4, tree.getEntryCount());
+			}
+
+			GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+			tw.reset();
+			tw.setPostOrderTraversal(true);
+			tw.addTree(new DirCacheIterator(tree));
+
+			assertModes("a", FileMode.RegularFile, tw);
+
+			assertModes("b", FileMode.Tree, tw);
+			Assert.IsTrue(tw.isSubtree());
+			Assert.IsFalse(tw.isPostChildren());
+
+			assertModes("q", FileMode.RegularFile, tw);
+		}
+
+		private DirCacheEntry makeFile(string path)
+		{
+			byte[] pathBytes = Constants.encode(path);
+			DirCacheEntry ent = new DirCacheEntry(path);
+			ent.setFileMode(FileMode.RegularFile);
+			ent.setObjectId(new ObjectWriter(db).ComputeBlobSha1(pathBytes.Length, new MemoryStream(pathBytes)));
+			return ent;
+		}
+
+		private static void assertModes(string path, FileMode mode0, GitSharp.TreeWalk.TreeWalk tw)
+		{
+			Assert.IsTrue(tw.next(), "has " + path);
+			Assert.AreEqual(path, tw.getPathString());
+			Assert.AreEqual(mode0, tw.getFileMode(0));
+		}
+
 	}
-
-	private DirCacheEntry makeFile(final String path) throws Exception {
-		final byte[] pathBytes = Constants.encode(path);
-		final DirCacheEntry ent = new DirCacheEntry(path);
-		ent.setFileMode(REGULAR_FILE);
-		ent.setObjectId(new ObjectWriter(db).computeBlobSha1(pathBytes.length,
-				new ByteArrayInputStream(pathBytes)));
-		return ent;
-	}
-
-	private static void assertModes(final String path, final FileMode mode0,
-			final TreeWalk tw) throws Exception {
-		assertTrue("has " + path, tw.next());
-		assertEquals(path, tw.getPathString());
-		assertEquals(mode0, tw.getFileMode(0));
-	}
-#endif
-    }
 }

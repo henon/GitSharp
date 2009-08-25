@@ -39,11 +39,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System.Globalization;
-using System.Linq;
+
 using System.Text;
 using System;
-using System.IO;
 using GitSharp.Util;
 using GitSharp.Exceptions;
 
@@ -333,7 +331,7 @@ namespace GitSharp
          *             function. Very unlikely given that JGit uses a hash function
          *             that is in the Java reference specification.
          */
-        internal static MessageDigest newMessageDigest()
+        public static MessageDigest newMessageDigest()
         {
             //try {
             //    return MessageDigest.getInstance(HASH_FUNCTION);

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
 
 namespace GitSharp
 {
@@ -9,7 +6,7 @@ namespace GitSharp
     {
         public static void That(bool istrue)
         {
-            throw new NotImplementedException();
+            Debug.Assert(istrue);
         }
     }
 }

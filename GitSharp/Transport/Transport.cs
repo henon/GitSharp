@@ -107,12 +107,18 @@ namespace GitSharp.Transport
         }
 
         /**
-         * We don't support any transports right now
+         * Support for Transport over HTTP and Git (Anon+SSH)
          */
         public static Transport Open(Repository local, URIish remote)
         {
             if (TransportHttp.canHandle(remote))
                 return new TransportHttp(local, remote);
+
+            if (TransportGitAnon.canHandle(remote))
+                return new TransportGitAnon(local, remote);
+
+            if (TransportGitSsh.canHandle(remote))
+                return new TransportGitSsh(local, remote);
 
             throw new NotSupportedException("URI not supported: " + remote);
         }

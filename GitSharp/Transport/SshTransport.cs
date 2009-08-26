@@ -69,7 +69,7 @@ namespace GitSharp.Transport
             return sch;
         }
 
-        protected void initSesssion()
+        protected void initSession()
         {
             if (sock != null)
                 return;

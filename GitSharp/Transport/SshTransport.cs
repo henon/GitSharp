@@ -41,6 +41,7 @@
 using System;
 using System.Net.Sockets;
 using GitSharp.Exceptions;
+using Tamir.SharpSsh.jsch;
 
 namespace GitSharp.Transport
 {
@@ -48,7 +49,6 @@ namespace GitSharp.Transport
     public abstract class SshTransport : TcpTransport
     {
         private SshSessionFactory sch;
-
         protected Session sock;
 
         protected SshTransport(Repository local, URIish uri)
@@ -77,7 +77,7 @@ namespace GitSharp.Transport
                 return;
 
             string user = uri.User;
-            string pass = uri.Path;
+            string pass = uri.Pass;
             string host = uri.Host;
             int port = uri.Port;
             try
@@ -86,10 +86,29 @@ namespace GitSharp.Transport
                 if (!sock.isConnected())
                     sock.connect();
             }
+            catch (JSchException je)
+            {
+                throw new TransportException(uri, je.Message, je.InnerException);
+            }
             catch (SocketException e)
             {
                 throw new TransportException(e.Message, e.InnerException ?? e);
             }
-	}
+        }
+
+        public override void close()
+        {
+            if (sock != null)
+            {
+                try
+                {
+                    sch.releaseSession(sock);
+                }
+                finally
+                {
+                    sock = null;
+                }
+            }
+        }
     }
 }

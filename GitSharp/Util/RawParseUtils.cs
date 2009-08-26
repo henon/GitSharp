@@ -50,12 +50,14 @@ namespace GitSharp
     {
         private static readonly byte[] digits10 = gen10();
         private static readonly byte[] digits16 = gen16();
+        private static readonly byte[] footerLineKeyChars = GenerateFooterLineKeyChars();
+
 
         private static byte[] gen10()
         {
             byte[] ret = new byte['9' + 1];
             for (char i = '0'; i <= '9'; i++)
-                ret[i] = (byte) (i - '0');
+                ret[i] = (byte)(i - '0');
             return ret;
         }
 
@@ -63,28 +65,25 @@ namespace GitSharp
         {
             byte[] ret = new byte['f' + 1];
             for (char i = '0'; i <= '9'; i++)
-                ret[i] = (byte) (i - '0');
+                ret[i] = (byte)(i - '0');
             for (char i = 'a'; i <= 'f'; i++)
-                ret[i] = (byte) ((i - 'a') + 10);
+                ret[i] = (byte)((i - 'a') + 10);
             for (char i = 'A'; i <= 'F'; i++)
-                ret[i] = (byte) ((i - 'A') + 10);
+                ret[i] = (byte)((i - 'A') + 10);
             return ret;
         }
 
-        public static int parseHexInt16(byte[] bs, int p)
+        private static byte[] GenerateFooterLineKeyChars()
         {
-            int r = digits16[bs[p]] << 4;
-
-            r |= digits16[bs[p + 1]];
-            r <<= 4;
-
-            r |= digits16[bs[p + 2]];
-            r <<= 4;
-
-            r |= digits16[bs[p + 3]];
-            if (r < 0)
-                throw new IndexOutOfRangeException();
-            return r;
+            var footerLineKeyChars = new byte[(byte)'z' + 1];
+            footerLineKeyChars[(byte)'-'] = 1;
+            for (char i = '0'; i <= '9'; i++)
+                footerLineKeyChars[i] = 1;
+            for (char i = 'A'; i <= 'Z'; i++)
+                footerLineKeyChars[i] = 1;
+            for (char i = 'a'; i <= 'z'; i++)
+                footerLineKeyChars[i] = 1;
+            return footerLineKeyChars;
         }
 
         /**
@@ -374,6 +373,98 @@ namespace GitSharp
             return sign < 0 ? -r : r;
         }
 
+
+        /**
+         * Parse 4 character base 16 (hex) formatted string to unsigned integer.
+         * <p>
+         * The number is read in network byte order, that is, most significant
+         * nybble first.
+         *
+         * @param bs
+         *            buffer to parse digits from; positions {@code [p, p+4)} will
+         *            be parsed.
+         * @param p
+         *            first position within the buffer to parse.
+         * @return the integer value.
+         * @throws IndexOutOfRangeException
+         *             if the string is not hex formatted.
+         */
+        public static int parseHexInt16(byte[] bs, int p)
+        {
+            int r = digits16[bs[p]] << 4;
+
+            r |= digits16[bs[p + 1]];
+            r <<= 4;
+
+            r |= digits16[bs[p + 2]];
+            r <<= 4;
+
+            r |= digits16[bs[p + 3]];
+            if (r < 0)
+                throw new IndexOutOfRangeException();
+            return r;
+        }
+
+        /**
+         * Parse 8 character base 16 (hex) formatted string to unsigned integer.
+         * <p>
+         * The number is read in network byte order, that is, most significant
+         * nybble first.
+         *
+         * @param bs
+         *            buffer to parse digits from; positions {@code [p, p+8)} will
+         *            be parsed.
+         * @param p
+         *            first position within the buffer to parse.
+         * @return the integer value.
+         * @throws IndexOutOfRangeException
+         *             if the string is not hex formatted.
+         */
+        public static int parseHexInt32(byte[] bs, int p)
+        {
+            int r = digits16[bs[p]] << 4;
+
+            r |= digits16[bs[p + 1]];
+            r <<= 4;
+
+            r |= digits16[bs[p + 2]];
+            r <<= 4;
+
+            r |= digits16[bs[p + 3]];
+            r <<= 4;
+
+            r |= digits16[bs[p + 4]];
+            r <<= 4;
+
+            r |= digits16[bs[p + 5]];
+            r <<= 4;
+
+            r |= digits16[bs[p + 6]];
+
+            int last = digits16[bs[p + 7]];
+            if (r < 0 || last < 0)
+                throw new IndexOutOfRangeException();
+            return (r << 4) | last;
+        }
+
+        /**
+         * Parse a single hex digit to its numeric value (0-15).
+         *
+         * @param digit
+         *            hex character to parse.
+         * @return numeric value, in the range 0-15.
+         * @throws IndexOutOfRangeException
+         *             if the input digit is not a valid hex digit.
+         */
+        public static int parseHexInt4(byte digit)
+        {
+            byte r = digits16[digit];
+            if (r < 0)
+                throw new IndexOutOfRangeException();
+            return r;
+        }
+
+
         /**
          * Parse a Git style timezone string.
          * <p>
@@ -443,6 +534,17 @@ namespace GitSharp
             return next(b, ptr, '\n');
         }
 
+        /**
+         * Locate the first position after the next LF.
+         * <p>
+         * This method stops on the first '\n' it finds.
+         *
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position within buffer to start looking for LF at.
+         * @return new position just after the first LF found.
+         */
         public static int nextLF(byte[] b, int ptr)
         {
             return next(b, ptr, (byte)'\n');
@@ -473,6 +575,19 @@ namespace GitSharp
             return ptr;
         }
 
+        /**
+         * Locate the first position after either the given character or LF.
+         * <p>
+         * This method stops on the first match it finds from either chrA or '\n'.
+         * 
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position within buffer to start looking for chrA or LF at.
+         * @param chrA
+         *            character to find.
+         * @return new position just after the first chrA or LF to be found.
+         */
         public static int nextLF(byte[] b, int ptr, byte chrA)
         {
             int sz = b.Length;
@@ -485,28 +600,95 @@ namespace GitSharp
             return ptr;
         }
 
-/**
- * Index the region between <code>[ptr, end)</code> to find line starts.
- * <p>
- * The returned list is 1 indexed. Index 0 contains
- * {@link Integer#MIN_VALUE} to pad the list out.
- * <p>
- * Using a 1 indexed list means that line numbers can be directly accessed
- * from the list, so <code>list.get(1)</code> (aka get line 1) returns
- * <code>ptr</code>.
- * <p>
- * The last element (index <code>map.size()-1</code>) always contains
- * <code>end</code>.
- *
- * @param buf
- *            buffer to scan.
- * @param ptr
- *            position within the buffer corresponding to the first byte of
- *            line 1.
- * @param end
- *            1 past the end of the content within <code>buf</code>.
- * @return a line map indexing the start position of each line.
- */
+
+        /**
+         * Locate the first position before a given character.
+         *
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position within buffer to start looking for chrA at.
+         * @param chrA
+         *            character to find.
+         * @return new position just before chrA, -1 for not found
+         */
+        public static int prev(byte[] b, int ptr, char chrA)
+        {
+            if (ptr == b.Length)
+                --ptr;
+            while (ptr >= 0)
+            {
+                if (b[ptr--] == chrA)
+                    return ptr;
+            }
+            return ptr;
+        }
+
+        /**
+         * Locate the first position before the previous LF.
+         * <p>
+         * This method stops on the first '\n' it finds.
+         *
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position within buffer to start looking for LF at.
+         * @return new position just before the first LF found, -1 for not found
+         */
+        public static int prevLF(byte[] b, int ptr)
+        {
+            return prev(b, ptr, '\n');
+        }
+
+        /**
+         * Locate the previous position before either the given character or LF.
+         * <p>
+         * This method stops on the first match it finds from either chrA or '\n'.
+         *
+         * @param b
+         *            buffer to scan.
+         * @param ptr
+         *            position within buffer to start looking for chrA or LF at.
+         * @param chrA
+         *            character to find.
+         * @return new position just before the first chrA or LF to be found, -1 for
+         *         not found
+         */
+        public static int prevLF(byte[] b, int ptr, char chrA)
+        {
+            if (ptr == b.Length)
+                --ptr;
+            while (ptr >= 0)
+            {
+                byte c = b[ptr--];
+                if (c == (byte)chrA || c == (byte)'\n')
+                    return ptr;
+            }
+            return ptr;
+        }
+
+        /**
+         * Index the region between <code>[ptr, end)</code> to find line starts.
+         * <p>
+         * The returned list is 1 indexed. Index 0 contains
+         * {@link Integer#MIN_VALUE} to pad the list out.
+         * <p>
+         * Using a 1 indexed list means that line numbers can be directly accessed
+         * from the list, so <code>list.get(1)</code> (aka get line 1) returns
+         * <code>ptr</code>.
+         * <p>
+         * The last element (index <code>map.size()-1</code>) always contains
+         * <code>end</code>.
+         *
+         * @param buf
+         *            buffer to scan.
+         * @param ptr
+         *            position within the buffer corresponding to the first byte of
+         *            line 1.
+         * @param end
+         *            1 past the end of the content within <code>buf</code>.
+         * @return a line map indexing the start position of each line.
+         */
         public static IntList lineMap(byte[] buf, int ptr, int end)
         {
             // Experimentally derived from multiple source repositories
@@ -683,19 +865,143 @@ namespace GitSharp
 
 
         /**
-     * Decode a buffer under UTF-8, if possible.
-     *
-     * If the byte stream cannot be decoded that way, the platform default is tried
-     * and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
-     * 
-     * @param buffer
-     *            buffer to pull raw bytes from.
-     * @return a string representation of the range <code>[start,end)</code>,
-     *         after decoding the region through the specified character set.
-     */
+         * Parse a name data (e.g. as within a reflog) into a PersonIdent.
+         * <p>
+         * When passing in a value for <code>nameB</code> callers should use the
+         * return value of {@link #author(byte[], int)} or
+         * {@link #committer(byte[], int)}, as these methods provide the proper
+         * position within the buffer.
+         *
+         * @param raw
+         *            the buffer to parse character data from.
+         * @param nameB
+         *            first position of the identity information. This should be the
+         *            first position after the space which delimits the header field
+         *            name (e.g. "author" or "committer") from the rest of the
+         *            identity line.
+         * @return the parsed identity. Never null.
+         */
+        public static PersonIdent parsePersonIdentOnly(byte[] raw, int nameB)
+        {
+            int stop = nextLF(raw, nameB);
+            int emailB = nextLF(raw, nameB, (byte)'<');
+            int emailE = nextLF(raw, emailB, (byte)'>');
+            string name;
+            string email;
+            if (emailE < stop)
+            {
+                email = decode(raw, emailB, emailE - 1);
+            }
+            else
+            {
+                email = "invalid";
+            }
+            if (emailB < stop)
+                name = decode(raw, nameB, emailB - 2);
+            else
+                name = decode(raw, nameB, stop);
+
+            MutableInteger ptrout = new MutableInteger();
+            long when;
+            int tz;
+            if (emailE < stop)
+            {
+                when = parseLongBase10(raw, emailE + 1, ptrout);
+                tz = parseTimeZoneOffset(raw, ptrout.value);
+            }
+            else
+            {
+                when = 0;
+                tz = 0;
+            }
+            return new PersonIdent(name, email, when * 1000L, tz);
+        }
+
+        /**
+         * Locate the end of a footer line key string.
+         * <p>
+         * If the region at {@code raw[ptr]} matches {@code ^[A-Za-z0-9-]+:} (e.g.
+         * "Signed-off-by: A. U. Thor\n") then this method returns the position of
+         * the first ':'.
+         * <p>
+         * If the region at {@code raw[ptr]} does not match {@code ^[A-Za-z0-9-]+:}
+         * then this method returns -1.
+         *
+         * @param raw
+         *            buffer to scan.
+         * @param ptr
+         *            first position within raw to consider as a footer line key.
+         * @return position of the ':' which terminates the footer line key if this
+         *         is otherwise a valid footer line key; otherwise -1.
+         */
+        public static int endOfFooterLineKey(byte[] raw, int ptr)
+        {
+            try
+            {
+                for (; ; )
+                {
+                    byte c = raw[ptr];
+                    if (footerLineKeyChars[c] == 0)
+                    {
+                        if (c == (byte)':')
+                            return ptr;
+                        return -1;
+                    }
+                    ptr++;
+                }
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                return -1;
+            }
+        }
+
+
+        private static string decode(byte[] b, Encoding charset)
+        {
+            // CharsetDecoder d = charset.newDecoder();
+            //d.onMalformedInput(CodingErrorAction.REPORT);
+            //d.onUnmappableCharacter(CodingErrorAction.REPORT);
+            //return d.decode(b).ToString();
+            return charset.GetString(b);
+        }
+
+
+        /**
+         * Decode a buffer under UTF-8, if possible.
+         *
+         * If the byte stream cannot be decoded that way, the platform default is tried
+         * and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
+         * 
+         * @param buffer
+         *            buffer to pull raw bytes from.
+         * @return a string representation of the range <code>[start,end)</code>,
+         *         after decoding the region through the specified character set.
+         */
         public static string decode(byte[] buffer)
         {
-            return decode(Constants.CHARSET, buffer, 0, buffer.Length);
+            return decode(buffer, 0, buffer.Length);
+        }
+
+        /**
+         * Decode a buffer under UTF-8, if possible.
+         *
+         * If the byte stream cannot be decoded that way, the platform default is
+         * tried and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
+         *
+         * @param buffer
+         *            buffer to pull raw bytes from.
+         * @param start
+         *            start position in buffer
+         * @param end
+         *            one position past the last location within the buffer to take
+         *            data from.
+         * @return a string representation of the range <code>[start,end)</code>,
+         *         after decoding the region through the specified character set.
+         */
+        public static string decode(byte[] buffer, int start, int end)
+        {
+            return decode(Constants.CHARSET, buffer, start, end);
         }
 
         /**
@@ -847,16 +1153,6 @@ namespace GitSharp
                 r.Append((char)(buffer[i] & 0xff));
             return r.ToString();
         }
-
-        private static string decode(byte[] b, Encoding charset)
-        {
-            // CharsetDecoder d = charset.newDecoder();
-            //d.onMalformedInput(CodingErrorAction.REPORT);
-            //d.onUnmappableCharacter(CodingErrorAction.REPORT);
-            //return d.decode(b).ToString();
-            return charset.GetString(b);
-        }
-
 
         /**
         * Locate the position of the commit message body.

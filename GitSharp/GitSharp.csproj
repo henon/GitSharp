@@ -111,7 +111,7 @@
     <Compile Include="Transport\TransportAmazonS3.cs" />
     <Compile Include="Transport\TransportBundleStream.cs" />
     <Compile Include="Transport\TransportGitAnon.cs" />
-    <None Include="Transport\TransportGitSsh.cs" />
+    <Compile Include="Transport\TransportGitSsh.cs" />
     <Compile Include="Transport\TransportHttp.cs" />
     <Compile Include="Transport\TransportLocal.cs" />
     <None Include="Transport\TransportSftp.cs" />

@@ -39,7 +39,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using GitSharp.Exceptions;
 using GitSharp.FnMatch;
@@ -56,14 +55,14 @@ namespace GitSharp.Transport
         {
             DirectoryInfo home = FS.userHome() ?? new DirectoryInfo(Path.GetFullPath("."));
 
-            FileInfo config = new FileInfo(Path.Combine(home.ToString(), ".ssh/config"));
+            FileInfo config = new FileInfo(Path.Combine(home.ToString(), ".ssh\\config"));
             OpenSshConfig osc = new OpenSshConfig(home, config);
             osc.refresh();
             return osc;
         }
 
-        private DirectoryInfo home;
-        private FileInfo configFile;
+        private readonly DirectoryInfo home;
+        private readonly FileInfo configFile;
         private long lastModified;
         private Dictionary<string, Host> hosts;
 
@@ -77,7 +76,11 @@ namespace GitSharp.Transport
         public Host lookup(string hostName)
         {
             Dictionary<string, Host> cache = refresh();
-            Host h = cache[hostName];
+            Host h = null;
+            if (cache.ContainsKey(hostName))
+            {
+                h = cache[hostName];
+            }
             if (h == null)
                 h = new Host();
             if (h.patternsApplied)
@@ -148,7 +151,15 @@ namespace GitSharp.Transport
 
                 string[] parts = Regex.Split(line, "[ \t]*[= \t]");
                 string keyword = parts[0].Trim();
-                string argValue = parts[1].Trim();
+                string argValue;
+                if (parts[1].Length == 0 && parts.Length == 3)
+                {
+                    argValue = parts[2].Trim();
+                }
+                else
+                {
+                    argValue = parts[1];
+                }
 
                 if ("Host".Equals(keyword, StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -156,7 +167,11 @@ namespace GitSharp.Transport
                     foreach (string pattern in Regex.Split(argValue, "[ \t]"))
                     {
                         string name = dequote(pattern);
-                        Host c = m[name];
+                        Host c = null;
+                        if (m.ContainsKey(name))
+                        {
+                            c = m[name];
+                        }
                         if (c == null)
                         {
                             c = new Host();
@@ -254,6 +269,7 @@ namespace GitSharp.Transport
             return value;
         }
 
+/*
         private static string nows(string value)
         {
             StringBuilder b = new StringBuilder();
@@ -262,6 +278,7 @@ namespace GitSharp.Transport
                     b.Append(value[i]);
             return b.ToString();
         }
+*/
 
         private static bool yesno(string value)
         {

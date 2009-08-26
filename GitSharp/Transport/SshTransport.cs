@@ -36,8 +36,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 using System;
 using System.Net.Sockets;
 using GitSharp.Exceptions;

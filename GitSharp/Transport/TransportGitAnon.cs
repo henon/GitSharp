@@ -38,11 +38,16 @@
  */
 
 using System;
+using System.Net.Sockets;
+using System.Text;
+using GitSharp.Exceptions;
 
 namespace GitSharp.Transport
 {
     public class TransportGitAnon : TcpTransport, IPackTransport
     {
+        public const int GIT_PORT = Daemon.DEFAULT_PORT;
+
         public static bool canHandle(URIish uri)
         {
             return "git".Equals(uri.Scheme);
@@ -55,17 +60,136 @@ namespace GitSharp.Transport
 
         public override IFetchConnection openFetch()
         {
-            throw new NotImplementedException();
+            return new TcpFetchConnection(this);
         }
 
         public override IPushConnection openPush()
         {
-            throw new NotImplementedException();
+            return new TcpPushConnection(this);
         }
 
         public override void close()
         {
-            throw new NotImplementedException();
+        }
+
+        public Socket openConnection()
+        {
+            int port = uri.Port > 0 ? uri.Port : GIT_PORT;
+            try
+            {
+                Socket ret = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                ret.Connect(uri.Host, port);
+                return ret;
+            }
+            catch (SocketException e)
+            {
+                throw new TransportException(uri, "Connection failed", e);
+            }
+        }
+
+        public void service(string name, PacketLineOut pckOut)
+        {
+            StringBuilder cmd = new StringBuilder();
+            cmd.Append(name);
+            cmd.Append(' ');
+            cmd.Append(uri.Path);
+            cmd.Append('\0');
+            cmd.Append("host=");
+            cmd.Append(uri.Host);
+            if (uri.Port > 0 && uri.Port != GIT_PORT)
+            {
+                cmd.Append(":");
+                cmd.Append(uri.Port);
+            }
+            cmd.Append('\0');
+            pckOut.WriteString(cmd.ToString());
+            pckOut.Flush();
+        }
+
+        private class TcpFetchConnection : BasePackFetchConnection
+        {
+            private Socket sock;
+
+            public TcpFetchConnection(TransportGitAnon instance)
+                : base(instance)
+            {
+                sock = instance.openConnection();
+                try
+                {
+                    init(new NetworkStream(sock));
+                    instance.service("git-upload-pack", pckOut);
+                }
+                catch (SocketException err)
+                {
+                    Close();
+                    throw new TransportException(uri, "remote hung up unexpectedly", err);
+                }
+                readAdvertisedRefs();
+            }
+
+            public override void Close()
+            {
+                base.Close();
+
+                if (sock != null)
+                {
+                    try
+                    {
+                        sock.Close();
+                    }
+                    catch (SocketException)
+                    {
+                        
+                    }
+                    finally
+                    {
+                        sock = null;
+                    }
+                }
+            }
+        }
+
+        private class TcpPushConnection : BasePackPushConnection
+        {
+            private Socket sock;
+
+            public TcpPushConnection(TransportGitAnon instance)
+                : base(instance)
+            {
+                sock = instance.openConnection();
+                try
+                {
+                    init(new NetworkStream(sock));
+                    instance.service("git-receive-pack", pckOut);
+                }
+                catch (SocketException err)
+                {
+                    Close();
+                    throw new TransportException(uri, "remote hung up unexpectedly", err);
+                }
+                readAdvertisedRefs();
+            }
+
+            public override void Close()
+            {
+                base.Close();
+
+                if (sock != null)
+                {
+                    try
+                    {
+                        sock.Close();
+                    }
+                    catch (SocketException)
+                    {
+                        
+                    }
+                    finally
+                    {
+                        sock = null;
+                    }
+                }
+            }
         }
     }
 }

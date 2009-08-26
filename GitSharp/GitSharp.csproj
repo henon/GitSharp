@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -42,6 +42,10 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="Tamir.SharpSSH, Version=1.1.1.13, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\extern\Tamir.SharpSSH.dll</HintPath>
     </Reference>
     <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5">
       <SpecificVersion>False</SpecificVersion>
@@ -96,12 +100,14 @@
     <Compile Include="ObjectDatabase.cs" />
     <Compile Include="ObjectDirectory.cs" />
     <Compile Include="Transport\BundleWriter.cs" />
+    <Compile Include="Transport\DefaultSshSessionFactory.cs" />
     <Compile Include="Transport\FetchProcess.cs" />
+    <Compile Include="Transport\OpenSshConfig.cs" />
     <Compile Include="Transport\PushProcess.cs" />
     <Compile Include="Transport\SideBandProgressMonitor.cs" />
-    <None Include="Transport\SshTransport.cs" />
-    <None Include="Transport\SshConfigSessionFactory.cs" />
-    <None Include="Transport\SshSessionFactory.cs" />
+    <Compile Include="Transport\SshTransport.cs" />
+    <Compile Include="Transport\SshConfigSessionFactory.cs" />
+    <Compile Include="Transport\SshSessionFactory.cs" />
     <Compile Include="Transport\TransportAmazonS3.cs" />
     <Compile Include="Transport\TransportBundleStream.cs" />
     <Compile Include="Transport\TransportGitAnon.cs" />

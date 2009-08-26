@@ -37,6 +37,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+
+// Note: this file originates from jgit's NB.java
+
+
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +51,9 @@ using System.IO;
 
 namespace GitSharp.Util
 {
+    /// <summary>
+    /// Conversion utilities for network byte order handling.
+    /// </summary>
     public static class NB // [henon] need public for testsuite
     {
 
@@ -147,9 +156,66 @@ namespace GitSharp.Util
             return decodeInt32(intbuf, offset);
         }
 
+        /**
+         * Read an entire local file into memory as a byte array.
+         *
+         * @param path
+         *            location of the file to read.
+         * @return complete contents of the requested local file.
+         * @throws FileNotFoundException
+         *             the file does not exist.
+         * @throws IOException
+         *             the file exists, but its contents cannot be read.
+         */
+        public static byte[] ReadFully(FileInfo path)
+        {
+            return ReadFully(path, int.MaxValue);
+        }
+
+        /**
+         * Read an entire local file into memory as a byte array.
+         *
+         * @param path
+         *            location of the file to read.
+         * @param max
+         *            maximum number of bytes to read, if the file is larger than
+         *            this limit an IOException is thrown.
+         * @return complete contents of the requested local file.
+         * @throws FileNotFoundException
+         *             the file does not exist.
+         * @throws IOException
+         *             the file exists, but its contents cannot be read.
+         */
+        public static byte[] ReadFully(FileInfo path, int max)
+        {
+            using (var @in = new FileStream(path.FullName, System.IO.FileMode.Open, FileAccess.Read))
+            {
+                long sz = @in.Length;
+                if (sz > max)
+                    throw new IOException("File is too large: " + path);
+                byte[] buf = new byte[(int)sz];
+                ReadFully(@in, buf, 0, buf.Length);
+                return buf;
+            }
+        }
 
 
-
+        /**
+         * Read the entire byte array into memory, or throw an exception.
+         * 
+         * @param fd
+         *            input stream to read the data from.
+         * @param dst
+         *            buffer that must be fully populated, [off, off+len).
+         * @param off
+         *            position within the buffer to start writing to.
+         * @param len
+         *            number of bytes that must be read.
+         * @throws EOFException
+         *             the stream ended before dst was fully populated.
+         * @throws IOException
+         *             there was an error reading from the stream.
+         */
         public static void ReadFully(Stream fd, byte[] dst, int off, int len)
         {
             while (len > 0)
@@ -177,7 +243,7 @@ namespace GitSharp.Util
          *            number of bytes that must be read.
          * @throws EOFException
          *             the stream ended before dst was fully populated.
-         * @
+         * @throws IOException
          *             there was an error reading from the stream.
          */
         public static void ReadFully(Stream fd, long pos, byte[] dst, int off, int len)

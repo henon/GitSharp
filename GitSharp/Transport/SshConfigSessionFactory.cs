@@ -46,6 +46,12 @@ namespace GitSharp.Transport
 
     public abstract class SshConfigSessionFactory : SshSessionFactory
     {
+        private OpenSshConfig config;
+
+        public override Session getSession(string user, string pass, string host, int port)
+        {
+            
+        }
     }
 
 }

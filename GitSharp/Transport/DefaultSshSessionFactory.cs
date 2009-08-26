@@ -38,10 +38,9 @@
 
 namespace GitSharp.Transport
 {
-
+    
     public class DefaultSshSessionFactory : SshConfigSessionFactory
     {
-        
     }
 
 }

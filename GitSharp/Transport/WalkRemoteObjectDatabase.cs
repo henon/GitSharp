@@ -54,7 +54,7 @@ namespace GitSharp.Transport
         public abstract URIish getURI();
         public abstract List<string> getPackNames();
         public abstract List<WalkRemoteObjectDatabase> getAlternates();
-        public abstract FileStream open(string path);
+        public abstract Stream open(string path);
         public abstract WalkRemoteObjectDatabase openAlternate(string location);
         public abstract void close();
 
@@ -117,7 +117,7 @@ namespace GitSharp.Transport
 
         public StreamReader openReader(string path)
         {
-            FileStream s  = open(path);
+            Stream s  = open(path);
             // StreamReader buffers itself
             return new StreamReader(s, Constants.CHARSET);
         }

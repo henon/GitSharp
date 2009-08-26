@@ -46,28 +46,6 @@ namespace GitSharp.Transport
 
     public class PacketLineIn
     {
-        private static readonly byte[] fromhex = fillHex();
-
-        private static byte[] fillHex()
-        {
-            byte[] ret = new byte['f' + 1];
-
-            // [caytchen] TODO: java signed/unsigned madness
-            //for (int i = 0; i < ret.Length; i++) ret[i] = (byte)-1;
-            for (int i = 0; i < ret.Length; i++) ret[i] = byte.MinValue;
-
-            for (char i = '0'; i <= '9'; i++)
-            {
-                    fromhex[i] = (byte)(i - '0');
-            }
-            for (char i = 'a'; i <= 'f'; i++)
-            {
-                fromhex[i] = (byte) ((i - 'a') + 10);
-            }
-
-            return ret;
-        }
-
         public enum AckNackResult
         {
             NAK,
@@ -75,8 +53,8 @@ namespace GitSharp.Transport
             ACK_CONTINUE
         }
 
-        private Stream ins;
-        private byte[] lenbuffer;
+        private readonly Stream ins;
+        private readonly byte[] lenbuffer;
 
         public PacketLineIn(Stream i)
         {
@@ -114,31 +92,31 @@ namespace GitSharp.Transport
             if (len == 0)
                 return string.Empty;
 
-            len -= 5; // length header (4 bytes) and trailing LF.
+            len -= 4; // length header (4 bytes)
+            
+            if (len <= 0)
+                return string.Empty;
 
             byte[] raw = new byte[len];
             NB.ReadFully(ins, raw, 0, len);
-            readLF();
+            if (raw[len - 1] == '\n')
+                len--;
             return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
         }
 
-        public string ReadStringNoLF()
+        public string ReadStringRaw()
         {
             int len = ReadLength();
             if (len == 0)
                 return string.Empty;
 
             len -= 4; // length header (4 bytes)
+            if (len == 0)
+                return string.Empty;
 
             byte[] raw = new byte[len];
             NB.ReadFully(ins, raw, 0, len);
             return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
-        }
-
-        private void readLF()
-        {
-            if (ins.ReadByte() != '\n')
-                throw new IOException("Protocol Error: expected LF");
         }
 
         public int ReadLength()
@@ -146,22 +124,14 @@ namespace GitSharp.Transport
             NB.ReadFully(ins, lenbuffer, 0, 4);
             try
             {
-                int r = fromhex[lenbuffer[0]] << 4;
-
-                r |= fromhex[lenbuffer[1]];
-                r <<= 4;
-
-                r |= fromhex[lenbuffer[2]];
-                r <<= 4;
-
-                r |= fromhex[lenbuffer[3]];
-                if (r < 0)
+                int len = RawParseUtils.parseHexInt16(lenbuffer, 0);
+                if (len != 0 && len < 4)
                     throw new IndexOutOfRangeException();
-                return r;
+                return len;
             }
             catch (IndexOutOfRangeException)
             {
-                throw new InvalidOperationException("Invalid packet line header: " + (char) lenbuffer[0] +
+                throw new IOException("Invalid packet line header: " + (char) lenbuffer[0] +
                                                     (char) lenbuffer[1] + (char) lenbuffer[2] + (char) lenbuffer[3]);
             }
         }

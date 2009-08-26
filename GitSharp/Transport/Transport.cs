@@ -111,6 +111,9 @@ namespace GitSharp.Transport
          */
         public static Transport Open(Repository local, URIish remote)
         {
+            if (TransportHttp.canHandle(remote))
+                return new TransportHttp(local, remote);
+
             throw new NotSupportedException("URI not supported: " + remote);
         }
 

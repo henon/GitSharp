@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
  *
  * All rights reserved.
  *
@@ -35,41 +35,41 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.IO;
-using System.Net;
-using GitSharp.Util;
+/* Note: jgit has implemented its own FileStream in WalkRemoteObjectDatabase */
 
-namespace GitSharp.Transport
+using System.IO;
+
+namespace GitSharp.Util
 {
 
-    public class DaemonClient
+    public static class FileStreamExtensions
     {
-        public Daemon Daemon { get; private set; }
-        public EndPoint Peer { get; set; }
-        public Stream Stream { get; private set; }
-
-        public DaemonClient(Daemon d)
+        public static byte[] toArray(this Stream stream)
         {
-            Daemon = d;
-        }
-
-        public void Execute(Stream inout)
-        {
-            Stream = inout;
-            string cmd = new PacketLineIn(inout).ReadStringRaw();
-            if (string.IsNullOrEmpty(cmd))
-                return;
-
-            int nul = cmd.IndexOf('\0');
-            if (nul >= 0)
+            try
             {
-                cmd = cmd.Slice(0, nul);
-            }
+                // Note: if we can seek, it's likely we have a length
+                if (stream.CanSeek)
+                {
+                    if (stream.Length >= 0)
+                    {
+                        byte[] r = new byte[stream.Length];
+                        NB.ReadFully(stream, r, 0, r.Length);
+                        return r;
+                    }
+                }
 
-            DaemonService srv = Daemon.MatchService(cmd);
-            if (srv == null)
-                return;
-            srv.Execute(this, cmd);
+                MemoryStream m = new MemoryStream();
+                byte[] buf = new byte[2048];
+                int n;
+                while ((n = stream.Read(buf, 0, buf.Length)) > 0)
+                    m.Write(buf, 0, n);
+                return m.ToArray();
+            }
+            finally
+            {
+                stream.Close();
+            }
         }
     }
 

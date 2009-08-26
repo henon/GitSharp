@@ -70,7 +70,7 @@ namespace GitSharp.Transport
 
         public abstract void Close();
 
-        protected void available(Dictionary<string, Ref> all)
+        public void available(Dictionary<string, Ref> all)
         {
             advertisedRefs = all;
         }

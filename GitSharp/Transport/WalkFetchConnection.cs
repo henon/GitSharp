@@ -767,7 +767,7 @@ namespace GitSharp.Transport
                     
                 }
 
-                FileStream s = connection.open("pack/" + idxName);
+                Stream s = connection.open("pack/" + idxName);
                 pm.BeginTask("Get " + idxName.Slice(0, 12) + "..idx", s.Length < 0 ? -1 : (int)(s.Length / 1024));
                 try
                 {
@@ -817,7 +817,7 @@ namespace GitSharp.Transport
 
             public void downloadPack(IProgressMonitor monitor)
             {
-                FileStream s = connection.open("pack/" + packName);
+                Stream s = connection.open("pack/" + packName);
                 IndexPack ip = IndexPack.create(local, s);
                 ip.setFixThin(false);
                 ip.setObjectChecker(objCheck);

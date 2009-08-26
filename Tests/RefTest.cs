@@ -34,117 +34,118 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using NUnit.Framework;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
+using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
-
-    /**
-     * Misc tests for refs. A lot of things are tested elsewhere so not having a
-     * test for a ref related method, does not mean it is untested.
-     */
-    [TestFixture]
-    public class RefTest : RepositoryTestCase
-    {
-#if false
-	public void testReadAllIncludingSymrefs() throws Exception {
-		ObjectId masterId = db.resolve("refs/heads/master");
-		RefUpdate updateRef = db.updateRef("refs/remotes/origin/master");
-		updateRef.setNewObjectId(masterId);
-		updateRef.setForceUpdate(true);
-		updateRef.update();
-		db
-				.writeSymref("refs/remotes/origin/HEAD",
-						"refs/remotes/origin/master");
-
-		ObjectId r = db.resolve("refs/remotes/origin/HEAD");
-		assertEquals(masterId, r);
-
-		Map<String, Ref> allRefs = db.getAllRefs();
-		Ref refHEAD = allRefs.get("refs/remotes/origin/HEAD");
-		assertNotNull(refHEAD);
-		assertEquals(masterId, refHEAD.getObjectId());
-		assertTrue(refHEAD.isPeeled());
-		assertNull(refHEAD.getPeeledObjectId());
-
-		Ref refmaster = allRefs.get("refs/remotes/origin/master");
-		assertEquals(masterId, refmaster.getObjectId());
-		assertFalse(refmaster.isPeeled());
-		assertNull(refmaster.getPeeledObjectId());
-	}
-
-	public void testReadSymRefToPacked() throws IOException {
-		db.writeSymref("HEAD", "refs/heads/b");
-		Ref ref = db.getRef("HEAD");
-		assertEquals(Ref.Storage.LOOSE_PACKED, ref.getStorage());
-	}
-
-	public void testReadSymRefToLoosePacked() throws IOException {
-		ObjectId pid = db.resolve("refs/heads/master^");
-		RefUpdate updateRef = db.updateRef("refs/heads/master");
-		updateRef.setNewObjectId(pid);
-		updateRef.setForceUpdate(true);
-		Result update = updateRef.update();
-		assertEquals(Result.FORCED, update); // internal
-
-		db.writeSymref("HEAD", "refs/heads/master");
-		Ref ref = db.getRef("HEAD");
-		assertEquals(Ref.Storage.LOOSE_PACKED, ref.getStorage());
-	}
-
-	public void testReadLooseRef() throws IOException {
-		RefUpdate updateRef = db.updateRef("ref/heads/new");
-		updateRef.setNewObjectId(db.resolve("refs/heads/master"));
-		Result update = updateRef.update();
-		assertEquals(Result.NEW, update);
-		Ref ref = db.getRef("ref/heads/new");
-		assertEquals(Storage.LOOSE, ref.getStorage());
-	}
-
 	/**
-	 * Let an "outsider" create a loose ref with the same name as a packed one
-	 *
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * Misc tests for refs. A lot of things are tested elsewhere so not having a
+	 * test for a ref related method, does not mean it is untested.
 	 */
-	public void testReadLoosePackedRef() throws IOException,
-			InterruptedException {
-		Ref ref = db.getRef("refs/heads/master");
-		assertEquals(Storage.PACKED, ref.getStorage());
-		FileOutputStream os = new FileOutputStream(new File(db.getDirectory(),
-				"refs/heads/master"));
-		os.write(ref.getObjectId().name().getBytes());
-		os.write('\n');
-		os.close();
+	[TestFixture]
+	public class RefTest : RepositoryTestCase
+	{
+		[Test]
+		public virtual void testReadAllIncludingSymrefs()
+		{
+			ObjectId masterId = db.Resolve("refs/heads/master");
+			RefUpdate updateRef = db.UpdateRef("refs/remotes/origin/master");
+			updateRef.NewObjectId = masterId;
+			updateRef.IsForceUpdate = true;
+			updateRef.Update();
+			db.WriteSymref("refs/remotes/origin/HEAD", "refs/remotes/origin/master");
 
-		ref = db.getRef("refs/heads/master");
-		assertEquals(Storage.LOOSE_PACKED, ref.getStorage());
+			ObjectId r = db.Resolve("refs/remotes/origin/HEAD");
+			Assert.AreEqual(masterId, r);
+
+			IDictionary<string, Ref> allRefs = db.Refs;
+			Ref refHEAD = allRefs["refs/remotes/origin/HEAD"];
+			Assert.IsNotNull(refHEAD);
+			Assert.AreEqual(masterId, refHEAD.ObjectId);
+			Assert.IsTrue(refHEAD.Peeled);
+			Assert.IsNull(refHEAD.PeeledObjectId);
+
+			Ref refmaster = allRefs["refs/remotes/origin/master"];
+			Assert.AreEqual(masterId, refmaster.ObjectId);
+			Assert.IsFalse(refmaster.Peeled);
+			Assert.IsNull(refmaster.PeeledObjectId);
+		}
+
+		[Test]
+		public virtual void testReadSymRefToPacked()
+		{
+			db.WriteSymref("HEAD", "refs/heads/b");
+			Ref @ref = db.Refs["HEAD"];
+			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+		}
+
+		[Test]
+		public void testReadSymRefToLoosePacked()
+		{
+			ObjectId pid = db.Resolve("refs/heads/master^");
+			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+			updateRef.NewObjectId = pid;
+			updateRef.IsForceUpdate = true;
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update); // internal
+
+			db.WriteSymref("HEAD", "refs/heads/master");
+			Ref @ref = db.Refs["HEAD"];
+			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+		}
+
+		[Test]
+		public void testReadLooseRef()
+		{
+			RefUpdate updateRef = db.UpdateRef("ref/heads/new");
+			updateRef.NewObjectId = db.Resolve("refs/heads/master");
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
+			Ref @ref = db.Refs["ref/heads/new"];
+			Assert.AreEqual(Ref.Storage.Loose, @ref.StorageFormat);
+		}
+
+		/// <summary>
+		/// Let an "outsider" create a loose ref with the same name as a packed one
+		/// </summary>
+		[Test]
+		public void testReadLoosePackedRef()
+		{
+			Ref @ref = db.Refs["refs/heads/master"];
+			Assert.AreEqual(Ref.Storage.Packed, @ref.StorageFormat);
+			string path = Path.Combine(db.Directory.FullName, "refs/heads/master");
+			FileStream os = new FileStream(path, System.IO.FileMode.OpenOrCreate);
+			byte[] buffer = Encoding.UTF8.GetBytes(@ref.ObjectId.Name);
+			os.Write(buffer, 0, buffer.Length);
+			os.WriteByte(Convert.ToByte('\n'));
+			os.Close();
+
+			@ref = db.Refs["refs/heads/master"];
+			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+		}
+
+		///	<summary>
+		/// Modify a packed ref using the API. This creates a loose ref too, ie. LOOSE_PACKED
+		///	</summary>
+		[Test]
+		public void testReadSimplePackedRefSameRepo()
+		{
+			Ref @ref = db.Refs["refs/heads/master"];
+			ObjectId pid = db.Resolve("refs/heads/master^");
+			Assert.AreEqual(Ref.Storage.Packed, @ref.StorageFormat);
+			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+			updateRef.NewObjectId = pid;
+			updateRef.IsForceUpdate = true;
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
+
+			@ref = db.Refs["refs/heads/master"];
+			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+		}
 	}
-
-	/**
-	 * Modify a packed ref using the API. This creates a loose ref too, ie.
-	 * LOOSE_PACKED
-	 *
-	 * @throws IOException
-	 */
-	public void testReadSimplePackedRefSameRepo() throws IOException {
-		Ref ref = db.getRef("refs/heads/master");
-		ObjectId pid = db.resolve("refs/heads/master^");
-		assertEquals(Storage.PACKED, ref.getStorage());
-		RefUpdate updateRef = db.updateRef("refs/heads/master");
-		updateRef.setNewObjectId(pid);
-		updateRef.setForceUpdate(true);
-		Result update = updateRef.update();
-		assertEquals(Result.FORCED, update);
-
-		ref = db.getRef("refs/heads/master");
-		assertEquals(Storage.LOOSE_PACKED, ref.getStorage());
-	}
-#endif
-    }
 }

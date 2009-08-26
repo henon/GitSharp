@@ -35,168 +35,175 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.IO;
+using GitSharp.DirectoryCache;
 using GitSharp.TreeWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.TreeWalk
-{
+{	
+	[TestFixture]
+	public class NameConflictTreeWalkTest : RepositoryTestCase
+	{
+		private static readonly FileMode TREE = FileMode.Tree;
 
-    using NUnit.Framework;
-    [TestFixture]
-    public class NameConflictTreeWalkTest : RepositoryTestCase
-    {
-#if false
-	private static final FileMode TREE = FileMode.TREE;
+		private static readonly FileMode SYMLINK = FileMode.Symlink;
 
-	private static final FileMode SYMLINK = FileMode.SYMLINK;
+		private static readonly FileMode MISSING = FileMode.Missing;
 
-	private static final FileMode MISSING = FileMode.MISSING;
+		private static readonly FileMode REGULAR_FILE = FileMode.RegularFile;
 
-	private static final FileMode REGULAR_FILE = FileMode.REGULAR_FILE;
+		private static readonly FileMode EXECUTABLE_FILE = FileMode.ExecutableFile;
 
-	private static final FileMode EXECUTABLE_FILE = FileMode.EXECUTABLE_FILE;
-
-	public void testNoDF_NoGap() throws Exception {
-		final DirCache tree0 = DirCache.read(db);
-		final DirCache tree1 = DirCache.read(db);
+		[Test]
+		public virtual void testNoDF_NoGap()
 		{
-			final DirCacheBuilder b0 = tree0.builder();
-			final DirCacheBuilder b1 = tree1.builder();
+			DirCache tree0 = DirCache.read(db);
+			DirCache tree1 = DirCache.read(db);
+			{
+				DirCacheBuilder b0 = tree0.builder();
+				DirCacheBuilder b1 = tree1.builder();
 
-			b0.add(makeEntry("a", REGULAR_FILE));
-			b0.add(makeEntry("a.b", EXECUTABLE_FILE));
-			b1.add(makeEntry("a/b", REGULAR_FILE));
-			b0.add(makeEntry("a0b", SYMLINK));
+				b0.add(makeEntry("a", REGULAR_FILE));
+				b0.add(makeEntry("a.b", EXECUTABLE_FILE));
+				b1.add(makeEntry("a/b", REGULAR_FILE));
+				b0.add(makeEntry("a0b", SYMLINK));
 
-			b0.finish();
-			b1.finish();
-			assertEquals(3, tree0.getEntryCount());
-			assertEquals(1, tree1.getEntryCount());
+				b0.finish();
+				b1.finish();
+				Assert.AreEqual(3, tree0.getEntryCount());
+				Assert.AreEqual(1, tree1.getEntryCount());
+			}
+
+			GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+			tw.reset();
+			tw.addTree(new DirCacheIterator(tree0));
+			tw.addTree(new DirCacheIterator(tree1));
+
+			assertModes("a", REGULAR_FILE, MISSING, tw);
+			assertModes("a.b", EXECUTABLE_FILE, MISSING, tw);
+			assertModes("a", MISSING, TREE, tw);
+			tw.enterSubtree();
+			assertModes("a/b", MISSING, REGULAR_FILE, tw);
+			assertModes("a0b", SYMLINK, MISSING, tw);
 		}
 
-		final TreeWalk tw = new TreeWalk(db);
-		tw.reset();
-		tw.addTree(new DirCacheIterator(tree0));
-		tw.addTree(new DirCacheIterator(tree1));
-
-		assertModes("a", REGULAR_FILE, MISSING, tw);
-		assertModes("a.b", EXECUTABLE_FILE, MISSING, tw);
-		assertModes("a", MISSING, TREE, tw);
-		tw.enterSubtree();
-		assertModes("a/b", MISSING, REGULAR_FILE, tw);
-		assertModes("a0b", SYMLINK, MISSING, tw);
-	}
-
-	public void testDF_NoGap() throws Exception {
-		final DirCache tree0 = DirCache.read(db);
-		final DirCache tree1 = DirCache.read(db);
+		[Test]
+		public virtual void testDF_NoGap()
 		{
-			final DirCacheBuilder b0 = tree0.builder();
-			final DirCacheBuilder b1 = tree1.builder();
+			DirCache tree0 = DirCache.read(db);
+			DirCache tree1 = DirCache.read(db);
+			{
+				DirCacheBuilder b0 = tree0.builder();
+				DirCacheBuilder b1 = tree1.builder();
 
-			b0.add(makeEntry("a", REGULAR_FILE));
-			b0.add(makeEntry("a.b", EXECUTABLE_FILE));
-			b1.add(makeEntry("a/b", REGULAR_FILE));
-			b0.add(makeEntry("a0b", SYMLINK));
+				b0.add(makeEntry("a", REGULAR_FILE));
+				b0.add(makeEntry("a.b", EXECUTABLE_FILE));
+				b1.add(makeEntry("a/b", REGULAR_FILE));
+				b0.add(makeEntry("a0b", SYMLINK));
 
-			b0.finish();
-			b1.finish();
-			assertEquals(3, tree0.getEntryCount());
-			assertEquals(1, tree1.getEntryCount());
+				b0.finish();
+				b1.finish();
+				Assert.AreEqual(3, tree0.getEntryCount());
+				Assert.AreEqual(1, tree1.getEntryCount());
+			}
+
+			NameConflictTreeWalk tw = new NameConflictTreeWalk(db);
+			tw.reset();
+			tw.addTree(new DirCacheIterator(tree0));
+			tw.addTree(new DirCacheIterator(tree1));
+
+			assertModes("a", REGULAR_FILE, TREE, tw);
+			Assert.IsTrue(tw.isSubtree());
+			tw.enterSubtree();
+			assertModes("a/b", MISSING, REGULAR_FILE, tw);
+			assertModes("a.b", EXECUTABLE_FILE, MISSING, tw);
+			assertModes("a0b", SYMLINK, MISSING, tw);
 		}
 
-		final NameConflictTreeWalk tw = new NameConflictTreeWalk(db);
-		tw.reset();
-		tw.addTree(new DirCacheIterator(tree0));
-		tw.addTree(new DirCacheIterator(tree1));
-
-		assertModes("a", REGULAR_FILE, TREE, tw);
-		assertTrue(tw.isSubtree());
-		tw.enterSubtree();
-		assertModes("a/b", MISSING, REGULAR_FILE, tw);
-		assertModes("a.b", EXECUTABLE_FILE, MISSING, tw);
-		assertModes("a0b", SYMLINK, MISSING, tw);
-	}
-
-	public void testDF_GapByOne() throws Exception {
-		final DirCache tree0 = DirCache.read(db);
-		final DirCache tree1 = DirCache.read(db);
+		[Test]
+		public virtual void testDF_GapByOne()
 		{
-			final DirCacheBuilder b0 = tree0.builder();
-			final DirCacheBuilder b1 = tree1.builder();
+			DirCache tree0 = DirCache.read(db);
+			DirCache tree1 = DirCache.read(db);
+			{
+				DirCacheBuilder b0 = tree0.builder();
+				DirCacheBuilder b1 = tree1.builder();
 
-			b0.add(makeEntry("a", REGULAR_FILE));
-			b0.add(makeEntry("a.b", EXECUTABLE_FILE));
-			b1.add(makeEntry("a.b", EXECUTABLE_FILE));
-			b1.add(makeEntry("a/b", REGULAR_FILE));
-			b0.add(makeEntry("a0b", SYMLINK));
+				b0.add(makeEntry("a", REGULAR_FILE));
+				b0.add(makeEntry("a.b", EXECUTABLE_FILE));
+				b1.add(makeEntry("a.b", EXECUTABLE_FILE));
+				b1.add(makeEntry("a/b", REGULAR_FILE));
+				b0.add(makeEntry("a0b", SYMLINK));
 
-			b0.finish();
-			b1.finish();
-			assertEquals(3, tree0.getEntryCount());
-			assertEquals(2, tree1.getEntryCount());
+				b0.finish();
+				b1.finish();
+				Assert.AreEqual(3, tree0.getEntryCount());
+				Assert.AreEqual(2, tree1.getEntryCount());
+			}
+
+			NameConflictTreeWalk tw = new NameConflictTreeWalk(db);
+			tw.reset();
+			tw.addTree(new DirCacheIterator(tree0));
+			tw.addTree(new DirCacheIterator(tree1));
+
+			assertModes("a", REGULAR_FILE, TREE, tw);
+			Assert.IsTrue(tw.isSubtree());
+			tw.enterSubtree();
+			assertModes("a/b", MISSING, REGULAR_FILE, tw);
+			assertModes("a.b", EXECUTABLE_FILE, EXECUTABLE_FILE, tw);
+			assertModes("a0b", SYMLINK, MISSING, tw);
 		}
 
-		final NameConflictTreeWalk tw = new NameConflictTreeWalk(db);
-		tw.reset();
-		tw.addTree(new DirCacheIterator(tree0));
-		tw.addTree(new DirCacheIterator(tree1));
-
-		assertModes("a", REGULAR_FILE, TREE, tw);
-		assertTrue(tw.isSubtree());
-		tw.enterSubtree();
-		assertModes("a/b", MISSING, REGULAR_FILE, tw);
-		assertModes("a.b", EXECUTABLE_FILE, EXECUTABLE_FILE, tw);
-		assertModes("a0b", SYMLINK, MISSING, tw);
-	}
-
-	public void testDF_SkipsSeenSubtree() throws Exception {
-		final DirCache tree0 = DirCache.read(db);
-		final DirCache tree1 = DirCache.read(db);
+		[Test]
+		public virtual void testDF_SkipsSeenSubtree()
 		{
-			final DirCacheBuilder b0 = tree0.builder();
-			final DirCacheBuilder b1 = tree1.builder();
+			DirCache tree0 = DirCache.read(db);
+			DirCache tree1 = DirCache.read(db);
+			{
+				DirCacheBuilder b0 = tree0.builder();
+				DirCacheBuilder b1 = tree1.builder();
 
-			b0.add(makeEntry("a", REGULAR_FILE));
-			b1.add(makeEntry("a.b", EXECUTABLE_FILE));
-			b1.add(makeEntry("a/b", REGULAR_FILE));
-			b0.add(makeEntry("a0b", SYMLINK));
-			b1.add(makeEntry("a0b", SYMLINK));
+				b0.add(makeEntry("a", REGULAR_FILE));
+				b1.add(makeEntry("a.b", EXECUTABLE_FILE));
+				b1.add(makeEntry("a/b", REGULAR_FILE));
+				b0.add(makeEntry("a0b", SYMLINK));
+				b1.add(makeEntry("a0b", SYMLINK));
 
-			b0.finish();
-			b1.finish();
-			assertEquals(2, tree0.getEntryCount());
-			assertEquals(3, tree1.getEntryCount());
+				b0.finish();
+				b1.finish();
+				Assert.AreEqual(2, tree0.getEntryCount());
+				Assert.AreEqual(3, tree1.getEntryCount());
+			}
+
+			NameConflictTreeWalk tw = new NameConflictTreeWalk(db);
+			tw.reset();
+			tw.addTree(new DirCacheIterator(tree0));
+			tw.addTree(new DirCacheIterator(tree1));
+
+			assertModes("a", REGULAR_FILE, TREE, tw);
+			Assert.IsTrue(tw.isSubtree());
+			tw.enterSubtree();
+			assertModes("a/b", MISSING, REGULAR_FILE, tw);
+			assertModes("a.b", MISSING, EXECUTABLE_FILE, tw);
+			assertModes("a0b", SYMLINK, SYMLINK, tw);
 		}
 
-		final NameConflictTreeWalk tw = new NameConflictTreeWalk(db);
-		tw.reset();
-		tw.addTree(new DirCacheIterator(tree0));
-		tw.addTree(new DirCacheIterator(tree1));
+		private DirCacheEntry makeEntry(string path, FileMode mode)
+		{
+			byte[] pathBytes = Constants.encode(path);
+			DirCacheEntry ent = new DirCacheEntry(path);
+			ent.setFileMode(mode);
+			ent.setObjectId(new ObjectWriter(db).ComputeBlobSha1(pathBytes.Length, new MemoryStream(pathBytes)));
+			return ent;
+		}
 
-		assertModes("a", REGULAR_FILE, TREE, tw);
-		assertTrue(tw.isSubtree());
-		tw.enterSubtree();
-		assertModes("a/b", MISSING, REGULAR_FILE, tw);
-		assertModes("a.b", MISSING, EXECUTABLE_FILE, tw);
-		assertModes("a0b", SYMLINK, SYMLINK, tw);
+		private static void assertModes(string path, FileMode mode0, FileMode mode1, GitSharp.TreeWalk.TreeWalk tw)
+		{
+			Assert.IsTrue(tw.next(), "has " + path);
+			Assert.AreEqual(path, tw.getPathString());
+			Assert.AreEqual(mode0, tw.getFileMode(0));
+			Assert.AreEqual(mode1, tw.getFileMode(1));
+		}
 	}
-
-	private DirCacheEntry makeEntry(final String path, final FileMode mode)
-			throws Exception {
-		final byte[] pathBytes = Constants.encode(path);
-		final DirCacheEntry ent = new DirCacheEntry(path);
-		ent.setFileMode(mode);
-		ent.setObjectId(new ObjectWriter(db).computeBlobSha1(pathBytes.length,
-				new ByteArrayInputStream(pathBytes)));
-		return ent;
-	}
-
-	private static void assertModes(final String path, final FileMode mode0,
-			final FileMode mode1, final TreeWalk tw) throws Exception {
-		assertTrue("has " + path, tw.next());
-		assertEquals(path, tw.getPathString());
-		assertEquals(mode0, tw.getFileMode(0));
-		assertEquals(mode1, tw.getFileMode(1));
-	}
-#endif
-    }
 }

@@ -60,6 +60,12 @@ namespace GitSharp.Transport
  */
     public abstract class Transport
     {
+        public enum Operation
+        {
+            FETCH,
+            PUSH
+        }
+
         public static Transport Open(Repository local, string remote)
         {
             RemoteConfig cfg = new RemoteConfig(local.Config, remote);
@@ -103,6 +109,29 @@ namespace GitSharp.Transport
                 tranports.Add(tn);
             }
             return tranports;
+        }
+
+        private static List<URIish> getURIs(RemoteConfig cfg, Operation op)
+        {
+            switch (op)
+            {
+                case Operation.FETCH:
+                    return cfg.URIs;
+
+                case Operation.PUSH:
+                    List<URIish> uris = cfg.PushURIs;
+                    if (uris.Count == 0)
+                        uris = cfg.URIs;
+                    return uris;
+
+                default:
+                    throw new ArgumentException(op.ToString());
+            }
+        }
+
+        private static bool doesNotExist(RemoteConfig cfg)
+        {
+            return cfg.URIs.Count == 0 && cfg.PushURIs.Count == 0;
         }
 
         /**
@@ -170,6 +199,8 @@ namespace GitSharp.Transport
 
         protected Repository local;
         protected URIish uri;
+
+        private int timeout;
 
         public Repository Local { get { return local; } }
         public URIish Uri { get { return uri; } }
@@ -366,6 +397,16 @@ namespace GitSharp.Transport
                 result.Add(rru);
             }
             return result;
+        }
+
+        public int getTimeout()
+        {
+            return timeout;
+        }
+
+        public void setTimeout(int seconds)
+        {
+            timeout = seconds;
         }
 
     }

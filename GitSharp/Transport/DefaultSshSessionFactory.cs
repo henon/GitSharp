@@ -36,12 +36,22 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+using Tamir.SharpSsh.jsch;
+
 namespace GitSharp.Transport
 {
-
+    
     public class DefaultSshSessionFactory : SshConfigSessionFactory
     {
-        
+        protected override void configure(OpenSshConfig.Host hc, Session session)
+        {
+            if (!hc.isBatchMode())
+            {
+#warning need something to replace jgit gui infrastructure as gitsharp is library only
+                throw new NotImplementedException("GUI Configuration is not available");
+            }
+        }
     }
 
 }

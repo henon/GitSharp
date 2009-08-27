@@ -69,9 +69,9 @@ namespace GitSharp.TreeWalk.Filter
      * <p>
      * <b>Boolean modifiers:</b>
      * <ul>
-     * <li>AND: {@link AndRevFilter}</li>
-     * <li>OR: {@link OrRevFilter}</li>
-     * <li>NOT: {@link NotRevFilter}</li>
+     * <li>AND: {@link AndTreeFilter}</li>
+     * <li>OR: {@link OrTreeFilter}</li>
+     * <li>NOT: {@link NotTreeFilter}</li>
      * </ul>
      */
     public abstract class TreeFilter

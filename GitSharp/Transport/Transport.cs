@@ -75,8 +75,7 @@ namespace GitSharp.Transport
             List<URIish> uris = cfg.URIs;
             if (uris.isEmpty())
             {
-                List<Transport> transports = new List<Transport>(1);
-                transports.Add(Open(local, new URIish(remote)));
+                List<Transport> transports = new List<Transport>(1) {Open(local, new URIish(remote))};
                 return transports;
             }
 
@@ -107,17 +106,23 @@ namespace GitSharp.Transport
         }
 
         /**
-         * We don't support any transports right now
+         * Support for Transport over HTTP and Git (Anon+SSH)
          */
         public static Transport Open(Repository local, URIish remote)
         {
             if (TransportHttp.canHandle(remote))
                 return new TransportHttp(local, remote);
 
+            if (TransportGitAnon.canHandle(remote))
+                return new TransportGitAnon(local, remote);
+
+            if (TransportGitSsh.canHandle(remote))
+                return new TransportGitSsh(local, remote);
+
             throw new NotSupportedException("URI not supported: " + remote);
         }
 
-        private static List<RefSpec> expandPushWildcardsFor(Repository db, List<RefSpec> specs)
+        private static List<RefSpec> expandPushWildcardsFor(Repository db, IEnumerable<RefSpec> specs)
         {
             Dictionary<string, Ref> localRefs = db.Refs;
             List<RefSpec> procRefs = new List<RefSpec>();
@@ -140,7 +145,7 @@ namespace GitSharp.Transport
             return procRefs;
         }
 
-        private static string findTrackingRefName(string remoteName, List<RefSpec> fetchSpecs)
+        private static string findTrackingRefName(string remoteName, IEnumerable<RefSpec> fetchSpecs)
         {
             foreach (RefSpec fetchSpec in fetchSpecs)
             {
@@ -173,16 +178,8 @@ namespace GitSharp.Transport
             {
                 return _optionUploadPack;
             }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    _optionUploadPack = RemoteConfig.DEFAULT_UPLOAD_PACK;
-                }
-                else
-                {
-                    _optionUploadPack = value;
-                }
+            set {
+                _optionUploadPack = string.IsNullOrEmpty(value) ? RemoteConfig.DEFAULT_UPLOAD_PACK : value;
             }
         }
 
@@ -193,16 +190,8 @@ namespace GitSharp.Transport
             {
                 return _optionReceivePack;
             }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    _optionReceivePack = RemoteConfig.DEFAULT_RECEIVE_PACK;
-                }
-                else
-                {
-                    _optionReceivePack = value;
-                }
+            set {
+                _optionReceivePack = string.IsNullOrEmpty(value) ? RemoteConfig.DEFAULT_RECEIVE_PACK : value;
             }
         }
 
@@ -359,11 +348,7 @@ namespace GitSharp.Transport
                 if (srcRef != null)
                     srcSpec = srcRef.Name;
 
-                string destSpec = spec.Destination;
-                if (destSpec == null)
-                {
-                    destSpec = srcSpec;
-                }
+                string destSpec = spec.Destination ?? srcSpec;
 
                 if (srcRef != null && !destSpec.StartsWith(Constants.R_REFS))
                 {

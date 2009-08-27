@@ -39,6 +39,7 @@
 
 using GitSharp.Exceptions;
 using System;
+using GitSharp.Util;
 
 namespace GitSharp.TreeWalk
 {
@@ -51,16 +52,19 @@ namespace GitSharp.TreeWalk
 
         private byte[] raw;
 
+        /** First offset within {@link #raw} of the prior entry. */
+        private int prevPtr;
+
         /** First offset within {@link #raw} of the current entry's data. */
         private int currPtr;
 
-        /** Offset one past the current entry (first byte of next entry. */
+        /** Offset one past the current entry (first byte of next entry). */
         private int nextPtr;
 
         /** Create a new parser. */
         public CanonicalTreeParser()
         {
-            raw = EMPTY;
+            reset(EMPTY);
         }
 
         /**
@@ -108,6 +112,7 @@ namespace GitSharp.TreeWalk
         public void reset(byte[] treeData)
         {
             raw = treeData;
+            prevPtr = -1;
             currPtr = 0;
             if (!eof())
                 parseEntry();
@@ -270,18 +275,19 @@ namespace GitSharp.TreeWalk
             {
                 // Moving forward one is the most common case.
                 //
+                prevPtr = currPtr;
                 currPtr = nextPtr;
                 if (!eof())
                     parseEntry();
                 return;
             }
-
             // Fast skip over records, then parse the last one.
             //
             int end = raw.Length;
             int ptr = nextPtr;
             while (--delta > 0 && ptr != end)
             {
+                prevPtr = ptr;
                 while (raw[ptr] != 0)
                     ptr++;
                 ptr += Constants.OBJECT_ID_LENGTH + 1;
@@ -295,48 +301,40 @@ namespace GitSharp.TreeWalk
 
         public override void back(int delta)
         {
-            int ptr = currPtr;
-            while (--delta >= 0)
+            if (delta == 1 && 0 <= prevPtr)
             {
-                if (ptr == 0)
-                    throw new IndexOutOfRangeException(delta.ToString());
-
-                // Rewind back beyond the id and the null byte. Find the
-                // last space, this _might_ be the split between the mode
-                // and the path. Most paths in most trees do not contain a
-                // space so this prunes our search more quickly.
+                // Moving back one is common in NameTreeWalk, as the average tree
+                // won't have D/F type conflicts to study.
                 //
-                ptr -= Constants.OBJECT_ID_LENGTH;
-                while (raw[--ptr] != ' ')
-                {
-                    /* nothing */
-                }
-                if (--ptr < Constants.OBJECT_ID_LENGTH)
-                {
-                    if (delta != 0)
-                        throw new IndexOutOfRangeException(delta.ToString());
-                    ptr = 0;
-                    break;
-                }
-
-                // Locate a position that matches "\0.{20}[0-7]" such that
-                // the ptr will rest on the [0-7]. This must be the first
-                // byte of the mode. This search works because the path in
-                // the prior record must have a non-zero Length and must not
-                // contain a null byte.
-                //
-                for (int n; ; ptr = n)
-                {
-                    n = ptr - 1;
-                    byte b = raw[n];
-                    if ((byte)'0' <= b && b <= (byte)'7')
-                        continue;
-                    if (raw[n - Constants.OBJECT_ID_LENGTH] != 0)
-                        continue;
-                    break;
-                }
+                currPtr = prevPtr;
+                prevPtr = -1;
+                if (!eof())
+                    parseEntry();
+                return;
             }
-            currPtr = ptr;
+            else if (delta <= 0)
+                throw new IndexOutOfRangeException(delta.ToString());
+
+            // Fast skip through the records, from the beginning of the tree.
+            // There is no reliable way to read the tree backwards, so we must
+            // parse all over again from the beginning. We hold the last "delta"
+            // positions in a buffer, so we can find the correct position later.
+            //
+            int[] trace = new int[delta + 1];
+            Arrays.Fill<int>(trace, -1);
+            int ptr = 0;
+            while (ptr != currPtr)
+            {
+                Array.Copy(trace, 1, trace, 0, delta);
+                trace[delta] = ptr;
+                while (raw[ptr] != 0)
+                    ptr++;
+                ptr += Constants.OBJECT_ID_LENGTH + 1;
+            }
+            if (trace[1] == -1)
+                throw new IndexOutOfRangeException(delta.ToString());
+            prevPtr = trace[0];
+            currPtr = trace[1];
             parseEntry();
         }
 

@@ -36,6 +36,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using Tamir.SharpSsh.jsch;
+
 namespace GitSharp.Transport
 {
 

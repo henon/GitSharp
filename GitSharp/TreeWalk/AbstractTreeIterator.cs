@@ -257,12 +257,46 @@ namespace GitSharp.TreeWalk
          */
         public void growPath(int len)
         {
+            setPathCapacity(path.Length << 1, len);
+        }
+
+        /**
+         * Ensure that path is capable to hold at least {@code capacity} bytes
+         *
+         * @param capacity
+         *            the amount of bytes to hold
+         * @param len
+         *            the amount of live bytes in path buffer
+         */
+        protected void ensurePathCapacity(int capacity, int len)
+        {
+            if (path.Length >= capacity)
+                return;
+            byte[] o = path;
+            int current = o.Length;
+            int newCapacity = current;
+            while (newCapacity < capacity && newCapacity > 0)
+                newCapacity <<= 1;
+            setPathCapacity(newCapacity, len);
+        }
+
+        /**
+         * Set path buffer capacity to the specified size
+         *
+         * @param capacity
+         *            the new size
+         * @param len
+         *            the amount of bytes to copy
+         */
+        private void setPathCapacity(int capacity, int len)
+        {
             byte[] o = path;
             byte[] n = new byte[o.Length << 1];
             Array.Copy(o, 0, n, 0, len);
             for (AbstractTreeIterator p = this; p != null && p.path == o; p = p.parent)
                 p.path = n;
         }
+
 
         /**
          * Compare the path of this current entry to another iterator's entry.
@@ -366,6 +400,12 @@ namespace GitSharp.TreeWalk
         public virtual FileMode getEntryFileMode()
         {
             return FileMode.FromBits(mode);
+        }
+
+        /** @return the file mode of the current entry as bits */
+        public int getEntryRawMode()
+        {
+            return mode;
         }
 
         /** @return path of the current entry, as a string. */
@@ -545,6 +585,26 @@ namespace GitSharp.TreeWalk
         public virtual void stopWalk()
         {
             // Do nothing by default.  Most iterators do not care.
+        }
+
+        /**
+         * @return the Length of the name component of the path for the current entry
+         */
+        public int getNameLength()
+        {
+            return pathLen - pathOffset;
+        }
+
+        /**
+         * Get the name component of the current entry path into the provided buffer.
+         *
+         * @param buffer the buffer to get the name into, it is assumed that buffer can hold the name
+         * @param offset the offset of the name in the buffer
+         * @see #getNameLength()
+         */
+        public void getName(byte[] buffer, int offset)
+        {
+            Array.Copy(path, pathOffset, buffer, offset, pathLen - pathOffset);
         }
     }
 }

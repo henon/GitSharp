@@ -43,6 +43,10 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="Tamir.SharpSSH, Version=1.1.1.13, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\extern\Tamir.SharpSSH.dll</HintPath>
+    </Reference>
     <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\extern\FileMap\Winterdom.IO.FileMap.dll</HintPath>
@@ -96,16 +100,18 @@
     <Compile Include="ObjectDatabase.cs" />
     <Compile Include="ObjectDirectory.cs" />
     <Compile Include="Transport\BundleWriter.cs" />
+    <Compile Include="Transport\DefaultSshSessionFactory.cs" />
     <Compile Include="Transport\FetchProcess.cs" />
+    <Compile Include="Transport\OpenSshConfig.cs" />
     <Compile Include="Transport\PushProcess.cs" />
     <Compile Include="Transport\SideBandProgressMonitor.cs" />
-    <None Include="Transport\SshTransport.cs" />
-    <None Include="Transport\SshConfigSessionFactory.cs" />
-    <None Include="Transport\SshSessionFactory.cs" />
+    <Compile Include="Transport\SshTransport.cs" />
+    <Compile Include="Transport\SshConfigSessionFactory.cs" />
+    <Compile Include="Transport\SshSessionFactory.cs" />
     <Compile Include="Transport\TransportAmazonS3.cs" />
     <Compile Include="Transport\TransportBundleStream.cs" />
     <Compile Include="Transport\TransportGitAnon.cs" />
-    <None Include="Transport\TransportGitSsh.cs" />
+    <Compile Include="Transport\TransportGitSsh.cs" />
     <Compile Include="Transport\TransportHttp.cs" />
     <Compile Include="Transport\TransportLocal.cs" />
     <None Include="Transport\TransportSftp.cs" />
@@ -113,6 +119,7 @@
     <Compile Include="Transport\WalkFetchConnection.cs" />
     <Compile Include="Transport\WalkPushConnection.cs" />
     <Compile Include="Transport\WalkRemoteObjectDatabase.cs" />
+    <Compile Include="TreeWalk\Filter\PathSuffixFilter.cs" />
     <Compile Include="UnpackedObjectCache.cs" />
     <Compile Include="Util\AtomicReference.cs" />
     <Compile Include="Util\DateTime.cs" />
@@ -186,6 +193,7 @@
     <Compile Include="Util\CheckedOutputStream.cs" />
     <Compile Include="Util\CRC32.cs" />
     <Compile Include="Util\MessageDigest.cs" />
+    <Compile Include="Util\StringUtils.cs" />
     <Compile Include="Util\WeakReference.cs" />
     <Compile Include="WholePackedObjectLoader.cs" />
     <Compile Include="WindowCachConfig.cs" />

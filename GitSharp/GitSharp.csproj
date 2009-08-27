@@ -119,6 +119,7 @@
     <Compile Include="Transport\WalkFetchConnection.cs" />
     <Compile Include="Transport\WalkPushConnection.cs" />
     <Compile Include="Transport\WalkRemoteObjectDatabase.cs" />
+    <Compile Include="TreeWalk\Filter\PathSuffixFilter.cs" />
     <Compile Include="UnpackedObjectCache.cs" />
     <Compile Include="Util\AtomicReference.cs" />
     <Compile Include="Util\DateTime.cs" />

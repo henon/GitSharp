@@ -50,8 +50,8 @@ namespace GitSharp
     public class FileMode
     {
 
-        // [henon] c# does not support octal literals, so every number starting with 0 has to be converted to decimal!
-        // frequently used octal literals and their decimal counterparts:
+        // [henon] c# does not support octal literals, so every number starting with 0 in java code had to be converted to decimal!
+        // Here are the octal literals used by jgit and their decimal counterparts:
         // decimal ... octal
         // 33188 ... 0100644
         // 33261 ... 0100755
@@ -62,15 +62,46 @@ namespace GitSharp
         // 57344 ... 0160000
         // 73 ... 0111
 
-        public static readonly FileMode Tree = new FileMode(16384, ObjectType.Tree, modeBits => (modeBits & 61440) == 16384);
+        /**
+         * Mask to apply to a file mode to obtain its type bits.
+         *
+         * @see #TYPE_TREE
+         * @see #TYPE_SYMLINK
+         * @see #TYPE_FILE
+         * @see #TYPE_GITLINK
+         * @see #TYPE_MISSING
+         */
+        public static int TYPE_MASK = 61440;
 
-        public static readonly FileMode Symlink = new FileMode(40960, ObjectType.Blob, modeBits => (modeBits & 61440) == 40960);
+        /** Bit pattern for {@link #TYPE_MASK} matching {@link #TREE}. */
+        public static int TYPE_TREE = 16384;
 
-        public static readonly FileMode RegularFile = new FileMode(33188, ObjectType.Blob, modeBits => (modeBits & 61440) == 32768 && (modeBits & 73) == 0);
+        /** Bit pattern for {@link #TYPE_MASK} matching {@link #SYMLINK}. */
+        public static int TYPE_SYMLINK = 40960;
 
-        public static readonly FileMode ExecutableFile = new FileMode(33261, ObjectType.Blob, modeBits => (modeBits & 61440) == 32768 && (modeBits & 73) != 0);
+        /** Bit pattern for {@link #TYPE_MASK} matching {@link #REGULAR_FILE}. */
+        public static int TYPE_FILE = 32768;
 
-        public static readonly FileMode GitLink = new FileMode(57344, ObjectType.Commit, modeBits => (modeBits & 61440) == 57344);
+        /** Bit pattern for {@link #TYPE_MASK} matching {@link #GITLINK}. */
+        public static int TYPE_GITLINK = 57344;
+
+        /** Bit pattern for {@link #TYPE_MASK} matching {@link #MISSING}. */
+        public static int TYPE_MISSING = 0;
+
+        public static int OCTAL_0111 = 73;
+        public static int OCTAL_0100644 = 33188;
+        public static int OCTAL_0100755 = 33261;
+
+
+        public static readonly FileMode Tree = new FileMode(TYPE_TREE, ObjectType.Tree, modeBits => (modeBits & TYPE_MASK) == TYPE_TREE);
+
+        public static readonly FileMode Symlink = new FileMode(TYPE_SYMLINK, ObjectType.Blob, modeBits => (modeBits & TYPE_MASK) == TYPE_SYMLINK);
+
+        public static readonly FileMode RegularFile = new FileMode(OCTAL_0100644, ObjectType.Blob, modeBits => (modeBits & TYPE_MASK) == TYPE_FILE && (modeBits & OCTAL_0111) == 0);
+
+        public static readonly FileMode ExecutableFile = new FileMode(OCTAL_0100755, ObjectType.Blob, modeBits => (modeBits & TYPE_MASK) == TYPE_FILE && (modeBits & OCTAL_0111) != 0);
+
+        public static readonly FileMode GitLink = new FileMode(TYPE_GITLINK, ObjectType.Commit, modeBits => (modeBits & TYPE_MASK) == TYPE_GITLINK);
 
         public static readonly FileMode Missing = new FileMode(0, ObjectType.Bad, modeBits => modeBits == 0);
 
@@ -119,21 +150,21 @@ namespace GitSharp
 
         public static FileMode FromBits(int bits)
         {
-            switch (bits & 61440) // octal 0170000
+            switch (bits & TYPE_MASK) // octal 0170000
             {
                 case 0:
                     if (bits == 0)
                         return Missing;
                     break;
-                case 16384: // octal 0040000
+                case TYPE_TREE: // octal 0040000
                     return Tree;
-                case 32768: // octal 0100000
-                    if ((bits & 73) != 0) // octal 0111
+                case TYPE_FILE: // octal 0100000
+                    if ((bits & OCTAL_0111) != 0)
                         return ExecutableFile;
                     return RegularFile;
-                case 40960: // octal 0120000
+                case TYPE_SYMLINK: // octal 0120000
                     return Symlink;
-                case 57344: // octal 0160000
+                case TYPE_GITLINK: // octal 0160000
                     return GitLink;
             }
 

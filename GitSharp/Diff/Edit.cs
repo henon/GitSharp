@@ -37,164 +37,246 @@
  */
 
 using System;
+
 namespace GitSharp.Diff
 {
-    /**
-     * A modified region detected between two versions of roughly the same content.
-     * <p>
-     * An edit covers the modified region only. It does not cover a common region.
-     * <p>
-     * Regions should be specified using 0 based notation, so add 1 to the start and
-     * end marks for line numbers in a file.
-     * <p>
-     * An edit where <code>beginA == endA && beginB < endB</code> is an insert edit,
-     * that is sequence B inserted the elements in region
-     * <code>[beginB, endB)</code> at <code>beginA</code>.
-     * <p>
-     * An edit where <code>beginA < endA && beginB == endB</code> is a delete edit,
-     * that is sequence B has removed the elements between
-     * <code>[beginA, endA)</code>.
-     * <p>
-     * An edit where <code>beginA < endA && beginB < endB</code> is a replace edit,
-     * that is sequence B has replaced the range of elements between
-     * <code>[beginA, endA)</code> with those found in <code>[beginB, endB)</code>.
-     */
-    public class Edit
-    {
-	    /** Type of edit */
-	    public enum Type
-        {
-		    /** Sequence B has inserted the region. */
-		    INSERT,
+	/// <summary>
+	/// A modified region detected between two versions of roughly the same content.
+	/// <para>
+	/// Regions should be specified using 0 based notation, so add 1 to the 
+	/// start and end marks for line numbers in a file.
+	/// </para>
+	/// <para>
+	/// An edit where <code>beginA == endA && beginB < endB</code> is an insert edit,
+	/// that is sequence B inserted the elements in region
+	/// <code>[beginB, endB)</code> at <code>beginA</code>.
+	/// </para>
+	/// <para>
+	/// An edit where <code>beginA < endA && beginB < endB</code> is a replace edit,
+	/// that is sequence B has replaced the range of elements between
+	/// <code>[beginA, endA)</code> with those found in <code>[beginB, endB)</code>.
+	/// </para> 
+	/// </summary>
+	public class Edit : IEquatable<Edit>
+	{
+		/// <summary>
+		/// Type of edit
+		/// </summary>
+		public enum Type
+		{
+			/// <summary>
+			/// Sequence B has inserted the region.
+			/// </summary>
+			INSERT,
 
-		    /** Sequence B has removed the region. */
-		    DELETE,
+			/// <summary>
+			/// Sequence B has removed the region.
+			/// </summary>
+			DELETE,
 
-		    /** Sequence B has replaced the region with different content. */
-		    REPLACE,
+			/// <summary>
+			/// Sequence B has replaced the region with different content.
+			/// </summary>
+			REPLACE,
 
-		    /** Sequence A and B have zero length, describing nothing. */
-		    EMPTY
-	    }
+			/// <summary>
+			/// Sequence A and B have zero length, describing nothing.
+			/// </summary>
+			EMPTY
+		}
 
-	    int beginA;
-	    int endA;
-	    int beginB;
-	    int endB;
+		/// <summary>
+		/// Create a new empty edit.
+		/// </summary>
+		/// <param name="aStart">beginA: start and end of region in sequence A; 0 based.</param>
+		/// <param name="bStart">beginB: start and end of region in sequence B; 0 based.</param>
+		public Edit(int aStart, int bStart)
+			: this(aStart, aStart, bStart, bStart)
+		{
+		}
 
-	    /**
-	     * Create a new empty edit.
-	     *
-	     * @param a_start
-	     *            beginA: start and end of region in sequence A; 0 based.
-	     * @param b_start
-	     *            beginB: start and end of region in sequence B; 0 based.
-	     */
-	    public Edit(int a_start, int b_start)
-            :this(a_start, a_start, b_start, b_start)
-        {}
+		/// <summary>
+		/// Create a new empty edit.
+		/// </summary>
+		/// <param name="aStart">beginA: start and end of region in sequence A; 0 based.</param>
+		/// <param name="aEnd">endA: end of region in sequence A; must be >= as.</param>
+		/// <param name="bStart">beginB: start and end of region in sequence B; 0 based.</param>
+		/// <param name="bEnd">endB: end of region in sequence B; must be >= bs.</param>
+		public Edit(int aStart, int aEnd, int bStart, int bEnd)
+		{
+			BeginA = aStart;
+			EndA = aEnd;
 
-	    /**
-	     * Create a new edit.
-	     *
-	     * @param a_start
-	     *            beginA: start of region in sequence A; 0 based.
-	     * @param a_end
-	     *            endA: end of region in sequence A; must be >= as.
-	     * @param b_start
-	     *            beginB: start of region in sequence B; 0 based.
-	     * @param b_end
-	     *            endB: end of region in sequence B; must be >= bs.
-	     */
-	    public Edit(int a_start, int a_end, int b_start, int b_end)
-        {
-		    beginA = a_start;
-		    endA = a_end;
+			BeginB = bStart;
+			EndB = bEnd;
+		}
 
-		    beginB = b_start;
-		    endB = b_end;
-	    }
+		/// <summary>
+		/// Gets the type of this region.
+		/// </summary>
+		public Type EditType
+		{
+			get
+			{
+				if (BeginA == EndA && BeginB < EndB)
+				{
+					return Type.INSERT;
+				}
+				if (BeginA < EndA && BeginB == EndB)
+				{
+					return Type.DELETE;
+				}
+				if (BeginA == EndA && BeginB == EndB)
+				{
+					return Type.REPLACE;
+				}
 
-	    /** @return the type of this region */
-	    public Type getType()
-        {
-		    if (beginA == endA && beginB < endB)
-			    return Type.INSERT;
-		    if (beginA < endA && beginB == endB)
-			    return Type.DELETE;
-		    if (beginA == endA && beginB == endB)
-			    return Type.EMPTY;
-		    return Type.REPLACE;
-	    }
+				return Type.REPLACE;
+			}
+		}
 
-	    /** @return start point in sequence A. */
-	    public int getBeginA()
-        {
-		    return beginA;
-	    }
+		/// <summary>
+		/// Start point in sequence A.
+		/// </summary>
+		public int BeginA
+		{
+			get;
+			set;
+		}
 
-	    /** @return end point in sequence A. */
-	    public int getEndA()
-        {
-		    return endA;
-	    }
+		/// <summary>
+		/// End point in sequence A.
+		/// </summary>
+		public int EndA
+		{
+			get;
+			set;
+		}
 
-	    /** @return start point in sequence B. */
-	    public int getBeginB() {
-		    return beginB;
-	    }
+		/// <summary>
+		/// Start point in sequence B.
+		/// </summary>
+		public int BeginB
+		{
+			get;
+			set;
+		}
 
-	    /** @return end point in sequence B. */
-	    public int getEndB() {
-		    return endB;
-	    }
+		/// <summary>
+		/// End point in sequence B.
+		/// </summary>
+		public int EndB
+		{
+			get;
+			set;
+		}
 
-	    /** Increase {@link #getEndA()} by 1. */
-	    public void extendA() {
-		    endA++;
-	    }
+		/// <summary>
+		/// Increase <see cref="EndA"/> by 1.
+		/// </summary>
+		public void ExtendA()
+		{
+			EndA++;
+		}
 
-	    /** Increase {@link #getEndB()} by 1. */
-	    public void extendB() {
-		    endB++;
-	    }
+		/// <summary>
+		/// Increase <see cref="EndB"/> by 1.
+		/// </summary>
+		public void ExtendB()
+		{
+			EndB++;
+		}
 
-	    /** Swap A and B, so the edit goes the other direction. */
-	    public void swap() {
-		    int sBegin = beginA;
-		    int sEnd = endA;
+		/// <summary>
+		/// Swap A and B, so the edit goes the other direction.
+		/// </summary>
+		public void Swap()
+		{
+			int sBegin = BeginA;
+			int sEnd = EndA;
 
-		    beginA = beginB;
-		    endA = endB;
+			BeginA = BeginB;
+			EndA = EndB;
 
-		    beginB = sBegin;
-		    endB = sEnd;
-	    }
+			BeginB = sBegin;
+			EndB = sEnd;
+		}
 
-        public override int GetHashCode()
-        {
- 	        return beginA ^ endA;
-        }
+		/// <summary>
+		/// Indicates whether the current object is equal to another object of the same type.
+		/// </summary>
+		/// <returns>
+		/// true if the current object is equal to the <paramref name="other"/>
+		/// parameter; otherwise, false.
+		/// </returns>
+		/// <param name="other">An object to compare with this object.</param>
+		public bool Equals(Edit other)
+		{
+			if (ReferenceEquals(null, other)) return false;
+			if (ReferenceEquals(this, other)) return true;
 
-	    public int hashCode()
-        {
-		    return this.GetHashCode();
-	    }
+			return other.BeginA == BeginA &&
+				other.EndA == EndA &&
+				other.BeginB == BeginB &&
+				other.EndB == EndB;
+		}
 
-        public override bool Equals(Object o)
-        {
-		    if (o is Edit)
-            {
-			    Edit e = (Edit) o;
-			    return this.beginA == e.beginA && this.endA == e.endA
-					    && this.beginB == e.beginB && this.endB == e.endB;
-		    }
-		    return false;
-	    }
+		/// <summary>
+		/// Determines whether the specified <see cref="T:System.Object"/> is 
+		/// equal to the current <see cref="T:System.Object"/>.
+		/// </summary>
+		/// <returns>
+		/// true if the specified <see cref="T:System.Object"/> is equal to the 
+		/// current <see cref="T:System.Object"/>; otherwise, false.
+		/// </returns>
+		/// <param name="obj">The <see cref="T:System.Object"/> to compare with 
+		/// the current <see cref="T:System.Object"/>.
+		/// </param>
+		/// <exception cref="T:System.NullReferenceException">
+		/// The <paramref name="obj"/> parameter is null.
+		/// </exception>
+		/// <filterpriority>2</filterpriority>
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			if (obj.GetType() != typeof(Edit)) return false;
+			return Equals((Edit)obj);
+		}
 
-	    public override String ToString() {
-		    Type t = getType();
-		    return t + "(" + beginA + "-" + endA + "," + beginB + "-" + endB + ")";
-	    }
-    }
+		/// <summary>
+		/// Serves as a hash function for a particular type. 
+		/// </summary>
+		/// <returns>
+		/// A hash code for the current <see cref="T:System.Object"/>.
+		/// </returns>
+		/// <filterpriority>2</filterpriority>
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				int result = BeginA;
+				result = (result * 397) ^ EndA;
+				result = (result * 397) ^ BeginB;
+				result = (result * 397) ^ EndB;
+				return result;
+			}
+		}
+
+		public static bool operator ==(Edit left, Edit right)
+		{
+			return Equals(left, right);
+		}
+
+		public static bool operator !=(Edit left, Edit right)
+		{
+			return !Equals(left, right);
+		}
+
+		public override string ToString()
+		{
+			Type t = EditType;
+			return t + "(" + BeginA + "-" + EndA + "," + BeginB + "-" + EndB + ")";
+		}
+	}
 }

@@ -45,7 +45,10 @@ using GitSharp.Util;
 
 namespace GitSharp.Patch
 {
-    /** Patch header describing an action for a single file path. */
+    /// <summary>
+	/// Patch header describing an action for a single file path.
+    /// </summary>
+    [Serializable]
     public class FileHeader
     {
 	    /** Magical file name used for file adds or deletes. */

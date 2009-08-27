@@ -36,15 +36,17 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp;
-using GitSharp.Patch;
 using GitSharp.Util;
 
 namespace GitSharp.Patch
 {
-    /** A parsed collection of {@link FileHeader}s from a unified diff patch file */
+    /// <summary>
+	/// A parsed collection of <seealso cref="FileHeader"/>s from a unified diff patch file.
+    /// </summary>
+    [Serializable]
     public class Patch
     {
 	    private static readonly byte[] DIFF_GIT = Constants.encodeASCII("diff --git ");

@@ -36,14 +36,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp;
-using GitSharp.Util;
 using System.Text;
 using System;
 
 namespace GitSharp.Patch
 {
-    /** An error in a patch script */
+    /// <summary>
+	/// An error in a patch script.
+    /// </summary>
+    [Serializable]
     public class FormatError
     {
 	    /** Classification of an error. */
@@ -79,7 +80,7 @@ namespace GitSharp.Patch
 	    }
 
 	    /** @return a message describing the error. */
-	    public String getMessage()
+	    public string getMessage()
         {
 		    return message;
 	    }
@@ -97,7 +98,7 @@ namespace GitSharp.Patch
 	    }
 
 	    /** @return line of the patch script the error appears on. */
-	    public String getLineText()
+	    public string getLineText()
         {
 		    int eol = RawParseUtils.nextLF(buf, offset);
 		    return RawParseUtils.decode(Constants.CHARSET, buf, offset, eol);

@@ -119,6 +119,9 @@ namespace GitSharp.Transport
             if (TransportGitSsh.canHandle(remote))
                 return new TransportGitSsh(local, remote);
 
+            if (TransportSftp.canHandle(remote))
+                return new TransportSftp(local, remote);
+
             throw new NotSupportedException("URI not supported: " + remote);
         }
 

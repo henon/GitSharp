@@ -74,7 +74,7 @@ namespace GitSharp.Util
             if (patternText.Length == 0)
                 throw new ArgumentException("Cannot match on empty string.");
             needleString = patternText;
-            byte[] b = Encoding.UTF8.GetBytes(patternText);
+            byte[] b = Constants.encode(patternText);
             needle = new byte[b.Length];
             for (int i = 0; i < b.Length; i++)
                 needle[i] = lc(b[i]);
@@ -135,7 +135,7 @@ namespace GitSharp.Util
 
         private static byte lc(byte q)
         {
-            return (byte)char.ToLower((char)(q & 0xff));
+            return (byte)StringUtils.toLowerCase((char)(q & 0xff));
         }
 
         /**

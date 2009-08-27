@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -114,7 +114,7 @@
     <Compile Include="Transport\TransportGitSsh.cs" />
     <Compile Include="Transport\TransportHttp.cs" />
     <Compile Include="Transport\TransportLocal.cs" />
-    <None Include="Transport\TransportSftp.cs" />
+    <Compile Include="Transport\TransportSftp.cs" />
     <Compile Include="Transport\WalkEncryption.cs" />
     <Compile Include="Transport\WalkFetchConnection.cs" />
     <Compile Include="Transport\WalkPushConnection.cs" />

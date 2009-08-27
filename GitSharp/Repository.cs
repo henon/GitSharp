@@ -807,6 +807,11 @@ namespace GitSharp
         {
             objectDatabase.openPack(pack, idx);
         }
+
+        public ObjectDirectory getObjectDatabase()
+        {
+            return objectDatabase;
+        }
         
         //public void OpenPack(FileInfo pack, FileInfo idx)
         //{

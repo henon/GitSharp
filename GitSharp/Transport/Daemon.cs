@@ -125,6 +125,8 @@ namespace GitSharp.Transport
 
         public void ExportRepository(string name, Repository db)
         {
+            if (!name.EndsWith(".git"))
+                name = name + ".git";
             Exports.Add(name, db);
         }
 

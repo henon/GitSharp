@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -192,6 +192,7 @@
     <Compile Include="Util\CheckedOutputStream.cs" />
     <Compile Include="Util\CRC32.cs" />
     <Compile Include="Util\MessageDigest.cs" />
+    <Compile Include="Util\StringUtils.cs" />
     <Compile Include="Util\WeakReference.cs" />
     <Compile Include="WholePackedObjectLoader.cs" />
     <Compile Include="WindowCachConfig.cs" />

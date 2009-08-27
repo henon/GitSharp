@@ -71,26 +71,26 @@ namespace GitSharp
          * @see #TYPE_GITLINK
          * @see #TYPE_MISSING
          */
-        public static int TYPE_MASK = 61440;
+        public const int TYPE_MASK = 61440;
 
         /** Bit pattern for {@link #TYPE_MASK} matching {@link #TREE}. */
-        public static int TYPE_TREE = 16384;
+        public const int TYPE_TREE = 16384;
 
         /** Bit pattern for {@link #TYPE_MASK} matching {@link #SYMLINK}. */
-        public static int TYPE_SYMLINK = 40960;
+        public const int TYPE_SYMLINK = 40960;
 
         /** Bit pattern for {@link #TYPE_MASK} matching {@link #REGULAR_FILE}. */
-        public static int TYPE_FILE = 32768;
+        public const int TYPE_FILE = 32768;
 
         /** Bit pattern for {@link #TYPE_MASK} matching {@link #GITLINK}. */
-        public static int TYPE_GITLINK = 57344;
+        public const int TYPE_GITLINK = 57344;
 
         /** Bit pattern for {@link #TYPE_MASK} matching {@link #MISSING}. */
-        public static int TYPE_MISSING = 0;
+        public const int TYPE_MISSING = 0;
 
-        public static int OCTAL_0111 = 73;
-        public static int OCTAL_0100644 = 33188;
-        public static int OCTAL_0100755 = 33261;
+        public const int OCTAL_0111 = 73;
+        public const int OCTAL_0100644 = 33188;
+        public const int OCTAL_0100755 = 33261;
 
 
         public static readonly FileMode Tree = new FileMode(TYPE_TREE, ObjectType.Tree, modeBits => (modeBits & TYPE_MASK) == TYPE_TREE);

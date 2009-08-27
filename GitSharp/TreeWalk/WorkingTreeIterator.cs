@@ -134,17 +134,17 @@ namespace GitSharp.TreeWalk
         {
             if (contentIdFromPtr == ptr)
                 return contentId;
-            switch (mode & 61440)
+            switch (mode & FileMode.TYPE_MASK)
             {
-                case 32768: /* normal files */
+                case FileMode.TYPE_FILE:
                     contentIdFromPtr = ptr;
                     return contentId = idBufferBlob(entries[ptr]);
-                case 40960: /* symbolic links */
+                case FileMode.TYPE_SYMLINK:
                     // Windows does not support symbolic links, so we should not
                     // have reached this particular part of the walk code.
                     //
                     return zeroid;
-                case 57344: /* gitlink */
+                case FileMode.TYPE_GITLINK:
                     // TODO: Support obtaining current HEAD SHA-1 from nested repository
                     //
                     return zeroid;
@@ -277,8 +277,7 @@ namespace GitSharp.TreeWalk
             mode = e.getMode().Bits;
 
             int nameLen = e.encodedNameLen;
-            while (pathOffset + nameLen > path.Length)
-                growPath(pathOffset);
+            ensurePathCapacity(pathOffset + nameLen, pathOffset);
             Array.Copy(e.encodedName, 0, path, pathOffset, nameLen);
             pathLen = pathOffset + nameLen;
         }

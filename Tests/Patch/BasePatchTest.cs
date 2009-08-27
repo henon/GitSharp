@@ -7,6 +7,7 @@ namespace GitSharp.Tests.Patch
 {
 	public class BasePatchTest
 	{
+		protected const string DIFFS_DIR = "../../../Tests/Diff/Resources/";
 		protected const string PATCHS_DIR = "../../../Tests/Patch/Resources/";
 
 		protected GitSharp.Patch.Patch parseTestPatchFile(string patchFile)

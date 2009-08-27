@@ -266,7 +266,7 @@ namespace GitSharp.Patch
 		    // Always treat the headers as US-ASCII; Git file names are encoded
 		    // in a C style escape if any character has the high-bit set.
 		    //
-		    int hdrEnd = getHunks()[0].getStartOffset();
+		    int hdrEnd = getHunks()[0].StartOffset;
 		    for (int ptr = startOffset; ptr < hdrEnd;) {
 			    int eol = Math.Min(hdrEnd, RawParseUtils.nextLF(buf, ptr));
 			    r.Append(RawParseUtils.extractBinaryString(buf, ptr, eol));
@@ -433,10 +433,14 @@ namespace GitSharp.Patch
 
         public void addHunk(HunkHeader h)
         {
-		    if (h.getFileHeader() != this)
-                throw new ArgumentException("Hunk belongs to another file");
+		    if (h.File != this)
+		    {
+		    	throw new ArgumentException("Hunk belongs to another file");
+		    }
 		    if (hunks == null)
-			    hunks = new List<HunkHeader>();
+		    {
+		    	hunks = new List<HunkHeader>();
+		    }
 		    hunks.Add(h);
 	    }
 
@@ -457,12 +461,14 @@ namespace GitSharp.Patch
 		    return reverseBinaryHunk;
 	    }
 
-	    /** @return a list describing the content edits performed on this file. */
-	    public EditList toEditList()
+	    /// <summary>
+		/// Returns a list describing the content edits performed on this file.
+	    /// </summary>
+	    /// <returns></returns>
+	    public EditList ToEditList()
         {
 		    EditList r = new EditList();
-		    foreach (HunkHeader hunk in hunks)
-			    r.AddRange(hunk.toEditList());
+			hunks.ForEach(hunk => r.AddRange(hunk.ToEditList()));
 		    return r;
 	    }
 

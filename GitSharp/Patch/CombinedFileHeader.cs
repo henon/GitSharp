@@ -38,8 +38,6 @@
 
 using System.Collections.Generic;
 using System.Text;
-using GitSharp;
-using GitSharp.Util;
 
 namespace GitSharp.Patch
 {

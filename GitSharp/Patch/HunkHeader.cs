@@ -36,395 +36,426 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.IO;
+using System;
 using System.Text;
 using GitSharp.Diff;
 using GitSharp.Util;
-using GitSharp.Patch;
 
 namespace GitSharp.Patch
 {
-    /** Hunk header describing the layout of a single block of lines */
-    public class HunkHeader
-    {
-	    /** Details about an old image of the file. */
-	    public abstract class OldImage
-        {
-		    /** First line number the hunk starts on in this file. */
-		    public int startLine;
+	/// <summary>
+	/// Hunk header describing the layout of a single block of lines.
+	/// </summary>
+	public class HunkHeader
+	{
+		private readonly FileHeader _file;
+		private readonly OldImage _oldImage;
+		private readonly int _startOffset;
 
-		    /** Total number of lines this hunk covers in this file. */
-		    public int lineCount;
+		public HunkHeader(FileHeader fh, int offset)
+			: this(fh, offset, new OldImage(fh))
+		{
+		}
 
-		    /** Number of lines deleted by the post-image from this file. */
-		    public int nDeleted;
+		internal HunkHeader(FileHeader fh, int offset, OldImage oi)
+		{
+			_file = fh;
+			_startOffset = offset;
+			_oldImage = oi;
+		}
 
-		    /** Number of lines added by the post-image not in this file. */
-		    public int nAdded;
+		/// <summary>
+		/// Header for the file this hunk applies to.
+		/// </summary>
+		public virtual FileHeader File
+		{
+			get { return _file; }
+		}
 
-		    /** @return first line number the hunk starts on in this file. */
-		    public int getStartLine()
-            {
-			    return startLine;
-		    }
+		/// <summary>
+		/// The byte array holding this hunk's patch script.
+		/// </summary>
+		/// <returns></returns>
+		public byte[] Buffer
+		{
+			get { return _file.buf; }
+		}
 
-		    /** @return total number of lines this hunk covers in this file. */
-		    public int getLineCount()
-            {
-			    return lineCount;
-		    }
+		/// <summary>
+		/// Offset within <seealso cref="FileHeader.buf"/> to the "@@ -" line.
+		/// </summary>
+		public int StartOffset
+		{
+			get { return _startOffset; }
+		}
 
-		    /** @return number of lines deleted by the post-image from this file. */
-		    public int getLinesDeleted()
-            {
-			    return nDeleted;
-		    }
+		/// <summary>
+		/// Position 1 past the end of this hunk within {@link #file}'s buf.
+		/// </summary>
+		public int EndOffset { get; set; }
 
-		    /** @return number of lines added by the post-image not in this file. */
-		    public int getLinesAdded()
-            {
-			    return nAdded;
-		    }
+		internal virtual OldImage OldImage
+		{
+			get { return _oldImage; }
+		}
 
-		    /** @return object id of the pre-image file. */
-		    public abstract AbbreviatedObjectId getId();
-	    }
+		/// <summary>
+		/// First line number in the post-image file where the hunk starts.
+		/// </summary>
+		public int NewStartLine { get; set; }
 
-        public readonly FileHeader file;
+		/// <summary>
+		/// Total number of post-image lines this hunk covers (context + inserted)
+		/// </summary>
+		public int NewLineCount { get; set; }
 
-	    /** Offset within {@link #file}.buf to the "@@ -" line. */
-        public readonly int startOffset;
+		/// <summary>
+		/// Total number of lines of context appearing in this hunk.
+		/// </summary>
+		public int LinesContext { get; set; }
 
-	    /** Position 1 past the end of this hunk within {@link #file}'s buf. */
-	    public int endOffset;
+		/// <summary>
+		/// Returns a list describing the content edits performed within the hunk.
+		/// </summary>
+		/// <returns></returns>
+		public EditList ToEditList()
+		{
+			var r = new EditList();
+			byte[] buf = _file.buf;
+			int c = RawParseUtils.nextLF(buf, _startOffset);
+			int oLine = _oldImage.StartLine;
+			int nLine = NewStartLine;
+			Edit inEdit = null;
 
-	    private readonly OldImage old;
+			for (; c < EndOffset; c = RawParseUtils.nextLF(buf, c))
+			{
+				bool breakScan;
 
-	    /** First line number in the post-image file where the hunk starts */
-        public int newStartLine;
+				switch (buf[c])
+				{
+					case (byte)' ':
+					case (byte)'\n':
+						inEdit = null;
+						oLine++;
+						nLine++;
+						continue;
 
-	    /** Total number of post-image lines this hunk covers (context + inserted) */
-        public int newLineCount;
+					case (byte)'-':
+						if (inEdit == null)
+						{
+							inEdit = new Edit(oLine - 1, nLine - 1);
+							r.Add(inEdit);
+						}
+						oLine++;
+						inEdit.ExtendA();
+						continue;
 
-	    /** Total number of lines of context appearing in this hunk */
-        public int nContext;
+					case (byte)'+':
+						if (inEdit == null)
+						{
+							inEdit = new Edit(oLine - 1, nLine - 1);
+							r.Add(inEdit);
+						}
+						nLine++;
+						inEdit.ExtendB();
+						continue;
 
-        private class OldImageInstance : OldImage
-        {
-            private FileHeader fh;
+					case (byte)'\\': // Matches "\ No newline at end of file"
+						continue;
 
-            public OldImageInstance(FileHeader fh)
-            {
-                this.fh = fh;
-            }
+					default:
+						breakScan = true;
+						break;
+				}
 
-            public override AbbreviatedObjectId getId()
-            {
-                return fh.getOldId();
-            }
-        }
+				if (breakScan)
+					break;
+			}
 
-        public HunkHeader(FileHeader fh, int offset)
-            :this(fh, offset, new OldImageInstance(fh))
-        {}
+			return r;
+		}
 
-	    public HunkHeader(FileHeader fh, int offset, OldImage oi)
-        {
-		    file = fh;
-		    startOffset = offset;
-		    old = oi;
-	    }
+		public virtual void parseHeader()
+		{
+			// Parse "@@ -236,9 +236,9 @@ protected boolean"
+			//
+			byte[] buf = _file.buf;
+			var ptr = new MutableInteger
+						{
+							value = RawParseUtils.nextLF(buf, _startOffset, (byte)' ')
+						};
 
-	    /** @return header for the file this hunk applies to */
-	    public FileHeader getFileHeader()
-        {
-		    return file;
-	    }
+			_oldImage.StartLine = -1 * RawParseUtils.parseBase10(buf, ptr.value, ptr);
 
-	    /** @return the byte array holding this hunk's patch script. */
-	    public byte[] getBuffer()
-        {
-		    return file.buf;
-	    }
+			_oldImage.LineCount = buf[ptr.value] == ',' ? RawParseUtils.parseBase10(buf, ptr.value + 1, ptr) : 1;
+			NewStartLine = RawParseUtils.parseBase10(buf, ptr.value + 1, ptr);
+			NewLineCount = buf[ptr.value] == ',' ? RawParseUtils.parseBase10(buf, ptr.value + 1, ptr) : 1;
+		}
 
-	    /** @return offset the start of this hunk in {@link #getBuffer()}. */
-	    public int getStartOffset()
-        {
-		    return startOffset;
-	    }
+		public virtual int parseBody(Patch script, int end)
+		{
+			byte[] buf = _file.buf;
+			int c = RawParseUtils.nextLF(buf, _startOffset), last = c;
 
-	    /** @return offset one past the end of the hunk in {@link #getBuffer()}. */
-	    public int getEndOffset()
-        {
-		    return endOffset;
-	    }
+			_oldImage.LinesDeleted = 0;
+			_oldImage.LinesAdded = 0;
 
-	    /** @return information about the old image mentioned in this hunk. */
-	    public virtual OldImage getOldImage()
-        {
-		    return old;
-	    }
+			for (; c < end; last = c, c = RawParseUtils.nextLF(buf, c))
+			{
+				bool breakScan;
+				switch (buf[c])
+				{
+					case (byte)' ':
+					case (byte)'\n':
+						LinesContext++;
+						continue;
 
-	    /** @return first line number in the post-image file where the hunk starts */
-	    public int getNewStartLine()
-        {
-		    return newStartLine;
-	    }
+					case (byte)'-':
+						_oldImage.LinesDeleted++;
+						continue;
 
-	    /** @return Total number of post-image lines this hunk covers */
-	    public int getNewLineCount()
-        {
-		    return newLineCount;
-	    }
+					case (byte)'+':
+						_oldImage.LinesAdded++;
+						continue;
 
-	    /** @return total number of lines of context appearing in this hunk */
-	    public int getLinesContext()
-        {
-		    return nContext;
-	    }
+					case (byte)'\\': // Matches "\ No newline at end of file"
+						continue;
 
-	    /** @return a list describing the content edits performed within the hunk. */
-	    public EditList toEditList()
-        {
-		    EditList r = new EditList();
-		    byte[] buf = file.buf;
-		    int c = RawParseUtils.nextLF(buf, startOffset);
-		    int oLine = old.startLine;
-		    int nLine = newStartLine;
-		    Edit inEdit = null;
+					default:
+						breakScan = true;
+						break;
+				}
+				if (breakScan)
+					break;
+			}
 
-            bool break_scan = false;
+			if (last < end && LinesContext + _oldImage.LinesDeleted - 1 == _oldImage.LineCount
+				&& LinesContext + _oldImage.LinesAdded == NewLineCount
+				&& RawParseUtils.match(buf, last, Patch.SIG_FOOTER) >= 0)
+			{
+				// This is an extremely common occurrence of "corruption".
+				// Users add footers with their signatures after this mark,
+				// and git diff adds the git executable version number.
+				// Let it slide; the hunk otherwise looked sound.
+				//
+				_oldImage.LinesDeleted--;
+				return last;
+			}
 
-		    for (; c < endOffset; c = RawParseUtils.nextLF(buf, c)) {
-			    switch (buf[c]) {
-			    case (byte)' ':
-			    case (byte)'\n':
-				    inEdit = null;
-				    oLine++;
-				    nLine++;
-				    continue;
+			if (LinesContext + _oldImage.LinesDeleted < _oldImage.LineCount)
+			{
+				int missingCount = _oldImage.LineCount - (LinesContext + _oldImage.LinesDeleted);
+				script.error(buf, _startOffset, "Truncated hunk, at least "
+												+ missingCount + " old lines is missing");
+			}
+			else if (LinesContext + _oldImage.LinesAdded < NewLineCount)
+			{
+				int missingCount = NewLineCount - (LinesContext + _oldImage.LinesAdded);
+				script.error(buf, _startOffset, "Truncated hunk, at least "
+												+ missingCount + " new lines is missing");
+			}
+			else if (LinesContext + _oldImage.LinesDeleted > _oldImage.LineCount
+					 || LinesContext + _oldImage.LinesAdded > NewLineCount)
+			{
+				string oldcnt = _oldImage.LineCount + ":" + NewLineCount;
+				string newcnt = (LinesContext + _oldImage.LinesDeleted) + ":"
+								+ (LinesContext + _oldImage.LinesAdded);
+				script.warn(buf, _startOffset, "Hunk header " + oldcnt
+											   + " does not match body line count of " + newcnt);
+			}
 
-			    case (byte)'-':
-				    if (inEdit == null) {
-					    inEdit = new Edit(oLine - 1, nLine - 1);
-					    r.Add(inEdit);
-				    }
-				    oLine++;
-				    inEdit.extendA();
-				    continue;
+			return c;
+		}
 
-			    case (byte)'+':
-				    if (inEdit == null) {
-					    inEdit = new Edit(oLine - 1, nLine - 1);
-					    r.Add(inEdit);
-				    }
-				    nLine++;
-				    inEdit.extendB();
-				    continue;
+		public void extractFileLines(TemporaryBuffer[] outStream)
+		{
+			byte[] buf = _file.buf;
+			int ptr = _startOffset;
+			int eol = RawParseUtils.nextLF(buf, ptr);
+			if (EndOffset <= eol)
+				return;
 
-			    case (byte)'\\': // Matches "\ No newline at end of file"
-				    continue;
+			// Treat the hunk header as though it were from the ancestor,
+			// as it may have a function header appearing after it which
+			// was copied out of the ancestor file.
+			//
+			outStream[0].write(buf, ptr, eol - ptr);
 
-			    default:
-				    break_scan = true;
-                    break;
-			    }
+			bool break_scan = false;
+			for (ptr = eol; ptr < EndOffset; ptr = eol)
+			{
+				eol = RawParseUtils.nextLF(buf, ptr);
+				switch (buf[ptr])
+				{
+					case (byte)' ':
+					case (byte)'\n':
+					case (byte)'\\':
+						outStream[0].write(buf, ptr, eol - ptr);
+						outStream[1].write(buf, ptr, eol - ptr);
+						break;
+					case (byte)'-':
+						outStream[0].write(buf, ptr, eol - ptr);
+						break;
+					case (byte)'+':
+						outStream[1].write(buf, ptr, eol - ptr);
+						break;
+					default:
+						break_scan = true;
+						break;
+				}
+				if (break_scan)
+					break;
+			}
+		}
 
-                if (break_scan)
-                    break;
-		    }
-		    return r;
-	    }
+		public virtual void extractFileLines(StringBuilder sb, string[] text, int[] offsets)
+		{
+			byte[] buf = _file.buf;
+			int ptr = _startOffset;
+			int eol = RawParseUtils.nextLF(buf, ptr);
+			if (EndOffset <= eol)
+				return;
+			copyLine(sb, text, offsets, 0);
 
-	    public virtual void parseHeader()
-        {
-		    // Parse "@@ -236,9 +236,9 @@ protected boolean"
-		    //
-		    byte[] buf = file.buf;
-		    MutableInteger ptr = new MutableInteger();
-		    ptr.value = RawParseUtils.nextLF(buf, startOffset, (byte)' ');
-		    old.startLine = -RawParseUtils.parseBase10(buf, ptr.value, ptr);
-		    if (buf[ptr.value] == ',')
-			    old.lineCount = RawParseUtils.parseBase10(buf, ptr.value + 1, ptr);
-		    else
-			    old.lineCount = 1;
+			bool break_scan = false;
+			for (ptr = eol; ptr < EndOffset; ptr = eol)
+			{
+				eol = RawParseUtils.nextLF(buf, ptr);
+				switch (buf[ptr])
+				{
+					case (byte)' ':
+					case (byte)'\n':
+					case (byte)'\\':
+						copyLine(sb, text, offsets, 0);
+						skipLine(text, offsets, 1);
+						break;
+					case (byte)'-':
+						copyLine(sb, text, offsets, 0);
+						break;
+					case (byte)'+':
+						copyLine(sb, text, offsets, 1);
+						break;
+					default:
+						break_scan = true;
+						break;
+				}
+				if (break_scan)
+					break;
+			}
+		}
 
-		    newStartLine = RawParseUtils.parseBase10(buf, ptr.value + 1, ptr);
-		    if (buf[ptr.value] == ',')
-			    newLineCount = RawParseUtils.parseBase10(buf, ptr.value + 1, ptr);
-		    else
-			    newLineCount = 1;
-	    }
+		public void copyLine(StringBuilder sb, string[] text, int[] offsets, int fileIdx)
+		{
+			string s = text[fileIdx];
+			int start = offsets[fileIdx];
+			int end = s.IndexOf('\n', start);
+			if (end < 0)
+			{
+				end = s.Length;
+			}
+			else
+			{
+				end++;
+			}
+			sb.Append(s, start, end - start);
+			offsets[fileIdx] = end;
+		}
 
-	    public virtual int parseBody(Patch script, int end) {
-		    byte[] buf = file.buf;
-		    int c = RawParseUtils.nextLF(buf, startOffset), last = c;
+		public void skipLine(string[] text, int[] offsets, int fileIdx)
+		{
+			string s = text[fileIdx];
+			int end = s.IndexOf('\n', offsets[fileIdx]);
+			offsets[fileIdx] = end < 0 ? s.Length : end + 1;
+		}
+	}
 
-		    old.nDeleted = 0;
-		    old.nAdded = 0;
+	#region Nested Types
 
-            bool break_scan = false;
-		    for (; c < end; last = c, c = RawParseUtils.nextLF(buf, c))
-            {
-			    switch (buf[c])
-                {
-			    case (byte)' ':
-			    case (byte)'\n':
-				    nContext++;
-				    continue;
+	/// <summary>
+	/// Details about an old image of the file.
+	/// </summary>
+	internal class OldImage
+	{
+		private readonly FileHeader _fh;
+		private readonly AbbreviatedObjectId _id;
 
-			    case (byte)'-':
-				    old.nDeleted++;
-				    continue;
+		public OldImage(FileHeader fh)
+			: this(fh, fh.getOldId())
+		{
+		}
 
-			    case (byte)'+':
-				    old.nAdded++;
-				    continue;
+		public OldImage(FileHeader fh, AbbreviatedObjectId id)
+		{
+			_fh = fh;
+			_id = fh.getOldId();
+		}
 
-			    case (byte)'\\': // Matches "\ No newline at end of file"
-				    continue;
+		/// <summary>
+		/// Returns the <see cref="AbbreviatedObjectId"/> of the pre-image file.
+		/// </summary>
+		/// <returns></returns>
+		public virtual AbbreviatedObjectId Id
+		{
+			get { return _id; }
+		}
 
-			    default:
-                    break_scan = true;
-				    break;
-			    }
-                if (break_scan)
-                    break;
-		    }
+		/// <summary>
+		/// Returns the <see cref="FileHeader"/> of this hunk.
+		/// </summary>
+		public virtual FileHeader Fh
+		{
+			get { return _fh; }
+		}
 
-		    if (last < end && nContext + old.nDeleted - 1 == old.lineCount
-				    && nContext + old.nAdded == newLineCount
-				    && RawParseUtils.match(buf, last, Patch.SIG_FOOTER) >= 0)
-            {
-			    // This is an extremely common occurrence of "corruption".
-			    // Users add footers with their signatures after this mark,
-			    // and git diff adds the git executable version number.
-			    // Let it slide; the hunk otherwise looked sound.
-			    //
-			    old.nDeleted--;
-			    return last;
-		    }
+		/// <summary>
+		/// Return the first line number the hunk starts on in this file.
+		/// </summary>
+		/// <returns></returns>
+		public int StartLine { get; set; }
 
-		    if (nContext + old.nDeleted < old.lineCount)
-            {
-			    int missingCount = old.lineCount - (nContext + old.nDeleted);
-			    script.error(buf, startOffset, "Truncated hunk, at least "
-					    + missingCount + " old lines is missing");
+		/// <summary>
+		/// rReturn the total number of lines this hunk covers in this file.
+		/// </summary>
+		public int LineCount { get; set; }
 
-		    }
-            else if (nContext + old.nAdded < newLineCount)
-            {
-			    int missingCount = newLineCount - (nContext + old.nAdded);
-			    script.error(buf, startOffset, "Truncated hunk, at least "
-					    + missingCount + " new lines is missing");
+		/// <summary>
+		/// Returns the number of lines deleted by the post-image from this file.
+		/// </summary>
+		public int LinesDeleted { get; set; }
 
-		    }
-            else if (nContext + old.nDeleted > old.lineCount
-				    || nContext + old.nAdded > newLineCount)
-            {
-			    string oldcnt = old.lineCount + ":" + newLineCount;
-			    string newcnt = (nContext + old.nDeleted) + ":"
-					    + (nContext + old.nAdded);
-			    script.warn(buf, startOffset, "Hunk header " + oldcnt
-					    + " does not match body line count of " + newcnt);
-		    }
+		/// <summary>
+		/// Returns the number of lines added by the post-image not in this file.
+		/// </summary>
+		public int LinesAdded { get; set; }
 
-		    return c;
-	    }
+		public virtual int LinesContext
+		{
+			get { throw new NotImplementedException(); }
+			set { throw new NotImplementedException(); }
+		}
+	}
 
-	    public void extractFileLines(TemporaryBuffer[] outStream)
-        {
-		    byte[] buf = file.buf;
-		    int ptr = startOffset;
-		    int eol = RawParseUtils.nextLF(buf, ptr);
-		    if (endOffset <= eol)
-			    return;
+	internal class CombinedOldImage : OldImage
+	{
+		private readonly int _imagePos;
 
-		    // Treat the hunk header as though it were from the ancestor,
-		    // as it may have a function header appearing after it which
-		    // was copied out of the ancestor file.
-		    //
-		    outStream[0].write(buf, ptr, eol - ptr);
+		public CombinedOldImage(FileHeader fh, int imagePos)
+			: base(fh, ((CombinedFileHeader)fh).getOldId(imagePos))
+		{
+			_imagePos = imagePos;
+		}
 
-            bool break_scan = false;
-		    for (ptr = eol; ptr < endOffset; ptr = eol)
-            {
-			    eol = RawParseUtils.nextLF(buf, ptr);
-			    switch (buf[ptr]) {
-			    case (byte)' ':
-			    case (byte)'\n':
-			    case (byte)'\\':
-				    outStream[0].write(buf, ptr, eol - ptr);
-				    outStream[1].write(buf, ptr, eol - ptr);
-				    break;
-			    case (byte)'-':
-				    outStream[0].write(buf, ptr, eol - ptr);
-				    break;
-			    case (byte)'+':
-				    outStream[1].write(buf, ptr, eol - ptr);
-				    break;
-			    default:
-				    break_scan = true;
-                    break;
-			    }
-                if (break_scan)
-                    break;
-		    }
-	    }
+		public override int LinesContext
+		{
+			get;
+			set;
+		}
 
-	    public virtual void extractFileLines(StringBuilder sb, string[] text, int[] offsets)
-        {
-		    byte[] buf = file.buf;
-		    int ptr = startOffset;
-		    int eol = RawParseUtils.nextLF(buf, ptr);
-		    if (endOffset <= eol)
-			    return;
-		    copyLine(sb, text, offsets, 0);
+		public int ImagePos
+		{
+			get { return _imagePos; }
+		}
+	}
 
-            bool break_scan = false;
-		    for (ptr = eol; ptr < endOffset; ptr = eol)
-            {
-			    eol = RawParseUtils.nextLF(buf, ptr);
-			    switch (buf[ptr]) {
-			    case (byte)' ':
-			    case (byte)'\n':
-			    case (byte)'\\':
-				    copyLine(sb, text, offsets, 0);
-				    skipLine(text, offsets, 1);
-				    break;
-			    case (byte)'-':
-				    copyLine(sb, text, offsets, 0);
-				    break;
-			    case (byte)'+':
-				    copyLine(sb, text, offsets, 1);
-				    break;
-			    default:
-                    break_scan = true;
-				    break;
-			    }
-                if (break_scan)
-                    break;
-		    }
-	    }
-
-	    public void copyLine(StringBuilder sb, string[] text, int[] offsets, int fileIdx)
-        {
-		    string s = text[fileIdx];
-		    int start = offsets[fileIdx];
-		    int end = s.IndexOf('\n', start);
-		    if (end < 0)
-			    end = s.Length;
-		    else
-			    end++;
-		    sb.Append(s, start, end - start);
-		    offsets[fileIdx] = end;
-	    }
-
-	    public void skipLine(string[] text, int[] offsets, int fileIdx)
-        {
-		    string s = text[fileIdx];
-		    int end = s.IndexOf('\n', offsets[fileIdx]);
-		    offsets[fileIdx] = end < 0 ? s.Length : end + 1;
-	    }
-    }
+	#endregion
 }

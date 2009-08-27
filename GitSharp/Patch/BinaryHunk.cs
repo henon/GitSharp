@@ -36,12 +36,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Util;
+using System;
 
 namespace GitSharp.Patch
 {
     /** Part of a "GIT binary patch" to describe the pre-image or post-image */
-    public class BinaryHunk
+	[Serializable]
+	public class BinaryHunk
     {
 	    private static readonly byte[] LITERAL = Constants.encodeASCII("literal ");
 

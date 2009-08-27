@@ -39,30 +39,26 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace GitSharp
 {
+	[Serializable]
+	public class FileMode
+	{
+		// [henon] c# does not support octal literals, so every number starting with 0 in java code had to be converted to decimal!
+		// Here are the octal literals used by jgit and their decimal counterparts:
+		// decimal ... octal
+		// 33188 ... 0100644
+		// 33261 ... 0100755
+		// 61440 ... 0170000
+		// 16384 ... 0040000
+		// 32768 ... 0100000
+		// 40960 ... 0120000
+		// 57344 ... 0160000
+		// 73 ... 0111
 
-    public class FileMode
-    {
-
-        // [henon] c# does not support octal literals, so every number starting with 0 in java code had to be converted to decimal!
-        // Here are the octal literals used by jgit and their decimal counterparts:
-        // decimal ... octal
-        // 33188 ... 0100644
-        // 33261 ... 0100755
-        // 61440 ... 0170000
-        // 16384 ... 0040000
-        // 32768 ... 0100000
-        // 40960 ... 0120000
-        // 57344 ... 0160000
-        // 73 ... 0111
-
-        /**
+		/**
          * Mask to apply to a file mode to obtain its type bits.
          *
          * @see #TYPE_TREE
@@ -71,119 +67,140 @@ namespace GitSharp
          * @see #TYPE_GITLINK
          * @see #TYPE_MISSING
          */
-        public const int TYPE_MASK = 61440;
 
-        /** Bit pattern for {@link #TYPE_MASK} matching {@link #TREE}. */
-        public const int TYPE_TREE = 16384;
+		/** Bit pattern for {@link #TYPE_MASK} matching {@link #REGULAR_FILE}. */
 
-        /** Bit pattern for {@link #TYPE_MASK} matching {@link #SYMLINK}. */
-        public const int TYPE_SYMLINK = 40960;
+		#region Delegates
 
-        /** Bit pattern for {@link #TYPE_MASK} matching {@link #REGULAR_FILE}. */
-        public const int TYPE_FILE = 32768;
+		public delegate bool EqualsDelegate(int bits);
 
-        /** Bit pattern for {@link #TYPE_MASK} matching {@link #GITLINK}. */
-        public const int TYPE_GITLINK = 57344;
+		#endregion
 
-        /** Bit pattern for {@link #TYPE_MASK} matching {@link #MISSING}. */
-        public const int TYPE_MISSING = 0;
+		public const int OCTAL_0100644 = 33188;
+		public const int OCTAL_0100755 = 33261;
+		public const int OCTAL_0111 = 73;
 
-        public const int OCTAL_0111 = 73;
-        public const int OCTAL_0100644 = 33188;
-        public const int OCTAL_0100755 = 33261;
+		public const int TYPE_FILE = 32768;
+		public const int TYPE_GITLINK = 57344;
 
+		/** Bit pattern for {@link #TYPE_MASK} matching {@link #GITLINK}. */
+		public const int TYPE_MASK = 61440;
 
-        public static readonly FileMode Tree = new FileMode(TYPE_TREE, ObjectType.Tree, modeBits => (modeBits & TYPE_MASK) == TYPE_TREE);
+		/** Bit pattern for {@link #TYPE_MASK} matching {@link #MISSING}. */
+		public const int TYPE_MISSING = 0;
+		public const int TYPE_SYMLINK = 40960;
+		public const int TYPE_TREE = 16384;
 
-        public static readonly FileMode Symlink = new FileMode(TYPE_SYMLINK, ObjectType.Blob, modeBits => (modeBits & TYPE_MASK) == TYPE_SYMLINK);
+		[field: NonSerialized]
+		public static readonly FileMode ExecutableFile = 
+			new FileMode(OCTAL_0100755, ObjectType.Blob,
+				modeBits => (modeBits & TYPE_MASK) == TYPE_FILE && (modeBits & OCTAL_0111) != 0);
 
-        public static readonly FileMode RegularFile = new FileMode(OCTAL_0100644, ObjectType.Blob, modeBits => (modeBits & TYPE_MASK) == TYPE_FILE && (modeBits & OCTAL_0111) == 0);
+		[field: NonSerialized]
+		public static readonly FileMode GitLink = 
+			new FileMode(TYPE_GITLINK, ObjectType.Commit,
+				modeBits => (modeBits & TYPE_MASK) == TYPE_GITLINK);
 
-        public static readonly FileMode ExecutableFile = new FileMode(OCTAL_0100755, ObjectType.Blob, modeBits => (modeBits & TYPE_MASK) == TYPE_FILE && (modeBits & OCTAL_0111) != 0);
+		[field: NonSerialized]
+		public static readonly FileMode Missing = 
+			new FileMode(0, ObjectType.Bad, modeBits => modeBits == 0);
 
-        public static readonly FileMode GitLink = new FileMode(TYPE_GITLINK, ObjectType.Commit, modeBits => (modeBits & TYPE_MASK) == TYPE_GITLINK);
+		[field: NonSerialized]
+		public static readonly FileMode RegularFile = 
+			new FileMode(OCTAL_0100644, ObjectType.Blob,
+                modeBits => (modeBits & TYPE_MASK) == TYPE_FILE && (modeBits & OCTAL_0111) == 0);
 
-        public static readonly FileMode Missing = new FileMode(0, ObjectType.Bad, modeBits => modeBits == 0);
+		[field: NonSerialized]
+		public static readonly FileMode Symlink = 
+			new FileMode(TYPE_SYMLINK, ObjectType.Blob,
+				modeBits => (modeBits & TYPE_MASK) == TYPE_SYMLINK);
 
+		[field: NonSerialized]
+		public static readonly FileMode Tree = 
+			new FileMode(TYPE_TREE, ObjectType.Tree,
+                modeBits => (modeBits & TYPE_MASK) == TYPE_TREE);
+		
+		public static FileMode FromBits(int bits)
+		{
+			switch (bits & TYPE_MASK) // octal 0170000
+			{
+				case 0:
+					if (bits == 0)
+					{
+						return Missing;
+					}
+					break;
 
-        private byte[] _octalBytes;
+				case TYPE_TREE: // octal 0040000
+					return Tree;
 
-        private FileMode(int mode, ObjectType type, EqualsDelegate equals)
-        {
-            if (equals == null)
-                throw new ArgumentNullException("equals");
+				case TYPE_FILE: // octal 0100000
+					return (bits & OCTAL_0111) != 0 ? ExecutableFile : RegularFile;
 
-            this.Equals = equals;
+				case TYPE_SYMLINK: // octal 0120000
+					return Symlink;
 
-            this.Bits = mode;
-            this.ObjectType = type;
+				case TYPE_GITLINK: // octal 0160000
+					return GitLink;
+			}
 
-            if (mode != 0)
-            {
-                byte[] tmp = new byte[10];
-                int p = tmp.Length;
+			return new FileMode(bits, ObjectType.Bad, a => bits == a);
+		}
 
-                while (mode != 0)
-                {
-                    tmp[--p] = (byte)((byte)'0' + (mode & 07));
-                    mode >>= 3;
-                }
+		private readonly byte[] _octalBytes;
 
-                _octalBytes = new byte[tmp.Length - p];
-                for (int k = 0; k < _octalBytes.Length; k++)
-                {
-                    _octalBytes[k] = tmp[p + k];
-                }
-            }
-            else
-            {
-                _octalBytes = new byte[] { (byte)'0' };
-            }
-        }
+		private FileMode(int mode, ObjectType type, EqualsDelegate equals)
+		{
+			if (equals == null)
+			{
+				throw new ArgumentNullException("equals");
+			}
 
-        public delegate bool EqualsDelegate(int bits);
-        public new EqualsDelegate Equals { get; private set; }
+			Equals = equals;
 
-        public int Bits { get; private set; }
-        public ObjectType ObjectType { get; private set; }
+			Bits = mode;
+			ObjectType = type;
 
+			if (mode != 0)
+			{
+				var tmp = new byte[10];
+				int p = tmp.Length;
 
-        public static FileMode FromBits(int bits)
-        {
-            switch (bits & TYPE_MASK) // octal 0170000
-            {
-                case 0:
-                    if (bits == 0)
-                        return Missing;
-                    break;
-                case TYPE_TREE: // octal 0040000
-                    return Tree;
-                case TYPE_FILE: // octal 0100000
-                    if ((bits & OCTAL_0111) != 0)
-                        return ExecutableFile;
-                    return RegularFile;
-                case TYPE_SYMLINK: // octal 0120000
-                    return Symlink;
-                case TYPE_GITLINK: // octal 0160000
-                    return GitLink;
-            }
+				while (mode != 0)
+				{
+					tmp[--p] = (byte) ((byte) '0' + (mode & 07));
+					mode >>= 3;
+				}
 
-            return new FileMode(bits, ObjectType.Bad,
-                delegate(int a) { return bits == a; }
-            );
-        }
+				_octalBytes = new byte[tmp.Length - p];
+				for (int k = 0; k < _octalBytes.Length; k++)
+				{
+					_octalBytes[k] = tmp[p + k];
+				}
+			}
+			else
+			{
+				_octalBytes = new byte[] {(byte) '0'};
+			}
+		}
 
-        public void CopyTo(Stream stream)
-        {
-            new BinaryWriter(stream).Write(_octalBytes);
-        }
+		public new EqualsDelegate Equals { get; private set; }
 
-        /**
-         * @return the number of bytes written by {@link #copyTo(OutputStream)}.
-         */
-        public int copyToLength()
-        {
-            return _octalBytes.Length;
-        }
-    }
+		public int Bits { get; private set; }
+		public ObjectType ObjectType { get; private set; }
+
+		public void CopyTo(Stream stream)
+		{
+			new BinaryWriter(stream).Write(_octalBytes);
+		}
+
+		/// <summary>
+		/// Returns the number of bytes written by <see cref="CopyTo(Stream)"/>
+		/// </summary>
+		/// <returns></returns>
+		public int copyToLength()
+		{
+			return _octalBytes.Length;
+		}
+	}
 }

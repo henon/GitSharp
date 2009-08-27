@@ -36,12 +36,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 
 namespace GitSharp.Diff
 {
-    /** Specialized list of {@link Edit}s in a document. */
+    /// <summary>
+	/// Specialized list of {@link Edit}s in a document.
+    /// </summary>
     public class EditList : List<Edit>
     {
 	    public int size()

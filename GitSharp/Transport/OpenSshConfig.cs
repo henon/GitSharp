@@ -39,6 +39,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using GitSharp.Exceptions;
 using GitSharp.FnMatch;
@@ -149,37 +150,44 @@ namespace GitSharp.Transport
                 if (line.Length == 0 || line.StartsWith("#"))
                     continue;
 
-                string[] parts = Regex.Split(line, "[ \t]*[= \t]");
-                string keyword = parts[0].Trim();
-                string argValue;
-                if (parts[1].Length == 0 && parts.Length == 3)
+                string keyword = string.Empty, argValue = string.Empty;
+                bool haveKeyword = false;
+                for (int i = 0; i < line.Length; i++)
                 {
-                    argValue = parts[2].Trim();
-                }
-                else
-                {
-                    argValue = parts[1];
+                    char c = line[i];
+                    if (!haveKeyword && (c == ' ' || c == '\t' || c == '='))
+                    {
+                        keyword = line.Substring(0, i);
+                        haveKeyword = true;
+                        continue;
+                    }
+
+                    if (haveKeyword && c != '=' && c != ' ' && c != '\t')
+                    {
+                        argValue = line.Substring(i);
+                        break;
+                    }
                 }
 
                 if ("Host".Equals(keyword, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    current.Clear();
-                    foreach (string pattern in Regex.Split(argValue, "[ \t]"))
                     {
-                        string name = dequote(pattern);
-                        Host c = null;
-                        if (m.ContainsKey(name))
+                        current.Clear();
+                        foreach (string pattern in Regex.Split(argValue, "[ \t]"))
                         {
-                            c = m[name];
+                            string name = dequote(pattern);
+                            Host c = null;
+                            if (m.ContainsKey(name))
+                            {
+                                c = m[name];
+                            }
+                            if (c == null)
+                            {
+                                c = new Host();
+                                m.Add(name, c);
+                            }
+                            current.Add(c);
                         }
-                        if (c == null)
-                        {
-                            c = new Host();
-                            m.Add(name, c);
-                        }
-                        current.Add(c);
                     }
-                }
 
                 if (current.Count == 0)
                 {
@@ -222,7 +230,7 @@ namespace GitSharp.Transport
                 {
                     foreach (Host c in current)
                         if (c.preferredAuthentications == null)
-                            c.preferredAuthentications = dequote(argValue);
+                            c.preferredAuthentications = nows(dequote(argValue));
                 }
                 else if ("BatchMode".Equals(keyword, StringComparison.CurrentCultureIgnoreCase))
                 {
@@ -269,7 +277,6 @@ namespace GitSharp.Transport
             return value;
         }
 
-/*
         private static string nows(string value)
         {
             StringBuilder b = new StringBuilder();
@@ -278,7 +285,6 @@ namespace GitSharp.Transport
                     b.Append(value[i]);
             return b.ToString();
         }
-*/
 
         private static bool yesno(string value)
         {
@@ -363,7 +369,7 @@ namespace GitSharp.Transport
 
             public bool isBatchMode()
             {
-                return batchMode.Value;
+                return batchMode != null && batchMode.Value;
             }
         }
     }

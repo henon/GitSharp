@@ -145,5 +145,117 @@ namespace GitSharp.Tests.Transport
             Assert.AreEqual(" spaced\ttld ", osc.lookup("spaced").getHostName());
             Assert.AreEqual("bad.tld\"", osc.lookup("bad").getHostName());
         }
+
+        [Test]
+        public void testAlias_DoesNotMatch()
+        {
+            config("Host orcz\n" + "\tHostName repo.or.cz\n");
+            OpenSshConfig.Host h = osc.lookup("repo.or.cz");
+            Assert.IsNotNull(h);
+            Assert.AreEqual("repo.or.cz", h.getHostName());
+            Assert.AreEqual(Environment.UserName, h.getUser());
+            Assert.AreEqual(22, h.port);
+            Assert.IsNull(h.getIdentityFile());
+        }
+
+        [Test]
+        public void testAlias_OptionsSet()
+        {
+            config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\tPort 2222\n"
+                   + "\tUser jex\n" + "\tIdentityFile .ssh/id_jex\n"
+                   + "\tForwardX11 no\n");
+
+            OpenSshConfig.Host h = osc.lookup("orcz");
+            Assert.IsNotNull(h);
+            Assert.AreEqual("repo.or.cz", h.getHostName());
+            Assert.AreEqual("jex", h.getUser());
+            Assert.AreEqual(2222, h.getPort());
+            Assert.AreEqual(new FileInfo(Path.Combine(home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
+        }
+
+        [Test]
+        public void testAlias_OptionsKeywordCaseInsensitive()
+        {
+            config("hOsT orcz\n" + "\thOsTnAmE repo.or.cz\n" + "\tPORT 2222\n"
+                   + "\tuser jex\n" + "\tidentityfile .ssh/id_jex\n"
+                   + "\tForwardX11 no\n");
+
+            OpenSshConfig.Host h = osc.lookup("orcz");
+            Assert.IsNotNull(h);
+            Assert.AreEqual("repo.or.cz", h.getHostName());
+            Assert.AreEqual("jex", h.getUser());
+            Assert.AreEqual(2222, h.getPort());
+            Assert.AreEqual(new FileInfo(Path.Combine(home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
+        }
+
+        [Test]
+        public void testAlias_OptionsInherit()
+        {
+            config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"
+                   + "\tHostName not.a.host.example.com\n" + "\tPort 2222\n"
+                   + "\tUser jex\n" + "\tIdentityFile .ssh/id_jex\n"
+                   + "\tForwardX11 no\n");
+
+            OpenSshConfig.Host h = osc.lookup("orcz");
+            Assert.IsNotNull(h);
+            Assert.AreEqual("repo.or.cz", h.getHostName());
+            Assert.AreEqual("jex", h.getUser());
+            Assert.AreEqual(2222, h.getPort());
+            Assert.AreEqual(new FileInfo(Path.Combine(home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
+        }
+
+        [Test]
+        public void testAlias_PreferredAuthenticationsDefault()
+        {
+            OpenSshConfig.Host h = osc.lookup("orcz");
+            Assert.IsNotNull(h);
+            Assert.IsNull(h.getPreferredAuthentications());
+        }
+
+        [Test]
+        public void testAlias_PreferredAuthentications()
+        {
+            config("Host orcz\n" + "\tPreferredAuthentications publickey\n");
+            OpenSshConfig.Host h = osc.lookup("orcz");
+            Assert.IsNotNull(h);
+            Assert.AreEqual("publickey", h.getPreferredAuthentications());
+        }
+
+        [Test]
+        public void testAlias_InheritPreferredAuthentications()
+        {
+            config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"
+                   + "\tPreferredAuthentications publickey, hostbased\n");
+            OpenSshConfig.Host h = osc.lookup("orcz");
+            Assert.IsNotNull(h);
+            Assert.AreEqual("publickey,hostbased", h.getPreferredAuthentications());
+        }
+
+        [Test]
+        public void testAlias_BatchModeDefault()
+        {
+            OpenSshConfig.Host h = osc.lookup("orcz");
+            Assert.IsNotNull(h);
+            Assert.AreEqual(false, h.isBatchMode());
+        }
+
+        [Test]
+        public void testAlias_BatchModeYes()
+        {
+            config("Host orcz\n" + "\tBatchMode yes\n");
+            OpenSshConfig.Host h = osc.lookup("orcz");
+            Assert.IsNotNull(h);
+            Assert.AreEqual(true, h.isBatchMode());
+        }
+
+        [Test]
+        public void testAlias_InheritBatchMode()
+        {
+            config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"
+                   + "\tBatchMode yes\n");
+            OpenSshConfig.Host h = osc.lookup("orcz");
+            Assert.IsNotNull(h);
+            Assert.AreEqual(true, h.isBatchMode());
+        }
     }
 }

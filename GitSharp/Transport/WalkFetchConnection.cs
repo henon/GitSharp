@@ -93,7 +93,6 @@ namespace GitSharp.Transport
             packLocks = new List<PackLock>(4);
 
             revWalk = new RevWalk.RevWalk(local);
-            revWalk.setRetainBody(false);
             treeWalk = new TreeWalk.TreeWalk(local);
             COMPLETE = revWalk.newFlag("COMPLETE");
             IN_WORK_QUEUE = revWalk.newFlag("IN_WORK_QUEUE");
@@ -181,7 +180,7 @@ namespace GitSharp.Transport
                     obj = (RevObject) id;
                     if (obj.has(COMPLETE))
                         return;
-                    revWalk.parseHeaders(obj);
+                    revWalk.parse(obj);
                 }
                 else
                 {
@@ -613,8 +612,9 @@ namespace GitSharp.Transport
             while (obj.getType() == Constants.OBJ_TAG)
             {
                 obj.add(COMPLETE);
+                obj.dispose();
                 obj = ((RevTag) obj).getObject();
-                revWalk.parseHeaders(obj);
+                revWalk.parse(obj);
             }
 
             switch (obj.getType())
@@ -659,10 +659,11 @@ namespace GitSharp.Transport
         {
             if (p.has(LOCALLY_SEEN))
                 return;
-            revWalk.parseHeaders(p);
+            revWalk.parse(p);
             p.add(LOCALLY_SEEN);
             p.add(COMPLETE);
             p.carry(COMPLETE);
+            p.dispose();
             localCommitQueue.add(p);
         }
 

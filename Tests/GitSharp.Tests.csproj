@@ -266,6 +266,24 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Diff\Resources\E.patch" />
+    <None Include="Diff\Resources\E_PostImage" />
+    <None Include="Diff\Resources\E_PreImage" />
+    <None Include="Diff\Resources\testContext0.out" />
+    <None Include="Diff\Resources\testContext1.out" />
+    <None Include="Diff\Resources\testContext10.out" />
+    <None Include="Diff\Resources\testContext100.out" />
+    <None Include="Diff\Resources\testContext3.out" />
+    <None Include="Diff\Resources\testContext5.out" />
+    <None Include="Diff\Resources\X.patch" />
+    <None Include="Diff\Resources\X_PostImage" />
+    <None Include="Diff\Resources\X_PreImage" />
+    <None Include="Diff\Resources\Y.patch" />
+    <None Include="Diff\Resources\Y_PostImage" />
+    <None Include="Diff\Resources\Y_PreImage" />
+    <None Include="Diff\Resources\Z.patch" />
+    <None Include="Diff\Resources\Z_PostImage" />
+    <None Include="Diff\Resources\Z_PreImage" />
     <None Include="Patch\Resources\testEditList_Types.patch" />
     <None Include="Patch\Resources\testError_BodyTooLong.patch" />
     <None Include="Patch\Resources\testError_CcTruncatedOld.patch" />

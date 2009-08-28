@@ -36,15 +36,17 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp;
-using GitSharp.Patch;
 using GitSharp.Util;
 
 namespace GitSharp.Patch
 {
-    /** A parsed collection of {@link FileHeader}s from a unified diff patch file */
+    /// <summary>
+	/// A parsed collection of <seealso cref="FileHeader"/>s from a unified diff patch file.
+    /// </summary>
+    [Serializable]
     public class Patch
     {
 	    private static readonly byte[] DIFF_GIT = Constants.encodeASCII("diff --git ");
@@ -161,7 +163,9 @@ namespace GitSharp.Patch
 	    public void parse(byte[] buf, int ptr, int end)
         {
 		    while (ptr < end)
-			    ptr = parseFile(buf, ptr, end);
+		    {
+		    	ptr = parseFile(buf, ptr, end);
+		    }
 	    }
 
 	    private int parseFile(byte[] buf, int c, int end)
@@ -182,11 +186,17 @@ namespace GitSharp.Patch
 			    // Valid git style patch?
 			    //
 			    if (RawParseUtils.match(buf, c, DIFF_GIT) >= 0)
-				    return parseDiffGit(buf, c, end);
+			    {
+			    	return parseDiffGit(buf, c, end);
+			    }
 			    if (RawParseUtils.match(buf, c, DIFF_CC) >= 0)
-				    return parseDiffCombined(DIFF_CC, buf, c, end);
+			    {
+			    	return parseDiffCombined(DIFF_CC, buf, c, end);
+			    }
 			    if (RawParseUtils.match(buf, c, DIFF_COMBINED) >= 0)
-				    return parseDiffCombined(DIFF_COMBINED, buf, c, end);
+			    {
+			    	return parseDiffCombined(DIFF_COMBINED, buf, c, end);
+			    }
 
 			    // Junk between files? Leading junk? Traditional
 			    // (non-git generated) patch?
@@ -239,10 +249,10 @@ namespace GitSharp.Patch
 		    return ptr;
 	    }
 
-	    private int parseDiffCombined(byte[] hdr, byte[] buf, int start, int end)
+	    private int parseDiffCombined(ICollection<byte> hdr, byte[] buf, int start, int end)
         {
-		    CombinedFileHeader fh = new CombinedFileHeader(buf, start);
-		    int ptr = fh.parseGitFileName(start + hdr.Length, end);
+		    var fh = new CombinedFileHeader(buf, start);
+		    int ptr = fh.parseGitFileName(start + hdr.Count, end);
 		    if (ptr < 0)
 			    return skipFile(buf, start);
 
@@ -296,7 +306,7 @@ namespace GitSharp.Patch
 				    HunkHeader h = fh.newHunkHeader(c);
 				    h.parseHeader();
 				    c = h.parseBody(this, end);
-				    h.endOffset = c;
+				    h.EndOffset = c;
 				    fh.addHunk(h);
 				    if (c < end) {
 					    switch (buf[c]) {

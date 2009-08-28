@@ -36,344 +36,338 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using GitSharp;
 using GitSharp.Util;
 
 namespace GitSharp.Patch
 {
-    /** Hunk header for a hunk appearing in a "diff --cc" style patch. */
-    public class CombinedHunkHeader : HunkHeader
-    {
-        private class CombinedOldImageInstance : CombinedOldImage
-        {
-            private CombinedFileHeader fh;
-            private int imagePos;
+	/// <summary>
+	/// Hunk header for a hunk appearing in a "diff --cc" style patch.
+	/// </summary>
+	public class CombinedHunkHeader : HunkHeader
+	{
+		private readonly List<CombinedOldImage> _old;
 
-            public CombinedOldImageInstance(CombinedFileHeader fh, int imagePos)
-            {
-                this.fh = fh;
-                this.imagePos = imagePos;
-            }
-
-            public override AbbreviatedObjectId getId()
-            {
-			    return fh.getOldId(imagePos);
+		public CombinedHunkHeader(FileHeader fh, int offset)
+			: base(fh, offset, null)
+		{
+			int size = fh.getParentCount();
+			_old = new List<CombinedOldImage>(size);
+			for (int i = 0; i < size; i++)
+			{
+				_old[i] = new CombinedOldImage(fh, i);
 			}
-        }
+		}
 
-	    private abstract class CombinedOldImage : OldImage
-        {
-		    public int nContext;
-	    }
+		/// <summary>
+		/// Gets the <see cref="OldImage"/> data related to the nth ancestor
+		/// </summary>
+		/// <param name="nthParent">The ancestor to get the old image data of</param>
+		/// <returns>The image data of the requested ancestor.</returns>
+		internal OldImage GetOldImage(int nthParent)
+		{
+			return _old[nthParent];
+		}
 
-	    private CombinedOldImageInstance[] old;
+		public override void parseHeader()
+		{
+			// Parse "@@@ -55,12 -163,13 +163,15 @@@ protected boolean"
+			//
+			byte[] buf = File.buf;
+			var ptr = new MutableInteger
+						{
+							value = RawParseUtils.nextLF(buf, StartOffset, (byte)' ')
+						};
 
-	    public CombinedHunkHeader(CombinedFileHeader fh, int offset)
-            :base(fh, offset, null)
-        {
-		    old = new CombinedOldImageInstance[fh.getParentCount()];
-		    for (int i = 0; i < old.Length; i++)
-            {
-			    int imagePos = i;
-			    old[i] = new CombinedOldImageInstance(fh, imagePos);
-		    }
-	    }
+			_old.ForEach(coi =>
+							{
+								coi.StartLine = -1 * RawParseUtils.parseBase10(buf, ptr.value, ptr);
+								coi.LineCount = buf[ptr.value] == ',' ?
+									RawParseUtils.parseBase10(buf, ptr.value + 1, ptr) : 1;
+							});
 
-	    public new CombinedFileHeader getFileHeader()
-        {
-		    return (CombinedFileHeader) base.getFileHeader();
-	    }
+			NewStartLine = RawParseUtils.parseBase10(buf, ptr.value + 1, ptr);
+			NewLineCount = buf[ptr.value] == ',' ? RawParseUtils.parseBase10(buf, ptr.value + 1, ptr) : 1;
+		}
 
-	    public override OldImage getOldImage()
-        {
-		    return getOldImage(0);
-	    }
+		public override int parseBody(Patch script, int end)
+		{
+			byte[] buf = File.buf;
+			int c = RawParseUtils.nextLF(buf, StartOffset);
 
-	    /**
-	     * Get the OldImage data related to the nth ancestor
-	     *
-	     * @param nthParent
-	     *            the ancestor to get the old image data of
-	     * @return image data of the requested ancestor.
-	     */
-	    public OldImage getOldImage(int nthParent)
-        {
-		    return old[nthParent];
-	    }
+			_old.ForEach(coi =>
+			             	{
+			             		coi.LinesAdded = 0;
+			             		coi.LinesDeleted = 0;
+			             		coi.LinesContext = 0;
+			             	});
 
-	    public override void parseHeader()
-        {
-		    // Parse "@@@ -55,12 -163,13 +163,15 @@@ protected boolean"
-		    //
-		    byte[] buf = file.buf;
-		    MutableInteger ptr = new MutableInteger();
-		    ptr.value = RawParseUtils.nextLF(buf, startOffset, (byte)' ');
+			LinesContext = 0;
+			int nAdded = 0;
 
-		    for (int n = 0; n < old.Length; n++) {
-			    old[n].startLine = -RawParseUtils.parseBase10(buf, ptr.value, ptr);
-			    if (buf[ptr.value] == ',')
-				    old[n].lineCount = RawParseUtils.parseBase10(buf, ptr.value + 1, ptr);
-			    else
-				    old[n].lineCount = 1;
-		    }
+			for (int eol; c < end; c = eol)
+			{
+				eol = RawParseUtils.nextLF(buf, c);
 
-		    newStartLine = RawParseUtils.parseBase10(buf, ptr.value + 1, ptr);
-		    if (buf[ptr.value] == ',')
-			    newLineCount = RawParseUtils.parseBase10(buf, ptr.value + 1, ptr);
-		    else
-			    newLineCount = 1;
-	    }
+				if (eol - c < _old.Count + 1)
+				{
+					// Line isn't long enough to mention the state of each
+					// ancestor. It must be the end of the hunk.
+					break;
+				}
 
-	    public override int parseBody(Patch script, int end)
-        {
-		    byte[] buf = file.buf;
-		    int c = RawParseUtils.nextLF(buf, startOffset);
+				bool break_scan = false;
+				switch (buf[c])
+				{
+					case (byte)' ':
+					case (byte)'-':
+					case (byte)'+':
+						break;
 
-		    foreach(CombinedOldImageInstance o in old)
-            {
-			    o.nDeleted = 0;
-			    o.nAdded = 0;
-			    o.nContext = 0;
-		    }
-		    nContext = 0;
-		    int nAdded = 0;
+					default:
+						// Line can't possibly be part of this hunk; the first
+						// ancestor information isn't recognizable.
+						//
+						break_scan = true;
+						break;
+				}
+				if (break_scan)
+					break;
 
-		    for (int eol; c < end; c = eol)
-            {
-			    eol = RawParseUtils.nextLF(buf, c);
+				int localcontext = 0;
+				for (int ancestor = 0; ancestor < _old.Count; ancestor++)
+				{
+					switch (buf[c + ancestor])
+					{
+						case (byte)' ':
+							localcontext++;
+							_old[ancestor].LinesContext++;
+							continue;
 
-			    if (eol - c < old.Length + 1) {
-				    // Line isn't long enough to mention the state of each
-				    // ancestor. It must be the end of the hunk.
-				    break;
-			    }
+						case (byte)'-':
+							_old[ancestor].LinesDeleted++;
+							continue;
 
-                bool break_scan = false;
-			    switch (buf[c]) {
-			    case (byte)' ':
-			    case (byte)'-':
-			    case (byte)'+':
-				    break;
+						case (byte)'+':
+							_old[ancestor].LinesAdded++;
+							nAdded++;
+							continue;
 
-			    default:
-				    // Line can't possibly be part of this hunk; the first
-				    // ancestor information isn't recognizable.
-				    //
-                    break_scan = true;
-				    break;
-			    }
-                if (break_scan)
-                    break;
+						default:
+							break_scan = true;
+							break;
+					}
+					if (break_scan)
+						break;
+				}
+				if (break_scan)
+					break;
 
-			    int localcontext = 0;
-			    for (int ancestor = 0; ancestor < old.Length; ancestor++)
-                {
-				    switch (buf[c + ancestor])
-                    {
-				    case (byte)' ':
-					    localcontext++;
-					    old[ancestor].nContext++;
-					    continue;
+				if (localcontext == _old.Count)
+				{
+					LinesContext++;
+				}
+			}
 
-				    case (byte)'-':
-					    old[ancestor].nDeleted++;
-					    continue;
+			for (int ancestor = 0; ancestor < _old.Count; ancestor++)
+			{
+				CombinedOldImage o = _old[ancestor];
+				int cmp = o.LinesContext + o.LinesDeleted;
+				if (cmp < o.LineCount)
+				{
+					int missingCnt = o.LineCount - cmp;
+					script.error(buf, StartOffset, "Truncated hunk, at least "
+							+ missingCnt + " lines is missing for ancestor "
+							+ (ancestor + 1));
+				}
+			}
 
-				    case (byte)'+':
-					    old[ancestor].nAdded++;
-					    nAdded++;
-					    continue;
+			if (LinesContext + nAdded < NewLineCount)
+			{
+				int missingCount = NewLineCount - (LinesContext + nAdded);
+				script.error(buf, StartOffset, "Truncated hunk, at least "
+						+ missingCount + " new lines is missing");
+			}
 
-				    default:
-					    break_scan = true;
-                        break;
-				    }
-                    if (break_scan)
-                        break;
-			    }
-                if (break_scan)
-                    break;
+			return c;
+		}
 
-			    if (localcontext == old.Length)
-				    nContext++;
-		    }
+		public void extractFileLines(Stream[] outStream)
+		{
+			byte[] buf = File.buf;
+			int ptr = StartOffset;
+			int eol = RawParseUtils.nextLF(buf, ptr);
+			if (EndOffset <= eol)
+			{
+				return;
+			}
 
-		    for (int ancestor = 0; ancestor < old.Length; ancestor++) {
-			    CombinedOldImage o = old[ancestor];
-			    int cmp = o.nContext + o.nDeleted;
-			    if (cmp < o.lineCount) {
-				    int missingCnt = o.lineCount - cmp;
-				    script.error(buf, startOffset, "Truncated hunk, at least "
-						    + missingCnt + " lines is missing for ancestor "
-						    + (ancestor + 1));
-			    }
-		    }
+			// Treat the hunk header as though it were from the ancestor,
+			// as it may have a function header appearing after it which
+			// was copied out of the ancestor file.
+			//
+			outStream[0].Write(buf, ptr, eol - ptr);
 
-		    if (nContext + nAdded < newLineCount) {
-			    int missingCount = newLineCount - (nContext + nAdded);
-			    script.error(buf, startOffset, "Truncated hunk, at least "
-					    + missingCount + " new lines is missing");
-		    }
+			//SCAN: 
+			for (ptr = eol; ptr < EndOffset; ptr = eol)
+			{
+				eol = RawParseUtils.nextLF(buf, ptr);
 
-		    return c;
-	    }
+				if (eol - ptr < _old.Count + 1)
+				{
+					// Line isn't long enough to mention the state of each
+					// ancestor. It must be the end of the hunk.
+					break;
+				}
 
-	    public void extractFileLines(Stream[] outStream)
-        {
-		    byte[] buf = file.buf;
-		    int ptr = startOffset;
-		    int eol = RawParseUtils.nextLF(buf, ptr);
-		    if (endOffset <= eol)
-			    return;
+				bool breakScan = false;
+				switch (buf[ptr])
+				{
+					case (byte)' ':
+					case (byte)'-':
+					case (byte)'+':
+						break;
 
-		    // Treat the hunk header as though it were from the ancestor,
-		    // as it may have a function header appearing after it which
-		    // was copied out of the ancestor file.
-		    //
-		    outStream[0].Write(buf, ptr, eol - ptr);
+					default:
+						// Line can't possibly be part of this hunk; the first
+						// ancestor information isn't recognizable.
+						//
+						breakScan = true;
+						break;
+				}
+				if (breakScan)
+					break;
 
-		    //SCAN: 
-            for (ptr = eol; ptr < endOffset; ptr = eol) {
-			    eol = RawParseUtils.nextLF(buf, ptr);
+				int delcnt = 0;
+				for (int ancestor = 0; ancestor < _old.Count; ancestor++)
+				{
+					switch (buf[ptr + ancestor])
+					{
+						case (byte)'-':
+							delcnt++;
+							outStream[ancestor].Write(buf, ptr, eol - ptr);
+							continue;
 
-			    if (eol - ptr < old.Length + 1) {
-				    // Line isn't long enough to mention the state of each
-				    // ancestor. It must be the end of the hunk.
-				    break;
-			    }
+						case (byte)' ':
+							outStream[ancestor].Write(buf, ptr, eol - ptr);
+							continue;
 
-                bool break_scan = false;
-			    switch (buf[ptr])
-                {
-			    case (byte)' ':
-			    case (byte)'-':
-			    case (byte)'+':
-				    break;
+						case (byte)'+':
+							continue;
 
-			    default:
-				    // Line can't possibly be part of this hunk; the first
-				    // ancestor information isn't recognizable.
-				    //
-                    break_scan = true;
-				    break;
-			    }
-                if (break_scan)
-                    break;
+						default:
+							breakScan = true;
+							break;
+					}
 
-			    int delcnt = 0;
-			    for (int ancestor = 0; ancestor < old.Length; ancestor++)
-                {
-				    switch (buf[ptr + ancestor])
-                    {
-				    case (byte)'-':
-					    delcnt++;
-					    outStream[ancestor].Write(buf, ptr, eol - ptr);
-					    continue;
+					if (breakScan)
+					{
+						break;
+					}
+				}
 
-				    case (byte)' ':
-					    outStream[ancestor].Write(buf, ptr, eol - ptr);
-					    continue;
+				if (breakScan)
+					break;
 
-				    case (byte)'+':
-					    continue;
+				if (delcnt < _old.Count)
+				{
+					// This line appears in the new file if it wasn't deleted
+					// relative to all ancestors.
+					//
+					outStream[_old.Count].Write(buf, ptr, eol - ptr);
+				}
+			}
+		}
 
-				    default:
-                        break_scan = true;
-					    break;
-				    }
+		public override void extractFileLines(StringBuilder sb, string[] text, int[] offsets)
+		{
+			byte[] buf = File.buf;
+			int ptr = StartOffset;
+			int eol = RawParseUtils.nextLF(buf, ptr);
 
-                    if (break_scan)
-                        break;
-			    }
+			if (EndOffset <= eol)
+			{
+				return;
+			}
 
-                if (break_scan)
-                        break;
+			copyLine(sb, text, offsets, 0);
 
-			    if (delcnt < old.Length) {
-				    // This line appears in the new file if it wasn't deleted
-				    // relative to all ancestors.
-				    //
-				    outStream[old.Length].Write(buf, ptr, eol - ptr);
-			    }
-		    }
-	    }
+			for (ptr = eol; ptr < EndOffset; ptr = eol)
+			{
+				eol = RawParseUtils.nextLF(buf, ptr);
 
-	    public override void extractFileLines(StringBuilder sb, string[] text, int[] offsets)
-        {
-		    byte[] buf = file.buf;
-		    int ptr = startOffset;
-		    int eol = RawParseUtils.nextLF(buf, ptr);
-		    if (endOffset <= eol)
-			    return;
-		    copyLine(sb, text, offsets, 0);
-		    for (ptr = eol; ptr < endOffset; ptr = eol)
-            {
-			    eol = RawParseUtils.nextLF(buf, ptr);
+				if (eol - ptr < _old.Count + 1)
+				{
+					// Line isn't long enough to mention the state of each
+					// ancestor. It must be the end of the hunk.
+					break;
+				}
 
-			    if (eol - ptr < old.Length + 1)
-                {
-				    // Line isn't long enough to mention the state of each
-				    // ancestor. It must be the end of the hunk.
-				    break;
-			    }
+				bool breakScan = false;
+				switch (buf[ptr])
+				{
+					case (byte)' ':
+					case (byte)'-':
+					case (byte)'+':
+						break;
 
-                bool break_scan = false;
-			    switch (buf[ptr])
-                {
-			    case (byte)' ':
-			    case (byte)'-':
-			    case (byte)'+':
-				    break;
+					default:
+						// Line can't possibly be part of this hunk; the first
+						// ancestor information isn't recognizable.
+						//
+						breakScan = true;
+						break;
+				}
+				if (breakScan)
+				{
+					break;
+				}
 
-			    default:
-				    // Line can't possibly be part of this hunk; the first
-				    // ancestor information isn't recognizable.
-				    //
-                    break_scan = true;
-				    break;
-			    }
-                if (break_scan)
-                    break;
+				bool copied = false;
+				for (int ancestor = 0; ancestor < _old.Count; ancestor++)
+				{
+					switch (buf[ptr + ancestor])
+					{
+						case (byte)' ':
+						case (byte)'-':
+							if (copied)
+								skipLine(text, offsets, ancestor);
+							else
+							{
+								copyLine(sb, text, offsets, ancestor);
+								copied = true;
+							}
+							continue;
 
-			    bool copied = false;
-			    for (int ancestor = 0; ancestor < old.Length; ancestor++)
-                {
-				    switch (buf[ptr + ancestor])
-                    {
-				    case (byte)' ':
-				    case (byte)'-':
-					    if (copied)
-						    skipLine(text, offsets, ancestor);
-					    else
-                        {
-						    copyLine(sb, text, offsets, ancestor);
-						    copied = true;
-					    }
-					    continue;
+						case (byte)'+':
+							continue;
 
-				    case (byte)'+':
-					    continue;
+						default:
+							breakScan = true;
+							break;
+					}
+					if (breakScan)
+					{
+						break;
+					}
+				}
 
-				    default:
-					    break_scan = true;
-                        break;
-				    }
-                    if (break_scan)
-                        break;
-			    }
-                if (break_scan)
-                    break;
+				if (breakScan)
+				{
+					break;
+				}
 
-			    if (!copied) {
-				    // If none of the ancestors caused the copy then this line
-				    // must be new across the board, so it only appears in the
-				    // text of the new file.
-				    //
-				    copyLine(sb, text, offsets, old.Length);
-			    }
-		    }
-	    }
-    }
+				if (!copied)
+				{
+					// If none of the ancestors caused the copy then this line
+					// must be new across the board, so it only appears in the
+					// text of the new file.
+					//
+					copyLine(sb, text, offsets, _old.Count);
+				}
+			}
+		}
+	}
 }

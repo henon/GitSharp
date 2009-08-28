@@ -63,6 +63,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DeltaRefPackedObjectLoader.cs" />
+    <Compile Include="Diff\DiffFormatter.cs" />
     <Compile Include="DirectoryCache\DirCacheBuildIterator.cs" />
     <Compile Include="DirectoryCache\DirCacheIterator.cs" />
     <Compile Include="Ensure.cs" />

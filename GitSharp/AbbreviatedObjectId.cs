@@ -40,8 +40,6 @@
 using GitSharp.Util;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace GitSharp
@@ -58,6 +56,7 @@ namespace GitSharp
      * This class converts the hex string into a binary form, to make it more
      * efficient for matching against an object.
      */
+	[Serializable]
     public class AbbreviatedObjectId
     {
         /**

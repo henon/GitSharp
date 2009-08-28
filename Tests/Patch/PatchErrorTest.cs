@@ -35,147 +35,122 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.Patch;
+using GitSharp.Util;
 using NUnit.Framework;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Tests.Patch
 {
-    [TestFixture]
-    public class PatchErrorTest
-    {
-#if false
-	public void testError_DisconnectedHunk() throws IOException {
-		final Patch p = parseTestPatchFile();
-		assertEquals(1, p.getFiles().size());
+	[TestFixture]
+	public class PatchErrorTest : BasePatchTest
+	{
+		[Test]
+		public void testError_DisconnectedHunk()
 		{
-			final FileHeader fh = p.getFiles().get(0);
-			assertEquals(
-					"org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java",
-					fh.getNewName());
-			assertEquals(1, fh.getHunks().size());
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testError_DisconnectedHunk.patch");
+			Assert.AreEqual(1, p.getFiles().Count);
+			Assert.AreEqual(1, p.getErrors().Count);
+
+			FileHeader fh = p.getFiles()[0];
+			Assert.AreEqual("org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java", fh.getNewName());
+			Assert.AreEqual(1, fh.getHunks().Count);
+
+			Assert.AreEqual(1, p.getErrors().Count);
+			FormatError e = p.getErrors()[0];
+			Assert.AreEqual(FormatError.Severity.ERROR, e.getSeverity());
+			Assert.AreEqual("Hunk disconnected from file", e.getMessage());
+			Assert.AreEqual(18, e.getOffset());
+			Assert.IsTrue(e.getLineText().StartsWith("@@ -109,4 +109,11 @@ assert"));
 		}
 
-		assertEquals(1, p.getErrors().size());
-		final FormatError e = p.getErrors().get(0);
-		assertSame(FormatError.Severity.ERROR, e.getSeverity());
-		assertEquals("Hunk disconnected from file", e.getMessage());
-		assertEquals(18, e.getOffset());
-		assertTrue(e.getLineText().startsWith("@@ -109,4 +109,11 @@ assert"));
-	}
-
-	public void testError_TruncatedOld() throws IOException {
-		final Patch p = parseTestPatchFile();
-		assertEquals(1, p.getFiles().size());
-		assertEquals(1, p.getErrors().size());
-
-		final FormatError e = p.getErrors().get(0);
-		assertSame(FormatError.Severity.ERROR, e.getSeverity());
-		assertEquals("Truncated hunk, at least 1 old lines is missing", e
-				.getMessage());
-		assertEquals(313, e.getOffset());
-		assertTrue(e.getLineText().startsWith("@@ -236,9 +236,9 @@ protected "));
-	}
-
-	public void testError_TruncatedNew() throws IOException {
-		final Patch p = parseTestPatchFile();
-		assertEquals(1, p.getFiles().size());
-		assertEquals(1, p.getErrors().size());
-
-		final FormatError e = p.getErrors().get(0);
-		assertSame(FormatError.Severity.ERROR, e.getSeverity());
-		assertEquals("Truncated hunk, at least 1 new lines is missing", e
-				.getMessage());
-		assertEquals(313, e.getOffset());
-		assertTrue(e.getLineText().startsWith("@@ -236,9 +236,9 @@ protected "));
-	}
-
-	public void testError_BodyTooLong() throws IOException {
-		final Patch p = parseTestPatchFile();
-		assertEquals(1, p.getFiles().size());
-		assertEquals(1, p.getErrors().size());
-
-		final FormatError e = p.getErrors().get(0);
-		assertSame(FormatError.Severity.WARNING, e.getSeverity());
-		assertEquals("Hunk header 4:11 does not match body line count of 4:12",
-				e.getMessage());
-		assertEquals(349, e.getOffset());
-		assertTrue(e.getLineText().startsWith("@@ -109,4 +109,11 @@ assert"));
-	}
-
-	public void testError_GarbageBetweenFiles() throws IOException {
-		final Patch p = parseTestPatchFile();
-		assertEquals(2, p.getFiles().size());
+		[Test]
+		public void testError_TruncatedOld()
 		{
-			final FileHeader fh = p.getFiles().get(0);
-			assertEquals(
-					"org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java",
-					fh.getNewName());
-			assertEquals(1, fh.getHunks().size());
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testError_TruncatedOld.patch");
+			Assert.AreEqual(1, p.getFiles().Count);
+			Assert.AreEqual(1, p.getErrors().Count);
+
+			FormatError e = p.getErrors()[0];
+			Assert.AreEqual(FormatError.Severity.ERROR, e.getSeverity());
+			Assert.AreEqual("Truncated hunk, at least 1 old lines is missing", e.getMessage());
+			Assert.AreEqual(313, e.getOffset());
+			Assert.IsTrue(e.getLineText().StartsWith("@@ -236,9 +236,9 @@ protected "));
 		}
+
+		[Test]
+		public void testError_TruncatedNew()
 		{
-			final FileHeader fh = p.getFiles().get(1);
-			assertEquals(
-					"org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java",
-					fh.getNewName());
-			assertEquals(1, fh.getHunks().size());
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testError_TruncatedNew.patch");
+			Assert.AreEqual(1, p.getFiles().Count);
+			Assert.AreEqual(1, p.getErrors().Count);
+
+			FormatError e = p.getErrors()[0];
+			Assert.AreEqual(FormatError.Severity.ERROR, e.getSeverity());
+			Assert.AreEqual("Truncated hunk, at least 1 new lines is missing", e.getMessage());
+			Assert.AreEqual(313, e.getOffset());
+			Assert.IsTrue(e.getLineText().StartsWith("@@ -236,9 +236,9 @@ protected "));
 		}
 
-		assertEquals(1, p.getErrors().size());
-		final FormatError e = p.getErrors().get(0);
-		assertSame(FormatError.Severity.WARNING, e.getSeverity());
-		assertEquals("Unexpected hunk trailer", e.getMessage());
-		assertEquals(926, e.getOffset());
-		assertEquals("I AM NOT HERE\n", e.getLineText());
-	}
-
-	public void testError_GitBinaryNoForwardHunk() throws IOException {
-		final Patch p = parseTestPatchFile();
-		assertEquals(2, p.getFiles().size());
+		[Test]
+		public void testError_BodyTooLong()
 		{
-			final FileHeader fh = p.getFiles().get(0);
-			assertEquals("org.spearce.egit.ui/icons/toolbar/fetchd.png", fh
-					.getNewName());
-			assertSame(FileHeader.PatchType.GIT_BINARY, fh.getPatchType());
-			assertTrue(fh.getHunks().isEmpty());
-			assertNull(fh.getForwardBinaryHunk());
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testError_BodyTooLong.patch");
+			Assert.AreEqual(1, p.getFiles().Count);
+			Assert.AreEqual(1, p.getErrors().Count);
+
+			FormatError e = p.getErrors()[0];
+			Assert.AreEqual(FormatError.Severity.WARNING, e.getSeverity());
+			Assert.AreEqual("Hunk header 4:11 does not match body line count of 4:12", e.getMessage());
+			Assert.AreEqual(349, e.getOffset());
+			Assert.IsTrue(e.getLineText().StartsWith("@@ -109,4 +109,11 @@ assert"));
 		}
+
+		[Test]
+		public void testError_GarbageBetweenFiles()
 		{
-			final FileHeader fh = p.getFiles().get(1);
-			assertEquals("org.spearce.egit.ui/icons/toolbar/fetche.png", fh
-					.getNewName());
-			assertSame(FileHeader.PatchType.UNIFIED, fh.getPatchType());
-			assertTrue(fh.getHunks().isEmpty());
-			assertNull(fh.getForwardBinaryHunk());
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testError_GarbageBetweenFiles.patch");
+			Assert.AreEqual(2, p.getFiles().Count);
+
+			FileHeader fh0 = p.getFiles()[0];
+			Assert.AreEqual("org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java", fh0.getNewName());
+			Assert.AreEqual(1, fh0.getHunks().Count);
+
+			FileHeader fh1 = p.getFiles()[1];
+			Assert.AreEqual("org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java", fh1.getNewName());
+			Assert.AreEqual(1, fh1.getHunks().Count);
+
+			Assert.AreEqual(1, p.getErrors().Count);
+			FormatError e = p.getErrors()[0];
+			Assert.AreSame(FormatError.Severity.WARNING, e.getSeverity());
+			Assert.AreEqual("Unexpected hunk trailer", e.getMessage());
+			Assert.AreEqual(926, e.getOffset());
+			Assert.AreEqual("I AM NOT HERE\n", e.getLineText());
 		}
 
-		assertEquals(1, p.getErrors().size());
-		final FormatError e = p.getErrors().get(0);
-		assertSame(FormatError.Severity.ERROR, e.getSeverity());
-		assertEquals("Missing forward-image in GIT binary patch", e
-				.getMessage());
-		assertEquals(297, e.getOffset());
-		assertEquals("\n", e.getLineText());
-	}
+		[Test]
+		public void testError_GitBinaryNoForwardHunk()
+		{
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testError_GitBinaryNoForwardHunk.patch");
+			Assert.AreEqual(2, p.getFiles().Count);
 
-	private Patch parseTestPatchFile() throws IOException {
-		final String patchFile = getName() + ".patch";
-		final InputStream in = getClass().getResourceAsStream(patchFile);
-		if (in == null) {
-			fail("No " + patchFile + " test vector");
-			return null; // Never happens
-		}
-		try {
-			final Patch p = new Patch();
-			p.parse(in);
-			return p;
-		} finally {
-			in.close();
+			FileHeader fh0 = p.getFiles()[0];
+			Assert.AreEqual("org.spearce.egit.ui/icons/toolbar/fetchd.png", fh0.getNewName());
+			Assert.AreSame(FileHeader.PatchType.GIT_BINARY, fh0.getPatchType());
+			Assert.IsTrue(fh0.getHunks().isEmpty());
+			Assert.IsNull(fh0.getForwardBinaryHunk());
+
+			FileHeader fh1 = p.getFiles()[1];
+			Assert.AreEqual("org.spearce.egit.ui/icons/toolbar/fetche.png", fh1.getNewName());
+			Assert.AreSame(FileHeader.PatchType.UNIFIED, fh1.getPatchType());
+			Assert.IsTrue(fh1.getHunks().isEmpty());
+			Assert.IsNull(fh1.getForwardBinaryHunk());
+
+			Assert.AreEqual(1, p.getErrors().Count);
+			FormatError e = p.getErrors()[0];
+			Assert.AreSame(FormatError.Severity.ERROR, e.getSeverity());
+			Assert.AreEqual("Missing forward-image in GIT binary patch", e.getMessage());
+			Assert.AreEqual(297, e.getOffset());
+			Assert.AreEqual("\n", e.getLineText());
 		}
 	}
-#endif
-    }
 }

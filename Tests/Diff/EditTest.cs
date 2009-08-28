@@ -39,136 +39,136 @@
 using GitSharp.Diff;
 using NUnit.Framework;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Diff
 {
-    [TestFixture]
-    public class EditTest
-    {
-        [Test]
-	    public void testCreate()
-        {
-		    Edit e = new Edit(1, 2, 3, 4);
-		    Assert.AreEqual(1, e.getBeginA());
-		    Assert.AreEqual(2, e.getEndA());
-		    Assert.AreEqual(3, e.getBeginB());
-		    Assert.AreEqual(4, e.getEndB());
-	    }
+	[TestFixture]
+	public class EditTest
+	{
+		[Test]
+		public void testCreate()
+		{
+			Edit e = new Edit(1, 2, 3, 4);
+			Assert.AreEqual(1, e.BeginA);
+			Assert.AreEqual(2, e.EndA);
+			Assert.AreEqual(3, e.BeginB);
+			Assert.AreEqual(4, e.EndB);
+		}
 
-        [Test]
-	    public void testCreateEmpty()
-        {
-		    Edit e = new Edit(1, 3);
-		    Assert.AreEqual(1, e.getBeginA());
-		    Assert.AreEqual(1, e.getEndA());
-		    Assert.AreEqual(3, e.getBeginB());
-		    Assert.AreEqual(3, e.getEndB());
-	    }
+		[Test]
+		public void testCreateEmpty()
+		{
+			Edit e = new Edit(1, 3);
+			Assert.AreEqual(1, e.BeginA);
+			Assert.AreEqual(1, e.EndA);
+			Assert.AreEqual(3, e.BeginB);
+			Assert.AreEqual(3, e.EndB);
+		}
 
-        [Test]
-	    public void testSwap()
-        {
-		    Edit e = new Edit(1, 2, 3, 4);
-		    e.swap();
-		    Assert.AreEqual(3, e.getBeginA());
-		    Assert.AreEqual(4, e.getEndA());
-		    Assert.AreEqual(1, e.getBeginB());
-		    Assert.AreEqual(2, e.getEndB());
-	    }
+		[Test]
+		public void testSwap()
+		{
+			Edit e = new Edit(1, 2, 3, 4);
+			e.Swap();
+			Assert.AreEqual(3, e.BeginA);
+			Assert.AreEqual(4, e.EndA);
+			Assert.AreEqual(1, e.BeginB);
+			Assert.AreEqual(2, e.EndB);
+		}
 
-        [Test]
-	    public void testType_Insert()
-        {
-		    Edit e = new Edit(1, 1, 1, 2);
-		    Assert.AreEqual(Edit.Type.INSERT, e.getType());
-	    }
+		[Test]
+		public void testType_Insert()
+		{
+			Edit e = new Edit(1, 1, 1, 2);
+			Assert.AreEqual(Edit.Type.INSERT, e.EditType);
+		}
 
-        [Test]
-	    public void testType_Delete()
-        {
-		    Edit e = new Edit(1, 2, 1, 1);
-            Assert.AreEqual(Edit.Type.DELETE, e.getType());
-	    }
+		[Test]
+		public void testType_Delete()
+		{
+			Edit e = new Edit(1, 2, 1, 1);
+			Assert.AreEqual(Edit.Type.DELETE, e.EditType);
+		}
 
-        [Test]
-	    public void testType_Replace()
-        {
-		    Edit e = new Edit(1, 2, 1, 4);
-            Assert.AreEqual(Edit.Type.REPLACE, e.getType());
-	    }
+		[Test]
+		public void testType_Replace()
+		{
+			Edit e = new Edit(1, 2, 1, 4);
+			Assert.AreEqual(Edit.Type.REPLACE, e.EditType);
+		}
 
-        [Test]
-	    public void testType_Empty() 
-        {
-            Assert.AreEqual(Edit.Type.EMPTY, new Edit(1, 1, 2, 2).getType());
-		    Assert.AreEqual(Edit.Type.EMPTY, new Edit(1, 2).getType());
-	    }
+		[Test]
+		public void testType_Empty() 
+		{
+			Assert.AreEqual(Edit.Type.EMPTY, new Edit(1, 1, 2, 2).EditType);
+			Assert.AreEqual(Edit.Type.EMPTY, new Edit(1, 2).EditType);
+		}
 
-        [Test]
-	    public void testToString()
-        {
-		    Edit e = new Edit(1, 2, 1, 4);
-		    Assert.AreEqual("REPLACE(1-2,1-4)", e.ToString());
-	    }
+		[Test]
+		public void testToString()
+		{
+			Edit e = new Edit(1, 2, 1, 4);
+			Assert.AreEqual("REPLACE(1-2,1-4)", e.ToString());
+		}
 
-        [Test]
-	    public void testEquals1()
-        {
-		    Edit e1 = new Edit(1, 2, 3, 4);
-		    Edit e2 = new Edit(1, 2, 3, 4);
+		[Test]
+		public void testEquals1()
+		{
+			Edit e1 = new Edit(1, 2, 3, 4);
+			Edit e2 = new Edit(1, 2, 3, 4);
 
-		    Assert.IsTrue(e1.Equals(e1));
-		    Assert.IsTrue(e1.Equals(e2));
-		    Assert.IsTrue(e2.Equals(e1));
-		    Assert.AreEqual(e1.hashCode(), e2.hashCode());
-		    Assert.IsFalse(e1.Equals(""));
-	    }
+			Assert.IsTrue(e1.Equals(e1));
+			Assert.IsTrue(e1.Equals(e2));
+			Assert.IsTrue(e2.Equals(e1));
+			Assert.AreEqual(e1.GetHashCode(), e2.GetHashCode());
+			Assert.IsFalse(e1.Equals(""));
+		}
 
-        [Test]
-	    public void testNotEquals1()
-        {
-		    Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(0, 2, 3, 4)));
-	    }
+		[Test]
+		public void testNotEquals1()
+		{
+			Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(0, 2, 3, 4)));
+		}
 
-        [Test]
-	    public void testNotEquals2()
-        {
-		    Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(1, 0, 3, 4)));
-	    }
+		[Test]
+		public void testNotEquals2()
+		{
+			Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(1, 0, 3, 4)));
+		}
 
-        [Test]
-	    public void testNotEquals3()
-        {
-		    Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(1, 2, 0, 4)));
-	    }
+		[Test]
+		public void testNotEquals3()
+		{
+			Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(1, 2, 0, 4)));
+		}
 
-        [Test]
-	    public void testNotEquals4()
-        {
-		    Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(1, 2, 3, 0)));
-	    }
+		[Test]
+		public void testNotEquals4()
+		{
+			Assert.IsFalse(new Edit(1, 2, 3, 4).Equals(new Edit(1, 2, 3, 0)));
+		}
 
-        [Test]
-	    public void testExtendA()
-        {
-		    Edit e = new Edit(1, 2, 1, 1);
+		[Test]
+		public void testExtendA()
+		{
+			Edit e = new Edit(1, 2, 1, 1);
 
-		    e.extendA();
-		    Assert.AreEqual(new Edit(1, 3, 1, 1), e);
+			e.ExtendA();
+			Assert.AreEqual(new Edit(1, 3, 1, 1), e);
 
-		    e.extendA();
-		    Assert.AreEqual(new Edit(1, 4, 1, 1), e);
-	    }
+			e.ExtendA();
+			Assert.AreEqual(new Edit(1, 4, 1, 1), e);
+		}
 
-        [Test]
-	    public void testExtendB()
-        {
-		    Edit e = new Edit(1, 2, 1, 1);
+		[Test]
+		public void testExtendB()
+		{
+			Edit e = new Edit(1, 2, 1, 1);
 
-		    e.extendB();
-		    Assert.AreEqual(new Edit(1, 2, 1, 2), e);
+			e.ExtendB();
+			Assert.AreEqual(new Edit(1, 2, 1, 2), e);
 
-		    e.extendB();
-		    Assert.AreEqual(new Edit(1, 2, 1, 3), e);
-	    }
-    }
+			e.ExtendB();
+			Assert.AreEqual(new Edit(1, 2, 1, 3), e);
+		}
+	}
 }

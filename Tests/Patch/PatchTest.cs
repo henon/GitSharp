@@ -80,19 +80,19 @@ namespace GitSharp.Tests.Patch
 			Assert.AreEqual(1, fRepositoryConfigTest.getHunks().Count);
 			{
 				HunkHeader h = fRepositoryConfigTest.getHunks()[0];
-				Assert.AreEqual(fRepositoryConfigTest, h.getFileHeader());
-				Assert.AreEqual(921, h.startOffset);
-				Assert.AreEqual(109, h.getOldImage().getStartLine());
-				Assert.AreEqual(4, h.getOldImage().getLineCount());
-				Assert.AreEqual(109, h.getNewStartLine());
-				Assert.AreEqual(11, h.getNewLineCount());
+				Assert.AreEqual(fRepositoryConfigTest, h.File);
+				Assert.AreEqual(921, h.StartOffset);
+				Assert.AreEqual(109, h.OldImage.StartLine);
+				Assert.AreEqual(4, h.OldImage.LineCount);
+				Assert.AreEqual(109, h.NewStartLine);
+				Assert.AreEqual(11, h.NewLineCount);
 
-				Assert.AreEqual(4, h.getLinesContext());
-				Assert.AreEqual(7, h.getOldImage().getLinesAdded());
-				Assert.AreEqual(0, h.getOldImage().getLinesDeleted());
-				Assert.AreEqual(fRepositoryConfigTest.getOldId(), h.getOldImage().getId());
+				Assert.AreEqual(4, h.LinesContext);
+				Assert.AreEqual(7, h.OldImage.LinesAdded);
+				Assert.AreEqual(0, h.OldImage.LinesDeleted);
+				Assert.AreEqual(fRepositoryConfigTest.getOldId(), h.OldImage.Id);
 
-				Assert.AreEqual(1490, h.endOffset);
+				Assert.AreEqual(1490, h.EndOffset);
 			}
 
 			Assert.AreEqual("45c2f8a", fRepositoryConfig.getOldId().name());
@@ -104,47 +104,47 @@ namespace GitSharp.Tests.Patch
 			Assert.AreEqual(3, fRepositoryConfig.getHunks().Count);
 			{
 				HunkHeader h = fRepositoryConfig.getHunks()[0];
-				Assert.AreEqual(fRepositoryConfig, h.getFileHeader());
-				Assert.AreEqual(1803, h.startOffset);
-				Assert.AreEqual(236, h.getOldImage().getStartLine());
-				Assert.AreEqual(9, h.getOldImage().getLineCount());
-				Assert.AreEqual(236, h.getNewStartLine());
-				Assert.AreEqual(9, h.getNewLineCount());
+				Assert.AreEqual(fRepositoryConfig, h.File);
+				Assert.AreEqual(1803, h.StartOffset);
+				Assert.AreEqual(236, h.OldImage.StartLine);
+				Assert.AreEqual(9, h.OldImage.LineCount);
+				Assert.AreEqual(236, h.NewStartLine);
+				Assert.AreEqual(9, h.NewLineCount);
 
-				Assert.AreEqual(7, h.getLinesContext());
-				Assert.AreEqual(2, h.getOldImage().getLinesAdded());
-				Assert.AreEqual(2, h.getOldImage().getLinesDeleted());
-				Assert.AreEqual(fRepositoryConfig.getOldId(), h.getOldImage().getId());
+				Assert.AreEqual(7, h.LinesContext);
+				Assert.AreEqual(2, h.OldImage.LinesAdded);
+				Assert.AreEqual(2, h.OldImage.LinesDeleted);
+				Assert.AreEqual(fRepositoryConfig.getOldId(), h.OldImage.Id);
 
-				Assert.AreEqual(2434, h.endOffset);
+				Assert.AreEqual(2434, h.EndOffset);
 			}
 			{
 				HunkHeader h = fRepositoryConfig.getHunks()[1];
-				Assert.AreEqual(2434, h.startOffset);
-				Assert.AreEqual(300, h.getOldImage().getStartLine());
-				Assert.AreEqual(7, h.getOldImage().getLineCount());
-				Assert.AreEqual(300, h.getNewStartLine());
-				Assert.AreEqual(7, h.getNewLineCount());
+				Assert.AreEqual(2434, h.StartOffset);
+				Assert.AreEqual(300, h.OldImage.StartLine);
+				Assert.AreEqual(7, h.OldImage.LineCount);
+				Assert.AreEqual(300, h.NewStartLine);
+				Assert.AreEqual(7, h.NewLineCount);
 
-				Assert.AreEqual(6, h.getLinesContext());
-				Assert.AreEqual(1, h.getOldImage().getLinesAdded());
-				Assert.AreEqual(1, h.getOldImage().getLinesDeleted());
+				Assert.AreEqual(6, h.LinesContext);
+				Assert.AreEqual(1, h.OldImage.LinesAdded);
+				Assert.AreEqual(1, h.OldImage.LinesDeleted);
 
-				Assert.AreEqual(2816, h.endOffset);
+				Assert.AreEqual(2816, h.EndOffset);
 			}
 			{
 				HunkHeader h = fRepositoryConfig.getHunks()[2];
-				Assert.AreEqual(2816, h.startOffset);
-				Assert.AreEqual(954, h.getOldImage().getStartLine());
-				Assert.AreEqual(7, h.getOldImage().getLineCount());
-				Assert.AreEqual(954, h.getNewStartLine());
-				Assert.AreEqual(7, h.getNewLineCount());
+				Assert.AreEqual(2816, h.StartOffset);
+				Assert.AreEqual(954, h.OldImage.StartLine);
+				Assert.AreEqual(7, h.OldImage.LineCount);
+				Assert.AreEqual(954, h.NewStartLine);
+				Assert.AreEqual(7, h.NewLineCount);
 
-				Assert.AreEqual(6, h.getLinesContext());
-				Assert.AreEqual(1, h.getOldImage().getLinesAdded());
-				Assert.AreEqual(1, h.getOldImage().getLinesDeleted());
+				Assert.AreEqual(6, h.LinesContext);
+				Assert.AreEqual(1, h.OldImage.LinesAdded);
+				Assert.AreEqual(1, h.OldImage.LinesDeleted);
 
-				Assert.AreEqual(3035, h.endOffset);
+				Assert.AreEqual(3035, h.EndOffset);
 			}
 		}
 
@@ -184,7 +184,7 @@ namespace GitSharp.Tests.Patch
 				Assert.IsNull(fh.getForwardBinaryHunk());
 				Assert.IsNull(fh.getReverseBinaryHunk());
 				Assert.AreEqual(1, fh.getHunks().Count);
-				Assert.AreEqual(272, fh.getHunks()[0].getOldImage().getStartLine());
+				Assert.AreEqual(272, fh.getHunks()[0].OldImage.StartLine);
 			}
 		}
 
@@ -234,7 +234,7 @@ namespace GitSharp.Tests.Patch
 				Assert.IsNull(fh.getForwardBinaryHunk());
 				Assert.IsNull(fh.getReverseBinaryHunk());
 				Assert.AreEqual(1, fh.getHunks().Count);
-				Assert.AreEqual(272, fh.getHunks()[0].getOldImage().getStartLine());
+				Assert.AreEqual(272, fh.getHunks()[0].OldImage.StartLine);
 			}
 		}
 
@@ -297,19 +297,19 @@ namespace GitSharp.Tests.Patch
 			Assert.AreEqual(1, f.getHunks().Count);
 			{
 				HunkHeader h = f.getHunks()[0];
-				Assert.AreEqual(f, h.getFileHeader());
-				Assert.AreEqual(317, h.startOffset);
-				Assert.AreEqual(1, h.getOldImage().getStartLine());
-				Assert.AreEqual(1, h.getOldImage().getLineCount());
-				Assert.AreEqual(1, h.getNewStartLine());
-				Assert.AreEqual(1, h.getNewLineCount());
+				Assert.AreEqual(f, h.File);
+				Assert.AreEqual(317, h.StartOffset);
+				Assert.AreEqual(1, h.OldImage.StartLine);
+				Assert.AreEqual(1, h.OldImage.LineCount);
+				Assert.AreEqual(1, h.NewStartLine);
+				Assert.AreEqual(1, h.NewLineCount);
 
-				Assert.AreEqual(0, h.getLinesContext());
-				Assert.AreEqual(1, h.getOldImage().getLinesAdded());
-				Assert.AreEqual(1, h.getOldImage().getLinesDeleted());
-				Assert.AreEqual(f.getOldId(), h.getOldImage().getId());
+				Assert.AreEqual(0, h.LinesContext);
+				Assert.AreEqual(1, h.OldImage.LinesAdded);
+				Assert.AreEqual(1, h.OldImage.LinesDeleted);
+				Assert.AreEqual(f.getOldId(), h.OldImage.Id);
 
-				Assert.AreEqual(363, h.endOffset);
+				Assert.AreEqual(363, h.EndOffset);
 			}
 		}
 
@@ -333,19 +333,19 @@ namespace GitSharp.Tests.Patch
 			Assert.AreEqual(1, f.getHunks().Count);
 			{
 				HunkHeader h = f.getHunks()[0];
-				Assert.AreEqual(f, h.getFileHeader());
-				Assert.AreEqual(321, h.startOffset);
-				Assert.AreEqual(1, h.getOldImage().getStartLine());
-				Assert.AreEqual(1, h.getOldImage().getLineCount());
-				Assert.AreEqual(1, h.getNewStartLine());
-				Assert.AreEqual(1, h.getNewLineCount());
+				Assert.AreEqual(f, h.File);
+				Assert.AreEqual(321, h.StartOffset);
+				Assert.AreEqual(1, h.OldImage.StartLine);
+				Assert.AreEqual(1, h.OldImage.LineCount);
+				Assert.AreEqual(1, h.NewStartLine);
+				Assert.AreEqual(1, h.NewLineCount);
 
-				Assert.AreEqual(0, h.getLinesContext());
-				Assert.AreEqual(1, h.getOldImage().getLinesAdded());
-				Assert.AreEqual(1, h.getOldImage().getLinesDeleted());
-				Assert.AreEqual(f.getOldId(), h.getOldImage().getId());
+				Assert.AreEqual(0, h.LinesContext);
+				Assert.AreEqual(1, h.OldImage.LinesAdded);
+				Assert.AreEqual(1, h.OldImage.LinesDeleted);
+				Assert.AreEqual(f.getOldId(), h.OldImage.Id);
 
-				Assert.AreEqual(367, h.endOffset);
+				Assert.AreEqual(367, h.EndOffset);
 			}
 		}
 	}

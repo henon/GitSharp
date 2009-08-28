@@ -36,48 +36,48 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace GitSharp.Diff
 {
-    /** Specialized list of {@link Edit}s in a document. */
-    public class EditList : ArrayList
+    /// <summary>
+	/// Specialized list of {@link Edit}s in a document.
+    /// </summary>
+    public class EditList : List<Edit>
     {
 	    public int size()
         {
-		    return this.Count;
+		    return Count;
         }
 
 	    public Edit get(int index)
         {
-            return (Edit)this[index];
+            return this[index];
 	    }
 
 	    public Edit set(int index, Edit element)
         {
-            Edit retval = (Edit)this[index];
+            Edit retval = this[index];
             this[index] = element;
             return retval;
 	    }
 
 	    public void Add(int index, Edit element)
         {
-		    this.Insert(index, element);
+		    Insert(index, element);
 	    }
 
 	    public void remove(int index)
         {
-		    this.RemoveAt(index);
+		    RemoveAt(index);
 	    }
 
 	    public int hashCode()
         {
-		    return this.GetHashCode();
+		    return GetHashCode();
 	    }
 
-	    public override String ToString()
+	    public override string ToString()
         {
             /* Unfortunately, C#'s List does not implement ToString the same
              * way Java's ArrayList does. It simply inherits from the base class
@@ -87,7 +87,9 @@ namespace GitSharp.Diff
              */
             string retval = "EditList[";
             foreach (Edit e in this)
-                retval = retval + e.ToString();
+            {
+            	retval = retval + e;
+            }
             retval = retval + "]";
             return retval;
 	    }
@@ -98,40 +100,50 @@ namespace GitSharp.Diff
          */
         public bool isEmpty()
         {
-            return (this.Count == 0);
+            return (Count == 0);
         }
 
         private bool isEqual(EditList o)
         {
-            if (this.Count != ((EditList)o).Count)
-                return false;
+            if (Count != o.Count)
+            {
+            	return false;
+            }
 
-            for (int i = 0; i < this.Count; i++)
-                if (!this[i].Equals(((EditList)o)[i]))
-                    return false;
+            for (int i = 0; i < Count; i++)
+            {
+            	if (!this[i].Equals(o[i]))
+            	{
+            		return false;
+            	}
+            }
 
             return true;
         }
 
         private bool isEqual(string s)
         {
-            return this.ToString().Equals(s);
+            return ToString().Equals(s);
         }
 
         public override bool Equals(object o)
         {
             if (o is EditList)
-                return this.isEqual((EditList)o);
+            {
+            	return isEqual((EditList)o);
+            }
 
             if (o is string)
-                return this.isEqual((string)o);
+            {
+            	return isEqual((string)o);
+            }
 
             return false;
         }
 
         public override int GetHashCode()
         {
-            return this.ToString().GetHashCode();
+            return ToString().GetHashCode();
         }
     }
 }

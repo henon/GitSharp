@@ -249,7 +249,7 @@ namespace GitSharp.Tests
         private List<Repository> repositoriesToClose = new List<Repository>();
 
         [TearDown]
-        public void tearDown()
+        public virtual void tearDown()
         {
             db.Close();
             foreach (var r in repositoriesToClose)

@@ -36,116 +36,119 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.IO;
 using NUnit.Framework;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Tests
 {
     [TestFixture]
     public class TreeIteratorPostOrderTest : RepositoryTestCase
     {
-#if false
+		/// <summary>
+		/// Empty tree
+		/// </summary>
+		[Test]
+		public void testEmpty()
+		{
+			Tree tree = new Tree(db);
+			TreeIterator i = makeIterator(tree);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("", i.Current.FullName);
+			Assert.IsFalse(i.MoveNext());
+		}
 
-	/** Empty tree */
-	public void testEmpty() {
-		Tree tree = new Tree(db);
-		TreeIterator i = makeIterator(tree);
-		assertTrue(i.hasNext());
-		assertEquals("", i.next().getFullName());
-		assertFalse(i.hasNext());
-	}
+		///	<summary>
+		/// one file
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[Test]
+		public void testSimpleF1()
+		{
+			Tree tree = new Tree(db);
+			tree.AddFile("x");
+			TreeIterator i = makeIterator(tree);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("x", i.Current.Name);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("", i.Current.FullName);
+			Assert.IsFalse(i.MoveNext());
+		}
 
-	/**
-	 * one file
-	 * 
-	 * @throws IOException
-	 */
-	public void testSimpleF1() throws IOException {
-		Tree tree = new Tree(db);
-		tree.addFile("x");
-		TreeIterator i = makeIterator(tree);
-		assertTrue(i.hasNext());
-		assertEquals("x", i.next().getName());
-		assertTrue(i.hasNext());
-		assertEquals("", i.next().getFullName());
-		assertFalse(i.hasNext());
-	}
+		///	<summary>
+		/// two files
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[Test]
+		public void testSimpleF2()
+		{
+			Tree tree = new Tree(db);
+			tree.AddFile("a");
+			tree.AddFile("x");
+			TreeIterator i = makeIterator(tree);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("a", i.Current.Name);
+			Assert.AreEqual("x", i.Current.Name);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("", i.Current.FullName);
+			Assert.IsFalse(i.MoveNext());
+		}
 
-	/**
-	 * two files
-	 * 
-	 * @throws IOException
-	 */
-	public void testSimpleF2() throws IOException {
-		Tree tree = new Tree(db);
-		tree.addFile("a");
-		tree.addFile("x");
-		TreeIterator i = makeIterator(tree);
-		assertTrue(i.hasNext());
-		assertEquals("a", i.next().getName());
-		assertEquals("x", i.next().getName());
-		assertTrue(i.hasNext());
-		assertEquals("", i.next().getFullName());
-		assertFalse(i.hasNext());
-	}
+		///	<summary>
+		/// Empty tree
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[Test]
+		public void testSimpleT()
+		{
+			Tree tree = new Tree(db);
+			tree.AddTree("a");
+			TreeIterator i = makeIterator(tree);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("a", i.Current.FullName);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("", i.Current.FullName);
+			Assert.IsFalse(i.MoveNext());
+		}
 
-	/**
-	 * Empty tree
-	 * 
-	 * @throws IOException
-	 */
-	public void testSimpleT() throws IOException {
-		Tree tree = new Tree(db);
-		tree.addTree("a");
-		TreeIterator i = makeIterator(tree);
-		assertTrue(i.hasNext());
-		assertEquals("a", i.next().getFullName());
-		assertTrue(i.hasNext());
-		assertEquals("", i.next().getFullName());
-		assertFalse(i.hasNext());
-	}
-	
-	public void testTricky() throws IOException {
-		Tree tree = new Tree(db);
-		tree.addFile("a.b");
-		tree.addFile("a.c");
-		tree.addFile("a/b.b/b");
-		tree.addFile("a/b");
-		tree.addFile("a/c");
-		tree.addFile("a=c");
-		tree.addFile("a=d");
+		[Test]
+		public void testTricky()
+		{
+			Tree tree = new Tree(db);
+			tree.AddFile("a.b");
+			tree.AddFile("a.c");
+			tree.AddFile("a/b.b/b");
+			tree.AddFile("a/b");
+			tree.AddFile("a/c");
+			tree.AddFile("a=c");
+			tree.AddFile("a=d");
 
-		TreeIterator i = makeIterator(tree);
-		assertTrue(i.hasNext());
-		assertEquals("a.b", i.next().getFullName());
-		assertTrue(i.hasNext());
-		assertEquals("a.c", i.next().getFullName());
-		assertTrue(i.hasNext());
-		assertEquals("a/b", i.next().getFullName());
-		assertTrue(i.hasNext());
-		assertEquals("a/b.b/b", i.next().getFullName());
-		assertTrue(i.hasNext());
-		assertEquals("a/b.b", i.next().getFullName());
-		assertTrue(i.hasNext());
-		assertEquals("a/c", i.next().getFullName());
-		assertTrue(i.hasNext());
-		assertEquals("a", i.next().getFullName());
-		assertTrue(i.hasNext());
-		assertEquals("a=c", i.next().getFullName());
-		assertTrue(i.hasNext());
-		assertEquals("a=d", i.next().getFullName());
-		assertTrue(i.hasNext());
-		assertEquals("", i.next().getFullName());
-		assertFalse(i.hasNext());
-	}
+			TreeIterator i = makeIterator(tree);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("a.b", i.Current.FullName);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("a.c", i.Current.FullName);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("a/b", i.Current.FullName);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("a/b.b/b", i.Current.FullName);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("a/b.b", i.Current.FullName);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("a/c", i.Current.FullName);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("a", i.Current.FullName);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("a=c", i.Current.FullName);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("a=d", i.Current.FullName);
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreEqual("", i.Current.FullName);
+			Assert.IsFalse(i.MoveNext());
+		}
 
-	private TreeIterator makeIterator(Tree tree) {
-		return new TreeIterator(tree, TreeIterator.Order.POSTORDER);
-	}
-#endif
+		private static TreeIterator makeIterator(Tree tree)
+		{
+			return new TreeIterator(tree, TreeIterator.Order.POSTORDER);
+		}
     }
 }

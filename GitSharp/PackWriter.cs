@@ -288,12 +288,12 @@ namespace GitSharp
             return objectsMap.size();
         }
 
-        public void preparePack(IEnumerator<RevObject> objectsSource)
+        public void preparePack(IEnumerable<RevObject> objectsSource)
         {
-            while (objectsSource.MoveNext())
-            {
-                addObject(objectsSource.Current);
-            }
+			foreach(RevObject obj in objectsSource)
+			{
+				addObject(obj);
+			}
         }
 
         public void preparePack<T>(IEnumerable<T> interestingObjects, IEnumerable<T> uninterestingObjects) where T : ObjectId

@@ -532,15 +532,15 @@ namespace GitSharp
 
         private string ReadLine(FileInfo file)
         {
-            using (BufferedReader br = OpenReader(file))
+            using (StreamReader sr = OpenReader(file))
             {
-                return br.ReadLine();
+                return sr.ReadLine();
             }
         }
 
-        private BufferedReader OpenReader(FileInfo file)
+        private StreamReader OpenReader(FileInfo file)
         {
-            return new BufferedReader(file.FullName);
+            return new StreamReader(file.FullName);
         }
 
         private class CachedRef : Ref

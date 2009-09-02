@@ -39,7 +39,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using GitSharp.Exceptions;
 using GitSharp.RevWalk;
 using GitSharp.Transport;
@@ -61,8 +60,7 @@ namespace GitSharp
 
         class ObjectToPack : PackedObjectInfo
         {
-            private ObjectId deltaBase;
-            private PackedObjectLoader reuseLoader;
+        	private PackedObjectLoader reuseLoader;
             private int flags;
 
             public ObjectToPack(AnyObjectId src, int type) : base(src)
@@ -70,31 +68,27 @@ namespace GitSharp
                 flags |= type << 1;
             }
 
-            public ObjectId DeltaBaseId
-            {
-                get { return deltaBase; }
-                set { deltaBase = value; }
-            }
+        	public ObjectId DeltaBaseId { get; set; }
 
-            public ObjectToPack DeltaBase
+        	public ObjectToPack DeltaBase
             {
                 get
                 {
-                    if (deltaBase is ObjectToPack) return (ObjectToPack) deltaBase;
+                    if (DeltaBaseId is ObjectToPack) return (ObjectToPack) DeltaBaseId;
                     return null;
                 }
             }
 
             public void clearDeltaBase()
             {
-                deltaBase = null;
+                DeltaBaseId = null;
             }
 
             public bool IsDeltaRepresentation
             {
                 get
                 {
-                    return deltaBase != null;
+                    return DeltaBaseId != null;
                 }
             }
 
@@ -147,14 +141,16 @@ namespace GitSharp
                 }
             }
             
+			/*
             public void updateDeltaDepth()
             {
                 int d;
-                if (deltaBase is ObjectToPack)
-                    d = ((ObjectToPack)deltaBase).DeltaDepth + 1;
-                else d = deltaBase != null ? 1 : 0;
+                if (DeltaBaseId is ObjectToPack)
+                    d = ((ObjectToPack)DeltaBaseId).DeltaDepth + 1;
+                else d = DeltaBaseId != null ? 1 : 0;
                 flags = (d << 4) | flags & 0x15;
             }
+			*/
 
             public bool WantWrite
             {
@@ -194,91 +190,35 @@ namespace GitSharp
         private readonly WindowCursor windowCursor = new WindowCursor();
         private List<ObjectToPack> sortedByName;
         private byte[] packcsum;
-        private bool reuseDeltas = DEFAULT_REUSE_DELTAS;
-        private bool reuseObjects = DEFAULT_REUSE_OBJECTS;
-        private bool deltaBaseAsOffset = DEFAULT_DELTA_BASE_AS_OFFSET;
-        private int maxDeltaDepth = DEFAULT_MAX_DELTA_DEPTH;
-        private int outputVersion;
-        private bool ignoreMissingUninteresting = true;
+    	private int outputVersion;
 
-        public PackWriter(Repository repo, IProgressMonitor monitor)
+    	public PackWriter(Repository repo, IProgressMonitor monitor)
             : this(repo, monitor, monitor)
         {
-            
         }
 
         public PackWriter(Repository repo, IProgressMonitor imonitor, IProgressMonitor wmonitor)
         {
-            db = repo;
+        	IgnoreMissingUninteresting = true;
+        	MaxDeltaDepth = DEFAULT_MAX_DELTA_DEPTH;
+        	DeltaBaseAsOffset = DEFAULT_DELTA_BASE_AS_OFFSET;
+        	ReuseObjects = DEFAULT_REUSE_OBJECTS;
+        	ReuseDeltas = DEFAULT_REUSE_DELTAS;
+        	db = repo;
             initMonitor = imonitor;
             writeMonitor = wmonitor;
             deflater = new Deflater(db.Config.Core.Compression);
             outputVersion = repo.Config.Core.PackIndexVersion;
         }
 
-        public bool ReuseDeltas
-        {
-            get
-            {
-                return reuseDeltas;
-            }
-            set
-            {
-                reuseDeltas = value;
-            }
-        }
+    	public bool ReuseDeltas { get; set; }
+    	public bool ReuseObjects { get; set; }
+    	public bool DeltaBaseAsOffset { get; set; }
+    	public int MaxDeltaDepth { get; set; }
+    	public bool Thin { get; set; }
+    	public bool IgnoreMissingUninteresting { get; set; }
 
-        public bool ReuseObjects
-        {
-            get
-            {
-                return reuseObjects;
-            }
-            set
-            {
-                reuseObjects = value;
-            }
-        }
-
-        public bool DeltaBaseAsOffset
-        {
-            get
-            {
-                return deltaBaseAsOffset;
-            }
-            set
-            {
-                deltaBaseAsOffset = value;
-            }
-        }
-
-        public int MaxDeltaDepth
-        {
-            get
-            {
-                return maxDeltaDepth;
-            }
-            set
-            {
-                maxDeltaDepth = value;
-            }
-        }
-
-        public bool Thin { get; set; }
-
-        public bool IgnoreMissingUninteresting
-        {
-            get
-            {
-                return ignoreMissingUninteresting;
-            }
-            set
-            {
-                ignoreMissingUninteresting = value;
-            }
-        }
-
-        public void setIndexVersion(int version)
+    	public void setIndexVersion(int version)
         {
             outputVersion = version;
         }
@@ -296,7 +236,8 @@ namespace GitSharp
 			}
         }
 
-        public void preparePack<T>(IEnumerable<T> interestingObjects, IEnumerable<T> uninterestingObjects) where T : ObjectId
+        public void preparePack<T>(IEnumerable<T> interestingObjects, IEnumerable<T> uninterestingObjects) 
+			where T : ObjectId
         {
             ObjectWalk walker = setUpWalker(interestingObjects, uninterestingObjects);
             findObjectsToPack(walker);
@@ -321,11 +262,11 @@ namespace GitSharp
         public void writeIndex(Stream indexStream)
         {
             List<ObjectToPack> list = sortByName();
-            PackIndexWriter iw;
-            if (outputVersion <= 0)
-                iw = PackIndexWriter.CreateOldestPossible(indexStream, list);
-            else
-                iw = PackIndexWriter.CreateVersion(indexStream, outputVersion);
+
+			PackIndexWriter iw = outputVersion <= 0 ? 
+				PackIndexWriter.CreateOldestPossible(indexStream, list) : 
+				PackIndexWriter.CreateVersion(indexStream, outputVersion);
+
             iw.Write(list, packcsum);
         }
 
@@ -334,6 +275,7 @@ namespace GitSharp
             if (sortedByName == null)
             {
                 sortedByName = new List<ObjectToPack>(objectsMap.size());
+
                 foreach (List<ObjectToPack> list in objectsLists)
                 {
                     foreach (ObjectToPack otp in list)
@@ -341,18 +283,25 @@ namespace GitSharp
                         sortedByName.Add(otp);
                     }
                 }
+
                 sortedByName.Sort();
             }
+
             return sortedByName;
         }
 
         public void writePack(Stream packStream)
         {
-            if (reuseDeltas || reuseObjects)
-                searchForReuse();
+            if (ReuseDeltas || ReuseObjects)
+            {
+            	searchForReuse();
+            }
 
             if (!(packStream is BufferedStream))
-                packStream = new BufferedStream(packStream);
+            {
+            	packStream = new BufferedStream(packStream);
+            }
+
             pos = new PackOutputStream(packStream);
 
             writeMonitor.BeginTask(WRITING_OBJECTS_PROGRESS, getObjectsNumber());
@@ -387,14 +336,19 @@ namespace GitSharp
         private void searchForReuse(List<PackedObjectLoader> reuseLoaders, ObjectToPack otp)
         {
             db.openObjectInAllPacks(otp, reuseLoaders, windowCursor);
-            if (reuseDeltas)
-                selectDeltaReuseForObject(otp, reuseLoaders);
 
-            if (reuseObjects && !otp.HasReuseLoader)
-                selectObjectReuseForObject(otp, reuseLoaders);
+            if (ReuseDeltas)
+            {
+            	selectDeltaReuseForObject(otp, reuseLoaders);
+            }
+
+            if (ReuseObjects && !otp.HasReuseLoader)
+            {
+            	SelectObjectReuseForObject(otp, reuseLoaders);
+            }
         }
 
-        private void selectDeltaReuseForObject(ObjectToPack otp, List<PackedObjectLoader> loaders)
+        private void selectDeltaReuseForObject(ObjectToPack otp, IEnumerable<PackedObjectLoader> loaders)
         {
             PackedObjectLoader bestLoader = null;
             ObjectId bestBase = null;
@@ -412,30 +366,31 @@ namespace GitSharp
                 }
             }
 
-            if (bestLoader != null)
-            {
-                otp.setReuseLoader(bestLoader);
-                otp.DeltaBaseId = bestBase;
-            }
+        	if (bestLoader == null) return;
+
+        	otp.setReuseLoader(bestLoader);
+        	otp.DeltaBaseId = bestBase;
         }
 
         private static bool isBetterDeltaReuseLoader(PackedObjectLoader currentLoader, PackedObjectLoader loader)
         {
             if (currentLoader == null) return true;
+
             if (loader.getRawSize() < currentLoader.getRawSize()) return true;
-            return (loader.getRawSize() == currentLoader.getRawSize() && loader.supportsFastCopyRawData() &&
-                    !currentLoader.supportsFastCopyRawData());
+
+            return loader.getRawSize() == currentLoader.getRawSize() && 
+				loader.supportsFastCopyRawData() &&
+                !currentLoader.supportsFastCopyRawData();
         }
 
-        private void selectObjectReuseForObject(ObjectToPack otp, List<PackedObjectLoader> loaders)
+        private static void SelectObjectReuseForObject(ObjectToPack otp, IEnumerable<PackedObjectLoader> loaders)
         {
             foreach (PackedObjectLoader loader in loaders)
             {
-                if (loader is WholePackedObjectLoader)
-                {
-                    otp.setReuseLoader(loader);
-                    return;
-                }
+            	if (!(loader is WholePackedObjectLoader)) continue;
+
+            	otp.setReuseLoader(loader);
+            	return;
             }
         }
 
@@ -454,9 +409,14 @@ namespace GitSharp
                 foreach (ObjectToPack otp in list)
                 {
                     if (writeMonitor.IsCancelled)
-                        throw new IOException("Packing cancelled during objects writing");
+                    {
+                    	throw new IOException("Packing cancelled during objects writing");
+                    }
+
                     if (!otp.IsWritten)
-                        writeObject(otp);
+                    {
+                    	writeObject(otp);
+                    }
                 }
             }
         }
@@ -521,7 +481,7 @@ namespace GitSharp
 
         private PackedObjectLoader open(ObjectToPack otp)
         {
-            for (;;)
+            while(true)
             {
                 PackedObjectLoader reuse = otp.useLoader();
                 if (reuse == null)
@@ -559,7 +519,7 @@ namespace GitSharp
 
         private void writeDeltaObjectReuse(ObjectToPack otp, PackedObjectLoader reuse)
         {
-            if (deltaBaseAsOffset && otp.DeltaBase != null)
+            if (DeltaBaseAsOffset && otp.DeltaBase != null)
             {
                 writeObjectHeader(Constants.OBJ_OFS_DELTA, reuse.getRawSize());
 
@@ -629,7 +589,7 @@ namespace GitSharp
                     }
                     catch (MissingObjectException x)
                     {
-                        if (ignoreMissingUninteresting)
+                        if (IgnoreMissingUninteresting)
                             continue;
                         throw x;
                     }
@@ -681,5 +641,4 @@ namespace GitSharp
             objectsMap.add(otp);
         }
     }
-
 }

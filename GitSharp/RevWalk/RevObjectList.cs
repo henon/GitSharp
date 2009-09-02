@@ -37,123 +37,170 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GitSharp.RevWalk
 {
+	/// <summary>
+	/// An ordered list of <see cref="RevObject"/> subclasses.
+	/// </summary>
+	/// <typeparam name="T">
+	/// Type of subclass of RevObject the list is storing.
+	/// </typeparam>
+	public class RevObjectList<T> : IEnumerable<T> // [henon] was AbstractList
+	where T : RevObject
+	{
+		public static int BLOCK_SHIFT = 8;
+		public static int BLOCK_SIZE = 1 << BLOCK_SHIFT;
 
+		public Block Contents
+		{
+			get; protected set;
+		}
 
-    /**
-     * An ordered list of {@link RevObject} subclasses.
-     * 
-     * @param <E>
-     *            type of subclass of RevObject the list is storing.
-     */
-    public class RevObjectList<E> : IEnumerable<E> // [henon] was AbstractList
-    where E : RevObject
-    {
-        public static int BLOCK_SHIFT = 8;
+		/// <summary>
+		/// Create an empty object list.
+		/// </summary>
+		public RevObjectList()
+		{
+			clear();
+		}
 
-        public static int BLOCK_SIZE = 1 << BLOCK_SHIFT;
+		public int Size
+		{
+			get; protected set;
+		}
 
-        public Block contents;
+		public void add(int index, T element)
+		{
+			if (index != Size)
+			{
+				throw new InvalidOperationException("Not add-at-end: " + index);
+			}
 
-        public int _size;
+			set(index, element);
+			Size++;
+		}
 
-        /** Create an empty object list. */
-        public RevObjectList()
-        {
-            clear();
-        }
+		public void add(T element)
+		{
+			add(Size, element);
+		}
 
-        public void add(int index, E element)
-        {
-            if (index != _size)
-                throw new InvalidOperationException("Not add-at-end: " + index);
-            set(index, element);
-            _size++;
-        }
+		public T set(int index, T element)
+		{
+			Block s = Contents;
+			while (index >> s.Shift >= BLOCK_SIZE)
+			{
+				s = new Block(s.Shift + BLOCK_SHIFT);
+				s.Contents[0] = Contents;
+				Contents = s;
+			}
 
-        public void add(E element)
-        {
-            add(_size, element);
-        }
+			while (s.Shift > 0)
+			{
+				int i = index >> s.Shift;
+				index -= i << s.Shift;
+				
+				if (s.Contents[i] == null)
+				{
+					s.Contents[i] = new Block(s.Shift - BLOCK_SHIFT);
+				}
 
-        public E set(int index, E element)
-        {
-            Block s = contents;
-            while (index >> s.shift >= BLOCK_SIZE)
-            {
-                s = new Block(s.shift + BLOCK_SHIFT);
-                s.contents[0] = contents;
-                contents = s;
-            }
-            while (s.shift > 0)
-            {
-                int i = index >> s.shift;
-                index -= i << s.shift;
-                if (s.contents[i] == null)
-                    s.contents[i] = new Block(s.shift - BLOCK_SHIFT);
-                s = (Block)s.contents[i];
-            }
-            object old = s.contents[index];
-            s.contents[index] = element;
-            return (E)old;
-        }
+				s = (Block)s.Contents[i];
+			}
+			object old = s.Contents[index];
+			s.Contents[index] = element;
+			return (T)old;
+		}
 
-        public E get(int index)
-        {
-            Block s = contents;
-            if (index >> s.shift >= 1024)
-                return null;
-            while (s != null && s.shift > 0)
-            {
-                int i = index >> s.shift;
-                index -= i << s.shift;
-                s = (Block)s.contents[i];
-            }
-            return s != null ? (E)s.contents[index] : null;
-        }
+		public T get(int index)
+		{
+			Block s = Contents;
 
-        public int size()
-        {
-            return _size;
-        }
+			if (index >> s.Shift >= 1024)
+			{
+				return null;
+			}
 
-        public virtual void clear()
-        {
-            contents = new Block(0);
-            _size = 0;
-        }
+			while (s != null && s.Shift > 0)
+			{
+				int i = index >> s.Shift;
+				index -= i << s.Shift;
+				s = (Block)s.Contents[i];
+			}
 
-        public class Block
-        {
-            public object[] contents = new object[BLOCK_SIZE];
+			return s != null ? (T)s.Contents[index] : null;
+		}
 
-            public int shift;
+		public virtual void clear()
+		{
+			Contents = new Block(0);
+			Size = 0;
+		}
 
-            public Block(int s)
-            {
-                shift = s;
-            }
-        }
+		public class Block : IEnumerable<object>
+		{
+			public object[] Contents { get; private set; }
+			public int Shift { get; private set; }
 
-        #region IEnumerable<E> Members
+			public Block(int s)
+			{
+				Contents = new T[BLOCK_SIZE];
+				Shift = s;
+			}
 
-        public IEnumerator<E> GetEnumerator()
-        {
-            throw new System.NotImplementedException();
-        }
+			#region Implementation of IEnumerable<object>
 
-        #endregion
+			/// <summary>
+			/// Returns an enumerator that iterates through the collection.
+			/// </summary>
+			/// <returns>
+			/// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
+			/// </returns>
+			/// <filterpriority>1</filterpriority>
+			public IEnumerator<object> GetEnumerator()
+			{
+				return Contents.AsEnumerable().GetEnumerator();
+			}
 
-        #region IEnumerable Members
+			#endregion
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            throw new System.NotImplementedException();
-        }
+			#region Implementation of IEnumerable
 
-        #endregion
-    }
+			/// <summary>
+			/// Returns an enumerator that iterates through a collection.
+			/// </summary>
+			/// <returns>
+			/// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
+			/// </returns>
+			/// <filterpriority>2</filterpriority>
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return Contents.GetEnumerator();
+			}
+
+			#endregion
+		}
+
+		#region Implementation of IEnumerable<T>
+
+		public IEnumerator<T> GetEnumerator()
+		{
+			throw new NotImplementedException();
+		}
+
+		#endregion
+
+		#region Implementation of IEnumerable
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return Contents.GetEnumerator();
+		}
+
+		#endregion
+	}
 }

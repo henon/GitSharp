@@ -37,70 +37,61 @@
  */
 
 using System;
+
 namespace GitSharp.RevWalk
 {
-
-    /**
-     * Application level mark bit for {@link RevObject}s.
-     * <p>
-     * To create a flag use {@link RevWalk#newFlag(string)}.
-     */
+	/// <summary>
+	/// Application level mark bit for <see cref="RevObject"/>s.
+	/// </summary>
     public class RevFlag
     {
-        /**
-         * Uninteresting by {@link RevWalk#markUninteresting(RevCommit)}.
-         * <p>
-         * We flag commits as uninteresting if the caller does not want commits
-         * reachable from a commit to {@link RevWalk#markUninteresting(RevCommit)}.
-         * This flag is always carried into the commit's parents and is a key part
-         * of the "rev-list B --not A" feature; A is marked UNINTERESTING.
-         * <p>
-         * This is a static flag. Its RevWalk is not available.
-         */
-        public static RevFlag UNINTERESTING = new StaticRevFlag(
-                "UNINTERESTING", RevWalk.UNINTERESTING);
+		/// <summary>
+		/// Uninteresting by {@link RevWalk#markUninteresting(RevCommit)}.
+		/// 
+		/// We flag commits as uninteresting if the caller does not want commits
+		/// reachable from a commit to {@link RevWalk#markUninteresting(RevCommit)}.
+		/// This flag is always carried into the commit's parents and is a key part
+		/// of the "rev-list B --not A" feature; A is marked UNINTERESTING.
+		/// 
+		/// This is a static flag. Its RevWalk is not available.
+		/// </summary>
+        public static RevFlag UNINTERESTING = new StaticRevFlag("UNINTERESTING", RevWalk.UNINTERESTING);
 
-        public RevWalk walker;
+		/// <summary>
+		/// Get the revision walk instance this flag was created from.
+		/// </summary>
+        public virtual RevWalk Walker { get; private set; }
 
-        public string name;
+        public string Name { get; set; }
+        public int Mask { get; set; }
 
-        public int mask;
-
-        public RevFlag(RevWalk w, string n, int m)
+        public RevFlag(RevWalk walker, string name, int mask)
         {
-            walker = w;
-            name = n;
-            mask = m;
-        }
-
-        /**
-         * Get the revision walk instance this flag was created from.
-         * 
-         * @return the walker this flag was allocated out of, and belongs to.
-         */
-        public virtual RevWalk getRevWalk()
-        {
-            return walker;
+            Walker = walker;
+            Name = name;
+            Mask = mask;
         }
 
         public override string ToString()
         {
-            return name;
-        }
-
-        public class StaticRevFlag : RevFlag
-        {
-            public StaticRevFlag(string n, int m)
-                : base(null, n, m)
-            {
-
-            }
-
-            public override RevWalk getRevWalk()
-            {
-                throw new InvalidOperationException(ToString()
-                        + " is a static flag and has no RevWalk instance");
-            }
-        }
+            return Name;
+        }   
     }
+
+	public class StaticRevFlag : RevFlag
+	{
+		public StaticRevFlag(string name, int mask)
+			: base(null, name, mask)
+		{
+		}
+
+		public override RevWalk Walker
+		{
+			get
+			{
+				throw new InvalidOperationException(ToString()
+						+ " is a static flag and has no RevWalk instance");
+			}
+		}
+	}
 }

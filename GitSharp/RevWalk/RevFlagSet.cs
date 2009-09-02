@@ -36,134 +36,89 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Linq;
 using System.Collections.Generic;
-using GitSharp.Util;
 
 namespace GitSharp.RevWalk
 {
+	/// <summary>
+	/// Multiple application level mark bits for <see cref="RevObject"/>s.
+	/// </summary>
+	public class RevFlagSet : HashSet<RevFlag>
+	{
+		public int Mask { get; private set; }
 
-    /**
-     * Multiple application level mark bits for {@link RevObject}s.
-     * 
-     * @see RevFlag
-     */
-    public class RevFlagSet // [henon] was derived from AbstractSet<RevFlag> 
-    //TODO: implement C# interfaces IEnumreable and the likes ..
-    {
-        public int mask;
+		/// <summary>
+		/// Create a set of flags.
+		/// </summary>
+		public RevFlagSet()
+		{
+		}
 
-        private List<RevFlag> active;
+		/// <summary>
+		/// Create a set of flags.
+		/// </summary>
+		/// <param name="flags">the set to copy flags from.</param>
+		public RevFlagSet(RevFlagSet flags)
+		{
+			Mask = flags.Mask;
+		}
 
-        /** Create an empty set of flags. */
-        public RevFlagSet()
-        {
-            active = new List<RevFlag>();
-        }
+		/// <summary>
+		/// Create a set of flags.
+		/// </summary>
+		/// <param name="collection">the collection to copy flags from.</param>
+		public RevFlagSet(IEnumerable<RevFlag> collection)
+			: base(collection)
+		{
+		}
 
-        /**
-         * Create a set of flags, copied from an existing set.
-         * 
-         * @param s
-         *            the set to copy flags from.
-         */
-        public RevFlagSet(RevFlagSet s)
-        {
-            mask = s.mask;
-            active = new List<RevFlag>(s.active);
-        }
+		public bool ContainsAll(IEnumerable<RevFlag> c) // [henon] was Collection<?> in java
+		{
+			if (c is RevFlagSet)
+			{
+				int cMask = ((RevFlagSet)c).Mask;
+				return (Mask & cMask) == cMask;
+			}
 
-        /**
-         * Create a set of flags, copied from an existing collection.
-         * 
-         * @param s
-         *            the collection to copy flags from.
-         */
-        public RevFlagSet(IEnumerable<RevFlag> s)
-            : this()
-        {
-            foreach (var f in s)
-                Add(f);
-        }
+			return c.All(flag => Contains(flag));
+		}
 
-        public bool Contains(object o)
-        {
-            if (o is RevFlag)
-                return (mask & ((RevFlag)o).mask) != 0;
-            return false;
-        }
+		public new bool Add(RevFlag flag)
+		{
+			if ((Mask & flag.Mask) != 0)
+			{
+				return false;
+			}
 
-        public bool ContainsAll(IEnumerable<RevFlag> c) // [henon] was Collection<?> in java
-        {
-            if (c is RevFlagSet)
-            {
-                int cMask = ((RevFlagSet)c).mask;
-                return (mask & cMask) == cMask;
-            }
-            return c.All(flag => Contains(flag));
-        }
+			Mask |= flag.Mask;
 
-        public bool Add(RevFlag flag)
-        {
-            if ((mask & flag.mask) != 0)
-                return false;
-            mask |= flag.mask;
-            int p = 0;
-            while (p < active.Count && active[p].mask < flag.mask)
-                p++;
-            active[p] = (flag);
-            return true;
-        }
+			int p = 0;
+			foreach(var x in this)
+			{
+				if(x.Mask < flag.Mask)
+				{
+					p++;
+				}
+				else
+				{
+					break;
+				}
+			}
 
-        public bool Remove(object o)
-        {
-            RevFlag flag = (RevFlag)o;
-            if ((mask & flag.mask) == 0)
-                return false;
-            mask &= ~flag.mask;
-            for (int i = 0; i < active.Count; i++)
-                if (active[i].mask == flag.mask)
-                    active.RemoveAt(i);
-            return true;
-        }
+			return base.Add(flag);
+		}
 
-        public Iterator<RevFlag> iterator()
-        {
-            return new Iterator<RevFlag>(this);
-        }
+		public new bool Remove(RevFlag flag)
+		{
+			if ((Mask & flag.Mask) == 0)
+			{
+				return false;
+			}
+			
+			Mask &= ~flag.Mask;
 
-        public class Iterator<T> : ListIterator<T>
-            where T : RevFlag
-        {
-
-            public Iterator(RevFlagSet set)
-                : base(set.active as List<T>)
-            {
-            }
-
-            private T current;
-            private RevFlagSet set;
-
-            //public override bool hasNext() {
-            //    return base.hasNext();
-            //}
-
-            public override T next()
-            {
-                return current = base.next();
-            }
-
-            public override void remove()
-            {
-                set.mask &= ~current.mask;
-                base.remove();
-            }
-        }
-
-        public int size()
-        {
-            return active.Count;
-        }
-    }
+			return base.Remove(flag);
+		}
+	}
 }

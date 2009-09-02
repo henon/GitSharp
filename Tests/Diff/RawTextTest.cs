@@ -38,6 +38,7 @@
 
 using System.IO;
 using GitSharp.Diff;
+using GitSharp.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests

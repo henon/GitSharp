@@ -38,6 +38,7 @@
 using System.IO;
 using System.Text;
 using GitSharp.TreeWalk;
+using GitSharp.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.TreeWalk

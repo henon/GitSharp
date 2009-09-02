@@ -41,6 +41,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using GitSharp.Diff;
 using GitSharp.Patch;
 using GitSharp.Tests.Patch;
+using GitSharp.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Diff

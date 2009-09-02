@@ -38,6 +38,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+using GitSharp.Util;
 
 namespace GitSharp.Patch
 {
@@ -59,12 +60,6 @@ namespace GitSharp.Patch
         public CombinedFileHeader(byte[] b, int offset)
             : base(b, offset)
         { }
-
-        //@SuppressWarnings("unchecked")
-        //public List<CombinedHunkHeader> getHunks()
-        //{
-        //    return (List<CombinedHunkHeader>)base.getHunks();
-        //}
 
         /** @return number of ancestor revisions mentioned in this diff. */
         public override int getParentCount()

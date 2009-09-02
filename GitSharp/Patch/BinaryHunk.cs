@@ -37,6 +37,7 @@
  */
 
 using System;
+using GitSharp.Util;
 
 namespace GitSharp.Patch
 {

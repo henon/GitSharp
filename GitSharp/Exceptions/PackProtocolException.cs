@@ -41,11 +41,8 @@ using GitSharp.Transport;
 
 namespace GitSharp.Exceptions
 {
-
     public class PackProtocolException : TransportException
     {
-        private static long serialVersionUID = 1L;
-
         public PackProtocolException(URIish uri, string s)
             : base(uri + ": " + s)
         {            
@@ -66,5 +63,4 @@ namespace GitSharp.Exceptions
         {
         }
     }
-
 }

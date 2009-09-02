@@ -36,41 +36,35 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using GitSharp.DirectoryCache;
 
 namespace GitSharp.Exceptions
 {
-    /**
-     * Indicates one or more paths in a DirCache have non-zero stages present.
-     */
+	/// <summary>
+	/// Indicates one or more paths in a DirCache have non-zero stages present.
+	/// </summary>
     public class UnmergedPathException : IOException
     {
-        private static long serialVersionUID = 1L;
+        private readonly DirCacheEntry _entry;
 
-        private DirCacheEntry entry;
-
-        /**
-         * Create a new unmerged path exception.
-         *
-         * @param dce
-         *            the first non-zero stage of the unmerged path.
-         */
-        public UnmergedPathException(DirCacheEntry dce) 
-            : base("Unmerged path: " + dce.getPathString())
+		/// <summary>
+		/// Create a new unmerged path exception.
+		/// </summary>
+		/// <param name="dce">The first non-zero stage of the unmerged path.</param>
+        public UnmergedPathException(DirCacheEntry entry) 
+            : base("Unmerged path: " + entry.getPathString())
         {
-            entry = dce;
+            _entry = entry;
         }
 
-        /** @return the first non-zero stage of the unmerged path */
-        public DirCacheEntry getDirCacheEntry()
+        /// <summary>
+		/// Returns the first non-zero stage of the unmerged path.
+        /// </summary>
+        /// <returns></returns>
+        public DirCacheEntry DirCacheEntry
         {
-            return entry;
+            get { return _entry; }
         }
     }
 }

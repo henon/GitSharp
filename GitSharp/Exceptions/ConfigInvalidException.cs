@@ -36,44 +36,32 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Exceptions
 {
-    /** Indicates a text string is not a valid Git style configuration. */
+    /// <summary>
+	/// Indicates a text string is not a valid Git style configuration.
+    /// </summary>
     public class ConfigInvalidException : Exception
     {
-        private static long serialVersionUID = 1L;
-
-        /**
-         * Construct an invalid configuration error.
-         *
-         * @param message
-         *            why the configuration is invalid.
-         */
+		/// <summary>
+		/// Construct an invalid configuration error.
+		/// </summary>
+		/// <param name="message">Why the configuration is invalid.</param>
         public ConfigInvalidException(string message)
             : base(message)
         {
-
         }
 
-        /**
-         * Construct an invalid configuration error.
-         *
-         * @param message
-         *            why the configuration is invalid.
-         * @param cause
-         *            root cause of the error.
-         */
+		/// <summary>
+		/// Construct an invalid configuration error.
+		/// </summary>
+		/// <param name="message">why the configuration is invalid.</param>
+		/// <param name="inner_exception">Construct an invalid configuration error.</param>
         public ConfigInvalidException(string message, Exception inner_exception)
             : base(message, inner_exception)
         {
-
         }
     }
 }

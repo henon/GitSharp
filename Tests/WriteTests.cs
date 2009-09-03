@@ -239,8 +239,8 @@ namespace GitSharp.Tests
         public void test009_CreateCommitOldFormat()
         {
             writeTrashFile(".git/config", "[core]\n" + "legacyHeaders=1\n");
-            db.Config.Load();
-            Assert.AreEqual(db.Config.GetBoolean("core", "legacyHeaders", false), true);
+            db.Config.load();
+            Assert.AreEqual(db.Config.getBoolean("core", "legacyHeaders", false), true);
 
             Tree t = new Tree(db);
             FileTreeEntry f = t.AddFile("i-am-a-file");
@@ -486,7 +486,7 @@ namespace GitSharp.Tests
         [Test]
         public void test026_CreateCommitMultipleparents()
         {
-            db.Config.Load();
+            db.Config.load();
 
             Tree t = new Tree(db);
             FileTreeEntry f = t.AddFile("i-am-a-file");

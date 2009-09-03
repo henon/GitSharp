@@ -65,7 +65,7 @@ namespace GitSharp.Transport
             if (db == null) return;
             bool on = Enabled;
             if (Overridable)
-                on = db.Config.GetBoolean("daemon", Config, on);
+                on = db.Config.getBoolean("daemon", Config, on);
             if (on)
                 Execute(client, db);
         }

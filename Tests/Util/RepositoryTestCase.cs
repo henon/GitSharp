@@ -40,6 +40,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.IO;
 using NUnit.Framework;
@@ -101,6 +102,10 @@ namespace GitSharp.Tests
             {
                 this.userGitConfig = userGitConfig;
             }
+            public string getHostname()
+            {
+                return Dns.GetHostName();
+            }
         }
 
         /**
@@ -112,11 +117,9 @@ namespace GitSharp.Tests
 
         static RepositoryTestCase()
         {
-            RepositoryConfig.SystemReader = fakeSystemReader;
+            GitSharpSystemReader.SetInstance(fakeSystemReader);
             Microsoft.Win32.SystemEvents.SessionEnded += (o, args) => // cleanup
-            {
-                recursiveDelete(trashParent, false, null, false);
-            };
+                                                         recursiveDelete(trashParent, false, null, false);
         }
 
         /**
@@ -141,8 +144,6 @@ namespace GitSharp.Tests
             recursiveDelete(trashParent, true, name, false); // Cleanup old failed stuff
             trash = new DirectoryInfo(trashParent + "/trash" + DateTime.Now.Ticks + "." + (testcount++));
             trash_git = new DirectoryInfo(trash + "/.git");
-
-
 
             var userGitConfigFile = new FileInfo(trash_git + "/usergitconfig").FullName;
             var userGitConfig = new RepositoryConfig(null, new FileInfo(userGitConfigFile));

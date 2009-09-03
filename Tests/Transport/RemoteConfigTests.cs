@@ -60,7 +60,7 @@ namespace GitSharp.Tests.Transport
             {
                 stream.Close();
             }
-            db.Config.Load();
+            db.Config.load();
         }
 
         [Test]
@@ -348,9 +348,9 @@ namespace GitSharp.Tests.Transport
             rc.AddURI(new URIish("/some/dir"));
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.Update(db.Config);
-            db.Config.Save();
+            db.Config.save();
 
-            checkFile(new FileInfo(Path.Combine(db.Directory.ToString(), "config")),
+            checkFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" +
                       "\tfilemode = true\n"
@@ -371,9 +371,9 @@ namespace GitSharp.Tests.Transport
             rc.AddURI(new URIish("/some/dir"));
             Assert.AreEqual(2, rc.URIs.Count);
             rc.Update(db.Config);
-            db.Config.Save();
+            db.Config.save();
 
-            checkFile(new FileInfo(Path.Combine(db.Directory.ToString(), "config")),
+            checkFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
                       + "[remote \"spearce\"]\n"
@@ -395,9 +395,9 @@ namespace GitSharp.Tests.Transport
             rc.RemoveURI(new URIish("/some/dir"));
             Assert.AreEqual(1, rc.URIs.Count);
             rc.Update(db.Config);
-            db.Config.Save();
+            db.Config.save();
 
-            checkFile(new FileInfo(Path.Combine(db.Directory.ToString(), "config")),
+            checkFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
                       + "[remote \"spearce\"]\n"
@@ -418,9 +418,9 @@ namespace GitSharp.Tests.Transport
             rc.RemoveURI(new URIish("http://www.spearce.org/egit.git"));
             Assert.AreEqual(1, rc.URIs.Count);
             rc.Update(db.Config);
-            db.Config.Save();
+            db.Config.save();
 
-            checkFile(new FileInfo(Path.Combine(db.Directory.ToString(), "config")),
+            checkFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
                       + "[remote \"spearce\"]\n" + "\turl = /some/dir\n"
@@ -435,9 +435,9 @@ namespace GitSharp.Tests.Transport
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.SetTagOpt(TagOpt.NO_TAGS);
             rc.Update(db.Config);
-            db.Config.Save();
+            db.Config.save();
 
-            checkFile(new FileInfo(Path.Combine(db.Directory.ToString(), "config")),
+            checkFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
                       + "[remote \"origin\"]\n" + "\turl = /some/dir\n"
@@ -453,9 +453,9 @@ namespace GitSharp.Tests.Transport
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.SetTagOpt(TagOpt.FETCH_TAGS);
             rc.Update(db.Config);
-            db.Config.Save();
+            db.Config.save();
 
-            checkFile(new FileInfo(Path.Combine(db.Directory.ToString(), "config")),
+            checkFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
                       + "[remote \"origin\"]\n" + "\turl = /some/dir\n"

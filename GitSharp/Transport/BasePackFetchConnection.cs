@@ -78,7 +78,7 @@ namespace GitSharp.Transport
             RepositoryConfig cfg = local.Config;
             includeTags = transport.TagOpt != TagOpt.NO_TAGS;
             thinPack = transport.FetchThin;
-            allowOfsDelta = cfg.GetBoolean("repack", "usedeltabaseoffset", true);
+            allowOfsDelta = cfg.getBoolean("repack", "usedeltabaseoffset", true);
 
             walk = new RevWalk.RevWalk(local);
             reachableCommits = new RevCommitList<RevCommit>();

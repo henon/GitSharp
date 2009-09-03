@@ -212,8 +212,8 @@ namespace GitSharp
             db = repo;
             initMonitor = imonitor;
             writeMonitor = wmonitor;
-            deflater = new Deflater(db.Config.Core.Compression);
-            outputVersion = repo.Config.Core.PackIndexVersion;
+            deflater = new Deflater(db.Config.getCore().getCompression());
+            outputVersion = repo.Config.getCore().getPackIndexVersion();
         }
 
         public bool ReuseDeltas

@@ -109,8 +109,17 @@ namespace GitSharp
             bool isExisting = _objectsDirs[0].Exists;
             if (isExisting)
             {
-                this.Config.Load();
-                string repositoryFormatVersion = this.Config.GetString("core", null, "repositoryFormatVersion");
+                try
+                {
+                    this.Config.load();
+                }
+                catch (ConfigInvalidException e1)
+                {
+                    IOException e2 = new IOException("Unknown repository format", e1);
+                    throw e2;
+                }
+
+                string repositoryFormatVersion = this.Config.getString("core", null, "repositoryFormatVersion");
 
                 if (!"0".Equals(repositoryFormatVersion))
                 {
@@ -120,7 +129,7 @@ namespace GitSharp
             }
             else
             {
-                this.Config.Create();
+                //this.Config.Create();
             }
             //if (isExisting)
             //    ScanForPacks();
@@ -170,8 +179,7 @@ namespace GitSharp
 
             this._refDb.Link(Constants.Head, master);
 
-            this.Config.Create();
-            this.Config.Save();
+            this.Config.save();
 
         }
         /**

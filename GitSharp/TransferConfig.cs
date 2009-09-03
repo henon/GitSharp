@@ -1,6 +1,5 @@
 ﻿/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
  *
@@ -36,40 +35,32 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using ICSharpCode.SharpZipLib.Zip.Compression;
-
 namespace GitSharp
 {
-    public class CoreConfig
+
+    public class TransferConfig
     {
-        private class SectionParser : Config.SectionParser<CoreConfig>
+        private class SectionParser : Config.SectionParser<TransferConfig>
         {
-            public CoreConfig parse(Config cfg)
+            public TransferConfig parse(Config cfg)
             {
-                return new CoreConfig(cfg);
+                return new TransferConfig(cfg);
             }
         }
 
-        public static Config.SectionParser<CoreConfig> KEY = new SectionParser();
+        public static Config.SectionParser<TransferConfig> KEY = new SectionParser();
 
-        private readonly int compression;
-        private readonly int packIndexVersion;
+        private readonly bool fsckObjects;
 
-        private CoreConfig(Config rc)
+        public TransferConfig(Config rc)
         {
-            compression = rc.getInt("core", "compression", Deflater.DEFAULT_COMPRESSION);
-            packIndexVersion = rc.getInt("pack", "indexversion", 2);
+            fsckObjects = rc.getBoolean("receive", "fsckobjects", false);
         }
 
-        public int getCompression()
+        public bool isFsckObjects()
         {
-            return compression;
+            return fsckObjects;
         }
-
-        public int getPackIndexVersion()
-        {
-            return packIndexVersion;
-        }
-            
     }
+
 }

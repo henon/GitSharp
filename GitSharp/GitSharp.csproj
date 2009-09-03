@@ -84,6 +84,7 @@
     <Compile Include="Exceptions\RepositoryNotFoundException.cs" />
     <Compile Include="Exceptions\RevisionSyntaxException.cs" />
     <Compile Include="Exceptions\SymlinksNotSupportedException.cs" />
+    <Compile Include="FileBasedConfig.cs" />
     <Compile Include="FnMatch\AbstractHead.cs" />
     <Compile Include="FnMatch\CharacterHead.cs" />
     <Compile Include="FnMatch\FileNameMatcher.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="FnMatch\LastHead.cs" />
     <Compile Include="FnMatch\RestrictedWildCardHead.cs" />
     <Compile Include="FnMatch\WildCardHead.cs" />
+    <Compile Include="GitSharpSystemReader.cs" />
     <Compile Include="Merge\Merger.cs" />
     <Compile Include="Merge\MergeStrategy.cs" />
     <Compile Include="Merge\StrategyOneSided.cs" />
@@ -100,6 +102,8 @@
     <Compile Include="Merge\ThreeWayMergeStrategy.cs" />
     <Compile Include="ObjectDatabase.cs" />
     <Compile Include="ObjectDirectory.cs" />
+    <Compile Include="RepositoryConfig.cs" />
+    <Compile Include="TransferConfig.cs" />
     <Compile Include="Transport\BundleWriter.cs" />
     <Compile Include="Transport\DefaultSshSessionFactory.cs" />
     <Compile Include="Transport\FetchProcess.cs" />
@@ -122,6 +126,7 @@
     <Compile Include="Transport\WalkRemoteObjectDatabase.cs" />
     <Compile Include="TreeWalk\Filter\PathSuffixFilter.cs" />
     <Compile Include="UnpackedObjectCache.cs" />
+    <Compile Include="UserConfig.cs" />
     <Compile Include="Util\AtomicReference.cs" />
     <Compile Include="Util\DateTime.cs" />
     <Compile Include="Util\Extensions.cs" />
@@ -168,7 +173,7 @@
     <Compile Include="RefLogWriter.cs" />
     <Compile Include="RefUpdate.cs" />
     <Compile Include="Repository.cs" />
-    <Compile Include="RepositoryConfig.cs" />
+    <Compile Include="Config.cs" />
     <Compile Include="RepositoryState.cs" />
     <Compile Include="SymlinkTreeEntry.cs" />
     <Compile Include="Tag.cs" />

@@ -40,60 +40,75 @@
  */
 
 using System.IO;
+using GitSharp.Exceptions;
 using GitSharp.Util;
 
 namespace GitSharp
 {
 
-    public class RepositoryConfig : FileBasedConfig
+    public class FileBasedConfig : Config
     {
-        public const string BRANCH_SECTION = "branch";
+        private readonly FileInfo configFile;
 
-        public RepositoryConfig(Repository repo)
-            : this(GitSharpSystemReader.Instance.openUserConfig(), new FileInfo(Path.Combine(repo.Directory.FullName, "config")))
+        public FileBasedConfig(FileInfo cfgLocation)
+            : this(null, cfgLocation)
         {
             
         }
 
-        public RepositoryConfig(Config @base, FileInfo cfgLocation)
-            : base(@base, cfgLocation)
+        public FileBasedConfig(Config @base, FileInfo cfgLocation)
+            : base(@base)
         {
-            
+            configFile = cfgLocation;
         }
 
-        public CoreConfig getCore()
+        public FileInfo getFile()
         {
-            return get(CoreConfig.KEY);
+            return configFile;
         }
 
-        public TransferConfig getTransfer()
+        public void load()
         {
-            return get(TransferConfig.KEY);
+            try
+            {
+                fromText(RawParseUtils.decode(NB.ReadFully(getFile())));
+            }
+            catch (FileNotFoundException)
+            {
+                clear();
+            }
+            catch (IOException e)
+            {
+                IOException e2 = new IOException("Cannot read " + getFile(), e);
+                throw e2;
+            }
+            catch (ConfigInvalidException e)
+            {
+                throw new ConfigInvalidException("Cannot read " + getFile(), e);
+            }
         }
 
-        public UserConfig getUserConfig()
+        public void save()
         {
-            return get(UserConfig.KEY);
+            byte[] o = Constants.encode(toText());
+            LockFile lf = new LockFile(getFile());
+            if (!lf.Lock())
+                throw new IOException("Cannot lock " + getFile());
+            try
+            {
+                lf.Write(o);
+                if (!lf.Commit())
+                    throw new IOException("Cannot commit write to " + getFile());
+            }
+            finally
+            {
+                lf.Unlock();
+            }
         }
 
-        public string getAuthorName()
+        public override string ToString()
         {
-            return getUserConfig().getAuthorName();
-        }
-
-        public string getCommitterName()
-        {
-            return getUserConfig().getCommitterName();
-        }
-
-        public string getAuthorEmail()
-        {
-            return getUserConfig().getAuthorEmail();
-        }
-
-        public string getCommitterEmail()
-        {
-            return getUserConfig().getCommitterEmail();
+            return GetType() + "[" + getFile() + "]";
         }
     }
 

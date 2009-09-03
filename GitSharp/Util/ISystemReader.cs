@@ -53,6 +53,8 @@ namespace GitSharp.Util
      */
     public interface ISystemReader
     {
+        string getHostname();
+
         /**
          * @param variable system variable to read
          * @return value of the system variable

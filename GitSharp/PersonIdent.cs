@@ -75,8 +75,8 @@ namespace GitSharp
         public PersonIdent(Repository repo)
         {
             RepositoryConfig config = repo.Config;
-            string username = config.GetString("user", null, "name");
-            string email = config.GetString("user", null, "email");
+            string username = config.getString("user", null, "name");
+            string email = config.getString("user", null, "email");
             this.Name = username;
             this.EmailAddress = email;
             this.when_time = DateTimeOffset.Now;

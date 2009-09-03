@@ -170,11 +170,11 @@ public class WindowCacheConfig {
 	 * @param rc configuration to read properties from.
 	 */
 	public void fromConfig( RepositoryConfig rc) {
-		setPackedGitOpenFiles(rc.GetInt("core", null, "packedgitopenfiles", getPackedGitOpenFiles()));
-        setPackedGitLimit(rc.GetInt("core", null, "packedgitlimit", getPackedGitLimit()));
-        setPackedGitWindowSize(rc.GetInt("core", null, "packedgitwindowsize", getPackedGitWindowSize()));
-		setPackedGitMMAP(rc.GetBoolean("core", null, "packedgitmmap", isPackedGitMMAP()));
-        setDeltaBaseCacheLimit(rc.GetInt("core", null, "deltabasecachelimit", getDeltaBaseCacheLimit()));
+		setPackedGitOpenFiles(rc.getInt("core", null, "packedgitopenfiles", getPackedGitOpenFiles()));
+        setPackedGitLimit(rc.getInt("core", null, "packedgitlimit", getPackedGitLimit()));
+        setPackedGitWindowSize(rc.getInt("core", null, "packedgitwindowsize", getPackedGitWindowSize()));
+		setPackedGitMMAP(rc.getBoolean("core", null, "packedgitmmap", isPackedGitMMAP()));
+        setDeltaBaseCacheLimit(rc.getInt("core", null, "deltabasecachelimit", getDeltaBaseCacheLimit()));
 	}
 }
 

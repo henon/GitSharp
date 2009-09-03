@@ -72,7 +72,7 @@ namespace GitSharp.Transport
 
             basef = new FileInfo(Path.Combine(objdir.ToString(), n.Slice(0, n.Length - suffix.Length)));
             IndexPack ip = new IndexPack(db, stream, basef);
-            ip.setIndexVersion(db.Config.Core.PackIndexVersion);
+            ip.setIndexVersion(db.Config.getCore().getPackIndexVersion());
             return ip;
         }
 

@@ -76,7 +76,7 @@ namespace GitSharp
             this.r = repo;
             buf = new byte[8192];
             md = new MessageDigest(); // [henon] Sha1 hash digest generator
-            def = new Deflater(r.Config.Core.Compression);
+            def = new Deflater(r.Config.getCore().getCompression());
         }
 
         public ObjectId WriteBlob(byte[] b)

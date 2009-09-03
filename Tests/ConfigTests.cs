@@ -56,12 +56,12 @@ namespace GitSharp.Tests
         {
             RepositoryConfig c = db.Config;
             Assert.IsNotNull(c);
-            Assert.AreEqual("0", c.GetString("core", null, "repositoryformatversion"));
-            Assert.AreEqual("0", c.GetString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
-            Assert.AreEqual("true", c.GetString("core", null, "filemode"));
-            Assert.AreEqual("true", c.GetString("cOrE", null, "fIlEModE"));
-            Assert.IsNull(c.GetString("notavalue", null, "reallyNotAValue"));
-            c.Load();
+            Assert.AreEqual("0", c.getString("core", null, "repositoryformatversion"));
+            Assert.AreEqual("0", c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
+            Assert.AreEqual("true", c.getString("core", null, "filemode"));
+            Assert.AreEqual("true", c.getString("cOrE", null, "fIlEModE"));
+            Assert.IsNull(c.getString("notavalue", null, "reallyNotAValue"));
+            c.load();
         }
 
 
@@ -70,19 +70,19 @@ namespace GitSharp.Tests
         {
             RepositoryConfig c = db.Config;
             Assert.IsNotNull(c);
-            c.Load();
-            Assert.AreEqual("0", c.GetString("core", null, "repositoryformatversion"));
-            Assert.AreEqual("0", c.GetString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
-            Assert.AreEqual("true", c.GetString("core", null, "filemode"));
-            Assert.AreEqual("true", c.GetString("cOrE", null, "fIlEModE"));
-            Assert.IsNull(c.GetString("notavalue", null, "reallyNotAValue"));
+            c.load();
+            Assert.AreEqual("0", c.getString("core", null, "repositoryformatversion"));
+            Assert.AreEqual("0", c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
+            Assert.AreEqual("true", c.getString("core", null, "filemode"));
+            Assert.AreEqual("true", c.getString("cOrE", null, "fIlEModE"));
+            Assert.IsNull(c.getString("notavalue", null, "reallyNotAValue"));
         }
 
         [Test]
         public void test006_ReadUglyConfig()
         {
             RepositoryConfig c = db.Config;
-            string cfg = c.ConfigFile.FullName; // db.Directory.FullName + "config";
+            string cfg = c.getFile().FullName; // db.Directory.FullName + "config";
             //FileWriter pw = new FileWriter(cfg);
             string configStr = "  [core];comment\n\tfilemode = yes\n"
                    + "[user]\n"
@@ -91,13 +91,13 @@ namespace GitSharp.Tests
                    + "    defaultCheckInComment = a many line\\n\\\ncomment\\n\\\n"
                    + " to test\n";
             File.WriteAllText(cfg, configStr);
-            c.Load();
-            Assert.AreEqual("yes", c.GetString("core", null, "filemode"));
+            c.load();
+            Assert.AreEqual("yes", c.getString("core", null, "filemode"));
             Assert.AreEqual("A U Thor <thor@example.com>", c
-                    .GetString("user", null, "email"));
-            Assert.AreEqual("A  Thor \\ \"\t ", c.GetString("user", null, "name"));
-            Assert.AreEqual("a many line\ncomment\n to test", c.GetString("user", null, "defaultCheckInComment"));
-            c.Save();
+                    .getString("user", null, "email"));
+            Assert.AreEqual("A  Thor \\ \"\t ", c.getString("user", null, "name"));
+            Assert.AreEqual("a many line\ncomment\n to test", c.getString("user", null, "defaultCheckInComment"));
+            c.save();
             var configStr1 = File.ReadAllText(cfg);
             Assert.AreEqual(configStr, configStr1);
         }

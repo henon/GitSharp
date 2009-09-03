@@ -164,11 +164,11 @@ namespace GitSharp.Transport
             walk = new RevWalk.RevWalk(db);
 
             RepositoryConfig cfg = db.Config;
-            checkReceivedObjects = cfg.GetBoolean("receive", "fsckobjects", false);
+            checkReceivedObjects = cfg.getBoolean("receive", "fsckobjects", false);
             allowCreates = true;
-            allowDeletes = !cfg.GetBoolean("receive", "denydeletes", false);
-            allowNonFastForwards = !cfg.GetBoolean("receive", "denynonfastforwards", false);
-            allowOfsDelta = cfg.GetBoolean("repack", "usedeltabaseoffset", true);
+            allowDeletes = !cfg.getBoolean("receive", "denydeletes", false);
+            allowNonFastForwards = !cfg.getBoolean("receive", "denynonfastforwards", false);
+            allowOfsDelta = cfg.getBoolean("repack", "usedeltabaseoffset", true);
             preReceive = PreReceiveHook.NULL;
             postReceive = PostReceiveHook.NULL;
         }

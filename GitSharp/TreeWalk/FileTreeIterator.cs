@@ -37,6 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
 using GitSharp.Util;
 namespace GitSharp.TreeWalk
@@ -89,7 +90,17 @@ namespace GitSharp.TreeWalk
 
         private Entry[] entries()
         {
-            FileInfo[] all = directory.GetFiles();
+            FileInfo[] all = null;
+            try
+            {
+                all = directory.GetFiles();
+            }
+            catch (DirectoryNotFoundException)
+            {
+            }
+            catch(IOException)
+            {
+            }
             if (all == null)
                 return EOF;
             Entry[] r = new Entry[all.Length];

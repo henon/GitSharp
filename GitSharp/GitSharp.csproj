@@ -67,6 +67,7 @@
     <Compile Include="DirectoryCache\DirCacheBuildIterator.cs" />
     <Compile Include="DirectoryCache\DirCacheIterator.cs" />
     <Compile Include="Ensure.cs" />
+    <Compile Include="Exceptions\CheckoutConflictException.cs" />
     <Compile Include="Exceptions\ConfigInvalidException.cs" />
     <Compile Include="Exceptions\GitlinksNotSupportedException.cs" />
     <Compile Include="Exceptions\InvalidObjectIdException.cs" />

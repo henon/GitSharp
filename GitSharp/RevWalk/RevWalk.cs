@@ -37,14 +37,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 using System;
+using System.Collections.Generic;
 using System.IO;
-using GitSharp.Util;
 using GitSharp.Exceptions;
 using GitSharp.RevWalk.Filter;
 using GitSharp.TreeWalk.Filter;
-using System.Collections.Generic;
+using GitSharp.Util;
 
 namespace GitSharp.RevWalk
 {
@@ -813,11 +812,11 @@ namespace GitSharp.RevWalk
          */
         public virtual void carry(RevFlag flag)
         {
-            if ((freeFlags & flag.mask) != 0)
-                throw new ArgumentException(flag.name + " is disposed.");
-            if (flag.walker != this)
-                throw new ArgumentException(flag.name + " not from this.");
-            carryFlags |= flag.mask;
+            if ((freeFlags & flag.Mask) != 0)
+                throw new ArgumentException(flag.Name + " is disposed.");
+            if (flag.Walker != this)
+                throw new ArgumentException(flag.Name + " not from this.");
+            carryFlags |= flag.Mask;
         }
 
         /**
@@ -850,7 +849,7 @@ namespace GitSharp.RevWalk
          */
         public virtual void disposeFlag(RevFlag flag)
         {
-            freeFlag(flag.mask);
+            freeFlag(flag.Mask);
         }
 
         internal virtual void freeFlag(int mask)
@@ -901,7 +900,7 @@ namespace GitSharp.RevWalk
          */
         public virtual void resetRetain(RevFlagSet retainFlags)
         {
-            reset(retainFlags.mask);
+            reset(retainFlags.Mask);
         }
 
         /**
@@ -919,7 +918,7 @@ namespace GitSharp.RevWalk
         {
             int mask = 0;
             foreach (RevFlag flag in retainFlags)
-                mask |= flag.mask;
+                mask |= flag.Mask;
             reset(mask);
         }
 

@@ -38,47 +38,40 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace GitSharp.Exceptions
 {
-    /**
-     * Thrown when an invalid object id is passed in as an argument.
-     */
+	/// <summary>
+	/// Thrown when an invalid object id is passed in as an argument.
+	/// </summary>
     public class InvalidObjectIdException : ArgumentException
     {
-        //private static final long serialVersionUID = 1L;
-
-        /**
-         * Create exception with bytes of the invalid object id.
-         *
-         * @param bytes containing the invalid id.
-         * @param offset in the byte array where the error occurred.
-         * @param length of the sequence of invalid bytes.
-         */
+		/// <summary>
+		/// Create exception with bytes of the invalid object id.
+		/// </summary>
+		/// <param name="bytes">containing the invalid id.</param>
+		/// <param name="offset">offset in the byte array where the error occurred.</param>
+		/// <param name="length">length of the sequence of invalid bytes.</param>
         public InvalidObjectIdException(byte[] bytes, int offset, int length)
-            : base("Invalid id" + asAscii(bytes, offset, length))
+            : base("Invalid id" + AsAscii(bytes, offset, length))
         {
         }
 
-        private static String asAscii(byte[] bytes, int offset, int length)
+        private static string AsAscii(byte[] bytes, int offset, int length)
         {
             try
             {
                 return ": " + Encoding.ASCII.GetString(bytes, offset, length);
             }
-            catch (DecoderFallbackException e2)
+            catch (DecoderFallbackException)
             {
-                return "";
+                return string.Empty;
             }
-            catch (IndexOutOfRangeException e2)
+            catch (IndexOutOfRangeException)
             {
-                return "";
+				return string.Empty;
             }
         }
     }

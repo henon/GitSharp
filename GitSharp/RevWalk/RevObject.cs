@@ -83,7 +83,7 @@ namespace GitSharp.RevWalk
          */
         public bool has(RevFlag flag)
         {
-            return (flags & flag.mask) != 0;
+            return (flags & flag.Mask) != 0;
         }
 
         /**
@@ -96,7 +96,7 @@ namespace GitSharp.RevWalk
          */
         public bool hasAny(RevFlagSet set)
         {
-            return (flags & set.mask) != 0;
+            return (flags & set.Mask) != 0;
         }
 
         /**
@@ -109,7 +109,7 @@ namespace GitSharp.RevWalk
          */
         public bool hasAll(RevFlagSet set)
         {
-            return (flags & set.mask) == set.mask;
+            return (flags & set.Mask) == set.Mask;
         }
 
         /**
@@ -122,7 +122,7 @@ namespace GitSharp.RevWalk
          */
         public void add(RevFlag flag)
         {
-            flags |= flag.mask;
+            flags |= flag.Mask;
         }
 
         /**
@@ -133,7 +133,7 @@ namespace GitSharp.RevWalk
          */
         public void add(RevFlagSet set)
         {
-            flags |= set.mask;
+            flags |= set.Mask;
         }
 
         /**
@@ -146,7 +146,7 @@ namespace GitSharp.RevWalk
          */
         public void remove(RevFlag flag)
         {
-            flags &= ~flag.mask;
+            flags &= ~flag.Mask;
         }
 
         /**
@@ -157,7 +157,7 @@ namespace GitSharp.RevWalk
          */
         public void remove(RevFlagSet set)
         {
-            flags &= ~set.mask;
+            flags &= ~set.Mask;
         }
 
         /** Release as much memory as possible from this object. */

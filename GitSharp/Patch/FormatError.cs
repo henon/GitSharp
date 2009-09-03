@@ -38,6 +38,7 @@
 
 using System;
 using System.Text;
+using GitSharp.Util;
 
 namespace GitSharp.Patch
 {

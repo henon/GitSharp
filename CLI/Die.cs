@@ -55,8 +55,6 @@ namespace GitSharp.CLI
      */
     public class Die : Exception
     {
-        private static long serialVersionUID = 1L;
-
         /**
          * Construct a new message explaining what has gone wrong.
          *

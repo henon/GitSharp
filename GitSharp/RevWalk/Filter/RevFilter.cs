@@ -37,6 +37,7 @@
  */
 
 using System;
+
 namespace GitSharp.RevWalk.Filter
 {
 
@@ -199,7 +200,7 @@ namespace GitSharp.RevWalk.Filter
          *             walk is halted and no more results are provided.
          * @throws MissingObjectException
          *             an object the filter needs to consult to determine its answer
-         *             does not exist in the Git repository the walker is operating
+         *             does not exist in the Git repository the Walker is operating
          *             on. Filtering this commit is impossible without the object.
          * @throws IncorrectObjectTypeException
          *             an object the filter needed to consult was not of the

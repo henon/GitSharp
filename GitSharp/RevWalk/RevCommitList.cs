@@ -37,344 +37,332 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
 using GitSharp.RevWalk.Filter;
-using System;
+
 namespace GitSharp.RevWalk
 {
+	/// <summary>
+	/// An ordered list of <see cref="RevCommit"/> subclasses.
+	/// </summary>
+	/// <typeparam name="T">type of subclass of RevCommit the list is storing.</typeparam>
+	public class RevCommitList<T> : RevObjectList<T>
+		where T : RevCommit
+	{
+		private RevWalk _walker;
 
+		public override void clear()
+		{
+			base.clear();
+			_walker = null;
+		}
 
-    /**
-     * An ordered list of {@link RevCommit} subclasses.
-     * 
-     * @param <E>
-     *            type of subclass of RevCommit the list is storing.
-     */
-    public class RevCommitList<E> : RevObjectList<E>
-        where E : RevCommit
-    {
-        private RevWalk walker;
+		/// <summary>
+		/// Apply a flag to all commits matching the specified filter.
+		/// 
+		/// <code>applyFlag(matching, flag, 0, size())</code>, but without
+		/// the incremental behavior.
+		/// </summary>
+		/// <param name="matching">
+		/// the filter to test commits with. If the filter includes a
+		/// commit it will have the flag set; if the filter does not
+		/// include the commit the flag will be unset.
+		/// </param>
+		/// <param name="flag">
+		/// revision filter needed to read additional objects, but an
+		/// error occurred while reading the pack files or loose objects
+		/// of the repository.
+		/// </param>
+		public void applyFlag(RevFilter matching, RevFlag flag)
+		{
+			applyFlag(matching, flag, 0, Size);
+		}
 
-        public override void clear()
-        {
-            base.clear();
-            walker = null;
-        }
+		/// <summary>
+		/// Apply a flag to all commits matching the specified filter.
+		/// 
+		/// This version allows incremental testing and application, such as from a
+		/// background thread that needs to periodically halt processing and send
+		/// updates to the UI.
+		/// </summary>
+		/// <param name="matching">
+		/// the filter to test commits with. If the filter includes a
+		/// commit it will have the flag set; if the filter does not
+		/// include the commit the flag will be unset.
+		/// </param>
+		/// <param name="flag">
+		/// the flag to apply (or remove). Applications are responsible
+		/// for allocating this flag from the source RevWalk.
+		/// </param>
+		/// <param name="rangeBegin">
+		/// first commit within the list to begin testing at, inclusive.
+		/// Must not be negative, but may be beyond the end of the list.
+		/// </param>
+		/// <param name="rangeEnd">
+		/// last commit within the list to end testing at, exclusive. If
+		/// smaller than or equal to <code>rangeBegin</code> then no
+		/// commits will be tested.
+		/// </param>
+		/// <remarks>
+		/// Revision filter needed to read additional objects, but an
+		/// error occurred while reading the pack files or loose objects
+		/// of the repository.
+		/// </remarks>
+		public void applyFlag(RevFilter matching, RevFlag flag, int rangeBegin, int rangeEnd)
+		{
+			RevWalk w = flag.Walker;
+			rangeEnd = Math.Min(rangeEnd, Size);
+			while (rangeBegin < rangeEnd)
+			{
+				int index = rangeBegin;
+				Block s = Contents;
 
-        /**
-         * Apply a flag to all commits matching the specified filter.
-         * <p>
-         * Same as <code>applyFlag(matching, flag, 0, size())</code>, but without
-         * the incremental behavior.
-         * 
-         * @param matching
-         *            the filter to test commits with. If the filter includes a
-         *            commit it will have the flag set; if the filter does not
-         *            include the commit the flag will be unset.
-         * @param flag
-         *            the flag to apply (or remove). Applications are responsible
-         *            for allocating this flag from the source RevWalk.
-         * @
-         *             revision filter needed to read additional objects, but an
-         *             error occurred while reading the pack files or loose objects
-         *             of the repository.
-         * @throws IncorrectObjectTypeException
-         *             revision filter needed to read additional objects, but an
-         *             object was not of the correct type. Repository corruption may
-         *             have occurred.
-         * @throws MissingObjectException
-         *             revision filter needed to read additional objects, but an
-         *             object that should be present was not found. Repository
-         *             corruption may have occurred.
-         */
-        public void applyFlag(RevFilter matching, RevFlag flag)
-        {
-            applyFlag(matching, flag, 0, size());
-        }
+				while (s.Shift > 0)
+				{
+					int i = index >> s.Shift;
+					index -= i << s.Shift;
+					s = (Block)s.Contents[i];
+				}
 
-        /**
-         * Apply a flag to all commits matching the specified filter.
-         * <p>
-         * This version allows incremental testing and application, such as from a
-         * background thread that needs to periodically halt processing and send
-         * updates to the UI.
-         * 
-         * @param matching
-         *            the filter to test commits with. If the filter includes a
-         *            commit it will have the flag set; if the filter does not
-         *            include the commit the flag will be unset.
-         * @param flag
-         *            the flag to apply (or remove). Applications are responsible
-         *            for allocating this flag from the source RevWalk.
-         * @param rangeBegin
-         *            first commit within the list to begin testing at, inclusive.
-         *            Must not be negative, but may be beyond the end of the list.
-         * @param rangeEnd
-         *            last commit within the list to end testing at, exclusive. If
-         *            smaller than or equal to <code>rangeBegin</code> then no
-         *            commits will be tested.
-         * @
-         *             revision filter needed to read additional objects, but an
-         *             error occurred while reading the pack files or loose objects
-         *             of the repository.
-         * @throws IncorrectObjectTypeException
-         *             revision filter needed to read additional objects, but an
-         *             object was not of the correct type. Repository corruption may
-         *             have occurred.
-         * @throws MissingObjectException
-         *             revision filter needed to read additional objects, but an
-         *             object that should be present was not found. Repository
-         *             corruption may have occurred.
-         */
-        public void applyFlag(RevFilter matching, RevFlag flag, int rangeBegin, int rangeEnd)
-        {
-            RevWalk w = flag.getRevWalk();
-            rangeEnd = Math.Min(rangeEnd, size());
-            while (rangeBegin < rangeEnd)
-            {
-                int index = rangeBegin;
-                Block s = contents;
-                while (s.shift > 0)
-                {
-                    int i = index >> s.shift;
-                    index -= i << s.shift;
-                    s = (Block)s.contents[i];
-                }
+				while (rangeBegin++ < rangeEnd && index < BLOCK_SIZE)
+				{
+					RevCommit c = (RevCommit)s.Contents[index++];
 
-                while (rangeBegin++ < rangeEnd && index < BLOCK_SIZE)
-                {
-                    RevCommit c = (RevCommit)s.contents[index++];
-                    if (matching.include(w, c))
-                        c.add(flag);
-                    else
-                        c.remove(flag);
-                }
-            }
-        }
+					if (matching.include(w, c))
+					{
+						c.add(flag);
+					}
+					else
+					{
+						c.remove(flag);
+					}
+				}
+			}
+		}
 
-        /**
-         * Remove the given flag from all commits.
-         * <p>
-         * Same as <code>clearFlag(flag, 0, size())</code>, but without the
-         * incremental behavior.
-         * 
-         * @param flag
-         *            the flag to remove. Applications are responsible for
-         *            allocating this flag from the source RevWalk.
-         */
-        public void clearFlag(RevFlag flag)
-        {
-            clearFlag(flag, 0, size());
-        }
+		/// <summary>
+		/// Remove the given flag from all commits.
+		/// 
+		/// Same as <code>clearFlag(flag, 0, size())</code>, but without the
+		/// incremental behavior.
+		/// </summary>
+		/// <param name="flag">the flag to remove. Applications are responsible for
+		/// allocating this flag from the source <see cref="RevWalk"/>.</param>
+		public void clearFlag(RevFlag flag)
+		{
+			clearFlag(flag, 0, Size);
+		}
 
-        /**
-         * Remove the given flag from all commits.
-         * <p>
-         * This method is actually implemented in terms of:
-         * <code>applyFlag(RevFilter.NONE, flag, rangeBegin, rangeEnd)</code>.
-         * 
-         * @param flag
-         *            the flag to remove. Applications are responsible for
-         *            allocating this flag from the source RevWalk.
-         * @param rangeBegin
-         *            first commit within the list to begin testing at, inclusive.
-         *            Must not be negative, but may be beyond the end of the list.
-         * @param rangeEnd
-         *            last commit within the list to end testing at, exclusive. If
-         *            smaller than or equal to <code>rangeBegin</code> then no
-         *            commits will be tested.
-         */
-        public void clearFlag(RevFlag flag, int rangeBegin,
-                 int rangeEnd)
-        {
-            try
-            {
-                applyFlag(RevFilter.NONE, flag, rangeBegin, rangeEnd);
-            }
-            catch (IOException)
-            {
-                // Never happen. The filter we use does not throw any
-                // exceptions, for any reason.
-            }
-        }
+		/// <summary>
+		/// Remove the given flag from all commits.
+		/// 
+		/// This method is actually implemented in terms of:
+		/// <code>applyFlag(RevFilter.NONE, flag, rangeBegin, rangeEnd)</code>.
+		/// </summary>
+		/// <param name="flag">
+		/// The flag to remove. Applications are responsible for
+		/// allocating this flag from the source <see cref="RevWalk"/>.
+		/// </param>
+		/// <param name="rangeBegin">
+		/// First commit within the list to begin testing at, inclusive.
+		/// Must not be negative, but may be beyond the end of the list.
+		/// </param>
+		/// <param name="rangeEnd">
+		/// Last commit within the list to end testing at, exclusive. If
+		/// smaller than or equal to <code>rangeBegin</code> then no
+		/// commits will be tested.
+		/// </param>
+		public void clearFlag(RevFlag flag, int rangeBegin, int rangeEnd)
+		{
+			try
+			{
+				applyFlag(RevFilter.NONE, flag, rangeBegin, rangeEnd);
+			}
+			catch (IOException)
+			{
+				// Never happen. The filter we use does not throw any
+				// exceptions, for any reason.
+			}
+		}
 
-        /**
-         * Find the next commit that has the given flag set.
-         * 
-         * @param flag
-         *            the flag to test commits against.
-         * @param begin
-         *            first commit index to test at. Applications may wish to begin
-         *            at 0, to test the first commit in the list.
-         * @return index of the first commit at or after index <code>begin</code>
-         *         that has the specified flag set on it; -1 if no match is found.
-         */
-        public int indexOf(RevFlag flag, int begin)
-        {
-            while (begin < size())
-            {
-                int index = begin;
-                Block s = contents;
-                while (s.shift > 0)
-                {
-                    int i = index >> s.shift;
-                    index -= i << s.shift;
-                    s = (Block)s.contents[i];
-                }
+		/// <summary>
+		/// Find the next commit that has the given flag set.
+		/// </summary>
+		/// <param name="flag">the flag to test commits against.</param>
+		/// <param name="begin">
+		/// First commit index to test at. Applications may wish to begin
+		/// at 0, to test the first commit in the list.
+		/// </param>
+		/// <returns>
+		/// Index of the first commit at or after index <code>begin</code>
+		/// that has the specified flag set on it; -1 if no match is found.
+		/// </returns>
+		public int indexOf(RevFlag flag, int begin)
+		{
+			while (begin < Size)
+			{
+				int index = begin;
+				Block s = Contents;
+				while (s.Shift > 0)
+				{
+					int i = index >> s.Shift;
+					index -= i << s.Shift;
+					s = (Block)s.Contents[i];
+				}
 
-                while (begin++ < size() && index < BLOCK_SIZE)
-                {
-                    RevCommit c = (RevCommit)s.contents[index++];
-                    if (c.has(flag))
-                        return begin;
-                }
-            }
-            return -1;
-        }
+				while (begin++ < Size && index < BLOCK_SIZE)
+				{
+					RevCommit c = (RevCommit)s.Contents[index++];
+					if (c.has(flag))
+					{
+						return begin;
+					}
+				}
+			}
 
-        /**
-         * Find the next commit that has the given flag set.
-         * 
-         * @param flag
-         *            the flag to test commits against.
-         * @param begin
-         *            first commit index to test at. Applications may wish to begin
-         *            at <code>size()-1</code>, to test the last commit in the
-         *            list.
-         * @return index of the first commit at or before index <code>begin</code>
-         *         that has the specified flag set on it; -1 if no match is found.
-         */
-        public int LastIndexOf(RevFlag flag, int begin)
-        {
-            begin = Math.Min(begin, size() - 1);
-            while (begin >= 0)
-            {
-                int index = begin;
-                Block s = contents;
-                while (s.shift > 0)
-                {
-                    int i = index >> s.shift;
-                    index -= i << s.shift;
-                    s = (Block)s.contents[i];
-                }
+			return -1;
+		}
 
-                while (begin-- >= 0 && index >= 0)
-                {
-                    RevCommit c = (RevCommit)s.contents[index--];
-                    if (c.has(flag))
-                        return begin;
-                }
-            }
-            return -1;
-        }
+		/// <summary>
+		/// Find the next commit that has the given flag set.
+		/// </summary>
+		/// <param name="flag">the flag to test commits against.</param>
+		/// <param name="begin">
+		/// First commit index to test at. Applications may wish to begin
+		/// at <code>size()-1</code>, to test the last commit in the
+		/// list.</param>
+		/// <returns>
+		/// Index of the first commit at or before index <code>begin</code>
+		/// that has the specified flag set on it; -1 if no match is found.
+		/// </returns>
+		public int LastIndexOf(RevFlag flag, int begin)
+		{
+			begin = Math.Min(begin, Size - 1);
+			while (begin >= 0)
+			{
+				int index = begin;
+				Block s = Contents;
+				while (s.Shift > 0)
+				{
+					int i = index >> s.Shift;
+					index -= i << s.Shift;
+					s = (Block)s.Contents[i];
+				}
 
-        /**
-         * Set the revision walker this list populates itself from.
-         * 
-         * @param w
-         *            the walker to populate from.
-         * @see #fillTo(int)
-         */
-        public void source(RevWalk w)
-        {
-            walker = w;
-        }
+				while (begin-- >= 0 && index >= 0)
+				{
+					RevCommit c = (RevCommit)s.Contents[index--];
+					if (c.has(flag))
+					{
+						return begin;
+					}
+				}
+			}
 
-        /**
-         * Is this list still pending more items?
-         * 
-         * @return true if {@link #fillTo(int)} might be able to extend the list
-         *         size when called.
-         */
-        public bool isPending()
-        {
-            return walker != null;
-        }
+			return -1;
+		}
 
-        /**
-         * Ensure this list contains at least a specified number of commits.
-         * <p>
-         * The revision walker specified by {@link #source(RevWalk)} is pumped until
-         * the given number of commits are contained in this list. If there are
-         * fewer total commits available from the walk then the method will return
-         * early. Callers can test the  size of the list by {@link #size()} to
-         * determine if the high water mark specified was met.
-         * 
-         * @param highMark
-         *            number of commits the caller wants this list to contain when
-         *            the fill operation is complete.
-         * @
-         *             see {@link RevWalk#next()}
-         * @throws IncorrectObjectTypeException
-         *             see {@link RevWalk#next()}
-         * @throws MissingObjectException
-         *             see {@link RevWalk#next()}
-         */
-        public void fillTo(int highMark)
-        {
-            if (walker == null || _size > highMark)
-                return;
+		/// <summary>
+		/// Set the revision walker this list populates itself from.
+		/// </summary>
+		/// <param name="walker">the walker to populate from.</param>
+		public void Source(RevWalk walker)
+		{
+			_walker = walker;
+		}
 
-            Generator p = walker.pending;
-            RevCommit c = p.next();
-            if (c == null)
-            {
-                walker.pending = EndGenerator.INSTANCE;
-                walker = null;
-                return;
-            }
-            enter(_size, (E)c);
-            add((E)c);
-            p = walker.pending;
+		/// <summary>
+		/// Is this list still pending more items?
+		/// </summary>
+		/// <returns>
+		/// true if <see cref="fillTo(int)"/> might be able to extend the list
+		/// size when called.
+		/// </returns>
+		public bool IsPending
+		{
+			get { return _walker != null; }
+		}
 
-            while (_size <= highMark)
-            {
-                int index = _size;
-                Block s = contents;
-                while (index >> s.shift >= BLOCK_SIZE)
-                {
-                    s = new Block(s.shift + BLOCK_SHIFT);
-                    s.contents[0] = contents;
-                    contents = s;
-                }
-                while (s.shift > 0)
-                {
-                    int i = index >> s.shift;
-                    index -= i << s.shift;
-                    if (s.contents[i] == null)
-                        s.contents[i] = new Block(s.shift - BLOCK_SHIFT);
-                    s = (Block)s.contents[i];
-                }
+		/// <summary>
+		/// Ensure this list contains at least a specified number of commits.
+		/// 
+		/// The revision walker specified by {@link #source(RevWalk)} is pumped until
+		/// the given number of commits are contained in this list. If there are
+		/// fewer total commits available from the walk then the method will return
+		/// early. Callers can test the  size of the list by {@link #size()} to
+		/// determine if the high water mark specified was met.
+		/// </summary>
+		/// <param name="highMark">
+		/// Number of commits the caller wants this list to contain when
+		/// the fill operation is complete.
+		/// </param>
+		public void fillTo(int highMark)
+		{
+			if (_walker == null || Size > highMark) return;
 
-                object[] dst = s.contents;
-                while (_size <= highMark && index < BLOCK_SIZE)
-                {
-                    c = p.next();
-                    if (c == null)
-                    {
-                        walker.pending = EndGenerator.INSTANCE;
-                        walker = null;
-                        return;
-                    }
-                    enter(_size++, (E)c);
-                    dst[index++] = c;
-                }
-            }
-        }
+			Generator p = _walker.pending;
+			RevCommit c = p.next();
+			if (c == null)
+			{
+				_walker.pending = EndGenerator.INSTANCE;
+				_walker = null;
+				return;
+			}
 
-        /**
-         * Optional callback invoked when commits enter the list by fillTo.
-         * <p>
-         * This method is only called during {@link #fillTo(int)}.
-         * 
-         * @param index
-         *            the list position this object will appear at.
-         * @param e
-         *            the object being added (or set) into the list.
-         */
-        internal void enter(int index, E e)
-        {
-            // Do nothing by default.
-        }
-    }
+			enter(Size, (T)c);
+			add((T)c);
+			p = _walker.pending;
+
+			while (Size <= highMark)
+			{
+				int index = Size;
+				Block s = Contents;
+
+				while (index >> s.Shift >= BLOCK_SIZE)
+				{
+					s = new Block(s.Shift + BLOCK_SHIFT);
+					s.Contents[0] = Contents;
+					Contents = s;
+				}
+
+				while (s.Shift > 0)
+				{
+					int i = index >> s.Shift;
+					index -= i << s.Shift;
+					if (s.Contents[i] == null)
+					{
+						s.Contents[i] = new Block(s.Shift - BLOCK_SHIFT);
+					}
+					s = (Block)s.Contents[i];
+				}
+
+				object[] dst = s.Contents;
+				while (Size <= highMark && index < BLOCK_SIZE)
+				{
+					c = p.next();
+					if (c == null)
+					{
+						_walker.pending = EndGenerator.INSTANCE;
+						_walker = null;
+						return;
+					}
+					enter(Size++, (T)c);
+					dst[index++] = c;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Optional callback invoked when commits enter the list by fillTo.
+		/// 
+		/// This method is only called during {@link #fillTo(int)}.
+		/// </summary>
+		/// <param name="index">the list position this object will appear at.</param>
+		/// <param name="t">the object being added (or set) into the list.</param>
+		internal void enter(int index, T t)
+		{
+			// Do nothing by default.
+		}
+	}
 }

@@ -38,94 +38,115 @@
 using NUnit.Framework;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Tests
 {
     [TestFixture]
     public class WindowCacheReconfigureTest : RepositoryTestCase
     {
-#if false
-	public void testConfigureCache_PackedGitLimit_0() {
-		try {
-			final WindowCacheConfig cfg = new WindowCacheConfig();
+		[Test]
+		[ExpectedException(typeof(ArgumentException))]
+		public void testConfigureCache_PackedGitLimit_0()
+		{
+			WindowCacheConfig cfg = new WindowCacheConfig();
 			cfg.setPackedGitLimit(0);
 			WindowCache.reconfigure(cfg);
-			fail("incorrectly permitted PackedGitLimit = 0");
-		} catch (IllegalArgumentException e) {
+			Assert.Fail("incorrectly permitted PackedGitLimit = 0");
+		}
+
+		[Test]
+		public void testConfigureCache_PackedGitWindowSize_0()
+		{
+			try
+			{
+				WindowCacheConfig cfg = new WindowCacheConfig();
+				cfg.setPackedGitWindowSize(0);
+				WindowCache.reconfigure(cfg);
+				Assert.Fail("incorrectly permitted PackedGitWindowSize = 0");
+			}
+			catch (ArgumentException e)
+			{
+				Assert.AreEqual("Invalid window size", e.Message);
+			}
+		}
+
+		[Test]
+		public void testConfigureCache_PackedGitWindowSize_512()
+		{
+			try
+			{
+				WindowCacheConfig cfg = new WindowCacheConfig();
+				cfg.setPackedGitWindowSize(512);
+				WindowCache.reconfigure(cfg);
+				Assert.Fail("incorrectly permitted PackedGitWindowSize = 512");
+			}
+			catch (ArgumentException e)
+			{
+				Assert.AreEqual("Invalid window size", e.Message);
+			}
+		}
+
+		[Test]
+		public void testConfigureCache_PackedGitWindowSize_4097()
+		{
+			try
+			{
+				WindowCacheConfig cfg = new WindowCacheConfig();
+				cfg.setPackedGitWindowSize(4097);
+				WindowCache.reconfigure(cfg);
+				Assert.Fail("incorrectly permitted PackedGitWindowSize = 4097");
+			}
+			catch (ArgumentException e)
+			{
+				Assert.AreEqual("Window size must be power of 2", e.Message);
+			}
+		}
+
+		[Test]
+		public void testConfigureCache_PackedGitOpenFiles_0()
+		{
+			try
+			{
+				WindowCacheConfig cfg = new WindowCacheConfig();
+				cfg.setPackedGitOpenFiles(0);
+				WindowCache.reconfigure(cfg);
+				Assert.Fail("incorrectly permitted PackedGitOpenFiles = 0");
+			}
+			catch (System.ArgumentException e)
+			{
+				Assert.AreEqual("Open files must be >= 1", e.Message);
+			}
+		}
+
+		[Test]
+		public void testConfigureCache_PackedGitWindowSizeAbovePackedGitLimit()
+		{
+			try
+			{
+				WindowCacheConfig cfg = new WindowCacheConfig();
+				cfg.setPackedGitLimit(1024);
+				cfg.setPackedGitWindowSize(8192);
+				WindowCache.reconfigure(cfg);
+				Assert.Fail("incorrectly permitted PackedGitWindowSize > PackedGitLimit");
+			}
+			catch (ArgumentException e)
+			{
+				Assert.AreEqual("Window size must be < limit", e.Message);
+			}
+		}
+
+		[Test]
+		public void testConfigureCache_Limits1()
+		{
+			// This test is just to force coverage over some lower bounds for
+			// the table. We don't want the table to wind up with too small
+			// of a size. This is highly dependent upon the table allocation
+			// algorithm actually implemented in WindowCache.
 			//
-		}
-	}
-
-	public void testConfigureCache_PackedGitWindowSize_0() {
-		try {
-			final WindowCacheConfig cfg = new WindowCacheConfig();
-			cfg.setPackedGitWindowSize(0);
+			WindowCacheConfig cfg = new WindowCacheConfig();
+			cfg.setPackedGitLimit(6 * 4096 / 5);
+			cfg.setPackedGitWindowSize(4096);
 			WindowCache.reconfigure(cfg);
-			fail("incorrectly permitted PackedGitWindowSize = 0");
-		} catch (IllegalArgumentException e) {
-			assertEquals("Invalid window size", e.getMessage());
 		}
-	}
-
-	public void testConfigureCache_PackedGitWindowSize_512() {
-		try {
-			final WindowCacheConfig cfg = new WindowCacheConfig();
-			cfg.setPackedGitWindowSize(512);
-			WindowCache.reconfigure(cfg);
-			fail("incorrectly permitted PackedGitWindowSize = 512");
-		} catch (IllegalArgumentException e) {
-			assertEquals("Invalid window size", e.getMessage());
-		}
-	}
-
-	public void testConfigureCache_PackedGitWindowSize_4097() {
-		try {
-			final WindowCacheConfig cfg = new WindowCacheConfig();
-			cfg.setPackedGitWindowSize(4097);
-			WindowCache.reconfigure(cfg);
-			fail("incorrectly permitted PackedGitWindowSize = 4097");
-		} catch (IllegalArgumentException e) {
-			assertEquals("Window size must be power of 2", e.getMessage());
-		}
-	}
-
-	public void testConfigureCache_PackedGitOpenFiles_0() {
-		try {
-			final WindowCacheConfig cfg = new WindowCacheConfig();
-			cfg.setPackedGitOpenFiles(0);
-			WindowCache.reconfigure(cfg);
-			fail("incorrectly permitted PackedGitOpenFiles = 0");
-		} catch (IllegalArgumentException e) {
-			assertEquals("Open files must be >= 1", e.getMessage());
-		}
-	}
-
-	public void testConfigureCache_PackedGitWindowSizeAbovePackedGitLimit() {
-		try {
-			final WindowCacheConfig cfg = new WindowCacheConfig();
-			cfg.setPackedGitLimit(1024);
-			cfg.setPackedGitWindowSize(8192);
-			WindowCache.reconfigure(cfg);
-			fail("incorrectly permitted PackedGitWindowSize > PackedGitLimit");
-		} catch (IllegalArgumentException e) {
-			assertEquals("Window size must be < limit", e.getMessage());
-		}
-	}
-
-	public void testConfigureCache_Limits1() {
-		// This test is just to force coverage over some lower bounds for
-		// the table. We don't want the table to wind up with too small
-		// of a size. This is highly dependent upon the table allocation
-		// algorithm actually implemented in WindowCache.
-		//
-		final WindowCacheConfig cfg = new WindowCacheConfig();
-		cfg.setPackedGitLimit(6 * 4096 / 5);
-		cfg.setPackedGitWindowSize(4096);
-		WindowCache.reconfigure(cfg);
-	}
-#endif
     }
 }

@@ -37,252 +37,266 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Util;
-
 using System;
 using System.Text;
+using GitSharp.Util;
 
 namespace GitSharp
 {
-
-    /**
-     * A prefix abbreviation of an {@link ObjectId}.
-     * <p>
-     * Sometimes Git produces abbreviated SHA-1 strings, using sufficient leading
-     * digits from the ObjectId name to still be unique within the repository the
-     * string was generated from. These ids are likely to be unique for a useful
-     * period of time, especially if they contain at least 6-10 hex digits.
-     * <p>
-     * This class converts the hex string into a binary form, to make it more
-     * efficient for matching against an object.
-     */
+	/// <summary>
+	/// A prefix abbreviation of an {@link ObjectId}.
+	/// 
+	/// Sometimes Git produces abbreviated SHA-1 strings, using sufficient leading
+	/// digits from the ObjectId name to still be unique within the repository the
+	/// string was generated from. These ids are likely to be unique for a useful
+	/// period of time, especially if they contain at least 6-10 hex digits.
+	/// 
+	/// This class converts the hex string into a binary form, to make it more
+	/// efficient for matching against an object.
+	/// </summary>
 	[Serializable]
-    public class AbbreviatedObjectId
-    {
-        /**
-         * Convert an AbbreviatedObjectId from hex characters (US-ASCII).
-         *
-         * @param buf
-         *            the US-ASCII buffer to read from.
-         * @param offset
-         *            position to read the first character from.
-         * @param end
-         *            one past the last position to read (<code>end-offset</code> is
-         *            the Length of the string).
-         * @return the converted object id.
-         */
-        public static AbbreviatedObjectId FromString(byte[] buf, int offset, int end)
-        {
-            if (end - offset > AnyObjectId.StringLength)
-                throw new ArgumentException("Invalid id");
-            return fromHexString(buf, offset, end);
-        }
+	public class AbbreviatedObjectId
+	{
+		/// Number of half-bytes used by this id.
+		private readonly int _nibbles;
 
-        /**
-         * Convert an AbbreviatedObjectId from hex characters.
-         *
-         * @param str
-         *            the string to read from. Must be &lt;= 40 characters.
-         * @return the converted object id.
-         */
-        public static AbbreviatedObjectId FromString(string str)
-        {
-            if (str.Length > AnyObjectId.StringLength)
-                throw new ArgumentException("Invalid id: " + str);
-            byte[] b = Constants.encodeASCII(str);
-            return fromHexString(b, 0, b.Length);
-        }
+		readonly int _w1;
+		readonly int _w2;
+		readonly int _w3;
+		readonly int _w4;
+		readonly int _w5;
 
-        private static AbbreviatedObjectId fromHexString(byte[] bs, int ptr, int end)
-        {
-            try
-            {
-                int a = hexUInt32(bs, ptr, end);
-                int b = hexUInt32(bs, ptr + 8, end);
-                int c = hexUInt32(bs, ptr + 16, end);
-                int d = hexUInt32(bs, ptr + 24, end);
-                int e = hexUInt32(bs, ptr + 32, end);
-                return new AbbreviatedObjectId(end - ptr, a, b, c, d, e);
-            }
-            catch (IndexOutOfRangeException)
-            {
-                string str = Encoding.GetEncoding("US-ASCII").GetString(bs, ptr, end - ptr);
-                throw new ArgumentException("Invalid id: " + str);
-            }
-        }
+		/// <summary>
+		/// Convert an AbbreviatedObjectId from hex characters (US-ASCII).
+		/// </summary>
+		/// <param name="buf">the US-ASCII buffer to read from.</param>
+		/// <param name="offset">position to read the first character from.</param>
+		/// <param name="end">
+		/// one past the last position to read (<code>end-offset</code> is
+		/// the Length of the string).
+		/// </param>
+		/// <returns>the converted object id.</returns>
+		public static AbbreviatedObjectId FromString(byte[] buf, int offset, int end)
+		{
+			if (end - offset > AnyObjectId.StringLength)
+			{
+				throw new ArgumentException("Invalid id");
+			}
 
-        private static int hexUInt32(byte[] bs, int p, int end)
-        {
-            if (8 <= end - p)
-                return Hex.HexStringToUInt32(bs, p);
+			return FromHexString(buf, offset, end);
+		}
 
-            int r = 0, n = 0;
-            while (n < 8 && p < end)
-            {
-                int v = Hex.HexCharToValue(bs[p++]);
-                if (v < 0)
-                    throw new IndexOutOfRangeException();
-                r <<= 4;
-                r |= v;
-                n++;
-            }
-            return r << (8 - n) * 4;
-        }
+		/// <summary>
+		/// Convert an AbbreviatedObjectId from hex characters.
+		/// </summary>
+		/// <param name="str">
+		/// the string to read from. Must be &lt;= 40 characters.
+		/// </param>
+		/// <returns>the converted object id.</returns>
+		public static AbbreviatedObjectId FromString(string str)
+		{
+			if (str.Length > AnyObjectId.StringLength)
+			{
+				throw new ArgumentException("Invalid id: " + str);
+			}
 
-        public static int Mask(int nibbles, int word, int v)
-        {
+			byte[] b = Constants.encodeASCII(str);
+			return FromHexString(b, 0, b.Length);
+		}
 
-            int b = (word - 1) * 8;
-            if (b + 8 <= nibbles)
-            {
-                // We have all of the bits required for this word.
-                //
-                return v;
-            }
+		public static int Mask(int nibbles, int word, int v)
+		{
+			int b = (word - 1) * 8;
+			if (b + 8 <= nibbles)
+			{
+				// We have all of the bits required for this word.
+				//
+				return v;
+			}
 
-            if (nibbles <= b)
-            {
-                // We have none of the bits required for this word.
-                //
-                return 0;
-            }
+			if (nibbles <= b)
+			{
+				// We have none of the bits required for this word.
+				//
+				return 0;
+			}
 
-            int s = 32 - (nibbles - b) * 4;
-            return (int)((uint)v >> s) << s; // [henon] unsigned int needed to get the effect of java's rightshift operator >>>
-        }
+			int s = 32 - (nibbles - b) * 4;
+			return (int)((uint)v >> s) << s; // [henon] unsigned int needed to get the effect of java's rightshift operator >>>
+		}
 
-        /** Number of half-bytes used by this id. */
-        int nibbles;
+		public AbbreviatedObjectId(int nibbles, int w1, int w2, int w3, int w4, int w5)
+		{
+			_nibbles = nibbles;
+			_w1 = w1;
+			_w2 = w2;
+			_w3 = w3;
+			_w4 = w4;
+			_w5 = w5;
+		}
 
-        int w1;
+		/// <summary>
+		/// Number of hex digits appearing in this id
+		/// </summary>
+		public int Length
+		{
+			get { return _nibbles; }
+		}
 
-        int w2;
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns>
+		/// true if this ObjectId is actually a complete id.
+		/// </returns>
+		public bool isComplete()
+		{
+			return Length == AnyObjectId.ObjectIdLength * 2;
+		}
 
-        int w3;
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns>
+		/// Return a complete ObjectId; null if <see cref="isComplete"/> is false */
+		/// </returns>
+		public ObjectId ToObjectId()
+		{
+			return isComplete() ? new ObjectId(_w1, _w2, _w3, _w4, _w5) : null;
+		}
 
-        int w4;
+		/// <summary>
+		/// Compares this abbreviation to a full object id.
+		/// </summary>
+		/// <param name="other">the other object id.</param>
+		/// <returns>
+		/// Return &lt;0 if this abbreviation names an object that is less than
+		/// <code>other</code>; 0 if this abbreviation exactly matches the
+		/// first {@link #Length} digits of <code>other.name()</code>;
+		/// &gt;0 if this abbreviation names an object that is after
+		/// <code>other</code>.
+		/// </returns>
+		public int prefixCompare(AnyObjectId other)
+		{
+			int cmp = NB.CompareUInt32(_w1, mask(1, other.W1));
+			if (cmp != 0)
+			{
+				return cmp;
+			}
 
-        int w5;
+			cmp = NB.CompareUInt32(_w2, mask(2, other.W2));
+			if (cmp != 0)
+			{
+				return cmp;
+			}
 
-        public AbbreviatedObjectId(int n, int new_1, int new_2, int new_3, int new_4, int new_5)
-        {
-            nibbles = n;
-            w1 = new_1;
-            w2 = new_2;
-            w3 = new_3;
-            w4 = new_4;
-            w5 = new_5;
-        }
+			cmp = NB.CompareUInt32(_w3, mask(3, other.W3));
+			if (cmp != 0)
+			{
+				return cmp;
+			}
 
-        /** @return number of hex digits appearing in this id */
-        public int Length
-        {
-            get
-            {
-                return nibbles;
-            }
-        }
+			cmp = NB.CompareUInt32(_w4, mask(4, other.W4));
+			if (cmp != 0)
+			{
+				return cmp;
+			}
 
-        /** @return true if this ObjectId is actually a complete id. */
-        public bool isComplete()
-        {
-            return Length == AnyObjectId.ObjectIdLength * 2;
-        }
+			return NB.CompareUInt32(_w5, mask(5, other.W5));
+		}
 
-        /** @return a complete ObjectId; null if {@link #isComplete()} is false */
-        public ObjectId ToObjectId()
-        {
-            return isComplete() ? new ObjectId(w1, w2, w3, w4, w5) : null;
-        }
+		private int mask(int word, int v)
+		{
+			return Mask(_nibbles, word, v);
+		}
 
-        /**
-         * Compares this abbreviation to a full object id.
-         *
-         * @param other
-         *            the other object id.
-         * @return &lt;0 if this abbreviation names an object that is less than
-         *         <code>other</code>; 0 if this abbreviation exactly matches the
-         *         first {@link #Length} digits of <code>other.name()</code>;
-         *         &gt;0 if this abbreviation names an object that is after
-         *         <code>other</code>.
-         */
-        public int prefixCompare(AnyObjectId other)
-        {
-            int cmp;
+		public override int GetHashCode()
+		{
+			return _w2;
+		}
+        
+		public override bool Equals(object o)
+		{
+			if (o is AbbreviatedObjectId)
+			{
+				AbbreviatedObjectId b = (AbbreviatedObjectId)o;
+				return _nibbles == b._nibbles && _w1 == b._w1 && _w2 == b._w2
+						&& _w3 == b._w3 && _w4 == b._w4 && _w5 == b._w5;
+			}
+			return false;
+		}
 
-            cmp = NB.CompareUInt32(w1, mask(1, other.W1));
-            if (cmp != 0)
-                return cmp;
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns>string form of the abbreviation, in lower case hexadecimal.</returns>
+		public string name()
+		{
+			char[] b = new char[AnyObjectId.StringLength];
 
-            cmp = NB.CompareUInt32(w2, mask(2, other.W2));
-            if (cmp != 0)
-                return cmp;
+			Hex.FillHexCharArray(b, 0, _w1);
+			if (_nibbles <= 8)
+				return new string(b, 0, _nibbles);
 
-            cmp = NB.CompareUInt32(w3, mask(3, other.W3));
-            if (cmp != 0)
-                return cmp;
+			Hex.FillHexCharArray(b, 8, _w2);
+			if (_nibbles <= 16)
+				return new string(b, 0, _nibbles);
 
-            cmp = NB.CompareUInt32(w4, mask(4, other.W4));
-            if (cmp != 0)
-                return cmp;
+			Hex.FillHexCharArray(b, 16, _w3);
+			if (_nibbles <= 24)
+				return new string(b, 0, _nibbles);
 
-            return NB.CompareUInt32(w5, mask(5, other.W5));
-        }
+			Hex.FillHexCharArray(b, 24, _w4);
+			if (_nibbles <= 32)
+				return new string(b, 0, _nibbles);
 
-        private int mask(int word, int v)
-        {
-            return Mask(nibbles, word, v);
-        }
+			Hex.FillHexCharArray(b, 32, _w5);
+			return new string(b, 0, _nibbles);
+		}
 
+		public override string ToString()
+		{
+			return "AbbreviatedObjectId[" + name() + "]";
+		}
 
-        public override int GetHashCode()
-        {
-            return w2;
-        }
+		private static AbbreviatedObjectId FromHexString(byte[] bs, int ptr, int end)
+		{
+			try
+			{
+				int a = HexUInt32(bs, ptr, end);
+				int b = HexUInt32(bs, ptr + 8, end);
+				int c = HexUInt32(bs, ptr + 16, end);
+				int d = HexUInt32(bs, ptr + 24, end);
+				int e = HexUInt32(bs, ptr + 32, end);
+				return new AbbreviatedObjectId(end - ptr, a, b, c, d, e);
+			}
+			catch (IndexOutOfRangeException)
+			{
+				string str = Encoding.GetEncoding("US-ASCII").GetString(bs, ptr, end - ptr);
+				throw new ArgumentException("Invalid id: " + str);
+			}
+		}
 
+		private static int HexUInt32(byte[] bs, int p, int end)
+		{
+			if (8 <= end - p)
+			{
+				return Hex.HexStringToUInt32(bs, p);
+			}
 
-        public override bool Equals(object o)
-        {
-            if (o is AbbreviatedObjectId)
-            {
-                AbbreviatedObjectId b = (AbbreviatedObjectId)o;
-                return nibbles == b.nibbles && w1 == b.w1 && w2 == b.w2
-                        && w3 == b.w3 && w4 == b.w4 && w5 == b.w5;
-            }
-            return false;
-        }
-
-        /**
-         * @return string form of the abbreviation, in lower case hexadecimal.
-         */
-        public string name()
-        {
-            char[] b = new char[AnyObjectId.StringLength];
-
-            Hex.FillHexCharArray(b, 0, w1);
-            if (nibbles <= 8)
-                return new string(b, 0, nibbles);
-
-            Hex.FillHexCharArray(b, 8, w2);
-            if (nibbles <= 16)
-                return new string(b, 0, nibbles);
-
-            Hex.FillHexCharArray(b, 16, w3);
-            if (nibbles <= 24)
-                return new string(b, 0, nibbles);
-
-            Hex.FillHexCharArray(b, 24, w4);
-            if (nibbles <= 32)
-                return new string(b, 0, nibbles);
-
-            Hex.FillHexCharArray(b, 32, w5);
-            return new string(b, 0, nibbles);
-        }
-
-
-        public override string ToString()
-        {
-            return "AbbreviatedObjectId[" + name() + "]";
-        }
-    }
+			int r = 0, n = 0;
+			while (n < 8 && p < end)
+			{
+				int v = Hex.HexCharToValue(bs[p++]);
+				if (v < 0)
+				{
+					throw new IndexOutOfRangeException();
+				}
+				r <<= 4;
+				r |= v;
+				n++;
+			}
+			return r << (8 - n) * 4;
+		}
+	}
 }

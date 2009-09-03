@@ -39,146 +39,32 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace GitSharp
 {
-    public abstract class TreeEntry : IComparable
+    public abstract class TreeEntry : IComparable, IComparable<TreeEntry>
     {
-        public static int MODIFIED_ONLY = 1 << 0;
-
-        public static int LOADED_ONLY = 1 << 1;
-
-        public static int CONCURRENT_MODIFICATION = 1 << 2;
-
-
-        public Tree Parent { get; private set; }
-        public byte[] NameUTF8 { get; private set; }
-
-        public TreeEntry(Tree myParent, ObjectId id, byte[] nameUTF8)
-        {
-            this.NameUTF8 = nameUTF8;
-            this.Parent = myParent;
-            this._id = id;
-        }
-
-        public void Delete()
-        {
-            this.Parent.RemoveEntry(this);
-            DetachParent();
-        }
-
-        public void DetachParent()
-        {
-            this.Parent = null;
-        }
-
-        public void AttachParent(Tree p)
-        {
-            this.Parent = p;
-        }
-        public virtual Repository Repository
-        {
-            get
-            {
-                return this.Parent.Repository;
-            }
-        }
-
-        public string Name
-        {
-            get
-            {
-                return this.NameUTF8 != null ? new string(Encoding.ASCII.GetChars(this.NameUTF8)) : null;
-            }
-        }
-
-
-        public void Rename(string n)
-        {
-            Rename(Encoding.ASCII.GetBytes(n));
-        }
-
-        public void Rename(byte[] n)
-        {
-            Tree t = this.Parent;
-            if (t != null)
-            {
-                Delete();
-            }
-            this.NameUTF8 = n;
-            if (t != null)
-            {
-                t.AddEntry(this);
-            }
-        }
-
-
-        #region IComparable Members
-
-        public int CompareTo(object o)
-        {
-
-            if (this == o)
-                return 0;
-
-			TreeEntry t = o as TreeEntry;
-			
-			if (t != null)
-                return Tree.CompareNames(NameUTF8, t.NameUTF8, LastChar(this), LastChar(t));
-            return -1;
-        }
-
-        #endregion
-
-
-        public static int LastChar(TreeEntry treeEntry)
-        {
-            if (treeEntry is FileTreeEntry)
-                return '\0';
-            else
-                return '/';
-        }
-
+        // Fields
+        public static int CONCURRENT_MODIFICATION = 4;
+        public static int LOADED_ONLY = 2;
+        public static int MODIFIED_ONLY = 1;
         private ObjectId _id;
-        public ObjectId Id
-        {
-            get
-            {
-                return _id;
-            }
-            set
-            {
-                //
-                Tree p = Parent;
-                if (p != null && _id != value)
-                    if ((_id == null && value != null) || (_id != null && value == null) || !_id.Equals(value))
-                        p.Id = null;
 
-                _id = value;
-            }
+        // Methods
+        protected TreeEntry(Tree myParent, ObjectId id, byte[] nameUTF8)
+        {
+            NameUTF8 = nameUTF8;
+            Parent = myParent;
+            _id = id;
         }
 
-        public bool IsModified
-        {
-            get
-            {
-                return _id == null;
-            }
-        }
-
-        public void SetModified()
-        {
-            this.Id = null;
-        }
-
+        // Properties
         public string FullName
         {
             get
             {
-                StringBuilder r = new StringBuilder();
+                var r = new StringBuilder();
                 AppendFullName(r);
                 return r.ToString();
             }
@@ -186,29 +72,91 @@ namespace GitSharp
 
         public byte[] FullNameUTF8
         {
-            get
+            get { return Encoding.UTF8.GetBytes(FullName); }
+        }
+
+        public ObjectId Id
+        {
+            get { return _id; }
+            set
             {
-                return Encoding.UTF8.GetBytes(this.FullName);
+                Tree parent = Parent;
+                if (((parent != null) && (_id != value)) &&
+                    !((((_id != null) || (value == null)) && ((_id == null) || (value != null))) &&
+                      _id.Equals(value)))
+                {
+                    parent.Id = null;
+                }
+                _id = value;
             }
         }
 
-        private void AppendFullName(StringBuilder r)
+        public bool IsBlob
         {
-            TreeEntry p = this.Parent;
-            string n = this.Name;
-            if (p != null)
-            {
-                p.AppendFullName(r);
-                if (r.Length > 0)
-                {
-                    r.Append('/');
-                }
-            }
-            if (n != null)
-            {
-                r.Append(n);
-            }
+            get { return (Mode.ObjectType == ObjectType.Blob); }
         }
+
+        public bool IsCommit
+        {
+            get { return (Mode.ObjectType == ObjectType.Commit); }
+        }
+
+        public bool IsModified
+        {
+            get { return (_id == null); }
+        }
+
+        public bool IsTag
+        {
+            get { return (Mode.ObjectType == ObjectType.Tag); }
+        }
+
+        public bool IsTree
+        {
+            get { return (Mode.ObjectType == ObjectType.Tree); }
+        }
+
+        public abstract FileMode Mode { get; }
+
+        public string Name
+        {
+            get { return ((NameUTF8 != null) ? new string(Encoding.ASCII.GetChars(NameUTF8)) : null); }
+        }
+
+        public byte[] NameUTF8 { get; private set; }
+
+        public Tree Parent { get; private set; }
+
+        public virtual Repository Repository
+        {
+            get { return Parent.Repository; }
+        }
+
+        #region IComparable Members
+
+        public int CompareTo(object o)
+        {
+            if (this == o)
+            {
+                return 0;
+            }
+            return CompareTo(o as TreeEntry);
+        }
+
+        #endregion
+
+        #region IComparable<TreeEntry> Members
+
+        public int CompareTo(TreeEntry other)
+        {
+            if (other != null)
+            {
+                return Tree.CompareNames(NameUTF8, other.NameUTF8, LastChar(this), LastChar(other));
+            }
+            return -1;
+        }
+
+        #endregion
 
         public void Accept(TreeVisitor tv)
         {
@@ -217,40 +165,76 @@ namespace GitSharp
 
         public abstract void Accept(TreeVisitor tv, int flags);
 
-        public abstract FileMode Mode { get; }
-
-
-        public bool IsBlob
+        private void AppendFullName(StringBuilder r)
         {
-            get
+            TreeEntry parent = Parent;
+            string name = Name;
+            if (parent != null)
             {
-                return this.Mode.ObjectType == ObjectType.Blob;
+                parent.AppendFullName(r);
+                if (r.Length > 0)
+                {
+                    r.Append('/');
+                }
+            }
+            if (name != null)
+            {
+                r.Append(name);
             }
         }
 
-        public bool IsCommit
+        public void AttachParent(Tree p)
         {
-            get
+            Parent = p;
+        }
+
+        public void Delete()
+        {
+            Parent.RemoveEntry(this);
+            DetachParent();
+        }
+
+        public void DetachParent()
+        {
+            Parent = null;
+        }
+
+        public static int LastChar(GitIndex.Entry i)
+        {
+            return (FileMode.Tree.Equals(i.getModeBits()) ? 0x2f : 0);
+        }
+
+        public static int LastChar(TreeEntry treeEntry)
+        {
+            if (treeEntry is FileTreeEntry)
             {
-                return this.Mode.ObjectType == ObjectType.Commit;
+                return Convert.ToInt32('\0');
+            }
+            return Convert.ToInt32('/');
+        }
+
+        public void Rename(string n)
+        {
+            Rename(Encoding.ASCII.GetBytes(n));
+        }
+
+        public void Rename(byte[] n)
+        {
+            Tree parent = Parent;
+            if (parent != null)
+            {
+                Delete();
+            }
+            NameUTF8 = n;
+            if (parent != null)
+            {
+                parent.AddEntry(this);
             }
         }
 
-        public bool IsTag
+        public void SetModified()
         {
-            get
-            {
-                return this.Mode.ObjectType == ObjectType.Tag;
-            }
+            Id = null;
         }
-
-        public bool IsTree
-        {
-            get
-            {
-                return this.Mode.ObjectType == ObjectType.Tree;
-            }
-        }
-
     }
 }

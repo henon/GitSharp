@@ -36,14 +36,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Text;
 using GitSharp.Exceptions;
-using System;
+using GitSharp.Util;
+
 namespace GitSharp.RevWalk
 {
-
-
-    /** A commit reference to a commit in the DAG. */
+    /// <summary>
+	/// A commit reference to a commit in the DAG.
+    /// </summary>
     public class RevCommit : RevObject
     {
         public static RevCommit[] NO_PARENTS = { };
@@ -60,12 +62,10 @@ namespace GitSharp.RevWalk
 
         private byte[] buffer;
 
-        /**
-         * Create a new commit reference.
-         * 
-         * @param id
-         *            object name for the commit.
-         */
+		/// <summary>
+		/// Create a new commit reference.
+		/// </summary>
+		/// <param name="id">object name for the commit.</param>
         public RevCommit(AnyObjectId id)
             : base(id)
         {
@@ -188,7 +188,7 @@ namespace GitSharp.RevWalk
          */
         public void carry(RevFlag flag)
         {
-            int carry = flags & flag.mask;
+            int carry = flags & flag.Mask;
             if (carry != 0)
                 carryFlags(this, carry);
         }

@@ -37,542 +37,540 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
+using GitSharp.Exceptions;
+using GitSharp.Util;
+using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
     [TestFixture]
     public class ReadTreeTest : RepositoryTestCase
     {
-#if false
-	private Tree theHead;
-	private Tree theMerge;
-	private GitIndex theIndex;
-	private WorkDirCheckout theReadTree;
-	// Each of these rules are from the read-tree manpage
-	// go there to see what they mean.
-	// Rule 0 is left out for obvious reasons :)
-	public void testRules1thru3_NoIndexEntry() throws IOException {
-		GitIndex index = new GitIndex(db);
-		
-		Tree head = new Tree(db);
-		FileTreeEntry headFile = head.addFile("foo");
-		ObjectId objectId = ObjectId.fromString("ba78e065e2c261d4f7b8f42107588051e87e18e9");
-		headFile.setId(objectId);
-		Tree merge = new Tree(db);
-		
-		WorkDirCheckout readTree = new WorkDirCheckout(db, trash, head, index, merge);
-		readTree.prescanTwoTrees();
-		
-		assertTrue(readTree.removed.contains("foo"));
-		
-		readTree = new WorkDirCheckout(db, trash, merge, index, head);
-		readTree.prescanTwoTrees();
-		
-		assertEquals(objectId, readTree.updated.get("foo"));
-		
-		ObjectId anotherId = ObjectId.fromString("ba78e065e2c261d4f7b8f42107588051e87e18ee");
-		merge.addFile("foo").setId(anotherId);
-		
-		readTree = new WorkDirCheckout(db, trash, head, index, merge);
-		readTree.prescanTwoTrees();
-		
-		assertEquals(anotherId, readTree.updated.get("foo"));
-	}
+        /*
+             * Directory/File Conflict cases:
+             * It's entirely possible that in practice a number of these may be equivalent
+             * to the cases described in git-read-tree.txt. As long as it does the right thing,
+             * that's all I care about. These are basically reverse-engineered from
+             * what git currently does. If there are tests for these in git, it's kind of
+             * hard to track them all down...
+             * 
+             *     H        I       M     Clean     H==M     H==I    I==M         Result
+             *     ------------------------------------------------------------------
+             *1    D        D       F       Y         N       Y       N           Update
+             *2    D        D       F       N         N       Y       N           Conflict
+             *3    D        F       D                 Y       N       N           Update
+             *4    D        F       D                 N       N       N           Update
+             *5    D        F       F       Y         N       N       Y           Keep
+             *6    D        F       F       N         N       N       Y           Keep
+             *7    F        D       F       Y         Y       N       N           Update
+             *8    F        D       F       N         Y       N       N           Conflict
+             *9    F        D       F       Y         N       N       N           Update
+             *10   F        D       D                 N       N       Y           Keep
+             *11   F		D		D				  N		  N		  N			  Conflict
+             *12   F		F		D		Y		  N		  Y		  N			  Update
+             *13   F		F		D		N		  N		  Y		  N			  Conflict
+             *14   F		F		D				  N		  N		  N			  Conflict
+             *15   0		F		D				  N		  N		  N			  Conflict
+             *16   0		D		F		Y		  N		  N		  N			  Update
+             *17   0		D		F		 		  N		  N		  N			  Conflict
+             *18   F        0       D    										  Update
+             *19   D	    0       F											  Update
+        */
 
-	void setupCase(HashMap<String, String> headEntries, 
-			HashMap<String, String> mergeEntries, 
-			HashMap<String, String> indexEntries) throws IOException {
-		theHead = buildTree(headEntries);
-		theMerge = buildTree(mergeEntries);
-		theIndex = buildIndex(indexEntries);
-	}
-	
-	private GitIndex buildIndex(HashMap<String, String> indexEntries) throws IOException {
-		GitIndex index = new GitIndex(db);
-		
-		if (indexEntries == null)
-			return index;
-		for (java.util.Map.Entry<String,String> e : indexEntries.entrySet()) {
-			index.add(trash, writeTrashFile(e.getKey(), e.getValue())).forceRecheck();
-		}
-		
-		return index;
-	}
+        // Fields
+        private Tree _theHead;
+        private GitIndex _theIndex;
+        private Tree _theMerge;
+        private WorkDirCheckout _theReadTree;
 
-	private Tree buildTree(HashMap<String, String> headEntries) throws IOException {
-		Tree tree = new Tree(db);
-		
-		if (headEntries == null) 
-			return tree;
-		for (java.util.Map.Entry<String,String> e : headEntries.entrySet()) {
-			tree.addFile(e.getKey()).setId(genSha1(e.getValue()));
-		}
-		
-		return tree;
-	}
-	
-	ObjectId genSha1(String data) {
-		InputStream is = new ByteArrayInputStream(data.getBytes());
-		ObjectWriter objectWriter = new ObjectWriter(db);
-		try {
-			return objectWriter.writeObject(Constants.OBJ_BLOB, data
-					.getBytes().length, is, true);
-		} catch (IOException e) {
-			fail(e.toString());
-		}
-		return null;
-	}
-	
-	private WorkDirCheckout go() throws IOException {
-		theReadTree = new WorkDirCheckout(db, trash, theHead, theIndex, theMerge);
-		theReadTree.prescanTwoTrees();
-		return theReadTree;
-	}
+        // Methods
+        private void assertAllEmpty()
+        {
+            Assert.IsTrue(_theReadTree.Removed.isEmpty());
+            Assert.IsTrue(_theReadTree.Updated.isEmpty());
+            Assert.IsTrue(_theReadTree.Conflicts.isEmpty());
+        }
 
-    // for these rules, they all have clean yes/no options
-	// but it doesn't matter if the entry is clean or not
-	// so we can just ignore the state in the filesystem entirely
-	public void testRules4thru13_IndexEntryNotInHead() throws IOException {
-		// rules 4 and 5
-		HashMap<String, String> idxMap;
+        private void AssertConflict(string s)
+        {
+            Assert.IsTrue(_theReadTree.Conflicts.Contains(s));
+        }
 
-		idxMap = new HashMap<String, String>();
-		idxMap.put("foo", "foo");
-		setupCase(null, null, idxMap);
-		theReadTree = go();
-		
-		assertTrue(theReadTree.updated.isEmpty());
-		assertTrue(theReadTree.removed.isEmpty());
-		assertTrue(theReadTree.conflicts.isEmpty());
-		
-		// rules 6 and 7
-		idxMap = new HashMap<String, String>();
-		idxMap.put("foo", "foo");
-		setupCase(null, idxMap, idxMap);
-		theReadTree = go();
+        private void AssertNoConflicts()
+        {
+            Assert.IsTrue(_theReadTree.Conflicts.isEmpty());
+        }
 
-		assertAllEmpty();
-		
-		// rules 8 and 9
-		HashMap<String, String> mergeMap;
-		mergeMap = new HashMap<String, String>();
-		
-		mergeMap.put("foo", "merge");
-		setupCase(null, mergeMap, idxMap);
-		go();
-		
-		assertTrue(theReadTree.updated.isEmpty());
-		assertTrue(theReadTree.removed.isEmpty());
-		assertTrue(theReadTree.conflicts.contains("foo"));
-		
-		// rule 10
-		
-		HashMap<String, String> headMap = new HashMap<String, String>();
-		headMap.put("foo", "foo");
-		setupCase(headMap, null, idxMap);
-		go();
-		
-		assertTrue(theReadTree.removed.contains("foo"));
-		assertTrue(theReadTree.updated.isEmpty());
-		assertTrue(theReadTree.conflicts.isEmpty());
-		
-		// rule 11
-		setupCase(headMap, null, idxMap);
-		new File(trash, "foo").delete();
-		writeTrashFile("foo", "bar");
-		theIndex.getMembers()[0].forceRecheck();
-		go();
-		
-		assertTrue(theReadTree.removed.isEmpty());
-		assertTrue(theReadTree.updated.isEmpty());
-		assertTrue(theReadTree.conflicts.contains("foo"));
-		
-		// rule 12 & 13
-		headMap.put("foo", "head");
-		setupCase(headMap, null, idxMap);
-		go();
-		
-		assertTrue(theReadTree.removed.isEmpty());
-		assertTrue(theReadTree.updated.isEmpty());
-		assertTrue(theReadTree.conflicts.contains("foo"));
-		
-		// rules 14 & 15
-		setupCase(headMap, headMap, idxMap);
-		go();
-		
-		assertAllEmpty();
-		
-		// rules 16 & 17
-		setupCase(headMap, mergeMap, idxMap); go();
-		assertTrue(theReadTree.conflicts.contains("foo"));
-		
-		// rules 18 & 19
-		setupCase(headMap, idxMap, idxMap); go();
-		assertAllEmpty();
-		
-		// rule 20
-		setupCase(idxMap, mergeMap, idxMap); go();
-		assertTrue(theReadTree.updated.containsKey("foo"));
-		
-		// rules 21
-		setupCase(idxMap, mergeMap, idxMap); 
-		new File(trash, "foo").delete();
-		writeTrashFile("foo", "bar");
-		theIndex.getMembers()[0].forceRecheck();
-		go();
-		assertTrue(theReadTree.conflicts.contains("foo"));
-	}
+        private void AssertRemoved(string s)
+        {
+            Assert.IsTrue(_theReadTree.Removed.Contains(s));
+        }
 
-	private void assertAllEmpty() {
-		assertTrue(theReadTree.removed.isEmpty());
-		assertTrue(theReadTree.updated.isEmpty());
-		assertTrue(theReadTree.conflicts.isEmpty());
-	}
-	
-	public void testDirectoryFileSimple() throws IOException {
-		theIndex = new GitIndex(db);
-		theIndex.add(trash, writeTrashFile("DF", "DF"));
-		Tree treeDF = db.mapTree(theIndex.writeTree());
-		
-		recursiveDelete(new File(trash, "DF"));
-		theIndex = new GitIndex(db);
-		theIndex.add(trash, writeTrashFile("DF/DF", "DF/DF"));
-		Tree treeDFDF = db.mapTree(theIndex.writeTree());
-		
-		theIndex = new GitIndex(db);
-		recursiveDelete(new File(trash, "DF"));
-		
-		theIndex.add(trash, writeTrashFile("DF", "DF"));
-		theReadTree = new WorkDirCheckout(db, trash, treeDF, theIndex, treeDFDF);
-		theReadTree.prescanTwoTrees();
-		
-		assertTrue(theReadTree.removed.contains("DF"));
-		assertTrue(theReadTree.updated.containsKey("DF/DF"));
-		
-		recursiveDelete(new File(trash, "DF"));
-		theIndex = new GitIndex(db);
-		theIndex.add(trash, writeTrashFile("DF/DF", "DF/DF"));
-		
-		theReadTree = new WorkDirCheckout(db, trash, treeDFDF, theIndex, treeDF);
-		theReadTree.prescanTwoTrees();
-		assertTrue(theReadTree.removed.contains("DF/DF"));
-		assertTrue(theReadTree.updated.containsKey("DF"));
-	}
-	
-	/*
-	 * Directory/File Conflict cases:
-	 * It's entirely possible that in practice a number of these may be equivalent
-	 * to the cases described in git-read-tree.txt. As long as it does the right thing,
-	 * that's all I care about. These are basically reverse-engineered from
-	 * what git currently does. If there are tests for these in git, it's kind of
-	 * hard to track them all down...
-	 * 
-	 *     H        I       M     Clean     H==M     H==I    I==M         Result
-	 *     ------------------------------------------------------------------
-	 *1    D        D       F       Y         N       Y       N           Update
-	 *2    D        D       F       N         N       Y       N           Conflict
-	 *3    D        F       D                 Y       N       N           Update
-	 *4    D        F       D                 N       N       N           Update
-	 *5    D        F       F       Y         N       N       Y           Keep
-	 *6    D        F       F       N         N       N       Y           Keep
-	 *7    F        D       F       Y         Y       N       N           Update
-	 *8    F        D       F       N         Y       N       N           Conflict
-	 *9    F        D       F       Y         N       N       N           Update
-	 *10   F        D       D                 N       N       Y           Keep
-	 *11   F		D		D				  N		  N		  N			  Conflict			
-	 *12   F		F		D		Y		  N		  Y		  N			  Update
-	 *13   F		F		D		N		  N		  Y		  N			  Conflict
-	 *14   F		F		D				  N		  N		  N			  Conflict
-	 *15   0		F		D				  N		  N		  N			  Conflict
-	 *16   0		D		F		Y		  N		  N		  N			  Update
-	 *17   0		D		F		 		  N		  N		  N			  Conflict
-	 *18   F        0       D    										  Update
-	 *19   D	    0       F											  Update
-	 */
-	
-	public void testDirectoryFileConflicts_1() throws Exception {
-		// 1
-		doit(mk("DF/DF"), mk("DF"), mk("DF/DF"));
-		assertNoConflicts();
-		assertUpdated("DF");
-		assertRemoved("DF/DF");
-	}
+        private void AssertUpdated(string s)
+        {
+            Assert.IsTrue(_theReadTree.Updated.ContainsKey(s));
+        }
 
-	public void testDirectoryFileConflicts_2() throws Exception {
-		// 2
-		setupCase(mk("DF/DF"), mk("DF"), mk("DF/DF"));
-		writeTrashFile("DF/DF", "different");
-		go();
-		assertConflict("DF/DF");
-		
-	}
+        private GitIndex BuildIndex(Dictionary<string, string> indexEntries)
+        {
+            var index = new GitIndex(db);
+            if (indexEntries != null)
+            {
+                foreach (var pair in indexEntries)
+                {
+                    index.add(trash, writeTrashFile(pair.Key, pair.Value)).forceRecheck();
+                }
+            }
+            return index;
+        }
 
-	public void testDirectoryFileConflicts_3() throws Exception {
-		// 3 - the first to break!
-		doit(mk("DF/DF"), mk("DF/DF"), mk("DF"));
-		assertUpdated("DF/DF");
-		assertRemoved("DF");
-	}
+        private Tree BuildTree(Dictionary<string, string> headEntries)
+        {
+            var tree = new Tree(db);
+            if (headEntries != null)
+            {
+                foreach (var pair in headEntries)
+                {
+                    tree.AddFile(pair.Key).Id = GenSha1(pair.Value);
+                }
+            }
+            return tree;
+        }
 
-	public void testDirectoryFileConflicts_4() throws Exception {
-		// 4 (basically same as 3, just with H and M different)
-		doit(mk("DF/DF"), mkmap("DF/DF", "foo"), mk("DF"));
-		assertUpdated("DF/DF");
-		assertRemoved("DF");
-		
-	}
+        private void Checkout()
+        {
+            _theReadTree = new WorkDirCheckout(db, trash, _theHead, _theIndex, _theMerge);
+            _theReadTree.checkout();
+        }
 
-	public void testDirectoryFileConflicts_5() throws Exception {
-		// 5
-		doit(mk("DF/DF"), mk("DF"), mk("DF"));
-		assertRemoved("DF/DF");
-		
-	}
+        private void cleanUpDF()
+        {
+            tearDown();
+            setUp();
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "DF")));
+        }
 
-	public void testDirectoryFileConflicts_6() throws Exception {
-		// 6
-		setupCase(mk("DF/DF"), mk("DF"), mk("DF"));
-		writeTrashFile("DF", "different");
-		go();
-		assertRemoved("DF/DF");
-	}
+        private void DoIt(Dictionary<string, string> h, Dictionary<string, string> m, Dictionary<string, string> i)
+        {
+            SetupCase(h, m, i);
+            Go();
+        }
 
-	public void testDirectoryFileConflicts_7() throws Exception {
-		// 7
-		doit(mk("DF"), mk("DF"), mk("DF/DF"));
-		assertUpdated("DF");
-		assertRemoved("DF/DF");
+        private ObjectId GenSha1(string data)
+        {
+            byte[] buffer = Constants.encode(data);
+            var input = new MemoryStream(buffer);
+            var writer = new ObjectWriter(db);
+            try
+            {
+                return writer.WriteObject(ObjectType.Blob, buffer.Length, input, true);
+            }
+            catch (IOException exception)
+            {
+                Assert.Fail(exception.ToString());
+            }
+            return null;
+        }
 
-		cleanUpDF();
-		setupCase(mk("DF/DF"), mk("DF/DF"), mk("DF/DF/DF/DF/DF"));
-		go();
-		assertRemoved("DF/DF/DF/DF/DF");
-		assertUpdated("DF/DF");
-		
-		cleanUpDF();
-		setupCase(mk("DF/DF"), mk("DF/DF"), mk("DF/DF/DF/DF/DF"));
-		writeTrashFile("DF/DF/DF/DF/DF", "diff");
-		go();
-		assertConflict("DF/DF/DF/DF/DF");
-		assertUpdated("DF/DF");
+        private WorkDirCheckout Go()
+        {
+            _theReadTree = new WorkDirCheckout(db, trash, _theHead, _theIndex, _theMerge);
+            _theReadTree.PrescanTwoTrees();
+            return _theReadTree;
+        }
 
-	}
+        private static Dictionary<string, string> MakeMap(string a)
+        {
+            return MakeMap(new[] { a, a });
+        }
 
-	// 8 ?
+        private static Dictionary<string, string> MakeMap(params string[] args)
+        {
+            if ((args.Length % 2) > 0)
+            {
+                throw new ArgumentException("needs to be pairs");
+            }
+            var dictionary = new Dictionary<string, string>();
+            for (int i = 0; i < args.Length; i += 2)
+            {
+                dictionary.Add(args[i], args[i + 1]);
+            }
+            return dictionary;
+        }
 
-	public void testDirectoryFileConflicts_9() throws Exception {
-		// 9
-		doit(mk("DF"), mkmap("DF", "QP"), mk("DF/DF"));
-		assertRemoved("DF/DF");
-		assertUpdated("DF");
-	}
+        private void SetupCase(Dictionary<string, string> headEntries, Dictionary<string, string> mergeEntries,
+                               Dictionary<string, string> indexEntries)
+        {
+            _theHead = BuildTree(headEntries);
+            _theMerge = BuildTree(mergeEntries);
+            _theIndex = BuildIndex(indexEntries);
+        }
 
-	public void testDirectoryFileConflicts_10() throws Exception {
-		// 10
-		cleanUpDF();
-		doit(mk("DF"), mk("DF/DF"), mk("DF/DF"));
-		assertNoConflicts();
-		
-	}
+        [Test]
+        public void testCheckoutOutChanges()
+        {
+            SetupCase(MakeMap("foo"), MakeMap("foo/bar"), MakeMap("foo"));
+            Checkout();
+            Assert.IsFalse(new FileInfo(Path.Combine(trash.FullName, "foo")).IsFile());
+            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo/bar")).IsFile());
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
 
-	public void testDirectoryFileConflicts_11() throws Exception {
-		// 11
-		doit(mk("DF"), mk("DF/DF"), mkmap("DF/DF", "asdf"));
-		assertConflict("DF/DF");
-	}
+            SetupCase(MakeMap("foo/bar"), MakeMap("foo"), MakeMap("foo/bar"));
+            Checkout();
+            Assert.IsFalse(new FileInfo(Path.Combine(trash.FullName, "foo/bar")).IsFile());
+            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo")).IsFile());
+            SetupCase(MakeMap("foo"), MakeMap(new[] { "foo", "qux" }), MakeMap(new[] { "foo", "bar" }));
+            try
+            {
+                Checkout();
+                Assert.Fail("did not throw exception");
+            }
+            catch (CheckoutConflictException)
+            {
+            }
+        }
 
-	public void testDirectoryFileConflicts_12() throws Exception {
-		// 12
-		cleanUpDF();
-		doit(mk("DF"), mk("DF/DF"), mk("DF"));
-		assertRemoved("DF");
-		assertUpdated("DF/DF");
-	}
+        [Test]
+        public void testCloseNameConflicts1()
+        {
+            SetupCase(MakeMap(new[] { "a/a", "a/a-c" }), MakeMap(new[] { "a/a", "a/a", "a.a/a.a", "a.a/a.a" }),
+                      MakeMap(new[] { "a/a", "a/a-c" }));
+            Checkout();
+            Go();
+            AssertNoConflicts();
+        }
 
-	public void testDirectoryFileConflicts_13() throws Exception {
-		// 13
-		cleanUpDF();
-		setupCase(mk("DF"), mk("DF/DF"), mk("DF"));
-		writeTrashFile("DF", "asdfsdf");
-		go();
-		assertConflict("DF");
-		assertUpdated("DF/DF");
-	}
+        [Test]
+        public void testCloseNameConflictsX0()
+        {
+            SetupCase(MakeMap(new[] { "a/a", "a/a-c" }),
+                      MakeMap(new[] { "a/a", "a/a", "b.b/b.b", "b.b/b.bs" }),
+                      MakeMap(new[] { "a/a", "a/a-c" }));
+            Checkout();
+            Go();
+            AssertNoConflicts();
+        }
 
-	public void testDirectoryFileConflicts_14() throws Exception {
-		// 14
-		cleanUpDF();
-		doit(mk("DF"), mk("DF/DF"), mkmap("DF", "Foo"));
-		assertConflict("DF");
-		assertUpdated("DF/DF");
-	}
+        [Test]
+        public void testDirectoryFileConflicts_1()
+        {
+            DoIt(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF/DF"));
+            AssertNoConflicts();
+            AssertUpdated("DF");
+            AssertRemoved("DF/DF");
+        }
 
-	public void testDirectoryFileConflicts_15() throws Exception {
-		// 15
-		doit(mkmap(), mk("DF/DF"), mk("DF"));
-		assertRemoved("DF");
-		assertUpdated("DF/DF");
-	}
+        [Test]
+        public void testDirectoryFileConflicts_10()
+        {
+            cleanUpDF();
+            DoIt(MakeMap("DF"), MakeMap("DF/DF"), MakeMap("DF/DF"));
+            AssertNoConflicts();
+        }
 
-	public void testDirectoryFileConflicts_15b() throws Exception {
-		// 15, take 2, just to check multi-leveled
-		doit(mkmap(), mk("DF/DF/DF/DF"), mk("DF"));
-		assertRemoved("DF");
-		assertUpdated("DF/DF/DF/DF");
-	}
+        [Test]
+        public void testDirectoryFileConflicts_11()
+        {
+            DoIt(MakeMap("DF"), MakeMap("DF/DF"), MakeMap(new[] { "DF/DF", "asdf" }));
+            AssertConflict("DF/DF");
+        }
 
-	public void testDirectoryFileConflicts_16() throws Exception {
-		// 16
-		cleanUpDF();
-		doit(mkmap(), mk("DF"), mk("DF/DF/DF"));
-		assertRemoved("DF/DF/DF");
-		assertUpdated("DF");
-	}
+        [Test]
+        public void testDirectoryFileConflicts_12()
+        {
+            cleanUpDF();
+            DoIt(MakeMap("DF"), MakeMap("DF/DF"), MakeMap("DF"));
+            AssertRemoved("DF");
+            AssertUpdated("DF/DF");
+        }
 
-	public void testDirectoryFileConflicts_17() throws Exception {
-		// 17
-		cleanUpDF();
-		setupCase(mkmap(), mk("DF"), mk("DF/DF/DF"));
-		writeTrashFile("DF/DF/DF", "asdf");
-		go();
-		assertConflict("DF/DF/DF");
-		assertUpdated("DF");
-	}
+        [Test]
+        public void testDirectoryFileConflicts_13()
+        {
+            cleanUpDF();
+            SetupCase(MakeMap("DF"), MakeMap("DF/DF"), MakeMap("DF"));
+            writeTrashFile("DF", "asdfsdf");
+            Go();
+            AssertConflict("DF");
+            AssertUpdated("DF/DF");
+        }
 
-	public void testDirectoryFileConflicts_18() throws Exception {
-		// 18
-		cleanUpDF();
-		doit(mk("DF/DF"), mk("DF/DF/DF/DF"), null);
-		assertRemoved("DF/DF");
-		assertUpdated("DF/DF/DF/DF");
-	}
+        [Test]
+        public void testDirectoryFileConflicts_14()
+        {
+            cleanUpDF();
+            DoIt(MakeMap("DF"), MakeMap("DF/DF"), MakeMap(new[] { "DF", "Foo" }));
+            AssertConflict("DF");
+            AssertUpdated("DF/DF");
+        }
 
-	public void testDirectoryFileConflicts_19() throws Exception {
-		// 19
-		cleanUpDF();
-		doit(mk("DF/DF/DF/DF"), mk("DF/DF/DF"), null);
-		assertRemoved("DF/DF/DF/DF");
-		assertUpdated("DF/DF/DF");
-	}
+        [Test]
+        public void testDirectoryFileConflicts_15()
+        {
+            DoIt(MakeMap(new string[0]), MakeMap("DF/DF"), MakeMap("DF"));
+            AssertRemoved("DF");
+            AssertUpdated("DF/DF");
+        }
 
-	private void cleanUpDF() throws Exception {
-		tearDown();
-		setUp();
-		recursiveDelete(new File(trash, "DF"));
-	}
-	
-	private void assertConflict(String s) {
-		assertTrue(theReadTree.conflicts.contains(s));
-	}
-	
-	private void assertUpdated(String s) {
-		assertTrue(theReadTree.updated.containsKey(s));
-	}
-	
-	private void assertRemoved(String s) {
-		assertTrue(theReadTree.removed.contains(s));
-	}
-	
-	private void assertNoConflicts() {
-		assertTrue(theReadTree.conflicts.isEmpty());
-	}
+        [Test]
+        public void testDirectoryFileConflicts_15b()
+        {
+            DoIt(MakeMap(new string[0]), MakeMap("DF/DF/DF/DF"), MakeMap("DF"));
+            AssertRemoved("DF");
+            AssertUpdated("DF/DF/DF/DF");
+        }
 
-	private void doit(HashMap<String, String> h, HashMap<String, String>m,
-			HashMap<String, String> i) throws IOException {
-		setupCase(h, m, i);
-		go();
-	}
-	
-	private static HashMap<String, String> mk(String a) {
-		return mkmap(a, a);
-	}
-	
-	private static HashMap<String, String> mkmap(String... args) {
-		if ((args.length % 2) > 0) 
-			throw new IllegalArgumentException("needs to be pairs");
-		
-		HashMap<String, String> map = new HashMap<String, String>();
-		for (int i = 0; i < args.length; i += 2) {
-			map.put(args[i], args[i+1]);
-		}
-		
-		return map;
-	}
-	
-	public void testUntrackedConflicts() throws IOException { 
-		setupCase(null, mk("foo"), null);
-		writeTrashFile("foo", "foo");
-		go();
-		
-		assertConflict("foo");
-		
-		recursiveDelete(new File(trash, "foo"));
-		setupCase(null, mk("foo"), null);
-		writeTrashFile("foo/bar/baz", "");
-		writeTrashFile("foo/blahblah", "");
-		go();
+        [Test]
+        public void testDirectoryFileConflicts_16()
+        {
+            cleanUpDF();
+            DoIt(MakeMap(new string[0]), MakeMap("DF"), MakeMap("DF/DF/DF"));
+            AssertRemoved("DF/DF/DF");
+            AssertUpdated("DF");
+        }
 
-		assertConflict("foo/bar/baz");
-		assertConflict("foo/blahblah");
-		
-		recursiveDelete(new File(trash, "foo"));
-		
-		setupCase(mkmap("foo/bar", "", "foo/baz", ""), 
-				mk("foo"), mkmap("foo/bar", "", "foo/baz", ""));
-		assertTrue(new File(trash, "foo/bar").exists());
-		go();
-		
-		assertNoConflicts();
-	}
+        [Test]
+        public void testDirectoryFileConflicts_17()
+        {
+            cleanUpDF();
+            SetupCase(MakeMap(new string[0]), MakeMap("DF"), MakeMap("DF/DF/DF"));
+            writeTrashFile("DF/DF/DF", "asdf");
+            Go();
+            AssertConflict("DF/DF/DF");
+            AssertUpdated("DF");
+        }
 
-	public void testCloseNameConflictsX0() throws IOException {
-		setupCase(mkmap("a/a", "a/a-c"), mkmap("a/a","a/a", "b.b/b.b","b.b/b.bs"), mkmap("a/a", "a/a-c") );
-		checkout();
-		go();
-		assertNoConflicts();
-	}
+        [Test]
+        public void testDirectoryFileConflicts_18()
+        {
+            cleanUpDF();
+            DoIt(MakeMap("DF/DF"), MakeMap("DF/DF/DF/DF"), null);
+            AssertRemoved("DF/DF");
+            AssertUpdated("DF/DF/DF/DF");
+        }
 
-	public void testCloseNameConflicts1() throws IOException {
-		setupCase(mkmap("a/a", "a/a-c"), mkmap("a/a","a/a", "a.a/a.a","a.a/a.a"), mkmap("a/a", "a/a-c") );
-		checkout();
-		go();
-		assertNoConflicts();
-	}
+        [Test]
+        public void testDirectoryFileConflicts_19()
+        {
+            cleanUpDF();
+            DoIt(MakeMap("DF/DF/DF/DF"), MakeMap("DF/DF/DF"), null);
+            AssertRemoved("DF/DF/DF/DF");
+            AssertUpdated("DF/DF/DF");
+        }
 
-	private void checkout() throws IOException {
-		theReadTree = new WorkDirCheckout(db, trash, theHead, theIndex, theMerge);
-		theReadTree.checkout();
-	}
-	
-	public void testCheckoutOutChanges() throws IOException {
-		setupCase(mk("foo"), mk("foo/bar"), mk("foo"));
-		checkout();
-		
-		assertFalse(new File(trash, "foo").isFile());
-		assertTrue(new File(trash, "foo/bar").isFile());
-		recursiveDelete(new File(trash, "foo"));
+        [Test]
+        public void testDirectoryFileConflicts_2()
+        {
+            SetupCase(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF/DF"));
+            writeTrashFile("DF/DF", "different");
+            Go();
+            AssertConflict("DF/DF");
+        }
 
-		setupCase(mk("foo/bar"), mk("foo"), mk("foo/bar"));
-		checkout();
-		
-		assertFalse(new File(trash, "foo/bar").isFile());
-		assertTrue(new File(trash, "foo").isFile());
-		
-		setupCase(mk("foo"), mkmap("foo", "qux"), mkmap("foo", "bar"));
-		
-		try {
-			checkout();
-			fail("did not throw exception");
-		} catch (CheckoutConflictException e) {
-			// should have thrown
-		}
-	}
-#endif
+        [Test]
+        public void testDirectoryFileConflicts_3()
+        {
+            DoIt(MakeMap("DF/DF"), MakeMap("DF/DF"), MakeMap("DF"));
+            AssertUpdated("DF/DF");
+            AssertRemoved("DF");
+        }
+
+        [Test]
+        public void testDirectoryFileConflicts_4()
+        {
+            DoIt(MakeMap("DF/DF"), MakeMap(new[] { "DF/DF", "foo" }), MakeMap("DF"));
+            AssertUpdated("DF/DF");
+            AssertRemoved("DF");
+        }
+
+        [Test]
+        public void testDirectoryFileConflicts_5()
+        {
+            DoIt(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF"));
+            AssertRemoved("DF/DF");
+        }
+
+        [Test]
+        public void testDirectoryFileConflicts_6()
+        {
+            SetupCase(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF"));
+            writeTrashFile("DF", "different");
+            Go();
+            AssertRemoved("DF/DF");
+        }
+
+        [Test]
+        public void testDirectoryFileConflicts_7()
+        {
+            DoIt(MakeMap("DF"), MakeMap("DF"), MakeMap("DF/DF"));
+            AssertUpdated("DF");
+            AssertRemoved("DF/DF");
+            cleanUpDF();
+
+            SetupCase(MakeMap("DF/DF"), MakeMap("DF/DF"), MakeMap("DF/DF/DF/DF/DF"));
+            Go();
+            AssertRemoved("DF/DF/DF/DF/DF");
+            AssertUpdated("DF/DF");
+            cleanUpDF();
+
+            SetupCase(MakeMap("DF/DF"), MakeMap("DF/DF"), MakeMap("DF/DF/DF/DF/DF"));
+            writeTrashFile("DF/DF/DF/DF/DF", "diff");
+            Go();
+            AssertConflict("DF/DF/DF/DF/DF");
+            AssertUpdated("DF/DF");
+        }
+
+        [Test]
+        public void testDirectoryFileConflicts_9()
+        {
+            DoIt(MakeMap("DF"), MakeMap(new[] { "DF", "QP" }), MakeMap("DF/DF"));
+            AssertRemoved("DF/DF");
+            AssertUpdated("DF");
+        }
+
+        [Test]
+        public void testDirectoryFileSimple()
+        {
+            _theIndex = new GitIndex(db);
+            _theIndex.add(trash, writeTrashFile("DF", "DF"));
+            Tree head = db.MapTree(_theIndex.writeTree());
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "DF")));
+
+            _theIndex = new GitIndex(db);
+            _theIndex.add(trash, writeTrashFile("DF/DF", "DF/DF"));
+            Tree merge = db.MapTree(_theIndex.writeTree());
+            _theIndex = new GitIndex(db);
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "DF")));
+
+            _theIndex.add(trash, writeTrashFile("DF", "DF"));
+            _theReadTree = new WorkDirCheckout(db, trash, head, _theIndex, merge);
+            _theReadTree.PrescanTwoTrees();
+            Assert.IsTrue(_theReadTree.Removed.Contains("DF"));
+            Assert.IsTrue(_theReadTree.Updated.ContainsKey("DF/DF"));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "DF")));
+
+            _theIndex = new GitIndex(db);
+            _theIndex.add(trash, writeTrashFile("DF/DF", "DF/DF"));
+            _theReadTree = new WorkDirCheckout(db, trash, merge, _theIndex, head);
+            _theReadTree.PrescanTwoTrees();
+            Assert.IsTrue(_theReadTree.Removed.Contains("DF/DF"));
+            Assert.IsTrue(_theReadTree.Updated.ContainsKey("DF"));
+        }
+
+        [Test]
+        public void testRules1thru3_NoIndexEntry()
+        {
+            var index = new GitIndex(db);
+            var head = new Tree(db);
+            FileTreeEntry entry = head.AddFile("foo");
+            ObjectId expected = ObjectId.FromString("ba78e065e2c261d4f7b8f42107588051e87e18e9");
+            entry.Id = expected;
+            var merge = new Tree(db);
+            var checkout = new WorkDirCheckout(db, trash, head, index, merge);
+            checkout.PrescanTwoTrees();
+            Assert.IsTrue(checkout.Removed.Contains("foo"));
+            checkout = new WorkDirCheckout(db, trash, merge, index, head);
+            checkout.PrescanTwoTrees();
+            Assert.AreEqual(expected, checkout.Updated["foo"]);
+            ObjectId id2 = ObjectId.FromString("ba78e065e2c261d4f7b8f42107588051e87e18ee");
+            merge.AddFile("foo").Id = id2;
+            checkout = new WorkDirCheckout(db, trash, head, index, merge);
+            checkout.PrescanTwoTrees();
+            Assert.AreEqual(id2, checkout.Updated["foo"]);
+        }
+
+        [Test]
+        public void testRules4thru13_IndexEntryNotInHead()
+        {
+            var indexEntries = new Dictionary<string, string>();
+            indexEntries.Add("foo", "foo");
+            SetupCase(null, null, indexEntries);
+            _theReadTree = Go();
+            assertAllEmpty();
+
+            indexEntries = new Dictionary<string, string> { { "foo", "foo" } };
+            SetupCase(null, indexEntries, indexEntries);
+            _theReadTree = Go();
+            assertAllEmpty();
+
+            var mergeEntries = new Dictionary<string, string> { { "foo", "merge" } };
+            SetupCase(null, mergeEntries, indexEntries);
+            Go();
+            Assert.IsTrue(_theReadTree.Updated.isEmpty());
+            Assert.IsTrue(_theReadTree.Removed.isEmpty());
+            Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
+
+            var dictionary4 = new Dictionary<string, string> { { "foo", "foo" } };
+            Dictionary<string, string> headEntries = dictionary4;
+            SetupCase(headEntries, null, indexEntries);
+            Go();
+            Assert.IsTrue(_theReadTree.Removed.Contains("foo"));
+            Assert.IsTrue(_theReadTree.Updated.isEmpty());
+            Assert.IsTrue(_theReadTree.Conflicts.isEmpty());
+
+            SetupCase(headEntries, null, indexEntries);
+            new FileInfo(Path.Combine(trash.FullName, "foo")).Delete();
+            writeTrashFile("foo", "bar");
+            _theIndex.Members[0].forceRecheck();
+            Go();
+            Assert.IsTrue(_theReadTree.Removed.isEmpty());
+            Assert.IsTrue(_theReadTree.Updated.isEmpty());
+            Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
+
+            headEntries.Add("foo", "head");
+            SetupCase(headEntries, null, indexEntries);
+            Go();
+            Assert.IsTrue(_theReadTree.Removed.isEmpty());
+            Assert.IsTrue(_theReadTree.Updated.isEmpty());
+            Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
+
+            SetupCase(headEntries, headEntries, indexEntries);
+            Go();
+            assertAllEmpty();
+
+            SetupCase(headEntries, mergeEntries, indexEntries);
+            Go();
+            Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
+
+            SetupCase(headEntries, indexEntries, indexEntries);
+            Go();
+            assertAllEmpty();
+
+            SetupCase(indexEntries, mergeEntries, indexEntries);
+            Go();
+            Assert.IsTrue(_theReadTree.Updated.ContainsKey("foo"));
+
+            SetupCase(indexEntries, mergeEntries, indexEntries);
+            new FileInfo(Path.Combine(trash.FullName, "foo")).Delete();
+            writeTrashFile("foo", "bar");
+            _theIndex.Members[0].forceRecheck();
+            Go();
+            Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
+        }
+
+        [Test]
+        public void testUntrackedConflicts()
+        {
+            SetupCase(null, MakeMap("foo"), null);
+            writeTrashFile("foo", "foo");
+            Go();
+            AssertConflict("foo");
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
+            SetupCase(null, MakeMap("foo"), null);
+            writeTrashFile("foo/bar/baz", "");
+            writeTrashFile("foo/blahblah", "");
+            Go();
+            AssertConflict("foo/bar/baz");
+            AssertConflict("foo/blahblah");
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
+            SetupCase(MakeMap(new[] { "foo/bar", "", "foo/baz", "" }), MakeMap("foo"),
+                      MakeMap(new[] { "foo/bar", "", "foo/baz", "" }));
+            Assert.IsTrue(new DirectoryInfo(Path.Combine(trash.FullName, "foo")).Exists);
+            Go();
+            AssertNoConflicts();
+        }
     }
 }

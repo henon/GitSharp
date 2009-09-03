@@ -35,250 +35,262 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.IO;
+using GitSharp.RevWalk;
 using NUnit.Framework;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
-    public class RefUpdateTest : RepositoryTestCase
-    {
-#if false
+	[TestFixture]
+	public class RefUpdateTest : RepositoryTestCase
+	{
+		private RefUpdate updateRef(string name)
+		{
+			RefUpdate @ref = db.UpdateRef(name);
+			@ref.NewObjectId = db.Resolve(Constants.HEAD);
+			return @ref;
+		}
 
-	private RefUpdate updateRef(final String name) throws IOException {
-		final RefUpdate ref = db.updateRef(name);
-		ref.setNewObjectId(db.resolve(Constants.HEAD));
-		return ref;
-	}
+		private void delete(RefUpdate @ref, RefUpdate.RefUpdateResult expected)
+		{
+			delete(@ref, expected, true, true);
+		}
 
-	private void delete(final RefUpdate ref, final Result expected)
-			throws IOException {
-		delete(ref, expected, true, true);
-	}
+		private void delete(RefUpdate @ref, RefUpdate.RefUpdateResult expected, bool exists, bool removed)
+		{
+			Assert.AreEqual(exists, db.Refs.ContainsKey(@ref.Name));
+			Assert.AreEqual(expected, @ref.Delete());
+			Assert.AreEqual(!removed, db.Refs.ContainsKey(@ref.Name));
+		}
 
-	private void delete(final RefUpdate ref, final Result expected,
-			final boolean exists, final boolean removed) throws IOException {
-		assertEquals(exists, db.getAllRefs().containsKey(ref.getName()));
-		assertEquals(expected, ref.delete());
-		assertEquals(!removed, db.getAllRefs().containsKey(ref.getName()));
-	}
+		[Test]
+		public virtual void testDeleteFastForward()
+		{
+			RefUpdate @ref = updateRef("refs/heads/a");
+			delete(@ref, RefUpdate.RefUpdateResult.FastForward);
+		}
 
-	public void testNoCacheObjectIdSubclass() throws IOException {
-		final String newRef = "refs/heads/abc";
-		final RefUpdate ru = updateRef(newRef);
-		final RevCommit newid = new RevCommit(ru.getNewObjectId()) {
-			// empty
-		};
-		ru.setNewObjectId(newid);
-		Result update = ru.update();
-		assertEquals(Result.NEW, update);
-		final Ref r = db.getAllRefs().get(newRef);
-		assertNotNull(r);
-		assertEquals(newRef, r.getName());
-		assertNotNull(r.getObjectId());
-		assertNotSame(newid, r.getObjectId());
-		assertSame(ObjectId.class, r.getObjectId().getClass());
-		assertEquals(newid.copy(), r.getObjectId());
-	}
+		[Test]
+		public void testDeleteForce()
+		{
+			RefUpdate @ref = db.UpdateRef("refs/heads/b");
+			@ref.NewObjectId = (db.Resolve("refs/heads/a"));
+			delete(@ref, RefUpdate.RefUpdateResult.Rejected, true, false);
+			@ref.IsForceUpdate = (true);
+			delete(@ref, RefUpdate.RefUpdateResult.Forced);
+		}
 
-	/**
-	 * Delete a ref that is pointed to by HEAD
-	 *
-	 * @throws IOException
-	 */
-	public void testDeleteHEADreferencedRef() throws IOException {
-		ObjectId pid = db.resolve("refs/heads/master^");
-		RefUpdate updateRef = db.updateRef("refs/heads/master");
-		updateRef.setNewObjectId(pid);
-		updateRef.setForceUpdate(true);
-		Result update = updateRef.update();
-		assertEquals(Result.FORCED, update); // internal
+		[Test]
+		public virtual void testDeleteHead()
+		{
+			RefUpdate @ref = updateRef(Constants.HEAD);
+			delete(@ref, RefUpdate.RefUpdateResult.RejectedCurrentBranch, true, false);
+		}
 
-		RefUpdate updateRef2 = db.updateRef("refs/heads/master");
-		Result delete = updateRef2.delete();
-		assertEquals(Result.REJECTED_CURRENT_BRANCH, delete);
-		assertEquals(pid, db.resolve("refs/heads/master"));
-	}
+		///	<summary>
+		/// Delete a ref that is pointed to by HEAD
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[Test]
+		public void testDeleteHEADreferencedRef()
+		{
+			ObjectId pid = db.Resolve("refs/heads/master^");
+			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+			updateRef.NewObjectId = pid;
+			updateRef.IsForceUpdate = true;
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update); // internal
 
-	public void testLooseDelete() throws IOException {
-		final String newRef = "refs/heads/abc";
-		RefUpdate ref = updateRef(newRef);
-		ref.update(); // create loose ref
-		ref = updateRef(newRef); // refresh
-		delete(ref, Result.NO_CHANGE);
-	}
+			RefUpdate updateRef2 = db.UpdateRef("refs/heads/master");
+			RefUpdate.RefUpdateResult delete = updateRef2.Delete();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.RejectedCurrentBranch, delete);
+			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+		}
 
-	public void testDeleteHead() throws IOException {
-		final RefUpdate ref = updateRef(Constants.HEAD);
-		delete(ref, Result.REJECTED_CURRENT_BRANCH, true, false);
-	}
+		///	<summary>
+		/// Delete a loose ref and make sure the directory in refs is deleted too,
+		///	and the reflog dir too
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[Test]
+		public void testDeleteLooseAndItsDirectory()
+		{
+			ObjectId pid = db.Resolve("refs/heads/c^");
+			RefUpdate updateRef = db.UpdateRef("refs/heads/z/c");
+			updateRef.NewObjectId = (pid);
+			updateRef.IsForceUpdate = (true);
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update); // internal
+			Assert.IsTrue(new FileInfo(Path.Combine(db.Directory.FullName, Constants.R_HEADS + "z")).Exists);
+			Assert.IsTrue(new FileInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/z")).Exists);
 
-	/**
-	 * Delete a loose ref and make sure the directory in refs is deleted too,
-	 * and the reflog dir too
-	 *
-	 * @throws IOException
-	 */
-	public void testDeleteLooseAndItsDirectory() throws IOException {
-		ObjectId pid = db.resolve("refs/heads/c^");
-		RefUpdate updateRef = db.updateRef("refs/heads/z/c");
-		updateRef.setNewObjectId(pid);
-		updateRef.setForceUpdate(true);
-		Result update = updateRef.update();
-		assertEquals(Result.NEW, update); // internal
-		assertTrue(new File(db.getDirectory(), Constants.R_HEADS + "z")
-				.exists());
-		assertTrue(new File(db.getDirectory(), "logs/refs/heads/z").exists());
+			// The real test here
+			RefUpdate updateRef2 = db.UpdateRef("refs/heads/z/c");
+			updateRef2.IsForceUpdate = (true);
+			RefUpdate.RefUpdateResult delete = updateRef2.Delete();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, delete);
+			Assert.IsNull(db.Resolve("refs/heads/z/c"));
+			Assert.IsFalse(new FileInfo(Path.Combine(db.Directory.FullName, Constants.R_HEADS + "z")).Exists);
+			Assert.IsFalse(new FileInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/z")).Exists);
+		}
 
-		// The real test here
-		RefUpdate updateRef2 = db.updateRef("refs/heads/z/c");
-		updateRef2.setForceUpdate(true);
-		Result delete = updateRef2.delete();
-		assertEquals(Result.FORCED, delete);
-		assertNull(db.resolve("refs/heads/z/c"));
-		assertFalse(new File(db.getDirectory(), Constants.R_HEADS + "z")
-				.exists());
-		assertFalse(new File(db.getDirectory(), "logs/refs/heads/z").exists());
-	}
+		///	<summary>
+		/// Delete a ref that exists both as packed and loose. Make sure the ref
+		///	cannot be resolved after delete.
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[Test]
+		public void testDeleteLoosePacked()
+		{
+			ObjectId pid = db.Resolve("refs/heads/c^");
+			RefUpdate updateRef = db.UpdateRef("refs/heads/c");
+			updateRef.NewObjectId = (pid);
+			updateRef.IsForceUpdate = (true);
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update); // internal
 
-	public void testDeleteNotFound() throws IOException {
-		final RefUpdate ref = updateRef("refs/heads/xyz");
-		delete(ref, Result.NEW, false, true);
-	}
+			// The real test here
+			RefUpdate updateRef2 = db.UpdateRef("refs/heads/c");
+			updateRef2.IsForceUpdate = true;
+			RefUpdate.RefUpdateResult delete = updateRef2.Delete();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, delete);
+			Assert.IsNull(db.Resolve("refs/heads/c"));
+		}
 
-	public void testDeleteFastForward() throws IOException {
-		final RefUpdate ref = updateRef("refs/heads/a");
-		delete(ref, Result.FAST_FORWARD);
-	}
+		///	<summary>
+		/// Try to delete a ref. Delete requires force.
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[Test]
+		public void testDeleteLoosePackedRejected()
+		{
+			ObjectId pid = db.Resolve("refs/heads/c^");
+			ObjectId oldpid = db.Resolve("refs/heads/c");
+			RefUpdate updateRef = db.UpdateRef("refs/heads/c");
+			updateRef.NewObjectId = (pid);
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.Rejected, update);
+			Assert.AreEqual(oldpid, db.Resolve("refs/heads/c"));
+		}
 
-	public void testDeleteForce() throws IOException {
-		final RefUpdate ref = db.updateRef("refs/heads/b");
-		ref.setNewObjectId(db.resolve("refs/heads/a"));
-		delete(ref, Result.REJECTED, true, false);
-		ref.setForceUpdate(true);
-		delete(ref, Result.FORCED);
-	}
+		[Test]
+		public void testDeleteNotFound()
+		{
+			RefUpdate @ref = updateRef("refs/heads/xyz");
+			delete(@ref, RefUpdate.RefUpdateResult.New, false, true);
+		}
 
-	public void testRefKeySameAsOrigName() {
-		Map<String, Ref> allRefs = db.getAllRefs();
-		for (Entry<String, Ref> e : allRefs.entrySet()) {
-			assertEquals(e.getKey(), e.getValue().getOrigName());
+		[Test]
+		public void testLooseDelete()
+		{
+			const string newRef = "refs/heads/abc";
+			RefUpdate @ref = updateRef(newRef);
+			@ref.Update(); // create loose ref
+			@ref = updateRef(newRef); // refresh
+			delete(@ref, RefUpdate.RefUpdateResult.NoChange);
+		}
 
+		[Test]
+		public void testNoCacheObjectIdSubclass()
+		{
+			const string newRef = "refs/heads/abc";
+			RefUpdate ru = updateRef(newRef);
+			var newid = new RevCommit(ru.NewObjectId);
+			ru.NewObjectId = newid;
+			RefUpdate.RefUpdateResult update = ru.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
+			Ref r = db.Refs[newRef];
+			Assert.IsNotNull(r);
+			Assert.AreEqual(newRef, r.Name);
+			Assert.IsNotNull(r.ObjectId);
+			Assert.AreNotSame(newid, r.ObjectId);
+			Assert.AreSame(typeof (ObjectId), r.ObjectId.GetType());
+			Assert.AreEqual(newid.Copy(), r.ObjectId);
+		}
+
+		[Test]
+		public virtual void testRefKeySameAsOrigName()
+		{
+			foreach (var e in db.Refs)
+			{
+				Assert.AreEqual(e.Key, e.Value.OriginalName);
+			}
+		}
+
+		///	<summary>
+		/// Try modify a ref forward, fast forward
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[Test]
+		public void testUpdateRefForward()
+		{
+			ObjectId ppid = db.Resolve("refs/heads/master^");
+			ObjectId pid = db.Resolve("refs/heads/master");
+
+			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+			updateRef.NewObjectId = (ppid);
+			updateRef.IsForceUpdate = (true);
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
+			Assert.AreEqual(ppid, db.Resolve("refs/heads/master"));
+
+			// real test
+			RefUpdate updateRef2 = db.UpdateRef("refs/heads/master");
+			updateRef2.NewObjectId = (pid);
+			RefUpdate.RefUpdateResult update2 = updateRef2.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update2);
+			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+		}
+
+		/// <summary>
+		/// Try modify a ref that is locked
+		/// </summary>
+		/// <exception cref="IOException"> </exception>
+		[Test]
+		public void testUpdateRefLockFailureLocked()
+		{
+			ObjectId opid = db.Resolve("refs/heads/master");
+			ObjectId pid = db.Resolve("refs/heads/master^");
+			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+			updateRef.NewObjectId = (pid);
+			var lockFile1 = new LockFile(new FileInfo(Path.Combine(db.Directory.FullName, "refs/heads/master")));
+			Assert.IsTrue(lockFile1.Lock()); // precondition to test
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.LockFailure, update);
+			Assert.AreEqual(opid, db.Resolve("refs/heads/master"));
+			var lockFile2 = new LockFile(new FileInfo(Path.Combine(db.Directory.FullName, "refs/heads/master")));
+			Assert.IsFalse(lockFile2.Lock()); // was locked, still is
+		}
+
+		/// <summary>
+		/// Try modify a ref, but get wrong expected old value
+		/// </summary>
+		/// <exception cref="IOException"> </exception>
+		[Test]
+		public void testUpdateRefLockFailureWrongOldValue()
+		{
+			ObjectId pid = db.Resolve("refs/heads/master");
+			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+			updateRef.NewObjectId = (pid);
+			updateRef.ExpectedOldObjectId = db.Resolve("refs/heads/master^");
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.LockFailure, update);
+			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+		}
+
+		///	<summary>
+		/// Try modify a ref to same
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[Test]
+		public void testUpdateRefNoChange()
+		{
+			ObjectId pid = db.Resolve("refs/heads/master");
+			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+			updateRef.NewObjectId = (pid);
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.NoChange, update);
+			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
 		}
 	}
-
-	/**
-	 * Try modify a ref forward, fast forward
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateRefForward() throws IOException {
-		ObjectId ppid = db.resolve("refs/heads/master^");
-		ObjectId pid = db.resolve("refs/heads/master");
-
-		RefUpdate updateRef = db.updateRef("refs/heads/master");
-		updateRef.setNewObjectId(ppid);
-		updateRef.setForceUpdate(true);
-		Result update = updateRef.update();
-		assertEquals(Result.FORCED, update);
-		assertEquals(ppid, db.resolve("refs/heads/master"));
-
-		// real test
-		RefUpdate updateRef2 = db.updateRef("refs/heads/master");
-		updateRef2.setNewObjectId(pid);
-		Result update2 = updateRef2.update();
-		assertEquals(Result.FAST_FORWARD, update2);
-		assertEquals(pid, db.resolve("refs/heads/master"));
-	}
-
-	/**
-	 * Delete a ref that exists both as packed and loose. Make sure the ref
-	 * cannot be resolved after delete.
-	 *
-	 * @throws IOException
-	 */
-	public void testDeleteLoosePacked() throws IOException {
-		ObjectId pid = db.resolve("refs/heads/c^");
-		RefUpdate updateRef = db.updateRef("refs/heads/c");
-		updateRef.setNewObjectId(pid);
-		updateRef.setForceUpdate(true);
-		Result update = updateRef.update();
-		assertEquals(Result.FORCED, update); // internal
-
-		// The real test here
-		RefUpdate updateRef2 = db.updateRef("refs/heads/c");
-		updateRef2.setForceUpdate(true);
-		Result delete = updateRef2.delete();
-		assertEquals(Result.FORCED, delete);
-		assertNull(db.resolve("refs/heads/c"));
-	}
-
-	/**
-	 * Try modify a ref to same
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateRefNoChange() throws IOException {
-		ObjectId pid = db.resolve("refs/heads/master");
-		RefUpdate updateRef = db.updateRef("refs/heads/master");
-		updateRef.setNewObjectId(pid);
-		Result update = updateRef.update();
-		assertEquals(Result.NO_CHANGE, update);
-		assertEquals(pid, db.resolve("refs/heads/master"));
-	}
-
-	/**
-	 * Try modify a ref, but get wrong expected old value
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateRefLockFailureWrongOldValue() throws IOException {
-		ObjectId pid = db.resolve("refs/heads/master");
-		RefUpdate updateRef = db.updateRef("refs/heads/master");
-		updateRef.setNewObjectId(pid);
-		updateRef.setExpectedOldObjectId(db.resolve("refs/heads/master^"));
-		Result update = updateRef.update();
-		assertEquals(Result.LOCK_FAILURE, update);
-		assertEquals(pid, db.resolve("refs/heads/master"));
-	}
-
-	/**
-	 * Try modify a ref that is locked
-	 *
-	 * @throws IOException
-	 */
-	public void testUpdateRefLockFailureLocked() throws IOException {
-		ObjectId opid = db.resolve("refs/heads/master");
-		ObjectId pid = db.resolve("refs/heads/master^");
-		RefUpdate updateRef = db.updateRef("refs/heads/master");
-		updateRef.setNewObjectId(pid);
-		LockFile lockFile1 = new LockFile(new File(db.getDirectory(),"refs/heads/master"));
-		assertTrue(lockFile1.lock()); // precondition to test
-		Result update = updateRef.update();
-		assertEquals(Result.LOCK_FAILURE, update);
-		assertEquals(opid, db.resolve("refs/heads/master"));
-		LockFile lockFile2 = new LockFile(new File(db.getDirectory(),"refs/heads/master"));
-		assertFalse(lockFile2.lock()); // was locked, still is
-	}
-
-	/**
-	 * Try to delete a ref. Delete requires force.
-	 *
-	 * @throws IOException
-	 */
-	public void testDeleteLoosePackedRejected() throws IOException {
-		ObjectId pid = db.resolve("refs/heads/c^");
-		ObjectId oldpid = db.resolve("refs/heads/c");
-		RefUpdate updateRef = db.updateRef("refs/heads/c");
-		updateRef.setNewObjectId(pid);
-		Result update = updateRef.update();
-		assertEquals(Result.REJECTED, update);
-		assertEquals(oldpid, db.resolve("refs/heads/c"));
-	}
-#endif
-    }
 }

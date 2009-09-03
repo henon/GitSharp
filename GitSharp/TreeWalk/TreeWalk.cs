@@ -37,15 +37,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.TreeWalk.Filter;
 using System;
-using GitSharp.RevWalk;
 using System.Collections.Generic;
 using GitSharp.Exceptions;
+using GitSharp.RevWalk;
+using GitSharp.TreeWalk.Filter;
+using GitSharp.Util;
+
 namespace GitSharp.TreeWalk
 {
-
-
     /**
      * Walks one or more {@link AbstractTreeIterator}s in parallel.
      * <p>

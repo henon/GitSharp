@@ -42,11 +42,8 @@ using GitSharp.Transport;
 
 namespace GitSharp.Exceptions
 {
-
     public class TransportException : IOException
     {
-        private static readonly long serialVersionUID = 1L;
-
         public TransportException(URIish uri, string s)
             : base(uri.SetPass(null) + ": " + s)
         {
@@ -66,5 +63,4 @@ namespace GitSharp.Exceptions
         {
         }
     }
-
 }

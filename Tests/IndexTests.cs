@@ -36,312 +36,106 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
+using System.Threading;
+using GitSharp.Exceptions;
+using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
     [TestFixture]
     public class T0007_Index : RepositoryTestCase
     {
-#if false
-	static boolean canrungitstatus;
-	static {
-		try {
-			canrungitstatus = system(new File("."),"git --version") == 0;
-		} catch (IOException e) {
-			System.out.println("Warning: cannot invoke native git to validate index");
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+        private const bool CanRunGitStatus = false;
 
-	private static int system(File dir, String cmd) throws IOException,
-			InterruptedException {
-		final Process process = Runtime.getRuntime().exec(cmd, null, dir);
-		new Thread() {
-			public void run() {
-				try {
-					InputStream s = process.getErrorStream();
-					for (int c = s.read(); c != -1; c = s.read()) {
-						System.err.print((char) c);
-					}
-					s.close();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		}.start();
-		final Thread t2 = new Thread() {
-			public void run() {
-				synchronized (this) {
-					try {
-						InputStream e = process.getInputStream();
-						for (int c = e.read(); c != -1; c = e.read()) {
-							System.out.print((char) c);
-						}
-						e.close();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-			}
-		};
-		t2.start();
-		process.getOutputStream().close();
-		int ret = process.waitFor();
-		synchronized (t2) {
-			return ret;
-		}
-	}
+        private string content(FileSystemInfo f)
+        {
+            using (var sr = new StreamReader(f.FullName))
+            {
+                return sr.ReadToEnd();
+            }
+        }
 
-	public void testCreateEmptyIndex() throws Exception {
-		GitIndex index = new GitIndex(db);
-		index.write();
-// native git doesn't like an empty index
-// assertEquals(0,system(trash,"git status"));
+        private static void Delete(FileSystemInfo f)
+        {
+            f.Delete();
+        }
 
-		GitIndex indexr = new GitIndex(db);
-		indexr.read();
-		assertEquals(0, indexr.getMembers().length);
-	}
+        private static int system(FileSystemInfo dir, string cmd)
+        {
+            /*
+                    final Process process = Runtime.getRuntime().exec(cmd, null, dir);
+                    new Thread() {
+                        public void run() {
+                            try {
+                                InputStream s = process.getErrorStream();
+                                for (int c = s.read(); c != -1; c = s.read()) {
+                                    System.err.print((char) c);
+                                }
+                                s.close();
+                            } catch (IOException e1) {
+                                // TODO Auto-generated catch block
+                                e1.printStackTrace();
+                            }
+                        }
+                    }.start();
+                    final Thread t2 = new Thread() {
+                        public void run() {
+                            synchronized (this) {
+                                try {
+                                    InputStream e = process.getInputStream();
+                                    for (int c = e.read(); c != -1; c = e.read()) {
+                                        System.out.print((char) c);
+                                    }
+                                    e.close();
+                                } catch (IOException e1) {
+                                    // TODO Auto-generated catch block
+                                    e1.printStackTrace();
+                                }
+                            }
+                        }
+                    };
+                    t2.start();
+                    process.getOutputStream().close();
+                    int ret = process.waitFor();
+                    synchronized (t2) {
+                        return ret;
+                    }
+             */
 
-	public void testReadWithNoIndex() throws Exception {
-		GitIndex index = new GitIndex(db);
-		index.read();
-		assertEquals(0, index.getMembers().length);
-	}
+            return 0;
+        }
 
-	public void testCreateSimpleSortTestIndex() throws Exception {
-		GitIndex index = new GitIndex(db);
-		writeTrashFile("a/b", "data:a/b");
-		writeTrashFile("a:b", "data:a:b");
-		writeTrashFile("a.b", "data:a.b");
-		index.add(trash, new File(trash, "a/b"));
-		index.add(trash, new File(trash, "a:b"));
-		index.add(trash, new File(trash, "a.b"));
-		index.write();
-
-		assertEquals("a/b", index.getEntry("a/b").getName());
-		assertEquals("a:b", index.getEntry("a:b").getName());
-		assertEquals("a.b", index.getEntry("a.b").getName());
-		assertNull(index.getEntry("a*b"));
-
-		// Repeat test for re-read index
-		GitIndex indexr = new GitIndex(db);
-		indexr.read();
-		assertEquals("a/b", indexr.getEntry("a/b").getName());
-		assertEquals("a:b", indexr.getEntry("a:b").getName());
-		assertEquals("a.b", indexr.getEntry("a.b").getName());
-		assertNull(indexr.getEntry("a*b"));
-
-		if (canrungitstatus)
-			assertEquals(0, system(trash, "git status"));
-	}
-
-	public void testUpdateSimpleSortTestIndex() throws Exception {
-		GitIndex index = new GitIndex(db);
-		writeTrashFile("a/b", "data:a/b");
-		writeTrashFile("a:b", "data:a:b");
-		writeTrashFile("a.b", "data:a.b");
-		index.add(trash, new File(trash, "a/b"));
-		index.add(trash, new File(trash, "a:b"));
-		index.add(trash, new File(trash, "a.b"));
-		writeTrashFile("a/b", "data:a/b modified");
-		index.add(trash, new File(trash, "a/b"));
-		index.write();
-		if (canrungitstatus)
-			assertEquals(0, system(trash, "git status"));
-	}
-
-	public void testWriteTree() throws Exception {
-		GitIndex index = new GitIndex(db);
-		writeTrashFile("a/b", "data:a/b");
-		writeTrashFile("a:b", "data:a:b");
-		writeTrashFile("a.b", "data:a.b");
-		index.add(trash, new File(trash, "a/b"));
-		index.add(trash, new File(trash, "a:b"));
-		index.add(trash, new File(trash, "a.b"));
-		index.write();
-
-		ObjectId id = index.writeTree();
-		assertEquals("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.name());
-		
-		writeTrashFile("a/b", "data:a/b");
-		index.add(trash, new File(trash, "a/b"));
-
-		if (canrungitstatus)
-			assertEquals(0, system(trash, "git status"));
-	}
-
-	public void testReadTree() throws Exception {
-		// Prepare tree
-		GitIndex index = new GitIndex(db);
-		writeTrashFile("a/b", "data:a/b");
-		writeTrashFile("a:b", "data:a:b");
-		writeTrashFile("a.b", "data:a.b");
-		index.add(trash, new File(trash, "a/b"));
-		index.add(trash, new File(trash, "a:b"));
-		index.add(trash, new File(trash, "a.b"));
-		index.write();
-
-		ObjectId id = index.writeTree();
-		System.out.println("wrote id " + id);
-		assertEquals("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.name());
-		GitIndex index2 = new GitIndex(db);
-
-		index2.readTree(db.mapTree(ObjectId.fromString(
-				"c696abc3ab8e091c665f49d00eb8919690b3aec3")));
-		Entry[] members = index2.getMembers();
-		assertEquals(3, members.length);
-		assertEquals("a.b", members[0].getName());
-		assertEquals("a/b", members[1].getName());
-		assertEquals("a:b", members[2].getName());
-		assertEquals(3, members.length);
-
-		GitIndex indexr = new GitIndex(db);
-		indexr.read();
-		Entry[] membersr = indexr.getMembers();
-		assertEquals(3, membersr.length);
-		assertEquals("a.b", membersr[0].getName());
-		assertEquals("a/b", membersr[1].getName());
-		assertEquals("a:b", membersr[2].getName());
-		assertEquals(3, membersr.length);
-
-		if (canrungitstatus)
-			assertEquals(0, system(trash, "git status"));
-	}
-
-	public void testReadTree2() throws Exception {
-		// Prepare a larger tree to test some odd cases in tree writing
-		GitIndex index = new GitIndex(db);
-		File f1 = writeTrashFile("a/a/a/a", "data:a/a/a/a");
-		File f2 = writeTrashFile("a/c/c", "data:a/c/c");
-		File f3 = writeTrashFile("a/b", "data:a/b");
-		File f4 = writeTrashFile("a:b", "data:a:b");
-		File f5 = writeTrashFile("a/d", "data:a/d");
-		File f6 = writeTrashFile("a.b", "data:a.b");
-		index.add(trash, f1);
-		index.add(trash, f2);
-		index.add(trash, f3);
-		index.add(trash, f4);
-		index.add(trash, f5);
-		index.add(trash, f6);
-		index.write();
-		ObjectId id = index.writeTree();
-		System.out.println("wrote id " + id);
-		assertEquals("ba78e065e2c261d4f7b8f42107588051e87e18e9", id.name());
-		GitIndex index2 = new GitIndex(db);
-
-		index2.readTree(db.mapTree(ObjectId.fromString(
-				"ba78e065e2c261d4f7b8f42107588051e87e18e9")));
-		Entry[] members = index2.getMembers();
-		assertEquals(6, members.length);
-		assertEquals("a.b", members[0].getName());
-		assertEquals("a/a/a/a", members[1].getName());
-		assertEquals("a/b", members[2].getName());
-		assertEquals("a/c/c", members[3].getName());
-		assertEquals("a/d", members[4].getName());
-		assertEquals("a:b", members[5].getName());
-
-		// reread and test
-		GitIndex indexr = new GitIndex(db);
-		indexr.read();
-		Entry[] membersr = indexr.getMembers();
-		assertEquals(6, membersr.length);
-		assertEquals("a.b", membersr[0].getName());
-		assertEquals("a/a/a/a", membersr[1].getName());
-		assertEquals("a/b", membersr[2].getName());
-		assertEquals("a/c/c", membersr[3].getName());
-		assertEquals("a/d", membersr[4].getName());
-		assertEquals("a:b", membersr[5].getName());
-	}
-
-	public void testDelete() throws Exception {
-		GitIndex index = new GitIndex(db);
-		writeTrashFile("a/b", "data:a/b");
-		writeTrashFile("a:b", "data:a:b");
-		writeTrashFile("a.b", "data:a.b");
-		index.add(trash, new File(trash, "a/b"));
-		index.add(trash, new File(trash, "a:b"));
-		index.add(trash, new File(trash, "a.b"));
-		index.write();
-		index.writeTree();
-		index.remove(trash, new File(trash, "a:b"));
-		index.write();
-		assertEquals("a.b", index.getMembers()[0].getName());
-		assertEquals("a/b", index.getMembers()[1].getName());
-
-		GitIndex indexr = new GitIndex(db);
-		indexr.read();
-		assertEquals("a.b", indexr.getMembers()[0].getName());
-		assertEquals("a/b", indexr.getMembers()[1].getName());
-
-		if (canrungitstatus)
-			assertEquals(0, system(trash, "git status"));
-	}
-
-	public void testCheckout() throws Exception {
-		// Prepare tree, remote it and checkout
-		GitIndex index = new GitIndex(db);
-		File aslashb = writeTrashFile("a/b", "data:a/b");
-		File acolonb = writeTrashFile("a:b", "data:a:b");
-		File adotb = writeTrashFile("a.b", "data:a.b");
-		index.add(trash, aslashb);
-		index.add(trash, acolonb);
-		index.add(trash, adotb);
-		index.write();
-		index.writeTree();
-		delete(aslashb);
-		delete(acolonb);
-		delete(adotb);
-		delete(aslashb.getParentFile());
-
-		GitIndex index2 = new GitIndex(db);
-		assertEquals(0, index2.getMembers().length);
-
-		index2.readTree(db.mapTree(ObjectId.fromString(
-				"c696abc3ab8e091c665f49d00eb8919690b3aec3")));
-
-		index2.checkout(trash);
-		assertEquals("data:a/b", content(aslashb));
-		assertEquals("data:a:b", content(acolonb));
-		assertEquals("data:a.b", content(adotb));
-
-		if (canrungitstatus)
-			assertEquals(0, system(trash, "git status"));
-	}
-
-	public void test030_executeBit_coreModeTrue() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, Error, Exception {
-		if (!FS.INSTANCE.supportsExecute()) {
+        [Test, Ignore("Not ported yet")]
+        public void test030_executeBit_coreModeTrue()
+        {
+            /*
+		if (!FS.INSTANCE.supportsExecute())
+		{
 			System.err.println("Test ignored since platform FS does not support the execute permission");
 			return;
 		}
-		try {
+		try
+		{
 			// coremode true is the default, typically set to false
 			// by git init (but not jgit!)
-			Method canExecute = File.class.getMethod("canExecute", (Class[])null);
-			Method setExecute = File.class.getMethod("setExecutable", new Class[] { Boolean.TYPE });
+			var canExecute = typeof(File).GetMethod("canExecute", (Class[])null);
+			Method setExecute = typeof(File).getMethod("setExecutable", new Class[] { bool.TYPE });
 			File execFile = writeTrashFile("exec","exec");
-			if (!((Boolean)setExecute.invoke(execFile, new Object[] { Boolean.TRUE })).booleanValue())
+			if (!((bool)setExecute.invoke(execFile, new object[] { Convert.true })).booleanValue())
 				throw new Error("could not set execute bit on "+execFile.getAbsolutePath()+"for test");
 			File nonexecFile = writeTrashFile("nonexec","nonexec");
-			if (!((Boolean)setExecute.invoke(nonexecFile, new Object[] { Boolean.FALSE })).booleanValue())
+			if (!((bool)setExecute.invoke(nonexecFile, new object[] { Convert.false })).booleanValue())
 				throw new Error("could not clear execute bit on "+nonexecFile.getAbsolutePath()+"for test");
 
 			GitIndex index = new GitIndex(db);
-			index.filemode = Boolean.TRUE; // TODO: we need a way to set this using config
-			index.add(trash, execFile);
-			index.add(trash, nonexecFile);
+			index.filemode = Convert.true; // TODO: we need a way to set this using config
+			index.Add(trash, execFile);
+			index.Add(trash, nonexecFile);
 			Tree tree = db.mapTree(index.writeTree());
-			assertEquals(FileMode.EXECUTABLE_FILE, tree.findBlobMember(execFile.getName()).getMode());
-			assertEquals(FileMode.REGULAR_FILE, tree.findBlobMember(nonexecFile.getName()).getMode());
+			Assert.AreEqual(FileMode.EXECUTABLE_FILE, tree.findBlobMember(execFile.Name).getMode());
+			Assert.AreEqual(FileMode.REGULAR_FILE, tree.findBlobMember(nonexecFile.Name).getMode());
 
 			index.write();
 
@@ -350,53 +144,61 @@ namespace GitSharp.Tests
 			if (!nonexecFile.delete())
 				throw new Error("Problem in test, cannot delete test file "+nonexecFile.getAbsolutePath());
 			GitIndex index2 = new GitIndex(db);
-			index2.filemode = Boolean.TRUE; // TODO: we need a way to set this using config
+			index2.filemode = Convert.true; // TODO: we need a way to set this using config
 			index2.read();
 			index2.checkout(trash);
-			assertTrue(((Boolean)canExecute.invoke(execFile,(Object[])null)).booleanValue());
-			assertFalse(((Boolean)canExecute.invoke(nonexecFile,(Object[])null)).booleanValue());
+			assertTrue(((bool)canExecute.invoke(execFile,(object[])null)).booleanValue());
+			assertFalse(((bool)canExecute.invoke(nonexecFile,(object[])null)).booleanValue());
 
-			assertFalse(index2.getEntry(execFile.getName()).isModified(trash));
-			assertFalse(index2.getEntry(nonexecFile.getName()).isModified(trash));
+			assertFalse(index2.getEntry(execFile.Name).isModified(trash));
+			assertFalse(index2.getEntry(nonexecFile.Name).isModified(trash));
 
-			if (!((Boolean)setExecute.invoke(execFile, new Object[] { Boolean.FALSE })).booleanValue())
+			if (!((bool)setExecute.invoke(execFile, new object[] { Convert.false })).booleanValue())
 				throw new Error("could not clear set execute bit on "+execFile.getAbsolutePath()+"for test");
-			if (!((Boolean)setExecute.invoke(nonexecFile, new Object[] { Boolean.TRUE })).booleanValue())
+			if (!((bool)setExecute.invoke(nonexecFile, new object[] { Convert.true })).booleanValue())
 				throw new Error("could set execute bit on "+nonexecFile.getAbsolutePath()+"for test");
 
-			assertTrue(index2.getEntry(execFile.getName()).isModified(trash));
-			assertTrue(index2.getEntry(nonexecFile.getName()).isModified(trash));
+			assertTrue(index2.getEntry(execFile.Name).isModified(trash));
+			assertTrue(index2.getEntry(nonexecFile.Name).isModified(trash));
 
-		} catch (NoSuchMethodException e) {
+		}
+		catch (NoSuchMethodException e)
+		{
 			System.err.println("Test ignored when running under JDK < 1.6");
 			return;
 		}
-	}
+            */
+        }
 
-	public void test031_executeBit_coreModeFalse() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, Error, Exception {
-		if (!FS.INSTANCE.supportsExecute()) {
+        [Test, Ignore("Not ported yet")]
+        public void test031_executeBit_coreModeFalse()
+        {
+            /*
+		if (!FS.INSTANCE.supportsExecute())
+		{
 			System.err.println("Test ignored since platform FS does not support the execute permission");
 			return;
 		}
-		try {
+		try
+		{
 			// coremode true is the default, typically set to false
 			// by git init (but not jgit!)
-			Method canExecute = File.class.getMethod("canExecute", (Class[])null);
-			Method setExecute = File.class.getMethod("setExecutable", new Class[] { Boolean.TYPE });
+			Method canExecute = typeof(File).getMethod("canExecute", (Class[])null);
+			Method setExecute = typeof(File).getMethod("setExecutable", new Class[] { bool.TYPE });
 			File execFile = writeTrashFile("exec","exec");
-			if (!((Boolean)setExecute.invoke(execFile, new Object[] { Boolean.TRUE })).booleanValue())
+			if (!((bool)setExecute.invoke(execFile, new object[] { Convert.true })).booleanValue())
 				throw new Error("could not set execute bit on "+execFile.getAbsolutePath()+"for test");
 			File nonexecFile = writeTrashFile("nonexec","nonexec");
-			if (!((Boolean)setExecute.invoke(nonexecFile, new Object[] { Boolean.FALSE })).booleanValue())
+			if (!((bool)setExecute.invoke(nonexecFile, new object[] { Convert.false })).booleanValue())
 				throw new Error("could not clear execute bit on "+nonexecFile.getAbsolutePath()+"for test");
 
 			GitIndex index = new GitIndex(db);
-			index.filemode = Boolean.FALSE; // TODO: we need a way to set this using config
-			index.add(trash, execFile);
-			index.add(trash, nonexecFile);
+			index.filemode = Convert.false; // TODO: we need a way to set this using config
+			index.Add(trash, execFile);
+			index.Add(trash, nonexecFile);
 			Tree tree = db.mapTree(index.writeTree());
-			assertEquals(FileMode.REGULAR_FILE, tree.findBlobMember(execFile.getName()).getMode());
-			assertEquals(FileMode.REGULAR_FILE, tree.findBlobMember(nonexecFile.getName()).getMode());
+			Assert.AreEqual(FileMode.REGULAR_FILE, tree.findBlobMember(execFile.Name).getMode());
+			Assert.AreEqual(FileMode.REGULAR_FILE, tree.findBlobMember(nonexecFile.Name).getMode());
 
 			index.write();
 
@@ -405,47 +207,295 @@ namespace GitSharp.Tests
 			if (!nonexecFile.delete())
 				throw new Error("Problem in test, cannot delete test file "+nonexecFile.getAbsolutePath());
 			GitIndex index2 = new GitIndex(db);
-			index2.filemode = Boolean.FALSE; // TODO: we need a way to set this using config
+			index2.filemode = Convert.false; // TODO: we need a way to set this using config
 			index2.read();
 			index2.checkout(trash);
-			assertFalse(((Boolean)canExecute.invoke(execFile,(Object[])null)).booleanValue());
-			assertFalse(((Boolean)canExecute.invoke(nonexecFile,(Object[])null)).booleanValue());
+			assertFalse(((bool)canExecute.invoke(execFile,(object[])null)).booleanValue());
+			assertFalse(((bool)canExecute.invoke(nonexecFile,(object[])null)).booleanValue());
 
-			assertFalse(index2.getEntry(execFile.getName()).isModified(trash));
-			assertFalse(index2.getEntry(nonexecFile.getName()).isModified(trash));
+			assertFalse(index2.getEntry(execFile.Name).isModified(trash));
+			assertFalse(index2.getEntry(nonexecFile.Name).isModified(trash));
 
-			if (!((Boolean)setExecute.invoke(execFile, new Object[] { Boolean.FALSE })).booleanValue())
+			if (!((bool)setExecute.invoke(execFile, new object[] { Convert.false })).booleanValue())
 				throw new Error("could not clear set execute bit on "+execFile.getAbsolutePath()+"for test");
-			if (!((Boolean)setExecute.invoke(nonexecFile, new Object[] { Boolean.TRUE })).booleanValue())
+			if (!((bool)setExecute.invoke(nonexecFile, new object[] { Convert.true })).booleanValue())
 				throw new Error("could set execute bit on "+nonexecFile.getAbsolutePath()+"for test");
 
 			// no change since we ignore the execute bit
-			assertFalse(index2.getEntry(execFile.getName()).isModified(trash));
-			assertFalse(index2.getEntry(nonexecFile.getName()).isModified(trash));
+			assertFalse(index2.getEntry(execFile.Name).isModified(trash));
+			assertFalse(index2.getEntry(nonexecFile.Name).isModified(trash));
 
-		} catch (NoSuchMethodException e) {
+		}
+		catch (NoSuchMethodException e)
+		{
 			System.err.println("Test ignored when running under JDK < 1.6");
 			return;
 		}
-	}
+             * */
+        }
 
-	private String content(File f) throws IOException {
-		byte[] buf = new byte[(int) f.length()];
-		FileInputStream is = new FileInputStream(f);
-		try {
-			int read = is.read(buf);
-			assertEquals(f.length(), read);
-			return new String(buf, 0);
-		} finally {
-			is.close();
-		}
-	}
+        [Test]
+        public void testCheckout()
+        {
+            // Prepare tree, remote it and checkout
+            var index = new GitIndex(db);
+            FileInfo aslashb = writeTrashFile("a/b", "data:a/b");
+            FileInfo acolonb = writeTrashFile("a:b", "data:a:b");
+            FileInfo adotb = writeTrashFile("a.b", "data:a.b");
+            index.add(trash, aslashb);
+            index.add(trash, acolonb);
+            index.add(trash, adotb);
+            index.write();
+            index.writeTree();
+            Delete(aslashb);
+            Delete(acolonb);
+            Delete(adotb);
+            Delete(Directory.GetParent(aslashb.FullName));
 
-	private void delete(File f) throws IOException {
-		if (!f.delete())
-			throw new IOException("Failed to delete f");
-	}
-#endif
+            var index2 = new GitIndex(db);
+            Assert.AreEqual(0, index2.Members.Length);
+
+            index2.ReadTree(db.MapTree(ObjectId.FromString("c696abc3ab8e091c665f49d00eb8919690b3aec3")));
+
+            index2.checkout(trash);
+            Assert.AreEqual("data:a/b", content(aslashb));
+            Assert.AreEqual("data:a:b", content(acolonb));
+            Assert.AreEqual("data:a.b", content(adotb));
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, system(trash, "git status"));
+            }
+        }
+
+        /*
+        internal static ImpliedClass()
+        {
+	        try
+	        {
+		        CanRunGitStatus = system(new File("."),"git --version") == 0;
+	        }
+	        catch (System.IO.IOException e)
+	        {
+		        Console.WriteLine("Warning: cannot invoke native git to validate index");
+	        }
+	        catch (InterruptedException e)
+	        {
+		        e.printStackTrace();
+	        }
+        }
+        */
+
+
+        [Test]
+        public void testCreateEmptyIndex()
+        {
+            var index = new GitIndex(db);
+            index.write();
+            // native git doesn't like an empty index
+            // Assert.AreEqual(0,system(trash,"git status"));
+
+            var indexr = new GitIndex(db);
+            indexr.Read();
+            Assert.AreEqual(0, indexr.Members.Length);
+        }
+
+        [Test]
+        public void testCreateSimpleSortTestIndex()
+        {
+            var index = new GitIndex(db);
+            writeTrashFile("a/b", "data:a/b");
+            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a.b", "data:a.b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
+            index.write();
+
+            Assert.AreEqual("a/b", index.GetEntry("a/b").Name);
+            Assert.AreEqual("a:b", index.GetEntry("a:b").Name);
+            Assert.AreEqual("a.b", index.GetEntry("a.b").Name);
+            Assert.IsNull(index.GetEntry("a*b"));
+
+            // Repeat test for re-read index
+            var indexr = new GitIndex(db);
+            indexr.Read();
+            Assert.AreEqual("a/b", indexr.GetEntry("a/b").Name);
+            Assert.AreEqual("a:b", indexr.GetEntry("a:b").Name);
+            Assert.AreEqual("a.b", indexr.GetEntry("a.b").Name);
+            Assert.IsNull(indexr.GetEntry("a*b"));
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, system(trash, "git status"));
+            }
+        }
+
+        [Test]
+        public void testDelete()
+        {
+            var index = new GitIndex(db);
+            writeTrashFile("a/b", "data:a/b");
+            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a.b", "data:a.b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
+            index.write();
+            index.writeTree();
+            index.remove(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.write();
+            Assert.AreEqual("a.b", index.Members[0].Name);
+            Assert.AreEqual("a/b", index.Members[1].Name);
+
+            var indexr = new GitIndex(db);
+            indexr.Read();
+            Assert.AreEqual("a.b", indexr.Members[0].Name);
+            Assert.AreEqual("a/b", indexr.Members[1].Name);
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, system(trash, "git status"));
+            }
+        }
+
+        [Test]
+        public void testReadTree()
+        {
+            // Prepare tree
+            var index = new GitIndex(db);
+            writeTrashFile("a/b", "data:a/b");
+            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a.b", "data:a.b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
+            index.write();
+
+            ObjectId id = index.writeTree();
+            Console.WriteLine("wrote id " + id);
+            Assert.AreEqual("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
+            var index2 = new GitIndex(db);
+
+            index2.ReadTree(db.MapTree(ObjectId.FromString("c696abc3ab8e091c665f49d00eb8919690b3aec3")));
+            GitIndex.Entry[] members = index2.Members;
+            Assert.AreEqual(3, members.Length);
+            Assert.AreEqual("a.b", members[0].Name);
+            Assert.AreEqual("a/b", members[1].Name);
+            Assert.AreEqual("a:b", members[2].Name);
+            Assert.AreEqual(3, members.Length);
+
+            var indexr = new GitIndex(db);
+            indexr.Read();
+            GitIndex.Entry[] membersr = indexr.Members;
+            Assert.AreEqual(3, membersr.Length);
+            Assert.AreEqual("a.b", membersr[0].Name);
+            Assert.AreEqual("a/b", membersr[1].Name);
+            Assert.AreEqual("a:b", membersr[2].Name);
+            Assert.AreEqual(3, membersr.Length);
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, system(trash, "git status"));
+            }
+        }
+
+        [Test]
+        public void testReadTree2()
+        {
+            // Prepare a larger tree to test some odd cases in tree writing
+            var index = new GitIndex(db);
+            FileInfo f1 = writeTrashFile("a/a/a/a", "data:a/a/a/a");
+            FileInfo f2 = writeTrashFile("a/c/c", "data:a/c/c");
+            FileInfo f3 = writeTrashFile("a/b", "data:a/b");
+            FileInfo f4 = writeTrashFile("a:b", "data:a:b");
+            FileInfo f5 = writeTrashFile("a/d", "data:a/d");
+            FileInfo f6 = writeTrashFile("a.b", "data:a.b");
+            index.add(trash, f1);
+            index.add(trash, f2);
+            index.add(trash, f3);
+            index.add(trash, f4);
+            index.add(trash, f5);
+            index.add(trash, f6);
+            index.write();
+            ObjectId id = index.writeTree();
+            Console.WriteLine("wrote id " + id);
+            Assert.AreEqual("ba78e065e2c261d4f7b8f42107588051e87e18e9", id.Name);
+            var index2 = new GitIndex(db);
+
+            index2.ReadTree(db.MapTree(ObjectId.FromString("ba78e065e2c261d4f7b8f42107588051e87e18e9")));
+            GitIndex.Entry[] members = index2.Members;
+            Assert.AreEqual(6, members.Length);
+            Assert.AreEqual("a.b", members[0].Name);
+            Assert.AreEqual("a/a/a/a", members[1].Name);
+            Assert.AreEqual("a/b", members[2].Name);
+            Assert.AreEqual("a/c/c", members[3].Name);
+            Assert.AreEqual("a/d", members[4].Name);
+            Assert.AreEqual("a:b", members[5].Name);
+
+            // reread and test
+            var indexr = new GitIndex(db);
+            indexr.Read();
+            GitIndex.Entry[] membersr = indexr.Members;
+            Assert.AreEqual(6, membersr.Length);
+            Assert.AreEqual("a.b", membersr[0].Name);
+            Assert.AreEqual("a/a/a/a", membersr[1].Name);
+            Assert.AreEqual("a/b", membersr[2].Name);
+            Assert.AreEqual("a/c/c", membersr[3].Name);
+            Assert.AreEqual("a/d", membersr[4].Name);
+            Assert.AreEqual("a:b", membersr[5].Name);
+        }
+
+        [Test]
+        public void testReadWithNoIndex()
+        {
+            var index = new GitIndex(db);
+            index.Read();
+            Assert.AreEqual(0, index.Members.Length);
+        }
+
+        [Test]
+        public void testUpdateSimpleSortTestIndex()
+        {
+            var index = new GitIndex(db);
+            writeTrashFile("a/b", "data:a/b");
+            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a.b", "data:a.b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
+            writeTrashFile("a/b", "data:a/b modified");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.write();
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, system(trash, "git status"));
+            }
+        }
+
+        [Test]
+        public void testWriteTree()
+        {
+            var index = new GitIndex(db);
+            writeTrashFile("a/b", "data:a/b");
+            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a.b", "data:a.b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
+            index.write();
+
+            ObjectId id = index.writeTree();
+            Assert.AreEqual("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
+
+            writeTrashFile("a/b", "data:a/b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, system(trash, "git status"));
+            }
+        }
     }
-
 }

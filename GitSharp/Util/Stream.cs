@@ -37,6 +37,7 @@
 
 /* Note: jgit has implemented its own FileStream in WalkRemoteObjectDatabase */
 
+using System;
 using System.IO;
 
 namespace GitSharp.Util
@@ -70,6 +71,13 @@ namespace GitSharp.Util
             {
                 stream.Close();
             }
+        }
+
+        public static void Clear(this MemoryStream ms)
+        {
+            ms.Seek(0, SeekOrigin.Begin);
+            ms.Write(new byte[ms.Length], 0, Convert.ToInt32(ms.Length));
+            ms.Seek(0, SeekOrigin.Begin);
         }
     }
 

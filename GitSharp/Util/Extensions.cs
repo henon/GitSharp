@@ -36,35 +36,33 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Security;
 
 namespace GitSharp
 {
     public static class Extensions
     {
-        public static long UnsignedRightShift(this long n, int s)  //Overloaded function where n is a long
+        private static string alphaNumeric = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+        public static long UnsignedRightShift(this long n, int s) //Overloaded function where n is a long
         {
             if (n > 0)
             {
                 return n >> s;
             }
-            else
-            {
-                return (n >> s) + (((long)2) << ~s);
-            }
+            
+            return (n >> s) + (((long) 2) << ~s);
         }
 
-        public static int UnsignedRightShift(this int n, int s){
+        public static int UnsignedRightShift(this int n, int s)
+        {
             if (n > 0)
             {
                 return n >> s;
             }
-            else
-            {
-                return (n >> s) + (2 << ~s);
-            }
+            
+            return (n >> s) + (2 << ~s);
         }
 
         /// <summary>
@@ -75,12 +73,16 @@ namespace GitSharp
         /// <param name="dict">The dict.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public static void AddOrReplace<K, V>(this Dictionary<K,V> dict, K key, V value)
+        public static void AddOrReplace<K, V>(this Dictionary<K, V> dict, K key, V value)
         {
             if (dict.ContainsKey(key))
+            {
                 dict[key] = value;
+            }
             else
+            {
                 dict.Add(key, value);
+            }
         }
 
         /// <summary>
@@ -108,7 +110,6 @@ namespace GitSharp
             o.CopyTo(writer);
         }
 
-        private static string alphaNumeric = "abcdefghijklmnopqrstuvwxyz0123456789";
         public static FileInfo CreateTempFile(this DirectoryInfo d, string prefix)
         {
             return CreateTempFile(d, prefix, null);
@@ -116,12 +117,12 @@ namespace GitSharp
 
         public static FileInfo CreateTempFile(this DirectoryInfo d, string prefix, string suffix)
         {
-            var name = "";
-            var rnd = new Random((int)DateTime.Now.Ticks);
+            string name = string.Empty;
+            var rnd = new Random((int) DateTime.Now.Ticks);
             if (!string.IsNullOrEmpty(prefix))
                 name += prefix;
 
-            var i = 8;
+            int i = 8;
             while (i-- > 0)
                 name += alphaNumeric[rnd.Next(alphaNumeric.Length - 1)];
 
@@ -140,15 +141,41 @@ namespace GitSharp
                 file.MoveTo(newPath);
                 return true;
             }
-            catch (IOException) { }
-            catch (ArgumentNullException) { }
-            catch (ArgumentException) { }
-            catch (System.Security.SecurityException) { }
-            catch (UnauthorizedAccessException) { }
-            catch (NotSupportedException) { }
+            catch (IOException)
+            {
+            }
+            catch (ArgumentNullException)
+            {
+            }
+            catch (ArgumentException)
+            {
+            }
+            catch (SecurityException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
+            catch (NotSupportedException)
+            {
+            }
 
             return false;
-
         }
+
+        public static string DirectoryName(this FileSystemInfo fileSystemInfo)
+        {
+            return Path.GetDirectoryName(fileSystemInfo.FullName);
+        }
+
+        public static bool IsDirectory(this FileSystemInfo fileSystemInfo)
+        {
+            return Directory.Exists(DirectoryName(fileSystemInfo));
+        }
+
+        public static bool IsFile(this FileSystemInfo fileSystemInfo)
+        {
+            return File.Exists(fileSystemInfo.FullName);
+        } 
     }
 }

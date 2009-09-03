@@ -237,43 +237,43 @@ namespace GitSharp
             Walk(_mainTree, _newTree);
         }
 
-        private void Walk(Tree tree, Tree auxTree)
-        {
-            var mi = new TreeIterator(tree, TreeIterator.Order.POSTORDER);
-            var ai = new TreeIterator(auxTree, TreeIterator.Order.POSTORDER);
-            TreeEntry m = mi.MoveNext() ? mi.Current : null;
-            TreeEntry a = ai.MoveNext() ? ai.Current : null;
-            int curIndexPos = IndexCounter;
-            GitIndex.Entry i = IndexCounter < _indexMembers.Length ? _indexMembers[IndexCounter++] : null;
-            while (((m != null) || (a != null)) || (i!= null))
-            {
-                int cmpma = Compare(m, a);
-                int cmpmi = Compare(m, i);
-                int cmpai = Compare(a, i);
-                TreeEntry pm = ((cmpma <= 0) && (cmpmi <= 0)) ? m : null;
-                TreeEntry pa = ((cmpma >= 0) && (cmpai <= 0)) ? a : null;
-                GitIndex.Entry pi = ((cmpmi >= 0) && (cmpai >= 0)) ? i : null;
-                if (pi != null)
-                {
-                    VisitEntry(pm, pa, pi);
-                }
-                else
-                {
-                    FinishVisitTree(pm, pa, curIndexPos);
-                }
-                if (pm != null)
-                {
-                    m = mi.MoveNext() ? mi.Current : null;
-                }
-                if (pa != null)
-                {
-                    a = ai.MoveNext() ? ai.Current : null;
-                }
-                if (pi != null)
-                {
-                    i = IndexCounter < _indexMembers.Length ? _indexMembers[IndexCounter++] : null;
-                }
-            }
-        }
+		private void Walk(Tree tree, Tree auxTree)
+		{
+			var mi = new TreeIterator(tree, TreeIterator.Order.POSTORDER);
+			var ai = new TreeIterator(auxTree, TreeIterator.Order.POSTORDER);
+			TreeEntry m = mi.MoveNext() ? mi.Current : null;
+			TreeEntry a = ai.MoveNext() ? ai.Current : null;
+			int curIndexPos = IndexCounter;
+			GitIndex.Entry entry = (IndexCounter < _indexMembers.Length) ? _indexMembers[0] : null;
+			while (((m != null) || (a != null)) || (entry != null))
+			{
+				int cmpma = Compare(m, a);
+				int cmpmi = Compare(m, entry);
+				int cmpai = Compare(a, entry);
+				TreeEntry pm = ((cmpma <= 0) && (cmpmi <= 0)) ? m : null;
+				TreeEntry pa = ((cmpma >= 0) && (cmpai <= 0)) ? a : null;
+				GitIndex.Entry pi = ((cmpmi >= 0) && (cmpai >= 0)) ? entry : null;
+				if (pi != null)
+				{
+					VisitEntry(pm, pa, pi);
+				}
+				else
+				{
+					FinishVisitTree(pm, pa, curIndexPos);
+				}
+				if (pm != null)
+				{
+					m = mi.MoveNext() ? mi.Current : null;
+				}
+				if (pa != null)
+				{
+					a = ai.MoveNext() ? ai.Current : null;
+				}
+				if (pi != null)
+				{
+					entry = (IndexCounter < _indexMembers.Length) ? _indexMembers[0] : null;
+				}
+			}
+		}
     }
 }

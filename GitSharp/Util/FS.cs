@@ -88,7 +88,7 @@ namespace GitSharp.Util
          *            abstract path to test.
          * @return true if the file is believed to be executable by the user.
          */
-        public static bool canExecute(FileInfo f)
+        public static bool canExecute(FileSystemInfo f)
         {
             return false; // windows does not support executable file flag
         }

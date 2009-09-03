@@ -90,10 +90,10 @@ namespace GitSharp.TreeWalk
 
         private Entry[] entries()
         {
-            FileInfo[] all = null;
+            FileSystemInfo[] all = null;
             try
             {
-                all = directory.GetFiles();
+                all = directory.GetFileSystemInfos();
             }
             catch (DirectoryNotFoundException)
             {
@@ -122,23 +122,25 @@ namespace GitSharp.TreeWalk
 
             private long lastModified;
 
-            public FileEntry(DirectoryInfo f)
+            public FileEntry(FileSystemInfo f)
             {
                 file = f;
-
-                if (new DirectoryInfo(f + "/.git").Exists)
+                if(Directory.Exists(file.FullName))
+                {
+                  if (new DirectoryInfo(f + "/.git").Exists)
                     mode = FileMode.GitLink;
-                else
+                  else
                     mode = FileMode.Tree;
-            }
-
-            public FileEntry(FileInfo f)
-            {
-                file = f;
-                if (FS.canExecute(f))
+                  return;
+                }
+                if(File.Exists(file.FullName))
+                {
+                  if (FS.canExecute(f))
                     mode = FileMode.ExecutableFile;
-                else
+                  else
                     mode = FileMode.RegularFile;
+                }
+                
             }
 
             public override FileMode getMode()

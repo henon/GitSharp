@@ -66,6 +66,7 @@ namespace GitSharp.Tests.TreeWalk
 				FileInfo fi = writeTrashFile(s, s);
 				mtime[i] = fi.LastWriteTime.Ticks;
 			}
+      trash.Refresh();
 		}
 
     [Test]

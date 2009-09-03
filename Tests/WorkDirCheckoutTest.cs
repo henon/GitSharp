@@ -36,98 +36,87 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
-
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
+using GitSharp.Exceptions;
+using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
     [TestFixture]
     public class WorkDirCheckoutTest : RepositoryTestCase
     {
-#if false
-	public void testFindingConflicts() throws IOException {
-		GitIndex index = new GitIndex(db);
-		index.add(trash, writeTrashFile("bar", "bar"));
-		index.add(trash, writeTrashFile("foo/bar/baz/qux", "foo/bar"));
-		recursiveDelete(new File(trash, "bar"));
-		recursiveDelete(new File(trash, "foo"));
-		writeTrashFile("bar/baz/qux/foo", "another nasty one");
-		writeTrashFile("foo", "troublesome little bugger");
+        // Methods
+        [Test]
+        public void testCheckingOutWithConflicts()
+        {
+            var index = new GitIndex(db);
+            index.add(trash, writeTrashFile("bar", "bar"));
+            index.add(trash, writeTrashFile("foo/bar/baz/qux", "foo/bar"));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "bar")));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
+            writeTrashFile("bar/baz/qux/foo", "another nasty one");
+            writeTrashFile("foo", "troublesome little bugger");
+            try
+            {
+                new WorkDirCheckout(db, trash, index, index).checkout();
+                Assert.Fail("Should have thrown exception");
+            }
+            catch (CheckoutConflictException)
+            {
+            }
 
-		WorkDirCheckout workDirCheckout = new WorkDirCheckout(db, trash, index,
-				index);
-		workDirCheckout.prescanOneTree();
-		ArrayList<String> conflictingEntries = workDirCheckout
-				.getConflicts();
-		ArrayList<String> removedEntries = workDirCheckout.getRemoved();
-		assertEquals("bar/baz/qux/foo", conflictingEntries.get(0));
-		assertEquals("foo", conflictingEntries.get(1));
+            WorkDirCheckout workDirCheckout = new WorkDirCheckout(db, trash, index, index) { FailOnConflict = false };
+            workDirCheckout.checkout();
+            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo")).IsFile());
+            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo/bar/baz/qux")).IsFile());
+            var index2 = new GitIndex(db);
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "bar")));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
+            index2.add(trash, writeTrashFile("bar/baz/qux/foo", "bar"));
+            writeTrashFile("bar/baz/qux/bar", "evil? I thought it said WEEVIL!");
+            index2.add(trash, writeTrashFile("foo", "lalala"));
 
-		GitIndex index2 = new GitIndex(db);
-		recursiveDelete(new File(trash, "bar"));
-		recursiveDelete(new File(trash, "foo"));
+            workDirCheckout = new WorkDirCheckout(db, trash, index2, index) { FailOnConflict = false };
+            workDirCheckout.checkout();
+            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "bar")).IsFile());
+            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo/bar/baz/qux")).IsFile());
+            Assert.IsNotNull(index2.GetEntry("bar"));
+            Assert.IsNotNull(index2.GetEntry("foo/bar/baz/qux"));
+            Assert.IsNull(index2.GetEntry("bar/baz/qux/foo"));
+            Assert.IsNull(index2.GetEntry("foo"));
+        }
 
-		index2.add(trash, writeTrashFile("bar/baz/qux/foo", "bar"));
-		index2.add(trash, writeTrashFile("foo", "lalala"));
+        [Test]
+        public void testFindingConflicts()
+        {
+            var index = new GitIndex(db);
+            index.add(trash, writeTrashFile("bar", "bar"));
+            index.add(trash, writeTrashFile("foo/bar/baz/qux", "foo/bar"));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "bar")));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
+            writeTrashFile("bar/baz/qux/foo", "another nasty one");
+            writeTrashFile("foo", "troublesome little bugger");
 
-		workDirCheckout = new WorkDirCheckout(db, trash, index2, index);
-		workDirCheckout.prescanOneTree();
+            var workDirCheckout = new WorkDirCheckout(db, trash, index, index);
+            workDirCheckout.PrescanOneTree();
+            List<string> conflictingEntries = workDirCheckout.Conflicts;
+            Assert.AreEqual("bar/baz/qux/foo", conflictingEntries[0]);
+            Assert.AreEqual("foo", conflictingEntries[1]);
 
-		conflictingEntries = workDirCheckout.getConflicts();
-		removedEntries = workDirCheckout.getRemoved();
-		assertTrue(conflictingEntries.isEmpty());
-		assertTrue(removedEntries.contains("bar/baz/qux/foo"));
-		assertTrue(removedEntries.contains("foo"));
-	}
-
-	public void testCheckingOutWithConflicts() throws IOException {
-		GitIndex index = new GitIndex(db);
-		index.add(trash, writeTrashFile("bar", "bar"));
-		index.add(trash, writeTrashFile("foo/bar/baz/qux", "foo/bar"));
-		recursiveDelete(new File(trash, "bar"));
-		recursiveDelete(new File(trash, "foo"));
-		writeTrashFile("bar/baz/qux/foo", "another nasty one");
-		writeTrashFile("foo", "troublesome little bugger");
-
-		try {
-			WorkDirCheckout workDirCheckout = new WorkDirCheckout(db, trash,
-					index, index);
-			workDirCheckout.checkout();
-			fail("Should have thrown exception");
-		} catch (CheckoutConflictException e) {
-			// all is well
-		}
-
-		WorkDirCheckout workDirCheckout = new WorkDirCheckout(db, trash, index,
-				index);
-		workDirCheckout.setFailOnConflict(false);
-		workDirCheckout.checkout();
-
-		assertTrue(new File(trash, "bar").isFile());
-		assertTrue(new File(trash, "foo/bar/baz/qux").isFile());
-
-		GitIndex index2 = new GitIndex(db);
-		recursiveDelete(new File(trash, "bar"));
-		recursiveDelete(new File(trash, "foo"));
-		index2.add(trash, writeTrashFile("bar/baz/qux/foo", "bar"));
-		writeTrashFile("bar/baz/qux/bar", "evil? I thought it said WEEVIL!");
-		index2.add(trash, writeTrashFile("foo", "lalala"));
-
-		workDirCheckout = new WorkDirCheckout(db, trash, index2, index);
-		workDirCheckout.setFailOnConflict(false);
-		workDirCheckout.checkout();
-
-		assertTrue(new File(trash, "bar").isFile());
-		assertTrue(new File(trash, "foo/bar/baz/qux").isFile());
-		assertNotNull(index2.getEntry("bar"));
-		assertNotNull(index2.getEntry("foo/bar/baz/qux"));
-		assertNull(index2.getEntry("bar/baz/qux/foo"));
-		assertNull(index2.getEntry("foo"));
-	}
-#endif
+            var index2 = new GitIndex(db);
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "bar")));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
+            index2.add(trash, writeTrashFile("bar/baz/qux/foo", "bar"));
+            index2.add(trash, writeTrashFile("foo", "lalala"));
+            
+            workDirCheckout = new WorkDirCheckout(db, trash, index2, index);
+            workDirCheckout.PrescanOneTree();
+            conflictingEntries = workDirCheckout.Conflicts;
+            List<string> removedEntries = workDirCheckout.Removed;
+            Assert.IsTrue(conflictingEntries.Count == 0);
+            Assert.IsTrue(removedEntries.Contains("bar/baz/qux/foo"));
+            Assert.IsTrue(removedEntries.Contains("foo"));
+        }
     }
 }

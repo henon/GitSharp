@@ -201,6 +201,7 @@
     <Compile Include="WindowCachConfig.cs" />
     <Compile Include="WindowCache.cs" />
     <Compile Include="WindowCursor.cs" />
+    <Compile Include="WorkDirCheckout.cs" />
     <Compile Include="WriteTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\BufferedReader.cs" />

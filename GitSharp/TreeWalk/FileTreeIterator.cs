@@ -93,6 +93,7 @@ namespace GitSharp.TreeWalk
             FileSystemInfo[] all = null;
             try
             {
+                directory.Refresh();
                 all = directory.GetFileSystemInfos();
             }
             catch (DirectoryNotFoundException)

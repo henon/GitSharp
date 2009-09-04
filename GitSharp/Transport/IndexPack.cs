@@ -389,8 +389,14 @@ namespace GitSharp.Transport
         private void resolveChildDeltas(long pos, int type, byte[] data, PackedObjectInfo oe)
         {
             UnresolvedDelta a = reverse(removeBaseById(oe));
-            UnresolvedDelta b = reverse(baseByPos[pos]);
-            baseByPos.Remove(pos);
+            UnresolvedDelta b = null;
+            if (baseByPos.ContainsKey(pos))
+            {
+                b = reverse(baseByPos[pos]);
+                baseByPos.Remove(pos);
+            }
+            else
+                b = reverse(null);
             while (a != null && b != null)
             {
                 if (a.position < b.position)
@@ -526,7 +532,7 @@ namespace GitSharp.Transport
             for (;;)
             {
                 int n = packOut.Read(buf, 0, buf.Length);
-                if (n < 0)
+                if (n <= 0)
                     break;
                 if (origRemaining != 0)
                 {
@@ -783,8 +789,9 @@ namespace GitSharp.Transport
                     next = bAvail;
                     free = buf.Length - next;
                 }
+                int prevNext = next;
                 next = stream.Read(buf, next, free);
-                if (next <= 0)
+                if (next <= 0 && (prevNext != buf.Length))
                     throw new EndOfStreamException("Packfile is truncated,");
                 bAvail += next;
             }
@@ -805,8 +812,9 @@ namespace GitSharp.Transport
                     next = bAvail;
                     free = buf.Length - next;
                 }
+                int prevNext = next;
                 next = packOut.Read(buf, next, free);
-                if (next <= 0)
+                if (next <= 0 && (prevNext != buf.Length))
                     throw new EndOfStreamException("Packfile is truncated.");
                 bAvail += next;
             }

@@ -312,8 +312,7 @@ namespace GitSharp
 
                     if (IsTOC(hdr))
                     {
-                        int va = NB.DecodeInt32(hdr, 4);
-                        int v = BitConverter.ToInt32(hdr, 4);
+                        int v = NB.DecodeInt32(hdr, 4);
                         switch (v)
                         {
                             case 2:

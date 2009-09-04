@@ -47,6 +47,7 @@ using System.IO;
 using System.Linq;
 using GitSharp.Exceptions;
 using GitSharp.Util;
+using Tamir.SharpSsh.java.util;
 
 namespace GitSharp
 {
@@ -606,8 +607,7 @@ namespace GitSharp
         public Entry GetEntry(string path)
         {
             byte[] val = Repository.GitInternalSlash(Constants.encode(path));
-            if (_entries.ContainsKey(val)) return _entries[val];
-            return null;
+            return _entries.Where(e => e.Key.SequenceEqual(val)).FirstOrDefault().Value;
         }
 
         #region Nested Types

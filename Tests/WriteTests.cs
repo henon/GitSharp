@@ -600,7 +600,7 @@ namespace GitSharp.Tests
             lockRef.NewObjectId = (newId);
             Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, lockRef.ForceUpdate());
 
-            Assert.IsTrue(new DirectoryInfo(db.Directory.FullName + "/refs/heads/foobar").Exists);
+            Assert.IsTrue(new FileInfo(db.Directory.FullName + "/refs/heads/foobar").Exists);
             Assert.AreEqual(newId, db.Resolve("refs/heads/foobar"));
 
             // Again. The ref already exists
@@ -609,7 +609,7 @@ namespace GitSharp.Tests
             lockRef2.NewObjectId = (newId2);
             Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, lockRef2.ForceUpdate());
 
-            Assert.IsTrue(new DirectoryInfo(db.Directory.FullName + "refs/heads/foobar").Exists);
+            Assert.IsTrue(new FileInfo(db.Directory.FullName + "/refs/heads/foobar").Exists);
             Assert.AreEqual(newId2, db.Resolve("refs/heads/foobar"));
         }
 

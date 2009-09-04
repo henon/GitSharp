@@ -605,7 +605,9 @@ namespace GitSharp
         /// <returns>Index entry for the path or null if not in index.</returns>
         public Entry GetEntry(string path)
         {
-            return _entries[Repository.GitInternalSlash(Constants.encode(path))];
+            byte[] val = Repository.GitInternalSlash(Constants.encode(path));
+            if (_entries.ContainsKey(val)) return _entries[val];
+            return null;
         }
 
         #region Nested Types

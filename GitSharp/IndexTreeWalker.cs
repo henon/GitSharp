@@ -132,6 +132,7 @@ namespace GitSharp
         {
             Debug.Assert((t1 != null) || (t2 != null), "Needs at least one entry");
             Debug.Assert(_root != null, "Needs workdir");
+
             if ((t1 != null) && (t1.Parent == null))
             {
                 t1 = null;
@@ -140,6 +141,7 @@ namespace GitSharp
             {
                 t2 = null;
             }
+
             FileInfo file = null;
             string fileName = null;
             if (t1 != null)
@@ -152,30 +154,20 @@ namespace GitSharp
                 fileName = Path.Combine(_root.FullName, t2.FullName);
                 file = new FileInfo(fileName);
             }
-            if (!string.IsNullOrEmpty(fileName))
+
+            if (t1 is Tree || t2 is Tree)
             {
-                if ((t1 is Tree) || (t2 is Tree))
-                {
-                    if (_threeTrees)
-                    {
-                        _visitor.FinishVisitTree((Tree) t1, (Tree) t2, fileName);
-                    }
-                    else
-                    {
-                        _visitor.FinishVisitTree((Tree) t1, (int) (IndexCounter - curIndexPos), fileName);
-                    }
-                }
-                if ((t1 != null) || (t2 != null))
-                {
-                    if (_threeTrees)
-                    {
-                        _visitor.VisitEntry(t1, t2, null, file);
-                    }
-                    else
-                    {
-                        _visitor.VisitEntry(t1, null, file);
-                    }
-                }
+                if (_threeTrees)
+                    _visitor.FinishVisitTree((Tree)t1, (Tree)t2, fileName);
+                else
+                    _visitor.FinishVisitTree((Tree)t1, IndexCounter - curIndexPos, fileName);
+            }
+            else if (t1 != null || t2 != null)
+            {
+                if (_threeTrees)
+                    _visitor.VisitEntry(t1, t2, null, file);
+                else
+                    _visitor.VisitEntry(t1, null, file);
             }
         }
 

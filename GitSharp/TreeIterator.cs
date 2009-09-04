@@ -150,6 +150,9 @@ namespace GitSharp
             if (order == Order.POSTORDER && index == tree.MemberCount)
                 return tree;
 
+            if (tree.Members.Length <= index)
+                return null;
+
             return tree.Members[index];
         }
 

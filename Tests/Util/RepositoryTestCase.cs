@@ -278,6 +278,7 @@ namespace GitSharp.Tests
             if (!tfp.Exists)
             {
                 tfp.Create();
+                tfp.Refresh();
                 if (!tfp.Exists)
                     throw new IOException("Could not create directory " + tfp.FullName);
             }

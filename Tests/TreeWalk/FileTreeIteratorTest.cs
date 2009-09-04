@@ -68,14 +68,15 @@ namespace GitSharp.Tests.TreeWalk
 			}
 		}
 
-		[Test]
+    [Test]
 		public virtual void testEmptyIfRootIsFile()
 		{
 			string path = Path.Combine(trash.FullName, paths[0]);
-			FileInfo fi = new FileInfo(path);
+      DirectoryInfo di = new DirectoryInfo(path);
+      FileInfo fi = new FileInfo(path);
 			Assert.IsTrue(fi.Exists);
 
-			FileTreeIterator fti = new FileTreeIterator(fi.Directory);
+			FileTreeIterator fti = new FileTreeIterator(di);
 			Assert.IsTrue(fti.first());
 			Assert.IsTrue(fti.eof());
 		}
@@ -100,6 +101,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.IsFalse(di.Exists);
 
 			di.Create();
+      di.Refresh();
 			Assert.IsTrue(di.Exists);
 
 			FileTreeIterator fti = new FileTreeIterator(di);

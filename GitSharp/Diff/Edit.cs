@@ -128,7 +128,7 @@ namespace GitSharp.Diff
 				}
 				if (BeginA == EndA && BeginB == EndB)
 				{
-					return Type.REPLACE;
+					return Type.EMPTY;
 				}
 
 				return Type.REPLACE;

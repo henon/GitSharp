@@ -37,9 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.IO;
-using System.Linq;
 using GitSharp.Util;
 
 namespace GitSharp.TreeWalk
@@ -91,24 +89,33 @@ namespace GitSharp.TreeWalk
 
         private Entry[] Entries
         {
-            FileSystemInfo[] all = null;
-            try
-            {
-                directory.Refresh();
-                all = directory.GetFileSystemInfos();
-            }
-            catch (DirectoryNotFoundException)
-            {
-            }
-            catch(IOException)
-            {
-            }
-            if (all == null)
-                return EOF;
-            Entry[] r = new Entry[all.Length];
-            for (int i = 0; i < r.Length; i++)
-                r[i] = new FileEntry(all[i]);
-            return r;
+			get
+			{
+				FileSystemInfo[] all = null;
+
+				try
+				{
+					_directory.Refresh();
+					all = _directory.GetFileSystemInfos();
+				}
+				catch (DirectoryNotFoundException)
+				{
+				}
+				catch (IOException)
+				{
+				}
+
+				if (all == null) return Eof;
+
+				var r = new Entry[all.Length];
+
+				for (int i = 0; i < r.Length; i++)
+				{
+					r[i] = new FileEntry(all[i]);
+				}
+
+				return r;
+			}
         }
 
         /// <summary>
@@ -119,29 +126,20 @@ namespace GitSharp.TreeWalk
             private readonly FileSystemInfo _file;
             private readonly FileMode _mode;
             private long _fileLength;
-            private long lastModified;
+            private long _lastModified;
 
             public FileEntry(FileSystemInfo f)
             {
-                _file = fileEntry;
-                _mode = new DirectoryInfo(Path.Combine(fileEntry.FullName, ".git")).Exists ? FileMode.GitLink : FileMode.Tree;
-            }
-                if(file is DirectoryInfo)
+				_file = f;
+
+				if (_file is DirectoryInfo)
                 {
-                  if (new DirectoryInfo(file + "/.git").Exists)
-                    mode = FileMode.GitLink;
-                  else
-                    mode = FileMode.Tree;
-                  return;
+					_mode = new DirectoryInfo(_file + "/.git").Exists ? FileMode.GitLink : FileMode.Tree;
                 }
-                if(file is FileInfo)
+				else if (_file is FileInfo)
                 {
-                  if (FS.canExecute(file))
-                    mode = FileMode.ExecutableFile;
-                  else
-                    mode = FileMode.RegularFile;
+					_mode = FS.canExecute(_file) ? FileMode.ExecutableFile : FileMode.RegularFile;
                 }
-                
             }
 
             public override FileMode Mode
@@ -173,12 +171,12 @@ namespace GitSharp.TreeWalk
             {
                 get
                 {
-                    if (lastModified == 0)
+                    if (_lastModified == 0)
                     {
-                        lastModified = _file.LastWriteTime.Ticks;
+                        _lastModified = _file.LastWriteTime.Ticks;
                     }
 
-                    return lastModified;
+                    return _lastModified;
                 }
             }
 

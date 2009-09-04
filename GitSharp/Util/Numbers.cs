@@ -46,6 +46,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.IO;
 
@@ -96,6 +97,7 @@ namespace GitSharp.Util
          */
         public static int decodeUInt16(byte[] intbuf, int offset)
         {
+            return IPAddress.HostToNetworkOrder(BitConverter.ToUInt16(intbuf, offset));
             int r = (intbuf[offset] & 0xff) << 8;
             return r | (intbuf[offset + 1] & 0xff);
         }
@@ -114,6 +116,7 @@ namespace GitSharp.Util
          */
         public static long decodeUInt32(byte[] intbuf, int offset)
         {
+            return IPAddress.HostToNetworkOrder(BitConverter.ToUInt32(intbuf, offset));
             int low = (intbuf[offset + 1] & 0xff) << 8;
             low |= (intbuf[offset + 2] & 0xff);
             low <<= 8;
@@ -141,6 +144,7 @@ namespace GitSharp.Util
          */
         public static int decodeInt32(byte[] intbuf, int offset)
         {
+            return IPAddress.HostToNetworkOrder(BitConverter.ToInt32(intbuf, offset));
             int r = intbuf[offset] << 8;
 
             r |= intbuf[offset + 1] & 0xff;
@@ -387,6 +391,7 @@ namespace GitSharp.Util
          */
         public static void encodeInt16(byte[] intbuf, int offset, int v)
         {
+            
             intbuf[offset + 1] = (byte)v;
             v >>= 8; // >>>
 

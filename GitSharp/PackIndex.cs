@@ -308,13 +308,12 @@ namespace GitSharp
                 using (FileStream fs = idxFile.OpenRead())
                 {
                     byte[] hdr = new byte[8];
-                    int n = fs.Read(hdr, 0, hdr.Length);
-                    if (n != hdr.Length)
-                        throw new IOException("The PackIndex is a partial file (" + idxFile.FullName + ")");
+                    NB.ReadFully(fs, hdr, 0, hdr.Length);
 
                     if (IsTOC(hdr))
                     {
-                        int v = NB.DecodeInt32(hdr, 4);
+                        int va = NB.DecodeInt32(hdr, 4);
+                        int v = BitConverter.ToInt32(hdr, 4);
                         switch (v)
                         {
                             case 2:

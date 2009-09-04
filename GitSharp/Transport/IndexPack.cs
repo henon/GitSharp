@@ -39,6 +39,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GitSharp.Exceptions;
 using GitSharp.Util;
 using ICSharpCode.SharpZipLib.Zip.Compression;
@@ -58,7 +59,7 @@ namespace GitSharp.Transport
             Random r = new Random();
             int randsuf = r.Next(100000, 999999);
             string p = Path.Combine(dir.ToString(), pre + randsuf + suf);
-            File.Create(p);
+            File.Create(p).Close();
             return new FileInfo(p);
         }
 
@@ -138,7 +139,7 @@ namespace GitSharp.Transport
         private Dictionary<long, UnresolvedDelta> baseByPos;
         private byte[] objectData;
         private MessageDigest packDigest;
-        private BinaryReader packOut;
+        private FileStream packOut;
         private byte[] packcsum;
 
         private long originalEOF;
@@ -162,7 +163,7 @@ namespace GitSharp.Transport
                 string nam = dstBase.Name;
                 dstPack = new FileInfo(Path.Combine(dir.ToString(), nam + ".pack"));
                 dstIdx = new FileInfo(Path.Combine(dir.ToString(), nam + ".idx"));
-                packOut = new BinaryReader(dstPack.Open(System.IO.FileMode.Truncate, FileAccess.ReadWrite));
+                packOut = dstPack.Create();
             }
             else
             {
@@ -237,7 +238,7 @@ namespace GitSharp.Transport
                     }
 
                     if (packOut != null && (keepEmpty || entryCount > 0))
-                        packOut.BaseStream.Flush();
+                        packOut.Flush();
 
                     packDigest = null;
                     baseById = null;
@@ -421,7 +422,7 @@ namespace GitSharp.Transport
             growEntries();
 
             packDigest.Reset();
-            originalEOF = packOut.BaseStream.Length - 20;
+            originalEOF = packOut.Length - 20;
             Deflater def = new Deflater(Deflater.DEFAULT_COMPRESSION, false);
             List<DeltaChain> missing = new List<DeltaChain>(64);
             long end = originalEOF;
@@ -446,11 +447,11 @@ namespace GitSharp.Transport
                 
 
                 crc.Reset();
-                packOut.BaseStream.Seek(end, SeekOrigin.Begin);
+                packOut.Seek(end, SeekOrigin.Begin);
                 writeWhole(def, typeCode, data);
 				PackedObjectInfo oe = new PackedObjectInfo(end, (int)crc.Value, baseId);
                 entries[entryCount++] = oe;
-                end = packOut.BaseStream.Position;
+                end = packOut.Position;
 
                 resolveChildDeltas(oe.Offset, typeCode, data, oe);
                 if (progress.IsCancelled)
@@ -483,7 +484,7 @@ namespace GitSharp.Transport
             }
             packDigest.Update(buf, 0, hdrlen);
             crc.Update(buf, 0, hdrlen);
-            packOut.BaseStream.Write(buf, 0, hdrlen);
+            packOut.Write(buf, 0, hdrlen);
             def.Reset();
             def.SetInput(data);
             def.Finish();
@@ -492,7 +493,7 @@ namespace GitSharp.Transport
                 int datlen = def.Deflate(buf);
                 packDigest.Update(buf, 0, datlen);
                 crc.Update(buf, 0, datlen);
-                packOut.BaseStream.Write(buf, 0, datlen);
+                packOut.Write(buf, 0, datlen);
             }
         }
 
@@ -502,16 +503,31 @@ namespace GitSharp.Transport
             MessageDigest tailDigest = Constants.newMessageDigest();
             long origRemaining = originalEOF;
 
-            packOut.BaseStream.Seek(0, SeekOrigin.Begin);
-            packOut.BaseStream.Write(buf, 0, 12);
-            packOut.BaseStream.Seek(bAvail, SeekOrigin.Begin);
-            
+            packOut.Seek(0, SeekOrigin.Begin);
+            bAvail = 0;
+            bOffset = 0;
+            fillFromFile(12);
+
+            {
+                int origCnt = (int) Math.Min(bAvail, origRemaining);
+                origDigest.Update(buf, 0, origCnt);
+                origRemaining -= origCnt;
+                if (origRemaining == 0)
+                    tailDigest.Update(buf, origCnt, bAvail - origCnt);
+            }
+
+            NB.encodeInt32(buf, 8, entryCount);
+            packOut.Seek(0, SeekOrigin.Begin);
+            packOut.Write(buf, 0, 12);
+            packOut.Seek(bAvail, SeekOrigin.Begin);
+
             packDigest.Reset();
             packDigest.Update(buf, 0, bAvail);
             for (;;)
             {
-                int n = packOut.BaseStream.Read(buf, 0, buf.Length);
-                if (n < 0) break;
+                int n = packOut.Read(buf, 0, buf.Length);
+                if (n < 0)
+                    break;
                 if (origRemaining != 0)
                 {
                     int origCnt = (int) Math.Min(n, origRemaining);
@@ -526,11 +542,13 @@ namespace GitSharp.Transport
                 packDigest.Update(buf, 0, n);
             }
 
-            if (!origDigest.Digest().ArrayEquals(origcsum) || !tailDigest.Digest().ArrayEquals(tailcsum))
+            if (!Enumerable.SequenceEqual(origDigest.Digest(), origcsum) || !Enumerable.SequenceEqual(tailDigest.Digest(), tailcsum))
+            {
                 throw new IOException("Pack corrupted while writing to filesystem");
+            }
 
             packcsum = packDigest.Digest();
-            packOut.BaseStream.Write(packcsum, 0, packcsum.Length);
+            packOut.Write(packcsum, 0, packcsum.Length);
         }
 
         private void growEntries()
@@ -548,7 +566,7 @@ namespace GitSharp.Transport
             if (entryCount < entries.Length)
                 list.RemoveRange(entryCount, entries.Length-entryCount);
 
-            FileStream os = new FileStream(dstIdx.ToString(), System.IO.FileMode.Open, FileAccess.ReadWrite);
+            FileStream os = dstIdx.Create();
             try
             {
                 PackIndexWriter iw;
@@ -573,7 +591,10 @@ namespace GitSharp.Transport
                 if (buf[p + k] != Constants.PACK_SIGNATURE[k])
                     throw new IOException("Not a PACK file.");
 
-            long vers = NB.decodeUInt32(buf, p + 8);
+            long vers = NB.decodeInt32(buf, p + 4);
+            if (vers != 2 && vers != 3)
+                throw new IOException("Unsupported pack version " + vers + ".");
+            objectCount = NB.decodeUInt32(buf, p + 8);
             use(hdrln);
         }
 
@@ -586,7 +607,7 @@ namespace GitSharp.Transport
             buf.ArrayCopy(c, packcsum, 0, 20);
             use(20);
             if (packOut != null)
-                packOut.BaseStream.Write(packcsum, 0, packcsum.Length);
+                packOut.Write(packcsum, 0, packcsum.Length);
 
             if (!cmpcsum.ArrayEquals(packcsum))
                 throw new CorruptObjectException("Packfile checksum incorrect.");
@@ -716,7 +737,7 @@ namespace GitSharp.Transport
 
         private void position(long pos)
         {
-            packOut.BaseStream.Seek(pos, SeekOrigin.Begin);
+            packOut.Seek(pos, SeekOrigin.Begin);
             bBase = pos;
             bOffset = 0;
             bAvail = 0;
@@ -784,7 +805,7 @@ namespace GitSharp.Transport
                     next = bAvail;
                     free = buf.Length - next;
                 }
-                next = packOut.BaseStream.Read(buf, next, free);
+                next = packOut.Read(buf, next, free);
                 if (next <= 0)
                     throw new EndOfStreamException("Packfile is truncated.");
                 bAvail += next;
@@ -796,7 +817,7 @@ namespace GitSharp.Transport
         {
             packDigest.Update(buf, 0, bOffset);
             if (packOut != null)
-                packOut.BaseStream.Write(buf, 0, bOffset);
+                packOut.Write(buf, 0, bOffset);
             if (bAvail > 0)
                 buf.ArrayCopy(bOffset, buf, 0, bAvail);
             bBase += bOffset;

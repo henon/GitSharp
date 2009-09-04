@@ -140,11 +140,11 @@ namespace GitSharp.Transport
         private Dictionary<string, Host> parse(Stream stream)
         {
             Dictionary<string, Host> m = new Dictionary<string, Host>();
-            BufferedReader br = new BufferedReader(new StreamReader(stream));
+            StreamReader sr = new StreamReader(stream);
             List<Host> current = new List<Host>(4);
             string line;
 
-            while ((line = br.ReadLine()) != null)
+            while ((line = sr.ReadLine()) != null)
             {
                 line = line.Trim();
                 if (line.Length == 0 || line.StartsWith("#"))

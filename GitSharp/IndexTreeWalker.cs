@@ -253,6 +253,7 @@ namespace GitSharp
 				TreeEntry pm = ((cmpma <= 0) && (cmpmi <= 0)) ? m : null;
 				TreeEntry pa = ((cmpma >= 0) && (cmpai <= 0)) ? a : null;
 				GitIndex.Entry pi = ((cmpmi >= 0) && (cmpai >= 0)) ? entry : null;
+
 				if (pi != null)
 				{
 					VisitEntry(pm, pa, pi);
@@ -261,17 +262,20 @@ namespace GitSharp
 				{
 					FinishVisitTree(pm, pa, curIndexPos);
 				}
+
 				if (pm != null)
 				{
 					m = mi.MoveNext() ? mi.Current : null;
 				}
+
 				if (pa != null)
 				{
 					a = ai.MoveNext() ? ai.Current : null;
 				}
+
 				if (pi != null)
 				{
-					entry = (IndexCounter < _indexMembers.Length) ? _indexMembers[0] : null;
+                    entry = (IndexCounter < _indexMembers.Length) ? _indexMembers[IndexCounter++] : null;
 				}
 			}
 		}

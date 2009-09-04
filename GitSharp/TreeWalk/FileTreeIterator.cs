@@ -39,56 +39,57 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using GitSharp.Util;
+
 namespace GitSharp.TreeWalk
 {
-
-
-    /**
-     * Working directory iterator for standard Java IO.
-     * <p>
-     * This iterator uses the standard <code>java.io</code> package to read the
-     * specified working directory as part of a {@link TreeWalk}.
-     */
+    /// <summary>
+    /// Working directory iterator for standard Java IO.
+    /// 
+    /// This iterator uses the standard <code>java.io</code> package to read the
+    /// specified working directory as part of a <see cref="TreeWalk"/>.
+    /// </summary>
     public class FileTreeIterator : WorkingTreeIterator
     {
-        private DirectoryInfo directory;
+        private readonly DirectoryInfo _directory;
 
-        /**
-         * Create a new iterator to traverse the given directory and its children.
-         * 
-         * @param root
-         *            the starting directory. This directory should correspond to
-         *            the root of the repository.
-         */
+        /// <summary>
+        /// Create a new iterator to traverse the given directory and its children.
+        /// </summary>
+        /// <param name="root">
+        /// The starting directory. This directory should correspond to
+        /// the root of the repository.
+        /// </param>
         public FileTreeIterator(DirectoryInfo root)
         {
-            directory = root;
-            init(entries());
+            _directory = root;
+            Init(Entries);
         }
 
-        /**
-         * Create a new iterator to traverse a subdirectory.
-         * 
-         * @param p
-         *            the parent iterator we were created from.
-         * @param root
-         *            the subdirectory. This should be a directory contained within
-         *            the parent directory.
-         */
-        public FileTreeIterator(FileTreeIterator p, DirectoryInfo root)
+        /// <summary>
+        /// Create a new iterator to traverse a subdirectory.
+        /// </summary>
+        /// <param name="p">
+        /// The parent iterator we were created from.
+        /// </param>
+        /// <param name="root">
+        /// The subdirectory. This should be a directory contained within
+        /// the parent directory.
+        /// </param>
+        public FileTreeIterator(WorkingTreeIterator p, DirectoryInfo root)
             : base(p)
         {
-            directory = root;
-            init(entries());
+            _directory = root;
+            Init(Entries);
         }
 
         public override AbstractTreeIterator createSubtreeIterator(Repository repo)
         {
-            return new FileTreeIterator(this, ((FileEntry)current()).file as DirectoryInfo);
+            return new FileTreeIterator(this, ((FileEntry)Current).File as DirectoryInfo);
         }
 
-        private Entry[] entries()
+        private Entry[] Entries
         {
             FileSystemInfo[] all = null;
             try
@@ -110,22 +111,21 @@ namespace GitSharp.TreeWalk
             return r;
         }
 
-        /**
-         * Wrapper for a standard file
-         */
+        /// <summary>
+        /// Wrapper for a standard file
+        /// </summary>
         public class FileEntry : Entry
         {
-            public FileSystemInfo file;
-
-            private FileMode mode;
-
-            private long Length = -1;
-
+            private readonly FileSystemInfo _file;
+            private readonly FileMode _mode;
+            private long _fileLength;
             private long lastModified;
 
             public FileEntry(FileSystemInfo f)
             {
-                file = f;
+                _file = fileEntry;
+                _mode = new DirectoryInfo(Path.Combine(fileEntry.FullName, ".git")).Exists ? FileMode.GitLink : FileMode.Tree;
+            }
                 if(file is DirectoryInfo)
                 {
                   if (new DirectoryInfo(file + "/.git").Exists)
@@ -144,45 +144,55 @@ namespace GitSharp.TreeWalk
                 
             }
 
-            public override FileMode getMode()
+            public override FileMode Mode
             {
-                return mode;
+                get { return _mode; }
             }
 
-            public override string getName()
+            public override string Name
             {
-                return file.Name;
+                get { return _file.Name; }
             }
 
-            public override long getLength()
+            public override long Length
             {
-                if (file is DirectoryInfo)
-                    return 0;
-                if (Length < 0)
-                    Length = (file as FileInfo).Length;
-                return Length;
+                get
+                {
+                    if (_file is DirectoryInfo) return 0;
+
+                    if (_fileLength < 0)
+                    {
+                        _fileLength = new FileInfo(_file.FullName).Length;
+                    }
+
+                    return _fileLength;
+                }
             }
 
-            public override long getLastModified()
+            public override long LastModified
             {
-                if (lastModified == 0)
-                    lastModified = file.LastWriteTime.Ticks;
-                return lastModified;
+                get
+                {
+                    if (lastModified == 0)
+                    {
+                        lastModified = _file.LastWriteTime.Ticks;
+                    }
+
+                    return lastModified;
+                }
             }
 
-            public override FileStream openInputStream()
+            public override FileStream OpenInputStream()
             {
-                return (file as FileInfo).Open(System.IO.FileMode.Open, FileAccess.Read);
+                return new FileStream(_file.FullName, System.IO.FileMode.Open, FileAccess.Read);
             }
 
-            /**
-             * Get the underlying file of this entry.
-             *
-             * @return the underlying file of this entry
-             */
-            public FileSystemInfo getFile()
+            /// <summary>
+            /// Get the underlying file of this entry.
+            /// </summary>
+            public FileSystemInfo File
             {
-                return file;
+                get { return _file; }
             }
         }
     }

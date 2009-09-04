@@ -96,15 +96,14 @@ namespace GitSharp.Tests
         [Test]
         public void testEncode_Unicode()
         {
-            string orig_src = "Ūnĭcōde̽";  // [henon] <--- this is how unicode strings are represented in c#
-            string src= Encoding.UTF8.GetString(Encoding.Default.GetBytes("ÅªnÄ­cÅdeÌ½")); // [henon] <--- this is how unicode strings are represented in java source files
+            string src = "Ūnĭcōde̽"; 
             byte[] exp = { (byte) 0xC5, (byte) 0xAA, 0x6E, (byte) 0xC4,
                 (byte) 0xAD, 0x63, (byte) 0xC5, (byte) 0x8D, 0x64, 0x65,
                 (byte) 0xCC, (byte) 0xBD };
 
             byte[] res = Constants.encode(src);
             Assert.IsTrue(Enumerable.SequenceEqual(exp, res));
-            Assert.AreEqual(orig_src, Encoding.UTF8.GetString(res, 0, res.Length));
+            Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
         }
     }
 

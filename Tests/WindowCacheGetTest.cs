@@ -53,7 +53,7 @@ namespace GitSharp.Tests
 			base.setUp();
 
 			toLoad = new List<TestObject>();
-			BufferedReader br = new BufferedReader(new StreamReader("Resources/all_packed_objects.txt", Constants.CHARSET));
+			StreamReader br = new StreamReader("Resources/all_packed_objects.txt", Constants.CHARSET);
 			try
 			{
 				string line;

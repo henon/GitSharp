@@ -56,8 +56,8 @@ namespace GitSharp.Tests
 			base.setUp();
 
 			// index with both small (< 2^31) and big offsets
-			FileInfo fi = new FileInfo("resources/pack-huge.idx");
-			Assert.IsTrue(fi.Exists);
+			FileInfo fi = new FileInfo("Resources/pack-huge.idx");
+			Assert.IsTrue(fi.Exists,"Does the index exist");
 			idx = PackIndex.Open(fi);
 			reverseIdx = new PackReverseIndex(idx);
 		}

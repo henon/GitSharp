@@ -284,7 +284,7 @@ namespace GitSharp.Tests.DirectoryCache
                 tw.setFilter(PathFilterGroup.createFromStrings(new string[] { paths[victimIdx] }));
                 tw.setRecursive(tw.getFilter().shouldBeRecursive());
                 Assert.IsTrue(tw.next());
-                DirCacheIterator c = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
+                var c = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
                 Assert.IsNotNull(c);
                 Assert.AreEqual(victimIdx, c.ptr);
                 Assert.AreSame(ents[victimIdx], c.getDirCacheEntry());

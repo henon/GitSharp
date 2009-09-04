@@ -48,92 +48,97 @@ namespace GitSharp.Tests.Patch
     public class GetTextTest : BasePatchTest
     {
         [Test]
-	    public void testGetText_BothISO88591()
-        {
-		    Encoding cs = Encoding.GetEncoding("ISO-8859-1");
-			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_BothISO88591.patch");
-		    Assert.IsTrue(p.getErrors().Count == 0);
-		    Assert.AreEqual(1, p.getFiles().Count);
-		    FileHeader fh = p.getFiles()[0];
-		    Assert.AreEqual(2, fh.getHunks().Count);
-		    Assert.AreEqual(readTestPatchFile(cs), fh.getScriptText(cs, cs));
-	    }
-
-        [Test]
-	    public void testGetText_NoBinary()
+        public void testGetText_BothISO88591()
         {
             Encoding cs = Encoding.GetEncoding("ISO-8859-1");
-			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_NoBinary.patch");
-		    Assert.IsTrue(p.getErrors().Count == 0);
+            GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_BothISO88591.patch");
+            Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
-		    FileHeader fh = p.getFiles()[0];
-		    Assert.AreEqual(0, fh.getHunks().Count);
-		    Assert.AreEqual(readTestPatchFile(cs), fh.getScriptText(cs, cs));
-	    }
+            FileHeader fh = p.getFiles()[0];
+            Assert.AreEqual(2, fh.getHunks().Count);
+            Assert.AreEqual(ReadTestPatchFile(cs), fh.getScriptText(cs, cs));
+        }
 
         [Test]
-	    public void testGetText_Convert()
+        public void testGetText_NoBinary()
         {
-		    Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
-		    Encoding csNew = Encoding.GetEncoding("UTF-8");
-			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_Convert.patch");
-		    Assert.IsTrue(p.getErrors().Count == 0);
+            Encoding cs = Encoding.GetEncoding("ISO-8859-1");
+            GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_NoBinary.patch");
+            Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
-		    FileHeader fh = p.getFiles()[0];
-		    Assert.AreEqual(2, fh.getHunks().Count);
-
-		    // Read the original file as ISO-8859-1 and fix up the one place
-		    // where we changed the character encoding. That makes the exp
-		    // string match what we really expect to get back.
-		    //
-		    string exp = readTestPatchFile(csOld);
-		    exp = exp.Replace("\\303\\205ngstr\\303\\266m", "\u00c5ngstr\u00f6m");
-
-		    Assert.AreEqual(exp, fh.getScriptText(csOld, csNew));
-	    }
+            FileHeader fh = p.getFiles()[0];
+            Assert.AreEqual(0, fh.getHunks().Count);
+            Assert.AreEqual(ReadTestPatchFile(cs), fh.getScriptText(cs, cs));
+        }
 
         [Test]
-	    public void testGetText_DiffCc()
+        public void testGetText_Convert()
         {
-		    Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
-		    Encoding csNew = Encoding.GetEncoding("UTF-8");
-			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_DiffCc.patch");
-		    Assert.IsTrue(p.getErrors().Count == 0);
-		    Assert.AreEqual(1, p.getFiles().Count);
-		    CombinedFileHeader fh = (CombinedFileHeader) p.getFiles()[0];
-		    Assert.AreEqual(1, fh.getHunks().Count);
+            Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
+            Encoding csNew = Encoding.GetEncoding("UTF-8");
+            GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_Convert.patch");
+            Assert.IsTrue(p.getErrors().Count == 0);
+            Assert.AreEqual(1, p.getFiles().Count);
+            FileHeader fh = p.getFiles()[0];
+            Assert.AreEqual(2, fh.getHunks().Count);
 
-		    // Read the original file as ISO-8859-1 and fix up the one place
-		    // where we changed the character encoding. That makes the exp
-		    // string match what we really expect to get back.
-		    //
-		    string exp = readTestPatchFile(csOld);
-		    exp = exp.Replace("\\303\\205ngstr\\303\\266m", "\u00c5ngstr\u00f6m");
+            // Read the original file as ISO-8859-1 and fix up the one place
+            // where we changed the character encoding. That makes the exp
+            // string match what we really expect to get back.
+            //
+            string exp = ReadTestPatchFile(csOld);
+            exp = exp.Replace("\\303\\205ngstr\\303\\266m", "\u00c5ngstr\u00f6m");
 
-		    Assert.AreEqual(exp, fh.getScriptText(new Encoding[] { csNew, csOld, csNew }));
-	    }
+            Assert.AreEqual(exp, fh.getScriptText(csOld, csNew));
+        }
 
-	    private string readTestPatchFile(Encoding cs)
+        [Test]
+        public void testGetText_DiffCc()
+        {
+            Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
+            Encoding csNew = Encoding.GetEncoding("UTF-8");
+            GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_DiffCc.patch");
+            Assert.IsTrue(p.getErrors().Count == 0);
+            Assert.AreEqual(1, p.getFiles().Count);
+            var fh = (CombinedFileHeader)p.getFiles()[0];
+            Assert.AreEqual(1, fh.getHunks().Count);
+
+            // Read the original file as ISO-8859-1 and fix up the one place
+            // where we changed the character encoding. That makes the exp
+            // string match what we really expect to get back.
+            //
+            string exp = ReadTestPatchFile(csOld);
+            exp = exp.Replace("\\303\\205ngstr\\303\\266m", "\u00c5ngstr\u00f6m");
+
+            Assert.AreEqual(exp, fh.getScriptText(new[] { csNew, csOld, csNew }));
+        }
+
+        private static string ReadTestPatchFile(Encoding cs)
         {
             string patchFile = (new StackFrame(1, true)).GetMethod().Name + ".patch";
-		    Stream inStream = new FileStream(PATCHS_DIR + patchFile, System.IO.FileMode.Open);
-		    if (inStream == null) {
-			    Assert.Fail("No " + patchFile + " test vector");
-			    return null; // Never happens
-		    }
-		    try {
-			    StreamReader r = new StreamReader(inStream, cs);
-			    char[] tmp = new char[2048];
-			    StringBuilder s = new StringBuilder();
-			    int n;
-			    while ((n = r.Read(tmp, 0, 2048)) > 0)
+
+            Stream inStream = new FileStream(PATCHS_DIR + patchFile, System.IO.FileMode.Open);
+            if (inStream == null)
+            {
+                Assert.Fail("No " + patchFile + " test vector");
+                return null; // Never happens
+            }
+            try
+            {
+                var r = new StreamReader(inStream, cs);
+                var tmp = new char[2048];
+                var s = new StringBuilder();
+                int n;
+                while ((n = r.Read(tmp, 0, 2048)) > 0)
                 {
-				    s.Append(tmp, 0, n);
+                    s.Append(tmp, 0, n);
                 }
-			    return s.ToString();
-		    } finally {
-			    inStream.Close();
-		    }
-	    }
+                return s.ToString();
+            }
+            finally
+            {
+                inStream.Close();
+            }
+        }
     }
 }

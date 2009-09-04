@@ -14,9 +14,9 @@ namespace GitSharp.Tests.Patch
 		{
 			try
 			{
-				using (Stream inStream = new FileStream(patchFile, System.IO.FileMode.Open))
+				using (var inStream = new FileStream(patchFile, System.IO.FileMode.Open))
 				{
-					GitSharp.Patch.Patch p = new GitSharp.Patch.Patch();
+					var p = new GitSharp.Patch.Patch();
 					p.parse(inStream);
 					return p;
 				}
@@ -35,7 +35,7 @@ namespace GitSharp.Tests.Patch
 				return string.Empty;
 			}
 
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 
 			foreach (FormatError formatError in patch.getErrors())
 			{

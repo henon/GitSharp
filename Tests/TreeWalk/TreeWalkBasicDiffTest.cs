@@ -47,7 +47,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Test]
 		public void testMissingSubtree_DetectFileAdded_FileModified()
 		{
-			ObjectWriter ow = new ObjectWriter(db);
+			var ow = new ObjectWriter(db);
 			ObjectId aFileId = ow.WriteBlob(Constants.CHARSET.GetBytes("a"));
 			ObjectId bFileId = ow.WriteBlob(Constants.CHARSET.GetBytes("b"));
 			ObjectId cFileId1 = ow.WriteBlob(Constants.CHARSET.GetBytes("c-1"));
@@ -56,7 +56,7 @@ namespace GitSharp.Tests.TreeWalk
 			// Create sub-a/empty, sub-c/empty = hello.
 			Func<ObjectId> oldTree = () =>
 			                         	{
-			                         		Tree root = new Tree(db);
+			                         		var root = new Tree(db);
 
 			                         		Tree subA = root.AddTree("sub-a");
 			                         		subA.AddFile("empty").Id = aFileId;
@@ -72,7 +72,7 @@ namespace GitSharp.Tests.TreeWalk
 			// Create sub-a/empty, sub-b/empty, sub-c/empty.
 			Func<ObjectId> newTree = () =>
 			                         	{
-			                         		Tree root = new Tree(db);
+			                         		var root = new Tree(db);
 
 			                         		Tree subA = root.AddTree("sub-a");
 			                         		subA.AddFile("empty").Id = aFileId;
@@ -89,8 +89,8 @@ namespace GitSharp.Tests.TreeWalk
 			                         		return ow.WriteTree(root);
 			                         	};
 
-			GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
-			tw.reset(new ObjectId[] { oldTree.Invoke(), newTree.Invoke() });
+			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			tw.reset(new[] { oldTree.Invoke(), newTree.Invoke() });
 			tw.setRecursive(true);
 			tw.setFilter(TreeFilter.ANY_DIFF);
 

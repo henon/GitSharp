@@ -289,7 +289,7 @@ namespace GitSharp.Tests
         protected static void checkFile(FileInfo f, string checkData)
         {
             var readData = File.ReadAllText(f.FullName, Encoding.GetEncoding("ISO-8859-1"));
-            if (f.Length != readData.Length)
+            if (checkData.Length != readData.Length)
                 throw new IOException("Internal error reading file data from " + f);
             Assert.AreEqual(checkData, readData);
         }

@@ -62,6 +62,11 @@ namespace GitSharp
             f.SetModified();
         }
 
+        public void VisitGitlink(GitLinkTreeEntry e)
+        {
+            // TODO: handle gitlinks
+        }
+
         public void VisitSymlink(SymlinkTreeEntry s)
         {
             // TODO: handle symlinks. Only problem is that JGit is independent of

@@ -85,6 +85,8 @@ namespace GitSharp
 
         public abstract void VisitSymlink(SymlinkTreeEntry s);
 
+        public abstract void VisitGitlink(GitLinkTreeEntry e);
+
         #endregion
     }
 }

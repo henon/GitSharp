@@ -129,7 +129,7 @@ namespace GitSharp
             }
             else
             {
-                //this.Config.Create();
+                Create();
             }
             //if (isExisting)
             //    ScanForPacks();
@@ -154,13 +154,18 @@ namespace GitSharp
         }
         #endregion
 
+        public void Create()
+        {
+            Create(false);
+        }
+
         /**
          * Create a new Git repository initializing the necessary files and
          * directories.
          *
          * @
          */
-        public void Create()
+        public void Create(bool bare)
         {
             if (this.Directory.Exists)
                 throw new GitException("Unable to create repository. Directory already exists.");
@@ -179,7 +184,11 @@ namespace GitSharp
 
             this._refDb.Link(Constants.Head, master);
 
-            this.Config.save();
+            Config.setInt("core", null, "repositoryformatversion", 0);
+            Config.setBoolean("core", null, "filemode", true);
+            if (bare)
+                Config.setBoolean("core", null, "bare", true);
+            Config.save();
 
         }
         /**

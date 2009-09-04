@@ -191,6 +191,7 @@ namespace GitSharp
             }
 
             SaveStatInformation();
+            string lockFileName = _lockFile.FullName;
             try
             {
                 _lockFile.MoveTo(_refFile.FullName);
@@ -209,6 +210,10 @@ namespace GitSharp
                 {
 
                 }
+            }
+            finally
+            {
+              _lockFile = new FileInfo(lockFileName);
             }
 
             Unlock();

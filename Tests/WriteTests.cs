@@ -439,19 +439,20 @@ namespace GitSharp.Tests
             test021_createTreeTag();
             test022_createCommitTag();
 
-            new DirectoryInfo(db.Directory.FullName + "/refs/tags/test020").Delete();
-            if (new DirectoryInfo(db.Directory.FullName + "/refs/tags/test020").Exists) throw new IOException("Cannot delete unpacked tag");
-            new DirectoryInfo(db.Directory.FullName + "/refs/tags/test021").Delete();
-            if (new DirectoryInfo(db.Directory.FullName + "/refs/tags/test021").Exists) throw new IOException("Cannot delete unpacked tag");
-            new DirectoryInfo(db.Directory.FullName + "/refs/tags/test022").Delete();
-            if (new DirectoryInfo(db.Directory.FullName + "/refs/tags/test022").Exists) throw new IOException("Cannot delete unpacked tag");
+            new FileInfo(db.Directory.FullName + "/refs/tags/test020").Delete();
+            if (new FileInfo(db.Directory.FullName + "/refs/tags/test020").Exists) throw new IOException("Cannot delete unpacked tag");
+            new FileInfo(db.Directory.FullName + "/refs/tags/test021").Delete();
+            if (new FileInfo(db.Directory.FullName + "/refs/tags/test021").Exists) throw new IOException("Cannot delete unpacked tag");
+            new FileInfo(db.Directory.FullName + "/refs/tags/test022").Delete();
+            if (new FileInfo(db.Directory.FullName + "/refs/tags/test022").Exists) throw new IOException("Cannot delete unpacked tag");
 
             // We cannot Resolve it now, since we have no ref
             Tag mapTag20missing = db.MapTag("test020");
             Assert.IsNull(mapTag20missing);
 
             // Construct packed refs file
-            var w = new StreamWriter(new FileStream(db.Directory.FullName + "/packed-refs", System.IO.FileMode.CreateNew));
+            var fs = new FileStream(db.Directory.FullName + "/packed-refs", System.IO.FileMode.Create);
+            var w = new StreamWriter(fs);
             w.WriteLine("# packed-refs with: peeled");
             w.WriteLine("6759556b09fbb4fd8ae5e315134481cc25d46954 refs/tags/test020");
             w.WriteLine("^e69de29bb2d1d6434b8b29ae775ad8c2e48c5391");

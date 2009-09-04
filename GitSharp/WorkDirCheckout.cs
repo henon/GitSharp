@@ -338,14 +338,14 @@ namespace GitSharp
                                                        ProcessEntry(treeEntry, auxEntry, indexEntry);
                                                    },
 
-                                  FinishVisitTree = (tree, auxTree, curDir) =>
+                                  FinishVisitTree = (tree, auxTree, currentDirectory) =>
                                                         {
-                                                            if (curDir.Length == 0) return;
+                                                            if (currentDirectory.Length == 0) return;
                                                             if (auxTree == null) return;
 
-                                                            if (_index.GetEntry(curDir) != null)
+                                                            if (_index.GetEntry(currentDirectory) != null)
                                                             {
-                                                                Removed.Add(curDir);
+                                                                Removed.Add(currentDirectory);
                                                             }
                                                         }
                               };

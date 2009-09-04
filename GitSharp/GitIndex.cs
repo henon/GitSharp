@@ -363,7 +363,7 @@ namespace GitSharp
         internal static byte[] makeKey(FileSystemInfo wd, FileSystemInfo f)
         {
             if (!string.IsNullOrEmpty(f.DirectoryName()) &&
-                wd.IsDirectory() && wd.Exists != null &&
+                wd.IsDirectory() && wd.Exists &&
                 !f.DirectoryName().StartsWith(wd.DirectoryName()))
             {
                 throw new Exception("Path is not in working dir");

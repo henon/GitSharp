@@ -38,137 +38,144 @@
  */
 
 using System.IO;
+using System.Linq;
 using GitSharp.Util;
+
 namespace GitSharp.TreeWalk
 {
-
-
-    /**
-     * Working directory iterator for standard Java IO.
-     * <p>
-     * This iterator uses the standard <code>java.io</code> package to read the
-     * specified working directory as part of a {@link TreeWalk}.
-     */
+    /// <summary>
+    /// Working directory iterator for standard Java IO.
+    /// 
+    /// This iterator uses the standard <code>java.io</code> package to read the
+    /// specified working directory as part of a <see cref="TreeWalk"/>.
+    /// </summary>
     public class FileTreeIterator : WorkingTreeIterator
     {
-        private DirectoryInfo directory;
+        private readonly DirectoryInfo _directory;
 
-        /**
-         * Create a new iterator to traverse the given directory and its children.
-         * 
-         * @param root
-         *            the starting directory. This directory should correspond to
-         *            the root of the repository.
-         */
+        /// <summary>
+        /// Create a new iterator to traverse the given directory and its children.
+        /// </summary>
+        /// <param name="root">
+        /// The starting directory. This directory should correspond to
+        /// the root of the repository.
+        /// </param>
         public FileTreeIterator(DirectoryInfo root)
         {
-            directory = root;
-            init(entries());
+            _directory = root;
+            Init(Entries);
         }
 
-        /**
-         * Create a new iterator to traverse a subdirectory.
-         * 
-         * @param p
-         *            the parent iterator we were created from.
-         * @param root
-         *            the subdirectory. This should be a directory contained within
-         *            the parent directory.
-         */
-        public FileTreeIterator(FileTreeIterator p, DirectoryInfo root)
+        /// <summary>
+        /// Create a new iterator to traverse a subdirectory.
+        /// </summary>
+        /// <param name="p">
+        /// The parent iterator we were created from.
+        /// </param>
+        /// <param name="root">
+        /// The subdirectory. This should be a directory contained within
+        /// the parent directory.
+        /// </param>
+        public FileTreeIterator(WorkingTreeIterator p, DirectoryInfo root)
             : base(p)
         {
-            directory = root;
-            init(entries());
+            _directory = root;
+            Init(Entries);
         }
 
         public override AbstractTreeIterator createSubtreeIterator(Repository repo)
         {
-            return new FileTreeIterator(this, ((FileEntry)current()).file as DirectoryInfo);
+            return new FileTreeIterator(this, ((FileEntry)Current).File as DirectoryInfo);
         }
 
-        private Entry[] entries()
+        private Entry[] Entries
         {
-            FileInfo[] all = directory.GetFiles();
-            if (all == null)
-                return EOF;
-            Entry[] r = new Entry[all.Length];
-            for (int i = 0; i < r.Length; i++)
-                r[i] = new FileEntry(all[i]);
-            return r;
+            get
+            {
+                FileInfo[] all = _directory.GetFiles();
+
+                return all.Length == 0 ? Eof : all.Select(x => new FileEntry(x)).Cast<Entry>().ToArray();
+            }
         }
 
-        /**
-         * Wrapper for a standard file
-         */
+        /// <summary>
+        /// Wrapper for a standard file
+        /// </summary>
         public class FileEntry : Entry
         {
-            public FileSystemInfo file;
-
-            private FileMode mode;
-
-            private long Length = -1;
-
+            private readonly FileSystemInfo _file;
+            private readonly FileMode _mode;
+            private long _fileLength;
             private long lastModified;
 
-            public FileEntry(DirectoryInfo f)
+            public FileEntry(DirectoryInfo fileEntry)
+                : this()
             {
-                file = f;
-
-                if (new DirectoryInfo(f + "/.git").Exists)
-                    mode = FileMode.GitLink;
-                else
-                    mode = FileMode.Tree;
+                _file = fileEntry;
+                _mode = new DirectoryInfo(Path.Combine(fileEntry.FullName, ".git")).Exists ? FileMode.GitLink : FileMode.Tree;
             }
 
-            public FileEntry(FileInfo f)
+            public FileEntry(FileInfo fileEntry)
+                : this()
             {
-                file = f;
-                if (FS.canExecute(f))
-                    mode = FileMode.ExecutableFile;
-                else
-                    mode = FileMode.RegularFile;
+                _file = fileEntry;
+                _mode = FS.canExecute(fileEntry) ? FileMode.ExecutableFile : FileMode.RegularFile;
             }
 
-            public override FileMode getMode()
+            private FileEntry()
             {
-                return mode;
+                _fileLength = -1;
             }
 
-            public override string getName()
+            public override FileMode Mode
             {
-                return file.Name;
+                get { return _mode; }
             }
 
-            public override long getLength()
+            public override string Name
             {
-                if (file is DirectoryInfo)
-                    return 0;
-                if (Length < 0)
-                    Length = (file as FileInfo).Length;
-                return Length;
+                get { return _file.Name; }
             }
 
-            public override long getLastModified()
+            public override long Length
             {
-                if (lastModified == 0)
-                    lastModified = file.LastWriteTime.Ticks;
-                return lastModified;
+                get
+                {
+                    if (_file is DirectoryInfo) return 0;
+
+                    if (_fileLength < 0)
+                    {
+                        _fileLength = new FileInfo(_file.FullName).Length;
+                    }
+
+                    return _fileLength;
+                }
             }
 
-            public override FileStream openInputStream()
+            public override long LastModified
             {
-                return (file as FileInfo).Open(System.IO.FileMode.Open, FileAccess.Read);
+                get
+                {
+                    if (lastModified == 0)
+                    {
+                        lastModified = _file.LastWriteTime.Ticks;
+                    }
+
+                    return lastModified;
+                }
             }
 
-            /**
-             * Get the underlying file of this entry.
-             *
-             * @return the underlying file of this entry
-             */
-            public FileSystemInfo getFile()
+            public override FileStream OpenInputStream()
             {
-                return file;
+                return new FileStream(_file.FullName, System.IO.FileMode.Open, FileAccess.Read);
+            }
+
+            /// <summary>
+            /// Get the underlying file of this entry.
+            /// </summary>
+            public FileSystemInfo File
+            {
+                get { return _file; }
             }
         }
     }

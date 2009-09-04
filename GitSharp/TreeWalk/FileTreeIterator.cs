@@ -126,17 +126,17 @@ namespace GitSharp.TreeWalk
             public FileEntry(FileSystemInfo f)
             {
                 file = f;
-                if(Directory.Exists(file.FullName))
+                if(file is DirectoryInfo)
                 {
-                  if (new DirectoryInfo(f + "/.git").Exists)
+                  if (new DirectoryInfo(file + "/.git").Exists)
                     mode = FileMode.GitLink;
                   else
                     mode = FileMode.Tree;
                   return;
                 }
-                if(File.Exists(file.FullName))
+                if(file is FileInfo)
                 {
-                  if (FS.canExecute(f))
+                  if (FS.canExecute(file))
                     mode = FileMode.ExecutableFile;
                   else
                     mode = FileMode.RegularFile;

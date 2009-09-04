@@ -37,6 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
 using GitSharp.Util;
 namespace GitSharp.TreeWalk
@@ -89,7 +90,18 @@ namespace GitSharp.TreeWalk
 
         private Entry[] entries()
         {
-            FileInfo[] all = directory.GetFiles();
+            FileSystemInfo[] all = null;
+            try
+            {
+                directory.Refresh();
+                all = directory.GetFileSystemInfos();
+            }
+            catch (DirectoryNotFoundException)
+            {
+            }
+            catch(IOException)
+            {
+            }
             if (all == null)
                 return EOF;
             Entry[] r = new Entry[all.Length];
@@ -111,23 +123,25 @@ namespace GitSharp.TreeWalk
 
             private long lastModified;
 
-            public FileEntry(DirectoryInfo f)
+            public FileEntry(FileSystemInfo f)
             {
                 file = f;
-
-                if (new DirectoryInfo(f + "/.git").Exists)
+                if(file is DirectoryInfo)
+                {
+                  if (new DirectoryInfo(file + "/.git").Exists)
                     mode = FileMode.GitLink;
-                else
+                  else
                     mode = FileMode.Tree;
-            }
-
-            public FileEntry(FileInfo f)
-            {
-                file = f;
-                if (FS.canExecute(f))
+                  return;
+                }
+                if(file is FileInfo)
+                {
+                  if (FS.canExecute(file))
                     mode = FileMode.ExecutableFile;
-                else
+                  else
                     mode = FileMode.RegularFile;
+                }
+                
             }
 
             public override FileMode getMode()

@@ -79,5 +79,13 @@ namespace GitSharp
          * @
          */
         void VisitSymlink(SymlinkTreeEntry s);
+
+        /**
+        * Visit to a gitlink.
+         *
+         * @param s Gitlink entry
+         * @throws IOException
+         */
+        void VisitGitlink(GitLinkTreeEntry s);
     }
 }

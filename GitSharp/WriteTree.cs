@@ -73,6 +73,14 @@ namespace GitSharp
             }
         }
 
+        public override void VisitGitlink(GitLinkTreeEntry e)
+        {
+            if (e.IsModified)
+            {
+                throw new GitlinksNotSupportedException(e.FullName);
+            }
+        }
+
         public override void EndVisitTree(Tree t)
         {
             base.EndVisitTree(t);            

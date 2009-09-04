@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -49,112 +50,112 @@ namespace GitSharp.Tests.DirectoryCache
         [Test]
         public void testReadMissing_RealIndex()
         {
-            FileInfo idx = new FileInfo(db.Directory + "index");
-            Assert.False(idx.Exists);
+            FileInfo idx = new FileInfo(db.Directory + "/index");
+            Assert.IsFalse(File.Exists(idx.FullName));
 
             DirCache dc = DirCache.read(db);
-            Assert.NotNull(dc);
+            Assert.IsNotNull(dc);
             Assert.AreEqual(0, dc.getEntryCount());
         }
 
         [Test]
         public void testReadMissing_TempIndex()
         {
-            FileInfo idx = new FileInfo(db.Directory + "tmp_index");
-            Assert.False(idx.Exists);
+            FileInfo idx = new FileInfo(db.Directory + "/tmp_index");
+            Assert.IsFalse(File.Exists(idx.FullName));
 
             DirCache dc = DirCache.read(idx);
-            Assert.NotNull(dc);
+            Assert.IsNotNull(dc);
             Assert.AreEqual(0, dc.getEntryCount());
         }
 
         [Test]
         public void testLockMissing_RealIndex()
         {
-            FileInfo idx = new FileInfo(db.Directory + "index");
-            FileInfo lck = new FileInfo(db.Directory + "index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            FileInfo idx = new FileInfo(db.Directory + "/index");
+            FileInfo lck = new FileInfo(db.Directory + "/index.lock");
+            Assert.IsFalse(File.Exists(idx.FullName));
+            Assert.IsFalse(File.Exists(lck.FullName));
 
             DirCache dc = DirCache.Lock(db);
-            Assert.NotNull(dc);
-            Assert.False(idx.Exists);
-            Assert.IsTrue(lck.Exists);
+            Assert.IsNotNull(dc);
+            Assert.IsFalse(File.Exists(idx.FullName));
+            Assert.IsTrue(File.Exists(lck.FullName));
             Assert.AreEqual(0, dc.getEntryCount());
 
             dc.unlock();
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(File.Exists(idx.FullName));
+            Assert.IsFalse(File.Exists(lck.FullName));
         }
 
         [Test]
         public void testLockMissing_TempIndex()
         {
-            FileInfo idx = new FileInfo(db.Directory + "tmp_index");
-            FileInfo lck = new FileInfo(db.Directory + "tmp_index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            FileInfo idx = new FileInfo(db.Directory + "/tmp_index");
+            FileInfo lck = new FileInfo(db.Directory + "/tmp_index.lock");
+            Assert.IsFalse(File.Exists(idx.FullName));
+            Assert.IsFalse(File.Exists(lck.FullName));
 
             DirCache dc = DirCache.Lock(idx);
-            Assert.NotNull(dc);
-            Assert.False(idx.Exists);
-            Assert.IsTrue(lck.Exists);
+            Assert.IsNotNull(dc);
+            Assert.IsFalse(File.Exists(idx.FullName));
+            Assert.IsTrue(File.Exists(lck.FullName));
             Assert.AreEqual(0, dc.getEntryCount());
 
             dc.unlock();
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(File.Exists(idx.FullName));
+            Assert.IsFalse(File.Exists(lck.FullName));
         }
 
         [Test]
         public void testWriteEmptyUnlock_RealIndex()
         {
-            FileInfo idx = new FileInfo(db.Directory + "index");
-            FileInfo lck = new FileInfo(db.Directory + "index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            FileInfo idx = new FileInfo(db.Directory + "/index");
+            FileInfo lck = new FileInfo(db.Directory + "/index.lock");
+            Assert.IsFalse(File.Exists(idx.FullName));
+            Assert.IsFalse(File.Exists(lck.FullName));
 
             DirCache dc = DirCache.Lock(db);
             Assert.AreEqual(0, lck.Length);
             dc.write();
-            Assert.AreEqual(12 + 20, lck.Length);
+            Assert.AreEqual(12 + 20, new FileInfo(lck.FullName).Length);
 
             dc.unlock();
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            Assert.IsFalse(File.Exists(idx.FullName));
+            Assert.IsFalse(File.Exists(lck.FullName));
         }
 
         [Test]
         public void testWriteEmptyCommit_RealIndex()
         {
-            FileInfo idx = new FileInfo(db.Directory + "index");
-            FileInfo lck = new FileInfo(db.Directory + "index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            FileInfo idx = new FileInfo(db.Directory + "/index");
+            FileInfo lck = new FileInfo(db.Directory + "/index.lock");
+            Assert.IsFalse(File.Exists(idx.FullName));
+            Assert.IsFalse(File.Exists(lck.FullName));
 
             DirCache dc = DirCache.Lock(db);
             Assert.AreEqual(0, lck.Length);
             dc.write();
-            Assert.AreEqual(12 + 20, lck.Length);
+            Assert.AreEqual(12 + 20, new FileInfo(lck.FullName).Length);
 
             Assert.IsTrue(dc.commit());
-            Assert.IsTrue(idx.Exists);
-            Assert.False(lck.Exists);
-            Assert.AreEqual(12 + 20, idx.Length);
+            Assert.IsTrue(File.Exists(idx.FullName));
+            Assert.IsFalse(File.Exists(lck.FullName));
+            Assert.AreEqual(12 + 20, new FileInfo(idx.FullName).Length);
         }
 
         [Test]
         public void testWriteEmptyReadEmpty_RealIndex()
         {
-            FileInfo idx = new FileInfo(db.Directory + "index");
-            FileInfo lck = new FileInfo(db.Directory + "index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            FileInfo idx = new FileInfo(db.Directory + "/index");
+            FileInfo lck = new FileInfo(db.Directory + "/index.lock");
+            Assert.IsFalse(File.Exists(idx.FullName));
+            Assert.IsFalse(File.Exists(lck.FullName));
             {
                 DirCache dc = DirCache.Lock(db);
                 dc.write();
                 Assert.IsTrue(dc.commit());
-                Assert.IsTrue(idx.Exists);
+                Assert.IsTrue(File.Exists(idx.FullName));
             }
             {
                 DirCache dc = DirCache.read(db);
@@ -165,21 +166,21 @@ namespace GitSharp.Tests.DirectoryCache
         [Test]
         public void testWriteEmptyLockEmpty_RealIndex()
         {
-            FileInfo idx = new FileInfo(db.Directory + "index");
-            FileInfo lck = new FileInfo(db.Directory + "index.Lock");
-            Assert.False(idx.Exists);
-            Assert.False(lck.Exists);
+            FileInfo idx = new FileInfo(db.Directory + "/index");
+            FileInfo lck = new FileInfo(db.Directory + "/index.lock");
+            Assert.IsFalse(File.Exists(idx.FullName));
+            Assert.IsFalse(File.Exists(lck.FullName));
             {
                 DirCache dc = DirCache.Lock(db);
                 dc.write();
                 Assert.IsTrue(dc.commit());
-                Assert.IsTrue(idx.Exists);
+                Assert.IsTrue(File.Exists(idx.FullName));
             }
             {
                 DirCache dc = DirCache.Lock(db);
                 Assert.AreEqual(0, dc.getEntryCount());
-                Assert.IsTrue(idx.Exists);
-                Assert.IsTrue(lck.Exists);
+                Assert.IsTrue(File.Exists(idx.FullName));
+                Assert.IsTrue(File.Exists(lck.FullName));
                 dc.unlock();
             }
         }

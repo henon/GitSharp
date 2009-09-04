@@ -426,7 +426,7 @@ namespace GitSharp.Transport
             bool progress = !options.Contains(OPTION_NO_PROGRESS);
             bool sideband = options.Contains(OPTION_SIDE_BAND) || options.Contains(OPTION_SIDE_BAND_64K);
 
-            ProgressMonitor pm = new NullProgressMonitor();
+            IProgressMonitor pm = new NullProgressMonitor();
             Stream packOut = stream;
 
             if (sideband)
@@ -438,9 +438,8 @@ namespace GitSharp.Transport
 
                 packOut = new BufferedStream(new SideBandOutputStream(SideBandOutputStream.CH_DATA, pckOut), bufsz);
 
-                // [caytchen] TODO: SideBandProgressMonitor
-                /*if (progress)
-                    pm = new SideBandProgressMonitor(pckOut);*/
+                if (progress)
+                    pm = new SideBandProgressMonitor(pckOut);
             }
 
             PackWriter pw;

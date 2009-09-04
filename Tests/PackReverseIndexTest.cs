@@ -35,88 +35,93 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
+using GitSharp.Exceptions;
+using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
-    public class PackReverseIndexTest : RepositoryTestCase
-    {
-#if false
-	private PackIndex idx;
+	[TestFixture]
+	public class PackReverseIndexTest : RepositoryTestCase
+	{
+		private PackIndex idx;
+		private PackReverseIndex reverseIdx;
 
-	private PackReverseIndex reverseIdx;
+		///	<summary>
+		/// Set up tested class instance, test constructor by the way.
+		/// </summary>
+		public override void setUp()
+		{
+			base.setUp();
 
-	/**
-	 * Set up tested class instance, test constructor by the way.
-	 */
-	public void setUp() throws Exception {
-		super.setUp();
-		// index with both small (< 2^31) and big offsets
-		idx = PackIndex.open(JGitTestUtil.getTestResourceFile(
-				"pack-huge.idx"));
-		reverseIdx = new PackReverseIndex(idx);
-	}
+			// index with both small (< 2^31) and big offsets
+			FileInfo fi = new FileInfo("Resources/pack-huge.idx");
+			Assert.IsTrue(fi.Exists,"Does the index exist");
+			idx = PackIndex.Open(fi);
+			reverseIdx = new PackReverseIndex(idx);
+		}
 
-	/**
-	 * Test findObject() for all index entries.
-	 */
-	public void testFindObject() {
-		for (MutableEntry me : idx)
-			assertEquals(me.toObjectId(), reverseIdx.findObject(me.getOffset()));
-	}
+		///	<summary>
+		/// Test findObject() for all index entries.
+		/// </summary>
+		[Test]
+		public void testFindObject()
+		{
+			foreach (PackIndex.MutableEntry me in idx)
+			{
+				Assert.AreEqual(me.ToObjectId(), reverseIdx.FindObject(me.Offset));
+			}
+		}
 
-	/**
-	 * Test findObject() with illegal argument.
-	 */
-	public void testFindObjectWrongOffset() {
-		assertNull(reverseIdx.findObject(0));
-	}
+		///	<summary>
+		/// Test findObject() with illegal argument.
+		/// </summary>
+		[Test]
+		public void testFindObjectWrongOffset()
+		{
+			Assert.IsNull(reverseIdx.FindObject(0));
+		}
 
-	/**
-	 * Test findNextOffset() for all index entries.
-	 *
-	 * @throws CorruptObjectException
-	 */
-	public void testFindNextOffset() throws CorruptObjectException {
-		long offset = findFirstOffset();
-		assertTrue(offset > 0);
-		for (int i = 0; i < idx.getObjectCount(); i++) {
-			long newOffset = reverseIdx.findNextOffset(offset, Long.MAX_VALUE);
-			assertTrue(newOffset > offset);
-			if (i == idx.getObjectCount() - 1)
-				assertEquals(newOffset, Long.MAX_VALUE);
-			else
-				assertEquals(newOffset, idx.findOffset(reverseIdx
-						.findObject(newOffset)));
-			offset = newOffset;
+		///	<summary>
+		/// Test findNextOffset() for all index entries.
+		///	</summary>
+		[Test]
+		public void testFindNextOffset()
+		{
+			long offset = findFirstOffset();
+			Assert.IsTrue(offset > 0);
+			for (int i = 0; i < idx.ObjectCount; i++)
+			{
+				long newOffset = reverseIdx.FindNextOffset(offset, long.MaxValue);
+				Assert.IsTrue(newOffset > offset);
+				if (i == idx.ObjectCount - 1)
+					Assert.AreEqual(newOffset, long.MaxValue);
+				else
+					Assert.AreEqual(newOffset, idx.FindOffset(reverseIdx.FindObject(newOffset)));
+				offset = newOffset;
+			}
+		}
+
+		///	<summary>
+		/// Test findNextOffset() with wrong illegal argument as offset.
+		/// </summary>
+		[Test]
+		[ExpectedException(typeof(CorruptObjectException))]
+		public void testFindNextOffsetWrongOffset()
+		{
+			reverseIdx.FindNextOffset(0, long.MaxValue);
+			Assert.Fail("findNextOffset() should throw exception");
+		}
+
+		private long findFirstOffset()
+		{
+			long min = long.MaxValue;
+			foreach (PackIndex.MutableEntry me in idx)
+			{
+				min = Math.Min(min, me.Offset);
+			}
+			return min;
 		}
 	}
-
-	/**
-	 * Test findNextOffset() with wrong illegal argument as offset.
-	 */
-	public void testFindNextOffsetWrongOffset() {
-		try {
-			reverseIdx.findNextOffset(0, Long.MAX_VALUE);
-			fail("findNextOffset() should throw exception");
-		} catch (CorruptObjectException x) {
-			// expected
-		}
-	}
-
-	private long findFirstOffset() {
-		long min = Long.MAX_VALUE;
-		for (MutableEntry me : idx)
-			min = Math.min(min, me.getOffset());
-		return min;
-	}
-#endif
-    }
-
 }

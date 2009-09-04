@@ -36,14 +36,13 @@
  */
 
 using GitSharp.TreeWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.TreeWalk
 {
-
-    using NUnit.Framework;
     [TestFixture]
     public class AbstractTreeIteratorTest
     {
-
         public class FakeTreeIterator : WorkingTreeIterator
         {
             public FakeTreeIterator(string path, FileMode fileMode)
@@ -59,6 +58,7 @@ namespace GitSharp.Tests.TreeWalk
             }
         }
 
+		[Test]
         public void testPathCompare()
         {
             Assert.IsTrue(new FakeTreeIterator("a", FileMode.RegularFile).pathCompare(new FakeTreeIterator("a", FileMode.Tree)) < 0);

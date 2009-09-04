@@ -50,7 +50,7 @@ namespace GitSharp
     {
         public class Constants
         {
-            public static readonly int DefaultCompression = 0;
+            public static readonly int DefaultCompression = ICSharpCode.SharpZipLib.Zip.Compression.Deflater.DEFAULT_COMPRESSION;
         }
 
         public int PackIndexVersion { get; private set; }

@@ -35,161 +35,127 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.Transport;
 using NUnit.Framework;
-
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Transport
 {
     [TestFixture]
     public class TransportTest : RepositoryTestCase
     {
-#if false
-	private Transport transport;
+        private GitSharp.Transport.Transport transport;
+        private RemoteConfig remoteConfig;
 
-	private RemoteConfig remoteConfig;
+        public override void setUp()
+        {
+            base.setUp();
+            RepositoryConfig config = db.Config;
+            remoteConfig = new RemoteConfig(config, "test");
+            remoteConfig.AddURI(new URIish("http://everyones.loves.git/u/2"));
+            transport = null;
+        }
 
-	@Override
-	public void setUp() throws Exception {
-		super.setUp();
-		final RepositoryConfig config = db.getConfig();
-		remoteConfig = new RemoteConfig(config, "test");
-		remoteConfig.addURI(new URIish("http://everyones.loves.git/u/2"));
-		transport = null;
-	}
+        protected new void tearDown()
+        {
+            if (transport != null)
+            {
+                transport.close();
+                transport = null;
+            }
+            base.tearDown();
+        }
 
-	@Override
-	protected void tearDown() throws Exception {
-		if (transport != null) {
-			transport.close();
-			transport = null;
-		}
-		super.tearDown();
-	}
+        [Test]
+        public void testFindRemoteRefUpdatesNoWilcardNoTracking()
+        {
+            transport = GitSharp.Transport.Transport.Open(db, remoteConfig);
+            List<RemoteRefUpdate> result =
+                transport.findRemoteRefUpdatesFor(new List<RefSpec> {new RefSpec("refs/heads/master:refs/heads/x")});
 
-	/**
-	 * Test RefSpec to RemoteRefUpdate conversion with simple RefSpec - no
-	 * wildcard, no tracking ref in repo configuration.
-	 *
-	 * @throws IOException
-	 */
-	public void testFindRemoteRefUpdatesNoWildcardNoTracking()
-			throws IOException {
-		transport = Transport.open(db, remoteConfig);
-		final Collection<RemoteRefUpdate> result = transport
-				.findRemoteRefUpdatesFor(Collections.nCopies(1, new RefSpec(
-						"refs/heads/master:refs/heads/x")));
+            Assert.AreEqual(1, result.Count);
+            RemoteRefUpdate rru = result[0];
+            Assert.AreEqual(null, rru.ExpectedOldObjectId);
+            Assert.IsFalse(rru.ForceUpdate);
+            Assert.AreEqual("refs/heads/master", rru.SourceRef);
+            Assert.AreEqual(db.Resolve("refs/heads/master"), rru.NewObjectId);
+            Assert.AreEqual("refs/heads/x", rru.RemoteName);
+        }
 
-		assertEquals(1, result.size());
-		final RemoteRefUpdate rru = result.iterator().next();
-		assertNull(rru.getExpectedOldObjectId());
-		assertFalse(rru.isForceUpdate());
-		assertEquals("refs/heads/master", rru.getSrcRef());
-		assertEquals(db.resolve("refs/heads/master"), rru.getNewObjectId());
-		assertEquals("refs/heads/x", rru.getRemoteName());
-	}
+        [Test]
+        public void testFindRemoteRefUpdatesNoWildcardNoDestination()
+        {
+            transport = GitSharp.Transport.Transport.Open(db, remoteConfig);
+            List<RemoteRefUpdate> result =
+                transport.findRemoteRefUpdatesFor(new List<RefSpec> {new RefSpec("+refs/heads/master")});
 
-	/**
-	 * Test RefSpec to RemoteRefUpdate conversion with no-destination RefSpec
-	 * (destination should be set up for the same name as source).
-	 *
-	 * @throws IOException
-	 */
-	public void testFindRemoteRefUpdatesNoWildcardNoDestination()
-			throws IOException {
-		transport = Transport.open(db, remoteConfig);
-		final Collection<RemoteRefUpdate> result = transport
-				.findRemoteRefUpdatesFor(Collections.nCopies(1, new RefSpec(
-						"+refs/heads/master")));
+            Assert.AreEqual(1, result.Count);
+            RemoteRefUpdate rru = result[0];
+            Assert.AreEqual(null, rru.ExpectedOldObjectId);
+            Assert.IsTrue(rru.ForceUpdate);
+            Assert.AreEqual("refs/heads/master", rru.SourceRef);
+            Assert.AreEqual(db.Resolve("refs/heads/master"), rru.NewObjectId);
+            Assert.AreEqual("refs/heads/master", rru.RemoteName);
+        }
 
-		assertEquals(1, result.size());
-		final RemoteRefUpdate rru = result.iterator().next();
-		assertNull(rru.getExpectedOldObjectId());
-		assertTrue(rru.isForceUpdate());
-		assertEquals("refs/heads/master", rru.getSrcRef());
-		assertEquals(db.resolve("refs/heads/master"), rru.getNewObjectId());
-		assertEquals("refs/heads/master", rru.getRemoteName());
-	}
+        [Test]
+        public void testFindRemoteRefUpdatesWildcardNoTracking()
+        {
+            transport = GitSharp.Transport.Transport.Open(db, remoteConfig);
+            List<RemoteRefUpdate> result =
+                transport.findRemoteRefUpdatesFor(new List<RefSpec> { new RefSpec("+refs/heads/*:refs/heads/test/*") });
 
-	/**
-	 * Test RefSpec to RemoteRefUpdate conversion with wildcard RefSpec.
-	 *
-	 * @throws IOException
-	 */
-	public void testFindRemoteRefUpdatesWildcardNoTracking() throws IOException {
-		transport = Transport.open(db, remoteConfig);
-		final Collection<RemoteRefUpdate> result = transport
-				.findRemoteRefUpdatesFor(Collections.nCopies(1, new RefSpec(
-						"+refs/heads/*:refs/heads/test/*")));
+            Assert.AreEqual(9, result.Count);
+            bool foundA = false;
+            bool foundB = false;
+            foreach (RemoteRefUpdate rru in result)
+            {
+                if ("refs/heads/a".Equals(rru.SourceRef) && "refs/heads/test/a".Equals(rru.RemoteName))
+                    foundA = true;
+                if ("refs/heads/b".Equals(rru.SourceRef) && "refs/heads/test/b".Equals(rru.RemoteName))
+                    foundB = true;
+            }
+            Assert.IsTrue(foundA);
+            Assert.IsTrue(foundB);
+        }
 
-		assertEquals(9, result.size());
-		boolean foundA = false;
-		boolean foundB = false;
-		for (final RemoteRefUpdate rru : result) {
-			if ("refs/heads/a".equals(rru.getSrcRef())
-					&& "refs/heads/test/a".equals(rru.getRemoteName()))
-				foundA = true;
-			if ("refs/heads/b".equals(rru.getSrcRef())
-					&& "refs/heads/test/b".equals(rru.getRemoteName()))
-				foundB = true;
-		}
-		assertTrue(foundA);
-		assertTrue(foundB);
-	}
+        [Test]
+        public void testFindRemoteRefUpdatesTwoRefSpecs()
+        {
+            transport = GitSharp.Transport.Transport.Open(db, remoteConfig);
+            RefSpec specA = new RefSpec("+refs/heads/a:refs/heads/b");
+            RefSpec specC = new RefSpec("+refs/heads/c:refs/heads/d");
+            List<RefSpec> specs = new List<RefSpec>{specA, specC};
+            List<RemoteRefUpdate> result = transport.findRemoteRefUpdatesFor(specs);
 
-	/**
-	 * Test RefSpec to RemoteRefUpdate conversion for more than one RefSpecs
-	 * handling.
-	 *
-	 * @throws IOException
-	 */
-	public void testFindRemoteRefUpdatesTwoRefSpecs() throws IOException {
-		transport = Transport.open(db, remoteConfig);
-		final RefSpec specA = new RefSpec("+refs/heads/a:refs/heads/b");
-		final RefSpec specC = new RefSpec("+refs/heads/c:refs/heads/d");
-		final Collection<RefSpec> specs = Arrays.asList(specA, specC);
-		final Collection<RemoteRefUpdate> result = transport
-				.findRemoteRefUpdatesFor(specs);
+            Assert.AreEqual(2, result.Count);
+            bool foundA = false;
+            bool foundC = false;
+            foreach (RemoteRefUpdate rru in result)
+            {
+                if ("refs/heads/a".Equals(rru.SourceRef) && "refs/heads/b".Equals(rru.RemoteName))
+                    foundA = true;
+                if ("refs/heads/c".Equals(rru.SourceRef) && "refs/heads/d".Equals(rru.RemoteName))
+                    foundC = true;
+            }
+            Assert.IsTrue(foundA);
+            Assert.IsTrue(foundC);
+        }
 
-		assertEquals(2, result.size());
-		boolean foundA = false;
-		boolean foundC = false;
-		for (final RemoteRefUpdate rru : result) {
-			if ("refs/heads/a".equals(rru.getSrcRef())
-					&& "refs/heads/b".equals(rru.getRemoteName()))
-				foundA = true;
-			if ("refs/heads/c".equals(rru.getSrcRef())
-					&& "refs/heads/d".equals(rru.getRemoteName()))
-				foundC = true;
-		}
-		assertTrue(foundA);
-		assertTrue(foundC);
-	}
+        [Test]
+        public void testFindRemoteRefUpdatesTrackingRef()
+        {
+            remoteConfig.AddFetchRefSpec(new RefSpec("refs/heads/*:refs/remotes/test/*"));
+            transport = GitSharp.Transport.Transport.Open(db, remoteConfig);
+            List<RemoteRefUpdate> result =
+                transport.findRemoteRefUpdatesFor(new List<RefSpec> {new RefSpec("+refs/heads/a:refs/heads/a")});
 
-	/**
-	 * Test RefSpec to RemoteRefUpdate conversion for tracking ref search.
-	 *
-	 * @throws IOException
-	 */
-	public void testFindRemoteRefUpdatesTrackingRef() throws IOException {
-		remoteConfig.addFetchRefSpec(new RefSpec(
-				"refs/heads/*:refs/remotes/test/*"));
-		transport = Transport.open(db, remoteConfig);
-		final Collection<RemoteRefUpdate> result = transport
-				.findRemoteRefUpdatesFor(Collections.nCopies(1, new RefSpec(
-						"+refs/heads/a:refs/heads/a")));
-
-		assertEquals(1, result.size());
-		final TrackingRefUpdate tru = result.iterator().next()
-				.getTrackingRefUpdate();
-		assertEquals("refs/remotes/test/a", tru.getLocalName());
-		assertEquals("refs/heads/a", tru.getRemoteName());
-		assertEquals(db.resolve("refs/heads/a"), tru.getNewObjectId());
-		assertNull(tru.getOldObjectId());
-	}
-#endif
+            Assert.AreEqual(1, result.Count);
+            TrackingRefUpdate tru = result[0].TrackingRefUpdate;
+            Assert.AreEqual("refs/remotes/test/a", tru.LocalName);
+            Assert.AreEqual("refs/heads/a", tru.RemoteName);
+            Assert.AreEqual(db.Resolve("refs/heads/a"), tru.NewObjectId);
+            Assert.AreEqual(null, tru.OldObjectId);
+        }
     }
 }

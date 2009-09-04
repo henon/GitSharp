@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -38,53 +39,55 @@
 namespace GitSharp.Tests.DirectoryCache
 {
     using NUnit.Framework;
+    using GitSharp.DirectoryCache;
     [TestFixture]
     public class DirCacheFindTest : RepositoryTestCase
     {
-#if false
-	public void testEntriesWithin() throws Exception {
-		final DirCache dc = DirCache.read(db);
+        [Test]
+        public void testEntriesWithin()
+        {
+            DirCache dc = DirCache.read(db);
 
-		final String[] paths = { "a.", "a/b", "a/c", "a/d", "a0b" };
-		final DirCacheEntry[] ents = new DirCacheEntry[paths.length];
-		for (int i = 0; i < paths.length; i++)
-			ents[i] = new DirCacheEntry(paths[i]);
-		final int aFirst = 1;
-		final int aLast = 3;
+            string[] paths = { "a.", "a/b", "a/c", "a/d", "a0b" };
+            DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
+            for (int i = 0; i < paths.Length; i++)
+                ents[i] = new DirCacheEntry(paths[i]);
+            int aFirst = 1;
+            int aLast = 3;
 
-		final DirCacheBuilder b = dc.builder();
-		for (int i = 0; i < ents.length; i++)
-			b.add(ents[i]);
-		b.finish();
+            DirCacheBuilder b = dc.builder();
+            for (int i = 0; i < ents.Length; i++)
+                b.add(ents[i]);
+            b.finish();
 
-		assertEquals(paths.length, dc.getEntryCount());
-		for (int i = 0; i < ents.length; i++)
-			assertSame(ents[i], dc.getEntry(i));
+            Assert.AreEqual(paths.Length, dc.getEntryCount());
+            for (int i = 0; i < ents.Length; i++)
+                Assert.AreSame(ents[i], dc.getEntry(i));
 
-		{
-			final DirCacheEntry[] aContents = dc.getEntriesWithin("a");
-			assertNotNull(aContents);
-			assertEquals(aLast - aFirst + 1, aContents.length);
-			for (int i = aFirst, j = 0; i <= aLast; i++, j++)
-				assertSame(ents[i], aContents[j]);
-		}
-		{
-			final DirCacheEntry[] aContents = dc.getEntriesWithin("a/");
-			assertNotNull(aContents);
-			assertEquals(aLast - aFirst + 1, aContents.length);
-			for (int i = aFirst, j = 0; i <= aLast; i++, j++)
-				assertSame(ents[i], aContents[j]);
-		}
+            {
+                DirCacheEntry[] aContents = dc.getEntriesWithin("a");
+                Assert.IsNotNull(aContents);
+                Assert.AreEqual(aLast - aFirst + 1, aContents.Length);
+                for (int i = aFirst, j = 0; i <= aLast; i++, j++)
+                    Assert.AreSame(ents[i], aContents[j]);
+            }
+            {
+                DirCacheEntry[] aContents = dc.getEntriesWithin("a/");
+                Assert.IsNotNull(aContents);
+                Assert.AreEqual(aLast - aFirst + 1, aContents.Length);
+                for (int i = aFirst, j = 0; i <= aLast; i++, j++)
+                    Assert.AreSame(ents[i], aContents[j]);
+            }
 
-		assertNotNull(dc.getEntriesWithin("a."));
-		assertEquals(0, dc.getEntriesWithin("a.").length);
+            Assert.IsNotNull(dc.getEntriesWithin("a."));
+            Assert.AreEqual(0, dc.getEntriesWithin("a.").Length);
 
-		assertNotNull(dc.getEntriesWithin("a0b"));
-		assertEquals(0, dc.getEntriesWithin("a0b.").length);
+            Assert.IsNotNull(dc.getEntriesWithin("a0b"));
+            Assert.AreEqual(0, dc.getEntriesWithin("a0b.").Length);
 
-		assertNotNull(dc.getEntriesWithin("zoo"));
-		assertEquals(0, dc.getEntriesWithin("zoo.").length);
-	}
-#endif
+            Assert.IsNotNull(dc.getEntriesWithin("zoo"));
+            Assert.AreEqual(0, dc.getEntriesWithin("zoo.").Length);
+        }
+
     }
 }

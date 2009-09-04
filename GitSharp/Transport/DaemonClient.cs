@@ -56,7 +56,7 @@ namespace GitSharp.Transport
         public void Execute(Stream inout)
         {
             Stream = inout;
-            string cmd = new PacketLineIn(inout).ReadStringNoLF();
+            string cmd = new PacketLineIn(inout).ReadStringRaw();
             if (string.IsNullOrEmpty(cmd))
                 return;
 

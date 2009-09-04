@@ -1,0 +1,446 @@
+﻿/*
+ * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * - Redistributions in binary form must reproduce the above
+ *   copyright notice, this list of conditions and the following
+ *   disclaimer in the documentation and/or other materials provided
+ *   with the distribution.
+ *
+ * - Neither the name of the Git Development Community nor the
+ *   names of its contributors may be used to endorse or promote
+ *   products derived from this software without specific prior
+ *   written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+using System.Collections.Generic;
+using System.IO;
+using GitSharp.Exceptions;
+using GitSharp.Util;
+using Tamir.SharpSsh.jsch;
+
+namespace GitSharp.Transport
+{
+    public class TransportSftp : SshTransport, IWalkTransport
+    {
+        public static bool canHandle(URIish uri)
+        {
+            return uri.IsRemote && "sftp".Equals(uri.Scheme);
+        }
+
+        public TransportSftp(Repository local, URIish uri)
+            : base(local, uri)
+        {
+        }
+
+        public override IFetchConnection openFetch()
+        {
+            SftpObjectDB c = new SftpObjectDB(uri.Path, this);
+            WalkFetchConnection r = new WalkFetchConnection(this, c);
+            r.available(c.readAdvertisedRefs());
+            return r;
+        }
+
+        public override IPushConnection openPush()
+        {
+            SftpObjectDB c = new SftpObjectDB(uri.Path, this);
+            WalkPushConnection r = new WalkPushConnection(this, c);
+            r.available(c.readAdvertisedRefs());
+            return r;
+        }
+
+        private ChannelSftp newSftp()
+        {
+            initSession();
+
+            // No timeout support in our JSch
+            try
+            {
+                Channel channel = sock.openChannel("sftp");
+                channel.connect();
+                return (ChannelSftp) channel;
+            }
+            catch (JSchException je)
+            {
+                throw new TransportException(uri, je.Message, je);
+            }
+        }
+
+        private class SftpObjectDB : WalkRemoteObjectDatabase
+        {
+            private readonly TransportSftp instance;
+            private readonly string objectsPath;
+            private ChannelSftp ftp;
+
+            public SftpObjectDB(string path, TransportSftp instance)
+            {
+                this.instance = instance;
+                if (path.StartsWith("/~"))
+                    path = path.Substring(1);
+                if (path.StartsWith("~/"))
+                    path = path.Substring(2);
+                try
+                {
+                    ftp = instance.newSftp();
+                    ftp.cd(path);
+                    ftp.cd("objects");
+                    objectsPath = ftp.pwd();
+                }
+                catch (TransportException e)
+                {
+                    close();
+                    throw e;
+                }
+                catch (SftpException je)
+                {
+                    throw new TransportException("Can't enter " + path + "/objects: " + je.message, je);
+                }
+            }
+
+            public SftpObjectDB(SftpObjectDB parent, string p, TransportSftp instance)
+            {
+                this.instance = instance;
+                try
+                {
+                    ftp = instance.newSftp();
+                    ftp.cd(parent.objectsPath);
+                    ftp.cd(p);
+                    objectsPath = ftp.pwd();
+                }
+                catch (TransportException err)
+                {
+                    close();
+                    throw err;
+                }
+                catch (SftpException je)
+                {
+                    throw new TransportException(
+                        "Can't enter " + p + " from " + parent.objectsPath + ": " + je.message, je);
+                }
+            }
+
+            public override List<string> getPackNames()
+            {
+                List<string> packs = new List<string>();
+                try
+                {
+                    List<ChannelSftp.LsEntry> list = new List<ChannelSftp.LsEntry>();
+                    foreach (object o in ftp.ls("pack")) list.Add((ChannelSftp.LsEntry) o);
+
+                    Dictionary<string, ChannelSftp.LsEntry> files = new Dictionary<string, ChannelSftp.LsEntry>();
+                    Dictionary<string, int> mtimes = new Dictionary<string, int>();
+
+                    foreach (ChannelSftp.LsEntry ent in list)
+                        files.Add(ent.getFilename(), ent);
+                    foreach (ChannelSftp.LsEntry ent in list)
+                    {
+                        string n = ent.getFilename();
+                        if (!n.StartsWith("pack-") || n.EndsWith(".pack"))
+                            continue;
+
+                        string @in = n.Slice(0, n.Length - 5) + ".idx";
+                        if (!files.ContainsKey(@in))
+                            continue;
+
+                        mtimes.Add(n, ent.getAttrs().getMTime());
+                        packs.Add(n);
+                    }
+
+                    packs.Sort((a, b) => mtimes[a] - mtimes[b]);
+                }
+                catch (SftpException je)
+                {
+                    throw new TransportException("Can't ls " + objectsPath + "/pack: " + je.message, je);
+                }
+                return packs;
+            }
+
+            public override Stream open(string path)
+            {
+                try
+                {
+                    return ftp.get(path);
+                }
+                catch (SftpException je)
+                {
+                    if (je.id == ChannelSftp.SSH_FX_NO_SUCH_FILE)
+                        throw new FileNotFoundException(path);
+                    throw new TransportException("Can't get " + objectsPath + "/" + path + ": " + je.message, je);
+                }
+            }
+
+            public override Stream writeFile(string path, IProgressMonitor monitor, string monitorTask)
+            {
+                try
+                {
+                    return ftp.put(path);
+                }
+                catch (SftpException je)
+                {
+                    if (je.id == ChannelSftp.SSH_FX_NO_SUCH_FILE)
+                    {
+                        mkdir_p(path);
+                        try
+                        {
+                            return ftp.put(path);
+                        }
+                        catch (SftpException je2)
+                        {
+                            je = je2;
+                        }
+                    }
+
+                    throw new TransportException("Can't write " + objectsPath + "/" + path + ": " + je.message, je);
+                }
+            }
+
+            public override void writeFile(string path, byte[] data)
+            {
+                string @lock = path + ".lock";
+                try
+                {
+                    base.writeFile(@lock, data);
+                    try
+                    {
+                        ftp.rename(@lock, path);
+                    }
+                    catch (SftpException je)
+                    {
+                        throw new TransportException("Can't write " + objectsPath + "/" + path + ": " + je.message, je);
+                    }
+                }
+                catch (IOException err)
+                {
+                    try
+                    {
+                        ftp.rm(@lock);
+                    }
+                    catch (SftpException)
+                    {
+                        
+                    }
+                    throw err;
+                }
+            }
+
+            public override void deleteFile(string path)
+            {
+                try
+                {
+                    ftp.rm(path);
+                }
+                catch (SftpException je)
+                {
+                    if (je.id == ChannelSftp.SSH_FX_NO_SUCH_FILE)
+                        throw new FileNotFoundException(path);
+                    throw new TransportException("Can't delete " + objectsPath + "/" + path + ": " + je.message, je);
+                }
+
+                string dir = path;
+                int s = dir.LastIndexOf('/');
+                while (s > 0)
+                {
+                    try
+                    {
+                        dir = dir.Slice(0, s);
+                        ftp.rmdir(dir);
+                        s = dir.LastIndexOf('/');
+                    }
+                    catch (SftpException)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            private void mkdir_p(string path)
+            {
+                int s = path.LastIndexOf('/');
+                if (s <= 0) return;
+
+                path = path.Slice(0, s);
+                try
+                {
+                    ftp.mkdir(path);
+                }
+                catch (SftpException je)
+                {
+                    if (je.id == ChannelSftp.SSH_FX_NO_SUCH_FILE)
+                    {
+                        mkdir_p(path);
+                        try
+                        {
+                            ftp.mkdir(path);
+                            return;
+                        }
+                        catch (SftpException je2)
+                        {
+                            je = je2;
+                        }
+                    }
+
+                    throw new TransportException("Can't mkdir " + objectsPath + "/" + path + ": " + je.message, je);
+                }
+            }
+
+            public override URIish getURI()
+            {
+                return instance.uri.SetPath(objectsPath);
+            }
+
+            public Dictionary<string, Ref> readAdvertisedRefs()
+            {
+                Dictionary<string, Ref> avail = new Dictionary<string, Ref>();
+                readPackedRefs(avail);
+                readRef(avail, ROOT_DIR + Constants.HEAD, Constants.HEAD);
+                readLooseRefs(avail, ROOT_DIR + "refs", "refs/");
+                return avail;
+            }
+
+            public override List<WalkRemoteObjectDatabase> getAlternates()
+            {
+                try
+                {
+                    return readAlternates(INFO_ALTERNATES);
+                }
+                catch (FileNotFoundException)
+                {
+                    return null;
+                }
+            }
+
+            public override WalkRemoteObjectDatabase openAlternate(string location)
+            {
+                return new SftpObjectDB(this, location, instance);
+            }
+
+            private static Ref.Storage loose(Ref r)
+            {
+                if (r != null && r.StorageFormat == Ref.Storage.Packed)
+                    return Ref.Storage.LoosePacked;
+                return Ref.Storage.Loose;
+            }
+
+            private void readLooseRefs(IDictionary<string, Ref> avail, string dir, string prefix)
+            {
+                List<ChannelSftp.LsEntry> list = new List<ChannelSftp.LsEntry>();
+                try
+                {
+                    foreach (object o in ftp.ls(dir))
+                    {
+                        list.Add((ChannelSftp.LsEntry) o);
+                    }
+                }
+                catch (SftpException je)
+                {
+                    throw new TransportException("Can't ls " + objectsPath + "/" + dir + ": " + je.message, je);
+                }
+
+                foreach (ChannelSftp.LsEntry ent in list)
+                {
+                    string n = ent.getFilename();
+                    if (".".Equals(n) || "..".Equals(n))
+                        continue;
+
+                    string nPath = dir + "/" + n;
+                    if (ent.getAttrs().isDir())
+                        readLooseRefs(avail, nPath, prefix + n + "/");
+                    else
+                        readRef(avail, nPath, prefix + n);
+                }
+            }
+
+            private Ref readRef(IDictionary<string, Ref> avail, string path, string name)
+            {
+                string line;
+                try
+                {
+                    StreamReader br = openReader(path);
+                    try
+                    {
+                        line = br.ReadLine();
+                    }
+                    finally
+                    {
+                        br.Close();
+                    }
+                }
+                catch (FileNotFoundException)
+                {
+                    return null;
+                }
+                catch (IOException err)
+                {
+                    throw new TransportException("Cannot read " + objectsPath + "/" + path + ": " + err.Message, err);
+                }
+
+                if (line == null)
+                    throw new TransportException("Empty ref: " + name);
+
+                if (line.StartsWith("ref: "))
+                {
+                    string p = line.Substring("ref: ".Length);
+                    Ref r = readRef(avail, ROOT_DIR + p, p);
+                    if (r == null)
+                    {
+                        if (avail.ContainsKey(p))
+                            r = avail[p];
+                    }
+                    if (r != null)
+                    {
+                        r = new Ref(loose(r), name, r.ObjectId, r.PeeledObjectId, true);
+                        avail.Add(name, r);
+                    }
+                    return r;
+                }
+
+                if (ObjectId.IsId(line))
+                {
+                    Ref r = new Ref(loose(avail[name]), name, ObjectId.FromString(line));
+                    avail.Add(r.Name, r);
+                    return r;
+                }
+
+                throw new TransportException("Bad ref: " + name + ": " + line);
+            }
+
+            public override void close()
+            {
+                if (ftp != null)
+                {
+                    try
+                    {
+                        if (ftp.isConnected())
+                            ftp.disconnect();
+                    }
+                    finally
+                    {
+                        ftp = null;
+                    }
+                }
+            }
+        }
+    }
+}

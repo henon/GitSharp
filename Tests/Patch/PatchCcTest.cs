@@ -35,171 +35,155 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.Patch;
+using GitSharp.Util;
 using NUnit.Framework;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Patch
 {
-    [TestFixture]
-    public class PatchCcTest
-    {
-#if false
-	public void testParse_OneFileCc() throws IOException {
-		final Patch p = parseTestPatchFile();
-		assertEquals(1, p.getFiles().size());
-		assertTrue(p.getErrors().isEmpty());
-
-		final CombinedFileHeader cfh = (CombinedFileHeader) p.getFiles().get(0);
-
-		assertEquals("org.spearce.egit.ui/src/org/spearce/egit/ui/UIText.java",
-				cfh.getNewName());
-		assertEquals(cfh.getNewName(), cfh.getOldName());
-
-		assertEquals(98, cfh.startOffset);
-
-		assertEquals(2, cfh.getParentCount());
-		assertSame(cfh.getOldId(0), cfh.getOldId());
-		assertEquals("169356b", cfh.getOldId(0).name());
-		assertEquals("dd8c317", cfh.getOldId(1).name());
-		assertEquals("fd85931", cfh.getNewId().name());
-
-		assertSame(cfh.getOldMode(0), cfh.getOldMode());
-		assertSame(FileMode.REGULAR_FILE, cfh.getOldMode(0));
-		assertSame(FileMode.REGULAR_FILE, cfh.getOldMode(1));
-		assertSame(FileMode.EXECUTABLE_FILE, cfh.getNewMode());
-		assertSame(FileHeader.ChangeType.MODIFY, cfh.getChangeType());
-		assertSame(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
-
-		assertEquals(1, cfh.getHunks().size());
+	[TestFixture]
+	public class PatchCcTest : BasePatchTest
+	{
+		[Test]
+		public void testParse_OneFileCc()
 		{
-			final CombinedHunkHeader h = cfh.getHunks().get(0);
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_OneFileCc.patch");
+			Assert.AreEqual(1, p.getFiles().Count);
+			Assert.IsTrue(p.getErrors().isEmpty());
 
-			assertSame(cfh, h.getFileHeader());
-			assertEquals(346, h.startOffset);
-			assertEquals(764, h.endOffset);
+			var cfh = (CombinedFileHeader)p.getFiles()[0];
 
-			assertSame(h.getOldImage(0), h.getOldImage());
-			assertSame(cfh.getOldId(0), h.getOldImage(0).getId());
-			assertSame(cfh.getOldId(1), h.getOldImage(1).getId());
+			Assert.AreEqual("org.spearce.egit.ui/src/org/spearce/egit/ui/UIText.java", cfh.getNewName());
+			Assert.AreEqual(cfh.getNewName(), cfh.getOldName());
 
-			assertEquals(55, h.getOldImage(0).getStartLine());
-			assertEquals(12, h.getOldImage(0).getLineCount());
-			assertEquals(3, h.getOldImage(0).getLinesAdded());
-			assertEquals(0, h.getOldImage(0).getLinesDeleted());
+			Assert.AreEqual(98, cfh.startOffset);
 
-			assertEquals(163, h.getOldImage(1).getStartLine());
-			assertEquals(13, h.getOldImage(1).getLineCount());
-			assertEquals(2, h.getOldImage(1).getLinesAdded());
-			assertEquals(0, h.getOldImage(1).getLinesDeleted());
+			Assert.AreEqual(2, cfh.getParentCount());
+			Assert.AreSame(cfh.getOldId(0), cfh.getOldId());
+			Assert.AreEqual("169356b", cfh.getOldId(0).name());
+			Assert.AreEqual("dd8c317", cfh.getOldId(1).name());
+			Assert.AreEqual("fd85931", cfh.getNewId().name());
 
-			assertEquals(163, h.getNewStartLine());
-			assertEquals(15, h.getNewLineCount());
+			Assert.AreSame(cfh.getOldMode(0), cfh.getOldMode());
+			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(0));
+			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(1));
+			Assert.AreSame(FileMode.ExecutableFile, cfh.getNewMode());
+			Assert.AreSame(FileHeader.ChangeType.MODIFY, cfh.getChangeType());
+			Assert.AreSame(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
 
-			assertEquals(10, h.getLinesContext());
+			Assert.AreEqual(1, cfh.getHunks().Count);
+			{
+				var h = (CombinedHunkHeader)cfh.getHunks()[0];
+
+				Assert.AreSame(cfh, h.File);
+				Assert.AreEqual(346, h.StartOffset);
+				Assert.AreEqual(764, h.EndOffset);
+
+				Assert.AreSame(h.GetOldImage(0), h.OldImage);
+				Assert.AreSame(cfh.getOldId(0), h.GetOldImage(0).Id);
+				Assert.AreSame(cfh.getOldId(1), h.GetOldImage(1).Id);
+
+				Assert.AreEqual(55, h.GetOldImage(0).StartLine);
+				Assert.AreEqual(12, h.GetOldImage(0).LineCount);
+				Assert.AreEqual(3, h.GetOldImage(0).LinesAdded);
+				Assert.AreEqual(0, h.GetOldImage(0).LinesDeleted);
+
+				Assert.AreEqual(163, h.GetOldImage(1).StartLine);
+				Assert.AreEqual(13, h.GetOldImage(1).LineCount);
+				Assert.AreEqual(2, h.GetOldImage(1).LinesAdded);
+				Assert.AreEqual(0, h.GetOldImage(1).LinesDeleted);
+
+				Assert.AreEqual(163, h.NewStartLine);
+				Assert.AreEqual(15, h.NewLineCount);
+
+				Assert.AreEqual(10, h.LinesContext);
+			}
 		}
-	}
 
-	public void testParse_CcNewFile() throws IOException {
-		final Patch p = parseTestPatchFile();
-		assertEquals(1, p.getFiles().size());
-		assertTrue(p.getErrors().isEmpty());
-
-		final CombinedFileHeader cfh = (CombinedFileHeader) p.getFiles().get(0);
-
-		assertSame(FileHeader.DEV_NULL, cfh.getOldName());
-		assertEquals("d", cfh.getNewName());
-
-		assertEquals(187, cfh.startOffset);
-
-		assertEquals(2, cfh.getParentCount());
-		assertSame(cfh.getOldId(0), cfh.getOldId());
-		assertEquals("0000000", cfh.getOldId(0).name());
-		assertEquals("0000000", cfh.getOldId(1).name());
-		assertEquals("4bcfe98", cfh.getNewId().name());
-
-		assertSame(cfh.getOldMode(0), cfh.getOldMode());
-		assertSame(FileMode.MISSING, cfh.getOldMode(0));
-		assertSame(FileMode.MISSING, cfh.getOldMode(1));
-		assertSame(FileMode.REGULAR_FILE, cfh.getNewMode());
-		assertSame(FileHeader.ChangeType.ADD, cfh.getChangeType());
-		assertSame(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
-
-		assertEquals(1, cfh.getHunks().size());
+		[Test]
+		public void testParse_CcNewFile()
 		{
-			final CombinedHunkHeader h = cfh.getHunks().get(0);
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_CcNewFile.patch");
+			Assert.AreEqual(1, p.getFiles().Count);
+			Assert.IsTrue(p.getErrors().isEmpty());
 
-			assertSame(cfh, h.getFileHeader());
-			assertEquals(273, h.startOffset);
-			assertEquals(300, h.endOffset);
+			var cfh = (CombinedFileHeader)p.getFiles()[0];
 
-			assertSame(h.getOldImage(0), h.getOldImage());
-			assertSame(cfh.getOldId(0), h.getOldImage(0).getId());
-			assertSame(cfh.getOldId(1), h.getOldImage(1).getId());
+			Assert.AreSame(FileHeader.DEV_NULL, cfh.getOldName());
+			Assert.AreEqual("d", cfh.getNewName());
 
-			assertEquals(1, h.getOldImage(0).getStartLine());
-			assertEquals(0, h.getOldImage(0).getLineCount());
-			assertEquals(1, h.getOldImage(0).getLinesAdded());
-			assertEquals(0, h.getOldImage(0).getLinesDeleted());
+			Assert.AreEqual(187, cfh.startOffset);
 
-			assertEquals(1, h.getOldImage(1).getStartLine());
-			assertEquals(0, h.getOldImage(1).getLineCount());
-			assertEquals(1, h.getOldImage(1).getLinesAdded());
-			assertEquals(0, h.getOldImage(1).getLinesDeleted());
+			Assert.AreEqual(2, cfh.getParentCount());
+			Assert.AreSame(cfh.getOldId(0), cfh.getOldId());
+			Assert.AreEqual("0000000", cfh.getOldId(0).name());
+			Assert.AreEqual("0000000", cfh.getOldId(1).name());
+			Assert.AreEqual("4bcfe98", cfh.getNewId().name());
 
-			assertEquals(1, h.getNewStartLine());
-			assertEquals(1, h.getNewLineCount());
+			Assert.AreSame(cfh.getOldMode(0), cfh.getOldMode());
+			Assert.AreSame(FileMode.Missing, cfh.getOldMode(0));
+			Assert.AreSame(FileMode.Missing, cfh.getOldMode(1));
+			Assert.AreSame(FileMode.RegularFile, cfh.getNewMode());
+			Assert.AreSame(FileHeader.ChangeType.ADD, cfh.getChangeType());
+			Assert.AreSame(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
 
-			assertEquals(0, h.getLinesContext());
+			Assert.AreEqual(1, cfh.getHunks().Count);
+			{
+				CombinedHunkHeader h = (CombinedHunkHeader)cfh.getHunks()[0];
+
+				Assert.AreSame(cfh, h.File);
+				Assert.AreEqual(273, h.StartOffset);
+				Assert.AreEqual(300, h.EndOffset);
+
+				Assert.AreSame(h.GetOldImage(0), h.OldImage);
+				Assert.AreSame(cfh.getOldId(0), h.GetOldImage(0).Id);
+				Assert.AreSame(cfh.getOldId(1), h.GetOldImage(1).Id);
+
+				Assert.AreEqual(1, h.GetOldImage(0).StartLine);
+				Assert.AreEqual(0, h.GetOldImage(0).LineCount);
+				Assert.AreEqual(1, h.GetOldImage(0).LinesAdded);
+				Assert.AreEqual(0, h.GetOldImage(0).LinesDeleted);
+
+				Assert.AreEqual(1, h.GetOldImage(1).StartLine);
+				Assert.AreEqual(0, h.GetOldImage(1).LineCount);
+				Assert.AreEqual(1, h.GetOldImage(1).LinesAdded);
+				Assert.AreEqual(0, h.GetOldImage(1).LinesDeleted);
+
+				Assert.AreEqual(1, h.NewStartLine);
+				Assert.AreEqual(1, h.NewLineCount);
+
+				Assert.AreEqual(0, h.LinesContext);
+			}
+		}
+
+		[Test]
+		public void testParse_CcDeleteFile()
+		{
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_CcDeleteFile.patch");
+			Assert.AreEqual(1, p.getFiles().Count);
+			Assert.IsTrue(p.getErrors().isEmpty());
+
+			var cfh = (CombinedFileHeader)p.getFiles()[0];
+
+			Assert.AreEqual("a", cfh.getOldName());
+			Assert.AreSame(FileHeader.DEV_NULL, cfh.getNewName());
+
+			Assert.AreEqual(187, cfh.startOffset);
+
+			Assert.AreEqual(2, cfh.getParentCount());
+			Assert.AreSame(cfh.getOldId(0), cfh.getOldId());
+			Assert.AreEqual("7898192", cfh.getOldId(0).name());
+			Assert.AreEqual("2e65efe", cfh.getOldId(1).name());
+			Assert.AreEqual("0000000", cfh.getNewId().name());
+
+			Assert.AreSame(cfh.getOldMode(0), cfh.getOldMode());
+			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(0));
+			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(1));
+			Assert.AreSame(FileMode.Missing, cfh.getNewMode());
+			Assert.AreSame(FileHeader.ChangeType.DELETE, cfh.getChangeType());
+			Assert.AreSame(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
+
+			Assert.IsTrue(cfh.getHunks().isEmpty());
 		}
 	}
-
-	public void testParse_CcDeleteFile() throws IOException {
-		final Patch p = parseTestPatchFile();
-		assertEquals(1, p.getFiles().size());
-		assertTrue(p.getErrors().isEmpty());
-
-		final CombinedFileHeader cfh = (CombinedFileHeader) p.getFiles().get(0);
-
-		assertEquals("a", cfh.getOldName());
-		assertSame(FileHeader.DEV_NULL, cfh.getNewName());
-
-		assertEquals(187, cfh.startOffset);
-
-		assertEquals(2, cfh.getParentCount());
-		assertSame(cfh.getOldId(0), cfh.getOldId());
-		assertEquals("7898192", cfh.getOldId(0).name());
-		assertEquals("2e65efe", cfh.getOldId(1).name());
-		assertEquals("0000000", cfh.getNewId().name());
-
-		assertSame(cfh.getOldMode(0), cfh.getOldMode());
-		assertSame(FileMode.REGULAR_FILE, cfh.getOldMode(0));
-		assertSame(FileMode.REGULAR_FILE, cfh.getOldMode(1));
-		assertSame(FileMode.MISSING, cfh.getNewMode());
-		assertSame(FileHeader.ChangeType.DELETE, cfh.getChangeType());
-		assertSame(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
-
-		assertTrue(cfh.getHunks().isEmpty());
-	}
-
-	private Patch parseTestPatchFile() throws IOException {
-		final String patchFile = getName() + ".patch";
-		final InputStream in = getClass().getResourceAsStream(patchFile);
-		if (in == null) {
-			fail("No " + patchFile + " test vector");
-			return null; // Never happens
-		}
-		try {
-			final Patch p = new Patch();
-			p.parse(in);
-			return p;
-		} finally {
-			in.close();
-		}
-	}
-#endif
-    }
 }

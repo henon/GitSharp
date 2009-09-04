@@ -78,8 +78,7 @@ namespace GitSharp.Tests.Util
 
         internal int readUInt8()
         {
-            byte[] b = new byte[_filestream.Length];
-            int r = _filestream.Read(b, 0, (int)_filestream.Length);
+            int r = _filestream.ReadByte();
             if (r < 0)
                 throw new EndOfStreamException();
             return r;

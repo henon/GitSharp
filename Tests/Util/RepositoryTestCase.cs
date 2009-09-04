@@ -249,7 +249,7 @@ namespace GitSharp.Tests
         private List<Repository> repositoriesToClose = new List<Repository>();
 
         [TearDown]
-        public void tearDown()
+        public virtual void tearDown()
         {
             db.Close();
             foreach (var r in repositoriesToClose)
@@ -270,7 +270,6 @@ namespace GitSharp.Tests
             //super.tearDown();
         }
 
-
         protected FileInfo writeTrashFile(string name, string data)
         {
             var tf = new FileInfo(trash + "/" + name);
@@ -278,6 +277,7 @@ namespace GitSharp.Tests
             if (!tfp.Exists)
             {
                 tfp.Create();
+                tfp.Refresh();
                 if (!tfp.Exists)
                     throw new IOException("Could not create directory " + tfp.FullName);
             }

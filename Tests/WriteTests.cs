@@ -266,7 +266,7 @@ namespace GitSharp.Tests
             Assert.AreEqual(cmtid, c.CommitId);
 
             // Verify the commit we just wrote is in the correct format.
-            XInputStream xis = new XInputStream(new FileStream(db.ToFile(cmtid).FullName, System.IO.FileMode.Open));
+            XInputStream xis = new XInputStream(new FileStream(db.ToFile(cmtid).FullName, System.IO.FileMode.Open, FileAccess.Read));
             try
             {
                 Assert.AreEqual(0x78, xis.readUInt8());

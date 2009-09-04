@@ -93,10 +93,10 @@ namespace GitSharp.TreeWalk
          * @throws MissingObjectException
          *             a tree object was not found.
          */
-        public static TreeWalk forPath(Repository db, string path, AnyObjectId[] trees)
+        public static TreeWalk forPath(Repository db, string path, params AnyObjectId[] trees)
         {
             TreeWalk r = new TreeWalk(db);
-            r.setFilter(PathFilterGroup.createFromStrings(new HashSet<string>() { path}));
+            r.setFilter(PathFilterGroup.createFromStrings(new HashSet<string>() { path }));
             r.setRecursive(r.getFilter().shouldBeRecursive());
             r.reset(trees);
             return r.next() ? r : null;
@@ -768,6 +768,39 @@ namespace GitSharp.TreeWalk
         }
 
         /**
+         * Test if the supplied path matches (being suffix of) the current entry's
+         * path.
+         * <p>
+         * This method tests that the supplied path is exactly equal to the current
+         * entry, or is relative to one of entry's parent directories. It is faster
+         * to use this method then to use {@link #getPathString()} to first create
+         * a String object, then test <code>endsWith</code> or some other type of
+         * string match function.
+         *
+         * @param p
+         *            path buffer to test.
+         * @param pLen
+         *            number of bytes from <code>buf</code> to test.
+         * @return true if p is suffix of the current path;
+         *         false if otherwise
+         */
+        public bool isPathSuffix(byte[] p, int pLen)
+        {
+            AbstractTreeIterator t = currentHead;
+            byte[] c = t.path;
+            int cLen = t.pathLen;
+            int ci;
+
+            for (ci = 1; ci < cLen && ci < pLen; ci++)
+            {
+                if (c[cLen - ci] != p[pLen - ci])
+                    return false;
+            }
+
+            return true;
+        }
+
+        /**
          * Get the current subtree depth of this walker.
          *
          * @return the current subtree depth of this walker.
@@ -927,5 +960,6 @@ namespace GitSharp.TreeWalk
         {
             return RawParseUtils.decode(Constants.CHARSET, t.path, 0, t.pathLen);
         }
+
     }
 }

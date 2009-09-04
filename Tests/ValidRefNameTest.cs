@@ -37,145 +37,171 @@
 
 using NUnit.Framework;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace GitSharp.Tests
 {
-    [TestFixture]
-    public class ValidRefNameTest
-    {
-#if false
-	private static void assertValid(final boolean exp, final String name) {
-		assertEquals("\"" + name + "\"", exp, Repository.isValidRefName(name));
+	[TestFixture]
+	public class ValidRefNameTest
+	{
+		private static void assertValid(bool exp, string name)
+		{
+			Assert.AreEqual(exp, Repository.IsValidRefName(name), "\"" + name + "\"");
+		}
+
+		[Test]
+		public void testEmptyString()
+		{
+			assertValid(false, "");
+			assertValid(false, "/");
+		}
+
+		[Test]
+		public void testMustHaveTwoComponents()
+		{
+			assertValid(false, "master");
+			assertValid(true, "heads/master");
+		}
+
+		[Test]
+		public void testValidHead()
+		{
+			assertValid(true, "refs/heads/master");
+			assertValid(true, "refs/heads/pu");
+			assertValid(true, "refs/heads/z");
+			assertValid(true, "refs/heads/FoO");
+		}
+
+		[Test]
+		public void testValidTag()
+		{
+			assertValid(true, "refs/tags/v1.0");
+		}
+
+		[Test]
+		public void testNoLockSuffix()
+		{
+			assertValid(false, "refs/heads/master.lock");
+		}
+
+		[Test]
+		public void testNoDirectorySuffix()
+		{
+			assertValid(false, "refs/heads/master/");
+		}
+
+		[Test]
+		public void testNoSpace()
+		{
+			assertValid(false, "refs/heads/i haz space");
+		}
+
+		[Test]
+		public void testNoAsciiControlCharacters()
+		{
+			for (char c = '\0'; c < ' '; c++)
+				assertValid(false, "refs/heads/mast" + c + "er");
+		}
+
+		[Test]
+		public void testNoBareDot()
+		{
+			assertValid(false, "refs/heads/.");
+			assertValid(false, "refs/heads/..");
+			assertValid(false, "refs/heads/./master");
+			assertValid(false, "refs/heads/../master");
+		}
+
+		[Test]
+		public void testNoLeadingOrTrailingDot()
+		{
+			assertValid(false, ".");
+			assertValid(false, "refs/heads/.bar");
+			assertValid(false, "refs/heads/..bar");
+			assertValid(false, "refs/heads/bar.");
+		}
+
+		[Test]
+		public void testContainsDot()
+		{
+			assertValid(true, "refs/heads/m.a.s.t.e.r");
+			assertValid(false, "refs/heads/master..pu");
+		}
+
+		[Test]
+		public void testNoMagicRefCharacters()
+		{
+			assertValid(false, "refs/heads/master^");
+			assertValid(false, "refs/heads/^master");
+			assertValid(false, "^refs/heads/master");
+
+			assertValid(false, "refs/heads/master~");
+			assertValid(false, "refs/heads/~master");
+			assertValid(false, "~refs/heads/master");
+
+			assertValid(false, "refs/heads/master:");
+			assertValid(false, "refs/heads/:master");
+			assertValid(false, ":refs/heads/master");
+		}
+
+		[Test]
+		public void testShellGlob()
+		{
+			assertValid(false, "refs/heads/master?");
+			assertValid(false, "refs/heads/?master");
+			assertValid(false, "?refs/heads/master");
+
+			assertValid(false, "refs/heads/master[");
+			assertValid(false, "refs/heads/[master");
+			assertValid(false, "[refs/heads/master");
+
+			assertValid(false, "refs/heads/master*");
+			assertValid(false, "refs/heads/*master");
+			assertValid(false, "*refs/heads/master");
+		}
+
+		[Test]
+		public void testValidSpecialCharacters()
+		{
+			assertValid(true, "refs/heads/!");
+			assertValid(true, "refs/heads/\"");
+			assertValid(true, "refs/heads/#");
+			assertValid(true, "refs/heads/$");
+			assertValid(true, "refs/heads/%");
+			assertValid(true, "refs/heads/&");
+			assertValid(true, "refs/heads/'");
+			assertValid(true, "refs/heads/(");
+			assertValid(true, "refs/heads/)");
+			assertValid(true, "refs/heads/+");
+			assertValid(true, "refs/heads/,");
+			assertValid(true, "refs/heads/-");
+			assertValid(true, "refs/heads/;");
+			assertValid(true, "refs/heads/<");
+			assertValid(true, "refs/heads/=");
+			assertValid(true, "refs/heads/>");
+			assertValid(true, "refs/heads/@");
+			assertValid(true, "refs/heads/]");
+			assertValid(true, "refs/heads/_");
+			assertValid(true, "refs/heads/`");
+			assertValid(true, "refs/heads/{");
+			assertValid(true, "refs/heads/|");
+			assertValid(true, "refs/heads/}");
+
+			// This is valid on UNIX, but not on Windows
+			// hence we make in invalid due to non-portability
+			//
+			assertValid(false, "refs/heads/\\");
+		}
+
+		[Test]
+		public void testUnicodeNames()
+		{
+			assertValid(true, "refs/heads/\u00e5ngstr\u00f6m");
+		}
+
+		[Test]
+		public void testRefLogQueryIsValidRef()
+		{
+			assertValid(false, "refs/heads/master@{1}");
+			assertValid(false, "refs/heads/master@{1.hour.ago}");
+		}
 	}
-
-	public void testEmptyString() {
-		assertValid(false, "");
-		assertValid(false, "/");
-	}
-
-	public void testMustHaveTwoComponents() {
-		assertValid(false, "master");
-		assertValid(true, "heads/master");
-	}
-
-	public void testValidHead() {
-		assertValid(true, "refs/heads/master");
-		assertValid(true, "refs/heads/pu");
-		assertValid(true, "refs/heads/z");
-		assertValid(true, "refs/heads/FoO");
-	}
-
-	public void testValidTag() {
-		assertValid(true, "refs/tags/v1.0");
-	}
-
-	public void testNoLockSuffix() {
-		assertValid(false, "refs/heads/master.lock");
-	}
-
-	public void testNoDirectorySuffix() {
-		assertValid(false, "refs/heads/master/");
-	}
-
-	public void testNoSpace() {
-		assertValid(false, "refs/heads/i haz space");
-	}
-
-	public void testNoAsciiControlCharacters() {
-		for (char c = '\0'; c < ' '; c++)
-			assertValid(false, "refs/heads/mast" + c + "er");
-	}
-
-	public void testNoBareDot() {
-		assertValid(false, "refs/heads/.");
-		assertValid(false, "refs/heads/..");
-		assertValid(false, "refs/heads/./master");
-		assertValid(false, "refs/heads/../master");
-	}
-
-	public void testNoLeadingOrTrailingDot() {
-		assertValid(false, ".");
-		assertValid(false, "refs/heads/.bar");
-		assertValid(false, "refs/heads/..bar");
-		assertValid(false, "refs/heads/bar.");
-	}
-
-	public void testContainsDot() {
-		assertValid(true, "refs/heads/m.a.s.t.e.r");
-		assertValid(false, "refs/heads/master..pu");
-	}
-
-	public void testNoMagicRefCharacters() {
-		assertValid(false, "refs/heads/master^");
-		assertValid(false, "refs/heads/^master");
-		assertValid(false, "^refs/heads/master");
-
-		assertValid(false, "refs/heads/master~");
-		assertValid(false, "refs/heads/~master");
-		assertValid(false, "~refs/heads/master");
-
-		assertValid(false, "refs/heads/master:");
-		assertValid(false, "refs/heads/:master");
-		assertValid(false, ":refs/heads/master");
-	}
-
-	public void testShellGlob() {
-		assertValid(false, "refs/heads/master?");
-		assertValid(false, "refs/heads/?master");
-		assertValid(false, "?refs/heads/master");
-
-		assertValid(false, "refs/heads/master[");
-		assertValid(false, "refs/heads/[master");
-		assertValid(false, "[refs/heads/master");
-
-		assertValid(false, "refs/heads/master*");
-		assertValid(false, "refs/heads/*master");
-		assertValid(false, "*refs/heads/master");
-	}
-
-	public void testValidSpecialCharacters() {
-		assertValid(true, "refs/heads/!");
-		assertValid(true, "refs/heads/\"");
-		assertValid(true, "refs/heads/#");
-		assertValid(true, "refs/heads/$");
-		assertValid(true, "refs/heads/%");
-		assertValid(true, "refs/heads/&");
-		assertValid(true, "refs/heads/'");
-		assertValid(true, "refs/heads/(");
-		assertValid(true, "refs/heads/)");
-		assertValid(true, "refs/heads/+");
-		assertValid(true, "refs/heads/,");
-		assertValid(true, "refs/heads/-");
-		assertValid(true, "refs/heads/;");
-		assertValid(true, "refs/heads/<");
-		assertValid(true, "refs/heads/=");
-		assertValid(true, "refs/heads/>");
-		assertValid(true, "refs/heads/@");
-		assertValid(true, "refs/heads/]");
-		assertValid(true, "refs/heads/_");
-		assertValid(true, "refs/heads/`");
-		assertValid(true, "refs/heads/{");
-		assertValid(true, "refs/heads/|");
-		assertValid(true, "refs/heads/}");
-
-		// This is valid on UNIX, but not on Windows
-		// hence we make in invalid due to non-portability
-		//
-		assertValid(false, "refs/heads/\\");
-	}
-
-	public void testUnicodeNames() {
-		assertValid(true, "refs/heads/\u00e5ngstr\u00f6m");
-	}
-
-	public void testRefLogQueryIsValidRef() {
-		assertValid(false, "refs/heads/master@{1}");
-		assertValid(false, "refs/heads/master@{1.hour.ago}");
-	}
-#endif
-    }
 }

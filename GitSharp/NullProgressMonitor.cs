@@ -37,17 +37,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace GitSharp
 {
     [Complete]
-    public class NullProgressMonitor : ProgressMonitor 
+    public class NullProgressMonitor : IProgressMonitor 
     {
-        #region ProgressMonitor Members
+        public static readonly NullProgressMonitor Instance = new NullProgressMonitor();
+
+        #region IProgressMonitor Members
 
         public void Start(int totalTasks)
         {

@@ -38,11 +38,8 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using GitSharp.Util;
-using System.IO;
 
 namespace GitSharp
 {
@@ -167,8 +164,6 @@ namespace GitSharp
             this.W4 = src.W4;
             this.W5 = src.W5;
         }
-
-
 
         public override ObjectId ToObjectId()
         {

@@ -35,146 +35,141 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using GitSharp.Diff;
+using GitSharp.Patch;
+using GitSharp.Tests.Patch;
 using NUnit.Framework;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Diff
 {
-    [TestFixture]
+	[TestFixture]
+	public class DiffFormatterReflowTest : BasePatchTest
+	{
+		private RawText a;
+		private RawText b;
+		private FileHeader file;
+		private MemoryStream memoryStream;
+		private DiffFormatter fmt;
 
-    public class DiffFormatterReflowTest
-    {
-#if false
-	private RawText a;
+		[SetUp]
+		protected void setUp()
+		{
+			memoryStream = new MemoryStream();
+			fmt = new DiffFormatter();
+		}
 
-	private RawText b;
-
-	private FileHeader file;
-
-	private ByteArrayOutputStream out;
-
-	private DiffFormatter fmt;
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		out = new ByteArrayOutputStream();
-		fmt = new DiffFormatter();
-	}
-
-	public void testNegativeContextFails() throws IOException {
-		init("X");
-		try {
+		[Test]
+		[ExpectedException(typeof(ArgumentException))]
+		public void testNegativeContextFails()
+		{
+			init("X");
 			fmt.setContext(-1);
-			fail("accepted negative context");
-		} catch (IllegalArgumentException e) {
-			// pass
+			Assert.Fail("accepted negative context");
+		}
+
+		[Test, Ignore("Not working yet")]
+		public void testContext0()
+		{
+			init("X");
+			fmt.setContext(0);
+			assertFormatted();
+		}
+
+		[Test, Ignore("Not working yet")]
+		public void testContext1()
+		{
+			init("X");
+			fmt.setContext(1);
+			assertFormatted();
+		}
+
+		[Test, Ignore("Not working yet")]
+		public void testContext3()
+		{
+			init("X");
+			fmt.setContext(3);
+			assertFormatted();
+		}
+
+		[Test, Ignore("Not working yet")]
+		public void testContext5()
+		{
+			init("X");
+			fmt.setContext(5);
+			assertFormatted();
+		}
+
+		[Test, Ignore("Not working yet")]
+		public void testContext10()
+		{
+			init("X");
+			fmt.setContext(10);
+			assertFormatted();
+		}
+
+		[Test, Ignore("Not working yet")]
+		public void testContext100()
+		{
+			init("X");
+			fmt.setContext(100);
+			assertFormatted();
+		}
+
+		[Test, Ignore("Serialization issues with FileMode.FromBits")]
+		public void testEmpty1()
+		{
+			init("E");
+			assertFormatted("E.patch");
+		}
+
+		[Test, Ignore("Serialization issues with FileMode.FromBits")]
+		public void testNoNewLine1()
+		{
+			init("Y");
+			assertFormatted("Y.patch");
+		}
+
+		[Test, Ignore("Serialization issues with FileMode.FromBits")]
+		public void testNoNewLine2()
+		{
+			init("Z");
+			assertFormatted("Z.patch");
+		}
+
+		private void init(string name)
+		{
+			a = new RawText(readFile(name + "_PreImage"));
+			b = new RawText(readFile(name + "_PostImage"));
+			file = parseTestPatchFile(DIFFS_DIR + name + ".patch").getFiles()[0];
+		}
+
+		private void assertFormatted()
+		{
+			assertFormatted(GetType().Name + ".out");
+		}
+
+		private void assertFormatted(string name)
+		{
+			fmt.format(memoryStream, file, a, b);
+			string exp = RawParseUtils.decode(readFile(name));
+			Assert.AreEqual(exp, RawParseUtils.decode(memoryStream.ToArray()));
+		}
+
+		private byte[] readFile(string patchFile)
+		{
+			var patch = parseTestPatchFile(DIFFS_DIR + patchFile);
+			using(var memoryStream = new MemoryStream())
+			{
+				BinaryFormatter bf = new BinaryFormatter();
+				bf.Serialize(memoryStream, patch);
+
+				// Resets the stream
+				memoryStream.Seek(0, SeekOrigin.Begin);
+				return memoryStream.ToArray();
+			}
 		}
 	}
-
-	public void testContext0() throws IOException {
-		init("X");
-		fmt.setContext(0);
-		assertFormatted();
-	}
-
-	public void testContext1() throws IOException {
-		init("X");
-		fmt.setContext(1);
-		assertFormatted();
-	}
-
-	public void testContext3() throws IOException {
-		init("X");
-		fmt.setContext(3);
-		assertFormatted();
-	}
-
-	public void testContext5() throws IOException {
-		init("X");
-		fmt.setContext(5);
-		assertFormatted();
-	}
-
-	public void testContext10() throws IOException {
-		init("X");
-		fmt.setContext(10);
-		assertFormatted();
-	}
-
-	public void testContext100() throws IOException {
-		init("X");
-		fmt.setContext(100);
-		assertFormatted();
-	}
-
-	public void testEmpty1() throws IOException {
-		init("E");
-		assertFormatted("E.patch");
-	}
-
-	public void testNoNewLine1() throws IOException {
-		init("Y");
-		assertFormatted("Y.patch");
-	}
-
-	public void testNoNewLine2() throws IOException {
-		init("Z");
-		assertFormatted("Z.patch");
-	}
-
-	private void init(final String name) throws IOException {
-		a = new RawText(readFile(name + "_PreImage"));
-		b = new RawText(readFile(name + "_PostImage"));
-		file = parseTestPatchFile(name + ".patch").getFiles().get(0);
-	}
-
-	private void assertFormatted() throws IOException {
-		assertFormatted(getName() + ".out");
-	}
-
-	private void assertFormatted(final String name) throws IOException {
-		fmt.format(out, file, a, b);
-		final String exp = RawParseUtils.decode(readFile(name));
-		assertEquals(exp, RawParseUtils.decode(out.toByteArray()));
-	}
-
-	private byte[] readFile(final String patchFile) throws IOException {
-		final InputStream in = getClass().getResourceAsStream(patchFile);
-		if (in == null) {
-			fail("No " + patchFile + " test vector");
-			return null; // Never happens
-		}
-		try {
-			final byte[] buf = new byte[1024];
-			final ByteArrayOutputStream temp = new ByteArrayOutputStream();
-			int n;
-			while ((n = in.read(buf)) > 0)
-				temp.write(buf, 0, n);
-			return temp.toByteArray();
-		} finally {
-			in.close();
-		}
-	}
-
-	private Patch parseTestPatchFile(final String patchFile) throws IOException {
-		final InputStream in = getClass().getResourceAsStream(patchFile);
-		if (in == null) {
-			fail("No " + patchFile + " test vector");
-			return null; // Never happens
-		}
-		try {
-			final Patch p = new Patch();
-			p.parse(in);
-			return p;
-		} finally {
-			in.close();
-		}
-	}
-#endif
-    }
 }

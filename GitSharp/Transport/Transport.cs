@@ -39,6 +39,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using GitSharp.Exceptions;
 using GitSharp.Util;
 
 namespace GitSharp.Transport
@@ -58,6 +60,12 @@ namespace GitSharp.Transport
  */
     public abstract class Transport
     {
+        public enum Operation
+        {
+            FETCH,
+            PUSH
+        }
+
         public static Transport Open(Repository local, string remote)
         {
             RemoteConfig cfg = new RemoteConfig(local.Config, remote);
@@ -73,8 +81,7 @@ namespace GitSharp.Transport
             List<URIish> uris = cfg.URIs;
             if (uris.isEmpty())
             {
-                List<Transport> transports = new List<Transport>(1);
-                transports.Add(Open(local, new URIish(remote)));
+                List<Transport> transports = new List<Transport>(1) {Open(local, new URIish(remote))};
                 return transports;
             }
 
@@ -104,15 +111,50 @@ namespace GitSharp.Transport
             return tranports;
         }
 
+        private static List<URIish> getURIs(RemoteConfig cfg, Operation op)
+        {
+            switch (op)
+            {
+                case Operation.FETCH:
+                    return cfg.URIs;
+
+                case Operation.PUSH:
+                    List<URIish> uris = cfg.PushURIs;
+                    if (uris.Count == 0)
+                        uris = cfg.URIs;
+                    return uris;
+
+                default:
+                    throw new ArgumentException(op.ToString());
+            }
+        }
+
+        private static bool doesNotExist(RemoteConfig cfg)
+        {
+            return cfg.URIs.Count == 0 && cfg.PushURIs.Count == 0;
+        }
+
         /**
-         * We don't support any transports right now
+         * Support for Transport over HTTP and Git (Anon+SSH)
          */
         public static Transport Open(Repository local, URIish remote)
         {
+            if (TransportHttp.canHandle(remote))
+                return new TransportHttp(local, remote);
+
+            if (TransportGitAnon.canHandle(remote))
+                return new TransportGitAnon(local, remote);
+
+            if (TransportGitSsh.canHandle(remote))
+                return new TransportGitSsh(local, remote);
+
+            if (TransportSftp.canHandle(remote))
+                return new TransportSftp(local, remote);
+
             throw new NotSupportedException("URI not supported: " + remote);
         }
 
-        private static List<RefSpec> expandPushWildcardsFor(Repository db, List<RefSpec> specs)
+        private static List<RefSpec> expandPushWildcardsFor(Repository db, IEnumerable<RefSpec> specs)
         {
             Dictionary<string, Ref> localRefs = db.Refs;
             List<RefSpec> procRefs = new List<RefSpec>();
@@ -135,7 +177,7 @@ namespace GitSharp.Transport
             return procRefs;
         }
 
-        private static string findTrackingRefName(string remoteName, List<RefSpec> fetchSpecs)
+        private static string findTrackingRefName(string remoteName, IEnumerable<RefSpec> fetchSpecs)
         {
             foreach (RefSpec fetchSpec in fetchSpecs)
             {
@@ -158,8 +200,10 @@ namespace GitSharp.Transport
         protected Repository local;
         protected URIish uri;
 
-        public Repository Local { get { return local; }}
-        public URIish URI { get { return uri; }}
+        private int timeout;
+
+        public Repository Local { get { return local; } }
+        public URIish Uri { get { return uri; } }
 
         private string _optionUploadPack = RemoteConfig.DEFAULT_UPLOAD_PACK;
         public string OptionUploadPack
@@ -168,16 +212,8 @@ namespace GitSharp.Transport
             {
                 return _optionUploadPack;
             }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    _optionUploadPack = RemoteConfig.DEFAULT_UPLOAD_PACK;
-                }
-                else
-                {
-                    _optionUploadPack = value;
-                }
+            set {
+                _optionUploadPack = string.IsNullOrEmpty(value) ? RemoteConfig.DEFAULT_UPLOAD_PACK : value;
             }
         }
 
@@ -188,16 +224,8 @@ namespace GitSharp.Transport
             {
                 return _optionReceivePack;
             }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    _optionReceivePack = RemoteConfig.DEFAULT_RECEIVE_PACK;
-                }
-                else
-                {
-                    _optionReceivePack = value;
-                }
+            set {
+                _optionReceivePack = string.IsNullOrEmpty(value) ? RemoteConfig.DEFAULT_RECEIVE_PACK : value;
             }
         }
 
@@ -258,8 +286,8 @@ namespace GitSharp.Transport
             set;
         }
 
-        private List<RefSpec> fetch = new List<RefSpec>();
-        private List<RefSpec> push = new List<RefSpec>();
+        private List<RefSpec> fetchSpecs = new List<RefSpec>();
+        private List<RefSpec> pushSpecs = new List<RefSpec>();
 
         protected Transport(Repository local, URIish uri)
         {
@@ -272,15 +300,114 @@ namespace GitSharp.Transport
         public void ApplyConfig(RemoteConfig cfg)
         {
             OptionUploadPack = cfg.UploadPack;
-            fetch = cfg.Fetch;
+            fetchSpecs = cfg.Fetch;
             TagOpt = cfg.TagOpt;
             OptionReceivePack = cfg.ReceivePack;
-            push = cfg.Push;
+            pushSpecs = cfg.Push;
         }
 
         public abstract IFetchConnection openFetch();
         public abstract IPushConnection openPush();
         public abstract void close();
+
+        public FetchResult fetch(IProgressMonitor monitor, List<RefSpec> toFetch)
+        {
+            if (toFetch == null || toFetch.Count == 0)
+            {
+                if (fetchSpecs.Count == 0)
+                    throw new TransportException("Nothing to fetch.");
+                toFetch = fetchSpecs;
+            }
+            else if (fetchSpecs.Count != 0)
+            {
+                List<RefSpec> tmp = new List<RefSpec>(toFetch);
+                foreach (RefSpec requested in toFetch)
+                {
+                    string reqSrc = requested.Source;
+                    foreach (RefSpec configured in fetchSpecs)
+                    {
+                        string cfgSrc = configured.Source;
+                        string cfgDst = configured.Destination;
+                        if (cfgSrc.Equals(reqSrc) && cfgDst != null)
+                        {
+                            tmp.Add(configured);
+                            break;
+                        }
+                    }
+                }
+                toFetch = tmp;
+            }
+
+            FetchResult result = new FetchResult();
+            new FetchProcess(this, toFetch).execute(monitor, result);
+            return result;
+        }
+
+        public PushResult push(IProgressMonitor monitor, List<RemoteRefUpdate> toPush)
+        {
+            if (toPush == null || toPush.Count == 0)
+            {
+                try
+                {
+                    toPush = findRemoteRefUpdatesFor(pushSpecs);
+                }
+                catch (IOException e)
+                {
+                    throw new TransportException("Problem with resolving push ref specs locally: " + e.Message, e);
+                }
+
+                if (toPush.Count == 0)
+                    throw new TransportException("Nothing to push");
+            }
+            PushProcess pushProcess = new PushProcess(this, toPush);
+            return pushProcess.execute(monitor);
+        }
+
+        public List<RemoteRefUpdate> findRemoteRefUpdatesFor(List<RefSpec> specs)
+        {
+            return findRemoteRefUpdatesFor(local, specs, fetchSpecs);
+        }
+
+        public static List<RemoteRefUpdate> findRemoteRefUpdatesFor(Repository db, List<RefSpec> specs, List<RefSpec> fetchSpecs)
+        {
+            if (fetchSpecs == null)
+                fetchSpecs = new List<RefSpec>();
+            List<RemoteRefUpdate> result = new List<RemoteRefUpdate>();
+            List<RefSpec> procRefs = expandPushWildcardsFor(db, specs);
+
+            foreach (RefSpec spec in procRefs)
+            {
+                string srcSpec = spec.Source;
+                Ref srcRef = db.Refs[srcSpec];
+                if (srcRef != null)
+                    srcSpec = srcRef.Name;
+
+                string destSpec = spec.Destination ?? srcSpec;
+
+                if (srcRef != null && !destSpec.StartsWith(Constants.R_REFS))
+                {
+                    string n = srcRef.Name;
+                    int kindEnd = n.IndexOf('/', Constants.R_REFS.Length);
+                    destSpec = n.Slice(0, kindEnd + 1) + destSpec;
+                }
+
+                bool forceUpdate = spec.Force;
+                string localName = findTrackingRefName(destSpec, fetchSpecs);
+                RemoteRefUpdate rru = new RemoteRefUpdate(db, srcSpec, destSpec, forceUpdate, localName, null);
+                result.Add(rru);
+            }
+            return result;
+        }
+
+        public int getTimeout()
+        {
+            return timeout;
+        }
+
+        public void setTimeout(int seconds)
+        {
+            timeout = seconds;
+        }
 
     }
 }

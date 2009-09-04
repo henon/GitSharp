@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2008, Robin Rosenberg
+ * Copyright (C) 2009, Dan Rigby <dan@danrigby.com>
  *
  * All rights reserved.
  *
@@ -36,113 +37,112 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.IO;
+using GitSharp.DirectoryCache;
+using GitSharp.Merge;
 using NUnit.Framework;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Tests.Merge
 {
     [TestFixture]
     public class CherryPickTest : RepositoryTestCase
     {
-#if false
-	public void testPick() throws Exception {
-		// B---O
-		// \----P---T
-		//
-		// Cherry-pick "T" onto "O". This shouldn't introduce "p-fail", which
-		// was created by "P", nor should it modify "a", which was done by "P".
-		//
-		final DirCache treeB = DirCache.read(db);
-		final DirCache treeO = DirCache.read(db);
-		final DirCache treeP = DirCache.read(db);
-		final DirCache treeT = DirCache.read(db);
-		{
-			final DirCacheBuilder b = treeB.builder();
-			final DirCacheBuilder o = treeO.builder();
-			final DirCacheBuilder p = treeP.builder();
-			final DirCacheBuilder t = treeT.builder();
+        [Test]
+	    public void TestPick()
+        {
+		    // B---O
+		    // \----P---T
+		    //
+		    // Cherry-pick "T" onto "O". This shouldn't introduce "p-fail", which
+		    // was created by "P", nor should it modify "a", which was done by "P".
+		    //
+		    DirCache treeB = DirCache.read(db);
+		    DirCache treeO = DirCache.read(db);
+		    DirCache treeP = DirCache.read(db);
+		    DirCache treeT = DirCache.read(db);
+		    {
+			    DirCacheBuilder b = treeB.builder();
+			    DirCacheBuilder o = treeO.builder();
+			    DirCacheBuilder p = treeP.builder();
+			    DirCacheBuilder t = treeT.builder();
 
-			b.add(makeEntry("a", FileMode.REGULAR_FILE));
+			    b.add(MakeEntry("a", FileMode.RegularFile));
 
-			o.add(makeEntry("a", FileMode.REGULAR_FILE));
-			o.add(makeEntry("o", FileMode.REGULAR_FILE));
+                o.add(MakeEntry("a", FileMode.RegularFile));
+                o.add(MakeEntry("o", FileMode.RegularFile));
 
-			p.add(makeEntry("a", FileMode.REGULAR_FILE, "q"));
-			p.add(makeEntry("p-fail", FileMode.REGULAR_FILE));
+                p.add(MakeEntry("a", FileMode.RegularFile, "q"));
+                p.add(MakeEntry("p-fail", FileMode.RegularFile));
 
-			t.add(makeEntry("a", FileMode.REGULAR_FILE));
-			t.add(makeEntry("t", FileMode.REGULAR_FILE));
+                t.add(MakeEntry("a", FileMode.RegularFile));
+                t.add(MakeEntry("t", FileMode.RegularFile));
 
-			b.finish();
-			o.finish();
-			p.finish();
-			t.finish();
-		}
+			    b.finish();
+			    o.finish();
+			    p.finish();
+			    t.finish();
+		    }
 
-		final ObjectWriter ow = new ObjectWriter(db);
-		final ObjectId B = commit(ow, treeB, new ObjectId[] {});
-		final ObjectId O = commit(ow, treeO, new ObjectId[] { B });
-		final ObjectId P = commit(ow, treeP, new ObjectId[] { B });
-		final ObjectId T = commit(ow, treeT, new ObjectId[] { P });
+		    ObjectWriter ow = new ObjectWriter(db);
+		    ObjectId B = Commit(ow, treeB, new ObjectId[] {});
+		    ObjectId O = Commit(ow, treeO, new[] { B });
+		    ObjectId P = Commit(ow, treeP, new[] { B });
+		    ObjectId T = Commit(ow, treeT, new[] { P });
 
-		ThreeWayMerger twm = MergeStrategy.SIMPLE_TWO_WAY_IN_CORE.newMerger(db);
-		twm.setBase(P);
-		boolean merge = twm.merge(new ObjectId[] { O, T });
-		assertTrue(merge);
+		    ThreeWayMerger twm = (ThreeWayMerger) MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+		    twm.SetBase(P);
+		    bool merge = twm.Merge(new[] { O, T });
+	        Assert.IsTrue(merge);
 
-		final TreeWalk tw = new TreeWalk(db);
-		tw.setRecursive(true);
-		tw.reset(twm.getResultTreeId());
+            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+		    tw.setRecursive(true);
+		    tw.reset(twm.GetResultTreeId());
 
-		assertTrue(tw.next());
-		assertEquals("a", tw.getPathString());
-		assertCorrectId(treeO, tw);
+		    Assert.IsTrue(tw.next());
+		    Assert.Equals("a", tw.getPathString());
+		    AssertCorrectId(treeO, tw);
 
-		assertTrue(tw.next());
-		assertEquals("o", tw.getPathString());
-		assertCorrectId(treeO, tw);
+		    Assert.IsTrue(tw.next());
+		    Assert.Equals("o", tw.getPathString());
+		    AssertCorrectId(treeO, tw);
 
-		assertTrue(tw.next());
-		assertEquals("t", tw.getPathString());
-		assertCorrectId(treeT, tw);
+		    Assert.IsTrue(tw.next());
+		    Assert.Equals("t", tw.getPathString());
+		    AssertCorrectId(treeT, tw);
 
-		assertFalse(tw.next());
-	}
+		    Assert.IsFalse(tw.next());
+	    }
 
-	private void assertCorrectId(final DirCache treeT, final TreeWalk tw) {
-		assertEquals(treeT.getEntry(tw.getPathString()).getObjectId(), tw
-				.getObjectId(0));
-	}
+        private void AssertCorrectId(DirCache treeT, GitSharp.TreeWalk.TreeWalk tw) 
+        {
+		    Assert.Equals(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
+	    }
 
-	private ObjectId commit(final ObjectWriter ow, final DirCache treeB,
-			final ObjectId[] parentIds) throws Exception {
-		final Commit c = new Commit(db);
-		c.setTreeId(treeB.writeTree(ow));
-		c.setAuthor(new PersonIdent("A U Thor", "a.u.thor", 1L, 0));
-		c.setCommitter(c.getAuthor());
-		c.setParentIds(parentIds);
-		c.setMessage("Tree " + c.getTreeId().name());
-		return ow.writeCommit(c);
-	}
+	    private ObjectId Commit(ObjectWriter ow, DirCache treeB, ObjectId[] parentIds)
+        {
+		    Commit c = new Commit(db);
+		    c.TreeId = treeB.writeTree(ow);
+		    c.Author = new PersonIdent("A U Thor", "a.u.thor", 1L, 0);
+		    c.Committer = c.Author;
+		    c.ParentIds = parentIds;
+		    c.Message = "Tree " + c.TreeId.Name;
+		    return ow.WriteCommit(c);
+	    }
 
-	private DirCacheEntry makeEntry(final String path, final FileMode mode)
-			throws Exception {
-		return makeEntry(path, mode, path);
-	}
+	    private DirCacheEntry MakeEntry(String path, FileMode mode)
+        {
+		    return MakeEntry(path, mode, path);
+	    }
 
-	private DirCacheEntry makeEntry(final String path, final FileMode mode,
-			final String content) throws Exception {
-		final DirCacheEntry ent = new DirCacheEntry(path);
-		ent.setFileMode(mode);
-		final byte[] contentBytes = Constants.encode(content);
-		ent.setObjectId(new ObjectWriter(db).computeBlobSha1(
-				contentBytes.length, new ByteArrayInputStream(contentBytes)));
-		return ent;
-	}
-#endif
+	    private DirCacheEntry MakeEntry(String path, FileMode mode, String content)
+        {
+		    DirCacheEntry ent = new DirCacheEntry(path);
+		    ent.setFileMode(mode);
+		    byte[] contentBytes = Constants.encode(content);
+		    ent.setObjectId(new ObjectWriter(db).ComputeBlobSha1(contentBytes.Length, new MemoryStream(contentBytes)));
+		    return ent;
+	    }
     }
 }

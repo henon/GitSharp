@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
@@ -33,7 +33,7 @@
  * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 using System;
 using System.IO;
@@ -41,18 +41,10 @@ using GitSharp.Exceptions;
 
 namespace GitSharp.Transport
 {
-    public class TransportBundleFile : Transport, TransportBundle
+    public class TransportBundleFile : Transport, ITransportBundle
     {
-        private static FileInfo resolve(DirectoryInfo @base, string path)
-        {
-            FileInfo file = new FileInfo(path);
-            if (!file.Exists)
-            {
-                file = new FileInfo(Path.Combine(@base.FullName, path));
-            }
-            return file;
-        }
-        
+        private readonly FileInfo _bundle;
+
         public static bool CanHandle(URIish uri)
         {
             if (uri.Host != null || uri.Port > 0 || uri.User != null || uri.Pass != null || uri.Path == null)
@@ -67,12 +59,10 @@ namespace GitSharp.Transport
             return false;
         }
 
-        private readonly FileInfo bundle;
-
         public TransportBundleFile(Repository local, URIish uri)
             : base(local, uri)
         {
-            bundle = resolve(new DirectoryInfo("."), uri.Path);
+            _bundle = resolve(new DirectoryInfo("."), uri.Path);
         }
 
         public override IFetchConnection openFetch()
@@ -80,11 +70,11 @@ namespace GitSharp.Transport
             Stream src;
             try
             {
-                src = bundle.Open(System.IO.FileMode.Open, FileAccess.Read);
+                src = _bundle.Open(System.IO.FileMode.Open, FileAccess.Read);
             }
             catch (FileNotFoundException)
             {
-                throw new TransportException(uri, "not found");
+                throw new TransportException(Uri, "not found");
             }
 
             return new BundleFetchConnection(this, src);
@@ -97,6 +87,16 @@ namespace GitSharp.Transport
 
         public override void close()
         {
+        }
+
+        private static FileInfo resolve(FileSystemInfo @base, string path)
+        {
+            FileInfo file = new FileInfo(path);
+            if (!file.Exists)
+            {
+                file = new FileInfo(Path.Combine(@base.FullName, path));
+            }
+            return file;
         }
     }
 }

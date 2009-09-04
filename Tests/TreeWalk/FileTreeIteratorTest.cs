@@ -35,132 +35,152 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.IO;
 using GitSharp.TreeWalk;
+using GitSharp.Util;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.TreeWalk
 {
+	[TestFixture]
+	public class FileTreeIteratorTest : RepositoryTestCase
+	{
+		private readonly string[] paths = { "a,", "a,b", "a/b", "a0b" };
+		private long[] mtime;
 
-    using NUnit.Framework;
-    [TestFixture]
-    public class FileTreeIteratorTest : RepositoryTestCase
-    {
-#if false
-	private final String[] paths = { "a,", "a,b", "a/b", "a0b" };
+		public override void setUp()
+		{
+			base.setUp();
 
-	private long[] mtime;
+			// We build the entries backwards so that on POSIX systems we
+			// are likely to get the entries in the trash directory in the
+			// opposite order of what they should be in for the iteration.
+			// This should stress the sorting code better than doing it in
+			// the correct order.
+			//
+			// [ammachado] Does Windows NTFS works in the same way? AFAIK, it orders by name
+			mtime = new long[paths.Length];
+			for (int i = paths.Length - 1; i >= 0; i--)
+			{
+				string s = paths[i];
+				FileInfo fi = writeTrashFile(s, s);
+				mtime[i] = fi.LastWriteTime.Ticks;
+			}
+		}
 
-	public void setUp() throws Exception {
-		super.setUp();
+    [Test]
+		public virtual void testEmptyIfRootIsFile()
+		{
+			string path = Path.Combine(trash.FullName, paths[0]);
+      DirectoryInfo di = new DirectoryInfo(path);
+      FileInfo fi = new FileInfo(path);
+			Assert.IsTrue(fi.Exists);
 
-		// We build the entries backwards so that on POSIX systems we
-		// are likely to get the entries in the trash directory in the
-		// opposite order of what they should be in for the iteration.
-		// This should stress the sorting code better than doing it in
-		// the correct order.
-		//
-		mtime = new long[paths.length];
-		for (int i = paths.length - 1; i >= 0; i--) {
-			final String s = paths[i];
-			writeTrashFile(s, s);
-			mtime[i] = new File(trash, s).lastModified();
+			FileTreeIterator fti = new FileTreeIterator(di);
+			Assert.IsTrue(fti.first());
+			Assert.IsTrue(fti.eof());
+		}
+
+		[Test]
+		public virtual void testEmptyIfRootDoesNotExist()
+		{
+			string path = Path.Combine(trash.FullName, "not-existing-file");
+			DirectoryInfo di = new DirectoryInfo(path);
+			Assert.IsFalse(di.Exists);
+
+			FileTreeIterator fti = new FileTreeIterator(di);
+			Assert.IsTrue(fti.first());
+			Assert.IsTrue(fti.eof());
+		}
+
+		[Test]
+		public virtual void testEmptyIfRootIsEmpty()
+		{
+			string path = Path.Combine(trash.FullName, "not-existing-file");
+			DirectoryInfo di = new DirectoryInfo(path);
+			Assert.IsFalse(di.Exists);
+
+			di.Create();
+      di.Refresh();
+			Assert.IsTrue(di.Exists);
+
+			FileTreeIterator fti = new FileTreeIterator(di);
+			Assert.IsTrue(fti.first());
+			Assert.IsTrue(fti.eof());
+		}
+
+		[Test]
+		public virtual void testSimpleIterate()
+		{
+			FileTreeIterator top = new FileTreeIterator(trash);
+
+			Assert.IsTrue(top.first());
+			Assert.IsFalse(top.eof());
+			Assert.AreEqual(FileMode.RegularFile.Bits, top.mode);
+			Assert.AreEqual(paths[0], nameOf(top));
+			Assert.AreEqual(paths[0].Length, top.getEntryLength());
+			Assert.AreEqual(mtime[0], top.getEntryLastModified());
+
+			top.next(1);
+			Assert.IsFalse(top.first());
+			Assert.IsFalse(top.eof());
+			Assert.AreEqual(FileMode.RegularFile.Bits, top.mode);
+			Assert.AreEqual(paths[1], nameOf(top));
+			Assert.AreEqual(paths[1].Length, top.getEntryLength());
+			Assert.AreEqual(mtime[1], top.getEntryLastModified());
+
+			top.next(1);
+			Assert.IsFalse(top.first());
+			Assert.IsFalse(top.eof());
+			Assert.AreEqual(FileMode.Tree.Bits, top.mode);
+
+			AbstractTreeIterator sub = top.createSubtreeIterator(db);
+			Assert.IsTrue(sub is FileTreeIterator);
+			FileTreeIterator subfti = (FileTreeIterator)sub;
+			Assert.IsTrue(sub.first());
+			Assert.IsFalse(sub.eof());
+			Assert.AreEqual(paths[2], nameOf(sub));
+			Assert.AreEqual(paths[2].Length, subfti.getEntryLength());
+			Assert.AreEqual(mtime[2], subfti.getEntryLastModified());
+
+			sub.next(1);
+			Assert.IsTrue(sub.eof());
+
+			top.next(1);
+			Assert.IsFalse(top.first());
+			Assert.IsFalse(top.eof());
+			Assert.AreEqual(FileMode.RegularFile.Bits, top.mode);
+			Assert.AreEqual(paths[3], nameOf(top));
+			Assert.AreEqual(paths[3].Length, top.getEntryLength());
+			Assert.AreEqual(mtime[3], top.getEntryLastModified());
+
+			top.next(1);
+			Assert.IsTrue(top.eof());
+		}
+
+		[Test]
+		public virtual void testComputeFileObjectId()
+		{
+			FileTreeIterator top = new FileTreeIterator(trash);
+
+			MessageDigest md = Constants.newMessageDigest();
+			md.Update(Constants.encodeASCII(Constants.TYPE_BLOB));
+			md.Update((byte) ' ');
+			md.Update(Constants.encodeASCII(paths[0].Length));
+			md.Update((byte) 0);
+			md.Update(Constants.encode(paths[0]));
+			ObjectId expect = ObjectId.FromRaw(md.Digest());
+
+			Assert.AreEqual(expect, top.getEntryObjectId());
+
+			// Verify it was cached by removing the file and getting it again.
+			File.Delete(Path.Combine(trash.FullName, paths[0]));
+			Assert.AreEqual(expect, top.getEntryObjectId());
+		}
+
+		private static string nameOf(AbstractTreeIterator i)
+		{
+			return RawParseUtils.decode(Constants.CHARSET, i.path, 0, i.pathLen);
 		}
 	}
-
-	public void testEmptyIfRootIsFile() throws Exception {
-		final File r = new File(trash, paths[0]);
-		assertTrue(r.isFile());
-		final FileTreeIterator fti = new FileTreeIterator(r);
-		assertTrue(fti.first());
-		assertTrue(fti.eof());
-	}
-
-	public void testEmptyIfRootDoesNotExist() throws Exception {
-		final File r = new File(trash, "not-existing-file");
-		assertFalse(r.exists());
-		final FileTreeIterator fti = new FileTreeIterator(r);
-		assertTrue(fti.first());
-		assertTrue(fti.eof());
-	}
-
-	public void testEmptyIfRootIsEmpty() throws Exception {
-		final File r = new File(trash, "not-existing-file");
-		assertFalse(r.exists());
-		r.mkdir();
-		assertTrue(r.isDirectory());
-
-		final FileTreeIterator fti = new FileTreeIterator(r);
-		assertTrue(fti.first());
-		assertTrue(fti.eof());
-	}
-
-	public void testSimpleIterate() throws Exception {
-		final FileTreeIterator top = new FileTreeIterator(trash);
-
-		assertTrue(top.first());
-		assertFalse(top.eof());
-		assertEquals(FileMode.REGULAR_FILE.getBits(), top.mode);
-		assertEquals(paths[0], nameOf(top));
-		assertEquals(paths[0].length(), top.getEntryLength());
-		assertEquals(mtime[0], top.getEntryLastModified());
-
-		top.next(1);
-		assertFalse(top.first());
-		assertFalse(top.eof());
-		assertEquals(FileMode.REGULAR_FILE.getBits(), top.mode);
-		assertEquals(paths[1], nameOf(top));
-		assertEquals(paths[1].length(), top.getEntryLength());
-		assertEquals(mtime[1], top.getEntryLastModified());
-
-		top.next(1);
-		assertFalse(top.first());
-		assertFalse(top.eof());
-		assertEquals(FileMode.TREE.getBits(), top.mode);
-
-		final AbstractTreeIterator sub = top.createSubtreeIterator(db);
-		assertTrue(sub instanceof FileTreeIterator);
-		final FileTreeIterator subfti = (FileTreeIterator) sub;
-		assertTrue(sub.first());
-		assertFalse(sub.eof());
-		assertEquals(paths[2], nameOf(sub));
-		assertEquals(paths[2].length(), subfti.getEntryLength());
-		assertEquals(mtime[2], subfti.getEntryLastModified());
-
-		sub.next(1);
-		assertTrue(sub.eof());
-
-		top.next(1);
-		assertFalse(top.first());
-		assertFalse(top.eof());
-		assertEquals(FileMode.REGULAR_FILE.getBits(), top.mode);
-		assertEquals(paths[3], nameOf(top));
-		assertEquals(paths[3].length(), top.getEntryLength());
-		assertEquals(mtime[3], top.getEntryLastModified());
-
-		top.next(1);
-		assertTrue(top.eof());
-	}
-
-	public void testComputeFileObjectId() throws Exception {
-		final FileTreeIterator top = new FileTreeIterator(trash);
-
-		final MessageDigest md = Constants.newMessageDigest();
-		md.update(Constants.encodeASCII(Constants.TYPE_BLOB));
-		md.update((byte) ' ');
-		md.update(Constants.encodeASCII(paths[0].length()));
-		md.update((byte) 0);
-		md.update(Constants.encode(paths[0]));
-		final ObjectId expect = ObjectId.fromRaw(md.digest());
-
-		assertEquals(expect, top.getEntryObjectId());
-
-		// Verify it was cached by removing the file and getting it again.
-		//
-		new File(trash, paths[0]).delete();
-		assertEquals(expect, top.getEntryObjectId());
-	}
-
-	private static String nameOf(final AbstractTreeIterator i) {
-		return RawParseUtils.decode(Constants.CHARSET, i.path, 0, i.pathLen);
-	}
-#endif
-    }
 }

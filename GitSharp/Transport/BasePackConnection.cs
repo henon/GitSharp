@@ -63,7 +63,7 @@ namespace GitSharp.Transport
         {
             transport = (Transport) packTransport;
             local = transport.Local;
-            uri = transport.URI;
+            uri = transport.Uri;
         }
 
         protected void init(Stream myStream)

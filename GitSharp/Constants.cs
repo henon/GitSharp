@@ -39,11 +39,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-using System.Globalization;
-using System.Linq;
+
 using System.Text;
 using System;
-using System.IO;
 using GitSharp.Util;
 using GitSharp.Exceptions;
 
@@ -51,6 +49,8 @@ namespace GitSharp
 {
     public static class Constants
     {
+
+        public static string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
 
         /// <summary>
         ///   Special name for the "HEAD" symbolic ref
@@ -331,7 +331,7 @@ namespace GitSharp
          *             function. Very unlikely given that JGit uses a hash function
          *             that is in the Java reference specification.
          */
-        internal static MessageDigest newMessageDigest()
+        public static MessageDigest newMessageDigest()
         {
             //try {
             //    return MessageDigest.getInstance(HASH_FUNCTION);
@@ -512,7 +512,7 @@ namespace GitSharp
 
 
         /**
-         * Convert a string to a byte array in the standard character encoding.
+         * Convert a string to a byte array in UTF-8 character encoding.
          *
          * @param str
          *            the string to convert. May contain any Unicode characters.
@@ -522,17 +522,7 @@ namespace GitSharp
          */
         public static byte[] encode(string str)
         {
-            byte[] origin_bytes = new byte[str.Length];
-
-            for (int i = 0; i < str.Length; i++)
-            {
-                origin_bytes[i] = (byte)str.ToCharArray()[i];
-			}
-
-            // Note that the two following lines are unnecessary, and we could
-            // have just returned origin_bytes.
-            string decoded = Encoding.GetString(origin_bytes);
-            return Encoding.GetBytes(decoded);
+            return CHARSET.GetBytes(str);
         }
 
 

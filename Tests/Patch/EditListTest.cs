@@ -39,27 +39,23 @@
 using GitSharp.Diff;
 using GitSharp.Patch;
 using NUnit.Framework;
-using System.IO;
-using System.Reflection;
 
 namespace GitSharp.Tests.Patch
 {
     [TestFixture]
-    public class EditListTest
+    public class EditListTest : BasePatchTest
     {
-        private readonly string PATCHS_DIR = "../../../Tests/Patch/Resources/";
-
         [Test]
 	    public void testHunkHeader()
         {
             GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_BothISO88591.patch");
 		    FileHeader fh = p.getFiles()[0];
 
-		    EditList list0 = fh.getHunks()[0].toEditList();
+		    EditList list0 = fh.getHunks()[0].ToEditList();
 		    Assert.AreEqual(1, list0.size());
 		    Assert.AreEqual(new Edit(4 - 1, 5 - 1, 4 - 1, 5 - 1), list0.get(0));
 
-		    EditList list1 = fh.getHunks()[1].toEditList();
+		    EditList list1 = fh.getHunks()[1].ToEditList();
 		    Assert.AreEqual(1, list1.size());
 		    Assert.AreEqual(new Edit(16 - 1, 17 - 1, 16 - 1, 17 - 1), list1.get(0));
 	    }
@@ -69,7 +65,7 @@ namespace GitSharp.Tests.Patch
         {
             GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_BothISO88591.patch");
 		    FileHeader fh = p.getFiles()[0];
-		    EditList e = fh.toEditList();
+		    EditList e = fh.ToEditList();
 		    Assert.AreEqual(2, e.size());
 		    Assert.AreEqual(new Edit(4 - 1, 5 - 1, 4 - 1, 5 - 1), e.get(0));
 		    Assert.AreEqual(new Edit(16 - 1, 17 - 1, 16 - 1, 17 - 1), e.get(1));
@@ -80,31 +76,11 @@ namespace GitSharp.Tests.Patch
         {
             GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testEditList_Types.patch");
 		    FileHeader fh = p.getFiles()[0];
-		    EditList e = fh.toEditList();
+		    EditList e = fh.ToEditList();
             Assert.AreEqual(3, e.size());
             Assert.AreEqual(new Edit(3 - 1, 3 - 1, 3 - 1, 4 - 1), e.get(0));
             Assert.AreEqual(new Edit(17 - 1, 19 - 1, 18 - 1, 18 - 1), e.get(1));
             Assert.AreEqual(new Edit(23 - 1, 25 - 1, 22 - 1, 28 - 1), e.get(2));
-	    }
-
-	    private GitSharp.Patch.Patch parseTestPatchFile(string patchFile)
-        {
-            Stream inStream = new FileStream(patchFile,System.IO.FileMode.Open);
-		    if (inStream == null)
-            {
-			    Assert.Fail("No " + patchFile + " test vector");
-			    return null; // Never happens
-		    }
-		    try
-            {
-                GitSharp.Patch.Patch p = new GitSharp.Patch.Patch();
-			    p.parse(inStream);
-			    return p;
-		    }
-            finally
-            {
-			    inStream.Close();
-		    }
 	    }
     }
 }

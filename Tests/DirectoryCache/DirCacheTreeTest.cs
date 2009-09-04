@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -38,147 +39,160 @@
 namespace GitSharp.Tests.DirectoryCache
 {
     using NUnit.Framework;
+    using GitSharp.DirectoryCache;
     [TestFixture]
     public class DirCacheTreeTest : RepositoryTestCase
     {
-#if false
-	public void testEmptyCache_NoCacheTree() throws Exception {
-		final DirCache dc = DirCache.read(db);
-		assertNull(dc.getCacheTree(false));
-	}
 
-	public void testEmptyCache_CreateEmptyCacheTree() throws Exception {
-		final DirCache dc = DirCache.read(db);
-		final DirCacheTree tree = dc.getCacheTree(true);
-		assertNotNull(tree);
-		assertSame(tree, dc.getCacheTree(false));
-		assertSame(tree, dc.getCacheTree(true));
-		assertEquals("", tree.getNameString());
-		assertEquals("", tree.getPathString());
-		assertEquals(0, tree.getChildCount());
-		assertEquals(0, tree.getEntrySpan());
-		assertFalse(tree.isValid());
-	}
+        [Test]
+        public void testEmptyCache_NoCacheTree()
+        {
+            DirCache dc = DirCache.read(db);
+            Assert.IsNull(dc.getCacheTree(false));
+        }
 
-	public void testEmptyCache_Clear_NoCacheTree() throws Exception {
-		final DirCache dc = DirCache.read(db);
-		final DirCacheTree tree = dc.getCacheTree(true);
-		assertNotNull(tree);
-		dc.clear();
-		assertNull(dc.getCacheTree(false));
-		assertNotSame(tree, dc.getCacheTree(true));
-	}
+        [Test]
+        public void testEmptyCache_CreateEmptyCacheTree()
+        {
+            DirCache dc = DirCache.read(db);
+            DirCacheTree tree = dc.getCacheTree(true);
+            Assert.IsNotNull(tree);
+            Assert.AreSame(tree, dc.getCacheTree(false));
+            Assert.AreSame(tree, dc.getCacheTree(true));
+            Assert.AreEqual("", tree.getNameString());
+            Assert.AreEqual("", tree.getPathString());
+            Assert.AreEqual(0, tree.getChildCount());
+            Assert.AreEqual(0, tree.getEntrySpan());
+            Assert.IsFalse(tree.isValid());
+        }
 
-	public void testSingleSubtree() throws Exception {
-		final DirCache dc = DirCache.read(db);
+        [Test]
+        public void testEmptyCache_Clear_NoCacheTree()
+        {
+            DirCache dc = DirCache.read(db);
+            DirCacheTree tree = dc.getCacheTree(true);
+            Assert.IsNotNull(tree);
+            dc.clear();
+            Assert.IsNull(dc.getCacheTree(false));
+            Assert.AreNotSame(tree, dc.getCacheTree(true));
+        }
 
-		final String[] paths = { "a.", "a/b", "a/c", "a/d", "a0b" };
-		final DirCacheEntry[] ents = new DirCacheEntry[paths.length];
-		for (int i = 0; i < paths.length; i++)
-			ents[i] = new DirCacheEntry(paths[i]);
-		final int aFirst = 1;
-		final int aLast = 3;
+        [Test]
+        public void testSingleSubtree()
+        {
+            DirCache dc = DirCache.read(db);
 
-		final DirCacheBuilder b = dc.builder();
-		for (int i = 0; i < ents.length; i++)
-			b.add(ents[i]);
-		b.finish();
+            string[] paths = { "a.", "a/b", "a/c", "a/d", "a0b" };
+            DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
+            for (int i = 0; i < paths.Length; i++)
+                ents[i] = new DirCacheEntry(paths[i]);
+            int aFirst = 1;
+            int aLast = 3;
 
-		assertNull(dc.getCacheTree(false));
-		final DirCacheTree root = dc.getCacheTree(true);
-		assertNotNull(root);
-		assertSame(root, dc.getCacheTree(true));
-		assertEquals("", root.getNameString());
-		assertEquals("", root.getPathString());
-		assertEquals(1, root.getChildCount());
-		assertEquals(dc.getEntryCount(), root.getEntrySpan());
-		assertFalse(root.isValid());
+            DirCacheBuilder b = dc.builder();
+            for (int i = 0; i < ents.Length; i++)
+                b.add(ents[i]);
+            b.finish();
 
-		final DirCacheTree aTree = root.getChild(0);
-		assertNotNull(aTree);
-		assertSame(aTree, root.getChild(0));
-		assertEquals("a", aTree.getNameString());
-		assertEquals("a/", aTree.getPathString());
-		assertEquals(0, aTree.getChildCount());
-		assertEquals(aLast - aFirst + 1, aTree.getEntrySpan());
-		assertFalse(aTree.isValid());
-	}
+            Assert.IsNull(dc.getCacheTree(false));
+            DirCacheTree root = dc.getCacheTree(true);
+            Assert.IsNotNull(root);
+            Assert.AreSame(root, dc.getCacheTree(true));
+            Assert.AreEqual("", root.getNameString());
+            Assert.AreEqual("", root.getPathString());
+            Assert.AreEqual(1, root.getChildCount());
+            Assert.AreEqual(dc.getEntryCount(), root.getEntrySpan());
+            Assert.IsFalse(root.isValid());
 
-	public void testTwoLevelSubtree() throws Exception {
-		final DirCache dc = DirCache.read(db);
+            DirCacheTree aTree = root.getChild(0);
+            Assert.IsNotNull(aTree);
+            Assert.AreSame(aTree, root.getChild(0));
+            Assert.AreEqual("a", aTree.getNameString());
+            Assert.AreEqual("a/", aTree.getPathString());
+            Assert.AreEqual(0, aTree.getChildCount());
+            Assert.AreEqual(aLast - aFirst + 1, aTree.getEntrySpan());
+            Assert.IsFalse(aTree.isValid());
+        }
 
-		final String[] paths = { "a.", "a/b", "a/c/e", "a/c/f", "a/d", "a0b" };
-		final DirCacheEntry[] ents = new DirCacheEntry[paths.length];
-		for (int i = 0; i < paths.length; i++)
-			ents[i] = new DirCacheEntry(paths[i]);
-		final int aFirst = 1;
-		final int aLast = 4;
-		final int acFirst = 2;
-		final int acLast = 3;
+        [Test]
+        public void testTwoLevelSubtree()
+        {
+            DirCache dc = DirCache.read(db);
 
-		final DirCacheBuilder b = dc.builder();
-		for (int i = 0; i < ents.length; i++)
-			b.add(ents[i]);
-		b.finish();
+            string[] paths = { "a.", "a/b", "a/c/e", "a/c/f", "a/d", "a0b" };
+            DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
+            for (int i = 0; i < paths.Length; i++)
+                ents[i] = new DirCacheEntry(paths[i]);
+            int aFirst = 1;
+            int aLast = 4;
+            int acFirst = 2;
+            int acLast = 3;
 
-		assertNull(dc.getCacheTree(false));
-		final DirCacheTree root = dc.getCacheTree(true);
-		assertNotNull(root);
-		assertSame(root, dc.getCacheTree(true));
-		assertEquals("", root.getNameString());
-		assertEquals("", root.getPathString());
-		assertEquals(1, root.getChildCount());
-		assertEquals(dc.getEntryCount(), root.getEntrySpan());
-		assertFalse(root.isValid());
+            DirCacheBuilder b = dc.builder();
+            for (int i = 0; i < ents.Length; i++)
+                b.add(ents[i]);
+            b.finish();
 
-		final DirCacheTree aTree = root.getChild(0);
-		assertNotNull(aTree);
-		assertSame(aTree, root.getChild(0));
-		assertEquals("a", aTree.getNameString());
-		assertEquals("a/", aTree.getPathString());
-		assertEquals(1, aTree.getChildCount());
-		assertEquals(aLast - aFirst + 1, aTree.getEntrySpan());
-		assertFalse(aTree.isValid());
+            Assert.IsNull(dc.getCacheTree(false));
+            DirCacheTree root = dc.getCacheTree(true);
+            Assert.IsNotNull(root);
+            Assert.AreSame(root, dc.getCacheTree(true));
+            Assert.AreEqual("", root.getNameString());
+            Assert.AreEqual("", root.getPathString());
+            Assert.AreEqual(1, root.getChildCount());
+            Assert.AreEqual(dc.getEntryCount(), root.getEntrySpan());
+            Assert.IsFalse(root.isValid());
 
-		final DirCacheTree acTree = aTree.getChild(0);
-		assertNotNull(acTree);
-		assertSame(acTree, aTree.getChild(0));
-		assertEquals("c", acTree.getNameString());
-		assertEquals("a/c/", acTree.getPathString());
-		assertEquals(0, acTree.getChildCount());
-		assertEquals(acLast - acFirst + 1, acTree.getEntrySpan());
-		assertFalse(acTree.isValid());
-	}
+            DirCacheTree aTree = root.getChild(0);
+            Assert.IsNotNull(aTree);
+            Assert.AreSame(aTree, root.getChild(0));
+            Assert.AreEqual("a", aTree.getNameString());
+            Assert.AreEqual("a/", aTree.getPathString());
+            Assert.AreEqual(1, aTree.getChildCount());
+            Assert.AreEqual(aLast - aFirst + 1, aTree.getEntrySpan());
+            Assert.IsFalse(aTree.isValid());
 
-	/**
-	 * We had bugs related to buffer size in the DirCache. This test creates an
-	 * index larger than the default BufferedInputStream buffer size. This made
-	 * the DirCache unable to read the extensions when index size exceeded the
-	 * buffer size (in some cases at least).
-	 * 
-	 * @throws CorruptObjectException
-	 * @throws IOException
-	 */
-	public void testWriteReadTree() throws CorruptObjectException, IOException {
-		final DirCache dc = DirCache.lock(db);
+            DirCacheTree acTree = aTree.getChild(0);
+            Assert.IsNotNull(acTree);
+            Assert.AreSame(acTree, aTree.getChild(0));
+            Assert.AreEqual("c", acTree.getNameString());
+            Assert.AreEqual("a/c/", acTree.getPathString());
+            Assert.AreEqual(0, acTree.getChildCount());
+            Assert.AreEqual(acLast - acFirst + 1, acTree.getEntrySpan());
+            Assert.IsFalse(acTree.isValid());
+        }
 
-		final String A = String.format("a%2000s", "a");
-		final String B = String.format("b%2000s", "b");
-		final String[] paths = { A + ".", A + "." + B, A + "/" + B, A + "0" + B };
-		final DirCacheEntry[] ents = new DirCacheEntry[paths.length];
-		for (int i = 0; i < paths.length; i++)
-			ents[i] = new DirCacheEntry(paths[i]);
+        /**
+         * We had bugs related to buffer size in the DirCache. This test creates an
+         * index larger than the default BufferedInputStream buffer size. This made
+         * the DirCache unable to read the extensions when index size exceeded the
+         * buffer size (in some cases at least).
+         * 
+         * @throws CorruptObjectException
+         * @throws IOException
+         */
+        [Test]
+        public void testWriteReadTree()
+        {
+            DirCache dc = DirCache.Lock(db);
 
-		final DirCacheBuilder b = dc.builder();
-		for (int i = 0; i < ents.length; i++)
-			b.add(ents[i]);
+            string A = string.Format("a%2000s", "a");
+            string B = string.Format("b%2000s", "b");
+            string[] paths = { A + ".", A + "." + B, A + "/" + B, A + "0" + B };
+            DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
+            for (int i = 0; i < paths.Length; i++)
+                ents[i] = new DirCacheEntry(paths[i]);
 
-		b.commit();
-		DirCache read = DirCache.read(db);
+            DirCacheBuilder b = dc.builder();
+            for (int i = 0; i < ents.Length; i++)
+                b.add(ents[i]);
 
-		assertEquals(paths.length, read.getEntryCount());
-		assertEquals(1, read.getCacheTree(true).getChildCount());
-	}
-#endif
+            b.commit();
+            DirCache read = DirCache.read(db);
+
+            Assert.AreEqual(paths.Length, read.getEntryCount());
+            Assert.AreEqual(1, read.getCacheTree(true).getChildCount());
+        }
+
     }
 }

@@ -196,7 +196,7 @@ namespace GitSharp.Transport
             setObjectChecker(on ? new ObjectChecker() : null);
         }
 
-        public void index(ProgressMonitor progress)
+        public void index(IProgressMonitor progress)
         {
             progress.Start(2);
             try
@@ -271,17 +271,15 @@ namespace GitSharp.Transport
                         dstIdx.IsReadOnly = true;
                 }
             }
-            catch (IOException err)
+            catch (IOException)
             {
-                if (dstPack != null)
-                    dstPack.Delete();
-                if (dstIdx != null)
-                    dstIdx.Delete();
-                throw err;
+                if (dstPack != null) dstPack.Delete();
+                if (dstIdx != null) dstIdx.Delete();
+                throw;
             }
         }
 
-        private void resolveDeltas(ProgressMonitor progress)
+        private void resolveDeltas(IProgressMonitor progress)
         {
             progress.BeginTask(PROGRESS_RESOLVE_DELTA, deltaCount);
             int last = entryCount;
@@ -418,7 +416,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private void fixThinPack(ProgressMonitor progress)
+        private void fixThinPack(IProgressMonitor progress)
         {
             growEntries();
 
@@ -427,35 +425,38 @@ namespace GitSharp.Transport
             Deflater def = new Deflater(Deflater.DEFAULT_COMPRESSION, false);
             List<DeltaChain> missing = new List<DeltaChain>(64);
             long end = originalEOF;
-            var it = baseById.iterator();
-            while (it.hasNext())
+            
+			foreach(DeltaChain baseId in baseById)
             {
-                DeltaChain baseId = it.next();
                 if (baseId.head == null)
                 {
                     missing.Add(baseId);
                     continue;
                 }
+
                 ObjectLoader ldr = repo.OpenObject(readCurs, baseId);
                 if (ldr == null)
                 {
                     missing.Add(baseId);
                     continue;
                 }
+
                 byte[] data = ldr.getCachedBytes();
                 int typeCode = ldr.getType();
-                PackedObjectInfo oe;
+                
 
                 crc.Reset();
                 packOut.BaseStream.Seek(end, SeekOrigin.Begin);
                 writeWhole(def, typeCode, data);
-                oe = new PackedObjectInfo(end, (int) crc.Value, baseId);
+				PackedObjectInfo oe = new PackedObjectInfo(end, (int)crc.Value, baseId);
                 entries[entryCount++] = oe;
                 end = packOut.BaseStream.Position;
 
                 resolveChildDeltas(oe.Offset, typeCode, data, oe);
                 if (progress.IsCancelled)
-                    throw new IOException("Download cancelled during indexing");
+                {
+                	throw new IOException("Download cancelled during indexing");
+                }
             }
             def.Finish();
 

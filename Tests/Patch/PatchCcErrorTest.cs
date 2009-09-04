@@ -36,24 +36,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Diff;
 using GitSharp.Patch;
 using NUnit.Framework;
-using System.IO;
-using System.Reflection;
-using System.Diagnostics;
 
 namespace GitSharp.Tests.Patch
 {
     [TestFixture]
-    public class PatchCcErrorTest
+    public class PatchCcErrorTest : BasePatchTest
     {
-        private readonly string PATCHS_DIR = "../../../Tests/Patch/Resources/";
-
         [Test]
 	    public void testError_CcTruncatedOld()
         {
-		    GitSharp.Patch.Patch p = parseTestPatchFile();
+			GitSharp.Patch.Patch p = parseTestPatchFile("testError_CcTruncatedOld");
 		    Assert.AreEqual(1, p.getFiles().Count);
 		    Assert.AreEqual(3, p.getErrors().Count);
 		    {
@@ -86,24 +80,5 @@ namespace GitSharp.Tests.Patch
 					    "@@@ -55,12 -163,13 +163,15 @@@ public "));
 		    }
 	    }
-
-        private GitSharp.Patch.Patch parseTestPatchFile()
-        {
-            string patchFile = (new StackFrame(1, true)).GetMethod().Name + ".patch";
-            Stream inStream = new FileStream(PATCHS_DIR + patchFile, System.IO.FileMode.Open);
-		    if (inStream == null)
-            {
-			    Assert.Fail("No " + patchFile + " test vector");
-			    return null; // Never happens
-		    }
-		    try {
-			    GitSharp.Patch.Patch p = new GitSharp.Patch.Patch();
-			    p.parse(inStream);
-			    return p;
-		    } finally {
-			    inStream.Close();
-		    }
-	    }
-
     }
 }

@@ -88,7 +88,7 @@ namespace GitSharp.Util
          *            abstract path to test.
          * @return true if the file is believed to be executable by the user.
          */
-        public static bool canExecute(FileInfo f)
+        public static bool canExecute(FileSystemInfo f)
         {
             return false; // windows does not support executable file flag
         }
@@ -154,10 +154,9 @@ namespace GitSharp.Util
          */
         private static DirectoryInfo resolveImpl(DirectoryInfo dir, string name)
         {
-            DirectoryInfo abspn = new DirectoryInfo(name);
-            if (abspn.Exists)
-                return abspn;
-            return new DirectoryInfo(dir.FullName + "/" + name);
+            if (Path.IsPathRooted(name))
+                return new DirectoryInfo(name);
+            return PathUtil.CombineDirectoryPath(dir, name);
         }
 
         /**

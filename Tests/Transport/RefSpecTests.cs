@@ -50,21 +50,21 @@ namespace GitSharp.Tests.Transport
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec(sn + ":" + sn);
-            Assert.False(rs.Force);
-            Assert.False(rs.Wildcard);
+            Assert.IsFalse(rs.Force);
+            Assert.IsFalse(rs.Wildcard);
             Assert.AreEqual(sn, rs.Source);
             Assert.AreEqual(sn, rs.Destination);
             Assert.AreEqual(sn + ":" + sn, rs.ToString());
             Assert.AreEqual(rs, new RefSpec(rs.ToString()));
 
             Ref r = new Ref(Ref.Storage.Loose, sn, null);
-            Assert.True(rs.MatchSource(r));
-            Assert.True(rs.MatchDestination(r));
+            Assert.IsTrue(rs.MatchSource(r));
+            Assert.IsTrue(rs.MatchDestination(r));
             Assert.AreSame(rs, rs.ExpandFromSource(r));
 
             r = new Ref(Ref.Storage.Loose, sn + "-and-more", null);
-            Assert.False(rs.MatchSource(r));
-            Assert.False(rs.MatchDestination(r));
+            Assert.IsFalse(rs.MatchSource(r));
+            Assert.IsFalse(rs.MatchDestination(r));
         }
 
         [Test]
@@ -73,8 +73,8 @@ namespace GitSharp.Tests.Transport
             string lhs = ":m:a:i:n:t";
             string rhs = "refs/heads/maint";
             RefSpec rs = new RefSpec(lhs + ":" + rhs);
-            Assert.False(rs.Force);
-            Assert.False(rs.Wildcard);
+            Assert.IsFalse(rs.Force);
+            Assert.IsFalse(rs.Wildcard);
             Assert.AreEqual(lhs, rs.Source);
             Assert.AreEqual(rhs, rs.Destination);
             Assert.AreEqual(lhs + ":" + rhs, rs.ToString());
@@ -86,21 +86,21 @@ namespace GitSharp.Tests.Transport
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec("+" + sn + ":" + sn);
-            Assert.True(rs.Force);
-            Assert.False(rs.Wildcard);
+            Assert.IsTrue(rs.Force);
+            Assert.IsFalse(rs.Wildcard);
             Assert.AreEqual(sn, rs.Source);
             Assert.AreEqual(sn, rs.Destination);
             Assert.AreEqual("+" + sn + ":" + sn, rs.ToString());
             Assert.AreEqual(rs, new RefSpec(rs.ToString()));
 
             Ref r = new Ref(Ref.Storage.Loose, sn, null);
-            Assert.True(rs.MatchSource(r));
-            Assert.True(rs.MatchDestination(r));
+            Assert.IsTrue(rs.MatchSource(r));
+            Assert.IsTrue(rs.MatchDestination(r));
             Assert.AreSame(rs, rs.ExpandFromSource(r));
 
             r = new Ref(Ref.Storage.Loose, sn + "-and-more", null);
-            Assert.False(rs.MatchSource(r));
-            Assert.False(rs.MatchDestination(r));
+            Assert.IsFalse(rs.MatchSource(r));
+            Assert.IsFalse(rs.MatchDestination(r));
         }
 
         [Test]
@@ -108,21 +108,21 @@ namespace GitSharp.Tests.Transport
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec(sn);
-            Assert.False(rs.Force);
-            Assert.False(rs.Wildcard);
+            Assert.IsFalse(rs.Force);
+            Assert.IsFalse(rs.Wildcard);
             Assert.AreEqual(sn, rs.Source);
-            Assert.Null(rs.Destination);
+            Assert.IsNull(rs.Destination);
             Assert.AreEqual(sn, rs.ToString());
             Assert.AreEqual(rs, new RefSpec(rs.ToString()));
 
             Ref r = new Ref(Ref.Storage.Loose, sn, null);
-            Assert.True(rs.MatchSource(r));
-            Assert.False(rs.MatchDestination(r));
+            Assert.IsTrue(rs.MatchSource(r));
+            Assert.IsFalse(rs.MatchDestination(r));
             Assert.AreSame(rs, rs.ExpandFromSource(r));
 
             r = new Ref(Ref.Storage.Loose, sn + "-and-more", null);
-            Assert.False(rs.MatchSource(r));
-            Assert.False(rs.MatchDestination(r));
+            Assert.IsFalse(rs.MatchSource(r));
+            Assert.IsFalse(rs.MatchDestination(r));
         }
 
         [Test]
@@ -130,21 +130,21 @@ namespace GitSharp.Tests.Transport
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec("+" + sn);
-            Assert.True(rs.Force);
-            Assert.False(rs.Wildcard);
+            Assert.IsTrue(rs.Force);
+            Assert.IsFalse(rs.Wildcard);
             Assert.AreEqual(sn, rs.Source);
-            Assert.Null(rs.Destination);
+            Assert.IsNull(rs.Destination);
             Assert.AreEqual("+" + sn, rs.ToString());
             Assert.AreEqual(rs, new RefSpec(rs.ToString()));
 
             Ref r = new Ref(Ref.Storage.Loose, sn, null);
-            Assert.True(rs.MatchSource(r));
-            Assert.False(rs.MatchDestination(r));
+            Assert.IsTrue(rs.MatchSource(r));
+            Assert.IsFalse(rs.MatchDestination(r));
             Assert.AreSame(rs, rs.ExpandFromSource(r));
 
             r = new Ref(Ref.Storage.Loose, sn + "-and-more", null);
-            Assert.False(rs.MatchSource(r));
-            Assert.False(rs.MatchDestination(r));
+            Assert.IsFalse(rs.MatchSource(r));
+            Assert.IsFalse(rs.MatchDestination(r));
         }
 
         [Test]
@@ -152,21 +152,21 @@ namespace GitSharp.Tests.Transport
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec(":" + sn);
-            Assert.False(rs.Force);
-            Assert.False(rs.Wildcard);
+            Assert.IsFalse(rs.Force);
+            Assert.IsFalse(rs.Wildcard);
             Assert.AreEqual(sn, rs.Destination);
-            Assert.Null(rs.Source);
+            Assert.IsNull(rs.Source);
             Assert.AreEqual(":" + sn, rs.ToString());
             Assert.AreEqual(rs, new RefSpec(rs.ToString()));
 
             Ref r = new Ref(Ref.Storage.Loose, sn, null);
-            Assert.False(rs.MatchSource(r));
-            Assert.True(rs.MatchDestination(r));
+            Assert.IsFalse(rs.MatchSource(r));
+            Assert.IsTrue(rs.MatchDestination(r));
             Assert.AreSame(rs, rs.ExpandFromSource(r));
 
             r = new Ref(Ref.Storage.Loose, sn + "-and-more", null);
-            Assert.False(rs.MatchSource(r));
-            Assert.False(rs.MatchDestination(r));
+            Assert.IsFalse(rs.MatchSource(r));
+            Assert.IsFalse(rs.MatchDestination(r));
         }
 
         [Test]
@@ -175,8 +175,8 @@ namespace GitSharp.Tests.Transport
             string srcn = "refs/heads/*";
             string dstn = "refs/remotes/origin/*";
             RefSpec rs = new RefSpec("+" + srcn + ":" + dstn);
-            Assert.True(rs.Force);
-            Assert.True(rs.Wildcard);
+            Assert.IsTrue(rs.Force);
+            Assert.IsTrue(rs.Wildcard);
             Assert.AreEqual(srcn, rs.Source);
             Assert.AreEqual(dstn, rs.Destination);
             Assert.AreEqual("+" + srcn + ":" + dstn, rs.ToString());
@@ -186,32 +186,32 @@ namespace GitSharp.Tests.Transport
             RefSpec expanded;
 
             r = new Ref(Ref.Storage.Loose, "refs/heads/master", null);
-            Assert.True(rs.MatchSource(r));
-            Assert.False(rs.MatchDestination(r));
+            Assert.IsTrue(rs.MatchSource(r));
+            Assert.IsFalse(rs.MatchDestination(r));
             expanded = rs.ExpandFromSource(r);
             Assert.AreNotSame(rs, expanded);
-            Assert.True(expanded.Force);
-            Assert.False(expanded.Wildcard);
+            Assert.IsTrue(expanded.Force);
+            Assert.IsFalse(expanded.Wildcard);
             Assert.AreEqual(r.Name, expanded.Source);
             Assert.AreEqual("refs/remotes/origin/master", expanded.Destination);
 
             r = new Ref(Ref.Storage.Loose, "refs/remotes/origin/next", null);
-            Assert.False(rs.MatchSource(r));
-            Assert.True(rs.MatchDestination(r));
+            Assert.IsFalse(rs.MatchSource(r));
+            Assert.IsTrue(rs.MatchDestination(r));
 
             r = new Ref(Ref.Storage.Loose, "refs/tags/v1.0", null);
-            Assert.False(rs.MatchSource(r));
-            Assert.False(rs.MatchDestination(r));
+            Assert.IsFalse(rs.MatchSource(r));
+            Assert.IsFalse(rs.MatchDestination(r));
         }
 
         [Test]
         public void test007_CreateEmpty()
         {
             RefSpec rs = new RefSpec();
-            Assert.False(rs.Force);
-            Assert.False(rs.Wildcard);
+            Assert.IsFalse(rs.Force);
+            Assert.IsFalse(rs.Wildcard);
             Assert.AreEqual("HEAD", rs.Source);
-            Assert.Null(rs.Destination);
+            Assert.IsNull(rs.Destination);
             Assert.AreEqual("HEAD", rs.ToString());
         }
 
@@ -220,11 +220,11 @@ namespace GitSharp.Tests.Transport
         {
             string s = "refs/heads/*:refs/remotes/origin/*";
             RefSpec a = new RefSpec(s);
-            Assert.False(a.Force);
+            Assert.IsFalse(a.Force);
             RefSpec b = a.SetForce(true);
             Assert.AreNotSame(a, b);
-            Assert.False(a.Force);
-            Assert.True(b.Force);
+            Assert.IsFalse(a.Force);
+            Assert.IsTrue(b.Force);
             Assert.AreEqual(s, a.ToString());
             Assert.AreEqual("+" + s, b.ToString());
         }
@@ -281,7 +281,7 @@ namespace GitSharp.Tests.Transport
             RefSpec a = new RefSpec(src + ":" + dst);
             RefSpec r = a.ExpandFromDestination(dst);
             Assert.AreSame(a, r);
-            Assert.False(r.Wildcard);
+            Assert.IsFalse(r.Wildcard);
             Assert.AreEqual(src, r.Source);
             Assert.AreEqual(dst, r.Destination);
         }
@@ -294,7 +294,7 @@ namespace GitSharp.Tests.Transport
             RefSpec a = new RefSpec("refs/heads/*:refs/remotes/origin/*");
             RefSpec r = a.ExpandFromDestination(dst);
             Assert.AreNotSame(a, r);
-            Assert.False(r.Wildcard);
+            Assert.IsFalse(r.Wildcard);
             Assert.AreEqual(src, r.Source);
             Assert.AreEqual(dst, r.Destination);
         }

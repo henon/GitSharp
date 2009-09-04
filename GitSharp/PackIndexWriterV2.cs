@@ -28,7 +28,7 @@ namespace GitSharp
         private void WriteObjectNames()
         {
             foreach (PackedObjectInfo oe in entries)
-                _stream.BaseStream.Write(oe);
+                _stream.Write(oe);
         }
 
         private void WriteCRCs()

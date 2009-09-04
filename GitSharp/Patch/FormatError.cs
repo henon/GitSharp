@@ -36,85 +36,95 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp;
-using GitSharp.Util;
-using System.Text;
 using System;
+using System.Text;
 
 namespace GitSharp.Patch
 {
-    /** An error in a patch script */
-    public class FormatError
-    {
-	    /** Classification of an error. */
-	    public enum Severity
-        {
-		    /** The error is unexpected, but can be worked around. */
-		    WARNING,
+	/// <summary>
+	/// An error in a patch script.
+	/// </summary>
+	[Serializable]
+	public class FormatError
+	{
+		/** Classification of an error. */
 
-		    /** The error indicates the script is severely flawed. */
-		    ERROR
-	    }
+		#region Severity enum
 
-	    private readonly byte[] buf;
+		public enum Severity
+		{
+			/** The error is unexpected, but can be worked around. */
+			WARNING,
 
-	    private readonly int offset;
+			/** The error indicates the script is severely flawed. */
+			ERROR
+		}
 
-	    private readonly Severity severity;
+		#endregion
 
-	    private readonly String message;
+		private readonly byte[] buf;
+		private readonly String message;
 
-	    public FormatError(byte[] buffer, int ptr, Severity sev, String msg)
-        {
-		    buf = buffer;
-		    offset = ptr;
-		    severity = sev;
-		    message = msg;
-	    }
+		private readonly int offset;
 
-	    /** @return the severity of the error. */
-	    public Severity getSeverity()
-        {
-		    return severity;
-	    }
+		private readonly Severity severity;
 
-	    /** @return a message describing the error. */
-	    public String getMessage()
-        {
-		    return message;
-	    }
+		public FormatError(byte[] buffer, int ptr, Severity sev, String msg)
+		{
+			buf = buffer;
+			offset = ptr;
+			severity = sev;
+			message = msg;
+		}
 
-	    /** @return the byte buffer holding the patch script. */
-	    public byte[] getBuffer()
-        {
-		    return buf;
-	    }
+		/** @return the severity of the error. */
 
-	    /** @return byte offset within {@link #getBuffer()} where the error is */
-	    public int getOffset()
-        {
-		    return offset;
-	    }
+		public Severity getSeverity()
+		{
+			return severity;
+		}
 
-	    /** @return line of the patch script the error appears on. */
-	    public String getLineText()
-        {
-		    int eol = RawParseUtils.nextLF(buf, offset);
-		    return RawParseUtils.decode(Constants.CHARSET, buf, offset, eol);
-	    }
+		/** @return a message describing the error. */
 
-	    public override string ToString()
-        {
-		    StringBuilder r = new StringBuilder();
-            r.Append(Enum.GetName(typeof(Severity), getSeverity()));
-		    r.Append(": at offset ");
-		    r.Append(getOffset());
-		    r.Append(": ");
-		    r.Append(getMessage());
-		    r.Append("\n");
-		    r.Append("  in ");
-		    r.Append(getLineText());
-		    return r.ToString();
-	    }
-    }
+		public string getMessage()
+		{
+			return message;
+		}
+
+		/** @return the byte buffer holding the patch script. */
+
+		public byte[] getBuffer()
+		{
+			return buf;
+		}
+
+		/** @return byte offset within {@link #getBuffer()} where the error is */
+
+		public int getOffset()
+		{
+			return offset;
+		}
+
+		/** @return line of the patch script the error appears on. */
+
+		public string getLineText()
+		{
+			int eol = RawParseUtils.nextLF(buf, offset);
+			return RawParseUtils.decode(Constants.CHARSET, buf, offset, eol);
+		}
+
+		public override string ToString()
+		{
+			var r = new StringBuilder();
+			r.Append(Enum.GetName(typeof (Severity), getSeverity()));
+			r.Append(": at offset ");
+			r.Append(getOffset());
+			r.Append(": ");
+			r.Append(getMessage());
+			r.Append("\n");
+			r.Append("  in ");
+			r.Append(getLineText());
+			return r.ToString();
+		}
+	}
 }

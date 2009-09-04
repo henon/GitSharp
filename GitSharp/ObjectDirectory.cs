@@ -478,7 +478,7 @@ namespace GitSharp
 
         public override ObjectDatabase[] loadAlternates()
         {
-            BufferedReader br = open(alternatesFile);
+            StreamReader br = open(alternatesFile);
             List<ObjectDirectory> l = new List<ObjectDirectory>(4);
             try
             {
@@ -500,9 +500,9 @@ namespace GitSharp
             return l.ToArray();
         }
 
-        private static BufferedReader open(FileInfo f)
+        private static StreamReader open(FileInfo f)
         {
-            return new BufferedReader(new FileStream(f.FullName, System.IO.FileMode.Open));
+            return new StreamReader(new FileStream(f.FullName, System.IO.FileMode.Open));
         }
     }
 

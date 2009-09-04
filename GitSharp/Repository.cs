@@ -181,16 +181,7 @@ namespace GitSharp
          */
         public bool HasObject(AnyObjectId objectId)
         {
-            //int k = this._packs.Count;
-            //if (k > 0)
-            //{
-            //    do
-            //    {
-            //        if (this._packs[--k].HasObject(objectId))
-            //            return true;
-            //    } while (k > 0);
-            //}
-            return ToFile(objectId).Exists;
+            return objectDatabase.hasObject(objectId);
         }
 
 
@@ -816,6 +807,11 @@ namespace GitSharp
         {
             objectDatabase.openPack(pack, idx);
         }
+
+        public ObjectDirectory getObjectDatabase()
+        {
+            return objectDatabase;
+        }
         
         //public void OpenPack(FileInfo pack, FileInfo idx)
         //{
@@ -1020,44 +1016,59 @@ namespace GitSharp
          *
          * @return true if refName is a valid ref name
          */
-        public static bool IsValidRefName(string refName)
-        {
-            int len = refName.Length;
-            char p = '\0';
-            for (int i = 0; i < len; ++i)
-            {
-                char c = refName[i];
-                if (c <= ' ')
-                    return false;
-                switch (c)
-                {
-                    case '.':
-                        if (i == 0)
-                            return false;
-                        if (p == '/')
-                            return false;
-                        if (p == '.')
-                            return false;
-                        break;
-                    case '/':
-                        if (i == 0)
-                            return false;
-                        if (i == len - 1)
-                            return false;
-                        break;
-                    case '~':
-                    case '^':
-                    case ':':
-                    case '?':
-                    case '[':
-                        return false;
-                    case '*':
-                        return false;
-                }
-                p = c;
-            }
-            return true;
-        }
+		public static bool IsValidRefName(string refName)
+		{
+			int len = refName.Length;
+
+			if (len == 0)
+				return false;
+
+			if (refName.EndsWith(".lock"))
+				return false;
+
+			int components = 1;
+			char p = '\0';
+			for (int i = 0; i < len; i++)
+			{
+				char c = refName[i];
+				if (c <= ' ')
+					return false;
+				switch (c)
+				{
+					case '.':
+						switch (p)
+						{
+							case '\0':
+							case '/':
+							case '.':
+								return false;
+						}
+						if (i == len - 1)
+							return false;
+						break;
+					case '/':
+						if (i == 0 || i == len - 1)
+							return false;
+						components++;
+						break;
+					case '{':
+						if (p == '@')
+							return false;
+						break;
+					case '~':
+					case '^':
+					case ':':
+					case '?':
+					case '[':
+					case '*':
+					case '\\':
+						return false;
+				}
+				p = c;
+			}
+
+			return components > 1;
+		}
 
         public Commit OpenCommit(ObjectId id)
         {

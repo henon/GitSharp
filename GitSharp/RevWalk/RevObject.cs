@@ -41,8 +41,6 @@ using System;
 
 namespace GitSharp.RevWalk
 {
-
-
     /** Base object type accessed during revision walking. */
     public abstract class RevObject : ObjectId, IDisposable
     {
@@ -51,7 +49,7 @@ namespace GitSharp.RevWalk
 
         public int flags;
 
-        public RevObject(AnyObjectId name)
+        protected RevObject(AnyObjectId name)
             : base(name)
         {
             
@@ -74,16 +72,6 @@ namespace GitSharp.RevWalk
         public ObjectId getId()
         {
             return this;
-        }
-
-        public override bool Equals(AnyObjectId o)
-        {
-            return this == o;
-        }
-
-        public override bool Equals(object o)
-        {
-            return this == (RevObject)o;
         }
 
         /**
@@ -206,6 +194,59 @@ namespace GitSharp.RevWalk
             s.Append((flags & RevWalk.UNINTERESTING) != 0 ? 'u' : '-');
             s.Append((flags & RevWalk.SEEN) != 0 ? 's' : '-');
             s.Append((flags & RevWalk.PARSED) != 0 ? 'p' : '-');
+        }
+
+        public override bool Equals(AnyObjectId o)
+        {
+            return this == o;
+        }
+
+        public override bool Equals(object o)
+        {
+            if (ReferenceEquals(null, o))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, o))
+            {
+                return true;
+            }
+            return Equals(o as RevObject);
+        }
+
+        public bool Equals(RevObject other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return base.Equals(other) && other.flags == flags;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                {
+                    return (base.GetHashCode() * 397) ^ flags;
+                }
+            }
+        }
+
+        public static bool operator ==(RevObject left, RevObject right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(RevObject left, RevObject right)
+        {
+            return !Equals(left, right);
         }
     }
 }

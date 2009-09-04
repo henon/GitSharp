@@ -36,194 +36,89 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp
 {
 
-    /**
-     * Fast, efficient map specifically for {@link ObjectId} subclasses.
-     * <p>
-     * This map provides an efficient translation from any ObjectId instance to a
-     * cached subclass of ObjectId that has the same value.
-     * <p>
-     * Raw value equality is tested when comparing two ObjectIds (or subclasses),
-     * not reference equality and not <code>.Equals(Object)</code> equality. This
-     * allows subclasses to override <code>Equals</code> to supply their own
-     * extended semantics.
-     * 
-     * @param <V>
-     *            type of subclass of ObjectId that will be stored in the map.
-     */
-    public class ObjectIdSubclassMap<V> //: IEnumerable<V> 
-        where V : ObjectId
-    {
-        private int _size;
+	/**
+	 * Fast, efficient map specifically for {@link ObjectId} subclasses.
+	 * <p>
+	 * This map provides an efficient translation from any ObjectId instance to a
+	 * cached subclass of ObjectId that has the same value.
+	 * <p>
+	 * Raw value equality is tested when comparing two ObjectIds (or subclasses),
+	 * not reference equality and not <code>.Equals(Object)</code> equality. This
+	 * allows subclasses to override <code>Equals</code> to supply their own
+	 * extended semantics.
+	 * 
+	 * @param <V>
+	 *            type of subclass of ObjectId that will be stored in the map.
+	 */
+	public class ObjectIdSubclassMap<V> : List<V>
+		where V : ObjectId
+	{
+		/// <summary>
+		/// Create an empty map.
+		/// </summary>
+		public ObjectIdSubclassMap()
+		{
+		}
 
-        private V[] obj_hash;
+		/// <summary>
+		/// Remove all entries from this map.
+		/// </summary>
+		public void clear()
+		{
+			base.Clear();
+		}
 
-        /** Create an empty map. */
-        public ObjectIdSubclassMap()
-        {
-            obj_hash = new V[32];
-        }
+		/// <summary>
+		/// Lookup an existing mapping.
+		/// </summary>
+		/// <param name="toFind">the object identifier to find.</param>
+		/// <returns>the instance mapped to toFind, or null if no mapping exists.</returns>
+		public V get(AnyObjectId toFind)
+		{
+			V item = base.Find(x => toFind.ToObjectId() == x.ToObjectId());
+			return item;
+		}
 
-        /** Remove all entries from this map. */
-        public void clear()
-        {
-            _size = 0;
-            obj_hash = new V[32];
-        }
+		/// <summary>
+		/// Store an object for future lookup.
+		/// <para />
+		/// An existing mapping for <b>must not</b> be in this map. Callers must
+		/// first call <see cref="get"/> to verify there is no current
+		/// mapping prior to adding a new mapping.
+		/// </summary>
+		/// <param name="newValue"></param>
+		public void add(V newValue)
+		{
+			if (!Contains(newValue))
+			{
+				base.Add(newValue);
+			}
+		}
 
-        /**
-         * Lookup an existing mapping.
-         * 
-         * @param toFind
-         *            the object identifier to find.
-         * @return the instance mapped to toFind, or null if no mapping exists.
-         */
-        public V get(AnyObjectId toFind)
-        {
-            int i = index(toFind);
-            V obj;
+		/// <returns>number of objects in map</returns>
+		public int size()
+		{
+			return base.Count;
+		}
 
-            while ((obj = obj_hash[i]) != null)
-            {
-                if (AnyObjectId.Equals(obj, toFind))
-                    return obj;
-                if (++i == obj_hash.Length)
-                    i = 0;
-            }
-            return null;
-        }
+		private int index(V id)
+		{
+			return base.IndexOf(id);
+		}
 
-        /**
-         * Store an object for future lookup.
-         * <p>
-         * An existing mapping for <b>must not</b> be in this map. Callers must
-         * first call {@link #get(AnyObjectId)} to verify there is no current
-         * mapping prior to adding a new mapping.
-         * 
-         * @param newValue
-         *            the object to store.
-         * @param
-         *            <Q>
-         *            type of instance to store.
-         */
-        public void add(V newValue)
-        {
-            if (obj_hash.Length - 1 <= _size * 2)
-                grow();
-            insert(newValue);
-            _size++;
-        }
+		private void insert(V newValue)
+		{
+			base.Add(newValue);
+		}
 
-        /**
-         * @return number of objects in map
-         */
-        public int size()
-        {
-            return _size;
-        }
-
-        public Iterator<V> iterator()
-        {
-            return new Iterator<V>(this);
-        }
-
-        public class Iterator<T>  // [henon] todo: change to implement IEnumerator
-            where T : V
-        {
-            public Iterator(ObjectIdSubclassMap<V> map)
-            {
-                this.map = map;
-            }
-
-            private int found;
-            private ObjectIdSubclassMap<V> map;
-            private int i;
-
-            public bool hasNext()
-            {
-                return found < map._size;
-            }
-
-            public T next()
-            {
-                while (i < map.obj_hash.Length)
-                {
-                    T v = (T)map.obj_hash[i++];
-                    if (v != null)
-                    {
-                        found++;
-                        return v;
-                    }
-                }
-                throw new InvalidOperationException();
-            }
-
-            public void remove()
-            {
-                throw new NotSupportedException();
-            }
-        }
-
-        //#region IEnumerable<V> Members
-
-        //public IEnumerator<V>  GetEnumerator()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //#endregion
-
-        //#region IEnumerable Members
-
-        //System.Collections.IEnumerator  System.Collections.IEnumerable.GetEnumerator()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //#endregion
-
-
-        private int index(AnyObjectId id)
-        {
-            return (int)((uint)id.W1 >> 1) % obj_hash.Length;
-        }
-
-        private void insert(V newValue)
-        {
-            int j = index(newValue);
-            while (obj_hash[j] != null)
-            {
-                if (++j >= obj_hash.Length)
-                    j = 0;
-            }
-            obj_hash[j] = newValue;
-        }
-
-        private void grow()
-        {
-            V[] old_hash = obj_hash;
-            int old_hash_size = obj_hash.Length;
-
-            obj_hash = createArray(2 * old_hash_size);
-            for (int i = 0; i < old_hash_size; i++)
-            {
-                V obj = old_hash[i];
-                if (obj != null)
-                    insert(obj);
-            }
-        }
-
-        //@SuppressWarnings("unchecked")
-        private V[] createArray(int sz)
-        {
-            return (V[])new ObjectId[sz];
-        }
-    }
+		private static V[] CreateArray(int sz)
+		{
+			return new V[sz];
+		}
+	}
 }

@@ -153,7 +153,7 @@ namespace GitSharp.DirectoryCache
          */
         public static DirCache read(Repository db)
         {
-            return read(new FileInfo(db.Directory + "index"));
+            return read(new FileInfo(db.Directory + "/index"));
         }
 
         /**
@@ -213,7 +213,7 @@ namespace GitSharp.DirectoryCache
          */
         public static DirCache Lock(Repository db)
         {
-            return Lock(new FileInfo(db.Directory + "index"));
+            return Lock(new FileInfo(db.Directory + "/index"));
         }
 
         /** Location of the current version of the index file. */
@@ -318,13 +318,13 @@ namespace GitSharp.DirectoryCache
                         {
                             inStream.Close();
                         }
-                        catch (IOException err2)
+                        catch (IOException)
                         {
                             // Ignore any close failures.
                         }
                     }
                 }
-                catch (FileNotFoundException fnfe)
+                catch (FileNotFoundException)
                 {
                     // Someone must have deleted it between our exists test
                     // and actually opening the path. That's fine, its empty.
@@ -773,7 +773,7 @@ namespace GitSharp.DirectoryCache
          * @throws UnmergedPathException
          *             one or more paths contain higher-order stages (stage > 0),
          *             which cannot be stored in a tree object.
-         * @
+         * @throws  IOException
          *             an unexpected error occurred writing to the object store.
          */
         public ObjectId writeTree(ObjectWriter ow)

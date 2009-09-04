@@ -49,7 +49,7 @@ namespace GitSharp.Transport
     public class BasePackFetchConnection : BasePackConnection, IFetchConnection
     {
         private const int MAX_HAVES = 256;
-        protected const int MIN_CLIENT_BUFFER = 2*32*46 + 8;
+        protected const int MIN_CLIENT_BUFFER = 2 * 32 * 46 + 8;
         public const string OPTION_INCLUDE_TAG = "include-tag";
         public const string OPTION_MULTI_ACK = "multi_ack";
         public const string OPTION_THIN_PACK = "thin-pack";
@@ -72,7 +72,8 @@ namespace GitSharp.Transport
         private string lockMessage;
         private PackLock packLock;
 
-        public BasePackFetchConnection(IPackTransport packTransport) : base(packTransport)
+        public BasePackFetchConnection(IPackTransport packTransport)
+            : base(packTransport)
         {
             RepositoryConfig cfg = local.Config;
             includeTags = transport.TagOpt != TagOpt.NO_TAGS;
@@ -90,7 +91,7 @@ namespace GitSharp.Transport
             walk.carry(ADVERTISED);
         }
 
-        public void Fetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        public void Fetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
         {
             markStartedOperation();
             doFetch(monitor, want, have);
@@ -123,13 +124,13 @@ namespace GitSharp.Transport
             {
                 if (packLock != null)
                 {
-                    return new List<PackLock> {packLock};
+                    return new List<PackLock> { packLock };
                 }
                 return new List<PackLock>();
             }
         }
 
-        protected void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        protected void doFetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
         {
             try
             {
@@ -146,7 +147,7 @@ namespace GitSharp.Transport
                     receivePack(monitor);
                 }
             }
-            catch (CancelledException ce)
+            catch (CancelledException)
             {
                 Close();
                 return;
@@ -158,7 +159,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private int maxTimeWanted(List<Ref> wants)
+        private int maxTimeWanted(IEnumerable<Ref> wants)
         {
             int maxTime = 0;
             foreach (Ref r in wants)
@@ -168,21 +169,20 @@ namespace GitSharp.Transport
                     RevObject obj = walk.parseAny(r.ObjectId);
                     if (obj is RevCommit)
                     {
-                        int cTime = ((RevCommit) obj).commitTime;
+                        int cTime = ((RevCommit)obj).commitTime;
                         if (maxTime < cTime)
                             maxTime = cTime;
                     }
                 }
-                catch (IOException error)
+                catch (IOException)
                 {
-                    
                 }
             }
 
             return maxTime;
         }
 
-        private void markReachable(List<ObjectId> have, int maxTime)
+        private void markReachable(IEnumerable<ObjectId> have, int maxTime)
         {
             foreach (Ref r in local.Refs.Values)
             {
@@ -192,9 +192,8 @@ namespace GitSharp.Transport
                     o.add(REACHABLE);
                     reachableCommits.add(o);
                 }
-                catch (IOException readError)
+                catch (IOException)
                 {
-                    
                 }
             }
 
@@ -206,9 +205,8 @@ namespace GitSharp.Transport
                     o.add(REACHABLE);
                     reachableCommits.add(o);
                 }
-                catch (IOException readError)
+                catch (IOException)
                 {
-                    
                 }
             }
 
@@ -218,7 +216,7 @@ namespace GitSharp.Transport
                 walk.sort(RevSort.COMMIT_TIME_DESC);
                 walk.markStart(reachableCommits);
                 walk.setRevFilter(CommitTimeRevFilter.after(maxWhen));
-                for (;;)
+                for (; ; )
                 {
                     RevCommit c = walk.next();
                     if (c == null)
@@ -233,7 +231,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private bool sendWants(List<Ref> want)
+        private bool sendWants(IEnumerable<Ref> want)
         {
             bool first = true;
             foreach (Ref r in want)
@@ -245,9 +243,8 @@ namespace GitSharp.Transport
                         continue;
                     }
                 }
-                catch (IOException err)
+                catch (IOException)
                 {
-                    
                 }
 
                 StringBuilder line = new StringBuilder(46);
@@ -283,7 +280,7 @@ namespace GitSharp.Transport
             return line.ToString();
         }
 
-        private void negotiate(ProgressMonitor monitor)
+        private void negotiate(IProgressMonitor monitor)
         {
             MutableObjectId ackId = new MutableObjectId();
             int resultsPending = 0;
@@ -319,11 +316,10 @@ namespace GitSharp.Transport
                     continue;
                 }
 
-                for (;;)
+                for (; ; )
                 {
-                    PacketLineIn.AckNackResult anr;
+                    PacketLineIn.AckNackResult anr = pckIn.readACK(ackId);
 
-                    anr = pckIn.readACK(ackId);
                     if (anr == PacketLineIn.AckNackResult.NAK)
                     {
                         resultsPending--;
@@ -370,9 +366,7 @@ namespace GitSharp.Transport
 
             while (resultsPending > 0 || multiAck)
             {
-                PacketLineIn.AckNackResult anr;
-
-                anr = pckIn.readACK(ackId);
+                PacketLineIn.AckNackResult anr = pckIn.readACK(ackId);
                 resultsPending--;
 
                 if (anr == PacketLineIn.AckNackResult.ACK)
@@ -439,7 +433,7 @@ namespace GitSharp.Transport
             }
             catch (IOException)
             {
-                
+
             }
         }
 
@@ -448,14 +442,13 @@ namespace GitSharp.Transport
             obj.add(COMMON);
             if (obj is RevCommit)
             {
-                ((RevCommit) obj).carry(COMMON);
+                ((RevCommit)obj).carry(COMMON);
             }
         }
 
-        private void receivePack(ProgressMonitor monitor)
+        private void receivePack(IProgressMonitor monitor)
         {
-            IndexPack ip;
-            ip = IndexPack.create(local, sideband ? pckIn.sideband(monitor) : stream);
+            IndexPack ip = IndexPack.create(local, sideband ? pckIn.sideband(monitor) : stream);
             ip.setFixThin(thinPack);
             ip.setObjectChecking(transport.CheckFetchedObjects);
             ip.index(monitor);
@@ -464,8 +457,6 @@ namespace GitSharp.Transport
 
         private class CancelledException : Exception
         {
-            
         }
     }
-
 }

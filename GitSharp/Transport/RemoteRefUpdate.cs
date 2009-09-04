@@ -65,7 +65,7 @@ namespace GitSharp.Transport
         public bool ForceUpdate { get; private set; }
         public bool FastForward { get; set; }
         public string Message { get; set; }
-        private Repository localDb;
+        private Repository _localDb;
 
         public RemoteRefUpdate(Repository localDb, string srcRef, string remoteName, bool forceUpdate, string localName, ObjectId expectedOldObjectId)
         {
@@ -88,13 +88,13 @@ namespace GitSharp.Transport
             {
                 TrackingRefUpdate = null;
             }
-            this.localDb = localDb;
+            this._localDb = localDb;
             ExpectedOldObjectId = expectedOldObjectId;
             Status = UpdateStatus.NOT_ATTEMPTED;
         }
 
         public RemoteRefUpdate(RemoteRefUpdate baseUpdate, ObjectId newExpectedOldObjectId)
-            : this(baseUpdate.localDb, baseUpdate.SourceRef, baseUpdate.RemoteName, baseUpdate.ForceUpdate, (baseUpdate.TrackingRefUpdate == null ? null : baseUpdate.TrackingRefUpdate.LocalName), newExpectedOldObjectId)
+            : this(baseUpdate._localDb, baseUpdate.SourceRef, baseUpdate.RemoteName, baseUpdate.ForceUpdate, (baseUpdate.TrackingRefUpdate == null ? null : baseUpdate.TrackingRefUpdate.LocalName), newExpectedOldObjectId)
         {
         }
 
@@ -122,7 +122,7 @@ namespace GitSharp.Transport
             }
         }
 
-        protected void updateTrackingRef(RevWalk.RevWalk walk)
+        protected internal void updateTrackingRef(RevWalk.RevWalk walk)
         {
             if (IsDelete)
                 TrackingRefUpdate.Delete(walk);
@@ -133,14 +133,14 @@ namespace GitSharp.Transport
         public override string ToString()
         {
             return "RemoteRefUpdate[remoteName=" + RemoteName + ", " + Status
-                   + ", " + (ExpectedOldObjectId != null ? ExpectedOldObjectId.Abbreviate(localDb).name() : "(null)")
-                   + "..." + (NewObjectId != null ? NewObjectId.Abbreviate(localDb).name() : "(null)")
+                   + ", " + (ExpectedOldObjectId != null ? ExpectedOldObjectId.Abbreviate(_localDb).name() : "(null)")
+                   + "..." + (NewObjectId != null ? NewObjectId.Abbreviate(_localDb).name() : "(null)")
                    + (FastForward ? ", fastForward" : "")
                    + ", srcRef=" + SourceRef + (ForceUpdate ? ", forceUpdate" : "") + ", message=" +
                    (Message != null
                         ? "\""
                           + Message + "\""
-                        : "null") + ", " + localDb.Directory + "]";
+                        : "null") + ", " + _localDb.Directory + "]";
         }
     }
 

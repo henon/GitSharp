@@ -96,7 +96,7 @@ namespace GitSharp.Tests
         [Test]
         public void testEncode_Unicode()
         {
-            String src = "Ūnĭcōde̽";
+            string src = "Ūnĭcōde̽"; 
             byte[] exp = { (byte) 0xC5, (byte) 0xAA, 0x6E, (byte) 0xC4,
                 (byte) 0xAD, 0x63, (byte) 0xC5, (byte) 0x8D, 0x64, 0x65,
                 (byte) 0xCC, (byte) 0xBD };

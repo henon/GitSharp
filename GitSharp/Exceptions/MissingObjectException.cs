@@ -68,5 +68,18 @@ namespace GitSharp.Exceptions
             : base("Missing " + type + " " + id)
         {
         }
+
+
+        /**
+         * Construct a MissingObjectException for the specified object id.
+         * Expected type is reported to simplify tracking down the problem.
+         *
+         * @param id SHA-1
+         * @param type object type
+         */
+        public MissingObjectException(ObjectId id, int type)
+            : this(id, Constants.typeString(type))
+        {
+        }
     }
 }

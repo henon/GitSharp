@@ -454,9 +454,5 @@ namespace GitSharp.Transport
             ip.index(monitor);
             packLock = ip.renameAndOpenPack(lockMessage);
         }
-
-        private class CancelledException : Exception
-        {
-        }
     }
 }

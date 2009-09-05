@@ -46,7 +46,6 @@ namespace GitSharp.Tests.TreeWalk
 	public class FileTreeIteratorTest : RepositoryTestCase
 	{
 		private readonly string[] paths = { "a,", "a,b", "a/b", "a0b" };
-		private long[] mtime;
 		private static readonly string[] Paths = { "a,", "a,b", "a/b", "a0b" };
 		private long[] _mtime;
 
@@ -70,15 +69,15 @@ namespace GitSharp.Tests.TreeWalk
 			}
 		}
 
-    [Test]
+		[Test]
 		public virtual void testEmptyIfRootIsFile()
 		{
 			string path = Path.Combine(trash.FullName, paths[0]);
-      DirectoryInfo di = new DirectoryInfo(path);
-      FileInfo fi = new FileInfo(path);
+			var di = new DirectoryInfo(path);
+			var fi = new FileInfo(path);
 			Assert.IsTrue(fi.Exists);
 
-			FileTreeIterator fti = new FileTreeIterator(di);
+			var fti = new FileTreeIterator(di);
 			Assert.IsTrue(fti.first());
 			Assert.IsTrue(fti.eof());
 		}
@@ -103,7 +102,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.IsFalse(di.Exists);
 
 			di.Create();
-      di.Refresh();
+			di.Refresh();
 			Assert.IsTrue(di.Exists);
 
 			var fti = new FileTreeIterator(di);
@@ -167,7 +166,7 @@ namespace GitSharp.Tests.TreeWalk
 
 			MessageDigest md = Constants.newMessageDigest();
 			md.Update(Constants.encodeASCII(Constants.TYPE_BLOB));
-			md.Update((byte) ' ');
+			md.Update((byte)' ');
 			md.Update(Constants.encodeASCII(Paths[0].Length));
 			md.Update(0);
 			md.Update(Constants.encode(Paths[0]));

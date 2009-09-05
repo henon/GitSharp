@@ -69,14 +69,15 @@
     <Compile Include="DirectoryCache\DirCacheBuildIterator.cs" />
     <Compile Include="DirectoryCache\DirCacheIterator.cs" />
     <Compile Include="Ensure.cs" />
+    <Compile Include="Exceptions\CancelledException.cs" />
     <Compile Include="Exceptions\CheckoutConflictException.cs" />
     <Compile Include="Exceptions\ConfigInvalidException.cs" />
+    <Compile Include="Exceptions\ExceptionExtensions.cs" />
     <Compile Include="Exceptions\GitlinksNotSupportedException.cs" />
     <Compile Include="Exceptions\InvalidObjectIdException.cs" />
     <Compile Include="Exceptions\NoClosingBracketException.cs" />
     <Compile Include="Exceptions\CorruptObjectException.cs" />
     <Compile Include="Exceptions\EntryExistsException.cs" />
-    <Compile Include="Exceptions\Exception.cs" />
     <Compile Include="Exceptions\FileLockedException.cs" />
     <Compile Include="Exceptions\IncorrectObjectTypeException.cs" />
     <Compile Include="Exceptions\InvalidPackException.cs" />

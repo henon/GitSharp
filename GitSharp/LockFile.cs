@@ -191,9 +191,12 @@ namespace GitSharp
             }
 
             SaveStatInformation();
+            string lockFileName = _lockFile.FullName;
             try
             {
+                FileInfo copy = new FileInfo(_lockFile.FullName);
                 _lockFile.MoveTo(_refFile.FullName);
+                _lockFile = copy;
                 return true;
             }
             catch (Exception)
@@ -202,13 +205,19 @@ namespace GitSharp
                 {
                     if (_refFile.Exists) _refFile.Delete();
 
+                    FileInfo copy = new FileInfo(_lockFile.FullName);
                     _lockFile.MoveTo(_refFile.FullName);
+                    _lockFile = copy;
                     return true;
                 }
                 catch (Exception)
                 {
 
                 }
+            }
+            finally
+            {
+              _lockFile = new FileInfo(lockFileName);
             }
 
             Unlock();

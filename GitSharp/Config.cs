@@ -493,6 +493,11 @@ namespace GitSharp
             return o.ToString();
         }
 
+        protected void AddEntry(Entry e)
+        {
+            state.EntryList.Add(e);
+        }
+
         public void fromText(string text)
         {
             List<Entry> newEntries = new List<Entry>();
@@ -823,7 +828,7 @@ namespace GitSharp
             }
         }
 
-        private class Entry
+        protected class Entry
         {
             public string prefix;
             public string section;

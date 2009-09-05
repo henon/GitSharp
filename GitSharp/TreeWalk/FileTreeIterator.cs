@@ -38,7 +38,6 @@
  */
 
 using System.IO;
-using System.Linq;
 using GitSharp.Util;
 
 namespace GitSharp.TreeWalk
@@ -90,12 +89,33 @@ namespace GitSharp.TreeWalk
 
         private Entry[] Entries
         {
-            get
-            {
-                FileInfo[] all = _directory.GetFiles();
+			get
+			{
+				FileSystemInfo[] all = null;
 
-                return all.Length == 0 ? Eof : all.Select(x => new FileEntry(x)).Cast<Entry>().ToArray();
-            }
+				try
+				{
+					_directory.Refresh();
+					all = _directory.GetFileSystemInfos();
+				}
+				catch (DirectoryNotFoundException)
+				{
+				}
+				catch (IOException)
+				{
+				}
+
+				if (all == null) return Eof;
+
+				var r = new Entry[all.Length];
+
+				for (int i = 0; i < r.Length; i++)
+				{
+					r[i] = new FileEntry(all[i]);
+				}
+
+				return r;
+			}
         }
 
         /// <summary>
@@ -106,25 +126,20 @@ namespace GitSharp.TreeWalk
             private readonly FileSystemInfo _file;
             private readonly FileMode _mode;
             private long _fileLength;
-            private long lastModified;
+            private long _lastModified;
 
-            public FileEntry(DirectoryInfo fileEntry)
-                : this()
+            public FileEntry(FileSystemInfo f)
             {
-                _file = fileEntry;
-                _mode = new DirectoryInfo(Path.Combine(fileEntry.FullName, ".git")).Exists ? FileMode.GitLink : FileMode.Tree;
-            }
+				_file = f;
 
-            public FileEntry(FileInfo fileEntry)
-                : this()
-            {
-                _file = fileEntry;
-                _mode = FS.canExecute(fileEntry) ? FileMode.ExecutableFile : FileMode.RegularFile;
-            }
-
-            private FileEntry()
-            {
-                _fileLength = -1;
+				if (_file is DirectoryInfo)
+                {
+					_mode = new DirectoryInfo(_file + "/.git").Exists ? FileMode.GitLink : FileMode.Tree;
+                }
+				else if (_file is FileInfo)
+                {
+					_mode = FS.canExecute(_file) ? FileMode.ExecutableFile : FileMode.RegularFile;
+                }
             }
 
             public override FileMode Mode
@@ -156,12 +171,12 @@ namespace GitSharp.TreeWalk
             {
                 get
                 {
-                    if (lastModified == 0)
+                    if (_lastModified == 0)
                     {
-                        lastModified = _file.LastWriteTime.Ticks;
+                        _lastModified = _file.LastWriteTime.Ticks;
                     }
 
-                    return lastModified;
+                    return _lastModified;
                 }
             }
 

@@ -108,7 +108,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.AreEqual(cFileId1, tw.getObjectId(0));
 			Assert.AreEqual(cFileId2, tw.getObjectId(1));
 
-			Assert.IsTrue(tw.next());
+			Assert.IsFalse(tw.next());
 		}
 	}
 }

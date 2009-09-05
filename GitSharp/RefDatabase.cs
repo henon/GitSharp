@@ -421,6 +421,7 @@ namespace GitSharp
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void RefreshPackedRefs()
         {
+            _packedRefsFile.Refresh();
             if (!_packedRefsFile.Exists)
                 return;
 

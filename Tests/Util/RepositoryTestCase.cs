@@ -278,6 +278,7 @@ namespace GitSharp.Tests
             if (!tfp.Exists)
             {
                 tfp.Create();
+                tfp.Refresh();
                 if (!tfp.Exists)
                 {
                     throw new IOException("Could not create directory " + tfp.FullName);
@@ -290,8 +291,12 @@ namespace GitSharp.Tests
         protected static void checkFile(FileInfo f, string checkData)
         {
             var readData = File.ReadAllText(f.FullName, Encoding.GetEncoding("ISO-8859-1"));
+<<<<<<< HEAD
             if (f.Length != readData.Length)
             {
+=======
+            if (checkData.Length != readData.Length)
+>>>>>>> f2db6d4b74a8631985550805f6191036c0374bd3
                 throw new IOException("Internal error reading file data from " + f);
             }
 

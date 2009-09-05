@@ -87,7 +87,7 @@ namespace GitSharp.Tests.Patch
 		    // string match what we really expect to get back.
 		    //
 		    string exp = readTestPatchFile(csOld);
-		    exp = exp.Replace("\\303\\205ngstr\\303\\266m", "\u00c5ngstr\u00f6m");
+		    exp = exp.Replace("\u00c3\u0085ngstr\u00c3\u00b6m", "\u00c5ngstr\u00f6m");
 
 		    Assert.AreEqual(exp, fh.getScriptText(csOld, csNew));
 	    }
@@ -108,7 +108,7 @@ namespace GitSharp.Tests.Patch
 		    // string match what we really expect to get back.
 		    //
 		    string exp = readTestPatchFile(csOld);
-		    exp = exp.Replace("\\303\\205ngstr\\303\\266m", "\u00c5ngstr\u00f6m");
+		    exp = exp.Replace("\u00c3\u0085ngstr\u00c3\u00b6m", "\u00c5ngstr\u00f6m");
 
 		    Assert.AreEqual(exp, fh.getScriptText(new Encoding[] { csNew, csOld, csNew }));
 	    }

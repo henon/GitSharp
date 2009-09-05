@@ -46,6 +46,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.IO;
 
@@ -387,6 +388,7 @@ namespace GitSharp.Util
          */
         public static void encodeInt16(byte[] intbuf, int offset, int v)
         {
+            
             intbuf[offset + 1] = (byte)v;
             v >>= 8; // >>>
 

@@ -180,9 +180,9 @@ namespace GitSharp.Patch
             }
 
             oldIds = new AbbreviatedObjectId[ids.Count + 1];
-            //oldIds = ids.ToArray();
+            ids.CopyTo(oldIds);
             int dot2 = RawParseUtils.nextLF(buf, ptr, (byte)'.');
-            oldIds[ids.Count - 1] = AbbreviatedObjectId.FromString(buf, ptr, dot2 - 1);
+            oldIds[oldIds.Length - 1] = AbbreviatedObjectId.FromString(buf, ptr, dot2 - 1);
             newId = AbbreviatedObjectId.FromString(buf, dot2 + 1, eol - 1);
             oldModes = new FileMode[oldIds.Length];
         }

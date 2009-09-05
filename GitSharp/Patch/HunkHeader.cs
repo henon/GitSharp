@@ -387,7 +387,7 @@ namespace GitSharp.Patch
 		public OldImage(FileHeader fh, AbbreviatedObjectId id)
 		{
 			_fh = fh;
-			_id = fh.getOldId();
+			_id = id;
 		}
 
 		/// <summary>

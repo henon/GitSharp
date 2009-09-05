@@ -207,8 +207,8 @@
     <Compile Include="Util\StringUtils.cs" />
     <Compile Include="Util\WeakReference.cs" />
     <Compile Include="WholePackedObjectLoader.cs" />
-    <Compile Include="WindowCachConfig.cs" />
     <Compile Include="WindowCache.cs" />
+    <Compile Include="WindowCacheConfig.cs" />
     <Compile Include="WindowCursor.cs" />
     <Compile Include="WorkDirCheckout.cs" />
     <Compile Include="WriteTree.cs" />

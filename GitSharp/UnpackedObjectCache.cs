@@ -36,71 +36,60 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using GitSharp.Util;
-using System.IO;
-using ICSharpCode.SharpZipLib.Zip.Compression;
-using GitSharp.Exceptions;
 using System.Runtime.CompilerServices;
 
 namespace GitSharp
 {
-
     public class UnpackedObjectCache
     {
-        private static int CACHE_SZ = 1024;
+        private const int CacheSize = 1024;
 
-        private static WeakReference<Entry> DEAD;
+        private static readonly WeakReference<Entry> Dead;
+        private static int _maxByteCount;
+        private static readonly Slot[] Cache;
+        private static Slot _lruHead;
+        private static Slot _lruTail;
+        private static int _openByteCount;
 
-        private static int hash(long position)
+        private static int Hash(long position)
         {
             return (int)((uint)(((int)position) << 22) >> 22);
         }
 
-        private static int maxByteCount;
-
-        private static Slot[] cache;
-
-        private static Slot lruHead;
-
-        private static Slot lruTail;
-
-        private static int openByteCount;
-
         static UnpackedObjectCache()
         {
-            DEAD = new WeakReference<Entry>(null);
-            maxByteCount = new WindowCacheConfig().getDeltaBaseCacheLimit();
+            Dead = new WeakReference<Entry>(null);
+            _maxByteCount = new WindowCacheConfig().DeltaBaseCacheLimit;
 
-            cache = new Slot[CACHE_SZ];
-            for (int i = 0; i < CACHE_SZ; i++)
-                cache[i] = new Slot();
+            Cache = new Slot[CacheSize];
+            for (int i = 0; i < CacheSize; i++)
+            {
+                Cache[i] = new Slot();
+            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public static void reconfigure(WindowCacheConfig cfg)
+        public static void Reconfigure(WindowCacheConfig cfg)
         {
-            int dbLimit = cfg.getDeltaBaseCacheLimit();
-            if (maxByteCount != dbLimit)
+            int dbLimit = cfg.DeltaBaseCacheLimit;
+            if (_maxByteCount != dbLimit)
             {
-                maxByteCount = dbLimit;
-                releaseMemory();
+                _maxByteCount = dbLimit;
+                ReleaseMemory();
             }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public static Entry get(PackFile pack, long position)
         {
-            Slot e = cache[hash(position)];
+            Slot e = Cache[Hash(position)];
             if (e.provider == pack && e.position == position)
             {
                 Entry buf = e.data.get();
                 if (buf != null)
                 {
-                    moveToHead(e);
+                    MoveToHead(e);
                     return buf;
                 }
             }
@@ -111,84 +100,99 @@ namespace GitSharp
         public static void store(PackFile pack, long position,
                  byte[] data, int objectType)
         {
-            if (data.Length > maxByteCount)
+            if (data.Length > _maxByteCount)
                 return; // Too large to cache.
 
-            Slot e = cache[hash(position)];
-            clearEntry(e);
+            Slot e = Cache[Hash(position)];
+            ClearEntry(e);
 
-            openByteCount += data.Length;
-            releaseMemory();
+            _openByteCount += data.Length;
+            ReleaseMemory();
 
             e.provider = pack;
             e.position = position;
             e.sz = data.Length;
             e.data = new WeakReference<Entry>(new Entry(data, objectType));
-            moveToHead(e);
+            MoveToHead(e);
         }
 
-        private static void releaseMemory()
+        private static void ReleaseMemory()
         {
-            while (openByteCount > maxByteCount && lruTail != null)
+            while (_openByteCount > _maxByteCount && _lruTail != null)
             {
-                Slot currOldest = lruTail;
+                Slot currOldest = _lruTail;
                 Slot nextOldest = currOldest.lruPrev;
 
-                clearEntry(currOldest);
+                ClearEntry(currOldest);
                 currOldest.lruPrev = null;
                 currOldest.lruNext = null;
 
                 if (nextOldest == null)
-                    lruHead = null;
+                {
+                    _lruHead = null;
+                }
                 else
+                {
                     nextOldest.lruNext = null;
-                lruTail = nextOldest;
+                }
+
+                _lruTail = nextOldest;
             }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public static void purge(PackFile file)
         {
-            foreach (Slot e in cache)
+            foreach (Slot e in Cache)
             {
                 if (e.provider == file)
                 {
-                    clearEntry(e);
-                    unlink(e);
+                    ClearEntry(e);
+                    Unlink(e);
                 }
             }
         }
 
-        private static void moveToHead(Slot e)
+        private static void MoveToHead(Slot e)
         {
-            unlink(e);
+            Unlink(e);
             e.lruPrev = null;
-            e.lruNext = lruHead;
-            if (lruHead != null)
-                lruHead.lruPrev = e;
+            e.lruNext = _lruHead;
+            if (_lruHead != null)
+            {
+                _lruHead.lruPrev = e;
+            }
             else
-                lruTail = e;
-            lruHead = e;
+            {
+                _lruTail = e;
+            }
+            _lruHead = e;
         }
 
-        private static void unlink(Slot e)
+        private static void Unlink(Slot e)
         {
             Slot prev = e.lruPrev;
             Slot next = e.lruNext;
+
             if (prev != null)
+            {
                 prev.lruNext = next;
+            }
             if (next != null)
+            {
                 next.lruPrev = prev;
+            }
         }
 
-        private static void clearEntry(Slot e)
+        private static void ClearEntry(Slot e)
         {
-            openByteCount -= e.sz;
+            _openByteCount -= e.sz;
             e.provider = null;
-            e.data = DEAD;
+            e.data = Dead;
             e.sz = 0;
         }
 
+        #region Nested Types
 
         public class Entry
         {
@@ -215,7 +219,9 @@ namespace GitSharp
 
             public int sz;
 
-            public WeakReference<Entry> data = DEAD;
+            public WeakReference<Entry> data = Dead;
         }
+
+        #endregion
     }
 }

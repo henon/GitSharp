@@ -59,7 +59,7 @@ namespace GitSharp.Tests
      * is used. Memory mapping has an effect on the file system, in that memory
      * mapped files in java cannot be deleted as long as they mapped arrays have not
      * been reclaimed by the garbage collector. The programmer cannot control this
-     * with precision, though hinting using <em>{@link java.lang.System#gc}</em>
+     * with precision, though hinting using <em><see cref="java.lang.System#gc}</em>
      * often helps.
      */
     public abstract class RepositoryTestCase
@@ -98,13 +98,15 @@ namespace GitSharp.Tests
         /// <summary>
         /// Configure Git before setting up test repositories.
         /// </summary>
-        protected void configure()  // [henon] reading performance can be implemented later
+        protected void Configure()  // [henon] reading performance can be implemented later
         {
-            // WindowCacheConfig c = new WindowCacheConfig();
-            //c.setPackedGitLimit(128 * WindowCacheConfig.KB);
-            //c.setPackedGitWindowSize(8 * WindowCacheConfig.KB);
-            //c.setPackedGitMMAP("true".equals(System.getProperty("jgit.junit.usemmap")));
-            //c.setDeltaBaseCacheLimit(8 * WindowCacheConfig.KB);
+            //var c = new WindowCacheConfig
+            //                          {
+            //                              PackedGitLimit = 128 * WindowCacheConfig.Kb,
+            //                              PackedGitWindowSize = 8 * WindowCacheConfig.Kb,
+            //                              PackedGitMMAP = "true".equals(System.getProperty("jgit.junit.usemmap")),
+            //                              DeltaBaseCacheLimit = 8 * WindowCacheConfig.Kb
+            //                          };
             //WindowCache.reconfigure(c);
         }
 
@@ -113,12 +115,12 @@ namespace GitSharp.Tests
         [SetUp]
         public virtual void setUp()
         {
-            configure();
+            Configure();
 
             string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
 
             // Cleanup old failed stuff
-            recursiveDelete(trashParent, true, name, false); 
+            recursiveDelete(trashParent, true, name, false);
 
             trash = new DirectoryInfo(trashParent + "/trash" + DateTime.Now.Ticks + "." + (_testcount++));
             trash_git = new DirectoryInfo(trash + "/.git");
@@ -198,7 +200,7 @@ namespace GitSharp.Tests
         /// <param name="dir"></param>
         protected void recursiveDelete(DirectoryInfo dir)
         {
-            recursiveDelete(dir, false, this.GetType().Name + "." + ToString(), true);
+            recursiveDelete(dir, false, GetType().Name + "." + ToString(), true);
         }
 
         /// <summary>
@@ -291,12 +293,9 @@ namespace GitSharp.Tests
         protected static void checkFile(FileInfo f, string checkData)
         {
             var readData = File.ReadAllText(f.FullName, Encoding.GetEncoding("ISO-8859-1"));
-<<<<<<< HEAD
-            if (f.Length != readData.Length)
-            {
-=======
+
             if (checkData.Length != readData.Length)
->>>>>>> f2db6d4b74a8631985550805f6191036c0374bd3
+            {
                 throw new IOException("Internal error reading file data from " + f);
             }
 

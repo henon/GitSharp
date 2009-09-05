@@ -105,11 +105,13 @@ namespace GitSharp
         [Obsolete("Use WindowCacheConfig instead.")]
         public static void reconfigure(int packedGitLimit, int packedGitWindowSize, bool packedGitMMAP, int deltaBaseCacheLimit)
         {
-            var c = new WindowCacheConfig();
-            c.setPackedGitLimit(packedGitLimit);
-            c.setPackedGitWindowSize(packedGitWindowSize);
-            c.setPackedGitMMAP(packedGitMMAP);
-            c.setDeltaBaseCacheLimit(deltaBaseCacheLimit);
+            var c = new WindowCacheConfig
+                        {
+                            PackedGitLimit = packedGitLimit,
+                            PackedGitWindowSize = packedGitWindowSize,
+                            PackedGitMMAP = packedGitMMAP,
+                            DeltaBaseCacheLimit = deltaBaseCacheLimit
+                        };
             reconfigure(c);
         }
 
@@ -137,7 +139,7 @@ namespace GitSharp
 
             _cache = newCache;
 
-            UnpackedObjectCache.reconfigure(cfg);
+            UnpackedObjectCache.Reconfigure(cfg);
         }
 
         internal static WindowCache getInstance()
@@ -169,10 +171,10 @@ namespace GitSharp
         private WindowCache(WindowCacheConfig cfg)
             : base(TableSize(cfg), LockCount(cfg))
         {
-            _maxFiles = cfg.getPackedGitOpenFiles();
-            _maxBytes = cfg.getPackedGitLimit();
-            _memoryMap = cfg.isPackedGitMMAP();
-            _windowSizeShift = Bits(cfg.getPackedGitWindowSize());
+            _maxFiles = cfg.PackedGitOpenFiles;
+            _maxBytes = cfg.PackedGitLimit;
+            _memoryMap = cfg.PackedGitMMAP;
+            _windowSizeShift = Bits(cfg.PackedGitWindowSize);
             _windowSize = 1 << _windowSizeShift;
 
             _openFiles = new AtomicValue<int>(0);
@@ -261,8 +263,8 @@ namespace GitSharp
 
         private static int TableSize(WindowCacheConfig cfg)
         {
-            int wsz = cfg.getPackedGitWindowSize();
-            int limit = cfg.getPackedGitLimit();
+            int wsz = cfg.PackedGitWindowSize;
+            int limit = cfg.PackedGitLimit;
             
             if (wsz <= 0)
             {
@@ -279,7 +281,7 @@ namespace GitSharp
 
         private static int LockCount(WindowCacheConfig cfg)
         {
-            return Math.Max(cfg.getPackedGitOpenFiles(), 32);
+            return Math.Max(cfg.PackedGitOpenFiles, 32);
         }
 
         #region Nested Types

@@ -121,7 +121,7 @@ namespace GitSharp.Tests.Patch
 
 			Assert.AreEqual(1, p.getErrors().Count);
 			FormatError e = p.getErrors()[0];
-			Assert.AreSame(FormatError.Severity.WARNING, e.getSeverity());
+			Assert.AreEqual(FormatError.Severity.WARNING, e.getSeverity());
 			Assert.AreEqual("Unexpected hunk trailer", e.getMessage());
 			Assert.AreEqual(926, e.getOffset());
 			Assert.AreEqual("I AM NOT HERE\n", e.getLineText());
@@ -135,19 +135,19 @@ namespace GitSharp.Tests.Patch
 
 			FileHeader fh0 = p.getFiles()[0];
 			Assert.AreEqual("org.spearce.egit.ui/icons/toolbar/fetchd.png", fh0.getNewName());
-			Assert.AreSame(FileHeader.PatchType.GIT_BINARY, fh0.getPatchType());
+            Assert.AreEqual(FileHeader.PatchType.GIT_BINARY, fh0.getPatchType());
 			Assert.IsTrue(fh0.getHunks().isEmpty());
 			Assert.IsNull(fh0.getForwardBinaryHunk());
 
 			FileHeader fh1 = p.getFiles()[1];
 			Assert.AreEqual("org.spearce.egit.ui/icons/toolbar/fetche.png", fh1.getNewName());
-			Assert.AreSame(FileHeader.PatchType.UNIFIED, fh1.getPatchType());
+            Assert.AreEqual(FileHeader.PatchType.UNIFIED, fh1.getPatchType());
 			Assert.IsTrue(fh1.getHunks().isEmpty());
 			Assert.IsNull(fh1.getForwardBinaryHunk());
 
 			Assert.AreEqual(1, p.getErrors().Count);
 			FormatError e = p.getErrors()[0];
-			Assert.AreSame(FormatError.Severity.ERROR, e.getSeverity());
+            Assert.AreEqual(FormatError.Severity.ERROR, e.getSeverity());
 			Assert.AreEqual("Missing forward-image in GIT binary patch", e.getMessage());
 			Assert.AreEqual(297, e.getOffset());
 			Assert.AreEqual("\n", e.getLineText());

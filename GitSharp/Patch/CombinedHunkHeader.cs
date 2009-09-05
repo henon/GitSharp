@@ -57,7 +57,7 @@ namespace GitSharp.Patch
 			_old = new List<CombinedOldImage>(size);
 			for (int i = 0; i < size; i++)
 			{
-				_old[i] = new CombinedOldImage(fh, i);
+				_old.Add(new CombinedOldImage(fh, i));
 			}
 		}
 

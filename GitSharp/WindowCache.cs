@@ -38,8 +38,8 @@
  */
 
 using System;
-using GitSharp.Util;
 using System.Collections;
+using GitSharp.Util;
 
 namespace GitSharp
 {
@@ -55,6 +55,7 @@ namespace GitSharp
     internal class WindowCache : OffsetCache<ByteWindow, WindowCache.WindowRef>
     {
         private static volatile WindowCache _cache;
+
         private readonly int _maxFiles;
         private readonly int _maxBytes;
         private readonly bool _memoryMap;
@@ -102,7 +103,7 @@ namespace GitSharp
         /// <param name="deltaBaseCacheLimit">
         /// Number of bytes to hold in the delta base cache.
         /// </param>
-        [Obsolete("Use WindowCacheConfig instead.")]
+        [Obsolete("Use WindowCache.reconfigure(WindowCacheConfig) instead.")]
         public static void reconfigure(int packedGitLimit, int packedGitWindowSize, bool packedGitMMAP, int deltaBaseCacheLimit)
         {
             var c = new WindowCacheConfig
@@ -126,7 +127,6 @@ namespace GitSharp
         /// <param name="cfg">
         /// The new window cache configuration.
         /// </param>
-        [Obsolete("Use WindowCacheConfig instead.")]
         public static void reconfigure(WindowCacheConfig cfg)
         {
             var newCache = new WindowCache(cfg);
@@ -142,9 +142,9 @@ namespace GitSharp
             UnpackedObjectCache.Reconfigure(cfg);
         }
 
-        internal static WindowCache getInstance()
+        internal static WindowCache Instance
         {
-            return _cache;
+            get { return _cache; }
         }
 
         public static ByteWindow get(PackFile pack, long offset)
@@ -163,7 +163,7 @@ namespace GitSharp
             return r;
         }
 
-        public static void purge(PackFile pack)
+        public static void Purge(PackFile pack)
         {
             _cache.removeAll(pack);
         }

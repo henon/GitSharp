@@ -44,133 +44,140 @@ namespace GitSharp.Tests.RevWalk
     [TestFixture]
     public class RevWalkSortTest : RevWalkTestCase
     {
-    [Test]
-    public void testSort_Default() {
-		RevCommit a = commit();
-		RevCommit b = commit(1, a);
-		RevCommit c = commit(1, b);
-		RevCommit d = commit(1, c);
+        [Test]
+        public void testSort_Default()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(1, a);
+            RevCommit c = commit(1, b);
+            RevCommit d = commit(1, c);
 
-		markStart(d);
-		assertCommit(d, rw.next());
-		assertCommit(c, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		Assert.IsNull(rw.next());
-	}
+            markStart(d);
+            assertCommit(d, rw.next());
+            assertCommit(c, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-    [Test]
-    public void testSort_COMMIT_TIME_DESC() {
-		RevCommit a = commit();
-		RevCommit b = commit(a);
-		RevCommit c = commit(b);
-		RevCommit d = commit(c);
+        [Test]
+        public void testSort_COMMIT_TIME_DESC()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
+            RevCommit d = commit(c);
 
-		rw.sort(RevSort.COMMIT_TIME_DESC);
-		markStart(d);
-		assertCommit(d, rw.next());
-		assertCommit(c, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		Assert.IsNull(rw.next());
-	}
+            rw.sort(RevSort.COMMIT_TIME_DESC);
+            markStart(d);
+            assertCommit(d, rw.next());
+            assertCommit(c, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-    [Test]
-    public void testSort_REVERSE() {
-		RevCommit a = commit();
-		RevCommit b = commit(a);
-		RevCommit c = commit(b);
-		RevCommit d = commit(c);
+        [Test]
+        public void testSort_REVERSE()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
+            RevCommit d = commit(c);
 
-		rw.sort(RevSort.REVERSE);
-		markStart(d);
-		assertCommit(a, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(c, rw.next());
-		assertCommit(d, rw.next());
-		Assert.IsNull(rw.next());
-	}
+            rw.sort(RevSort.REVERSE);
+            markStart(d);
+            assertCommit(a, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(c, rw.next());
+            assertCommit(d, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-    [Test]
-    public void testSort_COMMIT_TIME_DESC_OutOfOrder1() {
-		// Despite being out of order time-wise, a strand-of-pearls must
-		// still maintain topological order.
-		//
-		RevCommit a = commit();
-		RevCommit b = commit(a);
-		RevCommit c = commit(-5, b);
-		RevCommit d = commit(10, c);
-		Assert.IsTrue(parse(a).getCommitTime() < parse(d).getCommitTime());
-		Assert.IsTrue(parse(c).getCommitTime() < parse(b).getCommitTime());
+        [Test]
+        public void testSort_COMMIT_TIME_DESC_OutOfOrder1()
+        {
+            // Despite being out of order time-wise, a strand-of-pearls must
+            // still maintain topological order.
+            //
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(-5, b);
+            RevCommit d = commit(10, c);
+            Assert.IsTrue(parse(a).getCommitTime() < parse(d).getCommitTime());
+            Assert.IsTrue(parse(c).getCommitTime() < parse(b).getCommitTime());
 
-		rw.sort(RevSort.COMMIT_TIME_DESC);
-		markStart(d);
-		assertCommit(d, rw.next());
-		assertCommit(c, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		Assert.IsNull(rw.next());
-	}
+            rw.sort(RevSort.COMMIT_TIME_DESC);
+            markStart(d);
+            assertCommit(d, rw.next());
+            assertCommit(c, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-    [Test]
-    public void testSort_COMMIT_TIME_DESC_OutOfOrder2() {
-		// c1 is back dated before its parent.
-		//
-		RevCommit a = commit();
-		RevCommit b = commit(a);
-		RevCommit c1 = commit(-5, b);
-		RevCommit c2 = commit(10, b);
-		RevCommit d = commit(c1, c2);
+        [Test]
+        public void testSort_COMMIT_TIME_DESC_OutOfOrder2()
+        {
+            // c1 is back dated before its parent.
+            //
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c1 = commit(-5, b);
+            RevCommit c2 = commit(10, b);
+            RevCommit d = commit(c1, c2);
 
-		rw.sort(RevSort.COMMIT_TIME_DESC);
-		markStart(d);
-		assertCommit(d, rw.next());
-		assertCommit(c2, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		assertCommit(c1, rw.next());
-		Assert.IsNull(rw.next());
-	}
+            rw.sort(RevSort.COMMIT_TIME_DESC);
+            markStart(d);
+            assertCommit(d, rw.next());
+            assertCommit(c2, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            assertCommit(c1, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-    [Test]
-    public void testSort_TOPO() {
-		// c1 is back dated before its parent.
-		//
-		RevCommit a = commit();
-		RevCommit b = commit(a);
-		RevCommit c1 = commit(-5, b);
-		RevCommit c2 = commit(10, b);
-		RevCommit d = commit(c1, c2);
+        [Test]
+        public void testSort_TOPO()
+        {
+            // c1 is back dated before its parent.
+            //
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c1 = commit(-5, b);
+            RevCommit c2 = commit(10, b);
+            RevCommit d = commit(c1, c2);
 
-		rw.sort(RevSort.TOPO);
-		markStart(d);
-		assertCommit(d, rw.next());
-		assertCommit(c2, rw.next());
-		assertCommit(c1, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		Assert.IsNull(rw.next());
-	}
+            rw.sort(RevSort.TOPO);
+            markStart(d);
+            assertCommit(d, rw.next());
+            assertCommit(c2, rw.next());
+            assertCommit(c1, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-    [Test]
-    public void testSort_TOPO_REVERSE() {
-		// c1 is back dated before its parent.
-		//
-		RevCommit a = commit();
-		RevCommit b = commit(a);
-		RevCommit c1 = commit(-5, b);
-		RevCommit c2 = commit(10, b);
-		RevCommit d = commit(c1, c2);
+        [Test]
+        public void testSort_TOPO_REVERSE()
+        {
+            // c1 is back dated before its parent.
+            //
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c1 = commit(-5, b);
+            RevCommit c2 = commit(10, b);
+            RevCommit d = commit(c1, c2);
 
-		rw.sort(RevSort.TOPO);
-		rw.sort(RevSort.REVERSE, true);
-		markStart(d);
-		assertCommit(a, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(c1, rw.next());
-		assertCommit(c2, rw.next());
-		assertCommit(d, rw.next());
-		Assert.IsNull(rw.next());
-	}
+            rw.sort(RevSort.TOPO);
+            rw.sort(RevSort.REVERSE, true);
+            markStart(d);
+            assertCommit(a, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(c1, rw.next());
+            assertCommit(c2, rw.next());
+            assertCommit(d, rw.next());
+            Assert.IsNull(rw.next());
+        }
     }
 }

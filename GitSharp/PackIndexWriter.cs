@@ -44,6 +44,7 @@ using System.Text;
 using GitSharp.Transport;
 using System.IO;
 using System.Security.Cryptography;
+using GitSharp.Util;
 
 namespace GitSharp
 {
@@ -220,7 +221,8 @@ namespace GitSharp
         internal void WriteTOC(int version)
         {
             _stream.Write(TOC);
-            _stream.Write(version);
+            NB.encodeInt32(tmp, 0, version);
+            _stream.Write(tmp, 0 , 4);
         }
 
         /**
@@ -242,11 +244,14 @@ namespace GitSharp
 		    
             for (int i = 1; i < 256; i++)
 			    fanout[i] += fanout[i - 1];
-		    
-            foreach(int n in fanout) 
-                _stream.Write(n);
-		    
-	    }
+
+            foreach (int n in fanout)
+            {
+                NB.encodeInt32(tmp, 0, n);
+                _stream.Write(tmp, 0, 4);
+            }
+
+        }
 
 	    /**
 	     * Output the standard two-checksum index footer.

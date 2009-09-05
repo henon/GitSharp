@@ -53,10 +53,10 @@ using System.Runtime.CompilerServices;
 namespace GitSharp
 {
     /**
- * A Git version 2 pack file representation. A pack file contains Git objects in
- * delta packed format yielding high compression of lots of object where some
- * objects are similar.
- */
+     * A Git version 2 pack file representation. A pack file contains Git objects in
+     * delta packed format yielding high compression of lots of object where some
+     * objects are similar.
+     */
     public class PackFile : IEnumerable<PackIndex.MutableEntry>
     {
 

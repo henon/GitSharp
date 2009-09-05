@@ -47,12 +47,12 @@ namespace GitSharp.Tests.Patch
         [Test]
 	    public void testError_CcTruncatedOld()
         {
-			GitSharp.Patch.Patch p = parseTestPatchFile("testError_CcTruncatedOld");
+			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testError_CcTruncatedOld.patch");
 		    Assert.AreEqual(1, p.getFiles().Count);
 		    Assert.AreEqual(3, p.getErrors().Count);
 		    {
 			    FormatError e = p.getErrors()[0];
-			    Assert.AreSame(FormatError.Severity.ERROR, e.getSeverity());
+			    Assert.AreEqual(FormatError.Severity.ERROR, e.getSeverity());
 			    Assert.AreEqual(
 					    "Truncated hunk, at least 1 lines is missing for ancestor 1",
 					    e.getMessage());
@@ -62,7 +62,7 @@ namespace GitSharp.Tests.Patch
 		    }
 		    {
 			    FormatError e = p.getErrors()[1];
-			    Assert.AreSame(FormatError.Severity.ERROR, e.getSeverity());
+			    Assert.AreEqual(FormatError.Severity.ERROR, e.getSeverity());
 			    Assert.AreEqual(
 					    "Truncated hunk, at least 2 lines is missing for ancestor 2",
 					    e.getMessage());
@@ -72,7 +72,7 @@ namespace GitSharp.Tests.Patch
 		    }
 		    {
 			    FormatError e = p.getErrors()[2];
-			    Assert.AreSame(FormatError.Severity.ERROR, e.getSeverity());
+                Assert.AreEqual(FormatError.Severity.ERROR, e.getSeverity());
 			    Assert.AreEqual("Truncated hunk, at least 3 new lines is missing", e
 					    .getMessage());
 			    Assert.AreEqual(346, e.getOffset());

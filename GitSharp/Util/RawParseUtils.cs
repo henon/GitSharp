@@ -1087,49 +1087,33 @@ namespace GitSharp.Util
 			for (int i = 0; i < end - start; i++)
 				b[i] = buffer[start + i];
 
-			// Try our built-in favorite. The assumption here is that
-			// decoding will fail if the data is not actually encoded
-			// using that encoder.
-			//
-			try
-			{
-				return decode(b, Constants.CHARSET);
-			}
-			catch (EncoderFallbackException)
-			{
-				//b.reset();
-			}
-
-			if (cs != Constants.CHARSET)
-			{
-				// Try the suggested encoding, it might be right since it was
-				// provided by the caller.
-				//
-				try
-				{
-					return decode(b, cs);
-				}
-				catch (EncoderFallbackException)
-				{
-					//b.reset();
-				}
-			}
-
-			// Try the default character set. A small group of people
-			// might actually use the same (or very similar) locale.
-			//
-
-			if (Encoding.Default != cs && Encoding.Default != Constants.CHARSET) // [henon] actually this can not happen because   Encoding.Default == Constants.CHARSET by definition
-			{
-				try
-				{
-					return decode(b, Encoding.Default);
-				}
-				catch (EncoderFallbackException)
-				{
-					//b.reset();
-				}
-			}
+            if (cs != null)
+            {
+                // Try the suggested encoding, it might be right since it was
+                // provided by the caller.
+                //
+                try
+                {
+                    return decode(b, cs);
+                }
+                catch (EncoderFallbackException)
+                {
+                    //b.reset();
+                }
+            }
+            else
+            {
+                // No encoding specified, use default charset
+                //
+                try
+                {
+                    return decode(b, Constants.CHARSET);
+                }
+                catch (EncoderFallbackException)
+                {
+                    //b.reset();
+                }
+            }
 
 			throw new EncoderFallbackException("decoding failed with encoding: " + cs.HeaderName);
 		}

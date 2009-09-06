@@ -70,7 +70,7 @@ namespace GitSharp.Tests.Util
             nowTick = 1236977987L;
         }
 
-        protected GitSharp.RevWalk.RevWalk createRevWalk()
+        protected virtual GitSharp.RevWalk.RevWalk createRevWalk()
         {
             return new GitSharp.RevWalk.RevWalk(db);
         }

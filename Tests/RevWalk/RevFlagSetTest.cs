@@ -45,105 +45,111 @@ namespace GitSharp.Tests.RevWalk
     [TestFixture]
     public class RevFlagSetTest : RevWalkTestCase
     {
+        [Test]
+        public void testEmpty()
+        {
+            var set = new RevFlagSet();
+            Assert.AreEqual(0, set.Mask);
+            Assert.AreEqual(0, set.Count);
 
-    [Test]
-	public void testEmpty() {
-		RevFlagSet set = new RevFlagSet();
-		Assert.AreEqual(0, set.Mask);
-		Assert.AreEqual(0, set.Count);
+            Assert.Fail("Test not fully migrated");
+            //Assert.IsNotNull(set.iterator());
+            //Assert.IsFalse(set.iterator().hasNext());
+        }
 
-        Assert.Fail("Test not fully migrated");
-        //Assert.IsNotNull(set.iterator());
-        //Assert.IsFalse(set.iterator().hasNext());
-	}
+        [Test]
+        public void testAddOne()
+        {
+            string flagName = "flag";
+            RevFlag flag = rw.newFlag(flagName);
+            Assert.IsTrue(0 != flag.Mask);
+            Assert.AreSame(flagName, flag.Name);
 
-    [Test]
-	public void testAddOne() {
-		string flagName = "flag";
-		RevFlag flag = rw.newFlag(flagName);
-		Assert.IsTrue(0 != flag.Mask);
-		Assert.AreSame(flagName, flag.Name);
+            var set = new RevFlagSet();
+            Assert.IsTrue(set.Add(flag));
+            Assert.IsFalse(set.Add(flag));
+            Assert.AreEqual(flag.Mask, set.Mask);
+            Assert.AreEqual(1, set.Count);
 
-		RevFlagSet set = new RevFlagSet();
-		Assert.IsTrue(set.Add(flag));
-		Assert.IsFalse(set.Add(flag));
-		Assert.AreEqual(flag.Mask, set.Mask);
-		Assert.AreEqual(1, set.Count);
+            Assert.Fail("Test not fully migrated");
+            //Iterator<RevFlag> i = set.iterator();
+            //Assert.IsTrue(i.hasNext());
+            //Assert.AreSame(flag, i.next());
+            //Assert.IsFalse(i.hasNext());
+        }
 
-        Assert.Fail("Test not fully migrated");
-        //Iterator<RevFlag> i = set.iterator();
-        //Assert.IsTrue(i.hasNext());
-        //Assert.AreSame(flag, i.next());
-        //Assert.IsFalse(i.hasNext());
-	}
+        [Test]
+        public void testAddTwo()
+        {
+            RevFlag flag1 = rw.newFlag("flag_1");
+            RevFlag flag2 = rw.newFlag("flag_2");
+            Assert.IsTrue((flag1.Mask & flag2.Mask) == 0);
 
-    [Test]
-	public void testAddTwo() {
-		RevFlag flag1 = rw.newFlag("flag_1");
-		RevFlag flag2 = rw.newFlag("flag_2");
-		Assert.IsTrue((flag1.Mask & flag2.Mask) == 0);
+            var set = new RevFlagSet();
+            Assert.IsTrue(set.Add(flag1));
+            Assert.IsTrue(set.Add(flag2));
+            Assert.AreEqual(flag1.Mask | flag2.Mask, set.Mask);
+            Assert.AreEqual(2, set.Count);
+        }
 
-		RevFlagSet set = new RevFlagSet();
-		Assert.IsTrue(set.Add(flag1));
-		Assert.IsTrue(set.Add(flag2));
-		Assert.AreEqual(flag1.Mask | flag2.Mask, set.Mask);
-		Assert.AreEqual(2, set.Count);
-	}
+        [Test]
+        public void testContainsAll()
+        {
+            RevFlag flag1 = rw.newFlag("flag_1");
+            RevFlag flag2 = rw.newFlag("flag_2");
+            var set1 = new RevFlagSet();
+            Assert.IsTrue(set1.Add(flag1));
+            Assert.IsTrue(set1.Add(flag2));
 
-    [Test]
-	public void testContainsAll() {
-		RevFlag flag1 = rw.newFlag("flag_1");
-		RevFlag flag2 = rw.newFlag("flag_2");
-		RevFlagSet set1 = new RevFlagSet();
-		Assert.IsTrue(set1.Add(flag1));
-		Assert.IsTrue(set1.Add(flag2));
+            Assert.IsTrue(set1.ContainsAll(set1));
+            Assert.IsTrue(set1.ContainsAll(new List<RevFlag>(new[] {flag1, flag2})));
 
-		Assert.IsTrue(set1.ContainsAll(set1));
-		Assert.IsTrue(set1.ContainsAll(new List<RevFlag>(new [] { flag1, flag2 })));
+            var set2 = new RevFlagSet();
+            set2.Add(rw.newFlag("flag_3"));
+            Assert.IsFalse(set1.ContainsAll(set2));
+        }
 
-		RevFlagSet set2 = new RevFlagSet();
-		set2.Add(rw.newFlag("flag_3"));
-		Assert.IsFalse(set1.ContainsAll(set2));
-	}
+        [Test]
+        public void testEquals()
+        {
+            RevFlag flag1 = rw.newFlag("flag_1");
+            RevFlag flag2 = rw.newFlag("flag_2");
+            var set = new RevFlagSet();
+            Assert.IsTrue(set.Add(flag1));
+            Assert.IsTrue(set.Add(flag2));
 
-    [Test]
-	public void testEquals() {
-		RevFlag flag1 = rw.newFlag("flag_1");
-		RevFlag flag2 = rw.newFlag("flag_2");
-		RevFlagSet set = new RevFlagSet();
-		Assert.IsTrue(set.Add(flag1));
-		Assert.IsTrue(set.Add(flag2));
+            Assert.IsTrue(new RevFlagSet(set).Equals(set));
+            Assert.IsTrue(new RevFlagSet(new List<RevFlag>(new[] {flag1, flag2}))
+                              .Equals(set));
+        }
 
-		Assert.IsTrue(new RevFlagSet(set).Equals(set));
-        Assert.IsTrue(new RevFlagSet(new List<RevFlag>(new [] { flag1, flag2 }))
-				.Equals(set));
-	}
+        [Test]
+        public void testRemove()
+        {
+            RevFlag flag1 = rw.newFlag("flag_1");
+            RevFlag flag2 = rw.newFlag("flag_2");
+            var set = new RevFlagSet();
+            Assert.IsTrue(set.Add(flag1));
+            Assert.IsTrue(set.Add(flag2));
 
-    [Test]
-	public void testRemove() {
-		RevFlag flag1 = rw.newFlag("flag_1");
-		RevFlag flag2 = rw.newFlag("flag_2");
-		RevFlagSet set = new RevFlagSet();
-		Assert.IsTrue(set.Add(flag1));
-		Assert.IsTrue(set.Add(flag2));
+            Assert.IsTrue(set.Remove(flag1));
+            Assert.IsFalse(set.Remove(flag1));
+            Assert.AreEqual(flag2.Mask, set.Mask);
+            Assert.IsFalse(set.Contains(flag1));
+        }
 
-		Assert.IsTrue(set.Remove(flag1));
-		Assert.IsFalse(set.Remove(flag1));
-		Assert.AreEqual(flag2.Mask, set.Mask);
-		Assert.IsFalse(set.Contains(flag1));
-	}
+        [Test]
+        public void testContains()
+        {
+            RevFlag flag1 = rw.newFlag("flag_1");
+            RevFlag flag2 = rw.newFlag("flag_2");
+            var set = new RevFlagSet();
+            set.Add(flag1);
+            Assert.IsTrue(set.Contains(flag1));
+            Assert.IsFalse(set.Contains(flag2));
 
-    [Test]
-	public void testContains() {
-		RevFlag flag1 = rw.newFlag("flag_1");
-		RevFlag flag2 = rw.newFlag("flag_2");
-		RevFlagSet set = new RevFlagSet();
-		set.Add(flag1);
-		Assert.IsTrue(set.Contains(flag1));
-		Assert.IsFalse(set.Contains(flag2));
-
-        Assert.Fail("Test not fully migrated");
-		//Assert.IsFalse(set.Contains("bob"));
-	}
+            Assert.Fail("Test not fully migrated");
+            //Assert.IsFalse(set.Contains("bob"));
+        }
     }
 }

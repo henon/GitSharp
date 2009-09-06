@@ -71,6 +71,14 @@ namespace GitSharp.Patch
 			return _old[nthParent];
 		}
 
+        internal override OldImage OldImage
+        {
+            get
+            {
+                return GetOldImage(0);
+            }
+        }
+
 		public override void parseHeader()
 		{
 			// Parse "@@@ -55,12 -163,13 +163,15 @@@ protected boolean"

@@ -64,10 +64,10 @@ namespace GitSharp.Tests.Patch
 			Assert.AreEqual("dd8c317", cfh.getOldId(1).name());
 			Assert.AreEqual("fd85931", cfh.getNewId().name());
 
-			Assert.IsTrue(cfh.getOldMode(0) == cfh.getOldMode());
-			Assert.IsTrue(FileMode.RegularFile == cfh.getOldMode(0));
-			Assert.IsTrue(FileMode.RegularFile == cfh.getOldMode(1));
-			Assert.IsTrue(FileMode.ExecutableFile == cfh.getNewMode());
+			Assert.AreEqual(cfh.getOldMode(0), cfh.getOldMode());
+			Assert.AreEqual(FileMode.RegularFile, cfh.getOldMode(0));
+			Assert.AreEqual(FileMode.RegularFile, cfh.getOldMode(1));
+			Assert.AreEqual(FileMode.ExecutableFile, cfh.getNewMode());
 			Assert.AreEqual(FileHeader.ChangeType.MODIFY, cfh.getChangeType());
 			Assert.AreEqual(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
 
@@ -124,8 +124,8 @@ namespace GitSharp.Tests.Patch
 			Assert.AreSame(FileMode.Missing, cfh.getOldMode(0));
 			Assert.AreSame(FileMode.Missing, cfh.getOldMode(1));
 			Assert.AreSame(FileMode.RegularFile, cfh.getNewMode());
-			Assert.AreSame(FileHeader.ChangeType.ADD, cfh.getChangeType());
-			Assert.AreSame(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
+			Assert.AreEqual(FileHeader.ChangeType.ADD, cfh.getChangeType());
+			Assert.AreEqual(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
 
 			Assert.AreEqual(1, cfh.getHunks().Count);
 			{
@@ -180,8 +180,8 @@ namespace GitSharp.Tests.Patch
 			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(0));
 			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(1));
 			Assert.AreSame(FileMode.Missing, cfh.getNewMode());
-			Assert.AreSame(FileHeader.ChangeType.DELETE, cfh.getChangeType());
-			Assert.AreSame(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
+			Assert.AreEqual(FileHeader.ChangeType.DELETE, cfh.getChangeType());
+			Assert.AreEqual(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
 
 			Assert.IsTrue(cfh.getHunks().isEmpty());
 		}

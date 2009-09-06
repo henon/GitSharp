@@ -35,277 +35,341 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.IO;
+using System.Text;
 using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.RevWalk
 {
-    using NUnit.Framework;
     [TestFixture]
     public class RevCommitParseTest : RepositoryTestCase
     {
-#if false
-	public void testParse_NoParents() throws Exception {
-		final ObjectId treeId = id("9788669ad918b6fcce64af8882fc9a81cb6aba67");
-		final String authorName = "A U. Thor";
-		final String authorEmail = "a_u_thor@example.com";
-		final int authorTime = 1218123387;
+        [Test]
+        public void testParse_NoParents()
+        {
+            ObjectId treeId = id("9788669ad918b6fcce64af8882fc9a81cb6aba67");
+            string authorName = "A U. Thor";
+            string authorEmail = "a_u_thor@example.com";
+            int authorTime = 1218123387;
 
-		final String committerName = "C O. Miter";
-		final String committerEmail = "comiter@example.com";
-		final int committerTime = 1218123390;
-		final StringBuilder body = new StringBuilder();
+            string committerName = "C O. Miter";
+            string committerEmail = "comiter@example.com";
+            int committerTime = 1218123390;
+            var body = new StringBuilder();
 
-		body.append("tree ");
-		body.append(treeId.name());
-		body.append("\n");
+            body.Append("tree ");
+            body.Append(treeId.Name);
+            body.Append("\n");
 
-		body.append("author ");
-		body.append(authorName);
-		body.append(" <");
-		body.append(authorEmail);
-		body.append("> ");
-		body.append(authorTime);
-		body.append(" +0700\n");
+            body.Append("author ");
+            body.Append(authorName);
+            body.Append(" <");
+            body.Append(authorEmail);
+            body.Append("> ");
+            body.Append(authorTime);
+            body.Append(" +0700\n");
 
-		body.append("committer ");
-		body.append(committerName);
-		body.append(" <");
-		body.append(committerEmail);
-		body.append("> ");
-		body.append(committerTime);
-		body.append(" -0500\n");
+            body.Append("committer ");
+            body.Append(committerName);
+            body.Append(" <");
+            body.Append(committerEmail);
+            body.Append("> ");
+            body.Append(committerTime);
+            body.Append(" -0500\n");
 
-		body.append("\n");
+            body.Append("\n");
 
-		final RevWalk rw = new RevWalk(db);
-		final RevCommit c;
+            var rw = new GitSharp.RevWalk.RevWalk(db);
+            RevCommit c;
 
-		c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-		assertNull(c.getTree());
-		assertNull(c.parents);
+            c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+            Assert.IsNull(c.getTree());
+            Assert.IsNull(c.parents);
 
-		c.parseCanonical(rw, body.toString().getBytes("UTF-8"));
-		assertNotNull(c.getTree());
-		assertEquals(treeId, c.getTree().getId());
-		assertSame(rw.lookupTree(treeId), c.getTree());
+            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
 
-		assertNotNull(c.parents);
-		assertEquals(0, c.parents.length);
-		assertEquals("", c.getFullMessage());
+            c.parseCanonical(rw, utf8Enc.GetBytes(body.ToString()));
+            Assert.IsNotNull(c.getTree());
+            Assert.AreEqual(treeId, c.getTree().getId());
+            Assert.AreSame(rw.lookupTree(treeId), c.getTree());
 
-		final PersonIdent cAuthor = c.getAuthorIdent();
-		assertNotNull(cAuthor);
-		assertEquals(authorName, cAuthor.getName());
-		assertEquals(authorEmail, cAuthor.getEmailAddress());
+            Assert.IsNotNull(c.parents);
+            Assert.AreEqual(0, c.parents.Length);
+            Assert.AreEqual("", c.getFullMessage());
 
-		final PersonIdent cCommitter = c.getCommitterIdent();
-		assertNotNull(cCommitter);
-		assertEquals(committerName, cCommitter.getName());
-		assertEquals(committerEmail, cCommitter.getEmailAddress());
-	}
+            PersonIdent cAuthor = c.getAuthorIdent();
+            Assert.IsNotNull(cAuthor);
+            Assert.AreEqual(authorName, cAuthor.Name);
+            Assert.AreEqual(authorEmail, cAuthor.EmailAddress);
 
-	private RevCommit create(final String msg) throws Exception {
-		final StringBuilder b = new StringBuilder();
-		b.append("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n");
-		b.append("author A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
-		b.append("committer C O. Miter <c@example.com> 1218123390 -0500\n");
-		b.append("\n");
-		b.append(msg);
+            PersonIdent cCommitter = c.getCommitterIdent();
+            Assert.IsNotNull(cCommitter);
+            Assert.AreEqual(committerName, cCommitter.Name);
+            Assert.AreEqual(committerEmail, cCommitter.EmailAddress);
+        }
 
-		final RevCommit c;
-		c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-		c.parseCanonical(new RevWalk(db), b.toString().getBytes("UTF-8"));
-		return c;
-	}
+        private RevCommit create(string msg)
+        {
+            var b = new StringBuilder();
+            b.Append("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n");
+            b.Append("author A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
+            b.Append("committer C O. Miter <c@example.com> 1218123390 -0500\n");
+            b.Append("\n");
+            b.Append(msg);
 
-	public void testParse_WeirdHeaderOnlyCommit() throws Exception {
-		final StringBuilder b = new StringBuilder();
-		b.append("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n");
-		b.append("author A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
-		b.append("committer C O. Miter <c@example.com> 1218123390 -0500\n");
+            RevCommit c;
+            c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-		final RevCommit c;
-		c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-		c.parseCanonical(new RevWalk(db), b.toString().getBytes("UTF-8"));
+            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
+            c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), utf8Enc.GetBytes(b.ToString()));
+            return c;
+        }
 
-		assertEquals("", c.getFullMessage());
-		assertEquals("", c.getShortMessage());
-	}
+        [Test]
+        public void testParse_WeirdHeaderOnlyCommit()
+        {
+            var b = new StringBuilder();
+            b.Append("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n");
+            b.Append("author A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
+            b.Append("committer C O. Miter <c@example.com> 1218123390 -0500\n");
 
-	public void testParse_implicit_UTF8_encoded() throws Exception {
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		b.write("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
-		b.write("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("UTF-8"));
-		b.write("committer C O. Miter <c@example.com> 1218123390 -0500\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("Sm\u00f6rg\u00e5sbord\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
-		final RevCommit c;
-		c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
-		c.parseCanonical(new RevWalk(db), b.toByteArray());
+            RevCommit c;
+            c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-		assertEquals("F\u00f6r fattare", c.getAuthorIdent().getName());
-		assertEquals("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
-		assertEquals("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
-	}
+            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
+            c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), utf8Enc.GetBytes(b.ToString()));
 
-	public void testParse_implicit_mixed_encoded() throws Exception {
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		b.write("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
-		b.write("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("ISO-8859-1"));
-		b.write("committer C O. Miter <c@example.com> 1218123390 -0500\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("Sm\u00f6rg\u00e5sbord\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
-		final RevCommit c;
-		c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
-		c.parseCanonical(new RevWalk(db), b.toByteArray());
+            Assert.AreEqual("", c.getFullMessage());
+            Assert.AreEqual("", c.getShortMessage());
+        }
 
-		assertEquals("F\u00f6r fattare", c.getAuthorIdent().getName());
-		assertEquals("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
-		assertEquals("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
-	}
+        [Test]
+        public void testParse_implicit_UTF8_encoded()
+        {
+            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
 
-	/**
-	 * Test parsing of a commit whose encoding is given and works.
-	 *
-	 * @throws Exception
-	 */
-	public void testParse_explicit_encoded() throws Exception {
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		b.write("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("EUC-JP"));
-		b.write("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("EUC-JP"));
-		b.write("committer C O. Miter <c@example.com> 1218123390 -0500\n".getBytes("EUC-JP"));
-		b.write("encoding euc_JP\n".getBytes("EUC-JP"));
-		b.write("\n".getBytes("EUC-JP"));
-		b.write("\u304d\u308c\u3044\n".getBytes("EUC-JP"));
-		b.write("\n".getBytes("EUC-JP"));
-		b.write("Hi\n".getBytes("EUC-JP"));
-		final RevCommit c;
-		c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
-		c.parseCanonical(new RevWalk(db), b.toByteArray());
+            RevCommit c;
+            using (var b = new BinaryWriter(new MemoryStream()))
+            {
+                b.Write(utf8Enc.GetBytes("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
+                b.Write(utf8Enc.GetBytes("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
+                b.Write(utf8Enc.GetBytes("committer C O. Miter <c@example.com> 1218123390 -0500\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("Sm\u00f6rg\u00e5sbord\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
+                c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
+                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+            }
 
-		assertEquals("F\u00f6r fattare", c.getAuthorIdent().getName());
-		assertEquals("\u304d\u308c\u3044", c.getShortMessage());
-		assertEquals("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
-	}
+            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
+            Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
+            Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
+        }
 
-	/**
-	 * This is a twisted case, but show what we expect here. We can revise the
-	 * expectations provided this case is updated.
-	 *
-	 * What happens here is that an encoding us given, but data is not encoded
-	 * that way (and we can detect it), so we try other encodings.
-	 *
-	 * @throws Exception
-	 */
-	public void testParse_explicit_bad_encoded() throws Exception {
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		b.write("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
-		b.write("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("ISO-8859-1"));
-		b.write("committer C O. Miter <c@example.com> 1218123390 -0500\n".getBytes("UTF-8"));
-		b.write("encoding EUC-JP\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("Hi\n".getBytes("UTF-8"));
-		final RevCommit c;
-		c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
-		c.parseCanonical(new RevWalk(db), b.toByteArray());
+        [Test]
+        public void testParse_implicit_mixed_encoded()
+        {
+            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
+            Encoding isoEnc = Encoding.GetEncoding("ISO-8859-1");
 
-		assertEquals("F\u00f6r fattare", c.getAuthorIdent().getName());
-		assertEquals("\u304d\u308c\u3044", c.getShortMessage());
-		assertEquals("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
-	}
+            RevCommit c;
+            using (var b = new BinaryWriter(new MemoryStream()))
+            {
+                b.Write(utf8Enc.GetBytes("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
+                b.Write(isoEnc.GetBytes("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
+                b.Write(utf8Enc.GetBytes("committer C O. Miter <c@example.com> 1218123390 -0500\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("Sm\u00f6rg\u00e5sbord\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
 
-	/**
-	 * This is a twisted case too, but show what we expect here. We can revise the
-	 * expectations provided this case is updated.
-	 *
-	 * What happens here is that an encoding us given, but data is not encoded
-	 * that way (and we can detect it), so we try other encodings. Here data could
-	 * actually be decoded in the stated encoding, but we override using UTF-8.
-	 *
-	 * @throws Exception
-	 */
-	public void testParse_explicit_bad_encoded2() throws Exception {
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		b.write("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
-		b.write("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("UTF-8"));
-		b.write("committer C O. Miter <c@example.com> 1218123390 -0500\n".getBytes("UTF-8"));
-		b.write("encoding ISO-8859-1\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("Hi\n".getBytes("UTF-8"));
-		final RevCommit c;
-		c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
-		c.parseCanonical(new RevWalk(db), b.toByteArray());
+                c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
+                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+            }
 
-		assertEquals("F\u00f6r fattare", c.getAuthorIdent().getName());
-		assertEquals("\u304d\u308c\u3044", c.getShortMessage());
-		assertEquals("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
-	}
+            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
+            Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
+            Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
+        }
 
-	public void testParse_NoMessage() throws Exception {
-		final String msg = "";
-		final RevCommit c = create(msg);
-		assertEquals(msg, c.getFullMessage());
-		assertEquals(msg, c.getShortMessage());
-	}
+        /**
+         * Test parsing of a commit whose encoding is given and works.
+         *
+         * @throws Exception
+         */
 
-	public void testParse_OnlyLFMessage() throws Exception {
-		final RevCommit c = create("\n");
-		assertEquals("\n", c.getFullMessage());
-		assertEquals("", c.getShortMessage());
-	}
+        [Test]
+        public void testParse_explicit_encoded()
+        {
+            Encoding eucJpEnc = Encoding.GetEncoding("EUC-JP");
 
-	public void testParse_ShortLineOnlyNoLF() throws Exception {
-		final String shortMsg = "This is a short message.";
-		final RevCommit c = create(shortMsg);
-		assertEquals(shortMsg, c.getFullMessage());
-		assertEquals(shortMsg, c.getShortMessage());
-	}
+            RevCommit c;
+            using (var b = new BinaryWriter(new MemoryStream()))
+            {
+                b.Write(eucJpEnc.GetBytes("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
+                b.Write(eucJpEnc.GetBytes("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
+                b.Write(eucJpEnc.GetBytes("committer C O. Miter <c@example.com> 1218123390 -0500\n"));
+                b.Write(eucJpEnc.GetBytes("encoding euc_JP\n"));
+                b.Write(eucJpEnc.GetBytes("\n"));
+                b.Write(eucJpEnc.GetBytes("\u304d\u308c\u3044\n"));
+                b.Write(eucJpEnc.GetBytes("\n"));
+                b.Write(eucJpEnc.GetBytes("Hi\n"));
 
-	public void testParse_ShortLineOnlyEndLF() throws Exception {
-		final String shortMsg = "This is a short message.";
-		final String fullMsg = shortMsg + "\n";
-		final RevCommit c = create(fullMsg);
-		assertEquals(fullMsg, c.getFullMessage());
-		assertEquals(shortMsg, c.getShortMessage());
-	}
+                c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
+                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+            }
+            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
+            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+        }
 
-	public void testParse_ShortLineOnlyEmbeddedLF() throws Exception {
-		final String fullMsg = "This is a\nshort message.";
-		final String shortMsg = fullMsg.replace('\n', ' ');
-		final RevCommit c = create(fullMsg);
-		assertEquals(fullMsg, c.getFullMessage());
-		assertEquals(shortMsg, c.getShortMessage());
-	}
+        /**
+         * This is a twisted case, but show what we expect here. We can revise the
+         * expectations provided this case is updated.
+         *
+         * What happens here is that an encoding us given, but data is not encoded
+         * that way (and we can detect it), so we try other encodings.
+         *
+         * @throws Exception
+         */
 
-	public void testParse_ShortLineOnlyEmbeddedAndEndingLF() throws Exception {
-		final String fullMsg = "This is a\nshort message.\n";
-		final String shortMsg = "This is a short message.";
-		final RevCommit c = create(fullMsg);
-		assertEquals(fullMsg, c.getFullMessage());
-		assertEquals(shortMsg, c.getShortMessage());
-	}
+        [Test]
+        public void testParse_explicit_bad_encoded()
+        {
+            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
+            Encoding isoEnc = Encoding.GetEncoding("ISO-8859-1");
 
-	public void testParse_GitStyleMessage() throws Exception {
-		final String shortMsg = "This fixes a bug.";
-		final String body = "We do it with magic and pixie dust and stuff.\n"
-				+ "\n" + "Signed-off-by: A U. Thor <author@example.com>\n";
-		final String fullMsg = shortMsg + "\n" + "\n" + body;
-		final RevCommit c = create(fullMsg);
-		assertEquals(fullMsg, c.getFullMessage());
-		assertEquals(shortMsg, c.getShortMessage());
-	}
+            RevCommit c;
+            using (var b = new BinaryWriter(new MemoryStream()))
+            {
+                b.Write(utf8Enc.GetBytes("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
+                b.Write(isoEnc.GetBytes("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
+                b.Write(utf8Enc.GetBytes("committer C O. Miter <c@example.com> 1218123390 -0500\n"));
+                b.Write(utf8Enc.GetBytes("encoding EUC-JP\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("Hi\n"));
 
-	private static ObjectId id(final String str) {
-		return ObjectId.fromString(str);
-	}
-#endif
+                c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
+                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+            }
+            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
+            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+        }
+
+        /**
+         * This is a twisted case too, but show what we expect here. We can revise the
+         * expectations provided this case is updated.
+         *
+         * What happens here is that an encoding us given, but data is not encoded
+         * that way (and we can detect it), so we try other encodings. Here data could
+         * actually be decoded in the stated encoding, but we override using UTF-8.
+         *
+         * @throws Exception
+         */
+
+        [Test]
+        public void testParse_explicit_bad_encoded2()
+        {
+            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
+            Encoding isoEnc = Encoding.GetEncoding("ISO-8859-1");
+
+            RevCommit c;
+            using (var b = new BinaryWriter(new MemoryStream()))
+            {
+                b.Write(utf8Enc.GetBytes("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
+                b.Write(utf8Enc.GetBytes("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
+                b.Write(utf8Enc.GetBytes("committer C O. Miter <c@example.com> 1218123390 -0500\n"));
+                b.Write(utf8Enc.GetBytes("encoding ISO-8859-1\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("Hi\n"));
+
+                c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
+                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+            }
+            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
+            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+        }
+
+        [Test]
+        public void testParse_NoMessage()
+        {
+            string msg = "";
+            RevCommit c = create(msg);
+            Assert.AreEqual(msg, c.getFullMessage());
+            Assert.AreEqual(msg, c.getShortMessage());
+        }
+
+        [Test]
+        public void testParse_OnlyLFMessage()
+        {
+            RevCommit c = create("\n");
+            Assert.AreEqual("\n", c.getFullMessage());
+            Assert.AreEqual("", c.getShortMessage());
+        }
+
+        [Test]
+        public void testParse_ShortLineOnlyNoLF()
+        {
+            string shortMsg = "This is a short message.";
+            RevCommit c = create(shortMsg);
+            Assert.AreEqual(shortMsg, c.getFullMessage());
+            Assert.AreEqual(shortMsg, c.getShortMessage());
+        }
+
+        [Test]
+        public void testParse_ShortLineOnlyEndLF()
+        {
+            string shortMsg = "This is a short message.";
+            string fullMsg = shortMsg + "\n";
+            RevCommit c = create(fullMsg);
+            Assert.AreEqual(fullMsg, c.getFullMessage());
+            Assert.AreEqual(shortMsg, c.getShortMessage());
+        }
+
+        [Test]
+        public void testParse_ShortLineOnlyEmbeddedLF()
+        {
+            string fullMsg = "This is a\nshort message.";
+            string shortMsg = fullMsg.Replace('\n', ' ');
+            RevCommit c = create(fullMsg);
+            Assert.AreEqual(fullMsg, c.getFullMessage());
+            Assert.AreEqual(shortMsg, c.getShortMessage());
+        }
+
+        [Test]
+        public void testParse_ShortLineOnlyEmbeddedAndEndingLF()
+        {
+            string fullMsg = "This is a\nshort message.\n";
+            string shortMsg = "This is a short message.";
+            RevCommit c = create(fullMsg);
+            Assert.AreEqual(fullMsg, c.getFullMessage());
+            Assert.AreEqual(shortMsg, c.getShortMessage());
+        }
+
+        [Test]
+        public void testParse_GitStyleMessage()
+        {
+            string shortMsg = "This fixes a bug.";
+            string body = "We do it with magic and pixie dust and stuff.\n"
+                          + "\n" + "Signed-off-by: A U. Thor <author@example.com>\n";
+            string fullMsg = shortMsg + "\n" + "\n" + body;
+            RevCommit c = create(fullMsg);
+            Assert.AreEqual(fullMsg, c.getFullMessage());
+            Assert.AreEqual(shortMsg, c.getShortMessage());
+        }
+
+        private static ObjectId id(string str)
+        {
+            return ObjectId.FromString(str);
+        }
     }
 }

@@ -35,40 +35,49 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
 using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.RevWalk
 {
-    using NUnit.Framework;
     [TestFixture]
     public class LIFORevQueueTest : RevQueueTestCase<LIFORevQueue>
     {
-#if false
-	protected LIFORevQueue create() {
-		return new LIFORevQueue();
-	}
+        protected override LIFORevQueue create()
+        {
+            return new LIFORevQueue();
+        }
 
-	public void testEmpty() throws Exception {
-		super.testEmpty();
-		assertEquals(0, q.outputType());
-	}
+        [Test]
+        public override void testEmpty()
+        {
+            base.testEmpty();
+            Assert.AreEqual(0, q.outputType());
+        }
 
-	public void testCloneEmpty() throws Exception {
-		q = new LIFORevQueue(AbstractRevQueue.EMPTY_QUEUE);
-		assertNull(q.next());
-	}
+        [Test]
+        public void testCloneEmpty()
+        {
+            q = new LIFORevQueue(AbstractRevQueue.EMPTY_QUEUE);
+            Assert.IsNull(q.next());
+        }
 
-	public void testAddLargeBlocks() throws Exception {
-		final ArrayList<RevCommit> lst = new ArrayList<RevCommit>();
-		for (int i = 0; i < 3 * BlockRevQueue.Block.BLOCK_SIZE; i++) {
-			final RevCommit c = commit();
-			lst.add(c);
-			q.add(c);
-		}
-		Collections.reverse(lst);
-		for (int i = 0; i < lst.size(); i++)
-			assertSame(lst.get(i), q.next());
-	}
-#endif
+        [Test]
+        public void testAddLargeBlocks()
+        {
+            var lst = new List<RevCommit>();
+            for (int i = 0; i < 3*BlockRevQueue.Block.BLOCK_SIZE; i++)
+            {
+                RevCommit c = commit();
+                lst.Add(c);
+                q.add(c);
+            }
+
+            lst.Reverse();
+            for (int i = 0; i < lst.Count; i++)
+                Assert.AreSame(lst[i], q.next());
+        }
     }
 }

@@ -45,155 +45,163 @@ namespace GitSharp.Tests.RevWalk
     {
         protected ObjectWalk objw;
 
-#if false
 
-	protected RevWalk createRevWalk() {
+        protected override GitSharp.RevWalk.RevWalk createRevWalk()
+        {
 		return objw = new ObjectWalk(db);
 	}
 
-	public void testNoCommits() throws Exception {
-		assertNull(objw.next());
-		assertNull(objw.nextObject());
+        [Test]
+	public void testNoCommits() {
+		Assert.IsNull(objw.next());
+		Assert.IsNull(objw.nextObject());
 	}
 
-	public void testTwoCommitsEmptyTree() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
+        [Test]
+    public void testTwoCommitsEmptyTree()
+        {
+		RevCommit a = commit();
+		RevCommit b = commit(a);
 		markStart(b);
 
 		assertCommit(b, objw.next());
 		assertCommit(a, objw.next());
-		assertNull(objw.next());
+		Assert.IsNull(objw.next());
 
-		assertSame(emptyTree, objw.nextObject());
-		assertNull(objw.nextObject());
+		Assert.AreSame(emptyTree, objw.nextObject());
+		Assert.IsNull(objw.nextObject());
 	}
 
-	public void testOneCommitOneTreeTwoBlob() throws Exception {
-		final RevBlob f0 = blob("0");
-		final RevBlob f1 = blob("1");
-		final RevTree t = tree(file("0", f0), file("1", f1), file("2", f1));
-		final RevCommit a = commit(t);
+        [Test]
+    public void testOneCommitOneTreeTwoBlob()
+        {
+		RevBlob f0 = blob("0");
+		RevBlob f1 = blob("1");
+		RevTree t = tree(file("0", f0), file("1", f1), file("2", f1));
+		RevCommit a = commit(t);
 		markStart(a);
 
 		assertCommit(a, objw.next());
-		assertNull(objw.next());
+		Assert.IsNull(objw.next());
 
-		assertSame(t, objw.nextObject());
-		assertSame(f0, objw.nextObject());
-		assertSame(f1, objw.nextObject());
-		assertNull(objw.nextObject());
+		Assert.AreSame(t, objw.nextObject());
+		Assert.AreSame(f0, objw.nextObject());
+		Assert.AreSame(f1, objw.nextObject());
+		Assert.IsNull(objw.nextObject());
 	}
 
-	public void testTwoCommitTwoTreeTwoBlob() throws Exception {
-		final RevBlob f0 = blob("0");
-		final RevBlob f1 = blob("1");
-		final RevBlob f2 = blob("0v2");
-		final RevTree ta = tree(file("0", f0), file("1", f1), file("2", f1));
-		final RevTree tb = tree(file("0", f2), file("1", f1), file("2", f1));
-		final RevCommit a = commit(ta);
-		final RevCommit b = commit(tb, a);
+	[Test]
+    public void testTwoCommitTwoTreeTwoBlob() {
+		RevBlob f0 = blob("0");
+		RevBlob f1 = blob("1");
+		RevBlob f2 = blob("0v2");
+		RevTree ta = tree(file("0", f0), file("1", f1), file("2", f1));
+		RevTree tb = tree(file("0", f2), file("1", f1), file("2", f1));
+		RevCommit a = commit(ta);
+		RevCommit b = commit(tb, a);
 		markStart(b);
 
 		assertCommit(b, objw.next());
 		assertCommit(a, objw.next());
-		assertNull(objw.next());
+		Assert.IsNull(objw.next());
 
-		assertSame(tb, objw.nextObject());
-		assertSame(f2, objw.nextObject());
-		assertSame(f1, objw.nextObject());
+		Assert.AreSame(tb, objw.nextObject());
+		Assert.AreSame(f2, objw.nextObject());
+		Assert.AreSame(f1, objw.nextObject());
 
-		assertSame(ta, objw.nextObject());
-		assertSame(f0, objw.nextObject());
+		Assert.AreSame(ta, objw.nextObject());
+		Assert.AreSame(f0, objw.nextObject());
 
-		assertNull(objw.nextObject());
+		Assert.IsNull(objw.nextObject());
 	}
 
-	public void testTwoCommitDeepTree1() throws Exception {
-		final RevBlob f0 = blob("0");
-		final RevBlob f1 = blob("0v2");
-		final RevTree ta = tree(file("a/b/0", f0));
-		final RevTree tb = tree(file("a/b/1", f1));
-		final RevCommit a = commit(ta);
-		final RevCommit b = commit(tb, a);
+    [Test]
+	public void testTwoCommitDeepTree1() {
+		RevBlob f0 = blob("0");
+		RevBlob f1 = blob("0v2");
+		RevTree ta = tree(file("a/b/0", f0));
+		RevTree tb = tree(file("a/b/1", f1));
+		RevCommit a = commit(ta);
+		RevCommit b = commit(tb, a);
 		markStart(b);
 
 		assertCommit(b, objw.next());
 		assertCommit(a, objw.next());
-		assertNull(objw.next());
+		Assert.IsNull(objw.next());
 
-		assertSame(tb, objw.nextObject());
-		assertSame(get(tb, "a"), objw.nextObject());
-		assertSame(get(tb, "a/b"), objw.nextObject());
-		assertSame(f1, objw.nextObject());
+		Assert.AreSame(tb, objw.nextObject());
+		Assert.AreSame(get(tb, "a"), objw.nextObject());
+		Assert.AreSame(get(tb, "a/b"), objw.nextObject());
+		Assert.AreSame(f1, objw.nextObject());
 
-		assertSame(ta, objw.nextObject());
-		assertSame(get(ta, "a"), objw.nextObject());
-		assertSame(get(ta, "a/b"), objw.nextObject());
-		assertSame(f0, objw.nextObject());
+		Assert.AreSame(ta, objw.nextObject());
+		Assert.AreSame(get(ta, "a"), objw.nextObject());
+		Assert.AreSame(get(ta, "a/b"), objw.nextObject());
+		Assert.AreSame(f0, objw.nextObject());
 
-		assertNull(objw.nextObject());
+		Assert.IsNull(objw.nextObject());
 	}
 
-	public void testTwoCommitDeepTree2() throws Exception {
-		final RevBlob f1 = blob("1");
-		final RevTree ta = tree(file("a/b/0", f1), file("a/c/q", f1));
-		final RevTree tb = tree(file("a/b/1", f1), file("a/c/q", f1));
-		final RevCommit a = commit(ta);
-		final RevCommit b = commit(tb, a);
+    [Test]
+	public void testTwoCommitDeepTree2() {
+		RevBlob f1 = blob("1");
+		RevTree ta = tree(file("a/b/0", f1), file("a/c/q", f1));
+		RevTree tb = tree(file("a/b/1", f1), file("a/c/q", f1));
+		RevCommit a = commit(ta);
+		RevCommit b = commit(tb, a);
 		markStart(b);
 
 		assertCommit(b, objw.next());
 		assertCommit(a, objw.next());
-		assertNull(objw.next());
+		Assert.IsNull(objw.next());
 
-		assertSame(tb, objw.nextObject());
-		assertSame(get(tb, "a"), objw.nextObject());
-		assertSame(get(tb, "a/b"), objw.nextObject());
-		assertSame(f1, objw.nextObject());
-		assertSame(get(tb, "a/c"), objw.nextObject());
+		Assert.AreSame(tb, objw.nextObject());
+		Assert.AreSame(get(tb, "a"), objw.nextObject());
+		Assert.AreSame(get(tb, "a/b"), objw.nextObject());
+		Assert.AreSame(f1, objw.nextObject());
+		Assert.AreSame(get(tb, "a/c"), objw.nextObject());
 
-		assertSame(ta, objw.nextObject());
-		assertSame(get(ta, "a"), objw.nextObject());
-		assertSame(get(ta, "a/b"), objw.nextObject());
+		Assert.AreSame(ta, objw.nextObject());
+		Assert.AreSame(get(ta, "a"), objw.nextObject());
+		Assert.AreSame(get(ta, "a/b"), objw.nextObject());
 
-		assertNull(objw.nextObject());
+		Assert.IsNull(objw.nextObject());
 	}
 
-	public void testCull() throws Exception {
-		final RevBlob f1 = blob("1");
-		final RevBlob f2 = blob("2");
-		final RevBlob f3 = blob("3");
-		final RevBlob f4 = blob("4");
+    [Test]
+	public void testCull() {
+		RevBlob f1 = blob("1");
+		RevBlob f2 = blob("2");
+		RevBlob f3 = blob("3");
+		RevBlob f4 = blob("4");
 
-		final RevTree ta = tree(file("a/1", f1), file("c/3", f3));
-		final RevCommit a = commit(ta);
+		RevTree ta = tree(file("a/1", f1), file("c/3", f3));
+		RevCommit a = commit(ta);
 
-		final RevTree tb = tree(file("a/1", f2), file("c/3", f3));
-		final RevCommit b1 = commit(tb, a);
-		final RevCommit b2 = commit(tb, b1);
+		RevTree tb = tree(file("a/1", f2), file("c/3", f3));
+		RevCommit b1 = commit(tb, a);
+		RevCommit b2 = commit(tb, b1);
 
-		final RevTree tc = tree(file("a/1", f4));
-		final RevCommit c1 = commit(tc, a);
-		final RevCommit c2 = commit(tc, c1);
+		RevTree tc = tree(file("a/1", f4));
+		RevCommit c1 = commit(tc, a);
+		RevCommit c2 = commit(tc, c1);
 
 		markStart(b2);
 		markUninteresting(c2);
 
 		assertCommit(b2, objw.next());
 		assertCommit(b1, objw.next());
-		assertNull(objw.next());
+		Assert.IsNull(objw.next());
 
-		assertTrue(a.has(RevFlag.UNINTERESTING));
-		assertTrue(ta.has(RevFlag.UNINTERESTING));
-		assertTrue(f1.has(RevFlag.UNINTERESTING));
-		assertTrue(f3.has(RevFlag.UNINTERESTING));
+		Assert.IsTrue(a.has(RevFlag.UNINTERESTING));
+		Assert.IsTrue(ta.has(RevFlag.UNINTERESTING));
+		Assert.IsTrue(f1.has(RevFlag.UNINTERESTING));
+		Assert.IsTrue(f3.has(RevFlag.UNINTERESTING));
 
-		assertSame(tb, objw.nextObject());
-		assertSame(get(tb, "a"), objw.nextObject());
-		assertSame(f2, objw.nextObject());
-		assertNull(objw.nextObject());
+		Assert.AreSame(tb, objw.nextObject());
+		Assert.AreSame(get(tb, "a"), objw.nextObject());
+		Assert.AreSame(f2, objw.nextObject());
+		Assert.IsNull(objw.nextObject());
 	}
-#endif
     }
 }

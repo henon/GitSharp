@@ -35,130 +35,150 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
+using GitSharp.TreeWalk.Filter;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.RevWalk
 {
 
 
-    // Note: Much of this test case is broken as it depends upon
-    // the graph applying topological sorting *before* doing merge
-    // simplification.  It also depends upon a difference between
-    // full history and non-full history for a path, something we
-    // don't quite yet have a distiction for in JGit.
-    //
-    using NUnit.Framework;
-    [TestFixture]
-    public class RevWalkPathFilter6012Test : RevWalkTestCase
-    {
-#if false
-	private static final String pA = "pA", pF = "pF", pE = "pE";
+	// Note: Much of this test case is broken as it depends upon
+	// the graph applying topological sorting *before* doing merge
+	// simplification.  It also depends upon a difference between
+	// full history and non-full history for a path, something we
+	// don't quite yet have a distiction for in JGit.
+	//
+	[TestFixture]
+	public class RevWalkPathFilter6012Test : RevWalkTestCase
+	{
+		private const string pA = "pA", pF = "pF", pE = "pE";
+		private RevCommit a, b, c, d, e, f, g, h, i;
+		private Dictionary<RevCommit, string> byName;
 
-	private RevCommit a, b, c, d, e, f, g, h, i;
+		public override void setUp()
+		{
+			base.setUp();
 
-	private HashMap<RevCommit, String> byName;
+			// Test graph was stolen from git-core t6012-rev-list-simplify
+			// (by Junio C Hamano in 65347030590bcc251a9ff2ed96487a0f1b9e9fa8)
+			//
+			RevBlob zF = blob("zF");
+			RevBlob zH = blob("zH");
+			RevBlob zI = blob("zI");
+			RevBlob zS = blob("zS");
+			RevBlob zY = blob("zY");
 
-	public void setUp() throws Exception {
-		super.setUp();
+			a = commit(tree(file(pF, zH)));
+			b = commit(tree(file(pF, zI)), a);
+			c = commit(tree(file(pF, zI)), a);
+			d = commit(tree(file(pA, zS), file(pF, zI)), c);
+			parse(d);
+			e = commit(d.getTree(), d, b);
+			f = commit(tree(file(pA, zS), file(pE, zY), file(pF, zI)), e);
+			parse(f);
+			g = commit(tree(file(pE, zY), file(pF, zI)), b);
+			h = commit(f.getTree(), g, f);
+			i = commit(tree(file(pA, zS), file(pE, zY), file(pF, zF)), h);
 
-		// Test graph was stolen from git-core t6012-rev-list-simplify
-		// (by Junio C Hamano in 65347030590bcc251a9ff2ed96487a0f1b9e9fa8)
-		//
-		final RevBlob zF = blob("zF");
-		final RevBlob zH = blob("zH");
-		final RevBlob zI = blob("zI");
-		final RevBlob zS = blob("zS");
-		final RevBlob zY = blob("zY");
+			byName = new Dictionary<RevCommit, string>();
+			foreach (FieldInfo z in typeof(RevWalkPathFilter6012Test).GetFields(BindingFlags.NonPublic | BindingFlags.GetField).Where(f => f.FieldType == typeof(RevCommit)))
+			{
+				byName.Add((RevCommit)z.GetValue(this), z.Name);
+			}
+		}
 
-		a = commit(tree(file(pF, zH)));
-		b = commit(tree(file(pF, zI)), a);
-		c = commit(tree(file(pF, zI)), a);
-		d = commit(tree(file(pA, zS), file(pF, zI)), c);
-		parse(d);
-		e = commit(d.getTree(), d, b);
-		f = commit(tree(file(pA, zS), file(pE, zY), file(pF, zI)), e);
-		parse(f);
-		g = commit(tree(file(pE, zY), file(pF, zI)), b);
-		h = commit(f.getTree(), g, f);
-		i = commit(tree(file(pA, zS), file(pE, zY), file(pF, zF)), h);
+		protected void check(params RevCommit[] order)
+		{
+			markStart(i);
+			var act = new StringBuilder();
+			foreach (RevCommit z in rw)
+			{
+				string name = byName[z];
+				Assert.IsNotNull(name);
+				act.Append(name);
+				act.Append(' ');
+			}
 
-		byName = new HashMap<RevCommit, String>();
-		for (Field z : RevWalkPathFilter6012Test.class.getDeclaredFields()) {
-			if (z.getType() == RevCommit.class)
-				byName.put((RevCommit) z.get(this), z.getName());
+			var exp = new StringBuilder();
+			foreach (RevCommit z in order)
+			{
+				string name = byName[z];
+				Assert.IsNotNull(name);
+				exp.Append(name);
+				exp.Append(' ');
+			}
+			Assert.AreEqual(exp.ToString(), act.ToString());
+		}
+
+		protected internal virtual void filter(string path)
+		{
+			rw.setTreeFilter(AndTreeFilter.create(PathFilterGroup.createFromStrings(Enumerable.Repeat(path, 1)), TreeFilter.ANY_DIFF));
+		}
+
+		[Test]
+		public void test1()
+		{
+			// TODO --full-history
+			check(i, h, g, f, e, d, c, b, a);
+		}
+
+		[Test]
+		public void test2()
+		{
+			// TODO --full-history
+			filter(pF);
+			// TODO fix broken test
+			// check(i, h, e, c, b, a);
+		}
+
+		[Test]
+		public void test3()
+		{
+			// TODO --full-history
+			rw.sort(RevSort.TOPO);
+			filter(pF);
+			// TODO fix broken test
+			// check(i, h, e, c, b, a);
+		}
+
+		[Test]
+		public void test4()
+		{
+			// TODO --full-history
+			rw.sort(RevSort.COMMIT_TIME_DESC);
+			filter(pF);
+			// TODO fix broken test
+			// check(i, h, e, c, b, a);
+		}
+
+		[Test]
+		public void test5()
+		{
+			// TODO --simplify-merges
+			filter(pF);
+			// TODO fix broken test
+			// check(i, e, c, b, a);
+		}
+
+		[Test]
+		public void test6()
+		{
+			filter(pF);
+			check(i, b, a);
+		}
+
+		[Test]
+		public void test7()
+		{
+			rw.sort(RevSort.TOPO);
+			filter(pF);
+			check(i, b, a);
 		}
 	}
-
-	protected void check(final RevCommit... order) throws Exception {
-		markStart(i);
-		final StringBuilder act = new StringBuilder();
-		for (final RevCommit z : rw) {
-			final String name = byName.get(z);
-			assertNotNull(name);
-			act.append(name);
-			act.append(' ');
-		}
-		final StringBuilder exp = new StringBuilder();
-		for (final RevCommit z : order) {
-			final String name = byName.get(z);
-			assertNotNull(name);
-			exp.append(name);
-			exp.append(' ');
-		}
-		assertEquals(exp.toString(), act.toString());
-	}
-
-	protected void filter(final String path) {
-		rw.setTreeFilter(AndTreeFilter.create(PathFilterGroup
-				.createFromStrings(Collections.singleton(path)),
-				TreeFilter.ANY_DIFF));
-	}
-
-	public void test1() throws Exception {
-		// TODO --full-history
-		check(i, h, g, f, e, d, c, b, a);
-	}
-
-	public void test2() throws Exception {
-		// TODO --full-history
-		filter(pF);
-		// TODO fix broken test
-		// check(i, h, e, c, b, a);
-	}
-
-	public void test3() throws Exception {
-		// TODO --full-history
-		rw.sort(RevSort.TOPO);
-		filter(pF);
-		// TODO fix broken test
-		// check(i, h, e, c, b, a);
-	}
-
-	public void test4() throws Exception {
-		// TODO --full-history
-		rw.sort(RevSort.COMMIT_TIME_DESC);
-		filter(pF);
-		// TODO fix broken test
-		// check(i, h, e, c, b, a);
-	}
-
-	public void test5() throws Exception {
-		// TODO --simplify-merges
-		filter(pF);
-		// TODO fix broken test
-		// check(i, e, c, b, a);
-	}
-
-	public void test6() throws Exception {
-		filter(pF);
-		check(i, b, a);
-	}
-
-	public void test7() throws Exception {
-		rw.sort(RevSort.TOPO);
-		filter(pF);
-		check(i, b, a);
-	}
-#endif
-    }
 }

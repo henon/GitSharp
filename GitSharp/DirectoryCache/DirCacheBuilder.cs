@@ -36,7 +36,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 using System;
 using GitSharp.TreeWalk;
 using GitSharp.Util;
@@ -137,7 +136,7 @@ namespace GitSharp.DirectoryCache
 		 * @param stage
 		 *            stage of the entries when adding them.
 		 * @param db
-		 *            repository the tree(s) will be read from during recursive
+		 *            repository the tree(s) will be Read from during recursive
 		 *            traversal. This must be the same repository that the resulting
 		 *            DirCache would be written out to (or used in) otherwise the
 		 *            caller is simply asking for deferred MissingObjectExceptions.
@@ -147,7 +146,7 @@ namespace GitSharp.DirectoryCache
 		 *            tree; the caller is responsible for dereferencing a tag or
 		 *            commit (if necessary).
 		 * @throws IOException
-		 *             a tree cannot be read to iterate through its entries.
+		 *             a tree cannot be Read to iterate through its entries.
 		 */
 		public void addTree(byte[] pathPrefix, int stage, Repository db, AnyObjectId tree)
 		{
@@ -160,7 +159,7 @@ namespace GitSharp.DirectoryCache
 			}
 			finally
 			{
-				curs.release();
+				curs.Release();
 			}
 			tw.Recursive = true;
 

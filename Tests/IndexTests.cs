@@ -126,7 +126,7 @@ namespace GitSharp.Tests
 						public void run() {
 							try {
 								InputStream s = process.getErrorStream();
-								for (int c = s.read(); c != -1; c = s.read()) {
+								for (int c = s.Read(); c != -1; c = s.Read()) {
 									System.err.print((char) c);
 								}
 								s.close();
@@ -142,7 +142,7 @@ namespace GitSharp.Tests
 							synchronized (this) {
 								try {
 									InputStream e = process.getInputStream();
-									for (int c = e.read(); c != -1; c = e.read()) {
+									for (int c = e.Read(); c != -1; c = e.Read()) {
 										System.out.print((char) c);
 									}
 									e.close();
@@ -200,7 +200,7 @@ namespace GitSharp.Tests
 				throw new Error("Problem in test, cannot delete test file "+nonexecFile.getAbsolutePath());
 			GitIndex index2 = new GitIndex(db);
 			index2.filemode = Convert.true; // TODO: we need a way to set this using config
-			index2.read();
+			index2.Read();
 			index2.checkout(trash);
 			assertTrue(((bool)canExecute.invoke(execFile,(object[])null)).booleanValue());
 			assertFalse(((bool)canExecute.invoke(nonexecFile,(object[])null)).booleanValue());
@@ -263,7 +263,7 @@ namespace GitSharp.Tests
 				throw new Error("Problem in test, cannot delete test file "+nonexecFile.getAbsolutePath());
 			GitIndex index2 = new GitIndex(db);
 			index2.filemode = Convert.false; // TODO: we need a way to set this using config
-			index2.read();
+			index2.Read();
 			index2.checkout(trash);
 			assertFalse(((bool)canExecute.invoke(execFile,(object[])null)).booleanValue());
 			assertFalse(((bool)canExecute.invoke(nonexecFile,(object[])null)).booleanValue());
@@ -353,7 +353,7 @@ namespace GitSharp.Tests
 			Assert.AreEqual("a.b", index.GetEntry("a.b").Name);
 			Assert.IsNull(index.GetEntry("a*b"));
 
-			// Repeat test for re-read index
+			// Repeat test for re-Read index
 			var indexr = new GitIndex(db);
 			indexr.Read();
 			Assert.AreEqual("a/b", indexr.GetEntry("a/b").Name);

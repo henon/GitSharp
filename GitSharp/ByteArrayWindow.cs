@@ -69,7 +69,7 @@ namespace GitSharp
         }
 
 
-        internal override int inflate(int pos, byte[] b, int o, Inflater inf)
+        internal override int Inflate(int pos, byte[] b, int o, Inflater inf)
         {
             while (!inf.IsFinished)
             {

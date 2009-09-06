@@ -50,7 +50,7 @@ namespace GitSharp.Merge
 	     * Create a new merge instance for a repository.
 	     *
 	     * @param local
-	     *            the repository this merger will read and write data on.
+	     *            the repository this merger will Read and write data on.
 	     */
 	    public ThreeWayMerger(Repository local) : base(local)
         {
@@ -68,7 +68,7 @@ namespace GitSharp.Merge
 	     * @throws MissingObjectException
 	     *             the object does not exist.
 	     * @throws IOException
-	     *             the object could not be read.
+	     *             the object could not be Read.
 	     */
 	    public void SetBase(AnyObjectId id)
         {
@@ -99,7 +99,7 @@ namespace GitSharp.Merge
 	     *             one of the input objects is not a commit, but the strategy
 	     *             requires it to be a commit.
 	     * @throws IOException
-	     *             one or more sources could not be read, or outputs could not
+	     *             one or more sources could not be Read, or outputs could not
 	     *             be written to the Repository.
 	     */
 	    public bool Merge(AnyObjectId a, AnyObjectId b)

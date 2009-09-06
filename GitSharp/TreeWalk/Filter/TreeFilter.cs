@@ -182,7 +182,7 @@ namespace GitSharp.TreeWalk.Filter
          *             expected object type. This usually indicates a corrupt
          *             repository, as an object link is referencing the wrong type.
          * @throws IOException
-         *             a loose object or pack file could not be read to obtain data
+         *             a loose object or pack file could not be Read to obtain data
          *             necessary for the filter to make its decision.
          */
         public abstract bool include(TreeWalk walker);

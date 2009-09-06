@@ -70,7 +70,7 @@ namespace GitSharp.Merge
 	     * Create a new merge instance for a repository.
 	     *
 	     * @param local
-	     *            the repository this merger will read and write data on.
+	     *            the repository this merger will Read and write data on.
 	     */
 	    protected Merger(Repository local) 
         {
@@ -87,7 +87,7 @@ namespace GitSharp.Merge
 	    }
 
 	    /**
-	     * @return an object writer to create objects in {@link #getRepository()}.
+	     * @return an object writer to Create objects in {@link #getRepository()}.
 	     */
 	    public ObjectWriter GetObjectWriter() 
         {
@@ -112,7 +112,7 @@ namespace GitSharp.Merge
 	     *             one of the input objects is not a commit, but the strategy
 	     *             requires it to be a commit.
 	     * @throws IOException
-	     *             one or more sources could not be read, or outputs could not
+	     *             one or more sources could not be Read, or outputs could not
 	     *             be written to the Repository.
 	     */
 	    public virtual bool Merge(AnyObjectId[] tips)
@@ -189,7 +189,7 @@ namespace GitSharp.Merge
 	     * @throws IncorrectObjectTypeException
 	     *             the input object is not a tree.
 	     * @throws IOException
-	     *             the tree object is not found or cannot be read.
+	     *             the tree object is not found or cannot be Read.
 	     */
 	    protected AbstractTreeIterator OpenTree(AnyObjectId treeId)
         {
@@ -200,7 +200,7 @@ namespace GitSharp.Merge
 		    } 
             finally 
             {
-			    curs.release();
+			    curs.Release();
 		    }
 	    }
 
@@ -218,7 +218,7 @@ namespace GitSharp.Merge
 	     *             one of the input objects is not a commit, but the strategy
 	     *             requires it to be a commit.
 	     * @throws IOException
-	     *             one or more sources could not be read, or outputs could not
+	     *             one or more sources could not be Read, or outputs could not
 	     *             be written to the Repository.
 	     */
 	    protected abstract bool MergeImpl();

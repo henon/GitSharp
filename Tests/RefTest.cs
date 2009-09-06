@@ -111,7 +111,7 @@ namespace GitSharp.Tests
 		}
 
 		/// <summary>
-		/// Let an "outsider" create a loose ref with the same name as a packed one
+		/// Let an "outsider" Create a loose ref with the same name as a packed one
 		/// </summary>
 		[Test]
 		public void testReadLoosePackedRef()

@@ -36,55 +36,47 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using GitSharp.Transport;
 using GitSharp.Util;
 using System.IO;
 using GitSharp.Exceptions;
 
 namespace GitSharp
 {
-    /**
-     * Traditional file system based {@link ObjectDatabase}.
-     * <p>
-     * This is the classical object database representation for a Git repository,
-     * where objects are stored loose by hashing them into directories by their
-     * {@link ObjectId}, or are stored in compressed containers known as
-     * {@link PackFile}s.
-     */
+	/// <summary>
+	/// Traditional file system based {@link ObjectDatabase}.
+	/// <para>
+	/// This is the classical object database representation for a Git repository,
+	/// where objects are stored loose by hashing them into directories by their
+	/// <see cref="ObjectId"/>, or are stored in compressed containers known as
+	/// <see cref="PackFile"/>s.
+	/// </para>
+	/// </summary>
     public class ObjectDirectory : ObjectDatabase
     {
-        private static PackFile[] NO_PACKS = { };
+        private static readonly PackFile[] NoPacks = { };
+        private readonly DirectoryInfo _objects;
+        private readonly DirectoryInfo _infoDirectory;
+        private readonly DirectoryInfo _packDirectory;
+        private readonly FileInfo _alternatesFile;
+        private readonly AtomicReference<PackFile[]> _packList;
 
-        private DirectoryInfo objects;
+        private long _packDirectoryLastModified;
 
-        private DirectoryInfo infoDirectory;
-
-        private DirectoryInfo packDirectory;
-
-        private FileInfo alternatesFile;
-
-        private AtomicReference<PackFile[]> packList;
-
-        private long packDirectoryLastModified;
-
-        /**
-         * Initialize a reference to an on-disk object directory.
-         *
-         * @param dir
-         *            the location of the <code>objects</code> directory.
-         */
+		/// <summary>
+		/// Initialize a reference to an on-disk object directory.
+		/// </summary>
+		/// <param name="dir">the location of the <code>objects</code> directory.</param>
         public ObjectDirectory(DirectoryInfo dir)
         {
-            objects = dir;
-            infoDirectory = new DirectoryInfo(objects.FullName + "/info");
-            packDirectory = new DirectoryInfo(objects.FullName + "/pack");
-            alternatesFile = new FileInfo(infoDirectory + "/alternates");
-
-            packList = new AtomicReference<PackFile[]>();
+            _objects = dir;
+            _infoDirectory = new DirectoryInfo(_objects.FullName + "/info");
+            _packDirectory = new DirectoryInfo(_objects.FullName + "/pack");
+            _alternatesFile = new FileInfo(_infoDirectory + "/alternates");
+            _packList = new AtomicReference<PackFile[]>();
         }
 
         /**
@@ -92,34 +84,31 @@ namespace GitSharp
          */
         public DirectoryInfo getDirectory()
         {
-            return objects;
+            return _objects;
         }
-
 
         public override bool exists()
         {
-            return objects.Exists;
+            return _objects.Exists;
         }
-
 
         public override void create()
         {
-            objects.Create();
-            infoDirectory.Create();
-            packDirectory.Create();
+            _objects.Create();
+            _infoDirectory.Create();
+            _packDirectory.Create();
         }
 
         public override void closeSelf()
         {
-            PackFile[] packs = packList.get();
-            if (packs != null)
-            {
-                packList.set(null);
-                foreach (PackFile p in packs)
-                {
-                    p.Close();
-                }
-            }
+            PackFile[] packs = _packList.get();
+        	if (packs == null) return;
+        	
+			_packList.set(null);
+        	foreach (PackFile p in packs)
+        	{
+        		p.Close();
+        	}
         }
 
         /**
@@ -138,7 +127,7 @@ namespace GitSharp
         {
             string d = objectName.Slice(0, 2);
             string f = objectName.Substring(2);
-            return new FileInfo(objects.FullName + "/" + d + "/" + f);
+            return new FileInfo(_objects.FullName + "/" + d + "/" + f);
         }
 
         /**
@@ -157,28 +146,32 @@ namespace GitSharp
             string p = pack.Name;
             string i = idx.Name;
 
-            if (p.Length != 50 || !p.StartsWith("pack-") || !p.EndsWith(".pack"))
-                throw new IOException("Not a valid pack " + pack);
+			if (p.Length != 50 || !p.StartsWith("pack-") || !p.EndsWith(IndexPack.PackSuffix))
+            {
+            	throw new IOException("Not a valid pack " + pack);
+            }
 
-            if (i.Length != 49 || !i.StartsWith("pack-") || !i.EndsWith(".idx"))
-                throw new IOException("Not a valid pack " + idx);
+            if (i.Length != 49 || !i.StartsWith("pack-") || !i.EndsWith(IndexPack.IndexSuffix))
+            {
+            	throw new IOException("Not a valid pack " + idx);
+            }
 
             if (!p.Slice(0, 45).Equals(i.Slice(0, 45)))
-                throw new IOException("Pack " + pack + "does not match index");
+            {
+            	throw new IOException("Pack " + pack + "does not match index");
+            }
 
-            insertPack(new PackFile(idx, pack));
+            InsertPack(new PackFile(idx, pack));
         }
-
 
         public override string ToString()
         {
             return "ObjectDirectory[" + getDirectory() + "]";
         }
 
-
         public override bool hasObject1(AnyObjectId objectId)
         {
-            foreach (PackFile p in packs())
+            foreach (PackFile p in Packs())
             {
                 try
                 {
@@ -193,17 +186,18 @@ namespace GitSharp
                     // so any failure here indicates the index is unreadable
                     // by this process, and the pack is likewise not readable.
                     //
-                    removePack(p);
+                    RemovePack(p);
                     continue;
                 }
             }
+
             return false;
         }
 
 
         public override ObjectLoader openObject1(WindowCursor curs, AnyObjectId objectId)
         {
-            PackFile[] pList = packs();
+            PackFile[] pList = Packs();
             for (; ; )
             {
             SEARCH:
@@ -214,7 +208,7 @@ namespace GitSharp
                         PackedObjectLoader ldr = p.Get(curs, objectId);
                         if (ldr != null)
                         {
-                            ldr.materialize(curs);
+                            ldr.Materialize(curs);
                             return ldr;
                         }
                     }
@@ -222,32 +216,30 @@ namespace GitSharp
                     {
                         // Pack was modified; refresh the entire pack list.
                         //
-                        pList = scanPacks(pList);
+                        pList = ScanPacks(pList);
                         goto SEARCH;
                     }
                     catch (IOException)
                     {
                         // Assume the pack is corrupted.
                         //
-                        removePack(p);
+                        RemovePack(p);
                     }
                 }
                 return null;
             }
         }
 
-
-        public override void openObjectInAllPacks1(List<PackedObjectLoader> @out, WindowCursor curs, AnyObjectId objectId)
+        public override void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
         {
-            PackFile[] pList = packs();
-            for (; ; )
+            PackFile[] pList = Packs();
+            while (true)
             {
-            SEARCH:
                 foreach (PackFile p in pList)
                 {
                     try
                     {
-                        PackedObjectLoader ldr = p.Get(curs, objectId);
+                        PackedObjectLoader ldr = p.Get(windowCursor, objectId);
                         if (ldr != null)
                         {
                             @out.Add(ldr);
@@ -257,26 +249,25 @@ namespace GitSharp
                     {
                         // Pack was modified; refresh the entire pack list.
                         //
-                        pList = scanPacks(pList);
-                        goto SEARCH;
+                        pList = ScanPacks(pList);
+                    	break;
                     }
                     catch (IOException)
                     {
                         // Assume the pack is corrupted.
                         //
-                        removePack(p);
+                        RemovePack(p);
                     }
                 }
+
                 break;
             }
         }
-
 
         public override bool hasObject2(string objectName)
         {
             return fileFor(objectName).Exists;
         }
-
 
         public override ObjectLoader openObject2(WindowCursor curs, string objectName, AnyObjectId objectId)
         {
@@ -294,90 +285,82 @@ namespace GitSharp
             }
         }
 
-
         public override bool tryAgain1()
         {
-            PackFile[] old = packList.get();
-            if (packDirectoryLastModified < packDirectory.LastAccessTime.Ticks)
+            PackFile[] old = _packList.get();
+            if (_packDirectoryLastModified < _packDirectory.LastAccessTime.Ticks)
             {
-                scanPacks(old);
+                ScanPacks(old);
                 return true;
             }
+
             return false;
         }
 
-        private void insertPack(PackFile pf)
+        private void InsertPack(PackFile pf)
         {
             PackFile[] o, n;
             do
             {
-                o = packs();
+                o = Packs();
                 n = new PackFile[1 + o.Length];
                 n[0] = pf;
                 Array.Copy(o, 0, n, 1, o.Length);
-            } while (!packList.compareAndSet(o, n));
+            } while (!_packList.compareAndSet(o, n));
         }
 
-        private void removePack(PackFile deadPack)
+        private void RemovePack(PackFile deadPack)
         {
             PackFile[] o, n;
             do
             {
-                o = packList.get();
-                if (o == null || !inList(o, deadPack))
+                o = _packList.get();
+                if (o == null || !InList(o, deadPack))
                 {
                     break;
 
                 }
-                else if (o.Length == 1)
-                {
-                    n = NO_PACKS;
+            	
+				if (o.Length == 1)
+            	{
+            		n = NoPacks;
 
-                }
-                else
-                {
-                    n = new PackFile[o.Length - 1];
-                    int j = 0;
-                    foreach (PackFile p in o)
-                    {
-                        if (p != deadPack)
-                        {
-                            n[j++] = p;
-                        }
-                    }
-                }
-            } while (!packList.compareAndSet(o, n));
+            	}
+            	else
+            	{
+            		n = new PackFile[o.Length - 1];
+            		int j = 0;
+            		foreach (PackFile p in o)
+            		{
+            			if (p != deadPack)
+            			{
+            				n[j++] = p;
+            			}
+            		}
+            	}
+            } while (!_packList.compareAndSet(o, n));
             deadPack.Close();
         }
 
-        private static bool inList(PackFile[] list, PackFile pack)
+        private static bool InList(IEnumerable<PackFile> list, PackFile pack)
         {
-            foreach (PackFile p in list)
-            {
-                if (p == pack)
-                {
-                    return true;
-                }
-            }
-            return false;
+        	return list != null && list.Contains(pack);
         }
 
-        private PackFile[] packs()
+        private PackFile[] Packs()
         {
-            PackFile[] r = packList.get();
-            if (r == null)
-                r = scanPacks(null);
-            return r;
+            PackFile[] packFiles = _packList.get() ?? ScanPacks(null);
+        	return packFiles;
         }
 
-        private PackFile[] scanPacks(PackFile[] original)
+        private PackFile[] ScanPacks(PackFile[] original)
         {
-            lock (packList)
+            lock (_packList)
             {
                 PackFile[] o, n;
                 do
                 {
-                    o = packList.get();
+                    o = _packList.get();
                     if (o != original)
                     {
                         // Another thread did the scan for us, while we
@@ -385,23 +368,25 @@ namespace GitSharp
                         //
                         return o;
                     }
-                    n = scanPacksImpl(o != null ? o : NO_PACKS);
-                } while (!packList.compareAndSet(o, n));
+                    n = ScanPacksImpl(o ?? NoPacks);
+
+                } while (!_packList.compareAndSet(o, n));
+
                 return n;
             }
         }
 
-        private PackFile[] scanPacksImpl(PackFile[] old)
+        private PackFile[] ScanPacksImpl(IEnumerable<PackFile> old)
         {
-            Dictionary<string, PackFile> forReuse = reuseMap(old);
-            string[] idxList = listPackIdx();
-            List<PackFile> list = new List<PackFile>(idxList.Length);
+            Dictionary<string, PackFile> forReuse = ReuseMap(old);
+            string[] idxList = ListPackIdx();
+            var list = new List<PackFile>(idxList.Length);
             foreach (string indexName in idxList)
             {
                 string @base = indexName.Slice(0, indexName.Length - 4);
-                string packName = @base + ".pack";
+            	string packName = IndexPack.GetPackFileName(@base);
 
-                PackFile oldPack = null;
+                PackFile oldPack;
                 forReuse.TryGetValue(packName, out oldPack);
                 forReuse.Remove(packName);
                 if (oldPack != null)
@@ -410,7 +395,7 @@ namespace GitSharp
                     continue;
                 }
 
-                var packFile = new FileInfo(packDirectory.FullName + "/" + packName);
+                var packFile = new FileInfo(_packDirectory.FullName + "/" + packName);
                 if (!packFile.Exists)
                 {
                     // Sometimes C Git's HTTP fetch transport leaves a
@@ -420,7 +405,7 @@ namespace GitSharp
                     continue;
                 }
 
-                var idxFile = new FileInfo(packDirectory + "/" + indexName);
+                var idxFile = new FileInfo(_packDirectory + "/" + indexName);
                 list.Add(new PackFile(idxFile, packFile));
             }
 
@@ -431,16 +416,16 @@ namespace GitSharp
 
             if (list.Count == 0)
             {
-                return NO_PACKS;
+                return NoPacks;
             }
             PackFile[] r = list.ToArray();
-            Array.Sort(r, PackFile.SORT);
+            Array.Sort(r, PackFile.PackFileSortComparison);
             return r;
         }
 
-        private static Dictionary<string, PackFile> reuseMap(PackFile[] old)
+        private static Dictionary<string, PackFile> ReuseMap(IEnumerable<PackFile> old)
         {
-            Dictionary<string, PackFile> forReuse = new Dictionary<string, PackFile>();
+            var forReuse = new Dictionary<string, PackFile>();
             foreach (PackFile p in old)
             {
                 if (p.IsInvalid)
@@ -464,28 +449,33 @@ namespace GitSharp
                     prior.Close();
                 }
             }
+
             return forReuse;
         }
 
-        private string[] listPackIdx()
+        private string[] ListPackIdx()
         {
-            packDirectoryLastModified = packDirectory.LastAccessTime.Ticks;
+            _packDirectoryLastModified = _packDirectory.LastAccessTime.Ticks;
             // Must match "pack-[0-9a-f]{40}.idx" to be an index.
-            string[] idxList = packDirectory.GetFiles().Select(file => file.Name).Where(n => n.Length == 49 && n.EndsWith(".idx") && n.StartsWith("pack-")).ToArray();
+            
+			string[] idxList = _packDirectory.GetFiles()
+				.Select(file => file.Name)
+				.Where(n => n.Length == 49 && n.EndsWith(IndexPack.IndexSuffix) && n.StartsWith("pack-"))
+				.ToArray();
+
             return idxList;  // idxList != null ? idxList : "";
         }
 
-
         public override ObjectDatabase[] loadAlternates()
         {
-            StreamReader br = open(alternatesFile);
-            List<ObjectDirectory> l = new List<ObjectDirectory>(4);
+            StreamReader br = Open(_alternatesFile);
+            var l = new List<ObjectDirectory>(4);
             try
             {
                 string line;
                 while ((line = br.ReadLine()) != null)
                 {
-                    l.Add(new ObjectDirectory(FS.resolve(objects, line)));
+                    l.Add(new ObjectDirectory(FS.resolve(_objects, line)));
                 }
             }
             finally
@@ -493,17 +483,12 @@ namespace GitSharp
                 br.Close();
             }
 
-            if (l.Count == 0)
-            {
-                return NO_ALTERNATES;
-            }
-            return l.ToArray();
+            return l.Count == 0 ? NoAlternates : l.ToArray();
         }
 
-        private static StreamReader open(FileInfo f)
+        private static StreamReader Open(FileSystemInfo f)
         {
             return new StreamReader(new FileStream(f.FullName, System.IO.FileMode.Open));
         }
     }
-
 }

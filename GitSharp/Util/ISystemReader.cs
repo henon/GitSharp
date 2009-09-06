@@ -44,7 +44,7 @@ using System.Text;
 namespace GitSharp.Util
 {
     /**
-     * Interface to read values from the system.
+     * Interface to Read values from the system.
      * <p>
      * When writing unit tests, extending this interface with a custom class
      * permits to simulate an access to a system variable or property and
@@ -56,13 +56,13 @@ namespace GitSharp.Util
         string getHostname();
 
         /**
-         * @param variable system variable to read
+         * @param variable system variable to Read
          * @return value of the system variable
          */
         string getenv(string variable); // [henon] todo: rename later
 
         /**
-         * @param key of the system property to read
+         * @param key of the system property to Read
          * @return value of the system property
          */
         string getProperty(string key);  // [henon] todo: rename later

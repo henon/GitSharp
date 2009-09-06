@@ -76,7 +76,7 @@ namespace GitSharp.TreeWalk
 		 * looking for a possible directory/file name conflict.
 		 * 
 		 * @param db
-		 *            repository to read tree object data from.
+		 *            repository to Read tree object data from.
 		 * @param path
 		 *            single path to advance the tree walk instance into.
 		 * @param trees
@@ -86,7 +86,7 @@ namespace GitSharp.TreeWalk
 		 * @throws IOException
 		 *             reading a pack file or loose object failed.
 		 * @throws CorruptObjectException
-		 *             an tree object could not be read as its data stream did not
+		 *             an tree object could not be Read as its data stream did not
 		 *             appear to be a tree, or could not be inflated.
 		 * @throws IncorrectObjectTypeException
 		 *             an object we expected to be a tree was not a tree.
@@ -112,7 +112,7 @@ namespace GitSharp.TreeWalk
 		 * looking for a possible directory/file name conflict.
 		 * 
 		 * @param db
-		 *            repository to read tree object data from.
+		 *            repository to Read tree object data from.
 		 * @param path
 		 *            single path to advance the tree walk instance into.
 		 * @param tree
@@ -122,7 +122,7 @@ namespace GitSharp.TreeWalk
 		 * @throws IOException
 		 *             reading a pack file or loose object failed.
 		 * @throws CorruptObjectException
-		 *             an tree object could not be read as its data stream did not
+		 *             an tree object could not be Read as its data stream did not
 		 *             appear to be a tree, or could not be inflated.
 		 * @throws IncorrectObjectTypeException
 		 *             an object we expected to be a tree was not a tree.
@@ -191,7 +191,7 @@ namespace GitSharp.TreeWalk
 		 * TreeWalk instances. Every TreeWalk must be supplied its own unique
 		 * filter, unless the filter implementation specifically states it is (and
 		 * always will be) thread-safe. Callers may use {@link TreeFilter#Clone()}
-		 * to create a unique filter tree for this TreeWalk instance.
+		 * to Create a unique filter tree for this TreeWalk instance.
 		 * 
 		 * @param newFilter
 		 *            the new filter. If null the special {@link TreeFilter#ALL}
@@ -259,7 +259,7 @@ namespace GitSharp.TreeWalk
 		 *             the object claimed to be a tree, but its contents did not
 		 *             appear to be a tree. The repository may have data corruption.
 		 * @throws IOException
-		 *             a loose object or pack file could not be read.
+		 *             a loose object or pack file could not be Read.
 		 */
 		public void reset(AnyObjectId id)
 		{
@@ -309,7 +309,7 @@ namespace GitSharp.TreeWalk
 		 *             the object claimed to be a tree, but its contents did not
 		 *             appear to be a tree. The repository may have data corruption.
 		 * @throws IOException
-		 *             a loose object or pack file could not be read.
+		 *             a loose object or pack file could not be Read.
 		 */
 		public void reset(AnyObjectId[] ids)
 		{
@@ -368,7 +368,7 @@ namespace GitSharp.TreeWalk
 		 *             the object claimed to be a tree, but its contents did not
 		 *             appear to be a tree. The repository may have data corruption.
 		 * @throws IOException
-		 *             a loose object or pack file could not be read.
+		 *             a loose object or pack file could not be Read.
 		 */
 		public int addTree(ObjectId id)
 		{
@@ -437,7 +437,7 @@ namespace GitSharp.TreeWalk
 		 *             the contents of a tree did not appear to be a tree. The
 		 *             repository may have data corruption.
 		 * @throws IOException
-		 *             a loose object or pack file could not be read.
+		 *             a loose object or pack file could not be Read.
 		 */
 		public bool next()
 		{
@@ -689,7 +689,7 @@ namespace GitSharp.TreeWalk
 		 * <p>
 		 * This method tests that the supplied path is exactly equal to the current
 		 * entry, or is one of its parent directories. It is faster to use this
-		 * method then to use {@link #getPathString()} to first create a string
+		 * method then to use {@link #getPathString()} to first Create a string
 		 * object, then test <code>startsWith</code> or some other type of string
 		 * match function.
 		 * 
@@ -747,7 +747,7 @@ namespace GitSharp.TreeWalk
 		 * <p>
 		 * This method tests that the supplied path is exactly equal to the current
 		 * entry, or is relative to one of entry's parent directories. It is faster
-		 * to use this method then to use {@link #getPathString()} to first create
+		 * to use this method then to use {@link #getPathString()} to first Create
 		 * a String object, then test <code>endsWith</code> or some other type of
 		 * string match function.
 		 *
@@ -827,7 +827,7 @@ namespace GitSharp.TreeWalk
 		 *             the contents of a tree did not appear to be a tree. The
 		 *             repository may have data corruption.
 		 * @throws IOException
-		 *             a loose object or pack file could not be read.
+		 *             a loose object or pack file could not be Read.
 		 */
 		public void enterSubtree()
 		{

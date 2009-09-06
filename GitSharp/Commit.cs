@@ -50,9 +50,14 @@ namespace GitSharp
 {
     public class Commit : Treeish
     {
-        private byte[] raw;
+        private byte[] _raw;
+		private string _message;
+		private PersonIdent _committer;
+		private PersonIdent _author;
+		private ObjectId _treeId;
+		private Tree _treeEntry;
 
-        /**
+    	/**
          * Create an empty commit object. More information must be fed to this
          * object to make it useful.
          *
@@ -63,6 +68,7 @@ namespace GitSharp
             : this(db, new ObjectId[0])
         {
         }
+
         /**
          * Create a commit associated with these parents and associate it with a
          * repository.
@@ -77,6 +83,7 @@ namespace GitSharp
             Repository = db;
             ParentIds = parentIds;
         }
+
         /**
          * Create a commit object with the specified id and data from and existing
          * commit object in a repository.
@@ -92,7 +99,7 @@ namespace GitSharp
         {
             Repository = db;
             CommitId = id;
-            treeId = ObjectId.FromString(raw, 5);
+            _treeId = ObjectId.FromString(raw, 5);
             ParentIds = new ObjectId[1];
             int np = 0;
             int rawPtr = 46;
@@ -105,73 +112,81 @@ namespace GitSharp
                     case 0:
                         ParentIds[np++] = ObjectId.FromString(raw, rawPtr + 7);
                         break;
+
                     case 1:
                         ParentIds = new[] { ParentIds[0], ObjectId.FromString(raw, rawPtr + 7) };
                         np++;
                         break;
+
                     default:
                         if (ParentIds.Length <= np)
                         {
                             ObjectId[] old = ParentIds;
                             ParentIds = new ObjectId[ParentIds.Length + 32];
                             for (int i = 0; i < np; ++i)
-                                ParentIds[i] = old[i];
+                            {
+                            	ParentIds[i] = old[i];
+                            }
                         }
                         ParentIds[np++] = ObjectId.FromString(raw, rawPtr + 7);
                         break;
                 }
                 rawPtr += 48;
             }
+
             if (np != ParentIds.Length)
             {
                 ObjectId[] old = ParentIds;
                 ParentIds = new ObjectId[np];
                 for (int i = 0; i < np; ++i)
-                    ParentIds[i] = old[i];
+                {
+                	ParentIds[i] = old[i];
+                }
             }
             else
-                if (np == 0)
-                    ParentIds = new ObjectId[0];
-            this.raw = raw;
+            {
+            	if (np == 0)
+            	{
+            		ParentIds = new ObjectId[0];
+            	}
+            }
+            this._raw = raw;
         }
 
         #region Treeish Members
 
-        private ObjectId treeId;
-
         public ObjectId TreeId
         {
-            get
-            {
-                return treeId;
-            }
+            get { return _treeId; }
             set
             {
-                if (treeId == null || !treeId.Equals(value))
+                if (_treeId == null || !_treeId.Equals(value))
                 {
-                    treeEntry = null;
+                    _treeEntry = null;
                 }
-                treeId = value;
+                _treeId = value;
             }
         }
-
-        private Tree treeEntry;
+        
         public Tree TreeEntry
         {
             get
             {
-                if (treeEntry == null)
+                if (_treeEntry == null)
                 {
-                    treeEntry = Repository.MapTree(this.TreeId);
-                    if (treeEntry == null)
-                        throw new MissingObjectException(this.TreeId, ObjectType.Tree);
+                    _treeEntry = Repository.MapTree(TreeId);
+                    if (_treeEntry == null)
+                    {
+                    	throw new MissingObjectException(TreeId, ObjectType.Tree);
+                    }
                 }
-                return treeEntry;
+
+                return _treeEntry;
             }
             set
             {
-                treeId = value.TreeId;
-                treeEntry = value;
+                _treeId = value.TreeId;
+                _treeEntry = value;
             }
         }
 
@@ -179,14 +194,7 @@ namespace GitSharp
 
         public ObjectId CommitId { get; set; }
         public ObjectId[] ParentIds { get; set; }
-        public Encoding Encoding { get; set; }
-
-        // [henon] remove later
-        public void setEncoding(string name)
-        {
-            Encoding = Encoding.GetEncoding(name);
-        }
-
+    	public Encoding Encoding { get; set; }
         public Repository Repository { get; internal set; }
 
         // Returns all ancestor-commits of this commit
@@ -200,63 +208,52 @@ namespace GitSharp
             }
         }
 
-        private static void CollectAncestorIdsRecursive(Commit commit, Dictionary<ObjectId, Commit> ancestors)
+        private static void CollectAncestorIdsRecursive(Commit commit, IDictionary<ObjectId, Commit> ancestors)
         {
             foreach (var parent in commit.ParentIds.Where(id => !ancestors.ContainsKey(id)).Select(id => commit.Repository.OpenCommit(id)))
             {
-                var parent_commit = parent as Commit;
-                ancestors[parent_commit.CommitId] = parent_commit;
-                CollectAncestorIdsRecursive(parent_commit, ancestors);
+                var parentCommit = parent;
+                ancestors[parentCommit.CommitId] = parentCommit;
+                CollectAncestorIdsRecursive(parentCommit, ancestors);
             }
         }
 
-        private string message;
         public string Message
         {
             get
             {
                 Decode();
-                return message;
+                return _message;
             }
-            set
-            {
-                message = value;
-            }
+            set { _message = value; }
         }
 
-        private PersonIdent committer;
-        public PersonIdent Committer
+		public PersonIdent Committer
         {
             get
             {
                 Decode();
-                return committer;
+                return _committer;
             }
-            set
-            {
-                committer = value;
-            }
+            set { _committer = value; }
         }
 
-        private PersonIdent author;
+        
         public PersonIdent Author
         {
             get
             {
                 Decode();
-                return author;
+                return _author;
             }
-            set
-            {
-                author = value;
-            }
+            set { _author = value; }
         }
 
         private void Decode()
         {
-            if (raw == null) return;
+            if (_raw == null) return;
 
-            using (var reader = new StreamReader(new MemoryStream(raw)))
+            using (var reader = new StreamReader(new MemoryStream(_raw)))
             {
                 string n = reader.ReadLine();
                 if (n == null || !n.StartsWith("tree "))
@@ -281,11 +278,13 @@ namespace GitSharp
                 n = reader.ReadLine();
 
                 if (n != null && n.StartsWith("encoding"))
-                    Encoding = Encoding.GetEncoding(n.Substring("encoding ".Length));
+                {
+                	Encoding = Encoding.GetEncoding(n.Substring("encoding ".Length));
+                }
                 else if (n == null || !n.Equals(""))
-                    throw new CorruptObjectException(CommitId, "malformed header:" + n);
-
-
+                {
+                	throw new CorruptObjectException(CommitId, "malformed header:" + n);
+                }
 
 #warning This does not currently support custom encodings
                 //byte[] readBuf = new byte[br.available()]; // in-memory stream so this is all bytes left
@@ -296,24 +295,19 @@ namespace GitSharp
                 {
                     // TODO: this isn't reliable so we need to guess the encoding from the actual content
                     throw new NotSupportedException("Custom Encoding is not currently supported.");
-                    //author = new PersonIdent(new string(this.Encoding.GetBytes(rawAuthor), this.Encoding));
-                    //committer = new PersonIdent(new string(rawCommitter.getBytes(), encoding.name()));
-                    //message = new string(readBuf, msgstart, readBuf.Length - msgstart, encoding.name());
+                    //_author = new PersonIdent(new string(this.Encoding.GetBytes(rawAuthor), this.Encoding));
+                    //_committer = new PersonIdent(new string(rawCommitter.getBytes(), encoding.name()));
+                    //_message = new string(readBuf, msgstart, readBuf.Length - msgstart, encoding.name());
                 }
-                else
-                {
-                    // TODO: use config setting / platform / ascii / iso-latin
-                    author = new PersonIdent(rawAuthor);
-                    committer = new PersonIdent(rawCommitter);
-                    //message = new string(readBuf, msgstart, readBuf.Length - msgstart);
-                    message = reader.ReadToEnd();
-                }
+            	
+				// TODO: use config setting / platform / ascii / iso-latin
+            	_author = new PersonIdent(rawAuthor);
+            	_committer = new PersonIdent(rawCommitter);
+            	//_message = new string(readBuf, msgstart, readBuf.Length - msgstart);
+            	_message = reader.ReadToEnd();
             }
 
-
-            raw = null;
-
-
+            _raw = null;
         }
 
         public override string ToString()
@@ -332,6 +326,5 @@ namespace GitSharp
                 throw new InvalidOperationException("exists " + CommitId);
             CommitId = new ObjectWriter(Repository).WriteCommit(this);
         }
-
     }
 }

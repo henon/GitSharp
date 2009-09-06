@@ -42,48 +42,32 @@ using GitSharp.Util;
 
 namespace GitSharp.Transport
 {
-
     public class WalkPushConnection : BaseConnection, IPushConnection
     {
-        private readonly Repository local;
-        private readonly URIish uri;
-        private readonly WalkRemoteObjectDatabase dest;
+        private readonly Repository _local;
+        private readonly URIish _uri;
+        private readonly WalkRemoteObjectDatabase _dest;
 
-        private Dictionary<string, string> packNames;
-        private Dictionary<string, Ref> newRefs;
-        private List<RemoteRefUpdate> packedRefUpdates;
+        private Dictionary<string, string> _packNames;
+        private Dictionary<string, Ref> _newRefs;
+        private List<RemoteRefUpdate> _packedRefUpdates;
 
         public WalkPushConnection(IWalkTransport walkTransport, WalkRemoteObjectDatabase w)
         {
-            Transport t = (Transport) walkTransport;
-            local = t.Local;
-            uri = t.Uri;
-            dest = w;
-        }
-
-        private class PushRefWriter : RefWriter
-        {
-            private readonly WalkRemoteObjectDatabase dest;
-
-            public PushRefWriter(IEnumerable<Ref> refs, WalkRemoteObjectDatabase dest) : base(refs)
-            {
-                this.dest = dest;
-            }
-
-            protected override void writeFile(string file, byte[] content)
-            {
-                dest.writeFile(WalkRemoteObjectDatabase.ROOT_DIR + file, content);
-            }
+            var t = (Transport) walkTransport;
+            _local = t.Local;
+            _uri = t.Uri;
+            _dest = w;
         }
 
         public void Push(IProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refUpdates)
         {
             markStartedOperation();
-            packNames = null;
-            newRefs = new Dictionary<string, Ref>();
-            packedRefUpdates = new List<RemoteRefUpdate>();
+            _packNames = null;
+            _newRefs = new Dictionary<string, Ref>();
+            _packedRefUpdates = new List<RemoteRefUpdate>();
 
-            List<RemoteRefUpdate> updates = new List<RemoteRefUpdate>();
+            var updates = new List<RemoteRefUpdate>();
             foreach (RemoteRefUpdate u in refUpdates.Values)
             {
                 string n = u.RemoteName;
@@ -95,36 +79,48 @@ namespace GitSharp.Transport
                 }
 
                 if (ObjectId.ZeroId.Equals(u.NewObjectId))
-                    deleteCommand(u);
+                {
+                	DeleteCommand(u);
+                }
                 else
-                    updates.Add(u);
+                {
+                	updates.Add(u);
+                }
             }
 
             if (updates.Count > 0)
-                sendpack(updates, monitor);
+            {
+            	Sendpack(updates, monitor);
+            }
             foreach (RemoteRefUpdate u in updates)
-                updateCommand(u);
+            {
+            	UpdateCommand(u);
+            }
 
-            if (updates.Count > 0 && isNewRepository())
-                createNewRepository(updates);
+            if (updates.Count > 0 && IsNewRepository)
+            {
+            	CreateNewRepository(updates);
+            }
 
-            RefWriter refWriter = new PushRefWriter(newRefs.Values, dest);
-            if (packedRefUpdates.Count > 0)
+            RefWriter refWriter = new PushRefWriter(_newRefs.Values, _dest);
+            if (_packedRefUpdates.Count > 0)
             {
                 try
                 {
                     refWriter.writePackedRefs();
-                    foreach (RemoteRefUpdate u in packedRefUpdates)
-                        u.Status = RemoteRefUpdate.UpdateStatus.OK;
+                    foreach (RemoteRefUpdate u in _packedRefUpdates)
+                    {
+                    	u.Status = RemoteRefUpdate.UpdateStatus.OK;
+                    }
                 }
                 catch (IOException e)
                 {
-                    foreach (RemoteRefUpdate u in packedRefUpdates)
+                    foreach (RemoteRefUpdate u in _packedRefUpdates)
                     {
                         u.Status = RemoteRefUpdate.UpdateStatus.REJECTED_OTHER_REASON;
                         u.Message = e.Message;
                     }
-                    throw new TransportException(uri, "failed updating refs", e);
+                    throw new TransportException(_uri, "failed updating refs", e);
                 }
             }
 
@@ -134,56 +130,62 @@ namespace GitSharp.Transport
             }
             catch (IOException err)
             {
-                throw new TransportException(uri, "failed updating refs", err);
+                throw new TransportException(_uri, "failed updating refs", err);
             }
         }
 
         public override void Close()
         {
-            dest.close();
+            _dest.close();
         }
 
-        private void sendpack(IEnumerable<RemoteRefUpdate> updates, IProgressMonitor monitor)
+        private void Sendpack(IEnumerable<RemoteRefUpdate> updates, IProgressMonitor monitor)
         {
             string pathPack = null;
             string pathIdx = null;
             
             try
             {
-                PackWriter pw = new PackWriter(local, monitor);
-                List<ObjectId> need = new List<ObjectId>();
-                List<ObjectId> have = new List<ObjectId>();
+                var pw = new PackWriter(_local, monitor);
+                var need = new List<ObjectId>();
+                var have = new List<ObjectId>();
 
                 foreach (RemoteRefUpdate r in updates)
-                    need.Add(r.NewObjectId);
+                {
+                	need.Add(r.NewObjectId);
+                }
+
                 foreach (Ref r in Refs)
                 {
                     have.Add(r.ObjectId);
                     if (r.PeeledObjectId != null)
-                        have.Add(r.PeeledObjectId);
+                    {
+                    	have.Add(r.PeeledObjectId);
+                    }
                 }
                 pw.preparePack(need, have);
 
-                if (pw.getObjectsNumber() == 0)
-                    return;
+                if (pw.getObjectsNumber() == 0) return;
 
-                packNames = new Dictionary<string, string>();
-                foreach (string n in dest.getPackNames())
-                    packNames.Add(n, n);
+                _packNames = new Dictionary<string, string>();
+                foreach (string n in _dest.getPackNames())
+                {
+                	_packNames.Add(n, n);
+                }
 
                 string b = "pack-" + pw.computeName().Name;
-                string packName = b + ".pack";
+                string packName = b + IndexPack.PackSuffix;
                 pathPack = "pack/" + packName;
-                pathIdx = "pack/" + b + ".idx";
+                pathIdx = "pack/" + b + IndexPack.IndexSuffix;
 
-                if (packNames.Remove(packName))
+                if (_packNames.Remove(packName))
                 {
-                    dest.writeInfoPacks(new List<string>(packNames.Keys));
-                    dest.deleteFile(pathIdx);
+                    _dest.writeInfoPacks(new List<string>(_packNames.Keys));
+                    _dest.deleteFile(pathIdx);
                 }
 
                 string wt = "Put " + b.Slice(0, 12);
-                Stream os = dest.writeFile(pathPack, monitor, wt + "..pack");
+                Stream os = _dest.writeFile(pathPack, monitor, wt + "." + IndexPack.PackSuffix);
                 try
                 {
                     pw.writePack(os);
@@ -193,7 +195,7 @@ namespace GitSharp.Transport
                     os.Close();
                 }
 
-                os = dest.writeFile(pathIdx, monitor, wt + "..idx");
+                os = _dest.writeFile(pathIdx, monitor, wt + "..idx");
                 try
                 {
                     pw.writeIndex(os);
@@ -203,26 +205,26 @@ namespace GitSharp.Transport
                     os.Close();
                 }
 
-                List<string> infoPacks = new List<string> {packName};
-                infoPacks.AddRange(packNames.Keys);
-                dest.writeInfoPacks(infoPacks);
+                var infoPacks = new List<string> {packName};
+                infoPacks.AddRange(_packNames.Keys);
+                _dest.writeInfoPacks(infoPacks);
             }
             catch (IOException err)
             {
-                safeDelete(pathIdx);
-                safeDelete(pathPack);
+                SafeDelete(pathIdx);
+                SafeDelete(pathPack);
 
-                throw new TransportException(uri, "cannot store objects", err);
+                throw new TransportException(_uri, "cannot store objects", err);
             }
         }
 
-        private void safeDelete(string path)
+        private void SafeDelete(string path)
         {
             if (path != null)
             {
                 try
                 {
-                    dest.deleteFile(path);
+                    _dest.deleteFile(path);
                 }
                 catch (IOException)
                 {
@@ -233,15 +235,15 @@ namespace GitSharp.Transport
             }
         }
 
-        private void deleteCommand(RemoteRefUpdate u)
+        private void DeleteCommand(RemoteRefUpdate u)
         {
             Ref r = null;
-            foreach (string n in newRefs.Keys)
+            foreach (string n in _newRefs.Keys)
             {
                 if (n == u.RemoteName)
                 {
-                    r = newRefs[n];
-                    newRefs.Remove(n);
+                    r = _newRefs[n];
+                    _newRefs.Remove(n);
                 }
             }
             
@@ -253,14 +255,14 @@ namespace GitSharp.Transport
 
             if (r.StorageFormat.IsPacked)
             {
-                packedRefUpdates.Add(u);
+                _packedRefUpdates.Add(u);
             }
 
             if (r.StorageFormat.IsLoose)
             {
                 try
                 {
-                    dest.deleteRef(u.RemoteName);
+                    _dest.deleteRef(u.RemoteName);
                     u.Status = RemoteRefUpdate.UpdateStatus.OK;
                 }
                 catch (IOException e)
@@ -272,7 +274,7 @@ namespace GitSharp.Transport
 
             try
             {
-                dest.deleteRefLog(u.RemoteName);
+                _dest.deleteRefLog(u.RemoteName);
             }
             catch (IOException e)
             {
@@ -281,12 +283,12 @@ namespace GitSharp.Transport
             }
         }
 
-        private void updateCommand(RemoteRefUpdate u)
+        private void UpdateCommand(RemoteRefUpdate u)
         {
             try
             {
-                dest.writeRef(u.RemoteName, u.NewObjectId);
-                newRefs.Add(u.RemoteName, new Ref(Ref.Storage.Loose, u.RemoteName, u.NewObjectId));
+                _dest.writeRef(u.RemoteName, u.NewObjectId);
+                _newRefs.Add(u.RemoteName, new Ref(Ref.Storage.Loose, u.RemoteName, u.NewObjectId));
                 u.Status = RemoteRefUpdate.UpdateStatus.OK;
             }
             catch (IOException e)
@@ -296,54 +298,77 @@ namespace GitSharp.Transport
             }
         }
 
-        private bool isNewRepository()
-        {
-            return RefsMap.Count == 0 && packNames != null && packNames.Count == 0;
-        }
+    	private bool IsNewRepository
+    	{
+    		get { return RefsMap.Count == 0 && _packNames != null && _packNames.Count == 0; }
+    	}
 
-        private void createNewRepository(IList<RemoteRefUpdate> updates)
+    	private void CreateNewRepository(IList<RemoteRefUpdate> updates)
         {
             try
             {
-                string @ref = "ref: " + pickHEAD(updates) + "\n";
+                string @ref = "ref: " + PickHead(updates) + "\n";
                 byte[] bytes = Constants.encode(@ref);
-                dest.writeFile(WalkRemoteObjectDatabase.ROOT_DIR + Constants.HEAD, bytes);
+                _dest.writeFile(WalkRemoteObjectDatabase.ROOT_DIR + Constants.HEAD, bytes);
             }
             catch (IOException e)
             {
-                throw new TransportException(uri, "Cannot create HEAD", e);
+                throw new TransportException(_uri, "Cannot Create HEAD", e);
             }
 
             try
             {
                 const string config = "[core]\n\trepositoryformatversion = 0\n";
                 byte[] bytes = Constants.encode(config);
-                dest.writeFile(WalkRemoteObjectDatabase.ROOT_DIR + "config", bytes);
+                _dest.writeFile(WalkRemoteObjectDatabase.ROOT_DIR + "config", bytes);
             }
             catch (IOException e)
             {
-                throw new TransportException(uri, "Cannot create config", e);
+                throw new TransportException(_uri, "Cannot Create config", e);
             }
         }
 
-        private static string pickHEAD(IList<RemoteRefUpdate> updates)
+        private static string PickHead(IList<RemoteRefUpdate> updates)
         {
             foreach (RemoteRefUpdate u in updates)
             {
                 string n = u.RemoteName;
                 if (n.Equals(Constants.R_HEADS + Constants.MASTER))
-                    return n;
+                {
+                	return n;
+                }
             }
 
             foreach (RemoteRefUpdate u in updates)
             {
                 string n = u.RemoteName;
                 if (n.StartsWith(Constants.R_HEADS))
-                    return n;
+                {
+                	return n;
+                }
             }
 
             return updates[0].RemoteName;
-        }
-    }
+		}
 
+		#region Nested Types
+
+		private class PushRefWriter : RefWriter
+		{
+			private readonly WalkRemoteObjectDatabase _dest;
+
+			public PushRefWriter(IEnumerable<Ref> refs, WalkRemoteObjectDatabase dest)
+				: base(refs)
+			{
+				_dest = dest;
+			}
+
+			protected override void writeFile(string file, byte[] content)
+			{
+				_dest.writeFile(WalkRemoteObjectDatabase.ROOT_DIR + file, content);
+			}
+		}
+
+		#endregion
+	}
 }

@@ -163,13 +163,13 @@ namespace GitSharp.Tests
             Assert.IsNotNull(load2);
             Assert.AreNotSame(load1, load2);
 
-            byte[] data2 = load2.getCachedBytes();
-            byte[] data1 = load1.getCachedBytes();
+            byte[] data2 = load2.CachedBytes;
+            byte[] data1 = load1.CachedBytes;
             Assert.IsNotNull(data2);
             Assert.IsNotNull(data1);
             Assert.AreNotSame(data1, data2); // cache should be per-pack, not per object
             Assert.IsTrue(Equals(data1, data2));
-            Assert.AreEqual(load2.getType(), load1.getType());
+            Assert.AreEqual(load2.Type, load1.Type);
         }
 
         private static void WhackCache()
@@ -192,8 +192,8 @@ namespace GitSharp.Tests
             }
 
             ObjectId name = pw.computeName();
-            FileInfo packFile = FullPackFileName(name, ".pack");
-            FileInfo idxFile = FullPackFileName(name, ".idx");
+			FileInfo packFile = FullPackFileName(name);
+            FileInfo idxFile = FullPackFileName(name);
             var files = new[] { packFile, idxFile };
             Write(files, pw);
             return files;
@@ -266,10 +266,10 @@ namespace GitSharp.Tests
             }
         }
 
-        private FileInfo FullPackFileName(AnyObjectId name, string suffix)
+        private FileInfo FullPackFileName(AnyObjectId name)
         {
             var packdir = Path.Combine(db.getObjectDatabase().getDirectory().FullName, "pack");
-            return new FileInfo(Path.Combine(packdir, "pack-" + name.Name + suffix));
+            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetPackFileName(name.Name)));
         }
 
         private RevObject WriteBlob(Repository repo, string data)

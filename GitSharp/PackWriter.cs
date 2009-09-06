@@ -47,598 +47,588 @@ using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace GitSharp
 {
-    public class PackWriter
-    {
-        public const string COUNTING_OBJECTS_PROGRESS = "Counting objects";
-        public const string SEARCHING_REUSE_PROGRESS = "Compressing objects";
-        public const string WRITING_OBJECTS_PROGRESS = "Writing objects";
-        public const bool DEFAULT_REUSE_DELTAS = true;
-        public const bool DEFAULT_REUSE_OBJECTS = true;
-        public const bool DEFAULT_DELTA_BASE_AS_OFFSET = false;
-        public const int DEFAULT_MAX_DELTA_DEPTH = 50;
-        private const int PACK_VERSION_GENERATED = 2;
+	public class PackWriter
+	{
+		public const string COUNTING_OBJECTS_PROGRESS = "Counting objects";
+		public const string SEARCHING_REUSE_PROGRESS = "Compressing objects";
+		public const string WRITING_OBJECTS_PROGRESS = "Writing objects";
+		public const bool DEFAULT_REUSE_DELTAS = true;
+		public const bool DEFAULT_REUSE_OBJECTS = true;
+		public const bool DEFAULT_DELTA_BASE_AS_OFFSET = false;
+		public const int DEFAULT_MAX_DELTA_DEPTH = 50;
 
-        class ObjectToPack : PackedObjectInfo
-        {
-        	private PackedObjectLoader reuseLoader;
-            private int flags;
+		private const int PackVersionGenerated = 2;
+		
+		private static List<ObjectToPack>[] CreateObjectsLists()
+		{
+			var ret = new List<ObjectToPack>[Constants.OBJ_TAG + 1];
+			ret[0] = new List<ObjectToPack>();
+			ret[Constants.OBJ_COMMIT] = new List<ObjectToPack>();
+			ret[Constants.OBJ_TREE] = new List<ObjectToPack>();
+			ret[Constants.OBJ_BLOB] = new List<ObjectToPack>();
+			ret[Constants.OBJ_TAG] = new List<ObjectToPack>();
+			return ret;
+		}
 
-            public ObjectToPack(AnyObjectId src, int type) : base(src)
-            {
-                flags |= type << 1;
-            }
+		private readonly List<ObjectToPack>[] _objectsLists;
+		private readonly ObjectIdSubclassMap<ObjectToPack> _objectsMap;
+		private readonly ObjectIdSubclassMap<ObjectId> _edgeObjects;
+		private readonly byte[] _buf;
+		private readonly WindowCursor _windowCursor;
+		private readonly Repository _db;
+		private PackOutputStream _pos;
+		private readonly Deflater _deflater;
+		private readonly IProgressMonitor _initMonitor;
+		private readonly IProgressMonitor _writeMonitor;
+		private List<ObjectToPack> _sortedByName;
+		private byte[] _packChecksum;
+		private int _outputVersion;
 
-        	public ObjectId DeltaBaseId { get; set; }
+		public PackWriter(Repository repo, IProgressMonitor monitor)
+			: this(repo, monitor, monitor)
+		{
+		}
 
-        	public ObjectToPack DeltaBase
-            {
-                get
-                {
-                    if (DeltaBaseId is ObjectToPack) return (ObjectToPack) DeltaBaseId;
-                    return null;
-                }
-            }
+		public PackWriter(Repository repo, IProgressMonitor imonitor, IProgressMonitor wmonitor)
+		{
+			_objectsLists = CreateObjectsLists();
+			_objectsMap = new ObjectIdSubclassMap<ObjectToPack>();
+			_edgeObjects = new ObjectIdSubclassMap<ObjectId>();
+			_buf = new byte[16384]; // 16 KB
+			_windowCursor = new WindowCursor();
 
-            public void clearDeltaBase()
-            {
-                DeltaBaseId = null;
-            }
+			IgnoreMissingUninteresting = true;
+			MaxDeltaDepth = DEFAULT_MAX_DELTA_DEPTH;
+			DeltaBaseAsOffset = DEFAULT_DELTA_BASE_AS_OFFSET;
+			ReuseObjects = DEFAULT_REUSE_OBJECTS;
+			ReuseDeltas = DEFAULT_REUSE_DELTAS;
+			_db = repo;
+			_initMonitor = imonitor;
+			_writeMonitor = wmonitor;
+			_deflater = new Deflater(_db.Config.getCore().getCompression());
+			_outputVersion = repo.Config.getCore().getPackIndexVersion();
+		}
 
-            public bool IsDeltaRepresentation
-            {
-                get
-                {
-                    return DeltaBaseId != null;
-                }
-            }
+		public bool ReuseDeltas { get; set; }
+		public bool ReuseObjects { get; set; }
+		public bool DeltaBaseAsOffset { get; set; }
+		public int MaxDeltaDepth { get; set; }
+		public bool Thin { get; set; }
+		public bool IgnoreMissingUninteresting { get; set; }
 
-            public bool IsWritten
-            {
-                get
-                {
-                    return Offset != 0;
-                }
-            }
+		public void setIndexVersion(int version)
+		{
+			_outputVersion = version;
+		}
 
-            public PackedObjectLoader useLoader()
-            {
-                PackedObjectLoader r = reuseLoader;
-                reuseLoader = null;
-                return r;
-            }
+		public int getObjectsNumber()
+		{
+			return _objectsMap.size();
+		}
 
-            public bool HasReuseLoader
-            {
-                get
-                {
-                    return reuseLoader != null;
-                }
-            }
-
-            public void setReuseLoader(PackedObjectLoader reuseLoader)
-            {
-                this.reuseLoader = reuseLoader;
-            }
-
-            public void disposeLoader()
-            {
-                reuseLoader = null;
-            }
-
-            public int Type
-            {
-                get
-                {
-                    return (flags >> 1) & 0x7; 
-                }
-            }
-
-            public int DeltaDepth
-            {
-                get
-                {
-                    return (int) (((uint) flags) >> 4);
-                }
-            }
-            
-			/*
-            public void updateDeltaDepth()
-            {
-                int d;
-                if (DeltaBaseId is ObjectToPack)
-                    d = ((ObjectToPack)DeltaBaseId).DeltaDepth + 1;
-                else d = DeltaBaseId != null ? 1 : 0;
-                flags = (d << 4) | flags & 0x15;
-            }
-			*/
-
-            public bool WantWrite
-            {
-                get
-                {
-                    return (flags & 1) == 1;
-                }
-            }
-
-            public void markWantWrite()
-            {
-                flags |= 1;
-            }
-        }
-
-        private readonly List<ObjectToPack>[] objectsLists = createObjectsLists();
-
-        private static List<ObjectToPack>[] createObjectsLists()
-        {
-            List<ObjectToPack>[] ret = new List<ObjectToPack>[Constants.OBJ_TAG + 1];
-            ret[0] = new List<ObjectToPack>();
-            ret[Constants.OBJ_COMMIT] = new List<ObjectToPack>();
-            ret[Constants.OBJ_TREE] = new List<ObjectToPack>();
-            ret[Constants.OBJ_BLOB] = new List<ObjectToPack>();
-            ret[Constants.OBJ_TAG] = new List<ObjectToPack>();
-            return ret;
-        }
-
-        private readonly ObjectIdSubclassMap<ObjectToPack> objectsMap = new ObjectIdSubclassMap<ObjectToPack>();
-        private readonly ObjectIdSubclassMap<ObjectId> edgeObjects = new ObjectIdSubclassMap<ObjectId>();
-        private readonly Repository db;
-        private PackOutputStream pos;
-        private readonly Deflater deflater;
-        private readonly IProgressMonitor initMonitor;
-        private readonly IProgressMonitor writeMonitor;
-        private readonly byte[] buf = new byte[16384]; // 16 KB
-        private readonly WindowCursor windowCursor = new WindowCursor();
-        private List<ObjectToPack> sortedByName;
-        private byte[] packcsum;
-    	private int outputVersion;
-
-    	public PackWriter(Repository repo, IProgressMonitor monitor)
-            : this(repo, monitor, monitor)
-        {
-        }
-
-        public PackWriter(Repository repo, IProgressMonitor imonitor, IProgressMonitor wmonitor)
-        {
-        	IgnoreMissingUninteresting = true;
-        	MaxDeltaDepth = DEFAULT_MAX_DELTA_DEPTH;
-        	DeltaBaseAsOffset = DEFAULT_DELTA_BASE_AS_OFFSET;
-        	ReuseObjects = DEFAULT_REUSE_OBJECTS;
-        	ReuseDeltas = DEFAULT_REUSE_DELTAS;
-        	db = repo;
-            initMonitor = imonitor;
-            writeMonitor = wmonitor;
-            deflater = new Deflater(db.Config.getCore().getCompression());
-            outputVersion = repo.Config.getCore().getPackIndexVersion();
-        }
-
-    	public bool ReuseDeltas { get; set; }
-    	public bool ReuseObjects { get; set; }
-    	public bool DeltaBaseAsOffset { get; set; }
-    	public int MaxDeltaDepth { get; set; }
-    	public bool Thin { get; set; }
-    	public bool IgnoreMissingUninteresting { get; set; }
-
-    	public void setIndexVersion(int version)
-        {
-            outputVersion = version;
-        }
-
-        public int getObjectsNumber()
-        {
-            return objectsMap.size();
-        }
-
-        public void preparePack(IEnumerable<RevObject> objectsSource)
-        {
-			foreach(RevObject obj in objectsSource)
+		public void preparePack(IEnumerable<RevObject> objectsSource)
+		{
+			foreach (RevObject obj in objectsSource)
 			{
 				addObject(obj);
 			}
-        }
+		}
 
-        public void preparePack<T>(IEnumerable<T> interestingObjects, IEnumerable<T> uninterestingObjects) 
+		public void preparePack<T>(IEnumerable<T> interestingObjects, IEnumerable<T> uninterestingObjects)
 			where T : ObjectId
-        {
-            ObjectWalk walker = setUpWalker(interestingObjects, uninterestingObjects);
-            findObjectsToPack(walker);
-        }
+		{
+			ObjectWalk walker = SetUpWalker(interestingObjects, uninterestingObjects);
+			FindObjectsToPack(walker);
+		}
 
-        public bool willInclude(AnyObjectId id)
-        {
-            return objectsMap.get(id) != null;
-        }
+		public bool willInclude(AnyObjectId id)
+		{
+			return _objectsMap.get(id) != null;
+		}
 
-        public ObjectId computeName()
-        {
-            MessageDigest md = Constants.newMessageDigest();
-            foreach (ObjectToPack otp in sortByName())
-            {
-                otp.copyRawTo(buf, 0);
-                md.Update(buf, 0, Constants.OBJECT_ID_LENGTH);
-            }
-            return ObjectId.FromRaw(md.Digest());
-        }
+		public ObjectId computeName()
+		{
+			MessageDigest md = Constants.newMessageDigest();
+			foreach (ObjectToPack otp in sortByName())
+			{
+				otp.copyRawTo(_buf, 0);
+				md.Update(_buf, 0, Constants.OBJECT_ID_LENGTH);
+			}
+			return ObjectId.FromRaw(md.Digest());
+		}
 
-        public void writeIndex(Stream indexStream)
-        {
-            List<ObjectToPack> list = sortByName();
+		public void writeIndex(Stream indexStream)
+		{
+			List<ObjectToPack> list = sortByName();
 
-			PackIndexWriter iw = outputVersion <= 0 ? 
-				PackIndexWriter.CreateOldestPossible(indexStream, list) : 
-				PackIndexWriter.CreateVersion(indexStream, outputVersion);
+			PackIndexWriter iw = _outputVersion <= 0 ?
+				PackIndexWriter.CreateOldestPossible(indexStream, list) :
+				PackIndexWriter.CreateVersion(indexStream, _outputVersion);
 
-            iw.Write(list, packcsum);
-        }
+			iw.Write(list, _packChecksum);
+		}
 
-        private List<ObjectToPack> sortByName()
-        {
-            if (sortedByName == null)
-            {
-                sortedByName = new List<ObjectToPack>(objectsMap.size());
+		private List<ObjectToPack> sortByName()
+		{
+			if (_sortedByName == null)
+			{
+				_sortedByName = new List<ObjectToPack>(_objectsMap.size());
 
-                foreach (List<ObjectToPack> list in objectsLists)
-                {
-                    foreach (ObjectToPack otp in list)
-                    {
-                        sortedByName.Add(otp);
-                    }
-                }
+				foreach (List<ObjectToPack> list in _objectsLists)
+				{
+					foreach (ObjectToPack otp in list)
+					{
+						_sortedByName.Add(otp);
+					}
+				}
 
-                sortedByName.Sort();
-            }
+				_sortedByName.Sort();
+			}
 
-            return sortedByName;
-        }
+			return _sortedByName;
+		}
 
-        public void writePack(Stream packStream)
-        {
-            if (ReuseDeltas || ReuseObjects)
-            {
-            	searchForReuse();
-            }
+		public void writePack(Stream packStream)
+		{
+			if (ReuseDeltas || ReuseObjects)
+			{
+				SearchForReuse();
+			}
 
-            if (!(packStream is BufferedStream))
-            {
-            	packStream = new BufferedStream(packStream);
-            }
+			if (!(packStream is BufferedStream))
+			{
+				packStream = new BufferedStream(packStream);
+			}
 
-            pos = new PackOutputStream(packStream);
+			_pos = new PackOutputStream(packStream);
 
-            writeMonitor.BeginTask(WRITING_OBJECTS_PROGRESS, getObjectsNumber());
-            writeHeader();
-            writeObjects();
-            writeChecksum();
+			_writeMonitor.BeginTask(WRITING_OBJECTS_PROGRESS, getObjectsNumber());
+			WriteHeader();
+			WriteObjects();
+			WriteChecksum();
 
-            pos.Flush();
-            windowCursor.release();
-            writeMonitor.EndTask();
-        }
+			_pos.Flush();
+			_windowCursor.Release();
+			_writeMonitor.EndTask();
+		}
 
-        private void searchForReuse()
-        {
-            initMonitor.BeginTask(SEARCHING_REUSE_PROGRESS, getObjectsNumber());
-            List<PackedObjectLoader> reuseLoaders = new List<PackedObjectLoader>();
-            foreach (List<ObjectToPack> list in objectsLists)
-            {
-                foreach (ObjectToPack otp in list)
-                {
-                    if (initMonitor.IsCancelled)
-                        throw new IOException("Packing cancelled during objects writing.");
-                    reuseLoaders.Clear();
-                    searchForReuse(reuseLoaders, otp);
-                    initMonitor.Update(1);
-                }
-            }
+		private void SearchForReuse()
+		{
+			_initMonitor.BeginTask(SEARCHING_REUSE_PROGRESS, getObjectsNumber());
+			var reuseLoaders = new List<PackedObjectLoader>();
+			foreach (List<ObjectToPack> list in _objectsLists)
+			{
+				foreach (ObjectToPack otp in list)
+				{
+					if (_initMonitor.IsCancelled)
+					{
+						throw new IOException("Packing cancelled during objects writing.");
+					}
+					reuseLoaders.Clear();
+					SearchForReuse(reuseLoaders, otp);
+					_initMonitor.Update(1);
+				}
+			}
 
-            initMonitor.EndTask();
-        }
+			_initMonitor.EndTask();
+		}
 
-        private void searchForReuse(List<PackedObjectLoader> reuseLoaders, ObjectToPack otp)
-        {
-            db.openObjectInAllPacks(otp, reuseLoaders, windowCursor);
+		private void SearchForReuse(ICollection<PackedObjectLoader> reuseLoaders, ObjectToPack otp)
+		{
+			_db.OpenObjectInAllPacks(otp, reuseLoaders, _windowCursor);
 
-            if (ReuseDeltas)
-            {
-            	selectDeltaReuseForObject(otp, reuseLoaders);
-            }
+			if (ReuseDeltas)
+			{
+				SelectDeltaReuseForObject(otp, reuseLoaders);
+			}
 
-            if (ReuseObjects && !otp.HasReuseLoader)
-            {
-            	SelectObjectReuseForObject(otp, reuseLoaders);
-            }
-        }
+			if (ReuseObjects && !otp.HasReuseLoader)
+			{
+				SelectObjectReuseForObject(otp, reuseLoaders);
+			}
+		}
 
-        private void selectDeltaReuseForObject(ObjectToPack otp, IEnumerable<PackedObjectLoader> loaders)
-        {
-            PackedObjectLoader bestLoader = null;
-            ObjectId bestBase = null;
+		private void SelectDeltaReuseForObject(ObjectToPack otp, IEnumerable<PackedObjectLoader> loaders)
+		{
+			PackedObjectLoader bestLoader = null;
+			ObjectId bestBase = null;
 
-            foreach (PackedObjectLoader loader in loaders)
-            {
-                ObjectId idBase = loader.getDeltaBase();
-                if (idBase == null) continue;
-                ObjectToPack otpBase = objectsMap.get(idBase);
+			foreach (PackedObjectLoader loader in loaders)
+			{
+				ObjectId idBase = loader.DeltaBase;
+				if (idBase == null) continue;
+				ObjectToPack otpBase = _objectsMap.get(idBase);
 
-                if ((otpBase != null || (Thin && edgeObjects.get(idBase) != null)) && isBetterDeltaReuseLoader(bestLoader, loader))
-                {
-                    bestLoader = loader;
-                    bestBase = (otpBase ?? idBase);
-                }
-            }
+				if ((otpBase != null || (Thin && _edgeObjects.get(idBase) != null)) && IsBetterDeltaReuseLoader(bestLoader, loader))
+				{
+					bestLoader = loader;
+					bestBase = (otpBase ?? idBase);
+				}
+			}
 
-        	if (bestLoader == null) return;
+			if (bestLoader == null) return;
 
-        	otp.setReuseLoader(bestLoader);
-        	otp.DeltaBaseId = bestBase;
-        }
+			otp.SetReuseLoader(bestLoader);
+			otp.DeltaBaseId = bestBase;
+		}
 
-        private static bool isBetterDeltaReuseLoader(PackedObjectLoader currentLoader, PackedObjectLoader loader)
-        {
-            if (currentLoader == null) return true;
+		private static bool IsBetterDeltaReuseLoader(PackedObjectLoader currentLoader, PackedObjectLoader loader)
+		{
+			if (currentLoader == null) return true;
 
-            if (loader.getRawSize() < currentLoader.getRawSize()) return true;
+			if (loader.RawSize < currentLoader.RawSize) return true;
 
-            return loader.getRawSize() == currentLoader.getRawSize() && 
-				loader.supportsFastCopyRawData() &&
-                !currentLoader.supportsFastCopyRawData();
-        }
+			return loader.RawSize == currentLoader.RawSize &&
+				loader.SupportsFastCopyRawData &&
+				!currentLoader.SupportsFastCopyRawData;
+		}
 
-        private static void SelectObjectReuseForObject(ObjectToPack otp, IEnumerable<PackedObjectLoader> loaders)
-        {
-            foreach (PackedObjectLoader loader in loaders)
-            {
-            	if (!(loader is WholePackedObjectLoader)) continue;
+		private static void SelectObjectReuseForObject(ObjectToPack otp, IEnumerable<PackedObjectLoader> loaders)
+		{
+			foreach (PackedObjectLoader loader in loaders)
+			{
+				if (!(loader is WholePackedObjectLoader)) continue;
 
-            	otp.setReuseLoader(loader);
-            	return;
-            }
-        }
+				otp.SetReuseLoader(loader);
+				return;
+			}
+		}
 
-        private void writeHeader()
-        {
-            Constants.PACK_SIGNATURE.CopyTo(buf, 0);
-            NB.encodeInt32(buf, 4, PACK_VERSION_GENERATED);
-            NB.encodeInt32(buf, 8, getObjectsNumber());
-            pos.Write(buf, 0, 12);
-        }
+		private void WriteHeader()
+		{
+			Constants.PACK_SIGNATURE.CopyTo(_buf, 0);
+			NB.encodeInt32(_buf, 4, PackVersionGenerated);
+			NB.encodeInt32(_buf, 8, getObjectsNumber());
+			_pos.Write(_buf, 0, 12);
+		}
 
-        private void writeObjects()
-        {
-            foreach (List<ObjectToPack> list in objectsLists)
-            {
-                foreach (ObjectToPack otp in list)
-                {
-                    if (writeMonitor.IsCancelled)
-                    {
-                    	throw new IOException("Packing cancelled during objects writing");
-                    }
+		private void WriteObjects()
+		{
+			foreach (List<ObjectToPack> list in _objectsLists)
+			{
+				foreach (ObjectToPack otp in list)
+				{
+					if (_writeMonitor.IsCancelled)
+					{
+						throw new IOException("Packing cancelled during objects writing");
+					}
 
-                    if (!otp.IsWritten)
-                    {
-                    	writeObject(otp);
-                    }
-                }
-            }
-        }
+					if (!otp.IsWritten)
+					{
+						WriteObject(otp);
+					}
+				}
+			}
+		}
 
-        private void writeObject(ObjectToPack otp)
-        {
-            otp.markWantWrite();
-            if (otp.IsDeltaRepresentation)
-            {
-                ObjectToPack deltaBase = otp.DeltaBase;
-                Debug.Assert(deltaBase != null || Thin);
-                if (deltaBase != null && !deltaBase.IsWritten)
-                {
-                    if (deltaBase.WantWrite)
-                    {
-                        otp.clearDeltaBase();
-                        otp.disposeLoader();
-                    }
-                    else
-                    {
-                        writeObject(deltaBase);
-                    }
-                }
-            }
+		private void WriteObject(ObjectToPack otp)
+		{
+			otp.MarkWantWrite();
+			if (otp.IsDeltaRepresentation)
+			{
+				ObjectToPack deltaBase = otp.DeltaBase;
+				Debug.Assert(deltaBase != null || Thin);
+				if (deltaBase != null && !deltaBase.IsWritten)
+				{
+					if (deltaBase.WantWrite)
+					{
+						otp.ClearDeltaBase();
+						otp.DisposeLoader();
+					}
+					else
+					{
+						WriteObject(deltaBase);
+					}
+				}
+			}
 
-            Debug.Assert(!otp.IsWritten);
+			Debug.Assert(!otp.IsWritten);
 
-            pos.resetCRC32();
-            otp.Offset = pos.Length;
+			_pos.resetCRC32();
+			otp.Offset = _pos.Length;
 
-            PackedObjectLoader reuse = open(otp);
-            if (reuse != null)
-            {
-                try
-                {
-                    if (otp.IsDeltaRepresentation)
-                    {
-                        writeDeltaObjectReuse(otp, reuse);
-                    }
-                    else
-                    {
-                        writeObjectHeader(otp.Type, reuse.getSize());
-                        reuse.copyRawData(pos, buf, windowCursor);
-                    }
-                }
-                finally
-                {
-                    reuse.endCopyRawData();
-                }
-            }
-            else if (otp.IsDeltaRepresentation)
-            {
-                throw new IOException("creating deltas is not implemented");
-            }
-            else
-            {
-                writeWholeObjectDeflate(otp);
-            }
-            otp.CRC = pos.getCRC32();
-            writeMonitor.Update(1);
-        }
+			PackedObjectLoader reuse = Open(otp);
+			if (reuse != null)
+			{
+				try
+				{
+					if (otp.IsDeltaRepresentation)
+					{
+						WriteDeltaObjectReuse(otp, reuse);
+					}
+					else
+					{
+						WriteObjectHeader(otp.Type, reuse.Size);
+						reuse.CopyRawData(_pos, _buf, _windowCursor);
+					}
+				}
+				finally
+				{
+					reuse.endCopyRawData();
+				}
+			}
+			else if (otp.IsDeltaRepresentation)
+			{
+				throw new IOException("creating deltas is not implemented");
+			}
+			else
+			{
+				WriteWholeObjectDeflate(otp);
+			}
+			otp.CRC = _pos.getCRC32();
+			_writeMonitor.Update(1);
+		}
 
-        private PackedObjectLoader open(ObjectToPack otp)
-        {
-            while(true)
-            {
-                PackedObjectLoader reuse = otp.useLoader();
-                if (reuse == null)
-                    return null;
+		private PackedObjectLoader Open(ObjectToPack otp)
+		{
+			while (true)
+			{
+				PackedObjectLoader reuse = otp.UseLoader();
+				if (reuse == null) return null;
 
-                try
-                {
-                    reuse.beginCopyRawData();
-                    return reuse;
-                }
-                catch (IOException)
-                {
-                    otp.clearDeltaBase();
-                    searchForReuse(new List<PackedObjectLoader>(), otp);
-                    continue;
-                }
-            }
-        }
+				try
+				{
+					reuse.beginCopyRawData();
+					return reuse;
+				}
+				catch (IOException)
+				{
+					otp.ClearDeltaBase();
+					SearchForReuse(new List<PackedObjectLoader>(), otp);
+					continue;
+				}
+			}
+		}
 
-        private void writeWholeObjectDeflate(ObjectToPack otp)
-        {
-            ObjectLoader loader = db.openObject(windowCursor, otp);
-            byte[] data = loader.getCachedBytes();
-            writeObjectHeader(otp.Type, data.Length);
-            deflater.Reset();
-            deflater.SetInput(data, 0, data.Length);
-            deflater.Finish();
-            do
-            {
-                int n = deflater.Deflate(buf, 0, buf.Length);
-                if (n > 0)
-                    pos.Write(buf, 0, n);
-            } while (!deflater.IsFinished);
-        }
+		private void WriteWholeObjectDeflate(ObjectToPack otp)
+		{
+			ObjectLoader loader = _db.openObject(_windowCursor, otp);
+			byte[] data = loader.CachedBytes;
+			WriteObjectHeader(otp.Type, data.Length);
+			_deflater.Reset();
+			_deflater.SetInput(data, 0, data.Length);
+			_deflater.Finish();
+			do
+			{
+				int n = _deflater.Deflate(_buf, 0, _buf.Length);
+				if (n > 0)
+				{
+					_pos.Write(_buf, 0, n);
+				}
+			} while (!_deflater.IsFinished);
+		}
 
-        private void writeDeltaObjectReuse(ObjectToPack otp, PackedObjectLoader reuse)
-        {
-            if (DeltaBaseAsOffset && otp.DeltaBase != null)
-            {
-                writeObjectHeader(Constants.OBJ_OFS_DELTA, reuse.getRawSize());
+		private void WriteDeltaObjectReuse(ObjectToPack otp, PackedObjectLoader reuse)
+		{
+			if (DeltaBaseAsOffset && otp.DeltaBase != null)
+			{
+				WriteObjectHeader(Constants.OBJ_OFS_DELTA, reuse.RawSize);
 
-                ObjectToPack deltaBase = otp.DeltaBase;
-                long offsetDiff = otp.Offset - deltaBase.Offset;
-                int local_pos = buf.Length - 1;
-                buf[local_pos] = (byte) (offsetDiff & 0x7F);
-                while ((offsetDiff >>= 7) > 0)
-                {
-                    buf[--local_pos] = (byte) (0x80 | (--offsetDiff & 0x7F));
-                }
+				ObjectToPack deltaBase = otp.DeltaBase;
+				long offsetDiff = otp.Offset - deltaBase.Offset;
+				int localPos = _buf.Length - 1;
+				_buf[localPos] = (byte)(offsetDiff & 0x7F);
+				while ((offsetDiff >>= 7) > 0)
+				{
+					_buf[--localPos] = (byte)(0x80 | (--offsetDiff & 0x7F));
+				}
 
-                this.pos.Write(buf, local_pos, buf.Length - local_pos);
-            }
-            else
-            {
-                writeObjectHeader(Constants.OBJ_REF_DELTA, reuse.getRawSize());
-                otp.DeltaBaseId.copyRawTo(buf, 0);
-                this.pos.Write(buf, 0, Constants.OBJECT_ID_LENGTH);
-            }
-            reuse.copyRawData(this.pos, buf, windowCursor);
-        }
+				_pos.Write(_buf, localPos, _buf.Length - localPos);
+			}
+			else
+			{
+				WriteObjectHeader(Constants.OBJ_REF_DELTA, reuse.RawSize);
+				otp.DeltaBaseId.copyRawTo(_buf, 0);
+				_pos.Write(_buf, 0, Constants.OBJECT_ID_LENGTH);
+			}
 
-        private void writeObjectHeader(int objectType, long dataLength)
-        {
-            long nextLength = (long) (((ulong) dataLength) >> 4);
-            int size = 0;
-            buf[size++] = (byte) ((nextLength > 0 ? 0x80 : 0x00) | (objectType << 4) | (dataLength & 0x0F));
-            dataLength = nextLength;
-            while (dataLength > 0)
-            {
-                nextLength = (long) (((ulong) nextLength) >> 7);
-                buf[size++] = (byte) ((nextLength > 0 ? 0x80 : 0x00) | (dataLength & 0x7F));
-                dataLength = nextLength;
-            }
-            pos.Write(buf, 0, size);
-        }
+			reuse.CopyRawData(_pos, _buf, _windowCursor);
+		}
 
-        private void writeChecksum()
-        {
-            packcsum = pos.getDigest();
-            pos.Write(packcsum, 0, packcsum.Length);
-        }
+		private void WriteObjectHeader(int objectType, long dataLength)
+		{
+			var nextLength = (long)(((ulong)dataLength) >> 4);
+			int size = 0;
+			_buf[size++] = (byte)((nextLength > 0 ? 0x80 : 0x00) | (objectType << 4) | (dataLength & 0x0F));
+			dataLength = nextLength;
+			while (dataLength > 0)
+			{
+				nextLength = (long)(((ulong)nextLength) >> 7);
+				_buf[size++] = (byte)((nextLength > 0 ? 0x80 : 0x00) | (dataLength & 0x7F));
+				dataLength = nextLength;
+			}
+			_pos.Write(_buf, 0, size);
+		}
 
-        private ObjectWalk setUpWalker<T>(IEnumerable<T> interestingObjects, IEnumerable<T> uninterestingObjects) where T : ObjectId
-        {
-            ObjectWalk walker = new ObjectWalk(db);
-            walker.sort(RevSort.Strategy.TOPO);
-            walker.sort(RevSort.Strategy.COMMIT_TIME_DESC, true);
-            if (Thin)
-                walker.sort(RevSort.Strategy.BOUNDARY, true);
+		private void WriteChecksum()
+		{
+			_packChecksum = _pos.getDigest();
+			_pos.Write(_packChecksum, 0, _packChecksum.Length);
+		}
 
-            foreach (T id in interestingObjects)
-            {
-                RevObject o = walker.parseAny(id);
-                walker.markStart(o);
-            }
+		private ObjectWalk SetUpWalker<T>(IEnumerable<T> interestingObjects, IEnumerable<T> uninterestingObjects)
+			where T : ObjectId
+		{
+			var walker = new ObjectWalk(_db);
+			walker.sort(RevSort.Strategy.TOPO);
+			walker.sort(RevSort.Strategy.COMMIT_TIME_DESC, true);
 
-            if (uninterestingObjects != null)
-            {
-                foreach (T id in uninterestingObjects)
-                {
-                    RevObject o;
-                    try
-                    {
-                        o = walker.parseAny(id);
-                    }
-                    catch (MissingObjectException x)
-                    {
-                        if (IgnoreMissingUninteresting)
-                            continue;
-                        throw x;
-                    }
-                    walker.markUninteresting(o);
-                }
-            }
-            return walker;
-        }
+			if (Thin)
+			{
+				walker.sort(RevSort.Strategy.BOUNDARY, true);
+			}
 
-        private void findObjectsToPack(ObjectWalk walker)
-        {
-            // [caytchen] TODO: IProgressMonitor.UNKNOWN constant!
-            initMonitor.BeginTask(COUNTING_OBJECTS_PROGRESS, -1);
-            RevObject o;
+			foreach (T id in interestingObjects)
+			{
+				RevObject o = walker.parseAny(id);
+				walker.markStart(o);
+			}
 
-            while ((o = walker.next()) != null)
-            {
-                addObject(o);
-                o.dispose();
-                initMonitor.Update(1);
-            }
-            while ((o = walker.nextObject()) != null)
-            {
-                addObject(o);
-                o.dispose();
-                initMonitor.Update(1);
-            }
-            initMonitor.EndTask();
-        }
+			if (uninterestingObjects != null)
+			{
+				foreach (T id in uninterestingObjects)
+				{
+					RevObject o;
+					try
+					{
+						o = walker.parseAny(id);
+					}
+					catch (MissingObjectException)
+					{
+						if (IgnoreMissingUninteresting) continue;
+						throw;
+					}
+					walker.markUninteresting(o);
+				}
+			}
 
-        public void addObject(RevObject robject)
-        {
-            if (robject.has(RevFlag.UNINTERESTING))
-            {
-                edgeObjects.add(robject);
-                Thin = true;
-                return;
-            }
+			return walker;
+		}
 
-            ObjectToPack otp = new ObjectToPack(robject, robject.getType());
-            try
-            {
-                objectsLists[robject.getType()].Add(otp);
-            }
-            catch (IndexOutOfRangeException)
-            {
-                throw new IncorrectObjectTypeException(robject, "COMMIT nor TREE nor BLOB nor TAG");
-            }
-            objectsMap.add(otp);
-        }
-    }
+		private void FindObjectsToPack(ObjectWalk walker)
+		{
+			// [caytchen] TODO: IProgressMonitor.UNKNOWN constant!
+			_initMonitor.BeginTask(COUNTING_OBJECTS_PROGRESS, -1);
+			RevObject o;
+
+			while ((o = walker.next()) != null)
+			{
+				addObject(o);
+				o.dispose();
+				_initMonitor.Update(1);
+			}
+			while ((o = walker.nextObject()) != null)
+			{
+				addObject(o);
+				o.dispose();
+				_initMonitor.Update(1);
+			}
+			_initMonitor.EndTask();
+		}
+
+		public void addObject(RevObject robject)
+		{
+			if (robject.has(RevFlag.UNINTERESTING))
+			{
+				_edgeObjects.add(robject);
+				Thin = true;
+				return;
+			}
+
+			var otp = new ObjectToPack(robject, robject.getType());
+			try
+			{
+				_objectsLists[robject.getType()].Add(otp);
+			}
+			catch (IndexOutOfRangeException)
+			{
+				throw new IncorrectObjectTypeException(robject, "COMMIT nor TREE nor BLOB nor TAG");
+			}
+			_objectsMap.add(otp);
+		}
+
+		#region Nested Types
+
+		class ObjectToPack : PackedObjectInfo
+		{
+			private PackedObjectLoader _reuseLoader;
+			private int _flags;
+
+			public ObjectToPack(AnyObjectId src, int type)
+				: base(src)
+			{
+				_flags |= type << 1;
+			}
+
+			public ObjectId DeltaBaseId { get; set; }
+
+			public ObjectToPack DeltaBase
+			{
+				get
+				{
+					if (DeltaBaseId is ObjectToPack) return (ObjectToPack)DeltaBaseId;
+					return null;
+				}
+			}
+
+			public bool IsDeltaRepresentation
+			{
+				get { return DeltaBaseId != null; }
+			}
+
+			public bool IsWritten
+			{
+				get { return Offset != 0; }
+			}
+
+			public bool HasReuseLoader
+			{
+				get { return _reuseLoader != null; }
+			}
+
+			public int Type
+			{
+				get { return (_flags >> 1) & 0x7; }
+			}
+			/*
+			public int DeltaDepth
+			{
+				get { return (int)(((uint)_flags) >> 4); }
+			}
+			*/
+			public bool WantWrite
+			{
+				get { return (_flags & 1) == 1; }
+			}
+
+			public void DisposeLoader()
+			{
+				_reuseLoader = null;
+			}
+
+			public void ClearDeltaBase()
+			{
+				DeltaBaseId = null;
+			}
+
+			public PackedObjectLoader UseLoader()
+			{
+				PackedObjectLoader r = _reuseLoader;
+				_reuseLoader = null;
+				return r;
+			}
+
+			public void SetReuseLoader(PackedObjectLoader reuseLoader)
+			{
+				_reuseLoader = reuseLoader;
+			}
+
+			public void MarkWantWrite()
+			{
+				_flags |= 1;
+			}
+		}
+
+		#endregion
+	}
 }

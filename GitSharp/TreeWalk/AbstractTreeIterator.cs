@@ -421,7 +421,7 @@ namespace GitSharp.TreeWalk
 		 *             the current entry is not actually a tree and cannot be parsed
 		 *             as though it were a tree.
 		 * @throws IOException
-		 *             a loose object or pack file could not be read.
+		 *             a loose object or pack file could not be Read.
 		 */
 		public abstract AbstractTreeIterator createSubtreeIterator(Repository repo);
 
@@ -453,7 +453,7 @@ namespace GitSharp.TreeWalk
 		 *             the current entry is not actually a tree and cannot be parsed
 		 *             as though it were a tree.
 		 * @throws IOException
-		 *             a loose object or pack file could not be read.
+		 *             a loose object or pack file could not be Read.
 		 */
 		public virtual AbstractTreeIterator createSubtreeIterator(Repository repo, MutableObjectId idBuffer, WindowCursor curs)
 		{
@@ -543,7 +543,7 @@ namespace GitSharp.TreeWalk
 		}
 
 		/// <summary>
-		/// Indicates to the iterator that no more entries will be read.
+		/// Indicates to the iterator that no more entries will be Read.
 		/// <para>
 		/// This is only invoked by TreeWalk when the iteration is aborted early due
 		/// to a <see cref="StopWalkException"/> being thrown from

@@ -146,8 +146,8 @@ namespace GitSharp.Tests
 
             foreach (var packname in packs)
             {
-                new FileInfo("Resources/" + packname + ".pack").CopyTo(packDir + "/" + packname + ".pack", true);
-                new FileInfo("Resources/" + packname + ".idx").CopyTo(packDir + "/" + packname + ".idx", true);
+				new FileInfo("Resources/" + GitSharp.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir + "/" + GitSharp.Transport.IndexPack.GetPackFileName(packname), true);
+				new FileInfo("Resources/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir + "/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname), true);
             }
 
             new FileInfo("Resources/packed-refs").CopyTo(trash_git.FullName + "/packed-refs", true);
@@ -207,6 +207,7 @@ namespace GitSharp.Tests
         /// Utility method to delete a directory recursively. It is
         /// also used internally. If a file or directory cannot be removed
         /// it throws an AssertionFailure.
+        /// </summary>
         /// <param name="dir"></param>
         /// <param name="silent"></param>
         /// <param name="name"></param>
@@ -237,7 +238,7 @@ namespace GitSharp.Tests
             }
             catch (IOException e)
             {
-                ReportDeleteFailure(name, failOnError, dir);
+                //ReportDeleteFailure(name, failOnError, dir);
                 Console.WriteLine(name + ": " + e.Message);
             }
 
@@ -283,7 +284,7 @@ namespace GitSharp.Tests
                 tfp.Refresh();
                 if (!tfp.Exists)
                 {
-                    throw new IOException("Could not create directory " + tfp.FullName);
+                    throw new IOException("Could not Create directory " + tfp.FullName);
                 }
             }
             File.WriteAllText(tf.FullName, data, Encoding.Default);

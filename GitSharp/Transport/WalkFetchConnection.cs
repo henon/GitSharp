@@ -45,61 +45,63 @@ using GitSharp.Util;
 
 namespace GitSharp.Transport
 {
-
     public class WalkFetchConnection : BaseFetchConnection
     {
-        private readonly Repository local;
-        private readonly ObjectChecker objCheck;
-        private readonly List<WalkRemoteObjectDatabase> remotes;
-        private int lastRemoteIdx;
-        private readonly RevWalk.RevWalk revWalk;
-        private readonly TreeWalk.TreeWalk treeWalk;
+		private readonly RevFlag COMPLETE;
+		private readonly RevFlag IN_WORK_QUEUE;
+		private readonly RevFlag LOCALLY_SEEN;
 
-        private readonly RevFlag COMPLETE;
-        private readonly RevFlag IN_WORK_QUEUE;
-        private readonly RevFlag LOCALLY_SEEN;
+        private readonly Repository _local;
+        private readonly ObjectChecker _objCheck;
+        private readonly List<WalkRemoteObjectDatabase> _remotes;
+        private readonly RevWalk.RevWalk _revWalk;
+        private readonly TreeWalk.TreeWalk _treeWalk;
+        private readonly DateRevQueue _localCommitQueue;
+        private readonly LinkedList<WalkRemoteObjectDatabase> _noPacksYet;
+        private readonly LinkedList<WalkRemoteObjectDatabase> _noAlternatesYet;
+        private readonly LinkedList<RemotePack> _unfetchedPacks;
+        private readonly List<string> _packsConsidered;
+        private readonly MutableObjectId _idBuffer;
+        private readonly MessageDigest _objectDigest;
+        private readonly Dictionary<ObjectId, List<Exception>> _fetchErrors;
+        private readonly List<PackLock> _packLocks;
 
-        private readonly DateRevQueue localCommitQueue;
-        private LinkedList<ObjectId> workQueue;
-        private readonly LinkedList<WalkRemoteObjectDatabase> noPacksYet;
-        private readonly LinkedList<WalkRemoteObjectDatabase> noAlternatesYet;
-        private readonly LinkedList<RemotePack> unfetchedPacks;
-        private readonly List<string> packsConsidered;
-        private readonly MutableObjectId idBuffer = new MutableObjectId();
-        private readonly MessageDigest objectDigest = Constants.newMessageDigest();
-
-        private readonly Dictionary<ObjectId, List<Exception>> fetchErrors;
-        private string lockMessage;
-        private readonly List<PackLock> packLocks;
+		private int _lastRemoteIdx;
+		private string _lockMessage;
+		private LinkedList<ObjectId> _workQueue;
 
         public WalkFetchConnection(IWalkTransport t, WalkRemoteObjectDatabase w)
         {
-            Transport wt = (Transport) t;
-            local = wt.Local;
-            objCheck = wt.CheckFetchedObjects ? new ObjectChecker() : null;
+			_idBuffer = new MutableObjectId();
+			_objectDigest = Constants.newMessageDigest();
 
-            remotes = new List<WalkRemoteObjectDatabase> {w};
+            var wt = (Transport) t;
+            _local = wt.Local;
+            _objCheck = wt.CheckFetchedObjects ? new ObjectChecker() : null;
 
-            unfetchedPacks = new LinkedList<RemotePack>();
-            packsConsidered = new List<string>();
+            _remotes = new List<WalkRemoteObjectDatabase> {w};
 
-            noPacksYet = new LinkedList<WalkRemoteObjectDatabase>();
-            noPacksYet.AddFirst(w);
+            _unfetchedPacks = new LinkedList<RemotePack>();
+            _packsConsidered = new List<string>();
 
-            noAlternatesYet = new LinkedList<WalkRemoteObjectDatabase>();
-            noAlternatesYet.AddFirst(w);
+            _noPacksYet = new LinkedList<WalkRemoteObjectDatabase>();
+            _noPacksYet.AddFirst(w);
 
-            fetchErrors = new Dictionary<ObjectId, List<Exception>>();
-            packLocks = new List<PackLock>(4);
+            _noAlternatesYet = new LinkedList<WalkRemoteObjectDatabase>();
+            _noAlternatesYet.AddFirst(w);
 
-            revWalk = new RevWalk.RevWalk(local);
-            treeWalk = new TreeWalk.TreeWalk(local);
-            COMPLETE = revWalk.newFlag("COMPLETE");
-            IN_WORK_QUEUE = revWalk.newFlag("IN_WORK_QUEUE");
-            LOCALLY_SEEN = revWalk.newFlag("LOCALLY_SEEN");
+            _fetchErrors = new Dictionary<ObjectId, List<Exception>>();
+            _packLocks = new List<PackLock>(4);
 
-            localCommitQueue = new DateRevQueue();
-            workQueue = new LinkedList<ObjectId>();
+            _revWalk = new RevWalk.RevWalk(_local);
+            _treeWalk = new TreeWalk.TreeWalk(_local);
+
+            COMPLETE = _revWalk.newFlag("COMPLETE");
+            IN_WORK_QUEUE = _revWalk.newFlag("IN_WORK_QUEUE");
+            LOCALLY_SEEN = _revWalk.newFlag("LOCALLY_SEEN");
+
+            _localCommitQueue = new DateRevQueue();
+            _workQueue = new LinkedList<ObjectId>();
         }
 
         public override bool DidFetchTestConnectivity
@@ -112,65 +114,71 @@ namespace GitSharp.Transport
 
         public override List<PackLock> PackLocks
         {
-            get { return packLocks; }
+            get { return _packLocks; }
         }
 
         public override void SetPackLockMessage(string message)
         {
-            lockMessage = message;
+            _lockMessage = message;
         }
 
         public override void Close()
         {
-            foreach (RemotePack p in unfetchedPacks)
-                p.tmpIdx.Delete();
-            foreach (WalkRemoteObjectDatabase r in remotes)
-                r.close();
+            foreach (RemotePack p in _unfetchedPacks)
+            {
+            	p.tmpIdx.Delete();
+            }
+            foreach (WalkRemoteObjectDatabase r in _remotes)
+            {
+            	r.close();
+            }
         }
 
         protected override void doFetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
         {
             markLocalRefsComplete(have);
-            queueWants(want);
+            QueueWants(want);
 
-            while (!monitor.IsCancelled && workQueue.Count > 0)
+            while (!monitor.IsCancelled && _workQueue.Count > 0)
             {
-                ObjectId id = workQueue.First.Value;
-                workQueue.RemoveFirst();
+                ObjectId id = _workQueue.First.Value;
+                _workQueue.RemoveFirst();
                 if (!(id is RevObject) || !((RevObject)id).has(COMPLETE))
-                    downloadObject(monitor, id);
-                process(id);
+                {
+                	downloadObject(monitor, id);
+                }
+                Process(id);
             }
         }
 
-        private void queueWants(IEnumerable<Ref> want)
+        private void QueueWants(IEnumerable<Ref> want)
         {
-            List<ObjectId> inWorkQueue = new List<ObjectId>();
+            var inWorkQueue = new List<ObjectId>();
             foreach (Ref r in want)
             {
                 ObjectId id = r.ObjectId;
                 try
                 {
-                    RevObject obj = revWalk.parseAny(id);
+                    RevObject obj = _revWalk.parseAny(id);
                     if (obj.has(COMPLETE))
                         continue;
                     inWorkQueue.Add(id);
                     obj.add(IN_WORK_QUEUE);
-                    workQueue.AddLast(obj);
+                    _workQueue.AddLast(obj);
                 }
                 catch (MissingObjectException)
                 {
                     inWorkQueue.Add(id);
-                    workQueue.AddLast(id);
+                    _workQueue.AddLast(id);
                 }
                 catch (IOException e)
                 {
-                    throw new TransportException("Cannot read " + id.Name, e);
+                    throw new TransportException("Cannot Read " + id.Name, e);
                 }
             }
         }
 
-        private void process(ObjectId id)
+        private void Process(ObjectId id)
         {
             RevObject obj;
             try
@@ -180,18 +188,18 @@ namespace GitSharp.Transport
                     obj = (RevObject) id;
                     if (obj.has(COMPLETE))
                         return;
-                    revWalk.parse(obj);
+                    _revWalk.parse(obj);
                 }
                 else
                 {
-                    obj = revWalk.parseAny(id);
+                    obj = _revWalk.parseAny(id);
                     if (obj.has(COMPLETE))
                         return;
                 }
             }
             catch (IOException e)
             {
-                throw new TransportException("Cannot read " + id.Name, e);
+                throw new TransportException("Cannot Read " + id.Name, e);
             }
 
             obj.dispose();
@@ -218,13 +226,13 @@ namespace GitSharp.Transport
                     throw new TransportException("Unknown object type " + id.Name + " (" + obj.getType() + ")");
             }
 
-            fetchErrors.Remove(id.Copy());
+            _fetchErrors.Remove(id.Copy());
         }
 
         private void processBlob(RevObject obj)
         {
-            if (!local.HasObject(obj))
-                throw new TransportException("Cannot read blob " + obj.Name, new MissingObjectException(obj, Constants.TYPE_BLOB));
+            if (!_local.HasObject(obj))
+                throw new TransportException("Cannot Read blob " + obj.Name, new MissingObjectException(obj, Constants.TYPE_BLOB));
             obj.add(COMPLETE);
         }
 
@@ -232,32 +240,32 @@ namespace GitSharp.Transport
         {
             try
             {
-                treeWalk.reset(obj);
-                while (treeWalk.next())
+                _treeWalk.reset(obj);
+                while (_treeWalk.next())
                 {
-                    FileMode mode = treeWalk.getFileMode(0);
+                    FileMode mode = _treeWalk.getFileMode(0);
                     int sType = mode.Bits;
 
                     switch (sType)
                     {
                         case Constants.OBJ_BLOB:
                         case Constants.OBJ_TREE:
-                            treeWalk.getObjectId(idBuffer, 0);
-                            needs(revWalk.lookupAny(idBuffer, sType));
+                            _treeWalk.getObjectId(_idBuffer, 0);
+                            needs(_revWalk.lookupAny(_idBuffer, sType));
                             continue;
 
                         default:
                             if (FileMode.GitLink.Equals(sType))
                                 continue;
-                            treeWalk.getObjectId(idBuffer, 0);
-                            throw new CorruptObjectException("Invalid mode " + mode + " for " + idBuffer.Name + " " +
-                                                             treeWalk.getPathString() + " in " + obj.getId().Name + ".");
+                            _treeWalk.getObjectId(_idBuffer, 0);
+                            throw new CorruptObjectException("Invalid mode " + mode + " for " + _idBuffer.Name + " " +
+                                                             _treeWalk.getPathString() + " in " + obj.getId().Name + ".");
                     }
                 }
             }
             catch (IOException ioe)
             {
-                throw new TransportException("Cannot read tree " + obj.Name, ioe);
+                throw new TransportException("Cannot Read tree " + obj.Name, ioe);
             }
             obj.add(COMPLETE);
         }
@@ -286,13 +294,13 @@ namespace GitSharp.Transport
             if (!obj.has(IN_WORK_QUEUE))
             {
                 obj.add(IN_WORK_QUEUE);
-                workQueue.AddLast(obj);
+                _workQueue.AddLast(obj);
             }
         }
 
         private void downloadObject(IProgressMonitor pm, AnyObjectId id)
         {
-            if (local.HasObject(id))
+            if (_local.HasObject(id))
                 return;
 
             for (;;)
@@ -305,28 +313,28 @@ namespace GitSharp.Transport
                 string file = idStr.Substring(2);
                 string looseName = subdir + "/" + file;
 
-                for (int i = lastRemoteIdx; i < remotes.Count; i++)
+                for (int i = _lastRemoteIdx; i < _remotes.Count; i++)
                 {
-                    if (downloadLooseObject(id, looseName, remotes[i]))
+                    if (downloadLooseObject(id, looseName, _remotes[i]))
                     {
-                        lastRemoteIdx = i;
+                        _lastRemoteIdx = i;
                         return;
                     }
                 }
 
-                for (int i = 0; i < lastRemoteIdx; i++)
+                for (int i = 0; i < _lastRemoteIdx; i++)
                 {
-                    if (downloadLooseObject(id, looseName, remotes[i]))
+                    if (downloadLooseObject(id, looseName, _remotes[i]))
                     {
-                        lastRemoteIdx = i;
+                        _lastRemoteIdx = i;
                         return;
                     }
                 }
 
-                while (noPacksYet.Count > 0)
+                while (_noPacksYet.Count > 0)
                 {
-                    WalkRemoteObjectDatabase wrr = noPacksYet.First.Value;
-                    noPacksYet.RemoveFirst();
+                    WalkRemoteObjectDatabase wrr = _noPacksYet.First.Value;
+                    _noPacksYet.RemoveFirst();
                     List<string> packNameList;
                     try
                     {
@@ -347,10 +355,10 @@ namespace GitSharp.Transport
                         continue;
                     foreach (string packName in packNameList)
                     {
-                        if (!packsConsidered.Contains(packName))
+                        if (!_packsConsidered.Contains(packName))
                         {
-                            packsConsidered.Add(packName);
-                            unfetchedPacks.AddLast(new RemotePack(lockMessage, packLocks, objCheck, local, wrr, packName));
+                            _packsConsidered.Add(packName);
+                            _unfetchedPacks.AddLast(new RemotePack(_lockMessage, _packLocks, _objCheck, _local, wrr, packName));
                         }
                     }
                     if (downloadPackedObject(pm, id))
@@ -362,17 +370,17 @@ namespace GitSharp.Transport
                 {
                     foreach (WalkRemoteObjectDatabase alt in al)
                     {
-                        remotes.Add(alt);
-                        noPacksYet.AddLast(alt);
-                        noAlternatesYet.AddLast(alt);
+                        _remotes.Add(alt);
+                        _noPacksYet.AddLast(alt);
+                        _noAlternatesYet.AddLast(alt);
                     }
                     continue;
                 }
 
                 List<Exception> failures = null;
-                if (fetchErrors.ContainsKey(id.Copy()))
+                if (_fetchErrors.ContainsKey(id.Copy()))
                 {
-                    failures = fetchErrors[id.Copy()];
+                    failures = _fetchErrors[id.Copy()];
                 }
 
                 TransportException te = null;
@@ -391,7 +399,7 @@ namespace GitSharp.Transport
 
         private bool downloadPackedObject(IProgressMonitor monitor, AnyObjectId id)
         {
-            IEnumerator<RemotePack> packItr = unfetchedPacks.GetEnumerator();
+            IEnumerator<RemotePack> packItr = _unfetchedPacks.GetEnumerator();
             while (packItr.MoveNext() && !monitor.IsCancelled)
             {
                 RemotePack pack = packItr.Current;
@@ -402,7 +410,7 @@ namespace GitSharp.Transport
                 catch (IOException err)
                 {
                     recordError(id, err);
-                    unfetchedPacks.Remove(pack);
+                    _unfetchedPacks.Remove(pack);
                     continue;
                 }
 
@@ -424,10 +432,10 @@ namespace GitSharp.Transport
                 finally
                 {
                     pack.tmpIdx.Delete();
-                    unfetchedPacks.Remove(pack);
+                    _unfetchedPacks.Remove(pack);
                 }
 
-                if (!local.HasObject(id))
+                if (!_local.HasObject(id))
                 {
                     recordError(id,
                                 new FileNotFoundException("Object " + id.Name + " not found in " + pack.packName + "."));
@@ -440,11 +448,11 @@ namespace GitSharp.Transport
                     ObjectId p = pending.Current;
                     if (pack.index.HasObject(p))
                     {
-                        workQueue.Remove(p);
-                        process(p);
+                        _workQueue.Remove(p);
+                        Process(p);
                     }
                     else
-                        workQueue.AddLast(p);
+                        _workQueue.AddLast(p);
                 }
                 return true;
             }
@@ -453,8 +461,8 @@ namespace GitSharp.Transport
 
         private IEnumerator<ObjectId> swapFetchQueue()
         {
-            IEnumerator<ObjectId> r = workQueue.GetEnumerator();
-            workQueue = new LinkedList<ObjectId>();
+            IEnumerator<ObjectId> r = _workQueue.GetEnumerator();
+            _workQueue = new LinkedList<ObjectId>();
             return r;
         }
 
@@ -491,36 +499,36 @@ namespace GitSharp.Transport
                 throw e;
             }
 
-            objectDigest.Reset();
-            objectDigest.Update(Constants.encodedTypeString(uol.getType()));
-            objectDigest.Update((byte) ' ');
-            objectDigest.Update(Constants.encodeASCII(uol.getSize()));
-            objectDigest.Update(0);
-            objectDigest.Update(uol.getCachedBytes());
-            idBuffer.FromRaw(objectDigest.Digest(), 0);
+            _objectDigest.Reset();
+            _objectDigest.Update(Constants.encodedTypeString(uol.Type));
+            _objectDigest.Update((byte) ' ');
+            _objectDigest.Update(Constants.encodeASCII(uol.Size));
+            _objectDigest.Update(0);
+            _objectDigest.Update(uol.CachedBytes);
+            _idBuffer.FromRaw(_objectDigest.Digest(), 0);
 
-            if (!id.Equals(idBuffer))
+            if (!id.Equals(_idBuffer))
             {
-                throw new TransportException("Incorrect hash for " + id.Name + "; computed " + idBuffer.Name + " as a " +
-                                             Constants.typeString(uol.getType()) + " from " + compressed.Length +
+                throw new TransportException("Incorrect hash for " + id.Name + "; computed " + _idBuffer.Name + " as a " +
+                                             Constants.typeString(uol.Type) + " from " + compressed.Length +
                                              " bytes.");
             }
-            if (objCheck != null)
+            if (_objCheck != null)
             {
                 try
                 {
-                    objCheck.check(uol.getType(), uol.getCachedBytes());
+                    _objCheck.check(uol.Type, uol.CachedBytes);
                 }
                 catch (CorruptObjectException e)
                 {
-                    throw new TransportException("Invalid " + Constants.typeString(uol.getType()) + " " + id.Name + ": " + e.Message);
+                    throw new TransportException("Invalid " + Constants.typeString(uol.Type) + " " + id.Name + ": " + e.Message);
                 }
             }
         }
 
         private void saveLooseObject(AnyObjectId id, byte[] compressed)
         {
-            FileInfo tmp = new FileInfo(Path.Combine(local.ObjectsDirectory.ToString(), Path.GetTempFileName()));
+            FileInfo tmp = new FileInfo(Path.Combine(_local.ObjectsDirectory.ToString(), Path.GetTempFileName()));
             try
             {
                 FileStream stream = File.Create(tmp.ToString());
@@ -540,7 +548,7 @@ namespace GitSharp.Transport
                 throw e;
             }
 
-            FileInfo o = local.ToFile(id);
+            FileInfo o = _local.ToFile(id);
             if (tmp.RenameTo(o.ToString()))
                 return;
 
@@ -549,7 +557,7 @@ namespace GitSharp.Transport
                 return;
 
             tmp.Delete();
-            if (local.HasObject(id))
+            if (_local.HasObject(id))
                 return;
 
             throw new ObjectWritingException("Unable to store " + id.Name + ".");
@@ -557,10 +565,10 @@ namespace GitSharp.Transport
 
         private List<WalkRemoteObjectDatabase> expandOneAlternate(AnyObjectId id, IProgressMonitor pm)
         {
-            while (noAlternatesYet.Count > 0)
+            while (_noAlternatesYet.Count > 0)
             {
-                WalkRemoteObjectDatabase wrr = noAlternatesYet.First.Value;
-                noAlternatesYet.RemoveFirst();
+                WalkRemoteObjectDatabase wrr = _noAlternatesYet.First.Value;
+                _noAlternatesYet.RemoveFirst();
                 try
                 {
                     pm.BeginTask("Listing alternates", -1);
@@ -582,11 +590,11 @@ namespace GitSharp.Transport
 
         private void markLocalRefsComplete(IEnumerable<ObjectId> have)
         {
-            foreach (Ref r in local.Refs.Values)
+            foreach (Ref r in _local.Refs.Values)
             {
                 try
                 {
-                    markLocalObjComplete(revWalk.parseAny(r.ObjectId));
+                    markLocalObjComplete(_revWalk.parseAny(r.ObjectId));
                 }
                 catch (IOException readError)
                 {
@@ -598,7 +606,7 @@ namespace GitSharp.Transport
             {
                 try
                 {
-                    markLocalObjComplete(revWalk.parseAny(id));
+                    markLocalObjComplete(_revWalk.parseAny(id));
                 }
                 catch (IOException readError)
                 {
@@ -614,7 +622,7 @@ namespace GitSharp.Transport
                 obj.add(COMPLETE);
                 obj.dispose();
                 obj = ((RevTag) obj).getObject();
-                revWalk.parse(obj);
+                _revWalk.parse(obj);
             }
 
             switch (obj.getType())
@@ -639,10 +647,10 @@ namespace GitSharp.Transport
             {
                 for (;;)
                 {
-                    RevCommit c = localCommitQueue.peek();
+                    RevCommit c = _localCommitQueue.peek();
                     if (c == null || c.getCommitTime() < until)
                         return;
-                    localCommitQueue.next();
+                    _localCommitQueue.next();
 
                     markTreeComplete(c.getTree());
                     foreach (RevCommit p in c.getParents())
@@ -659,12 +667,12 @@ namespace GitSharp.Transport
         {
             if (p.has(LOCALLY_SEEN))
                 return;
-            revWalk.parse(p);
+            _revWalk.parse(p);
             p.add(LOCALLY_SEEN);
             p.add(COMPLETE);
             p.carry(COMPLETE);
             p.dispose();
-            localCommitQueue.add(p);
+            _localCommitQueue.add(p);
         }
 
         private void markTreeComplete(RevObject tree)
@@ -673,27 +681,27 @@ namespace GitSharp.Transport
                 return;
 
             tree.add(COMPLETE);
-            treeWalk.reset(tree);
-            while (treeWalk.next())
+            _treeWalk.reset(tree);
+            while (_treeWalk.next())
             {
-                FileMode mode = treeWalk.getFileMode(0);
+                FileMode mode = _treeWalk.getFileMode(0);
                 int sType = mode.Bits;
 
                 switch (sType)
                 {
                     case Constants.OBJ_BLOB:
-                        treeWalk.getObjectId(idBuffer, 0);
-                        revWalk.lookupAny(idBuffer, sType).add(COMPLETE);
+                        _treeWalk.getObjectId(_idBuffer, 0);
+                        _revWalk.lookupAny(_idBuffer, sType).add(COMPLETE);
                         continue;
 
                     case Constants.OBJ_TREE:
                         {
-                            treeWalk.getObjectId(idBuffer, 0);
-                            RevObject o = revWalk.lookupAny(idBuffer, sType);
+                            _treeWalk.getObjectId(_idBuffer, 0);
+                            RevObject o = _revWalk.lookupAny(_idBuffer, sType);
                             if (!o.has(COMPLETE))
                             {
                                 o.add(COMPLETE);
-                                treeWalk.enterSubtree();
+                                _treeWalk.enterSubtree();
                             }
                             continue;
                         }
@@ -701,9 +709,9 @@ namespace GitSharp.Transport
                     default:
                         if (FileMode.GitLink.Equals(sType))
                             continue;
-                        treeWalk.getObjectId(idBuffer, 0);
-                        throw new CorruptObjectException("Invalid mode " + mode + " for " + idBuffer.Name + " " +
-                                                         treeWalk.getPathString() + " in " + tree.Name);
+                        _treeWalk.getObjectId(_idBuffer, 0);
+                        throw new CorruptObjectException("Invalid mode " + mode + " for " + _idBuffer.Name + " " +
+                                                         _treeWalk.getPathString() + " in " + tree.Name);
                 }
             }
         }
@@ -711,122 +719,131 @@ namespace GitSharp.Transport
         private void recordError(AnyObjectId id, Exception e)
         {
             ObjectId objId = id.Copy();
-            if (fetchErrors.ContainsKey(objId))
+            if (_fetchErrors.ContainsKey(objId))
             {
-                fetchErrors[objId].Add(e);
+                _fetchErrors[objId].Add(e);
             }
             else
             {
-                fetchErrors.Add(objId, new List<Exception>(2){e});
+                _fetchErrors.Add(objId, new List<Exception>(2){e});
             }
         }
 
-        private class RemotePack
-        {
-            public readonly WalkRemoteObjectDatabase connection;
-            public readonly string packName;
-            public readonly string idxName;
-            public readonly FileInfo tmpIdx;
-            public PackIndex index;
-            private readonly Repository local;
-            private readonly ObjectChecker objCheck;
-            private readonly string lockMessage;
-            private readonly List<PackLock> packLocks;
+    	#region Nested Types
 
-            public RemotePack(string lM, List<PackLock> pL, ObjectChecker oC, Repository r, WalkRemoteObjectDatabase c, string pn)
-            {
-                lockMessage = lM;
-                packLocks = pL;
-                objCheck = oC;
-                local = r;
-                DirectoryInfo objdir = local.ObjectsDirectory;
-                connection = c;
-                packName = pn;
-                idxName = packName.Slice(0, packName.Length - 5) + ".idx";
+    	private class RemotePack
+    	{
+    		public readonly WalkRemoteObjectDatabase connection;
+    		public readonly string packName;
+    		public readonly string idxName;
+    		public readonly FileInfo tmpIdx;
+    		public PackIndex index;
+    		private readonly Repository local;
+    		private readonly ObjectChecker objCheck;
+    		private readonly string lockMessage;
+    		private readonly List<PackLock> packLocks;
 
-                string tn = idxName;
-                if (tn.StartsWith("pack-"))
-                    tn = tn.Substring(5);
-                if (tn.EndsWith(".idx"))
-                    tn = tn.Slice(0, tn.Length - 4);
-                tmpIdx = new FileInfo(Path.Combine(objdir.ToString(), "walk-" + tn + ".walkidx"));
-            }
+    		public RemotePack(string lM, List<PackLock> pL, ObjectChecker oC, Repository r, WalkRemoteObjectDatabase c, string pn)
+    		{
+    			lockMessage = lM;
+    			packLocks = pL;
+    			objCheck = oC;
+    			local = r;
+    			DirectoryInfo objdir = local.ObjectsDirectory;
+    			connection = c;
+    			packName = pn;
+    			idxName = IndexPack.GetIndexFileName(packName.Slice(0, packName.Length - 5));
 
-            public void openIndex(IProgressMonitor pm)
-            {
-                if (index != null)
-                    return;
+    			string tn = idxName;
+    			if (tn.StartsWith("pack-"))
+    			{
+    				tn = tn.Substring(5);
+    			}
                 
-                try
-                {
-                    index = PackIndex.Open(tmpIdx);
-                    return;
-                }
-                catch(FileNotFoundException)
-                {
+    			if (tn.EndsWith(IndexPack.IndexSuffix))
+    			{
+    				tn = tn.Slice(0, tn.Length - 4);
+    			}
+
+    			tmpIdx = new FileInfo(Path.Combine(objdir.ToString(), "walk-" + tn + ".walkidx"));
+    		}
+
+    		public void openIndex(IProgressMonitor pm)
+    		{
+    			if (index != null)
+    				return;
+                
+    			try
+    			{
+    				index = PackIndex.Open(tmpIdx);
+    				return;
+    			}
+    			catch(FileNotFoundException)
+    			{
                     
-                }
+    			}
 
-                Stream s = connection.open("pack/" + idxName);
-                pm.BeginTask("Get " + idxName.Slice(0, 12) + "..idx", s.Length < 0 ? -1 : (int)(s.Length / 1024));
-                try
-                {
-                    FileStream fos = new FileStream(tmpIdx.ToString(), System.IO.FileMode.Open, FileAccess.ReadWrite);
-                    try
-                    {
-                        byte[] buf = new byte[2048];
-                        int cnt;
-                        while (!pm.IsCancelled && (cnt = s.Read(buf, 0, buf.Length)) >= 0)
-                        {
-                            fos.Write(buf, 0, cnt);
-                            pm.Update(cnt / 1024);
-                        }
-                    }
-                    finally
-                    {
-                        fos.Close();
-                    }
-                }
-                catch (IOException err)
-                {
-                    tmpIdx.Delete();
-                    throw err;
-                }
-                finally
-                {
-                    s.Close();
-                }
-                pm.EndTask();
+    			Stream s = connection.open("pack/" + idxName);
+    			pm.BeginTask("Get " + idxName.Slice(0, 12) + "..idx", s.Length < 0 ? -1 : (int)(s.Length / 1024));
+    			try
+    			{
+    				FileStream fos = new FileStream(tmpIdx.ToString(), System.IO.FileMode.Open, FileAccess.ReadWrite);
+    				try
+    				{
+    					byte[] buf = new byte[2048];
+    					int cnt;
+    					while (!pm.IsCancelled && (cnt = s.Read(buf, 0, buf.Length)) >= 0)
+    					{
+    						fos.Write(buf, 0, cnt);
+    						pm.Update(cnt / 1024);
+    					}
+    				}
+    				finally
+    				{
+    					fos.Close();
+    				}
+    			}
+    			catch (IOException err)
+    			{
+    				tmpIdx.Delete();
+    				throw err;
+    			}
+    			finally
+    			{
+    				s.Close();
+    			}
+    			pm.EndTask();
 
-                if (pm.IsCancelled)
-                {
-                    tmpIdx.Delete();
-                    return;
-                }
+    			if (pm.IsCancelled)
+    			{
+    				tmpIdx.Delete();
+    				return;
+    			}
 
-                try
-                {
-                    index = PackIndex.Open(tmpIdx);
-                }
-                catch (IOException e)
-                {
-                    tmpIdx.Delete();
-                    throw e;
-                }
-            }
+    			try
+    			{
+    				index = PackIndex.Open(tmpIdx);
+    			}
+    			catch (IOException e)
+    			{
+    				tmpIdx.Delete();
+    				throw e;
+    			}
+    		}
 
-            public void downloadPack(IProgressMonitor monitor)
-            {
-                Stream s = connection.open("pack/" + packName);
-                IndexPack ip = IndexPack.create(local, s);
-                ip.setFixThin(false);
-                ip.setObjectChecker(objCheck);
-                ip.index(monitor);
-                PackLock keep = ip.renameAndOpenPack(lockMessage);
-                if (keep != null)
-                    packLocks.Add(keep);
-            }
-        }
+    		public void downloadPack(IProgressMonitor monitor)
+    		{
+    			Stream s = connection.open("pack/" + packName);
+    			IndexPack ip = IndexPack.Create(local, s);
+    			ip.setFixThin(false);
+    			ip.setObjectChecker(objCheck);
+    			ip.index(monitor);
+    			PackLock keep = ip.renameAndOpenPack(lockMessage);
+    			if (keep != null)
+    				packLocks.Add(keep);
+    		}
+    	}
+
+    	#endregion
     }
-
 }

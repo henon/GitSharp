@@ -55,29 +55,27 @@ namespace GitSharp
      * bytes from a window is very inexpensive.
      * </p>
      */
-    abstract internal class ByteWindow
+    abstract class ByteWindow
     {
-        internal PackFile pack;
-
-        internal long start;
-
-        internal long end;
+        private readonly PackFile _pack;
+        private readonly long _start;
+        private readonly long _end;
 
         internal ByteWindow(PackFile p, long s, long n)
         {
-            pack = p;
-            start = s;
-            end = start + n;
+            _pack = p;
+            _start = s;
+            _end = _start + n;
         }
 
-        internal int size()
+    	internal int size()
         {
-            return (int)(end - start);
+            return (int)(_end - _start);
         }
 
         internal bool contains(PackFile neededFile, long neededPos)
         {
-            return pack == neededFile && start <= neededPos && neededPos < end;
+            return _pack == neededFile && _start <= neededPos && neededPos < _end;
         }
 
         /**
@@ -99,7 +97,7 @@ namespace GitSharp
          */
         internal int copy(long pos, byte[] dstbuf, int dstoff, int cnt)
         {
-            return copy((int)(pos - start), dstbuf, dstoff, cnt);
+            return copy((int)(pos - _start), dstbuf, dstoff, cnt);
         }
 
         /**
@@ -145,9 +143,9 @@ namespace GitSharp
          *             the inflater encountered an invalid chunk of data. Data
          *             stream corruption is likely.
          */
-        internal int inflate(long pos, byte[] dstbuf, int dstoff, Inflater inf)
+        internal int Inflate(long pos, byte[] dstbuf, int dstoff, Inflater inf)
         {
-            return inflate((int)(pos - start), dstbuf, dstoff, inf);
+            return Inflate((int)(pos - _start), dstbuf, dstoff, inf);
         }
 
         /**
@@ -174,15 +172,30 @@ namespace GitSharp
          *             the inflater encountered an invalid chunk of data. Data
          *             stream corruption is likely.
          */
-        internal abstract int inflate(int pos, byte[] dstbuf, int dstoff, Inflater inf);
+        internal abstract int Inflate(int pos, byte[] dstbuf, int dstoff, Inflater inf);
 
         internal static byte[] verifyGarbageBuffer = new byte[2048];
 
         internal void inflateVerify(long pos, Inflater inf)
         {
-            inflateVerify((int)(pos - start), inf);
+            inflateVerify((int)(pos - _start), inf);
         }
 
         internal abstract void inflateVerify(int pos, Inflater inf);
+
+		public long End
+		{
+			get { return _end; }
+		}
+
+		public long Start
+		{
+			get { return _start; }
+		}
+
+		public PackFile Pack
+		{
+			get { return _pack; }
+		}
     }
 }

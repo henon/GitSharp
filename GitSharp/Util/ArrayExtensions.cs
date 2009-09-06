@@ -39,7 +39,6 @@ using System;
 
 namespace GitSharp.Util
 {
-
     public static class ArrayExtension
     {
         public static bool ArrayEquals<T>(this T[] a, T[] b)
@@ -52,13 +51,33 @@ namespace GitSharp.Util
             return true;
         }
 
-        public static void ArrayCopy<T>(this T[] from, int foff, T[] to, int toff, int cnt)
-        {
-            for (int i = 0; i < cnt; i++)
-            {
-                to[i + toff] = from[i + foff];
-            }
-        }
-    }
+		/// <summary>
+		/// Assigns the specified int value to each element of the specified array of ints.
+		/// </summary>
+		/// <typeparam name="T">type of the array's values</typeparam>
+		/// <param name="array"> the array to be filled</param>
+		/// <param name="value">the value to be stored in all elements of the array</param>
+		public static void Fill<T>(this T[] array, T value)
+		{
+			Fill(array, 0, array.Length, value);
+		}
 
+		/// <summary>
+		///     Assigns the specified int value to each element of the specified range of the specified array of ints. 
+		///     The range to be filled extends from index fromIndex, inclusive, to index toIndex, exclusive. 
+		///     (If fromIndex==toIndex, the range to be filled is empty.)
+		/// </summary>
+		/// <typeparam name="T">type of the array's values</typeparam>
+		/// <param name="array"> the array to be filled</param>
+		/// <param name="fromIndex"> the index of the first element (inclusive) to be filled with the specified value</param>
+		/// <param name="toIndex">the index of the last element (exclusive) to be filled with the specified value</param>
+		/// <param name="value">the value to be stored in the specified range of elements of the array</param>
+		public static void Fill<T>(this T[] array, int fromIndex, int toIndex, T value)
+		{
+			for (int i = Math.Max(0, fromIndex); i < Math.Max(array.Length, toIndex); i++)
+			{
+				array[i] = value;
+			}
+		}
+    }
 }

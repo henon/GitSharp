@@ -61,7 +61,7 @@ namespace GitSharp.Tests.Transport
 
             // Then we clone a new repo from that bundle and do a simple test. This
             // makes sure
-            // we could read the bundle we created.
+            // we could Read the bundle we created.
             Repository newRepo = createNewEmptyRepo();
             FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
             Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/firstcommit");
@@ -92,7 +92,7 @@ namespace GitSharp.Tests.Transport
 
             // Then we clone a new repo from that bundle and do a simple test. This
             // makes sure
-            // we could read the bundle we created.
+            // we could Read the bundle we created.
             Repository newRepo = createNewEmptyRepo();
             FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
             Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/aa");

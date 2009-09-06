@@ -66,7 +66,7 @@ namespace GitSharp.Transport
         ///	 <summary> * Create process for specified transport and refs updates specification.
         ///	 * </summary>
         ///	 * <param name="transport">
-        ///	 *            transport between remote and local repository, used to create
+        ///	 *            transport between remote and local repository, used to Create
         ///	 *            connection. </param>
         ///	 * <param name="toPush">
         ///	 *            specification of refs updates (and local tracking branches). </param>
@@ -156,7 +156,7 @@ namespace GitSharp.Transport
                     continue;
                 }
 
-                // create ref (hasn't existed on remote side) and delete ref
+                // Create ref (hasn't existed on remote side) and delete ref
                 // are always fast-forward commands, feasible at this level
                 if (advertisedOld.Equals(ObjectId.ZeroId) || rru.IsDelete)
                 {

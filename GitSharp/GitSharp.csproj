@@ -134,6 +134,7 @@
     <Compile Include="TreeWalk\Filter\PathSuffixFilter.cs" />
     <Compile Include="UnpackedObjectCache.cs" />
     <Compile Include="UserConfig.cs" />
+    <Compile Include="Util\ArrayExtensions.cs" />
     <Compile Include="Util\AtomicReference.cs" />
     <Compile Include="Util\DateTime.cs" />
     <Compile Include="Util\Extensions.cs" />
@@ -347,9 +348,7 @@
     <Compile Include="TreeWalk\NameConflictTreeWalk.cs" />
     <Compile Include="TreeWalk\TreeWalk.cs" />
     <Compile Include="TreeWalk\WorkingTreeIterator.cs" />
-    <Compile Include="Util\Arrays.cs" />
     <Compile Include="Util\DigestOutputStream.cs" />
-    <Compile Include="Util\Array.cs" />
     <Compile Include="Util\IListUtil.cs" />
     <Compile Include="Util\ICharSequence.cs" />
     <Compile Include="Util\IntList.cs" />

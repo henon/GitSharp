@@ -55,7 +55,7 @@ namespace GitSharp
             ObjectLoader loader = r.OpenBlob(objectid);
             if (loader == null)
                 throw new IOException("Blob not found: " + objectid);
-            fromText(RawParseUtils.decode(loader.getBytes()));
+            fromText(RawParseUtils.decode(loader.Bytes));
         }
 
         public BlobBasedConfig(Config @base, Commit commit, string path)
@@ -70,7 +70,7 @@ namespace GitSharp
             ObjectLoader loader = tree.Repository.OpenBlob(blobId);
             if (loader == null)
                 throw new IOException("Blob not found: " + blobId + " for path: " + path);
-            fromText(RawParseUtils.decode(loader.getBytes()));
+            fromText(RawParseUtils.decode(loader.Bytes));
         }
     }
 

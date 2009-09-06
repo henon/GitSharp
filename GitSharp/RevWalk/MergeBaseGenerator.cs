@@ -59,40 +59,31 @@ namespace GitSharp.RevWalk
      */
     public class MergeBaseGenerator : Generator
     {
-        private static int PARSED = RevWalk.PARSED;
-
-        private static int IN_PENDING = RevWalk.SEEN;
-
-        private static int POPPED = RevWalk.TEMP_MARK;
-
-        private static int MERGE_BASE = RevWalk.REWRITE;
-
-        private RevWalk walker;
-
-        private DateRevQueue pending;
-
-        private int branchMask;
-
-        private int recarryTest;
-
-        private int recarryMask;
+        private static readonly int Parsed = RevWalk.PARSED;
+        private static readonly int InPending = RevWalk.SEEN;
+        private static readonly int Popped = RevWalk.TEMP_MARK;
+        private static readonly int MergeBase = RevWalk.REWRITE;
+        private readonly RevWalk _walker;
+        private readonly DateRevQueue _pending;
+        private int _branchMask;
+        private int _recarryTest;
+        private int _recarryMask;
 
         public MergeBaseGenerator(RevWalk w)
         {
-            walker = w;
-            pending = new DateRevQueue();
+            _walker = w;
+            _pending = new DateRevQueue();
         }
 
         public void init(AbstractRevQueue p)
         {
             try
             {
-                for (; ; )
+                while (true)
                 {
                     RevCommit c = p.next();
-                    if (c == null)
-                        break;
-                    add(c);
+                    if (c == null) break;
+                    Add(c);
                 }
             }
             finally
@@ -100,21 +91,21 @@ namespace GitSharp.RevWalk
                 // Always free the flags immediately. This ensures the flags
                 // will be available for reuse when the walk resets.
                 //
-                walker.freeFlag(branchMask);
+                _walker.freeFlag(_branchMask);
 
-                // Setup the condition used by carryOntoOne to detect a late
+                // Setup the condition used by CarryOntoOne to detect a late
                 // merge base and produce it on the next round.
                 //
-                recarryTest = branchMask | POPPED;
-                recarryMask = branchMask | POPPED | MERGE_BASE;
+                _recarryTest = _branchMask | Popped;
+                _recarryMask = _branchMask | Popped | MergeBase;
             }
         }
 
-        private void add(RevCommit c)
+        private void Add(RevCommit c)
         {
-            int flag = walker.allocFlag();
-            branchMask |= flag;
-            if ((c.flags & branchMask) != 0)
+            int flag = _walker.allocFlag();
+            _branchMask |= flag;
+            if ((c.flags & _branchMask) != 0)
             {
                 // This should never happen. RevWalk ensures we get a
                 // commit admitted to the initial queue only once. If
@@ -123,7 +114,7 @@ namespace GitSharp.RevWalk
                 throw new InvalidOperationException("Stale RevFlags on " + c.ToString());
             }
             c.flags |= flag;
-            pending.add(c);
+            _pending.add(c);
         }
 
         public override int outputType()
@@ -133,97 +124,96 @@ namespace GitSharp.RevWalk
 
         public override RevCommit next()
         {
-            for (; ; )
+            while (true)
             {
-                RevCommit c = pending.next();
+                RevCommit c = _pending.next();
                 if (c == null)
                 {
-                    walker.curs.release();
+                    _walker.curs.Release();
                     return null;
                 }
 
                 foreach (RevCommit p in c.parents)
                 {
-                    if ((p.flags & IN_PENDING) != 0)
+                    if ((p.flags & InPending) != 0)
                         continue;
-                    if ((p.flags & PARSED) == 0)
-                        p.parse(walker);
-                    p.flags |= IN_PENDING;
-                    pending.add(p);
+                    if ((p.flags & Parsed) == 0)
+                        p.parse(_walker);
+                    p.flags |= InPending;
+                    _pending.add(p);
                 }
 
-                int carry = c.flags & branchMask;
-                bool mb = carry == branchMask;
+                int carry = c.flags & _branchMask;
+                bool mb = carry == _branchMask;
                 if (mb)
                 {
                     // If we are a merge base make sure our ancestors are
                     // also flagged as being popped, so that they do not
                     // generate to the caller.
                     //
-                    carry |= MERGE_BASE;
+                    carry |= MergeBase;
                 }
-                carryOntoHistory(c, carry);
+                CarryOntoHistory(c, carry);
 
-                if ((c.flags & MERGE_BASE) != 0)
+                if ((c.flags & MergeBase) != 0)
                 {
                     // This commit is an ancestor of a merge base we already
                     // popped back to the caller. If everyone in pending is
                     // that way we are done traversing; if not we just need
                     // to move to the next available commit and try again.
                     //
-                    if (pending.everbodyHasFlag(MERGE_BASE))
+                    if (_pending.everbodyHasFlag(MergeBase))
                         return null;
                     continue;
                 }
-                c.flags |= POPPED;
+                c.flags |= Popped;
 
                 if (mb)
                 {
-                    c.flags |= MERGE_BASE;
+                    c.flags |= MergeBase;
                     return c;
                 }
             }
         }
 
-        private void carryOntoHistory(RevCommit c, int carry)
+        private void CarryOntoHistory(RevCommit c, int carry)
         {
-            for (; ; )
+            while (true)
             {
                 RevCommit[] pList = c.parents;
-                if (pList == null)
-                    return;
+                if (pList == null) return;
                 int n = pList.Length;
-                if (n == 0)
-                    return;
+                if (n == 0) return;
 
                 for (int i = 1; i < n; i++)
                 {
                     RevCommit p = pList[i];
-                    if (!carryOntoOne(p, carry))
-                        carryOntoHistory(p, carry);
+                    if (!CarryOntoOne(p, carry))
+                    {
+                    	CarryOntoHistory(p, carry);
+                    }
                 }
 
                 c = pList[0];
-                if (carryOntoOne(c, carry))
-                    break;
+                if (CarryOntoOne(c, carry)) break;
             }
         }
 
-        private bool carryOntoOne(RevCommit p, int carry)
+        private bool CarryOntoOne(RevCommit p, int carry)
         {
             bool haveAll = (p.flags & carry) == carry;
             p.flags |= carry;
 
-            if ((p.flags & recarryMask) == recarryTest)
+            if ((p.flags & _recarryMask) == _recarryTest)
             {
                 // We were popped without being a merge base, but we just got
                 // voted to be one. Inject ourselves back at the front of the
                 // pending queue and tell all of our ancestors they are within
                 // the merge base now.
                 //
-                p.flags &= ~POPPED;
-                pending.add(p);
-                carryOntoHistory(p, branchMask | MERGE_BASE);
+                p.flags &= ~Popped;
+                _pending.add(p);
+                CarryOntoHistory(p, _branchMask | MergeBase);
                 return true;
             }
 

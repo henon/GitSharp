@@ -448,7 +448,7 @@ namespace GitSharp.Transport
 
         private void receivePack(IProgressMonitor monitor)
         {
-            IndexPack ip = IndexPack.create(local, sideband ? pckIn.sideband(monitor) : stream);
+            IndexPack ip = IndexPack.Create(local, sideband ? pckIn.sideband(monitor) : stream);
             ip.setFixThin(thinPack);
             ip.setObjectChecking(transport.CheckFetchedObjects);
             ip.index(monitor);

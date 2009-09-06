@@ -140,7 +140,7 @@ namespace GitSharp
                 looseRefsMTime[name] = time;
                 setModified();
             }
-            this.Repository.fireRefsMaybeChanged();
+            Repository.OnRefsChanged();
         }
 
         /**
@@ -160,7 +160,7 @@ namespace GitSharp
             {
                 setModified();
             }
-            this.Repository.fireRefsMaybeChanged();
+            Repository.OnRefsChanged();
         }
 
         private void setModified()
@@ -218,12 +218,12 @@ namespace GitSharp
             {
                 // ignore here
             }
-            this.Repository.fireRefsMaybeChanged();
+            Repository.OnRefsChanged();
             return avail;
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        private void ReadPackedRefs(Dictionary<string, Ref> avail)
+        private void ReadPackedRefs(IDictionary<string, Ref> avail)
         {
             RefreshPackedRefs();
             foreach (KeyValuePair<string, Ref> kv in packedRefs)

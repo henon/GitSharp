@@ -138,21 +138,24 @@ namespace GitSharp.Transport
 
             public override List<string> getPackNames()
             {
-                List<string> packs = new List<string>();
+                var packs = new List<string>();
                 try
                 {
                     StreamReader br = openReader(INFO_PACKS);
                     try
                     {
-                        for (;;)
+                        while (true)
                         {
                             string s = br.ReadLine();
-                            if (string.IsNullOrEmpty(s))
-                                break;
-                            if (!s.StartsWith("P pack-") || !s.EndsWith(".pack"))
-                                throw invalidAdvertisement(s);
+                            if (string.IsNullOrEmpty(s)) break;
+
+                            if (!s.StartsWith("P pack-") || !s.EndsWith(IndexPack.PackSuffix))
+                            {
+                            	throw invalidAdvertisement(s);
+                            }
                             packs.Add(s.Substring(2));
                         }
+
                         return packs;
                     }
                     finally
@@ -205,11 +208,11 @@ namespace GitSharp.Transport
                 {
                     try
                     {
-                        throw new TransportException(new Uri(objectsUrl, INFO_REFS) + ": cannot read available refs", err);
+                        throw new TransportException(new Uri(objectsUrl, INFO_REFS) + ": cannot Read available refs", err);
                     }
                     catch (UriFormatException)
                     {
-                        throw new TransportException(objectsUrl +  INFO_REFS + ": cannot read available refs", err);
+                        throw new TransportException(objectsUrl +  INFO_REFS + ": cannot Read available refs", err);
                     }
                 }
             }

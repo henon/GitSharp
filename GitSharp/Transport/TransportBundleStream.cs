@@ -46,7 +46,7 @@ namespace GitSharp.Transport
     /// <summary>
     /// Single shot fetch from a streamed Git bundle.
     /// 
-    /// The bundle is read from an unbuffered input stream, which limits the
+    /// The bundle is Read from an unbuffered input stream, which limits the
     /// transport to opening at most one FetchConnection before needing to recreate
     /// the transport instance.
     /// </summary>
@@ -59,7 +59,7 @@ namespace GitSharp.Transport
         /// 
         /// The stream can be unbuffered (buffering is automatically provided
         /// internally to smooth out short reads) and unpositionable (the stream is
-        /// read from only once, sequentially).
+        /// Read from only once, sequentially).
         /// 
         /// When the FetchConnection or the this instance is closed the supplied
         /// input stream is also automatically closed. This frees callers from
@@ -71,7 +71,7 @@ namespace GitSharp.Transport
         /// reference a non-existent resource. It is used only for
         /// exception reporting.
         /// </param>
-        /// <param name="inputStream">the stream to read the bundle from.</param>
+        /// <param name="inputStream">the stream to Read the bundle from.</param>
         public TransportBundleStream(Repository local, URIish uri, Stream inputStream) 
             : base(local, uri)
         {

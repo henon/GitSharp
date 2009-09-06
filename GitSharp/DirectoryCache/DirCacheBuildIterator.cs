@@ -61,7 +61,7 @@ namespace GitSharp.DirectoryCache
 	/// TreeWalk walk = new TreeWalk(db);
 	/// walk.reset();
 	/// walk.setRecursive(true);
-	/// walk.setFilter(PathFilter.create(&quot;name/to/remove&quot;));
+	/// walk.setFilter(PathFilter.Create(&quot;name/to/remove&quot;));
 	/// walk.addTree(new DirCacheBuildIterator(edit));
 	/// 
 	/// while (walk.next())
@@ -78,7 +78,7 @@ namespace GitSharp.DirectoryCache
 		/// Create a new iterator for an already loaded <see cref="DirCache"/> instance.
 		/// <p>
 		/// The iterator implementation may copy part of the cache's data during
-		/// construction, so the cache must be read in prior to creating the
+		/// construction, so the cache must be Read in prior to creating the
 		/// iterator.
 		/// </summary>
 		/// <param name="builder">
@@ -95,7 +95,7 @@ namespace GitSharp.DirectoryCache
 		/// Create a new iterator for an already loaded <see cref="DirCache"/> instance.
 		/// <p>
 		/// The iterator implementation may copy part of the cache's data during
-		/// construction, so the cache must be read in prior to creating the
+		/// construction, so the cache must be Read in prior to creating the
 		/// iterator.
 		/// </summary>
 		/// <param name="parentIterator">The parent iterator</param>

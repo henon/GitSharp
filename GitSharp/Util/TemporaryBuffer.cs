@@ -152,7 +152,7 @@ namespace GitSharp.Util
          * Copy all bytes remaining on the input stream into this buffer.
          *
          * @param in
-         *            the stream to read from, until EOF is reached.
+         *            the stream to Read from, until EOF is reached.
          * @
          *             an error occurred reading from the input stream, or while
          *             writing to a local temporary file.

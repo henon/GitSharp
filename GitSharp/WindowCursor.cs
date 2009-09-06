@@ -45,8 +45,8 @@ namespace GitSharp
     /// </summary>
     public class WindowCursor
     {
-        private Inflater _inf;
-        private ByteWindow _window;
+        private Inflater _inflater;
+        private ByteWindow _byteWindow;
 
         public WindowCursor()
         {
@@ -78,14 +78,14 @@ namespace GitSharp
         /// This cursor does not match the provider or id and the proper 
         /// window could not be acquired through the provider's cache.
         /// </remarks>
-        public int copy(PackFile pack, long position, byte[] dstbuf, int dstoff, int cnt)
+        public int Copy(PackFile pack, long position, byte[] dstbuf, int dstoff, int cnt)
         {
-            long Length = pack.Length;
+            long length = pack.Length;
             int need = cnt;
-            while (need > 0 && position < Length)
+            while (need > 0 && position < length)
             {
                 Pin(pack, position);
-                int r = _window.copy(position, dstbuf, dstoff, need);
+                int r = _byteWindow.copy(position, dstbuf, dstoff, need);
                 position += r;
                 dstoff += r;
                 need -= r;
@@ -111,55 +111,57 @@ namespace GitSharp
         /// this cursor does not match the provider or id and the proper
         /// window could not be acquired through the provider's cache.
         /// </remarks>
-        public int inflate(PackFile pack, long position, byte[] dstbuf, int dstoff)
+        public int Inflate(PackFile pack, long position, byte[] dstbuf, int dstoff)
         {
-            if (_inf == null)
+            if (_inflater == null)
             {
-                _inf = InflaterCache.Instance.get();
+                _inflater = InflaterCache.Instance.get();
             }
             else
             {
-                _inf.Reset();
+                _inflater.Reset();
             }
 
             while (true)
             {
                 Pin(pack, position);
-                dstoff = _window.inflate(position, dstbuf, dstoff, _inf);
-                if (_inf.IsFinished)
+                dstoff = _byteWindow.Inflate(position, dstbuf, dstoff, _inflater);
+                if (_inflater.IsFinished)
                 {
                     return dstoff;
                 }
-                position = _window.end;
+                position = _byteWindow.End;
             }
         }
 
-        public void inflateVerify(PackFile pack, long position)
+        public void InflateVerify(PackFile pack, long position)
         {
-            if (_inf == null)
+            if (_inflater == null)
             {
-                _inf = InflaterCache.Instance.get();
+                _inflater = InflaterCache.Instance.get();
             }
             else
             {
-                _inf.Reset();
+                _inflater.Reset();
             }
 
             while (true)
             {
                 Pin(pack, position);
-                _window.inflateVerify(position, _inf);
-                if (_inf.IsFinished)
+                _byteWindow.inflateVerify(position, _inflater);
+                
+				if (_inflater.IsFinished)
                 {
                     return;
                 }
-                position = _window.end;
+                
+				position = _byteWindow.End;
             }
         }
 
         private void Pin(PackFile pack, long position)
         {
-            ByteWindow w = _window;
+            ByteWindow w = _byteWindow;
             if (w == null || !w.contains(pack, position))
             {
                 // If memory is low, we may need what is in our window field to
@@ -167,38 +169,38 @@ namespace GitSharp
                 // So we always clear it, even though we are just going to set
                 // it again.
                 //
-                _window = null;
-                _window = WindowCache.get(pack, position);
+                _byteWindow = null;
+                _byteWindow = WindowCache.get(pack, position);
             }
         }
 
         /// <summary>
         /// Release the current window cursor.
         /// </summary>
-        public void release()
+        public void Release()
         {
-            _window = null;
+            _byteWindow = null;
             try
             {
-                InflaterCache.Instance.release(_inf);
+                InflaterCache.Instance.release(_inflater);
             }
             finally
             {
-                _inf = null;
+                _inflater = null;
             }
         }
 
         /// <summary>
         /// Release the window cursor.
         /// </summary>
-        /// <param name="cursor">cursor to release; may be null.
+        /// <param name="cursor">cursor to Release; may be null.
         /// </param>
         /// <returns>always null</returns>
-        public static WindowCursor release(WindowCursor cursor)
+        public static WindowCursor Release(WindowCursor cursor)
         {
             if (cursor != null)
             {
-                cursor.release();
+                cursor.Release();
             }
 
             return null;

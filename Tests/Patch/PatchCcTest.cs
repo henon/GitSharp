@@ -129,7 +129,7 @@ namespace GitSharp.Tests.Patch
 
 			Assert.AreEqual(1, cfh.getHunks().Count);
 			{
-				CombinedHunkHeader h = (CombinedHunkHeader)cfh.getHunks()[0];
+				var h = (CombinedHunkHeader)cfh.getHunks()[0];
 
 				Assert.AreSame(cfh, h.File);
 				Assert.AreEqual(273, h.StartOffset);

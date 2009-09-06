@@ -63,7 +63,7 @@ namespace GitSharp.TreeWalk
      * This walk implementation requires more CPU to implement a look-ahead and a
      * look-behind to merge a D/F pair together, or to skip a previously reported
      * directory. In typical Git repositories the look-ahead cost is 0 and the
-     * look-behind doesn't trigger, as users tend not to create trees which contain
+     * look-behind doesn't trigger, as users tend not to Create trees which contain
      * both "foo" as a directory and "foo.c" as a file.
      * <p>
      * In the worst-case however several thousand look-ahead steps per walk step may

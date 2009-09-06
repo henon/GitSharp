@@ -47,7 +47,7 @@ namespace GitSharp.RevWalk.Filter
      * This is an abstract interface. Applications may implement a subclass, or use
      * one of the predefined implementations already available within this package.
      * Filters may be chained together using <code>AndRevFilter</code> and
-     * <code>OrRevFilter</code> to create complex bool expressions.
+     * <code>OrRevFilter</code> to Create complex bool expressions.
      * <p>
      * Applications should install the filter on a RevWalk by
      * {@link RevWalk#setRevFilter(RevFilter)} prior to starting traversal.
@@ -207,7 +207,7 @@ namespace GitSharp.RevWalk.Filter
          *             expected object type. This usually indicates a corrupt
          *             repository, as an object link is referencing the wrong type.
          * @
-         *             a loose object or pack file could not be read to obtain data
+         *             a loose object or pack file could not be Read to obtain data
          *             necessary for the filter to make its decision.
          */
         public abstract bool include(RevWalk walker, RevCommit cmit);

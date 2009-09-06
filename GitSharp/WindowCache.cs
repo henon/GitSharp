@@ -217,15 +217,15 @@ namespace GitSharp
             {
                 if (_memoryMap)
                 {
-                    return pack.mmap(offset, _windowSize);
+                    return pack.MemoryMappedByteWindow(offset, _windowSize);
                 }
 
-                return pack.read(offset, _windowSize);
+                return pack.Read(offset, _windowSize);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Close(pack);
-                throw e;
+                throw;
             }
         }
 

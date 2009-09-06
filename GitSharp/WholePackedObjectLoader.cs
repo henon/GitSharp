@@ -37,77 +37,76 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using GitSharp.Exceptions;
 using System.IO;
+using GitSharp.Exceptions;
 
 namespace GitSharp
 {
-    /** Reader for a non-delta (just deflated) object in a pack file. */
+    /// <summary>
+	/// Reader for a non-delta (just deflated) object in a pack file.
+    /// </summary>
     public class WholePackedObjectLoader : PackedObjectLoader
     {
-        private static int OBJ_COMMIT = Constants.OBJ_COMMIT;
+        private const int ObjCommit = Constants.OBJ_COMMIT;
 
         public WholePackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int type, int size)
             : base(pr, dataOffset, objectOffset)
         {
-            objectType = type;
-            objectSize = size;
+            Type = type;
+            Size = size;
         }
 
-
-        public override void materialize(WindowCursor curs)
+        public override void Materialize(WindowCursor curs)
         {
-            if (cachedBytes != null)
+            if (CachedBytes != null)
             {
                 return;
             }
 
-            if (objectType != OBJ_COMMIT)
+            if (Type != ObjCommit)
             {
-                UnpackedObjectCache.Entry cache = pack.readCache(dataOffset);
+                UnpackedObjectCache.Entry cache = PackFile.readCache(DataOffset);
                 if (cache != null)
                 {
-                    curs.release();
-                    cachedBytes = cache.data;
+                    curs.Release();
+                    CachedBytes = cache.data;
                     return;
                 }
             }
 
             try
             {
-                cachedBytes = pack.decompress(dataOffset, objectSize, curs);
-                curs.release();
-                if (objectType != OBJ_COMMIT)
-                    pack.saveCache(dataOffset, cachedBytes, objectType);
+				CachedBytes = PackFile.decompress(DataOffset, Size, curs);
+                curs.Release();
+                if (Type != ObjCommit)
+                {
+					PackFile.saveCache(DataOffset, CachedBytes, Type);
+                }
             }
             catch (IOException dfe)
             {
-                CorruptObjectException coe;
-                coe = new CorruptObjectException("object at " + dataOffset + " in "
-                        + pack.File.FullName + " has bad zlib stream", dfe);
-                throw coe;
+                throw new CorruptObjectException("object at " + DataOffset + " in "
+					+ PackFile.File.FullName + " has bad zlib stream", dfe);
             }
         }
 
+    	public override ObjectId DeltaBase
+    	{
+    		get { return null; }
+    	}
 
-        public override int getRawType()
-        {
-            return objectType;
-        }
+    	#region Overrides of ObjectLoader
 
+    	public override int RawType
+    	{
+    		get { throw new NotImplementedException(); }
+    	}
 
-        public override long getRawSize()
-        {
-            return objectSize;
-        }
+    	public override long RawSize
+    	{
+    		get { throw new NotImplementedException(); }
+    	}
 
-
-        public override ObjectId getDeltaBase()
-        {
-            return null;
-        }
+    	#endregion
     }
 }

@@ -51,7 +51,7 @@ namespace GitSharp.TreeWalk
     /// Most applications will want to use the standard implementation of this
     /// iterator, {@link FileTreeIterator}, as that does all IO through the standard
     /// <code>java.io</code> package. Plugins for a Java based IDE may however wish
-    /// to create their own implementations of this class to allow traversal of the
+    /// to Create their own implementations of this class to allow traversal of the
     /// IDE's project space, as well as benefit from any caching the IDE may have.
     /// 
     /// <seealso cref="FileTreeIterator"/>
@@ -85,7 +85,7 @@ namespace GitSharp.TreeWalk
         protected static readonly Entry[] Eof = { };
 
         /// <summary>
-        /// Size we perform file IO in if we have to read and hash a file.
+        /// Size we perform file IO in if we have to Read and hash a file.
         /// </summary>
         private const int BufferSize = 2048;
 
@@ -256,7 +256,7 @@ namespace GitSharp.TreeWalk
 
                     while (true)
                     {
-                        int r = @is.Read(_contentReadBuffer, 0, _contentReadBuffer.Length); // was: read(_contentReadBuffer) in java
+                        int r = @is.Read(_contentReadBuffer, 0, _contentReadBuffer.Length); // was: Read(_contentReadBuffer) in java
                         if (r <= 0) break;
                         _contentDigest.Update(_contentReadBuffer, 0, r);
                         size += r;
@@ -285,7 +285,7 @@ namespace GitSharp.TreeWalk
             }
             catch (IOException)
             {
-                // Can't read the file? Don't report the failure either.
+                // Can't Read the file? Don't report the failure either.
                 //
             }
 
@@ -487,7 +487,7 @@ namespace GitSharp.TreeWalk
             public abstract string Name { get; }
 
             /// <summary>
-            /// Obtain an input stream to read the file content.
+            /// Obtain an input stream to Read the file content.
             /// 
             /// Efficient implementations are not required. The caller will usually
             /// obtain the stream only once per entry, if at all.
@@ -499,7 +499,7 @@ namespace GitSharp.TreeWalk
             /// The caller will close the stream once complete.
             /// </summary>
             /// <returns>
-            /// A stream to read from the file.
+            /// A stream to Read from the file.
             /// </returns>
             public abstract FileStream OpenInputStream();
         }

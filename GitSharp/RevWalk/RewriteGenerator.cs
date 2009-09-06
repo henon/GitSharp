@@ -44,7 +44,7 @@ namespace GitSharp.RevWalk
      * Replaces a RevCommit's parents until not colored with REWRITE.
      * <p>
      * Before a RevCommit is returned to the caller its parents are updated to
-     * create a dense DAG. Instead of reporting the actual parents as recorded when
+     * Create a dense DAG. Instead of reporting the actual parents as recorded when
      * the commit was created the returned commit will reflect the next closest
      * commit that matched the revision walker's filters.
      * <p>

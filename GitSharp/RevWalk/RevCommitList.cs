@@ -70,7 +70,7 @@ namespace GitSharp.RevWalk
 		/// include the commit the flag will be unset.
 		/// </param>
 		/// <param name="flag">
-		/// revision filter needed to read additional objects, but an
+		/// revision filter needed to Read additional objects, but an
 		/// error occurred while reading the pack files or loose objects
 		/// of the repository.
 		/// </param>
@@ -92,7 +92,7 @@ namespace GitSharp.RevWalk
 		/// include the commit the flag will be unset.
 		/// </param>
 		/// <param name="flag">
-		/// the flag to apply (or remove). Applications are responsible
+		/// the flag to Apply (or remove). Applications are responsible
 		/// for allocating this flag from the source RevWalk.
 		/// </param>
 		/// <param name="rangeBegin">
@@ -105,7 +105,7 @@ namespace GitSharp.RevWalk
 		/// commits will be tested.
 		/// </param>
 		/// <remarks>
-		/// Revision filter needed to read additional objects, but an
+		/// Revision filter needed to Read additional objects, but an
 		/// error occurred while reading the pack files or loose objects
 		/// of the repository.
 		/// </remarks>

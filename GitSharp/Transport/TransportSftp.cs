@@ -57,21 +57,21 @@ namespace GitSharp.Transport
 
         public override IFetchConnection openFetch()
         {
-            SftpObjectDB c = new SftpObjectDB(uri.Path, this);
-            WalkFetchConnection r = new WalkFetchConnection(this, c);
-            r.available(c.readAdvertisedRefs());
+            var c = new SftpObjectDB(uri.Path, this);
+            var r = new WalkFetchConnection(this, c);
+            r.available(c.ReadAdvertisedRefs());
             return r;
         }
 
         public override IPushConnection openPush()
         {
-            SftpObjectDB c = new SftpObjectDB(uri.Path, this);
-            WalkPushConnection r = new WalkPushConnection(this, c);
-            r.available(c.readAdvertisedRefs());
+            var c = new SftpObjectDB(uri.Path, this);
+            var r = new WalkPushConnection(this, c);
+            r.available(c.ReadAdvertisedRefs());
             return r;
         }
 
-        private ChannelSftp newSftp()
+        private ChannelSftp NewSftp()
         {
             initSession();
 
@@ -90,28 +90,35 @@ namespace GitSharp.Transport
 
         private class SftpObjectDB : WalkRemoteObjectDatabase
         {
-            private readonly TransportSftp instance;
-            private readonly string objectsPath;
-            private ChannelSftp ftp;
+            private readonly TransportSftp _instance;
+            private readonly string _objectsPath;
+            private ChannelSftp _ftp;
 
             public SftpObjectDB(string path, TransportSftp instance)
             {
-                this.instance = instance;
+                this._instance = instance;
+
                 if (path.StartsWith("/~"))
-                    path = path.Substring(1);
-                if (path.StartsWith("~/"))
-                    path = path.Substring(2);
+                {
+                	path = path.Substring(1);
+                }
+                
+				if (path.StartsWith("~/"))
+                {
+                	path = path.Substring(2);
+                }
+
                 try
                 {
-                    ftp = instance.newSftp();
-                    ftp.cd(path);
-                    ftp.cd("objects");
-                    objectsPath = ftp.pwd();
+                    _ftp = instance.NewSftp();
+                    _ftp.cd(path);
+                    _ftp.cd("objects");
+                    _objectsPath = _ftp.pwd();
                 }
-                catch (TransportException e)
+                catch (TransportException)
                 {
                     close();
-                    throw e;
+                    throw;
                 }
                 catch (SftpException je)
                 {
@@ -119,50 +126,50 @@ namespace GitSharp.Transport
                 }
             }
 
-            public SftpObjectDB(SftpObjectDB parent, string p, TransportSftp instance)
+        	private SftpObjectDB(SftpObjectDB parent, string p, TransportSftp instance)
             {
-                this.instance = instance;
+                this._instance = instance;
                 try
                 {
-                    ftp = instance.newSftp();
-                    ftp.cd(parent.objectsPath);
-                    ftp.cd(p);
-                    objectsPath = ftp.pwd();
+                    _ftp = instance.NewSftp();
+                    _ftp.cd(parent._objectsPath);
+                    _ftp.cd(p);
+                    _objectsPath = _ftp.pwd();
                 }
-                catch (TransportException err)
+                catch (TransportException)
                 {
                     close();
-                    throw err;
+                    throw;
                 }
                 catch (SftpException je)
                 {
-                    throw new TransportException(
-                        "Can't enter " + p + " from " + parent.objectsPath + ": " + je.message, je);
+                    throw new TransportException("Can't enter " + p + " from " + parent._objectsPath + ": " + je.message, je);
                 }
             }
 
             public override List<string> getPackNames()
             {
-                List<string> packs = new List<string>();
+                var packs = new List<string>();
                 try
                 {
-                    List<ChannelSftp.LsEntry> list = new List<ChannelSftp.LsEntry>();
-                    foreach (object o in ftp.ls("pack")) list.Add((ChannelSftp.LsEntry) o);
+                    var list = new List<ChannelSftp.LsEntry>();
+                    foreach (object o in _ftp.ls("pack")) list.Add((ChannelSftp.LsEntry) o);
 
-                    Dictionary<string, ChannelSftp.LsEntry> files = new Dictionary<string, ChannelSftp.LsEntry>();
-                    Dictionary<string, int> mtimes = new Dictionary<string, int>();
+                    var files = new Dictionary<string, ChannelSftp.LsEntry>();
+                    var mtimes = new Dictionary<string, int>();
 
                     foreach (ChannelSftp.LsEntry ent in list)
-                        files.Add(ent.getFilename(), ent);
+                    {
+                    	files.Add(ent.getFilename(), ent);
+                    }
+
                     foreach (ChannelSftp.LsEntry ent in list)
                     {
                         string n = ent.getFilename();
-                        if (!n.StartsWith("pack-") || n.EndsWith(".pack"))
-                            continue;
+                        if (!n.StartsWith("pack-") || n.EndsWith(IndexPack.PackSuffix)) continue;
 
-                        string @in = n.Slice(0, n.Length - 5) + ".idx";
-                        if (!files.ContainsKey(@in))
-                            continue;
+                        string @in = IndexPack.GetIndexFileName(n.Slice(0, n.Length - 5));
+                        if (!files.ContainsKey(@in)) continue;
 
                         mtimes.Add(n, ent.getAttrs().getMTime());
                         packs.Add(n);
@@ -172,7 +179,7 @@ namespace GitSharp.Transport
                 }
                 catch (SftpException je)
                 {
-                    throw new TransportException("Can't ls " + objectsPath + "/pack: " + je.message, je);
+                    throw new TransportException("Can't ls " + _objectsPath + "/pack: " + je.message, je);
                 }
                 return packs;
             }
@@ -181,13 +188,15 @@ namespace GitSharp.Transport
             {
                 try
                 {
-                    return ftp.get(path);
+                    return _ftp.get(path);
                 }
                 catch (SftpException je)
                 {
                     if (je.id == ChannelSftp.SSH_FX_NO_SUCH_FILE)
-                        throw new FileNotFoundException(path);
-                    throw new TransportException("Can't get " + objectsPath + "/" + path + ": " + je.message, je);
+                    {
+                    	throw new FileNotFoundException(path);
+                    }
+                    throw new TransportException("Can't get " + _objectsPath + "/" + path + ": " + je.message, je);
                 }
             }
 
@@ -195,16 +204,16 @@ namespace GitSharp.Transport
             {
                 try
                 {
-                    return ftp.put(path);
+                    return _ftp.put(path);
                 }
                 catch (SftpException je)
                 {
                     if (je.id == ChannelSftp.SSH_FX_NO_SUCH_FILE)
                     {
-                        mkdir_p(path);
+                        MkdirP(path);
                         try
                         {
-                            return ftp.put(path);
+                            return _ftp.put(path);
                         }
                         catch (SftpException je2)
                         {
@@ -212,7 +221,7 @@ namespace GitSharp.Transport
                         }
                     }
 
-                    throw new TransportException("Can't write " + objectsPath + "/" + path + ": " + je.message, je);
+                    throw new TransportException("Can't write " + _objectsPath + "/" + path + ": " + je.message, je);
                 }
             }
 
@@ -224,24 +233,23 @@ namespace GitSharp.Transport
                     base.writeFile(@lock, data);
                     try
                     {
-                        ftp.rename(@lock, path);
+                        _ftp.rename(@lock, path);
                     }
                     catch (SftpException je)
                     {
-                        throw new TransportException("Can't write " + objectsPath + "/" + path + ": " + je.message, je);
+                        throw new TransportException("Can't write " + _objectsPath + "/" + path + ": " + je.message, je);
                     }
                 }
-                catch (IOException err)
+                catch (IOException)
                 {
                     try
                     {
-                        ftp.rm(@lock);
+                        _ftp.rm(@lock);
                     }
                     catch (SftpException)
                     {
-                        
                     }
-                    throw err;
+                    throw;
                 }
             }
 
@@ -249,13 +257,15 @@ namespace GitSharp.Transport
             {
                 try
                 {
-                    ftp.rm(path);
+                    _ftp.rm(path);
                 }
                 catch (SftpException je)
                 {
                     if (je.id == ChannelSftp.SSH_FX_NO_SUCH_FILE)
-                        throw new FileNotFoundException(path);
-                    throw new TransportException("Can't delete " + objectsPath + "/" + path + ": " + je.message, je);
+                    {
+                    	throw new FileNotFoundException(path);
+                    }
+                    throw new TransportException("Can't delete " + _objectsPath + "/" + path + ": " + je.message, je);
                 }
 
                 string dir = path;
@@ -265,7 +275,7 @@ namespace GitSharp.Transport
                     try
                     {
                         dir = dir.Slice(0, s);
-                        ftp.rmdir(dir);
+                        _ftp.rmdir(dir);
                         s = dir.LastIndexOf('/');
                     }
                     catch (SftpException)
@@ -275,7 +285,7 @@ namespace GitSharp.Transport
                 }
             }
 
-            private void mkdir_p(string path)
+            private void MkdirP(string path)
             {
                 int s = path.LastIndexOf('/');
                 if (s <= 0) return;
@@ -283,16 +293,16 @@ namespace GitSharp.Transport
                 path = path.Slice(0, s);
                 try
                 {
-                    ftp.mkdir(path);
+                    _ftp.mkdir(path);
                 }
                 catch (SftpException je)
                 {
                     if (je.id == ChannelSftp.SSH_FX_NO_SUCH_FILE)
                     {
-                        mkdir_p(path);
+                        MkdirP(path);
                         try
                         {
-                            ftp.mkdir(path);
+                            _ftp.mkdir(path);
                             return;
                         }
                         catch (SftpException je2)
@@ -301,21 +311,21 @@ namespace GitSharp.Transport
                         }
                     }
 
-                    throw new TransportException("Can't mkdir " + objectsPath + "/" + path + ": " + je.message, je);
+                    throw new TransportException("Can't mkdir " + _objectsPath + "/" + path + ": " + je.message, je);
                 }
             }
 
             public override URIish getURI()
             {
-                return instance.uri.SetPath(objectsPath);
+                return _instance.uri.SetPath(_objectsPath);
             }
 
-            public Dictionary<string, Ref> readAdvertisedRefs()
+            public Dictionary<string, Ref> ReadAdvertisedRefs()
             {
-                Dictionary<string, Ref> avail = new Dictionary<string, Ref>();
+                var avail = new Dictionary<string, Ref>();
                 readPackedRefs(avail);
-                readRef(avail, ROOT_DIR + Constants.HEAD, Constants.HEAD);
-                readLooseRefs(avail, ROOT_DIR + "refs", "refs/");
+                ReadRef(avail, ROOT_DIR + Constants.HEAD, Constants.HEAD);
+                ReadLooseRefs(avail, ROOT_DIR + "refs", "refs/");
                 return avail;
             }
 
@@ -333,46 +343,49 @@ namespace GitSharp.Transport
 
             public override WalkRemoteObjectDatabase openAlternate(string location)
             {
-                return new SftpObjectDB(this, location, instance);
+                return new SftpObjectDB(this, location, _instance);
             }
 
-            private static Ref.Storage loose(Ref r)
+            private static Ref.Storage Loose(Ref r)
             {
                 if (r != null && r.StorageFormat == Ref.Storage.Packed)
                     return Ref.Storage.LoosePacked;
                 return Ref.Storage.Loose;
             }
 
-            private void readLooseRefs(IDictionary<string, Ref> avail, string dir, string prefix)
+            private void ReadLooseRefs(IDictionary<string, Ref> avail, string dir, string prefix)
             {
-                List<ChannelSftp.LsEntry> list = new List<ChannelSftp.LsEntry>();
+                var list = new List<ChannelSftp.LsEntry>();
                 try
                 {
-                    foreach (object o in ftp.ls(dir))
+                    foreach (object o in _ftp.ls(dir))
                     {
                         list.Add((ChannelSftp.LsEntry) o);
                     }
                 }
                 catch (SftpException je)
                 {
-                    throw new TransportException("Can't ls " + objectsPath + "/" + dir + ": " + je.message, je);
+                    throw new TransportException("Can't ls " + _objectsPath + "/" + dir + ": " + je.message, je);
                 }
 
                 foreach (ChannelSftp.LsEntry ent in list)
                 {
                     string n = ent.getFilename();
-                    if (".".Equals(n) || "..".Equals(n))
-                        continue;
+                    if (".".Equals(n) || "..".Equals(n)) continue;
 
                     string nPath = dir + "/" + n;
                     if (ent.getAttrs().isDir())
-                        readLooseRefs(avail, nPath, prefix + n + "/");
+                    {
+                    	ReadLooseRefs(avail, nPath, prefix + n + "/");
+                    }
                     else
-                        readRef(avail, nPath, prefix + n);
+                    {
+                    	ReadRef(avail, nPath, prefix + n);
+                    }
                 }
             }
 
-            private Ref readRef(IDictionary<string, Ref> avail, string path, string name)
+            private Ref ReadRef(IDictionary<string, Ref> avail, string path, string name)
             {
                 string line;
                 try
@@ -393,7 +406,7 @@ namespace GitSharp.Transport
                 }
                 catch (IOException err)
                 {
-                    throw new TransportException("Cannot read " + objectsPath + "/" + path + ": " + err.Message, err);
+                    throw new TransportException("Cannot Read " + _objectsPath + "/" + path + ": " + err.Message, err);
                 }
 
                 if (line == null)
@@ -402,7 +415,7 @@ namespace GitSharp.Transport
                 if (line.StartsWith("ref: "))
                 {
                     string p = line.Substring("ref: ".Length);
-                    Ref r = readRef(avail, ROOT_DIR + p, p);
+                    Ref r = ReadRef(avail, ROOT_DIR + p, p);
                     if (r == null)
                     {
                         if (avail.ContainsKey(p))
@@ -410,7 +423,7 @@ namespace GitSharp.Transport
                     }
                     if (r != null)
                     {
-                        r = new Ref(loose(r), name, r.ObjectId, r.PeeledObjectId, true);
+                        r = new Ref(Loose(r), name, r.ObjectId, r.PeeledObjectId, true);
                         avail.Add(name, r);
                     }
                     return r;
@@ -418,7 +431,7 @@ namespace GitSharp.Transport
 
                 if (ObjectId.IsId(line))
                 {
-                    Ref r = new Ref(loose(avail[name]), name, ObjectId.FromString(line));
+                    var r = new Ref(Loose(avail[name]), name, ObjectId.FromString(line));
                     avail.Add(r.Name, r);
                     return r;
                 }
@@ -428,16 +441,16 @@ namespace GitSharp.Transport
 
             public override void close()
             {
-                if (ftp != null)
+                if (_ftp != null)
                 {
                     try
                     {
-                        if (ftp.isConnected())
-                            ftp.disconnect();
+                        if (_ftp.isConnected())
+                            _ftp.disconnect();
                     }
                     finally
                     {
-                        ftp = null;
+                        _ftp = null;
                     }
                 }
             }

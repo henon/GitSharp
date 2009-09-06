@@ -124,7 +124,7 @@ namespace GitSharp.RevWalk
 		/// type in a <see cref="RevWalk#lookupAny(AnyObjectId, int)"/> call.
 		/// </exception>
 		/// <exception cref="Exception">
-		/// A pack file or loose object could not be read.
+		/// A pack file or loose object could not be Read.
 		/// </exception>
         public void markStart(RevObject o)
         {
@@ -184,7 +184,7 @@ namespace GitSharp.RevWalk
 		/// type in a <see cref="RevWalk.lookupAny(AnyObjectId, int)"/> call.
 		/// </exception>
 		/// <exception cref="Exception">
-		/// A pack file or loose object could not be read.
+		/// A pack file or loose object could not be Read.
 		/// </exception>
         public void markUninteresting(RevObject o)
         {
@@ -258,7 +258,7 @@ namespace GitSharp.RevWalk
 		/// One or or more of the objects in a tree do not match the type indicated.
 		/// </exception>
 		/// <exception cref="Exception">
-		/// A pack file or loose object could not be read.
+		/// A pack file or loose object could not be Read.
 		/// </exception>
         public RevObject nextObject()
         {
@@ -363,7 +363,7 @@ namespace GitSharp.RevWalk
 		/// indicated.
 		/// </exception>
 		/// <exception cref="Exception">
-		/// A pack file or loose object could not be read.
+		/// A pack file or loose object could not be Read.
 		/// </exception>
         public void checkConnectivity()
         {

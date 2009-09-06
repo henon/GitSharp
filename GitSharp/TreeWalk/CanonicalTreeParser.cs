@@ -48,7 +48,7 @@ namespace GitSharp.TreeWalk
 	/// </summary>
 	public class CanonicalTreeParser : AbstractTreeIterator
 	{
-		private static readonly byte[] EMPTY = { };
+		private static readonly byte[] Empty = { };
 
 		private byte[] _raw;
 
@@ -61,10 +61,12 @@ namespace GitSharp.TreeWalk
 		/** Offset one past the current entry (first byte of next entry). */
 		private int _nextPtr;
 
-		/** Create a new parser. */
+		/// <summary>
+		/// Create a new parser.
+		/// </summary>
 		public CanonicalTreeParser()
 		{
-			reset(EMPTY);
+			reset(Empty);
 		}
 
 		/**
@@ -88,7 +90,7 @@ namespace GitSharp.TreeWalk
 		 *             the object supplied as an argument is not actually a tree and
 		 *             cannot be parsed as though it were a tree.
 		 * @throws IOException
-		 *             a loose object or pack file could not be read.
+		 *             a loose object or pack file could not be Read.
 		 */
 		public CanonicalTreeParser(byte[] prefix, Repository repo, AnyObjectId treeId, WindowCursor curs)
 			: base(prefix)
@@ -135,7 +137,7 @@ namespace GitSharp.TreeWalk
 		 *             the object supplied as an argument is not actually a tree and
 		 *             cannot be parsed as though it were a tree.
 		 * @throws IOException
-		 *             a loose object or pack file could not be read.
+		 *             a loose object or pack file could not be Read.
 		 */
 		public CanonicalTreeParser resetRoot(Repository repo, AnyObjectId id, WindowCursor curs)
 		{
@@ -187,7 +189,7 @@ namespace GitSharp.TreeWalk
 		 *             the object supplied as an argument is not actually a tree and
 		 *             cannot be parsed as though it were a tree.
 		 * @throws IOException
-		 *             a loose object or pack file could not be read.
+		 *             a loose object or pack file could not be Read.
 		 */
 		public void reset(Repository repo, AnyObjectId id, WindowCursor curs)
 		{
@@ -197,8 +199,8 @@ namespace GitSharp.TreeWalk
 				ObjectId me = id.ToObjectId();
 				throw new MissingObjectException(me, Constants.TYPE_TREE);
 			}
-			byte[] subtreeData = ldr.getCachedBytes();
-			if (ldr.getType() != Constants.OBJ_TREE)
+			byte[] subtreeData = ldr.CachedBytes;
+			if (ldr.Type != Constants.OBJ_TREE)
 			{
 				ObjectId me = id.ToObjectId();
 				throw new IncorrectObjectTypeException(me, Constants.TYPE_TREE);
@@ -218,7 +220,7 @@ namespace GitSharp.TreeWalk
 		}
 
 		/**
-		 * Back door to quickly create a subtree iterator for any subtree.
+		 * Back door to quickly Create a subtree iterator for any subtree.
 		 * <p>
 		 * Don't use this unless you are ObjectWalk. The method is meant to be
 		 * called only once the current entry has been identified as a tree and its
@@ -232,7 +234,7 @@ namespace GitSharp.TreeWalk
 		 *            window cursor to use during repository access.
 		 * @return a new parser that walks over the current subtree.
 		 * @throws IOException
-		 *             a loose object or pack file could not be read.
+		 *             a loose object or pack file could not be Read.
 		 */
 		public CanonicalTreeParser createSubtreeIterator0(Repository repo, AnyObjectId id, WindowCursor curs) // [henon] createSubtreeIterator0 <--- not a typo!
 		{
@@ -250,7 +252,7 @@ namespace GitSharp.TreeWalk
 			}
 			finally
 			{
-				curs.release();
+				curs.Release();
 			}
 		}
 
@@ -339,7 +341,7 @@ namespace GitSharp.TreeWalk
 			}
 
 			// Fast skip through the records, from the beginning of the tree.
-			// There is no reliable way to read the tree backwards, so we must
+			// There is no reliable way to Read the tree backwards, so we must
 			// parse all over again from the beginning. We hold the last "delta"
 			// positions in a buffer, so we can find the correct position later.
 			//

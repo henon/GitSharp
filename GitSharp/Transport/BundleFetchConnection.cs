@@ -174,7 +174,7 @@ namespace GitSharp.Transport
 
         private IndexPack newIndexPack()
         {
-            IndexPack ip = IndexPack.create(transport.Local, bin);
+            IndexPack ip = IndexPack.Create(transport.Local, bin);
             ip.setFixThin(true);
             ip.setObjectChecking(transport.CheckFetchedObjects);
             return ip;
@@ -208,7 +208,7 @@ namespace GitSharp.Transport
                 }
                 catch (IOException err)
                 {
-                    throw new TransportException(transport.Uri, "Cannot read commit " + p.Name, err);
+                    throw new TransportException(transport.Uri, "Cannot Read commit " + p.Name, err);
                 }
             }
 
@@ -242,7 +242,7 @@ namespace GitSharp.Transport
             }
             catch (IOException err)
             {
-                throw new TransportException(transport.Uri, "Cannot read object", err);
+                throw new TransportException(transport.Uri, "Cannot Read object", err);
             }
 
             if (remaining > 0)

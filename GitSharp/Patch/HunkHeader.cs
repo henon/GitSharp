@@ -231,7 +231,7 @@ namespace GitSharp.Patch
 
 			if (last < end && LinesContext + _oldImage.LinesDeleted - 1 == _oldImage.LineCount
 				&& LinesContext + _oldImage.LinesAdded == NewLineCount
-				&& RawParseUtils.match(buf, last, Patch.SIG_FOOTER) >= 0)
+				&& RawParseUtils.match(buf, last, Patch.SigFooter) >= 0)
 			{
 				// This is an extremely common occurrence of "corruption".
 				// Users add footers with their signatures after this mark,

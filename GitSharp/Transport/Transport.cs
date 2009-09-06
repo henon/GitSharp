@@ -55,7 +55,7 @@ namespace GitSharp.Transport
  * the network connection(s) necessary for the copy, as well as actually
  * shuffling data back and forth.
  * </p>
- * Transport instances and the connections they create are not thread-safe.
+ * Transport instances and the connections they Create are not thread-safe.
  * Callers must ensure a transport is accessed by only one thread at a time.
  */
     public abstract class Transport

@@ -127,9 +127,9 @@ namespace GitSharp.Tests
 				ObjectLoader or = db.openObject(new WindowCursor(), o.Id);
 				Assert.IsNotNull(or);
 				Assert.IsTrue(or is PackedObjectLoader);
-				Assert.AreEqual(o.Type, or.getType());
-				Assert.AreEqual(o.RawSize, or.getRawSize());
-				Assert.AreEqual(o.Offset, ((PackedObjectLoader)or).getObjectOffset());
+				Assert.AreEqual(o.Type, or.Type);
+				Assert.AreEqual(o.RawSize, or.RawSize);
+				Assert.AreEqual(o.Offset, ((PackedObjectLoader)or).ObjectOffset);
 			}
 		}
 
@@ -159,7 +159,7 @@ namespace GitSharp.Tests
 			public override string ToString()
 			{
 				// 4b825dc642cb6eb9a060e54bf8d69288fbee4904 tree   0 9 7782
-				return Id.ToString() + " " + Type + " " + Offset + " " + Size + " " + RawSize;
+				return Id + " " + Type + " " + Size + " " + RawSize + " " + Offset;
 			}
 		}
 

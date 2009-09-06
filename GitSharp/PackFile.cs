@@ -42,12 +42,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using GitSharp.Exceptions;
 using GitSharp.Util;
 using Winterdom.IO.FileMap;
-using System.Runtime.CompilerServices;
 
 namespace GitSharp
 {
@@ -61,7 +61,7 @@ namespace GitSharp
 		/// <summary>
 		/// Sorts PackFiles to be most recently created to least recently created.
 		/// </summary>
-		public static readonly Comparison<PackFile> SORT = (a, b) => b._packLastModified - a._packLastModified;
+		internal static readonly Comparison<PackFile> PackFileSortComparison = (a, b) => b._packLastModified - a._packLastModified;
 		private volatile bool _invalid;
 
 		private readonly FileInfo _idxFile;
@@ -232,10 +232,12 @@ namespace GitSharp
 		public byte[] decompress(long position, long totalSize, WindowCursor curs)
 		{
 			var dstbuf = new byte[totalSize];
-			if (curs.inflate(this, position, dstbuf, 0) != totalSize)
+
+			if (curs.Inflate(this, position, dstbuf, 0) != totalSize)
 			{
 				throw new EndOfStreamException("Short compressed stream at " + position);
 			}
+
 			return dstbuf;
 		}
 
@@ -243,28 +245,33 @@ namespace GitSharp
 		public void beginCopyRawData()
 		{
 			if (++_activeCopyRawData == 1 && _activeWindows == 0)
+			{
 				DoOpen();
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void endCopyRawData()
 		{
 			if (--_activeCopyRawData == 0 && _activeWindows == 0)
+			{
 				DoClose();
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		public bool beginWindowCache()
 		{
-
 			if (++_activeWindows == 1)
 			{
 				if (_activeCopyRawData == 0)
+				{
 					DoOpen();
+				}
 				return true;
 			}
-			return false;
 
+			return false;
 		}
 
 		[MethodImpl(MethodImplOptions.Synchronized)]
@@ -278,7 +285,7 @@ namespace GitSharp
 			return r;
 		}
 
-		internal ByteArrayWindow read(long pos, int size)
+		internal ByteArrayWindow Read(long pos, int size)
 		{
 			if (Length < pos + size)
 			{
@@ -290,7 +297,7 @@ namespace GitSharp
 			return new ByteArrayWindow(this, pos, buf);
 		}
 
-		internal ByteWindow mmap(long pos, int size)
+		internal ByteWindow MemoryMappedByteWindow(long pos, int size)
 		{
 			if (Length < pos + size)
 			{
@@ -318,11 +325,11 @@ namespace GitSharp
 			return new ByteBufferWindow(this, pos, map);
 		}
 
-		internal void copyRawData<T>(PackedObjectLoader loader, T @out, byte[] buf, WindowCursor cursor)
+		internal void CopyRawData<T>(PackedObjectLoader loader, T @out, byte[] buf, WindowCursor cursor)
 			where T : Stream
 		{
-			long objectOffset = loader.objectOffset;
-			long dataOffset = loader.getDataOffset();
+			long objectOffset = loader.ObjectOffset;
+			long dataOffset = loader.DataOffset;
 			var cnt = (int)(FindEndOffset(objectOffset) - dataOffset);
 
 			if (LoadPackIndex().HasCRC32Support)
@@ -342,13 +349,15 @@ namespace GitSharp
 				ObjectId id = FindObjectForOffset(objectOffset);
 				long expected = LoadPackIndex().FindCRC32(id);
 				if (computed != expected)
+				{
 					throw new CorruptObjectException("object at " + dataOffset + " in " + File.FullName + " has bad zlib stream");
+				}
 			}
 			else
 			{
 				try
 				{
-					cursor.inflateVerify(this, dataOffset);
+					cursor.InflateVerify(this, dataOffset);
 				}
 				catch (Exception fe) // [henon] was DataFormatException
 				{
@@ -358,35 +367,6 @@ namespace GitSharp
 				CopyToStream(dataOffset, buf, cnt, @out, cursor);
 			}
 		}
-
-		// [henon] copied from dotgit:
-		//private Stream GetPackStream(int packFileOffset, int Length, ref int viewOffset)
-		//{
-		//    int dwFileMapStart = (packFileOffset / (int)_systemInfo.dwAllocationGranularity) * (int)_systemInfo.dwAllocationGranularity;
-		//    int dwMapViewSize = (packFileOffset % (int)_systemInfo.dwAllocationGranularity) + Length;
-		//    int dwFileMapSize = packFileOffset + Length;
-		//    viewOffset = packFileOffset - dwFileMapStart;
-		//    return _fd.MapView(MapAccess.FileMapRead, dwFileMapStart, dwMapViewSize);
-		//}
-
-		//private void ReadPackHeader()
-		//{
-		//    var Reader = new BinaryReader(_stream);
-
-		//    var sig = Reader.ReadBytes(Constants.PackSignature.Length);
-
-		//    for (int k = 0; k < Constants.PackSignature.Length; k++)
-		//        if (sig[k] != Constants.PackSignature[k])
-		//            throw new IOException("Not a PACK file.");
-
-		//    var vers = Reader.ReadUInt32();
-		//    if (vers != 2 && vers != 3)
-		//        throw new IOException("Unsupported pack version " + vers + ".");
-
-		//    long objectCnt = Reader.ReadUInt32();
-		//    if (Index.ObjectCount != objectCnt)
-		//        throw new IOException("Pack index object count mismatch; expected " + objectCnt + " found " + Index.ObjectCount + ": " + _stream.Name);
-		//}
 
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		private PackIndex LoadPackIndex()
@@ -425,21 +405,21 @@ namespace GitSharp
 
 		private void ReadFully(long position, byte[] dstbuf, int dstoff, int cnt, WindowCursor curs)
 		{
-			if (curs.copy(this, position, dstbuf, dstoff, cnt) != cnt)
+			if (curs.Copy(this, position, dstbuf, dstoff, cnt) != cnt)
 			{
 				throw new EndOfStreamException();
 			}
 		}
 
-		private void CopyToStream(long position, byte[] buf, long cnt, Stream @out, WindowCursor curs)
+		private void CopyToStream(long position, byte[] buffer, long count, Stream stream, WindowCursor windowCursor)
 		{
-			while (cnt > 0)
+			while (count > 0)
 			{
-				var toRead = (int)Math.Min(cnt, buf.Length);
-				ReadFully(position, buf, 0, toRead, curs);
+				var toRead = (int)Math.Min(count, buffer.Length);
+				ReadFully(position, buffer, 0, toRead, windowCursor);
 				position += toRead;
-				cnt -= toRead;
-				@out.Write(buf, 0, toRead);
+				count -= toRead;
+				stream.Write(buffer, 0, toRead);
 			}
 		}
 

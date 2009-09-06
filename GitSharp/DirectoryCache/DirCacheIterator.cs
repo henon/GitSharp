@@ -47,7 +47,7 @@ namespace GitSharp.DirectoryCache
 	/// Iterate a <see cref="DirCache"/> as part of a <see cref="TreeWalk"/>.
 	/// <p>
 	/// This is an iterator to adapt a loaded <see cref="DirCache"/> instance (such as
-	/// read from an existing <code>.git/index</code> file) to the tree structure
+	/// Read from an existing <code>.git/index</code> file) to the tree structure
 	/// used by a <see cref="TreeWalk"/>, making it possible for applications to walk
 	/// over any combination of tree objects already in the object database, index
 	/// files, or working directories.
@@ -64,7 +64,7 @@ namespace GitSharp.DirectoryCache
 		/// Create a new iterator for an already loaded DirCache instance.
 		/// <p>
 		/// The iterator implementation may copy part of the cache's data during
-		/// construction, so the cache must be read in prior to creating the
+		/// construction, so the cache must be Read in prior to creating the
 		/// iterator.
 		/// </summary>
 		/// <param name="dc">
@@ -195,7 +195,7 @@ namespace GitSharp.DirectoryCache
 		private void ParseEntry()
 		{
 			_currentEntry = Cache.getEntry(_pointer);
-			byte[] cep = _currentEntry.path;
+			byte[] cep = _currentEntry.Path;
 
 			if (_nextSubtreePos != Tree.getChildCount())
 			{

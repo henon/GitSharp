@@ -37,9 +37,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using GitSharp.Util;
 
@@ -53,7 +50,7 @@ namespace GitSharp.DirectoryCache
      */
     public class DirCacheEntry
     {
-        private static byte[] nullpad = new byte[8];
+        private static readonly byte[] NullPad = new byte[8];
 
         /** The standard (fully merged) stage for an entry. */
         public const int STAGE_0 = 0;
@@ -68,87 +65,83 @@ namespace GitSharp.DirectoryCache
         public const int STAGE_3 = 3;
 
         // private const  int P_CTIME = 0;
-
         // private const  int P_CTIME_NSEC = 4;
-
-        private const int P_MTIME = 8;
-
+        private const int PMtime = 8;
         // private const  int P_MTIME_NSEC = 12;
-
         // private const  int P_DEV = 16;
-
         // private const  int P_INO = 20;
-
-        private const int P_MODE = 24;
-
+        private const int PMode = 24;
         // private const  int P_UID = 28;
-
         // private const  int P_GID = 32;
+        private const int PSize = 36;
+        private const int PObjectid = 40;
+        private const int PFlags = 60;
 
-        private const int P_SIZE = 36;
+		public const int INFO_LEN = 62;
 
-        private const int P_OBJECTID = 40;
+        /// <summary>
+		/// Mask applied to data in {@link #PFlags} to get the name Length.
+        /// </summary>
+        private const int NameMask = 0xfff;
+		private const int AssumeValid = 0x80;
 
-        private const int P_FLAGS = 60;
+        /// <summary>
+		/// (Possibly shared) header information storage.
+        /// </summary>
+        private readonly byte[] _info;
 
-        /** Mask applied to data in {@link #P_FLAGS} to get the name Length. */
-        private const int NAME_MASK = 0xfff;
+        /// <summary>
+		/// First location within {@link #_info} where our header starts.
+        /// </summary>
+        private readonly int _infoOffset;
 
-        public const int INFO_LEN = 62;
+        /// <summary>
+		/// Our encoded path name, from the root of the repository.
+        /// </summary>
+        private readonly byte[] _path;
 
-        private const int ASSUME_VALID = 0x80;
-
-        /** (Possibly shared) header information storage. */
-        private byte[] info;
-
-        /** First location within {@link #info} where our header starts. */
-        private int infoOffset;
-
-        /** Our encoded path name, from the root of the repository. */
-        public byte[] path;
-
-        public DirCacheEntry(byte[] sharedInfo, int infoAt, Stream @in, MessageDigest md)
+    	public DirCacheEntry(byte[] sharedInfo, int infoAt, Stream @in, MessageDigest md)
         {
-            info = sharedInfo;
-            infoOffset = infoAt;
+            _info = sharedInfo;
+            _infoOffset = infoAt;
 
-            NB.ReadFully(@in, info, infoOffset, INFO_LEN);
-            md.Update(info, infoOffset, INFO_LEN);
+            NB.ReadFully(@in, _info, _infoOffset, INFO_LEN);
+            md.Update(_info, _infoOffset, INFO_LEN);
 
-            int pathLen = NB.decodeUInt16(info, infoOffset + P_FLAGS) & NAME_MASK;
+            int pathLen = NB.decodeUInt16(_info, _infoOffset + PFlags) & NameMask;
             int skipped = 0;
-            if (pathLen < NAME_MASK)
+            if (pathLen < NameMask)
             {
-                path = new byte[pathLen];
-                NB.ReadFully(@in, path, 0, pathLen);
-                md.Update(path, 0, pathLen);
+                _path = new byte[pathLen];
+                NB.ReadFully(@in, _path, 0, pathLen);
+                md.Update(_path, 0, pathLen);
             }
             else
             {
                 var tmp = new BinaryWriter(new MemoryStream());
                 {
-                    byte[] buf = new byte[NAME_MASK];
-                    NB.ReadFully(@in, buf, 0, NAME_MASK);
+                    var buf = new byte[NameMask];
+                    NB.ReadFully(@in, buf, 0, NameMask);
                     tmp.Write(buf);
                 }
                 for (; ; )
                 {
                     int c = @in.ReadByte();
                     if (c < 0)
-                        throw new EndOfStreamException("Short read of block.");
+                        throw new EndOfStreamException("Short Read of block.");
                     if (c == 0)
                         break;
                     tmp.Write(c);
                 }
-                path = (tmp.BaseStream as MemoryStream).ToArray();
-                pathLen = path.Length;
+                _path = (tmp.BaseStream as MemoryStream).ToArray();
+                pathLen = _path.Length;
                 skipped = 1; // we already skipped 1 '\0' above to break the loop.
-                md.Update(path, 0, pathLen);
+                md.Update(_path, 0, pathLen);
                 md.Update((byte)0);
             }
 
             // Index records are padded out to the next 8 byte alignment
-            // for historical reasons related to how C Git read the files.
+            // for historical reasons related to how C Git Read the files.
             //
             int actLen = INFO_LEN + pathLen;
             int expLen = (actLen + 8) & ~7;
@@ -156,7 +149,7 @@ namespace GitSharp.DirectoryCache
             if (padLen > 0)
             {
                 NB.skipFully(@in, padLen);
-                md.Update(nullpad, 0, padLen);
+                md.Update(NullPad, 0, padLen);
             }
         }
 
@@ -205,31 +198,31 @@ namespace GitSharp.DirectoryCache
          */
         public DirCacheEntry(byte[] newPath, int stage)
         {
-            info = new byte[INFO_LEN];
-            infoOffset = 0;
-            path = newPath;
+            _info = new byte[INFO_LEN];
+            _infoOffset = 0;
+            _path = newPath;
 
             int flags = ((stage & 0x3) << 12);
-            if (path.Length < NAME_MASK)
-                flags |= path.Length;
+            if (_path.Length < NameMask)
+                flags |= _path.Length;
             else
-                flags |= NAME_MASK;
-            NB.encodeInt16(info, infoOffset + P_FLAGS, flags);
+                flags |= NameMask;
+            NB.encodeInt16(_info, _infoOffset + PFlags, flags);
         }
 
         public void write(Stream os)
         {
-            int pathLen = path.Length;
-            os.Write(info, infoOffset, INFO_LEN);
-            os.Write(path, 0, pathLen);
+            int pathLen = _path.Length;
+            os.Write(_info, _infoOffset, INFO_LEN);
+            os.Write(_path, 0, pathLen);
 
             // Index records are padded out to the next 8 byte alignment
-            // for historical reasons related to how C Git read the files.
+            // for historical reasons related to how C Git Read the files.
             //
             int actLen = INFO_LEN + pathLen;
             int expLen = (actLen + 8) & ~7;
             if (actLen != expLen)
-                os.Write(nullpad, 0, expLen - actLen);
+                os.Write(NullPad, 0, expLen - actLen);
         }
 
         /**
@@ -257,12 +250,12 @@ namespace GitSharp.DirectoryCache
             // such cases the work file is too close to the index to tell if
             // it is clean or not based on the modification time alone.
             //
-            int @base = infoOffset + P_MTIME;
-            int mtime = NB.decodeInt32(info, @base);
+            int @base = _infoOffset + PMtime;
+            int mtime = NB.decodeInt32(_info, @base);
             if (smudge_s < mtime)
                 return true;
             if (smudge_s == mtime)
-                return smudge_ns <= NB.decodeInt32(info, @base + 4) / 1000000;
+                return smudge_ns <= NB.decodeInt32(_info, @base + 4) / 1000000;
             return false;
         }
 
@@ -282,23 +275,23 @@ namespace GitSharp.DirectoryCache
             //
             // Instead we force the mtime to the largest possible value, so
             // it is certainly after the index's own modification time and
-            // on a future read will cause mightBeRacilyClean to say "yes!".
+            // on a future Read will cause mightBeRacilyClean to say "yes!".
             // It is also unlikely to match with the working tree file.
             //
             // I'll see you again before Jan 19, 2038, 03:14:07 AM GMT.
             //
-            int @base = infoOffset + P_MTIME;
-            info.Fill(@base, @base + 8, (byte)127);
+            int @base = _infoOffset + PMtime;
+            _info.Fill(@base, @base + 8, (byte)127);
         }
 
         public byte[] idBuffer()
         {
-            return info;
+            return _info;
         }
 
         public int idOffset()
         {
-            return infoOffset + P_OBJECTID;
+            return _infoOffset + PObjectid;
         }
 
         /**
@@ -312,7 +305,7 @@ namespace GitSharp.DirectoryCache
          */
         public bool isAssumeValid()
         {
-            return (info[infoOffset + P_FLAGS] & ASSUME_VALID) != 0;
+            return (_info[_infoOffset + PFlags] & AssumeValid) != 0;
         }
 
         /**
@@ -327,9 +320,9 @@ namespace GitSharp.DirectoryCache
             unchecked
             {
                 if (assume)
-                    info[infoOffset + P_FLAGS] |= (byte)ASSUME_VALID;
+                    _info[_infoOffset + PFlags] |= (byte)AssumeValid;
                 else
-                    info[infoOffset + P_FLAGS] &= (byte)~ASSUME_VALID; // [henon] (byte)-129 results in an overflow
+                    _info[_infoOffset + PFlags] &= (byte)~AssumeValid; // [henon] (byte)-129 results in an overflow
             }
         }
 
@@ -342,7 +335,7 @@ namespace GitSharp.DirectoryCache
          */
         public int getStage()
         {
-            return (int)((uint)(info[infoOffset + P_FLAGS]) >> 4) & 0x3;
+            return (int)((uint)(_info[_infoOffset + PFlags]) >> 4) & 0x3;
         }
 
         /**
@@ -353,7 +346,7 @@ namespace GitSharp.DirectoryCache
          */
         public int getRawMode()
         {
-            return NB.decodeInt32(info, infoOffset + P_MODE);
+            return NB.decodeInt32(_info, _infoOffset + PMode);
         }
 
         /**
@@ -374,7 +367,7 @@ namespace GitSharp.DirectoryCache
          */
         public void setFileMode(FileMode mode)
         {
-            NB.encodeInt32(info, infoOffset + P_MODE, mode.Bits);
+            NB.encodeInt32(_info, _infoOffset + PMode, mode.Bits);
         }
 
         /**
@@ -389,7 +382,7 @@ namespace GitSharp.DirectoryCache
          */
         public long getLastModified()
         {
-            return decodeTS(P_MTIME);
+            return DecodeTS(PMtime);
         }
 
         /**
@@ -400,7 +393,7 @@ namespace GitSharp.DirectoryCache
          */
         public void setLastModified(long when)
         {
-            encodeTS(P_MTIME, when);
+            EncodeTS(PMtime, when);
         }
 
         /**
@@ -418,7 +411,7 @@ namespace GitSharp.DirectoryCache
          */
         public int getLength()
         {
-            return NB.decodeInt32(info, infoOffset + P_SIZE);
+            return NB.decodeInt32(_info, _infoOffset + PSize);
         }
 
         /**
@@ -429,7 +422,7 @@ namespace GitSharp.DirectoryCache
          */
         public void setLength(int sz)
         {
-            NB.encodeInt32(info, infoOffset + P_SIZE, sz);
+            NB.encodeInt32(_info, _infoOffset + PSize, sz);
         }
 
         /**
@@ -461,10 +454,10 @@ namespace GitSharp.DirectoryCache
          * Set the ObjectId for the entry from the raw binary representation.
          *
          * @param bs
-         *            the raw byte buffer to read from. At least 20 bytes after p
+         *            the raw byte buffer to Read from. At least 20 bytes after p
          *            must be available within this byte array.
          * @param p
-         *            position to read the first byte of data from.
+         *            position to Read the first byte of data from.
          */
         public void setObjectIdFromRaw(byte[] bs, int p)
         {
@@ -486,7 +479,7 @@ namespace GitSharp.DirectoryCache
          */
         public String getPathString()
         {
-            return Constants.CHARSET.GetString(path);
+            return Constants.CHARSET.GetString(_path);
         }
 
         /**
@@ -500,25 +493,30 @@ namespace GitSharp.DirectoryCache
          */
         public void copyMetaData(DirCacheEntry src)
         {
-            int pLen = NB.decodeUInt16(info, infoOffset + P_FLAGS) & NAME_MASK;
-            Array.Copy(src.info, src.infoOffset, info, infoOffset, INFO_LEN);
-            NB.encodeInt16(info, infoOffset + P_FLAGS, pLen
-                    | NB.decodeUInt16(info, infoOffset + P_FLAGS) & ~NAME_MASK);
+            int pLen = NB.decodeUInt16(_info, _infoOffset + PFlags) & NameMask;
+            Array.Copy(src._info, src._infoOffset, _info, _infoOffset, INFO_LEN);
+            NB.encodeInt16(_info, _infoOffset + PFlags, pLen
+                    | NB.decodeUInt16(_info, _infoOffset + PFlags) & ~NameMask);
         }
 
-        private long decodeTS(int pIdx)
+        private long DecodeTS(int pIdx)
         {
-            int @base = infoOffset + pIdx;
-            int sec = NB.decodeInt32(info, @base);
-            int ms = NB.decodeInt32(info, @base + 4) / 1000000;
+            int @base = _infoOffset + pIdx;
+            int sec = NB.decodeInt32(_info, @base);
+            int ms = NB.decodeInt32(_info, @base + 4) / 1000000;
             return 1000L * sec + ms;
         }
 
-        private void encodeTS(int pIdx, long when)
+        private void EncodeTS(int pIdx, long when)
         {
-            int @base = infoOffset + pIdx;
-            NB.encodeInt32(info, @base, (int)(when / 1000));
-            NB.encodeInt32(info, @base + 4, ((int)(when % 1000)) * 1000000);
+            int @base = _infoOffset + pIdx;
+            NB.encodeInt32(_info, @base, (int)(when / 1000));
+            NB.encodeInt32(_info, @base + 4, ((int)(when % 1000)) * 1000000);
         }
+
+		public byte[] Path
+		{
+			get { return _path; }
+		}
     }
 }

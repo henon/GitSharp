@@ -165,7 +165,7 @@ namespace GitSharp.Tests.DirectoryCache
         /**
          * We had bugs related to buffer size in the DirCache. This test creates an
          * index larger than the default BufferedInputStream buffer size. This made
-         * the DirCache unable to read the extensions when index size exceeded the
+         * the DirCache unable to Read the extensions when index size exceeded the
          * buffer size (in some cases at least).
          * 
          * @throws CorruptObjectException
@@ -179,13 +179,17 @@ namespace GitSharp.Tests.DirectoryCache
             string A = string.Format("a%2000s", "a");
             string B = string.Format("b%2000s", "b");
             string[] paths = { A + ".", A + "." + B, A + "/" + B, A + "0" + B };
-            DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
+            var ents = new DirCacheEntry[paths.Length];
             for (int i = 0; i < paths.Length; i++)
-                ents[i] = new DirCacheEntry(paths[i]);
+            {
+            	ents[i] = new DirCacheEntry(paths[i]);
+            }
 
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
-                b.add(ents[i]);
+            {
+            	b.add(ents[i]);
+            }
 
             b.commit();
             DirCache read = DirCache.read(db);
@@ -193,6 +197,5 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.AreEqual(paths.Length, read.getEntryCount());
             Assert.AreEqual(1, read.getCacheTree(true).getChildCount());
         }
-
     }
 }

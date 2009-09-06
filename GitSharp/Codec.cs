@@ -1,3 +1,4 @@
+using System;
 /*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
@@ -37,14 +38,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 using GitSharp.Exceptions;
-using System;
 
 namespace GitSharp
 {
     internal static class Codec
     {
-
         public static ObjectType DecodeTypeString(ObjectId id, byte[] typeString, byte endMark, ref int offset)
         {
             try
@@ -55,16 +55,14 @@ namespace GitSharp
                         if (typeString[offset + 1] != (byte)'l' ||
                         typeString[offset + 2] != (byte)'o' ||
                         typeString[offset + 3] != (byte)'b' ||
-                        typeString[offset + 4] != endMark)
-                            break;
+                        typeString[offset + 4] != endMark) break;
                         offset += 5;
                         return ObjectType.Blob;
 
                     case (byte)'c':
                         if (typeString[offset + 1] != (byte)'o' || typeString[offset + 2] != (byte)'m' ||
                         typeString[offset + 3] != (byte)'m' || typeString[offset + 4] != (byte)'i' ||
-                        typeString[offset + 5] != (byte)'t' || typeString[offset + 6] != endMark)
-                            break;
+                        typeString[offset + 5] != (byte)'t' || typeString[offset + 6] != endMark) break;
                         offset += 7;
                         return ObjectType.Commit;
 
@@ -73,13 +71,17 @@ namespace GitSharp
                         {
                             case (byte)'a':
                                 if (typeString[offset + 2] != (byte)'g' || typeString[offset + 2] != endMark)
-                                    throw new CorruptObjectException(id, "invalid type");
+                                {
+                                	throw new CorruptObjectException(id, "invalid type");
+                                }
                                 offset += 4;
                                 return ObjectType.Tag;
 
                             case (byte)'r':
                                 if (typeString[offset + 2] != (byte)'e' || typeString[offset + 3] != (byte)'e' || typeString[offset + 4] != endMark)
-                                    throw new CorruptObjectException(id, "invalid type");
+                                {
+                                	throw new CorruptObjectException(id, "invalid type");
+                                }
                                 offset += 5;
                                 return ObjectType.Tree;
 
@@ -110,7 +112,7 @@ namespace GitSharp
                     return Constants.ObjectTypes.Tag;
 
                 default:
-                    throw new ArgumentException("objectType", "Bad object type passed");
+                    throw new ArgumentException("Bad object type was passed", "objectType");
             }
         }
 
@@ -131,7 +133,7 @@ namespace GitSharp
                     return Constants.ObjectTypes.EncodedTag;
 
                 default:
-                    throw new ArgumentException("objectType", "Bad object type passed");
+					throw new ArgumentException("Bad object type was passed", "objectType");
             }
         }
     }

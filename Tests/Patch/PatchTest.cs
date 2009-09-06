@@ -46,9 +46,9 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testEmpty()
 		{
-			GitSharp.Patch.Patch p = new GitSharp.Patch.Patch();
-			Assert.IsTrue(p.getFiles().Count == 0);
-			Assert.IsTrue(p.getErrors().Count == 0);
+			var patch = new GitSharp.Patch.Patch();
+			Assert.IsTrue(patch.getFiles().Count == 0);
+			Assert.IsTrue(patch.getErrors().Count == 0);
 		}
 
 		[Test]

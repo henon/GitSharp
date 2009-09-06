@@ -45,360 +45,356 @@ using System;
 
 namespace GitSharp.Tests.Merge
 {
-    [TestFixture]
-    public class SimpleMergeTest : RepositoryTestCase
-    {
-        [Test]
-	    public void TestOurs()
-        {
-		    Merger ourMerger = MergeStrategy.Ours.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c") });
-		    Assert.IsTrue(merge);
-		    Assert.AreEqual(db.MapTree("a").Id, ourMerger.GetResultTreeId());
-	    }
-
-        [Test]
-	    public void TestTheirs()
-        {
-		    Merger ourMerger = MergeStrategy.Theirs.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c") });
-		    Assert.IsTrue(merge);
-		    Assert.AreEqual(db.MapTree("c").Id, ourMerger.GetResultTreeId());
-	    }
-
-        [Test]
-	    public void TestTrivialTwoWay()
-        {
-		    Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c") });
-		    Assert.IsTrue(merge);
-		    Assert.AreEqual("02ba32d3649e510002c21651936b7077aa75ffa9",ourMerger.GetResultTreeId().Name);
-	    }
-
-        [Test]
-	    public void TestTrivialTwoWayDisjointHistories()
-        {
-		    Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c~4") });
-		    Assert.IsTrue(merge);
-		    Assert.AreEqual("86265c33b19b2be71bdd7b8cb95823f2743d03a8",ourMerger.GetResultTreeId().Name);
-	    }
-
-        [Test]
-	    public void TestTrivialTwoWayOk()
-        {
-		    Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { db.Resolve("a^0^0^0"), db.Resolve("a^0^0^1") });
-		    Assert.IsTrue(merge);
-		    Assert.AreEqual(db.MapTree("a^0^0").Id, ourMerger.GetResultTreeId());
-	    }
-
-        [Test]
-	    public void TestTrivialTwoWayConflict()
-        {
-		    Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { db.Resolve("f"), db.Resolve("g") });
-		    Assert.IsFalse(merge);
-	    }
-
-        [Test]
-	    public void TestTrivialTwoWayValidSubtreeSort()
-        {
-		    DirCache treeB = DirCache.read(db);
-		    DirCache treeO = DirCache.read(db);
-		    DirCache treeT = DirCache.read(db);
-            {
-                DirCacheBuilder b = treeB.builder();
-                DirCacheBuilder o = treeO.builder();
-                DirCacheBuilder t = treeT.builder();
-
-                b.add(MakeEntry("libelf-po/a", FileMode.RegularFile));
-                b.add(MakeEntry("libelf/c", FileMode.RegularFile));
-
-                o.add(MakeEntry("Makefile", FileMode.RegularFile));
-                o.add(MakeEntry("libelf-po/a", FileMode.RegularFile));
-                o.add(MakeEntry("libelf/c", FileMode.RegularFile));
-
-                t.add(MakeEntry("libelf-po/a", FileMode.RegularFile));
-                t.add(MakeEntry("libelf/c", FileMode.RegularFile, "blah"));
-
-                b.finish();
-                o.finish();
-                t.finish();
-            }
-
-		    ObjectWriter ow = new ObjectWriter(db);
-		    ObjectId B = Commit(ow, treeB, new ObjectId[] {});
-		    ObjectId O = Commit(ow, treeO, new[] { B });
-		    ObjectId T = Commit(ow, treeT, new[] { B });
-
-		    Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { O, T });
-		    Assert.IsTrue(merge);
-
-            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
-		    tw.setRecursive(true);
-		    tw.reset(ourMerger.GetResultTreeId());
-
-		    Assert.IsTrue(tw.next());
-		    Assert.AreEqual("Makefile", tw.getPathString());
-		    AssertCorrectId(treeO, tw);
-
-		    Assert.IsTrue(tw.next());
-		    Assert.AreEqual("libelf-po/a", tw.getPathString());
-		    AssertCorrectId(treeO, tw);
-
-		    Assert.IsTrue(tw.next());
-		    Assert.AreEqual("libelf/c", tw.getPathString());
-		    AssertCorrectId(treeT, tw);
-
-		    Assert.IsFalse(tw.next());
-	    }
-
-        [Test]
-	    public void TestTrivialTwoWayConcurrentSubtreeChange()
-        {
-		    DirCache treeB = DirCache.read(db);
-		    DirCache treeO = DirCache.read(db);
-		    DirCache treeT = DirCache.read(db);
-		    {
-			    DirCacheBuilder b = treeB.builder();
-			    DirCacheBuilder o = treeO.builder();
-			    DirCacheBuilder t = treeT.builder();
-
-			    b.add(MakeEntry("d/o", FileMode.RegularFile));
-			    b.add(MakeEntry("d/t", FileMode.RegularFile));
-
-			    o.add(MakeEntry("d/o", FileMode.RegularFile, "o !"));
-			    o.add(MakeEntry("d/t", FileMode.RegularFile));
-
-			    t.add(MakeEntry("d/o", FileMode.RegularFile));
-			    t.add(MakeEntry("d/t", FileMode.RegularFile, "t !"));
-
-			    b.finish();
-			    o.finish();
-			    t.finish();
-		    }
-
-		    ObjectWriter ow = new ObjectWriter(db);
-		    ObjectId B = Commit(ow, treeB, new ObjectId[] {});
-		    ObjectId O = Commit(ow, treeO, new[] { B });
-		    ObjectId T = Commit(ow, treeT, new[] { B });
-
-		    Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { O, T });
-		    Assert.IsTrue(merge);
-
-            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
-		    tw.setRecursive(true);
-		    tw.reset(ourMerger.GetResultTreeId());
-
-		    Assert.IsTrue(tw.next());
-		    Assert.AreEqual("d/o", tw.getPathString());
-		    AssertCorrectId(treeO, tw);
-
-		    Assert.IsTrue(tw.next());
-		    Assert.AreEqual("d/t", tw.getPathString());
-		    AssertCorrectId(treeT, tw);
-
-		    Assert.IsFalse(tw.next());
-	    }
-
-        [Test]
-	    public void TestTrivialTwoWayConflictSubtreeChange()
-        {
-		    DirCache treeB = DirCache.read(db);
-		    DirCache treeO = DirCache.read(db);
-		    DirCache treeT = DirCache.read(db);
-		    {
-			    DirCacheBuilder b = treeB.builder();
-			    DirCacheBuilder o = treeO.builder();
-			    DirCacheBuilder t = treeT.builder();
-
-			    b.add(MakeEntry("d/o", FileMode.RegularFile));
-			    b.add(MakeEntry("d/t", FileMode.RegularFile));
-
-			    o.add(MakeEntry("d/o", FileMode.RegularFile));
-			    o.add(MakeEntry("d/t", FileMode.RegularFile, "o !"));
-
-			    t.add(MakeEntry("d/o", FileMode.RegularFile, "t !"));
-			    t.add(MakeEntry("d/t", FileMode.RegularFile, "t !"));
-
-			    b.finish();
-			    o.finish();
-			    t.finish();
-		    }
-
-		    ObjectWriter ow = new ObjectWriter(db);
-		    ObjectId B = Commit(ow, treeB, new ObjectId[] {});
-		    ObjectId O = Commit(ow, treeO, new[] { B });
-		    ObjectId T = Commit(ow, treeT, new[] { B });
-
-		    Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { O, T });
-		    Assert.IsFalse(merge);
-	    }
-
-        [Test]
-	    public void TestTrivialTwoWayLeftDFconflict1()
-        {
-		    DirCache treeB = DirCache.read(db);
-		    DirCache treeO = DirCache.read(db);
-		    DirCache treeT = DirCache.read(db);
-		    {
-			    DirCacheBuilder b = treeB.builder();
-			    DirCacheBuilder o = treeO.builder();
-			    DirCacheBuilder t = treeT.builder();
-
-			    b.add(MakeEntry("d/o", FileMode.RegularFile));
-			    b.add(MakeEntry("d/t", FileMode.RegularFile));
-
-			    o.add(MakeEntry("d", FileMode.RegularFile));
-
-			    t.add(MakeEntry("d/o", FileMode.RegularFile));
-			    t.add(MakeEntry("d/t", FileMode.RegularFile, "t !"));
-
-			    b.finish();
-			    o.finish();
-			    t.finish();
-		    }
-
-		    ObjectWriter ow = new ObjectWriter(db);
-		    ObjectId B = Commit(ow, treeB, new ObjectId[] {});
-		    ObjectId O = Commit(ow, treeO, new[] { B });
-		    ObjectId T = Commit(ow, treeT, new[] { B });
-
-		    Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { O, T });
-		    Assert.IsFalse(merge);
-	    }
-
-        [Test]
-	    public void TestTrivialTwoWayRightDFconflict1()
-        {
-		    DirCache treeB = DirCache.read(db);
-		    DirCache treeO = DirCache.read(db);
-		    DirCache treeT = DirCache.read(db);
-		    {
-			    DirCacheBuilder b = treeB.builder();
-			    DirCacheBuilder o = treeO.builder();
-			    DirCacheBuilder t = treeT.builder();
-
-			    b.add(MakeEntry("d/o", FileMode.RegularFile));
-			    b.add(MakeEntry("d/t", FileMode.RegularFile));
-
-			    o.add(MakeEntry("d/o", FileMode.RegularFile));
-			    o.add(MakeEntry("d/t", FileMode.RegularFile, "o !"));
-
-			    t.add(MakeEntry("d", FileMode.RegularFile));
-
-			    b.finish();
-			    o.finish();
-			    t.finish();
-		    }
-
-		    ObjectWriter ow = new ObjectWriter(db);
-		    ObjectId B = Commit(ow, treeB, new ObjectId[] {});
-		    ObjectId O = Commit(ow, treeO, new[] { B });
-		    ObjectId T = Commit(ow, treeT, new[] { B });
-
-		    Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { O, T });
-		    Assert.IsFalse(merge);
-	    }
-
-        [Test]
-	    public void TestTrivialTwoWayLeftDFconflict2()
-        {
-		    DirCache treeB = DirCache.read(db);
-		    DirCache treeO = DirCache.read(db);
-		    DirCache treeT = DirCache.read(db);
-		    {
-			    DirCacheBuilder b = treeB.builder();
-			    DirCacheBuilder o = treeO.builder();
-			    DirCacheBuilder t = treeT.builder();
-
-			    b.add(MakeEntry("d", FileMode.RegularFile));
-
-			    o.add(MakeEntry("d", FileMode.RegularFile, "o !"));
-
-			    t.add(MakeEntry("d/o", FileMode.RegularFile));
-
-			    b.finish();
-			    o.finish();
-			    t.finish();
-		    }
-
-		    ObjectWriter ow = new ObjectWriter(db);
-		    ObjectId B = Commit(ow, treeB, new ObjectId[] {});
-		    ObjectId O = Commit(ow, treeO, new[] { B });
-		    ObjectId T = Commit(ow, treeT, new[] { B });
-
-		    Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { O, T });
-		    Assert.IsFalse(merge);
-	    }
-
-        [Test]
-	    public void TestTrivialTwoWayRightDFconflict2()
-        {
-		    DirCache treeB = DirCache.read(db);
-		    DirCache treeO = DirCache.read(db);
-		    DirCache treeT = DirCache.read(db);
-		    {
-			    DirCacheBuilder b = treeB.builder();
-			    DirCacheBuilder o = treeO.builder();
-			    DirCacheBuilder t = treeT.builder();
-
-			    b.add(MakeEntry("d", FileMode.RegularFile));
-
-			    o.add(MakeEntry("d/o", FileMode.RegularFile));
-
-			    t.add(MakeEntry("d", FileMode.RegularFile, "t !"));
-
-			    b.finish();
-			    o.finish();
-			    t.finish();
-		    }
-
-		    ObjectWriter ow = new ObjectWriter(db);
-		    ObjectId B = Commit(ow, treeB, new ObjectId[] {});
-		    ObjectId O = Commit(ow, treeO, new[] { B });
-		    ObjectId T = Commit(ow, treeT, new[] { B });
-
-		    Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    bool merge = ourMerger.Merge(new[] { O, T });
-		    Assert.IsFalse(merge);
-	    }
-
-        private void AssertCorrectId(DirCache treeT, GitSharp.TreeWalk.TreeWalk tw) 
-        {
-		    Assert.AreEqual(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
-	    }
-
-	    private ObjectId Commit(ObjectWriter ow, DirCache treeB, ObjectId[] parentIds)
-        {
-		    Commit c = new Commit(db);
-		    c.TreeId = treeB.writeTree(ow);
-		    c.Author = new PersonIdent("A U Thor", "a.u.thor", 1L, 0);
-		    c.Committer = c.Author;
-		    c.ParentIds = parentIds;
-		    c.Message = "Tree " + c.TreeId.Name;
-		    return ow.WriteCommit(c);
-	    }
-        
-	    private DirCacheEntry MakeEntry(String path, FileMode mode)
-        {
-		    return MakeEntry(path, mode, path);
-	    }
-
-	    private DirCacheEntry MakeEntry(String path, FileMode mode, String content)
-        {
-		    DirCacheEntry ent = new DirCacheEntry(path);
-		    ent.setFileMode(mode);
-		    byte[] contentBytes = Constants.encode(content);
-		    ent.setObjectId(new ObjectWriter(db).ComputeBlobSha1(contentBytes.Length, new MemoryStream(contentBytes)));
-		    return ent;
-	    }
-    }
+	[TestFixture]
+	public class SimpleMergeTest : RepositoryTestCase
+	{
+		[Test]
+		public void TestOurs()
+		{
+			Merger ourMerger = MergeStrategy.Ours.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c") });
+			Assert.IsTrue(merge);
+			Assert.AreEqual(db.MapTree("a").Id, ourMerger.GetResultTreeId());
+		}
+
+		[Test]
+		public void TestTheirs()
+		{
+			Merger ourMerger = MergeStrategy.Theirs.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c") });
+			Assert.IsTrue(merge);
+			Assert.AreEqual(db.MapTree("c").Id, ourMerger.GetResultTreeId());
+		}
+
+		[Test]
+		public void TestTrivialTwoWay()
+		{
+			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c") });
+			Assert.IsTrue(merge);
+			Assert.AreEqual("02ba32d3649e510002c21651936b7077aa75ffa9", ourMerger.GetResultTreeId().Name);
+		}
+
+		[Test]
+		public void TestTrivialTwoWayDisjointHistories()
+		{
+			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c~4") });
+			Assert.IsTrue(merge);
+			Assert.AreEqual("86265c33b19b2be71bdd7b8cb95823f2743d03a8", ourMerger.GetResultTreeId().Name);
+		}
+
+		[Test]
+		public void TestTrivialTwoWayOk()
+		{
+			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { db.Resolve("a^0^0^0"), db.Resolve("a^0^0^1") });
+			Assert.IsTrue(merge);
+			Assert.AreEqual(db.MapTree("a^0^0").Id, ourMerger.GetResultTreeId());
+		}
+
+		[Test]
+		public void TestTrivialTwoWayConflict()
+		{
+			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { db.Resolve("f"), db.Resolve("g") });
+			Assert.IsFalse(merge);
+		}
+
+		[Test]
+		public void TestTrivialTwoWayValidSubtreeSort()
+		{
+			DirCache treeB = DirCache.read(db);
+			DirCache treeO = DirCache.read(db);
+			DirCache treeT = DirCache.read(db);
+			{
+				DirCacheBuilder b = treeB.builder();
+				DirCacheBuilder o = treeO.builder();
+				DirCacheBuilder t = treeT.builder();
+
+				b.add(MakeEntry("libelf-po/a", FileMode.RegularFile));
+				b.add(MakeEntry("libelf/c", FileMode.RegularFile));
+
+				o.add(MakeEntry("Makefile", FileMode.RegularFile));
+				o.add(MakeEntry("libelf-po/a", FileMode.RegularFile));
+				o.add(MakeEntry("libelf/c", FileMode.RegularFile));
+
+				t.add(MakeEntry("libelf-po/a", FileMode.RegularFile));
+				t.add(MakeEntry("libelf/c", FileMode.RegularFile, "blah"));
+
+				b.finish();
+				o.finish();
+				t.finish();
+			}
+
+			var ow = new ObjectWriter(db);
+			ObjectId B = Commit(ow, treeB, new ObjectId[] { });
+			ObjectId O = Commit(ow, treeO, new[] { B });
+			ObjectId T = Commit(ow, treeT, new[] { B });
+
+			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { O, T });
+			Assert.IsTrue(merge);
+
+			var tw = new GitSharp.TreeWalk.TreeWalk(db) { Recursive = true };
+			tw.reset(ourMerger.GetResultTreeId());
+
+			Assert.IsTrue(tw.next());
+			Assert.AreEqual("Makefile", tw.getPathString());
+			AssertCorrectId(treeO, tw);
+
+			Assert.IsTrue(tw.next());
+			Assert.AreEqual("libelf-po/a", tw.getPathString());
+			AssertCorrectId(treeO, tw);
+
+			Assert.IsTrue(tw.next());
+			Assert.AreEqual("libelf/c", tw.getPathString());
+			AssertCorrectId(treeT, tw);
+
+			Assert.IsFalse(tw.next());
+		}
+
+		[Test]
+		public void TestTrivialTwoWayConcurrentSubtreeChange()
+		{
+			DirCache treeB = DirCache.read(db);
+			DirCache treeO = DirCache.read(db);
+			DirCache treeT = DirCache.read(db);
+			{
+				DirCacheBuilder b = treeB.builder();
+				DirCacheBuilder o = treeO.builder();
+				DirCacheBuilder t = treeT.builder();
+
+				b.add(MakeEntry("d/o", FileMode.RegularFile));
+				b.add(MakeEntry("d/t", FileMode.RegularFile));
+
+				o.add(MakeEntry("d/o", FileMode.RegularFile, "o !"));
+				o.add(MakeEntry("d/t", FileMode.RegularFile));
+
+				t.add(MakeEntry("d/o", FileMode.RegularFile));
+				t.add(MakeEntry("d/t", FileMode.RegularFile, "t !"));
+
+				b.finish();
+				o.finish();
+				t.finish();
+			}
+
+			var ow = new ObjectWriter(db);
+			ObjectId B = Commit(ow, treeB, new ObjectId[] { });
+			ObjectId O = Commit(ow, treeO, new[] { B });
+			ObjectId T = Commit(ow, treeT, new[] { B });
+
+			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { O, T });
+			Assert.IsTrue(merge);
+
+			var tw = new GitSharp.TreeWalk.TreeWalk(db) { Recursive = true };
+			tw.reset(ourMerger.GetResultTreeId());
+
+			Assert.IsTrue(tw.next());
+			Assert.AreEqual("d/o", tw.getPathString());
+			AssertCorrectId(treeO, tw);
+
+			Assert.IsTrue(tw.next());
+			Assert.AreEqual("d/t", tw.getPathString());
+			AssertCorrectId(treeT, tw);
+
+			Assert.IsFalse(tw.next());
+		}
+
+		[Test]
+		public void TestTrivialTwoWayConflictSubtreeChange()
+		{
+			DirCache treeB = DirCache.read(db);
+			DirCache treeO = DirCache.read(db);
+			DirCache treeT = DirCache.read(db);
+			{
+				DirCacheBuilder b = treeB.builder();
+				DirCacheBuilder o = treeO.builder();
+				DirCacheBuilder t = treeT.builder();
+
+				b.add(MakeEntry("d/o", FileMode.RegularFile));
+				b.add(MakeEntry("d/t", FileMode.RegularFile));
+
+				o.add(MakeEntry("d/o", FileMode.RegularFile));
+				o.add(MakeEntry("d/t", FileMode.RegularFile, "o !"));
+
+				t.add(MakeEntry("d/o", FileMode.RegularFile, "t !"));
+				t.add(MakeEntry("d/t", FileMode.RegularFile, "t !"));
+
+				b.finish();
+				o.finish();
+				t.finish();
+			}
+
+			var ow = new ObjectWriter(db);
+			ObjectId B = Commit(ow, treeB, new ObjectId[] { });
+			ObjectId O = Commit(ow, treeO, new[] { B });
+			ObjectId T = Commit(ow, treeT, new[] { B });
+
+			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { O, T });
+			Assert.IsFalse(merge);
+		}
+
+		[Test]
+		public void TestTrivialTwoWayLeftDFconflict1()
+		{
+			DirCache treeB = DirCache.read(db);
+			DirCache treeO = DirCache.read(db);
+			DirCache treeT = DirCache.read(db);
+			{
+				DirCacheBuilder b = treeB.builder();
+				DirCacheBuilder o = treeO.builder();
+				DirCacheBuilder t = treeT.builder();
+
+				b.add(MakeEntry("d/o", FileMode.RegularFile));
+				b.add(MakeEntry("d/t", FileMode.RegularFile));
+
+				o.add(MakeEntry("d", FileMode.RegularFile));
+
+				t.add(MakeEntry("d/o", FileMode.RegularFile));
+				t.add(MakeEntry("d/t", FileMode.RegularFile, "t !"));
+
+				b.finish();
+				o.finish();
+				t.finish();
+			}
+
+			var ow = new ObjectWriter(db);
+			ObjectId B = Commit(ow, treeB, new ObjectId[] { });
+			ObjectId O = Commit(ow, treeO, new[] { B });
+			ObjectId T = Commit(ow, treeT, new[] { B });
+
+			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { O, T });
+			Assert.IsFalse(merge);
+		}
+
+		[Test]
+		public void TestTrivialTwoWayRightDFconflict1()
+		{
+			DirCache treeB = DirCache.read(db);
+			DirCache treeO = DirCache.read(db);
+			DirCache treeT = DirCache.read(db);
+			{
+				DirCacheBuilder b = treeB.builder();
+				DirCacheBuilder o = treeO.builder();
+				DirCacheBuilder t = treeT.builder();
+
+				b.add(MakeEntry("d/o", FileMode.RegularFile));
+				b.add(MakeEntry("d/t", FileMode.RegularFile));
+
+				o.add(MakeEntry("d/o", FileMode.RegularFile));
+				o.add(MakeEntry("d/t", FileMode.RegularFile, "o !"));
+
+				t.add(MakeEntry("d", FileMode.RegularFile));
+
+				b.finish();
+				o.finish();
+				t.finish();
+			}
+
+			var ow = new ObjectWriter(db);
+			ObjectId B = Commit(ow, treeB, new ObjectId[] { });
+			ObjectId O = Commit(ow, treeO, new[] { B });
+			ObjectId T = Commit(ow, treeT, new[] { B });
+
+			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { O, T });
+			Assert.IsFalse(merge);
+		}
+
+		[Test]
+		public void TestTrivialTwoWayLeftDFconflict2()
+		{
+			DirCache treeB = DirCache.read(db);
+			DirCache treeO = DirCache.read(db);
+			DirCache treeT = DirCache.read(db);
+			{
+				DirCacheBuilder b = treeB.builder();
+				DirCacheBuilder o = treeO.builder();
+				DirCacheBuilder t = treeT.builder();
+
+				b.add(MakeEntry("d", FileMode.RegularFile));
+
+				o.add(MakeEntry("d", FileMode.RegularFile, "o !"));
+
+				t.add(MakeEntry("d/o", FileMode.RegularFile));
+
+				b.finish();
+				o.finish();
+				t.finish();
+			}
+
+			var ow = new ObjectWriter(db);
+			ObjectId B = Commit(ow, treeB, new ObjectId[] { });
+			ObjectId O = Commit(ow, treeO, new[] { B });
+			ObjectId T = Commit(ow, treeT, new[] { B });
+
+			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { O, T });
+			Assert.IsFalse(merge);
+		}
+
+		[Test]
+		public void TestTrivialTwoWayRightDFconflict2()
+		{
+			DirCache treeB = DirCache.read(db);
+			DirCache treeO = DirCache.read(db);
+			DirCache treeT = DirCache.read(db);
+			{
+				DirCacheBuilder b = treeB.builder();
+				DirCacheBuilder o = treeO.builder();
+				DirCacheBuilder t = treeT.builder();
+
+				b.add(MakeEntry("d", FileMode.RegularFile));
+
+				o.add(MakeEntry("d/o", FileMode.RegularFile));
+
+				t.add(MakeEntry("d", FileMode.RegularFile, "t !"));
+
+				b.finish();
+				o.finish();
+				t.finish();
+			}
+
+			var ow = new ObjectWriter(db);
+			ObjectId B = Commit(ow, treeB, new ObjectId[] { });
+			ObjectId O = Commit(ow, treeO, new[] { B });
+			ObjectId T = Commit(ow, treeT, new[] { B });
+
+			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			bool merge = ourMerger.Merge(new[] { O, T });
+			Assert.IsFalse(merge);
+		}
+
+		private static void AssertCorrectId(DirCache treeT, GitSharp.TreeWalk.TreeWalk tw)
+		{
+			Assert.AreEqual(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
+		}
+
+		private ObjectId Commit(ObjectWriter ow, DirCache treeB, ObjectId[] parentIds)
+		{
+			var c = new Commit(db) { TreeId = treeB.writeTree(ow), Author = new PersonIdent("A U Thor", "a.u.thor", 1L, 0) };
+			c.Committer = c.Author;
+			c.ParentIds = parentIds;
+			c.Message = "Tree " + c.TreeId.Name;
+			return ow.WriteCommit(c);
+		}
+
+		private DirCacheEntry MakeEntry(String path, FileMode mode)
+		{
+			return MakeEntry(path, mode, path);
+		}
+
+		private DirCacheEntry MakeEntry(String path, FileMode mode, String content)
+		{
+			var ent = new DirCacheEntry(path);
+			ent.setFileMode(mode);
+			byte[] contentBytes = Constants.encode(content);
+			ent.setObjectId(new ObjectWriter(db).ComputeBlobSha1(contentBytes.Length, new MemoryStream(contentBytes)));
+			return ent;
+		}
+	}
 }

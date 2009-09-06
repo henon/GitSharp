@@ -35,79 +35,78 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
+
 namespace GitSharp
 {
-
     public class AlternateRepositoryDatabase : ObjectDatabase
     {
-        private readonly Repository repository;
-        private readonly ObjectDatabase odb;
+        private readonly Repository _repository;
+        private readonly ObjectDatabase _odb;
 
-        public AlternateRepositoryDatabase(Repository alt)
+        public AlternateRepositoryDatabase(Repository alternateRepository)
         {
-            repository = alt;
-            odb = repository.getObjectDatabase();
+            _repository = alternateRepository;
+            _odb = _repository.getObjectDatabase();
         }
 
         public Repository getRepository()
         {
-            return repository;
+            return _repository;
         }
 
-        public new void closeSelf()
+        public override void closeSelf()
         {
-            repository.Close();
+            _repository.Close();
         }
 
-        public new void create()
+		public override void create()
         {
-            repository.Create();
+            _repository.Create();
         }
 
-        public new bool exists()
+		public override bool exists()
         {
-            return odb.exists();
+            return _odb.exists();
         }
 
         public override bool hasObject1(AnyObjectId objectId)
         {
-            return odb.hasObject1(objectId);
+            return _odb.hasObject1(objectId);
         }
 
         public override bool tryAgain1()
         {
-            return odb.tryAgain1();
+            return _odb.tryAgain1();
         }
 
         public override bool hasObject2(string objectName)
         {
-            return odb.hasObject2(objectName);
+            return _odb.hasObject2(objectName);
         }
 
         public override ObjectLoader openObject1(WindowCursor curs, AnyObjectId objectId)
         {
-            return odb.openObject1(curs, objectId);
+            return _odb.openObject1(curs, objectId);
         }
 
         public override ObjectLoader openObject2(WindowCursor curs, string objectName, AnyObjectId objectId)
         {
-            return odb.openObject2(curs, objectName, objectId);
+            return _odb.openObject2(curs, objectName, objectId);
         }
 
-        public override void openObjectInAllPacks1(System.Collections.Generic.List<PackedObjectLoader> @out, WindowCursor curs, AnyObjectId objectId)
+		public override void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
         {
-            odb.openObjectInAllPacks1(@out, curs, objectId);
+			_odb.OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
         }
 
         public override ObjectDatabase[] loadAlternates()
         {
-            return odb.getAlternates();
+            return _odb.getAlternates();
         }
 
         public override void closeAlternates()
         {
-            
         }
     }
-
 }

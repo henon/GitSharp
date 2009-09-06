@@ -38,8 +38,6 @@
 
 namespace GitSharp.TreeWalk
 {
-
-
     /**
      * Specialized TreeWalk to detect directory-file (D/F) name conflicts.
      * <p>
@@ -65,7 +63,7 @@ namespace GitSharp.TreeWalk
      * This walk implementation requires more CPU to implement a look-ahead and a
      * look-behind to merge a D/F pair together, or to skip a previously reported
      * directory. In typical Git repositories the look-ahead cost is 0 and the
-     * look-behind doesn't trigger, as users tend not to create trees which contain
+     * look-behind doesn't trigger, as users tend not to Create trees which contain
      * both "foo" as a directory and "foo.c" as a file.
      * <p>
      * In the worst-case however several thousand look-ahead steps per walk step may
@@ -75,9 +73,8 @@ namespace GitSharp.TreeWalk
      */
     public class NameConflictTreeWalk : TreeWalk
     {
-        private static int TREE_MODE = FileMode.Tree.Bits;
-
-        private bool fastMinHasMatch;
+        private static readonly int TreeMode = FileMode.Tree.Bits;
+        private bool _fastMinHasMatch;
 
         /**
          * Create a new tree walker for a given repository.
@@ -92,67 +89,76 @@ namespace GitSharp.TreeWalk
 
         public override AbstractTreeIterator min()
         {
-            for (; ; )
+            while (true)
             {
-                AbstractTreeIterator minRef = fastMin();
-                if (fastMinHasMatch)
-                    return minRef;
-
-                if (isTree(minRef))
+                AbstractTreeIterator minRef = FastMin();
+                if (_fastMinHasMatch)
                 {
-                    if (skipEntry(minRef))
+                	return minRef;
+                }
+
+                if (IsTree(minRef))
+                {
+                    if (SkipEntry(minRef))
                     {
-                        foreach (AbstractTreeIterator t in trees)
+                        foreach (AbstractTreeIterator t in Trees)
                         {
-                            if (t.matches == minRef)
-                            {
-                                t.next(1);
-                                t.matches = null;
-                            }
+                        	if (t.Matches != minRef) continue;
+                        	t.next(1);
+                        	t.Matches = null;
                         }
+
                         continue;
                     }
+
                     return minRef;
                 }
 
-                return combineDF(minRef);
+                return CombineDF(minRef);
             }
         }
 
-        private AbstractTreeIterator fastMin()
+        private AbstractTreeIterator FastMin()
         {
-            fastMinHasMatch = true;
+            _fastMinHasMatch = true;
 
             int i = 0;
-            AbstractTreeIterator minRef = trees[i];
-            while (minRef.eof() && ++i < trees.Length)
-                minRef = trees[i];
-            if (minRef.eof())
-                return minRef;
-
-            minRef.matches = minRef;
-            while (++i < trees.Length)
+            AbstractTreeIterator minRef = Trees[i];
+            while (minRef.eof() && ++i < Trees.Length)
             {
-                AbstractTreeIterator t = trees[i];
+            	minRef = Trees[i];
+            }
+
+            if (minRef.eof())
+            {
+            	return minRef;
+            }
+
+            minRef.Matches = minRef;
+            while (++i < Trees.Length)
+            {
+                AbstractTreeIterator t = Trees[i];
                 if (t.eof())
-                    continue;
+                {
+                	continue;
+                }
 
                 int cmp = t.pathCompare(minRef);
                 if (cmp < 0)
                 {
-                    if (fastMinHasMatch && isTree(minRef) && !isTree(t)
-                            && nameEqual(minRef, t))
+                    if (_fastMinHasMatch && IsTree(minRef) && !IsTree(t)
+                            && NameEqual(minRef, t))
                     {
                         // We used to be at a tree, but now we are at a file
                         // with the same name. Allow the file to match the
                         // tree anyway.
                         //
-                        t.matches = minRef;
+                        t.Matches = minRef;
                     }
                     else
                     {
-                        fastMinHasMatch = false;
-                        t.matches = t;
+                        _fastMinHasMatch = false;
+                        t.Matches = t;
                         minRef = t;
                     }
                 }
@@ -160,58 +166,62 @@ namespace GitSharp.TreeWalk
                 {
                     // Exact name/mode match is best.
                     //
-                    t.matches = minRef;
+                    t.Matches = minRef;
                 }
-                else if (fastMinHasMatch && isTree(t) && !isTree(minRef)
-                      && nameEqual(t, minRef))
+                else if (_fastMinHasMatch && IsTree(t) && !IsTree(minRef)
+                      && NameEqual(t, minRef))
                 {
                     // The minimum is a file (non-tree) but the next entry
                     // of this iterator is a tree whose name matches our file.
                     // This is a classic D/F conflict and commonly occurs like
                     // this, with no gaps in between the file and directory.
                     //
-                    // Use the tree as the minimum instead (see combineDF).
+                    // Use the tree as the minimum instead (see CombineDF).
                     //
 
                     for (int k = 0; k < i; k++)
                     {
-                        AbstractTreeIterator p = trees[k];
-                        if (p.matches == minRef)
-                            p.matches = t;
+                        AbstractTreeIterator p = Trees[k];
+                        if (p.Matches == minRef)
+                        {
+                        	p.Matches = t;
+                        }
                     }
-                    t.matches = t;
+
+                    t.Matches = t;
                     minRef = t;
                 }
                 else
-                    fastMinHasMatch = false;
+                {
+                	_fastMinHasMatch = false;
+                }
             }
 
             return minRef;
         }
 
-        private static bool nameEqual(AbstractTreeIterator a,
+        private static bool NameEqual(AbstractTreeIterator a,
                  AbstractTreeIterator b)
         {
-            return a.pathCompare(b, TREE_MODE) == 0;
+            return a.pathCompare(b, TreeMode) == 0;
         }
 
-        private static bool isTree(AbstractTreeIterator p)
+        private static bool IsTree(AbstractTreeIterator p)
         {
-            return FileMode.Tree.Equals(p.mode);
+            return FileMode.Tree == p.EntryFileMode;
         }
 
-        private bool skipEntry(AbstractTreeIterator minRef)
+        private bool SkipEntry(AbstractTreeIterator minRef)
         {
             // A tree D/F may have been handled earlier. We need to
             // not report this path if it has already been reported.
             //
-            foreach (AbstractTreeIterator t in trees)
+            foreach (AbstractTreeIterator t in Trees)
             {
-                if (t.matches == minRef || t.first())
-                    continue;
+                if (t.Matches == minRef || t.first()) continue;
 
                 int stepsBack = 0;
-                for (; ; )
+                while (true)
                 {
                     stepsBack++;
                     t.back(1);
@@ -224,13 +234,13 @@ namespace GitSharp.TreeWalk
                         t.next(stepsBack);
                         return true;
                     }
-                    else if (cmp < 0 || t.first())
-                    {
-                        // We cannot find "$path" in t; it will never appear.
-                        //
-                        t.next(stepsBack);
-                        break;
-                    }
+
+                	if (cmp >= 0 && !t.first()) continue;
+
+                	// We cannot find "$path" in t; it will never appear.
+                	//
+                	t.next(stepsBack);
+                	break;
                 }
             }
 
@@ -239,31 +249,30 @@ namespace GitSharp.TreeWalk
             return false;
         }
 
-        private AbstractTreeIterator combineDF(AbstractTreeIterator minRef)
+        private AbstractTreeIterator CombineDF(AbstractTreeIterator minRef)
         {
             // Look for a possible D/F conflict forward in the tree(s)
             // as there may be a "$path/" which matches "$path". Make
             // such entries match this entry.
             //
             AbstractTreeIterator treeMatch = null;
-            foreach (AbstractTreeIterator t in trees)
+            foreach (AbstractTreeIterator t in Trees)
             {
-                if (t.matches == minRef || t.eof())
-                    continue;
+                if (t.Matches == minRef || t.eof()) continue;
 
                 for (; ; )
                 {
-                    int cmp = t.pathCompare(minRef, TREE_MODE);
+                    int cmp = t.pathCompare(minRef, TreeMode);
                     if (cmp < 0)
                     {
                         // The "$path/" may still appear later.
                         //
-                        t.matchShift++;
+                        t.MatchShift++;
                         t.next(1);
                         if (t.eof())
                         {
-                            t.back(t.matchShift);
-                            t.matchShift = 0;
+                            t.back(t.MatchShift);
+                            t.MatchShift = 0;
                             break;
                         }
                     }
@@ -271,7 +280,7 @@ namespace GitSharp.TreeWalk
                     {
                         // We have a conflict match here.
                         //
-                        t.matches = minRef;
+                        t.Matches = minRef;
                         treeMatch = t;
                         break;
                     }
@@ -279,10 +288,10 @@ namespace GitSharp.TreeWalk
                     {
                         // A conflict match is not possible.
                         //
-                        if (t.matchShift != 0)
+                        if (t.MatchShift != 0)
                         {
-                            t.back(t.matchShift);
-                            t.matchShift = 0;
+                            t.back(t.MatchShift);
+                            t.MatchShift = 0;
                         }
                         break;
                     }
@@ -295,9 +304,14 @@ namespace GitSharp.TreeWalk
                 // matching iterators instead of the file iterator.
                 // This way isSubtree is true and isRecursive works.
                 //
-                foreach (AbstractTreeIterator t in trees)
-                    if (t.matches == minRef)
-                        t.matches = treeMatch;
+                foreach (AbstractTreeIterator t in Trees)
+                {
+                	if (t.Matches == minRef)
+                	{
+                		t.Matches = treeMatch;
+                	}
+                }
+
                 return treeMatch;
             }
 
@@ -306,41 +320,45 @@ namespace GitSharp.TreeWalk
 
         public override void popEntriesEqual()
         {
-            AbstractTreeIterator ch = currentHead;
-            for (int i = 0; i < trees.Length; i++)
+            AbstractTreeIterator ch = CurrentHead;
+            for (int i = 0; i < Trees.Length; i++)
             {
-                AbstractTreeIterator t = trees[i];
-                if (t.matches == ch)
+                AbstractTreeIterator t = Trees[i];
+                if (t.Matches == ch)
                 {
-                    if (t.matchShift == 0)
-                        t.next(1);
+                    if (t.MatchShift == 0)
+                    {
+                    	t.next(1);
+                    }
                     else
                     {
-                        t.back(t.matchShift);
-                        t.matchShift = 0;
+                        t.back(t.MatchShift);
+                        t.MatchShift = 0;
                     }
-                    t.matches = null;
+                    t.Matches = null;
                 }
             }
         }
 
         public override void skipEntriesEqual()
         {
-            AbstractTreeIterator ch = currentHead;
-            for (int i = 0; i < trees.Length; i++)
+            AbstractTreeIterator ch = CurrentHead;
+            for (int i = 0; i < Trees.Length; i++)
             {
-                AbstractTreeIterator t = trees[i];
-                if (t.matches == ch)
-                {
-                    if (t.matchShift == 0)
-                        t.skip();
-                    else
-                    {
-                        t.back(t.matchShift);
-                        t.matchShift = 0;
-                    }
-                    t.matches = null;
-                }
+                AbstractTreeIterator t = Trees[i];
+            	if (t.Matches != ch) continue;
+
+            	if (t.MatchShift == 0)
+            	{
+            		t.skip();
+            	}
+            	else
+            	{
+            		t.back(t.MatchShift);
+            		t.MatchShift = 0;
+            	}
+
+            	t.Matches = null;
             }
         }
     }

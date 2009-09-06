@@ -77,8 +77,8 @@ namespace GitSharp.RevWalk
             ObjectLoader ldr = walk.db.openObject(walk.curs, this);
             if (ldr == null)
                 throw new MissingObjectException(this, TYPE_COMMIT);
-            byte[] data = ldr.getCachedBytes();
-            if (Constants.OBJ_COMMIT != ldr.getType())
+            byte[] data = ldr.CachedBytes;
+            if (Constants.OBJ_COMMIT != ldr.Type)
                 throw new IncorrectObjectTypeException(this, TYPE_COMMIT);
             parseCanonical(walk, data);
         }

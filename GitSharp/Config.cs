@@ -235,11 +235,15 @@ namespace GitSharp
             List<string> lst = getRawStringList(section, subsection, name);
             if (lst != null)
             {
-                string[] res = new string[baseList.Length + lst.Count];
+                var res = new string[baseList.Length + lst.Count];
                 int idx = baseList.Length;
-                baseList.ArrayCopy(0, res, 0, idx);
-                foreach (string val in lst)
-                    res[idx++] = val;
+
+				Array.Copy(baseList, 0, res, 0, idx);
+				
+				foreach (string val in lst)
+                {
+                	res[idx++] = val;
+                }
                 return res;
             }
 

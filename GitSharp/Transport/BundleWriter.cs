@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using GitSharp.RevWalk;
 
 namespace GitSharp.Transport
 {
     public class BundleWriter
     {
-	    private PackWriter _packWriter;
-
-	    private Dictionary<String, ObjectId> _include;
-
-	    private HashSet<RevCommit> _assume;
+	    private readonly PackWriter _packWriter;
+	    private readonly Dictionary<String, ObjectId> _include;
+	    private readonly HashSet<RevCommit> _assume;
 
         /// <summary>
         /// Create a writer for a bundle.
@@ -41,9 +38,14 @@ namespace GitSharp.Transport
 	    public void include(String name, AnyObjectId id) 
         {
 		    if (!Repository.IsValidRefName(name))
-			    throw new ArgumentException("Invalid ref name: " + name);
+		    {
+		    	throw new ArgumentException("Invalid ref name: " + name);
+		    }
+
 		    if (_include.ContainsKey(name))
-			    throw new InvalidOperationException("Duplicate ref: " + name);
+		    {
+		    	throw new InvalidOperationException("Duplicate ref: " + name);
+		    }
 
             _include[name] = id.ToObjectId();
 	    }
@@ -74,7 +76,9 @@ namespace GitSharp.Transport
 	    public void assume(RevCommit c)
         {
 		    if (c != null)
-			    _assume.Add(c);
+		    {
+		    	_assume.Add(c);
+		    }
 	    }
 
 	    /**
@@ -98,8 +102,8 @@ namespace GitSharp.Transport
 		        os = new BufferedStream(os);
 		    }
 
-		    HashSet<ObjectId> inc = new HashSet<ObjectId>();
-		    HashSet<ObjectId> exc = new HashSet<ObjectId>();
+		    var inc = new HashSet<ObjectId>();
+		    var exc = new HashSet<ObjectId>();
 
             foreach(ObjectId objectId in _include.Values)
             {
@@ -114,7 +118,7 @@ namespace GitSharp.Transport
 		    _packWriter.Thin = exc.Count > 0;
 		    _packWriter.preparePack(inc, exc);
 
-            BinaryWriter w = new BinaryWriter(os);
+            var w = new BinaryWriter(os);
 
 		    w.Write(Constants.V2_BUNDLE_SIGNATURE.ToCharArray());
             w.Write('\n');

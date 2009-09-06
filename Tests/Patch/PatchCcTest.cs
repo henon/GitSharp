@@ -64,10 +64,10 @@ namespace GitSharp.Tests.Patch
 			Assert.AreEqual("dd8c317", cfh.getOldId(1).name());
 			Assert.AreEqual("fd85931", cfh.getNewId().name());
 
-			Assert.AreSame(cfh.getOldMode(0), cfh.getOldMode());
-			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(0));
-			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(1));
-			Assert.AreSame(FileMode.ExecutableFile, cfh.getNewMode());
+			Assert.IsTrue(cfh.getOldMode(0) == cfh.getOldMode());
+			Assert.IsTrue(FileMode.RegularFile == cfh.getOldMode(0));
+			Assert.IsTrue(FileMode.RegularFile == cfh.getOldMode(1));
+			Assert.IsTrue(FileMode.ExecutableFile == cfh.getNewMode());
 			Assert.AreEqual(FileHeader.ChangeType.MODIFY, cfh.getChangeType());
 			Assert.AreEqual(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
 
@@ -129,7 +129,7 @@ namespace GitSharp.Tests.Patch
 
 			Assert.AreEqual(1, cfh.getHunks().Count);
 			{
-				CombinedHunkHeader h = (CombinedHunkHeader)cfh.getHunks()[0];
+				var h = (CombinedHunkHeader)cfh.getHunks()[0];
 
 				Assert.AreSame(cfh, h.File);
 				Assert.AreEqual(273, h.StartOffset);

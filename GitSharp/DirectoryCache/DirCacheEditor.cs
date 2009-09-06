@@ -36,71 +36,67 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.DirectoryCache
 {
-    /**
-     * Updates a {@link DirCache} by supplying discrete edit commands.
-     * <p>
-     * An editor updates a DirCache by taking a list of {@link PathEdit} commands
-     * and executing them against the entries of the destination cache to produce a
-     * new cache. This edit style allows applications to insert a few commands and
-     * then have the editor compute the proper entry indexes necessary to perform an
-     * efficient in-order update of the index records. This can be easier to use
-     * than {@link DirCacheBuilder}.
-     * <p>
-     *
-     * @see DirCacheBuilder
-     */
+    /// <summary>
+	/// Updates a <see cref="DirCache"/> by supplying discrete edit commands.
+	/// <p>
+	/// An editor updates a <see cref="DirCache"/> by taking a list of 
+	/// <see cref="PathEdit"/> commands and executing them against the entries 
+	/// of the destination cache to produce a new cache. This edit style allows 
+	/// applications to insert a few commands and then have the editor compute 
+	/// the proper entry indexes necessary to perform an efficient in-order 
+	/// update of the index records. This can be easier to use than 
+	/// <see cref="DirCacheBuilder"/>.
+    /// </summary>
+	/// <seealso cref="DirCacheBuilder"/>
     public class DirCacheEditor : BaseDirCacheEditor
     {
-        private static Comparison<PathEdit> EDIT_CMP = (o1, o2) =>
+        private static readonly Comparison<PathEdit> EditComparison = (o1, o2) =>
         {
-            byte[] a = o1.path;
-            byte[] b = o2.path;
+            byte[] a = o1.Path;
+            byte[] b = o2.Path;
             return DirCache.cmp(a, a.Length, b, b.Length);
         };
 
-        private List<PathEdit> edits;
+		private readonly List<PathEdit> _edits;
 
-        /**
-         * Construct a new editor.
-         *
-         * @param dc
-         *            the cache this editor will eventually update.
-         * @param ecnt
-         *            estimated number of entries the editor will have upon
-         *            completion. This sizes the initial entry table.
-         */
-        public DirCacheEditor(DirCache dc, int ecnt)
-            : base(dc, ecnt)
+        /// <summary>
+        /// Construct a new editor.
+        /// </summary>
+		/// <param name="dirCache">
+		/// The cache this editor will eventually update.
+		/// </param>
+		/// <param name="entryCount">
+        /// Estimated number of entries the editor will have upon
+		/// completion. This sizes the initial entry table.
+        /// </param>
+        public DirCacheEditor(DirCache dirCache, int entryCount)
+            : base(dirCache, entryCount)
         {
-            edits = new List<PathEdit>();
+            _edits = new List<PathEdit>();
         }
 
-        /**
-         * Append one edit command to the list of commands to be applied.
-         * <p>
-         * Edit commands may be added in any order chosen by the application. They
-         * are automatically rearranged by the builder to provide the most efficient
-         * update possible.
-         *
-         * @param edit
-         *            another edit command.
-         */
+        /// <summary>
+        /// Append one edit command to the list of commands to be applied.
+		/// <para>
+		/// Edit commands may be added in any order chosen by the application. They
+		/// are automatically rearranged by the builder to provide the most efficient
+		/// update possible.
+		/// </para>
+        /// </summary>
+        /// <param name="edit">Another edit command.</param>
         public void add(PathEdit edit)
         {
-            edits.Add(edit);
+            _edits.Add(edit);
         }
 
         public override bool commit()
         {
-            if (edits.Count == 0) // isEmpty()
+            if (_edits.Count == 0) // isEmpty()
             {
                 // No changes? Don't rewrite the index.
                 //
@@ -112,110 +108,115 @@ namespace GitSharp.DirectoryCache
 
         public override void finish()
         {
-            if (edits.Count > 0) // !edits.isEmpty()
-            { 
-                applyEdits();
-                replace();
-            }
+        	if (_edits.Count <= 0) return;
+        	ApplyEdits();
+        	replace();
         }
 
-        private void applyEdits()
+        private void ApplyEdits()
         {
-            edits.Sort(EDIT_CMP);
+            _edits.Sort(EditComparison);
 
             int maxIdx = cache.getEntryCount();
             int lastIdx = 0;
-            foreach (PathEdit e in edits)
+            foreach (PathEdit e in _edits)
             {
-                int eIdx = cache.findEntry(e.path, e.path.Length);
+                int eIdx = cache.findEntry(e.Path, e.Path.Length);
                 bool missing = eIdx < 0;
                 if (eIdx < 0)
-                    eIdx = -(eIdx + 1);
+                {
+                	eIdx = -(eIdx + 1);
+                }
                 int cnt = Math.Min(eIdx, maxIdx) - lastIdx;
                 if (cnt > 0)
-                    fastKeep(lastIdx, cnt);
+                {
+                	fastKeep(lastIdx, cnt);
+                }
                 lastIdx = missing ? eIdx : cache.nextEntry(eIdx);
 
-                if (e is DeletePath)
-                    continue;
+                if (e is DeletePath) continue;
                 if (e is DeleteTree)
                 {
-                    lastIdx = cache.nextEntry(e.path, e.path.Length, eIdx);
+                    lastIdx = cache.nextEntry(e.Path, e.Path.Length, eIdx);
                     continue;
                 }
 
-                DirCacheEntry ent;
-                if (missing)
-                    ent = new DirCacheEntry(e.path);
-                else
-                    ent = cache.getEntry(eIdx);
-                e.apply(ent);
+            	DirCacheEntry ent = missing ? new DirCacheEntry(e.Path) : cache.getEntry(eIdx);
+                e.Apply(ent);
                 fastAdd(ent);
             }
 
             int count = maxIdx - lastIdx;
             if (count > 0)
-                fastKeep(lastIdx, count);
-        }
+            {
+            	fastKeep(lastIdx, count);
+            }
+		}
 
-        /**
-         * Any index record update.
-         * <p>
-         * Applications should subclass and provide their own implementation for the
-         * {@link #apply(DirCacheEntry)} method. The editor will invoke apply once
-         * for each record in the index which matches the path name. If there are
-         * multiple records (for example in stages 1, 2 and 3), the edit instance
-         * will be called multiple times, once for each stage.
-         */
+		#region Nested Types
+
+		/// <summary>
+		/// Any index record update.
+		/// <para>
+		/// Applications should subclass and provide their own implementation for the
+		/// <see cref="Apply"/> method. The editor will invoke apply once
+		/// for each record in the index which matches the path name. If there are
+		/// multiple records (for example in stages 1, 2 and 3), the edit instance
+		/// will be called multiple times, once for each stage.
+		/// </para>
+		/// </summary>
         public abstract class PathEdit
         {
-            public byte[] path;
+            private readonly byte[] _path;
 
-            /**
-             * Create a new update command by path name.
-             *
-             * @param entryPath
-             *            path of the file within the repository.
-             */
-            public PathEdit(String entryPath)
+            /// <summary>
+            /// Create a new update command by path name.
+            /// </summary>
+            /// <param name="entryPath">path of the file within the repository.</param>
+        	protected PathEdit(string entryPath)
             {
-                path = Constants.encode(entryPath);
+                _path = Constants.encode(entryPath);
             }
 
-            /**
-             * Create a new update command for an existing entry instance.
-             *
-             * @param ent
-             *            entry instance to match path of. Only the path of this
-             *            entry is actually considered during command evaluation.
-             */
-            public PathEdit(DirCacheEntry ent)
+            /// <summary>
+            /// Create a new update command for an existing entry instance.
+            /// </summary>
+            /// <param name="ent">
+            /// Entry instance to match path of. Only the path of this
+			/// entry is actually considered during command evaluation.
+            /// </param>
+        	protected PathEdit(DirCacheEntry ent)
             {
-                path = ent.path;
+                _path = ent.Path;
             }
 
-            /**
-             * Apply the update to a single cache entry matching the path.
-             * <p>
-             * After apply is invoked the entry is added to the output table, and
-             * will be included in the new index.
-             *
-             * @param ent
-             *            the entry being processed. All fields are zeroed out if
-             *            the path is a new path in the index.
-             */
-            public abstract void apply(DirCacheEntry ent);
+			public byte[] Path
+			{
+				get { return _path; }
+			}
+
+			/// <summary>
+			/// Apply the update to a single cache entry matching the path.
+			/// <para>
+			/// After apply is invoked the entry is added to the output table, and
+			/// will be included in the new index.
+			/// </summary>
+			/// <param name="ent">
+			/// The entry being processed. All fields are zeroed out if 
+			/// the path is a new path in the index.
+			/// </param>
+            public abstract void Apply(DirCacheEntry ent);
         }
 
-        /**
-         * Deletes a single file entry from the index.
-         * <p>
-         * This deletion command removes only a single file at the given location,
-         * but removes multiple stages (if present) for that path. To remove a
-         * complete subtree use {@link DeleteTree} instead.
-         *
-         * @see DeleteTree
-         */
+        /// <summary>
+        /// Deletes a single file entry from the index.
+		/// <para>
+		/// This deletion command removes only a single file at the given location,
+		/// but removes multiple stages (if present) for that path. To remove a
+		/// complete subtree use <see cref="DeleteTree"/> instead.
+		/// </para>
+        /// </summary>
+		/// <seealso cref="DeleteTree"/>
         public class DeletePath : PathEdit
         {
             /**
@@ -241,7 +242,7 @@ namespace GitSharp.DirectoryCache
             {
             }
 
-            public override void apply(DirCacheEntry ent)
+            public override void Apply(DirCacheEntry ent)
             {
                 throw new NotSupportedException("No apply in delete");
             }
@@ -274,11 +275,12 @@ namespace GitSharp.DirectoryCache
             {
             }
 
-            public override void apply(DirCacheEntry ent)
+            public override void Apply(DirCacheEntry ent)
             {
                 throw new NotSupportedException("No apply in delete");
             }
-        }
-    }
+		}
 
+		#endregion
+	}
 }

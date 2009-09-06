@@ -36,85 +36,80 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using GitSharp.Util;
 
 namespace GitSharp.Tests.Util
 {
-    internal class XInputStream : IDisposable
-    {
-        private byte[] intbuf = new byte[8];
+	internal class XInputStream : IDisposable
+	{
+		private readonly byte[] _intbuf = new byte[8];
+		private FileStream _filestream;
 
-        FileStream _filestream;
+		internal XInputStream(FileStream s)
+		{
+			_filestream = s;
+		}
 
-        internal XInputStream(FileStream s)
-        {
-            _filestream = s;
-        }
+		internal long Length
+		{
+			get { return _filestream.Length; }
+		}
 
-        internal byte[] readFully(int len)
-        {
-            byte[] b = new byte[len];
-            _filestream.Read(b, 0, len);
-            return b;
-        }
+		#region IDisposable Members
 
-        internal void readFully(byte[] b, int o, int len)
-        {
-            int r;
-            while (len > 0 && (r = _filestream.Read(b, o, len)) > 0)
-            {
-                o += r;
-                len -= r;
-            }
-            if (len > 0)
-                throw new EndOfStreamException();
-        }
+		public void Dispose()
+		{
+			if (_filestream != null)
+			{
+				_filestream.Close();
+				_filestream = null;
+			}
+		}
 
-        internal int readUInt8()
-        {
-            int r = _filestream.ReadByte();
-            if (r < 0)
-                throw new EndOfStreamException();
-            return r;
-        }
+		#endregion
 
-        internal long readUInt32()
-        {
-            readFully(intbuf, 0, 4);
-            return NB.decodeUInt32(intbuf, 0);
-        }
+		internal byte[] ReadFully(int len)
+		{
+			var b = new byte[len];
+			_filestream.Read(b, 0, len);
+			return b;
+		}
 
-        internal void Close()
-        {
-            _filestream.Close();
-        }
+		internal void ReadFully(byte[] b, int o, int len)
+		{
+			int r;
+			while (len > 0 && (r = _filestream.Read(b, o, len)) > 0)
+			{
+				o += r;
+				len -= r;
+			}
+			if (len > 0)
+			{
+				throw new EndOfStreamException();
+			}
+		}
 
-        internal long Length
-        {
-            get
-            {
-                return _filestream.Length;
-            }
-        }
+		internal int ReadUInt8()
+		{
+			int r = _filestream.ReadByte();
+			if (r < 0)
+			{
+				throw new EndOfStreamException();
+			}
+			return r;
+		}
 
-        #region IDisposable Members
+		internal long ReadUInt32()
+		{
+			ReadFully(_intbuf, 0, 4);
+			return NB.decodeUInt32(_intbuf, 0);
+		}
 
-        public void Dispose()
-        {
-            if (_filestream != null)
-            {
-                _filestream.Close();
-                _filestream = null;
-            }
-        }
-
-        #endregion
-    }
-
+		internal void Close()
+		{
+			_filestream.Close();
+		}
+	}
 }

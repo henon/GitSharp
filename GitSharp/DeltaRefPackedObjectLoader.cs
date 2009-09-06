@@ -37,43 +37,41 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using GitSharp.Exceptions;
 
 namespace GitSharp
 {
-    /** Reads a deltified object which uses an {@link ObjectId} to find its base. */
+    /// <summary>
+	/// Reads a deltified object which uses an <see cref="ObjectId"/> to find its base.
+    /// </summary>
     public class DeltaRefPackedObjectLoader : DeltaPackedObjectLoader
     {
-        private ObjectId deltaBase;
+        private readonly ObjectId _deltaBase;
 
         public DeltaRefPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz, ObjectId @base)
             : base(pr, dataOffset, objectOffset, deltaSz)
         {
-            deltaBase = @base;
+            _deltaBase = @base;
         }
 
-        public override PackedObjectLoader getBaseLoader(WindowCursor curs)
+        public override PackedObjectLoader GetBaseLoader(WindowCursor curs)
         {
-            PackedObjectLoader or = pack.Get(curs, deltaBase);
+            PackedObjectLoader or = PackFile.Get(curs, _deltaBase);
             if (or == null)
-                throw new MissingObjectException(deltaBase, "delta base");
+            {
+            	throw new MissingObjectException(_deltaBase, "delta base");
+            }
             return or;
         }
 
+    	public override int RawType
+    	{
+    		get { return Constants.OBJ_REF_DELTA; }
+    	}
 
-        public override int getRawType()
-        {
-            return Constants.OBJ_REF_DELTA;
-        }
-
-
-        public override ObjectId getDeltaBase()
-        {
-            return deltaBase;
-        }
+    	public override ObjectId DeltaBase
+    	{
+    		get { return _deltaBase; }
+    	}
     }
 }

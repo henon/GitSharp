@@ -38,70 +38,67 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Security.Cryptography;
 
 namespace GitSharp
 {
-    /**
-    * Base class for a set of loaders for different representations of Git objects.
-    * New loaders are constructed for every object.
-    */
+    /// <summary>
+    /// Base class for a set of loaders for different representations of Git objects.
+	/// New loaders are constructed for every object.
+	/// </summary>
     public abstract class ObjectLoader
     {
-        /**
-         * @return Git in pack object type, see {@link Constants}.
-         */
-        public abstract int getType();
+    	/// <summary>
+    	/// Git in pack object type, see {@link Constants}.
+    	/// </summary>
+    	/// <returns></returns>
+		public abstract int Type { get; protected set; }
 
-        /**
-         * @return size of object in bytes
-         */
-        public abstract long getSize();
+    	/// <summary>
+    	/// Size of object in bytes
+    	/// </summary>
+    	/// <returns></returns>
+		public abstract long Size { get; protected set; }
 
-        /**
-         * Obtain a copy of the bytes of this object.
-         * <p>
-         * Unlike {@link #getCachedBytes()} this method returns an array that might
-         * be modified by the caller.
-         * 
-         * @return the bytes of this object.
-         */
-        public byte[] getBytes()
-        {
-            byte[] data = getCachedBytes();
-            byte[] copy = new byte[data.Length];
-            Array.Copy(data, 0, copy, 0, data.Length);
-            return copy;
-        }
+    	/// <summary>
+    	/// Obtain a copy of the bytes of this object.
+    	/// </summary>
+    	/// <returns>A copy of the bytes of this object.</returns>
+    	public byte[] Bytes
+    	{
+    		get
+    		{
+    			byte[] data = CachedBytes;
+    			var copy = new byte[data.Length];
+    			Array.Copy(data, 0, copy, 0, data.Length);
+    			return copy;
+    		}
+    	}
 
-        /**
-         * Obtain a reference to the (possibly cached) bytes of this object.
-         * <p>
-         * This method offers direct access to the internal caches, potentially
-         * saving on data copies between the internal cache and higher level code.
-         * Callers who receive this reference <b>must not</b> modify its contents.
-         * Changes (if made) will affect the cache but not the repository itself.
-         * 
-         * @return the cached bytes of this object. Do not modify it.
-         */
-        public abstract byte[] getCachedBytes();
+    	/// <summary>
+    	/// Obtain a reference to the (possibly cached) bytes of this object.
+    	/// <para>
+    	/// This method offers direct access to the internal caches, potentially
+    	/// saving on data copies between the internal cache and higher level code.
+    	/// Callers who receive this reference <b>must not</b> modify its contents.
+    	/// Changes (if made) will affect the cache but not the repository itself.
+    	/// </para>
+    	/// </summary>
+    	/// <returns>A copy of the cached bytes of this object.</returns>
+		public abstract byte[] CachedBytes { get; protected set; }
 
-        /**
-         * @return raw object type from object header, as stored in storage (pack,
-         *         loose file). This may be different from {@link #getType()} result
-         *         for packs (see {@link Constants}).
-         */
-        public abstract int getRawType();
+    	/// <summary>
+    	/// Raw object type from object header, as stored in storage (pack,
+    	/// loose file). This may be different from {@link #getType()} result
+    	/// for packs (see {@link Constants}).
+    	/// </summary>
+    	/// <returns></returns>
+    	public abstract int RawType { get; }
 
-        /**
-         * @return raw size of object from object header (pack, loose file).
-         *         Interpretation of this value depends on {@link #getRawType()}.
-         */
-        public abstract long getRawSize();
+    	/// <summary>
+    	/// Raw size of object from object header (pack, loose file).
+    	/// Interpretation of this value depends on {@link #getRawType()}.
+    	/// </summary>
+    	/// <returns></returns>
+    	public abstract long RawSize { get; }
     }
-
 }

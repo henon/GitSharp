@@ -45,7 +45,7 @@ namespace GitSharp.RevWalk
      * Implementations of this basic class provide the real work behind RevWalk.
      * Conceptually a Generator is an iterator or a queue, it returns commits until
      * there are no more relevant. Generators may be piped/stacked together to
-     * create a more complex set of operations.
+     * Create a more complex set of operations.
      * 
      * @see PendingGenerator
      * @see StartGenerator

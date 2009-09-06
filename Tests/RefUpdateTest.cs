@@ -185,7 +185,7 @@ namespace GitSharp.Tests
 		{
 			const string newRef = "refs/heads/abc";
 			RefUpdate @ref = updateRef(newRef);
-			@ref.Update(); // create loose ref
+			@ref.Update(); // Create loose ref
 			@ref = updateRef(newRef); // refresh
 			delete(@ref, RefUpdate.RefUpdateResult.NoChange);
 		}

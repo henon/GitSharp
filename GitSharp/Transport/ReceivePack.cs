@@ -313,7 +313,7 @@ namespace GitSharp.Transport
 
         private void receivePack()
         {
-            IndexPack ip = IndexPack.create(db, raw);
+            IndexPack ip = IndexPack.Create(db, raw);
             ip.setFixThin(true);
             ip.setObjectChecking(isCheckReceivedObjects());
             ip.index(new NullProgressMonitor());

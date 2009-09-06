@@ -46,27 +46,30 @@ namespace GitSharp.Tests
 	[TestFixture]
 	public class WindowCacheGetTest : RepositoryTestCase
 	{
-		private IList<TestObject> toLoad;
+		private IList<TestObject> _toLoad;
 
 		public override void setUp()
 		{
 			base.setUp();
 
-			toLoad = new List<TestObject>();
-			StreamReader br = new StreamReader("Resources/all_packed_objects.txt", Constants.CHARSET);
+			_toLoad = new List<TestObject>();
+			var br = new StreamReader("Resources/all_packed_objects.txt", Constants.CHARSET);
 			try
 			{
 				string line;
 				while ((line = br.ReadLine()) != null)
 				{
-					string[] parts = line.Split(new char[] { ' '}, StringSplitOptions.RemoveEmptyEntries);
-					TestObject o = new TestObject();
-					o.id = ObjectId.FromString(parts[0]);
-					o.setType(parts[1]);
-					o.rawSize = Convert.ToInt32(parts[2]);
-					// parts[3] is the size-in-pack
-					o.offset = Convert.ToInt64(parts[4]);
-					toLoad.Add(o);
+					string[] parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+					var testObject = new TestObject
+								{
+									Id = ObjectId.FromString(parts[0]),
+									Type = parts[1],
+									RawSize = Convert.ToInt32(parts[2]),
+									Size = Convert.ToInt64(parts[3]),
+									Offset = Convert.ToInt64(parts[4])
+								};
+
+					_toLoad.Add(testObject);
 				}
 			}
 			finally
@@ -74,18 +77,18 @@ namespace GitSharp.Tests
 				br.Close();
 			}
 
-			Assert.AreEqual(96, toLoad.Count);
+			Assert.AreEqual(96, _toLoad.Count);
 		}
 
 		[Test]
 		public void testCache_Defaults()
 		{
-			WindowCacheConfig cfg = new WindowCacheConfig();
+			var cfg = new WindowCacheConfig();
 			WindowCache.reconfigure(cfg);
-			doCacheTests();
-			checkLimits(cfg);
+			DoCacheTests();
+			CheckLimits(cfg);
 
-			WindowCache cache = WindowCache.getInstance();
+			WindowCache cache = WindowCache.Instance;
 			Assert.AreEqual(6, cache.getOpenFiles());
 			Assert.AreEqual(17346, cache.getOpenBytes());
 		}
@@ -93,59 +96,73 @@ namespace GitSharp.Tests
 		[Test]
 		public void testCache_TooFewFiles()
 		{
-			WindowCacheConfig cfg = new WindowCacheConfig();
-			cfg.setPackedGitOpenFiles(2);
+			var cfg = new WindowCacheConfig { PackedGitOpenFiles = 2 };
 			WindowCache.reconfigure(cfg);
-			doCacheTests();
-			checkLimits(cfg);
+			DoCacheTests();
+			CheckLimits(cfg);
 		}
 
 		[Test]
 		public void testCache_TooSmallLimit()
 		{
-			WindowCacheConfig cfg = new WindowCacheConfig();
-			cfg.setPackedGitWindowSize(4096);
-			cfg.setPackedGitLimit(4096);
+			var cfg = new WindowCacheConfig { PackedGitWindowSize = 4096, PackedGitLimit = 4096 };
 			WindowCache.reconfigure(cfg);
-			doCacheTests();
-			checkLimits(cfg);
+			DoCacheTests();
+			CheckLimits(cfg);
 		}
 
-		private void checkLimits(WindowCacheConfig cfg)
+		private static void CheckLimits(WindowCacheConfig cfg)
 		{
-			WindowCache cache = WindowCache.getInstance();
-			Assert.IsTrue(cache.getOpenFiles() <= cfg.getPackedGitOpenFiles());
-			Assert.IsTrue(cache.getOpenBytes() <= cfg.getPackedGitLimit());
+			WindowCache cache = WindowCache.Instance;
+			Assert.IsTrue(cache.getOpenFiles() <= cfg.PackedGitOpenFiles);
+			Assert.IsTrue(cache.getOpenBytes() <= cfg.PackedGitLimit);
 			Assert.IsTrue(0 < cache.getOpenFiles());
 			Assert.IsTrue(0 < cache.getOpenBytes());
 		}
 
-		private void doCacheTests()
+		private void DoCacheTests()
 		{
-			foreach (TestObject o in toLoad)
+			foreach (TestObject o in _toLoad)
 			{
-				ObjectLoader or = db.openObject(new WindowCursor(), o.id);
+				ObjectLoader or = db.openObject(new WindowCursor(), o.Id);
 				Assert.IsNotNull(or);
 				Assert.IsTrue(or is PackedObjectLoader);
-				Assert.AreEqual(o.type, or.getType());
-				Assert.AreEqual(o.rawSize, or.getRawSize());
-				Assert.AreEqual(o.offset, ((PackedObjectLoader)or).getObjectOffset());
+				Assert.AreEqual(o.Type, or.Type);
+				Assert.AreEqual(o.RawSize, or.RawSize);
+				Assert.AreEqual(o.Offset, ((PackedObjectLoader)or).ObjectOffset);
 			}
 		}
+
+		#region Nested Types
 
 		private class TestObject
 		{
-			internal ObjectId id;
-			internal int type;
-			internal int rawSize;
-			internal long offset;
+			private string _type;
 
-			internal virtual void setType(string typeStr)
+			public ObjectId Id { get; set; }
+			public int RawSize { get; set; }
+			public long Offset { get; set; }
+			public long Size { private get; set; }
+
+			public string Type
 			{
-				byte[] typeRaw = Constants.encode(typeStr + " ");
-				MutableInteger ptr = new MutableInteger();
-				type = Constants.decodeTypeString(id, typeRaw, (byte) ' ', ptr);
+				get { return _type; }
+				set
+				{
+					_type = value;
+					byte[] typeRaw = Constants.encode(value + " ");
+					var ptr = new MutableInteger();
+					Constants.decodeTypeString(Id, typeRaw, (byte)' ', ptr);
+				}
+			}
+
+			public override string ToString()
+			{
+				// 4b825dc642cb6eb9a060e54bf8d69288fbee4904 tree   0 9 7782
+				return Id + " " + Type + " " + Size + " " + RawSize + " " + Offset;
 			}
 		}
+
+		#endregion
 	}
 }

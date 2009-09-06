@@ -92,8 +92,8 @@ namespace GitSharp.Util
          * @param offset
          *            position within the buffer to begin reading from. This
          *            position and the next byte after it (for a total of 2 bytes)
-         *            will be read.
-         * @return unsigned integer value that matches the 16 bits read.
+         *            will be Read.
+         * @return unsigned integer value that matches the 16 bits Read.
          */
         public static int decodeUInt16(byte[] intbuf, int offset)
         {
@@ -110,8 +110,8 @@ namespace GitSharp.Util
          * @param offset
          *            position within the buffer to begin reading from. This
          *            position and the next 3 bytes after it (for a total of 4
-         *            bytes) will be read.
-         * @return unsigned integer value that matches the 32 bits read.
+         *            bytes) will be Read.
+         * @return unsigned integer value that matches the 32 bits Read.
          */
         public static long decodeUInt32(byte[] intbuf, int offset)
         {
@@ -137,8 +137,8 @@ namespace GitSharp.Util
          * @param offset
          *            position within the buffer to begin reading from. This
          *            position and the next 3 bytes after it (for a total of 4
-         *            bytes) will be read.
-         * @return signed integer value that matches the 32 bits read.
+         *            bytes) will be Read.
+         * @return signed integer value that matches the 32 bits Read.
          */
         public static int decodeInt32(byte[] intbuf, int offset)
         {
@@ -161,12 +161,12 @@ namespace GitSharp.Util
          * Read an entire local file into memory as a byte array.
          *
          * @param path
-         *            location of the file to read.
+         *            location of the file to Read.
          * @return complete contents of the requested local file.
          * @throws FileNotFoundException
          *             the file does not exist.
          * @throws IOException
-         *             the file exists, but its contents cannot be read.
+         *             the file exists, but its contents cannot be Read.
          */
         public static byte[] ReadFully(FileInfo path)
         {
@@ -177,15 +177,15 @@ namespace GitSharp.Util
          * Read an entire local file into memory as a byte array.
          *
          * @param path
-         *            location of the file to read.
+         *            location of the file to Read.
          * @param max
-         *            maximum number of bytes to read, if the file is larger than
+         *            maximum number of bytes to Read, if the file is larger than
          *            this limit an IOException is thrown.
          * @return complete contents of the requested local file.
          * @throws FileNotFoundException
          *             the file does not exist.
          * @throws IOException
-         *             the file exists, but its contents cannot be read.
+         *             the file exists, but its contents cannot be Read.
          */
         public static byte[] ReadFully(FileInfo path, int max)
         {
@@ -205,13 +205,13 @@ namespace GitSharp.Util
          * Read the entire byte array into memory, or throw an exception.
          * 
          * @param fd
-         *            input stream to read the data from.
+         *            input stream to Read the data from.
          * @param dst
          *            buffer that must be fully populated, [off, off+len).
          * @param off
          *            position within the buffer to start writing to.
          * @param len
-         *            number of bytes that must be read.
+         *            number of bytes that must be Read.
          * @throws EOFException
          *             the stream ended before dst was fully populated.
          * @throws IOException
@@ -223,7 +223,7 @@ namespace GitSharp.Util
             {
                 int r = fd.Read(dst, off, len);
                 if (r <= 0)
-                    throw new EndOfStreamException("Short read of block.");
+                    throw new EndOfStreamException("Short Read of block.");
                 off += r;
                 len -= r;
             }
@@ -233,15 +233,15 @@ namespace GitSharp.Util
          * Read the entire byte array into memory, or throw an exception.
          *
          * @param fd
-         *            file to read the data from.
+         *            file to Read the data from.
          * @param pos
-         *            position to read from the file at.
+         *            position to Read from the file at.
          * @param dst
          *            buffer that must be fully populated, [off, off+len).
          * @param off
          *            position within the buffer to start writing to.
          * @param len
-         *            number of bytes that must be read.
+         *            number of bytes that must be Read.
          * @throws EOFException
          *             the stream ended before dst was fully populated.
          * @throws IOException
@@ -254,7 +254,7 @@ namespace GitSharp.Util
                 fd.Position = pos;
                 int r = fd.Read(dst, off, len);
                 if (r <= 0)
-                    throw new EndOfStreamException("Short read of block.");
+                    throw new EndOfStreamException("Short Read of block.");
                 pos += r;
                 off += r;
                 len -= r;
@@ -298,8 +298,8 @@ namespace GitSharp.Util
          * @param offset
          *            position within the buffer to begin reading from. This
          *            position and the next 7 bytes after it (for a total of 8
-         *            bytes) will be read.
-         * @return unsigned integer value that matches the 64 bits read.
+         *            bytes) will be Read.
+         * @return unsigned integer value that matches the 64 bits Read.
          */
         public static long decodeUInt64(byte[] intbuf, int offset)
         {

@@ -37,83 +37,80 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using GitSharp.Exceptions;
 using System.IO;
+using GitSharp.Exceptions;
 
 namespace GitSharp
 {
-    /** Reader for a deltified object stored in a pack file. */
+    /// <summary>
+	/// Reader for a deltified object stored in a pack file.
+    /// </summary>
     public abstract class DeltaPackedObjectLoader : PackedObjectLoader
     {
-        private static int OBJ_COMMIT = Constants.OBJ_COMMIT;
+        private const int ObjCommit = Constants.OBJ_COMMIT;
+        private readonly int _deltaSize;
 
-        private int deltaSize;
-
-        public DeltaPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz)
+    	protected DeltaPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz)
             : base(pr, dataOffset, objectOffset)
         {
-            objectType = -1;
-            deltaSize = deltaSz;
+            Type = -1;
+            _deltaSize = deltaSz;
         }
 
-
-        public override void materialize(WindowCursor curs)
+        public override void Materialize(WindowCursor curs)
         {
-            if (cachedBytes != null)
+            if (CachedBytes != null)
             {
                 return;
             }
 
-            if (objectType != OBJ_COMMIT)
+            if (Type != ObjCommit)
             {
-                UnpackedObjectCache.Entry cache = pack.readCache(dataOffset);
+                UnpackedObjectCache.Entry cache = PackFile.readCache(DataOffset);
                 if (cache != null)
                 {
-                    curs.release();
-                    objectType = cache.type;
-                    objectSize = cache.data.Length;
-                    cachedBytes = cache.data;
+                    curs.Release();
+                    Type = cache.type;
+                    Size = cache.data.Length;
+                    CachedBytes = cache.data;
                     return;
                 }
             }
 
             try
             {
-                PackedObjectLoader baseLoader = getBaseLoader(curs);
-                baseLoader.materialize(curs);
-                cachedBytes = BinaryDelta.Apply(baseLoader.getCachedBytes(),
-                        pack.decompress(dataOffset, deltaSize, curs));
-                curs.release();
-                objectType = baseLoader.getType();
-                objectSize = cachedBytes.Length;
-                if (objectType != OBJ_COMMIT)
-                    pack.saveCache(dataOffset, cachedBytes, objectType);
+                PackedObjectLoader baseLoader = GetBaseLoader(curs);
+                baseLoader.Materialize(curs);
+                CachedBytes = BinaryDelta.Apply(baseLoader.CachedBytes, PackFile.decompress(DataOffset, _deltaSize, curs));
+                curs.Release();
+                Type = baseLoader.Type;
+                Size = CachedBytes.Length;
+                if (Type != ObjCommit)
+                {
+                	PackFile.saveCache(DataOffset, CachedBytes, Type);
+                }
             }
             catch (IOException dfe)
             {
-                CorruptObjectException coe;
-                coe = new CorruptObjectException("object at " + dataOffset + " in "
-                        + pack.File.FullName + " has bad zlib stream", dfe);
-                throw coe;
+				throw new CorruptObjectException("object at " + DataOffset + " in "
+                    + PackFile.File.FullName + " has bad zlib stream", dfe);
             }
         }
 
-        public override long getRawSize()
-        {
-            return deltaSize;
-        }
+    	public override long RawSize
+    	{
+    		get { return _deltaSize; }
+    	}
 
-        /**
-         * @param curs
-         *            temporary thread storage during data access.
-         * @return the object loader for the base object
-         * @
-         */
-        public abstract PackedObjectLoader getBaseLoader(WindowCursor curs);
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="windowCursor">
+		/// Temporary thread storage during data access.
+		/// </param>
+		/// <returns>
+		/// The object loader for the base object
+		/// </returns>
+        public abstract PackedObjectLoader GetBaseLoader(WindowCursor windowCursor);
     }
-
 }

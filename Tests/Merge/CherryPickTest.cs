@@ -46,103 +46,100 @@ using System;
 
 namespace GitSharp.Tests.Merge
 {
-    [TestFixture]
-    public class CherryPickTest : RepositoryTestCase
-    {
-        [Test]
-	    public void TestPick()
-        {
-		    // B---O
-		    // \----P---T
-		    //
-		    // Cherry-pick "T" onto "O". This shouldn't introduce "p-fail", which
-		    // was created by "P", nor should it modify "a", which was done by "P".
-		    //
-		    DirCache treeB = DirCache.read(db);
-		    DirCache treeO = DirCache.read(db);
-		    DirCache treeP = DirCache.read(db);
-		    DirCache treeT = DirCache.read(db);
-		    {
-			    DirCacheBuilder b = treeB.builder();
-			    DirCacheBuilder o = treeO.builder();
-			    DirCacheBuilder p = treeP.builder();
-			    DirCacheBuilder t = treeT.builder();
+	[TestFixture]
+	public class CherryPickTest : RepositoryTestCase
+	{
+		[Test]
+		public void TestPick()
+		{
+			// B---O
+			// \----P---T
+			//
+			// Cherry-pick "T" onto "O". This shouldn't introduce "p-fail", which
+			// was created by "P", nor should it modify "a", which was done by "P".
+			//
+			DirCache treeB = DirCache.read(db);
+			DirCache treeO = DirCache.read(db);
+			DirCache treeP = DirCache.read(db);
+			DirCache treeT = DirCache.read(db);
+			{
+				DirCacheBuilder b = treeB.builder();
+				DirCacheBuilder o = treeO.builder();
+				DirCacheBuilder p = treeP.builder();
+				DirCacheBuilder t = treeT.builder();
 
-			    b.add(MakeEntry("a", FileMode.RegularFile));
+				b.add(MakeEntry("a", FileMode.RegularFile));
 
-                o.add(MakeEntry("a", FileMode.RegularFile));
-                o.add(MakeEntry("o", FileMode.RegularFile));
+				o.add(MakeEntry("a", FileMode.RegularFile));
+				o.add(MakeEntry("o", FileMode.RegularFile));
 
-                p.add(MakeEntry("a", FileMode.RegularFile, "q"));
-                p.add(MakeEntry("p-fail", FileMode.RegularFile));
+				p.add(MakeEntry("a", FileMode.RegularFile, "q"));
+				p.add(MakeEntry("p-fail", FileMode.RegularFile));
 
-                t.add(MakeEntry("a", FileMode.RegularFile));
-                t.add(MakeEntry("t", FileMode.RegularFile));
+				t.add(MakeEntry("a", FileMode.RegularFile));
+				t.add(MakeEntry("t", FileMode.RegularFile));
 
-			    b.finish();
-			    o.finish();
-			    p.finish();
-			    t.finish();
-		    }
+				b.finish();
+				o.finish();
+				p.finish();
+				t.finish();
+			}
 
-		    ObjectWriter ow = new ObjectWriter(db);
-		    ObjectId B = Commit(ow, treeB, new ObjectId[] {});
-		    ObjectId O = Commit(ow, treeO, new[] { B });
-		    ObjectId P = Commit(ow, treeP, new[] { B });
-		    ObjectId T = Commit(ow, treeT, new[] { P });
+			var ow = new ObjectWriter(db);
+			ObjectId B = Commit(ow, treeB, new ObjectId[] { });
+			ObjectId O = Commit(ow, treeO, new[] { B });
+			ObjectId P = Commit(ow, treeP, new[] { B });
+			ObjectId T = Commit(ow, treeT, new[] { P });
 
-		    ThreeWayMerger twm = (ThreeWayMerger) MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
-		    twm.SetBase(P);
-		    bool merge = twm.Merge(new[] { O, T });
-	        Assert.IsTrue(merge);
+			var twm = (ThreeWayMerger)MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
+			twm.SetBase(P);
+			bool merge = twm.Merge(new[] { O, T });
+			Assert.IsTrue(merge);
 
-            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
-		    tw.setRecursive(true);
-		    tw.reset(twm.GetResultTreeId());
+			var tw = new GitSharp.TreeWalk.TreeWalk(db) { Recursive = true };
+			tw.reset(twm.GetResultTreeId());
 
-		    Assert.IsTrue(tw.next());
-		    Assert.Equals("a", tw.getPathString());
-		    AssertCorrectId(treeO, tw);
+			Assert.IsTrue(tw.next());
+			Assert.Equals("a", tw.getPathString());
+			AssertCorrectId(treeO, tw);
 
-		    Assert.IsTrue(tw.next());
-		    Assert.Equals("o", tw.getPathString());
-		    AssertCorrectId(treeO, tw);
+			Assert.IsTrue(tw.next());
+			Assert.Equals("o", tw.getPathString());
+			AssertCorrectId(treeO, tw);
 
-		    Assert.IsTrue(tw.next());
-		    Assert.Equals("t", tw.getPathString());
-		    AssertCorrectId(treeT, tw);
+			Assert.IsTrue(tw.next());
+			Assert.Equals("t", tw.getPathString());
+			AssertCorrectId(treeT, tw);
 
-		    Assert.IsFalse(tw.next());
-	    }
+			Assert.IsFalse(tw.next());
+		}
 
-        private void AssertCorrectId(DirCache treeT, GitSharp.TreeWalk.TreeWalk tw) 
-        {
-		    Assert.Equals(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
-	    }
+		private static void AssertCorrectId(DirCache treeT, GitSharp.TreeWalk.TreeWalk tw)
+		{
+			Assert.Equals(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
+		}
 
-	    private ObjectId Commit(ObjectWriter ow, DirCache treeB, ObjectId[] parentIds)
-        {
-		    Commit c = new Commit(db);
-		    c.TreeId = treeB.writeTree(ow);
-		    c.Author = new PersonIdent("A U Thor", "a.u.thor", 1L, 0);
-		    c.Committer = c.Author;
-		    c.ParentIds = parentIds;
-		    c.Message = "Tree " + c.TreeId.Name;
-		    return ow.WriteCommit(c);
-	    }
+		private ObjectId Commit(ObjectWriter ow, DirCache treeB, ObjectId[] parentIds)
+		{
+			var c = new Commit(db) { TreeId = treeB.writeTree(ow), Author = new PersonIdent("A U Thor", "a.u.thor", 1L, 0) };
+			c.Committer = c.Author;
+			c.ParentIds = parentIds;
+			c.Message = "Tree " + c.TreeId.Name;
+			return ow.WriteCommit(c);
+		}
 
-	    private DirCacheEntry MakeEntry(String path, FileMode mode)
-        {
-		    return MakeEntry(path, mode, path);
-	    }
+		private DirCacheEntry MakeEntry(String path, FileMode mode)
+		{
+			return MakeEntry(path, mode, path);
+		}
 
-	    private DirCacheEntry MakeEntry(String path, FileMode mode, String content)
-        {
-		    DirCacheEntry ent = new DirCacheEntry(path);
-		    ent.setFileMode(mode);
-		    byte[] contentBytes = Constants.encode(content);
-		    ent.setObjectId(new ObjectWriter(db).ComputeBlobSha1(contentBytes.Length, new MemoryStream(contentBytes)));
-		    return ent;
-	    }
-    }
+		private DirCacheEntry MakeEntry(String path, FileMode mode, String content)
+		{
+			var ent = new DirCacheEntry(path);
+			ent.setFileMode(mode);
+			byte[] contentBytes = Constants.encode(content);
+			ent.setObjectId(new ObjectWriter(db).ComputeBlobSha1(contentBytes.Length, new MemoryStream(contentBytes)));
+			return ent;
+		}
+	}
 }

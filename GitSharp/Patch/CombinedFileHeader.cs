@@ -105,9 +105,11 @@ namespace GitSharp.Patch
 
         public override string getScriptText(Encoding ocs, Encoding ncs)
         {
-            Encoding[] cs = new Encoding[getParentCount() + 1];
+            var cs = new Encoding[getParentCount() + 1];
             for (int i = 0; i < cs.Length; i++)
-                cs[i] = ocs;
+            {
+            	cs[i] = ocs;
+            }
             cs[getParentCount()] = ncs;
             return getScriptText(cs);
         }
@@ -169,7 +171,7 @@ namespace GitSharp.Patch
         {
             // "index $asha1,$bsha1..$csha1"
             //
-            List<AbbreviatedObjectId> ids = new List<AbbreviatedObjectId>();
+            var ids = new List<AbbreviatedObjectId>();
             while (ptr < eol)
             {
                 int comma = RawParseUtils.nextLF(buf, ptr, (byte)',');

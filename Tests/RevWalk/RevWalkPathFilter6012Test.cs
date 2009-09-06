@@ -39,8 +39,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
+using GitSharp.Tests.Util;
 using GitSharp.TreeWalk.Filter;
 using NUnit.Framework;
 
@@ -77,11 +77,11 @@ namespace GitSharp.Tests.RevWalk
 			c = commit(tree(file(pF, zI)), a);
 			d = commit(tree(file(pA, zS), file(pF, zI)), c);
 			parse(d);
-			e = commit(d.getTree(), d, b);
+			e = commit(d.Tree, d, b);
 			f = commit(tree(file(pA, zS), file(pE, zY), file(pF, zI)), e);
 			parse(f);
 			g = commit(tree(file(pE, zY), file(pF, zI)), b);
-			h = commit(f.getTree(), g, f);
+			h = commit(f.Tree, g, f);
 			i = commit(tree(file(pA, zS), file(pE, zY), file(pF, zF)), h);
 
 			byName = new Dictionary<RevCommit, string>();
@@ -91,7 +91,7 @@ namespace GitSharp.Tests.RevWalk
 			}
 		}
 
-		protected void check(params RevCommit[] order)
+		protected void Check(params RevCommit[] order)
 		{
 			markStart(i);
 			var act = new StringBuilder();
@@ -114,7 +114,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.AreEqual(exp.ToString(), act.ToString());
 		}
 
-		protected internal virtual void filter(string path)
+		protected internal virtual void Filter(string path)
 		{
 			rw.setTreeFilter(AndTreeFilter.create(PathFilterGroup.createFromStrings(Enumerable.Repeat(path, 1)), TreeFilter.ANY_DIFF));
 		}
@@ -123,14 +123,14 @@ namespace GitSharp.Tests.RevWalk
 		public void test1()
 		{
 			// TODO --full-history
-			check(i, h, g, f, e, d, c, b, a);
+			Check(i, h, g, f, e, d, c, b, a);
 		}
 
 		[Test]
 		public void test2()
 		{
 			// TODO --full-history
-			filter(pF);
+			Filter(pF);
 			// TODO fix broken test
 			// check(i, h, e, c, b, a);
 		}
@@ -140,7 +140,7 @@ namespace GitSharp.Tests.RevWalk
 		{
 			// TODO --full-history
 			rw.sort(RevSort.TOPO);
-			filter(pF);
+			Filter(pF);
 			// TODO fix broken test
 			// check(i, h, e, c, b, a);
 		}
@@ -150,7 +150,7 @@ namespace GitSharp.Tests.RevWalk
 		{
 			// TODO --full-history
 			rw.sort(RevSort.COMMIT_TIME_DESC);
-			filter(pF);
+			Filter(pF);
 			// TODO fix broken test
 			// check(i, h, e, c, b, a);
 		}
@@ -159,7 +159,7 @@ namespace GitSharp.Tests.RevWalk
 		public void test5()
 		{
 			// TODO --simplify-merges
-			filter(pF);
+			Filter(pF);
 			// TODO fix broken test
 			// check(i, e, c, b, a);
 		}
@@ -167,16 +167,16 @@ namespace GitSharp.Tests.RevWalk
 		[Test]
 		public void test6()
 		{
-			filter(pF);
-			check(i, b, a);
+			Filter(pF);
+			Check(i, b, a);
 		}
 
 		[Test]
 		public void test7()
 		{
 			rw.sort(RevSort.TOPO);
-			filter(pF);
-			check(i, b, a);
+			Filter(pF);
+			Check(i, b, a);
 		}
 	}
 }

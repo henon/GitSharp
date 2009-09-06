@@ -42,37 +42,38 @@ using GitSharp.Exceptions;
 
 namespace GitSharp.RevWalk.Filter
 {
-
-    /** Selects commits based upon the commit time field. */
+    /// <summary>
+	/// Selects commits based upon the commit time field.
+    /// </summary>
     public abstract class CommitTimeRevFilter : RevFilter
     {
-        /**
-         * Create a new filter to select commits before a given date/time.
-         * 
-         * @param ts
-         *            the point in time to cut on.
-         * @return a new filter to select commits on or before <code>ts</code>.
-         */
+		private readonly int when;  // seconds since  epoch, will overflow 2038.
+
+        /// <summary>
+        /// Create a new filter to select commits before a given date/time.
+        /// </summary>
+        /// <param name="ts">the point in time to cut on.</param>
+        /// <returns>
+        /// a new filter to select commits on or before <paramref name="ts"/>.
+        /// </returns>
         public static RevFilter before(DateTime ts)
         {
-            return new Before(ts.ToGitInternalTime());
+            return new BeforeCommitTimeRevFilter(ts.ToGitInternalTime());
         }
 
-        /**
-         * Create a new filter to select commits after a given date/time.
-         * 
-         * @param ts
-         *            the point in time to cut on.
-         * @return a new filter to select commits on or after <code>ts</code>.
-         */
-        public static RevFilter after(DateTime ts)
+		/// <summary>
+		/// Create a new filter to select commits After a given date/time.
+		/// </summary>
+		/// <param name="ts">the point in time to cut on.</param>
+		/// <returns>
+		/// a new filter to select commits on or After <paramref name="ts"/>.
+		/// </returns>
+		public static RevFilter After(DateTime ts)
         {
-            return new After(ts.ToGitInternalTime());
+            return new AfterCommitTimeRevFilter(ts.ToGitInternalTime());
         }
 
-        public int when;  // seconds since  epoch, will overflow 2038.
-
-        public CommitTimeRevFilter(long ts)
+    	protected CommitTimeRevFilter(long ts)
         {
             when = (int)(ts);
         }
@@ -87,46 +88,51 @@ namespace GitSharp.RevWalk.Filter
             return base.ToString() + "(" + ((long)when).GitTimeToDateTime() + ")";
         }
 
-        private class Before : CommitTimeRevFilter
-        {
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="ts">git internal time (seconds since epoch)</param>
-            public Before(long ts)
-                : base(ts)
-            {
+    	#region Nested Types
 
-            }
+    	private class BeforeCommitTimeRevFilter : CommitTimeRevFilter
+    	{
+    		/// <summary>
+    		/// 
+    		/// </summary>
+    		/// <param name="ts">git internal time (seconds since epoch)</param>
+    		public BeforeCommitTimeRevFilter(long ts)
+    			: base(ts)
+    		{
+    		}
 
-            public override bool include(RevWalk walker, RevCommit cmit)
-            {
-                return cmit.getCommitTime() <= when;
-            }
-        }
+    		public override bool include(RevWalk walker, RevCommit cmit)
+    		{
+    			return cmit.CommitTime <= when;
+    		}
+    	}
 
-        private class After : CommitTimeRevFilter
-        {
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="ts">git internal time (seconds since epoch)</param>
-            public After(long ts)
-                : base(ts)
-            {
+    	private class AfterCommitTimeRevFilter : CommitTimeRevFilter
+    	{
+    		/// <summary>
+    		/// 
+    		/// </summary>
+    		/// <param name="ts">git internal time (seconds since epoch)</param>
+    		public AfterCommitTimeRevFilter(long ts)
+    			: base(ts)
+    		{
+    		}
 
-            }
+    		public override bool include(RevWalk walker, RevCommit cmit)
+    		{
+    			// Since the walker sorts commits by commit time we can be
+    			// reasonably certain there is nothing remaining worth our
+    			// scanning if this commit is before the point in question.
+    			//
+    			if (cmit.CommitTime < when)
+    			{
+    				throw StopWalkException.INSTANCE;
+    			}
 
-            public override bool include(RevWalk walker, RevCommit cmit)
-            {
-                // Since the walker sorts commits by commit time we can be
-                // reasonably certain there is nothing remaining worth our
-                // scanning if this commit is before the point in question.
-                //
-                if (cmit.getCommitTime() < when)
-                    throw StopWalkException.INSTANCE;
-                return true;
-            }
-        }
+    			return true;
+    		}
+    	}
+
+    	#endregion
     }
 }

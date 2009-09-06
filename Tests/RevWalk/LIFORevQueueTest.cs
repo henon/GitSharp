@@ -54,13 +54,13 @@ namespace GitSharp.Tests.RevWalk
         public override void testEmpty()
         {
             base.testEmpty();
-            Assert.AreEqual(0, q.outputType());
+			Assert.AreEqual(0, q.OutputType);
         }
 
         [Test]
         public void testCloneEmpty()
         {
-            q = new LIFORevQueue(AbstractRevQueue.EMPTY_QUEUE);
+            q = new LIFORevQueue(AbstractRevQueue.EmptyQueue);
             Assert.IsNull(q.next());
         }
 

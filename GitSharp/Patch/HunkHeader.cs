@@ -234,7 +234,7 @@ namespace GitSharp.Patch
 				&& RawParseUtils.match(buf, last, Patch.SigFooter) >= 0)
 			{
 				// This is an extremely common occurrence of "corruption".
-				// Users add footers with their signatures after this mark,
+				// Users add footers with their signatures After this mark,
 				// and git diff adds the git executable version number.
 				// Let it slide; the hunk otherwise looked sound.
 				//
@@ -276,7 +276,7 @@ namespace GitSharp.Patch
 				return;
 
 			// Treat the hunk header as though it were from the ancestor,
-			// as it may have a function header appearing after it which
+			// as it may have a function header appearing After it which
 			// was copied out of the ancestor file.
 			//
 			outStream[0].write(buf, ptr, eol - ptr);

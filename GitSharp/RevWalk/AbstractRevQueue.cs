@@ -36,28 +36,34 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Text;
 using System;
+using System.Text;
+
 namespace GitSharp.RevWalk
 {
-
     public abstract class AbstractRevQueue : Generator
     {
-        public static AbstractRevQueue EMPTY_QUEUE = new AlwaysEmptyQueue();
+        public static readonly AbstractRevQueue EmptyQueue = new AlwaysEmptyQueue();
 
-        /** Current output flags set for this generator instance. */
-        public int _outputType;
+		private readonly GeneratorOutputType _outputType;
 
-        /**
-         * Add a commit to the queue.
-         * <p>
-         * This method always adds the commit, even if it is already in the queue or
-         * previously was in the queue but has already been removed. To control
-         * queue admission use {@link #add(RevCommit, RevFlag)}.
-         * 
-         * @param c
-         *            commit to add.
-         */
+		protected AbstractRevQueue()
+		{
+		}
+
+    	protected AbstractRevQueue(GeneratorOutputType outputType)
+    	{
+    		_outputType = outputType;
+    	}
+
+    	/// <summary>
+        /// Add a commit to the queue.
+		/// <para>
+		/// This method always adds the commit, even if it is already in the queue or
+		/// previously was in the queue but has already been removed. To control
+		/// queue admission use {@link #add(RevCommit, RevFlag)}.
+        /// </summary>
+		/// <param name="c">Commit to add.</param>
         public abstract void add(RevCommit c);
 
         /**
@@ -82,80 +88,84 @@ namespace GitSharp.RevWalk
             }
         }
 
-        /**
-         * Add a commit's parents if one does not have a flag set yet.
-         * <p>
-         * This method permits the application to test if the commit has the given
-         * flag; if it does not already have the flag than the commit is added to
-         * the queue and the flag is set. This later will prevent the commit from
-         * being added twice.
-         * 
-         * @param c
-         *            commit whose parents should be added.
-         * @param queueControl
-         *            flag that controls admission to the queue.
-         */
+        /// <summary>
+        /// Add a commit's parents if one does not have a flag set yet.
+		/// <para>
+		/// This method permits the application to test if the commit has the given
+		/// flag; if it does not already have the flag than the commit is added to
+		/// the queue and the flag is set. This later will prevent the commit from
+		/// being added twice.
+        /// </summary>
+        /// <param name="c">
+        /// commit whose parents should be added.
+        /// </param>
+        /// <param name="queueControl">
+        /// flag that controls admission to the queue.
+        /// </param>
         public void addParents(RevCommit c, RevFlag queueControl)
         {
-            RevCommit[] pList = c.parents;
-            if (pList == null)
-                return;
+            RevCommit[] pList = c.Parents;
+            if (pList == null) return;
             foreach (RevCommit p in pList)
-                add(p, queueControl);
+            {
+            	add(p, queueControl);
+            }
         }
 
-        /**
-         * Remove the first commit from the queue.
-         * 
-         * @return the first commit of this queue.
-         */
-        //public abstract RevCommit next();
-
-        /** Remove all entries from this queue. */
+        /// <summary>
+		/// Remove all entries from this queue.
+        /// </summary>
         public abstract void clear();
 
         internal abstract bool everbodyHasFlag(int f);
 
         internal abstract bool anybodyHasFlag(int f);
 
-        public override int outputType()
+		/// <summary>
+		/// Current output flags set for this generator instance.
+		/// </summary>
+        public override GeneratorOutputType OutputType
         {
-            return _outputType;
+			get { return _outputType; }
         }
 
-        internal static void describe(StringBuilder s, RevCommit c)
+        protected static void Describe(StringBuilder s, RevCommit c)
         {
             s.Append(c.ToString());
             s.Append('\n');
         }
 
-        public class AlwaysEmptyQueue : AbstractRevQueue
-        {
-            public override void add(RevCommit c)
-            {
-                throw new InvalidOperationException();
-            }
+    	#region Nested Types
 
-            public override RevCommit next()
-            {
-                return null;
-            }
+    	public class AlwaysEmptyQueue : AbstractRevQueue
+    	{
+    		public override void add(RevCommit c)
+    		{
+    			throw new InvalidOperationException();
+    		}
 
-            internal override bool anybodyHasFlag(int f)
-            {
-                return false;
-            }
+    		public override RevCommit next()
+    		{
+    			return null;
+    		}
 
-            internal override bool everbodyHasFlag(int f)
-            {
-                return true;
-            }
+    		internal override bool anybodyHasFlag(int f)
+    		{
+    			return false;
+    		}
 
-            public override void clear()
-            {
-                // Nothing to clear, we have no state.
-            }
+    		internal override bool everbodyHasFlag(int f)
+    		{
+    			return true;
+    		}
 
-        }
+    		public override void clear()
+    		{
+    			// Nothing to clear, we have no state.
+    		}
+
+    	}
+
+    	#endregion
     }
 }

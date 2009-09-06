@@ -215,7 +215,7 @@ namespace GitSharp.Tests.Util
             try
             {
                 var @in = new MemoryStream(test);
-                // [caytchen] StreamReader buffers data after the very first Read, thus advancing the Position in the underlying stream - causing this test to fail
+                // [caytchen] StreamReader buffers data After the very first Read, thus advancing the Position in the underlying stream - causing this test to fail
                 //var inReader = new StreamReader(@in);
                 b.write(@in.ReadByte());
                 b.copy(@in);

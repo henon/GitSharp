@@ -38,24 +38,18 @@
 
 namespace GitSharp.RevWalk
 {
-
     public class EndGenerator : Generator
     {
-        public static EndGenerator INSTANCE = new EndGenerator();
+        public static readonly EndGenerator Instance = new EndGenerator();
 
-        public EndGenerator()
-        {
-            // We have nothing to initialize.
-        }
-
-        public override RevCommit next()
+		public override RevCommit next()
         {
             return null;
         }
 
-        public override int outputType()
+        public override GeneratorOutputType OutputType
         {
-            return 0;
+			get { return 0; }
         }
     }
 }

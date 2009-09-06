@@ -54,7 +54,7 @@ namespace GitSharp.Util
      * too large.
      * <p>
      * The content of this buffered stream may be sent to another OutputStream only
-     * after this stream has been properly closed by {@link #close()}.
+     * After this stream has been properly closed by {@link #close()}.
      */
     public class TemporaryBuffer : Stream
     {
@@ -225,7 +225,7 @@ namespace GitSharp.Util
         /**
          * Obtain the length (in bytes) of the buffer.
          * <p>
-         * The length is only accurate after {@link #close()} has been invoked.
+         * The length is only accurate After {@link #close()} has been invoked.
          *
          * @return total length of the buffer, in bytes.
          */
@@ -243,7 +243,7 @@ namespace GitSharp.Util
         /**
          * Convert this buffer's contents into a contiguous byte array.
          * <p>
-         * The buffer is only complete after {@link #close()} has been invoked.
+         * The buffer is only complete After {@link #close()} has been invoked.
          *
          * @return the complete byte array; length matches {@link #length()}.
          * @
@@ -280,7 +280,7 @@ namespace GitSharp.Util
         /**
          * Send this buffer to an output stream.
          * <p>
-         * This method may only be invoked after {@link #close()} has completed
+         * This method may only be invoked After {@link #close()} has completed
          * normally, to ensure all data is completely transferred.
          *
          * @param os

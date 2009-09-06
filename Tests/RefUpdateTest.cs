@@ -136,7 +136,7 @@ namespace GitSharp.Tests
 
 		///	<summary>
 		/// Delete a ref that exists both as packed and loose. Make sure the ref
-		///	cannot be resolved after delete.
+		///	cannot be resolved After delete.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
 		[Test]

@@ -79,7 +79,7 @@
 // This allows specifying '-a -b -c' as '-abc', and specifying '-D name=value'
 // as '-Dname=value'.
 //
-// Option processing is disabled by specifying "--".  All options after "--"
+// Option processing is disabled by specifying "--".  All options After "--"
 // are returned by OptionSet.Parse() unchanged and unprocessed.
 //
 // Unprocessed options are returned from OptionSet.Parse().

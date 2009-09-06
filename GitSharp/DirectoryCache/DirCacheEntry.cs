@@ -274,7 +274,7 @@ namespace GitSharp.DirectoryCache
             // thinking a zero Length file is clean.
             //
             // Instead we force the mtime to the largest possible value, so
-            // it is certainly after the index's own modification time and
+            // it is certainly After the index's own modification time and
             // on a future Read will cause mightBeRacilyClean to say "yes!".
             // It is also unlikely to match with the working tree file.
             //
@@ -454,7 +454,7 @@ namespace GitSharp.DirectoryCache
          * Set the ObjectId for the entry from the raw binary representation.
          *
          * @param bs
-         *            the raw byte buffer to Read from. At least 20 bytes after p
+         *            the raw byte buffer to Read from. At least 20 bytes After p
          *            must be available within this byte array.
          * @param p
          *            position to Read the first byte of data from.

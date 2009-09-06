@@ -36,13 +36,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Tests
 {
@@ -59,43 +55,46 @@ namespace GitSharp.Tests
         // Methods
         static IndexTreeWalkerTest()
         {
-            AbstractIndexTreeVisitor visitor = new AbstractIndexTreeVisitor();
-            visitor.VisitEntry = delegate(TreeEntry treeEntry, GitIndex.Entry indexEntry, FileInfo file)
-            {
-                if (treeEntry == null)
-                {
-                    IndexOnlyEntriesVisited.Add(indexEntry.Name);
-                }
-                else if (indexEntry == null)
-                {
-                    TreeOnlyEntriesVisited.Add(treeEntry.FullName);
-                }
-                else
-                {
-                    BothVisited.Add(indexEntry.Name);
-                }
-            };
-            TestIndexTreeVisitor = visitor;
-            AbstractIndexTreeVisitor visitor2 = new AbstractIndexTreeVisitor();
-            visitor2.VisitEntry = delegate(TreeEntry entry, GitIndex.Entry indexEntry, FileInfo f)
-            {
-                if ((entry == null) || (indexEntry == null))
-                {
-                    Assert.Fail();
-                }
-            };
-            visitor2.FinishVisitTreeByIndex = delegate(Tree tree, int i, string curDir)
-            {
-                if (tree.MemberCount == 0)
-                {
-                    Assert.Fail();
-                }
-                if (i == 0)
-                {
-                    Assert.Fail();
-                }
-            };
-            TestTreeOnlyOneLevelTreeVisitor = visitor2;
+            TestIndexTreeVisitor = new AbstractIndexTreeVisitor
+                          	{
+                          		VisitEntry = delegate(TreeEntry treeEntry, GitIndex.Entry indexEntry, FileInfo file)
+                          		             	{
+                          		             		if (treeEntry == null)
+                          		             		{
+                          		             			IndexOnlyEntriesVisited.Add(indexEntry.Name);
+                          		             		}
+                          		             		else if (indexEntry == null)
+                          		             		{
+                          		             			TreeOnlyEntriesVisited.Add(treeEntry.FullName);
+                          		             		}
+                          		             		else
+                          		             		{
+                          		             			BothVisited.Add(indexEntry.Name);
+                          		             		}
+                          		             	}
+                          	};
+
+			TestTreeOnlyOneLevelTreeVisitor = new AbstractIndexTreeVisitor
+                           	{
+                           		VisitEntry = delegate(TreeEntry entry, GitIndex.Entry indexEntry, FileInfo f)
+                           		             	{
+                           		             		if ((entry == null) || (indexEntry == null))
+                           		             		{
+                           		             			Assert.Fail();
+                           		             		}
+                           		             	},
+                           		FinishVisitTreeByIndex = delegate(Tree tree, int i, string curDir)
+                           		                         	{
+                           		                         		if (tree.MemberCount == 0)
+                           		                         		{
+                           		                         			Assert.Fail();
+                           		                         		}
+                           		                         		if (i == 0)
+                           		                         		{
+                           		                         			Assert.Fail();
+                           		                         		}
+                           		                         	}
+                           	};
         }
 
         public override void tearDown()
@@ -108,13 +107,13 @@ namespace GitSharp.Tests
         [Test]
         public void testBoth()
         {
-            GitIndex index = new GitIndex(base.db);
-            Tree mainTree = new Tree(base.db);
-            index.add(base.trash, base.writeTrashFile("a", "a"));
+            var index = new GitIndex(db);
+            var mainTree = new Tree(db);
+            index.add(trash, writeTrashFile("a", "a"));
             mainTree.AddFile("b/b");
-            index.add(base.trash, base.writeTrashFile("c", "c"));
+            index.add(trash, writeTrashFile("c", "c"));
             mainTree.AddFile("c");
-            new IndexTreeWalker(index, mainTree, base.trash, TestIndexTreeVisitor).Walk();
+            new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
             Assert.IsTrue(IndexOnlyEntriesVisited.Contains("a"));
             Assert.IsTrue(TreeOnlyEntriesVisited.Contains("b/b"));
             Assert.IsTrue(BothVisited.Contains("c"));
@@ -123,11 +122,11 @@ namespace GitSharp.Tests
         [Test]
         public void testIndexOnlyOneLevel()
         {
-            GitIndex index = new GitIndex(base.db);
-            Tree mainTree = new Tree(base.db);
-            index.add(base.trash, base.writeTrashFile("foo", "foo"));
-            index.add(base.trash, base.writeTrashFile("bar", "bar"));
-            new IndexTreeWalker(index, mainTree, base.trash, TestIndexTreeVisitor).Walk();
+            var index = new GitIndex(db);
+            var mainTree = new Tree(db);
+            index.add(trash, writeTrashFile("foo", "foo"));
+            index.add(trash, writeTrashFile("bar", "bar"));
+            new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
             Assert.IsTrue(IndexOnlyEntriesVisited[0].Equals("bar"));
             Assert.IsTrue(IndexOnlyEntriesVisited[1].Equals("foo"));
         }
@@ -135,11 +134,11 @@ namespace GitSharp.Tests
         [Test]
         public void testIndexOnlySubDirs()
         {
-            GitIndex index = new GitIndex(base.db);
-            Tree mainTree = new Tree(base.db);
-            index.add(base.trash, base.writeTrashFile("foo/bar/baz", "foobar"));
-            index.add(base.trash, base.writeTrashFile("asdf", "asdf"));
-            new IndexTreeWalker(index, mainTree, base.trash, TestIndexTreeVisitor).Walk();
+            var index = new GitIndex(db);
+            var mainTree = new Tree(db);
+            index.add(trash, writeTrashFile("foo/bar/baz", "foobar"));
+            index.add(trash, writeTrashFile("asdf", "asdf"));
+            new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
             Assert.AreEqual("asdf", IndexOnlyEntriesVisited[0]);
             Assert.AreEqual("foo/bar/baz", IndexOnlyEntriesVisited[1]);
         }
@@ -147,20 +146,20 @@ namespace GitSharp.Tests
         [Test]
         public void testLeavingTree()
         {
-            GitIndex index = new GitIndex(base.db);
-            index.add(base.trash, base.writeTrashFile("foo/bar", "foo/bar"));
-            index.add(base.trash, base.writeTrashFile("foobar", "foobar"));
-            new IndexTreeWalker(index, base.db.MapTree(index.writeTree()), base.trash, TestTreeOnlyOneLevelTreeVisitor).Walk();
+            var index = new GitIndex(db);
+            index.add(trash, writeTrashFile("foo/bar", "foo/bar"));
+            index.add(trash, writeTrashFile("foobar", "foobar"));
+            new IndexTreeWalker(index, db.MapTree(index.writeTree()), trash, TestTreeOnlyOneLevelTreeVisitor).Walk();
         }
 
         [Test]
         public void testTreeOnlyOneLevel()
         {
-            GitIndex index = new GitIndex(base.db);
-            Tree mainTree = new Tree(base.db);
+            var index = new GitIndex(db);
+            var mainTree = new Tree(db);
             mainTree.AddFile("foo");
             mainTree.AddFile("bar");
-            new IndexTreeWalker(index, mainTree, base.trash, TestTreeOnlyOneLevelTreeVisitor).Walk();
+            new IndexTreeWalker(index, mainTree, trash, TestTreeOnlyOneLevelTreeVisitor).Walk();
             Assert.IsTrue(TreeOnlyEntriesVisited[0].Equals("bar"));
             Assert.IsTrue(TreeOnlyEntriesVisited[1].Equals("foo"));
         }

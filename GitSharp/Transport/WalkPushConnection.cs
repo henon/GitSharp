@@ -230,7 +230,7 @@ namespace GitSharp.Transport
                 {
                     // Ignore the deletion failure. We probably are
                     // already failing and were just trying to pick
-                    // up after ourselves.
+                    // up After ourselves.
                 }
             }
         }

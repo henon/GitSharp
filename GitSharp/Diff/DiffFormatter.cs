@@ -31,7 +31,7 @@ namespace GitSharp.Diff
 		/// </summary>
 		///	<param name="lineCount">
 		/// Number of lines of context to see before the first
-		/// modification and after the last modification within a hunk of
+		/// modification and After the last modification within a hunk of
 		/// the modified file.
 		/// </param>
 		public virtual void setContext(int lineCount)

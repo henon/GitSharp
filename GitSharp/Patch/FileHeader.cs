@@ -476,10 +476,10 @@ namespace GitSharp.Patch
 	     * Parse a "diff --git" or "diff --cc" line.
 	     *
 	     * @param ptr
-	     *            first character after the "diff --git " or "diff --cc " part.
+	     *            first character After the "diff --git " or "diff --cc " part.
 	     * @param end
 	     *            one past the last position to parse.
-	     * @return first character after the LF at the end of the line; -1 on error.
+	     * @return first character After the LF at the end of the line; -1 on error.
 	     */
 	    public int parseGitFileName(int ptr, int end)
         {

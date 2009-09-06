@@ -177,7 +177,7 @@ namespace GitSharp.Merge
 					    + SourceCommits[bIdx].Name + "found:" + "\n  "
 					    + base1.Name + "\n  " + base2.Name);
 		    }
-		    return OpenTree(base1.getTree());
+		    return OpenTree(base1.Tree);
 	    }
 
 	    /**
@@ -193,21 +193,21 @@ namespace GitSharp.Merge
 	     */
 	    protected AbstractTreeIterator OpenTree(AnyObjectId treeId)
         {
-		    WindowCursor curs = new WindowCursor();
+		    var windowCursor = new WindowCursor();
 		    try 
             {
-			    return new CanonicalTreeParser(null, Db, treeId, curs);
+			    return new CanonicalTreeParser(null, Db, treeId, windowCursor);
 		    } 
             finally 
             {
-			    curs.Release();
+			    windowCursor.Release();
 		    }
 	    }
 
 	    /**
 	     * Execute the merge.
 	     * <p>
-	     * This method is called from {@link #merge(AnyObjectId[])} after the
+	     * This method is called from {@link #merge(AnyObjectId[])} After the
 	     * {@link #sourceObjects}, {@link #sourceCommits} and {@link #sourceTrees}
 	     * have been populated.
 	     *

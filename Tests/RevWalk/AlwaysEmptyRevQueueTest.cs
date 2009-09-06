@@ -45,7 +45,7 @@ namespace GitSharp.Tests.RevWalk
 	[TestFixture]
 	public class AlwaysEmptyRevQueueTest : RevWalkTestCase
 	{
-		private readonly AbstractRevQueue _q = AbstractRevQueue.EMPTY_QUEUE;
+		private readonly AbstractRevQueue _q = AbstractRevQueue.EmptyQueue;
 
 		[Test]
 		public void testEmpty()
@@ -53,7 +53,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.IsNull(_q.next());
 			Assert.IsTrue(_q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
 			Assert.IsFalse(_q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-			Assert.AreEqual(0, _q.outputType());
+			Assert.AreEqual(Generator.GeneratorOutputType.None, _q.OutputType);
 		}
 
 		[Test]

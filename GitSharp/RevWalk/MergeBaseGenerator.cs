@@ -37,10 +37,9 @@
  */
 
 using System;
+
 namespace GitSharp.RevWalk
 {
-
-
     /**
      * Computes the merge base(s) of the starting commits.
      * <p>
@@ -111,15 +110,15 @@ namespace GitSharp.RevWalk
                 // commit admitted to the initial queue only once. If
                 // we see this marks aren't correctly erased.
                 //
-                throw new InvalidOperationException("Stale RevFlags on " + c.ToString());
+                throw new InvalidOperationException("Stale RevFlags on " + c);
             }
             c.flags |= flag;
             _pending.add(c);
         }
 
-        public override int outputType()
+        public override GeneratorOutputType OutputType
         {
-            return 0;
+			get { return GeneratorOutputType.None; }
         }
 
         public override RevCommit next()
@@ -133,7 +132,7 @@ namespace GitSharp.RevWalk
                     return null;
                 }
 
-                foreach (RevCommit p in c.parents)
+                foreach (RevCommit p in c.Parents)
                 {
                     if ((p.flags & InPending) != 0)
                         continue;
@@ -180,7 +179,7 @@ namespace GitSharp.RevWalk
         {
             while (true)
             {
-                RevCommit[] pList = c.parents;
+                RevCommit[] pList = c.Parents;
                 if (pList == null) return;
                 int n = pList.Length;
                 if (n == 0) return;

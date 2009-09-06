@@ -360,7 +360,7 @@ namespace GitSharp.Patch
 				}
 
 				// Skip this line and move to the next. Its probably garbage
-				// after the last hunk of a file.
+				// After the last hunk of a file.
 				//
 				c = eol;
 			}

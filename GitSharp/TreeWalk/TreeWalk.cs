@@ -217,10 +217,10 @@ namespace GitSharp.TreeWalk
 		public bool Recursive { get; set; }
 
 		/**
-		 * Does this walker return a tree entry after it exits the subtree?
+		 * Does this walker return a tree entry After it exits the subtree?
 		 * <p>
 		 * If post order traversal is enabled then the walker will return a subtree
-		 * after it has returned the last entry within that subtree. This may cause
+		 * After it has returned the last entry within that subtree. This may cause
 		 * a subtree to be seen by the application twice if {@link #isRecursive()}
 		 * is false, as the application will see it once, call
 		 * {@link #enterSubtree()}, and then see it again as it leaves the subtree.
@@ -229,7 +229,7 @@ namespace GitSharp.TreeWalk
 		 * call {@link #enterSubtree()} then the tree is returned only once as none
 		 * of the children were processed.
 		 *
-		 * @return true if subtrees are returned after entries within the subtree.
+		 * @return true if subtrees are returned After entries within the subtree.
 		 */
 		public bool PostOrderTraversal { get; set; }
 
@@ -799,9 +799,9 @@ namespace GitSharp.TreeWalk
 		}
 
 		/**
-		 * Is the current entry a subtree returned after its children?
+		 * Is the current entry a subtree returned After its children?
 		 *
-		 * @return true if the current node is a tree that has been returned after
+		 * @return true if the current node is a tree that has been returned After
 		 *         its children were already processed.
 		 * @see #isPostOrderTraversal()
 		 */

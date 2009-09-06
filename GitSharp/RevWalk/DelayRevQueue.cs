@@ -53,40 +53,34 @@ namespace GitSharp.RevWalk
      */
     class DelayRevQueue : Generator
     {
-        public static int OVER_SCAN = PendingGenerator.OVER_SCAN;
-
-        private Generator pending;
-
-        private FIFORevQueue delay;
-
-        private int size;
+        private readonly Generator _pending;
+        private readonly FIFORevQueue _delay;
+        private int _size;
 
         public DelayRevQueue(Generator g)
         {
-            pending = g;
-            delay = new FIFORevQueue();
+            _pending = g;
+            _delay = new FIFORevQueue();
         }
 
-        public override int outputType()
+        public override GeneratorOutputType OutputType
         {
-            return pending.outputType();
+            get { return _pending.OutputType; }
         }
 
         public override RevCommit next()
         {
-            while (size < OVER_SCAN)
+            while (_size < PendingGenerator.OVER_SCAN)
             {
-                RevCommit c = pending.next();
-                if (c == null)
-                    break;
-                delay.add(c);
-                size++;
+                RevCommit c = _pending.next();
+                if (c == null) break;
+                _delay.add(c);
+                _size++;
             }
 
-            RevCommit cc = delay.next();
-            if (cc == null)
-                return null;
-            size--;
+            RevCommit cc = _delay.next();
+            if (cc == null) return null;
+            _size--;
             return cc;
         }
     }

@@ -45,43 +45,53 @@ namespace GitSharp.Tests.RevWalk
     [TestFixture]
     public class FIFORevQueueTest : RevQueueTestCase<FIFORevQueue>
     {
-	protected override FIFORevQueue create() {
-		return new FIFORevQueue();
-	}
-        [Test]
-	public override void testEmpty() {
-		base.testEmpty();
-		Assert.AreEqual(0, q.outputType());
-	}
-        [Test]
-	public void testCloneEmpty() {
-		q = new FIFORevQueue(AbstractRevQueue.EMPTY_QUEUE);
-		Assert.IsNull(q.next());
-	}
-        [Test]
-	public void testAddLargeBlocks() {
-		List<RevCommit> lst = new List<RevCommit>();
-		for (int i = 0; i < 3 * BlockRevQueue.Block.BLOCK_SIZE; i++) {
-			RevCommit c = commit();
-			lst.Add(c);
-			q.add(c);
-		}
-		for (int i = 0; i < lst.Count; i++)
-			Assert.AreSame(lst[i], q.next());
-	}
-        [Test]
-	public void testUnpopAtFront() {
-		RevCommit a = commit();
-		RevCommit b = commit();
-		RevCommit c = commit();
+        protected override FIFORevQueue create()
+        {
+            return new FIFORevQueue();
+        }
 
-		q.add(a);
-		q.unpop(b);
-		q.unpop(c);
+        [Test]
+        public override void testEmpty()
+        {
+            base.testEmpty();
+            Assert.AreEqual(0, q.outputType());
+        }
 
-		Assert.AreSame(c, q.next());
-		Assert.AreSame(b, q.next());
-		Assert.AreSame(a, q.next());
-	}
+        [Test]
+        public void testCloneEmpty()
+        {
+            q = new FIFORevQueue(AbstractRevQueue.EMPTY_QUEUE);
+            Assert.IsNull(q.next());
+        }
+
+        [Test]
+        public void testAddLargeBlocks()
+        {
+            var lst = new List<RevCommit>();
+            for (int i = 0; i < 3*BlockRevQueue.Block.BLOCK_SIZE; i++)
+            {
+                RevCommit c = commit();
+                lst.Add(c);
+                q.add(c);
+            }
+            for (int i = 0; i < lst.Count; i++)
+                Assert.AreSame(lst[i], q.next());
+        }
+
+        [Test]
+        public void testUnpopAtFront()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit();
+            RevCommit c = commit();
+
+            q.add(a);
+            q.unpop(b);
+            q.unpop(c);
+
+            Assert.AreSame(c, q.next());
+            Assert.AreSame(b, q.next());
+            Assert.AreSame(a, q.next());
+        }
     }
 }

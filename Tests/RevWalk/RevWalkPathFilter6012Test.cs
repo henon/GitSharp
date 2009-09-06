@@ -46,8 +46,6 @@ using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
 {
-
-
 	// Note: Much of this test case is broken as it depends upon
 	// the graph applying topological sorting *before* doing merge
 	// simplification.  It also depends upon a difference between
@@ -87,7 +85,7 @@ namespace GitSharp.Tests.RevWalk
 			i = commit(tree(file(pA, zS), file(pE, zY), file(pF, zF)), h);
 
 			byName = new Dictionary<RevCommit, string>();
-			foreach (FieldInfo z in typeof(RevWalkPathFilter6012Test).GetFields(BindingFlags.NonPublic | BindingFlags.GetField).Where(f => f.FieldType == typeof(RevCommit)))
+			foreach (FieldInfo z in typeof(RevWalkPathFilter6012Test).GetFields(BindingFlags.NonPublic | BindingFlags.GetField).Where(x => x.FieldType == typeof(RevCommit)))
 			{
 				byName.Add((RevCommit)z.GetValue(this), z.Name);
 			}

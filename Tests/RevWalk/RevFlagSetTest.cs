@@ -37,101 +37,109 @@
 
 using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.RevWalk
 {
+	[TestFixture]
+	public class RevFlagSetTest : RevWalkTestCase
+	{
+		[Test]
+		public void testEmpty()
+		{
+			var flagSet = new RevFlagSet();
+			Assert.AreEqual(0, flagSet.Mask);
+			Assert.AreEqual(0, flagSet.Count);
+			Assert.IsNotNull(flagSet.GetEnumerator());
+			Assert.IsFalse(flagSet.GetEnumerator().MoveNext());
+		}
 
-    using NUnit.Framework;
-    [TestFixture]
-    public class RevFlagSetTest : RevWalkTestCase
-    {
-#if false
-	public void testEmpty() {
-		final RevFlagSet set = new RevFlagSet();
-		assertEquals(0, set.mask);
-		assertEquals(0, set.size());
-		assertNotNull(set.iterator());
-		assertFalse(set.iterator().hasNext());
+		[Test]
+		public void testAddOne()
+		{
+			const string flagName = "flag";
+			RevFlag flag = rw.newFlag(flagName);
+			Assert.IsTrue(0 != flag.Mask);
+			Assert.AreSame(flagName, flag.Name);
+
+			var flagSet = new RevFlagSet();
+			Assert.IsTrue(flagSet.Add(flag));
+			Assert.IsFalse(flagSet.Add(flag));
+			Assert.AreEqual(flag.Mask, flagSet.Mask);
+			Assert.AreEqual(1, flagSet.Count);
+			var i = flagSet.GetEnumerator();
+			Assert.IsTrue(i.MoveNext());
+			Assert.AreSame(flag, i.Current);
+			Assert.IsFalse(i.MoveNext());
+		}
+
+		[Test]
+		public void testAddTwo()
+		{
+			RevFlag flag1 = rw.newFlag("flag_1");
+			RevFlag flag2 = rw.newFlag("flag_2");
+			Assert.IsTrue((flag1.Mask & flag2.Mask) == 0);
+
+			var flagSet = new RevFlagSet();
+			Assert.IsTrue(flagSet.Add(flag1));
+			Assert.IsTrue(flagSet.Add(flag2));
+			Assert.AreEqual(flag1.Mask | flag2.Mask, flagSet.Mask);
+			Assert.AreEqual(2, flagSet.Count);
+		}
+
+		[Test]
+		public void testContainsAll()
+		{
+			RevFlag flag1 = rw.newFlag("flag_1");
+			RevFlag flag2 = rw.newFlag("flag_2");
+			var set1 = new RevFlagSet();
+			Assert.IsTrue(set1.Add(flag1));
+			Assert.IsTrue(set1.Add(flag2));
+
+			Assert.IsTrue(set1.ContainsAll(set1));
+			Assert.IsTrue(set1.ContainsAll(new[] { flag1, flag2 }));
+
+			var set2 = new RevFlagSet { rw.newFlag("flag_3") };
+			Assert.IsFalse(set1.ContainsAll(set2));
+		}
+
+		[Test]
+		public void testEquals()
+		{
+			RevFlag flag1 = rw.newFlag("flag_1");
+			RevFlag flag2 = rw.newFlag("flag_2");
+			var flagSet = new RevFlagSet();
+			Assert.IsTrue(flagSet.Add(flag1));
+			Assert.IsTrue(flagSet.Add(flag2));
+
+			Assert.IsTrue(new RevFlagSet(flagSet).Equals(flagSet));
+			Assert.IsTrue(new RevFlagSet(new[] { flag1, flag2 }).Equals(flagSet));
+		}
+
+		[Test]
+		public virtual void testRemove()
+		{
+			RevFlag flag1 = rw.newFlag("flag_1");
+			RevFlag flag2 = rw.newFlag("flag_2");
+			var flagSet = new RevFlagSet();
+			Assert.IsTrue(flagSet.Add(flag1));
+			Assert.IsTrue(flagSet.Add(flag2));
+
+			Assert.IsTrue(flagSet.Remove(flag1));
+			Assert.IsFalse(flagSet.Remove(flag1));
+			Assert.AreEqual(flag2.Mask, flagSet.Mask);
+			Assert.IsFalse(flagSet.Contains(flag1));
+		}
+
+		[Test]
+		public virtual void testContains()
+		{
+			RevFlag flag1 = rw.newFlag("flag_1");
+			RevFlag flag2 = rw.newFlag("flag_2");
+			var flagSet = new RevFlagSet {flag1};
+			Assert.IsTrue(flagSet.Contains(flag1));
+			Assert.IsFalse(flagSet.Contains(flag2));
+			//Assert.IsFalse(flagSet.Contains("bob"));
+		}
 	}
-
-	public void testAddOne() {
-		final String flagName = "flag";
-		final RevFlag flag = rw.newFlag(flagName);
-		assertTrue(0 != flag.mask);
-		assertSame(flagName, flag.name);
-
-		final RevFlagSet set = new RevFlagSet();
-		assertTrue(set.add(flag));
-		assertFalse(set.add(flag));
-		assertEquals(flag.mask, set.mask);
-		assertEquals(1, set.size());
-		final Iterator<RevFlag> i = set.iterator();
-		assertTrue(i.hasNext());
-		assertSame(flag, i.next());
-		assertFalse(i.hasNext());
-	}
-
-	public void testAddTwo() {
-		final RevFlag flag1 = rw.newFlag("flag_1");
-		final RevFlag flag2 = rw.newFlag("flag_2");
-		assertTrue((flag1.mask & flag2.mask) == 0);
-
-		final RevFlagSet set = new RevFlagSet();
-		assertTrue(set.add(flag1));
-		assertTrue(set.add(flag2));
-		assertEquals(flag1.mask | flag2.mask, set.mask);
-		assertEquals(2, set.size());
-	}
-
-	public void testContainsAll() {
-		final RevFlag flag1 = rw.newFlag("flag_1");
-		final RevFlag flag2 = rw.newFlag("flag_2");
-		final RevFlagSet set1 = new RevFlagSet();
-		assertTrue(set1.add(flag1));
-		assertTrue(set1.add(flag2));
-
-		assertTrue(set1.containsAll(set1));
-		assertTrue(set1.containsAll(Arrays
-				.asList(new RevFlag[] { flag1, flag2 })));
-
-		final RevFlagSet set2 = new RevFlagSet();
-		set2.add(rw.newFlag("flag_3"));
-		assertFalse(set1.containsAll(set2));
-	}
-
-	public void testEquals() {
-		final RevFlag flag1 = rw.newFlag("flag_1");
-		final RevFlag flag2 = rw.newFlag("flag_2");
-		final RevFlagSet set = new RevFlagSet();
-		assertTrue(set.add(flag1));
-		assertTrue(set.add(flag2));
-
-		assertTrue(new RevFlagSet(set).equals(set));
-		assertTrue(new RevFlagSet(Arrays.asList(new RevFlag[] { flag1, flag2 }))
-				.equals(set));
-	}
-
-	public void testRemove() {
-		final RevFlag flag1 = rw.newFlag("flag_1");
-		final RevFlag flag2 = rw.newFlag("flag_2");
-		final RevFlagSet set = new RevFlagSet();
-		assertTrue(set.add(flag1));
-		assertTrue(set.add(flag2));
-
-		assertTrue(set.remove(flag1));
-		assertFalse(set.remove(flag1));
-		assertEquals(flag2.mask, set.mask);
-		assertFalse(set.contains(flag1));
-	}
-
-	public void testContains() {
-		final RevFlag flag1 = rw.newFlag("flag_1");
-		final RevFlag flag2 = rw.newFlag("flag_2");
-		final RevFlagSet set = new RevFlagSet();
-		set.add(flag1);
-		assertTrue(set.contains(flag1));
-		assertFalse(set.contains(flag2));
-		assertFalse(set.contains("bob"));
-	}
-#endif
-    }
 }

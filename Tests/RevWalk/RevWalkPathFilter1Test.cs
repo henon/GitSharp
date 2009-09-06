@@ -45,145 +45,152 @@ namespace GitSharp.Tests.RevWalk
     [TestFixture]
     public class RevWalkPathFilter1Test : RevWalkTestCase
     {
+        protected void filter(string path)
+        {
+            rw.setTreeFilter(AndTreeFilter.create(
+                                 PathFilterGroup.createFromStrings(new[] {path}), TreeFilter.ANY_DIFF));
+        }
 
-	protected void filter(string path)
-	{
-	    rw.setTreeFilter(AndTreeFilter.create(
-            PathFilterGroup.createFromStrings(new[]{path}),TreeFilter.ANY_DIFF));
-	}
+        [Test]
+        public void testEmpty_EmptyTree()
+        {
+            RevCommit a = commit();
+            filter("a");
+            markStart(a);
+            Assert.IsNull(rw.next());
+        }
 
-    [Test]
-	public void testEmpty_EmptyTree() {
-		RevCommit a = commit();
-		filter("a");
-		markStart(a);
-		Assert.IsNull(rw.next());
-	}
+        [Test]
+        public void testEmpty_NoMatch()
+        {
+            RevCommit a = commit(tree(file("0", blob("0"))));
+            filter("a");
+            markStart(a);
+            Assert.IsNull(rw.next());
+        }
 
-    [Test]
-	public void testEmpty_NoMatch() {
-		RevCommit a = commit(tree(file("0", blob("0"))));
-		filter("a");
-		markStart(a);
-		Assert.IsNull(rw.next());
-	}
+        [Test]
+        public void testSimple1()
+        {
+            RevCommit a = commit(tree(file("0", blob("0"))));
+            filter("0");
+            markStart(a);
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-    [Test]
-	public void testSimple1() {
-		RevCommit a = commit(tree(file("0", blob("0"))));
-		filter("0");
-		markStart(a);
-		assertCommit(a, rw.next());
-		Assert.IsNull(rw.next());
-	}
+        [Test]
+        public void testEdits_MatchNone()
+        {
+            RevCommit a = commit(tree(file("0", blob("a"))));
+            RevCommit b = commit(tree(file("0", blob("b"))), a);
+            RevCommit c = commit(tree(file("0", blob("c"))), b);
+            RevCommit d = commit(tree(file("0", blob("d"))), c);
+            filter("a");
+            markStart(d);
+            Assert.IsNull(rw.next());
+        }
 
-    [Test]
-	public void testEdits_MatchNone() {
-		RevCommit a = commit(tree(file("0", blob("a"))));
-		RevCommit b = commit(tree(file("0", blob("b"))), a);
-		RevCommit c = commit(tree(file("0", blob("c"))), b);
-		RevCommit d = commit(tree(file("0", blob("d"))), c);
-		filter("a");
-		markStart(d);
-		Assert.IsNull(rw.next());
-	}
+        [Test]
+        public void testEdits_MatchAll()
+        {
+            RevCommit a = commit(tree(file("0", blob("a"))));
+            RevCommit b = commit(tree(file("0", blob("b"))), a);
+            RevCommit c = commit(tree(file("0", blob("c"))), b);
+            RevCommit d = commit(tree(file("0", blob("d"))), c);
+            filter("0");
+            markStart(d);
+            assertCommit(d, rw.next());
+            assertCommit(c, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-    [Test]
-	public void testEdits_MatchAll() {
-		RevCommit a = commit(tree(file("0", blob("a"))));
-		RevCommit b = commit(tree(file("0", blob("b"))), a);
-		RevCommit c = commit(tree(file("0", blob("c"))), b);
-		RevCommit d = commit(tree(file("0", blob("d"))), c);
-		filter("0");
-		markStart(d);
-		assertCommit(d, rw.next());
-		assertCommit(c, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		Assert.IsNull(rw.next());
-	}
+        [Test]
+        public void testStringOfPearls_FilePath1()
+        {
+            RevCommit a = commit(tree(file("d/f", blob("a"))));
+            RevCommit b = commit(tree(file("d/f", blob("a"))), a);
+            RevCommit c = commit(tree(file("d/f", blob("b"))), b);
+            filter("d/f");
+            markStart(c);
 
-    [Test]
-	public void testStringOfPearls_FilePath1() {
-		RevCommit a = commit(tree(file("d/f", blob("a"))));
-		RevCommit b = commit(tree(file("d/f", blob("a"))), a);
-		RevCommit c = commit(tree(file("d/f", blob("b"))), b);
-		filter("d/f");
-		markStart(c);
+            assertCommit(c, rw.next());
+            Assert.AreEqual(1, c.getParentCount());
+            assertCommit(a, c.getParent(0)); // b was skipped
 
-		assertCommit(c, rw.next());
-		Assert.AreEqual(1, c.getParentCount());
-		assertCommit(a, c.getParent(0)); // b was skipped
+            assertCommit(a, rw.next());
+            Assert.AreEqual(0, a.getParentCount());
+            Assert.IsNull(rw.next());
+        }
 
-		assertCommit(a, rw.next());
-		Assert.AreEqual(0, a.getParentCount());
-		Assert.IsNull(rw.next());
-	}
+        [Test]
+        public void testStringOfPearls_FilePath2()
+        {
+            RevCommit a = commit(tree(file("d/f", blob("a"))));
+            RevCommit b = commit(tree(file("d/f", blob("a"))), a);
+            RevCommit c = commit(tree(file("d/f", blob("b"))), b);
+            RevCommit d = commit(tree(file("d/f", blob("b"))), c);
+            filter("d/f");
+            markStart(d);
 
-    [Test]
-	public void testStringOfPearls_FilePath2() {
-		RevCommit a = commit(tree(file("d/f", blob("a"))));
-		RevCommit b = commit(tree(file("d/f", blob("a"))), a);
-		RevCommit c = commit(tree(file("d/f", blob("b"))), b);
-		RevCommit d = commit(tree(file("d/f", blob("b"))), c);
-		filter("d/f");
-		markStart(d);
+            // d was skipped
+            assertCommit(c, rw.next());
+            Assert.AreEqual(1, c.getParentCount());
+            assertCommit(a, c.getParent(0)); // b was skipped
 
-		// d was skipped
-		assertCommit(c, rw.next());
-		Assert.AreEqual(1, c.getParentCount());
-		assertCommit(a, c.getParent(0)); // b was skipped
+            assertCommit(a, rw.next());
+            Assert.AreEqual(0, a.getParentCount());
+            Assert.IsNull(rw.next());
+        }
 
-		assertCommit(a, rw.next());
-		Assert.AreEqual(0, a.getParentCount());
-		Assert.IsNull(rw.next());
-	}
+        [Test]
+        public void testStringOfPearls_DirPath2()
+        {
+            RevCommit a = commit(tree(file("d/f", blob("a"))));
+            RevCommit b = commit(tree(file("d/f", blob("a"))), a);
+            RevCommit c = commit(tree(file("d/f", blob("b"))), b);
+            RevCommit d = commit(tree(file("d/f", blob("b"))), c);
+            filter("d");
+            markStart(d);
 
-    [Test]
-	public void testStringOfPearls_DirPath2() {
-		RevCommit a = commit(tree(file("d/f", blob("a"))));
-		RevCommit b = commit(tree(file("d/f", blob("a"))), a);
-		RevCommit c = commit(tree(file("d/f", blob("b"))), b);
-		RevCommit d = commit(tree(file("d/f", blob("b"))), c);
-		filter("d");
-		markStart(d);
+            // d was skipped
+            assertCommit(c, rw.next());
+            Assert.AreEqual(1, c.getParentCount());
+            assertCommit(a, c.getParent(0)); // b was skipped
 
-		// d was skipped
-		assertCommit(c, rw.next());
-		Assert.AreEqual(1, c.getParentCount());
-		assertCommit(a, c.getParent(0)); // b was skipped
+            assertCommit(a, rw.next());
+            Assert.AreEqual(0, a.getParentCount());
+            Assert.IsNull(rw.next());
+        }
 
-		assertCommit(a, rw.next());
-		Assert.AreEqual(0, a.getParentCount());
-		Assert.IsNull(rw.next());
-	}
+        [Test]
+        public void testStringOfPearls_FilePath3()
+        {
+            RevCommit a = commit(tree(file("d/f", blob("a"))));
+            RevCommit b = commit(tree(file("d/f", blob("a"))), a);
+            RevCommit c = commit(tree(file("d/f", blob("b"))), b);
+            RevCommit d = commit(tree(file("d/f", blob("b"))), c);
+            RevCommit e = commit(tree(file("d/f", blob("b"))), d);
+            RevCommit f = commit(tree(file("d/f", blob("b"))), e);
+            RevCommit g = commit(tree(file("d/f", blob("b"))), f);
+            RevCommit h = commit(tree(file("d/f", blob("b"))), g);
+            RevCommit i = commit(tree(file("d/f", blob("c"))), h);
+            filter("d/f");
+            markStart(i);
 
-    [Test]
-	public void testStringOfPearls_FilePath3() {
-		RevCommit a = commit(tree(file("d/f", blob("a"))));
-		RevCommit b = commit(tree(file("d/f", blob("a"))), a);
-		RevCommit c = commit(tree(file("d/f", blob("b"))), b);
-		RevCommit d = commit(tree(file("d/f", blob("b"))), c);
-		RevCommit e = commit(tree(file("d/f", blob("b"))), d);
-		RevCommit f = commit(tree(file("d/f", blob("b"))), e);
-		RevCommit g = commit(tree(file("d/f", blob("b"))), f);
-		RevCommit h = commit(tree(file("d/f", blob("b"))), g);
-		RevCommit i = commit(tree(file("d/f", blob("c"))), h);
-		filter("d/f");
-		markStart(i);
+            assertCommit(i, rw.next());
+            Assert.AreEqual(1, i.getParentCount());
+            assertCommit(c, i.getParent(0)); // h..d was skipped
 
-		assertCommit(i, rw.next());
-		Assert.AreEqual(1, i.getParentCount());
-		assertCommit(c, i.getParent(0)); // h..d was skipped
+            assertCommit(c, rw.next());
+            Assert.AreEqual(1, c.getParentCount());
+            assertCommit(a, c.getParent(0)); // b was skipped
 
-		assertCommit(c, rw.next());
-		Assert.AreEqual(1, c.getParentCount());
-		assertCommit(a, c.getParent(0)); // b was skipped
-
-		assertCommit(a, rw.next());
-		Assert.AreEqual(0, a.getParentCount());
-		Assert.IsNull(rw.next());
-	}
-
+            assertCommit(a, rw.next());
+            Assert.AreEqual(0, a.getParentCount());
+            Assert.IsNull(rw.next());
+        }
     }
 }

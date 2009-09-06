@@ -37,57 +37,56 @@
 
 using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.RevWalk
 {
-    using NUnit.Framework;
     [TestFixture]
     public abstract class RevQueueTestCase<T> : RevWalkTestCase
         where T : AbstractRevQueue
     {
-#if false
 	protected T q;
-
-	public void setUp() throws Exception {
-		super.setUp();
+        [SetUp]
+	public override void setUp() {
+		base.setUp();
 		q = create();
 	}
 
 	protected abstract T create();
-
-	public void testEmpty() throws Exception {
-		assertNull(q.next());
-		assertTrue(q.everbodyHasFlag(RevWalk.UNINTERESTING));
-		assertFalse(q.anybodyHasFlag(RevWalk.UNINTERESTING));
+        [Test]
+	public virtual void testEmpty() {
+		Assert.IsNull(q.next());
+        Assert.IsTrue(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+        Assert.IsFalse(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
 	}
-
-	public void testClear() throws Exception {
-		final RevCommit a = parse(commit());
-		final RevCommit b = parse(commit(a));
+        [Test]
+	public void testClear() {
+		RevCommit a = parse(commit());
+		RevCommit b = parse(commit(a));
 
 		q.add(a);
 		q.add(b);
 		q.clear();
-		assertNull(q.next());
+		Assert.IsNull(q.next());
 	}
-
-	public void testHasFlags() throws Exception {
-		final RevCommit a = parse(commit());
-		final RevCommit b = parse(commit(a));
+        [Test]
+	public void testHasFlags() {
+		RevCommit a = parse(commit());
+		RevCommit b = parse(commit(a));
 
 		q.add(a);
 		q.add(b);
 
-		assertFalse(q.everbodyHasFlag(RevWalk.UNINTERESTING));
-		assertFalse(q.anybodyHasFlag(RevWalk.UNINTERESTING));
+        Assert.IsFalse(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+        Assert.IsFalse(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
 
-		a.flags |= RevWalk.UNINTERESTING;
-		assertFalse(q.everbodyHasFlag(RevWalk.UNINTERESTING));
-		assertTrue(q.anybodyHasFlag(RevWalk.UNINTERESTING));
+        a.flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
+        Assert.IsFalse(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+        Assert.IsTrue(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
 
-		b.flags |= RevWalk.UNINTERESTING;
-		assertTrue(q.everbodyHasFlag(RevWalk.UNINTERESTING));
-		assertTrue(q.anybodyHasFlag(RevWalk.UNINTERESTING));
+        b.flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
+        Assert.IsTrue(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+        Assert.IsTrue(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
 	}
-#endif
     }
 }

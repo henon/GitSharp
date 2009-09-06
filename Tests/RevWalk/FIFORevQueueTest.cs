@@ -35,53 +35,53 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
 using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.RevWalk
 {
-    using NUnit.Framework;
     [TestFixture]
     public class FIFORevQueueTest : RevQueueTestCase<FIFORevQueue>
     {
-#if false
-	protected FIFORevQueue create() {
+	protected override FIFORevQueue create() {
 		return new FIFORevQueue();
 	}
-
-	public void testEmpty() throws Exception {
-		super.testEmpty();
-		assertEquals(0, q.outputType());
+        [Test]
+	public override void testEmpty() {
+		base.testEmpty();
+		Assert.AreEqual(0, q.outputType());
 	}
-
-	public void testCloneEmpty() throws Exception {
+        [Test]
+	public void testCloneEmpty() {
 		q = new FIFORevQueue(AbstractRevQueue.EMPTY_QUEUE);
-		assertNull(q.next());
+		Assert.IsNull(q.next());
 	}
-
-	public void testAddLargeBlocks() throws Exception {
-		final ArrayList<RevCommit> lst = new ArrayList<RevCommit>();
+        [Test]
+	public void testAddLargeBlocks() {
+		List<RevCommit> lst = new List<RevCommit>();
 		for (int i = 0; i < 3 * BlockRevQueue.Block.BLOCK_SIZE; i++) {
-			final RevCommit c = commit();
-			lst.add(c);
+			RevCommit c = commit();
+			lst.Add(c);
 			q.add(c);
 		}
-		for (int i = 0; i < lst.size(); i++)
-			assertSame(lst.get(i), q.next());
+		for (int i = 0; i < lst.Count; i++)
+			Assert.AreSame(lst[i], q.next());
 	}
-
-	public void testUnpopAtFront() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit();
-		final RevCommit c = commit();
+        [Test]
+	public void testUnpopAtFront() {
+		RevCommit a = commit();
+		RevCommit b = commit();
+		RevCommit c = commit();
 
 		q.add(a);
 		q.unpop(b);
 		q.unpop(c);
 
-		assertSame(c, q.next());
-		assertSame(b, q.next());
-		assertSame(a, q.next());
+		Assert.AreSame(c, q.next());
+		Assert.AreSame(b, q.next());
+		Assert.AreSame(a, q.next());
 	}
-#endif
     }
 }

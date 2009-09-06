@@ -36,218 +36,271 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using GitSharp.TreeWalk;
 using GitSharp.Exceptions;
 using GitSharp.Util;
 
 namespace GitSharp.DirectoryCache
 {
+	/// <summary>
+	/// Iterate a <see cref="DirCache"/> as part of a <see cref="TreeWalk"/>.
+	/// <p>
+	/// This is an iterator to adapt a loaded <see cref="DirCache"/> instance (such as
+	/// read from an existing <code>.git/index</code> file) to the tree structure
+	/// used by a <see cref="TreeWalk"/>, making it possible for applications to walk
+	/// over any combination of tree objects already in the object database, index
+	/// files, or working directories.
+	/// </summary>
+	/// <seealso cref="TreeWalk"/>
+	public class DirCacheIterator : AbstractTreeIterator
+	{
+		private int _pointer;
+		private int _nextSubtreePos;
+		private DirCacheEntry _currentEntry;
+		private DirCacheTree _currentSubtree;
 
-    /**
-     * Iterate a {@link DirCache} as part of a <code>TreeWalk</code>.
-     * <p>
-     * This is an iterator to adapt a loaded <code>DirCache</code> instance (such as
-     * read from an existing <code>.git/index</code> file) to the tree structure
-     * used by a <code>TreeWalk</code>, making it possible for applications to walk
-     * over any combination of tree objects already in the object database, index
-     * files, or working directories.
-     *
-     * @see org.spearce.jgit.treewalk.TreeWalk
-     */
-    public class DirCacheIterator : AbstractTreeIterator
-    {
-        /** The cache this iterator was created to walk. */
-        public DirCache cache;
+		/// <summary>
+		/// Create a new iterator for an already loaded DirCache instance.
+		/// <p>
+		/// The iterator implementation may copy part of the cache's data during
+		/// construction, so the cache must be read in prior to creating the
+		/// iterator.
+		/// </summary>
+		/// <param name="dc">
+		/// The cache to walk. It must be already loaded into memory.
+		/// </param>
+		public DirCacheIterator(DirCache dc)
+		{
+			Cache = dc;
+			Tree = dc.getCacheTree(true);
+			TreeStart = 0;
+			TreeEnd = Tree.getEntrySpan();
+			SubtreeId = new byte[Constants.OBJECT_ID_LENGTH];
 
-        /** The tree this iterator is walking. */
-        private DirCacheTree tree;
+			if (!eof())
+			{
+				ParseEntry();
+			}
+		}
 
-        /** First position in this tree. */
-        private int treeStart;
+		public DirCacheIterator(DirCacheIterator parentIterator, DirCacheTree cacheTree)
+			: base(parentIterator, parentIterator.Path, parentIterator.PathLen + 1)
+		{
+			Cache = parentIterator.Cache;
+			Tree = cacheTree;
+			TreeStart = parentIterator._pointer;
+			TreeEnd = TreeStart + Tree.getEntrySpan();
+			SubtreeId = parentIterator.SubtreeId;
+			_pointer = parentIterator._pointer;
+			ParseEntry();
+		}
 
-        /** Last position in this tree. */
-        private int treeEnd;
+		public override AbstractTreeIterator createSubtreeIterator(Repository repo)
+		{
+			if (_currentSubtree == null)
+			{
+				throw new IncorrectObjectTypeException(getEntryObjectId(), Constants.TYPE_TREE);
+			}
 
-        /** Special buffer to hold the ObjectId of {@link #currentSubtree}. */
-        private byte[] subtreeId;
+			return new DirCacheIterator(this, _currentSubtree);
+		}
 
-        /** Index of entry within {@link #cache}. */
-        public int ptr;
+		public override EmptyTreeIterator createEmptyTreeIterator()
+		{
+			var newPath = new byte[Math.Max(PathLen + 1, DEFAULT_PATH_SIZE)];
+			Array.Copy(Path, 0, newPath, 0, PathLen);
+			newPath[PathLen] = (byte)'/';
+			return new EmptyTreeIterator(this, newPath, PathLen + 1);
+		}
 
-        /** Next subtree to consider within {@link #tree}. */
-        private int nextSubtreePos;
+		public override byte[] idBuffer()
+		{
+			if (_currentSubtree != null)
+			{
+				return SubtreeId;
+			}
 
-        /** The current file entry from {@link #cache}. */
-        public DirCacheEntry currentEntry;
+			if (_currentEntry != null)
+			{
+				return _currentEntry.idBuffer();
+			}
 
-        /** The subtree containing {@link #currentEntry} if this is first entry. */
-        public DirCacheTree currentSubtree;
+			return ZeroId;
+		}
 
-        /**
-         * Create a new iterator for an already loaded DirCache instance.
-         * <p>
-         * The iterator implementation may copy part of the cache's data during
-         * construction, so the cache must be read in prior to creating the
-         * iterator.
-         *
-         * @param dc
-         *            the cache to walk. It must be already loaded into memory.
-         */
-        public DirCacheIterator(DirCache dc)
-        {
-            cache = dc;
-            tree = dc.getCacheTree(true);
-            treeStart = 0;
-            treeEnd = tree.getEntrySpan();
-            subtreeId = new byte[Constants.OBJECT_ID_LENGTH];
-            if (!eof())
-                parseEntry();
-        }
+		public override int idOffset()
+		{
+			if (_currentSubtree != null)
+			{
+				return 0;
+			}
 
-        public DirCacheIterator(DirCacheIterator p, DirCacheTree dct)
-            : base(p, p.path, p.pathLen + 1)
-        {
+			if (_currentEntry != null)
+			{
+				return _currentEntry.idOffset();
+			}
 
-            cache = p.cache;
-            tree = dct;
-            treeStart = p.ptr;
-            treeEnd = treeStart + tree.getEntrySpan();
-            subtreeId = p.subtreeId;
-            ptr = p.ptr;
-            parseEntry();
-        }
+			return 0;
+		}
 
+		public override bool first()
+		{
+			return _pointer == TreeStart;
+		}
 
-        public override AbstractTreeIterator createSubtreeIterator(Repository repo)
-        {
-            if (currentSubtree == null)
-                throw new IncorrectObjectTypeException(getEntryObjectId(), Constants.TYPE_TREE);
-            return new DirCacheIterator(this, currentSubtree);
-        }
+		public override bool eof()
+		{
+			return _pointer == TreeEnd;
+		}
 
+		public override void next(int delta)
+		{
+			while (--delta >= 0)
+			{
+				if (_currentSubtree != null)
+				{
+					_pointer += _currentSubtree.getEntrySpan();
+				}
+				else
+				{
+					_pointer++;
+				}
 
-        public override EmptyTreeIterator createEmptyTreeIterator()
-        {
-            byte[] n = new byte[Math.Max(pathLen + 1, DEFAULT_PATH_SIZE)];
-            Array.Copy(path, 0, n, 0, pathLen);
-            n[pathLen] = (byte)'/';
-            return new EmptyTreeIterator(this, n, pathLen + 1);
-        }
+				if (eof()) break;
 
+				ParseEntry();
+			}
+		}
 
-        public override byte[] idBuffer()
-        {
-            if (currentSubtree != null)
-                return subtreeId;
-            if (currentEntry != null)
-                return currentEntry.idBuffer();
-            return zeroid;
-        }
+		public override void back(int delta)
+		{
+			while (--delta >= 0)
+			{
+				if (_currentSubtree != null)
+				{
+					_nextSubtreePos--;
+				}
 
+				_pointer--;
+				ParseEntry();
+				
+				if (_currentSubtree != null)
+				{
+					_pointer -= _currentSubtree.getEntrySpan() - 1;
+				}
+			}
+		}
 
-        public override int idOffset()
-        {
-            if (currentSubtree != null)
-                return 0;
-            if (currentEntry != null)
-                return currentEntry.idOffset();
-            return 0;
-        }
+		private void ParseEntry()
+		{
+			_currentEntry = Cache.getEntry(_pointer);
+			byte[] cep = _currentEntry.path;
 
+			if (_nextSubtreePos != Tree.getChildCount())
+			{
+				DirCacheTree s = Tree.getChild(_nextSubtreePos);
+				if (s.contains(cep, PathOffset, cep.Length))
+				{
+					// The current position is the first file of this subtree.
+					// Use the subtree instead as the current position.
+					//
+					_currentSubtree = s;
+					_nextSubtreePos++;
 
-        public override bool first()
-        {
-            return ptr == treeStart;
-        }
+					if (s.isValid())
+					{
+						s.getObjectId().copyRawTo(SubtreeId, 0);
+					}
+					else
+					{
+						SubtreeId.Fill((byte)0);
+					}
+					
+					Mode = FileMode.Tree.Bits;
 
+					Path = cep;
+					PathLen = PathOffset + s.nameLength();
+					return;
+				}
+			}
 
-        public override bool eof()
-        {
-            return ptr == treeEnd;
-        }
+			// The current position is a file/symlink/gitlink so we
+			// do not have a subtree located here.
+			//
+			Mode = _currentEntry.getRawMode();
+			Path = cep;
+			PathLen = cep.Length;
+			_currentSubtree = null;
+		}
 
+		/// <summary>
+		/// The cache this iterator was created to walk.
+		/// </summary>
+		public DirCache Cache { get; private set; }
 
-        public override void next(int delta)
-        {
-            while (--delta >= 0)
-            {
-                if (currentSubtree != null)
-                    ptr += currentSubtree.getEntrySpan();
-                else
-                    ptr++;
-                if (eof())
-                    break;
-                parseEntry();
-            }
-        }
+		/// <summary>
+		/// The tree this iterator is walking.
+		/// </summary>
+		public DirCacheTree Tree { get; private set; }
 
+		/// <summary>
+		/// First position in this tree.
+		/// </summary>
+		public int TreeStart { get; private set; }
 
-        public override void back(int delta)
-        {
-            while (--delta >= 0)
-            {
-                if (currentSubtree != null)
-                    nextSubtreePos--;
-                ptr--;
-                parseEntry();
-                if (currentSubtree != null)
-                    ptr -= currentSubtree.getEntrySpan() - 1;
-            }
-        }
+		/// <summary>
+		/// Last position in this tree.
+		/// </summary>
+		public int TreeEnd { get; private set; }
 
-        private void parseEntry()
-        {
-            currentEntry = cache.getEntry(ptr);
-            byte[] cep = currentEntry.path;
+		/// <summary>
+		/// Special buffer to hold the <see cref="ObjectId"/> of <see cref="CurrentSubtree"/>.
+		/// </summary>
+		public byte[] SubtreeId { get; private set; }
 
-            if (nextSubtreePos != tree.getChildCount())
-            {
-                DirCacheTree s = tree.getChild(nextSubtreePos);
-                if (s.contains(cep, pathOffset, cep.Length))
-                {
-                    // The current position is the first file of this subtree.
-                    // Use the subtree instead as the current position.
-                    //
-                    currentSubtree = s;
-                    nextSubtreePos++;
+		/// <summary>
+		/// Index of entry within <see cref="Cache"/>.
+		/// </summary>
+		public int Pointer
+		{
+			get { return _pointer; }
+		}
 
-                    if (s.isValid())
-                        s.getObjectId().copyRawTo(subtreeId, 0);
-                    else
-                        subtreeId.Fill( (byte)0);
-                    mode = FileMode.Tree.Bits;
-                    path = cep;
-                    pathLen = pathOffset + s.nameLength();
-                    return;
-                }
-            }
+		/// <summary>
+		/// Next subtree to consider within <see cref="Tree"/>.
+		/// </summary>
+		public int NextSubtreePos
+		{
+			get { return _nextSubtreePos; }
+		}
 
-            // The current position is a file/symlink/gitlink so we
-            // do not have a subtree located here.
-            //
-            mode = currentEntry.getRawMode();
-            path = cep;
-            pathLen = cep.Length;
-            currentSubtree = null;
-        }
+		/// <summary>
+		/// The current file entry from <see cref="Cache"/>.
+		/// </summary>
+		public DirCacheEntry CurrentEntry
+		{
+			get { return _currentEntry; }
+		}
 
-        /**
-         * Get the DirCacheEntry for the current file.
-         *
-         * @return the current cache entry, if this iterator is positioned on a
-         *         non-tree.
-         */
-        public DirCacheEntry getDirCacheEntry()
-        {
-            return currentSubtree == null ? currentEntry : null;
-        }
-    }
+		/// <summary>
+		/// The subtree containing <see cref="CurrentEntry"/> if this is first entry.
+		/// </summary>
+		public DirCacheTree CurrentSubtree
+		{
+			get { return _currentSubtree; }
+		}
 
+		/// <summary>
+		/// Get the DirCacheEntry for the current file.
+		/// </summary>
+		/// <returns>
+		/// The current cache entry, if this iterator is positioned on a
+		/// non-tree.
+		/// </returns>
+		public DirCacheEntry getDirCacheEntry()
+		{
+			return _currentSubtree == null ? _currentEntry : null;
+		}
+	}
 }

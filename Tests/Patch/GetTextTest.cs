@@ -116,13 +116,8 @@ namespace GitSharp.Tests.Patch
         private static string ReadTestPatchFile(Encoding cs)
         {
             string patchFile = (new StackFrame(1, true)).GetMethod().Name + ".patch";
-
             Stream inStream = new FileStream(PATCHS_DIR + patchFile, System.IO.FileMode.Open);
-            if (inStream == null)
-            {
-                Assert.Fail("No " + patchFile + " test vector");
-                return null; // Never happens
-            }
+
             try
             {
                 var r = new StreamReader(inStream, cs);

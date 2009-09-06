@@ -45,7 +45,6 @@ namespace GitSharp.Tests.TreeWalk
 	[TestFixture]
 	public class FileTreeIteratorTest : RepositoryTestCase
 	{
-		private readonly string[] paths = { "a,", "a,b", "a/b", "a0b" };
 		private static readonly string[] Paths = { "a,", "a,b", "a/b", "a0b" };
 		private long[] _mtime;
 
@@ -70,9 +69,9 @@ namespace GitSharp.Tests.TreeWalk
 		}
 
 		[Test]
-		public virtual void testEmptyIfRootIsFile()
+		public void testEmptyIfRootIsFile()
 		{
-			string path = Path.Combine(trash.FullName, paths[0]);
+			string path = Path.Combine(trash.FullName, Paths[0]);
 			var di = new DirectoryInfo(path);
 			var fi = new FileInfo(path);
 			Assert.IsTrue(fi.Exists);
@@ -83,7 +82,7 @@ namespace GitSharp.Tests.TreeWalk
 		}
 
 		[Test]
-		public virtual void testEmptyIfRootDoesNotExist()
+		public void testEmptyIfRootDoesNotExist()
 		{
 			string path = Path.Combine(trash.FullName, "not-existing-file");
 			var di = new DirectoryInfo(path);
@@ -95,7 +94,7 @@ namespace GitSharp.Tests.TreeWalk
 		}
 
 		[Test]
-		public virtual void testEmptyIfRootIsEmpty()
+		public void testEmptyIfRootIsEmpty()
 		{
 			string path = Path.Combine(trash.FullName, "not-existing-file");
 			var di = new DirectoryInfo(path);
@@ -111,13 +110,13 @@ namespace GitSharp.Tests.TreeWalk
 		}
 
 		[Test]
-		public virtual void testSimpleIterate()
+		public void testSimpleIterate()
 		{
 			var top = new FileTreeIterator(trash);
 
 			Assert.IsTrue(top.first());
 			Assert.IsFalse(top.eof());
-			Assert.AreEqual(FileMode.RegularFile.Bits, top.mode);
+			Assert.IsTrue(FileMode.RegularFile == top.EntryFileMode);
 			Assert.AreEqual(Paths[0], NameOf(top));
 			Assert.AreEqual(Paths[0].Length, top.getEntryLength());
 			Assert.AreEqual(_mtime[0], top.getEntryLastModified());
@@ -125,7 +124,7 @@ namespace GitSharp.Tests.TreeWalk
 			top.next(1);
 			Assert.IsFalse(top.first());
 			Assert.IsFalse(top.eof());
-			Assert.AreEqual(FileMode.RegularFile.Bits, top.mode);
+			Assert.IsTrue(FileMode.RegularFile == top.EntryFileMode);
 			Assert.AreEqual(Paths[1], NameOf(top));
 			Assert.AreEqual(Paths[1].Length, top.getEntryLength());
 			Assert.AreEqual(_mtime[1], top.getEntryLastModified());
@@ -133,7 +132,7 @@ namespace GitSharp.Tests.TreeWalk
 			top.next(1);
 			Assert.IsFalse(top.first());
 			Assert.IsFalse(top.eof());
-			Assert.AreEqual(FileMode.Tree.Bits, top.mode);
+			Assert.IsTrue(FileMode.Tree == top.EntryFileMode);
 
 			AbstractTreeIterator sub = top.createSubtreeIterator(db);
 			Assert.IsTrue(sub is FileTreeIterator);
@@ -150,7 +149,7 @@ namespace GitSharp.Tests.TreeWalk
 			top.next(1);
 			Assert.IsFalse(top.first());
 			Assert.IsFalse(top.eof());
-			Assert.AreEqual(FileMode.RegularFile.Bits, top.mode);
+			Assert.IsTrue(FileMode.RegularFile == top.EntryFileMode);
 			Assert.AreEqual(Paths[3], NameOf(top));
 			Assert.AreEqual(Paths[3].Length, top.getEntryLength());
 			Assert.AreEqual(_mtime[3], top.getEntryLastModified());
@@ -160,7 +159,7 @@ namespace GitSharp.Tests.TreeWalk
 		}
 
 		[Test]
-		public virtual void testComputeFileObjectId()
+		public void testComputeFileObjectId()
 		{
 			var top = new FileTreeIterator(trash);
 
@@ -181,7 +180,7 @@ namespace GitSharp.Tests.TreeWalk
 
 		private static string NameOf(AbstractTreeIterator i)
 		{
-			return RawParseUtils.decode(Constants.CHARSET, i.path, 0, i.pathLen);
+			return RawParseUtils.decode(Constants.CHARSET, i.Path, 0, i.PathLen);
 		}
 	}
 }

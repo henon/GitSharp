@@ -43,119 +43,126 @@ using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
-    public class WindowCacheGetTest : RepositoryTestCase
-    {
-        private IList<TestObject> toLoad;
+	[TestFixture]
+	public class WindowCacheGetTest : RepositoryTestCase
+	{
+		private IList<TestObject> _toLoad;
 
-        public override void setUp()
-        {
-            base.setUp();
+		public override void setUp()
+		{
+			base.setUp();
 
-            toLoad = new List<TestObject>();
-            var br = new StreamReader("Resources/all_packed_objects.txt", Constants.CHARSET);
-            try
-            {
-                string line;
-                while ((line = br.ReadLine()) != null)
-                {
-                    string[] parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    var o = new TestObject
-                                {
-                                    Id = ObjectId.FromString(parts[0]),
-                                    Type = Convert.ToInt32(parts[1]),
-                                    RawSize = Convert.ToInt32(parts[2]),
-                                    Size = Convert.ToInt64(parts[3]),
-                                    Offset = Convert.ToInt64(parts[4])
-                                };
+			_toLoad = new List<TestObject>();
+			var br = new StreamReader("Resources/all_packed_objects.txt", Constants.CHARSET);
+			try
+			{
+				string line;
+				while ((line = br.ReadLine()) != null)
+				{
+					string[] parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+					var testObject = new TestObject
+								{
+									Id = ObjectId.FromString(parts[0]),
+									Type = parts[1],
+									RawSize = Convert.ToInt32(parts[2]),
+									Size = Convert.ToInt64(parts[3]),
+									Offset = Convert.ToInt64(parts[4])
+								};
 
-                    toLoad.Add(o);
-                }
-            }
-            finally
-            {
-                br.Close();
-            }
+					_toLoad.Add(testObject);
+				}
+			}
+			finally
+			{
+				br.Close();
+			}
 
-            Assert.AreEqual(96, toLoad.Count);
-        }
+			Assert.AreEqual(96, _toLoad.Count);
+		}
 
-        [Test]
-        public void testCache_Defaults()
-        {
-            var cfg = new WindowCacheConfig();
-            WindowCache.reconfigure(cfg);
-            DoCacheTests();
-            CheckLimits(cfg);
+		[Test]
+		public void testCache_Defaults()
+		{
+			var cfg = new WindowCacheConfig();
+			WindowCache.reconfigure(cfg);
+			DoCacheTests();
+			CheckLimits(cfg);
 
-            WindowCache cache = WindowCache.Instance;
-            Assert.AreEqual(6, cache.getOpenFiles());
-            Assert.AreEqual(17346, cache.getOpenBytes());
-        }
+			WindowCache cache = WindowCache.Instance;
+			Assert.AreEqual(6, cache.getOpenFiles());
+			Assert.AreEqual(17346, cache.getOpenBytes());
+		}
 
-        [Test]
-        public void testCache_TooFewFiles()
-        {
-            var cfg = new WindowCacheConfig {PackedGitOpenFiles = 2};
-            WindowCache.reconfigure(cfg);
-            DoCacheTests();
-            CheckLimits(cfg);
-        }
+		[Test]
+		public void testCache_TooFewFiles()
+		{
+			var cfg = new WindowCacheConfig { PackedGitOpenFiles = 2 };
+			WindowCache.reconfigure(cfg);
+			DoCacheTests();
+			CheckLimits(cfg);
+		}
 
-        [Test]
-        public void testCache_TooSmallLimit()
-        {
-            var cfg = new WindowCacheConfig {PackedGitWindowSize = 4096, PackedGitLimit = 4096};
-            WindowCache.reconfigure(cfg);
-            DoCacheTests();
-            CheckLimits(cfg);
-        }
+		[Test]
+		public void testCache_TooSmallLimit()
+		{
+			var cfg = new WindowCacheConfig { PackedGitWindowSize = 4096, PackedGitLimit = 4096 };
+			WindowCache.reconfigure(cfg);
+			DoCacheTests();
+			CheckLimits(cfg);
+		}
 
-        private static void CheckLimits(WindowCacheConfig cfg)
-        {
-            WindowCache cache = WindowCache.Instance;
-            Assert.IsTrue(cache.getOpenFiles() <= cfg.PackedGitOpenFiles);
-            Assert.IsTrue(cache.getOpenBytes() <= cfg.PackedGitLimit);
-            Assert.IsTrue(0 < cache.getOpenFiles());
-            Assert.IsTrue(0 < cache.getOpenBytes());
-        }
+		private static void CheckLimits(WindowCacheConfig cfg)
+		{
+			WindowCache cache = WindowCache.Instance;
+			Assert.IsTrue(cache.getOpenFiles() <= cfg.PackedGitOpenFiles);
+			Assert.IsTrue(cache.getOpenBytes() <= cfg.PackedGitLimit);
+			Assert.IsTrue(0 < cache.getOpenFiles());
+			Assert.IsTrue(0 < cache.getOpenBytes());
+		}
 
-        private void DoCacheTests()
-        {
-            foreach (TestObject o in toLoad)
-            {
-                ObjectLoader or = db.openObject(new WindowCursor(), o.Id);
-                Assert.IsNotNull(or);
-                Assert.IsTrue(or is PackedObjectLoader);
-                Assert.AreEqual(o.Type, or.getType());
-                Assert.AreEqual(o.RawSize, or.getRawSize());
-                Assert.AreEqual(o.Offset, ((PackedObjectLoader)or).getObjectOffset());
-            }
-        }
+		private void DoCacheTests()
+		{
+			foreach (TestObject o in _toLoad)
+			{
+				ObjectLoader or = db.openObject(new WindowCursor(), o.Id);
+				Assert.IsNotNull(or);
+				Assert.IsTrue(or is PackedObjectLoader);
+				Assert.AreEqual(o.Type, or.getType());
+				Assert.AreEqual(o.RawSize, or.getRawSize());
+				Assert.AreEqual(o.Offset, ((PackedObjectLoader)or).getObjectOffset());
+			}
+		}
 
-        #region Nested Types
+		#region Nested Types
 
-        private class TestObject
-        {
-            private int _type;
+		private class TestObject
+		{
+			private string _type;
 
-            public ObjectId Id { get; set; }
-            public int RawSize { get; set; }
-            public long Offset { get; set; }
-            public long Size { get; set; }
+			public ObjectId Id { get; set; }
+			public int RawSize { get; set; }
+			public long Offset { get; set; }
+			public long Size { private get; set; }
 
-            public int Type
-            {
-                get { return _type; }
-                set
-                {
-                    byte[] typeRaw = Constants.encode(value + " ");
-                    var ptr = new MutableInteger();
-                    _type = Constants.decodeTypeString(Id, typeRaw, (byte) ' ', ptr);
-                }
-            }
-        }
+			public string Type
+			{
+				get { return _type; }
+				set
+				{
+					_type = value;
+					byte[] typeRaw = Constants.encode(value + " ");
+					var ptr = new MutableInteger();
+					Constants.decodeTypeString(Id, typeRaw, (byte)' ', ptr);
+				}
+			}
 
-        #endregion
-    }
+			public override string ToString()
+			{
+				// 4b825dc642cb6eb9a060e54bf8d69288fbee4904 tree   0 9 7782
+				return Id.ToString() + " " + Type + " " + Offset + " " + Size + " " + RawSize;
+			}
+		}
+
+		#endregion
+	}
 }

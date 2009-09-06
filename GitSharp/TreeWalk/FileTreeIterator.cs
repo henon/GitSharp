@@ -131,6 +131,7 @@ namespace GitSharp.TreeWalk
             public FileEntry(FileSystemInfo f)
             {
 				_file = f;
+            	_fileLength = -1;
 
 				if (_file is DirectoryInfo)
                 {

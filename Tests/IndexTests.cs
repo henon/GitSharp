@@ -39,7 +39,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using GitSharp.Exceptions;
 using NUnit.Framework;
 
@@ -48,7 +47,7 @@ namespace GitSharp.Tests
 	[TestFixture]
 	public class T0007_Index : RepositoryTestCase
 	{
-		private static bool CanRunGitStatus;
+		private static readonly bool CanRunGitStatus;
 
 		static T0007_Index()
 		{
@@ -190,8 +189,8 @@ namespace GitSharp.Tests
 			index.Add(trash, execFile);
 			index.Add(trash, nonexecFile);
 			Tree tree = db.mapTree(index.writeTree());
-			Assert.AreEqual(FileMode.EXECUTABLE_FILE, tree.findBlobMember(execFile.Name).getMode());
-			Assert.AreEqual(FileMode.REGULAR_FILE, tree.findBlobMember(nonexecFile.Name).getMode());
+			Assert.IsTrue(FileMode.ExecutableFile == FileMode.FromBits(tree.findBlobMember(execFile.Name).getMode()));
+			Assert.IsTrue(FileMode.RegularFile == FileMode.FromBits(tree.findBlobMember(nonexecFile.Name).getMode()));
 
 			index.write();
 
@@ -253,8 +252,8 @@ namespace GitSharp.Tests
 			index.Add(trash, execFile);
 			index.Add(trash, nonexecFile);
 			Tree tree = db.mapTree(index.writeTree());
-			Assert.AreEqual(FileMode.REGULAR_FILE, tree.findBlobMember(execFile.Name).getMode());
-			Assert.AreEqual(FileMode.REGULAR_FILE, tree.findBlobMember(nonexecFile.Name).getMode());
+			Assert.IsTrue(FileMode.REGULAR_FILE == FileMode.FromBits(tree.findBlobMember(execFile.Name).getMode()));
+			Assert.IsTrue(FileMode.REGULAR_FILE == FileMode.FromBits(tree.findBlobMember(nonexecFile.Name).getMode()));
 
 			index.write();
 

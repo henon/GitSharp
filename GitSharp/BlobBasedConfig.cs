@@ -63,11 +63,11 @@ namespace GitSharp
         {
             ObjectId treeId = commit.TreeId;
             Repository r = commit.Repository;
-            TreeWalk.TreeWalk tree = TreeWalk.TreeWalk.forPath(r, path, treeId);
+            TreeWalk.TreeWalk tree = TreeWalk.TreeWalk.ForPath(r, path, treeId);
             if (tree == null)
                 throw new FileNotFoundException("Entry not found by path: " + path);
             ObjectId blobId = tree.getObjectId(0);
-            ObjectLoader loader = tree.getRepository().OpenBlob(blobId);
+            ObjectLoader loader = tree.Repository.OpenBlob(blobId);
             if (loader == null)
                 throw new IOException("Blob not found: " + blobId + " for path: " + path);
             fromText(RawParseUtils.decode(loader.getBytes()));

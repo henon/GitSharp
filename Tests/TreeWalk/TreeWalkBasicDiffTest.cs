@@ -91,7 +91,7 @@ namespace GitSharp.Tests.TreeWalk
 
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
 			tw.reset(new[] { oldTree.Invoke(), newTree.Invoke() });
-			tw.setRecursive(true);
+			tw.Recursive = true;
 			tw.setFilter(TreeFilter.ANY_DIFF);
 
 			Assert.IsTrue(tw.next());

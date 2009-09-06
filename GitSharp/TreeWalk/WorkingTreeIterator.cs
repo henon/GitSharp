@@ -95,26 +95,38 @@ namespace GitSharp.TreeWalk
         private byte[] _contentId;
 
         /// <summary>
-        /// Index within <see cref="entries"/> that <see cref="_contentId"/> came from.
+        /// Index within <see cref="_entries"/> that <see cref="_contentId"/> came from.
         /// </summary>
         private int _contentIdFromPtr;
 
-        /** Buffer used to perform {@link #contentId} computations. */
-        private byte[] contentReadBuffer;
+        /// <summary>
+		/// Buffer used to perform <see cref="_contentId"/> computations.
+        /// </summary>
+        private byte[] _contentReadBuffer;
 
-        /** Digest computer for {@link #contentId} computations. */
-        private MessageDigest contentDigest;
+        /// <summary>
+		/// Digest computer for <see cref="_contentId"/> computations.
+        /// </summary>
+        private MessageDigest _contentDigest;
 
-        /** File name character encoder. */
-        private readonly Encoding nameEncoder;
+        /// <summary>
+		/// File name character encoder.
+        /// </summary>
+        private readonly Encoding _nameEncoder;
 
-        /** List of entries obtained from the subclass. */
-        private Entry[] entries;
+        /// <summary>
+		/// List of entries obtained from the subclass.
+        /// </summary>
+        private Entry[] _entries;
 
-        /** Total number of entries in {@link #entries} that are valid. */
-        private int entryCnt;
+        /// <summary>
+		/// Total number of _entries in <see cref="_entries"/> that are valid.
+        /// </summary>
+        private int _entryCount;
 
-        /** Current position within {@link #entries}. */
+        /// <summary>
+		/// Current position within <see cref="_entries"/>.
+        /// </summary>
         private int ptr;
 
         /// <summary>
@@ -122,7 +134,7 @@ namespace GitSharp.TreeWalk
         /// </summary>
         protected WorkingTreeIterator()
         {
-            nameEncoder = Constants.CHARSET;
+            _nameEncoder = Constants.CHARSET;
         }
 
         /// <summary>
@@ -143,7 +155,7 @@ namespace GitSharp.TreeWalk
         protected WorkingTreeIterator(string prefix)
             : base(prefix)
         {
-            nameEncoder = Constants.CHARSET;
+            _nameEncoder = Constants.CHARSET;
         }
 
         /// <summary>
@@ -153,7 +165,7 @@ namespace GitSharp.TreeWalk
         protected WorkingTreeIterator(WorkingTreeIterator parent) 
             : base(parent)
         {
-            nameEncoder = parent.nameEncoder;
+            _nameEncoder = parent._nameEncoder;
         }
 
         public override byte[] idBuffer()
@@ -163,42 +175,42 @@ namespace GitSharp.TreeWalk
                 return _contentId;
             }
 
-            switch (mode & FileMode.TYPE_MASK)
+            switch (Mode & FileMode.TYPE_MASK)
             {
                 case FileMode.TYPE_FILE:
                     _contentIdFromPtr = ptr;
-                    return _contentId = IdBufferBlob(entries[ptr]);
+                    return _contentId = IdBufferBlob(_entries[ptr]);
 
                 case FileMode.TYPE_SYMLINK:
                     // Windows does not support symbolic links, so we should not
                     // have reached this particular part of the walk code.
                     //
-                    return zeroid;
+                    return ZeroId;
 
                 case FileMode.TYPE_GITLINK:
                     // TODO: Support obtaining current HEAD SHA-1 from nested repository
                     //
-                    return zeroid;
+                    return ZeroId;
             }
 
-            return zeroid;
+            return ZeroId;
         }
 
         private void InitializeDigest()
         {
-            if (contentDigest != null) return;
+            if (_contentDigest != null) return;
 
-            if (parent == null)
+            if (Parent == null)
             {
-                contentReadBuffer = new byte[BufferSize];
-                contentDigest = Constants.newMessageDigest();
+                _contentReadBuffer = new byte[BufferSize];
+                _contentDigest = Constants.newMessageDigest();
             }
             else
             {
-                var p = (WorkingTreeIterator)parent;
+                var p = (WorkingTreeIterator)Parent;
                 p.InitializeDigest();
-                contentReadBuffer = p.contentReadBuffer;
-                contentDigest = p.contentDigest;
+                _contentReadBuffer = p._contentReadBuffer;
+                _contentDigest = p._contentDigest;
             }
         }
 
@@ -209,53 +221,53 @@ namespace GitSharp.TreeWalk
                 FileStream @is = entry.OpenInputStream();
                 if (@is == null)
                 {
-                    return zeroid;
+                    return ZeroId;
                 }
 
                 try
                 {
                     InitializeDigest();
 
-                    contentDigest.Reset();
-                    contentDigest.Update(HBlob);
-                    contentDigest.Update((byte)' ');
+                    _contentDigest.Reset();
+                    _contentDigest.Update(HBlob);
+                    _contentDigest.Update((byte)' ');
 
                     long blobLength = entry.Length;
                     
                     long size = blobLength;
                     if (size == 0)
                     {
-                        contentDigest.Update((byte)'0');
+                        _contentDigest.Update((byte)'0');
                     }
                     else
                     {
-                        int bufn = contentReadBuffer.Length;
+                        int bufn = _contentReadBuffer.Length;
                         int p = bufn;
                         do
                         {
-                            contentReadBuffer[--p] = Digits[(int)(size % 10)];
+                            _contentReadBuffer[--p] = Digits[(int)(size % 10)];
                             size /= 10;
                         } while (size > 0);
 
-                        contentDigest.Update(contentReadBuffer, p, bufn - p);
+                        _contentDigest.Update(_contentReadBuffer, p, bufn - p);
                     }
 
-                    contentDigest.Update(0);
+                    _contentDigest.Update(0);
 
                     while (true)
                     {
-                        int r = @is.Read(contentReadBuffer, 0, contentReadBuffer.Length); // was: read(contentReadBuffer) in java
+                        int r = @is.Read(_contentReadBuffer, 0, _contentReadBuffer.Length); // was: read(_contentReadBuffer) in java
                         if (r <= 0) break;
-                        contentDigest.Update(contentReadBuffer, 0, r);
+                        _contentDigest.Update(_contentReadBuffer, 0, r);
                         size += r;
                     }
 
                     if (size != blobLength)
                     {
-                        return zeroid;
+                        return ZeroId;
                     }
 
-                    return contentDigest.Digest();
+                    return _contentDigest.Digest();
                 }
                 finally
                 {
@@ -277,7 +289,7 @@ namespace GitSharp.TreeWalk
                 //
             }
 
-            return zeroid;
+            return ZeroId;
         }
 
         public override int idOffset()
@@ -292,7 +304,7 @@ namespace GitSharp.TreeWalk
 
         public override bool eof()
         {
-            return ptr == entryCnt;
+            return ptr == _entryCount;
         }
 
         public override void next(int delta)
@@ -313,13 +325,13 @@ namespace GitSharp.TreeWalk
 
         private void ParseEntry()
         {
-            Entry e = entries[ptr];
-            mode = e.Mode.Bits;
+            Entry e = _entries[ptr];
+            Mode = e.Mode.Bits;
 
             int nameLen = e.EncodedNameLen;
-            ensurePathCapacity(pathOffset + nameLen, pathOffset);
-            Array.Copy(e.EncodedName, 0, path, pathOffset, nameLen);
-            pathLen = pathOffset + nameLen;
+            ensurePathCapacity(PathOffset + nameLen, PathOffset);
+            Array.Copy(e.EncodedName, 0, Path, PathOffset, nameLen);
+            PathLen = PathOffset + nameLen;
         }
 
         /**
@@ -362,25 +374,25 @@ namespace GitSharp.TreeWalk
             // also cache the encoded forms of the path names for efficient use
             // later on during sorting and iteration.
             //
-            entries = list;
+            _entries = list;
             int i, o;
 
-            for (i = 0, o = 0; i < entries.Length; i++)
+            for (i = 0, o = 0; i < _entries.Length; i++)
             {
-                Entry e = entries[i];
+                Entry e = _entries[i];
                 if (e == null || treeEntries.Contains(e.Name)) continue;
 
                 if (i != o)
                 {
-                    entries[o] = e;
+                    _entries[o] = e;
                 }
 
-                e.EncodeName(nameEncoder);
+                e.EncodeName(_nameEncoder);
                 o++;
             }
 
-            entryCnt = o;
-            Array.Sort(entries, EntryComparison); // was Arrays.sort(entries, 0, entryCnt, EntryComparison) in java
+            _entryCount = o;
+            Array.Sort(_entries, EntryComparison); // was Arrays.sort(entries, 0, _entryCnt, EntryComparison) in java
 
             _contentIdFromPtr = -1;
             ptr = 0;
@@ -395,7 +407,7 @@ namespace GitSharp.TreeWalk
         /// </summary>
         internal Entry Current
         {
-            get { return entries[ptr]; }
+            get { return _entries[ptr]; }
         }
 
         #region Nested Types

@@ -64,7 +64,7 @@ namespace GitSharp.Tests.Patch
 			Assert.AreEqual("dd8c317", cfh.getOldId(1).name());
 			Assert.AreEqual("fd85931", cfh.getNewId().name());
 
-			Assert.IsTrue(cfh.getOldMode(0) == cfh.getOldMode());
+			Assert.AreEqual(cfh.getOldMode(0), cfh.getOldMode());
 			Assert.AreEqual(FileMode.RegularFile, cfh.getOldMode(0));
 			Assert.AreEqual(FileMode.RegularFile, cfh.getOldMode(1));
 			Assert.AreEqual(FileMode.ExecutableFile, cfh.getNewMode());

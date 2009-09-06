@@ -63,7 +63,7 @@ namespace GitSharp.Util
 
         private static string Inspect(string filename, ObjectId id)
         {
-            return Encoding.ASCII.GetString(new UnpackedObjectLoader(new FileInfo(filename), id).getBytes());
+            return Encoding.ASCII.GetString(new UnpackedObjectLoader(new FileInfo(filename), id).Bytes);
         }
 
         public Stream ContentStream(ObjectId id)
@@ -79,7 +79,7 @@ namespace GitSharp.Util
 
         private static Stream ContentStream(string filename, ObjectId id)
         {
-            return new MemoryStream(new UnpackedObjectLoader(new FileInfo(filename), id).getBytes());
+            return new MemoryStream(new UnpackedObjectLoader(new FileInfo(filename), id).Bytes);
         }
     }
 }

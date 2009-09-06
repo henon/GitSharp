@@ -211,7 +211,7 @@ namespace GitSharp.Util
             return PastEndOfBuffer(0);
         }
         /// <summary>
-        /// Returns a value indicating is the bufferPosition is more then the number of characters read into the buffer.
+        /// Returns a value indicating is the bufferPosition is more then the number of characters Read into the buffer.
         /// </summary>
         /// <returns></returns>
         private bool PastEndOfBuffer(int peekOffset)
@@ -262,7 +262,7 @@ namespace GitSharp.Util
         /// </summary>        
         public void Mark()
         {
-            if (_markLevel == _marks.Length) throw new InvalidOperationException(string.Format("Cannot create more then {0} marks deep.", this._marks.Length));
+            if (_markLevel == _marks.Length) throw new InvalidOperationException(string.Format("Cannot Create more then {0} marks deep.", this._marks.Length));
             this._marks[this._markLevel] = this._bufferPosition;
             this._markLevel++;
         }

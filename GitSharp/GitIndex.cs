@@ -468,7 +468,7 @@ namespace GitSharp
         public void checkoutEntry(FileSystemInfo workDir, Entry e)
         {
             ObjectLoader ol = Repository.OpenBlob(e.ObjectId);
-            byte[] bytes = ol.getBytes();
+            byte[] bytes = ol.Bytes;
 
             var file = new FileInfo(Path.Combine(workDir.DirectoryName(), e.Name));
             file.Delete();
@@ -713,7 +713,7 @@ namespace GitSharp
                 gid = -1;
                 try
                 {
-                    size = (int)Repository.OpenBlob(f.Id).getSize();
+                    size = (int)Repository.OpenBlob(f.Id).Size;
                 }
                 catch (IOException e)
                 {

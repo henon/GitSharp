@@ -36,35 +36,27 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.CLI
 {
-    /**
-     * Indicates a {@link TextBuiltin} implementation has failed during execution.
-     * <p>
-     * Typically the stack trace for a Die exception is not shown to the user as it
-     * may indicate a simple error condition that the end-user can fix on their own,
-     * without needing a screen of Java stack frames.
-     */
+    /// <summary>
+    /// Indicates a <see cref="TextBuiltin" /> implementation has failed during execution.
+    /// <para>
+    /// Typically the stack trace for a Die exception is not shown to the user as it
+    /// may indicate a simple error condition that the end-user can fix on their own,
+    /// without needing a screen of stack frames.
+    /// </para>
+    /// </summary>
     public class Die : Exception
     {
-        /**
-         * Construct a new message explaining what has gone wrong.
-         *
-         * @param why
-         *            the message to show to the end-user.
-         */
+        /// <summary>
+        /// Construct a new message explaining what has gone wrong.
+        /// </summary>
+        /// <param name="why">The message to show to the end-user.</param>
         public Die(string why)
             : base(why)
         {
         }
-
     }
 }

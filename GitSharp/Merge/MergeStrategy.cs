@@ -134,7 +134,7 @@ namespace GitSharp.Merge
 	     * Create a new merge instance.
 	     *
 	     * @param db
-	     *            repository database the merger will read from, and eventually
+	     *            repository database the merger will Read from, and eventually
 	     *            write results back to.
 	     * @return the new merge instance which implements this strategy.
 	     */

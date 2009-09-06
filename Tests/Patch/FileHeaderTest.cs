@@ -80,8 +80,7 @@ namespace GitSharp.Tests.Patch
         {
 		    string name = "foo";
 		    FileHeader fh = header(name);
-		    Assert.AreEqual(gitLine(name).Length, fh.parseGitFileName(0,
-				    fh.buf.Length));
+		    Assert.AreEqual(gitLine(name).Length, fh.parseGitFileName(0, fh.buf.Length));
 		    Assert.AreEqual(name, fh.getOldName());
 		    Assert.AreSame(fh.getOldName(), fh.getNewName());
 		    Assert.IsFalse(fh.hasMetaDataChanges());

@@ -51,561 +51,597 @@ namespace GitSharp.DirectoryCache
 {
 
 
-    /**
-     * Single tree record from the 'TREE' {@link DirCache} extension.
-     * <p>
-     * A valid cache tree record contains the object id of a tree object and the
-     * total number of {@link DirCacheEntry} instances (counted recursively) from
-     * the DirCache contained within the tree. This information facilitates faster
-     * traversal of the index and quicker generation of tree objects prior to
-     * creating a new commit.
-     * <p>
-     * An invalid cache tree record indicates a known subtree whose file entries
-     * have changed in ways that cause the tree to no longer have a known object id.
-     * Invalid cache tree records must be revalidated prior to use.
-     */
-    public class DirCacheTree
-    {
-        private static byte[] NO_NAME = { };
+	/**
+	 * Single tree record from the 'TREE' {@link DirCache} extension.
+	 * <p>
+	 * A valid cache tree record contains the object id of a tree object and the
+	 * total number of {@link DirCacheEntry} instances (counted recursively) from
+	 * the DirCache contained within the tree. This information facilitates faster
+	 * traversal of the index and quicker generation of tree objects prior to
+	 * creating a new commit.
+	 * <p>
+	 * An invalid cache tree record indicates a known subtree whose file entries
+	 * have changed in ways that cause the tree to no longer have a known object id.
+	 * Invalid cache tree records must be revalidated prior to use.
+	 */
+	public class DirCacheTree
+	{
+		private static readonly byte[] NoName = { };
+		private static readonly DirCacheTree[] NoChildren = { };
 
-        private static DirCacheTree[] NO_CHILDREN = { };
+		private static readonly Comparison<DirCacheTree> TreeComparison = (o1, o2) =>
+		{
+			byte[] a = o1._encodedName;
+			byte[] b = o2._encodedName;
+			int aLen = a.Length;
+			int bLen = b.Length;
+			int cPos;
 
-        private static Comparison<DirCacheTree> TREE_CMP = (o1, o2) =>
-        {
-            byte[] a = o1.encodedName;
-            byte[] b = o2.encodedName;
-            int aLen = a.Length;
-            int bLen = b.Length;
-            int cPos;
-            for (cPos = 0; cPos < aLen && cPos < bLen; cPos++)
-            {
-                int cmp = (a[cPos] & 0xff) - (b[cPos] & (byte)0xff);
-                if (cmp != 0)
-                    return cmp;
-            }
-            if (aLen == bLen)
-                return 0;
-            if (aLen < bLen)
-                return '/' - (b[cPos] & (byte)0xff);
-            return (a[cPos] & (byte)0xff) - '/';
-        };
+			for (cPos = 0; cPos < aLen && cPos < bLen; cPos++)
+			{
+				int cmp = (a[cPos] & 0xff) - (b[cPos] & (byte)0xff);
+				if (cmp != 0)
+				{
+					return cmp;
+				}
+			}
 
-        /** Tree this tree resides in; null if we are the root. */
-        private DirCacheTree parent;
+			if (aLen == bLen)
+			{
+				return 0;
+			}
 
-        /** Name of this tree within its parent. */
-        private byte[] encodedName;
+			if (aLen < bLen)
+			{
+				return '/' - (b[cPos] & 0xff);
+			}
 
-        /** Number of {@link DirCacheEntry} records that belong to this tree. */
-        private int entrySpan;
+			return (a[cPos] & 0xff) - '/';
+		};
 
-        /** Unique SHA-1 of this tree; null if invalid. */
-        private ObjectId id;
+		/** Tree this tree resides in; null if we are the root. */
+		private readonly DirCacheTree _parent;
 
-        /** Child trees, if any, sorted by {@link #EncodedName}. */
-        private DirCacheTree[] children;
+		/** Name of this tree within its parent. */
+		private readonly byte[] _encodedName;
 
-        /** Number of valid children in {@link #children}. */
-        private int childCnt;
+		/** Number of {@link DirCacheEntry} records that belong to this tree. */
+		private int _entrySpan;
 
-        public DirCacheTree()
-        {
-            encodedName = NO_NAME;
-            children = NO_CHILDREN;
-            childCnt = 0;
-            entrySpan = -1;
-        }
+		/** Unique SHA-1 of this tree; null if invalid. */
+		private ObjectId _id;
 
-        private DirCacheTree(DirCacheTree myParent, byte[] path, int pathOff, int pathLen)
-        {
-            parent = myParent;
-            encodedName = new byte[pathLen];
-            Array.Copy(path, pathOff, encodedName, 0, pathLen);
-            children = NO_CHILDREN;
-            childCnt = 0;
-            entrySpan = -1;
-        }
+		/** Child trees, if any, sorted by {@link #EncodedName}. */
+		private DirCacheTree[] _children;
 
-        public DirCacheTree(byte[] @in, MutableInteger off,
-                 DirCacheTree myParent)
-        {
-            parent = myParent;
+		/** Number of valid _children in {@link #_children}. */
+		private int _childCount;
 
-            int ptr = RawParseUtils.next(@in, off.value, (byte)'\0');
-            int nameLen = ptr - off.value - 1;
-            if (nameLen > 0)
-            {
-                encodedName = new byte[nameLen];
-                Array.Copy(@in, off.value, encodedName, 0, nameLen);
-            }
-            else
-                encodedName = NO_NAME;
+		public DirCacheTree()
+		{
+			_encodedName = NoName;
+			_children = NoChildren;
+			_childCount = 0;
+			_entrySpan = -1;
+		}
 
-            entrySpan = RawParseUtils.parseBase10(@in, ptr, off);
-            int subcnt = RawParseUtils.parseBase10(@in, off.value, off);
-            off.value = RawParseUtils.next(@in, off.value, (byte)'\n');
+		public DirCacheTree(byte[] @in, MutableInteger off, DirCacheTree myParent)
+		{
+			_parent = myParent;
 
-            if (entrySpan >= 0)
-            {
-                // Valid trees have a positive entry count and an id of a
-                // tree object that should exist in the object database.
-                //
-                id = ObjectId.FromRaw(@in, off.value);
-                off.value += Constants.OBJECT_ID_LENGTH;
-            }
+			int ptr = RawParseUtils.next(@in, off.value, (byte)'\0');
+			int nameLen = ptr - off.value - 1;
+			if (nameLen > 0)
+			{
+				_encodedName = new byte[nameLen];
+				Array.Copy(@in, off.value, _encodedName, 0, nameLen);
+			}
+			else
+			{
+				_encodedName = NoName;
+			}
 
-            if (subcnt > 0)
-            {
-                bool alreadySorted = true;
-                children = new DirCacheTree[subcnt];
-                for (int i = 0; i < subcnt; i++)
-                {
-                    children[i] = new DirCacheTree(@in, off, this);
+			_entrySpan = RawParseUtils.parseBase10(@in, ptr, off);
+			int subcnt = RawParseUtils.parseBase10(@in, off.value, off);
+			off.value = RawParseUtils.next(@in, off.value, (byte)'\n');
 
-                    // C Git's ordering differs from our own; it prefers to
-                    // sort by Length first. This sometimes produces a sort
-                    // we do not desire. On the other hand it may have been
-                    // created by us, and be sorted the way we want.
-                    //
-                    if (alreadySorted && i > 0
-                            && TREE_CMP(children[i - 1], children[i]) > 0)
-                        alreadySorted = false;
-                }
-                if (!alreadySorted)
-                    Array.Sort(children, TREE_CMP);
-            }
-            else
-            {
-                // Leaf level trees have no children, only (file) entries.
-                //
-                children = NO_CHILDREN;
-            }
-            childCnt = subcnt;
-        }
+			if (_entrySpan >= 0)
+			{
+				// Valid trees have a positive entry count and an id of a
+				// tree object that should exist in the object database.
+				//
+				_id = ObjectId.FromRaw(@in, off.value);
+				off.value += Constants.OBJECT_ID_LENGTH;
+			}
 
-        public void write(byte[] tmp, Stream os)
-        {
-            int ptr = tmp.Length;
-            tmp[--ptr] = (byte)'\n';
-            ptr = RawParseUtils.formatBase10(tmp, ptr, childCnt);
-            tmp[--ptr] = (byte)' ';
-            ptr = RawParseUtils.formatBase10(tmp, ptr, isValid() ? entrySpan : -1);
-            tmp[--ptr] = 0;
+			if (subcnt > 0)
+			{
+				bool alreadySorted = true;
+				_children = new DirCacheTree[subcnt];
+				for (int i = 0; i < subcnt; i++)
+				{
+					_children[i] = new DirCacheTree(@in, off, this);
 
-            os.Write(encodedName, 0, encodedName.Length);
-            os.Write(tmp, ptr, tmp.Length - ptr);
-            if (isValid())
-            {
-                id.copyRawTo(tmp, 0);
-                os.Write(tmp, 0, Constants.OBJECT_ID_LENGTH);
-            }
-            for (int i = 0; i < childCnt; i++)
-                children[i].write(tmp, os);
-        }
+					// C Git's ordering differs from our own; it prefers to
+					// sort by Length first. This sometimes produces a sort
+					// we do not desire. On the other hand it may have been
+					// created by us, and be sorted the way we want.
+					//
+					if (alreadySorted && i > 0
+							&& TreeComparison(_children[i - 1], _children[i]) > 0)
+					{
+						alreadySorted = false;
+					}
+				}
 
-        /**
-         * Determine if this cache is currently valid.
-         * <p>
-         * A valid cache tree knows how many {@link DirCacheEntry} instances from
-         * the parent {@link DirCache} reside within this tree (recursively
-         * enumerated). It also knows the object id of the tree, as the tree should
-         * be readily available from the repository's object database.
-         *
-         * @return true if this tree is knows key details about itself; false if the
-         *         tree needs to be regenerated.
-         */
-        public bool isValid()
-        {
-            return id != null;
-        }
+				if (!alreadySorted)
+				{
+					Array.Sort(_children, TreeComparison);
+				}
+			}
+			else
+			{
+				// Leaf level trees have no children, only (file) entries.
+				//
+				_children = NoChildren;
+			}
+			_childCount = subcnt;
+		}
 
-        /**
-         * Get the number of entries this tree spans within the DirCache.
-         * <p>
-         * If this tree is not valid (see {@link #isValid()}) this method's return
-         * value is always strictly negative (less than 0) but is otherwise an
-         * undefined result.
-         *
-         * @return total number of entries (recursively) contained within this tree.
-         */
-        public int getEntrySpan()
-        {
-            return entrySpan;
-        }
+		private DirCacheTree(DirCacheTree myParent, byte[] path, int pathOff, int pathLen)
+		{
+			_parent = myParent;
+			_encodedName = new byte[pathLen];
+			Array.Copy(path, pathOff, _encodedName, 0, pathLen);
+			_children = NoChildren;
+			_childCount = 0;
+			_entrySpan = -1;
+		}
 
-        /**
-         * Get the number of cached subtrees contained within this tree.
-         *
-         * @return number of child trees available through this tree.
-         */
-        public int getChildCount()
-        {
-            return childCnt;
-        }
+		public void write(byte[] tmp, Stream os)
+		{
+			int ptr = tmp.Length;
+			tmp[--ptr] = (byte)'\n';
+			ptr = RawParseUtils.formatBase10(tmp, ptr, _childCount);
+			tmp[--ptr] = (byte)' ';
+			ptr = RawParseUtils.formatBase10(tmp, ptr, isValid() ? _entrySpan : -1);
+			tmp[--ptr] = 0;
 
-        /**
-         * Get the i-th child cache tree.
-         *
-         * @param i
-         *            index of the child to obtain.
-         * @return the child tree.
-         */
-        public DirCacheTree getChild(int i)
-        {
-            return children[i];
-        }
+			os.Write(_encodedName, 0, _encodedName.Length);
+			os.Write(tmp, ptr, tmp.Length - ptr);
+			
+			if (isValid())
+			{
+				_id.copyRawTo(tmp, 0);
+				os.Write(tmp, 0, Constants.OBJECT_ID_LENGTH);
+			}
 
-        public ObjectId getObjectId()
-        {
-            return id;
-        }
+			for (int i = 0; i < _childCount; i++)
+			{
+				_children[i].write(tmp, os);
+			}
+		}
 
-        /**
-         * Get the tree's name within its parent.
-         * <p>
-         * This method is not very efficient and is primarily meant for debugging
-         * and  output generation. Applications should try to avoid calling it,
-         * and if invoked do so only once per interesting entry, where the name is
-         * absolutely required for correct function.
-         *
-         * @return name of the tree. This does not contain any '/' characters.
-         */
-        public String getNameString()
-        {
-            return Constants.CHARSET.GetString(encodedName);
-        }
+		/**
+		 * Determine if this cache is currently valid.
+		 * <p>
+		 * A valid cache tree knows how many {@link DirCacheEntry} instances from
+		 * the parent {@link DirCache} reside within this tree (recursively
+		 * enumerated). It also knows the object id of the tree, as the tree should
+		 * be readily available from the repository's object database.
+		 *
+		 * @return true if this tree is knows key details about itself; false if the
+		 *         tree needs to be regenerated.
+		 */
+		public bool isValid()
+		{
+			return _id != null;
+		}
 
-        /**
-         * Get the tree's path within the repository.
-         * <p>
-         * This method is not very efficient and is primarily meant for debugging
-         * and  output generation. Applications should try to avoid calling it,
-         * and if invoked do so only once per interesting entry, where the name is
-         * absolutely required for correct function.
-         *
-         * @return path of the tree, relative to the repository root. If this is not
-         *         the root tree the path ends with '/'. The root tree's path string
-         *         is the empty string ("").
-         */
-        public String getPathString()
-        {
-            StringBuilder r = new StringBuilder();
-            appendName(r);
-            return r.ToString();
-        }
+		/**
+		 * Get the number of entries this tree spans within the DirCache.
+		 * <p>
+		 * If this tree is not valid (see {@link #isValid()}) this method's return
+		 * value is always strictly negative (less than 0) but is otherwise an
+		 * undefined result.
+		 *
+		 * @return total number of entries (recursively) contained within this tree.
+		 */
+		public int getEntrySpan()
+		{
+			return _entrySpan;
+		}
 
-        /**
-         * Write (if necessary) this tree to the object store.
-         *
-         * @param cache
-         *            the complete cache from DirCache.
-         * @param cIdx
-         *            first position of <code>cache</code> that is a member of this
-         *            tree. The path of <code>cache[cacheIdx].path</code> for the
-         *            range <code>[0,pathOff-1)</code> matches the complete path of
-         *            this tree, from the root of the repository.
-         * @param pathOffset
-         *            number of bytes of <code>cache[cacheIdx].path</code> that
-         *            matches this tree's path. The value at array position
-         *            <code>cache[cacheIdx].path[pathOff-1]</code> is always '/' if
-         *            <code>pathOff</code> is > 0.
-         * @param ow
-         *            the writer to use when serializing to the store.
-         * @return identity of this tree.
-         * @throws UnmergedPathException
-         *             one or more paths contain higher-order stages (stage > 0),
-         *             which cannot be stored in a tree object.
-         * @throws IOException
-         *             an unexpected error occurred writing to the object store.
-         */
-        public ObjectId writeTree(DirCacheEntry[] cache, int cIdx, int pathOffset, ObjectWriter ow)
-        {
-            if (id == null)
-            {
-                int endIdx = cIdx + entrySpan;
-                int size = computeSize(cache, cIdx, pathOffset, ow);
-                var @out = new MemoryStream(size);
-                int childIdx = 0;
-                int entryIdx = cIdx;
+		/**
+		 * Get the number of cached subtrees contained within this tree.
+		 *
+		 * @return number of child trees available through this tree.
+		 */
+		public int getChildCount()
+		{
+			return _childCount;
+		}
 
-                while (entryIdx < endIdx)
-                {
-                    DirCacheEntry e = cache[entryIdx];
-                    byte[] ep = e.path;
-                    if (childIdx < childCnt)
-                    {
-                        DirCacheTree st = children[childIdx];
-                        if (st.contains(ep, pathOffset, ep.Length))
-                        {
-                            FileMode.Tree.CopyTo(@out);
-                            @out.Write(new byte[] { (byte)' ' }, 0, 1);
-                            @out.Write(st.encodedName, 0, st.encodedName.Length);
-                            @out.Write(new byte[] { (byte)0 }, 0, 1);
-                            st.id.copyRawTo(@out);
+		/**
+		 * Get the i-th child cache tree.
+		 *
+		 * @param i
+		 *            index of the child to obtain.
+		 * @return the child tree.
+		 */
+		public DirCacheTree getChild(int i)
+		{
+			return _children[i];
+		}
 
-                            entryIdx += st.entrySpan;
-                            childIdx++;
-                            continue;
-                        }
-                    }
+		public ObjectId getObjectId()
+		{
+			return _id;
+		}
 
-                    e.getFileMode().CopyTo(@out);
-                    @out.Write(new byte[] { (byte)' ' }, 0, 1);
-                    @out.Write(ep, pathOffset, ep.Length - pathOffset);
-                    @out.Write(new byte[] { 0 }, 0, 1);
-                    @out.Write(e.idBuffer(), e.idOffset(), Constants.OBJECT_ID_LENGTH);
-                    entryIdx++;
-                }
+		/**
+		 * Get the tree's name within its parent.
+		 * <p>
+		 * This method is not very efficient and is primarily meant for debugging
+		 * and  output generation. Applications should try to avoid calling it,
+		 * and if invoked do so only once per interesting entry, where the name is
+		 * absolutely required for correct function.
+		 *
+		 * @return name of the tree. This does not contain any '/' characters.
+		 */
+		public string getNameString()
+		{
+			return Constants.CHARSET.GetString(_encodedName);
+		}
 
-                id = ow.WriteCanonicalTree(@out.ToArray());
-            }
-            return id;
-        }
+		/**
+		 * Get the tree's path within the repository.
+		 * <p>
+		 * This method is not very efficient and is primarily meant for debugging
+		 * and  output generation. Applications should try to avoid calling it,
+		 * and if invoked do so only once per interesting entry, where the name is
+		 * absolutely required for correct function.
+		 *
+		 * @return path of the tree, relative to the repository root. If this is not
+		 *         the root tree the path ends with '/'. The root tree's path string
+		 *         is the empty string ("").
+		 */
+		public string getPathString()
+		{
+			var sb = new StringBuilder();
+			AppendName(sb);
+			return sb.ToString();
+		}
 
-        private int computeSize(DirCacheEntry[] cache, int cIdx, int pathOffset, ObjectWriter ow)
-        {
-            int endIdx = cIdx + entrySpan;
-            int childIdx = 0;
-            int entryIdx = cIdx;
-            int size = 0;
+		/**
+		 * Write (if necessary) this tree to the object store.
+		 *
+		 * @param cacheEntry
+		 *            the complete cache from DirCache.
+		 * @param cIdx
+		 *            first position of <code>cache</code> that is a member of this
+		 *            tree. The path of <code>cache[cacheIdx].path</code> for the
+		 *            range <code>[0,pathOff-1)</code> matches the complete path of
+		 *            this tree, from the root of the repository.
+		 * @param pathOffset
+		 *            number of bytes of <code>cache[cacheIdx].path</code> that
+		 *            matches this tree's path. The value at array position
+		 *            <code>cache[cacheIdx].path[pathOff-1]</code> is always '/' if
+		 *            <code>pathOff</code> is > 0.
+		 * @param ow
+		 *            the writer to use when serializing to the store.
+		 * @return identity of this tree.
+		 * @throws UnmergedPathException
+		 *             one or more paths contain higher-order stages (stage > 0),
+		 *             which cannot be stored in a tree object.
+		 * @throws IOException
+		 *             an unexpected error occurred writing to the object store.
+		 */
+		public ObjectId writeTree(DirCacheEntry[] cacheEntry, int cIdx, int pathOffset, ObjectWriter ow)
+		{
+			if (_id == null)
+			{
+				int endIdx = cIdx + _entrySpan;
+				int size = ComputeSize(cacheEntry, cIdx, pathOffset, ow);
+				var @out = new MemoryStream(size);
+				int childIdx = 0;
+				int entryIdx = cIdx;
 
-            while (entryIdx < endIdx)
-            {
-                DirCacheEntry e = cache[entryIdx];
-                if (e.getStage() != 0)
-                    throw new UnmergedPathException(e);
+				while (entryIdx < endIdx)
+				{
+					DirCacheEntry e = cacheEntry[entryIdx];
+					byte[] ep = e.Path;
+					if (childIdx < _childCount)
+					{
+						DirCacheTree st = _children[childIdx];
+						if (st.contains(ep, pathOffset, ep.Length))
+						{
+							FileMode.Tree.CopyTo(@out);
+							@out.Write(new[] { (byte)' ' }, 0, 1);
+							@out.Write(st._encodedName, 0, st._encodedName.Length);
+							@out.Write(new[] { (byte)0 }, 0, 1);
+							st._id.copyRawTo(@out);
 
-                byte[] ep = e.path;
-                if (childIdx < childCnt)
-                {
-                    DirCacheTree st = children[childIdx];
-                    if (st.contains(ep, pathOffset, ep.Length))
-                    {
-                        int stOffset = pathOffset + st.nameLength() + 1;
-                        st.writeTree(cache, entryIdx, stOffset, ow);
+							entryIdx += st._entrySpan;
+							childIdx++;
+							continue;
+						}
+					}
 
-                        size += FileMode.Tree.copyToLength();
-                        size += st.nameLength();
-                        size += Constants.OBJECT_ID_LENGTH + 2;
+					e.getFileMode().CopyTo(@out);
+					@out.Write(new[] { (byte)' ' }, 0, 1);
+					@out.Write(ep, pathOffset, ep.Length - pathOffset);
+					@out.Write(new byte[] { 0 }, 0, 1);
+					@out.Write(e.idBuffer(), e.idOffset(), Constants.OBJECT_ID_LENGTH);
+					entryIdx++;
+				}
 
-                        entryIdx += st.entrySpan;
-                        childIdx++;
-                        continue;
-                    }
-                }
+				_id = ow.WriteCanonicalTree(@out.ToArray());
+			}
+			return _id;
+		}
 
-                FileMode mode = e.getFileMode();
-                if ((int)mode.ObjectType == Constants.OBJ_BAD)
-                    throw new InvalidOperationException("Entry \"" + e.getPathString() + "\" has incorrect mode set up.");
+		private int ComputeSize(DirCacheEntry[] cache, int cIdx, int pathOffset, ObjectWriter ow)
+		{
+			int endIdx = cIdx + _entrySpan;
+			int childIdx = 0;
+			int entryIdx = cIdx;
+			int size = 0;
 
+			while (entryIdx < endIdx)
+			{
+				DirCacheEntry e = cache[entryIdx];
+				if (e.getStage() != 0)
+					throw new UnmergedPathException(e);
 
-                size += mode.copyToLength();
-                size += ep.Length - pathOffset;
-                size += Constants.OBJECT_ID_LENGTH + 2;
-                entryIdx++;
-            }
+				byte[] ep = e.Path;
+				if (childIdx < _childCount)
+				{
+					DirCacheTree st = _children[childIdx];
+					if (st.contains(ep, pathOffset, ep.Length))
+					{
+						int stOffset = pathOffset + st.nameLength() + 1;
+						st.writeTree(cache, entryIdx, stOffset, ow);
 
-            return size;
-        }
+						size += FileMode.Tree.copyToLength();
+						size += st.nameLength();
+						size += Constants.OBJECT_ID_LENGTH + 2;
 
-        private void appendName(StringBuilder r)
-        {
-            if (parent != null)
-            {
-                parent.appendName(r);
-                r.Append(getNameString());
-                r.Append('/');
-            }
-            else if (nameLength() > 0)
-            {
-                r.Append(getNameString());
-                r.Append('/');
-            }
-        }
+						entryIdx += st._entrySpan;
+						childIdx++;
+						continue;
+					}
+				}
 
-        public int nameLength()
-        {
-            return encodedName.Length;
-        }
+				FileMode mode = e.getFileMode();
+				if ((int)mode.ObjectType == Constants.OBJ_BAD)
+				{
+					throw new InvalidOperationException("Entry \"" + e.getPathString() + "\" has incorrect mode set up.");
+				}
 
-        public bool contains(byte[] a, int aOff, int aLen)
-        {
-            byte[] e = encodedName;
-            int eLen = e.Length;
-            for (int eOff = 0; eOff < eLen && aOff < aLen; eOff++, aOff++)
-                if (e[eOff] != a[aOff])
-                    return false;
-            if (aOff == aLen)
-                return false;
-            return a[aOff] == '/';
-        }
+				size += mode.copyToLength();
+				size += ep.Length - pathOffset;
+				size += Constants.OBJECT_ID_LENGTH + 2;
+				entryIdx++;
+			}
 
-        /**
-         * Update (if necessary) this tree's entrySpan.
-         *
-         * @param cache
-         *            the complete cache from DirCache.
-         * @param cCnt
-         *            number of entries in <code>cache</code> that are valid for
-         *            iteration.
-         * @param cIdx
-         *            first position of <code>cache</code> that is a member of this
-         *            tree. The path of <code>cache[cacheIdx].path</code> for the
-         *            range <code>[0,pathOff-1)</code> matches the complete path of
-         *            this tree, from the root of the repository.
-         * @param pathOff
-         *            number of bytes of <code>cache[cacheIdx].path</code> that
-         *            matches this tree's path. The value at array position
-         *            <code>cache[cacheIdx].path[pathOff-1]</code> is always '/' if
-         *            <code>pathOff</code> is > 0.
-         */
-        public void validate(DirCacheEntry[] cache, int cCnt, int cIdx,
-                 int pathOff)
-        {
-            if (entrySpan >= 0)
-            {
-                // If we are valid, our children are also valid.
-                // We have no need to validate them.
-                //
-                return;
-            }
+			return size;
+		}
 
-            entrySpan = 0;
-            if (cCnt == 0)
-            {
-                // Special case of an empty index, and we are the root tree.
-                //
-                return;
-            }
+		private void AppendName(StringBuilder sb)
+		{
+			if (_parent != null)
+			{
+				_parent.AppendName(sb);
+				sb.Append(getNameString());
+				sb.Append('/');
+			}
+			else if (nameLength() > 0)
+			{
+				sb.Append(getNameString());
+				sb.Append('/');
+			}
+		}
 
-            byte[] firstPath = cache[cIdx].path;
-            int stIdx = 0;
-            while (cIdx < cCnt)
-            {
-                byte[] currPath = cache[cIdx].path;
-                if (pathOff > 0 && !peq(firstPath, currPath, pathOff))
-                {
-                    // The current entry is no longer in this tree. Our
-                    // span is updated and the remainder goes elsewhere.
-                    //
-                    break;
-                }
+		public int nameLength()
+		{
+			return _encodedName.Length;
+		}
 
-                DirCacheTree st = stIdx < childCnt ? children[stIdx] : null;
-                int cc = namecmp(currPath, pathOff, st);
-                if (cc > 0)
-                {
-                    // This subtree is now empty.
-                    //
-                    removeChild(stIdx);
-                    continue;
-                }
+		public bool contains(byte[] a, int aOff, int aLen)
+		{
+			byte[] e = _encodedName;
+			int eLen = e.Length;
+			for (int eOff = 0; eOff < eLen && aOff < aLen; eOff++, aOff++)
+				if (e[eOff] != a[aOff])
+					return false;
+			if (aOff == aLen)
+				return false;
+			return a[aOff] == '/';
+		}
 
-                if (cc < 0)
-                {
-                    int p = slash(currPath, pathOff);
-                    if (p < 0)
-                    {
-                        // The entry has no '/' and thus is directly in this
-                        // tree. Count it as one of our own.
-                        //
-                        cIdx++;
-                        entrySpan++;
-                        continue;
-                    }
+		/**
+		 * Update (if necessary) this tree's entrySpan.
+		 *
+		 * @param cache
+		 *            the complete cache from DirCache.
+		 * @param cCnt
+		 *            number of entries in <code>cache</code> that are valid for
+		 *            iteration.
+		 * @param cIdx
+		 *            first position of <code>cache</code> that is a member of this
+		 *            tree. The path of <code>cache[cacheIdx].path</code> for the
+		 *            range <code>[0,pathOff-1)</code> matches the complete path of
+		 *            this tree, from the root of the repository.
+		 * @param pathOff
+		 *            number of bytes of <code>cache[cacheIdx].path</code> that
+		 *            matches this tree's path. The value at array position
+		 *            <code>cache[cacheIdx].path[pathOff-1]</code> is always '/' if
+		 *            <code>pathOff</code> is > 0.
+		 */
+		public void validate(DirCacheEntry[] cache, int cCnt, int cIdx,
+				 int pathOff)
+		{
+			if (_entrySpan >= 0)
+			{
+				// If we are valid, our children are also valid.
+				// We have no need to validate them.
+				//
+				return;
+			}
 
-                    // Build a new subtree for this entry.
-                    //
-                    st = new DirCacheTree(this, currPath, pathOff, p - pathOff);
-                    insertChild(stIdx, st);
-                }
+			_entrySpan = 0;
+			if (cCnt == 0)
+			{
+				// Special case of an empty index, and we are the root tree.
+				//
+				return;
+			}
 
-                // The entry is contained in this subtree.
-                //
-                st.validate(cache, cCnt, cIdx, pathOff + st.nameLength() + 1);
-                cIdx += st.entrySpan;
-                entrySpan += st.entrySpan;
-                stIdx++;
-            }
+			byte[] firstPath = cache[cIdx].Path;
+			int stIdx = 0;
+			while (cIdx < cCnt)
+			{
+				byte[] currPath = cache[cIdx].Path;
+				if (pathOff > 0 && !peq(firstPath, currPath, pathOff))
+				{
+					// The current entry is no longer in this tree. Our
+					// span is updated and the remainder goes elsewhere.
+					//
+					break;
+				}
 
-            if (stIdx < childCnt)
-            {
-                // None of our remaining children can be in this tree
-                // as the current cache entry is after our own name.
-                //
-                DirCacheTree[] dct = new DirCacheTree[stIdx];
-                Array.Copy(children, 0, dct, 0, stIdx);
-                children = dct;
-            }
-        }
+				DirCacheTree st = stIdx < _childCount ? _children[stIdx] : null;
+				int cc = NameComparison(currPath, pathOff, st);
+				if (cc > 0)
+				{
+					// This subtree is now empty.
+					//
+					RemoveChild(stIdx);
+					continue;
+				}
 
-        private void insertChild(int stIdx, DirCacheTree st)
-        {
-            DirCacheTree[] c = children;
-            if (childCnt + 1 <= c.Length)
-            {
-                if (stIdx < childCnt)
-                    Array.Copy(c, stIdx, c, stIdx + 1, childCnt - stIdx);
-                c[stIdx] = st;
-                childCnt++;
-                return;
-            }
+				if (cc < 0)
+				{
+					int p = Slash(currPath, pathOff);
+					if (p < 0)
+					{
+						// The entry has no '/' and thus is directly in this
+						// tree. Count it as one of our own.
+						//
+						cIdx++;
+						_entrySpan++;
+						continue;
+					}
 
-            int n = c.Length;
-            DirCacheTree[] a = new DirCacheTree[n + 1];
-            if (stIdx > 0)
-                Array.Copy(c, 0, a, 0, stIdx);
-            a[stIdx] = st;
-            if (stIdx < n)
-                Array.Copy(c, stIdx, a, stIdx + 1, n - stIdx);
-            children = a;
-            childCnt++;
-        }
+					// Build a new subtree for this entry.
+					//
+					st = new DirCacheTree(this, currPath, pathOff, p - pathOff);
+					InsertChild(stIdx, st);
+				}
 
-        private void removeChild(int stIdx)
-        {
-            int n = --childCnt;
-            if (stIdx < n)
-                Array.Copy(children, stIdx + 1, children, stIdx, n - stIdx);
-            children[n] = null;
-        }
+				// The entry is contained in this subtree.
+				//
+				st.validate(cache, cCnt, cIdx, pathOff + st.nameLength() + 1);
+				cIdx += st._entrySpan;
+				_entrySpan += st._entrySpan;
+				stIdx++;
+			}
 
-        public static bool peq(byte[] a, byte[] b, int aLen)
-        {
-            if (b.Length < aLen)
-                return false;
-            for (aLen--; aLen >= 0; aLen--)
-                if (a[aLen] != b[aLen])
-                    return false;
-            return true;
-        }
+			if (stIdx < _childCount)
+			{
+				// None of our remaining children can be in this tree
+				// as the current cache entry is after our own name.
+				//
+				var dct = new DirCacheTree[stIdx];
+				Array.Copy(_children, 0, dct, 0, stIdx);
+				_children = dct;
+			}
+		}
 
-        private static int namecmp(byte[] a, int aPos, DirCacheTree ct)
-        {
-            if (ct == null)
-                return -1;
-            byte[] b = ct.encodedName;
-            int aLen = a.Length;
-            int bLen = b.Length;
-            int bPos = 0;
-            for (; aPos < aLen && bPos < bLen; aPos++, bPos++)
-            {
-                int cmp = (a[aPos] & 0xff) - (b[bPos] & 0xff);
-                if (cmp != 0)
-                    return cmp;
-            }
-            if (bPos == bLen)
-                return a[aPos] == '/' ? 0 : -1;
-            return aLen - bLen;
-        }
+		private void InsertChild(int stIdx, DirCacheTree st)
+		{
+			DirCacheTree[] c = _children;
+			if (_childCount + 1 <= c.Length)
+			{
+				if (stIdx < _childCount)
+					Array.Copy(c, stIdx, c, stIdx + 1, _childCount - stIdx);
+				c[stIdx] = st;
+				_childCount++;
+				return;
+			}
 
-        private static int slash(byte[] a, int aPos)
-        {
-            int aLen = a.Length;
-            for (; aPos < aLen; aPos++)
-                if (a[aPos] == '/')
-                    return aPos;
-            return -1;
-        }
-    }
+			int n = c.Length;
+			var a = new DirCacheTree[n + 1];
+			if (stIdx > 0)
+				Array.Copy(c, 0, a, 0, stIdx);
+			a[stIdx] = st;
+			if (stIdx < n)
+				Array.Copy(c, stIdx, a, stIdx + 1, n - stIdx);
+			_children = a;
+			_childCount++;
+		}
+
+		private void RemoveChild(int stIdx)
+		{
+			int n = --_childCount;
+			if (stIdx < n)
+			{
+				Array.Copy(_children, stIdx + 1, _children, stIdx, n - stIdx);
+			}
+			_children[n] = null;
+		}
+
+		public static bool peq(byte[] a, byte[] b, int aLen)
+		{
+			if (b.Length < aLen) return false;
+			for (aLen--; aLen >= 0; aLen--)
+			{
+				if (a[aLen] != b[aLen])
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		private static int NameComparison(byte[] a, int aPos, DirCacheTree ct)
+		{
+			if (ct == null) return -1;
+
+			byte[] b = ct._encodedName;
+			int aLen = a.Length;
+			int bLen = b.Length;
+			int bPos = 0;
+			for (; aPos < aLen && bPos < bLen; aPos++, bPos++)
+			{
+				int cmp = (a[aPos] & 0xff) - (b[bPos] & 0xff);
+				if (cmp != 0)
+				{
+					return cmp;
+				}
+			}
+
+			if (bPos == bLen)
+			{
+				return a[aPos] == '/' ? 0 : -1;
+			}
+
+			return aLen - bLen;
+		}
+
+		private static int Slash(byte[] a, int aPos)
+		{
+			int aLen = a.Length;
+			for (; aPos < aLen; aPos++)
+			{
+				if (a[aPos] == '/')
+				{
+					return aPos;
+				}
+			}
+			return -1;
+		}
+	}
 }

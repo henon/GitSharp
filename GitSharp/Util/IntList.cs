@@ -69,7 +69,7 @@ namespace GitSharp.Util
 
 	    /**
 	     * @param i
-	     *            index to read, must be in the range [0, {@link #size()}).
+	     *            index to Read, must be in the range [0, {@link #size()}).
 	     * @return the number at the specified index
 	     * @throws ArrayIndexOutOfBoundsException
 	     *             the index outside the valid range

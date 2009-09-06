@@ -37,56 +37,41 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using GitSharp;
-using GitSharp.Tests.Util;
-using System.IO;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
-    public class PackReaderTests : RepositoryTestCase
-    {
-        private static string PACK_NAME = "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f";
-        private static string TEST_PACK = "Resources/" + PACK_NAME + ".pack";
-        private static string TEST_IDX = "Resources/" + PACK_NAME + ".idx";
+	[TestFixture]
+	public class PackReaderTests : RepositoryTestCase
+	{
+		private const string PackName = "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f";
+		private static readonly string TestPack = "Resources/" + GitSharp.Transport.IndexPack.GetPackFileName(PackName);
+		private static readonly string TestIdx = "Resources/" + GitSharp.Transport.IndexPack.GetIndexFileName(PackName);
 
-        [Test]
-        public void test003_lookupCompressedObject()
-        {
-            PackFile pr;
-            ObjectId id;
-            PackedObjectLoader or;
+		[Test]
+		public void test003_lookupCompressedObject()
+		{
+			ObjectId id = ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327");
+			var pr = new PackFile(TestIdx, TestPack);
+			PackedObjectLoader or = pr.Get(new WindowCursor(), id);
+			Assert.IsNotNull(or);
+			Assert.AreEqual(Constants.OBJ_TREE, or.Type);
+			Assert.AreEqual(35, or.Size);
+			Assert.AreEqual(7738, or.DataOffset);
+			pr.Close();
+		}
 
-            id = ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327");
-            pr = new PackFile(TEST_IDX, TEST_PACK);
-            or = pr.Get(new WindowCursor(), id);
-            Assert.IsNotNull(or);
-            Assert.AreEqual(Constants.OBJ_TREE, or.getType());
-            Assert.AreEqual(35, or.getSize());
-            Assert.AreEqual(7738, or.getDataOffset());
-            pr.Close();
-        }
-
-        [Test]
-        public void test004_lookupDeltifiedObject()
-        {
-            ObjectId id;
-            ObjectLoader or;
-
-            id = ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259");
-            or = db.OpenObject(id);
-            Assert.IsNotNull(or);
-            Assert.IsTrue(or is PackedObjectLoader);
-            Assert.AreEqual(Constants.OBJ_BLOB, or.getType());
-            Assert.AreEqual(18009, or.getSize());
-            Assert.AreEqual(537, ((PackedObjectLoader)or).getDataOffset());
-        }
+		[Test]
+		public void test004_lookupDeltifiedObject()
+		{
+			ObjectId id = ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259");
+			ObjectLoader or = db.OpenObject(id);
+			Assert.IsNotNull(or);
+			Assert.IsTrue(or is PackedObjectLoader);
+			Assert.AreEqual(Constants.OBJ_BLOB, or.Type);
+			Assert.AreEqual(18009, or.Size);
+			Assert.AreEqual(537, ((PackedObjectLoader)or).DataOffset);
+		}
 
 #if todopack 
         // [henon] what is todopack anyway?
@@ -101,10 +86,10 @@ namespace GitSharp.Tests
 
             FileInfo packDir = new FileInfo(db.getObjectsDirectory(), "pack");
             String packname = "pack-2e71952edc41f3ce7921c5e5dd1b64f48204cf35";
-            copyFile(new FileInfo(todopack, packname + ".pack"), new FileInfo(packDir,
-                    packname + ".pack"));
-            copyFile(new FileInfo(todopack, packname + ".idx"), new FileInfo(packDir,
-                    packname + ".idx"));
+            copyFile(new FileInfo(todopack, GitSharp.Transport.IndexPack.GetPackFileName(packname)), new FileInfo(packDir,
+                    GitSharp.Transport.IndexPack.GetPackFileName(packname));
+            copyFile(new FileInfo(todopack, GitSharp.Transport.IndexPack.GetIndexFileName(packname), new FileInfo(packDir,
+                    GitSharp.Transport.IndexPack.GetIndexFileName(packname));
             Tree t;
 
             t = db
@@ -120,5 +105,5 @@ namespace GitSharp.Tests
             t.memberCount();
         }
 #endif
-    }
+	}
 }

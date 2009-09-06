@@ -37,13 +37,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.RevWalk.Filter;
 using GitSharp.Exceptions;
+using GitSharp.RevWalk.Filter;
+
 namespace GitSharp.RevWalk
 {
-
-
-    /**
+	/**
      * Default (and first pass) RevCommit Generator implementation for RevWalk.
      * <p>
      * This generator starts from a set of one or more commits and process them in
@@ -52,137 +51,135 @@ namespace GitSharp.RevWalk
      * commit graph to be walked. A {@link RevFilter} may be used to select a subset
      * of the commits and return them to the caller.
      */
-    public class PendingGenerator : Generator
-    {
-        public static int PARSED = RevWalk.PARSED;
 
-        public static int SEEN = RevWalk.SEEN;
+	public class PendingGenerator : Generator
+	{
+		private static readonly RevCommit InitLast;
 
-        public static int UNINTERESTING = RevWalk.UNINTERESTING;
+		/**
+		 * Number of additional commits to scan after we think we are done.
+		 * <p>
+		 * This small buffer of commits is scanned to ensure we didn't miss anything
+		 * as a result of clock skew when the commits were made. We need to set our
+		 * constant to 1 additional commit due to the use of a pre-increment
+		 * operator when accessing the value.
+		 */
+		public static int OVER_SCAN = 5 + 1;
+		public static int PARSED = RevWalk.PARSED;
+		public static int SEEN = RevWalk.SEEN;
+		public static int UNINTERESTING = RevWalk.UNINTERESTING;
 
-        /**
-         * Number of additional commits to scan after we think we are done.
-         * <p>
-         * This small buffer of commits is scanned to ensure we didn't miss anything
-         * as a result of clock skew when the commits were made. We need to set our
-         * constant to 1 additional commit due to the use of a pre-increment
-         * operator when accessing the value.
-         */
-        public static int OVER_SCAN = 5 + 1;
+		private readonly RevFilter _filter;
+		private readonly int _output;
+		private readonly DateRevQueue _pending;
+		private readonly RevWalk _walker;
 
-        /** A commit near the end of time, to initialize {@link #last} with. */
-        private static RevCommit INIT_LAST;
+		public bool CanDispose { get; set; }
 
-        static PendingGenerator()
-        {
-            INIT_LAST = new RevCommit(ObjectId.ZeroId);
-            INIT_LAST.commitTime = int.MaxValue;
-        }
+		/** Last commit produced to the caller from {@link #next()}. */
+		private RevCommit _last = InitLast;
 
-        private RevWalk walker;
-
-        private DateRevQueue pending;
-
-        private RevFilter filter;
-
-        private int output;
-
-        /** Last commit produced to the caller from {@link #next()}. */
-        private RevCommit last = INIT_LAST;
-
-        /**
+		/**
          * Number of commits we have remaining in our over-scan allotment.
          * <p>
          * Only relevant if there are {@link #UNINTERESTING} commits in the
-         * {@link #pending} queue.
+         * {@link #_pending} queue.
          */
-        public int overScan = OVER_SCAN;
+		private int overScan = OVER_SCAN;
 
-        public bool canDispose;
+		static PendingGenerator()
+		{
+			InitLast = new RevCommit(ObjectId.ZeroId) { commitTime = int.MaxValue };
+		}
 
-        public PendingGenerator(RevWalk w, DateRevQueue p,
-                 RevFilter f, int @out)
-        {
-            walker = w;
-            pending = p;
-            filter = f;
-            output = @out;
-            canDispose = true;
-        }
+		public PendingGenerator(RevWalk w, DateRevQueue p, RevFilter f, int @out)
+		{
+			_walker = w;
+			_pending = p;
+			_filter = f;
+			_output = @out;
+			CanDispose = true;
+		}
 
-        public override int outputType()
-        {
-            return output | SORT_COMMIT_TIME_DESC;
-        }
+		public override int outputType()
+		{
+			return _output | SORT_COMMIT_TIME_DESC;
+		}
 
-        public override RevCommit next()
-        {
-            try
-            {
-                for (; ; )
-                {
-                    RevCommit c = pending.next();
-                    if (c == null)
-                    {
-                        walker.curs.release();
-                        return null;
-                    }
+		public override RevCommit next()
+		{
+			try
+			{
+				while (true)
+				{
+					RevCommit c = _pending.next();
+					if (c == null)
+					{
+						_walker.curs.Release();
+						return null;
+					}
 
-                    bool produce;
-                    if ((c.flags & UNINTERESTING) != 0)
-                        produce = false;
-                    else
-                        produce = filter.include(walker, c);
+					bool produce = !((c.flags & UNINTERESTING) != 0) && _filter.include(_walker, c);
 
-                    foreach (RevCommit p in c.parents)
-                    {
-                        if ((p.flags & SEEN) != 0)
-                            continue;
-                        if ((p.flags & PARSED) == 0)
-                            p.parse(walker);
-                        p.flags |= SEEN;
-                        pending.add(p);
-                    }
-                    walker.carryFlagsImpl(c);
+					foreach (RevCommit p in c.parents)
+					{
+						if ((p.flags & SEEN) != 0) continue;
+						if ((p.flags & PARSED) == 0)
+						{
+							p.parse(_walker);
+						}
+						p.flags |= SEEN;
+						_pending.add(p);
+					}
+					_walker.carryFlagsImpl(c);
 
-                    if ((c.flags & UNINTERESTING) != 0)
-                    {
-                        if (pending.everbodyHasFlag(UNINTERESTING))
-                        {
-                            RevCommit n = pending.peek();
-                            if (n != null && n.commitTime >= last.commitTime)
-                            {
-                                // This is too close to call. The next commit we
-                                // would pop is dated after the last one produced.
-                                // We have to keep going to ensure that we carry
-                                // flags as much as necessary.
-                                //
-                                overScan = OVER_SCAN;
-                            }
-                            else if (--overScan == 0)
-                                throw StopWalkException.INSTANCE;
-                        }
-                        else
-                        {
-                            overScan = OVER_SCAN;
-                        }
-                        if (canDispose)
-                            c.dispose();
-                        continue;
-                    }
+					if ((c.flags & UNINTERESTING) != 0)
+					{
+						if (_pending.everbodyHasFlag(UNINTERESTING))
+						{
+							RevCommit n = _pending.peek();
+							if (n != null && n.commitTime >= _last.commitTime)
+							{
+								// This is too close to call. The next commit we
+								// would pop is dated after the last one produced.
+								// We have to keep going to ensure that we carry
+								// flags as much as necessary.
+								//
+								overScan = OVER_SCAN;
+							}
+							else if (--overScan == 0)
+							{
+								throw StopWalkException.INSTANCE;
+							}
+						}
+						else
+						{
+							overScan = OVER_SCAN;
+						}
+						if (CanDispose)
+						{
+							c.dispose();
+						}
+						continue;
+					}
 
-                    if (produce)
-                        return last = c;
-                    else if (canDispose)
-                        c.dispose();
-                }
-            }
-            catch (StopWalkException)
-            {
-                walker.curs.release();
-                pending.clear();
-                return null;
-            }
-        }
-    }
+					if (produce)
+					{
+						return _last = c;
+					}
+
+					if (CanDispose)
+					{
+						c.dispose();
+					}
+				}
+			}
+			catch (StopWalkException)
+			{
+				_walker.curs.Release();
+				_pending.clear();
+				return null;
+			}
+		}
+	}
 }

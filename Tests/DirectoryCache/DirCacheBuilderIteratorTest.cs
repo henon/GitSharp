@@ -38,57 +38,60 @@
 
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
-    using GitSharp.DirectoryCache;
-    using GitSharp.TreeWalk.Filter;
-    [TestFixture]
-    public class DirCacheBuilderIteratorTest : RepositoryTestCase
-    {
-        [Test]
-        public void testPathFilterGroup_DoesNotSkipTail()
-        {
-            DirCache dc = DirCache.read(db);
+	using NUnit.Framework;
+	using GitSharp.DirectoryCache;
+	using GitSharp.TreeWalk.Filter;
+	[TestFixture]
+	public class DirCacheBuilderIteratorTest : RepositoryTestCase
+	{
+		[Test]
+		public void testPathFilterGroup_DoesNotSkipTail()
+		{
+			DirCache dc = DirCache.read(db);
 
-            var mode = FileMode.RegularFile;
-            string[] paths = { "a.", "a/b", "a/c", "a/d", "a0b" };
-            DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
-            for (int i = 0; i < paths.Length; i++)
-            {
-                ents[i] = new DirCacheEntry(paths[i]);
-                ents[i].setFileMode(mode);
-            }
-            {
-                DirCacheBuilder builder = dc.builder();
-                for (int i = 0; i < ents.Length; i++)
-                    builder.add(ents[i]);
-                builder.finish();
-            }
+			var mode = FileMode.RegularFile;
+			string[] paths = { "a.", "a/b", "a/c", "a/d", "a0b" };
+			var ents = new DirCacheEntry[paths.Length];
+			for (int i = 0; i < paths.Length; i++)
+			{
+				ents[i] = new DirCacheEntry(paths[i]);
+				ents[i].setFileMode(mode);
+			}
+			{
+				DirCacheBuilder builder = dc.builder();
+				for (int i = 0; i < ents.Length; i++)
+				{
+					builder.add(ents[i]);
+				}
+				builder.finish();
+			}
 
-            int expIdx = 2;
-            DirCacheBuilder b = dc.builder();
-            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
-            tw.reset();
-            tw.addTree(new DirCacheBuildIterator(b));
-            tw.setRecursive(true);
-            tw.setFilter(PathFilterGroup.createFromStrings(new string[]{ paths[expIdx] }));
+			const int expIdx = 2;
+			DirCacheBuilder b = dc.builder();
+			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			tw.reset();
+			tw.addTree(new DirCacheBuildIterator(b));
+			tw.Recursive = true;
+			tw.setFilter(PathFilterGroup.createFromStrings(new[] { paths[expIdx] }));
 
-            Assert.IsTrue( tw.next(),"found " + paths[expIdx]);
-            DirCacheIterator c = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
-            Assert.IsNotNull(c);
-            Assert.AreEqual(expIdx, c.ptr);
-            Assert.AreSame(ents[expIdx], c.getDirCacheEntry());
-            Assert.AreEqual(paths[expIdx], tw.getPathString());
-            Assert.AreEqual(mode.Bits, tw.getRawMode(0));
-            Assert.AreSame(mode, tw.getFileMode(0));
-            b.add(c.getDirCacheEntry());
+			Assert.IsTrue(tw.next(), "found " + paths[expIdx]);
+			var c = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
+			Assert.IsNotNull(c);
+			Assert.AreEqual(expIdx, c.Pointer);
+			Assert.AreSame(ents[expIdx], c.getDirCacheEntry());
+			Assert.AreEqual(paths[expIdx], tw.getPathString());
+			Assert.AreEqual(mode.Bits, tw.getRawMode(0));
+			Assert.AreSame(mode, tw.getFileMode(0));
+			b.add(c.getDirCacheEntry());
 
-            Assert.IsFalse(tw.next(),"no more entries" ); 
+			Assert.IsFalse(tw.next(), "no more entries");
 
-            b.finish();
-            Assert.AreEqual(ents.Length, dc.getEntryCount());
-            for (int i = 0; i < ents.Length; i++)
-                Assert.AreSame(ents[i], dc.getEntry(i));
-        }
-
-    }
+			b.finish();
+			Assert.AreEqual(ents.Length, dc.getEntryCount());
+			for (int i = 0; i < ents.Length; i++)
+			{
+				Assert.AreSame(ents[i], dc.getEntry(i));
+			}
+		}
+	}
 }

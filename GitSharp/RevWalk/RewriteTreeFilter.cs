@@ -60,19 +60,16 @@ namespace GitSharp.RevWalk
      */
     public class RewriteTreeFilter : RevFilter
     {
-        private static int PARSED = RevWalk.PARSED;
-
-        private static int UNINTERESTING = RevWalk.UNINTERESTING;
-
-        private static int REWRITE = RevWalk.REWRITE;
-
-        private TreeWalk.TreeWalk pathFilter;
+        private static readonly int Parsed = RevWalk.PARSED;
+        private static readonly int Uninteresting = RevWalk.UNINTERESTING;
+        private static readonly int Rewrite = RevWalk.REWRITE;
+        private readonly TreeWalk.TreeWalk _pathFilter;
 
         public RewriteTreeFilter(RevWalk walker, TreeFilter t)
         {
-            pathFilter = new TreeWalk.TreeWalk(walker.db);
-            pathFilter.setFilter(t);
-            pathFilter.setRecursive(t.shouldBeRecursive());
+            _pathFilter = new TreeWalk.TreeWalk(walker.db);
+            _pathFilter.setFilter(t);
+            _pathFilter.Recursive = t.shouldBeRecursive();
         }
 
         public override RevFilter Clone()
@@ -86,15 +83,19 @@ namespace GitSharp.RevWalk
             //
             RevCommit[] pList = c.parents;
             int nParents = pList.Length;
-            TreeWalk.TreeWalk tw = pathFilter;
-            ObjectId[] trees = new ObjectId[nParents + 1];
+            TreeWalk.TreeWalk tw = _pathFilter;
+            var trees = new ObjectId[nParents + 1];
+
             for (int i = 0; i < nParents; i++)
             {
                 RevCommit p = c.parents[i];
-                if ((p.flags & PARSED) == 0)
-                    p.parse(walker);
+                if ((p.flags & Parsed) == 0)
+                {
+                	p.parse(walker);
+                }
                 trees[i] = p.getTree();
             }
+
             trees[nParents] = c.getTree();
             tw.reset(trees);
 
@@ -117,47 +118,47 @@ namespace GitSharp.RevWalk
                     // No changes, so our tree is effectively the same as
                     // our parent tree. We pass the buck to our parent.
                     //
-                    c.flags |= REWRITE;
+                    c.flags |= Rewrite;
                     return false;
                 }
-                else
-                {
-                    // We have interesting items, but neither of the special
-                    // cases denoted above.
-                    //
-                    return true;
-                }
-            }
-            else if (nParents == 0)
-            {
-                // We have no parents to compare against. Consider us to be
-                // REWRITE only if we have no paths matching our filter.
-                //
-                if (tw.next())
-                    return true;
-                c.flags |= REWRITE;
-                return false;
-            }
 
-            // We are a merge commit. We can only be REWRITE if we are same
+				// We have interesting items, but neither of the special
+				// cases denoted above.
+				//
+				return true;
+            }
+        	
+			if (nParents == 0)
+        	{
+        		// We have no parents to compare against. Consider us to be
+        		// Rewrite only if we have no paths matching our filter.
+        		//
+        		if (tw.next()) return true;
+
+        		c.flags |= Rewrite;
+        		return false;
+        	}
+
+        	// We are a merge commit. We can only be Rewrite if we are same
             // to _all_ parents. We may also be able to eliminate a parent if
             // it does not contribute changes to us. Such a parent may be an
             // uninteresting side branch.
             //
-            int[] chgs_ = new int[nParents];
-            int[] adds_ = new int[nParents];
+            var chgs_ = new int[nParents];
+            var adds_ = new int[nParents];
             while (tw.next())
             {
                 int myMode = tw.getRawMode(nParents);
                 for (int i = 0; i < nParents; i++)
                 {
                     int pMode = tw.getRawMode(i);
-                    if (myMode == pMode && tw.idEqual(i, nParents))
-                        continue;
+                    if (myMode == pMode && tw.idEqual(i, nParents)) continue;
 
                     chgs_[i]++;
                     if (pMode == 0 && myMode != 0)
-                        adds_[i]++;
+                    {
+                    	adds_[i]++;
+                    }
                 }
             }
 
@@ -173,7 +174,7 @@ namespace GitSharp.RevWalk
                     //
 
                     RevCommit p = pList[i];
-                    if ((p.flags & UNINTERESTING) != 0)
+                    if ((p.flags & Uninteresting) != 0)
                     {
                         // This parent was marked as not interesting by the
                         // application. We should look for another parent
@@ -183,8 +184,8 @@ namespace GitSharp.RevWalk
                         continue;
                     }
 
-                    c.flags |= REWRITE;
-                    c.parents = new RevCommit[] { p };
+                    c.flags |= Rewrite;
+                    c.parents = new[] { p };
                     return false;
                 }
 
@@ -216,7 +217,7 @@ namespace GitSharp.RevWalk
             // as they are and allow those parents to flow into pending
             // for further scanning.
             //
-            c.flags |= REWRITE;
+            c.flags |= Rewrite;
             return false;
         }
     }

@@ -36,55 +36,56 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace GitSharp
 {
-    /** Active handle to a ByteWindow. */
+    /// <summary>
+    /// Active handle to a ByteWindow.
+    /// </summary>
     public class WindowCursor
     {
-        /** Temporary buffer large enough for at least one raw object id. */
-        internal byte[] tempId = new byte[Constants.OBJECT_ID_LENGTH];
+        private Inflater _inflater;
+        private ByteWindow _byteWindow;
 
-        private Inflater inf;
-
-        private ByteWindow window;
-
-
-        /**
-         * Copy bytes from the window to a caller supplied buffer.
-         * 
-         * @param pack
-         *            the file the desired window is stored within.
-         * @param position
-         *            position within the file to read from.
-         * @param dstbuf
-         *            destination buffer to copy into.
-         * @param dstoff
-         *            offset within <code>dstbuf</code> to start copying into.
-         * @param cnt
-         *            number of bytes to copy. This value may exceed the number of
-         *            bytes remaining in the window starting at offset
-         *            <code>pos</code>.
-         * @return number of bytes actually copied; this may be less than
-         *         <code>cnt</code> if <code>cnt</code> exceeded the number of
-         *         bytes available.
-         * @
-         *             this cursor does not match the provider or id and the proper
-         *             window could not be acquired through the provider's cache.
-         */
-        public int copy(PackFile pack, long position, byte[] dstbuf, int dstoff, int cnt)
+        public WindowCursor()
         {
-            long Length = pack.Length;
+            TempId = new byte[Constants.OBJECT_ID_LENGTH];
+        }
+
+        /// <summary>
+        /// Temporary buffer large enough for at least one raw object id.
+        /// </summary>
+        internal byte[] TempId { get; private set; }
+
+        /// <summary>
+        /// Copy bytes from the window to a caller supplied buffer.
+        /// </summary>
+        /// <param name="pack">The file the desired window is stored within.</param>
+        /// <param name="position">Position within the file to read from.</param>
+        /// <param name="dstbuf">Destination buffer to copy into.</param>
+        /// <param name="dstoff">Offset within <see cref="dstbuf"/> to start copying into.</param>
+        /// <param name="cnt">
+        /// The number of bytes to copy. This value may exceed the number of
+        /// bytes remaining in the window starting at offset <see cref="position"/>.
+        /// </param>
+        /// <returns>
+        /// number of bytes actually copied; this may be less than
+        /// <see cref="cnt"/> if <see cref="cnt"/> exceeded the number of
+        /// bytes available.
+        /// </returns>
+        /// <remarks>
+        /// This cursor does not match the provider or id and the proper 
+        /// window could not be acquired through the provider's cache.
+        /// </remarks>
+        public int Copy(PackFile pack, long position, byte[] dstbuf, int dstoff, int cnt)
+        {
+            long length = pack.Length;
             int need = cnt;
-            while (need > 0 && position < Length)
+            while (need > 0 && position < length)
             {
-                pin(pack, position);
-                int r = window.copy(position, dstbuf, dstoff, need);
+                Pin(pack, position);
+                int r = _byteWindow.copy(position, dstbuf, dstoff, need);
                 position += r;
                 dstoff += r;
                 need -= r;
@@ -92,63 +93,75 @@ namespace GitSharp
             return cnt - need;
         }
 
-
-        /**
-         * Pump bytes into the supplied inflater as input.
-         * 
-         * @param pack
-         *            the file the desired window is stored within.
-         * @param position
-         *            position within the file to read from.
-         * @param dstbuf
-         *            destination buffer the inflater should output decompressed
-         *            data to.
-         * @param dstoff
-         *            current offset within <code>dstbuf</code> to inflate into.
-         * @return updated <code>dstoff</code> based on the number of bytes
-         *         successfully inflated into <code>dstbuf</code>.
-         * @
-         *             this cursor does not match the provider or id and the proper
-         *             window could not be acquired through the provider's cache.
-         * @throws DataFormatException
-         *             the inflater encountered an invalid chunk of data. Data
-         *             stream corruption is likely.
-         */
-        public int inflate(PackFile pack, long position, byte[] dstbuf, int dstoff)
+        /// <summary>
+        /// Pump bytes into the supplied inflater as input.
+        /// </summary>
+        /// <param name="pack">The file the desired window is stored within.</param>
+        /// <param name="position">Position within the file to read from.</param>
+        /// <param name="dstbuf">
+        /// Destination buffer the inflater should output decompressed
+        /// data to.
+        /// </param>
+        /// <param name="dstoff">Current offset within <see cref="dstbuf"/> to inflate into.</param>
+        /// <returns>
+        /// Updated <see cref=dstoff"/> based on the number of bytes
+        /// successfully inflated into <see cref=dstbuff"/>.
+        /// </returns>
+        /// <remarks>
+        /// this cursor does not match the provider or id and the proper
+        /// window could not be acquired through the provider's cache.
+        /// </remarks>
+        public int Inflate(PackFile pack, long position, byte[] dstbuf, int dstoff)
         {
-            if (inf == null)
-                inf = InflaterCache.Instance.get();
-            else
-                inf.Reset();
-            for (; ; )
+            if (_inflater == null)
             {
-                pin(pack, position);
-                dstoff = window.inflate(position, dstbuf, dstoff, inf);
-                if (inf.IsFinished)
+                _inflater = InflaterCache.Instance.get();
+            }
+            else
+            {
+                _inflater.Reset();
+            }
+
+            while (true)
+            {
+                Pin(pack, position);
+                dstoff = _byteWindow.Inflate(position, dstbuf, dstoff, _inflater);
+                if (_inflater.IsFinished)
+                {
                     return dstoff;
-                position = window.end;
+                }
+                position = _byteWindow.End;
             }
         }
 
-        public void inflateVerify(PackFile pack, long position)
+        public void InflateVerify(PackFile pack, long position)
         {
-            if (inf == null)
-                inf = InflaterCache.Instance.get();
-            else
-                inf.Reset();
-            for (; ; )
+            if (_inflater == null)
             {
-                pin(pack, position);
-                window.inflateVerify(position, inf);
-                if (inf.IsFinished)
+                _inflater = InflaterCache.Instance.get();
+            }
+            else
+            {
+                _inflater.Reset();
+            }
+
+            while (true)
+            {
+                Pin(pack, position);
+                _byteWindow.inflateVerify(position, _inflater);
+                
+				if (_inflater.IsFinished)
+                {
                     return;
-                position = window.end;
+                }
+                
+				position = _byteWindow.End;
             }
         }
 
-        private void pin(PackFile pack, long position)
+        private void Pin(PackFile pack, long position)
         {
-            ByteWindow w = window;
+            ByteWindow w = _byteWindow;
             if (w == null || !w.contains(pack, position))
             {
                 // If memory is low, we may need what is in our window field to
@@ -156,33 +169,40 @@ namespace GitSharp
                 // So we always clear it, even though we are just going to set
                 // it again.
                 //
-                window = null;
-                window = WindowCache.get(pack, position);
+                _byteWindow = null;
+                _byteWindow = WindowCache.get(pack, position);
             }
         }
 
-        /** Release the current window cursor. */
-        public void release()
+        /// <summary>
+        /// Release the current window cursor.
+        /// </summary>
+        public void Release()
         {
-            window = null;
+            _byteWindow = null;
             try
             {
-                InflaterCache.Instance.release(inf);
+                InflaterCache.Instance.release(_inflater);
             }
             finally
             {
-                inf = null;
+                _inflater = null;
             }
         }
 
-        /**
-         * @param curs cursor to release; may be null.
-         * @return always null.
-         */
-        public static WindowCursor release(WindowCursor curs)
+        /// <summary>
+        /// Release the window cursor.
+        /// </summary>
+        /// <param name="cursor">cursor to Release; may be null.
+        /// </param>
+        /// <returns>always null</returns>
+        public static WindowCursor Release(WindowCursor cursor)
         {
-            if (curs != null)
-                curs.release();
+            if (cursor != null)
+            {
+                cursor.Release();
+            }
+
             return null;
         }
     }

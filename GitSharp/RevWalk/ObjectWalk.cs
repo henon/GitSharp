@@ -36,412 +36,462 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using GitSharp.TreeWalk;
 using GitSharp.Exceptions;
+
 namespace GitSharp.RevWalk
 {
-
-
-
-    /**
-     * Specialized subclass of RevWalk to include trees, blobs and tags.
-     * <p>
-     * Unlike RevWalk this subclass is able to remember starting roots that include
-     * annotated tags, or arbitrary trees or blobs. Once commit generation is
-     * complete and all commits have been popped by the application, individual
-     * annotated tag, tree and blob objects can be popped through the additional
-     * method {@link #nextObject()}.
-     * <p>
-     * Tree and blob objects reachable from interesting commits are automatically
-     * scheduled for inclusion in the results of {@link #nextObject()}, returning
-     * each object exactly once. Objects are sorted and returned according to the
-     * the commits that reference them and the order they appear within a tree.
-     * Ordering can be affected by changing the {@link RevSort} used to order the
-     * commits that are returned first.
-     */
+	/// <summary>
+	/// Specialized subclass of RevWalk to include trees, blobs and tags.
+	/// <para>
+	/// Unlike RevWalk this subclass is able to remember starting roots that include
+	/// annotated tags, or arbitrary trees or blobs. Once commit generation is
+	/// complete and all commits have been popped by the application, individual
+	/// annotated tag, tree and blob objects can be popped through the additional
+	/// method <see cref="nextObject"/>.
+	/// <p>
+	/// Tree and blob objects reachable from interesting commits are automatically
+	/// scheduled for inclusion in the results of <see cref="nextObject"/>, returning
+	/// each object exactly once. Objects are sorted and returned according to the
+	/// the commits that reference them and the order they appear within a tree.
+	/// Ordering can be affected by changing the <see cref="RevSort"/> used to order 
+	/// the commits that are returned first.
+	/// </summary>
     public class ObjectWalk : RevWalk
     {
+        /// <summary>
+		/// Indicates a non-RevCommit is in <see cref="PendingObjects"/>.
+		/// <para>
+		/// We can safely reuse <see cref="RevWalk.REWRITE"/> here for the same value as it
+		/// is only set on RevCommit and <see cref="PendingObjects"/> never has RevCommit
+		/// instances inserted into it.
+		/// </para>
+		/// </summary>
+        private static readonly int InPending = REWRITE;
 
-        /**
-         * Indicates a non-RevCommit is in {@link #pendingObjects}.
-         * <p>
-         * We can safely reuse {@link RevWalk#REWRITE} here for the same value as it
-         * is only set on RevCommit and {@link #pendingObjects} never has RevCommit
-         * instances inserted into it.
-         */
-        private static int IN_PENDING = RevWalk.REWRITE;
+        private CanonicalTreeParser _treeWalk;
+        private BlockObjQueue _pendingObjects;
+		private RevTree _currentTree;
+        private bool _fromTreeWalk;
+        private RevTree _nextSubtree;
 
-        private CanonicalTreeParser treeWalk;
-
-        private BlockObjQueue pendingObjects;
-
-        private RevTree currentTree;
-
-        private bool fromTreeWalk;
-
-        private RevTree nextSubtree;
-
-        /**
-         * Create a new revision and object walker for a given repository.
-         * 
-         * @param repo
-         *            the repository the walker will obtain data from.
-         */
+		/// <summary>
+		/// Create a new revision and object walker for a given repository.
+		/// </summary>
+		/// <param name="repo">
+		/// The repository the walker will obtain data from.
+		/// </param>
         public ObjectWalk(Repository repo)
             : base(repo)
         {
-            pendingObjects = new BlockObjQueue();
-            treeWalk = new CanonicalTreeParser();
+            _pendingObjects = new BlockObjQueue();
+            _treeWalk = new CanonicalTreeParser();
         }
-
-        /**
-         * Mark an object or commit to start graph traversal from.
-         * <p>
-         * Callers are encouraged to use {@link RevWalk#parseAny(AnyObjectId)}
-         * instead of {@link RevWalk#lookupAny(AnyObjectId, int)}, as this method
-         * requires the object to be parsed before it can be added as a root for the
-         * traversal.
-         * <p>
-         * The method will automatically parse an unparsed object, but error
-         * handling may be more difficult for the application to explain why a
-         * RevObject is not actually valid. The object pool of this walker would
-         * also be 'poisoned' by the invalid RevObject.
-         * <p>
-         * This method will automatically call {@link RevWalk#markStart(RevCommit)}
-         * if passed RevCommit instance, or a RevTag that directly (or indirectly)
-         * references a RevCommit.
-         * 
-         * @param o
-         *            the object to start traversing from. The object passed must be
-         *            from this same revision walker.
-         * @throws MissingObjectException
-         *             the object supplied is not available from the object
-         *             database. This usually indicates the supplied object is
-         *             invalid, but the reference was constructed during an earlier
-         *             invocation to {@link RevWalk#lookupAny(AnyObjectId, int)}.
-         * @throws IncorrectObjectTypeException
-         *             the object was not parsed yet and it was discovered during
-         *             parsing that it is not actually the type of the instance
-         *             passed in. This usually indicates the caller used the wrong
-         *             type in a {@link RevWalk#lookupAny(AnyObjectId, int)} call.
-         * @
-         *             a pack file or loose object could not be read.
-         */
+        
+		/// <summary>
+		/// Mark an object or commit to start graph traversal from. 
+		/// <para>
+		/// Callers are encouraged to use <see cref="RevWalk#parseAny(AnyObjectId)"/>
+		/// instead of <see cref="RevWalk#lookupAny(AnyObjectId, int)"/>, as this method
+		/// requires the object to be parsed before it can be added as a root for the
+		/// traversal.
+		/// </para><para>
+		/// The method will automatically parse an unparsed object, but error
+		/// handling may be more difficult for the application to explain why a
+		/// RevObject is not actually valid. The object pool of this walker would
+		/// also be 'poisoned' by the invalid <see cref="RevObject"/>.
+		/// </para><para>
+		/// This method will automatically call <see cref="RevWalk#markStart(RevCommit)"/>
+		/// if passed RevCommit instance, or a <see cref="RevTag"/> that directly (or indirectly)
+		/// references a <see cref="RevCommit"/>.
+		/// </para>
+		/// </summary>
+		/// <param name="o">
+		/// The object to start traversing from. The object passed must be
+		/// from this same revision walker.
+		/// </param>
+		/// <exception cref="MissingObjectException">
+		/// The object supplied is not available from the object
+		/// database. This usually indicates the supplied object is
+		/// invalid, but the reference was constructed during an earlier
+		/// invocation to <see cref="RevWalk#lookupAny(AnyObjectId, int)"/>.
+		/// </exception>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// The object was not parsed yet and it was discovered during
+		/// parsing that it is not actually the type of the instance
+		/// passed in. This usually indicates the caller used the wrong
+		/// type in a <see cref="RevWalk#lookupAny(AnyObjectId, int)"/> call.
+		/// </exception>
+		/// <exception cref="Exception">
+		/// A pack file or loose object could not be Read.
+		/// </exception>
         public void markStart(RevObject o)
         {
             while (o is RevTag)
             {
-                addObject(o);
+                AddObject(o);
                 o = ((RevTag)o).getObject();
                 parse(o);
             }
 
             if (o is RevCommit)
-                base.markStart((RevCommit)o);
+            {
+            	base.markStart((RevCommit)o);
+            }
             else
-                addObject(o);
+            {
+            	AddObject(o);
+            }
         }
 
-        /**
-         * Mark an object to not produce in the output.
-         * <p>
-         * Uninteresting objects denote not just themselves but also their entire
-         * reachable chain, back until the merge base of an uninteresting commit and
-         * an otherwise interesting commit.
-         * <p>
-         * Callers are encouraged to use {@link RevWalk#parseAny(AnyObjectId)}
-         * instead of {@link RevWalk#lookupAny(AnyObjectId, int)}, as this method
-         * requires the object to be parsed before it can be added as a root for the
-         * traversal.
-         * <p>
-         * The method will automatically parse an unparsed object, but error
-         * handling may be more difficult for the application to explain why a
-         * RevObject is not actually valid. The object pool of this walker would
-         * also be 'poisoned' by the invalid RevObject.
-         * <p>
-         * This method will automatically call {@link RevWalk#markStart(RevCommit)}
-         * if passed RevCommit instance, or a RevTag that directly (or indirectly)
-         * references a RevCommit.
-         * 
-         * @param o
-         *            the object to start traversing from. The object passed must be
-         * @throws MissingObjectException
-         *             the object supplied is not available from the object
-         *             database. This usually indicates the supplied object is
-         *             invalid, but the reference was constructed during an earlier
-         *             invocation to {@link RevWalk#lookupAny(AnyObjectId, int)}.
-         * @throws IncorrectObjectTypeException
-         *             the object was not parsed yet and it was discovered during
-         *             parsing that it is not actually the type of the instance
-         *             passed in. This usually indicates the caller used the wrong
-         *             type in a {@link RevWalk#lookupAny(AnyObjectId, int)} call.
-         * @
-         *             a pack file or loose object could not be read.
-         */
+		/// <summary>
+		/// Mark an object to not produce in the output.
+		/// <para>
+		/// Uninteresting objects denote not just themselves but also their entire
+		/// reachable chain, back until the merge base of an uninteresting commit and
+		/// an otherwise interesting commit.
+		/// </para><para>
+		/// Callers are encouraged to use <see cref="RevWalk#parseAny(AnyObjectId)"/>
+		/// instead of <see cref="RevWalk#lookupAny(AnyObjectId, int)"/>, as this method
+		/// requires the object to be parsed before it can be added as a root for the
+		/// traversal.
+		/// </para><para>
+		/// The method will automatically parse an unparsed object, but error
+		/// handling may be more difficult for the application to explain why a
+		/// RevObject is not actually valid. The object pool of this walker would
+		/// also be 'poisoned' by the invalid <see cref="RevObject"/>.
+		/// </para><para>
+		/// This method will automatically call <see cref="RevWalk#markStart(RevCommit)"/>
+		/// if passed RevCommit instance, or a <see cref="RevTag"/> that directly (or indirectly)
+		/// references a <see cref="RevCommit"/>.
+		/// </para>
+		/// </summary>
+		/// <param name="o">
+		/// The object to start traversing from. The object passed must be
+		/// from this same revision walker.
+		/// </param>
+		/// <exception cref="MissingObjectException">
+		/// The object supplied is not available from the object
+		/// database. This usually indicates the supplied object is
+		/// invalid, but the reference was constructed during an earlier
+		/// invocation to <see cref="RevWalk.lookupAny(AnyObjectId, int)"/>.
+		/// </exception>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// The object was not parsed yet and it was discovered during
+		/// parsing that it is not actually the type of the instance
+		/// passed in. This usually indicates the caller used the wrong
+		/// type in a <see cref="RevWalk.lookupAny(AnyObjectId, int)"/> call.
+		/// </exception>
+		/// <exception cref="Exception">
+		/// A pack file or loose object could not be Read.
+		/// </exception>
         public void markUninteresting(RevObject o)
         {
             while (o is RevTag)
             {
                 o.flags |= UNINTERESTING;
                 if (hasRevSort(RevSort.BOUNDARY))
-                    addObject(o);
+                {
+                	AddObject(o);
+                }
                 o = ((RevTag)o).getObject();
                 parse(o);
             }
 
             if (o is RevCommit)
-                base.markUninteresting((RevCommit)o);
+            {
+            	base.markUninteresting((RevCommit)o);
+            }
             else if (o is RevTree)
-                markTreeUninteresting((RevTree)o);
+            {
+            	MarkTreeUninteresting((RevTree)o);
+            }
             else
-                o.flags |= UNINTERESTING;
+            {
+            	o.flags |= UNINTERESTING;
+            }
 
             if (o.getType() != Constants.OBJ_COMMIT && hasRevSort(RevSort.BOUNDARY))
             {
-                addObject(o);
+                AddObject(o);
             }
         }
 
         public override RevCommit next()
         {
-            for (; ; )
+            while (true)
             {
                 RevCommit r = base.next();
-                if (r == null)
-                    return null;
-                if ((r.flags & UNINTERESTING) != 0)
+                
+				if (r == null) return null;
+                
+				if ((r.flags & UNINTERESTING) != 0)
                 {
-                    markTreeUninteresting(r.getTree());
+                    MarkTreeUninteresting(r.getTree());
+
                     if (hasRevSort(RevSort.BOUNDARY))
                     {
-                        pendingObjects.add(r.getTree());
+                        _pendingObjects.add(r.getTree());
                         return r;
                     }
+
                     continue;
                 }
-                pendingObjects.add(r.getTree());
-                return r;
+                
+				_pendingObjects.add(r.getTree());
+                
+				return r;
             }
         }
 
-        /**
-         * Pop the next most recent object.
-         * 
-         * @return next most recent object; null if traversal is over.
-         * @throws MissingObjectException
-         *             one or or more of the next objects are not available from the
-         *             object database, but were thought to be candidates for
-         *             traversal. This usually indicates a broken link.
-         * @throws IncorrectObjectTypeException
-         *             one or or more of the objects in a tree do not match the type
-         *             indicated.
-         * @
-         *             a pack file or loose object could not be read.
-         */
+		/// <summary>
+		/// Pop the next most recent object.
+		/// </summary>
+		/// <returns>next most recent object; null if traversal is over.</returns>
+		/// <exception cref="MissingObjectException">
+		/// One or or more of the next objects are not available from the
+		/// object database, but were thought to be candidates for
+		/// traversal. This usually indicates a broken link.
+		/// </exception>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// One or or more of the objects in a tree do not match the type indicated.
+		/// </exception>
+		/// <exception cref="Exception">
+		/// A pack file or loose object could not be Read.
+		/// </exception>
         public RevObject nextObject()
         {
-            fromTreeWalk = false;
+            _fromTreeWalk = false;
 
-            if (nextSubtree != null)
+            if (_nextSubtree != null)
             {
-                treeWalk = treeWalk.createSubtreeIterator0(db, nextSubtree, curs);
-                nextSubtree = null;
+                _treeWalk = _treeWalk.createSubtreeIterator0(db, _nextSubtree, curs);
+                _nextSubtree = null;
             }
 
-            while (!treeWalk.eof())
+            while (!_treeWalk.eof())
             {
-                FileMode mode = treeWalk.getEntryFileMode();
-                int sType = (int)mode.ObjectType;
+                FileMode mode = _treeWalk.EntryFileMode;
+                var sType = (int)mode.ObjectType;
 
                 switch (sType)
                 {
                     case Constants.OBJ_BLOB:
-                        {
-                            treeWalk.getEntryObjectId(idBuffer);
-                            RevBlob o = lookupBlob(idBuffer);
-                            if ((o.flags & SEEN) != 0)
-                                break;
-                            o.flags |= SEEN;
-                            if (shouldSkipObject(o))
-                                break;
-                            fromTreeWalk = true;
-                            return o;
-                        }
+						_treeWalk.getEntryObjectId(idBuffer);
+						
+						RevBlob blob = lookupBlob(idBuffer);
+						if ((blob.flags & SEEN) != 0) break;
+
+						blob.flags |= SEEN;
+						if (ShouldSkipObject(blob)) break;
+
+						_fromTreeWalk = true;
+						return blob;
+
                     case Constants.OBJ_TREE:
-                        {
-                            treeWalk.getEntryObjectId(idBuffer);
-                            RevTree o = lookupTree(idBuffer);
-                            if ((o.flags & SEEN) != 0)
-                                break;
-                            o.flags |= SEEN;
-                            if (shouldSkipObject(o))
-                                break;
-                            nextSubtree = o;
-                            fromTreeWalk = true;
-                            return o;
-                        }
+						_treeWalk.getEntryObjectId(idBuffer);
+						
+						RevTree tree = lookupTree(idBuffer);
+						if ((tree.flags & SEEN) != 0) break;
+						
+						tree.flags |= SEEN;
+						if (ShouldSkipObject(tree)) break;
+						
+						_nextSubtree = tree;
+						_fromTreeWalk = true;
+						return tree;
+
                     default:
-                        if (FileMode.GitLink.Equals(mode.Bits))
-                            break;
-                        treeWalk.getEntryObjectId(idBuffer);
+                        if (FileMode.GitLink.Equals(mode.Bits)) break;
+                        _treeWalk.getEntryObjectId(idBuffer);
+
                         throw new CorruptObjectException("Invalid mode " + mode
-                                + " for " + idBuffer.ToString() + " "
-                                + treeWalk.getEntryPathString() + " in " + currentTree
+                                + " for " + idBuffer + " "
+                                + _treeWalk.EntryPathString + " in " + _currentTree
                                 + ".");
                 }
 
-                treeWalk = treeWalk.next();
+                _treeWalk = _treeWalk.next();
             }
 
-            for (; ; )
+            while (true)
             {
-                RevObject o = pendingObjects.next();
-                if (o == null)
-                    return null;
-                if ((o.flags & SEEN) != 0)
-                    continue;
-                o.flags |= SEEN;
-                if (shouldSkipObject(o))
-                    continue;
-                if (o is RevTree)
+                RevObject obj = _pendingObjects.next();
+                if (obj == null) return null;
+                if ((obj.flags & SEEN) != 0) continue;
+                
+				obj.flags |= SEEN;
+                if (ShouldSkipObject(obj)) continue;
+                
+				if (obj is RevTree)
                 {
-                    currentTree = (RevTree)o;
-                    treeWalk = treeWalk.resetRoot(db, currentTree, curs);
+                    _currentTree = (RevTree)obj;
+                    _treeWalk = _treeWalk.resetRoot(db, _currentTree, curs);
                 }
-                return o;
+
+                return obj;
             }
         }
 
-        private bool shouldSkipObject(RevObject o)
+        private bool ShouldSkipObject(RevObject o)
         {
             return (o.flags & UNINTERESTING) != 0 && !hasRevSort(RevSort.BOUNDARY);
         }
 
-        /**
-         * Verify all interesting objects are available, and reachable.
-         * <p>
-         * Callers should populate starting points and ending points with
-         * {@link #markStart(RevObject)} and {@link #markUninteresting(RevObject)}
-         * and then use this method to verify all objects between those two points
-         * exist in the repository and are readable.
-         * <p>
-         * This method returns successfully if everything is connected; it throws an
-         * exception if there is a connectivity problem. The exception message
-         * provides some detail about the connectivity failure.
-         * 
-         * @throws MissingObjectException
-         *             one or or more of the next objects are not available from the
-         *             object database, but were thought to be candidates for
-         *             traversal. This usually indicates a broken link.
-         * @throws IncorrectObjectTypeException
-         *             one or or more of the objects in a tree do not match the type
-         *             indicated.
-         * @
-         *             a pack file or loose object could not be read.
-         */
+		/// <summary>
+		/// Verify all interesting objects are available, and reachable.
+		/// <p>
+		/// Callers should populate starting points and ending points with
+		/// <see cref="markStart(RevObject)"/> and <see cref="markUninteresting(RevObject)"/>
+		/// and then use this method to verify all objects between those two points
+		/// exist in the repository and are readable.
+		/// </p>
+		/// <p>
+		/// This method returns successfully if everything is connected; it throws an
+		/// exception if there is a connectivity problem. The exception message
+		/// provides some detail about the connectivity failure.
+		/// </p>
+		/// </summary>
+		/// <exception cref="MissingObjectException">
+		/// One or or more of the next objects are not available from the
+		/// object database, but were thought to be candidates for
+		/// traversal. This usually indicates a broken link.
+		/// </exception>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// One or or more of the objects in a tree do not match the type
+		/// indicated.
+		/// </exception>
+		/// <exception cref="Exception">
+		/// A pack file or loose object could not be Read.
+		/// </exception>
         public void checkConnectivity()
         {
-            for (; ; )
+            while (true)
             {
                 RevCommit c = next();
-                if (c == null)
-                    break;
+                if (c == null) break;
             }
-            for (; ; )
+            
+			while (true)
             {
                 RevObject o = nextObject();
-                if (o == null)
-                    break;
+                if (o == null) break;
+
                 if (o is RevBlob && !db.HasObject(o))
-                    throw new MissingObjectException(o, Constants.TYPE_BLOB);
+                {
+                	throw new MissingObjectException(o, Constants.TYPE_BLOB);
+                }
             }
         }
 
-        /**
-         * Get the current object's complete path.
-         * <p>
-         * This method is not very efficient and is primarily meant for debugging
-         * and  output generation. Applications should try to avoid calling it,
-         * and if invoked do so only once per interesting entry, where the name is
-         * absolutely required for correct function.
-         * 
-         * @return complete path of the current entry, from the root of the
-         *         repository. If the current entry is in a subtree there will be at
-         *         least one '/' in the returned string. Null if the current entry
-         *         has no path, such as for annotated tags or root level trees.
-         */
-        public string getPathString()
-        {
-            return fromTreeWalk ? treeWalk.getEntryPathString() : null;
-        }
+		/// <summary>
+		/// Get the current object's complete path.
+		/// <p>
+		/// This method is not very efficient and is primarily meant for debugging
+		/// and output generation. Applications should try to avoid calling it,
+		/// and if invoked do so only once per interesting entry, where the name is
+		/// absolutely required for correct function.
+		/// </summary>
+		/// <returns>
+		/// Complete path of the current entry, from the root of the
+		/// repository. If the current entry is in a subtree there will be at
+		/// least one '/' in the returned string. Null if the current entry
+		/// has no path, such as for annotated tags or root level trees.
+		/// </returns>
+		public string PathString
+		{
+			get { return _fromTreeWalk ? _treeWalk.EntryPathString : null; }
+		}
 
-        public override void dispose()
+		public override void dispose()
         {
             base.dispose();
-            pendingObjects = new BlockObjQueue();
-            nextSubtree = null;
-            currentTree = null;
+            _pendingObjects = new BlockObjQueue();
+            _nextSubtree = null;
+            _currentTree = null;
         }
 
         internal override void reset(int retainFlags)
         {
             base.reset(retainFlags);
-            pendingObjects = new BlockObjQueue();
-            nextSubtree = null;
+            _pendingObjects = new BlockObjQueue();
+            _nextSubtree = null;
         }
 
-        private void addObject(RevObject o)
+        private void AddObject(RevObject obj)
         {
-            if ((o.flags & IN_PENDING) == 0)
-            {
-                o.flags |= IN_PENDING;
-                pendingObjects.add(o);
-            }
+        	if ((obj.flags & InPending) != 0) return;
+
+        	obj.flags |= InPending;
+        	_pendingObjects.add(obj);
         }
 
-        private void markTreeUninteresting(RevTree tree)
+        private void MarkTreeUninteresting(RevObject tree)
         {
-            if ((tree.flags & UNINTERESTING) != 0)
-                return;
+            if ((tree.flags & UNINTERESTING) != 0) return;
             tree.flags |= UNINTERESTING;
 
-            treeWalk = treeWalk.resetRoot(db, tree, curs);
-            while (!treeWalk.eof())
+            _treeWalk = _treeWalk.resetRoot(db, tree, curs);
+            while (!_treeWalk.eof())
             {
-                FileMode mode = treeWalk.getEntryFileMode();
-                int sType = (int)mode.ObjectType;
+                FileMode mode = _treeWalk.EntryFileMode;
+                var sType = (int)mode.ObjectType;
 
                 switch (sType)
                 {
                     case Constants.OBJ_BLOB:
-                        {
-                            treeWalk.getEntryObjectId(idBuffer);
-                            lookupBlob(idBuffer).flags |= UNINTERESTING;
-                            break;
-                        }
+						_treeWalk.getEntryObjectId(idBuffer);
+						lookupBlob(idBuffer).flags |= UNINTERESTING;
+						break;
+
                     case Constants.OBJ_TREE:
-                        {
-                            treeWalk.getEntryObjectId(idBuffer);
-                            RevTree t = lookupTree(idBuffer);
-                            if ((t.flags & UNINTERESTING) == 0)
-                            {
-                                t.flags |= UNINTERESTING;
-                                treeWalk = treeWalk.createSubtreeIterator0(db, t, curs);
-                                continue;
-                            }
-                            break;
-                        }
+						_treeWalk.getEntryObjectId(idBuffer);
+						RevTree t = lookupTree(idBuffer);
+						if ((t.flags & UNINTERESTING) == 0)
+						{
+							t.flags |= UNINTERESTING;
+							_treeWalk = _treeWalk.createSubtreeIterator0(db, t, curs);
+							continue;
+						}
+						break;
+
                     default:
-                        if (FileMode.GitLink.Equals(mode.Bits))
-                            break;
-                        treeWalk.getEntryObjectId(idBuffer);
+                        if (FileMode.GitLink == FileMode.FromBits(mode.Bits)) break;
+                        _treeWalk.getEntryObjectId(idBuffer);
+
                         throw new CorruptObjectException("Invalid mode " + mode
-                                + " for " + idBuffer.ToString() + " "
-                                + treeWalk.getEntryPathString() + " in " + tree + ".");
+                                + " for " + idBuffer + " "
+                                + _treeWalk.EntryPathString + " in " + tree + ".");
                 }
 
-                treeWalk = treeWalk.next();
+                _treeWalk = _treeWalk.next();
             }
         }
+
+		public CanonicalTreeParser TreeWalk
+		{
+			get { return _treeWalk; }
+		}
+
+		public BlockObjQueue PendingObjects
+		{
+			get { return _pendingObjects; }
+		}
+
+		public RevTree CurrentTree
+		{
+			get { return _currentTree; }
+		}
+
+		public bool FromTreeWalk
+		{
+			get { return _fromTreeWalk; }
+		}
+
+		public RevTree NextSubtree
+		{
+			get { return _nextSubtree; }
+		}
     }
 }

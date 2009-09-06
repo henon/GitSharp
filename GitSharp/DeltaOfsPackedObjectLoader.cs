@@ -38,43 +38,41 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using GitSharp.Exceptions;
 
 namespace GitSharp
 {
     class DeltaOfsPackedObjectLoader : DeltaPackedObjectLoader
     {
-        private long deltaBase;
+        private readonly long _deltaBase;
 
         public DeltaOfsPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz, long @base)
             : base(pr, dataOffset, objectOffset, deltaSz)
         {
-            deltaBase = @base;
+            _deltaBase = @base;
         }
 
-        public override PackedObjectLoader getBaseLoader(WindowCursor curs)
+        public override PackedObjectLoader GetBaseLoader(WindowCursor curs)
         {
-            return pack.ResolveBase(curs, deltaBase);
+            return PackFile.ResolveBase(curs, _deltaBase);
         }
 
-        public override int getRawType()
-        {
-            return Constants.OBJ_OFS_DELTA;
-        }
+    	public override int RawType
+    	{
+    		get { return Constants.OBJ_OFS_DELTA; }
+    	}
 
-
-        public override ObjectId getDeltaBase()
-        {
-            ObjectId id = pack.FindObjectForOffset(deltaBase);
-            if (id == null)
-                throw new CorruptObjectException(
-                        "Offset-written delta base for object not found in a pack");
-            return id;
-        }
+    	public override ObjectId DeltaBase
+    	{
+    		get
+    		{
+    			ObjectId id = PackFile.FindObjectForOffset(_deltaBase);
+    			if (id == null)
+    			{
+    				throw new CorruptObjectException("Offset-written delta base for object not found in a pack");
+    			}
+    			return id;
+    		}
+    	}
     }
-
 }

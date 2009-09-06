@@ -382,7 +382,7 @@ namespace GitSharp.Util
 		/**
          * Parse 4 character base 16 (hex) formatted string to unsigned integer.
          * <p>
-         * The number is read in network byte order, that is, most significant
+         * The number is Read in network byte order, that is, most significant
          * nybble first.
          *
          * @param bs
@@ -413,7 +413,7 @@ namespace GitSharp.Util
 		/**
          * Parse 8 character base 16 (hex) formatted string to unsigned integer.
          * <p>
-         * The number is read in network byte order, that is, most significant
+         * The number is Read in network byte order, that is, most significant
          * nybble first.
          *
          * @param bs
@@ -818,7 +818,7 @@ namespace GitSharp.Util
          * <p>
          * Locates the "encoding " header (if present) by first calling
          * {@link #encoding(byte[], int)} and then returns the proper character set
-         * to apply to this buffer to evaluate its contents as character data.
+         * to Apply to this buffer to evaluate its contents as character data.
          * <p>
          * If no encoding header is present, {@link Constants#CHARSET} is assumed.
          * 

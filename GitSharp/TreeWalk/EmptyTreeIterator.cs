@@ -39,44 +39,50 @@
 
 namespace GitSharp.TreeWalk
 {
-
-
-    /** Iterator over an empty tree (a directory with no files). */
+    /// <summary>
+	/// Iterator over an empty tree (a directory with no files).
+    /// </summary>
     public class EmptyTreeIterator : AbstractTreeIterator
     {
-        /** Create a new iterator with no parent. */
+        /// <summary>
+		/// Create a new iterator with no parent.
+        /// </summary>
         public EmptyTreeIterator()
         {
             // Create a root empty tree.
         }
 
-        public EmptyTreeIterator(AbstractTreeIterator p)
-            : base(p)
+		/// <summary>
+		/// Create an iterator for a subtree of an existing iterator.
+		/// The caller is responsible for setting up the path of the child iterator.
+		/// </summary>
+		/// <param name="parentIterator">Parent tree iterator.</param>
+        public EmptyTreeIterator(AbstractTreeIterator parentIterator)
+            : base(parentIterator)
         {
-            pathLen = pathOffset;
+            PathLen = PathOffset;
         }
 
-        /**
-         * Create an iterator for a subtree of an existing iterator.
-         * <p>
-         * The caller is responsible for setting up the path of the child iterator.
-         *
-         * @param p
-         *            parent tree iterator.
-         * @param childPath
-         *            path array to be used by the child iterator. This path must
-         *            contain the path from the top of the walk to the first child
-         *            and must end with a '/'.
-         * @param childPathOffset
-         *            position within <code>childPath</code> where the child can
-         *            insert its data. The value at
-         *            <code>childPath[childPathOffset-1]</code> must be '/'.
-         */
-        public EmptyTreeIterator(AbstractTreeIterator p, byte[] childPath, int childPathOffset)
-            : base(p, childPath, childPathOffset)
+		/// <summary>
+		/// Create an iterator for a subtree of an existing iterator.
+		/// The caller is responsible for setting up the path of the child iterator.
+		/// </summary>
+		/// <param name="parent">Parent tree iterator.</param>
+		/// <param name="childPath">
+		/// Path array to be used by the child iterator. This path must
+		/// contain the path from the top of the walk to the first child
+		/// and must end with a '/'.
+		/// </param>
+		/// <param name="childPathOffset">
+		/// position within <paramref name="childPath"/> where the child can
+		/// insert its data. The value at
+		/// <code><paramref name="childPath"/>[<paramref name="childPathOffset"/>-1]</code> 
+		/// must be '/'.
+		/// </param>
+        public EmptyTreeIterator(AbstractTreeIterator parent, byte[] childPath, int childPathOffset)
+            : base(parent, childPath, childPathOffset)
         {
-
-            pathLen = childPathOffset - 1;
+            PathLen = childPathOffset - 1;
         }
 
         public override AbstractTreeIterator createSubtreeIterator(Repository repo)
@@ -91,7 +97,7 @@ namespace GitSharp.TreeWalk
 
         public override byte[] idBuffer()
         {
-            return zeroid;
+            return ZeroId;
         }
 
         public override int idOffset()
@@ -121,8 +127,10 @@ namespace GitSharp.TreeWalk
 
         public override void stopWalk()
         {
-            if (parent != null)
-                parent.stopWalk();
+            if (Parent != null)
+            {
+            	Parent.stopWalk();
+            }
         }
     }
 }

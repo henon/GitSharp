@@ -52,7 +52,7 @@ namespace GitSharp.Tests
         /*
              * Directory/File Conflict cases:
              * It's entirely possible that in practice a number of these may be equivalent
-             * to the cases described in git-read-tree.txt. As long as it does the right thing,
+             * to the cases described in git-Read-tree.txt. As long as it does the right thing,
              * that's all I care about. These are basically reverse-engineered from
              * what git currently does. If there are tests for these in git, it's kind of
              * hard to track them all down...

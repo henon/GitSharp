@@ -45,7 +45,7 @@ namespace GitSharp.TreeWalk
     /// <summary>
     /// Working directory iterator for standard Java IO.
     /// 
-    /// This iterator uses the standard <code>java.io</code> package to read the
+    /// This iterator uses the standard <code>java.io</code> package to Read the
     /// specified working directory as part of a <see cref="TreeWalk"/>.
     /// </summary>
     public class FileTreeIterator : WorkingTreeIterator
@@ -131,6 +131,7 @@ namespace GitSharp.TreeWalk
             public FileEntry(FileSystemInfo f)
             {
 				_file = f;
+            	_fileLength = -1;
 
 				if (_file is DirectoryInfo)
                 {

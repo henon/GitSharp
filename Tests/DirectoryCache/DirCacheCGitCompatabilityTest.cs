@@ -48,14 +48,13 @@ namespace GitSharp.Tests.DirectoryCache
     [TestFixture]
     public class DirCacheCGitCompatabilityTest : RepositoryTestCase
     {
-
-        private System.IO.FileInfo index = new System.IO.FileInfo("Resources/gitgit.index");
+        private readonly System.IO.FileInfo _index = new System.IO.FileInfo("Resources/gitgit.index");
 
         [Test]
         public void testReadIndex_LsFiles()
         {
-            Dictionary<string, CGitIndexRecord> ls = readLsFiles();
-            DirCache dc = new DirCache(index);
+            Dictionary<string, CGitIndexRecord> ls = ReadLsFiles();
+            var dc = new DirCache(_index);
             Assert.AreEqual(0, dc.getEntryCount());
             dc.read();
             Assert.AreEqual(ls.Count, dc.getEntryCount());
@@ -70,24 +69,23 @@ namespace GitSharp.Tests.DirectoryCache
         [Test]
         public void testTreeWalk_LsFiles()
         {
-            Dictionary<string, CGitIndexRecord> ls = readLsFiles();
-            DirCache dc = new DirCache(index);
+            Dictionary<string, CGitIndexRecord> ls = ReadLsFiles();
+            var dc = new DirCache(_index);
             Assert.AreEqual(0, dc.getEntryCount());
             dc.read();
             Assert.AreEqual(ls.Count, dc.getEntryCount());
+
+            var rItr = ls.Values.GetEnumerator();
+            var tw = new TreeWalk(db);
+            tw.reset();
+            tw.Recursive = true;
+            tw.addTree(new DirCacheIterator(dc));
+            while (rItr.MoveNext())
             {
-                var rItr = ls.Values.GetEnumerator();
-                TreeWalk tw = new TreeWalk(db);
-                tw.reset();
-                tw.setRecursive(true);
-                tw.addTree(new DirCacheIterator(dc));
-                while (rItr.MoveNext())
-                {
-                    Assert.IsTrue(tw.next());
-                    var dcItr = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
-                    Assert.IsNotNull(dcItr);
-                    AssertAreEqual(rItr.Current, dcItr.getDirCacheEntry());
-                }
+                Assert.IsTrue(tw.next());
+                var dcItr = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
+                Assert.IsNotNull(dcItr);
+                AssertAreEqual(rItr.Current, dcItr.getDirCacheEntry());
             }
         }
 
@@ -96,18 +94,18 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.IsNotNull(c);
             Assert.IsNotNull(j);
 
-            Assert.AreEqual(c.path, j.getPathString());
-            Assert.AreEqual(c.id, j.getObjectId());
-            Assert.AreEqual(c.mode, j.getRawMode());
-            Assert.AreEqual(c.stage, j.getStage());
+            Assert.AreEqual(c.Path, j.getPathString());
+            Assert.AreEqual(c.Id, j.getObjectId());
+            Assert.AreEqual(c.Mode, j.getRawMode());
+            Assert.AreEqual(c.Stage, j.getStage());
         }
 
         [Test]
         public void testReadIndex_DirCacheTree()
         {
-            Dictionary<string, CGitIndexRecord> cList = readLsFiles();
-            Dictionary<string, CGitLsTreeRecord> cTree = readLsTree();
-            DirCache dc = new DirCache(index);
+            Dictionary<string, CGitIndexRecord> cList = ReadLsFiles();
+            Dictionary<string, CGitLsTreeRecord> cTree = ReadLsTree();
+            var dc = new DirCache(_index);
             Assert.AreEqual(0, dc.getEntryCount());
             dc.read();
             Assert.AreEqual(cList.Count, dc.getEntryCount());
@@ -122,10 +120,10 @@ namespace GitSharp.Tests.DirectoryCache
                     .getObjectId());
             Assert.AreEqual(cList.Count, jTree.getEntrySpan());
 
-            List<CGitLsTreeRecord> subtrees = new List<CGitLsTreeRecord>();
+            var subtrees = new List<CGitLsTreeRecord>();
             foreach (CGitLsTreeRecord r in cTree.Values)
             {
-                if (FileMode.Tree.Equals(r.mode))
+                if (FileMode.Tree.Equals(r.Mode))
                     subtrees.Add(r);
             }
             Assert.AreEqual(subtrees.Count, jTree.getChildCount());
@@ -134,43 +132,38 @@ namespace GitSharp.Tests.DirectoryCache
             {
                 DirCacheTree sj = jTree.getChild(i);
                 CGitLsTreeRecord sc = subtrees[i];
-                Assert.AreEqual(sc.path, sj.getNameString());
-                Assert.AreEqual(sc.path + "/", sj.getPathString());
+                Assert.AreEqual(sc.Path, sj.getNameString());
+                Assert.AreEqual(sc.Path + "/", sj.getPathString());
                 Assert.IsTrue(sj.isValid());
-                Assert.AreEqual(sc.id, sj.getObjectId());
+                Assert.AreEqual(sc.Id, sj.getObjectId());
             }
         }
 
-        private System.IO.FileInfo pathOf(string name)
+    	private static Dictionary<string, CGitIndexRecord> ReadLsFiles()
         {
-            return new System.IO.FileInfo( name);
-        }
-
-        private Dictionary<string, CGitIndexRecord> readLsFiles()
-        {
-            Dictionary<string, CGitIndexRecord> r = new Dictionary<string, CGitIndexRecord>();
+            var r = new Dictionary<string, CGitIndexRecord>();
             using (var br = new System.IO.StreamReader(new System.IO.FileStream("Resources/gitgit.lsfiles", System.IO.FileMode.Open, System.IO.FileAccess.Read), Encoding.UTF8))
             {
                 string line;
                 while ((line = br.ReadLine()) != null)
                 {
-                    CGitIndexRecord cr = new CGitIndexRecord(line);
-                    r[cr.path]= cr;
+                    var cr = new CGitIndexRecord(line);
+                    r[cr.Path] = cr;
                 }
             }
             return r;
         }
 
-        private Dictionary<string, CGitLsTreeRecord> readLsTree()
+        private static Dictionary<string, CGitLsTreeRecord> ReadLsTree()
         {
-            Dictionary<string, CGitLsTreeRecord> r = new Dictionary<string, CGitLsTreeRecord>();
+            var r = new Dictionary<string, CGitLsTreeRecord>();
             using (var br = new System.IO.StreamReader(new System.IO.FileStream("Resources/gitgit.lstree", System.IO.FileMode.Open, System.IO.FileAccess.Read), Encoding.UTF8))
             {
                 string line;
                 while ((line = br.ReadLine()) != null)
                 {
-                    CGitLsTreeRecord cr = new CGitLsTreeRecord(line);
-                    r[cr.path]= cr;
+                    var cr = new CGitLsTreeRecord(line);
+                    r[cr.Path] = cr;
                 }
             }
             return r;
@@ -178,44 +171,38 @@ namespace GitSharp.Tests.DirectoryCache
 
         private class CGitIndexRecord
         {
-            public int mode;
-
-            public ObjectId id;
-
-            public int stage;
-
-            public string path;
+			public int Mode { get; private set; }
+			public ObjectId Id { get; private set; }
+			public int Stage { get; private set; }
+			public string Path { get; private set; }
 
             public CGitIndexRecord(string line)
             {
                 int tab = line.IndexOf('\t');
                 int sp1 = line.IndexOf(' ');
                 int sp2 = line.IndexOf(' ', sp1 + 1);
-                mode = NB.BaseToDecimal(line.Slice(0, sp1), 8);
-                id = ObjectId.FromString(line.Slice(sp1 + 1, sp2));
-                stage = int.Parse(line.Slice(sp2 + 1, tab));
-                path = line.Substring(tab + 1);
+                Mode = NB.BaseToDecimal(line.Slice(0, sp1), 8);
+                Id = ObjectId.FromString(line.Slice(sp1 + 1, sp2));
+                Stage = int.Parse(line.Slice(sp2 + 1, tab));
+                Path = line.Substring(tab + 1);
             }
         }
 
         private class CGitLsTreeRecord
         {
-            public int mode;
-
-            public ObjectId id;
-
-            public string path;
+			public int Mode { get; private set; }
+			public ObjectId Id { get; private set; }
+			public string Path { get; private set; }
 
             public CGitLsTreeRecord(string line)
             {
                 int tab = line.IndexOf('\t');
                 int sp1 = line.IndexOf(' ');
                 int sp2 = line.IndexOf(' ', sp1 + 1);
-                mode = NB.BaseToDecimal(line.Slice(0, sp1), 8);
-                id = ObjectId.FromString(line.Slice(sp2 + 1, tab));
-                path = line.Substring(tab + 1);
+                Mode = NB.BaseToDecimal(line.Slice(0, sp1), 8);
+                Id = ObjectId.FromString(line.Slice(sp2 + 1, tab));
+                Path = line.Substring(tab + 1);
             }
         }
-
     }
 }

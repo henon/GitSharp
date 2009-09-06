@@ -162,14 +162,10 @@ namespace GitSharp
          */
         public static string TYPE_TAG = "tag";
 
-
-        private static byte[] ENCODED_TYPE_COMMIT = encodeASCII(TYPE_COMMIT);
-
-        private static byte[] ENCODED_TYPE_BLOB = encodeASCII(TYPE_BLOB);
-
-        private static byte[] ENCODED_TYPE_TREE = encodeASCII(TYPE_TREE);
-
-        private static byte[] ENCODED_TYPE_TAG = encodeASCII(TYPE_TAG);
+        private static readonly byte[] EncodedTypeCommit = encodeASCII(TYPE_COMMIT);
+        private static readonly byte[] EncodedTypeBlob = encodeASCII(TYPE_BLOB);
+        private static readonly byte[] EncodedTypeTree = encodeASCII(TYPE_TREE);
+        private static readonly byte[] EncodedTypeTag = encodeASCII(TYPE_TAG);
 
         /** An unknown or invalid object type code. */
         public const int OBJ_BAD = -1;
@@ -380,13 +376,13 @@ namespace GitSharp
             switch (typeCode)
             {
                 case OBJ_COMMIT:
-                    return ENCODED_TYPE_COMMIT;
+                    return EncodedTypeCommit;
                 case OBJ_TREE:
-                    return ENCODED_TYPE_TREE;
+                    return EncodedTypeTree;
                 case OBJ_BLOB:
-                    return ENCODED_TYPE_BLOB;
+                    return EncodedTypeBlob;
                 case OBJ_TAG:
-                    return ENCODED_TYPE_TAG;
+                    return EncodedTypeTag;
                 default:
                     throw new ArgumentException("Bad object type: " + typeCode);
             }
@@ -424,9 +420,11 @@ namespace GitSharp
                             || typeString[position + 2] != (byte)'o'
                             || typeString[position + 3] != (byte)'b'
                             || typeString[position + 4] != endMark)
-                            throw new CorruptObjectException(id, "invalid type");
+                        {
+                        	throw new CorruptObjectException(id, "invalid type");
+                        }
                         offset.value = position + 5;
-                        return Constants.OBJ_BLOB;
+                        return OBJ_BLOB;
 
                     case (byte)'c':
                         if (typeString[position + 1] != (byte)'o'
@@ -435,9 +433,11 @@ namespace GitSharp
                                 || typeString[position + 4] != (byte)'i'
                                 || typeString[position + 5] != (byte)'t'
                                 || typeString[position + 6] != endMark)
-                            throw new CorruptObjectException(id, "invalid type");
+                        {
+                        	throw new CorruptObjectException(id, "invalid type");
+                        }
                         offset.value = position + 7;
-                        return Constants.OBJ_COMMIT;
+                        return OBJ_COMMIT;
 
                     case (byte)'t':
                         switch (typeString[position + 1])

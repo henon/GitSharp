@@ -69,14 +69,16 @@
     <Compile Include="DirectoryCache\DirCacheBuildIterator.cs" />
     <Compile Include="DirectoryCache\DirCacheIterator.cs" />
     <Compile Include="Ensure.cs" />
+    <Compile Include="Exceptions\CancelledException.cs" />
     <Compile Include="Exceptions\CheckoutConflictException.cs" />
     <Compile Include="Exceptions\ConfigInvalidException.cs" />
+    <Compile Include="Exceptions\ExceptionExtensions.cs" />
     <Compile Include="Exceptions\GitlinksNotSupportedException.cs" />
+    <Compile Include="Exceptions\GitSharpException.cs" />
     <Compile Include="Exceptions\InvalidObjectIdException.cs" />
     <Compile Include="Exceptions\NoClosingBracketException.cs" />
     <Compile Include="Exceptions\CorruptObjectException.cs" />
     <Compile Include="Exceptions\EntryExistsException.cs" />
-    <Compile Include="Exceptions\Exception.cs" />
     <Compile Include="Exceptions\FileLockedException.cs" />
     <Compile Include="Exceptions\IncorrectObjectTypeException.cs" />
     <Compile Include="Exceptions\InvalidPackException.cs" />
@@ -132,6 +134,7 @@
     <Compile Include="TreeWalk\Filter\PathSuffixFilter.cs" />
     <Compile Include="UnpackedObjectCache.cs" />
     <Compile Include="UserConfig.cs" />
+    <Compile Include="Util\ArrayExtensions.cs" />
     <Compile Include="Util\AtomicReference.cs" />
     <Compile Include="Util\DateTime.cs" />
     <Compile Include="Util\Extensions.cs" />
@@ -207,8 +210,8 @@
     <Compile Include="Util\StringUtils.cs" />
     <Compile Include="Util\WeakReference.cs" />
     <Compile Include="WholePackedObjectLoader.cs" />
-    <Compile Include="WindowCachConfig.cs" />
     <Compile Include="WindowCache.cs" />
+    <Compile Include="WindowCacheConfig.cs" />
     <Compile Include="WindowCursor.cs" />
     <Compile Include="WorkDirCheckout.cs" />
     <Compile Include="WriteTree.cs" />
@@ -345,9 +348,7 @@
     <Compile Include="TreeWalk\NameConflictTreeWalk.cs" />
     <Compile Include="TreeWalk\TreeWalk.cs" />
     <Compile Include="TreeWalk\WorkingTreeIterator.cs" />
-    <Compile Include="Util\Arrays.cs" />
     <Compile Include="Util\DigestOutputStream.cs" />
-    <Compile Include="Util\Array.cs" />
     <Compile Include="Util\IListUtil.cs" />
     <Compile Include="Util\ICharSequence.cs" />
     <Compile Include="Util\IntList.cs" />

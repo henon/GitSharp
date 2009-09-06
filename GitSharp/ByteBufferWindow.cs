@@ -76,7 +76,7 @@ namespace GitSharp
         }
 
 
-        internal override int inflate(int pos, byte[] b, int o, Inflater inf)
+        internal override int Inflate(int pos, byte[] b, int o, Inflater inf)
         {
             byte[] tmp = new byte[512];
             var s = _stream;

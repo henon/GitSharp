@@ -36,98 +36,108 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using GitSharp.Exceptions;
 using GitSharp.TreeWalk;
+using GitSharp.TreeWalk.Filter;
 
 namespace GitSharp.DirectoryCache
 {
-    /**
-     * Iterate and update a {@link DirCache} as part of a <code>TreeWalk</code>.
-     * <p>
-     * Like {@link DirCacheIterator} this iterator allows a DirCache to be used in
-     * parallel with other sorts of iterators in a TreeWalk. However any entry which
-     * appears in the source DirCache and which is skipped by the TreeFilter is
-     * automatically copied into {@link DirCacheBuilder}, thus retaining it in the
-     * newly updated index.
-     * <p>
-     * This iterator is suitable for update processes, or even a simple delete
-     * algorithm. For example deleting a path:
-     *
-     * <pre>
-     *  DirCache dirc = DirCache.lock(db);
-     *  DirCacheBuilder edit = dirc.builder();
-     *
-     *  TreeWalk walk = new TreeWalk(db);
-     * walk.reset();
-     * walk.setRecursive(true);
-     * walk.setFilter(PathFilter.create(&quot;name/to/remove&quot;));
-     * walk.addTree(new DirCacheBuildIterator(edit));
-     *
-     * while (walk.next())
-     * 	; // do nothing on a match as we want to remove matches
-     * edit.commit();
-     * </pre>
-     */
+	/// <summary>
+	/// Iterate and update a <see cref="DirCache"/> as part of a <see cref="TreeWalk"/>.
+	/// <p>
+	/// Like <see cref="DirCacheIterator"/> this iterator allows a <see cref="DirCache"/>
+	/// to be used in parallel with other sorts of iterators in a <see cref="TreeWalk"/>. 
+	/// However any entry which appears in the source <see cref="DirCache"/> and which 
+	/// is skipped by the <see cref="TreeFilter"/> is automatically copied into 
+	/// <see cref="DirCacheBuilder"/>, thus retaining it in the newly updated index.
+	/// <para><para>
+	/// This iterator is suitable for update processes, or even a simple delete
+	/// algorithm. For example deleting a path:
+	/// </para><para>
+	/// <example>
+	/// DirCache dirc = DirCache.lock(db);
+	/// DirCacheBuilder edit = dirc.builder();
+	/// 
+	/// TreeWalk walk = new TreeWalk(db);
+	/// walk.reset();
+	/// walk.setRecursive(true);
+	/// walk.setFilter(PathFilter.Create(&quot;name/to/remove&quot;));
+	/// walk.addTree(new DirCacheBuildIterator(edit));
+	/// 
+	/// while (walk.next())
+	/// ; // do nothing on a match as we want to remove matches
+	/// edit.commit();
+	/// </example>
+	/// </para>
+	/// </summary>
     public class DirCacheBuildIterator : DirCacheIterator
     {
-        private DirCacheBuilder builder;
+        private readonly DirCacheBuilder _builder;
 
-        /**
-         * Create a new iterator for an already loaded DirCache instance.
-         * <p>
-         * The iterator implementation may copy part of the cache's data during
-         * construction, so the cache must be read in prior to creating the
-         * iterator.
-         *
-         * @param dcb
-         *            the cache builder for the cache to walk. The cache must be
-         *            already loaded into memory.
-         */
-        public DirCacheBuildIterator(DirCacheBuilder dcb)
-            : base(dcb.getDirCache())
+		/// <summary>
+		/// Create a new iterator for an already loaded <see cref="DirCache"/> instance.
+		/// <p>
+		/// The iterator implementation may copy part of the cache's data during
+		/// construction, so the cache must be Read in prior to creating the
+		/// iterator.
+		/// </summary>
+		/// <param name="builder">
+		/// The cache builder for the cache to walk. The cache must be
+		/// already loaded into memory.
+		/// </param>
+        public DirCacheBuildIterator(DirCacheBuilder builder)
+            : base(builder.getDirCache())
         {
-
-            builder = dcb;
+            _builder = builder;
         }
 
-        DirCacheBuildIterator(DirCacheBuildIterator p, DirCacheTree dct)
-            : base(p, dct)
+		/// <summary>
+		/// Create a new iterator for an already loaded <see cref="DirCache"/> instance.
+		/// <p>
+		/// The iterator implementation may copy part of the cache's data during
+		/// construction, so the cache must be Read in prior to creating the
+		/// iterator.
+		/// </summary>
+		/// <param name="parentIterator">The parent iterator</param>
+		/// <param name="cacheTree">The cache tree</param>
+        DirCacheBuildIterator(DirCacheBuildIterator parentIterator, DirCacheTree cacheTree)
+            : base(parentIterator, cacheTree)
         {
-
-            builder = p.builder;
+            _builder = parentIterator._builder;
         }
 
         public override AbstractTreeIterator createSubtreeIterator(Repository repo)
         {
-            if (currentSubtree == null)
-                throw new IncorrectObjectTypeException(getEntryObjectId(),
-                        Constants.TYPE_TREE);
-            return new DirCacheBuildIterator(this, currentSubtree);
+            if (CurrentSubtree == null)
+            {
+            	throw new IncorrectObjectTypeException(getEntryObjectId(),
+            	                                       Constants.TYPE_TREE);
+            }
+
+            return new DirCacheBuildIterator(this, CurrentSubtree);
         }
 
         public override void skip()
         {
-            if (currentSubtree != null)
-                builder.keep(ptr, currentSubtree.getEntrySpan());
+            if (CurrentSubtree != null)
+            {
+            	_builder.keep(Pointer, CurrentSubtree.getEntrySpan());
+            }
             else
-                builder.add(currentEntry);
+            {
+            	_builder.add(CurrentEntry);
+            }
             next(1);
         }
 
         public override void stopWalk()
         {
-            int cur = ptr;
-            int cnt = cache.getEntryCount();
+            int cur = Pointer;
+            int cnt = Cache.getEntryCount();
             if (cur < cnt)
-                builder.keep(cur, cnt - cur);
+            {
+            	_builder.keep(cur, cnt - cur);
+            }
         }
     }
-
 }

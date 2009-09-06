@@ -38,101 +38,120 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using GitSharp.Util;
 using System.Collections;
+using GitSharp.Util;
 
 namespace GitSharp
 {
-
-    /**
-     * Caches slices of a {@link PackFile} in memory for faster read access.
-     * <p>
-     * The WindowCache serves as a Java based "buffer cache", loading segments of a
-     * PackFile into the JVM heap prior to use. As JGit often wants to do reads of
-     * only tiny slices of a file, the WindowCache tries to smooth out these tiny
-     * reads into larger block-sized IO operations.
-     */
+    /// <summary>
+    /// Caches slices of a <see cref="PackFile" /> in memory for faster read access.
+    /// <para>
+    /// The WindowCache serves as a Java based "buffer cache", loading segments of a
+    /// <see cref="PackFile" /> into the JVM heap prior to use. As JGit often wants to do reads of
+    /// only tiny slices of a file, the WindowCache tries to smooth out these tiny
+    /// reads into larger block-sized IO operations.
+    /// </para>
+    /// </summary>
     internal class WindowCache : OffsetCache<ByteWindow, WindowCache.WindowRef>
     {
-        private static int bits(int newSize)
-        {
-            if (newSize < 4096)
-                throw new ArgumentException("Invalid window size");
-            if (newSize.BitCount() != 1)
-                throw new ArgumentException("Window size must be power of 2");
-            return newSize.NumberOfTrailingZeros();
-        }
+        private static volatile WindowCache _cache;
 
-        private static volatile WindowCache cache;
+        private readonly int _maxFiles;
+        private readonly int _maxBytes;
+        private readonly bool _memoryMap;
+        private readonly int _windowSizeShift;
+        private readonly int _windowSize;
+        private readonly AtomicValue<int> _openFiles;
+        private readonly AtomicValue<int> _openBytes;
 
         static WindowCache()
         {
             reconfigure(new WindowCacheConfig());
         }
 
-        /**
-         * Modify the configuration of the window cache.
-         * <p>
-         * The new configuration is applied immediately. If the new limits are
-         * smaller than what what is currently cached, older entries will be purged
-         * as soon as possible to allow the cache to meet the new limit.
-         * 
-         * @param packedGitLimit
-         *            maximum number of bytes to hold within this instance.
-         * @param packedGitWindowSize
-         *            number of bytes per window within the cache.
-         * @param packedGitMMAP
-         *            true to enable use of mmap when creating windows.
-         * @param deltaBaseCacheLimit
-         *            number of bytes to hold in the delta base cache.
-         * @deprecated Use {@link WindowCacheConfig} instead.
-         */
+        private static int Bits(int newSize)
+        {
+            if (newSize < 4096)
+            {
+                throw new ArgumentException("Invalid window size");
+            }
+
+            if (newSize.BitCount() != 1)
+            {
+                throw new ArgumentException("Window size must be power of 2");
+            }
+
+            return newSize.NumberOfTrailingZeros();
+        }
+
+        /// <summary>
+        /// Modify the configuration of the window cache.
+        /// <para>
+        /// The new configuration is applied immediately. If the new limits are
+        /// smaller than what what is currently cached, older entries will be purged
+        /// as soon as possible to allow the cache to meet the new limit.
+        /// </summary>
+        /// <param name="packedGitLimit">
+        /// Maximum number of bytes to hold within this instance.
+        /// </param>
+        /// <param name="packedGitWindowSize">
+        /// Number of bytes per window within the cache.
+        /// </param>
+        /// <param name="packedGitMMAP">
+        /// True to enable use of mmap when creating windows.
+        /// </param>
+        /// <param name="deltaBaseCacheLimit">
+        /// Number of bytes to hold in the delta base cache.
+        /// </param>
+        [Obsolete("Use WindowCache.reconfigure(WindowCacheConfig) instead.")]
         public static void reconfigure(int packedGitLimit, int packedGitWindowSize, bool packedGitMMAP, int deltaBaseCacheLimit)
         {
-            WindowCacheConfig c = new WindowCacheConfig();
-            c.setPackedGitLimit(packedGitLimit);
-            c.setPackedGitWindowSize(packedGitWindowSize);
-            c.setPackedGitMMAP(packedGitMMAP);
-            c.setDeltaBaseCacheLimit(deltaBaseCacheLimit);
+            var c = new WindowCacheConfig
+                        {
+                            PackedGitLimit = packedGitLimit,
+                            PackedGitWindowSize = packedGitWindowSize,
+                            PackedGitMMAP = packedGitMMAP,
+                            DeltaBaseCacheLimit = deltaBaseCacheLimit
+                        };
             reconfigure(c);
         }
 
-        /**
-         * Modify the configuration of the window cache.
-         * <p>
-         * The new configuration is applied immediately. If the new limits are
-         * smaller than what what is currently cached, older entries will be purged
-         * as soon as possible to allow the cache to meet the new limit.
-         *
-         * @param cfg
-         *            the new window cache configuration.
-         * @throws ArgumentException
-         *             the cache configuration contains one or more invalid
-         *             settings, usually too low of a limit.
-         */
+        /// <summary>
+        /// Modify the configuration of the window cache.
+        /// <para>
+        /// The new configuration is applied immediately. If the new limits are
+        /// smaller than what what is currently cached, older entries will be purged
+        /// as soon as possible to allow the cache to meet the new limit.
+        /// </param>
+        /// </summary>
+        /// <param name="cfg">
+        /// The new window cache configuration.
+        /// </param>
         public static void reconfigure(WindowCacheConfig cfg)
         {
-            WindowCache nc = new WindowCache(cfg);
-            WindowCache oc = cache;
-            if (oc != null)
-                oc.removeAll();
-            cache = nc;
-            UnpackedObjectCache.reconfigure(cfg);
+            var newCache = new WindowCache(cfg);
+            WindowCache oldCache = _cache;
+
+            if (oldCache != null)
+            {
+                oldCache.removeAll();
+            }
+
+            _cache = newCache;
+
+            UnpackedObjectCache.Reconfigure(cfg);
         }
 
-        internal static WindowCache getInstance()
+        internal static WindowCache Instance
         {
-            return cache;
+            get { return _cache; }
         }
 
         public static ByteWindow get(PackFile pack, long offset)
         {
-            WindowCache c = cache;
-            ByteWindow r = c.getOrLoad(pack, c.toStart(offset));
-            if (c != cache)
+            WindowCache c = _cache;
+            ByteWindow r = c.getOrLoad(pack, c.ToStart(offset));
+            if (c != _cache)
             {
                 // The cache was reconfigured while we were using the old one
                 // to load this window. The window is still valid, but our
@@ -144,141 +163,140 @@ namespace GitSharp
             return r;
         }
 
-        public static void purge(PackFile pack)
+        public static void Purge(PackFile pack)
         {
-            cache.removeAll(pack);
+            _cache.removeAll(pack);
         }
 
-        private int maxFiles;
-
-        private int maxBytes;
-
-        private bool mmap;
-
-        private int windowSizeShift;
-
-        private int windowSize;
-
-        private AtomicValue<int> openFiles;
-
-        private AtomicValue<int> openBytes;
-
         private WindowCache(WindowCacheConfig cfg)
-            : base(tableSize(cfg), lockCount(cfg))
+            : base(TableSize(cfg), LockCount(cfg))
         {
-            maxFiles = cfg.getPackedGitOpenFiles();
-            maxBytes = cfg.getPackedGitLimit();
-            mmap = cfg.isPackedGitMMAP();
-            windowSizeShift = bits(cfg.getPackedGitWindowSize());
-            windowSize = 1 << windowSizeShift;
+            _maxFiles = cfg.PackedGitOpenFiles;
+            _maxBytes = cfg.PackedGitLimit;
+            _memoryMap = cfg.PackedGitMMAP;
+            _windowSizeShift = Bits(cfg.PackedGitWindowSize);
+            _windowSize = 1 << _windowSizeShift;
 
-            openFiles = new AtomicValue<int>(0);
-            openBytes = new AtomicValue<int>(0);
+            _openFiles = new AtomicValue<int>(0);
+            _openBytes = new AtomicValue<int>(0);
 
-            if (maxFiles < 1)
+            if (_maxFiles < 1)
+            {
                 throw new ArgumentException("Open files must be >= 1");
-            if (maxBytes < windowSize)
+            }
+
+            if (_maxBytes < _windowSize)
+            {
                 throw new ArgumentException("Window size must be < limit");
+            }
         }
 
         public int getOpenFiles()
         {
-            return openFiles.get();
+            return _openFiles.get();
         }
 
         public int getOpenBytes()
         {
-            return openBytes.get();
+            return _openBytes.get();
         }
 
         internal override int hash(int packHash, long off)
         {
-            return packHash + (int)((ulong)off >> windowSizeShift);
+            return packHash + (int)((ulong)off >> _windowSizeShift);
         }
-
 
         internal override ByteWindow load(PackFile pack, long offset)
         {
             if (pack.beginWindowCache())
             {
-                int c = openFiles.get();
-                openFiles.compareAndSet(c, c+1);
+                int c = _openFiles.get();
+                _openFiles.compareAndSet(c, c+1);
             }
             try
             {
-                if (mmap)
-                    return pack.mmap(offset, windowSize);
-                return pack.read(offset, windowSize);
+                if (_memoryMap)
+                {
+                    return pack.MemoryMappedByteWindow(offset, _windowSize);
+                }
+
+                return pack.Read(offset, _windowSize);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                close(pack);
-                throw e;
+                Close(pack);
+                throw;
             }
         }
-
 
         internal override WindowRef createRef(PackFile p, long o, ByteWindow v)
         {
-            WindowRef @ref = new WindowRef(p, o, v, queue);
-            int c = openBytes.get();
-            openBytes.compareAndSet(c, c + @ref.size);
+            var @ref = new WindowRef(p, o, v, queue);
+            int c = _openBytes.get();
+            _openBytes.compareAndSet(c, c + @ref.Size);
             return @ref;
         }
 
-
         internal override void clear(WindowRef @ref)
         {
-            int c = openBytes.get();
-            openBytes.compareAndSet(c, c - @ref.size);
-            close(@ref.pack);
+            int c = _openBytes.get();
+            _openBytes.compareAndSet(c, c - @ref.Size);
+            Close(@ref.pack);
         }
 
-        private void close(PackFile pack)
+        private void Close(PackFile pack)
         {
-            if (pack.endWindowCache())
-            {
-                int c = openFiles.get();
-                openFiles.compareAndSet(c, c - 1);
-            }
+            if (!pack.endWindowCache()) return;
+            int c = _openFiles.get();
+            _openFiles.compareAndSet(c, c - 1);
         }
-
 
         internal override bool isFull()
         {
-            return maxFiles < openFiles.get() || maxBytes < openBytes.get();
+            return _maxFiles < _openFiles.get() || _maxBytes < _openBytes.get();
         }
 
-        private long toStart(long offset)
+        private long ToStart(long offset)
         {
-            return (long)((ulong)offset >> windowSizeShift) << windowSizeShift;
+            return (long)((ulong)offset >> _windowSizeShift) << _windowSizeShift;
         }
 
-        private static int tableSize(WindowCacheConfig cfg)
+        private static int TableSize(WindowCacheConfig cfg)
         {
-            int wsz = cfg.getPackedGitWindowSize();
-            int limit = cfg.getPackedGitLimit();
+            int wsz = cfg.PackedGitWindowSize;
+            int limit = cfg.PackedGitLimit;
+            
             if (wsz <= 0)
+            {
                 throw new ArgumentException("Invalid window size");
+            }
+
             if (limit < wsz)
+            {
                 throw new ArgumentException("Window size must be < limit");
+            }
+
             return 5 * (limit / wsz) / 2;
         }
 
-        private static int lockCount(WindowCacheConfig cfg)
+        private static int LockCount(WindowCacheConfig cfg)
         {
-            return Math.Max(cfg.getPackedGitOpenFiles(), 32);
+            return Math.Max(cfg.PackedGitOpenFiles, 32);
         }
 
-        internal class WindowRef : OffsetCache<ByteWindow, WindowCache.WindowRef>.Ref<ByteWindow>
-        {
-            internal int size;
+        #region Nested Types
 
+        internal class WindowRef : Ref<ByteWindow>
+        {
             public WindowRef(PackFile pack, long position, ByteWindow v, Queue queue)
                 : base(pack, position, v, queue)
             {
-                size = v.size();
+                Size = v.size();
             }
+
+            public int Size { get; private set; }
         }
+
+        #endregion
     }
 }

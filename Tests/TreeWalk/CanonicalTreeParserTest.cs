@@ -51,40 +51,35 @@ namespace GitSharp.Tests.TreeWalk
 		[SetUp]
 		public void setUp()
 		{
-			tree1 = mkree(entry(m644, "a", hash_a));
-			tree2 = mkree(entry(m644, "a", hash_a), entry(m644, "foo", hash_foo));
-			tree3 = mkree(entry(m644, "a", hash_a), entry(mt, "b_sometree", hash_sometree), entry(m644, "foo", hash_foo));
+			tree1 = mkree(Entry(m644, "a", hash_a));
+			tree2 = mkree(Entry(m644, "a", hash_a), Entry(m644, "foo", hash_foo));
+			tree3 = mkree(Entry(m644, "a", hash_a), Entry(mt, "b_sometree", hash_sometree), Entry(m644, "foo", hash_foo));
 		}
 
 		#endregion
 
 		private readonly CanonicalTreeParser ctp = new CanonicalTreeParser();
-
 		private readonly FileMode m644 = FileMode.RegularFile;
-
 		private readonly FileMode mt = FileMode.Tree;
-
 		private readonly ObjectId hash_a = ObjectId.FromString("6b9c715d21d5486e59083fb6071566aa6ecd4d42");
-
 		private readonly ObjectId hash_foo = ObjectId.FromString("a213e8e25bb2442326e86cbfb9ef56319f482869");
-
 		private readonly ObjectId hash_sometree = ObjectId.FromString("daf4bdb0d7bb24319810fe0e73aa317663448c93");
 
 		private byte[] tree1;
-
 		private byte[] tree2;
-
 		private byte[] tree3;
 
 		private static byte[] mkree(params byte[][] data)
 		{
 			var @out = new MemoryStream();
 			foreach (var e in data)
+			{
 				@out.Write(e, 0, e.Length);
+			}
 			return @out.ToArray();
 		}
 
-		private static byte[] entry(FileMode mode, string name, ObjectId id)
+		private static byte[] Entry(FileMode mode, string name, AnyObjectId id)
 		{
 			var @out = new MemoryStream();
 			mode.CopyTo(@out);
@@ -96,30 +91,30 @@ namespace GitSharp.Tests.TreeWalk
 			return @out.ToArray();
 		}
 
-		private string path()
+		private string Path()
 		{
-			return RawParseUtils.decode(Constants.CHARSET, ctp.path, ctp.pathOffset, ctp.pathLen);
+			return RawParseUtils.decode(Constants.CHARSET, ctp.Path, ctp.PathOffset, ctp.PathLen);
 		}
 
 		[Test]
 		public void testBackwards_ConfusingPathName()
 		{
-			string aVeryConfusingName = "confusing 644 entry 755 and others";
-			ctp.reset(mkree(entry(m644, "a", hash_a), entry(mt, aVeryConfusingName,
-			                                                hash_sometree), entry(m644, "foo", hash_foo)));
+			const string aVeryConfusingName = "confusing 644 entry 755 and others";
+			ctp.reset(mkree(Entry(m644, "a", hash_a), Entry(mt, aVeryConfusingName,
+			                                                hash_sometree), Entry(m644, "foo", hash_foo)));
 			ctp.next(3);
 			Assert.IsTrue(ctp.eof());
 
 			ctp.back(2);
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(mt.Bits, ctp.mode);
-			Assert.AreEqual(aVeryConfusingName, path());
+			Assert.AreEqual(mt.Bits, ctp.Mode);
+			Assert.AreEqual(aVeryConfusingName, Path());
 			Assert.AreEqual(hash_sometree, ctp.getEntryObjectId());
 
 			ctp.back(1);
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.mode);
-			Assert.AreEqual("a", path());
+			Assert.AreEqual(m644.Bits, ctp.Mode);
+			Assert.AreEqual("a", Path());
 			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
 		}
 
@@ -136,12 +131,13 @@ namespace GitSharp.Tests.TreeWalk
 			int n = AbstractTreeIterator.DEFAULT_PATH_SIZE*4;
 			var b = new StringBuilder(n);
 			for (int i = 0; i < n; i++)
+			{
 				b.Append('q');
+			}
 			string name = b.ToString();
-			ctp.reset(entry(m644, name, hash_a));
+			ctp.reset(Entry(m644, name, hash_a));
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(name, RawParseUtils.decode(Constants.CHARSET, ctp.path,
-			                                           ctp.pathOffset, ctp.pathLen));
+			Assert.AreEqual(name, RawParseUtils.decode(Constants.CHARSET, ctp.Path, ctp.PathOffset, ctp.PathLen));
 		}
 
 		[Test]
@@ -155,8 +151,8 @@ namespace GitSharp.Tests.TreeWalk
 			ctp.back(1);
 			Assert.IsTrue(ctp.first());
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.mode);
-			Assert.AreEqual("a", path());
+			Assert.AreEqual(m644.Bits, ctp.Mode);
+			Assert.AreEqual("a", Path());
 			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
 		}
 
@@ -167,8 +163,8 @@ namespace GitSharp.Tests.TreeWalk
 
 			Assert.IsTrue(ctp.first());
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.mode);
-			Assert.AreEqual("a", path());
+			Assert.AreEqual(m644.Bits, ctp.Mode);
+			Assert.AreEqual("a", Path());
 			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
 
 			ctp.next(1);
@@ -193,14 +189,14 @@ namespace GitSharp.Tests.TreeWalk
 
 			ctp.back(2);
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(mt.Bits, ctp.mode);
-			Assert.AreEqual("b_sometree", path());
+			Assert.AreEqual(mt.Bits, ctp.Mode);
+			Assert.AreEqual("b_sometree", Path());
 			Assert.AreEqual(hash_sometree, ctp.getEntryObjectId());
 
 			ctp.next(1);
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.mode);
-			Assert.AreEqual("foo", path());
+			Assert.AreEqual(m644.Bits, ctp.Mode);
+			Assert.AreEqual("foo", Path());
 			Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
 
 			ctp.next(1);
@@ -215,8 +211,8 @@ namespace GitSharp.Tests.TreeWalk
 			ctp.next(2);
 			Assert.IsFalse(ctp.eof());
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.mode);
-			Assert.AreEqual("foo", path());
+			Assert.AreEqual(m644.Bits, ctp.Mode);
+			Assert.AreEqual("foo", Path());
 			Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
 
 			ctp.next(1);
@@ -240,14 +236,14 @@ namespace GitSharp.Tests.TreeWalk
 
 			ctp.back(1);
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.mode);
-			Assert.AreEqual("foo", path());
+			Assert.AreEqual(m644.Bits, ctp.Mode);
+			Assert.AreEqual("foo", Path());
 			Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
 
 			ctp.back(1);
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.mode);
-			Assert.AreEqual("a", path());
+			Assert.AreEqual(m644.Bits, ctp.Mode);
+			Assert.AreEqual("a", Path());
 			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
 		}
 
@@ -260,14 +256,14 @@ namespace GitSharp.Tests.TreeWalk
 
 			ctp.back(2);
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.mode);
-			Assert.AreEqual("a", path());
+			Assert.AreEqual(m644.Bits, ctp.Mode);
+			Assert.AreEqual("a", Path());
 			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
 
 			ctp.next(1);
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.mode);
-			Assert.AreEqual("foo", path());
+			Assert.AreEqual(m644.Bits, ctp.Mode);
+			Assert.AreEqual("foo", Path());
 			Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
 
 			ctp.next(1);
@@ -281,14 +277,14 @@ namespace GitSharp.Tests.TreeWalk
 
 			Assert.IsTrue(ctp.first());
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.mode);
-			Assert.AreEqual("a", path());
+			Assert.AreEqual(m644.Bits, ctp.Mode);
+			Assert.AreEqual("a", Path());
 			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
 
 			ctp.next(1);
 			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.mode);
-			Assert.AreEqual("foo", path());
+			Assert.AreEqual(m644.Bits, ctp.Mode);
+			Assert.AreEqual("foo", Path());
 			Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
 
 			ctp.next(1);

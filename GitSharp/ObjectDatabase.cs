@@ -37,47 +37,48 @@
  */
 
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using GitSharp.Util;
 using System.IO;
 
 namespace GitSharp
 {
-    /**
-     * Abstraction of arbitrary object storage.
-     * <p>
-     * An object database stores one or more Git objects, indexed by their unique
-     * {@link ObjectId}. Optionally an object database can reference one or more
-     * alternates; other ObjectDatabase instances that are searched in addition to
-     * the current database.
-     * <p>
-     * Databases are usually divided into two halves: a half that is considered to
-     * be fast to search, and a half that is considered to be slow to search. When
-     * alternates are present the fast half is fully searched (recursively through
-     * all alternates) before the slow half is considered.
-     */
-    public abstract class ObjectDatabase
+	/// <summary>
+	/// Abstraction of arbitrary object storage.
+	/// <para>
+	/// An object database stores one or more Git objects, indexed by their unique
+	/// <see cref="ObjectId"/>. Optionally an object database can reference one or more
+	/// alternates; other <see cref="ObjectDatabase"/> instances that are searched in 
+	/// addition to the current database.
+	/// </para><para>
+	/// Databases are usually divided into two halves: a half that is considered to
+	/// be fast to search, and a half that is considered to be slow to search. When
+	/// alternates are present the fast half is fully searched (recursively through
+	/// all alternates) before the slow half is considered.
+	/// </para>
+	/// </summary>
+	public abstract class ObjectDatabase
     {
-        /** Constant indicating no alternate databases exist. */
-        public static ObjectDatabase[] NO_ALTERNATES = { };
+        /// <summary>
+		/// Constant indicating no alternate databases exist.
+        /// </summary>
+        public static ObjectDatabase[] NoAlternates = { };
 
-        private AtomicReference<ObjectDatabase[]> alternates;
+        private readonly AtomicReference<ObjectDatabase[]> _alternates;
 
-        /** Initialize a new database instance for access. */
-        public ObjectDatabase()
+        /// <summary>
+		/// Initialize a new database instance for access.
+        /// </summary>
+    	protected ObjectDatabase()
         {
-            alternates = new AtomicReference<ObjectDatabase[]>();
+            _alternates = new AtomicReference<ObjectDatabase[]>();
         }
 
-        /**
-         * Does this database exist yet?
-         *
-         * @return true if this database is already created; false if the caller
-         *         should invoke {@link #create()} to create this database location.
-         */
+		/// <summary>
+		/// Gets if this database is already created; If it returns false, the caller
+		/// should invoke <see cref="create"/> to create this database location.
+		/// </summary>
+		/// <returns></returns>
         public virtual bool exists()
         {
             return true;
@@ -117,10 +118,10 @@ namespace GitSharp
         /** Fully close all loaded alternates and clear the alternate list. */
         public virtual void closeAlternates()
         {
-            ObjectDatabase[] alt = alternates.get();
+            ObjectDatabase[] alt = _alternates.get();
             if (alt != null)
             {
-                alternates.set(null);
+                _alternates.set(null);
                 foreach (ObjectDatabase d in alt)
                 {
                     d.close();
@@ -212,17 +213,15 @@ namespace GitSharp
          */
         public virtual ObjectLoader openObject(WindowCursor curs, AnyObjectId objectId)
         {
-            if (objectId == null)
-                return null;
-            ObjectLoader ldr;
+            if (objectId == null) return null;
 
-            ldr = openObjectImpl1(curs, objectId);
+        	ObjectLoader ldr = OpenObjectImpl1(curs, objectId);
             if (ldr != null)
             {
                 return ldr;
             }
 
-            ldr = openObjectImpl2(curs, objectId.ToString(), objectId);
+            ldr = OpenObjectImpl2(curs, objectId.ToString(), objectId);
             if (ldr != null)
             {
                 return ldr;
@@ -230,24 +229,24 @@ namespace GitSharp
             return null;
         }
 
-        private ObjectLoader openObjectImpl1(WindowCursor curs,
+        private ObjectLoader OpenObjectImpl1(WindowCursor curs,
                  AnyObjectId objectId)
         {
-            ObjectLoader ldr;
-
-            ldr = openObject1(curs, objectId);
+        	ObjectLoader ldr = openObject1(curs, objectId);
             if (ldr != null)
             {
                 return ldr;
             }
+
             foreach (ObjectDatabase alt in getAlternates())
             {
-                ldr = alt.openObjectImpl1(curs, objectId);
+                ldr = alt.OpenObjectImpl1(curs, objectId);
                 if (ldr != null)
                 {
                     return ldr;
                 }
             }
+
             if (tryAgain1())
             {
                 ldr = openObject1(curs, objectId);
@@ -256,27 +255,27 @@ namespace GitSharp
                     return ldr;
                 }
             }
+
             return null;
         }
 
-        private ObjectLoader openObjectImpl2(WindowCursor curs,
-                 string objectName, AnyObjectId objectId)
+        private ObjectLoader OpenObjectImpl2(WindowCursor curs, string objectName, AnyObjectId objectId)
         {
-            ObjectLoader ldr;
-
-            ldr = openObject2(curs, objectName, objectId);
+        	ObjectLoader ldr = openObject2(curs, objectName, objectId);
             if (ldr != null)
             {
                 return ldr;
             }
+
             foreach (ObjectDatabase alt in getAlternates())
             {
-                ldr = alt.openObjectImpl2(curs, objectName, objectId);
+                ldr = alt.OpenObjectImpl2(curs, objectName, objectId);
                 if (ldr != null)
                 {
                     return ldr;
                 }
             }
+
             return null;
         }
 
@@ -314,44 +313,44 @@ namespace GitSharp
             return null;
         }
 
-        /**
-         * Open the object from all packs containing it.
-         * <p>
-         * If any alternates are present, their packs are also considered.
-         *
-         * @param out
-         *            result collection of loaders for this object, filled with
-         *            loaders from all packs containing specified object
-         * @param curs
-         *            temporary working space associated with the calling thread.
-         * @param objectId
-         *            id of object to search for
-         * @
-         */
-        public virtual void openObjectInAllPacks(List<PackedObjectLoader> @out,
-                WindowCursor curs, AnyObjectId objectId)
+		/// <summary>
+		/// Open the object from all packs containing it.
+		/// <para>
+		/// If any alternates are present, their packs are also considered.
+		/// </para>
+		/// </summary>
+		/// <param name="out">
+		/// Result collection of loaders for this object, filled with
+		/// loaders from all packs containing specified object
+		/// </param>
+		/// <param name="windowCursor">
+		/// Temporary working space associated with the calling thread.
+		/// </param>
+		/// <param name="objectId"><see cref="ObjectId"/> of object to search for.</param>
+        public virtual void OpenObjectInAllPacks(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
         {
-            openObjectInAllPacks1(@out, curs, objectId);
+            OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
             foreach (ObjectDatabase alt in getAlternates())
             {
-                alt.openObjectInAllPacks1(@out, curs, objectId);
+                alt.OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
             }
         }
 
-        /**
-         * Open the object from all packs containing it.
-         *
-         * @param out
-         *            result collection of loaders for this object, filled with
-         *            loaders from all packs containing specified object
-         * @param curs
-         *            temporary working space associated with the calling thread.
-         * @param objectId
-         *            id of object to search for
-         * @
-         */
-        public virtual void openObjectInAllPacks1(List<PackedObjectLoader> @out,
-                WindowCursor curs, AnyObjectId objectId)
+		/// <summary>
+		/// Open the object from all packs containing it.
+		/// <para>
+		/// If any alternates are present, their packs are also considered.
+		/// </para>
+		/// </summary>
+		/// <param name="out">
+		/// Result collection of loaders for this object, filled with
+		/// loaders from all packs containing specified object.
+		/// </param>
+		/// <param name="windowCursor">
+		/// Temporary working space associated with the calling thread.
+		/// </param>
+		/// <param name="objectId"><see cref="ObjectId"/> of object to search for.</param>
+        public virtual void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
         {
             // Assume no pack support
         }
@@ -371,12 +370,12 @@ namespace GitSharp
          */
         public virtual ObjectDatabase[] getAlternates()
         {
-            ObjectDatabase[] r = alternates.get();
+            ObjectDatabase[] r = _alternates.get();
             if (r == null)
             {
-                lock (alternates)
+                lock (_alternates)
                 {
-                    r = alternates.get();
+                    r = _alternates.get();
                     if (r == null)
                     {
                         try
@@ -385,9 +384,9 @@ namespace GitSharp
                         }
                         catch (IOException)
                         {
-                            r = NO_ALTERNATES;
+                            r = NoAlternates;
                         }
-                        alternates.set(r); // [henon] possible deadlock?
+                        _alternates.set(r); // [henon] possible deadlock?
                     }
                 }
             }
@@ -402,16 +401,16 @@ namespace GitSharp
          * called on this instance and the alternate list is needed again.
          * <p>
          * If the alternate array is empty, implementors should consider using the
-         * constant {@link #NO_ALTERNATES}.
+         * constant {@link #NoAlternates}.
          *
          * @return the alternate list for this database.
          * @
          *             the alternate list could not be accessed. The empty alternate
-         *             array {@link #NO_ALTERNATES} will be assumed by the caller.
+         *             array {@link #NoAlternates} will be assumed by the caller.
          */
         public virtual ObjectDatabase[] loadAlternates()
         {
-            return NO_ALTERNATES;
+            return NoAlternates;
         }
     }
 }

@@ -48,8 +48,8 @@ namespace GitSharp.Tests.TreeWalk
             public FakeTreeIterator(string path, FileMode fileMode)
                 : base(path)
             {
-                mode = fileMode.Bits;
-                pathLen -= 1; // Get rid of extra '/'
+                Mode = fileMode.Bits;
+                PathLen -= 1; // Get rid of extra '/'
             }
 
             public override AbstractTreeIterator createSubtreeIterator(Repository repo)

@@ -42,9 +42,6 @@ using GitSharp.TreeWalk.Filter;
 
 namespace GitSharp.RevWalk
 {
-
-
-
     /**
      * Initial RevWalk generator that bootstraps a new walk.
      * <p>
@@ -55,11 +52,11 @@ namespace GitSharp.RevWalk
      */
     public class StartGenerator : Generator
     {
-        private RevWalk walker;
+        private readonly RevWalk _walker;
 
-        public StartGenerator(RevWalk w)
+        public StartGenerator(RevWalk walker)
         {
-            walker = w;
+            _walker = walker;
         }
 
         public override int outputType()
@@ -69,12 +66,10 @@ namespace GitSharp.RevWalk
 
         public override RevCommit next()
         {
-            Generator g;
-
-            RevWalk w = walker;
+        	RevWalk w = _walker;
             RevFilter rf = w.getRevFilter();
             TreeFilter tf = w.getTreeFilter();
-            AbstractRevQueue q = walker.queue;
+            AbstractRevQueue q = _walker.queue;
 
             if (rf == RevFilter.MERGE_BASE)
             {
@@ -82,19 +77,21 @@ namespace GitSharp.RevWalk
                 // use the bulk of the generator pipeline.
                 //
                 if (tf != TreeFilter.ALL)
-                    throw new InvalidOperationException("Cannot combine TreeFilter " + tf + " with RevFilter " + rf + ".");
+                {
+                	throw new InvalidOperationException("Cannot combine TreeFilter " + tf + " with RevFilter " + rf + ".");
+                }
 
-                MergeBaseGenerator mbg = new MergeBaseGenerator(w);
-                walker.pending = mbg;
-                walker.queue = AbstractRevQueue.EMPTY_QUEUE;
+                var mbg = new MergeBaseGenerator(w);
+                _walker.pending = mbg;
+                _walker.queue = AbstractRevQueue.EMPTY_QUEUE;
                 mbg.init(q);
                 return mbg.next();
             }
 
             bool uninteresting = q.anybodyHasFlag(RevWalk.UNINTERESTING);
-            bool boundary = walker.hasRevSort(RevSort.BOUNDARY);
+            bool boundary = _walker.hasRevSort(RevSort.BOUNDARY);
 
-            if (!boundary && walker is ObjectWalk)
+            if (!boundary && _walker is ObjectWalk)
             {
                 // The object walker requires boundary support to color
                 // trees and blobs at the boundary uninteresting so it
@@ -102,6 +99,7 @@ namespace GitSharp.RevWalk
                 //
                 boundary = true;
             }
+
             if (boundary && !uninteresting)
             {
                 // If we were not fed uninteresting commits we will never
@@ -114,17 +112,22 @@ namespace GitSharp.RevWalk
             DateRevQueue pending;
             int pendingOutputType = 0;
             if (q is DateRevQueue)
-                pending = (DateRevQueue)q;
+            {
+            	pending = (DateRevQueue)q;
+            }
             else
-                pending = new DateRevQueue(q);
+            {
+            	pending = new DateRevQueue(q);
+            }
+
             if (tf != TreeFilter.ALL)
             {
                 rf = AndRevFilter.create(rf, new RewriteTreeFilter(w, tf));
                 pendingOutputType |= HAS_REWRITE | NEEDS_REWRITE;
             }
 
-            walker.queue = q;
-            g = new PendingGenerator(w, pending, rf, pendingOutputType);
+            _walker.queue = q;
+            Generator g = new PendingGenerator(w, pending, rf, pendingOutputType);
 
             if (boundary)
             {
@@ -132,13 +135,13 @@ namespace GitSharp.RevWalk
                 // commits we cannot allow the pending generator to dispose
                 // of them early.
                 //
-                ((PendingGenerator)g).canDispose = false;
+                ((PendingGenerator)g).CanDispose = false;
             }
 
             if ((g.outputType() & NEEDS_REWRITE) != 0)
             {
                 // Correction for an upstream NEEDS_REWRITE is to buffer
-                // fully and then apply a rewrite generator that can
+                // fully and then Apply a rewrite generator that can
                 // pull through the rewrite chain and produce a dense
                 // output graph.
                 //
@@ -146,10 +149,10 @@ namespace GitSharp.RevWalk
                 g = new RewriteGenerator(g);
             }
 
-            if (walker.hasRevSort(RevSort.TOPO)
+            if (_walker.hasRevSort(RevSort.TOPO)
                     && (g.outputType() & SORT_TOPO) == 0)
                 g = new TopoSortGenerator(g);
-            if (walker.hasRevSort(RevSort.REVERSE))
+            if (_walker.hasRevSort(RevSort.REVERSE))
                 g = new LIFORevQueue(g);
             if (boundary)
                 g = new BoundaryGenerator(w, g);

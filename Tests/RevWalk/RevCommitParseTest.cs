@@ -37,7 +37,6 @@
 
 using System.IO;
 using System.Text;
-using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
 using NUnit.Framework;
 
@@ -46,6 +45,10 @@ namespace GitSharp.Tests.RevWalk
     [TestFixture]
     public class RevCommitParseTest : RepositoryTestCase
     {
+        private readonly Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
+        private readonly Encoding isoEnc = Encoding.GetEncoding("ISO-8859-1");
+        private readonly Encoding eucJpEnc = Encoding.GetEncoding("EUC-JP");
+
         [Test]
         public void testParse_NoParents()
         {
@@ -88,8 +91,6 @@ namespace GitSharp.Tests.RevWalk
             Assert.IsNull(c.getTree());
             Assert.IsNull(c.parents);
 
-            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
-
             c.parseCanonical(rw, utf8Enc.GetBytes(body.ToString()));
             Assert.IsNotNull(c.getTree());
             Assert.AreEqual(treeId, c.getTree().getId());
@@ -122,7 +123,6 @@ namespace GitSharp.Tests.RevWalk
             RevCommit c;
             c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
             c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), utf8Enc.GetBytes(b.ToString()));
             return c;
         }
@@ -138,7 +138,6 @@ namespace GitSharp.Tests.RevWalk
             RevCommit c;
             c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
             c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), utf8Enc.GetBytes(b.ToString()));
 
             Assert.AreEqual("", c.getFullMessage());
@@ -148,8 +147,6 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testParse_implicit_UTF8_encoded()
         {
-            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
-
             RevCommit c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
@@ -172,9 +169,6 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testParse_implicit_mixed_encoded()
         {
-            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
-            Encoding isoEnc = Encoding.GetEncoding("ISO-8859-1");
-
             RevCommit c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
@@ -204,8 +198,6 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testParse_explicit_encoded()
         {
-            Encoding eucJpEnc = Encoding.GetEncoding("EUC-JP");
-
             RevCommit c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
@@ -239,9 +231,6 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testParse_explicit_bad_encoded()
         {
-            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
-            Encoding isoEnc = Encoding.GetEncoding("ISO-8859-1");
-
             RevCommit c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
@@ -276,9 +265,6 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testParse_explicit_bad_encoded2()
         {
-            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
-            Encoding isoEnc = Encoding.GetEncoding("ISO-8859-1");
-
             RevCommit c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {

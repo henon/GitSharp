@@ -35,318 +35,358 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Tests.Util;
+using System.IO;
+using System.Text;
 using GitSharp.RevWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.RevWalk
 {
-
-    using NUnit.Framework;
     [TestFixture]
     public class RevTagParseTest : RepositoryTestCase
     {
-#if false
-	public void testTagBlob() throws Exception {
-		testOneType(Constants.OBJ_BLOB);
-	}
+        private readonly Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
+        private readonly Encoding isoEnc = Encoding.GetEncoding("ISO-8859-1");
+        private readonly Encoding eucJpEnc = Encoding.GetEncoding("EUC-JP");
 
-	public void testTagTree() throws Exception {
-		testOneType(Constants.OBJ_TREE);
-	}
+        [Test]
+        public void testTagBlob()
+        {
+            testOneType(Constants.OBJ_BLOB);
+        }
 
-	public void testTagCommit() throws Exception {
-		testOneType(Constants.OBJ_COMMIT);
-	}
+        [Test]
+        public void testTagTree()
+        {
+            testOneType(Constants.OBJ_TREE);
+        }
 
-	public void testTagTag() throws Exception {
-		testOneType(Constants.OBJ_TAG);
-	}
+        [Test]
+        public void testTagCommit()
+        {
+            testOneType(Constants.OBJ_COMMIT);
+        }
 
-	private void testOneType(final int typeCode) throws Exception {
-		final ObjectId id = id("9788669ad918b6fcce64af8882fc9a81cb6aba67");
-		final StringBuilder b = new StringBuilder();
-		b.append("object " + id.name() + "\n");
-		b.append("type " + Constants.typeString(typeCode) + "\n");
-		b.append("tag v1.2.3.4.5\n");
-		b.append("tagger A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
-		b.append("\n");
+        [Test]
+        public void testTagTag()
+        {
+            testOneType(Constants.OBJ_TAG);
+        }
 
-		final RevWalk rw = new RevWalk(db);
-		final RevTag c;
+        private void testOneType(int typeCode)
+        {
+            ObjectId locId = id("9788669ad918b6fcce64af8882fc9a81cb6aba67");
+            var b = new StringBuilder();
+            b.Append("object " + locId.Name + "\n");
+            b.Append("type " + Constants.typeString(typeCode) + "\n");
+            b.Append("tag v1.2.3.4.5\n");
+            b.Append("tagger A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
+            b.Append("\n");
 
-		c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-		assertNull(c.getObject());
-		assertNull(c.getName());
+            var rw = new GitSharp.RevWalk.RevWalk(db);
+            RevTag c;
 
-		c.parseCanonical(rw, b.toString().getBytes("UTF-8"));
-		assertNotNull(c.getObject());
-		assertEquals(id, c.getObject().getId());
-		assertSame(rw.lookupAny(id, typeCode), c.getObject());
-	}
+            c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+            Assert.IsNull(c.getObject());
+            Assert.IsNull(c.getName());
 
-	public void testParseAllFields() throws Exception {
-		final ObjectId treeId = id("9788669ad918b6fcce64af8882fc9a81cb6aba67");
-		final String name = "v1.2.3.4.5";
-		final String taggerName = "A U. Thor";
-		final String taggerEmail = "a_u_thor@example.com";
-		final int taggerTime = 1218123387;
+            c.parseCanonical(rw, utf8Enc.GetBytes(b.ToString()));
+            Assert.IsNotNull(c.getObject());
+            Assert.AreEqual(locId, c.getObject().getId());
+            Assert.AreSame(rw.lookupAny(locId, typeCode), c.getObject());
+        }
 
-		final StringBuilder body = new StringBuilder();
+        [Test]
+        public void testParseAllFields()
+        {
+            ObjectId treeId = id("9788669ad918b6fcce64af8882fc9a81cb6aba67");
+            string name = "v1.2.3.4.5";
+            string taggerName = "A U. Thor";
+            string taggerEmail = "a_u_thor@example.com";
+            int taggerTime = 1218123387;
 
-		body.append("object ");
-		body.append(treeId.name());
-		body.append("\n");
+            var body = new StringBuilder();
 
-		body.append("type tree\n");
+            body.Append("object ");
+            body.Append(treeId.Name);
+            body.Append("\n");
 
-		body.append("tag ");
-		body.append(name);
-		body.append("\n");
+            body.Append("type tree\n");
 
-		body.append("tagger ");
-		body.append(taggerName);
-		body.append(" <");
-		body.append(taggerEmail);
-		body.append("> ");
-		body.append(taggerTime);
-		body.append(" +0700\n");
+            body.Append("tag ");
+            body.Append(name);
+            body.Append("\n");
 
-		body.append("\n");
+            body.Append("tagger ");
+            body.Append(taggerName);
+            body.Append(" <");
+            body.Append(taggerEmail);
+            body.Append("> ");
+            body.Append(taggerTime);
+            body.Append(" +0700\n");
 
-		final RevWalk rw = new RevWalk(db);
-		final RevTag c;
+            body.Append("\n");
 
-		c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-		assertNull(c.getObject());
-		assertNull(c.getName());
+            var rw = new GitSharp.RevWalk.RevWalk(db);
+            RevTag c;
 
-		c.parseCanonical(rw, body.toString().getBytes("UTF-8"));
-		assertNotNull(c.getObject());
-		assertEquals(treeId, c.getObject().getId());
-		assertSame(rw.lookupTree(treeId), c.getObject());
+            c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+            Assert.IsNull(c.getObject());
+            Assert.IsNull(c.getName());
 
-		assertNotNull(c.getName());
-		assertEquals(name, c.getName());
-		assertEquals("", c.getFullMessage());
+            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
+            c.parseCanonical(rw, utf8Enc.GetBytes(body.ToString()));
+            Assert.IsNotNull(c.getObject());
+            Assert.AreEqual(treeId, c.getObject().getId());
+            Assert.AreSame(rw.lookupTree(treeId), c.getObject());
 
-		final PersonIdent cTagger = c.getTaggerIdent();
-		assertNotNull(cTagger);
-		assertEquals(taggerName, cTagger.getName());
-		assertEquals(taggerEmail, cTagger.getEmailAddress());
-	}
+            Assert.IsNotNull(c.getName());
+            Assert.AreEqual(name, c.getName());
+            Assert.AreEqual("", c.getFullMessage());
 
-	private RevTag create(final String msg) throws Exception {
-		final StringBuilder b = new StringBuilder();
-		b.append("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n");
-		b.append("type tree\n");
-		b.append("tag v1.2.3.4.5\n");
-		b.append("tagger A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
-		b.append("\n");
-		b.append(msg);
+            PersonIdent cTagger = c.getTaggerIdent();
+            Assert.IsNotNull(cTagger);
+            Assert.AreEqual(taggerName, cTagger.Name);
+            Assert.AreEqual(taggerEmail, cTagger.EmailAddress);
+        }
 
-		final RevTag c;
-		c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-		c.parseCanonical(new RevWalk(db), b.toString().getBytes("UTF-8"));
-		return c;
-	}
+        private RevTag create(string msg)
+        {
+            var b = new StringBuilder();
+            b.Append("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n");
+            b.Append("type tree\n");
+            b.Append("tag v1.2.3.4.5\n");
+            b.Append("tagger A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
+            b.Append("\n");
+            b.Append(msg);
 
-	public void testParse_implicit_UTF8_encoded() throws Exception {
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		b.write("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"
-				.getBytes("UTF-8"));
-		b.write("type tree\n".getBytes("UTF-8"));
-		b.write("tag v1.2.3.4.5\n".getBytes("UTF-8"));
+            RevTag c;
+            c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-		b
-				.write("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"
-						.getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("Sm\u00f6rg\u00e5sbord\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
-		final RevTag c;
-		c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-		c.parseCanonical(new RevWalk(db), b.toByteArray());
+            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
+            c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), utf8Enc.GetBytes(b.ToString()));
+            return c;
+        }
 
-		assertEquals("F\u00f6r fattare", c.getTaggerIdent().getName());
-		assertEquals("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
-		assertEquals("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c
-				.getFullMessage());
-	}
+        [Test]
+        public void testParse_implicit_UTF8_encoded()
+        {
+            RevTag c;
+            using (var b = new BinaryWriter(new MemoryStream()))
+            {
+                b.Write(utf8Enc.GetBytes("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
+                b.Write(utf8Enc.GetBytes("type tree\n"));
+                b.Write(utf8Enc.GetBytes("tag v1.2.3.4.5\n"));
+                b.Write(utf8Enc.GetBytes("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("Sm\u00f6rg\u00e5sbord\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
 
-	public void testParse_implicit_mixed_encoded() throws Exception {
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		b.write("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"
-				.getBytes("UTF-8"));
-		b.write("type tree\n".getBytes("UTF-8"));
-		b.write("tag v1.2.3.4.5\n".getBytes("UTF-8"));
-		b
-				.write("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"
-						.getBytes("ISO-8859-1"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("Sm\u00f6rg\u00e5sbord\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
-		final RevTag c;
-		c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-		c.parseCanonical(new RevWalk(db), b.toByteArray());
+                c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+            }
+            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
+            Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
+            Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
+        }
 
-		assertEquals("F\u00f6r fattare", c.getTaggerIdent().getName());
-		assertEquals("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
-		assertEquals("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c
-				.getFullMessage());
-	}
+        [Test]
+        public void testParse_implicit_mixed_encoded()
+        {
+            RevTag c;
+            using (var b = new BinaryWriter(new MemoryStream()))
+            {
+                b.Write(utf8Enc.GetBytes("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
+                b.Write(utf8Enc.GetBytes("type tree\n"));
+                b.Write(utf8Enc.GetBytes("tag v1.2.3.4.5\n"));
+                b.Write(isoEnc.GetBytes("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("Sm\u00f6rg\u00e5sbord\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
 
-	/**
-	 * Test parsing of a commit whose encoding is given and works.
-	 *
-	 * @throws Exception
-	 */
-	public void testParse_explicit_encoded() throws Exception {
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		b.write("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"
-				.getBytes("EUC-JP"));
-		b.write("type tree\n".getBytes("EUC-JP"));
-		b.write("tag v1.2.3.4.5\n".getBytes("EUC-JP"));
-		b
-				.write("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"
-						.getBytes("EUC-JP"));
-		b.write("encoding euc_JP\n".getBytes("EUC-JP"));
-		b.write("\n".getBytes("EUC-JP"));
-		b.write("\u304d\u308c\u3044\n".getBytes("EUC-JP"));
-		b.write("\n".getBytes("EUC-JP"));
-		b.write("Hi\n".getBytes("EUC-JP"));
-		final RevTag c;
-		c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-		c.parseCanonical(new RevWalk(db), b.toByteArray());
+                c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+            }
+            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
+            Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
+            Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c
+                                                                                 .getFullMessage());
+        }
 
-		assertEquals("F\u00f6r fattare", c.getTaggerIdent().getName());
-		assertEquals("\u304d\u308c\u3044", c.getShortMessage());
-		assertEquals("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
-	}
+        /**
+         * Test parsing of a commit whose encoding is given and works.
+         *
+         * @throws Exception
+         */
 
-	/**
-	 * This is a twisted case, but show what we expect here. We can revise the
-	 * expectations provided this case is updated.
-	 *
-	 * What happens here is that an encoding us given, but data is not encoded
-	 * that way (and we can detect it), so we try other encodings.
-	 *
-	 * @throws Exception
-	 */
-	public void testParse_explicit_bad_encoded() throws Exception {
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		b.write("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"
-				.getBytes("UTF-8"));
-		b.write("type tree\n".getBytes("UTF-8"));
-		b.write("tag v1.2.3.4.5\n".getBytes("UTF-8"));
-		b
-				.write("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"
-						.getBytes("ISO-8859-1"));
-		b.write("encoding EUC-JP\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("Hi\n".getBytes("UTF-8"));
-		final RevTag c;
-		c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-		c.parseCanonical(new RevWalk(db), b.toByteArray());
+        [Test]
+        public void testParse_explicit_encoded()
+        {
+            RevTag c;
+            using (var b = new BinaryWriter(new MemoryStream()))
+            {
+                b.Write(eucJpEnc.GetBytes("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
+                b.Write(eucJpEnc.GetBytes("type tree\n"));
+                b.Write(eucJpEnc.GetBytes("tag v1.2.3.4.5\n"));
+                b.Write(eucJpEnc.GetBytes("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
+                b.Write(eucJpEnc.GetBytes("encoding euc_JP\n"));
+                b.Write(eucJpEnc.GetBytes("\n"));
+                b.Write(eucJpEnc.GetBytes("\u304d\u308c\u3044\n"));
+                b.Write(eucJpEnc.GetBytes("\n"));
+                b.Write(eucJpEnc.GetBytes("Hi\n"));
 
-		assertEquals("F\u00f6r fattare", c.getTaggerIdent().getName());
-		assertEquals("\u304d\u308c\u3044", c.getShortMessage());
-		assertEquals("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
-	}
+                c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+            }
+            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
+            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+        }
 
-	/**
-	 * This is a twisted case too, but show what we expect here. We can revise
-	 * the expectations provided this case is updated.
-	 *
-	 * What happens here is that an encoding us given, but data is not encoded
-	 * that way (and we can detect it), so we try other encodings. Here data
-	 * could actually be decoded in the stated encoding, but we override using
-	 * UTF-8.
-	 *
-	 * @throws Exception
-	 */
-	public void testParse_explicit_bad_encoded2() throws Exception {
-		final ByteArrayOutputStream b = new ByteArrayOutputStream();
-		b.write("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"
-				.getBytes("UTF-8"));
-		b.write("type tree\n".getBytes("UTF-8"));
-		b.write("tag v1.2.3.4.5\n".getBytes("UTF-8"));
-		b
-				.write("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"
-						.getBytes("UTF-8"));
-		b.write("encoding ISO-8859-1\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
-		b.write("\n".getBytes("UTF-8"));
-		b.write("Hi\n".getBytes("UTF-8"));
-		final RevTag c;
-		c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-		c.parseCanonical(new RevWalk(db), b.toByteArray());
+	    /**
+	     * This is a twisted case, but show what we expect here. We can revise the
+	     * expectations provided this case is updated.
+	     *
+	     * What happens here is that an encoding us given, but data is not encoded
+	     * that way (and we can detect it), so we try other encodings.
+	     *
+	     * @throws Exception
+	     */
 
-		assertEquals("F\u00f6r fattare", c.getTaggerIdent().getName());
-		assertEquals("\u304d\u308c\u3044", c.getShortMessage());
-		assertEquals("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
-	}
+        [Test]
+        public void testParse_explicit_bad_encoded()
+        {
+            RevTag c;
+            using (var b = new BinaryWriter(new MemoryStream()))
+            {
+                b.Write(utf8Enc.GetBytes("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
+                b.Write(utf8Enc.GetBytes("type tree\n"));
+                b.Write(utf8Enc.GetBytes("tag v1.2.3.4.5\n"));
+                b.Write(isoEnc.GetBytes("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
+                b.Write(utf8Enc.GetBytes("encoding EUC-JP\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("Hi\n"));
 
-	public void testParse_NoMessage() throws Exception {
-		final String msg = "";
-		final RevTag c = create(msg);
-		assertEquals(msg, c.getFullMessage());
-		assertEquals(msg, c.getShortMessage());
-	}
+                c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+            }
 
-	public void testParse_OnlyLFMessage() throws Exception {
-		final RevTag c = create("\n");
-		assertEquals("\n", c.getFullMessage());
-		assertEquals("", c.getShortMessage());
-	}
+            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
+            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+        }
 
-	public void testParse_ShortLineOnlyNoLF() throws Exception {
-		final String shortMsg = "This is a short message.";
-		final RevTag c = create(shortMsg);
-		assertEquals(shortMsg, c.getFullMessage());
-		assertEquals(shortMsg, c.getShortMessage());
-	}
+	    /**
+	     * This is a twisted case too, but show what we expect here. We can revise
+	     * the expectations provided this case is updated.
+	     *
+	     * What happens here is that an encoding us given, but data is not encoded
+	     * that way (and we can detect it), so we try other encodings. Here data
+	     * could actually be decoded in the stated encoding, but we override using
+	     * UTF-8.
+	     *
+	     * @throws Exception
+	     */
 
-	public void testParse_ShortLineOnlyEndLF() throws Exception {
-		final String shortMsg = "This is a short message.";
-		final String fullMsg = shortMsg + "\n";
-		final RevTag c = create(fullMsg);
-		assertEquals(fullMsg, c.getFullMessage());
-		assertEquals(shortMsg, c.getShortMessage());
-	}
+        [Test]
+        public void testParse_explicit_bad_encoded2()
+        {
+            RevTag c;
+            using (var b = new BinaryWriter(new MemoryStream()))
+            {
+                b.Write(utf8Enc.GetBytes("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
+                b.Write(utf8Enc.GetBytes("type tree\n"));
+                b.Write(utf8Enc.GetBytes("tag v1.2.3.4.5\n"));
+                b.Write(utf8Enc.GetBytes("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
+                b.Write(utf8Enc.GetBytes("encoding ISO-8859-1\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
+                b.Write(utf8Enc.GetBytes("\n"));
+                b.Write(utf8Enc.GetBytes("Hi\n"));
 
-	public void testParse_ShortLineOnlyEmbeddedLF() throws Exception {
-		final String fullMsg = "This is a\nshort message.";
-		final String shortMsg = fullMsg.replace('\n', ' ');
-		final RevTag c = create(fullMsg);
-		assertEquals(fullMsg, c.getFullMessage());
-		assertEquals(shortMsg, c.getShortMessage());
-	}
+                c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+            }
+            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
+            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+        }
 
-	public void testParse_ShortLineOnlyEmbeddedAndEndingLF() throws Exception {
-		final String fullMsg = "This is a\nshort message.\n";
-		final String shortMsg = "This is a short message.";
-		final RevTag c = create(fullMsg);
-		assertEquals(fullMsg, c.getFullMessage());
-		assertEquals(shortMsg, c.getShortMessage());
-	}
+        [Test]
+        public void testParse_NoMessage()
+        {
+            string msg = "";
+            RevTag c = create(msg);
+            Assert.AreEqual(msg, c.getFullMessage());
+            Assert.AreEqual(msg, c.getShortMessage());
+        }
 
-	public void testParse_GitStyleMessage() throws Exception {
-		final String shortMsg = "This fixes a bug.";
-		final String body = "We do it with magic and pixie dust and stuff.\n"
-				+ "\n" + "Signed-off-by: A U. Thor <author@example.com>\n";
-		final String fullMsg = shortMsg + "\n" + "\n" + body;
-		final RevTag c = create(fullMsg);
-		assertEquals(fullMsg, c.getFullMessage());
-		assertEquals(shortMsg, c.getShortMessage());
-	}
+        [Test]
+        public void testParse_OnlyLFMessage()
+        {
+            RevTag c = create("\n");
+            Assert.AreEqual("\n", c.getFullMessage());
+            Assert.AreEqual("", c.getShortMessage());
+        }
 
-	private static ObjectId id(final String str) {
-		return ObjectId.fromString(str);
-	}
-#endif
+        [Test]
+        public void testParse_ShortLineOnlyNoLF()
+        {
+            string shortMsg = "This is a short message.";
+            RevTag c = create(shortMsg);
+            Assert.AreEqual(shortMsg, c.getFullMessage());
+            Assert.AreEqual(shortMsg, c.getShortMessage());
+        }
+
+        [Test]
+        public void testParse_ShortLineOnlyEndLF()
+        {
+            string shortMsg = "This is a short message.";
+            string fullMsg = shortMsg + "\n";
+            RevTag c = create(fullMsg);
+            Assert.AreEqual(fullMsg, c.getFullMessage());
+            Assert.AreEqual(shortMsg, c.getShortMessage());
+        }
+
+        [Test]
+        public void testParse_ShortLineOnlyEmbeddedLF()
+        {
+            string fullMsg = "This is a\nshort message.";
+            string shortMsg = fullMsg.Replace('\n', ' ');
+            RevTag c = create(fullMsg);
+            Assert.AreEqual(fullMsg, c.getFullMessage());
+            Assert.AreEqual(shortMsg, c.getShortMessage());
+        }
+
+        [Test]
+        public void testParse_ShortLineOnlyEmbeddedAndEndingLF()
+        {
+            string fullMsg = "This is a\nshort message.\n";
+            string shortMsg = "This is a short message.";
+            RevTag c = create(fullMsg);
+            Assert.AreEqual(fullMsg, c.getFullMessage());
+            Assert.AreEqual(shortMsg, c.getShortMessage());
+        }
+
+        [Test]
+        public void testParse_GitStyleMessage()
+        {
+            string shortMsg = "This fixes a bug.";
+            string body = "We do it with magic and pixie dust and stuff.\n"
+                          + "\n" + "Signed-off-by: A U. Thor <author@example.com>\n";
+            string fullMsg = shortMsg + "\n" + "\n" + body;
+            RevTag c = create(fullMsg);
+            Assert.AreEqual(fullMsg, c.getFullMessage());
+            Assert.AreEqual(shortMsg, c.getShortMessage());
+        }
+
+        private ObjectId id(string str)
+        {
+            return ObjectId.FromString(str);
+        }
     }
 }

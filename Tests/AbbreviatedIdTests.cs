@@ -36,12 +36,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
@@ -52,8 +48,7 @@ namespace GitSharp.Tests
         [Test]
         public void testEmpty_FromByteArray()
         {
-            AbbreviatedObjectId i;
-            i = AbbreviatedObjectId.FromString(new byte[] { }, 0, 0);
+        	AbbreviatedObjectId i = AbbreviatedObjectId.FromString(new byte[] { }, 0, 0);
             Assert.IsNotNull(i);
             Assert.AreEqual(0, i.Length);
             Assert.IsFalse(i.isComplete());
@@ -73,7 +68,7 @@ namespace GitSharp.Tests
         [Test]
         public void testFull_FromByteArray()
         {
-            String s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
+            const string s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             byte[] b = Constants.encodeASCII(s);
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(b, 0, b.Length);
             Assert.IsNotNull(i);
@@ -90,7 +85,7 @@ namespace GitSharp.Tests
         [Test]
         public void testFull_FromString()
         {
-            String s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
+            const string s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
@@ -106,7 +101,7 @@ namespace GitSharp.Tests
         [Test]
         public void test1_FromString()
         {
-            String s = "7";
+            const string s = "7";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
@@ -118,7 +113,7 @@ namespace GitSharp.Tests
         [Test]
         public void test2_FromString()
         {
-            String s = "7b";
+            const string s = "7b";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
@@ -130,7 +125,7 @@ namespace GitSharp.Tests
         [Test]
         public void test3_FromString()
         {
-            String s = "7b6";
+            const string s = "7b6";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
@@ -142,7 +137,7 @@ namespace GitSharp.Tests
         [Test]
         public void test4_FromString()
         {
-            String s = "7b6e";
+            const string s = "7b6e";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
@@ -154,7 +149,7 @@ namespace GitSharp.Tests
         [Test]
         public void test5_FromString()
         {
-            String s = "7b6e8";
+            const string s = "7b6e8";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
@@ -166,7 +161,7 @@ namespace GitSharp.Tests
         [Test]
         public void test6_FromString()
         {
-            String s = "7b6e80";
+            const string s = "7b6e80";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
@@ -178,7 +173,7 @@ namespace GitSharp.Tests
         [Test]
         public void test7_FromString()
         {
-            String s = "7b6e806";
+            const string s = "7b6e806";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
@@ -190,7 +185,7 @@ namespace GitSharp.Tests
         [Test]
         public void test8_FromString()
         {
-            String s = "7b6e8067";
+            const string s = "7b6e8067";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
@@ -202,7 +197,7 @@ namespace GitSharp.Tests
         [Test]
         public void test9_FromString()
         {
-            String s = "7b6e8067e";
+            const string s = "7b6e8067e";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
@@ -214,7 +209,7 @@ namespace GitSharp.Tests
         [Test]
         public void test17_FromString()
         {
-            String s = "7b6e8067ec96acef9";
+            const string s = "7b6e8067ec96acef9";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
             Assert.IsNotNull(i);
             Assert.AreEqual(s.Length, i.Length);
@@ -226,7 +221,7 @@ namespace GitSharp.Tests
         [Test]
         public void testEquals_Short()
         {
-            String s = "7b6e8067";
+            const string s = "7b6e8067";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(s);
             AbbreviatedObjectId b = AbbreviatedObjectId.FromString(s);
             Assert.AreNotSame(a, b);
@@ -238,7 +233,7 @@ namespace GitSharp.Tests
         [Test]
         public void testEquals_Full()
         {
-            String s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
+            const string s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(s);
             AbbreviatedObjectId b = AbbreviatedObjectId.FromString(s);
             Assert.AreNotSame(a, b);
@@ -250,8 +245,8 @@ namespace GitSharp.Tests
         [Test]
         public void testNotEquals_SameLength()
         {
-            String sa = "7b6e8067";
-            String sb = "7b6e806e";
+            const string sa = "7b6e8067";
+            const string sb = "7b6e806e";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
             AbbreviatedObjectId b = AbbreviatedObjectId.FromString(sb);
             Assert.IsFalse(a.Equals(b));
@@ -261,8 +256,8 @@ namespace GitSharp.Tests
         [Test]
         public void testNotEquals_DiffLength()
         {
-            String sa = "7b6e8067abcd";
-            String sb = "7b6e8067";
+            const string sa = "7b6e8067abcd";
+            const string sb = "7b6e8067";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
             AbbreviatedObjectId b = AbbreviatedObjectId.FromString(sb);
             Assert.IsFalse(a.Equals(b));
@@ -272,18 +267,18 @@ namespace GitSharp.Tests
         [Test]
         public void testPrefixCompare_Full()
         {
-            String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
+            const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(s1);
             ObjectId i1 = ObjectId.FromString(s1);
             Assert.AreEqual(0, a.prefixCompare(i1));
             Assert.IsTrue(i1.startsWith(a));
 
-            String s2 = "7b6e8067ec96acef9a4184b43210d583b6d2f99b";
+            const string s2 = "7b6e8067ec96acef9a4184b43210d583b6d2f99b";
             ObjectId i2 = ObjectId.FromString(s2);
             Assert.IsTrue(a.prefixCompare(i2) < 0);
             Assert.IsFalse(i2.startsWith(a));
 
-            String s3 = "7b6e8067ec96acef9a4184b43210d583b6d2f999";
+            const string s3 = "7b6e8067ec96acef9a4184b43210d583b6d2f999";
             ObjectId i3 = ObjectId.FromString(s3);
             Assert.IsTrue(a.prefixCompare(i3) > 0);
             Assert.IsFalse(i3.startsWith(a));
@@ -292,20 +287,20 @@ namespace GitSharp.Tests
         [Test]
         public void testPrefixCompare_1()
         {
-            String sa = "7";
+            const string sa = "7";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
 
-            String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
+            const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
             Assert.AreEqual(0, a.prefixCompare(i1));
             Assert.IsTrue(i1.startsWith(a));
 
-            String s2 = "8b6e8067ec96acef9a4184b43210d583b6d2f99a";
+            const string s2 = "8b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i2 = ObjectId.FromString(s2);
             Assert.IsTrue(a.prefixCompare(i2) < 0);
             Assert.IsFalse(i2.startsWith(a));
 
-            String s3 = "6b6e8067ec96acef9a4184b43210d583b6d2f99a";
+            const string s3 = "6b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i3 = ObjectId.FromString(s3);
             Assert.IsTrue(a.prefixCompare(i3) > 0);
             Assert.IsFalse(i3.startsWith(a));
@@ -314,20 +309,20 @@ namespace GitSharp.Tests
         [Test]
         public void testPrefixCompare_7()
         {
-            String sa = "7b6e806";
+            const string sa = "7b6e806";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
 
-            String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
+            const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
             Assert.AreEqual(0, a.prefixCompare(i1));
             Assert.IsTrue(i1.startsWith(a));
 
-            String s2 = "7b6e8167ec86acef9a4184b43210d583b6d2f99a";
+            const string s2 = "7b6e8167ec86acef9a4184b43210d583b6d2f99a";
             ObjectId i2 = ObjectId.FromString(s2);
             Assert.IsTrue(a.prefixCompare(i2) < 0);
             Assert.IsFalse(i2.startsWith(a));
 
-            String s3 = "7b6e8057eca6acef9a4184b43210d583b6d2f99a";
+            const string s3 = "7b6e8057eca6acef9a4184b43210d583b6d2f99a";
             ObjectId i3 = ObjectId.FromString(s3);
             Assert.IsTrue(a.prefixCompare(i3) > 0);
             Assert.IsFalse(i3.startsWith(a));
@@ -336,20 +331,20 @@ namespace GitSharp.Tests
         [Test]
         public void testPrefixCompare_8()
         {
-            String sa = "7b6e8067";
+            const string sa = "7b6e8067";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
 
-            String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
+            const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
             Assert.AreEqual(0, a.prefixCompare(i1));
             Assert.IsTrue(i1.startsWith(a));
 
-            String s2 = "7b6e8167ec86acef9a4184b43210d583b6d2f99a";
+            const string s2 = "7b6e8167ec86acef9a4184b43210d583b6d2f99a";
             ObjectId i2 = ObjectId.FromString(s2);
             Assert.IsTrue(a.prefixCompare(i2) < 0);
             Assert.IsFalse(i2.startsWith(a));
 
-            String s3 = "7b6e8057eca6acef9a4184b43210d583b6d2f99a";
+            const string s3 = "7b6e8057eca6acef9a4184b43210d583b6d2f99a";
             ObjectId i3 = ObjectId.FromString(s3);
             Assert.IsTrue(a.prefixCompare(i3) > 0);
             Assert.IsFalse(i3.startsWith(a));
@@ -358,20 +353,20 @@ namespace GitSharp.Tests
         [Test]
         public void testPrefixCompare_9()
         {
-            String sa = "7b6e8067e";
+            const string sa = "7b6e8067e";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
 
-            String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
+            const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
             Assert.AreEqual(0, a.prefixCompare(i1));
             Assert.IsTrue(i1.startsWith(a));
 
-            String s2 = "7b6e8167ec86acef9a4184b43210d583b6d2f99a";
+            const string s2 = "7b6e8167ec86acef9a4184b43210d583b6d2f99a";
             ObjectId i2 = ObjectId.FromString(s2);
             Assert.IsTrue(a.prefixCompare(i2) < 0);
             Assert.IsFalse(i2.startsWith(a));
 
-            String s3 = "7b6e8057eca6acef9a4184b43210d583b6d2f99a";
+            const string s3 = "7b6e8057eca6acef9a4184b43210d583b6d2f99a";
             ObjectId i3 = ObjectId.FromString(s3);
             Assert.IsTrue(a.prefixCompare(i3) > 0);
             Assert.IsFalse(i3.startsWith(a));
@@ -380,24 +375,23 @@ namespace GitSharp.Tests
         [Test]
         public void testPrefixCompare_17()
         {
-            String sa = "7b6e8067ec96acef9";
+            const string sa = "7b6e8067ec96acef9";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
 
-            String s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
+            const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
             Assert.AreEqual(0, a.prefixCompare(i1));
             Assert.IsTrue(i1.startsWith(a));
 
-            String s2 = "7b6e8067eca6acef9a4184b43210d583b6d2f99a";
+            const string s2 = "7b6e8067eca6acef9a4184b43210d583b6d2f99a";
             ObjectId i2 = ObjectId.FromString(s2);
             Assert.IsTrue(a.prefixCompare(i2) < 0);
             Assert.IsFalse(i2.startsWith(a));
 
-            String s3 = "7b6e8067ec86acef9a4184b43210d583b6d2f99a";
+            const string s3 = "7b6e8067ec86acef9a4184b43210d583b6d2f99a";
             ObjectId i3 = ObjectId.FromString(s3);
             Assert.IsTrue(a.prefixCompare(i3) > 0);
             Assert.IsFalse(i3.startsWith(a));
         }
-
     }
 }

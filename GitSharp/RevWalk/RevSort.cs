@@ -76,7 +76,7 @@ namespace GitSharp.RevWalk
             REVERSE,
 
             /**
-             * Include {@link RevFlag#UNINTERESTING} boundary commits after all others.
+             * Include {@link RevFlag#UNINTERESTING} boundary commits After all others.
              * In {@link ObjectWalk}, objects associated with such commits (trees,
              * blobs), and all other objects marked explicitly as UNINTERESTING are also
              * included.

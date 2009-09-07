@@ -79,24 +79,32 @@ namespace GitSharp
 	 *             no recognized pack index version can support the supplied
 	 *             objects. This is likely a bug in the implementation.
 	 */
-        public static PackIndexWriter CreateOldestPossible<T>(Stream dst, List<T> objs) where T : PackedObjectInfo
+        public static PackIndexWriter CreateOldestPossible<T>(Stream dst, List<T> objs) 
+			where T : PackedObjectInfo
         {
             int version = 1;
-        LOOP:
+        	bool breakLoop = false;
 
             foreach (T oe in objs)
             {
                 switch (version)
                 {
                     case 1:
-                        if (PackIndexWriterV1.CanStore(oe))
-                            continue;
+                        if (PackIndexWriterV1.CanStore(oe)) continue;
                         version = 2;
-                        goto LOOP;
+                		break;
+
                     case 2:
-                        goto LOOP;
-                }
+                		breakLoop = true;
+                		break;
+				}
+
+				if (breakLoop)
+				{
+					break;
+				}
             }
+
             return CreateVersion(dst, version);
         }
 

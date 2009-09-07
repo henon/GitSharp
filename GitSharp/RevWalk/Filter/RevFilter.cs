@@ -37,200 +37,221 @@
  */
 
 using System;
+using GitSharp.Exceptions;
 
 namespace GitSharp.RevWalk.Filter
 {
-
-    /**
-     * Selects interesting revisions during walking.
-     * <p>
-     * This is an abstract interface. Applications may implement a subclass, or use
-     * one of the predefined implementations already available within this package.
-     * Filters may be chained together using <code>AndRevFilter</code> and
-     * <code>OrRevFilter</code> to Create complex bool expressions.
-     * <p>
-     * Applications should install the filter on a RevWalk by
-     * {@link RevWalk#setRevFilter(RevFilter)} prior to starting traversal.
-     * <p>
-     * Unless specifically noted otherwise a RevFilter implementation is not thread
-     * safe and may not be shared by different RevWalk instances at the same time.
-     * This restriction allows RevFilter implementations to cache state within their
-     * instances during {@link #include(RevWalk, RevCommit)} if it is beneficial to
-     * their implementation. Deep clones created by {@link #Clone()} may be used to
-     * construct a thread-safe copy of an existing filter.
-     *
-     * <p>
-     * <b>Message filters:</b>
-     * <ul>
-     * <li>Author name/email: {@link AuthorRevFilter}</li>
-     * <li>Committer name/email: {@link CommitterRevFilter}</li>
-     * <li>Message body: {@link MessageRevFilter}</li>
-     * </ul>
-     *
-     * <p>
-     * <b>Merge filters:</b>
-     * <ul>
-     * <li>Skip all merges: {@link #NO_MERGES}.</li>
-     * </ul>
-     *
-     * <p>
-     * <b>Boolean modifiers:</b>
-     * <ul>
-     * <li>AND: {@link AndRevFilter}</li>
-     * <li>OR: {@link OrRevFilter}</li>
-     * <li>NOT: {@link NotRevFilter}</li>
-     * </ul>
-     */
-    public abstract class RevFilter
-    {
-        /** Default filter that always returns true (thread safe). */
-        public static RevFilter ALL = new RevFilter_ALL();
-
-        private class RevFilter_ALL : RevFilter
-        {
-            public override bool include(RevWalk walker, RevCommit c)
-            {
-                return true;
-            }
-
-            public override RevFilter Clone()
-            {
-                return this;
-            }
-
-            public override string ToString()
-            {
-                return "ALL";
-            }
-        }
-
-        /** Default filter that always returns false (thread safe). */
-        public static RevFilter NONE = new RevFilter_NONE();
-
-        private class RevFilter_NONE : RevFilter
-        {
-            public override bool include(RevWalk walker, RevCommit c)
-            {
-                return false;
-            }
-
-            public override RevFilter Clone()
-            {
-                return this;
-            }
-
-            public override string ToString()
-            {
-                return "NONE";
-            }
-        }
-
-        /** Excludes commits with more than one parent (thread safe). */
-        public static RevFilter NO_MERGES = new RevFilter_NO_MERGES();
-
-        private class RevFilter_NO_MERGES : RevFilter
-        {
-            public override bool include(RevWalk walker, RevCommit c)
-            {
-                return c.getParentCount() < 2;
-            }
-
-            public override RevFilter Clone()
-            {
-                return this;
-            }
-
-            public override string ToString()
-            {
-                return "NO_MERGES";
-            }
-        }
-
-        /**
-         * Selects only merge bases of the starting points (thread safe).
-         * <p>
-         * This is a special case filter that cannot be combined with any other
-         * filter. Its include method always throws an exception as context
-         * information beyond the arguments is necessary to determine if the
-         * supplied commit is a merge base.
-         */
-        public static RevFilter MERGE_BASE = new RevFilter_MERGE_BASE();
-
-        public class RevFilter_MERGE_BASE : RevFilter
-        {
-            public override bool include(RevWalk walker, RevCommit c)
-            {
-                throw new InvalidOperationException("Cannot be combined.");
-            }
-
-            public override RevFilter Clone()
-            {
-                return this;
-            }
-
-            public override string ToString()
-            {
-                return "MERGE_BASE";
-            }
-        }
-
-        /**
-	 * Create a new filter that does the opposite of this filter.
+	/**
+	 * Selects interesting revisions during walking.
+	 * <p>
+	 * This is an abstract interface. Applications may implement a subclass, or use
+	 * one of the predefined implementations already available within this package.
+	 * Filters may be chained together using <code>AndRevFilter</code> and
+	 * <code>OrRevFilter</code> to Create complex bool expressions.
+	 * <p>
+	 * Applications should install the filter on a RevWalk by
+	 * {@link RevWalk#setRevFilter(RevFilter)} prior to starting traversal.
+	 * <p>
+	 * Unless specifically noted otherwise a RevFilter implementation is not thread
+	 * safe and may not be shared by different RevWalk instances at the same time.
+	 * This restriction allows RevFilter implementations to cache state within their
+	 * instances during {@link #include(RevWalk, RevCommit)} if it is beneficial to
+	 * their implementation. Deep clones created by {@link #Clone()} may be used to
+	 * construct a thread-safe copy of an existing filter.
 	 *
-	 * @return a new filter that includes commits this filter rejects.
+	 * <p>
+	 * <b>Message filters:</b>
+	 * <ul>
+	 * <li>Author name/email: {@link AuthorRevFilter}</li>
+	 * <li>Committer name/email: {@link CommitterRevFilter}</li>
+	 * <li>Message body: {@link MessageRevFilter}</li>
+	 * </ul>
+	 *
+	 * <p>
+	 * <b>Merge filters:</b>
+	 * <ul>
+	 * <li>Skip all merges: {@link #NO_MERGES}.</li>
+	 * </ul>
+	 *
+	 * <p>
+	 * <b>Boolean modifiers:</b>
+	 * <ul>
+	 * <li>AND: {@link AndRevFilter}</li>
+	 * <li>OR: {@link OrRevFilter}</li>
+	 * <li>NOT: {@link NotRevFilter}</li>
+	 * </ul>
 	 */
-        public virtual RevFilter negate()
-        {
-            return NotRevFilter.create(this);
-        }
+	public abstract class RevFilter
+	{
+		/// <summary>
+		/// Default filter that always returns true (thread safe).
+		/// </summary>
+		public static RevFilter ALL = new RevFilterAll();
 
-        /**
-         * Determine if the supplied commit should be included in results.
-         *
-         * @param walker
-         *            the active walker this filter is being invoked from within.
-         * @param cmit
-         *            the commit currently being tested. The commit has been parsed
-         *            and its body is available for inspection.
-         * @return true to include this commit in the results; false to have this
-         *         commit be omitted entirely from the results.
-         * @throws StopWalkException
-         *             the filter knows for certain that no additional commits can
-         *             ever match, and the current commit doesn't match either. The
-         *             walk is halted and no more results are provided.
-         * @throws MissingObjectException
-         *             an object the filter needs to consult to determine its answer
-         *             does not exist in the Git repository the Walker is operating
-         *             on. Filtering this commit is impossible without the object.
-         * @throws IncorrectObjectTypeException
-         *             an object the filter needed to consult was not of the
-         *             expected object type. This usually indicates a corrupt
-         *             repository, as an object link is referencing the wrong type.
-         * @
-         *             a loose object or pack file could not be Read to obtain data
-         *             necessary for the filter to make its decision.
-         */
-        public abstract bool include(RevWalk walker, RevCommit cmit);
+		/// <summary>
+		/// Default filter that always returns false (thread safe).
+		/// </summary>
+		public static RevFilter NONE = new RevFilterNone();
 
-        /**
-         * Clone this revision filter, including its parameters.
-         * <p>
-         * This is a deep Clone. If this filter embeds objects or other filters it
-         * must also Clone those, to ensure the instances do not share mutable data.
-         *
-         * @return another copy of this filter, suitable for another thread.
-         */
-        public abstract RevFilter Clone();
+		/// <summary>
+		/// Excludes commits with more than one parent (thread safe).
+		/// </summary>
+		public static readonly RevFilter NO_MERGES = new RevFilterNoMerges();
 
-        public override string ToString()
-        {
-            string n = GetType().Name;
-            int lastDot = n.LastIndexOf('.');
-            if (lastDot >= 0)
-            {
-                n = n.Substring(lastDot + 1);
-            }
-            return n.Replace('$', '.');
-        }
-    }
+		/// <summary>
+		/// Selects only merge bases of the starting points (thread safe).
+		/// <para>
+		/// This is a special case filter that cannot be combined with any other
+		/// filter. Its include method always throws an exception as context
+		/// information beyond the arguments is necessary to determine if the
+		/// supplied commit is a merge base.
+		/// </para>
+		/// </summary>
+		public static readonly RevFilter MERGE_BASE = new RevFilterMergeBase();
+
+		/// <summary>
+		/// Create a new filter that does the opposite of this filter.
+		/// </summary>
+		/// <returns>
+		/// a new filter that includes commits this filter rejects.
+		/// </returns>
+		public virtual RevFilter negate()
+		{
+			return NotRevFilter.create(this);
+		}
+
+		/// <summary>
+		/// Determine if the supplied commit should be included in results.       
+		/// </summary>
+		/// <param name="walker">
+		/// The active walker this filter is being invoked from within.
+		/// </param>
+		/// <param name="cmit">
+		/// The commit currently being tested. The commit has been parsed
+		/// and its body is available for inspection.
+		/// </param>
+		/// <returns>
+		/// true to include this commit in the results; false to have this
+		/// commit be omitted entirely from the results.
+		/// </returns>
+		/// <exception cref="StopWalkException">
+		/// The filter knows for certain that no additional commits can
+		/// ever match, and the current commit doesn't match either. The
+		/// walk is halted and no more results are provided.
+		/// </exception>
+		/// <exception cref="MissingObjectException">
+		/// An object the filter needs to consult to determine its answer
+		/// does not exist in the Git repository the Walker is operating
+		/// on. Filtering this commit is impossible without the object.
+		/// </exception>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// An object the filter needed to consult was not of the
+		/// expected object type. This usually indicates a corrupt
+		/// repository, as an object link is referencing the wrong type.
+		/// </exception>
+		/// <exception cref="Exception">
+		/// A loose object or pack file could not be Read to obtain data
+		/// necessary for the filter to make its decision.
+		/// </exception>
+		public abstract bool include(RevWalk walker, RevCommit cmit);
+
+		/// <summary>
+		/// Clone this revision filter, including its parameters.
+		/// <para>
+		/// This is a deep Clone. If this filter embeds objects or other filters it
+		/// must also Clone those, to ensure the instances do not share mutable data.
+		/// </para>
+		/// </summary>
+		/// <returns>
+		/// Another copy of this filter, suitable for another thread.
+		/// </returns>
+		public abstract RevFilter Clone();
+
+		public override string ToString()
+		{
+			string n = GetType().Name;
+			int lastDot = n.LastIndexOf('.');
+			if (lastDot >= 0)
+			{
+				n = n.Substring(lastDot + 1);
+			}
+			return n.Replace('$', '.');
+		}
+
+		#region Nested Types
+
+		private class RevFilterAll : RevFilter
+		{
+			public override bool include(RevWalk walker, RevCommit c)
+			{
+				return true;
+			}
+
+			public override RevFilter Clone()
+			{
+				return this;
+			}
+
+			public override string ToString()
+			{
+				return "ALL";
+			}
+		}
+
+		private class RevFilterNone : RevFilter
+		{
+			public override bool include(RevWalk walker, RevCommit c)
+			{
+				return false;
+			}
+
+			public override RevFilter Clone()
+			{
+				return this;
+			}
+
+			public override string ToString()
+			{
+				return "NONE";
+			}
+		}
+
+		private class RevFilterNoMerges : RevFilter
+		{
+			public override bool include(RevWalk walker, RevCommit c)
+			{
+				return c.ParentCount < 2;
+			}
+
+			public override RevFilter Clone()
+			{
+				return this;
+			}
+
+			public override string ToString()
+			{
+				return "NO_MERGES";
+			}
+		}
+
+		private class RevFilterMergeBase : RevFilter
+		{
+			public override bool include(RevWalk walker, RevCommit c)
+			{
+				throw new InvalidOperationException("Cannot be combined.");
+			}
+
+			public override RevFilter Clone()
+			{
+				return this;
+			}
+
+			public override string ToString()
+			{
+				return "MERGE_BASE";
+			}
+		}
+
+		#endregion
+	}
 }

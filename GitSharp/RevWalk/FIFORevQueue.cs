@@ -37,143 +37,153 @@
  */
 
 using System.Text;
+
 namespace GitSharp.RevWalk
 {
+	/// <summary>
+	/// A queue of commits in FIFO order.
+	/// </summary>
+	public class FIFORevQueue : BlockRevQueue
+	{
+		private Block _head;
+		private Block _tail;
 
+		/// <summary>
+		/// Create an empty FIFO queue.
+		/// </summary>
+		public FIFORevQueue()
+		{
+		}
 
-    /** A queue of commits in FIFO order. */
-    public class FIFORevQueue : BlockRevQueue
-    {
-        private Block head;
+		public FIFORevQueue(Generator s)
+			: base(s)
+		{
+		}
 
-        private Block tail;
+		public override void add(RevCommit c)
+		{
+			Block b = _tail;
+			if (b == null)
+			{
+				b = Free.newBlock();
+				b.add(c);
+				_head = b;
+				_tail = b;
+				return;
+			}
 
-        /** Create an empty FIFO queue. */
-        public FIFORevQueue() : base()
-        {
-        }
+			if (b.isFull())
+			{
+				b = Free.newBlock();
+				_tail.Next = b;
+				_tail = b;
+			}
+			b.add(c);
+		}
 
-        public FIFORevQueue(Generator s)
-            : base(s)
-        {
-        }
+		/// <summary>
+		/// Insert the commit pointer at the front of the queue.
+		/// </summary>
+		/// <param name="c">
+		/// The commit to insert into the queue.
+		/// </param>
+		public void unpop(RevCommit c)
+		{
+			Block b = _head;
+			if (b == null)
+			{
+				b = Free.newBlock();
+				b.resetToMiddle();
+				b.add(c);
+				_head = b;
+				_tail = b;
+				return;
+			}
+			else if (b.canUnpop())
+			{
+				b.unpop(c);
+				return;
+			}
 
-        public override  void add(RevCommit c)
-        {
-            Block b = tail;
-            if (b == null)
-            {
-                b = free.newBlock();
-                b.add(c);
-                head = b;
-                tail = b;
-                return;
-            }
-            else if (b.isFull())
-            {
-                b = free.newBlock();
-                tail.next = b;
-                tail = b;
-            }
-            b.add(c);
-        }
+			b = Free.newBlock();
+			b.resetToEnd();
+			b.unpop(c);
+			b.Next = _head;
+			_head = b;
+		}
 
-        /**
-         * Insert the commit pointer at the front of the queue.
-         * 
-         * @param c
-         *            the commit to insert into the queue.
-         */
-        public void unpop(RevCommit c)
-        {
-            Block b = head;
-            if (b == null)
-            {
-                b = free.newBlock();
-                b.resetToMiddle();
-                b.add(c);
-                head = b;
-                tail = b;
-                return;
-            }
-            else if (b.canUnpop())
-            {
-                b.unpop(c);
-                return;
-            }
+		public override RevCommit next()
+		{
+			Block b = _head;
+			if (b == null) return null;
 
-            b = free.newBlock();
-            b.resetToEnd();
-            b.unpop(c);
-            b.next = head;
-            head = b;
-        }
+			RevCommit c = b.pop();
+			if (b.isEmpty())
+			{
+				_head = b.Next;
+				if (_head == null)
+				{
+					_tail = null;
+				}
+				Free.freeBlock(b);
+			}
+			return c;
+		}
 
-        public override RevCommit next()
-        {
-            Block b = head;
-            if (b == null)
-                return null;
+		public override void clear()
+		{
+			_head = null;
+			_tail = null;
+			Free.clear();
+		}
 
-            RevCommit c = b.pop();
-            if (b.isEmpty())
-            {
-                head = b.next;
-                if (head == null)
-                    tail = null;
-                free.freeBlock(b);
-            }
-            return c;
-        }
+		internal override bool everbodyHasFlag(int f)
+		{
+			for (Block b = _head; b != null; b = b.Next)
+			{
+				for (int i = b.HeadIndex; i < b.TailIndex; i++)
+				{
+					if ((b.Commits[i].flags & f) == 0) return false;
+				}
+			}
+			return true;
+		}
 
-        public override void clear()
-        {
-            head = null;
-            tail = null;
-            free.clear();
-        }
+		internal override bool anybodyHasFlag(int f)
+		{
+			for (Block b = _head; b != null; b = b.Next)
+			{
+				for (int i = b.HeadIndex; i < b.TailIndex; i++)
+				{
+					if ((b.Commits[i].flags & f) != 0) return true;
+				}
+			}
+			return false;
+		}
 
-        internal override bool everbodyHasFlag(int f)
-        {
-            for (Block b = head; b != null; b = b.next)
-            {
-                for (int i = b.headIndex; i < b.tailIndex; i++)
-                    if ((b.commits[i].flags & f) == 0)
-                        return false;
-            }
-            return true;
-        }
+		public void removeFlag(int flag)
+		{
+			int notFlag = ~flag;
+			for (Block b = _head; b != null; b = b.Next)
+			{
+				for (int i = b.HeadIndex; i < b.TailIndex; i++)
+				{
+					b.Commits[i].flags &= notFlag;
+				}
+			}
+		}
 
-        internal override bool anybodyHasFlag(int f)
-        {
-            for (Block b = head; b != null; b = b.next)
-            {
-                for (int i = b.headIndex; i < b.tailIndex; i++)
-                    if ((b.commits[i].flags & f) != 0)
-                        return true;
-            }
-            return false;
-        }
-
-        public void removeFlag(int f)
-        {
-            int not_f = ~f;
-            for (Block b = head; b != null; b = b.next)
-            {
-                for (int i = b.headIndex; i < b.tailIndex; i++)
-                    b.commits[i].flags &= not_f;
-            }
-        }
-
-        public override string ToString()
-        {
-            var s = new StringBuilder();
-            for (Block q = head; q != null; q = q.next)
-            {
-                for (int i = q.headIndex; i < q.tailIndex; i++)
-                    describe(s, q.commits[i]);
-            }
-            return s.ToString();
-        }
-    }
+		public override string ToString()
+		{
+			var s = new StringBuilder();
+			for (Block q = _head; q != null; q = q.Next)
+			{
+				for (int i = q.HeadIndex; i < q.TailIndex; i++)
+				{
+					Describe(s, q.Commits[i]);
+				}
+			}
+			return s.ToString();
+		}
+	}
 }

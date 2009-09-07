@@ -85,7 +85,7 @@ namespace GitSharp.Util
          *
          * @param in
          *            the input string. Must not be null.
-         * @return a copy of the input string, after converting characters in the
+         * @return a copy of the input string, After converting characters in the
          *         range 'A'..'Z' to 'a'..'z'.
          */
         public static string toLowerCase(string @in)

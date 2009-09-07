@@ -54,13 +54,13 @@ namespace GitSharp.Tests.RevWalk
         {
             base.testEmpty();
             Assert.IsNull(q.peek());
-            Assert.AreEqual(Generator.SORT_COMMIT_TIME_DESC, q.outputType());
+            Assert.AreEqual(Generator.GeneratorOutputType.SortCommitTimeDesc, q.OutputType);
         }
 
         [Test]
         public void testCloneEmpty()
         {
-            q = new DateRevQueue(AbstractRevQueue.EMPTY_QUEUE);
+            q = new DateRevQueue(AbstractRevQueue.EmptyQueue);
             Assert.IsNull(q.next());
         }
 

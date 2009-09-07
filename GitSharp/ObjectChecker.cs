@@ -124,7 +124,7 @@ namespace GitSharp
 
         public void check(int objType, byte[] raw)
         {
-            check(objType, Constants.Encoding.GetChars(raw));
+            check(objType, Constants.CHARSET.GetChars(raw));
         }
 
         /**
@@ -147,15 +147,19 @@ namespace GitSharp
                 case Constants.OBJ_COMMIT:
                     checkCommit(raw);
                     break;
+
                 case Constants.OBJ_TAG:
                     checkTag(raw);
                     break;
+
                 case Constants.OBJ_TREE:
                     checkTree(raw);
                     break;
+
                 case Constants.OBJ_BLOB:
                     checkBlob(raw);
                     break;
+
                 default:
                     throw new CorruptObjectException("Invalid object type: " + objType);
             }

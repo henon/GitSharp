@@ -402,7 +402,7 @@ namespace GitSharp
 
 		private void WriteWholeObjectDeflate(ObjectToPack otp)
 		{
-			ObjectLoader loader = _db.openObject(_windowCursor, otp);
+			ObjectLoader loader = _db.OpenObject(_windowCursor, otp);
 			byte[] data = loader.CachedBytes;
 			WriteObjectHeader(otp.Type, data.Length);
 			_deflater.Reset();

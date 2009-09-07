@@ -48,19 +48,9 @@ namespace GitSharp.RevWalk
     /// </summary>
     public class RevCommit : RevObject
     {
-        public static RevCommit[] NO_PARENTS = { };
-
-        private static string TYPE_COMMIT = Constants.TYPE_COMMIT;
-
-        private RevTree tree;
-
-        public RevCommit[] parents;
-
-        public int commitTime; // An int here for performance, overflows in 2038
-
-        public int inDegree;
-
-        private byte[] buffer;
+        public static readonly RevCommit[] NO_PARENTS = { };
+        private RevTree _tree;
+    	private byte[] _buffer;
 
 		/// <summary>
 		/// Create a new commit reference.
@@ -69,17 +59,54 @@ namespace GitSharp.RevWalk
         public RevCommit(AnyObjectId id)
             : base(id)
         {
-
         }
 
-        internal override void parse(RevWalk walk)
+		/// <summary>
+		/// Gets the time from the "committer " line of the buffer.
+		/// </summary>
+    	public int CommitTime { get; set; }
+
+    	public int InDegree { get; set; }
+
+		/// <summary>
+		/// Obtain an array of all parents (<b>NOTE - THIS IS NOT A COPY</b>).
+		/// <para>
+		/// This method is exposed only to provide very fast, efficient access to
+		/// this commit's parent list. Applications relying on this list should be
+		/// very careful to ensure they do not modify its contents during their use
+		/// of it.
+		/// </para>
+		/// </summary>
+    	public RevCommit[] Parents { get; set; }
+
+		/// <summary>
+		/// Get a reference to this commit's tree.
+		/// </summary>
+		public RevTree Tree
+		{
+			get { return _tree; }
+		}
+
+		/// <summary>
+		/// Gets the number of parent commits listed in this commit.
+		/// </summary>
+		public int ParentCount
+		{
+			get { return Parents.Length; }
+		}
+
+    	internal override void parse(RevWalk walk)
         {
-            ObjectLoader ldr = walk.db.openObject(walk.curs, this);
+            ObjectLoader ldr = walk.db.OpenObject(walk.curs, this);
             if (ldr == null)
-                throw new MissingObjectException(this, TYPE_COMMIT);
+            {
+				throw new MissingObjectException(this, Constants.TYPE_COMMIT);
+            }
             byte[] data = ldr.CachedBytes;
             if (Constants.OBJ_COMMIT != ldr.Type)
-                throw new IncorrectObjectTypeException(this, TYPE_COMMIT);
+            {
+				throw new IncorrectObjectTypeException(this, Constants.TYPE_COMMIT);
+            }
             parseCanonical(walk, data);
         }
 
@@ -87,12 +114,12 @@ namespace GitSharp.RevWalk
         {
             MutableObjectId idBuffer = walk.idBuffer;
             idBuffer.FromString(raw, 5);
-            tree = walk.lookupTree(idBuffer);
+            _tree = walk.lookupTree(idBuffer);
 
             int ptr = 46;
-            if (parents == null)
+            if (Parents == null)
             {
-                RevCommit[] pList = new RevCommit[1];
+                var pList = new RevCommit[1];
                 int nParents = 0;
                 for (; ; )
                 {
@@ -101,10 +128,12 @@ namespace GitSharp.RevWalk
                     idBuffer.FromString(raw, ptr + 7);
                     RevCommit p = walk.lookupCommit(idBuffer);
                     if (nParents == 0)
-                        pList[nParents++] = p;
+                    {
+                    	pList[nParents++] = p;
+                    }
                     else if (nParents == 1)
                     {
-                        pList = new RevCommit[] { pList[0], p };
+                        pList = new[] { pList[0], p };
                         nParents = 2;
                     }
                     else
@@ -125,7 +154,7 @@ namespace GitSharp.RevWalk
                     pList = new RevCommit[nParents];
                     Array.Copy(old, 0, pList, 0, nParents);
                 }
-                parents = pList;
+                Parents = pList;
             }
 
             // extract time from "committer "
@@ -135,10 +164,10 @@ namespace GitSharp.RevWalk
                 ptr = RawParseUtils.nextLF(raw, ptr, (byte)'>');
 
                 // In 2038 commitTime will overflow unless it is changed to long.
-                commitTime = RawParseUtils.parseBase10(raw, ptr, null);
+                CommitTime = RawParseUtils.parseBase10(raw, ptr, null);
             }
 
-            buffer = raw;
+            _buffer = raw;
             flags |= PARSED;
         }
 
@@ -151,7 +180,7 @@ namespace GitSharp.RevWalk
         {
             for (; ; )
             {
-                RevCommit[] pList = c.parents;
+                RevCommit[] pList = c.Parents;
                 if (pList == null)
                     return;
                 int n = pList.Length;
@@ -190,102 +219,66 @@ namespace GitSharp.RevWalk
         {
             int carry = flags & flag.Mask;
             if (carry != 0)
-                carryFlags(this, carry);
+            {
+            	carryFlags(this, carry);
+            }
         }
 
-        /**
-         * Time from the "committer " line of the buffer.
-         * 
-         * @return time, expressed as seconds since the epoch.
-         */
-        public int getCommitTime()
+        /// <summary>
+        /// Parse this commit buffer for display.
+        /// </summary>
+        /// <param name="walk">
+        /// revision walker owning this reference.
+        /// </param>
+        /// <returns>
+		/// Parsed commit.
+        /// </returns>
+        public Commit AsCommit(RevWalk walk)
         {
-            return commitTime;
+            return new Commit(walk.db, this, _buffer);
         }
 
-        /**
-         * Parse this commit buffer for display.
-         * 
-         * @param walk
-         *            revision walker owning this reference.
-         * @return parsed commit.
-         */
-        public Commit asCommit(RevWalk walk)
+    	/// <summary>
+        /// Get the nth parent from this commit's parent list.
+        /// </summary>
+        /// <param name="nth">
+        /// the specified parent
+        /// </param>
+        /// <returns>
+        /// Parent index to obtain. Must be in the range 0 through
+		/// <see cref="ParentCount"/>-1.
+        /// </returns>
+        /// <exception cref="IndexOutOfRangeException">
+        /// An invalid parent index was specified.
+        /// </exception>
+        public RevCommit GetParent(int nth)
         {
-            return new Commit(walk.db, this, buffer);
+            return Parents[nth];
         }
 
-        /**
-         * Get a reference to this commit's tree.
-         * 
-         * @return tree of this commit.
-         */
-        public RevTree getTree()
-        {
-            return tree;
-        }
+        /// <summary>
+        /// Obtain the raw unparsed commit body (<b>NOTE - THIS IS NOT A COPY</b>).
+		/// <para>
+		/// This method is exposed only to provide very fast, efficient access to
+		/// this commit's message buffer within a RevFilter. Applications relying on
+		/// this buffer should be very careful to ensure they do not modify its
+		/// contents during their use of it.
+		/// </para>
+		/// </summary>
+		/// <remarks>
+		/// This property returns the raw unparsed commit body. This is <b>NOT A COPY</b>.
+		/// Altering the contents of this buffer may alter the walker's
+		/// knowledge of this commit, and the results it produces.
+		/// </remarks>
+    	public byte[] RawBuffer
+    	{
+    		get { return _buffer; }
+    	}
 
-        /**
-         * Get the number of parent commits listed in this commit.
-         * 
-         * @return number of parents; always a positive value but can be 0.
-         */
-        public int getParentCount()
-        {
-            return parents.Length;
-        }
-
-        /**
-         * Get the nth parent from this commit's parent list.
-         * 
-         * @param nth
-         *            parent index to obtain. Must be in the range 0 through
-         *            {@link #getParentCount()}-1.
-         * @return the specified parent.
-         * @throws IndexOutOfRangeException
-         *             an invalid parent index was specified.
-         */
-        public RevCommit getParent(int nth)
-        {
-            return parents[nth];
-        }
-
-        /**
-         * Obtain an array of all parents (<b>NOTE - THIS IS NOT A COPY</b>).
-         * <p>
-         * This method is exposed only to provide very fast, efficient access to
-         * this commit's parent list. Applications relying on this list should be
-         * very careful to ensure they do not modify its contents during their use
-         * of it.
-         * 
-         * @return the array of parents.
-         */
-        public RevCommit[] getParents()
-        {
-            return parents;
-        }
-
-        /**
-         * Obtain the raw unparsed commit body (<b>NOTE - THIS IS NOT A COPY</b>).
-         * <p>
-         * This method is exposed only to provide very fast, efficient access to
-         * this commit's message buffer within a RevFilter. Applications relying on
-         * this buffer should be very careful to ensure they do not modify its
-         * contents during their use of it.
-         * 
-         * @return the raw unparsed commit body. This is <b>NOT A COPY</b>.
-         *         Altering the contents of this buffer may alter the walker's
-         *         knowledge of this commit, and the results it produces.
-         */
-        public byte[] getRawBuffer()
-        {
-            return buffer;
-        }
-
-        /**
+    	/**
          * Parse the author identity from the raw buffer.
          * <p>
-         * This method parses and returns the content of the author line, after
+         * This method parses and returns the content of the author line, After
          * taking the commit's character set into account and decoding the author
          * name and email address. This method is fairly expensive and produces a
          * new PersonIdent instance on each invocation. Callers should invoke this
@@ -302,17 +295,16 @@ namespace GitSharp.RevWalk
          */
         public PersonIdent getAuthorIdent()
         {
-            byte[] raw = buffer;
+            byte[] raw = _buffer;
             int nameB = RawParseUtils.author(raw, 0);
-            if (nameB < 0)
-                return null;
+            if (nameB < 0) return null;
             return RawParseUtils.parsePersonIdent(raw, nameB);
         }
 
         /**
          * Parse the committer identity from the raw buffer.
          * <p>
-         * This method parses and returns the content of the committer line, after
+         * This method parses and returns the content of the committer line, After
          * taking the commit's character set into account and decoding the committer
          * name and email address. This method is fairly expensive and produces a
          * new PersonIdent instance on each invocation. Callers should invoke this
@@ -329,29 +321,29 @@ namespace GitSharp.RevWalk
          */
         public PersonIdent getCommitterIdent()
         {
-            byte[] raw = buffer;
+            byte[] raw = _buffer;
             int nameB = RawParseUtils.committer(raw, 0);
-            if (nameB < 0)
-                return null;
+            if (nameB < 0) return null;
             return RawParseUtils.parsePersonIdent(raw, nameB);
         }
 
-        /**
-         * Parse the complete commit message and decode it to a string.
-         * <p>
-         * This method parses and returns the message portion of the commit buffer,
-         * after taking the commit's character set into account and decoding the
-         * buffer using that character set. This method is a fairly expensive
-         * operation and produces a new string on each invocation.
-         * 
-         * @return decoded commit message as a string. Never null.
-         */
+        /// <summary>
+        /// Parse the complete commit message and decode it to a string.
+		/// <para>
+		/// This method parses and returns the message portion of the commit buffer,
+		/// After taking the commit's character set into account and decoding the
+		/// buffer using that character set. This method is a fairly expensive
+		/// operation and produces a new string on each invocation.
+		/// </para>
+        /// </summary>
+        /// <returns>
+		/// Decoded commit message as a string. Never null.
+        /// </returns>
         public string getFullMessage()
         {
-            byte[] raw = buffer;
+            byte[] raw = _buffer;
             int msgB = RawParseUtils.commitMessage(raw, 0);
-            if (msgB < 0)
-                return "";
+            if (msgB < 0) return string.Empty;
             Encoding enc = RawParseUtils.parseEncoding(raw);
             return RawParseUtils.decode(enc, raw, msgB, raw.Length);
         }
@@ -363,7 +355,7 @@ namespace GitSharp.RevWalk
          * "oneline" format, suitable for output in a single line display.
          * <p>
          * This method parses and returns the message portion of the commit buffer,
-         * after taking the commit's character set into account and decoding the
+         * After taking the commit's character set into account and decoding the
          * buffer using that character set. This method is a fairly expensive
          * operation and produces a new string on each invocation.
          * 
@@ -373,7 +365,7 @@ namespace GitSharp.RevWalk
          */
         public string getShortMessage()
         {
-            byte[] raw = buffer;
+            byte[] raw = _buffer;
             int msgB = RawParseUtils.commitMessage(raw, 0);
             if (msgB < 0)
                 return "";
@@ -402,23 +394,23 @@ namespace GitSharp.RevWalk
          */
         public void reset()
         {
-            inDegree = 0;
+            InDegree = 0;
         }
 
         public override void dispose()
         {
             flags &= ~PARSED;
-            buffer = null;
+            _buffer = null;
         }
 
         public override string ToString()
         {
-            StringBuilder s = new StringBuilder();
+            var s = new StringBuilder();
             s.Append(Constants.typeString(getType()));
             s.Append(' ');
             s.Append(GetType().Name);
             s.Append(' ');
-            s.Append(commitTime);
+            s.Append(CommitTime);
             s.Append(' ');
             appendCoreFlags(s);
             return s.ToString();

@@ -39,144 +39,182 @@
 
 namespace GitSharp.RevWalk
 {
-
-
     public abstract class BlockRevQueue : AbstractRevQueue
     {
-        internal BlockFreeList free;
+        private BlockFreeList _free;
 
-        /** Create an empty revision queue. */
-        public BlockRevQueue()
+		/// <summary>
+		/// Create an empty revision queue.
+		/// </summary>
+		protected BlockRevQueue()
+			: base(GeneratorOutputType.None)
+		{
+			_free = new BlockFreeList();
+		}
+
+        /// <summary>
+		/// Create an empty revision queue.
+        /// </summary>
+    	protected BlockRevQueue(GeneratorOutputType outputType)
+			: base(outputType)
         {
-            free = new BlockFreeList();
+            _free = new BlockFreeList();
         }
 
-        public BlockRevQueue(Generator s)
+    	protected BlockRevQueue(Generator s)
+			: this(s.OutputType)
         {
-            free = new BlockFreeList();
-            _outputType = s.outputType();
+			_free = new BlockFreeList();
             s.shareFreeList(this);
-            for (; ; )
+        
+			while(true)
             {
                 RevCommit c = s.next();
-                if (c == null)
-                    break;
+                if (c == null) break;
                 add(c);
             }
         }
 
-        /**
-         * Reconfigure this queue to share the same free list as another.
-         * <p>
-         * Multiple revision queues can be connected to the same free list, making
-         * it less expensive for applications to shuttle commits between them. This
-         * method arranges for the receiver to take from / return to the same free
-         * list as the supplied queue.
-         * <p>
-         * Free lists are not thread-safe. Applications must ensure that all queues
-         * sharing the same free list are doing so from only a single thread.
-         * 
-         * @param q
-         *            the other queue we will steal entries from.
-         */
+		public BlockFreeList Free
+		{
+			get { return _free; }
+		}
+
+        /// <summary>
+        /// Reconfigure this queue to share the same free list as another.
+		/// <para>
+		/// Multiple revision queues can be connected to the same free list, making
+		/// it less expensive for applications to shuttle commits between them. This
+		/// method arranges for the receiver to take from / return to the same free
+		/// list as the supplied queue.
+		/// </para><para>
+		/// Free lists are not thread-safe. Applications must ensure that all queues
+		/// sharing the same free list are doing so from only a single thread.
+		/// </para>
+        /// </summary>
+		/// <param name="q">the other queue we will steal entries from.</param>
         public override void shareFreeList(BlockRevQueue q)
         {
-            free = q.free;
+            _free = q._free;
         }
 
-        public class BlockFreeList
-        {
-            private Block next;
+    	#region Nested Types
 
-            public Block newBlock()
-            {
-                Block b = next;
-                if (b == null)
-                    return new Block();
-                next = b.next;
-                b.clear();
-                return b;
-            }
+    	public class BlockFreeList
+    	{
+    		private Block _next;
 
-            public void freeBlock(Block b)
-            {
-                b.next = next;
-                next = b;
-            }
+    		public Block newBlock()
+    		{
+    			Block b = _next;
+    			if (b == null)
+    			{
+    				return new Block();
+    			}
+    			_next = b.Next;
+    			b.clear();
+    			return b;
+    		}
 
-            public void clear()
-            {
-                next = null;
-            }
-        }
+    		public void freeBlock(Block b)
+    		{
+    			b.Next = _next;
+    			_next = b;
+    		}
 
-        public class Block
-        {
-            public static int BLOCK_SIZE = 256;
+    		public void clear()
+    		{
+    			_next = null;
+    		}
+    	}
 
-            /** Next block in our chain of blocks; null if we are the last. */
-            public Block next;
+    	public class Block
+    	{
+    		public static readonly int BLOCK_SIZE = 256;
+    		private readonly RevCommit[] _commits;
 
-            /** Our table of queued commits. */
-            public RevCommit[] commits = new RevCommit[BLOCK_SIZE];
+    		public Block()
+			{
+				_commits = new RevCommit[BLOCK_SIZE];
+			}
 
-            /** Next valid entry in {@link #commits}. */
-            public int headIndex;
+    		/// <summary>
+    		/// Next free entry in <see cref="Commits"/> for addition at.
+    		/// </summary>
+    		public int TailIndex { get; set; }
 
-            /** Next free entry in {@link #commits} for addition at. */
-            public int tailIndex;
+    		/// <summary>
+    		/// Next valid entry in <see cref="Commits"/>.
+    		/// </summary>
+    		public int HeadIndex { get; set; }
 
-            public bool isFull()
-            {
-                return tailIndex == BLOCK_SIZE;
-            }
+    		/// <summary>
+			/// Our table of queued commits.
+			/// </summary>
+    		public RevCommit[] Commits
+    		{
+    			get { return _commits; }
+    		}
 
-            public bool isEmpty()
-            {
-                return headIndex == tailIndex;
-            }
+    		/// <summary>
+    		/// Next block in our chain of blocks; null if we are the last.
+    		/// </summary>
+    		public Block Next { get; set; }
 
-            public bool canUnpop()
-            {
-                return headIndex > 0;
-            }
+    		public bool isFull()
+    		{
+    			return TailIndex == BLOCK_SIZE;
+    		}
 
-            public void add(RevCommit c)
-            {
-                commits[tailIndex++] = c;
-            }
+    		public bool isEmpty()
+    		{
+    			return HeadIndex == TailIndex;
+    		}
 
-            public void unpop(RevCommit c)
-            {
-                commits[--headIndex] = c;
-            }
+    		public bool canUnpop()
+    		{
+    			return HeadIndex > 0;
+    		}
 
-            public RevCommit pop()
-            {
-                return commits[headIndex++];
-            }
+    		public void add(RevCommit c)
+    		{
+    			_commits[TailIndex++] = c;
+    		}
 
-            public RevCommit peek()
-            {
-                return commits[headIndex];
-            }
+    		public void unpop(RevCommit c)
+    		{
+    			_commits[--HeadIndex] = c;
+    		}
 
-            public void clear()
-            {
-                next = null;
-                headIndex = 0;
-                tailIndex = 0;
-            }
+    		public RevCommit pop()
+    		{
+    			return _commits[HeadIndex++];
+    		}
 
-            public void resetToMiddle()
-            {
-                headIndex = tailIndex = BLOCK_SIZE / 2;
-            }
+    		public RevCommit peek()
+    		{
+    			return _commits[HeadIndex];
+    		}
 
-            public void resetToEnd()
-            {
-                headIndex = tailIndex = BLOCK_SIZE;
-            }
-        }
+    		public void clear()
+    		{
+    			Next = null;
+    			HeadIndex = 0;
+    			TailIndex = 0;
+    		}
+
+    		public void resetToMiddle()
+    		{
+    			HeadIndex = TailIndex = BLOCK_SIZE / 2;
+    		}
+
+    		public void resetToEnd()
+    		{
+    			HeadIndex = TailIndex = BLOCK_SIZE;
+    		}
+    	}
+
+    	#endregion
+
     }
 }

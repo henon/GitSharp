@@ -42,135 +42,145 @@ using GitSharp.TreeWalk.Filter;
 
 namespace GitSharp.RevWalk
 {
-    /**
-     * Initial RevWalk generator that bootstraps a new walk.
-     * <p>
-     * Initially RevWalk starts with this generator as its chosen implementation.
-     * The first request for a RevCommit from the RevWalk instance calls to our
-     * {@link #next()} method, and we replace ourselves with the best Generator
-     * implementation available based upon the current RevWalk configuration.
-     */
-    public class StartGenerator : Generator
-    {
-        private readonly RevWalk _walker;
+	/// <summary>
+	/// Initial RevWalk generator that bootstraps a new walk.
+	/// <para>
+	/// Initially RevWalk starts with this generator as its chosen implementation.
+	/// The first request for a <see cref="RevCommit"/> from the <see cref="RevWalk"/> 
+	/// instance calls to our <see cref="Next()"/> method, and we replace ourselves with 
+	/// the best <see cref="Generator"/> implementation available based upon the 
+	/// current configuration.
+	/// </summary>
+	public class StartGenerator : Generator
+	{
+		private readonly RevWalk _walker;
 
-        public StartGenerator(RevWalk walker)
-        {
-            _walker = walker;
-        }
+		public StartGenerator(RevWalk walker)
+		{
+			_walker = walker;
+		}
 
-        public override int outputType()
-        {
-            return 0;
-        }
+		public override GeneratorOutputType OutputType
+		{
+			get { return 0; }
+		}
 
-        public override RevCommit next()
-        {
-        	RevWalk w = _walker;
-            RevFilter rf = w.getRevFilter();
-            TreeFilter tf = w.getTreeFilter();
-            AbstractRevQueue q = _walker.queue;
+		public override RevCommit next()
+		{
+			RevWalk w = _walker;
+			RevFilter rf = w.getRevFilter();
+			TreeFilter tf = w.getTreeFilter();
+			AbstractRevQueue q = _walker.queue;
 
-            if (rf == RevFilter.MERGE_BASE)
-            {
-                // Computing for merge bases is a special case and does not
-                // use the bulk of the generator pipeline.
-                //
-                if (tf != TreeFilter.ALL)
-                {
-                	throw new InvalidOperationException("Cannot combine TreeFilter " + tf + " with RevFilter " + rf + ".");
-                }
+			if (rf == RevFilter.MERGE_BASE)
+			{
+				// Computing for merge bases is a special case and does not
+				// use the bulk of the generator pipeline.
+				//
+				if (tf != TreeFilter.ALL)
+				{
+					throw new InvalidOperationException("Cannot combine TreeFilter " + tf + " with RevFilter " + rf + ".");
+				}
 
-                var mbg = new MergeBaseGenerator(w);
-                _walker.pending = mbg;
-                _walker.queue = AbstractRevQueue.EMPTY_QUEUE;
-                mbg.init(q);
-                return mbg.next();
-            }
+				var mbg = new MergeBaseGenerator(w);
+				_walker.pending = mbg;
+				_walker.queue = AbstractRevQueue.EmptyQueue;
+				mbg.init(q);
+				return mbg.next();
+			}
 
-            bool uninteresting = q.anybodyHasFlag(RevWalk.UNINTERESTING);
-            bool boundary = _walker.hasRevSort(RevSort.BOUNDARY);
+			bool uninteresting = q.anybodyHasFlag(RevWalk.UNINTERESTING);
+			bool boundary = _walker.hasRevSort(RevSort.BOUNDARY);
 
-            if (!boundary && _walker is ObjectWalk)
-            {
-                // The object walker requires boundary support to color
-                // trees and blobs at the boundary uninteresting so it
-                // does not produce those in the result.
-                //
-                boundary = true;
-            }
+			if (!boundary && _walker is ObjectWalk)
+			{
+				// The object walker requires boundary support to color
+				// trees and blobs at the boundary uninteresting so it
+				// does not produce those in the result.
+				//
+				boundary = true;
+			}
 
-            if (boundary && !uninteresting)
-            {
-                // If we were not fed uninteresting commits we will never
-                // construct a boundary. There is no reason to include the
-                // extra overhead associated with that in our pipeline.
-                //
-                boundary = false;
-            }
+			if (boundary && !uninteresting)
+			{
+				// If we were not fed uninteresting commits we will never
+				// construct a boundary. There is no reason to include the
+				// extra overhead associated with that in our pipeline.
+				//
+				boundary = false;
+			}
 
-            DateRevQueue pending;
-            int pendingOutputType = 0;
-            if (q is DateRevQueue)
-            {
-            	pending = (DateRevQueue)q;
-            }
-            else
-            {
-            	pending = new DateRevQueue(q);
-            }
+			DateRevQueue pending;
+			GeneratorOutputType pendingOutputType = 0;
+			if (q is DateRevQueue)
+			{
+				pending = (DateRevQueue)q;
+			}
+			else
+			{
+				pending = new DateRevQueue(q);
+			}
 
-            if (tf != TreeFilter.ALL)
-            {
-                rf = AndRevFilter.create(rf, new RewriteTreeFilter(w, tf));
-                pendingOutputType |= HAS_REWRITE | NEEDS_REWRITE;
-            }
+			if (tf != TreeFilter.ALL)
+			{
+				rf = AndRevFilter.create(rf, new RewriteTreeFilter(w, tf));
+				pendingOutputType |= GeneratorOutputType.HasRewrite | GeneratorOutputType.NeedsRewrite;
+			}
 
-            _walker.queue = q;
-            Generator g = new PendingGenerator(w, pending, rf, pendingOutputType);
+			_walker.queue = q;
+			Generator g = new PendingGenerator(w, pending, rf, pendingOutputType);
 
-            if (boundary)
-            {
-                // Because the boundary generator may produce uninteresting
-                // commits we cannot allow the pending generator to dispose
-                // of them early.
-                //
-                ((PendingGenerator)g).CanDispose = false;
-            }
+			if (boundary)
+			{
+				// Because the boundary generator may produce uninteresting
+				// commits we cannot allow the pending generator to dispose
+				// of them early.
+				//
+				((PendingGenerator)g).CanDispose = false;
+			}
 
-            if ((g.outputType() & NEEDS_REWRITE) != 0)
-            {
-                // Correction for an upstream NEEDS_REWRITE is to buffer
-                // fully and then Apply a rewrite generator that can
-                // pull through the rewrite chain and produce a dense
-                // output graph.
-                //
-                g = new FIFORevQueue(g);
-                g = new RewriteGenerator(g);
-            }
+			if ((g.OutputType & GeneratorOutputType.NeedsRewrite) != GeneratorOutputType.None)
+			{
+				// Correction for an upstream NEEDS_REWRITE is to buffer
+				// fully and then Apply a rewrite generator that can
+				// pull through the rewrite chain and produce a dense
+				// output graph.
+				//
+				g = new FIFORevQueue(g);
+				g = new RewriteGenerator(g);
+			}
 
-            if (_walker.hasRevSort(RevSort.TOPO)
-                    && (g.outputType() & SORT_TOPO) == 0)
-                g = new TopoSortGenerator(g);
-            if (_walker.hasRevSort(RevSort.REVERSE))
-                g = new LIFORevQueue(g);
-            if (boundary)
-                g = new BoundaryGenerator(w, g);
-            else if (uninteresting)
-            {
-                // Try to protect ourselves from uninteresting commits producing
-                // due to clock skew in the commit time stamps. Delay such that
-                // we have a chance at coloring enough of the graph correctly,
-                // and then strip any UNINTERESTING nodes that may have leaked
-                // through early.
-                //
-                if (pending.peek() != null)
-                    g = new DelayRevQueue(g);
-                g = new FixUninterestingGenerator(g);
-            }
+			if (_walker.hasRevSort(RevSort.TOPO) && (g.OutputType & GeneratorOutputType.SortTopo) == 0)
+			{
+				g = new TopoSortGenerator(g);
+			}
 
-            w.pending = g;
-            return g.next();
-        }
-    }
+			if (_walker.hasRevSort(RevSort.REVERSE))
+			{
+				g = new LIFORevQueue(g);
+			}
+
+			if (boundary)
+			{
+				g = new BoundaryGenerator(w, g);
+			}
+			else if (uninteresting)
+			{
+				// Try to protect ourselves from uninteresting commits producing
+				// due to clock skew in the commit time stamps. Delay such that
+				// we have a chance at coloring enough of the graph correctly,
+				// and then strip any UNINTERESTING nodes that may have leaked
+				// through early.
+				//
+				if (pending.peek() != null)
+				{
+					g = new DelayRevQueue(g);
+				}
+				g = new FixUninterestingGenerator(g);
+			}
+
+			w.pending = g;
+			return g.next();
+		}
+	}
 }

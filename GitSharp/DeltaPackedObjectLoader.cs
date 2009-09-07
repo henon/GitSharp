@@ -43,7 +43,7 @@ using GitSharp.Exceptions;
 namespace GitSharp
 {
     /// <summary>
-	/// Reader for a deltified object stored in a pack file.
+	/// Reader for a deltified object Stored in a pack file.
     /// </summary>
     public abstract class DeltaPackedObjectLoader : PackedObjectLoader
     {

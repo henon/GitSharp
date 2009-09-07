@@ -1045,7 +1045,7 @@ namespace GitSharp.Transport
 
 			try
 			{
-				_repo.openPack(finalPack, finalIdx);
+				_repo.OpenPack(finalPack, finalIdx);
 			}
 			catch (IOException)
 			{

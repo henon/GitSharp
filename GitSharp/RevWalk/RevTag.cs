@@ -66,7 +66,7 @@ namespace GitSharp.RevWalk
 
         internal override void parse(RevWalk walk)
         {
-            ObjectLoader ldr = walk.db.openObject(walk.curs, this);
+            ObjectLoader ldr = walk.db.OpenObject(walk.curs, this);
             if (ldr == null)
                 throw new MissingObjectException(this, Constants.TYPE_TAG);
             byte[] data = ldr.CachedBytes;

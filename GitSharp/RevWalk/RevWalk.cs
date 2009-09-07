@@ -677,12 +677,21 @@ namespace GitSharp.RevWalk
 				t = (RevTree)c;
 
 			if ((t.flags & PARSED) != 0)
+			{
 				return t;
-			ObjectLoader ldr = db.openObject(curs, t);
+			}
+
+			ObjectLoader ldr = db.OpenObject(curs, t);
 			if (ldr == null)
+			{
 				throw new MissingObjectException(t, Constants.TYPE_TREE);
+			}
+			
 			if (ldr.Type != Constants.OBJ_TREE)
+			{
 				throw new IncorrectObjectTypeException(t, Constants.TYPE_TREE);
+			}
+			
 			t.flags |= PARSED;
 			return t;
 		}
@@ -708,7 +717,7 @@ namespace GitSharp.RevWalk
 			RevObject r = objects.get(id);
 			if (r == null)
 			{
-				ObjectLoader ldr = db.openObject(curs, id);
+				ObjectLoader ldr = db.OpenObject(curs, id);
 				if (ldr == null)
 					throw new MissingObjectException(id.ToObjectId(), "unknown");
 				byte[] data = ldr.CachedBytes;

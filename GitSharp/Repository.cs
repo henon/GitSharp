@@ -44,6 +44,7 @@ using System.Collections.Generic;
 using System.IO;
 using GitSharp.Util;
 using GitSharp.Exceptions;
+using System.Threading;
 
 namespace GitSharp
 {
@@ -70,12 +71,16 @@ namespace GitSharp
 	 * This implementation only handles a subtly undocumented subset of git features.
 	 *
 	 */
+
 	public class Repository
 	{
+		private static object SyncLock = new object();
+
 		private readonly RefDatabase _refDb;
 		private readonly List<DirectoryInfo> _objectsDirs;
 		private readonly ObjectDirectory _objectDatabase;
 
+		private int _useCnt;
 		private GitIndex _index;
 		private Ref _head;
 		private Dictionary<string, Ref> _refs;
@@ -100,6 +105,7 @@ namespace GitSharp
 		/// <param name="workingDirectory">The working directory.</param>
 		public Repository(DirectoryInfo gitDirectory, DirectoryInfo workingDirectory)
 		{
+			_useCnt = 1;
 			_objectsDirs = new List<DirectoryInfo>();
 
 			Directory = gitDirectory;
@@ -128,7 +134,7 @@ namespace GitSharp
 				if (!"0".Equals(repositoryFormatVersion))
 				{
 					throw new IOException("Unknown repository format \""
-							+ repositoryFormatVersion + "\"; expected \"0\".");
+										  + repositoryFormatVersion + "\"; expected \"0\".");
 				}
 			}
 			else
@@ -158,17 +164,20 @@ namespace GitSharp
 			}
 		}
 
+		/// <summary>
+		/// Create a new Git repository initializing the necessary files and
+		/// directories.
+		/// </summary>
 		public void Create()
 		{
 			Create(false);
 		}
 
-
 		/// <summary>
 		/// Create a new Git repository initializing the necessary files and
 		/// directories.
 		/// </summary>
-		/// <param name="bare"></param>
+		/// <param name="bare">if true, a bare repository is created.</param>
 		public void Create(bool bare)
 		{
 			if (Directory.Exists)
@@ -265,9 +274,20 @@ namespace GitSharp
 			return new FileInfo(PathUtil.Combine(_objectsDirs[0].FullName, d, f));
 		}
 
-		public ObjectLoader OpenObject(WindowCursor curs, AnyObjectId id)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="windowCursor">
+		/// Temporary working space associated with the calling thread.
+		/// </param>
+		/// <param name="id">SHA-1 of an object.</param>
+		/// <returns>
+		/// A <see cref="ObjectLoader"/> for accessing the data of the named
+		/// object, or null if the object does not exist.
+		/// </returns>
+		public ObjectLoader OpenObject(WindowCursor windowCursor, AnyObjectId id)
 		{
-			return openObject(curs, id);
+			return _objectDatabase.openObject(windowCursor, id);
 		}
 
 		/// <summary>
@@ -283,27 +303,12 @@ namespace GitSharp
 			var wc = new WindowCursor();
 			try
 			{
-				return openObject(wc, id);
+				return OpenObject(wc, id);
 			}
 			finally
 			{
 				wc.Release();
 			}
-		}
-
-		/**
-		 * @param curs
-		 *            temporary working space associated with the calling thread.
-		 * @param id
-		 *            SHA-1 of an object.
-		 * 
-		 * @return a {@link ObjectLoader} for accessing the data of the named
-		 *         object, or null if the object does not exist.
-		 * @
-		 */
-		public ObjectLoader openObject(WindowCursor curs, AnyObjectId id)
-		{
-			return _objectDatabase.openObject(curs, id);
 		}
 
 		/// <summary>
@@ -335,72 +340,74 @@ namespace GitSharp
 		/// <param name="windowCursor">
 		/// Temporary working space associated with the calling thread.
 		/// </param>
-		public void OpenObjectInAllPacks(AnyObjectId objectId, ICollection<PackedObjectLoader> resultLoaders, WindowCursor windowCursor)
+		public void OpenObjectInAllPacks(AnyObjectId objectId, ICollection<PackedObjectLoader> resultLoaders,
+										 WindowCursor windowCursor)
 		{
 			_objectDatabase.OpenObjectInAllPacks(resultLoaders, windowCursor, objectId);
 		}
 
-		/**
-		 * @param id
-		 *            SHA'1 of a blob
-		 * @return an {@link ObjectLoader} for accessing the data of a named blob
-		 * @
-		 */
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="id">SHA'1 of a blob</param>
+		/// <returns>
+		/// An <see cref="ObjectLoader"/> for accessing the data of a named blob
+		/// </returns>
 		public ObjectLoader OpenBlob(ObjectId id)
 		{
 			return OpenObject(id);
 		}
-		/**
-		 * @param id
-		 *            SHA'1 of a tree
-		 * @return an {@link ObjectLoader} for accessing the data of a named tree
-		 * @
-		 */
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="id">SHA'1 of a tree</param>
+		/// <returns>
+		/// An <see cref="ObjectLoader"/> for accessing the data of a named tree
+		/// </returns>
 		public ObjectLoader OpenTree(ObjectId id)
 		{
 			return OpenObject(id);
 		}
-		/**
-		 * Access a Commit object using a symbolic reference. This reference may
-		 * be a SHA-1 or ref in combination with a number of symbols translating
-		 * from one ref or SHA1-1 to another, such as HEAD^ etc.
-		 *
-		 * @param revstr a reference to a git commit object
-		 * @return a Commit named by the specified string
-		 * @ for I/O error or unexpected object type.
-		 *
-		 * @see #resolve(string)
-		 */
+
+		/// <summary>
+		/// Access a Commit object using a symbolic reference. This reference may
+		/// be a SHA-1 or ref in combination with a number of symbols translating
+		/// from one ref or SHA1-1 to another, such as HEAD^ etc.
+		/// </summary>
+		/// <param name="resolveString">a reference to a git commit object</param>
+		/// <returns>A <see cref="Commit"/> named by the specified string</returns>
 		public Commit MapCommit(string resolveString)
 		{
 			ObjectId id = Resolve(resolveString);
 			return id != null ? MapCommit(id) : null;
 		}
-		/**
-		 * Access a Commit by SHA'1 id.
-		 * @param id
-		 * @return Commit or null
-		 * @ for I/O error or unexpected object type.
-		 */
+
+		/// <summary>
+		/// Access a Commit by SHA'1 id.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns>Commit or null</returns>
 		public Commit MapCommit(ObjectId id)
 		{
 			ObjectLoader or = OpenObject(id);
-			if (or == null)
-				return null;
+			if (or == null) return null;
+
 			byte[] raw = or.Bytes;
 			if (Constants.OBJ_COMMIT == or.Type)
+			{
 				return new Commit(this, id, raw);
+			}
+
 			throw new IncorrectObjectTypeException(id, ObjectType.Commit);
 		}
-		/**
-		 * Access any type of Git object by id and
-		 *
-		 * @param id
-		 *            SHA-1 of object to read
-		 * @param refName optional, only relevant for simple tags
-		 * @return The Git object if found or null
-		 * @
-		 */
+
+		/// <summary>
+		/// Access any type of Git object by id and
+		/// </summary>
+		/// <param name="id">SHA-1 of object to read</param>
+		/// <param name="refName">optional, only relevant for simple tags</param>
+		/// <returns>The Git object if found or null</returns>
 		public object MapObject(ObjectId id, string refName)
 		{
 			ObjectLoader or = OpenObject(id);
@@ -409,61 +416,60 @@ namespace GitSharp
 			{
 				case ObjectType.Tree:
 					return MakeTree(id, raw);
+
 				case ObjectType.Commit:
 					return MakeCommit(id, raw);
+
 				case ObjectType.Tag:
 					return MakeTag(id, refName, raw);
+
 				case ObjectType.Blob:
 					return raw;
+
+				default:
+					throw new IncorrectObjectTypeException(id,
+						"COMMIT nor TREE nor BLOB nor TAG");
 			}
-			return null;
-
 		}
-
 
 		private object MakeCommit(ObjectId id, byte[] raw)
 		{
 			return new Commit(this, id, raw);
 		}
 
-
-
-
-		/**
-		 * Access a Tree object using a symbolic reference. This reference may
-		 * be a SHA-1 or ref in combination with a number of symbols translating
-		 * from one ref or SHA1-1 to another, such as HEAD^{tree} etc.
-		 *
-		 * @param revstr a reference to a git commit object
-		 * @return a Tree named by the specified string
-		 * @
-		 *
-		 * @see #resolve(string)
-		 */
+		/// <summary>
+		/// Access a Tree object using a symbolic reference. This reference may
+		/// be a SHA-1 or ref in combination with a number of symbols translating
+		/// from one ref or SHA1-1 to another, such as HEAD^{tree} etc.
+		/// </summary>
+		/// <param name="revstr">a reference to a git commit object</param>
+		/// <returns>a Tree named by the specified string</returns>
 		public Tree MapTree(string revstr)
 		{
 			ObjectId id = Resolve(revstr);
 			return (id != null) ? MapTree(id) : null;
 		}
-		/**
-		 * Access a Tree by SHA'1 id.
-		 * @param id
-		 * @return Tree or null
-		 * @ for I/O error or unexpected object type.
-		 */
+
+		/// <summary>
+		/// Access a Tree by SHA'1 id.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns>Tree or null</returns>
 		public Tree MapTree(ObjectId id)
 		{
 			ObjectLoader or = OpenObject(id);
-			if (or == null)
-				return null;
+			if (or == null) return null;
+
 			byte[] raw = or.Bytes;
 			switch (((ObjectType)or.Type))
 			{
 				case ObjectType.Tree:
 					return new Tree(this, id, raw);
+
 				case ObjectType.Commit:
 					return MapTree(ObjectId.FromString(raw, 5));
 			}
+
 			throw new IncorrectObjectTypeException(id, ObjectType.Tree);
 		}
 
@@ -476,47 +482,47 @@ namespace GitSharp
 		{
 			return new Tree(this, id, raw);
 		}
-		/**
-		 * Access a tag by symbolic name.
-		 *
-		 * @param revstr
-		 * @return a Tag or null
-		 * @ on I/O error or unexpected type
-		 */
+
+		/// <summary>
+		/// Access a tag by symbolic name.
+		/// </summary>
+		/// <param name="revstr"></param>
+		/// <returns>Tag or null</returns>
 		public Tag MapTag(string revstr)
 		{
 			ObjectId id = Resolve(revstr);
 			return id != null ? MapTag(revstr, id) : null;
 		}
-		/**
-		 * Access a Tag by SHA'1 id
-		 * @param refName
-		 * @param id
-		 * @return Commit or null
-		 * @ for I/O error or unexpected object type.
-		 */
+
+		/// <summary>
+		/// Access a Tag by SHA'1 id
+		/// </summary>
+		/// <param name="refName"></param>
+		/// <param name="id"></param>
+		/// <returns>Commit or null</returns>
 		public Tag MapTag(string refName, ObjectId id)
 		{
 			ObjectLoader or = OpenObject(id);
-			if (or == null)
-				return null;
+			if (or == null) return null;
+
 			byte[] raw = or.Bytes;
 			if (ObjectType.Tag == (ObjectType)or.Type)
 				return new Tag(this, id, refName, raw);
+
 			return new Tag(this, id, refName, null);
 		}
-		/**
-		 * Create a command to update (or create) a ref in this repository.
-		 * 
-		 * @param ref
-		 *            name of the ref the caller wants to modify.
-		 * @return an update command. The caller must finish populating this command
-		 *         and then invoke one of the update methods to actually make a
-		 *         change.
-		 * @
-		 *             a symbolic ref was passed in and could not be resolved back
-		 *             to the base ref, as the symbolic ref could not be read.
-		 */
+
+		/// <summary>
+		/// Create a command to update (or create) a ref in this repository.
+		/// </summary>
+		/// <param name="refName">
+		/// name of the ref the caller wants to modify.
+		/// </param>
+		/// <returns>
+		/// An update command. The caller must finish populating this command
+		/// and then invoke one of the update methods to actually make a
+		/// change.
+		/// </returns>
 		public RefUpdate UpdateRef(string refName)
 		{
 			return _refDb.NewUpdate(refName);
@@ -767,37 +773,42 @@ namespace GitSharp
 			return r != null ? r.ObjectId : null;
 		}
 
+		public void IncrementOpen()
+		{
+			Interlocked.Increment(ref _useCnt);
+		}
+
 		/// <summary>
 		/// Close all resources used by this repository
 		/// </summary>
 		public void Close()
 		{
-			//ClosePacks();
+			int usageCount = Interlocked.Decrement(ref _useCnt);
+			if (usageCount == 0)
+			{
+				_objectDatabase.close();
+			}
 		}
 
-		public void openPack(FileInfo pack, FileInfo idx)
+		public void OpenPack(FileInfo pack, FileInfo idx)
 		{
 			_objectDatabase.openPack(pack, idx);
 		}
 
-		public ObjectDirectory getObjectDatabase()
+		public ObjectDirectory ObjectDatabase
 		{
-			return _objectDatabase;
+			get { return _objectDatabase; }
 		}
 
-		/**
-		 * Writes a symref (e.g. HEAD) to disk
-		 *
-		 * @param name symref name
-		 * @param target pointed to ref
-		 * @
-		 */
+		/// <summary>
+		/// Writes a symref (e.g. HEAD) to disk
+		/// </summary>
+		/// <param name="name">symref name</param>
+		/// <param name="target">pointed to ref</param>
 		public void WriteSymref(string name, string target)
 		{
 			_refDb.Link(name, target);
 		}
-
-
 
 		/// <summary>
 		/// Gets a representation of the index associated with this repo
@@ -930,6 +941,11 @@ namespace GitSharp
 			get { return _remoteBranches ?? (_remoteBranches = _refDb.GetRemotes()); }
 		}
 
+		public void Link(string name, string target)
+		{
+			_refDb.Link(name, target);
+		}
+
 		public Ref Peel(Ref pRef)
 		{
 			return _refDb.Peel(pRef);
@@ -960,7 +976,7 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// Check validty of a ref name. It must not contain character that has
+		/// Check validity of a ref name. It must not contain character that has
 		/// a special meaning in a Git object reference expression. Some other
 		/// dangerous characters are also excluded.
 		/// </summary>
@@ -1024,6 +1040,71 @@ namespace GitSharp
 		public Commit OpenCommit(ObjectId id)
 		{
 			return MapCommit(id);
+		}
+
+		public override string ToString()
+		{
+			return "Repository[" + Directory + "]";
+		}
+
+		public string FullBranch
+		{
+			get
+			{
+				var ptr = new FileInfo(Path.Combine(Directory.FullName, Constants.HEAD));
+				var sr = new StreamReader(ptr.FullName);
+				string reference;
+				try
+				{
+					reference = sr.ReadLine();
+				}
+				finally
+				{
+					sr.Close();
+				}
+
+				if (reference.StartsWith("ref: "))
+				{
+					reference = reference.Substring(5);
+				}
+
+				return reference;
+			}
+		}
+
+		/**
+		 * @param refName
+		 *
+		 * @return a more user friendly ref name
+		 */
+		public string ShortenRefName(string refName) 
+		{
+			if (refName.StartsWith(Constants.R_HEADS))
+				return refName.Substring(Constants.R_HEADS.Length);
+			if (refName.StartsWith(Constants.R_TAGS))
+				return refName.Substring(Constants.R_TAGS.Length);
+			if (refName.StartsWith(Constants.R_REMOTES))
+				return refName.Substring(Constants.R_REMOTES.Length);
+			return refName;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="refName"></param>
+		/// <returns>
+		/// A <see cref="ReflogReader"/> for the supplied <paramref name="refName"/>, 
+		/// or null if the /// named ref does not exist.
+		/// </returns>
+		public ReflogReader ReflogReader(string refName) 
+		{
+			Ref @ref;
+			if (Refs.TryGetValue(refName, out @ref))
+			{
+				return new ReflogReader(this, @ref.OriginalName);
+			}
+
+			return null;
 		}
 	}
 }

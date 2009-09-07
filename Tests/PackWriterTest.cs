@@ -435,7 +435,7 @@ namespace GitSharp.Tests
 			var crc32Idx = new FileInfo(Path.Combine(packDir.DirectoryName, "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.idx"));
 			FileInfo packFile = new FileInfo("Resources/pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.idxV2");
 			packFile.CopyTo(crc32Idx.FullName);
-			db.openPack(crc32Pack, crc32Idx);
+			db.OpenPack(crc32Pack, crc32Idx);
 
 			writeVerifyPack2(true);
 		}

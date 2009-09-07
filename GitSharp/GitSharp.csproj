@@ -110,6 +110,7 @@
     <Compile Include="ObjectDatabase.cs" />
     <Compile Include="ObjectDirectory.cs" />
     <Compile Include="ReflogReader.cs" />
+    <Compile Include="RefRename.cs" />
     <Compile Include="RepositoryConfig.cs" />
     <Compile Include="TransferConfig.cs" />
     <Compile Include="Transport\BundleWriter.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="UnpackedObjectCache.cs" />
     <Compile Include="UserConfig.cs" />
     <Compile Include="Util\ArrayExtensions.cs" />
+    <Compile Include="Util\AtomicInteger.cs" />
     <Compile Include="Util\AtomicReference.cs" />
     <Compile Include="Util\DateTime.cs" />
     <Compile Include="Util\Extensions.cs" />

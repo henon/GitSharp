@@ -47,7 +47,6 @@ using System.IO;
 using System.Linq;
 using GitSharp.Exceptions;
 using GitSharp.Util;
-using Tamir.SharpSsh.java.util;
 
 namespace GitSharp
 {
@@ -261,12 +260,10 @@ namespace GitSharp
                 using (var fileOutputStream = new FileStream(tmpIndex.FullName, System.IO.FileMode.CreateNew))
                 {
                     MessageDigest newMessageDigest = Constants.newMessageDigest();
-
-                    var bw = new BinaryWriter(fileOutputStream);
                     var ms = new MemoryStream();
 
                     header = new Header(_entries.Values as ICollection);
-                    header.Write(bw);
+                    header.Write(ms);
 
                     newMessageDigest.Update(ms.ToArray());
                     ms.WriteTo(fileOutputStream);
@@ -274,7 +271,7 @@ namespace GitSharp
 
                     foreach (Entry entry in _entries.Values)
                     {
-                        entry.write(ms);
+                        entry.Write(ms);
                         newMessageDigest.Update(ms.ToArray());
                         ms.WriteTo(fileOutputStream);
                         ms.Clear();
@@ -654,14 +651,14 @@ namespace GitSharp
         /// </summary>
         public class Entry
         {
-            private readonly int dev;
-            private readonly int gid;
-            private readonly int ino;
-            private readonly byte[] name;
+            private readonly int _dev;
+            private readonly int _gid;
+            private readonly int _ino;
+            private readonly byte[] _name;
+            private readonly int _uid;
 
-            private readonly int uid;
-            private short flags;
-            private int size;
+            private short _flags;
+            private int _size;
 
             internal Entry(Repository repository, byte[] key, FileInfo f, int stage)
                 : this(repository, key, f, stage, null)
@@ -673,8 +670,8 @@ namespace GitSharp
             {
                 Ctime = f.LastWriteTime.Ticks * 1000000L;
                 Mtime = Ctime; // we use same here
-                dev = -1;
-                ino = -1;
+                _dev = -1;
+                _ino = -1;
 
                 if (config_filemode(Repository) && File_canExecute(f))
                 {
@@ -685,9 +682,9 @@ namespace GitSharp
                     Mode = FileMode.RegularFile.Bits;
                 }
 
-                uid = -1;
-                gid = -1;
-                size = (newContent == null || newContent.Length == 0) ? (int)f.Length : newContent.Length;
+                _uid = -1;
+                _gid = -1;
+                _size = (newContent == null || newContent.Length == 0) ? (int)f.Length : newContent.Length;
                 var writer = new ObjectWriter(Repository);
                 if (newContent == null || newContent.Length == 0)
                 {
@@ -697,8 +694,8 @@ namespace GitSharp
                 {
                     ObjectId = writer.WriteBlob(newContent);
                 }
-                name = key;
-                flags = (short)((stage << 12) | name.Length); // TODO: fix flags
+                _name = key;
+                _flags = (short)((stage << 12) | _name.Length); // TODO: fix _flags
             }
 
             internal Entry(Repository repository, TreeEntry f, int stage)
@@ -706,23 +703,23 @@ namespace GitSharp
             {
                 Ctime = -1; // hmm
                 Mtime = -1;
-                dev = -1;
-                ino = -1;
+                _dev = -1;
+                _ino = -1;
                 Mode = f.Mode.Bits;
-                uid = -1;
-                gid = -1;
+                _uid = -1;
+                _gid = -1;
                 try
                 {
-                    size = (int)Repository.OpenBlob(f.Id).Size;
+                    _size = (int)Repository.OpenBlob(f.Id).Size;
                 }
                 catch (IOException e)
                 {
                     e.printStackTrace();
-                    size = -1;
+                    _size = -1;
                 }
                 ObjectId = f.Id;
-                name = Constants.encode(f.FullName);
-                flags = (short)((stage << 12) | name.Length); // TODO: fix flags
+                _name = Constants.encode(f.FullName);
+                _flags = (short)((stage << 12) | _name.Length); // TODO: fix _flags
             }
 
             internal Entry(Repository repository, Stream buffer)
@@ -733,18 +730,18 @@ namespace GitSharp
                     long startposition = b.BaseStream.Position;
                     Ctime = b.ReadInt32() * 1000000000L + (b.ReadInt32() % 1000000000L);
                     Mtime = b.ReadInt32() * 1000000000L + (b.ReadInt32() % 1000000000L);
-                    dev = b.ReadInt32();
-                    ino = b.ReadInt32();
+                    _dev = b.ReadInt32();
+                    _ino = b.ReadInt32();
                     Mode = b.ReadInt32();
-                    uid = b.ReadInt32();
-                    gid = b.ReadInt32();
-                    size = b.ReadInt32();
-                    byte[] sha1bytes = b.ReadBytes(Constants.OBJECT_ID_LENGTH);
-                    ObjectId = ObjectId.FromRaw(sha1bytes);
-                    flags = b.ReadInt16();
-                    name = b.ReadBytes(flags & 0xFFF);
+                    _uid = b.ReadInt32();
+                    _gid = b.ReadInt32();
+                    _size = b.ReadInt32();
+                    byte[] sha1Bytes = b.ReadBytes(Constants.OBJECT_ID_LENGTH);
+                    ObjectId = ObjectId.FromRaw(sha1Bytes);
+                    _flags = b.ReadInt16();
+                    _name = b.ReadBytes(_flags & 0xFFF);
                     b.BaseStream.Position = startposition +
-                                            ((8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 20 + 2 + name.Length + 8) & ~7);
+                                            ((8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 20 + 2 + _name.Length + 8) & ~7);
                 }
             }
 
@@ -765,25 +762,25 @@ namespace GitSharp
             /// <returns> path name for this entry </returns>
             public string Name
             {
-                get { return RawParseUtils.decode(name); }
+                get { return RawParseUtils.decode(_name); }
             }
 
             ///	<returns> path name for this entry as byte array, hopefully UTF-8 encoded </returns>
             public byte[] NameUTF8
             {
-                get { return name; }
+                get { return _name; }
             }
 
             ///	<returns> the stage this entry is in </returns>
             public int Stage
             {
-                get { return (flags & 0x3000) >> 12; }
+                get { return (_flags & 0x3000) >> 12; }
             }
 
             ///	<returns> size of disk object </returns>
             public int Size
             {
-                get { return size; }
+                get { return _size; }
             }
 
             ///	<summary>
@@ -799,7 +796,7 @@ namespace GitSharp
                 bool modified = Mtime != lm;
                 Mtime = lm;
 
-                if (size != f.Length)
+                if (_size != f.Length)
                 {
                     modified = true;
                 }
@@ -815,7 +812,7 @@ namespace GitSharp
 
                 if (modified)
                 {
-                    size = (int)f.Length;
+                    _size = (int)f.Length;
                     var writer = new ObjectWriter(Repository);
                     ObjectId newsha1 = ObjectId = writer.WriteBlob(f);
 
@@ -837,7 +834,7 @@ namespace GitSharp
             public bool update(FileInfo f, byte[] newContent)
             {
                 bool modified = false;
-                size = newContent.Length;
+                _size = newContent.Length;
                 var writer = new ObjectWriter(Repository);
                 ObjectId newsha1 = ObjectId = writer.WriteBlob(newContent);
 
@@ -850,31 +847,42 @@ namespace GitSharp
                 return modified;
             }
 
-            internal void write(MemoryStream buffer)
+            internal void Write(MemoryStream buffer)
             {
-                using (var buf = new BinaryWriter(buffer))
+				byte[] tmpBuffer;
+				
+				using (var ms = new MemoryStream())
+                using (var buf = new BinaryWriter(ms))
                 {
                     long startposition = buf.BaseStream.Position;
                     buf.Write((int)(Ctime / 1000000000L));
                     buf.Write((int)(Ctime % 1000000000L));
                     buf.Write((int)(Mtime / 1000000000L));
                     buf.Write((int)(Mtime % 1000000000L));
-                    buf.Write(dev);
-                    buf.Write(ino);
+                    buf.Write(_dev);
+                    buf.Write(_ino);
                     buf.Write(Mode);
-                    buf.Write(uid);
-                    buf.Write(gid);
-                    buf.Write(size);
+                    buf.Write(_uid);
+                    buf.Write(_gid);
+                    buf.Write(_size);
                     ObjectId.copyRawTo(buf.BaseStream);
-                    buf.Write(flags);
-                    buf.Write(name);
-                    long end = startposition + ((8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 20 + 2 + name.Length + 8) & ~7);
+                    buf.Write(_flags);
+                    buf.Write(_name);
+                    long end = startposition + ((8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 20 + 2 + _name.Length + 8) & ~7);
                     long remain = end - buf.BaseStream.Position;
                     while (remain-- > 0)
                     {
                         buf.Write((byte)0);
                     }
+
+					// Write a copy of the bytes in the original stream, because
+					// BinaryWriter disposes the underlying stream when it disposes.
+					tmpBuffer = ms.ToArray();
                 }
+
+				// Then, write the buffer created inside the loop
+				// to the original one.
+				buffer.Write(tmpBuffer, 0, tmpBuffer.Length);
             }
 
             ///	<summary>
@@ -964,7 +972,7 @@ namespace GitSharp
                     }
                 }
 
-                if (file.Length != size)
+                if (file.Length != _size)
                 {
                     return true;
                 }
@@ -1043,26 +1051,26 @@ namespace GitSharp
                        ObjectId.Name + ")/M:" +
                        new DateTime(Ctime / 1000000L) + "/C:" +
                        new DateTime(Mtime / 1000000L) + "/d" +
-                       dev +
-                       "/i" + ino +
+                       _dev +
+                       "/i" + _ino +
                        "/m" + Convert.ToString(Mode, 8) +
-                       "/u" + uid +
-                       "/g" + gid +
-                       "/s" + size +
-                       "/f" + flags +
+                       "/u" + _uid +
+                       "/g" + _gid +
+                       "/s" + _size +
+                       "/f" + _flags +
                        "/@" + Stage;
             }
 
             ///	<returns> true if this entry shall be assumed valid </returns>
             public bool isAssumedValid()
             {
-                return (flags & 0x8000) != 0;
+                return (_flags & 0x8000) != 0;
             }
 
             ///	<returns> true if this entry should be checked for changes </returns>
             public bool isUpdateNeeded()
             {
-                return (flags & 0x4000) != 0;
+                return (_flags & 0x4000) != 0;
             }
 
             /// <summary>
@@ -1073,11 +1081,11 @@ namespace GitSharp
             {
                 if (assumeValid)
                 {
-                    flags = Convert.ToInt16(flags | 0x8000);
+                    _flags = Convert.ToInt16(_flags | 0x8000);
                 }
                 else
                 {
-                    flags = Convert.ToInt16(flags & ~0x8000);
+                    _flags = Convert.ToInt16(_flags & ~0x8000);
                 }
             }
 
@@ -1089,11 +1097,11 @@ namespace GitSharp
             {
                 if (updateNeeded)
                 {
-                    flags |= 0x4000;
+                    _flags |= 0x4000;
                 }
                 else
                 {
-                    flags &= ~0x4000;
+                    _flags &= ~0x4000;
                 }
             }
 
@@ -1147,11 +1155,16 @@ namespace GitSharp
                 }
             }
 
-            internal void Write(BinaryWriter buf)
+            internal void Write(Stream buf)
             {
-                buf.Write(_signature);
-                buf.Write(_version);
-                buf.Write(Entries);
+            	var tmpBuffer = BitConverter.GetBytes(_signature);
+				buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+            	tmpBuffer = BitConverter.GetBytes(_version);
+				buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+				tmpBuffer = BitConverter.GetBytes(Entries);
+				buf.Write(tmpBuffer, 0, tmpBuffer.Length);
             }
         }
 

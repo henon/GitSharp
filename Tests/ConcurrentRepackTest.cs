@@ -275,7 +275,7 @@ namespace GitSharp.Tests
         private RevObject WriteBlob(Repository repo, string data)
         {
             var revWalk = new GitSharp.RevWalk.RevWalk(repo);
-            byte[] bytes = Constants.Encoding.GetBytes(data);
+            byte[] bytes = Constants.encode(data);
             var ow = new ObjectWriter(repo);
             ObjectId id = ow.WriteBlob(bytes);
             try

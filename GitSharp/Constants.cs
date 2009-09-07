@@ -109,8 +109,6 @@ namespace GitSharp
 
         }
 
-        public static readonly Encoding Encoding = Encoding.UTF8;
-
         public static readonly string Refs = "refs/";
         public static readonly string RefsTags = Refs + "tags/";
         public static readonly string RefsHeads = Refs + "heads/";

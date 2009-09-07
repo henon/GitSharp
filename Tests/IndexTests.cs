@@ -91,12 +91,14 @@ namespace GitSharp.Tests
 
 			var psi = new ProcessStartInfo
 						{
+							CreateNoWindow = true,
 							FileName = commandAndArgument[0],
 							Arguments = commandAndArgument.Length > 1 ? commandAndArgument[1] : null,
 							WorkingDirectory = dir.FullName,
 							RedirectStandardError = true,
 							RedirectStandardOutput = true,
-							UseShellExecute = false
+							UseShellExecute = false,
+							WindowStyle = ProcessWindowStyle.Hidden
 						};
 
 			var process = Process.Start(psi);

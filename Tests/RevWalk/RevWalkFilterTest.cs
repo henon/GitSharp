@@ -35,197 +35,223 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.RevWalk.Filter;
 using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.RevWalk
 {
-
-    using NUnit.Framework;
     [TestFixture]
     public class RevWalkFilterTest : RevWalkTestCase
     {
-#if false
-	private static final MyAll MY_ALL = new MyAll();
+        private static readonly MyAll MY_ALL = new MyAll();
 
-	public void testFilter_ALL() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_ALL()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(RevFilter.ALL);
-		markStart(c);
-		assertCommit(c, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(RevFilter.ALL);
+            markStart(c);
+            assertCommit(c, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_Negate_ALL() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_Negate_ALL()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(RevFilter.ALL.negate());
-		markStart(c);
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(RevFilter.ALL.negate());
+            markStart(c);
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_NOT_ALL() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_NOT_ALL()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(NotRevFilter.create(RevFilter.ALL));
-		markStart(c);
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(NotRevFilter.create(RevFilter.ALL));
+            markStart(c);
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_NONE() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_NONE()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(RevFilter.NONE);
-		markStart(c);
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(RevFilter.NONE);
+            markStart(c);
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_NOT_NONE() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_NOT_NONE()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(NotRevFilter.create(RevFilter.NONE));
-		markStart(c);
-		assertCommit(c, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(NotRevFilter.create(RevFilter.NONE));
+            markStart(c);
+            assertCommit(c, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_ALL_And_NONE() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_ALL_And_NONE()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(AndRevFilter.create(RevFilter.ALL, RevFilter.NONE));
-		markStart(c);
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(AndRevFilter.create(RevFilter.ALL, RevFilter.NONE));
+            markStart(c);
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_NONE_And_ALL() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_NONE_And_ALL()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(AndRevFilter.create(RevFilter.NONE, RevFilter.ALL));
-		markStart(c);
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(AndRevFilter.create(RevFilter.NONE, RevFilter.ALL));
+            markStart(c);
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_ALL_Or_NONE() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_ALL_Or_NONE()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(OrRevFilter.create(RevFilter.ALL, RevFilter.NONE));
-		markStart(c);
-		assertCommit(c, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(OrRevFilter.create(RevFilter.ALL, RevFilter.NONE));
+            markStart(c);
+            assertCommit(c, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_NONE_Or_ALL() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_NONE_Or_ALL()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(OrRevFilter.create(RevFilter.NONE, RevFilter.ALL));
-		markStart(c);
-		assertCommit(c, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(OrRevFilter.create(RevFilter.NONE, RevFilter.ALL));
+            markStart(c);
+            assertCommit(c, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_MY_ALL_And_NONE() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_MY_ALL_And_NONE()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(AndRevFilter.create(MY_ALL, RevFilter.NONE));
-		markStart(c);
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(AndRevFilter.create(MY_ALL, RevFilter.NONE));
+            markStart(c);
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_NONE_And_MY_ALL() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_NONE_And_MY_ALL()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(AndRevFilter.create(RevFilter.NONE, MY_ALL));
-		markStart(c);
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(AndRevFilter.create(RevFilter.NONE, MY_ALL));
+            markStart(c);
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_MY_ALL_Or_NONE() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_MY_ALL_Or_NONE()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(OrRevFilter.create(MY_ALL, RevFilter.NONE));
-		markStart(c);
-		assertCommit(c, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(OrRevFilter.create(MY_ALL, RevFilter.NONE));
+            markStart(c);
+            assertCommit(c, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_NONE_Or_MY_ALL() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c = commit(b);
+        [Test]
+        public void testFilter_NONE_Or_MY_ALL()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c = commit(b);
 
-		rw.setRevFilter(OrRevFilter.create(RevFilter.NONE, MY_ALL));
-		markStart(c);
-		assertCommit(c, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(OrRevFilter.create(RevFilter.NONE, MY_ALL));
+            markStart(c);
+            assertCommit(c, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-	public void testFilter_NO_MERGES() throws Exception {
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c1 = commit(b);
-		final RevCommit c2 = commit(b);
-		final RevCommit d = commit(c1, c2);
-		final RevCommit e = commit(d);
+        [Test]
+        public void testFilter_NO_MERGES()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c1 = commit(b);
+            RevCommit c2 = commit(b);
+            RevCommit d = commit(c1, c2);
+            RevCommit e = commit(d);
 
-		rw.setRevFilter(RevFilter.NO_MERGES);
-		markStart(e);
-		assertCommit(e, rw.next());
-		assertCommit(c2, rw.next());
-		assertCommit(c1, rw.next());
-		assertCommit(b, rw.next());
-		assertCommit(a, rw.next());
-		assertNull(rw.next());
-	}
+            rw.setRevFilter(RevFilter.NO_MERGES);
+            markStart(e);
+            assertCommit(e, rw.next());
+            assertCommit(c2, rw.next());
+            assertCommit(c1, rw.next());
+            assertCommit(b, rw.next());
+            assertCommit(a, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-	private static class MyAll extends RevFilter {
-		@Override
-		public RevFilter clone() {
-			return this;
-		}
+        private class MyAll : RevFilter
+        {
+            public override RevFilter Clone()
+            {
+                return this;
+            }
 
-		@Override
-		public boolean include(RevWalk walker, RevCommit cmit)
-				throws StopWalkException, MissingObjectException,
-				IncorrectObjectTypeException, IOException {
-			return true;
-		}
-	}
-#endif
+            public override bool include(GitSharp.RevWalk.RevWalk walker, RevCommit cmit)
+            {
+                return true;
+            }
+        }
     }
 }

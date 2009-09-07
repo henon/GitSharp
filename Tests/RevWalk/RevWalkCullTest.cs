@@ -37,67 +37,72 @@
 
 using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.RevWalk
 {
-
-    using NUnit.Framework;
     [TestFixture]
     public class RevWalkCullTest : RevWalkTestCase
     {
-#if false
-	public void testProperlyCullAllAncestors1() throws Exception {
-		// Credit goes to Junio C Hamano <gitster@pobox.com> for this
-		// test case in git-core (t/t6009-rev-list-parent.sh)
-		//
-		// We induce a clock skew so two is dated before one.
-		//
-		final RevCommit a = commit();
-		final RevCommit b = commit(-2400, a);
-		final RevCommit c = commit(b);
-		final RevCommit d = commit(c);
+        [Test]
+        public void testProperlyCullAllAncestors1()
+        {
+            // Credit goes to Junio C Hamano <gitster@pobox.com> for this
+            // test case in git-core (t/t6009-rev-list-parent.sh)
+            //
+            // We induce a clock skew so two is dated before one.
+            //
+            RevCommit a = commit();
+            RevCommit b = commit(-2400, a);
+            RevCommit c = commit(b);
+            RevCommit d = commit(c);
 
-		markStart(a);
-		markUninteresting(d);
-		assertNull(rw.next());
-	}
+            markStart(a);
+            markUninteresting(d);
+            Assert.IsNull(rw.next());
+        }
 
-	public void testProperlyCullAllAncestors2() throws Exception {
-		// Despite clock skew on c1 being very old it should not
-		// produce, neither should a or b, or any part of that chain.
-		//
-		final RevCommit a = commit();
-		final RevCommit b = commit(a);
-		final RevCommit c1 = commit(-5, b);
-		final RevCommit c2 = commit(10, b);
-		final RevCommit d = commit(c1, c2);
+        [Test]
+        public void testProperlyCullAllAncestors2()
+        {
+            // Despite clock skew on c1 being very old it should not
+            // produce, neither should a or b, or any part of that chain.
+            //
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            RevCommit c1 = commit(-5, b);
+            RevCommit c2 = commit(10, b);
+            RevCommit d = commit(c1, c2);
 
-		markStart(d);
-		markUninteresting(c1);
-		assertCommit(d, rw.next());
-		assertCommit(c2, rw.next());
-		assertNull(rw.next());
-	}
+            markStart(d);
+            markUninteresting(c1);
+            assertCommit(d, rw.next());
+            assertCommit(c2, rw.next());
+            Assert.IsNull(rw.next());
+        }
 
-	public void testProperlyCullAllAncestors_LongHistory() throws Exception {
-		final RevCommit a = commit();
-		RevCommit b = commit(a);
-		for (int i = 0; i < 24; i++) {
-			b = commit(b);
-			if ((i & 2) == 0)
-				markUninteresting(b);
-		}
-		final RevCommit c = commit(b);
+        [Test]
+        public void testProperlyCullAllAncestors_LongHistory()
+        {
+            RevCommit a = commit();
+            RevCommit b = commit(a);
+            for (int i = 0; i < 24; i++)
+            {
+                b = commit(b);
+                if ((i & 2) == 0)
+                    markUninteresting(b);
+            }
+            RevCommit c = commit(b);
 
-		markStart(c);
-		markUninteresting(b);
-		assertCommit(c, rw.next());
-		assertNull(rw.next());
+            markStart(c);
+            markUninteresting(b);
+            assertCommit(c, rw.next());
+            Assert.IsNull(rw.next());
 
-		// We should have aborted before we got back so far that "a"
-		// would be parsed. Thus, its parents shouldn't be allocated.
-		//
-		assertNull(a.parents);
-	}
-#endif
+            // We should have aborted before we got back so far that "a"
+            // would be parsed. Thus, its parents shouldn't be allocated.
+            //
+            Assert.IsNull(a.parents);
+        }
     }
 }

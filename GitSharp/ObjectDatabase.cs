@@ -221,7 +221,7 @@ namespace GitSharp
                 return ldr;
             }
 
-            ldr = OpenObjectImpl2(curs, objectId.ToString(), objectId);
+            ldr = OpenObjectImpl2(curs, objectId.Name, objectId);
             if (ldr != null)
             {
                 return ldr;

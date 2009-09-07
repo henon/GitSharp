@@ -276,7 +276,7 @@ namespace GitSharp.Tests
 
         protected FileInfo writeTrashFile(string name, string data)
         {
-            var tf = new FileInfo(Path.Combine(trash.FullName, name).Replace('/', Path.PathSeparator));
+            var tf = new FileInfo(Path.Combine(trash.FullName, name).Replace('/', Path.DirectorySeparatorChar));
             var tfp = tf.Directory;
             if (!tfp.Exists)
             {

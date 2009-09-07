@@ -172,7 +172,7 @@ namespace GitSharp.Transport
 
         private void MarkReachable(IEnumerable<ObjectId> have, int maxTime)
         {
-            foreach (Ref r in local.Refs.Values)
+            foreach (Ref r in local.getAllRefs().Values)
             {
                 try
                 {

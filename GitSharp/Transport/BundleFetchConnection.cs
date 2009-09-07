@@ -215,7 +215,7 @@ namespace GitSharp.Transport
             if (!missing.isEmpty())
                 throw new MissingBundlePrerequisiteException(transport.Uri, missing);
 
-            foreach (Ref r in transport.Local.Refs.Values)
+            foreach (Ref r in transport.Local.getAllRefs().Values)
             {
                 try
                 {

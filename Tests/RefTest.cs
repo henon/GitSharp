@@ -63,7 +63,7 @@ namespace GitSharp.Tests
 			ObjectId r = db.Resolve("refs/remotes/origin/HEAD");
 			Assert.AreEqual(masterId, r);
 
-			IDictionary<string, Ref> allRefs = db.Refs;
+			IDictionary<string, Ref> allRefs = db.getAllRefs();
 			Ref refHEAD = allRefs["refs/remotes/origin/HEAD"];
 			Assert.IsNotNull(refHEAD);
 			Assert.AreEqual(masterId, refHEAD.ObjectId);
@@ -80,7 +80,7 @@ namespace GitSharp.Tests
 		public virtual void testReadSymRefToPacked()
 		{
 			db.WriteSymref("HEAD", "refs/heads/b");
-			Ref @ref = db.Refs["HEAD"];
+		    Ref @ref = db.getRef("HEAD");
 			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
@@ -95,7 +95,7 @@ namespace GitSharp.Tests
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update); // internal
 
 			db.WriteSymref("HEAD", "refs/heads/master");
-			Ref @ref = db.Refs["HEAD"];
+		    Ref @ref = db.getRef("HEAD");
 			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
@@ -106,7 +106,7 @@ namespace GitSharp.Tests
 			updateRef.NewObjectId = db.Resolve("refs/heads/master");
 			RefUpdate.RefUpdateResult update = updateRef.Update();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
-			Ref @ref = db.Refs["ref/heads/new"];
+			Ref @ref = db.getRef("ref/heads/new");
 			Assert.AreEqual(Ref.Storage.Loose, @ref.StorageFormat);
 		}
 
@@ -116,7 +116,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testReadLoosePackedRef()
 		{
-			Ref @ref = db.Refs["refs/heads/master"];
+		    Ref @ref = db.getRef("refs/heads/master");
 			Assert.AreEqual(Ref.Storage.Packed, @ref.StorageFormat);
 			string path = Path.Combine(db.Directory.FullName, "refs/heads/master");
 			FileStream os = new FileStream(path, System.IO.FileMode.OpenOrCreate);
@@ -125,7 +125,7 @@ namespace GitSharp.Tests
 			os.WriteByte(Convert.ToByte('\n'));
 			os.Close();
 
-			@ref = db.Refs["refs/heads/master"];
+			@ref = db.getRef("refs/heads/master");
 			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
@@ -135,7 +135,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testReadSimplePackedRefSameRepo()
 		{
-			Ref @ref = db.Refs["refs/heads/master"];
+			Ref @ref = db.getRef("refs/heads/master");
 			ObjectId pid = db.Resolve("refs/heads/master^");
 			Assert.AreEqual(Ref.Storage.Packed, @ref.StorageFormat);
 			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
@@ -144,7 +144,7 @@ namespace GitSharp.Tests
 			RefUpdate.RefUpdateResult update = updateRef.Update();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
 
-			@ref = db.Refs["refs/heads/master"];
+			@ref = db.getRef("refs/heads/master");
 			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 	}

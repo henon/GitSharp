@@ -450,7 +450,7 @@ namespace GitSharp
                                     || typeString[position + 3] != endMark)
                                     throw new CorruptObjectException(id, "invalid type");
                                 offset.value = position + 4;
-                                return Constants.OBJ_TAG;
+                                return OBJ_TAG;
 
                             case (byte)'r':
                                 if (typeString[position + 2] != (byte)'e'
@@ -458,7 +458,7 @@ namespace GitSharp
                                         || typeString[position + 4] != endMark)
                                     throw new CorruptObjectException(id, "invalid type");
                                 offset.value = position + 5;
-                                return Constants.OBJ_TREE;
+                                return OBJ_TREE;
 
                             default:
                                 throw new CorruptObjectException(id, "invalid type");

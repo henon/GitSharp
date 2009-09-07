@@ -88,8 +88,8 @@ namespace GitSharp
 
     	/// <summary>
     	/// Raw object type from object header, as stored in storage (pack,
-    	/// loose file). This may be different from {@link #getType()} result
-    	/// for packs (see {@link Constants}).
+    	/// loose file). This may be different from <see cref="Type"/> result
+		/// for packs (see <see cref="Constants"/>).
     	/// </summary>
     	/// <returns></returns>
     	public abstract int RawType { get; }

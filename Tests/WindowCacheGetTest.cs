@@ -127,7 +127,7 @@ namespace GitSharp.Tests
 				ObjectLoader or = db.OpenObject(new WindowCursor(), o.Id);
 				Assert.IsNotNull(or);
 				Assert.IsTrue(or is PackedObjectLoader);
-				Assert.AreEqual(o.Type, or.Type);
+				Assert.AreEqual(o.Type, Constants.typeString(or.Type));
 				Assert.AreEqual(o.RawSize, or.RawSize);
 				Assert.AreEqual(o.Offset, ((PackedObjectLoader)or).ObjectOffset);
 			}

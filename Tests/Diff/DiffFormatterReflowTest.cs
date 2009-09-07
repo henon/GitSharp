@@ -63,12 +63,10 @@ namespace GitSharp.Tests.Diff
 		}
 
 		[Test]
-		[ExpectedException(typeof(ArgumentException))]
 		public void testNegativeContextFails()
 		{
 			init("X");
-			fmt.setContext(-1);
-			Assert.Fail("accepted negative context");
+		    AssertHelper.Throws<ArgumentException>(() => fmt.setContext(-1));
 		}
 
 		[Test, Ignore("Not working yet")]

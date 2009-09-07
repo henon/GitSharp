@@ -58,9 +58,9 @@ namespace GitSharp.Tests
 
 		private void delete(RefUpdate @ref, RefUpdate.RefUpdateResult expected, bool exists, bool removed)
 		{
-			Assert.AreEqual(exists, db.Refs.ContainsKey(@ref.Name));
+			Assert.AreEqual(exists, db.getRef(@ref.Name) != null);
 			Assert.AreEqual(expected, @ref.Delete());
-			Assert.AreEqual(!removed, db.Refs.ContainsKey(@ref.Name));
+			Assert.AreEqual(!removed, db.getRef(@ref.Name) != null);
 		}
 
 		[Test]
@@ -199,7 +199,7 @@ namespace GitSharp.Tests
 			ru.NewObjectId = newid;
 			RefUpdate.RefUpdateResult update = ru.Update();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
-			Ref r = db.Refs[newRef];
+		    Ref r = db.getRef(newRef);
 			Assert.IsNotNull(r);
 			Assert.AreEqual(newRef, r.Name);
 			Assert.IsNotNull(r.ObjectId);
@@ -211,7 +211,7 @@ namespace GitSharp.Tests
 		[Test]
 		public virtual void testRefKeySameAsOrigName()
 		{
-			foreach (var e in db.Refs)
+			foreach (var e in db.getAllRefs())
 			{
 				Assert.AreEqual(e.Key, e.Value.OriginalName);
 			}

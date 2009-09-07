@@ -47,7 +47,7 @@ namespace GitSharp
         public AlternateRepositoryDatabase(Repository alternateRepository)
         {
             _repository = alternateRepository;
-            _odb = _repository.getObjectDatabase();
+            _odb = _repository.ObjectDatabase;
         }
 
         public Repository getRepository()

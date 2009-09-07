@@ -3,6 +3,10 @@ using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
 {
+	// [ammachado]: TODO
+	/// <summary>
+	/// The base class for all exceptions thrown from GitSharp
+	/// </summary>
 	[Serializable]
 	public class GitSharpException : Exception
 	{

@@ -99,12 +99,12 @@ namespace GitSharp
 
     	public override int RawType
     	{
-    		get { throw new NotImplementedException(); }
+    		get { return Type; }
     	}
 
     	public override long RawSize
     	{
-    		get { throw new NotImplementedException(); }
+    		get { return Size; }
     	}
 
     	#endregion

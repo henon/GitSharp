@@ -193,7 +193,7 @@ namespace GitSharp.TreeWalk
 		 */
 		public void reset(Repository repo, AnyObjectId id, WindowCursor curs)
 		{
-			ObjectLoader ldr = repo.openObject(curs, id);
+			ObjectLoader ldr = repo.OpenObject(curs, id);
 			if (ldr == null)
 			{
 				ObjectId me = id.ToObjectId();

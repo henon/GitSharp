@@ -40,118 +40,159 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Text;
+using System.Threading;
 using GitSharp.Util;
 
 namespace GitSharp
 {
+	public class RefLogWriter
+	{
+		internal static void append(RefUpdate u, String msg)
+		{
+			ObjectId oldId = u.OldObjectId;
+			ObjectId newId = u.NewObjectId;
+			Repository db = u.Repository;
+			PersonIdent ident = u.RefLogIdent;
 
-    public class RefLogWriter
-    {
-       public static void append(RefUpdate u, String msg)
-        {
-            ObjectId oldId = u.OldObjectId;
-            ObjectId newId = u.NewObjectId;
-            Repository db = u.Repository;
-            PersonIdent ident = u.RefLogIdent;
+			AppendOneRecord(oldId, newId, ident, msg, db, u.Name);
+		}
 
-            appendOneRecord(oldId, newId, ident, msg, db, u.Name);
-        }
+		internal static void append(RefRename refRename, String msg)
+		{
+			ObjectId id = refRename.ObjectId;
+			Repository db = refRename.Repository;
+			PersonIdent ident = refRename.RefLogIdent;
+			AppendOneRecord(id, id, ident, msg, db, refRename.ToName);
+		}
 
-        private static void appendOneRecord(ObjectId oldId, ObjectId newId, PersonIdent ident, String msg, Repository db, String refName)
-        {
-            if (ident == null)
-                ident = new PersonIdent(db);
-            else
-                ident = new PersonIdent(ident);
+		internal static void renameTo(Repository db, RefUpdate from, RefUpdate to) 
+		{
+			var logdir = new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.LOGS));
+			var reflogFrom = new FileInfo(Path.Combine(logdir.FullName, from.Name));
+			if (!reflogFrom.Exists) return;
 
-            StringBuilder r = new StringBuilder();
-            r.Append(ObjectId.ToString(oldId));
-            r.Append(' ');
-            r.Append(ObjectId.ToString(newId));
-            r.Append(' ');
-            r.Append(ident.ToExternalString());
-            r.Append('\t');
-            r.Append(msg);
-            r.Append('\n');
+			var reflogTo = new FileInfo(Path.Combine(logdir.FullName, to.Name));
+			var reflogToDir = reflogTo.Directory;
+			var tmp = new FileInfo(Path.Combine(logdir.FullName, "tmp-renamed-log.." + Thread.CurrentThread.ManagedThreadId));
+			if (!reflogFrom.RenameTo(tmp.FullName))
+			{
+				throw new IOException("Cannot rename " + reflogFrom + " to (" + tmp + ")" + reflogTo);
+			}
 
-            byte[] rec = Constants.encode(r.ToString());
-            var logdir = new DirectoryInfo(db.Directory + "/" + Constants.LOGS);
-            var reflog = new DirectoryInfo(logdir + "/" + refName);
-            var refdir = reflog.Parent;
+			RefUpdate.DeleteEmptyDir(reflogFrom.Directory, RefUpdate.Count(from.Name, '/'));
+			if (reflogToDir != null && !reflogToDir.Exists) 
+			{
+				try { reflogToDir.Create(); }
+				catch(IOException)
+				{
+					throw new IOException("Cannot create directory " + reflogToDir);
+				}
+			}
 
-            refdir.Create();
-            if (!refdir.Exists)
-                throw new IOException("Cannot create directory " + refdir);
+			if (!tmp.RenameTo(reflogTo.FullName))
+			{
+				throw new IOException("Cannot rename (" + tmp + ")" + reflogFrom + " to " + reflogTo);
+			}
+		}
 
-            using (var @out = new FileStream(reflog.FullName, System.IO.FileMode.OpenOrCreate, FileAccess.Write))
-            {
-                try
-                {
-                    @out.Write(rec, 0, rec.Length);
-                }
-                finally
-                {
-                    @out.Close();
-                }
-            }
-        }
+		private static void AppendOneRecord(ObjectId oldId, ObjectId newId, PersonIdent ident, String msg, Repository db, String refName)
+		{
+			ident = ident == null ? new PersonIdent(db) : new PersonIdent(ident);
+
+			var r = new StringBuilder();
+			r.Append(ObjectId.ToString(oldId));
+			r.Append(' ');
+			r.Append(ObjectId.ToString(newId));
+			r.Append(' ');
+			r.Append(ident.ToExternalString());
+			r.Append('\t');
+			r.Append(msg);
+			r.Append('\n');
+
+			byte[] rec = Constants.encode(r.ToString());
+			var logdir = new DirectoryInfo(db.Directory + "/" + Constants.LOGS);
+			var reflog = new DirectoryInfo(logdir + "/" + refName);
+			var refdir = reflog.Parent;
+
+			if (refdir != null)
+			{
+				refdir.Create();
+				if (!refdir.Exists)
+				{
+					throw new IOException("Cannot create directory " + refdir);
+				}
+			}
+
+			using (var @out = new FileStream(reflog.FullName, System.IO.FileMode.OpenOrCreate, FileAccess.Write))
+			{
+				try
+				{
+					@out.Write(rec, 0, rec.Length);
+				}
+				finally
+				{
+					@out.Close();
+				}
+			}
+		}
 
 
-        /**
-         * Writes reflog entry for ref specified by refName
-         * 
-         * @param repo
-         *            repository to use
-         * @param oldCommit
-         *            previous commit
-         * @param commit
-         *            new commit
-         * @param message
-         *            reflog message
-         * @param refName
-         *            full ref name         
-         */
-        public static void WriteReflog(Repository repo, ObjectId oldCommit, ObjectId commit, string message, string refName)
-        {
-            string entry = BuildReflogString(repo, oldCommit, commit, message);
+		/**
+		 * Writes reflog entry for ref specified by refName
+		 * 
+		 * @param repo
+		 *            repository to use
+		 * @param oldCommit
+		 *            previous commit
+		 * @param commit
+		 *            new commit
+		 * @param message
+		 *            reflog message
+		 * @param refName
+		 *            full ref name         
+		 */
+		public static void WriteReflog(Repository repo, ObjectId oldCommit, ObjectId commit, string message, string refName)
+		{
+			string entry = BuildReflogString(repo, oldCommit, commit, message);
 
-            DirectoryInfo directory = repo.Directory;
+			DirectoryInfo directory = repo.Directory;
 
-            FileInfo reflogfile = PathUtil.CombineFilePath(directory, "logs/" + refName);
-            DirectoryInfo reflogdir = reflogfile.Directory;
-            if (!reflogdir.Exists)
-            {
-                try
-                {
-                    reflogdir.Create();
-                }
-                catch (Exception)
-                {
-                    throw new IOException("Cannot create directory " + reflogdir);
-                }
-            }
-            StreamWriter writer = new StreamWriter(reflogfile.OpenWrite());
-            writer.WriteLine(entry);
-            writer.Close();
-        }
+			FileInfo reflogfile = PathUtil.CombineFilePath(directory, "logs/" + refName);
+			DirectoryInfo reflogdir = reflogfile.Directory;
+			if (!reflogdir.Exists)
+			{
+				try
+				{
+					reflogdir.Create();
+				}
+				catch (Exception)
+				{
+					throw new IOException("Cannot create directory " + reflogdir);
+				}
+			}
+			
+			var writer = new StreamWriter(reflogfile.OpenWrite());
+			writer.WriteLine(entry);
+			writer.Close();
+		}
 
-        private static string BuildReflogString(Repository repo, ObjectId oldCommit, ObjectId commit, string message)
-        {
-            PersonIdent me = new PersonIdent(repo);
-            string initial = "";
-            if (oldCommit == null)
-            {
-                oldCommit = ObjectId.ZeroId;
-                initial = " (initial)";
-            }
-            string s = oldCommit.ToString() + " " + commit.ToString() + " "
-                    + me.ToExternalString() + "\t" + message + initial;
-            return s;
-        }
-    }
+		private static string BuildReflogString(Repository repo, ObjectId oldCommit, ObjectId commit, string message)
+		{
+			var me = new PersonIdent(repo);
+			string initial = string.Empty;
 
+			if (oldCommit == null)
+			{
+				oldCommit = ObjectId.ZeroId;
+				initial = " (initial)";
+			}
+			
+			string s = oldCommit + " " + commit + " "
+					+ me.ToExternalString() + "\t" + message + initial;
+
+			return s;
+		}
+	}
 }

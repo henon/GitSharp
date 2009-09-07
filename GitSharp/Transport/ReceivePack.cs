@@ -190,7 +190,7 @@ namespace GitSharp.Transport
                 enabledCapabilities = new List<string>();
                 commands = new List<ReceiveCommand>();
 
-                service();
+                Service();
             }
             finally
             {
@@ -201,7 +201,7 @@ namespace GitSharp.Transport
                 }
                 finally
                 {
-                    unlockPack();
+                    UnlockPack();
                     raw = null;
                     pckIn = null;
                     pckOut = null;
@@ -213,71 +213,71 @@ namespace GitSharp.Transport
             }
         }
 
-        private void service()
+        private void Service()
         {
-            sendAdvertisedRefs();
-            recvCommands();
-            if (!commands.isEmpty())
-            {
-                enableCapabilities();
+            SendAdvertisedRefs();
+            RecvCommands();
+        	if (commands.isEmpty()) return;
+        	EnableCapabilities();
 
-                if (needPack())
-                {
-                    try
-                    {
-                        receivePack();
-                        if (isCheckReceivedObjects())
-                            checkConnectivity();
-                        unpackError = null;
-                    }
-                    catch (IOException err)
-                    {
-                        unpackError = err;
-                    }
-                    catch (Exception err)
-                    {
-                        unpackError = err;
-                    }
-                }
+        	if (NeedPack())
+        	{
+        		try
+        		{
+        			receivePack();
+        			if (isCheckReceivedObjects())
+        			{
+        				CheckConnectivity();
+        			}
+        			unpackError = null;
+        		}
+        		catch (IOException err)
+        		{
+        			unpackError = err;
+        		}
+        		catch (Exception err)
+        		{
+        			unpackError = err;
+        		}
+        	}
 
-                if (unpackError == null)
-                {
-                    validateCommands();
-                    executeCommands();
-                }
-                unlockPack();
+        	if (unpackError == null)
+        	{
+        		ValidateCommands();
+        		ExecuteCommands();
+        	}
+        	UnlockPack();
 
-                if (reportStatus)
-                {
-                    sendStatusReport(true, new ServiceReporter(pckOut));
-                    pckOut.End();
-                }
-                else if (msgs != null)
-                {
-                    sendStatusReport(false, new MessagesReporter(msgs.BaseStream));
-                    msgs.Flush();
-                }
+        	if (reportStatus)
+        	{
+        		SendStatusReport(true, new ServiceReporter(pckOut));
+        		pckOut.End();
+        	}
+        	else if (msgs != null)
+        	{
+        		SendStatusReport(false, new MessagesReporter(msgs.BaseStream));
+        		msgs.Flush();
+        	}
 
-                postReceive.OnPostReceive(this, filterCommands(ReceiveCommand.Result.OK));
-            }
+        	postReceive.OnPostReceive(this, FilterCommands(ReceiveCommand.Result.OK));
         }
 
-        private void recvCommands()
+        private void RecvCommands()
         {
-            for (;;)
+            while (true)
             {
                 string line;
                 try
                 {
                     line = pckIn.ReadStringRaw();
                 }
-                catch (EndOfStreamException eof)
+                catch (EndOfStreamException)
                 {
                     if (commands.isEmpty())
                     {
                         return;
                     }
-                    throw eof;
+                    throw;
                 }
 
                 if (commands.isEmpty())
@@ -293,8 +293,7 @@ namespace GitSharp.Transport
                     }
                 }
 
-                if (line.Length == 0)
-                    break;
+                if (line.Length == 0) break;
                 if (line.Length < 83)
                 {
                     string m = "error: invalid protocol: wanted 'old new ref'";
@@ -305,7 +304,7 @@ namespace GitSharp.Transport
                 ObjectId oldId = ObjectId.FromString(line.Slice(0, 40));
                 ObjectId newId = ObjectId.FromString(line.Slice(41, 81));
                 string name = line.Substring(82);
-                ReceiveCommand cmd = new ReceiveCommand(oldId, newId, name);
+                var cmd = new ReceiveCommand(oldId, newId, name);
                 cmd.setRef(refs[cmd.getRefName()]);
                 commands.Add(cmd);
             }
@@ -325,16 +324,16 @@ namespace GitSharp.Transport
             packLock = ip.renameAndOpenPack(lockMsg);
         }
 
-        private void sendStatusReport(bool forClient, Reporter rout)
+        private void SendStatusReport(bool forClient, Reporter rout)
         {
             if (unpackError != null)
             {
-                rout.sendString("unpack error " + unpackError.Message);
+                rout.SendString("unpack error " + unpackError.Message);
                 if (forClient)
                 {
                     foreach (ReceiveCommand cmd in commands)
                     {
-                        rout.sendString("ng " + cmd.getRefName() + " n/a (unpacker error)");
+                        rout.SendString("ng " + cmd.getRefName() + " n/a (unpacker error)");
                     }
                 }
 
@@ -342,17 +341,19 @@ namespace GitSharp.Transport
             }
 
             if (forClient)
-                rout.sendString("unpack ok");
+            {
+            	rout.SendString("unpack ok");
+            }
             foreach (ReceiveCommand cmd in commands)
             {
                 if (cmd.getResult() == ReceiveCommand.Result.OK)
                 {
                     if (forClient)
-                        rout.sendString("ok " + cmd.getRefName());
+                        rout.SendString("ok " + cmd.getRefName());
                     continue;
                 }
 
-                StringBuilder r = new StringBuilder();
+                var r = new StringBuilder();
                 r.Append("ng ");
                 r.Append(cmd.getRefName());
                 r.Append(" ");
@@ -404,26 +405,26 @@ namespace GitSharp.Transport
                         continue;
                 }
 
-                rout.sendString(r.ToString());
+                rout.SendString(r.ToString());
             }
         }
 
-        private void sendAdvertisedRefs()
+        private void SendAdvertisedRefs()
         {
             refs = db.Refs;
 
-            StringBuilder m = new StringBuilder(100);
+            var m = new StringBuilder(100);
             char[] idtmp = new char[2 * Constants.OBJECT_ID_LENGTH];
             IEnumerator<Ref> i = RefComparator.Sort(refs.Values).GetEnumerator();
             {
                 if (i.MoveNext())
                 {
                     Ref r = i.Current;
-                    format(m, idtmp, r.ObjectId, r.OriginalName);
+                    Format(m, idtmp, r.ObjectId, r.OriginalName);
                 }
                 else
                 {
-                    format(m, idtmp, ObjectId.ZeroId, "capabilities^^{}");
+                    Format(m, idtmp, ObjectId.ZeroId, "capabilities^^{}");
                 }
                 m.Append('\0');
                 m.Append(' ');
@@ -436,38 +437,38 @@ namespace GitSharp.Transport
                     m.Append(CAPABILITY_OFS_DELTA);
                 }
                 m.Append(' ');
-                writeAdvertisedRef(m);
+                WriteAdvertisedRef(m);
             }
 
             while (i.MoveNext())
             {
                 Ref r = i.Current;
-                format(m, idtmp, r.ObjectId, r.Name);
-                writeAdvertisedRef(m);
+                Format(m, idtmp, r.ObjectId, r.Name);
+                WriteAdvertisedRef(m);
             }
             pckOut.End();
         }
 
-        private void executeCommands()
+        private void ExecuteCommands()
         {
-            preReceive.onPreReceive(this, filterCommands(ReceiveCommand.Result.NOT_ATTEMPTED));
-            foreach (ReceiveCommand cmd in filterCommands(ReceiveCommand.Result.NOT_ATTEMPTED))
+            preReceive.onPreReceive(this, FilterCommands(ReceiveCommand.Result.NOT_ATTEMPTED));
+            foreach (ReceiveCommand cmd in FilterCommands(ReceiveCommand.Result.NOT_ATTEMPTED))
             {
-                execute(cmd);
+                Execute(cmd);
             }
         }
 
         public void sendError(string what)
         {
-            sendMessage("error", what);
+            SendMessage("error", what);
         }
 
         public void sendMessage(string what)
         {
-            sendMessage("remote", what);
+            SendMessage("remote", what);
         }
 
-        private void sendMessage(string type, string what)
+        private void SendMessage(string type, string what)
         {
             if (msgs != null)
             {
@@ -475,7 +476,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private void unlockPack()
+        private void UnlockPack()
         {
             if (packLock != null)
             {
@@ -484,7 +485,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private void format(StringBuilder m, char[] idtmp, ObjectId id, string name)
+        private static void Format(StringBuilder m, char[] idtmp, AnyObjectId id, string name)
         {
             m.Length = 0;
             id.CopyTo(idtmp, m);
@@ -492,44 +493,43 @@ namespace GitSharp.Transport
             m.Append(name);
         }
 
-        private void writeAdvertisedRef(StringBuilder m)
+        private void WriteAdvertisedRef(StringBuilder m)
         {
             m.Append('\n');
             pckOut.WriteString(m.ToString());
         }
 
-        private void enableCapabilities()
+        private void EnableCapabilities()
         {
             reportStatus = enabledCapabilities.Contains(CAPABILITY_REPORT_STATUS);
         }
 
-        private bool needPack()
+        private bool NeedPack()
         {
             foreach (ReceiveCommand cmd in commands)
             {
-                if (cmd.getType() != ReceiveCommand.Type.DELETE)
-                    return true;
+                if (cmd.getType() != ReceiveCommand.Type.DELETE) return true;
             }
             return false;
         }
 
-        private void checkConnectivity()
+        private void CheckConnectivity()
         {
-            ObjectWalk ow = new ObjectWalk(db);
+            var ow = new ObjectWalk(db);
             foreach (ReceiveCommand cmd in commands)
             {
-                if (cmd.getResult() != ReceiveCommand.Result.NOT_ATTEMPTED)
-                    continue;
-                if (cmd.getType() == ReceiveCommand.Type.DELETE)
-                    continue;
+                if (cmd.getResult() != ReceiveCommand.Result.NOT_ATTEMPTED) continue;
+                if (cmd.getType() == ReceiveCommand.Type.DELETE) continue;
                 ow.markStart(ow.parseAny(cmd.getNewId()));
             }
             foreach (Ref @ref in refs.Values)
-                ow.markUninteresting(ow.parseAny(@ref.ObjectId));
+            {
+            	ow.markUninteresting(ow.parseAny(@ref.ObjectId));
+            }
             ow.checkConnectivity();
         }
 
-        private void validateCommands()
+        private void ValidateCommands()
         {
             foreach (ReceiveCommand cmd in commands)
             {
@@ -636,7 +636,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private void execute(ReceiveCommand cmd)
+        private void Execute(ReceiveCommand cmd)
         {
             try
             {
@@ -650,7 +650,7 @@ namespace GitSharp.Transport
                             ru.ExpectedOldObjectId = cmd.getOldId();
                         }
                         ru.IsForceUpdate = true;
-                        status(cmd, ru.Delete(walk));
+                        Status(cmd, ru.Delete(walk));
                         break;
 
                     case ReceiveCommand.Type.CREATE:
@@ -660,7 +660,7 @@ namespace GitSharp.Transport
                         ru.ExpectedOldObjectId = cmd.getOldId();
                         ru.NewObjectId = cmd.getNewId();
                         ru.SetRefLogMessage("push", true);
-                        status(cmd, ru.Update(walk));
+                        Status(cmd, ru.Update(walk));
                         break;
                 }
             }
@@ -670,9 +670,9 @@ namespace GitSharp.Transport
             }
         }
 
-        private List<ReceiveCommand> filterCommands(ReceiveCommand.Result want)
+        private List<ReceiveCommand> FilterCommands(ReceiveCommand.Result want)
         {
-            List<ReceiveCommand> r = new List<ReceiveCommand>(commands.Count);
+            var r = new List<ReceiveCommand>(commands.Count);
             foreach (ReceiveCommand cmd in commands)
             {
                 if (cmd.getResult() == want)
@@ -681,7 +681,7 @@ namespace GitSharp.Transport
             return r;
         }
 
-        private void status(ReceiveCommand cmd, RefUpdate.RefUpdateResult result)
+        private static void Status(ReceiveCommand cmd, RefUpdate.RefUpdateResult result)
         {
             switch (result)
             {
@@ -713,43 +713,46 @@ namespace GitSharp.Transport
                     cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, result.ToString());
                     break;
             }
-        }
+		}
 
-        private abstract class Reporter
+		#region Nested Types
+
+		private abstract class Reporter
         {
-            public abstract void sendString(string s);
+            public abstract void SendString(string s);
         }
 
         private class ServiceReporter : Reporter
         {
-            private readonly PacketLineOut pckOut;
+            private readonly PacketLineOut _pckOut;
 
             public ServiceReporter(PacketLineOut pck)
             {
-                pckOut = pck;
+                _pckOut = pck;
             }
 
-            public override void sendString(string s)
+            public override void SendString(string s)
             {
-                pckOut.WriteString(s + "\n");
+                _pckOut.WriteString(s + "\n");
             }
         }
 
         private class MessagesReporter : Reporter
         {
-            private readonly Stream stream;
+            private readonly Stream _stream;
 
             public MessagesReporter(Stream ms)
             {
-                stream = ms;
+                _stream = ms;
             }
 
-            public override void sendString(string s)
+            public override void SendString(string s)
             {
-                byte[] data = Constants.Encoding.GetBytes(s);
-                stream.Write(data, 0, data.Length);
+            	byte[] data = Constants.encode(s);
+                _stream.Write(data, 0, data.Length);
             }
-        }
-    }
+		}
 
+		#endregion
+	}
 }

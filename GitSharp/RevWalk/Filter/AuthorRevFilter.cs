@@ -73,7 +73,7 @@ namespace GitSharp.RevWalk.Filter
 
         public static RawCharSequence textFor(RevCommit cmit)
         {
-            byte[] raw = cmit.getRawBuffer();
+            byte[] raw = cmit.RawBuffer;
             int b = RawParseUtils.author(raw, 0);
             if (b < 0)
                 return RawCharSequence.EMPTY;

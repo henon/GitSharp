@@ -36,18 +36,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using GitSharp.RevWalk.Filter;
 using GitSharp.TreeWalk.Filter;
-using System;
+
 namespace GitSharp.RevWalk
 {
-
-
-
     /**
      * First phase of a path limited revision walk.
      * <p>
-     * This filter is ANDed to evaluate after all other filters and ties the
+     * This filter is ANDed to evaluate After all other filters and ties the
      * configured {@link TreeFilter} into the revision walking process.
      * <p>
      * Each commit is differenced concurrently against all of its parents to look
@@ -81,22 +79,22 @@ namespace GitSharp.RevWalk
         {
             // Reset the tree filter to scan this commit and parents.
             //
-            RevCommit[] pList = c.parents;
+            RevCommit[] pList = c.Parents;
             int nParents = pList.Length;
             TreeWalk.TreeWalk tw = _pathFilter;
             var trees = new ObjectId[nParents + 1];
 
             for (int i = 0; i < nParents; i++)
             {
-                RevCommit p = c.parents[i];
+                RevCommit p = c.Parents[i];
                 if ((p.flags & Parsed) == 0)
                 {
                 	p.parse(walker);
                 }
-                trees[i] = p.getTree();
+                trees[i] = p.Tree;
             }
 
-            trees[nParents] = c.getTree();
+            trees[nParents] = c.Tree;
             tw.reset(trees);
 
             if (nParents == 1)
@@ -185,7 +183,7 @@ namespace GitSharp.RevWalk
                     }
 
                     c.flags |= Rewrite;
-                    c.parents = new[] { p };
+                    c.Parents = new[] { p };
                     return false;
                 }
 
@@ -196,7 +194,7 @@ namespace GitSharp.RevWalk
                     // "empty tree root" and thus their history is not relevant.
                     // Cut our grandparents to be an empty list.
                     //
-                    pList[i].parents = RevCommit.NO_PARENTS;
+                    pList[i].Parents = RevCommit.NO_PARENTS;
                 }
 
                 // We have an interesting difference relative to this parent.

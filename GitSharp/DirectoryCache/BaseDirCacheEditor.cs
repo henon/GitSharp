@@ -170,7 +170,7 @@ namespace GitSharp.DirectoryCache
          * Update the DirCache with the contents of {@link #entries}.
          * <p>
          * This method should be invoked only during an implementation of
-         * {@link #finish()}, and only after {@link #entries} is sorted.
+         * {@link #finish()}, and only After {@link #entries} is sorted.
          */
         protected void replace()
         {
@@ -189,7 +189,7 @@ namespace GitSharp.DirectoryCache
          * If this method fails (returns false) the lock is still released.
          * <p>
          * This is a utility method for applications as the finish-write-commit
-         * pattern is very common after using a builder to update entries.
+         * pattern is very common After using a builder to update entries.
          *
          * @return true if the commit was successful and the file contains the new
          *         data; false if the commit failed and the file remains with the

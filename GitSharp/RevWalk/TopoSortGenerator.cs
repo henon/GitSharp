@@ -38,90 +38,86 @@
 
 namespace GitSharp.RevWalk
 {
+	/// <summary>
+	/// Sorts commits in topological order.
+	/// </summary>
+	public class TopoSortGenerator : Generator
+	{
+		private static readonly int TopoDelay = RevWalk.TOPO_DELAY;
+		private readonly FIFORevQueue _pending;
+		private readonly GeneratorOutputType _outputType;
 
+		/// <summary>
+		/// Create a new sorter and completely spin the generator.
+		/// <para>
+		/// When the constructor completes the supplied generator will have no
+		/// commits remaining, as all of the commits will be held inside of this
+		/// generator's internal buffer.
+		/// </summary>
+		/// <param name="s">
+		/// Generator to pull all commits out of, and into this buffer.
+		/// </param>
+		public TopoSortGenerator(Generator s)
+		{
+			_pending = new FIFORevQueue();
+			_outputType = s.OutputType | GeneratorOutputType.SortTopo;
+			s.shareFreeList(_pending);
 
-    /** Sorts commits in topological order. */
-    public class TopoSortGenerator : Generator
-    {
-        private static int TOPO_DELAY = RevWalk.TOPO_DELAY;
+			while (true)
+			{
+				RevCommit c = s.next();
+				if (c == null) break;
+				foreach (RevCommit p in c.Parents)
+				{
+					p.InDegree++;
+				}
+				_pending.add(c);
+			}
+		}
 
-        private FIFORevQueue pending;
+		public override GeneratorOutputType OutputType
+		{
+			get { return _outputType; }
+		}
 
-        private int _outputType;
+		public override void shareFreeList(BlockRevQueue q)
+		{
+			q.shareFreeList(_pending);
+		}
 
-        /**
-         * Create a new sorter and completely spin the generator.
-         * <p>
-         * When the constructor completes the supplied generator will have no
-         * commits remaining, as all of the commits will be held inside of this
-         * generator's internal buffer.
-         * 
-         * @param s
-         *            generator to pull all commits out of, and into this buffer.
-         * @throws MissingObjectException
-         * @throws IncorrectObjectTypeException
-         * @
-         */
-        public TopoSortGenerator(Generator s)
-        {
-            pending = new FIFORevQueue();
-            _outputType = s.outputType() | SORT_TOPO;
-            s.shareFreeList(pending);
-            for (; ; )
-            {
-                RevCommit c = s.next();
-                if (c == null)
-                    break;
-                foreach (RevCommit p in c.parents)
-                    p.inDegree++;
-                pending.add(c);
-            }
-        }
+		public override RevCommit next()
+		{
+			while (true)
+			{
+				RevCommit c = _pending.next();
+				if (c == null) return null;
 
-        public override int outputType()
-        {
-            return _outputType;
-        }
+				if (c.InDegree > 0)
+				{
+					// At least one of our children is missing. We delay
+					// production until all of our children are output.
+					//
+					c.flags |= TopoDelay;
+					continue;
+				}
 
-        public override void shareFreeList(BlockRevQueue q)
-        {
-            q.shareFreeList(pending);
-        }
-
-        public override RevCommit next()
-        {
-            for (; ; )
-            {
-                RevCommit c = pending.next();
-                if (c == null)
-                    return null;
-
-                if (c.inDegree > 0)
-                {
-                    // At least one of our children is missing. We delay
-                    // production until all of our children are output.
-                    //
-                    c.flags |= TOPO_DELAY;
-                    continue;
-                }
-
-                // All of our children have already produced,
-                // so it is OK for us to produce now as well.
-                //
-                foreach (RevCommit p in c.parents)
-                {
-                    if (--p.inDegree == 0 && (p.flags & TOPO_DELAY) != 0)
-                    {
-                        // This parent tried to come before us, but we are
-                        // his last child. unpop the parent so it goes right
-                        // behind this child.
-                        //
-                        p.flags &= ~TOPO_DELAY;
-                        pending.unpop(p);
-                    }
-                }
-                return c;
-            }
-        }
-    }
+				// All of our children have already produced,
+				// so it is OK for us to produce now as well.
+				//
+				foreach (RevCommit p in c.Parents)
+				{
+					if (--p.InDegree == 0 && (p.flags & TopoDelay) != 0)
+					{
+						// This parent tried to come before us, but we are
+						// his last child. unpop the parent so it goes right
+						// behind this child.
+						//
+						p.flags &= ~TopoDelay;
+						_pending.unpop(p);
+					}
+				}
+				return c;
+			}
+		}
+	}
 }

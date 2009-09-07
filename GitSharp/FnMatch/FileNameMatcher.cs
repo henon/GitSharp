@@ -348,7 +348,7 @@ namespace GitSharp.FnMatch
         }
 
         ///	<summary>
-        /// Resets this matcher to it's state right after construction.
+        /// Resets this matcher to it's state right After construction.
         /// </summary>
         public virtual void Reset()
         {

@@ -228,18 +228,18 @@ namespace GitSharp.RevWalk
                 
 				if ((r.flags & UNINTERESTING) != 0)
                 {
-                    MarkTreeUninteresting(r.getTree());
+                    MarkTreeUninteresting(r.Tree);
 
                     if (hasRevSort(RevSort.BOUNDARY))
                     {
-                        _pendingObjects.add(r.getTree());
+                        _pendingObjects.add(r.Tree);
                         return r;
                     }
 
                     continue;
                 }
                 
-				_pendingObjects.add(r.getTree());
+				_pendingObjects.add(r.Tree);
                 
 				return r;
             }

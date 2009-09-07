@@ -117,11 +117,11 @@ namespace GitSharp.Tests.RevWalk
             markStart(c);
 
             assertCommit(c, rw.next());
-            Assert.AreEqual(1, c.getParentCount());
-            assertCommit(a, c.getParent(0)); // b was skipped
+            Assert.AreEqual(1, c.ParentCount);
+            assertCommit(a, c.GetParent(0)); // b was skipped
 
             assertCommit(a, rw.next());
-            Assert.AreEqual(0, a.getParentCount());
+            Assert.AreEqual(0, a.ParentCount);
             Assert.IsNull(rw.next());
         }
 
@@ -137,11 +137,11 @@ namespace GitSharp.Tests.RevWalk
 
             // d was skipped
             assertCommit(c, rw.next());
-            Assert.AreEqual(1, c.getParentCount());
-            assertCommit(a, c.getParent(0)); // b was skipped
+            Assert.AreEqual(1, c.ParentCount);
+            assertCommit(a, c.GetParent(0)); // b was skipped
 
             assertCommit(a, rw.next());
-            Assert.AreEqual(0, a.getParentCount());
+            Assert.AreEqual(0, a.ParentCount);
             Assert.IsNull(rw.next());
         }
 
@@ -157,11 +157,11 @@ namespace GitSharp.Tests.RevWalk
 
             // d was skipped
             assertCommit(c, rw.next());
-            Assert.AreEqual(1, c.getParentCount());
-            assertCommit(a, c.getParent(0)); // b was skipped
+            Assert.AreEqual(1, c.ParentCount);
+            assertCommit(a, c.GetParent(0)); // b was skipped
 
             assertCommit(a, rw.next());
-            Assert.AreEqual(0, a.getParentCount());
+            Assert.AreEqual(0, a.ParentCount);
             Assert.IsNull(rw.next());
         }
 
@@ -181,15 +181,15 @@ namespace GitSharp.Tests.RevWalk
             markStart(i);
 
             assertCommit(i, rw.next());
-            Assert.AreEqual(1, i.getParentCount());
-            assertCommit(c, i.getParent(0)); // h..d was skipped
+            Assert.AreEqual(1, i.ParentCount);
+            assertCommit(c, i.GetParent(0)); // h..d was skipped
 
             assertCommit(c, rw.next());
-            Assert.AreEqual(1, c.getParentCount());
-            assertCommit(a, c.getParent(0)); // b was skipped
+            Assert.AreEqual(1, c.ParentCount);
+            assertCommit(a, c.GetParent(0)); // b was skipped
 
             assertCommit(a, rw.next());
-            Assert.AreEqual(0, a.getParentCount());
+            Assert.AreEqual(0, a.ParentCount);
             Assert.IsNull(rw.next());
         }
     }

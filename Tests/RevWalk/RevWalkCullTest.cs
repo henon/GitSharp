@@ -102,7 +102,7 @@ namespace GitSharp.Tests.RevWalk
             // We should have aborted before we got back so far that "a"
             // would be parsed. Thus, its parents shouldn't be allocated.
             //
-            Assert.IsNull(a.parents);
+            Assert.IsNull(a.Parents);
         }
     }
 }

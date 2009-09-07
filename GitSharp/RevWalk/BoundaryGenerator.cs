@@ -38,95 +38,96 @@
 
 namespace GitSharp.RevWalk
 {
+	public class BoundaryGenerator : Generator
+	{
+		private Generator _generator;
 
+		public BoundaryGenerator(RevWalk w, Generator s)
+		{
+			_generator = new InitialGenerator(w, s, this);
+		}
 
-    public class BoundaryGenerator : Generator
-    {
-        public static int UNINTERESTING = RevWalk.UNINTERESTING;
+		public override GeneratorOutputType OutputType
+		{
+			get { return _generator.OutputType | GeneratorOutputType.HasUninteresting; }
+		}
 
-        public Generator g;
+		public override void shareFreeList(BlockRevQueue q)
+		{
+			_generator.shareFreeList(q);
+		}
 
-        public BoundaryGenerator(RevWalk w, Generator s)
-        {
-            g = new InitialGenerator(w, s, this);
-        }
+		public override RevCommit next()
+		{
+			return _generator.next();
+		}
 
-        public override int outputType()
-        {
-            return g.outputType() | HAS_UNINTERESTING;
-        }
+		#region Nested Types
 
-        public override void shareFreeList(BlockRevQueue q)
-        {
-            g.shareFreeList(q);
-        }
+		private class InitialGenerator : Generator
+		{
+			private static readonly int Parsed = RevWalk.PARSED;
+			private static readonly int Duplicate = RevWalk.TEMP_MARK;
 
-        public override RevCommit next()
-        {
-            return g.next();
-        }
+			private readonly RevWalk _walk;
+			private readonly FIFORevQueue _held;
+			private readonly Generator _source;
+			private readonly BoundaryGenerator _parent;
 
-        private class InitialGenerator : Generator
-        {
-            private static int PARSED = RevWalk.PARSED;
+			public InitialGenerator(RevWalk w, Generator s, BoundaryGenerator parent) // [henon] parent needed because we cannot access outer instances in C#
+			{
+				_walk = w;
+				_held = new FIFORevQueue();
+				_source = s;
+				_source.shareFreeList(_held);
+				_parent = parent;
+			}
 
-            private static int DUPLICATE = RevWalk.TEMP_MARK;
+			public override GeneratorOutputType OutputType
+			{
+				get { return _source.OutputType; }
+			}
 
-            private RevWalk walk;
+			public override void shareFreeList(BlockRevQueue q)
+			{
+				q.shareFreeList(_held);
+			}
 
-            private FIFORevQueue held;
+			public override RevCommit next()
+			{
+				RevCommit c = _source.next();
+				if (c != null)
+				{
+					foreach (RevCommit p in c.Parents)
+					{
+						if ((p.flags & RevWalk.UNINTERESTING) != 0)
+						{
+							_held.add(p);
+						}
+					}
+					return c;
+				}
 
-            private Generator source;
-            private BoundaryGenerator parent;
+				var boundary = new FIFORevQueue();
+				boundary.shareFreeList(_held);
+				while (true)
+				{
+					c = _held.next();
+					if (c == null)
+						break;
+					if ((c.flags & Duplicate) != 0)
+						continue;
+					if ((c.flags & Parsed) == 0)
+						c.parse(_walk);
+					c.flags |= Duplicate;
+					boundary.add(c);
+				}
+				boundary.removeFlag(Duplicate);
+				_parent._generator = boundary;
+				return boundary.next();
+			}
+		}
 
-            public InitialGenerator(RevWalk w, Generator s, BoundaryGenerator parent) // [henon] parent needed because we cannot access outer instances in C#
-            {
-                walk = w;
-                held = new FIFORevQueue();
-                source = s;
-                source.shareFreeList(held);
-                this.parent = parent;
-            }
-
-            public override int outputType()
-            {
-                return source.outputType();
-            }
-
-            public override void shareFreeList(BlockRevQueue q)
-            {
-                q.shareFreeList(held);
-            }
-
-            public override RevCommit next()
-            {
-                RevCommit c = source.next();
-                if (c != null)
-                {
-                    foreach (RevCommit p in c.parents)
-                        if ((p.flags & UNINTERESTING) != 0)
-                            held.add(p);
-                    return c;
-                }
-
-                FIFORevQueue boundary = new FIFORevQueue();
-                boundary.shareFreeList(held);
-                for (; ; )
-                {
-                    c = held.next();
-                    if (c == null)
-                        break;
-                    if ((c.flags & DUPLICATE) != 0)
-                        continue;
-                    if ((c.flags & PARSED) == 0)
-                        c.parse(walk);
-                    c.flags |= DUPLICATE;
-                    boundary.add(c);
-                }
-                boundary.removeFlag(DUPLICATE);
-                parent.g = boundary;
-                return boundary.next();
-            }
-        }
-    }
+		#endregion
+	}
 }

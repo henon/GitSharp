@@ -35,51 +35,45 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace GitSharp.Util
 {
-    public class AtomicReference<T>
-    {
-        private T reference;
+	public class AtomicReference<T>
+	{
+		private T _reference;
 
-        public AtomicReference()
-        {
-        }
+		public AtomicReference()
+		{
+		}
 
-        public AtomicReference(T reference)
-        {
-            this.reference = reference;
-        }
+		public AtomicReference(T reference)
+		{
+			_reference = reference;
+		}
 
+		public bool compareAndSet(T expected, T update)
+		{
+			lock (this)
+			{
+				if ((_reference == null && expected == null) || (_reference != null && _reference.Equals(expected)))
+				{
+					_reference = update;
+					return true;
+				}
+				return false;
+			}
+		}
 
-        public bool compareAndSet(T expected, T update)
-        {
-            lock (this)
-            {
-                if((reference == null && expected == null) || (reference!=null && reference.Equals( expected)))
-                {
-                    reference = update;
-                    return true;
-                }
-                return false;
-            }
-        }
+		public void set(T update)
+		{
+			lock (this)
+			{
+				_reference = update;
+			}
+		}
 
-        public void set(T update)
-        {
-            lock (this)
-            {
-                reference = update;
-            }
-        }
-
-        public T get()
-        {
-            return reference;
-        }
-    }
+		public T get()
+		{
+			return _reference;
+		}
+	}
 }

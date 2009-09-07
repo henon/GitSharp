@@ -36,38 +36,35 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Util
 {
-    public class AtomicValue<T>
-    {
-        T value;
+	public class AtomicValue<T>
+		where T : IConvertible
+	{
+		private T _value;
 
-        public AtomicValue(T init)
-        {
-            value = init;
-        }
+		public AtomicValue(T init)
+		{
+			_value = init;
+		}
 
-        public bool compareAndSet(T expect, T update)
-        {
-            lock (this)
-            {
-                if (value.Equals( expect))
-                {
-                    value = update;
-                    return true;
-                }
-                return false;
-            }
-        }
+		public bool compareAndSet(T expect, T update)
+		{
+			lock (this)
+			{
+				if (_value.Equals(expect))
+				{
+					_value = update;
+					return true;
+				}
+				return false;
+			}
+		}
 
-        public T get()
-        {
-            return value;
-        }
-
-    }
+		public T get()
+		{
+			return _value;
+		}
+	}
 }

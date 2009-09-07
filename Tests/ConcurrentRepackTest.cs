@@ -268,14 +268,14 @@ namespace GitSharp.Tests
 
         private FileInfo FullPackFileName(AnyObjectId name)
         {
-            var packdir = Path.Combine(db.getObjectDatabase().getDirectory().FullName, "pack");
+            var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
             return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetPackFileName(name.Name)));
         }
 
         private RevObject WriteBlob(Repository repo, string data)
         {
             var revWalk = new GitSharp.RevWalk.RevWalk(repo);
-            byte[] bytes = Constants.Encoding.GetBytes(data);
+            byte[] bytes = Constants.encode(data);
             var ow = new ObjectWriter(repo);
             ObjectId id = ow.WriteBlob(bytes);
             try

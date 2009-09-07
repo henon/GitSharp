@@ -213,7 +213,7 @@ namespace GitSharp.Patch
 			}
 
 			// Treat the hunk header as though it were from the ancestor,
-			// as it may have a function header appearing after it which
+			// as it may have a function header appearing After it which
 			// was copied out of the ancestor file.
 			//
 			outStream[0].Write(buf, ptr, eol - ptr);

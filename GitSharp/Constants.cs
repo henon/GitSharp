@@ -61,19 +61,18 @@ namespace GitSharp
 
         public static class ObjectTypes
         {
-
             /// <summary>
-            ///    Text string that identifies an object as an annotated tag.
+            /// Text string that identifies an object as an annotated tag.
             /// <summary>
             /// <remarks>
-            ///   Annotated tags store a pointer to any other object, and an additional
-            ///   message. It is most commonly used to record a stable release of the
-            ///   project.
+            /// Annotated tags store a pointer to any other object, and an additional
+            /// message. It is most commonly used to record a stable release of the
+            /// project.
             /// </remarks>
             public const string Tag = "tag";
 
             /// <summary>
-            ///    Text string that identifies an object as tree.
+            /// Text string that identifies an object as tree.
             /// <summary>
             /// <remarks>
             /// Trees attach object ids (hashes) to names and file
@@ -83,7 +82,7 @@ namespace GitSharp
             public const string Tree = "tree";
 
             /// <summary>
-            ///    Text string that identifies an object as a blob
+            /// Text string that identifies an object as a blob
             /// <summary>
             /// <remarks>
             /// Blobs store whole file revisions. They are used
@@ -110,8 +109,6 @@ namespace GitSharp
 
         }
 
-        public static readonly Encoding Encoding = Encoding.UTF8;
-
         public static readonly string Refs = "refs/";
         public static readonly string RefsTags = Refs + "tags/";
         public static readonly string RefsHeads = Refs + "heads/";
@@ -128,38 +125,42 @@ namespace GitSharp
         /** Special name for the "HEAD" symbolic-ref. */
         public static string HEAD = "HEAD";
 
-        /**
-         * Text string that identifies an object as a commit.
-         * <p>
-         * Commits connect trees into a string of project histories, where each
-         * commit is an assertion that the best way to continue is to use this other
-         * tree (set of files).
-         */
+        /// <summary>
+        /// Text string that identifies an object as a commit.
+		/// <para>
+		/// Commits connect trees into a string of project histories, where each
+		/// commit is an assertion that the best way to continue is to use this other
+		/// tree (set of files).
+		/// </para>
+        /// </summary>
         public static string TYPE_COMMIT = "commit";
 
-        /**
-         * Text string that identifies an object as a blob.
-         * <p>
-         * Blobs store whole file revisions. They are used for any user file, as
-         * well as for symlinks. Blobs form the bulk of any project's storage space.
-         */
+        /// <summary>
+        /// Text string that identifies an object as a blob.
+		/// <para>
+		/// Blobs store whole file revisions. They are used for any user file, as
+		/// well as for symlinks. Blobs form the bulk of any project's storage space.
+		/// </para>
+		/// </summary>
         public static string TYPE_BLOB = "blob";
 
-        /**
-         * Text string that identifies an object as a tree.
-         * <p>
-         * Trees attach object ids (hashes) to names and file modes. The normal use
-         * for a tree is to store a version of a directory and its contents.
-         */
+        /// <summary>
+        /// Text string that identifies an object as a tree.
+		/// <para>
+		/// Trees attach object ids (hashes) to names and file modes. The normal use
+		/// for a tree is to store a version of a directory and its contents.
+        /// </para>
+        /// </summary>
         public static string TYPE_TREE = "tree";
 
-        /**
-         * Text string that identifies an object as an annotated tag.
-         * <p>
-         * Annotated tags store a pointer to any other object, and an additional
-         * message. It is most commonly used to record a stable release of the
-         * project.
-         */
+        /// <summary>
+        /// Text string that identifies an object as an annotated tag.
+		/// <para>
+		/// Annotated tags store a pointer to any other object, and an additional
+		/// message. It is most commonly used to record a stable release of the
+		/// project.
+		/// </para>
+        /// </summary>
         public static string TYPE_TAG = "tag";
 
         private static readonly byte[] EncodedTypeCommit = encodeASCII(TYPE_COMMIT);
@@ -447,7 +448,7 @@ namespace GitSharp
                                     || typeString[position + 3] != endMark)
                                     throw new CorruptObjectException(id, "invalid type");
                                 offset.value = position + 4;
-                                return Constants.OBJ_TAG;
+                                return OBJ_TAG;
 
                             case (byte)'r':
                                 if (typeString[position + 2] != (byte)'e'
@@ -455,7 +456,7 @@ namespace GitSharp
                                         || typeString[position + 4] != endMark)
                                     throw new CorruptObjectException(id, "invalid type");
                                 offset.value = position + 5;
-                                return Constants.OBJ_TREE;
+                                return OBJ_TREE;
 
                             default:
                                 throw new CorruptObjectException(id, "invalid type");

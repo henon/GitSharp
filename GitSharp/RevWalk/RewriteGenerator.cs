@@ -36,162 +36,167 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+
 namespace GitSharp.RevWalk
 {
+	/// <summary>
+	/// Replaces a <see cref="RevCommit"/>'s parents until not colored with 
+	/// <see cref="RevWalk.REWRITE"/>.
+	/// <para>
+	/// Before a <see cref="RevCommit"/> is returned to the caller its parents are updated to
+	/// Create a dense DAG. Instead of reporting the actual parents as recorded when
+	/// the commit was created the returned commit will reflect the Next closest
+	/// commit that matched the revision walker's filters.
+	/// </para><para>
+	/// This generator is the second phase of a path limited revision walk and
+	/// assumes it is receiving RevCommits from <see cref="RewriteTreeFilter"/>,
+	/// After they have been fully buffered by <see cref="AbstractRevQueue"/>. The full
+	/// buffering is necessary to allow the simple loop used within our own
+	/// <see cref="RewriteCommit(RevCommit)"/> to pull completely through a strand of
+	/// <see cref="RevWalk.REWRITE"/> colored commits and come up with a simplification
+	/// that makes the DAG dense. Not fully buffering the commits first would cause
+	/// this loop to abort early, due to commits not being parsed and colored
+	/// correctly.
+	/// </summary>
+	/// <seealso cref="RewriteTreeFilter"/>
+	public class RewriteGenerator : Generator
+	{
+		private static readonly int Rewrite = RevWalk.REWRITE;
 
+		/// <summary>
+		/// /** For <see cref="Cleanup"/> to remove duplicate parents.
+		/// </summary>
+		private static readonly int Duplicate = RevWalk.TEMP_MARK;
 
-    /**
-     * Replaces a RevCommit's parents until not colored with REWRITE.
-     * <p>
-     * Before a RevCommit is returned to the caller its parents are updated to
-     * Create a dense DAG. Instead of reporting the actual parents as recorded when
-     * the commit was created the returned commit will reflect the next closest
-     * commit that matched the revision walker's filters.
-     * <p>
-     * This generator is the second phase of a path limited revision walk and
-     * assumes it is receiving RevCommits from {@link RewriteTreeFilter},
-     * after they have been fully buffered by {@link AbstractRevQueue}. The full
-     * buffering is necessary to allow the simple loop used within our own
-     * {@link #rewrite(RevCommit)} to pull completely through a strand of
-     * {@link RevWalk#REWRITE} colored commits and come up with a simplification
-     * that makes the DAG dense. Not fully buffering the commits first would cause
-     * this loop to abort early, due to commits not being parsed and colored
-     * correctly.
-     * 
-     * @see RewriteTreeFilter
-     */
-    public class RewriteGenerator : Generator
-    {
-        private static int REWRITE = RevWalk.REWRITE;
+		private readonly Generator _source;
 
-        /** For {@link #cleanup(RevCommit[])} to remove duplicate parents. */
-        private static int DUPLICATE = RevWalk.TEMP_MARK;
+		public RewriteGenerator(Generator source)
+		{
+			_source = source;
+		}
 
-        private Generator source;
+		public override void shareFreeList(BlockRevQueue q)
+		{
+			_source.shareFreeList(q);
+		}
 
-        public RewriteGenerator(Generator s)
-        {
-            source = s;
-        }
+		public override GeneratorOutputType OutputType
+		{
+			get { return _source.OutputType & ~GeneratorOutputType.NeedsRewrite; }
+		}
 
-        public override void shareFreeList(BlockRevQueue q)
-        {
-            source.shareFreeList(q);
-        }
+		public override RevCommit next()
+		{
+			while (true)
+			{
+				RevCommit c = _source.next();
+				if (c == null) return null;
 
-        public override int outputType()
-        {
-            return source.outputType() & ~NEEDS_REWRITE;
-        }
+				bool rewrote = false;
+				RevCommit[] pList = c.Parents;
+				int nParents = pList.Length;
+				for (int i = 0; i < nParents; i++)
+				{
+					RevCommit oldp = pList[i];
+					RevCommit newp = RewriteCommit(oldp);
+					if (oldp != newp)
+					{
+						pList[i] = newp;
+						rewrote = true;
+					}
+				}
+				if (rewrote)
+				{
+					c.Parents = Cleanup(pList);
+				}
 
-        public override RevCommit next()
-        {
-            for (; ; )
-            {
-                RevCommit c = source.next();
-                if (c == null)
-                    return null;
+				return c;
+			}
+		}
 
-                bool rewrote = false;
-                RevCommit[] pList = c.parents;
-                int nParents = pList.Length;
-                for (int i = 0; i < nParents; i++)
-                {
-                    RevCommit oldp = pList[i];
-                    RevCommit newp = rewrite(oldp);
-                    if (oldp != newp)
-                    {
-                        pList[i] = newp;
-                        rewrote = true;
-                    }
-                }
-                if (rewrote)
-                    c.parents = cleanup(pList);
+		private static RevCommit RewriteCommit(RevCommit p)
+		{
+			while (true)
+			{
+				RevCommit[] pList = p.Parents;
+				if (pList.Length > 1)
+				{
+					// This parent is a merge, so keep it.
+					//
+					return p;
+				}
 
-                return c;
-            }
-        }
+				if ((p.flags & RevWalk.UNINTERESTING) != 0)
+				{
+					// Retain uninteresting parents. They show where the
+					// DAG was cut off because it wasn't interesting.
+					//
+					return p;
+				}
 
-        private RevCommit rewrite(RevCommit p)
-        {
-            for (; ; )
-            {
-                RevCommit[] pList = p.parents;
-                if (pList.Length > 1)
-                {
-                    // This parent is a merge, so keep it.
-                    //
-                    return p;
-                }
+				if ((p.flags & Rewrite) == 0)
+				{
+					// This parent was not eligible for rewriting. We
+					// need to keep it in the DAG.
+					//
+					return p;
+				}
 
-                if ((p.flags & RevWalk.UNINTERESTING) != 0)
-                {
-                    // Retain uninteresting parents. They show where the
-                    // DAG was cut off because it wasn't interesting.
-                    //
-                    return p;
-                }
+				if (pList.Length == 0)
+				{
+					// We can't go back any further, other than to
+					// just delete the parent entirely.
+					//
+					return null;
+				}
 
-                if ((p.flags & REWRITE) == 0)
-                {
-                    // This parent was not eligible for rewriting. We
-                    // need to keep it in the DAG.
-                    //
-                    return p;
-                }
+				p = pList[0];
+			}
+		}
 
-                if (pList.Length == 0)
-                {
-                    // We can't go back any further, other than to
-                    // just delete the parent entirely.
-                    //
-                    return null;
-                }
+		private static RevCommit[] Cleanup(RevCommit[] oldList)
+		{
+			// Remove any duplicate parents caused due to rewrites (e.g. a merge
+			// with two sides that both simplified back into the merge base).
+			// We also may have deleted a parent by marking it null.
+			//
+			int newCnt = 0;
+			for (int o = 0; o < oldList.Length; o++)
+			{
+				RevCommit p = oldList[o];
+				if (p == null)
+					continue;
+				if ((p.flags & Duplicate) != 0)
+				{
+					oldList[o] = null;
+					continue;
+				}
+				p.flags |= Duplicate;
+				newCnt++;
+			}
 
-                p = pList[0];
-            }
-        }
+			if (newCnt == oldList.Length)
+			{
+				foreach (RevCommit p in oldList)
+				{
+					p.flags &= ~Duplicate;
+				}
+				return oldList;
+			}
 
-        private RevCommit[] cleanup(RevCommit[] oldList)
-        {
-            // Remove any duplicate parents caused due to rewrites (e.g. a merge
-            // with two sides that both simplified back into the merge base).
-            // We also may have deleted a parent by marking it null.
-            //
-            int newCnt = 0;
-            for (int o = 0; o < oldList.Length; o++)
-            {
-                RevCommit p = oldList[o];
-                if (p == null)
-                    continue;
-                if ((p.flags & DUPLICATE) != 0)
-                {
-                    oldList[o] = null;
-                    continue;
-                }
-                p.flags |= DUPLICATE;
-                newCnt++;
-            }
+			var newList = new RevCommit[newCnt];
+			newCnt = 0;
+			foreach (RevCommit p in oldList)
+			{
+				if (p != null)
+				{
+					newList[newCnt++] = p;
+					p.flags &= ~Duplicate;
+				}
+			}
 
-            if (newCnt == oldList.Length)
-            {
-                foreach (RevCommit p in oldList)
-                    p.flags &= ~DUPLICATE;
-                return oldList;
-            }
-
-            RevCommit[] newList = new RevCommit[newCnt];
-            newCnt = 0;
-            foreach (RevCommit p in oldList)
-            {
-                if (p != null)
-                {
-                    newList[newCnt++] = p;
-                    p.flags &= ~DUPLICATE;
-                }
-            }
-
-            return newList;
-        }
-    }
+			return newList;
+		}
+	}
 }

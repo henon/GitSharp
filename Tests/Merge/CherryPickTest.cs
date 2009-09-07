@@ -100,15 +100,15 @@ namespace GitSharp.Tests.Merge
 			tw.reset(twm.GetResultTreeId());
 
 			Assert.IsTrue(tw.next());
-			Assert.Equals("a", tw.getPathString());
+			Assert.AreEqual("a", tw.getPathString());
 			AssertCorrectId(treeO, tw);
 
 			Assert.IsTrue(tw.next());
-			Assert.Equals("o", tw.getPathString());
+			Assert.AreEqual("o", tw.getPathString());
 			AssertCorrectId(treeO, tw);
 
 			Assert.IsTrue(tw.next());
-			Assert.Equals("t", tw.getPathString());
+			Assert.AreEqual("t", tw.getPathString());
 			AssertCorrectId(treeT, tw);
 
 			Assert.IsFalse(tw.next());
@@ -116,7 +116,7 @@ namespace GitSharp.Tests.Merge
 
 		private static void AssertCorrectId(DirCache treeT, GitSharp.TreeWalk.TreeWalk tw)
 		{
-			Assert.Equals(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
+			Assert.AreEqual(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
 		}
 
 		private ObjectId Commit(ObjectWriter ow, DirCache treeB, ObjectId[] parentIds)

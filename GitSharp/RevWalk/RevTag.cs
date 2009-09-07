@@ -66,7 +66,7 @@ namespace GitSharp.RevWalk
 
         internal override void parse(RevWalk walk)
         {
-            ObjectLoader ldr = walk.db.openObject(walk.curs, this);
+            ObjectLoader ldr = walk.db.OpenObject(walk.curs, this);
             if (ldr == null)
                 throw new MissingObjectException(this, Constants.TYPE_TAG);
             byte[] data = ldr.CachedBytes;
@@ -100,7 +100,7 @@ namespace GitSharp.RevWalk
         /**
          * Parse the tagger identity from the raw buffer.
          * <p>
-         * This method parses and returns the content of the tagger line, after
+         * This method parses and returns the content of the tagger line, After
          * taking the tag's character set into account and decoding the tagger
          * name and email address. This method is fairly expensive and produces a
          * new PersonIdent instance on each invocation. Callers should invoke this
@@ -124,7 +124,7 @@ namespace GitSharp.RevWalk
          * Parse the complete tag message and decode it to a string.
          * <p>
          * This method parses and returns the message portion of the tag buffer,
-         * after taking the tag's character set into account and decoding the buffer
+         * After taking the tag's character set into account and decoding the buffer
          * using that character set. This method is a fairly expensive operation and
          * produces a new string on each invocation.
          *
@@ -147,7 +147,7 @@ namespace GitSharp.RevWalk
          * "oneline" format, suitable for output in a single line display.
          * <p>
          * This method parses and returns the message portion of the tag buffer,
-         * after taking the tag's character set into account and decoding the buffer
+         * After taking the tag's character set into account and decoding the buffer
          * using that character set. This method is a fairly expensive operation and
          * produces a new string on each invocation.
          *

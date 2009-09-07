@@ -49,6 +49,7 @@ namespace GitSharp.RevWalk
 		protected BlockRevQueue()
 			: base(GeneratorOutputType.None)
 		{
+			_free = new BlockFreeList();
 		}
 
         /// <summary>
@@ -63,7 +64,7 @@ namespace GitSharp.RevWalk
     	protected BlockRevQueue(Generator s)
 			: this(s.OutputType)
         {
-            _free = new BlockFreeList();
+			_free = new BlockFreeList();
             s.shareFreeList(this);
         
 			while(true)

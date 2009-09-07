@@ -137,7 +137,6 @@
     <Compile Include="UnpackedObjectCache.cs" />
     <Compile Include="UserConfig.cs" />
     <Compile Include="Util\ArrayExtensions.cs" />
-    <Compile Include="Util\AtomicInteger.cs" />
     <Compile Include="Util\AtomicReference.cs" />
     <Compile Include="Util\DateTime.cs" />
     <Compile Include="Util\Extensions.cs" />

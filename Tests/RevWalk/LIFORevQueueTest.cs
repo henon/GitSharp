@@ -54,7 +54,7 @@ namespace GitSharp.Tests.RevWalk
         public override void testEmpty()
         {
             base.testEmpty();
-			Assert.AreEqual(0, q.OutputType);
+			Assert.AreEqual(Generator.GeneratorOutputType.None, q.OutputType);
         }
 
         [Test]

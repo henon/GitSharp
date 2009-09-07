@@ -91,7 +91,7 @@ namespace GitSharp.Util
          *            buffer to acquire the 2 bytes of data from.
          * @param offset
          *            position within the buffer to begin reading from. This
-         *            position and the next byte after it (for a total of 2 bytes)
+         *            position and the next byte After it (for a total of 2 bytes)
          *            will be Read.
          * @return unsigned integer value that matches the 16 bits Read.
          */
@@ -109,7 +109,7 @@ namespace GitSharp.Util
          *            buffer to acquire the 4 bytes of data from.
          * @param offset
          *            position within the buffer to begin reading from. This
-         *            position and the next 3 bytes after it (for a total of 4
+         *            position and the next 3 bytes After it (for a total of 4
          *            bytes) will be Read.
          * @return unsigned integer value that matches the 32 bits Read.
          */
@@ -136,7 +136,7 @@ namespace GitSharp.Util
          *            buffer to acquire the 4 bytes of data from.
          * @param offset
          *            position within the buffer to begin reading from. This
-         *            position and the next 3 bytes after it (for a total of 4
+         *            position and the next 3 bytes After it (for a total of 4
          *            bytes) will be Read.
          * @return signed integer value that matches the 32 bits Read.
          */
@@ -297,7 +297,7 @@ namespace GitSharp.Util
          *            buffer to acquire the 8 bytes of data from.
          * @param offset
          *            position within the buffer to begin reading from. This
-         *            position and the next 7 bytes after it (for a total of 8
+         *            position and the next 7 bytes After it (for a total of 8
          *            bytes) will be Read.
          * @return unsigned integer value that matches the 64 bits Read.
          */
@@ -381,7 +381,7 @@ namespace GitSharp.Util
          *            buffer to write the 2 bytes of data into.
          * @param offset
          *            position within the buffer to begin writing to. This position
-         *            and the next byte after it (for a total of 2 bytes) will be
+         *            and the next byte After it (for a total of 2 bytes) will be
          *            replaced.
          * @param v
          *            the value to write.
@@ -402,7 +402,7 @@ namespace GitSharp.Util
          *            buffer to write the 4 bytes of data into.
          * @param offset
          *            position within the buffer to begin writing to. This position
-         *            and the next 3 bytes after it (for a total of 4 bytes) will be
+         *            and the next 3 bytes After it (for a total of 4 bytes) will be
          *            replaced.
          * @param v
          *            the value to write.
@@ -428,7 +428,7 @@ namespace GitSharp.Util
          *            buffer to write the 48bytes of data into.
          * @param offset
          *            position within the buffer to begin writing to. This position
-         *            and the next 7 bytes after it (for a total of 8 bytes) will be
+         *            and the next 7 bytes After it (for a total of 8 bytes) will be
          *            replaced.
          * @param v
          *            the value to write.

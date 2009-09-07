@@ -42,8 +42,9 @@ using System.Text.RegularExpressions;
 
 namespace GitSharp.RevWalk.Filter
 {
-
-    /** Matches only commits whose message matches the pattern. */
+    /// <summary>
+	/// Matches only commits whose message matches the pattern.
+    /// </summary>
     public class MessageRevFilter
     {
         /**
@@ -77,7 +78,7 @@ namespace GitSharp.RevWalk.Filter
 
         static RawCharSequence textFor(RevCommit cmit)
         {
-            byte[] raw = cmit.getRawBuffer();
+            byte[] raw = cmit.RawBuffer;
             int b = RawParseUtils.commitMessage(raw, 0);
             if (b < 0)
                 return RawCharSequence.EMPTY;

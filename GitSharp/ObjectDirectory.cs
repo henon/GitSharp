@@ -55,440 +55,444 @@ namespace GitSharp
 	/// <see cref="PackFile"/>s.
 	/// </para>
 	/// </summary>
-    public class ObjectDirectory : ObjectDatabase
-    {
-        private static readonly PackFile[] NoPacks = { };
-        private readonly DirectoryInfo _objects;
-        private readonly DirectoryInfo _infoDirectory;
-        private readonly DirectoryInfo _packDirectory;
-        private readonly FileInfo _alternatesFile;
-        private readonly AtomicReference<PackFile[]> _packList;
+	public class ObjectDirectory : ObjectDatabase
+	{
+		private static readonly PackFile[] NoPacks = { };
+		private readonly DirectoryInfo _objects;
+		private readonly DirectoryInfo _infoDirectory;
+		private readonly DirectoryInfo _packDirectory;
+		private readonly FileInfo _alternatesFile;
+		private readonly AtomicReference<PackFile[]> _packList;
 
-        private long _packDirectoryLastModified;
+		private long _packDirectoryLastModified;
 
 		/// <summary>
 		/// Initialize a reference to an on-disk object directory.
 		/// </summary>
 		/// <param name="dir">the location of the <code>objects</code> directory.</param>
-        public ObjectDirectory(DirectoryInfo dir)
-        {
-            _objects = dir;
-            _infoDirectory = new DirectoryInfo(_objects.FullName + "/info");
-            _packDirectory = new DirectoryInfo(_objects.FullName + "/pack");
-            _alternatesFile = new FileInfo(_infoDirectory + "/alternates");
-            _packList = new AtomicReference<PackFile[]>();
-        }
+		public ObjectDirectory(DirectoryInfo dir)
+		{
+			_objects = dir;
+			_infoDirectory = new DirectoryInfo(_objects.FullName + "/info");
+			_packDirectory = new DirectoryInfo(_objects.FullName + "/pack");
+			_alternatesFile = new FileInfo(_infoDirectory + "/alternates");
+			_packList = new AtomicReference<PackFile[]>();
+		}
 
-        /**
-         * @return the location of the <code>objects</code> directory.
-         */
-        public DirectoryInfo getDirectory()
-        {
-            return _objects;
-        }
+		/**
+		 * @return the location of the <code>objects</code> directory.
+		 */
+		public DirectoryInfo getDirectory()
+		{
+			return _objects;
+		}
 
-        public override bool exists()
-        {
-            return _objects.Exists;
-        }
+		public override bool exists()
+		{
+			return _objects.Exists;
+		}
 
-        public override void create()
-        {
-            _objects.Create();
-            _infoDirectory.Create();
-            _packDirectory.Create();
-        }
+		public override void create()
+		{
+			_objects.Create();
+			_infoDirectory.Create();
+			_packDirectory.Create();
+		}
 
-        public override void closeSelf()
-        {
-            PackFile[] packs = _packList.get();
-        	if (packs == null) return;
-        	
+		public override void closeSelf()
+		{
+			PackFile[] packs = _packList.get();
+			if (packs == null) return;
+
 			_packList.set(null);
-        	foreach (PackFile p in packs)
-        	{
-        		p.Close();
-        	}
-        }
+			foreach (PackFile p in packs)
+			{
+				p.Close();
+			}
+		}
 
-        /**
-         * Compute the location of a loose object file.
-         *
-         * @param objectId
-         *            identity of the loose object to map to the directory.
-         * @return location of the object, if it were to exist as a loose object.
-         */
-        public FileInfo fileFor(AnyObjectId objectId)
-        {
-            return fileFor(objectId.ToString());
-        }
+		/**
+		 * Compute the location of a loose object file.
+		 *
+		 * @param objectId
+		 *            identity of the loose object to map to the directory.
+		 * @return location of the object, if it were to exist as a loose object.
+		 */
+		public FileInfo fileFor(AnyObjectId objectId)
+		{
+			return fileFor(objectId.ToString());
+		}
 
-        private FileInfo fileFor(string objectName)
-        {
-            string d = objectName.Slice(0, 2);
-            string f = objectName.Substring(2);
-            return new FileInfo(_objects.FullName + "/" + d + "/" + f);
-        }
+		private FileInfo fileFor(string objectName)
+		{
+			string d = objectName.Slice(0, 2);
+			string f = objectName.Substring(2);
+			return new FileInfo(_objects.FullName + "/" + d + "/" + f);
+		}
 
-        /**
-         * Add a single existing pack to the list of available pack files.
-         *
-         * @param pack
-         *            path of the pack file to open.
-         * @param idx
-         *            path of the corresponding index file.
-         * @
-         *             index file could not be opened, read, or is not recognized as
-         *             a Git pack file index.
-         */
-        public void openPack(FileInfo pack, FileInfo idx)
-        {
-            string p = pack.Name;
-            string i = idx.Name;
+		/**
+		 * Add a single existing pack to the list of available pack files.
+		 *
+		 * @param pack
+		 *            path of the pack file to open.
+		 * @param idx
+		 *            path of the corresponding index file.
+		 * @
+		 *             index file could not be opened, read, or is not recognized as
+		 *             a Git pack file index.
+		 */
+		public void openPack(FileInfo pack, FileInfo idx)
+		{
+			string p = pack.Name;
+			string i = idx.Name;
 
 			if (p.Length != 50 || !p.StartsWith("pack-") || !p.EndsWith(IndexPack.PackSuffix))
-            {
-            	throw new IOException("Not a valid pack " + pack);
-            }
+			{
+				throw new IOException("Not a valid pack " + pack);
+			}
 
-            if (i.Length != 49 || !i.StartsWith("pack-") || !i.EndsWith(IndexPack.IndexSuffix))
-            {
-            	throw new IOException("Not a valid pack " + idx);
-            }
+			if (i.Length != 49 || !i.StartsWith("pack-") || !i.EndsWith(IndexPack.IndexSuffix))
+			{
+				throw new IOException("Not a valid pack " + idx);
+			}
 
-            if (!p.Slice(0, 45).Equals(i.Slice(0, 45)))
-            {
-            	throw new IOException("Pack " + pack + "does not match index");
-            }
+			if (!p.Slice(0, 45).Equals(i.Slice(0, 45)))
+			{
+				throw new IOException("Pack " + pack + "does not match index");
+			}
 
-            InsertPack(new PackFile(idx, pack));
-        }
+			InsertPack(new PackFile(idx, pack));
+		}
 
-        public override string ToString()
-        {
-            return "ObjectDirectory[" + getDirectory() + "]";
-        }
+		public override string ToString()
+		{
+			return "ObjectDirectory[" + getDirectory() + "]";
+		}
 
-        public override bool hasObject1(AnyObjectId objectId)
-        {
-            foreach (PackFile p in Packs())
-            {
-                try
-                {
-                    if (p.HasObject(objectId))
-                    {
-                        return true;
-                    }
-                }
-                catch (IOException)
-                {
-                    // The hasObject call should have only touched the index,
-                    // so any failure here indicates the index is unreadable
-                    // by this process, and the pack is likewise not readable.
-                    //
-                    RemovePack(p);
-                    continue;
-                }
-            }
+		public override bool hasObject1(AnyObjectId objectId)
+		{
+			foreach (PackFile p in Packs())
+			{
+				try
+				{
+					if (p.HasObject(objectId))
+					{
+						return true;
+					}
+				}
+				catch (IOException)
+				{
+					// The hasObject call should have only touched the index,
+					// so any failure here indicates the index is unreadable
+					// by this process, and the pack is likewise not readable.
+					//
+					RemovePack(p);
+					continue;
+				}
+			}
 
-            return false;
-        }
+			return false;
+		}
 
+		public override ObjectLoader openObject1(WindowCursor curs, AnyObjectId objectId)
+		{
+			PackFile[] pList = Packs();
+			bool breakLoop = false;
 
-        public override ObjectLoader openObject1(WindowCursor curs, AnyObjectId objectId)
-        {
-            PackFile[] pList = Packs();
-            for (; ; )
-            {
-            SEARCH:
-                foreach (PackFile p in pList)
-                {
-                    try
-                    {
-                        PackedObjectLoader ldr = p.Get(curs, objectId);
-                        if (ldr != null)
-                        {
-                            ldr.Materialize(curs);
-                            return ldr;
-                        }
-                    }
-                    catch (PackMismatchException)
-                    {
-                        // Pack was modified; refresh the entire pack list.
-                        //
-                        pList = ScanPacks(pList);
-                        goto SEARCH;
-                    }
-                    catch (IOException)
-                    {
-                        // Assume the pack is corrupted.
-                        //
-                        RemovePack(p);
-                    }
-                }
-                return null;
-            }
-        }
+			while (true)
+			{
+				foreach (PackFile p in pList)
+				{
+					try
+					{
+						PackedObjectLoader ldr = p.Get(curs, objectId);
+						if (ldr != null)
+						{
+							ldr.Materialize(curs);
+							return ldr;
+						}
+					}
+					catch (PackMismatchException)
+					{
+						// Pack was modified; refresh the entire pack list.
+						//
+						pList = ScanPacks(pList);
+						breakLoop = true;
+					}
+					catch (IOException)
+					{
+						// Assume the pack is corrupted.
+						//
+						RemovePack(p);
+					}
 
-        public override void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
-        {
-            PackFile[] pList = Packs();
-            while (true)
-            {
-                foreach (PackFile p in pList)
-                {
-                    try
-                    {
-                        PackedObjectLoader ldr = p.Get(windowCursor, objectId);
-                        if (ldr != null)
-                        {
-                            @out.Add(ldr);
-                        }
-                    }
-                    catch (PackMismatchException)
-                    {
-                        // Pack was modified; refresh the entire pack list.
-                        //
-                        pList = ScanPacks(pList);
-                    	break;
-                    }
-                    catch (IOException)
-                    {
-                        // Assume the pack is corrupted.
-                        //
-                        RemovePack(p);
-                    }
-                }
+					if (breakLoop)
+					{
+						break;
+					}
+				}
 
-                break;
-            }
-        }
+				return null;
+			}
+		}
 
-        public override bool hasObject2(string objectName)
-        {
-            return fileFor(objectName).Exists;
-        }
+		public override void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
+		{
+			PackFile[] pList = Packs();
+			while (true)
+			{
+				foreach (PackFile p in pList)
+				{
+					try
+					{
+						PackedObjectLoader ldr = p.Get(windowCursor, objectId);
+						if (ldr != null)
+						{
+							@out.Add(ldr);
+						}
+					}
+					catch (PackMismatchException)
+					{
+						// Pack was modified; refresh the entire pack list.
+						//
+						pList = ScanPacks(pList);
+						break;
+					}
+					catch (IOException)
+					{
+						// Assume the pack is corrupted.
+						//
+						RemovePack(p);
+					}
+				}
 
-        public override ObjectLoader openObject2(WindowCursor curs, string objectName, AnyObjectId objectId)
-        {
-            try
-            {
-                return new UnpackedObjectLoader(fileFor(objectName), objectId);
-            }
-            catch (FileNotFoundException)
-            {
-                return null;
-            }
-            catch (DirectoryNotFoundException)
-            {
-                return null;
-            }
-        }
+				break;
+			}
+		}
 
-        public override bool tryAgain1()
-        {
-            PackFile[] old = _packList.get();
-            if (_packDirectoryLastModified < _packDirectory.LastAccessTime.Ticks)
-            {
-                ScanPacks(old);
-                return true;
-            }
+		public override bool hasObject2(string objectName)
+		{
+			return fileFor(objectName).Exists;
+		}
 
-            return false;
-        }
+		public override ObjectLoader openObject2(WindowCursor curs, string objectName, AnyObjectId objectId)
+		{
+			try
+			{
+				return new UnpackedObjectLoader(fileFor(objectName), objectId);
+			}
+			catch (FileNotFoundException)
+			{
+				return null;
+			}
+			catch (DirectoryNotFoundException)
+			{
+				return null;
+			}
+		}
 
-        private void InsertPack(PackFile pf)
-        {
-            PackFile[] o, n;
-            do
-            {
-                o = Packs();
-                n = new PackFile[1 + o.Length];
-                n[0] = pf;
-                Array.Copy(o, 0, n, 1, o.Length);
-            } while (!_packList.compareAndSet(o, n));
-        }
+		public override bool tryAgain1()
+		{
+			PackFile[] old = _packList.get();
+			if (_packDirectoryLastModified < _packDirectory.LastAccessTime.Ticks)
+			{
+				ScanPacks(old);
+				return true;
+			}
 
-        private void RemovePack(PackFile deadPack)
-        {
-            PackFile[] o, n;
-            do
-            {
-                o = _packList.get();
-                if (o == null || !InList(o, deadPack))
-                {
-                    break;
+			return false;
+		}
 
-                }
-            	
+		private void InsertPack(PackFile pf)
+		{
+			PackFile[] o, n;
+			do
+			{
+				o = Packs();
+				n = new PackFile[1 + o.Length];
+				n[0] = pf;
+				Array.Copy(o, 0, n, 1, o.Length);
+			} while (!_packList.compareAndSet(o, n));
+		}
+
+		private void RemovePack(PackFile deadPack)
+		{
+			PackFile[] o, n;
+			do
+			{
+				o = _packList.get();
+				if (o == null || !InList(o, deadPack))
+				{
+					break;
+				}
+
 				if (o.Length == 1)
-            	{
-            		n = NoPacks;
+				{
+					n = NoPacks;
+				}
+				else
+				{
+					n = new PackFile[o.Length - 1];
+					int j = 0;
+					foreach (PackFile p in o)
+					{
+						if (p != deadPack)
+						{
+							n[j++] = p;
+						}
+					}
+				}
+			} while (!_packList.compareAndSet(o, n));
+			deadPack.Close();
+		}
 
-            	}
-            	else
-            	{
-            		n = new PackFile[o.Length - 1];
-            		int j = 0;
-            		foreach (PackFile p in o)
-            		{
-            			if (p != deadPack)
-            			{
-            				n[j++] = p;
-            			}
-            		}
-            	}
-            } while (!_packList.compareAndSet(o, n));
-            deadPack.Close();
-        }
+		private static bool InList(IEnumerable<PackFile> list, PackFile pack)
+		{
+			return list != null && list.Contains(pack);
+		}
 
-        private static bool InList(IEnumerable<PackFile> list, PackFile pack)
-        {
-        	return list != null && list.Contains(pack);
-        }
+		private PackFile[] Packs()
+		{
+			PackFile[] packFiles = _packList.get() ?? ScanPacks(null);
+			return packFiles;
+		}
 
-        private PackFile[] Packs()
-        {
-            PackFile[] packFiles = _packList.get() ?? ScanPacks(null);
-        	return packFiles;
-        }
+		private PackFile[] ScanPacks(PackFile[] original)
+		{
+			lock (_packList)
+			{
+				PackFile[] o, n;
+				do
+				{
+					o = _packList.get();
+					if (o != original)
+					{
+						// Another thread did the scan for us, while we
+						// were blocked on the monitor above.
+						//
+						return o;
+					}
+					n = ScanPacksImpl(o ?? NoPacks);
 
-        private PackFile[] ScanPacks(PackFile[] original)
-        {
-            lock (_packList)
-            {
-                PackFile[] o, n;
-                do
-                {
-                    o = _packList.get();
-                    if (o != original)
-                    {
-                        // Another thread did the scan for us, while we
-                        // were blocked on the monitor above.
-                        //
-                        return o;
-                    }
-                    n = ScanPacksImpl(o ?? NoPacks);
+				} while (!_packList.compareAndSet(o, n));
 
-                } while (!_packList.compareAndSet(o, n));
+				return n;
+			}
+		}
 
-                return n;
-            }
-        }
+		private PackFile[] ScanPacksImpl(IEnumerable<PackFile> old)
+		{
+			Dictionary<string, PackFile> forReuse = ReuseMap(old);
+			string[] idxList = ListPackIdx();
+			var list = new List<PackFile>(idxList.Length);
+			foreach (string indexName in idxList)
+			{
+				string @base = indexName.Slice(0, indexName.Length - 4);
+				string packName = IndexPack.GetPackFileName(@base);
 
-        private PackFile[] ScanPacksImpl(IEnumerable<PackFile> old)
-        {
-            Dictionary<string, PackFile> forReuse = ReuseMap(old);
-            string[] idxList = ListPackIdx();
-            var list = new List<PackFile>(idxList.Length);
-            foreach (string indexName in idxList)
-            {
-                string @base = indexName.Slice(0, indexName.Length - 4);
-            	string packName = IndexPack.GetPackFileName(@base);
+				PackFile oldPack;
+				forReuse.TryGetValue(packName, out oldPack);
+				forReuse.Remove(packName);
+				if (oldPack != null)
+				{
+					list.Add(oldPack);
+					continue;
+				}
 
-                PackFile oldPack;
-                forReuse.TryGetValue(packName, out oldPack);
-                forReuse.Remove(packName);
-                if (oldPack != null)
-                {
-                    list.Add(oldPack);
-                    continue;
-                }
+				var packFile = new FileInfo(_packDirectory.FullName + "/" + packName);
+				if (!packFile.Exists)
+				{
+					// Sometimes C Git's HTTP fetch transport leaves a
+					// .idx file behind and does not download the .pack.
+					// We have to skip over such useless indexes.
+					//
+					continue;
+				}
 
-                var packFile = new FileInfo(_packDirectory.FullName + "/" + packName);
-                if (!packFile.Exists)
-                {
-                    // Sometimes C Git's HTTP fetch transport leaves a
-                    // .idx file behind and does not download the .pack.
-                    // We have to skip over such useless indexes.
-                    //
-                    continue;
-                }
+				var idxFile = new FileInfo(_packDirectory + "/" + indexName);
+				list.Add(new PackFile(idxFile, packFile));
+			}
 
-                var idxFile = new FileInfo(_packDirectory + "/" + indexName);
-                list.Add(new PackFile(idxFile, packFile));
-            }
+			foreach (PackFile p in forReuse.Values)
+			{
+				p.Close();
+			}
 
-            foreach (PackFile p in forReuse.Values)
-            {
-                p.Close();
-            }
+			if (list.Count == 0)
+			{
+				return NoPacks;
+			}
+			PackFile[] r = list.ToArray();
+			Array.Sort(r, PackFile.PackFileSortComparison);
+			return r;
+		}
 
-            if (list.Count == 0)
-            {
-                return NoPacks;
-            }
-            PackFile[] r = list.ToArray();
-            Array.Sort(r, PackFile.PackFileSortComparison);
-            return r;
-        }
+		private static Dictionary<string, PackFile> ReuseMap(IEnumerable<PackFile> old)
+		{
+			var forReuse = new Dictionary<string, PackFile>();
+			foreach (PackFile p in old)
+			{
+				if (p.IsInvalid)
+				{
+					// The pack instance is corrupted, and cannot be safely used
+					// again. Do not include it in our reuse map.
+					//
+					p.Close();
+					continue;
+				}
 
-        private static Dictionary<string, PackFile> ReuseMap(IEnumerable<PackFile> old)
-        {
-            var forReuse = new Dictionary<string, PackFile>();
-            foreach (PackFile p in old)
-            {
-                if (p.IsInvalid)
-                {
-                    // The pack instance is corrupted, and cannot be safely used
-                    // again. Do not include it in our reuse map.
-                    //
-                    p.Close();
-                    continue;
-                }
+				PackFile prior = forReuse[p.File.Name] = p;
+				if (prior != null)
+				{
+					// This should never occur. It should be impossible for us
+					// to have two pack files with the same name, as all of them
+					// came out of the same directory. If it does, we promised to
+					// close any PackFiles we did not reuse, so close the one we
+					// just evicted out of the reuse map.
+					//
+					prior.Close();
+				}
+			}
 
-                PackFile prior = forReuse[p.File.Name] = p;
-                if (prior != null)
-                {
-                    // This should never occur. It should be impossible for us
-                    // to have two pack files with the same name, as all of them
-                    // came out of the same directory. If it does, we promised to
-                    // close any PackFiles we did not reuse, so close the one we
-                    // just evicted out of the reuse map.
-                    //
-                    prior.Close();
-                }
-            }
+			return forReuse;
+		}
 
-            return forReuse;
-        }
+		private string[] ListPackIdx()
+		{
+			_packDirectoryLastModified = _packDirectory.LastAccessTime.Ticks;
+			// Must match "pack-[0-9a-f]{40}.idx" to be an index.
 
-        private string[] ListPackIdx()
-        {
-            _packDirectoryLastModified = _packDirectory.LastAccessTime.Ticks;
-            // Must match "pack-[0-9a-f]{40}.idx" to be an index.
-            
 			string[] idxList = _packDirectory.GetFiles()
 				.Select(file => file.Name)
 				.Where(n => n.Length == 49 && n.EndsWith(IndexPack.IndexSuffix) && n.StartsWith("pack-"))
 				.ToArray();
 
-            return idxList;  // idxList != null ? idxList : "";
-        }
+			return idxList;  // idxList != null ? idxList : "";
+		}
 
-        public override ObjectDatabase[] loadAlternates()
-        {
-            StreamReader br = Open(_alternatesFile);
-            var l = new List<ObjectDirectory>(4);
-            try
-            {
-                string line;
-                while ((line = br.ReadLine()) != null)
-                {
-                    l.Add(new ObjectDirectory(FS.resolve(_objects, line)));
-                }
-            }
-            finally
-            {
-                br.Close();
-            }
+		public override ObjectDatabase[] loadAlternates()
+		{
+			StreamReader br = Open(_alternatesFile);
+			var l = new List<ObjectDirectory>(4);
+			try
+			{
+				string line;
+				while ((line = br.ReadLine()) != null)
+				{
+					l.Add(new ObjectDirectory(FS.resolve(_objects, line)));
+				}
+			}
+			finally
+			{
+				br.Close();
+			}
 
-            return l.Count == 0 ? NoAlternates : l.ToArray();
-        }
+			return l.Count == 0 ? NoAlternates : l.ToArray();
+		}
 
-        private static StreamReader Open(FileSystemInfo f)
-        {
-            return new StreamReader(new FileStream(f.FullName, System.IO.FileMode.Open));
-        }
-    }
+		private static StreamReader Open(FileSystemInfo f)
+		{
+			return new StreamReader(new FileStream(f.FullName, System.IO.FileMode.Open));
+		}
+	}
 }

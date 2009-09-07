@@ -1,5 +1,6 @@
-/*
- * Copyright (C) 2009, Google Inc.
+﻿/*
+ * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -35,63 +36,57 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
-using GitSharp.Tests.Util;
-using GitSharp.RevWalk;
-using NUnit.Framework;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
 
-namespace GitSharp.Tests.RevWalk
+namespace GitSharp.Exceptions
 {
-    [TestFixture]
-    public class FIFORevQueueTest : RevQueueTestCase<FIFORevQueue>
-    {
-        protected override FIFORevQueue create()
-        {
-            return new FIFORevQueue();
-        }
+	/// <summary>
+	/// An exception detailing multiple reasons for failure.
+	/// </summary>
+	public class CompoundException : GitSharpException
+	{
+		private readonly IList<Exception> _causeList;
 
-        [Test]
-        public override void testEmpty()
-        {
-            base.testEmpty();
-			Assert.AreEqual(Generator.GeneratorOutputType.None, q.OutputType);
-        }
+		private static string Format(IEnumerable<Exception> causes)
+		{
+			var msg = new StringBuilder();
+			msg.Append("Failure due to one of the following:");
 
-        [Test]
-        public void testCloneEmpty()
-        {
-            q = new FIFORevQueue(AbstractRevQueue.EmptyQueue);
-            Assert.IsNull(q.next());
-        }
+			foreach (Exception c in causes)
+			{
+				msg.Append("  ");
+				msg.Append(c.Message);
+				msg.Append("\n");
+			}
 
-        [Test]
-        public void testAddLargeBlocks()
-        {
-            var lst = new List<RevCommit>();
-            for (int i = 0; i < 3*BlockRevQueue.Block.BLOCK_SIZE; i++)
-            {
-                RevCommit c = commit();
-                lst.Add(c);
-                q.add(c);
-            }
-            for (int i = 0; i < lst.Count; i++)
-                Assert.AreSame(lst[i], q.next());
-        }
+			return msg.ToString();
+		}
 
-        [Test]
-        public void testUnpopAtFront()
-        {
-            RevCommit a = commit();
-            RevCommit b = commit();
-            RevCommit c = commit();
+		/// <summary>
+		/// Constructs an exception detailing many potential reasons for failure.
+		/// </summary>
+		/// <param name="why">
+		/// Two or more exceptions that may have been the problem. 
+		/// </param>
+		public CompoundException(IEnumerable<Exception> why)
+			: base(Format(why))
+		{
+			_causeList = new List<Exception>(why);
+		}
 
-            q.add(a);
-            q.unpop(b);
-            q.unpop(c);
-
-            Assert.AreSame(c, q.next());
-            Assert.AreSame(b, q.next());
-            Assert.AreSame(a, q.next());
-        }
-    }
+		///	<summary>
+		/// Get the complete list of reasons why this failure happened.
+		///	</summary>
+		///	<returns>
+		/// Unmodifiable collection of all possible reasons.
+		/// </returns>
+		public IEnumerable<Exception> AllCauses
+		{
+			get { return new ReadOnlyCollection<Exception>(_causeList); }
+		}
+	}
 }

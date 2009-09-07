@@ -37,87 +37,95 @@
  */
 
 using System.Text;
+
 namespace GitSharp.RevWalk
 {
+	/// <summary>
+	/// A queue of commits in LIFO order.
+	/// </summary>
+	public class LIFORevQueue : BlockRevQueue
+	{
+		private Block _head;
 
+		/// <summary>
+		/// Create an empty LIFO queue.
+		/// </summary>
+		public LIFORevQueue()
+			: base()
+		{
+		}
 
-    /** A queue of commits in LIFO order. */
-    public class LIFORevQueue : BlockRevQueue
-    {
-        private Block head;
+		public LIFORevQueue(Generator s)
+			: base(s)
+		{
+		}
 
-        /** Create an empty LIFO queue. */
-        public LIFORevQueue() : base()
-        {
-        }
+		public override void add(RevCommit c)
+		{
+			Block b = _head;
+			if (b == null || !b.canUnpop())
+			{
+				b = Free.newBlock();
+				b.resetToEnd();
+				b.Next = _head;
+				_head = b;
+			}
+			b.unpop(c);
+		}
 
-        public LIFORevQueue(Generator s) : base(s) { }
+		public override RevCommit next()
+		{
+			Block b = _head;
+			if (b == null) return null;
 
-        public override void add(RevCommit c)
-        {
-            Block b = head;
-            if (b == null || !b.canUnpop())
-            {
-                b = free.newBlock();
-                b.resetToEnd();
-                b.next = head;
-                head = b;
-            }
-            b.unpop(c);
-        }
+			RevCommit c = b.pop();
+			if (b.isEmpty())
+			{
+				_head = b.Next;
+				Free.freeBlock(b);
+			}
+			return c;
+		}
 
-        public override RevCommit next()
-        {
-            Block b = head;
-            if (b == null)
-                return null;
+		public override void clear()
+		{
+			_head = null;
+			Free.clear();
+		}
 
-            RevCommit c = b.pop();
-            if (b.isEmpty())
-            {
-                head = b.next;
-                free.freeBlock(b);
-            }
-            return c;
-        }
+		internal override bool everbodyHasFlag(int f)
+		{
+			for (Block b = _head; b != null; b = b.Next)
+			{
+				for (int i = b.HeadIndex; i < b.TailIndex; i++)
+				{
+					if ((b.Commits[i].flags & f) == 0) return false;
+				}
+			}
+			return true;
+		}
 
-        public override void clear()
-        {
-            head = null;
-            free.clear();
-        }
+		internal override bool anybodyHasFlag(int f)
+		{
+			for (Block b = _head; b != null; b = b.Next)
+			{
+				for (int i = b.HeadIndex; i < b.TailIndex; i++)
+				{
+					if ((b.Commits[i].flags & f) != 0) return true;
+				}
+			}
+			return false;
+		}
 
-        internal override bool everbodyHasFlag(int f)
-        {
-            for (Block b = head; b != null; b = b.next)
-            {
-                for (int i = b.headIndex; i < b.tailIndex; i++)
-                    if ((b.commits[i].flags & f) == 0)
-                        return false;
-            }
-            return true;
-        }
-
-        internal override bool anybodyHasFlag(int f)
-        {
-            for (Block b = head; b != null; b = b.next)
-            {
-                for (int i = b.headIndex; i < b.tailIndex; i++)
-                    if ((b.commits[i].flags & f) != 0)
-                        return true;
-            }
-            return false;
-        }
-
-        public override string ToString()
-        {
-            StringBuilder s = new StringBuilder();
-            for (Block q = head; q != null; q = q.next)
-            {
-                for (int i = q.headIndex; i < q.tailIndex; i++)
-                    describe(s, q.commits[i]);
-            }
-            return s.ToString();
-        }
-    }
+		public override string ToString()
+		{
+			var s = new StringBuilder();
+			for (Block q = _head; q != null; q = q.Next)
+			{
+				for (int i = q.HeadIndex; i < q.TailIndex; i++)
+					Describe(s, q.Commits[i]);
+			}
+			return s.ToString();
+		}
+	}
 }

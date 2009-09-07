@@ -491,7 +491,7 @@ namespace GitSharp.Util
 		}
 
 		/**
-         * Locate the first position after a given character.
+         * Locate the first position After a given character.
          * 
          * @param b
          *            buffer to scan.
@@ -499,7 +499,7 @@ namespace GitSharp.Util
          *            position within buffer to start looking for chrA at.
          * @param chrA
          *            character to find.
-         * @return new position just after chrA.
+         * @return new position just After chrA.
          */
 		public static int next(char[] b, int ptr, char chrA)
 		{
@@ -524,7 +524,7 @@ namespace GitSharp.Util
 		}
 
 		/**
-         * Locate the first position after the next LF.
+         * Locate the first position After the next LF.
          * <p>
          * This method stops on the first '\n' it finds.
          *
@@ -532,7 +532,7 @@ namespace GitSharp.Util
          *            buffer to scan.
          * @param ptr
          *            position within buffer to start looking for LF at.
-         * @return new position just after the first LF found.
+         * @return new position just After the first LF found.
          */
 		public static int nextLF(char[] b, int ptr)
 		{
@@ -540,7 +540,7 @@ namespace GitSharp.Util
 		}
 
 		/**
-         * Locate the first position after the next LF.
+         * Locate the first position After the next LF.
          * <p>
          * This method stops on the first '\n' it finds.
          *
@@ -548,7 +548,7 @@ namespace GitSharp.Util
          *            buffer to scan.
          * @param ptr
          *            position within buffer to start looking for LF at.
-         * @return new position just after the first LF found.
+         * @return new position just After the first LF found.
          */
 		public static int nextLF(byte[] b, int ptr)
 		{
@@ -556,7 +556,7 @@ namespace GitSharp.Util
 		}
 
 		/**
-         * Locate the first position after either the given character or LF.
+         * Locate the first position After either the given character or LF.
          * <p>
          * This method stops on the first match it finds from either chrA or '\n'.
          * 
@@ -566,7 +566,7 @@ namespace GitSharp.Util
          *            position within buffer to start looking for chrA or LF at.
          * @param chrA
          *            character to find.
-         * @return new position just after the first chrA or LF to be found.
+         * @return new position just After the first chrA or LF to be found.
          */
 		public static int nextLF(char[] b, int ptr, char chrA)
 		{
@@ -581,7 +581,7 @@ namespace GitSharp.Util
 		}
 
 		/**
-         * Locate the first position after either the given character or LF.
+         * Locate the first position After either the given character or LF.
          * <p>
          * This method stops on the first match it finds from either chrA or '\n'.
          * 
@@ -591,7 +591,7 @@ namespace GitSharp.Util
          *            position within buffer to start looking for chrA or LF at.
          * @param chrA
          *            character to find.
-         * @return new position just after the first chrA or LF to be found.
+         * @return new position just After the first chrA or LF to be found.
          */
 		public static int nextLF(byte[] b, int ptr, byte chrA)
 		{
@@ -717,7 +717,7 @@ namespace GitSharp.Util
          *            position in buffer to start the scan at. Most callers should
          *            pass 0 to ensure the scan starts from the beginning of the
          *            commit buffer and does not accidentally look at message body.
-         * @return position just after the space in "author ", so the first
+         * @return position just After the space in "author ", so the first
          *         character of the author's name. If no author header can be
          *         located -1 is returned.
          */
@@ -740,7 +740,7 @@ namespace GitSharp.Util
          *            position in buffer to start the scan at. Most callers should
          *            pass 0 to ensure the scan starts from the beginning of the
          *            commit buffer and does not accidentally look at message body.
-         * @return position just after the space in "committer ", so the first
+         * @return position just After the space in "committer ", so the first
          *         character of the committer's name. If no committer header can be
          *         located -1 is returned.
          */
@@ -765,7 +765,7 @@ namespace GitSharp.Util
          *            position in buffer to start the scan at. Most callers should
          *            pass 0 to ensure the scan starts from the beginning of the tag
          *            buffer and does not accidentally look at message body.
-         * @return position just after the space in "tagger ", so the first
+         * @return position just After the space in "tagger ", so the first
          *         character of the tagger's name. If no tagger header can be
          *         located -1 is returned.
          */
@@ -795,7 +795,7 @@ namespace GitSharp.Util
          *            position in buffer to start the scan at. Most callers should
          *            pass 0 to ensure the scan starts from the beginning of the
          *            buffer and does not accidentally look at the message body.
-         * @return position just after the space in "encoding ", so the first
+         * @return position just After the space in "encoding ", so the first
          *         character of the encoding's name. If no encoding header can be
          *         located -1 is returned (and UTF-8 should be assumed).
          */
@@ -847,7 +847,7 @@ namespace GitSharp.Util
          *            the buffer to parse character data from.
          * @param nameB
          *            first position of the identity information. This should be the
-         *            first position after the space which delimits the header field
+         *            first position After the space which delimits the header field
          *            name (e.g. "author" or "committer") from the rest of the
          *            identity line.
          * @return the parsed identity. Never null.
@@ -881,7 +881,7 @@ namespace GitSharp.Util
          *            the buffer to parse character data from.
          * @param nameB
          *            first position of the identity information. This should be the
-         *            first position after the space which delimits the header field
+         *            first position After the space which delimits the header field
          *            name (e.g. "author" or "committer") from the rest of the
          *            identity line.
          * @return the parsed identity. Never null.
@@ -979,7 +979,7 @@ namespace GitSharp.Util
          * @param buffer
          *            buffer to pull raw bytes from.
          * @return a string representation of the range <code>[start,end)</code>,
-         *         after decoding the region through the specified character set.
+         *         After decoding the region through the specified character set.
          */
 		public static string decode(byte[] buffer)
 		{
@@ -1000,7 +1000,7 @@ namespace GitSharp.Util
          *            one position past the last location within the buffer to take
          *            data from.
          * @return a string representation of the range <code>[start,end)</code>,
-         *         after decoding the region through the specified character set.
+         *         After decoding the region through the specified character set.
          */
 		public static string decode(byte[] buffer, int start, int end)
 		{
@@ -1018,7 +1018,7 @@ namespace GitSharp.Util
          * @param buffer
          *            buffer to pull raw bytes from.
          * @return a string representation of the range <code>[start,end)</code>,
-         *         after decoding the region through the specified character set.
+         *         After decoding the region through the specified character set.
          */
 		public static string decode(Encoding cs, byte[] buffer)
 		{
@@ -1041,7 +1041,7 @@ namespace GitSharp.Util
          *            one position past the last location within the buffer to take
          *            data from.
          * @return a string representation of the range <code>[start,end)</code>,
-         *         after decoding the region through the specified character set.
+         *         After decoding the region through the specified character set.
          */
 		public static string decode(Encoding cs, byte[] buffer, int start, int end)
 		{
@@ -1075,7 +1075,7 @@ namespace GitSharp.Util
          *            one position past the last location within the buffer to take
          *            data from.
          * @return a string representation of the range <code>[start,end)</code>,
-         *         after decoding the region through the specified character set.
+         *         After decoding the region through the specified character set.
          * @throws CharacterCodingException
          *             the input is not in any of the tested character sets.
          */

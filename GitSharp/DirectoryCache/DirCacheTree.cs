@@ -551,7 +551,7 @@ namespace GitSharp.DirectoryCache
 			if (stIdx < _childCount)
 			{
 				// None of our remaining children can be in this tree
-				// as the current cache entry is after our own name.
+				// as the current cache entry is After our own name.
 				//
 				var dct = new DirCacheTree[stIdx];
 				Array.Copy(_children, 0, dct, 0, stIdx);

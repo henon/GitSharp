@@ -59,36 +59,37 @@ namespace GitSharp.Transport
         public const string OPTION_SHALLOW = "shallow";
         public const string OPTION_NO_PROGRESS = "no-progress";
 
-        private RevWalk.RevWalk walk;
-        private RevCommitList<RevCommit> reachableCommits;
+        private readonly RevWalk.RevWalk _walk;
+		private readonly bool _allowOfsDelta;
+        
         public readonly RevFlag REACHABLE;
         public readonly RevFlag COMMON;
         public readonly RevFlag ADVERTISED;
-        private bool multiAck;
-        private bool thinPack;
-        private bool sideband;
-        private bool includeTags;
-        private bool allowOfsDelta;
-        private string lockMessage;
-        private PackLock packLock;
+		private RevCommitList<RevCommit> _reachableCommits;
+        private bool _multiAck;
+        private bool _thinPack;
+        private bool _sideband;
+        private bool _includeTags;
+        private string _lockMessage;
+        private PackLock _packLock;
 
         public BasePackFetchConnection(IPackTransport packTransport)
             : base(packTransport)
         {
             RepositoryConfig cfg = local.Config;
-            includeTags = transport.TagOpt != TagOpt.NO_TAGS;
-            thinPack = transport.FetchThin;
-            allowOfsDelta = cfg.getBoolean("repack", "usedeltabaseoffset", true);
+            _includeTags = transport.TagOpt != TagOpt.NO_TAGS;
+            _thinPack = transport.FetchThin;
+            _allowOfsDelta = cfg.getBoolean("repack", "usedeltabaseoffset", true);
 
-            walk = new RevWalk.RevWalk(local);
-            reachableCommits = new RevCommitList<RevCommit>();
-            REACHABLE = walk.newFlag("REACHABLE");
-            COMMON = walk.newFlag("COMMON");
-            ADVERTISED = walk.newFlag("ADVERTISED");
+            _walk = new RevWalk.RevWalk(local);
+            _reachableCommits = new RevCommitList<RevCommit>();
+            REACHABLE = _walk.newFlag("REACHABLE");
+            COMMON = _walk.newFlag("COMMON");
+            ADVERTISED = _walk.newFlag("ADVERTISED");
 
-            walk.carry(COMMON);
-            walk.carry(REACHABLE);
-            walk.carry(ADVERTISED);
+            _walk.carry(COMMON);
+            _walk.carry(REACHABLE);
+            _walk.carry(ADVERTISED);
         }
 
         public void Fetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
@@ -99,52 +100,39 @@ namespace GitSharp.Transport
 
         public bool DidFetchIncludeTags
         {
-            get
-            {
-                return false;
-            }
+            get { return false; }
         }
 
         public bool DidFetchTestConnectivity
         {
-            get
-            {
-                return false;
-            }
+            get { return false; }
         }
 
         public void SetPackLockMessage(string message)
         {
-            lockMessage = message;
+            _lockMessage = message;
         }
 
         public List<PackLock> PackLocks
         {
-            get
-            {
-                if (packLock != null)
-                {
-                    return new List<PackLock> { packLock };
-                }
-                return new List<PackLock>();
-            }
+            get { return _packLock != null ? new List<PackLock> { _packLock } : new List<PackLock>(); }
         }
 
         protected void doFetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
         {
             try
             {
-                markRefsAdvertised();
-                markReachable(have, maxTimeWanted(want));
+                MarkRefsAdvertised();
+                MarkReachable(have, MaxTimeWanted(want));
 
-                if (sendWants(want))
+                if (SendWants(want))
                 {
-                    negotiate(monitor);
+                    Negotiate(monitor);
 
-                    walk.dispose();
-                    reachableCommits = null;
+                    _walk.dispose();
+                    _reachableCommits = null;
 
-                    receivePack(monitor);
+                    ReceivePack(monitor);
                 }
             }
             catch (CancelledException)
@@ -159,17 +147,17 @@ namespace GitSharp.Transport
             }
         }
 
-        private int maxTimeWanted(IEnumerable<Ref> wants)
+        private int MaxTimeWanted(IEnumerable<Ref> wants)
         {
             int maxTime = 0;
             foreach (Ref r in wants)
             {
                 try
                 {
-                    RevObject obj = walk.parseAny(r.ObjectId);
+                    RevObject obj = _walk.parseAny(r.ObjectId);
                     if (obj is RevCommit)
                     {
-                        int cTime = ((RevCommit)obj).commitTime;
+                        int cTime = ((RevCommit)obj).CommitTime;
                         if (maxTime < cTime)
                             maxTime = cTime;
                     }
@@ -182,15 +170,15 @@ namespace GitSharp.Transport
             return maxTime;
         }
 
-        private void markReachable(IEnumerable<ObjectId> have, int maxTime)
+        private void MarkReachable(IEnumerable<ObjectId> have, int maxTime)
         {
             foreach (Ref r in local.Refs.Values)
             {
                 try
                 {
-                    RevCommit o = walk.parseCommit(r.ObjectId);
+                    RevCommit o = _walk.parseCommit(r.ObjectId);
                     o.add(REACHABLE);
-                    reachableCommits.add(o);
+                    _reachableCommits.add(o);
                 }
                 catch (IOException)
                 {
@@ -201,9 +189,9 @@ namespace GitSharp.Transport
             {
                 try
                 {
-                    RevCommit o = walk.parseCommit(id);
+                    RevCommit o = _walk.parseCommit(id);
                     o.add(REACHABLE);
-                    reachableCommits.add(o);
+                    _reachableCommits.add(o);
                 }
                 catch (IOException)
                 {
@@ -213,32 +201,32 @@ namespace GitSharp.Transport
             if (maxTime > 0)
             {
                 DateTime maxWhen = new DateTime(1970, 1, 1) + TimeSpan.FromSeconds(maxTime);
-                walk.sort(RevSort.COMMIT_TIME_DESC);
-                walk.markStart(reachableCommits);
-                walk.setRevFilter(CommitTimeRevFilter.after(maxWhen));
+                _walk.sort(RevSort.COMMIT_TIME_DESC);
+                _walk.markStart(_reachableCommits);
+                _walk.setRevFilter(CommitTimeRevFilter.After(maxWhen));
                 for (; ; )
                 {
-                    RevCommit c = walk.next();
+                    RevCommit c = _walk.next();
                     if (c == null)
                         break;
                     if (c.has(ADVERTISED) && !c.has(COMMON))
                     {
                         c.add(COMMON);
                         c.carry(COMMON);
-                        reachableCommits.add(c);
+                        _reachableCommits.add(c);
                     }
                 }
             }
         }
 
-        private bool sendWants(IEnumerable<Ref> want)
+        private bool SendWants(IEnumerable<Ref> want)
         {
             bool first = true;
             foreach (Ref r in want)
             {
                 try
                 {
-                    if (walk.parseAny(r.ObjectId).has(REACHABLE))
+                    if (_walk.parseAny(r.ObjectId).has(REACHABLE))
                     {
                         continue;
                     }
@@ -247,12 +235,12 @@ namespace GitSharp.Transport
                 {
                 }
 
-                StringBuilder line = new StringBuilder(46);
+                var line = new StringBuilder(46);
                 line.Append("want ");
                 line.Append(r.ObjectId.Name);
                 if (first)
                 {
-                    line.Append(enableCapabilities());
+                    line.Append(EnableCapabilities());
                     first = false;
                 }
                 line.Append('\n');
@@ -263,26 +251,26 @@ namespace GitSharp.Transport
             return !first;
         }
 
-        private string enableCapabilities()
+        private string EnableCapabilities()
         {
-            StringBuilder line = new StringBuilder();
-            if (includeTags)
-                includeTags = wantCapability(line, OPTION_INCLUDE_TAG);
-            if (allowOfsDelta)
+            var line = new StringBuilder();
+            if (_includeTags)
+                _includeTags = wantCapability(line, OPTION_INCLUDE_TAG);
+            if (_allowOfsDelta)
                 wantCapability(line, OPTION_OFS_DELTA);
-            multiAck = wantCapability(line, OPTION_MULTI_ACK);
-            if (thinPack)
-                thinPack = wantCapability(line, OPTION_THIN_PACK);
+            _multiAck = wantCapability(line, OPTION_MULTI_ACK);
+            if (_thinPack)
+                _thinPack = wantCapability(line, OPTION_THIN_PACK);
             if (wantCapability(line, OPTION_SIDE_BAND_64K))
-                sideband = true;
+                _sideband = true;
             else if (wantCapability(line, OPTION_SIDE_BAND))
-                sideband = true;
+                _sideband = true;
             return line.ToString();
         }
 
-        private void negotiate(IProgressMonitor monitor)
+        private void Negotiate(IProgressMonitor monitor)
         {
-            MutableObjectId ackId = new MutableObjectId();
+            var ackId = new MutableObjectId();
             int resultsPending = 0;
             int havesSent = 0;
             int havesSinceLastContinue = 0;
@@ -290,10 +278,10 @@ namespace GitSharp.Transport
             bool receivedAck = false;
             bool sendHaves = true;
 
-            negotiateBegin();
+            NegotiateBegin();
             while (sendHaves)
             {
-                RevCommit c = walk.next();
+                RevCommit c = _walk.next();
                 if (c == null) break;
 
                 pckOut.WriteString("have " + c.getId().Name + "\n");
@@ -328,7 +316,7 @@ namespace GitSharp.Transport
 
                     if (anr == PacketLineIn.AckNackResult.ACK)
                     {
-                        multiAck = false;
+                        _multiAck = false;
                         resultsPending = 0;
                         receivedAck = true;
                         sendHaves = false;
@@ -337,7 +325,7 @@ namespace GitSharp.Transport
 
                     if (anr == PacketLineIn.AckNackResult.ACK_CONTINUE)
                     {
-                        markCommon(walk.parseAny(ackId));
+                        MarkCommon(_walk.parseAny(ackId));
                         receivedAck = true;
                         receivedContinue = true;
                         havesSinceLastContinue = 0;
@@ -360,11 +348,11 @@ namespace GitSharp.Transport
 
             if (!receivedAck)
             {
-                multiAck = false;
+                _multiAck = false;
                 resultsPending++;
             }
 
-            while (resultsPending > 0 || multiAck)
+            while (resultsPending > 0 || _multiAck)
             {
                 PacketLineIn.AckNackResult anr = pckIn.readACK(ackId);
                 resultsPending--;
@@ -373,7 +361,7 @@ namespace GitSharp.Transport
                     break;
 
                 if (anr == PacketLineIn.AckNackResult.ACK_CONTINUE)
-                    multiAck = true;
+                    _multiAck = true;
 
                 if (monitor.IsCancelled)
                     throw new CancelledException();
@@ -382,13 +370,13 @@ namespace GitSharp.Transport
 
         private class NegotiateBeginRevFilter : RevFilter
         {
-            private readonly RevFlag COMMON;
-            private readonly RevFlag ADVERTISED;
+            private readonly RevFlag _common;
+            private readonly RevFlag _advertised;
 
             public NegotiateBeginRevFilter(RevFlag c, RevFlag a)
             {
-                COMMON = c;
-                ADVERTISED = a;
+                _common = c;
+                _advertised = a;
             }
 
             public override RevFilter Clone()
@@ -398,38 +386,38 @@ namespace GitSharp.Transport
 
             public override bool include(GitSharp.RevWalk.RevWalk walker, RevCommit cmit)
             {
-                bool remoteKnowsIsCommon = cmit.has(COMMON);
-                if (cmit.has(ADVERTISED))
+                bool remoteKnowsIsCommon = cmit.has(_common);
+                if (cmit.has(_advertised))
                 {
-                    cmit.add(COMMON);
+                    cmit.add(_common);
                 }
                 return !remoteKnowsIsCommon;
             }
         }
 
-        private void negotiateBegin()
+        private void NegotiateBegin()
         {
-            walk.resetRetain(REACHABLE, ADVERTISED);
-            walk.markStart(reachableCommits);
-            walk.sort(RevSort.COMMIT_TIME_DESC);
-            walk.setRevFilter(new NegotiateBeginRevFilter(COMMON, ADVERTISED));
+            _walk.resetRetain(REACHABLE, ADVERTISED);
+            _walk.markStart(_reachableCommits);
+            _walk.sort(RevSort.COMMIT_TIME_DESC);
+            _walk.setRevFilter(new NegotiateBeginRevFilter(COMMON, ADVERTISED));
         }
 
-        private void markRefsAdvertised()
+        private void MarkRefsAdvertised()
         {
             foreach (Ref r in Refs)
             {
-                markAdvertised(r.ObjectId);
+                MarkAdvertised(r.ObjectId);
                 if (r.PeeledObjectId != null)
-                    markAdvertised(r.PeeledObjectId);
+                    MarkAdvertised(r.PeeledObjectId);
             }
         }
 
-        private void markAdvertised(AnyObjectId id)
+        private void MarkAdvertised(AnyObjectId id)
         {
             try
             {
-                walk.parseAny(id).add(ADVERTISED);
+                _walk.parseAny(id).add(ADVERTISED);
             }
             catch (IOException)
             {
@@ -437,7 +425,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private void markCommon(RevObject obj)
+        private void MarkCommon(RevObject obj)
         {
             obj.add(COMMON);
             if (obj is RevCommit)
@@ -446,13 +434,13 @@ namespace GitSharp.Transport
             }
         }
 
-        private void receivePack(IProgressMonitor monitor)
+        private void ReceivePack(IProgressMonitor monitor)
         {
-            IndexPack ip = IndexPack.Create(local, sideband ? pckIn.sideband(monitor) : stream);
-            ip.setFixThin(thinPack);
+            IndexPack ip = IndexPack.Create(local, _sideband ? pckIn.sideband(monitor) : stream);
+            ip.setFixThin(_thinPack);
             ip.setObjectChecking(transport.CheckFetchedObjects);
             ip.index(monitor);
-            packLock = ip.renameAndOpenPack(lockMessage);
+            _packLock = ip.renameAndOpenPack(_lockMessage);
         }
     }
 }

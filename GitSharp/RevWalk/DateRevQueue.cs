@@ -37,137 +37,141 @@
  */
 
 using System.Text;
+
 namespace GitSharp.RevWalk
 {
+	/// <summary>
+	/// A queue of commits sorted by commit time order.
+	/// </summary>
+	public class DateRevQueue : AbstractRevQueue
+	{
+		private Entry _head;
+		private Entry _free;
 
+		/// <summary>
+		/// Create an empty date queue.
+		/// </summary>
+		public DateRevQueue()
+		{
+		}
 
-    /** A queue of commits sorted by commit time order. */
-    public class DateRevQueue : AbstractRevQueue
-    {
-        private Entry head;
+		public DateRevQueue(Generator s)
+		{
+			while (true)
+			{
+				RevCommit c = s.next();
+				if (c == null) break;
+				add(c);
+			}
+		}
 
-        private Entry free;
+		public override void add(RevCommit c)
+		{
+			Entry q = _head;
+			long when = c.CommitTime;
+			Entry n = NewEntry(c);
+			if (q == null || when > q.Commit.CommitTime)
+			{
+				n.Next = q;
+				_head = n;
+			}
+			else
+			{
+				Entry p = q.Next;
+				while (p != null && p.Commit.CommitTime > when)
+				{
+					q = p;
+					p = q.Next;
+				}
+				n.Next = q.Next;
+				q.Next = n;
+			}
+		}
 
-        /** Create an empty date queue. */
-        public DateRevQueue() : base()
-        {
-        }
+		public override RevCommit next()
+		{
+			Entry q = _head;
+			if (q == null) return null;
+			_head = q.Next;
+			FreeEntry(q);
+			return q.Commit;
+		}
 
-        public DateRevQueue(Generator s)
-        {
-            for (; ; )
-            {
-                RevCommit c = s.next();
-                if (c == null)
-                    break;
-                add(c);
-            }
-        }
+		/// <summary>
+		/// Peek at the Next commit, without removing it.
+		/// </summary>
+		/// <returns>
+		/// The Next available commit; null if there are no commits left.
+		/// </returns>
+		public RevCommit peek()
+		{
+			return _head != null ? _head.Commit : null;
+		}
 
-        public override void add(RevCommit c)
-        {
-            Entry q = head;
-            long when = c.commitTime;
-            Entry n = newEntry(c);
-            if (q == null || when > q.commit.commitTime)
-            {
-                n.next = q;
-                head = n;
-            }
-            else
-            {
-                Entry p = q.next;
-                while (p != null && p.commit.commitTime > when)
-                {
-                    q = p;
-                    p = q.next;
-                }
-                n.next = q.next;
-                q.next = n;
-            }
-        }
+		public override void clear()
+		{
+			_head = null;
+			_free = null;
+		}
 
-        public override RevCommit next()
-        {
-            Entry q = head;
-            if (q == null)
-                return null;
-            head = q.next;
-            freeEntry(q);
-            return q.commit;
-        }
+		internal override bool everbodyHasFlag(int f)
+		{
+			for (Entry q = _head; q != null; q = q.Next)
+			{
+				if ((q.Commit.flags & f) == 0) return false;
+			}
+			return true;
+		}
 
-        /**
-         * Peek at the next commit, without removing it.
-         * 
-         * @return the next available commit; null if there are no commits left.
-         */
-        public RevCommit peek()
-        {
-            return head != null ? head.commit : null;
-        }
+		internal override bool anybodyHasFlag(int f)
+		{
+			for (Entry q = _head; q != null; q = q.Next)
+			{
+				if ((q.Commit.flags & f) != 0) return true;
+			}
+			return false;
+		}
 
-        public override void clear()
-        {
-            head = null;
-            free = null;
-        }
+		public override GeneratorOutputType OutputType
+		{
+			get { return base.OutputType | GeneratorOutputType.SortCommitTimeDesc; }
+		}
 
-        internal override bool everbodyHasFlag(int f)
-        {
-            for (Entry q = head; q != null; q = q.next)
-            {
-                if ((q.commit.flags & f) == 0)
-                    return false;
-            }
-            return true;
-        }
+		public override string ToString()
+		{
+			var s = new StringBuilder();
+			for (Entry q = _head; q != null; q = q.Next)
+			{
+				Describe(s, q.Commit);
+			}
+			return s.ToString();
+		}
 
-        internal override bool anybodyHasFlag(int f)
-        {
-            for (Entry q = head; q != null; q = q.next)
-            {
-                if ((q.commit.flags & f) != 0)
-                    return true;
-            }
-            return false;
-        }
+		private Entry NewEntry(RevCommit c)
+		{
+			Entry r = _free;
+			if (r == null)
+			{
+				r = new Entry();
+			}
+			else
+			{
+				_free = r.Next;
+			}
+			r.Commit = c;
+			return r;
+		}
 
-        public override int outputType()
-        {
-            return _outputType | SORT_COMMIT_TIME_DESC;
-        }
+		private void FreeEntry(Entry e)
+		{
+			e.Next = _free;
+			_free = e;
+		}
 
-        public override string ToString()
-        {
-            StringBuilder s = new StringBuilder();
-            for (Entry q = head; q != null; q = q.next)
-                describe(s, q.commit);
-            return s.ToString();
-        }
-
-        private Entry newEntry(RevCommit c)
-        {
-            Entry r = free;
-            if (r == null)
-                r = new Entry();
-            else
-                free = r.next;
-            r.commit = c;
-            return r;
-        }
-
-        private void freeEntry(Entry e)
-        {
-            e.next = free;
-            free = e;
-        }
-
-        internal class Entry
-        {
-            public Entry next;
-
-            public RevCommit commit;
-        }
-    }
+		internal class Entry
+		{
+			public Entry Next { get; set; }
+			public RevCommit Commit { get; set; }
+		}
+	}
 }

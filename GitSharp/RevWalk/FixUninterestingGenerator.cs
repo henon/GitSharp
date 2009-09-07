@@ -38,41 +38,40 @@
 
 namespace GitSharp.RevWalk
 {
+	/// <summary>
+	/// Filters out commits marked <see cref="RevWalk.UNINTERESTING"/>.
+	/// <para>
+	/// This generator is only in front of another generator that has fully buffered
+	/// commits, such that we are called only After the <see cref="PendingGenerator"/> has
+	/// exhausted its input queue and given up. It skips over any uninteresting
+	/// commits that may have leaked out of the PendingGenerator due to clock skew
+	/// being detected in the commit objects.
+	/// </summary>
+	class FixUninterestingGenerator : Generator
+	{
+		private readonly Generator _pending;
 
+		public FixUninterestingGenerator(Generator pendingGenerator)
+		{
+			_pending = pendingGenerator;
+		}
 
-    /**
-     * Filters out commits marked {@link RevWalk#UNINTERESTING}.
-     * <p>
-     * This generator is only in front of another generator that has fully buffered
-     * commits, such that we are called only after the {@link PendingGenerator} has
-     * exhausted its input queue and given up. It skips over any uninteresting
-     * commits that may have leaked out of the PendingGenerator due to clock skew
-     * being detected in the commit objects.
-     */
-    class FixUninterestingGenerator : Generator
-    {
-        private Generator pending;
+		public override GeneratorOutputType OutputType
+		{
+			get { return _pending.OutputType; }
+		}
 
-        public FixUninterestingGenerator(Generator g)
-        {
-            pending = g;
-        }
-
-        public override int outputType()
-        {
-            return pending.outputType();
-        }
-
-        public override RevCommit next()
-        {
-            for (; ; )
-            {
-                RevCommit c = pending.next();
-                if (c == null)
-                    return null;
-                if ((c.flags & RevWalk.UNINTERESTING) == 0)
-                    return c;
-            }
-        }
-    }
+		public override RevCommit next()
+		{
+			while (true)
+			{
+				RevCommit c = _pending.next();
+				if (c == null) return null;
+				if ((c.flags & RevWalk.UNINTERESTING) == 0)
+				{
+					return c;
+				}
+			}
+		}
+	}
 }

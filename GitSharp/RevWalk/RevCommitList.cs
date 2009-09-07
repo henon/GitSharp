@@ -127,7 +127,7 @@ namespace GitSharp.RevWalk
 
 				while (rangeBegin++ < rangeEnd && index < BLOCK_SIZE)
 				{
-					RevCommit c = (RevCommit)s.Contents[index++];
+					var c = (RevCommit)s.Contents[index++];
 
 					if (matching.include(w, c))
 					{
@@ -195,7 +195,7 @@ namespace GitSharp.RevWalk
 		/// at 0, to test the first commit in the list.
 		/// </param>
 		/// <returns>
-		/// Index of the first commit at or after index <code>begin</code>
+		/// Index of the first commit at or After index <code>begin</code>
 		/// that has the specified flag set on it; -1 if no match is found.
 		/// </returns>
 		public int indexOf(RevFlag flag, int begin)
@@ -213,7 +213,7 @@ namespace GitSharp.RevWalk
 
 				while (begin++ < Size && index < BLOCK_SIZE)
 				{
-					RevCommit c = (RevCommit)s.Contents[index++];
+					var c = (RevCommit)s.Contents[index++];
 					if (c.has(flag))
 					{
 						return begin;
@@ -252,7 +252,7 @@ namespace GitSharp.RevWalk
 
 				while (begin-- >= 0 && index >= 0)
 				{
-					RevCommit c = (RevCommit)s.Contents[index--];
+					var c = (RevCommit)s.Contents[index--];
 					if (c.has(flag))
 					{
 						return begin;
@@ -305,7 +305,7 @@ namespace GitSharp.RevWalk
 			RevCommit c = p.next();
 			if (c == null)
 			{
-				_walker.pending = EndGenerator.INSTANCE;
+				_walker.pending = EndGenerator.Instance;
 				_walker = null;
 				return;
 			}
@@ -343,7 +343,7 @@ namespace GitSharp.RevWalk
 					c = p.next();
 					if (c == null)
 					{
-						_walker.pending = EndGenerator.INSTANCE;
+						_walker.pending = EndGenerator.Instance;
 						_walker = null;
 						return;
 					}

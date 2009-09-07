@@ -37,43 +37,38 @@
 
 using System;
 using GitSharp.RevWalk;
-
 using GitSharp.Tests.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
-    public class AlwaysEmptyRevQueueTest : RevWalkTestCase
-    {
-	    private AbstractRevQueue q = AbstractRevQueue.EMPTY_QUEUE;
+	[TestFixture]
+	public class AlwaysEmptyRevQueueTest : RevWalkTestCase
+	{
+		private readonly AbstractRevQueue _q = AbstractRevQueue.EmptyQueue;
 
-        [Test]
-	    public void testEmpty()
-        {
-		    Assert.IsNull(q.next());
-            Assert.IsTrue(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-            Assert.IsFalse(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-		    Assert.AreEqual(0, q.outputType());
-    	}
+		[Test]
+		public void testEmpty()
+		{
+			Assert.IsNull(_q.next());
+			Assert.IsTrue(_q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+			Assert.IsFalse(_q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+			Assert.AreEqual(Generator.GeneratorOutputType.None, _q.OutputType);
+		}
 
-        [Test]
-        public void testClear(){
-		    q.clear();
-		    testEmpty();
-    	}
+		[Test]
+		public void testClear()
+		{
+			_q.clear();
+			testEmpty();
+		}
 
-        [Test]
-        public void testAddFails()
-        {
-    		try {
-	    		q.add(commit());
-		    	Assert.Fail("Did not throw UnsupportedOperationException");
-            }
-            catch (InvalidOperationException e)
-            {
-			    // expected result
-		    }
-	    }
-    }
+		[Test]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void testAddFails()
+		{
+			_q.add(commit());
+			Assert.Fail("Did not throw UnsupportedOperationException");
+		}
+	}
 }

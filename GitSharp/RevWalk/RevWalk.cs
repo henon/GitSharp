@@ -137,7 +137,7 @@ namespace GitSharp.RevWalk
 		/** Number of flag bits we keep internal for our own use. See above flags. */
 		public static int RESERVED_FLAGS = 6;
 
-		private static int APP_FLAGS = -1 & ~((1 << RESERVED_FLAGS) - 1);
+		private static readonly int APP_FLAGS = -1 & ~((1 << RESERVED_FLAGS) - 1);
 
 		public Repository db;
 
@@ -669,7 +669,7 @@ namespace GitSharp.RevWalk
 
 			RevTree t;
 			if (c is RevCommit)
-				t = ((RevCommit)c).getTree();
+				t = ((RevCommit)c).Tree;
 			else if (!(c is RevTree))
 				throw new IncorrectObjectTypeException(id.ToObjectId(),
 						Constants.TYPE_TREE);
@@ -677,12 +677,21 @@ namespace GitSharp.RevWalk
 				t = (RevTree)c;
 
 			if ((t.flags & PARSED) != 0)
+			{
 				return t;
-			ObjectLoader ldr = db.openObject(curs, t);
+			}
+
+			ObjectLoader ldr = db.OpenObject(curs, t);
 			if (ldr == null)
+			{
 				throw new MissingObjectException(t, Constants.TYPE_TREE);
+			}
+			
 			if (ldr.Type != Constants.OBJ_TREE)
+			{
 				throw new IncorrectObjectTypeException(t, Constants.TYPE_TREE);
+			}
+			
 			t.flags |= PARSED;
 			return t;
 		}
@@ -708,7 +717,7 @@ namespace GitSharp.RevWalk
 			RevObject r = objects.get(id);
 			if (r == null)
 			{
-				ObjectLoader ldr = db.openObject(curs, id);
+				ObjectLoader ldr = db.OpenObject(curs, id);
 				if (ldr == null)
 					throw new MissingObjectException(id.ToObjectId(), "unknown");
 				byte[] data = ldr.CachedBytes;
@@ -950,9 +959,9 @@ namespace GitSharp.RevWalk
 			{
 				RevCommit c = q.next();
 				if (c == null) break;
-				if (c.parents == null) continue;
+				if (c.Parents == null) continue;
 
-				foreach (RevCommit p in c.parents)
+				foreach (RevCommit p in c.Parents)
 				{
 					if ((p.flags & clearFlags) == 0) continue;
 					p.flags &= retainFlags;

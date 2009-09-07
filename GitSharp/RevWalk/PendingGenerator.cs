@@ -42,44 +42,43 @@ using GitSharp.RevWalk.Filter;
 
 namespace GitSharp.RevWalk
 {
-	/**
-     * Default (and first pass) RevCommit Generator implementation for RevWalk.
-     * <p>
-     * This generator starts from a set of one or more commits and process them in
-     * descending (newest to oldest) commit time order. Commits automatically cause
-     * their parents to be enqueued for further processing, allowing the entire
-     * commit graph to be walked. A {@link RevFilter} may be used to select a subset
-     * of the commits and return them to the caller.
-     */
-
+	/// <summary>
+	/// Default (and first pass) RevCommit Generator implementation for RevWalk.
+	/// <para>
+	/// This generator starts from a set of one or more commits and process them in
+	/// descending (newest to oldest) commit time order. Commits automatically cause
+	/// their parents to be enqueued for further processing, allowing the entire
+	/// commit graph to be walked. A <see cref="RevFilter"/> may be used to select a subset
+	/// of the commits and return them to the caller.
+	/// </summary>
 	public class PendingGenerator : Generator
 	{
 		private static readonly RevCommit InitLast;
 
 		/**
-		 * Number of additional commits to scan after we think we are done.
+		 * Number of additional commits to scan After we think we are done.
 		 * <p>
 		 * This small buffer of commits is scanned to ensure we didn't miss anything
 		 * as a result of clock skew when the commits were made. We need to set our
 		 * constant to 1 additional commit due to the use of a pre-increment
 		 * operator when accessing the value.
 		 */
-		public static int OVER_SCAN = 5 + 1;
-		public static int PARSED = RevWalk.PARSED;
-		public static int SEEN = RevWalk.SEEN;
-		public static int UNINTERESTING = RevWalk.UNINTERESTING;
+		public static readonly int OVER_SCAN = 5 + 1;
+		public static readonly int PARSED = RevWalk.PARSED;
+		public static readonly int SEEN = RevWalk.SEEN;
+		public static readonly int UNINTERESTING = RevWalk.UNINTERESTING;
 
 		private readonly RevFilter _filter;
-		private readonly int _output;
+		private readonly GeneratorOutputType _outputType;
 		private readonly DateRevQueue _pending;
 		private readonly RevWalk _walker;
 
 		public bool CanDispose { get; set; }
 
-		/** Last commit produced to the caller from {@link #next()}. */
+		/** Last commit produced to the caller from {@link #Next()}. */
 		private RevCommit _last = InitLast;
 
-		/**
+		/** 
          * Number of commits we have remaining in our over-scan allotment.
          * <p>
          * Only relevant if there are {@link #UNINTERESTING} commits in the
@@ -89,21 +88,21 @@ namespace GitSharp.RevWalk
 
 		static PendingGenerator()
 		{
-			InitLast = new RevCommit(ObjectId.ZeroId) { commitTime = int.MaxValue };
+			InitLast = new RevCommit(ObjectId.ZeroId) { CommitTime = int.MaxValue };
 		}
 
-		public PendingGenerator(RevWalk w, DateRevQueue p, RevFilter f, int @out)
+		public PendingGenerator(RevWalk w, DateRevQueue p, RevFilter f, GeneratorOutputType outputType)
 		{
 			_walker = w;
 			_pending = p;
 			_filter = f;
-			_output = @out;
+			_outputType = outputType;
 			CanDispose = true;
 		}
 
-		public override int outputType()
+		public override GeneratorOutputType OutputType
 		{
-			return _output | SORT_COMMIT_TIME_DESC;
+			get { return _outputType | GeneratorOutputType.SortCommitTimeDesc; }
 		}
 
 		public override RevCommit next()
@@ -121,7 +120,7 @@ namespace GitSharp.RevWalk
 
 					bool produce = !((c.flags & UNINTERESTING) != 0) && _filter.include(_walker, c);
 
-					foreach (RevCommit p in c.parents)
+					foreach (RevCommit p in c.Parents)
 					{
 						if ((p.flags & SEEN) != 0) continue;
 						if ((p.flags & PARSED) == 0)
@@ -138,10 +137,10 @@ namespace GitSharp.RevWalk
 						if (_pending.everbodyHasFlag(UNINTERESTING))
 						{
 							RevCommit n = _pending.peek();
-							if (n != null && n.commitTime >= _last.commitTime)
+							if (n != null && n.CommitTime >= _last.CommitTime)
 							{
-								// This is too close to call. The next commit we
-								// would pop is dated after the last one produced.
+								// This is too close to call. The Next commit we
+								// would pop is dated After the last one produced.
 								// We have to keep going to ensure that we carry
 								// flags as much as necessary.
 								//

@@ -36,64 +36,81 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+
 namespace GitSharp.RevWalk
 {
 
-    /**
-     * Produces commits for RevWalk to return to applications.
-     * <p>
-     * Implementations of this basic class provide the real work behind RevWalk.
-     * Conceptually a Generator is an iterator or a queue, it returns commits until
-     * there are no more relevant. Generators may be piped/stacked together to
-     * Create a more complex set of operations.
-     * 
-     * @see PendingGenerator
-     * @see StartGenerator
-     */
-    public abstract class Generator
-    {
-        /** Commits are sorted by commit date and time, descending. */
-        public static int SORT_COMMIT_TIME_DESC = 1 << 0;
+	/**
+	 * Produces commits for RevWalk to return to applications.
+	 * <p>
+	 * Implementations of this basic class provide the real work behind RevWalk.
+	 * Conceptually a Generator is an iterator or a queue, it returns commits until
+	 * there are no more relevant. Generators may be piped/stacked together to
+	 * Create a more complex set of operations.
+	 * 
+	 * @see PendingGenerator
+	 * @see StartGenerator
+	 */
+	public abstract class Generator
+	{
+		#region Enums
 
-        /** Output may have {@link RevWalk#REWRITE} marked on it. */
-        public static int HAS_REWRITE = 1 << 1;
+		[Flags]
+		public enum GeneratorOutputType
+		{
+			None = 0,
 
-        /** Output needs {@link RewriteGenerator}. */
-        public static int NEEDS_REWRITE = 1 << 2;
+			/// <summary>
+			/// Commits are sorted by commit date and time, descending.
+			/// </summary>
+			SortCommitTimeDesc = 1 << 0,
 
-        /** Topological ordering is enforced (all children before parents). */
-        public static int SORT_TOPO = 1 << 3;
+			/// <summary>
+			/// Output may have <see cref="RevWalk.REWRITE"/> marked on it.
+			/// </summary>
+			HasRewrite = 1 << 1,
 
-        /** Output may have {@link RevWalk#UNINTERESTING} marked on it. */
-        public static int HAS_UNINTERESTING = 1 << 4;
+			/// <summary>
+			/// Output needs <see cref="RewriteGenerator"/>.
+			/// </summary>
+			NeedsRewrite = 1 << 2,
 
-        /**
-         * Connect the supplied queue to this generator's own free list (if any).
-         * 
-         * @param q
-         *            another FIFO queue that wants to share our queue's free list.
-         */
-        public virtual void shareFreeList(BlockRevQueue q)
-        {
-            // Do nothing by default.
-        }
+			/// <summary>
+			/// Topological ordering is enforced (all children before parents).
+			/// </summary>
+			SortTopo = 1 << 3,
 
-        /**
-         * Obtain flags describing the output behavior of this generator.
-         * 
-         * @return one or more of the constants declared in this class, describing
-         *         how this generator produces its results.
-         */
-        public abstract int outputType();
+			/// <summary>
+			/// Output may have <see cref="RevWalk.UNINTERESTING"/> marked on it.
+			/// </summary>
+			HasUninteresting = 1 << 4
+		}
 
-        /**
-         * Return the next commit to the application, or the next generator.
-         * 
-         * @return next available commit; null if no more are to be returned.
-         * @throws MissingObjectException
-         * @throws IncorrectObjectTypeException
-         * @
-         */
-        public abstract RevCommit next();
-    }
+		#endregion
+
+		/// <summary>
+		/// Connect the supplied queue to this generator's own free list (if any).
+		/// </summary>
+		/// <param name="q">
+		/// Another FIFO queue that wants to share our queue's free list.
+		/// </param>
+		public virtual void shareFreeList(BlockRevQueue q)
+		{
+			// Do nothing by default.
+		}
+
+		/// <summary>
+		/// * Obtain flags describing the output behavior of this generator.
+		/// </summary>
+		public abstract GeneratorOutputType OutputType { get; }
+
+		/// <summary>
+		/// Return the next commit to the application, or the next generator.
+		/// </summary>
+		/// <returns>
+		/// Next available commit; null if no more are to be returned.
+		/// </returns>
+		public abstract RevCommit next();
+	}
 }

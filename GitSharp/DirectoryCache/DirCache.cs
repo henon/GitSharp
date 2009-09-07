@@ -671,7 +671,7 @@ namespace GitSharp.DirectoryCache
 		 *
 		 * @param position
 		 *            entry position of the path that should be skipped.
-		 * @return position of the next entry whose path is after the input.
+		 * @return position of the next entry whose path is After the input.
 		 */
 		public int nextEntry(int position)
 		{

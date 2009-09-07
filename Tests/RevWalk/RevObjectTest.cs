@@ -35,144 +35,164 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.RevWalk
 {
 
-    using NUnit.Framework;
     [TestFixture]
     public class RevObjectTest : RevWalkTestCase
     {
-#if false
-	public void testId() throws Exception {
-		final RevCommit a = commit();
-		assertSame(a, a.getId());
-	}
+        [Test]
+        public void testId()
+        {
+            RevCommit a = commit();
+            Assert.AreSame(a, a.getId());
+        }
 
-	public void testEqualsIsIdentity() throws Exception {
-		final RevCommit a1 = commit();
-		final RevCommit b1 = commit();
+        [Test]
+        public void testEqualsIsIdentity()
+        {
+            RevCommit a1 = commit();
+            RevCommit b1 = commit();
 
-		assertTrue(a1.equals(a1));
-		assertTrue(a1.equals((Object) a1));
-		assertFalse(a1.equals(b1));
+            Assert.IsTrue(a1.Equals(a1));
+            Assert.IsTrue(a1.Equals((Object) a1));
+            Assert.IsFalse(a1.Equals(b1));
 
-		assertFalse(a1.equals(a1.copy()));
-		assertFalse(a1.equals((Object) a1.copy()));
-		assertFalse(a1.equals(""));
+            Assert.IsFalse(a1.Equals(a1.Copy()));
+            Assert.IsFalse(a1.Equals((Object) a1.Copy()));
+            Assert.IsFalse(a1.Equals(""));
 
-		final RevWalk rw2 = new RevWalk(db);
-		final RevCommit a2 = rw2.parseCommit(a1);
-		final RevCommit b2 = rw2.parseCommit(b1);
-		assertNotSame(a1, a2);
-		assertNotSame(b1, b2);
+            var rw2 = new GitSharp.RevWalk.RevWalk(db);
+            RevCommit a2 = rw2.parseCommit(a1);
+            RevCommit b2 = rw2.parseCommit(b1);
+            Assert.AreNotSame(a1, a2);
+            Assert.AreNotSame(b1, b2);
 
-		assertFalse(a1.equals(a2));
-		assertFalse(b1.equals(b2));
+            Assert.IsFalse(a1.Equals(a2));
+            Assert.IsFalse(b1.Equals(b2));
 
-		assertEquals(a1.hashCode(), a2.hashCode());
-		assertEquals(b1.hashCode(), b2.hashCode());
+            Assert.AreEqual(a1.GetHashCode(), a2.GetHashCode());
+            Assert.AreEqual(b1.GetHashCode(), b2.GetHashCode());
 
-		assertTrue(AnyObjectId.equals(a1, a2));
-		assertTrue(AnyObjectId.equals(b1, b2));
-	}
+            Assert.IsTrue(Equals(a1, a2));
+            Assert.IsTrue(Equals(b1, b2));
+        }
 
-	public void testRevObjectTypes() throws Exception {
-		assertEquals(Constants.OBJ_TREE, emptyTree.getType());
-		assertEquals(Constants.OBJ_COMMIT, commit().getType());
-		assertEquals(Constants.OBJ_BLOB, blob("").getType());
-		assertEquals(Constants.OBJ_TAG, tag("emptyTree", emptyTree).getType());
-	}
+        [Test]
+        public void testRevObjectTypes()
+        {
+            Assert.AreEqual(Constants.OBJ_TREE, emptyTree.getType());
+            Assert.AreEqual(Constants.OBJ_COMMIT, commit().getType());
+            Assert.AreEqual(Constants.OBJ_BLOB, blob("").getType());
+            Assert.AreEqual(Constants.OBJ_TAG, tag("emptyTree", emptyTree).getType());
+        }
 
-	public void testHasRevFlag() throws Exception {
-		final RevCommit a = commit();
-		assertFalse(a.has(RevFlag.UNINTERESTING));
-		a.flags |= RevWalk.UNINTERESTING;
-		assertTrue(a.has(RevFlag.UNINTERESTING));
-	}
+        [Test]
+        public void testHasRevFlag()
+        {
+            RevCommit a = commit();
+            Assert.IsFalse(a.has(RevFlag.UNINTERESTING));
+            a.flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
+            Assert.IsTrue(a.has(RevFlag.UNINTERESTING));
+        }
 
-	public void testHasAnyFlag() throws Exception {
-		final RevCommit a = commit();
-		final RevFlag flag1 = rw.newFlag("flag1");
-		final RevFlag flag2 = rw.newFlag("flag2");
-		final RevFlagSet s = new RevFlagSet();
-		s.add(flag1);
-		s.add(flag2);
+        [Test]
+        public void testHasAnyFlag()
+        {
+            RevCommit a = commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            var s = new RevFlagSet();
+            s.Add(flag1);
+            s.Add(flag2);
 
-		assertFalse(a.hasAny(s));
-		a.flags |= flag1.mask;
-		assertTrue(a.hasAny(s));
-	}
+            Assert.IsFalse(a.hasAny(s));
+            a.flags |= flag1.Mask;
+            Assert.IsTrue(a.hasAny(s));
+        }
 
-	public void testHasAllFlag() throws Exception {
-		final RevCommit a = commit();
-		final RevFlag flag1 = rw.newFlag("flag1");
-		final RevFlag flag2 = rw.newFlag("flag2");
-		final RevFlagSet s = new RevFlagSet();
-		s.add(flag1);
-		s.add(flag2);
+        [Test]
+        public void testHasAllFlag()
+        {
+            RevCommit a = commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            var s = new RevFlagSet();
+            s.Add(flag1);
+            s.Add(flag2);
 
-		assertFalse(a.hasAll(s));
-		a.flags |= flag1.mask;
-		assertFalse(a.hasAll(s));
-		a.flags |= flag2.mask;
-		assertTrue(a.hasAll(s));
-	}
+            Assert.IsFalse(a.hasAll(s));
+            a.flags |= flag1.Mask;
+            Assert.IsFalse(a.hasAll(s));
+            a.flags |= flag2.Mask;
+            Assert.IsTrue(a.hasAll(s));
+        }
 
-	public void testAddRevFlag() throws Exception {
-		final RevCommit a = commit();
-		final RevFlag flag1 = rw.newFlag("flag1");
-		final RevFlag flag2 = rw.newFlag("flag2");
-		assertEquals(0, a.flags);
+        [Test]
+        public void testAddRevFlag()
+        {
+            RevCommit a = commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            Assert.AreEqual(0, a.flags);
 
-		a.add(flag1);
-		assertEquals(flag1.mask, a.flags);
+            a.add(flag1);
+            Assert.AreEqual(flag1.Mask, a.flags);
 
-		a.add(flag2);
-		assertEquals(flag1.mask | flag2.mask, a.flags);
-	}
+            a.add(flag2);
+            Assert.AreEqual(flag1.Mask | flag2.Mask, a.flags);
+        }
 
-	public void testAddRevFlagSet() throws Exception {
-		final RevCommit a = commit();
-		final RevFlag flag1 = rw.newFlag("flag1");
-		final RevFlag flag2 = rw.newFlag("flag2");
-		final RevFlagSet s = new RevFlagSet();
-		s.add(flag1);
-		s.add(flag2);
+        [Test]
+        public void testAddRevFlagSet()
+        {
+            RevCommit a = commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            var s = new RevFlagSet();
+            s.Add(flag1);
+            s.Add(flag2);
 
-		assertEquals(0, a.flags);
+            Assert.AreEqual(0, a.flags);
 
-		a.add(s);
-		assertEquals(flag1.mask | flag2.mask, a.flags);
-	}
+            a.add(s);
+            Assert.AreEqual(flag1.Mask | flag2.Mask, a.flags);
+        }
 
-	public void testRemoveRevFlag() throws Exception {
-		final RevCommit a = commit();
-		final RevFlag flag1 = rw.newFlag("flag1");
-		final RevFlag flag2 = rw.newFlag("flag2");
-		a.add(flag1);
-		a.add(flag2);
-		assertEquals(flag1.mask | flag2.mask, a.flags);
-		a.remove(flag2);
-		assertEquals(flag1.mask, a.flags);
-	}
+        [Test]
+        public void testRemoveRevFlag()
+        {
+            RevCommit a = commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            a.add(flag1);
+            a.add(flag2);
+            Assert.AreEqual(flag1.Mask | flag2.Mask, a.flags);
+            a.remove(flag2);
+            Assert.AreEqual(flag1.Mask, a.flags);
+        }
 
-	public void testRemoveRevFlagSet() throws Exception {
-		final RevCommit a = commit();
-		final RevFlag flag1 = rw.newFlag("flag1");
-		final RevFlag flag2 = rw.newFlag("flag2");
-		final RevFlag flag3 = rw.newFlag("flag3");
-		final RevFlagSet s = new RevFlagSet();
-		s.add(flag1);
-		s.add(flag2);
-		a.add(flag3);
-		a.add(s);
-		assertEquals(flag1.mask | flag2.mask | flag3.mask, a.flags);
-		a.remove(s);
-		assertEquals(flag3.mask, a.flags);
-	}
-#endif
+        [Test]
+        public void testRemoveRevFlagSet()
+        {
+            RevCommit a = commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            RevFlag flag3 = rw.newFlag("flag3");
+            var s = new RevFlagSet();
+            s.Add(flag1);
+            s.Add(flag2);
+            a.add(flag3);
+            a.add(s);
+            Assert.AreEqual(flag1.Mask | flag2.Mask | flag3.Mask, a.flags);
+            a.remove(s);
+            Assert.AreEqual(flag3.Mask, a.flags);
+        }
     }
 }
 

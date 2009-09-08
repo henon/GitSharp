@@ -80,7 +80,7 @@ namespace GitSharp.Tests
 		public virtual void testReadSymRefToPacked()
 		{
 			db.WriteSymref("HEAD", "refs/heads/b");
-		    Ref @ref = db.getRef("HEAD");
+			Ref @ref = db.getRef("HEAD");
 			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
@@ -95,7 +95,7 @@ namespace GitSharp.Tests
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update); // internal
 
 			db.WriteSymref("HEAD", "refs/heads/master");
-		    Ref @ref = db.getRef("HEAD");
+			Ref @ref = db.getRef("HEAD");
 			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
@@ -116,7 +116,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testReadLoosePackedRef()
 		{
-		    Ref @ref = db.getRef("refs/heads/master");
+			Ref @ref = db.getRef("refs/heads/master");
 			Assert.AreEqual(Ref.Storage.Packed, @ref.StorageFormat);
 			string path = Path.Combine(db.Directory.FullName, "refs/heads/master");
 			FileStream os = new FileStream(path, System.IO.FileMode.OpenOrCreate);
@@ -148,3 +148,4 @@ namespace GitSharp.Tests
 			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 	}
+}

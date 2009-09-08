@@ -42,9 +42,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Util;
-using GitSharp.Exceptions;
 using System.Threading;
+using GitSharp.Exceptions;
+using GitSharp.Util;
 
 namespace GitSharp
 {
@@ -669,7 +669,9 @@ namespace GitSharp
 											throw new RevisionSyntaxException(revstr);
 										}
 									else
+									{
 										throw new RevisionSyntaxException(revstr);
+									}
 									break;
 
 								default:
@@ -906,25 +908,24 @@ namespace GitSharp
 			_head = null;
 		}
 
-        
-        public Dictionary<string, Ref> getAllRefs()
-        {
-            return _refDb.GetAllRefs();
-        }
+		public Dictionary<string, Ref> getAllRefs()
+		{
+			return _refDb.GetAllRefs();
+		}
 
-        public Ref getRef(string name)
-        {
-            return _refDb.ReadRef(name);
-        }
+		public Ref getRef(string name)
+		{
+			return _refDb.ReadRef(name);
+		}
 
-        public Dictionary<string, Ref> getTags()
-        {
-            return _refDb.GetTags();
-        }
+		public Dictionary<string, Ref> getTags()
+		{
+			return _refDb.GetTags();
+		}
 
 		public Ref Head
 		{
-            get { return getRef("HEAD"); }
+			get { return getRef("HEAD"); }
 		}
 
 		public void Link(string name, string target)
@@ -1058,12 +1059,12 @@ namespace GitSharp
 			}
 		}
 
-		/**
-		 * @param refName
-		 *
-		 * @return a more user friendly ref name
-		 */
-		public string ShortenRefName(string refName) 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="refName"></param>
+		/// <returns>A more user friendly ref name</returns>
+		public string ShortenRefName(string refName)
 		{
 			if (refName.StartsWith(Constants.R_HEADS))
 				return refName.Substring(Constants.R_HEADS.Length);
@@ -1082,9 +1083,9 @@ namespace GitSharp
 		/// A <see cref="ReflogReader"/> for the supplied <paramref name="refName"/>, 
 		/// or null if the /// named ref does not exist.
 		/// </returns>
-		public ReflogReader ReflogReader(string refName) 
+		public ReflogReader ReflogReader(string refName)
 		{
-		    Ref @ref = getRef(refName);
+			Ref @ref = getRef(refName);
 			if (@ref != null)
 			{
 				return new ReflogReader(this, @ref.OriginalName);
@@ -1093,3 +1094,4 @@ namespace GitSharp
 			return null;
 		}
 	}
+}

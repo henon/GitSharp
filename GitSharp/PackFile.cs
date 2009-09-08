@@ -537,7 +537,7 @@ namespace GitSharp
 					p = 0;
 					c = ib[p++] & 0xff;
 					long ofs = c & 127;
-					while ((c & 128) != 0)
+					while ((c & 0x128) != 0)
 					{
 						ofs += 1;
 						c = ib[p++] & 0xff;

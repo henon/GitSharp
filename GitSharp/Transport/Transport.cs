@@ -157,7 +157,7 @@ namespace GitSharp.Transport
         private static ICollection<RefSpec> expandPushWildcardsFor(Repository db, IEnumerable<RefSpec> specs)
         {
             Dictionary<string, Ref> localRefs = db.getAllRefs();
-            var procRefs = new HashSet<RefSpec>();
+            List<RefSpec> procRefs = new List<RefSpec>();
 
             foreach (RefSpec spec in specs)
             {
@@ -378,7 +378,7 @@ namespace GitSharp.Transport
             foreach (RefSpec spec in procRefs)
             {
                 string srcSpec = spec.Source;
-                Ref srcRef = db.GetRef(srcSpec);
+                Ref srcRef = db.getRef(srcSpec);
                 if (srcRef != null)
                     srcSpec = srcRef.Name;
 

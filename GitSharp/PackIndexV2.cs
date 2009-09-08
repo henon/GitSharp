@@ -39,262 +39,289 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using GitSharp.Util;
 using GitSharp.Exceptions;
 
 namespace GitSharp
 {
-    /** Support for the pack index v2 format. */
-    public class PackIndexV2 : PackIndex
-    {
+	/// <summary>
+	/// Support for the pack index v2 format.
+	/// </summary>
+	public class PackIndexV2 : PackIndex
+	{
+		private const long IS_O64 = 1L << 31;
+		private const int FANOUT = 256;
+		private static readonly int[] NoInts = { };
+		private static readonly byte[] NoBytes = { };
+		private readonly long[] _fanoutTable;
 
-        private const long IS_O64 = 1L << 31;
+		/** 256 arrays of contiguous object names. */
+		private readonly int[][] _names;
 
-        private const int FANOUT = 256;
+		/** 256 arrays of the 32 bit offset data, matching {@link #names}. */
+		private readonly byte[][] _offset32;
 
-        private static readonly int[] NO_INTS = { };
+		/** 256 arrays of the CRC-32 of objects, matching {@link #names}. */
+		private readonly byte[][] _crc32;
 
-        private static readonly byte[] NO_BYTES = { };
+		/** 64 bit offset table. */
+		private readonly byte[] _offset64;
 
-        private readonly long[] fanoutTable;
+		public PackIndexV2(Stream fd)
+		{
+			var fanoutRaw = new byte[4 * FANOUT];
+			NB.ReadFully(fd, fanoutRaw, 0, fanoutRaw.Length);
+			_fanoutTable = new long[FANOUT];
+			for (int k = 0; k < FANOUT; k++)
+			{
+				_fanoutTable[k] = NB.DecodeUInt32(fanoutRaw, k * 4);
+			}
+			ObjectCount = _fanoutTable[FANOUT - 1];
 
-        /** 256 arrays of contiguous object names. */
-        private int[][] names;
+			_names = new int[FANOUT][];
+			_offset32 = new byte[FANOUT][];
+			_crc32 = new byte[FANOUT][];
 
-        /** 256 arrays of the 32 bit offset data, matching {@link #names}. */
-        private byte[][] offset32;
+			// object name table. The size we can permit per fan-out bucket
+			// is limited to Java's 2 GB per byte array limitation. That is
+			// no more than 107,374,182 objects per fan-out.
+			//
+			for (int k = 0; k < FANOUT; k++)
+			{
+				long bucketCnt;
+				if (k == 0)
+				{
+					bucketCnt = _fanoutTable[k];
+				}
+				else
+				{
+					bucketCnt = _fanoutTable[k] - _fanoutTable[k - 1];
+				}
 
-        /** 256 arrays of the CRC-32 of objects, matching {@link #names}. */
-        private byte[][] crc32;
+				if (bucketCnt == 0)
+				{
+					_names[k] = NoInts;
+					_offset32[k] = NoBytes;
+					_crc32[k] = NoBytes;
+					continue;
+				}
 
-        /** 64 bit offset table. */
-        private byte[] offset64;
+				long nameLen = bucketCnt * AnyObjectId.ObjectIdLength;
+				if (nameLen > int.MaxValue)
+				{
+					throw new IOException("Index file is too large");
+				}
 
-        public PackIndexV2(Stream fd)
-        {
-            byte[] fanoutRaw = new byte[4 * FANOUT];
-            NB.ReadFully(fd, fanoutRaw, 0, fanoutRaw.Length);
-            fanoutTable = new long[FANOUT];
-            for (int k = 0; k < FANOUT; k++)
-                fanoutTable[k] = NB.DecodeUInt32(fanoutRaw, k * 4);
-            ObjectCount = fanoutTable[FANOUT - 1];
+				var intNameLen = (int)nameLen;
+				var raw = new byte[intNameLen];
+				var bin = new int[intNameLen >> 2];
+				NB.ReadFully(fd, raw, 0, raw.Length);
+				for (int i = 0; i < bin.Length; i++)
+				{
+					bin[i] = NB.DecodeInt32(raw, i << 2);
+				}
 
-            names = new int[FANOUT][];
-            offset32 = new byte[FANOUT][];
-            crc32 = new byte[FANOUT][];
+				_names[k] = bin;
+				_offset32[k] = new byte[(int)(bucketCnt * 4)];
+				_crc32[k] = new byte[(int)(bucketCnt * 4)];
+			}
 
-            // object name table. The size we can permit per fan-out bucket
-            // is limited to Java's 2 GB per byte array limitation. That is
-            // no more than 107,374,182 objects per fan-out.
-            //
-            for (int k = 0; k < FANOUT; k++)
-            {
-                long bucketCnt;
-                if (k == 0)
-                    bucketCnt = fanoutTable[k];
-                else
-                    bucketCnt = fanoutTable[k] - fanoutTable[k - 1];
+			// CRC32 table.
+			for (int k = 0; k < FANOUT; k++)
+			{
+				NB.ReadFully(fd, _crc32[k], 0, _crc32[k].Length);
+			}
 
-                if (bucketCnt == 0)
-                {
-                    names[k] = NO_INTS;
-                    offset32[k] = NO_BYTES;
-                    crc32[k] = NO_BYTES;
-                    continue;
-                }
+			// 32 bit offset table. Any entries with the most significant bit
+			// set require a 64 bit offset entry in another table.
+			//
+			int o64cnt = 0;
+			for (int k = 0; k < FANOUT; k++)
+			{
+				byte[] ofs = _offset32[k];
+				NB.ReadFully(fd, ofs, 0, ofs.Length);
+				for (int p = 0; p < ofs.Length; p += 4)
+				{
+					if (ofs[p] < 0)
+					{
+						o64cnt++;
+					}
+				}
+			}
 
-                long nameLen = bucketCnt * AnyObjectId.ObjectIdLength;
-                if (nameLen > int.MaxValue)
-                    throw new IOException("Index file is too large");
+			// 64 bit offset table. Most objects should not require an entry.
+			//
+			if (o64cnt > 0)
+			{
+				_offset64 = new byte[o64cnt * 8];
+				NB.ReadFully(fd, _offset64, 0, _offset64.Length);
+			}
+			else
+			{
+				_offset64 = NoBytes;
+			}
 
-                int intNameLen = (int)nameLen;
-                byte[] raw = new byte[intNameLen];
-                int[] bin = new int[intNameLen >> 2];
-                NB.ReadFully(fd, raw, 0, raw.Length);
-                for (int i = 0; i < bin.Length; i++)
-                    bin[i] = NB.DecodeInt32(raw, i << 2);
+			_packChecksum = new byte[20];
+			NB.ReadFully(fd, _packChecksum, 0, _packChecksum.Length);
+		}
 
-                names[k] = bin;
-                offset32[k] = new byte[(int)(bucketCnt * 4)];
-                crc32[k] = new byte[(int)(bucketCnt * 4)];
-            }
+		public override IEnumerator<MutableEntry> GetEnumerator()
+		{
+			return new EntriesEnumeratorV2(this);
+		}
 
-            // CRC32 table.
-            for (int k = 0; k < FANOUT; k++)
-                NB.ReadFully(fd, crc32[k], 0, crc32[k].Length);
+		public override long ObjectCount { get; internal set; }
 
-            // 32 bit offset table. Any entries with the most significant bit
-            // set require a 64 bit offset entry in another table.
-            //
-            int o64cnt = 0;
-            for (int k = 0; k < FANOUT; k++)
-            {
-                byte[] ofs = offset32[k];
-                NB.ReadFully(fd, ofs, 0, ofs.Length);
-                for (int p = 0; p < ofs.Length; p += 4)
-                    if (ofs[p] < 0)
-                        o64cnt++;
-            }
+		public override long Offset64Count
+		{
+			get { return _offset64.Length / 8; }
+		}
 
-            // 64 bit offset table. Most objects should not require an entry.
-            //
-            if (o64cnt > 0)
-            {
-                offset64 = new byte[o64cnt * 8];
-                NB.ReadFully(fd, offset64, 0, offset64.Length);
-            }
-            else
-            {
-                offset64 = NO_BYTES;
-            }
-            _packChecksum = new byte[20];
-            NB.ReadFully(fd, _packChecksum, 0, _packChecksum.Length);
-        }
+		public override ObjectId GetObjectId(long nthPosition)
+		{
+			int levelOne = Array.BinarySearch(_fanoutTable, nthPosition + 1);
+			long lbase;
+			if (levelOne >= 0)
+			{
+				// If we hit the bucket exactly the item is in the bucket, or
+				// any bucket before it which has the same object count.
+				//
+				lbase = _fanoutTable[levelOne];
+				while (levelOne > 0 && lbase == _fanoutTable[levelOne - 1])
+				{
+					levelOne--;
+				}
+			}
+			else
+			{
+				// The item is in the bucket we would insert it into.
+				//
+				levelOne = -(levelOne + 1);
+			}
 
-        public override IEnumerator<PackIndex.MutableEntry> GetEnumerator()
-        {
-            return new EntriesEnumeratorV2(this);
-        }
+			lbase = levelOne > 0 ? _fanoutTable[levelOne - 1] : 0;
+			var p = (int)(nthPosition - lbase);
+			int p4 = p << 2;
+			return ObjectId.FromRaw(_names[levelOne], p4 + p); // p * 5
+		}
 
-        public override long ObjectCount{get;internal set;}
+		public override long FindOffset(AnyObjectId objId)
+		{
+			int levelOne = objId.GetFirstByte();
+			int levelTwo = BinarySearchLevelTwo(objId, levelOne);
+			if (levelTwo == -1)
+			{
+				return -1;
+			}
 
-        public override long Offset64Count
-        {
-            get
-            {
-                return offset64.Length / 8;
-            }
-        }
+			long p = NB.DecodeUInt32(_offset32[levelOne], levelTwo << 2);
+			if ((p & IS_O64) != 0)
+			{
+				return NB.DecodeUInt64(_offset64, (8 * (int)(p & ~IS_O64)));
+			}
 
-        public override ObjectId GetObjectId(long nthPosition)
-        {
-            int levelOne = Array.BinarySearch(fanoutTable, nthPosition + 1);
-            long lbase;
-            if (levelOne >= 0)
-            {
-                // If we hit the bucket exactly the item is in the bucket, or
-                // any bucket before it which has the same object count.
-                //
-                lbase = fanoutTable[levelOne];
-                while (levelOne > 0 && lbase == fanoutTable[levelOne - 1])
-                    levelOne--;
-            }
-            else
-            {
-                // The item is in the bucket we would insert it into.
-                //
-                levelOne = -(levelOne + 1);
-            }
+			return p;
+		}
 
-            lbase = levelOne > 0 ? fanoutTable[levelOne - 1] : 0;
-            int p = (int)(nthPosition - lbase);
-            int p4 = p << 2;
-            return ObjectId.FromRaw(names[levelOne], p4 + p); // p * 5
-        }
+		public override long FindCRC32(AnyObjectId objId)
+		{
+			int levelOne = objId.GetFirstByte();
+			int levelTwo = BinarySearchLevelTwo(objId, levelOne);
+			if (levelTwo == -1)
+			{
+				throw new MissingObjectException(objId.Copy(), ObjectType.Unknown);
+			}
 
-        public override long FindOffset(AnyObjectId objId)
-        {
-            int levelOne = objId.GetFirstByte();
-            int levelTwo = BinarySearchLevelTwo(objId, levelOne);
-            if (levelTwo == -1)
-                return -1;
-            long p = NB.DecodeUInt32(offset32[levelOne], levelTwo << 2);
-            if ((p & IS_O64) != 0)
-                return NB.DecodeUInt64(offset64, (8 * (int)(p & ~IS_O64)));
-            return p;
-        }
+			return NB.DecodeUInt32(_crc32[levelOne], levelTwo << 2);
+		}
 
-        public override long FindCRC32(AnyObjectId objId)
-        {
-            int levelOne = objId.GetFirstByte();
-            int levelTwo = BinarySearchLevelTwo(objId, levelOne);
-            if (levelTwo == -1)
-                throw new MissingObjectException(objId.Copy(), ObjectType.Unknown);
-            return NB.DecodeUInt32(crc32[levelOne], levelTwo << 2);
-        }
+		public override bool HasCRC32Support
+		{
+			get { return true; }
+		}
 
-        public override bool HasCRC32Support
-        {
-            get
-            {
-                return true;
-            }
-        }
+		private int BinarySearchLevelTwo(AnyObjectId objId, int levelOne)
+		{
+			int[] data = _names[levelOne];
+			var high = (int)((uint)(_offset32[levelOne].Length) >> 2);
+			if (high == 0)
+			{
+				return -1;
+			}
 
-        private int BinarySearchLevelTwo(AnyObjectId objId, int levelOne)
-        {
-            int[] data = names[levelOne];
-            int high = (int)((uint)(offset32[levelOne].Length) >> 2);
-            if (high == 0)
-                return -1;
-            int low = 0;
-            do
-            {
-                int mid = (int)((uint)(low + high) >> 1);
-                int mid4 = mid << 2;
-                int cmp;
+			int low = 0;
+			do
+			{
+				var mid = (int)((uint)(low + high) >> 1);
+				int mid4 = mid << 2;
 
-                cmp = objId.CompareTo(data, mid4 + mid); // mid * 5
-                if (cmp < 0)
-                    high = mid;
-                else if (cmp == 0)
-                {
-                    return mid;
-                }
-                else
-                    low = mid + 1;
-            } while (low < high);
-            return -1;
-        }
-        private class EntriesEnumeratorV2 : EntriesIterator
-        {
+				int cmp = objId.CompareTo(data, mid4 + mid);
+				if (cmp < 0)
+				{
+					high = mid;
+				}
+				else if (cmp == 0)
+				{
+					return mid;
+				}
+				else
+				{
+					low = mid + 1;
+				}
 
-            private int levelOne;
+			} while (low < high);
+			return -1;
+		}
 
-            private int levelTwo;
+		#region Nested Types
 
-            private readonly PackIndexV2 _index;
+		private class EntriesEnumeratorV2 : EntriesIterator
+		{
+			private readonly PackIndexV2 _index;
+			private int _levelOne;
+			private int _levelTwo;
 
-            public EntriesEnumeratorV2(PackIndexV2 index)
-            {
-                _index = index;
-            }
+			public EntriesEnumeratorV2(PackIndexV2 index)
+			{
+				_index = index;
+			}
 
-            public override bool MoveNext()
-            {
-                for (; levelOne < _index.names.Length; levelOne++)
-                {
-                    if (levelTwo < _index.names[levelOne].Length)
-                    {
-                        Current.FromRaw(_index.names[levelOne], levelTwo);
-                        int arrayIdx = levelTwo / (AnyObjectId.ObjectIdLength / 4) * 4;
-                        long offset = NB.DecodeUInt32(_index.offset32[levelOne], arrayIdx);
-                        if ((offset & IS_O64) != 0)
-                        {
-                            arrayIdx = (8 * (int)(offset & ~IS_O64));
-                            offset = NB.DecodeUInt64(_index.offset64, arrayIdx);
-                        }
-                        Current.Offset = offset;
+			public override bool MoveNext()
+			{
+				for (; _levelOne < _index._names.Length; _levelOne++)
+				{
+					if (_levelTwo < _index._names[_levelOne].Length)
+					{
+						Current.FromRaw(_index._names[_levelOne], _levelTwo);
+						int arrayIdx = _levelTwo / (AnyObjectId.ObjectIdLength / 4) * 4;
+						long offset = NB.DecodeUInt32(_index._offset32[_levelOne], arrayIdx);
+						if ((offset & IS_O64) != 0)
+						{
+							arrayIdx = (8 * (int)(offset & ~IS_O64));
+							offset = NB.DecodeUInt64(_index._offset64, arrayIdx);
+						}
+						Current.Offset = offset;
 
-                        levelTwo += AnyObjectId.ObjectIdLength / 4;
-                        returnedNumber++;
-                        return true;
-                    }
-                   levelTwo = 0;
-                }
-                return false;                
-            }
+						_levelTwo += AnyObjectId.ObjectIdLength / 4;
+						returnedNumber++;
+						return true;
+					}
+					_levelTwo = 0;
+				}
 
-            public override void Reset()
-            {
-                returnedNumber = 0;
-                levelOne = 0;
-                levelTwo = 0;
-                Current = new MutableEntry();
-            }
-        }
-    }
+				return false;
+			}
+
+			public override void Reset()
+			{
+				returnedNumber = 0;
+				_levelOne = 0;
+				_levelTwo = 0;
+				Current = new MutableEntry();
+			}
+		}
+
+		#endregion
+	}
 }

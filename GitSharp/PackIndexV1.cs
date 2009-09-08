@@ -40,8 +40,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using GitSharp.Util;
 
@@ -50,42 +48,48 @@ namespace GitSharp
     [Complete]
     public class PackIndexV1 : PackIndex
     {
-        private const int IDX_HDR_LEN = 256 * 4;
-
-        private readonly long[] idxHeader;
-
-        private byte[][] idxdata;
+        private const int IdxHdrLen = 256 * 4;
+        private readonly long[] _idxHeader;
+        private readonly byte[][] _idxdata;
 
         public PackIndexV1(Stream fd, byte[] hdr)
         {
-            var fanoutTable = new byte[IDX_HDR_LEN];
+            var fanoutTable = new byte[IdxHdrLen];
             Array.Copy(hdr, 0, fanoutTable, 0, hdr.Length);
-            NB.ReadFully(fd, fanoutTable, hdr.Length, IDX_HDR_LEN - hdr.Length);
+            NB.ReadFully(fd, fanoutTable, hdr.Length, IdxHdrLen - hdr.Length);
 
-            idxHeader = new long[256]; // really unsigned 32-bit...
-            for (int k = 0; k < idxHeader.Length; k++)
-                idxHeader[k] = NB.DecodeUInt32(fanoutTable, k * 4);
-            idxdata = new byte[idxHeader.Length][];
-            for (int k = 0; k < idxHeader.Length; k++)
+            _idxHeader = new long[256]; // really unsigned 32-bit...
+            for (int k = 0; k < _idxHeader.Length; k++)
+            {
+            	_idxHeader[k] = NB.DecodeUInt32(fanoutTable, k * 4);
+            }
+
+            _idxdata = new byte[_idxHeader.Length][];
+            for (int k = 0; k < _idxHeader.Length; k++)
             {
                 int n;
                 if (k == 0)
-                    n = (int)(idxHeader[k]);
+                {
+                	n = (int)(_idxHeader[k]);
+                }
                 else
-                    n = (int)(idxHeader[k] - idxHeader[k - 1]);
+                {
+                	n = (int)(_idxHeader[k] - _idxHeader[k - 1]);
+                }
 
                 if (n <= 0) continue;
 
-                idxdata[k] = new byte[n * (AnyObjectId.ObjectIdLength + 4)];
-                NB.ReadFully(fd, idxdata[k], 0, idxdata[k].Length);
+                _idxdata[k] = new byte[n * (AnyObjectId.ObjectIdLength + 4)];
+                NB.ReadFully(fd, _idxdata[k], 0, _idxdata[k].Length);
             }
-            ObjectCount = idxHeader[255];
+
+            ObjectCount = _idxHeader[255];
 
             _packChecksum = new byte[20];
             NB.ReadFully(fd, _packChecksum, 0, _packChecksum.Length);
         }
 
-        public override IEnumerator<PackIndex.MutableEntry> GetEnumerator()
+        public override IEnumerator<MutableEntry> GetEnumerator()
         {
             return new IndexV1Enumerator(this);
         }
@@ -108,16 +112,18 @@ namespace GitSharp
 
         public override ObjectId GetObjectId(long nthPosition)
         {
-            int levelOne = Array.BinarySearch(idxHeader, nthPosition + 1);
+            int levelOne = Array.BinarySearch(_idxHeader, nthPosition + 1);
             long lbase;
             if (levelOne >= 0)
             {
                 // If we hit the bucket exactly the item is in the bucket, or
                 // any bucket before it which has the same object count.
                 //
-                lbase = idxHeader[levelOne];
-                while (levelOne > 0 && lbase == idxHeader[levelOne - 1])
-                    levelOne--;
+                lbase = _idxHeader[levelOne];
+                while (levelOne > 0 && lbase == _idxHeader[levelOne - 1])
+                {
+                	levelOne--;
+                }
             }
             else
             {
@@ -126,16 +132,16 @@ namespace GitSharp
                 levelOne = -(levelOne + 1);
             }
 
-            lbase = levelOne > 0 ? idxHeader[levelOne - 1] : 0;
-            int p = (int)(nthPosition - lbase);
+            lbase = levelOne > 0 ? _idxHeader[levelOne - 1] : 0;
+            var p = (int)(nthPosition - lbase);
             int dataIdx = ((4 + AnyObjectId.ObjectIdLength) * p) + 4;
-            return ObjectId.FromRaw(idxdata[levelOne], dataIdx);
+            return ObjectId.FromRaw(_idxdata[levelOne], dataIdx);
         }
 
         public override long FindOffset(AnyObjectId objId)
         {
             int levelOne = objId.GetFirstByte();
-            byte[] data = idxdata[levelOne];
+            byte[] data = _idxdata[levelOne];
             if (data == null)
             {
             	return -1;
@@ -174,59 +180,58 @@ namespace GitSharp
 
         public override bool HasCRC32Support
         {
-            get
-            {
-                return false;
+            get { return false;
             }
         }
 
-        private class IndexV1Enumerator : EntriesIterator
-        {
-            private int levelOne;
+    	#region Nested Types
 
-            private int levelTwo;
+    	private class IndexV1Enumerator : EntriesIterator
+    	{
+    		private readonly PackIndexV1 _index;
+    		private int _levelOne;
+    		private int _levelTwo;
 
-            private PackIndexV1 _index;
+    		public IndexV1Enumerator(PackIndexV1 index)
+    		{
+    			_index = index;
+    		}
 
-            public IndexV1Enumerator(PackIndexV1 index)
-            {
-                _index = index;
-            }
+    		public override bool MoveNext()
+    		{
 
-            public override bool MoveNext()
-            {
+    			for (; _levelOne < _index._idxdata.Length; _levelOne++)
+    			{
+    				if (_index._idxdata[_levelOne] == null)
+    				{
+    					continue;
+    				}
 
-                for (; levelOne < _index.idxdata.Length; levelOne++)
-                {
-                    if (_index.idxdata[levelOne] == null)
-                        continue;
+    				if (_levelTwo < _index._idxdata[_levelOne].Length)
+    				{
+    					long offset = NB.DecodeUInt32(_index._idxdata[_levelOne], _levelTwo);
+    					Current.Offset = offset;
+    					Current.FromRaw(_index._idxdata[_levelOne], _levelTwo + 4);
+    					_levelTwo += AnyObjectId.ObjectIdLength + 4;
+    					returnedNumber++;
+    					return true;
+    				}
+                	
+    				_levelTwo = 0;
+    			}
+    			return false;
+    		}
 
-                    if (levelTwo < _index.idxdata[levelOne].Length)
-                    {
-                        long offset = NB.DecodeUInt32(_index.idxdata[levelOne], levelTwo);
-                        Current.Offset = offset;
-                        Current.FromRaw(_index.idxdata[levelOne], levelTwo + 4);
-                        levelTwo += AnyObjectId.ObjectIdLength + 4;
-                        returnedNumber++;
-                        return true;
-                    }
-                    else
-                    {
-                        levelTwo = 0;
-                    }
-                }
-                return false;
-                //throw new InvalidOperationException();
-            }
+    		public override void Reset()
+    		{
+    			returnedNumber = 0;
+    			_levelOne = 0;
+    			_levelTwo = 0;
+    			Current = new MutableEntry();
+    		}
+    	}
 
+    	#endregion
 
-            public override void Reset()
-            {
-                returnedNumber = 0;
-                levelOne = 0;
-                levelTwo = 0;
-                Current = new MutableEntry();
-            }
-        }
     }
 }

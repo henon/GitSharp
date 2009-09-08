@@ -197,46 +197,4 @@ namespace GitSharp
 			                    intbuffer[offset + 4]);
 		}
 	}
-
-	class ObjectIdEqualityComparer<T> : IEqualityComparer<T>
-		where T : ObjectId
-	{
-		#region Implementation of IEqualityComparer<ObjectId>
-
-		/// <summary>
-		/// Determines whether the specified objects are equal.
-		/// </summary>
-		/// <returns>
-		/// true if the specified objects are equal; otherwise, false.
-		/// </returns>
-		/// <param name="x">
-		/// The first object of type <see cref="ObjectId"/> to compare.
-		/// </param>
-		/// <param name="y">
-		/// The second object of type <see cref="ObjectId"/> to compare.
-		/// </param>
-		public bool Equals(T x, T y)
-		{
-			return x == y;
-		}
-
-		/// <summary>
-		/// Returns a hash code for the specified object.
-		/// </summary>
-		/// <returns>
-		/// A hash code for the specified object.
-		/// </returns>
-		/// <param name="obj">
-		/// The <see cref="ObjectId"/> for which a hash code is to be returned.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		/// The type of <paramref name="obj"/> is a reference type and <paramref name="obj"/> is null.
-		/// </exception>
-		public int GetHashCode(T obj)
-		{
-			return obj.GetHashCode();
-		}
-
-		#endregion
-	}
 }

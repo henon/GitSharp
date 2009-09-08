@@ -40,48 +40,52 @@ using GitSharp.Util;
 
 namespace GitSharp
 {
-    /** Keeps track of a {@link PackFile}'s associated <code>.keep</code> file. */
+    /// <summary>
+	/// Keeps track of a <see cref="PackFile"/> associated <code>.keep</code> file.
+    /// </summary>
     public class PackLock
     {
-        private readonly FileInfo keepFile;
+        private readonly FileInfo _keepFile;
 
-        /**
-         * Create a new lock for a pack file.
-         *
-         * @param packFile
-         *            location of the <code>pack-*.pack</code> file.
-         */
+        /// <summary>
+        /// Create a new lock for a pack file.
+        /// </summary>
+        /// <param name="packFile">
+		/// Location of the <code>pack-*.pack</code> file.
+        /// </param>
         public PackLock(FileInfo packFile)
         {
             string n = packFile.Name;
             string p = packFile.DirectoryName + Path.PathSeparator + n.Slice(0, n.Length - 5) + ".keep";
-            keepFile = new FileInfo(p);
+            _keepFile = new FileInfo(p);
         }
 
-        /**
-         * Create the <code>pack-*.keep</code> file, with the given message.
-         *
-         * @param msg
-         *            message to store in the file.
-         * @return true if the keep file was successfully written; false otherwise.
-         * @throws IOException
-         *             the keep file could not be written.
-         */
+        /// <summary>
+        /// Create the <code>pack-*.keep</code> file, with the given message.
+        /// </summary>
+        /// <param name="msg">message to store in the file.</param>
+        /// <returns>
+        /// true if the keep file was successfully written; false otherwise.
+        /// </returns>
+        /// <exception cref="IOException">
+		/// The keep file could not be written.
+        /// </exception>
         public bool Lock(string msg)
         {
             if (msg == null) return false;
             if (!msg.EndsWith("\n")) msg += "\n";
-            LockFile lf = new LockFile(keepFile);
+            var lf = new LockFile(_keepFile);
             if (!lf.Lock()) return false;
             lf.Write(Constants.encode(msg));
             return lf.Commit();
         }
 
-        /** Remove the <code>.keep</code> file that holds this pack in place. */
+        /// <summary>
+		/// Remove the <code>.keep</code> file that holds this pack in place.
+        /// </summary>
         public void Unlock()
         {
-            keepFile.Delete();
+            _keepFile.Delete();
         }
     }
-
 }

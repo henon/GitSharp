@@ -56,9 +56,9 @@ namespace GitSharp
 	/// Type of subclass of ObjectId that will be stored in the map.
 	/// </typeparam>
 	public class ObjectIdSubclassMap<TObject> : HashSet<TObject>
-		where TObject : ObjectId
+		where TObject : AnyObjectId
 	{
-		private static readonly IEqualityComparer<TObject> EqualityComparer = new ObjectIdEqualityComparer<TObject>();
+		private static readonly IEqualityComparer<TObject> EqualityComparer = new AnyObjectId.AnyObjectIdEqualityComparer<TObject>();
 
 		public ObjectIdSubclassMap()
 			: base(EqualityComparer)

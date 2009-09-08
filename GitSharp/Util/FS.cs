@@ -198,6 +198,21 @@ namespace GitSharp.Util
             //    return null;
             //return new File(home).getAbsoluteFile();
         }
+
+        public static bool mkdirs(this DirectoryInfo directoryInfo)
+        {
+            if (directoryInfo.Exists)
+            {
+                return true;
+            }
+
+            directoryInfo.Parent.mkdirs();
+
+            directoryInfo.Create();
+
+            return true;
+        }
+
     }
 
 }

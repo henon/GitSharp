@@ -36,6 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -71,9 +72,48 @@ namespace GitSharp.RevWalk
 		public RevFlagSet(IEnumerable<RevFlag> collection)
 			: base(collection)
 		{
-		}
+      addAll();
+    }
 
-		public bool ContainsAll(IEnumerable<RevFlag> c) // [henon] was Collection<?> in java
+	  private void addAll()
+	  {
+	    foreach (var set in this)
+	    {
+	      Mask |= set.Mask;
+	    }
+	  }
+
+	  public bool Equals(RevFlagSet other)
+	  {
+	    if (ReferenceEquals(null, other)) return false;
+	    if (ReferenceEquals(this, other)) return true;
+	    return other.Mask == Mask;
+	  }
+
+	  public override bool Equals(object obj)
+	  {
+	    if (ReferenceEquals(null, obj)) return false;
+	    if (ReferenceEquals(this, obj)) return true;
+	    if (obj.GetType() != typeof (RevFlagSet)) return false;
+	    return Equals((RevFlagSet) obj);
+	  }
+
+	  public override int GetHashCode()
+	  {
+	    return Mask;
+	  }
+
+	  public static bool operator ==(RevFlagSet left, RevFlagSet right)
+	  {
+	    return Equals(left, right);
+	  }
+
+	  public static bool operator !=(RevFlagSet left, RevFlagSet right)
+	  {
+	    return !Equals(left, right);
+	  }
+
+	  public bool ContainsAll(IEnumerable<RevFlag> c) // [henon] was Collection<?> in java
 		{
 			if (c is RevFlagSet)
 			{

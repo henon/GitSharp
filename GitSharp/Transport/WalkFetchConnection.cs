@@ -202,7 +202,7 @@ namespace GitSharp.Transport
 				throw new TransportException("Cannot Read " + id.Name, e);
 			}
 
-			obj.dispose();
+			obj.Dispose();
 
 			switch (obj.getType())
 			{
@@ -626,7 +626,7 @@ namespace GitSharp.Transport
 			while (obj.getType() == Constants.OBJ_TAG)
 			{
 				obj.add(COMPLETE);
-				obj.dispose();
+				obj.Dispose();
 				obj = ((RevTag)obj).getObject();
 				_revWalk.parse(obj);
 			}
@@ -677,7 +677,7 @@ namespace GitSharp.Transport
 			p.add(LOCALLY_SEEN);
 			p.add(COMPLETE);
 			p.carry(COMPLETE);
-			p.dispose();
+			p.Dispose();
 			_localCommitQueue.add(p);
 		}
 

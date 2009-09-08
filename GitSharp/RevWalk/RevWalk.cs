@@ -298,12 +298,12 @@ namespace GitSharp.RevWalk
 		/// </exception>
 		public virtual void markStart(RevCommit c)
 		{
-			if ((c.flags & SEEN) != 0) return;
-			if ((c.flags & PARSED) == 0)
+			if ((c.Flags & SEEN) != 0) return;
+			if ((c.Flags & PARSED) == 0)
 			{
 				c.parse(this);
 			}
-			c.flags |= SEEN;
+			c.Flags |= SEEN;
 			_roots.Add(c);
 			Queue.add(c);
 		}
@@ -380,7 +380,7 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual void markUninteresting(RevCommit c)
 		{
-			c.flags |= UNINTERESTING;
+			c.Flags |= UNINTERESTING;
 			carryFlagsImpl(c);
 			markStart(c);
 		}
@@ -421,7 +421,7 @@ namespace GitSharp.RevWalk
 			TreeFilter oldTF = _treeFilter;
 			try
 			{
-				finishDelayedFreeFlags();
+				FinishDelayedFreeFlags();
 				reset(~_freeFlags & APP_FLAGS);
 				_filter = RevFilter.MERGE_BASE;
 				_treeFilter = TreeFilter.ALL;
@@ -768,14 +768,19 @@ namespace GitSharp.RevWalk
 
 			RevTree t;
 			if (c is RevCommit)
+			{
 				t = ((RevCommit)c).Tree;
+			}
 			else if (!(c is RevTree))
-				throw new IncorrectObjectTypeException(id.ToObjectId(),
-						Constants.TYPE_TREE);
+			{
+				throw new IncorrectObjectTypeException(id.ToObjectId(), Constants.TYPE_TREE);
+			}
 			else
+			{
 				t = (RevTree)c;
+			}
 
-			if ((t.flags & PARSED) != 0)
+			if ((t.Flags & PARSED) != 0)
 			{
 				return t;
 			}
@@ -791,7 +796,7 @@ namespace GitSharp.RevWalk
 				throw new IncorrectObjectTypeException(t, Constants.TYPE_TREE);
 			}
 			
-			t.flags |= PARSED;
+			t.Flags |= PARSED;
 			return t;
 		}
 
@@ -833,13 +838,13 @@ namespace GitSharp.RevWalk
 					case Constants.OBJ_TREE:
 						{
 							r = new RevTree(id);
-							r.flags |= PARSED;
+							r.Flags |= PARSED;
 							break;
 						}
 					case Constants.OBJ_BLOB:
 						{
 							r = new RevBlob(id);
-							r.flags |= PARSED;
+							r.Flags |= PARSED;
 							break;
 						}
 					case Constants.OBJ_TAG:
@@ -854,7 +859,7 @@ namespace GitSharp.RevWalk
 				}
 				_objects.Add(r);
 			}
-			else if ((r.flags & PARSED) == 0)
+			else if ((r.Flags & PARSED) == 0)
 			{
 				r.parse(this);
 			}
@@ -877,7 +882,7 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual void parse(RevObject obj)
 		{
-			if ((obj.flags & PARSED) != 0)
+			if ((obj.Flags & PARSED) != 0)
 				return;
 			obj.parse(this);
 		}
@@ -963,7 +968,7 @@ namespace GitSharp.RevWalk
 
 		internal virtual void freeFlag(int mask)
 		{
-			if (isNotStarted())
+			if (IsNotStarted())
 			{
 				_freeFlags |= mask;
 				_carryFlags &= ~mask;
@@ -974,14 +979,12 @@ namespace GitSharp.RevWalk
 			}
 		}
 
-		private void finishDelayedFreeFlags()
+		private void FinishDelayedFreeFlags()
 		{
-			if (_delayFreeFlags != 0)
-			{
-				_freeFlags |= _delayFreeFlags;
-				_carryFlags &= ~_delayFreeFlags;
-				_delayFreeFlags = 0;
-			}
+			if (_delayFreeFlags == 0) return;
+			_freeFlags |= _delayFreeFlags;
+			_carryFlags &= ~_delayFreeFlags;
+			_delayFreeFlags = 0;
 		}
 
 		/**
@@ -1044,15 +1047,15 @@ namespace GitSharp.RevWalk
 		 */
 		internal virtual void reset(int retainFlags)
 		{
-			finishDelayedFreeFlags();
+			FinishDelayedFreeFlags();
 			retainFlags |= PARSED;
 			int clearFlags = ~retainFlags;
 
 			var q = new FIFORevQueue();
 			foreach (RevCommit c in _roots)
 			{
-				if ((c.flags & clearFlags) == 0) continue;
-				c.flags &= retainFlags;
+				if ((c.Flags & clearFlags) == 0) continue;
+				c.Flags &= retainFlags;
 				c.reset();
 				q.add(c);
 			}
@@ -1065,8 +1068,8 @@ namespace GitSharp.RevWalk
 
 				foreach (RevCommit p in c.Parents)
 				{
-					if ((p.flags & clearFlags) == 0) continue;
-					p.flags &= retainFlags;
+					if ((p.Flags & clearFlags) == 0) continue;
+					p.Flags &= retainFlags;
 					p.reset();
 					q.add(p);
 				}
@@ -1207,12 +1210,12 @@ namespace GitSharp.RevWalk
 		/** Throws an exception if we have started producing output. */
 		internal void assertNotStarted()
 		{
-			if (isNotStarted())
+			if (IsNotStarted())
 				return;
 			throw new InvalidOperationException("Output has already been started.");
 		}
 
-		private bool isNotStarted()
+		private bool IsNotStarted()
 		{
 			return Pending is StartGenerator;
 		}
@@ -1231,9 +1234,11 @@ namespace GitSharp.RevWalk
 
 		internal virtual void carryFlagsImpl(RevCommit c)
 		{
-			int carry = c.flags & _carryFlags;
+			int carry = c.Flags & _carryFlags;
 			if (carry != 0)
+			{
 				RevCommit.carryFlags(c, carry);
+			}
 		}
 
 		#region IEnumerable<RevCommit> Members

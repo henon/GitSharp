@@ -88,11 +88,11 @@ namespace GitSharp.Tests.RevWalk
             Assert.IsFalse(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
             Assert.IsFalse(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
 
-            a.flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
+            a.Flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
             Assert.IsFalse(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
             Assert.IsTrue(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
 
-            b.flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
+            b.Flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
             Assert.IsTrue(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
             Assert.IsTrue(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
         }

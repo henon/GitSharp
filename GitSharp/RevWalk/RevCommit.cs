@@ -49,6 +49,7 @@ namespace GitSharp.RevWalk
     public class RevCommit : RevObject
     {
         public static readonly RevCommit[] NO_PARENTS = { };
+
         private RevTree _tree;
     	private byte[] _buffer;
 
@@ -70,12 +71,11 @@ namespace GitSharp.RevWalk
 
 		/// <summary>
 		/// Obtain an array of all parents (<b>NOTE - THIS IS NOT A COPY</b>).
-		/// <para>
+		/// <para />
 		/// This method is exposed only to provide very fast, efficient access to
 		/// this commit's parent list. Applications relying on this list should be
 		/// very careful to ensure they do not modify its contents during their use
 		/// of it.
-		/// </para>
 		/// </summary>
     	public RevCommit[] Parents { get; set; }
 
@@ -168,7 +168,7 @@ namespace GitSharp.RevWalk
             }
 
             _buffer = raw;
-            flags |= PARSED;
+            Flags |= PARSED;
         }
 
         public override int getType()
@@ -188,32 +188,32 @@ namespace GitSharp.RevWalk
                 for (int i = 1; i < n; i++)
                 {
                     RevCommit p = pList[i];
-                    if ((p.flags & carry) == carry) continue;
-                    p.flags |= carry;
+                    if ((p.Flags & carry) == carry) continue;
+                    p.Flags |= carry;
                     carryFlags(p, carry);
                 }
 
                 c = pList[0];
-                if ((c.flags & carry) == carry) return;
-                c.flags |= carry;
+                if ((c.Flags & carry) == carry) return;
+                c.Flags |= carry;
             }
         }
 
-        /**
-         * Carry a RevFlag set on this commit to its parents.
-         * <p>
-         * If this commit is parsed, has parents, and has the supplied flag set on
-         * it we automatically add it to the parents, grand-parents, and so on until
-         * an unparsed commit or a commit with no parents is discovered. This
-         * permits applications to force a flag through the history chain when
-         * necessary.
-         * 
-         * @param flag
-         *            the single flag value to carry back onto parents.
-         */
+        /// <summary>
+        /// Carry a RevFlag set on this commit to its parents.
+		/// <para />
+		/// If this commit is parsed, has parents, and has the supplied flag set on
+		/// it we automatically add it to the parents, grand-parents, and so on until
+		/// an unparsed commit or a commit with no parents is discovered. This
+		/// permits applications to force a flag through the history chain when
+		/// necessary.
+        /// </summary>
+		/// <param name="flag">
+		/// The single flag value to carry back onto parents.
+		/// </param>
         public void carry(RevFlag flag)
         {
-            int carry = flags & flag.Mask;
+            int carry = Flags & flag.Mask;
             if (carry != 0)
             {
             	carryFlags(this, carry);
@@ -254,12 +254,11 @@ namespace GitSharp.RevWalk
 
         /// <summary>
         /// Obtain the raw unparsed commit body (<b>NOTE - THIS IS NOT A COPY</b>).
-		/// <para>
+		/// <para />
 		/// This method is exposed only to provide very fast, efficient access to
 		/// this commit's message buffer within a RevFilter. Applications relying on
 		/// this buffer should be very careful to ensure they do not modify its
 		/// contents during their use of it.
-		/// </para>
 		/// </summary>
 		/// <remarks>
 		/// This property returns the raw unparsed commit body. This is <b>NOT A COPY</b>.
@@ -325,12 +324,11 @@ namespace GitSharp.RevWalk
 
         /// <summary>
         /// Parse the complete commit message and decode it to a string.
-		/// <para>
+		/// <para />
 		/// This method parses and returns the message portion of the commit buffer,
 		/// After taking the commit's character set into account and decoding the
 		/// buffer using that character set. This method is a fairly expensive
 		/// operation and produces a new string on each invocation.
-		/// </para>
         /// </summary>
         /// <returns>
 		/// Decoded commit message as a string. Never null.
@@ -396,7 +394,7 @@ namespace GitSharp.RevWalk
 
         public override void dispose()
         {
-            flags &= ~PARSED;
+            Flags &= ~PARSED;
             _buffer = null;
         }
 

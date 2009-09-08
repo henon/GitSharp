@@ -100,7 +100,7 @@ namespace GitSharp.RevWalk
 				{
 					foreach (RevCommit p in c.Parents)
 					{
-						if ((p.flags & RevWalk.UNINTERESTING) != 0)
+						if ((p.Flags & RevWalk.UNINTERESTING) != 0)
 						{
 							_held.add(p);
 						}
@@ -115,11 +115,12 @@ namespace GitSharp.RevWalk
 					c = _held.next();
 					if (c == null)
 						break;
-					if ((c.flags & Duplicate) != 0)
-						continue;
-					if ((c.flags & Parsed) == 0)
+					if ((c.Flags & Duplicate) != 0) continue;
+					if ((c.Flags & Parsed) == 0)
+					{
 						c.parse(_walk);
-					c.flags |= Duplicate;
+					}
+					c.Flags |= Duplicate;
 					boundary.add(c);
 				}
 				boundary.removeFlag(Duplicate);

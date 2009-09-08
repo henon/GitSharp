@@ -190,7 +190,7 @@ namespace GitSharp.RevWalk
         {
             while (o is RevTag)
             {
-                o.flags |= UNINTERESTING;
+                o.Flags |= UNINTERESTING;
                 if (hasRevSort(RevSort.BOUNDARY))
                 {
                 	AddObject(o);
@@ -205,11 +205,11 @@ namespace GitSharp.RevWalk
             }
             else if (o is RevTree)
             {
-            	MarkTreeUninteresting((RevTree)o);
+            	MarkTreeUninteresting(o);
             }
             else
             {
-            	o.flags |= UNINTERESTING;
+            	o.Flags |= UNINTERESTING;
             }
 
             if (o.getType() != Constants.OBJ_COMMIT && hasRevSort(RevSort.BOUNDARY))
@@ -226,7 +226,7 @@ namespace GitSharp.RevWalk
                 
 				if (r == null) return null;
                 
-				if ((r.flags & UNINTERESTING) != 0)
+				if ((r.Flags & UNINTERESTING) != 0)
                 {
                     MarkTreeUninteresting(r.Tree);
 
@@ -281,9 +281,9 @@ namespace GitSharp.RevWalk
 						_treeWalk.getEntryObjectId(IdBuffer);
 
 						RevBlob blob = lookupBlob(IdBuffer);
-						if ((blob.flags & SEEN) != 0) break;
+						if ((blob.Flags & SEEN) != 0) break;
 
-						blob.flags |= SEEN;
+						blob.Flags |= SEEN;
 						if (ShouldSkipObject(blob)) break;
 
 						_fromTreeWalk = true;
@@ -293,9 +293,9 @@ namespace GitSharp.RevWalk
 						_treeWalk.getEntryObjectId(IdBuffer);
 
 						RevTree tree = lookupTree(IdBuffer);
-						if ((tree.flags & SEEN) != 0) break;
+						if ((tree.Flags & SEEN) != 0) break;
 						
-						tree.flags |= SEEN;
+						tree.Flags |= SEEN;
 						if (ShouldSkipObject(tree)) break;
 						
 						_nextSubtree = tree;
@@ -319,9 +319,9 @@ namespace GitSharp.RevWalk
             {
                 RevObject obj = _pendingObjects.next();
                 if (obj == null) return null;
-                if ((obj.flags & SEEN) != 0) continue;
+                if ((obj.Flags & SEEN) != 0) continue;
                 
-				obj.flags |= SEEN;
+				obj.Flags |= SEEN;
                 if (ShouldSkipObject(obj)) continue;
                 
 				if (obj is RevTree)
@@ -336,7 +336,7 @@ namespace GitSharp.RevWalk
 
         private bool ShouldSkipObject(RevObject o)
         {
-            return (o.flags & UNINTERESTING) != 0 && !hasRevSort(RevSort.BOUNDARY);
+            return (o.Flags & UNINTERESTING) != 0 && !hasRevSort(RevSort.BOUNDARY);
         }
 
 		/// <summary>
@@ -421,16 +421,16 @@ namespace GitSharp.RevWalk
 
         private void AddObject(RevObject obj)
         {
-        	if ((obj.flags & InPending) != 0) return;
+        	if ((obj.Flags & InPending) != 0) return;
 
-        	obj.flags |= InPending;
+        	obj.Flags |= InPending;
         	_pendingObjects.add(obj);
         }
 
         private void MarkTreeUninteresting(RevObject tree)
         {
-            if ((tree.flags & UNINTERESTING) != 0) return;
-            tree.flags |= UNINTERESTING;
+            if ((tree.Flags & UNINTERESTING) != 0) return;
+            tree.Flags |= UNINTERESTING;
 
 			_treeWalk = _treeWalk.resetRoot(getRepository(), tree, WindowCursor);
             while (!_treeWalk.eof())
@@ -442,15 +442,15 @@ namespace GitSharp.RevWalk
                 {
                     case Constants.OBJ_BLOB:
 						_treeWalk.getEntryObjectId(IdBuffer);
-						lookupBlob(IdBuffer).flags |= UNINTERESTING;
+						lookupBlob(IdBuffer).Flags |= UNINTERESTING;
 						break;
 
                     case Constants.OBJ_TREE:
 						_treeWalk.getEntryObjectId(IdBuffer);
 						RevTree t = lookupTree(IdBuffer);
-						if ((t.flags & UNINTERESTING) == 0)
+						if ((t.Flags & UNINTERESTING) == 0)
 						{
-							t.flags |= UNINTERESTING;
+							t.Flags |= UNINTERESTING;
 							_treeWalk = _treeWalk.createSubtreeIterator0(getRepository(), t, WindowCursor);
 							continue;
 						}

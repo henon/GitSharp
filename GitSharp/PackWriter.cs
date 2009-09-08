@@ -535,13 +535,13 @@ namespace GitSharp
 			while ((o = walker.next()) != null)
 			{
 				addObject(o);
-				o.dispose();
+				o.Dispose();
 				_initMonitor.Update(1);
 			}
 			while ((o = walker.nextObject()) != null)
 			{
 				addObject(o);
-				o.dispose();
+				o.Dispose();
 				_initMonitor.Update(1);
 			}
 			_initMonitor.EndTask();

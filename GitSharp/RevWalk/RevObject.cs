@@ -36,217 +36,219 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Text;
 using System;
+using System.Text;
 
 namespace GitSharp.RevWalk
 {
-    /** Base object type accessed during revision walking. */
-    public abstract class RevObject : ObjectId, IDisposable
-    {
+	/// <summary>
+	/// Base object type accessed during revision walking.
+	/// </summary>
+	public abstract class RevObject : ObjectId, IDisposable
+	{
+		public static int PARSED = 1;
 
-        public static int PARSED = 1;
+		protected RevObject(AnyObjectId name)
+			: base(name)
+		{
+		}
 
-        public int flags;
+		public int Flags { get; set; }
 
-        protected RevObject(AnyObjectId name)
-            : base(name)
-        {
-            
-        }
+		internal abstract void parse(RevWalk walk);
 
-        internal abstract void parse(RevWalk walk);
+		/// <summary>
+		/// Get Git object type. See <see cref="Constants"/>.
+		/// </summary>
+		/// <returns></returns>
+		public abstract int getType();
 
-        /**
-         * Get Git object type. See {@link Constants}.
-         * 
-         * @return object type
-         */
-        public abstract int getType();
+		/// <summary>
+		/// Get the name of this object.
+		/// </summary>
+		/// <returns>Unique hash of this object.</returns>
+		public ObjectId getId()
+		{
+			return this;
+		}
 
-        /**
-         * Get the name of this object.
-         * 
-         * @return unique hash of this object.
-         */
-        public ObjectId getId()
-        {
-            return this;
-        }
+		/// <summary>
+		/// Test to see if the flag has been set on this object.
+		/// </summary>
+		/// <param name="flag">the flag to test.</param>
+		/// <returns>
+		/// true if the flag has been added to this object; false if not.
+		/// </returns>
+		public bool has(RevFlag flag)
+		{
+			return (Flags & flag.Mask) != 0;
+		}
 
-        /**
-         * Test to see if the flag has been set on this object.
-         * 
-         * @param flag
-         *            the flag to test.
-         * @return true if the flag has been added to this object; false if not.
-         */
-        public bool has(RevFlag flag)
-        {
-            return (flags & flag.Mask) != 0;
-        }
+		/// <summary>
+		/// Test to see if any flag in the set has been set on this object.
+		/// </summary>
+		/// <param name="set">the flags to test.</param>
+		/// <returns>
+		/// true if any flag in the set has been added to this object; false
+		/// if not.
+		/// </returns>
+		public bool hasAny(RevFlagSet set)
+		{
+			return (Flags & set.Mask) != 0;
+		}
 
-        /**
-         * Test to see if any flag in the set has been set on this object.
-         * 
-         * @param set
-         *            the flags to test.
-         * @return true if any flag in the set has been added to this object; false
-         *         if not.
-         */
-        public bool hasAny(RevFlagSet set)
-        {
-            return (flags & set.Mask) != 0;
-        }
+		/// <summary>
+		/// Test to see if all flags in the set have been set on this object.
+		/// </summary>
+		/// <param name="set">the flags to test.</param>
+		/// <returns>true if all flags of the set have been added to this object;
+		/// false if some or none have been added.
+		/// </returns>
+		public bool hasAll(RevFlagSet set)
+		{
+			return (Flags & set.Mask) == set.Mask;
+		}
 
-        /**
-         * Test to see if all flags in the set have been set on this object.
-         * 
-         * @param set
-         *            the flags to test.
-         * @return true if all flags of the set have been added to this object;
-         *         false if some or none have been added.
-         */
-        public bool hasAll(RevFlagSet set)
-        {
-            return (flags & set.Mask) == set.Mask;
-        }
+		/// <summary>
+		/// Add a flag to this object.
+		/// <para />
+		/// If the flag is already set on this object then the method has no effect.
+		/// </summary>
+		/// <param name="flag">
+		/// The flag to mark on this object, for later testing.
+		/// </param>
+		public void add(RevFlag flag)
+		{
+			Flags |= flag.Mask;
+		}
 
-        /**
-         * Add a flag to this object.
-         * <p>
-         * If the flag is already set on this object then the method has no effect.
-         * 
-         * @param flag
-         *            the flag to mark on this object, for later testing.
-         */
-        public void add(RevFlag flag)
-        {
-            flags |= flag.Mask;
-        }
+		/// <summary>
+		/// Add a set of flags to this object.
+		/// </summary>
+		/// <param name="set">
+		/// The set of flags to mark on this object, for later testing.
+		/// </param>
+		public void add(RevFlagSet set)
+		{
+			Flags |= set.Mask;
+		}
 
-        /**
-         * Add a set of flags to this object.
-         * 
-         * @param set
-         *            the set of flags to mark on this object, for later testing.
-         */
-        public void add(RevFlagSet set)
-        {
-            flags |= set.Mask;
-        }
+		/// <summary>
+		/// Remove a flag from this object.
+		/// <para />
+		/// If the flag is not set on this object then the method has no effect.
+		/// </summary>
+		/// <param name="flag">
+		/// The flag to remove from this object.
+		/// </param>
+		public void remove(RevFlag flag)
+		{
+			Flags &= ~flag.Mask;
+		}
 
-        /**
-         * Remove a flag from this object.
-         * <p>
-         * If the flag is not set on this object then the method has no effect.
-         * 
-         * @param flag
-         *            the flag to remove from this object.
-         */
-        public void remove(RevFlag flag)
-        {
-            flags &= ~flag.Mask;
-        }
+		/// <summary>
+		/// Remove a set of flags from this object.
+		/// </summary>
+		/// <param name="set">
+		/// The flag to remove from this object.
+		/// </param>
+		public void remove(RevFlagSet set)
+		{
+			Flags &= ~set.Mask;
+		}
 
-        /**
-         * Remove a set of flags from this object.
-         * 
-         * @param set
-         *            the flag to remove from this object.
-         */
-        public void remove(RevFlagSet set)
-        {
-            flags &= ~set.Mask;
-        }
+		public virtual void dispose()
+		{
+			// Nothing needs to be done for most objects.
+		}
 
-        /** Release as much memory as possible from this object. */
-        public virtual void dispose()
-        {
-            // Nothing needs to be done for most objects.
-        }
+		/// <summary>
+		/// Release as much memory as possible from this object.
+		/// </summary>
+		public virtual void Dispose()
+		{
+			// Nothing needs to be done for most objects.
+		}
 
-        public virtual void Dispose()
-        {
-            // Nothing needs to be done for most objects.
-        }
+		public override string ToString()
+		{
+			var s = new StringBuilder();
+			s.Append(Constants.typeString(getType()));
+			s.Append(' ');
+			s.Append(GetType().Name);
+			s.Append(' ');
+			appendCoreFlags(s);
+			return s.ToString();
+		}
 
-        public override string ToString()
-        {
-            StringBuilder s = new StringBuilder();
-            s.Append(GitSharp.Constants.typeString(getType()));
-            s.Append(' ');
-            s.Append(GetType().Name);
-            s.Append(' ');
-            appendCoreFlags(s);
-            return s.ToString();
-        }
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="s">
+		/// Buffer to Append a debug description of core RevFlags onto.
+		/// </param>
+		internal void appendCoreFlags(StringBuilder s)
+		{
+			s.Append((Flags & RevWalk.TOPO_DELAY) != 0 ? 'o' : '-');
+			s.Append((Flags & RevWalk.TEMP_MARK) != 0 ? 't' : '-');
+			s.Append((Flags & RevWalk.REWRITE) != 0 ? 'r' : '-');
+			s.Append((Flags & RevWalk.UNINTERESTING) != 0 ? 'u' : '-');
+			s.Append((Flags & RevWalk.SEEN) != 0 ? 's' : '-');
+			s.Append((Flags & RevWalk.PARSED) != 0 ? 'p' : '-');
+		}
 
-        /**
-         * @param s
-         *            buffer to Append a debug description of core RevFlags onto.
-         */
-        internal void appendCoreFlags(StringBuilder s)
-        {
-            s.Append((flags & RevWalk.TOPO_DELAY) != 0 ? 'o' : '-');
-            s.Append((flags & RevWalk.TEMP_MARK) != 0 ? 't' : '-');
-            s.Append((flags & RevWalk.REWRITE) != 0 ? 'r' : '-');
-            s.Append((flags & RevWalk.UNINTERESTING) != 0 ? 'u' : '-');
-            s.Append((flags & RevWalk.SEEN) != 0 ? 's' : '-');
-            s.Append((flags & RevWalk.PARSED) != 0 ? 'p' : '-');
-        }
+		public override bool Equals(AnyObjectId o)
+		{
+			return this == o;
+		}
 
-        public override bool Equals(AnyObjectId o)
-        {
-            return this == o;
-        }
+		public override bool Equals(object o)
+		{
+			if (ReferenceEquals(null, o))
+			{
+				return false;
+			}
 
-        public override bool Equals(object o)
-        {
-            if (ReferenceEquals(null, o))
-            {
-                return false;
-            }
-            if (ReferenceEquals(this, o))
-            {
-                return true;
-            }
-            return Equals(o as RevObject);
-        }
+			if (ReferenceEquals(this, o))
+			{
+				return true;
+			}
+			return Equals(o as RevObject);
+		}
 
-        public bool Equals(RevObject other)
-        {
-            if (ReferenceEquals(null, other))
-            {
-                return false;
-            }
+		public bool Equals(RevObject other)
+		{
+			if (ReferenceEquals(null, other))
+			{
+				return false;
+			}
 
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
+			if (ReferenceEquals(this, other))
+			{
+				return true;
+			}
 
-            return base.Equals(other) && other.flags == flags;
-        }
+			return base.Equals(other) && other.Flags == Flags;
+		}
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                {
-                    return (base.GetHashCode() * 397) ^ flags;
-                }
-            }
-        }
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				{
+					return (base.GetHashCode() * 397) ^ Flags;
+				}
+			}
+		}
 
-        public static bool operator ==(RevObject left, RevObject right)
-        {
-            return Equals(left, right);
-        }
+		public static bool operator ==(RevObject left, RevObject right)
+		{
+			return Equals(left, right);
+		}
 
-        public static bool operator !=(RevObject left, RevObject right)
-        {
-            return !Equals(left, right);
-        }
-    }
+		public static bool operator !=(RevObject left, RevObject right)
+		{
+			return !Equals(left, right);
+		}
+	}
 }

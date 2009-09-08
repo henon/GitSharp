@@ -55,21 +55,13 @@ namespace GitSharp
 		}
 
 		internal ObjectId(int w1, int w2, int w3, int w4, int w5)
+			: base(w1, w2, w3, w4, w5)
 		{
-			W1 = w1;
-			W2 = w2;
-			W3 = w3;
-			W4 = w4;
-			W5 = w5;
 		}
 
 		public ObjectId(AnyObjectId src)
+			: base(src)
 		{
-			W1 = src.W1;
-			W2 = src.W2;
-			W3 = src.W3;
-			W4 = src.W4;
-			W5 = src.W5;
 		}
 
 		public static ObjectId ZeroId { get; private set; }

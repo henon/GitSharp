@@ -95,7 +95,7 @@ namespace GitSharp.Tests.RevWalk
 		{
 			RevCommit a = commit();
 			Assert.IsFalse(a.has(RevFlag.UNINTERESTING));
-			a.flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
+			a.Flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
 			Assert.IsTrue(a.has(RevFlag.UNINTERESTING));
 		}
 
@@ -108,7 +108,7 @@ namespace GitSharp.Tests.RevWalk
 			var s = new RevFlagSet { flag1, flag2 };
 
 			Assert.IsFalse(a.hasAny(s));
-			a.flags |= flag1.Mask;
+			a.Flags |= flag1.Mask;
 			Assert.IsTrue(a.hasAny(s));
 		}
 
@@ -121,9 +121,9 @@ namespace GitSharp.Tests.RevWalk
 			var s = new RevFlagSet { flag1, flag2 };
 
 			Assert.IsFalse(a.hasAll(s));
-			a.flags |= flag1.Mask;
+			a.Flags |= flag1.Mask;
 			Assert.IsFalse(a.hasAll(s));
-			a.flags |= flag2.Mask;
+			a.Flags |= flag2.Mask;
 			Assert.IsTrue(a.hasAll(s));
 		}
 
@@ -133,13 +133,13 @@ namespace GitSharp.Tests.RevWalk
 			RevCommit a = commit();
 			RevFlag flag1 = rw.newFlag("flag1");
 			RevFlag flag2 = rw.newFlag("flag2");
-			Assert.AreEqual(0, a.flags);
+			Assert.AreEqual(0, a.Flags);
 
 			a.add(flag1);
-			Assert.AreEqual(flag1.Mask, a.flags);
+			Assert.AreEqual(flag1.Mask, a.Flags);
 
 			a.add(flag2);
-			Assert.AreEqual(flag1.Mask | flag2.Mask, a.flags);
+			Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
 		}
 
 		[Test]
@@ -150,10 +150,10 @@ namespace GitSharp.Tests.RevWalk
 			RevFlag flag2 = rw.newFlag("flag2");
 			var s = new RevFlagSet { flag1, flag2 };
 
-			Assert.AreEqual(0, a.flags);
+			Assert.AreEqual(0, a.Flags);
 
 			a.add(s);
-			Assert.AreEqual(flag1.Mask | flag2.Mask, a.flags);
+			Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
 		}
 
 		[Test]
@@ -164,9 +164,9 @@ namespace GitSharp.Tests.RevWalk
 			RevFlag flag2 = rw.newFlag("flag2");
 			a.add(flag1);
 			a.add(flag2);
-			Assert.AreEqual(flag1.Mask | flag2.Mask, a.flags);
+			Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
 			a.remove(flag2);
-			Assert.AreEqual(flag1.Mask, a.flags);
+			Assert.AreEqual(flag1.Mask, a.Flags);
 		}
 
 		[Test]
@@ -179,9 +179,9 @@ namespace GitSharp.Tests.RevWalk
 			var s = new RevFlagSet { flag1, flag2 };
 			a.add(flag3);
 			a.add(s);
-			Assert.AreEqual(flag1.Mask | flag2.Mask | flag3.Mask, a.flags);
+			Assert.AreEqual(flag1.Mask | flag2.Mask | flag3.Mask, a.Flags);
 			a.remove(s);
-			Assert.AreEqual(flag3.Mask, a.flags);
+			Assert.AreEqual(flag3.Mask, a.Flags);
 		}
 	}
 }

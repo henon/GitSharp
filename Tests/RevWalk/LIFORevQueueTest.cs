@@ -36,7 +36,6 @@
  */
 
 using System.Collections.Generic;
-using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
 using NUnit.Framework;
 
@@ -77,7 +76,9 @@ namespace GitSharp.Tests.RevWalk
 
             lst.Reverse();
             for (int i = 0; i < lst.Count; i++)
-                Assert.AreSame(lst[i], q.next());
+            {
+            	Assert.AreSame(lst[i], q.next());
+            }
         }
     }
 }

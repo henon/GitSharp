@@ -37,25 +37,26 @@
  */
 
 using System;
+using GitSharp.RevWalk.Filter;
 
 namespace GitSharp.RevWalk
 {
-    /**
-     * Computes the merge base(s) of the starting commits.
-     * <p>
-     * This generator is selected if the RevFilter is only
-     * {@link org.spearce.jgit.revwalk.filter.RevFilter#MERGE_BASE}.
-     * <p>
-     * To compute the merge base we assign a temporary flag to each of the starting
-     * commits. The maximum number of starting commits is bounded by the number of
-     * free flags available in the RevWalk when the generator is initialized. These
-     * flags will be automatically released on the next reset of the RevWalk, but
-     * not until then, as they are assigned to commits throughout the history.
-     * <p>
-     * Several internal flags are reused here for a different purpose, but this
-     * should not have any impact as this generator should be run alone, and without
-     * any other generators wrapped around it.
-     */
+    /// <summary>
+    /// Computes the merge base(s) of the starting commits.
+	/// <para />
+	/// This generator is selected if the RevFilter is only
+	/// <see cref="RevFilter.MERGE_BASE"/>.
+	/// <para />
+	/// To compute the merge base we assign a temporary flag to each of the starting
+	/// commits. The maximum number of starting commits is bounded by the number of
+	/// free flags available in the RevWalk when the generator is initialized. These
+	/// flags will be automatically released on the next reset of the RevWalk, but
+	/// not until then, as they are assigned to commits throughout the history.
+	/// <para />
+	/// Several internal flags are reused here for a different purpose, but this
+	/// should not have any impact as this generator should be run alone, and without
+	/// any other generators wrapped around it.
+	/// </summary>
     public class MergeBaseGenerator : Generator
     {
         private static readonly int Parsed = RevWalk.PARSED;
@@ -104,7 +105,7 @@ namespace GitSharp.RevWalk
         {
             int flag = _walker.allocFlag();
             _branchMask |= flag;
-            if ((c.flags & _branchMask) != 0)
+            if ((c.Flags & _branchMask) != 0)
             {
                 // This should never happen. RevWalk ensures we get a
                 // commit admitted to the initial queue only once. If
@@ -112,7 +113,7 @@ namespace GitSharp.RevWalk
                 //
                 throw new InvalidOperationException("Stale RevFlags on " + c);
             }
-            c.flags |= flag;
+            c.Flags |= flag;
             _pending.add(c);
         }
 
@@ -134,15 +135,16 @@ namespace GitSharp.RevWalk
 
                 foreach (RevCommit p in c.Parents)
                 {
-                    if ((p.flags & InPending) != 0)
-                        continue;
-                    if ((p.flags & Parsed) == 0)
-                        p.parse(_walker);
-                    p.flags |= InPending;
+                    if ((p.Flags & InPending) != 0) continue;
+                    if ((p.Flags & Parsed) == 0)
+                    {
+                    	p.parse(_walker);
+                    }
+                    p.Flags |= InPending;
                     _pending.add(p);
                 }
 
-                int carry = c.flags & _branchMask;
+                int carry = c.Flags & _branchMask;
                 bool mb = carry == _branchMask;
                 if (mb)
                 {
@@ -154,24 +156,21 @@ namespace GitSharp.RevWalk
                 }
                 CarryOntoHistory(c, carry);
 
-                if ((c.flags & MergeBase) != 0)
+                if ((c.Flags & MergeBase) != 0)
                 {
                     // This commit is an ancestor of a merge base we already
                     // popped back to the caller. If everyone in pending is
                     // that way we are done traversing; if not we just need
                     // to move to the next available commit and try again.
                     //
-                    if (_pending.everbodyHasFlag(MergeBase))
-                        return null;
+                    if (_pending.everbodyHasFlag(MergeBase)) return null;
                     continue;
                 }
-                c.flags |= Popped;
+                c.Flags |= Popped;
 
-                if (mb)
-                {
-                    c.flags |= MergeBase;
-                    return c;
-                }
+            	if (!mb) continue;
+            	c.Flags |= MergeBase;
+            	return c;
             }
         }
 
@@ -200,17 +199,17 @@ namespace GitSharp.RevWalk
 
         private bool CarryOntoOne(RevCommit p, int carry)
         {
-            bool haveAll = (p.flags & carry) == carry;
-            p.flags |= carry;
+            bool haveAll = (p.Flags & carry) == carry;
+            p.Flags |= carry;
 
-            if ((p.flags & _recarryMask) == _recarryTest)
+            if ((p.Flags & _recarryMask) == _recarryTest)
             {
                 // We were popped without being a merge base, but we just got
                 // voted to be one. Inject ourselves back at the front of the
                 // pending queue and tell all of our ancestors they are within
                 // the merge base now.
                 //
-                p.flags &= ~Popped;
+                p.Flags &= ~Popped;
                 _pending.add(p);
                 CarryOntoHistory(p, _branchMask | MergeBase);
                 return true;

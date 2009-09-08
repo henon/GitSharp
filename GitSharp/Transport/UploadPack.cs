@@ -44,441 +44,456 @@ using GitSharp.Util;
 
 namespace GitSharp.Transport
 {
+	public class UploadPack
+	{
+		private const string OptionIncludeTag = BasePackFetchConnection.OPTION_INCLUDE_TAG;
+		private const string OptionMultiAck = BasePackFetchConnection.OPTION_MULTI_ACK;
+		private const string OptionThinPack = BasePackFetchConnection.OPTION_THIN_PACK;
+		private const string OptionSideBand = BasePackFetchConnection.OPTION_SIDE_BAND;
+		private const string OptionSideBand64K = BasePackFetchConnection.OPTION_SIDE_BAND_64K;
+		private const string OptionOfsDelta = BasePackFetchConnection.OPTION_OFS_DELTA;
+		private const string OptionNoProgress = BasePackFetchConnection.OPTION_NO_PROGRESS;
 
-    public class UploadPack
-    {
-        private static readonly string OPTION_INCLUDE_TAG = BasePackFetchConnection.OPTION_INCLUDE_TAG;
-        private static readonly string OPTION_MULTI_ACK = BasePackFetchConnection.OPTION_MULTI_ACK;
-        private static readonly string OPTION_THIN_PACK = BasePackFetchConnection.OPTION_THIN_PACK;
-        private static readonly string OPTION_SIDE_BAND = BasePackFetchConnection.OPTION_SIDE_BAND;
-        private static readonly string OPTION_SIDE_BAND_64K = BasePackFetchConnection.OPTION_SIDE_BAND_64K;
-        private static readonly string OPTION_OFS_DELTA = BasePackFetchConnection.OPTION_OFS_DELTA;
-        private static readonly string OPTION_NO_PROGRESS = BasePackFetchConnection.OPTION_NO_PROGRESS;
+		private readonly Repository _db;
+		private readonly RevWalk.RevWalk _walk;
+		private Stream _stream;
+		private PacketLineIn _pckIn;
+		private PacketLineOut _pckOut;
+		private bool _multiAck;
+		private Dictionary<string, Ref> _refs;
 
-        private readonly Repository db;
-        private readonly RevWalk.RevWalk walk;
-        private Stream stream;
-        private PacketLineIn pckIn;
-        private PacketLineOut pckOut;
+		private readonly List<string> _options;
+		private readonly List<RevObject> _wantAll;
+		private readonly List<RevCommit> _wantCommits;
+		private readonly List<RevObject> _commonBase;
 
-        private Dictionary<string, Ref> refs;
-        private readonly List<string> options = new List<string>();
-        private readonly List<RevObject> wantAll = new List<RevObject>();
-        private readonly List<RevCommit> wantCommits = new List<RevCommit>();
-        private readonly List<RevObject> commonBase = new List<RevObject>();
+		private readonly RevFlag ADVERTISED;
+		private readonly RevFlag WANT;
+		private readonly RevFlag PEER_HAS;
+		private readonly RevFlag COMMON;
+		private readonly RevFlagSet SAVE;
 
-        private readonly RevFlag ADVERTISED;
-        private readonly RevFlag WANT;
-        private readonly RevFlag PEER_HAS;
-        private readonly RevFlag COMMON;
-        private readonly RevFlagSet SAVE;
+		public UploadPack(Repository copyFrom)
+		{
+			_options = new List<string>();
+			_wantAll = new List<RevObject>();
+			_wantCommits = new List<RevCommit>();
+			_commonBase = new List<RevObject>();
 
-        private bool multiAck;
+			_db = copyFrom;
+			_walk = new RevWalk.RevWalk(_db);
 
-        public UploadPack(Repository copyFrom)
-        {
-            db = copyFrom;
-            walk = new RevWalk.RevWalk(db);
+			ADVERTISED = _walk.newFlag("ADVERTISED");
+			WANT = _walk.newFlag("WANT");
+			PEER_HAS = _walk.newFlag("PEER_HAS");
+			COMMON = _walk.newFlag("COMMON");
+			_walk.carry(PEER_HAS);
 
-            ADVERTISED = walk.newFlag("ADVERTISED");
-            WANT = walk.newFlag("WANT");
-            PEER_HAS = walk.newFlag("PEER_HAS");
-            COMMON = walk.newFlag("COMMON");
-            walk.carry(PEER_HAS);
+			SAVE = new RevFlagSet { ADVERTISED, WANT, PEER_HAS };
+		}
 
-            SAVE = new RevFlagSet();
-            SAVE.Add(ADVERTISED);
-            SAVE.Add(WANT);
-            SAVE.Add(PEER_HAS);
-        }
+		public Repository Repository
+		{
+			get { return _db; }
+		}
 
-        public Repository Repository
-        {
-            get
-            {
-                return db;
-            }
-        }
+		public RevWalk.RevWalk RevWalk
+		{
+			get { return _walk; }
+		}
 
-        public RevWalk.RevWalk RevWalk
-        {
-            get
-            {
-                return walk;
-            }
-        }
+		public void Upload(Stream stream, Stream messages)
+		{
+			_stream = stream;
+			_pckIn = new PacketLineIn(stream);
+			_pckOut = new PacketLineOut(stream);
+			Service();
+		}
 
-        public void Upload(Stream stream, Stream messages)
-        {
-            this.stream = stream;
-            pckIn = new PacketLineIn(stream);
-            pckOut = new PacketLineOut(stream);
-            service();
-        }
+		private void Service()
+		{
+			SendAdvertisedRefs();
+			RecvWants();
+			if (_wantAll.Count == 0)
+				return;
+			_multiAck = _options.Contains(OptionMultiAck);
+			Negotiate();
+			SendPack();
+		}
 
-        private void service()
-        {
-            sendAdvertisedRefs();
-            recvWants();
-            if (wantAll.Count == 0)
-                return;
-            multiAck = options.Contains(OPTION_MULTI_ACK);
-            negotiate();
-            sendPack();
-        }
+		private void SendAdvertisedRefs()
+		{
+			_refs = _db.getAllRefs();
 
-        private void sendAdvertisedRefs()
-        {
-            refs = db.getAllRefs();
+			var m = new StringBuilder(100);
+			var idtmp = new char[2 * Constants.OBJECT_ID_LENGTH];
+			IEnumerator<Ref> i = RefComparator.Sort(_refs.Values).GetEnumerator();
+			if (i.MoveNext())
+			{
+				Ref r = i.Current;
+				RevObject o = SafeParseAny(r.ObjectId);
+				if (o != null)
+				{
+					Advertise(m, idtmp, o, r.OriginalName);
+					m.Append('\0');
+					m.Append(' ');
+					m.Append(OptionIncludeTag);
+					m.Append(' ');
+					m.Append(OptionMultiAck);
+					m.Append(' ');
+					m.Append(OptionOfsDelta);
+					m.Append(' ');
+					m.Append(OptionSideBand);
+					m.Append(' ');
+					m.Append(OptionSideBand64K);
+					m.Append(' ');
+					m.Append(OptionThinPack);
+					m.Append(' ');
+					m.Append(OptionNoProgress);
+					m.Append(' ');
+					WriteAdvertisedRef(m);
+					if (o is RevTag)
+						WriteAdvertisedTag(m, idtmp, o, r.Name);
+				}
+			}
+			while (i.MoveNext())
+			{
+				Ref r = i.Current;
+				RevObject o = SafeParseAny(r.ObjectId);
+				if (o != null)
+				{
+					Advertise(m, idtmp, o, r.OriginalName);
+					WriteAdvertisedRef(m);
+					if (o is RevTag)
+					{
+						WriteAdvertisedTag(m, idtmp, o, r.Name);
+					}
+				}
+			}
+			_pckOut.End();
+		}
 
-            StringBuilder m = new StringBuilder(100);
-            char[] idtmp = new char[2 * Constants.OBJECT_ID_LENGTH];
-            IEnumerator<Ref> i = RefComparator.Sort(refs.Values).GetEnumerator();
-            if (i.MoveNext())
-            {
-                Ref r = i.Current;
-                RevObject o = safeParseAny(r.ObjectId);
-                if (o != null)
-                {
-                    advertise(m, idtmp, o, r.OriginalName);
-                    m.Append('\0');
-                    m.Append(' ');
-                    m.Append(OPTION_INCLUDE_TAG);
-                    m.Append(' ');
-                    m.Append(OPTION_MULTI_ACK);
-                    m.Append(' ');
-                    m.Append(OPTION_OFS_DELTA);
-                    m.Append(' ');
-                    m.Append(OPTION_SIDE_BAND);
-                    m.Append(' ');
-                    m.Append(OPTION_SIDE_BAND_64K);
-                    m.Append(' ');
-                    m.Append(OPTION_THIN_PACK);
-                    m.Append(' ');
-                    m.Append(OPTION_NO_PROGRESS);
-                    m.Append(' ');
-                    writeAdvertisedRef(m);
-                    if (o is RevTag)
-                        writeAdvertisedTag(m, idtmp, o, r.Name);
-                }
-            }
-            while (i.MoveNext())
-            {
-                Ref r = i.Current;
-                RevObject o = safeParseAny(r.ObjectId);
-                if (o != null)
-                {
-                    advertise(m, idtmp, o, r.OriginalName);
-                    writeAdvertisedRef(m);
-                    if (o is RevTag)
-                        writeAdvertisedTag(m, idtmp, o, r.Name);
-                }
-            }
-            pckOut.End();
-        }
+		private RevObject SafeParseAny(AnyObjectId id)
+		{
+			try
+			{
+				return _walk.parseAny(id);
+			}
+			catch (IOException)
+			{
+				return null;
+			}
+		}
 
-        private RevObject safeParseAny(ObjectId id)
-        {
-            try
-            {
-                return walk.parseAny(id);
-            }
-            catch (IOException)
-            {
-                return null;
-            }
-        }
+		private void Advertise(StringBuilder m, char[] idtmp, RevObject o, string name)
+		{
+			o.add(ADVERTISED);
+			m.Length = 0;
+			o.getId().CopyTo(idtmp, m);
+			m.Append(' ');
+			m.Append(name);
+		}
 
-        private void advertise(StringBuilder m, char[] idtmp, RevObject o, string name)
-        {
-            o.add(ADVERTISED);
-            m.Length = 0;
-            o.getId().CopyTo(idtmp, m);
-            m.Append(' ');
-            m.Append(name);
-        }
+		private void WriteAdvertisedRef(StringBuilder m)
+		{
+			m.Append('\n');
+			_pckOut.WriteString(m.ToString());
+		}
 
-        private void writeAdvertisedRef(StringBuilder m)
-        {
-            m.Append('\n');
-            pckOut.WriteString(m.ToString());
-        }
+		private void WriteAdvertisedTag(StringBuilder m, char[] idtmp, RevObject tag, string name)
+		{
+			RevObject o = tag;
+			while (o is RevTag)
+			{
+				try
+				{
+					_walk.parse(((RevTag)o).getObject());
+				}
+				catch (IOException)
+				{
+					return;
+				}
+				o = ((RevTag)o).getObject();
+				o.add(ADVERTISED);
+			}
+			Advertise(m, idtmp, ((RevTag)tag).getObject(), name + "^{}");
+			WriteAdvertisedRef(m);
+		}
 
-        private void writeAdvertisedTag(StringBuilder m, char[] idtmp, RevObject tag, string name)
-        {
-            RevObject o = tag;
-            while (o is RevTag)
-            {
-                try
-                {
-                    walk.parse(((RevTag) o).getObject());
-                }
-                catch (IOException)
-                {
-                    return;
-                }
-                o = ((RevTag) o).getObject();
-                o.add(ADVERTISED);
-            }
-            advertise(m, idtmp, ((RevTag) tag).getObject(), name + "^{}");
-            writeAdvertisedRef(m);
-        }
+		private void RecvWants()
+		{
+			bool isFirst = true;
+			for (; ; isFirst = false)
+			{
+				string line;
+				try
+				{
+					line = _pckIn.ReadString();
+				}
+				catch (EndOfStreamException)
+				{
+					if (isFirst) break;
+					throw;
+				}
 
-        private void recvWants()
-        {
-            bool isFirst = true;
-            for (;; isFirst = false)
-            {
-                string line;
-                try
-                {
-                    line = pckIn.ReadString();
-                }
-                catch (EndOfStreamException eof)
-                {
-                    if (isFirst) break;
-                    throw eof;
-                }
+				if (line.Length == 0) break;
+				if (!line.StartsWith("want ") || line.Length < 45)
+				{
+					throw new PackProtocolException("expected want; got " + line);
+				}
 
-                if (line.Length == 0) break;
-                if (!line.StartsWith("want ") || line.Length < 45)
-                    throw new PackProtocolException("expected want; got " + line);
+				if (isFirst)
+				{
+					int sp = line.IndexOf(' ', 45);
+					if (sp >= 0)
+					{
+						foreach (string c in line.Substring(sp + 1).Split(' '))
+							_options.Add(c);
+						line = line.Slice(0, sp);
+					}
+				}
 
-                if (isFirst)
-                {
-                    int sp = line.IndexOf(' ', 45);
-                    if (sp >= 0)
-                    {
-                        foreach (string c in line.Substring(sp + 1).Split(' '))
-                            options.Add(c);
-                        line = line.Slice(0, sp);
-                    }
-                }
+				string name = line.Substring(5);
+				ObjectId id = ObjectId.FromString(name);
+				RevObject o;
+				try
+				{
+					o = _walk.parseAny(id);
+				}
+				catch (IOException e)
+				{
+					throw new PackProtocolException(name + " not valid", e);
+				}
+				if (!o.has(ADVERTISED))
+				{
+					throw new PackProtocolException(name + " not valid");
+				}
 
-                string name = line.Substring(5);
-                ObjectId id = ObjectId.FromString(name);
-                RevObject o;
-                try
-                {
-                    o = walk.parseAny(id);
-                }
-                catch (IOException e)
-                {
-                    throw new PackProtocolException(name + " not valid", e);
-                }
-                if (!o.has(ADVERTISED))
-                    throw new PackProtocolException(name + " not valid");
-                want(o);
-            }
-        }
+				Want(o);
+			}
+		}
 
-        private void want(RevObject o)
-        {
-            if (!o.has(WANT))
-            {
-                o.add(WANT);
-                wantAll.Add(o);
+		private void Want(RevObject o)
+		{
+			if (o.has(WANT)) return;
 
-                if (o is RevCommit)
-                    wantCommits.Add((RevCommit) o);
-                else if (o is RevTag)
-                {
-                    do
-                    {
-                        o = ((RevTag) o).getObject();
-                    } while (o is RevTag);
-                    if (o is RevCommit)
-                        want(o);
-                }
-            }
-        }
+			o.add(WANT);
+			_wantAll.Add(o);
 
-        private void negotiate()
-        {
-            ObjectId last = ObjectId.ZeroId;
-            string lastName = "";
-            for (;;)
-            {
-                string line;
-                try
-                {
-                    line = pckIn.ReadString();
-                }
-                catch (EndOfStreamException eof)
-                {
-                    throw eof;
-                }
+			if (o is RevCommit)
+			{
+				_wantCommits.Add((RevCommit)o);
+			}
+			else if (o is RevTag)
+			{
+				do
+				{
+					o = ((RevTag)o).getObject();
+				} while (o is RevTag);
 
-                if (line.Length == 0)
-                {
-                    if (commonBase.Count == 0 || multiAck)
-                        pckOut.WriteString("NAK\n");
-                    pckOut.Flush();
-                }
-                else if (line.StartsWith("have ") && line.Length == 45)
-                {
-                    string name = line.Substring(5);
-                    ObjectId id = ObjectId.FromString(name);
-                    if (matchHave(id))
-                    {
-                        if (multiAck)
-                        {
-                            last = id;
-                            lastName = name;
-                            pckOut.WriteString("ACK " + name + " continue\n");
-                        }
-                        else if (commonBase.Count == 1)
-                            pckOut.WriteString("ACK " + name + "\n");
-                    }
-                    else
-                    {
-                        if (multiAck && okToGiveUp())
-                            pckOut.WriteString("ACK " + name + " continue\n");
-                    }
-                }
-                else if (line.Equals("done"))
-                {
-                    if (commonBase.Count == 0)
-                        pckOut.WriteString("NAK\n");
-                    else if (multiAck)
-                        pckOut.WriteString("ACK " + lastName + "\n");
-                    break;
-                }
-                else
-                {
-                    throw new PackProtocolException("expected have; got " + line);
-                }
-            }
-        }
+				if (o is RevCommit)
+				{
+					Want(o);
+				}
+			}
+		}
 
-        private bool matchHave(ObjectId id)
-        {
-            RevObject o;
-            try
-            {
-                o = walk.parseAny(id);
-            }
-            catch (IOException)
-            {
-                return false;
-            }
+		private void Negotiate()
+		{
+			ObjectId last = ObjectId.ZeroId;
+			string lastName = string.Empty;
 
-            if (!o.has(PEER_HAS))
-            {
-                o.add(PEER_HAS);
-                if (o is RevCommit)
-                    ((RevCommit) o).carry(PEER_HAS);
-                if (!o.has(COMMON))
-                {
-                    o.add(COMMON);
-                    commonBase.Add(o);
-                }
-            }
-            return true;
-        }
+			while (true)
+			{
+				string line = _pckIn.ReadString();
 
-        private bool okToGiveUp()
-        {
-            if (commonBase.Count == 0)
-                return false;
+				if (line.Length == 0)
+				{
+					if (_commonBase.Count == 0 || _multiAck)
+					{
+						_pckOut.WriteString("NAK\n");
+					}
+					_pckOut.Flush();
+				}
+				else if (line.StartsWith("have ") && line.Length == 45)
+				{
+					string name = line.Substring(5);
+					ObjectId id = ObjectId.FromString(name);
+					if (MatchHave(id))
+					{
+						if (_multiAck)
+						{
+							last = id;
+							lastName = name;
+							_pckOut.WriteString("ACK " + name + " continue\n");
+						}
+						else if (_commonBase.Count == 1)
+						{
+							_pckOut.WriteString("ACK " + name + "\n");
+						}
+					}
+					else
+					{
+						if (_multiAck && OkToGiveUp())
+						{
+							_pckOut.WriteString("ACK " + name + " continue\n");
+						}
+					}
+				}
+				else if (line.Equals("done"))
+				{
+					if (_commonBase.Count == 0)
+					{
+						_pckOut.WriteString("NAK\n");
+					}
+					else if (_multiAck)
+					{
+						_pckOut.WriteString("ACK " + lastName + "\n");
+					}
 
-            try
-            {
-                for (var i = wantCommits.GetEnumerator(); i.MoveNext();)
-                {
-                    RevCommit want = i.Current;
-                    if (wantSatisfied(want))
-                        wantCommits.Remove(want);
-                }
-            }
-            catch (IOException e)
-            {
-                throw new PackProtocolException("internal revision error", e);
-            }
-            return wantCommits.Count == 0;
-        }
+					break;
+				}
+				else
+				{
+					throw new PackProtocolException("expected have; got " + line);
+				}
+			}
+		}
 
-        private bool wantSatisfied(RevCommit want)
-        {
-            walk.resetRetain(SAVE);
-            walk.markStart(want);
-            for (;;)
-            {
-                RevCommit c = walk.next();
-                if (c == null) break;
-                if (c.has(PEER_HAS))
-                {
-                    if (!c.has(COMMON))
-                    {
-                        c.add(COMMON);
-                        commonBase.Add(c);
-                    }
-                    return true;
-                }
-                c.dispose();
-            }
-            return false;            
-        }
+		private bool MatchHave(AnyObjectId id)
+		{
+			RevObject o;
+			try
+			{
+				o = _walk.parseAny(id);
+			}
+			catch (IOException)
+			{
+				return false;
+			}
 
-        private void sendPack()
-        {
-            bool thin = options.Contains(OPTION_THIN_PACK);
-            bool progress = !options.Contains(OPTION_NO_PROGRESS);
-            bool sideband = options.Contains(OPTION_SIDE_BAND) || options.Contains(OPTION_SIDE_BAND_64K);
+			if (!o.has(PEER_HAS))
+			{
+				o.add(PEER_HAS);
+				if (o is RevCommit)
+				{
+					((RevCommit)o).carry(PEER_HAS);
+				}
+				if (!o.has(COMMON))
+				{
+					o.add(COMMON);
+					_commonBase.Add(o);
+				}
+			}
+			return true;
+		}
 
-            IProgressMonitor pm = new NullProgressMonitor();
-            Stream packOut = stream;
+		private bool OkToGiveUp()
+		{
+			if (_commonBase.Count == 0) return false;
 
-            if (sideband)
-            {
-                int bufsz = SideBandOutputStream.SMALL_BUF;
-                if (options.Contains(OPTION_SIDE_BAND_64K))
-                    bufsz = SideBandOutputStream.MAX_BUF;
-                bufsz -= SideBandOutputStream.HDR_SIZE;
+			try
+			{
+				for (var i = _wantCommits.GetEnumerator(); i.MoveNext(); )
+				{
+					RevCommit want = i.Current;
+					if (WantSatisfied(want))
+					{
+						_wantCommits.Remove(want);
+					}
+				}
+			}
+			catch (IOException e)
+			{
+				throw new PackProtocolException("internal revision error", e);
+			}
 
-                packOut = new BufferedStream(new SideBandOutputStream(SideBandOutputStream.CH_DATA, pckOut), bufsz);
+			return _wantCommits.Count == 0;
+		}
 
-                if (progress)
-                    pm = new SideBandProgressMonitor(pckOut);
-            }
+		private bool WantSatisfied(RevCommit want)
+		{
+			_walk.resetRetain(SAVE);
+			_walk.markStart(want);
+			for (; ; )
+			{
+				RevCommit c = _walk.next();
+				if (c == null) break;
+				if (c.has(PEER_HAS))
+				{
+					if (!c.has(COMMON))
+					{
+						c.add(COMMON);
+						_commonBase.Add(c);
+					}
+					return true;
+				}
+				c.dispose();
+			}
+			return false;
+		}
 
-            PackWriter pw;
-            pw = new PackWriter(db, pm, new NullProgressMonitor());
-            pw.DeltaBaseAsOffset = options.Contains(OPTION_OFS_DELTA);
-            pw.Thin = thin;
-            pw.preparePack(wantAll, commonBase);
-            if (options.Contains(OPTION_INCLUDE_TAG))
-            {
-                foreach (Ref r in refs.Values)
-                {
-                    RevObject o;
-                    try
-                    {
-                        o = walk.parseAny(r.ObjectId);
-                    }
-                    catch (IOException)
-                    {
-                        continue;
-                    }
-                    if (o.has(WANT) || !(o is RevTag))
-                        continue;
-                    RevTag t = (RevTag) o;
-                    if (!pw.willInclude(t) && pw.willInclude(t.getObject()))
-                        pw.addObject(t);
-                }
-            }
-            pw.writePack(packOut);
+		private void SendPack()
+		{
+			bool thin = _options.Contains(OptionThinPack);
+			bool progress = !_options.Contains(OptionNoProgress);
+			bool sideband = _options.Contains(OptionSideBand) || _options.Contains(OptionSideBand64K);
 
-            if (sideband)
-            {
-                packOut.Flush();
-                pckOut.End();
-            }
-            else
-            {
-                stream.Flush();
-            }
-        }
-    }
+			IProgressMonitor pm = new NullProgressMonitor();
+			Stream packOut = _stream;
 
+			if (sideband)
+			{
+				int bufsz = SideBandOutputStream.SMALL_BUF;
+				if (_options.Contains(OptionSideBand64K))
+				{
+					bufsz = SideBandOutputStream.MAX_BUF;
+				}
+				bufsz -= SideBandOutputStream.HDR_SIZE;
+
+				packOut = new BufferedStream(new SideBandOutputStream(SideBandOutputStream.CH_DATA, _pckOut), bufsz);
+
+				if (progress)
+					pm = new SideBandProgressMonitor(_pckOut);
+			}
+
+			var pw = new PackWriter(_db, pm, new NullProgressMonitor())
+						{
+							DeltaBaseAsOffset = _options.Contains(OptionOfsDelta),
+							Thin = thin
+						};
+			pw.preparePack(_wantAll, _commonBase);
+			if (_options.Contains(OptionIncludeTag))
+			{
+				foreach (Ref r in _refs.Values)
+				{
+					RevObject o;
+					try
+					{
+						o = _walk.parseAny(r.ObjectId);
+					}
+					catch (IOException)
+					{
+						continue;
+					}
+					if (o.has(WANT) || !(o is RevTag)) continue;
+
+					var t = (RevTag)o;
+					if (!pw.willInclude(t) && pw.willInclude(t.getObject()))
+						pw.addObject(t);
+				}
+			}
+			pw.writePack(packOut);
+
+			if (sideband)
+			{
+				packOut.Flush();
+				_pckOut.End();
+			}
+			else
+			{
+				_stream.Flush();
+			}
+		}
+	}
 }

@@ -181,11 +181,34 @@ namespace GitSharp
             return new AbbreviatedObjectId(len, a, b, c, d, e);
         }
 
-        public int W1 { get; set; }
-        public int W2 { get; set; }
-        public int W3 { get; set; }
-        public int W4 { get; set; }
-        public int W5 { get; set; }
+		protected AnyObjectId(AnyObjectId other)
+		{
+			if (other == null)
+			{
+				throw new ArgumentNullException("other");
+			}
+
+			W1 = other.W1;
+			W2 = other.W2;
+			W3 = other.W3;
+			W4 = other.W4;
+			W5 = other.W5;
+		}
+
+		protected AnyObjectId(int w1, int w2, int w3, int w4, int w5)
+		{
+			W1 = w1;
+			W2 = w2;
+			W3 = w3;
+			W4 = w4;
+			W5 = w5;
+		}
+
+        public int W1 { get; protected set; }
+		public int W2 { get; protected set; }
+		public int W3 { get; protected set; }
+		public int W4 { get; protected set; }
+		public int W5 { get; protected set; }
 
         public int GetFirstByte()
         {

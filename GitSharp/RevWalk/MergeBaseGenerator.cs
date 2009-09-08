@@ -128,7 +128,7 @@ namespace GitSharp.RevWalk
                 RevCommit c = _pending.next();
                 if (c == null)
                 {
-                    _walker.curs.Release();
+                    _walker.WindowCursor.Release();
                     return null;
                 }
 

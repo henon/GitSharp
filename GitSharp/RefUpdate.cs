@@ -321,14 +321,14 @@ namespace GitSharp
 			int lastSlash = Name.LastIndexOf('/');
 			if (lastSlash > 0)
 			{
-				if (Repository.Refs.ContainsKey(Name.Substring(0, lastSlash)))
+				if (Repository.getAllRefs().ContainsKey(Name.Substring(0, lastSlash)))
 				{
 					return RefUpdateResult.LockFailure;
 				}
 			}
 
 			string rName = Name + "/";
-			foreach (Ref r in Repository.Refs.Values)
+			foreach (Ref r in Repository.getAllRefs().Values)
 			{
 				if (r.Name.StartsWith(rName))
 				{

@@ -37,10 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace GitSharp
@@ -48,68 +45,78 @@ namespace GitSharp
     [Complete]
     public class IndexDiff
     {
-        private GitIndex _index;
-        private Tree _tree;
+        private readonly GitIndex _index;
+        private readonly Tree _tree;
+		private bool _anyChanges;
 
         public IndexDiff(Repository repository)
+			: this(repository.MapTree("HEAD"), repository.Index)
         {
-            this._tree = repository.MapTree("HEAD");
-            this._index = repository.Index;
         }
 
         public IndexDiff(Tree tree, GitIndex index)
         {
-            this._tree = tree;
-            this._index = index;
+			_anyChanges = false;
+            _tree = tree;
+            _index = index;
+
+			Added = new HashSet<string>();
+			Changed = new HashSet<string>();
+			Removed = new HashSet<string>();
+			Missing = new HashSet<string>();
+			Modified = new HashSet<string>();
         }
 
-        private bool anyChanges = false;
         public bool Diff()
         {
             DirectoryInfo root = _index.Repository.WorkingDirectory;
-            AbstractIndexTreeVisitor visitor = new AbstractIndexTreeVisitor();
-            visitor.VisitEntry = delegate(TreeEntry treeEntry, GitIndex.Entry indexEntry, FileInfo file)
-            {
-                if (treeEntry == null)
-                {
-                    this.Added.Add(indexEntry.Name);
-                    anyChanges = true;
-                }
-                else if (indexEntry == null)
-                {
-                    if (!(treeEntry is Tree))
-                        Removed.Add(treeEntry.FullName);
-                    anyChanges = true;
-                }
-                else
-                {
-                    if (!treeEntry.Id.Equals(indexEntry.ObjectId))
-                    {
-                        Changed.Add(indexEntry.Name);
-                        anyChanges = true;
-                    }
-                }
+            var visitor = new AbstractIndexTreeVisitor
+                          	{
+                          		VisitEntry = delegate(TreeEntry treeEntry, GitIndex.Entry indexEntry, FileInfo file)
+                          		             	{
+                          		             		if (treeEntry == null)
+                          		             		{
+                          		             			Added.Add(indexEntry.Name);
+                          		             			_anyChanges = true;
+                          		             		}
+                          		             		else if (indexEntry == null)
+                          		             		{
+                          		             			if (!(treeEntry is Tree))
+                          		             			{
+                          		             				Removed.Add(treeEntry.FullName);
+                          		             			}
+                          		             			_anyChanges = true;
+                          		             		}
+                          		             		else
+                          		             		{
+                          		             			if (!treeEntry.Id.Equals(indexEntry.ObjectId))
+                          		             			{
+                          		             				Changed.Add(indexEntry.Name);
+                          		             				_anyChanges = true;
+                          		             			}
+                          		             		}
 
-                if (indexEntry != null)
-                {
-                    if (!file.Exists)
-                    {
-                        Missing.Add(indexEntry.Name);
-                        anyChanges = true;
-                    }
-                    else
-                    {
-                        if (indexEntry.IsModified(root, true))
-                        {
-                            Modified.Add(indexEntry.Name);
-                            anyChanges = true;
-                        }
-                    }
-                }
-            };
-            new IndexTreeWalker(_index, _tree, root, visitor).Walk();
+													if (indexEntry != null)
+													{
+														if (!file.Exists)
+														{
+															Missing.Add(indexEntry.Name);
+															_anyChanges = true;
+														}
+														else
+														{
+															if (indexEntry.IsModified(root, true))
+															{
+																Modified.Add(indexEntry.Name);
+																_anyChanges = true;
+															}
+														}
+													}
+                          		             	}
+                          	};
+        	new IndexTreeWalker(_index, _tree, root, visitor).Walk();
 
-            return anyChanges;
+            return _anyChanges;
         }
 
         public HashSet<string> Added { get; private set; }

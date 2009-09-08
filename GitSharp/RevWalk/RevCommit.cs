@@ -97,7 +97,7 @@ namespace GitSharp.RevWalk
 
     	internal override void parse(RevWalk walk)
         {
-            ObjectLoader ldr = walk.db.OpenObject(walk.curs, this);
+            ObjectLoader ldr = walk.getRepository().OpenObject(walk.WindowCursor, this);
             if (ldr == null)
             {
 				throw new MissingObjectException(this, Constants.TYPE_COMMIT);
@@ -112,7 +112,7 @@ namespace GitSharp.RevWalk
 
         public void parseCanonical(RevWalk walk, byte[] raw)
         {
-            MutableObjectId idBuffer = walk.idBuffer;
+			MutableObjectId idBuffer = walk.IdBuffer;
             idBuffer.FromString(raw, 5);
             _tree = walk.lookupTree(idBuffer);
 
@@ -121,10 +121,10 @@ namespace GitSharp.RevWalk
             {
                 var pList = new RevCommit[1];
                 int nParents = 0;
-                for (; ; )
+                
+				while (true)
                 {
-                    if (raw[ptr] != (byte)'p')
-                        break;
+                    if (raw[ptr] != (byte)'p') break;
                     idBuffer.FromString(raw, ptr + 7);
                     RevCommit p = walk.lookupCommit(idBuffer);
                     if (nParents == 0)
@@ -178,27 +178,23 @@ namespace GitSharp.RevWalk
 
         public static void carryFlags(RevCommit c, int carry)
         {
-            for (; ; )
+            while (true)
             {
                 RevCommit[] pList = c.Parents;
-                if (pList == null)
-                    return;
+                if (pList == null) return;
                 int n = pList.Length;
-                if (n == 0)
-                    return;
+                if (n == 0) return;
 
                 for (int i = 1; i < n; i++)
                 {
                     RevCommit p = pList[i];
-                    if ((p.flags & carry) == carry)
-                        continue;
+                    if ((p.flags & carry) == carry) continue;
                     p.flags |= carry;
                     carryFlags(p, carry);
                 }
 
                 c = pList[0];
-                if ((c.flags & carry) == carry)
-                    return;
+                if ((c.flags & carry) == carry) return;
                 c.flags |= carry;
             }
         }
@@ -235,7 +231,7 @@ namespace GitSharp.RevWalk
         /// </returns>
         public Commit AsCommit(RevWalk walk)
         {
-            return new Commit(walk.db, this, _buffer);
+            return new Commit(walk.getRepository(), this, _buffer);
         }
 
     	/// <summary>
@@ -381,8 +377,9 @@ namespace GitSharp.RevWalk
         public static bool hasLF(byte[] r, int b, int e)
         {
             while (b < e)
-                if (r[b++] == (byte)'\n')
-                    return true;
+            {
+            	if (r[b++] == (byte)'\n') return true;
+            }
             return false;
         }
 

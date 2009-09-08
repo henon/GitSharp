@@ -52,7 +52,6 @@ namespace GitSharp.Transport
 		public const string PROGRESS_RESOLVE_DELTA = "Resolving deltas";
 		public const string PackSuffix = ".pack";
 		public const string IndexSuffix = ".idx";
-
 		public const int BUFFER_SIZE = 8192;
 
 		private readonly Repository _repo;
@@ -140,7 +139,7 @@ namespace GitSharp.Transport
 
 		public void index(IProgressMonitor progress)
 		{
-			progress.Start(2);
+			progress.Start(2 /* tasks */);
 			try
 			{
 				try
@@ -258,7 +257,7 @@ namespace GitSharp.Transport
 		private void ResolveDeltas(PackedObjectInfo objectInfo)
 		{
 			int oldCrc = objectInfo.CRC;
-			if (_baseById.get(objectInfo) != null || _baseByPos.ContainsKey(objectInfo.Offset))
+			if (_baseById.Get(objectInfo) != null || _baseByPos.ContainsKey(objectInfo.Offset))
 			{
 				ResolveDeltas(objectInfo.Offset, oldCrc, Constants.OBJ_BAD, null, objectInfo);
 			}
@@ -333,7 +332,7 @@ namespace GitSharp.Transport
 
 		private UnresolvedDelta RemoveBaseById(AnyObjectId id)
 		{
-			DeltaChain d = _baseById.get(id);
+			DeltaChain d = _baseById.Get(id);
 			return d != null ? d.Remove() : null;
 		}
 
@@ -566,7 +565,7 @@ namespace GitSharp.Transport
 				}
 			}
 
-			long vers = NB.decodeInt32(_buffer, p + 4);
+			long vers = NB.DecodeInt32(_buffer, p + 4);
 			if (vers != 2 && vers != 3)
 			{
 				throw new IOException("Unsupported pack version " + vers + ".");
@@ -655,11 +654,11 @@ namespace GitSharp.Transport
 					_crc.Update(_buffer, c, 20);
 					ObjectId baseId = ObjectId.FromRaw(_buffer, c);
 					Use(20);
-					DeltaChain r = _baseById.get(baseId);
+					DeltaChain r = _baseById.Get(baseId);
 					if (r == null)
 					{
 						r = new DeltaChain(baseId);
-						_baseById.add(r);
+						_baseById.Add(r);
 					}
 					SkipInflateFromInput(sz);
 					r.Add(new UnresolvedDelta(pos, (int)_crc.Value));
@@ -946,8 +945,12 @@ namespace GitSharp.Transport
 
 					n += inf.Inflate(dst, n, dst.Length - n);
 				}
+				
 				if (n != size)
+				{
 					throw new IOException("wrong decompressed length");
+				}
+
 				n = _bAvail - inf.RemainingInput;
 				if (n > 0)
 				{

@@ -411,7 +411,7 @@ namespace GitSharp.Transport
 
         private void SendAdvertisedRefs()
         {
-            refs = db.Refs;
+            refs = db.getAllRefs();
 
             var m = new StringBuilder(100);
             char[] idtmp = new char[2 * Constants.OBJECT_ID_LENGTH];

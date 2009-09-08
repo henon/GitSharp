@@ -40,6 +40,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using GitSharp.Exceptions;
@@ -300,26 +301,27 @@ namespace GitSharp
         private List<string> ListFiles(FileSystemInfo file)
         {
             var list = new List<string>();
-            ListFiles(file, list);
+            ListFiles(file.FullName, list);
             return list;
         }
 
-        private void ListFiles(FileSystemInfo dir, ICollection<string> list)
+        private void ListFiles(string dir, ICollection<string> list)
         {
-            if (!dir.IsDirectory())
+            if (File.Exists(dir))
             {
+                list.Add(dir);
                 return;
             }
 
-            foreach (FileInfo f in Directory.GetFiles(dir.DirectoryName()).Select(x => new FileInfo(x)))
+            foreach (string path in Directory.GetFiles(Path.GetDirectoryName(dir)))
             {
-                if (f.IsDirectory())
+                if (Directory.Exists(path))
                 {
-                    ListFiles(f, list);
+                    ListFiles(path, list);
                 }
                 else
                 {
-                    list.Add(Repository.StripWorkDir(_root, f));
+                    list.Add(Repository.StripWorkDir(_root, new FileInfo(path)));
                 }
             }
         }

@@ -325,7 +325,7 @@ namespace GitSharp.Transport
 				{
 				    ow.markStart(ow.parseAny(want));
 				}
-				foreach (Ref @ref in _transport.Local.Refs.Values)
+				foreach (Ref @ref in _transport.Local.getAllRefs().Values)
 				{
 				    ow.markUninteresting(ow.parseAny(@ref.ObjectId));
 				}
@@ -367,7 +367,7 @@ namespace GitSharp.Transport
         private ICollection<Ref> expandAutoFollowTags()
         {
             ICollection<Ref> additionalTags = new List<Ref>();
-            IDictionary<string, Ref> haveRefs = _transport.Local.Refs;
+            IDictionary<string, Ref> haveRefs = _transport.Local.getAllRefs();
             foreach (Ref r in _connection.Refs)
             {
                 if (!isTag(r))
@@ -399,7 +399,7 @@ namespace GitSharp.Transport
 
         private void expandFetchTags()
         {
-            IDictionary<string, Ref> haveRefs = _transport.Local.Refs;
+            IDictionary<string, Ref> haveRefs = _transport.Local.getAllRefs();
             foreach (Ref r in _connection.Refs)
             {
                 if (!isTag(r))
@@ -450,7 +450,7 @@ namespace GitSharp.Transport
         private void deleteStaleTrackingRefs(FetchResult result, RevWalk.RevWalk walk)
 		{
 			Repository db = _transport.Local;
-			foreach (Ref @ref in db.Refs.Values)
+			foreach (Ref @ref in db.getAllRefs().Values)
 			{
 				string refname = @ref.Name;
 				foreach (RefSpec spec in _toFetch)

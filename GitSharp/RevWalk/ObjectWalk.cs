@@ -266,7 +266,7 @@ namespace GitSharp.RevWalk
 
             if (_nextSubtree != null)
             {
-                _treeWalk = _treeWalk.createSubtreeIterator0(db, _nextSubtree, curs);
+                _treeWalk = _treeWalk.createSubtreeIterator0(getRepository(), _nextSubtree, WindowCursor);
                 _nextSubtree = null;
             }
 
@@ -278,9 +278,9 @@ namespace GitSharp.RevWalk
                 switch (sType)
                 {
                     case Constants.OBJ_BLOB:
-						_treeWalk.getEntryObjectId(idBuffer);
-						
-						RevBlob blob = lookupBlob(idBuffer);
+						_treeWalk.getEntryObjectId(IdBuffer);
+
+						RevBlob blob = lookupBlob(IdBuffer);
 						if ((blob.flags & SEEN) != 0) break;
 
 						blob.flags |= SEEN;
@@ -290,9 +290,9 @@ namespace GitSharp.RevWalk
 						return blob;
 
                     case Constants.OBJ_TREE:
-						_treeWalk.getEntryObjectId(idBuffer);
-						
-						RevTree tree = lookupTree(idBuffer);
+						_treeWalk.getEntryObjectId(IdBuffer);
+
+						RevTree tree = lookupTree(IdBuffer);
 						if ((tree.flags & SEEN) != 0) break;
 						
 						tree.flags |= SEEN;
@@ -304,10 +304,10 @@ namespace GitSharp.RevWalk
 
                     default:
                         if (FileMode.GitLink.Equals(mode.Bits)) break;
-                        _treeWalk.getEntryObjectId(idBuffer);
+						_treeWalk.getEntryObjectId(IdBuffer);
 
                         throw new CorruptObjectException("Invalid mode " + mode
-                                + " for " + idBuffer + " "
+								+ " for " + IdBuffer + " "
                                 + _treeWalk.EntryPathString + " in " + _currentTree
                                 + ".");
                 }
@@ -327,7 +327,7 @@ namespace GitSharp.RevWalk
 				if (obj is RevTree)
                 {
                     _currentTree = (RevTree)obj;
-                    _treeWalk = _treeWalk.resetRoot(db, _currentTree, curs);
+                    _treeWalk = _treeWalk.resetRoot(getRepository(), _currentTree, WindowCursor);
                 }
 
                 return obj;
@@ -378,7 +378,7 @@ namespace GitSharp.RevWalk
                 RevObject o = nextObject();
                 if (o == null) break;
 
-                if (o is RevBlob && !db.HasObject(o))
+                if (o is RevBlob && !getRepository().HasObject(o))
                 {
                 	throw new MissingObjectException(o, Constants.TYPE_BLOB);
                 }
@@ -432,7 +432,7 @@ namespace GitSharp.RevWalk
             if ((tree.flags & UNINTERESTING) != 0) return;
             tree.flags |= UNINTERESTING;
 
-            _treeWalk = _treeWalk.resetRoot(db, tree, curs);
+			_treeWalk = _treeWalk.resetRoot(getRepository(), tree, WindowCursor);
             while (!_treeWalk.eof())
             {
                 FileMode mode = _treeWalk.EntryFileMode;
@@ -441,27 +441,27 @@ namespace GitSharp.RevWalk
                 switch (sType)
                 {
                     case Constants.OBJ_BLOB:
-						_treeWalk.getEntryObjectId(idBuffer);
-						lookupBlob(idBuffer).flags |= UNINTERESTING;
+						_treeWalk.getEntryObjectId(IdBuffer);
+						lookupBlob(IdBuffer).flags |= UNINTERESTING;
 						break;
 
                     case Constants.OBJ_TREE:
-						_treeWalk.getEntryObjectId(idBuffer);
-						RevTree t = lookupTree(idBuffer);
+						_treeWalk.getEntryObjectId(IdBuffer);
+						RevTree t = lookupTree(IdBuffer);
 						if ((t.flags & UNINTERESTING) == 0)
 						{
 							t.flags |= UNINTERESTING;
-							_treeWalk = _treeWalk.createSubtreeIterator0(db, t, curs);
+							_treeWalk = _treeWalk.createSubtreeIterator0(getRepository(), t, WindowCursor);
 							continue;
 						}
 						break;
 
                     default:
                         if (FileMode.GitLink == FileMode.FromBits(mode.Bits)) break;
-                        _treeWalk.getEntryObjectId(idBuffer);
+						_treeWalk.getEntryObjectId(IdBuffer);
 
                         throw new CorruptObjectException("Invalid mode " + mode
-                                + " for " + idBuffer + " "
+								+ " for " + IdBuffer + " "
                                 + _treeWalk.EntryPathString + " in " + tree + ".");
                 }
 

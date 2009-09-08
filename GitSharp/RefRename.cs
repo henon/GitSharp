@@ -70,7 +70,7 @@ namespace GitSharp
 		/// <exception cref="IOException"></exception>
 		public Result Rename()
 		{
-			Ref oldRef = _oldFromDelete.Repository.Refs[Constants.HEAD];
+			Ref oldRef = _oldFromDelete.Repository.getRef(Constants.HEAD);
 			bool renameHeadToo = oldRef != null && oldRef.Name == _oldFromDelete.Name;
 			Repository db = _oldFromDelete.Repository;
 			try
@@ -111,7 +111,7 @@ namespace GitSharp
 				Result delete = _oldFromDelete.Delete();
 				if (delete != Result.Forced)
 				{
-					if (db.Refs.ContainsKey(_oldFromDelete.Name))
+					if (db.getRef(_oldFromDelete.Name) != null)
 					{
 						RefLogWriter.renameTo(db, _newToUpdate, _oldFromDelete);
 						if (renameHeadToo)

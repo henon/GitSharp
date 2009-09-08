@@ -301,18 +301,18 @@ namespace GitSharp.RevWalk
 		{
 			if (_walker == null || Size > highMark) return;
 
-			Generator p = _walker.pending;
+			Generator p = _walker.Pending;
 			RevCommit c = p.next();
 			if (c == null)
 			{
-				_walker.pending = EndGenerator.Instance;
+				_walker.Pending = EndGenerator.Instance;
 				_walker = null;
 				return;
 			}
 
 			enter(Size, (T)c);
 			add((T)c);
-			p = _walker.pending;
+			p = _walker.Pending;
 
 			while (Size <= highMark)
 			{
@@ -343,7 +343,7 @@ namespace GitSharp.RevWalk
 					c = p.next();
 					if (c == null)
 					{
-						_walker.pending = EndGenerator.Instance;
+						_walker.Pending = EndGenerator.Instance;
 						_walker = null;
 						return;
 					}

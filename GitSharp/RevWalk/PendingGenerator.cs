@@ -114,7 +114,7 @@ namespace GitSharp.RevWalk
 					RevCommit c = _pending.next();
 					if (c == null)
 					{
-						_walker.curs.Release();
+						_walker.WindowCursor.Release();
 						return null;
 					}
 
@@ -175,7 +175,7 @@ namespace GitSharp.RevWalk
 			}
 			catch (StopWalkException)
 			{
-				_walker.curs.Release();
+				_walker.WindowCursor.Release();
 				_pending.clear();
 				return null;
 			}

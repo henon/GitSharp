@@ -70,7 +70,7 @@ namespace GitSharp.RevWalk
 			RevWalk w = _walker;
 			RevFilter rf = w.getRevFilter();
 			TreeFilter tf = w.getTreeFilter();
-			AbstractRevQueue q = _walker.queue;
+			AbstractRevQueue q = _walker.Queue;
 
 			if (rf == RevFilter.MERGE_BASE)
 			{
@@ -83,8 +83,8 @@ namespace GitSharp.RevWalk
 				}
 
 				var mbg = new MergeBaseGenerator(w);
-				_walker.pending = mbg;
-				_walker.queue = AbstractRevQueue.EmptyQueue;
+				_walker.Pending = mbg;
+				_walker.Queue = AbstractRevQueue.EmptyQueue;
 				mbg.init(q);
 				return mbg.next();
 			}
@@ -127,7 +127,7 @@ namespace GitSharp.RevWalk
 				pendingOutputType |= GeneratorOutputType.HasRewrite | GeneratorOutputType.NeedsRewrite;
 			}
 
-			_walker.queue = q;
+			_walker.Queue = q;
 			Generator g = new PendingGenerator(w, pending, rf, pendingOutputType);
 
 			if (boundary)
@@ -179,7 +179,7 @@ namespace GitSharp.RevWalk
 				g = new FixUninterestingGenerator(g);
 			}
 
-			w.pending = g;
+			w.Pending = g;
 			return g.next();
 		}
 	}

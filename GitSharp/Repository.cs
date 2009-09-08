@@ -74,15 +74,12 @@ namespace GitSharp
 
 	public class Repository
 	{
-		private static object SyncLock = new object();
-
 		private readonly RefDatabase _refDb;
 		private readonly List<DirectoryInfo> _objectsDirs;
 		private readonly ObjectDirectory _objectDatabase;
 
 		private int _useCnt;
 		private GitIndex _index;
-		private Ref _head;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Repository"/> class. 
@@ -903,30 +900,44 @@ namespace GitSharp
 			}
 		}
 
-		public void ReloadRefs()
+		public Ref Head
 		{
-			_head = null;
+			get { return _refDb.ReadRef("HEAD"); }
 		}
 
-        
-        public Dictionary<string, Ref> getAllRefs()
-        {
-            return _refDb.GetAllRefs();
-        }
+    	/**
+	 * Get a ref by name.
+	 *
+	 * @param name
+	 *            the name of the ref to lookup. May be a short-hand form, e.g.
+	 *            "master" which is is automatically expanded to
+	 *            "refs/heads/master" if "refs/heads/master" already exists.
+	 * @return the Ref with the given name, or null if it does not exist
+	 * @throws IOException
+	 */
+    public Ref GetRef(string name)
+    {
+      return _refDb.ReadRef(name);
+    }
 
-        public Ref getRef(string name)
-        {
-            return _refDb.ReadRef(name);
-        }
+		public Dictionary<string, Ref> Refs
+		{
+			get { return _refDb.GetAllRefs(); }
+		}
 
-        public Dictionary<string, Ref> getTags()
-        {
-            return _refDb.GetTags();
-        }
+		public Dictionary<string, Ref> Tags
+		{
+			get { return _refDb.GetTags(); }
+		}
 
 		public Ref Head
 		{
-            get { return getRef("HEAD"); }
+			get { return _refDb.GetBranches(); }
+		}
+
+		public Dictionary<string, Ref> RemoteBranches
+		{
+			get { return _refDb.GetRemotes(); }
 		}
 
 		public void Link(string name, string target)

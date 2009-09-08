@@ -148,8 +148,19 @@ mkdir f
 echo "an F" >f/f
 git add f/f
 git commit -m "An F"
+
+git repack -d
+
+git checkout -b symlink master
+ln -s c/c1.txt symlink.txt
+git add symlink.txt
+git_commit -m "A symlink"
+
+git checkout -b gitlink master
+git submodule add "$(pwd)/.git" submodule
+git_commit -m "A gitlink"
+
 git repack -d
 git pack-refs --all
-
 
 gitk --all master

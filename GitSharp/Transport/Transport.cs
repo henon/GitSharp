@@ -154,10 +154,10 @@ namespace GitSharp.Transport
             throw new NotSupportedException("URI not supported: " + remote);
         }
 
-        private static List<RefSpec> expandPushWildcardsFor(Repository db, IEnumerable<RefSpec> specs)
+        private static ICollection<RefSpec> expandPushWildcardsFor(Repository db, IEnumerable<RefSpec> specs)
         {
             Dictionary<string, Ref> localRefs = db.getAllRefs();
-            List<RefSpec> procRefs = new List<RefSpec>();
+            var procRefs = new HashSet<RefSpec>();
 
             foreach (RefSpec spec in specs)
             {
@@ -343,7 +343,7 @@ namespace GitSharp.Transport
             return result;
         }
 
-        public PushResult push(IProgressMonitor monitor, List<RemoteRefUpdate> toPush)
+        public PushResult push(IProgressMonitor monitor, ICollection<RemoteRefUpdate> toPush)
         {
             if (toPush == null || toPush.Count == 0)
             {
@@ -363,22 +363,22 @@ namespace GitSharp.Transport
             return pushProcess.execute(monitor);
         }
 
-        public List<RemoteRefUpdate> findRemoteRefUpdatesFor(List<RefSpec> specs)
+        public ICollection<RemoteRefUpdate> findRemoteRefUpdatesFor(List<RefSpec> specs)
         {
             return findRemoteRefUpdatesFor(local, specs, fetchSpecs);
         }
 
-        public static List<RemoteRefUpdate> findRemoteRefUpdatesFor(Repository db, List<RefSpec> specs, List<RefSpec> fetchSpecs)
+        public static ICollection<RemoteRefUpdate> findRemoteRefUpdatesFor(Repository db, List<RefSpec> specs, List<RefSpec> fetchSpecs)
         {
             if (fetchSpecs == null)
                 fetchSpecs = new List<RefSpec>();
-            List<RemoteRefUpdate> result = new List<RemoteRefUpdate>();
-            List<RefSpec> procRefs = expandPushWildcardsFor(db, specs);
+            ICollection<RemoteRefUpdate> result = new List<RemoteRefUpdate>();
+            ICollection<RefSpec> procRefs = expandPushWildcardsFor(db, specs);
 
             foreach (RefSpec spec in procRefs)
             {
                 string srcSpec = spec.Source;
-                Ref srcRef = db.getRef(srcSpec);
+                Ref srcRef = db.GetRef(srcSpec);
                 if (srcRef != null)
                     srcSpec = srcRef.Name;
 

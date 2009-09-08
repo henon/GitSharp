@@ -143,7 +143,6 @@
     <Compile Include="WorkDirCheckoutTest.cs" />
     <Compile Include="WriteTests.cs" />
     <Compile Include="ObjectCheckerTests.cs" />
-    <Compile Include="ObjectIdMapTests.cs" />
     <Compile Include="ObjectIdTests.cs" />
     <Compile Include="PersonIdentTests.cs" />
     <Compile Include="PackIndexTests.cs" />

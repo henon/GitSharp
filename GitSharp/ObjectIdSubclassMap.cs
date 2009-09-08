@@ -52,17 +52,17 @@ namespace GitSharp
 	/// allows subclasses to override <code>Equals</code> to supply their own
 	/// extended semantics.
 	/// </summary>
-	/// <typeparam name="V">
+	/// <typeparam name="TObject">
 	/// Type of subclass of ObjectId that will be stored in the map.
 	/// </typeparam>
-	public class ObjectIdSubclassMap<V> : HashSet<V>
-		where V : ObjectId
+	public class ObjectIdSubclassMap<TObject> : HashSet<TObject>
+		where TObject : ObjectId
 	{
-		private static readonly IEqualityComparer<V> EqualityComparer = new ObjectIdEqualityComparer<V>();
+		private static readonly IEqualityComparer<TObject> EqualityComparer = new ObjectIdEqualityComparer<TObject>();
 
-		public V gget(AnyObjectId toFind)
+		public ObjectIdSubclassMap()
+			: base(EqualityComparer)
 		{
-			return null;	
 		}
 
 		/// <summary>
@@ -70,18 +70,9 @@ namespace GitSharp
 		/// </summary>
 		/// <param name="toFind">the object identifier to find.</param>
 		/// <returns>the instance mapped to toFind, or null if no mapping exists.</returns>
-		public V Get(AnyObjectId toFind)
+		public TObject Get(AnyObjectId toFind)
 		{
 			return this.SingleOrDefault(x => toFind.ToObjectId() == x.ToObjectId());
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns>number of objects in map</returns>
-		public int size()
-		{
-			return Count;
 		}
 	}
 }

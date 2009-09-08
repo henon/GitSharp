@@ -161,7 +161,6 @@
     <Compile Include="NullProgressMonitor.cs" />
     <Compile Include="ObjectChecker.cs" />
     <Compile Include="ObjectId.cs" />
-    <Compile Include="ObjectIdMap.cs" />
     <Compile Include="ObjectLoader.cs" />
     <Compile Include="ObjectType.cs" />
     <Compile Include="ObjectWriter.cs" />
@@ -359,9 +358,6 @@
     <Compile Include="Util\RawCharSequence.cs" />
     <Compile Include="Util\RawSubstringPattern.cs" />
     <Compile Include="Util\TemporaryBuffer.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -40,217 +40,200 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp
 {
-    public class TreeIterator : IEnumerator<TreeEntry>
-    {
+	public class TreeIterator : IEnumerator<TreeEntry>
+	{
+		private readonly Tree _tree;
+		private readonly Order _order;
+		private readonly bool _visitTreeNodes;
 
-        private Tree tree;
+		private int _index;
+		private TreeIterator _sub;
+		private bool _hasVisitedTree;
 
-        private int index;
+		/// <summary>
+		/// Traversal order
+		/// </summary>
+		public enum Order
+		{
+			/// <summary>
+			/// Visit node first, then leaves
+			/// </summary>
+			PREORDER,
 
-        private TreeIterator sub;
+			/// <summary>
+			/// Visit leaves first, then node
+			/// </summary>
+			POSTORDER
+		};
 
-        private Order order;
+		/// <summary>
+		/// Construct a <see cref="TreeIterator"/> for visiting all non-tree nodes.
+		/// </summary>
+		/// <param name="start"></param>
+		public TreeIterator(Tree start)
+			: this(start, Order.PREORDER, false)
+		{
+		}
 
-        private bool visitTreeNodes;
+		/// <summary>
+		/// Construct a <see cref="TreeIterator"/> for visiting all nodes in a
+		/// tree in a given order
+		/// </summary>
+		/// <param name="start">Root node</param>
+		/// <param name="order"><see cref="Order"/></param>
+		public TreeIterator(Tree start, Order order)
+			: this(start, order, true)
+		{
+		}
 
-        private bool hasVisitedTree;
+		/// <summary>
+		/// Construct a <see cref="TreeIterator"/>.
+		/// </summary>
+		/// <param name="start">First node to visit</param>
+		/// <param name="order">Visitation <see cref="Order"/></param>
+		/// <param name="visitTreeNode">True to include tree node</param>
+		private TreeIterator(Tree start, Order order, bool visitTreeNode)
+		{
+			_tree = start;
+			_visitTreeNodes = visitTreeNode;
+			_index = -1;
+			_order = order;
+			if (!_visitTreeNodes)
+			{
+				_hasVisitedTree = true;
+			}
 
-        /**
-         * Traversal order
-         */
-        public enum Order
-        {
-            /**
-             * Visit node first, then leaves
-             */
-            PREORDER,
+			try
+			{
+				Step();
+			}
+			catch (IOException e)
+			{
+				throw new Exception(string.Empty, e);
+			}
+		}
 
-            /**
-             * Visit leaves first, then node
-             */
-            POSTORDER
-        };
+		public bool MoveNext()
+		{
+			if (!HasNextTreeEntry()) return false;
 
-        /**
-         * Construct a {@link TreeIterator} for visiting all non-tree nodes.
-         *
-         * @param start
-         */
-        public TreeIterator(Tree start) :
-            this(start, Order.PREORDER, false)
-        {
-        }
+			try
+			{
+				TreeEntry ret = NextTreeEntry();
+				Step();
+				Current = ret;
+				return true;
+			}
+			catch (IOException e)
+			{
+				throw new Exception(string.Empty, e);
+			}
+		}
 
-        /**
-         * Construct a {@link TreeIterator} visiting all nodes in a tree in a given
-         * order.
-         *
-         * @param start Root node
-         * @param order {@link Order}
-         */
-        public TreeIterator(Tree start, Order order)
-            : this(start, order, true)
-        {
-        }
+		private TreeEntry NextTreeEntry()
+		{
+			if (_sub != null)
+				return _sub.NextTreeEntry();
 
-        /**
-         * Construct a {@link TreeIterator}
-         *
-         * @param start First node to visit
-         * @param order Visitation {@link Order}
-         * @param visitTreeNode True to include tree node
-         */
-        private TreeIterator(Tree start, Order order, bool visitTreeNode)
-        {
-            tree = start;
-            visitTreeNodes = visitTreeNode;
-            index = -1;
-            this.order = order;
-            if (!visitTreeNodes)
-                hasVisitedTree = true;
+			if (_index < 0 && _order == Order.PREORDER)
+				return _tree;
 
-            try
-            {
-                Step();
-            }
-            catch (IOException e)
-            {
-                throw new Exception(string.Empty, e);
-            }
-        }
+			if (_order == Order.POSTORDER && _index == _tree.MemberCount)
+				return _tree;
 
-        public bool MoveNext()
-        {
-            try
-            {
-                TreeEntry ret = NextTreeEntry();
-                Step();
-                Current = ret;
-                return true;
-            }
-            catch (IOException e)
-            {
-                throw new Exception(string.Empty, e);
-            }
-        }
+			if (_tree.Members.Length <= _index)
+				return null;
 
-        private TreeEntry NextTreeEntry()
-        {
-            if (sub != null)
-                return sub.NextTreeEntry();
-            
-            if (index < 0 && order == Order.PREORDER)
-                return tree;
+			return _tree.Members[_index];
+		}
 
-            if (order == Order.POSTORDER && index == tree.MemberCount)
-                return tree;
+		// Commented out since hasNext is not used my IEnumerator
+		//
+		//public bool hasNext()
+		//{
+		//    try
+		//    {
+		//        return HasNextTreeEntry();
+		//    }
+		//    catch (IOException e)
+		//    {
+		//        throw new Exception(string.Empty, e);
+		//    }
+		//}
 
-            if (tree.Members.Length <= index)
-                return null;
+		private bool HasNextTreeEntry()
+		{
+			if (_tree == null) return false;
 
-            return tree.Members[index];
-        }
+			return _sub != null || _index < _tree.MemberCount || _order == Order.POSTORDER && _index == _tree.MemberCount;
+		}
 
-        // Commented out since hasNext is not used my IEnumerator
-        //
-        //public bool hasNext()
-        //{
-        //    try
-        //    {
-        //        return HasNextTreeEntry();
-        //    }
-        //    catch (IOException e)
-        //    {
-        //        throw new Exception(string.Empty, e);
-        //    }
-        //}
+		private bool Step()
+		{
+			if (_tree == null) return false; 
+			if (_sub != null)
+			{
+				if (_sub.Step()) return true;
+				_sub = null;
+			}
 
-        private bool HasNextTreeEntry()
-        {
-            if (tree == null)
-                return false;
+			if (_index < 0 && !_hasVisitedTree && _order == Order.PREORDER)
+			{
+				_hasVisitedTree = true;
+				return true;
+			}
 
-            return sub != null || index < tree.MemberCount || order == Order.POSTORDER && index == tree.MemberCount;
-        }
+			while (++_index < _tree.MemberCount)
+			{
+				TreeEntry e = _tree.Members[_index];
+				if (e is Tree)
+				{
+					_sub = new TreeIterator((Tree)e, _order, _visitTreeNodes);
+					if (_sub.HasNextTreeEntry()) return true;
+					_sub = null;
+					continue;
+				}
+				return true;
+			}
 
-        private bool Step()
-        {
-            if (tree == null)
-                return false;
+			if (_index == _tree.MemberCount && !_hasVisitedTree && _order == Order.POSTORDER)
+			{
+				_hasVisitedTree = true;
+				return true;
+			}
 
-            if (sub != null)
-            {
-                if (sub.Step())
-                    return true;
-                sub = null;
-            }
+			return false;
+		}
 
-            if (index < 0 && !hasVisitedTree && order == Order.PREORDER)
-            {
-                hasVisitedTree = true;
-                return true;
-            }
+		#region IEnumerator<TreeEntry> Members
 
-            while (++index < tree.MemberCount)
-            {
-                TreeEntry e = tree.Members[index];
-                if (e is Tree)
-                {
-                    sub = new TreeIterator((Tree)e, order, visitTreeNodes);
-                    if (sub.HasNextTreeEntry())
-                        return true;
-                    sub = null;
-                    continue;
-                }
-                return true;
-            }
+		public TreeEntry Current { get; internal set; }
 
-            if (index == tree.MemberCount && !hasVisitedTree && order == Order.POSTORDER)
-            {
-                hasVisitedTree = true;
-                return true;
-            }
-            return false;
-        }
+		#endregion
 
-        // 
-        //public void remove()
-        //{
-        //    throw new InvalidOperationException("TreeIterator does not suppport remove()");
-        //}
+		#region IDisposable Members
 
+		public void Dispose()
+		{
+		}
 
-        #region IEnumerator<TreeEntry> Members
+		#endregion
 
-        public TreeEntry Current{ get; internal set; }
+		#region IEnumerator Members
 
-        #endregion
+		object System.Collections.IEnumerator.Current
+		{
+			get { return Current; }
+		}
 
-        #region IDisposable Members
+		public void Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-        public void Dispose()
-        {
-        }
-
-        #endregion
-
-        #region IEnumerator Members
-
-        object System.Collections.IEnumerator.Current
-        {
-            get { return Current; }
-        }
-
-        public void Reset()
-        {
-            throw new NotSupportedException();
-        }
-
-        #endregion
-    }
+		#endregion
+	}
 }

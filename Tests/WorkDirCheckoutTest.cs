@@ -54,10 +54,11 @@ namespace GitSharp.Tests
             var index = new GitIndex(db);
             index.add(trash, writeTrashFile("bar", "bar"));
             index.add(trash, writeTrashFile("foo/bar/baz/qux", "foo/bar"));
-            PathUtil.DeleteFile(Path.Combine(trash.FullName, "bar"));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "bar")));
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
             writeTrashFile("bar/baz/qux/foo", "another nasty one");
             writeTrashFile("foo", "troublesome little bugger");
+            
             try
             {
                 new WorkDirCheckout(db, trash, index, index).checkout();
@@ -69,17 +70,20 @@ namespace GitSharp.Tests
 
             WorkDirCheckout workDirCheckout = new WorkDirCheckout(db, trash, index, index) { FailOnConflict = false };
             workDirCheckout.checkout();
+
             Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo")).IsFile());
             Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo/bar/baz/qux")).IsFile());
+
             var index2 = new GitIndex(db);
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "bar")));
-            PathUtil.DeleteFile(Path.Combine(trash.FullName, "foo"));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
             index2.add(trash, writeTrashFile("bar/baz/qux/foo", "bar"));
             writeTrashFile("bar/baz/qux/bar", "evil? I thought it said WEEVIL!");
             index2.add(trash, writeTrashFile("foo", "lalala"));
 
             workDirCheckout = new WorkDirCheckout(db, trash, index2, index) { FailOnConflict = false };
-            workDirCheckout.checkout();
+            workDirCheckout.checkout()
+
             Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "bar")).IsFile());
             Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo/bar/baz/qux")).IsFile());
             Assert.IsNotNull(index2.GetEntry("bar"));
@@ -94,7 +98,7 @@ namespace GitSharp.Tests
             var index = new GitIndex(db);
             index.add(trash, writeTrashFile("bar", "bar"));
             index.add(trash, writeTrashFile("foo/bar/baz/qux", "foo/bar"));
-            PathUtil.DeleteFile(Path.Combine(trash.FullName, "bar"));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName,  "bar")));
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
             writeTrashFile("bar/baz/qux/foo", "another nasty one");
             writeTrashFile("foo", "troublesome little bugger");
@@ -107,12 +111,14 @@ namespace GitSharp.Tests
 
             var index2 = new GitIndex(db);
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "bar")));
-            PathUtil.DeleteFile(Path.Combine(trash.FullName, "foo"));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
+
             index2.add(trash, writeTrashFile("bar/baz/qux/foo", "bar"));
             index2.add(trash, writeTrashFile("foo", "lalala"));
             
             workDirCheckout = new WorkDirCheckout(db, trash, index2, index);
             workDirCheckout.PrescanOneTree();
+
             conflictingEntries = workDirCheckout.Conflicts;
             List<string> removedEntries = workDirCheckout.Removed;
             Assert.IsTrue(conflictingEntries.Count == 0);

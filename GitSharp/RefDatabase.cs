@@ -228,7 +228,7 @@ namespace GitSharp
 			return tags;
 		}
 
-		private Dictionary<string, Ref> ReadRefs()
+		private HashSet<Ref> ReadRefs()
 		{
 			var avail = new Dictionary<string, Ref>();
 			ReadPackedRefs(avail);

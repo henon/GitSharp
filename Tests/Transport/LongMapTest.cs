@@ -35,108 +35,129 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using NUnit.Framework;
 
 namespace GitSharp.Tests.Transport
 {
-    [TestFixture]
-    public class LongMapTest
-    {
-#if false
-	private LongMap<Long> map;
+	[TestFixture]
+	public class LongMapTest
+	{
+		private LongMap<long> _map;
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		map = new LongMap<Long>();
+		[SetUp]
+		public void setUp()
+		{
+			_map = new LongMap<long>();
+		}
+
+		[Test]
+		public void testEmptyMap()
+		{
+			Assert.IsFalse(_map.ContainsKey(0));
+			Assert.IsFalse(_map.ContainsKey(1));
+
+			AssertHelper.Throws<KeyNotFoundException>(() => { var number = _map[0]; });
+			AssertHelper.Throws<KeyNotFoundException>(() => { var number = _map[1]; });
+
+			Assert.IsFalse(_map.Remove(0));
+			Assert.IsFalse(_map.Remove(1));
+		}
+
+		[Test]
+		public void testInsertMinValue()
+		{
+			long min = long.MinValue;
+			Assert.AreEqual(min, _map[long.MinValue] = min);
+			Assert.IsTrue(_map.ContainsKey(long.MinValue));
+			Assert.AreEqual(min, _map[long.MinValue]);
+			Assert.IsFalse(_map.ContainsKey(int.MinValue));
+		}
+
+		[Test]
+		public void testReplaceMaxValue()
+		{
+			long min = Convert.ToInt64(long.MaxValue);
+			long one = Convert.ToInt64(1);
+			Assert.AreEqual(min, _map[long.MaxValue] = min);
+			Assert.AreEqual(min, _map[long.MaxValue]);
+			Assert.AreEqual(one, _map[long.MaxValue] = one);
+		}
+
+		[Test]
+		public void testRemoveOne()
+		{
+			const long start = 1;
+			Assert.AreEqual(1, _map[start] = Convert.ToInt64(start));
+			Assert.IsTrue(_map.Remove(start));
+			Assert.IsFalse(_map.ContainsKey(start));
+		}
+
+		[Test]
+		public void testRemoveCollision1()
+		{
+			// This test relies upon the fact that we always >>> 1 the value
+			// to derive an unsigned hash code. Thus, 0 and 1 fall into the
+			// same hash bucket. Further it relies on the fact that we add
+			// the 2nd put at the top of the chain, so removing the 1st will
+			// cause a different code path.
+			//
+			Assert.AreEqual(0, _map[0] = Convert.ToInt64(0));
+			Assert.AreEqual(1, _map[1] = Convert.ToInt64(1));
+			Assert.AreEqual(Convert.ToInt64(0), _map[0]);
+			Assert.IsTrue(_map.Remove(0));
+
+			Assert.IsFalse(_map.ContainsKey(0));
+			Assert.IsTrue(_map.ContainsKey(1));
+		}
+
+		[Test]
+		public void testRemoveCollision2()
+		{
+			// This test relies upon the fact that we always >>> 1 the value
+			// to derive an unsigned hash code. Thus, 0 and 1 fall into the
+			// same hash bucket. Further it relies on the fact that we add
+			// the 2nd put at the top of the chain, so removing the 2nd will
+			// cause a different code path.
+			//
+			Assert.AreEqual(0, _map[0] = Convert.ToInt64(0));
+			Assert.AreEqual(1, _map[1] = Convert.ToInt64(1));
+			Assert.AreEqual(Convert.ToInt64(1), _map[1]);
+			Assert.IsTrue(_map.Remove(1));
+
+			Assert.IsTrue(_map.ContainsKey(0));
+			Assert.IsFalse(_map.ContainsKey(1));
+		}
+
+		[Test]
+		public void testSmallMap()
+		{
+			const long start = 12;
+			const long n = 8;
+			for (long i = start; i < start + n; i++)
+				Assert.AreEqual(i, _map[i] = Convert.ToInt64(i));
+			for (long i = start; i < start + n; i++)
+				Assert.AreEqual(Convert.ToInt64(i), _map[i]);
+		}
+
+		[Test]
+		public void testLargeMap()
+		{
+			const long start = int.MaxValue;
+			const long n = 100000;
+			for (long i = start; i < start + n; i++)
+			{
+				Assert.AreEqual(i, _map[i] = Convert.ToInt64(i));
+			}
+			for (long i = start; i < start + n; i++)
+			{
+				Assert.AreEqual(Convert.ToInt64(i), _map[i]);
+			}
+		}
 	}
 
-	public void testEmptyMap() {
-		assertFalse(map.containsKey(0));
-		assertFalse(map.containsKey(1));
-
-		assertNull(map.get(0));
-		assertNull(map.get(1));
-
-		assertNull(map.remove(0));
-		assertNull(map.remove(1));
+	public class LongMap<T> : Dictionary<long, T>
+	{
 	}
-
-	public void testInsertMinValue() {
-		final Long min = Long.valueOf(Long.MIN_VALUE);
-		assertNull(map.put(Long.MIN_VALUE, min));
-		assertTrue(map.containsKey(Long.MIN_VALUE));
-		assertSame(min, map.get(Long.MIN_VALUE));
-		assertFalse(map.containsKey(Integer.MIN_VALUE));
-	}
-
-	public void testReplaceMaxValue() {
-		final Long min = Long.valueOf(Long.MAX_VALUE);
-		final Long one = Long.valueOf(1);
-		assertNull(map.put(Long.MAX_VALUE, min));
-		assertSame(min, map.get(Long.MAX_VALUE));
-		assertSame(min, map.put(Long.MAX_VALUE, one));
-		assertSame(one, map.get(Long.MAX_VALUE));
-	}
-
-	public void testRemoveOne() {
-		final long start = 1;
-		assertNull(map.put(start, Long.valueOf(start)));
-		assertEquals(Long.valueOf(start), map.remove(start));
-		assertFalse(map.containsKey(start));
-	}
-
-	public void testRemoveCollision1() {
-		// This test relies upon the fact that we always >>> 1 the value
-		// to derive an unsigned hash code. Thus, 0 and 1 fall into the
-		// same hash bucket. Further it relies on the fact that we add
-		// the 2nd put at the top of the chain, so removing the 1st will
-		// cause a different code path.
-		//
-		assertNull(map.put(0, Long.valueOf(0)));
-		assertNull(map.put(1, Long.valueOf(1)));
-		assertEquals(Long.valueOf(0), map.remove(0));
-
-		assertFalse(map.containsKey(0));
-		assertTrue(map.containsKey(1));
-	}
-
-	public void testRemoveCollision2() {
-		// This test relies upon the fact that we always >>> 1 the value
-		// to derive an unsigned hash code. Thus, 0 and 1 fall into the
-		// same hash bucket. Further it relies on the fact that we add
-		// the 2nd put at the top of the chain, so removing the 2nd will
-		// cause a different code path.
-		//
-		assertNull(map.put(0, Long.valueOf(0)));
-		assertNull(map.put(1, Long.valueOf(1)));
-		assertEquals(Long.valueOf(1), map.remove(1));
-
-		assertTrue(map.containsKey(0));
-		assertFalse(map.containsKey(1));
-	}
-
-	public void testSmallMap() {
-		final long start = 12;
-		final long n = 8;
-		for (long i = start; i < start + n; i++)
-			assertNull(map.put(i, Long.valueOf(i)));
-		for (long i = start; i < start + n; i++)
-			assertEquals(Long.valueOf(i), map.get(i));
-	}
-
-	public void testLargeMap() {
-		final long start = Integer.MAX_VALUE;
-		final long n = 100000;
-		for (long i = start; i < start + n; i++)
-			assertNull(map.put(i, Long.valueOf(i)));
-		for (long i = start; i < start + n; i++)
-			assertEquals(Long.valueOf(i), map.get(i));
-	}
-#endif
-    }
 }

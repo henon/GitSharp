@@ -37,40 +37,32 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GitSharp
 {
-
-	/**
-	 * Fast, efficient map specifically for {@link ObjectId} subclasses.
-	 * <p>
-	 * This map provides an efficient translation from any ObjectId instance to a
-	 * cached subclass of ObjectId that has the same value.
-	 * <p>
-	 * Raw value equality is tested when comparing two ObjectIds (or subclasses),
-	 * not reference equality and not <code>.Equals(Object)</code> equality. This
-	 * allows subclasses to override <code>Equals</code> to supply their own
-	 * extended semantics.
-	 * 
-	 * @param <V>
-	 *            type of subclass of ObjectId that will be stored in the map.
-	 */
-	public class ObjectIdSubclassMap<V> : List<V>
+	/// <summary>
+	/// Fast, efficient map specifically for {@link ObjectId} subclasses.
+	/// <para>
+	/// This map provides an efficient translation from any ObjectId instance to a
+	/// cached subclass of ObjectId that has the same value.
+	/// </para><para>
+	/// Raw value equality is tested when comparing two ObjectIds (or subclasses),
+	/// not reference equality and not <code>.Equals(Object)</code> equality. This
+	/// allows subclasses to override <code>Equals</code> to supply their own
+	/// extended semantics.
+	/// </summary>
+	/// <typeparam name="V">
+	/// Type of subclass of ObjectId that will be stored in the map.
+	/// </typeparam>
+	public class ObjectIdSubclassMap<V> : HashSet<V>
 		where V : ObjectId
 	{
-		/// <summary>
-		/// Create an empty map.
-		/// </summary>
-		public ObjectIdSubclassMap()
-		{
-		}
+		private static readonly IEqualityComparer<V> EqualityComparer = new ObjectIdEqualityComparer<V>();
 
-		/// <summary>
-		/// Remove all entries from this map.
-		/// </summary>
-		public void clear()
+		public V gget(AnyObjectId toFind)
 		{
-			base.Clear();
+			return null;	
 		}
 
 		/// <summary>
@@ -78,47 +70,18 @@ namespace GitSharp
 		/// </summary>
 		/// <param name="toFind">the object identifier to find.</param>
 		/// <returns>the instance mapped to toFind, or null if no mapping exists.</returns>
-		public V get(AnyObjectId toFind)
+		public V Get(AnyObjectId toFind)
 		{
-			V item = base.Find(x => toFind.ToObjectId() == x.ToObjectId());
-			return item;
+			return this.SingleOrDefault(x => toFind.ToObjectId() == x.ToObjectId());
 		}
 
 		/// <summary>
-		/// Store an object for future lookup.
-		/// <para />
-		/// An existing mapping for <b>must not</b> be in this map. Callers must
-		/// first call <see cref="get"/> to verify there is no current
-		/// mapping prior to adding a new mapping.
+		/// 
 		/// </summary>
-		/// <param name="newValue"></param>
-		public void add(V newValue)
-		{
-			if (!Contains(newValue))
-			{
-				base.Add(newValue);
-			}
-		}
-
 		/// <returns>number of objects in map</returns>
 		public int size()
 		{
-			return base.Count;
-		}
-
-		private int index(V id)
-		{
-			return base.IndexOf(id);
-		}
-
-		private void insert(V newValue)
-		{
-			base.Add(newValue);
-		}
-
-		private static V[] CreateArray(int sz)
-		{
-			return new V[sz];
+			return Count;
 		}
 	}
 }

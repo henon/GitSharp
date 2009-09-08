@@ -143,7 +143,7 @@ namespace GitSharp
 
 		public bool willInclude(AnyObjectId id)
 		{
-			return _objectsMap.get(id) != null;
+			return _objectsMap.Get(id) != null;
 		}
 
 		public ObjectId computeName()
@@ -257,9 +257,9 @@ namespace GitSharp
 			{
 				ObjectId idBase = loader.DeltaBase;
 				if (idBase == null) continue;
-				ObjectToPack otpBase = _objectsMap.get(idBase);
+				ObjectToPack otpBase = _objectsMap.Get(idBase);
 
-				if ((otpBase != null || (Thin && _edgeObjects.get(idBase) != null)) && IsBetterDeltaReuseLoader(bestLoader, loader))
+				if ((otpBase != null || (Thin && _edgeObjects.Get(idBase) != null)) && IsBetterDeltaReuseLoader(bestLoader, loader))
 				{
 					bestLoader = loader;
 					bestBase = (otpBase ?? idBase);
@@ -530,7 +530,7 @@ namespace GitSharp
 		{
 			if (robject.has(RevFlag.UNINTERESTING))
 			{
-				_edgeObjects.add(robject);
+				_edgeObjects.Add(robject);
 				Thin = true;
 				return;
 			}
@@ -544,7 +544,7 @@ namespace GitSharp
 			{
 				throw new IncorrectObjectTypeException(robject, "COMMIT nor TREE nor BLOB nor TAG");
 			}
-			_objectsMap.add(otp);
+			_objectsMap.Add(otp);
 		}
 
 		#region Nested Types

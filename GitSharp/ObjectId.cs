@@ -38,12 +38,12 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using GitSharp.Util;
 
 namespace GitSharp
 {
-	[Complete]
 	public class ObjectId : AnyObjectId
 	{
 		private static readonly string ZeroIdString;
@@ -74,17 +74,20 @@ namespace GitSharp
 
 		public static ObjectId ZeroId { get; private set; }
 
-
 		public static bool IsId(string id)
 		{
-			if (id.Length != 2*ObjectIdLength)
+			if (id.Length != 2 * ObjectIdLength)
+			{
 				return false;
+			}
 
 			try
 			{
 				for (int k = id.Length - 1; k >= 0; k--)
-					if (Hex.HexCharToValue(id[k]) == byte.MaxValue)
-						return false;
+				{
+					if (Hex.HexCharToValue(id[k]) == byte.MaxValue) return false;
+				}
+
 				return true;
 			}
 			catch (IndexOutOfRangeException)
@@ -98,22 +101,26 @@ namespace GitSharp
 			return i != null ? i.ToString() : ZeroIdString;
 		}
 
-		/**
-	     * Compare to object identifier byte sequences for equality.
-	     * 
-	     * @param firstBuffer
-	     *            the first buffer to compare against. Must have at least 20
-	     *            bytes from position ai through the end of the buffer.
-	     * @param fi
-	     *            first offset within firstBuffer to begin testing.
-	     * @param secondBuffer
-	     *            the second buffer to compare against. Must have at least 2
-	     *            bytes from position bi through the end of the buffer.
-	     * @param si
-	     *            first offset within secondBuffer to begin testing.
-	     * @return true if the two identifiers are the same.
-	     */
-
+		/// <summary>
+		/// Compare to object identifier byte sequences for equality.
+		/// </summary>
+		/// <param name="firstBuffer">
+		/// the first buffer to compare against. Must have at least 20
+		/// bytes from position ai through the end of the buffer.
+		/// </param>
+		/// <param name="fi">
+		/// first offset within firstBuffer to begin testing.
+		/// </param>
+		/// <param name="secondBuffer">
+		/// the second buffer to compare against. Must have at least 2
+		/// bytes from position bi through the end of the buffer.
+		/// </param>
+		/// <param name="si">
+		/// first offset within secondBuffer to begin testing.
+		/// </param>
+		/// <returns>
+		/// return true if the two identifiers are the same.
+		/// </returns>
 		public static bool Equals(byte[] firstBuffer, int fi, byte[] secondBuffer, int si)
 		{
 			return firstBuffer[fi] == secondBuffer[si]
@@ -197,5 +204,47 @@ namespace GitSharp
 			return new ObjectId(intbuffer[offset], intbuffer[offset + 1], intbuffer[offset + 2], intbuffer[offset + 3],
 			                    intbuffer[offset + 4]);
 		}
+	}
+
+	class ObjectIdEqualityComparer<T> : IEqualityComparer<T>
+		where T : ObjectId
+	{
+		#region Implementation of IEqualityComparer<ObjectId>
+
+		/// <summary>
+		/// Determines whether the specified objects are equal.
+		/// </summary>
+		/// <returns>
+		/// true if the specified objects are equal; otherwise, false.
+		/// </returns>
+		/// <param name="x">
+		/// The first object of type <see cref="ObjectId"/> to compare.
+		/// </param>
+		/// <param name="y">
+		/// The second object of type <see cref="ObjectId"/> to compare.
+		/// </param>
+		public bool Equals(T x, T y)
+		{
+			return x == y;
+		}
+
+		/// <summary>
+		/// Returns a hash code for the specified object.
+		/// </summary>
+		/// <returns>
+		/// A hash code for the specified object.
+		/// </returns>
+		/// <param name="obj">
+		/// The <see cref="ObjectId"/> for which a hash code is to be returned.
+		/// </param>
+		/// <exception cref="ArgumentNullException">
+		/// The type of <paramref name="obj"/> is a reference type and <paramref name="obj"/> is null.
+		/// </exception>
+		public int GetHashCode(T obj)
+		{
+			return obj.GetHashCode();
+		}
+
+		#endregion
 	}
 }

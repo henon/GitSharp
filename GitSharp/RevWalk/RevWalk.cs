@@ -73,6 +73,73 @@ namespace GitSharp.RevWalk
 	 */
 	public class RevWalk : IEnumerable<RevCommit>, IDisposable
 	{
+		#region Enums
+
+		public enum RevWalkState
+		{
+			/// <summary>
+			/// Set on objects whose important header data has been loaded.
+			/// <para />
+			/// For a RevCommit this indicates we have pulled apart the tree and parent
+			/// references from the raw bytes available in the repository and translated
+			/// those to our own local RevTree and RevCommit instances. The raw buffer is
+			/// also available for message and other header filtering.
+			/// <para />
+			/// For a RevTag this indicates we have pulled part the tag references to
+			/// find out who the tag refers to, and what that object's type is.
+			/// </summary>
+			PARSED = 1 << 0,
+
+			/// <summary>
+			/// Set on RevCommit instances added to our {@link #pending} queue.
+			/// <para />
+			/// We use this flag to avoid adding the same commit instance twice to our
+			/// queue, especially if we reached it by more than one path.
+			/// </summary>
+			SEEN = 1 << 1,
+
+			/// <summary>
+			/// Set on RevCommit instances the caller does not want output.
+			/// <para />
+			/// We flag commits as uninteresting if the caller does not want commits
+			/// reachable from a commit given to {@link #markUninteresting(RevCommit)}.
+			/// This flag is always carried into the commit's parents and is a key part
+			/// of the "rev-list B --not A" feature; A is marked UNINTERESTING.
+			/// </summary>
+			UNINTERESTING = 1 << 2,
+
+			/// <summary>
+			/// Set on a RevCommit that can collapse out of the history.
+			/// <para />
+			/// If the {@link #treeFilter} concluded that this commit matches his
+			/// parents' for all of the paths that the filter is interested in then we
+			/// mark the commit REWRITE. Later we can rewrite the parents of a REWRITE
+			/// child to remove chains of REWRITE commits before we produce the child to
+			/// the application.
+			/// </summary>
+			/// <seealso cref="RewriteGenerator"/>
+			REWRITE = 1 << 3,
+
+			/// <summary>
+			/// Temporary mark for use within generators or filters.
+			/// <para />
+			/// This mark is only for local use within a single scope. If someone sets
+			/// the mark they must unset it before any other code can see the mark.
+			/// </summary>
+			TEMP_MARK = 1 << 4,
+
+			/// <summary>
+			/// Temporary mark for use within {@link TopoSortGenerator}.
+			/// <para />
+			/// This mark indicates the commit could not produce when it wanted to, as at
+			/// least one child was behind it. Commits with this flag are delayed until
+			/// all children have been output first.
+			/// </summary>
+			TOPO_DELAY = 1 << 5,
+		}
+
+		#endregion
+
 		/**
 		 * Set on objects whose important header data has been loaded.
 		 * <p>
@@ -139,125 +206,143 @@ namespace GitSharp.RevWalk
 
 		private static readonly int APP_FLAGS = -1 & ~((1 << RESERVED_FLAGS) - 1);
 
-		public Repository db;
+		private readonly ObjectIdSubclassMap<RevObject> _objects;
+		private readonly List<RevCommit> _roots;
+		private readonly HashSet<RevSort.Strategy> _sorting;
+		private readonly Repository _db;
+		private readonly WindowCursor _curs;
+		private readonly MutableObjectId _idBuffer;
 
-		public WindowCursor curs;
+		private int _delayFreeFlags;
+		private int _freeFlags;
+		private int _carryFlags;
+		private RevFilter _filter;
+		private TreeFilter _treeFilter;
 
-		public MutableObjectId idBuffer;
-
-		private ObjectIdSubclassMap<RevObject> objects;
-
-		private int freeFlags = APP_FLAGS;
-
-		private int delayFreeFlags;
-
-		internal int carryFlags = UNINTERESTING;
-
-		private List<RevCommit> roots;
-
-		public AbstractRevQueue queue;
-
-		public Generator pending;
-
-		private HashSet<RevSort.Strategy> sorting;
-
-		private RevFilter filter;
-
-		private TreeFilter treeFilter;
-
-		/**
-		 * Create a new revision walker for a given repository.
-		 * 
-		 * @param repo
-		 *            the repository the walker will obtain data from.
-		 */
+		/// <summary>
+		/// Create a new revision walker for a given repository.
+		/// </summary>
+		/// <param name="repo">
+		/// The repository the walker will obtain data from.
+		/// </param>
 		public RevWalk(Repository repo)
 		{
-			db = repo;
-			curs = new WindowCursor();
-			idBuffer = new MutableObjectId();
-			objects = new ObjectIdSubclassMap<RevObject>();
-			roots = new List<RevCommit>();
-			queue = new DateRevQueue();
-			pending = new StartGenerator(this);
-			sorting = new HashSet<RevSort.Strategy>() { RevSort.NONE };
-			filter = RevFilter.ALL;
-			treeFilter = TreeFilter.ALL;
+			_freeFlags = APP_FLAGS;
+			_carryFlags = UNINTERESTING;
+
+			_db = repo;
+			_curs = new WindowCursor();
+			_idBuffer = new MutableObjectId();
+			_objects = new ObjectIdSubclassMap<RevObject>();
+			_roots = new List<RevCommit>();
+			Queue = new DateRevQueue();
+			Pending = new StartGenerator(this);
+			_sorting = new HashSet<RevSort.Strategy>() { RevSort.NONE };
+			_filter = RevFilter.ALL;
+			_treeFilter = TreeFilter.ALL;
 		}
 
-		/**
-		 * Get the repository this walker loads objects from.
-		 * 
-		 * @return the repository this walker was created to Read.
-		 */
+		public MutableObjectId IdBuffer
+		{
+			get { return _idBuffer; }
+		}
+
+		public WindowCursor WindowCursor
+		{
+			get { return _curs; }
+		}
+
+		public Generator Pending { get; set; }
+
+		public AbstractRevQueue Queue { get; set; }
+
+		/// <summary>
+		/// Get the repository this walker loads objects from.
+		/// </summary>
+		/// <returns>
+		/// Return the repository this walker was created to Read.
+		/// </returns>
 		public Repository getRepository()
 		{
-			return db;
+			return _db;
 		}
 
-		/**
-		 * Mark a commit to start graph traversal from.
-		 * <p>
-		 * Callers are encouraged to use {@link #parseCommit(AnyObjectId)} to obtain
-		 * the commit reference, rather than {@link #lookupCommit(AnyObjectId)}, as
-		 * this method requires the commit to be parsed before it can be added as a
-		 * root for the traversal.
-		 * <p>
-		 * The method will automatically parse an unparsed commit, but error
-		 * handling may be more difficult for the application to explain why a
-		 * RevCommit is not actually a commit. The object pool of this walker would
-		 * also be 'poisoned' by the non-commit RevCommit.
-		 * 
-		 * @param c
-		 *            the commit to start traversing from. The commit passed must be
-		 *            from this same revision walker.
-		 * @throws MissingObjectException
-		 *             the commit supplied is not available from the object
-		 *             database. This usually indicates the supplied commit is
-		 *             invalid, but the reference was constructed during an earlier
-		 *             invocation to {@link #lookupCommit(AnyObjectId)}.
-		 * @throws IncorrectObjectTypeException
-		 *             the object was not parsed yet and it was discovered during
-		 *             parsing that it is not actually a commit. This usually
-		 *             indicates the caller supplied a non-commit SHA-1 to
-		 *             {@link #lookupCommit(AnyObjectId)}.
-		 * @
-		 *             a pack file or loose object could not be Read.
-		 */
+		/// <summary>
+		/// Mark a commit to start graph traversal from.
+		/// <para />
+		/// Callers are encouraged to use <see cref="parseCommit(AnyObjectId)"/> to obtain
+		/// the commit reference, rather than <see cref="lookupCommit(AnyObjectId)"/>, as
+		/// this method requires the commit to be parsed before it can be added as a
+		/// root for the traversal.
+		/// <para />
+		/// The method will automatically parse an unparsed commit, but error
+		/// handling may be more difficult for the application to explain why a
+		/// <see cref="RevCommit"/> is not actually a commit. The object pool of this 
+		/// walker would also be 'poisoned' by the non-commit RevCommit.
+		/// </summary>
+		/// <param name="c">
+		/// The commit to start traversing from. The commit passed must be
+		/// from this same revision walker.
+		/// </param>
+		/// <exception cref="MissingObjectException">
+		/// The commit supplied is not available from the object
+		/// database. This usually indicates the supplied commit is
+		/// invalid, but the reference was constructed during an earlier
+		/// invocation to {@link #lookupCommit(AnyObjectId)}.
+		/// </exception>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// The object was not parsed yet and it was discovered during
+		/// parsing that it is not actually a commit. This usually
+		/// indicates the caller supplied a non-commit SHA-1 to
+		/// <see cref="lookupCommit(AnyObjectId)"/>.
+		/// </exception>
 		public virtual void markStart(RevCommit c)
 		{
-			if ((c.flags & SEEN) != 0)
-				return;
+			if ((c.flags & SEEN) != 0) return;
 			if ((c.flags & PARSED) == 0)
+			{
 				c.parse(this);
+			}
 			c.flags |= SEEN;
-			roots.Add(c);
-			queue.add(c);
+			_roots.Add(c);
+			Queue.add(c);
 		}
 
-		/**
-		 * Mark commits to start graph traversal from.
-		 * 
-		 * @param list
-		 *            commits to start traversing from. The commits passed must be
-		 *            from this same revision walker.
-		 * @throws MissingObjectException
-		 *             one of the commits supplied is not available from the object
-		 *             database. This usually indicates the supplied commit is
-		 *             invalid, but the reference was constructed during an earlier
-		 *             invocation to {@link #lookupCommit(AnyObjectId)}.
-		 * @throws IncorrectObjectTypeException
-		 *             the object was not parsed yet and it was discovered during
-		 *             parsing that it is not actually a commit. This usually
-		 *             indicates the caller supplied a non-commit SHA-1 to
-		 *             {@link #lookupCommit(AnyObjectId)}.
-		 * @
-		 *             a pack file or loose object could not be Read.
-		 */
+		/// <summary>
+		/// Mark a commit to start graph traversal from.
+		/// <para />
+		/// Callers are encouraged to use <see cref="parseCommit(AnyObjectId)"/> to obtain
+		/// the commit reference, rather than <see cref="lookupCommit(AnyObjectId)"/>, as
+		/// this method requires the commit to be parsed before it can be added as a
+		/// root for the traversal.
+		/// <para />
+		/// The method will automatically parse an unparsed commit, but error
+		/// handling may be more difficult for the application to explain why a
+		/// <see cref="RevCommit"/> is not actually a commit. The object pool of this 
+		/// walker would also be 'poisoned' by the non-commit RevCommit.
+		/// </summary>
+		/// <param name="list">
+		/// Commits to start traversing from. The commits passed must be
+		/// from this same revision walker.
+		/// </param>
+		/// <exception cref="MissingObjectException">
+		/// The commit supplied is not available from the object
+		/// database. This usually indicates the supplied commit is
+		/// invalid, but the reference was constructed during an earlier
+		/// invocation to {@link #lookupCommit(AnyObjectId)}.
+		/// </exception>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// The object was not parsed yet and it was discovered during
+		/// parsing that it is not actually a commit. This usually
+		/// indicates the caller supplied a non-commit SHA-1 to
+		/// <see cref="lookupCommit(AnyObjectId)"/>.
+		/// </exception>
 		public virtual void markStart(IEnumerable<RevCommit> list)
 		{
 			foreach (RevCommit c in list)
+			{
 				markStart(c);
+			}
 		}
 
 		/**
@@ -332,22 +417,22 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual bool isMergedInto(RevCommit @base, RevCommit tip)
 		{
-			RevFilter oldRF = filter;
-			TreeFilter oldTF = treeFilter;
+			RevFilter oldRF = _filter;
+			TreeFilter oldTF = _treeFilter;
 			try
 			{
 				finishDelayedFreeFlags();
-				reset(~freeFlags & APP_FLAGS);
-				filter = RevFilter.MERGE_BASE;
-				treeFilter = TreeFilter.ALL;
+				reset(~_freeFlags & APP_FLAGS);
+				_filter = RevFilter.MERGE_BASE;
+				_treeFilter = TreeFilter.ALL;
 				markStart(tip);
 				markStart(@base);
 				return (next() == @base);
 			}
 			finally
 			{
-				filter = oldRF;
-				treeFilter = oldTF;
+				_filter = oldRF;
+				_treeFilter = oldTF;
 			}
 		}
 
@@ -367,7 +452,7 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual RevCommit next()
 		{
-			return pending.next();
+			return Pending.next();
 		}
 
 		/**
@@ -378,7 +463,7 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual HashSet<RevSort.Strategy> getRevSort()
 		{
-			return new HashSet<RevSort.Strategy>(sorting);
+			return new HashSet<RevSort.Strategy>(_sorting);
 		}
 
 		/**
@@ -390,7 +475,7 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual bool hasRevSort(RevSort.Strategy sort)
 		{
-			return sorting.Contains(sort);
+			return _sorting.Contains(sort);
 		}
 
 		/**
@@ -405,8 +490,8 @@ namespace GitSharp.RevWalk
 		public virtual void sort(RevSort.Strategy s)
 		{
 			assertNotStarted();
-			sorting.Clear();
-			sorting.Add(s);
+			_sorting.Clear();
+			_sorting.Add(s);
 		}
 
 		/**
@@ -427,24 +512,33 @@ namespace GitSharp.RevWalk
 		{
 			assertNotStarted();
 			if (use)
-				sorting.Add(s);
+			{
+				_sorting.Add(s);
+			}
 			else
-				sorting.Remove(s);
+			{
+				_sorting.Remove(s);
+			}
 
-			if (sorting.Count > 1)
-				sorting.Remove(RevSort.NONE);
-			else if (sorting.Count == 0)
-				sorting.Add(RevSort.NONE);
+			if (_sorting.Count > 1)
+			{
+				_sorting.Remove(RevSort.NONE);
+			}
+			else if (_sorting.Count == 0)
+			{
+				_sorting.Add(RevSort.NONE);
+			}
 		}
 
-		/**
-		 * Get the currently configured commit filter.
-		 * 
-		 * @return the current filter. Never null as a filter is always needed.
-		 */
+		/// <summary>
+		/// Get the currently configured commit filter.
+		/// </summary>
+		/// <returns>
+		/// Return the current filter. Never null as a filter is always needed.
+		/// </returns>
 		public virtual RevFilter getRevFilter()
 		{
-			return filter;
+			return _filter;
 		}
 
 		/**
@@ -470,7 +564,7 @@ namespace GitSharp.RevWalk
 		public virtual void setRevFilter(RevFilter newFilter)
 		{
 			assertNotStarted();
-			filter = newFilter != null ? newFilter : RevFilter.ALL;
+			_filter = newFilter ?? RevFilter.ALL;
 		}
 
 		/**
@@ -481,7 +575,7 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual TreeFilter getTreeFilter()
 		{
-			return treeFilter;
+			return _treeFilter;
 		}
 
 		/**
@@ -506,7 +600,7 @@ namespace GitSharp.RevWalk
 		public virtual void setTreeFilter(TreeFilter newFilter)
 		{
 			assertNotStarted();
-			treeFilter = newFilter != null ? newFilter : TreeFilter.ALL;
+			_treeFilter = newFilter ?? TreeFilter.ALL;
 		}
 
 		/**
@@ -521,11 +615,11 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual RevBlob lookupBlob(AnyObjectId id)
 		{
-			RevBlob c = (RevBlob)objects.get(id);
+			var c = (RevBlob)_objects.Get(id);
 			if (c == null)
 			{
 				c = new RevBlob(id);
-				objects.add(c);
+				_objects.Add(c);
 			}
 			return c;
 		}
@@ -542,11 +636,11 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual RevTree lookupTree(AnyObjectId id)
 		{
-			RevTree c = (RevTree)objects.get(id);
+			var c = (RevTree)_objects.Get(id);
 			if (c == null)
 			{
 				c = new RevTree(id);
-				objects.add(c);
+				_objects.Add(c);
 			}
 			return c;
 		}
@@ -563,11 +657,11 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual RevCommit lookupCommit(AnyObjectId id)
 		{
-			RevCommit c = (RevCommit)objects.get(id);
+			var c = (RevCommit)_objects.Get(id);
 			if (c == null)
 			{
 				c = createCommit(id);
-				objects.add(c);
+				_objects.Add(c);
 			}
 			return c;
 		}
@@ -586,7 +680,7 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual RevObject lookupAny(AnyObjectId id, int type)
 		{
-			RevObject r = objects.get(id);
+			RevObject r = _objects.Get(id);
 			if (r == null)
 			{
 				switch (type)
@@ -594,19 +688,24 @@ namespace GitSharp.RevWalk
 					case Constants.OBJ_COMMIT:
 						r = createCommit(id);
 						break;
+
 					case Constants.OBJ_TREE:
 						r = new RevTree(id);
 						break;
+
 					case Constants.OBJ_BLOB:
 						r = new RevBlob(id);
 						break;
+
 					case Constants.OBJ_TAG:
 						r = new RevTag(id);
 						break;
+
 					default:
 						throw new ArgumentException("invalid git type: " + type);
 				}
-				objects.add(r);
+
+				_objects.Add(r);
 			}
 			return r;
 		}
@@ -681,7 +780,7 @@ namespace GitSharp.RevWalk
 				return t;
 			}
 
-			ObjectLoader ldr = db.OpenObject(curs, t);
+			ObjectLoader ldr = _db.OpenObject(_curs, t);
 			if (ldr == null)
 			{
 				throw new MissingObjectException(t, Constants.TYPE_TREE);
@@ -714,10 +813,10 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual RevObject parseAny(AnyObjectId id)
 		{
-			RevObject r = objects.get(id);
+			RevObject r = _objects.Get(id);
 			if (r == null)
 			{
-				ObjectLoader ldr = db.OpenObject(curs, id);
+				ObjectLoader ldr = _db.OpenObject(_curs, id);
 				if (ldr == null)
 					throw new MissingObjectException(id.ToObjectId(), "unknown");
 				byte[] data = ldr.CachedBytes;
@@ -745,7 +844,7 @@ namespace GitSharp.RevWalk
 						}
 					case Constants.OBJ_TAG:
 						{
-							RevTag t = new RevTag(id);
+							var t = new RevTag(id);
 							t.parseCanonical(this, data);
 							r = t;
 							break;
@@ -753,10 +852,13 @@ namespace GitSharp.RevWalk
 					default:
 						throw new ArgumentException("Bad object type: " + type);
 				}
-				objects.add(r);
+				_objects.Add(r);
 			}
 			else if ((r.flags & PARSED) == 0)
+			{
 				r.parse(this);
+			}
+
 			return r;
 		}
 
@@ -801,10 +903,10 @@ namespace GitSharp.RevWalk
 
 		public int allocFlag()
 		{
-			if (freeFlags == 0)
+			if (_freeFlags == 0)
 				throw new ArgumentException(32 - RESERVED_FLAGS + " flags already created.");
-			int m = freeFlags.LowestOneBit();
-			freeFlags &= ~m;
+			int m = _freeFlags.LowestOneBit();
+			_freeFlags &= ~m;
 			return m;
 		}
 
@@ -819,11 +921,11 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual void carry(RevFlag flag)
 		{
-			if ((freeFlags & flag.Mask) != 0)
+			if ((_freeFlags & flag.Mask) != 0)
 				throw new ArgumentException(flag.Name + " is disposed.");
 			if (flag.Walker != this)
 				throw new ArgumentException(flag.Name + " not from this.");
-			carryFlags |= flag.Mask;
+			_carryFlags |= flag.Mask;
 		}
 
 		/**
@@ -863,22 +965,22 @@ namespace GitSharp.RevWalk
 		{
 			if (isNotStarted())
 			{
-				freeFlags |= mask;
-				carryFlags &= ~mask;
+				_freeFlags |= mask;
+				_carryFlags &= ~mask;
 			}
 			else
 			{
-				delayFreeFlags |= mask;
+				_delayFreeFlags |= mask;
 			}
 		}
 
 		private void finishDelayedFreeFlags()
 		{
-			if (delayFreeFlags != 0)
+			if (_delayFreeFlags != 0)
 			{
-				freeFlags |= delayFreeFlags;
-				carryFlags &= ~delayFreeFlags;
-				delayFreeFlags = 0;
+				_freeFlags |= _delayFreeFlags;
+				_carryFlags &= ~_delayFreeFlags;
+				_delayFreeFlags = 0;
 			}
 		}
 
@@ -947,7 +1049,7 @@ namespace GitSharp.RevWalk
 			int clearFlags = ~retainFlags;
 
 			var q = new FIFORevQueue();
-			foreach (RevCommit c in roots)
+			foreach (RevCommit c in _roots)
 			{
 				if ((c.flags & clearFlags) == 0) continue;
 				c.flags &= retainFlags;
@@ -970,10 +1072,10 @@ namespace GitSharp.RevWalk
 				}
 			}
 
-			curs.Release();
-			roots.Clear();
-			queue = new DateRevQueue();
-			pending = new StartGenerator(this);
+			_curs.Release();
+			_roots.Clear();
+			Queue = new DateRevQueue();
+			Pending = new StartGenerator(this);
 		}
 
 		/**
@@ -986,14 +1088,14 @@ namespace GitSharp.RevWalk
 		 */
 		public virtual void dispose()
 		{
-			freeFlags = APP_FLAGS;
-			delayFreeFlags = 0;
-			carryFlags = UNINTERESTING;
-			objects.clear();
-			curs.Release();
-			roots.Clear();
-			queue = new DateRevQueue();
-			pending = new StartGenerator(this);
+			_freeFlags = APP_FLAGS;
+			_delayFreeFlags = 0;
+			_carryFlags = UNINTERESTING;
+			_objects.Clear();
+			_curs.Release();
+			_roots.Clear();
+			Queue = new DateRevQueue();
+			Pending = new StartGenerator(this);
 		}
 
 		/**
@@ -1112,7 +1214,7 @@ namespace GitSharp.RevWalk
 
 		private bool isNotStarted()
 		{
-			return pending is StartGenerator;
+			return Pending is StartGenerator;
 		}
 
 		/**
@@ -1129,7 +1231,7 @@ namespace GitSharp.RevWalk
 
 		internal virtual void carryFlagsImpl(RevCommit c)
 		{
-			int carry = c.flags & carryFlags;
+			int carry = c.flags & _carryFlags;
 			if (carry != 0)
 				RevCommit.carryFlags(c, carry);
 		}

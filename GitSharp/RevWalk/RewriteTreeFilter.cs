@@ -65,7 +65,7 @@ namespace GitSharp.RevWalk
 
         public RewriteTreeFilter(RevWalk walker, TreeFilter t)
         {
-            _pathFilter = new TreeWalk.TreeWalk(walker.db);
+            _pathFilter = new TreeWalk.TreeWalk(walker.getRepository());
             _pathFilter.setFilter(t);
             _pathFilter.Recursive = t.shouldBeRecursive();
         }

@@ -566,7 +566,7 @@ namespace GitSharp.Transport
 				}
 			}
 
-			long vers = NB.decodeInt32(_buffer, p + 4);
+			long vers = NB.DecodeInt32(_buffer, p + 4);
 			if (vers != 2 && vers != 3)
 			{
 				throw new IOException("Unsupported pack version " + vers + ".");

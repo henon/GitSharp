@@ -1081,11 +1081,11 @@ namespace GitSharp
             {
                 if (assumeValid)
                 {
-                    _flags = Convert.ToInt16(_flags | 0x8000);
+                    _flags = Convert.ToInt16(Convert.ToInt32(_flags) | 0x8000);
                 }
                 else
                 {
-                    _flags = Convert.ToInt16(_flags & ~0x8000);
+                    _flags = Convert.ToInt16(Convert.ToInt32(_flags) & ~0x8000);
                 }
             }
 

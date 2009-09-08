@@ -449,12 +449,12 @@ namespace GitSharp
 		{
 			var nextLength = (long)(((ulong)dataLength) >> 4);
 			int size = 0;
-			_buf[size++] = (byte)((nextLength > 0 ? 0x80 : 0x00) | (objectType << 4) | (dataLength & 0x0F));
+			_buf[size++] = (byte)((nextLength > 0 ? (byte)0x80 : (byte)0x00) | (byte)(objectType << 4) | (byte)(dataLength & 0x0F));
 			dataLength = nextLength;
 			while (dataLength > 0)
 			{
 				nextLength = (long)(((ulong)nextLength) >> 7);
-				_buf[size++] = (byte)((nextLength > 0 ? 0x80 : 0x00) | (dataLength & 0x7F));
+				_buf[size++] = (byte)((nextLength > 0 ? (byte)0x80 : (byte)0x00) | (byte)(dataLength & 0x7F));
 				dataLength = nextLength;
 			}
 			_pos.Write(_buf, 0, size);

@@ -251,11 +251,11 @@ namespace GitSharp.DirectoryCache
             // it is clean or not based on the modification time alone.
             //
             int @base = _infoOffset + PMtime;
-            int mtime = NB.decodeInt32(_info, @base);
-            if (smudge_s < mtime)
-                return true;
+            int mtime = NB.DecodeInt32(_info, @base);
+            if (smudge_s < mtime) return true;
+
             if (smudge_s == mtime)
-                return smudge_ns <= NB.decodeInt32(_info, @base + 4) / 1000000;
+                return smudge_ns <= NB.DecodeInt32(_info, @base + 4) / 1000000;
             return false;
         }
 
@@ -346,7 +346,7 @@ namespace GitSharp.DirectoryCache
          */
         public int getRawMode()
         {
-            return NB.decodeInt32(_info, _infoOffset + PMode);
+            return NB.DecodeInt32(_info, _infoOffset + PMode);
         }
 
         /**
@@ -411,7 +411,7 @@ namespace GitSharp.DirectoryCache
          */
         public int getLength()
         {
-            return NB.decodeInt32(_info, _infoOffset + PSize);
+            return NB.DecodeInt32(_info, _infoOffset + PSize);
         }
 
         /**
@@ -502,8 +502,8 @@ namespace GitSharp.DirectoryCache
         private long DecodeTS(int pIdx)
         {
             int @base = _infoOffset + pIdx;
-            int sec = NB.decodeInt32(_info, @base);
-            int ms = NB.decodeInt32(_info, @base + 4) / 1000000;
+            int sec = NB.DecodeInt32(_info, @base);
+            int ms = NB.DecodeInt32(_info, @base + 4) / 1000000;
             return 1000L * sec + ms;
         }
 

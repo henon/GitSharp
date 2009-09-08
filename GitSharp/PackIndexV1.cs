@@ -137,22 +137,28 @@ namespace GitSharp
             int levelOne = objId.GetFirstByte();
             byte[] data = idxdata[levelOne];
             if (data == null)
-                return -1;
+            {
+            	return -1;
+            }
+
             int high = data.Length / (4 + AnyObjectId.ObjectIdLength);
             int low = 0;
+
             do
             {
                 int mid = (low + high) / 2;
                 int pos = ((4 + AnyObjectId.ObjectIdLength) * mid) + 4;
                 int cmp = objId.CompareTo(data, pos);
                 if (cmp < 0)
-                    high = mid;
+                {
+                	high = mid;
+                }
                 else if (cmp == 0)
                 {
-                    int b0 = data[pos - 4] & 0xff;
-                    int b1 = data[pos - 3] & 0xff;
-                    int b2 = data[pos - 2] & 0xff;
-                    int b3 = data[pos - 1] & 0xff;
+                    uint b0 = data[pos - 4] & (uint)0xff;
+					uint b1 = data[pos - 3] & (uint)0xff;
+					uint b2 = data[pos - 2] & (uint)0xff;
+					uint b3 = data[pos - 1] & (uint)0xff;
                     return (((long)b0) << 24) | (b1 << 16) | (b2 << 8) | (b3);
                 }
                 else

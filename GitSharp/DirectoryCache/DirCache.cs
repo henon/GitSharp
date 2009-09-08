@@ -363,13 +363,13 @@ namespace GitSharp.DirectoryCache
 				throw new CorruptObjectException("Not a DIRC file.");
 			}
 
-			int ver = NB.decodeInt32(hdr, 4);
+			int ver = NB.DecodeInt32(hdr, 4);
 			if (ver != 2)
 			{
 				throw new CorruptObjectException("Unknown DIRC version " + ver);
 			}
 
-			_entryCnt = NB.decodeInt32(hdr, 8);
+			_entryCnt = NB.DecodeInt32(hdr, 8);
 			if (_entryCnt < 0)
 			{
 				throw new CorruptObjectException("DIRC has too many entries.");
@@ -399,10 +399,10 @@ namespace GitSharp.DirectoryCache
 				}
 				inStream.Seek(pos, SeekOrigin.Begin);
 
-				switch (NB.decodeInt32(hdr, 0))
+				switch (NB.DecodeInt32(hdr, 0))
 				{
 					case ExtTree:
-						var raw = new byte[NB.decodeInt32(hdr, 4)];
+						var raw = new byte[NB.DecodeInt32(hdr, 4)];
 						md.Update(hdr, 0, 8);
 						NB.skipFully(inStream, 8);
 						NB.ReadFully(inStream, raw, 0, raw.Length);

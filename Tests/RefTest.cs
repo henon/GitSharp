@@ -80,7 +80,7 @@ namespace GitSharp.Tests
 		public virtual void testReadSymRefToPacked()
 		{
 			db.WriteSymref("HEAD", "refs/heads/b");
-			Ref @ref = db.Refs["HEAD"];
+			Ref @ref = db.Head;
 			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
@@ -95,7 +95,7 @@ namespace GitSharp.Tests
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update); // internal
 
 			db.WriteSymref("HEAD", "refs/heads/master");
-			Ref @ref = db.Refs["HEAD"];
+			Ref @ref = db.Head;
 			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
@@ -106,7 +106,7 @@ namespace GitSharp.Tests
 			updateRef.NewObjectId = db.Resolve("refs/heads/master");
 			RefUpdate.RefUpdateResult update = updateRef.Update();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
-			Ref @ref = db.Refs["ref/heads/new"];
+			Ref @ref = db.GetRef("ref/heads/new");
 			Assert.AreEqual(Ref.Storage.Loose, @ref.StorageFormat);
 		}
 

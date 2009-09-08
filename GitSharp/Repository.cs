@@ -905,6 +905,21 @@ namespace GitSharp
 			get { return _refDb.ReadRef("HEAD"); }
 		}
 
+    	/**
+	 * Get a ref by name.
+	 *
+	 * @param name
+	 *            the name of the ref to lookup. May be a short-hand form, e.g.
+	 *            "master" which is is automatically expanded to
+	 *            "refs/heads/master" if "refs/heads/master" already exists.
+	 * @return the Ref with the given name, or null if it does not exist
+	 * @throws IOException
+	 */
+    public Ref GetRef(string name)
+    {
+      return _refDb.ReadRef(name);
+    }
+
 		public Dictionary<string, Ref> Refs
 		{
 			get { return _refDb.GetAllRefs(); }

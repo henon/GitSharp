@@ -378,7 +378,7 @@ namespace GitSharp.Transport
             foreach (RefSpec spec in procRefs)
             {
                 string srcSpec = spec.Source;
-                Ref srcRef = db.Refs[srcSpec];
+                Ref srcRef = db.GetRef(srcSpec);
                 if (srcRef != null)
                     srcSpec = srcRef.Name;
 

@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbbreviatedIdTests.cs" />
+    <Compile Include="AssertHelperFixture.cs" />
     <Compile Include="ConcurrentRepackTest.cs" />
     <None Include="ConfigTests.cs" />
     <Compile Include="Diff\DiffFormatterReflowTest.cs" />
@@ -152,6 +153,7 @@
     <Compile Include="Util\RepositoryTestCase.cs" />
     <Compile Include="TreeTests.cs" />
     <Compile Include="Patch\EditListTest.cs" />
+    <Compile Include="AssertHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="sample\README">

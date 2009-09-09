@@ -459,15 +459,7 @@ namespace GitSharp.Patch
 		/// <returns></returns>
 		public List<HunkHeader> Hunks
 		{
-			get
-			{
-				if (_hunks == null)
-				{
-					return new List<HunkHeader>();
-				}
-
-				return _hunks;
-			}
+			get { return _hunks ?? (_hunks = new List<HunkHeader>()); }
 		}
 
 		public void addHunk(HunkHeader h)

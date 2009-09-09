@@ -170,12 +170,12 @@ namespace GitSharp
 
         public static bool IsDirectory(this FileSystemInfo fileSystemInfo)
         {
-            return Directory.Exists(DirectoryName(fileSystemInfo));
+            return fileSystemInfo is DirectoryInfo;
         }
 
         public static bool IsFile(this FileSystemInfo fileSystemInfo)
         {
-            return File.Exists(fileSystemInfo.FullName);
+            return fileSystemInfo is FileInfo;
         } 
     }
 }

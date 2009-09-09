@@ -54,7 +54,7 @@ namespace GitSharp.Tests
             var index = new GitIndex(db);
             index.add(trash, writeTrashFile("bar", "bar"));
             index.add(trash, writeTrashFile("foo/bar/baz/qux", "foo/bar"));
-            PathUtil.DeleteFile(Path.Combine(trash.FullName, "bar"));
+            recursiveDelete(new FileInfo(Path.Combine(trash.FullName, "bar")));
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
             writeTrashFile("bar/baz/qux/foo", "another nasty one");
             writeTrashFile("foo", "troublesome little bugger");

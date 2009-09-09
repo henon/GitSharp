@@ -133,11 +133,11 @@ namespace GitSharp.TreeWalk
 				_file = f;
             	_fileLength = -1;
 
-				if (_file is DirectoryInfo)
+				if (_file.IsDirectory())
                 {
 					_mode = new DirectoryInfo(_file + "/.git").Exists ? FileMode.GitLink : FileMode.Tree;
                 }
-				else if (_file is FileInfo)
+				else if (_file.IsFile())
                 {
 					_mode = FS.canExecute(_file) ? FileMode.ExecutableFile : FileMode.RegularFile;
                 }
@@ -157,7 +157,7 @@ namespace GitSharp.TreeWalk
             {
                 get
                 {
-                    if (_file is DirectoryInfo) return 0;
+                    if (_file.IsDirectory()) return 0;
 
                     if (_fileLength < 0)
                     {

@@ -198,9 +198,14 @@ namespace GitSharp.Tests
         /// it throws an AssertionFailure.
         /// </summary>
         /// <param name="dir"></param>
-        protected void recursiveDelete(DirectoryInfo dir)
+        protected void recursiveDelete(FileSystemInfo fs)
         {
-            recursiveDelete(dir, false, GetType().Name + "." + ToString(), true);
+          if (fs.IsFile())
+          {
+            fs.DeleteFile();
+            return;
+          }
+          recursiveDelete(fs, false, GetType().Name + "." + ToString(), true);
         }
 
         /// <summary>
@@ -208,37 +213,35 @@ namespace GitSharp.Tests
         /// also used internally. If a file or directory cannot be removed
         /// it throws an AssertionFailure.
         /// </summary>
-        /// <param name="dir"></param>
+        /// <param name="fs"></param>
         /// <param name="silent"></param>
         /// <param name="name"></param>
         /// <param name="failOnError"></param>
         /// <returns></returns>
-        protected static bool recursiveDelete(DirectoryInfo dir, bool silent, string name, bool failOnError)
+        protected static bool recursiveDelete(FileSystemInfo fs, bool silent, string name, bool failOnError)
         {
             Debug.Assert(!(silent && failOnError));
+            Debug.Assert(fs.IsDirectory());
 
+          var dir = fs as DirectoryInfo;
             try
             {
-                if (!dir.Exists) return silent;
+                if (!fs.Exists) return silent;
 
-                FileInfo[] ls = dir.GetFiles();
-                DirectoryInfo[] subdirs = dir.GetDirectories();
+                FileSystemInfo[] ls = dir.GetFileSystemInfos();
 
                 foreach (var e in ls)
                 {
-                    PathUtil.DeleteFile(e);
-                }
-
-                foreach (var e in subdirs)
-                {
+                  if (e.IsFile())
+                    e.DeleteFile();
+                  else
                     silent = recursiveDelete(e, silent, name, failOnError);
                 }
-
-                dir.Delete();
+                fs.Delete();
             }
             catch (IOException e)
             {
-                //ReportDeleteFailure(name, failOnError, dir);
+                //ReportDeleteFailure(name, failOnError, fs);
                 Console.WriteLine(name + ": " + e.Message);
             }
 

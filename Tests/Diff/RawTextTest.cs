@@ -98,7 +98,7 @@ namespace GitSharp.Tests
 		    MemoryStream o = new MemoryStream();
 		    a.writeLine(o, 1);
 		    byte[] r = o.ToArray();
-		    Assert.AreEqual("", RawParseUtils.decode(r));
+		    Assert.AreEqual(string.Empty, RawParseUtils.decode(r));
 	    }
     }
 }

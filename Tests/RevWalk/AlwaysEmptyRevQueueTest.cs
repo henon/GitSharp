@@ -66,7 +66,7 @@ namespace GitSharp.Tests.RevWalk
 		[ExpectedException(typeof(InvalidOperationException))]
 		public void testAddFails()
 		{
-			_q.add(commit());
+			_q.add(Commit());
 			Assert.Fail("Did not throw UnsupportedOperationException");
 		}
 	}

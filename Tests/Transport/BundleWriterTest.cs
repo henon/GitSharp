@@ -148,9 +148,9 @@ namespace GitSharp.Tests.Transport
 
         #region makeBundle
 
-        private byte[] makeBundle(String name, String anObjectToInclude, RevCommit assume)
+        private byte[] makeBundle(string name, string anObjectToInclude, RevCommit assume)
         {
-            BundleWriter bw = new BundleWriter(db, NullProgressMonitor.Instance);
+            var bw = new BundleWriter(db, NullProgressMonitor.Instance);
             bw.include(name, ObjectId.FromString(anObjectToInclude));
             if (assume != null)
             {

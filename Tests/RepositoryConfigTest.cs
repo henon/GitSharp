@@ -54,7 +54,7 @@ namespace GitSharp.Tests
         {
             Config c = parse("[foo]\nbar\n");
             Assert.AreEqual(true, c.getBoolean("foo", null, "bar", false));
-            Assert.AreEqual("", c.getString("foo", null, "bar"));
+            Assert.AreEqual(string.Empty, c.getString("foo", null, "bar"));
         }
 
         [Test]
@@ -62,7 +62,7 @@ namespace GitSharp.Tests
         {
             Config c = parse("[foo \"zip\"]\nbar\n[foo \"zap\"]\nbar=false\nn=3\n");
             Assert.AreEqual(true, c.getBoolean("foo", "zip", "bar", false));
-            Assert.AreEqual("", c.getString("foo", "zip", "bar"));
+            Assert.AreEqual(string.Empty, c.getString("foo", "zip", "bar"));
             Assert.AreEqual(false, c.getBoolean("foo", "zap", "bar", true));
             Assert.AreEqual("false", c.getString("foo", "zap", "bar"));
             Assert.AreEqual(3, c.getInt("foo", "zap", "n", 4));
@@ -110,7 +110,7 @@ namespace GitSharp.Tests
         {
             Config c = parse("[Foo]\nBar\n");
             Assert.AreEqual(true, c.getBoolean("foo", null, "bar", false));
-            Assert.AreEqual("", c.getString("foo", null, "bar"));
+            Assert.AreEqual(string.Empty, c.getString("foo", null, "bar"));
         }
 
         [Test]

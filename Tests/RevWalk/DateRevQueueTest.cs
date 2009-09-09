@@ -67,35 +67,35 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testInsertOutOfOrder()
         {
-            RevCommit a = parse(commit());
-            RevCommit b = parse(commit(10, a));
-            RevCommit c1 = parse(commit(5, b));
-            RevCommit c2 = parse(commit(-50, b));
+            RevCommit a = Parse(Commit());
+            RevCommit b = Parse(Commit(10, a));
+            RevCommit c1 = Parse(Commit(5, b));
+            RevCommit c2 = Parse(Commit(-50, b));
 
             q.add(c2);
             q.add(a);
             q.add(b);
             q.add(c1);
 
-            assertCommit(c1, q.next());
-            assertCommit(b, q.next());
-            assertCommit(a, q.next());
-            assertCommit(c2, q.next());
+            AssertCommit(c1, q.next());
+            AssertCommit(b, q.next());
+            AssertCommit(a, q.next());
+            AssertCommit(c2, q.next());
             Assert.IsNull(q.next());
         }
 
         [Test]
         public void testInsertTie()
         {
-            RevCommit a = parse(commit());
-            RevCommit b = parse(commit(0, a));
+            RevCommit a = Parse(Commit());
+            RevCommit b = Parse(Commit(0, a));
             {
                 q = create();
                 q.add(a);
                 q.add(b);
 
-                assertCommit(a, q.next());
-                assertCommit(b, q.next());
+                AssertCommit(a, q.next());
+                AssertCommit(b, q.next());
                 Assert.IsNull(q.next());
             }
             {
@@ -103,8 +103,8 @@ namespace GitSharp.Tests.RevWalk
                 q.add(b);
                 q.add(a);
 
-                assertCommit(b, q.next());
-                assertCommit(a, q.next());
+                AssertCommit(b, q.next());
+                AssertCommit(a, q.next());
                 Assert.IsNull(q.next());
             }
         }
@@ -112,9 +112,9 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testCloneFIFO()
         {
-            RevCommit a = parse(commit());
-            RevCommit b = parse(commit(200, a));
-            RevCommit c = parse(commit(200, b));
+            RevCommit a = Parse(Commit());
+            RevCommit b = Parse(Commit(200, a));
+            RevCommit c = Parse(Commit(200, b));
 
             var src = new FIFORevQueue();
             src.add(a);
@@ -124,12 +124,12 @@ namespace GitSharp.Tests.RevWalk
             q = new DateRevQueue(src);
             Assert.IsFalse(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
             Assert.IsFalse(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-            assertCommit(c, q.peek());
-            assertCommit(c, q.peek());
+            AssertCommit(c, q.peek());
+            AssertCommit(c, q.peek());
 
-            assertCommit(c, q.next());
-            assertCommit(b, q.next());
-            assertCommit(a, q.next());
+            AssertCommit(c, q.next());
+            AssertCommit(b, q.next());
+            AssertCommit(a, q.next());
             Assert.IsNull(q.next());
         }
     }

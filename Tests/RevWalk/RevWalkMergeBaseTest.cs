@@ -49,12 +49,12 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testNone()
         {
-            RevCommit c1 = commit(commit(commit()));
-            RevCommit c2 = commit(commit(commit()));
+            RevCommit c1 = Commit(Commit(Commit()));
+            RevCommit c2 = Commit(Commit(Commit()));
 
             rw.setRevFilter(RevFilter.MERGE_BASE);
-            markStart(c1);
-            markStart(c2);
+            MarkStart(c1);
+            MarkStart(c2);
             Assert.IsNull(rw.next());
         }
 
@@ -62,13 +62,13 @@ namespace GitSharp.Tests.RevWalk
 		[ExpectedException(typeof(InvalidOperationException))]
         public void testDisallowTreeFilter()
         {
-            RevCommit c1 = commit();
-            RevCommit c2 = commit();
+            RevCommit c1 = Commit();
+            RevCommit c2 = Commit();
 
             rw.setRevFilter(RevFilter.MERGE_BASE);
             rw.setTreeFilter(TreeFilter.ANY_DIFF);
-            markStart(c1);
-            markStart(c2);
+            MarkStart(c1);
+            MarkStart(c2);
 
 			Assert.IsNull(rw.next());
 			Assert.Fail("did not throw InvalidOperationException");
@@ -77,50 +77,50 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testSimple()
         {
-            RevCommit a = commit();
-            RevCommit b = commit(a);
-            RevCommit c1 = commit(commit(commit(commit(commit(b)))));
-            RevCommit c2 = commit(commit(commit(commit(commit(b)))));
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
+            RevCommit c1 = Commit(Commit(Commit(Commit(Commit(b)))));
+            RevCommit c2 = Commit(Commit(Commit(Commit(Commit(b)))));
 
             rw.setRevFilter(RevFilter.MERGE_BASE);
-            markStart(c1);
-            markStart(c2);
-            assertCommit(b, rw.next());
+            MarkStart(c1);
+            MarkStart(c2);
+            AssertCommit(b, rw.next());
             Assert.IsNull(rw.next());
         }
 
         [Test]
         public void testMultipleHeads_SameBase1()
         {
-            RevCommit a = commit();
-            RevCommit b = commit(a);
-            RevCommit c1 = commit(commit(commit(commit(commit(b)))));
-            RevCommit c2 = commit(commit(commit(commit(commit(b)))));
-            RevCommit c3 = commit(commit(commit(b)));
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
+            RevCommit c1 = Commit(Commit(Commit(Commit(Commit(b)))));
+            RevCommit c2 = Commit(Commit(Commit(Commit(Commit(b)))));
+            RevCommit c3 = Commit(Commit(Commit(b)));
 
             rw.setRevFilter(RevFilter.MERGE_BASE);
-            markStart(c1);
-            markStart(c2);
-            markStart(c3);
-            assertCommit(b, rw.next());
+            MarkStart(c1);
+            MarkStart(c2);
+            MarkStart(c3);
+            AssertCommit(b, rw.next());
             Assert.IsNull(rw.next());
         }
 
         [Test]
         public void testMultipleHeads_SameBase2()
         {
-            RevCommit a = commit();
-            RevCommit b = commit(a);
-            RevCommit c = commit(b);
-            RevCommit d1 = commit(commit(commit(commit(commit(b)))));
-            RevCommit d2 = commit(commit(commit(commit(commit(c)))));
-            RevCommit d3 = commit(commit(commit(c)));
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
+            RevCommit c = Commit(b);
+            RevCommit d1 = Commit(Commit(Commit(Commit(Commit(b)))));
+            RevCommit d2 = Commit(Commit(Commit(Commit(Commit(c)))));
+            RevCommit d3 = Commit(Commit(Commit(c)));
 
             rw.setRevFilter(RevFilter.MERGE_BASE);
-            markStart(d1);
-            markStart(d2);
-            markStart(d3);
-            assertCommit(b, rw.next());
+            MarkStart(d1);
+            MarkStart(d2);
+            MarkStart(d3);
+            AssertCommit(b, rw.next());
             Assert.IsNull(rw.next());
         }
 
@@ -132,17 +132,17 @@ namespace GitSharp.Tests.RevWalk
             // clean merge base for d,e as they each merged the parents b,c
             // in different orders.
             //
-            RevCommit a = commit();
-            RevCommit b = commit(a);
-            RevCommit c = commit(a);
-            RevCommit d = commit(b, c);
-            RevCommit e = commit(c, b);
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
+            RevCommit c = Commit(a);
+            RevCommit d = Commit(b, c);
+            RevCommit e = Commit(c, b);
 
             rw.setRevFilter(RevFilter.MERGE_BASE);
-            markStart(d);
-            markStart(e);
-            assertCommit(c, rw.next());
-            assertCommit(b, rw.next());
+            MarkStart(d);
+            MarkStart(e);
+            AssertCommit(c, rw.next());
+            AssertCommit(b, rw.next());
             Assert.IsNull(rw.next());
         }
     }

@@ -36,13 +36,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using System.IO;
 
 namespace GitSharp.Tests
 {
@@ -52,18 +49,18 @@ namespace GitSharp.Tests
         [Test]
         public void testEncodeASCII_SimpleASCII()
         {
-            String src = "abc";
+            const string src = "abc";
             byte[] exp = { (byte)'a', (byte)'b', (byte)'c' };
             byte[] res = Constants.encodeASCII(src);
-            Assert.IsTrue(Enumerable.SequenceEqual(exp, res));
+            Assert.IsTrue(exp.SequenceEqual(res));
             Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
         }
 
         [Test]
         public void testEncodeASCII_FailOnNonASCII()
         {
-            String src = "ÅªnÄ­cÅdeÌ½";
-            try
+        	const string src = "ÅªnÄ­cÅdeÌ½";
+        	try
             {
                 Constants.encodeASCII(src);
                 Assert.Fail("Incorrectly accepted a Unicode character");
@@ -74,37 +71,36 @@ namespace GitSharp.Tests
             }
         }
 
-        [Test]
+    	[Test]
         public void testEncodeASCII_Number13()
         {
-            long src = 13;
+            const long src = 13;
             byte[] exp = { (byte)'1', (byte)'3' };
             byte[] res = Constants.encodeASCII(src);
-            Assert.IsTrue(Enumerable.SequenceEqual(exp, res));
+            Assert.IsTrue(exp.SequenceEqual(res));
         }
 
         [Test]
         public void testEncode_SimpleASCII()
         {
-            String src = "abc";
+            const string src = "abc";
             byte[] exp = { (byte)'a', (byte)'b', (byte)'c' };
             byte[] res = Constants.encode(src);
-            Assert.IsTrue(Enumerable.SequenceEqual(exp, res));
+            Assert.IsTrue(exp.SequenceEqual(res));
             Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
         }
 
         [Test]
         public void testEncode_Unicode()
         {
-            string src = "Ūnĭcōde̽"; 
-            byte[] exp = { (byte) 0xC5, (byte) 0xAA, 0x6E, (byte) 0xC4,
-                (byte) 0xAD, 0x63, (byte) 0xC5, (byte) 0x8D, 0x64, 0x65,
-                (byte) 0xCC, (byte) 0xBD };
+            const string src = "Ūnĭcōde̽"; 
+            byte[] exp = { 0xC5, 0xAA, 0x6E, 0xC4,
+                0xAD, 0x63, 0xC5, 0x8D, 0x64, 0x65,
+                0xCC, 0xBD };
 
             byte[] res = Constants.encode(src);
-            Assert.IsTrue(Enumerable.SequenceEqual(exp, res));
+            Assert.IsTrue(exp.SequenceEqual(res));
             Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
         }
     }
-
 }

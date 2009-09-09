@@ -46,15 +46,15 @@ namespace GitSharp.Tests.RevWalk
 		[Test]
 		public void testId()
 		{
-			RevCommit a = commit();
+			RevCommit a = Commit();
 			Assert.AreSame(a, a.getId());
 		}
 
 		[Test]
 		public void testEqualsIsIdentity()
 		{
-			RevCommit a1 = commit();
-			RevCommit b1 = commit();
+			RevCommit a1 = Commit();
+			RevCommit b1 = Commit();
 
 			Assert.IsTrue(a1.Equals(a1));
 			Assert.IsTrue(a1.Equals((object)a1));
@@ -84,15 +84,15 @@ namespace GitSharp.Tests.RevWalk
 		public void testRevObjectTypes()
 		{
 			Assert.AreEqual(Constants.OBJ_TREE, emptyTree.Type);
-			Assert.AreEqual(Constants.OBJ_COMMIT, commit().Type);
-			Assert.AreEqual(Constants.OBJ_BLOB, blob("").Type);
-			Assert.AreEqual(Constants.OBJ_TAG, tag("emptyTree", emptyTree).Type);
+			Assert.AreEqual(Constants.OBJ_COMMIT, Commit().Type);
+			Assert.AreEqual(Constants.OBJ_BLOB, blob(string.Empty).Type);
+			Assert.AreEqual(Constants.OBJ_TAG, Tag("emptyTree", emptyTree).Type);
 		}
 
 		[Test]
 		public void testHasRevFlag()
 		{
-			RevCommit a = commit();
+			RevCommit a = Commit();
 			Assert.IsFalse(a.has(RevFlag.UNINTERESTING));
 			a.Flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
 			Assert.IsTrue(a.has(RevFlag.UNINTERESTING));
@@ -101,7 +101,7 @@ namespace GitSharp.Tests.RevWalk
 		[Test]
 		public void testHasAnyFlag()
 		{
-			RevCommit a = commit();
+			RevCommit a = Commit();
 			RevFlag flag1 = rw.newFlag("flag1");
 			RevFlag flag2 = rw.newFlag("flag2");
 			var s = new RevFlagSet { flag1, flag2 };
@@ -114,7 +114,7 @@ namespace GitSharp.Tests.RevWalk
 		[Test]
 		public void testHasAllFlag()
 		{
-			RevCommit a = commit();
+			RevCommit a = Commit();
 			RevFlag flag1 = rw.newFlag("flag1");
 			RevFlag flag2 = rw.newFlag("flag2");
 			var s = new RevFlagSet { flag1, flag2 };
@@ -129,7 +129,7 @@ namespace GitSharp.Tests.RevWalk
 		[Test]
 		public void testAddRevFlag()
 		{
-			RevCommit a = commit();
+			RevCommit a = Commit();
 			RevFlag flag1 = rw.newFlag("flag1");
 			RevFlag flag2 = rw.newFlag("flag2");
 			Assert.AreEqual(0, a.Flags);
@@ -144,7 +144,7 @@ namespace GitSharp.Tests.RevWalk
 		[Test]
 		public void testAddRevFlagSet()
 		{
-			RevCommit a = commit();
+			RevCommit a = Commit();
 			RevFlag flag1 = rw.newFlag("flag1");
 			RevFlag flag2 = rw.newFlag("flag2");
 			var s = new RevFlagSet { flag1, flag2 };
@@ -158,7 +158,7 @@ namespace GitSharp.Tests.RevWalk
 		[Test]
 		public void testRemoveRevFlag()
 		{
-			RevCommit a = commit();
+			RevCommit a = Commit();
 			RevFlag flag1 = rw.newFlag("flag1");
 			RevFlag flag2 = rw.newFlag("flag2");
 			a.add(flag1);
@@ -171,7 +171,7 @@ namespace GitSharp.Tests.RevWalk
 		[Test]
 		public void testRemoveRevFlagSet()
 		{
-			RevCommit a = commit();
+			RevCommit a = Commit();
 			RevFlag flag1 = rw.newFlag("flag1");
 			RevFlag flag2 = rw.newFlag("flag2");
 			RevFlag flag3 = rw.newFlag("flag3");

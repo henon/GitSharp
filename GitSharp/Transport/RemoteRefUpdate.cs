@@ -135,13 +135,12 @@ namespace GitSharp.Transport
             return "RemoteRefUpdate[remoteName=" + RemoteName + ", " + Status
                    + ", " + (ExpectedOldObjectId != null ? ExpectedOldObjectId.Abbreviate(_localDb).name() : "(null)")
                    + "..." + (NewObjectId != null ? NewObjectId.Abbreviate(_localDb).name() : "(null)")
-                   + (FastForward ? ", fastForward" : "")
-                   + ", srcRef=" + SourceRef + (ForceUpdate ? ", forceUpdate" : "") + ", message=" +
+                   + (FastForward ? ", fastForward" : string.Empty)
+                   + ", srcRef=" + SourceRef + (ForceUpdate ? ", forceUpdate" : string.Empty) + ", message=" +
                    (Message != null
                         ? "\""
                           + Message + "\""
                         : "null") + ", " + _localDb.Directory + "]";
         }
     }
-
 }

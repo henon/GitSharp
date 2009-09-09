@@ -47,7 +47,7 @@ namespace GitSharp.Tests.RevWalk
 {
 	public abstract class RevWalkTestCase : RepositoryTestCase
 	{
-		private ObjectWriter ow;
+		private ObjectWriter _ow;
 		protected RevTree emptyTree;
 		private long nowTick; // [henon] this are seconds in git internal time representaiton
 		protected GitSharp.RevWalk.RevWalk rw;
@@ -56,9 +56,9 @@ namespace GitSharp.Tests.RevWalk
 		public override void setUp()
 		{
 			base.setUp();
-			ow = new ObjectWriter(db);
+			_ow = new ObjectWriter(db);
 			rw = createRevWalk();
-			emptyTree = rw.parseTree(ow.WriteTree(new Tree(db)));
+			emptyTree = rw.parseTree(_ow.WriteTree(new Tree(db)));
 			nowTick = 1236977987L;
 		}
 
@@ -67,19 +67,19 @@ namespace GitSharp.Tests.RevWalk
 			return new GitSharp.RevWalk.RevWalk(db);
 		}
 
-		protected void tick(int secDelta)
+		private void Tick(int secDelta)
 		{
 			nowTick += secDelta * 1000L;
 		}
 
-		protected RevBlob blob(String content)
+		protected RevBlob blob(string content)
 		{
-			return rw.lookupBlob(ow.WriteBlob(Constants.encode(content)));
+			return rw.lookupBlob(_ow.WriteBlob(Constants.encode(content)));
 		}
 
-		protected DirCacheEntry file(string path, RevBlob blob)
+		protected static DirCacheEntry File(string path, RevBlob blob)
 		{
-			DirCacheEntry e = new DirCacheEntry(path);
+			var e = new DirCacheEntry(path);
 			e.setFileMode(FileMode.RegularFile);
 			e.setObjectId(blob);
 			return e;
@@ -90,16 +90,19 @@ namespace GitSharp.Tests.RevWalk
 			DirCache dc = DirCache.newInCore();
 			DirCacheBuilder b = dc.builder();
 			foreach (DirCacheEntry e in entries)
+			{
 				b.add(e);
+			}
 			b.finish();
-			return rw.lookupTree(dc.writeTree(ow));
+			return rw.lookupTree(dc.writeTree(_ow));
 		}
 
-		protected RevObject get(RevTree tree, String path)
+		protected RevObject get(RevTree tree, string path)
 		{
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
-			tw.setFilter(PathFilterGroup.createFromStrings(new string[] { path }));
+			tw.setFilter(PathFilterGroup.createFromStrings(new[] { path }));
 			tw.reset(tree);
+			
 			while (tw.next())
 			{
 				if (tw.isSubtree() && !path.Equals(tw.getPathString()))
@@ -111,68 +114,74 @@ namespace GitSharp.Tests.RevWalk
 				FileMode entmode = tw.getFileMode(0);
 				return rw.lookupAny(entid, (int)entmode.ObjectType);
 			}
+
 			Assert.Fail("Can't find " + path + " in tree " + tree.Name);
 			return null; // never reached.
 		}
 
-		protected RevCommit commit(params RevCommit[] parents)
+		protected RevCommit Commit(params RevCommit[] parents)
 		{
-			return commit(1, emptyTree, parents);
+			return Commit(1, emptyTree, parents);
 		}
 
-		protected RevCommit commit(RevTree tree, params RevCommit[] parents)
+		protected RevCommit Commit(RevTree tree, params RevCommit[] parents)
 		{
-			return commit(1, tree, parents);
+			return Commit(1, tree, parents);
 		}
 
-		protected RevCommit commit(int secDelta, params RevCommit[] parents)
+		protected RevCommit Commit(int secDelta, params RevCommit[] parents)
 		{
-			return commit(secDelta, emptyTree, parents);
+			return Commit(secDelta, emptyTree, parents);
 		}
 
-		protected RevCommit commit(int secDelta, RevTree tree, params RevCommit[] parents)
+		private RevCommit Commit(int secDelta, ObjectId tree, params RevCommit[] parents)
 		{
-			tick(secDelta);
-			Commit c = new Commit(db);
-			c.TreeId = (tree);
-			c.ParentIds = (parents);
-			c.Author = (new PersonIdent(jauthor, nowTick.GitTimeToDateTimeOffset(0))); // [henon] offset?
-			c.Committer = (new PersonIdent(jcommitter, nowTick.GitTimeToDateTimeOffset(0)));
-			c.Message = string.Empty;
-			return rw.lookupCommit(ow.WriteCommit(c));
+			Tick(secDelta);
+
+			var c = new Commit(db)
+			        	{
+			        		TreeId = tree,
+			        		ParentIds = parents,
+							Author = new PersonIdent(jauthor, nowTick.GitTimeToDateTimeOffset(0)), // [henon] offset?
+			        		Committer = new PersonIdent(jcommitter, nowTick.GitTimeToDateTimeOffset(0)),
+			        		Message = string.Empty
+			        	};
+
+			return rw.lookupCommit(_ow.WriteCommit(c));
 		}
 
-		protected RevTag tag(String name, RevObject dst)
+		protected RevTag Tag(string name, RevObject dst)
 		{
 			var t = new Tag(db)
 						{
-							TagType = (Constants.typeString(dst.Type)),
-							Id = (dst.ToObjectId()),
-							TagName = (name),
-							Tagger = (new PersonIdent(jcommitter, nowTick.GitTimeToDateTimeOffset(0))),
+							TagType = Constants.typeString(dst.Type),
+							Id = dst.ToObjectId(),
+							TagName = name,
+							Tagger = new PersonIdent(jcommitter, nowTick.GitTimeToDateTimeOffset(0)),
 							Message = string.Empty
 						};
-			return (RevTag)rw.lookupAny(ow.WriteTag(t), Constants.OBJ_TAG);
+
+			return (RevTag)rw.lookupAny(_ow.WriteTag(t), Constants.OBJ_TAG);
 		}
 
-		protected T parse<T>(T t)
+		protected T Parse<T>(T t)
 			where T : RevObject
 		{
 			rw.parseBody(t);
 			return t;
 		}
 
-		protected void markStart(RevCommit commit)
+		protected void MarkStart(RevCommit commit)
 		{
 			rw.markStart(commit);
 		}
 
-		protected void markUninteresting(RevCommit commit)
+		protected void MarkUninteresting(RevCommit commit)
 		{
 			rw.markUninteresting(commit);
 		}
 
-		protected void assertCommit(RevCommit exp, RevCommit act)
+		protected static void AssertCommit(RevCommit exp, RevCommit act)
 		{
 			Assert.AreSame(exp, act);
 		}

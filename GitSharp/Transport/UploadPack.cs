@@ -35,7 +35,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Exceptions;
@@ -73,7 +72,6 @@ namespace GitSharp.Transport
 		private Stream _rawIn;
 		private Stream _rawOut;
 		private int _timeout;
-		private System.Timers.Timer _timer;
 		private PacketLineIn _pckIn;
 		private PacketLineOut _pckOut;
 
@@ -114,25 +112,28 @@ namespace GitSharp.Transport
 		public int Timeout
 		{
 			get { return _timeout; }
+			set { _timeout = value; }
 		}
 
-		///    
-		///	 <summary> * Execute the upload task on the socket.
-		///	 * </summary>
-		///	 * <param name="input">
-		///	 *            raw input to read client commands from. Caller must ensure the
-		///	 *            input is buffered, otherwise read performance may suffer. </param>
-		///	 * <param name="output">
-		///	 *            response back to the Git network client, to write the pack
-		///	 *            data onto. Caller must ensure the output is buffered,
-		///	 *            otherwise write performance may suffer. </param>
-		///	 * <param name="messages">
-		///	 *            secondary "notice" channel to send additional messages out
-		///	 *            through. When run over SSH this should be tied back to the
-		///	 *            standard error channel of the command execution. For most
-		///	 *            other network connections this should be null. </param>
-		///	 * <exception cref="IOException"> </exception>
-		///	 
+		/// <summary>
+		/// Execute the upload task on the socket.
+		/// </summary>
+		/// <param name="input">
+		/// raw input to read client commands from. Caller must ensure the
+		/// input is buffered, otherwise read performance may suffer.
+		/// </param>
+		/// <param name="output">
+		/// response back to the Git network client, to write the pack
+		/// data onto. Caller must ensure the output is buffered,
+		/// otherwise write performance may suffer.
+		/// </param>
+		/// <param name="messages">
+		/// secondary "notice" channel to send additional messages out
+		/// through. When run over SSH this should be tied back to the
+		/// standard error channel of the command execution. For most
+		/// other network connections this should be null.
+		/// </param>
+		/// <exception cref="IOException"></exception>
 		public void Upload(Stream input, Stream output, Stream messages)
 		{
 			_rawIn = input;
@@ -151,13 +152,11 @@ namespace GitSharp.Transport
 			Service();
 		}
 
-
 		private void Service()
 		{
 			SendAdvertisedRefs();
 			RecvWants();
-			if (_wantAll.Count == 0)
-				return;
+			if (_wantAll.Count == 0) return;
 			_multiAck = _options.Contains(OptionMultiAck);
 			Negotiate();
 			SendPack();
@@ -261,7 +260,6 @@ namespace GitSharp.Transport
 
 		private void Negotiate()
 		{
-			ObjectId last = ObjectId.ZeroId;
 			string lastName = string.Empty;
 
 			while (true)
@@ -284,7 +282,6 @@ namespace GitSharp.Transport
 					{
 						if (_multiAck)
 						{
-							last = id;
 							lastName = name;
 							_pckOut.WriteString("ACK " + name + " continue\n");
 						}
@@ -337,19 +334,19 @@ namespace GitSharp.Transport
 			{
 				o.add(PEER_HAS);
 				if (o is RevCommit)
+				{
 					((RevCommit)o).carry(PEER_HAS);
-				addCommonBase(o);
+				}
+				AddCommonBase(o);
 			}
 			return true;
 		}
 
-		private void addCommonBase(RevObject o)
+		private void AddCommonBase(RevObject o)
 		{
-			if (!o.has(COMMON))
-			{
-				o.add(COMMON);
-				_commonBase.Add(o);
-			}
+			if (o.has(COMMON)) return;
+			o.add(COMMON);
+			_commonBase.Add(o);
 		}
 
 		private bool OkToGiveUp()
@@ -379,13 +376,14 @@ namespace GitSharp.Transport
 		{
 			_walk.resetRetain(SAVE);
 			_walk.markStart(want);
-			for (;;)
+
+			while (true)
 			{
 				RevCommit c = _walk.next();
 				if (c == null) break;
 				if (c.has(PEER_HAS))
 				{
-					addCommonBase(c);
+					AddCommonBase(c);
 					return true;
 				}
 			}
@@ -421,6 +419,7 @@ namespace GitSharp.Transport
 							DeltaBaseAsOffset = _options.Contains(OptionOfsDelta),
 							Thin = thin
 						};
+
 			pw.preparePack(_wantAll, _commonBase);
 			if (_options.Contains(OptionIncludeTag))
 			{
@@ -442,6 +441,7 @@ namespace GitSharp.Transport
 						pw.addObject(t);
 				}
 			}
+
 			pw.writePack(packOut);
 
 			if (sideband)

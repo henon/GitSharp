@@ -47,7 +47,7 @@ namespace GitSharp.Tests.Patch
         [Test]
 	    public void testParseGitFileName_Empty()
         {
-		    FileHeader fh = data("");
+		    FileHeader fh = data(string.Empty);
 		    Assert.AreEqual(-1, fh.parseGitFileName(0, fh.buf.Length));
 		    Assert.IsNotNull(fh.getHunks());
 		    Assert.IsTrue(fh.getHunks().Count == 0);
@@ -162,7 +162,7 @@ namespace GitSharp.Tests.Patch
 	    public void testParseUnicodeName_NewFile()
         {
 		    FileHeader fh = data("diff --git \"a/\\303\\205ngstr\\303\\266m\" \"b/\\303\\205ngstr\\303\\266m\"\n"
-				    + "new file mode 100644\n"
+				    + "new File mode 100644\n"
 				    + "index 0000000..7898192\n"
 				    + "--- /dev/null\n"
 				    + "+++ \"b/\\303\\205ngstr\\303\\266m\"\n"
@@ -189,7 +189,7 @@ namespace GitSharp.Tests.Patch
 	    public void testParseUnicodeName_DeleteFile()
         {
 		    FileHeader fh = data("diff --git \"a/\\303\\205ngstr\\303\\266m\" \"b/\\303\\205ngstr\\303\\266m\"\n"
-				    + "deleted file mode 100644\n"
+				    + "deleted File mode 100644\n"
 				    + "index 7898192..0000000\n"
 				    + "--- \"a/\\303\\205ngstr\\303\\266m\"\n"
 				    + "+++ /dev/null\n"

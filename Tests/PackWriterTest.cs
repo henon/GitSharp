@@ -345,9 +345,9 @@ namespace GitSharp.Tests
 		[Test]
 		public void testModifySettings()
 		{
-			_writer.DeltaBaseAsOffset = (true);
-			_writer.ReuseDeltas = (false);
-			_writer.ReuseObjects = (false);
+			_writer.DeltaBaseAsOffset = true;
+			_writer.ReuseDeltas = false;
+			_writer.ReuseObjects = false;
 
 			Assert.AreEqual(true, _writer.DeltaBaseAsOffset);
 			Assert.AreEqual(false, _writer.ReuseDeltas);

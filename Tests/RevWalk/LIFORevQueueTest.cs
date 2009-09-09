@@ -69,7 +69,7 @@ namespace GitSharp.Tests.RevWalk
             var lst = new List<RevCommit>();
             for (int i = 0; i < 3*BlockRevQueue.Block.BLOCK_SIZE; i++)
             {
-                RevCommit c = commit();
+                RevCommit c = Commit();
                 lst.Add(c);
                 q.add(c);
             }

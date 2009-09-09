@@ -66,8 +66,8 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testClear()
         {
-            RevCommit a = parse(commit());
-            RevCommit b = parse(commit(a));
+            RevCommit a = Parse(Commit());
+            RevCommit b = Parse(Commit(a));
 
             q.add(a);
             q.add(b);
@@ -78,8 +78,8 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testHasFlags()
         {
-            RevCommit a = parse(commit());
-            RevCommit b = parse(commit(a));
+            RevCommit a = Parse(Commit());
+            RevCommit b = Parse(Commit(a));
 
             q.add(a);
             q.add(b);

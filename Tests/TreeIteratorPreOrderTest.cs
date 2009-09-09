@@ -53,7 +53,7 @@ namespace GitSharp.Tests
 			Tree tree = new Tree(db);
 			TreeIterator i = MakeIterator(tree);
 			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("", i.Current.FullName);
+			Assert.AreEqual(string.Empty, i.Current.FullName);
 			Assert.IsFalse(i.MoveNext());
 		}
 
@@ -86,7 +86,7 @@ namespace GitSharp.Tests
 			tree.AddFile("x");
 			TreeIterator i = MakeIterator(tree);
 			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("", i.Current.FullName);
+			Assert.AreEqual(string.Empty, i.Current.FullName);
 			Assert.IsTrue(i.MoveNext());
 			Assert.AreEqual("a", i.Current.Name);
 			Assert.AreEqual("x", i.Current.Name);
@@ -104,7 +104,7 @@ namespace GitSharp.Tests
 			tree.AddTree("a");
 			TreeIterator i = MakeIterator(tree);
 			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("", i.Current.FullName);
+			Assert.AreEqual(string.Empty, i.Current.FullName);
 			Assert.IsTrue(i.MoveNext());
 			Assert.AreEqual("a", i.Current.FullName);
 			Assert.IsFalse(i.MoveNext());
@@ -124,7 +124,7 @@ namespace GitSharp.Tests
 
 			TreeIterator i = MakeIterator(tree);
 			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("", i.Current.FullName);
+			Assert.AreEqual(string.Empty, i.Current.FullName);
 			Assert.IsTrue(i.MoveNext());
 			Assert.AreEqual("a.b", i.Current.FullName);
 			Assert.IsTrue(i.MoveNext());

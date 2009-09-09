@@ -167,7 +167,7 @@ namespace GitSharp.Tests.RevWalk
 
 			FooterLine f = footers[0];
 			Assert.AreEqual("Signed-off-by", f.Key);
-			Assert.AreEqual("", f.Value);
+			Assert.AreEqual(string.Empty, f.Value);
 			Assert.IsNull(f.getEmailAddress());
 		}
 
@@ -182,7 +182,7 @@ namespace GitSharp.Tests.RevWalk
 
 			FooterLine f = footers[0];
 			Assert.AreEqual("Signed-off-by", f.Key);
-			Assert.AreEqual("", f.Value);
+			Assert.AreEqual(string.Empty, f.Value);
 			Assert.IsNull(f.getEmailAddress());
 		}
 

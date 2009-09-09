@@ -76,7 +76,7 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void testWriteString3()
         {
-            o.WriteString("");
+            o.WriteString(string.Empty);
             assertBuffer("0004");
         }
 

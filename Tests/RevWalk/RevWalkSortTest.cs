@@ -46,50 +46,50 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testSort_Default()
         {
-            RevCommit a = commit();
-            RevCommit b = commit(1, a);
-            RevCommit c = commit(1, b);
-            RevCommit d = commit(1, c);
+            RevCommit a = Commit();
+            RevCommit b = Commit(1, a);
+            RevCommit c = Commit(1, b);
+            RevCommit d = Commit(1, c);
 
-            markStart(d);
-            assertCommit(d, rw.next());
-            assertCommit(c, rw.next());
-            assertCommit(b, rw.next());
-            assertCommit(a, rw.next());
+            MarkStart(d);
+            AssertCommit(d, rw.next());
+            AssertCommit(c, rw.next());
+            AssertCommit(b, rw.next());
+            AssertCommit(a, rw.next());
             Assert.IsNull(rw.next());
         }
 
         [Test]
         public void testSort_COMMIT_TIME_DESC()
         {
-            RevCommit a = commit();
-            RevCommit b = commit(a);
-            RevCommit c = commit(b);
-            RevCommit d = commit(c);
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
+            RevCommit c = Commit(b);
+            RevCommit d = Commit(c);
 
             rw.sort(RevSort.COMMIT_TIME_DESC);
-            markStart(d);
-            assertCommit(d, rw.next());
-            assertCommit(c, rw.next());
-            assertCommit(b, rw.next());
-            assertCommit(a, rw.next());
+            MarkStart(d);
+            AssertCommit(d, rw.next());
+            AssertCommit(c, rw.next());
+            AssertCommit(b, rw.next());
+            AssertCommit(a, rw.next());
             Assert.IsNull(rw.next());
         }
 
         [Test]
         public void testSort_REVERSE()
         {
-            RevCommit a = commit();
-            RevCommit b = commit(a);
-            RevCommit c = commit(b);
-            RevCommit d = commit(c);
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
+            RevCommit c = Commit(b);
+            RevCommit d = Commit(c);
 
             rw.sort(RevSort.REVERSE);
-            markStart(d);
-            assertCommit(a, rw.next());
-            assertCommit(b, rw.next());
-            assertCommit(c, rw.next());
-            assertCommit(d, rw.next());
+            MarkStart(d);
+            AssertCommit(a, rw.next());
+            AssertCommit(b, rw.next());
+            AssertCommit(c, rw.next());
+            AssertCommit(d, rw.next());
             Assert.IsNull(rw.next());
         }
 
@@ -99,19 +99,19 @@ namespace GitSharp.Tests.RevWalk
             // Despite being out of order time-wise, a strand-of-pearls must
             // still maintain topological order.
             //
-            RevCommit a = commit();
-            RevCommit b = commit(a);
-            RevCommit c = commit(-5, b);
-            RevCommit d = commit(10, c);
-            Assert.IsTrue(parse(a).CommitTime < parse(d).CommitTime);
-            Assert.IsTrue(parse(c).CommitTime < parse(b).CommitTime);
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
+            RevCommit c = Commit(-5, b);
+            RevCommit d = Commit(10, c);
+            Assert.IsTrue(Parse(a).CommitTime < Parse(d).CommitTime);
+            Assert.IsTrue(Parse(c).CommitTime < Parse(b).CommitTime);
 
             rw.sort(RevSort.COMMIT_TIME_DESC);
-            markStart(d);
-            assertCommit(d, rw.next());
-            assertCommit(c, rw.next());
-            assertCommit(b, rw.next());
-            assertCommit(a, rw.next());
+            MarkStart(d);
+            AssertCommit(d, rw.next());
+            AssertCommit(c, rw.next());
+            AssertCommit(b, rw.next());
+            AssertCommit(a, rw.next());
             Assert.IsNull(rw.next());
         }
 
@@ -120,19 +120,19 @@ namespace GitSharp.Tests.RevWalk
         {
             // c1 is back dated before its parent.
             //
-            RevCommit a = commit();
-            RevCommit b = commit(a);
-            RevCommit c1 = commit(-5, b);
-            RevCommit c2 = commit(10, b);
-            RevCommit d = commit(c1, c2);
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
+            RevCommit c1 = Commit(-5, b);
+            RevCommit c2 = Commit(10, b);
+            RevCommit d = Commit(c1, c2);
 
             rw.sort(RevSort.COMMIT_TIME_DESC);
-            markStart(d);
-            assertCommit(d, rw.next());
-            assertCommit(c2, rw.next());
-            assertCommit(b, rw.next());
-            assertCommit(a, rw.next());
-            assertCommit(c1, rw.next());
+            MarkStart(d);
+            AssertCommit(d, rw.next());
+            AssertCommit(c2, rw.next());
+            AssertCommit(b, rw.next());
+            AssertCommit(a, rw.next());
+            AssertCommit(c1, rw.next());
             Assert.IsNull(rw.next());
         }
 
@@ -141,19 +141,19 @@ namespace GitSharp.Tests.RevWalk
         {
             // c1 is back dated before its parent.
             //
-            RevCommit a = commit();
-            RevCommit b = commit(a);
-            RevCommit c1 = commit(-5, b);
-            RevCommit c2 = commit(10, b);
-            RevCommit d = commit(c1, c2);
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
+            RevCommit c1 = Commit(-5, b);
+            RevCommit c2 = Commit(10, b);
+            RevCommit d = Commit(c1, c2);
 
             rw.sort(RevSort.TOPO);
-            markStart(d);
-            assertCommit(d, rw.next());
-            assertCommit(c2, rw.next());
-            assertCommit(c1, rw.next());
-            assertCommit(b, rw.next());
-            assertCommit(a, rw.next());
+            MarkStart(d);
+            AssertCommit(d, rw.next());
+            AssertCommit(c2, rw.next());
+            AssertCommit(c1, rw.next());
+            AssertCommit(b, rw.next());
+            AssertCommit(a, rw.next());
             Assert.IsNull(rw.next());
         }
 
@@ -162,20 +162,20 @@ namespace GitSharp.Tests.RevWalk
         {
             // c1 is back dated before its parent.
             //
-            RevCommit a = commit();
-            RevCommit b = commit(a);
-            RevCommit c1 = commit(-5, b);
-            RevCommit c2 = commit(10, b);
-            RevCommit d = commit(c1, c2);
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
+            RevCommit c1 = Commit(-5, b);
+            RevCommit c2 = Commit(10, b);
+            RevCommit d = Commit(c1, c2);
 
             rw.sort(RevSort.TOPO);
             rw.sort(RevSort.REVERSE, true);
-            markStart(d);
-            assertCommit(a, rw.next());
-            assertCommit(b, rw.next());
-            assertCommit(c1, rw.next());
-            assertCommit(c2, rw.next());
-            assertCommit(d, rw.next());
+            MarkStart(d);
+            AssertCommit(a, rw.next());
+            AssertCommit(b, rw.next());
+            AssertCommit(c1, rw.next());
+            AssertCommit(c2, rw.next());
+            AssertCommit(d, rw.next());
             Assert.IsNull(rw.next());
         }
     }

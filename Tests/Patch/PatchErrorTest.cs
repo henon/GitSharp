@@ -58,7 +58,7 @@ namespace GitSharp.Tests.Patch
 			Assert.AreEqual(1, p.getErrors().Count);
 			FormatError e = p.getErrors()[0];
 			Assert.AreEqual(FormatError.Severity.ERROR, e.getSeverity());
-			Assert.AreEqual("Hunk disconnected from file", e.getMessage());
+			Assert.AreEqual("Hunk disconnected from File", e.getMessage());
 			Assert.AreEqual(18, e.getOffset());
 			Assert.IsTrue(e.getLineText().StartsWith("@@ -109,4 +109,11 @@ assert"));
 		}

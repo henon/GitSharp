@@ -82,7 +82,7 @@ namespace GitSharp.Tests.Patch
             FileHeader fh = p.getFiles()[0];
             Assert.AreEqual(2, fh.getHunks().Count);
 
-            // Read the original file as ISO-8859-1 and fix up the one place
+            // Read the original File as ISO-8859-1 and fix up the one place
             // where we changed the character encoding. That makes the exp
             // string match what we really expect to get back.
             //
@@ -103,7 +103,7 @@ namespace GitSharp.Tests.Patch
             var fh = (CombinedFileHeader)p.getFiles()[0];
             Assert.AreEqual(1, fh.getHunks().Count);
 
-            // Read the original file as ISO-8859-1 and fix up the one place
+            // Read the original File as ISO-8859-1 and fix up the one place
             // where we changed the character encoding. That makes the exp
             // string match what we really expect to get back.
             //

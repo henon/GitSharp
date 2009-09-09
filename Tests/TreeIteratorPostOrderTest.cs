@@ -53,7 +53,7 @@ namespace GitSharp.Tests
 			Tree tree = new Tree(db);
 			TreeIterator i = makeIterator(tree);
 			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("", i.Current.FullName);
+			Assert.AreEqual(string.Empty, i.Current.FullName);
 			Assert.IsFalse(i.MoveNext());
 		}
 
@@ -70,7 +70,7 @@ namespace GitSharp.Tests
 			Assert.IsTrue(i.MoveNext());
 			Assert.AreEqual("x", i.Current.Name);
 			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("", i.Current.FullName);
+			Assert.AreEqual(string.Empty, i.Current.FullName);
 			Assert.IsFalse(i.MoveNext());
 		}
 
@@ -89,7 +89,7 @@ namespace GitSharp.Tests
 			Assert.AreEqual("a", i.Current.Name);
 			Assert.AreEqual("x", i.Current.Name);
 			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("", i.Current.FullName);
+			Assert.AreEqual(string.Empty, i.Current.FullName);
 			Assert.IsFalse(i.MoveNext());
 		}
 
@@ -106,7 +106,7 @@ namespace GitSharp.Tests
 			Assert.IsTrue(i.MoveNext());
 			Assert.AreEqual("a", i.Current.FullName);
 			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("", i.Current.FullName);
+			Assert.AreEqual(string.Empty, i.Current.FullName);
 			Assert.IsFalse(i.MoveNext());
 		}
 
@@ -142,7 +142,7 @@ namespace GitSharp.Tests
 			Assert.IsTrue(i.MoveNext());
 			Assert.AreEqual("a=d", i.Current.FullName);
 			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("", i.Current.FullName);
+			Assert.AreEqual(string.Empty, i.Current.FullName);
 			Assert.IsFalse(i.MoveNext());
 		}
 

@@ -254,7 +254,7 @@ namespace GitSharp
 		public FileInfo ToFile(AnyObjectId objectId)
 		{
 			string n = objectId.ToString();
-			string d = n.Substring(0, 2);
+			string d = n.Slice(0, 2);
 			string f = n.Substring(2);
 			for (int i = 0; i < _objectsDirs.Count; ++i)
 			{

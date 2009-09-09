@@ -438,7 +438,7 @@ namespace GitSharp.Transport
 			int sz = data.Length;
 			int hdrlen = 0;
 			_buffer[hdrlen++] = (byte)((typeCode << 4) | sz & 15);
-			sz = (int)(((uint)sz) >> 7);
+			sz = (int)(((uint)sz) >> 4);
 			while (sz > 0)
 			{
 				_buffer[hdrlen - 1] |= 0x80;
@@ -1073,9 +1073,7 @@ namespace GitSharp.Transport
 
 		private static FileInfo CreateTempFile(string pre, string suf, DirectoryInfo dir)
 		{
-			var r = new Random();
-			int randsuf = r.Next(100000, 999999);
-			string p = Path.Combine(dir.ToString(), pre + randsuf + suf);
+			string p = Path.Combine(dir.ToString(), pre + Path.GetRandomFileName() + suf);
 			File.Create(p).Close();
 			return new FileInfo(p);
 		}

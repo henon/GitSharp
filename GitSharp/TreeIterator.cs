@@ -43,7 +43,7 @@ using System.IO;
 
 namespace GitSharp
 {
-	public class TreeIterator : IEnumerator<TreeEntry>
+	public class TreeIterator
 	{
 		private readonly Tree _tree;
 		private readonly Order _order;
@@ -116,23 +116,6 @@ namespace GitSharp
 			}
 		}
 
-		public bool MoveNext()
-		{
-			if (!HasNextTreeEntry()) return false;
-
-			try
-			{
-				TreeEntry ret = NextTreeEntry();
-				Step();
-				Current = ret;
-				return true;
-			}
-			catch (IOException e)
-			{
-				throw new Exception(string.Empty, e);
-			}
-		}
-
 		private TreeEntry NextTreeEntry()
 		{
 			if (_sub != null)
@@ -149,20 +132,6 @@ namespace GitSharp
 
 			return _tree.Members[_index];
 		}
-
-		// Commented out since hasNext is not used my IEnumerator
-		//
-		//public bool hasNext()
-		//{
-		//    try
-		//    {
-		//        return HasNextTreeEntry();
-		//    }
-		//    catch (IOException e)
-		//    {
-		//        throw new Exception(string.Empty, e);
-		//    }
-		//}
 
 		private bool HasNextTreeEntry()
 		{
@@ -208,32 +177,17 @@ namespace GitSharp
 			return false;
 		}
 
-		#region IEnumerator<TreeEntry> Members
 
-		public TreeEntry Current { get; internal set; }
+	    public bool hasNext()
+	    {
+	       return HasNextTreeEntry();
+	    }
 
-		#endregion
-
-		#region IDisposable Members
-
-		public void Dispose()
-		{
-		}
-
-		#endregion
-
-		#region IEnumerator Members
-
-		object System.Collections.IEnumerator.Current
-		{
-			get { return Current; }
-		}
-
-		public void Reset()
-		{
-			throw new NotSupportedException();
-		}
-
-		#endregion
+	    public TreeEntry next()
+	    {
+            TreeEntry ret = NextTreeEntry();
+            Step();
+            return ret;
+	    }
 	}
 }

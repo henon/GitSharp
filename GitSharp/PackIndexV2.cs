@@ -135,7 +135,7 @@ namespace GitSharp
                 byte[] ofs = offset32[k];
                 NB.ReadFully(fd, ofs, 0, ofs.Length);
                 for (int p = 0; p < ofs.Length; p += 4)
-                    if (ofs[p] < 0)
+                    if ((sbyte)ofs[p] < 0)
                         o64cnt++;
             }
 

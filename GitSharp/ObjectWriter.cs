@@ -229,7 +229,7 @@ namespace GitSharp
                     }
                     finally
                     {
-                        PathUtil.DeleteFile(info);
+                        info.DeleteFile();
                     }
                 }
             }
@@ -237,7 +237,7 @@ namespace GitSharp
             {
                 if (_r.HasObject(objectId))
                 {
-                    PathUtil.DeleteFile(info);
+                  info.DeleteFile();
                 }
                 else
                 {
@@ -250,7 +250,7 @@ namespace GitSharp
                         }
                         if (!info.RenameTo(info2.FullName) && !_r.HasObject(objectId))
                         {
-                            PathUtil.DeleteFile(info);
+                            info.DeleteFile();
                             throw new ObjectWritingException("Unable to create new object: " + info2);
                         }
                     }

@@ -45,7 +45,7 @@ using System.IO;
 
 namespace GitSharp.Util
 {
-    public sealed class PathUtil
+    public static class PathUtil
     {
         public static string Combine(params string[] paths)
         {
@@ -75,7 +75,7 @@ namespace GitSharp.Util
         /// Delete file without complaining about readonly status
         /// </summary>
         /// <param name="path"></param>
-        public static void DeleteFile(FileInfo path)
+        public static void DeleteFile(this FileSystemInfo path)
         {
             DeleteFile(path.FullName);
         }

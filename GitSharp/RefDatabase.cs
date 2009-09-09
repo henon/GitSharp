@@ -270,7 +270,7 @@ namespace GitSharp
 				string entName = ent.Name;
 				if (".".Equals(entName) || "..".Equals(entName)) continue;
 
-				if (ent is DirectoryInfo)
+				if (ent.IsDirectory())
 				{
 					ReadLooseRefs(avail, prefix + entName + "/", ent as DirectoryInfo);
 				}

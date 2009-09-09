@@ -192,74 +192,64 @@ namespace GitSharp.Tests
 
         #region --> Recursive deletion utility
 
+          /// <summary>
+        /// Utility method to delete a directory recursively. It is
+        /// also used internally. If a file or directory cannot be removed
+        /// it throws an AssertionFailure.
+        /// </summary>
+        /// <param name="dir"></param>
+        protected void recursiveDelete(FileSystemInfo fs)
+        {
+          recursiveDelete(fs, false, GetType().Name + "." + ToString(), true);
+        }
+ 
         /// <summary>
         /// Utility method to delete a directory recursively. It is
         /// also used internally. If a file or directory cannot be removed
         /// it throws an AssertionFailure.
         /// </summary>
-        /// <param name="fileOrDirectory">A file OR a directory</param>
-        protected void recursiveDelete(DirectoryInfo fileOrDirectory)
-        {
-            recursiveDelete(new FileInfo(fileOrDirectory.FullName), false, GetType().Name + "." + ToString(), true);
-        }
-
-        protected void recursiveDelete(FileInfo fileOrDirectory)
-        {
-            recursiveDelete(fileOrDirectory, false, GetType().Name + "." + ToString(), true);
-        }
-
-        /// <summary>
-        /// Utility method to delete a directory recursively. It is
-        /// also used internally. If a file or directory cannot be removed
-        /// it throws an AssertionFailure.
-        /// </summary>
-        /// <param name="fileOrDirectory">A file OR a directory</param>
+        /// <param name="fs"></param>
         /// <param name="silent"></param>
         /// <param name="name"></param>
         /// <param name="failOnError"></param>
         /// <returns></returns>
-        protected static bool recursiveDelete(FileInfo fileOrDirectory, bool silent, string name, bool failOnError)
+        protected static bool recursiveDelete(FileSystemInfo fs, bool silent, string name, bool failOnError)
         {
             Debug.Assert(!(silent && failOnError));
-
-            if (!fileOrDirectory.IsDirectory() && !fileOrDirectory.IsFile())
+            if (!fs.IsDirectory() && !fs.IsFile())
             {
                 return silent;
             }
 
             try
             {
-                if (fileOrDirectory.IsDirectory())
+                if (fs.IsDirectory())
                 {
-                    Directory.Delete(fileOrDirectory.FullName, true);
+                    Directory.Delete(fs.FullName, true);
                     return silent;
                 }
 
-                File.Delete(fileOrDirectory.FullName);
-                return silent;
+                File.Delete(fs.FullName);
             }
             catch (Exception e)
             {
-                ReportDeleteFailure(e.Message, failOnError, fileOrDirectory);
+                //ReportDeleteFailure(name, failOnError, fs);
+                Console.WriteLine(name + ": " + e.Message);
             }
-
+ 
             return silent;
         }
-
+ 
         private static void ReportDeleteFailure(string name, bool failOnError, FileSystemInfo fsi)
         {
-            // TODO : Solve the handle locking problem
-            Console.WriteLine("Error while recursive delete: " + name);
-            return;
-            /*
             string severity = failOnError ? "Error" : "Warning";
             string msg = severity + ": Failed to delete " + fsi;
-
+ 
             if (name != null)
             {
                 msg += " in " + name;
             }
-
+ 
             if (failOnError)
             {
                 Assert.Fail(msg);
@@ -268,8 +258,14 @@ namespace GitSharp.Tests
             {
                 Console.WriteLine(msg);
             }
-            */
         }
+
+       
+
+
+             
+         
+              
 
         #endregion
 

@@ -165,7 +165,7 @@ namespace GitSharp
 
         public static string DirectoryName(this FileSystemInfo fileSystemInfo)
         {
-            return fileSystemInfo.FullName;
+            return Path.GetDirectoryName(fileSystemInfo.FullName);
         }
 
         public static bool IsDirectory(this FileSystemInfo fileSystemInfo)

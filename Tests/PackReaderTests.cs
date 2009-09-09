@@ -37,40 +37,39 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-	[TestFixture]
 	public class PackReaderTests : RepositoryTestCase
 	{
 		private const string PackName = "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f";
 		private static readonly string TestPack = "Resources/" + GitSharp.Transport.IndexPack.GetPackFileName(PackName);
 		private static readonly string TestIdx = "Resources/" + GitSharp.Transport.IndexPack.GetIndexFileName(PackName);
 
-		[Test]
+		[Fact]
 		public void test003_lookupCompressedObject()
 		{
 			ObjectId id = ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327");
 			var pr = new PackFile(TestIdx, TestPack);
 			PackedObjectLoader or = pr.Get(new WindowCursor(), id);
-			Assert.IsNotNull(or);
-			Assert.AreEqual(Constants.OBJ_TREE, or.Type);
-			Assert.AreEqual(35, or.Size);
-			Assert.AreEqual(7738, or.DataOffset);
+			Assert.NotNull(or);
+			Assert.Equal(Constants.OBJ_TREE, or.Type);
+			Assert.Equal(35, or.Size);
+			Assert.Equal(7738, or.DataOffset);
 			pr.Close();
 		}
 
-		[Test]
+		[Fact]
 		public void test004_lookupDeltifiedObject()
 		{
 			ObjectId id = ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259");
 			ObjectLoader or = db.OpenObject(id);
-			Assert.IsNotNull(or);
-			Assert.IsTrue(or is PackedObjectLoader);
-			Assert.AreEqual(Constants.OBJ_BLOB, or.Type);
-			Assert.AreEqual(18009, or.Size);
-			Assert.AreEqual(537, ((PackedObjectLoader)or).DataOffset);
+			Assert.NotNull(or);
+			Assert.True(or is PackedObjectLoader);
+			Assert.Equal(Constants.OBJ_BLOB, or.Type);
+			Assert.Equal(18009, or.Size);
+			Assert.Equal(537, ((PackedObjectLoader)or).DataOffset);
 		}
 
 #if todopack 
@@ -95,13 +94,13 @@ namespace GitSharp.Tests
             t = db
                     .mapTree(ObjectId.FromString(
                             "aac9df07f653dd18b935298deb813e02c32d2e6f"));
-            Assert.IsNotNull(t);
+            Assert.NotNull(t);
             t.memberCount();
 
             t = db
                     .mapTree(ObjectId.FromString(
                             "6b9ffbebe7b83ac6a61c9477ab941d999f5d0c96"));
-            Assert.IsNotNull(t);
+            Assert.NotNull(t);
             t.memberCount();
         }
 #endif

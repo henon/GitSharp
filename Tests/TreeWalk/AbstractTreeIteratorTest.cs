@@ -36,11 +36,10 @@
  */
 
 using GitSharp.TreeWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.TreeWalk
 {
-    [TestFixture]
     public class AbstractTreeIteratorTest
     {
         public class FakeTreeIterator : WorkingTreeIterator
@@ -58,13 +57,13 @@ namespace GitSharp.Tests.TreeWalk
             }
         }
 
-		[Test]
+		[Fact]
         public void testPathCompare()
         {
-            Assert.IsTrue(new FakeTreeIterator("a", FileMode.RegularFile).pathCompare(new FakeTreeIterator("a", FileMode.Tree)) < 0);
-            Assert.IsTrue(new FakeTreeIterator("a", FileMode.Tree).pathCompare(new FakeTreeIterator("a", FileMode.RegularFile)) > 0);
-            Assert.IsTrue(new FakeTreeIterator("a", FileMode.RegularFile).pathCompare(new FakeTreeIterator("a", FileMode.RegularFile)) == 0);
-            Assert.IsTrue(new FakeTreeIterator("a", FileMode.Tree).pathCompare(new FakeTreeIterator("a", FileMode.Tree)) == 0);
+            Assert.True(new FakeTreeIterator("a", FileMode.RegularFile).pathCompare(new FakeTreeIterator("a", FileMode.Tree)) < 0);
+            Assert.True(new FakeTreeIterator("a", FileMode.Tree).pathCompare(new FakeTreeIterator("a", FileMode.RegularFile)) > 0);
+            Assert.True(new FakeTreeIterator("a", FileMode.RegularFile).pathCompare(new FakeTreeIterator("a", FileMode.RegularFile)) == 0);
+            Assert.True(new FakeTreeIterator("a", FileMode.Tree).pathCompare(new FakeTreeIterator("a", FileMode.Tree)) == 0);
         }
     }
 }

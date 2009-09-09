@@ -41,54 +41,52 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    
-    [TestFixture]
     public class RepositoryConfigTest
     {
-        [Test]
+        [Fact]
         public void ReadBareKey()
         {
             Config c = parse("[foo]\nbar\n");
-            Assert.AreEqual(true, c.getBoolean("foo", null, "bar", false));
-            Assert.AreEqual("", c.getString("foo", null, "bar"));
+            Assert.Equal(true, c.getBoolean("foo", null, "bar", false));
+            Assert.Equal("", c.getString("foo", null, "bar"));
         }
 
-        [Test]
+        [Fact]
         public void ReadWithSubsection()
         {
             Config c = parse("[foo \"zip\"]\nbar\n[foo \"zap\"]\nbar=false\nn=3\n");
-            Assert.AreEqual(true, c.getBoolean("foo", "zip", "bar", false));
-            Assert.AreEqual("", c.getString("foo", "zip", "bar"));
-            Assert.AreEqual(false, c.getBoolean("foo", "zap", "bar", true));
-            Assert.AreEqual("false", c.getString("foo", "zap", "bar"));
-            Assert.AreEqual(3, c.getInt("foo", "zap", "n", 4));
-            Assert.AreEqual(4, c.getInt("foo", "zap", "m", 4));
+            Assert.Equal(true, c.getBoolean("foo", "zip", "bar", false));
+            Assert.Equal("", c.getString("foo", "zip", "bar"));
+            Assert.Equal(false, c.getBoolean("foo", "zap", "bar", true));
+            Assert.Equal("false", c.getString("foo", "zap", "bar"));
+            Assert.Equal(3, c.getInt("foo", "zap", "n", 4));
+            Assert.Equal(4, c.getInt("foo", "zap", "m", 4));
         }
 
-        [Test]
+        [Fact]
         public void PutRemote()
         {
             Config c = new Config();
             c.setString("sec", "ext", "name", "value");
             c.setString("sec", "ext", "name2", "value2");
             string expText = "[sec \"ext\"]\n\tname = value\n\tname2 = value2\n";
-            Assert.AreEqual(expText, c.toText());
+            Assert.Equal(expText, c.toText());
         }
 
-        [Test]
+        [Fact]
         public void PutGetSimple()
         {
             Config c = new Config();
             c.setString("my", null, "somename", "false");
-            Assert.AreEqual("false", c.getString("my", null, "somename"));
-            Assert.AreEqual("[my]\n\tsomename = false\n", c.toText());
+            Assert.Equal("false", c.getString("my", null, "somename"));
+            Assert.Equal("[my]\n\tsomename = false\n", c.toText());
         }
 
-        [Test]
+        [Fact]
         public void PutGetStringList()
         {
             Config c = new Config();
@@ -99,32 +97,32 @@ namespace GitSharp.Tests
 
             object[] expArr = values.ToArray();
             string[] actArr = c.getStringList("my", null, "somename");
-            Assert.IsTrue(expArr.SequenceEqual(actArr));
+            Assert.True(expArr.SequenceEqual(actArr));
 
             string expText = "[my]\n\tsomename = value1\n\tsomename = value2\n";
-            Assert.AreEqual(expText, c.toText());
+            Assert.Equal(expText, c.toText());
         }
 
-        [Test]
+        [Fact]
         public void ReadCaseInsensitive()
         {
             Config c = parse("[Foo]\nBar\n");
-            Assert.AreEqual(true, c.getBoolean("foo", null, "bar", false));
-            Assert.AreEqual("", c.getString("foo", null, "bar"));
+            Assert.Equal(true, c.getBoolean("foo", null, "bar", false));
+            Assert.Equal("", c.getString("foo", null, "bar"));
         }
 
-        [Test]
+        [Fact]
         public void ReadBooleanTrueFalse1()
         {
             Config c = parse("[s]\na = true\nb = false\n");
-            Assert.AreEqual("true", c.getString("s", null, "a"));
-            Assert.AreEqual("false", c.getString("s", null, "b"));
+            Assert.Equal("true", c.getString("s", null, "a"));
+            Assert.Equal("false", c.getString("s", null, "b"));
 
-            Assert.IsTrue(c.getBoolean("s", "a", false));
-            Assert.IsFalse(c.getBoolean("s", "b", true));
+            Assert.True(c.getBoolean("s", "a", false));
+            Assert.False(c.getBoolean("s", "b", true));
         }
 
-        [Test]
+        [Fact]
         public void ReadLong()
         {
             assertReadLong(1L);
@@ -138,11 +136,11 @@ namespace GitSharp.Tests
             try
             {
                 assertReadLong(-1, "1.5g");
-                Assert.Fail("incorrectly accepted 1.5g");
+                Assert.False(true, "incorrectly accepted 1.5g");
             }
             catch (ArgumentException e)
             {
-                Assert.AreEqual("Invalid long value: s.a=1.5g", e.Message);
+                Assert.Equal("Invalid long value: s.a=1.5g", e.Message);
             }
         }
 
@@ -154,7 +152,7 @@ namespace GitSharp.Tests
         private void assertReadLong(long exp, string act)
         {
             Config c = parse("[s]\na = " + act + "\n");
-            Assert.AreEqual(exp, c.getLong("s", null, "a", 0L));
+            Assert.Equal(exp, c.getLong("s", null, "a", 0L));
         }
 
         private Config parse(string content)

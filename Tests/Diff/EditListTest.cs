@@ -36,54 +36,53 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
+using Xunit;
 using GitSharp.Diff;
 using System.Collections;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class EditListTest
     {
-        [Test]
+        [Fact]
 	    public void testEmpty()
         {
 		    EditList l = new EditList();
-		    Assert.AreEqual(0, l.size());
-		    Assert.IsTrue(l.isEmpty());
-		    Assert.AreEqual("EditList[]", l.ToString());
+		    Assert.Equal(0, l.size());
+		    Assert.True(l.isEmpty());
+		    Assert.Equal("EditList[]", l.ToString());
 
-		    Assert.IsTrue(l.Equals(l));
-		    Assert.IsTrue(l.Equals(new EditList()));
-		    Assert.IsFalse(l.Equals(""));
-            Assert.AreEqual(l.GetHashCode(), new EditList().GetHashCode());
+		    Assert.True(l.Equals(l));
+		    Assert.True(l.Equals(new EditList()));
+		    Assert.False(l.Equals(""));
+            Assert.Equal(l.GetHashCode(), new EditList().GetHashCode());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testAddOne()
         {
 		    Edit e = new Edit(1, 2, 1, 1);
 		    EditList l = new EditList();
 		    l.Add(e);
-		    Assert.AreEqual(1, l.size());
-		    Assert.IsFalse(l.isEmpty());
-		    Assert.AreSame(e, l.get(0));
+		    Assert.Equal(1, l.size());
+		    Assert.False(l.isEmpty());
+		    Assert.Same(e, l.get(0));
             IEnumerator i = l.GetEnumerator();
             i.Reset();
             i.MoveNext();
-		    Assert.AreSame(e, i.Current);
+		    Assert.Same(e, i.Current);
 
-		    Assert.IsTrue(l.Equals(l));
-		    Assert.IsFalse(l.Equals(new EditList()));
+		    Assert.True(l.Equals(l));
+		    Assert.False(l.Equals(new EditList()));
 
 		    EditList l2 = new EditList();
 		    l2.Add(e);
-		    Assert.IsTrue(l.Equals(l2));
-		    Assert.IsTrue(l2.Equals(l));
-		    Assert.AreEqual(l.GetHashCode(), l2.GetHashCode());
+		    Assert.True(l.Equals(l2));
+		    Assert.True(l2.Equals(l));
+		    Assert.Equal(l.GetHashCode(), l2.GetHashCode());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testAddTwo()
         {
 		    Edit e1 = new Edit(1, 2, 1, 1);
@@ -91,41 +90,41 @@ namespace GitSharp.Tests
 		    EditList l = new EditList();
 		    l.Add(e1);
 		    l.Add(e2);
-		    Assert.AreEqual(2, l.size());
-		    Assert.AreSame(e1, l.get(0));
-		    Assert.AreSame(e2, l.get(1));
+		    Assert.Equal(2, l.size());
+		    Assert.Same(e1, l.get(0));
+		    Assert.Same(e2, l.get(1));
 
 		    IEnumerator i = l.GetEnumerator();
             i.Reset();
             i.MoveNext();
-		    Assert.AreSame(e1, i.Current);
+		    Assert.Same(e1, i.Current);
             i.MoveNext();
-		    Assert.AreSame(e2, i.Current);
+		    Assert.Same(e2, i.Current);
 
-		    Assert.IsTrue(l.Equals(l));
-		    Assert.IsFalse(l.Equals(new EditList()));
+		    Assert.True(l.Equals(l));
+		    Assert.False(l.Equals(new EditList()));
 
 		    EditList l2 = new EditList();
 		    l2.Add(e1);
 		    l2.Add(e2);
-		    Assert.IsTrue(l.Equals(l2));
-		    Assert.IsTrue(l2.Equals(l));
-		    Assert.AreEqual(l.GetHashCode(), l2.GetHashCode());
+		    Assert.True(l.Equals(l2));
+		    Assert.True(l2.Equals(l));
+		    Assert.Equal(l.GetHashCode(), l2.GetHashCode());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testSet()
         {
 		    Edit e1 = new Edit(1, 2, 1, 1);
 		    Edit e2 = new Edit(3, 4, 3, 3);
 		    EditList l = new EditList();
 		    l.Add(e1);
-		    Assert.AreSame(e1, l.get(0));
-		    Assert.AreSame(e1, l.set(0, e2));
-		    Assert.AreSame(e2, l.get(0));
+		    Assert.Same(e1, l.get(0));
+		    Assert.Same(e1, l.set(0, e2));
+		    Assert.Same(e2, l.get(0));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testRemove()
         {
 		    Edit e1 = new Edit(1, 2, 1, 1);
@@ -134,8 +133,8 @@ namespace GitSharp.Tests
 		    l.Add(e1);
 		    l.Add(e2);
 		    l.Remove(e1);
-		    Assert.AreEqual(1, l.size());
-		    Assert.AreSame(e2, l.get(0));
+		    Assert.Equal(1, l.size());
+		    Assert.Same(e2, l.get(0));
 	    }
     }
 }

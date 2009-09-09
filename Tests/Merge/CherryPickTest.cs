@@ -40,16 +40,15 @@
 using System.IO;
 using GitSharp.DirectoryCache;
 using GitSharp.Merge;
-using NUnit.Framework;
+using Xunit;
 
 using System;
 
 namespace GitSharp.Tests.Merge
 {
-	[TestFixture]
 	public class CherryPickTest : RepositoryTestCase
 	{
-		[Test]
+		[Fact]
 		public void TestPick()
 		{
 			// B---O
@@ -94,29 +93,29 @@ namespace GitSharp.Tests.Merge
 			var twm = (ThreeWayMerger)MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			twm.SetBase(P);
 			bool merge = twm.Merge(new[] { O, T });
-			Assert.IsTrue(merge);
+			Assert.True(merge);
 
 			var tw = new GitSharp.TreeWalk.TreeWalk(db) { Recursive = true };
 			tw.reset(twm.GetResultTreeId());
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("a", tw.getPathString());
+			Assert.True(tw.next());
+			Assert.Equal("a", tw.getPathString());
 			AssertCorrectId(treeO, tw);
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("o", tw.getPathString());
+			Assert.True(tw.next());
+			Assert.Equal("o", tw.getPathString());
 			AssertCorrectId(treeO, tw);
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("t", tw.getPathString());
+			Assert.True(tw.next());
+			Assert.Equal("t", tw.getPathString());
 			AssertCorrectId(treeT, tw);
 
-			Assert.IsFalse(tw.next());
+			Assert.False(tw.next());
 		}
 
 		private static void AssertCorrectId(DirCache treeT, GitSharp.TreeWalk.TreeWalk tw)
 		{
-			Assert.AreEqual(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
+			Assert.Equal(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
 		}
 
 		private ObjectId Commit(ObjectWriter ow, DirCache treeB, ObjectId[] parentIds)

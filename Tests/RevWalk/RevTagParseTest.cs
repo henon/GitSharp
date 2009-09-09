@@ -38,36 +38,35 @@
 using System.IO;
 using System.Text;
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public class RevTagParseTest : RepositoryTestCase
     {
         private readonly Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
         private readonly Encoding isoEnc = Encoding.GetEncoding("ISO-8859-1");
         private readonly Encoding eucJpEnc = Encoding.GetEncoding("EUC-JP");
 
-        [Test]
+        [Fact]
         public void testTagBlob()
         {
             testOneType(Constants.OBJ_BLOB);
         }
 
-        [Test]
+        [Fact]
         public void testTagTree()
         {
             testOneType(Constants.OBJ_TREE);
         }
 
-        [Test]
+        [Fact]
         public void testTagCommit()
         {
             testOneType(Constants.OBJ_COMMIT);
         }
 
-        [Test]
+        [Fact]
         public void testTagTag()
         {
             testOneType(Constants.OBJ_TAG);
@@ -87,16 +86,16 @@ namespace GitSharp.Tests.RevWalk
             RevTag c;
 
             c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-            Assert.IsNull(c.getObject());
-            Assert.IsNull(c.getName());
+            Assert.Null(c.getObject());
+            Assert.Null(c.getName());
 
             c.parseCanonical(rw, utf8Enc.GetBytes(b.ToString()));
-            Assert.IsNotNull(c.getObject());
-            Assert.AreEqual(locId, c.getObject().getId());
-            Assert.AreSame(rw.lookupAny(locId, typeCode), c.getObject());
+            Assert.NotNull(c.getObject());
+            Assert.Equal(locId, c.getObject().getId());
+            Assert.Same(rw.lookupAny(locId, typeCode), c.getObject());
         }
 
-        [Test]
+        [Fact]
         public void testParseAllFields()
         {
             ObjectId treeId = id("9788669ad918b6fcce64af8882fc9a81cb6aba67");
@@ -131,23 +130,23 @@ namespace GitSharp.Tests.RevWalk
             RevTag c;
 
             c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-            Assert.IsNull(c.getObject());
-            Assert.IsNull(c.getName());
+            Assert.Null(c.getObject());
+            Assert.Null(c.getName());
 
             Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
             c.parseCanonical(rw, utf8Enc.GetBytes(body.ToString()));
-            Assert.IsNotNull(c.getObject());
-            Assert.AreEqual(treeId, c.getObject().getId());
-            Assert.AreSame(rw.lookupTree(treeId), c.getObject());
+            Assert.NotNull(c.getObject());
+            Assert.Equal(treeId, c.getObject().getId());
+            Assert.Same(rw.lookupTree(treeId), c.getObject());
 
-            Assert.IsNotNull(c.getName());
-            Assert.AreEqual(name, c.getName());
-            Assert.AreEqual("", c.getFullMessage());
+            Assert.NotNull(c.getName());
+            Assert.Equal(name, c.getName());
+            Assert.Equal("", c.getFullMessage());
 
             PersonIdent cTagger = c.getTaggerIdent();
-            Assert.IsNotNull(cTagger);
-            Assert.AreEqual(taggerName, cTagger.Name);
-            Assert.AreEqual(taggerEmail, cTagger.EmailAddress);
+            Assert.NotNull(cTagger);
+            Assert.Equal(taggerName, cTagger.Name);
+            Assert.Equal(taggerEmail, cTagger.EmailAddress);
         }
 
         private RevTag create(string msg)
@@ -168,7 +167,7 @@ namespace GitSharp.Tests.RevWalk
             return c;
         }
 
-        [Test]
+        [Fact]
         public void testParse_implicit_UTF8_encoded()
         {
             RevTag c;
@@ -186,12 +185,12 @@ namespace GitSharp.Tests.RevWalk
                 c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
-            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
-            Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
-            Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
+            Assert.Equal("F\u00f6r fattare", c.getTaggerIdent().Name);
+            Assert.Equal("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
+            Assert.Equal("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_implicit_mixed_encoded()
         {
             RevTag c;
@@ -209,9 +208,9 @@ namespace GitSharp.Tests.RevWalk
                 c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
-            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
-            Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
-            Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c
+            Assert.Equal("F\u00f6r fattare", c.getTaggerIdent().Name);
+            Assert.Equal("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
+            Assert.Equal("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c
                                                                                  .getFullMessage());
         }
 
@@ -221,7 +220,7 @@ namespace GitSharp.Tests.RevWalk
          * @throws Exception
          */
 
-        [Test]
+        [Fact]
         public void testParse_explicit_encoded()
         {
             RevTag c;
@@ -240,9 +239,9 @@ namespace GitSharp.Tests.RevWalk
                 c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
-            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
-            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
-            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+            Assert.Equal("F\u00f6r fattare", c.getTaggerIdent().Name);
+            Assert.Equal("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.Equal("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
 
 	    /**
@@ -255,7 +254,7 @@ namespace GitSharp.Tests.RevWalk
 	     * @throws Exception
 	     */
 
-        [Test]
+        [Fact]
         public void testParse_explicit_bad_encoded()
         {
             RevTag c;
@@ -275,9 +274,9 @@ namespace GitSharp.Tests.RevWalk
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
-            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
-            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
-            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+            Assert.Equal("F\u00f6r fattare", c.getTaggerIdent().Name);
+            Assert.Equal("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.Equal("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
 
 	    /**
@@ -292,7 +291,7 @@ namespace GitSharp.Tests.RevWalk
 	     * @throws Exception
 	     */
 
-        [Test]
+        [Fact]
         public void testParse_explicit_bad_encoded2()
         {
             RevTag c;
@@ -311,68 +310,68 @@ namespace GitSharp.Tests.RevWalk
                 c = new RevTag(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
-            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
-            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
-            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+            Assert.Equal("F\u00f6r fattare", c.getTaggerIdent().Name);
+            Assert.Equal("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.Equal("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_NoMessage()
         {
             string msg = "";
             RevTag c = create(msg);
-            Assert.AreEqual(msg, c.getFullMessage());
-            Assert.AreEqual(msg, c.getShortMessage());
+            Assert.Equal(msg, c.getFullMessage());
+            Assert.Equal(msg, c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_OnlyLFMessage()
         {
             RevTag c = create("\n");
-            Assert.AreEqual("\n", c.getFullMessage());
-            Assert.AreEqual("", c.getShortMessage());
+            Assert.Equal("\n", c.getFullMessage());
+            Assert.Equal("", c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_ShortLineOnlyNoLF()
         {
             string shortMsg = "This is a short message.";
             RevTag c = create(shortMsg);
-            Assert.AreEqual(shortMsg, c.getFullMessage());
-            Assert.AreEqual(shortMsg, c.getShortMessage());
+            Assert.Equal(shortMsg, c.getFullMessage());
+            Assert.Equal(shortMsg, c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_ShortLineOnlyEndLF()
         {
             string shortMsg = "This is a short message.";
             string fullMsg = shortMsg + "\n";
             RevTag c = create(fullMsg);
-            Assert.AreEqual(fullMsg, c.getFullMessage());
-            Assert.AreEqual(shortMsg, c.getShortMessage());
+            Assert.Equal(fullMsg, c.getFullMessage());
+            Assert.Equal(shortMsg, c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_ShortLineOnlyEmbeddedLF()
         {
             string fullMsg = "This is a\nshort message.";
             string shortMsg = fullMsg.Replace('\n', ' ');
             RevTag c = create(fullMsg);
-            Assert.AreEqual(fullMsg, c.getFullMessage());
-            Assert.AreEqual(shortMsg, c.getShortMessage());
+            Assert.Equal(fullMsg, c.getFullMessage());
+            Assert.Equal(shortMsg, c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_ShortLineOnlyEmbeddedAndEndingLF()
         {
             string fullMsg = "This is a\nshort message.\n";
             string shortMsg = "This is a short message.";
             RevTag c = create(fullMsg);
-            Assert.AreEqual(fullMsg, c.getFullMessage());
-            Assert.AreEqual(shortMsg, c.getShortMessage());
+            Assert.Equal(fullMsg, c.getFullMessage());
+            Assert.Equal(shortMsg, c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_GitStyleMessage()
         {
             string shortMsg = "This fixes a bug.";
@@ -380,8 +379,8 @@ namespace GitSharp.Tests.RevWalk
                           + "\n" + "Signed-off-by: A U. Thor <author@example.com>\n";
             string fullMsg = shortMsg + "\n" + "\n" + body;
             RevTag c = create(fullMsg);
-            Assert.AreEqual(fullMsg, c.getFullMessage());
-            Assert.AreEqual(shortMsg, c.getShortMessage());
+            Assert.Equal(fullMsg, c.getFullMessage());
+            Assert.Equal(shortMsg, c.getShortMessage());
         }
 
         private ObjectId id(string str)

@@ -42,43 +42,42 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
+using Xunit;
 using System.IO;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
    public class ConfigTests : RepositoryTestCase
     {
 
-        [Test]
+        [Fact]
         public void test004_CheckNewConfig()
         {
             RepositoryConfig c = db.Config;
-            Assert.IsNotNull(c);
-            Assert.AreEqual("0", c.getString("core", null, "repositoryformatversion"));
-            Assert.AreEqual("0", c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
-            Assert.AreEqual("true", c.getString("core", null, "filemode"));
-            Assert.AreEqual("true", c.getString("cOrE", null, "fIlEModE"));
-            Assert.IsNull(c.getString("notavalue", null, "reallyNotAValue"));
+            Assert.NotNull(c);
+            Assert.Equal("0", c.getString("core", null, "repositoryformatversion"));
+            Assert.Equal("0", c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
+            Assert.Equal("true", c.getString("core", null, "filemode"));
+            Assert.Equal("true", c.getString("cOrE", null, "fIlEModE"));
+            Assert.Null(c.getString("notavalue", null, "reallyNotAValue"));
             c.load();
         }
 
 
-        [Test]
+        [Fact]
         public void test005_ReadSimpleConfig()
         {
             RepositoryConfig c = db.Config;
-            Assert.IsNotNull(c);
+            Assert.NotNull(c);
             c.load();
-            Assert.AreEqual("0", c.getString("core", null, "repositoryformatversion"));
-            Assert.AreEqual("0", c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
-            Assert.AreEqual("true", c.getString("core", null, "filemode"));
-            Assert.AreEqual("true", c.getString("cOrE", null, "fIlEModE"));
-            Assert.IsNull(c.getString("notavalue", null, "reallyNotAValue"));
+            Assert.Equal("0", c.getString("core", null, "repositoryformatversion"));
+            Assert.Equal("0", c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
+            Assert.Equal("true", c.getString("core", null, "filemode"));
+            Assert.Equal("true", c.getString("cOrE", null, "fIlEModE"));
+            Assert.Null(c.getString("notavalue", null, "reallyNotAValue"));
         }
 
-        [Test]
+        [Fact]
         public void test006_ReadUglyConfig()
         {
             RepositoryConfig c = db.Config;
@@ -92,26 +91,26 @@ namespace GitSharp.Tests
                    + " to test\n";
             File.WriteAllText(cfg, configStr);
             c.load();
-            Assert.AreEqual("yes", c.getString("core", null, "filemode"));
-            Assert.AreEqual("A U Thor <thor@example.com>", c
+            Assert.Equal("yes", c.getString("core", null, "filemode"));
+            Assert.Equal("A U Thor <thor@example.com>", c
                     .getString("user", null, "email"));
-            Assert.AreEqual("A  Thor \\ \"\t ", c.getString("user", null, "name"));
-            Assert.AreEqual("a many line\ncomment\n to test", c.getString("user", null, "defaultCheckInComment"));
+            Assert.Equal("A  Thor \\ \"\t ", c.getString("user", null, "name"));
+            Assert.Equal("a many line\ncomment\n to test", c.getString("user", null, "defaultCheckInComment"));
             c.save();
             var configStr1 = File.ReadAllText(cfg);
-            Assert.AreEqual(configStr, configStr1);
+            Assert.Equal(configStr, configStr1);
         }
 
-        [Test]
+        [Fact]
         public void test007_Open()
         {
             Repository db2 = new Repository(db.Directory);
-            Assert.AreEqual(db.Directory, db2.Directory);
-            Assert.AreEqual(db.ObjectsDirectory.FullName, db2.ObjectsDirectory.FullName);
-            Assert.AreNotSame(db.Config, db2.Config);
+            Assert.Equal(db.Directory, db2.Directory);
+            Assert.Equal(db.ObjectsDirectory.FullName, db2.ObjectsDirectory.FullName);
+            Assert.NotSame(db.Config, db2.Config);
         }
 
-        [Test]
+        [Fact]
         public void test008_FailOnWrongVersion()
         {
             string cfg = db.Directory.FullName + "/config";
@@ -124,12 +123,12 @@ namespace GitSharp.Tests
             try
             {
                 new Repository(db.Directory);
-                Assert.Fail("incorrectly opened a bad repository");
+                Assert.False(true, "incorrectly opened a bad repository");
             }
             catch (IOException ioe)
             {
-                Assert.IsTrue(ioe.Message.IndexOf("format") > 0);
-                Assert.IsTrue(ioe.Message.IndexOf(badvers) > 0);
+                Assert.True(ioe.Message.IndexOf("format") > 0);
+                Assert.True(ioe.Message.IndexOf(badvers) > 0);
             }
         }
     }

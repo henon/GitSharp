@@ -39,16 +39,15 @@
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Exceptions;
-using NUnit.Framework;
+using Xunit;
 using GitSharp.Util;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class WorkDirCheckoutTest : RepositoryTestCase
     {
         // Methods
-        [Test]
+        [Fact]
         public void testCheckingOutWithConflicts()
         {
             var index = new GitIndex(db);
@@ -61,7 +60,7 @@ namespace GitSharp.Tests
             try
             {
                 new WorkDirCheckout(db, trash, index, index).checkout();
-                Assert.Fail("Should have thrown exception");
+                Assert.False(true, "Should have thrown exception");
             }
             catch (CheckoutConflictException)
             {
@@ -69,8 +68,8 @@ namespace GitSharp.Tests
 
             WorkDirCheckout workDirCheckout = new WorkDirCheckout(db, trash, index, index) { FailOnConflict = false };
             workDirCheckout.checkout();
-            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo")).IsFile());
-            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo/bar/baz/qux")).IsFile());
+            Assert.True(new FileInfo(Path.Combine(trash.FullName, "foo")).IsFile());
+            Assert.True(new FileInfo(Path.Combine(trash.FullName, "foo/bar/baz/qux")).IsFile());
             var index2 = new GitIndex(db);
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "bar")));
             PathUtil.DeleteFile(Path.Combine(trash.FullName, "foo"));
@@ -80,15 +79,15 @@ namespace GitSharp.Tests
 
             workDirCheckout = new WorkDirCheckout(db, trash, index2, index) { FailOnConflict = false };
             workDirCheckout.checkout();
-            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "bar")).IsFile());
-            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo/bar/baz/qux")).IsFile());
-            Assert.IsNotNull(index2.GetEntry("bar"));
-            Assert.IsNotNull(index2.GetEntry("foo/bar/baz/qux"));
-            Assert.IsNull(index2.GetEntry("bar/baz/qux/foo"));
-            Assert.IsNull(index2.GetEntry("foo"));
+            Assert.True(new FileInfo(Path.Combine(trash.FullName, "bar")).IsFile());
+            Assert.True(new FileInfo(Path.Combine(trash.FullName, "foo/bar/baz/qux")).IsFile());
+            Assert.NotNull(index2.GetEntry("bar"));
+            Assert.NotNull(index2.GetEntry("foo/bar/baz/qux"));
+            Assert.Null(index2.GetEntry("bar/baz/qux/foo"));
+            Assert.Null(index2.GetEntry("foo"));
         }
 
-        [Test]
+        [Fact]
         public void testFindingConflicts()
         {
             var index = new GitIndex(db);
@@ -102,8 +101,8 @@ namespace GitSharp.Tests
             var workDirCheckout = new WorkDirCheckout(db, trash, index, index);
             workDirCheckout.PrescanOneTree();
             List<string> conflictingEntries = workDirCheckout.Conflicts;
-            Assert.AreEqual("bar/baz/qux/foo", conflictingEntries[0]);
-            Assert.AreEqual("foo", conflictingEntries[1]);
+            Assert.Equal("bar/baz/qux/foo", conflictingEntries[0]);
+            Assert.Equal("foo", conflictingEntries[1]);
 
             var index2 = new GitIndex(db);
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "bar")));
@@ -115,9 +114,9 @@ namespace GitSharp.Tests
             workDirCheckout.PrescanOneTree();
             conflictingEntries = workDirCheckout.Conflicts;
             List<string> removedEntries = workDirCheckout.Removed;
-            Assert.IsTrue(conflictingEntries.Count == 0);
-            Assert.IsTrue(removedEntries.Contains("bar/baz/qux/foo"));
-            Assert.IsTrue(removedEntries.Contains("foo"));
+            Assert.True(conflictingEntries.Count == 0);
+            Assert.True(removedEntries.Contains("bar/baz/qux/foo"));
+            Assert.True(removedEntries.Contains("foo"));
         }
     }
 }

@@ -39,75 +39,74 @@
 using System;
 using GitSharp;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 using System.Text;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class QuotedStringBourneStyleTest
     {
 	    private static void assertQuote(String in_str, String exp)
         {
 		    String r = QuotedString.BOURNE.quote(in_str);
-		    Assert.AreNotSame(in_str, r);
-		    Assert.IsFalse(in_str.Equals(r));
-		    Assert.AreEqual('\'' + exp + '\'', r);
+		    Assert.NotSame(in_str, r);
+		    Assert.False(in_str.Equals(r));
+		    Assert.Equal('\'' + exp + '\'', r);
 	    }
 
 	    private static void assertDequote(String exp, String in_str)
         {
 		    byte[] b = Constants.encode('\'' + in_str + '\'');
             String r = QuotedString.BOURNE.dequote(b, 0, b.Length);
-		    Assert.AreEqual(exp, r);
+		    Assert.Equal(exp, r);
 	    }
         
-        [Test]
+        [Fact]
 	    public void testQuote_Empty() {
-            Assert.AreEqual("''", QuotedString.BOURNE.quote(""));
+            Assert.Equal("''", QuotedString.BOURNE.quote(""));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testDequote_Empty1() {
-            Assert.AreEqual("", QuotedString.BOURNE.dequote(new byte[0], 0, 0));
+            Assert.Equal("", QuotedString.BOURNE.dequote(new byte[0], 0, 0));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testDequote_Empty2() {
-            Assert.AreEqual("", QuotedString.BOURNE.dequote(new byte[] { (byte)'\'', (byte)'\'' }, 0, 2));
+            Assert.Equal("", QuotedString.BOURNE.dequote(new byte[] { (byte)'\'', (byte)'\'' }, 0, 2));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testDequote_SoleSq() {
-            Assert.AreEqual("", QuotedString.BOURNE.dequote(new byte[] { (byte)'\'' }, 0, 1));
+            Assert.Equal("", QuotedString.BOURNE.dequote(new byte[] { (byte)'\'' }, 0, 1));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testQuote_BareA() {
 		    assertQuote("a", "a");
 	    }
 
-        [Test]
+        [Fact]
 	    public void testDequote_BareA() {
 		    String in_str = "a";
 		    byte[] b = Constants.encode(in_str);
-            Assert.AreEqual(in_str, QuotedString.BOURNE.dequote(b, 0, b.Length));
+            Assert.Equal(in_str, QuotedString.BOURNE.dequote(b, 0, b.Length));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testDequote_BareABCZ_OnlyBC() {
 		    String in_str = "abcz";
 		    byte[] b = Constants.encode(in_str);
 		    int p = in_str.IndexOf('b');
-            Assert.AreEqual("bc", QuotedString.BOURNE.dequote(b, p, p + 2));
+            Assert.Equal("bc", QuotedString.BOURNE.dequote(b, p, p + 2));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testDequote_LoneBackslash() {
 		    assertDequote("\\", "\\");
 	    }
 
-        [Test]
+        [Fact]
 	    public void testQuote_NamedEscapes() {
 		    assertQuote("'", "'\\''");
 		    assertQuote("!", "'\\!'");
@@ -116,7 +115,7 @@ namespace GitSharp.Tests
 		    assertQuote("a!b", "a'\\!'b");
 	    }
 
-        [Test]
+        [Fact]
 	    public void testDequote_NamedEscapes() {
 		    assertDequote("'", "'\\''");
 		    assertDequote("!", "'\\!'");

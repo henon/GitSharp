@@ -1,30 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
+﻿using Xunit;
 using GitSharp.Util;
 
 namespace GitSharp.Tests.Util
 {
-    [TestFixture]
     public class VariousUtilityTests
     {
-        [Test]
+        [Fact]
         public void TestBitCount()
         {
-            Assert.AreEqual(1, (2 << 5).BitCount());
-            Assert.AreEqual(1, 1.BitCount());
-            Assert.AreEqual(2, 3.BitCount());
+            Assert.Equal(1, (2 << 5).BitCount());
+            Assert.Equal(1, 1.BitCount());
+            Assert.Equal(2, 3.BitCount());
         }
 
-        [Test]
+        [Fact]
         public void TestNumberOfTrailingZeros()
         {
-            Assert.AreEqual(0, 1.NumberOfTrailingZeros());
-            Assert.AreEqual(1, 2.NumberOfTrailingZeros());
-            Assert.AreEqual(6, (2 << 5).NumberOfTrailingZeros());
-            Assert.AreEqual(0, ((2 << 5)+1).NumberOfTrailingZeros());
+            Assert.Equal(0, 1.NumberOfTrailingZeros());
+            Assert.Equal(1, 2.NumberOfTrailingZeros());
+            Assert.Equal(6, (2 << 5).NumberOfTrailingZeros());
+            Assert.Equal(0, ((2 << 5)+1).NumberOfTrailingZeros());
         }
 
     }

@@ -42,11 +42,10 @@ using System.Linq;
 using GitSharp.Exceptions;
 using GitSharp.RevWalk;
 using GitSharp.Transport;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-	[TestFixture]
 	public class PackWriterTest : RepositoryTestCase
 	{
 		private static readonly IList<ObjectId> EMPTY_LIST_OBJECT = new List<ObjectId>();
@@ -62,10 +61,9 @@ namespace GitSharp.Tests
 
 		#region Setup/Teardown
 
-		[SetUp]
-		public override void setUp()
+		public override void SetUp()
 		{
-			base.setUp();
+			base.SetUp();
 
 			_os = new MemoryStream();
 			_cos = new PackOutputStream(_os);
@@ -81,7 +79,7 @@ namespace GitSharp.Tests
 		/// Try to pass non-existing object as uninteresting, with ignoring setting.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testIgnoreNonExistingObjects()
 		{
 			ObjectId nonExisting = ObjectId.FromString("0000000000000000000000000000000000000001");
@@ -94,7 +92,7 @@ namespace GitSharp.Tests
 		///	content. No delta reuse here.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testWritePack1()
 		{
 			_writer.ReuseDeltas = false;
@@ -108,17 +106,17 @@ namespace GitSharp.Tests
 		/// The pack with delta bases written as offsets should be smaller.
 		///	</summary>
 		///	<exception cref="Exception"> </exception>
-		[Test]
+		[Fact]
 		public void testWritePack2SizeOffsetsVsRefs()
 		{
 			testWritePack2DeltasReuseRefs();
 			long sizePack2DeltasRefs = _cos.Length;
-			tearDown();
-			setUp();
+			TearDown();
+			SetUp();
 			testWritePack2DeltasReuseOffsets();
 			long sizePack2DeltasOffsets = _cos.Length;
 
-			Assert.IsTrue(sizePack2DeltasRefs > sizePack2DeltasOffsets);
+			Assert.True(sizePack2DeltasRefs > sizePack2DeltasOffsets);
 		}
 
 		///	<summary>
@@ -127,20 +125,20 @@ namespace GitSharp.Tests
 		/// Obviously, the thin pack should be smaller.
 		///	</summary>
 		///	<exception cref="Exception"> </exception>
-		[Test]
+		[Fact]
 		public void testWritePack4SizeThinVsNoThin()
 		{
 			testWritePack4();
 			long sizePack4 = _cos.Length;
-			tearDown();
-			setUp();
+			TearDown();
+			SetUp();
 			testWritePack4ThinPack();
 			long sizePack4Thin = _cos.Length;
 
-			Assert.IsTrue(sizePack4 > sizePack4Thin);
+			Assert.True(sizePack4 > sizePack4Thin);
 		}
 
-		[Test]
+		[Fact]
 		public void testWriteIndex()
 		{
 			_writer.setIndexVersion(2);
@@ -148,11 +146,12 @@ namespace GitSharp.Tests
 
 			// Validate that IndexPack came up with the right CRC32 value.
 			PackIndex idx1 = PackIndex.Open(_indexFile);
-			Assert.IsTrue(idx1 is PackIndexV2);
-			Assert.AreEqual(0x4743F1E4L, idx1.FindCRC32(ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7")));
+			Assert.True(idx1 is PackIndexV2);
+			Assert.Equal(0x4743F1E4L, idx1.FindCRC32(ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7")));
 
 			// Validate that an index written by PackWriter is the same.
-			FileInfo idx2File = new FileInfo(_indexFile.DirectoryName+ ".2");
+			var idx2File = new FileInfo(_indexFile.DirectoryName+ ".2");
+
 			var @is = new FileStream(idx2File.FullName, System.IO.FileMode.CreateNew);
 			try
 			{
@@ -162,17 +161,18 @@ namespace GitSharp.Tests
 			{
 				@is.Close();
 			}
+
 			PackIndex idx2 = PackIndex.Open(idx2File);
-			Assert.IsInstanceOfType(typeof (PackIndexV2), idx2);
-			Assert.AreEqual(idx1.ObjectCount, idx2.ObjectCount);
-			Assert.AreEqual(idx1.Offset64Count, idx2.Offset64Count);
+			Assert.IsType<PackIndexV2>(idx2);
+			Assert.Equal(idx1.ObjectCount, idx2.ObjectCount);
+			Assert.Equal(idx1.Offset64Count, idx2.Offset64Count);
 
 			for (int i = 0; i < idx1.ObjectCount; i++)
 			{
 				ObjectId id = idx1.GetObjectId(i);
-				Assert.AreEqual(id, idx2.GetObjectId(i));
-				Assert.AreEqual(idx1.FindOffset(id), idx2.FindOffset(id));
-				Assert.AreEqual(idx1.FindCRC32(id), idx2.FindCRC32(id));
+				Assert.Equal(id, idx2.GetObjectId(i));
+				Assert.Equal(idx1.FindOffset(id), idx2.FindOffset(id));
+				Assert.Equal(idx1.FindCRC32(id), idx2.FindCRC32(id));
 			}
 		}
 
@@ -197,9 +197,9 @@ namespace GitSharp.Tests
 			                    		ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")
 			                    	};
 
-			Assert.AreEqual(expectedOrder.Length, _writer.getObjectsNumber());
+			Assert.Equal(expectedOrder.Length, _writer.getObjectsNumber());
 			verifyObjectsOrder(expectedOrder);
-			Assert.AreEqual("34be9032ac282b11fa9babdc2b2a93ca996c9c2f", _writer.computeName().Name);
+			Assert.Equal("34be9032ac282b11fa9babdc2b2a93ca996c9c2f", _writer.computeName().Name);
 		}
 
 		private void writeVerifyPack2(bool deltaReuse)
@@ -228,9 +228,9 @@ namespace GitSharp.Tests
 				expectedOrder[5] = temp;
 			}
 
-			Assert.AreEqual(expectedOrder.Length, _writer.getObjectsNumber());
+			Assert.Equal(expectedOrder.Length, _writer.getObjectsNumber());
 			verifyObjectsOrder(expectedOrder);
-			Assert.AreEqual("ed3f96b8327c7c66b0f8f70056129f0769323d86", _writer.computeName().Name);
+			Assert.Equal("ed3f96b8327c7c66b0f8f70056129f0769323d86", _writer.computeName().Name);
 		}
 
 		private void writeVerifyPack4(bool thin)
@@ -248,7 +248,7 @@ namespace GitSharp.Tests
 			                     		ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259")
 			                     	};
 
-			Assert.AreEqual(writtenObjects.Length, _writer.getObjectsNumber());
+			Assert.Equal(writtenObjects.Length, _writer.getObjectsNumber());
 			ObjectId[] expectedObjects;
 			if (thin)
 			{
@@ -262,7 +262,7 @@ namespace GitSharp.Tests
 			}
 
 			verifyObjectsOrder(expectedObjects);
-			Assert.AreEqual("cded4b74176b4456afa456768b2b5aafb41c44fc", _writer.computeName().Name);
+			Assert.Equal("cded4b74176b4456afa456768b2b5aafb41c44fc", _writer.computeName().Name);
 		}
 
 		private void createVerifyOpenPack(IEnumerable<ObjectId> interestings, 
@@ -291,15 +291,11 @@ namespace GitSharp.Tests
 			{
 				@is = new MemoryStream(_os.ToArray());
 				indexer = new IndexPack(db, @is, _packBase);
-				try
-				{
-					indexer.index(new TextProgressMonitor());
-					Assert.Fail("indexer should grumble about missing object");
-				}
-				catch (IOException)
-				{
-					// expected
-				}
+
+				Assert.Throws<IOException>(() =>
+				                           	{
+												indexer.index(new TextProgressMonitor());
+				                           	});
 			}
 
 			@is = new MemoryStream(_os.ToArray());
@@ -323,35 +319,35 @@ namespace GitSharp.Tests
 			int i = 0;
 			foreach (PackIndex.MutableEntry me in entries.Values)
 			{
-				Assert.AreEqual(objectsOrder[i++].ToObjectId(), me.ToObjectId());
+				Assert.Equal(objectsOrder[i++].ToObjectId(), me.ToObjectId());
 			}
 		}
 
 		///	 <summary>
 		/// Test constructor for exceptions, default settings, initialization.
 		/// </summary>
-		[Test]
+		[Fact]
 		public void testContructor()
 		{
-			Assert.AreEqual(false, _writer.DeltaBaseAsOffset);
-			Assert.AreEqual(true, _writer.ReuseDeltas);
-			Assert.AreEqual(true, _writer.ReuseObjects);
-			Assert.AreEqual(0, _writer.getObjectsNumber());
+			Assert.Equal(false, _writer.DeltaBaseAsOffset);
+			Assert.Equal(true, _writer.ReuseDeltas);
+			Assert.Equal(true, _writer.ReuseObjects);
+			Assert.Equal(0, _writer.getObjectsNumber());
 		}
 
 		///	<summary>
 		/// Change default settings and verify them.
 		/// </summary>
-		[Test]
+		[Fact]
 		public void testModifySettings()
 		{
 			_writer.DeltaBaseAsOffset = (true);
 			_writer.ReuseDeltas = (false);
 			_writer.ReuseObjects = (false);
 
-			Assert.AreEqual(true, _writer.DeltaBaseAsOffset);
-			Assert.AreEqual(false, _writer.ReuseDeltas);
-			Assert.AreEqual(false, _writer.ReuseObjects);
+			Assert.Equal(true, _writer.DeltaBaseAsOffset);
+			Assert.Equal(false, _writer.ReuseDeltas);
+			Assert.Equal(false, _writer.ReuseObjects);
 		}
 
 		///	<summary>
@@ -359,13 +355,14 @@ namespace GitSharp.Tests
 		///	setting.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
-		[ExpectedException(typeof (MissingObjectException))]
+		[Fact]
 		public void testNotIgnoreNonExistingObjects()
 		{
-			ObjectId nonExisting = ObjectId.FromString("0000000000000000000000000000000000000001");
-			createVerifyOpenPack(EMPTY_LIST_OBJECT, Enumerable.Repeat(nonExisting, 1), false, false);
-			Assert.Fail("Should have thrown MissingObjectException");
+			Assert.Throws<MissingObjectException>(() =>
+			                                      	{
+														ObjectId nonExisting = ObjectId.FromString("0000000000000000000000000000000000000001");
+														createVerifyOpenPack(EMPTY_LIST_OBJECT, Enumerable.Repeat(nonExisting, 1), false, false);
+			                                      	});
 		}
 
 		///	<summary>
@@ -373,14 +370,14 @@ namespace GitSharp.Tests
 		///	objects and check for correct format.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testWriteEmptyPack1()
 		{
 			createVerifyOpenPack(EMPTY_LIST_OBJECT, EMPTY_LIST_OBJECT, false, false);
 
-			Assert.AreEqual(0, _writer.getObjectsNumber());
-			Assert.AreEqual(0, _pack.ObjectCount);
-			Assert.AreEqual("da39a3ee5e6b4b0d3255bfef95601890afd80709", _writer.computeName().Name);
+			Assert.Equal(0, _writer.getObjectsNumber());
+			Assert.Equal(0, _pack.ObjectCount);
+			Assert.Equal("da39a3ee5e6b4b0d3255bfef95601890afd80709", _writer.computeName().Name);
 		}
 
 		/// <summary>
@@ -388,13 +385,13 @@ namespace GitSharp.Tests
 		/// check for correct format.
 		/// </summary>
 		/// <exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testWriteEmptyPack2()
 		{
 			createVerifyOpenPack(EMPTY_LIST_REVS);
 
-			Assert.AreEqual(0, _writer.getObjectsNumber());
-			Assert.AreEqual(0, _pack.ObjectCount);
+			Assert.Equal(0, _writer.getObjectsNumber());
+			Assert.Equal(0, _pack.ObjectCount);
 		}
 
 		///	<summary>
@@ -402,7 +399,7 @@ namespace GitSharp.Tests
 		///	<seealso cref="#testWritePack1()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public virtual void testWritePack1NoObjectReuse()
 		{
 			_writer.ReuseDeltas = false;
@@ -415,7 +412,7 @@ namespace GitSharp.Tests
 		///	precisely verify content. No delta reuse here.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testWritePack2()
 		{
 			writeVerifyPack2(false);
@@ -427,7 +424,7 @@ namespace GitSharp.Tests
 		///	<seealso cref="#testWritePack2DeltasReuseRefs()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testWritePack2DeltasCRC32Copy()
 		{
 			var packDir = new FileInfo(Path.Combine(db.ObjectsDirectory.FullName, "pack"));
@@ -445,7 +442,7 @@ namespace GitSharp.Tests
 		///	configuration as in <seealso cref="testWritePack2DeltasReuseRefs()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testWritePack2DeltasReuseOffsets()
 		{
 			_writer.DeltaBaseAsOffset = true;
@@ -457,7 +454,7 @@ namespace GitSharp.Tests
 		///	content/preparation as in <seealso cref="testWritePack2()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testWritePack2DeltasReuseRefs()
 		{
 			writeVerifyPack2(true);
@@ -469,17 +466,17 @@ namespace GitSharp.Tests
 		///	be smaller.
 		///	</summary>
 		///	<exception cref="Exception"> </exception>
-		[Test]
+		[Fact]
 		public void testWritePack2SizeDeltasVsNoDeltas()
 		{
 			testWritePack2();
 			long sizePack2NoDeltas = _cos.Length;
-			tearDown();
-			setUp();
+			TearDown();
+			SetUp();
 			testWritePack2DeltasReuseRefs();
 			long sizePack2DeltasRefs = _cos.Length;
 
-			Assert.IsTrue(sizePack2NoDeltas > sizePack2DeltasRefs);
+			Assert.True(sizePack2NoDeltas > sizePack2DeltasRefs);
 		}
 
 		///	<summary>
@@ -489,7 +486,7 @@ namespace GitSharp.Tests
 		///	<exception cref="IOException"> </exception>
 		///	<exception cref="MissingObjectException">
 		///	</exception>
-		[Test]
+		[Fact]
 		public void testWritePack3()
 		{
 			_writer.ReuseDeltas = false;
@@ -512,9 +509,9 @@ namespace GitSharp.Tests
 
 			createVerifyOpenPack(forcedOrderRevs.AsEnumerable());
 
-			Assert.AreEqual(forcedOrder.Length, _writer.getObjectsNumber());
+			Assert.Equal(forcedOrder.Length, _writer.getObjectsNumber());
 			verifyObjectsOrder(forcedOrder);
-			Assert.AreEqual("ed3f96b8327c7c66b0f8f70056129f0769323d86", _writer.computeName().Name);
+			Assert.Equal("ed3f96b8327c7c66b0f8f70056129f0769323d86", _writer.computeName().Name);
 		}
 
 		///	<summary>
@@ -523,7 +520,7 @@ namespace GitSharp.Tests
 		///	write only 1 commit, associated with 1 tree, 1 blob.
 		///	</summary>
 		///	 <exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testWritePack4()
 		{
 			writeVerifyPack4(false);
@@ -534,7 +531,7 @@ namespace GitSharp.Tests
 		///	configuration as in <seealso cref="#testWritePack4()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testWritePack4ThinPack()
 		{
 			writeVerifyPack4(true);

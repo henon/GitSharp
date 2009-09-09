@@ -37,46 +37,45 @@
 
 using System.IO;
 using GitSharp.DirectoryCache;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.TreeWalk
 {
-	[TestFixture]
 	public class PostOrderTreeWalkTest : RepositoryTestCase
 	{
-		[Test]
+		[Fact]
 		public void testInitialize_NoPostOrder()
 		{
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
-			Assert.IsFalse(tw.PostOrderTraversal);
+			Assert.False(tw.PostOrderTraversal);
 		}
 
-		[Test]
+		[Fact]
 		public void testInitialize_TogglePostOrder()
 		{
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
-			Assert.IsFalse(tw.PostOrderTraversal);
+			Assert.False(tw.PostOrderTraversal);
 			tw.PostOrderTraversal = true;
-			Assert.IsTrue(tw.PostOrderTraversal);
+			Assert.True(tw.PostOrderTraversal);
 			tw.PostOrderTraversal = false;
-			Assert.IsFalse(tw.PostOrderTraversal);
+			Assert.False(tw.PostOrderTraversal);
 		}
 
-		[Test]
+		[Fact]
 		public void testResetDoesNotAffectPostOrder()
 		{
 			var tw = new GitSharp.TreeWalk.TreeWalk(db) { PostOrderTraversal = true };
-			Assert.IsTrue(tw.PostOrderTraversal);
+			Assert.True(tw.PostOrderTraversal);
 			tw.reset();
-			Assert.IsTrue(tw.PostOrderTraversal);
+			Assert.True(tw.PostOrderTraversal);
 
 			tw.PostOrderTraversal = false;
-			Assert.IsFalse(tw.PostOrderTraversal);
+			Assert.False(tw.PostOrderTraversal);
 			tw.reset();
-			Assert.IsFalse(tw.PostOrderTraversal);
+			Assert.False(tw.PostOrderTraversal);
 		}
 
-		[Test]
+		[Fact]
 		public void testNoPostOrder()
 		{
 			DirCache tree = DirCache.read(db);
@@ -89,7 +88,7 @@ namespace GitSharp.Tests.TreeWalk
 				b.add(makeFile("q"));
 
 				b.finish();
-				Assert.AreEqual(4, tree.getEntryCount());
+				Assert.Equal(4, tree.getEntryCount());
 			}
 
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
@@ -99,15 +98,15 @@ namespace GitSharp.Tests.TreeWalk
 
 			assertModes("a", FileMode.RegularFile, tw);
 			assertModes("b", FileMode.Tree, tw);
-			Assert.IsTrue(tw.isSubtree());
-			Assert.IsFalse(tw.isPostChildren());
+			Assert.True(tw.isSubtree());
+			Assert.False(tw.isPostChildren());
 			tw.enterSubtree();
 			assertModes("b/c", FileMode.RegularFile, tw);
 			assertModes("b/d", FileMode.RegularFile, tw);
 			assertModes("q", FileMode.RegularFile, tw);
 		}
 
-		[Test]
+		[Fact]
 		public void testWithPostOrder_EnterSubtree()
 		{
 			DirCache tree = DirCache.read(db);
@@ -120,7 +119,7 @@ namespace GitSharp.Tests.TreeWalk
 				b.add(makeFile("q"));
 
 				b.finish();
-				Assert.AreEqual(4, tree.getEntryCount());
+				Assert.Equal(4, tree.getEntryCount());
 			}
 
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
@@ -131,20 +130,20 @@ namespace GitSharp.Tests.TreeWalk
 			assertModes("a", FileMode.RegularFile, tw);
 
 			assertModes("b", FileMode.Tree, tw);
-			Assert.IsTrue(tw.isSubtree());
-			Assert.IsFalse(tw.isPostChildren());
+			Assert.True(tw.isSubtree());
+			Assert.False(tw.isPostChildren());
 			tw.enterSubtree();
 			assertModes("b/c", FileMode.RegularFile, tw);
 			assertModes("b/d", FileMode.RegularFile, tw);
 
 			assertModes("b", FileMode.Tree, tw);
-			Assert.IsTrue(tw.isSubtree());
-			Assert.IsTrue(tw.isPostChildren());
+			Assert.True(tw.isSubtree());
+			Assert.True(tw.isPostChildren());
 
 			assertModes("q", FileMode.RegularFile, tw);
 		}
 
-		[Test]
+		[Fact]
 		public void testWithPostOrder_NoEnterSubtree()
 		{
 			DirCache tree = DirCache.read(db);
@@ -157,7 +156,7 @@ namespace GitSharp.Tests.TreeWalk
 				b.add(makeFile("q"));
 
 				b.finish();
-				Assert.AreEqual(4, tree.getEntryCount());
+				Assert.Equal(4, tree.getEntryCount());
 			}
 
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
@@ -168,8 +167,8 @@ namespace GitSharp.Tests.TreeWalk
 			assertModes("a", FileMode.RegularFile, tw);
 
 			assertModes("b", FileMode.Tree, tw);
-			Assert.IsTrue(tw.isSubtree());
-			Assert.IsFalse(tw.isPostChildren());
+			Assert.True(tw.isSubtree());
+			Assert.False(tw.isPostChildren());
 
 			assertModes("q", FileMode.RegularFile, tw);
 		}
@@ -185,9 +184,9 @@ namespace GitSharp.Tests.TreeWalk
 
 		private static void assertModes(string path, FileMode mode0, GitSharp.TreeWalk.TreeWalk tw)
 		{
-			Assert.IsTrue(tw.next(), "has " + path);
-			Assert.AreEqual(path, tw.getPathString());
-			Assert.AreEqual(mode0, tw.getFileMode(0));
+			Assert.True(tw.next(), "has " + path);
+			Assert.Equal(path, tw.getPathString());
+			Assert.Equal(mode0, tw.getFileMode(0));
 		}
 
 	}

@@ -36,14 +36,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using Xunit;
+using GitSharp.DirectoryCache;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
-    using GitSharp.DirectoryCache;
-    [TestFixture]
     public class DirCacheFindTest : RepositoryTestCase
     {
-        [Test]
+        [Fact]
         public void testEntriesWithin()
         {
             DirCache dc = DirCache.read(db);
@@ -60,33 +60,33 @@ namespace GitSharp.Tests.DirectoryCache
                 b.add(ents[i]);
             b.finish();
 
-            Assert.AreEqual(paths.Length, dc.getEntryCount());
+            Assert.Equal(paths.Length, dc.getEntryCount());
             for (int i = 0; i < ents.Length; i++)
-                Assert.AreSame(ents[i], dc.getEntry(i));
+                Assert.Same(ents[i], dc.getEntry(i));
 
             {
                 DirCacheEntry[] aContents = dc.getEntriesWithin("a");
-                Assert.IsNotNull(aContents);
-                Assert.AreEqual(aLast - aFirst + 1, aContents.Length);
+                Assert.NotNull(aContents);
+                Assert.Equal(aLast - aFirst + 1, aContents.Length);
                 for (int i = aFirst, j = 0; i <= aLast; i++, j++)
-                    Assert.AreSame(ents[i], aContents[j]);
+                    Assert.Same(ents[i], aContents[j]);
             }
             {
                 DirCacheEntry[] aContents = dc.getEntriesWithin("a/");
-                Assert.IsNotNull(aContents);
-                Assert.AreEqual(aLast - aFirst + 1, aContents.Length);
+                Assert.NotNull(aContents);
+                Assert.Equal(aLast - aFirst + 1, aContents.Length);
                 for (int i = aFirst, j = 0; i <= aLast; i++, j++)
-                    Assert.AreSame(ents[i], aContents[j]);
+                    Assert.Same(ents[i], aContents[j]);
             }
 
-            Assert.IsNotNull(dc.getEntriesWithin("a."));
-            Assert.AreEqual(0, dc.getEntriesWithin("a.").Length);
+            Assert.NotNull(dc.getEntriesWithin("a."));
+            Assert.Equal(0, dc.getEntriesWithin("a.").Length);
 
-            Assert.IsNotNull(dc.getEntriesWithin("a0b"));
-            Assert.AreEqual(0, dc.getEntriesWithin("a0b.").Length);
+            Assert.NotNull(dc.getEntriesWithin("a0b"));
+            Assert.Equal(0, dc.getEntriesWithin("a0b.").Length);
 
-            Assert.IsNotNull(dc.getEntriesWithin("zoo"));
-            Assert.AreEqual(0, dc.getEntriesWithin("zoo.").Length);
+            Assert.NotNull(dc.getEntriesWithin("zoo"));
+            Assert.Equal(0, dc.getEntriesWithin("zoo.").Length);
         }
 
     }

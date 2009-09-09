@@ -42,34 +42,32 @@ using GitSharp.Diff;
 using GitSharp.Patch;
 using GitSharp.Tests.Patch;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Diff
 {
-	[TestFixture]
 	public class DiffFormatterReflowTest : BasePatchTest
 	{
 		private RawText a;
 		private RawText b;
 		private FileHeader file;
-		private MemoryStream memoryStream;
-		private DiffFormatter fmt;
+		private readonly MemoryStream memoryStream;
+		private readonly DiffFormatter fmt;
 
-		[SetUp]
-		protected void setUp()
+		public DiffFormatterReflowTest()
 		{
 			memoryStream = new MemoryStream();
 			fmt = new DiffFormatter();
 		}
 
-		[Test]
+		[Fact]
 		public void testNegativeContextFails()
 		{
 			init("X");
-		    AssertHelper.Throws<ArgumentException>(() => fmt.setContext(-1));
+		    Assert.Throws<ArgumentException>(() => fmt.setContext(-1));
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Fact(Skip = "Not working yet")]
 		public void testContext0()
 		{
 			init("X");
@@ -77,7 +75,7 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Fact(Skip = "Not working yet")]
 		public void testContext1()
 		{
 			init("X");
@@ -85,7 +83,7 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Fact(Skip = "Not working yet")]
 		public void testContext3()
 		{
 			init("X");
@@ -93,7 +91,7 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Fact(Skip = "Not working yet")]
 		public void testContext5()
 		{
 			init("X");
@@ -101,7 +99,7 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Fact(Skip = "Not working yet")]
 		public void testContext10()
 		{
 			init("X");
@@ -109,7 +107,7 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Fact(Skip = "Not working yet")]
 		public void testContext100()
 		{
 			init("X");
@@ -117,21 +115,21 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Serialization issues with FileMode.FromBits")]
+		[Fact(Skip = "Serialization issues with FileMode.FromBits")]
 		public void testEmpty1()
 		{
 			init("E");
 			assertFormatted("E.patch");
 		}
 
-		[Test, Ignore("Serialization issues with FileMode.FromBits")]
+		[Fact(Skip = "Serialization issues with FileMode.FromBits")]
 		public void testNoNewLine1()
 		{
 			init("Y");
 			assertFormatted("Y.patch");
 		}
 
-		[Test, Ignore("Serialization issues with FileMode.FromBits")]
+		[Fact(Skip = "Serialization issues with FileMode.FromBits")]
 		public void testNoNewLine2()
 		{
 			init("Z");
@@ -154,7 +152,7 @@ namespace GitSharp.Tests.Diff
 		{
 			fmt.format(memoryStream, file, a, b);
 			string exp = RawParseUtils.decode(readFile(name));
-			Assert.AreEqual(exp, RawParseUtils.decode(memoryStream.ToArray()));
+			Assert.Equal(exp, RawParseUtils.decode(memoryStream.ToArray()));
 		}
 
 		private byte[] readFile(string patchFile)

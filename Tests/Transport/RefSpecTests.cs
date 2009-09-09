@@ -37,219 +37,218 @@
  */
 
 using GitSharp.Transport;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Transport
 {
-    [TestFixture]
     public class RefSpecTests
     {
         
-        [Test]
+        [Fact]
         public void test000_MasterMaster()
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec(sn + ":" + sn);
-            Assert.IsFalse(rs.Force);
-            Assert.IsFalse(rs.Wildcard);
-            Assert.AreEqual(sn, rs.Source);
-            Assert.AreEqual(sn, rs.Destination);
-            Assert.AreEqual(sn + ":" + sn, rs.ToString());
-            Assert.AreEqual(rs, new RefSpec(rs.ToString()));
+            Assert.False(rs.Force);
+            Assert.False(rs.Wildcard);
+            Assert.Equal(sn, rs.Source);
+            Assert.Equal(sn, rs.Destination);
+            Assert.Equal(sn + ":" + sn, rs.ToString());
+            Assert.Equal(rs, new RefSpec(rs.ToString()));
 
             Ref r = new Ref(Ref.Storage.Loose, sn, null);
-            Assert.IsTrue(rs.MatchSource(r));
-            Assert.IsTrue(rs.MatchDestination(r));
-            Assert.AreSame(rs, rs.ExpandFromSource(r));
+            Assert.True(rs.MatchSource(r));
+            Assert.True(rs.MatchDestination(r));
+            Assert.Same(rs, rs.ExpandFromSource(r));
 
             r = new Ref(Ref.Storage.Loose, sn + "-and-more", null);
-            Assert.IsFalse(rs.MatchSource(r));
-            Assert.IsFalse(rs.MatchDestination(r));
+            Assert.False(rs.MatchSource(r));
+            Assert.False(rs.MatchDestination(r));
         }
 
-        [Test]
+        [Fact]
         public void test001_SplitLastColon()
         {
             string lhs = ":m:a:i:n:t";
             string rhs = "refs/heads/maint";
             RefSpec rs = new RefSpec(lhs + ":" + rhs);
-            Assert.IsFalse(rs.Force);
-            Assert.IsFalse(rs.Wildcard);
-            Assert.AreEqual(lhs, rs.Source);
-            Assert.AreEqual(rhs, rs.Destination);
-            Assert.AreEqual(lhs + ":" + rhs, rs.ToString());
-            Assert.AreEqual(rs, new RefSpec(rs.ToString()));
+            Assert.False(rs.Force);
+            Assert.False(rs.Wildcard);
+            Assert.Equal(lhs, rs.Source);
+            Assert.Equal(rhs, rs.Destination);
+            Assert.Equal(lhs + ":" + rhs, rs.ToString());
+            Assert.Equal(rs, new RefSpec(rs.ToString()));
         }
 
-        [Test]
+        [Fact]
         public void test002_ForceMasterMaster()
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec("+" + sn + ":" + sn);
-            Assert.IsTrue(rs.Force);
-            Assert.IsFalse(rs.Wildcard);
-            Assert.AreEqual(sn, rs.Source);
-            Assert.AreEqual(sn, rs.Destination);
-            Assert.AreEqual("+" + sn + ":" + sn, rs.ToString());
-            Assert.AreEqual(rs, new RefSpec(rs.ToString()));
+            Assert.True(rs.Force);
+            Assert.False(rs.Wildcard);
+            Assert.Equal(sn, rs.Source);
+            Assert.Equal(sn, rs.Destination);
+            Assert.Equal("+" + sn + ":" + sn, rs.ToString());
+            Assert.Equal(rs, new RefSpec(rs.ToString()));
 
             Ref r = new Ref(Ref.Storage.Loose, sn, null);
-            Assert.IsTrue(rs.MatchSource(r));
-            Assert.IsTrue(rs.MatchDestination(r));
-            Assert.AreSame(rs, rs.ExpandFromSource(r));
+            Assert.True(rs.MatchSource(r));
+            Assert.True(rs.MatchDestination(r));
+            Assert.Same(rs, rs.ExpandFromSource(r));
 
             r = new Ref(Ref.Storage.Loose, sn + "-and-more", null);
-            Assert.IsFalse(rs.MatchSource(r));
-            Assert.IsFalse(rs.MatchDestination(r));
+            Assert.False(rs.MatchSource(r));
+            Assert.False(rs.MatchDestination(r));
         }
 
-        [Test]
+        [Fact]
         public void test003_Master()
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec(sn);
-            Assert.IsFalse(rs.Force);
-            Assert.IsFalse(rs.Wildcard);
-            Assert.AreEqual(sn, rs.Source);
-            Assert.IsNull(rs.Destination);
-            Assert.AreEqual(sn, rs.ToString());
-            Assert.AreEqual(rs, new RefSpec(rs.ToString()));
+            Assert.False(rs.Force);
+            Assert.False(rs.Wildcard);
+            Assert.Equal(sn, rs.Source);
+            Assert.Null(rs.Destination);
+            Assert.Equal(sn, rs.ToString());
+            Assert.Equal(rs, new RefSpec(rs.ToString()));
 
             Ref r = new Ref(Ref.Storage.Loose, sn, null);
-            Assert.IsTrue(rs.MatchSource(r));
-            Assert.IsFalse(rs.MatchDestination(r));
-            Assert.AreSame(rs, rs.ExpandFromSource(r));
+            Assert.True(rs.MatchSource(r));
+            Assert.False(rs.MatchDestination(r));
+            Assert.Same(rs, rs.ExpandFromSource(r));
 
             r = new Ref(Ref.Storage.Loose, sn + "-and-more", null);
-            Assert.IsFalse(rs.MatchSource(r));
-            Assert.IsFalse(rs.MatchDestination(r));
+            Assert.False(rs.MatchSource(r));
+            Assert.False(rs.MatchDestination(r));
         }
 
-        [Test]
+        [Fact]
         public void test004_ForceMaster()
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec("+" + sn);
-            Assert.IsTrue(rs.Force);
-            Assert.IsFalse(rs.Wildcard);
-            Assert.AreEqual(sn, rs.Source);
-            Assert.IsNull(rs.Destination);
-            Assert.AreEqual("+" + sn, rs.ToString());
-            Assert.AreEqual(rs, new RefSpec(rs.ToString()));
+            Assert.True(rs.Force);
+            Assert.False(rs.Wildcard);
+            Assert.Equal(sn, rs.Source);
+            Assert.Null(rs.Destination);
+            Assert.Equal("+" + sn, rs.ToString());
+            Assert.Equal(rs, new RefSpec(rs.ToString()));
 
             Ref r = new Ref(Ref.Storage.Loose, sn, null);
-            Assert.IsTrue(rs.MatchSource(r));
-            Assert.IsFalse(rs.MatchDestination(r));
-            Assert.AreSame(rs, rs.ExpandFromSource(r));
+            Assert.True(rs.MatchSource(r));
+            Assert.False(rs.MatchDestination(r));
+            Assert.Same(rs, rs.ExpandFromSource(r));
 
             r = new Ref(Ref.Storage.Loose, sn + "-and-more", null);
-            Assert.IsFalse(rs.MatchSource(r));
-            Assert.IsFalse(rs.MatchDestination(r));
+            Assert.False(rs.MatchSource(r));
+            Assert.False(rs.MatchDestination(r));
         }
 
-        [Test]
+        [Fact]
         public void test005_DeleteMaster()
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec(":" + sn);
-            Assert.IsFalse(rs.Force);
-            Assert.IsFalse(rs.Wildcard);
-            Assert.AreEqual(sn, rs.Destination);
-            Assert.IsNull(rs.Source);
-            Assert.AreEqual(":" + sn, rs.ToString());
-            Assert.AreEqual(rs, new RefSpec(rs.ToString()));
+            Assert.False(rs.Force);
+            Assert.False(rs.Wildcard);
+            Assert.Equal(sn, rs.Destination);
+            Assert.Null(rs.Source);
+            Assert.Equal(":" + sn, rs.ToString());
+            Assert.Equal(rs, new RefSpec(rs.ToString()));
 
             Ref r = new Ref(Ref.Storage.Loose, sn, null);
-            Assert.IsFalse(rs.MatchSource(r));
-            Assert.IsTrue(rs.MatchDestination(r));
-            Assert.AreSame(rs, rs.ExpandFromSource(r));
+            Assert.False(rs.MatchSource(r));
+            Assert.True(rs.MatchDestination(r));
+            Assert.Same(rs, rs.ExpandFromSource(r));
 
             r = new Ref(Ref.Storage.Loose, sn + "-and-more", null);
-            Assert.IsFalse(rs.MatchSource(r));
-            Assert.IsFalse(rs.MatchDestination(r));
+            Assert.False(rs.MatchSource(r));
+            Assert.False(rs.MatchDestination(r));
         }
 
-        [Test]
+        [Fact]
         public void test006_ForceRemotesOrigin()
         {
             string srcn = "refs/heads/*";
             string dstn = "refs/remotes/origin/*";
             RefSpec rs = new RefSpec("+" + srcn + ":" + dstn);
-            Assert.IsTrue(rs.Force);
-            Assert.IsTrue(rs.Wildcard);
-            Assert.AreEqual(srcn, rs.Source);
-            Assert.AreEqual(dstn, rs.Destination);
-            Assert.AreEqual("+" + srcn + ":" + dstn, rs.ToString());
-            Assert.AreEqual(rs, new RefSpec(rs.ToString()));
+            Assert.True(rs.Force);
+            Assert.True(rs.Wildcard);
+            Assert.Equal(srcn, rs.Source);
+            Assert.Equal(dstn, rs.Destination);
+            Assert.Equal("+" + srcn + ":" + dstn, rs.ToString());
+            Assert.Equal(rs, new RefSpec(rs.ToString()));
 
             Ref r;
             RefSpec expanded;
 
             r = new Ref(Ref.Storage.Loose, "refs/heads/master", null);
-            Assert.IsTrue(rs.MatchSource(r));
-            Assert.IsFalse(rs.MatchDestination(r));
+            Assert.True(rs.MatchSource(r));
+            Assert.False(rs.MatchDestination(r));
             expanded = rs.ExpandFromSource(r);
-            Assert.AreNotSame(rs, expanded);
-            Assert.IsTrue(expanded.Force);
-            Assert.IsFalse(expanded.Wildcard);
-            Assert.AreEqual(r.Name, expanded.Source);
-            Assert.AreEqual("refs/remotes/origin/master", expanded.Destination);
+            Assert.NotSame(rs, expanded);
+            Assert.True(expanded.Force);
+            Assert.False(expanded.Wildcard);
+            Assert.Equal(r.Name, expanded.Source);
+            Assert.Equal("refs/remotes/origin/master", expanded.Destination);
 
             r = new Ref(Ref.Storage.Loose, "refs/remotes/origin/next", null);
-            Assert.IsFalse(rs.MatchSource(r));
-            Assert.IsTrue(rs.MatchDestination(r));
+            Assert.False(rs.MatchSource(r));
+            Assert.True(rs.MatchDestination(r));
 
             r = new Ref(Ref.Storage.Loose, "refs/tags/v1.0", null);
-            Assert.IsFalse(rs.MatchSource(r));
-            Assert.IsFalse(rs.MatchDestination(r));
+            Assert.False(rs.MatchSource(r));
+            Assert.False(rs.MatchDestination(r));
         }
 
-        [Test]
+        [Fact]
         public void test007_CreateEmpty()
         {
             RefSpec rs = new RefSpec();
-            Assert.IsFalse(rs.Force);
-            Assert.IsFalse(rs.Wildcard);
-            Assert.AreEqual("HEAD", rs.Source);
-            Assert.IsNull(rs.Destination);
-            Assert.AreEqual("HEAD", rs.ToString());
+            Assert.False(rs.Force);
+            Assert.False(rs.Wildcard);
+            Assert.Equal("HEAD", rs.Source);
+            Assert.Null(rs.Destination);
+            Assert.Equal("HEAD", rs.ToString());
         }
 
-        [Test]
+        [Fact]
         public void test008_SetForceUpdate()
         {
             string s = "refs/heads/*:refs/remotes/origin/*";
             RefSpec a = new RefSpec(s);
-            Assert.IsFalse(a.Force);
+            Assert.False(a.Force);
             RefSpec b = a.SetForce(true);
-            Assert.AreNotSame(a, b);
-            Assert.IsFalse(a.Force);
-            Assert.IsTrue(b.Force);
-            Assert.AreEqual(s, a.ToString());
-            Assert.AreEqual("+" + s, b.ToString());
+            Assert.NotSame(a, b);
+            Assert.False(a.Force);
+            Assert.True(b.Force);
+            Assert.Equal(s, a.ToString());
+            Assert.Equal("+" + s, b.ToString());
         }
 
-        [Test]
+        [Fact]
         public void test009_SetSource()
         {
             RefSpec a = new RefSpec();
             RefSpec b = a.SetSource("refs/heads/master");
-            Assert.AreNotSame(a, b);
-            Assert.AreEqual("HEAD", a.ToString());
-            Assert.AreEqual("refs/heads/master", b.ToString());
+            Assert.NotSame(a, b);
+            Assert.Equal("HEAD", a.ToString());
+            Assert.Equal("refs/heads/master", b.ToString());
         }
 
-        [Test]
+        [Fact]
         public void test010_SetDestination()
         {
             RefSpec a = new RefSpec();
             RefSpec b = a.SetDestination("refs/heads/master");
-            Assert.AreNotSame(a, b);
-            Assert.AreEqual("HEAD", a.ToString());
-            Assert.AreEqual("HEAD:refs/heads/master", b.ToString());
+            Assert.NotSame(a, b);
+            Assert.Equal("HEAD", a.ToString());
+            Assert.Equal("HEAD:refs/heads/master", b.ToString());
         }
 
-        [Test]
+        [Fact]
         public void test010_SetDestination_SourceNull()
         {
             RefSpec a = new RefSpec();
@@ -257,46 +256,46 @@ namespace GitSharp.Tests.Transport
 
             b = a.SetDestination("refs/heads/master");
             b = b.SetSource(null);
-            Assert.AreNotSame(a, b);
-            Assert.AreEqual("HEAD", a.ToString());
-            Assert.AreEqual(":refs/heads/master", b.ToString());
+            Assert.NotSame(a, b);
+            Assert.Equal("HEAD", a.ToString());
+            Assert.Equal(":refs/heads/master", b.ToString());
         }
 
-        [Test]
+        [Fact]
         public void test011_SetSourceDestination()
         {
             RefSpec a = new RefSpec();
             RefSpec b;
             b = a.SetSourceDestination("refs/heads/*", "refs/remotes/origin/*");
-            Assert.AreNotSame(a, b);
-            Assert.AreEqual("HEAD", a.ToString());
-            Assert.AreEqual("refs/heads/*:refs/remotes/origin/*", b.ToString());
+            Assert.NotSame(a, b);
+            Assert.Equal("HEAD", a.ToString());
+            Assert.Equal("refs/heads/*:refs/remotes/origin/*", b.ToString());
         }
 
-        [Test]
+        [Fact]
         public void test012_ExpandFromDestination_NonWildcard()
         {
             string src = "refs/heads/master";
             string dst = "refs/remotes/origin/master";
             RefSpec a = new RefSpec(src + ":" + dst);
             RefSpec r = a.ExpandFromDestination(dst);
-            Assert.AreSame(a, r);
-            Assert.IsFalse(r.Wildcard);
-            Assert.AreEqual(src, r.Source);
-            Assert.AreEqual(dst, r.Destination);
+            Assert.Same(a, r);
+            Assert.False(r.Wildcard);
+            Assert.Equal(src, r.Source);
+            Assert.Equal(dst, r.Destination);
         }
 
-        [Test]
+        [Fact]
         public void test012_ExpandFromDestination_Wildcard()
         {
             string src = "refs/heads/master";
             string dst = "refs/remotes/origin/master";
             RefSpec a = new RefSpec("refs/heads/*:refs/remotes/origin/*");
             RefSpec r = a.ExpandFromDestination(dst);
-            Assert.AreNotSame(a, r);
-            Assert.IsFalse(r.Wildcard);
-            Assert.AreEqual(src, r.Source);
-            Assert.AreEqual(dst, r.Destination);
+            Assert.NotSame(a, r);
+            Assert.False(r.Wildcard);
+            Assert.Equal(src, r.Source);
+            Assert.Equal(dst, r.Destination);
         }
 
     }

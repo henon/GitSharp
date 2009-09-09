@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 using GitSharp.Patch;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Patch
 {
@@ -23,7 +23,7 @@ namespace GitSharp.Tests.Patch
 			}
 			catch(IOException)
 			{
-				Assert.Fail("No " + patchFile + " test vector");
+				Assert.False(true, "No " + patchFile + " test vector");
 				return null; // Never happens
 			}
 		}

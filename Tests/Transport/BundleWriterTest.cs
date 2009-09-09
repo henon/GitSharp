@@ -42,18 +42,17 @@ using System.Linq;
 using GitSharp.Exceptions;
 using GitSharp.RevWalk;
 using GitSharp.Transport;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Transport
 {
-    [TestFixture]
     public class BundleWriterTest : RepositoryTestCase
     {
         #region Test methods
 
         #region testWrite0
 
-        [Test]
+        [Fact]
         public void testWrite0()
         {
             // Create a tiny bundle, (well one of) the first commits only
@@ -67,9 +66,9 @@ namespace GitSharp.Tests.Transport
             Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/firstcommit");
 
             // We expect firstcommit to appear by id
-            Assert.AreEqual("42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", advertisedRef.ObjectId.Name);
+            Assert.Equal("42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", advertisedRef.ObjectId.Name);
             // ..and by name as the bundle created a new ref
-            Assert.AreEqual("42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", newRepo.Resolve(("refs/heads/firstcommit")).Name);
+            Assert.Equal("42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", newRepo.Resolve(("refs/heads/firstcommit")).Name);
         }
 
         #endregion
@@ -82,7 +81,7 @@ namespace GitSharp.Tests.Transport
 
         #region testWrite1
 
-        [Test]
+        [Fact]
         public void testWrite1()
         {
             byte[] bundle;
@@ -97,9 +96,9 @@ namespace GitSharp.Tests.Transport
             FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
             Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/aa");
 
-            Assert.AreEqual(db.Resolve("a").Name, advertisedRef.ObjectId.Name);
-            Assert.AreEqual(db.Resolve("a").Name, newRepo.Resolve("refs/heads/aa").Name);
-            Assert.IsNull(newRepo.Resolve("refs/heads/a"));
+            Assert.Equal(db.Resolve("a").Name, advertisedRef.ObjectId.Name);
+            Assert.Equal(db.Resolve("a").Name, newRepo.Resolve("refs/heads/aa").Name);
+            Assert.Null(newRepo.Resolve("refs/heads/a"));
 
             // Next an incremental bundle
             bundle = makeBundle(
@@ -109,21 +108,21 @@ namespace GitSharp.Tests.Transport
 
             fetchResult = fetchFromBundle(newRepo, bundle);
             advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/cc");
-            Assert.AreEqual(db.Resolve("c").Name, advertisedRef.ObjectId.Name);
-            Assert.AreEqual(db.Resolve("c").Name, newRepo.Resolve("refs/heads/cc").Name);
-            Assert.IsNull(newRepo.Resolve("refs/heads/c"));
-            Assert.IsNull(newRepo.Resolve("refs/heads/a")); // still unknown
+            Assert.Equal(db.Resolve("c").Name, advertisedRef.ObjectId.Name);
+            Assert.Equal(db.Resolve("c").Name, newRepo.Resolve("refs/heads/cc").Name);
+            Assert.Null(newRepo.Resolve("refs/heads/c"));
+            Assert.Null(newRepo.Resolve("refs/heads/a")); // still unknown
 
             try
             {
                 // Check that we actually needed the first bundle
                 Repository newRepo2 = createNewEmptyRepo();
                 fetchResult = fetchFromBundle(newRepo2, bundle);
-                Assert.Fail("We should not be able to fetch from bundle with prerequisites that are not fulfilled");
+                Assert.False(true, "We should not be able to fetch from bundle with prerequisites that are not fulfilled");
             }
             catch (MissingBundlePrerequisiteException e)
             {
-                Assert.IsTrue(e.Message.IndexOf(db.Resolve("refs/heads/a").Name) >= 0);
+                Assert.True(e.Message.IndexOf(db.Resolve("refs/heads/a").Name) >= 0);
             }
         }
 

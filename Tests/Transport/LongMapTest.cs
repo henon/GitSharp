@@ -37,64 +37,62 @@
 
 using System;
 using System.Collections.Generic;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Transport
 {
-	[TestFixture]
 	public class LongMapTest
 	{
-		private LongMap<long> _map;
+		private readonly LongMap<long> _map;
 
-		[SetUp]
-		public void setUp()
+		public LongMapTest()
 		{
 			_map = new LongMap<long>();
 		}
 
-		[Test]
+		[Fact]
 		public void testEmptyMap()
 		{
-			Assert.IsFalse(_map.ContainsKey(0));
-			Assert.IsFalse(_map.ContainsKey(1));
+			Assert.False(_map.ContainsKey(0));
+			Assert.False(_map.ContainsKey(1));
 
-			AssertHelper.Throws<KeyNotFoundException>(() => { var number = _map[0]; });
-			AssertHelper.Throws<KeyNotFoundException>(() => { var number = _map[1]; });
+			Assert.Throws<KeyNotFoundException>(() => { var number = _map[0]; });
+			Assert.Throws<KeyNotFoundException>(() => { var number = _map[1]; });
 
-			Assert.IsFalse(_map.Remove(0));
-			Assert.IsFalse(_map.Remove(1));
+			Assert.False(_map.Remove(0));
+			Assert.False(_map.Remove(1));
 		}
 
-		[Test]
+		[Fact]
 		public void testInsertMinValue()
 		{
 			long min = long.MinValue;
-			Assert.AreEqual(min, _map[long.MinValue] = min);
-			Assert.IsTrue(_map.ContainsKey(long.MinValue));
-			Assert.AreEqual(min, _map[long.MinValue]);
-			Assert.IsFalse(_map.ContainsKey(int.MinValue));
+			Assert.Equal(min, _map[long.MinValue] = min);
+			Assert.True(_map.ContainsKey(long.MinValue));
+			Assert.Equal(min, _map[long.MinValue]);
+			Assert.False(_map.ContainsKey(int.MinValue));
 		}
 
-		[Test]
+		[Fact]
 		public void testReplaceMaxValue()
 		{
 			long min = Convert.ToInt64(long.MaxValue);
 			long one = Convert.ToInt64(1);
-			Assert.AreEqual(min, _map[long.MaxValue] = min);
-			Assert.AreEqual(min, _map[long.MaxValue]);
-			Assert.AreEqual(one, _map[long.MaxValue] = one);
+			Assert.Equal(min, _map[long.MaxValue] = min);
+			Assert.Equal(min, _map[long.MaxValue]);
+			Assert.Equal(one, _map[long.MaxValue] = one);
 		}
 
-		[Test]
+		[Fact]
 		public void testRemoveOne()
 		{
 			const long start = 1;
-			Assert.AreEqual(1, _map[start] = Convert.ToInt64(start));
-			Assert.IsTrue(_map.Remove(start));
-			Assert.IsFalse(_map.ContainsKey(start));
+			Assert.Equal(1, _map[start] = Convert.ToInt64(start));
+			Assert.True(_map.Remove(start));
+			Assert.False(_map.ContainsKey(start));
 		}
 
-		[Test]
+		[Fact]
 		public void testRemoveCollision1()
 		{
 			// This test relies upon the fact that we always >>> 1 the value
@@ -103,16 +101,16 @@ namespace GitSharp.Tests.Transport
 			// the 2nd put at the top of the chain, so removing the 1st will
 			// cause a different code path.
 			//
-			Assert.AreEqual(0, _map[0] = Convert.ToInt64(0));
-			Assert.AreEqual(1, _map[1] = Convert.ToInt64(1));
-			Assert.AreEqual(Convert.ToInt64(0), _map[0]);
-			Assert.IsTrue(_map.Remove(0));
+			Assert.Equal(0, _map[0] = Convert.ToInt64(0));
+			Assert.Equal(1, _map[1] = Convert.ToInt64(1));
+			Assert.Equal(Convert.ToInt64(0), _map[0]);
+			Assert.True(_map.Remove(0));
 
-			Assert.IsFalse(_map.ContainsKey(0));
-			Assert.IsTrue(_map.ContainsKey(1));
+			Assert.False(_map.ContainsKey(0));
+			Assert.True(_map.ContainsKey(1));
 		}
 
-		[Test]
+		[Fact]
 		public void testRemoveCollision2()
 		{
 			// This test relies upon the fact that we always >>> 1 the value
@@ -121,38 +119,38 @@ namespace GitSharp.Tests.Transport
 			// the 2nd put at the top of the chain, so removing the 2nd will
 			// cause a different code path.
 			//
-			Assert.AreEqual(0, _map[0] = Convert.ToInt64(0));
-			Assert.AreEqual(1, _map[1] = Convert.ToInt64(1));
-			Assert.AreEqual(Convert.ToInt64(1), _map[1]);
-			Assert.IsTrue(_map.Remove(1));
+			Assert.Equal(0, _map[0] = Convert.ToInt64(0));
+			Assert.Equal(1, _map[1] = Convert.ToInt64(1));
+			Assert.Equal(Convert.ToInt64(1), _map[1]);
+			Assert.True(_map.Remove(1));
 
-			Assert.IsTrue(_map.ContainsKey(0));
-			Assert.IsFalse(_map.ContainsKey(1));
+			Assert.True(_map.ContainsKey(0));
+			Assert.False(_map.ContainsKey(1));
 		}
 
-		[Test]
+		[Fact]
 		public void testSmallMap()
 		{
 			const long start = 12;
 			const long n = 8;
 			for (long i = start; i < start + n; i++)
-				Assert.AreEqual(i, _map[i] = Convert.ToInt64(i));
+				Assert.Equal(i, _map[i] = Convert.ToInt64(i));
 			for (long i = start; i < start + n; i++)
-				Assert.AreEqual(Convert.ToInt64(i), _map[i]);
+				Assert.Equal(Convert.ToInt64(i), _map[i]);
 		}
 
-		[Test]
+		[Fact]
 		public void testLargeMap()
 		{
 			const long start = int.MaxValue;
 			const long n = 100000;
 			for (long i = start; i < start + n; i++)
 			{
-				Assert.AreEqual(i, _map[i] = Convert.ToInt64(i));
+				Assert.Equal(i, _map[i] = Convert.ToInt64(i));
 			}
 			for (long i = start; i < start + n; i++)
 			{
-				Assert.AreEqual(Convert.ToInt64(i), _map[i]);
+				Assert.Equal(Convert.ToInt64(i), _map[i]);
 			}
 		}
 	}

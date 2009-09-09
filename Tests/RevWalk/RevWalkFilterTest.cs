@@ -37,16 +37,15 @@
 
 using GitSharp.RevWalk.Filter;
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public class RevWalkFilterTest : RevWalkTestCase
     {
         private static readonly MyAll MY_ALL = new MyAll();
 
-        [Test]
+        [Fact]
         public void testFilter_ALL()
         {
             RevCommit a = commit();
@@ -58,10 +57,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c, rw.next());
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_Negate_ALL()
         {
             RevCommit a = commit();
@@ -70,10 +69,10 @@ namespace GitSharp.Tests.RevWalk
 
             rw.setRevFilter(RevFilter.ALL.negate());
             markStart(c);
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_NOT_ALL()
         {
             RevCommit a = commit();
@@ -82,10 +81,10 @@ namespace GitSharp.Tests.RevWalk
 
             rw.setRevFilter(NotRevFilter.create(RevFilter.ALL));
             markStart(c);
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_NONE()
         {
             RevCommit a = commit();
@@ -94,10 +93,10 @@ namespace GitSharp.Tests.RevWalk
 
             rw.setRevFilter(RevFilter.NONE);
             markStart(c);
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_NOT_NONE()
         {
             RevCommit a = commit();
@@ -109,10 +108,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c, rw.next());
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_ALL_And_NONE()
         {
             RevCommit a = commit();
@@ -121,10 +120,10 @@ namespace GitSharp.Tests.RevWalk
 
             rw.setRevFilter(AndRevFilter.create(RevFilter.ALL, RevFilter.NONE));
             markStart(c);
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_NONE_And_ALL()
         {
             RevCommit a = commit();
@@ -133,10 +132,10 @@ namespace GitSharp.Tests.RevWalk
 
             rw.setRevFilter(AndRevFilter.create(RevFilter.NONE, RevFilter.ALL));
             markStart(c);
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_ALL_Or_NONE()
         {
             RevCommit a = commit();
@@ -148,10 +147,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c, rw.next());
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_NONE_Or_ALL()
         {
             RevCommit a = commit();
@@ -163,10 +162,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c, rw.next());
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_MY_ALL_And_NONE()
         {
             RevCommit a = commit();
@@ -175,10 +174,10 @@ namespace GitSharp.Tests.RevWalk
 
             rw.setRevFilter(AndRevFilter.create(MY_ALL, RevFilter.NONE));
             markStart(c);
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_NONE_And_MY_ALL()
         {
             RevCommit a = commit();
@@ -187,10 +186,10 @@ namespace GitSharp.Tests.RevWalk
 
             rw.setRevFilter(AndRevFilter.create(RevFilter.NONE, MY_ALL));
             markStart(c);
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_MY_ALL_Or_NONE()
         {
             RevCommit a = commit();
@@ -202,10 +201,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c, rw.next());
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_NONE_Or_MY_ALL()
         {
             RevCommit a = commit();
@@ -217,10 +216,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c, rw.next());
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testFilter_NO_MERGES()
         {
             RevCommit a = commit();
@@ -237,7 +236,7 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c1, rw.next());
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
         private class MyAll : RevFilter

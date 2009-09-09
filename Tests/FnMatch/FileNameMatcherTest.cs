@@ -39,288 +39,287 @@
 using System;
 using GitSharp.Exceptions;
 using GitSharp.FnMatch;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.FileNameMatch
 {
-    [TestFixture]
     public class FileNameMatcherTest
     {
         private void assertMatch(string pattern, string input, bool matchExpected, bool appendCanMatchExpected)
         {
             FileNameMatcher matcher = new FileNameMatcher(pattern, null);
             matcher.Append(input);
-            Assert.AreEqual(matchExpected, matcher.IsMatch());
-            Assert.AreEqual(appendCanMatchExpected, matcher.CanAppendMatch());
+            Assert.Equal(matchExpected, matcher.IsMatch());
+            Assert.Equal(appendCanMatchExpected, matcher.CanAppendMatch());
         }
 
         private void assertFileNameMatch(string pattern, string input, char excludedCharacter, bool matchExpected, bool appendCanMatchExpected)
         {
             FileNameMatcher matcher = new FileNameMatcher(pattern, excludedCharacter);
             matcher.Append(input);
-            Assert.AreEqual(matchExpected, matcher.IsMatch());
-            Assert.AreEqual(appendCanMatchExpected, matcher.CanAppendMatch());
+            Assert.Equal(matchExpected, matcher.IsMatch());
+            Assert.Equal(appendCanMatchExpected, matcher.CanAppendMatch());
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimplePatternCase0()
         {
             assertMatch("", "", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimplePatternCase1()
         {
             assertMatch("ab", "a", false, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimplePatternCase2()
         {
             assertMatch("ab", "ab", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimplePatternCase3()
         {
             assertMatch("ab", "ac", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimplePatternCase4()
         {
             assertMatch("ab", "abc", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleWirdcardCase0()
         {
             assertMatch("?", "a", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleWildCardCase1()
         {
             assertMatch("??", "a", false, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleWildCardCase2()
         {
             assertMatch("??", "ab", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleWildCardCase3()
         {
             assertMatch("??", "abc", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleStarCase0()
         {
             assertMatch("*", "", true, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleStarCase1()
         {
             assertMatch("*", "a", true, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleStarCase2()
         {
             assertMatch("*", "ab", true, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSimpleStarCase0()
         {
             assertMatch("a*b", "a", false, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSimpleStarCase1()
         {
             assertMatch("a*c", "ac", true, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSimpleStarCase2()
         {
             assertMatch("a*c", "ab", false, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSimpleStarCase3()
         {
             assertMatch("a*c", "abc", true, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testManySolutionsCase0()
         {
             assertMatch("a*a*a", "aaa", true, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testManySolutionsCase1()
         {
             assertMatch("a*a*a", "aaaa", true, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testManySolutionsCase2()
         {
             assertMatch("a*a*a", "ababa", true, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testManySolutionsCase3()
         {
             assertMatch("a*a*a", "aaaaaaaa", true, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testManySolutionsCase4()
         {
             assertMatch("a*a*a", "aaaaaaab", false, true);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleGroupCase0()
         {
             assertMatch("[ab]", "a", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleGroupCase1()
         {
             assertMatch("[ab]", "b", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleGroupCase2()
         {
             assertMatch("[ab]", "ab", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleGroupRangeCase0()
         {
             assertMatch("[b-d]", "a", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleGroupRangeCase1()
         {
             assertMatch("[b-d]", "b", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleGroupRangeCase2()
         {
             assertMatch("[b-d]", "c", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleGroupRangeCase3()
         {
             assertMatch("[b-d]", "d", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleGroupRangeCase4()
         {
             assertMatch("[b-d]", "e", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testVerySimpleGroupRangeCase5()
         {
             assertMatch("[b-d]", "-", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testTwoGroupsCase0()
         {
             assertMatch("[b-d][ab]", "bb", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testTwoGroupsCase1()
         {
             assertMatch("[b-d][ab]", "ca", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testTwoGroupsCase2()
         {
             assertMatch("[b-d][ab]", "fa", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testTwoGroupsCase3()
         {
             assertMatch("[b-d][ab]", "bc", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testTwoRangesInOneGroupCase0()
         {
             assertMatch("[b-ce-e]", "a", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testTwoRangesInOneGroupCase1()
         {
             assertMatch("[b-ce-e]", "b", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testTwoRangesInOneGroupCase2()
         {
             assertMatch("[b-ce-e]", "c", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testTwoRangesInOneGroupCase3()
         {
             assertMatch("[b-ce-e]", "d", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testTwoRangesInOneGroupCase4()
         {
             assertMatch("[b-ce-e]", "e", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testTwoRangesInOneGroupCase5()
         {
             assertMatch("[b-ce-e]", "f", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testIncompleteRangesInOneGroupCase0()
         {
             assertMatch("a[b-]", "ab", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testIncompleteRangesInOneGroupCase1()
         {
             assertMatch("a[b-]", "ac", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testIncompleteRangesInOneGroupCase2()
         {
             assertMatch("a[b-]", "a-", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testCombinedRangesInOneGroupCase0()
         {
             assertMatch("[a-c-e]", "b", true, false);
@@ -330,62 +329,62 @@ namespace GitSharp.Tests.FileNameMatch
         /// The c belongs to the range a-c. "-e" is no valid range so d should not 	match.
         ///	</summary>
         ///	<exception cref="Exception">for some reasons </exception>
-        [Test]
+        [Fact]
         public virtual void testCombinedRangesInOneGroupCase1()
         {
             assertMatch("[a-c-e]", "d", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testCombinedRangesInOneGroupCase2()
         {
             assertMatch("[a-c-e]", "e", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testInversedGroupCase0()
         {
             assertMatch("[!b-c]", "a", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testInversedGroupCase1()
         {
             assertMatch("[!b-c]", "b", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testInversedGroupCase2()
         {
             assertMatch("[!b-c]", "c", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testInversedGroupCase3()
         {
             assertMatch("[!b-c]", "d", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testAlphaGroupCase0()
         {
             assertMatch("[[:alpha:]]", "d", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testAlphaGroupCase1()
         {
             assertMatch("[[:alpha:]]", ":", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testAlphaGroupCase2()
         {
             // \u00f6 = 'o' with dots on it
             assertMatch("[[:alpha:]]", "\u00f6", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void test2AlphaGroupsCase0()
         {
             // \u00f6 = 'o' with dots on it
@@ -393,512 +392,511 @@ namespace GitSharp.Tests.FileNameMatch
             assertMatch("[[:alpha:]][[:alpha:]]", "a1", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testAlnumGroupCase0()
         {
             assertMatch("[[:alnum:]]", "a", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testAlnumGroupCase1()
         {
             assertMatch("[[:alnum:]]", "1", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testAlnumGroupCase2()
         {
             assertMatch("[[:alnum:]]", ":", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testBlankGroupCase0()
         {
             assertMatch("[[:blank:]]", " ", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testBlankGroupCase1()
         {
             assertMatch("[[:blank:]]", "\t", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testBlankGroupCase2()
         {
             assertMatch("[[:blank:]]", "\r", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testBlankGroupCase3()
         {
             assertMatch("[[:blank:]]", "\n", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testBlankGroupCase4()
         {
             assertMatch("[[:blank:]]", "a", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testCntrlGroupCase0()
         {
             assertMatch("[[:cntrl:]]", "a", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testCntrlGroupCase1()
         {
             assertMatch("[[:cntrl:]]", Convert.ToString((char)7), true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testDigitGroupCase0()
         {
             assertMatch("[[:digit:]]", "0", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testDigitGroupCase1()
         {
             assertMatch("[[:digit:]]", "5", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testDigitGroupCase2()
         {
             assertMatch("[[:digit:]]", "9", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testDigitGroupCase3()
         {
             // \u06f9 = EXTENDED ARABIC-INDIC DIGIT NINE
             assertMatch("[[:digit:]]", "\u06f9", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testDigitGroupCase4()
         {
             assertMatch("[[:digit:]]", "a", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testDigitGroupCase5()
         {
             assertMatch("[[:digit:]]", "]", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testGraphGroupCase0()
         {
             assertMatch("[[:graph:]]", "]", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testGraphGroupCase1()
         {
             assertMatch("[[:graph:]]", "a", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testGraphGroupCase2()
         {
             assertMatch("[[:graph:]]", ".", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testGraphGroupCase3()
         {
             assertMatch("[[:graph:]]", "0", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testGraphGroupCase4()
         {
             assertMatch("[[:graph:]]", " ", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testGraphGroupCase5()
         {
             // \u00f6 = 'o' with dots on it
             assertMatch("[[:graph:]]", "\u00f6", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testLowerGroupCase0()
         {
             assertMatch("[[:lower:]]", "a", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testLowerGroupCase1()
         {
             assertMatch("[[:lower:]]", "h", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testLowerGroupCase2()
         {
             assertMatch("[[:lower:]]", "A", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testLowerGroupCase3()
         {
             assertMatch("[[:lower:]]", "H", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testLowerGroupCase4()
         {
             // \u00e4 = small 'a' with dots on it
             assertMatch("[[:lower:]]", "\u00e4", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testLowerGroupCase5()
         {
             assertMatch("[[:lower:]]", ".", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testPrintGroupCase0()
         {
             assertMatch("[[:print:]]", "]", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testPrintGroupCase1()
         {
             assertMatch("[[:print:]]", "a", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testPrintGroupCase2()
         {
             assertMatch("[[:print:]]", ".", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testPrintGroupCase3()
         {
             assertMatch("[[:print:]]", "0", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testPrintGroupCase4()
         {
             assertMatch("[[:print:]]", " ", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testPrintGroupCase5()
         {
             // \u00f6 = 'o' with dots on it
             assertMatch("[[:print:]]", "\u00f6", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testPunctGroupCase0()
         {
             assertMatch("[[:punct:]]", ".", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testPunctGroupCase1()
         {
             assertMatch("[[:punct:]]", "@", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testPunctGroupCase2()
         {
             assertMatch("[[:punct:]]", " ", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testPunctGroupCase3()
         {
             assertMatch("[[:punct:]]", "a", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpaceGroupCase0()
         {
             assertMatch("[[:space:]]", " ", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpaceGroupCase1()
         {
             assertMatch("[[:space:]]", "\t", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpaceGroupCase2()
         {
             assertMatch("[[:space:]]", "\r", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpaceGroupCase3()
         {
             assertMatch("[[:space:]]", "\n", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpaceGroupCase4()
         {
             assertMatch("[[:space:]]", "a", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testUpperGroupCase0()
         {
             assertMatch("[[:upper:]]", "a", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testUpperGroupCase1()
         {
             assertMatch("[[:upper:]]", "h", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testUpperGroupCase2()
         {
             assertMatch("[[:upper:]]", "A", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testUpperGroupCase3()
         {
             assertMatch("[[:upper:]]", "H", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testUpperGroupCase4()
         {
             // \u00c4 = 'A' with dots on it
             assertMatch("[[:upper:]]", "\u00c4", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testUpperGroupCase5()
         {
             assertMatch("[[:upper:]]", ".", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testXDigitGroupCase0()
         {
             assertMatch("[[:xdigit:]]", "a", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testXDigitGroupCase1()
         {
             assertMatch("[[:xdigit:]]", "d", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testXDigitGroupCase2()
         {
             assertMatch("[[:xdigit:]]", "f", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testXDigitGroupCase3()
         {
             assertMatch("[[:xdigit:]]", "0", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testXDigitGroupCase4()
         {
             assertMatch("[[:xdigit:]]", "5", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testXDigitGroupCase5()
         {
             assertMatch("[[:xdigit:]]", "9", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testXDigitGroupCase6()
         {
             assertMatch("[[:xdigit:]]", "۹", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testXDigitGroupCase7()
         {
             assertMatch("[[:xdigit:]]", ".", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testWordroupCase0()
         {
             assertMatch("[[:word:]]", "g", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testWordroupCase1()
         {
             // \u00f6 = 'o' with dots on it
             assertMatch("[[:word:]]", "\u00f6", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testWordroupCase2()
         {
             assertMatch("[[:word:]]", "5", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testWordroupCase3()
         {
             assertMatch("[[:word:]]", "_", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testWordroupCase4()
         {
             assertMatch("[[:word:]]", " ", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testWordroupCase5()
         {
             assertMatch("[[:word:]]", ".", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testMixedGroupCase0()
         {
             assertMatch("[A[:lower:]C3-5]", "A", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testMixedGroupCase1()
         {
             assertMatch("[A[:lower:]C3-5]", "C", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testMixedGroupCase2()
         {
             assertMatch("[A[:lower:]C3-5]", "e", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testMixedGroupCase3()
         {
             assertMatch("[A[:lower:]C3-5]", "3", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testMixedGroupCase4()
         {
             assertMatch("[A[:lower:]C3-5]", "4", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testMixedGroupCase5()
         {
             assertMatch("[A[:lower:]C3-5]", "5", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testMixedGroupCase6()
         {
             assertMatch("[A[:lower:]C3-5]", "B", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testMixedGroupCase7()
         {
             assertMatch("[A[:lower:]C3-5]", "2", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testMixedGroupCase8()
         {
             assertMatch("[A[:lower:]C3-5]", "6", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testMixedGroupCase9()
         {
             assertMatch("[A[:lower:]C3-5]", ".", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpecialGroupCase0()
         {
             assertMatch("[[]", "[", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpecialGroupCase1()
         {
             assertMatch("[]]", "]", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpecialGroupCase2()
         {
             assertMatch("[]a]", "]", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpecialGroupCase3()
         {
             assertMatch("[a[]", "[", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpecialGroupCase4()
         {
             assertMatch("[a[]", "a", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpecialGroupCase5()
         {
             assertMatch("[!]]", "]", false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpecialGroupCase6()
         {
             assertMatch("[!]]", "x", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpecialGroupCase7()
         {
             assertMatch("[:]]", ":]", true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testSpecialGroupCase8()
         {
             assertMatch("[:]]", ":", false, true);
         }
 
-        [Test]
-        [ExpectedException(typeof(NoClosingBracketException))]
+        [Fact]
         public virtual void testSpecialGroupCase9()
         {
-            assertMatch("[[:]", ":", true, true);
+        	Assert.Throws<NoClosingBracketException>(() => assertMatch("[[:]", ":", true, true));
         }
 
-        [Test]
+        [Fact]
         public virtual void testUnsupportedGroupCase0()
         {
             try
@@ -907,11 +905,11 @@ namespace GitSharp.Tests.FileNameMatch
             }
             catch (InvalidPatternException e)
             {
-                Assert.IsTrue(e.Message.Contains("[=a=]"));
+                Assert.True(e.Message.Contains("[=a=]"));
             }
         }
 
-        [Test]
+        [Fact]
         public virtual void testUnsupportedGroupCase1()
         {
             try
@@ -920,66 +918,66 @@ namespace GitSharp.Tests.FileNameMatch
             }
             catch (InvalidPatternException e)
             {
-                Assert.IsTrue(e.Message.Contains("[.a.]"));
+                Assert.True(e.Message.Contains("[.a.]"));
             }
         }
 
-        [Test]
+        [Fact]
         public virtual void testFilePathSimpleCase()
         {
             assertFileNameMatch("a/b", "a/b", '/', true, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testFilePathCase0()
         {
             assertFileNameMatch("a*b", "a/b", '/', false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testFilePathCase1()
         {
             assertFileNameMatch("a?b", "a/b", '/', false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testFilePathCase2()
         {
             assertFileNameMatch("a*b", "a\\b", '\\', false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testFilePathCase3()
         {
             assertFileNameMatch("a?b", "a\\b", '\\', false, false);
         }
 
-        [Test]
+        [Fact]
         public virtual void testReset()
         {
             const string pattern = "helloworld";
 
             FileNameMatcher matcher = new FileNameMatcher(pattern, null);
             matcher.Append("helloworld");
-            Assert.AreEqual(true, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
+            Assert.Equal(true, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
             matcher.Reset();
             matcher.Append("hello");
-            Assert.AreEqual(false, matcher.IsMatch());
-            Assert.AreEqual(true, matcher.CanAppendMatch());
+            Assert.Equal(false, matcher.IsMatch());
+            Assert.Equal(true, matcher.CanAppendMatch());
             matcher.Append("world");
-            Assert.AreEqual(true, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
+            Assert.Equal(true, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
             matcher.Append("to much");
-            Assert.AreEqual(false, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
+            Assert.Equal(false, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
             matcher.Reset();
             matcher.Append("helloworld");
-            Assert.AreEqual(true, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
+            Assert.Equal(true, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
         }
 
-        [Test]
+        [Fact]
         public virtual void testCreateMatcherForSuffix()
         {
             const string pattern = "helloworld";
@@ -988,33 +986,33 @@ namespace GitSharp.Tests.FileNameMatch
             matcher.Append("hello");
 
             FileNameMatcher childMatcher = matcher.CreateMatcherForSuffix();
-            Assert.AreEqual(false, matcher.IsMatch());
-            Assert.AreEqual(true, matcher.CanAppendMatch());
-            Assert.AreEqual(false, childMatcher.IsMatch());
-            Assert.AreEqual(true, childMatcher.CanAppendMatch());
+            Assert.Equal(false, matcher.IsMatch());
+            Assert.Equal(true, matcher.CanAppendMatch());
+            Assert.Equal(false, childMatcher.IsMatch());
+            Assert.Equal(true, childMatcher.CanAppendMatch());
             matcher.Append("world");
-            Assert.AreEqual(true, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
-            Assert.AreEqual(false, childMatcher.IsMatch());
-            Assert.AreEqual(true, childMatcher.CanAppendMatch());
+            Assert.Equal(true, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
+            Assert.Equal(false, childMatcher.IsMatch());
+            Assert.Equal(true, childMatcher.CanAppendMatch());
             childMatcher.Append("world");
-            Assert.AreEqual(true, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
-            Assert.AreEqual(true, childMatcher.IsMatch());
-            Assert.AreEqual(false, childMatcher.CanAppendMatch());
+            Assert.Equal(true, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
+            Assert.Equal(true, childMatcher.IsMatch());
+            Assert.Equal(false, childMatcher.CanAppendMatch());
             childMatcher.Reset();
-            Assert.AreEqual(true, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
-            Assert.AreEqual(false, childMatcher.IsMatch());
-            Assert.AreEqual(true, childMatcher.CanAppendMatch());
+            Assert.Equal(true, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
+            Assert.Equal(false, childMatcher.IsMatch());
+            Assert.Equal(true, childMatcher.CanAppendMatch());
             childMatcher.Append("world");
-            Assert.AreEqual(true, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
-            Assert.AreEqual(true, childMatcher.IsMatch());
-            Assert.AreEqual(false, childMatcher.CanAppendMatch());
+            Assert.Equal(true, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
+            Assert.Equal(true, childMatcher.IsMatch());
+            Assert.Equal(false, childMatcher.CanAppendMatch());
         }
 
-        [Test]
+        [Fact]
         public virtual void testCopyConstructor()
         {
             const string pattern = "helloworld";
@@ -1023,30 +1021,30 @@ namespace GitSharp.Tests.FileNameMatch
             matcher.Append("hello");
 
             FileNameMatcher copy = new FileNameMatcher(matcher);
-            Assert.AreEqual(false, matcher.IsMatch());
-            Assert.AreEqual(true, matcher.CanAppendMatch());
-            Assert.AreEqual(false, copy.IsMatch());
-            Assert.AreEqual(true, copy.CanAppendMatch());
+            Assert.Equal(false, matcher.IsMatch());
+            Assert.Equal(true, matcher.CanAppendMatch());
+            Assert.Equal(false, copy.IsMatch());
+            Assert.Equal(true, copy.CanAppendMatch());
             matcher.Append("world");
-            Assert.AreEqual(true, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
-            Assert.AreEqual(false, copy.IsMatch());
-            Assert.AreEqual(true, copy.CanAppendMatch());
+            Assert.Equal(true, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
+            Assert.Equal(false, copy.IsMatch());
+            Assert.Equal(true, copy.CanAppendMatch());
             copy.Append("world");
-            Assert.AreEqual(true, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
-            Assert.AreEqual(true, copy.IsMatch());
-            Assert.AreEqual(false, copy.CanAppendMatch());
+            Assert.Equal(true, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
+            Assert.Equal(true, copy.IsMatch());
+            Assert.Equal(false, copy.CanAppendMatch());
             copy.Reset();
-            Assert.AreEqual(true, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
-            Assert.AreEqual(false, copy.IsMatch());
-            Assert.AreEqual(true, copy.CanAppendMatch());
+            Assert.Equal(true, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
+            Assert.Equal(false, copy.IsMatch());
+            Assert.Equal(true, copy.CanAppendMatch());
             copy.Append("helloworld");
-            Assert.AreEqual(true, matcher.IsMatch());
-            Assert.AreEqual(false, matcher.CanAppendMatch());
-            Assert.AreEqual(true, copy.IsMatch());
-            Assert.AreEqual(false, copy.CanAppendMatch());
+            Assert.Equal(true, matcher.IsMatch());
+            Assert.Equal(false, matcher.CanAppendMatch());
+            Assert.Equal(true, copy.IsMatch());
+            Assert.Equal(false, copy.CanAppendMatch());
         }
     }
 }

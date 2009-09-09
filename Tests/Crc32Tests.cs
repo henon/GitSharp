@@ -1,23 +1,23 @@
-﻿using GitSharp.Util;
-using NUnit.Framework;
+﻿using System;
+using GitSharp.Util;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class Crc32Tests
     {
-        [Test]
+        [Fact]
         public void Tests()
         {
             var crc = new Crc32();
-            Assert.AreEqual(0, crc.Value);
+			Assert.Equal(0, Convert.ToInt32(crc.Value));
             crc.Update(145);
-            Assert.AreEqual(1426738271, crc.Value);
+            Assert.Equal(1426738271, Convert.ToInt32(crc.Value));
             crc.Update(123456789);
-            Assert.AreEqual(1147030863, crc.Value);
+			Assert.Equal(1147030863, Convert.ToInt32(crc.Value));
             var data = new byte[] { 145, 234, 156 };
             crc.Update(data);
-            Assert.AreEqual(3967437022, crc.Value);
+            Assert.Equal(3967437022, crc.Value);
         }
     }
 }

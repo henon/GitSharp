@@ -36,11 +36,10 @@
  */
 
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public class ObjectWalkTest : RevWalkTestCase
     {
         protected ObjectWalk objw;
@@ -50,14 +49,14 @@ namespace GitSharp.Tests.RevWalk
             return objw = new ObjectWalk(db);
         }
 
-        [Test]
+        [Fact]
         public void testNoCommits()
         {
-            Assert.IsNull(objw.next());
-            Assert.IsNull(objw.nextObject());
+            Assert.Null(objw.next());
+            Assert.Null(objw.nextObject());
         }
 
-        [Test]
+        [Fact]
         public void testTwoCommitsEmptyTree()
         {
             RevCommit a = commit();
@@ -66,13 +65,13 @@ namespace GitSharp.Tests.RevWalk
 
             assertCommit(b, objw.next());
             assertCommit(a, objw.next());
-            Assert.IsNull(objw.next());
+            Assert.Null(objw.next());
 
-            Assert.AreSame(emptyTree, objw.nextObject());
-            Assert.IsNull(objw.nextObject());
+            Assert.Same(emptyTree, objw.nextObject());
+            Assert.Null(objw.nextObject());
         }
 
-        [Test]
+        [Fact]
         public void testOneCommitOneTreeTwoBlob()
         {
             RevBlob f0 = blob("0");
@@ -82,15 +81,15 @@ namespace GitSharp.Tests.RevWalk
             markStart(a);
 
             assertCommit(a, objw.next());
-            Assert.IsNull(objw.next());
+            Assert.Null(objw.next());
 
-            Assert.AreSame(t, objw.nextObject());
-            Assert.AreSame(f0, objw.nextObject());
-            Assert.AreSame(f1, objw.nextObject());
-            Assert.IsNull(objw.nextObject());
+            Assert.Same(t, objw.nextObject());
+            Assert.Same(f0, objw.nextObject());
+            Assert.Same(f1, objw.nextObject());
+            Assert.Null(objw.nextObject());
         }
 
-        [Test]
+        [Fact]
         public void testTwoCommitTwoTreeTwoBlob()
         {
             RevBlob f0 = blob("0");
@@ -104,19 +103,19 @@ namespace GitSharp.Tests.RevWalk
 
             assertCommit(b, objw.next());
             assertCommit(a, objw.next());
-            Assert.IsNull(objw.next());
+            Assert.Null(objw.next());
 
-            Assert.AreSame(tb, objw.nextObject());
-            Assert.AreSame(f2, objw.nextObject());
-            Assert.AreSame(f1, objw.nextObject());
+            Assert.Same(tb, objw.nextObject());
+            Assert.Same(f2, objw.nextObject());
+            Assert.Same(f1, objw.nextObject());
 
-            Assert.AreSame(ta, objw.nextObject());
-            Assert.AreSame(f0, objw.nextObject());
+            Assert.Same(ta, objw.nextObject());
+            Assert.Same(f0, objw.nextObject());
 
-            Assert.IsNull(objw.nextObject());
+            Assert.Null(objw.nextObject());
         }
 
-        [Test]
+        [Fact]
         public void testTwoCommitDeepTree1()
         {
             RevBlob f0 = blob("0");
@@ -129,22 +128,22 @@ namespace GitSharp.Tests.RevWalk
 
             assertCommit(b, objw.next());
             assertCommit(a, objw.next());
-            Assert.IsNull(objw.next());
+            Assert.Null(objw.next());
 
-            Assert.AreSame(tb, objw.nextObject());
-            Assert.AreSame(get(tb, "a"), objw.nextObject());
-            Assert.AreSame(get(tb, "a/b"), objw.nextObject());
-            Assert.AreSame(f1, objw.nextObject());
+            Assert.Same(tb, objw.nextObject());
+            Assert.Same(get(tb, "a"), objw.nextObject());
+            Assert.Same(get(tb, "a/b"), objw.nextObject());
+            Assert.Same(f1, objw.nextObject());
 
-            Assert.AreSame(ta, objw.nextObject());
-            Assert.AreSame(get(ta, "a"), objw.nextObject());
-            Assert.AreSame(get(ta, "a/b"), objw.nextObject());
-            Assert.AreSame(f0, objw.nextObject());
+            Assert.Same(ta, objw.nextObject());
+            Assert.Same(get(ta, "a"), objw.nextObject());
+            Assert.Same(get(ta, "a/b"), objw.nextObject());
+            Assert.Same(f0, objw.nextObject());
 
-            Assert.IsNull(objw.nextObject());
+            Assert.Null(objw.nextObject());
         }
 
-        [Test]
+        [Fact]
         public void testTwoCommitDeepTree2()
         {
             RevBlob f1 = blob("1");
@@ -156,22 +155,22 @@ namespace GitSharp.Tests.RevWalk
 
             assertCommit(b, objw.next());
             assertCommit(a, objw.next());
-            Assert.IsNull(objw.next());
+            Assert.Null(objw.next());
 
-            Assert.AreSame(tb, objw.nextObject());
-            Assert.AreSame(get(tb, "a"), objw.nextObject());
-            Assert.AreSame(get(tb, "a/b"), objw.nextObject());
-            Assert.AreSame(f1, objw.nextObject());
-            Assert.AreSame(get(tb, "a/c"), objw.nextObject());
+            Assert.Same(tb, objw.nextObject());
+            Assert.Same(get(tb, "a"), objw.nextObject());
+            Assert.Same(get(tb, "a/b"), objw.nextObject());
+            Assert.Same(f1, objw.nextObject());
+            Assert.Same(get(tb, "a/c"), objw.nextObject());
 
-            Assert.AreSame(ta, objw.nextObject());
-            Assert.AreSame(get(ta, "a"), objw.nextObject());
-            Assert.AreSame(get(ta, "a/b"), objw.nextObject());
+            Assert.Same(ta, objw.nextObject());
+            Assert.Same(get(ta, "a"), objw.nextObject());
+            Assert.Same(get(ta, "a/b"), objw.nextObject());
 
-            Assert.IsNull(objw.nextObject());
+            Assert.Null(objw.nextObject());
         }
 
-        [Test]
+        [Fact]
         public void testCull()
         {
             RevBlob f1 = blob("1");
@@ -195,17 +194,17 @@ namespace GitSharp.Tests.RevWalk
 
             assertCommit(b2, objw.next());
             assertCommit(b1, objw.next());
-            Assert.IsNull(objw.next());
+            Assert.Null(objw.next());
 
-            Assert.IsTrue(a.has(RevFlag.UNINTERESTING));
-            Assert.IsTrue(ta.has(RevFlag.UNINTERESTING));
-            Assert.IsTrue(f1.has(RevFlag.UNINTERESTING));
-            Assert.IsTrue(f3.has(RevFlag.UNINTERESTING));
+            Assert.True(a.has(RevFlag.UNINTERESTING));
+            Assert.True(ta.has(RevFlag.UNINTERESTING));
+            Assert.True(f1.has(RevFlag.UNINTERESTING));
+            Assert.True(f3.has(RevFlag.UNINTERESTING));
 
-            Assert.AreSame(tb, objw.nextObject());
-            Assert.AreSame(get(tb, "a"), objw.nextObject());
-            Assert.AreSame(f2, objw.nextObject());
-            Assert.IsNull(objw.nextObject());
+            Assert.Same(tb, objw.nextObject());
+            Assert.Same(get(tb, "a"), objw.nextObject());
+            Assert.Same(f2, objw.nextObject());
+            Assert.Null(objw.nextObject());
         }
     }
 }

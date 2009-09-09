@@ -42,13 +42,12 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.IO;
-using NUnit.Framework;
+using Xunit;
 using System.Diagnostics;
 using GitSharp.Util;
 
 namespace GitSharp.Tests
 {
-
     /**
      * Base class for most unit tests.
      *
@@ -62,7 +61,7 @@ namespace GitSharp.Tests
      * with precision, though hinting using <em><see cref="java.lang.System#gc}</em>
      * often helps.
      */
-    public abstract class RepositoryTestCase
+    public abstract class RepositoryTestCase : IDisposable
     {
         /// <summary>
         /// Simulates the reading of system variables and properties.
@@ -83,16 +82,15 @@ namespace GitSharp.Tests
         protected bool packedGitMMAP;
         protected Repository db;
 
-        static RepositoryTestCase()
-        {
-            GitSharpSystemReader.SetInstance(SystemReader);
-            Microsoft.Win32.SystemEvents.SessionEnded += (o, args) => // cleanup
-                                                         recursiveDelete(trashParent, false, null, false);
-        }
-
         protected RepositoryTestCase()
         {
+			GitSharpSystemReader.SetInstance(SystemReader);
+			Microsoft.Win32.SystemEvents.SessionEnded += (o, args) => // cleanup
+														 recursiveDelete(trashParent, false, null, false);
+
             _repositoriesToClose = new List<Repository>();
+
+			SetUp();
         }
 
         /// <summary>
@@ -112,8 +110,7 @@ namespace GitSharp.Tests
 
         #region Test setup / teardown
 
-        [SetUp]
-        public virtual void setUp()
+        public virtual void SetUp()
         {
             Configure();
 
@@ -161,8 +158,7 @@ namespace GitSharp.Tests
             SystemReader.Values[Constants.GIT_COMMITTER_EMAIL_KEY] = Constants.GIT_COMMITTER_EMAIL_KEY;
         }
 
-        [TearDown]
-        public virtual void tearDown()
+    	protected virtual void TearDown()
         {
             db.Close();
             foreach (var r in _repositoriesToClose)
@@ -257,7 +253,7 @@ namespace GitSharp.Tests
 
             if (failOnError)
             {
-                Assert.Fail(msg);
+                Assert.False(true, msg);
             }
             else
             {
@@ -300,7 +296,7 @@ namespace GitSharp.Tests
                 throw new IOException("Internal error reading file data from " + f);
             }
 
-            Assert.AreEqual(checkData, readData);
+            Assert.Equal(checkData, readData);
         }
 
         /// <summary>
@@ -312,13 +308,26 @@ namespace GitSharp.Tests
         protected Repository createNewEmptyRepo()
         {
             var newTestRepo = new DirectoryInfo(trashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) + "/.git");
-            Assert.IsFalse(newTestRepo.Exists);
+            Assert.False(newTestRepo.Exists);
             var newRepo = new Repository(newTestRepo);
             newRepo.Create();
             string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
             _repositoriesToClose.Add(newRepo);
             return newRepo;
         }
+
+		#region Implementation of IDisposable
+
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
+		/// <filterpriority>2</filterpriority>
+		public void Dispose()
+		{
+			TearDown();
+		}
+
+		#endregion
 
         #region Nested Types
 

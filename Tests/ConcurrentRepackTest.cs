@@ -41,28 +41,27 @@ using System.IO;
 using System.Threading;
 using GitSharp.Exceptions;
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class ConcurrentRepackTest : RepositoryTestCase
     {
-        public override void setUp()
+        public override void SetUp()
         {
             var windowCacheConfig = new WindowCacheConfig { PackedGitOpenFiles = 1 };
             WindowCache.reconfigure(windowCacheConfig);
-            base.setUp();
+            base.SetUp();
         }
 
-        public override void tearDown()
+    	protected override void TearDown()
         {
-            base.tearDown();
+            base.TearDown();
             var windowCacheConfig = new WindowCacheConfig();
             WindowCache.reconfigure(windowCacheConfig);
         }
 
-        [Test]
+        [Fact]
         public void testObjectInNewPack()
         {
             // Create a new object in a new pack, and test that it is present.
@@ -70,10 +69,10 @@ namespace GitSharp.Tests
             Repository eden = createNewEmptyRepo();
             RevObject o1 = WriteBlob(eden, "o1");
             Pack(eden, o1);
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
+            Assert.Equal(o1.Name, Parse(o1).Name);
         }
 
-        [Test]
+        [Fact]
         public void testObjectMovedToNewPack1()
         {
             // Create an object and pack it. Then remove that pack and put the
@@ -83,7 +82,7 @@ namespace GitSharp.Tests
             Repository eden = createNewEmptyRepo();
             RevObject o1 = WriteBlob(eden, "o1");
             FileInfo[] out1 = Pack(eden, o1);
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
+            Assert.Equal(o1.Name, Parse(o1).Name);
 
             RevObject o2 = WriteBlob(eden, "o2");
             Pack(eden, o2, o1);
@@ -96,11 +95,11 @@ namespace GitSharp.Tests
             // Now here is the interesting thing. Will git figure the new
             // object exists in the new pack, and not the old one.
             //
-            Assert.AreEqual(o2.Name, Parse(o2).Name);
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
+            Assert.Equal(o2.Name, Parse(o2).Name);
+            Assert.Equal(o1.Name, Parse(o1).Name);
         }
 
-        [Test]
+        [Fact]
         public void testObjectMovedWithinPack()
         {
             // Create an object and pack it.
@@ -108,7 +107,7 @@ namespace GitSharp.Tests
             Repository eden = createNewEmptyRepo();
             RevObject o1 = WriteBlob(eden, "o1");
             FileInfo[] out1 = Pack(eden, o1);
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
+            Assert.Equal(o1.Name, Parse(o1).Name);
 
             // Force close the old pack.
             //
@@ -128,11 +127,11 @@ namespace GitSharp.Tests
             // Try the old name, then the new name. The old name should cause the
             // pack to reload when it opens and the index and pack mismatch.
             //
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
-            Assert.AreEqual(o2.Name, Parse(o2).Name);
+            Assert.Equal(o1.Name, Parse(o1).Name);
+            Assert.Equal(o2.Name, Parse(o2).Name);
         }
 
-        [Test]
+        [Fact]
         public void testObjectMovedToNewPack2()
         {
             // Create an object and pack it. Then remove that pack and put the
@@ -142,10 +141,10 @@ namespace GitSharp.Tests
             Repository eden = createNewEmptyRepo();
             RevObject o1 = WriteBlob(eden, "o1");
             FileInfo[] out1 = Pack(eden, o1);
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
+            Assert.Equal(o1.Name, Parse(o1).Name);
 
             ObjectLoader load1 = db.OpenBlob(o1);
-            Assert.IsNotNull(load1);
+            Assert.NotNull(load1);
 
             RevObject o2 = WriteBlob(eden, "o2");
             Pack(eden, o2, o1);
@@ -160,16 +159,16 @@ namespace GitSharp.Tests
             // pack is gone, but the object still exists.
             //
             ObjectLoader load2 = db.OpenBlob(o1);
-            Assert.IsNotNull(load2);
-            Assert.AreNotSame(load1, load2);
+            Assert.NotNull(load2);
+            Assert.NotSame(load1, load2);
 
             byte[] data2 = load2.CachedBytes;
             byte[] data1 = load1.CachedBytes;
-            Assert.IsNotNull(data2);
-            Assert.IsNotNull(data1);
-            Assert.AreNotSame(data1, data2); // cache should be per-pack, not per object
-            Assert.IsTrue(Equals(data1, data2));
-            Assert.AreEqual(load2.Type, load1.Type);
+            Assert.NotNull(data2);
+            Assert.NotNull(data1);
+            Assert.NotSame(data1, data2); // cache should be per-pack, not per object
+            Assert.True(Equals(data1, data2));
+            Assert.Equal(load2.Type, load1.Type);
         }
 
         private static void WhackCache()
@@ -244,7 +243,7 @@ namespace GitSharp.Tests
                 catch (IOException)
                 {
                 }
-                Assert.IsFalse(File.Exists(fi.FullName), fi + " was not removed");
+                Assert.False(File.Exists(fi.FullName), fi + " was not removed");
             }
 
             Touch(begin, list[0].Directory);
@@ -281,7 +280,7 @@ namespace GitSharp.Tests
             try
             {
                 Parse(id);
-                Assert.Fail("Object " + id.Name + " should not exist in test repository");
+                Assert.False(true, "Object " + id.Name + " should not exist in test repository");
             }
             catch (MissingObjectException)
             {

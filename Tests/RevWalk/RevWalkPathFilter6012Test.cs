@@ -41,7 +41,7 @@ using System.Reflection;
 using System.Text;
 using GitSharp.RevWalk;
 using GitSharp.TreeWalk.Filter;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
@@ -51,16 +51,15 @@ namespace GitSharp.Tests.RevWalk
 	// full history and non-full history for a path, something we
 	// don't quite yet have a distiction for in JGit.
 	//
-	[TestFixture]
 	public class RevWalkPathFilter6012Test : RevWalkTestCase
 	{
 		private const string pA = "pA", pF = "pF", pE = "pE";
 		private RevCommit a, b, c, d, e, f, g, h, i;
 		private Dictionary<RevCommit, string> byName;
 
-		public override void setUp()
+		public override void SetUp()
 		{
-			base.setUp();
+			base.SetUp();
 
 			// Test graph was stolen from git-core t6012-rev-list-simplify
 			// (by Junio C Hamano in 65347030590bcc251a9ff2ed96487a0f1b9e9fa8)
@@ -97,7 +96,7 @@ namespace GitSharp.Tests.RevWalk
 			foreach (RevCommit z in rw)
 			{
 				string name = byName[z];
-				Assert.IsNotNull(name);
+				Assert.NotNull(name);
 				act.Append(name);
 				act.Append(' ');
 			}
@@ -106,11 +105,11 @@ namespace GitSharp.Tests.RevWalk
 			foreach (RevCommit z in order)
 			{
 				string name = byName[z];
-				Assert.IsNotNull(name);
+				Assert.NotNull(name);
 				exp.Append(name);
 				exp.Append(' ');
 			}
-			Assert.AreEqual(exp.ToString(), act.ToString());
+			Assert.Equal(exp.ToString(), act.ToString());
 		}
 
 		private void Filter(string path)
@@ -118,14 +117,14 @@ namespace GitSharp.Tests.RevWalk
 			rw.setTreeFilter(AndTreeFilter.create(PathFilterGroup.createFromStrings(Enumerable.Repeat(path, 1)), TreeFilter.ANY_DIFF));
 		}
 
-		[Test]
+		[Fact]
 		public void test1()
 		{
 			// TODO --full-history
 			Check(i, h, g, f, e, d, c, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test2()
 		{
 			// TODO --full-history
@@ -134,7 +133,7 @@ namespace GitSharp.Tests.RevWalk
 			// check(i, h, e, c, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test3()
 		{
 			// TODO --full-history
@@ -144,7 +143,7 @@ namespace GitSharp.Tests.RevWalk
 			// check(i, h, e, c, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test4()
 		{
 			// TODO --full-history
@@ -154,7 +153,7 @@ namespace GitSharp.Tests.RevWalk
 			// check(i, h, e, c, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test5()
 		{
 			// TODO --simplify-merges
@@ -163,14 +162,14 @@ namespace GitSharp.Tests.RevWalk
 			// check(i, e, c, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test6()
 		{
 			Filter(pF);
 			Check(i, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test7()
 		{
 			rw.sort(RevSort.TOPO);

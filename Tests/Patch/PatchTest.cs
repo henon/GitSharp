@@ -36,316 +36,315 @@
  */
 
 using GitSharp.Patch;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Patch
 {
-	[TestFixture]
 	public class PatchTest : BasePatchTest
 	{
-		[Test]
+		[Fact]
 		public void testEmpty()
 		{
 			var patch = new GitSharp.Patch.Patch();
-			Assert.IsTrue(patch.getFiles().Count == 0);
-			Assert.IsTrue(patch.getErrors().Count == 0);
+			Assert.True(patch.getFiles().Count == 0);
+			Assert.True(patch.getErrors().Count == 0);
 		}
 
-		[Test]
+		[Fact]
 		public void testParse_ConfigCaseInsensitive()
 		{
 			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_ConfigCaseInsensitive.patch");
-			Assert.AreEqual(2, p.getFiles().Count);
-			Assert.IsTrue(p.getErrors().Count == 0);
+			Assert.Equal(2, p.getFiles().Count);
+			Assert.True(p.getErrors().Count == 0);
 
 			FileHeader fRepositoryConfigTest = p.getFiles()[0];
 			FileHeader fRepositoryConfig = p.getFiles()[1];
 
-			Assert.AreEqual(
+			Assert.Equal(
 					"org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java",
 					fRepositoryConfigTest.getNewName());
 
-			Assert.AreEqual(
+			Assert.Equal(
 					"org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java",
 					fRepositoryConfig.getNewName());
 
-			Assert.AreEqual(572, fRepositoryConfigTest.startOffset);
-			Assert.AreEqual(1490, fRepositoryConfig.startOffset);
+			Assert.Equal(572, fRepositoryConfigTest.startOffset);
+			Assert.Equal(1490, fRepositoryConfig.startOffset);
 
-			Assert.AreEqual("da7e704", fRepositoryConfigTest.getOldId().name());
-			Assert.AreEqual("34ce04a", fRepositoryConfigTest.getNewId().name());
-			Assert.AreEqual(FileHeader.PatchType.UNIFIED, fRepositoryConfigTest.getPatchType());
-			Assert.AreEqual(FileMode.RegularFile, fRepositoryConfigTest.getOldMode());
-			Assert.AreEqual(FileMode.RegularFile, fRepositoryConfigTest.getNewMode());
-			Assert.AreEqual(1, fRepositoryConfigTest.getHunks().Count);
+			Assert.Equal("da7e704", fRepositoryConfigTest.getOldId().name());
+			Assert.Equal("34ce04a", fRepositoryConfigTest.getNewId().name());
+			Assert.Equal(FileHeader.PatchType.UNIFIED, fRepositoryConfigTest.getPatchType());
+			Assert.Equal(FileMode.RegularFile, fRepositoryConfigTest.getOldMode());
+			Assert.Equal(FileMode.RegularFile, fRepositoryConfigTest.getNewMode());
+			Assert.Equal(1, fRepositoryConfigTest.getHunks().Count);
 			{
 				HunkHeader h = fRepositoryConfigTest.getHunks()[0];
-				Assert.AreEqual(fRepositoryConfigTest, h.File);
-				Assert.AreEqual(921, h.StartOffset);
-				Assert.AreEqual(109, h.OldImage.StartLine);
-				Assert.AreEqual(4, h.OldImage.LineCount);
-				Assert.AreEqual(109, h.NewStartLine);
-				Assert.AreEqual(11, h.NewLineCount);
+				Assert.Equal(fRepositoryConfigTest, h.File);
+				Assert.Equal(921, h.StartOffset);
+				Assert.Equal(109, h.OldImage.StartLine);
+				Assert.Equal(4, h.OldImage.LineCount);
+				Assert.Equal(109, h.NewStartLine);
+				Assert.Equal(11, h.NewLineCount);
 
-				Assert.AreEqual(4, h.LinesContext);
-				Assert.AreEqual(7, h.OldImage.LinesAdded);
-				Assert.AreEqual(0, h.OldImage.LinesDeleted);
-				Assert.AreEqual(fRepositoryConfigTest.getOldId(), h.OldImage.Id);
+				Assert.Equal(4, h.LinesContext);
+				Assert.Equal(7, h.OldImage.LinesAdded);
+				Assert.Equal(0, h.OldImage.LinesDeleted);
+				Assert.Equal(fRepositoryConfigTest.getOldId(), h.OldImage.Id);
 
-				Assert.AreEqual(1490, h.EndOffset);
+				Assert.Equal(1490, h.EndOffset);
 			}
 
-			Assert.AreEqual("45c2f8a", fRepositoryConfig.getOldId().name());
-			Assert.AreEqual("3291bba", fRepositoryConfig.getNewId().name());
-			Assert.AreEqual(FileHeader.PatchType.UNIFIED, fRepositoryConfig
+			Assert.Equal("45c2f8a", fRepositoryConfig.getOldId().name());
+			Assert.Equal("3291bba", fRepositoryConfig.getNewId().name());
+			Assert.Equal(FileHeader.PatchType.UNIFIED, fRepositoryConfig
 					.getPatchType());
-			Assert.AreEqual(FileMode.RegularFile, fRepositoryConfig.getOldMode());
-			Assert.AreEqual(FileMode.RegularFile, fRepositoryConfig.getNewMode());
-			Assert.AreEqual(3, fRepositoryConfig.getHunks().Count);
+			Assert.Equal(FileMode.RegularFile, fRepositoryConfig.getOldMode());
+			Assert.Equal(FileMode.RegularFile, fRepositoryConfig.getNewMode());
+			Assert.Equal(3, fRepositoryConfig.getHunks().Count);
 			{
 				HunkHeader h = fRepositoryConfig.getHunks()[0];
-				Assert.AreEqual(fRepositoryConfig, h.File);
-				Assert.AreEqual(1803, h.StartOffset);
-				Assert.AreEqual(236, h.OldImage.StartLine);
-				Assert.AreEqual(9, h.OldImage.LineCount);
-				Assert.AreEqual(236, h.NewStartLine);
-				Assert.AreEqual(9, h.NewLineCount);
+				Assert.Equal(fRepositoryConfig, h.File);
+				Assert.Equal(1803, h.StartOffset);
+				Assert.Equal(236, h.OldImage.StartLine);
+				Assert.Equal(9, h.OldImage.LineCount);
+				Assert.Equal(236, h.NewStartLine);
+				Assert.Equal(9, h.NewLineCount);
 
-				Assert.AreEqual(7, h.LinesContext);
-				Assert.AreEqual(2, h.OldImage.LinesAdded);
-				Assert.AreEqual(2, h.OldImage.LinesDeleted);
-				Assert.AreEqual(fRepositoryConfig.getOldId(), h.OldImage.Id);
+				Assert.Equal(7, h.LinesContext);
+				Assert.Equal(2, h.OldImage.LinesAdded);
+				Assert.Equal(2, h.OldImage.LinesDeleted);
+				Assert.Equal(fRepositoryConfig.getOldId(), h.OldImage.Id);
 
-				Assert.AreEqual(2434, h.EndOffset);
+				Assert.Equal(2434, h.EndOffset);
 			}
 			{
 				HunkHeader h = fRepositoryConfig.getHunks()[1];
-				Assert.AreEqual(2434, h.StartOffset);
-				Assert.AreEqual(300, h.OldImage.StartLine);
-				Assert.AreEqual(7, h.OldImage.LineCount);
-				Assert.AreEqual(300, h.NewStartLine);
-				Assert.AreEqual(7, h.NewLineCount);
+				Assert.Equal(2434, h.StartOffset);
+				Assert.Equal(300, h.OldImage.StartLine);
+				Assert.Equal(7, h.OldImage.LineCount);
+				Assert.Equal(300, h.NewStartLine);
+				Assert.Equal(7, h.NewLineCount);
 
-				Assert.AreEqual(6, h.LinesContext);
-				Assert.AreEqual(1, h.OldImage.LinesAdded);
-				Assert.AreEqual(1, h.OldImage.LinesDeleted);
+				Assert.Equal(6, h.LinesContext);
+				Assert.Equal(1, h.OldImage.LinesAdded);
+				Assert.Equal(1, h.OldImage.LinesDeleted);
 
-				Assert.AreEqual(2816, h.EndOffset);
+				Assert.Equal(2816, h.EndOffset);
 			}
 			{
 				HunkHeader h = fRepositoryConfig.getHunks()[2];
-				Assert.AreEqual(2816, h.StartOffset);
-				Assert.AreEqual(954, h.OldImage.StartLine);
-				Assert.AreEqual(7, h.OldImage.LineCount);
-				Assert.AreEqual(954, h.NewStartLine);
-				Assert.AreEqual(7, h.NewLineCount);
+				Assert.Equal(2816, h.StartOffset);
+				Assert.Equal(954, h.OldImage.StartLine);
+				Assert.Equal(7, h.OldImage.LineCount);
+				Assert.Equal(954, h.NewStartLine);
+				Assert.Equal(7, h.NewLineCount);
 
-				Assert.AreEqual(6, h.LinesContext);
-				Assert.AreEqual(1, h.OldImage.LinesAdded);
-				Assert.AreEqual(1, h.OldImage.LinesDeleted);
+				Assert.Equal(6, h.LinesContext);
+				Assert.Equal(1, h.OldImage.LinesAdded);
+				Assert.Equal(1, h.OldImage.LinesDeleted);
 
-				Assert.AreEqual(3035, h.EndOffset);
+				Assert.Equal(3035, h.EndOffset);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testParse_NoBinary()
 		{
 			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_NoBinary.patch");
-			Assert.AreEqual(5, p.getFiles().Count);
-			Assert.IsTrue(p.getErrors().Count == 0);
+			Assert.Equal(5, p.getFiles().Count);
+			Assert.True(p.getErrors().Count == 0);
 
 			for (int i = 0; i < 4; i++)
 			{
 				FileHeader fh = p.getFiles()[i];
-				Assert.AreEqual(FileHeader.ChangeType.ADD, fh.getChangeType());
-				Assert.IsNotNull(fh.getOldId());
-				Assert.IsNotNull(fh.getNewId());
-				Assert.AreEqual("0000000", fh.getOldId().name());
-				Assert.AreEqual(FileMode.Missing, fh.getOldMode());
-				Assert.AreEqual(FileMode.RegularFile, fh.getNewMode());
-				Assert.IsTrue(fh.getNewName().StartsWith(
+				Assert.Equal(FileHeader.ChangeType.ADD, fh.getChangeType());
+				Assert.NotNull(fh.getOldId());
+				Assert.NotNull(fh.getNewId());
+				Assert.Equal("0000000", fh.getOldId().name());
+				Assert.Equal(FileMode.Missing, fh.getOldMode());
+				Assert.Equal(FileMode.RegularFile, fh.getNewMode());
+				Assert.True(fh.getNewName().StartsWith(
 						"org.spearce.egit.ui/icons/toolbar/"));
-				Assert.AreEqual(FileHeader.PatchType.BINARY, fh.getPatchType());
-				Assert.IsTrue(fh.getHunks().Count == 0);
-				Assert.IsTrue(fh.hasMetaDataChanges());
+				Assert.Equal(FileHeader.PatchType.BINARY, fh.getPatchType());
+				Assert.True(fh.getHunks().Count == 0);
+				Assert.True(fh.hasMetaDataChanges());
 
-				Assert.IsNull(fh.getForwardBinaryHunk());
-				Assert.IsNull(fh.getReverseBinaryHunk());
+				Assert.Null(fh.getForwardBinaryHunk());
+				Assert.Null(fh.getReverseBinaryHunk());
 			}
 
 			{
 				FileHeader fh = p.getFiles()[4];
-				Assert.AreEqual("org.spearce.egit.ui/plugin.xml", fh.getNewName());
-				Assert.AreEqual(FileHeader.ChangeType.MODIFY, fh.getChangeType());
-				Assert.AreEqual(FileHeader.PatchType.UNIFIED, fh.getPatchType());
-				Assert.IsFalse(fh.hasMetaDataChanges());
-				Assert.AreEqual("ee8a5a0", fh.getNewId().name());
-				Assert.IsNull(fh.getForwardBinaryHunk());
-				Assert.IsNull(fh.getReverseBinaryHunk());
-				Assert.AreEqual(1, fh.getHunks().Count);
-				Assert.AreEqual(272, fh.getHunks()[0].OldImage.StartLine);
+				Assert.Equal("org.spearce.egit.ui/plugin.xml", fh.getNewName());
+				Assert.Equal(FileHeader.ChangeType.MODIFY, fh.getChangeType());
+				Assert.Equal(FileHeader.PatchType.UNIFIED, fh.getPatchType());
+				Assert.False(fh.hasMetaDataChanges());
+				Assert.Equal("ee8a5a0", fh.getNewId().name());
+				Assert.Null(fh.getForwardBinaryHunk());
+				Assert.Null(fh.getReverseBinaryHunk());
+				Assert.Equal(1, fh.getHunks().Count);
+				Assert.Equal(272, fh.getHunks()[0].OldImage.StartLine);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testParse_GitBinaryLiteral()
 		{
 			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_GitBinaryLiteral.patch");
 			int[] binsizes = { 359, 393, 372, 404 };
-			Assert.AreEqual(5, p.getFiles().Count);
-			Assert.IsTrue(p.getErrors().Count == 0);
+			Assert.Equal(5, p.getFiles().Count);
+			Assert.True(p.getErrors().Count == 0);
 
 			for (int i = 0; i < 4; i++)
 			{
 				FileHeader fh = p.getFiles()[i];
-				Assert.AreEqual(FileHeader.ChangeType.ADD, fh.getChangeType());
-				Assert.IsNotNull(fh.getOldId());
-				Assert.IsNotNull(fh.getNewId());
-				Assert.AreEqual(ObjectId.ZeroId.Name, fh.getOldId().name());
-				Assert.AreEqual(FileMode.RegularFile, fh.getNewMode());
-				Assert.IsTrue(fh.getNewName().StartsWith(
+				Assert.Equal(FileHeader.ChangeType.ADD, fh.getChangeType());
+				Assert.NotNull(fh.getOldId());
+				Assert.NotNull(fh.getNewId());
+				Assert.Equal(ObjectId.ZeroId.Name, fh.getOldId().name());
+				Assert.Equal(FileMode.RegularFile, fh.getNewMode());
+				Assert.True(fh.getNewName().StartsWith(
 						"org.spearce.egit.ui/icons/toolbar/"));
-				Assert.AreEqual(FileHeader.PatchType.GIT_BINARY, fh.getPatchType());
-				Assert.IsTrue(fh.getHunks().Count == 0);
-				Assert.IsTrue(fh.hasMetaDataChanges());
+				Assert.Equal(FileHeader.PatchType.GIT_BINARY, fh.getPatchType());
+				Assert.True(fh.getHunks().Count == 0);
+				Assert.True(fh.hasMetaDataChanges());
 
 				BinaryHunk fwd = fh.getForwardBinaryHunk();
 				BinaryHunk rev = fh.getReverseBinaryHunk();
-				Assert.IsNotNull(fwd);
-				Assert.IsNotNull(rev);
-				Assert.AreEqual(binsizes[i], fwd.getSize());
-				Assert.AreEqual(0, rev.getSize());
+				Assert.NotNull(fwd);
+				Assert.NotNull(rev);
+				Assert.Equal(binsizes[i], fwd.getSize());
+				Assert.Equal(0, rev.getSize());
 
-				Assert.AreEqual(fh, fwd.getFileHeader());
-				Assert.AreEqual(fh, rev.getFileHeader());
+				Assert.Equal(fh, fwd.getFileHeader());
+				Assert.Equal(fh, rev.getFileHeader());
 
-				Assert.AreEqual(BinaryHunk.Type.LITERAL_DEFLATED, fwd.getType());
-				Assert.AreEqual(BinaryHunk.Type.LITERAL_DEFLATED, rev.getType());
+				Assert.Equal(BinaryHunk.Type.LITERAL_DEFLATED, fwd.getType());
+				Assert.Equal(BinaryHunk.Type.LITERAL_DEFLATED, rev.getType());
 			}
 
 			{
 				FileHeader fh = p.getFiles()[4];
-				Assert.AreEqual("org.spearce.egit.ui/plugin.xml", fh.getNewName());
-				Assert.AreEqual(FileHeader.ChangeType.MODIFY, fh.getChangeType());
-				Assert.AreEqual(FileHeader.PatchType.UNIFIED, fh.getPatchType());
-				Assert.IsFalse(fh.hasMetaDataChanges());
-				Assert.AreEqual("ee8a5a0", fh.getNewId().name());
-				Assert.IsNull(fh.getForwardBinaryHunk());
-				Assert.IsNull(fh.getReverseBinaryHunk());
-				Assert.AreEqual(1, fh.getHunks().Count);
-				Assert.AreEqual(272, fh.getHunks()[0].OldImage.StartLine);
+				Assert.Equal("org.spearce.egit.ui/plugin.xml", fh.getNewName());
+				Assert.Equal(FileHeader.ChangeType.MODIFY, fh.getChangeType());
+				Assert.Equal(FileHeader.PatchType.UNIFIED, fh.getPatchType());
+				Assert.False(fh.hasMetaDataChanges());
+				Assert.Equal("ee8a5a0", fh.getNewId().name());
+				Assert.Null(fh.getForwardBinaryHunk());
+				Assert.Null(fh.getReverseBinaryHunk());
+				Assert.Equal(1, fh.getHunks().Count);
+				Assert.Equal(272, fh.getHunks()[0].OldImage.StartLine);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testParse_GitBinaryDelta()
 		{
 			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_GitBinaryDelta.patch");
-			Assert.AreEqual(1, p.getFiles().Count);
-			Assert.IsTrue(p.getErrors().Count == 0);
+			Assert.Equal(1, p.getFiles().Count);
+			Assert.True(p.getErrors().Count == 0);
 
 			FileHeader fh = p.getFiles()[0];
-			Assert.IsTrue(fh.getNewName().StartsWith("zero.bin"));
-			Assert.AreEqual(FileHeader.ChangeType.MODIFY, fh.getChangeType());
-			Assert.AreEqual(FileHeader.PatchType.GIT_BINARY, fh.getPatchType());
-			Assert.AreEqual(FileMode.RegularFile, fh.getNewMode());
+			Assert.True(fh.getNewName().StartsWith("zero.bin"));
+			Assert.Equal(FileHeader.ChangeType.MODIFY, fh.getChangeType());
+			Assert.Equal(FileHeader.PatchType.GIT_BINARY, fh.getPatchType());
+			Assert.Equal(FileMode.RegularFile, fh.getNewMode());
 
-			Assert.IsNotNull(fh.getOldId());
-			Assert.IsNotNull(fh.getNewId());
-			Assert.AreEqual("08e7df176454f3ee5eeda13efa0adaa54828dfd8", fh.getOldId()
+			Assert.NotNull(fh.getOldId());
+			Assert.NotNull(fh.getNewId());
+			Assert.Equal("08e7df176454f3ee5eeda13efa0adaa54828dfd8", fh.getOldId()
 					.name());
-			Assert.AreEqual("d70d8710b6d32ff844af0ee7c247e4b4b051867f", fh.getNewId()
+			Assert.Equal("d70d8710b6d32ff844af0ee7c247e4b4b051867f", fh.getNewId()
 					.name());
 
-			Assert.IsTrue(fh.getHunks().Count == 0);
-			Assert.IsFalse(fh.hasMetaDataChanges());
+			Assert.True(fh.getHunks().Count == 0);
+			Assert.False(fh.hasMetaDataChanges());
 
 			BinaryHunk fwd = fh.getForwardBinaryHunk();
 			BinaryHunk rev = fh.getReverseBinaryHunk();
-			Assert.IsNotNull(fwd);
-			Assert.IsNotNull(rev);
-			Assert.AreEqual(12, fwd.getSize());
-			Assert.AreEqual(11, rev.getSize());
+			Assert.NotNull(fwd);
+			Assert.NotNull(rev);
+			Assert.Equal(12, fwd.getSize());
+			Assert.Equal(11, rev.getSize());
 
-			Assert.AreEqual(fh, fwd.getFileHeader());
-			Assert.AreEqual(fh, rev.getFileHeader());
+			Assert.Equal(fh, fwd.getFileHeader());
+			Assert.Equal(fh, rev.getFileHeader());
 
-			Assert.AreEqual(BinaryHunk.Type.DELTA_DEFLATED, fwd.getType());
-			Assert.AreEqual(BinaryHunk.Type.DELTA_DEFLATED, rev.getType());
+			Assert.Equal(BinaryHunk.Type.DELTA_DEFLATED, fwd.getType());
+			Assert.Equal(BinaryHunk.Type.DELTA_DEFLATED, rev.getType());
 
-			Assert.AreEqual(496, fh.endOffset);
+			Assert.Equal(496, fh.endOffset);
 		}
 
-		[Test]
+		[Fact]
 		public void testParse_FixNoNewline()
 		{
 			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_FixNoNewline.patch");
-			Assert.AreEqual(1, p.getFiles().Count);
-			Assert.IsTrue(p.getErrors().Count == 0);
+			Assert.Equal(1, p.getFiles().Count);
+			Assert.True(p.getErrors().Count == 0);
 
 			FileHeader f = p.getFiles()[0];
 
-			Assert.AreEqual("a", f.getNewName());
-			Assert.AreEqual(252, f.startOffset);
+			Assert.Equal("a", f.getNewName());
+			Assert.Equal(252, f.startOffset);
 
-			Assert.AreEqual("2e65efe", f.getOldId().name());
-			Assert.AreEqual("f2ad6c7", f.getNewId().name());
-			Assert.AreEqual(FileHeader.PatchType.UNIFIED, f.getPatchType());
-			Assert.AreEqual(FileMode.RegularFile, f.getOldMode());
-			Assert.AreEqual(FileMode.RegularFile, f.getNewMode());
-			Assert.AreEqual(1, f.getHunks().Count);
+			Assert.Equal("2e65efe", f.getOldId().name());
+			Assert.Equal("f2ad6c7", f.getNewId().name());
+			Assert.Equal(FileHeader.PatchType.UNIFIED, f.getPatchType());
+			Assert.Equal(FileMode.RegularFile, f.getOldMode());
+			Assert.Equal(FileMode.RegularFile, f.getNewMode());
+			Assert.Equal(1, f.getHunks().Count);
 			{
 				HunkHeader h = f.getHunks()[0];
-				Assert.AreEqual(f, h.File);
-				Assert.AreEqual(317, h.StartOffset);
-				Assert.AreEqual(1, h.OldImage.StartLine);
-				Assert.AreEqual(1, h.OldImage.LineCount);
-				Assert.AreEqual(1, h.NewStartLine);
-				Assert.AreEqual(1, h.NewLineCount);
+				Assert.Equal(f, h.File);
+				Assert.Equal(317, h.StartOffset);
+				Assert.Equal(1, h.OldImage.StartLine);
+				Assert.Equal(1, h.OldImage.LineCount);
+				Assert.Equal(1, h.NewStartLine);
+				Assert.Equal(1, h.NewLineCount);
 
-				Assert.AreEqual(0, h.LinesContext);
-				Assert.AreEqual(1, h.OldImage.LinesAdded);
-				Assert.AreEqual(1, h.OldImage.LinesDeleted);
-				Assert.AreEqual(f.getOldId(), h.OldImage.Id);
+				Assert.Equal(0, h.LinesContext);
+				Assert.Equal(1, h.OldImage.LinesAdded);
+				Assert.Equal(1, h.OldImage.LinesDeleted);
+				Assert.Equal(f.getOldId(), h.OldImage.Id);
 
-				Assert.AreEqual(363, h.EndOffset);
+				Assert.Equal(363, h.EndOffset);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testParse_AddNoNewline()
 		{
 			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_AddNoNewline.patch");
-			Assert.AreEqual(1, p.getFiles().Count);
-			Assert.IsTrue(p.getErrors().Count == 0, GetAllErrorsFromPatch(p));
+			Assert.Equal(1, p.getFiles().Count);
+			Assert.True(p.getErrors().Count == 0, GetAllErrorsFromPatch(p));
 
 			FileHeader f = p.getFiles()[0];
 
-			Assert.AreEqual("a", f.getNewName());
-			Assert.AreEqual(256, f.startOffset);
+			Assert.Equal("a", f.getNewName());
+			Assert.Equal(256, f.startOffset);
 
-			Assert.AreEqual("f2ad6c7", f.getOldId().name());
-			Assert.AreEqual("c59d9b6", f.getNewId().name());
-			Assert.AreEqual(FileHeader.PatchType.UNIFIED, f.getPatchType());
-			Assert.AreEqual(FileMode.RegularFile, f.getOldMode());
-			Assert.AreEqual(FileMode.RegularFile, f.getNewMode());
-			Assert.AreEqual(1, f.getHunks().Count);
+			Assert.Equal("f2ad6c7", f.getOldId().name());
+			Assert.Equal("c59d9b6", f.getNewId().name());
+			Assert.Equal(FileHeader.PatchType.UNIFIED, f.getPatchType());
+			Assert.Equal(FileMode.RegularFile, f.getOldMode());
+			Assert.Equal(FileMode.RegularFile, f.getNewMode());
+			Assert.Equal(1, f.getHunks().Count);
 			{
 				HunkHeader h = f.getHunks()[0];
-				Assert.AreEqual(f, h.File);
-				Assert.AreEqual(321, h.StartOffset);
-				Assert.AreEqual(1, h.OldImage.StartLine);
-				Assert.AreEqual(1, h.OldImage.LineCount);
-				Assert.AreEqual(1, h.NewStartLine);
-				Assert.AreEqual(1, h.NewLineCount);
+				Assert.Equal(f, h.File);
+				Assert.Equal(321, h.StartOffset);
+				Assert.Equal(1, h.OldImage.StartLine);
+				Assert.Equal(1, h.OldImage.LineCount);
+				Assert.Equal(1, h.NewStartLine);
+				Assert.Equal(1, h.NewLineCount);
 
-				Assert.AreEqual(0, h.LinesContext);
-				Assert.AreEqual(1, h.OldImage.LinesAdded);
-				Assert.AreEqual(1, h.OldImage.LinesDeleted);
-				Assert.AreEqual(f.getOldId(), h.OldImage.Id);
+				Assert.Equal(0, h.LinesContext);
+				Assert.Equal(1, h.OldImage.LinesAdded);
+				Assert.Equal(1, h.OldImage.LinesDeleted);
+				Assert.Equal(f.getOldId(), h.OldImage.Id);
 
-				Assert.AreEqual(367, h.EndOffset);
+				Assert.Equal(367, h.EndOffset);
 			}
 		}
 	}

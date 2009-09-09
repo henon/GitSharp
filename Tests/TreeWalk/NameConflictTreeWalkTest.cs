@@ -38,11 +38,10 @@
 using System.IO;
 using GitSharp.DirectoryCache;
 using GitSharp.TreeWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.TreeWalk
 {	
-	[TestFixture]
 	public class NameConflictTreeWalkTest : RepositoryTestCase
 	{
 		private static readonly FileMode TREE = FileMode.Tree;
@@ -55,7 +54,7 @@ namespace GitSharp.Tests.TreeWalk
 
 		private static readonly FileMode EXECUTABLE_FILE = FileMode.ExecutableFile;
 
-		[Test]
+		[Fact]
 		public virtual void testNoDF_NoGap()
 		{
 			DirCache tree0 = DirCache.read(db);
@@ -71,8 +70,8 @@ namespace GitSharp.Tests.TreeWalk
 
 				b0.finish();
 				b1.finish();
-				Assert.AreEqual(3, tree0.getEntryCount());
-				Assert.AreEqual(1, tree1.getEntryCount());
+				Assert.Equal(3, tree0.getEntryCount());
+				Assert.Equal(1, tree1.getEntryCount());
 			}
 
 			GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
@@ -88,7 +87,7 @@ namespace GitSharp.Tests.TreeWalk
 			assertModes("a0b", SYMLINK, MISSING, tw);
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testDF_NoGap()
 		{
 			DirCache tree0 = DirCache.read(db);
@@ -104,8 +103,8 @@ namespace GitSharp.Tests.TreeWalk
 
 				b0.finish();
 				b1.finish();
-				Assert.AreEqual(3, tree0.getEntryCount());
-				Assert.AreEqual(1, tree1.getEntryCount());
+				Assert.Equal(3, tree0.getEntryCount());
+				Assert.Equal(1, tree1.getEntryCount());
 			}
 
 			NameConflictTreeWalk tw = new NameConflictTreeWalk(db);
@@ -114,14 +113,14 @@ namespace GitSharp.Tests.TreeWalk
 			tw.addTree(new DirCacheIterator(tree1));
 
 			assertModes("a", REGULAR_FILE, TREE, tw);
-			Assert.IsTrue(tw.isSubtree());
+			Assert.True(tw.isSubtree());
 			tw.enterSubtree();
 			assertModes("a/b", MISSING, REGULAR_FILE, tw);
 			assertModes("a.b", EXECUTABLE_FILE, MISSING, tw);
 			assertModes("a0b", SYMLINK, MISSING, tw);
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testDF_GapByOne()
 		{
 			DirCache tree0 = DirCache.read(db);
@@ -138,8 +137,8 @@ namespace GitSharp.Tests.TreeWalk
 
 				b0.finish();
 				b1.finish();
-				Assert.AreEqual(3, tree0.getEntryCount());
-				Assert.AreEqual(2, tree1.getEntryCount());
+				Assert.Equal(3, tree0.getEntryCount());
+				Assert.Equal(2, tree1.getEntryCount());
 			}
 
 			NameConflictTreeWalk tw = new NameConflictTreeWalk(db);
@@ -148,14 +147,14 @@ namespace GitSharp.Tests.TreeWalk
 			tw.addTree(new DirCacheIterator(tree1));
 
 			assertModes("a", REGULAR_FILE, TREE, tw);
-			Assert.IsTrue(tw.isSubtree());
+			Assert.True(tw.isSubtree());
 			tw.enterSubtree();
 			assertModes("a/b", MISSING, REGULAR_FILE, tw);
 			assertModes("a.b", EXECUTABLE_FILE, EXECUTABLE_FILE, tw);
 			assertModes("a0b", SYMLINK, MISSING, tw);
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testDF_SkipsSeenSubtree()
 		{
 			DirCache tree0 = DirCache.read(db);
@@ -172,8 +171,8 @@ namespace GitSharp.Tests.TreeWalk
 
 				b0.finish();
 				b1.finish();
-				Assert.AreEqual(2, tree0.getEntryCount());
-				Assert.AreEqual(3, tree1.getEntryCount());
+				Assert.Equal(2, tree0.getEntryCount());
+				Assert.Equal(3, tree1.getEntryCount());
 			}
 
 			NameConflictTreeWalk tw = new NameConflictTreeWalk(db);
@@ -182,7 +181,7 @@ namespace GitSharp.Tests.TreeWalk
 			tw.addTree(new DirCacheIterator(tree1));
 
 			assertModes("a", REGULAR_FILE, TREE, tw);
-			Assert.IsTrue(tw.isSubtree());
+			Assert.True(tw.isSubtree());
 			tw.enterSubtree();
 			assertModes("a/b", MISSING, REGULAR_FILE, tw);
 			assertModes("a.b", MISSING, EXECUTABLE_FILE, tw);
@@ -200,10 +199,10 @@ namespace GitSharp.Tests.TreeWalk
 
 		private static void assertModes(string path, FileMode mode0, FileMode mode1, GitSharp.TreeWalk.TreeWalk tw)
 		{
-			Assert.IsTrue(tw.next(), "has " + path);
-			Assert.AreEqual(path, tw.getPathString());
-			Assert.AreEqual(mode0, tw.getFileMode(0));
-			Assert.AreEqual(mode1, tw.getFileMode(1));
+			Assert.True(tw.next(), "has " + path);
+			Assert.Equal(path, tw.getPathString());
+			Assert.Equal(mode0, tw.getFileMode(0));
+			Assert.Equal(mode1, tw.getFileMode(1));
 		}
 	}
 }

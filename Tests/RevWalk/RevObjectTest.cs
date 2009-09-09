@@ -36,69 +36,68 @@
  */
 
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-	[TestFixture]
 	public class RevObjectTest : RevWalkTestCase
 	{
-		[Test]
+		[Fact]
 		public void testId()
 		{
 			RevCommit a = commit();
-			Assert.AreSame(a, a.getId());
+			Assert.Same(a, a.getId());
 		}
 
-		[Test]
+		[Fact]
 		public void testEqualsIsIdentity()
 		{
 			RevCommit a1 = commit();
 			RevCommit b1 = commit();
 
-			Assert.IsTrue(a1.Equals(a1));
-			Assert.IsTrue(a1.Equals((object)a1));
-			Assert.IsFalse(a1.Equals(b1));
+			Assert.True(a1.Equals(a1));
+			Assert.True(a1.Equals((object)a1));
+			Assert.False(a1.Equals(b1));
 
-			Assert.IsFalse(a1.Equals(a1.Copy()));
-			Assert.IsFalse(a1.Equals((object)a1.Copy()));
-			Assert.IsFalse(a1.Equals(string.Empty));
+			Assert.False(a1.Equals(a1.Copy()));
+			Assert.False(a1.Equals((object)a1.Copy()));
+			Assert.False(a1.Equals(string.Empty));
 
 			var rw2 = new GitSharp.RevWalk.RevWalk(db);
 			RevCommit a2 = rw2.parseCommit(a1);
 			RevCommit b2 = rw2.parseCommit(b1);
-			Assert.AreNotSame(a1, a2);
-			Assert.AreNotSame(b1, b2);
+			Assert.NotSame(a1, a2);
+			Assert.NotSame(b1, b2);
 
-			Assert.IsFalse(a1.Equals(a2));
-			Assert.IsFalse(b1.Equals(b2));
+			Assert.False(a1.Equals(a2));
+			Assert.False(b1.Equals(b2));
 
-			Assert.AreEqual(a1.GetHashCode(), a2.GetHashCode());
-			Assert.AreEqual(b1.GetHashCode(), b2.GetHashCode());
+			Assert.Equal(a1.GetHashCode(), a2.GetHashCode());
+			Assert.Equal(b1.GetHashCode(), b2.GetHashCode());
 
-			Assert.IsTrue(Equals(a1, a2));
-			Assert.IsTrue(Equals(b1, b2));
+			Assert.True(Equals(a1, a2));
+			Assert.True(Equals(b1, b2));
 		}
 
-		[Test]
+		[Fact]
 		public void testRevObjectTypes()
 		{
-			Assert.AreEqual(Constants.OBJ_TREE, emptyTree.Type);
-			Assert.AreEqual(Constants.OBJ_COMMIT, commit().Type);
-			Assert.AreEqual(Constants.OBJ_BLOB, blob("").Type);
-			Assert.AreEqual(Constants.OBJ_TAG, tag("emptyTree", emptyTree).Type);
+			Assert.Equal(Constants.OBJ_TREE, emptyTree.Type);
+			Assert.Equal(Constants.OBJ_COMMIT, commit().Type);
+			Assert.Equal(Constants.OBJ_BLOB, blob("").Type);
+			Assert.Equal(Constants.OBJ_TAG, tag("emptyTree", emptyTree).Type);
 		}
 
-		[Test]
+		[Fact]
 		public void testHasRevFlag()
 		{
 			RevCommit a = commit();
-			Assert.IsFalse(a.has(RevFlag.UNINTERESTING));
+			Assert.False(a.has(RevFlag.UNINTERESTING));
 			a.Flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
-			Assert.IsTrue(a.has(RevFlag.UNINTERESTING));
+			Assert.True(a.has(RevFlag.UNINTERESTING));
 		}
 
-		[Test]
+		[Fact]
 		public void testHasAnyFlag()
 		{
 			RevCommit a = commit();
@@ -106,12 +105,12 @@ namespace GitSharp.Tests.RevWalk
 			RevFlag flag2 = rw.newFlag("flag2");
 			var s = new RevFlagSet { flag1, flag2 };
 
-			Assert.IsFalse(a.hasAny(s));
+			Assert.False(a.hasAny(s));
 			a.Flags |= flag1.Mask;
-			Assert.IsTrue(a.hasAny(s));
+			Assert.True(a.hasAny(s));
 		}
 
-		[Test]
+		[Fact]
 		public void testHasAllFlag()
 		{
 			RevCommit a = commit();
@@ -119,29 +118,29 @@ namespace GitSharp.Tests.RevWalk
 			RevFlag flag2 = rw.newFlag("flag2");
 			var s = new RevFlagSet { flag1, flag2 };
 
-			Assert.IsFalse(a.hasAll(s));
+			Assert.False(a.hasAll(s));
 			a.Flags |= flag1.Mask;
-			Assert.IsFalse(a.hasAll(s));
+			Assert.False(a.hasAll(s));
 			a.Flags |= flag2.Mask;
-			Assert.IsTrue(a.hasAll(s));
+			Assert.True(a.hasAll(s));
 		}
 
-		[Test]
+		[Fact]
 		public void testAddRevFlag()
 		{
 			RevCommit a = commit();
 			RevFlag flag1 = rw.newFlag("flag1");
 			RevFlag flag2 = rw.newFlag("flag2");
-			Assert.AreEqual(0, a.Flags);
+			Assert.Equal(0, a.Flags);
 
 			a.add(flag1);
-			Assert.AreEqual(flag1.Mask, a.Flags);
+			Assert.Equal(flag1.Mask, a.Flags);
 
 			a.add(flag2);
-			Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
+			Assert.Equal(flag1.Mask | flag2.Mask, a.Flags);
 		}
 
-		[Test]
+		[Fact]
 		public void testAddRevFlagSet()
 		{
 			RevCommit a = commit();
@@ -149,13 +148,13 @@ namespace GitSharp.Tests.RevWalk
 			RevFlag flag2 = rw.newFlag("flag2");
 			var s = new RevFlagSet { flag1, flag2 };
 
-			Assert.AreEqual(0, a.Flags);
+			Assert.Equal(0, a.Flags);
 
 			a.add(s);
-			Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
+			Assert.Equal(flag1.Mask | flag2.Mask, a.Flags);
 		}
 
-		[Test]
+		[Fact]
 		public void testRemoveRevFlag()
 		{
 			RevCommit a = commit();
@@ -163,12 +162,12 @@ namespace GitSharp.Tests.RevWalk
 			RevFlag flag2 = rw.newFlag("flag2");
 			a.add(flag1);
 			a.add(flag2);
-			Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
+			Assert.Equal(flag1.Mask | flag2.Mask, a.Flags);
 			a.remove(flag2);
-			Assert.AreEqual(flag1.Mask, a.Flags);
+			Assert.Equal(flag1.Mask, a.Flags);
 		}
 
-		[Test]
+		[Fact]
 		public void testRemoveRevFlagSet()
 		{
 			RevCommit a = commit();
@@ -178,9 +177,9 @@ namespace GitSharp.Tests.RevWalk
 			var s = new RevFlagSet { flag1, flag2 };
 			a.add(flag3);
 			a.add(s);
-			Assert.AreEqual(flag1.Mask | flag2.Mask | flag3.Mask, a.Flags);
+			Assert.Equal(flag1.Mask | flag2.Mask | flag3.Mask, a.Flags);
 			a.remove(s);
-			Assert.AreEqual(flag3.Mask, a.Flags);
+			Assert.Equal(flag3.Mask, a.Flags);
 		}
 	}
 }

@@ -37,125 +37,124 @@
  */
 
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Util
 {
-    [TestFixture]
     public class NBTest
     {
-        [Test]
+        [Fact]
         public void testCompareUInt32()
         {
-            Assert.IsTrue(NB.CompareUInt32(0, 0) == 0);
-            Assert.IsTrue(NB.CompareUInt32(1, 0) > 0);
-            Assert.IsTrue(NB.CompareUInt32(0, 1) < 0);
-            Assert.IsTrue(NB.CompareUInt32(-1, 0) > 0);
-            Assert.IsTrue(NB.CompareUInt32(0, -1) < 0);
-            Assert.IsTrue(NB.CompareUInt32(-1, 1) > 0);
-            Assert.IsTrue(NB.CompareUInt32(1, -1) < 0);
+            Assert.True(NB.CompareUInt32(0, 0) == 0);
+            Assert.True(NB.CompareUInt32(1, 0) > 0);
+            Assert.True(NB.CompareUInt32(0, 1) < 0);
+            Assert.True(NB.CompareUInt32(-1, 0) > 0);
+            Assert.True(NB.CompareUInt32(0, -1) < 0);
+            Assert.True(NB.CompareUInt32(-1, 1) > 0);
+            Assert.True(NB.CompareUInt32(1, -1) < 0);
         }
 
-        [Test]
+        [Fact]
         public void testDecodeUInt16()
         {
-            Assert.AreEqual(0, NB.decodeUInt16(b(0, 0), 0));
-            Assert.AreEqual(0, NB.decodeUInt16(Padb(3, 0, 0), 3));
+            Assert.Equal(0, NB.decodeUInt16(b(0, 0), 0));
+            Assert.Equal(0, NB.decodeUInt16(Padb(3, 0, 0), 3));
 
-            Assert.AreEqual(3, NB.decodeUInt16(b(0, 3), 0));
-            Assert.AreEqual(3, NB.decodeUInt16(Padb(3, 0, 3), 3));
+            Assert.Equal(3, NB.decodeUInt16(b(0, 3), 0));
+            Assert.Equal(3, NB.decodeUInt16(Padb(3, 0, 3), 3));
 
-            Assert.AreEqual(0xde03, NB.decodeUInt16(b(0xde, 3), 0));
-            Assert.AreEqual(0xde03, NB.decodeUInt16(Padb(3, 0xde, 3), 3));
+            Assert.Equal(0xde03, NB.decodeUInt16(b(0xde, 3), 0));
+            Assert.Equal(0xde03, NB.decodeUInt16(Padb(3, 0xde, 3), 3));
 
-            Assert.AreEqual(0x03de, NB.decodeUInt16(b(3, 0xde), 0));
-            Assert.AreEqual(0x03de, NB.decodeUInt16(Padb(3, 3, 0xde), 3));
+            Assert.Equal(0x03de, NB.decodeUInt16(b(3, 0xde), 0));
+            Assert.Equal(0x03de, NB.decodeUInt16(Padb(3, 3, 0xde), 3));
 
-            Assert.AreEqual(0xffff, NB.decodeUInt16(b(0xff, 0xff), 0));
-            Assert.AreEqual(0xffff, NB.decodeUInt16(Padb(3, 0xff, 0xff), 3));
+            Assert.Equal(0xffff, NB.decodeUInt16(b(0xff, 0xff), 0));
+            Assert.Equal(0xffff, NB.decodeUInt16(Padb(3, 0xff, 0xff), 3));
         }
 
-        [Test]
+        [Fact]
         public  void testDecodeInt32()
         {
-            Assert.AreEqual(0, NB.DecodeInt32(b(0, 0, 0, 0), 0));
-            Assert.AreEqual(0, NB.DecodeInt32(Padb(3, 0, 0, 0, 0), 3));
+            Assert.Equal(0, NB.DecodeInt32(b(0, 0, 0, 0), 0));
+            Assert.Equal(0, NB.DecodeInt32(Padb(3, 0, 0, 0, 0), 3));
 
-            Assert.AreEqual(3, NB.DecodeInt32(b(0, 0, 0, 3), 0));
-            Assert.AreEqual(3, NB.DecodeInt32(Padb(3, 0, 0, 0, 3), 3));
+            Assert.Equal(3, NB.DecodeInt32(b(0, 0, 0, 3), 0));
+            Assert.Equal(3, NB.DecodeInt32(Padb(3, 0, 0, 0, 3), 3));
             unchecked
             {
-                Assert.AreEqual((int)0xdeadbeef, NB.DecodeInt32(b(0xde, 0xad, 0xbe, 0xef), 0));
-                Assert.AreEqual((int)0xdeadbeef, NB.DecodeInt32(Padb(3, 0xde, 0xad, 0xbe, 0xef), 3));
+                Assert.Equal((int)0xdeadbeef, NB.DecodeInt32(b(0xde, 0xad, 0xbe, 0xef), 0));
+                Assert.Equal((int)0xdeadbeef, NB.DecodeInt32(Padb(3, 0xde, 0xad, 0xbe, 0xef), 3));
             }
-            Assert.AreEqual(0x0310adef, NB.DecodeInt32(b(0x03, 0x10, 0xad, 0xef), 0));
-            Assert.AreEqual(0x0310adef, NB.DecodeInt32(Padb(3, 0x03, 0x10, 0xad, 0xef), 3));
+            Assert.Equal(0x0310adef, NB.DecodeInt32(b(0x03, 0x10, 0xad, 0xef), 0));
+            Assert.Equal(0x0310adef, NB.DecodeInt32(Padb(3, 0x03, 0x10, 0xad, 0xef), 3));
             unchecked
             {
-                Assert.AreEqual((int)0xffffffff, NB.DecodeInt32(b(0xff, 0xff, 0xff, 0xff), 0));
-                Assert.AreEqual((int)0xffffffff, NB.DecodeInt32(Padb(3, 0xff, 0xff, 0xff, 0xff), 3));
+                Assert.Equal((int)0xffffffff, NB.DecodeInt32(b(0xff, 0xff, 0xff, 0xff), 0));
+                Assert.Equal((int)0xffffffff, NB.DecodeInt32(Padb(3, 0xff, 0xff, 0xff, 0xff), 3));
             }
         }
 
-        [Test]
+        [Fact]
         public void testDecodeUInt32()
         {
-            Assert.AreEqual(0L, NB.decodeUInt32(b(0, 0, 0, 0), 0));
-            Assert.AreEqual(0L, NB.decodeUInt32(Padb(3, 0, 0, 0, 0), 3));
+            Assert.Equal(0L, NB.decodeUInt32(b(0, 0, 0, 0), 0));
+            Assert.Equal(0L, NB.decodeUInt32(Padb(3, 0, 0, 0, 0), 3));
 
-            Assert.AreEqual(3L, NB.decodeUInt32(b(0, 0, 0, 3), 0));
-            Assert.AreEqual(3L, NB.decodeUInt32(Padb(3, 0, 0, 0, 3), 3));
+            Assert.Equal(3L, NB.decodeUInt32(b(0, 0, 0, 3), 0));
+            Assert.Equal(3L, NB.decodeUInt32(Padb(3, 0, 0, 0, 3), 3));
 
-            Assert.AreEqual(0xdeadbeefL, NB.decodeUInt32(b(0xde, 0xad, 0xbe, 0xef), 0));
-            Assert.AreEqual(0xdeadbeefL, NB.decodeUInt32(Padb(3, 0xde, 0xad, 0xbe,
+            Assert.Equal(0xdeadbeefL, NB.decodeUInt32(b(0xde, 0xad, 0xbe, 0xef), 0));
+            Assert.Equal(0xdeadbeefL, NB.decodeUInt32(Padb(3, 0xde, 0xad, 0xbe,
                     0xef), 3));
 
-            Assert.AreEqual(0x0310adefL, NB.decodeUInt32(b(0x03, 0x10, 0xad, 0xef), 0));
-            Assert.AreEqual(0x0310adefL, NB.decodeUInt32(Padb(3, 0x03, 0x10, 0xad,
+            Assert.Equal(0x0310adefL, NB.decodeUInt32(b(0x03, 0x10, 0xad, 0xef), 0));
+            Assert.Equal(0x0310adefL, NB.decodeUInt32(Padb(3, 0x03, 0x10, 0xad,
                     0xef), 3));
 
-            Assert.AreEqual(0xffffffffL, NB.decodeUInt32(b(0xff, 0xff, 0xff, 0xff), 0));
-            Assert.AreEqual(0xffffffffL, NB.decodeUInt32(Padb(3, 0xff, 0xff, 0xff,
+            Assert.Equal(0xffffffffL, NB.decodeUInt32(b(0xff, 0xff, 0xff, 0xff), 0));
+            Assert.Equal(0xffffffffL, NB.decodeUInt32(Padb(3, 0xff, 0xff, 0xff,
                     0xff), 3));
         }
 
-        [Test]
+        [Fact]
         public void testDecodeUInt64()
         {
-            Assert.AreEqual(0L, NB.decodeUInt64(b(0, 0, 0, 0, 0, 0, 0, 0), 0));
-            Assert.AreEqual(0L, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0, 0, 0, 0), 3));
+            Assert.Equal(0L, NB.decodeUInt64(b(0, 0, 0, 0, 0, 0, 0, 0), 0));
+            Assert.Equal(0L, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0, 0, 0, 0), 3));
 
-            Assert.AreEqual(3L, NB.decodeUInt64(b(0, 0, 0, 0, 0, 0, 0, 3), 0));
-            Assert.AreEqual(3L, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0, 0, 0, 3), 3));
+            Assert.Equal(3L, NB.decodeUInt64(b(0, 0, 0, 0, 0, 0, 0, 3), 0));
+            Assert.Equal(3L, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0, 0, 0, 3), 3));
 
-            Assert.AreEqual(0xdeadbeefL, NB.decodeUInt64(b(0, 0, 0, 0, 0xde, 0xad,
+            Assert.Equal(0xdeadbeefL, NB.decodeUInt64(b(0, 0, 0, 0, 0xde, 0xad,
                     0xbe, 0xef), 0));
-            Assert.AreEqual(0xdeadbeefL, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0xde,
+            Assert.Equal(0xdeadbeefL, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0xde,
                     0xad, 0xbe, 0xef), 3));
 
-            Assert.AreEqual(0x0310adefL, NB.decodeUInt64(b(0, 0, 0, 0, 0x03, 0x10,
+            Assert.Equal(0x0310adefL, NB.decodeUInt64(b(0, 0, 0, 0, 0x03, 0x10,
                     0xad, 0xef), 0));
-            Assert.AreEqual(0x0310adefL, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0x03,
+            Assert.Equal(0x0310adefL, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0x03,
                     0x10, 0xad, 0xef), 3));
             unchecked
             {
-                Assert.AreEqual((long)0xc0ffee78deadbeefL, NB.decodeUInt64(b(0xc0, 0xff, 0xee,
+                Assert.Equal((long)0xc0ffee78deadbeefL, NB.decodeUInt64(b(0xc0, 0xff, 0xee,
                         0x78, 0xde, 0xad, 0xbe, 0xef), 0));
-                Assert.AreEqual((long)0xc0ffee78deadbeefL, NB.decodeUInt64(Padb(3, 0xc0, 0xff,
+                Assert.Equal((long)0xc0ffee78deadbeefL, NB.decodeUInt64(Padb(3, 0xc0, 0xff,
                         0xee, 0x78, 0xde, 0xad, 0xbe, 0xef), 3));
 
-                Assert.AreEqual(0x00000000ffffffffL, NB.decodeUInt64(b(0, 0, 0, 0, 0xff,
+                Assert.Equal(0x00000000ffffffffL, NB.decodeUInt64(b(0, 0, 0, 0, 0xff,
                         0xff, 0xff, 0xff), 0));
-                Assert.AreEqual(0x00000000ffffffffL, NB.decodeUInt64(Padb(3, 0, 0, 0, 0,
+                Assert.Equal(0x00000000ffffffffL, NB.decodeUInt64(Padb(3, 0, 0, 0, 0,
                         0xff, 0xff, 0xff, 0xff), 3));
-                Assert.AreEqual((long)0xffffffffffffffffL, NB.decodeUInt64(b(0xff, 0xff, 0xff,
+                Assert.Equal((long)0xffffffffffffffffL, NB.decodeUInt64(b(0xff, 0xff, 0xff,
                         0xff, 0xff, 0xff, 0xff, 0xff), 0));
-                Assert.AreEqual((long)0xffffffffffffffffL, NB.decodeUInt64(Padb(3, 0xff, 0xff,
+                Assert.Equal((long)0xffffffffffffffffL, NB.decodeUInt64(Padb(3, 0xff, 0xff,
                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff), 3));
             }
         }
 
-        [Test]
+        [Fact]
         public void testEncodeInt16()
         {
             var @out = new byte[16];
@@ -189,7 +188,7 @@ namespace GitSharp.Tests.Util
             AssertOutput(b(0xff, 0xff), @out, 3);
         }
 
-        [Test]
+        [Fact]
         public void testEncodeInt32()
         {
             var @out = new byte[16];
@@ -237,7 +236,7 @@ namespace GitSharp.Tests.Util
             AssertOutput(b(0xff, 0xff, 0xff, 0xff), @out, 3);
         }
 
-        [Test]
+        [Fact]
         public void testEncodeInt64()
         {
             var @out = new byte[16];
@@ -293,14 +292,14 @@ namespace GitSharp.Tests.Util
             AssertOutput(b(0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff), @out, 3);
         }
 
-		[Test]
+		[Fact]
 		public void TestDecimalToBase()
 		{
 			string x = NB.DecimalToBase(15, 16);
-			Assert.IsTrue(string.Compare(x, "F", true) == 0);
+			Assert.True(string.Compare(x, "F", true) == 0);
 
 			x = NB.DecimalToBase(8, 8);
-			Assert.IsTrue(string.Compare(x, "10", true) == 0);
+			Assert.True(string.Compare(x, "10", true) == 0);
 		}
 
         private static void PrepareOutput(byte[] buf)
@@ -312,11 +311,11 @@ namespace GitSharp.Tests.Util
         private static void AssertOutput(byte[] expect, byte[] buf, int offset)
         {
             for (int i = 0; i < offset; i++)
-                Assert.AreEqual((byte)(0x77 + i), buf[i]);
+                Assert.Equal((byte)(0x77 + i), buf[i]);
             for (int i = 0; i < expect.Length; i++)
-                Assert.AreEqual(expect[i], buf[offset + i]);
+                Assert.Equal(expect[i], buf[offset + i]);
             for (int i = offset + expect.Length; i < buf.Length; i++)
-                Assert.AreEqual((byte)(0x77 + i), buf[i]);
+                Assert.Equal((byte)(0x77 + i), buf[i]);
         }
 
         private static byte[] b(int a, int b)

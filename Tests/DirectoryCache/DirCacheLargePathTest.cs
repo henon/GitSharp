@@ -36,39 +36,39 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using Xunit;
+using GitSharp.DirectoryCache;
+using System.Text;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
-    using GitSharp.DirectoryCache;
-    using System.Text;
-    [TestFixture]
     public class DirCacheLargePathTest : RepositoryTestCase
     {
-        [Test]
+        [Fact]
         public void testPath_4090()
         {
             testLongPath(4090);
         }
 
-        [Test]
+        [Fact]
         public void testPath_4094()
         {
             testLongPath(4094);
         }
 
-        [Test]
+        [Fact]
         public void testPath_4095()
         {
             testLongPath(4095);
         }
 
-        [Test]
+        [Fact]
         public void testPath_4096()
         {
             testLongPath(4096);
         }
 
-        [Test]
+        [Fact]
         public void testPath_16384()
         {
             testLongPath(16384);
@@ -81,8 +81,8 @@ namespace GitSharp.Tests.DirectoryCache
 
             DirCacheEntry longEnt = new DirCacheEntry(longPath);
             DirCacheEntry shortEnt = new DirCacheEntry(shortPath);
-            Assert.AreEqual(longPath, longEnt.getPathString());
-            Assert.AreEqual(shortPath, shortEnt.getPathString());
+            Assert.Equal(longPath, longEnt.getPathString());
+            Assert.Equal(shortPath, shortEnt.getPathString());
 
             {
                 DirCache dc1 = DirCache.Lock(db);
@@ -90,21 +90,21 @@ namespace GitSharp.Tests.DirectoryCache
                     DirCacheBuilder b = dc1.builder();
                     b.add(longEnt);
                     b.add(shortEnt);
-                    Assert.IsTrue(b.commit());
+                    Assert.True(b.commit());
                 }
-                Assert.AreEqual(2, dc1.getEntryCount());
-                Assert.AreSame(longEnt, dc1.getEntry(0));
-                Assert.AreSame(shortEnt, dc1.getEntry(1));
+                Assert.Equal(2, dc1.getEntryCount());
+                Assert.Same(longEnt, dc1.getEntry(0));
+                Assert.Same(shortEnt, dc1.getEntry(1));
             }
             {
                 DirCache dc2 = DirCache.read(db);
-                Assert.AreEqual(2, dc2.getEntryCount());
+                Assert.Equal(2, dc2.getEntryCount());
 
-                Assert.AreNotSame(longEnt, dc2.getEntry(0));
-                Assert.AreEqual(longPath, dc2.getEntry(0).getPathString());
+                Assert.NotSame(longEnt, dc2.getEntry(0));
+                Assert.Equal(longPath, dc2.getEntry(0).getPathString());
 
-                Assert.AreNotSame(shortEnt, dc2.getEntry(1));
-                Assert.AreEqual(shortPath, dc2.getEntry(1).getPathString());
+                Assert.NotSame(shortEnt, dc2.getEntry(1));
+                Assert.Equal(shortPath, dc2.getEntry(1).getPathString());
             }
         }
 

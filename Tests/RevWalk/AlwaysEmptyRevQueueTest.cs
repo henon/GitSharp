@@ -37,37 +37,34 @@
 
 using System;
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-	[TestFixture]
 	public class AlwaysEmptyRevQueueTest : RevWalkTestCase
 	{
 		private readonly AbstractRevQueue _q = AbstractRevQueue.EmptyQueue;
 
-		[Test]
+		[Fact]
 		public void testEmpty()
 		{
-			Assert.IsNull(_q.next());
-			Assert.IsTrue(_q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-			Assert.IsFalse(_q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-			Assert.AreEqual(Generator.GeneratorOutputType.None, _q.OutputType);
+			Assert.Null(_q.next());
+			Assert.True(_q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+			Assert.False(_q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+			Assert.Equal(Generator.GeneratorOutputType.None, _q.OutputType);
 		}
 
-		[Test]
+		[Fact]
 		public void testClear()
 		{
 			_q.clear();
 			testEmpty();
 		}
 
-		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
+		[Fact]
 		public void testAddFails()
 		{
-			_q.add(commit());
-			Assert.Fail("Did not throw UnsupportedOperationException");
+			Assert.Throws<InvalidOperationException>(() => _q.add(commit()));
 		}
 	}
 }

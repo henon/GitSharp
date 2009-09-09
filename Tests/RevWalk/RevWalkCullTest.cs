@@ -36,14 +36,13 @@
  */
 
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public class RevWalkCullTest : RevWalkTestCase
     {
-        [Test]
+        [Fact]
         public void testProperlyCullAllAncestors1()
         {
             // Credit goes to Junio C Hamano <gitster@pobox.com> for this
@@ -58,10 +57,10 @@ namespace GitSharp.Tests.RevWalk
 
             markStart(a);
             markUninteresting(d);
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testProperlyCullAllAncestors2()
         {
             // Despite clock skew on c1 being very old it should not
@@ -77,10 +76,10 @@ namespace GitSharp.Tests.RevWalk
             markUninteresting(c1);
             assertCommit(d, rw.next());
             assertCommit(c2, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testProperlyCullAllAncestors_LongHistory()
         {
             RevCommit a = commit();
@@ -96,12 +95,12 @@ namespace GitSharp.Tests.RevWalk
             markStart(c);
             markUninteresting(b);
             assertCommit(c, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
 
             // We should have aborted before we got back so far that "a"
             // would be parsed. Thus, its parents shouldn't be allocated.
             //
-            Assert.IsNull(a.Parents);
+            Assert.Null(a.Parents);
         }
     }
 }

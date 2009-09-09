@@ -38,18 +38,17 @@
 using System.IO;
 using System.Text;
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public class RevCommitParseTest : RepositoryTestCase
     {
         private readonly Encoding _utf8Enc = Encoding.GetEncoding("UTF-8");
         private readonly Encoding _isoEnc = Encoding.GetEncoding("ISO-8859-1");
         private readonly Encoding _eucJpEnc = Encoding.GetEncoding("EUC-JP");
 
-        [Test]
+        [Fact]
         public void testParse_NoParents()
         {
             ObjectId treeId = id("9788669ad918b6fcce64af8882fc9a81cb6aba67");
@@ -87,27 +86,27 @@ namespace GitSharp.Tests.RevWalk
             var rw = new GitSharp.RevWalk.RevWalk(db);
 
         	var c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-            Assert.IsNull(c.Tree);
-            Assert.IsNull(c.Parents);
+            Assert.Null(c.Tree);
+            Assert.Null(c.Parents);
 
             c.parseCanonical(rw, _utf8Enc.GetBytes(body.ToString()));
-            Assert.IsNotNull(c.Tree);
-            Assert.AreEqual(treeId, c.Tree.getId());
-            Assert.AreSame(rw.lookupTree(treeId), c.Tree);
+            Assert.NotNull(c.Tree);
+            Assert.Equal(treeId, c.Tree.getId());
+            Assert.Same(rw.lookupTree(treeId), c.Tree);
 
-            Assert.IsNotNull(c.Parents);
-            Assert.AreEqual(0, c.Parents.Length);
-            Assert.AreEqual("", c.getFullMessage());
+            Assert.NotNull(c.Parents);
+            Assert.Equal(0, c.Parents.Length);
+            Assert.Equal("", c.getFullMessage());
 
             PersonIdent cAuthor = c.getAuthorIdent();
-            Assert.IsNotNull(cAuthor);
-            Assert.AreEqual(authorName, cAuthor.Name);
-            Assert.AreEqual(authorEmail, cAuthor.EmailAddress);
+            Assert.NotNull(cAuthor);
+            Assert.Equal(authorName, cAuthor.Name);
+            Assert.Equal(authorEmail, cAuthor.EmailAddress);
 
             PersonIdent cCommitter = c.getCommitterIdent();
-            Assert.IsNotNull(cCommitter);
-            Assert.AreEqual(committerName, cCommitter.Name);
-            Assert.AreEqual(committerEmail, cCommitter.EmailAddress);
+            Assert.NotNull(cCommitter);
+            Assert.Equal(committerName, cCommitter.Name);
+            Assert.Equal(committerEmail, cCommitter.EmailAddress);
         }
 
         private RevCommit create(string msg)
@@ -125,7 +124,7 @@ namespace GitSharp.Tests.RevWalk
             return c;
         }
 
-        [Test]
+        [Fact]
         public void testParse_WeirdHeaderOnlyCommit()
         {
             var b = new StringBuilder();
@@ -137,11 +136,11 @@ namespace GitSharp.Tests.RevWalk
 
             c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), _utf8Enc.GetBytes(b.ToString()));
 
-            Assert.AreEqual("", c.getFullMessage());
-            Assert.AreEqual("", c.getShortMessage());
+            Assert.Equal("", c.getFullMessage());
+            Assert.Equal("", c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_implicit_UTF8_encoded()
         {
             RevCommit c;
@@ -158,12 +157,12 @@ namespace GitSharp.Tests.RevWalk
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
-            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
-            Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
-            Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
+            Assert.Equal("F\u00f6r fattare", c.getAuthorIdent().Name);
+            Assert.Equal("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
+            Assert.Equal("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_implicit_mixed_encoded()
         {
             RevCommit c;
@@ -181,9 +180,9 @@ namespace GitSharp.Tests.RevWalk
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
-            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
-            Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
-            Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
+            Assert.Equal("F\u00f6r fattare", c.getAuthorIdent().Name);
+            Assert.Equal("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
+            Assert.Equal("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
         }
 
         /**
@@ -192,7 +191,7 @@ namespace GitSharp.Tests.RevWalk
          * @throws Exception
          */
 
-        [Test]
+        [Fact]
         public void testParse_explicit_encoded()
         {
             RevCommit c;
@@ -210,9 +209,9 @@ namespace GitSharp.Tests.RevWalk
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
-            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
-            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
-            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+            Assert.Equal("F\u00f6r fattare", c.getAuthorIdent().Name);
+            Assert.Equal("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.Equal("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
 
         /**
@@ -225,7 +224,7 @@ namespace GitSharp.Tests.RevWalk
          * @throws Exception
          */
 
-        [Test]
+        [Fact]
         public void testParse_explicit_bad_encoded()
         {
             RevCommit c;
@@ -243,9 +242,9 @@ namespace GitSharp.Tests.RevWalk
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
-            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
-            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
-            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+            Assert.Equal("F\u00f6r fattare", c.getAuthorIdent().Name);
+            Assert.Equal("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.Equal("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
 
         /**
@@ -259,7 +258,7 @@ namespace GitSharp.Tests.RevWalk
          * @throws Exception
          */
 
-        [Test]
+        [Fact]
         public void testParse_explicit_bad_encoded2()
         {
             RevCommit c;
@@ -277,68 +276,68 @@ namespace GitSharp.Tests.RevWalk
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
-            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
-            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
-            Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
+            Assert.Equal("F\u00f6r fattare", c.getAuthorIdent().Name);
+            Assert.Equal("\u304d\u308c\u3044", c.getShortMessage());
+            Assert.Equal("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_NoMessage()
         {
             string msg = string.Empty;
             RevCommit c = create(msg);
-            Assert.AreEqual(msg, c.getFullMessage());
-            Assert.AreEqual(msg, c.getShortMessage());
+            Assert.Equal(msg, c.getFullMessage());
+            Assert.Equal(msg, c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_OnlyLFMessage()
         {
             RevCommit c = create("\n");
-            Assert.AreEqual("\n", c.getFullMessage());
-            Assert.AreEqual("", c.getShortMessage());
+            Assert.Equal("\n", c.getFullMessage());
+            Assert.Equal("", c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_ShortLineOnlyNoLF()
         {
             const string shortMsg = "This is a short message.";
             RevCommit c = create(shortMsg);
-            Assert.AreEqual(shortMsg, c.getFullMessage());
-            Assert.AreEqual(shortMsg, c.getShortMessage());
+            Assert.Equal(shortMsg, c.getFullMessage());
+            Assert.Equal(shortMsg, c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_ShortLineOnlyEndLF()
         {
             const string shortMsg = "This is a short message.";
             const string fullMsg = shortMsg + "\n";
             RevCommit c = create(fullMsg);
-            Assert.AreEqual(fullMsg, c.getFullMessage());
-            Assert.AreEqual(shortMsg, c.getShortMessage());
+            Assert.Equal(fullMsg, c.getFullMessage());
+            Assert.Equal(shortMsg, c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_ShortLineOnlyEmbeddedLF()
         {
             const string fullMsg = "This is a\nshort message.";
             string shortMsg = fullMsg.Replace('\n', ' ');
             RevCommit c = create(fullMsg);
-            Assert.AreEqual(fullMsg, c.getFullMessage());
-            Assert.AreEqual(shortMsg, c.getShortMessage());
+            Assert.Equal(fullMsg, c.getFullMessage());
+            Assert.Equal(shortMsg, c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_ShortLineOnlyEmbeddedAndEndingLF()
         {
             const string fullMsg = "This is a\nshort message.\n";
             const string shortMsg = "This is a short message.";
             RevCommit c = create(fullMsg);
-            Assert.AreEqual(fullMsg, c.getFullMessage());
-            Assert.AreEqual(shortMsg, c.getShortMessage());
+            Assert.Equal(fullMsg, c.getFullMessage());
+            Assert.Equal(shortMsg, c.getShortMessage());
         }
 
-        [Test]
+        [Fact]
         public void testParse_GitStyleMessage()
         {
             const string shortMsg = "This fixes a bug.";
@@ -346,8 +345,8 @@ namespace GitSharp.Tests.RevWalk
                                 + "\n" + "Signed-off-by: A U. Thor <author@example.com>\n";
             const string fullMsg = shortMsg + "\n" + "\n" + body;
             RevCommit c = create(fullMsg);
-            Assert.AreEqual(fullMsg, c.getFullMessage());
-            Assert.AreEqual(shortMsg, c.getShortMessage());
+            Assert.Equal(fullMsg, c.getFullMessage());
+            Assert.Equal(shortMsg, c.getShortMessage());
         }
 
         private static ObjectId id(string str)

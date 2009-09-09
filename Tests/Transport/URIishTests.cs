@@ -37,243 +37,241 @@
  */
 
 using GitSharp.Transport;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Transport
 {
-
-    [TestFixture]
-    public class URIishTest
+	public class URIishTest
     {
-        [Test]
+        [Fact]
         public void test000_UnixFile()
         {
             const string str = "/home/m y";
             URIish u = new URIish(str);
-            Assert.IsNull(u.Scheme);
-            Assert.IsFalse(u.IsRemote);
-            Assert.AreEqual(str, u.Path);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Null(u.Scheme);
+            Assert.False(u.IsRemote);
+            Assert.Equal(str, u.Path);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test001_WindowsFile()
         {
             const string str = "D:/m y";
             URIish u = new URIish(str);
-            Assert.IsNull(u.Scheme);
-            Assert.IsFalse(u.IsRemote);
-            Assert.AreEqual(str, u.Path);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Null(u.Scheme);
+            Assert.False(u.IsRemote);
+            Assert.Equal(str, u.Path);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test001_WindowsFile2()
         {
             const string str = "D:\\m y";
             URIish u = new URIish(str);
-            Assert.IsNull(u.Scheme);
-            Assert.IsFalse(u.IsRemote);
-            Assert.AreEqual("D:/m y", u.Path);
-            Assert.AreEqual("D:/m y", u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Null(u.Scheme);
+            Assert.False(u.IsRemote);
+            Assert.Equal("D:/m y", u.Path);
+            Assert.Equal("D:/m y", u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test002_UNC()
         {
             const string str = "\\\\some\\place";
             URIish u = new URIish(str);
-            Assert.IsNull(u.Scheme);
-            Assert.IsFalse(u.IsRemote);
-            Assert.AreEqual("//some/place", u.Path);
-            Assert.AreEqual("//some/place", u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Null(u.Scheme);
+            Assert.False(u.IsRemote);
+            Assert.Equal("//some/place", u.Path);
+            Assert.Equal("//some/place", u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test003_FileProtoUnix()
         {
             const string str = "file:///home/m y";
             URIish u = new URIish(str);
-            Assert.AreEqual("file", u.Scheme);
-            Assert.IsFalse(u.IsRemote);
-            Assert.AreEqual("/home/m y", u.Path);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Equal("file", u.Scheme);
+            Assert.False(u.IsRemote);
+            Assert.Equal("/home/m y", u.Path);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test004_FileProtoWindows()
         {
             const string str = "file:///D:/m y";
             URIish u = new URIish(str);
-            Assert.AreEqual("file", u.Scheme);
-            Assert.IsFalse(u.IsRemote);
-            Assert.AreEqual("D:/m y", u.Path);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Equal("file", u.Scheme);
+            Assert.False(u.IsRemote);
+            Assert.Equal("D:/m y", u.Path);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test005_GitProtoUnix()
         {
             const string str = "git://example.com/home/m y";
             URIish u = new URIish(str);
-            Assert.AreEqual("git", u.Scheme);
-            Assert.IsTrue(u.IsRemote);
-            Assert.AreEqual("example.com", u.Host);
-            Assert.AreEqual("/home/m y", u.Path);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Equal("git", u.Scheme);
+            Assert.True(u.IsRemote);
+            Assert.Equal("example.com", u.Host);
+            Assert.Equal("/home/m y", u.Path);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test006_GitProtoUnixPort()
         {
             const string str = "git://example.com:333/home/m y";
             URIish u = new URIish(str);
-            Assert.AreEqual("git", u.Scheme);
-            Assert.IsTrue(u.IsRemote);
-            Assert.AreEqual("example.com", u.Host);
-            Assert.AreEqual("/home/m y", u.Path);
-            Assert.AreEqual(333, u.Port);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Equal("git", u.Scheme);
+            Assert.True(u.IsRemote);
+            Assert.Equal("example.com", u.Host);
+            Assert.Equal("/home/m y", u.Path);
+            Assert.Equal(333, u.Port);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test007_GitProtoWindowsPort()
         {
             const string str = "git://example.com:338/D:/m y";
             URIish u = new URIish(str);
-            Assert.AreEqual("git", u.Scheme);
-            Assert.IsTrue(u.IsRemote);
-            Assert.AreEqual("D:/m y", u.Path);
-            Assert.AreEqual(338, u.Port);
-            Assert.AreEqual("example.com", u.Host);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Equal("git", u.Scheme);
+            Assert.True(u.IsRemote);
+            Assert.Equal("D:/m y", u.Path);
+            Assert.Equal(338, u.Port);
+            Assert.Equal("example.com", u.Host);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test008_GitProtoWindows()
         {
             const string str = "git://example.com/D:/m y";
             URIish u = new URIish(str);
-            Assert.AreEqual("git", u.Scheme);
-            Assert.IsTrue(u.IsRemote);
-            Assert.AreEqual("D:/m y", u.Path);
-            Assert.AreEqual(-1, u.Port);
-            Assert.AreEqual("example.com", u.Host);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Equal("git", u.Scheme);
+            Assert.True(u.IsRemote);
+            Assert.Equal("D:/m y", u.Path);
+            Assert.Equal(-1, u.Port);
+            Assert.Equal("example.com", u.Host);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test009_ScpStyleWithoutUser()
         {
             const string str = "example.com:some/p ath";
             URIish u = new URIish(str);
-            Assert.IsNull(u.Scheme);
-            Assert.IsTrue(u.IsRemote);
-            Assert.AreEqual("some/p ath", u.Path);
-            Assert.AreEqual("example.com", u.Host);
-            Assert.AreEqual(-1, u.Port);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Null(u.Scheme);
+            Assert.True(u.IsRemote);
+            Assert.Equal("some/p ath", u.Path);
+            Assert.Equal("example.com", u.Host);
+            Assert.Equal(-1, u.Port);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test010_ScpStyleWithUser()
         {
             const string str = "user@example.com:some/p ath";
             URIish u = new URIish(str);
-            Assert.IsNull(u.Scheme);
-            Assert.IsTrue(u.IsRemote);
-            Assert.AreEqual("some/p ath", u.Path);
-            Assert.AreEqual("user", u.User);
-            Assert.AreEqual("example.com", u.Host);
-            Assert.AreEqual(-1, u.Port);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Null(u.Scheme);
+            Assert.True(u.IsRemote);
+            Assert.Equal("some/p ath", u.Path);
+            Assert.Equal("user", u.User);
+            Assert.Equal("example.com", u.Host);
+            Assert.Equal(-1, u.Port);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test011_GitSshProto()
         {
             const string str = "git+ssh://example.com/some/p ath";
             URIish u = new URIish(str);
-            Assert.AreEqual("git+ssh", u.Scheme);
-            Assert.IsTrue(u.IsRemote);
-            Assert.AreEqual("/some/p ath", u.Path);
-            Assert.AreEqual("example.com", u.Host);
-            Assert.AreEqual(-1, u.Port);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Equal("git+ssh", u.Scheme);
+            Assert.True(u.IsRemote);
+            Assert.Equal("/some/p ath", u.Path);
+            Assert.Equal("example.com", u.Host);
+            Assert.Equal(-1, u.Port);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test012_SshGitProto()
         {
             const string str = "ssh+git://example.com/some/p ath";
             URIish u = new URIish(str);
-            Assert.AreEqual("ssh+git", u.Scheme);
-            Assert.IsTrue(u.IsRemote);
-            Assert.AreEqual("/some/p ath", u.Path);
-            Assert.AreEqual("example.com", u.Host);
-            Assert.AreEqual(-1, u.Port);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Equal("ssh+git", u.Scheme);
+            Assert.True(u.IsRemote);
+            Assert.Equal("/some/p ath", u.Path);
+            Assert.Equal("example.com", u.Host);
+            Assert.Equal(-1, u.Port);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test013_SshProto()
         {
             const string str = "ssh://example.com/some/p ath";
             URIish u = new URIish(str);
-            Assert.AreEqual("ssh", u.Scheme);
-            Assert.IsTrue(u.IsRemote);
-            Assert.AreEqual("/some/p ath", u.Path);
-            Assert.AreEqual("example.com", u.Host);
-            Assert.AreEqual(-1, u.Port);
-            Assert.AreEqual(str, u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Equal("ssh", u.Scheme);
+            Assert.True(u.IsRemote);
+            Assert.Equal("/some/p ath", u.Path);
+            Assert.Equal("example.com", u.Host);
+            Assert.Equal(-1, u.Port);
+            Assert.Equal(str, u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test014_SshProtoWithUserAndPort()
         {
             const string str = "ssh://user@example.com:33/some/p ath";
             URIish u = new URIish(str);
-            Assert.AreEqual("ssh", u.Scheme);
-            Assert.IsTrue(u.IsRemote);
-            Assert.AreEqual("/some/p ath", u.Path);
-            Assert.AreEqual("example.com", u.Host);
-            Assert.AreEqual("user", u.User);
-            Assert.IsNull(u.Pass);
-            Assert.AreEqual(33, u.Port);
-            Assert.AreEqual(str, u.ToPrivateString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Equal("ssh", u.Scheme);
+            Assert.True(u.IsRemote);
+            Assert.Equal("/some/p ath", u.Path);
+            Assert.Equal("example.com", u.Host);
+            Assert.Equal("user", u.User);
+            Assert.Null(u.Pass);
+            Assert.Equal(33, u.Port);
+            Assert.Equal(str, u.ToPrivateString());
+            Assert.Equal(u, new URIish(str));
         }
 
-        [Test]
+        [Fact]
         public void test015_SshProtoWithUserPassAndPort()
         {
             const string str = "ssh://user:pass@example.com:33/some/p ath";
             URIish u = new URIish(str);
-            Assert.AreEqual("ssh", u.Scheme);
-            Assert.IsTrue(u.IsRemote);
-            Assert.AreEqual("/some/p ath", u.Path);
-            Assert.AreEqual("example.com", u.Host);
-            Assert.AreEqual("user", u.User);
-            Assert.AreEqual("pass", u.Pass);
-            Assert.AreEqual(33, u.Port);
-            Assert.AreEqual(str, u.ToPrivateString());
-            Assert.AreEqual(u.SetPass(null).ToPrivateString(), u.ToString());
-            Assert.AreEqual(u, new URIish(str));
+            Assert.Equal("ssh", u.Scheme);
+            Assert.True(u.IsRemote);
+            Assert.Equal("/some/p ath", u.Path);
+            Assert.Equal("example.com", u.Host);
+            Assert.Equal("user", u.User);
+            Assert.Equal("pass", u.Pass);
+            Assert.Equal(33, u.Port);
+            Assert.Equal(str, u.ToPrivateString());
+            Assert.Equal(u.SetPass(null).ToPrivateString(), u.ToString());
+            Assert.Equal(u, new URIish(str));
         }
     }
 

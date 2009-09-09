@@ -36,48 +36,48 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using Xunit;
+using GitSharp.DirectoryCache;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
-    using GitSharp.DirectoryCache;
-    [TestFixture]
     public class DirCacheTreeTest : RepositoryTestCase
     {
 
-        [Test]
+        [Fact]
         public void testEmptyCache_NoCacheTree()
         {
             DirCache dc = DirCache.read(db);
-            Assert.IsNull(dc.getCacheTree(false));
+            Assert.Null(dc.getCacheTree(false));
         }
 
-        [Test]
+        [Fact]
         public void testEmptyCache_CreateEmptyCacheTree()
         {
             DirCache dc = DirCache.read(db);
             DirCacheTree tree = dc.getCacheTree(true);
-            Assert.IsNotNull(tree);
-            Assert.AreSame(tree, dc.getCacheTree(false));
-            Assert.AreSame(tree, dc.getCacheTree(true));
-            Assert.AreEqual("", tree.getNameString());
-            Assert.AreEqual("", tree.getPathString());
-            Assert.AreEqual(0, tree.getChildCount());
-            Assert.AreEqual(0, tree.getEntrySpan());
-            Assert.IsFalse(tree.isValid());
+            Assert.NotNull(tree);
+            Assert.Same(tree, dc.getCacheTree(false));
+            Assert.Same(tree, dc.getCacheTree(true));
+            Assert.Equal("", tree.getNameString());
+            Assert.Equal("", tree.getPathString());
+            Assert.Equal(0, tree.getChildCount());
+            Assert.Equal(0, tree.getEntrySpan());
+            Assert.False(tree.isValid());
         }
 
-        [Test]
+        [Fact]
         public void testEmptyCache_Clear_NoCacheTree()
         {
             DirCache dc = DirCache.read(db);
             DirCacheTree tree = dc.getCacheTree(true);
-            Assert.IsNotNull(tree);
+            Assert.NotNull(tree);
             dc.clear();
-            Assert.IsNull(dc.getCacheTree(false));
-            Assert.AreNotSame(tree, dc.getCacheTree(true));
+            Assert.Null(dc.getCacheTree(false));
+            Assert.NotSame(tree, dc.getCacheTree(true));
         }
 
-        [Test]
+        [Fact]
         public void testSingleSubtree()
         {
             DirCache dc = DirCache.read(db);
@@ -94,27 +94,27 @@ namespace GitSharp.Tests.DirectoryCache
                 b.add(ents[i]);
             b.finish();
 
-            Assert.IsNull(dc.getCacheTree(false));
+            Assert.Null(dc.getCacheTree(false));
             DirCacheTree root = dc.getCacheTree(true);
-            Assert.IsNotNull(root);
-            Assert.AreSame(root, dc.getCacheTree(true));
-            Assert.AreEqual("", root.getNameString());
-            Assert.AreEqual("", root.getPathString());
-            Assert.AreEqual(1, root.getChildCount());
-            Assert.AreEqual(dc.getEntryCount(), root.getEntrySpan());
-            Assert.IsFalse(root.isValid());
+            Assert.NotNull(root);
+            Assert.Same(root, dc.getCacheTree(true));
+            Assert.Equal("", root.getNameString());
+            Assert.Equal("", root.getPathString());
+            Assert.Equal(1, root.getChildCount());
+            Assert.Equal(dc.getEntryCount(), root.getEntrySpan());
+            Assert.False(root.isValid());
 
             DirCacheTree aTree = root.getChild(0);
-            Assert.IsNotNull(aTree);
-            Assert.AreSame(aTree, root.getChild(0));
-            Assert.AreEqual("a", aTree.getNameString());
-            Assert.AreEqual("a/", aTree.getPathString());
-            Assert.AreEqual(0, aTree.getChildCount());
-            Assert.AreEqual(aLast - aFirst + 1, aTree.getEntrySpan());
-            Assert.IsFalse(aTree.isValid());
+            Assert.NotNull(aTree);
+            Assert.Same(aTree, root.getChild(0));
+            Assert.Equal("a", aTree.getNameString());
+            Assert.Equal("a/", aTree.getPathString());
+            Assert.Equal(0, aTree.getChildCount());
+            Assert.Equal(aLast - aFirst + 1, aTree.getEntrySpan());
+            Assert.False(aTree.isValid());
         }
 
-        [Test]
+        [Fact]
         public void testTwoLevelSubtree()
         {
             DirCache dc = DirCache.read(db);
@@ -133,33 +133,33 @@ namespace GitSharp.Tests.DirectoryCache
                 b.add(ents[i]);
             b.finish();
 
-            Assert.IsNull(dc.getCacheTree(false));
+            Assert.Null(dc.getCacheTree(false));
             DirCacheTree root = dc.getCacheTree(true);
-            Assert.IsNotNull(root);
-            Assert.AreSame(root, dc.getCacheTree(true));
-            Assert.AreEqual("", root.getNameString());
-            Assert.AreEqual("", root.getPathString());
-            Assert.AreEqual(1, root.getChildCount());
-            Assert.AreEqual(dc.getEntryCount(), root.getEntrySpan());
-            Assert.IsFalse(root.isValid());
+            Assert.NotNull(root);
+            Assert.Same(root, dc.getCacheTree(true));
+            Assert.Equal("", root.getNameString());
+            Assert.Equal("", root.getPathString());
+            Assert.Equal(1, root.getChildCount());
+            Assert.Equal(dc.getEntryCount(), root.getEntrySpan());
+            Assert.False(root.isValid());
 
             DirCacheTree aTree = root.getChild(0);
-            Assert.IsNotNull(aTree);
-            Assert.AreSame(aTree, root.getChild(0));
-            Assert.AreEqual("a", aTree.getNameString());
-            Assert.AreEqual("a/", aTree.getPathString());
-            Assert.AreEqual(1, aTree.getChildCount());
-            Assert.AreEqual(aLast - aFirst + 1, aTree.getEntrySpan());
-            Assert.IsFalse(aTree.isValid());
+            Assert.NotNull(aTree);
+            Assert.Same(aTree, root.getChild(0));
+            Assert.Equal("a", aTree.getNameString());
+            Assert.Equal("a/", aTree.getPathString());
+            Assert.Equal(1, aTree.getChildCount());
+            Assert.Equal(aLast - aFirst + 1, aTree.getEntrySpan());
+            Assert.False(aTree.isValid());
 
             DirCacheTree acTree = aTree.getChild(0);
-            Assert.IsNotNull(acTree);
-            Assert.AreSame(acTree, aTree.getChild(0));
-            Assert.AreEqual("c", acTree.getNameString());
-            Assert.AreEqual("a/c/", acTree.getPathString());
-            Assert.AreEqual(0, acTree.getChildCount());
-            Assert.AreEqual(acLast - acFirst + 1, acTree.getEntrySpan());
-            Assert.IsFalse(acTree.isValid());
+            Assert.NotNull(acTree);
+            Assert.Same(acTree, aTree.getChild(0));
+            Assert.Equal("c", acTree.getNameString());
+            Assert.Equal("a/c/", acTree.getPathString());
+            Assert.Equal(0, acTree.getChildCount());
+            Assert.Equal(acLast - acFirst + 1, acTree.getEntrySpan());
+            Assert.False(acTree.isValid());
         }
 
         /**
@@ -171,7 +171,7 @@ namespace GitSharp.Tests.DirectoryCache
          * @throws CorruptObjectException
          * @throws IOException
          */
-        [Test]
+        [Fact]
         public void testWriteReadTree()
         {
             DirCache dc = DirCache.Lock(db);
@@ -194,8 +194,8 @@ namespace GitSharp.Tests.DirectoryCache
             b.commit();
             DirCache read = DirCache.read(db);
 
-            Assert.AreEqual(paths.Length, read.getEntryCount());
-            Assert.AreEqual(1, read.getCacheTree(true).getChildCount());
+            Assert.Equal(paths.Length, read.getEntryCount());
+            Assert.Equal(1, read.getCacheTree(true).getChildCount());
         }
     }
 }

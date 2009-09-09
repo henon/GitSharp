@@ -39,7 +39,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
@@ -47,10 +47,9 @@ namespace GitSharp.Tests
 	 * Misc tests for refs. A lot of things are tested elsewhere so not having a
 	 * test for a ref related method, does not mean it is untested.
 	 */
-	[TestFixture]
 	public class RefTest : RepositoryTestCase
 	{
-		[Test]
+		[Fact]
 		public virtual void testReadAllIncludingSymrefs()
 		{
 			ObjectId masterId = db.Resolve("refs/heads/master");
@@ -61,30 +60,30 @@ namespace GitSharp.Tests
 			db.WriteSymref("refs/remotes/origin/HEAD", "refs/remotes/origin/master");
 
 			ObjectId r = db.Resolve("refs/remotes/origin/HEAD");
-			Assert.AreEqual(masterId, r);
+			Assert.Equal(masterId, r);
 
 			IDictionary<string, Ref> allRefs = db.getAllRefs();
 			Ref refHEAD = allRefs["refs/remotes/origin/HEAD"];
-			Assert.IsNotNull(refHEAD);
-			Assert.AreEqual(masterId, refHEAD.ObjectId);
-			Assert.IsTrue(refHEAD.Peeled);
-			Assert.IsNull(refHEAD.PeeledObjectId);
+			Assert.NotNull(refHEAD);
+			Assert.Equal(masterId, refHEAD.ObjectId);
+			Assert.True(refHEAD.Peeled);
+			Assert.Null(refHEAD.PeeledObjectId);
 
 			Ref refmaster = allRefs["refs/remotes/origin/master"];
-			Assert.AreEqual(masterId, refmaster.ObjectId);
-			Assert.IsFalse(refmaster.Peeled);
-			Assert.IsNull(refmaster.PeeledObjectId);
+			Assert.Equal(masterId, refmaster.ObjectId);
+			Assert.False(refmaster.Peeled);
+			Assert.Null(refmaster.PeeledObjectId);
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testReadSymRefToPacked()
 		{
 			db.WriteSymref("HEAD", "refs/heads/b");
 			Ref @ref = db.getRef("HEAD");
-			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+			Assert.Equal(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
-		[Test]
+		[Fact]
 		public void testReadSymRefToLoosePacked()
 		{
 			ObjectId pid = db.Resolve("refs/heads/master^");
@@ -92,32 +91,32 @@ namespace GitSharp.Tests
 			updateRef.NewObjectId = pid;
 			updateRef.IsForceUpdate = true;
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update); // internal
+			Assert.Equal(RefUpdate.RefUpdateResult.Forced, update); // internal
 
 			db.WriteSymref("HEAD", "refs/heads/master");
 			Ref @ref = db.getRef("HEAD");
-			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+			Assert.Equal(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
-		[Test]
+		[Fact]
 		public void testReadLooseRef()
 		{
 			RefUpdate updateRef = db.UpdateRef("ref/heads/new");
 			updateRef.NewObjectId = db.Resolve("refs/heads/master");
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
+			Assert.Equal(RefUpdate.RefUpdateResult.New, update);
 			Ref @ref = db.getRef("ref/heads/new");
-			Assert.AreEqual(Ref.Storage.Loose, @ref.StorageFormat);
+			Assert.Equal(Ref.Storage.Loose, @ref.StorageFormat);
 		}
 
 		/// <summary>
 		/// Let an "outsider" Create a loose ref with the same name as a packed one
 		/// </summary>
-		[Test]
+		[Fact]
 		public void testReadLoosePackedRef()
 		{
 			Ref @ref = db.getRef("refs/heads/master");
-			Assert.AreEqual(Ref.Storage.Packed, @ref.StorageFormat);
+			Assert.Equal(Ref.Storage.Packed, @ref.StorageFormat);
 			string path = Path.Combine(db.Directory.FullName, "refs/heads/master");
 			FileStream os = new FileStream(path, System.IO.FileMode.OpenOrCreate);
 			byte[] buffer = Encoding.UTF8.GetBytes(@ref.ObjectId.Name);
@@ -126,26 +125,26 @@ namespace GitSharp.Tests
 			os.Close();
 
 			@ref = db.getRef("refs/heads/master");
-			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+			Assert.Equal(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
 		///	<summary>
 		/// Modify a packed ref using the API. This creates a loose ref too, ie. LOOSE_PACKED
 		///	</summary>
-		[Test]
+		[Fact]
 		public void testReadSimplePackedRefSameRepo()
 		{
 			Ref @ref = db.getRef("refs/heads/master");
 			ObjectId pid = db.Resolve("refs/heads/master^");
-			Assert.AreEqual(Ref.Storage.Packed, @ref.StorageFormat);
+			Assert.Equal(Ref.Storage.Packed, @ref.StorageFormat);
 			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
 			updateRef.NewObjectId = pid;
 			updateRef.IsForceUpdate = true;
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
+			Assert.Equal(RefUpdate.RefUpdateResult.Forced, update);
 
 			@ref = db.getRef("refs/heads/master");
-			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+			Assert.Equal(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 	}
 }

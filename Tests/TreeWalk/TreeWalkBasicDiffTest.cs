@@ -37,14 +37,13 @@
 
 using System;
 using GitSharp.TreeWalk.Filter;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.TreeWalk
 {
-	[TestFixture]
 	public class TreeWalkBasicDiffTest : RepositoryTestCase
 	{
-		[Test]
+		[Fact]
 		public void testMissingSubtree_DetectFileAdded_FileModified()
 		{
 			var ow = new ObjectWriter(db);
@@ -94,21 +93,21 @@ namespace GitSharp.Tests.TreeWalk
 			tw.Recursive = true;
 			tw.setFilter(TreeFilter.ANY_DIFF);
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("sub-b/empty", tw.getPathString());
-			Assert.AreEqual(FileMode.Missing, tw.getFileMode(0));
-			Assert.AreEqual(FileMode.RegularFile, tw.getFileMode(1));
-			Assert.AreEqual(ObjectId.ZeroId, tw.getObjectId(0));
-			Assert.AreEqual(bFileId, tw.getObjectId(1));
+			Assert.True(tw.next());
+			Assert.Equal("sub-b/empty", tw.getPathString());
+			Assert.Equal(FileMode.Missing, tw.getFileMode(0));
+			Assert.Equal(FileMode.RegularFile, tw.getFileMode(1));
+			Assert.Equal(ObjectId.ZeroId, tw.getObjectId(0));
+			Assert.Equal(bFileId, tw.getObjectId(1));
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("sub-c/empty", tw.getPathString());
-			Assert.AreEqual(FileMode.RegularFile, tw.getFileMode(0));
-			Assert.AreEqual(FileMode.RegularFile, tw.getFileMode(1));
-			Assert.AreEqual(cFileId1, tw.getObjectId(0));
-			Assert.AreEqual(cFileId2, tw.getObjectId(1));
+			Assert.True(tw.next());
+			Assert.Equal("sub-c/empty", tw.getPathString());
+			Assert.Equal(FileMode.RegularFile, tw.getFileMode(0));
+			Assert.Equal(FileMode.RegularFile, tw.getFileMode(1));
+			Assert.Equal(cFileId1, tw.getObjectId(0));
+			Assert.Equal(cFileId2, tw.getObjectId(1));
 
-			Assert.IsFalse(tw.next());
+			Assert.False(tw.next());
 		}
 	}
 }

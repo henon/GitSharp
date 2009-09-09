@@ -41,59 +41,58 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
+using Xunit;
 using System.IO;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class ConstantsEncodingTest
     {
-        [Test]
+        [Fact]
         public void testEncodeASCII_SimpleASCII()
         {
             String src = "abc";
             byte[] exp = { (byte)'a', (byte)'b', (byte)'c' };
             byte[] res = Constants.encodeASCII(src);
-            Assert.IsTrue(Enumerable.SequenceEqual(exp, res));
-            Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
+            Assert.True(Enumerable.SequenceEqual(exp, res));
+            Assert.Equal(src, Encoding.UTF8.GetString(res, 0, res.Length));
         }
 
-        [Test]
+        [Fact]
         public void testEncodeASCII_FailOnNonASCII()
         {
             String src = "ÅªnÄ­cÅdeÌ½";
             try
             {
                 Constants.encodeASCII(src);
-                Assert.Fail("Incorrectly accepted a Unicode character");
+                Assert.False(true, "Incorrectly accepted a Unicode character");
             }
             catch (ArgumentException err)
             {
-                Assert.AreEqual("Not ASCII string: " + src, err.Message);
+                Assert.Equal("Not ASCII string: " + src, err.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testEncodeASCII_Number13()
         {
             long src = 13;
             byte[] exp = { (byte)'1', (byte)'3' };
             byte[] res = Constants.encodeASCII(src);
-            Assert.IsTrue(Enumerable.SequenceEqual(exp, res));
+            Assert.True(Enumerable.SequenceEqual(exp, res));
         }
 
-        [Test]
+        [Fact]
         public void testEncode_SimpleASCII()
         {
             String src = "abc";
             byte[] exp = { (byte)'a', (byte)'b', (byte)'c' };
             byte[] res = Constants.encode(src);
-            Assert.IsTrue(Enumerable.SequenceEqual(exp, res));
-            Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
+            Assert.True(Enumerable.SequenceEqual(exp, res));
+            Assert.Equal(src, Encoding.UTF8.GetString(res, 0, res.Length));
         }
 
-        [Test]
+        [Fact]
         public void testEncode_Unicode()
         {
             string src = "Ūnĭcōde̽"; 
@@ -102,8 +101,8 @@ namespace GitSharp.Tests
                 (byte) 0xCC, (byte) 0xBD };
 
             byte[] res = Constants.encode(src);
-            Assert.IsTrue(Enumerable.SequenceEqual(exp, res));
-            Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
+            Assert.True(Enumerable.SequenceEqual(exp, res));
+            Assert.Equal(src, Encoding.UTF8.GetString(res, 0, res.Length));
         }
     }
 

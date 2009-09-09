@@ -38,107 +38,106 @@
 using System.Collections.Generic;
 using System.Text;
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-	[TestFixture]
 	public class FooterLineTest : RepositoryTestCase
 	{
-		[Test]
+		[Fact]
 		public void testNoFooters_EmptyBody()
 		{
 			RevCommit commit = Parse(string.Empty);
 			IList<FooterLine> footers = commit.GetFooterLines();
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(0, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(0, footers.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void testNoFooters_NewlineOnlyBody1()
 		{
 			RevCommit commit = Parse("\n");
 			IList<FooterLine> footers = commit.GetFooterLines();
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(0, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(0, footers.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void testNoFooters_NewlineOnlyBody5()
 		{
 			RevCommit commit = Parse("\n\n\n\n\n");
 			IList<FooterLine> footers = commit.GetFooterLines();
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(0, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(0, footers.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void testNoFooters_OneLineBodyNoLF()
 		{
 			RevCommit commit = Parse("this is a commit");
 			IList<FooterLine> footers = commit.GetFooterLines();
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(0, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(0, footers.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void testNoFooters_OneLineBodyWithLF()
 		{
 			RevCommit commit = Parse("this is a commit\n");
 			IList<FooterLine> footers = commit.GetFooterLines();
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(0, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(0, footers.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void testNoFooters_ShortBodyNoLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit");
 			IList<FooterLine> footers = commit.GetFooterLines();
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(0, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(0, footers.Count);
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testNoFooters_ShortBodyWithLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n");
 			IList<FooterLine> footers = commit.GetFooterLines();
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(0, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(0, footers.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void testSignedOffBy_OneUserNoLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Signed-off-by: A. U. Thor <a@example.com>");
 			IList<FooterLine> footers = commit.GetFooterLines();
 
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(1, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(1, footers.Count);
 
 			FooterLine f = footers[0];
-			Assert.AreEqual("Signed-off-by", f.Key);
-			Assert.AreEqual("A. U. Thor <a@example.com>", f.Value);
-			Assert.AreEqual("a@example.com", f.getEmailAddress());
+			Assert.Equal("Signed-off-by", f.Key);
+			Assert.Equal("A. U. Thor <a@example.com>", f.Value);
+			Assert.Equal("a@example.com", f.getEmailAddress());
 		}
 
-		[Test]
+		[Fact]
 		public void testSignedOffBy_OneUserWithLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Signed-off-by: A. U. Thor <a@example.com>\n");
 			IList<FooterLine> footers = commit.GetFooterLines();
 
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(1, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(1, footers.Count);
 
 			FooterLine f = footers[0];
-			Assert.AreEqual("Signed-off-by", f.Key);
-			Assert.AreEqual("A. U. Thor <a@example.com>", f.Value);
-			Assert.AreEqual("a@example.com", f.getEmailAddress());
+			Assert.Equal("Signed-off-by", f.Key);
+			Assert.Equal("A. U. Thor <a@example.com>", f.Value);
+			Assert.Equal("a@example.com", f.getEmailAddress());
 		}
 
-		[Test]
+		[Fact]
 		public void testSignedOffBy_IgnoreWhitespace()
 		{
 			// We only ignore leading whitespace on the value, trailing
@@ -147,157 +146,157 @@ namespace GitSharp.Tests.RevWalk
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Signed-off-by:   A. U. Thor <a@example.com>  \n");
 			IList<FooterLine> footers = commit.GetFooterLines();
 
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(1, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(1, footers.Count);
 
 			FooterLine f = footers[0];
-			Assert.AreEqual("Signed-off-by", f.Key);
-			Assert.AreEqual("A. U. Thor <a@example.com>  ", f.Value);
-			Assert.AreEqual("a@example.com", f.getEmailAddress());
+			Assert.Equal("Signed-off-by", f.Key);
+			Assert.Equal("A. U. Thor <a@example.com>  ", f.Value);
+			Assert.Equal("a@example.com", f.getEmailAddress());
 		}
 
-		[Test]
+		[Fact]
 		public void testEmptyValueNoLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Signed-off-by:");
 			IList<FooterLine> footers = commit.GetFooterLines();
 
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(1, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(1, footers.Count);
 
 			FooterLine f = footers[0];
-			Assert.AreEqual("Signed-off-by", f.Key);
-			Assert.AreEqual("", f.Value);
-			Assert.IsNull(f.getEmailAddress());
+			Assert.Equal("Signed-off-by", f.Key);
+			Assert.Equal("", f.Value);
+			Assert.Null(f.getEmailAddress());
 		}
 
-		[Test]
+		[Fact]
 		public void testEmptyValueWithLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Signed-off-by:\n");
 			IList<FooterLine> footers = commit.GetFooterLines();
 
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(1, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(1, footers.Count);
 
 			FooterLine f = footers[0];
-			Assert.AreEqual("Signed-off-by", f.Key);
-			Assert.AreEqual("", f.Value);
-			Assert.IsNull(f.getEmailAddress());
+			Assert.Equal("Signed-off-by", f.Key);
+			Assert.Equal("", f.Value);
+			Assert.Null(f.getEmailAddress());
 		}
 
-		[Test]
+		[Fact]
 		public void testShortKey()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "K:V\n");
 			IList<FooterLine> footers = commit.GetFooterLines();
 
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(1, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(1, footers.Count);
 
 			FooterLine f = footers[0];
-			Assert.AreEqual("K", f.Key);
-			Assert.AreEqual("V", f.Value);
-			Assert.IsNull(f.getEmailAddress());
+			Assert.Equal("K", f.Key);
+			Assert.Equal("V", f.Value);
+			Assert.Null(f.getEmailAddress());
 		}
 
-		[Test]
+		[Fact]
 		public void testNonDelimtedEmail()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Acked-by: re@example.com\n");
 			IList<FooterLine> footers = commit.GetFooterLines();
 
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(1, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(1, footers.Count);
 
 			FooterLine f = footers[0];
-			Assert.AreEqual("Acked-by", f.Key);
-			Assert.AreEqual("re@example.com", f.Value);
-			Assert.AreEqual("re@example.com", f.getEmailAddress());
+			Assert.Equal("Acked-by", f.Key);
+			Assert.Equal("re@example.com", f.Value);
+			Assert.Equal("re@example.com", f.getEmailAddress());
 		}
 
-		[Test]
+		[Fact]
 		public void testNotEmail()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Acked-by: Main Tain Er\n");
 			IList<FooterLine> footers = commit.GetFooterLines();
 
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(1, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(1, footers.Count);
 
 			FooterLine f = footers[0];
-			Assert.AreEqual("Acked-by", f.Key);
-			Assert.AreEqual("Main Tain Er", f.Value);
-			Assert.IsNull(f.getEmailAddress());
+			Assert.Equal("Acked-by", f.Key);
+			Assert.Equal("Main Tain Er", f.Value);
+			Assert.Null(f.getEmailAddress());
 		}
 		
-		[Test]
+		[Fact]
 		public void testSignedOffBy_ManyUsers()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "Not-A-Footer-Line: this line must not be read as a footer\n" + "\n" + "Signed-off-by: A. U. Thor <a@example.com>\n" + "CC:            <some.mailing.list@example.com>\n" + "Acked-by: Some Reviewer <sr@example.com>\n" + "Signed-off-by: Main Tain Er <mte@example.com>\n");
 			IList<FooterLine> footers = commit.GetFooterLines();
 
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(4, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(4, footers.Count);
 
 			FooterLine f = footers[0];
-			Assert.AreEqual("Signed-off-by", f.Key);
-			Assert.AreEqual("A. U. Thor <a@example.com>", f.Value);
-			Assert.AreEqual("a@example.com", f.getEmailAddress());
+			Assert.Equal("Signed-off-by", f.Key);
+			Assert.Equal("A. U. Thor <a@example.com>", f.Value);
+			Assert.Equal("a@example.com", f.getEmailAddress());
 
 			f = footers[1];
-			Assert.AreEqual("CC", f.Key);
-			Assert.AreEqual("<some.mailing.list@example.com>", f.Value);
-			Assert.AreEqual("some.mailing.list@example.com", f.getEmailAddress());
+			Assert.Equal("CC", f.Key);
+			Assert.Equal("<some.mailing.list@example.com>", f.Value);
+			Assert.Equal("some.mailing.list@example.com", f.getEmailAddress());
 
 			f = footers[2];
-			Assert.AreEqual("Acked-by", f.Key);
-			Assert.AreEqual("Some Reviewer <sr@example.com>", f.Value);
-			Assert.AreEqual("sr@example.com", f.getEmailAddress());
+			Assert.Equal("Acked-by", f.Key);
+			Assert.Equal("Some Reviewer <sr@example.com>", f.Value);
+			Assert.Equal("sr@example.com", f.getEmailAddress());
 
 			f = footers[3];
-			Assert.AreEqual("Signed-off-by", f.Key);
-			Assert.AreEqual("Main Tain Er <mte@example.com>", f.Value);
-			Assert.AreEqual("mte@example.com", f.getEmailAddress());
+			Assert.Equal("Signed-off-by", f.Key);
+			Assert.Equal("Main Tain Er <mte@example.com>", f.Value);
+			Assert.Equal("mte@example.com", f.getEmailAddress());
 		}
 
-		[Test]
+		[Fact]
 		public void testSignedOffBy_SkipNonFooter()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "Not-A-Footer-Line: this line must not be read as a footer\n" + "\n" + "Signed-off-by: A. U. Thor <a@example.com>\n" + "CC:            <some.mailing.list@example.com>\n" + "not really a footer line but we'll skip it anyway\n" + "Acked-by: Some Reviewer <sr@example.com>\n" + "Signed-off-by: Main Tain Er <mte@example.com>\n");
 			IList<FooterLine> footers = commit.GetFooterLines();
 
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(4, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(4, footers.Count);
 
 			FooterLine f = footers[0];
-			Assert.AreEqual("Signed-off-by", f.Key);
-			Assert.AreEqual("A. U. Thor <a@example.com>", f.Value);
+			Assert.Equal("Signed-off-by", f.Key);
+			Assert.Equal("A. U. Thor <a@example.com>", f.Value);
 
 			f = footers[1];
-			Assert.AreEqual("CC", f.Key);
-			Assert.AreEqual("<some.mailing.list@example.com>", f.Value);
+			Assert.Equal("CC", f.Key);
+			Assert.Equal("<some.mailing.list@example.com>", f.Value);
 
 			f = footers[2];
-			Assert.AreEqual("Acked-by", f.Key);
-			Assert.AreEqual("Some Reviewer <sr@example.com>", f.Value);
+			Assert.Equal("Acked-by", f.Key);
+			Assert.Equal("Some Reviewer <sr@example.com>", f.Value);
 
 			f = footers[3];
-			Assert.AreEqual("Signed-off-by", f.Key);
-			Assert.AreEqual("Main Tain Er <mte@example.com>", f.Value);
+			Assert.Equal("Signed-off-by", f.Key);
+			Assert.Equal("Main Tain Er <mte@example.com>", f.Value);
 		}
 
-		[Test]
+		[Fact]
 		public void testFilterFootersIgnoreCase()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "Not-A-Footer-Line: this line must not be read as a footer\n" + "\n" + "Signed-Off-By: A. U. Thor <a@example.com>\n" + "CC:            <some.mailing.list@example.com>\n" + "Acked-by: Some Reviewer <sr@example.com>\n" + "signed-off-by: Main Tain Er <mte@example.com>\n");
 			IList<string> footers = commit.GetFooterLines("signed-off-by");
 
-			Assert.IsNotNull(footers);
-			Assert.AreEqual(2, footers.Count);
+			Assert.NotNull(footers);
+			Assert.Equal(2, footers.Count);
 
-			Assert.AreEqual("A. U. Thor <a@example.com>", footers[0]);
-			Assert.AreEqual("Main Tain Er <mte@example.com>", footers[1]);
+			Assert.Equal("A. U. Thor <a@example.com>", footers[0]);
+			Assert.Equal("Main Tain Er <mte@example.com>", footers[1]);
 		}
 
 		private RevCommit Parse(string msg)

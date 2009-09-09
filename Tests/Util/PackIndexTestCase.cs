@@ -36,132 +36,128 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using NUnit.Framework;
-using GitSharp;
-using GitSharp.Util;
+using Xunit;
 
 namespace GitSharp.Tests.Util
 {
-    public abstract class PackIndexTestCase : RepositoryTestCase
-    {
+	public abstract class PackIndexTestCase : RepositoryTestCase
+	{
+		private readonly PackIndex denseIdx;
+		private readonly PackIndex smallIdx;
 
-        protected PackIndex smallIdx;
+		protected PackIndexTestCase()
+		{
+			base.SetUp();
+			smallIdx = PackIndex.Open(getFileForPack34be9032());
+			denseIdx = PackIndex.Open(getFileForPackdf2982f28());
+		}
 
-        protected PackIndex denseIdx;
+		public PackIndex SmallIdx
+		{
+			get { return smallIdx; }
+		}
 
-        [SetUp]
-        public override void setUp()
-        {
-            base.setUp();
-            smallIdx = PackIndex.Open(getFileForPack34be9032());
-            denseIdx = PackIndex.Open(getFileForPackdf2982f28());
-        }
-        /**
-         * Return file with appropriate index version for prepared pack.
-         * 
-         * @return file with index
-         */
-        public abstract FileInfo getFileForPack34be9032();
+		public PackIndex DenseIdx
+		{
+			get { return denseIdx; }
+		}
 
-        /**
-         * Return file with appropriate index version for prepared pack.
-         * 
-         * @return file with index
-         */
-        public abstract FileInfo getFileForPackdf2982f28();
+		/// <summary>
+		/// Return file with appropriate index version for prepared pack.
+		/// </summary>
+		/// <returns>file with index</returns>
+		protected abstract FileInfo getFileForPack34be9032();
 
-        /**
-         * Verify CRC32 support.
-         *
-         * @throws MissingObjectException
-         * @throws UnsupportedOperationException
-         */
-        public abstract void testCRC32();
+		/// <summary>
+		/// Return file with appropriate index version for prepared pack.
+		/// </summary>
+		/// <returns>file with index</returns>
+		protected abstract FileInfo getFileForPackdf2982f28();
 
+		/// <summary>
+		/// Verify CRC32 support.
+		/// </summary>
+		public abstract void testCRC32();
 
-        /**
-         * Test contracts of Iterator methods and this implementation remove()
-         * limitations.
-         */
-        [Test]
-        public void testIteratorMethodsContract()
-        {
-            IEnumerator<PackIndex.MutableEntry> iter = smallIdx.GetEnumerator();
-            while (iter.MoveNext())
-            {
-                var entry = iter.Current;
-            }
-            Assert.IsFalse(iter.MoveNext());
-        }
+		/// <summary>
+		/// Test contracts of Iterator methods and this implementation remove()
+		/// limitations.
+		/// </summary>
+		[Fact]
+		public void testIteratorMethodsContract()
+		{
+			IEnumerator<PackIndex.MutableEntry> iter = smallIdx.GetEnumerator();
+			while (iter.MoveNext())
+			{
+				PackIndex.MutableEntry entry = iter.Current;
+			}
+			Assert.False(iter.MoveNext());
+		}
 
-        /**
-         * Test results of iterator comparing to content of well-known (prepared)
-         * small index.
-         */
-        [Test]
-        public void testIteratorReturnedValues1()
-        {
-            IEnumerator<PackIndex.MutableEntry> iter = smallIdx.GetEnumerator();
-            iter.MoveNext();
-            Assert.AreEqual("4b825dc642cb6eb9a060e54bf8d69288fbee4904", iter.Current.ToString());
-            iter.MoveNext();
-            Assert.AreEqual("540a36d136cf413e4b064c2b0e0a4db60f77feab", iter.Current.ToString());
-            iter.MoveNext();
-            Assert.AreEqual("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259", iter.Current.ToString());
-            iter.MoveNext();
-            Assert.AreEqual("6ff87c4664981e4397625791c8ea3bbb5f2279a3", iter.Current.ToString());
-            iter.MoveNext();
-            Assert.AreEqual("82c6b885ff600be425b4ea96dee75dca255b69e7", iter.Current.ToString());
-            iter.MoveNext();
-            Assert.AreEqual("902d5476fa249b7abc9d84c611577a81381f0327", iter.Current.ToString());
-            iter.MoveNext();
-            Assert.AreEqual("aabf2ffaec9b497f0950352b3e582d73035c2035", iter.Current.ToString());
-            iter.MoveNext();
-            Assert.AreEqual("c59759f143fb1fe21c197981df75a7ee00290799", iter.Current.ToString());
-            Assert.IsFalse(iter.MoveNext());
-        }
+		/// <summary>
+		/// Test results of iterator comparing to content of well-known (prepared)
+		/// small index.
+		/// </summary>
+		[Fact]
+		public void testIteratorReturnedValues1()
+		{
+			IEnumerator<PackIndex.MutableEntry> iter = smallIdx.GetEnumerator();
+			iter.MoveNext();
+			Assert.Equal("4b825dc642cb6eb9a060e54bf8d69288fbee4904", iter.Current.ToString());
+			iter.MoveNext();
+			Assert.Equal("540a36d136cf413e4b064c2b0e0a4db60f77feab", iter.Current.ToString());
+			iter.MoveNext();
+			Assert.Equal("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259", iter.Current.ToString());
+			iter.MoveNext();
+			Assert.Equal("6ff87c4664981e4397625791c8ea3bbb5f2279a3", iter.Current.ToString());
+			iter.MoveNext();
+			Assert.Equal("82c6b885ff600be425b4ea96dee75dca255b69e7", iter.Current.ToString());
+			iter.MoveNext();
+			Assert.Equal("902d5476fa249b7abc9d84c611577a81381f0327", iter.Current.ToString());
+			iter.MoveNext();
+			Assert.Equal("aabf2ffaec9b497f0950352b3e582d73035c2035", iter.Current.ToString());
+			iter.MoveNext();
+			Assert.Equal("c59759f143fb1fe21c197981df75a7ee00290799", iter.Current.ToString());
+			Assert.False(iter.MoveNext());
+		}
 
-        /**
-         * Compare offset from iterator entries with output of findOffset() method.
-         */
-        [Test]
-        public void testCompareEntriesOffsetsWithFindOffsets()
-        {
-            foreach (var me in smallIdx)
-            {
-                Assert.AreEqual(smallIdx.FindOffset(me.ToObjectId()), me.Offset);
-            }
-            foreach (var me in denseIdx)
-            {
-                Assert.AreEqual(denseIdx.FindOffset(me.ToObjectId()), me.Offset);
-            }
-        }
+		/// <summary>
+		/// Compare offset from iterator entries with output of findOffset() method.
+		/// </summary>
+		[Fact]
+		public void testCompareEntriesOffsetsWithFindOffsets()
+		{
+			foreach (PackIndex.MutableEntry me in smallIdx)
+			{
+				Assert.Equal(smallIdx.FindOffset(me.ToObjectId()), me.Offset);
+			}
+			foreach (PackIndex.MutableEntry me in denseIdx)
+			{
+				Assert.Equal(denseIdx.FindOffset(me.ToObjectId()), me.Offset);
+			}
+		}
 
-        /**
-         * Test partial results of iterator comparing to content of well-known
-         * (prepared) dense index, that may need multi-level indexing.
-         */
-        [Test]
-        public void testIteratorReturnedValues2()
-        {
-            IEnumerator<PackIndex.MutableEntry> iter = denseIdx.GetEnumerator();
-            iter.MoveNext();
-            while (!iter.Current.ToString().Equals("0a3d7772488b6b106fb62813c4d6d627918d9181"))
-            {
-                iter.MoveNext(); 			// just iterating
-            }
-            iter.MoveNext();
-            Assert.AreEqual("1004d0d7ac26fbf63050a234c9b88a46075719d3", iter.Current.ToString()); // same level-1
-            iter.MoveNext();
-            Assert.AreEqual("10da5895682013006950e7da534b705252b03be6", iter.Current.ToString()); // same level-1
-            iter.MoveNext();
-            Assert.AreEqual("1203b03dc816ccbb67773f28b3c19318654b0bc8", iter.Current.ToString());
-        }
-    }
-
+		/// <summary>
+		/// Test partial results of iterator comparing to content of well-known
+		/// (prepared) dense index, that may need multi-level indexing.
+		/// </summary>
+		[Fact]
+		public void testIteratorReturnedValues2()
+		{
+			IEnumerator<PackIndex.MutableEntry> iter = denseIdx.GetEnumerator();
+			iter.MoveNext();
+			while (!iter.Current.ToString().Equals("0a3d7772488b6b106fb62813c4d6d627918d9181"))
+			{
+				iter.MoveNext(); // just iterating
+			}
+			iter.MoveNext();
+			Assert.Equal("1004d0d7ac26fbf63050a234c9b88a46075719d3", iter.Current.ToString()); // same level-1
+			iter.MoveNext();
+			Assert.Equal("10da5895682013006950e7da534b705252b03be6", iter.Current.ToString()); // same level-1
+			iter.MoveNext();
+			Assert.Equal("1203b03dc816ccbb67773f28b3c19318654b0bc8", iter.Current.ToString());
+		}
+	}
 }

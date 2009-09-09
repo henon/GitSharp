@@ -36,38 +36,38 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using Xunit;
+using GitSharp.DirectoryCache;
+using GitSharp.TreeWalk.Filter;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
-    using GitSharp.DirectoryCache;
-    using GitSharp.TreeWalk.Filter;
-    [TestFixture]
     public class DirCacheIteratorTest : RepositoryTestCase
     {
 
-        [Test]
+        [Fact]
         public void testEmptyTree_NoTreeWalk()
         {
             DirCache dc = DirCache.read(db);
-            Assert.AreEqual(0, dc.getEntryCount());
+            Assert.Equal(0, dc.getEntryCount());
 
             var i = new DirCacheIterator(dc);
-            Assert.IsTrue(i.eof());
+            Assert.True(i.eof());
         }
 
-        [Test]
+        [Fact]
         public void testEmptyTree_WithTreeWalk()
         {
             DirCache dc = DirCache.read(db);
-            Assert.AreEqual(0, dc.getEntryCount());
+            Assert.Equal(0, dc.getEntryCount());
 
             var tw = new GitSharp.TreeWalk.TreeWalk(db);
             tw.reset();
             tw.addTree(new DirCacheIterator(dc));
-            Assert.IsFalse(tw.next());
+            Assert.False(tw.next());
         }
 
-        [Test]
+        [Fact]
         public void testNoSubtree_NoTreeWalk()
         {
             DirCache dc = DirCache.read(db);
@@ -92,15 +92,15 @@ namespace GitSharp.Tests.DirectoryCache
             int pathIdx = 0;
             for (; !iter.eof(); iter.next(1))
             {
-                Assert.AreEqual(pathIdx, iter.Pointer);
-                Assert.AreSame(ents[pathIdx], iter.getDirCacheEntry());
+                Assert.Equal(pathIdx, iter.Pointer);
+                Assert.Same(ents[pathIdx], iter.getDirCacheEntry());
                 pathIdx++;
             }
 
-            Assert.AreEqual(paths.Length, pathIdx);
+            Assert.Equal(paths.Length, pathIdx);
         }
 
-        [Test]
+        [Fact]
         public void testNoSubtree_WithTreeWalk()
         {
             DirCache dc = DirCache.read(db);
@@ -128,18 +128,18 @@ namespace GitSharp.Tests.DirectoryCache
             int pathIdx = 0;
             while (tw.next())
             {
-                Assert.AreSame(iter, tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator)));
-                Assert.AreEqual(pathIdx, iter.Pointer);
-                Assert.AreSame(ents[pathIdx], iter.getDirCacheEntry());
-                Assert.AreEqual(paths[pathIdx], tw.getPathString());
-                Assert.AreEqual(modes[pathIdx].Bits, tw.getRawMode(0));
-                Assert.AreSame(modes[pathIdx], tw.getFileMode(0));
+                Assert.Same(iter, tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator)));
+                Assert.Equal(pathIdx, iter.Pointer);
+                Assert.Same(ents[pathIdx], iter.getDirCacheEntry());
+                Assert.Equal(paths[pathIdx], tw.getPathString());
+                Assert.Equal(modes[pathIdx].Bits, tw.getRawMode(0));
+                Assert.Same(modes[pathIdx], tw.getFileMode(0));
                 pathIdx++;
             }
-            Assert.AreEqual(paths.Length, pathIdx);
+            Assert.Equal(paths.Length, pathIdx);
         }
 
-        [Test]
+        [Fact]
         public void testSingleSubtree_NoRecursion()
         {
             DirCache dc = DirCache.read(db);
@@ -171,27 +171,27 @@ namespace GitSharp.Tests.DirectoryCache
             int pathIdx = 0;
             while (tw.next())
             {
-                Assert.AreSame(iter, tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator)));
-                Assert.AreEqual(expModes[pathIdx].Bits, tw.getRawMode(0));
-                Assert.AreSame(expModes[pathIdx], tw.getFileMode(0));
-                Assert.AreEqual(expPaths[pathIdx], tw.getPathString());
+                Assert.Same(iter, tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator)));
+                Assert.Equal(expModes[pathIdx].Bits, tw.getRawMode(0));
+                Assert.Same(expModes[pathIdx], tw.getFileMode(0));
+                Assert.Equal(expPaths[pathIdx], tw.getPathString());
 
                 if (expPos[pathIdx] >= 0)
                 {
-                    Assert.AreEqual(expPos[pathIdx], iter.Pointer);
-                    Assert.AreSame(ents[expPos[pathIdx]], iter.getDirCacheEntry());
+                    Assert.Equal(expPos[pathIdx], iter.Pointer);
+                    Assert.Same(ents[expPos[pathIdx]], iter.getDirCacheEntry());
                 }
                 else
                 {
-                    Assert.AreSame(FileMode.Tree, tw.getFileMode(0));
+                    Assert.Same(FileMode.Tree, tw.getFileMode(0));
                 }
 
                 pathIdx++;
             }
-            Assert.AreEqual(expPaths.Length, pathIdx);
+            Assert.Equal(expPaths.Length, pathIdx);
         }
 
-        [Test]
+        [Fact]
         public void testSingleSubtree_Recursive()
         {
             DirCache dc = DirCache.read(db);
@@ -221,18 +221,18 @@ namespace GitSharp.Tests.DirectoryCache
             while (tw.next())
             {
                 var c = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
-                Assert.IsNotNull(c);
-                Assert.AreEqual(pathIdx, c.Pointer);
-                Assert.AreSame(ents[pathIdx], c.getDirCacheEntry());
-                Assert.AreEqual(paths[pathIdx], tw.getPathString());
-                Assert.AreEqual(mode.Bits, tw.getRawMode(0));
-                Assert.AreSame(mode, tw.getFileMode(0));
+                Assert.NotNull(c);
+                Assert.Equal(pathIdx, c.Pointer);
+                Assert.Same(ents[pathIdx], c.getDirCacheEntry());
+                Assert.Equal(paths[pathIdx], tw.getPathString());
+                Assert.Equal(mode.Bits, tw.getRawMode(0));
+                Assert.Same(mode, tw.getFileMode(0));
                 pathIdx++;
             }
-            Assert.AreEqual(paths.Length, pathIdx);
+            Assert.Equal(paths.Length, pathIdx);
         }
 
-        [Test]
+        [Fact]
         public void testTwoLevelSubtree_Recursive()
         {
             DirCache dc = DirCache.read(db);
@@ -261,18 +261,18 @@ namespace GitSharp.Tests.DirectoryCache
             while (tw.next())
             {
                 var c = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
-                Assert.IsNotNull(c);
-                Assert.AreEqual(pathIdx, c.Pointer);
-                Assert.AreSame(ents[pathIdx], c.getDirCacheEntry());
-                Assert.AreEqual(paths[pathIdx], tw.getPathString());
-                Assert.AreEqual(mode.Bits, tw.getRawMode(0));
-                Assert.AreSame(mode, tw.getFileMode(0));
+                Assert.NotNull(c);
+                Assert.Equal(pathIdx, c.Pointer);
+                Assert.Same(ents[pathIdx], c.getDirCacheEntry());
+                Assert.Equal(paths[pathIdx], tw.getPathString());
+                Assert.Equal(mode.Bits, tw.getRawMode(0));
+                Assert.Same(mode, tw.getFileMode(0));
                 pathIdx++;
             }
-            Assert.AreEqual(paths.Length, pathIdx);
+            Assert.Equal(paths.Length, pathIdx);
         }
 
-        [Test]
+        [Fact]
         public void testTwoLevelSubtree_FilterPath()
         {
             DirCache dc = DirCache.read(db);
@@ -300,15 +300,15 @@ namespace GitSharp.Tests.DirectoryCache
                 tw.addTree(new DirCacheIterator(dc));
                 tw.setFilter(PathFilterGroup.createFromStrings(new[] { paths[victimIdx] }));
                 tw.Recursive = tw.getFilter().shouldBeRecursive();
-                Assert.IsTrue(tw.next());
+                Assert.True(tw.next());
                 var c = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
-                Assert.IsNotNull(c);
-                Assert.AreEqual(victimIdx, c.Pointer);
-                Assert.AreSame(ents[victimIdx], c.getDirCacheEntry());
-                Assert.AreEqual(paths[victimIdx], tw.getPathString());
-                Assert.AreEqual(mode.Bits, tw.getRawMode(0));
-                Assert.AreSame(mode, tw.getFileMode(0));
-                Assert.IsFalse(tw.next());
+                Assert.NotNull(c);
+                Assert.Equal(victimIdx, c.Pointer);
+                Assert.Same(ents[victimIdx], c.getDirCacheEntry());
+                Assert.Equal(paths[victimIdx], tw.getPathString());
+                Assert.Equal(mode.Bits, tw.getRawMode(0));
+                Assert.Same(mode, tw.getFileMode(0));
+                Assert.False(tw.next());
             }
         }
     }

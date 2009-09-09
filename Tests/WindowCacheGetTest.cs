@@ -39,18 +39,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-	[TestFixture]
 	public class WindowCacheGetTest : RepositoryTestCase
 	{
 		private IList<TestObject> _toLoad;
 
-		public override void setUp()
+		public override void SetUp()
 		{
-			base.setUp();
+			base.SetUp();
 
 			_toLoad = new List<TestObject>();
 			var br = new StreamReader("Resources/all_packed_objects.txt", Constants.CHARSET);
@@ -77,10 +76,10 @@ namespace GitSharp.Tests
 				br.Close();
 			}
 
-			Assert.AreEqual(96, _toLoad.Count);
+			Assert.Equal(96, _toLoad.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void testCache_Defaults()
 		{
 			var cfg = new WindowCacheConfig();
@@ -89,11 +88,11 @@ namespace GitSharp.Tests
 			CheckLimits(cfg);
 
 			WindowCache cache = WindowCache.Instance;
-			Assert.AreEqual(6, cache.getOpenFiles());
-			Assert.AreEqual(17346, cache.getOpenBytes());
+			Assert.Equal(6, cache.getOpenFiles());
+			Assert.Equal(17346, cache.getOpenBytes());
 		}
 
-		[Test]
+		[Fact]
 		public void testCache_TooFewFiles()
 		{
 			var cfg = new WindowCacheConfig { PackedGitOpenFiles = 2 };
@@ -102,8 +101,8 @@ namespace GitSharp.Tests
 			CheckLimits(cfg);
 		}
 
-    [Test, Ignore("Seems to be some threading issues, that makes the test hang")]
-    public void testCache_TooSmallLimit()
+		[Fact(Skip = "Seems to be some threading issues, that makes the test hang")]
+		public void testCache_TooSmallLimit()
 		{
 			var cfg = new WindowCacheConfig { PackedGitWindowSize = 4096, PackedGitLimit = 4096 };
 			WindowCache.reconfigure(cfg);
@@ -114,10 +113,10 @@ namespace GitSharp.Tests
 		private static void CheckLimits(WindowCacheConfig cfg)
 		{
 			WindowCache cache = WindowCache.Instance;
-			Assert.IsTrue(cache.getOpenFiles() <= cfg.PackedGitOpenFiles);
-			Assert.IsTrue(cache.getOpenBytes() <= cfg.PackedGitLimit);
-			Assert.IsTrue(0 < cache.getOpenFiles());
-			Assert.IsTrue(0 < cache.getOpenBytes());
+			Assert.True(cache.getOpenFiles() <= cfg.PackedGitOpenFiles);
+			Assert.True(cache.getOpenBytes() <= cfg.PackedGitLimit);
+			Assert.True(0 < cache.getOpenFiles());
+			Assert.True(0 < cache.getOpenBytes());
 		}
 
 		private void DoCacheTests()
@@ -125,11 +124,11 @@ namespace GitSharp.Tests
 			foreach (TestObject o in _toLoad)
 			{
 				ObjectLoader or = db.OpenObject(new WindowCursor(), o.Id);
-				Assert.IsNotNull(or);
-				Assert.IsTrue(or is PackedObjectLoader);
-				Assert.AreEqual(o.Type, Constants.typeString(or.Type));
-				Assert.AreEqual(o.RawSize, or.RawSize);
-				Assert.AreEqual(o.Offset, ((PackedObjectLoader)or).ObjectOffset);
+				Assert.NotNull(or);
+				Assert.True(or is PackedObjectLoader);
+				Assert.Equal(o.Type, Constants.typeString(or.Type));
+				Assert.Equal(o.RawSize, or.RawSize);
+				Assert.Equal(o.Offset, ((PackedObjectLoader)or).ObjectOffset);
 			}
 		}
 

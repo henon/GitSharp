@@ -37,44 +37,43 @@
  */
 
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class RawParseUtils_MatchTest
     {
-        [Test]
+        [Fact]
 	    public void testMatch_Equal()
         {
 		    byte[] src = Constants.encodeASCII(" differ\n");
 		    byte[] dst = Constants.encodeASCII("foo differ\n");
-		    Assert.IsTrue(RawParseUtils.match(dst, 3, src) == 3 + src.Length);
+		    Assert.True(RawParseUtils.match(dst, 3, src) == 3 + src.Length);
 	    }
 
-        [Test]
+        [Fact]
 	    public void testMatch_NotEqual()
         {
 		    byte[] src = Constants.encodeASCII(" differ\n");
 		    byte[] dst = Constants.encodeASCII("a differ\n");
-		    Assert.IsTrue(RawParseUtils.match(dst, 2, src) < 0);
+		    Assert.True(RawParseUtils.match(dst, 2, src) < 0);
 	    }
 
-        [Test]
+        [Fact]
 	    public void testMatch_Prefix()
         {
 		    byte[] src = Constants.encodeASCII("author ");
 		    byte[] dst = Constants.encodeASCII("author A. U. Thor");
-            Assert.IsTrue(RawParseUtils.match(dst, 0, src) == src.Length);
-            Assert.IsTrue(RawParseUtils.match(dst, 1, src) < 0);
+            Assert.True(RawParseUtils.match(dst, 0, src) == src.Length);
+            Assert.True(RawParseUtils.match(dst, 1, src) < 0);
 	    }
 
-        [Test]
+        [Fact]
 	    public void testMatch_TooSmall()
         {
 		    byte[] src = Constants.encodeASCII("author ");
 		    byte[] dst = Constants.encodeASCII("author autho");
-		    Assert.IsTrue(RawParseUtils.match(dst, src.Length + 1, src) < 0);
+		    Assert.True(RawParseUtils.match(dst, src.Length + 1, src) < 0);
 	    }
     }
 }

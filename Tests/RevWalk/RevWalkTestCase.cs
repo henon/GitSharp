@@ -40,7 +40,7 @@ using System;
 using GitSharp.RevWalk;
 using GitSharp.DirectoryCache;
 using GitSharp.TreeWalk.Filter;
-using NUnit.Framework;
+using Xunit;
 using GitSharp.Util;
 
 namespace GitSharp.Tests.RevWalk
@@ -52,10 +52,9 @@ namespace GitSharp.Tests.RevWalk
 		private long nowTick; // [henon] this are seconds in git internal time representaiton
 		protected GitSharp.RevWalk.RevWalk rw;
 
-		[SetUp]
-		public override void setUp()
+		public override void SetUp()
 		{
-			base.setUp();
+			base.SetUp();
 			ow = new ObjectWriter(db);
 			rw = createRevWalk();
 			emptyTree = rw.parseTree(ow.WriteTree(new Tree(db)));
@@ -111,7 +110,7 @@ namespace GitSharp.Tests.RevWalk
 				FileMode entmode = tw.getFileMode(0);
 				return rw.lookupAny(entid, (int)entmode.ObjectType);
 			}
-			Assert.Fail("Can't find " + path + " in tree " + tree.Name);
+			Assert.False(true, "Can't find " + path + " in tree " + tree.Name);
 			return null; // never reached.
 		}
 
@@ -174,7 +173,7 @@ namespace GitSharp.Tests.RevWalk
 
 		protected void assertCommit(RevCommit exp, RevCommit act)
 		{
-			Assert.AreSame(exp, act);
+			Assert.Same(exp, act);
 		}
 	}
 }

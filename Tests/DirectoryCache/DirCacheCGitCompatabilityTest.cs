@@ -36,106 +36,96 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using GitSharp.DirectoryCache;
+using GitSharp.Util;
+using Xunit;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
-    using System.Collections.Generic;
-    using GitSharp.DirectoryCache;
-    using TreeWalk = GitSharp.TreeWalk.TreeWalk;
-    using System.Text;
-    using GitSharp.Util;
-
-    [TestFixture]
     public class DirCacheCGitCompatabilityTest : RepositoryTestCase
     {
-        private readonly System.IO.FileInfo _index = new System.IO.FileInfo("Resources/gitgit.index");
+        private readonly FileInfo _index = new FileInfo("Resources/gitgit.index");
 
-        [Test]
+        [Fact]
         public void testReadIndex_LsFiles()
         {
             Dictionary<string, CGitIndexRecord> ls = ReadLsFiles();
             var dc = new DirCache(_index);
-            Assert.AreEqual(0, dc.getEntryCount());
+            Assert.Equal(0, dc.getEntryCount());
             dc.read();
-            Assert.AreEqual(ls.Count, dc.getEntryCount());
+            Assert.Equal(ls.Count, dc.getEntryCount());
             int i = 0;
             foreach (var val in ls.Values)
             {
                 i++;
-                Assert.AreEqual(val, dc.getEntry(i));
+				AssertAreEqual(val, dc.getEntry(i));
             }
         }
 
-        [Test]
+        [Fact]
         public void testTreeWalk_LsFiles()
         {
             Dictionary<string, CGitIndexRecord> ls = ReadLsFiles();
             var dc = new DirCache(_index);
-            Assert.AreEqual(0, dc.getEntryCount());
+            Assert.Equal(0, dc.getEntryCount());
             dc.read();
-            Assert.AreEqual(ls.Count, dc.getEntryCount());
+            Assert.Equal(ls.Count, dc.getEntryCount());
 
             var rItr = ls.Values.GetEnumerator();
-            var tw = new TreeWalk(db);
+            var tw = new GitSharp.TreeWalk.TreeWalk(db);
             tw.reset();
             tw.Recursive = true;
             tw.addTree(new DirCacheIterator(dc));
             while (rItr.MoveNext())
             {
-                Assert.IsTrue(tw.next());
+                Assert.True(tw.next());
                 var dcItr = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
-                Assert.IsNotNull(dcItr);
+                Assert.NotNull(dcItr);
                 AssertAreEqual(rItr.Current, dcItr.getDirCacheEntry());
             }
         }
 
-        private static void AssertAreEqual(CGitIndexRecord c, DirCacheEntry j)
-        {
-            Assert.IsNotNull(c);
-            Assert.IsNotNull(j);
-
-            Assert.AreEqual(c.Path, j.getPathString());
-            Assert.AreEqual(c.Id, j.getObjectId());
-            Assert.AreEqual(c.Mode, j.getRawMode());
-            Assert.AreEqual(c.Stage, j.getStage());
-        }
-
-        [Test]
+        [Fact]
         public void testReadIndex_DirCacheTree()
         {
             Dictionary<string, CGitIndexRecord> cList = ReadLsFiles();
             Dictionary<string, CGitLsTreeRecord> cTree = ReadLsTree();
             var dc = new DirCache(_index);
-            Assert.AreEqual(0, dc.getEntryCount());
+            Assert.Equal(0, dc.getEntryCount());
             dc.read();
-            Assert.AreEqual(cList.Count, dc.getEntryCount());
+            Assert.Equal(cList.Count, dc.getEntryCount());
 
             DirCacheTree jTree = dc.getCacheTree(false);
-            Assert.IsNotNull(jTree);
-            Assert.AreEqual("", jTree.getNameString());
-            Assert.AreEqual("", jTree.getPathString());
-            Assert.IsTrue(jTree.isValid());
-            Assert.AreEqual(ObjectId
+            Assert.NotNull(jTree);
+            Assert.Equal("", jTree.getNameString());
+            Assert.Equal("", jTree.getPathString());
+            Assert.True(jTree.isValid());
+            Assert.Equal(ObjectId
                     .FromString("698dd0b8d0c299f080559a1cffc7fe029479a408"), jTree
                     .getObjectId());
-            Assert.AreEqual(cList.Count, jTree.getEntrySpan());
+            Assert.Equal(cList.Count, jTree.getEntrySpan());
 
             var subtrees = new List<CGitLsTreeRecord>();
             foreach (CGitLsTreeRecord r in cTree.Values)
             {
                 if (FileMode.Tree.Equals(r.Mode))
-                    subtrees.Add(r);
+                {
+                	subtrees.Add(r);
+                }
             }
-            Assert.AreEqual(subtrees.Count, jTree.getChildCount());
+            Assert.Equal(subtrees.Count, jTree.getChildCount());
 
             for (int i = 0; i < jTree.getChildCount(); i++)
             {
                 DirCacheTree sj = jTree.getChild(i);
                 CGitLsTreeRecord sc = subtrees[i];
-                Assert.AreEqual(sc.Path, sj.getNameString());
-                Assert.AreEqual(sc.Path + "/", sj.getPathString());
-                Assert.IsTrue(sj.isValid());
-                Assert.AreEqual(sc.Id, sj.getObjectId());
+                Assert.Equal(sc.Path, sj.getNameString());
+                Assert.Equal(sc.Path + "/", sj.getPathString());
+                Assert.True(sj.isValid());
+                Assert.Equal(sc.Id, sj.getObjectId());
             }
         }
 
@@ -167,9 +157,22 @@ namespace GitSharp.Tests.DirectoryCache
                 }
             }
             return r;
-        }
+		}
 
-        private class CGitIndexRecord
+		private static void AssertAreEqual(CGitIndexRecord c, DirCacheEntry j)
+		{
+			Assert.NotNull(c);
+			Assert.NotNull(j);
+
+			Assert.Equal(c.Path, j.getPathString());
+			Assert.Equal(c.Id, j.getObjectId());
+			Assert.Equal(c.Mode, j.getRawMode());
+			Assert.Equal(c.Stage, j.getStage());
+		}
+
+		#region Nested Types
+
+		private class CGitIndexRecord
         {
 			public int Mode { get; private set; }
 			public ObjectId Id { get; private set; }
@@ -203,6 +206,8 @@ namespace GitSharp.Tests.DirectoryCache
                 Id = ObjectId.FromString(line.Slice(sp2 + 1, tab));
                 Path = line.Substring(tab + 1);
             }
-        }
-    }
+		}
+
+		#endregion
+	}
 }

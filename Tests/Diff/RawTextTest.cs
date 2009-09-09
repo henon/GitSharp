@@ -39,66 +39,65 @@
 using System.IO;
 using GitSharp.Diff;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class RawTextTest
     {
-        [Test]
+        [Fact]
 	    public void testEmpty()
         {
 		    RawText r = new RawText(new byte[0]);
-		    Assert.AreEqual(0, r.size());
+		    Assert.Equal(0, r.size());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testEquals()
         {
 		    RawText a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
 		    RawText b = new RawText(Constants.encodeASCII("foo-b\nfoo-c\n"));
 
-		    Assert.AreEqual(2, a.size());
-		    Assert.AreEqual(2, b.size());
+		    Assert.Equal(2, a.size());
+		    Assert.Equal(2, b.size());
 
 		    // foo-a != foo-b
-		    Assert.IsFalse(a.equals(0, b, 0));
-		    Assert.IsFalse(b.equals(0, a, 0));
+		    Assert.False(a.equals(0, b, 0));
+		    Assert.False(b.equals(0, a, 0));
 
 		    // foo-b == foo-b
-		    Assert.IsTrue(a.equals(1, b, 0));
-		    Assert.IsTrue(b.equals(0, a, 1));
+		    Assert.True(a.equals(1, b, 0));
+		    Assert.True(b.equals(0, a, 1));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testWriteLine1()
         {
 		    RawText a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
 		    MemoryStream o = new MemoryStream();
 		    a.writeLine(o, 0);
 		    byte[] r = o.ToArray();
-		    Assert.AreEqual("foo-a", RawParseUtils.decode(r));
+		    Assert.Equal("foo-a", RawParseUtils.decode(r));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testWriteLine2()
         {
 		    RawText a = new RawText(Constants.encodeASCII("foo-a\nfoo-b"));
 		    MemoryStream o = new MemoryStream();
 		    a.writeLine(o, 1);
 		    byte[] r = o.ToArray();
-		    Assert.AreEqual("foo-b", RawParseUtils.decode(r));
+		    Assert.Equal("foo-b", RawParseUtils.decode(r));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testWriteLine3()
         {
 		    RawText a = new RawText(Constants.encodeASCII("a\n\nb\n"));
 		    MemoryStream o = new MemoryStream();
 		    a.writeLine(o, 1);
 		    byte[] r = o.ToArray();
-		    Assert.AreEqual("", RawParseUtils.decode(r));
+		    Assert.Equal("", RawParseUtils.decode(r));
 	    }
     }
 }

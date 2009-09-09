@@ -36,14 +36,13 @@
  */
 
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public class RevWalkSortTest : RevWalkTestCase
     {
-        [Test]
+        [Fact]
         public void testSort_Default()
         {
             RevCommit a = commit();
@@ -56,10 +55,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c, rw.next());
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testSort_COMMIT_TIME_DESC()
         {
             RevCommit a = commit();
@@ -73,10 +72,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c, rw.next());
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testSort_REVERSE()
         {
             RevCommit a = commit();
@@ -90,10 +89,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(b, rw.next());
             assertCommit(c, rw.next());
             assertCommit(d, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testSort_COMMIT_TIME_DESC_OutOfOrder1()
         {
             // Despite being out of order time-wise, a strand-of-pearls must
@@ -103,8 +102,8 @@ namespace GitSharp.Tests.RevWalk
             RevCommit b = commit(a);
             RevCommit c = commit(-5, b);
             RevCommit d = commit(10, c);
-            Assert.IsTrue(parse(a).CommitTime < parse(d).CommitTime);
-            Assert.IsTrue(parse(c).CommitTime < parse(b).CommitTime);
+            Assert.True(parse(a).CommitTime < parse(d).CommitTime);
+            Assert.True(parse(c).CommitTime < parse(b).CommitTime);
 
             rw.sort(RevSort.COMMIT_TIME_DESC);
             markStart(d);
@@ -112,10 +111,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c, rw.next());
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testSort_COMMIT_TIME_DESC_OutOfOrder2()
         {
             // c1 is back dated before its parent.
@@ -133,10 +132,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
             assertCommit(c1, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testSort_TOPO()
         {
             // c1 is back dated before its parent.
@@ -154,10 +153,10 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c1, rw.next());
             assertCommit(b, rw.next());
             assertCommit(a, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testSort_TOPO_REVERSE()
         {
             // c1 is back dated before its parent.
@@ -176,7 +175,7 @@ namespace GitSharp.Tests.RevWalk
             assertCommit(c1, rw.next());
             assertCommit(c2, rw.next());
             assertCommit(d, rw.next());
-            Assert.IsNull(rw.next());
+            Assert.Null(rw.next());
         }
     }
 }

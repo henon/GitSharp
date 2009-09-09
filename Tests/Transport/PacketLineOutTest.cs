@@ -39,25 +39,22 @@ using System.IO;
 using System.Text;
 using GitSharp.Transport;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Transport
 {
-    
-    [TestFixture]
     public class PacketLineOutTest
     {
-        private MemoryStream rawOut;
-        private PacketLineOut o;
+        private readonly MemoryStream rawOut;
+        private readonly PacketLineOut o;
 
-        [SetUp]
-        protected void setUp()
+		public PacketLineOutTest()
         {
             rawOut = new MemoryStream();
             o = new PacketLineOut(rawOut);
         }
 
-        [Test]
+        [Fact]
         public void testWriteString1()
         {
             o.WriteString("a");
@@ -65,7 +62,7 @@ namespace GitSharp.Tests.Transport
             assertBuffer("0005a0006bc");
         }
 
-        [Test]
+        [Fact]
         public void testWriteString2()
         {
             o.WriteString("a\n");
@@ -73,28 +70,28 @@ namespace GitSharp.Tests.Transport
             assertBuffer("0006a\n0007bc\n");
         }
 
-        [Test]
+        [Fact]
         public void testWriteString3()
         {
             o.WriteString("");
             assertBuffer("0004");
         }
 
-        [Test]
+        [Fact]
         public void testWritePacket1()
         {
             o.WritePacket(Encoding.ASCII.GetBytes("a"));
             assertBuffer("0005a");
         }
 
-        [Test]
+        [Fact]
         public void testWritePacket2()
         {
             o.WritePacket(Encoding.ASCII.GetBytes("abcd"));
             assertBuffer("0008abcd");
         }
 
-        [Test]
+        [Fact]
         public void testWritePacket3()
         {
             const int buflen = SideBandOutputStream.MAX_BUF - SideBandOutputStream.HDR_SIZE;
@@ -108,27 +105,27 @@ namespace GitSharp.Tests.Transport
 
             byte[] act = rawOut.ToArray();
             string explen = NB.DecimalToBase(buf.Length + 4, 16);
-            Assert.AreEqual(4 + buf.Length, act.Length);
-            Assert.AreEqual(Encoding.UTF8.GetString(act, 0, 4).ToUpper(), explen);
+            Assert.Equal(4 + buf.Length, act.Length);
+            Assert.Equal(Encoding.UTF8.GetString(act, 0, 4).ToUpper(), explen);
             for (int i = 0, j = 4; i < buf.Length; i++, j++)
-                Assert.AreEqual(buf[i], act[j]);
+                Assert.Equal(buf[i], act[j]);
         }
 
-        [Test]
+        [Fact]
         public void testWriteChannelPacket1()
         {
             o.WriteChannelPacket(1, new[] { (byte)'a' }, 0, 1);
             assertBuffer("0006\x01" + "a");
         }
 
-        [Test]
+        [Fact]
         public void testWriteChannelPacket2()
         {
             o.WriteChannelPacket(2, new[] { (byte)'b' }, 0, 1);
             assertBuffer("0006\x02" + "b");
         }
 
-        [Test]
+        [Fact]
         public void testWriteChannelPacket3()
         {
             o.WriteChannelPacket(3, new[] { (byte)'c' }, 0, 1);
@@ -139,7 +136,7 @@ namespace GitSharp.Tests.Transport
         {
             byte[] resb = rawOut.ToArray();
             string res = Encoding.GetEncoding(Constants.CHARACTER_ENCODING).GetString(resb);
-            Assert.AreEqual(exp, res);
+            Assert.Equal(exp, res);
         }
     }
 

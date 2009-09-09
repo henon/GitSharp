@@ -38,65 +38,65 @@
 
 using GitSharp.TreeWalk;
 using GitSharp.TreeWalk.Filter;
+using Xunit;
+
 namespace GitSharp.Tests.TreeWalk
 {
-    using NUnit.Framework;
-    [TestFixture]
     public class NotTreeFilterTest : RepositoryTestCase
     {
 
-        [Test]
+        [Fact]
         public void testWrap()
         {
             GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
             TreeFilter a = TreeFilter.ALL;
             TreeFilter n = NotTreeFilter.create(a);
-            Assert.IsNotNull(n);
-            Assert.IsTrue(a.include(tw));
-            Assert.IsFalse(n.include(tw));
+            Assert.NotNull(n);
+            Assert.True(a.include(tw));
+            Assert.False(n.include(tw));
         }
 
-        [Test]
+        [Fact]
         public void testNegateIsUnwrap()
         {
             TreeFilter a = PathFilter.create("a/b");
             TreeFilter n = NotTreeFilter.create(a);
-            Assert.AreSame(a, n.negate());
+            Assert.Same(a, n.negate());
         }
 
-        [Test]
+        [Fact]
         public void testShouldBeRecursive_ALL()
         {
             TreeFilter a = TreeFilter.ALL;
             TreeFilter n = NotTreeFilter.create(a);
-            Assert.AreEqual(a.shouldBeRecursive(), n.shouldBeRecursive());
+            Assert.Equal(a.shouldBeRecursive(), n.shouldBeRecursive());
         }
 
-        [Test]
+        [Fact]
         public void testShouldBeRecursive_PathFilter()
         {
             TreeFilter a = PathFilter.create("a/b");
-            Assert.IsTrue(a.shouldBeRecursive());
+            Assert.True(a.shouldBeRecursive());
             TreeFilter n = NotTreeFilter.create(a);
-            Assert.IsTrue(n.shouldBeRecursive());
+            Assert.True(n.shouldBeRecursive());
         }
 
-        [Test]
+        [Fact]
         public void testCloneIsDeepClone()
         {
             TreeFilter a = new AlwaysCloneTreeFilter();
-            Assert.AreNotSame(a, a.Clone());
+            Assert.NotSame(a, a.Clone());
             TreeFilter n = NotTreeFilter.create(a);
-            Assert.AreNotSame(n, n.Clone());
+            Assert.NotSame(n, n.Clone());
         }
 
-        [Test]
+        [Fact]
         public void testCloneIsSparseWhenPossible()
         {
             TreeFilter a = TreeFilter.ALL;
-            Assert.AreSame(a, a.Clone());
+            Assert.Same(a, a.Clone());
             TreeFilter n = NotTreeFilter.create(a);
-            Assert.AreSame(n, n.Clone());
+            Assert.Same(n, n.Clone());
         }
     }
 }

@@ -37,46 +37,45 @@
  */
 
 using GitSharp.Patch;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Patch
 {
-    [TestFixture]
     public class PatchCcErrorTest : BasePatchTest
     {
-        [Test]
+        [Fact]
 	    public void testError_CcTruncatedOld()
         {
 			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testError_CcTruncatedOld.patch");
-		    Assert.AreEqual(1, p.getFiles().Count);
-		    Assert.AreEqual(3, p.getErrors().Count);
+		    Assert.Equal(1, p.getFiles().Count);
+		    Assert.Equal(3, p.getErrors().Count);
 		    {
 			    FormatError e = p.getErrors()[0];
-			    Assert.AreEqual(FormatError.Severity.ERROR, e.getSeverity());
-			    Assert.AreEqual(
+			    Assert.Equal(FormatError.Severity.ERROR, e.getSeverity());
+			    Assert.Equal(
 					    "Truncated hunk, at least 1 lines is missing for ancestor 1",
 					    e.getMessage());
-			    Assert.AreEqual(346, e.getOffset());
-			    Assert.IsTrue(e.getLineText().StartsWith(
+			    Assert.Equal(346, e.getOffset());
+			    Assert.True(e.getLineText().StartsWith(
 					    "@@@ -55,12 -163,13 +163,15 @@@ public "));
 		    }
 		    {
 			    FormatError e = p.getErrors()[1];
-			    Assert.AreEqual(FormatError.Severity.ERROR, e.getSeverity());
-			    Assert.AreEqual(
+			    Assert.Equal(FormatError.Severity.ERROR, e.getSeverity());
+			    Assert.Equal(
 					    "Truncated hunk, at least 2 lines is missing for ancestor 2",
 					    e.getMessage());
-			    Assert.AreEqual(346, e.getOffset());
-			    Assert.IsTrue(e.getLineText().StartsWith(
+			    Assert.Equal(346, e.getOffset());
+			    Assert.True(e.getLineText().StartsWith(
 					    "@@@ -55,12 -163,13 +163,15 @@@ public "));
 		    }
 		    {
 			    FormatError e = p.getErrors()[2];
-                Assert.AreEqual(FormatError.Severity.ERROR, e.getSeverity());
-			    Assert.AreEqual("Truncated hunk, at least 3 new lines is missing", e
+                Assert.Equal(FormatError.Severity.ERROR, e.getSeverity());
+			    Assert.Equal("Truncated hunk, at least 3 new lines is missing", e
 					    .getMessage());
-			    Assert.AreEqual(346, e.getOffset());
-			    Assert.IsTrue(e.getLineText().StartsWith(
+			    Assert.Equal(346, e.getOffset());
+			    Assert.True(e.getLineText().StartsWith(
 					    "@@@ -55,12 -163,13 +163,15 @@@ public "));
 		    }
 	    }

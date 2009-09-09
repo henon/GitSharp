@@ -39,15 +39,15 @@ using System.Collections.Generic;
 
 namespace GitSharp
 {
-    public class AlternateRepositoryDatabase : ObjectDatabase
+    public sealed class AlternateRepositoryDatabase : ObjectDatabase
     {
         private readonly Repository _repository;
-        private readonly ObjectDatabase _odb;
+        private readonly ObjectDatabase _objectDatabase;
 
         public AlternateRepositoryDatabase(Repository alternateRepository)
         {
             _repository = alternateRepository;
-            _odb = _repository.ObjectDatabase;
+            _objectDatabase = _repository.ObjectDatabase;
         }
 
         public Repository getRepository()
@@ -67,42 +67,42 @@ namespace GitSharp
 
 		public override bool exists()
         {
-            return _odb.exists();
+            return _objectDatabase.exists();
         }
 
         public override bool hasObject1(AnyObjectId objectId)
         {
-            return _odb.hasObject1(objectId);
+            return _objectDatabase.hasObject1(objectId);
         }
 
         public override bool tryAgain1()
         {
-            return _odb.tryAgain1();
+            return _objectDatabase.tryAgain1();
         }
 
         public override bool hasObject2(string objectName)
         {
-            return _odb.hasObject2(objectName);
+            return _objectDatabase.hasObject2(objectName);
         }
 
         public override ObjectLoader openObject1(WindowCursor curs, AnyObjectId objectId)
         {
-            return _odb.openObject1(curs, objectId);
+            return _objectDatabase.openObject1(curs, objectId);
         }
 
         public override ObjectLoader openObject2(WindowCursor curs, string objectName, AnyObjectId objectId)
         {
-            return _odb.openObject2(curs, objectName, objectId);
+            return _objectDatabase.openObject2(curs, objectName, objectId);
         }
 
 		public override void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
         {
-			_odb.OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
+			_objectDatabase.OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
         }
 
         public override ObjectDatabase[] loadAlternates()
         {
-            return _odb.getAlternates();
+            return _objectDatabase.getAlternates();
         }
 
         public override void closeAlternates()

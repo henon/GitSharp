@@ -112,6 +112,8 @@
     <Compile Include="ReflogReader.cs" />
     <Compile Include="RefRename.cs" />
     <Compile Include="RepositoryConfig.cs" />
+    <Compile Include="RevWalk\FooterKey.cs" />
+    <Compile Include="RevWalk\FooterLine.cs" />
     <Compile Include="TransferConfig.cs" />
     <Compile Include="Transport\BundleWriter.cs" />
     <Compile Include="Transport\DefaultSshSessionFactory.cs" />

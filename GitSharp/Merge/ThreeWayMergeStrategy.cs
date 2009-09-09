@@ -38,7 +38,9 @@
 
 namespace GitSharp.Merge
 {
-    /** A merge strategy to merge 2 trees, using a common base ancestor tree. */
+	/// <summary>
+	/// A merge strategy to merge 2 trees, using a common base ancestor tree.
+	/// </summary>
     public abstract class ThreeWayMergeStrategy : MergeStrategy
     {
         public override abstract Merger NewMerger(Repository db);

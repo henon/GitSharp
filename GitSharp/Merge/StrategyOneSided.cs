@@ -40,60 +40,65 @@ using System;
 
 namespace GitSharp.Merge
 {
-    /**
-     * Trivial merge strategy to make the resulting tree exactly match an input.
-     * <p>
-     * This strategy can be used to cauterize an entire side branch of history, by
-     * setting the output tree to one of the inputs, and ignoring any of the paths
-     * of the other inputs.
-     */
-    public class StrategyOneSided : MergeStrategy
-    {
-        private readonly String _strategyName;
+	/// <summary>
+	/// Trivial merge strategy to make the resulting tree exactly match an input.
+	/// <para />
+	/// This strategy can be used to cauterize an entire side branch of history, by
+	/// setting the output tree to one of the inputs, and ignoring any of the paths
+	/// of the other inputs.
+	/// </summary>
+	public class StrategyOneSided : MergeStrategy
+	{
+		private readonly string _strategyName;
+		private readonly int _treeIndex;
 
-	    private readonly int _treeIndex;
+		///	<summary>
+		/// Create a new merge strategy to select a specific input tree.
+		/// </summary>
+		/// <param name="name">name of this strategy.</param>
+		/// <param name="index">
+		/// the position of the input tree to accept as the result.
+		/// </param>
+		public StrategyOneSided(String name, int index)
+		{
+			_strategyName = name;
+			_treeIndex = index;
+		}
 
-	    /**
-	     * Create a new merge strategy to select a specific input tree.
-	     *
-	     * @param name
-	     *            name of this strategy.
-	     * @param index
-	     *            the position of the input tree to accept as the result.
-	     */
-	    public StrategyOneSided(String name, int index) 
-        {
-		    _strategyName = name;
-		    _treeIndex = index;
-	    }
+		public override string Name
+		{
+			get { return _strategyName; }
+		}
 
-	    public override String GetName() {
-		    return _strategyName;
-	    }
+		public override Merger NewMerger(Repository db)
+		{
+			return new OneSide(db, _treeIndex);
+		}
 
-	    public override Merger NewMerger(Repository db) 
-        {
-		    return new OneSide(db, _treeIndex);
-	    }
+		#region Nested Types
 
-	    public class OneSide : Merger 
-        {
-		    private readonly int _treeIndex;
+		private class OneSide : Merger
+		{
+			private readonly int _treeIndex;
 
-		    public OneSide(Repository local, int index) : base(local)
-            {
-			    _treeIndex = index;
-		    }
+			public OneSide(Repository local, int index)
+				: base(local)
+			{
+				_treeIndex = index;
+			}
 
-		    protected override bool MergeImpl()
-            {
-			    return _treeIndex < SourceTrees.Length;
-		    }
+			protected override bool MergeImpl()
+			{
+				return _treeIndex < SourceTrees.Length;
+			}
 
-		    public override ObjectId GetResultTreeId()
-            {
-			    return SourceTrees[_treeIndex];
-		    }
-	    }
-    }
+			public override ObjectId GetResultTreeId()
+			{
+				return SourceTrees[_treeIndex];
+			}
+		}
+
+		#endregion
+
+	}
 }

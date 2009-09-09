@@ -44,188 +44,225 @@ using GitSharp.TreeWalk;
 
 namespace GitSharp.Merge
 {
-    /**
-     * Instance of a specific {@link MergeStrategy} for a single {@link Repository}.
-     */
-    public abstract class Merger
-    {
-        /** The repository this merger operates on. */
-	    protected readonly Repository Db;
+	/// <summary>
+	/// Instance of a specific <seealso cref="MergeStrategy"/> for a single <seealso cref="Repository"/>.
+	/// </summary>
+	public abstract class Merger
+	{
+		private readonly Repository _db;
+		private readonly RevWalk.RevWalk _walk;
+		private ObjectWriter _writer;
+		private RevObject[] _sourceObjects;
+		private RevCommit[] _sourceCommits;
 
-	    /** A RevWalk for computing merge bases, or listing incoming commits. */
-        protected readonly RevWalk.RevWalk Walk;
+		/// <summary>
+		/// Create a new merge instance for a repository.
+		/// </summary>
+		/// <param name="local">
+		/// the repository this merger will read and write data on. 
+		/// </param>
+		protected Merger(Repository local)
+		{
+			_db = local;
+			_walk = new RevWalk.RevWalk(_db);
+		}
 
-	    private ObjectWriter _writer;
+		/// <summary>
+		/// The repository this merger operates on.
+		/// </summary>
+		protected Repository Repository
+		{
+			get { return _db; }
+		}
 
-	    /** The original objects supplied in the merge; this can be any tree-ish. */
-	    protected RevObject[] SourceObjects;
+		/// <summary>
+		/// A <see cref="RevWalk"/> for computing merge bases, or listing incoming commits.
+		/// </summary>
+		protected RevWalk.RevWalk Walk
+		{
+			get { return _walk; }
+		}
 
-	    /** If {@link #sourceObjects}[i] is a commit, this is the commit. */
-	    protected RevCommit[] SourceCommits;
+		/// <summary>
+		/// The original objects supplied in the merge; this can be any <see cref="Treeish"/>.
+		/// </summary>
+		public RevCommit[] SourceCommits
+		{
+			get { return _sourceCommits; }
+		}
 
-	    /** The trees matching every entry in {@link #sourceObjects}. */
-	    protected RevTree[] SourceTrees;
+		/// <summary>
+		/// If <seealso cref="SourceObjects"/>[i] is a commit, this is the commit.
+		/// </summary>
+		public RevObject[] SourceObjects
+		{
+			get { return _sourceObjects; }
+		}
 
-        /**
-	     * Create a new merge instance for a repository.
-	     *
-	     * @param local
-	     *            the repository this merger will Read and write data on.
-	     */
-	    protected Merger(Repository local) 
-        {
-		    Db = local;
-            Walk = new RevWalk.RevWalk(Db);
-	    }
+		/// <summary>
+		/// The trees matching every entry in <seealso cref="SourceObjects"/>.
+		/// </summary>
+		protected RevTree[] SourceTrees { get; set; }
 
-        /**
-	     * @return the repository this merger operates on.
-	     */
-	    public Repository GetRepository() 
-        {
-		    return Db;
-	    }
+		/// <summary>
+		/// An object writer to Create objects in <see cref="Repository"/>.
+		/// </summary>
+		/// <returns></returns>
+		protected ObjectWriter GetObjectWriter()
+		{
+			if (_writer == null)
+			{
+				_writer = new ObjectWriter(Repository);
+			}
+			return _writer;
+		}
 
-	    /**
-	     * @return an object writer to Create objects in {@link #getRepository()}.
-	     */
-	    public ObjectWriter GetObjectWriter() 
-        {
-		    if (_writer == null)
-			    _writer = new ObjectWriter(GetRepository());
-		    return _writer;
-	    }
+		///	<summary>
+		/// Merge together two or more tree-ish objects.
+		/// <para />
+		/// Any tree-ish may be supplied as inputs. Commits and/or tags pointing at
+		/// trees or commits may be passed as input objects.
+		/// </summary>
+		/// <param name="tips">
+		/// source trees to be combined together. The merge base is not
+		/// included in this set. </param>
+		/// <returns>
+		/// True if the merge was completed without conflicts; false if the
+		/// merge strategy cannot handle this merge or there were conflicts
+		/// preventing it from automatically resolving all paths.
+		/// </returns>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// one of the input objects is not a commit, but the strategy
+		/// requires it to be a commit.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// one or more sources could not be read, or outputs could not
+		/// be written to the Repository.
+		/// </exception>
+		public virtual bool Merge(AnyObjectId[] tips)
+		{
+			_sourceObjects = new RevObject[tips.Length];
+			for (int i = 0; i < tips.Length; i++)
+				_sourceObjects[i] = _walk.parseAny(tips[i]);
 
-	    /**
-	     * Merge together two or more tree-ish objects.
-	     * <p>
-	     * Any tree-ish may be supplied as inputs. Commits and/or tags pointing at
-	     * trees or commits may be passed as input objects.
-	     *
-	     * @param tips
-	     *            source trees to be combined together. The merge base is not
-	     *            included in this set.
-	     * @return true if the merge was completed without conflicts; false if the
-	     *         merge strategy cannot handle this merge or there were conflicts
-	     *         preventing it from automatically resolving all paths.
-	     * @throws IncorrectObjectTypeException
-	     *             one of the input objects is not a commit, but the strategy
-	     *             requires it to be a commit.
-	     * @throws IOException
-	     *             one or more sources could not be Read, or outputs could not
-	     *             be written to the Repository.
-	     */
-	    public virtual bool Merge(AnyObjectId[] tips)
-        {
-		    SourceObjects = new RevObject[tips.Length];
-		    for (int i = 0; i < tips.Length; i++)
-			    SourceObjects[i] = Walk.parseAny(tips[i]);
+			_sourceCommits = new RevCommit[_sourceObjects.Length];
+			for (int i = 0; i < _sourceObjects.Length; i++)
+			{
+				try
+				{
+					_sourceCommits[i] = _walk.parseCommit(_sourceObjects[i]);
+				}
+				catch (IncorrectObjectTypeException)
+				{
+					_sourceCommits[i] = null;
+				}
+			}
 
-		    SourceCommits = new RevCommit[SourceObjects.Length];
-		    for (int i = 0; i < SourceObjects.Length; i++) 
-            {
-			    try 
-                {
-				    SourceCommits[i] = Walk.parseCommit(SourceObjects[i]);
-			    } 
-                catch (IncorrectObjectTypeException) 
-                {
-				    SourceCommits[i] = null;
-			    }
-		    }
+			SourceTrees = new RevTree[_sourceObjects.Length];
+			for (int i = 0; i < _sourceObjects.Length; i++)
+				SourceTrees[i] = _walk.parseTree(_sourceObjects[i]);
 
-		    SourceTrees = new RevTree[SourceObjects.Length];
-		    for (int i = 0; i < SourceObjects.Length; i++)
-			    SourceTrees[i] = Walk.parseTree(SourceObjects[i]);
+			return MergeImpl();
+		}
 
-		    return MergeImpl();
-	    }
+		///	<summary>
+		/// Create an iterator to walk the merge base of two commits.
+		/// </summary>
+		/// <param name="aIdx">
+		/// Index of the first commit in <seealso cref="SourceObjects"/>.
+		/// </param>
+		/// <param name="bIdx">
+		/// Index of the second commit in <seealso cref="SourceObjects"/>.
+		/// </param>
+		/// <returns> the new iterator </returns>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// one of the input objects is not a commit.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// objects are missing or multiple merge bases were found.
+		/// </exception>
+		protected AbstractTreeIterator MergeBase(int aIdx, int bIdx)
+		{
+			if (_sourceCommits[aIdx] == null)
+				throw new IncorrectObjectTypeException(_sourceObjects[aIdx], Constants.TYPE_COMMIT);
 
-	    /**
-	     * Create an iterator to walk the merge base of two commits.
-	     *
-	     * @param aIdx
-	     *            index of the first commit in {@link #sourceObjects}.
-	     * @param bIdx
-	     *            index of the second commit in {@link #sourceObjects}.
-	     * @return the new iterator
-	     * @throws IncorrectObjectTypeException
-	     *             one of the input objects is not a commit.
-	     * @throws IOException
-	     *             objects are missing or multiple merge bases were found.
-	     */
-	    protected AbstractTreeIterator MergeBase(int aIdx, int bIdx)
-        {
-		    if (SourceCommits[aIdx] == null)
-			    throw new IncorrectObjectTypeException(SourceObjects[aIdx],
-					    Constants.TYPE_COMMIT);
-		    if (SourceCommits[bIdx] == null)
-			    throw new IncorrectObjectTypeException(SourceObjects[bIdx],
-					    Constants.TYPE_COMMIT);
+			if (_sourceCommits[bIdx] == null)
+				throw new IncorrectObjectTypeException(_sourceObjects[bIdx], Constants.TYPE_COMMIT);
 
-		    Walk.reset();
-		    Walk.setRevFilter(RevFilter.MERGE_BASE);
-		    Walk.markStart(SourceCommits[aIdx]);
-		    Walk.markStart(SourceCommits[bIdx]);
-		    RevCommit base1 = Walk.next();
-		    if (base1 == null)
-			    return new EmptyTreeIterator();
-		    RevCommit base2 = Walk.next();
-		    if (base2 != null) {
-			    throw new IOException("Multiple merge bases for:" + "\n  "
-					    + SourceCommits[aIdx].Name + "\n  "
-					    + SourceCommits[bIdx].Name + "found:" + "\n  "
-					    + base1.Name + "\n  " + base2.Name);
-		    }
-		    return OpenTree(base1.Tree);
-	    }
+			_walk.reset();
+			_walk.setRevFilter(RevFilter.MERGE_BASE);
+			_walk.markStart(_sourceCommits[aIdx]);
+			_walk.markStart(_sourceCommits[bIdx]);
+			RevCommit base1 = _walk.next();
 
-	    /**
-	     * Open an iterator over a tree.
-	     *
-	     * @param treeId
-	     *            the tree to scan; must be a tree (not a treeish).
-	     * @return an iterator for the tree.
-	     * @throws IncorrectObjectTypeException
-	     *             the input object is not a tree.
-	     * @throws IOException
-	     *             the tree object is not found or cannot be Read.
-	     */
-	    protected AbstractTreeIterator OpenTree(AnyObjectId treeId)
-        {
-		    var windowCursor = new WindowCursor();
-		    try 
-            {
-			    return new CanonicalTreeParser(null, Db, treeId, windowCursor);
-		    } 
-            finally 
-            {
-			    windowCursor.Release();
-		    }
-	    }
+			if (base1 == null)
+			{
+				return new EmptyTreeIterator();
+			}
 
-	    /**
-	     * Execute the merge.
-	     * <p>
-	     * This method is called from {@link #merge(AnyObjectId[])} After the
-	     * {@link #sourceObjects}, {@link #sourceCommits} and {@link #sourceTrees}
-	     * have been populated.
-	     *
-	     * @return true if the merge was completed without conflicts; false if the
-	     *         merge strategy cannot handle this merge or there were conflicts
-	     *         preventing it from automatically resolving all paths.
-	     * @throws IncorrectObjectTypeException
-	     *             one of the input objects is not a commit, but the strategy
-	     *             requires it to be a commit.
-	     * @throws IOException
-	     *             one or more sources could not be Read, or outputs could not
-	     *             be written to the Repository.
-	     */
-	    protected abstract bool MergeImpl();
+			RevCommit base2 = _walk.next();
+			if (base2 != null)
+			{
+				throw new IOException("Multiple merge bases for:" + "\n  "
+						+ _sourceCommits[aIdx].Name + "\n  "
+						+ _sourceCommits[bIdx].Name + "found:" + "\n  "
+						+ base1.Name + "\n  " + base2.Name);
+			}
 
-	    /**
-	     * @return resulting tree, if {@link #merge(AnyObjectId[])} returned true.
-	     */
-	    public abstract ObjectId GetResultTreeId();
-    }
+			return OpenTree(base1.Tree);
+		}
+
+		///	<summary>
+		/// Open an iterator over a tree.
+		/// </summary>
+		/// <param name="treeId">
+		/// the tree to scan; must be a tree (not a <see cref="Treeish"/>).
+		/// </param>
+		/// <returns>An iterator for the tree.</returns>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// the input object is not a tree.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// the tree object is not found or cannot be read.
+		/// </exception>
+		protected AbstractTreeIterator OpenTree(AnyObjectId treeId)
+		{
+			var windowCursor = new WindowCursor();
+			try
+			{
+				return new CanonicalTreeParser(null, _db, treeId, windowCursor);
+			}
+			finally
+			{
+				windowCursor.Release();
+			}
+		}
+
+		///	<summary>
+		/// Execute the merge.
+		/// <para />
+		/// This method is called from <seealso cref="Merge(AnyObjectId[])"/> after the
+		/// <seealso cref="#sourceObjects"/>, <seealso cref="SourceCommits"/> and <seealso cref="SourceTrees"/>
+		/// have been populated.
+		/// </summary>
+		/// <returns> true if the merge was completed without conflicts; false if the
+		/// merge strategy cannot handle this merge or there were conflicts
+		/// preventing it from automatically resolving all paths. </returns>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// one of the input objects is not a commit, but the strategy
+		/// requires it to be a commit. </exception>
+		/// <exception cref="IOException">
+		/// one or more sources could not be read, or outputs could not
+		/// be written to the Repository.
+		/// </exception>
+		protected abstract bool MergeImpl();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns>
+		/// Resulting tree, if <seealso cref="Merge(AnyObjectId[])"/> returned true. 
+		/// </returns>
+		public abstract ObjectId GetResultTreeId();
+	}
 }

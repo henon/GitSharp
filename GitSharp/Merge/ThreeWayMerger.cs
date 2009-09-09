@@ -36,92 +36,95 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.IO;
+using GitSharp.Exceptions;
 using GitSharp.RevWalk;
 using GitSharp.TreeWalk;
 
 namespace GitSharp.Merge
 {
-    /** A merge of 2 trees, using a common base ancestor tree. */
-    public abstract class ThreeWayMerger : Merger
-    {
-        private RevTree _baseTree;
+	/// <summary>
+	/// A merge of 2 trees, using a common base ancestor tree.
+	/// </summary>
+	public abstract class ThreeWayMerger : Merger
+	{
+		private RevTree _baseTree;
 
-	    /**
-	     * Create a new merge instance for a repository.
-	     *
-	     * @param local
-	     *            the repository this merger will Read and write data on.
-	     */
-	    public ThreeWayMerger(Repository local) : base(local)
-        {
-	    }
+		/// <summary>
+		/// Create a new merge instance for a repository.
+		/// </summary>
+		/// <param name="local">
+		/// The repository this merger will Read and write data on. 
+		/// </param>
+		protected ThreeWayMerger(Repository local)
+			: base(local)
+		{
+		}
 
-	    /**
-	     * Set the common ancestor tree.
-	     *
-	     * @param id
-	     *            common base treeish; null to automatically compute the common
-	     *            base from the input commits during
-	     *            {@link #merge(AnyObjectId, AnyObjectId)}.
-	     * @throws IncorrectObjectTypeException
-	     *             the object is not a treeish.
-	     * @throws MissingObjectException
-	     *             the object does not exist.
-	     * @throws IOException
-	     *             the object could not be Read.
-	     */
-	    public void SetBase(AnyObjectId id)
-        {
-		    if (id != null) 
-            {
-			    _baseTree = Walk.parseTree(id);
-		    } 
-            else 
-            {
-			    _baseTree = null;
-		    }
-	    }
+		/// <summary>
+		/// Set the common ancestor tree.
+		/// </summary>
+		/// <param name="id">
+		/// Common base treeish; null to automatically compute the common
+		/// base from the input commits during
+		/// <see cref="Merge(AnyObjectId, AnyObjectId)"/>.
+		/// </param>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// The object is not a <see cref="Treeish"/>.
+		/// </exception>
+		/// <exception cref="MissingObjectException">
+		/// The object does not exist.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// The object could not be read.
+		/// </exception>
+		public void SetBase(AnyObjectId id)
+		{
+			_baseTree = id != null ? Walk.parseTree(id) : null;
+		}
 
-	    /**
-	     * Merge together two tree-ish objects.
-	     * <p>
-	     * Any tree-ish may be supplied as inputs. Commits and/or tags pointing at
-	     * trees or commits may be passed as input objects.
-	     *
-	     * @param a
-	     *            source tree to be combined together.
-	     * @param b
-	     *            source tree to be combined together.
-	     * @return true if the merge was completed without conflicts; false if the
-	     *         merge strategy cannot handle this merge or there were conflicts
-	     *         preventing it from automatically resolving all paths.
-	     * @throws IncorrectObjectTypeException
-	     *             one of the input objects is not a commit, but the strategy
-	     *             requires it to be a commit.
-	     * @throws IOException
-	     *             one or more sources could not be Read, or outputs could not
-	     *             be written to the Repository.
-	     */
-	    public bool Merge(AnyObjectId a, AnyObjectId b)
-        {
-		    return Merge(new[] { a, b });
-	    }
+		///	<summary>
+		/// Merge together two <see cref="Treeish"/> objects.
+		/// <para />
+		/// Any tree-ish may be supplied as inputs. Commits and/or tags pointing at
+		/// trees or commits may be passed as input objects.
+		/// </summary>
+		/// <param name="a">source tree to be combined together.</param>
+		/// <param name="b">source tree to be combined together.</param>
+		/// <returns> 
+		/// true if the merge was completed without conflicts; false if the
+		/// merge strategy cannot handle this merge or there were conflicts
+		/// preventing it from automatically resolving all paths.
+		/// </returns>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// one of the input objects is not a commit, but the strategy
+		/// requires it to be a commit.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// one or more sources could not be read, or outputs could not
+		/// be written to the Repository.
+		/// </exception>
+		public bool Merge(AnyObjectId a, AnyObjectId b)
+		{
+			return Merge(new[] { a, b });
+		}
 
-	    public override bool Merge(AnyObjectId[] tips)
-        {
-            return tips.Length != 2 ? false : base.Merge(tips);
-	    }
+		public override bool Merge(AnyObjectId[] tips)
+		{
+			return tips.Length != 2 ? false : base.Merge(tips);
+		}
 
-	    /**
-	     * Create an iterator to walk the merge base.
-	     *
-	     * @return an iterator over the caller-specified merge base, or the natural
-	     *         merge base of the two input commits.
-	     * @throws IOException
-	     */
-	    protected AbstractTreeIterator MergeBase()
-	    {
-	        return _baseTree != null ? OpenTree(_baseTree) : MergeBase(0, 1);
-	    }
-    }
+		///	<summary>
+		/// Create an iterator to walk the merge base.
+		/// </summary>
+		/// <returns>
+		/// An iterator over the caller-specified merge base, or the natural
+		/// merge base of the two input commits.
+		/// </returns>
+		/// <exception cref="IOException"></exception> 
+		protected AbstractTreeIterator MergeBase()
+		{
+			return _baseTree != null ? OpenTree(_baseTree) : MergeBase(0, 1);
+		}
+	}
 }

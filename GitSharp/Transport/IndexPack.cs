@@ -624,6 +624,7 @@ namespace GitSharp.Transport
 				case Constants.OBJ_TAG:
 					Whole(typeCode, pos, sz);
 					break;
+
 				case Constants.OBJ_OFS_DELTA:
 					c = ReadFromInput();
 					long ofs = c & 127;

@@ -43,101 +43,109 @@ using System.Runtime.CompilerServices;
 
 namespace GitSharp.Merge
 {
-    /**
-     * A method of combining two or more trees together to form an output tree.
-     * <p>
-     * Different strategies may employ different techniques for deciding which paths
-     * (and ObjectIds) to carry from the input trees into the final output tree.
-     */
-    public abstract class MergeStrategy
-    {
-        /** Simple strategy that sets the output tree to the first input tree. */
-	    public static readonly MergeStrategy Ours = new StrategyOneSided("ours", 0);
+	/// <summary> * A method of combining two or more trees together to form an output tree.
+	/// * <p>
+	/// * Different strategies may employ different techniques for deciding which paths
+	/// * (and ObjectIds) to carry from the input trees into the final output tree. </summary>
+	public abstract class MergeStrategy
+	{
+		/// <summary>
+		/// Simple strategy that sets the output tree to the first input tree.
+		/// </summary>
+		public static readonly MergeStrategy Ours = new StrategyOneSided("ours", 0);
 
-	    /** Simple strategy that sets the output tree to the second input tree. */
-	    public static readonly MergeStrategy Theirs = new StrategyOneSided("theirs", 1);
+		/// <summary>
+		/// Simple strategy that sets the output tree to the second input tree.
+		/// </summary>
+		public static readonly MergeStrategy Theirs = new StrategyOneSided("theirs", 1);
 
-	    /** Simple strategy to merge paths, without simultaneous edits. */
-	    public static readonly ThreeWayMergeStrategy SimpleTwoWayInCore = new StrategySimpleTwoWayInCore();
+		/// <summary>
+		/// Simple strategy to merge paths, without simultaneous edits.
+		/// </summary>
+		public static readonly ThreeWayMergeStrategy SimpleTwoWayInCore = new StrategySimpleTwoWayInCore();
 
-        private static readonly Dictionary<String, MergeStrategy> Strategies = new Dictionary<String, MergeStrategy>();
+		private static readonly Dictionary<String, MergeStrategy> Strategies = new Dictionary<String, MergeStrategy>();
 
-	    static MergeStrategy()
-        {
-		    Register(Ours);
-		    Register(Theirs);
-		    Register(SimpleTwoWayInCore);
-	    }
+		static MergeStrategy()
+		{
+			Register(Ours);
+			Register(Theirs);
+			Register(SimpleTwoWayInCore);
+		}
 
-	    /**
-	     * Register a merge strategy so it can later be obtained by name.
-	     *
-	     * @param imp
-	     *            the strategy to register.
-	     * @throws IllegalArgumentException
-	     *             a strategy by the same name has already been registered.
-	     */
-	    public static void Register(MergeStrategy imp) 
-        {
-		    Register(imp.GetName(), imp);
-	    }
+		///	<summary>
+		/// Register a merge strategy so it can later be obtained by name.
+		///	</summary>
+		///	<param name="imp">the strategy to register.</param>
+		///	<exception cref="ArgumentException">
+		/// a strategy by the same name has already been registered.
+		/// </exception>
+		public static void Register(MergeStrategy imp)
+		{
+			Register(imp.Name, imp);
+		}
 
-	    /**
-	     * Register a merge strategy so it can later be obtained by name.
-	     *
-	     * @param name
-	     *            name the strategy can be looked up under.
-	     * @param imp
-	     *            the strategy to register.
-	     * @throws IllegalArgumentException
-	     *             a strategy by the same name has already been registered.
-	     */
-        [MethodImpl(MethodImplOptions.Synchronized)]
-	    public static void Register(String name, MergeStrategy imp) 
-        {
-		    if (Strategies.ContainsKey(name))
-			    throw new ArgumentException("Merge strategy \"" + name + "\" already exists as a default strategy");
+		///	<summary>
+		/// Register a merge strategy so it can later be obtained by name.
+		/// </summary>
+		/// <param name="name">
+		/// name the strategy can be looked up under.</param>
+		/// <param name="imp">the strategy to register.</param>
+		/// <exception cref="ArgumentException">
+		/// a strategy by the same name has already been registered.
+		/// </exception>
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		public static void Register(String name, MergeStrategy imp)
+		{
+			if (Strategies.ContainsKey(name))
+			{
+				throw new ArgumentException("Merge strategy \"" + name + "\" already exists as a default strategy");
+			}
 
-		    Strategies.Add(name, imp);
-	    }
+			Strategies.Add(name, imp);
+		}
 
-	    /**
-	     * Locate a strategy by name.
-	     *
-	     * @param name
-	     *            name of the strategy to locate.
-	     * @return the strategy instance; null if no strategy matches the name.
-	     */
-        [MethodImpl(MethodImplOptions.Synchronized)]
-	    public static MergeStrategy Get(String name) 
-        {
-		    return Strategies[name];
-	    }
+		///	<summary>
+		/// Locate a strategy by name.
+		///	</summary>
+		///	<param name="name">name of the strategy to locate.</param>
+		/// <returns>
+		/// The strategy instance; null if no strategy matches the name.
+		/// </returns>
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		public static MergeStrategy Get(String name)
+		{
+			return Strategies[name];
+		}
 
-	    /**
-	     * Get all registered strategies.
-	     *
-	     * @return the registered strategy instances. No inherit order is returned;
-	     *         the caller may modify (and/or sort) the returned array if
-	     *         necessary to obtain a reasonable ordering.
-	     */
-        [MethodImpl(MethodImplOptions.Synchronized)]
-	    public static MergeStrategy[] Get() 
-        {
-            return Strategies.Values.ToArray();
-	    }
+		///	<summary>
+		/// Get all registered strategies.
+		/// </summary>
+		/// <returns>
+		/// The registered strategy instances. No inherit order is returned;
+		/// the caller may modify (and/or sort) the returned array if
+		/// necessary to obtain a reasonable ordering.
+		/// </returns>
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		public static MergeStrategy[] Get()
+		{
+			return Strategies.Values.ToArray();
+		}
 
-	    /** @return default name of this strategy implementation. */
-	    public abstract String GetName();
+		/// <summary>
+		/// default name of this strategy implementation.
+		/// </summary>
+		/// <returns></returns>
+		public abstract string Name { get; }
 
-	    /**
-	     * Create a new merge instance.
-	     *
-	     * @param db
-	     *            repository database the merger will Read from, and eventually
-	     *            write results back to.
-	     * @return the new merge instance which implements this strategy.
-	     */
-	    public abstract Merger NewMerger(Repository db);
-    }
+		///	<summary>
+		/// Create a new merge instance.
+		/// </summary>
+		/// <param name="db">
+		/// repository database the merger will read from, and eventually
+		/// write results back to.
+		/// </param>
+		/// <returns> the new merge instance which implements this strategy.</returns>
+		public abstract Merger NewMerger(Repository db);
+	}
 }

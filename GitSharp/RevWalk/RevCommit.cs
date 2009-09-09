@@ -99,7 +99,7 @@ namespace GitSharp.RevWalk
 
 		internal override void parse(RevWalk walk)
 		{
-			ObjectLoader ldr = walk.getRepository().OpenObject(walk.WindowCursor, this);
+			ObjectLoader ldr = walk.Repository.OpenObject(walk.WindowCursor, this);
 			if (ldr == null)
 			{
 				throw new MissingObjectException(this, Constants.TYPE_COMMIT);
@@ -234,7 +234,7 @@ namespace GitSharp.RevWalk
 		/// </returns>
 		public Commit AsCommit(RevWalk walk)
 		{
-			return new Commit(walk.getRepository(), this, _buffer);
+			return new Commit(walk.Repository, this, _buffer);
 		}
 
 		/// <summary>

@@ -102,15 +102,15 @@ namespace GitSharp.Diff
 			// header lines, but avoiding its hunks. Instead we recreate
 			// the hunks from the text instances we have been supplied.
 			//
-			int start = head.getStartOffset();
-			int end = head.getEndOffset();
+			int start = head.StartOffset;
+			int end = head.EndOffset;
 
-			if (!head.getHunks().isEmpty())
+			if (!head.Hunks.isEmpty())
 			{
-				end = head.getHunks()[0].StartOffset;
+				end = head.Hunks[0].StartOffset;
 			}
 
-			@out.Write(head.getBuffer(), start, end - start);
+			@out.Write(head.Buffer, start, end - start);
 
 			FormatEdits(@out, a, b, head.ToEditList());
 		}

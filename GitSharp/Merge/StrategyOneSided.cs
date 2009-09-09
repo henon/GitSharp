@@ -59,7 +59,7 @@ namespace GitSharp.Merge
 		/// <param name="index">
 		/// the position of the input tree to accept as the result.
 		/// </param>
-		public StrategyOneSided(String name, int index)
+		public StrategyOneSided(string name, int index)
 		{
 			_strategyName = name;
 			_treeIndex = index;

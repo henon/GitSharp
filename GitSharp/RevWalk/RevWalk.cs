@@ -52,7 +52,7 @@ namespace GitSharp.RevWalk
 	/// <para />
 	/// A RevWalk instance can only be used once to generate results. Running a
 	/// second time requires creating a new RevWalk instance, or invoking
-	/// <seealso cref="Reset()"/> before starting again. Resetting an existing instance may be
+	/// <seealso cref="reset()"/> before starting again. Resetting an existing instance may be
 	/// faster for some applications as commit body parsing can be avoided on the
 	/// later invocations.
 	/// <para />
@@ -67,9 +67,9 @@ namespace GitSharp.RevWalk
 	/// <para />
 	/// The offered iterator is over the list of RevCommits described by the
 	/// configuration of this instance. Applications should restrict themselves to
-	/// using either the provided Iterator or <seealso cref="#next()"/>, but never use both on
+	/// using either the provided Iterator or <seealso cref="next()"/>, but never use both on
 	/// the same RevWalk at the same time. The Iterator may buffer RevCommits, while
-	/// <seealso cref="#next()"/> does not.
+	/// <seealso cref="next()"/> does not.
 	/// </summary>
 	public class RevWalk : IEnumerable<RevCommit>, IDisposable
 	{
@@ -200,7 +200,7 @@ namespace GitSharp.RevWalk
 		/// </summary>
 		internal const int TOPO_DELAY = 1 << 5;
 
-		/** Number of flag bits we keep internal for our own use. See above flags. */
+		// Number of flag bits we keep internal for our own use. See above flags.
 		private const int ReservedFlags = 6;
 		private const int AppFlags = -1 & ~((1 << ReservedFlags) - 1);
 
@@ -258,12 +258,9 @@ namespace GitSharp.RevWalk
 		/// <summary>
 		/// Get the repository this walker loads objects from.
 		/// </summary>
-		/// <returns>
-		/// Return the repository this walker was created to Read.
-		/// </returns>
-		public Repository getRepository()
+		public Repository Repository
 		{
-			return _db;
+			get { return _db; }
 		}
 
 		/// <summary>
@@ -295,7 +292,7 @@ namespace GitSharp.RevWalk
 		/// indicates the caller supplied a non-commit SHA-1 to
 		/// <see cref="lookupCommit(AnyObjectId)"/>.
 		/// </exception>
-		public virtual void markStart(RevCommit c)
+		public void markStart(RevCommit c)
 		{
 			if ((c.Flags & SEEN) != 0) return;
 			if ((c.Flags & PARSED) == 0)
@@ -534,7 +531,7 @@ namespace GitSharp.RevWalk
 
 			if (_sorting.Count > 1)
 			{
-				_sorting.Remove(GitSharp.RevWalk.RevSort.NONE);
+				_sorting.Remove(RevSort.NONE);
 			}
 			else if (_sorting.Count == 0)
 			{
@@ -769,28 +766,35 @@ namespace GitSharp.RevWalk
 				c = ((RevTag)c).getObject();
 				parseHeaders(c);
 			}
+
 			if (!(c is RevCommit))
+			{
 				throw new IncorrectObjectTypeException(id.ToObjectId(), Constants.TYPE_COMMIT);
+			}
+
 			return (RevCommit)c;
 		}
 
-		///    
-		///	 <summary> * Locate a reference to a tree.
-		///	 * <p>
-		///	 * This method only returns successfully if the tree object exists, is
-		///	 * verified to be a tree.
-		///	 * </summary>
-		///	 * <param name="id">
-		///	 *            name of the tree object, or a commit or annotated tag that may
-		///	 *            reference a tree. </param>
-		///	 * <returns> reference to the tree object. Never null. </returns>
-		///	 * <exception cref="MissingObjectException">
-		///	 *             the supplied tree does not exist. </exception>
-		///	 * <exception cref="IncorrectObjectTypeException">
-		///	 *             the supplied id is not a tree, a commit or an annotated tag. </exception>
-		///	 * <exception cref="IOException">
-		///	 *             a pack file or loose object could not be read. </exception>
-		///	 
+		///	<summary>
+		/// Locate a reference to a tree.
+		/// <para />
+		/// This method only returns successfully if the tree object exists, is
+		/// verified to be a tree.
+		/// </summary>
+		/// <param name="id">
+		/// Name of the tree object, or a commit or annotated tag that may
+		/// reference a tree.
+		/// </param>
+		/// <returns>Reference to the tree object. Never null.</returns>
+		/// <exception cref="MissingObjectException">
+		/// The supplied tree does not exist.
+		/// </exception>
+		/// <exception cref="IncorrectObjectTypeException">
+		/// The supplied id is not a tree, a commit or an annotated tag.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// A pack file or loose object could not be read.
+		/// </exception>
 		public RevTree parseTree(AnyObjectId id)
 		{
 			RevObject c = parseAny(id);
@@ -819,30 +823,31 @@ namespace GitSharp.RevWalk
 			return t;
 		}
 
-		///    
-		///	 <summary> * Locate a reference to any object and immediately parse its headers.
-		///	 * <p>
-		///	 * This method only returns successfully if the object exists and was parsed
-		///	 * without error. Parsing an object can be expensive as the type must be
-		///	 * determined. For blobs this may mean the blob content was unpacked
-		///	 * unnecessarily, and thrown away.
-		///	 *  </summary>
-		///	 * <param name="id">
-		///	 *            name of the object. </param>
-		///	 * <returns> reference to the object. Never null. </returns>
-		///	 * <exception cref="MissingObjectException">
-		///	 *             the supplied does not exist. </exception>
-		///	 * <exception cref="IOException">
-		///	 *             a pack file or loose object could not be read. </exception>
-		///	 
-		public virtual RevObject parseAny(AnyObjectId id)
+		///	<summary>
+		/// Locate a reference to any object and immediately parse its headers.
+		/// <para />
+		/// This method only returns successfully if the object exists and was parsed
+		/// without error. Parsing an object can be expensive as the type must be
+		/// determined. For blobs this may mean the blob content was unpacked
+		/// unnecessarily, and thrown away.
+		/// </summary>
+		/// <param name="id">Name of the object.</param>
+		/// <returns>Reference to the object. Never null.</returns>
+		/// <exception cref="MissingObjectException">the supplied does not exist.</exception>
+		/// <exception cref="IOException">
+		/// a pack file or loose object could not be read.
+		/// </exception>
+		public RevObject parseAny(AnyObjectId id)
 		{
 			RevObject r = _objects.Get(id);
 			if (r == null)
 			{
 				ObjectLoader ldr = _db.OpenObject(_curs, id);
 				if (ldr == null)
+				{
 					throw new MissingObjectException(id.ToObjectId(), "unknown");
+				}
+
 				byte[] data = ldr.CachedBytes;
 				int type = ldr.Type;
 				switch (type)
@@ -879,23 +884,25 @@ namespace GitSharp.RevWalk
 				_objects.Add(r);
 			}
 			else
+			{
 				parseHeaders(r);
+			}
 			return r;
 		}
 
-		///    
-		///	 <summary> * Ensure the object's critical headers have been parsed.
-		///	 * <p>
-		///	 * This method only returns successfully if the object exists and was parsed
-		///	 * without error.
-		///	 *  </summary>
-		///	 * <param name="obj">
-		///	 *            the object the caller needs to be parsed. </param>
-		///	 * <exception cref="MissingObjectException">
-		///	 *             the supplied does not exist. </exception>
-		///	 * <exception cref="IOException">
-		///	 *             a pack file or loose object could not be read. </exception>
-		///	 
+		///	<summary>
+		/// Ensure the object's critical headers have been parsed.
+		///	<para />
+		///	This method only returns successfully if the object exists and was parsed
+		///	without error.
+		///	</summary>
+		///	<param name="obj">The object the caller needs to be parsed.</param>
+		///	<exception cref="MissingObjectException">
+		/// The supplied does not exist.
+		/// </exception>
+		///	<exception cref="IOException">
+		/// A pack file or loose object could not be read.
+		/// </exception>
 		public void parseHeaders(RevObject obj)
 		{
 			if ((obj.Flags & PARSED) == 0)
@@ -904,19 +911,18 @@ namespace GitSharp.RevWalk
 			}
 		}
 
-		///    
-		///	 <summary> * Ensure the object's fully body content is available.
-		///	 * <p>
-		///	 * This method only returns successfully if the object exists and was parsed
-		///	 * without error.
-		///	 * </summary>
-		///	 * <param name="obj">
-		///	 *            the object the caller needs to be parsed. </param>
-		///	 * <exception cref="MissingObjectException">
-		///	 *             the supplied does not exist. </exception>
-		///	 * <exception cref="IOException">
-		///	 *             a pack file or loose object could not be read. </exception>
-		///	 
+		///	<summary> * Ensure the object's fully body content is available.
+		///	<para />
+		///	This method only returns successfully if the object exists and was parsed
+		///	without error.
+		///	</summary>
+		///	<param name="obj">the object the caller needs to be parsed.</param>
+		/// <exception cref="MissingObjectException">
+		/// the supplied does not exist.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// a pack file or loose object could not be read.
+		/// </exception>
 		public void parseBody(RevObject obj)
 		{
 			obj.parseBody(this);
@@ -945,22 +951,24 @@ namespace GitSharp.RevWalk
 		public int allocFlag()
 		{
 			if (_freeFlags == 0)
+			{
 				throw new ArgumentException(32 - ReservedFlags + " flags already created.");
+			}
 			int m = _freeFlags.LowestOneBit();
 			_freeFlags &= ~m;
 			return m;
 		}
 
-		///    
-		///	 <summary> * Automatically carry a flag from a child commit to its parents.
-		///	 * <p>
-		///	 * A carried flag is copied from the child commit onto its parents when the
-		///	 * child commit is popped from the lowest level of walk's internal graph.
-		///	 *  </summary>
-		///	 * <param name="flag">
-		///	 *            the flag to carry onto parents, if set on a descendant. </param>
-		///	 
-		public virtual void carry(RevFlag flag)
+		///	<summary>
+		/// Automatically carry a flag from a child commit to its parents.
+		/// <para />
+		/// A carried flag is copied from the child commit onto its parents when the
+		/// child commit is popped from the lowest level of walk's internal graph.
+		/// </summary>
+		/// <param name="flag">
+		/// The flag to carry onto parents, if set on a descendant.
+		/// </param>
+		public void carry(RevFlag flag)
 		{
 			if ((_freeFlags & flag.Mask) != 0)
 				throw new ArgumentException(flag.Name + " is disposed.");
@@ -969,40 +977,38 @@ namespace GitSharp.RevWalk
 			_carryFlags |= flag.Mask;
 		}
 
-		///    
-		///	 <summary> * Automatically carry flags from a child commit to its parents.
-		///	 * <p>
-		///	 * A carried flag is copied from the child commit onto its parents when the
-		///	 * child commit is popped from the lowest level of walk's internal graph.
-		///	 *  </summary>
-		///	 * <param name="set">
-		///	 *            the flags to carry onto parents, if set on a descendant. </param>
-		///	 
-		public virtual void carry(IEnumerable<RevFlag> set)
+		///	<summary>
+		/// Automatically carry flags from a child commit to its parents.
+		///	<para />
+		///	A carried flag is copied from the child commit onto its parents when the
+		///	child commit is popped from the lowest level of walk's internal graph.
+		///	</summary>
+		///	<param name="set">
+		///	The flags to carry onto parents, if set on a descendant.
+		/// </param>
+		public void carry(IEnumerable<RevFlag> set)
 		{
 			foreach (RevFlag flag in set)
 				carry(flag);
 		}
 
-		///    
-		///	 <summary> * Allow a flag to be recycled for a different use.
-		///	 * <p>
-		///	 * Recycled flags always come back as a different Java object instance when
-		///	 * assigned again by <seealso cref="#newFlag(String)"/>.
-		///	 * <p>
-		///	 * If the flag was previously being carried, the carrying request is
-		///	 * removed. Disposing of a carried flag while a traversal is in progress has
-		///	 * an undefined behavior.
-		///	 *  </summary>
-		///	 * <param name="flag">
-		///	 *            the to recycle. </param>
-		///	 
-		public virtual void disposeFlag(RevFlag flag)
+		///	<summary>
+		/// Allow a flag to be recycled for a different use.
+		/// <para />
+		/// Recycled flags always come back as a different Java object instance when
+		/// assigned again by <seealso cref="newFlag(string)"/>.
+		/// <para />
+		/// If the flag was previously being carried, the carrying request is
+		/// removed. Disposing of a carried flag while a traversal is in progress has
+		/// an undefined behavior.
+		/// </summary>
+		/// <param name="flag">the to recycle.</param>
+		public void disposeFlag(RevFlag flag)
 		{
 			freeFlag(flag.Mask);
 		}
 
-		internal virtual void freeFlag(int mask)
+		internal void freeFlag(int mask)
 		{
 			if (IsNotStarted())
 			{
@@ -1023,46 +1029,46 @@ namespace GitSharp.RevWalk
 			_delayFreeFlags = 0;
 		}
 
-		///    
-		///	 <summary> * Resets internal state and allows this instance to be used again.
-		///	 * <p>
-		///	 * Unlike <seealso cref="#dispose()"/> previously acquired RevObject (and RevCommit)
-		///	 * instances are not invalidated. RevFlag instances are not invalidated, but
-		///	 * are removed from all RevObjects. </summary>
-		///	 
-		public virtual void reset()
+		///	<summary>
+		/// Resets internal state and allows this instance to be used again.
+		/// <para />
+		/// Unlike <seealso cref="Dispose()"/> previously acquired RevObject (and RevCommit)
+		/// instances are not invalidated. RevFlag instances are not invalidated, but
+		/// are removed from all RevObjects.
+		/// </summary>
+		public void reset()
 		{
 			reset(0);
 		}
 
-		///    
-		///	 <summary> * Resets internal state and allows this instance to be used again.
-		///	 * <p>
-		///	 * Unlike <seealso cref="#dispose()"/> previously acquired RevObject (and RevCommit)
-		///	 * instances are not invalidated. RevFlag instances are not invalidated, but
-		///	 * are removed from all RevObjects.
-		///	 *  </summary>
-		///	 * <param name="retainFlags">
-		///	 *            application flags that should <b>not</b> be cleared from
-		///	 *            existing commit objects. </param>
-		///	 
-		public virtual void resetRetain(RevFlagSet retainFlags)
+		///	<summary>
+		/// Resets internal state and allows this instance to be used again.
+		/// <para />
+		/// Unlike <seealso cref="#dispose()"/> previously acquired RevObject (and RevCommit)
+		/// instances are not invalidated. RevFlag instances are not invalidated, but
+		/// are removed from all RevObjects.
+		/// </summary>
+		/// <param name="retainFlags">
+		/// application flags that should <b>not</b> be cleared from
+		/// existing commit objects.
+		/// </param>
+		public void resetRetain(RevFlagSet retainFlags)
 		{
 			reset(retainFlags.Mask);
 		}
 
-		///    
-		///	 <summary> * Resets internal state and allows this instance to be used again.
-		///	 * <p>
-		///	 * Unlike <seealso cref="#dispose()"/> previously acquired RevObject (and RevCommit)
-		///	 * instances are not invalidated. RevFlag instances are not invalidated, but
-		///	 * are removed from all RevObjects.
-		///	 *  </summary>
-		///	 * <param name="retainFlags">
-		///	 *            application flags that should <b>not</b> be cleared from
-		///	 *            existing commit objects. </param>
-		///	 
-		public virtual void resetRetain(params RevFlag[] retainFlags)
+		///	<summary>
+		/// Resets internal state and allows this instance to be used again.
+		/// <para />
+		/// Unlike <seealso cref="Dispose()"/> previously acquired RevObject (and RevCommit)
+		/// instances are not invalidated. RevFlag instances are not invalidated, but
+		/// are removed from all RevObjects.
+		/// </summary>
+		/// <param name="retainFlags">
+		/// application flags that should <b>not</b> be cleared from
+		/// existing commit objects.
+		/// </param>
+		public void resetRetain(params RevFlag[] retainFlags)
 		{
 			int mask = 0;
 			foreach (RevFlag flag in retainFlags)
@@ -1070,17 +1076,17 @@ namespace GitSharp.RevWalk
 			reset(mask);
 		}
 
-		///    
-		///	 <summary> * Resets internal state and allows this instance to be used again.
-		///	 * <p>
-		///	 * Unlike <seealso cref="#dispose()"/> previously acquired RevObject (and RevCommit)
-		///	 * instances are not invalidated. RevFlag instances are not invalidated, but
-		///	 * are removed from all RevObjects.
-		///	 *  </summary>
-		///	 * <param name="retainFlags">
-		///	 *            application flags that should <b>not</b> be cleared from
-		///	 *            existing commit objects. </param>
-		///	 
+		///	<summary>
+		/// Resets internal state and allows this instance to be used again.
+		/// <para />
+		/// Unlike <seealso cref="Dispose()"/> previously acquired RevObject (and RevCommit)
+		/// instances are not invalidated. RevFlag instances are not invalidated, but
+		/// are removed from all RevObjects.
+		/// </summary>
+		/// <param name="retainFlags">
+		/// application flags that should <b>not</b> be cleared from
+		/// existing commit objects.
+		/// </param>
 		internal virtual void reset(int retainFlags)
 		{
 			FinishDelayedFreeFlags();
@@ -1139,16 +1145,16 @@ namespace GitSharp.RevWalk
 		public class Iterator<T> : IEnumerator<T>
 			where T : RevCommit
 		{
-			private T first;
-			private T next;
-			private RevWalk revwalk;
+			private T _first;
+			private T _next;
+			private RevWalk _revwalk;
 
 			public Iterator(RevWalk revwalk)
 			{
-				this.revwalk = revwalk;
+				_revwalk = revwalk;
 				try
 				{
-					first = next = (T)revwalk.next();
+					_first = _next = (T)revwalk.next();
 					//} catch (MissingObjectException e) {
 					//    throw new RevWalkException(e);
 					//} catch (IncorrectObjectTypeException e) {
@@ -1162,28 +1168,20 @@ namespace GitSharp.RevWalk
 
 			public T Current
 			{
-				get
-				{
-					return next;
-				}
+				get { return _next; }
 			}
 
 			object System.Collections.IEnumerator.Current
 			{
-				get { return next; }
+				get { return _next; }
 			}
-
-			//public bool hasNext() {
-			//    return this.next != null;
-			//}
 
 			public bool MoveNext()
 			{
 				try
 				{
-					T r = next;
-					next = (T)revwalk.next();
-					return this.next != null;
+					_next = (T)_revwalk.next();
+					return _next != null;
 				}
 				catch (MissingObjectException e)
 				{
@@ -1201,16 +1199,16 @@ namespace GitSharp.RevWalk
 
 			public void Reset()
 			{
-				this.next = first;
+				_next = _first;
 			}
 
 			#region IDisposable Members
 
 			public void Dispose()
 			{
-				first = null;
-				next = null;
-				revwalk = null;
+				_first = null;
+				_next = null;
+				_revwalk = null;
 			}
 
 			#endregion
@@ -1238,7 +1236,7 @@ namespace GitSharp.RevWalk
 		/// </param>
 		/// <returns> a new unparsed reference for the object.
 		/// </returns>
-		internal RevCommit createCommit(AnyObjectId id)
+		internal static RevCommit createCommit(AnyObjectId id)
 		{
 			return new RevCommit(id);
 		}

@@ -159,7 +159,7 @@ namespace GitSharp.DirectoryCache
          * @param newPath
          *            name of the cache entry.
          */
-        public DirCacheEntry(String newPath)
+        public DirCacheEntry(string newPath)
             : this(Constants.encode(newPath))
         {
         }
@@ -172,7 +172,7 @@ namespace GitSharp.DirectoryCache
          * @param stage
          *            the stage index of the new entry.
          */
-        public DirCacheEntry(String newPath, int stage)
+        public DirCacheEntry(string newPath, int stage)
             : this(Constants.encode(newPath), stage)
         {
         }
@@ -477,7 +477,7 @@ namespace GitSharp.DirectoryCache
          *         the entry is in a subtree there will be at least one '/' in the
          *         returned string.
          */
-        public String getPathString()
+        public string getPathString()
         {
             return Constants.CHARSET.GetString(_path);
         }

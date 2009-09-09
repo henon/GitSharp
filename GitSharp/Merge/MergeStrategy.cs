@@ -95,7 +95,7 @@ namespace GitSharp.Merge
 		/// a strategy by the same name has already been registered.
 		/// </exception>
 		[MethodImpl(MethodImplOptions.Synchronized)]
-		public static void Register(String name, MergeStrategy imp)
+		public static void Register(string name, MergeStrategy imp)
 		{
 			if (Strategies.ContainsKey(name))
 			{
@@ -113,7 +113,7 @@ namespace GitSharp.Merge
 		/// The strategy instance; null if no strategy matches the name.
 		/// </returns>
 		[MethodImpl(MethodImplOptions.Synchronized)]
-		public static MergeStrategy Get(String name)
+		public static MergeStrategy Get(string name)
 		{
 			return Strategies[name];
 		}

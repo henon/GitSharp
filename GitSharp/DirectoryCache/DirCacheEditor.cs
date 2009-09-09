@@ -225,7 +225,7 @@ namespace GitSharp.DirectoryCache
              * @param entryPath
              *            path of the file within the repository.
              */
-            public DeletePath(String entryPath)
+            public DeletePath(string entryPath)
                 : base(entryPath)
             {
             }
@@ -270,7 +270,7 @@ namespace GitSharp.DirectoryCache
              *            does not end with "/" a "/" is implicitly added to ensure
              *            only the subtree's contents are matched by the command.
              */
-            public DeleteTree(String entryPath)
+            public DeleteTree(string entryPath)
                 : base(entryPath.EndsWith("/") ? entryPath : entryPath + "/")
             {
             }

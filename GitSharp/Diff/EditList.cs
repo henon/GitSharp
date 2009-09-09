@@ -72,11 +72,6 @@ namespace GitSharp.Diff
 		    RemoveAt(index);
 	    }
 
-	    public int hashCode()
-        {
-		    return GetHashCode();
-	    }
-
 	    public override string ToString()
         {
             /* Unfortunately, C#'s List does not implement ToString the same

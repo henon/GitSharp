@@ -51,11 +51,11 @@ namespace GitSharp.Tests.Patch
             GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_BothISO88591.patch");
 		    FileHeader fh = p.getFiles()[0];
 
-		    EditList list0 = fh.getHunks()[0].ToEditList();
+		    EditList list0 = fh.Hunks[0].ToEditList();
 		    Assert.AreEqual(1, list0.size());
 		    Assert.AreEqual(new Edit(4 - 1, 5 - 1, 4 - 1, 5 - 1), list0.get(0));
 
-		    EditList list1 = fh.getHunks()[1].ToEditList();
+		    EditList list1 = fh.Hunks[1].ToEditList();
 		    Assert.AreEqual(1, list1.size());
 		    Assert.AreEqual(new Edit(16 - 1, 17 - 1, 16 - 1, 17 - 1), list1.get(0));
 	    }

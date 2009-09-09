@@ -45,764 +45,829 @@ using GitSharp.Util;
 
 namespace GitSharp.Patch
 {
-    /// <summary>
+	/// <summary>
 	/// Patch header describing an action for a single file path.
-    /// </summary>
-    [Serializable]
-    public class FileHeader
-    {
-	    /** Magical file name used for file adds or deletes. */
-	    public static readonly string DEV_NULL = "/dev/null";
+	/// </summary>
+	[Serializable]
+	public class FileHeader
+	{
+		/** Magical file name used for file adds or deletes. */
+		public const string DEV_NULL = "/dev/null";
 
-        private static readonly byte[] OLD_MODE = Constants.encodeASCII("old mode ");
+		private static readonly byte[] OldModeString = Constants.encodeASCII("old mode ");
 
-        private static readonly byte[] NEW_MODE = Constants.encodeASCII("new mode ");
+		private static readonly byte[] NewModeString = Constants.encodeASCII("new mode ");
 
-        public static readonly byte[] DELETED_FILE_MODE = Constants.encodeASCII("deleted file mode ");
+		protected static readonly byte[] DeletedFileMode = Constants.encodeASCII("deleted file mode ");
 
-        public static readonly byte[] NEW_FILE_MODE = Constants.encodeASCII("new file mode ");
+		protected static readonly byte[] NewFileMode = Constants.encodeASCII("new file mode ");
 
-        private static readonly byte[] COPY_FROM = Constants.encodeASCII("copy from ");
+		private static readonly byte[] CopyFrom = Constants.encodeASCII("copy from ");
 
-        private static readonly byte[] COPY_TO = Constants.encodeASCII("copy to ");
+		private static readonly byte[] CopyTo = Constants.encodeASCII("copy to ");
 
-        private static readonly byte[] RENAME_OLD = Constants.encodeASCII("rename old ");
+		private static readonly byte[] RenameOld = Constants.encodeASCII("rename old ");
 
-        private static readonly byte[] RENAME_NEW = Constants.encodeASCII("rename new ");
+		private static readonly byte[] RenameNew = Constants.encodeASCII("rename new ");
 
-        private static readonly byte[] RENAME_FROM = Constants.encodeASCII("rename from ");
+		private static readonly byte[] RenameFrom = Constants.encodeASCII("rename from ");
 
-        private static readonly byte[] RENAME_TO = Constants.encodeASCII("rename to ");
+		private static readonly byte[] RenameTo = Constants.encodeASCII("rename to ");
 
-        private static readonly byte[] SIMILARITY_INDEX = Constants.encodeASCII("similarity index ");
+		private static readonly byte[] SimilarityIndex = Constants.encodeASCII("similarity index ");
 
-        private static readonly byte[] DISSIMILARITY_INDEX = Constants.encodeASCII("dissimilarity index ");
+		private static readonly byte[] DissimilarityIndex = Constants.encodeASCII("dissimilarity index ");
 
-        public static readonly byte[] INDEX = Constants.encodeASCII("index ");
+		protected static readonly byte[] Index = Constants.encodeASCII("index ");
 
-        public static readonly byte[] OLD_NAME = Constants.encodeASCII("--- ");
+		public static readonly byte[] OLD_NAME = Constants.encodeASCII("--- ");
 
-        public static readonly byte[] NEW_NAME = Constants.encodeASCII("+++ ");
+		public static readonly byte[] NEW_NAME = Constants.encodeASCII("+++ ");
 
-	    /** General type of change a single file-level patch describes. */
-	    public enum ChangeType {
-		    /** Add a new file to the project */
-		    ADD,
+		/// <summary>
+		/// General type of change a single file-level patch describes.
+		/// </summary>
+		public enum ChangeTypeEnum
+		{
+			/// <summary>
+			/// Add a new file to the project
+			/// </summary>
+			ADD,
 
-		    /** Modify an existing file in the project (content and/or mode) */
-		    MODIFY,
+			/// <summary>
+			/// Modify an existing file in the project (content and/or mode)
+			/// </summary>
+			MODIFY,
 
-		    /** Delete an existing file from the project */
-		    DELETE,
+			/// <summary>
+			/// Delete an existing file from the project
+			/// </summary>
+			DELETE,
 
-		    /** Rename an existing file to a new location */
-		    RENAME,
+			/// <summary>
+			/// Rename an existing file to a new location
+			/// </summary>
+			RENAME,
 
-		    /** Copy an existing file to a new location, keeping the original */
-		    COPY
-	    }
+			/// <summary>
+			/// Copy an existing file to a new location, keeping the original
+			/// </summary>
+			COPY
+		}
 
-	    /** Type of patch used by this file. */
-	    public enum PatchType {
-		    /** A traditional unified diff style patch of a text file. */
-		    UNIFIED,
-
-		    /** An empty patch with a message "Binary files ... differ" */
-		    BINARY,
-
-		    /** A Git binary patch, holding pre and post image deltas */
-		    GIT_BINARY
-	    }
-
-	    /** Buffer holding the patch data for this file. */
-	    public readonly byte[] buf;
-
-	    /** Offset within {@link #buf} to the "diff ..." line. */
-	    public readonly int startOffset;
-
-	    /** Position 1 past the end of this file within {@link #buf}. */
-	    public int endOffset;
-
-	    /** File name of the old (pre-image). */
-	    private String oldName;
-
-	    /** File name of the new (post-image). */
-	    private String newName;
-
-	    /** Old mode of the file, if described by the patch, else null. */
-	    private FileMode oldMode;
-
-	    /** New mode of the file, if described by the patch, else null. */
-	    protected FileMode newMode;
-
-	    /** General type of change indicated by the patch. */
-	    protected ChangeType changeType;
-
-	    /** Similarity score if {@link #changeType} is a copy or rename. */
-	    private int score;
-
-	    /** ObjectId listed on the index line for the old (pre-image) */
-	    private AbbreviatedObjectId oldId;
-
-	    /** ObjectId listed on the index line for the new (post-image) */
-	    protected AbbreviatedObjectId newId;
-
-	    /** Type of patch used to modify this file */
-        public PatchType patchType;
-
-	    /** The hunks of this file */
-	    private List<HunkHeader> hunks;
-
-	    /** If {@link #patchType} is {@link PatchType#GIT_BINARY}, the new image */
-	    public BinaryHunk forwardBinaryHunk;
-
-	    /** If {@link #patchType} is {@link PatchType#GIT_BINARY}, the old image */
-	    public BinaryHunk reverseBinaryHunk;
-
-	    public FileHeader(byte[] b, int offset)
-        {
-		    buf = b;
-		    startOffset = offset;
-		    changeType = ChangeType.MODIFY; // unless otherwise designated
-		    patchType = PatchType.UNIFIED;
-	    }
-
-	    public virtual int getParentCount()
-        {
-		    return 1;
-	    }
-
-	    /** @return the byte array holding this file's patch script. */
-	    public byte[] getBuffer()
-        {
-		    return buf;
-	    }
-
-	    /** @return offset the start of this file's script in {@link #getBuffer()}. */
-	    public int getStartOffset()
-        {
-		    return startOffset;
-	    }
-
-	    /** @return offset one past the end of the file script. */
-	    public int getEndOffset()
-        {
-		    return endOffset;
-	    }
-
-	    /**
-	     * Convert the patch script for this file into a string.
-	     * <p>
-	     * The default character encoding ({@link Constants#CHARSET}) is assumed for
-	     * both the old and new files.
-	     *
-	     * @return the patch script, as a Unicode string.
-	     */
-	    public String getScriptText()
-        {
-		    return getScriptText(null, null);
-	    }
-
-        /// <summary>
-        ///Convert the patch script for this file into a string.
-        /// </summary>
-        /// <param name="oldCharset">hint character set to decode the old lines with.</param>
-        /// <param name="newCharset">hint character set to decode the new lines with.</param>
-        /// <returns>the patch script, as a Unicode string.</returns>
-	    public virtual String getScriptText(Encoding oldCharset, Encoding newCharset)
-        {
-		    return getScriptText(new Encoding[] { oldCharset, newCharset });
-	    }
-
-        /// <summary>
-        /// Convert the patch script for this file into a string.
-        /// </summary>
-        /// <param name="charsetGuess">
-        /// optional array to suggest the character set to use when
-        /// decoding each file's line. If supplied the array must have a
-        /// length of <code>{@link #getParentCount()} + 1</code>
-        /// representing the old revision character sets and the new
-        /// revision character set.
-        /// </param>
-        /// <returns>the patch script, as a Unicode string.</returns>
-	    public virtual String getScriptText(Encoding[] charsetGuess)
-        {
-		    if (getHunks().Count == 0)
-            {
-			    // If we have no hunks then we can safely assume the entire
-			    // patch is a binary style patch, or a meta-data only style
-			    // patch. Either way the encoding of the headers should be
-			    // strictly 7-bit US-ASCII and the body is either 7-bit ASCII
-			    // (due to the base 85 encoding used for a BinaryHunk) or is
-			    // arbitrary noise we have chosen to ignore and not understand
-			    // (e.g. the message "Binary files ... differ").
-			    //
-			    return RawParseUtils.extractBinaryString(buf, startOffset, endOffset);
-		    }
-
-		    if (charsetGuess != null && charsetGuess.Length != getParentCount() + 1)
-			    throw new ArgumentException("Expected "
-					    + (getParentCount() + 1) + " character encoding guesses");
-
-		    if (trySimpleConversion(charsetGuess))
-            {
-			    Encoding cs = charsetGuess != null ? charsetGuess[0] : null;
-			    if (cs == null)
-				    cs = Constants.CHARSET;
-
-			    try
-                {
-				    return RawParseUtils.decodeNoFallback(cs, buf, startOffset, endOffset);
-			    }
-                catch (EncoderFallbackException)
-                {
-				    // Try the much slower, more-memory intensive version which
-				    // can handle a character set conversion patch.
-			    }
-		    }
-
-		    StringBuilder r = new StringBuilder(endOffset - startOffset);
-
-		    // Always treat the headers as US-ASCII; Git file names are encoded
-		    // in a C style escape if any character has the high-bit set.
-		    //
-		    int hdrEnd = getHunks()[0].StartOffset;
-		    for (int ptr = startOffset; ptr < hdrEnd;) {
-			    int eol = Math.Min(hdrEnd, RawParseUtils.nextLF(buf, ptr));
-			    r.Append(RawParseUtils.extractBinaryString(buf, ptr, eol));
-			    ptr = eol;
-		    }
-
-		    String[] files = extractFileLines(charsetGuess);
-		    int[] offsets = new int[files.Length];
-		    foreach (HunkHeader h in getHunks())
-			    h.extractFileLines(r, files, offsets);
-		    return r.ToString();
-	    }
-
-        private static bool trySimpleConversion(Encoding[] charsetGuess)
-        {
-		    if (charsetGuess == null)
-			    return true;
-		    for (int i = 1; i < charsetGuess.Length; i++) {
-			    if (charsetGuess[i] != charsetGuess[0])
-				    return false;
-		    }
-		    return true;
-	    }
-
-	    private String[] extractFileLines(Encoding[] csGuess)
-        {
-		    TemporaryBuffer[] tmp = new TemporaryBuffer[getParentCount() + 1];
-		    try
-            {
-			    for (int i = 0; i < tmp.Length; i++)
-				    tmp[i] = new TemporaryBuffer();
-			    foreach (HunkHeader h in getHunks())
-				    h.extractFileLines(tmp);
-
-			    String[] r = new String[tmp.Length];
-			    for (int i = 0; i < tmp.Length; i++) {
-				    Encoding cs = csGuess != null ? csGuess[i] : null;
-				    if (cs == null)
-					    cs = Constants.CHARSET;
-				    r[i] = RawParseUtils.decode(cs, tmp[i].ToArray());
-			    }
-			    return r;
-		    }
-            catch (IOException ioe)
-            {
-			    throw new Exception("Cannot convert script to text", ioe);
-		    }
-            finally
-            {
-			    foreach (TemporaryBuffer b in tmp)
-                {
-				    if (b != null)
-					    b.destroy();
-			    }
-		    }
-	    }
-
-	    /**
-	     * Get the old name associated with this file.
-	     * <p>
-	     * The meaning of the old name can differ depending on the semantic meaning
-	     * of this patch:
-	     * <ul>
-	     * <li><i>file add</i>: always <code>/dev/null</code></li>
-	     * <li><i>file modify</i>: always {@link #getNewName()}</li>
-	     * <li><i>file delete</i>: always the file being deleted</li>
-	     * <li><i>file copy</i>: source file the copy originates from</li>
-	     * <li><i>file rename</i>: source file the rename originates from</li>
-	     * </ul>
-	     *
-	     * @return old name for this file.
-	     */
-	    public String getOldName() {
-		    return oldName;
-	    }
-
-	    /**
-	     * Get the new name associated with this file.
-	     * <p>
-	     * The meaning of the new name can differ depending on the semantic meaning
-	     * of this patch:
-	     * <ul>
-	     * <li><i>file add</i>: always the file being created</li>
-	     * <li><i>file modify</i>: always {@link #getOldName()}</li>
-	     * <li><i>file delete</i>: always <code>/dev/null</code></li>
-	     * <li><i>file copy</i>: destination file the copy ends up at</li>
-	     * <li><i>file rename</i>: destination file the rename ends up at/li>
-	     * </ul>
-	     *
-	     * @return new name for this file.
-	     */
-	    public String getNewName()
-        {
-		    return newName;
-	    }
-
-	    /** @return the old file mode, if described in the patch */
-	    public virtual FileMode getOldMode()
-        {
-		    return oldMode;
-	    }
-
-	    /** @return the new file mode, if described in the patch */
-	    public FileMode getNewMode()
-        {
-		    return newMode;
-	    }
-
-	    /** @return the type of change this patch makes on {@link #getNewName()} */
-	    public ChangeType getChangeType()
-        {
-		    return changeType;
-	    }
-
-	    /**
-	     * @return similarity score between {@link #getOldName()} and
-	     *         {@link #getNewName()} if {@link #getChangeType()} is
-	     *         {@link ChangeType#COPY} or {@link ChangeType#RENAME}.
-	     */
-	    public int getScore()
-        {
-		    return score;
-	    }
-
-	    /**
-	     * Get the old object id from the <code>index</code>.
-	     *
-	     * @return the object id; null if there is no index line
-	     */
-	    public virtual AbbreviatedObjectId getOldId()
-        {
-		    return oldId;
-	    }
-
-	    /**
-	     * Get the new object id from the <code>index</code>.
-	     *
-	     * @return the object id; null if there is no index line
-	     */
-	    public AbbreviatedObjectId getNewId()
-        {
-		    return newId;
-	    }
-
-	    /** @return style of patch used to modify this file */
-	    public PatchType getPatchType()
-        {
-		    return patchType;
-	    }
-
-	    /** @return true if this patch modifies metadata about a file */
-	    public bool hasMetaDataChanges()
-        {
-		    return changeType != ChangeType.MODIFY || newMode != oldMode;
-	    }
-
-	    /** @return hunks altering this file; in order of appearance in patch */
-	    public List<HunkHeader> getHunks()
-        {
-		    if (hunks == null)
-			    return new List<HunkHeader>();
-		    return hunks;
-	    }
-
-        public void addHunk(HunkHeader h)
-        {
-		    if (h.File != this)
-		    {
-		    	throw new ArgumentException("Hunk belongs to another file");
-		    }
-		    if (hunks == null)
-		    {
-		    	hunks = new List<HunkHeader>();
-		    }
-		    hunks.Add(h);
-	    }
-
-	    public virtual HunkHeader newHunkHeader(int offset)
-        {
-		    return new HunkHeader(this, offset);
-	    }
-
-	    /** @return if a {@link PatchType#GIT_BINARY}, the new-image delta/literal */
-	    public BinaryHunk getForwardBinaryHunk()
-        {
-		    return forwardBinaryHunk;
-	    }
-
-	    /** @return if a {@link PatchType#GIT_BINARY}, the old-image delta/literal */
-	    public BinaryHunk getReverseBinaryHunk()
-        {
-		    return reverseBinaryHunk;
-	    }
-
-	    /// <summary>
+		/// <summary>
+		/// Type of patch used by this file.
+		/// </summary>
+		public enum PatchTypeEnum
+		{
+			/// <summary>
+			/// A traditional unified diff style patch of a text file.
+			/// </summary>
+			UNIFIED,
+
+			/// <summary>
+			/// An empty patch with a message "Binary files ... differ"
+			/// </summary>
+			BINARY,
+
+			/// <summary>
+			/// A Git binary patch, holding pre and post image deltas
+			/// </summary>
+			GIT_BINARY
+		}
+
+		// File name of the old (pre-image).
+		private string oldName;
+
+		// File name of the new (post-image).
+		private string newName;
+
+		// Old mode of the file, if described by the patch, else null.
+		private FileMode _oldMode;
+
+		// New mode of the file, if described by the patch, else null.
+		private FileMode _newMode;
+
+		// Similarity score if ChangeType is a copy or rename.
+		private int _score;
+
+		// ObjectId listed on the index line for the old (pre-image)
+		private AbbreviatedObjectId oldId;
+
+		// The hunks of this file
+		private readonly List<HunkHeader> _hunks;
+
+		public FileHeader(byte[] b, int offset)
+		{
+			Buffer = b;
+			StartOffset = offset;
+			ChangeType = ChangeTypeEnum.MODIFY; // unless otherwise designated
+			PatchType = PatchTypeEnum.UNIFIED;
+		}
+
+		public virtual int ParentCount
+		{
+			get { return 1; }
+		}
+
+		protected AbbreviatedObjectId NewId { private get; set; }
+
+		/// <summary>
+		/// The byte array holding this file's patch script.
+		/// </summary>
+		/// <returns></returns>
+		public byte[] Buffer { get; private set; }
+
+		/// <summary>
+		/// Offset the start of this file's script in <see cref="Buffer"/>
+		/// </summary>
+		public int StartOffset { get; private set; }
+
+		/// <summary>
+		/// Offset one past the end of the file script.
+		/// </summary>
+		/// <returns></returns>
+		public int EndOffset { get; set; }
+
+		public BinaryHunk ForwardBinaryHunk { get; set; }
+
+		public BinaryHunk ReverseBinaryHunk { get; set; }
+
+		public ChangeTypeEnum ChangeType { get; set; }
+
+		public PatchTypeEnum PatchType { get; set; }
+
+		/// <summary>
+		/// Convert the patch script for this file into a string.
+		/// <para />
+		/// The default character encoding <see cref="Constants.CHARSET"/> is assumed for
+		/// both the old and new files.
+		/// </summary>
+		/// <returns>
+		/// The patch script, as a Unicode string.
+		/// </returns>
+		public string getScriptText()
+		{
+			return getScriptText(null, null);
+		}
+
+		/// <summary>
+		///Convert the patch script for this file into a string.
+		/// </summary>
+		/// <param name="oldCharset">hint character set to decode the old lines with.</param>
+		/// <param name="newCharset">hint character set to decode the new lines with.</param>
+		/// <returns>the patch script, as a Unicode string.</returns>
+		public virtual string getScriptText(Encoding oldCharset, Encoding newCharset)
+		{
+			return getScriptText(new[] { oldCharset, newCharset });
+		}
+
+		/// <summary>
+		/// Convert the patch script for this file into a string.
+		/// </summary>
+		/// <param name="charsetGuess">
+		/// optional array to suggest the character set to use when
+		/// decoding each file's line. If supplied the array must have a
+		/// length of <code>{@link #getParentCount()} + 1</code>
+		/// representing the old revision character sets and the new
+		/// revision character set.
+		/// </param>
+		/// <returns>the patch script, as a Unicode string.</returns>
+		public string getScriptText(Encoding[] charsetGuess)
+		{
+			if (Hunks.Count == 0)
+			{
+				// If we have no hunks then we can safely assume the entire
+				// patch is a binary style patch, or a meta-data only style
+				// patch. Either way the encoding of the headers should be
+				// strictly 7-bit US-ASCII and the body is either 7-bit ASCII
+				// (due to the base 85 encoding used for a BinaryHunk) or is
+				// arbitrary noise we have chosen to ignore and not understand
+				// (e.g. the message "Binary files ... differ").
+				//
+				return RawParseUtils.extractBinaryString(Buffer, StartOffset, EndOffset);
+			}
+
+			if (charsetGuess != null && charsetGuess.Length != ParentCount + 1)
+				throw new ArgumentException("Expected "
+						+ (ParentCount + 1) + " character encoding guesses");
+
+			if (TrySimpleConversion(charsetGuess))
+			{
+				Encoding cs = (charsetGuess != null ? charsetGuess[0] : null) ?? Constants.CHARSET;
+
+				try
+				{
+					return RawParseUtils.decodeNoFallback(cs, Buffer, StartOffset, EndOffset);
+				}
+				catch (EncoderFallbackException)
+				{
+					// Try the much slower, more-memory intensive version which
+					// can handle a character set conversion patch.
+				}
+			}
+
+			var r = new StringBuilder(EndOffset - StartOffset);
+
+			// Always treat the headers as US-ASCII; Git file names are encoded
+			// in a C style escape if any character has the high-bit set.
+			//
+			int hdrEnd = Hunks[0].StartOffset;
+			for (int ptr = StartOffset; ptr < hdrEnd; )
+			{
+				int eol = Math.Min(hdrEnd, RawParseUtils.nextLF(Buffer, ptr));
+				r.Append(RawParseUtils.extractBinaryString(Buffer, ptr, eol));
+				ptr = eol;
+			}
+
+			string[] files = ExtractFileLines(charsetGuess);
+			var offsets = new int[files.Length];
+			foreach (HunkHeader h in Hunks)
+			{
+				h.extractFileLines(r, files, offsets);
+			}
+
+			return r.ToString();
+		}
+
+		private static bool TrySimpleConversion(Encoding[] charsetGuess)
+		{
+			if (charsetGuess == null) return true;
+
+			for (int i = 1; i < charsetGuess.Length; i++)
+			{
+				if (charsetGuess[i] != charsetGuess[0]) return false;
+			}
+			return true;
+		}
+
+		private string[] ExtractFileLines(Encoding[] csGuess)
+		{
+			var tmp = new TemporaryBuffer[ParentCount + 1];
+			try
+			{
+				for (int i = 0; i < tmp.Length; i++)
+				{
+					tmp[i] = new TemporaryBuffer();
+				}
+
+				foreach (HunkHeader h in Hunks)
+				{
+					h.extractFileLines(tmp);
+				}
+
+				var r = new String[tmp.Length];
+				for (int i = 0; i < tmp.Length; i++)
+				{
+					Encoding cs = (csGuess != null ? csGuess[i] : null) ?? Constants.CHARSET;
+					r[i] = RawParseUtils.decode(cs, tmp[i].ToArray());
+				}
+
+				return r;
+			}
+			catch (IOException ioe)
+			{
+				throw new Exception("Cannot convert script to text", ioe);
+			}
+			finally
+			{
+				foreach (TemporaryBuffer b in tmp)
+				{
+					if (b != null)
+						b.destroy();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Get the old name associated with this file.
+		/// <para />
+		/// The meaning of the old name can differ depending on the semantic meaning
+		/// of this patch:
+		/// <ul>
+		/// <li><i>file add</i>: always <code>/dev/null</code></li>
+		/// <li><i>file modify</i>: always {@link #getNewName()}</li>
+		/// <li><i>file delete</i>: always the file being deleted</li>
+		/// <li><i>file copy</i>: source file the copy originates from</li>
+		/// <li><i>file rename</i>: source file the rename originates from</li>
+		/// </ul>
+		/// </summary>
+		/// <returns>Old name for this file.</returns>
+		public string OldName
+		{
+			get { return oldName; }
+		}
+
+		/// <summary>
+		/// Get the new name associated with this file.
+		/// <para />
+		/// The meaning of the new name can differ depending on the semantic meaning
+		/// of this patch:
+		/// <ul>
+		/// <li><i>file add</i>: always the file being created</li>
+		/// <li><i>file modify</i>: always {@link #getOldName()}</li>
+		/// <li><i>file delete</i>: always <code>/dev/null</code></li>
+		/// <li><i>file copy</i>: destination file the copy ends up at</li>
+		/// <li><i>file rename</i>: destination file the rename ends up at/li>
+		/// </ul>
+		/// </summary>
+		/// <returns></returns>
+		public string NewName
+		{
+			get { return newName; }
+		}
+
+		/// <summary>
+		/// The old file mode, if described in the patch
+		/// </summary>
+		public virtual FileMode GetOldMode()
+		{
+			return _oldMode;
+		}
+
+		/// <summary>
+		/// The new file mode, if described in the patch
+		/// </summary>
+		public FileMode NewMode
+		{
+			get { return _newMode; }
+			protected set { _newMode = value; }
+		}
+
+		/// <summary>
+		/// The type of change this patch makes on <see cref="NewName"/>
+		/// </summary>
+		public ChangeTypeEnum getChangeType()
+		{
+			return ChangeType;
+		}
+
+		/// <summary>
+		/// Returns similarity score between <see cref="getOldName()"/> and
+		/// <see cref="getNewName()"/> if <see cref="getChangeType()"/> is
+		/// <see cref="ChangeType.COPY"/> or <see cref="ChangeType.RENAME"/>.
+		/// </summary>
+		/// <returns></returns>
+		public int getScore()
+		{
+			return _score;
+		}
+
+		/// <summary>
+		/// Get the old object id from the <code>index</code>.
+		/// </summary>
+		/// <returns>
+		/// The object id; null if there is no index line
+		/// </returns>
+		public virtual AbbreviatedObjectId getOldId()
+		{
+			return oldId;
+		}
+
+		/// <summary>
+		/// Get the new object id from the <code>index</code>.
+		/// </summary>
+		/// <returns>
+		/// The object id; null if there is no index line
+		/// </returns>
+		public AbbreviatedObjectId getNewId()
+		{
+			return NewId;
+		}
+
+		/// <summary>
+		/// Style of patch used to modify this file
+		/// </summary>
+		/// <returns></returns>
+		public PatchTypeEnum getPatchType()
+		{
+			return PatchType;
+		}
+
+		/// <summary>
+		/// True if this patch modifies metadata about a file
+		/// </summary>
+		/// <returns></returns>
+		public bool hasMetaDataChanges()
+		{
+			return ChangeType != ChangeTypeEnum.MODIFY || _newMode != _oldMode;
+		}
+
+		/// <summary>
+		/// Gets the hunks altering this file; in order of appearance in patch
+		/// </summary>
+		/// <returns></returns>
+		public List<HunkHeader> Hunks
+		{
+			get
+			{
+				if (_hunks == null)
+				{
+					return new List<HunkHeader>();
+				}
+
+				return _hunks;
+			}
+		}
+
+		public void addHunk(HunkHeader h)
+		{
+			if (h.File != this)
+			{
+				throw new ArgumentException("Hunk belongs to another file");
+			}
+
+			Hunks.Add(h);
+		}
+
+		public virtual HunkHeader newHunkHeader(int offset)
+		{
+			return new HunkHeader(this, offset);
+		}
+
+		/// <summary>
+		/// If a <see cref="PatchType.GIT_BINARY"/>, the new-image delta/literal
+		/// </summary>
+		/// <returns></returns>
+		public BinaryHunk getForwardBinaryHunk()
+		{
+			return ForwardBinaryHunk;
+		}
+
+		/// <summary>
+		/// If a <see cref="PatchType.GIT_BINARY"/>, the old-image delta/literal
+		/// </summary>
+		/// <returns></returns>
+		public BinaryHunk getReverseBinaryHunk()
+		{
+			return ReverseBinaryHunk;
+		}
+
+		/// <summary>
 		/// Returns a list describing the content edits performed on this file.
-	    /// </summary>
-	    /// <returns></returns>
-	    public EditList ToEditList()
-        {
-		    EditList r = new EditList();
-			hunks.ForEach(hunk => r.AddRange(hunk.ToEditList()));
-		    return r;
-	    }
+		/// </summary>
+		/// <returns></returns>
+		public EditList ToEditList()
+		{
+			var r = new EditList();
+			_hunks.ForEach(hunk => r.AddRange(hunk.ToEditList()));
+			return r;
+		}
 
-	    /**
-	     * Parse a "diff --git" or "diff --cc" line.
-	     *
-	     * @param ptr
-	     *            first character After the "diff --git " or "diff --cc " part.
-	     * @param end
-	     *            one past the last position to parse.
-	     * @return first character After the LF at the end of the line; -1 on error.
-	     */
-	    public int parseGitFileName(int ptr, int end)
-        {
-		    int eol = RawParseUtils.nextLF(buf, ptr);
-		    int bol = ptr;
-		    if (eol >= end)
-            {
-			    return -1;
-		    }
+		/// <summary>
+		/// Parse a "diff --git" or "diff --cc" line.
+		/// </summary>
+		/// <param name="ptr">
+		/// first character After the "diff --git " or "diff --cc " part.
+		/// </param>
+		/// <param name="end">
+		/// one past the last position to parse.
+		/// </param>
+		/// <returns>
+		/// first character After the LF at the end of the line; -1 on error.
+		/// </returns>
+		public int parseGitFileName(int ptr, int end)
+		{
+			int eol = RawParseUtils.nextLF(Buffer, ptr);
+			int bol = ptr;
+			if (eol >= end)
+			{
+				return -1;
+			}
 
-		    // buffer[ptr..eol] looks like "a/foo b/foo\n". After the first
-		    // A regex to match this is "^[^/]+/(.*?) [^/+]+/\1\n$". There
-		    // is only one way to split the line such that text to the left
-		    // of the space matches the text to the right, excluding the part
-		    // before the first slash.
-		    //
+			// buffer[ptr..eol] looks like "a/foo b/foo\n". After the first
+			// A regex to match this is "^[^/]+/(.*?) [^/+]+/\1\n$". There
+			// is only one way to split the line such that text to the left
+			// of the space matches the text to the right, excluding the part
+			// before the first slash.
+			//
+			int aStart = RawParseUtils.nextLF(Buffer, ptr, (byte)'/');
+			if (aStart >= eol)
+				return eol;
 
-		    int aStart = RawParseUtils.nextLF(buf, ptr, (byte)'/');
-		    if (aStart >= eol)
-			    return eol;
+			while (ptr < eol)
+			{
+				int sp = RawParseUtils.nextLF(Buffer, ptr, (byte)' ');
+				if (sp >= eol)
+				{
+					// We can't split the header, it isn't valid.
+					// This may be OK if this is a rename patch.
+					//
+					return eol;
+				}
+				int bStart = RawParseUtils.nextLF(Buffer, sp, (byte)'/');
+				if (bStart >= eol)
+					return eol;
 
-		    while (ptr < eol) {
-			    int sp = RawParseUtils.nextLF(buf, ptr, (byte)' ');
-			    if (sp >= eol) {
-				    // We can't split the header, it isn't valid.
-				    // This may be OK if this is a rename patch.
-				    //
-				    return eol;
-			    }
-			    int bStart = RawParseUtils.nextLF(buf, sp, (byte)'/');
-			    if (bStart >= eol)
-				    return eol;
+				// If buffer[aStart..sp - 1] = buffer[bStart..eol - 1]
+				// we have a valid split.
+				//
+				if (Eq(aStart, sp - 1, bStart, eol - 1))
+				{
+					if (Buffer[bol] == '"')
+					{
+						// We're a double quoted name. The region better end
+						// in a double quote too, and we need to decode the
+						// characters before reading the name.
+						//
+						if (Buffer[sp - 2] != '"')
+						{
+							return eol;
+						}
+						oldName = QuotedString.GitPathStyle.GIT_PATH.dequote(Buffer, bol, sp - 1);
+						oldName = P1(oldName);
+					}
+					else
+					{
+						oldName = RawParseUtils.decode(Constants.CHARSET, Buffer, aStart, sp - 1);
+					}
+					newName = oldName;
+					return eol;
+				}
 
-			    // If buffer[aStart..sp - 1] = buffer[bStart..eol - 1]
-			    // we have a valid split.
-			    //
-			    if (eq(aStart, sp - 1, bStart, eol - 1)) {
-				    if (buf[bol] == '"') {
-					    // We're a double quoted name. The region better end
-					    // in a double quote too, and we need to decode the
-					    // characters before reading the name.
-					    //
-					    if (buf[sp - 2] != '"') {
-						    return eol;
-					    }
-					    oldName = QuotedString.GitPathStyle.GIT_PATH.dequote(buf, bol, sp - 1);
-					    oldName = p1(oldName);
-				    } else {
-					    oldName = RawParseUtils.decode(Constants.CHARSET, buf, aStart, sp - 1);
-				    }
-				    newName = oldName;
-				    return eol;
-			    }
+				// This split wasn't correct. Move past the space and try
+				// another split as the space must be part of the file name.
+				//
+				ptr = sp;
+			}
 
-			    // This split wasn't correct. Move past the space and try
-			    // another split as the space must be part of the file name.
-			    //
-			    ptr = sp;
-		    }
+			return eol;
+		}
 
-		    return eol;
-	    }
+		public virtual int parseGitHeaders(int ptr, int end)
+		{
+			while (ptr < end)
+			{
+				int eol = RawParseUtils.nextLF(Buffer, ptr);
+				if (isHunkHdr(Buffer, ptr, eol) >= 1)
+				{
+					// First hunk header; break out and parse them later.
+					break;
+				}
 
-	    public virtual int parseGitHeaders(int ptr, int end)
-        {
-		    while (ptr < end)
-            {
-			    int eol = RawParseUtils.nextLF(buf, ptr);
-			    if (isHunkHdr(buf, ptr, eol) >= 1)
-                {
-				    // First hunk header; break out and parse them later.
-				    break;
+				if (RawParseUtils.match(Buffer, ptr, OLD_NAME) >= 0)
+				{
+					ParseOldName(ptr, eol);
+				}
+				else if (RawParseUtils.match(Buffer, ptr, NEW_NAME) >= 0)
+				{
+					ParseNewName(ptr, eol);
+				}
+				else if (RawParseUtils.match(Buffer, ptr, OldModeString) >= 0)
+				{
+					_oldMode = ParseFileMode(ptr + OldModeString.Length, eol);
+				}
+				else if (RawParseUtils.match(Buffer, ptr, NewModeString) >= 0)
+				{
+					_newMode = ParseFileMode(ptr + NewModeString.Length, eol);
+				}
+				else if (RawParseUtils.match(Buffer, ptr, DeletedFileMode) >= 0)
+				{
+					_oldMode = ParseFileMode(ptr + DeletedFileMode.Length, eol);
+					_newMode = FileMode.Missing;
+					ChangeType = ChangeTypeEnum.DELETE;
+				}
+				else if (RawParseUtils.match(Buffer, ptr, NewFileMode) >= 0)
+				{
+					ParseNewFileMode(ptr, eol);
+				}
+				else if (RawParseUtils.match(Buffer, ptr, CopyFrom) >= 0)
+				{
+					oldName = ParseName(oldName, ptr + CopyFrom.Length, eol);
+					ChangeType = ChangeTypeEnum.COPY;
 
-                }
-                else if (RawParseUtils.match(buf, ptr, OLD_NAME) >= 0)
-                {
-				    parseOldName(ptr, eol);
+				}
+				else if (RawParseUtils.match(Buffer, ptr, CopyTo) >= 0)
+				{
+					newName = ParseName(newName, ptr + CopyTo.Length, eol);
+					ChangeType = ChangeTypeEnum.COPY;
+				}
+				else if (RawParseUtils.match(Buffer, ptr, RenameOld) >= 0)
+				{
+					oldName = ParseName(oldName, ptr + RenameOld.Length, eol);
+					ChangeType = ChangeTypeEnum.RENAME;
+				}
+				else if (RawParseUtils.match(Buffer, ptr, RenameNew) >= 0)
+				{
+					newName = ParseName(newName, ptr + RenameNew.Length, eol);
+					ChangeType = ChangeTypeEnum.RENAME;
+				}
+				else if (RawParseUtils.match(Buffer, ptr, RenameFrom) >= 0)
+				{
+					oldName = ParseName(oldName, ptr + RenameFrom.Length, eol);
+					ChangeType = ChangeTypeEnum.RENAME;
+				}
+				else if (RawParseUtils.match(Buffer, ptr, RenameTo) >= 0)
+				{
+					newName = ParseName(newName, ptr + RenameTo.Length, eol);
+					ChangeType = ChangeTypeEnum.RENAME;
+				}
+				else if (RawParseUtils.match(Buffer, ptr, SimilarityIndex) >= 0)
+				{
+					_score = RawParseUtils.parseBase10(Buffer, ptr + SimilarityIndex.Length, null);
+				}
+				else if (RawParseUtils.match(Buffer, ptr, DissimilarityIndex) >= 0)
+				{
+					_score = RawParseUtils.parseBase10(Buffer, ptr + DissimilarityIndex.Length, null);
+				}
+				else if (RawParseUtils.match(Buffer, ptr, Index) >= 0)
+				{
+					ParseIndexLine(ptr + Index.Length, eol);
+				}
+				else
+				{
+					// Probably an empty patch (stat dirty).
+					break;
+				}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, NEW_NAME) >= 0)
-                {
-				    parseNewName(ptr, eol);
+				ptr = eol;
+			}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, OLD_MODE) >= 0)
-                {
-				    oldMode = parseFileMode(ptr + OLD_MODE.Length, eol);
+			return ptr;
+		}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, NEW_MODE) >= 0)
-                {
-				    newMode = parseFileMode(ptr + NEW_MODE.Length, eol);
+		protected void ParseOldName(int ptr, int eol)
+		{
+			oldName = P1(ParseName(oldName, ptr + OLD_NAME.Length, eol));
+			if (oldName == DEV_NULL)
+			{
+				ChangeType = ChangeTypeEnum.ADD;
+			}
+		}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, DELETED_FILE_MODE) >= 0)
-                {
-				    oldMode = parseFileMode(ptr + DELETED_FILE_MODE.Length, eol);
-				    newMode = FileMode.Missing;
-				    changeType = ChangeType.DELETE;
+		protected void ParseNewName(int ptr, int eol)
+		{
+			newName = P1(ParseName(newName, ptr + NEW_NAME.Length, eol));
+			if (newName == DEV_NULL)
+			{
+				ChangeType = ChangeTypeEnum.DELETE;
+			}
+		}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, NEW_FILE_MODE) >= 0)
-                {
-				    parseNewFileMode(ptr, eol);
+		protected virtual void ParseNewFileMode(int ptr, int eol)
+		{
+			_oldMode = FileMode.Missing;
+			_newMode = ParseFileMode(ptr + NewFileMode.Length, eol);
+			ChangeType = ChangeTypeEnum.ADD;
+		}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, COPY_FROM) >= 0)
-                {
-				    oldName = parseName(oldName, ptr + COPY_FROM.Length, eol);
-				    changeType = ChangeType.COPY;
+		public int parseTraditionalHeaders(int ptr, int end)
+		{
+			while (ptr < end)
+			{
+				int eol = RawParseUtils.nextLF(Buffer, ptr);
+				if (isHunkHdr(Buffer, ptr, eol) >= 1)
+				{
+					// First hunk header; break out and parse them later.
+					break;
+				}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, COPY_TO) >= 0)
-                {
-				    newName = parseName(newName, ptr + COPY_TO.Length, eol);
-				    changeType = ChangeType.COPY;
+				if (RawParseUtils.match(Buffer, ptr, OLD_NAME) >= 0)
+				{
+					ParseOldName(ptr, eol);
+				}
+				else if (RawParseUtils.match(Buffer, ptr, NEW_NAME) >= 0)
+				{
+					ParseNewName(ptr, eol);
+				}
+				else
+				{
+					// Possibly an empty patch.
+					break;
+				}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, RENAME_OLD) >= 0)
-                {
-				    oldName = parseName(oldName, ptr + RENAME_OLD.Length, eol);
-				    changeType = ChangeType.RENAME;
+				ptr = eol;
+			}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, RENAME_NEW) >= 0)
-                {
-				    newName = parseName(newName, ptr + RENAME_NEW.Length, eol);
-				    changeType = ChangeType.RENAME;
+			return ptr;
+		}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, RENAME_FROM) >= 0)
-                {
-				    oldName = parseName(oldName, ptr + RENAME_FROM.Length, eol);
-				    changeType = ChangeType.RENAME;
+		private string ParseName(String expect, int ptr, int end)
+		{
+			if (ptr == end)
+			{
+				return expect;
+			}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, RENAME_TO) >= 0)
-                {
-				    newName = parseName(newName, ptr + RENAME_TO.Length, eol);
-				    changeType = ChangeType.RENAME;
+			string r;
+			if (Buffer[ptr] == '"')
+			{
+				// New style GNU diff format
+				//
+				r = QuotedString.GitPathStyle.GIT_PATH.dequote(Buffer, ptr, end - 1);
+			}
+			else
+			{
+				// Older style GNU diff format, an optional tab ends the name.
+				//
+				int tab = end;
+				while (ptr < tab && Buffer[tab - 1] != '\t')
+				{
+					tab--;
+				}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, SIMILARITY_INDEX) >= 0)
-                {
-                    score = RawParseUtils.parseBase10(buf, ptr + SIMILARITY_INDEX.Length, null);
+				if (ptr == tab)
+				{
+					tab = end;
+				}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, DISSIMILARITY_INDEX) >= 0)
-                {
-                    score = RawParseUtils.parseBase10(buf, ptr + DISSIMILARITY_INDEX.Length, null);
+				r = RawParseUtils.decode(Constants.CHARSET, Buffer, ptr, tab - 1);
+			}
 
-                }
-                else if (RawParseUtils.match(buf, ptr, INDEX) >= 0)
-                {
-				    parseIndexLine(ptr + INDEX.Length, eol);
+			if (r.Equals(DEV_NULL))
+			{
+				r = DEV_NULL;
+			}
 
-			    }
-                else
-                {
-				    // Probably an empty patch (stat dirty).
-				    break;
-			    }
+			return r;
+		}
 
-			    ptr = eol;
-		    }
-		    return ptr;
-	    }
+		private static string P1(string r)
+		{
+			int s = r.IndexOf('/');
+			return s > 0 ? r.Substring(s + 1) : r;
+		}
 
-	    public void parseOldName(int ptr, int eol)
-        {
-		    oldName = p1(parseName(oldName, ptr + OLD_NAME.Length, eol));
-		    if (oldName == DEV_NULL)
-			    changeType = ChangeType.ADD;
-	    }
+		protected FileMode ParseFileMode(int ptr, int end)
+		{
+			int tmp = 0;
+			while (ptr < end - 1)
+			{
+				tmp <<= 3;
+				tmp += Buffer[ptr++] - '0';
+			}
+			return FileMode.FromBits(tmp);
+		}
 
-        public void parseNewName(int ptr, int eol)
-        {
-		    newName = p1(parseName(newName, ptr + NEW_NAME.Length, eol));
-		    if (newName == DEV_NULL)
-			    changeType = ChangeType.DELETE;
-	    }
+		protected virtual void ParseIndexLine(int ptr, int end)
+		{
+			// "index $asha1..$bsha1[ $mode]" where $asha1 and $bsha1
+			// can be unique abbreviations
+			//
+			int dot2 = RawParseUtils.nextLF(Buffer, ptr, (byte)'.');
+			int mode = RawParseUtils.nextLF(Buffer, dot2, (byte)' ');
 
-        public virtual void parseNewFileMode(int ptr, int eol)
-        {
-		    oldMode = FileMode.Missing;
-		    newMode = parseFileMode(ptr + NEW_FILE_MODE.Length, eol);
-		    changeType = ChangeType.ADD;
-	    }
+			oldId = AbbreviatedObjectId.FromString(Buffer, ptr, dot2 - 1);
+			NewId = AbbreviatedObjectId.FromString(Buffer, dot2 + 1, mode - 1);
 
-	    public int parseTraditionalHeaders(int ptr, int end)
-        {
-		    while (ptr < end)
-            {
-                int eol = RawParseUtils.nextLF(buf, ptr);
-			    if (isHunkHdr(buf, ptr, eol) >= 1)
-                {
-				    // First hunk header; break out and parse them later.
-				    break;
-                }
+			if (mode < end)
+			{
+				_newMode = _oldMode = ParseFileMode(mode, end);
+			}
+		}
 
-                if (RawParseUtils.match(buf, ptr, OLD_NAME) >= 0)
-                {
-				    parseOldName(ptr, eol);
-                }
-                else if (RawParseUtils.match(buf, ptr, NEW_NAME) >= 0)
-                {
-				    parseNewName(ptr, eol);
-			    }
-                else
-                {
-				    // Possibly an empty patch.
-				    break;
-			    }
+		private bool Eq(int aPtr, int aEnd, int bPtr, int bEnd)
+		{
+			if (aEnd - aPtr != bEnd - bPtr)
+			{
+				return false;
+			}
+			while (aPtr < aEnd)
+			{
+				if (Buffer[aPtr++] != Buffer[bPtr++])
+				{
+					return false;
+				}
+			}
 
-			    ptr = eol;
-		    }
+			return true;
+		}
 
-		    return ptr;
-	    }
+		/// <summary>
+		/// Determine if this is a patch hunk header.
+		/// </summary>
+		/// <param name="buf">the buffer to scan</param>
+		/// <param name="start">first position in the buffer to evaluate</param>
+		/// <param name="end">
+		/// last position to consider; usually the end of the buffer 
+		/// (<code>buf.length</code>) or the first position on the next
+		/// line. This is only used to avoid very long runs of '@' from
+		/// killing the scan loop.
+		/// </param>
+		/// <returns>
+		/// the number of "ancestor revisions" in the hunk header. A
+		/// traditional two-way diff ("@@ -...") returns 1; a combined diff
+		/// for a 3 way-merge returns 3. If this is not a hunk header, 0 is
+		/// returned instead.
+		/// </returns>
+		public static int isHunkHdr(byte[] buf, int start, int end)
+		{
+			int ptr = start;
+			while ((ptr < end) && (buf[ptr] == '@'))
+			{
+				ptr++;
+			}
 
-	    private String parseName(String expect, int ptr, int end)
-        {
-		    if (ptr == end)
-			    return expect;
-
-		    String r;
-		    if (buf[ptr] == '"')
-            {
-			    // New style GNU diff format
-			    //
-			    r = QuotedString.GitPathStyle.GIT_PATH.dequote(buf, ptr, end - 1);
-		    }
-            else
-            {
-			    // Older style GNU diff format, an optional tab ends the name.
-			    //
-			    int tab = end;
-			    while (ptr < tab && buf[tab - 1] != '\t')
-				    tab--;
-			    if (ptr == tab)
-				    tab = end;
-                r = RawParseUtils.decode(Constants.CHARSET, buf, ptr, tab - 1);
-		    }
-
-		    if (r.Equals(DEV_NULL))
-			    r = DEV_NULL;
-		    return r;
-	    }
-
-	    private static String p1(String r)
-        {
-		    int s = r.IndexOf('/');
-		    return s > 0 ? r.Substring(s + 1) : r;
-	    }
-
-	    public FileMode parseFileMode(int ptr, int end)
-        {
-		    int tmp = 0;
-		    while (ptr < end - 1) {
-			    tmp <<= 3;
-			    tmp += buf[ptr++] - '0';
-		    }
-		    return FileMode.FromBits(tmp);
-	    }
-
-        public virtual void parseIndexLine(int ptr, int end)
-        {
-		    // "index $asha1..$bsha1[ $mode]" where $asha1 and $bsha1
-		    // can be unique abbreviations
-		    //
-            int dot2 = RawParseUtils.nextLF(buf, ptr, (byte)'.');
-            int mode = RawParseUtils.nextLF(buf, dot2, (byte)' ');
-
-		    oldId = AbbreviatedObjectId.FromString(buf, ptr, dot2 - 1);
-		    newId = AbbreviatedObjectId.FromString(buf, dot2 + 1, mode - 1);
-
-		    if (mode < end)
-			    newMode = oldMode = parseFileMode(mode, end);
-	    }
-
-	    private bool eq(int aPtr, int aEnd, int bPtr, int bEnd)
-        {
-		    if (aEnd - aPtr != bEnd - bPtr)
-            {
-			    return false;
-		    }
-		    while (aPtr < aEnd)
-            {
-			    if (buf[aPtr++] != buf[bPtr++])
-				    return false;
-		    }
-		    return true;
-	    }
-
-	    /**
-	     * Determine if this is a patch hunk header.
-	     *
-	     * @param buf
-	     *            the buffer to scan
-	     * @param start
-	     *            first position in the buffer to evaluate
-	     * @param end
-	     *            last position to consider; usually the end of the buffer (
-	     *            <code>buf.length</code>) or the first position on the next
-	     *            line. This is only used to avoid very long runs of '@' from
-	     *            killing the scan loop.
-	     * @return the number of "ancestor revisions" in the hunk header. A
-	     *         traditional two-way diff ("@@ -...") returns 1; a combined diff
-	     *         for a 3 way-merge returns 3. If this is not a hunk header, 0 is
-	     *         returned instead.
-	     */
-	    public static int isHunkHdr(byte[] buf, int start, int end)
-        {
-		    int ptr = start;
-		    while ((ptr < end) && (buf[ptr] == '@'))
-			    ptr++;
-		    if ((ptr - start) < 2)
-			    return 0;
-		    if ((ptr == end) || (buf[ptr++] != ' '))
-			    return 0;
-		    if ((ptr == end) || (buf[ptr++] != '-'))
-			    return 0;
-		    return (ptr - 3) - start;
-	    }
-    }
+			if ((ptr - start) < 2)
+				return 0;
+			
+			if ((ptr == end) || (buf[ptr++] != ' '))
+				return 0;
+			
+			if ((ptr == end) || (buf[ptr++] != '-'))
+				return 0;
+			
+			return (ptr - 3) - start;
+		}
+	}
 }

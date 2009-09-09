@@ -102,7 +102,7 @@ namespace GitSharp.Merge
 		/// <summary>
 		/// The trees matching every entry in <seealso cref="SourceObjects"/>.
 		/// </summary>
-		protected RevTree[] SourceTrees { get; set; }
+		protected RevTree[] SourceTrees { get; private set; }
 
 		/// <summary>
 		/// An object writer to Create objects in <see cref="Repository"/>.
@@ -242,7 +242,7 @@ namespace GitSharp.Merge
 		/// Execute the merge.
 		/// <para />
 		/// This method is called from <seealso cref="Merge(AnyObjectId[])"/> after the
-		/// <seealso cref="#sourceObjects"/>, <seealso cref="SourceCommits"/> and <seealso cref="SourceTrees"/>
+		/// <seealso cref="SourceObjects"/>, <seealso cref="SourceCommits"/> and <seealso cref="SourceTrees"/>
 		/// have been populated.
 		/// </summary>
 		/// <returns> true if the merge was completed without conflicts; false if the

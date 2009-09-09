@@ -631,7 +631,7 @@ namespace GitSharp.DirectoryCache
 		 *         index; pass to {@link #getEntry(int)} to obtain the entry
 		 *         information. If < 0 the entry does not exist in the index.
 		 */
-		public int findEntry(String path)
+		public int findEntry(string path)
 		{
 			if (_entryCnt == 0) return -1;
 			byte[] p = Constants.encode(path);
@@ -735,7 +735,7 @@ namespace GitSharp.DirectoryCache
 		 *            the path to search for.
 		 * @return the entry at position <code>i</code>.
 		 */
-		public DirCacheEntry getEntry(String path)
+		public DirCacheEntry getEntry(string path)
 		{
 			int i = findEntry(path);
 			return i < 0 ? null : _sortedEntries[i];

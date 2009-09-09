@@ -57,14 +57,14 @@ namespace GitSharp.RevWalk
     /// <seealso cref="RewriteGenerator"/>
     public class RewriteTreeFilter : RevFilter
     {
-        private static readonly int Parsed = RevWalk.PARSED;
-        private static readonly int Uninteresting = RevWalk.UNINTERESTING;
-        private static readonly int Rewrite = RevWalk.REWRITE;
+        private const int Parsed = RevWalk.PARSED;
+        private const int Uninteresting = RevWalk.UNINTERESTING;
+        private const int Rewrite = RevWalk.REWRITE;
         private readonly TreeWalk.TreeWalk _pathFilter;
 
         public RewriteTreeFilter(RevWalk walker, TreeFilter t)
         {
-            _pathFilter = new TreeWalk.TreeWalk(walker.getRepository());
+            _pathFilter = new TreeWalk.TreeWalk(walker.Repository);
             _pathFilter.setFilter(t);
             _pathFilter.Recursive = t.shouldBeRecursive();
         }

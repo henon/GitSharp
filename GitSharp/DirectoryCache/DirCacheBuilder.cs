@@ -260,7 +260,7 @@ namespace GitSharp.DirectoryCache
 			sorted = true;
 		}
 
-		private static InvalidOperationException Bad(DirCacheEntry a, String msg)
+		private static InvalidOperationException Bad(DirCacheEntry a, string msg)
 		{
 			return new InvalidOperationException(msg + ": " + a.getStage() + " " + a.getPathString());
 		}

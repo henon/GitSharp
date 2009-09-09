@@ -70,7 +70,7 @@ namespace GitSharp.RevWalk
         
 		internal byte[] loadCanonical(RevWalk walk)
 		{
-			ObjectLoader ldr = walk.getRepository().OpenObject(walk.WindowCursor, this);
+			ObjectLoader ldr = walk.Repository.OpenObject(walk.WindowCursor, this);
 			if (ldr == null)
 			{
 				throw new MissingObjectException(this, Type);

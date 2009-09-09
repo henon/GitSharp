@@ -42,33 +42,37 @@ using GitSharp.RevWalk;
 
 namespace GitSharp.Transport
 {
-
 	public class RefAdvertiser
 	{
-		private readonly PacketLineOut pckOut;
-		private readonly RevWalk.RevWalk walk;
+		private readonly PacketLineOut _pckOut;
+		private readonly RevWalk.RevWalk _walk;
 		private readonly RevFlag ADVERTISED;
-		private readonly StringBuilder tmpLine = new StringBuilder(100);
-		private readonly char[] tmpId = new char[2 * Constants.OBJECT_ID_LENGTH];
-		private readonly List<string> capabilities = new List<string>();
-		private bool derefTags;
-		private bool first = true;
+		private readonly StringBuilder _tmpLine;
+		private readonly char[] _tmpId;
+		private readonly List<string> _capabilities;
+		private bool _derefTags;
+		private bool _first;
 
 		public RefAdvertiser(PacketLineOut o, RevWalk.RevWalk protoWalk, RevFlag advertisedFlag)
 		{
-			pckOut = o;
-			walk = protoWalk;
+			_tmpLine = new StringBuilder(100);
+            _tmpId = new char[2 * Constants.OBJECT_ID_LENGTH];
+			_capabilities = new List<string>();
+			_first = true;
+
+			_pckOut = o;
+			_walk = protoWalk;
 			ADVERTISED = advertisedFlag;
 		}
 
 		public void setDerefTags(bool deref)
 		{
-			derefTags = deref;
+			_derefTags = deref;
 		}
 
 		public void advertiseCapability(string name)
 		{
-			capabilities.Add(name);
+			_capabilities.Add(name);
 		}
 
 		public void send(IEnumerable<Ref> refs)
@@ -79,7 +83,7 @@ namespace GitSharp.Transport
 				if (obj != null)
 				{
 					advertiseAny(obj, r.OriginalName);
-					if (derefTags && obj is RevTag)
+					if (_derefTags && obj is RevTag)
 					{
 						advertiseTag((RevTag)obj, r.OriginalName + "^{}");
 					}
@@ -91,14 +95,19 @@ namespace GitSharp.Transport
 		{
 			RevObject obj = parseAnyOrNull(id);
 			if (obj != null)
+			{
 				advertiseAnyOnce(obj, ".have");
+			}
+
 			if (obj is RevTag)
+			{
 				advertiseAnyOnce(((RevTag)obj).getObject(), ".have");
+			}
 		}
 
 		public void includeAdditionalHaves()
 		{
-			additionalHaves(walk.getRepository().ObjectDatabase);
+			additionalHaves(_walk.Repository.ObjectDatabase);
 		}
 
 		private void additionalHaves(ObjectDatabase db)
@@ -107,8 +116,11 @@ namespace GitSharp.Transport
 			{
 				additionalHaves(((AlternateRepositoryDatabase)db).getRepository());
 			}
+
 			foreach (ObjectDatabase alt in db.getAlternates())
+			{
 				additionalHaves(alt);
+			}
 		}
 
 		private void additionalHaves(Repository alt)
@@ -121,16 +133,16 @@ namespace GitSharp.Transport
 
 		public bool isEmpty()
 		{
-			return first;
+			return _first;
 		}
 
 		private RevObject parseAnyOrNull(AnyObjectId id)
 		{
-			if (id == null)
-				return null;
+			if (id == null) return null;
+
 			try
 			{
-				return walk.parseAny(id);
+				return _walk.parseAny(id);
 			}
 			catch (IOException)
 			{
@@ -141,7 +153,9 @@ namespace GitSharp.Transport
 		private void advertiseAnyOnce(RevObject obj, string refName)
 		{
 			if (!obj.has(ADVERTISED))
+			{
 				advertiseAny(obj, refName);
+			}
 		}
 
 		private void advertiseAny(RevObject obj, string refName)
@@ -158,7 +172,7 @@ namespace GitSharp.Transport
 				RevObject target = ((RevTag)o).getObject();
 				try
 				{
-					walk.parseHeaders(target);
+					_walk.parseHeaders(target);
 				}
 				catch (IOException)
 				{
@@ -170,29 +184,30 @@ namespace GitSharp.Transport
 			advertiseAny(tag.getObject(), refName);
 		}
 
-		void advertiseId(AnyObjectId id, string refName)
+		private void advertiseId(AnyObjectId id, string refName)
 		{
-			tmpLine.Length = 0;
-			id.CopyTo(tmpId, tmpLine);
-			tmpLine.Append(' ');
-			tmpLine.Append(refName);
-			if (first)
+			_tmpLine.Length = 0;
+			id.CopyTo(_tmpId, _tmpLine);
+			_tmpLine.Append(' ');
+			_tmpLine.Append(refName);
+
+			if (_first)
 			{
-				first = false;
-				if (capabilities.Count > 0)
+				_first = false;
+				if (_capabilities.Count > 0)
 				{
-					tmpLine.Append('\0');
-					foreach (string capName in capabilities)
+					_tmpLine.Append('\0');
+					foreach (string capName in _capabilities)
 					{
-						tmpLine.Append(' ');
-						tmpLine.Append(capName);
+						_tmpLine.Append(' ');
+						_tmpLine.Append(capName);
 					}
-					tmpLine.Append(' ');
+					_tmpLine.Append(' ');
 				}
 			}
-			tmpLine.Append('\n');
-			pckOut.WriteString(tmpLine.ToString());
+
+			_tmpLine.Append('\n');
+			_pckOut.WriteString(_tmpLine.ToString());
 		}
 	}
-
 }

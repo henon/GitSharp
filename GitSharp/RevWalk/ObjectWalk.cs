@@ -68,7 +68,7 @@ namespace GitSharp.RevWalk
 		/// instances inserted into it.
 		/// </para>
 		/// </summary>
-        private static readonly int InPending = RevWalk.REWRITE;
+        private const int InPending = REWRITE;
 
         private CanonicalTreeParser _treeWalk;
         private BlockObjQueue _pendingObjects;
@@ -266,7 +266,7 @@ namespace GitSharp.RevWalk
 
             if (_nextSubtree != null)
             {
-                _treeWalk = _treeWalk.createSubtreeIterator0(getRepository(), _nextSubtree, WindowCursor);
+                _treeWalk = _treeWalk.createSubtreeIterator0(Repository, _nextSubtree, WindowCursor);
                 _nextSubtree = null;
             }
 
@@ -327,7 +327,7 @@ namespace GitSharp.RevWalk
 				if (obj is RevTree)
                 {
                     _currentTree = (RevTree)obj;
-                    _treeWalk = _treeWalk.resetRoot(getRepository(), _currentTree, WindowCursor);
+                    _treeWalk = _treeWalk.resetRoot(Repository, _currentTree, WindowCursor);
                 }
 
                 return obj;
@@ -378,7 +378,7 @@ namespace GitSharp.RevWalk
                 RevObject o = nextObject();
                 if (o == null) break;
 
-                if (o is RevBlob && !getRepository().HasObject(o))
+                if (o is RevBlob && !Repository.HasObject(o))
                 {
                 	throw new MissingObjectException(o, Constants.TYPE_BLOB);
                 }
@@ -432,7 +432,7 @@ namespace GitSharp.RevWalk
             if ((tree.Flags & UNINTERESTING) != 0) return;
             tree.Flags |= UNINTERESTING;
 
-			_treeWalk = _treeWalk.resetRoot(getRepository(), tree, WindowCursor);
+			_treeWalk = _treeWalk.resetRoot(Repository, tree, WindowCursor);
             while (!_treeWalk.eof())
             {
                 FileMode mode = _treeWalk.EntryFileMode;
@@ -451,7 +451,7 @@ namespace GitSharp.RevWalk
 						if ((t.Flags & UNINTERESTING) == 0)
 						{
 							t.Flags |= UNINTERESTING;
-							_treeWalk = _treeWalk.createSubtreeIterator0(getRepository(), t, WindowCursor);
+							_treeWalk = _treeWalk.createSubtreeIterator0(Repository, t, WindowCursor);
 							continue;
 						}
 						break;

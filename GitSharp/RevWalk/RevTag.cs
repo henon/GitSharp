@@ -48,8 +48,8 @@ namespace GitSharp.RevWalk
 	public class RevTag : RevObject
 	{
 		private RevObject _object;
-		private byte[] buffer;
-		private string name;
+		private byte[] _buffer;
+		private string _name;
 
 		/// <summary>
 		/// Create a new tag reference.
@@ -64,7 +64,7 @@ namespace GitSharp.RevWalk
 
 		internal override void parse(RevWalk walk)
 		{
-			ObjectLoader ldr = walk.getRepository().OpenObject(walk.WindowCursor, this);
+			ObjectLoader ldr = walk.Repository.OpenObject(walk.WindowCursor, this);
 			if (ldr == null)
 			{
 				throw new MissingObjectException(this, Constants.TYPE_TAG);
@@ -89,8 +89,8 @@ namespace GitSharp.RevWalk
 
 			int p = pos.value += 4; // "tag "
 			int nameEnd = RawParseUtils.nextLF(rawTag, p) - 1;
-			name = RawParseUtils.decode(Constants.CHARSET, rawTag, p, nameEnd);
-			buffer = rawTag;
+			_name = RawParseUtils.decode(Constants.CHARSET, rawTag, p, nameEnd);
+			_buffer = rawTag;
 			Flags |= PARSED;
 		}
 
@@ -116,7 +116,7 @@ namespace GitSharp.RevWalk
 		/// </returns>
 		public PersonIdent getTaggerIdent()
 		{
-			byte[] raw = buffer;
+			byte[] raw = _buffer;
 			int nameB = RawParseUtils.tagger(raw, 0);
 			if (nameB < 0) return null;
 			return RawParseUtils.parsePersonIdent(raw, nameB);
@@ -135,7 +135,7 @@ namespace GitSharp.RevWalk
 		/// </returns>
 		public string getFullMessage()
 		{
-			byte[] raw = buffer;
+			byte[] raw = _buffer;
 			int msgB = RawParseUtils.tagMessage(raw, 0);
 			if (msgB < 0) return string.Empty;
 			Encoding enc = RawParseUtils.parseEncoding(raw);
@@ -160,7 +160,7 @@ namespace GitSharp.RevWalk
 		/// </returns>
 		public string getShortMessage()
 		{
-			byte[] raw = buffer;
+			byte[] raw = _buffer;
 			int msgB = RawParseUtils.tagMessage(raw, 0);
 			if (msgB < 0) return string.Empty;
 
@@ -182,7 +182,7 @@ namespace GitSharp.RevWalk
 		/// <returns>parsed tag.</returns>
 		public Tag asTag(RevWalk walk)
 		{
-			return new Tag(walk.getRepository(), this, name, buffer);
+			return new Tag(walk.Repository, this, _name, _buffer);
 		}
 
 		/// <summary>
@@ -204,13 +204,13 @@ namespace GitSharp.RevWalk
 		/// </returns>
 		public string getName()
 		{
-			return name;
+			return _name;
 		}
 
 		public override void Dispose()
 		{
 			Flags &= ~PARSED;
-			buffer = null;
+			_buffer = null;
 		}
 	}
 }

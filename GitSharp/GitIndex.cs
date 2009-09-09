@@ -469,7 +469,7 @@ namespace GitSharp
 
             var file = new FileInfo(Path.Combine(workDir.DirectoryName(), e.Name));
             file.Delete();
-            //file.getParentFile().mkdirs();
+            file.Directory.Mkdirs();
 
             using (var fs = new FileStream(file.FullName, System.IO.FileMode.CreateNew))
             {

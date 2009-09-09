@@ -284,7 +284,7 @@ namespace GitSharp.Tests
         {
             var tf = new FileInfo(Path.Combine(trash.FullName, name).Replace('/', Path.DirectorySeparatorChar));
             var tfp = tf.Directory;
-            if (!tfp.Exists && !tfp.mkdirs())
+            if (!tfp.Exists && !tfp.Mkdirs())
             {
                 if (!tfp.Exists)
                 {

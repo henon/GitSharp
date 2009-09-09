@@ -58,9 +58,9 @@ namespace GitSharp.Tests
 
 		private void delete(RefUpdate @ref, RefUpdate.RefUpdateResult expected, bool exists, bool removed)
 		{
-			Assert.AreEqual(exists, db.Refs.ContainsKey(@ref.Name));
+			Assert.AreEqual(exists, db.getRef(@ref.Name) != null);
 			Assert.AreEqual(expected, @ref.Delete());
-			Assert.AreEqual(!removed, db.Refs.ContainsKey(@ref.Name));
+			Assert.AreEqual(!removed, db.getRef(@ref.Name) != null);
 		}
 
 		[Test]
@@ -119,10 +119,11 @@ namespace GitSharp.Tests
 			RefUpdate updateRef = db.UpdateRef("refs/heads/z/c");
 			updateRef.NewObjectId = (pid);
 			updateRef.IsForceUpdate = (true);
+      updateRef.SetRefLogMessage("new test ref", false);
 			RefUpdate.RefUpdateResult update = updateRef.Update();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update); // internal
-			Assert.IsTrue(new FileInfo(Path.Combine(db.Directory.FullName, Constants.R_HEADS + "z")).Exists);
-			Assert.IsTrue(new FileInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/z")).Exists);
+			Assert.IsTrue(new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.R_HEADS + "z")).Exists);
+			Assert.IsTrue(new DirectoryInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/z")).Exists);
 
 			// The real test here
 			RefUpdate updateRef2 = db.UpdateRef("refs/heads/z/c");
@@ -130,8 +131,8 @@ namespace GitSharp.Tests
 			RefUpdate.RefUpdateResult delete = updateRef2.Delete();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, delete);
 			Assert.IsNull(db.Resolve("refs/heads/z/c"));
-			Assert.IsFalse(new FileInfo(Path.Combine(db.Directory.FullName, Constants.R_HEADS + "z")).Exists);
-			Assert.IsFalse(new FileInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/z")).Exists);
+      Assert.IsFalse(new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.R_HEADS + "z")).Exists);
+      Assert.IsFalse(new DirectoryInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/z")).Exists);
 		}
 
 		///	<summary>
@@ -199,7 +200,7 @@ namespace GitSharp.Tests
 			ru.NewObjectId = newid;
 			RefUpdate.RefUpdateResult update = ru.Update();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
-			Ref r = db.Refs[newRef];
+		    Ref r = db.getRef(newRef);
 			Assert.IsNotNull(r);
 			Assert.AreEqual(newRef, r.Name);
 			Assert.IsNotNull(r.ObjectId);
@@ -211,7 +212,7 @@ namespace GitSharp.Tests
 		[Test]
 		public virtual void testRefKeySameAsOrigName()
 		{
-			foreach (var e in db.Refs)
+			foreach (var e in db.getAllRefs())
 			{
 				Assert.AreEqual(e.Key, e.Value.OriginalName);
 			}

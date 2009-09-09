@@ -52,18 +52,16 @@ namespace GitSharp.Tests.Transport
         private MockTransport transport;
         private List<RemoteRefUpdate> refUpdates;
         private List<Ref> advertisedRefs;
-        private RemoteRefUpdate.UpdateStatus connectionUpdateStatus;
+        public static RemoteRefUpdate.UpdateStatus connectionUpdateStatus;
 
         private class MockTransport : GitSharp.Transport.Transport
         {
             private readonly List<Ref> advertised;
-            private RemoteRefUpdate.UpdateStatus status;
 
-            public MockTransport(Repository local, URIish uri, List<Ref> advertisedRefs, ref RemoteRefUpdate.UpdateStatus status)
+            public MockTransport(Repository local, URIish uri, List<Ref> advertisedRefs)
                 : base(local, uri)
             {
                 advertised = advertisedRefs;
-                this.status = status;
             }
 
             public override IFetchConnection openFetch()
@@ -73,7 +71,7 @@ namespace GitSharp.Tests.Transport
 
             public override IPushConnection openPush()
             {
-                return new MockPushConnection(advertised, ref status);
+                return new MockPushConnection(advertised);
             }
 
             public override void close()
@@ -83,15 +81,12 @@ namespace GitSharp.Tests.Transport
 
         private class MockPushConnection : BaseConnection, IPushConnection
         {
-            private RemoteRefUpdate.UpdateStatus connectionUpdateStatus;
-
-            public MockPushConnection(IEnumerable<Ref> advertisedRefs, ref RemoteRefUpdate.UpdateStatus status)
+            public MockPushConnection(IEnumerable<Ref> advertisedRefs)
             {
                 Dictionary<string, Ref> refsMap = new Dictionary<string, Ref>();
                 foreach (Ref r in advertisedRefs)
                     refsMap.Add(r.Name, r);
                 available(refsMap);
-                connectionUpdateStatus = status;
             }
 
             public override void Close()
@@ -103,7 +98,7 @@ namespace GitSharp.Tests.Transport
                 foreach (RemoteRefUpdate rru in refsToUpdate.Values)
                 {
                     Assert.AreEqual(RemoteRefUpdate.UpdateStatus.NOT_ATTEMPTED, rru.Status);
-                    rru.Status = connectionUpdateStatus;
+                    rru.Status = PushProcessTest.connectionUpdateStatus;
                 }
             }
         }
@@ -112,7 +107,7 @@ namespace GitSharp.Tests.Transport
         {
             base.setUp();
             advertisedRefs = new List<Ref>();
-            transport = new MockTransport(db, new URIish(), advertisedRefs, ref connectionUpdateStatus);
+            transport = new MockTransport(db, new URIish(), advertisedRefs);
             refUpdates = new List<RemoteRefUpdate>();
             connectionUpdateStatus = RemoteRefUpdate.UpdateStatus.OK;
         }

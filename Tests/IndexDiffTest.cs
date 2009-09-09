@@ -59,7 +59,7 @@ namespace GitSharp.Tests
 			diff.Diff();
 			Assert.AreEqual(2, diff.Added.Count);
 			Assert.IsTrue(diff.Added.Contains("file1"));
-			Assert.IsTrue(diff.Added.Contains("dir/subfile"));
+			Assert.IsTrue(diff.Added.Contains("dir/subfile".Replace('/', Path.DirectorySeparatorChar)));
 			Assert.AreEqual(0, diff.Changed.Count);
 			Assert.AreEqual(0, diff.Modified.Count);
 			Assert.AreEqual(0, diff.Removed.Count);
@@ -70,7 +70,7 @@ namespace GitSharp.Tests
 		{
 			var index = new GitIndex(db);
 			index.add(trash, writeTrashFile("file2", "file2"));
-			index.add(trash, writeTrashFile("dir/file3", "dir/file3"));
+			index.add(trash, writeTrashFile("dir/file3", "dir/file3".Replace('/', Path.DirectorySeparatorChar)));
 			writeTrashFile("dir/file3", "changed");
 			var t = new Tree(db);
 			t.AddFile("file2").Id = ObjectId.FromString("0123456789012345678901234567890123456789");
@@ -83,9 +83,9 @@ namespace GitSharp.Tests
 			diff.Diff();
 			Assert.AreEqual(2, diff.Changed.Count);
 			Assert.IsTrue(diff.Changed.Contains("file2"));
-			Assert.IsTrue(diff.Changed.Contains("dir/file3"));
+			Assert.IsTrue(diff.Changed.Contains("dir/file3".Replace('/', Path.DirectorySeparatorChar)));
 			Assert.AreEqual(1, diff.Modified.Count);
-			Assert.IsTrue(diff.Modified.Contains("dir/file3"));
+			Assert.IsTrue(diff.Modified.Contains("dir/file3".Replace('/', Path.DirectorySeparatorChar)));
 			Assert.AreEqual(0, diff.Added.Count);
 			Assert.AreEqual(0, diff.Removed.Count);
 			Assert.AreEqual(0, diff.Missing.Count);
@@ -97,7 +97,7 @@ namespace GitSharp.Tests
 			var index = new GitIndex(db);
 			writeTrashFile("file2", "file2");
 			writeTrashFile("dir/file3", "dir/file3");
-			var t = new Tree(base.db);
+			var t = new Tree(db);
 			t.AddFile("file2");
 			t.AddFile("dir/file3");
 			Assert.AreEqual(2, t.MemberCount);
@@ -110,7 +110,7 @@ namespace GitSharp.Tests
 			diff.Diff();
 			Assert.AreEqual(2, diff.Removed.Count);
 			Assert.IsTrue(diff.Removed.Contains("file2"));
-			Assert.IsTrue(diff.Removed.Contains("dir/file3"));
+			Assert.IsTrue(diff.Removed.Contains("dir/file3".Replace('/', Path.DirectorySeparatorChar)));
 			Assert.AreEqual(0, diff.Changed.Count);
 			Assert.AreEqual(0, diff.Modified.Count);
 			Assert.AreEqual(0, diff.Added.Count);

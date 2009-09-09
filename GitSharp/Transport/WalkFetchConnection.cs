@@ -596,7 +596,7 @@ namespace GitSharp.Transport
 
 		private void MarkLocalRefsComplete(IEnumerable<ObjectId> have)
 		{
-			foreach (Ref r in _local.Refs.Values)
+			foreach (Ref r in _local.getAllRefs().Values)
 			{
 				try
 				{

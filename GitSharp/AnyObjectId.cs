@@ -38,35 +38,30 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
 using GitSharp.Util;
-using System.IO;
 
 namespace GitSharp
 {
-    [Complete]
-    public abstract class AnyObjectId
-        :
+    public abstract class AnyObjectId :
 #if !__MonoCS__
  IComparable<ObjectId>,
 #endif
  IComparable
     {
-
         public static readonly int ObjectIdLength = 20;
         public static readonly int StringLength = ObjectIdLength * 2;
-
 
         public static bool operator ==(AnyObjectId a, AnyObjectId b)
         {
             if ((object)a == null)
                 return (object)b == null;
-            else if ((object)b == null)
-                return false;
+        	
+			if ((object)b == null)
+        		return false;
 
-            return (a.W2 == b.W2) &&
+        	return (a.W2 == b.W2) &&
                    (a.W3 == b.W3) &&
                    (a.W4 == b.W4) &&
                    (a.W5 == b.W5) &&
@@ -114,7 +109,6 @@ namespace GitSharp
             w.Write(tmp, 0, StringLength);
         }
 
-
         public void copyRawTo(Stream s)
         {
             var buf = new byte[20];
@@ -126,15 +120,11 @@ namespace GitSharp
             s.Write(buf, 0, 20);
         }
 
-
-        /**
-         * Copy this ObjectId to a byte array.
-         * 
-         * @param b
-         *            the buffer to copy to.
-         * @param o
-         *            the offset within b to write at.
-         */
+		/// <summary>
+		/// Copy this ObjectId to a byte array.
+		/// </summary>
+		/// <param name="buf">the buffer to copy to.</param>
+		/// <param name="off">the offset within b to write at.</param>
         public void copyRawTo(byte[] buf, int off)
         {
             NB.encodeInt32(buf, 0 + off, W1);
@@ -144,38 +134,36 @@ namespace GitSharp
             NB.encodeInt32(buf, 16 + off, W5);
         }
 
-        /**
-         * Copy this ObjectId to an int array.
-         *
-         * @param b
-         *            the buffer to copy to.
-         * @param o
-         *            the offset within b to write at.
-         */
-        public void copyRawTo(int[] b, int o)
+		/// <summary>
+		/// Copy this ObjectId to a byte array.
+		/// </summary>
+		/// <param name="b">the buffer to copy to.</param>
+		/// <param name="offset">the offset within b to write at.</param>
+        public void copyRawTo(int[] b, int offset)
         {
-            b[o] = W1;
-            b[o + 1] = W2;
-            b[o + 2] = W3;
-            b[o + 3] = W4;
-            b[o + 4] = W5;
+			b[offset] = W1;
+			b[offset + 1] = W2;
+			b[offset + 2] = W3;
+			b[offset + 3] = W4;
+			b[offset + 4] = W5;
         }
 
         private byte[] ToHexByteArray()
         {
-            byte[] dst = new byte[StringLength];
+            var dst = new byte[StringLength];
 
             Hex.FillHexByteArray(dst, 0, W1);
             Hex.FillHexByteArray(dst, 8, W2);
             Hex.FillHexByteArray(dst, 16, W3);
             Hex.FillHexByteArray(dst, 24, W4);
             Hex.FillHexByteArray(dst, 32, W5);
+
             return dst;
         }
 
         public override int GetHashCode()
         {
-            return (int)this.W2;
+            return W2;
         }
 
         public AbbreviatedObjectId Abbreviate(Repository repo)
@@ -211,9 +199,7 @@ namespace GitSharp
             if (this == other)
                 return 0;
 
-            int cmp;
-
-            cmp = NB.CompareUInt32(W1, other.W1);
+        	int cmp = NB.CompareUInt32(W1, other.W1);
             if (cmp != 0)
                 return cmp;
 
@@ -230,14 +216,11 @@ namespace GitSharp
                 return cmp;
 
             return NB.CompareUInt32(W5, other.W5);
-
         }
 
         public int CompareTo(byte[] bs, int p)
         {
-            int cmp;
-
-            cmp = NB.CompareUInt32(W1, NB.DecodeInt32(bs, p));
+        	int cmp = NB.CompareUInt32(W1, NB.DecodeInt32(bs, p));
             if (cmp != 0)
                 return cmp;
 
@@ -277,7 +260,6 @@ namespace GitSharp
             return NB.CompareUInt32(W5, bs[p + 4]);
         }
 
-
         #endregion
 
         #region IComparable Members
@@ -289,13 +271,13 @@ namespace GitSharp
 
         #endregion
 
-        /**
-	     * Tests if this ObjectId starts with the given abbreviation.
-	     *
-	     * @param abbr
-	     *            the abbreviation.
-	     * @return true if this ObjectId begins with the abbreviation; else false.
-	     */
+		/// <summary>
+		/// Tests if this ObjectId starts with the given abbreviation.
+		/// </summary>
+		/// <param name="abbr">the abbreviation.</param>
+		/// <returns>
+		/// True if this ObjectId begins with the abbreviation; else false.
+		/// </returns>
         public bool startsWith(AbbreviatedObjectId abbr)
         {
             return abbr.prefixCompare(this) == 0;
@@ -303,7 +285,7 @@ namespace GitSharp
 
         private char[] ToHexCharArray()
         {
-            char[] dest = new char[StringLength];
+            var dest = new char[StringLength];
             ToHexCharArray(dest);
             return dest;
         }
@@ -319,10 +301,7 @@ namespace GitSharp
 
         public string Name
         {
-            get
-            {
-                return new string(ToHexCharArray());
-            }
+            get { return new string(ToHexCharArray()); }
         }
 
         public override string ToString()
@@ -332,12 +311,13 @@ namespace GitSharp
 
         public ObjectId Copy()
         {
-            if (this.GetType() == typeof(ObjectId))
-                return (ObjectId)this;
+            if (GetType() == typeof(ObjectId))
+            {
+            	return (ObjectId)this;
+            }
             return new ObjectId(this);
         }
 
         public abstract ObjectId ToObjectId();
-
     }
 }

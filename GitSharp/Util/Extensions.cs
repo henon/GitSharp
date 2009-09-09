@@ -37,6 +37,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security;
 
 namespace GitSharp
@@ -176,6 +177,30 @@ namespace GitSharp
         public static bool IsFile(this FileSystemInfo fileSystemInfo)
         {
             return File.Exists(fileSystemInfo.FullName);
-        } 
+        }
+
+        public static FileSystemInfo[] ListFiles(this FileSystemInfo fileInfo)
+        {
+            if (fileInfo.IsFile())
+            {
+                return null;
+            }
+
+            return Directory.GetFileSystemEntries(fileInfo.FullName).Select(x => new FileInfo(x)).ToArray();
+        }
+
+        public static bool Mkdirs(this DirectoryInfo directoryInfo)
+        {
+            if (directoryInfo.Exists)
+            {
+                return true;
+            }
+
+            directoryInfo.Parent.Mkdirs();
+
+            directoryInfo.Create();
+
+            return true;
+        }
     }
 }

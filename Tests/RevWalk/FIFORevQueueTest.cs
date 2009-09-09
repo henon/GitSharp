@@ -36,7 +36,6 @@
  */
 
 using System.Collections.Generic;
-using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
 using NUnit.Framework;
 

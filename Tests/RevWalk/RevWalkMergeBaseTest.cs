@@ -37,7 +37,6 @@
 
 using System;
 using GitSharp.RevWalk.Filter;
-using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
 using GitSharp.TreeWalk.Filter;
 using NUnit.Framework;

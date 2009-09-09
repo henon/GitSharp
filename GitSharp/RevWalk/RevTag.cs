@@ -94,9 +94,9 @@ namespace GitSharp.RevWalk
 			Flags |= PARSED;
 		}
 
-		public override int getType()
+		public override int Type
 		{
-			return Constants.OBJ_TAG;
+			get { return Constants.OBJ_TAG; }
 		}
 
 		/// <summary>

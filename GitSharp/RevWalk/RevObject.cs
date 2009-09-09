@@ -38,6 +38,7 @@
 
 using System;
 using System.Text;
+using GitSharp.Exceptions;
 
 namespace GitSharp.RevWalk
 {
@@ -46,7 +47,7 @@ namespace GitSharp.RevWalk
 	/// </summary>
 	public abstract class RevObject : ObjectId, IDisposable
 	{
-		public static int PARSED = 1;
+		protected const int PARSED = 1;
 
 		protected RevObject(AnyObjectId name)
 			: base(name)
@@ -55,13 +56,42 @@ namespace GitSharp.RevWalk
 
 		public int Flags { get; set; }
 
+		internal virtual void parseHeaders(RevWalk walk)
+		{
+			loadCanonical(walk);
+			Flags |= PARSED;
+		}
+		
+		internal virtual void parseBody(RevWalk walk)
+		{
+			if ((Flags & PARSED) == 0)
+				parseHeaders(walk);
+		}
+        
+		internal byte[] loadCanonical(RevWalk walk)
+		{
+			ObjectLoader ldr = walk.getRepository().OpenObject(walk.WindowCursor, this);
+			if (ldr == null)
+			{
+				throw new MissingObjectException(this, Type);
+			}
+			
+			byte[] data = ldr.CachedBytes;
+			if (Type != ldr.Type)
+			{
+				throw new IncorrectObjectTypeException(this, Type);
+			}
+
+			return data;
+		}
+
 		internal abstract void parse(RevWalk walk);
 
 		/// <summary>
 		/// Get Git object type. See <see cref="Constants"/>.
 		/// </summary>
 		/// <returns></returns>
-		public abstract int getType();
+		public abstract int Type { get; }
 
 		/// <summary>
 		/// Get the name of this object.
@@ -157,11 +187,6 @@ namespace GitSharp.RevWalk
 			Flags &= ~set.Mask;
 		}
 
-		public virtual void dispose()
-		{
-			// Nothing needs to be done for most objects.
-		}
-
 		/// <summary>
 		/// Release as much memory as possible from this object.
 		/// </summary>
@@ -173,7 +198,7 @@ namespace GitSharp.RevWalk
 		public override string ToString()
 		{
 			var s = new StringBuilder();
-			s.Append(Constants.typeString(getType()));
+			s.Append(Constants.typeString(Type));
 			s.Append(' ');
 			s.Append(GetType().Name);
 			s.Append(' ');

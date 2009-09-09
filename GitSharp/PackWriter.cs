@@ -177,10 +177,10 @@ namespace GitSharp
 				return;
 			}
 
-			var otp = new ObjectToPack(robject, robject.getType());
+			var otp = new ObjectToPack(robject, robject.Type);
 			try
 			{
-				_objectsLists[robject.getType()].Add(otp);
+				_objectsLists[robject.Type].Add(otp);
 			}
 			catch (IndexOutOfRangeException)
 			{

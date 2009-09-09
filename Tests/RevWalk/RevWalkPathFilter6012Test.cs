@@ -40,7 +40,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using GitSharp.RevWalk;
-using GitSharp.Tests.Util;
 using GitSharp.TreeWalk.Filter;
 using NUnit.Framework;
 
@@ -91,7 +90,7 @@ namespace GitSharp.Tests.RevWalk
 			}
 		}
 
-		protected void Check(params RevCommit[] order)
+		private void Check(params RevCommit[] order)
 		{
 			markStart(i);
 			var act = new StringBuilder();
@@ -114,7 +113,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.AreEqual(exp.ToString(), act.ToString());
 		}
 
-		protected internal virtual void Filter(string path)
+		private void Filter(string path)
 		{
 			rw.setTreeFilter(AndTreeFilter.create(PathFilterGroup.createFromStrings(Enumerable.Repeat(path, 1)), TreeFilter.ANY_DIFF));
 		}

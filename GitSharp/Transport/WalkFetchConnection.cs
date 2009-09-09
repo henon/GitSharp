@@ -188,7 +188,7 @@ namespace GitSharp.Transport
 					obj = (RevObject)id;
 					if (obj.has(COMPLETE))
 						return;
-					_revWalk.parse(obj);
+					_revWalk.parseHeaders(obj);
 				}
 				else
 				{
@@ -204,7 +204,7 @@ namespace GitSharp.Transport
 
 			obj.Dispose();
 
-			switch (obj.getType())
+			switch (obj.Type)
 			{
 				case Constants.OBJ_BLOB:
 					ProcessBlob(obj);
@@ -223,7 +223,7 @@ namespace GitSharp.Transport
 					break;
 
 				default:
-					throw new TransportException("Unknown object type " + id.Name + " (" + obj.getType() + ")");
+					throw new TransportException("Unknown object type " + id.Name + " (" + obj.Type + ")");
 			}
 
 			_fetchErrors.Remove(id.Copy());
@@ -623,15 +623,15 @@ namespace GitSharp.Transport
 
 		private void MarkLocalObjComplete(RevObject obj)
 		{
-			while (obj.getType() == Constants.OBJ_TAG)
+			while (obj.Type == Constants.OBJ_TAG)
 			{
 				obj.add(COMPLETE);
 				obj.Dispose();
 				obj = ((RevTag)obj).getObject();
-				_revWalk.parse(obj);
+				_revWalk.parseHeaders(obj);
 			}
 
-			switch (obj.getType())
+			switch (obj.Type)
 			{
 				case Constants.OBJ_BLOB:
 					obj.add(COMPLETE);
@@ -673,7 +673,7 @@ namespace GitSharp.Transport
 		private void PushLocalCommit(RevCommit p)
 		{
 			if (p.has(LOCALLY_SEEN)) return;
-			_revWalk.parse(p);
+			_revWalk.parseHeaders(p);
 			p.add(LOCALLY_SEEN);
 			p.add(COMPLETE);
 			p.carry(COMPLETE);

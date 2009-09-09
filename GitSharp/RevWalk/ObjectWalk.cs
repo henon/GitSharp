@@ -68,7 +68,7 @@ namespace GitSharp.RevWalk
 		/// instances inserted into it.
 		/// </para>
 		/// </summary>
-        private static readonly int InPending = REWRITE;
+        private static readonly int InPending = RevWalk.REWRITE;
 
         private CanonicalTreeParser _treeWalk;
         private BlockObjQueue _pendingObjects;
@@ -132,7 +132,7 @@ namespace GitSharp.RevWalk
             {
                 AddObject(o);
                 o = ((RevTag)o).getObject();
-                parse(o);
+				parseHeaders(o);
             }
 
             if (o is RevCommit)
@@ -196,7 +196,7 @@ namespace GitSharp.RevWalk
                 	AddObject(o);
                 }
                 o = ((RevTag)o).getObject();
-                parse(o);
+				parseHeaders(o);
             }
 
             if (o is RevCommit)
@@ -212,7 +212,7 @@ namespace GitSharp.RevWalk
             	o.Flags |= UNINTERESTING;
             }
 
-            if (o.getType() != Constants.OBJ_COMMIT && hasRevSort(RevSort.BOUNDARY))
+            if (o.Type != Constants.OBJ_COMMIT && hasRevSort(RevSort.BOUNDARY))
             {
                 AddObject(o);
             }
@@ -404,9 +404,9 @@ namespace GitSharp.RevWalk
 			get { return _fromTreeWalk ? _treeWalk.EntryPathString : null; }
 		}
 
-		public override void dispose()
+		public override void Dispose()
         {
-            base.dispose();
+            base.Dispose();
             _pendingObjects = new BlockObjQueue();
             _nextSubtree = null;
             _currentTree = null;

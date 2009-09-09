@@ -36,7 +36,6 @@
  */
 
 using GitSharp.RevWalk;
-using GitSharp.Tests.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -84,10 +83,10 @@ namespace GitSharp.Tests.RevWalk
 		[Test]
 		public void testRevObjectTypes()
 		{
-			Assert.AreEqual(Constants.OBJ_TREE, emptyTree.getType());
-			Assert.AreEqual(Constants.OBJ_COMMIT, commit().getType());
-			Assert.AreEqual(Constants.OBJ_BLOB, blob("").getType());
-			Assert.AreEqual(Constants.OBJ_TAG, tag("emptyTree", emptyTree).getType());
+			Assert.AreEqual(Constants.OBJ_TREE, emptyTree.Type);
+			Assert.AreEqual(Constants.OBJ_COMMIT, commit().Type);
+			Assert.AreEqual(Constants.OBJ_BLOB, blob("").Type);
+			Assert.AreEqual(Constants.OBJ_TAG, tag("emptyTree", emptyTree).Type);
 		}
 
 		[Test]

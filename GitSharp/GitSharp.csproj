@@ -111,6 +111,7 @@
     <Compile Include="ObjectDirectory.cs" />
     <Compile Include="ReflogReader.cs" />
     <Compile Include="RefRename.cs" />
+    <Compile Include="RepositoryCache.cs" />
     <Compile Include="RepositoryConfig.cs" />
     <Compile Include="RevWalk\FooterKey.cs" />
     <Compile Include="RevWalk\FooterLine.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="Transport\FetchProcess.cs" />
     <Compile Include="Transport\OpenSshConfig.cs" />
     <Compile Include="Transport\PushProcess.cs" />
+    <Compile Include="Transport\RefAdvertiser.cs" />
     <Compile Include="Transport\SideBandProgressMonitor.cs" />
     <Compile Include="Transport\SshTransport.cs" />
     <Compile Include="Transport\SshConfigSessionFactory.cs" />
@@ -211,6 +213,7 @@
     <Compile Include="Util\CRC32.cs" />
     <Compile Include="Util\MessageDigest.cs" />
     <Compile Include="Util\StringUtils.cs" />
+    <Compile Include="Util\TimeoutStream.cs" />
     <Compile Include="Util\WeakReference.cs" />
     <Compile Include="WholePackedObjectLoader.cs" />
     <Compile Include="WindowCache.cs" />

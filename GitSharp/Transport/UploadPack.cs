@@ -35,9 +35,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using GitSharp.Exceptions;
 using GitSharp.RevWalk;
 using GitSharp.Util;
@@ -56,16 +56,12 @@ namespace GitSharp.Transport
 
 		private readonly Repository _db;
 		private readonly RevWalk.RevWalk _walk;
-		private Stream _stream;
-		private PacketLineIn _pckIn;
-		private PacketLineOut _pckOut;
-		private bool _multiAck;
 		private Dictionary<string, Ref> _refs;
 
 		private readonly List<string> _options;
-		private readonly List<RevObject> _wantAll;
-		private readonly List<RevCommit> _wantCommits;
-		private readonly List<RevObject> _commonBase;
+		private readonly IList<RevObject> _wantAll;
+		private readonly IList<RevCommit> _wantCommits;
+		private readonly IList<RevObject> _commonBase;
 
 		private readonly RevFlag ADVERTISED;
 		private readonly RevFlag WANT;
@@ -73,6 +69,18 @@ namespace GitSharp.Transport
 		private readonly RevFlag COMMON;
 		private readonly RevFlagSet SAVE;
 
+		private bool _multiAck;
+		private Stream _rawIn;
+		private Stream _rawOut;
+		private int _timeout;
+		private System.Timers.Timer _timer;
+		private PacketLineIn _pckIn;
+		private PacketLineOut _pckOut;
+
+		///	<summary>
+		/// Create a new pack upload for an open repository.
+		/// </summary>
+		/// <param name="copyFrom">the source repository.</param>
 		public UploadPack(Repository copyFrom)
 		{
 			_options = new List<string>();
@@ -82,6 +90,7 @@ namespace GitSharp.Transport
 
 			_db = copyFrom;
 			_walk = new RevWalk.RevWalk(_db);
+			_walk.setRetainBody(false);
 
 			ADVERTISED = _walk.newFlag("ADVERTISED");
 			WANT = _walk.newFlag("WANT");
@@ -102,13 +111,46 @@ namespace GitSharp.Transport
 			get { return _walk; }
 		}
 
-		public void Upload(Stream stream, Stream messages)
+		public int Timeout
 		{
-			_stream = stream;
-			_pckIn = new PacketLineIn(stream);
-			_pckOut = new PacketLineOut(stream);
+			get { return _timeout; }
+		}
+
+		///    
+		///	 <summary> * Execute the upload task on the socket.
+		///	 * </summary>
+		///	 * <param name="input">
+		///	 *            raw input to read client commands from. Caller must ensure the
+		///	 *            input is buffered, otherwise read performance may suffer. </param>
+		///	 * <param name="output">
+		///	 *            response back to the Git network client, to write the pack
+		///	 *            data onto. Caller must ensure the output is buffered,
+		///	 *            otherwise write performance may suffer. </param>
+		///	 * <param name="messages">
+		///	 *            secondary "notice" channel to send additional messages out
+		///	 *            through. When run over SSH this should be tied back to the
+		///	 *            standard error channel of the command execution. For most
+		///	 *            other network connections this should be null. </param>
+		///	 * <exception cref="IOException"> </exception>
+		///	 
+		public void Upload(Stream input, Stream output, Stream messages)
+		{
+			_rawIn = input;
+			_rawOut = output;
+
+			if (_timeout > 0)
+			{
+				var i = new TimeoutStream(_rawIn, _timeout * 1000);
+				var o = new TimeoutStream(_rawOut, _timeout * 1000);
+				_rawIn = i;
+				_rawOut = o;
+			}
+
+			_pckIn = new PacketLineIn(_rawIn);
+			_pckOut = new PacketLineOut(_rawOut);
 			Service();
 		}
+
 
 		private void Service()
 		{
@@ -125,99 +167,18 @@ namespace GitSharp.Transport
 		{
 			_refs = _db.getAllRefs();
 
-			var m = new StringBuilder(100);
-			var idtmp = new char[2 * Constants.OBJECT_ID_LENGTH];
-			IEnumerator<Ref> i = RefComparator.Sort(_refs.Values).GetEnumerator();
-			if (i.MoveNext())
-			{
-				Ref r = i.Current;
-				RevObject o = SafeParseAny(r.ObjectId);
-				if (o != null)
-				{
-					Advertise(m, idtmp, o, r.OriginalName);
-					m.Append('\0');
-					m.Append(' ');
-					m.Append(OptionIncludeTag);
-					m.Append(' ');
-					m.Append(OptionMultiAck);
-					m.Append(' ');
-					m.Append(OptionOfsDelta);
-					m.Append(' ');
-					m.Append(OptionSideBand);
-					m.Append(' ');
-					m.Append(OptionSideBand64K);
-					m.Append(' ');
-					m.Append(OptionThinPack);
-					m.Append(' ');
-					m.Append(OptionNoProgress);
-					m.Append(' ');
-					WriteAdvertisedRef(m);
-					if (o is RevTag)
-						WriteAdvertisedTag(m, idtmp, o, r.Name);
-				}
-			}
-			while (i.MoveNext())
-			{
-				Ref r = i.Current;
-				RevObject o = SafeParseAny(r.ObjectId);
-				if (o != null)
-				{
-					Advertise(m, idtmp, o, r.OriginalName);
-					WriteAdvertisedRef(m);
-					if (o is RevTag)
-					{
-						WriteAdvertisedTag(m, idtmp, o, r.Name);
-					}
-				}
-			}
+			var adv = new RefAdvertiser(_pckOut, _walk, ADVERTISED);
+			adv.advertiseCapability(OptionIncludeTag);
+			adv.advertiseCapability(OptionMultiAck);
+			adv.advertiseCapability(OptionOfsDelta);
+			adv.advertiseCapability(OptionSideBand);
+			adv.advertiseCapability(OptionSideBand64K);
+			adv.advertiseCapability(OptionThinPack);
+			adv.advertiseCapability(OptionNoProgress);
+			adv.setDerefTags(true);
+			_refs = _db.getAllRefs();
+			adv.send(_refs.Values);
 			_pckOut.End();
-		}
-
-		private RevObject SafeParseAny(AnyObjectId id)
-		{
-			try
-			{
-				return _walk.parseAny(id);
-			}
-			catch (IOException)
-			{
-				return null;
-			}
-		}
-
-		private void Advertise(StringBuilder m, char[] idtmp, RevObject o, string name)
-		{
-			o.add(ADVERTISED);
-			m.Length = 0;
-			o.getId().CopyTo(idtmp, m);
-			m.Append(' ');
-			m.Append(name);
-		}
-
-		private void WriteAdvertisedRef(StringBuilder m)
-		{
-			m.Append('\n');
-			_pckOut.WriteString(m.ToString());
-		}
-
-		private void WriteAdvertisedTag(StringBuilder m, char[] idtmp, RevObject tag, string name)
-		{
-			RevObject o = tag;
-			while (o is RevTag)
-			{
-				try
-				{
-					_walk.parse(((RevTag)o).getObject());
-				}
-				catch (IOException)
-				{
-					return;
-				}
-				o = ((RevTag)o).getObject();
-				o.add(ADVERTISED);
-			}
-			Advertise(m, idtmp, ((RevTag)tag).getObject(), name + "^{}");
-			WriteAdvertisedRef(m);
 		}
 
 		private void RecvWants()
@@ -376,16 +337,19 @@ namespace GitSharp.Transport
 			{
 				o.add(PEER_HAS);
 				if (o is RevCommit)
-				{
 					((RevCommit)o).carry(PEER_HAS);
-				}
-				if (!o.has(COMMON))
-				{
-					o.add(COMMON);
-					_commonBase.Add(o);
-				}
+				addCommonBase(o);
 			}
 			return true;
+		}
+
+		private void addCommonBase(RevObject o)
+		{
+			if (!o.has(COMMON))
+			{
+				o.add(COMMON);
+				_commonBase.Add(o);
+			}
 		}
 
 		private bool OkToGiveUp()
@@ -415,20 +379,15 @@ namespace GitSharp.Transport
 		{
 			_walk.resetRetain(SAVE);
 			_walk.markStart(want);
-			for (; ; )
+			for (;;)
 			{
 				RevCommit c = _walk.next();
 				if (c == null) break;
 				if (c.has(PEER_HAS))
 				{
-					if (!c.has(COMMON))
-					{
-						c.add(COMMON);
-						_commonBase.Add(c);
-					}
+					addCommonBase(c);
 					return true;
 				}
-				c.dispose();
 			}
 			return false;
 		}
@@ -439,8 +398,8 @@ namespace GitSharp.Transport
 			bool progress = !_options.Contains(OptionNoProgress);
 			bool sideband = _options.Contains(OptionSideBand) || _options.Contains(OptionSideBand64K);
 
-			IProgressMonitor pm = new NullProgressMonitor();
-			Stream packOut = _stream;
+			IProgressMonitor pm = NullProgressMonitor.Instance;
+			Stream packOut = _rawOut;
 
 			if (sideband)
 			{
@@ -492,7 +451,7 @@ namespace GitSharp.Transport
 			}
 			else
 			{
-				_stream.Flush();
+				_rawOut.Flush();
 			}
 		}
 	}

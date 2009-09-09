@@ -38,287 +38,349 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using GitSharp.Transport;
 
 namespace GitSharp.Transport
 {
+	public class Daemon
+	{
+		public const int DEFAULT_PORT = 9418;
+		private const int BACKLOG = 5;
 
-    // [caytchen] note these two were actually done anonymously in the original jgit
-    class UploadPackService : DaemonService
-    {
-        public UploadPackService() : base("upload-pack", "uploadpack")
-        {
-            Enabled = true;
-        }
+		public IPEndPoint MyAddress { get; private set; }
+		public DaemonService[] Services { get; private set; }
+		public Dictionary<string, Thread> Processors { get; private set; }
+		public bool ExportAll { get; set; }
+		public Dictionary<string, Repository> Exports { get; private set; }
+		public ICollection<DirectoryInfo> ExportBase { get; private set; }
+		public bool Run { get; private set; }
 
-        public override void Execute(DaemonClient dc, Repository db)
-        {
-            UploadPack rp = new UploadPack(db);
-            Stream stream = dc.Stream;
-            rp.Upload(stream, null);
-        }
-    }
+		private Thread acceptThread;
 
-    class ReceivePackService : DaemonService
-    {
-        public ReceivePackService() : base("receive-pack", "receivepack")
-        {
-            Enabled = false;
-        }
+		private int timeout;
 
-        public override void Execute(DaemonClient dc, Repository db)
-        {
-            EndPoint peer = dc.Peer;
-            string host = Dns.GetHostEntry((peer as IPEndPoint).Address).HostName ??
-                          (peer as IPEndPoint).Address.ToString();
-            ReceivePack rp = new ReceivePack(db);
-            Stream stream = dc.Stream;
-            string name = "anonymous";
-            string email = name + "@" + host;
-            rp.setRefLogIdent(new PersonIdent(name, email));
-            rp.receive(stream, null);
-        }
-    }
+		/// <summary> Configure a daemon to listen on any available network port.  </summary>
+		public Daemon()
+			: this(null)
+		{
+		}
 
-    public class Daemon
-    {
-        public const int DEFAULT_PORT = 9418;
-        private const int BACKLOG = 5;
+		///    
+		///	 <summary> * Configure a new daemon for the specified network address.
+		///	 * </summary>
+		///	 * <param name="addr">
+		///	 *            address to listen for connections on. If null, any available
+		///	 *            port will be chosen on all network interfaces. </param>
+		///	 
+		public Daemon(IPEndPoint addr)
+		{
+			MyAddress = addr;
+			Exports = new Dictionary<string, Repository>();
+			ExportBase = new List<DirectoryInfo>();
+			Processors = new Dictionary<string, Thread>();
+			Services = new DaemonService[] { new UploadPackService(), new ReceivePackService() };
+		}
 
-        public IPEndPoint MyAddress { get; private set; }
-        public DaemonService[] Services { get; private set; }
-        public Dictionary<string, Thread> Processors { get; private set; }
-        public bool ExportAll { get; set; }
-        public Dictionary<string, Repository> Exports { get; private set; }
-        public List<DirectoryInfo> ExportBase { get; private set; }
-        public bool Run { get; private set; }
+		///    
+		///	 <summary> * Lookup a supported service so it can be reconfigured.
+		///	 * </summary>
+		///	 * <param name="name">
+		///	 *            name of the service; e.g. "receive-pack"/"git-receive-pack" or
+		///	 *            "upload-pack"/"git-upload-pack". </param>
+		///	 * <returns> the service; null if this daemon implementation doesn't support
+		///	 *         the requested service type. </returns>
+		///	 
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		public DaemonService GetService(string name)
+		{
+			if (!name.StartsWith("git-"))
+				name = "git-" + name;
+			foreach (DaemonService s in Services)
+			{
+				if (s.Command.Equals(name))
+					return s;
+			}
+			return null;
+		}
 
-        private Thread acceptThread;
+		///    
+		///	 <summary> * Add a single repository to the set that is exported by this daemon.
+		///	 * <p>
+		///	 * The existence (or lack-thereof) of <code>git-daemon-export-ok</code> is
+		///	 * ignored by this method. The repository is always published.
+		///	 * </summary>
+		///	 * <param name="name">
+		///	 *            name the repository will be published under. </param>
+		///	 * <param name="db">
+		///	 *            the repository instance. </param>
+		///	 
+		public void ExportRepository(string name, Repository db)
+		{
+			if (!name.EndsWith(".git"))
+				name = name + ".git";
+			Exports.Add(name, db);
+			RepositoryCache.register(db);
+		}
 
-        public Daemon() : this(null)
-        {
-        }
+		///    
+		///	 <summary> * Recursively export all Git repositories within a directory.
+		///	 * </summary>
+		///	 * <param name="dir">
+		///	 *            the directory to export. This directory must not itself be a
+		///	 *            git repository, but any directory below it which has a file
+		///	 *            named <code>git-daemon-export-ok</code> will be published. </param>
+		///	 
+		public void ExportDirectory(DirectoryInfo dir)
+		{
+			ExportBase.Add(dir);
+		}
 
-        public Daemon(IPEndPoint addr)
-        {
-            MyAddress = addr;
-            Exports = new Dictionary<string, Repository>();
-            ExportBase = new List<DirectoryInfo>();
-            Processors = new Dictionary<string, Thread>();
-            Services = new DaemonService[] {new UploadPackService(), new ReceivePackService()};
-        }
+		///    
+		///	 <summary> * Set the timeout before willing to abort an IO call.
+		///	 * </summary>
+		///	 * <param name="seconds">
+		///	 *            number of seconds to wait (with no data transfer occurring)
+		///	 *            before aborting an IO read or write operation with the
+		///	 *            connected client. </param>
+		///	 
+		public void Start()
+		{
+			if (acceptThread != null)
+				throw new InvalidOperationException("Daemon already running");
 
-        public DaemonService GetService(string name)
-        {
-            if (!name.StartsWith("git-"))
-                name = "git-" + name;
-            foreach (DaemonService s in Services)
-            {
-                if (s.Command.Equals(name))
-                    return s;
-            }
-            return null;
-        }
+			Socket listenSock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			listenSock.Bind(MyAddress ?? new IPEndPoint(IPAddress.Any, 0));
+			listenSock.Listen(BACKLOG);
+			MyAddress = (IPEndPoint)listenSock.LocalEndPoint;
 
-        public void ExportRepository(string name, Repository db)
-        {
-            if (!name.EndsWith(".git"))
-                name = name + ".git";
-            Exports.Add(name, db);
-        }
+			Run = true;
+			acceptThread = new Thread(new ThreadStart(delegate
+														  {
+															  while (Run)
+															  {
+																  try
+																  {
+																	  startClient(listenSock.Accept());
+																  }
+																  catch (ThreadInterruptedException)
+																  {
 
-        public void ExportDirectory(DirectoryInfo dir)
-        {
-            ExportBase.Add(dir);
-        }
+																  }
+																  catch (SocketException)
+																  {
+																	  break;
+																  }
+															  }
 
-        public void Start()
-        {
-            if (acceptThread != null)
-                throw new InvalidOperationException("Daemon already running");
+															  try
+															  {
+																  listenSock.Close();
+															  }
+															  catch (SocketException)
+															  {
 
-            Socket listenSock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            listenSock.Bind(MyAddress ?? new IPEndPoint(IPAddress.Any, 0));
-            listenSock.Listen(BACKLOG);
-            MyAddress = (IPEndPoint) listenSock.LocalEndPoint;
+															  }
+															  finally
+															  {
+																  acceptThread = null;
+															  }
+														  }));
+			acceptThread.Start();
+			Processors.Add("Git-Daemon-Accept", acceptThread);
+		}
 
-            Run = true;
-            acceptThread = new Thread(new ThreadStart(delegate
-                                                          {
-                                                              while (Run)
-                                                              {
-                                                                  try
-                                                                  {
-                                                                      startClient(listenSock.Accept());
-                                                                  }
-                                                                  catch (ThreadInterruptedException)
-                                                                  {
+		private void startClient(Socket s)
+		{
+			DaemonClient dc = new DaemonClient(this);
+			dc.Peer = s.RemoteEndPoint;
 
-                                                                  }
-                                                                  catch (SocketException)
-                                                                  {
-                                                                      break;
-                                                                  }
-                                                              }
+			// [caytchen] TODO: insanse anonymous methods were ported 1:1 from jgit, do properly sometime
+			Thread t = new Thread(
+				new ThreadStart(delegate
+									{
+										NetworkStream
+											stream =
+												new NetworkStream
+													(s);
+										try
+										{
+											dc.Execute(
+												new BufferedStream
+													(stream));
+										}
+										catch (
+											IOException)
+										{
 
-                                                              try
-                                                              {
-                                                                  listenSock.Close();
-                                                              }
-                                                              catch (SocketException)
-                                                              {
+										}
+										catch (
+											SocketException
+											)
+										{
 
-                                                              }
-                                                              finally
-                                                              {
-                                                                  acceptThread = null;
-                                                              }
-                                                          }));
-            acceptThread.Start();
-            Processors.Add("Git-Daemon-Accept", acceptThread);
-        }
+										}
+										finally
+										{
+											try
+											{
+												stream.
+													Close
+													();
+												s.Close();
+											}
+											catch (
+												IOException
+												)
+											{
 
-        private void startClient(Socket s)
-        {
-            DaemonClient dc = new DaemonClient(this);
-            dc.Peer = s.RemoteEndPoint;
+											}
+											catch (
+												SocketException
+												)
+											{
 
-            // [caytchen] TODO: insanse anonymous methods were ported 1:1 from jgit, do properly sometime
-            Thread t = new Thread(
-                new ThreadStart(delegate
-                                    {
-                                        NetworkStream
-                                            stream =
-                                                new NetworkStream
-                                                    (s);
-                                        try
-                                        {
-                                            dc.Execute(
-                                                new BufferedStream
-                                                    (stream));
-                                        }
-                                        catch (
-                                            IOException)
-                                        {
+											}
+										}
+									}));
 
-                                        }
-                                        catch (
-                                            SocketException
-                                            )
-                                        {
+			t.Start();
+			Processors.Add("Git-Daemon-Client " + s.RemoteEndPoint, t);
+		}
 
-                                        }
-                                        finally
-                                        {
-                                            try
-                                            {
-                                                stream.
-                                                    Close
-                                                    ();
-                                                s.Close();
-                                            }
-                                            catch (
-                                                IOException
-                                                )
-                                            {
+		public DaemonService MatchService(string cmd)
+		{
+			foreach (DaemonService d in Services)
+			{
+				if (d.Handles(cmd))
+					return d;
+			}
+			return null;
+		}
 
-                                            }
-                                            catch (
-                                                SocketException
-                                                )
-                                            {
+		public void Stop()
+		{
+			if (acceptThread != null)
+			{
+				Run = false;
+				// [caytchen] behaviour probably doesn't match
+				//acceptThread.Interrupt();
+			}
+		}
 
-                                            }
-                                        }
-                                    }));
+		public Repository OpenRepository(string name)
+		{
+			name = name.Replace('\\', '/');
+			if (!name.StartsWith("/"))
+				return null;
 
-            t.Start();
-            Processors.Add("Git-Daemon-Client " + s.RemoteEndPoint, t);
-        }
+			if (name.StartsWith("//"))
+				return null;
 
-        public DaemonService MatchService(string cmd)
-        {
-            foreach (DaemonService d in Services)
-            {
-                if (d.Handles(cmd))
-                    return d;
-            }
-            return null;
-        }
+			if (name.Contains("/../"))
+				return null;
 
-        public void Stop()
-        {
-            if (acceptThread != null)
-            {
-                Run = false;
-                // [caytchen] behaviour probably doesn't match
-                //acceptThread.Interrupt();
-            }
-        }
+			name = name.Substring(1);
+			Repository db;
+			db = Exports[name];
+			if (db != null) return db;
+			db = Exports[name + ".git"];
+			if (db != null) return db;
 
-        public Repository OpenRepository(string name)
-        {
-            name = name.Replace('\\', '/');
-            if (!name.StartsWith("/"))
-                return null;
+			DirectoryInfo[] search;
+			search = ExportBase.ToArray();
+			foreach (DirectoryInfo f in search)
+			{
+				string p = f.ToString();
+				if (!p.EndsWith("/")) p = p + '/';
 
-            if (name.StartsWith("//"))
-                return null;
+				db = openRepository(new DirectoryInfo(p + name));
+				if (db != null) return db;
 
-            if (name.Contains("/../"))
-                return null;
+				db = openRepository(new DirectoryInfo(p + name + ".git"));
+				if (db != null) return db;
 
-            name = name.Substring(1);
-            Repository db;
-            db = Exports[name];
-            if (db != null) return db;
-            db = Exports[name + ".git"];
-            if (db != null) return db;
+				db = openRepository(new DirectoryInfo(p + name + "/.git"));
+				if (db != null) return db;
+			}
+			return null;
+		}
 
-            DirectoryInfo[] search;
-            search = ExportBase.ToArray();
-            foreach (DirectoryInfo f in search)
-            {
-                string p = f.ToString();
-                if (!p.EndsWith("/")) p = p + '/';
+		private Repository openRepository(DirectoryInfo f)
+		{
+			if (Directory.Exists(f.ToString()) && canExport(f))
+			{
+				try
+				{
+					return new Repository(f);
+				}
+				catch (IOException)
+				{
 
-                db = openRepository(new DirectoryInfo(p + name));
-                if (db != null) return db;
+				}
+			}
+			return null;
+		}
 
-                db = openRepository(new DirectoryInfo(p + name + ".git"));
-                if (db != null) return db;
+		private bool canExport(DirectoryInfo d)
+		{
+			if (ExportAll) return true;
+			string p = d.ToString();
+			if (!p.EndsWith("/")) p = p + '/';
+			return File.Exists(p + "git-daemon-export-ok");
+		}
 
-                db = openRepository(new DirectoryInfo(p + name + "/.git"));
-                if (db != null) return db;
-            }
-            return null;
-        }
+		#region Nested Types
 
-        private Repository openRepository(DirectoryInfo f)
-        {
-            if (Directory.Exists(f.ToString()) && canExport(f))
-            {
-                try
-                {
-                    return new Repository(f);
-                }
-                catch (IOException)
-                {
-                    
-                }
-            }
-            return null;
-        }
+		// [caytchen] note these two were actually done anonymously in the original jgit
+		class UploadPackService : DaemonService
+		{
+			public UploadPackService()
+				: base("upload-pack", "uploadpack")
+			{
+				Enabled = true;
+			}
 
-        private bool canExport(DirectoryInfo d)
-        {
-            if (ExportAll) return true;
-            string p = d.ToString();
-            if (!p.EndsWith("/")) p = p + '/';
-            return File.Exists(p + "git-daemon-export-ok");
-        }
-    }
+			public override void Execute(DaemonClient dc, Repository db)
+			{
+				var rp = new UploadPack(db);
+				Stream stream = dc.Stream;
+				rp.Upload(stream, null, null);
+			}
+		}
+
+		class ReceivePackService : DaemonService
+		{
+			public ReceivePackService()
+				: base("receive-pack", "receivepack")
+			{
+				Enabled = false;
+			}
+
+			public override void Execute(DaemonClient dc, Repository db)
+			{
+				EndPoint peer = dc.Peer;
+
+				var ipEndpoint = peer as IPEndPoint;
+				if (ipEndpoint == null)
+				{
+					throw new InvalidOperationException("peer must be a IPEndPoint");
+				}
+
+				string host = Dns.GetHostEntry(ipEndpoint.Address).HostName ?? ipEndpoint.Address.ToString();
+				var rp = new ReceivePack(db);
+				Stream stream = dc.Stream;
+				const string name = "anonymous";
+				string email = name + "@" + host;
+				rp.setRefLogIdent(new PersonIdent(name, email));
+				rp.receive(stream, null);
+			}
+		}
+
+		#endregion
+	}
 }

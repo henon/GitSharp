@@ -40,105 +40,105 @@ using System.Collections.Generic;
 
 namespace GitSharp.Diff
 {
-    /// <summary>
-	/// Specialized list of {@link Edit}s in a document.
-    /// </summary>
-    public class EditList : List<Edit>
-    {
-	    public int size()
-        {
-		    return Count;
-        }
+	/// <summary>
+	/// Specialized list of <seealso cref="Edit"/>s in a document.
+	/// </summary>
+	public class EditList : List<Edit>
+	{
+		public int size()
+		{
+			return Count;
+		}
 
-	    public Edit get(int index)
-        {
-            return this[index];
-	    }
+		public Edit get(int index)
+		{
+			return this[index];
+		}
 
-	    public Edit set(int index, Edit element)
-        {
-            Edit retval = this[index];
-            this[index] = element;
-            return retval;
-	    }
+		public Edit set(int index, Edit element)
+		{
+			Edit retval = this[index];
+			this[index] = element;
+			return retval;
+		}
 
-	    public void Add(int index, Edit element)
-        {
-		    Insert(index, element);
-	    }
+		public void Add(int index, Edit element)
+		{
+			Insert(index, element);
+		}
 
-	    public void remove(int index)
-        {
-		    RemoveAt(index);
-	    }
+		public void remove(int index)
+		{
+			RemoveAt(index);
+		}
 
-	    public override string ToString()
-        {
-            /* Unfortunately, C#'s List does not implement ToString the same
-             * way Java's ArrayList does. It simply inherits from the base class
-             * object. This means that ToString returns the string identifier of
-             * the type.
-             * Until a better solution is found, I'm implementing ToString myself.
-             */
-            string retval = "EditList[";
-            foreach (Edit e in this)
-            {
-            	retval = retval + e;
-            }
-            retval = retval + "]";
-            return retval;
-	    }
+		public override string ToString()
+		{
+			/* Unfortunately, C#'s List does not implement ToString the same
+			 * way Java's ArrayList does. It simply inherits from the base class
+			 * object. This means that ToString returns the string identifier of
+			 * the type.
+			 * Until a better solution is found, I'm implementing ToString myself.
+			 */
+			string retval = "EditList[";
+			foreach (Edit e in this)
+			{
+				retval = retval + e;
+			}
+			retval = retval + "]";
+			return retval;
+		}
 
-        /* This method did not exist in the original Java code.
-         * In Java, the AbstractList has a method named isEmpty
-         * C#'s AbstractList has no such method
-         */
-        public bool isEmpty()
-        {
-            return (Count == 0);
-        }
+		/* This method did not exist in the original Java code.
+		 * In Java, the AbstractList has a method named isEmpty
+		 * C#'s AbstractList has no such method
+		 */
+		public bool isEmpty()
+		{
+			return (Count == 0);
+		}
 
-        private bool isEqual(EditList o)
-        {
-            if (Count != o.Count)
-            {
-            	return false;
-            }
+		private bool isEqual(EditList o)
+		{
+			if (Count != o.Count)
+			{
+				return false;
+			}
 
-            for (int i = 0; i < Count; i++)
-            {
-            	if (!this[i].Equals(o[i]))
-            	{
-            		return false;
-            	}
-            }
+			for (int i = 0; i < Count; i++)
+			{
+				if (!this[i].Equals(o[i]))
+				{
+					return false;
+				}
+			}
 
-            return true;
-        }
+			return true;
+		}
 
-        private bool isEqual(string s)
-        {
-            return ToString().Equals(s);
-        }
+		private bool isEqual(string s)
+		{
+			return ToString().Equals(s);
+		}
 
-        public override bool Equals(object o)
-        {
-            if (o is EditList)
-            {
-            	return isEqual((EditList)o);
-            }
+		public override bool Equals(object o)
+		{
+			if (o is EditList)
+			{
+				return isEqual((EditList)o);
+			}
 
-            if (o is string)
-            {
-            	return isEqual((string)o);
-            }
+			if (o is string)
+			{
+				return isEqual((string)o);
+			}
 
-            return false;
-        }
+			return false;
+		}
 
-        public override int GetHashCode()
-        {
-            return ToString().GetHashCode();
-        }
-    }
+		public override int GetHashCode()
+		{
+			return ToString().GetHashCode();
+		}
+	}
 }

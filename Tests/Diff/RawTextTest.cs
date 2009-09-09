@@ -49,15 +49,15 @@ namespace GitSharp.Tests
         [Test]
 	    public void testEmpty()
         {
-		    RawText r = new RawText(new byte[0]);
+		    var r = new RawText(new byte[0]);
 		    Assert.AreEqual(0, r.size());
 	    }
 
         [Test]
 	    public void testEquals()
         {
-		    RawText a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
-		    RawText b = new RawText(Constants.encodeASCII("foo-b\nfoo-c\n"));
+		    var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
+		    var b = new RawText(Constants.encodeASCII("foo-b\nfoo-c\n"));
 
 		    Assert.AreEqual(2, a.size());
 		    Assert.AreEqual(2, b.size());
@@ -74,8 +74,8 @@ namespace GitSharp.Tests
         [Test]
 	    public void testWriteLine1()
         {
-		    RawText a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
-		    MemoryStream o = new MemoryStream();
+		    var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
+		    var o = new MemoryStream();
 		    a.writeLine(o, 0);
 		    byte[] r = o.ToArray();
 		    Assert.AreEqual("foo-a", RawParseUtils.decode(r));
@@ -84,8 +84,8 @@ namespace GitSharp.Tests
         [Test]
 	    public void testWriteLine2()
         {
-		    RawText a = new RawText(Constants.encodeASCII("foo-a\nfoo-b"));
-		    MemoryStream o = new MemoryStream();
+		    var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b"));
+		    var o = new MemoryStream();
 		    a.writeLine(o, 1);
 		    byte[] r = o.ToArray();
 		    Assert.AreEqual("foo-b", RawParseUtils.decode(r));
@@ -94,8 +94,8 @@ namespace GitSharp.Tests
         [Test]
 	    public void testWriteLine3()
         {
-		    RawText a = new RawText(Constants.encodeASCII("a\n\nb\n"));
-		    MemoryStream o = new MemoryStream();
+		    var a = new RawText(Constants.encodeASCII("a\n\nb\n"));
+		    var o = new MemoryStream();
 		    a.writeLine(o, 1);
 		    byte[] r = o.ToArray();
 		    Assert.AreEqual(string.Empty, RawParseUtils.decode(r));

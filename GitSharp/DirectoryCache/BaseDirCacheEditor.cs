@@ -38,174 +38,185 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 
 namespace GitSharp.DirectoryCache
 {
-    /**
-     * Generic update/editing support for {@link DirCache}.
-     * <p>
-     * The different update strategies extend this class to provide their own unique
-     * services to applications.
-     */
-    public abstract class BaseDirCacheEditor
-    {
-        /** The cache instance this editor updates during {@link #finish()}. */
-        protected DirCache cache;
+	/// <summary>
+	/// Generic update/editing support for <seealso cref="DirCache"/>.
+	/// <para />
+	/// The different update strategies extend this class to provide their 
+	/// own unique services to applications. 
+	/// </summary>
+	public abstract class BaseDirCacheEditor
+	{
+		// The cache instance this editor updates during finish.
+		private readonly DirCache _cache;
 
-        /**
-         * Entry table this builder will eventually replace into {@link #cache}.
-         * <p>
-         * Use {@link #fastAdd(DirCacheEntry)} or {@link #fastKeep(int, int)} to
-         * make additions to this table. The table is automatically expanded if it
-         * is too small for a new addition.
-         * <p>
-         * Typically the entries in here are sorted by their path names, just like
-         * they are in the DirCache instance.
-         */
-        protected DirCacheEntry[] entries;
+		///	<summary>
+		/// Entry table this builder will eventually replace into <seealso cref="Cache"/>.
+		///	<para />
+		/// Use <seealso cref="FastAdd(DirCacheEntry)"/> or <seealso cref="FastKeep(int, int)"/> to
+		/// make additions to this table. The table is automatically expanded if it
+		/// is too small for a new addition.
+		/// <para />
+		/// Typically the entries in here are sorted by their path names, just like
+		/// they are in the DirCache instance.
+		/// </summary>
+		private DirCacheEntry[] _entries;
 
-        /** Total number of valid entries in {@link #entries}. */
-        protected int entryCnt;
+		// Total number of valid entries in Entries.
+		private int _entryCnt;
 
-        /**
-         * Construct a new editor.
-         *
-         * @param dc
-         *            the cache this editor will eventually update.
-         * @param ecnt
-         *            estimated number of entries the editor will have upon
-         *            completion. This sizes the initial entry table.
-         */
-        protected BaseDirCacheEditor(DirCache dc, int ecnt)
-        {
-            cache = dc;
-            entries = new DirCacheEntry[ecnt];
-        }
+		///	<summary>
+		/// Construct a new editor.
+		///	</summary>
+		/// <param name="dc">
+		/// the cache this editor will eventually update.
+		/// </param>
+		///	<param name="ecnt">
+		/// estimated number of entries the editor will have upon
+		/// completion. This sizes the initial entry table.
+		/// </param>
+		protected BaseDirCacheEditor(DirCache dc, int ecnt)
+		{
+			_cache = dc;
+			_entries = new DirCacheEntry[ecnt];
+		}
 
-        /**
-         * @return the cache we will update on {@link #finish()}.
-         */
-        public DirCache getDirCache()
-        {
-            return cache;
-        }
+		/// <summary>
+		/// 
+		/// </summary>
+		///	<returns> 
+		/// The cache we will update on <seealso cref="Finish()"/>.
+		/// </returns>
+		public DirCache getDirCache()
+		{
+			return _cache;
+		}
 
-        /**
-         * Append one entry into the resulting entry list.
-         * <p>
-         * The entry is placed at the end of the entry list. The caller is
-         * responsible for making sure the  table is correctly sorted.
-         * <p>
-         * The {@link #entries} table is automatically expanded if there is
-         * insufficient space for the new addition.
-         *
-         * @param newEntry
-         *            the new entry to add.
-         */
-        protected void fastAdd(DirCacheEntry newEntry)
-        {
-            if (entries.Length == entryCnt)
-            {
-                DirCacheEntry[] n = new DirCacheEntry[(entryCnt + 16) * 3 / 2];
-                Array.Copy(entries, 0, n, 0, entryCnt);
-                entries = n;
-            }
-            entries[entryCnt++] = newEntry;
-        }
+		///	<summary>
+		/// Append one entry into the resulting entry list.
+		/// <para />
+		/// The entry is placed at the end of the entry list. The caller is
+		/// responsible for making sure the final table is correctly sorted.
+		/// <para />
+		///	The <seealso cref="Entries"/> table is automatically expanded 
+		/// if there is insufficient space for the new addition.
+		/// </summary>
+		/// <param name="newEntry">The new entry to add.</param>
+		protected void FastAdd(DirCacheEntry newEntry)
+		{
+			if (_entries.Length == _entryCnt)
+			{
+				var n = new DirCacheEntry[(_entryCnt + 16) * 3 / 2];
+				Array.Copy(_entries, 0, n, 0, _entryCnt);
+				_entries = n;
+			}
+			_entries[_entryCnt++] = newEntry;
+		}
 
-        /**
-         * Add a range of existing entries from the destination cache.
-         * <p>
-         * The entries are placed at the end of the entry list, preserving their
-         * current order. The caller is responsible for making sure the  table
-         * is correctly sorted.
-         * <p>
-         * This method copies from the destination cache, which has not yet been
-         * updated with this editor's new table. So all offsets into the destination
-         * cache are not affected by any updates that may be currently taking place
-         * in this editor.
-         * <p>
-         * The {@link #entries} table is automatically expanded if there is
-         * insufficient space for the new additions.
-         *
-         * @param pos
-         *            first entry to copy from the destination cache.
-         * @param cnt
-         *            number of entries to copy.
-         */
-        protected void fastKeep(int pos, int cnt)
-        {
-            if (entryCnt + cnt > entries.Length)
-            {
-                int m1 = (entryCnt + 16) * 3 / 2;
-                int m2 = entryCnt + cnt;
-                DirCacheEntry[] n = new DirCacheEntry[Math.Max(m1, m2)];
-                Array.Copy(entries, 0, n, 0, entryCnt);
-                entries = n;
-            }
+		protected DirCacheEntry[] Entries
+		{
+			get { return _entries; }
+		}
 
-            cache.toArray(pos, entries, entryCnt, cnt);
-            entryCnt += cnt;
-        }
+		protected DirCache Cache
+		{
+			get { return _cache; }
+		}
 
-        /**
-         * Finish this builder and update the destination {@link DirCache}.
-         * <p>
-         * When this method completes this builder instance is no longer usable by
-         * the calling application. A new builder must be created to make additional
-         * changes to the index entries.
-         * <p>
-         * After completion the DirCache returned by {@link #getDirCache()} will
-         * contain all modifications.
-         * <p>
-         * <i>Note to implementors:</i> Make sure {@link #entries} is fully sorted
-         * then invoke {@link #replace()} to update the DirCache with the new table.
-         */
-        public abstract void finish();
+		protected int EntryCnt
+		{
+			get { return _entryCnt; }
+		}
 
-        /**
-         * Update the DirCache with the contents of {@link #entries}.
-         * <p>
-         * This method should be invoked only during an implementation of
-         * {@link #finish()}, and only After {@link #entries} is sorted.
-         */
-        protected void replace()
-        {
-            if (entryCnt < entries.Length / 2)
-            {
-                DirCacheEntry[] n = new DirCacheEntry[entryCnt];
-                Array.Copy(entries, 0, n, 0, entryCnt);
-                entries = n;
-            }
-            cache.replace(entries, entryCnt);
-        }
+		///	<summary>
+		/// Add a range of existing entries from the destination cache.
+		/// <para />
+		/// The entries are placed at the end of the entry list, preserving their
+		/// current order. The caller is responsible for making sure the final table
+		/// is correctly sorted.
+		/// <para />
+		/// This method copies from the destination cache, which has not yet been
+		/// updated with this editor's new table. So all offsets into the destination
+		/// cache are not affected by any updates that may be currently taking place
+		/// in this editor.
+		/// <para />
+		/// The <seealso cref="Entries"/> table is automatically expanded if there is
+		/// insufficient space for the new additions.
+		/// </summary>
+		/// <param name="pos">First entry to copy from the destination cache. </param>
+		/// <param name="cnt">Number of entries to copy.</param>
+		protected void FastKeep(int pos, int cnt)
+		{
+			if (_entryCnt + cnt > _entries.Length)
+			{
+				int m1 = (_entryCnt + 16) * 3 / 2;
+				int m2 = _entryCnt + cnt;
+				var n = new DirCacheEntry[Math.Max(m1, m2)];
+				Array.Copy(_entries, 0, n, 0, _entryCnt);
+				_entries = n;
+			}
 
-        /**
-         * Finish, write, commit this change, and release the index lock.
-         * <p>
-         * If this method fails (returns false) the lock is still released.
-         * <p>
-         * This is a utility method for applications as the finish-write-commit
-         * pattern is very common After using a builder to update entries.
-         *
-         * @return true if the commit was successful and the file contains the new
-         *         data; false if the commit failed and the file remains with the
-         *         old data.
-         * @throws IllegalStateException
-         *             the lock is not held.
-         * @throws IOException
-         *             the output file could not be created. The caller no longer
-         *             holds the lock.
-         */
-        public virtual bool commit()
-        {
-            finish();
-            cache.write();
-            return cache.commit();
-        }
-    }
+			_cache.toArray(pos, _entries, _entryCnt, cnt);
+			_entryCnt += cnt;
+		}
 
+		///	<summary> * Finish this builder and update the destination <seealso cref="DirCache"/>.
+		///	<para />
+		/// When this method completes this builder instance is no longer usable by
+		/// the calling application. A new builder must be created to make additional
+		/// changes to the index entries.
+		/// <para />
+		/// After completion the DirCache returned by <seealso cref="#getDirCache()"/> will
+		/// contain all modifications.
+		/// </summary>
+		/// <remarks>
+		/// <i>Note to implementors:</i> Make sure <seealso cref="Entries"/> is fully sorted
+		/// then invoke <seealso cref="Replace()"/> to update the DirCache with the new table. 
+		/// </remarks>
+		public abstract void finish();
+
+		///	<summary>
+		/// Update the DirCache with the contents of <seealso cref="Entries"/>.
+		///	<para />
+		/// This method should be invoked only during an implementation of
+		/// <seealso cref="Finish()"/>, and only after <seealso cref="Entries"/> is sorted.
+		/// </summary>
+		protected void Replace()
+		{
+			if (_entryCnt < _entries.Length / 2)
+			{
+				var n = new DirCacheEntry[_entryCnt];
+				Array.Copy(_entries, 0, n, 0, _entryCnt);
+				_entries = n;
+			}
+			_cache.replace(_entries, _entryCnt);
+		}
+
+		///	<summary>
+		/// Finish, write, commit this change, and release the index lock.
+		/// <para />
+		/// If this method fails (returns false) the lock is still released.
+		/// <para />
+		/// This is a utility method for applications as the finish-write-commit
+		/// pattern is very common after using a builder to update entries.
+		/// </summary>
+		/// <returns>
+		/// True if the commit was successful and the file contains the new
+		/// data; false if the commit failed and the file remains with the
+		/// old data.
+		/// </returns>
+		/// <exception cref="IOException">
+		/// The output file could not be created. The caller no longer
+		/// holds the lock.
+		/// </exception>
+		public virtual bool commit()
+		{
+			finish();
+			_cache.write();
+			return _cache.commit();
+		}
+	}
 }

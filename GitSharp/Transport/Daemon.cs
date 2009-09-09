@@ -47,6 +47,9 @@ using GitSharp.Transport;
 
 namespace GitSharp.Transport
 {
+	/// <summary>
+	/// Basic daemon for the anonymous <code>git://</code> transport protocol.
+	/// </summary>
 	public class Daemon
 	{
 		public const int DEFAULT_PORT = 9418;
@@ -61,22 +64,23 @@ namespace GitSharp.Transport
 		public bool Run { get; private set; }
 
 		private Thread acceptThread;
-
 		private int timeout;
 
-		/// <summary> Configure a daemon to listen on any available network port.  </summary>
+		/// <summary>
+		///  Configure a daemon to listen on any available network port.
+		/// </summary>
 		public Daemon()
 			: this(null)
 		{
 		}
 
-		///    
-		///	 <summary> * Configure a new daemon for the specified network address.
-		///	 * </summary>
-		///	 * <param name="addr">
-		///	 *            address to listen for connections on. If null, any available
-		///	 *            port will be chosen on all network interfaces. </param>
-		///	 
+		///	<summary>
+		/// Configure a new daemon for the specified network address.
+		///	</summary>
+		///	<param name="addr">
+		/// Address to listen for connections on. If null, any available
+		/// port will be chosen on all network interfaces.
+		/// </param>
 		public Daemon(IPEndPoint addr)
 		{
 			MyAddress = addr;
@@ -86,15 +90,16 @@ namespace GitSharp.Transport
 			Services = new DaemonService[] { new UploadPackService(), new ReceivePackService() };
 		}
 
-		///    
-		///	 <summary> * Lookup a supported service so it can be reconfigured.
-		///	 * </summary>
-		///	 * <param name="name">
-		///	 *            name of the service; e.g. "receive-pack"/"git-receive-pack" or
-		///	 *            "upload-pack"/"git-upload-pack". </param>
-		///	 * <returns> the service; null if this daemon implementation doesn't support
-		///	 *         the requested service type. </returns>
-		///	 
+		///	<summary> * Lookup a supported service so it can be reconfigured.
+		///	</summary>
+		///	<param name="name">
+		///	Name of the service; e.g. "receive-pack"/"git-receive-pack" or
+		///	"upload-pack"/"git-upload-pack".
+		/// </param>
+		///	<returns>
+		/// The service; null if this daemon implementation doesn't support
+		///	the requested service type.
+		/// </returns>
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		public DaemonService GetService(string name)
 		{
@@ -108,17 +113,16 @@ namespace GitSharp.Transport
 			return null;
 		}
 
-		///    
-		///	 <summary> * Add a single repository to the set that is exported by this daemon.
-		///	 * <p>
-		///	 * The existence (or lack-thereof) of <code>git-daemon-export-ok</code> is
-		///	 * ignored by this method. The repository is always published.
-		///	 * </summary>
-		///	 * <param name="name">
-		///	 *            name the repository will be published under. </param>
-		///	 * <param name="db">
-		///	 *            the repository instance. </param>
-		///	 
+		///	<summary>
+		/// Add a single repository to the set that is exported by this daemon.
+		///	<para />
+		///	The existence (or lack-thereof) of <code>git-daemon-export-ok</code> is
+		///	ignored by this method. The repository is always published.
+		///	</summary>
+		///	<param name="name">
+		/// name the repository will be published under.
+		/// </param>
+		///	<param name="db">the repository instance. </param>
 		public void ExportRepository(string name, Repository db)
 		{
 			if (!name.EndsWith(".git"))
@@ -127,33 +131,36 @@ namespace GitSharp.Transport
 			RepositoryCache.register(db);
 		}
 
-		///    
-		///	 <summary> * Recursively export all Git repositories within a directory.
-		///	 * </summary>
-		///	 * <param name="dir">
-		///	 *            the directory to export. This directory must not itself be a
-		///	 *            git repository, but any directory below it which has a file
-		///	 *            named <code>git-daemon-export-ok</code> will be published. </param>
-		///	 
+		/// <summary>
+		/// Recursively export all Git repositories within a directory.
+		/// </summary>
+		/// <param name="dir">
+		/// the directory to export. This directory must not itself be a
+		/// git repository, but any directory below it which has a file
+		/// named <code>git-daemon-export-ok</code> will be published.
+		/// </param>
 		public void ExportDirectory(DirectoryInfo dir)
 		{
 			ExportBase.Add(dir);
 		}
 
-		///    
-		///	 <summary> * Set the timeout before willing to abort an IO call.
-		///	 * </summary>
-		///	 * <param name="seconds">
-		///	 *            number of seconds to wait (with no data transfer occurring)
-		///	 *            before aborting an IO read or write operation with the
-		///	 *            connected client. </param>
-		///	 
+		///	<summary>
+		/// Start this daemon on a background thread.
+		///	</summary>
+		///	<exception cref="IOException">
+		/// the server socket could not be opened.
+		/// </exception>
+		/// <exception cref="InvalidOperationException">
+		/// the daemon is already running.
+		/// </exception>
 		public void Start()
 		{
 			if (acceptThread != null)
+			{
 				throw new InvalidOperationException("Daemon already running");
+			}
 
-			Socket listenSock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			var listenSock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			listenSock.Bind(MyAddress ?? new IPEndPoint(IPAddress.Any, 0));
 			listenSock.Listen(BACKLOG);
 			MyAddress = (IPEndPoint)listenSock.LocalEndPoint;
@@ -187,63 +194,55 @@ namespace GitSharp.Transport
 															  }
 															  finally
 															  {
-																  acceptThread = null;
+																  lock (this)
+																  {
+																	  acceptThread = null;
+																  }
 															  }
 														  }));
 			acceptThread.Start();
-			Processors.Add("Git-Daemon-Accept", acceptThread);
+		}
+
+		/// <returns>
+		/// true if this daemon is receiving connections.
+		/// </returns>
+		[MethodImpl(MethodImplOptions.Synchronized)]
+		public virtual bool isRunning()
+		{
+			return Run;
 		}
 
 		private void startClient(Socket s)
 		{
-			DaemonClient dc = new DaemonClient(this);
-			dc.Peer = s.RemoteEndPoint;
+			var dc = new DaemonClient(this) { Peer = s.RemoteEndPoint };
 
 			// [caytchen] TODO: insanse anonymous methods were ported 1:1 from jgit, do properly sometime
-			Thread t = new Thread(
+			var t = new Thread(
 				new ThreadStart(delegate
 									{
-										NetworkStream
-											stream =
-												new NetworkStream
-													(s);
+										var stream = new NetworkStream(s);
 										try
 										{
-											dc.Execute(
-												new BufferedStream
-													(stream));
+											dc.Execute(new BufferedStream(stream));
 										}
-										catch (
-											IOException)
+										catch (IOException)
 										{
-
 										}
-										catch (
-											SocketException
-											)
+										catch (SocketException)
 										{
-
 										}
 										finally
 										{
 											try
 											{
-												stream.
-													Close
-													();
+												stream.Close();
 												s.Close();
 											}
-											catch (
-												IOException
-												)
+											catch (IOException)
 											{
-
 											}
-											catch (
-												SocketException
-												)
+											catch (SocketException)
 											{
-
 											}
 										}
 									}));
@@ -262,6 +261,9 @@ namespace GitSharp.Transport
 			return null;
 		}
 
+		/// <summary>
+		/// Stop this daemon.
+		/// </summary>
 		public void Stop()
 		{
 			if (acceptThread != null)
@@ -274,45 +276,52 @@ namespace GitSharp.Transport
 
 		public Repository OpenRepository(string name)
 		{
+			// Assume any attempt to use \ was by a Windows client
+			// and correct to the more typical / used in Git URIs.
+			//
 			name = name.Replace('\\', '/');
-			if (!name.StartsWith("/"))
-				return null;
 
-			if (name.StartsWith("//"))
-				return null;
+			// git://thishost/path should always be name="/path" here
+			//
+			if (!name.StartsWith("/")) return null;
 
-			if (name.Contains("/../"))
-				return null;
+			// Forbid Windows UNC paths as they might escape the base
+			//
+			if (name.StartsWith("//")) return null;
+
+			// Forbid funny paths which contain an up-reference, they
+			// might be trying to escape and read /../etc/password.
+			//
+			if (name.Contains("/../")) return null;
 
 			name = name.Substring(1);
-			Repository db;
-			db = Exports[name];
+
+			Repository db = Exports[name];
 			if (db != null) return db;
 			db = Exports[name + ".git"];
 			if (db != null) return db;
 
-			DirectoryInfo[] search;
-			search = ExportBase.ToArray();
+			DirectoryInfo[] search = ExportBase.ToArray();
 			foreach (DirectoryInfo f in search)
 			{
 				string p = f.ToString();
 				if (!p.EndsWith("/")) p = p + '/';
 
-				db = openRepository(new DirectoryInfo(p + name));
+				db = OpenRepository(new DirectoryInfo(p + name));
 				if (db != null) return db;
 
-				db = openRepository(new DirectoryInfo(p + name + ".git"));
+				db = OpenRepository(new DirectoryInfo(p + name + ".git"));
 				if (db != null) return db;
 
-				db = openRepository(new DirectoryInfo(p + name + "/.git"));
+				db = OpenRepository(new DirectoryInfo(p + name + "/.git"));
 				if (db != null) return db;
 			}
 			return null;
 		}
 
-		private Repository openRepository(DirectoryInfo f)
+		private Repository OpenRepository(DirectoryInfo f)
 		{
-			if (Directory.Exists(f.ToString()) && canExport(f))
+			if (Directory.Exists(f.ToString()) && CanExport(f))
 			{
 				try
 				{
@@ -320,13 +329,12 @@ namespace GitSharp.Transport
 				}
 				catch (IOException)
 				{
-
 				}
 			}
 			return null;
 		}
 
-		private bool canExport(DirectoryInfo d)
+		private bool CanExport(DirectoryInfo d)
 		{
 			if (ExportAll) return true;
 			string p = d.ToString();

@@ -155,7 +155,7 @@ namespace GitSharp.Patch
 		private AbbreviatedObjectId oldId;
 
 		// The hunks of this file
-		private readonly List<HunkHeader> _hunks;
+		private List<HunkHeader> _hunks;
 
 		public FileHeader(byte[] b, int offset)
 		{

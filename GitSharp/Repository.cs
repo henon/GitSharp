@@ -849,7 +849,7 @@ namespace GitSharp
 
 			for (int i = 0; i < bytes.Length; ++i)
 			{
-				if (bytes[i] == Path.PathSeparator)
+                if (bytes[i] == Path.DirectorySeparatorChar)
 				{
 					bytes[i] = (byte)'/';
 				}
@@ -868,7 +868,7 @@ namespace GitSharp
 		public static string StripWorkDir(FileSystemInfo wd, FileSystemInfo f)
 		{
 			string relName = f.FullName.Substring(wd.FullName.Length + 1);
-			relName = relName.Replace(Path.PathSeparator, '/');
+			relName = relName.Replace(Path.DirectorySeparatorChar, '/');
 			return relName;
 		}
 

@@ -54,7 +54,7 @@ namespace GitSharp
         public PackLock(FileInfo packFile)
         {
             string n = packFile.Name;
-            string p = packFile.DirectoryName + Path.PathSeparator + n.Slice(0, n.Length - 5) + ".keep";
+            string p = packFile.DirectoryName + Path.DirectorySeparatorChar + n.Slice(0, n.Length - 5) + ".keep";
             keepFile = new FileInfo(p);
         }
 

@@ -91,8 +91,7 @@ namespace GitSharp
             if (offset > buffer.Length - count)
                 throw new ArgumentException("Reading would overrun buffer");
 
-            crc.Update(buffer);
-
+            crc.Update(buffer, offset, count);
             under.Write(buffer, offset, count);
         }
 

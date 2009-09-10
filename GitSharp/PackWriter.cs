@@ -296,7 +296,7 @@ namespace GitSharp
 
 		private void WriteHeader()
 		{
-			Constants.PACK_SIGNATURE.CopyTo(_buf, 0);
+			Array.Copy(Constants.PACK_SIGNATURE, 0, _buf, 0, 4);
 			NB.encodeInt32(_buf, 4, PackVersionGenerated);
 			NB.encodeInt32(_buf, 8, getObjectsNumber());
 			_pos.Write(_buf, 0, 12);
@@ -514,13 +514,11 @@ namespace GitSharp
 			while ((o = walker.next()) != null)
 			{
 				addObject(o);
-				o.dispose();
 				_initMonitor.Update(1);
 			}
 			while ((o = walker.nextObject()) != null)
 			{
 				addObject(o);
-				o.dispose();
 				_initMonitor.Update(1);
 			}
 			_initMonitor.EndTask();

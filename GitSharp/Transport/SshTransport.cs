@@ -43,50 +43,60 @@ using Tamir.SharpSsh.jsch;
 
 namespace GitSharp.Transport
 {
-
     public abstract class SshTransport : TcpTransport
     {
-        private SshSessionFactory sch;
-        protected Session sock;
+        private SshSessionFactory _sch;
+        private Session _sock;
 
-        protected SshTransport(Repository local, URIish uri)
+    	protected SshTransport(Repository local, URIish uri)
             : base(local, uri)
         {
-            sch = SshSessionFactory.Instance;
+            _sch = SshSessionFactory.Instance;
         }
 
-        public void setSshSessionFactory(SshSessionFactory factory)
-        {
-            if (factory == null)
-                throw new ArgumentException("The factory must not be null");
-            if (sock != null)
-                throw new ApplicationException("An SSH session has already been created");
-            sch = factory;
-        }
+		public Session Sock
+		{
+			get { return _sock; }
+		}
 
-        public SshSessionFactory getSshSessionFactory()
-        {
-            return sch;
-        }
+    	public SshSessionFactory SshSessionFactory
+    	{
+			get { return _sch; }
+			set
+			{
+				if (value == null)
+				{
+					throw new ArgumentException("The factory must not be null");
+				}
 
-        protected void initSession()
-        {
-            if (sock != null)
-                return;
+				if (_sock != null)
+				{
+					throw new ApplicationException("An SSH session has already been created");
+				}
 
-            string user = uri.User;
-            string pass = uri.Pass;
-            string host = uri.Host;
-            int port = uri.Port;
+				_sch = value;
+			}
+    	}
+
+        protected void InitSession()
+        {
+            if (_sock != null) return;
+
+			string user = Uri.User;
+			string pass = Uri.Pass;
+			string host = Uri.Host;
+			int port = Uri.Port;
             try
             {
-                sock = sch.getSession(user, pass, host, port);
-                if (!sock.isConnected())
-                    sock.connect();
+                _sock = _sch.getSession(user, pass, host, port);
+                if (!_sock.isConnected())
+                {
+                	_sock.connect();
+                }
             }
             catch (JSchException je)
             {
-                throw new TransportException(uri, je.Message, je.InnerException);
+				throw new TransportException(Uri, je.Message, je.InnerException);
             }
             catch (SocketException e)
             {
@@ -96,17 +106,16 @@ namespace GitSharp.Transport
 
         public override void close()
         {
-            if (sock != null)
-            {
-                try
-                {
-                    sch.releaseSession(sock);
-                }
-                finally
-                {
-                    sock = null;
-                }
-            }
+            if (_sock == null) return;
+
+			try
+			{
+				_sch.releaseSession(_sock);
+			}
+			finally
+			{
+				_sock = null;
+			}
         }
     }
 }

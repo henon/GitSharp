@@ -89,24 +89,32 @@ namespace GitSharp.Transport
             if (c == 0)
             {
                 s = s.Substring(1);
-                if (IsWildcard(s))
-                    throw new ArgumentException("Invalid Wildcards " + spec);
-                Destination = s;
+				if (IsWildcard(s))
+				{
+					throw new ArgumentException("Invalid Wildcards " + spec);
+				}
+            	Destination = s;
             }
             else if (c > 0)
             {
                 Source = s.Slice(0, c);
                 Destination = s.Substring(c + 1);
-                if (IsWildcard(Source) && IsWildcard(Destination))
-                    Wildcard = true;
-                else if (IsWildcard(Source) || IsWildcard(Destination))
-                    throw new ArgumentException("Invalid Wildcards " + spec);
+				if (IsWildcard(Source) && IsWildcard(Destination))
+				{
+					Wildcard = true;
+				}
+				else if (IsWildcard(Source) || IsWildcard(Destination))
+				{
+					throw new ArgumentException("Invalid Wildcards " + spec);
+				}
             }
             else
             {
-                if (IsWildcard(s))
-                    throw new ArgumentException("Invalid Wildcards " + spec);
-                Source = s;
+				if (IsWildcard(s))
+				{
+					throw new ArgumentException("Invalid Wildcards " + spec);
+				}
+            	Source = s;
             }
         }
 
@@ -214,11 +222,16 @@ namespace GitSharp.Transport
 
         private bool match(string refName, string s)
         {
-            if (s == null) return false;
+			if (string.IsNullOrEmpty(s))
+			{
+				return false;
+			}
+
             if (Wildcard)
             {
                 return refName.StartsWith(s.Slice(0, s.Length - 1));
             }
+
             return refName.Equals(s);
         }
 

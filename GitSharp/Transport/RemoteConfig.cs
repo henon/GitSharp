@@ -36,255 +36,279 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 
 namespace GitSharp.Transport
 {
-    /**
- * A remembered remote repository, including URLs and RefSpecs.
- * <p>
- * A remote configuration remembers one or more URLs for a frequently accessed
- * remote repository as well as zero or more fetch and push specifications
- * describing how refs should be transferred between this repository and the
- * remote repository.
- */
-    public class RemoteConfig
-    {
-        private const string SECTION = "remote";
-        private const string KEY_URL = "url";
-        private const string KEY_PUSHURL = "pushurl";
-        private const string KEY_FETCH = "fetch";
-        private const string KEY_PUSH = "push";
-        private const string KEY_UPLOADPACK = "uploadpack";
-        private const string KEY_RECEIVEPACK = "receivepack";
-        private const string KEY_TAGOPT = "tagopt";
-        private const string KEY_MIRROR = "mirror";
-        private const string KEY_TIMEOUT = "timeout";
-        private const bool DEFAULT_MIRROR = false;
+	/// <summary>
+	/// A remembered remote repository, including URLs and RefSpecs.
+	/// <para />
+	/// A remote configuration remembers one or more URLs for a frequently accessed
+	/// remote repository as well as zero or more fetch and push specifications
+	/// describing how refs should be transferred between this repository and the
+	/// remote repository.
+	/// </summary>
+	public class RemoteConfig
+	{
+		private const string Section = "remote";
+		private const string KeyUrl = "url";
+		private const string KeyPushurl = "pushurl";
+		private const string KeyFetch = "fetch";
+		private const string KeyPush = "push";
+		private const string KeyUploadpack = "uploadpack";
+		private const string KeyReceivepack = "receivepack";
+		private const string KeyTagopt = "tagopt";
+		private const string KeyMirror = "mirror";
+		private const string KeyTimeout = "timeout";
+		private const bool DefaultMirror = false;
 
-        /** Default value for {@link #getUploadPack()} if not specified. */
-        public const string DEFAULT_UPLOAD_PACK = "git-upload-pack";
+		/// <summary>
+		/// Default value for {@link #getUploadPack()} if not specified.
+		/// </summary>
+		public const string DEFAULT_UPLOAD_PACK = "git-upload-pack";
 
-        /** Default value for {@link #getReceivePack()} if not specified. */
-        public const string DEFAULT_RECEIVE_PACK = "git-receive-pack";
+		/// <summary>
+		/// Default value for {@link #getReceivePack()} if not specified.
+		/// </summary>
+		public const string DEFAULT_RECEIVE_PACK = "git-receive-pack";
 
-        /**
-         * Parse all remote blocks in an existing configuration file, looking for
-         * remotes configuration.
-         *
-         * @param rc
-         *            the existing configuration to get the remote settings from.
-         *            The configuration must already be loaded into memory.
-         * @return all remotes configurations existing in provided repository
-         *         configuration. Returned configurations are ordered
-         *         lexicographically by names.
-         * @throws URISyntaxException
-         *             one of the URIs within the remote's configuration is invalid.
-         */
-        public static List<RemoteConfig> getAllRemoteConfigs(RepositoryConfig rc)
-        {
-            List<string> names = new List<string>(rc.getSubsections(SECTION));
-            names.Sort();
+		/// <summary>
+		/// Parse all remote blocks in an existing configuration file, looking for
+		/// remotes configuration.
+		/// </summary>
+		/// <param name="rc">
+		/// The existing configuration to get the remote settings from.
+		/// The configuration must already be loaded into memory.
+		/// </param>
+		/// <returns>
+		/// All remotes configurations existing in provided repository
+		/// configuration. Returned configurations are ordered
+		/// lexicographically by names.
+		/// </returns>
+		/// <exception cref="URISyntaxException">
+		/// One of the URIs within the remote's configuration is invalid.
+		/// </exception>
+		public static List<RemoteConfig> GetAllRemoteConfigs(RepositoryConfig rc)
+		{
+			var names = new List<string>(rc.getSubsections(Section));
+			names.Sort();
 
-            List<RemoteConfig> result = new List<RemoteConfig>(names.Count);
-            foreach (string name in names)
-            {
-                result.Add(new RemoteConfig(rc, name));
-            }
-            return result;
-        }
+			var result = new List<RemoteConfig>(names.Count);
+			foreach (string name in names)
+			{
+				result.Add(new RemoteConfig(rc, name));
+			}
 
-        public string Name { get; private set; }
-        public List<URIish> URIs { get; private set; }
-        public List<URIish> PushURIs { get; private set; }
-        public List<RefSpec> Fetch { get; private set; }
-        public List<RefSpec> Push { get; private set; }
-        public string UploadPack { get; private set; }
-        public string ReceivePack { get; private set; }
-        public TagOpt TagOpt { get; private set; }
-        public bool Mirror { get; set; }
+			return result;
+		}
 
-        private int timeout;
+		public string Name { get; private set; }
+		public List<URIish> URIs { get; private set; }
+		public List<URIish> PushURIs { get; private set; }
+		public List<RefSpec> Fetch { get; private set; }
+		public List<RefSpec> Push { get; private set; }
+		public string UploadPack { get; private set; }
+		public string ReceivePack { get; private set; }
+		public TagOpt TagOpt { get; private set; }
+		public bool Mirror { get; set; }
 
-        public RemoteConfig(RepositoryConfig rc, string remoteName)
-        {
-            Name = remoteName;
+		public RemoteConfig(Config rc, string remoteName)
+		{
+			Name = remoteName;
 
-            string[] vlst;
-            string val;
+			string[] vlst = rc.getStringList(Section, Name, KeyUrl);
+			URIs = new List<URIish>(vlst.Length);
+			foreach (string s in vlst)
+			{
+				URIs.Add(new URIish(s));
+			}
 
-            vlst = rc.getStringList(SECTION, Name, KEY_URL);
-            URIs = new List<URIish>(vlst.Length);
-            foreach (string s in vlst)
-                URIs.Add(new URIish(s));
+			vlst = rc.getStringList(Section, Name, KeyPushurl);
+			PushURIs = new List<URIish>(vlst.Length);
+			foreach (string s in vlst)
+			{
+				PushURIs.Add(new URIish(s));
+			}
 
-            vlst = rc.getStringList(SECTION, Name, KEY_PUSHURL);
-            PushURIs = new List<URIish>(vlst.Length);
-            foreach (string s in vlst)
-                PushURIs.Add(new URIish(s));
+			vlst = rc.getStringList(Section, Name, KeyFetch);
+			Fetch = new List<RefSpec>(vlst.Length);
+			foreach (string s in vlst)
+			{
+				Fetch.Add(new RefSpec(s));
+			}
 
-            vlst = rc.getStringList(SECTION, Name, KEY_FETCH);
-            Fetch = new List<RefSpec>(vlst.Length);
-            foreach (string s in vlst)
-                Fetch.Add(new RefSpec(s));
+			vlst = rc.getStringList(Section, Name, KeyPush);
+			Push = new List<RefSpec>(vlst.Length);
+			foreach (string s in vlst)
+			{
+				Push.Add(new RefSpec(s));
+			}
 
-            vlst = rc.getStringList(SECTION, Name, KEY_PUSH);
-            Push = new List<RefSpec>(vlst.Length);
-            foreach (string s in vlst)
-                Push.Add(new RefSpec(s));
+			string val = rc.getString(Section, Name, KeyUploadpack) ?? DEFAULT_UPLOAD_PACK;
+			UploadPack = val;
 
-            val = rc.getString(SECTION, Name, KEY_UPLOADPACK) ?? DEFAULT_UPLOAD_PACK;
-            UploadPack = val;
+			val = rc.getString(Section, Name, KeyReceivepack) ?? DEFAULT_RECEIVE_PACK;
+			ReceivePack = val;
 
-            val = rc.getString(SECTION, Name, KEY_RECEIVEPACK) ?? DEFAULT_RECEIVE_PACK;
-            ReceivePack = val;
+			val = rc.getString(Section, Name, KeyTagopt);
+			TagOpt = TagOpt.fromOption(val);
+			Mirror = rc.getBoolean(Section, Name, KeyMirror, DefaultMirror);
 
-            val = rc.getString(SECTION, Name, KEY_TAGOPT);
-            TagOpt = TagOpt.fromOption(val);
-            Mirror = rc.getBoolean(SECTION, Name, KEY_MIRROR, DEFAULT_MIRROR);
+			Timeout = rc.getInt(Section, Name, KeyTimeout, 0);
+		}
 
-            timeout = rc.getInt(SECTION, Name, KEY_TIMEOUT, 0);
-        }
+		public void Update(RepositoryConfig rc)
+		{
+			var vlst = new List<string>();
 
-        public void Update(RepositoryConfig rc)
-        {
-            List<string> vlst = new List<string>();
+			vlst.Clear();
+			foreach (URIish u in URIs)
+			{
+				vlst.Add(u.ToPrivateString());
+			}
+			rc.setStringList(Section, Name, KeyUrl, vlst);
 
-            vlst.Clear();
-            foreach (URIish u in URIs)
-            {
-                vlst.Add(u.ToPrivateString());
-            }
-            rc.setStringList(SECTION, Name, KEY_URL, vlst);
+			vlst.Clear();
+			foreach (URIish u in PushURIs)
+				vlst.Add(u.ToPrivateString());
+			rc.setStringList(Section, Name, KeyPushurl, vlst);
 
-            vlst.Clear();
-            foreach (URIish u in PushURIs)
-                vlst.Add(u.ToPrivateString());
-            rc.setStringList(SECTION, Name, KEY_PUSHURL, vlst);
+			vlst.Clear();
+			foreach (RefSpec u in Fetch)
+			{
+				vlst.Add(u.ToString());
+			}
+			rc.setStringList(Section, Name, KeyFetch, vlst);
 
-            vlst.Clear();
-            foreach (RefSpec u in Fetch)
-                vlst.Add(u.ToString());
-            rc.setStringList(SECTION, Name, KEY_FETCH, vlst);
+			vlst.Clear();
+			foreach (RefSpec u in Push)
+			{
+				vlst.Add(u.ToString());
+			}
+			rc.setStringList(Section, Name, KeyPush, vlst);
 
-            vlst.Clear();
-            foreach (RefSpec u in Push)
-                vlst.Add(u.ToString());
-            rc.setStringList(SECTION, Name, KEY_PUSH, vlst);
+			Set(rc, KeyUploadpack, UploadPack, DEFAULT_UPLOAD_PACK);
+			Set(rc, KeyReceivepack, ReceivePack, DEFAULT_RECEIVE_PACK);
+			Set(rc, KeyTagopt, TagOpt.Option, TagOpt.AUTO_FOLLOW.Option);
+			Set(rc, KeyMirror, Mirror, DefaultMirror);
+			Set(rc, KeyTimeout, Timeout, 0);
+		}
 
-            set(rc, KEY_UPLOADPACK, UploadPack, DEFAULT_UPLOAD_PACK);
-            set(rc, KEY_RECEIVEPACK, ReceivePack, DEFAULT_RECEIVE_PACK);
-            set(rc, KEY_TAGOPT, TagOpt.Option, TagOpt.AUTO_FOLLOW.Option);
-            set(rc, KEY_MIRROR, Mirror, DEFAULT_MIRROR);
-            set(rc, KEY_TIMEOUT, timeout, 0);
-        }
+		private void Set(Config rc, string key, string currentValue, IEquatable<string> defaultValue)
+		{
+			if (defaultValue.Equals(currentValue))
+			{
+				Unset(rc, key);
+			}
+			else
+			{
+				rc.setString(Section, Name, key, currentValue);
+			}
+		}
 
-        private void set(RepositoryConfig rc, string key, string currentValue, string defaultValue)
-        {
-            if (defaultValue.Equals(currentValue))
-                unset(rc, key);
-            else
-                rc.setString(SECTION, Name, key, currentValue);
-        }
+		private void Set(Config rc, string key, int currentValue, IEquatable<int> defaultValue)
+		{
+			if (defaultValue.Equals(currentValue))
+			{
+				Unset(rc, key);
+			}
+			else
+			{
+				rc.setInt(Section, Name, key, currentValue);
+			}
+		}
 
-        private void set(RepositoryConfig rc, string key, int currentValue, int defaultValue)
-        {
-            if (defaultValue.Equals(currentValue))
-                unset(rc, key);
-            else
-                rc.setInt(SECTION, Name, key, currentValue);
-        }
+		private void Set(Config rc, string key, bool currentValue, bool defaultValue)
+		{
+			if (defaultValue == currentValue)
+			{
+				Unset(rc, key);
+			}
+			else
+			{
+				rc.setBoolean(Section, Name, key, currentValue);
+			}
+		}
 
-        private void set(RepositoryConfig rc, string key, bool currentValue, bool defaultValue)
-        {
-            if (defaultValue == currentValue)
-                unset(rc, key);
-            else
-                rc.setBoolean(SECTION, Name, key, currentValue);
-        }
+		private void Unset(Config rc, string key)
+		{
+			rc.unset(Section, Name, key);
+		}
 
-        private void unset(RepositoryConfig rc, string key)
-        {
-            rc.unset(SECTION, Name, key);
-        }
+		public bool AddURI(URIish toAdd)
+		{
+			if (URIs.Contains(toAdd)) return false;
 
-        public bool AddURI(URIish toAdd)
-        {
-            if (URIs.Contains(toAdd))
-                return false;
-            URIs.Add(toAdd);
-            return true;
-        }
+			URIs.Add(toAdd);
+			return true;
+		}
 
-        public bool RemoveURI(URIish toRemove)
-        {
-            return URIs.Remove(toRemove);
-        }
+		public bool RemoveURI(URIish toRemove)
+		{
+			return URIs.Remove(toRemove);
+		}
 
-        public bool AddFetchRefSpec(RefSpec s)
-        {
-            if (Fetch.Contains(s))
-                return false;
-            Fetch.Add(s);
-            return true;
-        }
+		public bool AddFetchRefSpec(RefSpec s)
+		{
+			if (Fetch.Contains(s))
+			{
+				return false;
+			}
 
-        public bool AddPushURI(URIish toAdd)
-        {
-            if (PushURIs.Contains(toAdd))
-                return false;
-            PushURIs.Add(toAdd);
-            return true;
-        }
+			Fetch.Add(s);
 
-        public void SetFetchRefSpecs(List<RefSpec> specs)
-        {
-            Fetch.Clear();
-            Fetch.AddRange(specs);
-        }
+			return true;
+		}
 
-        public void SetPushRefSpecs(List<RefSpec> specs)
-        {
-            Push.Clear();
-            Push.AddRange(specs);
-        }
+		public bool AddPushURI(URIish toAdd)
+		{
+			if (PushURIs.Contains(toAdd)) return false;
 
-        public bool RemovePushURI(URIish toRemove)
-        {
-            return PushURIs.Remove(toRemove);
-        }
+			PushURIs.Add(toAdd);
+			return true;
+		}
 
-        public bool RemoveFetchRefSpec(RefSpec s)
-        {
-            return Fetch.Remove(s);
-        }
+		public void SetFetchRefSpecs(List<RefSpec> specs)
+		{
+			Fetch.Clear();
+			Fetch.AddRange(specs);
+		}
 
-        public bool AddPushRefSpec(RefSpec s)
-        {
-            if (Push.Contains(s))
-                return false;
-            Push.Add(s);
-            return true;
-        }
+		public void SetPushRefSpecs(List<RefSpec> specs)
+		{
+			Push.Clear();
+			Push.AddRange(specs);
+		}
 
-        public bool RemovePushRefSpec(RefSpec s)
-        {
-            return Push.Remove(s);
-        }
+		public bool RemovePushURI(URIish toRemove)
+		{
+			return PushURIs.Remove(toRemove);
+		}
 
-        public void SetTagOpt(TagOpt option)
-        {
-            TagOpt = option ?? TagOpt.AUTO_FOLLOW;
-        }
+		public bool RemoveFetchRefSpec(RefSpec s)
+		{
+			return Fetch.Remove(s);
+		}
 
-        public int getTimeout()
-        {
-            return timeout;
-        }
+		public bool AddPushRefSpec(RefSpec s)
+		{
+			if (Push.Contains(s)) return false;
 
-        public void setTimeout(int seconds)
-        {
-            timeout = seconds;
-        }
-    }
+			Push.Add(s);
+			return true;
+		}
+
+		public bool RemovePushRefSpec(RefSpec s)
+		{
+			return Push.Remove(s);
+		}
+
+		public void SetTagOpt(TagOpt option)
+		{
+			TagOpt = option ?? TagOpt.AUTO_FOLLOW;
+		}
+
+		public int Timeout { get; set; }
+	}
 }

@@ -228,7 +228,6 @@
     <Compile Include="Util\Numbers.cs" />
     <Compile Include="Util\PathUtil.cs" />
     <Compile Include="Util\RawParseUtils.cs" />
-    <Compile Include="test.cs" />
     <Compile Include="RepositoryChangedEventArgs.cs" />
     <Compile Include="RefsChangedEventArgs.cs" />
     <Compile Include="IndexChangedEventArgs.cs" />

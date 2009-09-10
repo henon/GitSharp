@@ -112,9 +112,13 @@ namespace GitSharp.Tests.Transport
             foreach (RemoteRefUpdate rru in result)
             {
                 if ("refs/heads/a".Equals(rru.SourceRef) && "refs/heads/test/a".Equals(rru.RemoteName))
-                    foundA = true;
+                {
+                	foundA = true;
+                }
                 if ("refs/heads/b".Equals(rru.SourceRef) && "refs/heads/test/b".Equals(rru.RemoteName))
-                    foundB = true;
+                {
+                	foundB = true;
+                }
             }
             Assert.IsTrue(foundA);
             Assert.IsTrue(foundB);

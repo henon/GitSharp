@@ -85,10 +85,8 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void testWrite1()
         {
-            byte[] bundle;
-
-            // Create a small bundle, an early commit
-            bundle = makeBundle("refs/heads/aa", db.Resolve("a").Name, null);
+        	// Create a small bundle, an early commit
+            byte[] bundle = makeBundle("refs/heads/aa", db.Resolve("a").Name, null);
 
             // Then we clone a new repo from that bundle and do a simple test. This
             // makes sure

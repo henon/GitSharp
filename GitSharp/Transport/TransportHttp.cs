@@ -46,241 +46,255 @@ using GitSharp.Util;
 
 namespace GitSharp.Transport
 {
-    public class TransportHttp : HttpTransport, IWalkTransport
-    {
-        public static bool canHandle(URIish uri)
-        {
-            if (!uri.IsRemote)
-            {
-                return false;
-            }
-            string s = uri.Scheme;
-            return "http".Equals(s) || "https".Equals(s) || "ftp".Equals(s);
-        }
+	public class TransportHttp : HttpTransport, IWalkTransport
+	{
+		public static bool canHandle(URIish uri)
+		{
+			if (!uri.IsRemote)
+			{
+				return false;
+			}
+			string s = uri.Scheme;
+			return "http".Equals(s) || "https".Equals(s) || "ftp".Equals(s);
+		}
 
-        private readonly Uri baseUrl;
-        private readonly Uri objectsUrl;
+		private readonly Uri _baseUrl;
+		private readonly Uri _objectsUrl;
 
-        public TransportHttp(Repository local, URIish uri)
-            : base(local, uri)
-        {
-            try
-            {
-                string uriString = uri.ToString();
-                if (!uriString.EndsWith("/"))
-                    uriString += "/";
-                baseUrl = new Uri(uriString);
-                objectsUrl = new Uri(baseUrl, "objects/");
-            }
-            catch (UriFormatException e)
-            {
-                throw new NotSupportedException("Invalid URL " + uri, e);
-            }
-        }
+		public TransportHttp(Repository local, URIish uri)
+			: base(local, uri)
+		{
+			try
+			{
+				string uriString = uri.ToString();
+				if (!uriString.EndsWith("/"))
+				{
+					uriString += "/";
+				}
+				_baseUrl = new Uri(uriString);
+				_objectsUrl = new Uri(_baseUrl, "objects/");
+			}
+			catch (UriFormatException e)
+			{
+				throw new NotSupportedException("Invalid URL " + uri, e);
+			}
+		}
 
-        public override IFetchConnection openFetch()
-        {
-            HttpObjectDB c = new HttpObjectDB(objectsUrl);
-            WalkFetchConnection r = new WalkFetchConnection(this, c);
-            r.available(c.readAdvertisedRefs());
-            return r;
-        }
+		public override IFetchConnection openFetch()
+		{
+			var c = new HttpObjectDatabase(_objectsUrl);
+			var r = new WalkFetchConnection(this, c);
+			r.available(c.ReadAdvertisedRefs());
+			return r;
+		}
 
-        public override IPushConnection openPush()
-        {
-            string s = uri.Scheme;
-            throw new NotSupportedException("Push not supported over " + s + ".");
-        }
+		public override IPushConnection openPush()
+		{
+			string s = Uri.Scheme;
+			throw new NotSupportedException("Push not supported over " + s + ".");
+		}
 
-        public override void close()
-        {
-        }
+		public override void close()
+		{
+		}
 
-        private class HttpObjectDB : WalkRemoteObjectDatabase
-        {
-            private readonly Uri objectsUrl;
+		#region Nested Types
 
-            public HttpObjectDB(Uri b)
-            {
-                objectsUrl = b;
-            }
+		private class HttpObjectDatabase : WalkRemoteObjectDatabase
+		{
+			private readonly Uri _objectsUrl;
 
-            public override URIish getURI()
-            {
-                return new URIish(objectsUrl);
-            }
+			public HttpObjectDatabase(Uri b)
+			{
+				_objectsUrl = b;
+			}
 
-            public override List<WalkRemoteObjectDatabase> getAlternates()
-            {
-                try
-                {
-                    return readAlternates(INFO_HTTP_ALTERNATES);
-                }
-                catch (FileNotFoundException)
-                {   
-                }
+			public override URIish getURI()
+			{
+				return new URIish(_objectsUrl);
+			}
 
-                try
-                {
-                    return readAlternates(INFO_ALTERNATES);
-                }
-                catch (FileNotFoundException)
-                {
-                }
+			public override List<WalkRemoteObjectDatabase> getAlternates()
+			{
+				try
+				{
+					return readAlternates(INFO_HTTP_ALTERNATES);
+				}
+				catch (FileNotFoundException)
+				{
+				}
 
-                return null;
-            }
+				try
+				{
+					return readAlternates(INFO_ALTERNATES);
+				}
+				catch (FileNotFoundException)
+				{
+				}
 
-            public override WalkRemoteObjectDatabase openAlternate(string location)
-            {
-                return new HttpObjectDB(new Uri(objectsUrl, location));
-            }
+				return null;
+			}
 
-            public override List<string> getPackNames()
-            {
-                var packs = new List<string>();
-                try
-                {
-                    StreamReader br = openReader(INFO_PACKS);
-                    try
-                    {
-                        while (true)
-                        {
-                            string s = br.ReadLine();
-                            if (string.IsNullOrEmpty(s)) break;
+			public override WalkRemoteObjectDatabase openAlternate(string location)
+			{
+				return new HttpObjectDatabase(new Uri(_objectsUrl, location));
+			}
 
-                            if (!s.StartsWith("P pack-") || !s.EndsWith(IndexPack.PackSuffix))
-                            {
-                            	throw invalidAdvertisement(s);
-                            }
-                            packs.Add(s.Substring(2));
-                        }
+			public override List<string> getPackNames()
+			{
+				var packs = new List<string>();
+				try
+				{
+					StreamReader br = openReader(INFO_PACKS);
+					try
+					{
+						while (true)
+						{
+							string s = br.ReadLine();
+							if (string.IsNullOrEmpty(s)) break;
 
-                        return packs;
-                    }
-                    finally
-                    {
-                        br.Close();
-                    }
-                }
-                catch (FileNotFoundException)
-                {
-                    return packs;
-                }
-            }
+							if (!s.StartsWith("P pack-") || !s.EndsWith(IndexPack.PackSuffix))
+							{
+								throw InvalidAdvertisement(s);
+							}
+							packs.Add(s.Substring(2));
+						}
 
-            public override Stream open(string path)
-            {
-                Uri @base = objectsUrl;
-                Uri u = new Uri(@base, path);
+						return packs;
+					}
+					finally
+					{
+						br.Close();
+					}
+				}
+				catch (FileNotFoundException)
+				{
+					return packs;
+				}
+			}
 
-                HttpWebRequest c = (HttpWebRequest) WebRequest.Create(u);
-                HttpWebResponse response = (HttpWebResponse) c.GetResponse();
+			public override Stream open(string path)
+			{
+				Uri @base = _objectsUrl;
+				var u = new Uri(@base, path);
 
-                switch (response.StatusCode)
-                {
-                    case HttpStatusCode.OK:
-                        return response.GetResponseStream();
-                        
-                    case HttpStatusCode.NotFound:
-                        throw new FileNotFoundException(u.ToString());
+				var c = (HttpWebRequest)WebRequest.Create(u);
+				var response = (HttpWebResponse)c.GetResponse();
 
-                    default:
-                        throw new IOException(u + ": " + response.StatusDescription);
-                }
-            }
+				switch (response.StatusCode)
+				{
+					case HttpStatusCode.OK:
+						return response.GetResponseStream();
 
-            public Dictionary<string, Ref> readAdvertisedRefs()
-            {
-                try
-                {
-                    StreamReader br = openReader(INFO_REFS);
-                    try
-                    {
-                        return readAdvertisedImpl(br);
-                    }
-                    finally
-                    {
-                        br.Close();
-                    }
-                }
-                catch (IOException err)
-                {
-                    try
-                    {
-                        throw new TransportException(new Uri(objectsUrl, INFO_REFS) + ": cannot Read available refs", err);
-                    }
-                    catch (UriFormatException)
-                    {
-                        throw new TransportException(objectsUrl +  INFO_REFS + ": cannot Read available refs", err);
-                    }
-                }
-            }
+					case HttpStatusCode.NotFound:
+						throw new FileNotFoundException(u.ToString());
 
-            private static Dictionary<string, Ref> readAdvertisedImpl(TextReader br)
-            {
-                Dictionary<string, Ref> avail = new Dictionary<string, Ref>();
-                for (;;)
-                {
-                    string line = br.ReadLine();
-                    if (line == null)
-                        break;
+					default:
+						throw new IOException(u + ": " + response.StatusDescription);
+				}
+			}
 
-                    int tab = line.IndexOf('\t');
-                    if (tab < 0)
-                        throw invalidAdvertisement(line);
+			public Dictionary<string, Ref> ReadAdvertisedRefs()
+			{
+				try
+				{
+					StreamReader br = openReader(INFO_REFS);
+					try
+					{
+						return ReadAdvertisedImpl(br);
+					}
+					finally
+					{
+						br.Close();
+					}
+				}
+				catch (IOException err)
+				{
+					try
+					{
+						throw new TransportException(new Uri(_objectsUrl, INFO_REFS) + ": cannot Read available refs", err);
+					}
+					catch (UriFormatException)
+					{
+						throw new TransportException(_objectsUrl + INFO_REFS + ": cannot Read available refs", err);
+					}
+				}
+			}
 
-                    string name = line.Substring(tab + 1);
-                    ObjectId id = ObjectId.FromString(line.Slice(0, tab));
-                    if (name.EndsWith("^{}"))
-                    {
-                        name = name.Slice(0, name.Length - 3);
-                        Ref prior = avail[name];
-                        if (prior == null)
-                            throw outOfOrderAdvertisement(name);
+			private static Dictionary<string, Ref> ReadAdvertisedImpl(TextReader br)
+			{
+				var avail = new Dictionary<string, Ref>();
 
-                        if (prior.PeeledObjectId != null)
-                            throw duplicateAdvertisement(name + "^{}");
+				while (true)
+				{
+					string line = br.ReadLine();
+					if (line == null) break;
 
-                        avail.Add(name, new Ref(Ref.Storage.Network, name, prior.ObjectId, id, true));
-                    }
-                    else
-                    {
-                        Ref prior = null;
-                        if (avail.ContainsKey(name))
-                        {
-                            prior = avail[name];
-                            avail[name] = new Ref(Ref.Storage.Network, name, id);
-                        }
-                        else
-                        {
-                            avail.Add(name, new Ref(Ref.Storage.Network, name, id));
-                        }
-                        if (prior != null)
-                            throw duplicateAdvertisement(name);
-                    }
-                }
-                return avail;
-            }
+					int tab = line.IndexOf('\t');
+					if (tab < 0)
+					{
+						throw InvalidAdvertisement(line);
+					}
 
-            private static PackProtocolException outOfOrderAdvertisement(string n)
-            {
-                return new PackProtocolException("advertisement of " + n +"^{} came before " + n);
-            }
+					string name = line.Substring(tab + 1);
+					ObjectId id = ObjectId.FromString(line.Slice(0, tab));
+					if (name.EndsWith("^{}"))
+					{
+						name = name.Slice(0, name.Length - 3);
+						Ref prior = avail[name];
+						if (prior == null)
+						{
+							throw OutOfOrderAdvertisement(name);
+						}
 
-            private static PackProtocolException invalidAdvertisement(string n)
-            {
-                return new PackProtocolException("invalid advertisement of " + n);
-            }
+						if (prior.PeeledObjectId != null)
+						{
+							throw DuplicateAdvertisement(name + "^{}");
+						}
 
-            private static PackProtocolException duplicateAdvertisement(string n)
-            {
-                return new PackProtocolException("duplicate advertisements of " + n);
-            }
+						avail.Add(name, new Ref(Ref.Storage.Network, name, prior.ObjectId, id, true));
+					}
+					else
+					{
+						Ref prior = null;
+						if (avail.ContainsKey(name))
+						{
+							prior = avail[name];
+							avail[name] = new Ref(Ref.Storage.Network, name, id);
+						}
+						else
+						{
+							avail.Add(name, new Ref(Ref.Storage.Network, name, id));
+						}
+						if (prior != null)
+						{
+							throw DuplicateAdvertisement(name);
+						}
+					}
+				}
+				return avail;
+			}
 
-            public override void close()
-            {
-            }
-        }
-    }
+			private static PackProtocolException OutOfOrderAdvertisement(string n)
+			{
+				return new PackProtocolException("advertisement of " + n + "^{} came before " + n);
+			}
+
+			private static PackProtocolException InvalidAdvertisement(string n)
+			{
+				return new PackProtocolException("invalid advertisement of " + n);
+			}
+
+			private static PackProtocolException DuplicateAdvertisement(string n)
+			{
+				return new PackProtocolException("duplicate advertisements of " + n);
+			}
+
+			public override void close()
+			{
+			}
+		}
+
+		#endregion
+	}
 }

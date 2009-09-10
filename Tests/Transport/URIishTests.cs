@@ -41,15 +41,14 @@ using NUnit.Framework;
 
 namespace GitSharp.Tests.Transport
 {
-
     [TestFixture]
     public class URIishTest
     {
         [Test]
-        public void test000_UnixFile()
+        public void testUnixFile()
         {
             const string str = "/home/m y";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.IsNull(u.Scheme);
             Assert.IsFalse(u.IsRemote);
             Assert.AreEqual(str, u.Path);
@@ -58,7 +57,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test001_WindowsFile()
+        public void testWindowsFile()
         {
             const string str = "D:/m y";
             URIish u = new URIish(str);
@@ -70,10 +69,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test001_WindowsFile2()
+        public void testWindowsFile2()
         {
             const string str = "D:\\m y";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.IsNull(u.Scheme);
             Assert.IsFalse(u.IsRemote);
             Assert.AreEqual("D:/m y", u.Path);
@@ -82,10 +81,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test002_UNC()
+        public void testUNC()
         {
             const string str = "\\\\some\\place";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.IsNull(u.Scheme);
             Assert.IsFalse(u.IsRemote);
             Assert.AreEqual("//some/place", u.Path);
@@ -94,11 +93,11 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test003_FileProtoUnix()
+        public void testFileProtoUnix()
         {
-            const string str = "File:///home/m y";
-            URIish u = new URIish(str);
-            Assert.AreEqual("File", u.Scheme);
+            const string str = "file:///home/m y";
+            var u = new URIish(str);
+            Assert.AreEqual("file", u.Scheme);
             Assert.IsFalse(u.IsRemote);
             Assert.AreEqual("/home/m y", u.Path);
             Assert.AreEqual(str, u.ToString());
@@ -106,11 +105,11 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test004_FileProtoWindows()
+        public void testFileProtoWindows()
         {
-            const string str = "File:///D:/m y";
-            URIish u = new URIish(str);
-            Assert.AreEqual("File", u.Scheme);
+            const string str = "file:///D:/m y";
+            var u = new URIish(str);
+            Assert.AreEqual("file", u.Scheme);
             Assert.IsFalse(u.IsRemote);
             Assert.AreEqual("D:/m y", u.Path);
             Assert.AreEqual(str, u.ToString());
@@ -118,10 +117,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test005_GitProtoUnix()
+        public void testGitProtoUnix()
         {
             const string str = "git://example.com/home/m y";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.AreEqual("git", u.Scheme);
             Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("example.com", u.Host);
@@ -131,10 +130,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test006_GitProtoUnixPort()
+        public void testGitProtoUnixPort()
         {
             const string str = "git://example.com:333/home/m y";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.AreEqual("git", u.Scheme);
             Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("example.com", u.Host);
@@ -145,10 +144,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test007_GitProtoWindowsPort()
+        public void testGitProtoWindowsPort()
         {
             const string str = "git://example.com:338/D:/m y";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.AreEqual("git", u.Scheme);
             Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("D:/m y", u.Path);
@@ -159,10 +158,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test008_GitProtoWindows()
+        public void testGitProtoWindows()
         {
             const string str = "git://example.com/D:/m y";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.AreEqual("git", u.Scheme);
             Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("D:/m y", u.Path);
@@ -173,10 +172,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test009_ScpStyleWithoutUser()
+        public void testScpStyleWithoutUser()
         {
             const string str = "example.com:some/p ath";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.IsNull(u.Scheme);
             Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("some/p ath", u.Path);
@@ -187,10 +186,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test010_ScpStyleWithUser()
+        public void testScpStyleWithUser()
         {
             const string str = "user@example.com:some/p ath";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.IsNull(u.Scheme);
             Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("some/p ath", u.Path);
@@ -202,10 +201,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test011_GitSshProto()
+        public void testGitSshProto()
         {
             const string str = "git+ssh://example.com/some/p ath";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.AreEqual("git+ssh", u.Scheme);
             Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("/some/p ath", u.Path);
@@ -216,10 +215,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test012_SshGitProto()
+        public void testSshGitProto()
         {
             const string str = "ssh+git://example.com/some/p ath";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.AreEqual("ssh+git", u.Scheme);
             Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("/some/p ath", u.Path);
@@ -230,10 +229,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test013_SshProto()
+        public void testSshProto()
         {
             const string str = "ssh://example.com/some/p ath";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.AreEqual("ssh", u.Scheme);
             Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("/some/p ath", u.Path);
@@ -244,10 +243,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test014_SshProtoWithUserAndPort()
+        public void testSshProtoWithUserAndPort()
         {
             const string str = "ssh://user@example.com:33/some/p ath";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.AreEqual("ssh", u.Scheme);
             Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("/some/p ath", u.Path);
@@ -260,10 +259,10 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test015_SshProtoWithUserPassAndPort()
+        public void testSshProtoWithUserPassAndPort()
         {
             const string str = "ssh://user:pass@example.com:33/some/p ath";
-            URIish u = new URIish(str);
+            var u = new URIish(str);
             Assert.AreEqual("ssh", u.Scheme);
             Assert.IsTrue(u.IsRemote);
             Assert.AreEqual("/some/p ath", u.Path);
@@ -276,5 +275,4 @@ namespace GitSharp.Tests.Transport
             Assert.AreEqual(u, new URIish(str));
         }
     }
-
 }

@@ -48,76 +48,89 @@ namespace GitSharp.Patch
 	[Serializable]
 	public class FormatError
 	{
-		/** Classification of an error. */
-
 		#region Severity enum
 
+		/// <summary>
+		/// Classification of an error.
+		/// </summary>
 		public enum Severity
 		{
-			/** The error is unexpected, but can be worked around. */
+			/// <summary>
+			/// The error is unexpected, but can be worked around.
+			/// </summary>
 			WARNING,
 
-			/** The error indicates the script is severely flawed. */
+			/// <summary>
+			/// The error indicates the script is severely flawed.
+			/// </summary>
 			ERROR
 		}
 
 		#endregion
 
-		private readonly byte[] buf;
-		private readonly String message;
+		private readonly byte[] _buf;
+		private readonly string _message;
+		private readonly int _offset;
+		private readonly Severity _severity;
 
-		private readonly int offset;
-
-		private readonly Severity severity;
-
-		public FormatError(byte[] buffer, int ptr, Severity sev, String msg)
+		public FormatError(byte[] buffer, int ptr, Severity sev, string msg)
 		{
-			buf = buffer;
-			offset = ptr;
-			severity = sev;
-			message = msg;
+			_buf = buffer;
+			_offset = ptr;
+			_severity = sev;
+			_message = msg;
 		}
 
-		/** @return the severity of the error. */
-
+		/// <summary>
+		/// The severity of the error.
+		/// </summary>
+		/// <returns></returns>
 		public Severity getSeverity()
 		{
-			return severity;
+			return _severity;
 		}
 
-		/** @return a message describing the error. */
-
+		/// <summary>
+		/// A message describing the error.
+		/// </summary>
+		/// <returns></returns>
 		public string getMessage()
 		{
-			return message;
+			return _message;
 		}
 
-		/** @return the byte buffer holding the patch script. */
-
+		/// <summary>
+		/// The byte buffer holding the patch script.
+		/// </summary>
+		/// <returns></returns>
 		public byte[] getBuffer()
 		{
-			return buf;
+			return _buf;
 		}
 
-		/** @return byte offset within {@link #getBuffer()} where the error is */
-
+		/// <summary>
+		/// Byte offset within {@link #getBuffer()} where the error is
+		/// </summary>
+		/// <returns></returns>
 		public int getOffset()
 		{
-			return offset;
+			return _offset;
 		}
 
-		/** @return line of the patch script the error appears on. */
-
+		/// <summary>
+		/// Line of the patch script the error appears on.
+		/// </summary>
+		/// <returns></returns>
 		public string getLineText()
 		{
-			int eol = RawParseUtils.nextLF(buf, offset);
-			return RawParseUtils.decode(Constants.CHARSET, buf, offset, eol);
+			int eol = RawParseUtils.nextLF(_buf, _offset);
+			return RawParseUtils.decode(Constants.CHARSET, _buf, _offset, eol);
 		}
 
 		public override string ToString()
 		{
 			var r = new StringBuilder();
-			r.Append(Enum.GetName(typeof (Severity), getSeverity()));
+			r.Append(Enum.GetName(typeof(Severity), getSeverity()));
 			r.Append(": at offset ");
 			r.Append(getOffset());
 			r.Append(": ");

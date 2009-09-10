@@ -88,7 +88,7 @@ namespace GitSharp.Patch
 	    /** @return the byte array holding this hunk's patch script. */
 	    public byte[] getBuffer()
         {
-		    return file.buf;
+			return file.Buffer;
 	    }
 
 	    /** @return offset the start of this hunk in {@link #getBuffer()}. */
@@ -116,7 +116,7 @@ namespace GitSharp.Patch
 
 	    public int parseHunk(int ptr, int end)
         {
-		    byte[] buf = file.buf;
+			byte[] buf = file.Buffer;
 
 		    if (RawParseUtils.match(buf, ptr, LITERAL) >= 0) {
 			    type = Type.LITERAL_DEFLATED;

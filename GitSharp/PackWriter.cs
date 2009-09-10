@@ -123,7 +123,7 @@ namespace GitSharp
 
 		public int getObjectsNumber()
 		{
-			return _objectsMap.size();
+			return _objectsMap.Count;
 		}
 
 		public void preparePack(IEnumerable<RevObject> objectsSource)
@@ -172,7 +172,7 @@ namespace GitSharp
 		{
 			if (_sortedByName == null)
 			{
-				_sortedByName = new List<ObjectToPack>(_objectsMap.size());
+				_sortedByName = new List<ObjectToPack>(_objectsMap.Count);
 
 				foreach (List<ObjectToPack> list in _objectsLists)
 				{
@@ -533,10 +533,10 @@ namespace GitSharp
 				return;
 			}
 
-			var otp = new ObjectToPack(robject, robject.getType());
+			var otp = new ObjectToPack(robject, robject.Type);
 			try
 			{
-				_objectsLists[robject.getType()].Add(otp);
+				_objectsLists[robject.Type].Add(otp);
 			}
 			catch (IndexOutOfRangeException)
 			{

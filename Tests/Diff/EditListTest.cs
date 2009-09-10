@@ -55,7 +55,7 @@ namespace GitSharp.Tests
 
 		    Assert.IsTrue(l.Equals(l));
 		    Assert.IsTrue(l.Equals(new EditList()));
-		    Assert.IsFalse(l.Equals(""));
+		    Assert.IsFalse(l.Equals(string.Empty));
             Assert.AreEqual(l.GetHashCode(), new EditList().GetHashCode());
 	    }
 

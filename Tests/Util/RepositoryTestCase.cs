@@ -87,7 +87,7 @@ namespace GitSharp.Tests
         {
             GitSharpSystemReader.SetInstance(SystemReader);
             Microsoft.Win32.SystemEvents.SessionEnded += (o, args) => // cleanup
-                                                         recursiveDelete(new FileInfo(trashParent.FullName), false, null, false);
+                                                         recursiveDelete(new DirectoryInfo(trashParent.FullName), false, null, false);
         }
 
         protected RepositoryTestCase()
@@ -120,7 +120,7 @@ namespace GitSharp.Tests
             string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
 
             // Cleanup old failed stuff
-            recursiveDelete(new FileInfo(trashParent.FullName), true, name, false);
+            recursiveDelete(new DirectoryInfo(trashParent.FullName), true, name, false);
 
             trash = new DirectoryInfo(trashParent + "/trash" + DateTime.Now.Ticks + "." + (_testcount++));
             trash_git = new DirectoryInfo(trash + "/.git");
@@ -179,10 +179,10 @@ namespace GitSharp.Tests
             }
 
             string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
-            recursiveDelete(new FileInfo(trash.FullName), false, name, true);
+            recursiveDelete(new DirectoryInfo(trash.FullName), false, name, true);
             foreach (var r in _repositoriesToClose)
             {
-                recursiveDelete(new FileInfo(r.WorkingDirectory.FullName), false, name, true);
+              recursiveDelete(new DirectoryInfo(r.WorkingDirectory.FullName), false, name, true);
             }
 
             _repositoriesToClose.Clear();
@@ -200,9 +200,14 @@ namespace GitSharp.Tests
         /// <param name="dir"></param>
         protected void recursiveDelete(FileSystemInfo fs)
         {
+          if (fs.IsFile())
+          {
+            fs.DeleteFile();
+            return;
+          }
           recursiveDelete(fs, false, GetType().Name + "." + ToString(), true);
         }
- 
+
         /// <summary>
         /// Utility method to delete a directory recursively. It is
         /// also used internally. If a file or directory cannot be removed
@@ -215,29 +220,33 @@ namespace GitSharp.Tests
         /// <returns></returns>
         protected static bool recursiveDelete(FileSystemInfo fs, bool silent, string name, bool failOnError)
         {
-            Debug.Assert(!(silent && failOnError));
-            if (!fs.IsDirectory() && !fs.IsFile())
-            {
-                return silent;
-            }
-
-            try
-            {
-                if (fs.IsDirectory())
-                {
-                    Directory.Delete(fs.FullName, true);
-                    return silent;
-                }
-
-                File.Delete(fs.FullName);
-            }
-            catch (Exception e)
-            {
-                //ReportDeleteFailure(name, failOnError, fs);
-                Console.WriteLine(name + ": " + e.Message);
-            }
- 
+          Debug.Assert(!(silent && failOnError));
+          if(!fs.IsDirectory())
             return silent;
+
+          var dir = new DirectoryInfo(fs.FullName);
+          try
+          {
+            if (!dir.Exists) return silent;
+
+            FileSystemInfo[] ls = dir.GetFileSystemInfos();
+
+            foreach (var e in ls)
+            {
+              if (e.IsFile())
+                e.DeleteFile();
+              else
+                silent = recursiveDelete(e, silent, name, failOnError);
+            }
+            fs.Delete();
+          }
+          catch (IOException e)
+          {
+            //ReportDeleteFailure(name, failOnError, fs);
+            Console.WriteLine(name + ": " + e.Message);
+          }
+
+          return silent;
         }
  
         private static void ReportDeleteFailure(string name, bool failOnError, FileSystemInfo fsi)

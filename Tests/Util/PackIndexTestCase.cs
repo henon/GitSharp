@@ -62,16 +62,16 @@ namespace GitSharp.Tests.Util
             denseIdx = PackIndex.Open(getFileForPackdf2982f28());
         }
         /**
-         * Return file with appropriate index version for prepared pack.
+         * Return File with appropriate index version for prepared pack.
          * 
-         * @return file with index
+         * @return File with index
          */
         public abstract FileInfo getFileForPack34be9032();
 
         /**
-         * Return file with appropriate index version for prepared pack.
+         * Return File with appropriate index version for prepared pack.
          * 
-         * @return file with index
+         * @return File with index
          */
         public abstract FileInfo getFileForPackdf2982f28();
 

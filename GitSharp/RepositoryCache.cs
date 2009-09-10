@@ -42,17 +42,13 @@ using GitSharp.Util;
 
 namespace GitSharp
 {
-
     public class RepositoryCache
     {
         private static readonly RepositoryCache cache = new RepositoryCache();
 
         public static RepositoryCache Instance
         {
-            get
-            {
-                return cache;
-            }
+            get { return cache; }
         }
 
         public static Repository open(Key location)
@@ -106,13 +102,13 @@ namespace GitSharp
                     cacheMap.Add(location, r);
                 }
             }
-            r.incrementOpen();
+            r.IncrementOpen();
             return r;
         }
 
         private void registerRepository(Key location, Repository db)
         {
-            db.incrementOpen();
+            db.IncrementOpen();
             if (cacheMap.ContainsKey(location))
             {
                 cacheMap[location].Close();

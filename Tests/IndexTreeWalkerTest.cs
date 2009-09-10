@@ -127,6 +127,7 @@ namespace GitSharp.Tests
             index.add(trash, writeTrashFile("foo", "foo"));
             index.add(trash, writeTrashFile("bar", "bar"));
             new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
+            Assert.AreEqual(2, IndexOnlyEntriesVisited.Count);
             Assert.IsTrue(IndexOnlyEntriesVisited[0].Equals("bar"));
             Assert.IsTrue(IndexOnlyEntriesVisited[1].Equals("foo"));
         }

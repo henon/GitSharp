@@ -52,8 +52,8 @@ namespace GitSharp.Tests.Patch
 			Assert.AreEqual(1, p.getErrors().Count);
 
 			FileHeader fh = p.getFiles()[0];
-			Assert.AreEqual("org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java", fh.getNewName());
-			Assert.AreEqual(1, fh.getHunks().Count);
+			Assert.AreEqual("org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java", fh.NewName);
+			Assert.AreEqual(1, fh.Hunks.Count);
 
 			Assert.AreEqual(1, p.getErrors().Count);
 			FormatError e = p.getErrors()[0];
@@ -112,12 +112,12 @@ namespace GitSharp.Tests.Patch
 			Assert.AreEqual(2, p.getFiles().Count);
 
 			FileHeader fh0 = p.getFiles()[0];
-			Assert.AreEqual("org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java", fh0.getNewName());
-			Assert.AreEqual(1, fh0.getHunks().Count);
+			Assert.AreEqual("org.spearce.jgit.test/tst/org/spearce/jgit/lib/RepositoryConfigTest.java", fh0.NewName);
+			Assert.AreEqual(1, fh0.Hunks.Count);
 
 			FileHeader fh1 = p.getFiles()[1];
-			Assert.AreEqual("org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java", fh1.getNewName());
-			Assert.AreEqual(1, fh1.getHunks().Count);
+			Assert.AreEqual("org.spearce.jgit/src/org/spearce/jgit/lib/RepositoryConfig.java", fh1.NewName);
+			Assert.AreEqual(1, fh1.Hunks.Count);
 
 			Assert.AreEqual(1, p.getErrors().Count);
 			FormatError e = p.getErrors()[0];
@@ -134,15 +134,15 @@ namespace GitSharp.Tests.Patch
 			Assert.AreEqual(2, p.getFiles().Count);
 
 			FileHeader fh0 = p.getFiles()[0];
-			Assert.AreEqual("org.spearce.egit.ui/icons/toolbar/fetchd.png", fh0.getNewName());
-            Assert.AreEqual(FileHeader.PatchType.GIT_BINARY, fh0.getPatchType());
-			Assert.IsTrue(fh0.getHunks().isEmpty());
+			Assert.AreEqual("org.spearce.egit.ui/icons/toolbar/fetchd.png", fh0.NewName);
+            Assert.AreEqual(FileHeader.PatchTypeEnum.GIT_BINARY, fh0.getPatchType());
+			Assert.IsTrue(fh0.Hunks.isEmpty());
 			Assert.IsNull(fh0.getForwardBinaryHunk());
 
 			FileHeader fh1 = p.getFiles()[1];
-			Assert.AreEqual("org.spearce.egit.ui/icons/toolbar/fetche.png", fh1.getNewName());
-            Assert.AreEqual(FileHeader.PatchType.UNIFIED, fh1.getPatchType());
-			Assert.IsTrue(fh1.getHunks().isEmpty());
+			Assert.AreEqual("org.spearce.egit.ui/icons/toolbar/fetche.png", fh1.NewName);
+            Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, fh1.getPatchType());
+			Assert.IsTrue(fh1.Hunks.isEmpty());
 			Assert.IsNull(fh1.getForwardBinaryHunk());
 
 			Assert.AreEqual(1, p.getErrors().Count);

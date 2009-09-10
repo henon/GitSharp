@@ -570,7 +570,7 @@ namespace GitSharp
             int c = 0;
             while ((p1 = name.IndexOf('/', p0 + 1)) != -1)
             {
-                tmp[c++] = name.Slice(p0 + 1, p1 - p0 + 1);
+                tmp[c++] = name.Slice(p0 + 1, p1);
                 p0 = p1;
             }
             tmp[c++] = name.Substring(p0 + 1);
@@ -620,7 +620,7 @@ namespace GitSharp
             {
                 for (int i = 0; i < x.Length && i < y.Length; ++i)
                 {
-                    int c = x[i] - x[i];
+                    int c = x[i] - y[i];
                     if (c != 0)
                     {
                         return c;

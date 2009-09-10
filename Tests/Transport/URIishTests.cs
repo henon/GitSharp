@@ -96,9 +96,9 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test003_FileProtoUnix()
         {
-            const string str = "file:///home/m y";
+            const string str = "File:///home/m y";
             URIish u = new URIish(str);
-            Assert.AreEqual("file", u.Scheme);
+            Assert.AreEqual("File", u.Scheme);
             Assert.IsFalse(u.IsRemote);
             Assert.AreEqual("/home/m y", u.Path);
             Assert.AreEqual(str, u.ToString());
@@ -108,9 +108,9 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test004_FileProtoWindows()
         {
-            const string str = "file:///D:/m y";
+            const string str = "File:///D:/m y";
             URIish u = new URIish(str);
-            Assert.AreEqual("file", u.Scheme);
+            Assert.AreEqual("File", u.Scheme);
             Assert.IsFalse(u.IsRemote);
             Assert.AreEqual("D:/m y", u.Path);
             Assert.AreEqual(str, u.ToString());

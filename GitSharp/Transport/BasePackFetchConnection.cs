@@ -129,7 +129,7 @@ namespace GitSharp.Transport
                 {
                     Negotiate(monitor);
 
-                    _walk.dispose();
+                    _walk.Dispose();
                     _reachableCommits = null;
 
                     ReceivePack(monitor);

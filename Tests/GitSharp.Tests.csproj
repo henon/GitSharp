@@ -80,6 +80,7 @@
     <Compile Include="RefTest.cs" />
     <Compile Include="RefUpdateTest.cs" />
     <Compile Include="RepositoryConfigTest.cs" />
+    <Compile Include="RevWalk\FooterLineTest.cs" />
     <Compile Include="Transport\BundleWriterTest.cs" />
     <Compile Include="Transport\LongMapTest.cs" />
     <Compile Include="Transport\OpenSshConfigTest.cs" />
@@ -128,7 +129,7 @@
     <Compile Include="Util\IntListTest.cs" />
     <Compile Include="Transport\URIishTests.cs" />
     <Compile Include="Util\PackIndexTestCase.cs" />
-    <Compile Include="Util\RevWalkTestCase.cs" />
+    <Compile Include="RevWalk\RevWalkTestCase.cs" />
     <Compile Include="Util\QuotedStringBourneStyleTest.cs" />
     <Compile Include="Util\QuotedStringBourneUserPathStyleTest.cs" />
     <Compile Include="Util\QuotedStringGitPathStyleTest.cs" />
@@ -144,7 +145,6 @@
     <Compile Include="WorkDirCheckoutTest.cs" />
     <Compile Include="WriteTests.cs" />
     <Compile Include="ObjectCheckerTests.cs" />
-    <Compile Include="ObjectIdMapTests.cs" />
     <Compile Include="ObjectIdTests.cs" />
     <Compile Include="PersonIdentTests.cs" />
     <Compile Include="PackIndexTests.cs" />

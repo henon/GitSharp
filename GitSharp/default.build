@@ -8,7 +8,6 @@
 		<fileset id="project.references" basedir="../extern">
 			<include name="ICSharpCode.SharpZipLib.dll" />
 			<include name="FileMap/Winterdom.IO.FileMap.dll" />
-			<include name="Tamir.SharpSSH.dll" />
 		</fileset>
 		<call target="common.copy-references"/>
 		<call target="common.compile-dll"/>

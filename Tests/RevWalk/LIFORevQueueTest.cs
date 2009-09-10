@@ -36,7 +36,6 @@
  */
 
 using System.Collections.Generic;
-using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
 using NUnit.Framework;
 
@@ -70,14 +69,16 @@ namespace GitSharp.Tests.RevWalk
             var lst = new List<RevCommit>();
             for (int i = 0; i < 3*BlockRevQueue.Block.BLOCK_SIZE; i++)
             {
-                RevCommit c = commit();
+                RevCommit c = Commit();
                 lst.Add(c);
                 q.add(c);
             }
 
             lst.Reverse();
             for (int i = 0; i < lst.Count; i++)
-                Assert.AreSame(lst[i], q.next());
+            {
+            	Assert.AreSame(lst[i], q.next());
+            }
         }
     }
 }

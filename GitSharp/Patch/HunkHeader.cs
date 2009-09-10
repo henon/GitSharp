@@ -78,7 +78,7 @@ namespace GitSharp.Patch
 		/// <returns></returns>
 		public byte[] Buffer
 		{
-			get { return _file.buf; }
+			get { return _file.Buffer; }
 		}
 
 		/// <summary>
@@ -121,7 +121,7 @@ namespace GitSharp.Patch
 		public EditList ToEditList()
 		{
 			var r = new EditList();
-			byte[] buf = _file.buf;
+			byte[] buf = _file.Buffer;
 			int c = RawParseUtils.nextLF(buf, _startOffset);
 			int oLine = _oldImage.StartLine;
 			int nLine = NewStartLine;
@@ -179,7 +179,7 @@ namespace GitSharp.Patch
 		{
 			// Parse "@@ -236,9 +236,9 @@ protected boolean"
 			//
-			byte[] buf = _file.buf;
+			byte[] buf = _file.Buffer;
 			var ptr = new MutableInteger
 						{
 							value = RawParseUtils.nextLF(buf, _startOffset, (byte)' ')
@@ -194,7 +194,7 @@ namespace GitSharp.Patch
 
 		public virtual int parseBody(Patch script, int end)
 		{
-			byte[] buf = _file.buf;
+			byte[] buf = _file.Buffer;
 			int c = RawParseUtils.nextLF(buf, _startOffset), last = c;
 
 			_oldImage.LinesDeleted = 0;
@@ -225,8 +225,11 @@ namespace GitSharp.Patch
 						breakScan = true;
 						break;
 				}
+
 				if (breakScan)
+				{
 					break;
+				}
 			}
 
 			if (last < end && LinesContext + _oldImage.LinesDeleted - 1 == _oldImage.LineCount
@@ -269,7 +272,7 @@ namespace GitSharp.Patch
 
 		public void extractFileLines(TemporaryBuffer[] outStream)
 		{
-			byte[] buf = _file.buf;
+			byte[] buf = _file.Buffer;
 			int ptr = _startOffset;
 			int eol = RawParseUtils.nextLF(buf, ptr);
 			if (EndOffset <= eol)
@@ -310,7 +313,7 @@ namespace GitSharp.Patch
 
 		public virtual void extractFileLines(StringBuilder sb, string[] text, int[] offsets)
 		{
-			byte[] buf = _file.buf;
+			byte[] buf = _file.Buffer;
 			int ptr = _startOffset;
 			int eol = RawParseUtils.nextLF(buf, ptr);
 			if (EndOffset <= eol)

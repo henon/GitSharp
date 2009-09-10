@@ -1,6 +1,5 @@
-/*
+﻿/*
  * Copyright (C) 2009, Google Inc.
- * Copyright (C) 2009, Dan Rigby <dan@danrigby.com>
  *
  * All rights reserved.
  *
@@ -36,13 +35,48 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.Merge
+namespace GitSharp.RevWalk
 {
 	/// <summary>
-	/// A merge strategy to merge 2 trees, using a common base ancestor tree.
+	/// Case insensitive key for a <see cref="FooterLine"/>.
 	/// </summary>
-    public abstract class ThreeWayMergeStrategy : MergeStrategy
-    {
-        public override abstract Merger NewMerger(Repository db);
-    }
+	public class FooterKey
+	{
+        /** Standard {@code Signed-off-by} */
+        public static FooterKey SIGNED_OFF_BY = new FooterKey("Signed-off-by");
+
+        /** Standard {@code Acked-by} */
+        public static FooterKey ACKED_BY = new FooterKey("Acked-by");
+
+        /** Standard {@code CC} */
+        public static FooterKey CC = new FooterKey("CC");
+
+        private readonly string _name;
+        private readonly byte[] _raw;
+
+		/// <summary>
+		/// Create a key for a specific footer line.
+		/// </summary>
+		/// <param _name="keyName">Name of the footer line.</param>
+		public FooterKey(string keyName)
+		{
+			_name = keyName;
+			_raw = Constants.encode(keyName.ToLowerInvariant());
+		}
+
+		public override string ToString()
+		{
+			return "FooterKey[" + _name + "]";
+		}
+
+		public string Name
+		{
+			get { return _name; }
+		}
+
+		public byte[] Raw
+		{
+			get { return _raw; }
+		}
+	}
 }

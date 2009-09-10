@@ -36,6 +36,7 @@
 
 using System;
 using System.IO;
+using GitSharp.Util;
 
 namespace GitSharp
 {

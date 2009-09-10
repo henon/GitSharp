@@ -66,7 +66,7 @@ namespace GitSharp.Tests.DirectoryCache
         [Test]
         public void testBuildOneFile_FinishWriteCommit()
         {
-            string path = "a-file-path";
+            string path = "a-File-path";
             var mode = GitSharp.FileMode.RegularFile;
             long lastModified = 1218123387057L;
             int Length = 1342;
@@ -117,7 +117,7 @@ namespace GitSharp.Tests.DirectoryCache
         [Test]
         public void testBuildOneFile_Commit()
         {
-            string path = "a-file-path";
+            string path = "a-File-path";
             var mode = GitSharp.FileMode.RegularFile;
             long lastModified = 1218123387057L;
             int Length = 1342;
@@ -166,7 +166,7 @@ namespace GitSharp.Tests.DirectoryCache
         [Test]
         public void testFindSingleFile()
         {
-            string path = "a-file-path";
+            string path = "a-File-path";
             DirCache dc = DirCache.read(db);
             DirCacheBuilder b = dc.builder();
             Assert.IsNotNull(b);

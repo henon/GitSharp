@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using GitSharp.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -18,7 +15,7 @@ namespace GitSharp.Tests
             Assert.AreEqual(1426738271, crc.Value);
             crc.Update(123456789);
             Assert.AreEqual(1147030863, crc.Value);
-            byte[] data = new byte[] { 145, 234, 156 };
+            var data = new byte[] { 145, 234, 156 };
             crc.Update(data);
             Assert.AreEqual(3967437022, crc.Value);
         }

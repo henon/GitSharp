@@ -51,29 +51,33 @@ namespace GitSharp.Patch
      */
     public class CombinedFileHeader : FileHeader
     {
-        private static readonly byte[] MODE = Constants.encodeASCII("mode ");
+        private static readonly byte[] Mode = Constants.encodeASCII("mode ");
 
-        private AbbreviatedObjectId[] oldIds;
-
-        private FileMode[] oldModes;
+        private AbbreviatedObjectId[] _oldIds;
+        private FileMode[] _oldModes;
 
         public CombinedFileHeader(byte[] b, int offset)
             : base(b, offset)
-        { }
-
-        /** @return number of ancestor revisions mentioned in this diff. */
-        public override int getParentCount()
         {
-            return oldIds.Length;
         }
 
-        /** @return get the file mode of the first parent. */
-        public override FileMode getOldMode()
-        {
-            return getOldMode(0);
-        }
+        /// <summary>
+		/// Number of ancestor revisions mentioned in this diff.
+        /// </summary>
+    	public override int ParentCount
+    	{
+    		get { return _oldIds.Length; }
+    	}
 
-        /**
+    	/// <summary>
+    	/// Get the file mode of the first parent.
+    	///  </summary>
+    	public override FileMode GetOldMode()
+    	{
+    		return getOldMode(0);
+    	}
+
+    	/**
          * Get the file mode of the nth ancestor
          *
          * @param nthParent
@@ -82,7 +86,7 @@ namespace GitSharp.Patch
          */
         public FileMode getOldMode(int nthParent)
         {
-            return oldModes[nthParent];
+            return _oldModes[nthParent];
         }
 
         /** @return get the object id of the first parent. */
@@ -100,17 +104,17 @@ namespace GitSharp.Patch
          */
         public AbbreviatedObjectId getOldId(int nthParent)
         {
-            return oldIds[nthParent];
+            return _oldIds[nthParent];
         }
 
         public override string getScriptText(Encoding ocs, Encoding ncs)
         {
-            var cs = new Encoding[getParentCount() + 1];
+            var cs = new Encoding[ParentCount + 1];
             for (int i = 0; i < cs.Length; i++)
             {
             	cs[i] = ocs;
             }
-            cs[getParentCount()] = ncs;
+            cs[ParentCount] = ncs;
             return getScriptText(cs);
         }
         
@@ -118,42 +122,41 @@ namespace GitSharp.Patch
         {
             while (ptr < end)
             {
-                int eol = RawParseUtils.nextLF(buf, ptr);
-                if (isHunkHdr(buf, ptr, end) >= 1)
+                int eol = RawParseUtils.nextLF(Buffer, ptr);
+				if (isHunkHdr(Buffer, ptr, end) >= 1)
                 {
                     // First hunk header; break out and parse them later.
                     break;
+                }
+
+				if (RawParseUtils.match(Buffer, ptr, OLD_NAME) >= 0)
+                {
+                    ParseOldName(ptr, eol);
 
                 }
-                
-                if (RawParseUtils.match(buf, ptr, OLD_NAME) >= 0)
+				else if (RawParseUtils.match(Buffer, ptr, NEW_NAME) >= 0)
                 {
-                    parseOldName(ptr, eol);
+                    ParseNewName(ptr, eol);
 
                 }
-                else if (RawParseUtils.match(buf, ptr, NEW_NAME) >= 0)
+				else if (RawParseUtils.match(Buffer, ptr, Index) >= 0)
                 {
-                    parseNewName(ptr, eol);
+                    ParseIndexLine(ptr + Index.Length, eol);
 
                 }
-                else if (RawParseUtils.match(buf, ptr, INDEX) >= 0)
+				else if (RawParseUtils.match(Buffer, ptr, Mode) >= 0)
                 {
-                    parseIndexLine(ptr + INDEX.Length, eol);
+                    parseModeLine(ptr + Mode.Length, eol);
 
                 }
-                else if (RawParseUtils.match(buf, ptr, MODE) >= 0)
+				else if (RawParseUtils.match(Buffer, ptr, NewFileMode) >= 0)
                 {
-                    parseModeLine(ptr + MODE.Length, eol);
+                    ParseNewFileMode(ptr, eol);
 
                 }
-                else if (RawParseUtils.match(buf, ptr, NEW_FILE_MODE) >= 0)
+				else if (RawParseUtils.match(Buffer, ptr, DeletedFileMode) >= 0)
                 {
-                    parseNewFileMode(ptr, eol);
-
-                }
-                else if (RawParseUtils.match(buf, ptr, DELETED_FILE_MODE) >= 0)
-                {
-                    parseDeletedFileMode(ptr + DELETED_FILE_MODE.Length, eol);
+                    parseDeletedFileMode(ptr + DeletedFileMode.Length, eol);
 
                 }
                 else
@@ -167,33 +170,34 @@ namespace GitSharp.Patch
             return ptr;
         }
 
-        public override void parseIndexLine(int ptr, int eol)
+    	protected override void ParseIndexLine(int ptr, int eol)
         {
             // "index $asha1,$bsha1..$csha1"
             //
             var ids = new List<AbbreviatedObjectId>();
             while (ptr < eol)
             {
-                int comma = RawParseUtils.nextLF(buf, ptr, (byte)',');
-                if (eol <= comma)
-                    break;
-                ids.Add(AbbreviatedObjectId.FromString(buf, ptr, comma - 1));
+				int comma = RawParseUtils.nextLF(Buffer, ptr, (byte)',');
+                if (eol <= comma) break;
+				ids.Add(AbbreviatedObjectId.FromString(Buffer, ptr, comma - 1));
                 ptr = comma;
             }
 
-            oldIds = new AbbreviatedObjectId[ids.Count + 1];
-            ids.CopyTo(oldIds);
-            int dot2 = RawParseUtils.nextLF(buf, ptr, (byte)'.');
-            oldIds[oldIds.Length - 1] = AbbreviatedObjectId.FromString(buf, ptr, dot2 - 1);
-            newId = AbbreviatedObjectId.FromString(buf, dot2 + 1, eol - 1);
-            oldModes = new FileMode[oldIds.Length];
+            _oldIds = new AbbreviatedObjectId[ids.Count + 1];
+            ids.CopyTo(_oldIds);
+			int dot2 = RawParseUtils.nextLF(Buffer, ptr, (byte)'.');
+			_oldIds[_oldIds.Length - 1] = AbbreviatedObjectId.FromString(Buffer, ptr, dot2 - 1);
+			NewId = AbbreviatedObjectId.FromString(Buffer, dot2 + 1, eol - 1);
+            _oldModes = new FileMode[_oldIds.Length];
         }
 
-        public override void parseNewFileMode(int ptr, int eol)
+    	protected override void ParseNewFileMode(int ptr, int eol)
         {
-            for (int i = 0; i < oldModes.Length; i++)
-                oldModes[i] = FileMode.Missing;
-            base.parseNewFileMode(ptr, eol);
+            for (int i = 0; i < _oldModes.Length; i++)
+            {
+            	_oldModes[i] = FileMode.Missing;
+            }
+            base.ParseNewFileMode(ptr, eol);
         }
 
         public override HunkHeader newHunkHeader(int offset)
@@ -208,33 +212,33 @@ namespace GitSharp.Patch
             int n = 0;
             while (ptr < eol)
             {
-                int comma = RawParseUtils.nextLF(buf, ptr, (byte)',');
+				int comma = RawParseUtils.nextLF(Buffer, ptr, (byte)',');
                 if (eol <= comma)
                     break;
-                oldModes[n++] = parseFileMode(ptr, comma);
+                _oldModes[n++] = ParseFileMode(ptr, comma);
                 ptr = comma;
             }
-            int dot2 = RawParseUtils.nextLF(buf, ptr, (byte)'.');
-            oldModes[n] = parseFileMode(ptr, dot2);
-            newMode = parseFileMode(dot2 + 1, eol);
+			int dot2 = RawParseUtils.nextLF(Buffer, ptr, (byte)'.');
+            _oldModes[n] = ParseFileMode(ptr, dot2);
+            NewMode = ParseFileMode(dot2 + 1, eol);
         }
 
         private void parseDeletedFileMode(int ptr, int eol)
         {
             // "deleted file mode $amode,$bmode"
             //
-            changeType = ChangeType.DELETE;
+            ChangeType = ChangeTypeEnum.DELETE;
             int n = 0;
             while (ptr < eol)
             {
-                int comma = RawParseUtils.nextLF(buf, ptr, (byte)',');
+				int comma = RawParseUtils.nextLF(Buffer, ptr, (byte)',');
                 if (eol <= comma)
                     break;
-                oldModes[n++] = parseFileMode(ptr, comma);
+                _oldModes[n++] = ParseFileMode(ptr, comma);
                 ptr = comma;
             }
-            oldModes[n] = parseFileMode(ptr, eol);
-            newMode = FileMode.Missing;
+            _oldModes[n] = ParseFileMode(ptr, eol);
+            NewMode = FileMode.Missing;
         }
     }
 }

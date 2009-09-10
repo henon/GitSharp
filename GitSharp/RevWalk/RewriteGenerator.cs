@@ -62,13 +62,6 @@ namespace GitSharp.RevWalk
 	/// <seealso cref="RewriteTreeFilter"/>
 	public class RewriteGenerator : Generator
 	{
-		private static readonly int Rewrite = RevWalk.REWRITE;
-
-		/// <summary>
-		/// /** For <see cref="Cleanup"/> to remove duplicate parents.
-		/// </summary>
-		private static readonly int Duplicate = RevWalk.TEMP_MARK;
-
 		private readonly Generator _source;
 
 		public RewriteGenerator(Generator source)
@@ -127,7 +120,7 @@ namespace GitSharp.RevWalk
 					return p;
 				}
 
-				if ((p.flags & RevWalk.UNINTERESTING) != 0)
+				if ((p.Flags & RevWalk.UNINTERESTING) != 0)
 				{
 					// Retain uninteresting parents. They show where the
 					// DAG was cut off because it wasn't interesting.
@@ -135,7 +128,7 @@ namespace GitSharp.RevWalk
 					return p;
 				}
 
-				if ((p.flags & Rewrite) == 0)
+				if ((p.Flags & RevWalk.REWRITE) == 0)
 				{
 					// This parent was not eligible for rewriting. We
 					// need to keep it in the DAG.
@@ -165,14 +158,13 @@ namespace GitSharp.RevWalk
 			for (int o = 0; o < oldList.Length; o++)
 			{
 				RevCommit p = oldList[o];
-				if (p == null)
-					continue;
-				if ((p.flags & Duplicate) != 0)
+				if (p == null) continue;
+				if ((p.Flags & RevWalk.TEMP_MARK) != 0)
 				{
 					oldList[o] = null;
 					continue;
 				}
-				p.flags |= Duplicate;
+				p.Flags |= RevWalk.TEMP_MARK;
 				newCnt++;
 			}
 
@@ -180,7 +172,7 @@ namespace GitSharp.RevWalk
 			{
 				foreach (RevCommit p in oldList)
 				{
-					p.flags &= ~Duplicate;
+					p.Flags &= ~RevWalk.TEMP_MARK;
 				}
 				return oldList;
 			}
@@ -192,7 +184,7 @@ namespace GitSharp.RevWalk
 				if (p != null)
 				{
 					newList[newCnt++] = p;
-					p.flags &= ~Duplicate;
+					p.Flags &= ~RevWalk.TEMP_MARK;
 				}
 			}
 

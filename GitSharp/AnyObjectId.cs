@@ -38,12 +38,20 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using GitSharp.Util;
 
 namespace GitSharp
 {
+    /// <summary>
+    /// A (possibly mutable) SHA-1 abstraction.
+    /// <para />
+    /// If this is an instance of <seealso cref="MutableObjectId"/> the concept of equality
+    /// with this instance can alter at any time, if this instance is modified to
+    /// represent a different object name.
+    /// </summary>
     public abstract class AnyObjectId :
 #if !__MonoCS__
  IComparable<ObjectId>,
@@ -57,11 +65,11 @@ namespace GitSharp
         {
             if ((object)a == null)
                 return (object)b == null;
-        	
-			if ((object)b == null)
-        		return false;
 
-        	return (a.W2 == b.W2) &&
+            if ((object)b == null)
+                return false;
+
+            return (a.W2 == b.W2) &&
                    (a.W3 == b.W3) &&
                    (a.W4 == b.W4) &&
                    (a.W5 == b.W5) &&
@@ -109,11 +117,11 @@ namespace GitSharp
             w.Write(tmp, 0, StringLength);
         }
 
-        public void CopyTo(char[] tmp, Encoding charset, Stream w)
+        public void CopyTo(char[] tmp, Encoding e, Stream w)
         {
             ToHexCharArray(tmp);
-            byte[] val = charset.GetBytes(tmp, 0, StringLength);
-            w.Write(val, 0, val.Length);
+            var data = e.GetBytes(tmp, 0, StringLength);
+            w.Write(data, 0, data.Length);
         }
 
         public void copyRawTo(Stream s)
@@ -127,11 +135,11 @@ namespace GitSharp
             s.Write(buf, 0, 20);
         }
 
-		/// <summary>
-		/// Copy this ObjectId to a byte array.
-		/// </summary>
-		/// <param name="buf">the buffer to copy to.</param>
-		/// <param name="off">the offset within b to write at.</param>
+        /// <summary>
+        /// Copy this ObjectId to a byte array.
+        /// </summary>
+        /// <param name="buf">the buffer to copy to.</param>
+        /// <param name="off">the offset within b to write at.</param>
         public void copyRawTo(byte[] buf, int off)
         {
             NB.encodeInt32(buf, 0 + off, W1);
@@ -141,18 +149,18 @@ namespace GitSharp
             NB.encodeInt32(buf, 16 + off, W5);
         }
 
-		/// <summary>
-		/// Copy this ObjectId to a byte array.
-		/// </summary>
-		/// <param name="b">the buffer to copy to.</param>
-		/// <param name="offset">the offset within b to write at.</param>
+        /// <summary>
+        /// Copy this ObjectId to a byte array.
+        /// </summary>
+        /// <param name="b">the buffer to copy to.</param>
+        /// <param name="offset">the offset within b to write at.</param>
         public void copyRawTo(int[] b, int offset)
         {
-			b[offset] = W1;
-			b[offset + 1] = W2;
-			b[offset + 2] = W3;
-			b[offset + 3] = W4;
-			b[offset + 4] = W5;
+            b[offset] = W1;
+            b[offset + 1] = W2;
+            b[offset + 2] = W3;
+            b[offset + 3] = W4;
+            b[offset + 4] = W5;
         }
 
         private byte[] ToHexByteArray()
@@ -188,11 +196,34 @@ namespace GitSharp
             return new AbbreviatedObjectId(len, a, b, c, d, e);
         }
 
-        public int W1 { get; set; }
-        public int W2 { get; set; }
-        public int W3 { get; set; }
-        public int W4 { get; set; }
-        public int W5 { get; set; }
+        protected AnyObjectId(AnyObjectId other)
+        {
+            if (other == null)
+            {
+                throw new ArgumentNullException("other");
+            }
+
+            W1 = other.W1;
+            W2 = other.W2;
+            W3 = other.W3;
+            W4 = other.W4;
+            W5 = other.W5;
+        }
+
+        protected AnyObjectId(int w1, int w2, int w3, int w4, int w5)
+        {
+            W1 = w1;
+            W2 = w2;
+            W3 = w3;
+            W4 = w4;
+            W5 = w5;
+        }
+
+        public int W1 { get; protected set; }
+        public int W2 { get; protected set; }
+        public int W3 { get; protected set; }
+        public int W4 { get; protected set; }
+        public int W5 { get; protected set; }
 
         public int GetFirstByte()
         {
@@ -206,7 +237,7 @@ namespace GitSharp
             if (this == other)
                 return 0;
 
-        	int cmp = NB.CompareUInt32(W1, other.W1);
+            int cmp = NB.CompareUInt32(W1, other.W1);
             if (cmp != 0)
                 return cmp;
 
@@ -227,7 +258,7 @@ namespace GitSharp
 
         public int CompareTo(byte[] bs, int p)
         {
-        	int cmp = NB.CompareUInt32(W1, NB.DecodeInt32(bs, p));
+            int cmp = NB.CompareUInt32(W1, NB.DecodeInt32(bs, p));
             if (cmp != 0)
                 return cmp;
 
@@ -278,13 +309,13 @@ namespace GitSharp
 
         #endregion
 
-		/// <summary>
-		/// Tests if this ObjectId starts with the given abbreviation.
-		/// </summary>
-		/// <param name="abbr">the abbreviation.</param>
-		/// <returns>
-		/// True if this ObjectId begins with the abbreviation; else false.
-		/// </returns>
+        /// <summary>
+        /// Tests if this ObjectId starts with the given abbreviation.
+        /// </summary>
+        /// <param name="abbr">the abbreviation.</param>
+        /// <returns>
+        /// True if this ObjectId begins with the abbreviation; else false.
+        /// </returns>
         public bool startsWith(AbbreviatedObjectId abbr)
         {
             return abbr.prefixCompare(this) == 0;
@@ -320,11 +351,58 @@ namespace GitSharp
         {
             if (GetType() == typeof(ObjectId))
             {
-            	return (ObjectId)this;
+                return (ObjectId)this;
             }
             return new ObjectId(this);
         }
 
         public abstract ObjectId ToObjectId();
+
+        #region Nested Types
+
+        internal class AnyObjectIdEqualityComparer<T> : IEqualityComparer<T>
+            where T : AnyObjectId
+        {
+            #region Implementation of IEqualityComparer<ObjectId>
+
+            /// <summary>
+            /// Determines whether the specified objects are equal.
+            /// </summary>
+            /// <returns>
+            /// true if the specified objects are equal; otherwise, false.
+            /// </returns>
+            /// <param name="x">
+            /// The first object of type <see cref="ObjectId"/> to compare.
+            /// </param>
+            /// <param name="y">
+            /// The second object of type <see cref="ObjectId"/> to compare.
+            /// </param>
+            public bool Equals(T x, T y)
+            {
+                return x == y;
+            }
+
+            /// <summary>
+            /// Returns a hash code for the specified object.
+            /// </summary>
+            /// <returns>
+            /// A hash code for the specified object.
+            /// </returns>
+            /// <param name="obj">
+            /// The <see cref="ObjectId"/> for which a hash code is to be returned.
+            /// </param>
+            /// <exception cref="ArgumentNullException">
+            /// The type of <paramref name="obj"/> is a reference type and <paramref name="obj"/> is null.
+            /// </exception>
+            public int GetHashCode(T obj)
+            {
+                return obj.GetHashCode();
+            }
+
+            #endregion
+        }
+
+        #endregion
+
     }
 }

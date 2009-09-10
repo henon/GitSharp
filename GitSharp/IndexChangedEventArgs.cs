@@ -37,24 +37,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-
 namespace GitSharp
 {
-	
-	
 	public class IndexChangedEventArgs : RepositoryChangedEventArgs
 	{
-		
 		public IndexChangedEventArgs(Repository repo)
 			: base(repo)
 		{
 		}
-		
-		public override string ToString ()
-		{
-			return string.Format("IndexChangedEventArgs[{0}]", this.Repository);
-		}
 
+		public override string ToString()
+		{
+			return string.Format("IndexChangedEventArgs[{0}]", Repository);
+		}
 	}
 }

@@ -38,109 +38,105 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using GitSharp.Util;
 
 namespace GitSharp
 {
+	public class MutableObjectId : AnyObjectId
+	{
+		public MutableObjectId()
+			: base(ObjectId.ZeroId)
+		{
+		}
 
-    public class MutableObjectId : AnyObjectId
-    {
+		public MutableObjectId(AnyObjectId src)
+			: base(src)
+		{
+		}
 
-        public MutableObjectId()
-            : base()
-        {
+		/// <summary>
+		/// Make this id match <see cref=ObjectId.ZeroId"/>.
+		/// </summary>
+		public void Clear()
+		{
+			W1 = 0;
+			W2 = 0;
+			W3 = 0;
+			W4 = 0;
+			W5 = 0;
+		}
 
-        }
+		public void FromRaw(byte[] bs)
+		{
+			FromRaw(bs, 0);
+		}
 
-        public MutableObjectId(MutableObjectId src)
-        {
-            this.W1 = src.W1;
-            this.W2 = src.W2;
-            this.W3 = src.W3;
-            this.W4 = src.W4;
-            this.W5 = src.W5;
-        }
+		public void FromRaw(byte[] bs, int p)
+		{
+			W1 = NB.DecodeInt32(bs, p);
+			W2 = NB.DecodeInt32(bs, p + 4);
+			W3 = NB.DecodeInt32(bs, p + 8);
+			W4 = NB.DecodeInt32(bs, p + 12);
+			W5 = NB.DecodeInt32(bs, p + 16);
+		}
 
-        /** Make this id match {@link ObjectId#zeroId()}. */
-        public void Clear()
-        {
-            W1 = 0;
-            W2 = 0;
-            W3 = 0;
-            W4 = 0;
-            W5 = 0;
-        }
+		public void FromRaw(int[] ints)
+		{
+			FromRaw(ints, 0);
+		}
 
-        public void FromRaw(byte[] bs)
-        {
-            FromRaw(bs, 0);
-        }
+		public void FromRaw(int[] ints, int p)
+		{
+			W1 = ints[p];
+			W2 = ints[p + 1];
+			W3 = ints[p + 2];
+			W4 = ints[p + 3];
+			W5 = ints[p + 4];
+		}
 
-        public void FromRaw(byte[] bs, int p)
-        {
-            W1 = NB.DecodeInt32(bs, p);
-            W2 = NB.DecodeInt32(bs, p + 4);
-            W3 = NB.DecodeInt32(bs, p + 8);
-            W4 = NB.DecodeInt32(bs, p + 12);
-            W5 = NB.DecodeInt32(bs, p + 16);
-        }
+		public void FromString(byte[] buf, int offset)
+		{
+			FromHexString(buf, offset);
+		}
 
-        public void FromRaw(int[] ints)
-        {
-            FromRaw(ints, 0);
-        }
+		public void FromString(string str)
+		{
+			if (str.Length != StringLength)
+			{
+				throw new ArgumentException("Invalid id: " + str);
+			}
 
-        public void FromRaw(int[] ints, int p)
-        {
-            W1 = ints[p];
-            W2 = ints[p + 1];
-            W3 = ints[p + 2];
-            W4 = ints[p + 3];
-            W5 = ints[p + 4];
-        }
+			FromHexString(Encoding.ASCII.GetBytes(str), 0);
+		}
 
-        public void FromString(byte[] buf, int offset)
-        {
-            FromHexString(buf, offset);
-        }
+		private void FromHexString(byte[] bs, int p)
+		{
+			try
+			{
+				W1 = Hex.HexStringToUInt32(bs, p);
+				W2 = Hex.HexStringToUInt32(bs, p + 8);
+				W3 = Hex.HexStringToUInt32(bs, p + 16);
+				W4 = Hex.HexStringToUInt32(bs, p + 24);
+				W5 = Hex.HexStringToUInt32(bs, p + 32);
+			}
+			catch (IndexOutOfRangeException)
+			{
+				try
+				{
+					var str = new string(Encoding.ASCII.GetChars(bs, p, StringLength));
+					throw new ArgumentException("Invalid id: " + str);
+				}
+				catch (Exception)
+				{
+					throw new ArgumentException("Invalid id");
+				}
+			}
+		}
 
-        public void FromString(string str)
-        {
-            if (str.Length != StringLength)
-                throw new ArgumentException("Invalid id: " + str);
-            FromHexString(Encoding.ASCII.GetBytes(str), 0);
-        }
-
-        private void FromHexString(byte[] bs, int p)
-        {
-            try
-            {
-                W1 = Hex.HexStringToUInt32(bs, p);
-                W2 = Hex.HexStringToUInt32(bs, p + 8);
-                W3 = Hex.HexStringToUInt32(bs, p + 16);
-                W4 = Hex.HexStringToUInt32(bs, p + 24);
-                W5 = Hex.HexStringToUInt32(bs, p + 32);
-            }
-            catch (IndexOutOfRangeException)
-            {
-                try
-                {
-                    string str = new string(Encoding.ASCII.GetChars(bs, p, StringLength));
-                    throw new ArgumentException("Invalid id: " + str);
-                }
-                catch (Exception)
-                {
-                    throw new ArgumentException("Invalid id");
-                }
-            }
-        }
-
-        public override ObjectId ToObjectId()
-        {
-            return new ObjectId(this);
-        }
-    }
+		public override ObjectId ToObjectId()
+		{
+			return new ObjectId(this);
+		}
+	}
 }

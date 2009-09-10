@@ -38,96 +38,112 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp
 {
-    [Complete]
-    public class BinaryDelta
-    {
-        public static byte[] Apply(byte[] baseData, byte[] delta)
-        {
-            int deltaPtr = 0;
+	/// <summary>
+	/// Recreate a stream from a base stream and a GIT pack delta.
+	/// <para />
+	/// This entire class is heavily cribbed from <code>patch-delta.c</code> in the
+	/// GIT project. The original delta patching code was written by Nicolas Pitre
+	/// (&lt;nico@cam.org&gt;).
+	/// </summary>
+	public class BinaryDelta
+	{
+		///	<summary>
+		/// Apply the changes defined by delta to the data in base, yielding a new
+		/// array of bytes.
+		/// </summary>
+		/// <param name="baseData">some byte representing an object of some kind.</param>
+		///	<param name="delta">
+		/// A git pack delta defining the transform from one version to
+		/// another.
+		/// </param>
+		///	<returns>Patched base</returns>
+		public static byte[] Apply(byte[] baseData, byte[] delta)
+		{
+			int deltaPtr = 0;
 
-            // Length of the base object (a variable Length int).
-            //
-            int baseLen = 0;
-            int c, shift = 0;
-            do
-            {
-                c = delta[deltaPtr++] & 0xff;
-                baseLen |= (c & 0x7f) << shift;
-                shift += 7;
-            } while ((c & 0x80) != 0);
-            if (baseData.Length != baseLen)
-                throw new ArgumentException("baseData Length incorrect");
+			// Length of the base object (a variable Length int).
+			//
+			int baseLen = 0;
+			int c, shift = 0;
+			do
+			{
+				c = delta[deltaPtr++] & 0xff;
+				baseLen |= (c & 0x7f) << shift;
+				shift += 7;
+			} while ((c & 0x80) != 0);
 
-            // Length of the resulting object (a variable Length int).
-            //
-            int resLen = 0;
-            shift = 0;
-            do
-            {
-                c = delta[deltaPtr++] & 0xff;
-                resLen |= (c & 0x7f) << shift;
-                shift += 7;
-            } while ((c & 0x80) != 0);
+			if (baseData.Length != baseLen)
+			{
+				throw new ArgumentException("baseData Length incorrect");
+			}
 
-            byte[] result = new byte[resLen];
-            int resultPtr = 0;
-            while (deltaPtr < delta.Length)
-            {
-                int cmd = delta[deltaPtr++] & 0xff;
-                if ((cmd & 0x80) != 0)
-                {
-                    // Determine the segment of the base which should
-                    // be copied into the output. The segment is given
-                    // as an offset and a Length.
-                    //
-                    int copyOffset = 0;
-                    if ((cmd & 0x01) != 0)
-                        copyOffset = delta[deltaPtr++] & 0xff;
-                    if ((cmd & 0x02) != 0)
-                        copyOffset |= (delta[deltaPtr++] & 0xff) << 8;
-                    if ((cmd & 0x04) != 0)
-                        copyOffset |= (delta[deltaPtr++] & 0xff) << 16;
-                    if ((cmd & 0x08) != 0)
-                        copyOffset |= (delta[deltaPtr++] & 0xff) << 24;
+			// Length of the resulting object (a variable Length int).
+			//
+			int resLen = 0;
+			shift = 0;
+			do
+			{
+				c = delta[deltaPtr++] & 0xff;
+				resLen |= (c & 0x7f) << shift;
+				shift += 7;
+			} while ((c & 0x80) != 0);
 
-                    int copySize = 0;
-                    if ((cmd & 0x10) != 0)
-                        copySize = delta[deltaPtr++] & 0xff;
-                    if ((cmd & 0x20) != 0)
-                        copySize |= (delta[deltaPtr++] & 0xff) << 8;
-                    if ((cmd & 0x40) != 0)
-                        copySize |= (delta[deltaPtr++] & 0xff) << 16;
-                    if (copySize == 0)
-                        copySize = 0x10000;
+			var result = new byte[resLen];
+			int resultPtr = 0;
+			while (deltaPtr < delta.Length)
+			{
+				int cmd = delta[deltaPtr++] & 0xff;
+				if ((cmd & 0x80) != 0)
+				{
+					// Determine the segment of the base which should
+					// be copied into the output. The segment is given
+					// as an offset and a Length.
+					//
+					int copyOffset = 0;
+					if ((cmd & 0x01) != 0)
+						copyOffset = delta[deltaPtr++] & 0xff;
+					if ((cmd & 0x02) != 0)
+						copyOffset |= (delta[deltaPtr++] & 0xff) << 8;
+					if ((cmd & 0x04) != 0)
+						copyOffset |= (delta[deltaPtr++] & 0xff) << 16;
+					if ((cmd & 0x08) != 0)
+						copyOffset |= (delta[deltaPtr++] & 0xff) << 24;
 
-                    Array.Copy(baseData, copyOffset, result, resultPtr, copySize);
-                    resultPtr += copySize;
-                }
-                else if (cmd != 0)
-                {
-                    // Anything else the data is literal within the delta
-                    // itself.
-                    //
-                    Array.Copy(delta, deltaPtr, result, resultPtr, cmd);
-                    deltaPtr += cmd;
-                    resultPtr += cmd;
-                }
-                else
-                {
-                    // cmd == 0 has been reserved for future encoding but
-                    // for now its not acceptable.
-                    //
-                    throw new ArgumentException("unsupported command 0");
-                }
-            }
+					int copySize = 0;
+					if ((cmd & 0x10) != 0)
+						copySize = delta[deltaPtr++] & 0xff;
+					if ((cmd & 0x20) != 0)
+						copySize |= (delta[deltaPtr++] & 0xff) << 8;
+					if ((cmd & 0x40) != 0)
+						copySize |= (delta[deltaPtr++] & 0xff) << 16;
+					if (copySize == 0)
+						copySize = 0x10000;
 
-            return result;
-        }
-    }
+					Array.Copy(baseData, copyOffset, result, resultPtr, copySize);
+					resultPtr += copySize;
+				}
+				else if (cmd != 0)
+				{
+					// Anything else the data is literal within the delta
+					// itself.
+					//
+					Array.Copy(delta, deltaPtr, result, resultPtr, cmd);
+					deltaPtr += cmd;
+					resultPtr += cmd;
+				}
+				else
+				{
+					// cmd == 0 has been reserved for future encoding but
+					// for now its not acceptable.
+					//
+					throw new ArgumentException("unsupported command 0");
+				}
+			}
+
+			return result;
+		}
+	}
 }

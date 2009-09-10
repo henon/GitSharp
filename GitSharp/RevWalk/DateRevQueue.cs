@@ -118,7 +118,7 @@ namespace GitSharp.RevWalk
 		{
 			for (Entry q = _head; q != null; q = q.Next)
 			{
-				if ((q.Commit.flags & f) == 0) return false;
+				if ((q.Commit.Flags & f) == 0) return false;
 			}
 			return true;
 		}
@@ -127,7 +127,7 @@ namespace GitSharp.RevWalk
 		{
 			for (Entry q = _head; q != null; q = q.Next)
 			{
-				if ((q.Commit.flags & f) != 0) return true;
+				if ((q.Commit.Flags & f) != 0) return true;
 			}
 			return false;
 		}

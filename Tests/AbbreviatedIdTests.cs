@@ -52,17 +52,17 @@ namespace GitSharp.Tests
             Assert.IsNotNull(i);
             Assert.AreEqual(0, i.Length);
             Assert.IsFalse(i.isComplete());
-            Assert.AreEqual("", i.name());
+            Assert.AreEqual(string.Empty, i.name());
         }
 
         [Test]
         public void testEmpty_FromString()
         {
-            AbbreviatedObjectId i = AbbreviatedObjectId.FromString("");
+			AbbreviatedObjectId i = AbbreviatedObjectId.FromString(string.Empty);
             Assert.IsNotNull(i);
             Assert.AreEqual(0, i.Length);
             Assert.IsFalse(i.isComplete());
-            Assert.AreEqual("", i.name());
+            Assert.AreEqual(string.Empty, i.name());
         }
 
         [Test]

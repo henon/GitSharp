@@ -68,7 +68,7 @@ namespace GitSharp.RevWalk
 		/// instances inserted into it.
 		/// </para>
 		/// </summary>
-        private static readonly int InPending = REWRITE;
+        private const int InPending = REWRITE;
 
         private CanonicalTreeParser _treeWalk;
         private BlockObjQueue _pendingObjects;
@@ -132,7 +132,7 @@ namespace GitSharp.RevWalk
             {
                 AddObject(o);
                 o = ((RevTag)o).getObject();
-                parse(o);
+				parseHeaders(o);
             }
 
             if (o is RevCommit)
@@ -190,13 +190,13 @@ namespace GitSharp.RevWalk
         {
             while (o is RevTag)
             {
-                o.flags |= UNINTERESTING;
+                o.Flags |= UNINTERESTING;
                 if (hasRevSort(RevSort.BOUNDARY))
                 {
                 	AddObject(o);
                 }
                 o = ((RevTag)o).getObject();
-                parse(o);
+				parseHeaders(o);
             }
 
             if (o is RevCommit)
@@ -205,14 +205,14 @@ namespace GitSharp.RevWalk
             }
             else if (o is RevTree)
             {
-            	MarkTreeUninteresting((RevTree)o);
+            	MarkTreeUninteresting(o);
             }
             else
             {
-            	o.flags |= UNINTERESTING;
+            	o.Flags |= UNINTERESTING;
             }
 
-            if (o.getType() != Constants.OBJ_COMMIT && hasRevSort(RevSort.BOUNDARY))
+            if (o.Type != Constants.OBJ_COMMIT && hasRevSort(RevSort.BOUNDARY))
             {
                 AddObject(o);
             }
@@ -226,7 +226,7 @@ namespace GitSharp.RevWalk
                 
 				if (r == null) return null;
                 
-				if ((r.flags & UNINTERESTING) != 0)
+				if ((r.Flags & UNINTERESTING) != 0)
                 {
                     MarkTreeUninteresting(r.Tree);
 
@@ -266,7 +266,7 @@ namespace GitSharp.RevWalk
 
             if (_nextSubtree != null)
             {
-                _treeWalk = _treeWalk.createSubtreeIterator0(getRepository(), _nextSubtree, WindowCursor);
+                _treeWalk = _treeWalk.createSubtreeIterator0(Repository, _nextSubtree, WindowCursor);
                 _nextSubtree = null;
             }
 
@@ -281,9 +281,9 @@ namespace GitSharp.RevWalk
 						_treeWalk.getEntryObjectId(IdBuffer);
 
 						RevBlob blob = lookupBlob(IdBuffer);
-						if ((blob.flags & SEEN) != 0) break;
+						if ((blob.Flags & SEEN) != 0) break;
 
-						blob.flags |= SEEN;
+						blob.Flags |= SEEN;
 						if (ShouldSkipObject(blob)) break;
 
 						_fromTreeWalk = true;
@@ -293,9 +293,9 @@ namespace GitSharp.RevWalk
 						_treeWalk.getEntryObjectId(IdBuffer);
 
 						RevTree tree = lookupTree(IdBuffer);
-						if ((tree.flags & SEEN) != 0) break;
+						if ((tree.Flags & SEEN) != 0) break;
 						
-						tree.flags |= SEEN;
+						tree.Flags |= SEEN;
 						if (ShouldSkipObject(tree)) break;
 						
 						_nextSubtree = tree;
@@ -319,15 +319,15 @@ namespace GitSharp.RevWalk
             {
                 RevObject obj = _pendingObjects.next();
                 if (obj == null) return null;
-                if ((obj.flags & SEEN) != 0) continue;
+                if ((obj.Flags & SEEN) != 0) continue;
                 
-				obj.flags |= SEEN;
+				obj.Flags |= SEEN;
                 if (ShouldSkipObject(obj)) continue;
                 
 				if (obj is RevTree)
                 {
                     _currentTree = (RevTree)obj;
-                    _treeWalk = _treeWalk.resetRoot(getRepository(), _currentTree, WindowCursor);
+                    _treeWalk = _treeWalk.resetRoot(Repository, _currentTree, WindowCursor);
                 }
 
                 return obj;
@@ -336,7 +336,7 @@ namespace GitSharp.RevWalk
 
         private bool ShouldSkipObject(RevObject o)
         {
-            return (o.flags & UNINTERESTING) != 0 && !hasRevSort(RevSort.BOUNDARY);
+            return (o.Flags & UNINTERESTING) != 0 && !hasRevSort(RevSort.BOUNDARY);
         }
 
 		/// <summary>
@@ -378,7 +378,7 @@ namespace GitSharp.RevWalk
                 RevObject o = nextObject();
                 if (o == null) break;
 
-                if (o is RevBlob && !getRepository().HasObject(o))
+                if (o is RevBlob && !Repository.HasObject(o))
                 {
                 	throw new MissingObjectException(o, Constants.TYPE_BLOB);
                 }
@@ -404,9 +404,9 @@ namespace GitSharp.RevWalk
 			get { return _fromTreeWalk ? _treeWalk.EntryPathString : null; }
 		}
 
-		public override void dispose()
+		public override void Dispose()
         {
-            base.dispose();
+            base.Dispose();
             _pendingObjects = new BlockObjQueue();
             _nextSubtree = null;
             _currentTree = null;
@@ -421,18 +421,18 @@ namespace GitSharp.RevWalk
 
         private void AddObject(RevObject obj)
         {
-        	if ((obj.flags & InPending) != 0) return;
+        	if ((obj.Flags & InPending) != 0) return;
 
-        	obj.flags |= InPending;
+        	obj.Flags |= InPending;
         	_pendingObjects.add(obj);
         }
 
         private void MarkTreeUninteresting(RevObject tree)
         {
-            if ((tree.flags & UNINTERESTING) != 0) return;
-            tree.flags |= UNINTERESTING;
+            if ((tree.Flags & UNINTERESTING) != 0) return;
+            tree.Flags |= UNINTERESTING;
 
-			_treeWalk = _treeWalk.resetRoot(getRepository(), tree, WindowCursor);
+			_treeWalk = _treeWalk.resetRoot(Repository, tree, WindowCursor);
             while (!_treeWalk.eof())
             {
                 FileMode mode = _treeWalk.EntryFileMode;
@@ -442,16 +442,16 @@ namespace GitSharp.RevWalk
                 {
                     case Constants.OBJ_BLOB:
 						_treeWalk.getEntryObjectId(IdBuffer);
-						lookupBlob(IdBuffer).flags |= UNINTERESTING;
+						lookupBlob(IdBuffer).Flags |= UNINTERESTING;
 						break;
 
                     case Constants.OBJ_TREE:
 						_treeWalk.getEntryObjectId(IdBuffer);
 						RevTree t = lookupTree(IdBuffer);
-						if ((t.flags & UNINTERESTING) == 0)
+						if ((t.Flags & UNINTERESTING) == 0)
 						{
-							t.flags |= UNINTERESTING;
-							_treeWalk = _treeWalk.createSubtreeIterator0(getRepository(), t, WindowCursor);
+							t.Flags |= UNINTERESTING;
+							_treeWalk = _treeWalk.createSubtreeIterator0(Repository, t, WindowCursor);
 							continue;
 						}
 						break;

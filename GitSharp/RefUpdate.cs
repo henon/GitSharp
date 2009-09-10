@@ -42,6 +42,7 @@ using System;
 using System.IO;
 using GitSharp.RevWalk;
 using GitSharp.Exceptions;
+using GitSharp.Util;
 
 namespace GitSharp
 {
@@ -321,7 +322,7 @@ namespace GitSharp
 			int lastSlash = Name.LastIndexOf('/');
 			if (lastSlash > 0)
 			{
-				if (Repository.getAllRefs().ContainsKey(Name.Substring(0, lastSlash)))
+				if (Repository.getAllRefs().ContainsKey(Name.Slice(0, lastSlash)))
 				{
 					return RefUpdateResult.LockFailure;
 				}

@@ -157,7 +157,7 @@ namespace GitSharp.Transport
                     char c = line[i];
                     if (!haveKeyword && (c == ' ' || c == '\t' || c == '='))
                     {
-                        keyword = line.Substring(0, i);
+                        keyword = line.Slice(0, i);
                         haveKeyword = true;
                         continue;
                     }

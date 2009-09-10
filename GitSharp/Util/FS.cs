@@ -198,6 +198,8 @@ namespace GitSharp.Util
             //    return null;
             //return new File(home).getAbsoluteFile();
         }
+
+
     }
 
 }

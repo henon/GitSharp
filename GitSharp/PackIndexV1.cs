@@ -54,12 +54,44 @@ namespace GitSharp
 
         public PackIndexV1(Stream fd, byte[] hdr)
         {
-            var fanoutTable = new byte[IdxHdrLen];
+            byte[] fanoutTable = new byte[IDX_HDR_LEN];
             Array.Copy(hdr, 0, fanoutTable, 0, hdr.Length);
             NB.ReadFully(fd, fanoutTable, hdr.Length, IdxHdrLen - hdr.Length);
 
-            _idxHeader = new long[256]; // really unsigned 32-bit...
-            for (int k = 0; k < _idxHeader.Length; k++)
+            idxHeader = new long[256];
+            for (int k = 0; k < idxHeader.Length; k++)
+                idxHeader[k] = NB.decodeUInt32(fanoutTable, k*4);
+            
+            idxdata = new byte[idxHeader.Length][];
+            for (int k = 0; k < idxHeader.Length; k++)
+            {
+                uint n;
+                if (k == 0)
+                    n = (uint)(idxHeader[k]);
+                else
+                    n = (uint) (idxHeader[k] - idxHeader[k - 1]);
+                if (n > 0)
+                {
+                    idxdata[k] = new byte[n * (Constants.OBJECT_ID_LENGTH + 4)];
+                    NB.ReadFully(fd, idxdata[k], 0, idxdata[k].Length);
+                }
+            }
+
+            ObjectCount = idxHeader[255];
+            _packChecksum = new byte[20];
+            NB.ReadFully(fd, packChecksum, 0, packChecksum.Length);
+            
+
+
+            /*var fanoutTable = new byte[IDX_HDR_LEN];
+            Array.Copy(hdr, 0, fanoutTable, 0, hdr.Length);
+            NB.ReadFully(fd, fanoutTable, hdr.Length, IDX_HDR_LEN - hdr.Length);
+
+            idxHeader = new long[256]; // really unsigned 32-bit...
+            for (int k = 0; k < idxHeader.Length; k++)
+                idxHeader[k] = NB.DecodeUInt32(fanoutTable, k * 4);
+            idxdata = new byte[idxHeader.Length][];
+            for (int k = 0; k < idxHeader.Length; k++)
             {
             	_idxHeader[k] = NB.DecodeUInt32(fanoutTable, k * 4);
             }
@@ -87,6 +119,7 @@ namespace GitSharp
 
             _packChecksum = new byte[20];
             NB.ReadFully(fd, _packChecksum, 0, _packChecksum.Length);
+             * */
         }
 
         public override IEnumerator<MutableEntry> GetEnumerator()
@@ -234,4 +267,3 @@ namespace GitSharp
     	#endregion
 
     }
-}

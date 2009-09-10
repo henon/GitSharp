@@ -38,7 +38,7 @@
 using System;
 using System.IO;
 using System.Threading;
-using Result = GitSharp.RefUpdate.RefUpdateResult;
+using RefResult = GitSharp.RefUpdate.RefUpdateResult;
 
 namespace GitSharp
 {
@@ -46,11 +46,11 @@ namespace GitSharp
 	{
 		private readonly RefUpdate _newToUpdate;
 		private readonly RefUpdate _oldFromDelete;
-		private Result _renameResult;
+		private RefResult _renameResult;
 
 		public RefRename(RefUpdate toUpdate, RefUpdate fromUpdate)
 		{
-			_renameResult = Result.NotAttempted;
+			_renameResult = RefResult.NotAttempted;
 			_newToUpdate = toUpdate;
 			_oldFromDelete = fromUpdate;
 		}
@@ -58,7 +58,7 @@ namespace GitSharp
 		/// <summary>
 		/// Gets the result of rename operation.
 		/// </summary>
-		public Result Result
+		public RefResult Result
 		{
 			get { return _renameResult; }
 		}
@@ -68,7 +68,7 @@ namespace GitSharp
 		/// </summary>
 		/// <returns></returns>
 		/// <exception cref="IOException"></exception>
-		public Result Rename()
+		public RefResult Rename()
 		{
 			Ref oldRef = _oldFromDelete.Repository.getRef(Constants.HEAD);
 			bool renameHeadToo = oldRef != null && oldRef.Name == _oldFromDelete.Name;
@@ -88,14 +88,14 @@ namespace GitSharp
 					catch (IOException)
 					{
 						RefLogWriter.renameTo(db, _newToUpdate, _oldFromDelete);
-						return _renameResult = Result.LockFailure;
+						return _renameResult = RefResult.LockFailure;
 					}
 				}
 
 				tmpUpdateRef.NewObjectId = _oldFromDelete.OldObjectId;
 				tmpUpdateRef.IsForceUpdate = true;
-				Result update = tmpUpdateRef.Update();
-				if (update != Result.Forced && update != Result.New && update != Result.NoChange)
+				RefResult update = tmpUpdateRef.Update();
+				if (update != RefResult.Forced && update != RefResult.New && update != RefResult.NoChange)
 				{
 					RefLogWriter.renameTo(db, _newToUpdate, _oldFromDelete);
 					if (renameHeadToo)
@@ -108,8 +108,8 @@ namespace GitSharp
 
 				_oldFromDelete.ExpectedOldObjectId = _oldFromDelete.OldObjectId;
 				_oldFromDelete.IsForceUpdate = true;
-				Result delete = _oldFromDelete.Delete();
-				if (delete != Result.Forced)
+				RefResult delete = _oldFromDelete.Delete();
+				if (delete != RefResult.Forced)
 				{
 					if (db.getRef(_oldFromDelete.Name) != null)
 					{
@@ -123,8 +123,8 @@ namespace GitSharp
 				}
 
 				_newToUpdate.NewObjectId = tmpUpdateRef.NewObjectId;
-				Result updateResult = _newToUpdate.Update();
-				if (updateResult != Result.New)
+				RefResult updateResult = _newToUpdate.Update();
+				if (updateResult != RefResult.New)
 				{
 					RefLogWriter.renameTo(db, _newToUpdate, _oldFromDelete);
 					if (renameHeadToo)
@@ -135,12 +135,12 @@ namespace GitSharp
 					_oldFromDelete.NewObjectId = _oldFromDelete.OldObjectId;
 					_oldFromDelete.IsForceUpdate = true;
 					_oldFromDelete.SetRefLogMessage(null, false);
-					Result undelete = _oldFromDelete.Update();
-					if (undelete != Result.New && undelete != Result.LockFailure)
+					RefResult undelete = _oldFromDelete.Update();
+					if (undelete != RefResult.New && undelete != RefResult.LockFailure)
 					{
-						return _renameResult = Result.IOFailure;
+						return _renameResult = RefResult.IOFailure;
 					}
-					return _renameResult = Result.LockFailure;
+					return _renameResult = RefResult.LockFailure;
 				}
 
 				if (renameHeadToo)
@@ -156,7 +156,7 @@ namespace GitSharp
 						+ db.ShortenRefName(_oldFromDelete.Name) + " to "
 						+ db.ShortenRefName(_newToUpdate.Name));
 				
-				return _renameResult = Result.Renamed;
+				return _renameResult = RefResult.Renamed;
 			}
 			catch (Exception)
 			{

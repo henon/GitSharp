@@ -52,7 +52,7 @@ namespace GitSharp.Tests
 		{
 			Tree tree = new Tree(db);
 			TreeIterator i = MakeIterator(tree);
-			Assert.IsFalse(i.MoveNext());
+			Assert.IsFalse(i.hasNext());
 		}
 
 		///	<summary>
@@ -65,8 +65,8 @@ namespace GitSharp.Tests
 			Tree tree = new Tree(db);
 			tree.AddFile("x");
 			TreeIterator i = MakeIterator(tree);
-			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("x", i.Current.Name);
+			Assert.IsTrue(i.hasNext());
+			Assert.AreEqual("x", i.next().Name);
 		}
 
 		///	<summary>
@@ -80,9 +80,9 @@ namespace GitSharp.Tests
 			tree.AddFile("a");
 			tree.AddFile("x");
 			TreeIterator i = MakeIterator(tree);
-			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("a", i.Current.Name);
-			Assert.AreEqual("x", i.Current.Name);
+			Assert.IsTrue(i.hasNext());
+			Assert.AreEqual("a", i.next().Name);
+			Assert.AreEqual("x", i.next().Name);
 		}
 
 		///	<summary>
@@ -95,7 +95,7 @@ namespace GitSharp.Tests
 			Tree tree = new Tree(db);
 			tree.AddTree("a");
 			TreeIterator i = MakeIterator(tree);
-			Assert.IsFalse(i.MoveNext());
+			Assert.IsFalse(i.hasNext());
 		}
 
 		[Test]
@@ -111,21 +111,21 @@ namespace GitSharp.Tests
 			tree.AddFile("a=d");
 
 			TreeIterator i = MakeIterator(tree);
-			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("a.b", i.Current.FullName);
-			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("a.c", i.Current.FullName);
-			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("a/b", i.Current.FullName);
-			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("a/b.b/b", i.Current.FullName);
-			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("a/c", i.Current.FullName);
-			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("a=c", i.Current.FullName);
-			Assert.IsTrue(i.MoveNext());
-			Assert.AreEqual("a=d", i.Current.FullName);
-			Assert.IsFalse(i.MoveNext());
+			Assert.IsTrue(i.hasNext());
+			Assert.AreEqual("a.b", i.next().FullName);
+            Assert.IsTrue(i.hasNext());
+            Assert.AreEqual("a.c", i.next().FullName);
+            Assert.IsTrue(i.hasNext());
+            Assert.AreEqual("a/b", i.next().FullName);
+            Assert.IsTrue(i.hasNext());
+            Assert.AreEqual("a/b.b/b", i.next().FullName);
+            Assert.IsTrue(i.hasNext());
+            Assert.AreEqual("a/c", i.next().FullName);
+            Assert.IsTrue(i.hasNext());
+            Assert.AreEqual("a=c", i.next().FullName);
+            Assert.IsTrue(i.hasNext());
+            Assert.AreEqual("a=d", i.next().FullName);
+            Assert.IsFalse(i.hasNext());
 		}
 
 		private static TreeIterator MakeIterator(Tree tree)

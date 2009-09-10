@@ -270,7 +270,7 @@ namespace GitSharp
 				string entName = ent.Name;
 				if (".".Equals(entName) || "..".Equals(entName)) continue;
 
-				if (ent is DirectoryInfo)
+				if (ent.IsDirectory())
 				{
 					ReadLooseRefs(avail, prefix + entName + "/", ent as DirectoryInfo);
 				}
@@ -510,7 +510,7 @@ namespace GitSharp
 						}
 
 						int sp = p.IndexOf(' ');
-						ObjectId id2 = ObjectId.FromString(p.Substring(0, sp));
+						ObjectId id2 = ObjectId.FromString(p.Slice(0, sp));
 						string name = p.Substring(sp + 1);
 						last = new Ref(Ref.Storage.Packed, name, id2);
 						newPackedRefs.Add(last.Name, last);

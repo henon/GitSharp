@@ -44,6 +44,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using GitSharp.Exceptions;
+using GitSharp.Util;
 
 namespace GitSharp
 {
@@ -253,7 +254,7 @@ namespace GitSharp
             FileSystemInfo parentFile = Directory.GetParent(f.FullName);
             if (parentFile == null) return;
 
-            while (!parentFile.Equals(_root))
+            while (parentFile.FullName != _root.FullName)
             {
                 if (parentFile.IsDirectory() && Directory.GetFiles(parentFile.FullName).Length == 0)
                 {
@@ -298,33 +299,26 @@ namespace GitSharp
             Conflicts.RemoveAll(conflict => Removed.Contains(conflict));
         }
 
-        private List<string> ListFiles(FileSystemInfo file)
+
+         private List<string> ListFiles(FileSystemInfo file)
         {
             var list = new List<string>();
-            ListFiles(file.FullName, list);
+            ListFiles(file, list);
             return list;
         }
 
-        private void ListFiles(string dir, ICollection<string> list)
-        {
-            if (File.Exists(dir))
-            {
-                list.Add(dir);
-                return;
-            }
-
-            foreach (string path in Directory.GetFiles(Path.GetDirectoryName(dir)))
-            {
-                if (Directory.Exists(path))
-                {
-                    ListFiles(path, list);
-                }
-                else
-                {
-                    list.Add(Repository.StripWorkDir(_root, new FileInfo(path)));
-                }
-            }
-        }
+         private void ListFiles(FileSystemInfo dir, ICollection<string> list)
+         {
+             foreach (FileInfo f in dir.ListFiles())
+             {
+                 if (f.IsDirectory())
+                     ListFiles(f, list);
+                 else
+                 {
+                     list.Add(Repository.StripWorkDir(_root, new FileInfo(f.FullName)));
+                 }
+             }
+         }
 
         internal void PrescanTwoTrees()
         {
@@ -493,7 +487,7 @@ namespace GitSharp
                 return false;
             }
 
-            string parent = name.Substring(0, name.LastIndexOf("/"));
+            string parent = name.Slice(0, name.LastIndexOf("/"));
             return t.FindBlobMember(parent) != null || HasParentBlob(t, parent);
         }
 

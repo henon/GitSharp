@@ -233,8 +233,8 @@ namespace GitSharp
 		{
 			var mi = new TreeIterator(tree, TreeIterator.Order.POSTORDER);
 			var ai = new TreeIterator(auxTree, TreeIterator.Order.POSTORDER);
-			TreeEntry m = mi.MoveNext() ? mi.Current : null;
-			TreeEntry a = ai.MoveNext() ? ai.Current : null;
+			TreeEntry m = mi.hasNext() ? mi.next() : null;
+			TreeEntry a = ai.hasNext() ? ai.next() : null;
 			int curIndexPos = IndexCounter;
 			GitIndex.Entry entry = (IndexCounter < _indexMembers.Length) ? _indexMembers[0] : null;
 			while (((m != null) || (a != null)) || (entry != null))
@@ -257,12 +257,12 @@ namespace GitSharp
 
 				if (pm != null)
 				{
-					m = mi.MoveNext() ? mi.Current : null;
+					m = mi.hasNext() ? mi.next() : null;
 				}
 
 				if (pa != null)
 				{
-					a = ai.MoveNext() ? ai.Current : null;
+					a = ai.hasNext() ? ai.next() : null;
 				}
 
 				if (pi != null)

@@ -173,18 +173,10 @@ namespace GitSharp
 
 		public override long ObjectCount { get; internal set; }
 
-            // 32 bit offset table. Any entries with the most significant bit
-            // set require a 64 bit offset entry in another table.
-            //
-            int o64cnt = 0;
-            for (int k = 0; k < FANOUT; k++)
-            {
-                byte[] ofs = offset32[k];
-                NB.ReadFully(fd, ofs, 0, ofs.Length);
-                for (int p = 0; p < ofs.Length; p += 4)
-                    if ((sbyte)ofs[p] < 0)
-                        o64cnt++;
-            }
+		public override long Offset64Count
+		{
+			get  { return _offset64.Length / 8; }
+		}
 
 		public override ObjectId GetObjectId(long nthPosition)
 		{

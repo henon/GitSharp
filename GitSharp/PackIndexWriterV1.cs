@@ -40,6 +40,7 @@
 
 using System.IO;
 using GitSharp.Transport;
+using GitSharp.Util;
 
 namespace GitSharp
 {
@@ -76,4 +77,3 @@ namespace GitSharp
         }
     }
 }
-

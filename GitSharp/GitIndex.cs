@@ -563,6 +563,7 @@ namespace GitSharp
 
         internal string[] SplitDirPath(string name)
         {
+            // TODO : Maybe should we rely on a plain string.Split(). Seems to deliver the expected output.
             var tmp = new string[name.Length / 2 + 1];
             int p0 = -1;
             int p1;

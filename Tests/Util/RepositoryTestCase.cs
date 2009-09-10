@@ -294,7 +294,9 @@ namespace GitSharp.Tests
                     throw new IOException("Could not create directory " + tfp.FullName);
                 }
             }
-            File.WriteAllText(tf.FullName, data, Encoding.UTF8);
+
+			File.WriteAllText(tf.FullName, data);
+
             return tf;
         }
 

@@ -620,7 +620,7 @@ namespace GitSharp
             {
                 for (int i = 0; i < x.Length && i < y.Length; ++i)
                 {
-                    int c = x[i] - x[i];
+                    int c = x[i] - y[i];
                     if (c != 0)
                     {
                         return c;

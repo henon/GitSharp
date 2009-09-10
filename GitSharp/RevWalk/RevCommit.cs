@@ -50,7 +50,7 @@ namespace GitSharp.RevWalk
 	/// </summary>
 	public class RevCommit : RevObject
 	{
-		public static readonly RevCommit[] NO_PARENTS = { };
+		internal static readonly RevCommit[] NoParents = { };
 
 		private RevTree _tree;
 		private byte[] _buffer;

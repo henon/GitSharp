@@ -74,9 +74,9 @@ namespace GitSharp.TreeWalk
                 if (cmp != 0) return cmp;
             }
 
-            if (cPos < aLen) return (a[cPos] & 0xff) - lastPathChar(o2);
-            if (cPos < bLen) return lastPathChar(o1) - (b[cPos] & 0xff);
-            return lastPathChar(o1) - lastPathChar(o2);
+            if (cPos < aLen) return (a[cPos] & 0xff) - LastPathChar(o2);
+            if (cPos < bLen) return LastPathChar(o1) - (b[cPos] & 0xff);
+            return LastPathChar(o1) - LastPathChar(o2);
         };
 
         /// <summary>
@@ -334,28 +334,28 @@ namespace GitSharp.TreeWalk
             PathLen = PathOffset + nameLen;
         }
 
-        /**
-         * Get the byte Length of this entry.
-         *
-         * @return size of this file, in bytes.
-         */
+        /// <summary>
+        /// Get the byte Length of this entry.
+        /// </summary>
+		/// <returns>Size of this file, in bytes.</returns>
         public long getEntryLength()
         {
             return Current.Length;
         }
 
-        /**
-         * Get the last modified time of this entry.
-         *
-         * @return last modified time of this file, in milliseconds since the epoch
-         *         (Jan 1, 1970 UTC).
-         */
+        /// <summary>
+        /// Get the last modified time of this entry.
+        /// </summary>
+        /// <returns>
+        /// Last modified time of this file, in milliseconds since the epoch
+		/// (Jan 1, 1970 UTC).
+        /// </returns>
         public long getEntryLastModified()
         {
             return Current.LastModified;
         }
 
-        private static int lastPathChar(Entry e)
+        private static int LastPathChar(Entry e)
         {
             return e.Mode == FileMode.Tree ? (byte)'/' : (byte)'\0';
         }

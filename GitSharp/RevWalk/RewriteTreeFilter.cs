@@ -193,7 +193,7 @@ namespace GitSharp.RevWalk
                     // "empty tree root" and thus their history is not relevant.
                     // Cut our grandparents to be an empty list.
                     //
-                    pList[i].Parents = RevCommit.NO_PARENTS;
+                    pList[i].Parents = RevCommit.NoParents;
                 }
 
                 // We have an interesting difference relative to this parent.

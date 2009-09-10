@@ -40,6 +40,7 @@ using System;
 using System.IO;
 using GitSharp.Exceptions;
 using GitSharp.Util;
+using ICSharpCode.SharpZipLib.Tar;
 
 namespace GitSharp.Transport
 {
@@ -98,7 +99,16 @@ namespace GitSharp.Transport
                 return string.Empty;
 
             byte[] raw = new byte[len];
-            NB.ReadFully(ins, raw, 0, len);
+
+            try
+            {
+                NB.ReadFully(ins, raw, 0, len);
+            }
+            catch (IOException e)
+            {
+                throw invalidHeader(lenbuffer, e);
+            }
+
             if (raw[len - 1] == '\n')
                 len--;
             return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
@@ -115,13 +125,30 @@ namespace GitSharp.Transport
                 return string.Empty;
 
             byte[] raw = new byte[len];
-            NB.ReadFully(ins, raw, 0, len);
+
+            try
+            {
+                NB.ReadFully(ins, raw, 0, len);
+            }
+            catch (IOException e)
+            {
+                throw invalidHeader(lenbuffer, e);
+            }
+
             return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
         }
 
         public int ReadLength()
         {
-            NB.ReadFully(ins, lenbuffer, 0, 4);
+            try
+            {
+                NB.ReadFully(ins, lenbuffer, 0, 4);
+            }
+            catch (IOException e)
+            {
+                throw invalidHeader(lenbuffer, e);
+            }
+
             try
             {
                 int len = RawParseUtils.parseHexInt16(lenbuffer, 0);
@@ -129,11 +156,16 @@ namespace GitSharp.Transport
                     throw new IndexOutOfRangeException();
                 return len;
             }
-            catch (IndexOutOfRangeException)
+            catch (IndexOutOfRangeException e)
             {
-                throw new IOException("Invalid packet line header: " + (char) lenbuffer[0] +
-                                                    (char) lenbuffer[1] + (char) lenbuffer[2] + (char) lenbuffer[3]);
+                throw invalidHeader(lenbuffer, e);
             }
+        }
+
+        private static Exception invalidHeader(byte[] lenbuffer, Exception e)
+        {
+            return new IOException("Invalid packet line header: " + (char)lenbuffer[0] +
+                                                    (char)lenbuffer[1] + (char)lenbuffer[2] + (char)lenbuffer[3], e);
         }
     }
 

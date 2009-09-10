@@ -44,6 +44,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using GitSharp.Exceptions;
+using GitSharp.Util;
 
 namespace GitSharp
 {
@@ -486,7 +487,7 @@ namespace GitSharp
                 return false;
             }
 
-            string parent = name.Substring(0, name.LastIndexOf("/"));
+            string parent = name.Slice(0, name.LastIndexOf("/"));
             return t.FindBlobMember(parent) != null || HasParentBlob(t, parent);
         }
 

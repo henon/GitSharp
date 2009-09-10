@@ -71,7 +71,9 @@ namespace GitSharp.Util
 
         public byte[] Digest()
         {
-            return new SHA1Managed().ComputeHash(_stream.ToArray());
+            var ret = new SHA1Managed().ComputeHash(_stream.ToArray());
+            Reset();
+            return ret;
         }
 
         public byte[] Digest(byte[] input)

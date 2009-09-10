@@ -67,7 +67,7 @@ namespace GitSharp.Tests
             var workDirCheckout2 = new WorkDirCheckout(db, trash, index, index) { FailOnConflict = false };
             workDirCheckout2.checkout();
 
-            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo")).IsFile());
+            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "bar")).IsFile());
             Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo/bar/baz/qux")).IsFile());
 
             var index2 = new GitIndex(db);

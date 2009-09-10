@@ -203,7 +203,7 @@ namespace GitSharp.Util
 				    int i = in_str.IndexOf('/') + 1;
 				    if (i == in_str.Length)
 					    return in_str;
-				    return in_str.Substring(0, i) + base.quote(in_str.Substring(i));
+				    return in_str.Slice(0, i) + base.quote(in_str.Substring(i));
 			    }
 
 			    return base.quote(in_str);

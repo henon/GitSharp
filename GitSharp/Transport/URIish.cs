@@ -39,6 +39,7 @@
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using GitSharp.Util;
 
 namespace GitSharp.Transport
 {
@@ -80,7 +81,7 @@ namespace GitSharp.Transport
             if (ui != null)
             {
                 int d = ui.IndexOf(':');
-                User = d < 0 ? ui : ui.Substring(0, d);
+                User = d < 0 ? ui : ui.Slice(0, d);
                 Pass = d < 0 ? null : ui.Substring(d + 1);
             }
         }

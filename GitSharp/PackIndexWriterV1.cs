@@ -32,8 +32,9 @@ namespace GitSharp
             {
                 if (!CanStore(oe))
                     throw new IOException("Pack too large for index version 1");
-                _stream.Write((int)oe.Offset);
-				_stream.Write(oe);
+                NB.encodeInt32(tmp, 0, (int)oe.Offset);
+                oe.copyRawTo(tmp, 4);
+                _stream.Write(tmp, 0, tmp.Length);
             }
 
             WriteChecksumFooter();

@@ -563,13 +563,14 @@ namespace GitSharp
 
         internal string[] SplitDirPath(string name)
         {
+            // TODO : Maybe should we rely on a plain string.Split(). Seems to deliver the expected output.
             var tmp = new string[name.Length / 2 + 1];
             int p0 = -1;
             int p1;
             int c = 0;
             while ((p1 = name.IndexOf('/', p0 + 1)) != -1)
             {
-                tmp[c++] = name.Substring(p0 + 1, p1 - p0 + 1);
+                tmp[c++] = name.Slice(p0 + 1, p1 - p0 + 1);
                 p0 = p1;
             }
             tmp[c++] = name.Substring(p0 + 1);

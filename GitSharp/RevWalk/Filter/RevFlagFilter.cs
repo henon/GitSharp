@@ -36,122 +36,128 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Collections.Generic;
 namespace GitSharp.RevWalk.Filter
 {
+	/// <summary>
+	/// Matches only commits with some/all RevFlags already set.
+	/// </summary>
+	public abstract class RevFlagFilter : RevFilter
+	{
+		private readonly RevFlagSet _flags;
 
-    /** Matches only commits with some/all RevFlags already set. */
-    public abstract class RevFlagFilter : RevFilter
-    {
-        /**
-         * Create a new filter that tests for a single flag.
-         * 
-         * @param a
-         *            the flag to test.
-         * @return filter that selects only commits with flag <code>a</code>.
-         */
-        public static RevFilter has(RevFlag a)
-        {
-            RevFlagSet s = new RevFlagSet();
-            s.Add(a);
-            return new HasAll(s);
-        }
+		/// <summary>
+		/// Create a new filter that tests for a single flag.
+		///	</summary>
+		/// <param name="a">The flag to test.</param>
+		///	<returns>
+		/// Filter that selects only commits with flag <paramref name="a"/>.
+		/// </returns>
+		public static RevFilter has(RevFlag a)
+		{
+			var s = new RevFlagSet { a };
+			return new HasAll(s);
+		}
 
-        /**
-         * Create a new filter that tests all flags in a set.
-         * 
-         * @param a
-         *            set of flags to test.
-         * @return filter that selects only commits with all flags in <code>a</code>.
-         */
-        public static RevFilter hasAll(params RevFlag[] a)
-        {
-            RevFlagSet set = new RevFlagSet();
-            foreach (RevFlag flag in a)
-                set.Add(flag);
-            return new HasAll(set);
-        }
+		///	<summary>
+		/// Create a new filter that tests all flags in a set.
+		///	</summary>
+		///	<param name="a">Set of flags to test.</param>
+		///	<returns>
+		/// Filter that selects only commits with all flags in <paramref name="a"/>.
+		/// </returns>
+		public static RevFilter hasAll(params RevFlag[] a)
+		{
+			var set = new RevFlagSet();
+			foreach (RevFlag flag in a)
+			{
+				set.Add(flag);
+			}
+			return new HasAll(set);
+		}
 
-        /**
-         * Create a new filter that tests all flags in a set.
-         * 
-         * @param a
-         *            set of flags to test.
-         * @return filter that selects only commits with all flags in <code>a</code>.
-         */
-        public static RevFilter hasAll(RevFlagSet a)
-        {
-            return new HasAll(new RevFlagSet(a));
-        }
+		///	<summary>
+		/// Create a new filter that tests all flags in a set.
+		///	</summary>
+		///	<param name="a">Set of flags to test.</param>
+		///	<returns> filter that selects only commits with all flags in <paramref name="a"/>.
+		/// </returns>
+		public static RevFilter hasAll(RevFlagSet a)
+		{
+			return new HasAll(new RevFlagSet(a));
+		}
 
-        /**
-         * Create a new filter that tests for any flag in a set.
-         * 
-         * @param a
-         *            set of flags to test.
-         * @return filter that selects only commits with any flag in <code>a</code>.
-         */
-        public static RevFilter hasAny(params RevFlag[] a)
-        {
-            RevFlagSet set = new RevFlagSet();
-            foreach (RevFlag flag in a)
-                set.Add(flag);
-            return new HasAny(set);
-        }
+		///	<summary>
+		/// Create a new filter that tests for any flag in a set.
+		///	</summary>
+		///	<param name="a">Set of flags to test. </param>
+		///	<returns>
+		/// Filter that selects only commits with any flag in <code>a</code>.
+		/// </returns>
+		public static RevFilter hasAny(params RevFlag[] a)
+		{
+			var set = new RevFlagSet();
+			foreach (RevFlag flag in a)
+			{
+				set.Add(flag);
+			}
+			return new HasAny(set);
+		}
 
-        /**
-         * Create a new filter that tests for any flag in a set.
-         * 
-         * @param a
-         *            set of flags to test.
-         * @return filter that selects only commits with any flag in <code>a</code>.
-         */
-        public static RevFilter hasAny(RevFlagSet a)
-        {
-            return new HasAny(new RevFlagSet(a));
-        }
+		///	<summary>
+		/// Create a new filter that tests for any flag in a set.
+		///	</summary>
+		///	<param name="a">Set of flags to test.</param>
+		///	<returns>
+		/// Filter that selects only commits with any flag in <code>a</code>.
+		/// </returns>
+		public static RevFilter hasAny(RevFlagSet a)
+		{
+			return new HasAny(new RevFlagSet(a));
+		}
 
-        public RevFlagSet flags;
+		internal RevFlagFilter(RevFlagSet m)
+		{
+			_flags = m;
+		}
 
-        public RevFlagFilter(RevFlagSet m)
-        {
-            flags = m;
-        }
+		public override RevFilter Clone()
+		{
+			return this;
+		}
 
-        public override RevFilter Clone()
-        {
-            return this;
-        }
+		public override string ToString()
+		{
+			return base.ToString() + _flags;
+		}
 
-        public override string ToString()
-        {
-            return base.ToString() + flags;
-        }
+		#region Nested Types
 
-        public class HasAll : RevFlagFilter
-        {
-            public HasAll(RevFlagSet m)
-                : base(m)
-            {
-            }
+		private class HasAll : RevFlagFilter
+		{
+			public HasAll(RevFlagSet m)
+				: base(m)
+			{
+			}
 
-            public override bool include(RevWalk walker, RevCommit c)
-            {
-                return c.hasAll(flags);
-            }
-        }
+			public override bool include(RevWalk walker, RevCommit c)
+			{
+				return c.hasAll(_flags);
+			}
+		}
 
-        public class HasAny : RevFlagFilter
-        {
-            public HasAny(RevFlagSet m)
-                : base(m)
-            {
-            }
+		private class HasAny : RevFlagFilter
+		{
+			internal HasAny(RevFlagSet m)
+				: base(m)
+			{
+			}
 
-            public override bool include(RevWalk walker, RevCommit c)
-            {
-                return c.hasAny(flags);
-            }
-        }
-    }
+			public override bool include(RevWalk walker, RevCommit c)
+			{
+				return c.hasAny(_flags);
+			}
+		}
+
+		#endregion
+	}
 }

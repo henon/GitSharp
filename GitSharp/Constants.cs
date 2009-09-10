@@ -49,15 +49,14 @@ namespace GitSharp
 {
     public static class Constants
     {
-
-        public static string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
+        public const string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
 
         /// <summary>
         ///   Special name for the "HEAD" symbolic ref
         /// </summary>
-        public static readonly string Head = "HEAD";
+        public const string Head = "HEAD";
 
-        public static readonly string Master = "master";
+        public const string Master = "master";
 
         public static class ObjectTypes
         {
@@ -102,28 +101,35 @@ namespace GitSharp
             /// </remarks>
             public const string Commit = "commit";
 
-            public static readonly byte[] EncodedCommit = new byte[] { (byte)'c', (byte)'o', (byte)'m', (byte)'m', (byte)'i', (byte)'t' };
-            public static readonly byte[] EncodedTree = new byte[] { (byte)'t', (byte)'r', (byte)'e', (byte)'e' };
-            public static readonly byte[] EncodedBlob = new byte[] { (byte)'b', (byte)'l', (byte)'o', (byte)'b' };
-            public static readonly byte[] EncodedTag = new byte[] { (byte)'t', (byte)'a', (byte)'g' };
-
+            public static readonly byte[] EncodedCommit = new[] { (byte)'c', (byte)'o', (byte)'m', (byte)'m', (byte)'i', (byte)'t' };
+            public static readonly byte[] EncodedTree = new[] { (byte)'t', (byte)'r', (byte)'e', (byte)'e' };
+            public static readonly byte[] EncodedBlob = new[] { (byte)'b', (byte)'l', (byte)'o', (byte)'b' };
+            public static readonly byte[] EncodedTag = new[] { (byte)'t', (byte)'a', (byte)'g' };
         }
 
-        public static readonly string Refs = "refs/";
-        public static readonly string RefsTags = Refs + "tags/";
-        public static readonly string RefsHeads = Refs + "heads/";
-        public static readonly string RefsRemotes = Refs + "remotes/";
+		public const string Refs = "refs/";
+		public const string RefsTags = Refs + "tags/";
+		public const string RefsHeads = Refs + "heads/";
+		public const string RefsRemotes = Refs + "remotes/";
 
-        public static readonly string[] RefSearchPaths = { "", Refs, RefsTags, RefsHeads, RefsRemotes };
+        public static readonly string[] RefSearchPaths = { string.Empty, Refs, RefsTags, RefsHeads, RefsRemotes };
 
-        /** Hash function used natively by Git for all objects. */
-        //private static string HASH_FUNCTION = "SHA-1"; // [henon] we don't use it anyway
+		/*
+        /// <summary>
+		/// Hash function used natively by Git for all objects.
+        /// </summary>
+        private const string HASH_FUNCTION = "SHA-1"; // [henon] we don't use it anyway
+		*/
 
-        /** Length of an object hash. */
-        public static int OBJECT_ID_LENGTH = 20;
+        /// <summary>
+		/// Length of an object hash.
+        /// </summary>
+        public const int OBJECT_ID_LENGTH = 20;
 
-        /** Special name for the "HEAD" symbolic-ref. */
-        public static string HEAD = "HEAD";
+        /// <summary>
+		/// Special name for the "HEAD" symbolic-ref.
+        /// </summary>
+        public const string HEAD = "HEAD";
 
         /// <summary>
         /// Text string that identifies an object as a commit.
@@ -133,7 +139,7 @@ namespace GitSharp
 		/// tree (set of files).
 		/// </para>
         /// </summary>
-        public static string TYPE_COMMIT = "commit";
+        public const string TYPE_COMMIT = "commit";
 
         /// <summary>
         /// Text string that identifies an object as a blob.
@@ -142,7 +148,7 @@ namespace GitSharp
 		/// well as for symlinks. Blobs form the bulk of any project's storage space.
 		/// </para>
 		/// </summary>
-        public static string TYPE_BLOB = "blob";
+		public const string TYPE_BLOB = "blob";
 
         /// <summary>
         /// Text string that identifies an object as a tree.
@@ -151,7 +157,7 @@ namespace GitSharp
 		/// for a tree is to store a version of a directory and its contents.
         /// </para>
         /// </summary>
-        public static string TYPE_TREE = "tree";
+		public const string TYPE_TREE = "tree";
 
         /// <summary>
         /// Text string that identifies an object as an annotated tag.
@@ -168,166 +174,193 @@ namespace GitSharp
         private static readonly byte[] EncodedTypeTree = encodeASCII(TYPE_TREE);
         private static readonly byte[] EncodedTypeTag = encodeASCII(TYPE_TAG);
 
-        /** An unknown or invalid object type code. */
+        /// <summary>
+		/// An unknown or invalid object type code.
+        /// </summary>
         public const int OBJ_BAD = -1;
 
-        /**
-         * In-pack object type: extended types.
-         * <p>
-         * This header code is reserved for future expansion. It is currently
-         * undefined/unsupported.
-         */
+        /// <summary>
+        /// In-pack object type: extended types.
+		/// <para />
+		/// This header code is reserved for future expansion. It is currently
+		/// undefined/unsupported.
+        /// </summary>
         public const int OBJ_EXT = 0;
 
-        /**
-         * In-pack object type: commit.
-         * <p>
-         * Indicates the associated object is a commit.
-         * <p>
-         * <b>This constant is fixed and is defined by the Git packfile format.</b>
-         * 
-         * @see #TYPE_COMMIT
-         */
+        /// <summary>
+        /// In-pack object type: commit.
+		/// <para />
+		/// Indicates the associated object is a commit.
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+		/// <seealso cref="TYPE_COMMIT"/>
+        /// </summary>
         public const int OBJ_COMMIT = 1;
 
-        /**
-         * In-pack object type: tree.
-         * <p>
-         * Indicates the associated object is a tree.
-         * <p>
-         * <b>This constant is fixed and is defined by the Git packfile format.</b>
-         * 
-         * @see #TYPE_BLOB
-         */
+        /// <summary>
+        /// In-pack object type: tree.
+		/// <para />
+		/// Indicates the associated object is a tree.
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+        /// </summary>
+		/// <seealso cref="TYPE_BLOB"/>
         public const int OBJ_TREE = 2;
 
-        /**
-         * In-pack object type: blob.
-         * <p>
-         * Indicates the associated object is a blob.
-         * <p>
-         * <b>This constant is fixed and is defined by the Git packfile format.</b>
-         * 
-         * @see #TYPE_BLOB
-         */
+        /// <summary>
+        /// In-pack object type: blob.
+		/// <para />
+		/// Indicates the associated object is a blob.
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+        /// </summary>
+		/// <seealso cref="TYPE_BLOB"/>
         public const int OBJ_BLOB = 3;
 
-        /**
-         * In-pack object type: annotated tag.
-         * <p>
-         * Indicates the associated object is an annotated tag.
-         * <p>
-         * <b>This constant is fixed and is defined by the Git packfile format.</b>
-         * 
-         * @see #TYPE_TAG
-         */
+        /// <summary>
+        /// In-pack object type: annotated tag.
+		/// <para />
+		/// Indicates the associated object is an annotated tag.
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+        /// </summary>
+		/// <seealso cref="TYPE_TAG"/>
         public const int OBJ_TAG = 4;
 
-        /** In-pack object type: reserved for future use. */
+        /// <summary>
+		/// In-pack object type: reserved for future use.
+        /// </summary>
         public const int OBJ_TYPE_5 = 5;
 
-        /**
-         * In-pack object type: offset delta
-         * <p>
-         * Objects stored with this type actually have a different type which must
-         * be obtained from their delta base object. Delta objects store only the
-         * changes needed to apply to the base object in order to recover the
-         * original object.
-         * <p>
-         * An offset delta uses a negative offset from the start of this object to
-         * refer to its delta base. The base object must exist in this packfile
-         * (even in the case of a thin pack).
-         * <p>
-         * <b>This constant is fixed and is defined by the Git packfile format.</b>
-         */
+        /// <summary>
+        /// In-pack object type: offset delta
+		/// <para />
+		/// Objects stored with this type actually have a different type which must
+		/// be obtained from their delta base object. Delta objects store only the
+		/// changes needed to apply to the base object in order to recover the
+		/// original object.
+		/// <para />
+		/// An offset delta uses a negative offset from the start of this object to
+		/// refer to its delta base. The base object must exist in this packfile
+		/// (even in the case of a thin pack).
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+        /// </summary>
         public const int OBJ_OFS_DELTA = 6;
 
-        /**
-         * In-pack object type: reference delta
-         * <p>
-         * Objects stored with this type actually have a different type which must
-         * be obtained from their delta base object. Delta objects store only the
-         * changes needed to apply to the base object in order to recover the
-         * original object.
-         * <p>
-         * A reference delta uses a full object id (hash) to reference the delta
-         * base. The base object is allowed to be omitted from the packfile, but
-         * only in the case of a thin pack being transferred over the network.
-         * <p>
-         * <b>This constant is fixed and is defined by the Git packfile format.</b>
-         */
+        /// <summary>
+        /// In-pack object type: reference delta
+		/// <para />
+		/// Objects stored with this type actually have a different type which must
+		/// be obtained from their delta base object. Delta objects store only the
+		/// changes needed to apply to the base object in order to recover the
+		/// original object.
+		/// <para />
+		/// A reference delta uses a full object id (hash) to reference the delta
+		/// base. The base object is allowed to be omitted from the packfile, but
+		/// only in the case of a thin pack being transferred over the network.
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+        /// </summary>
         public const int OBJ_REF_DELTA = 7;
 
-        /**
-         * Pack file signature that occurs at file header - identifies file as Git
-         * packfile formatted.
-         * <p>
-         * <b>This constant is fixed and is defined by the Git packfile format.</b>
-         */
-        public static byte[] PACK_SIGNATURE = { (byte)'P', (byte)'A', (byte)'C', (byte)'K' };
+        /// <summary>
+        /// Pack file signature that occurs at file header - identifies file as Git
+		/// packfile formatted.
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+        /// </summary>
+        public static readonly byte[] PACK_SIGNATURE = { (byte)'P', (byte)'A', (byte)'C', (byte)'K' };
 
-        /** Native character encoding for commit messages, file names... */
-        public static string CHARACTER_ENCODING = "UTF-8";
+        /// <summary>
+		/// Native character encoding for commit messages, file names...
+        /// </summary>
+        public const string CHARACTER_ENCODING = "UTF-8";
 
-        /** Native character encoding for commit messages, file names... */
-        public static Encoding CHARSET = Encoding.GetEncoding(CHARACTER_ENCODING);
+        /// <summary>
+		/// Native character encoding for commit messages, file names...
+        /// </summary>
+        public static readonly Encoding CHARSET = Encoding.GetEncoding(CHARACTER_ENCODING);
 
+        /// <summary>
+		/// Default main branch name
+        /// </summary>
+		public const string MASTER = "master";
 
-        /** Default main branch name */
-        public static string MASTER = "master";
+        /// <summary>
+		/// Prefix for branch refs
+        /// </summary>
+		public const string R_HEADS = "refs/heads/";
 
-        /** Prefix for branch refs */
-        public static string R_HEADS = "refs/heads/";
+        /// <summary>
+		/// Prefix for remotes refs
+        /// </summary>
+		public const string R_REMOTES = "refs/remotes/";
 
-        /** Prefix for remotes refs */
-        public static string R_REMOTES = "refs/remotes/";
+        /// <summary>
+		/// Prefix for tag refs
+        /// </summary>
+		public const string R_TAGS = "refs/tags/";
 
-        /** Prefix for tag refs */
-        public static string R_TAGS = "refs/tags/";
+        /// <summary>
+		/// Prefix for any ref
+        /// </summary>
+		public const string R_REFS = "refs/";
 
-        /** Prefix for any ref */
-        public static string R_REFS = "refs/";
+        /// <summary>
+		/// Logs folder name
+        /// </summary>
+		public const string LOGS = "logs";
 
-        /** Logs folder name */
-        public static string LOGS = "logs";
+        /// <summary>
+		/// Info refs folder
+        /// </summary>
+		public const string INFO_REFS = "info/refs";
 
-        /** Info refs folder */
-        public static string INFO_REFS = "info/refs";
+        /// <summary>
+		/// Packed refs file
+        /// </summary>
+		public const string PACKED_REFS = "packed-refs";
 
-        /** Packed refs file */
-        public static string PACKED_REFS = "packed-refs";
+        /// <summary>
+		/// The environment variable that contains the system user name
+        /// </summary>
+		public const string OS_USER_NAME_KEY = "user.name";
 
-        /** The environment variable that contains the system user name */
-        public static string OS_USER_NAME_KEY = "user.name";
+        /// <summary>
+		/// The environment variable that contains the author's name
+        /// </summary>
+		public const string GIT_AUTHOR_NAME_KEY = "GIT_AUTHOR_NAME";
 
-        /** The environment variable that contains the author's name */
-        public static string GIT_AUTHOR_NAME_KEY = "GIT_AUTHOR_NAME";
+        /// <summary>
+		/// The environment variable that contains the author's email
+        /// </summary>
+		public const string GIT_AUTHOR_EMAIL_KEY = "GIT_AUTHOR_EMAIL";
 
-        /** The environment variable that contains the author's email */
-        public static string GIT_AUTHOR_EMAIL_KEY = "GIT_AUTHOR_EMAIL";
+        /// <summary>
+		/// The environment variable that contains the commiter's name
+        /// </summary>
+		public const string GIT_COMMITTER_NAME_KEY = "GIT_COMMITTER_NAME";
 
-        /** The environment variable that contains the commiter's name */
-        public static string GIT_COMMITTER_NAME_KEY = "GIT_COMMITTER_NAME";
+        /// <summary>
+		/// The environment variable that contains the commiter's email
+        /// </summary>
+		public const string GIT_COMMITTER_EMAIL_KEY = "GIT_COMMITTER_EMAIL";
 
-        /** The environment variable that contains the commiter's email */
-        public static string GIT_COMMITTER_EMAIL_KEY = "GIT_COMMITTER_EMAIL";
+        /// <summary>
+		/// Default value for the user name if no other information is available
+        /// </summary>
+		public const string UNKNOWN_USER_DEFAULT = "unknown-user";
 
-        /** Default value for the user name if no other information is available */
-        public static string UNKNOWN_USER_DEFAULT = "unknown-user";
+        /// <summary>
+		/// Beginning of the common "Signed-off-by: " commit message line
+        /// </summary>
+        public const string SIGNED_OFF_BY_TAG = "Signed-off-by: ";
 
-        /** Beginning of the common "Signed-off-by: " commit message line */
-        public static string SIGNED_OFF_BY_TAG = "Signed-off-by: ";
-
-
-        /**
-         * Create a new digest function for objects.
-         * 
-         * @return a new digest object.
-         * @throws RuntimeException
-         *             this Java virtual machine does not support the required hash
-         *             function. Very unlikely given that JGit uses a hash function
-         *             that is in the Java reference specification.
-         */
+        /// <summary>
+        /// Create a new digest function for objects.
+        /// </summary>
+        /// <returns>A new digest object.</returns>
         public static MessageDigest newMessageDigest()
         {
             //try {
@@ -339,13 +372,13 @@ namespace GitSharp
             return new MessageDigest();
         }
 
-
-        /**
-         * Convert an OBJ_* type constant to a TYPE_* type constant.
-         *
-         * @param typeCode the type code, from a pack representation.
-         * @return the canonical string name of this type.
-         */
+		/// <summary>
+		/// Convert an OBJ_* type constant to a TYPE_* type constant.
+		/// </summary>
+		/// <param name="typeCode">
+		/// typeCode the type code, from a pack representation.
+		/// </param>
+		/// <returns>The canonical string name of this type.</returns>
         public static string typeString(int typeCode)
         {
             switch (typeCode)
@@ -363,15 +396,18 @@ namespace GitSharp
             }
         }
 
-        /**
-         * Convert an OBJ_* type constant to an ASCII encoded string constant.
-         * <p>
-         * The ASCII encoded string is often the canonical representation of
-         * the type within a loose object header, or within a tag header.
-         *
-         * @param typeCode the type code, from a pack representation.
-         * @return the canonical ASCII encoded name of this type.
-         */
+        /// <summary>
+        /// Convert an OBJ_* type constant to an ASCII encoded string constant.
+        /// <para />
+		/// The ASCII encoded string is often the canonical representation of
+		/// the type within a loose object header, or within a tag header.
+        /// </summary>
+        /// <param name="typeCode">
+        /// typeCode the type code, from a pack representation.
+        /// </param>
+        /// <returns>
+		/// The canonical ASCII encoded name of this type.
+        /// </returns>
         public static byte[] encodedTypeString(int typeCode)
         {
             switch (typeCode)
@@ -389,26 +425,28 @@ namespace GitSharp
             }
         }
 
-        /**
-         * Parse an encoded type string into a type constant.
-         * 
-         * @param id
-         *            object id this type string came from; may be null if that is
-         *            not known at the time the parse is occurring.
-         * @param typeString
-         *            string version of the type code.
-         * @param endMark
-         *            character immediately following the type string. Usually ' '
-         *            (space) or '\n' (line feed).
-         * @param offset
-         *            position within <code>typeString</code> where the parse
-         *            should start. Updated with the new position (just past
-         *            <code>endMark</code> when the parse is successful.
-         * @return a type code constant (one of {@link #OBJ_BLOB},
-         *         {@link #OBJ_COMMIT}, {@link #OBJ_TAG}, {@link #OBJ_TREE}.
-         * @throws CorruptObjectException
-         *             there is no valid type identified by <code>typeString</code>.
-         */
+        /// <summary>
+        /// Parse an encoded type string into a type constant.
+        /// </summary>
+        /// <param name="id">
+        /// <see cref="ObjectId" /> this type string came from; may be null if 
+        /// that is not known at the time the parse is occurring.
+        /// </param>
+        /// <param name="typeString">string version of the type code.</param>
+        /// <param name="endMark">
+        /// Character immediately following the type string. Usually ' '
+        /// (space) or '\n' (line feed).
+        /// </param>
+        /// <param name="offset">
+		/// Position within <paramref name="typeString"/> where the parse
+		/// should start. Updated with the new position (just past
+		/// <paramref name="endMark"/> when the parse is successful).
+        /// </param>
+        /// <returns>
+        /// A type code constant (one of <see cref="OBJ_BLOB"/>,
+		/// <see cref="OBJ_COMMIT"/>, <see cref="OBJ_TAG"/>, <see cref="OBJ_TREE"/>
+		/// </returns>
+		/// <exception cref="CorruptObjectException"></exception>
         public static int decodeTypeString(AnyObjectId id, byte[] typeString, byte endMark, MutableInteger offset)
         {
             try
@@ -472,60 +510,63 @@ namespace GitSharp
             }
         }
 
-        /**
-         * Convert an integer into its decimal representation.
-         * 
-         * @param s
-         *            the integer to convert.
-         * @return a decimal representation of the input integer. The returned array
-         *         is the smallest array that will hold the value.
-         */
+        /// <summary>
+        /// Convert an integer into its decimal representation.
+        /// </summary>
+        /// <param name="s">the integer to convert.</param>
+        /// <returns>
+        /// Decimal representation of the input integer. The returned array
+		/// is the smallest array that will hold the value.
+        /// </returns>
         public static byte[] encodeASCII(long s)
         {
             return encodeASCII(Convert.ToString(s));
         }
 
-
-        /**
-         * Convert a string to US-ASCII encoding.
-         * 
-         * @param s
-         *            the string to convert. Must not contain any characters over
-         *            127 (outside of 7-bit ASCII).
-         * @return a byte array of the same Length as the input string, holding the
-         *         same characters, in the same order.
-         * @throws ArgumentException
-         *             the input string contains one or more characters outside of
-         *             the 7-bit ASCII character space.
-         */
+		/// <summary>
+		/// Convert a string to US-ASCII encoding.       
+		/// </summary>
+		/// <param name="s">
+		/// The string to convert. Must not contain any characters over
+		/// 127 (outside of 7-bit ASCII).
+		/// </param>
+		/// <returns>
+		/// A byte array of the same Length as the input string, holding the
+		/// same characters, in the same order.
+		/// </returns>
+		/// <exception cref="ArgumentException">
+		/// The input string contains one or more characters outside of
+		/// the 7-bit ASCII character space.
+		/// </exception>
         public static byte[] encodeASCII(string s)
         {
-            byte[] r = new byte[s.Length];
+            var r = new byte[s.Length];
             for (int k = r.Length - 1; k >= 0; k--)
             {
                 char c = s[k];
                 if (c > 127)
-                    throw new ArgumentException("Not ASCII string: " + s);
+                {
+                	throw new ArgumentException("Not ASCII string: " + s);
+                }
                 r[k] = (byte)c;
             }
             return r;
         }
 
-
-        /**
-         * Convert a string to a byte array in UTF-8 character encoding.
-         *
-         * @param str
-         *            the string to convert. May contain any Unicode characters.
-         * @return a byte array representing the requested string, encoded using the
-         *         default character encoding (UTF-8).
-         * @see #CHARACTER_ENCODING
-         */
+		/// <summary>
+		/// Convert a string to a byte array in UTF-8 character encoding.
+		/// </summary>
+		/// <param name="str">
+		/// The string to convert. May contain any Unicode characters.
+		/// </param>
+		/// <returns>
+		/// A byte array representing the requested string, encoded using the
+		/// default character encoding (UTF-8).
+		/// </returns>
+		/// <seealso cref="CHARACTER_ENCODING"/>
         public static byte[] encode(string str)
         {
             return CHARSET.GetBytes(str);
         }
-
-
     }
 }

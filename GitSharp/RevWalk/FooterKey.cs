@@ -42,13 +42,19 @@ namespace GitSharp.RevWalk
 	/// </summary>
 	public class FooterKey
 	{
-        /** Standard {@code Signed-off-by} */
+        /// <summary>
+		/// Standard <code>Signed-off-by</code>
+        /// </summary>
         public static FooterKey SIGNED_OFF_BY = new FooterKey("Signed-off-by");
 
-        /** Standard {@code Acked-by} */
+		/// <summary>
+		/// Standard <code>Acked-by</code>
+		/// </summary>
         public static FooterKey ACKED_BY = new FooterKey("Acked-by");
 
-        /** Standard {@code CC} */
+        /// <summary>
+		/// Standard <code>CC</code>
+        /// </summary>
         public static FooterKey CC = new FooterKey("CC");
 
         private readonly string _name;

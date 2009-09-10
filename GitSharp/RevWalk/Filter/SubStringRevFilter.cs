@@ -36,82 +36,94 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Util;
+using System;
+using System.Text.RegularExpressions;
+
 namespace GitSharp.RevWalk.Filter
 {
+	/// <summary>
+	/// Abstract filter that searches text using only substring search.
+	/// </summary>
+	public abstract class SubStringRevFilter : RevFilter
+	{
+		///	<summary>
+		/// Can this string be safely handled by a substring filter?
+		///	</summary>
+		///	<param name="pattern">
+		///	the pattern text proposed by the user.
+		/// </param>
+		///	<returns>
+		/// True if a substring filter can perform this pattern match; false
+		/// if <seealso cref="PatternMatchRevFilter"/> must be used instead.
+		/// </returns>
+		public static bool safe(string pattern)
+		{
+			for (int i = 0; i < pattern.Length; i++)
+			{
+				char c = pattern[i];
+				switch (c)
+				{
+					case '.':
+					case '?':
+					case '*':
+					case '+':
+					case '{':
+					case '}':
+					case '(':
+					case ')':
+					case '[':
+					case ']':
+					case '\\':
+						return false;
+				}
+			}
+			return true;
+		}
 
-    /** Abstract filter that searches text using only substring search. */
-    public abstract class SubStringRevFilter : RevFilter
-    {
-        /**
-         * Can this string be safely handled by a substring filter?
-         * 
-         * @param pattern
-         *            the pattern text proposed by the user.
-         * @return true if a substring filter can perform this pattern match; false
-         *         if {@link PatternMatchRevFilter} must be used instead.
-         */
-        public static bool safe(string pattern)
-        {
-            for (int i = 0; i < pattern.Length; i++)
-            {
-                char c = pattern[i];
-                switch (c)
-                {
-                    case '.':
-                    case '?':
-                    case '*':
-                    case '+':
-                    case '{':
-                    case '}':
-                    case '(':
-                    case ')':
-                    case '[':
-                    case ']':
-                    case '\\':
-                        return false;
-                }
-            }
-            return true;
-        }
+		private readonly string _patternText;
+		private readonly Regex _pattern;
 
-        private RawSubStringPattern pattern;
+		///	<summary>
+		/// Construct a new matching filter.
+		///	</summary>
+		///	<param name="patternText">
+		///	text to locate. This should be a safe string as described by
+		///	the <seealso cref="safe(string)"/> as regular expression meta
+		///	characters are treated as literals.
+		/// </param>
+		internal SubStringRevFilter(string patternText)
+		{
+			if (string.IsNullOrEmpty(patternText))
+			{
+				throw new ArgumentNullException("patternText");
+			}
 
-        /**
-         * Construct a new matching filter.
-         * 
-         * @param patternText
-         *            text to locate. This should be a safe string as described by
-         *            the {@link #safe(string)} as regular expression meta
-         *            characters are treated as literals.
-         */
-        internal SubStringRevFilter(string patternText)
-        {
-            pattern = new RawSubStringPattern(patternText);
-        }
+			_patternText = patternText;
+			_pattern = new Regex(patternText);
+		}
 
-        public override bool include(RevWalk walker, RevCommit cmit)
-        {
-            return pattern.match(text(cmit)) >= 0;
-        }
+		public override bool include(RevWalk walker, RevCommit commit)
+		{
+			return _pattern.IsMatch(Text(commit));
+		}
 
-        /**
-         * Obtain the raw text to match against.
-         * 
-         * @param cmit
-         *            current commit being evaluated.
-         * @return sequence for the commit's content that we need to match on.
-         */
-        internal abstract RawCharSequence text(RevCommit cmit);
+		///	<summary>
+		/// Obtain the raw text to match against.
+		///	</summary>
+		///	<param name="cmit">Current commit being evaluated.</param>
+		///	<returns>
+		/// Sequence for the commit's content that we need to match on.
+		/// </returns>
+		protected abstract string Text(RevCommit cmit);
 
-        public override RevFilter Clone()
-        {
-            return this; // Typically we are actually thread-safe.
-        }
+		public override RevFilter Clone()
+		{
+			return this; // Typically we are actually thread-safe.
+		}
 
-        public override string ToString()
-        {
-            return base.ToString() + "(\"" + pattern.pattern() + "\")";
-        }
-    }
+		public override string ToString()
+		{
+			return base.ToString() + "(\"" + _patternText + "\")";
+		}
+	}
 }

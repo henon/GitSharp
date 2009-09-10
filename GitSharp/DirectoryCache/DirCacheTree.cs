@@ -37,11 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 using GitSharp.Util;
@@ -49,21 +45,19 @@ using GitSharp.Exceptions;
 
 namespace GitSharp.DirectoryCache
 {
-
-
-	/**
-	 * Single tree record from the 'TREE' {@link DirCache} extension.
-	 * <p>
-	 * A valid cache tree record contains the object id of a tree object and the
-	 * total number of {@link DirCacheEntry} instances (counted recursively) from
-	 * the DirCache contained within the tree. This information facilitates faster
-	 * traversal of the index and quicker generation of tree objects prior to
-	 * creating a new commit.
-	 * <p>
-	 * An invalid cache tree record indicates a known subtree whose file entries
-	 * have changed in ways that cause the tree to no longer have a known object id.
-	 * Invalid cache tree records must be revalidated prior to use.
-	 */
+	/// <summary>
+	/// Single tree record from the 'TREE' <seealso cref="DirCache"/> extension.
+	/// <para />
+	/// A valid cache tree record contains the object id of a tree object and the
+	/// total number of <seealso cref="DirCacheEntry"/> instances (counted recursively) from
+	/// the DirCache contained within the tree. This information facilitates faster
+	/// traversal of the index and quicker generation of tree objects prior to
+	/// creating a new commit.
+	/// <para />
+	/// An invalid cache tree record indicates a known subtree whose file entries
+	/// have changed in ways that cause the tree to no longer have a known object id.
+	/// Invalid cache tree records must be revalidated prior to use.
+	/// </summary>
 	public class DirCacheTree
 	{
 		private static readonly byte[] NoName = { };
@@ -120,6 +114,16 @@ namespace GitSharp.DirectoryCache
 		public DirCacheTree()
 		{
 			_encodedName = NoName;
+			_children = NoChildren;
+			_childCount = 0;
+			_entrySpan = -1;
+		}
+
+		private DirCacheTree(DirCacheTree myParent, byte[] path, int pathOff, int pathLen)
+		{
+			_parent = myParent;
+			_encodedName = new byte[pathLen];
+			Array.Copy(path, pathOff, _encodedName, 0, pathLen);
 			_children = NoChildren;
 			_childCount = 0;
 			_entrySpan = -1;
@@ -188,16 +192,6 @@ namespace GitSharp.DirectoryCache
 			_childCount = subcnt;
 		}
 
-		private DirCacheTree(DirCacheTree myParent, byte[] path, int pathOff, int pathLen)
-		{
-			_parent = myParent;
-			_encodedName = new byte[pathLen];
-			Array.Copy(path, pathOff, _encodedName, 0, pathLen);
-			_children = NoChildren;
-			_childCount = 0;
-			_entrySpan = -1;
-		}
-
 		public void write(byte[] tmp, Stream os)
 		{
 			int ptr = tmp.Length;
@@ -209,7 +203,7 @@ namespace GitSharp.DirectoryCache
 
 			os.Write(_encodedName, 0, _encodedName.Length);
 			os.Write(tmp, ptr, tmp.Length - ptr);
-			
+
 			if (isValid())
 			{
 				_id.copyRawTo(tmp, 0);
@@ -222,53 +216,54 @@ namespace GitSharp.DirectoryCache
 			}
 		}
 
-		/**
-		 * Determine if this cache is currently valid.
-		 * <p>
-		 * A valid cache tree knows how many {@link DirCacheEntry} instances from
-		 * the parent {@link DirCache} reside within this tree (recursively
-		 * enumerated). It also knows the object id of the tree, as the tree should
-		 * be readily available from the repository's object database.
-		 *
-		 * @return true if this tree is knows key details about itself; false if the
-		 *         tree needs to be regenerated.
-		 */
+		/// <summary>
+		/// Determine if this cache is currently valid.
+		/// <para />
+		/// A valid cache tree knows how many <seealso cref="DirCacheEntry"/> instances from
+		/// the parent <seealso cref="DirCache"/> reside within this tree (recursively
+		/// enumerated). It also knows the object id of the tree, as the tree should
+		/// be readily available from the repository's object database.
+		/// </summary>
+		/// <returns>
+		/// True if this tree is knows key details about itself; false if the
+		/// tree needs to be regenerated.
+		/// </returns>
 		public bool isValid()
 		{
 			return _id != null;
 		}
 
-		/**
-		 * Get the number of entries this tree spans within the DirCache.
-		 * <p>
-		 * If this tree is not valid (see {@link #isValid()}) this method's return
-		 * value is always strictly negative (less than 0) but is otherwise an
-		 * undefined result.
-		 *
-		 * @return total number of entries (recursively) contained within this tree.
-		 */
+		/// <summary>
+		/// Get the number of entries this tree spans within the DirCache.
+		/// <para />
+		/// If this tree is not valid (see <seealso cref="isValid()"/>) this method's return
+		/// value is always strictly negative (less than 0) but is otherwise an
+		/// undefined result.
+		/// </summary>
+		/// <returns>
+		/// Total number of entries (recursively) contained within this tree.
+		/// </returns>
 		public int getEntrySpan()
 		{
 			return _entrySpan;
 		}
 
-		/**
-		 * Get the number of cached subtrees contained within this tree.
-		 *
-		 * @return number of child trees available through this tree.
-		 */
+		/// <summary>
+		/// Get the number of cached subtrees contained within this tree.
+		/// </summary>
+		/// <returns>
+		/// Number of child trees available through this tree.
+		/// </returns>
 		public int getChildCount()
 		{
 			return _childCount;
 		}
 
-		/**
-		 * Get the i-th child cache tree.
-		 *
-		 * @param i
-		 *            index of the child to obtain.
-		 * @return the child tree.
-		 */
+		/// <summary>
+		/// Get the i-th child cache tree.
+		/// </summary>
+		/// <param name="i">Index of the child to obtain.</param>
+		/// <returns>The child tree.</returns>
 		public DirCacheTree getChild(int i)
 		{
 			return _children[i];
@@ -279,33 +274,35 @@ namespace GitSharp.DirectoryCache
 			return _id;
 		}
 
-		/**
-		 * Get the tree's name within its parent.
-		 * <p>
-		 * This method is not very efficient and is primarily meant for debugging
-		 * and  output generation. Applications should try to avoid calling it,
-		 * and if invoked do so only once per interesting entry, where the name is
-		 * absolutely required for correct function.
-		 *
-		 * @return name of the tree. This does not contain any '/' characters.
-		 */
+		/// <summary>
+		/// Get the tree's name within its parent.
+		/// <para />
+		/// This method is not very efficient and is primarily meant for debugging
+		/// and final output generation. Applications should try to avoid calling it,
+		/// and if invoked do so only once per interesting entry, where the name is
+		/// absolutely required for correct function.
+		/// </summary>
+		/// <returns>
+		/// Name of the tree. This does not contain any '/' characters.
+		/// </returns>
 		public string getNameString()
 		{
 			return Constants.CHARSET.GetString(_encodedName);
 		}
 
-		/**
-		 * Get the tree's path within the repository.
-		 * <p>
-		 * This method is not very efficient and is primarily meant for debugging
-		 * and  output generation. Applications should try to avoid calling it,
-		 * and if invoked do so only once per interesting entry, where the name is
-		 * absolutely required for correct function.
-		 *
-		 * @return path of the tree, relative to the repository root. If this is not
-		 *         the root tree the path ends with '/'. The root tree's path string
-		 *         is the empty string ("").
-		 */
+		/// <summary>
+		/// Get the tree's path within the repository.
+		/// <para />
+		/// This method is not very efficient and is primarily meant for debugging
+		/// and final output generation. Applications should try to avoid calling it,
+		/// and if invoked do so only once per interesting entry, where the name is
+		/// absolutely required for correct function.
+		/// </summary>
+		/// <returns>
+		/// Path of the tree, relative to the repository root. If this is not
+		/// the root tree the path ends with '/'. The root tree's path string
+		/// is the empty string ("").
+		/// </returns>
 		public string getPathString()
 		{
 			var sb = new StringBuilder();
@@ -313,30 +310,32 @@ namespace GitSharp.DirectoryCache
 			return sb.ToString();
 		}
 
-		/**
-		 * Write (if necessary) this tree to the object store.
-		 *
-		 * @param cacheEntry
-		 *            the complete cache from DirCache.
-		 * @param cIdx
-		 *            first position of <code>cache</code> that is a member of this
-		 *            tree. The path of <code>cache[cacheIdx].path</code> for the
-		 *            range <code>[0,pathOff-1)</code> matches the complete path of
-		 *            this tree, from the root of the repository.
-		 * @param pathOffset
-		 *            number of bytes of <code>cache[cacheIdx].path</code> that
-		 *            matches this tree's path. The value at array position
-		 *            <code>cache[cacheIdx].path[pathOff-1]</code> is always '/' if
-		 *            <code>pathOff</code> is > 0.
-		 * @param ow
-		 *            the writer to use when serializing to the store.
-		 * @return identity of this tree.
-		 * @throws UnmergedPathException
-		 *             one or more paths contain higher-order stages (stage > 0),
-		 *             which cannot be stored in a tree object.
-		 * @throws IOException
-		 *             an unexpected error occurred writing to the object store.
-		 */
+		///	<summary>
+		/// Write (if necessary) this tree to the object store.
+		///	</summary>
+		///	<param name="cacheEntry">the complete cache from DirCache.</param>
+		///	<param name="cIdx">
+		/// first position of <code>cache</code> that is a member of this
+		/// tree. The path of <code>cache[cacheIdx].path</code> for the
+		/// range <code>[0,pathOff-1)</code> matches the complete path of
+		/// this tree, from the root of the repository. </param>
+		///	<param name="pathOffset">
+		/// number of bytes of <code>cache[cacheIdx].path</code> that
+		/// matches this tree's path. The value at array position
+		/// <code>cache[cacheIdx].path[pathOff-1]</code> is always '/' if
+		/// <code>pathOff</code> is > 0.
+		/// </param>
+		///	<param name="ow">
+		/// the writer to use when serializing to the store.
+		/// </param>
+		///	<returns>identity of this tree.</returns>
+		///	<exception cref="UnmergedPathException">
+		/// one or more paths contain higher-order stages (stage > 0),
+		/// which cannot be stored in a tree object.
+		/// </exception>
+		///	<exception cref="IOException">
+		/// an unexpected error occurred writing to the object store.
+		/// </exception>
 		public ObjectId writeTree(DirCacheEntry[] cacheEntry, int cIdx, int pathOffset, ObjectWriter ow)
 		{
 			if (_id == null)
@@ -392,7 +391,9 @@ namespace GitSharp.DirectoryCache
 			{
 				DirCacheEntry e = cache[entryIdx];
 				if (e.getStage() != 0)
+				{
 					throw new UnmergedPathException(e);
+				}
 
 				byte[] ep = e.Path;
 				if (childIdx < _childCount)
@@ -453,34 +454,35 @@ namespace GitSharp.DirectoryCache
 			byte[] e = _encodedName;
 			int eLen = e.Length;
 			for (int eOff = 0; eOff < eLen && aOff < aLen; eOff++, aOff++)
-				if (e[eOff] != a[aOff])
-					return false;
-			if (aOff == aLen)
-				return false;
+			{
+				if (e[eOff] != a[aOff]) return false;
+			}
+
+			if (aOff == aLen) return false;
 			return a[aOff] == '/';
 		}
 
-		/**
-		 * Update (if necessary) this tree's entrySpan.
-		 *
-		 * @param cache
-		 *            the complete cache from DirCache.
-		 * @param cCnt
-		 *            number of entries in <code>cache</code> that are valid for
-		 *            iteration.
-		 * @param cIdx
-		 *            first position of <code>cache</code> that is a member of this
-		 *            tree. The path of <code>cache[cacheIdx].path</code> for the
-		 *            range <code>[0,pathOff-1)</code> matches the complete path of
-		 *            this tree, from the root of the repository.
-		 * @param pathOff
-		 *            number of bytes of <code>cache[cacheIdx].path</code> that
-		 *            matches this tree's path. The value at array position
-		 *            <code>cache[cacheIdx].path[pathOff-1]</code> is always '/' if
-		 *            <code>pathOff</code> is > 0.
-		 */
-		public void validate(DirCacheEntry[] cache, int cCnt, int cIdx,
-				 int pathOff)
+		///	<summary>
+		/// Update (if necessary) this tree's entrySpan.
+		///	</summary>
+		///	<param name="cache">the complete cache from DirCache. </param>
+		///	<param name="cCnt">
+		/// Number of entries in <code>cache</code> that are valid for
+		/// iteration.
+		/// </param>
+		///	<param name="cIdx">
+		/// First position of <code>cache</code> that is a member of this
+		/// tree. The path of <code>cache[cacheIdx].path</code> for the
+		/// range <code>[0,pathOff-1)</code> matches the complete path of
+		/// this tree, from the root of the repository.
+		/// </param>
+		///	<param name="pathOff">
+		/// number of bytes of <code>cache[cacheIdx].path</code> that
+		/// matches this tree's path. The value at array position
+		/// <code>cache[cacheIdx].path[pathOff-1]</code> is always '/' if
+		/// <code>pathOff</code> is > 0.
+		/// </param>
+		public void validate(DirCacheEntry[] cache, int cCnt, int cIdx, int pathOff)
 		{
 			if (_entrySpan >= 0)
 			{
@@ -565,7 +567,9 @@ namespace GitSharp.DirectoryCache
 			if (_childCount + 1 <= c.Length)
 			{
 				if (stIdx < _childCount)
+				{
 					Array.Copy(c, stIdx, c, stIdx + 1, _childCount - stIdx);
+				}
 				c[stIdx] = st;
 				_childCount++;
 				return;
@@ -574,10 +578,14 @@ namespace GitSharp.DirectoryCache
 			int n = c.Length;
 			var a = new DirCacheTree[n + 1];
 			if (stIdx > 0)
+			{
 				Array.Copy(c, 0, a, 0, stIdx);
+			}
 			a[stIdx] = st;
 			if (stIdx < n)
+			{
 				Array.Copy(c, stIdx, a, stIdx + 1, n - stIdx);
+			}
 			_children = a;
 			_childCount++;
 		}

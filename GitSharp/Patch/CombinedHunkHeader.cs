@@ -53,7 +53,7 @@ namespace GitSharp.Patch
 		public CombinedHunkHeader(FileHeader fh, int offset)
 			: base(fh, offset, null)
 		{
-			int size = fh.getParentCount();
+			int size = fh.ParentCount;
 			_old = new List<CombinedOldImage>(size);
 			for (int i = 0; i < size; i++)
 			{
@@ -83,7 +83,7 @@ namespace GitSharp.Patch
 		{
 			// Parse "@@@ -55,12 -163,13 +163,15 @@@ protected boolean"
 			//
-			byte[] buf = File.buf;
+			byte[] buf = File.Buffer;
 			var ptr = new MutableInteger
 						{
 							value = RawParseUtils.nextLF(buf, StartOffset, (byte)' ')
@@ -91,7 +91,7 @@ namespace GitSharp.Patch
 
 			_old.ForEach(coi =>
 							{
-								coi.StartLine = -1 * RawParseUtils.parseBase10(buf, ptr.value, ptr);
+								coi.StartLine = -1 * RawParseUtils.parseBase10(Buffer, ptr.value, ptr);
 								coi.LineCount = buf[ptr.value] == ',' ?
 									RawParseUtils.parseBase10(buf, ptr.value + 1, ptr) : 1;
 							});
@@ -102,7 +102,7 @@ namespace GitSharp.Patch
 
 		public override int parseBody(Patch script, int end)
 		{
-			byte[] buf = File.buf;
+			byte[] buf = File.Buffer;
 			int c = RawParseUtils.nextLF(buf, StartOffset);
 
 			_old.ForEach(coi =>
@@ -204,7 +204,7 @@ namespace GitSharp.Patch
 
 		public void extractFileLines(Stream[] outStream)
 		{
-			byte[] buf = File.buf;
+			byte[] buf = File.Buffer;
 			int ptr = StartOffset;
 			int eol = RawParseUtils.nextLF(buf, ptr);
 			if (EndOffset <= eol)
@@ -291,7 +291,7 @@ namespace GitSharp.Patch
 
 		public override void extractFileLines(StringBuilder sb, string[] text, int[] offsets)
 		{
-			byte[] buf = File.buf;
+			byte[] buf = File.Buffer;
 			int ptr = StartOffset;
 			int eol = RawParseUtils.nextLF(buf, ptr);
 
@@ -356,6 +356,7 @@ namespace GitSharp.Patch
 							breakScan = true;
 							break;
 					}
+
 					if (breakScan)
 					{
 						break;

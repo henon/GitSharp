@@ -223,13 +223,11 @@ namespace GitSharp.Tests
               return silent;
           }
 
-          if(!fs.IsDirectory())
-            return silent;
-
           var dir = new DirectoryInfo(fs.FullName);
+          if (!dir.Exists) return silent;
+          
           try
           {
-            if (!dir.Exists) return silent;
 
             FileSystemInfo[] ls = dir.GetFileSystemInfos();
 
@@ -240,7 +238,7 @@ namespace GitSharp.Tests
             
               dir.Delete();
           }
-          catch (Exception e)
+          catch (IOException e)
           {
             //ReportDeleteFailure(name, failOnError, fs);
             Console.WriteLine(name + ": " + e.Message);

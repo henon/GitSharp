@@ -97,7 +97,7 @@ namespace GitSharp.Tests.RevWalk
 
             Assert.IsNotNull(c.Parents);
             Assert.AreEqual(0, c.Parents.Length);
-            Assert.AreEqual("", c.getFullMessage());
+            Assert.AreEqual(string.Empty, c.getFullMessage());
 
             PersonIdent cAuthor = c.getAuthorIdent();
             Assert.IsNotNull(cAuthor);
@@ -137,8 +137,8 @@ namespace GitSharp.Tests.RevWalk
 
             c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), _utf8Enc.GetBytes(b.ToString()));
 
-            Assert.AreEqual("", c.getFullMessage());
-            Assert.AreEqual("", c.getShortMessage());
+            Assert.AreEqual(string.Empty, c.getFullMessage());
+            Assert.AreEqual(string.Empty, c.getShortMessage());
         }
 
         [Test]
@@ -296,7 +296,7 @@ namespace GitSharp.Tests.RevWalk
         {
             RevCommit c = create("\n");
             Assert.AreEqual("\n", c.getFullMessage());
-            Assert.AreEqual("", c.getShortMessage());
+            Assert.AreEqual(string.Empty, c.getShortMessage());
         }
 
         [Test]

@@ -357,15 +357,17 @@ namespace GitSharp.Tests
             var almostEmptyTree = new Tree(db);
             almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Encoding.ASCII.GetBytes("empty"), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
-            var t = new Tag(db)
+            
+			var t = new Tag(db)
                     	{
-                    		Id = (almostEmptyTreeId),
-                    		TagType = ("tree"),
-                    		TagName = ("test021"),
-                    		Author = (new PersonIdent(jauthor, 1154236443L, -4*60)),
-                    		Message = ("test021 tagged\n")
+                    		Id = almostEmptyTreeId,
+                    		TagType = "tree",
+                    		TagName = "test021",
+                    		Author = new PersonIdent(jauthor, 1154236443L, -4*60),
+                    		Message = "test021 tagged\n"
                     	};
-        	t.Save();
+        	
+			t.Save();
             Assert.AreEqual("b0517bc8dbe2096b419d42424cd7030733f4abe5", t.TagId.ToString());
 
             Tag MapTag = db.MapTag("test021");
@@ -382,22 +384,26 @@ namespace GitSharp.Tests
             var almostEmptyTree = new Tree(db);
             almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Constants.encodeASCII("empty"), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
+
             var almostEmptyCommit = new Commit(db)
                                     	{
-                                    		Author = (new PersonIdent(jauthor, 1154236443L, -2*60)),
-                                    		Committer = (new PersonIdent(jauthor, 1154236443L, -2*60)),
-                                    		Message = ("test022\n"),
-                                    		TreeId = (almostEmptyTreeId)
+                                    		Author = new PersonIdent(jauthor, 1154236443L, -2*60),
+                                    		Committer = new PersonIdent(jauthor, 1154236443L, -2*60),
+                                    		Message = "test022\n",
+                                    		TreeId = almostEmptyTreeId
                                     	};
+
         	ObjectId almostEmptyCommitId = new ObjectWriter(db).WriteCommit(almostEmptyCommit);
+
             var t = new Tag(db)
                     	{
-                    		Id = (almostEmptyCommitId),
-                    		TagType = ("commit"),
-                    		TagName = ("test022"),
-                    		Author = (new PersonIdent(jauthor, 1154236443L, -4*60)),
-                    		Message = ("test022 tagged\n")
+                    		Id = almostEmptyCommitId,
+                    		TagType = "commit",
+                    		TagName = "test022",
+                    		Author = new PersonIdent(jauthor, 1154236443L, -4*60),
+                    		Message = "test022 tagged\n"
                     	};
+
         	t.Save();
             Assert.AreEqual("0ce2ebdb36076ef0b38adbe077a07d43b43e3807", t.TagId.ToString());
 
@@ -415,15 +421,17 @@ namespace GitSharp.Tests
             var almostEmptyTree = new Tree(db);
 			almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Constants.encodeASCII("empty"), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
-            var commit = new Commit(db)
+            
+			var commit = new Commit(db)
                          	{
-                         		TreeId = (almostEmptyTreeId),
-                         		Author = (new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295L, 60)),
-                         		Committer = (new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295L, 60)),
+                         		TreeId = almostEmptyTreeId,
+                         		Author = new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295L, 60),
+                         		Committer = new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295L, 60),
                          		Encoding = Encoding.UTF8,
-                         		Message = ("\u00dcbergeeks")
+                         		Message = "\u00dcbergeeks"
                          	};
-        	ObjectId cid = new ObjectWriter(db).WriteCommit(commit);
+        	
+			ObjectId cid = new ObjectWriter(db).WriteCommit(commit);
             Assert.AreEqual("4680908112778718f37e686cbebcc912730b3154", cid.ToString());
         }
 
@@ -436,9 +444,9 @@ namespace GitSharp.Tests
             ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
             var commit = new Commit(db)
                          	{
-                         		TreeId = (almostEmptyTreeId),
-                         		Author = (new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295L, 60)),
-                         		Committer = (new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295L, 60)),
+                         		TreeId = almostEmptyTreeId,
+                         		Author = new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295L, 60),
+                         		Committer = new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295L, 60),
                          		Encoding = Encoding.GetEncoding("ISO-8859-1"),
                          		Message = "\u00dcbergeeks"
                          	};
@@ -497,8 +505,6 @@ namespace GitSharp.Tests
             Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag22.Id.ToString());
         }
 
-
-
         [Test]
         public void test026_CreateCommitMultipleparents()
         {
@@ -513,11 +519,12 @@ namespace GitSharp.Tests
 
             var c1 = new Commit(db)
                      	{
-                     		Author = (new PersonIdent(jauthor, 1154236443L, -4*60)),
-                     		Committer = (new PersonIdent(jcommitter, 1154236443L, -4*60)),
-                     		Message = ("A Commit\n"),
-                     		TreeEntry = (t)
+                     		Author = new PersonIdent(jauthor, 1154236443L, -4*60),
+                     		Committer = new PersonIdent(jcommitter, 1154236443L, -4*60),
+                     		Message = "A Commit\n",
+                     		TreeEntry = t
                      	};
+
         	Assert.AreEqual(t.TreeId, c1.TreeId);
             c1.Save();
             ObjectId cmtid1 = ObjectId.FromString("803aec4aba175e8ab1d666873c984c0308179099");
@@ -525,13 +532,14 @@ namespace GitSharp.Tests
 
             var c2 = new Commit(db)
                      	{
-                     		Author = (new PersonIdent(jauthor, 1154236443L, -4*60)),
-                     		Committer = (new PersonIdent(jcommitter, 1154236443L, -4*60)),
-                     		Message = ("A Commit 2\n"),
-                     		TreeEntry = (t)
+                     		Author = new PersonIdent(jauthor, 1154236443L, -4*60),
+                     		Committer = new PersonIdent(jcommitter, 1154236443L, -4*60),
+                     		Message = "A Commit 2\n",
+                     		TreeEntry = t
                      	};
+
         	Assert.AreEqual(t.TreeId, c2.TreeId);
-            c2.ParentIds = (new[] { c1.CommitId });
+            c2.ParentIds = new[] { c1.CommitId };
             c2.Save();
             ObjectId cmtid2 = ObjectId.FromString("95d068687c91c5c044fb8c77c5154d5247901553");
             Assert.AreEqual(cmtid2, c2.CommitId);
@@ -547,13 +555,14 @@ namespace GitSharp.Tests
 
             var c3 = new Commit(db)
                      	{
-                     		Author = (new PersonIdent(jauthor, 1154236443L, -4*60)),
-                     		Committer = (new PersonIdent(jcommitter, 1154236443L, -4*60)),
-                     		Message = ("A Commit 3\n"),
-                     		TreeEntry = (t)
+                     		Author = new PersonIdent(jauthor, 1154236443L, -4*60),
+                     		Committer = new PersonIdent(jcommitter, 1154236443L, -4*60),
+                     		Message = "A Commit 3\n",
+                     		TreeEntry = t
                      	};
+
         	Assert.AreEqual(t.TreeId, c3.TreeId);
-            c3.ParentIds = (new[] { c1.CommitId, c2.CommitId });
+            c3.ParentIds = new[] { c1.CommitId, c2.CommitId };
             c3.Save();
             ObjectId cmtid3 = ObjectId.FromString("ce6e1ce48fbeeb15a83f628dc8dc2debefa066f4");
             Assert.AreEqual(cmtid3, c3.CommitId);
@@ -570,14 +579,14 @@ namespace GitSharp.Tests
 
             var c4 = new Commit(db)
                      	{
-                     		Author = (new PersonIdent(jauthor, 1154236443L, -4*60)),
-                     		Committer = (new PersonIdent(jcommitter, 1154236443L, -4*60)),
-                     		Message = ("A Commit 4\n"),
-                     		TreeEntry = (t)
+                     		Author = new PersonIdent(jauthor, 1154236443L, -4*60),
+                     		Committer = new PersonIdent(jcommitter, 1154236443L, -4*60),
+                     		Message = "A Commit 4\n",
+                     		TreeEntry = t
                      	};
 
         	Assert.AreEqual(t.TreeId, c3.TreeId);
-            c4.ParentIds = (new[] { c1.CommitId, c2.CommitId, c3.CommitId });
+            c4.ParentIds = new[] { c1.CommitId, c2.CommitId, c3.CommitId };
             c4.Save();
             ObjectId cmtid4 = ObjectId.FromString("d1fca9fe3fef54e5212eb67902c8ed3e79736e27");
             Assert.AreEqual(cmtid4, c4.CommitId);
@@ -612,12 +621,12 @@ namespace GitSharp.Tests
             writeTrashFile(".git/packed-refs", "7f822839a2fe9760f386cbbbcb3f92c5fe81def7 refs/heads/foobar");
             writeTrashFile(".git/HEAD", "ref: refs/heads/foobar\n");
 
-            ObjectId Resolve = db.Resolve("HEAD");
-            Assert.AreEqual("7f822839a2fe9760f386cbbbcb3f92c5fe81def7", Resolve.ToString());
+            ObjectId resolve = db.Resolve("HEAD");
+            Assert.AreEqual("7f822839a2fe9760f386cbbbcb3f92c5fe81def7", resolve.ToString());
 
             RefUpdate lockRef = db.UpdateRef("HEAD");
             ObjectId newId = ObjectId.FromString("07f822839a2fe9760f386cbbbcb3f92c5fe81def");
-            lockRef.NewObjectId = (newId);
+            lockRef.NewObjectId = newId;
             Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, lockRef.ForceUpdate());
 
             Assert.IsTrue(new FileInfo(db.Directory.FullName + "/refs/heads/foobar").Exists);
@@ -626,7 +635,7 @@ namespace GitSharp.Tests
             // Again. The ref already exists
             RefUpdate lockRef2 = db.UpdateRef("HEAD");
             ObjectId newId2 = ObjectId.FromString("7f822839a2fe9760f386cbbbcb3f92c5fe81def7");
-            lockRef2.NewObjectId = (newId2);
+            lockRef2.NewObjectId = newId2;
             Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, lockRef2.ForceUpdate());
 
             Assert.IsTrue(new FileInfo(db.Directory.FullName + "/refs/heads/foobar").Exists);

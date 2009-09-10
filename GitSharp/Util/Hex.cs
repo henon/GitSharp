@@ -45,79 +45,83 @@ namespace GitSharp.Util
 {
     public sealed class Hex
     {
-        static byte[] __hexCharToValue;
-        static char[] __valueToHexChar;
-        static byte[] __valueToHexByte;
-        public static int Nibble = 4;
-        static Hex()
+        private static readonly byte[] _hexCharToValue;
+        private static char[] _valueToHexChar;
+        private static byte[] _valueToHexByte;
+        private const int Nibble = 4;
+        
+		static Hex()
         {
-            __valueToHexChar = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-            __valueToHexByte = new byte[__valueToHexChar.Length];
-            for (int i = 0; i < __valueToHexChar.Length; i++)
-                __valueToHexByte[i] = (byte)__valueToHexChar[i];
+            _valueToHexChar = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+            _valueToHexByte = new byte[_valueToHexChar.Length];
+            for (int i = 0; i < _valueToHexChar.Length; i++)
+                _valueToHexByte[i] = (byte)_valueToHexChar[i];
 
-            __hexCharToValue = new byte['f' + 1];
-            for (int i = 0; i < __hexCharToValue.Length; i++)
-                __hexCharToValue[i] = byte.MaxValue;
+            _hexCharToValue = new byte['f' + 1];
+            for (int i = 0; i < _hexCharToValue.Length; i++)
+                _hexCharToValue[i] = byte.MaxValue;
             for (char i = '0'; i <= '9'; i++)
-                __hexCharToValue[i] = (byte)(i - '0');
+                _hexCharToValue[i] = (byte)(i - '0');
             for (char i = 'a'; i <= 'f'; i++)
-                __hexCharToValue[i] = (byte)((i - 'a') + 10);
+                _hexCharToValue[i] = (byte)((i - 'a') + 10);
         }
 
         public static byte HexCharToValue(Char c)
         {
-            return __hexCharToValue[c];
+            return _hexCharToValue[c];
         }
 
         public static byte HexCharToValue(byte c)
         {
-            return __hexCharToValue[c];
+            return _hexCharToValue[c];
         }
 
         public static int HexStringToUInt32(byte[] bs, int offset)
         {
-            int r = __hexCharToValue[bs[offset]];
+            int r = _hexCharToValue[bs[offset]];
             r <<= Nibble; // push one nibble
 
-            r |= __hexCharToValue[bs[offset + 1]];
+            r |= _hexCharToValue[bs[offset + 1]];
             r <<= Nibble;
 
-            r |= __hexCharToValue[bs[offset + 2]];
+            r |= _hexCharToValue[bs[offset + 2]];
             r <<= Nibble;
 
-            r |= __hexCharToValue[bs[offset + 3]];
+            r |= _hexCharToValue[bs[offset + 3]];
             r <<= Nibble;
 
-            r |= __hexCharToValue[bs[offset + 4]];
+            r |= _hexCharToValue[bs[offset + 4]];
             r <<= Nibble;
 
-            r |= __hexCharToValue[bs[offset + 5]];
+            r |= _hexCharToValue[bs[offset + 5]];
             r <<= Nibble;
 
-            r |= __hexCharToValue[bs[offset + 6]];
+            r |= _hexCharToValue[bs[offset + 6]];
 
-            int last = __hexCharToValue[bs[offset + 7]];
+            int last = _hexCharToValue[bs[offset + 7]];
             if (r < 0 || last < 0)
-                throw new IndexOutOfRangeException();
+            {
+            	throw new IndexOutOfRangeException();
+            }
 
             return (r << Nibble) | last;
         }
-
-
+        
         public static void FillHexByteArray(byte[] dest, int offset, int value)
         {
             uint uvalue = (uint)value;
             int curOffset = offset + 7;
             while (curOffset >= offset && uvalue != 0)
             {
-                dest[curOffset--] = __valueToHexByte[uvalue & 0xf];
+                dest[curOffset--] = _valueToHexByte[uvalue & 0xf];
                 uvalue >>= Nibble;
             }
-            while (curOffset >= offset)
-                dest[curOffset--] = __valueToHexByte[0];
-        }
 
+            while (curOffset >= offset)
+            {
+            	dest[curOffset--] = _valueToHexByte[0];
+            }
+        }
 
         public static void FillHexCharArray(char[] dest, int offset, int value)
         {
@@ -125,12 +129,38 @@ namespace GitSharp.Util
             int curOffset = offset + 7;
             while (curOffset >= offset && uvalue != 0)
             {
-                dest[curOffset--] = __valueToHexChar[uvalue & 0xf];
+                dest[curOffset--] = _valueToHexChar[uvalue & 0xf];
                 uvalue >>= Nibble;
             }
+
             while (curOffset >= offset)
-                dest[curOffset--] = '0';
+            {
+            	dest[curOffset--] = '0';
+            }
         }
+
+		public static int HexUInt32(byte[] bs, int p, int end)
+		{
+			if (8 <= end - p)
+			{
+				return Hex.HexStringToUInt32(bs, p);
+			}
+
+			int r = 0, n = 0;
+			while (n < 8 && p < end)
+			{
+				int v = HexCharToValue(bs[p++]);
+				if (v < 0)
+				{
+					throw new IndexOutOfRangeException();
+				}
+				r <<= 4;
+				r |= v;
+				n++;
+			}
+
+			return r << (8 - n) * 4;
+		}
 
     }
 }

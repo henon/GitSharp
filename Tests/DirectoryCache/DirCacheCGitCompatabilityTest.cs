@@ -112,8 +112,8 @@ namespace GitSharp.Tests.DirectoryCache
 
             DirCacheTree jTree = dc.getCacheTree(false);
             Assert.IsNotNull(jTree);
-            Assert.AreEqual("", jTree.getNameString());
-            Assert.AreEqual("", jTree.getPathString());
+            Assert.AreEqual(string.Empty, jTree.getNameString());
+            Assert.AreEqual(string.Empty, jTree.getPathString());
             Assert.IsTrue(jTree.isValid());
             Assert.AreEqual(ObjectId
                     .FromString("698dd0b8d0c299f080559a1cffc7fe029479a408"), jTree

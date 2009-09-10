@@ -158,7 +158,7 @@ namespace GitSharp.Tests.Transport
         {
             init("0004");
             string act = pckIn.ReadString();
-            Assert.AreEqual("", act);
+            Assert.AreEqual(string.Empty, act);
             assertEOF();
         }
 
@@ -166,7 +166,7 @@ namespace GitSharp.Tests.Transport
         public void testReadString_End()
         {
             init("0000");
-            Assert.AreEqual("", pckIn.ReadString());
+            Assert.AreEqual(string.Empty, pckIn.ReadString());
             assertEOF();
         }
 
@@ -193,7 +193,7 @@ namespace GitSharp.Tests.Transport
         {
             init("0004");
             string act = pckIn.ReadStringRaw();
-            Assert.AreEqual("", act);
+            Assert.AreEqual(string.Empty, act);
             assertEOF();
         }
 
@@ -216,7 +216,7 @@ namespace GitSharp.Tests.Transport
         public void testReadStringRaw_End()
         {
             init("0000");
-            Assert.AreEqual("", pckIn.ReadStringRaw());
+            Assert.AreEqual(string.Empty, pckIn.ReadStringRaw());
             assertEOF();
         }
 

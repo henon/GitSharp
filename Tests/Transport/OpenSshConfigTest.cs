@@ -46,216 +46,213 @@ using System.Text;
 
 namespace GitSharp.Tests.Transport
 {
-    [TestFixture]
-    public class OpenSshConfigTest : RepositoryTestCase
-    {
-        private DirectoryInfo home;
-        private FileInfo configFile;
-        private OpenSshConfig osc;
+	[TestFixture]
+	public class OpenSshConfigTest : RepositoryTestCase
+	{
+		private DirectoryInfo _home;
+		private FileInfo _configFile;
+		private OpenSshConfig _osc;
 
-        public override void setUp()
-        {
-            base.setUp();
+		public override void setUp()
+		{
+			base.setUp();
 
-            home = new DirectoryInfo(Path.Combine(trash.ToString(), "home"));
-            configFile = new FileInfo(Path.Combine(home.ToString(), ".ssh"));
-            Directory.CreateDirectory(configFile.ToString());
+			_home = new DirectoryInfo(Path.Combine(trash.ToString(), "home"));
+			_configFile = new FileInfo(Path.Combine(_home.ToString(), ".ssh"));
+			Directory.CreateDirectory(_configFile.ToString());
 
-            configFile = new FileInfo(Path.Combine(configFile.ToString(), "config"));
+			_configFile = new FileInfo(Path.Combine(_configFile.ToString(), "config"));
 
-            // can't do
-            //Environment.UserName = "jex_junit";
+			// can't do
+			//Environment.UserName = "jex_junit";
 
-            osc = new OpenSshConfig(home, configFile);
-        }
+			_osc = new OpenSshConfig(_home, _configFile);
+		}
 
-        private void config(string data)
-        {
-            StreamWriter fw =
-                new StreamWriter(
-                    new FileStream(configFile.ToString(), System.IO.FileMode.Create, FileAccess.ReadWrite),
-                    Encoding.UTF8);
-            fw.Write(data);
-            fw.Close();
-        }
+		private void Config(string data)
+		{
+			var fw = new StreamWriter(new FileStream(_configFile.ToString(), System.IO.FileMode.Create, FileAccess.ReadWrite), Encoding.UTF8);
+			fw.Write(data);
+			fw.Close();
+		}
 
-        [Test]
-        public void testNoConfig()
-        {
-            OpenSshConfig.Host h = osc.lookup("repo.or.cz");
-            Assert.IsNotNull(h);
-            Assert.AreEqual("repo.or.cz", h.getHostName());
-            Assert.AreEqual(Environment.UserName, h.getUser());
-            Assert.AreEqual(22, h.getPort());
-            Assert.IsNull(h.getIdentityFile());
-        }
+		[Test]
+		public void testNoConfig()
+		{
+			OpenSshConfig.Host h = _osc.lookup("repo.or.cz");
+			Assert.IsNotNull(h);
+			Assert.AreEqual("repo.or.cz", h.getHostName());
+			Assert.AreEqual(Environment.UserName, h.getUser());
+			Assert.AreEqual(22, h.getPort());
+			Assert.IsNull(h.getIdentityFile());
+		}
 
-        [Test]
-        public void testSeperatorParsing()
-        {
-            config("Host\tfirst\n" +
-                   "\tHostName\tfirst.tld\n" +
-                   "\n" +
-                   "Host second\n" +
-                   " HostName\tsecond.tld\n" +
-                   "Host=third\n" +
-                   "HostName=third.tld\n\n\n" +
-                   "\t Host = fourth\n\n\n" +
-                   " \t HostName\t=fourth.tld\n" +
-                   "Host\t =     last\n" +
-                   "HostName  \t    last.tld");
+		[Test]
+		public void testSeperatorParsing()
+		{
+			Config("Host\tfirst\n" +
+				   "\tHostName\tfirst.tld\n" +
+				   "\n" +
+				   "Host second\n" +
+				   " HostName\tsecond.tld\n" +
+				   "Host=third\n" +
+				   "HostName=third.tld\n\n\n" +
+				   "\t Host = fourth\n\n\n" +
+				   " \t HostName\t=fourth.tld\n" +
+				   "Host\t =     last\n" +
+				   "HostName  \t    last.tld");
 
-            Assert.IsNotNull(osc.lookup("first"));
-            Assert.AreEqual("first.tld", osc.lookup("first").getHostName());
-            Assert.IsNotNull(osc.lookup("second"));
-            Assert.AreEqual("second.tld", osc.lookup("second").getHostName());
-            Assert.IsNotNull(osc.lookup("third"));
-            Assert.AreEqual("third.tld", osc.lookup("third").getHostName());
-            Assert.IsNotNull(osc.lookup("fourth"));
-            Assert.AreEqual("fourth.tld", osc.lookup("fourth").getHostName());
-            Assert.IsNotNull(osc.lookup("last"));
-            Assert.AreEqual("last.tld", osc.lookup("last").getHostName());
-        }
+			Assert.IsNotNull(_osc.lookup("first"));
+			Assert.AreEqual("first.tld", _osc.lookup("first").getHostName());
+			Assert.IsNotNull(_osc.lookup("second"));
+			Assert.AreEqual("second.tld", _osc.lookup("second").getHostName());
+			Assert.IsNotNull(_osc.lookup("third"));
+			Assert.AreEqual("third.tld", _osc.lookup("third").getHostName());
+			Assert.IsNotNull(_osc.lookup("fourth"));
+			Assert.AreEqual("fourth.tld", _osc.lookup("fourth").getHostName());
+			Assert.IsNotNull(_osc.lookup("last"));
+			Assert.AreEqual("last.tld", _osc.lookup("last").getHostName());
+		}
 
-        [Test]
-        public void testQuoteParsing()
-        {
-            config("Host \"good\"\n" +
-                   " HostName=\"good.tld\"\n" +
-                   " Port=\"6007\"\n" +
-                   " User=\"gooduser\"\n" +
-                   "Host multiple unquoted and \"quoted\" \"hosts\"\n" +
-                   " Port=\"2222\"\n" +
-                   "Host \"spaced\"\n" +
-                   "# Bad host name, but testing preservation of spaces\n" +
-                   " HostName=\" spaced\ttld \"\n" +
-                   "# Misbalanced quotes\n" +
-                   "Host \"bad\"\n" +
-                   "# OpenSSH doesn't allow this but ...\n" +
-                   " HostName=bad.tld\"\n");
+		[Test]
+		public void testQuoteParsing()
+		{
+			Config("Host \"good\"\n" +
+				   " HostName=\"good.tld\"\n" +
+				   " Port=\"6007\"\n" +
+				   " User=\"gooduser\"\n" +
+				   "Host multiple unquoted and \"quoted\" \"hosts\"\n" +
+				   " Port=\"2222\"\n" +
+				   "Host \"spaced\"\n" +
+				   "# Bad host name, but testing preservation of spaces\n" +
+				   " HostName=\" spaced\ttld \"\n" +
+				   "# Misbalanced quotes\n" +
+				   "Host \"bad\"\n" +
+				   "# OpenSSH doesn't allow this but ...\n" +
+				   " HostName=bad.tld\"\n");
 
-            Assert.AreEqual("good.tld", osc.lookup("good").getHostName());
-            Assert.AreEqual("gooduser", osc.lookup("good").getUser());
-            Assert.AreEqual(6007, osc.lookup("good").getPort());
-            Assert.AreEqual(2222, osc.lookup("multiple").getPort());
-            Assert.AreEqual(2222, osc.lookup("quoted").getPort());
-            Assert.AreEqual(2222, osc.lookup("and").getPort());
-            Assert.AreEqual(2222, osc.lookup("unquoted").getPort());
-            Assert.AreEqual(2222, osc.lookup("hosts").getPort());
-            Assert.AreEqual(" spaced\ttld ", osc.lookup("spaced").getHostName());
-            Assert.AreEqual("bad.tld\"", osc.lookup("bad").getHostName());
-        }
+			Assert.AreEqual("good.tld", _osc.lookup("good").getHostName());
+			Assert.AreEqual("gooduser", _osc.lookup("good").getUser());
+			Assert.AreEqual(6007, _osc.lookup("good").getPort());
+			Assert.AreEqual(2222, _osc.lookup("multiple").getPort());
+			Assert.AreEqual(2222, _osc.lookup("quoted").getPort());
+			Assert.AreEqual(2222, _osc.lookup("and").getPort());
+			Assert.AreEqual(2222, _osc.lookup("unquoted").getPort());
+			Assert.AreEqual(2222, _osc.lookup("hosts").getPort());
+			Assert.AreEqual(" spaced\ttld ", _osc.lookup("spaced").getHostName());
+			Assert.AreEqual("bad.tld\"", _osc.lookup("bad").getHostName());
+		}
 
-        [Test]
-        public void testAlias_DoesNotMatch()
-        {
-            config("Host orcz\n" + "\tHostName repo.or.cz\n");
-            OpenSshConfig.Host h = osc.lookup("repo.or.cz");
-            Assert.IsNotNull(h);
-            Assert.AreEqual("repo.or.cz", h.getHostName());
-            Assert.AreEqual(Environment.UserName, h.getUser());
-            Assert.AreEqual(22, h.port);
-            Assert.IsNull(h.getIdentityFile());
-        }
+		[Test]
+		public void testAlias_DoesNotMatch()
+		{
+			Config("Host orcz\n" + "\tHostName repo.or.cz\n");
+			OpenSshConfig.Host h = _osc.lookup("repo.or.cz");
+			Assert.IsNotNull(h);
+			Assert.AreEqual("repo.or.cz", h.getHostName());
+			Assert.AreEqual(Environment.UserName, h.getUser());
+			Assert.AreEqual(22, h.port);
+			Assert.IsNull(h.getIdentityFile());
+		}
 
-        [Test]
-        public void testAlias_OptionsSet()
-        {
-            config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\tPort 2222\n"
-                   + "\tUser jex\n" + "\tIdentityFile .ssh/id_jex\n"
-                   + "\tForwardX11 no\n");
+		[Test]
+		public void testAlias_OptionsSet()
+		{
+			Config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\tPort 2222\n"
+				   + "\tUser jex\n" + "\tIdentityFile .ssh/id_jex\n"
+				   + "\tForwardX11 no\n");
 
-            OpenSshConfig.Host h = osc.lookup("orcz");
-            Assert.IsNotNull(h);
-            Assert.AreEqual("repo.or.cz", h.getHostName());
-            Assert.AreEqual("jex", h.getUser());
-            Assert.AreEqual(2222, h.getPort());
-            Assert.AreEqual(new FileInfo(Path.Combine(home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
-        }
+			OpenSshConfig.Host h = _osc.lookup("orcz");
+			Assert.IsNotNull(h);
+			Assert.AreEqual("repo.or.cz", h.getHostName());
+			Assert.AreEqual("jex", h.getUser());
+			Assert.AreEqual(2222, h.getPort());
+			Assert.AreEqual(new FileInfo(Path.Combine(_home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
+		}
 
-        [Test]
-        public void testAlias_OptionsKeywordCaseInsensitive()
-        {
-            config("hOsT orcz\n" + "\thOsTnAmE repo.or.cz\n" + "\tPORT 2222\n"
-                   + "\tuser jex\n" + "\tidentityfile .ssh/id_jex\n"
-                   + "\tForwardX11 no\n");
+		[Test]
+		public void testAlias_OptionsKeywordCaseInsensitive()
+		{
+			Config("hOsT orcz\n" + "\thOsTnAmE repo.or.cz\n" + "\tPORT 2222\n"
+				   + "\tuser jex\n" + "\tidentityfile .ssh/id_jex\n"
+				   + "\tForwardX11 no\n");
 
-            OpenSshConfig.Host h = osc.lookup("orcz");
-            Assert.IsNotNull(h);
-            Assert.AreEqual("repo.or.cz", h.getHostName());
-            Assert.AreEqual("jex", h.getUser());
-            Assert.AreEqual(2222, h.getPort());
-            Assert.AreEqual(new FileInfo(Path.Combine(home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
-        }
+			OpenSshConfig.Host h = _osc.lookup("orcz");
+			Assert.IsNotNull(h);
+			Assert.AreEqual("repo.or.cz", h.getHostName());
+			Assert.AreEqual("jex", h.getUser());
+			Assert.AreEqual(2222, h.getPort());
+			Assert.AreEqual(new FileInfo(Path.Combine(_home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
+		}
 
-        [Test]
-        public void testAlias_OptionsInherit()
-        {
-            config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"
-                   + "\tHostName not.a.host.example.com\n" + "\tPort 2222\n"
-                   + "\tUser jex\n" + "\tIdentityFile .ssh/id_jex\n"
-                   + "\tForwardX11 no\n");
+		[Test]
+		public void testAlias_OptionsInherit()
+		{
+			Config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"
+				   + "\tHostName not.a.host.example.com\n" + "\tPort 2222\n"
+				   + "\tUser jex\n" + "\tIdentityFile .ssh/id_jex\n"
+				   + "\tForwardX11 no\n");
 
-            OpenSshConfig.Host h = osc.lookup("orcz");
-            Assert.IsNotNull(h);
-            Assert.AreEqual("repo.or.cz", h.getHostName());
-            Assert.AreEqual("jex", h.getUser());
-            Assert.AreEqual(2222, h.getPort());
-            Assert.AreEqual(new FileInfo(Path.Combine(home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
-        }
+			OpenSshConfig.Host h = _osc.lookup("orcz");
+			Assert.IsNotNull(h);
+			Assert.AreEqual("repo.or.cz", h.getHostName());
+			Assert.AreEqual("jex", h.getUser());
+			Assert.AreEqual(2222, h.getPort());
+			Assert.AreEqual(new FileInfo(Path.Combine(_home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
+		}
 
-        [Test]
-        public void testAlias_PreferredAuthenticationsDefault()
-        {
-            OpenSshConfig.Host h = osc.lookup("orcz");
-            Assert.IsNotNull(h);
-            Assert.IsNull(h.getPreferredAuthentications());
-        }
+		[Test]
+		public void testAlias_PreferredAuthenticationsDefault()
+		{
+			OpenSshConfig.Host h = _osc.lookup("orcz");
+			Assert.IsNotNull(h);
+			Assert.IsNull(h.getPreferredAuthentications());
+		}
 
-        [Test]
-        public void testAlias_PreferredAuthentications()
-        {
-            config("Host orcz\n" + "\tPreferredAuthentications publickey\n");
-            OpenSshConfig.Host h = osc.lookup("orcz");
-            Assert.IsNotNull(h);
-            Assert.AreEqual("publickey", h.getPreferredAuthentications());
-        }
+		[Test]
+		public void testAlias_PreferredAuthentications()
+		{
+			Config("Host orcz\n" + "\tPreferredAuthentications publickey\n");
+			OpenSshConfig.Host h = _osc.lookup("orcz");
+			Assert.IsNotNull(h);
+			Assert.AreEqual("publickey", h.getPreferredAuthentications());
+		}
 
-        [Test]
-        public void testAlias_InheritPreferredAuthentications()
-        {
-            config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"
-                   + "\tPreferredAuthentications publickey, hostbased\n");
-            OpenSshConfig.Host h = osc.lookup("orcz");
-            Assert.IsNotNull(h);
-            Assert.AreEqual("publickey,hostbased", h.getPreferredAuthentications());
-        }
+		[Test]
+		public void testAlias_InheritPreferredAuthentications()
+		{
+			Config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"
+				   + "\tPreferredAuthentications publickey, hostbased\n");
+			OpenSshConfig.Host h = _osc.lookup("orcz");
+			Assert.IsNotNull(h);
+			Assert.AreEqual("publickey,hostbased", h.getPreferredAuthentications());
+		}
 
-        [Test]
-        public void testAlias_BatchModeDefault()
-        {
-            OpenSshConfig.Host h = osc.lookup("orcz");
-            Assert.IsNotNull(h);
-            Assert.AreEqual(false, h.isBatchMode());
-        }
+		[Test]
+		public void testAlias_BatchModeDefault()
+		{
+			OpenSshConfig.Host h = _osc.lookup("orcz");
+			Assert.IsNotNull(h);
+			Assert.AreEqual(false, h.isBatchMode());
+		}
 
-        [Test]
-        public void testAlias_BatchModeYes()
-        {
-            config("Host orcz\n" + "\tBatchMode yes\n");
-            OpenSshConfig.Host h = osc.lookup("orcz");
-            Assert.IsNotNull(h);
-            Assert.AreEqual(true, h.isBatchMode());
-        }
+		[Test]
+		public void testAlias_BatchModeYes()
+		{
+			Config("Host orcz\n" + "\tBatchMode yes\n");
+			OpenSshConfig.Host h = _osc.lookup("orcz");
+			Assert.IsNotNull(h);
+			Assert.AreEqual(true, h.isBatchMode());
+		}
 
-        [Test]
-        public void testAlias_InheritBatchMode()
-        {
-            config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"
-                   + "\tBatchMode yes\n");
-            OpenSshConfig.Host h = osc.lookup("orcz");
-            Assert.IsNotNull(h);
-            Assert.AreEqual(true, h.isBatchMode());
-        }
-    }
+		[Test]
+		public void testAlias_InheritBatchMode()
+		{
+			Config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"
+				   + "\tBatchMode yes\n");
+			OpenSshConfig.Host h = _osc.lookup("orcz");
+			Assert.IsNotNull(h);
+			Assert.AreEqual(true, h.isBatchMode());
+		}
+	}
 }

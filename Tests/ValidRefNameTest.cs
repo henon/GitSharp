@@ -50,7 +50,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testEmptyString()
 		{
-			assertValid(false, "");
+			assertValid(false, string.Empty);
 			assertValid(false, "/");
 		}
 

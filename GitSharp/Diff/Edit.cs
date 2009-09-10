@@ -43,7 +43,7 @@ namespace GitSharp.Diff
 	/// <summary>
 	/// A modified region detected between two versions of roughly the same content.
 	/// <para>
-	/// Regions should be specified using 0 based notation, so add 1 to the 
+	/// Regions should be specified using 0 based notation, so add 1 to the
 	/// start and end marks for line numbers in a file.
 	/// </para>
 	/// <para>
@@ -55,9 +55,9 @@ namespace GitSharp.Diff
 	/// An edit where <code>beginA < endA && beginB < endB</code> is a replace edit,
 	/// that is sequence B has replaced the range of elements between
 	/// <code>[beginA, endA)</code> with those found in <code>[beginB, endB)</code>.
-	/// </para> 
+	/// </para>
 	/// </summary>
-	public class Edit : IEquatable<Edit>
+	public class Edit
 	{
 		/// <summary>
 		/// Type of edit
@@ -202,34 +202,20 @@ namespace GitSharp.Diff
 			EndB = sEnd;
 		}
 
-		/// <summary>
-		/// Indicates whether the current object is equal to another object of the same type.
-		/// </summary>
-		/// <returns>
-		/// true if the current object is equal to the <paramref name="other"/>
-		/// parameter; otherwise, false.
-		/// </returns>
-		/// <param name="other">An object to compare with this object.</param>
-		public bool Equals(Edit other)
+		public override int GetHashCode()
 		{
-			if (ReferenceEquals(null, other)) return false;
-			if (ReferenceEquals(this, other)) return true;
-
-			return other.BeginA == BeginA &&
-				other.EndA == EndA &&
-				other.BeginB == BeginB &&
-				other.EndB == EndB;
+			return BeginA ^ EndA;
 		}
 
 		/// <summary>
-		/// Determines whether the specified <see cref="T:System.Object"/> is 
+		/// Determines whether the specified <see cref="T:System.Object"/> is
 		/// equal to the current <see cref="T:System.Object"/>.
 		/// </summary>
 		/// <returns>
-		/// true if the specified <see cref="T:System.Object"/> is equal to the 
+		/// true if the specified <see cref="T:System.Object"/> is equal to the
 		/// current <see cref="T:System.Object"/>; otherwise, false.
 		/// </returns>
-		/// <param name="obj">The <see cref="T:System.Object"/> to compare with 
+		/// <param name="obj">The <see cref="T:System.Object"/> to compare with
 		/// the current <see cref="T:System.Object"/>.
 		/// </param>
 		/// <exception cref="T:System.NullReferenceException">
@@ -238,29 +224,13 @@ namespace GitSharp.Diff
 		/// <filterpriority>2</filterpriority>
 		public override bool Equals(object obj)
 		{
-			if (ReferenceEquals(null, obj)) return false;
-			if (ReferenceEquals(this, obj)) return true;
-			if (obj.GetType() != typeof(Edit)) return false;
-			return Equals((Edit)obj);
-		}
-
-		/// <summary>
-		/// Serves as a hash function for a particular type. 
-		/// </summary>
-		/// <returns>
-		/// A hash code for the current <see cref="T:System.Object"/>.
-		/// </returns>
-		/// <filterpriority>2</filterpriority>
-		public override int GetHashCode()
-		{
-			unchecked
+			if (obj is Edit)
 			{
-				int result = BeginA;
-				result = (result * 397) ^ EndA;
-				result = (result * 397) ^ BeginB;
-				result = (result * 397) ^ EndB;
-				return result;
+				var e = (Edit) obj;
+				return BeginA == e.BeginA && EndA == EndA && BeginB == BeginB && EndB == e.EndB;
 			}
+
+			return false;
 		}
 
 		public static bool operator ==(Edit left, Edit right)

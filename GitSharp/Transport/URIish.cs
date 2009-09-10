@@ -53,7 +53,7 @@ namespace GitSharp.Transport
     {
         private static readonly Regex FULL_URI =
             new Regex(
-                "^(?:([a-z][a-z0-9+-]+)://(?:([^/]+?)(?::([^/]+?))?@)?(?:([^/]+?))?(?::(\\d+))?)?((?:[A-Za-z]:)?/.+)$");
+                "^(?:([A-Za-z][a-z0-9+-]+)://(?:([^/]+?)(?::([^/]+?))?@)?(?:([^/]+?))?(?::(\\d+))?)?((?:[A-Za-z]:)?/.+)$");
 
         private static readonly Regex SCP_URI = new Regex("^(?:([^@]+?)@)?([^:]+?):(.+)$");
 

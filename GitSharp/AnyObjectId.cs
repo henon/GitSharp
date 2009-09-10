@@ -109,6 +109,13 @@ namespace GitSharp
             w.Write(tmp, 0, StringLength);
         }
 
+        public void CopyTo(char[] tmp, Encoding charset, Stream w)
+        {
+            ToHexCharArray(tmp);
+            byte[] val = charset.GetBytes(tmp, 0, StringLength);
+            w.Write(val, 0, val.Length);
+        }
+
         public void copyRawTo(Stream s)
         {
             var buf = new byte[20];

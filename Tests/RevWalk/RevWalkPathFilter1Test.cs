@@ -35,7 +35,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
 using GitSharp.TreeWalk.Filter;
 using NUnit.Framework;
@@ -54,73 +53,73 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testEmpty_EmptyTree()
         {
-            RevCommit a = commit();
+            RevCommit a = Commit();
             filter("a");
-            markStart(a);
+            MarkStart(a);
             Assert.IsNull(rw.next());
         }
 
         [Test]
         public void testEmpty_NoMatch()
         {
-            RevCommit a = commit(tree(file("0", blob("0"))));
+            RevCommit a = Commit(tree(File("0", blob("0"))));
             filter("a");
-            markStart(a);
+            MarkStart(a);
             Assert.IsNull(rw.next());
         }
 
         [Test]
         public void testSimple1()
         {
-            RevCommit a = commit(tree(file("0", blob("0"))));
+            RevCommit a = Commit(tree(File("0", blob("0"))));
             filter("0");
-            markStart(a);
-            assertCommit(a, rw.next());
+            MarkStart(a);
+            AssertCommit(a, rw.next());
             Assert.IsNull(rw.next());
         }
 
         [Test]
         public void testEdits_MatchNone()
         {
-            RevCommit a = commit(tree(file("0", blob("a"))));
-            RevCommit b = commit(tree(file("0", blob("b"))), a);
-            RevCommit c = commit(tree(file("0", blob("c"))), b);
-            RevCommit d = commit(tree(file("0", blob("d"))), c);
+            RevCommit a = Commit(tree(File("0", blob("a"))));
+            RevCommit b = Commit(tree(File("0", blob("b"))), a);
+            RevCommit c = Commit(tree(File("0", blob("c"))), b);
+            RevCommit d = Commit(tree(File("0", blob("d"))), c);
             filter("a");
-            markStart(d);
+            MarkStart(d);
             Assert.IsNull(rw.next());
         }
 
         [Test]
         public void testEdits_MatchAll()
         {
-            RevCommit a = commit(tree(file("0", blob("a"))));
-            RevCommit b = commit(tree(file("0", blob("b"))), a);
-            RevCommit c = commit(tree(file("0", blob("c"))), b);
-            RevCommit d = commit(tree(file("0", blob("d"))), c);
+            RevCommit a = Commit(tree(File("0", blob("a"))));
+            RevCommit b = Commit(tree(File("0", blob("b"))), a);
+            RevCommit c = Commit(tree(File("0", blob("c"))), b);
+            RevCommit d = Commit(tree(File("0", blob("d"))), c);
             filter("0");
-            markStart(d);
-            assertCommit(d, rw.next());
-            assertCommit(c, rw.next());
-            assertCommit(b, rw.next());
-            assertCommit(a, rw.next());
+            MarkStart(d);
+            AssertCommit(d, rw.next());
+            AssertCommit(c, rw.next());
+            AssertCommit(b, rw.next());
+            AssertCommit(a, rw.next());
             Assert.IsNull(rw.next());
         }
 
         [Test]
         public void testStringOfPearls_FilePath1()
         {
-            RevCommit a = commit(tree(file("d/f", blob("a"))));
-            RevCommit b = commit(tree(file("d/f", blob("a"))), a);
-            RevCommit c = commit(tree(file("d/f", blob("b"))), b);
+            RevCommit a = Commit(tree(File("d/f", blob("a"))));
+            RevCommit b = Commit(tree(File("d/f", blob("a"))), a);
+            RevCommit c = Commit(tree(File("d/f", blob("b"))), b);
             filter("d/f");
-            markStart(c);
+            MarkStart(c);
 
-            assertCommit(c, rw.next());
+            AssertCommit(c, rw.next());
             Assert.AreEqual(1, c.ParentCount);
-            assertCommit(a, c.GetParent(0)); // b was skipped
+            AssertCommit(a, c.GetParent(0)); // b was skipped
 
-            assertCommit(a, rw.next());
+            AssertCommit(a, rw.next());
             Assert.AreEqual(0, a.ParentCount);
             Assert.IsNull(rw.next());
         }
@@ -128,19 +127,19 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testStringOfPearls_FilePath2()
         {
-            RevCommit a = commit(tree(file("d/f", blob("a"))));
-            RevCommit b = commit(tree(file("d/f", blob("a"))), a);
-            RevCommit c = commit(tree(file("d/f", blob("b"))), b);
-            RevCommit d = commit(tree(file("d/f", blob("b"))), c);
+            RevCommit a = Commit(tree(File("d/f", blob("a"))));
+            RevCommit b = Commit(tree(File("d/f", blob("a"))), a);
+            RevCommit c = Commit(tree(File("d/f", blob("b"))), b);
+            RevCommit d = Commit(tree(File("d/f", blob("b"))), c);
             filter("d/f");
-            markStart(d);
+            MarkStart(d);
 
             // d was skipped
-            assertCommit(c, rw.next());
+            AssertCommit(c, rw.next());
             Assert.AreEqual(1, c.ParentCount);
-            assertCommit(a, c.GetParent(0)); // b was skipped
+            AssertCommit(a, c.GetParent(0)); // b was skipped
 
-            assertCommit(a, rw.next());
+            AssertCommit(a, rw.next());
             Assert.AreEqual(0, a.ParentCount);
             Assert.IsNull(rw.next());
         }
@@ -148,19 +147,19 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testStringOfPearls_DirPath2()
         {
-            RevCommit a = commit(tree(file("d/f", blob("a"))));
-            RevCommit b = commit(tree(file("d/f", blob("a"))), a);
-            RevCommit c = commit(tree(file("d/f", blob("b"))), b);
-            RevCommit d = commit(tree(file("d/f", blob("b"))), c);
+            RevCommit a = Commit(tree(File("d/f", blob("a"))));
+            RevCommit b = Commit(tree(File("d/f", blob("a"))), a);
+            RevCommit c = Commit(tree(File("d/f", blob("b"))), b);
+            RevCommit d = Commit(tree(File("d/f", blob("b"))), c);
             filter("d");
-            markStart(d);
+            MarkStart(d);
 
             // d was skipped
-            assertCommit(c, rw.next());
+            AssertCommit(c, rw.next());
             Assert.AreEqual(1, c.ParentCount);
-            assertCommit(a, c.GetParent(0)); // b was skipped
+            AssertCommit(a, c.GetParent(0)); // b was skipped
 
-            assertCommit(a, rw.next());
+            AssertCommit(a, rw.next());
             Assert.AreEqual(0, a.ParentCount);
             Assert.IsNull(rw.next());
         }
@@ -168,27 +167,27 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testStringOfPearls_FilePath3()
         {
-            RevCommit a = commit(tree(file("d/f", blob("a"))));
-            RevCommit b = commit(tree(file("d/f", blob("a"))), a);
-            RevCommit c = commit(tree(file("d/f", blob("b"))), b);
-            RevCommit d = commit(tree(file("d/f", blob("b"))), c);
-            RevCommit e = commit(tree(file("d/f", blob("b"))), d);
-            RevCommit f = commit(tree(file("d/f", blob("b"))), e);
-            RevCommit g = commit(tree(file("d/f", blob("b"))), f);
-            RevCommit h = commit(tree(file("d/f", blob("b"))), g);
-            RevCommit i = commit(tree(file("d/f", blob("c"))), h);
+            RevCommit a = Commit(tree(File("d/f", blob("a"))));
+            RevCommit b = Commit(tree(File("d/f", blob("a"))), a);
+            RevCommit c = Commit(tree(File("d/f", blob("b"))), b);
+            RevCommit d = Commit(tree(File("d/f", blob("b"))), c);
+            RevCommit e = Commit(tree(File("d/f", blob("b"))), d);
+            RevCommit f = Commit(tree(File("d/f", blob("b"))), e);
+            RevCommit g = Commit(tree(File("d/f", blob("b"))), f);
+            RevCommit h = Commit(tree(File("d/f", blob("b"))), g);
+            RevCommit i = Commit(tree(File("d/f", blob("c"))), h);
             filter("d/f");
-            markStart(i);
+            MarkStart(i);
 
-            assertCommit(i, rw.next());
+            AssertCommit(i, rw.next());
             Assert.AreEqual(1, i.ParentCount);
-            assertCommit(c, i.GetParent(0)); // h..d was skipped
+            AssertCommit(c, i.GetParent(0)); // h..d was skipped
 
-            assertCommit(c, rw.next());
+            AssertCommit(c, rw.next());
             Assert.AreEqual(1, c.ParentCount);
-            assertCommit(a, c.GetParent(0)); // b was skipped
+            AssertCommit(a, c.GetParent(0)); // b was skipped
 
-            assertCommit(a, rw.next());
+            AssertCommit(a, rw.next());
             Assert.AreEqual(0, a.ParentCount);
             Assert.IsNull(rw.next());
         }

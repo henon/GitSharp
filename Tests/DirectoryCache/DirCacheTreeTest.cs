@@ -59,8 +59,8 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.IsNotNull(tree);
             Assert.AreSame(tree, dc.getCacheTree(false));
             Assert.AreSame(tree, dc.getCacheTree(true));
-            Assert.AreEqual("", tree.getNameString());
-            Assert.AreEqual("", tree.getPathString());
+            Assert.AreEqual(string.Empty, tree.getNameString());
+            Assert.AreEqual(string.Empty, tree.getPathString());
             Assert.AreEqual(0, tree.getChildCount());
             Assert.AreEqual(0, tree.getEntrySpan());
             Assert.IsFalse(tree.isValid());
@@ -98,8 +98,8 @@ namespace GitSharp.Tests.DirectoryCache
             DirCacheTree root = dc.getCacheTree(true);
             Assert.IsNotNull(root);
             Assert.AreSame(root, dc.getCacheTree(true));
-            Assert.AreEqual("", root.getNameString());
-            Assert.AreEqual("", root.getPathString());
+            Assert.AreEqual(string.Empty, root.getNameString());
+            Assert.AreEqual(string.Empty, root.getPathString());
             Assert.AreEqual(1, root.getChildCount());
             Assert.AreEqual(dc.getEntryCount(), root.getEntrySpan());
             Assert.IsFalse(root.isValid());
@@ -137,8 +137,8 @@ namespace GitSharp.Tests.DirectoryCache
             DirCacheTree root = dc.getCacheTree(true);
             Assert.IsNotNull(root);
             Assert.AreSame(root, dc.getCacheTree(true));
-            Assert.AreEqual("", root.getNameString());
-            Assert.AreEqual("", root.getPathString());
+            Assert.AreEqual(string.Empty, root.getNameString());
+            Assert.AreEqual(string.Empty, root.getPathString());
             Assert.AreEqual(1, root.getChildCount());
             Assert.AreEqual(dc.getEntryCount(), root.getEntrySpan());
             Assert.IsFalse(root.isValid());

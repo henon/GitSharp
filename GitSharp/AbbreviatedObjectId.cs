@@ -158,7 +158,7 @@ namespace GitSharp
 		/// 
 		/// </summary>
 		/// <returns>
-		/// Return a complete ObjectId; null if <see cref="isComplete"/> is false */
+		/// Return a complete <see cref="ObjectId"/>; null if <see cref="isComplete"/> is false.
 		/// </returns>
 		public ObjectId ToObjectId()
 		{
@@ -172,7 +172,7 @@ namespace GitSharp
 		/// <returns>
 		/// Return &lt;0 if this abbreviation names an object that is less than
 		/// <code>other</code>; 0 if this abbreviation exactly matches the
-		/// first {@link #Length} digits of <code>other.name()</code>;
+		/// first <see cref="Length"/> digits of <code>other.name()</code>;
 		/// &gt;0 if this abbreviation names an object that is after
 		/// <code>other</code>.
 		/// </returns>
@@ -214,15 +214,16 @@ namespace GitSharp
 		{
 			return _w2;
 		}
-        
+
 		public override bool Equals(object o)
 		{
 			if (o is AbbreviatedObjectId)
 			{
-				AbbreviatedObjectId b = (AbbreviatedObjectId)o;
+				var b = (AbbreviatedObjectId)o;
 				return _nibbles == b._nibbles && _w1 == b._w1 && _w2 == b._w2
 						&& _w3 == b._w3 && _w4 == b._w4 && _w5 == b._w5;
 			}
+
 			return false;
 		}
 
@@ -232,23 +233,31 @@ namespace GitSharp
 		/// <returns>string form of the abbreviation, in lower case hexadecimal.</returns>
 		public string name()
 		{
-			char[] b = new char[AnyObjectId.StringLength];
+			var b = new char[AnyObjectId.StringLength];
 
 			Hex.FillHexCharArray(b, 0, _w1);
 			if (_nibbles <= 8)
+			{
 				return new string(b, 0, _nibbles);
+			}
 
 			Hex.FillHexCharArray(b, 8, _w2);
 			if (_nibbles <= 16)
+			{
 				return new string(b, 0, _nibbles);
+			}
 
 			Hex.FillHexCharArray(b, 16, _w3);
 			if (_nibbles <= 24)
+			{
 				return new string(b, 0, _nibbles);
+			}
 
 			Hex.FillHexCharArray(b, 24, _w4);
 			if (_nibbles <= 32)
+			{
 				return new string(b, 0, _nibbles);
+			}
 
 			Hex.FillHexCharArray(b, 32, _w5);
 			return new string(b, 0, _nibbles);
@@ -263,11 +272,11 @@ namespace GitSharp
 		{
 			try
 			{
-				int a = HexUInt32(bs, ptr, end);
-				int b = HexUInt32(bs, ptr + 8, end);
-				int c = HexUInt32(bs, ptr + 16, end);
-				int d = HexUInt32(bs, ptr + 24, end);
-				int e = HexUInt32(bs, ptr + 32, end);
+				int a = Hex.HexUInt32(bs, ptr, end);
+				int b = Hex.HexUInt32(bs, ptr + 8, end);
+				int c = Hex.HexUInt32(bs, ptr + 16, end);
+				int d = Hex.HexUInt32(bs, ptr + 24, end);
+				int e = Hex.HexUInt32(bs, ptr + 32, end);
 				return new AbbreviatedObjectId(end - ptr, a, b, c, d, e);
 			}
 			catch (IndexOutOfRangeException)
@@ -275,28 +284,6 @@ namespace GitSharp
 				string str = Encoding.GetEncoding("US-ASCII").GetString(bs, ptr, end - ptr);
 				throw new ArgumentException("Invalid id: " + str);
 			}
-		}
-
-		private static int HexUInt32(byte[] bs, int p, int end)
-		{
-			if (8 <= end - p)
-			{
-				return Hex.HexStringToUInt32(bs, p);
-			}
-
-			int r = 0, n = 0;
-			while (n < 8 && p < end)
-			{
-				int v = Hex.HexCharToValue(bs[p++]);
-				if (v < 0)
-				{
-					throw new IndexOutOfRangeException();
-				}
-				r <<= 4;
-				r |= v;
-				n++;
-			}
-			return r << (8 - n) * 4;
 		}
 	}
 }

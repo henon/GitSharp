@@ -42,149 +42,156 @@ using GitSharp.Util;
 
 namespace GitSharp.Diff
 {
-    /**
-     * A Sequence supporting UNIX formatted text in byte[] format.
-     * <p>
-     * Elements of the sequence are the lines of the file, as delimited by the UNIX
-     * newline character ('\n'). The file content is treated as 8 bit binary text,
-     * with no assumptions or requirements on character encoding.
-     * <p>
-     * Note that the first line of the file is element 0, as defined by the Sequence
-     * interface API. Traditionally in a text editor a patch file the first line is
-     * line number 1. Callers may need to subtract 1 prior to invoking methods if
-     * they are converting from "line number" to "element index".
-     */
-    public class RawText : Sequence
-    {
-	    /** The file content for this sequence. */
-	    protected readonly byte[] content;
 
-	    /** Map of line number to starting position within {@link #content}. */
-	    protected readonly IntList lines;
 
-	    /** Hash code for each line, for fast equality elimination. */
-	    protected readonly IntList hashes;
+	/// <summary>
+	/// A sequence supporting UNIX formatted text in byte[] format.
+	/// <para />
+	/// Elements of the sequence are the lines of the file, as delimited by the UNIX
+	/// newline character ('\n'). The file content is treated as 8 bit binary text,
+	/// with no assumptions or requirements on character encoding.
+	/// <para />
+	/// Note that the first line of the file is element 0, as defined by the Sequence
+	/// interface API. Traditionally in a text editor a patch file the first line is
+	/// line number 1. Callers may need to subtract 1 prior to invoking methods if
+	/// they are converting from "line number" to "element index".
+	/// </summary>
+	public class RawText : Sequence
+	{
+		// The file content for this sequence.
+		private readonly byte[] content;
 
-	    /**
-	     * Create a new sequence from an existing content byte array.
-	     * <p>
-	     * The entire array (indexes 0 through length-1) is used as the content.
-	     *
-	     * @param input
-	     *            the content array. The array is never modified, so passing
-	     *            through cached arrays is safe.
-	     */
-	    public RawText(byte[] input)
-        {
-		    content = input;
-		    lines = RawParseUtils.lineMap(content, 0, content.Length);
-		    hashes = computeHashes();
-	    }
+		// Map of line number to starting position within content.
+		private readonly IntList lines;
 
-	    public int size()
-        {
-		    // The line map is always 2 entries larger than the number of lines in
-		    // the file. Index 0 is padded out/unused. The last index is the total
-		    // length of the buffer, and acts as a sentinel.
-		    //
-		    return lines.size() - 2;
-	    }
+		// Hash code for each line, for fast equality elimination.
+		private readonly IntList hashes;
 
-	    public bool equals(int i, Sequence other, int j)
-    {
-		    return equals(this, i + 1, (RawText) other, j + 1);
-	    }
+		///	<summary>
+		/// Create a new sequence from an existing content byte array.
+		///	<para />
+		///	The entire array (indexes 0 through length-1) is used as the content.
+		///	</summary>
+		///	<param name="input">
+		///	the content array. The array is never modified, so passing
+		///	through cached arrays is safe.
+		/// </param>
+		public RawText(byte[] input)
+		{
+			content = input;
+			lines = RawParseUtils.lineMap(content, 0, content.Length);
+			hashes = computeHashes();
+		}
 
-	    private static bool equals(RawText a, int ai, RawText b, int bi)
-        {
-		    if (a.hashes.get(ai) != b.hashes.get(bi))
-			    return false;
+		public int size()
+		{
+			// The line map is always 2 entries larger than the number of lines in
+			// the file. Index 0 is padded out/unused. The last index is the total
+			// length of the buffer, and acts as a sentinel.
+			//
+			return lines.size() - 2;
+		}
 
-		    int a_start = a.lines.get(ai);
-		    int b_start = b.lines.get(bi);
-		    int a_end = a.lines.get(ai + 1);
-		    int b_end = b.lines.get(bi + 1);
+		public bool equals(int i, Sequence other, int j)
+		{
+			return equals(this, i + 1, (RawText) other, j + 1);
+		}
 
-		    if (a_end - a_start != b_end - b_start)
-			    return false;
+		private static bool equals(RawText a, int ai, RawText b, int bi)
+		{
+			if (a.hashes.get(ai) != b.hashes.get(bi))
+				return false;
 
-		    while (a_start < a_end) {
-			    if (a.content[a_start++] != b.content[b_start++])
-				    return false;
-		    }
-		    return true;
-	    }
+			int a_start = a.lines.get(ai);
+			int b_start = b.lines.get(bi);
+			int a_end = a.lines.get(ai + 1);
+			int b_end = b.lines.get(bi + 1);
 
-	    /**
-	     * Write a specific line to the output stream, without its trailing LF.
-	     * <p>
-	     * The specified line is copied as-is, with no character encoding
-	     * translation performed.
-	     * <p>
-	     * If the specified line ends with an LF ('\n'), the LF is <b>not</b>
-	     * copied. It is up to the caller to write the LF, if desired, between
-	     * output lines.
-	     *
-	     * @param out
-	     *            stream to copy the line data onto.
-	     * @param i
-	     *            index of the line to extract. Note this is 0-based, so line
-	     *            number 1 is actually index 0.
-	     * @throws IOException
-	     *             the stream write operation failed.
-	     */
-	    public void writeLine(System.IO.Stream output, int i)
-        {
-		    int start = lines.get(i + 1);
-		    int end = lines.get(i + 2);
-		    if (content[end - 1] == '\n')
-			    end--;
-		    output.Write(content, start, end - start);
-	    }
+			if (a_end - a_start != b_end - b_start)
+				return false;
 
-	    /**
-	     * Determine if the file ends with a LF ('\n').
-	     *
-	     * @return true if the last line has an LF; false otherwise.
-	     */
-	    public bool isMissingNewlineAtEnd()
-        {
-		    int end = lines.get(lines.size() - 1);
-		    if (end == 0)
-			    return true;
-		    return content[end - 1] != '\n';
-	    }
+			while (a_start < a_end) {
+				if (a.content[a_start++] != b.content[b_start++])
+					return false;
+			}
+			return true;
+		}
 
-	    private IntList computeHashes()
-        {
-		    IntList r = new IntList(lines.size());
-		    r.add(0);
-		    for (int lno = 1; lno < lines.size() - 1; lno++) {
-			    int ptr = lines.get(lno);
-			    int end = lines.get(lno + 1);
-			    r.add(hashLine(content, ptr, end));
-		    }
-		    r.add(0);
-		    return r;
-	    }
+		///	<summary>
+		/// Write a specific line to the output stream, without its trailing LF.
+		///	<para />
+		///	The specified line is copied as-is, with no character encoding
+		///	translation performed.
+		///	<para />
+		///	If the specified line ends with an LF ('\n'), the LF is <b>not</b>
+		///	copied. It is up to the caller to write the LF, if desired, between
+		///	output lines.
+		///	</summary>
+		///	<param name="out">
+		///	Stream to copy the line data onto. </param>
+		///	<param name="i">
+		///	Index of the line to extract. Note this is 0-based, so line
+		///	number 1 is actually index 0. </param>
+		///	<exception cref="IOException">
+		///	the stream write operation failed.
+		/// </exception>
+		public void writeLine(Stream @out, int i)
+		{
+			int start = lines.get(i + 1);
+			int end = lines.get(i + 2);
+			if (content[end - 1] == '\n')
+			{
+				end--;
+			}
+			@out.Write(content, start, end - start);
+		}
 
-	    /**
-	     * Compute a hash code for a single line.
-	     *
-	     * @param raw
-	     *            the raw file content.
-	     * @param ptr
-	     *            first byte of the content line to hash.
-	     * @param end
-	     *            1 past the last byte of the content line.
-	     * @return hash code for the region <code>[ptr, end)</code> of raw.
-	     */
-	    protected int hashLine(byte[] raw, int ptr, int end)
-        {
-		    int hash = 5381;
-		    for (; ptr < end; ptr++)
-			    hash = (hash << 5) ^ (raw[ptr] & 0xff);
-		    return hash;
-	    }
-    }
+		///	<summary>
+		/// Determine if the file ends with a LF ('\n').
+		///	</summary>
+		///	<returns> true if the last line has an LF; false otherwise. </returns>
+		public bool isMissingNewlineAtEnd()
+		{
+			int end = lines.get(lines.size() - 1);
+			if (end == 0)
+				return true;
+			return content[end - 1] != '\n';
+		}
+
+		private IntList computeHashes()
+		{
+			var r = new IntList(lines.size());
+			r.add(0);
+			for (int lno = 1; lno < lines.size() - 1; lno++)
+			{
+				int ptr = lines.get(lno);
+				int end = lines.get(lno + 1);
+				r.add(HashLine(content, ptr, end));
+			}
+			r.add(0);
+			return r;
+		}
+
+		///	<summary>
+		/// Compute a hash code for a single line.
+		///	</summary>
+		///	<param name="raw">The raw file content. </param>
+		///	<param name="ptr">
+		///	First byte of the content line to hash. </param>
+		///	<param name="end">
+		/// 1 past the last byte of the content line.
+		/// </param>
+		///	<returns>
+		/// Hash code for the region <code>[ptr, end)</code> of raw.
+		/// </returns>
+		private static int HashLine(byte[] raw, int ptr, int end)
+		{
+			int hash = 5381;
+			for (; ptr < end; ptr++)
+			{
+				hash = (hash << 5) ^ (raw[ptr] & 0xff);
+			}
+			return hash;
+		}
+	}
 }

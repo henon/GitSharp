@@ -36,42 +36,86 @@
  */
 
 using System.IO;
+using GitSharp.Exceptions;
 using GitSharp.Util;
 
 namespace GitSharp
 {
+	/// <summary>
+	/// The configuration file based on the blobs stored in the repository.
+	/// </summary>
+	public class BlobBasedConfig : Config
+	{
+		///	<summary>
+		/// The constructor from a byte array
+		/// </summary>
+		///	<param name="base">the base configuration file </param>
+		///	<param name="blob">the byte array, should be UTF-8 encoded text. </param>
+		///	<exception cref="ConfigInvalidException">
+		///	The byte array is not a valid configuration format.
+		/// </exception>
 
-    public class BlobBasedConfig : Config
-    {
-        public BlobBasedConfig(Config @base, byte[] blob)
-            : base(@base)
-        {
-            fromText(RawParseUtils.decode(blob));
-        }
+		public BlobBasedConfig(Config @base, byte[] blob)
+			: base(@base)
+		{
+			fromText(RawParseUtils.decode(blob));
+		}
 
-        public BlobBasedConfig(Config @base, Repository r, ObjectId objectid)
-            : base(@base)
-        {
-            ObjectLoader loader = r.OpenBlob(objectid);
-            if (loader == null)
-                throw new IOException("Blob not found: " + objectid);
-            fromText(RawParseUtils.decode(loader.Bytes));
-        }
+		///	<summary> * The constructor from object identifier
+		///	</summary>
+		///	<param name="base">the base configuration file </param>
+		///	<param name="r">the repository</param>
+		/// <param name="objectid">the object identifier</param>
+		/// <exception cref="IOException">
+		/// the blob cannot be read from the repository. </exception>
+		/// <exception cref="ConfigInvalidException">
+		/// the blob is not a valid configuration format.
+		/// </exception> 
+		public BlobBasedConfig(Config @base, Repository r, ObjectId objectid)
+			: base(@base)
+		{
+			ObjectLoader loader = r.OpenBlob(objectid);
+			if (loader == null)
+			{
+				throw new IOException("Blob not found: " + objectid);
+			}
+			fromText(RawParseUtils.decode(loader.Bytes));
+		}
 
-        public BlobBasedConfig(Config @base, Commit commit, string path)
-            : base(@base)
-        {
-            ObjectId treeId = commit.TreeId;
-            Repository r = commit.Repository;
-            TreeWalk.TreeWalk tree = TreeWalk.TreeWalk.ForPath(r, path, treeId);
-            if (tree == null)
-                throw new FileNotFoundException("Entry not found by path: " + path);
-            ObjectId blobId = tree.getObjectId(0);
-            ObjectLoader loader = tree.Repository.OpenBlob(blobId);
-            if (loader == null)
-                throw new IOException("Blob not found: " + blobId + " for path: " + path);
-            fromText(RawParseUtils.decode(loader.Bytes));
-        }
-    }
+		///	<summary>
+		/// The constructor from commit and path
+		///	</summary>
+		///	<param name="base">The base configuration file</param>
+		///	<param name="commit">The commit that contains the object</param>
+		///	<param name="path">The path within the tree of the commit</param>
+		/// <exception cref="FileNotFoundException">
+		/// the path does not exist in the commit's tree.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// the tree and/or blob cannot be accessed.
+		/// </exception>
+		/// <exception cref="ConfigInvalidException">
+		/// the blob is not a valid configuration format.
+		/// </exception>
+		public BlobBasedConfig(Config @base, Commit commit, string path)
+			: base(@base)
+		{
+			ObjectId treeId = commit.TreeId;
+			Repository r = commit.Repository;
+			TreeWalk.TreeWalk tree = TreeWalk.TreeWalk.ForPath(r, path, treeId);
+			if (tree == null)
+			{
+				throw new FileNotFoundException("Entry not found by path: " + path);
+			}
+			ObjectId blobId = tree.getObjectId(0);
+			ObjectLoader loader = tree.Repository.OpenBlob(blobId);
+			
+			if (loader == null)
+			{
+				throw new IOException("Blob not found: " + blobId + " for path: " + path);
+			}
 
+			fromText(RawParseUtils.decode(loader.Bytes));
+		}
+	}
 }

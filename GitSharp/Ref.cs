@@ -230,7 +230,7 @@ namespace GitSharp
 
 		public override string ToString()
 		{
-			return "Ref[" + (OriginalName == Name ? "" : "(" + OriginalName + ")") + Name + "=" + ObjectId + "]";
+			return "Ref[" + (OriginalName == Name ? string.Empty : "(" + OriginalName + ")") + Name + "=" + ObjectId + "]";
 		}
 	}
 }

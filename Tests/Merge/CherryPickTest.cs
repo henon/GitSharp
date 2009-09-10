@@ -128,12 +128,12 @@ namespace GitSharp.Tests.Merge
 			return ow.WriteCommit(c);
 		}
 
-		private DirCacheEntry MakeEntry(String path, FileMode mode)
+		private DirCacheEntry MakeEntry(string path, FileMode mode)
 		{
 			return MakeEntry(path, mode, path);
 		}
 
-		private DirCacheEntry MakeEntry(String path, FileMode mode, String content)
+		private DirCacheEntry MakeEntry(string path, FileMode mode, string content)
 		{
 			var ent = new DirCacheEntry(path);
 			ent.setFileMode(mode);

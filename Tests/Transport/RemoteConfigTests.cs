@@ -227,7 +227,7 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test006_Unknown()
         {
-            writeConfig("");
+            writeConfig(string.Empty);
 
             RemoteConfig rc = new RemoteConfig(db.Config, "backup");
             Assert.AreEqual(0, rc.URIs.Count);
@@ -240,7 +240,7 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test007_AddURI()
         {
-            writeConfig("");
+            writeConfig(string.Empty);
 
             URIish uri = new URIish("/some/dir");
             RemoteConfig rc = new RemoteConfig(db.Config, "backup");
@@ -257,7 +257,7 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test008_RemoveFirstURI()
         {
-            writeConfig("");
+            writeConfig(string.Empty);
 
             URIish a = new URIish("/some/dir");
             URIish b = new URIish("/another/dir");
@@ -280,7 +280,7 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test009_RemoveMiddleURI()
         {
-            writeConfig("");
+            writeConfig(string.Empty);
 
             URIish a = new URIish("/some/dir");
             URIish b = new URIish("/another/dir");
@@ -304,7 +304,7 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test010_RemoveLastURI()
         {
-            writeConfig("");
+            writeConfig(string.Empty);
 
             URIish a = new URIish("/some/dir");
             URIish b = new URIish("/another/dir");
@@ -328,7 +328,7 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test011_RemoveOnlyURI()
         {
-            writeConfig("");
+            writeConfig(string.Empty);
 
             URIish a = new URIish("/some/dir");
             RemoteConfig rc = new RemoteConfig(db.Config, "backup");

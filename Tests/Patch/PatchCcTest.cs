@@ -53,27 +53,27 @@ namespace GitSharp.Tests.Patch
 
 			var cfh = (CombinedFileHeader)p.getFiles()[0];
 
-			Assert.AreEqual("org.spearce.egit.ui/src/org/spearce/egit/ui/UIText.java", cfh.getNewName());
-			Assert.AreEqual(cfh.getNewName(), cfh.getOldName());
+			Assert.AreEqual("org.spearce.egit.ui/src/org/spearce/egit/ui/UIText.java", cfh.NewName);
+			Assert.AreEqual(cfh.NewName, cfh.OldName);
 
-			Assert.AreEqual(98, cfh.startOffset);
+			Assert.AreEqual(98, cfh.StartOffset);
 
-			Assert.AreEqual(2, cfh.getParentCount());
+			Assert.AreEqual(2, cfh.ParentCount);
 			Assert.AreSame(cfh.getOldId(0), cfh.getOldId());
 			Assert.AreEqual("169356b", cfh.getOldId(0).name());
 			Assert.AreEqual("dd8c317", cfh.getOldId(1).name());
 			Assert.AreEqual("fd85931", cfh.getNewId().name());
 
-			Assert.AreEqual(cfh.getOldMode(0), cfh.getOldMode());
+			Assert.AreEqual(cfh.getOldMode(0), cfh.GetOldMode());
 			Assert.AreEqual(FileMode.RegularFile, cfh.getOldMode(0));
 			Assert.AreEqual(FileMode.RegularFile, cfh.getOldMode(1));
-			Assert.AreEqual(FileMode.ExecutableFile, cfh.getNewMode());
-			Assert.AreEqual(FileHeader.ChangeType.MODIFY, cfh.getChangeType());
-			Assert.AreEqual(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
+			Assert.AreEqual(FileMode.ExecutableFile, cfh.NewMode);
+			Assert.AreEqual(FileHeader.ChangeTypeEnum.MODIFY, cfh.getChangeType());
+			Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, cfh.getPatchType());
 
-			Assert.AreEqual(1, cfh.getHunks().Count);
+			Assert.AreEqual(1, cfh.Hunks.Count);
 			{
-				var h = (CombinedHunkHeader)cfh.getHunks()[0];
+				var h = (CombinedHunkHeader)cfh.Hunks[0];
 
 				Assert.AreSame(cfh, h.File);
 				Assert.AreEqual(346, h.StartOffset);
@@ -109,27 +109,27 @@ namespace GitSharp.Tests.Patch
 
 			var cfh = (CombinedFileHeader)p.getFiles()[0];
 
-			Assert.AreSame(FileHeader.DEV_NULL, cfh.getOldName());
-			Assert.AreEqual("d", cfh.getNewName());
+			Assert.AreSame(FileHeader.DEV_NULL, cfh.OldName);
+			Assert.AreEqual("d", cfh.NewName);
 
-			Assert.AreEqual(187, cfh.startOffset);
+			Assert.AreEqual(187, cfh.StartOffset);
 
-			Assert.AreEqual(2, cfh.getParentCount());
+			Assert.AreEqual(2, cfh.ParentCount);
 			Assert.AreSame(cfh.getOldId(0), cfh.getOldId());
 			Assert.AreEqual("0000000", cfh.getOldId(0).name());
 			Assert.AreEqual("0000000", cfh.getOldId(1).name());
 			Assert.AreEqual("4bcfe98", cfh.getNewId().name());
 
-			Assert.AreSame(cfh.getOldMode(0), cfh.getOldMode());
+			Assert.AreSame(cfh.getOldMode(0), cfh.GetOldMode());
 			Assert.AreSame(FileMode.Missing, cfh.getOldMode(0));
 			Assert.AreSame(FileMode.Missing, cfh.getOldMode(1));
-			Assert.AreSame(FileMode.RegularFile, cfh.getNewMode());
-			Assert.AreEqual(FileHeader.ChangeType.ADD, cfh.getChangeType());
-			Assert.AreEqual(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
+			Assert.AreSame(FileMode.RegularFile, cfh.NewMode);
+			Assert.AreEqual(FileHeader.ChangeTypeEnum.ADD, cfh.getChangeType());
+			Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, cfh.getPatchType());
 
-			Assert.AreEqual(1, cfh.getHunks().Count);
+			Assert.AreEqual(1, cfh.Hunks.Count);
 			{
-				var h = (CombinedHunkHeader)cfh.getHunks()[0];
+				var h = (CombinedHunkHeader)cfh.Hunks[0];
 
 				Assert.AreSame(cfh, h.File);
 				Assert.AreEqual(273, h.StartOffset);
@@ -165,25 +165,25 @@ namespace GitSharp.Tests.Patch
 
 			var cfh = (CombinedFileHeader)p.getFiles()[0];
 
-			Assert.AreEqual("a", cfh.getOldName());
-			Assert.AreSame(FileHeader.DEV_NULL, cfh.getNewName());
+			Assert.AreEqual("a", cfh.OldName);
+			Assert.AreSame(FileHeader.DEV_NULL, cfh.NewName);
 
-			Assert.AreEqual(187, cfh.startOffset);
+			Assert.AreEqual(187, cfh.StartOffset);
 
-			Assert.AreEqual(2, cfh.getParentCount());
+			Assert.AreEqual(2, cfh.ParentCount);
 			Assert.AreSame(cfh.getOldId(0), cfh.getOldId());
 			Assert.AreEqual("7898192", cfh.getOldId(0).name());
 			Assert.AreEqual("2e65efe", cfh.getOldId(1).name());
 			Assert.AreEqual("0000000", cfh.getNewId().name());
 
-			Assert.AreSame(cfh.getOldMode(0), cfh.getOldMode());
+			Assert.AreSame(cfh.getOldMode(0), cfh.GetOldMode());
 			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(0));
 			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(1));
-			Assert.AreSame(FileMode.Missing, cfh.getNewMode());
-			Assert.AreEqual(FileHeader.ChangeType.DELETE, cfh.getChangeType());
-			Assert.AreEqual(FileHeader.PatchType.UNIFIED, cfh.getPatchType());
+			Assert.AreSame(FileMode.Missing, cfh.NewMode);
+			Assert.AreEqual(FileHeader.ChangeTypeEnum.DELETE, cfh.getChangeType());
+			Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, cfh.getPatchType());
 
-			Assert.IsTrue(cfh.getHunks().isEmpty());
+			Assert.IsTrue(cfh.Hunks.isEmpty());
 		}
 	}
 }

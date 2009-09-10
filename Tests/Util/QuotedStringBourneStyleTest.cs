@@ -37,92 +37,100 @@
  */
 
 using System;
-using GitSharp;
 using GitSharp.Util;
 using NUnit.Framework;
-using System.Text;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
-    public class QuotedStringBourneStyleTest
-    {
-	    private static void assertQuote(String in_str, String exp)
-        {
-		    String r = QuotedString.BOURNE.quote(in_str);
-		    Assert.AreNotSame(in_str, r);
-		    Assert.IsFalse(in_str.Equals(r));
-		    Assert.AreEqual('\'' + exp + '\'', r);
-	    }
+	[TestFixture]
+	public class QuotedStringBourneStyleTest
+	{
+		private static void AssertQuote(string inStr, string exp)
+		{
+			string r = QuotedString.BOURNE.quote(inStr);
+			Assert.AreNotSame(inStr, r);
+			Assert.IsFalse(inStr.Equals(r));
+			Assert.AreEqual('\'' + exp + '\'', r);
+		}
 
-	    private static void assertDequote(String exp, String in_str)
-        {
-		    byte[] b = Constants.encode('\'' + in_str + '\'');
-            String r = QuotedString.BOURNE.dequote(b, 0, b.Length);
-		    Assert.AreEqual(exp, r);
-	    }
-        
-        [Test]
-	    public void testQuote_Empty() {
-            Assert.AreEqual("''", QuotedString.BOURNE.quote(""));
-	    }
+		private static void AssertDequote(string exp, string inStr)
+		{
+			byte[] b = Constants.encode('\'' + inStr + '\'');
+			String r = QuotedString.BOURNE.dequote(b, 0, b.Length);
+			Assert.AreEqual(exp, r);
+		}
 
-        [Test]
-	    public void testDequote_Empty1() {
-            Assert.AreEqual("", QuotedString.BOURNE.dequote(new byte[0], 0, 0));
-	    }
+		[Test]
+		public void testDequote_BareA()
+		{
+			const string in_str = "a";
+			byte[] b = Constants.encode(in_str);
+			Assert.AreEqual(in_str, QuotedString.BOURNE.dequote(b, 0, b.Length));
+		}
 
-        [Test]
-	    public void testDequote_Empty2() {
-            Assert.AreEqual("", QuotedString.BOURNE.dequote(new byte[] { (byte)'\'', (byte)'\'' }, 0, 2));
-	    }
+		[Test]
+		public void testDequote_BareABCZ_OnlyBC()
+		{
+			const string in_str = "abcz";
+			byte[] b = Constants.encode(in_str);
+			int p = in_str.IndexOf('b');
+			Assert.AreEqual("bc", QuotedString.BOURNE.dequote(b, p, p + 2));
+		}
 
-        [Test]
-	    public void testDequote_SoleSq() {
-            Assert.AreEqual("", QuotedString.BOURNE.dequote(new byte[] { (byte)'\'' }, 0, 1));
-	    }
+		[Test]
+		public void testDequote_Empty1()
+		{
+			Assert.AreEqual(string.Empty, QuotedString.BOURNE.dequote(new byte[0], 0, 0));
+		}
 
-        [Test]
-	    public void testQuote_BareA() {
-		    assertQuote("a", "a");
-	    }
+		[Test]
+		public void testDequote_Empty2()
+		{
+			Assert.AreEqual(string.Empty, QuotedString.BOURNE.dequote(new[] {(byte) '\'', (byte) '\''}, 0, 2));
+		}
 
-        [Test]
-	    public void testDequote_BareA() {
-		    String in_str = "a";
-		    byte[] b = Constants.encode(in_str);
-            Assert.AreEqual(in_str, QuotedString.BOURNE.dequote(b, 0, b.Length));
-	    }
+		[Test]
+		public void testDequote_LoneBackslash()
+		{
+			AssertDequote("\\", "\\");
+		}
 
-        [Test]
-	    public void testDequote_BareABCZ_OnlyBC() {
-		    String in_str = "abcz";
-		    byte[] b = Constants.encode(in_str);
-		    int p = in_str.IndexOf('b');
-            Assert.AreEqual("bc", QuotedString.BOURNE.dequote(b, p, p + 2));
-	    }
+		[Test]
+		public void testDequote_NamedEscapes()
+		{
+			AssertDequote("'", "'\\''");
+			AssertDequote("!", "'\\!'");
 
-        [Test]
-	    public void testDequote_LoneBackslash() {
-		    assertDequote("\\", "\\");
-	    }
+			AssertDequote("a'b", "a'\\''b");
+			AssertDequote("a!b", "a'\\!'b");
+		}
 
-        [Test]
-	    public void testQuote_NamedEscapes() {
-		    assertQuote("'", "'\\''");
-		    assertQuote("!", "'\\!'");
+		[Test]
+		public void testDequote_SoleSq()
+		{
+			Assert.AreEqual(string.Empty, QuotedString.BOURNE.dequote(new[] {(byte) '\''}, 0, 1));
+		}
 
-		    assertQuote("a'b", "a'\\''b");
-		    assertQuote("a!b", "a'\\!'b");
-	    }
+		[Test]
+		public void testQuote_BareA()
+		{
+			AssertQuote("a", "a");
+		}
 
-        [Test]
-	    public void testDequote_NamedEscapes() {
-		    assertDequote("'", "'\\''");
-		    assertDequote("!", "'\\!'");
+		[Test]
+		public void testQuote_Empty()
+		{
+			Assert.AreEqual("''", QuotedString.BOURNE.quote(string.Empty));
+		}
 
-		    assertDequote("a'b", "a'\\''b");
-		    assertDequote("a!b", "a'\\!'b");
-	    }
-    }
+		[Test]
+		public void testQuote_NamedEscapes()
+		{
+			AssertQuote("'", "'\\''");
+			AssertQuote("!", "'\\!'");
+
+			AssertQuote("a'b", "a'\\''b");
+			AssertQuote("a!b", "a'\\!'b");
+		}
+	}
 }

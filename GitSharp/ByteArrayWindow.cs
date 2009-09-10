@@ -38,44 +38,37 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using GitSharp.Util;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace GitSharp
 {
-
-    /**
-     * A {@link ByteWindow} with an underlying byte array for storage.
-     */
+	/// <summary>
+	/// A <seealso cref="ByteWindow"/> with an underlying byte array for storage.
+	/// </summary>
     internal class ByteArrayWindow : ByteWindow
     {
-        private byte[] array;
+        private readonly byte[] _array;
 
         internal ByteArrayWindow(PackFile pack, long o, byte[] b)
             : base(pack, o, b.Length)
         {
-            array = b;
+            _array = b;
         }
 
+		protected override int copy(int p, byte[] b, int o, int n)
+		{
+			n = Math.Min(_array.Length - p, n);
+			Array.Copy(_array, p, b, o, n);
+			return n;
+		}
 
-        internal override int copy(int p, byte[] b, int o, int n)
-        {
-            n = Math.Min(array.Length - p, n);
-            Array.Copy(array, p, b, o, n);
-            return n;
-        }
-
-
-        internal override int Inflate(int pos, byte[] b, int o, Inflater inf)
+		protected override int Inflate(int pos, byte[] b, int o, Inflater inf)
         {
             while (!inf.IsFinished)
             {
                 if (inf.IsNeedingInput)
                 {
-                    inf.SetInput(array, pos, array.Length - pos);
+                    inf.SetInput(_array, pos, _array.Length - pos);
                     break;
                 }
                 o += inf.Inflate(b, o, b.Length - o);
@@ -85,20 +78,19 @@ namespace GitSharp
             return o;
         }
 
-
-        internal override void inflateVerify(int pos, Inflater inf)
+		protected override void inflateVerify(int pos, Inflater inf)
         {
             while (!inf.IsFinished)
             {
                 if (inf.IsNeedingInput)
                 {
-                    inf.SetInput(array, pos, array.Length - pos);
+                    inf.SetInput(_array, pos, _array.Length - pos);
                     break;
                 }
-                inf.Inflate(verifyGarbageBuffer, 0, verifyGarbageBuffer.Length);
+                inf.Inflate(VerifyGarbageBuffer, 0, VerifyGarbageBuffer.Length);
             }
             while (!inf.IsFinished && !inf.IsNeedingInput)
-                inf.Inflate(verifyGarbageBuffer, 0, verifyGarbageBuffer.Length);
+                inf.Inflate(VerifyGarbageBuffer, 0, VerifyGarbageBuffer.Length);
         }
     }
 }

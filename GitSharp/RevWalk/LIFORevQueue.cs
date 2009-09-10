@@ -50,8 +50,7 @@ namespace GitSharp.RevWalk
 		/// <summary>
 		/// Create an empty LIFO queue.
 		/// </summary>
-		public LIFORevQueue()
-			: base()
+		internal LIFORevQueue()
 		{
 		}
 
@@ -99,9 +98,10 @@ namespace GitSharp.RevWalk
 			{
 				for (int i = b.HeadIndex; i < b.TailIndex; i++)
 				{
-					if ((b.Commits[i].flags & f) == 0) return false;
+					if ((b.Commits[i].Flags & f) == 0) return false;
 				}
 			}
+
 			return true;
 		}
 
@@ -111,9 +111,10 @@ namespace GitSharp.RevWalk
 			{
 				for (int i = b.HeadIndex; i < b.TailIndex; i++)
 				{
-					if ((b.Commits[i].flags & f) != 0) return true;
+					if ((b.Commits[i].Flags & f) != 0) return true;
 				}
 			}
+
 			return false;
 		}
 
@@ -123,7 +124,9 @@ namespace GitSharp.RevWalk
 			for (Block q = _head; q != null; q = q.Next)
 			{
 				for (int i = q.HeadIndex; i < q.TailIndex; i++)
+				{
 					Describe(s, q.Commits[i]);
+				}
 			}
 			return s.ToString();
 		}

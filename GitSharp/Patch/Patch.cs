@@ -58,10 +58,10 @@ namespace GitSharp.Patch
 
 		public static readonly byte[] SigFooter = Constants.encodeASCII("-- \n");
 
-		/** The files, in the order they were parsed out of the input. */
+		// The files, in the order they were parsed out of the input.
 		private readonly List<FileHeader> _files;
 
-		/** Formatting errors, if any were identified. */
+		// Formatting errors, if any were identified.
 		private readonly List<FormatError> _errors;
 
 		/// <summary>
@@ -257,7 +257,7 @@ namespace GitSharp.Patch
 
 			ptr = fileHeader.parseGitHeaders(ptr, end);
 			ptr = ParseHunks(fileHeader, ptr, end);
-			fileHeader.endOffset = ptr;
+			fileHeader.EndOffset = ptr;
 			addFile(fileHeader);
 			return ptr;
 		}
@@ -273,7 +273,7 @@ namespace GitSharp.Patch
 
 			ptr = fh.parseGitHeaders(ptr, end);
 			ptr = ParseHunks(fh, ptr, end);
-			fh.endOffset = ptr;
+			fh.EndOffset = ptr;
 			addFile(fh);
 			return ptr;
 		}
@@ -283,7 +283,7 @@ namespace GitSharp.Patch
 			var fh = new FileHeader(buf, start);
 			int ptr = fh.parseTraditionalHeaders(start, end);
 			ptr = ParseHunks(fh, ptr, end);
-			fh.endOffset = ptr;
+			fh.EndOffset = ptr;
 			addFile(fh);
 			return ptr;
 		}
@@ -300,7 +300,7 @@ namespace GitSharp.Patch
 
 		private int ParseHunks(FileHeader fh, int c, int end)
 		{
-			byte[] buf = fh.buf;
+			byte[] buf = fh.Buffer;
 			while (c < end)
 			{
 				// If we see a file header at this point, we have all of the
@@ -318,7 +318,7 @@ namespace GitSharp.Patch
 				if (RawParseUtils.match(buf, c, FileHeader.NEW_NAME) >= 0)
 					break;
 
-				if (FileHeader.isHunkHdr(buf, c, end) == fh.getParentCount())
+				if (FileHeader.isHunkHdr(buf, c, end) == fh.ParentCount)
 				{
 					HunkHeader h = fh.newHunkHeader(c);
 					h.parseHeader();
@@ -333,6 +333,7 @@ namespace GitSharp.Patch
 							case (byte)'d':
 							case (byte)'\n':
 								break;
+
 							default:
 								if (RawParseUtils.match(buf, c, SigFooter) < 0)
 									warn(buf, c, "Unexpected hunk trailer");
@@ -343,19 +344,19 @@ namespace GitSharp.Patch
 				}
 
 				int eol = RawParseUtils.nextLF(buf, c);
-				if (fh.getHunks().isEmpty() && RawParseUtils.match(buf, c, GitBinary) >= 0)
+				if (fh.Hunks.isEmpty() && RawParseUtils.match(buf, c, GitBinary) >= 0)
 				{
-					fh.patchType = FileHeader.PatchType.GIT_BINARY;
+					fh.PatchType = FileHeader.PatchTypeEnum.GIT_BINARY;
 					return ParseGitBinary(fh, eol, end);
 				}
 
-				if (fh.getHunks().isEmpty() && BinTrailer.Length < eol - c
+				if (fh.Hunks.isEmpty() && BinTrailer.Length < eol - c
 						&& RawParseUtils.match(buf, eol - BinTrailer.Length, BinTrailer) >= 0
 						&& MatchAny(buf, c, BinHeaders))
 				{
 					// The patch is a binary file diff, with no deltas.
 					//
-					fh.patchType = FileHeader.PatchType.BINARY;
+					fh.PatchType = FileHeader.PatchTypeEnum.BINARY;
 					return eol;
 				}
 
@@ -365,14 +366,14 @@ namespace GitSharp.Patch
 				c = eol;
 			}
 
-			if (fh.getHunks().isEmpty()
-					&& fh.getPatchType() == FileHeader.PatchType.UNIFIED
+			if (fh.Hunks.isEmpty()
+					&& fh.getPatchType() == FileHeader.PatchTypeEnum.UNIFIED
 					&& !fh.hasMetaDataChanges())
 			{
 				// Hmm, an empty patch? If there is no metadata here we
 				// really have a binary patch that we didn't notice above.
 				//
-				fh.patchType = FileHeader.PatchType.BINARY;
+				fh.PatchType = FileHeader.PatchTypeEnum.BINARY;
 			}
 
 			return c;
@@ -386,12 +387,12 @@ namespace GitSharp.Patch
 			{
 				// Not a binary hunk.
 				//
-				error(fh.buf, c, "Missing forward-image in GIT binary patch");
+				error(fh.Buffer, c, "Missing forward-image in GIT binary patch");
 				return c;
 			}
 			c = nEnd;
 			postImage.endOffset = c;
-			fh.forwardBinaryHunk = postImage;
+			fh.ForwardBinaryHunk = postImage;
 
 			var preImage = new BinaryHunk(fh, c);
 			int oEnd = preImage.parseHunk(c, end);
@@ -399,7 +400,7 @@ namespace GitSharp.Patch
 			{
 				c = oEnd;
 				preImage.endOffset = c;
-				fh.reverseBinaryHunk = preImage;
+				fh.ReverseBinaryHunk = preImage;
 			}
 
 			return c;

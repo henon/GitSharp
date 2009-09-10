@@ -37,117 +37,116 @@
  */
 
 using System;
+using System.IO;
 using GitSharp.TreeWalk;
 using GitSharp.Util;
 
 namespace GitSharp.DirectoryCache
 {
-
-	/**
-	 * Updates a {@link DirCache} by adding individual {@link DirCacheEntry}s.
-	 * <p>
-	 * A builder always starts from a clean slate and appends in every single
-	 * <code>DirCacheEntry</code> which the  updated index must have to reflect
-	 * its new content.
-	 * <p>
-	 * For maximum performance applications should add entries in path name order.
-	 * Adding entries out of order is permitted, however a  sorting pass will
-	 * be implicitly performed during {@link #finish()} to correct any out-of-order
-	 * entries. Duplicate detection is also delayed until the sorting is complete.
-	 *
-	 * @see DirCacheEditor
-	 */
+	/// <summary>
+	/// Updates a <seealso cref="DirCache"/> by adding individual <seealso cref="DirCacheEntry"/>s.
+	/// <para />
+	/// A builder always starts from a clean slate and appends in every single
+	/// <seealso cref="DirCacheEntry" /> which the final updated index must have to reflect
+	/// its new content.
+	/// <para />
+	/// For maximum performance applications should add entries in path name order.
+	/// Adding entries out of order is permitted, however a final sorting pass will
+	/// be implicitly performed during <seealso cref="Finish()"/> to correct any out-of-order
+	/// entries. Duplicate detection is also delayed until the sorting is complete.
+	/// </summary>
+	/// <seealso cref= DirCacheEditor </seealso>
 	public class DirCacheBuilder : BaseDirCacheEditor
 	{
-		private bool sorted;
+		private bool _sorted;
 
-		/**
-		 * Construct a new builder.
-		 *
-		 * @param dc
-		 *            the cache this builder will eventually update.
-		 * @param ecnt
-		 *            estimated number of entries the builder will have upon
-		 *            completion. This sizes the initial entry table.
-		 */
+		/// <summary>
+		/// Construct a new builder.
+		/// </summary>
+		/// <param name="dc">
+		/// the cache this builder will eventually update.
+		/// </param>
+		/// <param name="ecnt">
+		/// Estimated number of entries the builder will have upon
+		/// completion. This sizes the initial entry table.
+		/// </param>
 		public DirCacheBuilder(DirCache dc, int ecnt)
 			: base(dc, ecnt)
 		{
 		}
 
-		/**
-		 * Append one entry into the resulting entry list.
-		 * <p>
-		 * The entry is placed at the end of the entry list. If the entry causes the
-		 * list to now be incorrectly sorted a  sorting phase will be
-		 * automatically enabled within {@link #finish()}.
-		 * <p>
-		 * The internal entry table is automatically expanded if there is
-		 * insufficient space for the new addition.
-		 *
-		 * @param newEntry
-		 *            the new entry to add.
-		 */
+		/// <summary>
+		/// Append one entry into the resulting entry list.
+		/// <para />
+		/// The entry is placed at the end of the entry list. If the entry causes the
+		/// list to now be incorrectly sorted a final sorting phase will be
+		/// automatically enabled within <seealso cref="finish()"/>.
+		/// <para />
+		/// The internal entry table is automatically expanded if there is
+		/// insufficient space for the new addition.
+		/// </summary>
+		/// <param name="newEntry">the new entry to add.</param>
 		public void add(DirCacheEntry newEntry)
 		{
 			BeforeAdd(newEntry);
-			fastAdd(newEntry);
+			FastAdd(newEntry);
 		}
 
-		/**
-		 * Add a range of existing entries from the destination cache.
-		 * <p>
-		 * The entries are placed at the end of the entry list. If any of the
-		 * entries causes the list to now be incorrectly sorted a  sorting
-		 * phase will be automatically enabled within {@link #finish()}.
-		 * <p>
-		 * This method copies from the destination cache, which has not yet been
-		 * updated with this editor's new table. So all offsets into the destination
-		 * cache are not affected by any updates that may be currently taking place
-		 * in this editor.
-		 * <p>
-		 * The internal entry table is automatically expanded if there is
-		 * insufficient space for the new additions.
-		 *
-		 * @param pos
-		 *            first entry to copy from the destination cache.
-		 * @param cnt
-		 *            number of entries to copy.
-		 */
+		///	<summary>
+		/// Add a range of existing entries from the destination cache.
+		/// <para />
+		/// The entries are placed at the end of the entry list. If any of the
+		/// entries causes the list to now be incorrectly sorted a final sorting
+		/// phase will be automatically enabled within <seealso cref="finish()"/>.
+		/// <para />
+		/// This method copies from the destination cache, which has not yet been
+		/// updated with this editor's new table. So all offsets into the destination
+		/// cache are not affected by any updates that may be currently taking place
+		/// in this editor.
+		/// <para />
+		/// The internal entry table is automatically expanded if there is
+		/// insufficient space for the new additions.
+		/// </summary>
+		/// <param name="pos">
+		/// First entry to copy from the destination cache.
+		/// </param>
+		/// <param name="cnt">Number of entries to copy.</param>
 		public void keep(int pos, int cnt)
 		{
-			BeforeAdd(cache.getEntry(pos));
-			fastKeep(pos, cnt);
+			BeforeAdd(Cache.getEntry(pos));
+			FastKeep(pos, cnt);
 		}
 
-		/**
-		 * Recursively add an entire tree into this builder.
-		 * <p>
-		 * If pathPrefix is "a/b" and the tree contains file "c" then the resulting
-		 * DirCacheEntry will have the path "a/b/c".
-		 * <p>
-		 * All entries are inserted at stage 0, therefore assuming that the
-		 * application will not insert any other paths with the same pathPrefix.
-		 *
-		 * @param pathPrefix
-		 *            UTF-8 encoded prefix to mount the tree's entries at. If the
-		 *            path does not end with '/' one will be automatically inserted
-		 *            as necessary.
-		 * @param stage
-		 *            stage of the entries when adding them.
-		 * @param db
-		 *            repository the tree(s) will be Read from during recursive
-		 *            traversal. This must be the same repository that the resulting
-		 *            DirCache would be written out to (or used in) otherwise the
-		 *            caller is simply asking for deferred MissingObjectExceptions.
-		 * @param tree
-		 *            the tree to recursively add. This tree's contents will appear
-		 *            under <code>pathPrefix</code>. The ObjectId must be that of a
-		 *            tree; the caller is responsible for dereferencing a tag or
-		 *            commit (if necessary).
-		 * @throws IOException
-		 *             a tree cannot be Read to iterate through its entries.
-		 */
+		///	<summary>
+		/// Recursively add an entire tree into this builder.
+		/// <para />
+		/// If pathPrefix is "a/b" and the tree contains file "c" then the resulting
+		/// DirCacheEntry will have the path "a/b/c".
+		/// <para />
+		/// All entries are inserted at stage 0, therefore assuming that the
+		/// application will not insert any other paths with the same pathPrefix.
+		/// </summary>
+		/// <param name="pathPrefix">
+		/// UTF-8 encoded prefix to mount the tree's entries at. If the
+		/// path does not end with '/' one will be automatically inserted
+		/// as necessary.
+		/// </param>
+		/// <param name="stage">Stage of the entries when adding them.</param>
+		/// <param name="db">
+		/// Repository the tree(s) will be read from during recursive
+		/// traversal. This must be the same repository that the resulting
+		/// <see cref="DirCache"/> would be written out to (or used in) otherwise 
+		/// the caller is simply asking for deferred MissingObjectExceptions.
+		/// </param>
+		/// <param name="tree">
+		/// The tree to recursively add. This tree's contents will appear
+		/// under <paramref name="pathPrefix"/>. The ObjectId must be that of a
+		/// tree; the caller is responsible for dereferencing a tag or
+		/// commit (if necessary).
+		/// </param>
+		/// <exception cref="IOException">
+		/// A tree cannot be read to iterate through its entries.
+		/// </exception>
 		public void addTree(byte[] pathPrefix, int stage, Repository db, AnyObjectId tree)
 		{
 			var tw = new TreeWalk.TreeWalk(db);
@@ -167,10 +166,10 @@ namespace GitSharp.DirectoryCache
 
 			DirCacheEntry newEntry = ToEntry(stage, tw);
 			BeforeAdd(newEntry);
-			fastAdd(newEntry);
+			FastAdd(newEntry);
 			while (tw.next())
 			{
-				fastAdd(ToEntry(stage, tw));
+				FastAdd(ToEntry(stage, tw));
 			}
 		}
 
@@ -185,11 +184,11 @@ namespace GitSharp.DirectoryCache
 
 		public override void finish()
 		{
-			if (!sorted)
+			if (!_sorted)
 			{
 				Resort();
 			}
-			replace();
+			Replace();
 		}
 
 		private void BeforeAdd(DirCacheEntry newEntry)
@@ -199,17 +198,17 @@ namespace GitSharp.DirectoryCache
 				throw Bad(newEntry, "Adding subtree not allowed");
 			}
 
-			if (sorted && entryCnt > 0)
+			if (_sorted && EntryCnt > 0)
 			{
-				DirCacheEntry lastEntry = entries[entryCnt - 1];
-				int cr = DirCache.cmp(lastEntry, newEntry);
+				DirCacheEntry lastEntry = Entries[EntryCnt - 1];
+				int cr = DirCache.Compare(lastEntry, newEntry);
 				if (cr > 0)
 				{
 					// The new entry sorts before the old entry; we are
 					// no longer sorted correctly. We'll need to redo
 					// the sorting before we can close out the build.
 					//
-					sorted = false;
+					_sorted = false;
 				}
 				else if (cr == 0)
 				{
@@ -223,20 +222,20 @@ namespace GitSharp.DirectoryCache
 					if (peStage == 0 || dceStage == 0)
 						throw Bad(newEntry, "Mixed stages not allowed");
 					if (peStage > dceStage)
-						sorted = false;
+						_sorted = false;
 				}
 			}
 		}
 
 		private void Resort()
 		{
-			Array.Sort(entries, 0, entryCnt, new GenericComparer<DirCacheEntry>(DirCache.ENT_CMP));
+			Array.Sort(Entries, 0, EntryCnt, new GenericComparer<DirCacheEntry>(DirCache.EntryComparer));
 
-			for (int entryIdx = 1; entryIdx < entryCnt; entryIdx++)
+			for (int entryIdx = 1; entryIdx < EntryCnt; entryIdx++)
 			{
-				DirCacheEntry pe = entries[entryIdx - 1];
-				DirCacheEntry ce = entries[entryIdx];
-				int cr = DirCache.cmp(pe, ce);
+				DirCacheEntry pe = Entries[entryIdx - 1];
+				DirCacheEntry ce = Entries[entryIdx];
+				int cr = DirCache.Compare(pe, ce);
 				if (cr == 0)
 				{
 					// Same file path; we can only allow this if the stages
@@ -244,7 +243,7 @@ namespace GitSharp.DirectoryCache
 					//
 					int peStage = pe.getStage();
 					int ceStage = ce.getStage();
-					
+
 					if (peStage == ceStage)
 					{
 						throw Bad(ce, "Duplicate stages not allowed");
@@ -257,10 +256,10 @@ namespace GitSharp.DirectoryCache
 				}
 			}
 
-			sorted = true;
+			_sorted = true;
 		}
 
-		private static InvalidOperationException Bad(DirCacheEntry a, String msg)
+		private static InvalidOperationException Bad(DirCacheEntry a, string msg)
 		{
 			return new InvalidOperationException(msg + ": " + a.getStage() + " " + a.getPathString());
 		}

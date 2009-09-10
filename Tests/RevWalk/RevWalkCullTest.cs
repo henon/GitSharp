@@ -35,7 +35,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
 using NUnit.Framework;
 
@@ -52,13 +51,13 @@ namespace GitSharp.Tests.RevWalk
             //
             // We induce a clock skew so two is dated before one.
             //
-            RevCommit a = commit();
-            RevCommit b = commit(-2400, a);
-            RevCommit c = commit(b);
-            RevCommit d = commit(c);
+            RevCommit a = Commit();
+            RevCommit b = Commit(-2400, a);
+            RevCommit c = Commit(b);
+            RevCommit d = Commit(c);
 
-            markStart(a);
-            markUninteresting(d);
+            MarkStart(a);
+            MarkUninteresting(d);
             Assert.IsNull(rw.next());
         }
 
@@ -68,35 +67,35 @@ namespace GitSharp.Tests.RevWalk
             // Despite clock skew on c1 being very old it should not
             // produce, neither should a or b, or any part of that chain.
             //
-            RevCommit a = commit();
-            RevCommit b = commit(a);
-            RevCommit c1 = commit(-5, b);
-            RevCommit c2 = commit(10, b);
-            RevCommit d = commit(c1, c2);
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
+            RevCommit c1 = Commit(-5, b);
+            RevCommit c2 = Commit(10, b);
+            RevCommit d = Commit(c1, c2);
 
-            markStart(d);
-            markUninteresting(c1);
-            assertCommit(d, rw.next());
-            assertCommit(c2, rw.next());
+            MarkStart(d);
+            MarkUninteresting(c1);
+            AssertCommit(d, rw.next());
+            AssertCommit(c2, rw.next());
             Assert.IsNull(rw.next());
         }
 
         [Test]
         public void testProperlyCullAllAncestors_LongHistory()
         {
-            RevCommit a = commit();
-            RevCommit b = commit(a);
+            RevCommit a = Commit();
+            RevCommit b = Commit(a);
             for (int i = 0; i < 24; i++)
             {
-                b = commit(b);
+                b = Commit(b);
                 if ((i & 2) == 0)
-                    markUninteresting(b);
+                    MarkUninteresting(b);
             }
-            RevCommit c = commit(b);
+            RevCommit c = Commit(b);
 
-            markStart(c);
-            markUninteresting(b);
-            assertCommit(c, rw.next());
+            MarkStart(c);
+            MarkUninteresting(b);
+            AssertCommit(c, rw.next());
             Assert.IsNull(rw.next());
 
             // We should have aborted before we got back so far that "a"

@@ -36,29 +36,28 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using GitSharp.DirectoryCache;
 using GitSharp.Exceptions;
 using GitSharp.TreeWalk;
 
 namespace GitSharp.Merge
 {
-    /**
-     * Merges two commits together in-memory, ignoring any working directory.
-     * <p>
-     * The strategy chooses a path from one of the two input trees if the path is
-     * unchanged in the other relative to their common merge base tree. This is a
-     * trivial 3-way merge (at the file path level only).
-     * <p>
-     * Modifications of the same file path (content and/or file mode) by both input
-     * trees will cause a merge conflict, as this strategy does not attempt to merge
-     * file contents.
-     */
+    /// <summary>
+    /// Merges two commits together in-memory, ignoring any working directory.
+	/// <para />
+	/// The strategy chooses a path from one of the two input trees if the path is
+	/// unchanged in the other relative to their common merge base tree. This is a
+	/// trivial 3-way merge (at the file path level only).
+	/// <para />
+	/// Modifications of the same file path (content and/or file mode) by both input
+	/// trees will cause a merge conflict, as this strategy does not attempt to merge
+	/// file contents.
+	/// </summary>
     public class StrategySimpleTwoWayInCore : ThreeWayMergeStrategy
     {
-        public override String GetName()
+        public override string Name
         {
-            return "simple-two-way-in-core";
+            get {return "simple-two-way-in-core";}
         }
 
         public override Merger NewMerger(Repository db)
@@ -66,131 +65,129 @@ namespace GitSharp.Merge
             return new InCoreMerger(db);
         }
 
-        private class InCoreMerger : ThreeWayMerger
-        {
-            private const int Base = 0;
+    	#region Nested Types
 
-            private const int Ours = 1;
+    	private class InCoreMerger : ThreeWayMerger
+    	{
+    		private const int Base = 0;
+    		private const int Ours = 1;
+    		private const int Theirs = 2;
 
-            private const int Theirs = 2;
+    		private readonly NameConflictTreeWalk _tw;
+    		private readonly DirCache _cache;
+    		private DirCacheBuilder _builder;
+    		private ObjectId _resultTree;
 
-            private readonly NameConflictTreeWalk _tw;
+    		public InCoreMerger(Repository local)
+    			: base(local)
+    		{
+    			_tw = new NameConflictTreeWalk(Repository);
+    			_cache = DirCache.newInCore();
+    		}
 
-            private readonly DirCache _cache;
+    		protected override bool MergeImpl()
+    		{
+    			_tw.reset();
+    			_tw.addTree(MergeBase());
+    			_tw.addTree(SourceTrees[0]);
+    			_tw.addTree(SourceTrees[1]);
 
-            private DirCacheBuilder _builder;
+    			bool hasConflict = false;
 
-            private ObjectId _resultTree;
+    			_builder = _cache.builder();
+    			while (_tw.next())
+    			{
+    				int modeO = _tw.getRawMode(Ours);
+    				int modeT = _tw.getRawMode(Theirs);
+    				if (modeO == modeT && _tw.idEqual(Ours, Theirs))
+    				{
+    					Add(Ours, DirCacheEntry.STAGE_0);
+    					continue;
+    				}
 
-            public InCoreMerger(Repository local)
-                : base(local)
-            {
-                _tw = new NameConflictTreeWalk(Db);
-                _cache = DirCache.newInCore();
-            }
+    				int modeB = _tw.getRawMode(Base);
+    				if (modeB == modeO && _tw.idEqual(Base, Ours))
+    					Add(Theirs, DirCacheEntry.STAGE_0);
+    				else if (modeB == modeT && _tw.idEqual(Base, Theirs))
+    					Add(Ours, DirCacheEntry.STAGE_0);
+    				else if (_tw.isSubtree())
+    				{
+    					if (NonTree(modeB))
+    					{
+    						Add(Base, DirCacheEntry.STAGE_1);
+    						hasConflict = true;
+    					}
+    					if (NonTree(modeO))
+    					{
+    						Add(Ours, DirCacheEntry.STAGE_2);
+    						hasConflict = true;
+    					}
+    					if (NonTree(modeT))
+    					{
+    						Add(Theirs, DirCacheEntry.STAGE_3);
+    						hasConflict = true;
+    					}
+    					_tw.enterSubtree();
+    				}
+    				else
+    				{
+    					Add(Base, DirCacheEntry.STAGE_1);
+    					Add(Ours, DirCacheEntry.STAGE_2);
+    					Add(Theirs, DirCacheEntry.STAGE_3);
+    					hasConflict = true;
+    				}
+    			}
+    			_builder.finish();
+    			_builder = null;
 
-            protected override bool MergeImpl()
-            {
-                _tw.reset();
-                _tw.addTree(MergeBase());
-                _tw.addTree(SourceTrees[0]);
-                _tw.addTree(SourceTrees[1]);
+    			if (hasConflict)
+    				return false;
+    			try
+    			{
+    				_resultTree = _cache.writeTree(GetObjectWriter());
+    				return true;
+    			}
+    			catch (UnmergedPathException)
+    			{
+    				_resultTree = null;
+    				return false;
+    			}
+    		}
 
-                bool hasConflict = false;
-                _builder = _cache.builder();
-                while (_tw.next())
-                {
-                    int modeO = _tw.getRawMode(Ours);
-                    int modeT = _tw.getRawMode(Theirs);
-                    if (modeO == modeT && _tw.idEqual(Ours, Theirs))
-                    {
-                        Add(Ours, DirCacheEntry.STAGE_0);
-                        continue;
-                    }
+    		private static bool NonTree(int mode)
+    		{
+    			return mode != 0 && !FileMode.Tree.Equals(mode);
+    		}
 
-                    int modeB = _tw.getRawMode(Base);
-                    if (modeB == modeO && _tw.idEqual(Base, Ours))
-                        Add(Theirs, DirCacheEntry.STAGE_0);
-                    else if (modeB == modeT && _tw.idEqual(Base, Theirs))
-                        Add(Ours, DirCacheEntry.STAGE_0);
-                    else if (_tw.isSubtree())
-                    {
-                        if (NonTree(modeB))
-                        {
-                            Add(Base, DirCacheEntry.STAGE_1);
-                            hasConflict = true;
-                        }
-                        if (NonTree(modeO))
-                        {
-                            Add(Ours, DirCacheEntry.STAGE_2);
-                            hasConflict = true;
-                        }
-                        if (NonTree(modeT))
-                        {
-                            Add(Theirs, DirCacheEntry.STAGE_3);
-                            hasConflict = true;
-                        }
-                        _tw.enterSubtree();
-                    }
-                    else
-                    {
-                        Add(Base, DirCacheEntry.STAGE_1);
-                        Add(Ours, DirCacheEntry.STAGE_2);
-                        Add(Theirs, DirCacheEntry.STAGE_3);
-                        hasConflict = true;
-                    }
-                }
-                _builder.finish();
-                _builder = null;
+    		private void Add(int tree, int stage)
+    		{
+    			AbstractTreeIterator i = GetTree(tree);
+    			if (i == null) return;
 
-                if (hasConflict)
-                    return false;
-                try
-                {
-                    _resultTree = _cache.writeTree(GetObjectWriter());
-                    return true;
-                }
-                catch (UnmergedPathException)
-                {
-                    _resultTree = null;
-                    return false;
-                }
-            }
+    			if (FileMode.Tree.Equals(_tw.getRawMode(tree)))
+    			{
+    				_builder.addTree(_tw.getRawPath(), stage, Repository, _tw.getObjectId(tree));
+    			}
+    			else
+    			{
+    				var e = new DirCacheEntry(_tw.getRawPath(), stage);
+    				e.setObjectIdFromRaw(i.idBuffer(), i.idOffset());
+    				e.setFileMode(_tw.getFileMode(tree));
+    				_builder.add(e);
+    			}
+    		}
 
-            private static bool NonTree(int mode)
-            {
-                return mode != 0 && !FileMode.Tree.Equals(mode);
-            }
+    		private AbstractTreeIterator GetTree(int tree)
+    		{
+    			return _tw.getTree<AbstractTreeIterator>(tree, typeof(AbstractTreeIterator));
+    		}
 
-            private void Add(int tree, int stage)
-            {
-                AbstractTreeIterator i = GetTree(tree);
-                if (i != null)
-                {
-                    if (FileMode.Tree.Equals(_tw.getRawMode(tree)))
-                    {
-                        _builder.addTree(_tw.getRawPath(), stage, Db, _tw
-                                .getObjectId(tree));
-                    }
-                    else
-                    {
-                        DirCacheEntry e = new DirCacheEntry(_tw.getRawPath(), stage);
-                        e.setObjectIdFromRaw(i.idBuffer(), i.idOffset());
-                        e.setFileMode(_tw.getFileMode(tree));
-                        _builder.add(e);
-                    }
-                }
-            }
+    		public override ObjectId GetResultTreeId()
+    		{
+    			return _resultTree;
+    		}
+    	}
 
-            private AbstractTreeIterator GetTree(int tree)
-            {
-                return _tw.getTree<AbstractTreeIterator>(tree, typeof(AbstractTreeIterator));
-            }
-
-            public override ObjectId GetResultTreeId()
-            {
-                return _resultTree;
-            }
-        }
+    	#endregion
     }
 }

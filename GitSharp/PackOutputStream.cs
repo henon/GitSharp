@@ -41,25 +41,26 @@ using GitSharp.Util;
 
 namespace GitSharp
 {
-
     public class PackOutputStream : Stream
     {
-        private readonly Stream stream;
-        private readonly Crc32 crc = new Crc32();
-        private readonly MessageDigest md = Constants.newMessageDigest();
-        private long count;
+        private readonly Stream _stream;
+        private readonly Crc32 _crc;
+        private readonly MessageDigest _md;
+        private long _count;
 
         public PackOutputStream(Stream stream)
         {
-            this.stream = stream;
+			_crc = new Crc32();
+			_md = Constants.newMessageDigest();
+            _stream = stream;
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            stream.Write(buffer, offset, count);
-            crc.Update(buffer, offset, count);
-            md.Update(buffer, offset, count);
-            this.count += count;
+            _stream.Write(buffer, offset, count);
+            _crc.Update(buffer, offset, count);
+            _md.Update(buffer, offset, count);
+            _count += count;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -94,41 +95,34 @@ namespace GitSharp
 
         public override long Position
         {
-            get
-            {
-                throw new System.NotImplementedException();
-            }
-            set
-            {
-                throw new System.NotImplementedException();
-            }
+            get { throw new System.NotImplementedException(); }
+            set { throw new System.NotImplementedException(); }
         }
 
         public override void Flush()
         {
-            stream.Flush();    
+            _stream.Flush();    
         }
 
         public override long Length
         {
-            get { return count; }
+            get { return _count; }
         }
 
         public int getCRC32()
         {
             // [caytchen] TODO: REVISIT: C# seperates signed/unsigned, all ported code doesn't seem to resemble this CRC-wise
-            return (int)crc.Value;
+            return (int)_crc.Value;
         }
 
         public void resetCRC32()
         {
-            crc.Reset();
+            _crc.Reset();
         }
 
         public byte[] getDigest()
         {
-            return md.Digest();
+            return _md.Digest();
         }
     }
-
 }

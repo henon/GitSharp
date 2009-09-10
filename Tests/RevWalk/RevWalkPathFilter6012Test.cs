@@ -40,7 +40,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using GitSharp.RevWalk;
-using GitSharp.Tests.Util;
 using GitSharp.TreeWalk.Filter;
 using NUnit.Framework;
 
@@ -72,17 +71,17 @@ namespace GitSharp.Tests.RevWalk
 			RevBlob zS = blob("zS");
 			RevBlob zY = blob("zY");
 
-			a = commit(tree(file(pF, zH)));
-			b = commit(tree(file(pF, zI)), a);
-			c = commit(tree(file(pF, zI)), a);
-			d = commit(tree(file(pA, zS), file(pF, zI)), c);
-			parse(d);
-			e = commit(d.Tree, d, b);
-			f = commit(tree(file(pA, zS), file(pE, zY), file(pF, zI)), e);
-			parse(f);
-			g = commit(tree(file(pE, zY), file(pF, zI)), b);
-			h = commit(f.Tree, g, f);
-			i = commit(tree(file(pA, zS), file(pE, zY), file(pF, zF)), h);
+			a = Commit(tree(File(pF, zH)));
+			b = Commit(tree(File(pF, zI)), a);
+			c = Commit(tree(File(pF, zI)), a);
+			d = Commit(tree(File(pA, zS), File(pF, zI)), c);
+			Parse(d);
+			e = Commit(d.Tree, d, b);
+			f = Commit(tree(File(pA, zS), File(pE, zY), File(pF, zI)), e);
+			Parse(f);
+			g = Commit(tree(File(pE, zY), File(pF, zI)), b);
+			h = Commit(f.Tree, g, f);
+			i = Commit(tree(File(pA, zS), File(pE, zY), File(pF, zF)), h);
 
 			byName = new Dictionary<RevCommit, string>();
 			foreach (FieldInfo z in typeof(RevWalkPathFilter6012Test).GetFields(BindingFlags.NonPublic | BindingFlags.GetField).Where(x => x.FieldType == typeof(RevCommit)))
@@ -91,9 +90,9 @@ namespace GitSharp.Tests.RevWalk
 			}
 		}
 
-		protected void Check(params RevCommit[] order)
+		private void Check(params RevCommit[] order)
 		{
-			markStart(i);
+			MarkStart(i);
 			var act = new StringBuilder();
 			foreach (RevCommit z in rw)
 			{
@@ -114,7 +113,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.AreEqual(exp.ToString(), act.ToString());
 		}
 
-		protected internal virtual void Filter(string path)
+		private void Filter(string path)
 		{
 			rw.setTreeFilter(AndTreeFilter.create(PathFilterGroup.createFromStrings(Enumerable.Repeat(path, 1)), TreeFilter.ANY_DIFF));
 		}

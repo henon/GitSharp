@@ -57,7 +57,7 @@ namespace GitSharp.Transport
         private readonly PacketLineIn pckIn;
         private readonly Stream ins;
         private readonly IProgressMonitor monitor;
-        private string progressBuffer = "";
+        private string progressBuffer;
         private string currentTask;
         private int lastCnt;
         private bool eof;
@@ -69,7 +69,8 @@ namespace GitSharp.Transport
             pckIn = aPckIn;
             ins = aIns;
             monitor = aProgress;
-            currentTask = "";
+            currentTask = string.Empty;
+        	progressBuffer = string.Empty;
         }
 
         public override void Flush()

@@ -42,30 +42,29 @@ using GitSharp.TreeWalk.Filter;
 
 namespace GitSharp.RevWalk
 {
-    /**
-     * First phase of a path limited revision walk.
-     * <p>
-     * This filter is ANDed to evaluate After all other filters and ties the
-     * configured {@link TreeFilter} into the revision walking process.
-     * <p>
-     * Each commit is differenced concurrently against all of its parents to look
-     * for tree entries that are interesting to the TreeFilter. If none are found
-     * the commit is colored with {@link RevWalk#REWRITE}, allowing a later pass
-     * implemented by {@link RewriteGenerator} to remove those colored commits from
-     * the DAG.
-     * 
-     * @see RewriteGenerator
-     */
+    /// <summary>
+    /// First phase of a path limited revision walk.
+	/// <para />
+	/// This filter is ANDed to evaluate After all other filters and ties the
+	/// configured <see cref="TreeFilter" /> into the revision walking process.
+	/// <para />
+	/// Each commit is differenced concurrently against all of its parents to look
+	/// for tree entries that are interesting to the TreeFilter. If none are found
+	/// the commit is colored with <see cref="RevWalk.REWRITE"/>, allowing a later pass
+	/// implemented by <see cref="RewriteGenerator"/> to remove those colored commits from
+	/// the DAG.
+    /// </summary>
+    /// <seealso cref="RewriteGenerator"/>
     public class RewriteTreeFilter : RevFilter
     {
-        private static readonly int Parsed = RevWalk.PARSED;
-        private static readonly int Uninteresting = RevWalk.UNINTERESTING;
-        private static readonly int Rewrite = RevWalk.REWRITE;
+        private const int Parsed = RevWalk.PARSED;
+        private const int Uninteresting = RevWalk.UNINTERESTING;
+        private const int Rewrite = RevWalk.REWRITE;
         private readonly TreeWalk.TreeWalk _pathFilter;
 
         public RewriteTreeFilter(RevWalk walker, TreeFilter t)
         {
-            _pathFilter = new TreeWalk.TreeWalk(walker.getRepository());
+            _pathFilter = new TreeWalk.TreeWalk(walker.Repository);
             _pathFilter.setFilter(t);
             _pathFilter.Recursive = t.shouldBeRecursive();
         }
@@ -87,7 +86,7 @@ namespace GitSharp.RevWalk
             for (int i = 0; i < nParents; i++)
             {
                 RevCommit p = c.Parents[i];
-                if ((p.flags & Parsed) == 0)
+                if ((p.Flags & Parsed) == 0)
                 {
                 	p.parse(walker);
                 }
@@ -116,7 +115,7 @@ namespace GitSharp.RevWalk
                     // No changes, so our tree is effectively the same as
                     // our parent tree. We pass the buck to our parent.
                     //
-                    c.flags |= Rewrite;
+                    c.Flags |= Rewrite;
                     return false;
                 }
 
@@ -133,7 +132,7 @@ namespace GitSharp.RevWalk
         		//
         		if (tw.next()) return true;
 
-        		c.flags |= Rewrite;
+        		c.Flags |= Rewrite;
         		return false;
         	}
 
@@ -172,7 +171,7 @@ namespace GitSharp.RevWalk
                     //
 
                     RevCommit p = pList[i];
-                    if ((p.flags & Uninteresting) != 0)
+                    if ((p.Flags & Uninteresting) != 0)
                     {
                         // This parent was marked as not interesting by the
                         // application. We should look for another parent
@@ -182,7 +181,7 @@ namespace GitSharp.RevWalk
                         continue;
                     }
 
-                    c.flags |= Rewrite;
+                    c.Flags |= Rewrite;
                     c.Parents = new[] { p };
                     return false;
                 }
@@ -215,7 +214,7 @@ namespace GitSharp.RevWalk
             // as they are and allow those parents to flow into pending
             // for further scanning.
             //
-            c.flags |= Rewrite;
+            c.Flags |= Rewrite;
             return false;
         }
     }

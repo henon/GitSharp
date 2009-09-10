@@ -256,9 +256,9 @@ namespace GitSharp.Transport
 
 		private void ResolveDeltas(PackedObjectInfo objectInfo)
 		{
-			int oldCrc = objectInfo.CRC;
 			if (_baseById.Get(objectInfo) != null || _baseByPos.ContainsKey(objectInfo.Offset))
 			{
+				int oldCrc = objectInfo.CRC;
 				ResolveDeltas(objectInfo.Offset, oldCrc, Constants.OBJ_BAD, null, objectInfo);
 			}
 		}
@@ -523,7 +523,7 @@ namespace GitSharp.Transport
 
 		private void GrowEntries()
 		{
-			var newEntries = new PackedObjectInfo[(int)_objectCount + _baseById.size()];
+			var newEntries = new PackedObjectInfo[(int)_objectCount + _baseById.Count];
 			Array.Copy(_entries, 0, newEntries, 0, _entryCount);
 			_entries = newEntries;
 		}
@@ -624,6 +624,7 @@ namespace GitSharp.Transport
 				case Constants.OBJ_TAG:
 					Whole(typeCode, pos, sz);
 					break;
+
 				case Constants.OBJ_OFS_DELTA:
 					c = ReadFromInput();
 					long ofs = c & 127;
@@ -1135,7 +1136,6 @@ namespace GitSharp.Transport
 			public DeltaChain(AnyObjectId id)
 				: base(id)
 			{
-
 			}
 
 			public UnresolvedDelta Remove()

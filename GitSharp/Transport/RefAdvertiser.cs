@@ -42,155 +42,172 @@ using GitSharp.RevWalk;
 
 namespace GitSharp.Transport
 {
-    
-    public class RefAdvertiser
-    {
-        private readonly PacketLineOut pckOut;
-        private readonly RevWalk.RevWalk walk;
-        private readonly RevFlag ADVERTISED;
-        private readonly StringBuilder tmpLine = new StringBuilder(100);
-        private readonly char[] tmpId = new char[2 * Constants.OBJECT_ID_LENGTH];
-        private readonly List<string> capabilities = new List<string>();
-        private bool derefTags;
-        private bool first = true;
+	public class RefAdvertiser
+	{
+		private readonly PacketLineOut _pckOut;
+		private readonly RevWalk.RevWalk _walk;
+		private readonly RevFlag ADVERTISED;
+		private readonly StringBuilder _tmpLine;
+		private readonly char[] _tmpId;
+		private readonly List<string> _capabilities;
+		private bool _derefTags;
+		private bool _first;
 
-        public RefAdvertiser(PacketLineOut o, RevWalk.RevWalk protoWalk, RevFlag advertisedFlag)
-        {
-            pckOut = o;
-            walk = protoWalk;
-            ADVERTISED = advertisedFlag;
-        }
+		public RefAdvertiser(PacketLineOut o, RevWalk.RevWalk protoWalk, RevFlag advertisedFlag)
+		{
+			_tmpLine = new StringBuilder(100);
+            _tmpId = new char[2 * Constants.OBJECT_ID_LENGTH];
+			_capabilities = new List<string>();
+			_first = true;
 
-        public void setDerefTags(bool deref)
-        {
-            derefTags = deref;
-        }
+			_pckOut = o;
+			_walk = protoWalk;
+			ADVERTISED = advertisedFlag;
+		}
 
-        public void advertiseCapability(string name)
-        {
-            capabilities.Add(name);
-        }
+		public void setDerefTags(bool deref)
+		{
+			_derefTags = deref;
+		}
 
-        public void send(List<Ref> refs)
-        {
-            foreach (Ref r in RefComparator.Sort(refs))
-            {
-                RevObject obj = parseAnyOrNull(r.ObjectId);
-                if (obj != null)
-                {
-                    advertiseAny(obj, r.OriginalName);
-                    if (derefTags && obj is RevTag)
-                        advertiseTag((RevTag) obj, r.OriginalName + "^{}");
-                }
-            }
-        }
+		public void advertiseCapability(string name)
+		{
+			_capabilities.Add(name);
+		}
 
-        public void advertiseHave(AnyObjectId id)
-        {
-            RevObject obj = parseAnyOrNull(id);
-            if (obj != null)
-                advertiseAnyOnce(obj, ".have");
-            if (obj is RevTag)
-                advertiseAnyOnce(((RevTag) obj).getObject(), ".have");
-        }
+		public void send(IEnumerable<Ref> refs)
+		{
+			foreach (Ref r in RefComparator.Sort(refs))
+			{
+				RevObject obj = parseAnyOrNull(r.ObjectId);
+				if (obj != null)
+				{
+					advertiseAny(obj, r.OriginalName);
+					if (_derefTags && obj is RevTag)
+					{
+						advertiseTag((RevTag)obj, r.OriginalName + "^{}");
+					}
+				}
+			}
+		}
 
-        public void includeAdditionalHaves()
-        {
-            additionalHaves(walk.getRepository().getObjectDatabase());
-        }
+		public void advertiseHave(AnyObjectId id)
+		{
+			RevObject obj = parseAnyOrNull(id);
+			if (obj != null)
+			{
+				advertiseAnyOnce(obj, ".have");
+			}
 
-        private void additionalHaves(ObjectDatabase db)
-        {
-            if (db is AlternateRepositoryDatabase)
-            {
-                additionalHaves(((AlternateRepositoryDatabase) db).getRepository());
-            }
-            foreach (ObjectDatabase alt in db.getAlternates())
-                additionalHaves(alt);
-        }
+			if (obj is RevTag)
+			{
+				advertiseAnyOnce(((RevTag)obj).getObject(), ".have");
+			}
+		}
 
-        private void additionalHaves(Repository alt)
-        {
-            foreach (Ref r in alt.Refs.Values)
-            {
-                advertiseHave(r.ObjectId);
-            }
-        }
+		public void includeAdditionalHaves()
+		{
+			additionalHaves(_walk.Repository.ObjectDatabase);
+		}
 
-        public bool isEmpty()
-        {
-            return first;
-        }
+		private void additionalHaves(ObjectDatabase db)
+		{
+			if (db is AlternateRepositoryDatabase)
+			{
+				additionalHaves(((AlternateRepositoryDatabase)db).getRepository());
+			}
 
-        private RevObject parseAnyOrNull(AnyObjectId id)
-        {
-            if (id == null)
-                return null;
-            try
-            {
-                return walk.parseAny(id);
-            }
-            catch (IOException)
-            {
-                return null;
-            }
-        }
+			foreach (ObjectDatabase alt in db.getAlternates())
+			{
+				additionalHaves(alt);
+			}
+		}
 
-        private void advertiseAnyOnce(RevObject obj, string refName)
-        {
-            if (!obj.has(ADVERTISED))
-                advertiseAny(obj, refName);
-        }
+		private void additionalHaves(Repository alt)
+		{
+			foreach (Ref r in alt.getAllRefs().Values)
+			{
+				advertiseHave(r.ObjectId);
+			}
+		}
 
-        private void advertiseAny(RevObject obj, string refName)
-        {
-            obj.add(ADVERTISED);
-            advertiseId(obj, refName);
-        }
+		public bool isEmpty()
+		{
+			return _first;
+		}
 
-        private void advertiseTag(RevTag tag, string refName)
-        {
-            RevObject o = tag;
-            do
-            {
-                RevObject target = ((RevTag) o).getObject();
-                try
-                {
-                    walk.parseHeaders(target);
-                }
-                catch (IOException)
-                {
-                    return;
-                }
-                target.add(ADVERTISED);
-                o = target;
-            } while (o is RevTag);
-            advertiseAny(tag.getObject(), refName);
-        }
+		private RevObject parseAnyOrNull(AnyObjectId id)
+		{
+			if (id == null) return null;
 
-        void advertiseId(AnyObjectId id, string refName)
-        {
-            tmpLine.Length = 0;
-            id.CopyTo(tmpId, tmpLine);
-            tmpLine.Append(' ');
-            tmpLine.Append(refName);
-            if (first)
-            {
-                first = false;
-                if (capabilities.Count > 0)
-                {
-                    tmpLine.Append('\0');
-                    foreach (string capName in capabilities)
-                    {
-                        tmpLine.Append(' ');
-                        tmpLine.Append(capName);
-                    }
-                    tmpLine.Append(' ');
-                }
-            }
-            tmpLine.Append('\n');
-            pckOut.WriteString(tmpLine.ToString());
-        }
-    }
+			try
+			{
+				return _walk.parseAny(id);
+			}
+			catch (IOException)
+			{
+				return null;
+			}
+		}
 
+		private void advertiseAnyOnce(RevObject obj, string refName)
+		{
+			if (!obj.has(ADVERTISED))
+			{
+				advertiseAny(obj, refName);
+			}
+		}
+
+		private void advertiseAny(RevObject obj, string refName)
+		{
+			obj.add(ADVERTISED);
+			advertiseId(obj, refName);
+		}
+
+		private void advertiseTag(RevTag tag, string refName)
+		{
+			RevObject o = tag;
+			do
+			{
+				RevObject target = ((RevTag)o).getObject();
+				try
+				{
+					_walk.parseHeaders(target);
+				}
+				catch (IOException)
+				{
+					return;
+				}
+				target.add(ADVERTISED);
+				o = target;
+			} while (o is RevTag);
+			advertiseAny(tag.getObject(), refName);
+		}
+
+		private void advertiseId(AnyObjectId id, string refName)
+		{
+			_tmpLine.Length = 0;
+			id.CopyTo(_tmpId, _tmpLine);
+			_tmpLine.Append(' ');
+			_tmpLine.Append(refName);
+
+			if (_first)
+			{
+				_first = false;
+				if (_capabilities.Count > 0)
+				{
+					_tmpLine.Append('\0');
+					foreach (string capName in _capabilities)
+					{
+						_tmpLine.Append(' ');
+						_tmpLine.Append(capName);
+					}
+					_tmpLine.Append(' ');
+				}
+			}
+
+			_tmpLine.Append('\n');
+			_pckOut.WriteString(_tmpLine.ToString());
+		}
+	}
 }

@@ -44,140 +44,160 @@ using System.Collections.Generic;
 
 namespace GitSharp.RevWalk.Filter
 {
+	/// <summary>
+	/// Includes a commit only if all subfilters include the same commit.
+	/// <para />
+	/// Classic shortcut behavior is used, so evaluation of the
+	/// <seealso cref="RevFilter.include(RevWalk, RevCommit)"/> method stops as soon as a false
+	/// result is obtained. Applications can improve filtering performance by placing
+	/// faster filters that are more likely to reject a result earlier in the list.
+	/// </summary>
+	public abstract class AndRevFilter : RevFilter
+	{
+		///	<summary>
+		/// Create a filter with two filters, both of which must match.
+		///	</summary>
+		///	<param name="a">First filter to test.</param>
+		///	<param name="b">Second filter to test.</param>
+		///	<returns>
+		/// A filter that must match both input filters.
+		/// </returns>
+		public static RevFilter create(RevFilter a, RevFilter b)
+		{
+			if (a == ALL) return b;
+			if (b == ALL) return a;
 
-    /**
-     * Includes a commit only if all subfilters include the same commit.
-     * <p>
-     * Classic shortcut behavior is used, so evaluation of the
-     * {@link RevFilter#include(RevWalk, RevCommit)} method stops as soon as a false
-     * result is obtained. Applications can improve filtering performance by placing
-     * faster filters that are more likely to reject a result earlier in the list.
-     */
-    public abstract class AndRevFilter : RevFilter
-    {
-        /**
-         * Create a filter with two filters, both of which must match.
-         *
-         * @param a
-         *            first filter to test.
-         * @param b
-         *            second filter to test.
-         * @return a filter that must match both input filters.
-         */
-        public static RevFilter create(RevFilter a, RevFilter b)
-        {
-            if (a == ALL)
-                return b;
-            if (b == ALL)
-                return a;
-            return new Binary(a, b);
-        }
+			return new Binary(a, b);
+		}
 
-        /**
-         * Create a filter around many filters, all of which must match.
-         *
-         * @param list
-         *            list of filters to match against. Must contain at least 2
-         *            filters.
-         * @return a filter that must match all input filters.
-         */
-        public static RevFilter create(RevFilter[] list)
-        {
-            if (list.Length == 2)
-                return create(list[0], list[1]);
-            if (list.Length < 2)
-                throw new ArgumentException("At least two filters needed.");
-            RevFilter[] subfilters = new RevFilter[list.Length];
-            Array.Copy(list, 0, subfilters, 0, list.Length);
-            return new List(subfilters);
-        }
+		///	<summary>
+		/// Create a filter around many filters, all of which must match.
+		///	</summary>
+		///	<param name="list">
+		/// List of filters to match against. Must contain at least 2
+		/// filters.
+		/// </param>
+		///	<returns>
+		/// A filter that must match all input filters.
+		/// </returns>
+		public static RevFilter create(RevFilter[] list)
+		{
+			if (list.Length == 2)
+			{
+				return create(list[0], list[1]);
+			}
 
-        /**
-         * Create a filter around many filters, all of which must match.
-         *
-         * @param list
-         *            list of filters to match against. Must contain at least 2
-         *            filters.
-         * @return a filter that must match all input filters.
-         */
-        public static RevFilter create(IEnumerable<RevFilter> list)
-        {
-            if (list.Count() < 2)
-                throw new ArgumentException("At least two filters needed.");
-            RevFilter[] subfilters = list.ToArray();
-            if (subfilters.Length == 2)
-                return create(subfilters[0], subfilters[1]);
-            return new List(subfilters);
-        }
+			if (list.Length < 2)
+			{
+				throw new ArgumentException("At least two filters needed.");
+			}
 
-        private class Binary : AndRevFilter
-        {
-            private RevFilter a;
+			var subfilters = new RevFilter[list.Length];
+			Array.Copy(list, 0, subfilters, 0, list.Length);
+			return new List(subfilters);
+		}
 
-            private RevFilter b;
+		///	<summary>
+		/// Create a filter around many filters, all of which must match.
+		///	</summary>
+		///	<param name="list">
+		/// List of filters to match against. Must contain at least 2
+		/// filters.
+		/// </param>
+		///	<returns>
+		/// A filter that must match all input filters.
+		/// </returns>
+		public static RevFilter create(IEnumerable<RevFilter> list)
+		{
+			if (list.Count() < 2)
+			{
+				throw new ArgumentException("At least two filters needed.");
+			}
 
-            public Binary(RevFilter one, RevFilter two)
-            {
-                a = one;
-                b = two;
-            }
+			RevFilter[] subfilters = list.ToArray();
+			if (subfilters.Length == 2)
+			{
+				return create(subfilters[0], subfilters[1]);
+			}
 
-            public override bool include(RevWalk walker, RevCommit c)
-            {
-                return a.include(walker, c) && b.include(walker, c);
-            }
+			return new List(subfilters);
+		}
 
-            public override RevFilter Clone()
-            {
-                return new Binary(a.Clone(), b.Clone());
-            }
+		#region Nested Types
 
-            public override string ToString()
-            {
-                return "(" + a.ToString() + " AND " + b.ToString() + ")";
-            }
-        }
+		private class Binary : AndRevFilter
+		{
+			private readonly RevFilter _a;
+			private readonly RevFilter _b;
 
-        private class List : AndRevFilter
-        {
-            private RevFilter[] subfilters;
+			internal Binary(RevFilter one, RevFilter two)
+			{
+				_a = one;
+				_b = two;
+			}
 
-            public List(RevFilter[] list)
-            {
-                subfilters = list;
-            }
+			public override bool include(RevWalk walker, RevCommit c)
+			{
+				return _a.include(walker, c) && _b.include(walker, c);
+			}
 
-            public override bool include(RevWalk walker, RevCommit c)
-            {
-                foreach (RevFilter f in subfilters)
-                {
-                    if (!f.include(walker, c))
-                        return false;
-                }
-                return true;
-            }
+			public override RevFilter Clone()
+			{
+				return new Binary(_a.Clone(), _b.Clone());
+			}
 
-            public override RevFilter Clone()
-            {
-                RevFilter[] s = new RevFilter[subfilters.Length];
-                for (int i = 0; i < s.Length; i++)
-                    s[i] = subfilters[i].Clone();
-                return new List(s);
-            }
+			public override string ToString()
+			{
+				return "(" + _a + " AND " + _b + ")";
+			}
+		}
 
-            public override string ToString()
-            {
-                StringBuilder r = new StringBuilder();
-                r.Append("(");
-                for (int i = 0; i < subfilters.Length; i++)
-                {
-                    if (i > 0)
-                        r.Append(" AND ");
-                    r.Append(subfilters[i].ToString());
-                }
-                r.Append(")");
-                return r.ToString();
-            }
-        }
-    }
+		private class List : AndRevFilter
+		{
+			private readonly RevFilter[] _subfilters;
+
+			internal List(RevFilter[] list)
+			{
+				_subfilters = list;
+			}
+
+			public override bool include(RevWalk walker, RevCommit c)
+			{
+				foreach (RevFilter f in _subfilters)
+				{
+					if (!f.include(walker, c)) return false;
+				}
+				return true;
+			}
+
+			public override RevFilter Clone()
+			{
+				var s = new RevFilter[_subfilters.Length];
+				for (int i = 0; i < s.Length; i++)
+				{
+					s[i] = _subfilters[i].Clone();
+				}
+
+				return new List(s);
+			}
+
+			public override string ToString()
+			{
+				var r = new StringBuilder();
+				r.Append("(");
+				for (int i = 0; i < _subfilters.Length; i++)
+				{
+					if (i > 0)
+					{
+						r.Append(" AND ");
+					}
+					r.Append(_subfilters[i].ToString());
+				}
+				r.Append(")");
+				return r.ToString();
+			}
+		}
+
+		#endregion
+	}
 }

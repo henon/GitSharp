@@ -200,11 +200,6 @@ namespace GitSharp.Tests
         /// <param name="dir"></param>
         protected void recursiveDelete(FileSystemInfo fs)
         {
-          if (fs.IsFile())
-          {
-            fs.DeleteFile();
-            return;
-          }
           recursiveDelete(fs, false, GetType().Name + "." + ToString(), true);
         }
 
@@ -221,24 +216,27 @@ namespace GitSharp.Tests
         protected static bool recursiveDelete(FileSystemInfo fs, bool silent, string name, bool failOnError)
         {
           Debug.Assert(!(silent && failOnError));
-          if(!fs.IsDirectory())
-            return silent;
+
+          if (fs.IsFile())
+          {
+              fs.DeleteFile();
+              return silent;
+          }
 
           var dir = new DirectoryInfo(fs.FullName);
+          if (!dir.Exists) return silent;
+          
           try
           {
-            if (!dir.Exists) return silent;
 
             FileSystemInfo[] ls = dir.GetFileSystemInfos();
 
             foreach (var e in ls)
             {
-              if (e.IsFile())
-                e.DeleteFile();
-              else
-                silent = recursiveDelete(e, silent, name, failOnError);
+              silent = recursiveDelete(e, silent, name, failOnError);
             }
-            fs.Delete();
+            
+              dir.Delete();
           }
           catch (IOException e)
           {
@@ -296,7 +294,9 @@ namespace GitSharp.Tests
                     throw new IOException("Could not create directory " + tfp.FullName);
                 }
             }
-            File.WriteAllText(tf.FullName, data, Encoding.UTF8);
+
+			File.WriteAllText(tf.FullName, data);
+
             return tf;
         }
 

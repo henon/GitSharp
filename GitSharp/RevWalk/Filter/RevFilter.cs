@@ -41,57 +41,54 @@ using GitSharp.Exceptions;
 
 namespace GitSharp.RevWalk.Filter
 {
-	/**
-	 * Selects interesting revisions during walking.
-	 * <p>
-	 * This is an abstract interface. Applications may implement a subclass, or use
-	 * one of the predefined implementations already available within this package.
-	 * Filters may be chained together using <code>AndRevFilter</code> and
-	 * <code>OrRevFilter</code> to Create complex bool expressions.
-	 * <p>
-	 * Applications should install the filter on a RevWalk by
-	 * {@link RevWalk#setRevFilter(RevFilter)} prior to starting traversal.
-	 * <p>
-	 * Unless specifically noted otherwise a RevFilter implementation is not thread
-	 * safe and may not be shared by different RevWalk instances at the same time.
-	 * This restriction allows RevFilter implementations to cache state within their
-	 * instances during {@link #include(RevWalk, RevCommit)} if it is beneficial to
-	 * their implementation. Deep clones created by {@link #Clone()} may be used to
-	 * construct a thread-safe copy of an existing filter.
-	 *
-	 * <p>
-	 * <b>Message filters:</b>
-	 * <ul>
-	 * <li>Author name/email: {@link AuthorRevFilter}</li>
-	 * <li>Committer name/email: {@link CommitterRevFilter}</li>
-	 * <li>Message body: {@link MessageRevFilter}</li>
-	 * </ul>
-	 *
-	 * <p>
-	 * <b>Merge filters:</b>
-	 * <ul>
-	 * <li>Skip all merges: {@link #NO_MERGES}.</li>
-	 * </ul>
-	 *
-	 * <p>
-	 * <b>Boolean modifiers:</b>
-	 * <ul>
-	 * <li>AND: {@link AndRevFilter}</li>
-	 * <li>OR: {@link OrRevFilter}</li>
-	 * <li>NOT: {@link NotRevFilter}</li>
-	 * </ul>
-	 */
+	/// <summary>
+	/// Selects interesting revisions during walking.
+	/// <para />
+	/// This is an abstract interface. Applications may implement a subclass, or use
+	/// one of the predefined implementations already available within this package.
+	/// Filters may be chained together using <see cref="AndRevFilter"/> and
+	/// <see cref="OrRevFilter"/> to create complex boolean expressions.
+	/// <para />
+	/// Applications should install the filter on a RevWalk by
+	/// <seealso cref="RevWalk.setRevFilter(RevFilter)"/> prior to starting traversal.
+	/// <para />
+	/// Unless specifically noted otherwise a RevFilter implementation is not thread
+	/// safe and may not be shared by different RevWalk instances at the same time.
+	/// This restriction allows RevFilter implementations to cache state within their
+	/// instances during <seealso cref="include(RevWalk, RevCommit)"/> if it is beneficial to
+	/// their implementation. Deep clones created by <seealso cref="Clone()"/> may be used to
+	/// construct a thread-safe copy of an existing filter.
+	/// <para />
+	/// <b>Message filters:</b>
+	/// <ul>
+	/// <li>Author name/email: <seealso cref="AuthorRevFilter"/></li>
+	/// <li>Committer name/email: <seealso cref="CommitterRevFilter"/></li>
+	/// <li>Message body: <seealso cref="MessageRevFilter"/></li>
+	/// </ul>
+	/// <para />
+	/// <b>Merge filters:</b>
+	/// <ul>
+	/// <li>Skip all merges: <seealso cref="NO_MERGES"/>.</li>
+	/// </ul>
+	/// <para />
+	/// <b>Boolean modifiers:</b>
+	/// <ul>
+	/// <li>AND: <seealso cref="AndRevFilter"/></li>
+	/// <li>OR: <seealso cref="OrRevFilter"/></li>
+	/// <li>NOT: <seealso cref="NotRevFilter"/></li>
+	/// </ul>
+	/// </summary>
 	public abstract class RevFilter
 	{
 		/// <summary>
 		/// Default filter that always returns true (thread safe).
 		/// </summary>
-		public static RevFilter ALL = new RevFilterAll();
+		public static readonly RevFilter ALL = new RevFilterAll();
 
 		/// <summary>
 		/// Default filter that always returns false (thread safe).
 		/// </summary>
-		public static RevFilter NONE = new RevFilterNone();
+		public static readonly RevFilter NONE = new RevFilterNone();
 
 		/// <summary>
 		/// Excludes commits with more than one parent (thread safe).
@@ -100,12 +97,11 @@ namespace GitSharp.RevWalk.Filter
 
 		/// <summary>
 		/// Selects only merge bases of the starting points (thread safe).
-		/// <para>
+		/// <para />
 		/// This is a special case filter that cannot be combined with any other
 		/// filter. Its include method always throws an exception as context
 		/// information beyond the arguments is necessary to determine if the
 		/// supplied commit is a merge base.
-		/// </para>
 		/// </summary>
 		public static readonly RevFilter MERGE_BASE = new RevFilterMergeBase();
 
@@ -113,7 +109,7 @@ namespace GitSharp.RevWalk.Filter
 		/// Create a new filter that does the opposite of this filter.
 		/// </summary>
 		/// <returns>
-		/// a new filter that includes commits this filter rejects.
+		/// A new filter that includes commits this filter rejects.
 		/// </returns>
 		public virtual RevFilter negate()
 		{
@@ -121,7 +117,7 @@ namespace GitSharp.RevWalk.Filter
 		}
 
 		/// <summary>
-		/// Determine if the supplied commit should be included in results.       
+		/// Determine if the supplied commit should be included in results.
 		/// </summary>
 		/// <param name="walker">
 		/// The active walker this filter is being invoked from within.
@@ -157,10 +153,9 @@ namespace GitSharp.RevWalk.Filter
 
 		/// <summary>
 		/// Clone this revision filter, including its parameters.
-		/// <para>
+		/// <para />
 		/// This is a deep Clone. If this filter embeds objects or other filters it
 		/// must also Clone those, to ensure the instances do not share mutable data.
-		/// </para>
 		/// </summary>
 		/// <returns>
 		/// Another copy of this filter, suitable for another thread.
@@ -198,6 +193,9 @@ namespace GitSharp.RevWalk.Filter
 			}
 		}
 
+		/// <summary>
+		/// Default filter that always returns false (thread safe).
+		/// </summary>
 		private class RevFilterNone : RevFilter
 		{
 			public override bool include(RevWalk walker, RevCommit c)
@@ -216,6 +214,9 @@ namespace GitSharp.RevWalk.Filter
 			}
 		}
 
+		/// <summary>
+		/// Excludes commits with more than one parent (thread safe).
+		/// </summary>
 		private class RevFilterNoMerges : RevFilter
 		{
 			public override bool include(RevWalk walker, RevCommit c)
@@ -234,6 +235,13 @@ namespace GitSharp.RevWalk.Filter
 			}
 		}
 
+		///	<summary>
+		/// Selects only merge bases of the starting points (thread safe).
+		///	<para />
+		///	This is a special case filter that cannot be combined with any other
+		///	filter. Its include method always throws an exception as context
+		///	information beyond the arguments is necessary to determine if the
+		///	supplied commit is a merge base. </summary>
 		private class RevFilterMergeBase : RevFilter
 		{
 			public override bool include(RevWalk walker, RevCommit c)

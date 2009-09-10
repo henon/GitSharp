@@ -44,70 +44,82 @@ namespace GitSharp.RevWalk.Filter
 {
 
 
-    /** Matches only commits whose author name matches the pattern. */
-    public static class AuthorRevFilter
-    {
-        /**
-         * Create a new author filter.
-         * <p>
-         * An optimized substring search may be automatically selected if the
-         * pattern does not contain any regular expression meta-characters.
-         * <p>
-         * The search is performed using a case-insensitive comparison. The
-         * character encoding of the commit message itself is not respected. The
-         * filter matches on raw UTF-8 byte sequences.
-         *
-         * @param pattern
-         *            regular expression pattern to match.
-         * @return a new filter that matches the given expression against the author
-         *         name and address of a commit.
-         */
-        public static RevFilter create(string pattern)
-        {
-            if (pattern.Length == 0)
-                throw new ArgumentException("Cannot match on empty string.");
-            if (SubStringRevFilter.safe(pattern))
-                return new SubStringSearch(pattern);
-            return new PatternSearch(pattern);
-        }
+	/// <summary>
+	/// Matches only commits whose author name matches the pattern.
+	/// </summary>
+	public static class AuthorRevFilter
+	{
+		///	<summary>
+		/// Create a new author filter.
+		///	<para />
+		///	An optimized substring search may be automatically selected if the
+		///	pattern does not contain any regular expression meta-characters.
+		///	<para />
+		///	The search is performed using a case-insensitive comparison. The
+		///	character encoding of the commit message itself is not respected. The
+		///	filter matches on raw UTF-8 byte sequences.
+		///	</summary>
+		///	<param name="pattern">Regular expression pattern to match.</param>
+		///	<returns>
+		/// A new filter that matches the given expression against the author
+		/// name and address of a commit.
+		/// </returns>
+		public static RevFilter create(string pattern)
+		{
+			if (string.IsNullOrEmpty(pattern))
+			{
+				throw new ArgumentNullException("pattern", "Cannot match on empty string.");
+			}
 
-        public static RawCharSequence textFor(RevCommit cmit)
-        {
-            byte[] raw = cmit.RawBuffer;
-            int b = RawParseUtils.author(raw, 0);
-            if (b < 0)
-                return RawCharSequence.EMPTY;
-            int e = RawParseUtils.nextLF(raw, b, (byte)'>');
-            return new RawCharSequence(raw, b, e);
-        }
+			if (SubStringRevFilter.safe(pattern))
+			{
+				return new SubStringSearch(pattern);
+			}
 
-        private class PatternSearch : PatternMatchRevFilter
-        {
-            public PatternSearch(string patternText):  base(patternText, true, true, RegexOptions.IgnoreCase)
-            {
-            }
+			return new PatternSearch(pattern);
+		}
 
-            internal override string text(RevCommit cmit)
-            {
-                return textFor(cmit).ToString();
-            }
+		private static string TextFor(RevCommit cmit)
+		{
+			byte[] raw = cmit.RawBuffer;
+			int b = RawParseUtils.author(raw, 0);
+			if (b < 0) return string.Empty;
+			int e = RawParseUtils.nextLF(raw, b, (byte)'>');
+			return Constants.CHARSET.GetString(raw, b, e);
+		}
 
-            public override RevFilter Clone()
-            {
-                return new PatternSearch(pattern());
-            }
-        }
+		#region Nested Types
 
-        private class SubStringSearch : SubStringRevFilter
-        {
-            public SubStringSearch(string patternText):base(patternText)
-            {
-            }
+		private class PatternSearch : PatternMatchRevFilter
+		{
+			public PatternSearch(string patternText):  base(patternText, true, true, RegexOptions.IgnoreCase)
+			{
+			}
 
-            internal override RawCharSequence text(RevCommit cmit)
-            {
-                return textFor(cmit);
-            }
-        }
-    }
+			protected override string text(RevCommit commit)
+			{
+				return TextFor(commit);
+			}
+
+			public override RevFilter Clone()
+			{
+				return new PatternSearch(Pattern);
+			}
+		}
+
+		private class SubStringSearch : SubStringRevFilter
+		{
+			internal SubStringSearch(string patternText) : base(patternText)
+			{
+			}
+
+			protected override string Text(RevCommit cmit)
+			{
+				return TextFor(cmit);
+			}
+		}
+
+		#endregion
+
+	}
 }

@@ -40,99 +40,113 @@ using System.Text.RegularExpressions;
 using System;
 using System.Text;
 using GitSharp.Util;
+
 namespace GitSharp.RevWalk.Filter
 {
+	/// <summary>
+	/// Abstract filter that searches text using extended regular expressions.
+	/// </summary>
+	public abstract class PatternMatchRevFilter : RevFilter
+	{
+		///	<summary>
+		/// Encode a string pattern for faster matching on byte arrays.
+		///	<para />
+		///	Force the characters to our funny UTF-8 only convention that we use on
+		///	raw buffers. This avoids needing to perform character set decodes on the
+		///	individual commit buffers.
+		///	</summary>
+		///	<param name="patternText">
+		///	original pattern string supplied by the user or the
+		///	application.
+		/// </param>
+		///	<returns>
+		/// Same pattern, but re-encoded to match our funny raw UTF-8
+		///	character sequence <seealso cref="RawCharSequence"/>.
+		/// </returns>
+		private static string forceToRaw(string patternText) // [henon] I believe, such recoding is not necessary in C#, is it?
+		{
+			byte[] b = Encoding.UTF8.GetBytes( patternText);
+			var needle = new StringBuilder(b.Length);
+			for (int i = 0; i < b.Length; i++)
+			{
+				needle.Append((char)(b[i] & 0xff));
+			}
+			return needle.ToString();
+		}
 
-    /** Abstract filter that searches text using extended regular expressions. */
-    public abstract class PatternMatchRevFilter : RevFilter
-    {
-        /**
-         * Encode a string pattern for faster matching on byte arrays.
-         * <p>
-         * Force the characters to our funny UTF-8 only convention that we use on
-         * raw buffers. This avoids needing to perform character set decodes on the
-         * individual commit buffers.
-         *
-         * @param patternText
-         *            original pattern string supplied by the user or the
-         *            application.
-         * @return same pattern, but re-encoded to match our funny raw UTF-8
-         *         character sequence {@link RawCharSequence}.
-         */
-        internal static string forceToRaw(string patternText) // [henon] I believe, such recoding is not necessary in C#, is it?
-        {
-            byte[] b = Encoding.UTF8.GetBytes( patternText);
-            StringBuilder needle = new StringBuilder(b.Length);
-            for (int i = 0; i < b.Length; i++)
-                needle.Append((char)(b[i] & 0xff));
-            return needle.ToString();
-        }
+		private readonly string _patternText;
+		private readonly Regex _compiledPattern;
 
-        private string patternText;
+		///	<summary>
+		/// Construct a new pattern matching filter.
+		///	</summary>
+		///	<param name="pattern">
+		///	Text of the pattern. Callers may want to surround their
+		///	pattern with ".*" on either end to allow matching in the
+		///	middle of the string.
+		/// </param>
+		///	<param name="innerString">
+		///	Should .* be wrapped around the pattern of ^ and $ are
+		///	missing? Most users will want this set.
+		/// </param>
+		///	<param name="rawEncoding">
+		///	should <seealso cref="#forceToRaw(String)"/> be applied to the pattern
+		///	before compiling it?
+		/// </param>
+		///	<param name="flags">
+		///	flags from <seealso cref="Pattern"/> to control how matching performs. </param>
+		internal PatternMatchRevFilter(string pattern, bool innerString, bool rawEncoding, RegexOptions flags)
+		{
+			if (pattern.Length == 0)
+			{
+				throw new ArgumentException("Cannot match on empty string.");
+			}
 
-        private Regex compiledPattern;
+			_patternText = pattern;
 
-        /**
-         * Construct a new pattern matching filter.
-         *
-         * @param pattern
-         *            text of the pattern. Callers may want to surround their
-         *            pattern with ".*" on either end to allow matching in the
-         *            middle of the string.
-         * @param innerString
-         *            should .* be wrapped around the pattern of ^ and $ are
-         *            missing? Most users will want this set.
-         * @param rawEncoding
-         *            should {@link #forceToRaw(string)} be applied to the pattern
-         *            before compiling it?
-         * @param flags
-         *            flags from {@link Pattern} to control how matching performs.
-         */
-        internal PatternMatchRevFilter(string pattern, bool innerString,
-                 bool rawEncoding, RegexOptions flags)
-        {
-            if (pattern.Length == 0)
-                throw new ArgumentException("Cannot match on empty string.");
-            patternText = pattern;
+			if (innerString)
+			{
+				if (!pattern.StartsWith("^") && !pattern.StartsWith(".*"))
+				{
+					pattern = ".*" + pattern;
+				}
+				if (!pattern.EndsWith("$") && !pattern.EndsWith(".*"))
+				{
+					pattern = pattern + ".*";
+				}
+			}
+			string p = rawEncoding ? forceToRaw(pattern) : pattern;
+			_compiledPattern = new Regex(p, flags); //.matcher("");
+		}
 
-            if (innerString)
-            {
-                if (!pattern.StartsWith("^") && !pattern.StartsWith(".*"))
-                    pattern = ".*" + pattern;
-                if (!pattern.EndsWith("$") && !pattern.EndsWith(".*"))
-                    pattern = pattern + ".*";
-            }
-            string p = rawEncoding ? forceToRaw(pattern) : pattern;
-            compiledPattern = new Regex(p, flags); //.matcher("");
-        }
+		///	<summary>
+		/// Get the pattern this filter uses.
+		///	</summary>
+		///	<returns>
+		/// The pattern this filter is applying to candidate strings.
+		/// </returns>
+		protected string Pattern
+		{
+			get { return _patternText; }
+		}
 
-        /**
-         * Get the pattern this filter uses.
-         *
-         * @return the pattern this filter is applying to candidate strings.
-         */
-        public string pattern()
-        {
-            return patternText;
-        }
+		public override bool include(RevWalk walker, RevCommit cmit)
+		{
+			return _compiledPattern.IsMatch(text(cmit));
+		}
 
-        public override bool include(RevWalk walker, RevCommit cmit)
-        {
-            return compiledPattern.IsMatch(text(cmit));
-        }
+		///	<summary>
+		/// Obtain the raw text to match against.
+		///	</summary>
+		///	<param name="cmit">Current commit being evaluated.</param>
+		///	<returns>
+		/// Sequence for the commit's content that we need to match on.
+		/// </returns>
+		protected abstract string text(RevCommit cmit); // [henon] changed returntype from CharSequence to string! we have no equivalent for CharSequences in C# and Regex works with strings only.
 
-        /**
-         * Obtain the raw text to match against.
-         *
-         * @param cmit
-         *            current commit being evaluated.
-         * @return sequence for the commit's content that we need to match on.
-         */
-        internal abstract string text(RevCommit cmit); // [henon] changed returntype from CharSequence to string! we have no equivalent for CharSequences in C# and Regex works with strings only.
-
-        public override string ToString()
-        {
-            return base.ToString() + "(\"" + patternText + "\")";
-        }
-    }
+		public override string ToString()
+		{
+			return base.ToString() + "(\"" + _patternText + "\")";
+		}
+	}
 }

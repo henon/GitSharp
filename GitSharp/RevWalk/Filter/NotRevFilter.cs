@@ -38,47 +38,48 @@
 
 namespace GitSharp.RevWalk.Filter
 {
+	/// <summary>
+	/// Includes a commit only if the subfilter does not include the commit.
+	/// </summary>
+	public class NotRevFilter : RevFilter
+	{
+		///	<summary>
+		/// Create a filter that negates the result of another filter.
+		///	</summary>
+		///	<param name="a">Filter to negate.</param>
+		///	<returns>
+		/// A filter that does the reverse of <code>a</code>.
+		/// </returns>
+		public static RevFilter create(RevFilter a)
+		{
+			return new NotRevFilter(a);
+		}
 
-    /** Includes a commit only if the subfilter does not include the commit. */
-    public class NotRevFilter : RevFilter
-    {
-        /**
-         * Create a filter that negates the result of another filter.
-         *
-         * @param a
-         *            filter to negate.
-         * @return a filter that does the reverse of <code>a</code>.
-         */
-        public static RevFilter create(RevFilter a)
-        {
-            return new NotRevFilter(a);
-        }
+		private readonly RevFilter _a;
 
-        private RevFilter a;
+		private NotRevFilter(RevFilter one)
+		{
+			_a = one;
+		}
 
-        private NotRevFilter(RevFilter one)
-        {
-            a = one;
-        }
+		public override RevFilter negate()
+		{
+			return _a;
+		}
 
-        public override RevFilter negate()
-        {
-            return a;
-        }
+		public override bool include(RevWalk walker, RevCommit c)
+		{
+			return !_a.include(walker, c);
+		}
 
-        public override bool include(RevWalk walker, RevCommit c)
-        {
-            return !a.include(walker, c);
-        }
+		public override RevFilter Clone()
+		{
+			return new NotRevFilter(_a.Clone());
+		}
 
-        public override RevFilter Clone()
-        {
-            return new NotRevFilter(a.Clone());
-        }
-
-        public override string ToString()
-        {
-            return "NOT " + a.ToString();
-        }
-    }
+		public override string ToString()
+		{
+			return "NOT " + _a;
+		}
+	}
 }

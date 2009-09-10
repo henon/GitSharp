@@ -47,7 +47,7 @@ namespace GitSharp.RevWalk
 	/// a commit, like the path it followed through reviewers before finally being
 	/// accepted into the project's main repository as an immutable commit.
 	/// </summary>
-	/// <seealso cref="RevCommit.getFooterLines()"/>
+	/// <seealso cref="RevCommit.GetFooterLines()"/>
 	public class FooterLine
 	{
 		private readonly byte[] _buffer;

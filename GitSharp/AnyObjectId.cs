@@ -45,357 +45,364 @@ using GitSharp.Util;
 
 namespace GitSharp
 {
-	/// <summary>
-	/// A (possibly mutable) SHA-1 abstraction.
-	/// <para />
-	/// If this is an instance of <seealso cref="MutableObjectId"/> the concept of equality
-	/// with this instance can alter at any time, if this instance is modified to
-	/// represent a different object name.
-	/// </summary>
-	public abstract class AnyObjectId :
+    /// <summary>
+    /// A (possibly mutable) SHA-1 abstraction.
+    /// <para />
+    /// If this is an instance of <seealso cref="MutableObjectId"/> the concept of equality
+    /// with this instance can alter at any time, if this instance is modified to
+    /// represent a different object name.
+    /// </summary>
+    public abstract class AnyObjectId :
 #if !__MonoCS__
  IComparable<ObjectId>,
 #endif
  IComparable
-	{
-		public static readonly int ObjectIdLength = 20;
-		public static readonly int StringLength = ObjectIdLength * 2;
+    {
+        public static readonly int ObjectIdLength = 20;
+        public static readonly int StringLength = ObjectIdLength * 2;
 
-		public static bool operator ==(AnyObjectId a, AnyObjectId b)
-		{
-			if ((object)a == null)
-				return (object)b == null;
+        public static bool operator ==(AnyObjectId a, AnyObjectId b)
+        {
+            if ((object)a == null)
+                return (object)b == null;
 
-			if ((object)b == null)
-				return false;
+            if ((object)b == null)
+                return false;
 
-			return (a.W2 == b.W2) &&
-				   (a.W3 == b.W3) &&
-				   (a.W4 == b.W4) &&
-				   (a.W5 == b.W5) &&
-				   (a.W1 == b.W1);
-		}
+            return (a.W2 == b.W2) &&
+                   (a.W3 == b.W3) &&
+                   (a.W4 == b.W4) &&
+                   (a.W5 == b.W5) &&
+                   (a.W1 == b.W1);
+        }
 
-		public static bool operator !=(AnyObjectId a, AnyObjectId b)
-		{
-			return !(a == b);
-		}
+        public static bool operator !=(AnyObjectId a, AnyObjectId b)
+        {
+            return !(a == b);
+        }
 
-		public virtual bool Equals(AnyObjectId obj)
-		{
-			return (obj != null) ? this == obj : false;
-		}
+        public virtual bool Equals(AnyObjectId obj)
+        {
+            return (obj != null) ? this == obj : false;
+        }
 
-		public override bool Equals(object obj)
-		{
-			return Equals(((AnyObjectId)obj));
-		}
+        public override bool Equals(object obj)
+        {
+            return Equals(((AnyObjectId)obj));
+        }
 
-		public void CopyTo(BinaryWriter s)
-		{
-			s.Write(ToHexByteArray());
-		}
+        public void CopyTo(BinaryWriter s)
+        {
+            s.Write(ToHexByteArray());
+        }
 
-		/// <summary>
-		/// Copy this ObjectId to a StringBuilder in hex format.
-		/// </summary>
-		/// <param name="tmp">
-		/// temporary char array to buffer construct into before writing.
-		/// Must be at least large enough to hold 2 digits for each byte
-		/// of object id (40 characters or larger).
-		/// </param>
-		/// <param name="w">the string to append onto.</param>
-		public void CopyTo(char[] tmp, StringBuilder w)
-		{
-			ToHexCharArray(tmp);
-			w.Append(tmp, 0, StringLength);
-		}
+        /// <summary>
+        /// Copy this ObjectId to a StringBuilder in hex format.
+        /// </summary>
+        /// <param name="tmp">
+        /// temporary char array to buffer construct into before writing.
+        /// Must be at least large enough to hold 2 digits for each byte
+        /// of object id (40 characters or larger).
+        /// </param>
+        /// <param name="w">the string to append onto.</param>
+        public void CopyTo(char[] tmp, StringBuilder w)
+        {
+            ToHexCharArray(tmp);
+            w.Append(tmp, 0, StringLength);
+        }
 
-		public void CopyTo(char[] tmp, StreamWriter w)
-		{
-			ToHexCharArray(tmp);
-			w.Write(tmp, 0, StringLength);
-		}
+        public void CopyTo(char[] tmp, StreamWriter w)
+        {
+            ToHexCharArray(tmp);
+            w.Write(tmp, 0, StringLength);
+        }
 
-		public void copyRawTo(Stream s)
-		{
-			var buf = new byte[20];
-			NB.encodeInt32(buf, 0, W1);
-			NB.encodeInt32(buf, 4, W2);
-			NB.encodeInt32(buf, 8, W3);
-			NB.encodeInt32(buf, 12, W4);
-			NB.encodeInt32(buf, 16, W5);
-			s.Write(buf, 0, 20);
-		}
+        public void CopyTo(char[] tmp, Encoding e, Stream w)
+        {
+            ToHexCharArray(tmp);
+            var data = e.GetBytes(tmp, 0, StringLength);
+            w.Write(data, 0, data.Length);
+        }
 
-		/// <summary>
-		/// Copy this ObjectId to a byte array.
-		/// </summary>
-		/// <param name="buf">the buffer to copy to.</param>
-		/// <param name="off">the offset within b to write at.</param>
-		public void copyRawTo(byte[] buf, int off)
-		{
-			NB.encodeInt32(buf, 0 + off, W1);
-			NB.encodeInt32(buf, 4 + off, W2);
-			NB.encodeInt32(buf, 8 + off, W3);
-			NB.encodeInt32(buf, 12 + off, W4);
-			NB.encodeInt32(buf, 16 + off, W5);
-		}
+        public void copyRawTo(Stream s)
+        {
+            var buf = new byte[20];
+            NB.encodeInt32(buf, 0, W1);
+            NB.encodeInt32(buf, 4, W2);
+            NB.encodeInt32(buf, 8, W3);
+            NB.encodeInt32(buf, 12, W4);
+            NB.encodeInt32(buf, 16, W5);
+            s.Write(buf, 0, 20);
+        }
 
-		/// <summary>
-		/// Copy this ObjectId to a byte array.
-		/// </summary>
-		/// <param name="b">the buffer to copy to.</param>
-		/// <param name="offset">the offset within b to write at.</param>
-		public void copyRawTo(int[] b, int offset)
-		{
-			b[offset] = W1;
-			b[offset + 1] = W2;
-			b[offset + 2] = W3;
-			b[offset + 3] = W4;
-			b[offset + 4] = W5;
-		}
+        /// <summary>
+        /// Copy this ObjectId to a byte array.
+        /// </summary>
+        /// <param name="buf">the buffer to copy to.</param>
+        /// <param name="off">the offset within b to write at.</param>
+        public void copyRawTo(byte[] buf, int off)
+        {
+            NB.encodeInt32(buf, 0 + off, W1);
+            NB.encodeInt32(buf, 4 + off, W2);
+            NB.encodeInt32(buf, 8 + off, W3);
+            NB.encodeInt32(buf, 12 + off, W4);
+            NB.encodeInt32(buf, 16 + off, W5);
+        }
 
-		private byte[] ToHexByteArray()
-		{
-			var dst = new byte[StringLength];
+        /// <summary>
+        /// Copy this ObjectId to a byte array.
+        /// </summary>
+        /// <param name="b">the buffer to copy to.</param>
+        /// <param name="offset">the offset within b to write at.</param>
+        public void copyRawTo(int[] b, int offset)
+        {
+            b[offset] = W1;
+            b[offset + 1] = W2;
+            b[offset + 2] = W3;
+            b[offset + 3] = W4;
+            b[offset + 4] = W5;
+        }
 
-			Hex.FillHexByteArray(dst, 0, W1);
-			Hex.FillHexByteArray(dst, 8, W2);
-			Hex.FillHexByteArray(dst, 16, W3);
-			Hex.FillHexByteArray(dst, 24, W4);
-			Hex.FillHexByteArray(dst, 32, W5);
+        private byte[] ToHexByteArray()
+        {
+            var dst = new byte[StringLength];
 
-			return dst;
-		}
+            Hex.FillHexByteArray(dst, 0, W1);
+            Hex.FillHexByteArray(dst, 8, W2);
+            Hex.FillHexByteArray(dst, 16, W3);
+            Hex.FillHexByteArray(dst, 24, W4);
+            Hex.FillHexByteArray(dst, 32, W5);
 
-		public override int GetHashCode()
-		{
-			return W2;
-		}
+            return dst;
+        }
 
-		public AbbreviatedObjectId Abbreviate(Repository repo)
-		{
-			return Abbreviate(repo, 8);
-		}
+        public override int GetHashCode()
+        {
+            return W2;
+        }
 
-		public AbbreviatedObjectId Abbreviate(Repository repo, int len)
-		{
-			int a = AbbreviatedObjectId.Mask(len, 1, W1);
-			int b = AbbreviatedObjectId.Mask(len, 2, W2);
-			int c = AbbreviatedObjectId.Mask(len, 3, W3);
-			int d = AbbreviatedObjectId.Mask(len, 4, W4);
-			int e = AbbreviatedObjectId.Mask(len, 5, W5);
-			return new AbbreviatedObjectId(len, a, b, c, d, e);
-		}
+        public AbbreviatedObjectId Abbreviate(Repository repo)
+        {
+            return Abbreviate(repo, 8);
+        }
 
-		protected AnyObjectId(AnyObjectId other)
-		{
-			if (other == null)
-			{
-				throw new ArgumentNullException("other");
-			}
+        public AbbreviatedObjectId Abbreviate(Repository repo, int len)
+        {
+            int a = AbbreviatedObjectId.Mask(len, 1, W1);
+            int b = AbbreviatedObjectId.Mask(len, 2, W2);
+            int c = AbbreviatedObjectId.Mask(len, 3, W3);
+            int d = AbbreviatedObjectId.Mask(len, 4, W4);
+            int e = AbbreviatedObjectId.Mask(len, 5, W5);
+            return new AbbreviatedObjectId(len, a, b, c, d, e);
+        }
 
-			W1 = other.W1;
-			W2 = other.W2;
-			W3 = other.W3;
-			W4 = other.W4;
-			W5 = other.W5;
-		}
+        protected AnyObjectId(AnyObjectId other)
+        {
+            if (other == null)
+            {
+                throw new ArgumentNullException("other");
+            }
 
-		protected AnyObjectId(int w1, int w2, int w3, int w4, int w5)
-		{
-			W1 = w1;
-			W2 = w2;
-			W3 = w3;
-			W4 = w4;
-			W5 = w5;
-		}
+            W1 = other.W1;
+            W2 = other.W2;
+            W3 = other.W3;
+            W4 = other.W4;
+            W5 = other.W5;
+        }
 
-		public int W1 { get; protected set; }
-		public int W2 { get; protected set; }
-		public int W3 { get; protected set; }
-		public int W4 { get; protected set; }
-		public int W5 { get; protected set; }
+        protected AnyObjectId(int w1, int w2, int w3, int w4, int w5)
+        {
+            W1 = w1;
+            W2 = w2;
+            W3 = w3;
+            W4 = w4;
+            W5 = w5;
+        }
 
-		public int GetFirstByte()
-		{
-			return (byte)(((uint)W1) >> 24); // W1 >>> 24 in java
-		}
+        public int W1 { get; protected set; }
+        public int W2 { get; protected set; }
+        public int W3 { get; protected set; }
+        public int W4 { get; protected set; }
+        public int W5 { get; protected set; }
 
-		#region IComparable<ObjectId> Members
+        public int GetFirstByte()
+        {
+            return (byte)(((uint)W1) >> 24); // W1 >>> 24 in java
+        }
 
-		public int CompareTo(ObjectId other)
-		{
-			if (this == other)
-				return 0;
+        #region IComparable<ObjectId> Members
 
-			int cmp = NB.CompareUInt32(W1, other.W1);
-			if (cmp != 0)
-				return cmp;
+        public int CompareTo(ObjectId other)
+        {
+            if (this == other)
+                return 0;
 
-			cmp = NB.CompareUInt32(W2, other.W2);
-			if (cmp != 0)
-				return cmp;
+            int cmp = NB.CompareUInt32(W1, other.W1);
+            if (cmp != 0)
+                return cmp;
 
-			cmp = NB.CompareUInt32(W3, other.W3);
-			if (cmp != 0)
-				return cmp;
+            cmp = NB.CompareUInt32(W2, other.W2);
+            if (cmp != 0)
+                return cmp;
 
-			cmp = NB.CompareUInt32(W4, other.W4);
-			if (cmp != 0)
-				return cmp;
+            cmp = NB.CompareUInt32(W3, other.W3);
+            if (cmp != 0)
+                return cmp;
 
-			return NB.CompareUInt32(W5, other.W5);
-		}
+            cmp = NB.CompareUInt32(W4, other.W4);
+            if (cmp != 0)
+                return cmp;
 
-		public int CompareTo(byte[] bs, int p)
-		{
-			int cmp = NB.CompareUInt32(W1, NB.DecodeInt32(bs, p));
-			if (cmp != 0)
-				return cmp;
+            return NB.CompareUInt32(W5, other.W5);
+        }
 
-			cmp = NB.CompareUInt32(W2, NB.DecodeInt32(bs, p + 4));
-			if (cmp != 0)
-				return cmp;
+        public int CompareTo(byte[] bs, int p)
+        {
+            int cmp = NB.CompareUInt32(W1, NB.DecodeInt32(bs, p));
+            if (cmp != 0)
+                return cmp;
 
-			cmp = NB.CompareUInt32(W3, NB.DecodeInt32(bs, p + 8));
-			if (cmp != 0)
-				return cmp;
+            cmp = NB.CompareUInt32(W2, NB.DecodeInt32(bs, p + 4));
+            if (cmp != 0)
+                return cmp;
 
-			cmp = NB.CompareUInt32(W4, NB.DecodeInt32(bs, p + 12));
-			if (cmp != 0)
-				return cmp;
+            cmp = NB.CompareUInt32(W3, NB.DecodeInt32(bs, p + 8));
+            if (cmp != 0)
+                return cmp;
 
-			return NB.CompareUInt32(W5, NB.DecodeInt32(bs, p + 16));
-		}
+            cmp = NB.CompareUInt32(W4, NB.DecodeInt32(bs, p + 12));
+            if (cmp != 0)
+                return cmp;
 
-		public int CompareTo(int[] bs, int p)
-		{
-			int cmp = NB.CompareUInt32(W1, bs[p]);
-			if (cmp != 0)
-				return cmp;
+            return NB.CompareUInt32(W5, NB.DecodeInt32(bs, p + 16));
+        }
 
-			cmp = NB.CompareUInt32(W2, bs[p + 1]);
-			if (cmp != 0)
-				return cmp;
+        public int CompareTo(int[] bs, int p)
+        {
+            int cmp = NB.CompareUInt32(W1, bs[p]);
+            if (cmp != 0)
+                return cmp;
 
-			cmp = NB.CompareUInt32(W3, bs[p + 2]);
-			if (cmp != 0)
-				return cmp;
+            cmp = NB.CompareUInt32(W2, bs[p + 1]);
+            if (cmp != 0)
+                return cmp;
 
-			cmp = NB.CompareUInt32(W4, bs[p + 3]);
-			if (cmp != 0)
-				return cmp;
+            cmp = NB.CompareUInt32(W3, bs[p + 2]);
+            if (cmp != 0)
+                return cmp;
 
-			return NB.CompareUInt32(W5, bs[p + 4]);
-		}
+            cmp = NB.CompareUInt32(W4, bs[p + 3]);
+            if (cmp != 0)
+                return cmp;
 
-		#endregion
+            return NB.CompareUInt32(W5, bs[p + 4]);
+        }
 
-		#region IComparable Members
+        #endregion
 
-		public int CompareTo(object obj)
-		{
-			return this.CompareTo((ObjectId)obj);
-		}
+        #region IComparable Members
 
-		#endregion
+        public int CompareTo(object obj)
+        {
+            return this.CompareTo((ObjectId)obj);
+        }
 
-		/// <summary>
-		/// Tests if this ObjectId starts with the given abbreviation.
-		/// </summary>
-		/// <param name="abbr">the abbreviation.</param>
-		/// <returns>
-		/// True if this ObjectId begins with the abbreviation; else false.
-		/// </returns>
-		public bool startsWith(AbbreviatedObjectId abbr)
-		{
-			return abbr.prefixCompare(this) == 0;
-		}
+        #endregion
 
-		private char[] ToHexCharArray()
-		{
-			var dest = new char[StringLength];
-			ToHexCharArray(dest);
-			return dest;
-		}
+        /// <summary>
+        /// Tests if this ObjectId starts with the given abbreviation.
+        /// </summary>
+        /// <param name="abbr">the abbreviation.</param>
+        /// <returns>
+        /// True if this ObjectId begins with the abbreviation; else false.
+        /// </returns>
+        public bool startsWith(AbbreviatedObjectId abbr)
+        {
+            return abbr.prefixCompare(this) == 0;
+        }
 
-		private void ToHexCharArray(char[] dest)
-		{
-			Hex.FillHexCharArray(dest, 0, W1);
-			Hex.FillHexCharArray(dest, 8, W2);
-			Hex.FillHexCharArray(dest, 16, W3);
-			Hex.FillHexCharArray(dest, 24, W4);
-			Hex.FillHexCharArray(dest, 32, W5);
-		}
+        private char[] ToHexCharArray()
+        {
+            var dest = new char[StringLength];
+            ToHexCharArray(dest);
+            return dest;
+        }
 
-		public string Name
-		{
-			get { return new string(ToHexCharArray()); }
-		}
+        private void ToHexCharArray(char[] dest)
+        {
+            Hex.FillHexCharArray(dest, 0, W1);
+            Hex.FillHexCharArray(dest, 8, W2);
+            Hex.FillHexCharArray(dest, 16, W3);
+            Hex.FillHexCharArray(dest, 24, W4);
+            Hex.FillHexCharArray(dest, 32, W5);
+        }
 
-		public override string ToString()
-		{
-			return new string(ToHexCharArray());
-		}
+        public string Name
+        {
+            get { return new string(ToHexCharArray()); }
+        }
 
-		public ObjectId Copy()
-		{
-			if (GetType() == typeof(ObjectId))
-			{
-				return (ObjectId)this;
-			}
-			return new ObjectId(this);
-		}
+        public override string ToString()
+        {
+            return new string(ToHexCharArray());
+        }
 
-		public abstract ObjectId ToObjectId();
+        public ObjectId Copy()
+        {
+            if (GetType() == typeof(ObjectId))
+            {
+                return (ObjectId)this;
+            }
+            return new ObjectId(this);
+        }
 
-		#region Nested Types
+        public abstract ObjectId ToObjectId();
 
-		internal class AnyObjectIdEqualityComparer<T> : IEqualityComparer<T>
-			where T : AnyObjectId
-		{
-			#region Implementation of IEqualityComparer<ObjectId>
+        #region Nested Types
 
-			/// <summary>
-			/// Determines whether the specified objects are equal.
-			/// </summary>
-			/// <returns>
-			/// true if the specified objects are equal; otherwise, false.
-			/// </returns>
-			/// <param name="x">
-			/// The first object of type <see cref="ObjectId"/> to compare.
-			/// </param>
-			/// <param name="y">
-			/// The second object of type <see cref="ObjectId"/> to compare.
-			/// </param>
-			public bool Equals(T x, T y)
-			{
-				return x == y;
-			}
+        internal class AnyObjectIdEqualityComparer<T> : IEqualityComparer<T>
+            where T : AnyObjectId
+        {
+            #region Implementation of IEqualityComparer<ObjectId>
 
-			/// <summary>
-			/// Returns a hash code for the specified object.
-			/// </summary>
-			/// <returns>
-			/// A hash code for the specified object.
-			/// </returns>
-			/// <param name="obj">
-			/// The <see cref="ObjectId"/> for which a hash code is to be returned.
-			/// </param>
-			/// <exception cref="ArgumentNullException">
-			/// The type of <paramref name="obj"/> is a reference type and <paramref name="obj"/> is null.
-			/// </exception>
-			public int GetHashCode(T obj)
-			{
-				return obj.GetHashCode();
-			}
+            /// <summary>
+            /// Determines whether the specified objects are equal.
+            /// </summary>
+            /// <returns>
+            /// true if the specified objects are equal; otherwise, false.
+            /// </returns>
+            /// <param name="x">
+            /// The first object of type <see cref="ObjectId"/> to compare.
+            /// </param>
+            /// <param name="y">
+            /// The second object of type <see cref="ObjectId"/> to compare.
+            /// </param>
+            public bool Equals(T x, T y)
+            {
+                return x == y;
+            }
 
-			#endregion
-		}
+            /// <summary>
+            /// Returns a hash code for the specified object.
+            /// </summary>
+            /// <returns>
+            /// A hash code for the specified object.
+            /// </returns>
+            /// <param name="obj">
+            /// The <see cref="ObjectId"/> for which a hash code is to be returned.
+            /// </param>
+            /// <exception cref="ArgumentNullException">
+            /// The type of <paramref name="obj"/> is a reference type and <paramref name="obj"/> is null.
+            /// </exception>
+            public int GetHashCode(T obj)
+            {
+                return obj.GetHashCode();
+            }
 
-		#endregion
+            #endregion
+        }
 
-	}
+        #endregion
+
+    }
 }

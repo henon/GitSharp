@@ -149,7 +149,7 @@ namespace GitSharp
 		public ObjectId computeName()
 		{
 			MessageDigest md = Constants.newMessageDigest();
-			foreach (ObjectToPack otp in SortByName())
+			foreach (ObjectToPack otp in sortByName())
 			{
 				otp.copyRawTo(_buf, 0);
 				md.Update(_buf, 0, Constants.OBJECT_ID_LENGTH);
@@ -159,7 +159,7 @@ namespace GitSharp
 
 		public void writeIndex(Stream indexStream)
 		{
-			List<ObjectToPack> list = SortByName();
+			List<ObjectToPack> list = sortByName();
 
 			PackIndexWriter iw = _outputVersion <= 0 ?
 				PackIndexWriter.CreateOldestPossible(indexStream, list) :
@@ -168,25 +168,24 @@ namespace GitSharp
 			iw.Write(list, _packChecksum);
 		}
 
-		public void addObject(RevObject robject)
+		private List<ObjectToPack> sortByName()
 		{
-			if (robject.has(RevFlag.UNINTERESTING))
+			if (_sortedByName == null)
 			{
-				_edgeObjects.Add(robject);
-				Thin = true;
-				return;
+				_sortedByName = new List<ObjectToPack>(_objectsMap.Count);
+
+				foreach (List<ObjectToPack> list in _objectsLists)
+				{
+					foreach (ObjectToPack otp in list)
+					{
+						_sortedByName.Add(otp);
+					}
+				}
+
+				_sortedByName.Sort();
 			}
 
-			var otp = new ObjectToPack(robject, robject.Type);
-			try
-			{
-				_objectsLists[robject.Type].Add(otp);
-			}
-			catch (IndexOutOfRangeException)
-			{
-				throw new IncorrectObjectTypeException(robject, "COMMIT nor TREE nor BLOB nor TAG");
-			}
-			_objectsMap.Add(otp);
+			return _sortedByName;
 		}
 
 		public void writePack(Stream packStream)
@@ -211,26 +210,6 @@ namespace GitSharp
 			_pos.Flush();
 			_windowCursor.Release();
 			_writeMonitor.EndTask();
-		}
-
-		private List<ObjectToPack> SortByName()
-		{
-			if (_sortedByName == null)
-			{
-				_sortedByName = new List<ObjectToPack>(_objectsMap.Count);
-
-				foreach (List<ObjectToPack> list in _objectsLists)
-				{
-					foreach (ObjectToPack otp in list)
-					{
-						_sortedByName.Add(otp);
-					}
-				}
-
-				_sortedByName.Sort();
-			}
-
-			return _sortedByName;
 		}
 
 		private void SearchForReuse()
@@ -317,7 +296,7 @@ namespace GitSharp
 
 		private void WriteHeader()
 		{
-			Constants.PACK_SIGNATURE.CopyTo(_buf, 0);
+			Array.Copy(Constants.PACK_SIGNATURE, 0, _buf, 0, 4);
 			NB.encodeInt32(_buf, 4, PackVersionGenerated);
 			NB.encodeInt32(_buf, 8, getObjectsNumber());
 			_pos.Write(_buf, 0, 12);
@@ -535,16 +514,35 @@ namespace GitSharp
 			while ((o = walker.next()) != null)
 			{
 				addObject(o);
-				o.Dispose();
 				_initMonitor.Update(1);
 			}
 			while ((o = walker.nextObject()) != null)
 			{
 				addObject(o);
-				o.Dispose();
 				_initMonitor.Update(1);
 			}
 			_initMonitor.EndTask();
+		}
+
+		public void addObject(RevObject robject)
+		{
+			if (robject.has(RevFlag.UNINTERESTING))
+			{
+				_edgeObjects.Add(robject);
+				Thin = true;
+				return;
+			}
+
+			var otp = new ObjectToPack(robject, robject.Type);
+			try
+			{
+				_objectsLists[robject.Type].Add(otp);
+			}
+			catch (IndexOutOfRangeException)
+			{
+				throw new IncorrectObjectTypeException(robject, "COMMIT nor TREE nor BLOB nor TAG");
+			}
+			_objectsMap.Add(otp);
 		}
 
 		#region Nested Types

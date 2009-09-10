@@ -340,17 +340,17 @@ namespace GitSharp
 
             public override bool CanRead
             {
-                get { throw new NotImplementedException(); }
+                get { return false; }
             }
 
             public override bool CanSeek
             {
-                get { throw new NotImplementedException(); }
+                get { return false; }
             }
 
             public override bool CanWrite
             {
-                get { throw new NotImplementedException(); }
+                get { return true; }
             }
 
             public override long Length

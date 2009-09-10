@@ -90,7 +90,8 @@ namespace GitSharp.Transport
             {
                 foreach (PackLock @lock in _packLocks)
                 {
-                    @lock.Unlock();
+                    if (@lock != null)
+                        @lock.Unlock();
                 }
             }
         }

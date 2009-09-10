@@ -119,6 +119,12 @@ namespace GitSharp.Transport
 		    }
 	    }
 
+        private static void writeString(Stream os, string data)
+        {
+            byte[] val = Constants.CHARSET.GetBytes(data);
+            os.Write(val, 0, val.Length);
+        }
+
 	    /**
 	     * Generate and write the bundle to the output stream.
 	     * <p>
@@ -156,32 +162,35 @@ namespace GitSharp.Transport
 		    _packWriter.Thin = exc.Count > 0;
 		    _packWriter.preparePack(inc, exc);
 
-            var w = new BinaryWriter(os);
+            //var w = new BinaryWriter(os);
+	        //var w = new StreamWriter(os, Constants.CHARSET);
+	        var w = os;
+ 
+		    writeString(w, Constants.V2_BUNDLE_SIGNATURE);
+            writeString(w, "\n");
 
-		    w.Write(Constants.V2_BUNDLE_SIGNATURE.ToCharArray());
-            w.Write('\n');
-
+	        char[] tmp = new char[Constants.OBJECT_ID_LENGTH*2];
 		    foreach (RevCommit a in _assume) 
             {
-                w.Write('-');
-			    a.CopyTo(w);
+                writeString(w, "-");
+                a.CopyTo(tmp, Constants.CHARSET, w);
 			    if (a.RawBuffer != null)
                 {
-                    w.Write(' ');
-                    w.Write(a.getShortMessage().ToCharArray());
+                    writeString(w, " ");
+                    writeString(w, a.getShortMessage());
 			    }
-                w.Write('\n');
+                writeString(w, "\n");
 		    }
 
             foreach(var entry in _include)
             {
-                entry.Value.CopyTo(w);
-                w.Write(' ');
-                w.Write(entry.Key.ToCharArray());
-                w.Write('\n');
+                entry.Value.CopyTo(tmp, Constants.CHARSET, w);
+                writeString(w, " ");
+                writeString(w, entry.Key);
+                writeString(w, "\n");
             }
 
-            w.Write('\n');
+            writeString(w, "\n");
 		    w.Flush();
 
 		    _packWriter.writePack(os);

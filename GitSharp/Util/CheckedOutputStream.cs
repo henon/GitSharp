@@ -36,82 +36,85 @@
 
 using System;
 using System.IO;
+using GitSharp.Util;
 
-namespace GitSharp.Util
+namespace GitSharp
 {
-	public class CheckedOutputStream : Stream
-	{
-		private readonly Stream _baseStream;
-		private readonly Crc32 _crc;
 
-		// Stream configuration: read-only, non-seeking stream
-		public override bool CanRead { get { return false; } }
-		public override bool CanSeek { get { return false; } }
-		public override bool CanWrite { get { return true; } }
+    public class CheckedOutputStream : System.IO.Stream
+    {
+        Stream under;
+        Crc32 crc;
 
-		public CheckedOutputStream(Stream baseStream, Crc32 crc)
-		{
-			_baseStream = baseStream;
-			_crc = crc;
-		}
+        // Stream configuration: read-only, non-seeking stream
+        public override bool CanRead { get { return false; } }
+        public override bool CanSeek { get { return false; } }
+        public override bool CanWrite { get { return true; } }
 
-		public override void Flush()
-		{
-			_baseStream.Flush();
-		}
+        public CheckedOutputStream(Stream under, Crc32 crc)
+        {
+            this.under = under;
+            this.crc = crc;
+        }
 
-		public override int Read(byte[] buffer, int offset, int count)
-		{
-			throw new InvalidOperationException();
-		}
+        public override void Flush()
+        {
+            under.Flush();
+        }
 
-		public override long Seek(long offset, SeekOrigin origin)
-		{
-			throw new InvalidOperationException();
-		}
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            throw new InvalidOperationException();
+        }
 
-		public override void SetLength(long value)
-		{
-			throw new InvalidOperationException();
-		}
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            throw new InvalidOperationException();
+        }
 
-		public override void Write(byte[] buffer, int offset, int count)
-		{
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer");
-			}
+        public override void SetLength(long value)
+        {
+            throw new InvalidOperationException();
+        }
 
-			if (offset < 0)
-			{
-				throw new ArgumentOutOfRangeException("offset", "< 0");
-			}
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException("buffer");
 
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", "< 0");
-			}
+            if (offset < 0)
+                throw new ArgumentOutOfRangeException("offset", "< 0");
 
-			// ordered to avoid possible integer overflow
-			if (offset > buffer.Length - count)
-			{
-				throw new ArgumentException("Reading would overrun buffer");
-			}
+            if (count < 0)
+                throw new ArgumentOutOfRangeException("count", "< 0");
 
-			_crc.Update(buffer);
+            // ordered to avoid possible integer overflow
+            if (offset > buffer.Length - count)
+                throw new ArgumentException("Reading would overrun buffer");
 
-			_baseStream.Write(buffer, offset, count);
-		}
+            crc.Update(buffer, offset, count);
+            under.Write(buffer, offset, count);
+        }
 
-		public override long Length
-		{
-			get { return _baseStream.Length; }
-		}
+        public override long Length
+        {
+            get
+            {
+                return under.Length;
+            }
+        }
 
-		public override long Position
-		{
-			get { return _baseStream.Position; }
-			set { throw new InvalidOperationException(); }
-		}
-	}
+        public override long Position
+        {
+            get
+            {
+                return under.Position;
+            }
+
+            set
+            {
+                throw new InvalidOperationException();
+            }
+        }
+    }
 }

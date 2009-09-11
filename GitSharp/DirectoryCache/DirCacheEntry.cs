@@ -118,11 +118,11 @@ namespace GitSharp.DirectoryCache
 			}
 			else
 			{
-				var tmp = new BinaryWriter(new MemoryStream());
+				var tmp = new MemoryStream();
 				{
 					var buf = new byte[NameMask];
 					NB.ReadFully(@in, buf, 0, NameMask);
-					tmp.Write(buf);
+					tmp.Write(buf, 0, buf.Length);
 				}
 				for (; ; )
 				{
@@ -131,9 +131,9 @@ namespace GitSharp.DirectoryCache
 						throw new EndOfStreamException("Short Read of block.");
 					if (c == 0)
 						break;
-					tmp.Write(c);
+					tmp.Write(new[]{(byte)c}, 0, 1);
 				}
-				_path = (tmp.BaseStream as MemoryStream).ToArray();
+			    _path = tmp.ToArray();
 				pathLen = _path.Length;
 				skipped = 1; // we already skipped 1 '\0' above to break the loop.
 				md.Update(_path, 0, pathLen);

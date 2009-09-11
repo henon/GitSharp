@@ -76,8 +76,8 @@ namespace GitSharp.Tests.RevWalk
 			Assert.AreEqual(a1.GetHashCode(), a2.GetHashCode());
 			Assert.AreEqual(b1.GetHashCode(), b2.GetHashCode());
 
-			Assert.IsTrue(Equals(a1, a2));
-			Assert.IsTrue(Equals(b1, b2));
+			Assert.IsTrue(AnyObjectId.equals(a1, a2));
+			Assert.IsTrue(AnyObjectId.equals(b1, b2));
 		}
 
 		[Test]

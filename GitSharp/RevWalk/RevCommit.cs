@@ -97,20 +97,20 @@ namespace GitSharp.RevWalk
 			get { return Parents.Length; }
 		}
 
-		internal override void parse(RevWalk walk)
-		{
-			ObjectLoader ldr = walk.Repository.OpenObject(walk.WindowCursor, this);
-			if (ldr == null)
-			{
-				throw new MissingObjectException(this, Constants.TYPE_COMMIT);
-			}
-			byte[] data = ldr.CachedBytes;
-			if (Constants.OBJ_COMMIT != ldr.Type)
-			{
-				throw new IncorrectObjectTypeException(this, Constants.TYPE_COMMIT);
-			}
-			parseCanonical(walk, data);
-		}
+        internal override void parseHeaders(RevWalk walk)
+        {
+            parseCanonical(walk, loadCanonical(walk));
+        }
+
+        internal override void parseBody(RevWalk walk)
+        {
+            if (_buffer == null)
+            {
+                _buffer = loadCanonical(walk);
+                if ((Flags & PARSED) == 0)
+                    parseCanonical(walk, _buffer);
+            }
+        }
 
 		public void parseCanonical(RevWalk walk, byte[] raw)
 		{
@@ -514,26 +514,26 @@ namespace GitSharp.RevWalk
 		/// with the specified key, or there are no footers at all.
 		/// </returns>
 		///	<seealso cref= GetFooterLines()" />
-		public IList<string> GetFooterLines(FooterKey keyName)
+        public IList<string> GetFooterLines(FooterKey keyName)
 		{
-			IList<FooterLine> src = GetFooterLines();
-			if (src.isEmpty())
-			{
-				return new List<string>();
-			}
+		    IList<FooterLine> src = GetFooterLines();
+		    if (src.isEmpty())
+		    {
+		        return new List<string>();
+		    }
 
-			var r = new List<String>(src.Count);
-			foreach (FooterLine f in src)
-			{
-				if (f.Matches(keyName))
-				{
-					r.Add(f.Value);
-				}
-			}
-			return r;
+		    var r = new List<String>(src.Count);
+		    foreach (FooterLine f in src)
+		    {
+		        if (f.Matches(keyName))
+		        {
+		            r.Add(f.Value);
+		        }
+		    }
+		    return r;
 		}
 
-		/// <summary>
+	    /// <summary>
 		/// Reset this commit to allow another RevWalk with the same instances.
 		/// <para />
 		/// Subclasses <b>must</b> call <code>base.reset()</code> to ensure the
@@ -544,10 +544,10 @@ namespace GitSharp.RevWalk
 			InDegree = 0;
 		}
 
-		public override void Dispose()
-		{
-			_buffer = null;
-		}
+        public new void DisposeBody()
+        {
+            _buffer = null;
+        }
 
 		public override string ToString()
 		{

@@ -138,7 +138,7 @@ namespace GitSharp.RevWalk
                     if ((p.Flags & InPending) != 0) continue;
                     if ((p.Flags & Parsed) == 0)
                     {
-                    	p.parse(_walker);
+                    	p.parseHeaders(_walker);
                     }
                     p.Flags |= InPending;
                     _pending.add(p);

@@ -118,7 +118,7 @@ namespace GitSharp.RevWalk
 					if ((c.Flags & Duplicate) != 0) continue;
 					if ((c.Flags & Parsed) == 0)
 					{
-						c.parse(_walk);
+                        c.parseHeaders(_walk);
 					}
 					c.Flags |= Duplicate;
 					boundary.add(c);

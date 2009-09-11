@@ -239,6 +239,7 @@ namespace GitSharp.RevWalk
 			_sorting = new HashSet<RevSort.Strategy>() { RevSort.NONE };
 			_filter = RevFilter.ALL;
 			_treeFilter = TreeFilter.ALL;
+		    _retainBody = true;
 		}
 
 		public MutableObjectId IdBuffer
@@ -297,7 +298,7 @@ namespace GitSharp.RevWalk
 			if ((c.Flags & SEEN) != 0) return;
 			if ((c.Flags & PARSED) == 0)
 			{
-				c.parse(this);
+				c.parseHeaders(this);
 			}
 			c.Flags |= SEEN;
 			_roots.Add(c);

@@ -125,7 +125,7 @@ namespace GitSharp.RevWalk
 						if ((p.Flags & SEEN) != 0) continue;
 						if ((p.Flags & PARSED) == 0)
 						{
-							p.parse(_walker);
+							p.parseHeaders(_walker);
 						}
 						p.Flags |= SEEN;
 						_pending.add(p);
@@ -157,7 +157,7 @@ namespace GitSharp.RevWalk
 						}
 						if (CanDispose)
 						{
-							c.Dispose();
+						    c.DisposeBody();
 						}
 						continue;
 					}
@@ -169,7 +169,7 @@ namespace GitSharp.RevWalk
 
 					if (CanDispose)
 					{
-						c.Dispose();
+					    c.DisposeBody();
 					}
 				}
 			}

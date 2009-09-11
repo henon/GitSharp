@@ -88,7 +88,7 @@ namespace GitSharp.RevWalk
                 RevCommit p = c.Parents[i];
                 if ((p.Flags & Parsed) == 0)
                 {
-                	p.parse(walker);
+                	p.parseHeaders(walker);
                 }
                 trees[i] = p.Tree;
             }

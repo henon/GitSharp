@@ -769,9 +769,8 @@ namespace GitSharp.Transport
 					free = _buffer.Length - next;
 				}
 
-				int prevNext = next;
 				next = _stream.Read(_buffer, next, free);
-				if (next <= 0 && (prevNext != _buffer.Length))
+				if (next <= 0)
 				{
 					throw new EndOfStreamException("Packfile is truncated,");
 				}
@@ -798,10 +797,9 @@ namespace GitSharp.Transport
 					next = _bAvail;
 					free = _buffer.Length - next;
 				}
-				int prevNext = next;
-				next = _packOut.Read(_buffer, next, free);
 
-				if (next <= 0 && (prevNext != _buffer.Length))
+				next = _packOut.Read(_buffer, next, free);
+				if (next <= 0)
 				{
 					throw new EndOfStreamException("Packfile is truncated.");
 				}
@@ -899,12 +897,14 @@ namespace GitSharp.Transport
 							_crc.Update(_buffer, p, _bAvail);
 							Use(_bAvail);
 						}
-						p = FillFromFile(1);
+						p = FillFromInput(1);
 						inf.SetInput(_buffer, p, _bAvail);
 					}
 
 					n += inf.Inflate(dst, n, size - n);
 				}
+                if (n != size)
+                    throw new Exception("Wrong decrompressed length");
 				n = _bAvail - inf.RemainingInput;
 				if (n > 0)
 				{
@@ -940,7 +940,7 @@ namespace GitSharp.Transport
 							_crc.Update(_buffer, p, _bAvail);
 							Use(_bAvail);
 						}
-						p = FillFromInput(1);
+						p = FillFromFile(1);
 						inf.SetInput(_buffer, p, _bAvail);
 					}
 

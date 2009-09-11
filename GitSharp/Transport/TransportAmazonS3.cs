@@ -43,7 +43,7 @@ namespace GitSharp.Transport
 {
     public class TransportAmazonS3 : HttpTransport
     {
-        private static string S3_SCHEME = "amazon-s3";
+        private const string S3_SCHEME = "amazon-s3";
 
 	    public static bool canHandle(URIish uri)
         {

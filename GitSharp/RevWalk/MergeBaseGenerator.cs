@@ -59,10 +59,10 @@ namespace GitSharp.RevWalk
 	/// </summary>
     public class MergeBaseGenerator : Generator
     {
-        private static readonly int Parsed = RevWalk.PARSED;
-        private static readonly int InPending = RevWalk.SEEN;
-        private static readonly int Popped = RevWalk.TEMP_MARK;
-        private static readonly int MergeBase = RevWalk.REWRITE;
+        private const int Parsed = RevWalk.PARSED;
+        private const int InPending = RevWalk.SEEN;
+        private const int Popped = RevWalk.TEMP_MARK;
+        private const int MergeBase = RevWalk.REWRITE;
         private readonly RevWalk _walker;
         private readonly DateRevQueue _pending;
         private int _branchMask;

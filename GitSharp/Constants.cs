@@ -265,14 +265,16 @@ namespace GitSharp
          * <b>This constant is fixed and is defined by the Git packfile format.</b>
          */
         public static byte[] PACK_SIGNATURE = { (byte)'P', (byte)'A', (byte)'C', (byte)'K' };
-
+		
+        public static EncoderFallback ENCODINGFALLBACK = new EncoderExceptionFallback();
+        public static DecoderFallback DECODINGFALLBACK = new DecoderExceptionFallback();
+		
         /** Native character encoding for commit messages, file names... */
         public static string CHARACTER_ENCODING = "UTF-8";
 
         /** Native character encoding for commit messages, file names... */
-        public static Encoding CHARSET = Encoding.GetEncoding(CHARACTER_ENCODING);
-
-
+        public static Encoding CHARSET = Encoding.GetEncoding(CHARACTER_ENCODING,ENCODINGFALLBACK,DECODINGFALLBACK);
+  
         /** Default main branch name */
         public static string MASTER = "master";
 

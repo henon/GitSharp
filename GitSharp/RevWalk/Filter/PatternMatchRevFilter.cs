@@ -65,7 +65,7 @@ namespace GitSharp.RevWalk.Filter
 		/// </returns>
 		private static string forceToRaw(string patternText) // [henon] I believe, such recoding is not necessary in C#, is it?
 		{
-			byte[] b = Encoding.UTF8.GetBytes( patternText);
+		    byte[] b = Constants.encode(patternText);
 			var needle = new StringBuilder(b.Length);
 			for (int i = 0; i < b.Length; i++)
 			{

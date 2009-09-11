@@ -52,11 +52,6 @@ namespace GitSharp.RevWalk
         {
         }
 
-        internal override void parse(RevWalk walk)
-        {
-            Flags |= PARSED;
-        }
-
     	public override int Type
     	{
     		get { return Constants.OBJ_TREE; }

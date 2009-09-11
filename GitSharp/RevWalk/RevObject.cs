@@ -45,7 +45,7 @@ namespace GitSharp.RevWalk
 	/// <summary>
 	/// Base object type accessed during revision walking.
 	/// </summary>
-	public abstract class RevObject : ObjectId, IDisposable
+	public abstract class RevObject : ObjectId
 	{
 		protected const int PARSED = 1;
 
@@ -84,8 +84,6 @@ namespace GitSharp.RevWalk
 
 			return data;
 		}
-
-		internal abstract void parse(RevWalk walk);
 
 		/// <summary>
 		/// Get Git object type. See <see cref="Constants"/>.
@@ -190,7 +188,7 @@ namespace GitSharp.RevWalk
 		/// <summary>
 		/// Release as much memory as possible from this object.
 		/// </summary>
-		public virtual void Dispose()
+		public virtual void DisposeBody()
 		{
 			// Nothing needs to be done for most objects.
 		}

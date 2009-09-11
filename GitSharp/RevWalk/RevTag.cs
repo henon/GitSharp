@@ -62,22 +62,20 @@ namespace GitSharp.RevWalk
 		{
 		}
 
-		internal override void parse(RevWalk walk)
-		{
-			ObjectLoader ldr = walk.Repository.OpenObject(walk.WindowCursor, this);
-			if (ldr == null)
-			{
-				throw new MissingObjectException(this, Constants.TYPE_TAG);
-			}
+        internal override void parseHeaders(RevWalk walk)
+        {
+            parseCanonical(walk, loadCanonical(walk));
+        }
 
-			byte[] data = ldr.CachedBytes;
-			if (Constants.OBJ_TAG != ldr.Type)
-			{
-				throw new IncorrectObjectTypeException(this, Constants.TYPE_TAG);
-			}
-
-			parseCanonical(walk, data);
-		}
+        internal override void parseBody(RevWalk walk)
+        {
+            if (_buffer == null)
+            {
+                _buffer = loadCanonical(walk);
+                if ((Flags & PARSED) == 0)
+                    parseCanonical(walk, _buffer);
+            }
+        }
 
 		public void parseCanonical(RevWalk walk, byte[] rawTag)
 		{
@@ -90,7 +88,9 @@ namespace GitSharp.RevWalk
 			int p = pos.value += 4; // "tag "
 			int nameEnd = RawParseUtils.nextLF(rawTag, p) - 1;
 			_name = RawParseUtils.decode(Constants.CHARSET, rawTag, p, nameEnd);
-			_buffer = rawTag;
+
+            if (walk.isRetainBody())
+			    _buffer = rawTag;
 			Flags |= PARSED;
 		}
 
@@ -207,10 +207,9 @@ namespace GitSharp.RevWalk
 			return _name;
 		}
 
-		public override void Dispose()
-		{
-			Flags &= ~PARSED;
-			_buffer = null;
-		}
+        public new void DisposeBody()
+        {
+            _buffer = null;
+        }
 	}
 }

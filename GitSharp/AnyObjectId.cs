@@ -81,6 +81,17 @@ namespace GitSharp
             return !(a == b);
         }
 
+        public static bool equals(AnyObjectId firstObjectId, AnyObjectId secondObjectId)
+        {
+            if (firstObjectId == secondObjectId) return true;
+
+            return firstObjectId.W2 == secondObjectId.W2
+                   && firstObjectId.W3 == secondObjectId.W3
+                   && firstObjectId.W4 == secondObjectId.W4
+                   && firstObjectId.W5 == secondObjectId.W5
+                   && firstObjectId.W1 == secondObjectId.W1;
+        }
+
         public virtual bool Equals(AnyObjectId obj)
         {
             return (obj != null) ? this == obj : false;

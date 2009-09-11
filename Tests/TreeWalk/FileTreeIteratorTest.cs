@@ -84,7 +84,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Test]
 		public void testEmptyIfRootDoesNotExist()
 		{
-			string path = Path.Combine(trash.FullName, "not-existing-file");
+			string path = Path.Combine(trash.FullName, "not-existing-File");
 			var di = new DirectoryInfo(path);
 			Assert.IsFalse(di.Exists);
 
@@ -96,7 +96,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Test]
 		public void testEmptyIfRootIsEmpty()
 		{
-			string path = Path.Combine(trash.FullName, "not-existing-file");
+			string path = Path.Combine(trash.FullName, "not-existing-File");
 			var di = new DirectoryInfo(path);
 			Assert.IsFalse(di.Exists);
 
@@ -173,7 +173,7 @@ namespace GitSharp.Tests.TreeWalk
 
 			Assert.AreEqual(expect, top.getEntryObjectId());
 
-			// Verify it was cached by removing the file and getting it again.
+			// Verify it was cached by removing the File and getting it again.
 			File.Delete(Path.Combine(trash.FullName, Paths[0]));
 			Assert.AreEqual(expect, top.getEntryObjectId());
 		}

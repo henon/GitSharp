@@ -67,7 +67,7 @@ namespace GitSharp.RevWalk
 			{
 				RevCommit c = _pending.next();
 				if (c == null) return null;
-				if ((c.flags & RevWalk.UNINTERESTING) == 0)
+				if ((c.Flags & RevWalk.UNINTERESTING) == 0)
 				{
 					return c;
 				}

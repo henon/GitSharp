@@ -38,31 +38,28 @@
 
 namespace GitSharp.RevWalk
 {
-
-
-    /** A binary file, or a symbolic link. */
+    /// <summary>
+	/// A binary file, or a symbolic link.
+    /// </summary>
     public class RevBlob : RevObject
     {
-        /**
-         * Create a new blob reference.
-         * 
-         * @param id
-         *            object name for the blob.
-         */
+        /// <summary>
+        /// Create a new blob reference.
+        /// </summary>
+		/// <param name="id">object name for the blob.</param>
         internal RevBlob(AnyObjectId id)
             : base(id)
         {
-
         }
 
         internal override void parse(RevWalk walk)
         {
-            flags |= PARSED;
+            Flags |= PARSED;
         }
 
-        public override int getType()
-        {
-            return Constants.OBJ_BLOB;
-        }
+    	public override int Type
+    	{
+    		get { return Constants.OBJ_BLOB; }
+    	}
     }
 }

@@ -38,17 +38,15 @@
 
 namespace GitSharp.RevWalk
 {
-
-
-    /** A reference to a tree of subtrees/files. */
+    /// <summary>
+	/// A reference to a tree of subtrees/files.
+    /// </summary>
     public class RevTree : RevObject
     {
-        /**
-         * Create a new tree reference.
-         * 
-         * @param id
-         *            object name for the tree.
-         */
+		/// <summary>
+		/// Create a new tree reference.
+		/// </summary>
+		/// <param name="id">Object name for the tree.</param>
         internal RevTree(AnyObjectId id)
             : base(id)
         {
@@ -56,12 +54,12 @@ namespace GitSharp.RevWalk
 
         internal override void parse(RevWalk walk)
         {
-            flags |= PARSED;
+            Flags |= PARSED;
         }
 
-        public override int getType()
-        {
-            return Constants.OBJ_TREE;
-        }
+    	public override int Type
+    	{
+    		get { return Constants.OBJ_TREE; }
+    	}
     }
 }

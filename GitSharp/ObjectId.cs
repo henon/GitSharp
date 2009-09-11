@@ -55,25 +55,25 @@ namespace GitSharp
 		}
 
 		internal ObjectId(int w1, int w2, int w3, int w4, int w5)
+			: base(w1, w2, w3, w4, w5)
 		{
-			W1 = w1;
-			W2 = w2;
-			W3 = w3;
-			W4 = w4;
-			W5 = w5;
 		}
 
 		public ObjectId(AnyObjectId src)
+			: base(src)
 		{
-			W1 = src.W1;
-			W2 = src.W2;
-			W3 = src.W3;
-			W4 = src.W4;
-			W5 = src.W5;
 		}
 
 		public static ObjectId ZeroId { get; private set; }
-
+		
+///	 <summary> * Test a string of characters to verify it is a hex format.
+///	 * <p>
+///	 * If true the string can be parsed with <seealso cref="#fromString(String)"/>.
+///	 *  </summary>
+///	 * <param name="id">
+///	 *            the string to test. </param>
+///	 * <returns> true if the string can converted into an ObjectId. </returns>
+///	 
 		public static bool IsId(string id)
 		{
 			if (id.Length != 2 * ObjectIdLength)
@@ -96,6 +96,13 @@ namespace GitSharp
 			}
 		}
 
+///    
+///	 <summary> * Convert an ObjectId into a hex string representation.
+///	 *  </summary>
+///	 * <param name="i">
+///	 *            the id to convert. May be null. </param>
+///	 * <returns> the hex string conversion of this id's content. </returns>
+///	 
 		public static string ToString(ObjectId i)
 		{
 			return i != null ? i.ToString() : ZeroIdString;
@@ -145,11 +152,30 @@ namespace GitSharp
 			       && firstBuffer[fi + 19] == secondBuffer[si + 19];
 		}
 
+
+///    
+///	 <summary> * Convert an ObjectId from raw binary representation.
+///	 *  </summary>
+///	 * <param name="bs">
+///	 *            the raw byte buffer to read from. At least 20 bytes after p
+///	 *            must be available within this byte array. </param>
+///	 * <param name="p">
+///	 *            position to read the first byte of data from. </param>
+///	 * <returns> the converted object id. </returns>
+///	 
 		public static ObjectId FromString(byte[] bs, int offset)
 		{
 			return FromHexString(bs, offset);
 		}
 
+///    
+///	 <summary> * Convert an ObjectId from raw binary representation.
+///	 *  </summary>
+///	 * <param name="bs">
+///	 *            the raw byte buffer to read from. At least 20 bytes must be
+///	 *            available within this byte array. </param>
+///	 * <returns> the converted object id. </returns>
+///	 
 		public static ObjectId FromString(string s)
 		{
 			if (string.IsNullOrEmpty(s) || s.Length != StringLength) return null;
@@ -204,47 +230,5 @@ namespace GitSharp
 			return new ObjectId(intbuffer[offset], intbuffer[offset + 1], intbuffer[offset + 2], intbuffer[offset + 3],
 			                    intbuffer[offset + 4]);
 		}
-	}
-
-	class ObjectIdEqualityComparer<T> : IEqualityComparer<T>
-		where T : ObjectId
-	{
-		#region Implementation of IEqualityComparer<ObjectId>
-
-		/// <summary>
-		/// Determines whether the specified objects are equal.
-		/// </summary>
-		/// <returns>
-		/// true if the specified objects are equal; otherwise, false.
-		/// </returns>
-		/// <param name="x">
-		/// The first object of type <see cref="ObjectId"/> to compare.
-		/// </param>
-		/// <param name="y">
-		/// The second object of type <see cref="ObjectId"/> to compare.
-		/// </param>
-		public bool Equals(T x, T y)
-		{
-			return x == y;
-		}
-
-		/// <summary>
-		/// Returns a hash code for the specified object.
-		/// </summary>
-		/// <returns>
-		/// A hash code for the specified object.
-		/// </returns>
-		/// <param name="obj">
-		/// The <see cref="ObjectId"/> for which a hash code is to be returned.
-		/// </param>
-		/// <exception cref="ArgumentNullException">
-		/// The type of <paramref name="obj"/> is a reference type and <paramref name="obj"/> is null.
-		/// </exception>
-		public int GetHashCode(T obj)
-		{
-			return obj.GetHashCode();
-		}
-
-		#endregion
 	}
 }

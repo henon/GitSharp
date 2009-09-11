@@ -37,55 +37,43 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using System.IO;
 
 namespace GitSharp
 {
-
-    /**
-     * A window for accessing git packs using a {@link ByteBuffer} for storage.
-     *
-     * @see ByteWindow
-     */
+	/// <summary>
+	/// A window for accessing git packs using a <see cref="Stream"/> for storage.
+	/// </summary>
     internal class ByteBufferWindow : ByteWindow
     {
-        private Stream _stream;
+        private readonly Stream _stream;
 
-        public ByteBufferWindow(PackFile pack, long o, Stream b)
+        internal ByteBufferWindow(PackFile pack, long o, Stream b)
             : base(pack, o, b.Length)
         {
             _stream = b;
         }
 
-
-        internal override int copy(int p, byte[] b, int o, int n)
+		protected override int copy(int pos, byte[] dstbuf, int dstoff, int cnt)
         {
-            _stream.Position=(p);
-            n = (int)Math.Min(_stream.Length - p, n);
-            _stream.Read(b, o, n);
-            return n;
+            _stream.Position = pos;
+			cnt = (int)Math.Min(_stream.Length - pos, cnt);
+            _stream.Read(dstbuf, dstoff, cnt);
+			return cnt;
         }
 
-
-        internal override int Inflate(int pos, byte[] b, int o, Inflater inf)
+    	protected override int Inflate(int pos, byte[] b, int o, Inflater inf)
         {
-            byte[] tmp = new byte[512];
+            var tmp = new byte[512];
             var s = _stream;
             s.Position=pos;
             while ((s.Length-s.Position) > 0 && !inf.IsFinished)
             {
                 if (inf.IsNeedingInput)
                 {
-                    int n = (int)Math.Min((s.Length - s.Position), tmp.Length);
+                    var n = (int)Math.Min((s.Length - s.Position), tmp.Length);
                     s.Read(tmp, 0, n);
                     inf.SetInput(tmp, 0, n);
                 }
@@ -96,24 +84,23 @@ namespace GitSharp
             return o;
         }
 
-
-        internal override void inflateVerify(int pos, Inflater inf)
+        protected override void inflateVerify(int pos, Inflater inf)
         {
-            byte[] tmp = new byte[512];
+            var tmp = new byte[512];
             var s = _stream;
-            s.Position=(pos);
+            s.Position = pos;
             while ((s.Length - s.Position) > 0 && !inf.IsFinished)
             {
                 if (inf.IsNeedingInput)
                 {
-                    int n = (int)Math.Min((s.Length - s.Position), tmp.Length);
+                    var n = (int)Math.Min((s.Length - s.Position), tmp.Length);
                     s.Read(tmp, 0, n);
                     inf.SetInput(tmp, 0, n);
                 }
-                inf.Inflate(verifyGarbageBuffer, 0, verifyGarbageBuffer.Length);
+                inf.Inflate(VerifyGarbageBuffer, 0, VerifyGarbageBuffer.Length);
             }
             while (!inf.IsFinished && !inf.IsNeedingInput)
-                inf.Inflate(verifyGarbageBuffer, 0, verifyGarbageBuffer.Length);
+                inf.Inflate(VerifyGarbageBuffer, 0, VerifyGarbageBuffer.Length);
         }
     }
 }

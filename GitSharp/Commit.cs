@@ -192,10 +192,10 @@ namespace GitSharp
 
         #endregion
 
-        public ObjectId CommitId { get; set; }
+        public ObjectId CommitId { get; private set; }
         public ObjectId[] ParentIds { get; set; }
     	public Encoding Encoding { get; set; }
-        public Repository Repository { get; internal set; }
+        public Repository Repository { get; private set; }
 
         // Returns all ancestor-commits of this commit
         public IEnumerable<Commit> Ancestors
@@ -281,7 +281,7 @@ namespace GitSharp
                 {
                 	Encoding = Encoding.GetEncoding(n.Substring("encoding ".Length));
                 }
-                else if (n == null || !n.Equals(""))
+                else if (n == null || !n.Equals(string.Empty))
                 {
                 	throw new CorruptObjectException(CommitId, "malformed header:" + n);
                 }

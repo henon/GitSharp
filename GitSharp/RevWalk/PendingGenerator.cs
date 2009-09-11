@@ -84,7 +84,7 @@ namespace GitSharp.RevWalk
          * Only relevant if there are {@link #UNINTERESTING} commits in the
          * {@link #_pending} queue.
          */
-		private int overScan = OVER_SCAN;
+		private int _overScan = OVER_SCAN;
 
 		static PendingGenerator()
 		{
@@ -118,21 +118,21 @@ namespace GitSharp.RevWalk
 						return null;
 					}
 
-					bool produce = !((c.flags & UNINTERESTING) != 0) && _filter.include(_walker, c);
+					bool produce = !((c.Flags & UNINTERESTING) != 0) && _filter.include(_walker, c);
 
 					foreach (RevCommit p in c.Parents)
 					{
-						if ((p.flags & SEEN) != 0) continue;
-						if ((p.flags & PARSED) == 0)
+						if ((p.Flags & SEEN) != 0) continue;
+						if ((p.Flags & PARSED) == 0)
 						{
 							p.parse(_walker);
 						}
-						p.flags |= SEEN;
+						p.Flags |= SEEN;
 						_pending.add(p);
 					}
 					_walker.carryFlagsImpl(c);
 
-					if ((c.flags & UNINTERESTING) != 0)
+					if ((c.Flags & UNINTERESTING) != 0)
 					{
 						if (_pending.everbodyHasFlag(UNINTERESTING))
 						{
@@ -144,20 +144,20 @@ namespace GitSharp.RevWalk
 								// We have to keep going to ensure that we carry
 								// flags as much as necessary.
 								//
-								overScan = OVER_SCAN;
+								_overScan = OVER_SCAN;
 							}
-							else if (--overScan == 0)
+							else if (--_overScan == 0)
 							{
 								throw StopWalkException.INSTANCE;
 							}
 						}
 						else
 						{
-							overScan = OVER_SCAN;
+							_overScan = OVER_SCAN;
 						}
 						if (CanDispose)
 						{
-							c.dispose();
+							c.Dispose();
 						}
 						continue;
 					}
@@ -169,7 +169,7 @@ namespace GitSharp.RevWalk
 
 					if (CanDispose)
 					{
-						c.dispose();
+						c.Dispose();
 					}
 				}
 			}

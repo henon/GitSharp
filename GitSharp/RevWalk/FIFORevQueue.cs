@@ -99,7 +99,8 @@ namespace GitSharp.RevWalk
 				_tail = b;
 				return;
 			}
-			else if (b.canUnpop())
+			
+			if (b.canUnpop())
 			{
 				b.unpop(c);
 				return;
@@ -143,7 +144,7 @@ namespace GitSharp.RevWalk
 			{
 				for (int i = b.HeadIndex; i < b.TailIndex; i++)
 				{
-					if ((b.Commits[i].flags & f) == 0) return false;
+					if ((b.Commits[i].Flags & f) == 0) return false;
 				}
 			}
 			return true;
@@ -155,7 +156,7 @@ namespace GitSharp.RevWalk
 			{
 				for (int i = b.HeadIndex; i < b.TailIndex; i++)
 				{
-					if ((b.Commits[i].flags & f) != 0) return true;
+					if ((b.Commits[i].Flags & f) != 0) return true;
 				}
 			}
 			return false;
@@ -168,7 +169,7 @@ namespace GitSharp.RevWalk
 			{
 				for (int i = b.HeadIndex; i < b.TailIndex; i++)
 				{
-					b.Commits[i].flags &= notFlag;
+					b.Commits[i].Flags &= notFlag;
 				}
 			}
 		}

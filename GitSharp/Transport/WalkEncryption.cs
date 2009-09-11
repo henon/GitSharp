@@ -81,7 +81,7 @@ namespace GitSharp.Transport
 
             public override void validate(HttpWebRequest u, string p)
             {
-                validateImpl(u, p, "", "");
+                validateImpl(u, p, string.Empty, string.Empty);
             }
 
             public override Stream decrypt(Stream stream)

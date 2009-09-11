@@ -64,26 +64,26 @@ namespace GitSharp.Tests
         [Test]
 	    public void testQuote_Empty()
         {
-            Assert.AreEqual("''", QuotedString.BOURNE_USER_PATH.quote(""));
+            Assert.AreEqual("''", QuotedString.BOURNE_USER_PATH.quote(string.Empty));
 	    }
 
         [Test]
 	    public void testDequote_Empty1()
         {
-            Assert.AreEqual("", QuotedString.BOURNE.dequote(new byte[0], 0, 0));
+            Assert.AreEqual(string.Empty, QuotedString.BOURNE.dequote(new byte[0], 0, 0));
 	    }
 
         [Test]
 	    public void testDequote_Empty2()
         {
-            Assert.AreEqual("", QuotedString.BOURNE_USER_PATH.dequote(new byte[] { (byte)'\'', (byte)'\'' }, 0,
+            Assert.AreEqual(string.Empty, QuotedString.BOURNE_USER_PATH.dequote(new byte[] { (byte)'\'', (byte)'\'' }, 0,
 				    2));
 	    }
 
         [Test]
 	    public void testDequote_SoleSq()
         {
-            Assert.AreEqual("", QuotedString.BOURNE_USER_PATH.dequote(new byte[] { (byte)'\'' }, 0, 1));
+            Assert.AreEqual(string.Empty, QuotedString.BOURNE_USER_PATH.dequote(new byte[] { (byte)'\'' }, 0, 1));
 	    }
 
         [Test]

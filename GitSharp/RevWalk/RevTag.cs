@@ -36,42 +36,46 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Util;
-using GitSharp.Exceptions;
 using System.Text;
+using GitSharp.Exceptions;
+using GitSharp.Util;
+
 namespace GitSharp.RevWalk
 {
-
-
-	/** An annotated tag. */
+	/// <summary>
+	/// An annotated tag.
+	/// </summary>
 	public class RevTag : RevObject
 	{
-		private RevObject @object;
+		private RevObject _object;
+		private byte[] _buffer;
+		private string _name;
 
-		private byte[] buffer;
-
-		private string name;
-
-		/**
-		 * Create a new tag reference.
-		 * 
-		 * @param id
-		 *            @object name for the tag.
-		 */
+		/// <summary>
+		/// Create a new tag reference.
+		/// </summary>
+		/// <param name="id">
+		/// Object name for the tag.
+		/// </param>
 		internal RevTag(AnyObjectId id)
 			: base(id)
 		{
 		}
 
-
 		internal override void parse(RevWalk walk)
 		{
-			ObjectLoader ldr = walk.getRepository().OpenObject(walk.WindowCursor, this);
+			ObjectLoader ldr = walk.Repository.OpenObject(walk.WindowCursor, this);
 			if (ldr == null)
+			{
 				throw new MissingObjectException(this, Constants.TYPE_TAG);
+			}
+
 			byte[] data = ldr.CachedBytes;
 			if (Constants.OBJ_TAG != ldr.Type)
+			{
 				throw new IncorrectObjectTypeException(this, Constants.TYPE_TAG);
+			}
+
 			parseCanonical(walk, data);
 		}
 
@@ -81,129 +85,132 @@ namespace GitSharp.RevWalk
 
 			int oType = Constants.decodeTypeString(this, rawTag, (byte)'\n', pos);
 			walk.IdBuffer.FromString(rawTag, 7);
-			@object = walk.lookupAny(walk.IdBuffer, oType);
+			_object = walk.lookupAny(walk.IdBuffer, oType);
 
 			int p = pos.value += 4; // "tag "
 			int nameEnd = RawParseUtils.nextLF(rawTag, p) - 1;
-			name = RawParseUtils.decode(Constants.CHARSET, rawTag, p, nameEnd);
-			buffer = rawTag;
-			flags |= PARSED;
+			_name = RawParseUtils.decode(Constants.CHARSET, rawTag, p, nameEnd);
+			_buffer = rawTag;
+			Flags |= PARSED;
 		}
 
-		public override int getType()
+		public override int Type
 		{
-			return Constants.OBJ_TAG;
+			get { return Constants.OBJ_TAG; }
 		}
 
-		/**
-		 * Parse the tagger identity from the raw buffer.
-		 * <p>
-		 * This method parses and returns the content of the tagger line, After
-		 * taking the tag's character set into account and decoding the tagger
-		 * name and email address. This method is fairly expensive and produces a
-		 * new PersonIdent instance on each invocation. Callers should invoke this
-		 * method only if they are certain they will be outputting the result, and
-		 * should cache the return value for as long as necessary to use all
-		 * information from it.
-		 *
-		 * @return identity of the tagger (name, email) and the time the tag
-		 *         was made by the tagger; null if no tagger line was found.
-		 */
+		/// <summary>
+		/// Parse the tagger identity from the raw buffer.
+		/// <para />
+		/// This method parses and returns the content of the tagger line, After
+		/// taking the tag's character set into account and decoding the tagger
+		/// name and email address. This method is fairly expensive and produces a
+		/// new PersonIdent instance on each invocation. Callers should invoke this
+		/// method only if they are certain they will be outputting the result, and
+		/// should cache the return value for as long as necessary to use all
+		/// information from it.
+		/// </summary>
+		/// <returns>
+		/// Identity of the tagger (name, email) and the time the tag
+		/// was made by the tagger; null if no tagger line was found.
+		/// </returns>
 		public PersonIdent getTaggerIdent()
 		{
-			byte[] raw = buffer;
+			byte[] raw = _buffer;
 			int nameB = RawParseUtils.tagger(raw, 0);
-			if (nameB < 0)
-				return null;
+			if (nameB < 0) return null;
 			return RawParseUtils.parsePersonIdent(raw, nameB);
 		}
 
-		/**
-		 * Parse the complete tag message and decode it to a string.
-		 * <p>
-		 * This method parses and returns the message portion of the tag buffer,
-		 * After taking the tag's character set into account and decoding the buffer
-		 * using that character set. This method is a fairly expensive operation and
-		 * produces a new string on each invocation.
-		 *
-		 * @return decoded tag message as a string. Never null.
-		 */
+		/// <summary>
+		/// Parse the complete tag message and decode it to a string.
+		/// <para />
+		/// This method parses and returns the message portion of the tag buffer,
+		/// After taking the tag's character set into account and decoding the buffer
+		/// using that character set. This method is a fairly expensive operation and
+		/// produces a new string on each invocation.
+		/// </summary>
+		/// <returns>
+		/// Decoded tag message as a string. Never null.
+		/// </returns>
 		public string getFullMessage()
 		{
-			byte[] raw = buffer;
+			byte[] raw = _buffer;
 			int msgB = RawParseUtils.tagMessage(raw, 0);
-			if (msgB < 0)
-				return "";
+			if (msgB < 0) return string.Empty;
 			Encoding enc = RawParseUtils.parseEncoding(raw);
 			return RawParseUtils.decode(enc, raw, msgB, raw.Length);
 		}
 
-		/**
-		 * Parse the tag message and return the first "line" of it.
-		 * <p>
-		 * The first line is everything up to the first pair of LFs. This is the
-		 * "oneline" format, suitable for output in a single line display.
-		 * <p>
-		 * This method parses and returns the message portion of the tag buffer,
-		 * After taking the tag's character set into account and decoding the buffer
-		 * using that character set. This method is a fairly expensive operation and
-		 * produces a new string on each invocation.
-		 *
-		 * @return decoded tag message as a string. Never null. The returned string
-		 *         does not contain any LFs, even if the first paragraph spanned
-		 *         multiple lines. Embedded LFs are converted to spaces.
-		 */
+		/// <summary>
+		/// Parse the tag message and return the first "line" of it.
+		/// <para />
+		/// The first line is everything up to the first pair of LFs. This is the
+		/// "oneline" format, suitable for output in a single line display.
+		/// <para />
+		/// This method parses and returns the message portion of the tag buffer,
+		/// After taking the tag's character set into account and decoding the buffer
+		/// using that character set. This method is a fairly expensive operation and
+		/// produces a new string on each invocation.
+		/// </summary>
+		/// <returns>
+		/// Decoded tag message as a string. Never null. The returned string
+		/// does not contain any LFs, even if the first paragraph spanned
+		/// multiple lines. Embedded LFs are converted to spaces.
+		/// </returns>
 		public string getShortMessage()
 		{
-			byte[] raw = buffer;
+			byte[] raw = _buffer;
 			int msgB = RawParseUtils.tagMessage(raw, 0);
-			if (msgB < 0)
-				return "";
+			if (msgB < 0) return string.Empty;
 
 			Encoding enc = RawParseUtils.parseEncoding(raw);
 			int msgE = RawParseUtils.endOfParagraph(raw, msgB);
 			string str = RawParseUtils.decode(enc, raw, msgB, msgE);
 			if (RevCommit.hasLF(raw, msgB, msgE))
+			{
 				str = str.Replace('\n', ' ');
+			}
+
 			return str;
 		}
 
-		/**
-		 * Parse this tag buffer for display.
-		 * 
-		 * @param walk
-		 *            revision walker owning this reference.
-		 * @return parsed tag.
-		 */
+		/// <summary>
+		/// Parse this tag buffer for display.
+		/// </summary>
+		/// <param name="walk">revision walker owning this reference.</param>
+		/// <returns>parsed tag.</returns>
 		public Tag asTag(RevWalk walk)
 		{
-			return new Tag(walk.getRepository(), this, name, buffer);
+			return new Tag(walk.Repository, this, _name, _buffer);
 		}
 
-		/**
-		 * Get a reference to the @object this tag was placed on.
-		 * 
-		 * @return @object this tag refers to.
-		 */
+		/// <summary>
+		/// Get a reference to the @object this tag was placed on.
+		/// </summary>
+		/// <returns>
+		/// Object this tag refers to.
+		/// </returns>
 		public RevObject getObject()
 		{
-			return @object;
+			return _object;
 		}
 
-		/**
-		 * Get the name of this tag, from the tag header.
-		 * 
-		 * @return name of the tag, according to the tag header.
-		 */
+		/// <summary>
+		/// Get the name of this tag, from the tag header.
+		/// </summary>
+		/// <returns>
+		/// Name of the tag, according to the tag header.
+		/// </returns>
 		public string getName()
 		{
-			return name;
+			return _name;
 		}
 
-		public override void dispose()
+		public override void Dispose()
 		{
-			flags &= ~PARSED;
-			buffer = null;
+			Flags &= ~PARSED;
+			_buffer = null;
 		}
 	}
 }

@@ -36,7 +36,6 @@
  */
 
 using System.Collections.Generic;
-using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
 using NUnit.Framework;
 
@@ -70,7 +69,7 @@ namespace GitSharp.Tests.RevWalk
             var lst = new List<RevCommit>();
             for (int i = 0; i < 3*BlockRevQueue.Block.BLOCK_SIZE; i++)
             {
-                RevCommit c = commit();
+                RevCommit c = Commit();
                 lst.Add(c);
                 q.add(c);
             }
@@ -81,9 +80,9 @@ namespace GitSharp.Tests.RevWalk
         [Test]
         public void testUnpopAtFront()
         {
-            RevCommit a = commit();
-            RevCommit b = commit();
-            RevCommit c = commit();
+            RevCommit a = Commit();
+            RevCommit b = Commit();
+            RevCommit c = Commit();
 
             q.add(a);
             q.unpop(b);

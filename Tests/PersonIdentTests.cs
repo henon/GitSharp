@@ -62,7 +62,7 @@ namespace GitSharp.Tests
         [Test]
         public void test001_NewIdent()
         {
-            PersonIdent p = new PersonIdent("A U Thor", "author@example.com", 1142878501L, 0);
+            var p = new PersonIdent("A U Thor", "author@example.com", 1142878501L, 0);
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
             Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());
@@ -72,8 +72,8 @@ namespace GitSharp.Tests
         [Test]
         public void test002_ParseIdent()
         {
-            String i = "A U Thor <author@example.com> 1142878501 -0500";
-            PersonIdent p = new PersonIdent(i);
+            const string i = "A U Thor <author@example.com> 1142878501 -0500";
+            var p = new PersonIdent(i);
             Assert.AreEqual(i, p.ToExternalString());
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
@@ -83,8 +83,8 @@ namespace GitSharp.Tests
         [Test]
         public void test003_ParseIdent()
         {
-            String i = "A U Thor <author@example.com> 1142878501 +0230";
-            PersonIdent p = new PersonIdent(i);
+            const string i = "A U Thor <author@example.com> 1142878501 +0230";
+            var p = new PersonIdent(i);
             Assert.AreEqual(i, p.ToExternalString());
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
@@ -94,8 +94,8 @@ namespace GitSharp.Tests
         [Test]
         public void test004_ParseIdent()
         {
-            String i = "A U Thor<author@example.com> 1142878501 +0230";
-            PersonIdent p = new PersonIdent(i);
+            const string i = "A U Thor<author@example.com> 1142878501 +0230";
+            var p = new PersonIdent(i);
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
             Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());
@@ -104,8 +104,8 @@ namespace GitSharp.Tests
         [Test]
         public void test005_ParseIdent()
         {
-            String i = "A U Thor<author@example.com>1142878501 +0230";
-            PersonIdent p = new PersonIdent(i);
+            const string i = "A U Thor<author@example.com>1142878501 +0230";
+            var p = new PersonIdent(i);
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
             Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());
@@ -114,8 +114,8 @@ namespace GitSharp.Tests
         [Test]
         public void test006_ParseIdent()
         {
-            String i = "A U Thor   <author@example.com>1142878501 +0230";
-            PersonIdent p = new PersonIdent(i);
+            const string i = "A U Thor   <author@example.com>1142878501 +0230";
+            var p = new PersonIdent(i);
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
             Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());
@@ -124,8 +124,8 @@ namespace GitSharp.Tests
         [Test]
         public void test007_ParseIdent()
         {
-            String i = "A U Thor<author@example.com>1142878501 +0230 ";
-            PersonIdent p = new PersonIdent(i);
+            const string i = "A U Thor<author@example.com>1142878501 +0230 ";
+            var p = new PersonIdent(i);
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
             Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());

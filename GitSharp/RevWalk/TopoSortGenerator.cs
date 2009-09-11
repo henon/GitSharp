@@ -49,7 +49,7 @@ namespace GitSharp.RevWalk
 
 		/// <summary>
 		/// Create a new sorter and completely spin the generator.
-		/// <para>
+		/// <para />
 		/// When the constructor completes the supplied generator will have no
 		/// commits remaining, as all of the commits will be held inside of this
 		/// generator's internal buffer.
@@ -97,7 +97,7 @@ namespace GitSharp.RevWalk
 					// At least one of our children is missing. We delay
 					// production until all of our children are output.
 					//
-					c.flags |= TopoDelay;
+					c.Flags |= TopoDelay;
 					continue;
 				}
 
@@ -106,13 +106,13 @@ namespace GitSharp.RevWalk
 				//
 				foreach (RevCommit p in c.Parents)
 				{
-					if (--p.InDegree == 0 && (p.flags & TopoDelay) != 0)
+					if (--p.InDegree == 0 && (p.Flags & TopoDelay) != 0)
 					{
 						// This parent tried to come before us, but we are
 						// his last child. unpop the parent so it goes right
 						// behind this child.
 						//
-						p.flags &= ~TopoDelay;
+						p.Flags &= ~TopoDelay;
 						_pending.unpop(p);
 					}
 				}

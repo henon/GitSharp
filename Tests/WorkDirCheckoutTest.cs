@@ -55,7 +55,7 @@ namespace GitSharp.Tests
             index.add(trash, writeTrashFile("bar", "bar"));
             index.add(trash, writeTrashFile("foo/bar/baz/qux", "foo/bar"));
             recursiveDelete(new FileInfo(Path.Combine(trash.FullName, "bar")));
-            recursiveDelete(new FileInfo(Path.Combine(trash.FullName, "foo")));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
             writeTrashFile("bar/baz/qux/foo", "another nasty one");
             writeTrashFile("foo", "troublesome little bugger");
             
@@ -72,7 +72,7 @@ namespace GitSharp.Tests
 
             var index2 = new GitIndex(db);
             recursiveDelete(new FileInfo(Path.Combine(trash.FullName, "bar")));
-            recursiveDelete(new FileInfo(Path.Combine(trash.FullName, "foo")));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
             index2.add(trash, writeTrashFile("bar/baz/qux/foo", "bar"));
             writeTrashFile("bar/baz/qux/bar", "evil? I thought it said WEEVIL!");
             index2.add(trash, writeTrashFile("foo", "lalala"));
@@ -95,7 +95,7 @@ namespace GitSharp.Tests
             index.add(trash, writeTrashFile("bar", "bar"));
             index.add(trash, writeTrashFile("foo/bar/baz/qux", "foo/bar"));
             recursiveDelete(new FileInfo(Path.Combine(trash.FullName, "bar")));
-            recursiveDelete(new FileInfo(Path.Combine(trash.FullName, "foo")));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
             writeTrashFile("bar/baz/qux/foo", "another nasty one");
             writeTrashFile("foo", "troublesome little bugger");
 
@@ -106,8 +106,8 @@ namespace GitSharp.Tests
             Assert.AreEqual("foo", conflictingEntries[1]);
 
             var index2 = new GitIndex(db);
-            recursiveDelete(new FileInfo(Path.Combine(trash.FullName, "bar")));
-            recursiveDelete(new FileInfo(Path.Combine(trash.FullName, "foo")));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "bar")));
+            recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
 
             index2.add(trash, writeTrashFile("bar/baz/qux/foo", "bar"));
             index2.add(trash, writeTrashFile("foo", "lalala"));

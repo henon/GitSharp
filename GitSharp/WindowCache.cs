@@ -286,7 +286,7 @@ namespace GitSharp
 
         #region Nested Types
 
-        internal class WindowRef : Ref<ByteWindow>
+        internal class WindowRef : OffsetCache<ByteWindow, WindowCache.WindowRef>.Ref<ByteWindow>
         {
             public WindowRef(PackFile pack, long position, ByteWindow v, Queue queue)
                 : base(pack, position, v, queue)

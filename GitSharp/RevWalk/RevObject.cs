@@ -222,6 +222,7 @@ namespace GitSharp.RevWalk
 
 		public override bool Equals(AnyObjectId o)
 		{
+            if (o.GetType() != typeof(RevObject)) return false;
 			return this == o;
 		}
 
@@ -252,16 +253,6 @@ namespace GitSharp.RevWalk
 			}
 
 			return base.Equals(other) && other.Flags == Flags;
-		}
-
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				{
-					return (base.GetHashCode() * 397) ^ Flags;
-				}
-			}
 		}
 
 		public static bool operator ==(RevObject left, RevObject right)

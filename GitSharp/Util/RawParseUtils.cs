@@ -1049,7 +1049,7 @@ namespace GitSharp.Util
 			{
 				return decodeNoFallback(cs, buffer, start, end);
 			}
-			catch (EncoderFallbackException)
+			catch (DecoderFallbackException)
 			{
 				// Fall back to an ISO-8859-1 style encoding. At least all of
 				// the bytes will be present in the output.
@@ -1087,6 +1087,7 @@ namespace GitSharp.Util
 			for (int i = 0; i < end - start; i++)
 				b[i] = buffer[start + i];
 
+
             if (cs != null)
             {
                 // Try the suggested encoding, it might be right since it was
@@ -1096,26 +1097,23 @@ namespace GitSharp.Util
                 {
                     return decode(b, cs);
                 }
-                catch (EncoderFallbackException)
+				catch (DecoderFallbackException)
                 {
                     //b.reset();
                 }
             }
-            else
+            // No encoding specified or decoding failed, try default charset
+            //
+            try
             {
-                // No encoding specified, use default charset
-                //
-                try
-                {
-                    return decode(b, Constants.CHARSET);
-                }
-                catch (EncoderFallbackException)
-                {
-                    //b.reset();
-                }
+                return decode(b, Constants.CHARSET);
+            }
+			catch (DecoderFallbackException)
+            {
+                //b.reset();
             }
 
-			throw new EncoderFallbackException("decoding failed with encoding: " + cs.HeaderName);
+			throw new DecoderFallbackException("decoding failed with encoding: " + cs.HeaderName);
 		}
 
 		/**

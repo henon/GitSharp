@@ -60,7 +60,7 @@ namespace GitSharp.Tests.Transport
         private void assertBuffer(string exp)
         {
             byte[] res = rawOut.ToArray();
-            string ress = Encoding.GetEncoding(Constants.CHARACTER_ENCODING).GetString(res);
+            string ress = Constants.CHARSET.GetString(res);
             Assert.AreEqual(exp, ress);
         }
 
@@ -120,7 +120,7 @@ namespace GitSharp.Tests.Transport
             byte[] act = rawOut.ToArray();
             string explen = NB.DecimalToBase(buf.Length + 5, 16);
             Assert.AreEqual(5 + buf.Length, act.Length);
-            Assert.AreEqual(Encoding.UTF8.GetString(act, 0, 4).ToUpper(), explen.ToUpper());
+            Assert.AreEqual(Constants.CHARSET.GetString(act, 0, 4).ToUpper(), explen.ToUpper());
             Assert.AreEqual(1, act[4]);
             for (int i = 0, j = 5; i < buf.Length; i++, j++)
                 Assert.AreEqual(buf[i], act[j]);

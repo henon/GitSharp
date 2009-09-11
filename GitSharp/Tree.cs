@@ -130,7 +130,7 @@ namespace GitSharp
         private static int CompareNames(byte[] a, byte[] nameUTF8, int nameStart, int nameEnd, int lasta, int lastb)
         {
             // There must be a .NET way of doing this! I assume there are both UTF8 names, 
-            // perhaps Encoding.UTF8.GetString on both then .Compare on the strings?
+            // perhaps Constants.CHARSET.GetString on both then .Compare on the strings?
             // I'm pretty sure this is just doing that but the long way round, however 
             // I could be wrong so we'll leave it at this for now. - NR
             int j = 0;
@@ -251,7 +251,7 @@ namespace GitSharp
 
         public FileTreeEntry AddFile(string name)
         {
-            return AddFile(GitSharp.Repository.GitInternalSlash(Encoding.UTF8.GetBytes(name)), 0);
+            return AddFile(GitSharp.Repository.GitInternalSlash(Constants.CHARSET.GetBytes(name)), 0);
         }
 
         public FileTreeEntry AddFile(byte[] s, int offset)
@@ -273,7 +273,7 @@ namespace GitSharp
 
             byte[] newName = SubString(s, offset, slash);
             if (p >= 0)
-                throw new EntryExistsException(Encoding.UTF8.GetString(newName));
+                throw new EntryExistsException(Constants.CHARSET.GetString(newName));
             else if (slash < s.Length)
             {
                 Tree t = new Tree(this, newName);
@@ -290,7 +290,7 @@ namespace GitSharp
 
         public Tree AddTree(string name)
         {
-            return AddTree(Repository.GitInternalSlash(Encoding.UTF8.GetBytes(name)), 0);
+            return AddTree(Repository.GitInternalSlash(Constants.CHARSET.GetBytes(name)), 0);
         }
 
         public Tree AddTree(byte[] s, int offset)
@@ -310,7 +310,7 @@ namespace GitSharp
 
             byte[] newName = SubString(s, offset, slash);
             if (p >= 0)
-                throw new EntryExistsException(Encoding.UTF8.GetString(newName));
+                throw new EntryExistsException(Constants.CHARSET.GetString(newName));
 
             Tree t = new Tree(this, newName);
             InsertEntry(p, t);
@@ -524,7 +524,7 @@ namespace GitSharp
 
         private TreeEntry FindMember(string s, byte slast)
         {
-            return FindMember(Repository.GitInternalSlash(Encoding.UTF8.GetBytes(s)), slast, 0);
+            return FindMember(Repository.GitInternalSlash(Constants.CHARSET.GetBytes(s)), slast, 0);
         }
 
 

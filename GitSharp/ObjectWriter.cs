@@ -123,7 +123,7 @@ namespace GitSharp
             s.Write(' ');
             s.Write(c.Committer.ToExternalString().ToCharArray());
             s.Write('\n');
-            if (encoding != Encoding.UTF8)
+            if (encoding != Constants.CHARSET)
             {
                 s.Write(HEncoding);
                 s.Write(' ');

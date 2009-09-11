@@ -274,12 +274,18 @@ namespace GitSharp
 		
         public static EncoderFallback ENCODINGFALLBACK = new EncoderExceptionFallback();
         public static DecoderFallback DECODINGFALLBACK = new DecoderExceptionFallback();
-        
-	    /// <summary>
-    	/// Native character encoding for commit messages, file names...
+        private static readonly Encoding _charset = new UTF8Encoding(false, true);
+
+        /// <summary>
+        /// Native character encoding for commit messages, file names...
         /// </summary>
-        public const string CHARACTER_ENCODING = "UTF-8";
-        public static Encoding CHARSET = Encoding.GetEncoding(CHARACTER_ENCODING,ENCODINGFALLBACK,DECODINGFALLBACK);
+        public static Encoding CHARSET
+        {
+            get
+            {
+                return _charset;
+            }
+        }
   
         /// <summary>
 		/// Default main branch name
@@ -355,6 +361,7 @@ namespace GitSharp
 		/// Beginning of the common "Signed-off-by: " commit message line
         /// </summary>
         public const string SIGNED_OFF_BY_TAG = "Signed-off-by: ";
+
 
         /// <summary>
         /// Create a new digest function for objects.

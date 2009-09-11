@@ -120,7 +120,7 @@ namespace GitSharp.Tests
 			Assert.AreEqual(Ref.Storage.Packed, @ref.StorageFormat);
 			string path = Path.Combine(db.Directory.FullName, "refs/heads/master");
 			FileStream os = new FileStream(path, System.IO.FileMode.OpenOrCreate);
-			byte[] buffer = Encoding.UTF8.GetBytes(@ref.ObjectId.Name);
+            byte[] buffer = Constants.CHARSET.GetBytes(@ref.ObjectId.Name);
 			os.Write(buffer, 0, buffer.Length);
 			os.WriteByte(Convert.ToByte('\n'));
 			os.Close();

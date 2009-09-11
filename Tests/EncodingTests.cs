@@ -53,7 +53,7 @@ namespace GitSharp.Tests
             byte[] exp = { (byte)'a', (byte)'b', (byte)'c' };
             byte[] res = Constants.encodeASCII(src);
             Assert.IsTrue(exp.SequenceEqual(res));
-            Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
+            Assert.AreEqual(src, Constants.CHARSET.GetString(res, 0, res.Length));
         }
 
         [Test]
@@ -87,7 +87,7 @@ namespace GitSharp.Tests
             byte[] exp = { (byte)'a', (byte)'b', (byte)'c' };
             byte[] res = Constants.encode(src);
             Assert.IsTrue(exp.SequenceEqual(res));
-            Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
+            Assert.AreEqual(src, Constants.CHARSET.GetString(res, 0, res.Length));
         }
 
         [Test]
@@ -100,7 +100,7 @@ namespace GitSharp.Tests
 
             byte[] res = Constants.encode(src);
             Assert.IsTrue(exp.SequenceEqual(res));
-            Assert.AreEqual(src, Encoding.UTF8.GetString(res, 0, res.Length));
+            Assert.AreEqual(src, Constants.CHARSET.GetString(res, 0, res.Length));
         }
     }
 }

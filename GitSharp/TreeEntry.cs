@@ -72,7 +72,7 @@ namespace GitSharp
 
         public byte[] FullNameUTF8
         {
-            get { return Encoding.UTF8.GetBytes(FullName); }
+            get { return Constants.CHARSET.GetBytes(FullName); }
         }
 
         public ObjectId Id

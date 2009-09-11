@@ -294,7 +294,7 @@ namespace GitSharp.Tests
                 }
             }
 
-			File.WriteAllText(tf.FullName, data);
+			File.WriteAllText(tf.FullName, data, Constants.CHARSET);
 
             return tf;
         }

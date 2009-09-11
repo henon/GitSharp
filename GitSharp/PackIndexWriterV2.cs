@@ -40,6 +40,7 @@
 
 using System.IO;
 using GitSharp.Transport;
+using GitSharp.Util;
 
 namespace GitSharp
 {
@@ -65,7 +66,7 @@ namespace GitSharp
         {
             foreach (PackedObjectInfo oe in entries)
             {
-            	_stream.Write(oe);
+                oe.copyRawTo(_stream.BaseStream);
             }
         }
 
@@ -73,7 +74,8 @@ namespace GitSharp
         {
             foreach (PackedObjectInfo oe in entries)
             {
-            	_stream.Write(oe.CRC);
+                NB.encodeInt32(tmp, 0, oe.CRC);
+            	_stream.BaseStream.Write(tmp, 0, 4);
             }
         }
 
@@ -85,12 +87,13 @@ namespace GitSharp
                 long o = oe.Offset;
                 if (o < int.MaxValue)
                 {
-                	_stream.Write((int)o);
+                    NB.encodeInt32(tmp, 0, (int)o);
                 }
                 else
                 {
-                	_stream.Write((1 << 31) | o64++);
+                    NB.encodeInt32(tmp, 0, (1 << 31) | o64++);
                 }
+                _stream.BaseStream.Write(tmp, 0, 4);
             }
         }
 
@@ -101,7 +104,8 @@ namespace GitSharp
                 long o = oe.Offset;
                 if (o > int.MaxValue)
                 {
-                	_stream.Write(o);
+                    NB.encodeInt64(tmp, 0, o);
+                	_stream.BaseStream.Write(tmp, 0, 8);
                 }
             }
         }

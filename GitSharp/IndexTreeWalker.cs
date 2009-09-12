@@ -236,7 +236,7 @@ namespace GitSharp
 			TreeEntry m = mi.hasNext() ? mi.next() : null;
 			TreeEntry a = ai.hasNext() ? ai.next() : null;
 			int curIndexPos = IndexCounter;
-			GitIndex.Entry entry = (IndexCounter < _indexMembers.Length) ? _indexMembers[0] : null;
+			GitIndex.Entry entry = (IndexCounter < _indexMembers.Length) ? _indexMembers[IndexCounter++] : null;
 			while (((m != null) || (a != null)) || (entry != null))
 			{
 				int cmpma = Compare(m, a);

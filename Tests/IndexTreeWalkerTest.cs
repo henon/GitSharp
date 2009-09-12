@@ -109,10 +109,12 @@ namespace GitSharp.Tests
         {
             var index = new GitIndex(db);
             var mainTree = new Tree(db);
+
             index.add(trash, writeTrashFile("a", "a"));
             mainTree.AddFile("b/b");
             index.add(trash, writeTrashFile("c", "c"));
             mainTree.AddFile("c");
+
             new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
             Assert.IsTrue(IndexOnlyEntriesVisited.Contains("a"));
             Assert.IsTrue(TreeOnlyEntriesVisited.Contains("b/b"));
@@ -124,9 +126,11 @@ namespace GitSharp.Tests
         {
             var index = new GitIndex(db);
             var mainTree = new Tree(db);
+
             index.add(trash, writeTrashFile("foo", "foo"));
             index.add(trash, writeTrashFile("bar", "bar"));
             new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
+
             Assert.AreEqual(2, IndexOnlyEntriesVisited.Count);
             Assert.IsTrue(IndexOnlyEntriesVisited[0].Equals("bar"));
             Assert.IsTrue(IndexOnlyEntriesVisited[1].Equals("foo"));
@@ -137,9 +141,11 @@ namespace GitSharp.Tests
         {
             var index = new GitIndex(db);
             var mainTree = new Tree(db);
+
             index.add(trash, writeTrashFile("foo/bar/baz", "foobar"));
             index.add(trash, writeTrashFile("asdf", "asdf"));
             new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
+
             Assert.AreEqual("asdf", IndexOnlyEntriesVisited[0]);
             Assert.AreEqual("foo/bar/baz", IndexOnlyEntriesVisited[1]);
         }
@@ -150,6 +156,7 @@ namespace GitSharp.Tests
             var index = new GitIndex(db);
             index.add(trash, writeTrashFile("foo/bar", "foo/bar"));
             index.add(trash, writeTrashFile("foobar", "foobar"));
+
             new IndexTreeWalker(index, db.MapTree(index.writeTree()), trash, TestTreeOnlyOneLevelTreeVisitor).Walk();
         }
 
@@ -160,7 +167,7 @@ namespace GitSharp.Tests
             var mainTree = new Tree(db);
             mainTree.AddFile("foo");
             mainTree.AddFile("bar");
-            new IndexTreeWalker(index, mainTree, trash, TestTreeOnlyOneLevelTreeVisitor).Walk();
+            new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
             Assert.IsTrue(TreeOnlyEntriesVisited[0].Equals("bar"));
             Assert.IsTrue(TreeOnlyEntriesVisited[1].Equals("foo"));
         }

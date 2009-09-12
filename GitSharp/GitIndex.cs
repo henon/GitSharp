@@ -1043,7 +1043,7 @@ namespace GitSharp
 
             private FileInfo getFile(FileSystemInfo wd)
             {
-                return new FileInfo(Path.Combine(Directory.GetDirectoryRoot(wd.FullName), Name));
+                return new FileInfo(Path.Combine(wd.FullName, Name));
             }
 
             public override string ToString()

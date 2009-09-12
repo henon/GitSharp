@@ -208,7 +208,7 @@
     <Compile Include="Util\Int32.cs" />
     <Compile Include="Util\ISystemReader.cs" />
     <Compile Include="Util\MutableInteger.cs" />
-    <Compile Include="Util\String.cs" />
+    <Compile Include="Util\StringExtension.cs" />
     <Compile Include="Util\CheckedOutputStream.cs" />
     <Compile Include="Util\CRC32.cs" />
     <Compile Include="Util\MessageDigest.cs" />

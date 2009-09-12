@@ -215,7 +215,9 @@ namespace GitSharp.Tests
         /// <returns></returns>
         protected static bool recursiveDelete(FileSystemInfo fs, bool silent, string name, bool failOnError)
         {
-            Debug.Assert(!(silent && failOnError));
+          Debug.Assert(!(silent && failOnError));
+          if(!fs.IsDirectory())
+            return silent;
 
             if (fs.IsFile())
             {

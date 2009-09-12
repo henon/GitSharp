@@ -227,7 +227,7 @@ namespace GitSharp.Diff
 			if (obj is Edit)
 			{
 				var e = (Edit) obj;
-				return BeginA == e.BeginA && EndA == EndA && BeginB == BeginB && EndB == e.EndB;
+				return BeginA == e.BeginA && EndA == e.EndA && BeginB == e.BeginB && EndB == e.EndB;
 			}
 
 			return false;

@@ -284,7 +284,7 @@ namespace GitSharp.Transport
 		public abstract IPushConnection openPush();
 		public abstract void close();
 
-		public FetchResult fetch(IProgressMonitor monitor, List<RefSpec> toFetch)
+		public FetchResult fetch(ProgressMonitor monitor, List<RefSpec> toFetch)
 		{
 			if (toFetch == null || toFetch.Count == 0)
 			{
@@ -319,7 +319,7 @@ namespace GitSharp.Transport
 			return result;
 		}
 
-		public PushResult push(IProgressMonitor monitor, ICollection<RemoteRefUpdate> toPush)
+		public PushResult push(ProgressMonitor monitor, ICollection<RemoteRefUpdate> toPush)
 		{
 			if (toPush == null || toPush.Count == 0)
 			{

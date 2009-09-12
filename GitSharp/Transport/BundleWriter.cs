@@ -54,7 +54,7 @@ namespace GitSharp.Transport
         /// </summary>
         /// <param name="repo">repository where objects are stored.</param>
         /// <param name="monitor">operations progress monitor.</param>
-        public BundleWriter(Repository repo, IProgressMonitor monitor) 
+        public BundleWriter(Repository repo, ProgressMonitor monitor) 
         {
 		    _packWriter = new PackWriter(repo, monitor);
             _include = new Dictionary<String, ObjectId>();

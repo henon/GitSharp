@@ -63,7 +63,7 @@ namespace GitSharp.Transport
             throw new IOException("Deleting '" + path + "' not supported");
         }
 
-        public virtual Stream writeFile(string path, IProgressMonitor monitor, string monitorTask)
+        public virtual Stream writeFile(string path, ProgressMonitor monitor, string monitorTask)
         {
             throw new IOException("Writing of '" + path + "' not supported.");
         }

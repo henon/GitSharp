@@ -42,7 +42,7 @@ namespace GitSharp.Transport
 
     public abstract class BaseFetchConnection : BaseConnection, IFetchConnection
     {
-        public void Fetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        public void Fetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
         {
             markStartedOperation();
             doFetch(monitor, want, have);
@@ -60,7 +60,7 @@ namespace GitSharp.Transport
         public abstract List<PackLock> PackLocks { get; }
         public abstract void SetPackLockMessage(string message);
 
-        protected abstract void doFetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have);
+        protected abstract void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have);
     }
 
 }

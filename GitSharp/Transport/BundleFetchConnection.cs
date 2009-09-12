@@ -148,7 +148,7 @@ namespace GitSharp.Transport
             }
         }
 
-        protected override void doFetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        protected override void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
         {
             verifyPrerequisites();
             try

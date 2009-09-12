@@ -41,7 +41,7 @@ namespace GitSharp.Transport
 {
     public interface IFetchConnection : IConnection
     {
-        void Fetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have);
+        void Fetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have);
         bool DidFetchIncludeTags { get; }
         bool DidFetchTestConnectivity { get; }
         void SetPackLockMessage(string message);

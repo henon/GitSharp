@@ -93,7 +93,7 @@ namespace GitSharp.Tests.Transport
             {
             }
 
-            public void Push(IProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refsToUpdate)
+            public void Push(ProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refsToUpdate)
             {
                 foreach (RemoteRefUpdate rru in refsToUpdate.Values)
                 {

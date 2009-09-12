@@ -396,7 +396,7 @@ namespace GitSharp.Transport
 			bool progress = !_options.Contains(OptionNoProgress);
 			bool sideband = _options.Contains(OptionSideBand) || _options.Contains(OptionSideBand64K);
 
-			IProgressMonitor pm = NullProgressMonitor.Instance;
+			ProgressMonitor pm = NullProgressMonitor.Instance;
 			Stream packOut = _rawOut;
 
 			if (sideband)

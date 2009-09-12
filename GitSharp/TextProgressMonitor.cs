@@ -43,7 +43,7 @@ using System.Text;
 
 namespace GitSharp
 {
-	public class TextProgressMonitor : IProgressMonitor
+	public class TextProgressMonitor : ProgressMonitor
 	{
 		private readonly TextWriter _writer;
 		private DateTime _taskBeganAt;
@@ -63,14 +63,14 @@ namespace GitSharp
 			_taskBeganAt = DateTime.Now;
 		}
 
-		#region IProgressMonitor Members
+		#region ProgressMonitor Members
 
-		public void Start(int totalTasks)
+		public override void Start(int totalTasks)
 		{
 			_taskBeganAt = DateTime.Now;
 		}
 
-		public void BeginTask(string title, int totalWork)
+		public override void BeginTask(string title, int totalWork)
 		{
 			EndTask();
 			_message = title;
@@ -78,7 +78,7 @@ namespace GitSharp
 			_totalWork = totalWork;
 		}
 
-		public void Update(int completed)
+		public override void Update(int completed)
 		{
 			if (_message == null) return;
 			int cmp = _lastWorked + completed;
@@ -146,7 +146,7 @@ namespace GitSharp
 			_writer.Write(m);
 		}
 
-		public void EndTask()
+		public override void EndTask()
 		{
 			if (_output)
 			{
@@ -162,7 +162,7 @@ namespace GitSharp
 			_message = null;
 		}
 
-		public bool IsCancelled
+		public override bool IsCancelled
 		{
 			get { return false; }
 		}

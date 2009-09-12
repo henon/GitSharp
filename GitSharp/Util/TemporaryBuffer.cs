@@ -293,7 +293,7 @@ namespace GitSharp.Util
          *             an error occurred reading from a temporary file on the local
          *             system, or writing to the output stream.
          */
-        public void writeTo(Stream os, IProgressMonitor pm)
+        public void writeTo(Stream os, ProgressMonitor pm)
         {
             if (pm == null)
                 pm = new NullProgressMonitor();

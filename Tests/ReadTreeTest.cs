@@ -485,17 +485,19 @@ namespace GitSharp.Tests
         [Test]
         public void testRules4thru13_IndexEntryNotInHead()
         {
-            var indexEntries = new Dictionary<string, string>();
-            indexEntries.Add("foo", "foo");
+            // rule 4 and 5
+            var indexEntries = new Dictionary<string, string> {{"foo", "foo"}};
             SetupCase(null, null, indexEntries);
             _theReadTree = Go();
             assertAllEmpty();
 
+            // rule 6 and 7
             indexEntries = new Dictionary<string, string> { { "foo", "foo" } };
             SetupCase(null, indexEntries, indexEntries);
             _theReadTree = Go();
             assertAllEmpty();
 
+            // rule 8 and 9
             var mergeEntries = new Dictionary<string, string> { { "foo", "merge" } };
             SetupCase(null, mergeEntries, indexEntries);
             Go();
@@ -503,14 +505,15 @@ namespace GitSharp.Tests
             Assert.IsTrue(_theReadTree.Removed.isEmpty());
             Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
 
-            var dictionary4 = new Dictionary<string, string> { { "foo", "foo" } };
-            Dictionary<string, string> headEntries = dictionary4;
+            // rule 10
+            var headEntries = new Dictionary<string, string> { { "foo", "foo" } };
             SetupCase(headEntries, null, indexEntries);
             Go();
             Assert.IsTrue(_theReadTree.Removed.Contains("foo"));
             Assert.IsTrue(_theReadTree.Updated.isEmpty());
             Assert.IsTrue(_theReadTree.Conflicts.isEmpty());
 
+            // rule 11
             SetupCase(headEntries, null, indexEntries);
             new FileInfo(Path.Combine(trash.FullName, "foo")).Delete();
             writeTrashFile("foo", "bar");
@@ -520,29 +523,35 @@ namespace GitSharp.Tests
             Assert.IsTrue(_theReadTree.Updated.isEmpty());
             Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
 
-            headEntries.Add("foo", "head");
+            // rule 12 and 13
+            headEntries["foo"] = "head";
             SetupCase(headEntries, null, indexEntries);
             Go();
             Assert.IsTrue(_theReadTree.Removed.isEmpty());
             Assert.IsTrue(_theReadTree.Updated.isEmpty());
             Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
 
+            // rule 14 and 15
             SetupCase(headEntries, headEntries, indexEntries);
             Go();
             assertAllEmpty();
 
+            // rule 16 and 17
             SetupCase(headEntries, mergeEntries, indexEntries);
             Go();
             Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
 
+            // rule 18 and 19
             SetupCase(headEntries, indexEntries, indexEntries);
             Go();
             assertAllEmpty();
 
+            // rule 20
             SetupCase(indexEntries, mergeEntries, indexEntries);
             Go();
             Assert.IsTrue(_theReadTree.Updated.ContainsKey("foo"));
 
+            // rule 21
             SetupCase(indexEntries, mergeEntries, indexEntries);
             new FileInfo(Path.Combine(trash.FullName, "foo")).Delete();
             writeTrashFile("foo", "bar");

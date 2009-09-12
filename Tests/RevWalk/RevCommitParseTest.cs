@@ -186,14 +186,10 @@ namespace GitSharp.Tests.RevWalk
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
         }
 
-        /**
-         * Test parsing of a commit whose encoding is given and works.
-         *
-         * @throws Exception
-         */
-
+        /// <summary>
+		/// Test parsing of a commit whose encoding is given and works.
+        /// </summary>
         [Test]
-        [Ignore("no support for euc_JP in .NET")]
         public void testParse_explicit_encoded()
         {
             RevCommit c;
@@ -216,16 +212,13 @@ namespace GitSharp.Tests.RevWalk
             Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
 
-        /**
-         * This is a twisted case, but show what we expect here. We can revise the
-         * expectations provided this case is updated.
-         *
-         * What happens here is that an encoding us given, but data is not encoded
-         * that way (and we can detect it), so we try other encodings.
-         *
-         * @throws Exception
-         */
-
+		/// <summary>
+		/// This is a twisted case, but show what we expect here. We can revise the
+		/// expectations provided this case is updated.
+		/// 
+		/// What happens here is that an encoding us given, but data is not encoded
+		/// that way (and we can detect it), so we try other encodings.
+		/// </summary>
         [Test]
         public void testParse_explicit_bad_encoded()
         {
@@ -249,17 +242,14 @@ namespace GitSharp.Tests.RevWalk
             Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
 
-        /**
-         * This is a twisted case too, but show what we expect here. We can revise the
-         * expectations provided this case is updated.
-         *
-         * What happens here is that an encoding us given, but data is not encoded
-         * that way (and we can detect it), so we try other encodings. Here data could
-         * actually be decoded in the stated encoding, but we override using UTF-8.
-         *
-         * @throws Exception
-         */
-
+        /// <summary>
+        /// This is a twisted case too, but show what we expect here. We can revise the
+		/// expectations provided this case is updated.
+		/// 
+		/// What happens here is that an encoding us given, but data is not encoded
+		/// that way (and we can detect it), so we try other encodings. Here data could
+		/// actually be decoded in the stated encoding, but we override using UTF-8.
+        /// </summary>
         [Test]
         public void testParse_explicit_bad_encoded2()
         {

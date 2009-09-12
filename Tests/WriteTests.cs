@@ -642,15 +642,13 @@ namespace GitSharp.Tests
             Assert.AreEqual(newId2, db.Resolve("refs/heads/foobar"));
         }
 
-        [Test, Ignore("Seems to be some threading issues, that makes the test hang")]
+        [Test]
         public void test029_mapObject()
         {
-            Assert.AreEqual(new byte[0].GetType(), db.MapObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"), null).GetType());
+            Assert.AreEqual(typeof(byte[]), db.MapObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"), null).GetType());
             Assert.AreEqual(typeof(Commit), db.MapObject(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab"), null).GetType());
             Assert.AreEqual(typeof(Tree), db.MapObject(ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"), null).GetType());
             Assert.AreEqual(typeof(Tag), db.MapObject(ObjectId.FromString("17768080a2318cd89bba4c8b87834401e2095703"), null).GetType());
-
         }
-
     }
 }

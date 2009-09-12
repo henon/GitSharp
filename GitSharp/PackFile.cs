@@ -433,7 +433,7 @@ namespace GitSharp
 				}
 
 				_fd = new FileStream(File.FullName, System.IO.FileMode.Open, FileAccess.Read);
-				Length = File.Length;
+			    Length = _fd.Length;
 				OnOpenPack();
 			}
 			catch (Exception)

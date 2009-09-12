@@ -836,7 +836,7 @@ namespace GitSharp.Util
 
 			if (string.IsNullOrEmpty(encodingName)) return Constants.CHARSET;
 
-			if(encodingName.Contains("_"))
+			if (encodingName.Contains("_"))
 			{
 				encodingName = encodingName.Replace("_", "-");
 			}
@@ -870,7 +870,7 @@ namespace GitSharp.Util
 			string name = decode(cs, raw, nameB, emailB - 2);
 			string email = decode(cs, raw, emailB, emailE - 1);
 
-			MutableInteger ptrout = new MutableInteger();
+			var ptrout = new MutableInteger();
 			long when = parseLongBase10(raw, emailE + 1, ptrout);
 			int tz = parseTimeZoneOffset(raw, ptrout.value);
 
@@ -972,10 +972,6 @@ namespace GitSharp.Util
 
 		private static string decode(byte[] b, Encoding charset)
 		{
-			// CharsetDecoder d = charset.newDecoder();
-			//d.onMalformedInput(CodingErrorAction.REPORT);
-			//d.onUnmappableCharacter(CodingErrorAction.REPORT);
-			//return d.decode(b).ToString();
 			return charset.GetString(b);
 		}
 

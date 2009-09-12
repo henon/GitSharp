@@ -142,7 +142,7 @@ namespace GitSharp.Tests.DirectoryCache
     	private static Dictionary<string, CGitIndexRecord> ReadLsFiles()
         {
             var r = new Dictionary<string, CGitIndexRecord>();
-            using (var br = new System.IO.StreamReader(new System.IO.FileStream("Resources/gitgit.lsfiles", System.IO.FileMode.Open, System.IO.FileAccess.Read), Encoding.UTF8))
+            using (var br = new System.IO.StreamReader(new System.IO.FileStream("Resources/gitgit.lsfiles", System.IO.FileMode.Open, System.IO.FileAccess.Read), Constants.CHARSET))
             {
                 string line;
                 while ((line = br.ReadLine()) != null)
@@ -157,7 +157,7 @@ namespace GitSharp.Tests.DirectoryCache
         private static Dictionary<string, CGitLsTreeRecord> ReadLsTree()
         {
             var r = new Dictionary<string, CGitLsTreeRecord>();
-            using (var br = new System.IO.StreamReader(new System.IO.FileStream("Resources/gitgit.lstree", System.IO.FileMode.Open, System.IO.FileAccess.Read), Encoding.UTF8))
+            using (var br = new System.IO.StreamReader(new System.IO.FileStream("Resources/gitgit.lstree", System.IO.FileMode.Open, System.IO.FileAccess.Read), Constants.CHARSET))
             {
                 string line;
                 while ((line = br.ReadLine()) != null)

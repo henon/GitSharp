@@ -271,17 +271,22 @@ namespace GitSharp
 		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
         /// </summary>
         public static readonly byte[] PACK_SIGNATURE = { (byte)'P', (byte)'A', (byte)'C', (byte)'K' };
+		
+        public static EncoderFallback ENCODINGFALLBACK = new EncoderExceptionFallback();
+        public static DecoderFallback DECODINGFALLBACK = new DecoderExceptionFallback();
+        private static readonly Encoding _charset = new UTF8Encoding(false, true);
 
         /// <summary>
-		/// Native character encoding for commit messages, file names...
+        /// Native character encoding for commit messages, file names...
         /// </summary>
-        public const string CHARACTER_ENCODING = "UTF-8";
-
-        /// <summary>
-		/// Native character encoding for commit messages, file names...
-        /// </summary>
-        public static readonly Encoding CHARSET = Encoding.GetEncoding(CHARACTER_ENCODING);
-
+        public static Encoding CHARSET
+        {
+            get
+            {
+                return _charset;
+            }
+        }
+  
         /// <summary>
 		/// Default main branch name
         /// </summary>
@@ -356,6 +361,7 @@ namespace GitSharp
 		/// Beginning of the common "Signed-off-by: " commit message line
         /// </summary>
         public const string SIGNED_OFF_BY_TAG = "Signed-off-by: ";
+
 
         /// <summary>
         /// Create a new digest function for objects.

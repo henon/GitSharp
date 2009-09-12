@@ -75,7 +75,7 @@ namespace GitSharp.Tests.Patch
         public void testGetText_Convert()
         {
             Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
-            Encoding csNew = Encoding.GetEncoding("UTF-8");
+            Encoding csNew = Constants.CHARSET;
             GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_Convert.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
@@ -96,7 +96,7 @@ namespace GitSharp.Tests.Patch
         public void testGetText_DiffCc()
         {
             Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
-            Encoding csNew = Encoding.GetEncoding("UTF-8");
+            Encoding csNew = Constants.CHARSET;
             GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_DiffCc.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);

@@ -198,10 +198,10 @@ namespace GitSharp.Tests
         /// it throws an AssertionFailure.
         /// </summary>
         /// <param name="dir"></param>
-        protected void recursiveDelete(FileSystemInfo fs)
-        {
-          recursiveDelete(fs, false, GetType().Name + "." + ToString(), true);
-        }
+          protected void recursiveDelete(FileSystemInfo fs)
+          {
+              recursiveDelete(fs, false, GetType().Name + "." + ToString(), true);
+          }
 
         /// <summary>
         /// Utility method to delete a directory recursively. It is
@@ -219,34 +219,33 @@ namespace GitSharp.Tests
           if(!fs.IsDirectory())
             return silent;
 
-          if (fs.IsFile())
-          {
-              fs.DeleteFile();
-              return silent;
-          }
-
-          var dir = new DirectoryInfo(fs.FullName);
-          if (!dir.Exists) return silent;
-          
-          try
-          {
-
-            FileSystemInfo[] ls = dir.GetFileSystemInfos();
-
-            foreach (var e in ls)
+            if (fs.IsFile())
             {
-              silent = recursiveDelete(e, silent, name, failOnError);
+                fs.DeleteFile();
+                return silent;
             }
-            
-              dir.Delete();
-          }
-          catch (IOException e)
-          {
-            //ReportDeleteFailure(name, failOnError, fs);
-            Console.WriteLine(name + ": " + e.Message);
-          }
 
-          return silent;
+            var dir = new DirectoryInfo(fs.FullName);
+            if (!dir.Exists) return silent;
+
+            try
+            {
+                FileSystemInfo[] ls = dir.GetFileSystemInfos();
+
+                foreach (FileSystemInfo e in ls)
+                {
+                    silent = recursiveDelete(e, silent, name, failOnError);
+                }
+
+                dir.Delete();
+            }
+            catch (IOException e)
+            {
+                //ReportDeleteFailure(name, failOnError, fs);
+                Console.WriteLine(name + ": " + e.Message);
+            }
+
+            return silent;
         }
  
         private static void ReportDeleteFailure(string name, bool failOnError, FileSystemInfo fsi)
@@ -297,7 +296,7 @@ namespace GitSharp.Tests
                 }
             }
 
-			File.WriteAllText(tf.FullName, data);
+			File.WriteAllText(tf.FullName, data, Constants.CHARSET);
 
             return tf;
         }

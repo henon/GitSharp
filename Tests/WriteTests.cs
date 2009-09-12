@@ -172,7 +172,7 @@ namespace GitSharp.Tests
             ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             t.AddFile("should-be-empty").Id = (emptyId);
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
-            //var s = Encoding.UTF8.GetString(db.OpenObject(t.Id).getBytes());
+            //var s = Constants.CHARSET.GetString(db.OpenObject(t.Id).getBytes());
             //var s1 = File.ReadAllText(trash_git + "/objects/71/01da2d239567432e3d10a0c45bb81b58f25be6");
             Assert.AreEqual("7bb943559a305bdd6bdee2cef6e5df2413c3d30a", t.Id.ToString());
 
@@ -192,7 +192,7 @@ namespace GitSharp.Tests
             FileTreeEntry f = t.AddFile("i-am-a-file");
             writeTrashFile(f.Name, "and this is the data in me\r\n\r\n");
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
-            //new ObjectChecker().checkBlob(Encoding.UTF8.GetString(db.OpenObject(t.TreeId).getBytes()).ToCharArray());
+            //new ObjectChecker().checkBlob(Constants.CHARSET.GetString(db.OpenObject(t.TreeId).getBytes()).ToCharArray());
 
             string s = new Inspector(db).Inspect(t.Id);
             string s1 = Inspector.Inspect("Resources/single_file_commit", "16c0beaf7523eb3ef5df45bd42dd4fc6343de864");
@@ -427,7 +427,7 @@ namespace GitSharp.Tests
                          		TreeId = almostEmptyTreeId,
                          		Author = new PersonIdent("Joe H\u00e4cker", "joe@example.com", 4294967295L, 60),
                          		Committer = new PersonIdent("Joe Hacker", "joe2@example.com", 4294967295L, 60),
-                         		Encoding = Encoding.UTF8,
+                                Encoding = Constants.CHARSET,
                          		Message = "\u00dcbergeeks"
                          	};
         	

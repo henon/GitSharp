@@ -45,7 +45,7 @@ namespace GitSharp.Tests.RevWalk
     [TestFixture]
     public class RevTagParseTest : RepositoryTestCase
     {
-        private readonly Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
+        private readonly Encoding utf8Enc = Constants.CHARSET;
         private readonly Encoding isoEnc = Encoding.GetEncoding("ISO-8859-1");
         private readonly Encoding eucJpEnc = Encoding.GetEncoding("EUC-JP");
 
@@ -132,7 +132,6 @@ namespace GitSharp.Tests.RevWalk
             Assert.IsNull(c.getObject());
             Assert.IsNull(c.getName());
 
-            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
             c.parseCanonical(rw, utf8Enc.GetBytes(body.ToString()));
             Assert.IsNotNull(c.getObject());
             Assert.AreEqual(treeId, c.getObject().getId());
@@ -160,7 +159,6 @@ namespace GitSharp.Tests.RevWalk
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-            Encoding utf8Enc = Encoding.GetEncoding("UTF-8");
             c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), utf8Enc.GetBytes(b.ToString()));
             return c;
         }

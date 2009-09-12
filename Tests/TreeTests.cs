@@ -138,7 +138,7 @@ namespace GitSharp.Tests
 			FileTreeEntry f = t.AddFile(n);
 			Assert.IsNotNull(f);
 			Assert.AreEqual(n, f.Name);
-			Assert.AreEqual(f.Name, Encoding.UTF8.GetString(f.NameUTF8));
+            Assert.AreEqual(f.Name, Constants.CHARSET.GetString(f.NameUTF8));
 			Assert.AreEqual(n, f.FullName);
 			Assert.IsTrue(f.Id == null);
 			Assert.IsTrue(t.IsModified);
@@ -163,7 +163,7 @@ namespace GitSharp.Tests
 			Tree f = t.AddTree(n);
 			Assert.IsNotNull(f);
 			Assert.AreEqual(n, f.Name);
-			Assert.AreEqual(f.Name, Encoding.UTF8.GetString(f.NameUTF8));
+            Assert.AreEqual(f.Name, Constants.CHARSET.GetString(f.NameUTF8));
 			Assert.AreEqual(n, f.FullName);
 			Assert.IsTrue(f.Id == null);
 			Assert.IsTrue(f.Parent == t);

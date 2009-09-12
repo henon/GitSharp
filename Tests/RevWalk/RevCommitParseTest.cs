@@ -45,7 +45,7 @@ namespace GitSharp.Tests.RevWalk
     [TestFixture]
     public class RevCommitParseTest : RepositoryTestCase
     {
-        private readonly Encoding _utf8Enc = Encoding.GetEncoding("UTF-8");
+        private readonly Encoding _utf8Enc = Constants.CHARSET;
         private readonly Encoding _isoEnc = Encoding.GetEncoding("ISO-8859-1");
         private readonly Encoding _eucJpEnc = Encoding.GetEncoding("EUC-JP");
 

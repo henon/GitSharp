@@ -71,7 +71,7 @@ namespace GitSharp.Tests.Transport
 
 		private void Config(string data)
 		{
-			var fw = new StreamWriter(new FileStream(_configFile.ToString(), System.IO.FileMode.Create, FileAccess.ReadWrite), Encoding.UTF8);
+			var fw = new StreamWriter(new FileStream(_configFile.ToString(), System.IO.FileMode.Create, FileAccess.ReadWrite), Constants.CHARSET);
 			fw.Write(data);
 			fw.Close();
 		}

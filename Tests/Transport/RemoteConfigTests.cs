@@ -53,7 +53,7 @@ namespace GitSharp.Tests.Transport
             FileStream stream = new FileStream(f.ToString(), System.IO.FileMode.Append);
             try
             {
-                byte[] data = Encoding.UTF8.GetBytes(dat);
+                byte[] data = Constants.CHARSET.GetBytes(dat);
                 stream.Write(data, 0, data.Length);
             }
             finally

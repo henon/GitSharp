@@ -45,10 +45,25 @@ namespace GitSharp.Util
 {
     public static class StringExtension
     {
-        // this is a helper to easily replace all occurences of the incompatible string.Substring method in ported java code
-        public static string Slice(this string longstring, int index1, int index2)
+        /// <summary>
+        /// Helper function to easily replace all occurences of the incompatible string.Substring method in ported java code
+        /// </summary>
+        /// <param name="longstring">The string from which a part has to extracted.</param>
+        /// <param name="beginIndex">The beginning index, inclusive.</param>
+        /// <param name="endIndex">The ending index, exclusive. </param>
+        /// <returns>The specified substring.</returns>
+        public static string Slice(this string longstring, int beginIndex, int endIndex)
         {
-            return index2 - index1 > 0 ? longstring.Substring(index1, index2 - index1) : string.Empty;
+            #region Parameters Validation
+
+            if (beginIndex > endIndex)
+            {
+                throw new ArgumentOutOfRangeException("beginIndex", string.Format("beginIndex has to be less or equal than endIndex. Actual values were beginIndex={0} and endIndex={1}", beginIndex, endIndex));
+            }
+
+            #endregion
+
+            return longstring.Substring(beginIndex, endIndex - beginIndex);
         }
     }
 }

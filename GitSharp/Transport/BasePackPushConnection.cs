@@ -65,7 +65,7 @@ namespace GitSharp.Transport
             thinPack = transport.PushThin;
         }
 
-        public void Push(IProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refUpdates)
+        public void Push(ProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refUpdates)
         {
             markStartedOperation();
             doPush(monitor, refUpdates);
@@ -88,7 +88,7 @@ namespace GitSharp.Transport
             return new TransportException(uri, "push not permitted");
         }
 
-        protected void doPush(IProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refUpdates)
+        protected void doPush(ProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refUpdates)
         {
             try
             {
@@ -112,7 +112,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private void writeCommands(List<RemoteRefUpdate> refUpdates, IProgressMonitor monitor)
+        private void writeCommands(List<RemoteRefUpdate> refUpdates, ProgressMonitor monitor)
         {
             string capabilities = enableCapabilities();
             foreach (RemoteRefUpdate rru in refUpdates)
@@ -162,7 +162,7 @@ namespace GitSharp.Transport
             return line.ToString();
         }
 
-        private void writePack(IDictionary<string, RemoteRefUpdate> refUpdates, IProgressMonitor monitor)
+        private void writePack(IDictionary<string, RemoteRefUpdate> refUpdates, ProgressMonitor monitor)
         {
             PackWriter writer = new PackWriter(local, monitor);
             List<ObjectId> remoteObjects = new List<ObjectId>(Refs.Count);

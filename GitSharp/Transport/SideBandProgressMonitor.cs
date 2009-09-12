@@ -42,7 +42,7 @@ using System.Text;
 namespace GitSharp.Transport
 {
 
-    public class SideBandProgressMonitor : IProgressMonitor
+    public class SideBandProgressMonitor : ProgressMonitor
     {
         private readonly StreamWriter writer;
         private bool output;
@@ -58,13 +58,13 @@ namespace GitSharp.Transport
             writer = new StreamWriter(new BufferedStream(new SideBandOutputStream(SideBandOutputStream.CH_PROGRESS, pckOut), bufsz), Constants.CHARSET);
         }
 
-        public void Start(int totalTasks)
+        public override void Start(int totalTasks)
         {
             taskBeganAt = DateTime.Now;
             lastOutput = taskBeganAt;
         }
 
-        public void BeginTask(string title, int total)
+        public override void BeginTask(string title, int total)
         {
             EndTask();
             msg = title;
@@ -72,7 +72,7 @@ namespace GitSharp.Transport
             totalWork = total;
         }
 
-        public void Update(int completed)
+        public override void Update(int completed)
         {
             if (msg == null)
                 return;
@@ -135,12 +135,12 @@ namespace GitSharp.Transport
             writer.Flush();
         }
 
-        public bool IsCancelled
+        public override bool IsCancelled
         {
             get { return false; }
         }
 
-        public void EndTask()
+        public override void EndTask()
         {
             if (output)
             {

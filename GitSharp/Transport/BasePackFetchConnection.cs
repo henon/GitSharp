@@ -92,7 +92,7 @@ namespace GitSharp.Transport
             _walk.carry(ADVERTISED);
         }
 
-        public void Fetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        public void Fetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
         {
             markStartedOperation();
             doFetch(monitor, want, have);
@@ -118,7 +118,7 @@ namespace GitSharp.Transport
             get { return _packLock != null ? new List<PackLock> { _packLock } : new List<PackLock>(); }
         }
 
-        protected void doFetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        protected void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
         {
             try
             {
@@ -268,7 +268,7 @@ namespace GitSharp.Transport
             return line.ToString();
         }
 
-        private void Negotiate(IProgressMonitor monitor)
+        private void Negotiate(ProgressMonitor monitor)
         {
             var ackId = new MutableObjectId();
             int resultsPending = 0;
@@ -434,7 +434,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private void ReceivePack(IProgressMonitor monitor)
+        private void ReceivePack(ProgressMonitor monitor)
         {
             IndexPack ip = IndexPack.Create(local, _sideband ? pckIn.sideband(monitor) : stream);
             ip.setFixThin(_thinPack);

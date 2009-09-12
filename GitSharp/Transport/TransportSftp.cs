@@ -202,7 +202,7 @@ namespace GitSharp.Transport
     			}
     		}
 
-    		public override Stream writeFile(string path, IProgressMonitor monitor, string monitorTask)
+    		public override Stream writeFile(string path, ProgressMonitor monitor, string monitorTask)
     		{
     			try
     			{

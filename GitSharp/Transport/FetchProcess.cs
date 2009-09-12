@@ -75,7 +75,7 @@ namespace GitSharp.Transport
             _toFetch = f;
         }
 
-        internal virtual void execute(IProgressMonitor monitor, FetchResult result)
+        internal virtual void execute(ProgressMonitor monitor, FetchResult result)
         {
             _askFor.Clear();
             _localUpdates.Clear();
@@ -96,7 +96,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private void executeImp(IProgressMonitor monitor, FetchResult result)
+        private void executeImp(ProgressMonitor monitor, FetchResult result)
         {
             _connection = _transport.openFetch();
             try
@@ -212,7 +212,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private void fetchObjects(IProgressMonitor monitor)
+        private void fetchObjects(ProgressMonitor monitor)
         {
             try
             {

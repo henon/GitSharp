@@ -40,29 +40,29 @@
 namespace GitSharp
 {
     [Complete]
-    public class NullProgressMonitor : IProgressMonitor 
+    public class NullProgressMonitor : ProgressMonitor 
     {
         public static readonly NullProgressMonitor Instance = new NullProgressMonitor();
 
-        #region IProgressMonitor Members
+        #region ProgressMonitor Members
 
-        public void Start(int totalTasks)
+        public override void Start(int totalTasks)
         {
         }
 
-        public void BeginTask(string title, int totalWork)
+        public override void BeginTask(string title, int totalWork)
         {
         }
 
-        public void Update(int completed)
+        public override void Update(int completed)
         {
         }
 
-        public void EndTask()
+        public override void EndTask()
         {
         }
 
-        public bool IsCancelled
+        public override bool IsCancelled
         {
             get { return false; }
         }

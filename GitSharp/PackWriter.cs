@@ -78,18 +78,18 @@ namespace GitSharp
 		private readonly Repository _db;
 		private PackOutputStream _pos;
 		private readonly Deflater _deflater;
-		private readonly IProgressMonitor _initMonitor;
-		private readonly IProgressMonitor _writeMonitor;
+		private readonly ProgressMonitor _initMonitor;
+		private readonly ProgressMonitor _writeMonitor;
 		private List<ObjectToPack> _sortedByName;
 		private byte[] _packChecksum;
 		private int _outputVersion;
 
-		public PackWriter(Repository repo, IProgressMonitor monitor)
+		public PackWriter(Repository repo, ProgressMonitor monitor)
 			: this(repo, monitor, monitor)
 		{
 		}
 
-		public PackWriter(Repository repo, IProgressMonitor imonitor, IProgressMonitor wmonitor)
+		public PackWriter(Repository repo, ProgressMonitor imonitor, ProgressMonitor wmonitor)
 		{
 			_objectsLists = CreateObjectsLists();
 			_objectsMap = new ObjectIdSubclassMap<ObjectToPack>();
@@ -507,8 +507,7 @@ namespace GitSharp
 
 		private void FindObjectsToPack(ObjectWalk walker)
 		{
-			// [caytchen] TODO: IProgressMonitor.UNKNOWN constant!
-			_initMonitor.BeginTask(COUNTING_OBJECTS_PROGRESS, -1);
+			_initMonitor.BeginTask(COUNTING_OBJECTS_PROGRESS, ProgressMonitor.UNKNOWN);
 			RevObject o;
 
 			while ((o = walker.next()) != null)

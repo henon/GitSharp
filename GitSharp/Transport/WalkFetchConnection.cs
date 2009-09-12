@@ -134,7 +134,7 @@ namespace GitSharp.Transport
 			}
 		}
 
-		protected override void doFetch(IProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+		protected override void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
 		{
 			MarkLocalRefsComplete(have);
 			QueueWants(want);
@@ -302,7 +302,7 @@ namespace GitSharp.Transport
 			}
 		}
 
-		private void DownloadObject(IProgressMonitor pm, AnyObjectId id)
+		private void DownloadObject(ProgressMonitor pm, AnyObjectId id)
 		{
 			if (_local.HasObject(id)) return;
 
@@ -341,7 +341,7 @@ namespace GitSharp.Transport
 					List<string> packNameList;
 					try
 					{
-						pm.BeginTask("Listing packs", -1);
+						pm.BeginTask("Listing packs", ProgressMonitor.UNKNOWN);
 						packNameList = wrr.getPackNames();
 					}
 					catch (IOException e)
@@ -403,7 +403,7 @@ namespace GitSharp.Transport
 			}
 		}
 
-		private bool DownloadPackedObject(IProgressMonitor monitor, AnyObjectId id)
+		private bool DownloadPackedObject(ProgressMonitor monitor, AnyObjectId id)
 		{
 			IEnumerator<RemotePack> packItr = _unfetchedPacks.GetEnumerator();
 			while (packItr.MoveNext() && !monitor.IsCancelled)
@@ -569,7 +569,7 @@ namespace GitSharp.Transport
 			throw new ObjectWritingException("Unable to store " + id.Name + ".");
 		}
 
-		private List<WalkRemoteObjectDatabase> ExpandOneAlternate(AnyObjectId id, IProgressMonitor pm)
+		private List<WalkRemoteObjectDatabase> ExpandOneAlternate(AnyObjectId id, ProgressMonitor pm)
 		{
 			while (_noAlternatesYet.Count > 0)
 			{
@@ -577,7 +577,7 @@ namespace GitSharp.Transport
 				_noAlternatesYet.RemoveFirst();
 				try
 				{
-					pm.BeginTask("Listing alternates", -1);
+					pm.BeginTask("Listing alternates", ProgressMonitor.UNKNOWN);
 					List<WalkRemoteObjectDatabase> altList = wrr.getAlternates();
 					if (altList != null && altList.Count > 0)
 						return altList;
@@ -774,7 +774,7 @@ namespace GitSharp.Transport
 				TmpIdx = new FileInfo(Path.Combine(objdir.ToString(), "walk-" + tn + ".walkidx"));
 			}
 
-			public void OpenIndex(IProgressMonitor pm)
+			public void OpenIndex(ProgressMonitor pm)
 			{
 				if (Index != null) return;
 
@@ -836,7 +836,7 @@ namespace GitSharp.Transport
 				}
 			}
 
-			public void DownloadPack(IProgressMonitor monitor)
+			public void DownloadPack(ProgressMonitor monitor)
 			{
 				Stream s = _connection.open("pack/" + PackName);
 				IndexPack ip = IndexPack.Create(_local, s);

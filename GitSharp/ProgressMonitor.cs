@@ -37,21 +37,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace GitSharp
 {
     [Complete]
-    public interface IProgressMonitor
+    public abstract class ProgressMonitor
     {
-        void Start(int totalTasks);
-        void BeginTask(string title, int totalWork);
-        void Update(int completed);
-        void EndTask();
+        public const int UNKNOWN = -1;
 
-        bool IsCancelled{ get; } 
+        public abstract void Start(int totalTasks);
+        public abstract void BeginTask(string title, int totalWork);
+        public abstract void Update(int completed);
+        public abstract void EndTask();
+
+        public abstract bool IsCancelled{ get; } 
     }
 }

@@ -197,10 +197,10 @@ namespace GitSharp
 		public override ObjectLoader openObject1(WindowCursor curs, AnyObjectId objectId)
 		{
 			PackFile[] pList = Packs();
-			bool breakLoop = false;
 
 			while (true)
 			{
+                SEARCH:
 				foreach (PackFile p in pList)
 				{
 					try
@@ -217,18 +217,13 @@ namespace GitSharp
 						// Pack was modified; refresh the entire pack list.
 						//
 						pList = ScanPacks(pList);
-						breakLoop = true;
+						goto SEARCH;
 					}
 					catch (IOException)
 					{
 						// Assume the pack is corrupted.
 						//
 						RemovePack(p);
-					}
-
-					if (breakLoop)
-					{
-						break;
 					}
 				}
 
@@ -241,6 +236,7 @@ namespace GitSharp
 			PackFile[] pList = Packs();
 			while (true)
 			{
+                SEARCH:
 				foreach (PackFile p in pList)
 				{
 					try
@@ -256,7 +252,7 @@ namespace GitSharp
 						// Pack was modified; refresh the entire pack list.
 						//
 						pList = ScanPacks(pList);
-						break;
+						goto SEARCH;
 					}
 					catch (IOException)
 					{
@@ -294,7 +290,8 @@ namespace GitSharp
 		public override bool tryAgain1()
 		{
 			PackFile[] old = _packList.get();
-			if (_packDirectoryLastModified < _packDirectory.LastAccessTime.Ticks)
+            _packDirectory.Refresh();
+            if (_packDirectoryLastModified < _packDirectory.LastAccessTime.Ticks)
 			{
 				ScanPacks(old);
 				return true;
@@ -459,7 +456,7 @@ namespace GitSharp
 
 		private string[] ListPackIdx()
 		{
-			_packDirectoryLastModified = _packDirectory.LastAccessTime.Ticks;
+            _packDirectoryLastModified = _packDirectory.LastAccessTime.Ticks;
 			// Must match "pack-[0-9a-f]{40}.idx" to be an index.
 
 			string[] idxList = _packDirectory.GetFiles()

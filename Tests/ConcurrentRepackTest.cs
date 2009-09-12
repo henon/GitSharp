@@ -202,7 +202,7 @@ namespace GitSharp.Tests
         private static void Write(FileInfo[] files, PackWriter pw)
         {
             FileInfo file = files[0];
-            long begin = file.Directory.LastWriteTime.Ticks;
+            long begin = file.Directory.LastAccessTime.Ticks;
 
             using (var stream = file.Create())
             {
@@ -224,7 +224,7 @@ namespace GitSharp.Tests
 
         private static void Delete(FileInfo[] list)
         {
-            long begin = list[0].Directory.LastWriteTime.Ticks;
+            long begin = list[0].Directory.LastAccessTime.Ticks;
             foreach (var fi in list)
             {
                 try

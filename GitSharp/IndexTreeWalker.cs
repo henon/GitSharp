@@ -146,13 +146,13 @@ namespace GitSharp
             string fileName = null;
             if (t1 != null)
             {
-                fileName = Path.Combine(_root.FullName, t1.FullName);
-                file = new FileInfo(fileName);
+                fileName = t1.FullName;
+                file = new FileInfo(Path.Combine(_root.FullName, fileName));
             }
             else if (t2 != null)
             {
-                fileName = Path.Combine(_root.FullName, t2.FullName);
-                file = new FileInfo(fileName);
+                fileName = t2.FullName;
+                file = new FileInfo(Path.Combine(_root.FullName, fileName));
             }
 
             if (t1 is Tree || t2 is Tree)

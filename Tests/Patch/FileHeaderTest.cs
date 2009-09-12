@@ -162,7 +162,7 @@ namespace GitSharp.Tests.Patch
 	    public void testParseUnicodeName_NewFile()
         {
 		    FileHeader fh = Data("diff --git \"a/\\303\\205ngstr\\303\\266m\" \"b/\\303\\205ngstr\\303\\266m\"\n"
-				    + "new File mode 100644\n"
+				    + "new file mode 100644\n"
 				    + "index 0000000..7898192\n"
 				    + "--- /dev/null\n"
 				    + "+++ \"b/\\303\\205ngstr\\303\\266m\"\n"
@@ -189,7 +189,7 @@ namespace GitSharp.Tests.Patch
 	    public void testParseUnicodeName_DeleteFile()
         {
 		    FileHeader fh = Data("diff --git \"a/\\303\\205ngstr\\303\\266m\" \"b/\\303\\205ngstr\\303\\266m\"\n"
-				    + "deleted File mode 100644\n"
+				    + "deleted file mode 100644\n"
 				    + "index 7898192..0000000\n"
 				    + "--- \"a/\\303\\205ngstr\\303\\266m\"\n"
 				    + "+++ /dev/null\n"

@@ -47,7 +47,7 @@
     <Compile Include="AssertHelperFixture.cs" />
     <Compile Include="ExtensionsFixture.cs" />
     <Compile Include="ConcurrentRepackTest.cs" />
-    <None Include="ConfigTests.cs" />
+    <Compile Include="ConfigTests.cs" />
     <Compile Include="Diff\DiffFormatterReflowTest.cs" />
     <Compile Include="Diff\EditListTest.cs" />
     <Compile Include="Diff\EditTest.cs" />

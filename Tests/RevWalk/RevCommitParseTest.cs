@@ -193,6 +193,7 @@ namespace GitSharp.Tests.RevWalk
          */
 
         [Test]
+        [Ignore("no support for euc_JP in .NET")]
         public void testParse_explicit_encoded()
         {
             RevCommit c;

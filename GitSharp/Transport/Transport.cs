@@ -40,6 +40,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GitSharp.Exceptions;
 using GitSharp.Util;
 
@@ -189,11 +190,11 @@ namespace GitSharp.Transport
 		private static ICollection<RefSpec> ExpandPushWildcardsFor(Repository db, IEnumerable<RefSpec> specs)
 		{
 			Dictionary<string, Ref> localRefs = db.getAllRefs();
-			var procRefs = new List<RefSpec>();
+		    var procRefs = new HashSet<RefSpec>();
 
 			foreach (RefSpec spec in specs)
 			{
-				if (spec.Wildcard)
+                if (spec.Wildcard)
 				{
 					foreach (Ref localRef in localRefs.Values)
 					{

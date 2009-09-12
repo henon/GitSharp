@@ -193,7 +193,7 @@ namespace GitSharp.Tests
 
             ObjectId name = pw.computeName();
 			FileInfo packFile = FullPackFileName(name);
-            FileInfo idxFile = FullPackFileName(name);
+            FileInfo idxFile = FullIndexFileName(name);
             var files = new[] { packFile, idxFile };
             Write(files, pw);
             return files;
@@ -206,27 +206,17 @@ namespace GitSharp.Tests
 
             using (var stream = file.Create())
             {
-                try
-                {
+
                     pw.writePack(stream);
-                }
-                catch (Exception)
-                {
-                    stream.Close();
-                }
+
             }
 
             file = files[1];
             using (var stream = file.Create())
             {
-                try
-                {
+
                     pw.writeIndex(stream);
-                }
-                catch (Exception)
-                {
-                    stream.Close();
-                }
+   
             }
 
             Touch(begin, files[0].Directory);
@@ -270,6 +260,12 @@ namespace GitSharp.Tests
         {
             var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
             return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetPackFileName(name.Name)));
+        }
+
+        private FileInfo FullIndexFileName(AnyObjectId name)
+        {
+            var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
+            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetIndexFileName(name.Name)));
         }
 
         private RevObject WriteBlob(Repository repo, string data)

@@ -230,37 +230,26 @@ namespace GitSharp.FnMatch
 			var heads = new List<AbstractHead>();
 			int currentIndex = 0;
 
-			do
+            while (currentIndex < pattern.Length)
 			{
 				int groupStart = pattern.IndexOf('[', currentIndex);
 				if (groupStart == -1)
 				{
 					string patternPart = pattern.Substring(currentIndex);
-					if (!string.IsNullOrEmpty(patternPart))
-					{
-						heads.AddRange(CreateSimpleHeads(patternPart, invalidWildgetCharacter));
-					}
+					heads.AddRange(CreateSimpleHeads(patternPart, invalidWildgetCharacter));
 					currentIndex = pattern.Length;
 				}
 				else
 				{
-					string patternPart = pattern.Slice(currentIndex, groupStart - currentIndex);
-					if (!string.IsNullOrEmpty(patternPart))
-					{
-						heads.AddRange(CreateSimpleHeads(patternPart, invalidWildgetCharacter));
-					}
+					string patternPart = pattern.Slice(currentIndex, groupStart);
+					heads.AddRange(CreateSimpleHeads(patternPart, invalidWildgetCharacter));
 
-					int groupEnd = FindGroupEnd(groupStart, pattern);
+                    int groupEnd = FindGroupEnd(groupStart, pattern);
 					string groupPart = pattern.Slice(groupStart + 1, groupEnd);
-
-					if (!string.IsNullOrEmpty(groupPart))
-					{
-						heads.Add(new GroupHead(groupPart, pattern));
-					}
-
+					heads.Add(new GroupHead(groupPart, pattern));
 					currentIndex = groupEnd + 1;
 				}
-			} while (currentIndex < pattern.Length);
+			}
 
 			return heads;
 		}

@@ -159,16 +159,17 @@ namespace GitSharp.Tests.Diff
 
 		private byte[] readFile(string patchFile)
 		{
-			var patch = parseTestPatchFile(DIFFS_DIR + patchFile);
-			using(var memoryStream = new MemoryStream())
-			{
-				var bf = new BinaryFormatter();
-				bf.Serialize(memoryStream, patch);
+            return File.ReadAllBytes(DIFFS_DIR + patchFile);
+            //var patch = parseTestPatchFile(DIFFS_DIR + patchFile);
+            //using(var memoryStream = new MemoryStream())
+            //{
+            //    var bf = new BinaryFormatter();
+            //    bf.Serialize(memoryStream, patch);
 
-				// Resets the stream
-				memoryStream.Seek(0, SeekOrigin.Begin);
-				return memoryStream.ToArray();
-			}
+            //    // Resets the stream
+            //    memoryStream.Seek(0, SeekOrigin.Begin);
+            //    return memoryStream.ToArray();
+            //}
 		}
 	}
 }

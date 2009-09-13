@@ -44,7 +44,7 @@ namespace GitSharp.Tests
     [TestFixture]
     public class RawParseUtils_LineMapTest
     {
-        private static readonly System.Text.ASCIIEncoding asciienc = new System.Text.ASCIIEncoding();
+       // private static readonly System.Text.ASCIIEncoding asciienc = new System.Text.ASCIIEncoding();
 
         [Test]
 	    public void testEmpty()
@@ -69,7 +69,7 @@ namespace GitSharp.Tests
         [Test]
 	    public void testTwoLineFooBar()
         {
-            byte[] buf = asciienc.GetBytes("foo\nbar\n");
+            byte[] buf = "foo\nbar\n".getBytes("ISO-8859-1");
 		    IntList map = RawParseUtils.lineMap(buf, 0, buf.Length);
 		    Assert.AreEqual(4, map.size());
 		    Assert.AreEqual(int.MinValue, map.get(0));
@@ -81,7 +81,7 @@ namespace GitSharp.Tests
         [Test]
 	    public void testTwoLineNoLF()
         {
-		    byte[] buf = asciienc.GetBytes("foo\nbar");
+            byte[] buf = "foo\nbar".getBytes("ISO-8859-1");
 		    IntList map = RawParseUtils.lineMap(buf, 0, buf.Length);
 		    Assert.AreEqual(4, map.size());
 		    Assert.AreEqual(int.MinValue, map.get(0));
@@ -93,7 +93,7 @@ namespace GitSharp.Tests
         [Test]
 	    public void testFourLineBlanks()
         {
-		    byte[] buf = asciienc.GetBytes("foo\n\n\nbar\n");
+            byte[] buf = "foo\n\n\nbar\n".getBytes("ISO-8859-1");
 		    IntList map = RawParseUtils.lineMap(buf, 0, buf.Length);
             Assert.AreEqual(6, map.size());
             Assert.AreEqual(int.MinValue, map.get(0));

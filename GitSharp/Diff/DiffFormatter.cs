@@ -189,12 +189,12 @@ namespace GitSharp.Diff
 				case 1:
 					// If the range is exactly one line, produce only the number.
 					//
-					@out.WriteByte(Convert.ToByte(begin));
+                    WriteInteger(@out, begin);
 					break;
 
 				default:
-					@out.WriteByte(Convert.ToByte(begin));
-					@out.WriteByte(Convert.ToByte(','));
+                    WriteInteger(@out, begin);
+                    @out.WriteByte(Convert.ToByte(','));
 					WriteInteger(@out, cnt);
 					break;
 			}

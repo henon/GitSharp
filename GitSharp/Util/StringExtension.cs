@@ -65,5 +65,23 @@ namespace GitSharp.Util
 
             return longstring.Substring(beginIndex, endIndex - beginIndex);
         }
+
+        public static byte[] getBytes(this string plainString, string encodingAlias)
+        {
+            Encoding encoder;
+
+            switch (encodingAlias.ToUpperInvariant())
+            {
+                case "UTF-8":
+                    encoder = Constants.CHARSET;
+                    break;
+
+                default:
+                    encoder = Encoding.GetEncoding(encodingAlias);
+                    break;
+            }
+
+            return encoder.GetBytes(plainString);
+        }
     }
 }

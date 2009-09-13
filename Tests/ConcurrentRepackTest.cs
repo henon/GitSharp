@@ -38,6 +38,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using GitSharp.Exceptions;
 using GitSharp.RevWalk;
@@ -168,7 +169,7 @@ namespace GitSharp.Tests
             Assert.IsNotNull(data2);
             Assert.IsNotNull(data1);
             Assert.AreNotSame(data1, data2); // cache should be per-pack, not per object
-            Assert.IsTrue(Equals(data1, data2));
+            Assert.IsTrue(data1.SequenceEqual(data2));
             Assert.AreEqual(load2.Type, load1.Type);
         }
 

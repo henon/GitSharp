@@ -147,7 +147,8 @@ namespace GitSharp.Tests.Diff
 
 		private void assertFormatted()
 		{
-			assertFormatted(GetType().Name + ".out");
+		    var methodName = new System.Diagnostics.StackTrace(false).GetFrame(1).GetMethod().Name;
+            assertFormatted(methodName + ".out");
 		}
 
 		private void assertFormatted(string name)
@@ -160,16 +161,6 @@ namespace GitSharp.Tests.Diff
 		private byte[] readFile(string patchFile)
 		{
             return File.ReadAllBytes(DIFFS_DIR + patchFile);
-            //var patch = parseTestPatchFile(DIFFS_DIR + patchFile);
-            //using(var memoryStream = new MemoryStream())
-            //{
-            //    var bf = new BinaryFormatter();
-            //    bf.Serialize(memoryStream, patch);
-
-            //    // Resets the stream
-            //    memoryStream.Seek(0, SeekOrigin.Begin);
-            //    return memoryStream.ToArray();
-            //}
 		}
 	}
 }

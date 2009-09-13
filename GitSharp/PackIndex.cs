@@ -39,6 +39,7 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -221,16 +222,23 @@ namespace GitSharp
          */
         public abstract bool HasCRC32Support { get; }
 
-        public class MutableEntry : MutableObjectId
+        public class MutableEntry
         {
+            private readonly Func<MutableObjectId> _idBufferBuilder;
+
+            public MutableObjectId idBuffer { get; set; }
             /**
              * Empty constructor. object fields should be filled in later.
              */
-            public MutableEntry()
-                : base()
+            public MutableEntry(Func<MutableObjectId> idBufferBuilder) : this(new MutableObjectId(), idBufferBuilder)
             {
             }
 
+            public MutableEntry(MutableObjectId idBuffer, Func<MutableObjectId> idBufferBuilder)
+            {
+                this.idBuffer = idBuffer;
+                _idBufferBuilder = idBufferBuilder;
+            }
             /**
              * Returns offset for this index object entry
              * 
@@ -238,57 +246,111 @@ namespace GitSharp
              */
             public long Offset { get; set; }
 
-            private MutableEntry(MutableEntry src)
-                : base(src)
+            /** @return hex string describing the object id of this entry. */
+            public String Name
             {
-                this.Offset = src.Offset;
+                get
+                {
+                    ensureId();
+                    return idBuffer.Name;
+                }
             }
 
+            public ObjectId ToObjectId()
+            {
+                ensureId();
+                return idBuffer.ToObjectId();
+            }
+
+            private void ensureId()
+            {
+                idBuffer = _idBufferBuilder();
+            }
             /**
              * Returns mutable copy of this mutable entry.
              * 
              * @return copy of this mutable entry
              */
+
             public MutableEntry CloneEntry()
             {
-                return new MutableEntry(this);
+                ensureId(); 
+                
+                var r = new MutableEntry(idBuffer, _idBufferBuilder);
+                r.Offset = Offset;
+
+                return r;
+            }
+
+            public override string ToString()
+            {
+                ensureId();
+                return idBuffer.ToString();
             }
         }
 
         internal abstract class EntriesIterator : IEnumerator<MutableEntry>
         {
-            internal long returnedNumber = 0;
+            private readonly PackIndex _packIndex;
 
-            internal EntriesIterator()
+            protected EntriesIterator(PackIndex packIndex)
             {
-                Current = new MutableEntry();
+                _packIndex = packIndex;
             }
 
-            #region IEnumerator<MutableEntry> Members
+            protected long ReturnedNumber;
 
-            public MutableEntry Current { get; internal set; }
+            private MutableEntry _current;
 
-            #endregion
+            protected abstract MutableObjectId IdBufferBuilder();
 
-            #region IDisposable Members
-
-            public void Dispose()
+            private MutableEntry InitEntry()
             {
+                return new MutableEntry(IdBufferBuilder);
             }
 
-            #endregion
+            public bool hasNext()
+            {
+                return ReturnedNumber < _packIndex.ObjectCount;
+            }
 
-            #region IEnumerator Members
+            protected abstract MutableEntry InnerNext(MutableEntry entry);
 
-            object System.Collections.IEnumerator.Current
+            public MutableEntry next()
+            {
+                _current = InnerNext(InitEntry());
+                return _current;
+            }
+
+            public bool MoveNext()
+            {
+                if (!hasNext())
+                {
+                    return false;
+                }
+
+                next();
+                return true;
+            }
+
+            public void Reset()
+            {
+                throw new NotSupportedException();
+            }
+
+            public MutableEntry Current
+            {
+                get { return _current; }
+            }
+
+            object IEnumerator.Current
             {
                 get { return Current; }
             }
 
-            public abstract bool MoveNext();
-            public abstract void Reset();
-
-            #endregion
+            public void Dispose()
+            {
+            }
         }
 
         /// <summary>

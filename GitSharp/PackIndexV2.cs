@@ -282,43 +282,41 @@ namespace GitSharp
 			private int _levelOne;
 			private int _levelTwo;
 
-			public EntriesEnumeratorV2(PackIndexV2 index)
+			public EntriesEnumeratorV2(PackIndexV2 index) : base(index)
 			{
 				_index = index;
 			}
 
-			public override bool MoveNext()
+            protected override MutableObjectId IdBufferBuilder()
+            {
+                var m = new MutableObjectId();
+                m.FromRaw(_index._names[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength / 4);
+                return m;
+            }
+
+		    protected override MutableEntry InnerNext(MutableEntry entry)
 			{
 				for (; _levelOne < _index._names.Length; _levelOne++)
 				{
 					if (_levelTwo < _index._names[_levelOne].Length)
 					{
-						Current.FromRaw(_index._names[_levelOne], _levelTwo);
-						int arrayIdx = _levelTwo / (AnyObjectId.ObjectIdLength / 4) * 4;
-						long offset = NB.DecodeUInt32(_index._offset32[_levelOne], arrayIdx);
+						int idx = _levelTwo / (AnyObjectId.ObjectIdLength / 4) * 4;
+						long offset = NB.DecodeUInt32(_index._offset32[_levelOne], idx);
 						if ((offset & IS_O64) != 0)
 						{
-							arrayIdx = (8 * (int)(offset & ~IS_O64));
-							offset = NB.DecodeUInt64(_index._offset64, arrayIdx);
+							idx = (8 * (int)(offset & ~IS_O64));
+							offset = NB.DecodeUInt64(_index._offset64, idx);
 						}
-						Current.Offset = offset;
+						entry.Offset = offset;
 
 						_levelTwo += AnyObjectId.ObjectIdLength / 4;
-						returnedNumber++;
-						return true;
+						ReturnedNumber++;
+						return entry;
 					}
 					_levelTwo = 0;
 				}
 
-				return false;
-			}
-
-			public override void Reset()
-			{
-				returnedNumber = 0;
-				_levelOne = 0;
-				_levelTwo = 0;
-				Current = new MutableEntry();
+				throw new IndexOutOfRangeException();
 			}
 		}
 

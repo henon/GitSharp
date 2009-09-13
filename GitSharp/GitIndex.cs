@@ -468,7 +468,12 @@ namespace GitSharp
             byte[] bytes = ol.Bytes;
 
             var file = new FileInfo(Path.Combine(workDir.DirectoryName(), e.Name));
-            file.Delete();
+            
+            if (file.Exists)
+            {
+                file.Delete();
+            }
+
             file.Directory.Mkdirs();
 
             using (var fs = new FileStream(file.FullName, System.IO.FileMode.CreateNew))

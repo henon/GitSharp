@@ -226,6 +226,11 @@ namespace GitSharp.RevWalk
 			return this == o;
 		}
 
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
 		public override bool Equals(object o)
 		{
 			if (ReferenceEquals(null, o))

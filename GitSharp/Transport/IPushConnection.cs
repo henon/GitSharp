@@ -99,6 +99,6 @@ namespace GitSharp
          *             created. Non-critical errors concerning only isolated refs
          *             should be placed in refUpdates.
          */
-        void Push(IProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refUpdates);
+        void Push(ProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refUpdates);
     }
 }

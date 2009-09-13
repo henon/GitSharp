@@ -56,7 +56,7 @@ namespace GitSharp.Transport
 
         private readonly PacketLineIn pckIn;
         private readonly Stream ins;
-        private readonly IProgressMonitor monitor;
+        private readonly ProgressMonitor monitor;
         private string progressBuffer;
         private string currentTask;
         private int lastCnt;
@@ -64,7 +64,7 @@ namespace GitSharp.Transport
         private int channel;
         private int available;
 
-        public SideBandInputStream(PacketLineIn aPckIn, Stream aIns, IProgressMonitor aProgress)
+        public SideBandInputStream(PacketLineIn aPckIn, Stream aIns, ProgressMonitor aProgress)
         {
             pckIn = aPckIn;
             ins = aIns;
@@ -243,8 +243,7 @@ namespace GitSharp.Transport
                 {
                     currentTask = taskname;
                     lastCnt = 0;
-                    // [caytchen] TODO: add ProgresMonitor.UNKNOWN (and handle in our monitors..)
-                    monitor.BeginTask(currentTask, -1);
+                    monitor.BeginTask(currentTask, ProgressMonitor.UNKNOWN);
                 }
                 int cnt = int.Parse(matcher.Groups[2].Value);
                 monitor.Update(cnt - lastCnt);

@@ -60,7 +60,7 @@ namespace GitSharp.Transport
             _dest = w;
         }
 
-        public void Push(IProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refUpdates)
+        public void Push(ProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refUpdates)
         {
             markStartedOperation();
             _packNames = null;
@@ -139,7 +139,7 @@ namespace GitSharp.Transport
             _dest.close();
         }
 
-        private void Sendpack(IEnumerable<RemoteRefUpdate> updates, IProgressMonitor monitor)
+        private void Sendpack(IEnumerable<RemoteRefUpdate> updates, ProgressMonitor monitor)
         {
             string pathPack = null;
             string pathIdx = null;

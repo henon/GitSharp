@@ -69,7 +69,7 @@ namespace GitSharp.Tests.Diff
 		    AssertHelper.Throws<ArgumentException>(() => fmt.setContext(-1));
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Test]
 		public void testContext0()
 		{
 			init("X");
@@ -77,7 +77,7 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Test]
 		public void testContext1()
 		{
 			init("X");
@@ -85,7 +85,7 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Test]
 		public void testContext3()
 		{
 			init("X");
@@ -93,7 +93,7 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Test]
 		public void testContext5()
 		{
 			init("X");
@@ -101,7 +101,7 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Test]
 		public void testContext10()
 		{
 			init("X");
@@ -109,7 +109,7 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Not working yet")]
+		[Test]
 		public void testContext100()
 		{
 			init("X");
@@ -117,21 +117,21 @@ namespace GitSharp.Tests.Diff
 			assertFormatted();
 		}
 
-		[Test, Ignore("Serialization issues with FileMode.FromBits")]
+		[Test]
 		public void testEmpty1()
 		{
 			init("E");
 			assertFormatted("E.patch");
 		}
 
-		[Test, Ignore("Serialization issues with FileMode.FromBits")]
+		[Test]
 		public void testNoNewLine1()
 		{
 			init("Y");
 			assertFormatted("Y.patch");
 		}
 
-		[Test, Ignore("Serialization issues with FileMode.FromBits")]
+		[Test]
 		public void testNoNewLine2()
 		{
 			init("Z");
@@ -162,7 +162,7 @@ namespace GitSharp.Tests.Diff
 			var patch = parseTestPatchFile(DIFFS_DIR + patchFile);
 			using(var memoryStream = new MemoryStream())
 			{
-				BinaryFormatter bf = new BinaryFormatter();
+				var bf = new BinaryFormatter();
 				bf.Serialize(memoryStream, patch);
 
 				// Resets the stream

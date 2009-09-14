@@ -44,7 +44,7 @@ namespace GitSharp.RevWalk
 {
 	/// <summary>
 	/// Default (and first pass) RevCommit Generator implementation for RevWalk.
-	/// <para>
+	/// <para />
 	/// This generator starts from a set of one or more commits and process them in
 	/// descending (newest to oldest) commit time order. Commits automatically cause
 	/// their parents to be enqueued for further processing, allowing the entire
@@ -57,7 +57,7 @@ namespace GitSharp.RevWalk
 
 		/**
 		 * Number of additional commits to scan After we think we are done.
-		 * <p>
+		 * <para />
 		 * This small buffer of commits is scanned to ensure we didn't miss anything
 		 * as a result of clock skew when the commits were made. We need to set our
 		 * constant to 1 additional commit due to the use of a pre-increment
@@ -80,7 +80,7 @@ namespace GitSharp.RevWalk
 
 		/** 
          * Number of commits we have remaining in our over-scan allotment.
-         * <p>
+         * <para />
          * Only relevant if there are {@link #UNINTERESTING} commits in the
          * {@link #_pending} queue.
          */

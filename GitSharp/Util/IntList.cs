@@ -37,103 +37,113 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Text;
+
 namespace GitSharp.Util
 {
-    /** A more efficient List<Integer> using a primitive integer array. */
-    public class IntList
-    {
-	    private int[] entries;
+	/// <summary>
+	/// A more efficient <see cref="List{Int32}"/> using a primitive integer array.
+	/// </summary>
+	public class IntList
+	{
+		private int[] entries;
 
-	    private int count;
+		private int count;
 
-	    /** Create an empty list with a default capacity. */
-	    public IntList() : this(10) {}
+		/// <summary>
+		/// Create an empty list with a default capacity.
+		/// </summary>
+		public IntList() 
+			: this(10)
+		{
+		}
 
-	    /**
-	     * Create an empty list with the specified capacity.
-	     *
-	     * @param capacity
-	     *            number of entries the list can initially hold.
-	     */
-	    public IntList(int capacity)
-        {
-		    entries = new int[capacity];
-	    }
+		/**
+		 * Create an empty list with the specified capacity.
+		 *
+		 * @param capacity
+		 *            number of entries the list can initially hold.
+		 */
+		public IntList(int capacity)
+		{
+			entries = new int[capacity];
+		}
 
-	    /** @return number of entries in this list */
-	    public int size()
-        {
-		    return count;
-	    }
+		/** @return number of entries in this list */
+		public int size()
+		{
+			return count;
+		}
 
-	    /**
-	     * @param i
-	     *            index to Read, must be in the range [0, {@link #size()}).
-	     * @return the number at the specified index
-	     * @throws ArrayIndexOutOfBoundsException
-	     *             the index outside the valid range
-	     */
-	    public int get(int i)
-        {
-		    if (count <= i)
-			    throw new IndexOutOfRangeException();
-		    return entries[i];
-	    }
+		/**
+		 * @param i
+		 *            index to Read, must be in the range [0, {@link #size()}).
+		 * @return the number at the specified index
+		 * @throws ArrayIndexOutOfBoundsException
+		 *             the index outside the valid range
+		 */
+		public int get(int i)
+		{
+			if (count <= i)
+				throw new IndexOutOfRangeException();
+			return entries[i];
+		}
 
-	    /** Empty this list */
-	    public void clear()
-        {
-		    count = 0;
-	    }
+		/** Empty this list */
+		public void clear()
+		{
+			count = 0;
+		}
 
-	    /**
-	     * Add an entry to the end of the list.
-	     *
-	     * @param n
-	     *            the number to add.
-	     */
-	    public void add(int n)
-        {
-		    if (count == entries.Length)
-			    grow();
-		    entries[count++] = n;
-	    }
+		/**
+		 * Add an entry to the end of the list.
+		 *
+		 * @param n
+		 *            the number to add.
+		 */
+		public void add(int n)
+		{
+			if (count == entries.Length)
+				grow();
+			entries[count++] = n;
+		}
 
-	    /**
-	     * Pad the list with entries.
-	     *
-	     * @param toIndex
-	     *            index position to stop filling at. 0 inserts no filler. 1
-	     *            ensures the list has a size of 1, adding <code>val</code> if
-	     *            the list is currently empty.
-	     * @param val
-	     *            value to insert into padded positions.
-	     */
-	    public void fillTo(int toIndex, int val)
-        {
-		    while (count < toIndex)
-			    add(val);
-	    }
+		/**
+		 * Pad the list with entries.
+		 *
+		 * @param toIndex
+		 *            index position to stop filling at. 0 inserts no filler. 1
+		 *            ensures the list has a size of 1, adding <code>val</code> if
+		 *            the list is currently empty.
+		 * @param val
+		 *            value to insert into padded positions.
+		 */
+		public void fillTo(int toIndex, int val)
+		{
+			while (count < toIndex)
+				add(val);
+		}
 
-	    private void grow()
-        {
-		    int[] n = new int[(entries.Length + 16) * 3 / 2];
-		    Array.Copy(entries, 0, n, 0, count);
-		    entries = n;
-	    }
+		private void grow()
+		{
+			var n = new int[(entries.Length + 16) * 3 / 2];
+			Array.Copy(entries, 0, n, 0, count);
+			entries = n;
+		}
 
-	    public string toString()
-        {
-		    StringBuilder r = new StringBuilder();
-		    r.Append('[');
-		    for (int i = 0; i < count; i++) {
-			    if (i > 0)
-				    r.Append(", ");
-			    r.Append(entries[i]);
-		    }
-		    r.Append(']');
-		    return r.ToString();
-	    }
-    }
+		public string toString()
+		{
+			var r = new StringBuilder();
+			r.Append('[');
+			for (int i = 0; i < count; i++)
+			{
+				if (i > 0)
+					r.Append(", ");
+				r.Append(entries[i]);
+			}
+			r.Append(']');
+			return r.ToString();
+		}
+	}
 }

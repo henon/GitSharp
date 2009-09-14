@@ -75,41 +75,37 @@ namespace GitSharp
 
 			/// <summary>
 			/// The ref was created locally for an update, but ignored for Delete.
-			/// <para>
+			/// <para />
 			/// The ref did not exist when the update started, but it was created
 			/// successfully with the new value.
-			/// </para>
 			/// </summary>
 			New,
 
 			/// <summary>
 			/// The ref had to be forcefully updated/deleted.
-			/// <para>
+			/// <para />
 			/// The ref already existed but its old value was not fully merged into
 			/// the new value. The configuration permitted a forced update to take
 			/// place, so ref now contains the new value. History associated with the
 			/// objects not merged may no longer be reachable.
-			/// </para>
 			/// </summary>
 			Forced,
 
 			/// <summary>
 			/// The ref was updated/deleted in a fast-forward way.
-			/// <para>
+			/// <para />
 			/// The tracking ref already existed and its old value was fully merged
 			/// into the new value. No history was made unreachable.
-			/// </para>
 			/// </summary>
 			FastForward,
 
 			/// <summary>
 			/// Not a fast-forward and not stored.
-			/// <para>
+			/// <para />
 			/// The tracking ref already existed but its old value was not fully
 			/// merged into the new value. The configuration did not allow a forced
 			/// update/Delete to take place, so ref still contains the old value. No
 			/// previous history was lost.
-			/// </para>
 			/// </summary>
 			Rejected,
 
@@ -123,13 +119,12 @@ namespace GitSharp
 
 			/// <summary>
 			/// The ref was probably not updated/deleted because of I/O error.
-			/// <para>
+			/// <para />
 			/// Unexpected I/O error occurred when writing new ref. Such error may
 			/// result in uncertain state, but most probably ref was not updated.
-			/// </para><para>
+			/// <para />
 			/// This kind of error doesn't include <see cref="LockFailure"/>, 
 			/// which is a different case.
-			/// </para>
 			/// </summary>
 			IOFailure,
 
@@ -281,9 +276,9 @@ namespace GitSharp
 
 		/// <summary>
 		/// Gracefully update the ref to the new value.
-		/// <para>
-		/// Merge test will be performed according to {@link #isForceUpdate()}.
-		/// </para><para>
+		/// <para/>
+		/// Merge test will be performed according to <see cref="ForceUpdate"/>.
+		/// <para />
 		/// This is the same as:
 		/// <example>
 		/// return Update(new RevWalk(repository));
@@ -390,7 +385,7 @@ namespace GitSharp
 
 		/// <summary>
 		/// Delete the ref.
-		/// <para>
+		/// <para />
 		/// This is the same as:
 		/// <example>
 		/// return Delete(new RevWalk(repository));

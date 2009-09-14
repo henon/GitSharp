@@ -46,10 +46,10 @@ namespace GitSharp.TreeWalk
 {
 	/// <summary>
 	/// Walks a Git tree (directory) in Git sort order.
-	/// <para>
+	/// <para />
 	/// A new iterator instance should be positioned on the first entry, or at eof.
 	/// Data for the first entry (if not at eof) should be available immediately.
-	/// </para><para>
+	/// <para />
 	/// Implementors must walk a tree in the Git sort order, which has the following
 	/// odd sorting:
 	/// <list>
@@ -57,11 +57,10 @@ namespace GitSharp.TreeWalk
 	/// <item>A/c</item>
 	/// <item>A0c</item>
 	/// </list>
-	/// </para><para>
+	/// <para />
 	/// In the second item, <code>A</code> is the name of a subtree and
 	/// <code>c</code> is a file within that subtree. The other two items are files
 	/// in the root level tree.
-	/// </para>
 	/// </summary>
 	/// <seealso cref="CanonicalTreeParser"/>
 	public abstract class AbstractTreeIterator
@@ -329,11 +328,10 @@ namespace GitSharp.TreeWalk
 
 		/// <summary>
 		/// Check if the current entry of both iterators has the same id.
-		/// <para>
+		/// <para />
 		/// This method is faster than <see cref="getEntryObjectId()"/>as it does not
-		/// require copying the bytes out of the buffers. A direct {@link #idBuffer}
+		/// require copying the bytes out of the buffers. A direct <see cref="idBuffer"/>
 		/// compare operation is performed.
-		/// </para>
 		/// </summary>
 		/// <param name="otherIterator">the other iterator to test against.</param>
 		/// <returns>
@@ -388,7 +386,7 @@ namespace GitSharp.TreeWalk
 
 		/// <summary>
 		/// Get the byte array buffer object IDs must be copied out of.
-		/// <para>
+		/// <para />
 		/// The id buffer contains the bytes necessary to construct an <see cref="ObjectId"/> for
 		/// the current entry of this iterator. The buffer can be the same buffer for
 		/// all entries, or it can be a unique buffer per-entry. Implementations are
@@ -409,7 +407,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Create a new iterator for the current entry's subtree.
-		 * <p>
+		 * <para />
 		 * The parent reference of the iterator must be <code>this</code>,
 		 * otherwise the caller would not be able to exit out of the subtree
 		 * iterator correctly and return to continue walking <code>this</code>.
@@ -437,7 +435,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Create a new iterator for the current entry's subtree.
-		 * <p>
+		 * <para />
 		 * The parent reference of the iterator must be <code>this</code>, otherwise
 		 * the caller would not be able to exit out of the subtree iterator
 		 * correctly and return to continue walking <code>this</code>.
@@ -462,10 +460,10 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Is this tree iterator positioned on its first entry?
-		 * <p>
+		 * <para />
 		 * An iterator is positioned on the first entry if <code>back(1)</code>
 		 * would be an invalid request as there is no entry before the current one.
-		 * <p>
+		 * <para />
 		 * An empty iterator (one with no entries) will be
 		 * <code>first() &amp;&amp; eof()</code>.
 		 *
@@ -475,7 +473,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Is this tree iterator at its EOF point (no more entries)?
-		 * <p>
+		 * <para />
 		 * An iterator is at EOF if there is no current entry.
 		 * 
 		 * @return true if we have walked all entries and have none left.
@@ -484,10 +482,10 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Move to next entry, populating this iterator with the entry data.
-		 * <p>
+		 * <para />
 		 * The delta indicates how many moves forward should occur. The most common
 		 * delta is 1 to move to the next entry.
-		 * <p>
+		 * <para />
 		 * Implementations must populate the following members:
 		 * <ul>
 		 * <li>{@link #mode}</li>
@@ -508,18 +506,18 @@ namespace GitSharp.TreeWalk
 
 		/// <summary>
 		/// Move to prior entry, populating this iterator with the entry data.
-		/// <para>
+		/// <para />
 		/// The delta indicates how many moves backward should occur.  
 		/// The most common delta is 1 to move to the prior entry.
-		/// </para><para>
+		/// <para />
 		/// Implementations must populate the following members:
 		/// <ul>
-		/// <li>{@link #mode}</li>
+		/// <li><see cref="Mode"/></li>
 		/// <li>{@link #_path} (from {@link #_pathOffset} to {@link #_pathLen})</li>
 		/// <li>{@link #_pathLen}</li>
 		/// </ul>
 		/// as well as any implementation dependent information necessary to
-		/// accurately return data from {@link #idBuffer()} and {@link #idOffset()}
+		/// accurately return data from <see cref="idBuffer()"/> and <see cref="idOffset()"/>
 		/// when demanded.
 		/// </summary>
 		/// <param name="delta">
@@ -530,12 +528,11 @@ namespace GitSharp.TreeWalk
 
 		/// <summary>
 		/// Advance to the next tree entry, populating this iterator with its data.
-		/// <para>
+		/// <para />
 		/// This method behaves like <code>seek(1)</code> but is called by
 		/// <see cref="TreeWalk"/> only if a <see cref="TreeFilter"/> was used and 
 		/// ruled out the current entry from the results. In such cases this tree 
 		/// iterator may perform special behavior.
-		/// </para>
 		/// </summary>
 		public virtual void skip()
 		{
@@ -544,7 +541,7 @@ namespace GitSharp.TreeWalk
 
 		/// <summary>
 		/// Indicates to the iterator that no more entries will be Read.
-		/// <para>
+		/// <para />
 		/// This is only invoked by TreeWalk when the iteration is aborted early due
 		/// to a <see cref="StopWalkException"/> being thrown from
 		/// within a TreeFilter.
@@ -599,42 +596,38 @@ namespace GitSharp.TreeWalk
 
 		/// <summary>
 		/// <see cref="FileMode"/> bits for the current entry.
-		/// <para>
+		/// <para />
 		/// A numerical value from FileMode is usually faster for an iterator to
 		/// obtain from its data source so this is the preferred representation.
-		/// </para>
 		/// </summary>
 		public int Mode { get; protected set; }
 
 		/// <summary>
 		/// Path buffer for the current entry.
-		/// <para>
+		/// <para />
 		/// This buffer is pre-allocated at the start of walking and is shared from
 		/// parent iterators down into their subtree iterators. The sharing allows
 		/// the current entry to always be a full path from the root, while each
 		/// subtree only needs to populate the part that is under their control.
-		/// </para>
 		/// </summary>
 		public byte[] Path { get; protected set; }
 
 		/// <summary>
 		/// Position within <see cref="Path"/> this iterator starts writing at.
-		/// <para>
+		/// <para />
 		/// This is the first offset in <see cref="Path"/> that this iterator must
-		/// populate during <see cref="Next"/>. At the root level (when <see cref="Parent"/>
+		/// populate during <see cref="next"/>. At the root level (when <see cref="Parent"/>
 		/// is null) this is 0. For a subtree iterator the index before this position
 		/// should have the value '/'.
-		/// </para>
 		/// </summary>
-		public int PathOffset { get; protected set; }
+		public int PathOffset { get; private set; }
 
 		/// <summary>
 		/// Total Length of the current entry's complete _path from the root.
-		/// <para>
+		/// <para />
 		/// This is the number of bytes within <see cref="Path"/> that pertain to the
 		/// current entry. Values at this index through the end of the array are
 		/// garbage and may be randomly populated from prior entries.
-		/// </para>
 		/// </summary>
 		public int PathLen { get; protected set; }
 	}

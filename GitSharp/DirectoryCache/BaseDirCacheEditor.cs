@@ -88,7 +88,7 @@ namespace GitSharp.DirectoryCache
 		/// 
 		/// </summary>
 		///	<returns> 
-		/// The cache we will update on <seealso cref="Finish()"/>.
+		/// The cache we will update on <seealso cref="finish()"/>.
 		/// </returns>
 		public DirCache getDirCache()
 		{
@@ -169,7 +169,7 @@ namespace GitSharp.DirectoryCache
 		/// the calling application. A new builder must be created to make additional
 		/// changes to the index entries.
 		/// <para />
-		/// After completion the DirCache returned by <seealso cref="#getDirCache()"/> will
+		/// After completion the DirCache returned by <seealso cref="getDirCache()"/> will
 		/// contain all modifications.
 		/// </summary>
 		/// <remarks>
@@ -182,7 +182,7 @@ namespace GitSharp.DirectoryCache
 		/// Update the DirCache with the contents of <seealso cref="Entries"/>.
 		///	<para />
 		/// This method should be invoked only during an implementation of
-		/// <seealso cref="Finish()"/>, and only after <seealso cref="Entries"/> is sorted.
+		/// <seealso cref="finish()"/>, and only after <seealso cref="Entries"/> is sorted.
 		/// </summary>
 		protected void Replace()
 		{

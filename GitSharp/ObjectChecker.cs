@@ -38,29 +38,24 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using GitSharp.Exceptions;
 using GitSharp.Util;
 
 namespace GitSharp
 {
-
-    /**
-     * Verifies that an object is formatted correctly.
-     * <p>
-     * Verifications made by this class only check that the fields of an object are
-     * formatted correctly. The ObjectId checksum of the object is not verified, and
-     * connectivity links between objects are also not verified. Its assumed that
-     * the caller can provide both of these validations on its own.
-     * <p>
-     * Instances of this class are not thread safe, but they may be reused to
-     * perform multiple object validations.
-     */
+    /// <summary>
+    /// Verifies that an object is formatted correctly.
+	/// <para />
+	/// Verifications made by this class only check that the fields of an object are
+	/// formatted correctly. The ObjectId checksum of the object is not verified, and
+	/// connectivity links between objects are also not verified. Its assumed that
+	/// the caller can provide both of these validations on its own.
+	/// <para />
+	/// Instances of this class are not thread safe, but they may be reused to
+	/// perform multiple object validations.
+    /// </summary>
     public class ObjectChecker
     {
         /** Header "tree " */

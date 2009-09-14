@@ -52,10 +52,10 @@ namespace GitSharp.DirectoryCache
 	/// <para />
 	/// For maximum performance applications should add entries in path name order.
 	/// Adding entries out of order is permitted, however a final sorting pass will
-	/// be implicitly performed during <seealso cref="Finish()"/> to correct any out-of-order
+	/// be implicitly performed during <seealso cref="finish()"/> to correct any out-of-order
 	/// entries. Duplicate detection is also delayed until the sorting is complete.
 	/// </summary>
-	/// <seealso cref= DirCacheEditor </seealso>
+	/// <seealso cref="DirCacheEditor"/>
 	public class DirCacheBuilder : BaseDirCacheEditor
 	{
 		private bool _sorted;

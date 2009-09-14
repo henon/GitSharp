@@ -36,26 +36,21 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-
 namespace GitSharp.Diff
 {
 	/// <summary>
 	/// A modified region detected between two versions of roughly the same content.
-	/// <para>
+	/// <para />
 	/// Regions should be specified using 0 based notation, so add 1 to the
 	/// start and end marks for line numbers in a file.
-	/// </para>
-	/// <para>
-	/// An edit where <code>beginA == endA && beginB < endB</code> is an insert edit,
+	/// <para />
+	/// An edit where <code>beginA == endA &amp;&amp; beginB &gt; endB</code> is an insert edit,
 	/// that is sequence B inserted the elements in region
 	/// <code>[beginB, endB)</code> at <code>beginA</code>.
-	/// </para>
-	/// <para>
-	/// An edit where <code>beginA < endA && beginB < endB</code> is a replace edit,
+	/// <para />
+	/// An edit where <code>beginA &gt; endA &amp;&amp; beginB &gt; endB</code> is a replace edit,
 	/// that is sequence B has replaced the range of elements between
 	/// <code>[beginA, endA)</code> with those found in <code>[beginB, endB)</code>.
-	/// </para>
 	/// </summary>
 	public class Edit
 	{
@@ -138,38 +133,22 @@ namespace GitSharp.Diff
 		/// <summary>
 		/// Start point in sequence A.
 		/// </summary>
-		public int BeginA
-		{
-			get;
-			set;
-		}
+		public int BeginA { get; set; }
 
 		/// <summary>
 		/// End point in sequence A.
 		/// </summary>
-		public int EndA
-		{
-			get;
-			set;
-		}
+		public int EndA { get; private set; }
 
 		/// <summary>
 		/// Start point in sequence B.
 		/// </summary>
-		public int BeginB
-		{
-			get;
-			set;
-		}
+		public int BeginB { get; private set; }
 
 		/// <summary>
 		/// End point in sequence B.
 		/// </summary>
-		public int EndB
-		{
-			get;
-			set;
-		}
+		public int EndB { get; private set; }
 
 		/// <summary>
 		/// Increase <see cref="EndA"/> by 1.

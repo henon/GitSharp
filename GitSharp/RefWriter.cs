@@ -70,7 +70,7 @@ namespace GitSharp
 
         /**
          * Rebuild the {@link Constants#INFO_REFS}.
-         * <p>
+         * <para />
          * This method rebuilds the contents of the {@link Constants#INFO_REFS} file
          * to match the passed list of references.
          * 
@@ -112,7 +112,7 @@ namespace GitSharp
 
         /**
          * Rebuild the {@link Constants#PACKED_REFS} file.
-         * <p>
+         * <para />
          * This method rebuilds the contents of the {@link Constants#PACKED_REFS}
          * file to match the passed list of references, including only those refs
          * that have a storage type of {@link Ref.Storage#PACKED}.

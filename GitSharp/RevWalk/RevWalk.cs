@@ -91,7 +91,7 @@ namespace GitSharp.RevWalk
 			PARSED = 1 << 0,
 
 			/// <summary>
-			/// Set on RevCommit instances added to our {@link #pending} queue.
+			/// Set on RevCommit instances added to our <see cref="Pending"/> queue.
 			/// <para />
 			/// We use this flag to avoid adding the same commit instance twice to our
 			/// queue, especially if we reached it by more than one path.
@@ -102,7 +102,7 @@ namespace GitSharp.RevWalk
 			/// Set on RevCommit instances the caller does not want output.
 			/// <para />
 			/// We flag commits as uninteresting if the caller does not want commits
-			/// reachable from a commit given to {@link #markUninteresting(RevCommit)}.
+			/// reachable from a commit given to <see cref="markUninteresting(RevCommit)"/>.
 			/// This flag is always carried into the commit's parents and is a key part
 			/// of the "rev-list B --not A" feature; A is marked UNINTERESTING.
 			/// </summary>
@@ -111,7 +111,7 @@ namespace GitSharp.RevWalk
 			/// <summary>
 			/// Set on a RevCommit that can collapse out of the history.
 			/// <para />
-			/// If the {@link #treeFilter} concluded that this commit matches his
+			/// If the <see cref="TreeFilter"/> concluded that this commit matches his
 			/// parents' for all of the paths that the filter is interested in then we
 			/// mark the commit REWRITE. Later we can rewrite the parents of a REWRITE
 			/// child to remove chains of REWRITE commits before we produce the child to
@@ -173,8 +173,8 @@ namespace GitSharp.RevWalk
 
 		///	<summary> 
 		/// Set on a RevCommit that can collapse out of the history.
-		/// <p>
-		/// If the <seealso cref="#treeFilter"/> concluded that this commit matches his
+		/// <para />
+		/// If the <seealso cref="TreeFilter"/> concluded that this commit matches his
 		/// parents' for all of the paths that the filter is interested in then we
 		/// mark the commit REWRITE. Later we can rewrite the parents of a REWRITE
 		/// child to remove chains of REWRITE commits before we produce the child to
@@ -285,7 +285,7 @@ namespace GitSharp.RevWalk
 		/// The commit supplied is not available from the object
 		/// database. This usually indicates the supplied commit is
 		/// invalid, but the reference was constructed during an earlier
-		/// invocation to {@link #lookupCommit(AnyObjectId)}.
+		/// invocation to <see cref="lookupCommit(AnyObjectId)"/>.
 		/// </exception>
 		/// <exception cref="IncorrectObjectTypeException">
 		/// The object was not parsed yet and it was discovered during
@@ -326,7 +326,7 @@ namespace GitSharp.RevWalk
 		/// The commit supplied is not available from the object
 		/// database. This usually indicates the supplied commit is
 		/// invalid, but the reference was constructed during an earlier
-		/// invocation to {@link #lookupCommit(AnyObjectId)}.
+		/// invocation to <see cref="lookupCommit(AnyObjectId)"/>.
 		/// </exception>
 		/// <exception cref="IncorrectObjectTypeException">
 		/// The object was not parsed yet and it was discovered during
@@ -373,7 +373,7 @@ namespace GitSharp.RevWalk
 		/// the object was not parsed yet and it was discovered during
 		/// parsing that it is not actually a commit. This usually
 		/// indicates the caller supplied a non-commit SHA-1 to
-		/// <seealso cref="#lookupCommit(AnyObjectId)"/>.
+		/// <seealso cref="lookupCommit(AnyObjectId)"/>.
 		/// </exception>
 		/// <exception cref="IOException">
 		/// a pack file or loose object could not be read.
@@ -600,7 +600,7 @@ namespace GitSharp.RevWalk
 		/// that do not contain tree entries matched by the filter.
 		/// <para />
 		/// Usually callers should be inserting a filter graph including
-		/// <seealso cref="TreeFilter#ANY_DIFF"/> along with one or more
+		/// <seealso cref="TreeFilter.ANY_DIFF"/> along with one or more
 		/// <seealso cref="PathFilter"/> instances.
 		/// </summary>
 		/// <param name="newFilter">
@@ -1045,7 +1045,7 @@ namespace GitSharp.RevWalk
 		///	<summary>
 		/// Resets internal state and allows this instance to be used again.
 		/// <para />
-		/// Unlike <seealso cref="#dispose()"/> previously acquired RevObject (and RevCommit)
+		/// Unlike <seealso cref="Dispose()"/> previously acquired RevObject (and RevCommit)
 		/// instances are not invalidated. RevFlag instances are not invalidated, but
 		/// are removed from all RevObjects.
 		/// </summary>

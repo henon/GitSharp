@@ -60,7 +60,7 @@ namespace GitSharp.Util
 
         /**
          * Convert the input to lowercase.
-         * <p>
+         * <para />
          * This method does not honor the JVM locale, but instead always behaves as
          * though it is in the US-ASCII locale. Only characters in the range 'A'
          * through 'Z' are converted. All other characters are left as-is, even if
@@ -77,7 +77,7 @@ namespace GitSharp.Util
 
         /**
          * Convert the input string to lower case, according to the "C" locale.
-         * <p>
+         * <para />
          * This method does not honor the JVM locale, but instead always behaves as
          * though it is in the US-ASCII locale. Only characters in the range 'A'
          * through 'Z' are converted, all other characters are left as-is, even if
@@ -98,7 +98,7 @@ namespace GitSharp.Util
 
         /**
          * Test if two strings are equal, ignoring case.
-         * <p>
+         * <para />
          * This method does not honor the JVM locale, but instead always behaves as
          * though it is in the US-ASCII locale.
          *

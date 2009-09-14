@@ -44,13 +44,13 @@ namespace GitSharp.RevWalk
 {
 	/// <summary>
 	/// Specialized subclass of RevWalk to include trees, blobs and tags.
-	/// <para>
+	/// <para />
 	/// Unlike RevWalk this subclass is able to remember starting roots that include
 	/// annotated tags, or arbitrary trees or blobs. Once commit generation is
 	/// complete and all commits have been popped by the application, individual
 	/// annotated tag, tree and blob objects can be popped through the additional
 	/// method <see cref="nextObject"/>.
-	/// <p>
+	/// <para />
 	/// Tree and blob objects reachable from interesting commits are automatically
 	/// scheduled for inclusion in the results of <see cref="nextObject"/>, returning
 	/// each object exactly once. Objects are sorted and returned according to the
@@ -62,11 +62,10 @@ namespace GitSharp.RevWalk
     {
         /// <summary>
 		/// Indicates a non-RevCommit is in <see cref="PendingObjects"/>.
-		/// <para>
+		/// <para />
 		/// We can safely reuse <see cref="RevWalk.REWRITE"/> here for the same value as it
 		/// is only set on RevCommit and <see cref="PendingObjects"/> never has RevCommit
 		/// instances inserted into it.
-		/// </para>
 		/// </summary>
         private const int InPending = REWRITE;
 
@@ -91,21 +90,20 @@ namespace GitSharp.RevWalk
         
 		/// <summary>
 		/// Mark an object or commit to start graph traversal from. 
-		/// <para>
-		/// Callers are encouraged to use <see cref="RevWalk#parseAny(AnyObjectId)"/>
-		/// instead of <see cref="RevWalk#lookupAny(AnyObjectId, int)"/>, as this method
+		/// <para />
+		/// Callers are encouraged to use <see cref="RevWalk.parseAny(AnyObjectId)"/>
+		/// instead of <see cref="RevWalk.lookupAny(AnyObjectId, int)"/>, as this method
 		/// requires the object to be parsed before it can be added as a root for the
 		/// traversal.
-		/// </para><para>
+		/// <para />
 		/// The method will automatically parse an unparsed object, but error
 		/// handling may be more difficult for the application to explain why a
 		/// RevObject is not actually valid. The object pool of this walker would
 		/// also be 'poisoned' by the invalid <see cref="RevObject"/>.
-		/// </para><para>
-		/// This method will automatically call <see cref="RevWalk#markStart(RevCommit)"/>
+		/// <para />
+		/// This method will automatically call <see cref="RevWalk.markStart(RevCommit)"/>
 		/// if passed RevCommit instance, or a <see cref="RevTag"/> that directly (or indirectly)
 		/// references a <see cref="RevCommit"/>.
-		/// </para>
 		/// </summary>
 		/// <param name="o">
 		/// The object to start traversing from. The object passed must be
@@ -115,13 +113,13 @@ namespace GitSharp.RevWalk
 		/// The object supplied is not available from the object
 		/// database. This usually indicates the supplied object is
 		/// invalid, but the reference was constructed during an earlier
-		/// invocation to <see cref="RevWalk#lookupAny(AnyObjectId, int)"/>.
+		/// invocation to <see cref="RevWalk.lookupAny(AnyObjectId, int)"/>.
 		/// </exception>
 		/// <exception cref="IncorrectObjectTypeException">
 		/// The object was not parsed yet and it was discovered during
 		/// parsing that it is not actually the type of the instance
 		/// passed in. This usually indicates the caller used the wrong
-		/// type in a <see cref="RevWalk#lookupAny(AnyObjectId, int)"/> call.
+		/// type in a <see cref="RevWalk.lookupAny(AnyObjectId, int)"/> call.
 		/// </exception>
 		/// <exception cref="Exception">
 		/// A pack file or loose object could not be Read.
@@ -147,25 +145,24 @@ namespace GitSharp.RevWalk
 
 		/// <summary>
 		/// Mark an object to not produce in the output.
-		/// <para>
+		/// <para />
 		/// Uninteresting objects denote not just themselves but also their entire
 		/// reachable chain, back until the merge base of an uninteresting commit and
 		/// an otherwise interesting commit.
-		/// </para><para>
-		/// Callers are encouraged to use <see cref="RevWalk#parseAny(AnyObjectId)"/>
-		/// instead of <see cref="RevWalk#lookupAny(AnyObjectId, int)"/>, as this method
+		/// <para />
+		/// Callers are encouraged to use <see cref="RevWalk.parseAny(AnyObjectId)"/>
+		/// instead of <see cref="RevWalk.lookupAny(AnyObjectId, int)"/>, as this method
 		/// requires the object to be parsed before it can be added as a root for the
 		/// traversal.
-		/// </para><para>
+		/// <para />
 		/// The method will automatically parse an unparsed object, but error
 		/// handling may be more difficult for the application to explain why a
 		/// RevObject is not actually valid. The object pool of this walker would
 		/// also be 'poisoned' by the invalid <see cref="RevObject"/>.
-		/// </para><para>
-		/// This method will automatically call <see cref="RevWalk#markStart(RevCommit)"/>
+		/// <para />
+		/// This method will automatically call <see cref="RevWalk.markStart(RevCommit)"/>
 		/// if passed RevCommit instance, or a <see cref="RevTag"/> that directly (or indirectly)
 		/// references a <see cref="RevCommit"/>.
-		/// </para>
 		/// </summary>
 		/// <param name="o">
 		/// The object to start traversing from. The object passed must be
@@ -341,17 +338,15 @@ namespace GitSharp.RevWalk
 
 		/// <summary>
 		/// Verify all interesting objects are available, and reachable.
-		/// <p>
+		/// <para />
 		/// Callers should populate starting points and ending points with
 		/// <see cref="markStart(RevObject)"/> and <see cref="markUninteresting(RevObject)"/>
 		/// and then use this method to verify all objects between those two points
 		/// exist in the repository and are readable.
-		/// </p>
-		/// <p>
+		/// <para />
 		/// This method returns successfully if everything is connected; it throws an
 		/// exception if there is a connectivity problem. The exception message
 		/// provides some detail about the connectivity failure.
-		/// </p>
 		/// </summary>
 		/// <exception cref="MissingObjectException">
 		/// One or or more of the next objects are not available from the
@@ -387,7 +382,7 @@ namespace GitSharp.RevWalk
 
 		/// <summary>
 		/// Get the current object's complete path.
-		/// <p>
+		/// <para />
 		/// This method is not very efficient and is primarily meant for debugging
 		/// and output generation. Applications should try to avoid calling it,
 		/// and if invoked do so only once per interesting entry, where the name is

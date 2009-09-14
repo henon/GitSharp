@@ -62,7 +62,7 @@ namespace GitSharp
         {
             /// <summary>
             /// Text string that identifies an object as an annotated tag.
-            /// <summary>
+            /// </summary>
             /// <remarks>
             /// Annotated tags store a pointer to any other object, and an additional
             /// message. It is most commonly used to record a stable release of the
@@ -72,7 +72,7 @@ namespace GitSharp
 
             /// <summary>
             /// Text string that identifies an object as tree.
-            /// <summary>
+			/// </summary>
             /// <remarks>
             /// Trees attach object ids (hashes) to names and file
             /// modes. The normal use for a tree is to store a
@@ -82,7 +82,7 @@ namespace GitSharp
 
             /// <summary>
             /// Text string that identifies an object as a blob
-            /// <summary>
+			/// </summary>
             /// <remarks>
             /// Blobs store whole file revisions. They are used
             /// for any user file, as well as for symlinks. Blobs
@@ -91,8 +91,8 @@ namespace GitSharp
             public const string Blob = "blob";
 
             /// <summary>
-            ///    Text string that identifies an object as a commit.
-            /// <summary>
+            /// Text string that identifies an object as a commit.
+			/// </summary>
             /// <remarks>
             /// Commits connect trees into a string of project
             /// histories, where each commit is an assertion that
@@ -133,39 +133,35 @@ namespace GitSharp
 
         /// <summary>
         /// Text string that identifies an object as a commit.
-		/// <para>
+		/// <para />
 		/// Commits connect trees into a string of project histories, where each
 		/// commit is an assertion that the best way to continue is to use this other
 		/// tree (set of files).
-		/// </para>
         /// </summary>
         public const string TYPE_COMMIT = "commit";
 
         /// <summary>
         /// Text string that identifies an object as a blob.
-		/// <para>
+		/// <para />
 		/// Blobs store whole file revisions. They are used for any user file, as
 		/// well as for symlinks. Blobs form the bulk of any project's storage space.
-		/// </para>
 		/// </summary>
 		public const string TYPE_BLOB = "blob";
 
         /// <summary>
         /// Text string that identifies an object as a tree.
-		/// <para>
+		/// <para />
 		/// Trees attach object ids (hashes) to names and file modes. The normal use
 		/// for a tree is to store a version of a directory and its contents.
-        /// </para>
         /// </summary>
 		public const string TYPE_TREE = "tree";
 
         /// <summary>
         /// Text string that identifies an object as an annotated tag.
-		/// <para>
+		/// <para />
 		/// Annotated tags store a pointer to any other object, and an additional
 		/// message. It is most commonly used to record a stable release of the
 		/// project.
-		/// </para>
         /// </summary>
         public static string TYPE_TAG = "tag";
 
@@ -569,7 +565,6 @@ namespace GitSharp
 		/// A byte array representing the requested string, encoded using the
 		/// default character encoding (UTF-8).
 		/// </returns>
-		/// <seealso cref="CHARACTER_ENCODING"/>
         public static byte[] encode(string str)
         {
             return CHARSET.GetBytes(str);

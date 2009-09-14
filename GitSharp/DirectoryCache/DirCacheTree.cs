@@ -105,10 +105,10 @@ namespace GitSharp.DirectoryCache
 		/** Unique SHA-1 of this tree; null if invalid. */
 		private ObjectId _id;
 
-		/** Child trees, if any, sorted by {@link #EncodedName}. */
+		/** Child trees, if any, sorted by EncodedName. */
 		private DirCacheTree[] _children;
 
-		/** Number of valid _children in {@link #_children}. */
+		/** Number of valid children. */
 		private int _childCount;
 
 		public DirCacheTree()

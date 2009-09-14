@@ -384,9 +384,9 @@ namespace GitSharp
 
 					if (_packChecksum == null)
 					{
-						_packChecksum = idx.packChecksum;
+						_packChecksum = idx.PackChecksum;
 					}
-					else if (_packChecksum.SequenceEqual(idx.packChecksum))
+					else if (_packChecksum.SequenceEqual(idx.PackChecksum))
 					{
 						throw new PackMismatchException("Pack checksum mismatch");
 					}
@@ -501,7 +501,7 @@ namespace GitSharp
 			{
 				throw new PackMismatchException("Pack checksum mismatch:"
 												+ " pack " + ObjectId.FromRaw(buf)
-												+ " index " + ObjectId.FromRaw(idx.packChecksum)
+												+ " index " + ObjectId.FromRaw(idx.PackChecksum)
 												+ ": " + File.FullName);
 			}
 		}

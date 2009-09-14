@@ -241,7 +241,7 @@ namespace GitSharp.DirectoryCache
 		// Individual file index entries, sorted by path name.
 		private DirCacheEntry[] _sortedEntries;
 
-		// Number of positions within {@link #_sortedEntries} that are valid.
+		// Number of positions within sortedEntries that are valid.
 		private int _entryCnt;
 
 		// Cache tree for this index; null if the cache tree is not available.
@@ -279,7 +279,7 @@ namespace GitSharp.DirectoryCache
 		/// Create a new editor to recreate this cache.
 		/// <para />
 		/// Callers should add commands to the editor, then use
-		/// <seealso cref="DirCacheEditor#finish()"/> to update this instance.
+		/// <seealso cref="DirCacheEditor.finish()"/> to update this instance.
 		///	</summary>
 		///	<returns>A new builder instance for this cache.</returns>
 		public DirCacheEditor editor()
@@ -502,7 +502,7 @@ namespace GitSharp.DirectoryCache
 		/// <summary>
 		/// Write the entry records from memory to disk.
 		/// <para />
-		/// The cache must be locked first by calling <seealso cref="lock()"/> and receiving
+		/// The cache must be locked first by calling <seealso cref="Lock()"/> and receiving
 		/// true as the return value. Applications are encouraged to lock the index,
 		/// then invoke <seealso cref="read()"/> to ensure the in-memory data is current,
 		/// prior to updating the in-memory entries.
@@ -646,7 +646,7 @@ namespace GitSharp.DirectoryCache
 		/// <returns>
 		/// if >= 0 then the return value is the position of the entry in the
 		/// index; pass to <seealso cref="getEntry(int)"/> to obtain the entry
-		/// information. If < 0 the entry does not exist in the index.
+		/// information. If &gt; 0 the entry does not exist in the index.
 		/// </returns>
 		///
 		public int findEntry(string path)
@@ -729,7 +729,7 @@ namespace GitSharp.DirectoryCache
 		/// Note that this value counts only <i>files</i>.
 		/// </summary>
 		/// <returns>Number of entries available.</returns>
-		/// <seealso cref= getEntry(int) </seealso>
+		/// <seealso cref="getEntry(int)"/>
 		public int getEntryCount()
 		{
 			return _entryCnt;
@@ -805,7 +805,7 @@ namespace GitSharp.DirectoryCache
 		/// </param>
 		///	<returns>
 		/// The cache tree; null if there is no current cache tree available
-		/// and <see cref="build"/> was false.
+		/// and <paramref name="build"/> was false.
 		/// </returns>
 		public DirCacheTree getCacheTree(bool build)
 		{

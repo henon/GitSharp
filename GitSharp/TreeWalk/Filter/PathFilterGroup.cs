@@ -49,12 +49,12 @@ namespace GitSharp.TreeWalk.Filter
 
     /**
      * Includes tree entries only if they match one or more configured paths.
-     * <p>
+     * <para />
      * Operates like {@link PathFilter} but causes the walk to abort as soon as the
      * tree can no longer match any of the paths within the group. This may bypass
      * the bool logic of a higher level AND or OR group, but does improve
      * performance for the common case of examining one or more modified paths.
-     * <p>
+     * <para />
      * This filter is effectively an OR group around paths, with the early abort
      * feature described above.
      */
@@ -62,13 +62,13 @@ namespace GitSharp.TreeWalk.Filter
     {
         /**
          * Create a collection of path filters from Java strings.
-         * <p>
+         * <para />
          * Path strings are relative to the root of the repository. If the user's
          * input should be assumed relative to a subdirectory of the repository the
          * caller must prepend the subdirectory's path prior to creating the filter.
-         * <p>
+         * <para />
          * Path strings use '/' to delimit directories on all platforms.
-         * <p>
+         * <para />
          * Paths may appear in any order within the collection. Sorting may be done
          * internally when the group is constructed if doing so will improve path
          * matching performance.
@@ -90,7 +90,7 @@ namespace GitSharp.TreeWalk.Filter
 
         /**
          * Create a collection of path filters.
-         * <p>
+         * <para />
          * Paths may appear in any order within the collection. Sorting may be done
          * internally when the group is constructed if doing so will improve path
          * matching performance.

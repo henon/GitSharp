@@ -72,18 +72,17 @@ namespace GitSharp
         }
         private static InflaterCache m_instance;
 
-        /**
-         * Obtain an Inflater for decompression.
-         * <p>
-         * Inflaters obtained through this cache should be returned (if possible) by
-         * {@link #Release(Inflater)} to avoid garbage collection and reallocation.
-         * 
-         * @return an available inflater. Never null.
-         */
+        /// <summary>
+		/// Obtain an Inflater for decompression.
+		/// <para />
+		/// Inflaters obtained through this cache should be returned (if possible) by
+		/// <see cref="release(Inflater)"/> to avoid garbage collection and reallocation.
+        /// </summary>
+		/// <returns>An available inflater. Never null.</returns>
         public Inflater get()
         {
             Inflater r = getImpl();
-            return r != null ? r : new Inflater(false);
+            return r ?? new Inflater(false);
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]

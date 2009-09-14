@@ -46,7 +46,7 @@ namespace GitSharp.RevWalk
         {
             /**
              * No specific sorting is requested.
-             * <p>
+             * <para />
              * Applications should not rely upon the ordering produced by this strategy.
              * Any ordering in the output is caused by low level implementation details
              * and may change without notice.
@@ -55,21 +55,21 @@ namespace GitSharp.RevWalk
 
             /**
              * Sort by commit time, descending (newest first, oldest last).
-             * <p>
+             * <para />
              * This strategy can be combined with {@link #TOPO}.
              */
             COMMIT_TIME_DESC,
 
             /**
              * Topological sorting (all children before parents).
-             * <p>
+             * <para />
              * This strategy can be combined with {@link #COMMIT_TIME_DESC}.
              */
             TOPO,
 
             /**
              * Flip the output into the reverse ordering.
-             * <p>
+             * <para />
              * This strategy can be combined with the others described by this type as
              * it is usually performed at the very end.
              */
@@ -80,7 +80,7 @@ namespace GitSharp.RevWalk
              * In {@link ObjectWalk}, objects associated with such commits (trees,
              * blobs), and all other objects marked explicitly as UNINTERESTING are also
              * included.
-             * <p>
+             * <para />
              * A boundary commit is a UNINTERESTING parent of an interesting commit that
              * was previously output.
              */

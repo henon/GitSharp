@@ -49,7 +49,6 @@ namespace GitSharp
 	/// they are very likely already in memory, unless the operating system's memory
 	/// is very low and has paged part of this process out to disk. Therefore copying
 	/// bytes from a window is very inexpensive.
-	/// </p> 
 	/// </summary>
 	internal abstract class ByteWindow
 	{

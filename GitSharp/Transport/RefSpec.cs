@@ -43,7 +43,7 @@ namespace GitSharp.Transport
 {
     /**
  * Describes how refs in one repository copy into another repository.
- * <p>
+ * <para />
  * A ref specification provides matching support and limited rules to rewrite a
  * reference in one repository to another reference in another repository.
  */

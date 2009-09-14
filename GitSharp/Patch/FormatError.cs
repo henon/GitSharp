@@ -109,7 +109,7 @@ namespace GitSharp.Patch
 		}
 
 		/// <summary>
-		/// Byte offset within {@link #getBuffer()} where the error is
+		/// Byte offset within <see cref="getBuffer()"/> where the error is
 		/// </summary>
 		/// <returns></returns>
 		public int getOffset()

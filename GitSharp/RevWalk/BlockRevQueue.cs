@@ -82,15 +82,14 @@ namespace GitSharp.RevWalk
 
         /// <summary>
         /// Reconfigure this queue to share the same free list as another.
-		/// <para>
+		/// <para />
 		/// Multiple revision queues can be connected to the same free list, making
 		/// it less expensive for applications to shuttle commits between them. This
 		/// method arranges for the receiver to take from / return to the same free
 		/// list as the supplied queue.
-		/// </para><para>
+		/// <para />
 		/// Free lists are not thread-safe. Applications must ensure that all queues
 		/// sharing the same free list are doing so from only a single thread.
-		/// </para>
         /// </summary>
 		/// <param name="q">the other queue we will steal entries from.</param>
         public override void shareFreeList(BlockRevQueue q)

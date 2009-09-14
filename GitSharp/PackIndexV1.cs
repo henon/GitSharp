@@ -78,8 +78,8 @@ namespace GitSharp
 			}
 
 			ObjectCount = _idxHeader[255];
-			_packChecksum = new byte[20];
-			NB.ReadFully(fd, packChecksum, 0, packChecksum.Length);
+			PackChecksum = new byte[20];
+			NB.ReadFully(fd, PackChecksum, 0, PackChecksum.Length);
 
 
 
@@ -248,7 +248,7 @@ namespace GitSharp
 						Current.Offset = offset;
 						Current.FromRaw(_index._idxdata[_levelOne], _levelTwo + 4);
 						_levelTwo += AnyObjectId.ObjectIdLength + 4;
-						returnedNumber++;
+						ReturnedNumber++;
 						return true;
 					}
 
@@ -259,7 +259,7 @@ namespace GitSharp
 
 			public override void Reset()
 			{
-				returnedNumber = 0;
+				ReturnedNumber = 0;
 				_levelOne = 0;
 				_levelTwo = 0;
 				Current = new MutableEntry();

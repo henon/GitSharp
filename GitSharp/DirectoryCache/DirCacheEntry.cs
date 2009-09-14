@@ -80,7 +80,7 @@ namespace GitSharp.DirectoryCache
 		public const int INFO_LEN = 62;
 
 		/// <summary>
-		/// Mask applied to data in {@link #PFlags} to get the name Length.
+		/// Mask applied to data in <see cref="PFlags"/> to get the name Length.
 		/// </summary>
 		private const int NameMask = 0xfff;
 		private const int AssumeValid = 0x80;
@@ -91,7 +91,7 @@ namespace GitSharp.DirectoryCache
 		private readonly byte[] _info;
 
 		/// <summary>
-		/// First location within {@link #_info} where our header starts.
+		/// First location within <see cref="_info"/> where our header starts.
 		/// </summary>
 		private readonly int _infoOffset;
 
@@ -401,7 +401,7 @@ namespace GitSharp.DirectoryCache
 		/// <para />
 		/// Note that this is the length of the file in the working directory, which
 		/// may differ from the size of the decompressed blob if work tree filters
-		/// are being used, such as LF<->CRLF conversion.
+		/// are being used, such as LF&lt;-&gt;CRLF conversion.
 		/// </summary>
 		/// <returns> cached size of the working directory file, in bytes. </returns>
 		public int getLength()

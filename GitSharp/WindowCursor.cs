@@ -64,14 +64,14 @@ namespace GitSharp
         /// <param name="pack">The file the desired window is stored within.</param>
         /// <param name="position">Position within the file to read from.</param>
         /// <param name="dstbuf">Destination buffer to copy into.</param>
-        /// <param name="dstoff">Offset within <see cref="dstbuf"/> to start copying into.</param>
+        /// <param name="dstoff">Offset within <paramref name="dstbuf"/> to start copying into.</param>
         /// <param name="cnt">
         /// The number of bytes to copy. This value may exceed the number of
-        /// bytes remaining in the window starting at offset <see cref="position"/>.
+        /// bytes remaining in the window starting at offset <paramref name="position"/>.
         /// </param>
         /// <returns>
         /// number of bytes actually copied; this may be less than
-        /// <see cref="cnt"/> if <see cref="cnt"/> exceeded the number of
+        /// <paramref name="cnt"/> if <paramref name="cnt"/> exceeded the number of
         /// bytes available.
         /// </returns>
         /// <remarks>
@@ -102,10 +102,10 @@ namespace GitSharp
         /// Destination buffer the inflater should output decompressed
         /// data to.
         /// </param>
-        /// <param name="dstoff">Current offset within <see cref="dstbuf"/> to inflate into.</param>
+        /// <param name="dstoff">Current offset within <paramref name="dstbuf"/> to inflate into.</param>
         /// <returns>
-        /// Updated <see cref=dstoff"/> based on the number of bytes
-        /// successfully inflated into <see cref=dstbuff"/>.
+        /// Updated <paramref name="dstoff"/> based on the number of bytes
+        /// successfully inflated into <paramref name="dstbuf"/>.
         /// </returns>
         /// <remarks>
         /// this cursor does not match the provider or id and the proper

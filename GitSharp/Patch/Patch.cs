@@ -75,7 +75,7 @@ namespace GitSharp.Patch
 
 		/**
 		 * Add a single file to this patch.
-		 * <p>
+		 * <para />
 		 * Typically files should be added by parsing the text through one of this
 		 * class's parse methods.
 		 *
@@ -112,7 +112,7 @@ namespace GitSharp.Patch
 
 		/**
 		 * Parse a patch received from an InputStream.
-		 * <p>
+		 * <para />
 		 * Multiple parse calls on the same instance will concatenate the patch
 		 * data, but each parse input must start with a valid file header (don't
 		 * split a single file across parse calls).
@@ -146,7 +146,7 @@ namespace GitSharp.Patch
 
 		/**
 		 * Parse a patch stored in a byte[].
-		 * <p>
+		 * <para />
 		 * Multiple parse calls on the same instance will concatenate the patch
 		 * data, but each parse input must start with a valid file header (don't
 		 * split a single file across parse calls).

@@ -51,7 +51,7 @@ namespace GitSharp.Patch
 	[Serializable]
 	public class FileHeader
 	{
-		/** Magical file name used for file adds or deletes. */
+		// Magical file name used for file adds or deletes.
 		public const string DEV_NULL = "/dev/null";
 
 		private static readonly byte[] OldModeString = Constants.encodeASCII("old mode ");
@@ -228,7 +228,7 @@ namespace GitSharp.Patch
 		/// <param name="charsetGuess">
 		/// optional array to suggest the character set to use when
 		/// decoding each file's line. If supplied the array must have a
-		/// length of <code>{@link #getParentCount()} + 1</code>
+		/// length of <code><see cref="ParentCount"/> + 1</code>
 		/// representing the old revision character sets and the new
 		/// revision character set.
 		/// </param>
@@ -346,7 +346,7 @@ namespace GitSharp.Patch
 		/// of this patch:
 		/// <ul>
 		/// <li><i>file add</i>: always <code>/dev/null</code></li>
-		/// <li><i>file modify</i>: always {@link #getNewName()}</li>
+		/// <li><i>file modify</i>: always <see cref="NewName"/></li>
 		/// <li><i>file delete</i>: always the file being deleted</li>
 		/// <li><i>file copy</i>: source file the copy originates from</li>
 		/// <li><i>file rename</i>: source file the rename originates from</li>
@@ -365,10 +365,10 @@ namespace GitSharp.Patch
 		/// of this patch:
 		/// <ul>
 		/// <li><i>file add</i>: always the file being created</li>
-		/// <li><i>file modify</i>: always {@link #getOldName()}</li>
+		/// <li><i>file modify</i>: always <see cref="OldName"/></li>
 		/// <li><i>file delete</i>: always <code>/dev/null</code></li>
 		/// <li><i>file copy</i>: destination file the copy ends up at</li>
-		/// <li><i>file rename</i>: destination file the rename ends up at/li>
+		/// <li><i>file rename</i>: destination file the rename ends up at</li>
 		/// </ul>
 		/// </summary>
 		/// <returns></returns>
@@ -403,9 +403,9 @@ namespace GitSharp.Patch
 		}
 
 		/// <summary>
-		/// Returns similarity score between <see cref="getOldName()"/> and
-		/// <see cref="getNewName()"/> if <see cref="getChangeType()"/> is
-		/// <see cref="ChangeType.COPY"/> or <see cref="ChangeType.RENAME"/>.
+		/// Returns similarity score between <see cref="OldName"/> and
+		/// <see cref="NewName"/> if <see cref="getChangeType()"/> is
+		/// <see cref="ChangeTypeEnum.COPY"/> or <see cref="ChangeTypeEnum.RENAME"/>.
 		/// </summary>
 		/// <returns></returns>
 		public int getScore()
@@ -478,7 +478,7 @@ namespace GitSharp.Patch
 		}
 
 		/// <summary>
-		/// If a <see cref="PatchType.GIT_BINARY"/>, the new-image delta/literal
+		/// If a <see cref="PatchTypeEnum.GIT_BINARY"/>, the new-image delta/literal
 		/// </summary>
 		/// <returns></returns>
 		public BinaryHunk getForwardBinaryHunk()
@@ -487,7 +487,7 @@ namespace GitSharp.Patch
 		}
 
 		/// <summary>
-		/// If a <see cref="PatchType.GIT_BINARY"/>, the old-image delta/literal
+		/// If a <see cref="PatchTypeEnum.GIT_BINARY"/>, the old-image delta/literal
 		/// </summary>
 		/// <returns></returns>
 		public BinaryHunk getReverseBinaryHunk()

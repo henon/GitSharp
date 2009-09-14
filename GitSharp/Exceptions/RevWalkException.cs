@@ -37,39 +37,28 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-using GitSharp.RevWalk;
-
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Exceptions
 {
-/**
- * Indicates a checked exception was thrown inside of {@link RevWalk}.
- * <p>
- * Usually this exception is thrown from the Iterator created around a RevWalk
- * instance, as the Iterator API does not allow checked exceptions to be thrown
- * from hasNext() or next(). The {@link Exception#getCause()} of this exception
- * is the original checked exception that we really wanted to throw back to the
- * application for handling and recovery.
- */
-public class RevWalkException : Exception {
-
-	/**
-	 * Create a new walk exception an original cause.
-	 *
-	 * @param cause
-	 *            the checked exception that describes why the walk failed.
-	 */
-    public RevWalkException(Exception cause)
-        : base("Walk failure.", cause)
-    {
-		
+	/// <summary>
+	/// Indicates a checked exception was thrown inside of <see cref="RevWalk"/>.
+	/// <para/>
+	/// Usually this exception is thrown from the Iterator created around a RevWalk
+	/// instance, as the Iterator API does not allow checked exceptions to be thrown
+	/// from hasNext() or next(). The <see cref="Exception.Message"/> of this exception
+	/// is the original checked exception that we really wanted to throw back to the
+	/// application for handling and recovery.
+	/// </summary>
+	public class RevWalkException : Exception
+	{
+		/// <summary>
+		/// Create a new walk exception an original cause.
+		/// </summary>
+		/// <param name="cause">The checked exception that describes why the walk failed.</param>
+		public RevWalkException(Exception cause)
+			: base("Walk failure.", cause)
+		{
+		}
 	}
-}
 }

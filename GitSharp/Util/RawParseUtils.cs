@@ -262,7 +262,7 @@ namespace GitSharp.Util
 
 		/**
          * Parse a base 10 numeric from a sequence of ASCII digits into an int.
-         * <p>
+         * <para />
          * Digit sequences can begin with an optional run of spaces before the
          * sequence, and may start with a '+' or a '-' to indicate sign position.
          * Any other characters will cause the method to stop and return the current
@@ -321,7 +321,7 @@ namespace GitSharp.Util
 
 		/**
      * Parse a base 10 numeric from a sequence of ASCII digits into a long.
-     * <p>
+     * <para />
      * Digit sequences can begin with an optional run of spaces before the
      * sequence, and may start with a '+' or a '-' to indicate sign position.
      * Any other characters will cause the method to stop and return the current
@@ -381,7 +381,7 @@ namespace GitSharp.Util
 
 		/**
          * Parse 4 character base 16 (hex) formatted string to unsigned integer.
-         * <p>
+         * <para />
          * The number is Read in network byte order, that is, most significant
          * nybble first.
          *
@@ -412,7 +412,7 @@ namespace GitSharp.Util
 
 		/**
          * Parse 8 character base 16 (hex) formatted string to unsigned integer.
-         * <p>
+         * <para />
          * The number is Read in network byte order, that is, most significant
          * nybble first.
          *
@@ -472,7 +472,7 @@ namespace GitSharp.Util
 
 		/**
          * Parse a Git style timezone string.
-         * <p>
+         * <para />
          * The sequence "-0315" will be parsed as the numeric value -195, as the
          * lower two positions count minutes, not 100ths of an hour.
          * 
@@ -525,7 +525,7 @@ namespace GitSharp.Util
 
 		/**
          * Locate the first position After the next LF.
-         * <p>
+         * <para />
          * This method stops on the first '\n' it finds.
          *
          * @param b
@@ -541,7 +541,7 @@ namespace GitSharp.Util
 
 		/**
          * Locate the first position After the next LF.
-         * <p>
+         * <para />
          * This method stops on the first '\n' it finds.
          *
          * @param b
@@ -557,7 +557,7 @@ namespace GitSharp.Util
 
 		/**
          * Locate the first position After either the given character or LF.
-         * <p>
+         * <para />
          * This method stops on the first match it finds from either chrA or '\n'.
          * 
          * @param b
@@ -582,7 +582,7 @@ namespace GitSharp.Util
 
 		/**
          * Locate the first position After either the given character or LF.
-         * <p>
+         * <para />
          * This method stops on the first match it finds from either chrA or '\n'.
          * 
          * @param b
@@ -631,7 +631,7 @@ namespace GitSharp.Util
 
 		/**
          * Locate the first position before the previous LF.
-         * <p>
+         * <para />
          * This method stops on the first '\n' it finds.
          *
          * @param b
@@ -647,7 +647,7 @@ namespace GitSharp.Util
 
 		/**
          * Locate the previous position before either the given character or LF.
-         * <p>
+         * <para />
          * This method stops on the first match it finds from either chrA or '\n'.
          *
          * @param b
@@ -674,14 +674,14 @@ namespace GitSharp.Util
 
 		/**
          * Index the region between <code>[ptr, end)</code> to find line starts.
-         * <p>
+         * <para />
          * The returned list is 1 indexed. Index 0 contains
          * {@link Integer#MIN_VALUE} to pad the list out.
-         * <p>
+         * <para />
          * Using a 1 indexed list means that line numbers can be directly accessed
          * from the list, so <code>list.get(1)</code> (aka get line 1) returns
          * <code>ptr</code>.
-         * <p>
+         * <para />
          * The last element (index <code>map.size()-1</code>) always contains
          * <code>end</code>.
          *
@@ -815,11 +815,11 @@ namespace GitSharp.Util
 
 		/**
          * Parse the "encoding " header into a character set reference.
-         * <p>
+         * <para />
          * Locates the "encoding " header (if present) by first calling
          * {@link #encoding(byte[], int)} and then returns the proper character set
          * to Apply to this buffer to evaluate its contents as character data.
-         * <p>
+         * <para />
          * If no encoding header is present, {@link Constants#CHARSET} is assumed.
          * 
          * @param b
@@ -846,7 +846,7 @@ namespace GitSharp.Util
 
 		/**
          * Parse a name line (e.g. author, committer, tagger) into a PersonIdent.
-         * <p>
+         * <para />
          * When passing in a value for <code>nameB</code> callers should use the
          * return value of {@link #author(byte[], int)} or
          * {@link #committer(byte[], int)}, as these methods provide the proper
@@ -880,7 +880,7 @@ namespace GitSharp.Util
 
 		/**
          * Parse a name data (e.g. as within a reflog) into a PersonIdent.
-         * <p>
+         * <para />
          * When passing in a value for <code>nameB</code> callers should use the
          * return value of {@link #author(byte[], int)} or
          * {@link #committer(byte[], int)}, as these methods provide the proper
@@ -933,11 +933,11 @@ namespace GitSharp.Util
 
 		/**
          * Locate the end of a footer line key string.
-         * <p>
+         * <para />
          * If the region at {@code raw[ptr]} matches {@code ^[A-Za-z0-9-]+:} (e.g.
          * "Signed-off-by: A. U. Thor\n") then this method returns the position of
          * the first ':'.
-         * <p>
+         * <para />
          * If the region at {@code raw[ptr]} does not match {@code ^[A-Za-z0-9-]+:}
          * then this method returns -1.
          *
@@ -1194,7 +1194,7 @@ namespace GitSharp.Util
 
 		/**
          * Locate the end of a paragraph.
-         * <p>
+         * <para />
          * A paragraph is ended by two consecutive LF bytes.
          * 
          * @param b

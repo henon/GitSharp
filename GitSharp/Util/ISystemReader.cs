@@ -36,40 +36,37 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace GitSharp.Util
 {
-    /**
-     * Interface to Read values from the system.
-     * <p>
-     * When writing unit tests, extending this interface with a custom class
-     * permits to simulate an access to a system variable or property and
-     * permits to control the user's global configuration.
-     * </p>
-     */
+    /// <summary>
+    /// Interface to read values from the system.
+	/// <para />
+	/// When writing unit tests, extending this interface with a custom class
+	/// permits to simulate an access to a system variable or property and
+	/// permits to control the user's global configuration.
+    /// </summary>
     public interface ISystemReader
     {
         string getHostname();
 
-        /**
-         * @param variable system variable to Read
-         * @return value of the system variable
-         */
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="variable">variable system variable to read</param>
+        /// <returns>value of the system variable</returns>
         string getenv(string variable); // [henon] todo: rename later
 
-        /**
-         * @param key of the system property to Read
-         * @return value of the system property
-         */
+        /// <summary>
+        /// key of the system property to read
+        /// </summary>
+		/// <param name="key">value of the system property</param>
+        /// <returns></returns>
         string getProperty(string key);  // [henon] todo: rename later
 
-        /**
-         * @return the git configuration found in the user home
-         */
+        /// <summary>
+		/// The git configuration found in the user home
+        /// </summary>
+        /// <returns></returns>
         RepositoryConfig openUserConfig();  // [henon] todo: rename later
     }
 }

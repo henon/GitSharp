@@ -221,7 +221,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Back door to quickly Create a subtree iterator for any subtree.
-		 * <p>
+		 * <para />
 		 * Don't use this unless you are ObjectWalk. The method is meant to be
 		 * called only once the current entry has been identified as a tree and its
 		 * identity has been converted into an ObjectId.

@@ -45,7 +45,7 @@ namespace GitSharp.DirectoryCache
 {
 	/// <summary>
 	/// Iterate a <see cref="DirCache"/> as part of a <see cref="TreeWalk"/>.
-	/// <p>
+	/// <para/>
 	/// This is an iterator to adapt a loaded <see cref="DirCache"/> instance (such as
 	/// Read from an existing <code>.git/index</code> file) to the tree structure
 	/// used by a <see cref="TreeWalk"/>, making it possible for applications to walk
@@ -62,7 +62,7 @@ namespace GitSharp.DirectoryCache
 
 		/// <summary>
 		/// Create a new iterator for an already loaded DirCache instance.
-		/// <p>
+		/// <para/>
 		/// The iterator implementation may copy part of the cache's data during
 		/// construction, so the cache must be Read in prior to creating the
 		/// iterator.

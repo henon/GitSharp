@@ -44,16 +44,16 @@ namespace GitSharp.DirectoryCache
 {
 	/// <summary>
 	/// Iterate and update a <see cref="DirCache"/> as part of a <see cref="TreeWalk"/>.
-	/// <p>
+	/// <para />
 	/// Like <see cref="DirCacheIterator"/> this iterator allows a <see cref="DirCache"/>
 	/// to be used in parallel with other sorts of iterators in a <see cref="TreeWalk"/>. 
 	/// However any entry which appears in the source <see cref="DirCache"/> and which 
 	/// is skipped by the <see cref="TreeFilter"/> is automatically copied into 
 	/// <see cref="DirCacheBuilder"/>, thus retaining it in the newly updated index.
-	/// <para><para>
+	/// <para/>
 	/// This iterator is suitable for update processes, or even a simple delete
 	/// algorithm. For example deleting a path:
-	/// </para><para>
+	/// <para/>
 	/// <example>
 	/// DirCache dirc = DirCache.lock(db);
 	/// DirCacheBuilder edit = dirc.builder();
@@ -68,7 +68,6 @@ namespace GitSharp.DirectoryCache
 	/// ; // do nothing on a match as we want to remove matches
 	/// edit.commit();
 	/// </example>
-	/// </para>
 	/// </summary>
     public class DirCacheBuildIterator : DirCacheIterator
     {
@@ -76,7 +75,7 @@ namespace GitSharp.DirectoryCache
 
 		/// <summary>
 		/// Create a new iterator for an already loaded <see cref="DirCache"/> instance.
-		/// <p>
+		/// <para/>
 		/// The iterator implementation may copy part of the cache's data during
 		/// construction, so the cache must be Read in prior to creating the
 		/// iterator.
@@ -93,7 +92,7 @@ namespace GitSharp.DirectoryCache
 
 		/// <summary>
 		/// Create a new iterator for an already loaded <see cref="DirCache"/> instance.
-		/// <p>
+		/// <para/>
 		/// The iterator implementation may copy part of the cache's data during
 		/// construction, so the cache must be Read in prior to creating the
 		/// iterator.

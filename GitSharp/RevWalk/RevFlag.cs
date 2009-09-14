@@ -46,13 +46,13 @@ namespace GitSharp.RevWalk
     public class RevFlag
     {
 		/// <summary>
-		/// Uninteresting by {@link RevWalk#markUninteresting(RevCommit)}.
-		/// 
+		/// Uninteresting by <see cref="RevWalk.markUninteresting(RevCommit)"/>.
+		/// <para />
 		/// We flag commits as uninteresting if the caller does not want commits
-		/// reachable from a commit to {@link RevWalk#markUninteresting(RevCommit)}.
+		/// reachable from a commit to <see cref="RevWalk.markUninteresting(RevCommit)"/>.
 		/// This flag is always carried into the commit's parents and is a key part
 		/// of the "rev-list B --not A" feature; A is marked UNINTERESTING.
-		/// 
+		/// <para />
 		/// This is a static flag. Its RevWalk is not available.
 		/// </summary>
         public static RevFlag UNINTERESTING = new StaticRevFlag("UNINTERESTING", RevWalk.UNINTERESTING);

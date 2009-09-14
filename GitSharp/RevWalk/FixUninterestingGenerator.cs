@@ -40,7 +40,7 @@ namespace GitSharp.RevWalk
 {
 	/// <summary>
 	/// Filters out commits marked <see cref="RevWalk.UNINTERESTING"/>.
-	/// <para>
+	/// <para />
 	/// This generator is only in front of another generator that has fully buffered
 	/// commits, such that we are called only After the <see cref="PendingGenerator"/> has
 	/// exhausted its input queue and given up. It skips over any uninteresting

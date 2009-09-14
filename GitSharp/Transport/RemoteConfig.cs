@@ -64,12 +64,12 @@ namespace GitSharp.Transport
 		private const bool DefaultMirror = false;
 
 		/// <summary>
-		/// Default value for {@link #getUploadPack()} if not specified.
+		/// Default value for <see cref="UploadPack"/> if not specified.
 		/// </summary>
 		public const string DEFAULT_UPLOAD_PACK = "git-upload-pack";
 
 		/// <summary>
-		/// Default value for {@link #getReceivePack()} if not specified.
+		/// Default value for <see cref="ReceivePack"/> if not specified.
 		/// </summary>
 		public const string DEFAULT_RECEIVE_PACK = "git-receive-pack";
 
@@ -86,9 +86,6 @@ namespace GitSharp.Transport
 		/// configuration. Returned configurations are ordered
 		/// lexicographically by names.
 		/// </returns>
-		/// <exception cref="URISyntaxException">
-		/// One of the URIs within the remote's configuration is invalid.
-		/// </exception>
 		public static List<RemoteConfig> GetAllRemoteConfigs(RepositoryConfig rc)
 		{
 			var names = new List<string>(rc.getSubsections(Section));

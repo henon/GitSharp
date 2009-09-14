@@ -65,13 +65,12 @@ namespace GitSharp.Diff
 		/// <summary>
 		/// Change the number of lines of context to display.
 		///	</summary>
-		/// </summary>
 		///	<param name="lineCount">
 		/// Number of lines of context to see before the first
 		/// modification and After the last modification within a hunk of
 		/// the modified file.
 		/// </param>
-		public virtual void setContext(int lineCount)
+		public void setContext(int lineCount)
 		{
 			if (lineCount < 0)
 			{
@@ -83,11 +82,10 @@ namespace GitSharp.Diff
 
 		/// <summary>
 		/// Format a patch script, reusing a previously parsed FileHeader.
-		///	<p>
+		///	<para />
 		///	This formatter is primarily useful for editing an existing patch script
 		///	to increase or reduce the number of lines of context within the script.
 		///	All header lines are reused as-is from the supplied FileHeader.
-		///	</summary>
 		/// </summary>
 		/// <param name="out">stream to write the patch script out to.</param>
 		/// <param name="head">existing file header containing the header lines to copy.</param>
@@ -96,7 +94,7 @@ namespace GitSharp.Diff
 		/// This must match the content of <seealso cref="FileHeader.getOldId()"/>.
 		/// </param>
 		/// <param name="b">writing to the supplied stream failed.</param>
-		public virtual void format(Stream @out, FileHeader head, RawText a, RawText b)
+		public void format(Stream @out, FileHeader head, RawText a, RawText b)
 		{
 			// Reuse the existing FileHeader as-is by blindly copying its
 			// header lines, but avoiding its hunks. Instead we recreate

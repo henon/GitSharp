@@ -80,7 +80,7 @@ namespace GitSharp.Util
 
         /**
          * Determine if the file is executable (or not).
-         * <p>
+         * <para />
          * Not all platforms and JREs support executable flags on files. If the
          * feature is unsupported this method will always return false.
          * 
@@ -95,7 +95,7 @@ namespace GitSharp.Util
 
         /**
          * Set a file to be executable by the user.
-         * <p>
+         * <para />
          * Not all platforms and JREs support executable flags on files. If the
          * feature is unsupported this method will always return false and no
          * changes will be made to the file specified.
@@ -113,12 +113,12 @@ namespace GitSharp.Util
 
         /**
          * Resolve this file to its actual path name that the JRE can use.
-         * <p>
+         * <para />
          * This method can be relatively expensive. Computing a translation may
          * require forking an external process per path name translated. Callers
          * should try to minimize the number of translations necessary by caching
          * the results.
-         * <p>
+         * <para />
          * Not all platforms and JREs require path name translation. Currently only
          * Cygwin on Win32 require translation for Cygwin based paths.
          * 
@@ -136,12 +136,12 @@ namespace GitSharp.Util
 
         /**
          * Resolve this file to its actual path name that the JRE can use.
-         * <p>
+         * <para />
          * This method can be relatively expensive. Computing a translation may
          * require forking an external process per path name translated. Callers
          * should try to minimize the number of translations necessary by caching
          * the results.
-         * <p>
+         * <para />
          * Not all platforms and JREs require path name translation. Currently only
          * Cygwin on Win32 require translation for Cygwin based paths.
          * 
@@ -161,10 +161,10 @@ namespace GitSharp.Util
 
         /**
          * Determine the user's home directory (location where preferences are).
-         * <p>
+         * <para />
          * This method can be expensive on the first invocation if path name
          * translation is required. Subsequent invocations return a cached result.
-         * <p>
+         * <para />
          * Not all platforms and JREs require path name translation. Currently only
          * Cygwin on Win32 requires translation of the Cygwin HOME directory.
          * 

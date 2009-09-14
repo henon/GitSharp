@@ -40,7 +40,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading;
 using GitSharp.Exceptions;
 using GitSharp.Util;
 
@@ -95,8 +94,8 @@ namespace GitSharp.Transport
 
         private void readAdvertisedRefsImpl()
         {
-            Dictionary<string, Ref> avail = new Dictionary<string, Ref>();
-            for (;;)
+            var avail = new Dictionary<string, Ref>();
+            while (true)
             {
                 string line;
 
@@ -104,11 +103,14 @@ namespace GitSharp.Transport
                 {
                     line = pckIn.ReadString();
                 }
-                catch (EndOfStreamException eof)
+                catch (EndOfStreamException)
                 {
                     if (avail.Count == 0)
-                        throw noRepository();
-                    throw eof;
+                    {
+                    	throw noRepository();
+                    }
+
+                    throw;
                 }
 
                 if (avail.Count == 0)
@@ -158,7 +160,7 @@ namespace GitSharp.Transport
             available(avail);
         }
 
-        protected TransportException noRepository()
+        protected virtual TransportException noRepository()
         {
             return new NoRemoteRepositoryException(uri, "not found.");
         }

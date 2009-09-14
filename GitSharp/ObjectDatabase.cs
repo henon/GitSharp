@@ -36,33 +36,32 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+using System;
 using System.Collections.Generic;
-using GitSharp.Util;
 using System.IO;
+using GitSharp.Util;
 
 namespace GitSharp
 {
 	/// <summary>
 	/// Abstraction of arbitrary object storage.
-	/// <para>
+	/// <para />
 	/// An object database stores one or more Git objects, indexed by their unique
 	/// <see cref="ObjectId"/>. Optionally an object database can reference one or more
 	/// alternates; other <see cref="ObjectDatabase"/> instances that are searched in 
 	/// addition to the current database.
-	/// </para><para>
+	/// <para />
 	/// Databases are usually divided into two halves: a half that is considered to
 	/// be fast to search, and a half that is considered to be slow to search. When
 	/// alternates are present the fast half is fully searched (recursively through
 	/// all alternates) before the slow half is considered.
-	/// </para>
 	/// </summary>
 	public abstract class ObjectDatabase
     {
         /// <summary>
 		/// Constant indicating no alternate databases exist.
         /// </summary>
-        public static ObjectDatabase[] NoAlternates = { };
+        protected static readonly ObjectDatabase[] NoAlternates = { };
 
         private readonly AtomicReference<ObjectDatabase[]> _alternates;
 
@@ -84,38 +83,37 @@ namespace GitSharp
             return true;
         }
 
-        /**
-         * Initialize a new object database at this location.
-         *
-         * @
-         *             the database could not be created.
-         */
+        /// <summary>
+		/// Initialize a new object database at this location.
+        /// </summary>
         public virtual void create()
         {
             // Assume no action is required.
         }
 
-        /**
-         * Close any resources held by this database and its active alternates.
-         */
-        public virtual void close()
+        /// <summary>
+		/// Close any resources held by this database and its active alternates.
+        /// </summary>
+        public void close()
         {
             closeSelf();
             closeAlternates();
         }
 
-        /**
-         * Close any resources held by this database only; ignoring alternates.
-         * <p>
-         * To fully close this database and its referenced alternates, the caller
-         * should instead invoke {@link #close()}.
-         */
+        /// <summary>
+        /// Close any resources held by this database only; ignoring alternates.
+		/// <para />
+		/// To fully close this database and its referenced alternates, the caller
+		/// should instead invoke <see cref="close()"/>.
+        /// </summary>
         public virtual void closeSelf()
         {
             // Assume no action is required.
         }
 
-        /** Fully close all loaded alternates and clear the alternate list. */
+        /// <summary>
+		/// Fully close all loaded alternates and clear the alternate list.
+        /// </summary>
         public virtual void closeAlternates()
         {
             ObjectDatabase[] alt = _alternates.get();
@@ -129,17 +127,17 @@ namespace GitSharp
             }
         }
 
-        /**
-         * Does the requested object exist in this database?
-         * <p>
-         * Alternates (if present) are searched automatically.
-         *
-         * @param objectId
-         *            identity of the object to test for existence of.
-         * @return true if the specified object is stored in this database, or any
-         *         of the alternate databases.
-         */
-        public virtual bool hasObject(AnyObjectId objectId)
+        /// <summary>
+        /// Does the requested object exist in this database?
+		/// <para />
+		/// Alternates (if present) are searched automatically.
+        /// </summary>
+        /// <param name="objectId">identity of the object to test for existence of.</param>
+        /// <returns>
+        /// True if the specified object is stored in this database, or any
+		/// of the alternate databases.
+        /// </returns>
+        public bool hasObject(AnyObjectId objectId)
         {
             return hasObjectImpl1(objectId) || hasObjectImpl2(objectId.ToString());
         }
@@ -176,42 +174,46 @@ namespace GitSharp
             return false;
         }
 
-        /**
-         * Fast half of {@link #hasObject(AnyObjectId)}.
-         *
-         * @param objectId
-         *            identity of the object to test for existence of.
-         * @return true if the specified object is stored in this database.
-         */
+        /// <summary>
+		/// Fast half of <see cref="hasObject(AnyObjectId)"/>.
+        /// </summary>
+        /// <param name="objectId">
+        /// Identity of the object to test for existence of.
+        /// </param>
+        /// <returns>
+        /// true if the specified object is stored in this database.
+        /// </returns>
         public abstract bool hasObject1(AnyObjectId objectId);
 
-        /**
-         * Slow half of {@link #hasObject(AnyObjectId)}.
-         *
-         * @param objectName
-         *            identity of the object to test for existence of.
-         * @return true if the specified object is stored in this database.
-         */
+		/// <summary>
+		/// Slow half of <see cref="hasObject(AnyObjectId)"/>.
+		/// </summary>
+		/// <param name="objectName">
+		/// Identity of the object to test for existence of.
+		/// </param>
+		/// <returns>
+		/// true if the specified object is stored in this database.
+		/// </returns>
         public virtual bool hasObject2(string objectName)
         {
             // Assume the search took place during hasObject1.
             return false;
         }
 
-        /**
-         * Open an object from this database.
-         * <p>
-         * Alternates (if present) are searched automatically.
-         *
-         * @param curs
-         *            temporary working space associated with the calling thread.
-         * @param objectId
-         *            identity of the object to open.
-         * @return a {@link ObjectLoader} for accessing the data of the named
-         *         object, or null if the object does not exist.
-         * @
-         */
-        public virtual ObjectLoader openObject(WindowCursor curs, AnyObjectId objectId)
+        /// <summary>
+        /// Open an object from this database.
+		/// <para />
+		/// Alternates (if present) are searched automatically.
+        /// </summary>
+        /// <param name="curs">
+        /// Temporary working space associated with the calling thread.
+        /// </param>
+        /// <param name="objectId">Identity of the object to open.</param>
+        /// <returns>
+        /// A <see cref="ObjectLoader"/> for accessing the data of the named
+		/// object, or null if the object does not exist.
+        /// </returns>
+        public ObjectLoader openObject(WindowCursor curs, AnyObjectId objectId)
         {
             if (objectId == null) return null;
 
@@ -279,33 +281,32 @@ namespace GitSharp
             return null;
         }
 
-        /**
-         * Fast half of {@link #openObject(WindowCursor, AnyObjectId)}.
-         *
-         * @param curs
-         *            temporary working space associated with the calling thread.
-         * @param objectId
-         *            identity of the object to open.
-         * @return a {@link ObjectLoader} for accessing the data of the named
-         *         object, or null if the object does not exist.
-         * @
-         */
+        /// <summary>
+        /// Fast half of <see cref="openObject(WindowCursor, AnyObjectId)"/>.
+        /// </summary>
+        /// <param name="curs">
+        /// temporary working space associated with the calling thread.
+        /// </param>
+        /// <param name="objectId">identity of the object to open.</param>
+        /// <returns>
+        /// A <see cref="ObjectLoader"/> for accessing the data of the named
+		/// object, or null if the object does not exist.
+        /// </returns>
         public abstract ObjectLoader openObject1(WindowCursor curs,
                 AnyObjectId objectId);
 
-        /**
-         * Slow half of {@link #openObject(WindowCursor, AnyObjectId)}.
-         *
-         * @param curs
-         *            temporary working space associated with the calling thread.
-         * @param objectName
-         *            name of the object to open.
-         * @param objectId
-         *            identity of the object to open.
-         * @return a {@link ObjectLoader} for accessing the data of the named
-         *         object, or null if the object does not exist.
-         * @
-         */
+		/// <summary>
+		/// Slow half of <see cref="openObject(WindowCursor, AnyObjectId)"/>.
+		/// </summary>
+		/// <param name="curs">
+		/// temporary working space associated with the calling thread.
+		/// </param>
+		/// <param name="objectName">Name of the object to open.</param>
+		/// <param name="objectId">identity of the object to open.</param>
+		/// <returns>
+		/// A <see cref="ObjectLoader"/> for accessing the data of the named
+		/// object, or null if the object does not exist.
+		/// </returns>
         public virtual ObjectLoader openObject2(WindowCursor curs, string objectName,
                 AnyObjectId objectId)
         {
@@ -315,9 +316,8 @@ namespace GitSharp
 
 		/// <summary>
 		/// Open the object from all packs containing it.
-		/// <para>
+		/// <para />
 		/// If any alternates are present, their packs are also considered.
-		/// </para>
 		/// </summary>
 		/// <param name="out">
 		/// Result collection of loaders for this object, filled with
@@ -327,7 +327,7 @@ namespace GitSharp
 		/// Temporary working space associated with the calling thread.
 		/// </param>
 		/// <param name="objectId"><see cref="ObjectId"/> of object to search for.</param>
-        public virtual void OpenObjectInAllPacks(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
+        public void OpenObjectInAllPacks(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
         {
             OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
             foreach (ObjectDatabase alt in getAlternates())
@@ -338,9 +338,8 @@ namespace GitSharp
 
 		/// <summary>
 		/// Open the object from all packs containing it.
-		/// <para>
+		/// <para />
 		/// If any alternates are present, their packs are also considered.
-		/// </para>
 		/// </summary>
 		/// <param name="out">
 		/// Result collection of loaders for this object, filled with
@@ -355,20 +354,22 @@ namespace GitSharp
             // Assume no pack support
         }
 
-        /**
-         * @return true if the fast-half search should be tried again.
-         */
+        /// <summary>
+		/// true if the fast-half search should be tried again.
+        /// </summary>
+        /// <returns></returns>
         public virtual bool tryAgain1()
         {
             return false;
         }
 
-        /**
-         * Get the alternate databases known to this database.
-         *
-         * @return the alternate list. Never null, but may be an empty array.
-         */
-        public virtual ObjectDatabase[] getAlternates()
+        /// <summary>
+        /// Get the alternate databases known to this database.
+        /// </summary>
+        /// <returns>
+		/// The alternate list. Never null, but may be an empty array.
+        /// </returns>
+        public ObjectDatabase[] getAlternates()
         {
             ObjectDatabase[] r = _alternates.get();
             if (r == null)
@@ -393,21 +394,21 @@ namespace GitSharp
             return r;
         }
 
-        /**
-         * Load the list of alternate databases into memory.
-         * <p>
-         * This method is invoked by {@link #getAlternates()} if the alternate list
-         * has not yet been populated, or if {@link #closeAlternates()} has been
-         * called on this instance and the alternate list is needed again.
-         * <p>
-         * If the alternate array is empty, implementors should consider using the
-         * constant {@link #NoAlternates}.
-         *
-         * @return the alternate list for this database.
-         * @
-         *             the alternate list could not be accessed. The empty alternate
-         *             array {@link #NoAlternates} will be assumed by the caller.
-         */
+        /// <summary>
+        /// Load the list of alternate databases into memory.
+		/// <para />
+		/// This method is invoked by <see cref="getAlternates()"/> if the alternate list
+		/// has not yet been populated, or if <see cref="closeAlternates()"/> has been
+		/// called on this instance and the alternate list is needed again.
+		/// <para />
+		/// If the alternate array is empty, implementors should consider using the
+		/// constant <see cref="NoAlternates"/>.
+        /// </summary>
+        /// <returns>The alternate list for this database.</returns>
+        /// <exception cref="Exception">
+        /// The alternate list could not be accessed. The empty alternate
+		/// array <see cref="NoAlternates"/> will be assumed by the caller.
+        /// </exception>
         public virtual ObjectDatabase[] loadAlternates()
         {
             return NoAlternates;

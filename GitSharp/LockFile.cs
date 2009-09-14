@@ -279,61 +279,65 @@ namespace GitSharp
             }
         }
 
-        /**
-         * Obtain the direct output stream for this lock.
-         *
-         * The stream may only be accessed once, and only after {@link #lock()} has
-         * been successfully invoked and returned true. Callers must close the
-         * stream prior to calling {@link #commit()} to commit the change.
-         * 
-         * @return a stream to write to the new file. The stream is unbuffered.
-         */
-        public Stream GetOutputStream()
+		/// <summary>
+		/// Obtain the direct output stream for this lock.
+		/// <para />
+		/// The stream may only be accessed once, and only after <see cref="Lock()"/> has
+		/// been successfully invoked and returned true. Callers must close the
+		/// stream prior to calling <see cref="Commit()"/> to commit the change.
+		/// </summary>
+		/// <returns>
+		/// A stream to write to the new file. The stream is unbuffered.
+		/// </returns>
+		public Stream GetOutputStream()
         {
             RequireLock();
             return new LockFileOutputStream(this);
-        }
+		}
 
-        public class LockFileOutputStream : Stream
+		#region Nested Types
+
+		public class LockFileOutputStream : Stream
         {
-            private LockFile m_lock_file;
+            private readonly LockFile _lockFile;
+
             public LockFileOutputStream(LockFile lockfile)
             {
-                m_lock_file = lockfile;
+				_lockFile = lockfile;
             }
 
             public override void Write(byte[] b, int o, int n)
             {
-                m_lock_file._os.Write(b, o, n);
+				_lockFile._os.Write(b, o, n);
             }
 
             public void write(byte[] b)
             {
-                m_lock_file._os.Write(b, 0, b.Length);
+				_lockFile._os.Write(b, 0, b.Length);
             }
 
             public void write(int b)
             {
-                m_lock_file._os.WriteByte((byte)b);
+				_lockFile._os.WriteByte((byte)b);
             }
 
             public override void Flush()
             {
-                m_lock_file._os.Flush();
+				_lockFile._os.Flush();
             }
 
             public override void Close()
             {
                 try
                 {
-                    m_lock_file._os.Flush();
-                    m_lock_file._fLck.Release();
-                    m_lock_file._os.Close();
-                    m_lock_file._os = null;
+					_lockFile._os.Flush();
+					_lockFile._fLck.Release();
+					_lockFile._os.Close();
+					_lockFile._os = null;
                 }
                 catch (Exception)
                 {
-                    m_lock_file.Unlock();
+					_lockFile.Unlock();
                     throw;
                 }
             }
@@ -385,7 +389,6 @@ namespace GitSharp
                 throw new NotImplementedException();
             }
         }
-
 
         /// <summary>
         /// Wraps a FileStream and tracks its locking status
@@ -457,7 +460,8 @@ namespace GitSharp
                 Debug.WriteLine(GetType().Name + " has not been properly disposed: " + File);
             }
 #endif
-        }
+		}
 
-    }
+		#endregion
+	}
 }

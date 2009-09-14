@@ -287,10 +287,10 @@ namespace GitSharp.RevWalk
 		/// <summary>
 		/// Ensure this list contains at least a specified number of commits.
 		/// 
-		/// The revision walker specified by {@link #source(RevWalk)} is pumped until
+		/// The revision walker specified by <see cref="Source(RevWalk)"/> is pumped until
 		/// the given number of commits are contained in this list. If there are
 		/// fewer total commits available from the walk then the method will return
-		/// early. Callers can test the  size of the list by {@link #size()} to
+		/// early. Callers can test the  size of the list by <see cref="RevObjectList{T}.Size"/> to
 		/// determine if the high water mark specified was met.
 		/// </summary>
 		/// <param name="highMark">
@@ -356,7 +356,7 @@ namespace GitSharp.RevWalk
 		/// <summary>
 		/// Optional callback invoked when commits enter the list by fillTo.
 		/// 
-		/// This method is only called during {@link #fillTo(int)}.
+		/// This method is only called during <see cref="fillTo(int)"/>.
 		/// </summary>
 		/// <param name="index">the list position this object will appear at.</param>
 		/// <param name="t">the object being added (or set) into the list.</param>

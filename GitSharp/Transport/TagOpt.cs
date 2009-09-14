@@ -45,7 +45,7 @@ namespace GitSharp.Transport
     {
         /**
  * Automatically follow tags if we fetch the thing they point at.
- * <p>
+ * <para />
  * This is the default behavior and tries to balance the benefit of having
  * an annotated tag against the cost of possibly objects that are only on
  * branches we care nothing about. Annotated tags are fetched only if we can
@@ -56,7 +56,7 @@ namespace GitSharp.Transport
 
         /**
  * Never fetch tags, even if we have the thing it points at.
- * <p>
+ * <para />
  * This option must be requested by the user and always avoids fetching
  * annotated tags. It is most useful if the location you are fetching from
  * publishes annotated tags, but you are not interested in the tags and only
@@ -66,7 +66,7 @@ namespace GitSharp.Transport
 
         /**
  * Always fetch tags, even if we do not have the thing it points at.
- * <p>
+ * <para />
  * Unlike {@link #AUTO_FOLLOW} the tag is always obtained. This may cause
  * hundreds of megabytes of objects to be fetched if the receiving
  * repository does not yet have the necessary dependencies.

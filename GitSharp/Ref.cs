@@ -40,16 +40,15 @@ namespace GitSharp
 {
 	/// <summary>
 	/// Pairing of a name and the <seealso cref="ObjectId"/> it currently has.
-	/// <para>
+	/// <para />
 	/// A ref in Git is (more or less) a variable that holds a single object
 	/// identifier. The object identifier can be any valid Git object (blob, tree,
 	/// commit, annotated tag, ...).
-	/// </para><para>
+	/// <para />
 	/// The ref name has the attributes of the ref that was asked for as well as
 	/// the ref it was resolved to for symbolic refs plus the object id it points
 	/// to and (for tags) the peeled target object id, i.e. the tag resolved
-	/// recursively until a non-tag object is referenced. </summary>
-	///</para>
+	/// recursively until a non-tag object is referenced. 
 	/// </summary>
 	public class Ref
 	{
@@ -60,45 +59,40 @@ namespace GitSharp
 		{		
 			/// <summary>
 			/// The ref does not exist yet, updating it may create it.
-			/// <para>
+			/// <para />
 			/// Creation is likely to choose <see cref="Loose"/> storage.
-			/// </para>
 			/// </summary>
 			public static readonly Storage New = new Storage("New", true, false);
 
 			/// <summary>
 			/// The ref is Stored in a file by itself.
-			/// <para>
+			/// <para />
 			/// Updating this ref affects only this ref.
-			/// </para>
 			/// </summary>
 			public static readonly Storage Loose = new Storage("Loose", true, false);
 
 			/// <summary>
 			/// The ref is Stored in the <code>packed-refs</code> file, with others.
-			/// <para>
+			/// <para />
 			/// Updating this ref requires rewriting the file, with perhaps many
 			/// other refs being included at the same time.
-			/// </para>
 			/// </summary>
 			public static readonly Storage Packed = new Storage("Packed", false, true);
 
 			/// <summary>
 			/// The ref is both <see cref="Loose"/> and <see cref="Packed"/>.
-			/// <para>
+			/// <para />
 			/// Updating this ref requires only updating the loose file, but deletion
 			/// requires updating both the loose file and the packed refs file.
-			/// </para>
 			/// </summary>
 			public static readonly Storage LoosePacked = new Storage("LoosePacked", true, true);
 
 			/// <summary>
 			/// The ref came from a network advertisement and storage is unknown.
-			/// <para>
+			/// <para />
 			/// This ref cannot be updated without Git-aware support on the remote
 			/// side, as Git-aware code consolidate the remote refs and reported them
 			/// to this process.
-			/// </para>
 			/// </summary>
 			public static readonly Storage Network = new Storage("Network", false, false);
 
@@ -157,7 +151,8 @@ namespace GitSharp
 		/// tag or not yet peeled (in which case the next parameter should be null)
 		/// </param>
 		/// <param name="peeled">
-		/// true if <param name="peeledObjectId"> represents a the peeled value of the object</param>
+		/// true if <paramref name="peeledObjectId"/> represents a the peeled value of the object
+		/// </param>
 		public Ref(Storage storage, string refName, ObjectId id, ObjectId peeledObjectId, bool peeled)
 			: this(storage, refName, refName, id, peeledObjectId, peeled)
 		{
@@ -178,7 +173,8 @@ namespace GitSharp
 		/// tag or not yet peeled (in which case the next parameter should be null)
 		/// </param>
 		/// <param name="peeled">
-		/// true if <param name="peeledObjectId"> represents a the peeled value of the object</param>
+		/// true if <paramref name="peeledObjectId"/> represents a the peeled value of the object
+		/// </param>
 		public Ref(Storage storage, string origName, string refName, ObjectId id, ObjectId peeledObjectId, bool peeled)
 		{
 			StorageFormat = storage;

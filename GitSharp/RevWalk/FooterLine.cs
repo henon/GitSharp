@@ -124,8 +124,8 @@ namespace GitSharp.RevWalk
 		/// Extract the email address (if present) from the footer.
 		/// <para />
 		/// If there is an email address looking string inside of angle brackets
-		/// (e.g. "<a@b>"), the return value is the part extracted from inside the
-		/// brackets. If no brackets are found, then {@link #getValue()} is returned
+		/// (e.g. "&lt;a@b&gt;"), the return value is the part extracted from inside the
+		/// brackets. If no brackets are found, then <see cref="Value"/> is returned
 		/// if the value contains an '@' sign. Otherwise, null.
 		/// </summary>
 		/// <returns>email address appearing in the value of this footer, or null.</returns>

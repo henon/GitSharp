@@ -162,8 +162,8 @@ namespace GitSharp
 				_offset64 = NoBytes;
 			}
 
-			_packChecksum = new byte[20];
-			NB.ReadFully(fd, _packChecksum, 0, _packChecksum.Length);
+			PackChecksum = new byte[20];
+			NB.ReadFully(fd, PackChecksum, 0, PackChecksum.Length);
 		}
 
 		public override IEnumerator<MutableEntry> GetEnumerator()
@@ -304,7 +304,7 @@ namespace GitSharp
 						Current.Offset = offset;
 
 						_levelTwo += AnyObjectId.ObjectIdLength / 4;
-						returnedNumber++;
+						ReturnedNumber++;
 						return true;
 					}
 					_levelTwo = 0;
@@ -315,7 +315,7 @@ namespace GitSharp
 
 			public override void Reset()
 			{
-				returnedNumber = 0;
+				ReturnedNumber = 0;
 				_levelOne = 0;
 				_levelTwo = 0;
 				Current = new MutableEntry();

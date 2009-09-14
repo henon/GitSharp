@@ -48,7 +48,7 @@ namespace GitSharp.Util
     {
 	    /**
 	     * Quoting style used by the Bourne shell.
-	     * <p>
+	     * <para />
 	     * Quotes are unconditionally inserted during {@link #quote(String)}. This
 	     * protects shell meta-characters like <code>$</code> or <code>~</code> from
 	     * being recognized as special.
@@ -60,10 +60,10 @@ namespace GitSharp.Util
 
 	    /**
 	     * Quote an input string by the quoting rules.
-	     * <p>
+	     * <para />
 	     * If the input string does not require any quoting, the same String
 	     * reference is returned to the caller.
-	     * <p>
+	     * <para />
 	     * Otherwise a quoted string is returned, including the opening and closing
 	     * quotation marks at the start and end of the string. If the style does not
 	     * permit raw Unicode characters then the string will first be encoded in
@@ -77,7 +77,7 @@ namespace GitSharp.Util
 
 	    /**
 	     * Clean a previously quoted input, decoding the result via UTF-8.
-	     * <p>
+	     * <para />
 	     * This method must match quote such that:
 	     *
 	     * <pre>
@@ -99,7 +99,7 @@ namespace GitSharp.Util
 
 	    /**
 	     * Decode a previously quoted input, scanning a UTF-8 encoded buffer.
-	     * <p>
+	     * <para />
 	     * This method must match quote such that:
 	     *
 	     * <pre>
@@ -107,7 +107,7 @@ namespace GitSharp.Util
 	     * </pre>
 	     *
 	     * is true for any <code>a</code>.
-	     * <p>
+	     * <para />
 	     * This method removes any opening/closing quotation marks added by
 	     * {@link #quote(String)}.
 	     *
@@ -123,7 +123,7 @@ namespace GitSharp.Util
 
 	    /**
 	     * Quoting style used by the Bourne shell.
-	     * <p>
+	     * <para />
 	     * Quotes are unconditionally inserted during {@link #quote(String)}. This
 	     * protects shell meta-characters like <code>$</code> or <code>~</code> from
 	     * being recognized as special.

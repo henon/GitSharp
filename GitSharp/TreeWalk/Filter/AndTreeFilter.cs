@@ -48,7 +48,7 @@ namespace GitSharp.TreeWalk.Filter
 
     /**
      * Includes a tree entry only if all subfilters include the same tree entry.
-     * <p>
+     * <para />
      * Classic shortcut behavior is used, so evaluation of the
      * {@link TreeFilter#include(TreeWalk)} method stops as soon as a false result
      * is obtained. Applications can improve filtering performance by placing faster

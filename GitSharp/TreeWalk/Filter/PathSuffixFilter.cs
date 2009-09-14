@@ -55,7 +55,7 @@ namespace GitSharp.TreeWalk.Filter
 
         /**
          * Create a new tree filter for a user supplied path.
-         * <p>
+         * <para />
          * Path strings use '/' to delimit directories on all platforms.
          *
          * @param path

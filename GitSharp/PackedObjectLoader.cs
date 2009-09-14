@@ -37,6 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
 
 namespace GitSharp
@@ -57,25 +58,21 @@ namespace GitSharp
 			_objectOffset = objectOffset;
 		}
 
-		/**
-		 * Force this object to be loaded into memory and pinned in this loader.
-		 * <p>
-		 * Once materialized, subsequent get operations for the following methods
-		 * will always succeed without raising an exception, as all information is
-		 * pinned in memory by this loader instance.
-		 * <ul>
-		 * <li>{@link #getType()}</li>
-		 * <li>{@link #getSize()}</li>
-		 * <li>{@link #getBytes()}, {@link #getCachedBytes}</li>
-		 * <li>{@link #getRawSize()}</li>
-		 * <li>{@link #getRawType()}</li>
-		 * </ul>
-		 *
-		 * @param curs
-		 *            temporary thread storage during data access.
-		 * @
-		 *             the object cannot be read.
-		 */
+		/// <summary>
+		/// Force this object to be loaded into memory and pinned in this loader.
+		/// <para />
+		/// Once materialized, subsequent get operations for the following methods
+		/// will always succeed without raising an exception, as all information is
+		/// pinned in memory by this loader instance.
+		/// <ul>
+		/// <li>{@link Type}</li>
+		/// <li>{@link Size}</li>
+		/// <li>{@link #getBytes()}, {@link #getCachedBytes}</li>
+		/// <li>{@link #getRawSize()}</li>
+		/// <li>{@link #getRawType()}</li>
+		/// </ul>
+		/// </summary>
+		/// <param name="curs">temporary thread storage during data access.</param>
 		public abstract void Materialize(WindowCursor curs);
 
 		public override int Type { get; protected set; }
@@ -124,26 +121,28 @@ namespace GitSharp
 			get { return _packFile; }
 		}
 
-		/**
-		 * Peg the pack file open to support data copying.
-		 * <p>
-		 * Applications trying to copy raw pack data should ensure the pack stays
-		 * open and available throughout the entire copy. To do that use:
-		 *
-		 * <pre>
-		 * loader.beginCopyRawData();
-		 * try {
-		 * 	loader.CopyRawData(out, tmpbuf, curs);
-		 * } finally {
-		 * 	loader.endCopyRawData();
-		 * }
-		 * </pre>
-		 *
-		 * @
-		 *             this loader contains stale information and cannot be used.
-		 *             The most likely cause is the underlying pack file has been
-		 *             deleted, and the object has moved to another pack file.
-		 */
+		/// <summary>
+		/// Peg the pack file open to support data copying.
+		/// <para />
+		/// Applications trying to copy raw pack data should ensure the pack stays
+		/// open and available throughout the entire copy. To do that use:
+		/// <example>
+		/// loader.beginCopyRawData();
+		/// try 
+		/// {
+		///		loader.CopyRawData(out, tmpbuf, curs);
+		///	}
+		/// finally
+		/// {
+		///		loader.endCopyRawData();
+		///	}
+		///	</example>
+		/// </summary>
+		/// <exception cref="Exception">
+		/// This loader contains stale information and cannot be used.
+		/// The most likely cause is the underlying pack file has been
+		/// deleted, and the object has moved to another pack file.
+		/// </exception>
 		public void beginCopyRawData()
 		{
 			_packFile.beginCopyRawData();
@@ -157,24 +156,25 @@ namespace GitSharp
 			_packFile.endCopyRawData();
 		}
 
-		/**
-		 * Copy raw object representation from storage to provided output stream.
-		 * <p>
-		 * Copied data doesn't include object header. User must provide temporary
-		 * buffer used during copying by underlying I/O layer.
-		 * </p>
-		 *
-		 * @param out
-		 *            output stream when data is copied. No buffering is guaranteed.
-		 * @param buf
-		 *            temporary buffer used during copying. Recommended size is at
-		 *            least few kB.
-		 * @param curs
-		 *            temporary thread storage during data access.
-		 * @
-		 *             when the object cannot be read.
-		 * @see #beginCopyRawData()
-		 */
+		/// <summary>
+		/// Copy raw object representation from storage to provided output stream.
+		/// <para />
+		/// Copied data doesn't include object header. User must provide temporary
+		/// buffer used during copying by underlying I/O layer.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="out">
+		/// Output stream when data is copied. No buffering is guaranteed.
+		/// </param>
+		/// <param name="buf">
+		/// Temporary buffer used during copying. Recommended size is at
+		/// least few kB.
+		/// </param>
+		/// <param name="curs">temporary thread storage during data access.</param>
+		/// <exception cref="Exception">
+		/// When the object cannot be read.
+		/// </exception>
+		/// <seealso cref="beginCopyRawData"/>
 		public void CopyRawData<T>(T @out, byte[] buf, WindowCursor curs)
 			where T : Stream
 		{

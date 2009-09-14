@@ -41,11 +41,11 @@ namespace GitSharp.Transport
 
     /**
      * Marker interface for an object transport walking transport.
-     * <p>
+     * <para />
      * Implementations of WalkTransport transfer individual objects one at a time
      * from the loose objects directory, or entire packs if the source side does not
      * have the object as a loose object.
-     * <p>
+     * <para />
      * WalkTransports are not as efficient as {@link PackTransport} instances, but
      * can be useful in situations where a pack transport is not acceptable.
      * 

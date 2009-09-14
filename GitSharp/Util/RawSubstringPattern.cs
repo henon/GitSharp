@@ -51,7 +51,7 @@ namespace GitSharp.Util
 {
     /**
      * Searches text using only substring search.
-     * <p>
+     * <para />
      * Instances are thread-safe. Multiple concurrent threads may perform matches on
      * different character sequences at the same time.
      */

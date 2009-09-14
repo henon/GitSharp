@@ -43,10 +43,12 @@ using System.Runtime.CompilerServices;
 
 namespace GitSharp.Merge
 {
-	/// <summary> * A method of combining two or more trees together to form an output tree.
-	/// * <p>
-	/// * Different strategies may employ different techniques for deciding which paths
-	/// * (and ObjectIds) to carry from the input trees into the final output tree. </summary>
+	/// <summary>
+	/// A method of combining two or more trees together to form an output tree.
+	/// <para />
+	/// Different strategies may employ different techniques for deciding which paths
+	/// (and ObjectIds) to carry from the input trees into the final output tree.
+	/// </summary>
 	public abstract class MergeStrategy
 	{
 		/// <summary>

@@ -7,10 +7,10 @@ namespace GitSharp.Tests.Patch
 {
 	public class BasePatchTest
 	{
-		protected const string DIFFS_DIR = "../../../Tests/Diff/Resources/";
-		protected const string PATCHS_DIR = "../../../Tests/Patch/Resources/";
+		protected const string DiffsDir = "../../../Tests/Diff/Resources/";
+		protected const string PatchsDir = "../../../Tests/Patch/Resources/";
 
-		protected GitSharp.Patch.Patch parseTestPatchFile(string patchFile)
+		protected static GitSharp.Patch.Patch ParseTestPatchFile(string patchFile)
 		{
 			try
 			{
@@ -28,7 +28,7 @@ namespace GitSharp.Tests.Patch
 			}
 		}
 
-		protected string GetAllErrorsFromPatch(GitSharp.Patch.Patch patch)
+		protected static string GetAllErrorsFromPatch(GitSharp.Patch.Patch patch)
 		{
 			if (patch == null || patch.getErrors().Count == 0)
 			{

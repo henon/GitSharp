@@ -48,7 +48,7 @@ namespace GitSharp.Tests.Patch
         [Test]
 	    public void testHunkHeader()
         {
-            GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_BothISO88591.patch");
+            GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_BothISO88591.patch");
 		    FileHeader fh = p.getFiles()[0];
 
 		    EditList list0 = fh.Hunks[0].ToEditList();
@@ -63,7 +63,7 @@ namespace GitSharp.Tests.Patch
         [Test]
 	    public void testFileHeader()
         {
-            GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_BothISO88591.patch");
+            GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_BothISO88591.patch");
 		    FileHeader fh = p.getFiles()[0];
 		    EditList e = fh.ToEditList();
 		    Assert.AreEqual(2, e.size());
@@ -74,7 +74,7 @@ namespace GitSharp.Tests.Patch
         [Test]
 	    public void testTypes()
         {
-            GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testEditList_Types.patch");
+            GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testEditList_Types.patch");
 		    FileHeader fh = p.getFiles()[0];
 		    EditList e = fh.ToEditList();
             Assert.AreEqual(3, e.size());

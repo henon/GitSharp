@@ -142,7 +142,7 @@ namespace GitSharp.Tests.Diff
 		{
 			a = new RawText(readFile(name + "_PreImage"));
 			b = new RawText(readFile(name + "_PostImage"));
-			file = parseTestPatchFile(DIFFS_DIR + name + ".patch").getFiles()[0];
+			file = ParseTestPatchFile(DiffsDir + name + ".patch").getFiles()[0];
 		}
 
 		private void assertFormatted(string name)
@@ -154,7 +154,7 @@ namespace GitSharp.Tests.Diff
 
 		private byte[] readFile(string patchFile)
 		{
-            return File.ReadAllBytes(DIFFS_DIR + patchFile);
+            return File.ReadAllBytes(DiffsDir + patchFile);
 		}
 	}
 }

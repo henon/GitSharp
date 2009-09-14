@@ -51,7 +51,7 @@ namespace GitSharp.Tests.Patch
         public void testGetText_BothISO88591()
         {
             Encoding cs = Encoding.GetEncoding("ISO-8859-1");
-            GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_BothISO88591.patch");
+            GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_BothISO88591.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
             FileHeader fh = p.getFiles()[0];
@@ -63,7 +63,7 @@ namespace GitSharp.Tests.Patch
         public void testGetText_NoBinary()
         {
             Encoding cs = Encoding.GetEncoding("ISO-8859-1");
-            GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_NoBinary.patch");
+            GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_NoBinary.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
             FileHeader fh = p.getFiles()[0];
@@ -76,7 +76,7 @@ namespace GitSharp.Tests.Patch
         {
             Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
             Encoding csNew = Constants.CHARSET;
-            GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_Convert.patch");
+            GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_Convert.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
             FileHeader fh = p.getFiles()[0];
@@ -97,7 +97,7 @@ namespace GitSharp.Tests.Patch
         {
             Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
             Encoding csNew = Constants.CHARSET;
-            GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testGetText_DiffCc.patch");
+            GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_DiffCc.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
             var fh = (CombinedFileHeader)p.getFiles()[0];
@@ -116,7 +116,7 @@ namespace GitSharp.Tests.Patch
         private static string ReadTestPatchFile(Encoding cs)
         {
             string patchFile = (new StackFrame(1, true)).GetMethod().Name + ".patch";
-            Stream inStream = new FileStream(PATCHS_DIR + patchFile, System.IO.FileMode.Open);
+            Stream inStream = new FileStream(PatchsDir + patchFile, System.IO.FileMode.Open);
 
             try
             {

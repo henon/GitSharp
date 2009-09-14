@@ -39,7 +39,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace GitSharp.Exceptions
@@ -47,7 +46,7 @@ namespace GitSharp.Exceptions
 	/// <summary>
 	/// An exception detailing multiple reasons for failure.
 	/// </summary>
-	public class CompoundException : GitSharpException
+	public class CompoundException : GitException
 	{
 		private readonly IList<Exception> _causeList;
 

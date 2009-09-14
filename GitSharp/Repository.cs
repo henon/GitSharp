@@ -79,10 +79,9 @@ namespace GitSharp
 
 		private int _useCnt;
 		private GitIndex _index;
-		private Ref _head;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Repository"/> class. 
+		/// Initializes a new instance of the <see cref="Repository"/> class.
 		/// Assumes parent directory is the working directory.
 		/// </summary>
 		/// <param name="gitDirectory">The git directory.</param>
@@ -268,7 +267,7 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="windowCursor">
 		/// Temporary working space associated with the calling thread.
@@ -284,7 +283,7 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="id">SHA-1 of an object.</param>
 		/// <returns>
@@ -340,7 +339,7 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="id">SHA'1 of a blob</param>
 		/// <returns>
@@ -352,7 +351,7 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="id">SHA'1 of a tree</param>
 		/// <returns>
@@ -500,7 +499,9 @@ namespace GitSharp
 
 			byte[] raw = or.Bytes;
 			if (ObjectType.Tag == (ObjectType)or.Type)
+			{
 				return new Tag(this, id, refName, raw);
+			}
 
 			return new Tag(this, id, refName, null);
 		}
@@ -521,52 +522,51 @@ namespace GitSharp
 			return _refDb.NewUpdate(refName);
 		}
 
-
-		/**
-		 * Parse a git revision string and return an object id.
-		 *
-		 * Currently supported is combinations of these.
-		 * <ul>
-		 *  <li>SHA-1 - a SHA-1</li>
-		 *  <li>refs/... - a ref name</li>
-		 *  <li>ref^n - nth parent reference</li>
-		 *  <li>ref~n - distance via parent reference</li>
-		 *  <li>ref@{n} - nth version of ref</li>
-		 *  <li>ref^{tree} - tree references by ref</li>
-		 *  <li>ref^{commit} - commit references by ref</li>
-		 * </ul>
-		 *
-		 * Not supported is
-		 * <ul>
-		 * <li>timestamps in reflogs, ref@{full or relative timestamp}</li>
-		 * <li>abbreviated SHA-1's</li>
-		 * </ul>
-		 *
-		 * @param revstr A git object references expression
-		 * @return an ObjectId or null if revstr can't be resolved to any ObjectId
-		 * @ on serious errors
-		 */
-		public ObjectId Resolve(string revstr)
+		///	<summary>
+		/// Parse a git revision string and return an object id.
+		///	<para />
+		///	Currently supported is combinations of these.
+		///	<ul>
+		///	 <li>SHA-1 - a SHA-1</li>
+		///	 <li>refs/... - a ref name</li>
+		///	 <li>ref^n - nth parent reference</li>
+		///	 <li>ref~n - distance via parent reference</li>
+		///	 <li>ref@{n} - nth version of ref</li>
+		///	 <li>ref^{tree} - tree references by ref</li>
+		///	 <li>ref^{commit} - commit references by ref</li>
+		///	</ul>
+		///	<para />
+		///	Not supported is
+		///	<ul>
+		///	 <li>timestamps in reflogs, ref@{full or relative timestamp}</li>
+		///	 <li>abbreviated SHA-1's</li>
+		///	</ul>
+		///	</summary>
+		///	<param name="revision">A git object references expression.</param>
+		///	<returns>
+		/// An <see cref="ObjectId"/> or null if revstr can't be resolved to any <see cref="ObjectId"/>.
+		/// </returns>
+		///	<exception cref="IOException">On serious errors.</exception>
+		public ObjectId Resolve(string revision)
 		{
-			char[] rev = revstr.ToCharArray();
 			object oref = null;
 			ObjectId refId = null;
 
-			for (int i = 0; i < rev.Length; ++i)
+			for (int i = 0; i < revision.Length; ++i)
 			{
-				switch (rev[i])
+				switch (revision[i])
 				{
 					case '^':
 						if (refId == null)
 						{
-							var refstr = new string(rev, 0, i);
+							var refstr = new string(revision.ToCharArray(0, i));
 							refId = ResolveSimple(refstr);
 							if (refId == null) return null;
 						}
 
-						if (i + 1 < rev.Length)
+						if (i + 1 < revision.Length)
 						{
-							switch (rev[i + 1])
+							switch (revision[i + 1])
 							{
 								case '0':
 								case '1':
@@ -581,34 +581,49 @@ namespace GitSharp
 
 									int j;
 									oref = MapObject(refId, null);
+
+									while (oref is Tag)
+									{
+										var tag = (Tag)oref;
+										refId = tag.Id;
+										oref = MapObject(refId, null);
+									}
+
 									if (!(oref is Commit))
 									{
 										throw new IncorrectObjectTypeException(refId, ObjectType.Commit);
 									}
-									for (j = i + 1; j < rev.Length; ++j)
+
+									for (j = i + 1; j < revision.Length; ++j)
 									{
-										if (!Char.IsDigit(rev[j]))
-											break;
+										if (!Char.IsDigit(revision[j])) break;
 									}
-									var parentnum = new string(rev, i + 1, j - i - 1);
-									int pnum = int.Parse(parentnum);
-									if (pnum != 0)
-										refId = ((Commit)oref).ParentIds[pnum - 1];
+
+									var parentnum = new string(revision.ToCharArray(i + 1, j - i - 1));
+
+									int pnum;
+									if (int.TryParse(parentnum, out pnum) && pnum != 0)
+									{
+										ObjectId[] parents = ((Commit)oref).ParentIds;
+										refId = pnum > parents.Length ? null : parents[pnum - 1];
+									}
+
 									i = j - 1;
 									break;
 
 								case '{':
 									int k;
 									string item = null;
-									for (k = i + 2; k < rev.Length; ++k)
+									for (k = i + 2; k < revision.Length; ++k)
 									{
-										if (rev[k] != '}') continue;
-										item = new string(rev, i + 2, k - i - 2);
+										if (revision[k] != '}') continue;
+										item = new string(revision.ToCharArray(i + 2, k - i - 2));
 										break;
 									}
 
 									i = k;
 									if (item != null)
+									{
 										if (item.Equals("tree"))
 										{
 											oref = MapObject(refId, null);
@@ -655,21 +670,24 @@ namespace GitSharp
 												throw new IncorrectObjectTypeException(refId, ObjectType.Commit);
 											}
 										}
-										else if (string.IsNullOrEmpty(item))
+										else if (string.Empty.Equals(item))
 										{
 											oref = MapObject(refId, null);
-											if (oref is Tag)
+											while (oref is Tag)
 											{
-												refId = ((Tag)oref).Id;
+												var t = (Tag)oref;
+												refId = t.Id;
+												oref = MapObject(refId, null);
 											}
 										}
 										else
 										{
-											throw new RevisionSyntaxException(revstr);
+											throw new RevisionSyntaxException(revision);
 										}
+									}
 									else
 									{
-										throw new RevisionSyntaxException(revstr);
+										throw new RevisionSyntaxException(revision);
 									}
 									break;
 
@@ -677,7 +695,8 @@ namespace GitSharp
 									oref = MapObject(refId, null);
 									if (oref is Commit)
 									{
-										refId = ((Commit)oref).ParentIds[0];
+										ObjectId[] parents = ((Commit)oref).ParentIds;
+										refId = parents.Length == 0 ? null : parents[0];
 									}
 									else
 									{
@@ -689,13 +708,21 @@ namespace GitSharp
 						else
 						{
 							oref = MapObject(refId, null);
+							while (oref is Tag)
+							{
+								var tag = (Tag)oref;
+								refId = tag.Id;
+								oref = MapObject(refId, null);
+							}
+
 							if (oref is Commit)
 							{
-								refId = ((Commit)oref).ParentIds[0];
+								ObjectId[] parents = ((Commit)oref).ParentIds;
+								refId = parents.Length == 0 ? null : parents[0];
 							}
 							else
 							{
-								throw new IncorrectObjectTypeException(refId, ObjectType.Commit);
+								throw new IncorrectObjectTypeException(refId, Constants.TYPE_COMMIT);
 							}
 						}
 						break;
@@ -703,21 +730,52 @@ namespace GitSharp
 					case '~':
 						if (oref == null)
 						{
-							var refstr = new string(rev, 0, i);
+							var refstr = new string(revision.ToCharArray(0, i));
 							refId = ResolveSimple(refstr);
-							oref = MapCommit(refId);
+							if (refId == null) return null;
+							oref = MapObject(refId, null);
 						}
-						int l;
-						for (l = i + 1; l < rev.Length; ++l)
+
+						while (oref is Tag)
 						{
-							if (!Char.IsDigit(rev[l]))
+							var tag = (Tag)oref;
+							refId = tag.Id;
+							oref = MapObject(refId, null);
+						}
+
+						if (!(oref is Commit))
+						{
+							throw new IncorrectObjectTypeException(refId, Constants.TYPE_COMMIT);
+						}
+
+						int l;
+						for (l = i + 1; l < revision.Length; ++l)
+						{
+							if (!Char.IsDigit(revision[l]))
 								break;
 						}
-						var distnum = new string(rev, i + 1, l - i - 1);
-						int dist = int.Parse(distnum);
+
+						var distnum = new string(revision.ToCharArray(i + 1, l - i - 1));
+						int dist;
+
+						try
+						{
+							dist = Convert.ToInt32(distnum);
+						}
+						catch (FormatException)
+						{
+							throw new RevisionSyntaxException("Invalid ancestry length", revision);
+						}
 						while (dist > 0)
 						{
-							refId = ((Commit)oref).ParentIds[0];
+
+							ObjectId[] parents = ((Commit)oref).ParentIds;
+							if (parents.Length == 0)
+							{
+								refId = null;
+								break;
+							}
+							refId = parents[0];
 							oref = MapCommit(refId);
 							--dist;
 						}
@@ -727,16 +785,16 @@ namespace GitSharp
 					case '@':
 						int m;
 						string time = null;
-						for (m = i + 2; m < rev.Length; ++m)
+						for (m = i + 2; m < revision.Length; ++m)
 						{
-							if (rev[m] != '}') continue;
-							time = new string(rev, i + 2, m - i - 2);
+							if (revision[m] != '}') continue;
+							time = new string(revision.ToCharArray(i + 2, m - i - 2));
 							break;
 						}
 
 						if (time != null)
 						{
-							throw new RevisionSyntaxException("reflogs not yet supported by revision parser yet", revstr);
+							throw new RevisionSyntaxException("reflogs not yet supported by revision parser yet", revision);
 						}
 						i = m - 1;
 						break;
@@ -744,7 +802,7 @@ namespace GitSharp
 					default:
 						if (refId != null)
 						{
-							throw new RevisionSyntaxException(revstr);
+							throw new RevisionSyntaxException(revision);
 						}
 						break;
 				}
@@ -752,7 +810,7 @@ namespace GitSharp
 
 			if (refId == null)
 			{
-				refId = ResolveSimple(revstr);
+				refId = ResolveSimple(revision);
 			}
 
 			return refId;
@@ -848,7 +906,7 @@ namespace GitSharp
 
 			for (int i = 0; i < bytes.Length; ++i)
 			{
-                if (bytes[i] == Path.DirectorySeparatorChar)
+				if (bytes[i] == Path.DirectorySeparatorChar)
 				{
 					bytes[i] = (byte)'/';
 				}
@@ -878,6 +936,7 @@ namespace GitSharp
 		{
 			get
 			{
+				// Pre Git-1.6 logic
 				if (WorkingDirectory.GetFiles(".dotest").Length > 0)
 				{
 					return RepositoryState.Rebasing;
@@ -888,6 +947,33 @@ namespace GitSharp
 					return RepositoryState.RebasingInteractive;
 				}
 
+				// From 1.6 onwards
+				if (WorkingDirectory.GetFiles("rebase-apply/rebasing").Length > 0)
+				{
+					return RepositoryState.RebasingRebasing;
+				}
+
+				if (WorkingDirectory.GetFiles("rebase-apply/applying").Length > 0)
+				{
+					return RepositoryState.Apply;
+				}
+
+				if (WorkingDirectory.GetFiles("rebase-apply").Length > 0)
+				{
+					return RepositoryState.Rebasing;
+				}
+
+				if (WorkingDirectory.GetFiles("rebase-merge/interactive").Length > 0)
+				{
+					return RepositoryState.RebasingInteractive;
+				}
+
+				if (WorkingDirectory.GetFiles("rebase-merge").Length > 0)
+				{
+					return RepositoryState.RebasingMerge;
+				}
+
+				// Both versions
 				if (WorkingDirectory.GetFiles("MERGE_HEAD").Length > 0)
 				{
 					return RepositoryState.Merging;
@@ -900,11 +986,6 @@ namespace GitSharp
 
 				return RepositoryState.Safe;
 			}
-		}
-
-		public void ReloadRefs()
-		{
-			_head = null;
 		}
 
 		public Dictionary<string, Ref> getAllRefs()
@@ -1059,27 +1140,36 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="refName"></param>
 		/// <returns>A more user friendly ref name</returns>
-		public string ShortenRefName(string refName)
+		public static string ShortenRefName(string refName)
 		{
 			if (refName.StartsWith(Constants.R_HEADS))
+			{
 				return refName.Substring(Constants.R_HEADS.Length);
+			}
+
 			if (refName.StartsWith(Constants.R_TAGS))
+			{
 				return refName.Substring(Constants.R_TAGS.Length);
+			}
+
 			if (refName.StartsWith(Constants.R_REMOTES))
+			{
 				return refName.Substring(Constants.R_REMOTES.Length);
+			}
+
 			return refName;
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="refName"></param>
 		/// <returns>
-		/// A <see cref="ReflogReader"/> for the supplied <paramref name="refName"/>, 
+		/// A <see cref="ReflogReader"/> for the supplied <paramref name="refName"/>,
 		/// or null if the /// named ref does not exist.
 		/// </returns>
 		public ReflogReader ReflogReader(string refName)

@@ -74,7 +74,7 @@ namespace GitSharp.Tests.Diff
 		{
 			init("X");
 			fmt.setContext(0);
-			assertFormatted();
+            assertFormatted("testContext0.out");
 		}
 
 		[Test]
@@ -82,7 +82,7 @@ namespace GitSharp.Tests.Diff
 		{
 			init("X");
 			fmt.setContext(1);
-			assertFormatted();
+            assertFormatted("testContext1.out");
 		}
 
 		[Test]
@@ -90,7 +90,7 @@ namespace GitSharp.Tests.Diff
 		{
 			init("X");
 			fmt.setContext(3);
-			assertFormatted();
+            assertFormatted("testContext3.out");
 		}
 
 		[Test]
@@ -98,7 +98,7 @@ namespace GitSharp.Tests.Diff
 		{
 			init("X");
 			fmt.setContext(5);
-			assertFormatted();
+            assertFormatted("testContext5.out");
 		}
 
 		[Test]
@@ -106,7 +106,7 @@ namespace GitSharp.Tests.Diff
 		{
 			init("X");
 			fmt.setContext(10);
-			assertFormatted();
+            assertFormatted("testContext10.out");
 		}
 
 		[Test]
@@ -114,7 +114,7 @@ namespace GitSharp.Tests.Diff
 		{
 			init("X");
 			fmt.setContext(100);
-			assertFormatted();
+            assertFormatted("testContext100.out");
 		}
 
 		[Test]
@@ -143,12 +143,6 @@ namespace GitSharp.Tests.Diff
 			a = new RawText(readFile(name + "_PreImage"));
 			b = new RawText(readFile(name + "_PostImage"));
 			file = parseTestPatchFile(DIFFS_DIR + name + ".patch").getFiles()[0];
-		}
-
-		private void assertFormatted()
-		{
-		    var methodName = new System.Diagnostics.StackTrace(false).GetFrame(1).GetMethod().Name;
-            assertFormatted(methodName + ".out");
 		}
 
 		private void assertFormatted(string name)

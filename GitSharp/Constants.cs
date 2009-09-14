@@ -91,7 +91,7 @@ namespace GitSharp
             public const string Blob = "blob";
 
             /// <summary>
-            /// Text string that identifies an object as a commit.
+            ///    Text string that identifies an object as a commit.
 			/// </summary>
             /// <remarks>
             /// Commits connect trees into a string of project

@@ -272,8 +272,6 @@ namespace GitSharp
         /// </summary>
         public static readonly byte[] PACK_SIGNATURE = { (byte)'P', (byte)'A', (byte)'C', (byte)'K' };
 		
-        public static EncoderFallback ENCODINGFALLBACK = new EncoderExceptionFallback();
-        public static DecoderFallback DECODINGFALLBACK = new DecoderExceptionFallback();
         private static readonly Encoding _charset = new UTF8Encoding(false, true);
 
         /// <summary>

@@ -232,11 +232,10 @@ namespace GitSharp
 				_index = index;
 			}
 
-		    protected override MutableObjectId IdBufferBuilder()
+		    protected override MutableObjectId IdBufferBuilder(MutableObjectId idBuffer)
             {
-                var m = new MutableObjectId();
-                m.FromRaw(_index._idxdata[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength);
-                return m;
+                idBuffer.FromRaw(_index._idxdata[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength);
+                return idBuffer;
             }
 
 		    protected override MutableEntry InnerNext(MutableEntry entry)

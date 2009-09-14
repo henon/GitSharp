@@ -224,20 +224,29 @@ namespace GitSharp
 
         public class MutableEntry
         {
-            private readonly Func<MutableObjectId> _idBufferBuilder;
+            private readonly Func<MutableObjectId, MutableObjectId> _idBufferBuilder;
+            private MutableObjectId _idBuffer;
 
-            public MutableObjectId idBuffer { get; set; }
-            /**
-             * Empty constructor. object fields should be filled in later.
-             */
-            public MutableEntry(Func<MutableObjectId> idBufferBuilder) : this(new MutableObjectId(), idBufferBuilder)
+            public MutableObjectId idBuffer
             {
+                get
+                {
+                    if (_idBuffer == null)
+                    {
+                        _idBuffer = _idBufferBuilder(new MutableObjectId());
+                    }
+                    return _idBuffer;
+                }
             }
 
-            public MutableEntry(MutableObjectId idBuffer, Func<MutableObjectId> idBufferBuilder)
+            public MutableEntry(Func<MutableObjectId, MutableObjectId> idBufferBuilder)
             {
-                this.idBuffer = idBuffer;
                 _idBufferBuilder = idBufferBuilder;
+            }
+
+            public MutableEntry(MutableObjectId idBuffer)
+            {
+                _idBuffer = idBuffer;
             }
             /**
              * Returns offset for this index object entry
@@ -251,21 +260,15 @@ namespace GitSharp
             {
                 get
                 {
-                    ensureId();
                     return idBuffer.Name;
                 }
             }
 
             public ObjectId ToObjectId()
             {
-                ensureId();
                 return idBuffer.ToObjectId();
             }
 
-            private void ensureId()
-            {
-                idBuffer = _idBufferBuilder();
-            }
             /**
              * Returns mutable copy of this mutable entry.
              * 
@@ -274,9 +277,7 @@ namespace GitSharp
 
             public MutableEntry CloneEntry()
             {
-                ensureId(); 
-                
-                var r = new MutableEntry(idBuffer, _idBufferBuilder);
+                var r = new MutableEntry(new MutableObjectId(idBuffer.ToObjectId()));
                 r.Offset = Offset;
 
                 return r;
@@ -284,13 +285,13 @@ namespace GitSharp
 
             public override string ToString()
             {
-                ensureId();
                 return idBuffer.ToString();
             }
         }
 
         internal abstract class EntriesIterator : IEnumerator<MutableEntry>
         {
+            private MutableEntry _current;
             private readonly PackIndex _packIndex;
 
             protected EntriesIterator(PackIndex packIndex)
@@ -300,9 +301,7 @@ namespace GitSharp
 
             protected long ReturnedNumber;
 
-            private MutableEntry _current;
-
-            protected abstract MutableObjectId IdBufferBuilder();
+            protected abstract MutableObjectId IdBufferBuilder(MutableObjectId idBuffer);
 
             private MutableEntry InitEntry()
             {

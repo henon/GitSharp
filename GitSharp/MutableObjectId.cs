@@ -46,7 +46,7 @@ namespace GitSharp
 	public class MutableObjectId : AnyObjectId
 	{
 		public MutableObjectId()
-			: base(ObjectId.ZeroId)
+			: this(ObjectId.ZeroId)
 		{
 		}
 
@@ -107,7 +107,7 @@ namespace GitSharp
 				throw new ArgumentException("Invalid id: " + str);
 			}
 
-			FromHexString(Encoding.ASCII.GetBytes(str), 0);
+			FromHexString(Constants.encodeASCII(str), 0);
 		}
 
 		private void FromHexString(byte[] bs, int p)
@@ -127,7 +127,7 @@ namespace GitSharp
 					var str = new string(Encoding.ASCII.GetChars(bs, p, StringLength));
 					throw new ArgumentException("Invalid id: " + str);
 				}
-				catch (Exception)
+				catch
 				{
 					throw new ArgumentException("Invalid id");
 				}

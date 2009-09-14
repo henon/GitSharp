@@ -58,7 +58,7 @@ namespace GitSharp
 #endif
  IComparable
     {
-        public static readonly int ObjectIdLength = 20;
+        public static readonly int ObjectIdLength = Constants.OBJECT_ID_LENGTH;
         public static readonly int StringLength = ObjectIdLength * 2;
 
         public static bool operator ==(AnyObjectId a, AnyObjectId b)

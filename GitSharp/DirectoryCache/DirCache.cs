@@ -213,7 +213,7 @@ namespace GitSharp.DirectoryCache
 		///	the method from returning a partially populated index.
 		///	</summary>
 		///	<param name="db">
-		/// Repository the caller wants to read the default index of. 
+		/// Repository the caller wants to read the default index of.
 		/// </param>
 		/// <returns>
 		/// A cache representing the contents of the specified index file (if
@@ -405,7 +405,9 @@ namespace GitSharp.DirectoryCache
 			{
 				var pos = inStream.Position;
 				NB.ReadFully(inStream, hdr, 0, 20);
-				if (@in.Read() < 0)
+
+				int nextByte = @in.Read();
+				if (nextByte < 0 || inStream.Position == inStream.Length)
 				{
 					// No extensions present; the file ended where we expected.
 					//
@@ -512,7 +514,7 @@ namespace GitSharp.DirectoryCache
 		/// </summary>
 		/// <exception cref="IOException">
 		/// The output file could not be created. The caller no longer
-		/// holds the lock. 
+		/// holds the lock.
 		/// </exception>
 		public void write()
 		{

@@ -93,22 +93,22 @@ namespace GitSharp.DirectoryCache
 			return (a[cPos] & 0xff) - '/';
 		};
 
-		/** Tree this tree resides in; null if we are the root. */
+		// Tree this tree resides in; null if we are the root.
 		private readonly DirCacheTree _parent;
 
-		/** Name of this tree within its parent. */
+		// Name of this tree within its parent.
 		private readonly byte[] _encodedName;
 
-		/** Number of {@link DirCacheEntry} records that belong to this tree. */
+		// Number of DirCacheEntry records that belong to this tree.
 		private int _entrySpan;
 
-		/** Unique SHA-1 of this tree; null if invalid. */
+		// Unique SHA-1 of this tree; null if invalid.
 		private ObjectId _id;
 
-		/** Child trees, if any, sorted by EncodedName. */
+		// Child trees, if any, sorted by EncodedName.
 		private DirCacheTree[] _children;
 
-		/** Number of valid children. */
+		// Number of valid children.
 		private int _childCount;
 
 		public DirCacheTree()
@@ -603,12 +603,10 @@ namespace GitSharp.DirectoryCache
 		public static bool peq(byte[] a, byte[] b, int aLen)
 		{
 			if (b.Length < aLen) return false;
+
 			for (aLen--; aLen >= 0; aLen--)
 			{
-				if (a[aLen] != b[aLen])
-				{
-					return false;
-				}
+				if (a[aLen] != b[aLen]) return false;
 			}
 
 			return true;

@@ -124,20 +124,25 @@ namespace GitSharp.DirectoryCache
 					NB.ReadFully(@in, buf, 0, NameMask);
 					tmp.Write(buf, 0, buf.Length);
 				}
-				for (; ; )
+
+				while (true)
 				{
 					int c = @in.ReadByte();
 					if (c < 0)
+					{
 						throw new EndOfStreamException("Short Read of block.");
-					if (c == 0)
-						break;
-					tmp.Write(new[]{(byte)c}, 0, 1);
+					}
+
+					if (c == 0) break;
+
+					tmp.Write(new[] { (byte)c }, 0, 1);
 				}
-			    _path = tmp.ToArray();
+
+				_path = tmp.ToArray();
 				pathLen = _path.Length;
 				skipped = 1; // we already skipped 1 '\0' above to break the loop.
 				md.Update(_path, 0, pathLen);
-				md.Update((byte)0);
+				md.Update(0);
 			}
 
 			// Index records are padded out to the next 8 byte alignment
@@ -378,7 +383,7 @@ namespace GitSharp.DirectoryCache
 		/// </returns>
 		public long getLastModified()
 		{
-			return DecodeTS(PMtime);
+			return DecodeTimestamp(PMtime);
 		}
 
 		/// <summary>
@@ -389,7 +394,7 @@ namespace GitSharp.DirectoryCache
 		/// </param>
 		public void setLastModified(long when)
 		{
-			EncodeTS(PMtime, when);
+			EncodeTimestamp(PMtime, when);
 		}
 
 		/// <summary>
@@ -452,8 +457,7 @@ namespace GitSharp.DirectoryCache
 		/// <param name="p">position to read the first byte of data from. </param>
 		public void setObjectIdFromRaw(byte[] bs, int p)
 		{
-			int n = Constants.OBJECT_ID_LENGTH;
-			Array.Copy(bs, p, idBuffer(), idOffset(), n);
+			Array.Copy(bs, p, idBuffer(), idOffset(), Constants.OBJECT_ID_LENGTH);
 		}
 
 		///	<summary>
@@ -487,12 +491,12 @@ namespace GitSharp.DirectoryCache
 		{
 			int pLen = NB.decodeUInt16(_info, _infoOffset + PFlags) & NameMask;
 			Array.Copy(src._info, src._infoOffset, _info, _infoOffset, INFO_LEN);
-			
+
 			NB.encodeInt16(_info, _infoOffset + PFlags, pLen
 					| NB.decodeUInt16(_info, _infoOffset + PFlags) & ~NameMask);
 		}
 
-		private long DecodeTS(int pIdx)
+		private long DecodeTimestamp(int pIdx)
 		{
 			int @base = _infoOffset + pIdx;
 			int sec = NB.DecodeInt32(_info, @base);
@@ -500,7 +504,7 @@ namespace GitSharp.DirectoryCache
 			return 1000L * sec + ms;
 		}
 
-		private void EncodeTS(int pIdx, long when)
+		private void EncodeTimestamp(int pIdx, long when)
 		{
 			int @base = _infoOffset + pIdx;
 			NB.encodeInt32(_info, @base, (int)(when / 1000));

@@ -48,7 +48,7 @@ namespace GitSharp.Util
 
     /**
      * A rough character sequence around a raw byte buffer.
-     * <p>
+     * <para />
      * Characters are assumed to be 8-bit US-ASCII.
      */
     public class RawCharSequence : ICharSequence

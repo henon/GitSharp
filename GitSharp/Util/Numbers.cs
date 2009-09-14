@@ -51,14 +51,14 @@ namespace GitSharp.Util
 	{
 		/// <summary>
 		/// Compare a 32 bit unsigned integer stored in a 32 bit signed integer.
-		/// <para>
+		/// <para />
 		/// This function performs an unsigned compare operation, even though Java
 		/// does not natively support unsigned integer values. Negative numbers are
 		/// treated as larger than positive ones.
 		/// </summary>
 		/// <param name="a">the first value to compare.</param>
 		/// <param name="b">the second value to compare.</param>
-		/// <returns>return < 0 if a < b; 0 if a == b; > 0 if a > b.</returns>
+		/// <returns>return &lt; 0 if a &lt; b; 0 if a == b; &gt; 0 if a &gt; b.</returns>
 		public static int CompareUInt32(int a, int b)
 		{
 			var cmp = (int)(((uint)a >> 1) - ((uint)b >> 1));
@@ -245,7 +245,7 @@ namespace GitSharp.Util
 
 		/**
 		 * Skip an entire region of an input stream.
-		 * <p>
+		 * <para />
 		 * The input stream's position is moved forward by the number of requested
 		 * bytes, discarding them from the input. This method does not return until
 		 * the exact number of bytes requested has been skipped.

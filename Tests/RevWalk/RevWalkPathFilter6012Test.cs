@@ -54,7 +54,7 @@ namespace GitSharp.Tests.RevWalk
 	[TestFixture]
 	public class RevWalkPathFilter6012Test : RevWalkTestCase
 	{
-		private const string pA = "pA", pF = "pF", pE = "pE";
+		private const string pA = "pA", pE = "pE", pF = "pF";
 		private RevCommit a, b, c, d, e, f, g, h, i;
 		private Dictionary<RevCommit, string> byName;
 
@@ -76,15 +76,20 @@ namespace GitSharp.Tests.RevWalk
 			c = Commit(tree(File(pF, zI)), a);
 			d = Commit(tree(File(pA, zS), File(pF, zI)), c);
 			Parse(d);
+
 			e = Commit(d.Tree, d, b);
 			f = Commit(tree(File(pA, zS), File(pE, zY), File(pF, zI)), e);
 			Parse(f);
+
 			g = Commit(tree(File(pE, zY), File(pF, zI)), b);
 			h = Commit(f.Tree, g, f);
 			i = Commit(tree(File(pA, zS), File(pE, zY), File(pF, zF)), h);
 
 			byName = new Dictionary<RevCommit, string>();
-			foreach (FieldInfo z in typeof(RevWalkPathFilter6012Test).GetFields(BindingFlags.NonPublic | BindingFlags.GetField).Where(x => x.FieldType == typeof(RevCommit)))
+			var fields = typeof(RevWalkPathFilter6012Test).GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+				.Where(x => x.FieldType == typeof(RevCommit));
+
+			foreach (FieldInfo z in fields)
 			{
 				byName.Add((RevCommit)z.GetValue(this), z.Name);
 			}
@@ -93,6 +98,7 @@ namespace GitSharp.Tests.RevWalk
 		private void Check(params RevCommit[] order)
 		{
 			MarkStart(i);
+
 			var act = new StringBuilder();
 			foreach (RevCommit z in rw)
 			{
@@ -110,6 +116,7 @@ namespace GitSharp.Tests.RevWalk
 				exp.Append(name);
 				exp.Append(' ');
 			}
+
 			Assert.AreEqual(exp.ToString(), act.ToString());
 		}
 
@@ -131,7 +138,7 @@ namespace GitSharp.Tests.RevWalk
 			// TODO --full-history
 			Filter(pF);
 			// TODO fix broken test
-			// check(i, h, e, c, b, a);
+			//Check(i, h, e, c, b, a);
 		}
 
 		[Test]
@@ -141,7 +148,7 @@ namespace GitSharp.Tests.RevWalk
 			rw.sort(RevSort.TOPO);
 			Filter(pF);
 			// TODO fix broken test
-			// check(i, h, e, c, b, a);
+			//Check(i, h, e, c, b, a);
 		}
 
 		[Test]
@@ -151,7 +158,7 @@ namespace GitSharp.Tests.RevWalk
 			rw.sort(RevSort.COMMIT_TIME_DESC);
 			Filter(pF);
 			// TODO fix broken test
-			// check(i, h, e, c, b, a);
+			//Check(i, h, e, c, b, a);
 		}
 
 		[Test]
@@ -160,7 +167,7 @@ namespace GitSharp.Tests.RevWalk
 			// TODO --simplify-merges
 			Filter(pF);
 			// TODO fix broken test
-			// check(i, e, c, b, a);
+			//Check(i, e, c, b, a);
 		}
 
 		[Test]

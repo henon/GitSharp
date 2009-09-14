@@ -459,7 +459,7 @@ namespace GitSharp
         /// <summary>
         /// Check out content of the specified index entry
         /// </summary>
-        /// <param name="wd">workdir</param>
+        /// <param name="workDir">workdir</param>
         /// <param name="e">index entry</param>
         /// <exception cref="IOException"></exception>
         public void checkoutEntry(FileSystemInfo workDir, Entry e)

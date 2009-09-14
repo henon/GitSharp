@@ -36,19 +36,17 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-
 namespace GitSharp.RevWalk
 {
 	/// <summary>
 	/// Replaces a <see cref="RevCommit"/>'s parents until not colored with 
 	/// <see cref="RevWalk.REWRITE"/>.
-	/// <para>
+	/// <para />
 	/// Before a <see cref="RevCommit"/> is returned to the caller its parents are updated to
 	/// Create a dense DAG. Instead of reporting the actual parents as recorded when
 	/// the commit was created the returned commit will reflect the Next closest
 	/// commit that matched the revision walker's filters.
-	/// </para><para>
+	/// <para />
 	/// This generator is the second phase of a path limited revision walk and
 	/// assumes it is receiving RevCommits from <see cref="RewriteTreeFilter"/>,
 	/// After they have been fully buffered by <see cref="AbstractRevQueue"/>. The full

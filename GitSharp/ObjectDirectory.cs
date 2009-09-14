@@ -38,22 +38,21 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using GitSharp.Exceptions;
 using GitSharp.Transport;
 using GitSharp.Util;
-using System.IO;
-using GitSharp.Exceptions;
 
 namespace GitSharp
 {
 	/// <summary>
-	/// Traditional file system based {@link ObjectDatabase}.
-	/// <para>
+	/// Traditional file system based <see cref="ObjectDatabase"/>.
+	/// <para />
 	/// This is the classical object database representation for a Git repository,
 	/// where objects are stored loose by hashing them into directories by their
 	/// <see cref="ObjectId"/>, or are stored in compressed containers known as
 	/// <see cref="PackFile"/>s.
-	/// </para>
 	/// </summary>
 	public class ObjectDirectory : ObjectDatabase
 	{

@@ -36,20 +36,18 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Util
 {
     public static class DateTimeExtensions
     {
-        public static readonly long EPOCH_TICKS = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
+    	private static readonly long EPOCH_TICKS = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
         public const long TICKS_PER_SECOND = 10000000L;
 
         /// <summary>
         /// Calculates the git time from a DateTimeOffset instance.
-        /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
+        /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT. 
+        /// C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
@@ -60,7 +58,8 @@ namespace GitSharp.Util
 
         /// <summary>
         /// Calculates the git time from a DateTimeOffset instance.
-        /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
+        /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT.
+        /// C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
@@ -73,12 +72,13 @@ namespace GitSharp.Util
         /// Calculates the DateTimeOffset of a given git time and time zone offset in minutes.
         /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
         /// </summary>
-        /// <param name="time"></param>
+		/// <param name="gitTime"></param>
+		/// <param name="offsetMinutes"></param>
         /// <returns></returns>
-        public static DateTimeOffset GitTimeToDateTimeOffset(this long gittime, long offset_minutes)
+        public static DateTimeOffset GitTimeToDateTimeOffset(this long gitTime, long offsetMinutes)
         {
-            var offset = TimeSpan.FromMinutes(offset_minutes);
-            var utc_ticks = EPOCH_TICKS + gittime * TICKS_PER_SECOND;
+            var offset = TimeSpan.FromMinutes(offsetMinutes);
+			var utc_ticks = EPOCH_TICKS + gitTime * TICKS_PER_SECOND;
             return new DateTimeOffset(utc_ticks + offset.Ticks, offset);
         }
 
@@ -86,13 +86,12 @@ namespace GitSharp.Util
         /// Calculates the UTC DateTime of a given git time.
         /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
         /// </summary>
-        /// <param name="time"></param>
+		/// <param name="gitTime"></param>
         /// <returns></returns>
-        public static DateTime GitTimeToDateTime(this long gittime)
+		public static DateTime GitTimeToDateTime(this long gitTime)
         {
-            var utc_ticks = EPOCH_TICKS + gittime * TICKS_PER_SECOND;
+			var utc_ticks = EPOCH_TICKS + gitTime * TICKS_PER_SECOND;
             return new DateTime(utc_ticks);
         }
     }
-
 }

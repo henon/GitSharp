@@ -45,24 +45,23 @@ using GitSharp.Util;
 
 namespace GitSharp.Transport
 {
-
-    public class BasePackPushConnection : BasePackConnection, IPushConnection
+    public abstract class BasePackPushConnection : BasePackConnection, IPushConnection
     {
         public const string CAPABILITY_REPORT_STATUS = "report-status";
         public const string CAPABILITY_DELETE_REFS = "delete-refs";
         public const string CAPABILITY_OFS_DELTA = "ofs-delta";
 
-        private bool thinPack;
-        private bool capableDeleteRefs;
-        private bool capableReport;
-        private bool capableOfsDelta;
-        private bool sentCommand;
-        private bool shouldWritePack;
+        private readonly bool _thinPack;
+        private bool _capableDeleteRefs;
+        private bool _capableReport;
+        private bool _capableOfsDelta;
+        private bool _sentCommand;
+        private bool _shouldWritePack;
 
-        public BasePackPushConnection(IPackTransport packTransport)
+    	protected BasePackPushConnection(IPackTransport packTransport)
             : base(packTransport)
         {
-            thinPack = transport.PushThin;
+            _thinPack = transport.PushThin;
         }
 
         public void Push(ProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refUpdates)
@@ -71,20 +70,23 @@ namespace GitSharp.Transport
             doPush(monitor, refUpdates);
         }
 
-        protected new TransportException noRepository()
+        protected override TransportException noRepository()
         {
             try
             {
                 transport.openFetch().Close();
             }
             catch (NotSupportedException)
-            {}
+            {
+            }
             catch (NoRemoteRepositoryException e)
             {
                 return e;
             }
             catch (TransportException)
-            {}
+            {
+            }
+
             return new TransportException(uri, "push not permitted");
         }
 
@@ -92,10 +94,10 @@ namespace GitSharp.Transport
         {
             try
             {
-                writeCommands(new List<RemoteRefUpdate>(refUpdates.Values), monitor);
-                if (shouldWritePack)
+                WriteCommands(new List<RemoteRefUpdate>(refUpdates.Values), monitor);
+                if (_shouldWritePack)
                     writePack(refUpdates, monitor);
-                if (sentCommand && capableReport)
+                if (_sentCommand && _capableReport)
                     readStatusReport(refUpdates);
             }
             catch (TransportException e)
@@ -112,18 +114,18 @@ namespace GitSharp.Transport
             }
         }
 
-        private void writeCommands(List<RemoteRefUpdate> refUpdates, ProgressMonitor monitor)
+        private void WriteCommands(IEnumerable<RemoteRefUpdate> refUpdates, ProgressMonitor monitor)
         {
-            string capabilities = enableCapabilities();
+            string capabilities = EnableCapabilities();
             foreach (RemoteRefUpdate rru in refUpdates)
             {
-                if (!capableDeleteRefs && rru.IsDelete)
+                if (!_capableDeleteRefs && rru.IsDelete)
                 {
                     rru.Status = RemoteRefUpdate.UpdateStatus.REJECTED_NODELETE;
                     continue;
                 }
 
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 Ref advertisedRef = GetRef(rru.RemoteName);
                 ObjectId oldId = (advertisedRef == null ? ObjectId.ZeroId : advertisedRef.ObjectId);
                 sb.Append(oldId.Name);
@@ -131,18 +133,18 @@ namespace GitSharp.Transport
                 sb.Append(rru.NewObjectId.Name);
                 sb.Append(' ');
                 sb.Append(rru.RemoteName);
-                if (!sentCommand)
+                if (!_sentCommand)
                 {
-                    sentCommand = true;
+                    _sentCommand = true;
                     sb.Append(capabilities);
                 }
 
                 pckOut.WriteString(sb.ToString());
-                rru.Status = sentCommand
+                rru.Status = _sentCommand
                                  ? RemoteRefUpdate.UpdateStatus.AWAITING_REPORT
                                  : RemoteRefUpdate.UpdateStatus.OK;
                 if (!rru.IsDelete)
-                    shouldWritePack = true;
+                    _shouldWritePack = true;
             }
 
             if (monitor.IsCancelled)
@@ -151,12 +153,12 @@ namespace GitSharp.Transport
             outNeedsEnd = false;
         }
 
-        private string enableCapabilities()
+        private string EnableCapabilities()
         {
-            StringBuilder line = new StringBuilder();
-            capableReport = wantCapability(line, CAPABILITY_REPORT_STATUS);
-            capableDeleteRefs = wantCapability(line, CAPABILITY_DELETE_REFS);
-            capableOfsDelta = wantCapability(line, CAPABILITY_OFS_DELTA);
+            var line = new StringBuilder();
+            _capableReport = wantCapability(line, CAPABILITY_REPORT_STATUS);
+            _capableDeleteRefs = wantCapability(line, CAPABILITY_DELETE_REFS);
+            _capableOfsDelta = wantCapability(line, CAPABILITY_OFS_DELTA);
             if (line.Length > 0)
                 line[0] = '\0';
             return line.ToString();
@@ -178,8 +180,8 @@ namespace GitSharp.Transport
                     newObjects.Add(r.NewObjectId);
             }
 
-            writer.Thin = thinPack;
-            writer.DeltaBaseAsOffset = capableOfsDelta;
+            writer.Thin = _thinPack;
+            writer.DeltaBaseAsOffset = _capableOfsDelta;
             writer.preparePack(newObjects, remoteObjects);
             writer.writePack(stream);
         }

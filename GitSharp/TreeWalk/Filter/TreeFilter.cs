@@ -43,10 +43,10 @@ namespace GitSharp.TreeWalk.Filter
 
     /**
      * Selects interesting tree entries during walking.
-     * <p>
+     * <para />
      * This is an abstract interface. Applications may implement a subclass, or use
      * one of the predefined implementations already available within this package.
-     * <p>
+     * <para />
      * Unless specifically noted otherwise a TreeFilter implementation is not thread
      * safe and may not be shared by different TreeWalk instances at the same time.
      * This restriction allows TreeFilter implementations to cache state within
@@ -54,19 +54,19 @@ namespace GitSharp.TreeWalk.Filter
      * their implementation. Deep clones created by {@link #Clone()} may be used to
      * construct a thread-safe copy of an existing filter.
      * 
-     * <p>
+     * <para />
      * <b>Path filters:</b>
      * <ul>
      * <li>Matching pathname: {@link PathFilter}</li>
      * </ul>
      * 
-     * <p>
+     * <para />
      * <b>Difference filters:</b>
      * <ul>
      * <li>Only select differences: {@link #ANY_DIFF}.</li>
      * </ul>
      * 
-     * <p>
+     * <para />
      * <b>Boolean modifiers:</b>
      * <ul>
      * <li>AND: {@link AndTreeFilter}</li>
@@ -104,12 +104,12 @@ namespace GitSharp.TreeWalk.Filter
 
         /**
          * Selects only tree entries which differ between at least 2 trees.
-         * <p>
+         * <para />
          * This filter also prevents a TreeWalk from recursing into a subtree if all
          * parent trees have the identical subtree at the same path. This
          * dramatically improves walk performance as only the changed subtrees are
          * entered into.
-         * <p>
+         * <para />
          * If this filter is applied to a walker with only one tree it behaves like
          * {@link #ALL}, or as though the walker was matching a virtual empty tree
          * against the single tree it was actually given. Applications may wish to
@@ -162,7 +162,7 @@ namespace GitSharp.TreeWalk.Filter
 
         /**
          * Determine if the current entry is interesting to report.
-         * <p>
+         * <para />
          * This method is consulted for subtree entries even if
          * {@link TreeWalk#isRecursive()} is enabled. The consultation allows the
          * filter to bypass subtree recursion on a case-by-case basis, even when
@@ -189,7 +189,7 @@ namespace GitSharp.TreeWalk.Filter
 
         /**
          * Does this tree filter require a recursive walk to match everything?
-         * <p>
+         * <para />
          * If this tree filter is matching on full entry path names and its pattern
          * is looking for a '/' then the filter would require a recursive TreeWalk
          * to accurately make its decisions. The walker is not required to enable
@@ -203,7 +203,7 @@ namespace GitSharp.TreeWalk.Filter
 
         /**
          * Clone this tree filter, including its parameters.
-         * <p>
+         * <para />
          * This is a deep Clone. If this filter embeds objects or other filters it
          * must also Clone those, to ensure the instances do not share mutable data.
          * 

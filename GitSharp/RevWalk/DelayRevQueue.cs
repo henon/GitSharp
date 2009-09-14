@@ -42,12 +42,12 @@ namespace GitSharp.RevWalk
 
     /**
      * Delays commits to be at least {@link PendingGenerator#OVER_SCAN} late.
-     * <p>
+     * <para />
      * This helps to "fix up" weird corner cases resulting from clock skew, by
      * slowing down what we produce to the caller we get a better chance to ensure
      * PendingGenerator reached back far enough in the graph to correctly mark
      * commits {@link RevWalk#UNINTERESTING} if necessary.
-     * <p>
+     * <para />
      * This generator should appear before {@link FixUninterestingGenerator} if the
      * lower level {@link #pending} isn't already fully buffered.
      */

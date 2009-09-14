@@ -399,7 +399,7 @@ namespace GitSharp.Tests
 
 		///	<summary>
 		/// Test writing pack without object reuse. Pack content/preparation as in
-		///	<seealso cref="#testWritePack1()"/>.
+		///	<seealso cref="testWritePack1()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
 		[Test]
@@ -424,7 +424,7 @@ namespace GitSharp.Tests
 		///	<summary>
 		/// Test pack writing with delta reuse. Raw-data copy (reuse) is made on a
 		///	pack with CRC32 index. Pack configuration as in
-		///	<seealso cref="#testWritePack2DeltasReuseRefs()"/>.
+		///	<seealso cref="testWritePack2DeltasReuseRefs()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
 		[Test]
@@ -531,7 +531,7 @@ namespace GitSharp.Tests
 
 		///	<summary>
 		/// Test thin pack writing: 1 blob delta base is on objects edge. Pack
-		///	configuration as in <seealso cref="#testWritePack4()"/>.
+		///	configuration as in <seealso cref="testWritePack4()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
 		[Test]

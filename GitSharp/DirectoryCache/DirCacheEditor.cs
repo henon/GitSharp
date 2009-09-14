@@ -43,7 +43,7 @@ namespace GitSharp.DirectoryCache
 {
 	/// <summary>
 	/// Updates a <see cref="DirCache"/> by supplying discrete edit commands.
-	/// <p>
+	/// <para/>
 	/// An editor updates a <see cref="DirCache"/> by taking a list of
 	/// <see cref="PathEdit"/> commands and executing them against the entries
 	/// of the destination cache to produce a new cache. This edit style allows
@@ -82,11 +82,10 @@ namespace GitSharp.DirectoryCache
 
 		/// <summary>
 		/// Append one edit command to the list of commands to be applied.
-		/// <para>
+		/// <para />
 		/// Edit commands may be added in any order chosen by the application. They
 		/// are automatically rearranged by the builder to provide the most efficient
 		/// update possible.
-		/// </para>
 		/// </summary>
 		/// <param name="edit">Another edit command.</param>
 		public void add(PathEdit edit)
@@ -157,13 +156,12 @@ namespace GitSharp.DirectoryCache
 
 		/// <summary>
 		/// Any index record update.
-		/// <para>
+		/// <para />
 		/// Applications should subclass and provide their own implementation for the
 		/// <see cref="Apply"/> method. The editor will invoke apply once
 		/// for each record in the index which matches the path name. If there are
 		/// multiple records (for example in stages 1, 2 and 3), the edit instance
 		/// will be called multiple times, once for each stage.
-		/// </para>
 		/// </summary>
 		public abstract class PathEdit
 		{
@@ -197,7 +195,7 @@ namespace GitSharp.DirectoryCache
 
 			/// <summary>
 			/// Apply the update to a single cache entry matching the path.
-			/// <para>
+			/// <para />
 			/// After apply is invoked the entry is added to the output table, and
 			/// will be included in the new index.
 			/// </summary>
@@ -210,11 +208,10 @@ namespace GitSharp.DirectoryCache
 
 		/// <summary>
 		/// Deletes a single file entry from the index.
-		/// <para>
+		/// <para />
 		/// This deletion command removes only a single file at the given location,
 		/// but removes multiple stages (if present) for that path. To remove a
 		/// complete subtree use <see cref="DeleteTree"/> instead.
-		/// </para>
 		/// </summary>
 		/// <seealso cref="DeleteTree"/>
 		private class DeletePath : PathEdit
@@ -258,7 +255,7 @@ namespace GitSharp.DirectoryCache
 		/// This command will not remove a single file entry. To remove a single file
 		/// use <seealso cref="DeletePath"/>.
 		/// </summary>
-		/// <seealso cref= DeletePath </seealso>
+		/// <seealso cref="DeletePath"/>
 		private class DeleteTree : PathEdit
 		{
 			///	<summary>

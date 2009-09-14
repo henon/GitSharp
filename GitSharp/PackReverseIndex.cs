@@ -57,13 +57,13 @@ namespace GitSharp
         private readonly int[] _offsets32;
 
 		// Offsets not accommodating in 31 bits.
-        private readonly long[] offsets64;
+        private readonly long[] _offsets64;
 
-		// Position of the corresponding {@link #offsets32} in {@link #index}.
-        private readonly int[] nth32;
+		// Position of the corresponding offsets32 in index.
+        private readonly int[] _nth32;
 
-        // Position of the corresponding {@link #offsets64} in {@link #index}.
-        private readonly int[] nth64;
+        // Position of the corresponding offsets64 in index.
+        private readonly int[] _nth64;
 
         /// <summary>
         /// Create reverse index from straight/forward pack index, by indexing all
@@ -85,9 +85,9 @@ namespace GitSharp
             }
 
             _offsets32 = new int[(int)n32];
-            offsets64 = new long[(int)n64];
-            nth32 = new int[_offsets32.Length];
-            nth64 = new int[offsets64.Length];
+            _offsets64 = new long[(int)n64];
+            _nth32 = new int[_offsets32.Length];
+            _nth64 = new int[_offsets64.Length];
 
             int i32 = 0;
             int i64 = 0;
@@ -100,13 +100,13 @@ namespace GitSharp
                 }
                 else
                 {
-                	offsets64[i64++] = o;
+                	_offsets64[i64++] = o;
                 }
             }
 
 
             Array.Sort(_offsets32);
-            Array.Sort(offsets64);
+            Array.Sort(_offsets64);
 
             int nth = 0;
             foreach (PackIndex.MutableEntry me in _index)
@@ -114,11 +114,11 @@ namespace GitSharp
                 long o = me.Offset;
                 if (o < int.MaxValue)
                 {
-                	nth32[Array.BinarySearch(_offsets32, (int)o)] = nth++;
+                	_nth32[Array.BinarySearch(_offsets32, (int)o)] = nth++;
                 }
                 else
                 {
-                	nth64[Array.BinarySearch(offsets64, o)] = nth++;
+                	_nth64[Array.BinarySearch(_offsets64, o)] = nth++;
                 }
             }
         }
@@ -137,12 +137,12 @@ namespace GitSharp
             {
                 int i32 = Array.BinarySearch(_offsets32, (int)offset);
                 if (i32 < 0) return null;
-                return _index.GetObjectId(nth32[i32]);
+                return _index.GetObjectId(_nth32[i32]);
             }
 
-            int i64 = Array.BinarySearch(offsets64, offset);
+            int i64 = Array.BinarySearch(_offsets64, offset);
             if (i64 < 0) return null;
-            return _index.GetObjectId(nth64[i64]);
+            return _index.GetObjectId(_nth64[i64]);
         }
 
         /// <summary>
@@ -174,26 +174,26 @@ namespace GitSharp
 
                 if (i32 + 1 == _offsets32.Length)
                 {
-                    if (offsets64.Length > 0)
+                    if (_offsets64.Length > 0)
                     {
-                    	return offsets64[0];
+                    	return _offsets64[0];
                     }
                     return maxOffset;
                 }
                 return _offsets32[i32 + 1];
             }
 
-            int i64 = Array.BinarySearch(offsets64, offset);
+            int i64 = Array.BinarySearch(_offsets64, offset);
             if (i64 < 0)
             {
             	throw new CorruptObjectException("Can't find object in (reverse) pack index for the specified offset " + offset);
             }
 
-            if (i64 + 1 == offsets64.Length)
+            if (i64 + 1 == _offsets64.Length)
             {
             	return maxOffset;
             }
-            return offsets64[i64 + 1];
+            return _offsets64[i64 + 1];
         }
     }
 }

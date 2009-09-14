@@ -48,21 +48,21 @@ namespace GitSharp.TreeWalk
 {
 	/**
 	 * Walks one or more {@link AbstractTreeIterator}s in parallel.
-	 * <p>
+	 * <para />
 	 * This class can perform n-way differences across as many trees as necessary.
-	 * <p>
+	 * <para />
 	 * Each tree added must have the same root as existing trees in the walk.
-	 * <p>
+	 * <para />
 	 * A TreeWalk instance can only be used once to generate results. Running a
 	 * second time requires creating a new TreeWalk instance, or invoking
 	 * {@link #reset()} and adding new trees before starting again. Resetting an
 	 * existing instance may be faster for some applications as some internal
 	 * buffers may be recycled.
-	 * <p>
+	 * <para />
 	 * TreeWalk instances are not thread-safe. Applications must either restrict
 	 * usage of a TreeWalk instance to a single thread, or implement their own
 	 * synchronization at a higher level.
-	 * <p>
+	 * <para />
 	 * Multiple simultaneous TreeWalk instances per {@link Repository} are
 	 * permitted, even from concurrent threads.
 	 */
@@ -70,7 +70,7 @@ namespace GitSharp.TreeWalk
 	{
 		/**
 		 * Open a tree walk and filter to exactly one path.
-		 * <p>
+		 * <para />
 		 * The returned tree walk is already positioned on the requested path, so
 		 * the caller should not need to invoke {@link #next()} unless they are
 		 * looking for a possible directory/file name conflict.
@@ -106,7 +106,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Open a tree walk and filter to exactly one path.
-		 * <p>
+		 * <para />
 		 * The returned tree walk is already positioned on the requested path, so
 		 * the caller should not need to invoke {@link #next()} unless they are
 		 * looking for a possible directory/file name conflict.
@@ -181,12 +181,12 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Set the tree entry filter for this walker.
-		 * <p>
+		 * <para />
 		 * Multiple filters may be combined by constructing an arbitrary tree of
 		 * <code>AndTreeFilter</code> or <code>OrTreeFilter</code> instances to
 		 * describe the bool expression required by the application. Custom
 		 * filter implementations may also be constructed by applications.
-		 * <p>
+		 * <para />
 		 * Note that filters are not thread-safe and may not be shared by concurrent
 		 * TreeWalk instances. Every TreeWalk must be supplied its own unique
 		 * filter, unless the filter implementation specifically states it is (and
@@ -206,25 +206,24 @@ namespace GitSharp.TreeWalk
 
 		/// <summary>
 		/// Is this walker automatically entering into subtrees?
-		/// <para>
+		/// <para />
 		/// If recursive mode is enabled the walker will hide subtree nodes from the
 		/// calling application and will produce only file level nodes. If a tree
 		/// (directory) is deleted then all of the file level nodes will appear to be
 		/// deleted, recursively, through as many levels as necessary to account for
 		/// all entries.
-		/// </para>
 		/// </summary>
 		public bool Recursive { get; set; }
 
 		/**
 		 * Does this walker return a tree entry After it exits the subtree?
-		 * <p>
+		 * <para />
 		 * If post order traversal is enabled then the walker will return a subtree
 		 * After it has returned the last entry within that subtree. This may cause
 		 * a subtree to be seen by the application twice if {@link #isRecursive()}
 		 * is false, as the application will see it once, call
 		 * {@link #enterSubtree()}, and then see it again as it leaves the subtree.
-		 * <p>
+		 * <para />
 		 * If an application does not enable {@link #isRecursive()} and it does not
 		 * call {@link #enterSubtree()} then the tree is returned only once as none
 		 * of the children were processed.
@@ -349,10 +348,10 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Add an already existing tree object for walking.
-		 * <p>
+		 * <para />
 		 * The position of this tree is returned to the caller, in case the caller
 		 * has lost track of the order they added the trees into the walker.
-		 * <p>
+		 * <para />
 		 * The tree must have the same root as existing trees in the walk.
 		 * 
 		 * @param id
@@ -377,10 +376,10 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Add an already created tree iterator for walking.
-		 * <p>
+		 * <para />
 		 * The position of this tree is returned to the caller, in case the caller
 		 * has lost track of the order they added the trees into the walker.
-		 * <p>
+		 * <para />
 		 * The tree which the iterator operates on must have the same root as
 		 * existing trees in the walk.
 		 * 
@@ -495,23 +494,21 @@ namespace GitSharp.TreeWalk
 			}
 		}
 
-		/**
-		 * Obtain the tree iterator for the current entry.
-		 * <p>
-		 * Entering into (or exiting out of) a subtree causes the current tree
-		 * iterator instance to be changed for the nth tree. This allows the tree
-		 * iterators to manage only one list of items, with the diving handled by
-		 * recursive trees.
-		 *
-		 * @param <T>
-		 *            type of the tree iterator expected by the caller.
-		 * @param nth
-		 *            tree to obtain the current iterator of.
-		 * @param clazz
-		 *            type of the tree iterator expected by the caller.
-		 * @return r the current iterator of the requested type; null if the tree
-		 *         has no entry to match the current path.
-		 */
+		/// <summary>
+		/// Obtain the tree iterator for the current entry.
+		/// <para />
+		/// Entering into (or exiting out of) a subtree causes the current tree
+		/// iterator instance to be changed for the nth tree. This allows the tree
+		/// iterators to manage only one list of items, with the diving handled by
+		/// recursive trees.
+		/// </summary>
+		/// <typeparam name="T">type of the tree iterator expected by the caller.</typeparam>
+		/// <param name="nth">tree to obtain the current iterator of.</param>
+		/// <param name="clazz">type of the tree iterator expected by the caller.</param>
+		/// <returns>
+		/// The current iterator of the requested type; null if the tree
+		/// has no entry to match the current path.
+		/// </returns>
 		public T getTree<T>(int nth, Type clazz) // [henon] was Class<T> clazz
 			where T : AbstractTreeIterator
 		{
@@ -521,7 +518,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Obtain the raw {@link FileMode} bits for the current entry.
-		 * <p>
+		 * <para />
 		 * Every added tree supplies mode bits, even if the tree does not contain
 		 * the current entry. In the latter case {@link FileMode#MISSING}'s mode
 		 * bits (0) are returned.
@@ -539,7 +536,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Obtain the {@link FileMode} for the current entry.
-		 * <p>
+		 * <para />
 		 * Every added tree supplies a mode, even if the tree does not contain the
 		 * current entry. In the latter case {@link FileMode#MISSING} is returned.
 		 * 
@@ -554,12 +551,12 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Obtain the ObjectId for the current entry.
-		 * <p>
+		 * <para />
 		 * Using this method to compare ObjectId values between trees of this walker
 		 * is very inefficient. Applications should try to use
 		 * {@link #idEqual(int, int)} or {@link #getObjectId(MutableObjectId, int)}
 		 * whenever possible.
-		 * <p>
+		 * <para />
 		 * Every tree supplies an object id, even if the tree does not contain the
 		 * current entry. In the latter case {@link ObjectId#zeroId()} is returned.
 		 * 
@@ -577,10 +574,10 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Obtain the ObjectId for the current entry.
-		 * <p>
+		 * <para />
 		 * Every tree supplies an object id, even if the tree does not contain the
 		 * current entry. In the latter case {@link ObjectId#zeroId()} is supplied.
-		 * <p>
+		 * <para />
 		 * Applications should try to use {@link #idEqual(int, int)} when possible
 		 * as it avoids conversion overheads.
 		 *
@@ -634,7 +631,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Get the current entry's name within its parent tree.
-		 * <p>
+		 * <para />
 		 * This method is not very efficient and is primarily meant for debugging
 		 * and  output generation. Applications should try to avoid calling it,
 		 * and if invoked do so only once per interesting entry, where the name is
@@ -653,7 +650,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Get the current entry's complete path.
-		 * <p>
+		 * <para />
 		 * This method is not very efficient and is primarily meant for debugging
 		 * and  output generation. Applications should try to avoid calling it,
 		 * and if invoked do so only once per interesting entry, where the name is
@@ -686,7 +683,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Test if the supplied path matches the current entry's path.
-		 * <p>
+		 * <para />
 		 * This method tests that the supplied path is exactly equal to the current
 		 * entry, or is one of its parent directories. It is faster to use this
 		 * method then to use {@link #getPathString()} to first Create a string
@@ -698,7 +695,7 @@ namespace GitSharp.TreeWalk
 		 *            end with '/' prior to invocation.
 		 * @param pLen
 		 *            number of bytes from <code>buf</code> to test.
-		 * @return < 0 if p is before the current path; 0 if p matches the current
+		 * @return &lt; 0 if p is before the current path; 0 if p matches the current
 		 *         path; 1 if the current path is past p and p will never match
 		 *         again on this tree walk.
 		 */
@@ -744,7 +741,7 @@ namespace GitSharp.TreeWalk
 		/**
 		 * Test if the supplied path matches (being suffix of) the current entry's
 		 * path.
-		 * <p>
+		 * <para />
 		 * This method tests that the supplied path is exactly equal to the current
 		 * entry, or is relative to one of entry's parent directories. It is faster
 		 * to use this method then to use {@link #getPathString()} to first Create
@@ -786,7 +783,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Is the current entry a subtree?
-		 * <p>
+		 * <para />
 		 * This method is faster then testing the raw mode bits of all trees to see
 		 * if any of them are a subtree. If at least one is a subtree then this
 		 * method will return true.
@@ -812,7 +809,7 @@ namespace GitSharp.TreeWalk
 
 		/**
 		 * Enter into the current subtree.
-		 * <p>
+		 * <para />
 		 * If the current entry is a subtree this method arranges for its children
 		 * to be returned before the next sibling following the subtree is returned.
 		 * 

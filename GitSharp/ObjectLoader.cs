@@ -76,12 +76,11 @@ namespace GitSharp
 
     	/// <summary>
     	/// Obtain a reference to the (possibly cached) bytes of this object.
-    	/// <para>
+    	/// <para />
     	/// This method offers direct access to the internal caches, potentially
     	/// saving on data copies between the internal cache and higher level code.
     	/// Callers who receive this reference <b>must not</b> modify its contents.
     	/// Changes (if made) will affect the cache but not the repository itself.
-    	/// </para>
     	/// </summary>
     	/// <returns>A copy of the cached bytes of this object.</returns>
 		public abstract byte[] CachedBytes { get; protected set; }
@@ -96,7 +95,7 @@ namespace GitSharp
 
     	/// <summary>
     	/// Raw size of object from object header (pack, loose file).
-    	/// Interpretation of this value depends on {@link #getRawType()}.
+		/// Interpretation of this value depends on <see cref="RawType"/>.
     	/// </summary>
     	/// <returns></returns>
     	public abstract long RawSize { get; }

@@ -56,7 +56,7 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// Make this id match <see cref=ObjectId.ZeroId"/>.
+		/// Make this id match <see cref="ObjectId.ZeroId"/>.
 		/// </summary>
 		public void Clear()
 		{

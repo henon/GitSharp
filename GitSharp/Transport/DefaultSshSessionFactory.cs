@@ -41,7 +41,6 @@ using Tamir.SharpSsh.jsch;
 
 namespace GitSharp.Transport
 {
-    
     public class DefaultSshSessionFactory : SshConfigSessionFactory
     {
         protected override void configure(OpenSshConfig.Host hc, Session session)
@@ -53,5 +52,4 @@ namespace GitSharp.Transport
             }
         }
     }
-
 }

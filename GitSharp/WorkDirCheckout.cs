@@ -40,9 +40,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using GitSharp.Exceptions;
 using GitSharp.Util;
 
@@ -51,8 +49,8 @@ namespace GitSharp
     /// <summary>
     /// This class handles checking out one or two trees merging
     /// with the index (actually a tree too).
-    /// 
-    /// Three-way merges are no performed. See <seealso cref="FailOnConflict"/>. </summary>
+    /// <para />
+    /// Three-way merges are no performed. See <seealso cref="FailOnConflict"/>.
     /// </summary>
     public class WorkDirCheckout
     {

@@ -45,7 +45,7 @@ namespace GitSharp.TreeWalk.Filter
 
     /**
      * Includes tree entries only if they match the configured path.
-     * <p>
+     * <para />
      * Applications should use {@link PathFilterGroup} to connect these into a tree
      * filter graph, as the group supports breaking out of traversal once it is
      * known the path can never match.
@@ -54,11 +54,11 @@ namespace GitSharp.TreeWalk.Filter
     {
         /**
          * Create a new tree filter for a user supplied path.
-         * <p>
+         * <para />
          * Path strings are relative to the root of the repository. If the user's
          * input should be assumed relative to a subdirectory of the repository the
          * caller must prepend the subdirectory's path prior to creating the filter.
-         * <p>
+         * <para />
          * Path strings use '/' to delimit directories on all platforms.
          * 
          * @param path

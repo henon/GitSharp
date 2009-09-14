@@ -41,13 +41,16 @@ using System;
 using System.IO;
 using System.Text;
 using GitSharp.Exceptions;
-using GitSharp.Util;
 
 namespace GitSharp
 {
     public class Tag
     {
         public Repository Repository { get; internal set; }
+
+		private PersonIdent author;
+		private string message;
+		private string tagType;
         private byte[] raw;
 
         /**
@@ -88,7 +91,6 @@ namespace GitSharp
         /**
          * @return tagger of a annotated tag or null
          */
-        private PersonIdent author;
         public PersonIdent Author
         {
             get
@@ -105,7 +107,6 @@ namespace GitSharp
         /**
          * @return comment of an annotated tag, or null
          */
-        private string message;
         public string Message
         {
             get
@@ -227,7 +228,7 @@ namespace GitSharp
         /**
          * @return tag target type
          */
-        string tagType;
+        
         public string TagType
         {
             get

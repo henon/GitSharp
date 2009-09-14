@@ -40,32 +40,32 @@ namespace GitSharp.TreeWalk
 {
     /**
      * Specialized TreeWalk to detect directory-file (D/F) name conflicts.
-     * <p>
+     * <para />
      * Due to the way a Git tree is organized the standard {@link TreeWalk} won't
      * easily find a D/F conflict when merging two or more trees together. In the
      * standard TreeWalk the file will be returned first, and then much later the
      * directory will be returned. This makes it impossible for the application to
      * efficiently detect and handle the conflict.
-     * <p>
+     * <para />
      * Using this walk implementation causes the directory to report earlier than
      * usual, at the same time as the non-directory entry. This permits the
      * application to handle the D/F conflict in a single step. The directory is
      * returned only once, so it does not get returned later in the iteration.
-     * <p>
+     * <para />
      * When a D/F conflict is detected {@link TreeWalk#isSubtree()} will return true
      * and {@link TreeWalk#enterSubtree()} will recurse into the subtree, no matter
      * which iterator originally supplied the subtree.
-     * <p>
+     * <para />
      * Because conflicted directories report early, using this walk implementation
      * to populate a {@link DirCacheBuilder} may cause the automatic resorting to
      * run and fix the entry ordering.
-     * <p>
+     * <para />
      * This walk implementation requires more CPU to implement a look-ahead and a
      * look-behind to merge a D/F pair together, or to skip a previously reported
      * directory. In typical Git repositories the look-ahead cost is 0 and the
      * look-behind doesn't trigger, as users tend not to Create trees which contain
      * both "foo" as a directory and "foo.c" as a file.
-     * <p>
+     * <para />
      * In the worst-case however several thousand look-ahead steps per walk step may
      * be necessary, making the overhead quite significant. Since this worst-case
      * should never happen this walk implementation has made the time/space tradeoff

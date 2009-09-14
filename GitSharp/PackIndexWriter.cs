@@ -39,11 +39,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using GitSharp.Transport;
 using System.IO;
 using System.Security.Cryptography;
+using GitSharp.Transport;
 using GitSharp.Util;
 
 namespace GitSharp
@@ -52,33 +50,37 @@ namespace GitSharp
     {
         internal static byte[] TOC = { 255, (byte)'t', (byte)'O', (byte)'c' };
 
-
-        /**
-	 * Create a new writer for the oldest (most widely understood) format.
-	 * <p>
-	 * This method selects an index format that can accurate describe the
-	 * supplied objects and that will be the most compatible format with older
-	 * Git implementations.
-	 * <p>
-	 * Index version 1 is widely recognized by all Git implementations, but
-	 * index version 2 (and later) is not as well recognized as it was
-	 * introduced more than a year later. Index version 1 can only be used if
-	 * the resulting pack file is under 4 gigabytes in size; packs larger than
-	 * that limit must use index version 2.
-	 *
-	 * @param dst
-	 *            the stream the index data will be written to. If not already
-	 *            buffered it will be automatically wrapped in a buffered
-	 *            stream. Callers are always responsible for closing the stream.
-	 * @param objs
-	 *            the objects the caller needs to store in the index. Entries
-	 *            will be examined until a format can be conclusively selected.
-	 * @return a new writer to output an index file of the requested format to
-	 *         the supplied stream.
-	 * @throws ArgumentException
-	 *             no recognized pack index version can support the supplied
-	 *             objects. This is likely a bug in the implementation.
-	 */
+		/// <summary>
+		/// Create a new writer for the oldest (most widely understood) format.
+		/// <para />
+		/// This method selects an index format that can accurate describe the
+		/// supplied objects and that will be the most compatible format with older
+		/// Git implementations.
+		/// <para />
+		/// Index version 1 is widely recognized by all Git implementations, but
+		/// index version 2 (and later) is not as well recognized as it was
+		/// introduced more than a year later. Index version 1 can only be used if
+		/// the resulting pack file is under 4 gigabytes in size; packs larger than
+		/// that limit must use index version 2.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="dst">
+		/// The stream the index data will be written to. If not already
+		/// buffered it will be automatically wrapped in a buffered
+		/// stream. Callers are always responsible for closing the stream.
+		/// </param>
+		/// <param name="objs">
+		/// The objects the caller needs to store in the index. Entries
+		/// will be examined until a format can be conclusively selected.
+		/// </param>
+		/// <returns>
+		/// A new writer to output an index file of the requested format to
+		/// the supplied stream.
+		/// </returns>
+		/// <exception cref="ArgumentException">
+		/// No recognized pack index version can support the supplied
+		/// objects. This is likely a bug in the implementation.
+		/// </exception>
         public static PackIndexWriter CreateOldestPossible<T>(Stream dst, List<T> objs) 
 			where T : PackedObjectInfo
         {
@@ -165,7 +167,7 @@ namespace GitSharp
 
         /**
          * Write all object entries to the index stream.
-         * <p>
+         * <para />
          * After writing the stream passed to the factory is flushed but remains
          * open. Callers are always responsible for closing the output stream.
          *
@@ -191,7 +193,7 @@ namespace GitSharp
 
         /**
          * Writes the index file to {@link #out}.
-         * <p>
+         * <para />
          * Implementations should go something like:
          *
          * <pre>
@@ -201,7 +203,7 @@ namespace GitSharp
          * writeChecksumFooter();
          * </pre>
          *
-         * <p>
+         * <para />
          * Where the logic for <code>writeOneEntry</code> is specific to the index
          * format in use. Additional headers/footers may be used if necessary and
          * the {@link #entries} collection may be iterated over more than once if
@@ -215,7 +217,7 @@ namespace GitSharp
 
         /**
          * Output the version 2 (and later) TOC header, with version number.
-         * <p>
+         * <para />
          * Post version 1 all index files start with a TOC header that makes the
          * file an invalid version 1 file, and then includes the version number.
          * This header is necessary to recognize a version 1 from a version 2
@@ -235,7 +237,7 @@ namespace GitSharp
 
         /**
 	     * Output the standard 256 entry first-level fan-out table.
-	     * <p>
+	     * <para />
 	     * The fan-out table is 4 KB in size, holding 256 32-bit unsigned integer
 	     * counts. Each count represents the number of objects within this index
 	     * whose {@link ObjectId#getFirstByte()} matches the count's position in the
@@ -263,7 +265,7 @@ namespace GitSharp
 
 	    /**
 	     * Output the standard two-checksum index footer.
-	     * <p>
+	     * <para />
 	     * The standard footer contains two checksums (20 byte SHA-1 values):
 	     * <ol>
 	     * <li>Pack data checksum - taken from the last 20 bytes of the pack file.</li>

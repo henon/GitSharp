@@ -82,7 +82,7 @@ namespace GitSharp.Patch
 		}
 
 		/// <summary>
-		/// Offset within <seealso cref="FileHeader.buf"/> to the "@@ -" line.
+		/// Offset within <seealso cref="FileHeader.Buffer"/> to the "@@ -" line.
 		/// </summary>
 		public int StartOffset
 		{
@@ -90,7 +90,7 @@ namespace GitSharp.Patch
 		}
 
 		/// <summary>
-		/// Position 1 past the end of this hunk within {@link #file}'s buf.
+		/// Position 1 past the end of this hunk within <see cref="File"/>'s buffer.
 		/// </summary>
 		public int EndOffset { get; set; }
 
@@ -102,17 +102,17 @@ namespace GitSharp.Patch
 		/// <summary>
 		/// First line number in the post-image file where the hunk starts.
 		/// </summary>
-		public int NewStartLine { get; set; }
+		public int NewStartLine { get; protected set; }
 
 		/// <summary>
 		/// Total number of post-image lines this hunk covers (context + inserted)
 		/// </summary>
-		public int NewLineCount { get; set; }
+		public int NewLineCount { get; protected set; }
 
 		/// <summary>
 		/// Total number of lines of context appearing in this hunk.
 		/// </summary>
-		public int LinesContext { get; set; }
+		public int LinesContext { get; protected set; }
 
 		/// <summary>
 		/// Returns a list describing the content edits performed within the hunk.
@@ -169,7 +169,9 @@ namespace GitSharp.Patch
 				}
 
 				if (breakScan)
+				{
 					break;
+				}
 			}
 
 			return r;

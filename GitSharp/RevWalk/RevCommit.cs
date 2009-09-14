@@ -39,7 +39,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using GitSharp.Exceptions;
 using GitSharp.RevWalk.Filter;
 using GitSharp.Util;
 
@@ -312,7 +311,7 @@ namespace GitSharp.RevWalk
 		/// information from it.
 		/// <para />
 		/// <see cref="RevFilter"/> implementations should try to use <seealso cref="RawParseUtils"/> to scan
-		/// the <seealso cref="#getRawBuffer()"/> instead, as this will allow faster evaluation
+		/// the <seealso cref="RawBuffer"/> instead, as this will allow faster evaluation
 		/// of commits.
 		/// </summary>
 		/// <returns>
@@ -415,12 +414,12 @@ namespace GitSharp.RevWalk
 		/// the value is free-form, but must not contain an LF. Very common keys seen
 		/// in the wild are:
 		/// <ul>
-		/// <li>{@code Signed-off-by} (agrees to Developer Certificate of Origin)
-		/// <li>{@code Acked-by} (thinks change looks sane in context)
-		/// <li>{@code Reported-by} (originally found the issue this change fixes)
-		/// <li>{@code Tested-by} (validated change fixes the issue for them)
-		/// <li>{@code CC}, {@code Cc} (copy on all email related to this change)
-		/// <li>{@code Bug} (link to project's bug tracking system)
+		/// <li>{@code Signed-off-by} (agrees to Developer Certificate of Origin)</li>
+		/// <li>{@code Acked-by} (thinks change looks sane in context)</li>
+		/// <li>{@code Reported-by} (originally found the issue this change fixes)</li>
+		/// <li>{@code Tested-by} (validated change fixes the issue for them)</li>
+		/// <li>{@code CC}, {@code Cc} (copy on all email related to this change)</li>
+		/// <li>{@code Bug} (link to project's bug tracking system)</li>
 		/// </ul>
 		/// </summary>
 		/// <returns>
@@ -495,7 +494,7 @@ namespace GitSharp.RevWalk
 		/// footer appeared more than once. Empty list if no footers appear
 		/// with the specified key, or there are no footers at all.
 		/// </returns>
-		///	<seealso cref= GetFooterLines()" />
+		///	<seealso cref="GetFooterLines()" />
 		public IList<string> GetFooterLines(string keyName)
 		{
 			return GetFooterLines(new FooterKey(keyName));
@@ -513,7 +512,7 @@ namespace GitSharp.RevWalk
 		/// footer appeared more than once. Empty list if no footers appear
 		/// with the specified key, or there are no footers at all.
 		/// </returns>
-		///	<seealso cref= GetFooterLines()" />
+		///	<seealso cref="GetFooterLines()" />
         public IList<string> GetFooterLines(FooterKey keyName)
 		{
 		    IList<FooterLine> src = GetFooterLines();

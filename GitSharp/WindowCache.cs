@@ -45,12 +45,11 @@ namespace GitSharp
 {
     /// <summary>
     /// Caches slices of a <see cref="PackFile" /> in memory for faster read access.
-    /// <para>
+	/// <para />
     /// The WindowCache serves as a Java based "buffer cache", loading segments of a
     /// <see cref="PackFile" /> into the JVM heap prior to use. As JGit often wants to do reads of
     /// only tiny slices of a file, the WindowCache tries to smooth out these tiny
     /// reads into larger block-sized IO operations.
-    /// </para>
     /// </summary>
     internal class WindowCache : OffsetCache<ByteWindow, WindowCache.WindowRef>
     {
@@ -86,7 +85,7 @@ namespace GitSharp
 
         /// <summary>
         /// Modify the configuration of the window cache.
-        /// <para>
+		/// <para />
         /// The new configuration is applied immediately. If the new limits are
         /// smaller than what what is currently cached, older entries will be purged
         /// as soon as possible to allow the cache to meet the new limit.
@@ -118,11 +117,10 @@ namespace GitSharp
 
         /// <summary>
         /// Modify the configuration of the window cache.
-        /// <para>
+		/// <para />
         /// The new configuration is applied immediately. If the new limits are
         /// smaller than what what is currently cached, older entries will be purged
         /// as soon as possible to allow the cache to meet the new limit.
-        /// </param>
         /// </summary>
         /// <param name="cfg">
         /// The new window cache configuration.

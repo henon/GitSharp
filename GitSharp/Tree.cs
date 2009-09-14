@@ -125,7 +125,7 @@ namespace GitSharp
          * @param lasta '/' if a is a tree, else NUL
          * @param lastb '/' if b is a tree, else NUL
          *
-         * @return < 0 if a is sorted before b, 0 if they are the same, else b
+         * @return &lt; 0 if a is sorted before b, 0 if they are the same, else b
          */
         private static int CompareNames(byte[] a, byte[] nameUTF8, int nameStart, int nameEnd, int lasta, int lastb)
         {

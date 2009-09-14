@@ -51,7 +51,7 @@ namespace GitSharp.Exceptions
 		/// <summary>
 		/// Create a new unmerged path exception.
 		/// </summary>
-		/// <param name="dce">The first non-zero stage of the unmerged path.</param>
+		/// <param name="entry">The first non-zero stage of the unmerged path.</param>
         public UnmergedPathException(DirCacheEntry entry) 
             : base("Unmerged path: " + entry.getPathString())
         {

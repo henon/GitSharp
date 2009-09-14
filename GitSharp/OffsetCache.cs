@@ -47,41 +47,41 @@ namespace GitSharp
 {
 	/// <summary>
 	/// Least frequently used cache for objects specified by PackFile positions.
-	/// <para>
+	/// <para />
 	/// This cache maps a <code>(PackFile, position)</code> tuple to an object.
-	/// </para><para>
+	/// <para />
 	/// This cache is suitable for objects that are "relative expensive" to compute
 	/// from the underlying PackFile, given some known position in that file.
-	/// </para><para>
+	/// <para />
 	/// Whenever a cache miss occurs, <see cref="load(PackFile, long)"/> is invoked by
 	/// exactly one thread for the given <code>(PackFile,position)</code> key tuple.
 	/// This is ensured by an array of _locks, with the tuple hashed to a @lock instance.
-	/// </para><para>
+	/// <para />
 	/// During a miss, older entries are evicted from the cache so long as
 	/// <see cref="isFull"/> returns true.
-	/// </para><para>
+	/// <para />
 	/// Its too expensive during object access to be 100% accurate with a least
 	/// recently used (LRU) algorithm. Strictly ordering every read is a lot of
 	/// overhead that typically doesn't yield a corresponding benefit to the
 	/// application.
-	/// </para><para>
+	/// <para />
 	/// This cache : a loose LRU policy by randomly picking a window
 	/// comprised of roughly 10% of the cache, and evicting the oldest accessed entry
 	/// within that window.
-	/// </para><para>
+	/// <para />
 	/// Entities created by the cache are held under SoftReferences, permitting the
 	/// Java runtime's garbage collector to evict entries when heap memory gets low.
 	/// Most JREs implement a loose least recently used algorithm for this eviction.
-	/// </para><para>
+	/// <para />
 	/// The internal hash table does not expand at runtime, instead it is fixed in
 	/// size at cache creation time. The internal @lock table used to gate load
 	/// invocations is also fixed in size.
-	/// </para><para>
+	/// <para />
 	/// The key tuple is passed through to methods as a pair of parameters rather
 	/// than as a single object, thus reducing the transient memory allocations of
 	/// callers. It is more efficient to avoid the allocation, as we can't be 100%
 	/// sure that a JIT would be able to stack-allocate a key tuple.
-	/// </para><para>
+	/// <para />
 	/// This cache has an implementation rule such that:
 	/// <list>
 	/// <item><see cref="load(PackFile, long)"/> is invoked by at most one thread at a time
@@ -94,15 +94,15 @@ namespace GitSharp
 	/// with the (now expired) cached entity.
 	/// </item>
 	/// </list>
-	/// </para><para>
+	/// <para />
 	/// Therefore, it is safe to perform resource accounting increments during the
 	/// <see cref="load(PackFile, long)"/> or <see cref="createRef(PackFile, long, V)"/>
 	/// methods, and matching decrements during <see cref="clear(R)"/>. Implementors may
 	/// need to override <see cref="createRef(PackFile, long, V)"/> in order to embed
 	/// additional accounting information into an implementation specific
-	/// <see cref="V"/> subclass, as the cached entity may have already been
+	/// <typeparamref name="V"/> subclass, as the cached entity may have already been
 	/// evicted by the JRE's garbage collector.
-	/// </para><para>
+	/// <para />
 	/// To maintain higher concurrency workloads, during eviction only one thread
 	/// performs the eviction work, while other threads can continue to insert new
 	/// objects in parallel. This means that the cache can be temporarily over limit,
@@ -111,7 +111,7 @@ namespace GitSharp
 	/// </summary>
 	/// <typeparam name="V">Type of value stored in the cache.</typeparam>
 	/// <typeparam name="R">
-	/// Subtype of <see cref="R"/> subclass used by the cache.
+	/// Subtype of <typeparamref name="R"/> subclass used by the cache.
 	/// </typeparam>
 	internal abstract class OffsetCache<V, R>
 		where R : OffsetCache<V, R>.Ref<V>
@@ -212,7 +212,7 @@ namespace GitSharp
 		/// Lookup a cached object, creating and loading it if it doesn't exist.
 		/// </summary>
 		/// <param name="pack">the pack that "contains" the cached object.</param>
-		/// <param name="position">offset within <see cref="pack"/> of the object.</param>
+		/// <param name="position">offset within <paramref name="pack"/> of the object.</param>
 		/// <returns>The object reference.</returns>
 		/// <exception cref="Exception">
 		/// The object reference was not in the cache and could not be
@@ -337,14 +337,13 @@ namespace GitSharp
 
 		/// <summary>
 		/// Clear every entry from the cache.
-		/// <para>
+		/// <para />
 		/// This is a last-ditch effort to clear out the cache, such as before it
 		/// gets replaced by another cache that is configured differently. This
 		/// method tries to force every cached entry through <see cref="clear(R)"/> to
 		/// ensure that resources are correctly accounted for and cleaned up by the
 		/// subclass. A concurrent reader loading entries while this method is
 		/// running may cause resource accounting failures.
-		/// </para>
 		/// </summary>
 		internal void removeAll()
 		{
@@ -366,12 +365,11 @@ namespace GitSharp
 
 		/// <summary>
 		/// Clear all entries related to a single file.
-		/// <para>
-		/// Typically this method is invoked during <see cref="PackFile#close()}, when we
+		/// <para />
+		/// Typically this method is invoked during <see cref="PackFile.Close()"/>, when we
 		/// know the pack is never going to be useful to us again (for example, it no
 		/// longer exists on disk). A concurrent reader loading an entry from this
 		/// same pack may cause the pack to become stuck in the cache anyway.
-		/// </para>
 		/// </summary>
 		/// <param name="pack">the file to purge all entries of.</param>
 		internal void removeAll(PackFile pack)
@@ -398,13 +396,12 @@ namespace GitSharp
 
 		/// <summary>
 		/// Materialize an object that doesn't yet exist in the cache.
-		/// <para>
+		/// <para />
 		/// This method is invoked by <see cref="getOrLoad(PackFile, long)"/> when the
 		/// specified entity does not yet exist in the cache. Internal locking
 		/// ensures that at most one thread can call this method for each unique
 		/// <code>(pack,position)</code>, but multiple threads can call this method
 		/// concurrently for different <code>(pack,position)</code> tuples.
-		/// </para>
 		/// </summary>
 		/// <param name="pack">The file to materialize the entry from.</param>
 		/// <param name="position">Offset within the file of the entry.</param>
@@ -418,15 +415,14 @@ namespace GitSharp
 
 		/// <summary>
 		/// Construct a Ref (SoftReference) around a cached entity.
-		/// <para>
+		/// <para />
 		/// Implementing this is only necessary if the subclass is performing
 		/// resource accounting during <see cref="load(PackFile, long)"/> and
 		/// <see cref="clear(R)"/> requires some information to update the accounting.
-		/// <para>
+		/// <para />
 		/// Implementors <b>MUST</b> ensure that the returned reference uses the
 		/// <see cref="queue">Queue</see>, otherwise <see cref="clear(R)"/> will not be
 		/// invoked at the proper time.
-		/// </para>
 		/// </summary>
 		/// <param name="pack">The file to materialize the entry from.</param>
 		/// <param name="position">Offset within the file of the entry.</param>
@@ -434,7 +430,7 @@ namespace GitSharp
 		/// The object returned by <see cref="load(PackFile, long)"/>.
 		/// </param>
 		/// <returns>
-		/// A weak reference subclass wrapped around <see cref="V"/>.
+		/// A weak reference subclass wrapped around <typeparamref name="V"/>.
 		/// </returns>
 		internal virtual R createRef(PackFile pack, long position, V v)
 		{
@@ -443,12 +439,11 @@ namespace GitSharp
 
 		/// <summary>
 		/// Update accounting information now that an object has left the cache.
-		/// <para>
+		/// <para />
 		/// This method is invoked exactly once for the combined
 		/// <see cref="load(PackFile, long)"/> and
 		/// <see cref="createRef(PackFile, long, V)"/> invocation pair that was used
 		/// to construct and insert an object into the cache.
-		/// </para>
 		/// </summary>
 		/// <param name="ref">
 		/// the reference wrapped around the object. Implementations must
@@ -459,16 +454,17 @@ namespace GitSharp
 			// Do nothing by default.
 		}
 
-		/**
-		 * Determine if the cache is full and requires eviction of entries.
-		 * <para>
-		 * By default this method returns false. Implementors may override to
-		 * consult with the accounting updated by <see cref="#load(PackFile, long)},
-		 * <see cref="#createRef(PackFile, long, object)} and <see cref="#clear(Ref)}.
-		 *
-		 * <returns> true if the cache is still over-limit and requires eviction of
-		 *         more entries.
-		 */
+		/// <summary>
+		/// Determine if the cache is full and requires eviction of entries.
+		/// <para />
+		/// By default this method returns false. Implementors may override to
+		/// consult with the accounting updated by <see cref="load(PackFile, long)"/>,
+		/// <see cref="createRef(PackFile, long, V)"/> and <see cref="clear(R)"/>.
+		/// </summary>
+		/// <returns>
+		/// True if the cache is still over-limit and requires eviction of
+		/// more entries.
+		/// </returns>
 		internal virtual bool isFull()
 		{
 			return false;
@@ -517,11 +513,10 @@ namespace GitSharp
 
 		/// <summary>
 		/// Compute the hash code value for a <code>(PackFile,position)</code> tuple.
-		/// <para>
+		/// <para />
 		/// For example, <code>return packHash + (int) (position >>> 4)</code>.
 		/// Implementors must override with a suitable hash (for example, a different
 		/// right shift on the position).
-		/// </para>
 		/// </summary>
 		/// <param name="packHash">hash code for the file being accessed.</param>
 		/// <param name="position">position within the file being accessed.</param>
@@ -568,11 +563,10 @@ namespace GitSharp
 			/// <summary>
 			/// Marked true when <see cref="Ref"/> returns null and the <see cref="Ref"/> 
 			/// is garbage collected.
-			/// <para>
+			/// <para />
 			/// A true here indicates that the @ref is no longer accessible, and that
 			/// we therefore need to eventually purge this Entry object out of the
 			/// bucket's chain.
-			/// </para>
 			/// </summary>
 			public bool Dead
 			{

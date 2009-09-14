@@ -102,10 +102,10 @@ namespace GitSharp
 
         /// <summary>
         /// Update properties by setting fields from the configuration.
-        /// <para>
+		/// <para />
         /// If a property is not defined in the configuration, then it is left
         /// unmodified.
-        /// </para>/// </summary>
+        /// </summary>
         /// <param name="rc">Configuration to read properties from.</param>
         public void FromConfig(RepositoryConfig rc)
         {

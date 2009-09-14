@@ -46,7 +46,7 @@ namespace GitSharp
 {
     /**
      * Util for sorting (or comparing) Ref instances by name.
-     * <p>
+     * <para />
      * Useful for command line tools or writing out refs to file.
      */
     public class RefComparator : IComparer<Ref>

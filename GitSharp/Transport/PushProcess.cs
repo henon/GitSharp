@@ -45,7 +45,7 @@ namespace GitSharp.Transport
     /// <summary>
     /// Class performing push operation on remote repository.
     /// </summary>
-    /// <seealso cref= Transport.push(ProgressMonitor, Collection)</seealso>
+	/// <seealso cref="Transport.push(ProgressMonitor, ICollection{RemoteRefUpdate})"/>
     public class PushProcess
     {
         /// <summary> Task name for <seealso cref="ProgressMonitor"/> used during opening connection.  </summary>
@@ -87,21 +87,25 @@ namespace GitSharp.Transport
             }
         }
 
-        ///	 <summary> * Perform push operation between local and remote repository - set remote
-        ///	 * refs appropriately, send needed objects and update local tracking refs.
-        ///	 * <p>
-        ///	 * When <seealso cref="Transport#isDryRun()"/> is true, result of this operation is
-        ///	 * just estimation of real operation result, no real action is performed.
-        ///	 * </summary>
-        ///	 * <param name="monitor">
-        ///	 *            progress monitor used for feedback about operation. </param>
-        ///	 * <returns> result of push operation with complete status description. </returns>
-        ///	 * <exception cref="NotSupportedException">
-        ///	 *             when push operation is not supported by provided transport. </exception>
-        ///	 * <exception cref="TransportException">
-        ///	 *             when some error occurred during operation, like I/O, protocol
-        ///	 *             error, or local database consistency error. </exception>
-        public virtual PushResult execute(ProgressMonitor monitor)
+        ///	<summary>
+        /// Perform push operation between local and remote repository - set remote
+        /// refs appropriately, send needed objects and update local tracking refs.
+        /// <para />
+        /// When <seealso cref="Transport.DryRun"/> is true, result of this operation is
+        /// just estimation of real operation result, no real action is performed.
+        /// </summary>
+        /// <param name="monitor">
+        /// Progress monitor used for feedback about operation.
+        /// </param>
+        /// <returns> result of push operation with complete status description. </returns>
+        /// <exception cref="NotSupportedException">
+        /// When push operation is not supported by provided transport.
+        /// </exception>
+        /// <exception cref="TransportException">
+        /// When some error occurred during operation, like I/O, protocol
+        /// error, or local database consistency error.
+        /// </exception>
+        public PushResult execute(ProgressMonitor monitor)
         {
             monitor.BeginTask(PROGRESS_OPENING_CONNECTION, ProgressMonitor.UNKNOWN);
             _connection = _transport.openPush();
@@ -110,10 +114,10 @@ namespace GitSharp.Transport
             {
                 monitor.EndTask();
 
-                IDictionary<string, RemoteRefUpdate> preprocessed = prepareRemoteUpdates();
+                IDictionary<string, RemoteRefUpdate> preprocessed = PrepareRemoteUpdates();
                 if (_transport.DryRun)
                 {
-                    modifyUpdatesForDryRun();
+                    ModifyUpdatesForDryRun();
                 }
                 else if (preprocessed.Count != 0)
                 {
@@ -127,13 +131,13 @@ namespace GitSharp.Transport
 
             if (!_transport.DryRun)
             {
-                updateTrackingRefs();
+                UpdateTrackingRefs();
             }
 
-            return prepareOperationResult();
+            return PrepareOperationResult();
         }
 
-        private IDictionary<string, RemoteRefUpdate> prepareRemoteUpdates()
+        private IDictionary<string, RemoteRefUpdate> PrepareRemoteUpdates()
         {
             IDictionary<string, RemoteRefUpdate> result = new Dictionary<string, RemoteRefUpdate>();
             foreach (RemoteRefUpdate rru in _toPush.Values)
@@ -197,7 +201,7 @@ namespace GitSharp.Transport
             return result;
         }
 
-        private void modifyUpdatesForDryRun()
+        private void ModifyUpdatesForDryRun()
         {
             foreach (RemoteRefUpdate rru in _toPush.Values)
             {
@@ -208,7 +212,7 @@ namespace GitSharp.Transport
             }
         }
 
-        private void updateTrackingRefs()
+        private void UpdateTrackingRefs()
         {
             foreach (RemoteRefUpdate rru in _toPush.Values)
             {
@@ -231,9 +235,9 @@ namespace GitSharp.Transport
             }
         }
 
-        private PushResult prepareOperationResult()
+        private PushResult PrepareOperationResult()
         {
-            PushResult result = new PushResult();
+            var result = new PushResult();
             result.SetAdvertisedRefs(_transport.Uri, _connection.RefsMap);
             result.SetRemoteUpdates(_toPush);
 

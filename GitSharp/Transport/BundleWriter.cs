@@ -127,7 +127,7 @@ namespace GitSharp.Transport
 
 	    /**
 	     * Generate and write the bundle to the output stream.
-	     * <p>
+	     * <para />
 	     * This method can only be called once per BundleWriter instance.
 	     *
 	     * @param os

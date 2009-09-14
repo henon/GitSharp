@@ -36,48 +36,44 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace GitSharp.Util
 {
-    /**
-     * A fully buffered output stream using local disk storage for large data.
-     * <p>
-     * Initially this output stream buffers to memory, like ByteArrayOutputStream
-     * might do, but it shifts to using an on disk temporary file if the output gets
-     * too large.
-     * <p>
-     * The content of this buffered stream may be sent to another OutputStream only
-     * After this stream has been properly closed by {@link #close()}.
-     */
+    /// <summary>
+    /// A fully buffered output stream using local disk storage for large data.
+	/// <para />
+	/// Initially this output stream buffers to memory, like ByteArrayOutputStream
+	/// might do, but it shifts to using an on disk temporary file if the output gets
+	/// too large.
+	/// <para />
+	/// The content of this buffered stream may be sent to another OutputStream only
+	/// After this stream has been properly closed by <see cref="close()"/>.
+    /// </summary>
     public class TemporaryBuffer : Stream
     {
         public static int DEFAULT_IN_CORE_LIMIT = 1024 * 1024;
 
-        /** Chain of data, if we are still completely in-core; otherwise null. */
-        private List<Block> blocks;
+        // Chain of data, if we are still completely in-core; otherwise null.
+        private List<Block> _blocks;
 
         /**
          * Maximum number of bytes we will permit storing in memory.
-         * <p>
+         * <para />
          * When this limit is reached the data will be shifted to a file on disk,
          * preventing the JVM heap from growing out of control.
          */
-        private int inCoreLimit;
+        private readonly int inCoreLimit;
 
         /**
          * Location of our temporary file if we are on disk; otherwise null.
-         * <p>
+         * <para />
          * If we exceeded the {@link #inCoreLimit} we nulled out {@link #blocks} and
          * created this file instead. All output goes here through {@link #diskOut}.
          */
-        private FileInfo onDiskFile;
+        private FileInfo _onDiskFile;
 
         /** If writing to {@link #onDiskFile} this is a buffered stream to it. */
         private BufferedStream diskOut;
@@ -86,14 +82,14 @@ namespace GitSharp.Util
         public TemporaryBuffer()
         {
             inCoreLimit = DEFAULT_IN_CORE_LIMIT;
-            blocks = new List<Block>(inCoreLimit / Block.SZ);
-            blocks.Add(new Block());
+            _blocks = new List<Block>(inCoreLimit / Block.SZ);
+            _blocks.Add(new Block());
         }
 
 
         public void write(int b)
         {
-            if (blocks == null)
+            if (_blocks == null)
             {
                 diskOut.WriteByte((byte)b);
                 return;
@@ -109,14 +105,14 @@ namespace GitSharp.Util
                 }
 
                 s = new Block();
-                blocks.Add(s);
+                _blocks.Add(s);
             }
             s.buffer[s.count++] = (byte)b;
         }
 
         public void write(byte[] b, int off, int len)
         {
-            if (blocks != null)
+            if (_blocks != null)
             {
                 while (len > 0)
                 {
@@ -127,7 +123,7 @@ namespace GitSharp.Util
                             break;
 
                         s = new Block();
-                        blocks.Add(s);
+                        _blocks.Add(s);
                     }
 
                     int n = Math.Min(Block.SZ - s.count, len);
@@ -159,7 +155,7 @@ namespace GitSharp.Util
          */
         public void copy(Stream @in)
         {
-            if (blocks != null)
+            if (_blocks != null)
             {
                 for (; ; )
                 {
@@ -169,7 +165,7 @@ namespace GitSharp.Util
                         if (reachedInCoreLimit())
                             break;
                         s = new Block();
-                        blocks.Add(s);
+                        _blocks.Add(s);
                     }
 
                     int n = @in.Read(s.buffer, s.count, Block.SZ - s.count);
@@ -187,20 +183,20 @@ namespace GitSharp.Util
 
         private Block last()
         {
-            return blocks[blocks.Count - 1];
+            return _blocks[_blocks.Count - 1];
         }
 
         private bool reachedInCoreLimit()
         {
-            if (blocks.Count * Block.SZ < inCoreLimit)
+            if (_blocks.Count * Block.SZ < inCoreLimit)
                 return false;
-            onDiskFile = new FileInfo("gitsharp_" + Path.GetRandomFileName());
-            Block last = blocks[blocks.Count - 1];
-            blocks.RemoveAt(blocks.Count - 1);
-            var diskOut_filestream = new FileStream(onDiskFile.FullName, System.IO.FileMode.Create, FileAccess.Write);
-            foreach (Block b in blocks)
+            _onDiskFile = new FileInfo("gitsharp_" + Path.GetRandomFileName());
+            Block last = _blocks[_blocks.Count - 1];
+            _blocks.RemoveAt(_blocks.Count - 1);
+            var diskOut_filestream = new FileStream(_onDiskFile.FullName, System.IO.FileMode.Create, FileAccess.Write);
+            foreach (Block b in _blocks)
                 diskOut_filestream.Write(b.buffer, 0, b.count);
-            blocks = null;
+            _blocks = null;
 
             diskOut = new BufferedStream(diskOut_filestream, Block.SZ);
             diskOut.Write(last.buffer, 0, last.count);
@@ -224,7 +220,7 @@ namespace GitSharp.Util
 
         /**
          * Obtain the length (in bytes) of the buffer.
-         * <p>
+         * <para />
          * The length is only accurate After {@link #close()} has been invoked.
          *
          * @return total length of the buffer, in bytes.
@@ -233,16 +229,16 @@ namespace GitSharp.Util
         {
             get
             {
-                if (onDiskFile != null)
-                    return onDiskFile.Length;
+                if (_onDiskFile != null)
+                    return _onDiskFile.Length;
                 Block last = this.last();
-                return ((long)blocks.Count) * Block.SZ - (Block.SZ - last.count);
+                return ((long)_blocks.Count) * Block.SZ - (Block.SZ - last.count);
             }
         }
 
         /**
          * Convert this buffer's contents into a contiguous byte array.
-         * <p>
+         * <para />
          * The buffer is only complete After {@link #close()} has been invoked.
          *
          * @return the complete byte array; length matches {@link #length()}.
@@ -258,10 +254,10 @@ namespace GitSharp.Util
                 throw new OutOfMemoryException("Length exceeds maximum array size");
 
             byte[] @out = new byte[(int)len];
-            if (blocks != null)
+            if (_blocks != null)
             {
                 int outPtr = 0;
-                foreach (Block b in blocks)
+                foreach (Block b in _blocks)
                 {
                     Array.Copy(b.buffer, 0, @out, outPtr, b.count);
                     outPtr += b.count;
@@ -269,7 +265,7 @@ namespace GitSharp.Util
             }
             else
             {
-                using (var @in = new FileStream(onDiskFile.FullName, System.IO.FileMode.Open, FileAccess.Read))
+                using (var @in = new FileStream(_onDiskFile.FullName, System.IO.FileMode.Open, FileAccess.Read))
                 {
                     NB.ReadFully(@in, @out, 0, (int)len);
                 }
@@ -279,7 +275,7 @@ namespace GitSharp.Util
 
         /**
          * Send this buffer to an output stream.
-         * <p>
+         * <para />
          * This method may only be invoked After {@link #close()} has completed
          * normally, to ensure all data is completely transferred.
          *
@@ -297,11 +293,11 @@ namespace GitSharp.Util
         {
             if (pm == null)
                 pm = new NullProgressMonitor();
-            if (blocks != null)
+            if (_blocks != null)
             {
                 // Everything is in core so we can stream directly to the output.
                 //
-                foreach (Block b in blocks)
+                foreach (Block b in _blocks)
                 {
                     os.Write(b.buffer, 0, b.count);
                     pm.Update(b.count / 1024);
@@ -311,7 +307,7 @@ namespace GitSharp.Util
             {
                 // Reopen the temporary file and copy the contents.
                 //
-                using (var @in = new FileStream(onDiskFile.FullName, System.IO.FileMode.Open, FileAccess.Read))
+                using (var @in = new FileStream(_onDiskFile.FullName, System.IO.FileMode.Open, FileAccess.Read))
                 {
                     int cnt;
                     byte[] buf = new byte[Block.SZ];
@@ -327,7 +323,7 @@ namespace GitSharp.Util
         /** Clear this buffer so it has no data, and cannot be used again. */
         public void destroy()
         {
-            blocks = null;
+            _blocks = null;
 
             if (diskOut != null)
             {
@@ -345,15 +341,15 @@ namespace GitSharp.Util
                 }
             }
 
-            if (onDiskFile != null)
+            if (_onDiskFile != null)
             {
-                onDiskFile.Delete();
-                if (onDiskFile.Exists)
+                _onDiskFile.Delete();
+                if (_onDiskFile.Exists)
                 {
                     ;
                     //    onDiskFile.deleteOnExit(); // [henon] <--- hmm, how to do this?
                 }
-                onDiskFile = null;
+                _onDiskFile = null;
             }
         }
 

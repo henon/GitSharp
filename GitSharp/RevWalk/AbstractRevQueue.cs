@@ -58,17 +58,17 @@ namespace GitSharp.RevWalk
 
     	/// <summary>
         /// Add a commit to the queue.
-		/// <para>
+		/// <para />
 		/// This method always adds the commit, even if it is already in the queue or
 		/// previously was in the queue but has already been removed. To control
-		/// queue admission use {@link #add(RevCommit, RevFlag)}.
+		/// queue admission use <see cref="add(RevCommit, RevFlag)"/>.
         /// </summary>
 		/// <param name="c">Commit to add.</param>
         public abstract void add(RevCommit c);
 
         /**
          * Add a commit if it does not have a flag set yet, then set the flag.
-         * <p>
+         * <para />
          * This method permits the application to test if the commit has the given
          * flag; if it does not already have the flag than the commit is added to
          * the queue and the flag is set. This later will prevent the commit from
@@ -90,7 +90,7 @@ namespace GitSharp.RevWalk
 
         /// <summary>
         /// Add a commit's parents if one does not have a flag set yet.
-		/// <para>
+		/// <para />
 		/// This method permits the application to test if the commit has the given
 		/// flag; if it does not already have the flag than the commit is added to
 		/// the queue and the flag is set. This later will prevent the commit from

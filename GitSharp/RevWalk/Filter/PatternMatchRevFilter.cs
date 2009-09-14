@@ -90,7 +90,7 @@ namespace GitSharp.RevWalk.Filter
 		///	missing? Most users will want this set.
 		/// </param>
 		///	<param name="rawEncoding">
-		///	should <seealso cref="#forceToRaw(String)"/> be applied to the pattern
+		///	should <seealso cref="forceToRaw(String)"/> be applied to the pattern
 		///	before compiling it?
 		/// </param>
 		///	<param name="flags">

@@ -44,10 +44,10 @@ namespace GitSharp.RevWalk
 {
 	/// <summary>
 	/// Initial RevWalk generator that bootstraps a new walk.
-	/// <para>
+	/// <para />
 	/// Initially RevWalk starts with this generator as its chosen implementation.
 	/// The first request for a <see cref="RevCommit"/> from the <see cref="RevWalk"/> 
-	/// instance calls to our <see cref="Next()"/> method, and we replace ourselves with 
+	/// instance calls to our <see cref="next()"/> method, and we replace ourselves with 
 	/// the best <see cref="Generator"/> implementation available based upon the 
 	/// current configuration.
 	/// </summary>

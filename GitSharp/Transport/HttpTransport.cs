@@ -38,28 +38,26 @@
 
 namespace GitSharp.Transport
 {
-    /**
-     * The base class for transports that use HTTP as underlying protocol. This class
-     * allows customizing HTTP connection settings.
-     */
+    /// <summary>
+    /// The base class for transports that use HTTP as underlying protocol. This class
+	/// allows customizing HTTP connection settings.
+    /// </summary>
     public abstract class HttpTransport : Transport
     {
-        /**
-         * Create a new transport instance.
-         *
-         * @param local
-         *            the repository this instance will fetch into, or push out of.
-         *            This must be the repository passed to
-         *            {@link #open(Repository, URIish)}.
-         * @param uri
-         *            the URI used to access the remote repository. This must be the
-         *            URI passed to {@link #open(Repository, URIish)}.
-         */
+        /// <summary>
+        /// Create a new transport instance.
+        /// </summary>
+        /// <param name="local">
+        /// the repository this instance will fetch into, or push out of.
+		/// This must be the repository passed to <see cref="Transport.Open(Repository, URIish)"/>
+		/// </param>
+        /// <param name="uri">
+        /// The URI used to access the remote repository. This must be the
+		/// URI passed to <see cref="Transport.Open(Repository, URIish)"/>.
+        /// </param>
         protected HttpTransport(Repository local, URIish uri)
             : base(local, uri)
         {
-            
         }
     }
-
 }

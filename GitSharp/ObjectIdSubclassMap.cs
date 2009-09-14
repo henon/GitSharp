@@ -43,10 +43,10 @@ namespace GitSharp
 {
 	/// <summary>
 	/// Fast, efficient map specifically for {@link ObjectId} subclasses.
-	/// <para>
+	/// <para />
 	/// This map provides an efficient translation from any ObjectId instance to a
 	/// cached subclass of ObjectId that has the same value.
-	/// </para><para>
+	/// <para />
 	/// Raw value equality is tested when comparing two ObjectIds (or subclasses),
 	/// not reference equality and not <code>.Equals(Object)</code> equality. This
 	/// allows subclasses to override <code>Equals</code> to supply their own

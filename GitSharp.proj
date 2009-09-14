@@ -1,24 +1,28 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="3.5">
-	<UsingTask AssemblyFile="$(MSBuildProjectDirectory)\extern\Gallio.MSBuildTasks.dll" TaskName="Gallio" />
+	
+	<UsingTask AssemblyFile="$(MSBuildProjectDirectory)\extern\CodePlex.MSBuildTasks.dll" TaskName="CodePlex.MSBuildTasks.RegexReplace" />
+	<UsingTask AssemblyFile="$(MSBuildProjectDirectory)\extern\CodePlex.MSBuildTasks.dll" TaskName="CodePlex.MSBuildTasks.Unzip" />
+	<UsingTask AssemblyFile="$(MSBuildProjectDirectory)\extern\CodePlex.MSBuildTasks.dll" TaskName="CodePlex.MSBuildTasks.Zip" />
+	<UsingTask AssemblyFile="$(MSBuildProjectDirectory)\extern\Gallio\Gallio.MSBuildTasks.dll" TaskName="Gallio" />
+
 	<Target Name="Clean">
 		<MSBuild Projects="GitSharp.sln" StopOnFirstFailure="true" Properties="$(BuildConfigProp)" BuildInParallel="true" Targets="Clean"/>
 	</Target>
-  <Target Name="Build">
+	
+	<Target Name="Build">
 		<MSBuild Projects="GitSharp.sln" StopOnFirstFailure="true" Properties="$(BuildConfigProp)" BuildInParallel="true" Targets="Rebuild"/>
 	</Target>
-	<Target Name="SetRelease">
-		<PropertyGroup>
-			<BuildConfig>Release</BuildConfig>
-			<BuildConfigProp>Configuration=$(BuildConfig)</BuildConfigProp>
-		</PropertyGroup>
+	
+	<Target Name="Test" DependsOnTargets="Build">
+		<ItemGroup>
+			<TestAssemblies Include="$(MSBuildProjectDirectory)\Tests\bin\Debug\GitSharp.Tests.dll"/>
+		</ItemGroup>
+		
+		<Gallio IgnoreFailures="true" Files="@(TestAssemblies)" ReportTypes="html;xml">
+			<Output TaskParameter="ExitCode" PropertyName="ExitCode"/>
+		</Gallio>
+		
+		<Error Text="Tests execution failed" Condition="'$(ExitCode)' != 0" />
 	</Target>
-  <Target Name="Test" DependsOnTargets="Build">
-  	<ItemGroup>
-  		<TestAssemblies Include="$(MSBuildProjectDirectory)\Tests\bin\Debug\GitSharp.Tests.dll"/>
-  	</ItemGroup>
-    <Gallio IgnoreFailures="true" PluginDirectories="$(MSBuildProjectDirectory)\extern" Assemblies="@(TestAssemblies)">
-      <Output TaskParameter="ExitCode" PropertyName="ExitCode"/>
-    </Gallio>
-    <Error Text="Tests execution failed" Condition="'$(ExitCode)' != 0" />
-  </Target>	
+
 </Project>

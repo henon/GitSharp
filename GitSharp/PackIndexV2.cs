@@ -276,51 +276,49 @@ namespace GitSharp
 
 		#region Nested Types
 
-		private class EntriesEnumeratorV2 : EntriesIterator
-		{
-			private readonly PackIndexV2 _index;
-			private int _levelOne;
-			private int _levelTwo;
+        private class EntriesEnumeratorV2 : EntriesIterator
+        {
+            private readonly PackIndexV2 _index;
+            private int _levelOne;
+            private int _levelTwo;
 
-			public EntriesEnumeratorV2(PackIndexV2 index)
-			{
-				_index = index;
-			}
+            public EntriesEnumeratorV2(PackIndexV2 index)
+                : base(index)
+            {
+                _index = index;
+            }
 
-			public override bool MoveNext()
-			{
-				for (; _levelOne < _index._names.Length; _levelOne++)
-				{
-					if (_levelTwo < _index._names[_levelOne].Length)
-					{
-						Current.FromRaw(_index._names[_levelOne], _levelTwo);
-						int arrayIdx = _levelTwo / (AnyObjectId.ObjectIdLength / 4) * 4;
-						long offset = NB.DecodeUInt32(_index._offset32[_levelOne], arrayIdx);
-						if ((offset & IS_O64) != 0)
-						{
-							arrayIdx = (8 * (int)(offset & ~IS_O64));
-							offset = NB.DecodeUInt64(_index._offset64, arrayIdx);
-						}
-						Current.Offset = offset;
+            protected override MutableObjectId IdBufferBuilder(MutableObjectId idBuffer)
+            {
+                idBuffer.FromRaw(_index._names[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength / 4);
+                return idBuffer;
+            }
 
-						_levelTwo += AnyObjectId.ObjectIdLength / 4;
-						ReturnedNumber++;
-						return true;
-					}
-					_levelTwo = 0;
-				}
+            protected override MutableEntry InnerNext(MutableEntry entry)
+            {
+                for (; _levelOne < _index._names.Length; _levelOne++)
+                {
+                    if (_levelTwo < _index._names[_levelOne].Length)
+                    {
+                        int idx = _levelTwo / (AnyObjectId.ObjectIdLength / 4) * 4;
+                        long offset = NB.DecodeUInt32(_index._offset32[_levelOne], idx);
+                        if ((offset & IS_O64) != 0)
+                        {
+                            idx = (8 * (int)(offset & ~IS_O64));
+                            offset = NB.DecodeUInt64(_index._offset64, idx);
+                        }
+                        entry.Offset = offset;
 
-				return false;
-			}
+                        _levelTwo += AnyObjectId.ObjectIdLength / 4;
+                        ReturnedNumber++;
+                        return entry;
+                    }
+                    _levelTwo = 0;
+                }
 
-			public override void Reset()
-			{
-				ReturnedNumber = 0;
-				_levelOne = 0;
-				_levelTwo = 0;
-				Current = new MutableEntry();
-			}
-		}
+                throw new IndexOutOfRangeException();
+            }
+        }
 
 		#endregion
 	}

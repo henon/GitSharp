@@ -27,7 +27,7 @@ namespace GitSharp.Tests
             {
                 Assert.AreEqual(knownObjectIds[i], item.ToString().ToUpper(), "ObjectListId#"+i.ToString());
                 Assert.AreEqual(knownOffsets[i], item.Offset, "ObjectListOffset#" + i.ToString());
-                Assert.AreEqual(knownCRCs[i], index.FindCRC32(item), "ObjectListCRC#" + i.ToString());
+                Assert.AreEqual(knownCRCs[i], index.FindCRC32(item.idBuffer), "ObjectListCRC#" + i.ToString());
                 i++;
             }
         }

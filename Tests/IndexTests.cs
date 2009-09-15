@@ -517,10 +517,10 @@ namespace GitSharp.Tests
 		{
 			var index = new GitIndex(db);
 			writeTrashFile("a/b", "data:a/b");
-			writeTrashFile("a:b", "data:a:b");
+			//writeTrashFile("a:b", "data:a:b");
 			writeTrashFile("a.b", "data:a.b");
 			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+			//index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
 			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
 			index.write();
 

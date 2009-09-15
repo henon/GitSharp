@@ -653,7 +653,6 @@ namespace GitSharp.DirectoryCache
 		///
 		public int findEntry(string path)
 		{
-			if (_entryCnt == 0) return -1;
 			byte[] p = Constants.encode(path);
 			return findEntry(p, p.Length);
 		}
@@ -662,12 +661,15 @@ namespace GitSharp.DirectoryCache
 		{
 			int low = 0;
 			int high = _entryCnt;
-			do
+			
+			while (low < high)
 			{
 				var mid = (int)(((uint)(low + high)) >> 1);
 				int cmp = Compare(p, pLen, _sortedEntries[mid]);
 				if (cmp < 0)
+				{
 					high = mid;
+				}
 				else if (cmp == 0)
 				{
 					while (mid > 0 && Compare(p, pLen, _sortedEntries[mid - 1]) == 0)
@@ -677,8 +679,12 @@ namespace GitSharp.DirectoryCache
 					return mid;
 				}
 				else
+				{
 					low = mid + 1;
-			} while (low < high);
+				}
+
+			}
+
 			return -(low + 1);
 		}
 

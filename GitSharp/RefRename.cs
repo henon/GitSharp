@@ -35,7 +35,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.IO;
 using System.Threading;
 using RefResult = GitSharp.RefUpdate.RefUpdateResult;
@@ -73,95 +72,96 @@ namespace GitSharp
 			Ref oldRef = _oldFromDelete.Repository.getRef(Constants.HEAD);
 			bool renameHeadToo = oldRef != null && oldRef.Name == _oldFromDelete.Name;
 			Repository db = _oldFromDelete.Repository;
-			try
+			RefLogWriter.renameTo(db, _oldFromDelete, _newToUpdate);
+			_newToUpdate.SetRefLogMessage(null, false);
+			string tmpRefName = "RENAMED-REF.." + Thread.CurrentThread.ManagedThreadId;
+
+			RefUpdate tmpUpdateRef = db.UpdateRef(tmpRefName);
+			if (renameHeadToo)
 			{
-				RefLogWriter.renameTo(db, _oldFromDelete, _newToUpdate);
-				_newToUpdate.SetRefLogMessage(null, false);
-				string tmpRefName = "RENAMED-REF.." + Thread.CurrentThread.ManagedThreadId;
-				RefUpdate tmpUpdateRef = db.UpdateRef(tmpRefName);
-				if (renameHeadToo)
+				try
 				{
-					try
-					{
-						_oldFromDelete.Repository.Link(Constants.HEAD, tmpRefName);
-					}
-					catch (IOException)
-					{
-						RefLogWriter.renameTo(db, _newToUpdate, _oldFromDelete);
-						return _renameResult = RefResult.LockFailure;
-					}
+					_oldFromDelete.Repository.Link(Constants.HEAD, tmpRefName);
 				}
-
-				tmpUpdateRef.NewObjectId = _oldFromDelete.OldObjectId;
-				tmpUpdateRef.IsForceUpdate = true;
-				RefResult update = tmpUpdateRef.Update();
-				if (update != RefResult.Forced && update != RefResult.New && update != RefResult.NoChange)
+				catch (IOException)
 				{
 					RefLogWriter.renameTo(db, _newToUpdate, _oldFromDelete);
-					if (renameHeadToo)
-					{
-						_oldFromDelete.Repository.Link(Constants.HEAD, _oldFromDelete.Name);
-					}
-
-					return _renameResult = update;
-				}
-
-				_oldFromDelete.ExpectedOldObjectId = _oldFromDelete.OldObjectId;
-				_oldFromDelete.IsForceUpdate = true;
-				RefResult delete = _oldFromDelete.Delete();
-				if (delete != RefResult.Forced)
-				{
-					if (db.getRef(_oldFromDelete.Name) != null)
-					{
-						RefLogWriter.renameTo(db, _newToUpdate, _oldFromDelete);
-						if (renameHeadToo)
-						{
-							_oldFromDelete.Repository.Link(Constants.HEAD, _oldFromDelete.Name);
-						}
-					}
-					return _renameResult = delete;
-				}
-
-				_newToUpdate.NewObjectId = tmpUpdateRef.NewObjectId;
-				RefResult updateResult = _newToUpdate.Update();
-				if (updateResult != RefResult.New)
-				{
-					RefLogWriter.renameTo(db, _newToUpdate, _oldFromDelete);
-					if (renameHeadToo)
-					{
-						_oldFromDelete.Repository.Link(Constants.HEAD, _oldFromDelete.Name);
-					}
-					_oldFromDelete.ExpectedOldObjectId = null;
-					_oldFromDelete.NewObjectId = _oldFromDelete.OldObjectId;
-					_oldFromDelete.IsForceUpdate = true;
-					_oldFromDelete.SetRefLogMessage(null, false);
-					RefResult undelete = _oldFromDelete.Update();
-					if (undelete != RefResult.New && undelete != RefResult.LockFailure)
-					{
-						return _renameResult = RefResult.IOFailure;
-					}
 					return _renameResult = RefResult.LockFailure;
 				}
+			}
 
+			tmpUpdateRef.NewObjectId = _oldFromDelete.OldObjectId;
+			tmpUpdateRef.IsForceUpdate = true;
+			RefResult update = tmpUpdateRef.Update();
+			if (update != RefResult.Forced && update != RefResult.New && update != RefResult.NoChange)
+			{
+				RefLogWriter.renameTo(db, _newToUpdate, _oldFromDelete);
 				if (renameHeadToo)
 				{
-					_oldFromDelete.Repository.Link(Constants.HEAD, _newToUpdate.Name);
-				}
-				else
-				{
-					db.OnRefsChanged();
+					_oldFromDelete.Repository.Link(Constants.HEAD, _oldFromDelete.Name);
 				}
 
-				RefLogWriter.append(this, "Branch: renamed "
-						+ Repository.ShortenRefName(_oldFromDelete.Name) + " to "
-						+ Repository.ShortenRefName(_newToUpdate.Name));
-				
-				return _renameResult = RefResult.Renamed;
+				return _renameResult = update;
 			}
-			catch (Exception)
+
+			_oldFromDelete.ExpectedOldObjectId = _oldFromDelete.OldObjectId;
+			_oldFromDelete.IsForceUpdate = true;
+			RefResult delete = _oldFromDelete.Delete();
+			if (delete != RefResult.Forced)
 			{
-				throw;
+				if (db.getRef(_oldFromDelete.Name) != null)
+				{
+					RefLogWriter.renameTo(db, _newToUpdate, _oldFromDelete);
+					if (renameHeadToo)
+					{
+						_oldFromDelete.Repository.Link(Constants.HEAD, _oldFromDelete.Name);
+					}
+				}
+				return _renameResult = delete;
 			}
+
+			_newToUpdate.NewObjectId = tmpUpdateRef.NewObjectId;
+			RefResult updateResult = _newToUpdate.Update();
+			if (updateResult != RefResult.New)
+			{
+				RefLogWriter.renameTo(db, _newToUpdate, _oldFromDelete);
+				if (renameHeadToo)
+				{
+					_oldFromDelete.Repository.Link(Constants.HEAD, _oldFromDelete.Name);
+				}
+				_oldFromDelete.ExpectedOldObjectId = null;
+				_oldFromDelete.NewObjectId = _oldFromDelete.OldObjectId;
+				_oldFromDelete.IsForceUpdate = true;
+				_oldFromDelete.SetRefLogMessage(null, false);
+				RefResult undelete = _oldFromDelete.Update();
+				if (undelete != RefResult.New && undelete != RefResult.LockFailure)
+				{
+					return _renameResult = RefResult.IOFailure;
+				}
+				return _renameResult = RefResult.LockFailure;
+			}
+
+			if (renameHeadToo)
+			{
+				_oldFromDelete.Repository.Link(Constants.HEAD, _newToUpdate.Name);
+			}
+			else
+			{
+				db.OnRefsChanged();
+			}
+
+			RefLogWriter.append(this, _newToUpdate.Name, "Branch: renamed "
+				+ Repository.ShortenRefName(_oldFromDelete.Name) + " to "
+				+ Repository.ShortenRefName(_newToUpdate.Name));
+
+			if (renameHeadToo)
+			{
+				RefLogWriter.append(this, Constants.HEAD, "Branch: renamed "
+					+ Repository.ShortenRefName(_oldFromDelete.Name) + " to "
+					+ Repository.ShortenRefName(_newToUpdate.Name));
+			}
+
+			return _renameResult = RefResult.Renamed;
 		}
 
 		public ObjectId ObjectId

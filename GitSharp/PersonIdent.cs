@@ -38,8 +38,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using GitSharp.Util;
 
@@ -47,14 +45,15 @@ namespace GitSharp
 {
     public class PersonIdent
     {
+		private readonly DateTimeOffset _whenTime;
+
         public string Name { get; private set; }
         public string EmailAddress { get; private set; }
 
         public DateTimeOffset When
         {
-            get { return when_time; }
+            get { return _whenTime; }
         }
-        private DateTimeOffset when_time = DateTimeOffset.Now;
 
         /// <summary>
         /// TimeZone offset in minutes
@@ -63,9 +62,9 @@ namespace GitSharp
         {
             get
             {
-                foreach (TimeZoneInfo tzi in System.TimeZoneInfo.GetSystemTimeZones())
+                foreach (TimeZoneInfo tzi in TimeZoneInfo.GetSystemTimeZones())
                 {
-                    if (tzi.BaseUtcOffset == when_time.Offset)
+                    if (tzi.BaseUtcOffset == _whenTime.Offset)
                         return tzi;
                 }
                 return null;
@@ -77,41 +76,47 @@ namespace GitSharp
             RepositoryConfig config = repo.Config;
             string username = config.getString("user", null, "name");
             string email = config.getString("user", null, "email");
-            this.Name = username;
-            this.EmailAddress = email;
-            this.when_time = DateTimeOffset.Now;
+            Name = username;
+            EmailAddress = email;
+            _whenTime = DateTimeOffset.Now;
         }
 
-        public PersonIdent(PersonIdent pi) : this(pi.Name, pi.EmailAddress) { }
+        public PersonIdent(PersonIdent pi) 
+			: this(pi.Name, pi.EmailAddress)
+        {
+        }
 
-        public PersonIdent(string name, string emailAddress) : this(name, emailAddress, DateTimeOffset.Now) { }
+        public PersonIdent(string name, string emailAddress)
+			: this(name, emailAddress, DateTimeOffset.Now)
+        {
+        }
 
         public PersonIdent(PersonIdent pi, DateTimeOffset when)
         {
-            this.Name = pi.Name;
-            this.EmailAddress = pi.EmailAddress;
-            this.when_time = when;
+            Name = pi.Name;
+            EmailAddress = pi.EmailAddress;
+            _whenTime = when;
         }
 
         public PersonIdent(string name, string emailAddress, DateTimeOffset when)
         {
-            this.Name = name;
-            this.EmailAddress = emailAddress;
-            this.when_time = when;
+            Name = name;
+            EmailAddress = emailAddress;
+            _whenTime = when;
         }
 
-        public PersonIdent(string name, string emailAddress, long git_time, int offset_in_minutes)
+        public PersonIdent(string name, string emailAddress, long gitTime, int offsetInMinutes)
         {
-            this.Name = name;
-            this.EmailAddress = emailAddress;
-            this.when_time = git_time.GitTimeToDateTimeOffset((long)offset_in_minutes);
+            Name = name;
+            EmailAddress = emailAddress;
+            _whenTime = gitTime.GitTimeToDateTimeOffset(offsetInMinutes);
         }
 
-        public PersonIdent(PersonIdent pi, long git_time, int offset_in_minutes)
+        public PersonIdent(PersonIdent pi, long gitTime, int offsetInMinutes)
         {
-            this.Name = pi.Name;
-            this.EmailAddress = pi.EmailAddress;
-            this.when_time = git_time.GitTimeToDateTimeOffset((long)offset_in_minutes);
+            Name = pi.Name;
+            EmailAddress = pi.EmailAddress;
+            _whenTime = gitTime.GitTimeToDateTimeOffset(offsetInMinutes);
         }
 
         public PersonIdent(string str)
@@ -122,63 +127,55 @@ namespace GitSharp
                 throw new ArgumentException("Malformed PersonIdent string"
                         + " (no < was found): " + str);
             }
+
             int gt = str.IndexOf('>', lt);
             if (gt == -1)
             {
                 throw new ArgumentException("Malformed PersonIdent string"
                         + " (no > was found): " + str);
             }
+
             int sp = str.IndexOf(' ', gt + 2);
             if (sp == -1)
             {
-                when_time = new DateTimeOffset(0, TimeSpan.Zero);
+                _whenTime = new DateTimeOffset(0, TimeSpan.Zero);
             }
             else
             {
                 string tzHoursStr = str.Slice(sp + 1, sp + 4).Trim();
-                int tzHours;
-                if (tzHoursStr[0] == '+')
-                {
-                    tzHours = int.Parse(tzHoursStr.Substring(1));
-                }
-                else
-                {
-                    tzHours = int.Parse(tzHoursStr);
-                }
+            	int tzHours = tzHoursStr[0] == '+' ? int.Parse(tzHoursStr.Substring(1)) : int.Parse(tzHoursStr);
+
                 int tzMins = int.Parse(str.Substring(sp + 4).Trim());
                 long gittime = long.Parse(str.Slice(gt + 1, sp).Trim());
-                this.when_time = gittime.GitTimeToDateTimeOffset(tzHours * 60 + tzMins);
+                _whenTime = gittime.GitTimeToDateTimeOffset(tzHours * 60 + tzMins);
             }
 
-            this.Name = str.Slice(0, lt).Trim();
-            this.EmailAddress = str.Slice(lt + 1, gt).Trim();
+            Name = str.Slice(0, lt).Trim();
+            EmailAddress = str.Slice(lt + 1, gt).Trim();
         }
 
         public override int GetHashCode()
         {
-            return this.EmailAddress.GetHashCode() ^ (int)when_time.ToGitInternalTime();
+            return EmailAddress.GetHashCode() ^ (int)_whenTime.ToGitInternalTime();
         }
 
         public override bool Equals(object o)
         {
-            PersonIdent p = o as PersonIdent;
-            if (p == null)
-                return false;
+            var p = o as PersonIdent;
+            if (p == null) return false;
 
-            return this.Name == p.Name
-                && this.EmailAddress == p.EmailAddress
-                && when_time.ToGitInternalTime() == p.when_time.ToGitInternalTime();
+            return Name == p.Name
+                && EmailAddress == p.EmailAddress
+                && _whenTime.ToGitInternalTime() == p._whenTime.ToGitInternalTime();
         }
 
         public string ToExternalString()
         {
-            StringBuilder r = new StringBuilder();
-            int offset = (int)when_time.Offset.TotalMinutes;
+            var r = new StringBuilder();
+            var offset = (int)_whenTime.Offset.TotalMinutes;
             char sign;
-            int offsetHours;
-            int offsetMins;
 
-            if (offset < 0)
+        	if (offset < 0)
             {
                 sign = '-';
                 offset = -offset;
@@ -188,14 +185,14 @@ namespace GitSharp
                 sign = '+';
             }
 
-            offsetHours = offset / 60;
-            offsetMins = offset % 60;
+            int offsetHours = offset / 60;
+            int offsetMins = offset % 60;
 
             r.Append(Name);
             r.Append(" <");
             r.Append(EmailAddress);
             r.Append("> ");
-            r.Append(when_time.ToGitInternalTime());
+            r.Append(_whenTime.ToGitInternalTime());
             r.Append(' ');
             r.Append(sign);
             if (offsetHours < 10)

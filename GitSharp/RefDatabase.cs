@@ -574,7 +574,14 @@ namespace GitSharp
 		{
 			using (StreamReader sr = OpenReader(file))
 			{
-				return sr.ReadLine();
+				string line = sr.ReadLine();
+
+				if (line != null)
+				{
+					line = line.Trim();
+				}
+
+				return line;
 			}
 		}
 

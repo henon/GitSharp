@@ -40,7 +40,6 @@ using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public abstract class RevQueueTestCase<T> : RevWalkTestCase
         where T : AbstractRevQueue
     {

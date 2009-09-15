@@ -83,5 +83,10 @@ namespace GitSharp.Util
 
             return encoder.GetBytes(plainString);
         }
+
+        public static byte[] getBytes(this string plainString)
+        {
+            return plainString.getBytes("UTF-8");
+        }
     }
 }

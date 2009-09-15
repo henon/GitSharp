@@ -642,7 +642,7 @@ namespace GitSharp.Tests
             Assert.AreEqual(newId2, db.Resolve("refs/heads/foobar"));
         }
 
-        [Test, Ignore("Seem to be some threading issues that make the test hang when run with all other tests by Gallio Icarius")]
+        [Test]
         public void test029_mapObject()
         {
             Assert.AreEqual((new byte[0].GetType()), db.MapObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"), null).GetType());

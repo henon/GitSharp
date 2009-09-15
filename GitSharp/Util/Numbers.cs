@@ -39,6 +39,7 @@
 
 // Note: this file originates from jgit's NB.java
 using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 
@@ -312,9 +313,9 @@ namespace GitSharp.Util
 		/// if you pass the first argument value "1101", then the second argument should take the value "2".
 		/// </summary>
 		/// <param name="sBase">the string in base sBase notation</param>
-		/// <param name="numbase">the base to convert from</param>
+		/// <param name="numBase">the base to convert from</param>
 		/// <returns>decimal</returns>
-		public static int BaseToDecimal(string sBase, int numbase)
+		public static int BaseToDecimal(string sBase, int numBase)
 		{
 			long value;
 			if (!long.TryParse(sBase, out value))
@@ -322,7 +323,7 @@ namespace GitSharp.Util
 				throw new ArgumentException("sBase");
 			}
 
-			return Convert.ToInt32(Convert.ToString(value, numbase));
+			return Convert.ToInt32(Convert.ToString(value, CultureInfo.InvariantCulture), numBase);
 		}
 
 		/**

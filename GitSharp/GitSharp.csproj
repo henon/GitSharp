@@ -79,7 +79,6 @@
     <Compile Include="Exceptions\ConfigInvalidException.cs" />
     <Compile Include="Exceptions\ExceptionExtensions.cs" />
     <Compile Include="Exceptions\GitlinksNotSupportedException.cs" />
-    <Compile Include="Exceptions\GitSharpException.cs" />
     <Compile Include="Exceptions\InvalidObjectIdException.cs" />
     <Compile Include="Exceptions\NoClosingBracketException.cs" />
     <Compile Include="Exceptions\CorruptObjectException.cs" />

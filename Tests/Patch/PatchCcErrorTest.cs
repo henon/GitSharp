@@ -47,7 +47,7 @@ namespace GitSharp.Tests.Patch
         [Test]
 	    public void testError_CcTruncatedOld()
         {
-			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testError_CcTruncatedOld.patch");
+			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_CcTruncatedOld.patch");
 		    Assert.AreEqual(1, p.getFiles().Count);
 		    Assert.AreEqual(3, p.getErrors().Count);
 		    {

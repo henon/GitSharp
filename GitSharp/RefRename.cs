@@ -153,8 +153,8 @@ namespace GitSharp
 				}
 
 				RefLogWriter.append(this, "Branch: renamed "
-						+ db.ShortenRefName(_oldFromDelete.Name) + " to "
-						+ db.ShortenRefName(_newToUpdate.Name));
+						+ Repository.ShortenRefName(_oldFromDelete.Name) + " to "
+						+ Repository.ShortenRefName(_newToUpdate.Name));
 				
 				return _renameResult = RefResult.Renamed;
 			}

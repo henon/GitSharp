@@ -47,7 +47,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testParse_OneFileCc()
 		{
-			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_OneFileCc.patch");
+			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_OneFileCc.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().isEmpty());
 
@@ -103,7 +103,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testParse_CcNewFile()
 		{
-			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_CcNewFile.patch");
+			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_CcNewFile.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().isEmpty());
 
@@ -159,7 +159,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testParse_CcDeleteFile()
 		{
-			GitSharp.Patch.Patch p = parseTestPatchFile(PATCHS_DIR + "testParse_CcDeleteFile.patch");
+			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_CcDeleteFile.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().isEmpty());
 

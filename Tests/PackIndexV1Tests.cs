@@ -36,52 +36,34 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using GitSharp;
-using GitSharp.Exceptions;
-using NUnit.Framework;
 using GitSharp.Tests.Util;
+using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
     [TestFixture]
     public class PackIndexV1Test : PackIndexTestCase
     {
-
-        public override FileInfo getFileForPack34be9032()
+    	protected override FileInfo getFileForPack34be9032()
         {
             return new FileInfo("Resources/pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.idx");
         }
 
-
-        public override FileInfo getFileForPackdf2982f28()
+    	protected override FileInfo getFileForPackdf2982f28()
         {
             return new FileInfo("Resources/pack-df2982f284bbabb6bdb59ee3fcc6eb0983e20371.idx");
         }
 
-        /**
-         * Verify CRC32 - V1 should not index anything.
-         *
-         */
+        /// <summary>
+		/// Verify CRC32 - V1 should not index anything.
+        /// </summary>
         [Test]
         public override void testCRC32()
         {
-            Assert.IsFalse(smallIdx.HasCRC32Support);
-            try
-            {
-                smallIdx.FindCRC32(ObjectId.FromString("4b825dc642cb6eb9a060e54bf8d69288fbee4904"));
-                Assert.Fail("index V1 shouldn't support CRC");
-            }
-            catch (NotSupportedException)
-            {
-                // expected
-            }
+        	AssertHelper.Throws<NotSupportedException>(() => 
+				smallIdx.FindCRC32(ObjectId.FromString("4b825dc642cb6eb9a060e54bf8d69288fbee4904")));
         }
     }
-
 }

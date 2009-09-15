@@ -36,37 +36,28 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using GitSharp;
-using GitSharp.Exceptions;
-using NUnit.Framework;
 using GitSharp.Tests.Util;
+using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
     [TestFixture]
     public class PackIndexV2Tests : PackIndexTestCase
     {
-        public override FileInfo getFileForPack34be9032()
+    	protected override FileInfo getFileForPack34be9032()
         {
             return new FileInfo("Resources/pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.idxV2");
         }
 
-        public override FileInfo getFileForPackdf2982f28()
+    	protected override FileInfo getFileForPackdf2982f28()
         {
             return new FileInfo("Resources/pack-df2982f284bbabb6bdb59ee3fcc6eb0983e20371.idxV2");
         }
 
-        /**
-         * Verify CRC32 indexing.
-         *
-         */
+        /// <summary>
+		/// Verify CRC32 indexing.
+        /// </summary>
         [Test]
         public override void testCRC32()
         {
@@ -81,5 +72,4 @@ namespace GitSharp.Tests
             Assert.AreEqual(0x000000000B3B5BA6L, smallIdx.FindCRC32(ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799")));
         }
     }
-
 }

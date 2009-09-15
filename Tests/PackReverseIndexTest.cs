@@ -45,8 +45,8 @@ namespace GitSharp.Tests
 	[TestFixture]
 	public class PackReverseIndexTest : RepositoryTestCase
 	{
-		private PackIndex idx;
-		private PackReverseIndex reverseIdx;
+		private PackIndex _idx;
+		private PackReverseIndex _reverseIdx;
 
 		///	<summary>
 		/// Set up tested class instance, test constructor by the way.
@@ -56,10 +56,10 @@ namespace GitSharp.Tests
 			base.setUp();
 
 			// index with both small (< 2^31) and big offsets
-			FileInfo fi = new FileInfo("Resources/pack-huge.idx");
+			var fi = new FileInfo("Resources/pack-huge.idx");
 			Assert.IsTrue(fi.Exists,"Does the index exist");
-			idx = PackIndex.Open(fi);
-			reverseIdx = new PackReverseIndex(idx);
+			_idx = PackIndex.Open(fi);
+			_reverseIdx = new PackReverseIndex(_idx);
 		}
 
 		///	<summary>
@@ -68,9 +68,9 @@ namespace GitSharp.Tests
 		[Test]
 		public void testFindObject()
 		{
-			foreach (PackIndex.MutableEntry me in idx)
+			foreach (PackIndex.MutableEntry me in _idx)
 			{
-				Assert.AreEqual(me.ToObjectId(), reverseIdx.FindObject(me.Offset));
+				Assert.AreEqual(me.ToObjectId(), _reverseIdx.FindObject(me.Offset));
 			}
 		}
 
@@ -80,7 +80,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testFindObjectWrongOffset()
 		{
-			Assert.IsNull(reverseIdx.FindObject(0));
+			Assert.IsNull(_reverseIdx.FindObject(0));
 		}
 
 		///	<summary>
@@ -89,16 +89,16 @@ namespace GitSharp.Tests
 		[Test]
 		public void testFindNextOffset()
 		{
-			long offset = findFirstOffset();
+			long offset = FindFirstOffset();
 			Assert.IsTrue(offset > 0);
-			for (int i = 0; i < idx.ObjectCount; i++)
+			for (int i = 0; i < _idx.ObjectCount; i++)
 			{
-				long newOffset = reverseIdx.FindNextOffset(offset, long.MaxValue);
+				long newOffset = _reverseIdx.FindNextOffset(offset, long.MaxValue);
 				Assert.IsTrue(newOffset > offset);
-				if (i == idx.ObjectCount - 1)
+				if (i == _idx.ObjectCount - 1)
 					Assert.AreEqual(newOffset, long.MaxValue);
 				else
-					Assert.AreEqual(newOffset, idx.FindOffset(reverseIdx.FindObject(newOffset)));
+					Assert.AreEqual(newOffset, _idx.FindOffset(_reverseIdx.FindObject(newOffset)));
 				offset = newOffset;
 			}
 		}
@@ -110,14 +110,14 @@ namespace GitSharp.Tests
 		[ExpectedException(typeof(CorruptObjectException))]
 		public void testFindNextOffsetWrongOffset()
 		{
-			reverseIdx.FindNextOffset(0, long.MaxValue);
+			_reverseIdx.FindNextOffset(0, long.MaxValue);
 			Assert.Fail("findNextOffset() should throw exception");
 		}
 
-		private long findFirstOffset()
+		private long FindFirstOffset()
 		{
 			long min = long.MaxValue;
-			foreach (PackIndex.MutableEntry me in idx)
+			foreach (PackIndex.MutableEntry me in _idx)
 			{
 				min = Math.Min(min, me.Offset);
 			}

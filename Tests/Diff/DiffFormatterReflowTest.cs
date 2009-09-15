@@ -37,7 +37,6 @@
 
 using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using GitSharp.Diff;
 using GitSharp.Patch;
 using GitSharp.Tests.Patch;
@@ -65,94 +64,94 @@ namespace GitSharp.Tests.Diff
 		[Test]
 		public void testNegativeContextFails()
 		{
-			init("X");
+			Init("X");
 		    AssertHelper.Throws<ArgumentException>(() => fmt.setContext(-1));
 		}
 
 		[Test]
 		public void testContext0()
 		{
-			init("X");
+			Init("X");
 			fmt.setContext(0);
-            assertFormatted("testContext0.out");
+            AssertFormatted("testContext0.out");
 		}
 
 		[Test]
 		public void testContext1()
 		{
-			init("X");
+			Init("X");
 			fmt.setContext(1);
-            assertFormatted("testContext1.out");
+            AssertFormatted("testContext1.out");
 		}
 
 		[Test]
 		public void testContext3()
 		{
-			init("X");
+			Init("X");
 			fmt.setContext(3);
-            assertFormatted("testContext3.out");
+            AssertFormatted("testContext3.out");
 		}
 
 		[Test]
 		public void testContext5()
 		{
-			init("X");
+			Init("X");
 			fmt.setContext(5);
-            assertFormatted("testContext5.out");
+            AssertFormatted("testContext5.out");
 		}
 
 		[Test]
 		public void testContext10()
 		{
-			init("X");
+			Init("X");
 			fmt.setContext(10);
-            assertFormatted("testContext10.out");
+            AssertFormatted("testContext10.out");
 		}
 
 		[Test]
 		public void testContext100()
 		{
-			init("X");
+			Init("X");
 			fmt.setContext(100);
-            assertFormatted("testContext100.out");
+            AssertFormatted("testContext100.out");
 		}
 
 		[Test]
 		public void testEmpty1()
 		{
-			init("E");
-			assertFormatted("E.patch");
+			Init("E");
+			AssertFormatted("E.patch");
 		}
 
 		[Test]
 		public void testNoNewLine1()
 		{
-			init("Y");
-			assertFormatted("Y.patch");
+			Init("Y");
+			AssertFormatted("Y.patch");
 		}
 
 		[Test]
 		public void testNoNewLine2()
 		{
-			init("Z");
-			assertFormatted("Z.patch");
+			Init("Z");
+			AssertFormatted("Z.patch");
 		}
 
-		private void init(string name)
+		private void Init(string name)
 		{
-			a = new RawText(readFile(name + "_PreImage"));
-			b = new RawText(readFile(name + "_PostImage"));
+			a = new RawText(ReadFile(name + "_PreImage"));
+			b = new RawText(ReadFile(name + "_PostImage"));
 			file = ParseTestPatchFile(DiffsDir + name + ".patch").getFiles()[0];
 		}
 
-		private void assertFormatted(string name)
+		private void AssertFormatted(string name)
 		{
 			fmt.format(memoryStream, file, a, b);
-			string exp = RawParseUtils.decode(readFile(name));
+			string exp = RawParseUtils.decode(ReadFile(name));
 			Assert.AreEqual(exp, RawParseUtils.decode(memoryStream.ToArray()));
 		}
 
-		private byte[] readFile(string patchFile)
+		private static byte[] ReadFile(string patchFile)
 		{
             return File.ReadAllBytes(DiffsDir + patchFile);
 		}

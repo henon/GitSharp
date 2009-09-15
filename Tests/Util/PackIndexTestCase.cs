@@ -36,58 +36,46 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using NUnit.Framework;
-using GitSharp;
-using GitSharp.Util;
 
 namespace GitSharp.Tests.Util
 {
     public abstract class PackIndexTestCase : RepositoryTestCase
     {
-
         protected PackIndex smallIdx;
-
-        protected PackIndex denseIdx;
+    	private PackIndex _denseIdx;
 
         [SetUp]
         public override void setUp()
         {
             base.setUp();
             smallIdx = PackIndex.Open(getFileForPack34be9032());
-            denseIdx = PackIndex.Open(getFileForPackdf2982f28());
+            _denseIdx = PackIndex.Open(getFileForPackdf2982f28());
         }
-        /**
-         * Return File with appropriate index version for prepared pack.
-         * 
-         * @return File with index
-         */
-        public abstract FileInfo getFileForPack34be9032();
 
-        /**
-         * Return File with appropriate index version for prepared pack.
-         * 
-         * @return File with index
-         */
-        public abstract FileInfo getFileForPackdf2982f28();
+        /// <summary>
+		/// Return File with appropriate index version for prepared pack.
+        /// </summary>
+        /// <returns></returns>
+    	protected abstract FileInfo getFileForPack34be9032();
 
-        /**
-         * Verify CRC32 support.
-         *
-         * @throws MissingObjectException
-         * @throws UnsupportedOperationException
-         */
+        /// <summary>
+		/// Return File with appropriate index version for prepared pack.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract FileInfo getFileForPackdf2982f28();
+
+        /// <summary>
+		/// Verify CRC32 support.
+        /// </summary>
         public abstract void testCRC32();
 
-
-        /**
-         * Test contracts of Iterator methods and this implementation remove()
-         * limitations.
-         */
+        /// <summary>
+        /// Test contracts of Iterator methods and this implementation remove()
+		/// limitations.
+        /// </summary>
         [Test]
         public void testIteratorMethodsContract()
         {
@@ -99,10 +87,10 @@ namespace GitSharp.Tests.Util
             Assert.IsFalse(iter.MoveNext());
         }
 
-        /**
-         * Test results of iterator comparing to content of well-known (prepared)
-         * small index.
-         */
+        /// <summary>
+        /// Test results of iterator comparing to content of well-known (prepared)
+		/// small index.
+        /// </summary>
         [Test]
         public void testIteratorReturnedValues1()
         {
@@ -126,9 +114,9 @@ namespace GitSharp.Tests.Util
             Assert.IsFalse(iter.MoveNext());
         }
 
-        /**
-         * Compare offset from iterator entries with output of findOffset() method.
-         */
+        /// <summary>
+		/// Compare offset from iterator entries with output of findOffset() method.
+        /// </summary>
         [Test]
         public void testCompareEntriesOffsetsWithFindOffsets()
         {
@@ -136,25 +124,29 @@ namespace GitSharp.Tests.Util
             {
                 Assert.AreEqual(smallIdx.FindOffset(me.ToObjectId()), me.Offset);
             }
-            foreach (var me in denseIdx)
+
+            foreach (var me in _denseIdx)
             {
-                Assert.AreEqual(denseIdx.FindOffset(me.ToObjectId()), me.Offset);
+                Assert.AreEqual(_denseIdx.FindOffset(me.ToObjectId()), me.Offset);
             }
         }
 
-        /**
-         * Test partial results of iterator comparing to content of well-known
-         * (prepared) dense index, that may need multi-level indexing.
-         */
+        /// <summary>
+        /// Test partial results of iterator comparing to content of well-known
+		/// (prepared) dense index, that may need multi-level indexing.
+        /// </summary>
         [Test]
         public void testIteratorReturnedValues2()
         {
-            IEnumerator<PackIndex.MutableEntry> iter = denseIdx.GetEnumerator();
+            IEnumerator<PackIndex.MutableEntry> iter = _denseIdx.GetEnumerator();
             iter.MoveNext();
+
             while (!iter.Current.ToString().Equals("0a3d7772488b6b106fb62813c4d6d627918d9181"))
             {
-                iter.MoveNext(); 			// just iterating
+				// just iterating
+                iter.MoveNext();
             }
+
             iter.MoveNext();
             Assert.AreEqual("1004d0d7ac26fbf63050a234c9b88a46075719d3", iter.Current.ToString()); // same level-1
             iter.MoveNext();
@@ -163,5 +155,4 @@ namespace GitSharp.Tests.Util
             Assert.AreEqual("1203b03dc816ccbb67773f28b3c19318654b0bc8", iter.Current.ToString());
         }
     }
-
 }

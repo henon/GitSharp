@@ -85,7 +85,7 @@ namespace GitSharp.Tests
 		public void testIgnoreNonExistingObjects()
 		{
 			ObjectId nonExisting = ObjectId.FromString("0000000000000000000000000000000000000001");
-			createVerifyOpenPack(EMPTY_LIST_OBJECT, Enumerable.Repeat(nonExisting, 1), false, true);
+			CreateVerifyOpenPack(EMPTY_LIST_OBJECT, Enumerable.Repeat(nonExisting, 1), false, true);
 			// shouldn't throw anything
 		}
 
@@ -98,7 +98,7 @@ namespace GitSharp.Tests
 		public void testWritePack1()
 		{
 			_writer.ReuseDeltas = false;
-			writeVerifyPack1();
+			WriteVerifyPack1();
 		}
 
 		///	<summary>
@@ -144,7 +144,7 @@ namespace GitSharp.Tests
 		public void testWriteIndex()
 		{
 			_writer.setIndexVersion(2);
-			writeVerifyPack4(false);
+			WriteVerifyPack4(false);
 
 			// Validate that IndexPack came up with the right CRC32 value.
 			PackIndex idx1 = PackIndex.Open(_indexFile);
@@ -179,13 +179,13 @@ namespace GitSharp.Tests
 		// TODO: testWritePackDeltasCycle()
 		// TODO: testWritePackDeltasDepth()
 
-		private void writeVerifyPack1()
+		private void WriteVerifyPack1()
 		{
 			var interestings = new LinkedList<ObjectId>();
 			interestings.AddLast(ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"));
-			createVerifyOpenPack(interestings, EMPTY_LIST_OBJECT, false, false);
+			CreateVerifyOpenPack(interestings, EMPTY_LIST_OBJECT, false, false);
 
-			var expectedOrder = new ObjectId[]
+			var expectedOrder = new[]
 			                    	{
 			                    		ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"),
 			                    		ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799"),
@@ -198,20 +198,20 @@ namespace GitSharp.Tests
 			                    	};
 
 			Assert.AreEqual(expectedOrder.Length, _writer.getObjectsNumber());
-			verifyObjectsOrder(expectedOrder);
+			VerifyObjectsOrder(expectedOrder);
 			Assert.AreEqual("34be9032ac282b11fa9babdc2b2a93ca996c9c2f", _writer.computeName().Name);
 		}
 
-		private void writeVerifyPack2(bool deltaReuse)
+		private void WriteVerifyPack2(bool deltaReuse)
 		{
 			_writer.ReuseDeltas = deltaReuse;
 			var interestings = new LinkedList<ObjectId>();
 			interestings.AddLast(ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"));
 			var uninterestings = new LinkedList<ObjectId>();
 			uninterestings.AddLast(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab"));
-			createVerifyOpenPack(interestings, uninterestings, false, false);
+			CreateVerifyOpenPack(interestings, uninterestings, false, false);
 
-			var expectedOrder = new ObjectId[]
+			var expectedOrder = new[]
 			                    	{
 			                    		ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"),
 			                    		ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799"),
@@ -229,19 +229,19 @@ namespace GitSharp.Tests
 			}
 
 			Assert.AreEqual(expectedOrder.Length, _writer.getObjectsNumber());
-			verifyObjectsOrder(expectedOrder);
+			VerifyObjectsOrder(expectedOrder);
 			Assert.AreEqual("ed3f96b8327c7c66b0f8f70056129f0769323d86", _writer.computeName().Name);
 		}
 
-		private void writeVerifyPack4(bool thin)
+		private void WriteVerifyPack4(bool thin)
 		{
 			var interestings = new LinkedList<ObjectId>();
 			interestings.AddLast(ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"));
 			var uninterestings = new LinkedList<ObjectId>();
 			uninterestings.AddLast(ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799"));
-			createVerifyOpenPack(interestings, uninterestings, thin, false);
+			CreateVerifyOpenPack(interestings, uninterestings, thin, false);
 
-			var writtenObjects = new ObjectId[]
+			var writtenObjects = new[]
 			                     	{
 			                     		ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"),
 			                     		ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"),
@@ -261,28 +261,28 @@ namespace GitSharp.Tests
 				expectedObjects = writtenObjects;
 			}
 
-			verifyObjectsOrder(expectedObjects);
+			VerifyObjectsOrder(expectedObjects);
 			Assert.AreEqual("cded4b74176b4456afa456768b2b5aafb41c44fc", _writer.computeName().Name);
 		}
 
-		private void createVerifyOpenPack(IEnumerable<ObjectId> interestings, 
+		private void CreateVerifyOpenPack(IEnumerable<ObjectId> interestings, 
 			IEnumerable<ObjectId> uninterestings, bool thin, bool ignoreMissingUninteresting)
 		{
 			_writer.Thin = thin;
 			_writer.IgnoreMissingUninteresting = ignoreMissingUninteresting;
 			_writer.preparePack(interestings, uninterestings);
 			_writer.writePack(_cos);
-			verifyOpenPack(thin);
+			VerifyOpenPack(thin);
 		}
 
-		private void createVerifyOpenPack(IEnumerable<RevObject> objectSource)
+		private void CreateVerifyOpenPack(IEnumerable<RevObject> objectSource)
 		{
 			_writer.preparePack(objectSource);
 			_writer.writePack(_cos);
-			verifyOpenPack(false);
+			VerifyOpenPack(false);
 		}
 
-		private void verifyOpenPack(bool thin)
+		private void VerifyOpenPack(bool thin)
 		{
 			IndexPack indexer;
 			Stream @is;
@@ -311,7 +311,7 @@ namespace GitSharp.Tests
 			_pack = new PackFile(_indexFile, _packFile);
 		}
 
-		private void verifyObjectsOrder(ObjectId[] objectsOrder)
+		private void VerifyObjectsOrder(ObjectId[] objectsOrder)
 		{
 			var entries = new SortedList<long, PackIndex.MutableEntry>();
 
@@ -360,12 +360,13 @@ namespace GitSharp.Tests
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
 		[Test]
-		[ExpectedException(typeof (MissingObjectException))]
 		public void testNotIgnoreNonExistingObjects()
 		{
-			ObjectId nonExisting = ObjectId.FromString("0000000000000000000000000000000000000001");
-			createVerifyOpenPack(EMPTY_LIST_OBJECT, Enumerable.Repeat(nonExisting, 1), false, false);
-			Assert.Fail("Should have thrown MissingObjectException");
+			AssertHelper.Throws<MissingObjectException>(() =>
+			                                            	{
+																ObjectId nonExisting = ObjectId.FromString("0000000000000000000000000000000000000001");
+																CreateVerifyOpenPack(EMPTY_LIST_OBJECT, Enumerable.Repeat(nonExisting, 1), false, false);
+			                                            	});
 		}
 
 		///	<summary>
@@ -376,7 +377,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testWriteEmptyPack1()
 		{
-			createVerifyOpenPack(EMPTY_LIST_OBJECT, EMPTY_LIST_OBJECT, false, false);
+			CreateVerifyOpenPack(EMPTY_LIST_OBJECT, EMPTY_LIST_OBJECT, false, false);
 
 			Assert.AreEqual(0, _writer.getObjectsNumber());
 			Assert.AreEqual(0, _pack.ObjectCount);
@@ -391,7 +392,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testWriteEmptyPack2()
 		{
-			createVerifyOpenPack(EMPTY_LIST_REVS);
+			CreateVerifyOpenPack(EMPTY_LIST_REVS);
 
 			Assert.AreEqual(0, _writer.getObjectsNumber());
 			Assert.AreEqual(0, _pack.ObjectCount);
@@ -407,7 +408,7 @@ namespace GitSharp.Tests
 		{
 			_writer.ReuseDeltas = false;
 			_writer.ReuseObjects = false;
-			writeVerifyPack1();
+			WriteVerifyPack1();
 		}
 
 		///	<summary>
@@ -418,7 +419,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testWritePack2()
 		{
-			writeVerifyPack2(false);
+			WriteVerifyPack2(false);
 		}
 
 		///	<summary>
@@ -437,7 +438,7 @@ namespace GitSharp.Tests
 			packFile.CopyTo(crc32Idx.FullName);
 			db.OpenPack(crc32Pack, crc32Idx);
 
-			writeVerifyPack2(true);
+			WriteVerifyPack2(true);
 		}
 
 		///	<summary> 
@@ -449,7 +450,7 @@ namespace GitSharp.Tests
 		public void testWritePack2DeltasReuseOffsets()
 		{
 			_writer.DeltaBaseAsOffset = true;
-			writeVerifyPack2(true);
+			WriteVerifyPack2(true);
 		}
 
 		///	<summary>
@@ -460,7 +461,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testWritePack2DeltasReuseRefs()
 		{
-			writeVerifyPack2(true);
+			WriteVerifyPack2(true);
 		}
 
 		///	<summary>
@@ -510,10 +511,10 @@ namespace GitSharp.Tests
 				forcedOrderRevs[i] = parser.parseAny(forcedOrder[i]);
 			}
 
-			createVerifyOpenPack(forcedOrderRevs.AsEnumerable());
+			CreateVerifyOpenPack(forcedOrderRevs.AsEnumerable());
 
 			Assert.AreEqual(forcedOrder.Length, _writer.getObjectsNumber());
-			verifyObjectsOrder(forcedOrder);
+			VerifyObjectsOrder(forcedOrder);
 			Assert.AreEqual("ed3f96b8327c7c66b0f8f70056129f0769323d86", _writer.computeName().Name);
 		}
 
@@ -526,7 +527,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testWritePack4()
 		{
-			writeVerifyPack4(false);
+			WriteVerifyPack4(false);
 		}
 
 		///	<summary>
@@ -537,7 +538,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testWritePack4ThinPack()
 		{
-			writeVerifyPack4(true);
+			WriteVerifyPack4(true);
 		}
 	}
 }

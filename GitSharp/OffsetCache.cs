@@ -307,7 +307,7 @@ namespace GitSharp
 			{
 				Entry<V> old = null;
 				int slot = 0;
-				for (int b = _evictBatch - 1; b >= 0; b--)
+				for (int b = _evictBatch - 1; b >= 0; b-- , ptr++)
 				{
 					if (_tableSize <= ptr)
 						ptr = 0;
@@ -322,7 +322,6 @@ namespace GitSharp
 						}
 					}
 
-					if (++ptr == start) return;
 				}
 
 				if (old != null)

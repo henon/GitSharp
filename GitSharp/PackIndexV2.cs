@@ -50,54 +50,50 @@ namespace GitSharp
 	/// </summary>
 	public class PackIndexV2 : PackIndex
 	{
-		private const long IS_O64 = 1L << 31;
-		private const int FANOUT = 256;
+		private const long IsO64 = 1L << 31;
+		private const int Fanout = 256;
+
 		private static readonly int[] NoInts = { };
 		private static readonly byte[] NoBytes = { };
+
 		private readonly long[] _fanoutTable;
 
-		/** 256 arrays of contiguous object names. */
+		// 256 arrays of contiguous object names.
 		private readonly int[][] _names;
 
-		/** 256 arrays of the 32 bit offset data, matching {@link #names}. */
+		// 256 arrays of the 32 bit offset data, matching names.
 		private readonly byte[][] _offset32;
 
-		/** 256 arrays of the CRC-32 of objects, matching {@link #names}. */
+		// 256 arrays of the CRC-32 of objects, matching names.
 		private readonly byte[][] _crc32;
 
-		/** 64 bit offset table. */
+		// 64 bit offset table.
 		private readonly byte[] _offset64;
 
 		public PackIndexV2(Stream fd)
 		{
-			var fanoutRaw = new byte[4 * FANOUT];
+			var fanoutRaw = new byte[4 * Fanout];
 			NB.ReadFully(fd, fanoutRaw, 0, fanoutRaw.Length);
-			_fanoutTable = new long[FANOUT];
-			for (int k = 0; k < FANOUT; k++)
+			
+			_fanoutTable = new long[Fanout];
+			for (int k = 0; k < Fanout; k++)
 			{
 				_fanoutTable[k] = NB.DecodeUInt32(fanoutRaw, k * 4);
 			}
-			ObjectCount = _fanoutTable[FANOUT - 1];
 
-			_names = new int[FANOUT][];
-			_offset32 = new byte[FANOUT][];
-			_crc32 = new byte[FANOUT][];
+			ObjectCount = _fanoutTable[Fanout - 1];
+
+			_names = new int[Fanout][];
+			_offset32 = new byte[Fanout][];
+			_crc32 = new byte[Fanout][];
 
 			// object name table. The size we can permit per fan-out bucket
 			// is limited to Java's 2 GB per byte array limitation. That is
 			// no more than 107,374,182 objects per fan-out.
 			//
-			for (int k = 0; k < FANOUT; k++)
+			for (int k = 0; k < Fanout; k++)
 			{
-				long bucketCnt;
-				if (k == 0)
-				{
-					bucketCnt = _fanoutTable[k];
-				}
-				else
-				{
-					bucketCnt = _fanoutTable[k] - _fanoutTable[k - 1];
-				}
+				long bucketCnt = (k == 0) ? _fanoutTable[k] : _fanoutTable[k] - _fanoutTable[k - 1];
 
 				if (bucketCnt == 0)
 				{
@@ -128,7 +124,7 @@ namespace GitSharp
 			}
 
 			// CRC32 table.
-			for (int k = 0; k < FANOUT; k++)
+			for (int k = 0; k < Fanout; k++)
 			{
 				NB.ReadFully(fd, _crc32[k], 0, _crc32[k].Length);
 			}
@@ -136,8 +132,8 @@ namespace GitSharp
 			// 32 bit offset table. Any entries with the most significant bit
 			// set require a 64 bit offset entry in another table.
 			//
-			int o64cnt = 0;
-			for (int k = 0; k < FANOUT; k++)
+			int offset64Count = 0;
+			for (int k = 0; k < Fanout; k++)
 			{
 				byte[] ofs = _offset32[k];
 				NB.ReadFully(fd, ofs, 0, ofs.Length);
@@ -145,16 +141,16 @@ namespace GitSharp
 				{
 					if (ofs[p] < 0)
 					{
-						o64cnt++;
+						offset64Count++;
 					}
 				}
 			}
 
 			// 64 bit offset table. Most objects should not require an entry.
 			//
-			if (o64cnt > 0)
+			if (offset64Count > 0)
 			{
-				_offset64 = new byte[o64cnt * 8];
+				_offset64 = new byte[offset64Count * 8];
 				NB.ReadFully(fd, _offset64, 0, _offset64.Length);
 			}
 			else
@@ -216,9 +212,9 @@ namespace GitSharp
 			}
 
 			long p = NB.DecodeUInt32(_offset32[levelOne], levelTwo << 2);
-			if ((p & IS_O64) != 0)
+			if ((p & IsO64) != 0)
 			{
-				return NB.DecodeUInt64(_offset64, (8 * (int)(p & ~IS_O64)));
+				return NB.DecodeUInt64(_offset64, (8 * (int)(p & ~IsO64)));
 			}
 
 			return p;
@@ -301,9 +297,9 @@ namespace GitSharp
 					{
 						int idx = _levelTwo / (AnyObjectId.ObjectIdLength / 4) * 4;
 						long offset = NB.DecodeUInt32(_index._offset32[_levelOne], idx);
-						if ((offset & IS_O64) != 0)
+						if ((offset & IsO64) != 0)
 						{
-							idx = (8 * (int)(offset & ~IS_O64));
+							idx = (8 * (int)(offset & ~IsO64));
 							offset = NB.DecodeUInt64(_index._offset64, idx);
 						}
 						entry.Offset = offset;

@@ -892,10 +892,9 @@ namespace GitSharp.Tests.FnMatch
 		}
 
 		[Test]
-		[ExpectedException(typeof(NoClosingBracketException))]
 		public virtual void testSpecialGroupCase9()
 		{
-			AssertMatch("[[:]", ":", true, true);
+			AssertHelper.Throws<NoClosingBracketException>(() => AssertMatch("[[:]", ":", true, true));
 		}
 
 		[Test]

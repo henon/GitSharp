@@ -59,7 +59,6 @@ namespace GitSharp.Tests.RevWalk
         }
 
         [Test]
-		[ExpectedException(typeof(InvalidOperationException))]
         public void testDisallowTreeFilter()
         {
             RevCommit c1 = Commit();
@@ -70,8 +69,7 @@ namespace GitSharp.Tests.RevWalk
             MarkStart(c1);
             MarkStart(c2);
 
-			Assert.IsNull(rw.next());
-			Assert.Fail("did not throw InvalidOperationException");
+			AssertHelper.Throws<InvalidOperationException>(() => Assert.IsNull(rw.next()));
         }
 
         [Test]

@@ -120,15 +120,15 @@ namespace GitSharp
 		/// This method is a constant-time replacement for the following loop:
 		/// <para />
 		/// <Example>
-		/// IEnumerable&lt;MutableEntry&gt; eItr = index.GetEnumerator();
+		/// IEnumerable&lt;MutableEntry&gt; e = index.GetEnumerator();
 		/// int curPosition = 0;
-		/// while (eItr.MoveNext() &amp;&amp; curPosition++ &lt; nthPosition);
-		/// ObjectId result = eItr.Current.ToObjectId();
+		/// while (e.MoveNext() &amp;&amp; curPosition++ &lt; nthPosition);
+		/// ObjectId result = e.Current.ToObjectId();
 		/// </example>
 		/// </summary>
 		/// <param name="nthPosition">
 		/// Unsigned 32 bit position within the traversal of
-		/// {@link #iterator()} that the caller needs the object for. The
+		/// <see cref="GetEnumerator()"/> that the caller needs the object for. The
 		/// first returned <see cref="MutableEntry"/> is 0, the second is 1,
 		/// etc. Positions past 2**31-1 are negative, but still valid.
 		/// </param>
@@ -143,15 +143,15 @@ namespace GitSharp
 		/// This method is a constant-time replacement for the following loop:
 		/// <para />
 		/// <Example>
-		/// IEnumerable&lt;MutableEntry&gt; eItr = index.GetEnumerator();
+		/// IEnumerable&lt;MutableEntry&gt; e = index.GetEnumerator();
 		/// int curPosition = 0;
-		/// while (eItr.MoveNext() &amp;&amp; curPosition++ &lt; nthPosition);
-		/// ObjectId result = eItr.Current.ToObjectId();
+		/// while (e.MoveNext() &amp;&amp; curPosition++ &lt; nthPosition);
+		/// ObjectId result = e.Current.ToObjectId();
 		/// </example>
 		/// </summary>
 		/// <param name="nthPosition">
 		/// Unsigned 32 bit position within the traversal of
-		/// {@link #iterator()} that the caller needs the object for. The
+		/// <see cref="GetEnumerator()"/> that the caller needs the object for. The
 		/// first returned <see cref="MutableEntry"/> is 0, the second is 1,
 		/// etc. Positions past 2**31-1 are negative, but still valid.
 		/// </param>
@@ -249,7 +249,7 @@ namespace GitSharp
 			private readonly Func<MutableObjectId, MutableObjectId> _idBufferBuilder;
 			private MutableObjectId _idBuffer;
 
-			public MutableObjectId idBuffer
+			public MutableObjectId IdBuffer
 			{
 				get
 				{
@@ -281,12 +281,12 @@ namespace GitSharp
 			/// </summary>
 			public string Name
 			{
-				get { return idBuffer.Name; }
+				get { return IdBuffer.Name; }
 			}
 
 			public ObjectId ToObjectId()
 			{
-				return idBuffer.ToObjectId();
+				return IdBuffer.ToObjectId();
 			}
 
 			/// <summary>
@@ -295,14 +295,14 @@ namespace GitSharp
 			/// <returns>A copy of this mutable entry.</returns>
 			public MutableEntry CloneEntry()
 			{
-				var r = new MutableEntry(new MutableObjectId(idBuffer.ToObjectId())) { Offset = Offset };
+				var r = new MutableEntry(new MutableObjectId(IdBuffer.ToObjectId())) { Offset = Offset };
 
 				return r;
 			}
 
 			public override string ToString()
 			{
-				return idBuffer.ToString();
+				return IdBuffer.ToString();
 			}
 		}
 
@@ -325,27 +325,22 @@ namespace GitSharp
 				return new MutableEntry(IdBufferBuilder);
 			}
 
-			public bool hasNext()
+			private bool HasNext()
 			{
 				return ReturnedNumber < _packIndex.ObjectCount;
 			}
 
 			protected abstract MutableEntry InnerNext(MutableEntry entry);
 
-			public MutableEntry next()
-			{
-				_current = InnerNext(InitEntry());
-				return _current;
-			}
-
 			public bool MoveNext()
 			{
-				if (!hasNext())
+				if (!HasNext())
 				{
 					return false;
 				}
 
-				next();
+				_current = InnerNext(InitEntry());
+
 				return true;
 			}
 

@@ -44,12 +44,10 @@ namespace GitSharp.Tests
     public class WindowCacheReconfigureTest : RepositoryTestCase
     {
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
         public void testConfigureCache_PackedGitLimit_0()
         {
             var cfg = new WindowCacheConfig { PackedGitLimit = 0 };
-            WindowCache.reconfigure(cfg);
-            Assert.Fail("incorrectly permitted PackedGitLimit = 0");
+            AssertHelper.Throws<ArgumentException>(() => WindowCache.reconfigure(cfg));
         }
 
         [Test]

@@ -95,10 +95,16 @@ namespace GitSharp.Tests
 			{
 				long newOffset = _reverseIdx.FindNextOffset(offset, long.MaxValue);
 				Assert.IsTrue(newOffset > offset);
+
 				if (i == _idx.ObjectCount - 1)
+				{
 					Assert.AreEqual(newOffset, long.MaxValue);
+				}
 				else
+				{
 					Assert.AreEqual(newOffset, _idx.FindOffset(_reverseIdx.FindObject(newOffset)));
+				}
+
 				offset = newOffset;
 			}
 		}
@@ -107,11 +113,9 @@ namespace GitSharp.Tests
 		/// Test findNextOffset() with wrong illegal argument as offset.
 		/// </summary>
 		[Test]
-		[ExpectedException(typeof(CorruptObjectException))]
 		public void testFindNextOffsetWrongOffset()
 		{
-			_reverseIdx.FindNextOffset(0, long.MaxValue);
-			Assert.Fail("findNextOffset() should throw exception");
+			AssertHelper.Throws<CorruptObjectException>(() => _reverseIdx.FindNextOffset(0, long.MaxValue));
 		}
 
 		private long FindFirstOffset()

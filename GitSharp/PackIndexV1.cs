@@ -227,14 +227,19 @@ namespace GitSharp
 			private int _levelOne;
 			private int _levelTwo;
 
-			public IndexV1Enumerator(PackIndexV1 index)
+			public IndexV1Enumerator(PackIndexV1 index) : base(index)
 			{
 				_index = index;
 			}
 
-			public override bool MoveNext()
-			{
+		    protected override MutableObjectId IdBufferBuilder(MutableObjectId idBuffer)
+            {
+                idBuffer.FromRaw(_index._idxdata[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength);
+                return idBuffer;
+            }
 
+		    protected override MutableEntry InnerNext(MutableEntry entry)
+			{
 				for (; _levelOne < _index._idxdata.Length; _levelOne++)
 				{
 					if (_index._idxdata[_levelOne] == null)
@@ -244,25 +249,15 @@ namespace GitSharp
 
 					if (_levelTwo < _index._idxdata[_levelOne].Length)
 					{
-						long offset = NB.DecodeUInt32(_index._idxdata[_levelOne], _levelTwo);
-						Current.Offset = offset;
-						Current.FromRaw(_index._idxdata[_levelOne], _levelTwo + 4);
+						entry.Offset = NB.DecodeUInt32(_index._idxdata[_levelOne], _levelTwo);
 						_levelTwo += AnyObjectId.ObjectIdLength + 4;
 						ReturnedNumber++;
-						return true;
+						return entry;
 					}
 
 					_levelTwo = 0;
 				}
-				return false;
-			}
-
-			public override void Reset()
-			{
-				ReturnedNumber = 0;
-				_levelOne = 0;
-				_levelTwo = 0;
-				Current = new MutableEntry();
+				throw new IndexOutOfRangeException();
 			}
 		}
 

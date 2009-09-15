@@ -205,110 +205,135 @@ namespace GitSharp
 		/// </summary>
 		public abstract bool HasCRC32Support { get; }
 
-		/// <summary>
-		/// Open an existing pack <code>.idx</code> file for reading..
-		/// <para />
-		/// The format of the file will be automatically detected and a proper access
-		/// implementation for that format will be constructed and returned to the
-		/// caller. The file may or may not be held open by the returned instance.
-		/// </summary>
-		/// <param name="idxFile">existing pack .idx to read.</param>
-		/// <returns></returns>
-		public static PackIndex Open(FileInfo idxFile)
-		{
-			try
-			{
-				using (FileStream fs = idxFile.OpenRead())
-				{
-					byte[] hdr = new byte[8];
-					NB.ReadFully(fs, hdr, 0, hdr.Length);
+        public class MutableEntry
+        {
+            private readonly Func<MutableObjectId, MutableObjectId> _idBufferBuilder;
+            private MutableObjectId _idBuffer;
 
-					if (IsTOC(hdr))
-					{
-						int v = NB.DecodeInt32(hdr, 4);
-						switch (v)
-						{
-							case 2:
-								return new PackIndexV2(fs);
-							default:
-								throw new IOException("Unsupported pack index version " + v);
-						}
-					}
-					return new PackIndexV1(fs, hdr);
-				}
-			}
-			catch (IOException)
-			{
-				throw new IOException("Unable to read pack index: " + idxFile.FullName);
-			}
-		}
+            public MutableObjectId idBuffer
+            {
+                get
+                {
+                    if (_idBuffer == null)
+                    {
+                        _idBuffer = _idBufferBuilder(new MutableObjectId());
+                    }
+                    return _idBuffer;
+                }
+            }
 
-		#region Nested Types
+            public MutableEntry(Func<MutableObjectId, MutableObjectId> idBufferBuilder)
+            {
+                _idBufferBuilder = idBufferBuilder;
+            }
 
-		public class MutableEntry : MutableObjectId
-		{
-			/// <summary>
-			/// Empty constructor. object fields should be filled in later.
-			/// </summary>
-			public MutableEntry()
-			{
-			}
+            public MutableEntry(MutableObjectId idBuffer)
+            {
+                _idBuffer = idBuffer;
+            }
+            /**
+             * Returns offset for this index object entry
+             * 
+             * @return offset of this object in a pack file
+             */
+            public long Offset { get; set; }
 
-			private MutableEntry(MutableEntry src)
-				: base(src)
-			{
-				Offset = src.Offset;
-			}
+            /** @return hex string describing the object id of this entry. */
+            public String Name
+            {
+                get
+                {
+                    return idBuffer.Name;
+                }
+            }
 
-			/// <summary>
-			/// Returns offset for this index object entry
-			/// </summary>
-			public long Offset { get; set; }
+            public ObjectId ToObjectId()
+            {
+                return idBuffer.ToObjectId();
+            }
 
-			/// <summary>
-			/// Returns mutable copy of this mutable entry.
-			/// </summary>
-			/// <returns>
-			/// Copy of this mutable entry
-			/// </returns>
-			public MutableEntry CloneEntry()
-			{
-				return new MutableEntry(this);
-			}
-		}
+            /**
+             * Returns mutable copy of this mutable entry.
+             * 
+             * @return copy of this mutable entry
+             */
 
-		/// <summary>
-		/// Provide iterator that gives access to index entries. Note, that iterator
-		/// returns reference to mutable object, the same reference in each call -
-		/// for performance reason. If client needs immutable objects, it must copy
-		/// returned object on its own.
-		/// <para />
-		/// Iterator returns objects in SHA-1 lexicographical order.
-		/// </summary>
-		internal abstract class EntriesIterator : IEnumerator<MutableEntry>
-		{
-			protected long ReturnedNumber;
+            public MutableEntry CloneEntry()
+            {
+                var r = new MutableEntry(new MutableObjectId(idBuffer.ToObjectId()));
+                r.Offset = Offset;
 
-			internal EntriesIterator()
-			{
-				Current = new MutableEntry();
-			}
+                return r;
+            }
 
-			#region IEnumerator<MutableEntry> Members
+            public override string ToString()
+            {
+                return idBuffer.ToString();
+            }
+        }
 
-			public MutableEntry Current { get; internal set; }
+        internal abstract class EntriesIterator : IEnumerator<MutableEntry>
+        {
+            private MutableEntry _current;
+            private readonly PackIndex _packIndex;
 
-			#endregion
+            protected EntriesIterator(PackIndex packIndex)
+            {
+                _packIndex = packIndex;
+            }
 
-			#region IDisposable Members
+            protected long ReturnedNumber;
 
-			public void Dispose()
-			{
-			}
+            protected abstract MutableObjectId IdBufferBuilder(MutableObjectId idBuffer);
 
-			#endregion
+            private MutableEntry InitEntry()
+            {
+                return new MutableEntry(IdBufferBuilder);
+            }
 
-			#region IEnumerator Members
+            public bool hasNext()
+            {
+                return ReturnedNumber < _packIndex.ObjectCount;
+            }
+
+            protected abstract MutableEntry InnerNext(MutableEntry entry);
+
+            public MutableEntry next()
+            {
+                _current = InnerNext(InitEntry());
+                return _current;
+            }
+
+            public bool MoveNext()
+            {
+                if (!hasNext())
+                {
+                    return false;
+                }
+
+                next();
+                return true;
+            }
+
+            public void Reset()
+            {
+                throw new NotSupportedException();
+            }
+
+            public MutableEntry Current
+            {
+                get { return _current; }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+
+            public void Dispose()
+            {
+            }
+        }
 
 			object IEnumerator.Current
 			{

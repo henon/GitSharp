@@ -221,45 +221,46 @@ namespace GitSharp
 
 		#region Nested Types
 
-		private class IndexV1Enumerator : EntriesIterator
-		{
-			private readonly PackIndexV1 _index;
-			private int _levelOne;
-			private int _levelTwo;
+        private class IndexV1Enumerator : EntriesIterator
+        {
+            private readonly PackIndexV1 _index;
+            private int _levelOne;
+            private int _levelTwo;
 
-			public IndexV1Enumerator(PackIndexV1 index) : base(index)
-			{
-				_index = index;
-			}
+            public IndexV1Enumerator(PackIndexV1 index)
+                : base(index)
+            {
+                _index = index;
+            }
 
-		    protected override MutableObjectId IdBufferBuilder(MutableObjectId idBuffer)
+            protected override MutableObjectId IdBufferBuilder(MutableObjectId idBuffer)
             {
                 idBuffer.FromRaw(_index._idxdata[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength);
                 return idBuffer;
             }
 
-		    protected override MutableEntry InnerNext(MutableEntry entry)
-			{
-				for (; _levelOne < _index._idxdata.Length; _levelOne++)
-				{
-					if (_index._idxdata[_levelOne] == null)
-					{
-						continue;
-					}
+            protected override MutableEntry InnerNext(MutableEntry entry)
+            {
+                for (; _levelOne < _index._idxdata.Length; _levelOne++)
+                {
+                    if (_index._idxdata[_levelOne] == null)
+                    {
+                        continue;
+                    }
 
-					if (_levelTwo < _index._idxdata[_levelOne].Length)
-					{
-						entry.Offset = NB.DecodeUInt32(_index._idxdata[_levelOne], _levelTwo);
-						_levelTwo += AnyObjectId.ObjectIdLength + 4;
-						ReturnedNumber++;
-						return entry;
-					}
+                    if (_levelTwo < _index._idxdata[_levelOne].Length)
+                    {
+                        entry.Offset = NB.DecodeUInt32(_index._idxdata[_levelOne], _levelTwo);
+                        _levelTwo += AnyObjectId.ObjectIdLength + 4;
+                        ReturnedNumber++;
+                        return entry;
+                    }
 
-					_levelTwo = 0;
-				}
-				throw new IndexOutOfRangeException();
-			}
-		}
+                    _levelTwo = 0;
+                }
+                throw new IndexOutOfRangeException();
+            }
+        }
 
 		#endregion
 	}

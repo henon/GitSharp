@@ -67,7 +67,10 @@ namespace GitSharp
 			byte[] toc = PackIndexWriter.TOC;
 			for (int i = 0; i < toc.Length; i++)
 			{
-				if (h[i] != toc[i]) return false;
+				if (h[i] != toc[i])
+				{
+					return false;
+				}
 			}
 
 			return true;
@@ -102,85 +105,82 @@ namespace GitSharp
 
 		#endregion
 
-		/// <summary>
-		/// Gets the number of objects in this index, and likewise in the 
-		/// associated pack that this index was generated from.
-		/// </summary>
+
+		/**
+	 * Obtain the total number of objects described by this index.
+	 * 
+	 * @return number of objects in this index, and likewise in the associated
+	 *         pack that this index was generated from.
+	 */
 		public abstract long ObjectCount { get; internal set; }
 
-		/// <summary>
-		/// Gets the number of objects in this index using a 64 bit offset; 
-		/// that is an object positioned after the 2 GB position within the file.
-		/// </summary>
+		/**
+		 * Obtain the total number of objects needing 64 bit offsets.
+		 *
+		 * @return number of objects in this index using a 64 bit offset; that is an
+		 *         object positioned after the 2 GB position within the file.
+		 */
 		public abstract long Offset64Count { get; }
 
-		/// <summary>
-		/// Get ObjectId for the n-th object entry returned by <see cref="GetEnumerator()"/>.
-		/// <para />
-		/// This method is a constant-time replacement for the following loop:
-		/// <para />
-		/// <Example>
-		/// IEnumerable&lt;MutableEntry&gt; e = index.GetEnumerator();
-		/// int curPosition = 0;
-		/// while (e.MoveNext() &amp;&amp; curPosition++ &lt; nthPosition);
-		/// ObjectId result = e.Current.ToObjectId();
-		/// </example>
-		/// </summary>
-		/// <param name="nthPosition">
-		/// Unsigned 32 bit position within the traversal of
-		/// <see cref="GetEnumerator()"/> that the caller needs the object for. The
-		/// first returned <see cref="MutableEntry"/> is 0, the second is 1,
-		/// etc. Positions past 2**31-1 are negative, but still valid.
-		/// </param>
-		/// <returns>
-		/// The <see cref="ObjectId"/> for the corresponding entry.
-		/// </returns>
+		/**
+		 * Get ObjectId for the n-th object entry returned by {@link #iterator()}.
+		 * <para />
+		 * This method is a constant-time replacement for the following loop:
+		 *
+		 * <pre>
+		 * Iterator&lt;MutableEntry&gt; eItr = index.iterator();
+		 * int curPosition = 0;
+		 * while (eItr.hasNext() &amp;&amp; curPosition++ &lt; nthPosition)
+		 * 	eItr.next();
+		 * ObjectId result = eItr.next().ToObjectId();
+		 * </pre>
+		 *
+		 * @param nthPosition
+		 *            position within the traversal of {@link #iterator()} that the
+		 *            caller needs the object for. The first returned
+		 *            {@link MutableEntry} is 0, the second is 1, etc.
+		 * @return the ObjectId for the corresponding entry.
+		 */
 		public abstract ObjectId GetObjectId(long nthPosition);
 
-		/// <summary>
-		/// Get ObjectId for the n-th object entry returned by <see cref="GetEnumerator()"/>.
-		/// <para />
-		/// This method is a constant-time replacement for the following loop:
-		/// <para />
-		/// <Example>
-		/// IEnumerable&lt;MutableEntry&gt; e = index.GetEnumerator();
-		/// int curPosition = 0;
-		/// while (e.MoveNext() &amp;&amp; curPosition++ &lt; nthPosition);
-		/// ObjectId result = e.Current.ToObjectId();
-		/// </example>
-		/// </summary>
-		/// <param name="nthPosition">
-		/// Unsigned 32 bit position within the traversal of
-		/// <see cref="GetEnumerator()"/> that the caller needs the object for. The
-		/// first returned <see cref="MutableEntry"/> is 0, the second is 1,
-		/// etc. Positions past 2**31-1 are negative, but still valid.
-		/// </param>
-		/// <returns>
-		/// The <see cref="ObjectId"/> for the corresponding entry.
-		/// </returns>
+		/**
+		 * Get ObjectId for the n-th object entry returned by {@link #iterator()}.
+		 * <para />
+		 * This method is a constant-time replacement for the following loop:
+		 *
+		 * <pre>
+		 * Iterator&lt;MutableEntry&gt; eItr = index.iterator();
+		 * int curPosition = 0;
+		 * while (eItr.hasNext() &amp;&amp; curPosition++ &lt; nthPosition)
+		 * 	eItr.next();
+		 * ObjectId result = eItr.next().ToObjectId();
+		 * </pre>
+		 *
+		 * @param nthPosition
+		 *            unsigned 32 bit position within the traversal of
+		 *            {@link #iterator()} that the caller needs the object for. The
+		 *            first returned {@link MutableEntry} is 0, the second is 1,
+		 *            etc. Positions past 2**31-1 are negative, but still valid.
+		 * @return the ObjectId for the corresponding entry.
+		 */
 		public ObjectId GetObjectId(int nthPosition)
 		{
 			if (nthPosition >= 0)
-			{
 				return GetObjectId((long)nthPosition);
-			}
-
 			int u31 = nthPosition.UnsignedRightShift(1);
 			int one = nthPosition & 1;
 			return GetObjectId((((long)u31) << 1) | (uint)one);
 		}
 
-		/// <summary>
-		/// Locate the file offset position for the requested object.
-		/// </summary>
-		/// <param name="objId">
-		/// Name of the object to locate within the pack.
-		/// </param>
-		/// <returns>
-		/// Offset of the object's header and compressed content; -1 if the
-		/// object does not exist in this index and is thus not stored in the
-		/// associated pack.
-		/// </returns>
+		/**
+		 * Locate the file offset position for the requested object.
+		 * 
+		 * @param objId
+		 *            name of the object to locate within the pack.
+		 * @return offset of the object's header and compressed content; -1 if the
+		 *         object does not exist in this index and is thus not stored in the
+		 *         associated pack.
+		 */
 		public abstract long FindOffset(AnyObjectId objId);
 
 		/// <summary>
@@ -199,171 +199,194 @@ namespace GitSharp
 		/// </exception>
 		public abstract long FindCRC32(AnyObjectId objId);
 
+
 		/// <summary>
 		/// Check whether this index supports (has) CRC32 checksums for objects.
 		/// </summary>
 		public abstract bool HasCRC32Support { get; }
 
-		/// <summary>
-		/// Open an existing pack <code>.idx</code> file for reading..
-		/// <para />
-		/// The format of the file will be automatically detected and a proper access
-		/// implementation for that format will be constructed and returned to the
-		/// caller. The file may or may not be held open by the returned instance.
-		/// </summary>
-		/// <param name="idxFile">existing pack .idx to read.</param>
-		/// <returns></returns>
-		public static PackIndex Open(FileInfo idxFile)
-		{
-			try
-			{
-				using (FileStream fs = idxFile.OpenRead())
-				{
-					var hdr = new byte[8];
-					NB.ReadFully(fs, hdr, 0, hdr.Length);
+	    public class MutableEntry
+	    {
+	        private readonly Func<MutableObjectId, MutableObjectId> _idBufferBuilder;
+	        private MutableObjectId _idBuffer;
 
-					if (IsTOC(hdr))
-					{
-						int v = NB.DecodeInt32(hdr, 4);
-						switch (v)
-						{
-							case 2:
-								return new PackIndexV2(fs);
-							default:
-								throw new IOException("Unsupported pack index version " + v);
-						}
-					}
-					return new PackIndexV1(fs, hdr);
-				}
-			}
-			catch (IOException)
-			{
-				throw new IOException("Unable to read pack index: " + idxFile.FullName);
-			}
-		}
+	        public MutableObjectId idBuffer
+	        {
+	            get
+	            {
+	                if (_idBuffer == null)
+	                {
+	                    _idBuffer = _idBufferBuilder(new MutableObjectId());
+	                }
+	                return _idBuffer;
+	            }
+	        }
 
-		#region Nested Types
+	        public MutableEntry(Func<MutableObjectId, MutableObjectId> idBufferBuilder)
+	        {
+	            _idBufferBuilder = idBufferBuilder;
+	        }
 
-		public class MutableEntry
-		{
-			private readonly Func<MutableObjectId, MutableObjectId> _idBufferBuilder;
-			private MutableObjectId _idBuffer;
+	        public MutableEntry(MutableObjectId idBuffer)
+	        {
+	            _idBuffer = idBuffer;
+	        }
 
-			public MutableObjectId IdBuffer
-			{
-				get
-				{
-					if (_idBuffer == null)
-					{
-						_idBuffer = _idBufferBuilder(new MutableObjectId());
-					}
-					return _idBuffer;
-				}
-			}
+            /// <summary>
+            /// Returns offset for this index object entry
+            /// </summary>
+	        public long Offset { get; set; }
 
-			public MutableEntry(Func<MutableObjectId, MutableObjectId> idBufferBuilder)
-			{
-				_idBufferBuilder = idBufferBuilder;
-			}
+            /// <summary>
+            /// Returns hex string describing the object id of this entry
+            /// </summary>
+	        public String Name
+	        {
+	            get { return idBuffer.Name; }
+	        }
 
-			private MutableEntry(MutableObjectId idBuffer)
-			{
-				_idBuffer = idBuffer;
-			}
+	        public ObjectId ToObjectId()
+	        {
+	            return idBuffer.ToObjectId();
+	        }
 
-			/// <summary>
-			/// Gets/Sets the offset of this object in a pack file.
-			/// </summary>
-			public long Offset { get; set; }
+            /// <summary>
+            /// Returns mutable copy of this mutable entry.
+            /// </summary>
+            /// <returns>
+            /// Copy of this mutable entry
+            /// </returns>
+	        public MutableEntry CloneEntry()
+	        {
+	            var r = new MutableEntry(new MutableObjectId(idBuffer.ToObjectId()));
+	            r.Offset = Offset;
 
-			/// <summary>
-			/// Hex string describing the object id of this entry.
-			/// </summary>
-			public string Name
-			{
-				get { return IdBuffer.Name; }
-			}
+	            return r;
+	        }
 
-			public ObjectId ToObjectId()
-			{
-				return IdBuffer.ToObjectId();
-			}
+	        public override string ToString()
+	        {
+	            return idBuffer.ToString();
+	        }
+	    }
 
-			/// <summary>
-			/// Returns mutable copy of this mutable entry.
-			/// </summary>
-			/// <returns>A copy of this mutable entry.</returns>
-			public MutableEntry CloneEntry()
-			{
-				var r = new MutableEntry(new MutableObjectId(IdBuffer.ToObjectId())) { Offset = Offset };
+        /// <summary>
+        /// Provide iterator that gives access to index entries. Note, that iterator
+        /// returns reference to mutable object, the same reference in each call -
+        /// for performance reason. If client needs immutable objects, it must copy
+        /// returned object on its own.
+        /// <para />
+        /// Iterator returns objects in SHA-1 lexicographical order.
+        /// </summary>
+	    internal abstract class EntriesIterator : IEnumerator<MutableEntry>
+	    {
+	        private MutableEntry _current;
+	        private readonly PackIndex _packIndex;
 
-				return r;
-			}
+	        protected EntriesIterator(PackIndex packIndex)
+	        {
+	            _packIndex = packIndex;
+	        }
 
-			public override string ToString()
-			{
-				return IdBuffer.ToString();
-			}
-		}
+	        protected long ReturnedNumber;
 
-		internal abstract class EntriesIterator : IEnumerator<MutableEntry>
-		{
-			private MutableEntry _current;
-			private readonly PackIndex _packIndex;
+	        protected abstract MutableObjectId IdBufferBuilder(MutableObjectId idBuffer);
 
-			protected EntriesIterator(PackIndex packIndex)
-			{
-				_packIndex = packIndex;
-			}
+	        private MutableEntry InitEntry()
+	        {
+	            return new MutableEntry(IdBufferBuilder);
+	        }
 
-			protected long ReturnedNumber;
+	        public bool hasNext()
+	        {
+	            return ReturnedNumber < _packIndex.ObjectCount;
+	        }
 
-			protected abstract MutableObjectId IdBufferBuilder(MutableObjectId idBuffer);
+	        protected abstract MutableEntry InnerNext(MutableEntry entry);
 
-			private MutableEntry InitEntry()
-			{
-				return new MutableEntry(IdBufferBuilder);
-			}
+	        public MutableEntry next()
+	        {
+	            _current = InnerNext(InitEntry());
+	            return _current;
+	        }
 
-			private bool HasNext()
-			{
-				return ReturnedNumber < _packIndex.ObjectCount;
-			}
+	        public bool MoveNext()
+	        {
+	            if (!hasNext())
+	            {
+	                return false;
+	            }
 
-			protected abstract MutableEntry InnerNext(MutableEntry entry);
+	            next();
+	            return true;
+	        }
 
-			public bool MoveNext()
-			{
-				if (!HasNext())
-				{
-					return false;
-				}
+	        public void Reset()
+	        {
+	            throw new NotSupportedException();
+	        }
 
-				_current = InnerNext(InitEntry());
+	        public MutableEntry Current
+	        {
+	            get { return _current; }
+	        }
 
-				return true;
-			}
+	        object IEnumerator.Current
+	        {
+	            get { return Current; }
+	        }
 
-			public void Reset()
-			{
-				throw new NotSupportedException();
-			}
+	        public void Dispose()
+	        {
+	        }
+	    }
 
-			public MutableEntry Current
-			{
-				get { return _current; }
-			}
 
-			object IEnumerator.Current
-			{
-				get { return Current; }
-			}
+        /// <summary>
+        /// Open an existing pack <code>.idx</code> file for reading..
+        /// <p>
+        /// The format of the file will be automatically detected and a proper access
+        /// implementation for that format will be constructed and returned to the
+        /// caller. The file may or may not be held open by the returned instance.
+        /// </p>
+        /// </summary>
+        /// <param name="idxFile">existing pack .idx to read.</param>
+        /// <returns></returns>
+        public static PackIndex Open(FileInfo idxFile)
+        {
+            try
+            {
+                using (FileStream fs = idxFile.OpenRead())
+                {
+                    byte[] hdr = new byte[8];
+                    NB.ReadFully(fs, hdr, 0, hdr.Length);
 
-			public void Dispose()
-			{
-			}
-		}
+                    if (IsTOC(hdr))
+                    {
+                        int v = NB.DecodeInt32(hdr, 4);
+                        switch (v)
+                        {
+                            case 2:
+                                return new PackIndexV2(fs);
+                            default:
+                                throw new IOException("Unsupported pack index version " + v);
+                        }
+                    }
+                    return new PackIndexV1(fs, hdr);
+                }
+            }
+            catch (IOException)
+            {
+                throw new IOException("Unable to read pack index: " + idxFile.FullName);
+            }
+        }
 
-		#endregion
+
+
+
+
+            
+
+
 	}
 }

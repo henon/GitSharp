@@ -50,50 +50,54 @@ namespace GitSharp
 	/// </summary>
 	public class PackIndexV2 : PackIndex
 	{
-		private const long IsO64 = 1L << 31;
-		private const int Fanout = 256;
-
+		private const long IS_O64 = 1L << 31;
+		private const int FANOUT = 256;
 		private static readonly int[] NoInts = { };
 		private static readonly byte[] NoBytes = { };
-
 		private readonly long[] _fanoutTable;
 
-		// 256 arrays of contiguous object names.
+		/** 256 arrays of contiguous object names. */
 		private readonly int[][] _names;
 
-		// 256 arrays of the 32 bit offset data, matching names.
+		/** 256 arrays of the 32 bit offset data, matching {@link #names}. */
 		private readonly byte[][] _offset32;
 
-		// 256 arrays of the CRC-32 of objects, matching names.
+		/** 256 arrays of the CRC-32 of objects, matching {@link #names}. */
 		private readonly byte[][] _crc32;
 
-		// 64 bit offset table.
+		/** 64 bit offset table. */
 		private readonly byte[] _offset64;
 
 		public PackIndexV2(Stream fd)
 		{
-			var fanoutRaw = new byte[4 * Fanout];
+			var fanoutRaw = new byte[4 * FANOUT];
 			NB.ReadFully(fd, fanoutRaw, 0, fanoutRaw.Length);
-
-			_fanoutTable = new long[Fanout];
-			for (int k = 0; k < Fanout; k++)
+			_fanoutTable = new long[FANOUT];
+			for (int k = 0; k < FANOUT; k++)
 			{
 				_fanoutTable[k] = NB.DecodeUInt32(fanoutRaw, k * 4);
 			}
+			ObjectCount = _fanoutTable[FANOUT - 1];
 
-			ObjectCount = _fanoutTable[Fanout - 1];
-
-			_names = new int[Fanout][];
-			_offset32 = new byte[Fanout][];
-			_crc32 = new byte[Fanout][];
+			_names = new int[FANOUT][];
+			_offset32 = new byte[FANOUT][];
+			_crc32 = new byte[FANOUT][];
 
 			// object name table. The size we can permit per fan-out bucket
 			// is limited to Java's 2 GB per byte array limitation. That is
 			// no more than 107,374,182 objects per fan-out.
 			//
-			for (int k = 0; k < Fanout; k++)
+			for (int k = 0; k < FANOUT; k++)
 			{
-				long bucketCnt = (k == 0) ? _fanoutTable[k] : _fanoutTable[k] - _fanoutTable[k - 1];
+				long bucketCnt;
+				if (k == 0)
+				{
+					bucketCnt = _fanoutTable[k];
+				}
+				else
+				{
+					bucketCnt = _fanoutTable[k] - _fanoutTable[k - 1];
+				}
 
 				if (bucketCnt == 0)
 				{
@@ -113,7 +117,6 @@ namespace GitSharp
 				var raw = new byte[intNameLen];
 				var bin = new int[intNameLen >> 2];
 				NB.ReadFully(fd, raw, 0, raw.Length);
-
 				for (int i = 0; i < bin.Length; i++)
 				{
 					bin[i] = NB.DecodeInt32(raw, i << 2);
@@ -125,7 +128,7 @@ namespace GitSharp
 			}
 
 			// CRC32 table.
-			for (int k = 0; k < Fanout; k++)
+			for (int k = 0; k < FANOUT; k++)
 			{
 				NB.ReadFully(fd, _crc32[k], 0, _crc32[k].Length);
 			}
@@ -133,25 +136,25 @@ namespace GitSharp
 			// 32 bit offset table. Any entries with the most significant bit
 			// set require a 64 bit offset entry in another table.
 			//
-			int offset64Count = 0;
-			for (int k = 0; k < Fanout; k++)
+			int o64cnt = 0;
+			for (int k = 0; k < FANOUT; k++)
 			{
 				byte[] ofs = _offset32[k];
 				NB.ReadFully(fd, ofs, 0, ofs.Length);
 				for (int p = 0; p < ofs.Length; p += 4)
 				{
-					if (NB.ConvertUnsignedByteToSigned(ofs[p]) < 0)
+                    if (NB.ConvertUnsignedByteToSigned(ofs[p]) < 0)
 					{
-						offset64Count++;
+						o64cnt++;
 					}
 				}
 			}
 
 			// 64 bit offset table. Most objects should not require an entry.
 			//
-			if (offset64Count > 0)
+			if (o64cnt > 0)
 			{
-				_offset64 = new byte[offset64Count * 8];
+				_offset64 = new byte[o64cnt * 8];
 				NB.ReadFully(fd, _offset64, 0, _offset64.Length);
 			}
 			else
@@ -172,7 +175,7 @@ namespace GitSharp
 
 		public override long Offset64Count
 		{
-			get { return _offset64.Length / 8; }
+			get  { return _offset64.Length / 8; }
 		}
 
 		public override ObjectId GetObjectId(long nthPosition)
@@ -213,9 +216,9 @@ namespace GitSharp
 			}
 
 			long p = NB.DecodeUInt32(_offset32[levelOne], levelTwo << 2);
-			if ((p & IsO64) != 0)
+			if ((p & IS_O64) != 0)
 			{
-				return NB.DecodeUInt64(_offset64, (8 * (int)(p & ~IsO64)));
+				return NB.DecodeUInt64(_offset64, (8 * (int)(p & ~IS_O64)));
 			}
 
 			return p;
@@ -273,49 +276,49 @@ namespace GitSharp
 
 		#region Nested Types
 
-		private class EntriesEnumeratorV2 : EntriesIterator
-		{
-			private readonly PackIndexV2 _index;
-			private int _levelOne;
-			private int _levelTwo;
+        private class EntriesEnumeratorV2 : EntriesIterator
+        {
+            private readonly PackIndexV2 _index;
+            private int _levelOne;
+            private int _levelTwo;
 
-			public EntriesEnumeratorV2(PackIndexV2 index)
-				: base(index)
-			{
-				_index = index;
-			}
+            public EntriesEnumeratorV2(PackIndexV2 index)
+                : base(index)
+            {
+                _index = index;
+            }
 
-			protected override MutableObjectId IdBufferBuilder(MutableObjectId idBuffer)
-			{
-				idBuffer.FromRaw(_index._names[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength / 4);
-				return idBuffer;
-			}
+            protected override MutableObjectId IdBufferBuilder(MutableObjectId idBuffer)
+            {
+                idBuffer.FromRaw(_index._names[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength / 4);
+                return idBuffer;
+            }
 
-			protected override MutableEntry InnerNext(MutableEntry entry)
-			{
-				for (; _levelOne < _index._names.Length; _levelOne++)
-				{
-					if (_levelTwo < _index._names[_levelOne].Length)
-					{
-						int idx = _levelTwo / (AnyObjectId.ObjectIdLength / 4) * 4;
-						long offset = NB.DecodeUInt32(_index._offset32[_levelOne], idx);
-						if ((offset & IsO64) != 0)
-						{
-							idx = (8 * (int)(offset & ~IsO64));
-							offset = NB.DecodeUInt64(_index._offset64, idx);
-						}
-						entry.Offset = offset;
+            protected override MutableEntry InnerNext(MutableEntry entry)
+            {
+                for (; _levelOne < _index._names.Length; _levelOne++)
+                {
+                    if (_levelTwo < _index._names[_levelOne].Length)
+                    {
+                        int idx = _levelTwo / (AnyObjectId.ObjectIdLength / 4) * 4;
+                        long offset = NB.DecodeUInt32(_index._offset32[_levelOne], idx);
+                        if ((offset & IS_O64) != 0)
+                        {
+                            idx = (8 * (int)(offset & ~IS_O64));
+                            offset = NB.DecodeUInt64(_index._offset64, idx);
+                        }
+                        entry.Offset = offset;
 
-						_levelTwo += AnyObjectId.ObjectIdLength / 4;
-						ReturnedNumber++;
-						return entry;
-					}
-					_levelTwo = 0;
-				}
+                        _levelTwo += AnyObjectId.ObjectIdLength / 4;
+                        ReturnedNumber++;
+                        return entry;
+                    }
+                    _levelTwo = 0;
+                }
 
-				throw new IndexOutOfRangeException();
-			}
-		}
+                throw new IndexOutOfRangeException();
+            }
+        }
 
 		#endregion
 	}

@@ -272,26 +272,21 @@ namespace GitSharp.Util
 			}
 		}
 
-		/**
-		 * Convert sequence of 8 bytes (network byte order) into unsigned value.
-		 * 
-		 * @param intbuf
-		 *            buffer to acquire the 8 bytes of data from.
-		 * @param offset
-		 *            position within the buffer to begin reading from. This
-		 *            position and the next 7 bytes After it (for a total of 8
-		 *            bytes) will be Read.
-		 * @return unsigned integer value that matches the 64 bits Read.
-		 */
-		public static long decodeUInt64(byte[] intbuf, int offset)
-		{
-			return DecodeUInt64(intbuf, offset);
-		}
-
+		/// <summary>
+		/// Convert sequence of 8 bytes (network byte order) into unsigned value.
+		/// </summary>
+		/// <param name="intbuf">buffer to acquire the 8 bytes of data from.</param>
+		/// <param name="offset">
+		/// Position within the buffer to begin reading from. This
+		/// position and the next 7 bytes After it (for a total of 8
+		/// bytes) will be read.
+		/// </param>
+		/// <returns>
+		/// Unsigned integer value that matches the 64 bits read.
+		/// </returns>
 		public static long DecodeUInt64(byte[] intbuf, int offset)
 		{
-			return (DecodeUInt32(intbuf, offset) << 32)
-				   | DecodeUInt32(intbuf, offset + 4);
+			return (DecodeUInt32(intbuf, offset) << 32) | DecodeUInt32(intbuf, offset + 4);
 		}
 
 		/// <summary>
@@ -408,6 +403,18 @@ namespace GitSharp.Util
 			v >>= 8;
 
 			intbuf[offset] = (byte)v;
+		}
+
+		/// <summary>
+		/// Converts an unsigned byte (.NET default when reading files, for instance) 
+		/// to a signed byte
+		/// </summary>
+		/// <param name="b">The value to be converted.</param>
+		/// <returns></returns>
+		public static sbyte ConvertUnsignedByteToSigned(byte b)
+		{
+			// Convert to the equivalent binary string, then to the equivalent signed value.
+			return Convert.ToSByte(Convert.ToString(b, 2), 2);
 		}
 	}
 }

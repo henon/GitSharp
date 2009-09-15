@@ -74,7 +74,7 @@ namespace GitSharp
 		{
 			var fanoutRaw = new byte[4 * Fanout];
 			NB.ReadFully(fd, fanoutRaw, 0, fanoutRaw.Length);
-			
+
 			_fanoutTable = new long[Fanout];
 			for (int k = 0; k < Fanout; k++)
 			{
@@ -113,6 +113,7 @@ namespace GitSharp
 				var raw = new byte[intNameLen];
 				var bin = new int[intNameLen >> 2];
 				NB.ReadFully(fd, raw, 0, raw.Length);
+
 				for (int i = 0; i < bin.Length; i++)
 				{
 					bin[i] = NB.DecodeInt32(raw, i << 2);
@@ -139,7 +140,7 @@ namespace GitSharp
 				NB.ReadFully(fd, ofs, 0, ofs.Length);
 				for (int p = 0; p < ofs.Length; p += 4)
 				{
-					if (ofs[p] < 0)
+					if (NB.ConvertUnsignedByteToSigned(ofs[p]) < 0)
 					{
 						offset64Count++;
 					}
@@ -171,7 +172,7 @@ namespace GitSharp
 
 		public override long Offset64Count
 		{
-			get  { return _offset64.Length / 8; }
+			get { return _offset64.Length / 8; }
 		}
 
 		public override ObjectId GetObjectId(long nthPosition)
@@ -278,18 +279,19 @@ namespace GitSharp
 			private int _levelOne;
 			private int _levelTwo;
 
-			public EntriesEnumeratorV2(PackIndexV2 index) : base(index)
+			public EntriesEnumeratorV2(PackIndexV2 index)
+				: base(index)
 			{
 				_index = index;
 			}
 
-            protected override MutableObjectId IdBufferBuilder(MutableObjectId idBuffer)
-            {
-                idBuffer.FromRaw(_index._names[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength / 4);
-                return idBuffer;
-            }
+			protected override MutableObjectId IdBufferBuilder(MutableObjectId idBuffer)
+			{
+				idBuffer.FromRaw(_index._names[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength / 4);
+				return idBuffer;
+			}
 
-		    protected override MutableEntry InnerNext(MutableEntry entry)
+			protected override MutableEntry InnerNext(MutableEntry entry)
 			{
 				for (; _levelOne < _index._names.Length; _levelOne++)
 				{

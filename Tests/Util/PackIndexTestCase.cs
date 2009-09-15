@@ -51,21 +51,21 @@ namespace GitSharp.Tests.Util
         public override void setUp()
         {
             base.setUp();
-            smallIdx = PackIndex.Open(getFileForPack34be9032());
-            _denseIdx = PackIndex.Open(getFileForPackdf2982f28());
+            smallIdx = PackIndex.Open(GetFileForPack34Be9032());
+            _denseIdx = PackIndex.Open(GetFileForPackdf2982F28());
         }
 
         /// <summary>
 		/// Return File with appropriate index version for prepared pack.
         /// </summary>
         /// <returns></returns>
-    	protected abstract FileInfo getFileForPack34be9032();
+    	protected abstract FileInfo GetFileForPack34Be9032();
 
         /// <summary>
 		/// Return File with appropriate index version for prepared pack.
         /// </summary>
         /// <returns></returns>
-        protected abstract FileInfo getFileForPackdf2982f28();
+        protected abstract FileInfo GetFileForPackdf2982F28();
 
         /// <summary>
 		/// Verify CRC32 support.

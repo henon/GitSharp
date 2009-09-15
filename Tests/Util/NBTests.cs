@@ -122,35 +122,31 @@ namespace GitSharp.Tests.Util
         [Test]
         public void testDecodeUInt64()
         {
-            Assert.AreEqual(0L, NB.decodeUInt64(b(0, 0, 0, 0, 0, 0, 0, 0), 0));
-            Assert.AreEqual(0L, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0, 0, 0, 0), 3));
+            Assert.AreEqual(0L, NB.DecodeUInt64(b(0, 0, 0, 0, 0, 0, 0, 0), 0));
+            Assert.AreEqual(0L, NB.DecodeUInt64(Padb(3, 0, 0, 0, 0, 0, 0, 0, 0), 3));
 
-            Assert.AreEqual(3L, NB.decodeUInt64(b(0, 0, 0, 0, 0, 0, 0, 3), 0));
-            Assert.AreEqual(3L, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0, 0, 0, 3), 3));
+            Assert.AreEqual(3L, NB.DecodeUInt64(b(0, 0, 0, 0, 0, 0, 0, 3), 0));
+            Assert.AreEqual(3L, NB.DecodeUInt64(Padb(3, 0, 0, 0, 0, 0, 0, 0, 3), 3));
 
-            Assert.AreEqual(0xdeadbeefL, NB.decodeUInt64(b(0, 0, 0, 0, 0xde, 0xad,
-                    0xbe, 0xef), 0));
-            Assert.AreEqual(0xdeadbeefL, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0xde,
-                    0xad, 0xbe, 0xef), 3));
+            Assert.AreEqual(0xdeadbeefL, NB.DecodeUInt64(b(0, 0, 0, 0, 0xde, 0xad, 0xbe, 0xef), 0));
+            Assert.AreEqual(0xdeadbeefL, NB.DecodeUInt64(Padb(3, 0, 0, 0, 0, 0xde, 0xad, 0xbe, 0xef), 3));
 
-            Assert.AreEqual(0x0310adefL, NB.decodeUInt64(b(0, 0, 0, 0, 0x03, 0x10,
-                    0xad, 0xef), 0));
-            Assert.AreEqual(0x0310adefL, NB.decodeUInt64(Padb(3, 0, 0, 0, 0, 0x03,
-                    0x10, 0xad, 0xef), 3));
+            Assert.AreEqual(0x0310adefL, NB.DecodeUInt64(b(0, 0, 0, 0, 0x03, 0x10, 0xad, 0xef), 0));
+            Assert.AreEqual(0x0310adefL, NB.DecodeUInt64(Padb(3, 0, 0, 0, 0, 0x03, 0x10, 0xad, 0xef), 3));
             unchecked
             {
-                Assert.AreEqual((long)0xc0ffee78deadbeefL, NB.decodeUInt64(b(0xc0, 0xff, 0xee,
+                Assert.AreEqual((long)0xc0ffee78deadbeefL, NB.DecodeUInt64(b(0xc0, 0xff, 0xee,
                         0x78, 0xde, 0xad, 0xbe, 0xef), 0));
-                Assert.AreEqual((long)0xc0ffee78deadbeefL, NB.decodeUInt64(Padb(3, 0xc0, 0xff,
+                Assert.AreEqual((long)0xc0ffee78deadbeefL, NB.DecodeUInt64(Padb(3, 0xc0, 0xff,
                         0xee, 0x78, 0xde, 0xad, 0xbe, 0xef), 3));
 
-                Assert.AreEqual(0x00000000ffffffffL, NB.decodeUInt64(b(0, 0, 0, 0, 0xff,
+                Assert.AreEqual(0x00000000ffffffffL, NB.DecodeUInt64(b(0, 0, 0, 0, 0xff,
                         0xff, 0xff, 0xff), 0));
-                Assert.AreEqual(0x00000000ffffffffL, NB.decodeUInt64(Padb(3, 0, 0, 0, 0,
+                Assert.AreEqual(0x00000000ffffffffL, NB.DecodeUInt64(Padb(3, 0, 0, 0, 0,
                         0xff, 0xff, 0xff, 0xff), 3));
-                Assert.AreEqual((long)0xffffffffffffffffL, NB.decodeUInt64(b(0xff, 0xff, 0xff,
+                Assert.AreEqual((long)0xffffffffffffffffL, NB.DecodeUInt64(b(0xff, 0xff, 0xff,
                         0xff, 0xff, 0xff, 0xff, 0xff), 0));
-                Assert.AreEqual((long)0xffffffffffffffffL, NB.decodeUInt64(Padb(3, 0xff, 0xff,
+                Assert.AreEqual((long)0xffffffffffffffffL, NB.DecodeUInt64(Padb(3, 0xff, 0xff,
                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff), 3));
             }
         }

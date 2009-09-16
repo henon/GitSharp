@@ -39,6 +39,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using GitSharp.Exceptions;
 using GitSharp.Tests.Util;
 using Xunit;
@@ -48,6 +49,7 @@ namespace GitSharp.Tests
 	public class T0007_Index : RepositoryTestCase
 	{
 		private static readonly bool CanRunGitStatus;
+		private static readonly PlatformID[] WindowsPlatforms = new[] { PlatformID.Win32NT, PlatformID.Win32S, PlatformID.Win32Windows };
 
 		static T0007_Index()
 		{
@@ -82,6 +84,8 @@ namespace GitSharp.Tests
 		{
 			int exitCode = -1;
 
+			bool runningOnWindows = WindowsPlatforms.Contains(Environment.OSVersion.Platform);
+
 			if (dir == null || !dir.Exists || !Directory.Exists(dir.FullName) || string.IsNullOrEmpty(cmd))
 			{
 				return exitCode;
@@ -92,7 +96,7 @@ namespace GitSharp.Tests
 			var psi = new ProcessStartInfo
 						{
 							CreateNoWindow = true,
-							FileName = commandAndArgument[0],
+							FileName = runningOnWindows ? commandAndArgument[0] + ".cmd" : commandAndArgument[0],
 							Arguments = commandAndArgument.Length > 1 ? commandAndArgument[1] : null,
 							WorkingDirectory = dir.FullName,
 							RedirectStandardError = true,
@@ -103,6 +107,8 @@ namespace GitSharp.Tests
 
 			var process = Process.Start(psi);
 			if (process == null) return exitCode;
+
+			
 
 			process.WaitForExit();
 			exitCode = process.ExitCode;

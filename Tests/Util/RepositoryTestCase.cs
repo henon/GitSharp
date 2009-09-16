@@ -56,24 +56,24 @@ namespace GitSharp.Tests.Util
 		/// <see cref="FakeSystemReader.Values"/>
 		/// </summary>
 		private static readonly FakeSystemReader SystemReader = new FakeSystemReader();
+		private static readonly DirectoryInfo TrashParent = new DirectoryInfo("trash");
 
-		private int _testcount;
+		protected static readonly PersonIdent JAuthor = new PersonIdent("J. Author", "jauthor@example.com");
+		protected static readonly PersonIdent JCommitter = new PersonIdent("J. Committer", "jcommitter@example.com");
+
 		private readonly List<Repository> _repositoriesToClose;
-
-		protected static DirectoryInfo trashParent = new DirectoryInfo("trash");
-		protected static PersonIdent jauthor = new PersonIdent("J. Author", "jauthor@example.com");
-		protected static PersonIdent jcommitter = new PersonIdent("J. Committer", "jcommitter@example.com");
+		private readonly bool _packedGitMmap;
+		private int _testcount;
 
 		protected DirectoryInfo trash;
 		protected DirectoryInfo trash_git;
-		protected bool packedGitMMAP;
 		protected Repository db;
 
 		static RepositoryTestCase()
 		{
 			GitSharpSystemReader.SetInstance(SystemReader);
 			Microsoft.Win32.SystemEvents.SessionEnded += (o, args) => // cleanup
-			                                             recursiveDelete(new DirectoryInfo(trashParent.FullName), false, null, false);
+                RecursiveDelete(new DirectoryInfo(TrashParent.FullName), false, null, false);
 		}
 
 		protected RepositoryTestCase()
@@ -84,7 +84,7 @@ namespace GitSharp.Tests.Util
 		/// <summary>
 		/// Configure Git before setting up test repositories.
 		/// </summary>
-		protected void Configure()  // [henon] reading performance can be implemented later
+		private void Configure()  // [henon] reading performance can be implemented later
 		{
 			//var c = new WindowCacheConfig
 			//                          {
@@ -105,15 +105,15 @@ namespace GitSharp.Tests.Util
 			string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
 
 			// Cleanup old failed stuff
-			recursiveDelete(new DirectoryInfo(trashParent.FullName), true, name, false);
+			RecursiveDelete(new DirectoryInfo(TrashParent.FullName), true, name, false);
 
-			trash = new DirectoryInfo(trashParent + "/trash" + DateTime.Now.Ticks + "." + (_testcount++));
+			trash = new DirectoryInfo(TrashParent + "/trash" + DateTime.Now.Ticks + "." + (_testcount++));
 			trash_git = new DirectoryInfo(trash + "/.git");
 
 			var gitConfigFile = new FileInfo(trash_git + "/usergitconfig").FullName;
 			var gitConfig = new RepositoryConfig(null, new FileInfo(gitConfigFile));
 
-			SystemReader.setUserGitConfig(gitConfig);
+			SystemReader.SetUserGitConfig(gitConfig);
 
 			db = new Repository(trash_git);
 			db.Create();
@@ -157,16 +157,16 @@ namespace GitSharp.Tests.Util
 			// Since memory mapping is controlled by the GC we need to
 			// tell it this is a good time to clean up and unlock
 			// memory mapped files.
-			if (packedGitMMAP)
+			if (_packedGitMmap)
 			{
 				GC.Collect();
 			}
 
 			string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
-			recursiveDelete(new DirectoryInfo(trash.FullName), false, name, true);
+			RecursiveDelete(new DirectoryInfo(trash.FullName), false, name, true);
 			foreach (var r in _repositoriesToClose)
 			{
-				recursiveDelete(new DirectoryInfo(r.WorkingDirectory.FullName), false, name, true);
+				RecursiveDelete(new DirectoryInfo(r.WorkingDirectory.FullName), false, name, true);
 			}
 
 			_repositoriesToClose.Clear();
@@ -181,10 +181,10 @@ namespace GitSharp.Tests.Util
 		/// also used internally. If a file or directory cannot be removed
 		/// it throws an AssertionFailure.
 		/// </summary>
-		/// <param name="dir"></param>
+		/// <param name="fs"></param>
 		protected void recursiveDelete(FileSystemInfo fs)
 		{
-			recursiveDelete(fs, false, GetType().Name + "." + ToString(), true);
+			RecursiveDelete(fs, false, GetType().Name + "." + ToString(), true);
 		}
 
 		/// <summary>
@@ -197,7 +197,7 @@ namespace GitSharp.Tests.Util
 		/// <param name="name"></param>
 		/// <param name="failOnError"></param>
 		/// <returns></returns>
-		protected static bool recursiveDelete(FileSystemInfo fs, bool silent, string name, bool failOnError)
+		private static bool RecursiveDelete(FileSystemInfo fs, bool silent, string name, bool failOnError)
 		{
 			Debug.Assert(!(silent && failOnError));
 
@@ -216,7 +216,7 @@ namespace GitSharp.Tests.Util
 
 				foreach (FileSystemInfo e in ls)
 				{
-					silent = recursiveDelete(e, silent, name, failOnError);
+					silent = RecursiveDelete(e, silent, name, failOnError);
 				}
 
 				dir.Delete();
@@ -250,13 +250,6 @@ namespace GitSharp.Tests.Util
 			}
 		}
 
-       
-
-
-             
-         
-              
-
 		#endregion
 
 		/// <summary>
@@ -270,6 +263,9 @@ namespace GitSharp.Tests.Util
 		{
 			var tf = new FileInfo(Path.Combine(trash.FullName, name).Replace('/', Path.DirectorySeparatorChar));
 			var tfp = tf.Directory;
+
+			Assert.NotNull(tfp);
+
 			if (!tfp.Exists && !tfp.Mkdirs())
 			{
 				if (!tfp.Exists)
@@ -283,7 +279,7 @@ namespace GitSharp.Tests.Util
 			return tf;
 		}
 
-		protected static void checkFile(FileInfo f, string checkData)
+		protected static void CheckFile(FileInfo f, string checkData)
 		{
 			var readData = File.ReadAllText(f.FullName, Encoding.GetEncoding("ISO-8859-1"));
 
@@ -301,25 +297,24 @@ namespace GitSharp.Tests.Util
 		/// <returns>
 		/// A new empty git repository for testing purposes
 		/// </returns>
-		protected Repository createNewEmptyRepo()
+		protected Repository CreateNewEmptyRepo()
 		{
-			var newTestRepo = new DirectoryInfo(trashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) + "/.git");
+			var newTestRepo = new DirectoryInfo(TrashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) + "/.git");
 			Assert.False(newTestRepo.Exists);
 			var newRepo = new Repository(newTestRepo);
 			newRepo.Create();
-			string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
+			//string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
 			_repositoriesToClose.Add(newRepo);
 			return newRepo;
 		}
 
-		protected void setupReflog(String logName, byte[] data)
+		protected void SetupReflog(string logName, byte[] data)
 		{
 			var logfile = new FileInfo(Path.Combine(db.Directory.FullName, logName));
             
 			if (!logfile.Directory.Mkdirs() && !logfile.Directory.IsDirectory())
 			{
-				throw new IOException(
-					"oops, cannot create the directory for the test reflog file"
+				throw new IOException("oops, cannot create the directory for the test reflog file"
 					+ logfile);
 			}
 
@@ -328,7 +323,7 @@ namespace GitSharp.Tests.Util
 
 		#region Nested Types
 
-		internal class FakeSystemReader : ISystemReader
+		private class FakeSystemReader : ISystemReader
 		{
 			private RepositoryConfig _userGitConfig;
 
@@ -363,7 +358,7 @@ namespace GitSharp.Tests.Util
 
 			#endregion
 
-			public void setUserGitConfig(RepositoryConfig userGitConfig)
+			public void SetUserGitConfig(RepositoryConfig userGitConfig)
 			{
 				_userGitConfig = userGitConfig;
 			}

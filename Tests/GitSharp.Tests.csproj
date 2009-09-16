@@ -88,7 +88,7 @@
     <Compile Include="RepositoryConfigTest.cs" />
     <Compile Include="RevWalk\FooterLineTest.cs" />
     <Compile Include="Transport\BundleWriterTest.cs" />
-    <Compile Include="Transport\LongMapTest.cs" />
+    <Compile Include="Util\LongMapTest.cs" />
     <Compile Include="Transport\OpenSshConfigTest.cs" />
     <Compile Include="Transport\PacketLineInTest.cs" />
     <Compile Include="Transport\PacketLineOutTest.cs" />

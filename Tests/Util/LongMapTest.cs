@@ -39,7 +39,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace GitSharp.Tests.Transport
+namespace GitSharp.Tests.Util
 {
 	public class LongMapTest : XunitBaseFact
 	{

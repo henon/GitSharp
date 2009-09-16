@@ -56,7 +56,7 @@ namespace GitSharp.Tests.Transport
             // Then we clone a new repo from that bundle and do a simple test. This
             // makes sure
             // we could Read the bundle we created.
-            Repository newRepo = createNewEmptyRepo();
+            Repository newRepo = CreateNewEmptyRepo();
             FetchResult fetchResult = FetchFromBundle(newRepo, bundle);
             Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/firstcommit");
 
@@ -75,7 +75,7 @@ namespace GitSharp.Tests.Transport
             // Then we clone a new repo from that bundle and do a simple test. This
             // makes sure
             // we could Read the bundle we created.
-            Repository newRepo = createNewEmptyRepo();
+            Repository newRepo = CreateNewEmptyRepo();
             FetchResult fetchResult = FetchFromBundle(newRepo, bundle);
             Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/aa");
 
@@ -99,7 +99,7 @@ namespace GitSharp.Tests.Transport
             try
             {
                 // Check that we actually needed the first bundle
-                Repository newRepo2 = createNewEmptyRepo();
+                Repository newRepo2 = CreateNewEmptyRepo();
                 fetchResult = FetchFromBundle(newRepo2, bundle);
                 Assert.False(true, "We should not be able to fetch from bundle with prerequisites that are not fulfilled");
             }

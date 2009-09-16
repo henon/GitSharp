@@ -344,7 +344,7 @@ namespace GitSharp.Tests.Transport
             rc.Update(db.Config);
             db.Config.save();
 
-            checkFile(db.Config.getFile(),
+            CheckFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" +
                       "\tfilemode = true\n"
@@ -367,7 +367,7 @@ namespace GitSharp.Tests.Transport
             rc.Update(db.Config);
             db.Config.save();
 
-            checkFile(db.Config.getFile(),
+            CheckFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
                       + "[remote \"spearce\"]\n"
@@ -391,7 +391,7 @@ namespace GitSharp.Tests.Transport
             rc.Update(db.Config);
             db.Config.save();
 
-            checkFile(db.Config.getFile(),
+            CheckFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
                       + "[remote \"spearce\"]\n"
@@ -414,7 +414,7 @@ namespace GitSharp.Tests.Transport
             rc.Update(db.Config);
             db.Config.save();
 
-            checkFile(db.Config.getFile(),
+            CheckFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
                       + "[remote \"spearce\"]\n" + "\turl = /some/dir\n"
@@ -431,7 +431,7 @@ namespace GitSharp.Tests.Transport
             rc.Update(db.Config);
             db.Config.save();
 
-            checkFile(db.Config.getFile(),
+            CheckFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
                       + "[remote \"origin\"]\n" + "\turl = /some/dir\n"
@@ -449,7 +449,7 @@ namespace GitSharp.Tests.Transport
             rc.Update(db.Config);
             db.Config.save();
 
-            checkFile(db.Config.getFile(),
+            CheckFile(db.Config.getFile(),
                       "[core]\n"
                       + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
                       + "[remote \"origin\"]\n" + "\turl = /some/dir\n"

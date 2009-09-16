@@ -41,8 +41,7 @@ namespace GitSharp.Util
 {
     public static class DateTimeExtensions
     {
-    	private static readonly long EPOCH_TICKS = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
-        public const long TICKS_PER_SECOND = 10000000L;
+    	private static readonly long EpochTicks = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
 
         /// <summary>
         /// Calculates the git time from a DateTimeOffset instance.
@@ -53,7 +52,7 @@ namespace GitSharp.Util
         /// <returns></returns>
         public static long ToGitInternalTime(this DateTimeOffset time)
         {
-            return (time.Ticks - time.Offset.Ticks - EPOCH_TICKS) / TICKS_PER_SECOND;
+            return (time.Ticks - time.Offset.Ticks - EpochTicks) / Constants.TICKS_PER_SECOND;
         }
 
         /// <summary>
@@ -78,8 +77,8 @@ namespace GitSharp.Util
         public static DateTimeOffset GitTimeToDateTimeOffset(this long gitTime, long offsetMinutes)
         {
             var offset = TimeSpan.FromMinutes(offsetMinutes);
-			var utc_ticks = EPOCH_TICKS + gitTime * TICKS_PER_SECOND;
-            return new DateTimeOffset(utc_ticks + offset.Ticks, offset);
+			var utcTicks = EpochTicks + gitTime * Constants.TICKS_PER_SECOND;
+            return new DateTimeOffset(utcTicks + offset.Ticks, offset);
         }
 
         /// <summary>
@@ -90,8 +89,8 @@ namespace GitSharp.Util
         /// <returns></returns>
 		public static DateTime GitTimeToDateTime(this long gitTime)
         {
-			var utc_ticks = EPOCH_TICKS + gitTime * TICKS_PER_SECOND;
-            return new DateTime(utc_ticks);
+			var utcTicks = EpochTicks + gitTime * Constants.TICKS_PER_SECOND;
+            return new DateTime(utcTicks);
         }
     }
 }

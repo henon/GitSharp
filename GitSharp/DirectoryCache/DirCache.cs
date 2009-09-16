@@ -557,13 +557,15 @@ namespace GitSharp.DirectoryCache
 			}
 			else
 			{
-				var smudge_s = (int)(_lastModified.ToGitInternalTime());
-				var smudge_ns = (int)(_lastModified.Millisecond * 1000000); // [henon] <--- this could be done with much more precision in C# since DateTime has 100 nanosec ticks
+				var smudgeS = (int)(_lastModified.ToGitInternalTime());
+				var smudgeNs = _lastModified.Millisecond * Constants.TICKS_PER_MILLISECOND; // [henon] <--- this could be done with much more precision in C# since DateTime has 100 nanosec ticks
 				for (int i = 0; i < _entryCnt; i++)
 				{
 					DirCacheEntry e = _sortedEntries[i];
-					if (e.mightBeRacilyClean(smudge_s, smudge_ns))
+					if (e.mightBeRacilyClean(smudgeS, smudgeNs))
+					{
 						e.smudgeRacilyClean();
+					}
 					e.write(dos);
 				}
 			}

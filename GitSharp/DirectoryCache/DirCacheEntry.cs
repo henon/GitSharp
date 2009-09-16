@@ -241,14 +241,14 @@ namespace GitSharp.DirectoryCache
 		/// timestamp. This method tests to see if file was written out at the same
 		/// time as the index.
 		/// </summary>
-		/// <param name="smudge_s">
+		/// <param name="smudgeS">
 		/// Seconds component of the index's last modified time.
 		/// </param>
-		/// <param name="smudge_ns">
+		/// <param name="smudgeNs">
 		/// Nanoseconds component of the index's last modified time.
 		/// </param>
 		/// <returns>true if extra careful checks should be used.</returns>
-		public bool mightBeRacilyClean(int smudge_s, int smudge_ns)
+		public bool mightBeRacilyClean(int smudgeS, int smudgeNs)
 		{
 			// If the index has a modification time then it came from disk
 			// and was not generated from scratch in memory. In such cases
@@ -259,10 +259,13 @@ namespace GitSharp.DirectoryCache
 			//
 			int @base = _infoOffset + PMtime;
 			int mtime = NB.DecodeInt32(_info, @base);
-			if (smudge_s < mtime) return true;
+			if (smudgeS < mtime) return true;
 
-			if (smudge_s == mtime)
-				return smudge_ns <= NB.DecodeInt32(_info, @base + 4) / 1000000;
+			if (smudgeS == mtime)
+			{
+				return smudgeNs <= NB.DecodeInt32(_info, @base + 4)/Constants.TICKS_PER_MILLISECOND;
+			}
+
 			return false;
 		}
 
@@ -498,17 +501,24 @@ namespace GitSharp.DirectoryCache
 
 		private long DecodeTimestamp(int pIdx)
 		{
-			int @base = _infoOffset + pIdx;
-			int sec = NB.DecodeInt32(_info, @base);
-			int ms = NB.DecodeInt32(_info, @base + 4) / 1000000;
+			int baseOffset = _infoOffset + pIdx;
+			int sec = NB.DecodeInt32(_info, baseOffset);
+			int ms = NB.DecodeInt32(_info, baseOffset + 4) / Constants.TICKS_PER_MILLISECOND;
 			return 1000L * sec + ms;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="pIdx"></param>
+		/// <param name="when">
+		/// New cached modification date of the file, in milliseconds.
+		/// </param>
 		private void EncodeTimestamp(int pIdx, long when)
 		{
-			int @base = _infoOffset + pIdx;
-			NB.encodeInt32(_info, @base, (int)(when / 1000));
-			NB.encodeInt32(_info, @base + 4, ((int)(when % 1000)) * 1000000);
+			int baseOffset = _infoOffset + pIdx;
+			NB.encodeInt32(_info, baseOffset, (int)(when / 1000));
+			NB.encodeInt32(_info, baseOffset + 4, ((int)(when % 1000)) * Constants.TICKS_PER_MILLISECOND);
 		}
 
 		public byte[] Path

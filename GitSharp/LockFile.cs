@@ -45,16 +45,14 @@ using System.Diagnostics;
 
 namespace GitSharp
 {
-    [Complete]
     public class LockFile
     {
-        private FileInfo _refFile;
+        private readonly FileInfo _refFile;
         private FileInfo _lockFile;
         private FileStream _os;
         private FileLock _fLck;
         private bool _haveLock;
-
-
+        
         public DateTime CommitLastModified { get; private set; }
         public bool NeedStatInformation { get; set; }
 
@@ -66,8 +64,9 @@ namespace GitSharp
 
         public bool Lock()
         {
-            _lockFile.Directory.Create();
-            if (_lockFile.Exists)
+        	if (_lockFile.Directory != null) _lockFile.Directory.Create();
+
+        	if (_lockFile.Exists)
             {
                 return false;
             }
@@ -78,6 +77,7 @@ namespace GitSharp
                 _os = _lockFile.Create();
 
                 _fLck = FileLock.TryLock(_os, _lockFile);
+
                 if (_fLck == null)
                 {
                     // We cannot use unlock() here as this file is not
@@ -88,7 +88,7 @@ namespace GitSharp
                     {
                         _os.Close();
                     }
-                    catch (Exception)
+                    catch (IOException)
                     {
                         // Fail by returning haveLck = false.
                     }
@@ -125,7 +125,7 @@ namespace GitSharp
                 FileStream fis = _refFile.OpenRead();
                 try
                 {
-                    byte[] buf = new byte[2048];
+                    var buf = new byte[2048];
                     int r;
                     while ((r = fis.Read(buf, 0, buf.Length)) >= 0)
                         _os.Write(buf, 0, r);
@@ -192,9 +192,10 @@ namespace GitSharp
 
             SaveStatInformation();
             string lockFileName = _lockFile.FullName;
+
             try
             {
-                FileInfo copy = new FileInfo(_lockFile.FullName);
+                var copy = new FileInfo(_lockFile.FullName);
                 _lockFile.MoveTo(_refFile.FullName);
                 _lockFile = copy;
                 return true;
@@ -205,14 +206,13 @@ namespace GitSharp
                 {
                     if (_refFile.Exists) _refFile.Delete();
 
-                    FileInfo copy = new FileInfo(_lockFile.FullName);
+                    var copy = new FileInfo(_lockFile.FullName);
                     _lockFile.MoveTo(_refFile.FullName);
                     _lockFile = copy;
                     return true;
                 }
-                catch (Exception)
+                catch (IOException)
                 {
-
                 }
             }
             finally
@@ -297,7 +297,7 @@ namespace GitSharp
 
 		#region Nested Types
 
-		public class LockFileOutputStream : Stream
+    	private class LockFileOutputStream : Stream
         {
             private readonly LockFile _lockFile;
 
@@ -309,16 +309,6 @@ namespace GitSharp
             public override void Write(byte[] b, int o, int n)
             {
 				_lockFile._os.Write(b, o, n);
-            }
-
-            public void write(byte[] b)
-            {
-				_lockFile._os.Write(b, 0, b.Length);
-            }
-
-            public void write(int b)
-            {
-				_lockFile._os.WriteByte((byte)b);
             }
 
             public override void Flush()
@@ -395,9 +385,9 @@ namespace GitSharp
         /// </summary>
         public class FileLock : IDisposable
         {
-            public FileStream FileStream { get; private set; }
-            public bool Locked { get; private set; }
-            public string File { get; private set; }
+        	private FileStream FileStream { get; set; }
+        	private bool Locked { get; set; }
+        	private string File { get; set; }
 
             private FileLock(FileStream fs, string file)
             {

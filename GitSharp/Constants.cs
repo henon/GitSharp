@@ -567,5 +567,9 @@ namespace GitSharp
         {
             return CHARSET.GetBytes(str);
         }
+
+		public const long TICKS_PER_SECOND = 10000000L;
+    	public const int TICKS_PER_MILLISECOND = 1000000;
+    	public const long TICKS_PER_NANOSECOND = 1000000000L;
     }
 }

@@ -69,26 +69,24 @@ namespace GitSharp.Tests
         [Fact]
         public void testReadOneLine()
         {
-            setupReflog("logs/refs/heads/master", OneLine);
+            SetupReflog("logs/refs/heads/master", OneLine);
 
             var reader = new ReflogReader(db, "refs/heads/master");
             ReflogReader.Entry e = reader.getLastEntry();
 
             Assert.Equal(ObjectId
-                    .FromString("da85355dfc525c9f6f3927b876f379f46ccf826e"), e
-                    .getOldId());
+                    .FromString("da85355dfc525c9f6f3927b876f379f46ccf826e"), e.OldId);
 
             Assert.Equal(ObjectId
-                    .FromString("3e7549db262d1e836d9bf0af7e22355468f1717c"), e
-                    .getNewId());
+                    .FromString("3e7549db262d1e836d9bf0af7e22355468f1717c"), e.NewId);
 
-            Assert.Equal("A O Thor Too", e.getWho().Name);
-            Assert.Equal("authortoo@wri.tr", e.getWho().EmailAddress);
-            Assert.Equal("120", e.getWho().TimeZone.ToString());
-            Assert.Equal("2009-05-22T23:36:40", ToIsoFormatDate(e.getWho()));
+            Assert.Equal("A O Thor Too", e.Who.Name);
+            Assert.Equal("authortoo@wri.tr", e.Who.EmailAddress);
+            Assert.Equal("120", e.Who.TimeZone.ToString());
+            Assert.Equal("2009-05-22T23:36:40", ToIsoFormatDate(e.Who));
 
             Assert.Equal("commit: Add a toString for debugging to RemoteRefUpdate",
-                    e.getComment());
+                    e.Comment);
         }
 
         private static string ToIsoFormatDate(PersonIdent id)
@@ -99,7 +97,7 @@ namespace GitSharp.Tests
         [Fact]
         public void testReadTwoLine()
         {
-            setupReflog("logs/refs/heads/master", TwoLine);
+            SetupReflog("logs/refs/heads/master", TwoLine);
 
             var reader = new ReflogReader(db, "refs/heads/master");
             List<ReflogReader.Entry> reverseEntries = reader.getReverseEntries();
@@ -107,62 +105,56 @@ namespace GitSharp.Tests
             ReflogReader.Entry e = reverseEntries[0];
 
             Assert.Equal(ObjectId
-                    .FromString("c6734895958052a9dbc396cff4459dc1a25029ab"), e
-                    .getOldId());
+                    .FromString("c6734895958052a9dbc396cff4459dc1a25029ab"), e.OldId);
 
             Assert.Equal(ObjectId
-                    .FromString("54794942a18a237c57a80719afed44bb78172b10"), e
-                    .getNewId());
+                    .FromString("54794942a18a237c57a80719afed44bb78172b10"), e.NewId);
 
-            Assert.Equal("Same A U Thor", e.getWho().Name);
-            Assert.Equal("same.author@example.com", e.getWho().EmailAddress);
-            Assert.Equal("60", e.getWho().TimeZone.ToString());
-            Assert.Equal("2009-05-22T22:36:42", ToIsoFormatDate(e.getWho()));
+            Assert.Equal("Same A U Thor", e.Who.Name);
+            Assert.Equal("same.author@example.com", e.Who.EmailAddress);
+            Assert.Equal("60", e.Who.TimeZone.ToString());
+            Assert.Equal("2009-05-22T22:36:42", ToIsoFormatDate(e.Who));
             Assert.Equal(
                     "rebase finished: refs/heads/rr/renamebranch5 onto c6e3b9fe2da0293f11eae202ec35fb343191a82d",
-                    e.getComment());
+                    e.Comment);
 
             e = reverseEntries[1];
 
             Assert.Equal(ObjectId
-                    .FromString("0000000000000000000000000000000000000000"), e
-                    .getOldId());
+                    .FromString("0000000000000000000000000000000000000000"), e.OldId);
 
             Assert.Equal(ObjectId
-                    .FromString("c6734895958052a9dbc396cff4459dc1a25029ab"), e
-                    .getNewId());
+                    .FromString("c6734895958052a9dbc396cff4459dc1a25029ab"), e.NewId);
 
-            Assert.Equal("A U Thor", e.getWho().Name);
-            Assert.Equal("thor@committer.au", e.getWho().EmailAddress);
-            Assert.Equal("-60", e.getWho().TimeZone.ToString());
-            Assert.Equal("2009-05-22T20:36:41", ToIsoFormatDate(e.getWho()));
-            Assert.Equal("branch: Created from rr/renamebranchv4", e.getComment());
+            Assert.Equal("A U Thor", e.Who.Name);
+            Assert.Equal("thor@committer.au", e.Who.EmailAddress);
+            Assert.Equal("-60", e.Who.TimeZone.ToString());
+            Assert.Equal("2009-05-22T20:36:41", ToIsoFormatDate(e.Who));
+            Assert.Equal("branch: Created from rr/renamebranchv4", e.Comment);
         }
 
         [Fact]
         public void testReadWhileAppendIsInProgress()
         {
-            setupReflog("logs/refs/heads/master", TwoLineWithAppendInProgress);
+            SetupReflog("logs/refs/heads/master", TwoLineWithAppendInProgress);
             var reader = new ReflogReader(db, "refs/heads/master");
             List<ReflogReader.Entry> reverseEntries = reader.getReverseEntries();
             Assert.Equal(2, reverseEntries.Count);
             ReflogReader.Entry e = reverseEntries[0];
 
             Assert.Equal(ObjectId
-                    .FromString("c6734895958052a9dbc396cff4459dc1a25029ab"), e
-                    .getOldId());
+                    .FromString("c6734895958052a9dbc396cff4459dc1a25029ab"), e.OldId);
 
             Assert.Equal(ObjectId
-                    .FromString("54794942a18a237c57a80719afed44bb78172b10"), e
-                    .getNewId());
+                    .FromString("54794942a18a237c57a80719afed44bb78172b10"), e.NewId);
 
-            Assert.Equal("Same A U Thor", e.getWho().Name);
-            Assert.Equal("same.author@example.com", e.getWho().EmailAddress);
-            Assert.Equal("60", e.getWho().TimeZone.ToString());
-            Assert.Equal("2009-05-22T22:36:42", ToIsoFormatDate(e.getWho()));
+            Assert.Equal("Same A U Thor", e.Who.Name);
+            Assert.Equal("same.author@example.com", e.Who.EmailAddress);
+            Assert.Equal("60", e.Who.TimeZone.ToString());
+            Assert.Equal("2009-05-22T22:36:42", ToIsoFormatDate(e.Who));
             Assert.Equal(
                     "rebase finished: refs/heads/rr/renamebranch5 onto c6e3b9fe2da0293f11eae202ec35fb343191a82d",
-                    e.getComment());
+                    e.Comment);
 
             // while similar to testReadTwoLine, we can assume that if we get the last entry
             // right, everything else is too
@@ -171,15 +163,15 @@ namespace GitSharp.Tests
         [Fact]
         public void testReadRightLog()
         {
-            setupReflog("logs/refs/heads/a", ALine);
-            setupReflog("logs/refs/heads/master", MasterLine);
-            setupReflog("logs/HEAD", HeadLine);
+            SetupReflog("logs/refs/heads/a", ALine);
+            SetupReflog("logs/refs/heads/master", MasterLine);
+            SetupReflog("logs/HEAD", HeadLine);
             Assert.Equal("branch: change to master", db.ReflogReader("master")
-                    .getLastEntry().getComment());
+                                                     	.getLastEntry().Comment);
             Assert.Equal("branch: change to a", db.ReflogReader("a")
-                    .getLastEntry().getComment());
+                                                	.getLastEntry().Comment);
             Assert.Equal("branch: change to HEAD", db.ReflogReader("HEAD")
-                    .getLastEntry().getComment());
+                                                   	.getLastEntry().Comment);
         }
 
         [Fact]

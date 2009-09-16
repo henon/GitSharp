@@ -38,11 +38,11 @@
 using System;
 using System.IO;
 using GitSharp.Exceptions;
-using NUnit.Framework;
+using GitSharp.Tests.Util;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-	[TestFixture]
 	public class PackReverseIndexTest : RepositoryTestCase
 	{
 		private PackIndex _idx;
@@ -51,13 +51,13 @@ namespace GitSharp.Tests
 		///	<summary>
 		/// Set up tested class instance, test constructor by the way.
 		/// </summary>
-		public override void setUp()
+		protected override void SetUp()
 		{
-			base.setUp();
+			base.SetUp();
 
 			// index with both small (< 2^31) and big offsets
 			var fi = new FileInfo("Resources/pack-huge.idx");
-			Assert.IsTrue(fi.Exists, "Does the index exist");
+			Assert.True(fi.Exists, "Does the index exist");
 			_idx = PackIndex.Open(fi);
 			_reverseIdx = new PackReverseIndex(_idx);
 		}
@@ -65,45 +65,45 @@ namespace GitSharp.Tests
 		///	<summary>
 		/// Test findObject() for all index entries.
 		/// </summary>
-		[Test]
+		[Fact]
 		public void testFindObject()
 		{
 			foreach (PackIndex.MutableEntry me in _idx)
 			{
-				Assert.AreEqual(me.ToObjectId(), _reverseIdx.FindObject(me.Offset));
+				Assert.Equal(me.ToObjectId(), _reverseIdx.FindObject(me.Offset));
 			}
 		}
 
 		///	<summary>
 		/// Test findObject() with illegal argument.
 		/// </summary>
-		[Test]
+		[Fact]
 		public void testFindObjectWrongOffset()
 		{
-			Assert.IsNull(_reverseIdx.FindObject(0));
+			Assert.Null(_reverseIdx.FindObject(0));
 		}
 
 		///	<summary>
 		/// Test findNextOffset() for all index entries.
 		///	</summary>
-		[Test]
+		[Fact]
 		public void testFindNextOffset()
 		{
 			long offset = FindFirstOffset();
-			Assert.IsTrue(offset > 0);
+			Assert.True(offset > 0);
 
 			for (int i = 0; i < _idx.ObjectCount; i++)
 			{
 				long newOffset = _reverseIdx.FindNextOffset(offset, long.MaxValue);
-				Assert.IsTrue(newOffset > offset);
+				Assert.True(newOffset > offset);
 
 				if (i == _idx.ObjectCount - 1)
 				{
-					Assert.AreEqual(newOffset, long.MaxValue);
+					Assert.Equal(newOffset, long.MaxValue);
 				}
 				else
 				{
-					Assert.AreEqual(newOffset, _idx.FindOffset(_reverseIdx.FindObject(newOffset)));
+					Assert.Equal(newOffset, _idx.FindOffset(_reverseIdx.FindObject(newOffset)));
 				}
 
 				offset = newOffset;
@@ -113,10 +113,10 @@ namespace GitSharp.Tests
 		///	<summary>
 		/// Test findNextOffset() with wrong illegal argument as offset.
 		/// </summary>
-		[Test]
+		[Fact]
 		public void testFindNextOffsetWrongOffset()
 		{
-			AssertHelper.Throws<CorruptObjectException>(() => _reverseIdx.FindNextOffset(0, long.MaxValue));
+			Assert.Throws<CorruptObjectException>(() => _reverseIdx.FindNextOffset(0, long.MaxValue));
 		}
 
 		private long FindFirstOffset()

@@ -40,16 +40,14 @@
 using System.IO;
 using GitSharp.DirectoryCache;
 using GitSharp.Merge;
-using NUnit.Framework;
-
-using System;
+using GitSharp.Tests.Util;
+using Xunit;
 
 namespace GitSharp.Tests.Merge
 {
-	[TestFixture]
 	public class CherryPickTest : RepositoryTestCase
 	{
-		[Test]
+		[Fact]
 		public void TestPick()
 		{
 			// B---O
@@ -62,28 +60,27 @@ namespace GitSharp.Tests.Merge
 			DirCache treeO = DirCache.read(db);
 			DirCache treeP = DirCache.read(db);
 			DirCache treeT = DirCache.read(db);
-			{
-				DirCacheBuilder b = treeB.builder();
-				DirCacheBuilder o = treeO.builder();
-				DirCacheBuilder p = treeP.builder();
-				DirCacheBuilder t = treeT.builder();
 
-				b.add(MakeEntry("a", FileMode.RegularFile));
+			DirCacheBuilder b = treeB.builder();
+			DirCacheBuilder o = treeO.builder();
+			DirCacheBuilder p = treeP.builder();
+			DirCacheBuilder t = treeT.builder();
 
-				o.add(MakeEntry("a", FileMode.RegularFile));
-				o.add(MakeEntry("o", FileMode.RegularFile));
+			b.add(MakeEntry("a", FileMode.RegularFile));
 
-				p.add(MakeEntry("a", FileMode.RegularFile, "q"));
-				p.add(MakeEntry("p-fail", FileMode.RegularFile));
+			o.add(MakeEntry("a", FileMode.RegularFile));
+			o.add(MakeEntry("o", FileMode.RegularFile));
 
-				t.add(MakeEntry("a", FileMode.RegularFile));
-				t.add(MakeEntry("t", FileMode.RegularFile));
+			p.add(MakeEntry("a", FileMode.RegularFile, "q"));
+			p.add(MakeEntry("p-fail", FileMode.RegularFile));
 
-				b.finish();
-				o.finish();
-				p.finish();
-				t.finish();
-			}
+			t.add(MakeEntry("a", FileMode.RegularFile));
+			t.add(MakeEntry("t", FileMode.RegularFile));
+
+			b.finish();
+			o.finish();
+			p.finish();
+			t.finish();
 
 			var ow = new ObjectWriter(db);
 			ObjectId B = Commit(ow, treeB, new ObjectId[] { });
@@ -94,29 +91,29 @@ namespace GitSharp.Tests.Merge
 			var twm = (ThreeWayMerger)MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			twm.SetBase(P);
 			bool merge = twm.Merge(new[] { O, T });
-			Assert.IsTrue(merge);
+			Assert.True(merge);
 
 			var tw = new GitSharp.TreeWalk.TreeWalk(db) { Recursive = true };
 			tw.reset(twm.GetResultTreeId());
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("a", tw.getPathString());
+			Assert.True(tw.next());
+			Assert.Equal("a", tw.getPathString());
 			AssertCorrectId(treeO, tw);
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("o", tw.getPathString());
+			Assert.True(tw.next());
+			Assert.Equal("o", tw.getPathString());
 			AssertCorrectId(treeO, tw);
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("t", tw.getPathString());
+			Assert.True(tw.next());
+			Assert.Equal("t", tw.getPathString());
 			AssertCorrectId(treeT, tw);
 
-			Assert.IsFalse(tw.next());
+			Assert.False(tw.next());
 		}
 
 		private static void AssertCorrectId(DirCache treeT, GitSharp.TreeWalk.TreeWalk tw)
 		{
-			Assert.AreEqual(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
+			Assert.Equal(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
 		}
 
 		private ObjectId Commit(ObjectWriter ow, DirCache treeB, ObjectId[] parentIds)

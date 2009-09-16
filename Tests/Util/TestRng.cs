@@ -36,40 +36,38 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace GitSharp.Tests.Util
 {
-
-    /** Toy RNG to ensure we get predictable numbers during unit tests. */
+    /// <summary>
+	/// Toy RNG to ensure we get predictable numbers during unit tests.
+    /// </summary>
     public class TestRng
     {
-        private int next;
+        private int _next;
 
         public TestRng(string seed)
         {
-            next = 0;
+            _next = 0;
             for (int i = 0; i < seed.Length; i++)
-                next = next * 11 + (byte)(seed[i]);
+            {
+            	_next = _next * 11 + (byte)(seed[i]);
+            }
         }
 
         public byte[] nextBytes(int cnt)
         {
-            byte[] r = new byte[cnt];
+            var r = new byte[cnt];
             for (int i = 0; i < cnt; i++)
-                r[i] = (byte)nextInt();
+            {
+            	r[i] = (byte)NextInt();
+            }
             return r;
         }
 
-        public int nextInt()
+        public int NextInt()
         {
-            next = next * 1103515245 + 12345;
-            return next;
+            _next = _next * 1103515245 + 12345;
+            return _next;
         }
     }
-
 }

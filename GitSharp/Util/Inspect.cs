@@ -35,9 +35,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 
@@ -45,15 +42,16 @@ namespace GitSharp.Util
 {
     public class Inspector
     {
-        Repository db;
+    	private readonly Repository _db;
+
         public Inspector(Repository db)
         {
-            this.db = db;
+            _db = db;
         }
 
         public string Inspect(ObjectId id)
         {
-            return Inspect(db.ToFile(id).FullName, id);
+            return Inspect(_db.ToFile(id).FullName, id);
         }
 
         public static string Inspect(string path, string id)
@@ -61,23 +59,22 @@ namespace GitSharp.Util
             return Inspect(path + "/" + id, ObjectId.FromString(id));
         }
 
-        private static string Inspect(string filename, ObjectId id)
+        private static string Inspect(string filename, AnyObjectId id)
         {
             return Encoding.ASCII.GetString(new UnpackedObjectLoader(new FileInfo(filename), id).Bytes);
         }
 
         public Stream ContentStream(ObjectId id)
         {
-            return ContentStream(db.ToFile(id).FullName, id);
+            return ContentStream(_db.ToFile(id).FullName, id);
         }
 
         public static Stream ContentStream(string path, string id)
         {
             return ContentStream(path + "/" + id, ObjectId.FromString(id));
-
         }
 
-        private static Stream ContentStream(string filename, ObjectId id)
+        private static Stream ContentStream(string filename, AnyObjectId id)
         {
             return new MemoryStream(new UnpackedObjectLoader(new FileInfo(filename), id).Bytes);
         }

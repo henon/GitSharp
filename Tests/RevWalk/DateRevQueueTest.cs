@@ -35,36 +35,34 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Tests.Util;
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public class DateRevQueueTest : RevQueueTestCase<DateRevQueue>
     {
-        protected override DateRevQueue create()
+        protected override DateRevQueue Create()
         {
             return new DateRevQueue();
         }
 
-        [Test]
+        [Fact]
         public override void testEmpty()
         {
             base.testEmpty();
-            Assert.IsNull(q.peek());
-            Assert.AreEqual(Generator.GeneratorOutputType.SortCommitTimeDesc, q.OutputType);
+            Assert.Null(q.peek());
+            Assert.Equal(Generator.GeneratorOutputType.SortCommitTimeDesc, q.OutputType);
         }
 
-        [Test]
+        [Fact]
         public void testCloneEmpty()
         {
             q = new DateRevQueue(AbstractRevQueue.EmptyQueue);
-            Assert.IsNull(q.next());
+            Assert.Null(q.next());
         }
 
-        [Test]
+        [Fact]
         public void testInsertOutOfOrder()
         {
             RevCommit a = Parse(Commit());
@@ -81,35 +79,35 @@ namespace GitSharp.Tests.RevWalk
             AssertCommit(b, q.next());
             AssertCommit(a, q.next());
             AssertCommit(c2, q.next());
-            Assert.IsNull(q.next());
+            Assert.Null(q.next());
         }
 
-        [Test]
+        [Fact]
         public void testInsertTie()
         {
             RevCommit a = Parse(Commit());
             RevCommit b = Parse(Commit(0, a));
             {
-                q = create();
+                q = Create();
                 q.add(a);
                 q.add(b);
 
                 AssertCommit(a, q.next());
                 AssertCommit(b, q.next());
-                Assert.IsNull(q.next());
+                Assert.Null(q.next());
             }
             {
-                q = create();
+                q = Create();
                 q.add(b);
                 q.add(a);
 
                 AssertCommit(b, q.next());
                 AssertCommit(a, q.next());
-                Assert.IsNull(q.next());
+                Assert.Null(q.next());
             }
         }
 
-        [Test]
+        [Fact]
         public void testCloneFIFO()
         {
             RevCommit a = Parse(Commit());
@@ -122,15 +120,15 @@ namespace GitSharp.Tests.RevWalk
             src.add(c);
 
             q = new DateRevQueue(src);
-            Assert.IsFalse(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-            Assert.IsFalse(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+            Assert.False(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+            Assert.False(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
             AssertCommit(c, q.peek());
             AssertCommit(c, q.peek());
 
             AssertCommit(c, q.next());
             AssertCommit(b, q.next());
             AssertCommit(a, q.next());
-            Assert.IsNull(q.next());
+            Assert.Null(q.next());
         }
     }
 }

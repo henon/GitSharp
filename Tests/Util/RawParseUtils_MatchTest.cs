@@ -37,44 +37,43 @@
  */
 
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Util
 {
-    [TestFixture]
-    public class RawParseUtils_MatchTest
-    {
-        [Test]
-	    public void testMatch_Equal()
-        {
-		    byte[] src = Constants.encodeASCII(" differ\n");
-		    byte[] dst = Constants.encodeASCII("foo differ\n");
-		    Assert.IsTrue(RawParseUtils.match(dst, 3, src) == 3 + src.Length);
-	    }
+	public class RawParseUtils_MatchTest
+	{
+		[Fact]
+		public void testMatch_Equal()
+		{
+			byte[] src = Constants.encodeASCII(" differ\n");
+			byte[] dst = Constants.encodeASCII("foo differ\n");
+			Assert.True(RawParseUtils.match(dst, 3, src) == 3 + src.Length);
+		}
 
-        [Test]
-	    public void testMatch_NotEqual()
-        {
-		    byte[] src = Constants.encodeASCII(" differ\n");
-		    byte[] dst = Constants.encodeASCII("a differ\n");
-		    Assert.IsTrue(RawParseUtils.match(dst, 2, src) < 0);
-	    }
+		[Fact]
+		public void testMatch_NotEqual()
+		{
+			byte[] src = Constants.encodeASCII(" differ\n");
+			byte[] dst = Constants.encodeASCII("a differ\n");
+			Assert.True(RawParseUtils.match(dst, 2, src) < 0);
+		}
 
-        [Test]
-	    public void testMatch_Prefix()
-        {
-		    byte[] src = Constants.encodeASCII("author ");
-		    byte[] dst = Constants.encodeASCII("author A. U. Thor");
-            Assert.IsTrue(RawParseUtils.match(dst, 0, src) == src.Length);
-            Assert.IsTrue(RawParseUtils.match(dst, 1, src) < 0);
-	    }
+		[Fact]
+		public void testMatch_Prefix()
+		{
+			byte[] src = Constants.encodeASCII("author ");
+			byte[] dst = Constants.encodeASCII("author A. U. Thor");
+			Assert.True(RawParseUtils.match(dst, 0, src) == src.Length);
+			Assert.True(RawParseUtils.match(dst, 1, src) < 0);
+		}
 
-        [Test]
-	    public void testMatch_TooSmall()
-        {
-		    byte[] src = Constants.encodeASCII("author ");
-		    byte[] dst = Constants.encodeASCII("author autho");
-		    Assert.IsTrue(RawParseUtils.match(dst, src.Length + 1, src) < 0);
-	    }
-    }
+		[Fact]
+		public void testMatch_TooSmall()
+		{
+			byte[] src = Constants.encodeASCII("author ");
+			byte[] dst = Constants.encodeASCII("author autho");
+			Assert.True(RawParseUtils.match(dst, src.Length + 1, src) < 0);
+		}
+	}
 }

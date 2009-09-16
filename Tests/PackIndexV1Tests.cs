@@ -39,11 +39,10 @@
 using System;
 using System.IO;
 using GitSharp.Tests.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class PackIndexV1Test : PackIndexTestCase
     {
     	protected override FileInfo GetFileForPack34Be9032()
@@ -59,11 +58,11 @@ namespace GitSharp.Tests
         /// <summary>
 		/// Verify CRC32 - V1 should not index anything.
         /// </summary>
-        [Test]
-        public override void testCRC32()
+        [Fact]
+        public override void TestCrc32()
         {
-        	AssertHelper.Throws<NotSupportedException>(() => 
-				smallIdx.FindCRC32(ObjectId.FromString("4b825dc642cb6eb9a060e54bf8d69288fbee4904")));
+        	Assert.Throws<NotSupportedException>(() => 
+				SmallIdx.FindCRC32(ObjectId.FromString("4b825dc642cb6eb9a060e54bf8d69288fbee4904")));
         }
     }
 }

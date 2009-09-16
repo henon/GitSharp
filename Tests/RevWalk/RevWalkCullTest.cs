@@ -36,14 +36,13 @@
  */
 
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public class RevWalkCullTest : RevWalkTestCase
     {
-        [Test]
+        [Fact]
         public void testProperlyCullAllAncestors1()
         {
             // Credit goes to Junio C Hamano <gitster@pobox.com> for this
@@ -58,10 +57,10 @@ namespace GitSharp.Tests.RevWalk
 
             MarkStart(a);
             MarkUninteresting(d);
-            Assert.IsNull(rw.next());
+            Assert.Null(Rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testProperlyCullAllAncestors2()
         {
             // Despite clock skew on c1 being very old it should not
@@ -75,12 +74,12 @@ namespace GitSharp.Tests.RevWalk
 
             MarkStart(d);
             MarkUninteresting(c1);
-            AssertCommit(d, rw.next());
-            AssertCommit(c2, rw.next());
-            Assert.IsNull(rw.next());
+            AssertCommit(d, Rw.next());
+            AssertCommit(c2, Rw.next());
+            Assert.Null(Rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testProperlyCullAllAncestors_LongHistory()
         {
             RevCommit a = Commit();
@@ -89,19 +88,21 @@ namespace GitSharp.Tests.RevWalk
             {
                 b = Commit(b);
                 if ((i & 2) == 0)
-                    MarkUninteresting(b);
+                {
+                	MarkUninteresting(b);
+                }
             }
             RevCommit c = Commit(b);
 
             MarkStart(c);
             MarkUninteresting(b);
-            AssertCommit(c, rw.next());
-            Assert.IsNull(rw.next());
+            AssertCommit(c, Rw.next());
+            Assert.Null(Rw.next());
 
             // We should have aborted before we got back so far that "a"
             // would be parsed. Thus, its parents shouldn't be allocated.
             //
-            Assert.IsNull(a.Parents);
+            Assert.Null(a.Parents);
         }
     }
 }

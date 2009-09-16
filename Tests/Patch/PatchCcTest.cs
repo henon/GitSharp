@@ -37,153 +37,152 @@
 
 using GitSharp.Patch;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Patch
 {
-	[TestFixture]
 	public class PatchCcTest : BasePatchTest
 	{
-		[Test]
+		[Fact]
 		public void testParse_OneFileCc()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_OneFileCc.patch");
-			Assert.AreEqual(1, p.getFiles().Count);
-			Assert.IsTrue(p.getErrors().isEmpty());
+			Assert.Equal(1, p.getFiles().Count);
+			Assert.True(p.getErrors().isEmpty());
 
 			var cfh = (CombinedFileHeader)p.getFiles()[0];
 
-			Assert.AreEqual("org.spearce.egit.ui/src/org/spearce/egit/ui/UIText.java", cfh.NewName);
-			Assert.AreEqual(cfh.NewName, cfh.OldName);
+			Assert.Equal("org.spearce.egit.ui/src/org/spearce/egit/ui/UIText.java", cfh.NewName);
+			Assert.Equal(cfh.NewName, cfh.OldName);
 
-			Assert.AreEqual(98, cfh.StartOffset);
+			Assert.Equal(98, cfh.StartOffset);
 
-			Assert.AreEqual(2, cfh.ParentCount);
-			Assert.AreSame(cfh.getOldId(0), cfh.getOldId());
-			Assert.AreEqual("169356b", cfh.getOldId(0).name());
-			Assert.AreEqual("dd8c317", cfh.getOldId(1).name());
-			Assert.AreEqual("fd85931", cfh.getNewId().name());
+			Assert.Equal(2, cfh.ParentCount);
+			Assert.Same(cfh.getOldId(0), cfh.getOldId());
+			Assert.Equal("169356b", cfh.getOldId(0).name());
+			Assert.Equal("dd8c317", cfh.getOldId(1).name());
+			Assert.Equal("fd85931", cfh.getNewId().name());
 
-			Assert.AreEqual(cfh.getOldMode(0), cfh.GetOldMode());
-			Assert.AreEqual(FileMode.RegularFile, cfh.getOldMode(0));
-			Assert.AreEqual(FileMode.RegularFile, cfh.getOldMode(1));
-			Assert.AreEqual(FileMode.ExecutableFile, cfh.NewMode);
-			Assert.AreEqual(FileHeader.ChangeTypeEnum.MODIFY, cfh.getChangeType());
-			Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, cfh.getPatchType());
+			Assert.Equal(cfh.getOldMode(0), cfh.GetOldMode());
+			Assert.Equal(FileMode.RegularFile, cfh.getOldMode(0));
+			Assert.Equal(FileMode.RegularFile, cfh.getOldMode(1));
+			Assert.Equal(FileMode.ExecutableFile, cfh.NewMode);
+			Assert.Equal(FileHeader.ChangeTypeEnum.MODIFY, cfh.getChangeType());
+			Assert.Equal(FileHeader.PatchTypeEnum.UNIFIED, cfh.getPatchType());
 
-			Assert.AreEqual(1, cfh.Hunks.Count);
+			Assert.Equal(1, cfh.Hunks.Count);
 			{
 				var h = (CombinedHunkHeader)cfh.Hunks[0];
 
-				Assert.AreSame(cfh, h.File);
-				Assert.AreEqual(346, h.StartOffset);
-				Assert.AreEqual(764, h.EndOffset);
+				Assert.Same(cfh, h.File);
+				Assert.Equal(346, h.StartOffset);
+				Assert.Equal(764, h.EndOffset);
 
-				Assert.AreSame(h.GetOldImage(0), h.OldImage);
-				Assert.AreSame(cfh.getOldId(0), h.GetOldImage(0).Id);
-				Assert.AreSame(cfh.getOldId(1), h.GetOldImage(1).Id);
+				Assert.Same(h.GetOldImage(0), h.OldImage);
+				Assert.Same(cfh.getOldId(0), h.GetOldImage(0).Id);
+				Assert.Same(cfh.getOldId(1), h.GetOldImage(1).Id);
 
-				Assert.AreEqual(55, h.GetOldImage(0).StartLine);
-				Assert.AreEqual(12, h.GetOldImage(0).LineCount);
-				Assert.AreEqual(3, h.GetOldImage(0).LinesAdded);
-				Assert.AreEqual(0, h.GetOldImage(0).LinesDeleted);
+				Assert.Equal(55, h.GetOldImage(0).StartLine);
+				Assert.Equal(12, h.GetOldImage(0).LineCount);
+				Assert.Equal(3, h.GetOldImage(0).LinesAdded);
+				Assert.Equal(0, h.GetOldImage(0).LinesDeleted);
 
-				Assert.AreEqual(163, h.GetOldImage(1).StartLine);
-				Assert.AreEqual(13, h.GetOldImage(1).LineCount);
-				Assert.AreEqual(2, h.GetOldImage(1).LinesAdded);
-				Assert.AreEqual(0, h.GetOldImage(1).LinesDeleted);
+				Assert.Equal(163, h.GetOldImage(1).StartLine);
+				Assert.Equal(13, h.GetOldImage(1).LineCount);
+				Assert.Equal(2, h.GetOldImage(1).LinesAdded);
+				Assert.Equal(0, h.GetOldImage(1).LinesDeleted);
 
-				Assert.AreEqual(163, h.NewStartLine);
-				Assert.AreEqual(15, h.NewLineCount);
+				Assert.Equal(163, h.NewStartLine);
+				Assert.Equal(15, h.NewLineCount);
 
-				Assert.AreEqual(10, h.LinesContext);
+				Assert.Equal(10, h.LinesContext);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testParse_CcNewFile()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_CcNewFile.patch");
-			Assert.AreEqual(1, p.getFiles().Count);
-			Assert.IsTrue(p.getErrors().isEmpty());
+			Assert.Equal(1, p.getFiles().Count);
+			Assert.True(p.getErrors().isEmpty());
 
 			var cfh = (CombinedFileHeader)p.getFiles()[0];
 
-			Assert.AreSame(FileHeader.DEV_NULL, cfh.OldName);
-			Assert.AreEqual("d", cfh.NewName);
+			Assert.Same(FileHeader.DEV_NULL, cfh.OldName);
+			Assert.Equal("d", cfh.NewName);
 
-			Assert.AreEqual(187, cfh.StartOffset);
+			Assert.Equal(187, cfh.StartOffset);
 
-			Assert.AreEqual(2, cfh.ParentCount);
-			Assert.AreSame(cfh.getOldId(0), cfh.getOldId());
-			Assert.AreEqual("0000000", cfh.getOldId(0).name());
-			Assert.AreEqual("0000000", cfh.getOldId(1).name());
-			Assert.AreEqual("4bcfe98", cfh.getNewId().name());
+			Assert.Equal(2, cfh.ParentCount);
+			Assert.Same(cfh.getOldId(0), cfh.getOldId());
+			Assert.Equal("0000000", cfh.getOldId(0).name());
+			Assert.Equal("0000000", cfh.getOldId(1).name());
+			Assert.Equal("4bcfe98", cfh.getNewId().name());
 
-			Assert.AreSame(cfh.getOldMode(0), cfh.GetOldMode());
-			Assert.AreSame(FileMode.Missing, cfh.getOldMode(0));
-			Assert.AreSame(FileMode.Missing, cfh.getOldMode(1));
-			Assert.AreSame(FileMode.RegularFile, cfh.NewMode);
-			Assert.AreEqual(FileHeader.ChangeTypeEnum.ADD, cfh.getChangeType());
-			Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, cfh.getPatchType());
+			Assert.Same(cfh.getOldMode(0), cfh.GetOldMode());
+			Assert.Same(FileMode.Missing, cfh.getOldMode(0));
+			Assert.Same(FileMode.Missing, cfh.getOldMode(1));
+			Assert.Same(FileMode.RegularFile, cfh.NewMode);
+			Assert.Equal(FileHeader.ChangeTypeEnum.ADD, cfh.getChangeType());
+			Assert.Equal(FileHeader.PatchTypeEnum.UNIFIED, cfh.getPatchType());
 
-			Assert.AreEqual(1, cfh.Hunks.Count);
+			Assert.Equal(1, cfh.Hunks.Count);
 			{
 				var h = (CombinedHunkHeader)cfh.Hunks[0];
 
-				Assert.AreSame(cfh, h.File);
-				Assert.AreEqual(273, h.StartOffset);
-				Assert.AreEqual(300, h.EndOffset);
+				Assert.Same(cfh, h.File);
+				Assert.Equal(273, h.StartOffset);
+				Assert.Equal(300, h.EndOffset);
 
-				Assert.AreSame(h.GetOldImage(0), h.OldImage);
-				Assert.AreSame(cfh.getOldId(0), h.GetOldImage(0).Id);
-				Assert.AreSame(cfh.getOldId(1), h.GetOldImage(1).Id);
+				Assert.Same(h.GetOldImage(0), h.OldImage);
+				Assert.Same(cfh.getOldId(0), h.GetOldImage(0).Id);
+				Assert.Same(cfh.getOldId(1), h.GetOldImage(1).Id);
 
-				Assert.AreEqual(1, h.GetOldImage(0).StartLine);
-				Assert.AreEqual(0, h.GetOldImage(0).LineCount);
-				Assert.AreEqual(1, h.GetOldImage(0).LinesAdded);
-				Assert.AreEqual(0, h.GetOldImage(0).LinesDeleted);
+				Assert.Equal(1, h.GetOldImage(0).StartLine);
+				Assert.Equal(0, h.GetOldImage(0).LineCount);
+				Assert.Equal(1, h.GetOldImage(0).LinesAdded);
+				Assert.Equal(0, h.GetOldImage(0).LinesDeleted);
 
-				Assert.AreEqual(1, h.GetOldImage(1).StartLine);
-				Assert.AreEqual(0, h.GetOldImage(1).LineCount);
-				Assert.AreEqual(1, h.GetOldImage(1).LinesAdded);
-				Assert.AreEqual(0, h.GetOldImage(1).LinesDeleted);
+				Assert.Equal(1, h.GetOldImage(1).StartLine);
+				Assert.Equal(0, h.GetOldImage(1).LineCount);
+				Assert.Equal(1, h.GetOldImage(1).LinesAdded);
+				Assert.Equal(0, h.GetOldImage(1).LinesDeleted);
 
-				Assert.AreEqual(1, h.NewStartLine);
-				Assert.AreEqual(1, h.NewLineCount);
+				Assert.Equal(1, h.NewStartLine);
+				Assert.Equal(1, h.NewLineCount);
 
-				Assert.AreEqual(0, h.LinesContext);
+				Assert.Equal(0, h.LinesContext);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testParse_CcDeleteFile()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_CcDeleteFile.patch");
-			Assert.AreEqual(1, p.getFiles().Count);
-			Assert.IsTrue(p.getErrors().isEmpty());
+			Assert.Equal(1, p.getFiles().Count);
+			Assert.True(p.getErrors().isEmpty());
 
 			var cfh = (CombinedFileHeader)p.getFiles()[0];
 
-			Assert.AreEqual("a", cfh.OldName);
-			Assert.AreSame(FileHeader.DEV_NULL, cfh.NewName);
+			Assert.Equal("a", cfh.OldName);
+			Assert.Same(FileHeader.DEV_NULL, cfh.NewName);
 
-			Assert.AreEqual(187, cfh.StartOffset);
+			Assert.Equal(187, cfh.StartOffset);
 
-			Assert.AreEqual(2, cfh.ParentCount);
-			Assert.AreSame(cfh.getOldId(0), cfh.getOldId());
-			Assert.AreEqual("7898192", cfh.getOldId(0).name());
-			Assert.AreEqual("2e65efe", cfh.getOldId(1).name());
-			Assert.AreEqual("0000000", cfh.getNewId().name());
+			Assert.Equal(2, cfh.ParentCount);
+			Assert.Same(cfh.getOldId(0), cfh.getOldId());
+			Assert.Equal("7898192", cfh.getOldId(0).name());
+			Assert.Equal("2e65efe", cfh.getOldId(1).name());
+			Assert.Equal("0000000", cfh.getNewId().name());
 
-			Assert.AreSame(cfh.getOldMode(0), cfh.GetOldMode());
-			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(0));
-			Assert.AreSame(FileMode.RegularFile, cfh.getOldMode(1));
-			Assert.AreSame(FileMode.Missing, cfh.NewMode);
-			Assert.AreEqual(FileHeader.ChangeTypeEnum.DELETE, cfh.getChangeType());
-			Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, cfh.getPatchType());
+			Assert.Same(cfh.getOldMode(0), cfh.GetOldMode());
+			Assert.Same(FileMode.RegularFile, cfh.getOldMode(0));
+			Assert.Same(FileMode.RegularFile, cfh.getOldMode(1));
+			Assert.Same(FileMode.Missing, cfh.NewMode);
+			Assert.Equal(FileHeader.ChangeTypeEnum.DELETE, cfh.getChangeType());
+			Assert.Equal(FileHeader.PatchTypeEnum.UNIFIED, cfh.getPatchType());
 
-			Assert.IsTrue(cfh.Hunks.isEmpty());
+			Assert.True(cfh.Hunks.isEmpty());
 		}
 	}
 }

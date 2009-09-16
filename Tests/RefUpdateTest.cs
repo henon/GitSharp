@@ -35,64 +35,63 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Collections.Generic;
 using System.IO;
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using GitSharp.Tests.Util;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-	[TestFixture]
 	public class RefUpdateTest : RepositoryTestCase
 	{
-		private RefUpdate updateRef(string name)
+		private RefUpdate UpdateRef(string name)
 		{
 			RefUpdate @ref = db.UpdateRef(name);
 			@ref.NewObjectId = db.Resolve(Constants.HEAD);
 			return @ref;
 		}
 
-		private void delete(RefUpdate @ref, RefUpdate.RefUpdateResult expected)
+		private void Delete(RefUpdate @ref, RefUpdate.RefUpdateResult expected)
 		{
-			delete(@ref, expected, true, true);
+			Delete(@ref, expected, true, true);
 		}
 
-		private void delete(RefUpdate @ref, RefUpdate.RefUpdateResult expected, bool exists, bool removed)
+		private void Delete(RefUpdate @ref, RefUpdate.RefUpdateResult expected, bool exists, bool removed)
 		{
-			Assert.AreEqual(exists, db.getRef(@ref.Name) != null);
-			Assert.AreEqual(expected, @ref.Delete());
-			Assert.AreEqual(!removed, db.getRef(@ref.Name) != null);
+			Assert.Equal(exists, db.getRef(@ref.Name) != null);
+			Assert.Equal(expected, @ref.Delete());
+			Assert.Equal(!removed, db.getRef(@ref.Name) != null);
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testDeleteFastForward()
 		{
-			RefUpdate @ref = updateRef("refs/heads/a");
-			delete(@ref, RefUpdate.RefUpdateResult.FastForward);
+			RefUpdate @ref = UpdateRef("refs/heads/a");
+			Delete(@ref, RefUpdate.RefUpdateResult.FastForward);
 		}
 
-		[Test]
+		[Fact]
 		public void testDeleteForce()
 		{
 			RefUpdate @ref = db.UpdateRef("refs/heads/b");
 			@ref.NewObjectId = db.Resolve("refs/heads/a");
-			delete(@ref, RefUpdate.RefUpdateResult.Rejected, true, false);
+			Delete(@ref, RefUpdate.RefUpdateResult.Rejected, true, false);
 			@ref.IsForceUpdate = true;
-			delete(@ref, RefUpdate.RefUpdateResult.Forced);
+			Delete(@ref, RefUpdate.RefUpdateResult.Forced);
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testDeleteHead()
 		{
-			RefUpdate @ref = updateRef(Constants.HEAD);
-			delete(@ref, RefUpdate.RefUpdateResult.RejectedCurrentBranch, true, false);
+			RefUpdate @ref = UpdateRef(Constants.HEAD);
+			Delete(@ref, RefUpdate.RefUpdateResult.RejectedCurrentBranch, true, false);
 		}
 
 		///	<summary>
 		/// Delete a ref that is pointed to by HEAD
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testDeleteHEADreferencedRef()
 		{
 			ObjectId pid = db.Resolve("refs/heads/master^");
@@ -100,12 +99,12 @@ namespace GitSharp.Tests
 			updateRef.NewObjectId = pid;
 			updateRef.IsForceUpdate = true;
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update); // internal
+			Assert.Equal(RefUpdate.RefUpdateResult.Forced, update); // internal
 
 			RefUpdate updateRef2 = db.UpdateRef("refs/heads/master");
 			RefUpdate.RefUpdateResult delete = updateRef2.Delete();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.RejectedCurrentBranch, delete);
-			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+			Assert.Equal(RefUpdate.RefUpdateResult.RejectedCurrentBranch, delete);
+			Assert.Equal(pid, db.Resolve("refs/heads/master"));
 		}
 
 		///	<summary>
@@ -113,7 +112,7 @@ namespace GitSharp.Tests
 		///	and the reflog dir too
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testDeleteLooseAndItsDirectory()
 		{
 			ObjectId pid = db.Resolve("refs/heads/c^");
@@ -122,18 +121,18 @@ namespace GitSharp.Tests
 			updateRef.IsForceUpdate = true;
 			updateRef.SetRefLogMessage("new test ref", false);
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update); // internal
-			Assert.IsTrue(new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.R_HEADS + "z")).Exists);
-			Assert.IsTrue(new DirectoryInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/z")).Exists);
+			Assert.Equal(RefUpdate.RefUpdateResult.New, update); // internal
+			Assert.True(new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.R_HEADS + "z")).Exists);
+			Assert.True(new DirectoryInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/z")).Exists);
 
 			// The real test here
 			RefUpdate updateRef2 = db.UpdateRef("refs/heads/z/c");
 			updateRef2.IsForceUpdate = true;
 			RefUpdate.RefUpdateResult delete = updateRef2.Delete();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, delete);
-			Assert.IsNull(db.Resolve("refs/heads/z/c"));
-			Assert.IsFalse(new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.R_HEADS + "z")).Exists);
-			Assert.IsFalse(new DirectoryInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/z")).Exists);
+			Assert.Equal(RefUpdate.RefUpdateResult.Forced, delete);
+			Assert.Null(db.Resolve("refs/heads/z/c"));
+			Assert.False(new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.R_HEADS + "z")).Exists);
+			Assert.False(new DirectoryInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/z")).Exists);
 		}
 
 		///	<summary>
@@ -141,7 +140,7 @@ namespace GitSharp.Tests
 		///	cannot be resolved After delete.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testDeleteLoosePacked()
 		{
 			ObjectId pid = db.Resolve("refs/heads/c^");
@@ -149,21 +148,21 @@ namespace GitSharp.Tests
 			updateRef.NewObjectId = pid;
 			updateRef.IsForceUpdate = true;
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update); // internal
+			Assert.Equal(RefUpdate.RefUpdateResult.Forced, update); // internal
 
 			// The real test here
 			RefUpdate updateRef2 = db.UpdateRef("refs/heads/c");
 			updateRef2.IsForceUpdate = true;
 			RefUpdate.RefUpdateResult delete = updateRef2.Delete();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, delete);
-			Assert.IsNull(db.Resolve("refs/heads/c"));
+			Assert.Equal(RefUpdate.RefUpdateResult.Forced, delete);
+			Assert.Null(db.Resolve("refs/heads/c"));
 		}
 
 		///	<summary>
 		/// Try to delete a ref. Delete requires force.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testDeleteLoosePackedRejected()
 		{
 			ObjectId pid = db.Resolve("refs/heads/c^");
@@ -171,61 +170,61 @@ namespace GitSharp.Tests
 			RefUpdate updateRef = db.UpdateRef("refs/heads/c");
 			updateRef.NewObjectId = pid;
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Rejected, update);
-			Assert.AreEqual(oldpid, db.Resolve("refs/heads/c"));
+			Assert.Equal(RefUpdate.RefUpdateResult.Rejected, update);
+			Assert.Equal(oldpid, db.Resolve("refs/heads/c"));
 		}
 
-		[Test]
+		[Fact]
 		public void testDeleteNotFound()
 		{
-			RefUpdate @ref = updateRef("refs/heads/xyz");
-			delete(@ref, RefUpdate.RefUpdateResult.New, false, true);
+			RefUpdate @ref = UpdateRef("refs/heads/xyz");
+			Delete(@ref, RefUpdate.RefUpdateResult.New, false, true);
 		}
 
-		[Test]
+		[Fact]
 		public void testLooseDelete()
 		{
 			const string newRef = "refs/heads/abc";
-			RefUpdate @ref = updateRef(newRef);
+			RefUpdate @ref = UpdateRef(newRef);
 			@ref.Update(); // Create loose ref
-			@ref = updateRef(newRef); // refresh
-			delete(@ref, RefUpdate.RefUpdateResult.NoChange);
+			@ref = UpdateRef(newRef); // refresh
+			Delete(@ref, RefUpdate.RefUpdateResult.NoChange);
 		}
 
-		[Test]
+		[Fact]
 		public void testNoCacheObjectIdSubclass()
 		{
 			const string newRef = "refs/heads/abc";
-			RefUpdate ru = updateRef(newRef);
+			RefUpdate ru = UpdateRef(newRef);
 			var newid = new RevCommit(ru.NewObjectId);
 			ru.NewObjectId = newid;
 			RefUpdate.RefUpdateResult update = ru.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
+			Assert.Equal(RefUpdate.RefUpdateResult.New, update);
 			Ref r = db.getRef(newRef);
-			Assert.IsNotNull(r);
-			Assert.AreEqual(newRef, r.Name);
-			Assert.IsNotNull(r.ObjectId);
-			Assert.AreNotSame(newid, r.ObjectId);
-			Assert.AreSame(typeof(ObjectId), r.ObjectId.GetType());
-			Assert.AreEqual(newid.Copy(), r.ObjectId);
+			Assert.NotNull(r);
+			Assert.Equal(newRef, r.Name);
+			Assert.NotNull(r.ObjectId);
+			Assert.NotSame(newid, r.ObjectId);
+			Assert.Same(typeof(ObjectId), r.ObjectId.GetType());
+			Assert.Equal(newid.Copy(), r.ObjectId);
 
 			//var reverseEntries1 = db.GetReflogReader("refs/heads/abc").getReverseEntries();
 			//var entry1 = reverseEntries1[0];
-			//Assert.AreEqual(1, reverseEntries1.Count);
-			//Assert.AreEqual(ObjectId.ZeroId, entry1.OldId);
-			//Assert.AreEqual(r.getObjectId(), entry1.NewId);
-			//Assert.AreEqual(new PersonIdent(db).toString(), entry1.Who.toString());
-			//Assert.AreEqual(string.Empty, entry1.Comment);
+			//Assert.Equal(1, reverseEntries1.Count);
+			//Assert.Equal(ObjectId.ZeroId, entry1.OldId);
+			//Assert.Equal(r.getObjectId(), entry1.NewId);
+			//Assert.Equal(new PersonIdent(db).toString(), entry1.Who.toString());
+			//Assert.Equal(string.Empty, entry1.Comment);
 			//var reverseEntries2 = db.getReflogReader("HEAD").getReverseEntries();
-			//Assert.AreEqual(0, reverseEntries2.Count);
+			//Assert.Equal(0, reverseEntries2.Count);
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testRefKeySameAsOrigName()
 		{
 			foreach (var e in db.getAllRefs())
 			{
-				Assert.AreEqual(e.Key, e.Value.OriginalName);
+				Assert.Equal(e.Key, e.Value.OriginalName);
 			}
 		}
 
@@ -233,7 +232,7 @@ namespace GitSharp.Tests
 		/// Try modify a ref forward, fast forward
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testUpdateRefForward()
 		{
 			ObjectId ppid = db.Resolve("refs/heads/master^");
@@ -243,21 +242,21 @@ namespace GitSharp.Tests
 			updateRef.NewObjectId = ppid;
 			updateRef.IsForceUpdate = true;
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
-			Assert.AreEqual(ppid, db.Resolve("refs/heads/master"));
+			Assert.Equal(RefUpdate.RefUpdateResult.Forced, update);
+			Assert.Equal(ppid, db.Resolve("refs/heads/master"));
 
 			// real test
 			RefUpdate updateRef2 = db.UpdateRef("refs/heads/master");
 			updateRef2.NewObjectId = pid;
 			RefUpdate.RefUpdateResult update2 = updateRef2.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update2);
-			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+			Assert.Equal(RefUpdate.RefUpdateResult.FastForward, update2);
+			Assert.Equal(pid, db.Resolve("refs/heads/master"));
 		}
 
  		/// <summary>
 		/// Try modify a ref forward, fast forward, checking old value first.
  		/// </summary>
-		[Test]
+		[Fact]
 		public void testUpdateRefForwardWithCheck1() 
 		{
 			ObjectId ppid = db.Resolve("refs/heads/master^");
@@ -267,22 +266,22 @@ namespace GitSharp.Tests
 			updateRef.NewObjectId = ppid;
 			updateRef.IsForceUpdate = true;
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
-			Assert.AreEqual(ppid, db.Resolve("refs/heads/master"));
+			Assert.Equal(RefUpdate.RefUpdateResult.Forced, update);
+			Assert.Equal(ppid, db.Resolve("refs/heads/master"));
 
 			// real test
 			RefUpdate updateRef2 = db.UpdateRef("refs/heads/master");
 			updateRef2.ExpectedOldObjectId = ppid;
 			updateRef2.NewObjectId = pid;
 			RefUpdate.RefUpdateResult update2 = updateRef2.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update2);
-			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+			Assert.Equal(RefUpdate.RefUpdateResult.FastForward, update2);
+			Assert.Equal(pid, db.Resolve("refs/heads/master"));
 		}
 
 		/// <summary>
 		/// Try modify a ref forward, fast forward, checking old commit first
 		/// </summary>
-		[Test]
+		[Fact]
 		public void testUpdateRefForwardWithCheck2()
 		{
 			ObjectId ppid = db.Resolve("refs/heads/master^");
@@ -292,8 +291,8 @@ namespace GitSharp.Tests
 			updateRef.NewObjectId = ppid;
 			updateRef.IsForceUpdate = true;
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
-			Assert.AreEqual(ppid, db.Resolve("refs/heads/master"));
+			Assert.Equal(RefUpdate.RefUpdateResult.Forced, update);
+			Assert.Equal(ppid, db.Resolve("refs/heads/master"));
 
 			// real test
 			RevCommit old = new GitSharp.RevWalk.RevWalk(db).parseCommit(ppid);
@@ -301,15 +300,15 @@ namespace GitSharp.Tests
 			updateRef2.ExpectedOldObjectId = old;
 			updateRef2.NewObjectId = pid;
 			RefUpdate.RefUpdateResult update2 = updateRef2.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update2);
-			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+			Assert.Equal(RefUpdate.RefUpdateResult.FastForward, update2);
+			Assert.Equal(pid, db.Resolve("refs/heads/master"));
 		}
 
 		/// <summary>
 		/// Try modify a ref that is locked
 		/// </summary>
 		/// <exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testUpdateRefLockFailureLocked()
 		{
 			ObjectId opid = db.Resolve("refs/heads/master");
@@ -317,19 +316,19 @@ namespace GitSharp.Tests
 			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
 			updateRef.NewObjectId = pid;
 			var lockFile1 = new LockFile(new FileInfo(Path.Combine(db.Directory.FullName, "refs/heads/master")));
-			Assert.IsTrue(lockFile1.Lock()); // precondition to test
+			Assert.True(lockFile1.Lock()); // precondition to test
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.LockFailure, update);
-			Assert.AreEqual(opid, db.Resolve("refs/heads/master"));
+			Assert.Equal(RefUpdate.RefUpdateResult.LockFailure, update);
+			Assert.Equal(opid, db.Resolve("refs/heads/master"));
 			var lockFile2 = new LockFile(new FileInfo(Path.Combine(db.Directory.FullName, "refs/heads/master")));
-			Assert.IsFalse(lockFile2.Lock()); // was locked, still is
+			Assert.False(lockFile2.Lock()); // was locked, still is
 		}
 
 		/// <summary>
 		/// Try modify a ref, but get wrong expected old value
 		/// </summary>
 		/// <exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testUpdateRefLockFailureWrongOldValue()
 		{
 			ObjectId pid = db.Resolve("refs/heads/master");
@@ -337,23 +336,23 @@ namespace GitSharp.Tests
 			updateRef.NewObjectId = pid;
 			updateRef.ExpectedOldObjectId = db.Resolve("refs/heads/master^");
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.LockFailure, update);
-			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+			Assert.Equal(RefUpdate.RefUpdateResult.LockFailure, update);
+			Assert.Equal(pid, db.Resolve("refs/heads/master"));
 		}
 
 		///	<summary>
 		/// Try modify a ref to same
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Test]
+		[Fact]
 		public void testUpdateRefNoChange()
 		{
 			ObjectId pid = db.Resolve("refs/heads/master");
 			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
 			updateRef.NewObjectId = pid;
 			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.NoChange, update);
-			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+			Assert.Equal(RefUpdate.RefUpdateResult.NoChange, update);
+			Assert.Equal(pid, db.Resolve("refs/heads/master"));
 		}
 	}
 }

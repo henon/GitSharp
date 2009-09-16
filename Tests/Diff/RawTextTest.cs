@@ -39,66 +39,65 @@
 using System.IO;
 using GitSharp.Diff;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Diff
 {
-    [TestFixture]
-    public class RawTextTest
-    {
-        [Test]
-	    public void testEmpty()
-        {
-		    var r = new RawText(new byte[0]);
-		    Assert.AreEqual(0, r.size());
-	    }
+	public class RawTextTest
+	{
+		[Fact]
+		public void testEmpty()
+		{
+			var r = new RawText(new byte[0]);
+			Assert.Equal(0, r.size());
+		}
 
-        [Test]
-	    public void testEquals()
-        {
-		    var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
-		    var b = new RawText(Constants.encodeASCII("foo-b\nfoo-c\n"));
+		[Fact]
+		public void testEquals()
+		{
+			var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
+			var b = new RawText(Constants.encodeASCII("foo-b\nfoo-c\n"));
 
-		    Assert.AreEqual(2, a.size());
-		    Assert.AreEqual(2, b.size());
+			Assert.Equal(2, a.size());
+			Assert.Equal(2, b.size());
 
-		    // foo-a != foo-b
-		    Assert.IsFalse(a.equals(0, b, 0));
-		    Assert.IsFalse(b.equals(0, a, 0));
+			// foo-a != foo-b
+			Assert.False(a.equals(0, b, 0));
+			Assert.False(b.equals(0, a, 0));
 
-		    // foo-b == foo-b
-		    Assert.IsTrue(a.equals(1, b, 0));
-		    Assert.IsTrue(b.equals(0, a, 1));
-	    }
+			// foo-b == foo-b
+			Assert.True(a.equals(1, b, 0));
+			Assert.True(b.equals(0, a, 1));
+		}
 
-        [Test]
-	    public void testWriteLine1()
-        {
-		    var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
-		    var o = new MemoryStream();
-		    a.writeLine(o, 0);
-		    byte[] r = o.ToArray();
-		    Assert.AreEqual("foo-a", RawParseUtils.decode(r));
-	    }
+		[Fact]
+		public void testWriteLine1()
+		{
+			var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
+			var o = new MemoryStream();
+			a.writeLine(o, 0);
+			byte[] r = o.ToArray();
+			Assert.Equal("foo-a", RawParseUtils.decode(r));
+		}
 
-        [Test]
-	    public void testWriteLine2()
-        {
-		    var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b"));
-		    var o = new MemoryStream();
-		    a.writeLine(o, 1);
-		    byte[] r = o.ToArray();
-		    Assert.AreEqual("foo-b", RawParseUtils.decode(r));
-	    }
+		[Fact]
+		public void testWriteLine2()
+		{
+			var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b"));
+			var o = new MemoryStream();
+			a.writeLine(o, 1);
+			byte[] r = o.ToArray();
+			Assert.Equal("foo-b", RawParseUtils.decode(r));
+		}
 
-        [Test]
-	    public void testWriteLine3()
-        {
-		    var a = new RawText(Constants.encodeASCII("a\n\nb\n"));
-		    var o = new MemoryStream();
-		    a.writeLine(o, 1);
-		    byte[] r = o.ToArray();
-		    Assert.AreEqual(string.Empty, RawParseUtils.decode(r));
-	    }
-    }
+		[Fact]
+		public void testWriteLine3()
+		{
+			var a = new RawText(Constants.encodeASCII("a\n\nb\n"));
+			var o = new MemoryStream();
+			a.writeLine(o, 1);
+			byte[] r = o.ToArray();
+			Assert.Equal(string.Empty, RawParseUtils.decode(r));
+		}
+	}
 }

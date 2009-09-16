@@ -1,11 +1,11 @@
 ﻿using System.IO;
 using System.Text;
 using GitSharp.Patch;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Patch
 {
-	public class BasePatchTest
+	public abstract class BasePatchTest : XunitBaseFact
 	{
 		protected const string DiffsDir = "../../../Tests/Diff/Resources/";
 		protected const string PatchsDir = "../../../Tests/Patch/Resources/";
@@ -23,7 +23,7 @@ namespace GitSharp.Tests.Patch
 			}
 			catch(IOException)
 			{
-				Assert.Fail("No " + patchFile + " test vector");
+				Assert.False(true, "No " + patchFile + " test vector");
 				return null; // Never happens
 			}
 		}

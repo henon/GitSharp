@@ -36,26 +36,25 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.TreeWalk;
 using GitSharp.TreeWalk.Filter;
-namespace GitSharp.Tests.TreeWalk
+
+namespace GitSharp.Tests.TreeWalk.Filter
 {
+	class AlwaysCloneTreeFilter : TreeFilter
+	{
+		public override TreeFilter Clone()
+		{
+			return new AlwaysCloneTreeFilter();
+		}
 
-    class AlwaysCloneTreeFilter : TreeFilter
-    {
-        public override TreeFilter Clone()
-        {
-            return new AlwaysCloneTreeFilter();
-        }
+		public override bool include(GitSharp.TreeWalk.TreeWalk walker)
+		{
+			return false;
+		}
 
-        public override bool include(GitSharp.TreeWalk.TreeWalk walker)
-        {
-            return false;
-        }
-
-        public override bool shouldBeRecursive()
-        {
-            return false;
-        }
-    }
+		public override bool shouldBeRecursive()
+		{
+			return false;
+		}
+	}
 }

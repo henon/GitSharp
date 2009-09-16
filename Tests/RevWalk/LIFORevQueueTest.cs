@@ -37,33 +37,32 @@
 
 using System.Collections.Generic;
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public class LIFORevQueueTest : RevQueueTestCase<LIFORevQueue>
     {
-        protected override LIFORevQueue create()
+        protected override LIFORevQueue Create()
         {
             return new LIFORevQueue();
         }
 
-        [Test]
+        [Fact]
         public override void testEmpty()
         {
             base.testEmpty();
-			Assert.AreEqual(Generator.GeneratorOutputType.None, q.OutputType);
+			Assert.Equal(Generator.GeneratorOutputType.None, q.OutputType);
         }
 
-        [Test]
+        [Fact]
         public void testCloneEmpty()
         {
             q = new LIFORevQueue(AbstractRevQueue.EmptyQueue);
-            Assert.IsNull(q.next());
+            Assert.Null(q.next());
         }
 
-        [Test]
+        [Fact]
         public void testAddLargeBlocks()
         {
             var lst = new List<RevCommit>();
@@ -77,7 +76,7 @@ namespace GitSharp.Tests.RevWalk
             lst.Reverse();
             for (int i = 0; i < lst.Count; i++)
             {
-            	Assert.AreSame(lst[i], q.next());
+            	Assert.Same(lst[i], q.next());
             }
         }
     }

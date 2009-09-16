@@ -38,34 +38,31 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using GitSharp.Util;
-using NUnit.Framework;
 using System.IO;
+using System.Linq;
+using GitSharp.Util;
+using Xunit;
 
 namespace GitSharp.Tests.Util
 {
-    [TestFixture]
     public class TemporaryBufferTest
     {
-        private string getName()
+        private string GetName()
         {
-            return this.ToString();
+            return ToString();
         }
 
-        [Test]
+        [Fact]
         public void testEmpty()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            var b = new TemporaryBuffer();
             try
             {
                 b.close();
-                Assert.AreEqual(0, b.Length);
+                Assert.Equal(0, b.Length);
                 byte[] r = b.ToArray();
-                Assert.IsNotNull(r);
-                Assert.AreEqual(0, r.Length);
+                Assert.NotNull(r);
+                Assert.Equal(0, r.Length);
             }
             finally
             {
@@ -73,30 +70,27 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Test]
+        [Fact]
         public void testOneByte()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
-            byte test = (byte)new TestRng(getName()).nextInt();
+            var b = new TemporaryBuffer();
+            var test = (byte)new TestRng(GetName()).NextInt();
             try
             {
                 b.write(test);
                 b.close();
-                Assert.AreEqual(1, b.Length);
-                {
-                    byte[] r = b.ToArray();
-                    Assert.IsNotNull(r);
-                    Assert.AreEqual(1, r.Length);
-                    Assert.AreEqual(test, r[0]);
-                }
-                {
-                    var o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
-                    Assert.AreEqual(1, r.Length);
-                    Assert.AreEqual(test, r[0]);
-                }
+                Assert.Equal(1, b.Length);
+				byte[] r = b.ToArray();
+				Assert.NotNull(r);
+				Assert.Equal(1, r.Length);
+				Assert.Equal(test, r[0]);
+
+				var o = new MemoryStream();
+				b.writeTo(o, null);
+				o.Close();
+				r = o.ToArray();
+				Assert.Equal(1, r.Length);
+				Assert.Equal(test, r[0]);
             }
             finally
             {
@@ -104,11 +98,11 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Test]
+        [Fact]
         public void testOneBlock_BulkWrite()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
-            byte[] test = new TestRng(getName())
+            var b = new TemporaryBuffer();
+            byte[] test = new TestRng(GetName())
                    .nextBytes(TemporaryBuffer.Block.SZ);
             try
             {
@@ -117,21 +111,19 @@ namespace GitSharp.Tests.Util
                 b.write(test, 6, test.Length - 6 - 2);
                 b.write(test, test.Length - 2, 2);
                 b.close();
-                Assert.AreEqual(test.Length, b.Length);
-                {
-                    byte[] r = b.ToArray();
-                    Assert.IsNotNull(r);
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
-                {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
+                Assert.Equal(test.Length, b.Length);
+
+				byte[] r = b.ToArray();
+				Assert.NotNull(r);
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
+
+				var o = new MemoryStream();
+				b.writeTo(o, null);
+				o.Close();
+				r = o.ToArray();
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
             }
             finally
             {
@@ -139,11 +131,11 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Test]
+        [Fact]
         public void testOneBlockAndHalf_BulkWrite()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
-            byte[] test = new TestRng(getName()).nextBytes(TemporaryBuffer.Block.SZ * 3 / 2);
+            var b = new TemporaryBuffer();
+            byte[] test = new TestRng(GetName()).nextBytes(TemporaryBuffer.Block.SZ * 3 / 2);
             try
             {
                 b.write(test, 0, 2);
@@ -151,21 +143,18 @@ namespace GitSharp.Tests.Util
                 b.write(test, 6, test.Length - 6 - 2);
                 b.write(test, test.Length - 2, 2);
                 b.close();
-                Assert.AreEqual(test.Length, b.Length);
-                {
-                    byte[] r = b.ToArray();
-                    Assert.IsNotNull(r);
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
-                {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
+                Assert.Equal(test.Length, b.Length);
+				byte[] r = b.ToArray();
+				Assert.NotNull(r);
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
+
+				var o = new MemoryStream();
+				b.writeTo(o, null);
+				o.Close();
+				r = o.ToArray();
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
             }
             finally
             {
@@ -173,32 +162,33 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Test]
+        [Fact]
         public void testOneBlockAndHalf_SingleWrite()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
-            byte[] test = new TestRng(getName())
+            var b = new TemporaryBuffer();
+            byte[] test = new TestRng(GetName())
                    .nextBytes(TemporaryBuffer.Block.SZ * 3 / 2);
             try
             {
                 for (int i = 0; i < test.Length; i++)
-                    b.write(test[i]);
+                {
+                	b.write(test[i]);
+                }
+
                 b.close();
-                Assert.AreEqual(test.Length, b.Length);
-                {
-                    byte[] r = b.ToArray();
-                    Assert.IsNotNull(r);
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
-                {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
+
+                Assert.Equal(test.Length, b.Length);
+				byte[] r = b.ToArray();
+				Assert.NotNull(r);
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
+
+				var o = new MemoryStream();
+				b.writeTo(o, null);
+				o.Close();
+				r = o.ToArray();
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
             }
             finally
             {
@@ -206,11 +196,11 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Test]
+        [Fact]
         public void testOneBlockAndHalf_Copy()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
-            byte[] test = new TestRng(getName())
+            var b = new TemporaryBuffer();
+            byte[] test = new TestRng(GetName())
                    .nextBytes(TemporaryBuffer.Block.SZ * 3 / 2);
             try
             {
@@ -220,21 +210,19 @@ namespace GitSharp.Tests.Util
                 b.write(@in.ReadByte());
                 b.copy(@in);
                 b.close();
-                Assert.AreEqual(test.Length, b.Length);
-                {
-                    byte[] r = b.ToArray();
-                    Assert.IsNotNull(r);
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
-                {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
+                Assert.Equal(test.Length, b.Length);
+
+				byte[] r = b.ToArray();
+				Assert.NotNull(r);
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
+
+				var o = new MemoryStream();
+				b.writeTo(o, null);
+				o.Close();
+				r = o.ToArray();
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
             }
             finally
             {
@@ -242,30 +230,27 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Test]
+        [Fact]
         public void testLarge_SingleWrite()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
-            byte[] test = new TestRng(getName()).nextBytes(TemporaryBuffer.DEFAULT_IN_CORE_LIMIT * 3);
+            var b = new TemporaryBuffer();
+            byte[] test = new TestRng(GetName()).nextBytes(TemporaryBuffer.DEFAULT_IN_CORE_LIMIT * 3);
             try
             {
                 b.write(test);
                 b.close();
-                Assert.AreEqual(test.Length, b.Length);
-                {
-                    byte[] r = b.ToArray();
-                    Assert.IsNotNull(r);
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
-                {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
+                Assert.Equal(test.Length, b.Length);
+				byte[] r = b.ToArray();
+				Assert.NotNull(r);
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
+
+				var o = new MemoryStream();
+				b.writeTo(o, null);
+				o.Close();
+				r = o.ToArray();
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
             }
             finally
             {
@@ -273,32 +258,30 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Test]
+        [Fact]
         public void testInCoreLimit_SwitchOnAppendByte()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
-            byte[] test = new TestRng(getName())
+            var b = new TemporaryBuffer();
+            byte[] test = new TestRng(GetName())
                    .nextBytes(TemporaryBuffer.DEFAULT_IN_CORE_LIMIT + 1);
             try
             {
                 b.write(test, 0, test.Length - 1);
                 b.write(test[test.Length - 1]);
                 b.close();
-                Assert.AreEqual(test.Length, b.Length);
-                {
-                    byte[] r = b.ToArray();
-                    Assert.IsNotNull(r);
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
-                {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
+                Assert.Equal(test.Length, b.Length);
+
+				byte[] r = b.ToArray();
+				Assert.NotNull(r);
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
+
+				var o = new MemoryStream();
+				b.writeTo(o, null);
+				o.Close();
+				r = o.ToArray();
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
             }
             finally
             {
@@ -306,32 +289,30 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Test]
+        [Fact]
         public void testInCoreLimit_SwitchBeforeAppendByte()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
-            byte[] test = new TestRng(getName())
+            var b = new TemporaryBuffer();
+            byte[] test = new TestRng(GetName())
                    .nextBytes(TemporaryBuffer.DEFAULT_IN_CORE_LIMIT * 3);
             try
             {
                 b.write(test, 0, test.Length - 1);
                 b.write(test[test.Length - 1]);
                 b.close();
-                Assert.AreEqual(test.Length, b.Length);
-                {
-                    byte[] r = b.ToArray();
-                    Assert.IsNotNull(r);
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
-                {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
+                Assert.Equal(test.Length, b.Length);
+
+				byte[] r = b.ToArray();
+				Assert.NotNull(r);
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
+
+				var o = new MemoryStream();
+				b.writeTo(o, null);
+				o.Close();
+				r = o.ToArray();
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
             }
             finally
             {
@@ -339,35 +320,32 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Test]
+        [Fact]
         public void testInCoreLimit_SwitchOnCopy()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
-            byte[] test = new TestRng(getName())
+            var b = new TemporaryBuffer();
+            byte[] test = new TestRng(GetName())
                    .nextBytes(TemporaryBuffer.DEFAULT_IN_CORE_LIMIT * 2);
             try
             {
-                MemoryStream @in = new MemoryStream(test,
+                var @in = new MemoryStream(test,
                        TemporaryBuffer.DEFAULT_IN_CORE_LIMIT, test.Length
                                - TemporaryBuffer.DEFAULT_IN_CORE_LIMIT);
                 b.write(test, 0, TemporaryBuffer.DEFAULT_IN_CORE_LIMIT);
                 b.copy(@in);
                 b.close();
-                Assert.AreEqual(test.Length, b.Length);
-                {
-                    byte[] r = b.ToArray();
-                    Assert.IsNotNull(r);
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
-                {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
-                    Assert.AreEqual(test.Length, r.Length);
-                    Assert.IsTrue(test.SequenceEqual(r));
-                }
+                Assert.Equal(test.Length, b.Length);
+				byte[] r = b.ToArray();
+				Assert.NotNull(r);
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
+
+				var o = new MemoryStream();
+				b.writeTo(o, null);
+				o.Close();
+				r = o.ToArray();
+				Assert.Equal(test.Length, r.Length);
+				Assert.True(test.SequenceEqual(r));
             }
             finally
             {
@@ -375,13 +353,13 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Test]
+        [Fact]
         public void testDestroyWhileOpen()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            var b = new TemporaryBuffer();
             try
             {
-                b.write(new TestRng(getName())
+                b.write(new TestRng(GetName())
                         .nextBytes(TemporaryBuffer.DEFAULT_IN_CORE_LIMIT * 2));
             }
             finally
@@ -390,13 +368,13 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Test]
+        [Fact]
         public void testRandomWrites()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
-            TestRng rng = new TestRng(getName());
+            var b = new TemporaryBuffer();
+            var rng = new TestRng(GetName());
             int max = TemporaryBuffer.DEFAULT_IN_CORE_LIMIT * 2;
-            byte[] expect = new byte[max];
+            var expect = new byte[max];
             try
             {
                 int written = 0;
@@ -405,13 +383,13 @@ namespace GitSharp.Tests.Util
                 {
                     if (onebyte)
                     {
-                        byte v = (byte)rng.nextInt();
+                        var v = (byte)rng.NextInt();
                         b.write(v);
                         expect[written++] = v;
                     }
                     else
                     {
-                        int len = Math.Min(rng.nextInt() & 127, max - written);
+                        int len = Math.Min(rng.NextInt() & 127, max - written);
                         byte[] tmp = rng.nextBytes(len);
                         b.write(tmp, 0, len);
                         Array.Copy(tmp, 0, expect, written, len);
@@ -419,24 +397,21 @@ namespace GitSharp.Tests.Util
                     }
                     onebyte = !onebyte;
                 }
-                Assert.AreEqual(expect.Length, written);
+                Assert.Equal(expect.Length, written);
                 b.close();
 
-                Assert.AreEqual(expect.Length, b.Length);
-                {
-                    byte[] r = b.ToArray();
-                    Assert.IsNotNull(r);
-                    Assert.AreEqual(expect.Length, r.Length);
-                    Assert.IsTrue(expect.SequenceEqual(r));
-                }
-                {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
-                    Assert.AreEqual(expect.Length, r.Length);
-                    Assert.IsTrue(expect.SequenceEqual(r));
-                }
+                Assert.Equal(expect.Length, b.Length);
+				byte[] r = b.ToArray();
+				Assert.NotNull(r);
+				Assert.Equal(expect.Length, r.Length);
+				Assert.True(expect.SequenceEqual(r));
+
+				var o = new MemoryStream();
+				b.writeTo(o, null);
+				o.Close();
+				r = o.ToArray();
+				Assert.Equal(expect.Length, r.Length);
+				Assert.True(expect.SequenceEqual(r));
             }
             finally
             {

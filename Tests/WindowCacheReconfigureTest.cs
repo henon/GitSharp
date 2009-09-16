@@ -36,96 +36,96 @@
  */
 
 using System;
-using NUnit.Framework;
+using GitSharp.Tests.Util;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class WindowCacheReconfigureTest : RepositoryTestCase
     {
-        [Test]
+        [Fact]
         public void testConfigureCache_PackedGitLimit_0()
         {
             var cfg = new WindowCacheConfig { PackedGitLimit = 0 };
-            AssertHelper.Throws<ArgumentException>(() => WindowCache.reconfigure(cfg));
+            Assert.Throws<ArgumentException>(() => WindowCache.reconfigure(cfg));
         }
 
-        [Test]
+        [Fact]
         public void testConfigureCache_PackedGitWindowSize_0()
         {
             try
             {
                 var cfg = new WindowCacheConfig { PackedGitWindowSize = 0 };
                 WindowCache.reconfigure(cfg);
-                Assert.Fail("incorrectly permitted PackedGitWindowSize = 0");
+                Assert.False(true, "incorrectly permitted PackedGitWindowSize = 0");
             }
             catch (ArgumentException e)
             {
-                Assert.AreEqual("Invalid window size", e.Message);
+                Assert.Equal("Invalid window size", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testConfigureCache_PackedGitWindowSize_512()
         {
             try
             {
                 var cfg = new WindowCacheConfig { PackedGitWindowSize = 512 };
                 WindowCache.reconfigure(cfg);
-                Assert.Fail("incorrectly permitted PackedGitWindowSize = 512");
+                Assert.False(true, "incorrectly permitted PackedGitWindowSize = 512");
             }
             catch (ArgumentException e)
             {
-                Assert.AreEqual("Invalid window size", e.Message);
+                Assert.Equal("Invalid window size", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testConfigureCache_PackedGitWindowSize_4097()
         {
             try
             {
                 var cfg = new WindowCacheConfig { PackedGitWindowSize = 4097 };
                 WindowCache.reconfigure(cfg);
-                Assert.Fail("incorrectly permitted PackedGitWindowSize = 4097");
+                Assert.False(true, "incorrectly permitted PackedGitWindowSize = 4097");
             }
             catch (ArgumentException e)
             {
-                Assert.AreEqual("Window size must be power of 2", e.Message);
+                Assert.Equal("Window size must be power of 2", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testConfigureCache_PackedGitOpenFiles_0()
         {
             try
             {
                 var cfg = new WindowCacheConfig { PackedGitOpenFiles = 0 };
                 WindowCache.reconfigure(cfg);
-                Assert.Fail("incorrectly permitted PackedGitOpenFiles = 0");
+                Assert.False(true, "incorrectly permitted PackedGitOpenFiles = 0");
             }
             catch (ArgumentException e)
             {
-                Assert.AreEqual("Open files must be >= 1", e.Message);
+                Assert.Equal("Open files must be >= 1", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testConfigureCache_PackedGitWindowSizeAbovePackedGitLimit()
         {
             try
             {
                 var cfg = new WindowCacheConfig { PackedGitLimit = 1024, PackedGitWindowSize = 8192 };
                 WindowCache.reconfigure(cfg);
-                Assert.Fail("incorrectly permitted PackedGitWindowSize > PackedGitLimit");
+                Assert.False(true, "incorrectly permitted PackedGitWindowSize > PackedGitLimit");
             }
             catch (ArgumentException e)
             {
-                Assert.AreEqual("Window size must be < limit", e.Message);
+                Assert.Equal("Window size must be < limit", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testConfigureCache_Limits1()
         {
             // This test is just to force coverage over some lower bounds for

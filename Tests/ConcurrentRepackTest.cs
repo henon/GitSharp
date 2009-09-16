@@ -42,250 +42,233 @@ using System.Linq;
 using System.Threading;
 using GitSharp.Exceptions;
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using GitSharp.Tests.Util;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
-    public class ConcurrentRepackTest : RepositoryTestCase
-    {
-        public override void setUp()
-        {
-            var windowCacheConfig = new WindowCacheConfig { PackedGitOpenFiles = 1 };
-            WindowCache.reconfigure(windowCacheConfig);
-            base.setUp();
-        }
+	public class ConcurrentRepackTest : RepositoryTestCase
+	{
+		protected override void SetUp()
+		{
+			var windowCacheConfig = new WindowCacheConfig { PackedGitOpenFiles = 1 };
+			WindowCache.reconfigure(windowCacheConfig);
+			base.SetUp();
+		}
 
-        public override void tearDown()
-        {
-            base.tearDown();
-            var windowCacheConfig = new WindowCacheConfig();
-            WindowCache.reconfigure(windowCacheConfig);
-        }
+		protected override void TearDown()
+		{
+			base.TearDown();
+			var windowCacheConfig = new WindowCacheConfig();
+			WindowCache.reconfigure(windowCacheConfig);
+		}
 
-        [Test]
-        public void testObjectInNewPack()
-        {
-            // Create a new object in a new pack, and test that it is present.
-            //
-            Repository eden = createNewEmptyRepo();
-            RevObject o1 = WriteBlob(eden, "o1");
-            Pack(eden, o1);
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
-        }
+		[Fact]
+		public void testObjectInNewPack()
+		{
+			// Create a new object in a new pack, and test that it is present.
+			//
+			Repository eden = createNewEmptyRepo();
+			RevObject o1 = WriteBlob(eden, "o1");
+			Pack(eden, o1);
+			Assert.Equal(o1.Name, Parse(o1).Name);
+		}
 
-        [Test]
-        public void testObjectMovedToNewPack1()
-        {
-            // Create an object and pack it. Then remove that pack and put the
-            // object into a different pack file, with some other object. We
-            // still should be able to access the objects.
-            //
-            Repository eden = createNewEmptyRepo();
-            RevObject o1 = WriteBlob(eden, "o1");
-            FileInfo[] out1 = Pack(eden, o1);
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
+		[Fact]
+		public void testObjectMovedToNewPack1()
+		{
+			// Create an object and pack it. Then remove that pack and put the
+			// object into a different pack file, with some other object. We
+			// still should be able to access the objects.
+			//
+			Repository eden = createNewEmptyRepo();
+			RevObject o1 = WriteBlob(eden, "o1");
+			FileInfo[] out1 = Pack(eden, o1);
+			Assert.Equal(o1.Name, Parse(o1).Name);
 
-            RevObject o2 = WriteBlob(eden, "o2");
-            Pack(eden, o2, o1);
+			RevObject o2 = WriteBlob(eden, "o2");
+			Pack(eden, o2, o1);
 
-            // Force close, and then delete, the old pack.
-            //
-            WhackCache();
-            Delete(out1);
+			// Force close, and then delete, the old pack.
+			//
+			WhackCache();
+			Delete(out1);
 
-            // Now here is the interesting thing. Will git figure the new
-            // object exists in the new pack, and not the old one.
-            //
-            Assert.AreEqual(o2.Name, Parse(o2).Name);
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
-        }
+			// Now here is the interesting thing. Will git figure the new
+			// object exists in the new pack, and not the old one.
+			//
+			Assert.Equal(o2.Name, Parse(o2).Name);
+			Assert.Equal(o1.Name, Parse(o1).Name);
+		}
 
-        [Test]
-        public void testObjectMovedWithinPack()
-        {
-            // Create an object and pack it.
-            //
-            Repository eden = createNewEmptyRepo();
-            RevObject o1 = WriteBlob(eden, "o1");
-            FileInfo[] out1 = Pack(eden, o1);
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
+		[Fact]
+		public void testObjectMovedWithinPack()
+		{
+			// Create an object and pack it.
+			//
+			Repository eden = createNewEmptyRepo();
+			RevObject o1 = WriteBlob(eden, "o1");
+			FileInfo[] out1 = Pack(eden, o1);
+			Assert.Equal(o1.Name, Parse(o1).Name);
 
-            // Force close the old pack.
-            //
-            WhackCache();
+			// Force close the old pack.
+			//
+			WhackCache();
 
-            // Now overwrite the old pack in place. This method of creating a
-            // different pack under the same file name is partially broken. We
-            // should also have a different file name because the list of objects
-            // within the pack has been modified.
-            //
-            RevObject o2 = WriteBlob(eden, "o2");
-            var pw = new PackWriter(eden, NullProgressMonitor.Instance);
-            pw.addObject(o2);
-            pw.addObject(o1);
-            Write(out1, pw);
+			// Now overwrite the old pack in place. This method of creating a
+			// different pack under the same file name is partially broken. We
+			// should also have a different file name because the list of objects
+			// within the pack has been modified.
+			//
+			RevObject o2 = WriteBlob(eden, "o2");
+			var pw = new PackWriter(eden, NullProgressMonitor.Instance);
+			pw.addObject(o2);
+			pw.addObject(o1);
+			Write(out1, pw);
 
-            // Try the old name, then the new name. The old name should cause the
-            // pack to reload when it opens and the index and pack mismatch.
-            //
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
-            Assert.AreEqual(o2.Name, Parse(o2).Name);
-        }
+			// Try the old name, then the new name. The old name should cause the
+			// pack to reload when it opens and the index and pack mismatch.
+			//
+			Assert.Equal(o1.Name, Parse(o1).Name);
+			Assert.Equal(o2.Name, Parse(o2).Name);
+		}
 
-        [Test]
-        public void testObjectMovedToNewPack2()
-        {
-            // Create an object and pack it. Then remove that pack and put the
-            // object into a different pack file, with some other object. We
-            // still should be able to access the objects.
-            //
-            Repository eden = createNewEmptyRepo();
-            RevObject o1 = WriteBlob(eden, "o1");
-            FileInfo[] out1 = Pack(eden, o1);
-            Assert.AreEqual(o1.Name, Parse(o1).Name);
+		[Fact]
+		public void testObjectMovedToNewPack2()
+		{
+			// Create an object and pack it. Then remove that pack and put the
+			// object into a different pack file, with some other object. We
+			// still should be able to access the objects.
+			//
+			Repository eden = createNewEmptyRepo();
+			RevObject o1 = WriteBlob(eden, "o1");
+			FileInfo[] out1 = Pack(eden, o1);
+			Assert.Equal(o1.Name, Parse(o1).Name);
 
-            ObjectLoader load1 = db.OpenBlob(o1);
-            Assert.IsNotNull(load1);
+			ObjectLoader load1 = db.OpenBlob(o1);
+			Assert.NotNull(load1);
 
-            RevObject o2 = WriteBlob(eden, "o2");
-            Pack(eden, o2, o1);
+			RevObject o2 = WriteBlob(eden, "o2");
+			Pack(eden, o2, o1);
 
-            // Force close, and then delete, the old pack.
-            //
-            WhackCache();
-            Delete(out1);
+			// Force close, and then delete, the old pack.
+			//
+			WhackCache();
+			Delete(out1);
 
-            // Now here is the interesting thing... can the loader we made
-            // earlier still resolve the object, even though its underlying
-            // pack is gone, but the object still exists.
-            //
-            ObjectLoader load2 = db.OpenBlob(o1);
-            Assert.IsNotNull(load2);
-            Assert.AreNotSame(load1, load2);
+			// Now here is the interesting thing... can the loader we made
+			// earlier still resolve the object, even though its underlying
+			// pack is gone, but the object still exists.
+			//
+			ObjectLoader load2 = db.OpenBlob(o1);
+			Assert.NotNull(load2);
+			Assert.NotSame(load1, load2);
 
-            byte[] data2 = load2.CachedBytes;
-            byte[] data1 = load1.CachedBytes;
-            Assert.IsNotNull(data2);
-            Assert.IsNotNull(data1);
-            Assert.AreNotSame(data1, data2); // cache should be per-pack, not per object
-            Assert.IsTrue(data1.SequenceEqual(data2));
-            Assert.AreEqual(load2.Type, load1.Type);
-        }
+			byte[] data2 = load2.CachedBytes;
+			byte[] data1 = load1.CachedBytes;
+			Assert.NotNull(data2);
+			Assert.NotNull(data1);
+			Assert.NotSame(data1, data2); // cache should be per-pack, not per object
+			Assert.True(data1.SequenceEqual(data2));
+			Assert.Equal(load2.Type, load1.Type);
+		}
 
-        private static void WhackCache()
-        {
-            var config = new WindowCacheConfig { PackedGitOpenFiles = 1 };
-            WindowCache.reconfigure(config);
-        }
+		private static void WhackCache()
+		{
+			var config = new WindowCacheConfig { PackedGitOpenFiles = 1 };
+			WindowCache.reconfigure(config);
+		}
 
-        private RevObject Parse(AnyObjectId id)
-        {
-            return new GitSharp.RevWalk.RevWalk(db).parseAny(id);
-        }
+		private RevObject Parse(AnyObjectId id)
+		{
+			return new GitSharp.RevWalk.RevWalk(db).parseAny(id);
+		}
 
-        private FileInfo[] Pack(Repository src, params RevObject[] list)
-        {
-            var pw = new PackWriter(src, NullProgressMonitor.Instance);
-            foreach (RevObject o in list)
-            {
-                pw.addObject(o);
-            }
+		private FileInfo[] Pack(Repository src, params RevObject[] list)
+		{
+			var pw = new PackWriter(src, NullProgressMonitor.Instance);
+			foreach (RevObject o in list)
+			{
+				pw.addObject(o);
+			}
 
-            ObjectId name = pw.computeName();
+			ObjectId name = pw.computeName();
 			FileInfo packFile = FullPackFileName(name);
-            FileInfo idxFile = FullIndexFileName(name);
-            var files = new[] { packFile, idxFile };
-            Write(files, pw);
-            return files;
-        }
+			FileInfo idxFile = FullIndexFileName(name);
+			var files = new[] { packFile, idxFile };
+			Write(files, pw);
+			return files;
+		}
 
-        private static void Write(FileInfo[] files, PackWriter pw)
-        {
-            FileInfo file = files[0];
-            long begin = file.Directory.LastAccessTime.Ticks;
+		private static void Write(FileInfo[] files, PackWriter pw)
+		{
+			FileInfo file = files[0];
+			long begin = file.Directory.LastAccessTime.Ticks;
 
-            using (var stream = file.Create())
-            {
+			using (var stream = file.Create())
+			{
+				pw.writePack(stream);
+			}
 
-                    pw.writePack(stream);
+			file = files[1];
+			using (var stream = file.Create())
+			{
+				pw.writeIndex(stream);
+			}
 
-            }
+			Touch(begin, files[0].Directory);
+		}
 
-            file = files[1];
-            using (var stream = file.Create())
-            {
+		private static void Delete(FileInfo[] list)
+		{
+			long begin = list[0].Directory.LastAccessTime.Ticks;
+			foreach (var fi in list)
+			{
+				Assert.DoesNotThrow(fi.Delete);
+				Assert.False(File.Exists(fi.FullName), fi + " was not removed");
+			}
 
-                    pw.writeIndex(stream);
-   
-            }
+			Touch(begin, list[0].Directory);
+		}
 
-            Touch(begin, files[0].Directory);
-        }
+		private static void Touch(long begin, FileSystemInfo dir)
+		{
+			while (begin >= dir.LastAccessTime.Ticks)
+			{
+				try
+				{
+					Thread.Sleep(25);
+				}
+				catch (IOException)
+				{
+					//
+				}
+				dir.LastAccessTime = DateTime.Now;
+			}
+		}
 
-        private static void Delete(FileInfo[] list)
-        {
-            long begin = list[0].Directory.LastAccessTime.Ticks;
-            foreach (var fi in list)
-            {
-                try
-                {
-                    fi.Delete();
-                }
-                catch (IOException)
-                {
-                }
-                Assert.IsFalse(File.Exists(fi.FullName), fi + " was not removed");
-            }
+		private FileInfo FullPackFileName(AnyObjectId name)
+		{
+			var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
+			return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetPackFileName(name.Name)));
+		}
 
-            Touch(begin, list[0].Directory);
-        }
+		private FileInfo FullIndexFileName(AnyObjectId name)
+		{
+			var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
+			return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetIndexFileName(name.Name)));
+		}
 
-        private static void Touch(long begin, FileSystemInfo dir)
-        {
-            while (begin >= dir.LastAccessTime.Ticks)
-            {
-                try
-                {
-                    Thread.Sleep(25);
-                }
-                catch (IOException)
-                {
-                    //
-                }
-                dir.LastAccessTime = DateTime.Now;
-            }
-        }
+		private RevObject WriteBlob(Repository repo, string data)
+		{
+			var revWalk = new GitSharp.RevWalk.RevWalk(repo);
+			byte[] bytes = Constants.encode(data);
+			var ow = new ObjectWriter(repo);
+			ObjectId id = ow.WriteBlob(bytes);
 
-        private FileInfo FullPackFileName(AnyObjectId name)
-        {
-            var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
-            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetPackFileName(name.Name)));
-        }
+			Assert.Throws<MissingObjectException>(() => Parse(id));
 
-        private FileInfo FullIndexFileName(AnyObjectId name)
-        {
-            var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
-            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetIndexFileName(name.Name)));
-        }
-
-        private RevObject WriteBlob(Repository repo, string data)
-        {
-            var revWalk = new GitSharp.RevWalk.RevWalk(repo);
-            byte[] bytes = Constants.encode(data);
-            var ow = new ObjectWriter(repo);
-            ObjectId id = ow.WriteBlob(bytes);
-            try
-            {
-                Parse(id);
-                Assert.Fail("Object " + id.Name + " should not exist in test repository");
-            }
-            catch (MissingObjectException)
-            {
-                // Ok
-            }
-
-            return revWalk.lookupBlob(id);
-        }
-    }
+			return revWalk.lookupBlob(id);
+		}
+	}
 }

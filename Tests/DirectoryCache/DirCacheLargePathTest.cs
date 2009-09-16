@@ -36,39 +36,40 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Text;
+using GitSharp.DirectoryCache;
+using GitSharp.Tests.Util;
+using Xunit;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
-    using GitSharp.DirectoryCache;
-    using System.Text;
-    [TestFixture]
     public class DirCacheLargePathTest : RepositoryTestCase
     {
-        [Test]
+        [Fact]
         public void testPath_4090()
         {
             testLongPath(4090);
         }
 
-        [Test]
+        [Fact]
         public void testPath_4094()
         {
             testLongPath(4094);
         }
 
-        [Test]
+        [Fact]
         public void testPath_4095()
         {
             testLongPath(4095);
         }
 
-        [Test]
+        [Fact]
         public void testPath_4096()
         {
             testLongPath(4096);
         }
 
-        [Test]
+        [Fact]
         public void testPath_16384()
         {
             testLongPath(16384);
@@ -76,45 +77,42 @@ namespace GitSharp.Tests.DirectoryCache
 
         private void testLongPath(int len)
         {
-            string longPath = makeLongPath(len);
-            string shortPath = "~~~ shorter-path";
+            string longPath = MakeLongPath(len);
+            const string shortPath = "~~~ shorter-path";
 
-            DirCacheEntry longEnt = new DirCacheEntry(longPath);
-            DirCacheEntry shortEnt = new DirCacheEntry(shortPath);
-            Assert.AreEqual(longPath, longEnt.getPathString());
-            Assert.AreEqual(shortPath, shortEnt.getPathString());
+            var longEnt = new DirCacheEntry(longPath);
+            var shortEnt = new DirCacheEntry(shortPath);
+            Assert.Equal(longPath, longEnt.getPathString());
+            Assert.Equal(shortPath, shortEnt.getPathString());
 
-            {
-                DirCache dc1 = DirCache.Lock(db);
-                {
-                    DirCacheBuilder b = dc1.builder();
-                    b.add(longEnt);
-                    b.add(shortEnt);
-                    Assert.IsTrue(b.commit());
-                }
-                Assert.AreEqual(2, dc1.getEntryCount());
-                Assert.AreSame(longEnt, dc1.getEntry(0));
-                Assert.AreSame(shortEnt, dc1.getEntry(1));
-            }
-            {
-                DirCache dc2 = DirCache.read(db);
-                Assert.AreEqual(2, dc2.getEntryCount());
+			DirCache dc1 = DirCache.Lock(db);
+			DirCacheBuilder b = dc1.builder();
+			b.add(longEnt);
+			b.add(shortEnt);
+			Assert.True(b.commit());
 
-                Assert.AreNotSame(longEnt, dc2.getEntry(0));
-                Assert.AreEqual(longPath, dc2.getEntry(0).getPathString());
+			Assert.Equal(2, dc1.getEntryCount());
+			Assert.Same(longEnt, dc1.getEntry(0));
+			Assert.Same(shortEnt, dc1.getEntry(1));
 
-                Assert.AreNotSame(shortEnt, dc2.getEntry(1));
-                Assert.AreEqual(shortPath, dc2.getEntry(1).getPathString());
-            }
+			DirCache dc2 = DirCache.read(db);
+			Assert.Equal(2, dc2.getEntryCount());
+
+			Assert.NotSame(longEnt, dc2.getEntry(0));
+			Assert.Equal(longPath, dc2.getEntry(0).getPathString());
+
+			Assert.NotSame(shortEnt, dc2.getEntry(1));
+			Assert.Equal(shortPath, dc2.getEntry(1).getPathString());
         }
 
-        private static string makeLongPath(int len)
+        private static string MakeLongPath(int len)
         {
-            StringBuilder r = new StringBuilder(len);
+            var r = new StringBuilder(len);
             for (int i = 0; i < len; i++)
-                r.Append('a' + (i % 26));
+            {
+            	r.Append('a' + (i % 26));
+            }
             return r.ToString();
         }
-
     }
 }

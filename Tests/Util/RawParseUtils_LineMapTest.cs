@@ -37,71 +37,68 @@
  */
 
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class RawParseUtils_LineMapTest
     {
-       // private static readonly System.Text.ASCIIEncoding asciienc = new System.Text.ASCIIEncoding();
-
-        [Test]
+        [Fact]
 	    public void testEmpty()
         {
 		    IntList map = RawParseUtils.lineMap(new byte[] {}, 0, 0);
-		    Assert.IsNotNull(map);
-		    Assert.AreEqual(2, map.size());
-		    Assert.AreEqual(int.MinValue, map.get(0));
-		    Assert.AreEqual(0, map.get(1));
+		    Assert.NotNull(map);
+		    Assert.Equal(2, map.size());
+		    Assert.Equal(int.MinValue, map.get(0));
+		    Assert.Equal(0, map.get(1));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testOneBlankLine()
         {
 		    IntList map = RawParseUtils.lineMap(new byte[] { (byte)'\n' }, 0, 1);
-		    Assert.AreEqual(3, map.size());
-		    Assert.AreEqual(int.MinValue, map.get(0));
-		    Assert.AreEqual(0, map.get(1));
-		    Assert.AreEqual(1, map.get(2));
+		    Assert.Equal(3, map.size());
+		    Assert.Equal(int.MinValue, map.get(0));
+		    Assert.Equal(0, map.get(1));
+		    Assert.Equal(1, map.get(2));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testTwoLineFooBar()
         {
             byte[] buf = "foo\nbar\n".getBytes("ISO-8859-1");
 		    IntList map = RawParseUtils.lineMap(buf, 0, buf.Length);
-		    Assert.AreEqual(4, map.size());
-		    Assert.AreEqual(int.MinValue, map.get(0));
-		    Assert.AreEqual(0, map.get(1));
-		    Assert.AreEqual(4, map.get(2));
-		    Assert.AreEqual(buf.Length, map.get(3));
+		    Assert.Equal(4, map.size());
+		    Assert.Equal(int.MinValue, map.get(0));
+		    Assert.Equal(0, map.get(1));
+		    Assert.Equal(4, map.get(2));
+		    Assert.Equal(buf.Length, map.get(3));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testTwoLineNoLF()
         {
             byte[] buf = "foo\nbar".getBytes("ISO-8859-1");
 		    IntList map = RawParseUtils.lineMap(buf, 0, buf.Length);
-		    Assert.AreEqual(4, map.size());
-		    Assert.AreEqual(int.MinValue, map.get(0));
-		    Assert.AreEqual(0, map.get(1));
-		    Assert.AreEqual(4, map.get(2));
-		    Assert.AreEqual(buf.Length, map.get(3));
+		    Assert.Equal(4, map.size());
+		    Assert.Equal(int.MinValue, map.get(0));
+		    Assert.Equal(0, map.get(1));
+		    Assert.Equal(4, map.get(2));
+		    Assert.Equal(buf.Length, map.get(3));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testFourLineBlanks()
         {
             byte[] buf = "foo\n\n\nbar\n".getBytes("ISO-8859-1");
 		    IntList map = RawParseUtils.lineMap(buf, 0, buf.Length);
-            Assert.AreEqual(6, map.size());
-            Assert.AreEqual(int.MinValue, map.get(0));
-            Assert.AreEqual(0, map.get(1));
-            Assert.AreEqual(4, map.get(2));
-            Assert.AreEqual(5, map.get(3));
-            Assert.AreEqual(6, map.get(4));
-            Assert.AreEqual(buf.Length, map.get(5));
+            Assert.Equal(6, map.size());
+            Assert.Equal(int.MinValue, map.get(0));
+            Assert.Equal(0, map.get(1));
+            Assert.Equal(4, map.get(2));
+            Assert.Equal(5, map.get(3));
+            Assert.Equal(6, map.get(4));
+            Assert.Equal(buf.Length, map.get(5));
 	    }
     }
 }

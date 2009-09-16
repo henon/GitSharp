@@ -41,7 +41,7 @@ using System.Reflection;
 using System.Text;
 using GitSharp.RevWalk;
 using GitSharp.TreeWalk.Filter;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
@@ -51,39 +51,38 @@ namespace GitSharp.Tests.RevWalk
 	// full history and non-full history for a path, something we
 	// don't quite yet have a distiction for in JGit.
 	//
-	[TestFixture]
 	public class RevWalkPathFilter6012Test : RevWalkTestCase
 	{
 		private const string pA = "pA", pE = "pE", pF = "pF";
 		private RevCommit a, b, c, d, e, f, g, h, i;
 		private Dictionary<RevCommit, string> byName;
 
-		public override void setUp()
+		protected override void SetUp()
 		{
-			base.setUp();
+			base.SetUp();
 
 			// Test graph was stolen from git-core t6012-rev-list-simplify
 			// (by Junio C Hamano in 65347030590bcc251a9ff2ed96487a0f1b9e9fa8)
 			//
-			RevBlob zF = blob("zF");
-			RevBlob zH = blob("zH");
-			RevBlob zI = blob("zI");
-			RevBlob zS = blob("zS");
-			RevBlob zY = blob("zY");
+			RevBlob zF = Blob("zF");
+			RevBlob zH = Blob("zH");
+			RevBlob zI = Blob("zI");
+			RevBlob zS = Blob("zS");
+			RevBlob zY = Blob("zY");
 
-			a = Commit(tree(File(pF, zH)));
-			b = Commit(tree(File(pF, zI)), a);
-			c = Commit(tree(File(pF, zI)), a);
-			d = Commit(tree(File(pA, zS), File(pF, zI)), c);
+			a = Commit(Tree(File(pF, zH)));
+			b = Commit(Tree(File(pF, zI)), a);
+			c = Commit(Tree(File(pF, zI)), a);
+			d = Commit(Tree(File(pA, zS), File(pF, zI)), c);
 			Parse(d);
 
 			e = Commit(d.Tree, d, b);
-			f = Commit(tree(File(pA, zS), File(pE, zY), File(pF, zI)), e);
+			f = Commit(Tree(File(pA, zS), File(pE, zY), File(pF, zI)), e);
 			Parse(f);
 
-			g = Commit(tree(File(pE, zY), File(pF, zI)), b);
+			g = Commit(Tree(File(pE, zY), File(pF, zI)), b);
 			h = Commit(f.Tree, g, f);
-			i = Commit(tree(File(pA, zS), File(pE, zY), File(pF, zF)), h);
+			i = Commit(Tree(File(pA, zS), File(pE, zY), File(pF, zF)), h);
 
 			byName = new Dictionary<RevCommit, string>();
 			var fields = typeof(RevWalkPathFilter6012Test).GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
@@ -100,10 +99,10 @@ namespace GitSharp.Tests.RevWalk
 			MarkStart(i);
 
 			var act = new StringBuilder();
-			foreach (RevCommit z in rw)
+			foreach (RevCommit z in Rw)
 			{
 				string name = byName[z];
-				Assert.IsNotNull(name);
+				Assert.NotNull(name);
 				act.Append(name);
 				act.Append(' ');
 			}
@@ -112,27 +111,27 @@ namespace GitSharp.Tests.RevWalk
 			foreach (RevCommit z in order)
 			{
 				string name = byName[z];
-				Assert.IsNotNull(name);
+				Assert.NotNull(name);
 				exp.Append(name);
 				exp.Append(' ');
 			}
 
-			Assert.AreEqual(exp.ToString(), act.ToString());
+			Assert.Equal(exp.ToString(), act.ToString());
 		}
 
 		private void Filter(string path)
 		{
-			rw.setTreeFilter(AndTreeFilter.create(PathFilterGroup.createFromStrings(Enumerable.Repeat(path, 1)), TreeFilter.ANY_DIFF));
+			Rw.setTreeFilter(AndTreeFilter.create(PathFilterGroup.createFromStrings(Enumerable.Repeat(path, 1)), TreeFilter.ANY_DIFF));
 		}
 
-		[Test]
+		[Fact]
 		public void test1()
 		{
 			// TODO --full-history
 			Check(i, h, g, f, e, d, c, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test2()
 		{
 			// TODO --full-history
@@ -141,27 +140,27 @@ namespace GitSharp.Tests.RevWalk
 			//Check(i, h, e, c, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test3()
 		{
 			// TODO --full-history
-			rw.sort(RevSort.TOPO);
+			Rw.sort(RevSort.TOPO);
 			Filter(pF);
 			// TODO fix broken test
 			//Check(i, h, e, c, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test4()
 		{
 			// TODO --full-history
-			rw.sort(RevSort.COMMIT_TIME_DESC);
+			Rw.sort(RevSort.COMMIT_TIME_DESC);
 			Filter(pF);
 			// TODO fix broken test
 			//Check(i, h, e, c, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test5()
 		{
 			// TODO --simplify-merges
@@ -170,17 +169,17 @@ namespace GitSharp.Tests.RevWalk
 			//Check(i, e, c, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test6()
 		{
 			Filter(pF);
 			Check(i, b, a);
 		}
 
-		[Test]
+		[Fact]
 		public void test7()
 		{
-			rw.sort(RevSort.TOPO);
+			Rw.sort(RevSort.TOPO);
 			Filter(pF);
 			Check(i, b, a);
 		}

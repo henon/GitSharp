@@ -41,12 +41,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Exceptions;
+using GitSharp.Tests.Util;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class ReadTreeTest : RepositoryTestCase
     {
         /*
@@ -86,32 +86,31 @@ namespace GitSharp.Tests
         private Tree _theMerge;
         private WorkDirCheckout _theReadTree;
 
-        // Methods
-        private void assertAllEmpty()
+        private void AssertAllEmpty()
         {
-            Assert.IsTrue(_theReadTree.Removed.isEmpty());
-            Assert.IsTrue(_theReadTree.Updated.isEmpty());
-            Assert.IsTrue(_theReadTree.Conflicts.isEmpty());
+            Assert.True(_theReadTree.Removed.isEmpty());
+            Assert.True(_theReadTree.Updated.isEmpty());
+            Assert.True(_theReadTree.Conflicts.isEmpty());
         }
 
         private void AssertConflict(string s)
         {
-            Assert.IsTrue(_theReadTree.Conflicts.Contains(s));
+            Assert.True(_theReadTree.Conflicts.Contains(s));
         }
 
         private void AssertNoConflicts()
         {
-            Assert.IsTrue(_theReadTree.Conflicts.isEmpty());
+            Assert.True(_theReadTree.Conflicts.isEmpty());
         }
 
         private void AssertRemoved(string s)
         {
-            Assert.IsTrue(_theReadTree.Removed.Contains(s));
+            Assert.True(_theReadTree.Removed.Contains(s));
         }
 
         private void AssertUpdated(string s)
         {
-            Assert.IsTrue(_theReadTree.Updated.ContainsKey(s));
+            Assert.True(_theReadTree.Updated.ContainsKey(s));
         }
 
         private GitIndex BuildIndex(Dictionary<string, string> indexEntries)
@@ -146,10 +145,11 @@ namespace GitSharp.Tests
             _theReadTree.checkout();
         }
 
-        private void cleanUpDF()
+        private void CleanUpDF()
         {
-            tearDown();
-            setUp();
+#warning This might not work
+			base.TearDown();
+			base.SetUp();
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "DF")));
         }
 
@@ -170,7 +170,7 @@ namespace GitSharp.Tests
             }
             catch (IOException exception)
             {
-                Assert.Fail(exception.ToString());
+                Assert.False(true, exception.ToString());
             }
             return null;
         }
@@ -209,31 +209,25 @@ namespace GitSharp.Tests
             _theIndex = BuildIndex(indexEntries);
         }
 
-        [Test]
+        [Fact]
         public void testCheckoutOutChanges()
         {
             SetupCase(MakeMap("foo"), MakeMap("foo/bar"), MakeMap("foo"));
             Checkout();
-            Assert.IsFalse(new FileInfo(Path.Combine(trash.FullName, "foo")).IsFile());
-            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo/bar")).IsFile());
+            Assert.False(new FileInfo(Path.Combine(trash.FullName, "foo")).IsFile());
+            Assert.True(new FileInfo(Path.Combine(trash.FullName, "foo/bar")).IsFile());
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
 
             SetupCase(MakeMap("foo/bar"), MakeMap("foo"), MakeMap("foo/bar"));
             Checkout();
-            Assert.IsFalse(new FileInfo(Path.Combine(trash.FullName, "foo/bar")).IsFile());
-            Assert.IsTrue(new FileInfo(Path.Combine(trash.FullName, "foo")).IsFile());
+            Assert.False(new FileInfo(Path.Combine(trash.FullName, "foo/bar")).IsFile());
+            Assert.True(new FileInfo(Path.Combine(trash.FullName, "foo")).IsFile());
             SetupCase(MakeMap("foo"), MakeMap(new[] { "foo", "qux" }), MakeMap(new[] { "foo", "bar" }));
-            try
-            {
-                Checkout();
-                Assert.Fail("did not throw exception");
-            }
-            catch (CheckoutConflictException)
-            {
-            }
+
+        	Assert.Throws<CheckoutConflictException>(Checkout);
         }
 
-        [Test]
+        [Fact]
         public void testCloseNameConflicts1()
         {
             SetupCase(MakeMap(new[] { "a/a", "a/a-c" }), MakeMap(new[] { "a/a", "a/a", "a.a/a.a", "a.a/a.a" }),
@@ -243,7 +237,7 @@ namespace GitSharp.Tests
             AssertNoConflicts();
         }
 
-        [Test]
+        [Fact]
         public void testCloseNameConflictsX0()
         {
             SetupCase(MakeMap(new[] { "a/a", "a/a-c" }),
@@ -254,7 +248,7 @@ namespace GitSharp.Tests
             AssertNoConflicts();
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_1()
         {
             DoIt(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF/DF"));
@@ -263,34 +257,34 @@ namespace GitSharp.Tests
             AssertRemoved("DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_10()
         {
-            cleanUpDF();
+            CleanUpDF();
             DoIt(MakeMap("DF"), MakeMap("DF/DF"), MakeMap("DF/DF"));
             AssertNoConflicts();
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_11()
         {
             DoIt(MakeMap("DF"), MakeMap("DF/DF"), MakeMap(new[] { "DF/DF", "asdf" }));
             AssertConflict("DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_12()
         {
-            cleanUpDF();
+            CleanUpDF();
             DoIt(MakeMap("DF"), MakeMap("DF/DF"), MakeMap("DF"));
             AssertRemoved("DF");
             AssertUpdated("DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_13()
         {
-            cleanUpDF();
+            CleanUpDF();
             SetupCase(MakeMap("DF"), MakeMap("DF/DF"), MakeMap("DF"));
             writeTrashFile("DF", "asdfsdf");
             Go();
@@ -298,16 +292,16 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_14()
         {
-            cleanUpDF();
+            CleanUpDF();
             DoIt(MakeMap("DF"), MakeMap("DF/DF"), MakeMap(new[] { "DF", "Foo" }));
             AssertConflict("DF");
             AssertUpdated("DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_15()
         {
             DoIt(MakeMap(new string[0]), MakeMap("DF/DF"), MakeMap("DF"));
@@ -315,7 +309,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_15b()
         {
             DoIt(MakeMap(new string[0]), MakeMap("DF/DF/DF/DF"), MakeMap("DF"));
@@ -323,19 +317,19 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF/DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_16()
         {
-            cleanUpDF();
+            CleanUpDF();
             DoIt(MakeMap(new string[0]), MakeMap("DF"), MakeMap("DF/DF/DF"));
             AssertRemoved("DF/DF/DF");
             AssertUpdated("DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_17()
         {
-            cleanUpDF();
+            CleanUpDF();
             SetupCase(MakeMap(new string[0]), MakeMap("DF"), MakeMap("DF/DF/DF"));
             writeTrashFile("DF/DF/DF", "asdf");
             Go();
@@ -343,25 +337,25 @@ namespace GitSharp.Tests
             AssertUpdated("DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_18()
         {
-            cleanUpDF();
+            CleanUpDF();
             DoIt(MakeMap("DF/DF"), MakeMap("DF/DF/DF/DF"), null);
             AssertRemoved("DF/DF");
             AssertUpdated("DF/DF/DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_19()
         {
-            cleanUpDF();
+            CleanUpDF();
             DoIt(MakeMap("DF/DF/DF/DF"), MakeMap("DF/DF/DF"), null);
             AssertRemoved("DF/DF/DF/DF");
             AssertUpdated("DF/DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_2()
         {
             SetupCase(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF/DF"));
@@ -370,7 +364,7 @@ namespace GitSharp.Tests
             AssertConflict("DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_3()
         {
             DoIt(MakeMap("DF/DF"), MakeMap("DF/DF"), MakeMap("DF"));
@@ -378,7 +372,7 @@ namespace GitSharp.Tests
             AssertRemoved("DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_4()
         {
             DoIt(MakeMap("DF/DF"), MakeMap(new[] { "DF/DF", "foo" }), MakeMap("DF"));
@@ -386,14 +380,14 @@ namespace GitSharp.Tests
             AssertRemoved("DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_5()
         {
             DoIt(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF"));
             AssertRemoved("DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_6()
         {
             SetupCase(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF"));
@@ -402,19 +396,19 @@ namespace GitSharp.Tests
             AssertRemoved("DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_7()
         {
             DoIt(MakeMap("DF"), MakeMap("DF"), MakeMap("DF/DF"));
             AssertUpdated("DF");
             AssertRemoved("DF/DF");
-            cleanUpDF();
+            CleanUpDF();
 
             SetupCase(MakeMap("DF/DF"), MakeMap("DF/DF"), MakeMap("DF/DF/DF/DF/DF"));
             Go();
             AssertRemoved("DF/DF/DF/DF/DF");
             AssertUpdated("DF/DF");
-            cleanUpDF();
+            CleanUpDF();
 
             SetupCase(MakeMap("DF/DF"), MakeMap("DF/DF"), MakeMap("DF/DF/DF/DF/DF"));
             writeTrashFile("DF/DF/DF/DF/DF", "diff");
@@ -423,7 +417,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileConflicts_9()
         {
             DoIt(MakeMap("DF"), MakeMap(new[] { "DF", "QP" }), MakeMap("DF/DF"));
@@ -431,7 +425,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF");
         }
 
-        [Test]
+        [Fact]
         public void testDirectoryFileSimple()
         {
             _theIndex = new GitIndex(db);
@@ -448,19 +442,19 @@ namespace GitSharp.Tests
             _theIndex.add(trash, writeTrashFile("DF", "DF"));
             _theReadTree = new WorkDirCheckout(db, trash, head, _theIndex, merge);
             _theReadTree.PrescanTwoTrees();
-            Assert.IsTrue(_theReadTree.Removed.Contains("DF"));
-            Assert.IsTrue(_theReadTree.Updated.ContainsKey("DF/DF"));
+            Assert.True(_theReadTree.Removed.Contains("DF"));
+            Assert.True(_theReadTree.Updated.ContainsKey("DF/DF"));
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "DF")));
 
             _theIndex = new GitIndex(db);
             _theIndex.add(trash, writeTrashFile("DF/DF", "DF/DF"));
             _theReadTree = new WorkDirCheckout(db, trash, merge, _theIndex, head);
             _theReadTree.PrescanTwoTrees();
-            Assert.IsTrue(_theReadTree.Removed.Contains("DF/DF"));
-            Assert.IsTrue(_theReadTree.Updated.ContainsKey("DF"));
+            Assert.True(_theReadTree.Removed.Contains("DF/DF"));
+            Assert.True(_theReadTree.Updated.ContainsKey("DF"));
         }
 
-        [Test]
+        [Fact]
         public void testRules1thru3_NoIndexEntry()
         {
             var index = new GitIndex(db);
@@ -471,47 +465,47 @@ namespace GitSharp.Tests
             var merge = new Tree(db);
             var checkout = new WorkDirCheckout(db, trash, head, index, merge);
             checkout.PrescanTwoTrees();
-            Assert.IsTrue(checkout.Removed.Contains("foo"));
+            Assert.True(checkout.Removed.Contains("foo"));
             checkout = new WorkDirCheckout(db, trash, merge, index, head);
             checkout.PrescanTwoTrees();
-            Assert.AreEqual(expected, checkout.Updated["foo"]);
+            Assert.Equal(expected, checkout.Updated["foo"]);
             ObjectId id2 = ObjectId.FromString("ba78e065e2c261d4f7b8f42107588051e87e18ee");
             merge.AddFile("foo").Id = id2;
             checkout = new WorkDirCheckout(db, trash, head, index, merge);
             checkout.PrescanTwoTrees();
-            Assert.AreEqual(id2, checkout.Updated["foo"]);
+            Assert.Equal(id2, checkout.Updated["foo"]);
         }
 
-        [Test]
+        [Fact]
         public void testRules4thru13_IndexEntryNotInHead()
         {
             // rule 4 and 5
             var indexEntries = new Dictionary<string, string> {{"foo", "foo"}};
             SetupCase(null, null, indexEntries);
             _theReadTree = Go();
-            assertAllEmpty();
+            AssertAllEmpty();
 
             // rule 6 and 7
             indexEntries = new Dictionary<string, string> { { "foo", "foo" } };
             SetupCase(null, indexEntries, indexEntries);
             _theReadTree = Go();
-            assertAllEmpty();
+            AssertAllEmpty();
 
             // rule 8 and 9
             var mergeEntries = new Dictionary<string, string> { { "foo", "merge" } };
             SetupCase(null, mergeEntries, indexEntries);
             Go();
-            Assert.IsTrue(_theReadTree.Updated.isEmpty());
-            Assert.IsTrue(_theReadTree.Removed.isEmpty());
-            Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
+            Assert.True(_theReadTree.Updated.isEmpty());
+            Assert.True(_theReadTree.Removed.isEmpty());
+            Assert.True(_theReadTree.Conflicts.Contains("foo"));
 
             // rule 10
             var headEntries = new Dictionary<string, string> { { "foo", "foo" } };
             SetupCase(headEntries, null, indexEntries);
             Go();
-            Assert.IsTrue(_theReadTree.Removed.Contains("foo"));
-            Assert.IsTrue(_theReadTree.Updated.isEmpty());
-            Assert.IsTrue(_theReadTree.Conflicts.isEmpty());
+            Assert.True(_theReadTree.Removed.Contains("foo"));
+            Assert.True(_theReadTree.Updated.isEmpty());
+            Assert.True(_theReadTree.Conflicts.isEmpty());
 
             // rule 11
             SetupCase(headEntries, null, indexEntries);
@@ -519,37 +513,37 @@ namespace GitSharp.Tests
             writeTrashFile("foo", "bar");
             _theIndex.Members[0].forceRecheck();
             Go();
-            Assert.IsTrue(_theReadTree.Removed.isEmpty());
-            Assert.IsTrue(_theReadTree.Updated.isEmpty());
-            Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
+            Assert.True(_theReadTree.Removed.isEmpty());
+            Assert.True(_theReadTree.Updated.isEmpty());
+            Assert.True(_theReadTree.Conflicts.Contains("foo"));
 
             // rule 12 and 13
             headEntries["foo"] = "head";
             SetupCase(headEntries, null, indexEntries);
             Go();
-            Assert.IsTrue(_theReadTree.Removed.isEmpty());
-            Assert.IsTrue(_theReadTree.Updated.isEmpty());
-            Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
+            Assert.True(_theReadTree.Removed.isEmpty());
+            Assert.True(_theReadTree.Updated.isEmpty());
+            Assert.True(_theReadTree.Conflicts.Contains("foo"));
 
             // rule 14 and 15
             SetupCase(headEntries, headEntries, indexEntries);
             Go();
-            assertAllEmpty();
+            AssertAllEmpty();
 
             // rule 16 and 17
             SetupCase(headEntries, mergeEntries, indexEntries);
             Go();
-            Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
+            Assert.True(_theReadTree.Conflicts.Contains("foo"));
 
             // rule 18 and 19
             SetupCase(headEntries, indexEntries, indexEntries);
             Go();
-            assertAllEmpty();
+            AssertAllEmpty();
 
             // rule 20
             SetupCase(indexEntries, mergeEntries, indexEntries);
             Go();
-            Assert.IsTrue(_theReadTree.Updated.ContainsKey("foo"));
+            Assert.True(_theReadTree.Updated.ContainsKey("foo"));
 
             // rule 21
             SetupCase(indexEntries, mergeEntries, indexEntries);
@@ -557,10 +551,10 @@ namespace GitSharp.Tests
             writeTrashFile("foo", "bar");
             _theIndex.Members[0].forceRecheck();
             Go();
-            Assert.IsTrue(_theReadTree.Conflicts.Contains("foo"));
+            Assert.True(_theReadTree.Conflicts.Contains("foo"));
         }
 
-        [Test]
+        [Fact]
         public void testUntrackedConflicts()
         {
             SetupCase(null, MakeMap("foo"), null);
@@ -577,7 +571,7 @@ namespace GitSharp.Tests
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "foo")));
             SetupCase(MakeMap(new[] { "foo/bar", "", "foo/baz", "" }), MakeMap("foo"),
                       MakeMap(new[] { "foo/bar", "", "foo/baz", "" }));
-            Assert.IsTrue(new DirectoryInfo(Path.Combine(trash.FullName, "foo")).Exists);
+            Assert.True(new DirectoryInfo(Path.Combine(trash.FullName, "foo")).Exists);
             Go();
             AssertNoConflicts();
         }

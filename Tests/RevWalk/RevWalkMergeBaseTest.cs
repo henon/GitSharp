@@ -36,43 +36,42 @@
  */
 
 using System;
-using GitSharp.RevWalk.Filter;
 using GitSharp.RevWalk;
+using GitSharp.RevWalk.Filter;
 using GitSharp.TreeWalk.Filter;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public class RevWalkMergeBaseTest : RevWalkTestCase
     {
-        [Test]
+        [Fact]
         public void testNone()
         {
             RevCommit c1 = Commit(Commit(Commit()));
             RevCommit c2 = Commit(Commit(Commit()));
 
-            rw.setRevFilter(RevFilter.MERGE_BASE);
+            Rw.setRevFilter(RevFilter.MERGE_BASE);
             MarkStart(c1);
             MarkStart(c2);
-            Assert.IsNull(rw.next());
+            Assert.Null(Rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testDisallowTreeFilter()
         {
             RevCommit c1 = Commit();
             RevCommit c2 = Commit();
 
-            rw.setRevFilter(RevFilter.MERGE_BASE);
-            rw.setTreeFilter(TreeFilter.ANY_DIFF);
+            Rw.setRevFilter(RevFilter.MERGE_BASE);
+            Rw.setTreeFilter(TreeFilter.ANY_DIFF);
             MarkStart(c1);
             MarkStart(c2);
 
-			AssertHelper.Throws<InvalidOperationException>(() => Assert.IsNull(rw.next()));
+			Assert.Throws<InvalidOperationException>(() => Assert.Null(Rw.next()));
         }
 
-        [Test]
+        [Fact]
         public void testSimple()
         {
             RevCommit a = Commit();
@@ -80,14 +79,14 @@ namespace GitSharp.Tests.RevWalk
             RevCommit c1 = Commit(Commit(Commit(Commit(Commit(b)))));
             RevCommit c2 = Commit(Commit(Commit(Commit(Commit(b)))));
 
-            rw.setRevFilter(RevFilter.MERGE_BASE);
+            Rw.setRevFilter(RevFilter.MERGE_BASE);
             MarkStart(c1);
             MarkStart(c2);
-            AssertCommit(b, rw.next());
-            Assert.IsNull(rw.next());
+            AssertCommit(b, Rw.next());
+            Assert.Null(Rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testMultipleHeads_SameBase1()
         {
             RevCommit a = Commit();
@@ -96,15 +95,15 @@ namespace GitSharp.Tests.RevWalk
             RevCommit c2 = Commit(Commit(Commit(Commit(Commit(b)))));
             RevCommit c3 = Commit(Commit(Commit(b)));
 
-            rw.setRevFilter(RevFilter.MERGE_BASE);
+            Rw.setRevFilter(RevFilter.MERGE_BASE);
             MarkStart(c1);
             MarkStart(c2);
             MarkStart(c3);
-            AssertCommit(b, rw.next());
-            Assert.IsNull(rw.next());
+            AssertCommit(b, Rw.next());
+            Assert.Null(Rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testMultipleHeads_SameBase2()
         {
             RevCommit a = Commit();
@@ -114,15 +113,15 @@ namespace GitSharp.Tests.RevWalk
             RevCommit d2 = Commit(Commit(Commit(Commit(Commit(c)))));
             RevCommit d3 = Commit(Commit(Commit(c)));
 
-            rw.setRevFilter(RevFilter.MERGE_BASE);
+            Rw.setRevFilter(RevFilter.MERGE_BASE);
             MarkStart(d1);
             MarkStart(d2);
             MarkStart(d3);
-            AssertCommit(b, rw.next());
-            Assert.IsNull(rw.next());
+            AssertCommit(b, Rw.next());
+            Assert.Null(Rw.next());
         }
 
-        [Test]
+        [Fact]
         public void testCrissCross()
         {
             // See http://marc.info/?l=git&m=111463358500362&w=2 for a nice
@@ -136,12 +135,12 @@ namespace GitSharp.Tests.RevWalk
             RevCommit d = Commit(b, c);
             RevCommit e = Commit(c, b);
 
-            rw.setRevFilter(RevFilter.MERGE_BASE);
+            Rw.setRevFilter(RevFilter.MERGE_BASE);
             MarkStart(d);
             MarkStart(e);
-            AssertCommit(c, rw.next());
-            AssertCommit(b, rw.next());
-            Assert.IsNull(rw.next());
+            AssertCommit(c, Rw.next());
+            AssertCommit(b, Rw.next());
+            Assert.Null(Rw.next());
         }
     }
 }

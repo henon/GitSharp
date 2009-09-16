@@ -36,51 +36,50 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Patch;
-using NUnit.Framework;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Diagnostics;
+using GitSharp.Patch;
+using Xunit;
 
 namespace GitSharp.Tests.Patch
 {
-    [TestFixture]
     public class GetTextTest : BasePatchTest
     {
-        [Test]
+        [Fact]
         public void testGetText_BothISO88591()
         {
             Encoding cs = Encoding.GetEncoding("ISO-8859-1");
             GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_BothISO88591.patch");
-            Assert.IsTrue(p.getErrors().Count == 0);
-            Assert.AreEqual(1, p.getFiles().Count);
+            Assert.True(p.getErrors().Count == 0);
+            Assert.Equal(1, p.getFiles().Count);
             FileHeader fh = p.getFiles()[0];
-            Assert.AreEqual(2, fh.Hunks.Count);
-            Assert.AreEqual(ReadTestPatchFile(cs), fh.getScriptText(cs, cs));
+            Assert.Equal(2, fh.Hunks.Count);
+            Assert.Equal(ReadTestPatchFile(cs), fh.getScriptText(cs, cs));
         }
 
-        [Test]
+        [Fact]
         public void testGetText_NoBinary()
         {
             Encoding cs = Encoding.GetEncoding("ISO-8859-1");
             GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_NoBinary.patch");
-            Assert.IsTrue(p.getErrors().Count == 0);
-            Assert.AreEqual(1, p.getFiles().Count);
+            Assert.True(p.getErrors().Count == 0);
+            Assert.Equal(1, p.getFiles().Count);
             FileHeader fh = p.getFiles()[0];
-            Assert.AreEqual(0, fh.Hunks.Count);
-            Assert.AreEqual(ReadTestPatchFile(cs), fh.getScriptText(cs, cs));
+            Assert.Equal(0, fh.Hunks.Count);
+            Assert.Equal(ReadTestPatchFile(cs), fh.getScriptText(cs, cs));
         }
 
-        [Test]
+        [Fact]
         public void testGetText_Convert()
         {
             Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
             Encoding csNew = Constants.CHARSET;
             GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_Convert.patch");
-            Assert.IsTrue(p.getErrors().Count == 0);
-            Assert.AreEqual(1, p.getFiles().Count);
+            Assert.True(p.getErrors().Count == 0);
+            Assert.Equal(1, p.getFiles().Count);
             FileHeader fh = p.getFiles()[0];
-            Assert.AreEqual(2, fh.Hunks.Count);
+            Assert.Equal(2, fh.Hunks.Count);
 
             // Read the original File as ISO-8859-1 and fix up the one place
             // where we changed the character encoding. That makes the exp
@@ -89,19 +88,19 @@ namespace GitSharp.Tests.Patch
             string exp = ReadTestPatchFile(csOld);
             exp = exp.Replace("\u00c3\u0085ngstr\u00c3\u00b6m", "\u00c5ngstr\u00f6m");
 
-            Assert.AreEqual(exp, fh.getScriptText(csOld, csNew));
+            Assert.Equal(exp, fh.getScriptText(csOld, csNew));
         }
 
-        [Test]
+        [Fact]
         public void testGetText_DiffCc()
         {
             Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
             Encoding csNew = Constants.CHARSET;
             GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_DiffCc.patch");
-            Assert.IsTrue(p.getErrors().Count == 0);
-            Assert.AreEqual(1, p.getFiles().Count);
+            Assert.True(p.getErrors().Count == 0);
+            Assert.Equal(1, p.getFiles().Count);
             var fh = (CombinedFileHeader)p.getFiles()[0];
-            Assert.AreEqual(1, fh.Hunks.Count);
+            Assert.Equal(1, fh.Hunks.Count);
 
             // Read the original File as ISO-8859-1 and fix up the one place
             // where we changed the character encoding. That makes the exp
@@ -110,7 +109,7 @@ namespace GitSharp.Tests.Patch
             string exp = ReadTestPatchFile(csOld);
             exp = exp.Replace("\u00c3\u0085ngstr\u00c3\u00b6m", "\u00c5ngstr\u00f6m");
 
-            Assert.AreEqual(exp, fh.getScriptText(new[] { csNew, csOld, csNew }));
+            Assert.Equal(exp, fh.getScriptText(new[] { csNew, csOld, csNew }));
         }
 
         private static string ReadTestPatchFile(Encoding cs)

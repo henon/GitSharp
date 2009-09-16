@@ -1,52 +1,51 @@
 ﻿using System;
 using System.IO;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class StringExtensionsFixture
     {
-        [Test]
+        [Fact]
         public void GetBytesShouldNotGenerateABOMWhenWorkingInUTF8()
         {
             string filePath = Path.GetTempFileName();
 
             File.WriteAllBytes(filePath, "a".getBytes("UTF-8"));
 
-            Assert.AreEqual(1, new FileInfo(filePath).Length);
+            Assert.Equal(1, new FileInfo(filePath).Length);
         }
 
-        [Test]
+        [Fact]
         public void GetBytesShouldThrowIfPassedAnUnknownEncodingAlias()
         {
-            AssertHelper.Throws<ArgumentException>(() => "a".getBytes("Dummy"));
+            Assert.Throws<ArgumentException>(() => "a".getBytes("Dummy"));
         }
 
-        [Test]
+        [Fact]
         public void SliceShouldReturnExpectedResult()
         {
-            Assert.AreEqual("urge", "hamburger".Slice(4, 8));
-            Assert.AreEqual("mile", "smiles".Slice(1, 5));
+            Assert.Equal("urge", "hamburger".Slice(4, 8));
+            Assert.Equal("mile", "smiles".Slice(1, 5));
         }
 
-        [Test]
+        [Fact]
         public void SliceShouldThrowIfBeginIndexIsNegative()
         {
-            AssertHelper.Throws<ArgumentOutOfRangeException>(() => "hamburger".Slice(-1, 8));
+            Assert.Throws<ArgumentOutOfRangeException>(() => "hamburger".Slice(-1, 8));
         }
 
-        [Test]
+        [Fact]
         public void SliceShouldThrowIfEndIndexIsGreaterThanTheLengthOfTheString()
         {
-            AssertHelper.Throws<ArgumentOutOfRangeException>(() => "hamburger".Slice(4, 42));
+            Assert.Throws<ArgumentOutOfRangeException>(() => "hamburger".Slice(4, 42));
         }
 
-        [Test]
+        [Fact]
         public void SliceShouldThrowIfBeginIndexIsGreaterThanEndIndex()
         {
-            AssertHelper.Throws<ArgumentOutOfRangeException>(() => "hamburger".Slice(8, 4));
+            Assert.Throws<ArgumentOutOfRangeException>(() => "hamburger".Slice(8, 4));
         }
     }
 }

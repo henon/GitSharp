@@ -40,17 +40,17 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using GitSharp.Tests.Util;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-	[TestFixture]
 	public class TreeTests : RepositoryTestCase
 	{
 		private static readonly ObjectId SomeFakeId = ObjectId.FromString("0123456789abcdef0123456789abcdef01234567");
 
-		private static int CompareNamesUsingSpecialCompare(String a, String b)
+		private static int CompareNamesUsingSpecialCompare(string a, string b)
 		{
 			char lasta = '\0';
 			if (a.Length > 0 && a[a.Length - 1] == '/')
@@ -69,195 +69,195 @@ namespace GitSharp.Tests
 			return Tree.CompareNames(abytes, bbytes, lasta, lastb);
 		}
 
-		[Test]
+		[Fact]
 		public void test000_sort_01()
 		{
-			Assert.AreEqual(0, CompareNamesUsingSpecialCompare("a", "a"));
+			Assert.Equal(0, CompareNamesUsingSpecialCompare("a", "a"));
 		}
 
-		[Test]
+		[Fact]
 		public void test000_sort_02()
 		{
-			Assert.AreEqual(-1, CompareNamesUsingSpecialCompare("a", "b"));
-			Assert.AreEqual(1, CompareNamesUsingSpecialCompare("b", "a"));
+			Assert.Equal(-1, CompareNamesUsingSpecialCompare("a", "b"));
+			Assert.Equal(1, CompareNamesUsingSpecialCompare("b", "a"));
 		}
 
-		[Test]
+		[Fact]
 		public void test000_sort_03()
 		{
-			Assert.AreEqual(1, CompareNamesUsingSpecialCompare("a:", "a"));
-			Assert.AreEqual(1, CompareNamesUsingSpecialCompare("a/", "a"));
-			Assert.AreEqual(-1, CompareNamesUsingSpecialCompare("a", "a/"));
-			Assert.AreEqual(-1, CompareNamesUsingSpecialCompare("a", "a:"));
-			Assert.AreEqual(1, CompareNamesUsingSpecialCompare("a:", "a/"));
-			Assert.AreEqual(-1, CompareNamesUsingSpecialCompare("a/", "a:"));
+			Assert.Equal(1, CompareNamesUsingSpecialCompare("a:", "a"));
+			Assert.Equal(1, CompareNamesUsingSpecialCompare("a/", "a"));
+			Assert.Equal(-1, CompareNamesUsingSpecialCompare("a", "a/"));
+			Assert.Equal(-1, CompareNamesUsingSpecialCompare("a", "a:"));
+			Assert.Equal(1, CompareNamesUsingSpecialCompare("a:", "a/"));
+			Assert.Equal(-1, CompareNamesUsingSpecialCompare("a/", "a:"));
 		}
 
-		[Test]
+		[Fact]
 		public void test000_sort_04()
 		{
-			Assert.AreEqual(-1, CompareNamesUsingSpecialCompare("a.a", "a/a"));
-			Assert.AreEqual(1, CompareNamesUsingSpecialCompare("a/a", "a.a"));
+			Assert.Equal(-1, CompareNamesUsingSpecialCompare("a.a", "a/a"));
+			Assert.Equal(1, CompareNamesUsingSpecialCompare("a/a", "a.a"));
 		}
 
-		[Test]
+		[Fact]
 		public void test000_sort_05()
 		{
-			Assert.AreEqual(-1, CompareNamesUsingSpecialCompare("a.", "a/"));
-			Assert.AreEqual(1, CompareNamesUsingSpecialCompare("a/", "a."));
+			Assert.Equal(-1, CompareNamesUsingSpecialCompare("a.", "a/"));
+			Assert.Equal(1, CompareNamesUsingSpecialCompare("a/", "a."));
 		}
 
-		[Test]
+		[Fact]
 		public void test001_createEmpty()
 		{
 			var t = new Tree(db);
-			Assert.IsTrue(t.IsLoaded);
-			Assert.IsTrue(t.IsModified);
-			Assert.IsTrue(t.Parent == null);
-			Assert.IsTrue(t.IsRoot);
-			Assert.IsTrue(t.Name == null);
-			Assert.IsTrue(t.NameUTF8 == null);
-			Assert.IsTrue(t.Members != null);
-			Assert.IsTrue(t.Members.Length == 0);
-			Assert.AreEqual(string.Empty, t.FullName);
-			Assert.IsTrue(t.Id == null);
-			Assert.IsTrue(t.TreeEntry == t);
-			Assert.IsTrue(t.Repository == db);
-			Assert.IsTrue(t.findTreeMember("foo") == null);
-			Assert.IsTrue(t.FindBlobMember("foo") == null);
+			Assert.True(t.IsLoaded);
+			Assert.True(t.IsModified);
+			Assert.True(t.Parent == null);
+			Assert.True(t.IsRoot);
+			Assert.True(t.Name == null);
+			Assert.True(t.NameUTF8 == null);
+			Assert.True(t.Members != null);
+			Assert.True(t.Members.Length == 0);
+			Assert.Equal(string.Empty, t.FullName);
+			Assert.True(t.Id == null);
+			Assert.True(t.TreeEntry == t);
+			Assert.True(t.Repository == db);
+			Assert.True(t.findTreeMember("foo") == null);
+			Assert.True(t.FindBlobMember("foo") == null);
 		}
 
-		[Test]
+		[Fact]
 		public void test002_addFile()
 		{
 			var t = new Tree(db) { Id = SomeFakeId };
-			Assert.IsTrue(t.Id != null);
-			Assert.IsFalse(t.IsModified);
+			Assert.True(t.Id != null);
+			Assert.False(t.IsModified);
 
 			const string n = "bob";
 			FileTreeEntry f = t.AddFile(n);
-			Assert.IsNotNull(f);
-			Assert.AreEqual(n, f.Name);
-            Assert.AreEqual(f.Name, Constants.CHARSET.GetString(f.NameUTF8));
-			Assert.AreEqual(n, f.FullName);
-			Assert.IsTrue(f.Id == null);
-			Assert.IsTrue(t.IsModified);
-			Assert.IsTrue(t.Id == null);
-			Assert.IsTrue(t.FindBlobMember(f.Name) == f);
+			Assert.NotNull(f);
+			Assert.Equal(n, f.Name);
+            Assert.Equal(f.Name, Constants.CHARSET.GetString(f.NameUTF8));
+			Assert.Equal(n, f.FullName);
+			Assert.True(f.Id == null);
+			Assert.True(t.IsModified);
+			Assert.True(t.Id == null);
+			Assert.True(t.FindBlobMember(f.Name) == f);
 
 			TreeEntry[] i = t.Members;
-			Assert.IsNotNull(i);
-			Assert.IsTrue(i != null && i.Length > 0);
-			Assert.IsTrue(i != null && i[0] == f);
-			Assert.IsTrue(i != null && i.Length == 1);
+			Assert.NotNull(i);
+			Assert.True(i != null && i.Length > 0);
+			Assert.True(i != null && i[0] == f);
+			Assert.True(i != null && i.Length == 1);
 		}
 
-		[Test]
+		[Fact]
 		public void test004_addTree()
 		{
 			var t = new Tree(db) {Id = SomeFakeId};
-			Assert.IsTrue(t.Id != null);
-			Assert.IsFalse(t.IsModified);
+			Assert.True(t.Id != null);
+			Assert.False(t.IsModified);
 
 			const string n = "bob";
 			Tree f = t.AddTree(n);
-			Assert.IsNotNull(f);
-			Assert.AreEqual(n, f.Name);
-            Assert.AreEqual(f.Name, Constants.CHARSET.GetString(f.NameUTF8));
-			Assert.AreEqual(n, f.FullName);
-			Assert.IsTrue(f.Id == null);
-			Assert.IsTrue(f.Parent == t);
-			Assert.IsTrue(f.Repository == db);
-			Assert.IsTrue(f.IsLoaded);
-			Assert.IsFalse(f.Members.Length > 0);
-			Assert.IsFalse(f.IsRoot);
-			Assert.IsTrue(f.TreeEntry == f);
-			Assert.IsTrue(t.IsModified);
-			Assert.IsTrue(t.Id == null);
-			Assert.IsTrue(t.findTreeMember(f.Name) == f);
+			Assert.NotNull(f);
+			Assert.Equal(n, f.Name);
+            Assert.Equal(f.Name, Constants.CHARSET.GetString(f.NameUTF8));
+			Assert.Equal(n, f.FullName);
+			Assert.True(f.Id == null);
+			Assert.True(f.Parent == t);
+			Assert.True(f.Repository == db);
+			Assert.True(f.IsLoaded);
+			Assert.False(f.Members.Length > 0);
+			Assert.False(f.IsRoot);
+			Assert.True(f.TreeEntry == f);
+			Assert.True(t.IsModified);
+			Assert.True(t.Id == null);
+			Assert.True(t.findTreeMember(f.Name) == f);
 
 			TreeEntry[] i = t.Members;
-			Assert.IsTrue(i.Length > 0);
-			Assert.IsTrue(i[0] == f);
-			Assert.IsTrue(i.Length == 1);
+			Assert.True(i.Length > 0);
+			Assert.True(i[0] == f);
+			Assert.True(i.Length == 1);
 		}
 
-		[Test]
+		[Fact]
 		public void test005_addRecursiveFile()
 		{
 			var t = new Tree(db);
 			FileTreeEntry f = t.AddFile("a/b/c");
-			Assert.IsNotNull(f);
-			Assert.AreEqual(f.Name, "c");
-			Assert.AreEqual(f.Parent.Name, "b");
-			Assert.AreEqual(f.Parent.Parent.Name, "a");
-			Assert.IsTrue(t == f.Parent.Parent.Parent, "t is great-grandparent");
+			Assert.NotNull(f);
+			Assert.Equal(f.Name, "c");
+			Assert.Equal(f.Parent.Name, "b");
+			Assert.Equal(f.Parent.Parent.Name, "a");
+			Assert.True(t == f.Parent.Parent.Parent, "t is great-grandparent");
 		}
 
-		[Test]
+		[Fact]
 		public void test005_addRecursiveTree()
 		{
 			var t = new Tree(db);
 			Tree f = t.AddTree("a/b/c");
-			Assert.IsNotNull(f);
-			Assert.AreEqual(f.Name, "c");
-			Assert.AreEqual(f.Parent.Name, "b");
-			Assert.AreEqual(f.Parent.Parent.Name, "a");
-			Assert.IsTrue(t == f.Parent.Parent.Parent, "t is great-grandparent");
+			Assert.NotNull(f);
+			Assert.Equal(f.Name, "c");
+			Assert.Equal(f.Parent.Name, "b");
+			Assert.Equal(f.Parent.Parent.Name, "a");
+			Assert.True(t == f.Parent.Parent.Parent, "t is great-grandparent");
 		}
 
-		[Test]
+		[Fact]
 		public void test006_addDeepTree()
 		{
 			var t = new Tree(db);
 
 			Tree e = t.AddTree("e");
-			Assert.IsNotNull(e);
-			Assert.IsTrue(e.Parent == t);
+			Assert.NotNull(e);
+			Assert.True(e.Parent == t);
 			Tree f = t.AddTree("f");
-			Assert.IsNotNull(f);
-			Assert.IsTrue(f.Parent == t);
+			Assert.NotNull(f);
+			Assert.True(f.Parent == t);
 			Tree g = f.AddTree("g");
-			Assert.IsNotNull(g);
-			Assert.IsTrue(g.Parent == f);
+			Assert.NotNull(g);
+			Assert.True(g.Parent == f);
 			Tree h = g.AddTree("h");
-			Assert.IsNotNull(h);
-			Assert.IsTrue(h.Parent == g);
+			Assert.NotNull(h);
+			Assert.True(h.Parent == g);
 
 			h.Id = SomeFakeId;
-			Assert.IsTrue(!h.IsModified);
+			Assert.True(!h.IsModified);
 			g.Id = SomeFakeId;
-			Assert.IsTrue(!g.IsModified);
+			Assert.True(!g.IsModified);
 			f.Id = SomeFakeId;
-			Assert.IsTrue(!f.IsModified);
+			Assert.True(!f.IsModified);
 			e.Id = SomeFakeId;
-			Assert.IsTrue(!e.IsModified);
+			Assert.True(!e.IsModified);
 			t.Id = SomeFakeId;
-			Assert.IsTrue(!t.IsModified);
+			Assert.True(!t.IsModified);
 
-			Assert.AreEqual("f/g/h", h.FullName);
-			Assert.IsTrue(t.findTreeMember(h.FullName) == h);
-			Assert.IsTrue(t.FindBlobMember("f/z") == null);
-			Assert.IsTrue(t.FindBlobMember("y/z") == null);
+			Assert.Equal("f/g/h", h.FullName);
+			Assert.True(t.findTreeMember(h.FullName) == h);
+			Assert.True(t.FindBlobMember("f/z") == null);
+			Assert.True(t.FindBlobMember("y/z") == null);
 
 			FileTreeEntry i = h.AddFile("i");
-			Assert.IsNotNull(i);
-			Assert.AreEqual("f/g/h/i", i.FullName);
-			Assert.IsTrue(t.FindBlobMember(i.FullName) == i);
-			Assert.IsTrue(h.IsModified);
-			Assert.IsTrue(g.IsModified);
-			Assert.IsTrue(f.IsModified);
-			Assert.IsTrue(!e.IsModified);
-			Assert.IsTrue(t.IsModified);
+			Assert.NotNull(i);
+			Assert.Equal("f/g/h/i", i.FullName);
+			Assert.True(t.FindBlobMember(i.FullName) == i);
+			Assert.True(h.IsModified);
+			Assert.True(g.IsModified);
+			Assert.True(f.IsModified);
+			Assert.True(!e.IsModified);
+			Assert.True(t.IsModified);
 
-			Assert.IsTrue(h.Id == null);
-			Assert.IsTrue(g.Id == null);
-			Assert.IsTrue(f.Id == null);
-			Assert.IsTrue(e.Id != null);
-			Assert.IsTrue(t.Id == null);
+			Assert.True(h.Id == null);
+			Assert.True(g.Id == null);
+			Assert.True(f.Id == null);
+			Assert.True(e.Id != null);
+			Assert.True(t.Id == null);
 		}
 
-		[Test]
+		[Fact]
 		public void test007_manyFileLookup()
 		{
 			var t = new Tree(db);
@@ -268,22 +268,22 @@ namespace GitSharp.Tests
 				{
 					String n = "." + level1 + level2 + "9";
 					FileTreeEntry f = t.AddFile(n);
-					Assert.IsNotNull(f, "File " + n + " added.");
-					Assert.AreEqual(n, f.Name);
+					Assert.NotNull(f);
+					Assert.Equal(n, f.Name);
 					files.Add(f);
 				}
 			}
-			Assert.AreEqual(files.Count, t.MemberCount);
+			Assert.Equal(files.Count, t.MemberCount);
 			TreeEntry[] ents = t.Members;
-			Assert.IsNotNull(ents);
-			Assert.AreEqual(files.Count, ents.Length);
+			Assert.NotNull(ents);
+			Assert.Equal(files.Count, ents.Length);
 			for (int k = 0; k < ents.Length; k++)
 			{
-				Assert.IsTrue(files[k] == ents[k], "File " + files[k].Name + " is at " + k + ".");
+				Assert.True(files[k] == ents[k], "File " + files[k].Name + " is at " + k + ".");
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void test008_SubtreeInternalSorting()
 		{
 			var t = new Tree(db);
@@ -294,12 +294,11 @@ namespace GitSharp.Tests
 			FileTreeEntry e4 = t.AddFile("a=");
 
 			TreeEntry[] ents = t.Members;
-			Assert.AreSame(e1, ents[0]);
-			Assert.AreSame(e0, ents[1]);
-			Assert.AreSame(e3, ents[2]);
-			Assert.AreSame(e4, ents[3]);
-			Assert.AreSame(e2, ents[4]);
+			Assert.Same(e1, ents[0]);
+			Assert.Same(e0, ents[1]);
+			Assert.Same(e3, ents[2]);
+			Assert.Same(e4, ents[3]);
+			Assert.Same(e2, ents[4]);
 		}
-
 	}
 }

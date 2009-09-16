@@ -38,15 +38,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
 using System.IO;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-	[TestFixture]
-	public class PackIndexTests
+	public class PackIndexTests : XunitBaseFact
 	{
-		[Test]
+		[Fact]
 		public void ObjectList()
 		{
 			var knownOffsets = new long[] { 370, 349, 304, 12, 175, 414 };
@@ -59,15 +58,15 @@ namespace GitSharp.Tests
 
 			var index = PackIndex.Open(indexFile);
 	
-			Assert.AreEqual(6, index.ObjectCount);
-			Assert.IsTrue(index.HasCRC32Support);
+			Assert.Equal(6, index.ObjectCount);
+			Assert.True(index.HasCRC32Support);
 			
 			var i = 0;
 			foreach (var item in index)
 			{
-				Assert.AreEqual(knownObjectIds[i], item.ToString().ToUpper(), "ObjectListId#" + i);
-				Assert.AreEqual(knownOffsets[i], item.Offset, "ObjectListOffset#" + i);
-				Assert.AreEqual(knownCrcs[i], index.FindCRC32(item.idBuffer), "ObjectListCRC#" + i);
+				Assert.Equal(knownObjectIds[i], item.ToString().ToUpper());
+				Assert.Equal(knownOffsets[i], item.Offset);
+				Assert.Equal(knownCrcs[i], index.FindCRC32(item.idBuffer));
 				i++;
 			}
 		}

@@ -38,164 +38,173 @@
 
 using System;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Util
 {
-    [TestFixture]
-    public class IntListTest
-    {
-        [Test]
-	    public void testEmpty_DefaultCapacity()
-        {
-		    IntList i = new IntList();
-		    Assert.AreEqual(0, i.size());
-		    try
-            {
-			    i.get(0);
-			    Assert.Fail("Accepted 0 index on empty list");
-		    }
-            catch (IndexOutOfRangeException)
-            {
-			    Assert.IsTrue(true);
-		    }
-	    }
+	public class IntListTest
+	{
+		[Fact]
+		public void testEmpty_DefaultCapacity()
+		{
+			var i = new IntList();
+			Assert.Equal(0, i.size());
+			try
+			{
+				i.get(0);
+				Assert.False(true, "Accepted 0 index on empty list");
+			}
+			catch (IndexOutOfRangeException)
+			{
+				Assert.True(true);
+			}
+		}
 
-        [Test]
-	    public void testEmpty_SpecificCapacity()
-        {
-		    IntList i = new IntList(5);
-		    Assert.AreEqual(0, i.size());
-		    try
-            {
-			    i.get(0);
-			    Assert.Fail("Accepted 0 index on empty list");
-		    }
-            catch (IndexOutOfRangeException)
-            {
-                Assert.IsTrue(true);
-		    }
-	    }
+		[Fact]
+		public void testEmpty_SpecificCapacity()
+		{
+			var i = new IntList(5);
+			Assert.Equal(0, i.size());
+			try
+			{
+				i.get(0);
+				Assert.False(true, "Accepted 0 index on empty list");
+			}
+			catch (IndexOutOfRangeException)
+			{
+				Assert.True(true);
+			}
+		}
 
-        [Test]
-	    public void testAdd_SmallGroup()
-        {
-		    IntList i = new IntList();
-		    int n = 5;
-		    for (int v = 0; v < n; v++)
-			    i.add(10 + v);
+		[Fact]
+		public void testAdd_SmallGroup()
+		{
+			var i = new IntList();
+			const int n = 5;
+			for (int v = 0; v < n; v++)
+			{
+				i.add(10 + v);
+			}
 		    
-            Assert.AreEqual(n, i.size());
+			Assert.Equal(n, i.size());
 
-		    for (int v = 0; v < n; v++)
-                Assert.AreEqual(10 + v, i.get(v));
+			for (int v = 0; v < n; v++)
+			{
+				Assert.Equal(10 + v, i.get(v));
+			}
 
-		    try
-            {
-			    i.get(n);
-			    Assert.Fail("Accepted out of bound index on list");
-		    }
-            catch (IndexOutOfRangeException)
-            {
-			    Assert.IsTrue(true);
-		    }
-	    }
+			try
+			{
+				i.get(n);
+				Assert.False(true, "Accepted out of bound index on list");
+			}
+			catch (IndexOutOfRangeException)
+			{
+				Assert.True(true);
+			}
+		}
 
-        [Test]
-	    public void testAdd_ZeroCapacity()
-        {
-		    IntList i = new IntList(0);
-		    Assert.AreEqual(0, i.size());
-		    i.add(1);
-            Assert.AreEqual(1, i.get(0));
-	    }
+		[Fact]
+		public void testAdd_ZeroCapacity()
+		{
+			var i = new IntList(0);
+			Assert.Equal(0, i.size());
+			i.add(1);
+			Assert.Equal(1, i.get(0));
+		}
 
-        [Test]
-	    public void testAdd_LargeGroup()
-        {
-		    IntList i = new IntList();
-		    int n = 500;
-		    for (int v = 0; v < n; v++)
-			    i.add(10 + v);
+		[Fact]
+		public void testAdd_LargeGroup()
+		{
+			const int n = 500;
+			var i = new IntList();
+			for (int v = 0; v < n; v++)
+			{
+				i.add(10 + v);
+			}
             
-            Assert.AreEqual(n, i.size());
+			Assert.Equal(n, i.size());
 
-		    for (int v = 0; v < n; v++)
-                Assert.AreEqual(10 + v, i.get(v));
+			for (int v = 0; v < n; v++)
+			{
+				Assert.Equal(10 + v, i.get(v));
+			}
 
-		    try
-            {
-			    i.get(n);
-			    Assert.Fail("Accepted out of bound index on list");
-		    }
-            catch (IndexOutOfRangeException)
-            {
-			    Assert.IsTrue(true);
-		    }
-	    }
+			try
+			{
+				i.get(n);
+				Assert.False(true, "Accepted out of bound index on list");
+			}
+			catch (IndexOutOfRangeException)
+			{
+				Assert.True(true);
+			}
+		}
 
-        [Test]
-	    public void testFillTo0()
-        {
-		    IntList i = new IntList();
-		    i.fillTo(0, int.MinValue);
-		    Assert.AreEqual(0, i.size());
-	    }
+		[Fact]
+		public void testFillTo0()
+		{
+			var i = new IntList();
+			i.fillTo(0, int.MinValue);
+			Assert.Equal(0, i.size());
+		}
 
-        [Test]
-	    public void testFillTo1()
-        {
-		    IntList i = new IntList();
-		    i.fillTo(1, int.MinValue);
-		    Assert.AreEqual(1, i.size());
-		    i.add(0);
-            Assert.AreEqual(int.MinValue, i.get(0));
-            Assert.AreEqual(0, i.get(1));
-	    }
+		[Fact]
+		public void testFillTo1()
+		{
+			var i = new IntList();
+			i.fillTo(1, int.MinValue);
+			Assert.Equal(1, i.size());
+			i.add(0);
+			Assert.Equal(int.MinValue, i.get(0));
+			Assert.Equal(0, i.get(1));
+		}
 
-        [Test]
-	    public void testFillTo100()
-        {
-		    IntList i = new IntList();
-		    i.fillTo(100, int.MinValue);
-		    Assert.AreEqual(100, i.size());
-		    i.add(3);
-		    Assert.AreEqual(int.MinValue, i.get(99));
-		    Assert.AreEqual(3, i.get(100));
-	    }
+		[Fact]
+		public void testFillTo100()
+		{
+			var i = new IntList();
+			i.fillTo(100, int.MinValue);
+			Assert.Equal(100, i.size());
+			i.add(3);
+			Assert.Equal(int.MinValue, i.get(99));
+			Assert.Equal(3, i.get(100));
+		}
 
-        [Test]
-	    public void testClear()
-        {
-		    IntList i = new IntList();
-		    int n = 5;
-		    for (int v = 0; v < n; v++)
-			    i.add(10 + v);
-		    Assert.AreEqual(n, i.size());
+		[Fact]
+		public void testClear()
+		{
+			var i = new IntList();
+			const int n = 5;
+			for (int v = 0; v < n; v++)
+			{
+				i.add(10 + v);
+			}
+			Assert.Equal(n, i.size());
 
-		    i.clear();
-		    Assert.AreEqual(0, i.size());
+			i.clear();
+			Assert.Equal(0, i.size());
 		    
-            try
-            {
-			    i.get(0);
-			    Assert.Fail("Accepted 0 index on empty list");
-		    }
-            catch (IndexOutOfRangeException)
-            {
-			    Assert.IsTrue(true);
-		    }
-	    }
+			try
+			{
+				i.get(0);
+				Assert.False(true, "Accepted 0 index on empty list");
+			}
+			catch (IndexOutOfRangeException)
+			{
+				Assert.True(true);
+			}
+		}
 
-        [Test]
-	    public void testToString()
-        {
-		    IntList i = new IntList();
-		    i.add(1);
-		    Assert.AreEqual("[1]", i.toString());
-		    i.add(13);
-		    i.add(5);
-            Assert.AreEqual("[1, 13, 5]", i.toString());
-	    }
-    }
+		[Fact]
+		public void testToString()
+		{
+			var i = new IntList();
+			i.add(1);
+			Assert.Equal("[1]", i.toString());
+			i.add(13);
+			i.add(5);
+			Assert.Equal("[1, 13, 5]", i.toString());
+		}
+	}
 }

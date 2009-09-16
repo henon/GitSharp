@@ -36,239 +36,236 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.IO;
+using GitSharp.DirectoryCache;
+using GitSharp.Tests.Util;
+using Xunit;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
-    using GitSharp.DirectoryCache;
-    using System.IO;
-
-    [TestFixture]
     public class DirCacheBuilderTest : RepositoryTestCase
     {
+		const string path = "a-File-path";
+		static FileMode mode = FileMode.RegularFile;
+		const long lastModified = 1218123387057L;
+		const int Length = 1342;
 
-        [Test]
+        [Fact]
         public void testBuildEmpty()
         {
-            {
-                DirCache dc = DirCache.Lock(db);
-                DirCacheBuilder b = dc.builder();
-                Assert.IsNotNull(b);
-                b.finish();
-                dc.write();
-                Assert.IsTrue(dc.commit());
-            }
-            {
-                DirCache dc = DirCache.read(db);
-                Assert.AreEqual(0, dc.getEntryCount());
-            }
+			DirCache dc = DirCache.Lock(db);
+			DirCacheBuilder b = dc.builder();
+			Assert.NotNull(b);
+			b.finish();
+			dc.write();
+			Assert.True(dc.commit());
+
+			dc = DirCache.read(db);
+			Assert.Equal(0, dc.getEntryCount());
         }
 
-        [Test]
+        [Fact]
         public void testBuildOneFile_FinishWriteCommit()
         {
-            string path = "a-File-path";
-            var mode = GitSharp.FileMode.RegularFile;
-            long lastModified = 1218123387057L;
-            int Length = 1342;
-            DirCacheEntry entOrig;
-            {
-                DirCache dc = DirCache.Lock(db);
-                DirCacheBuilder b = dc.builder();
-                Assert.IsNotNull(b);
+        	DirCache dc = DirCache.Lock(db);
+			DirCacheBuilder b = dc.builder();
+			Assert.NotNull(b);
 
-                entOrig = new DirCacheEntry(path);
-                entOrig.setFileMode(mode);
-                entOrig.setLastModified(lastModified);
-                entOrig.setLength(Length);
+			var entOrig = new DirCacheEntry(path);
+			entOrig.setFileMode(mode);
+			entOrig.setLastModified(lastModified);
+			entOrig.setLength(Length);
 
-                Assert.AreNotSame(path, entOrig.getPathString());
-                Assert.AreEqual(path, entOrig.getPathString());
-                Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
-                Assert.AreEqual(mode.Bits, entOrig.getRawMode());
-                Assert.AreEqual(0, entOrig.getStage());
-                Assert.AreEqual(lastModified, entOrig.getLastModified());
-                Assert.AreEqual(Length, entOrig.getLength());
-                Assert.IsFalse(entOrig.isAssumeValid());
-                b.add(entOrig);
+			Assert.NotSame(path, entOrig.getPathString());
+			Assert.Equal(path, entOrig.getPathString());
+			Assert.Equal(ObjectId.ZeroId, entOrig.getObjectId());
+			Assert.Equal(mode.Bits, entOrig.getRawMode());
+			Assert.Equal(0, entOrig.getStage());
+			Assert.Equal(lastModified, entOrig.getLastModified());
+			Assert.Equal(Length, entOrig.getLength());
+			Assert.False(entOrig.isAssumeValid());
+			b.add(entOrig);
 
-                b.finish();
-                Assert.AreEqual(1, dc.getEntryCount());
-                Assert.AreSame(entOrig, dc.getEntry(0));
+			b.finish();
+			Assert.Equal(1, dc.getEntryCount());
+			Assert.Same(entOrig, dc.getEntry(0));
 
-                dc.write();
-                Assert.IsTrue(dc.commit());
-            }
-            {
-                DirCache dc = DirCache.read(db);
-                Assert.AreEqual(1, dc.getEntryCount());
+			dc.write();
+			Assert.True(dc.commit());
 
-                DirCacheEntry entRead = dc.getEntry(0);
-                Assert.AreNotSame(entOrig, entRead);
-                Assert.AreEqual(path, entRead.getPathString());
-                Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
-                Assert.AreEqual(mode.Bits, entOrig.getRawMode());
-                Assert.AreEqual(0, entOrig.getStage());
-                Assert.AreEqual(lastModified, entOrig.getLastModified());
-                Assert.AreEqual(Length, entOrig.getLength());
-                Assert.IsFalse(entOrig.isAssumeValid());
-            }
+			dc = DirCache.read(db);
+			Assert.Equal(1, dc.getEntryCount());
+
+			DirCacheEntry entRead = dc.getEntry(0);
+			Assert.NotSame(entOrig, entRead);
+			Assert.Equal(path, entRead.getPathString());
+			Assert.Equal(ObjectId.ZeroId, entOrig.getObjectId());
+			Assert.Equal(mode.Bits, entOrig.getRawMode());
+			Assert.Equal(0, entOrig.getStage());
+			Assert.Equal(lastModified, entOrig.getLastModified());
+			Assert.Equal(Length, entOrig.getLength());
+			Assert.False(entOrig.isAssumeValid());
         }
 
-        [Test]
+        [Fact]
         public void testBuildOneFile_Commit()
         {
-            string path = "a-File-path";
-            var mode = GitSharp.FileMode.RegularFile;
-            long lastModified = 1218123387057L;
-            int Length = 1342;
-            DirCacheEntry entOrig;
-            {
-                DirCache dc = DirCache.Lock(db);
-                DirCacheBuilder b = dc.builder();
-                Assert.IsNotNull(b);
+        	DirCache dc = DirCache.Lock(db);
+			DirCacheBuilder b = dc.builder();
+			Assert.NotNull(b);
 
-                entOrig = new DirCacheEntry(path);
-                entOrig.setFileMode(mode);
-                entOrig.setLastModified(lastModified);
-                entOrig.setLength(Length);
+			var entOrig = new DirCacheEntry(path);
+			entOrig.setFileMode(mode);
+			entOrig.setLastModified(lastModified);
+			entOrig.setLength(Length);
 
-                Assert.AreNotSame(path, entOrig.getPathString());
-                Assert.AreEqual(path, entOrig.getPathString());
-                Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
-                Assert.AreEqual(mode.Bits, entOrig.getRawMode());
-                Assert.AreEqual(0, entOrig.getStage());
-                Assert.AreEqual(lastModified, entOrig.getLastModified());
-                Assert.AreEqual(Length, entOrig.getLength());
-                Assert.IsFalse(entOrig.isAssumeValid());
-                b.add(entOrig);
+			Assert.NotSame(path, entOrig.getPathString());
+			Assert.Equal(path, entOrig.getPathString());
+			Assert.Equal(ObjectId.ZeroId, entOrig.getObjectId());
+			Assert.Equal(mode.Bits, entOrig.getRawMode());
+			Assert.Equal(0, entOrig.getStage());
+			Assert.Equal(lastModified, entOrig.getLastModified());
+			Assert.Equal(Length, entOrig.getLength());
+			Assert.False(entOrig.isAssumeValid());
+			b.add(entOrig);
 
-                Assert.IsTrue(b.commit());
-                Assert.AreEqual(1, dc.getEntryCount());
-                Assert.AreSame(entOrig, dc.getEntry(0));
-                Assert.IsFalse(new FileInfo(db.Directory+ "/index.lock").Exists);
-            }
-            {
-                DirCache dc = DirCache.read(db);
-                Assert.AreEqual(1, dc.getEntryCount());
+			Assert.True(b.commit());
+			Assert.Equal(1, dc.getEntryCount());
+			Assert.Same(entOrig, dc.getEntry(0));
+			Assert.False(new FileInfo(db.Directory + "/index.lock").Exists);
 
-                DirCacheEntry entRead = dc.getEntry(0);
-                Assert.AreNotSame(entOrig, entRead);
-                Assert.AreEqual(path, entRead.getPathString());
-                Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
-                Assert.AreEqual(mode.Bits, entOrig.getRawMode());
-                Assert.AreEqual(0, entOrig.getStage());
-                Assert.AreEqual(lastModified, entOrig.getLastModified());
-                Assert.AreEqual(Length, entOrig.getLength());
-                Assert.IsFalse(entOrig.isAssumeValid());
-            }
+			dc = DirCache.read(db);
+			Assert.Equal(1, dc.getEntryCount());
+
+			DirCacheEntry entRead = dc.getEntry(0);
+			Assert.NotSame(entOrig, entRead);
+			Assert.Equal(path, entRead.getPathString());
+			Assert.Equal(ObjectId.ZeroId, entOrig.getObjectId());
+			Assert.Equal(mode.Bits, entOrig.getRawMode());
+			Assert.Equal(0, entOrig.getStage());
+			Assert.Equal(lastModified, entOrig.getLastModified());
+			Assert.Equal(Length, entOrig.getLength());
+			Assert.False(entOrig.isAssumeValid());
         }
 
-        [Test]
+        [Fact]
         public void testFindSingleFile()
         {
-            string path = "a-File-path";
             DirCache dc = DirCache.read(db);
             DirCacheBuilder b = dc.builder();
-            Assert.IsNotNull(b);
+            Assert.NotNull(b);
 
-            DirCacheEntry entOrig = new DirCacheEntry(path);
-            Assert.AreNotSame(path, entOrig.getPathString());
-            Assert.AreEqual(path, entOrig.getPathString());
+            var entOrig = new DirCacheEntry(path);
+            Assert.NotSame(path, entOrig.getPathString());
+            Assert.Equal(path, entOrig.getPathString());
             b.add(entOrig);
             b.finish();
 
-            Assert.AreEqual(1, dc.getEntryCount());
-            Assert.AreSame(entOrig, dc.getEntry(0));
-            Assert.AreEqual(0, dc.findEntry(path));
+            Assert.Equal(1, dc.getEntryCount());
+            Assert.Same(entOrig, dc.getEntry(0));
+            Assert.Equal(0, dc.findEntry(path));
 
-            Assert.AreEqual(-1, dc.findEntry("@@-before"));
-            Assert.AreEqual(0, real(dc.findEntry("@@-before")));
+            Assert.Equal(-1, dc.findEntry("@@-before"));
+            Assert.Equal(0, Real(dc.findEntry("@@-before")));
 
-            Assert.AreEqual(-2, dc.findEntry("a-zoo"));
-            Assert.AreEqual(1, real(dc.findEntry("a-zoo")));
+            Assert.Equal(-2, dc.findEntry("a-zoo"));
+            Assert.Equal(1, Real(dc.findEntry("a-zoo")));
 
-            Assert.AreSame(entOrig, dc.getEntry(path));
+            Assert.Same(entOrig, dc.getEntry(path));
         }
 
-        [Test]
+        [Fact]
         public void testAdd_InGitSortOrder()
         {
             DirCache dc = DirCache.read(db);
 
             string[] paths = { "a.", "a.b", "a/b", "a0b" };
-            DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
+            var ents = new DirCacheEntry[paths.Length];
             for (int i = 0; i < paths.Length; i++)
-                ents[i] = new DirCacheEntry(paths[i]);
+            {
+            	ents[i] = new DirCacheEntry(paths[i]);
+            }
 
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
-                b.add(ents[i]);
+            {
+            	b.add(ents[i]);
+            }
             b.finish();
 
-            Assert.AreEqual(paths.Length, dc.getEntryCount());
+            Assert.Equal(paths.Length, dc.getEntryCount());
             for (int i = 0; i < paths.Length; i++)
             {
-                Assert.AreSame(ents[i], dc.getEntry(i));
-                Assert.AreEqual(paths[i], dc.getEntry(i).getPathString());
-                Assert.AreEqual(i, dc.findEntry(paths[i]));
-                Assert.AreSame(ents[i], dc.getEntry(paths[i]));
+                Assert.Same(ents[i], dc.getEntry(i));
+                Assert.Equal(paths[i], dc.getEntry(i).getPathString());
+                Assert.Equal(i, dc.findEntry(paths[i]));
+                Assert.Same(ents[i], dc.getEntry(paths[i]));
             }
         }
 
-        [Test]
+        [Fact]
         public void testAdd_ReverseGitSortOrder()
         {
             DirCache dc = DirCache.read(db);
 
             string[] paths = { "a.", "a.b", "a/b", "a0b" };
-            DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
+            var ents = new DirCacheEntry[paths.Length];
             for (int i = 0; i < paths.Length; i++)
-                ents[i] = new DirCacheEntry(paths[i]);
+            {
+            	ents[i] = new DirCacheEntry(paths[i]);
+            }
 
             DirCacheBuilder b = dc.builder();
             for (int i = ents.Length - 1; i >= 0; i--)
-                b.add(ents[i]);
+            {
+            	b.add(ents[i]);
+            }
             b.finish();
 
-            Assert.AreEqual(paths.Length, dc.getEntryCount());
+            Assert.Equal(paths.Length, dc.getEntryCount());
             for (int i = 0; i < paths.Length; i++)
             {
-                Assert.AreSame(ents[i], dc.getEntry(i));
-                Assert.AreEqual(paths[i], dc.getEntry(i).getPathString());
-                Assert.AreEqual(i, dc.findEntry(paths[i]));
-                Assert.AreSame(ents[i], dc.getEntry(paths[i]));
+                Assert.Same(ents[i], dc.getEntry(i));
+                Assert.Equal(paths[i], dc.getEntry(i).getPathString());
+                Assert.Equal(i, dc.findEntry(paths[i]));
+                Assert.Same(ents[i], dc.getEntry(paths[i]));
             }
         }
 
-        [Test]
+        [Fact]
         public void testBuilderClear()
         {
             DirCache dc = DirCache.read(db);
 
             string[] paths = { "a.", "a.b", "a/b", "a0b" };
-            DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
+            var ents = new DirCacheEntry[paths.Length];
             for (int i = 0; i < paths.Length; i++)
-                ents[i] = new DirCacheEntry(paths[i]);
             {
-                DirCacheBuilder b = dc.builder();
-                for (int i = 0; i < ents.Length; i++)
-                    b.add(ents[i]);
+            	ents[i] = new DirCacheEntry(paths[i]);
+            }
+
+			DirCacheBuilder b = dc.builder();
+			for (int i = 0; i < ents.Length; i++)
+			{
+				b.add(ents[i]);
+			}
+			b.finish();
+
+            Assert.Equal(paths.Length, dc.getEntryCount());
+            {
+                b = dc.builder();
                 b.finish();
             }
-            Assert.AreEqual(paths.Length, dc.getEntryCount());
-            {
-                DirCacheBuilder b = dc.builder();
-                b.finish();
-            }
-            Assert.AreEqual(0, dc.getEntryCount());
+            Assert.Equal(0, dc.getEntryCount());
         }
 
-        private static int real(int eIdx)
+        private static int Real(int eIdx)
         {
             if (eIdx < 0)
-                eIdx = -(eIdx + 1);
+            {
+            	eIdx = -(eIdx + 1);
+            }
             return eIdx;
         }
-
     }
 }

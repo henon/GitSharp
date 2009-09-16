@@ -37,12 +37,10 @@
 
 using System.IO;
 using GitSharp.Transport;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Transport
 {
-
-    [TestFixture]
     public class PacketLineInTest
     {
         private MemoryStream rawIn;
@@ -54,259 +52,259 @@ namespace GitSharp.Tests.Transport
             pckIn = new PacketLineIn(rawIn);
         }
 
-        [Test]
+        [Fact]
         public void testReadString1()
         {
             init("0006a\n0007bc\n");
-            Assert.AreEqual("a", pckIn.ReadString());
-            Assert.AreEqual("bc", pckIn.ReadString());
+            Assert.Equal("a", pckIn.ReadString());
+            Assert.Equal("bc", pckIn.ReadString());
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadString2()
         {
             init("0032want fcfcfb1fd94829c1a1704f894fc111d14770d34e\n");
             string act = pckIn.ReadString();
-            Assert.AreEqual("want fcfcfb1fd94829c1a1704f894fc111d14770d34e", act);
+            Assert.Equal("want fcfcfb1fd94829c1a1704f894fc111d14770d34e", act);
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadString4()
         {
             init("0005a0006bc");
-            Assert.AreEqual("a", pckIn.ReadString());
-            Assert.AreEqual("bc", pckIn.ReadString());
+            Assert.Equal("a", pckIn.ReadString());
+            Assert.Equal("bc", pckIn.ReadString());
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadString5()
         {
             init("000Fhi i am a s");
-            Assert.AreEqual("hi i am a s", pckIn.ReadString());
+            Assert.Equal("hi i am a s", pckIn.ReadString());
             assertEOF();
 
             init("000fhi i am a s");
-            Assert.AreEqual("hi i am a s", pckIn.ReadString());
+            Assert.Equal("hi i am a s", pckIn.ReadString());
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadString_LenHELO()
         {
             init("HELO");
             try
             {
                 pckIn.ReadString();
-                Assert.Fail("incorrectly accepted invalid packet header");
+                Assert.False(true, "incorrectly accepted invalid packet header");
             }
             catch (IOException e)
             {
-                Assert.AreEqual("Invalid packet line header: HELO", e.Message);
+                Assert.Equal("Invalid packet line header: HELO", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testReadString_Len0001()
         {
             init("0001");
             try
             {
                 pckIn.ReadString();
-                Assert.Fail("incorrectly accepted invalid packet header");
+                Assert.False(true, "incorrectly accepted invalid packet header");
             }
             catch (IOException e)
             {
-                Assert.AreEqual("Invalid packet line header: 0001", e.Message);
+                Assert.Equal("Invalid packet line header: 0001", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testReadString_Len0002()
         {
             init("0002");
             try
             {
                 pckIn.ReadString();
-                Assert.Fail("incorrectly accepted invalid packet header");
+                Assert.False(true, "incorrectly accepted invalid packet header");
             }
             catch (IOException e)
             {
-                Assert.AreEqual("Invalid packet line header: 0002", e.Message);
+                Assert.Equal("Invalid packet line header: 0002", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testReadString_Len0003()
         {
             init("0003");
             try
             {
                 pckIn.ReadString();
-                Assert.Fail("incorrectly accepted invalid packet header");
+                Assert.False(true, "incorrectly accepted invalid packet header");
             }
             catch (IOException e)
             {
-                Assert.AreEqual("Invalid packet line header: 0003", e.Message);
+                Assert.Equal("Invalid packet line header: 0003", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testReadString_Len0004()
         {
             init("0004");
             string act = pckIn.ReadString();
-            Assert.AreEqual(string.Empty, act);
+            Assert.Equal(string.Empty, act);
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadString_End()
         {
             init("0000");
-            Assert.AreEqual(string.Empty, pckIn.ReadString());
+            Assert.Equal(string.Empty, pckIn.ReadString());
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadStringRaw1()
         {
             init("0005a0006bc");
-            Assert.AreEqual("a", pckIn.ReadStringRaw());
-            Assert.AreEqual("bc", pckIn.ReadStringRaw());
+            Assert.Equal("a", pckIn.ReadStringRaw());
+            Assert.Equal("bc", pckIn.ReadStringRaw());
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadStringRaw2()
         {
             init("0031want fcfcfb1fd94829c1a1704f894fc111d14770d34e");
             string act = pckIn.ReadStringRaw();
-            Assert.AreEqual("want fcfcfb1fd94829c1a1704f894fc111d14770d34e", act);
+            Assert.Equal("want fcfcfb1fd94829c1a1704f894fc111d14770d34e", act);
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadStringRaw3()
         {
             init("0004");
             string act = pckIn.ReadStringRaw();
-            Assert.AreEqual(string.Empty, act);
+            Assert.Equal(string.Empty, act);
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadStringRaw4()
         {
             init("HELO");
             try
             {
                 pckIn.ReadStringRaw();
-                Assert.Fail("incorrectly accepted invalid packet header");
+                Assert.False(true, "incorrectly accepted invalid packet header");
             }
             catch (IOException e)
             {
-                Assert.AreEqual("Invalid packet line header: HELO", e.Message);
+                Assert.Equal("Invalid packet line header: HELO", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testReadStringRaw_End()
         {
             init("0000");
-            Assert.AreEqual(string.Empty, pckIn.ReadStringRaw());
+            Assert.Equal(string.Empty, pckIn.ReadStringRaw());
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadACK_NAK()
         {
             ObjectId expid = ObjectId.FromString("fcfcfb1fd94829c1a1704f894fc111d14770d34e");
-            MutableObjectId actid = new MutableObjectId();
+            var actid = new MutableObjectId();
             actid.FromString(expid.Name);
 
             init("0008NAK\n");
-            Assert.AreEqual(PacketLineIn.AckNackResult.NAK, pckIn.readACK(actid));
-            Assert.IsTrue(actid.Equals(expid));
+            Assert.Equal(PacketLineIn.AckNackResult.NAK, pckIn.readACK(actid));
+            Assert.True(actid.Equals(expid));
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadACK_ACK1()
         {
             ObjectId expid = ObjectId.FromString("fcfcfb1fd94829c1a1704f894fc111d14770d34e");
-            MutableObjectId actid = new MutableObjectId();
+            var actid = new MutableObjectId();
             actid.FromString(expid.Name);
 
             init("0031ACK fcfcfb1fd94829c1a1704f894fc111d14770d34e\n");
-            Assert.AreEqual(PacketLineIn.AckNackResult.ACK, pckIn.readACK(actid));
-            Assert.IsTrue(actid.Equals(expid));
+            Assert.Equal(PacketLineIn.AckNackResult.ACK, pckIn.readACK(actid));
+            Assert.True(actid.Equals(expid));
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadACK_ACKcontinue1()
         {
             ObjectId expid = ObjectId.FromString("fcfcfb1fd94829c1a1704f894fc111d14770d34e");
-            MutableObjectId actid = new MutableObjectId();
+            var actid = new MutableObjectId();
             actid.FromString(expid.Name);
 
             init("003aACK fcfcfb1fd94829c1a1704f894fc111d14770d34e continue\n");
-            Assert.AreEqual(PacketLineIn.AckNackResult.ACK_CONTINUE, pckIn.readACK(actid));
-            Assert.IsTrue(actid.Equals(expid));
+            Assert.Equal(PacketLineIn.AckNackResult.ACK_CONTINUE, pckIn.readACK(actid));
+            Assert.True(actid.Equals(expid));
             assertEOF();
         }
 
-        [Test]
+        [Fact]
         public void testReadACK_Invalid1()
         {
             init("HELO");
             try
             {
                 pckIn.readACK(new MutableObjectId());
-                Assert.Fail("incorrectly accepted invalid packet header");
+                Assert.False(true, "incorrectly accepted invalid packet header");
             }
             catch (IOException e)
             {
-                Assert.AreEqual("Invalid packet line header: HELO", e.Message);
+                Assert.Equal("Invalid packet line header: HELO", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testReadACK_Invalid2()
         {
             init("0009HELO\n");
             try
             {
                 pckIn.readACK(new MutableObjectId());
-                Assert.Fail("incorrectly accepted invalid ACK/NAK");
+                Assert.False(true, "incorrectly accepted invalid ACK/NAK");
             }
             catch (IOException e)
             {
-                Assert.AreEqual("Expected ACK/NAK, got: HELO", e.Message);
+                Assert.Equal("Expected ACK/NAK, got: HELO", e.Message);
             }
         }
 
-        [Test]
+        [Fact]
         public void testReadACK_Invalid3()
         {
             init("0000");
             try
             {
                 pckIn.readACK(new MutableObjectId());
-                Assert.Fail("incorrectly accepted no ACK/NAK");
+                Assert.False(true, "incorrectly accepted no ACK/NAK");
             }
             catch (IOException e)
             {
-                Assert.AreEqual("Expected ACK/NAK, found EOF", e.Message);
+                Assert.Equal("Expected ACK/NAK, found EOF", e.Message);
             }
         }
 
         private void assertEOF()
         {
-            Assert.AreEqual(-1, rawIn.ReadByte());
+            Assert.Equal(-1, rawIn.ReadByte());
         }
     }
 

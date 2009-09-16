@@ -40,11 +40,11 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using GitSharp.Exceptions;
-using NUnit.Framework;
+using GitSharp.Tests.Util;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-	[TestFixture]
 	public class T0007_Index : RepositoryTestCase
 	{
 		private static readonly bool CanRunGitStatus;
@@ -164,7 +164,7 @@ namespace GitSharp.Tests
 			 */
 		}
 
-		[Test, Ignore("Not ported yet")]
+		[Fact(Skip = "Not ported yet")]
 		public void test030_executeBit_coreModeTrue()
 		{
 			/*
@@ -191,8 +191,8 @@ namespace GitSharp.Tests
 			index.Add(trash, execFile);
 			index.Add(trash, nonexecFile);
 			Tree tree = db.mapTree(index.writeTree());
-			Assert.IsTrue(FileMode.ExecutableFile == FileMode.FromBits(tree.findBlobMember(execFile.Name).getMode()));
-			Assert.IsTrue(FileMode.RegularFile == FileMode.FromBits(tree.findBlobMember(nonexecFile.Name).getMode()));
+			Assert.True(FileMode.ExecutableFile == FileMode.FromBits(tree.findBlobMember(execFile.Name).getMode()));
+			Assert.True(FileMode.RegularFile == FileMode.FromBits(tree.findBlobMember(nonexecFile.Name).getMode()));
 
 			index.write();
 
@@ -227,7 +227,7 @@ namespace GitSharp.Tests
 			*/
 		}
 
-		[Test, Ignore("Not ported yet")]
+		[Fact(Skip = "Not ported yet")]
 		public void test031_executeBit_coreModeFalse()
 		{
 			/*
@@ -254,8 +254,8 @@ namespace GitSharp.Tests
 			index.Add(trash, execFile);
 			index.Add(trash, nonexecFile);
 			Tree tree = db.mapTree(index.writeTree());
-			Assert.IsTrue(FileMode.REGULAR_FILE == FileMode.FromBits(tree.findBlobMember(execFile.Name).getMode()));
-			Assert.IsTrue(FileMode.REGULAR_FILE == FileMode.FromBits(tree.findBlobMember(nonexecFile.Name).getMode()));
+			Assert.True(FileMode.REGULAR_FILE == FileMode.FromBits(tree.findBlobMember(execFile.Name).getMode()));
+			Assert.True(FileMode.REGULAR_FILE == FileMode.FromBits(tree.findBlobMember(nonexecFile.Name).getMode()));
 
 			index.write();
 
@@ -291,7 +291,7 @@ namespace GitSharp.Tests
 			 * */
 		}
 
-		[Test]
+		[Fact]
 		public void testCheckout()
 		{
 			// Prepare tree, remote it and checkout
@@ -310,35 +310,35 @@ namespace GitSharp.Tests
 			Delete(Directory.GetParent(aslashb.FullName));
 
 			var index2 = new GitIndex(db);
-			Assert.AreEqual(0, index2.Members.Length);
+			Assert.Equal(0, index2.Members.Length);
 
 			index2.ReadTree(db.MapTree(ObjectId.FromString("c696abc3ab8e091c665f49d00eb8919690b3aec3")));
 
 			index2.checkout(trash);
-			Assert.AreEqual("data:a/b", Content(aslashb));
-			Assert.AreEqual("data:a:b", Content(acolonb));
-			Assert.AreEqual("data:a.b", Content(adotb));
+			Assert.Equal("data:a/b", Content(aslashb));
+			Assert.Equal("data:a:b", Content(acolonb));
+			Assert.Equal("data:a.b", Content(adotb));
 
 			if (CanRunGitStatus)
 			{
-				Assert.AreEqual(0, System(trash, "git status"));
+				Assert.Equal(0, System(trash, "git status"));
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testCreateEmptyIndex()
 		{
 			var index = new GitIndex(db);
 			index.write();
 			// native git doesn't like an empty index
-			// Assert.AreEqual(0,System(trash,"git status"));
+			// Assert.Equal(0,System(trash,"git status"));
 
 			var indexr = new GitIndex(db);
 			indexr.Read();
-			Assert.AreEqual(0, indexr.Members.Length);
+			Assert.Equal(0, indexr.Members.Length);
 		}
 
-		[Test]
+		[Fact]
 		public void testCreateSimpleSortTestIndex()
 		{
 			var index = new GitIndex(db);
@@ -350,26 +350,26 @@ namespace GitSharp.Tests
 			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
 			index.write();
 
-			Assert.AreEqual("a/b", index.GetEntry("a/b").Name);
-			Assert.AreEqual("a:b", index.GetEntry("a:b").Name);
-			Assert.AreEqual("a.b", index.GetEntry("a.b").Name);
-			Assert.IsNull(index.GetEntry("a*b"));
+			Assert.Equal("a/b", index.GetEntry("a/b").Name);
+			Assert.Equal("a:b", index.GetEntry("a:b").Name);
+			Assert.Equal("a.b", index.GetEntry("a.b").Name);
+			Assert.Null(index.GetEntry("a*b"));
 
 			// Repeat test for re-Read index
 			var indexr = new GitIndex(db);
 			indexr.Read();
-			Assert.AreEqual("a/b", indexr.GetEntry("a/b").Name);
-			Assert.AreEqual("a:b", indexr.GetEntry("a:b").Name);
-			Assert.AreEqual("a.b", indexr.GetEntry("a.b").Name);
-			Assert.IsNull(indexr.GetEntry("a*b"));
+			Assert.Equal("a/b", indexr.GetEntry("a/b").Name);
+			Assert.Equal("a:b", indexr.GetEntry("a:b").Name);
+			Assert.Equal("a.b", indexr.GetEntry("a.b").Name);
+			Assert.Null(indexr.GetEntry("a*b"));
 
 			if (CanRunGitStatus)
 			{
-				Assert.AreEqual(0, System(trash, "git status"));
+				Assert.Equal(0, System(trash, "git status"));
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testDelete()
 		{
 			var index = new GitIndex(db);
@@ -383,21 +383,21 @@ namespace GitSharp.Tests
 			index.writeTree();
 			index.remove(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
 			index.write();
-			Assert.AreEqual("a.b", index.Members[0].Name);
-			Assert.AreEqual("a/b", index.Members[1].Name);
+			Assert.Equal("a.b", index.Members[0].Name);
+			Assert.Equal("a/b", index.Members[1].Name);
 
 			var indexr = new GitIndex(db);
 			indexr.Read();
-			Assert.AreEqual("a.b", indexr.Members[0].Name);
-			Assert.AreEqual("a/b", indexr.Members[1].Name);
+			Assert.Equal("a.b", indexr.Members[0].Name);
+			Assert.Equal("a/b", indexr.Members[1].Name);
 
 			if (CanRunGitStatus)
 			{
-				Assert.AreEqual(0, System(trash, "git status"));
+				Assert.Equal(0, System(trash, "git status"));
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testReadTree()
 		{
 			// Prepare tree
@@ -412,33 +412,33 @@ namespace GitSharp.Tests
 
 			ObjectId id = index.writeTree();
 			Console.WriteLine("wrote id " + id);
-			Assert.AreEqual("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
+			Assert.Equal("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
 			var index2 = new GitIndex(db);
 
 			index2.ReadTree(db.MapTree(ObjectId.FromString("c696abc3ab8e091c665f49d00eb8919690b3aec3")));
 			GitIndex.Entry[] members = index2.Members;
-			Assert.AreEqual(3, members.Length);
-			Assert.AreEqual("a.b", members[0].Name);
-			Assert.AreEqual("a/b", members[1].Name);
-			Assert.AreEqual("a:b", members[2].Name);
-			Assert.AreEqual(3, members.Length);
+			Assert.Equal(3, members.Length);
+			Assert.Equal("a.b", members[0].Name);
+			Assert.Equal("a/b", members[1].Name);
+			Assert.Equal("a:b", members[2].Name);
+			Assert.Equal(3, members.Length);
 
 			var indexr = new GitIndex(db);
 			indexr.Read();
 			GitIndex.Entry[] membersr = indexr.Members;
-			Assert.AreEqual(3, membersr.Length);
-			Assert.AreEqual("a.b", membersr[0].Name);
-			Assert.AreEqual("a/b", membersr[1].Name);
-			Assert.AreEqual("a:b", membersr[2].Name);
-			Assert.AreEqual(3, membersr.Length);
+			Assert.Equal(3, membersr.Length);
+			Assert.Equal("a.b", membersr[0].Name);
+			Assert.Equal("a/b", membersr[1].Name);
+			Assert.Equal("a:b", membersr[2].Name);
+			Assert.Equal(3, membersr.Length);
 
 			if (CanRunGitStatus)
 			{
-				Assert.AreEqual(0, System(trash, "git status"));
+				Assert.Equal(0, System(trash, "git status"));
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testReadTree2()
 		{
 			// Prepare a larger tree to test some odd cases in tree writing
@@ -458,41 +458,41 @@ namespace GitSharp.Tests
 			index.write();
 			ObjectId id = index.writeTree();
 			Console.WriteLine("wrote id " + id);
-			Assert.AreEqual("ba78e065e2c261d4f7b8f42107588051e87e18e9", id.Name);
+			Assert.Equal("ba78e065e2c261d4f7b8f42107588051e87e18e9", id.Name);
 			var index2 = new GitIndex(db);
 
 			index2.ReadTree(db.MapTree(ObjectId.FromString("ba78e065e2c261d4f7b8f42107588051e87e18e9")));
 			GitIndex.Entry[] members = index2.Members;
-			Assert.AreEqual(6, members.Length);
-			Assert.AreEqual("a.b", members[0].Name);
-			Assert.AreEqual("a/a/a/a", members[1].Name);
-			Assert.AreEqual("a/b", members[2].Name);
-			Assert.AreEqual("a/c/c", members[3].Name);
-			Assert.AreEqual("a/d", members[4].Name);
-			Assert.AreEqual("a:b", members[5].Name);
+			Assert.Equal(6, members.Length);
+			Assert.Equal("a.b", members[0].Name);
+			Assert.Equal("a/a/a/a", members[1].Name);
+			Assert.Equal("a/b", members[2].Name);
+			Assert.Equal("a/c/c", members[3].Name);
+			Assert.Equal("a/d", members[4].Name);
+			Assert.Equal("a:b", members[5].Name);
 
 			// reread and test
 			var indexr = new GitIndex(db);
 			indexr.Read();
 			GitIndex.Entry[] membersr = indexr.Members;
-			Assert.AreEqual(6, membersr.Length);
-			Assert.AreEqual("a.b", membersr[0].Name);
-			Assert.AreEqual("a/a/a/a", membersr[1].Name);
-			Assert.AreEqual("a/b", membersr[2].Name);
-			Assert.AreEqual("a/c/c", membersr[3].Name);
-			Assert.AreEqual("a/d", membersr[4].Name);
-			Assert.AreEqual("a:b", membersr[5].Name);
+			Assert.Equal(6, membersr.Length);
+			Assert.Equal("a.b", membersr[0].Name);
+			Assert.Equal("a/a/a/a", membersr[1].Name);
+			Assert.Equal("a/b", membersr[2].Name);
+			Assert.Equal("a/c/c", membersr[3].Name);
+			Assert.Equal("a/d", membersr[4].Name);
+			Assert.Equal("a:b", membersr[5].Name);
 		}
 
-		[Test]
+		[Fact]
 		public void testReadWithNoIndex()
 		{
 			var index = new GitIndex(db);
 			index.Read();
-			Assert.AreEqual(0, index.Members.Length);
+			Assert.Equal(0, index.Members.Length);
 		}
 
-		[Test]
+		[Fact]
 		public void testUpdateSimpleSortTestIndex()
 		{
 			var index = new GitIndex(db);
@@ -508,11 +508,11 @@ namespace GitSharp.Tests
 
 			if (CanRunGitStatus)
 			{
-				Assert.AreEqual(0, System(trash, "git status"));
+				Assert.Equal(0, System(trash, "git status"));
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testWriteTree()
 		{
 			var index = new GitIndex(db);
@@ -525,14 +525,14 @@ namespace GitSharp.Tests
 			index.write();
 
 			ObjectId id = index.writeTree();
-			Assert.AreEqual("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
+			Assert.Equal("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
 
 			writeTrashFile("a/b", "data:a/b");
 			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
 
 			if (CanRunGitStatus)
 			{
-				Assert.AreEqual(0, System(trash, "git status"));
+				Assert.Equal(0, System(trash, "git status"));
 			}
 		}
 	}

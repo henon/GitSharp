@@ -37,73 +37,70 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
+using System;
+using System.IO;
+using GitSharp.Tests.Util;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-	[TestFixture]
 	public class PackReaderTests : RepositoryTestCase
 	{
 		private const string PackName = "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f";
 		private static readonly string TestPack = "Resources/" + GitSharp.Transport.IndexPack.GetPackFileName(PackName);
 		private static readonly string TestIdx = "Resources/" + GitSharp.Transport.IndexPack.GetIndexFileName(PackName);
 
-		[Test]
+		[Fact]
 		public void test003_lookupCompressedObject()
 		{
 			ObjectId id = ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327");
 			var pr = new PackFile(TestIdx, TestPack);
 			PackedObjectLoader or = pr.Get(new WindowCursor(), id);
-			Assert.IsNotNull(or);
-			Assert.AreEqual(Constants.OBJ_TREE, or.Type);
-			Assert.AreEqual(35, or.Size);
-			Assert.AreEqual(7738, or.DataOffset);
+			Assert.NotNull(or);
+			Assert.Equal(Constants.OBJ_TREE, or.Type);
+			Assert.Equal(35, or.Size);
+			Assert.Equal(7738, or.DataOffset);
 			pr.Close();
 		}
 
-		[Test]
+		[Fact]
 		public void test004_lookupDeltifiedObject()
 		{
 			ObjectId id = ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259");
 			ObjectLoader or = db.OpenObject(id);
-			Assert.IsNotNull(or);
-			Assert.IsTrue(or is PackedObjectLoader);
-			Assert.AreEqual(Constants.OBJ_BLOB, or.Type);
-			Assert.AreEqual(18009, or.Size);
-			Assert.AreEqual(537, ((PackedObjectLoader)or).DataOffset);
+			Assert.NotNull(or);
+			Assert.True(or is PackedObjectLoader);
+			Assert.Equal(Constants.OBJ_BLOB, or.Type);
+			Assert.Equal(18009, or.Size);
+			Assert.Equal(537, ((PackedObjectLoader)or).DataOffset);
 		}
 
-#if todopack 
-        // [henon] what is todopack anyway?
+		[Fact]
         public void test005_todopack()
         {
-            FileInfo todopack = new FileInfo("Resources/todopack");
+            var todopack = new FileInfo("Resources/todopack");
             if (!todopack.Exists)
             {
-                System.Console.WriteLinen("Skipping " + getName() + ": no " + todopack);
+                Console.WriteLine("Skipping \"test005_todopack\": no " + todopack.FullName);
                 return;
             }
 
-            FileInfo packDir = new FileInfo(db.getObjectsDirectory(), "pack");
-            String packname = "pack-2e71952edc41f3ce7921c5e5dd1b64f48204cf35";
-            copyFile(new FileInfo(todopack, GitSharp.Transport.IndexPack.GetPackFileName(packname)), new FileInfo(packDir,
-                    GitSharp.Transport.IndexPack.GetPackFileName(packname));
-            copyFile(new FileInfo(todopack, GitSharp.Transport.IndexPack.GetIndexFileName(packname), new FileInfo(packDir,
-                    GitSharp.Transport.IndexPack.GetIndexFileName(packname));
-            Tree t;
+            var packDir = new FileInfo(Path.Combine(db.ObjectsDirectory.FullName, "pack"));
+            const string packName = "pack-2e71952edc41f3ce7921c5e5dd1b64f48204cf35";
 
-            t = db
-                    .mapTree(ObjectId.FromString(
-                            "aac9df07f653dd18b935298deb813e02c32d2e6f"));
-            Assert.IsNotNull(t);
-            t.memberCount();
+			new FileInfo(Path.Combine(todopack.FullName, GitSharp.Transport.IndexPack.GetPackFileName(packName)))
+				.CopyTo(Path.Combine(packDir.FullName, GitSharp.Transport.IndexPack.GetPackFileName(packName)));
 
-            t = db
-                    .mapTree(ObjectId.FromString(
-                            "6b9ffbebe7b83ac6a61c9477ab941d999f5d0c96"));
-            Assert.IsNotNull(t);
-            t.memberCount();
+			new FileInfo(Path.Combine(todopack.FullName, GitSharp.Transport.IndexPack.GetIndexFileName(packName)))
+				.CopyTo(Path.Combine(packDir.FullName, GitSharp.Transport.IndexPack.GetIndexFileName(packName)));
+
+			Tree t = db.MapTree(ObjectId.FromString("aac9df07f653dd18b935298deb813e02c32d2e6f"));
+            Assert.NotNull(t);
+            var x = t.MemberCount;
+
+            t = db.MapTree(ObjectId.FromString("6b9ffbebe7b83ac6a61c9477ab941d999f5d0c96"));
+            Assert.NotNull(t);
+            x = t.MemberCount;
         }
-#endif
 	}
 }

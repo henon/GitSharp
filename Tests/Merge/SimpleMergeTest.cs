@@ -40,67 +40,67 @@ using System;
 using System.IO;
 using GitSharp.DirectoryCache;
 using GitSharp.Merge;
-using NUnit.Framework;
+using GitSharp.Tests.Util;
+using Xunit;
 
 namespace GitSharp.Tests.Merge
 {
-	[TestFixture]
 	public class SimpleMergeTest : RepositoryTestCase
 	{
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestOurs()
 		{
 			Merger ourMerger = MergeStrategy.Ours.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c") });
-			Assert.IsTrue(merge);
-			Assert.AreEqual(db.MapTree("a").Id, ourMerger.GetResultTreeId());
+			Assert.True(merge);
+			Assert.Equal(db.MapTree("a").Id, ourMerger.GetResultTreeId());
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTheirs()
 		{
 			Merger ourMerger = MergeStrategy.Theirs.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c") });
-			Assert.IsTrue(merge);
-			Assert.AreEqual(db.MapTree("c").Id, ourMerger.GetResultTreeId());
+			Assert.True(merge);
+			Assert.Equal(db.MapTree("c").Id, ourMerger.GetResultTreeId());
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTrivialTwoWay()
 		{
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c") });
-			Assert.IsTrue(merge);
-			Assert.AreEqual("02ba32d3649e510002c21651936b7077aa75ffa9", ourMerger.GetResultTreeId().Name);
+			Assert.True(merge);
+			Assert.Equal("02ba32d3649e510002c21651936b7077aa75ffa9", ourMerger.GetResultTreeId().Name);
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTrivialTwoWayDisjointHistories()
 		{
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c~4") });
-			Assert.IsTrue(merge);
-			Assert.AreEqual("86265c33b19b2be71bdd7b8cb95823f2743d03a8", ourMerger.GetResultTreeId().Name);
+			Assert.True(merge);
+			Assert.Equal("86265c33b19b2be71bdd7b8cb95823f2743d03a8", ourMerger.GetResultTreeId().Name);
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTrivialTwoWayOk()
 		{
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { db.Resolve("a^0^0^0"), db.Resolve("a^0^0^1") });
-			Assert.IsTrue(merge);
-			Assert.AreEqual(db.MapTree("a^0^0").Id, ourMerger.GetResultTreeId());
+			Assert.True(merge);
+			Assert.Equal(db.MapTree("a^0^0").Id, ourMerger.GetResultTreeId());
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTrivialTwoWayConflict()
 		{
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { db.Resolve("f"), db.Resolve("g") });
-			Assert.IsFalse(merge);
+			Assert.False(merge);
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTrivialTwoWayValidSubtreeSort()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -133,27 +133,27 @@ namespace GitSharp.Tests.Merge
 
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { O, T });
-			Assert.IsTrue(merge);
+			Assert.True(merge);
 
 			var tw = new GitSharp.TreeWalk.TreeWalk(db) { Recursive = true };
 			tw.reset(ourMerger.GetResultTreeId());
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("Makefile", tw.getPathString());
+			Assert.True(tw.next());
+			Assert.Equal("Makefile", tw.getPathString());
 			AssertCorrectId(treeO, tw);
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("libelf-po/a", tw.getPathString());
+			Assert.True(tw.next());
+			Assert.Equal("libelf-po/a", tw.getPathString());
 			AssertCorrectId(treeO, tw);
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("libelf/c", tw.getPathString());
+			Assert.True(tw.next());
+			Assert.Equal("libelf/c", tw.getPathString());
 			AssertCorrectId(treeT, tw);
 
-			Assert.IsFalse(tw.next());
+			Assert.False(tw.next());
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTrivialTwoWayConcurrentSubtreeChange()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -185,23 +185,23 @@ namespace GitSharp.Tests.Merge
 
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { O, T });
-			Assert.IsTrue(merge);
+			Assert.True(merge);
 
 			var tw = new GitSharp.TreeWalk.TreeWalk(db) { Recursive = true };
 			tw.reset(ourMerger.GetResultTreeId());
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("d/o", tw.getPathString());
+			Assert.True(tw.next());
+			Assert.Equal("d/o", tw.getPathString());
 			AssertCorrectId(treeO, tw);
 
-			Assert.IsTrue(tw.next());
-			Assert.AreEqual("d/t", tw.getPathString());
+			Assert.True(tw.next());
+			Assert.Equal("d/t", tw.getPathString());
 			AssertCorrectId(treeT, tw);
 
-			Assert.IsFalse(tw.next());
+			Assert.False(tw.next());
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTrivialTwoWayConflictSubtreeChange()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -233,10 +233,10 @@ namespace GitSharp.Tests.Merge
 
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { O, T });
-			Assert.IsFalse(merge);
+			Assert.False(merge);
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTrivialTwoWayLeftDFconflict1()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -267,10 +267,10 @@ namespace GitSharp.Tests.Merge
 
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { O, T });
-			Assert.IsFalse(merge);
+			Assert.False(merge);
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTrivialTwoWayRightDFconflict1()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -301,10 +301,10 @@ namespace GitSharp.Tests.Merge
 
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { O, T });
-			Assert.IsFalse(merge);
+			Assert.False(merge);
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTrivialTwoWayLeftDFconflict2()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -333,10 +333,10 @@ namespace GitSharp.Tests.Merge
 
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { O, T });
-			Assert.IsFalse(merge);
+			Assert.False(merge);
 		}
 
-		[Test]
+		[Fact(Timeout = 30000)]
 		public void TestTrivialTwoWayRightDFconflict2()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -365,12 +365,12 @@ namespace GitSharp.Tests.Merge
 
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { O, T });
-			Assert.IsFalse(merge);
+			Assert.False(merge);
 		}
 
 		private static void AssertCorrectId(DirCache treeT, GitSharp.TreeWalk.TreeWalk tw)
 		{
-			Assert.AreEqual(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
+			Assert.Equal(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
 		}
 
 		private ObjectId Commit(ObjectWriter ow, DirCache treeB, ObjectId[] parentIds)

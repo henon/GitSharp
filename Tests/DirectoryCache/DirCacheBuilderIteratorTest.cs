@@ -36,15 +36,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.DirectoryCache;
+using GitSharp.Tests.Util;
+using GitSharp.TreeWalk.Filter;
+using Xunit;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-	using NUnit.Framework;
-	using GitSharp.DirectoryCache;
-	using GitSharp.TreeWalk.Filter;
-	[TestFixture]
 	public class DirCacheBuilderIteratorTest : RepositoryTestCase
 	{
-		[Test]
+		[Fact]
 		public void testPathFilterGroup_DoesNotSkipTail()
 		{
 			DirCache dc = DirCache.read(db);
@@ -57,14 +58,13 @@ namespace GitSharp.Tests.DirectoryCache
 				ents[i] = new DirCacheEntry(paths[i]);
 				ents[i].setFileMode(mode);
 			}
+
+			DirCacheBuilder builder = dc.builder();
+			for (int i = 0; i < ents.Length; i++)
 			{
-				DirCacheBuilder builder = dc.builder();
-				for (int i = 0; i < ents.Length; i++)
-				{
-					builder.add(ents[i]);
-				}
-				builder.finish();
+				builder.add(ents[i]);
 			}
+			builder.finish();
 
 			const int expIdx = 2;
 			DirCacheBuilder b = dc.builder();
@@ -74,23 +74,23 @@ namespace GitSharp.Tests.DirectoryCache
 			tw.Recursive = true;
 			tw.setFilter(PathFilterGroup.createFromStrings(new[] { paths[expIdx] }));
 
-			Assert.IsTrue(tw.next(), "found " + paths[expIdx]);
+			Assert.True(tw.next(), "found " + paths[expIdx]);
 			var c = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
-			Assert.IsNotNull(c);
-			Assert.AreEqual(expIdx, c.Pointer);
-			Assert.AreSame(ents[expIdx], c.getDirCacheEntry());
-			Assert.AreEqual(paths[expIdx], tw.getPathString());
-			Assert.AreEqual(mode.Bits, tw.getRawMode(0));
-			Assert.AreSame(mode, tw.getFileMode(0));
+			Assert.NotNull(c);
+			Assert.Equal(expIdx, c.Pointer);
+			Assert.Same(ents[expIdx], c.getDirCacheEntry());
+			Assert.Equal(paths[expIdx], tw.getPathString());
+			Assert.Equal(mode.Bits, tw.getRawMode(0));
+			Assert.Same(mode, tw.getFileMode(0));
 			b.add(c.getDirCacheEntry());
 
-			Assert.IsFalse(tw.next(), "no more entries");
+			Assert.False(tw.next(), "no more entries");
 
 			b.finish();
-			Assert.AreEqual(ents.Length, dc.getEntryCount());
+			Assert.Equal(ents.Length, dc.getEntryCount());
 			for (int i = 0; i < ents.Length; i++)
 			{
-				Assert.AreSame(ents[i], dc.getEntry(i));
+				Assert.Same(ents[i], dc.getEntry(i));
 			}
 		}
 	}

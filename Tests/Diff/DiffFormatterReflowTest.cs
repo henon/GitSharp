@@ -41,96 +41,94 @@ using GitSharp.Diff;
 using GitSharp.Patch;
 using GitSharp.Tests.Patch;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Diff
 {
-	[TestFixture]
 	public class DiffFormatterReflowTest : BasePatchTest
 	{
-		private RawText a;
-		private RawText b;
-		private FileHeader file;
-		private MemoryStream memoryStream;
-		private DiffFormatter fmt;
+		private RawText _a;
+		private RawText _b;
+		private FileHeader _file;
+		private MemoryStream _memoryStream;
+		private DiffFormatter _fmt;
 
-		[SetUp]
-		protected void setUp()
+		protected override void SetUp()
 		{
-			memoryStream = new MemoryStream();
-			fmt = new DiffFormatter();
+			_memoryStream = new MemoryStream();
+			_fmt = new DiffFormatter();
 		}
 
-		[Test]
+		[Fact]
 		public void testNegativeContextFails()
 		{
 			Init("X");
-		    AssertHelper.Throws<ArgumentException>(() => fmt.setContext(-1));
+		    Assert.Throws<ArgumentException>(() => _fmt.setContext(-1));
 		}
 
-		[Test]
+		[Fact]
 		public void testContext0()
 		{
 			Init("X");
-			fmt.setContext(0);
+			_fmt.setContext(0);
             AssertFormatted("testContext0.out");
 		}
 
-		[Test]
+		[Fact]
 		public void testContext1()
 		{
 			Init("X");
-			fmt.setContext(1);
+			_fmt.setContext(1);
             AssertFormatted("testContext1.out");
 		}
 
-		[Test]
+		[Fact]
 		public void testContext3()
 		{
 			Init("X");
-			fmt.setContext(3);
+			_fmt.setContext(3);
             AssertFormatted("testContext3.out");
 		}
 
-		[Test]
+		[Fact]
 		public void testContext5()
 		{
 			Init("X");
-			fmt.setContext(5);
+			_fmt.setContext(5);
             AssertFormatted("testContext5.out");
 		}
 
-		[Test]
+		[Fact]
 		public void testContext10()
 		{
 			Init("X");
-			fmt.setContext(10);
+			_fmt.setContext(10);
             AssertFormatted("testContext10.out");
 		}
 
-		[Test]
+		[Fact]
 		public void testContext100()
 		{
 			Init("X");
-			fmt.setContext(100);
+			_fmt.setContext(100);
             AssertFormatted("testContext100.out");
 		}
 
-		[Test]
+		[Fact]
 		public void testEmpty1()
 		{
 			Init("E");
 			AssertFormatted("E.patch");
 		}
 
-		[Test]
+		[Fact]
 		public void testNoNewLine1()
 		{
 			Init("Y");
 			AssertFormatted("Y.patch");
 		}
 
-		[Test]
+		[Fact]
 		public void testNoNewLine2()
 		{
 			Init("Z");
@@ -139,16 +137,16 @@ namespace GitSharp.Tests.Diff
 
 		private void Init(string name)
 		{
-			a = new RawText(ReadFile(name + "_PreImage"));
-			b = new RawText(ReadFile(name + "_PostImage"));
-			file = ParseTestPatchFile(DiffsDir + name + ".patch").getFiles()[0];
+			_a = new RawText(ReadFile(name + "_PreImage"));
+			_b = new RawText(ReadFile(name + "_PostImage"));
+			_file = ParseTestPatchFile(DiffsDir + name + ".patch").getFiles()[0];
 		}
 
 		private void AssertFormatted(string name)
 		{
-			fmt.format(memoryStream, file, a, b);
+			_fmt.format(_memoryStream, _file, _a, _b);
 			string exp = RawParseUtils.decode(ReadFile(name));
-			Assert.AreEqual(exp, RawParseUtils.decode(memoryStream.ToArray()));
+			Assert.Equal(exp, RawParseUtils.decode(_memoryStream.ToArray()));
 		}
 
 		private static byte[] ReadFile(string patchFile)

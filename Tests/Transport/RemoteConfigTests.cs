@@ -37,20 +37,18 @@
  */
 
 using System.IO;
-using System.Text;
+using GitSharp.Tests.Util;
 using GitSharp.Transport;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Transport
 {
-
-    [TestFixture]
-    public class RemoteConfigTests : RepositoryTestCase
+	public class RemoteConfigTests : RepositoryTestCase
     {
-        private void writeConfig(string dat)
+        private void WriteConfig(string dat)
         {
-            FileInfo f = new FileInfo(Path.Combine(db.Directory.ToString(), "config"));
-            FileStream stream = new FileStream(f.ToString(), System.IO.FileMode.Append);
+            var f = new FileInfo(Path.Combine(db.Directory.ToString(), "config"));
+            var stream = new FileStream(f.ToString(), System.IO.FileMode.Append);
             try
             {
                 byte[] data = Constants.CHARSET.GetBytes(dat);
@@ -63,288 +61,284 @@ namespace GitSharp.Tests.Transport
             db.Config.load();
         }
 
-        [Test]
+        [Fact]
         public void test000_Simple()
         {
-            writeConfig("[remote \"spearce\"]\n" + "url = http://www.spearce.org/egit.git\n" +
+            WriteConfig("[remote \"spearce\"]\n" + "url = http://www.spearce.org/egit.git\n" +
                         "fetch = +refs/heads/*:refs/remotes/spearce/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
+            var rc = new RemoteConfig(db.Config, "spearce");
             System.Collections.Generic.List<URIish> allURIs = rc.URIs;
-            RefSpec spec;
 
-            Assert.AreEqual("spearce", rc.Name);
-            Assert.IsNotNull(allURIs);
-            Assert.IsNotNull(rc.Fetch);
-            Assert.IsNotNull(rc.Push);
-            Assert.IsNotNull(rc.TagOpt);
-            Assert.AreSame(TagOpt.AUTO_FOLLOW, rc.TagOpt);
+        	Assert.Equal("spearce", rc.Name);
+            Assert.NotNull(allURIs);
+            Assert.NotNull(rc.Fetch);
+            Assert.NotNull(rc.Push);
+            Assert.NotNull(rc.TagOpt);
+            Assert.Same(TagOpt.AUTO_FOLLOW, rc.TagOpt);
 
-            Assert.AreEqual(1, allURIs.Count);
-            Assert.AreEqual("http://www.spearce.org/egit.git", allURIs[0].ToString());
+            Assert.Equal(1, allURIs.Count);
+            Assert.Equal("http://www.spearce.org/egit.git", allURIs[0].ToString());
 
-            Assert.AreEqual(1, rc.Fetch.Count);
-            spec = rc.Fetch[0];
-            Assert.IsTrue(spec.Force);
-            Assert.IsTrue(spec.Wildcard);
-            Assert.AreEqual("refs/heads/*", spec.Source);
-            Assert.AreEqual("refs/remotes/spearce/*", spec.Destination);
+            Assert.Equal(1, rc.Fetch.Count);
+            RefSpec spec = rc.Fetch[0];
+            Assert.True(spec.Force);
+            Assert.True(spec.Wildcard);
+            Assert.Equal("refs/heads/*", spec.Source);
+            Assert.Equal("refs/remotes/spearce/*", spec.Destination);
 
-            Assert.AreEqual(0, rc.Push.Count);
+            Assert.Equal(0, rc.Push.Count);
         }
 
-        [Test]
+        [Fact]
         public void test001_SimpleNoTags()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            WriteConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "fetch = +refs/heads/*:refs/remotes/spearce/*\n"
                         + "tagopt = --no-tags\n");
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
-            Assert.AreSame(TagOpt.NO_TAGS, rc.TagOpt);
+            var rc = new RemoteConfig(db.Config, "spearce");
+            Assert.Same(TagOpt.NO_TAGS, rc.TagOpt);
         }
 
-        [Test]
+        [Fact]
         public void test002_SimpleAlwaysTags()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            WriteConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "fetch = +refs/heads/*:refs/remotes/spearce/*\n"
                         + "tagopt = --tags\n");
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
-            Assert.AreSame(TagOpt.FETCH_TAGS, rc.TagOpt);
+            var rc = new RemoteConfig(db.Config, "spearce");
+            Assert.Same(TagOpt.FETCH_TAGS, rc.TagOpt);
         }
 
-        [Test]
+        [Fact]
         public void test003_Mirror()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            WriteConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "fetch = +refs/heads/*:refs/heads/*\n"
                         + "fetch = refs/tags/*:refs/tags/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
+            var rc = new RemoteConfig(db.Config, "spearce");
             System.Collections.Generic.List<URIish> allURIs = rc.URIs;
-            RefSpec spec;
 
-            Assert.AreEqual("spearce", rc.Name);
-            Assert.IsNotNull(allURIs);
-            Assert.IsNotNull(rc.Fetch);
-            Assert.IsNotNull(rc.Push);
+        	Assert.Equal("spearce", rc.Name);
+            Assert.NotNull(allURIs);
+            Assert.NotNull(rc.Fetch);
+            Assert.NotNull(rc.Push);
 
-            Assert.AreEqual(1, allURIs.Count);
-            Assert.AreEqual("http://www.spearce.org/egit.git", allURIs[0].ToString());
+            Assert.Equal(1, allURIs.Count);
+            Assert.Equal("http://www.spearce.org/egit.git", allURIs[0].ToString());
 
-            Assert.AreEqual(2, rc.Fetch.Count);
+            Assert.Equal(2, rc.Fetch.Count);
 
-            spec = rc.Fetch[0];
-            Assert.IsTrue(spec.Force);
-            Assert.IsTrue(spec.Wildcard);
-            Assert.AreEqual("refs/heads/*", spec.Source);
-            Assert.AreEqual("refs/heads/*", spec.Destination);
+            RefSpec spec = rc.Fetch[0];
+            Assert.True(spec.Force);
+            Assert.True(spec.Wildcard);
+            Assert.Equal("refs/heads/*", spec.Source);
+            Assert.Equal("refs/heads/*", spec.Destination);
 
             spec = rc.Fetch[1];
-            Assert.IsFalse(spec.Force);
-            Assert.IsTrue(spec.Wildcard);
-            Assert.AreEqual("refs/tags/*", spec.Source);
-            Assert.AreEqual("refs/tags/*", spec.Destination);
+            Assert.False(spec.Force);
+            Assert.True(spec.Wildcard);
+            Assert.Equal("refs/tags/*", spec.Source);
+            Assert.Equal("refs/tags/*", spec.Destination);
 
-            Assert.AreEqual(0, rc.Push.Count);
+            Assert.Equal(0, rc.Push.Count);
         }
 
-        [Test]
+        [Fact]
         public void test004_Backup()
         {
-            writeConfig("[remote \"backup\"]\n"
+            WriteConfig("[remote \"backup\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "url = user@repo.or.cz:/srv/git/egit.git\n"
                         + "push = +refs/heads/*:refs/heads/*\n"
                         + "push = refs/tags/*:refs/tags/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
+            var rc = new RemoteConfig(db.Config, "backup");
             System.Collections.Generic.List<URIish> allURIs = rc.URIs;
-            RefSpec spec;
 
-            Assert.AreEqual("backup", rc.Name);
-            Assert.IsNotNull(allURIs);
-            Assert.IsNotNull(rc.Fetch);
-            Assert.IsNotNull(rc.Push);
+        	Assert.Equal("backup", rc.Name);
+            Assert.NotNull(allURIs);
+            Assert.NotNull(rc.Fetch);
+            Assert.NotNull(rc.Push);
 
-            Assert.AreEqual(2, allURIs.Count);
-            Assert.AreEqual("http://www.spearce.org/egit.git", allURIs[0].ToString());
-            Assert.AreEqual("user@repo.or.cz:/srv/git/egit.git", allURIs[1].ToString());
+            Assert.Equal(2, allURIs.Count);
+            Assert.Equal("http://www.spearce.org/egit.git", allURIs[0].ToString());
+            Assert.Equal("user@repo.or.cz:/srv/git/egit.git", allURIs[1].ToString());
 
-            Assert.AreEqual(0, rc.Fetch.Count);
+            Assert.Equal(0, rc.Fetch.Count);
 
-            Assert.AreEqual(2, rc.Push.Count);
-            spec = rc.Push[0];
-            Assert.IsTrue(spec.Force);
-            Assert.IsTrue(spec.Wildcard);
-            Assert.AreEqual("refs/heads/*", spec.Source);
-            Assert.AreEqual("refs/heads/*", spec.Destination);
+            Assert.Equal(2, rc.Push.Count);
+            RefSpec spec = rc.Push[0];
+            Assert.True(spec.Force);
+            Assert.True(spec.Wildcard);
+            Assert.Equal("refs/heads/*", spec.Source);
+            Assert.Equal("refs/heads/*", spec.Destination);
 
             spec = rc.Push[1];
-            Assert.IsFalse(spec.Force);
-            Assert.IsTrue(spec.Wildcard);
-            Assert.AreEqual("refs/tags/*", spec.Source);
-            Assert.AreEqual("refs/tags/*", spec.Destination);
+            Assert.False(spec.Force);
+            Assert.True(spec.Wildcard);
+            Assert.Equal("refs/tags/*", spec.Source);
+            Assert.Equal("refs/tags/*", spec.Destination);
         }
 
-        [Test]
+        [Fact]
         public void test005_UploadPack()
         {
-            writeConfig("[remote \"example\"]\n"
+            WriteConfig("[remote \"example\"]\n"
                         + "url = user@example.com:egit.git\n"
                         + "fetch = +refs/heads/*:refs/remotes/example/*\n"
                         + "uploadpack = /path/to/git/git-upload-pack\n"
                         + "receivepack = /path/to/git/git-receive-pack\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "example");
+            var rc = new RemoteConfig(db.Config, "example");
             System.Collections.Generic.List<URIish> allURIs = rc.URIs;
-            RefSpec spec;
 
-            Assert.AreEqual("example", rc.Name);
-            Assert.IsNotNull(allURIs);
-            Assert.IsNotNull(rc.Fetch);
-            Assert.IsNotNull(rc.Push);
+        	Assert.Equal("example", rc.Name);
+            Assert.NotNull(allURIs);
+            Assert.NotNull(rc.Fetch);
+            Assert.NotNull(rc.Push);
 
-            Assert.AreEqual(1, allURIs.Count);
-            Assert.AreEqual("user@example.com:egit.git", allURIs[0].ToString());
+            Assert.Equal(1, allURIs.Count);
+            Assert.Equal("user@example.com:egit.git", allURIs[0].ToString());
 
-            Assert.AreEqual(1, rc.Fetch.Count);
-            spec = rc.Fetch[0];
-            Assert.IsTrue(spec.Force);
-            Assert.IsTrue(spec.Wildcard);
-            Assert.AreEqual("refs/heads/*", spec.Source);
-            Assert.AreEqual("refs/remotes/example/*", spec.Destination);
+            Assert.Equal(1, rc.Fetch.Count);
+            RefSpec spec = rc.Fetch[0];
+            Assert.True(spec.Force);
+            Assert.True(spec.Wildcard);
+            Assert.Equal("refs/heads/*", spec.Source);
+            Assert.Equal("refs/remotes/example/*", spec.Destination);
 
-            Assert.AreEqual(0, rc.Push.Count);
+            Assert.Equal(0, rc.Push.Count);
 
-            Assert.AreEqual("/path/to/git/git-upload-pack", rc.UploadPack);
-            Assert.AreEqual("/path/to/git/git-receive-pack", rc.ReceivePack);
+            Assert.Equal("/path/to/git/git-upload-pack", rc.UploadPack);
+            Assert.Equal("/path/to/git/git-receive-pack", rc.ReceivePack);
         }
 
-        [Test]
+        [Fact]
         public void test006_Unknown()
         {
-            writeConfig(string.Empty);
+            WriteConfig(string.Empty);
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
-            Assert.AreEqual(0, rc.URIs.Count);
-            Assert.AreEqual(0, rc.Fetch.Count);
-            Assert.AreEqual(0, rc.Push.Count);
-            Assert.AreEqual("git-upload-pack", rc.UploadPack);
-            Assert.AreEqual("git-receive-pack", rc.ReceivePack);
+            var rc = new RemoteConfig(db.Config, "backup");
+            Assert.Equal(0, rc.URIs.Count);
+            Assert.Equal(0, rc.Fetch.Count);
+            Assert.Equal(0, rc.Push.Count);
+            Assert.Equal("git-upload-pack", rc.UploadPack);
+            Assert.Equal("git-receive-pack", rc.ReceivePack);
         }
 
-        [Test]
+        [Fact]
         public void test007_AddURI()
         {
-            writeConfig(string.Empty);
+            WriteConfig(string.Empty);
 
-            URIish uri = new URIish("/some/dir");
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
-            Assert.AreEqual(0, rc.URIs.Count);
+            var uri = new URIish("/some/dir");
+            var rc = new RemoteConfig(db.Config, "backup");
+            Assert.Equal(0, rc.URIs.Count);
 
-            Assert.IsTrue(rc.AddURI(uri));
-            Assert.AreEqual(1, rc.URIs.Count);
-            Assert.AreSame(uri, rc.URIs[0]);
+            Assert.True(rc.AddURI(uri));
+            Assert.Equal(1, rc.URIs.Count);
+            Assert.Same(uri, rc.URIs[0]);
 
-            Assert.IsFalse(rc.AddURI(new URIish(uri.ToString())));
-            Assert.AreEqual(1, rc.URIs.Count);
+            Assert.False(rc.AddURI(new URIish(uri.ToString())));
+            Assert.Equal(1, rc.URIs.Count);
         }
 
-        [Test]
+        [Fact]
         public void test008_RemoveFirstURI()
         {
-            writeConfig(string.Empty);
+            WriteConfig(string.Empty);
 
-            URIish a = new URIish("/some/dir");
-            URIish b = new URIish("/another/dir");
-            URIish c = new URIish("/more/dirs");
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
-            Assert.IsTrue(rc.AddURI(a));
-            Assert.IsTrue(rc.AddURI(b));
-            Assert.IsTrue(rc.AddURI(c));
+            var a = new URIish("/some/dir");
+            var b = new URIish("/another/dir");
+            var c = new URIish("/more/dirs");
+            var rc = new RemoteConfig(db.Config, "backup");
+            Assert.True(rc.AddURI(a));
+            Assert.True(rc.AddURI(b));
+            Assert.True(rc.AddURI(c));
 
-            Assert.AreEqual(3, rc.URIs.Count);
-            Assert.AreSame(a, rc.URIs[0]);
-            Assert.AreSame(b, rc.URIs[1]);
-            Assert.AreEqual(c, rc.URIs[2]);
+            Assert.Equal(3, rc.URIs.Count);
+            Assert.Same(a, rc.URIs[0]);
+            Assert.Same(b, rc.URIs[1]);
+            Assert.Equal(c, rc.URIs[2]);
 
-            Assert.IsTrue(rc.RemoveURI(a));
-            Assert.AreSame(b, rc.URIs[0]);
-            Assert.AreSame(c, rc.URIs[1]);
+            Assert.True(rc.RemoveURI(a));
+            Assert.Same(b, rc.URIs[0]);
+            Assert.Same(c, rc.URIs[1]);
         }
 
-        [Test]
+        [Fact]
         public void test009_RemoveMiddleURI()
         {
-            writeConfig(string.Empty);
+            WriteConfig(string.Empty);
 
-            URIish a = new URIish("/some/dir");
-            URIish b = new URIish("/another/dir");
-            URIish c = new URIish("/more/dirs");
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
-            Assert.IsTrue(rc.AddURI(a));
-            Assert.IsTrue(rc.AddURI(b));
-            Assert.IsTrue(rc.AddURI(c));
+            var a = new URIish("/some/dir");
+            var b = new URIish("/another/dir");
+            var c = new URIish("/more/dirs");
+            var rc = new RemoteConfig(db.Config, "backup");
+            Assert.True(rc.AddURI(a));
+            Assert.True(rc.AddURI(b));
+            Assert.True(rc.AddURI(c));
 
-            Assert.AreEqual(3, rc.URIs.Count);
-            Assert.AreSame(a, rc.URIs[0]);
-            Assert.AreSame(b, rc.URIs[1]);
-            Assert.AreEqual(c, rc.URIs[2]);
+            Assert.Equal(3, rc.URIs.Count);
+            Assert.Same(a, rc.URIs[0]);
+            Assert.Same(b, rc.URIs[1]);
+            Assert.Equal(c, rc.URIs[2]);
 
-            Assert.IsTrue(rc.RemoveURI(b));
-            Assert.AreEqual(2, rc.URIs.Count);
-            Assert.AreSame(a, rc.URIs[0]);
-            Assert.AreSame(c, rc.URIs[1]);
+            Assert.True(rc.RemoveURI(b));
+            Assert.Equal(2, rc.URIs.Count);
+            Assert.Same(a, rc.URIs[0]);
+            Assert.Same(c, rc.URIs[1]);
         }
 
-        [Test]
+        [Fact]
         public void test010_RemoveLastURI()
         {
-            writeConfig(string.Empty);
+            WriteConfig(string.Empty);
 
-            URIish a = new URIish("/some/dir");
-            URIish b = new URIish("/another/dir");
-            URIish c = new URIish("/more/dirs");
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
-            Assert.IsTrue(rc.AddURI(a));
-            Assert.IsTrue(rc.AddURI(b));
-            Assert.IsTrue(rc.AddURI(c));
+            var a = new URIish("/some/dir");
+            var b = new URIish("/another/dir");
+            var c = new URIish("/more/dirs");
+            var rc = new RemoteConfig(db.Config, "backup");
+            Assert.True(rc.AddURI(a));
+            Assert.True(rc.AddURI(b));
+            Assert.True(rc.AddURI(c));
 
-            Assert.AreEqual(3, rc.URIs.Count);
-            Assert.AreSame(a, rc.URIs[0]);
-            Assert.AreSame(b, rc.URIs[1]);
-            Assert.AreEqual(c, rc.URIs[2]);
+            Assert.Equal(3, rc.URIs.Count);
+            Assert.Same(a, rc.URIs[0]);
+            Assert.Same(b, rc.URIs[1]);
+            Assert.Equal(c, rc.URIs[2]);
 
-            Assert.IsTrue(rc.RemoveURI(c));
-            Assert.AreEqual(2, rc.URIs.Count);
-            Assert.AreSame(a, rc.URIs[0]);
-            Assert.AreSame(b, rc.URIs[1]);
+            Assert.True(rc.RemoveURI(c));
+            Assert.Equal(2, rc.URIs.Count);
+            Assert.Same(a, rc.URIs[0]);
+            Assert.Same(b, rc.URIs[1]);
         }
 
-        [Test]
+        [Fact]
         public void test011_RemoveOnlyURI()
         {
-            writeConfig(string.Empty);
+            WriteConfig(string.Empty);
 
-            URIish a = new URIish("/some/dir");
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
-            Assert.IsTrue(rc.AddURI(a));
+            var a = new URIish("/some/dir");
+            var rc = new RemoteConfig(db.Config, "backup");
+            Assert.True(rc.AddURI(a));
 
-            Assert.AreEqual(1, rc.URIs.Count);
-            Assert.AreSame(a, rc.URIs[0]);
+            Assert.Equal(1, rc.URIs.Count);
+            Assert.Same(a, rc.URIs[0]);
 
-            Assert.IsTrue(rc.RemoveURI(a));
-            Assert.AreEqual(0, rc.URIs.Count);
+            Assert.True(rc.RemoveURI(a));
+            Assert.Equal(0, rc.URIs.Count);
         }
 
-        [Test]
+        [Fact]
         public void test012_CreateOrigin()
         {
-            RemoteConfig rc = new RemoteConfig(db.Config, "origin");
+            var rc = new RemoteConfig(db.Config, "origin");
             rc.AddURI(new URIish("/some/dir"));
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.Update(db.Config);
@@ -360,16 +354,16 @@ namespace GitSharp.Tests.Transport
                       "\tfetch = +refs/heads/*:refs/remotes/origin/*\n");
         }
 
-        [Test]
+        [Fact]
         public void test013_SaveAddURI()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            WriteConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "fetch = +refs/heads/*:refs/remotes/spearce/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
+            var rc = new RemoteConfig(db.Config, "spearce");
             rc.AddURI(new URIish("/some/dir"));
-            Assert.AreEqual(2, rc.URIs.Count);
+            Assert.Equal(2, rc.URIs.Count);
             rc.Update(db.Config);
             db.Config.save();
 
@@ -382,18 +376,18 @@ namespace GitSharp.Tests.Transport
                       + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
         }
 
-        [Test]
+        [Fact]
         public void test014_SaveRemoveLastURI()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            WriteConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "url = /some/dir\n"
                         + "fetch = +refs/heads/*:refs/remotes/spearce/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
-            Assert.AreEqual(2, rc.URIs.Count);
+            var rc = new RemoteConfig(db.Config, "spearce");
+            Assert.Equal(2, rc.URIs.Count);
             rc.RemoveURI(new URIish("/some/dir"));
-            Assert.AreEqual(1, rc.URIs.Count);
+            Assert.Equal(1, rc.URIs.Count);
             rc.Update(db.Config);
             db.Config.save();
 
@@ -405,18 +399,18 @@ namespace GitSharp.Tests.Transport
                       + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
         }
 
-        [Test]
+        [Fact]
         public void test015_SaveRemoveFirstURI()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            WriteConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "url = /some/dir\n"
                         + "fetch = +refs/heads/*:refs/remotes/spearce/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
-            Assert.AreEqual(2, rc.URIs.Count);
+            var rc = new RemoteConfig(db.Config, "spearce");
+            Assert.Equal(2, rc.URIs.Count);
             rc.RemoveURI(new URIish("http://www.spearce.org/egit.git"));
-            Assert.AreEqual(1, rc.URIs.Count);
+            Assert.Equal(1, rc.URIs.Count);
             rc.Update(db.Config);
             db.Config.save();
 
@@ -427,10 +421,10 @@ namespace GitSharp.Tests.Transport
                       + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
         }
 
-        [Test]
+        [Fact]
         public void test016_SaveNoTags()
         {
-            RemoteConfig rc = new RemoteConfig(db.Config, "origin");
+            var rc = new RemoteConfig(db.Config, "origin");
             rc.AddURI(new URIish("/some/dir"));
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.SetTagOpt(TagOpt.NO_TAGS);
@@ -445,10 +439,10 @@ namespace GitSharp.Tests.Transport
                       + "\ttagopt = --no-tags\n");
         }
 
-        [Test]
+        [Fact]
         public void test017_SaveAllTags()
         {
-            RemoteConfig rc = new RemoteConfig(db.Config, "origin");
+            var rc = new RemoteConfig(db.Config, "origin");
             rc.AddURI(new URIish("/some/dir"));
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.SetTagOpt(TagOpt.FETCH_TAGS);
@@ -463,5 +457,4 @@ namespace GitSharp.Tests.Transport
                       + "\ttagopt = --tags\n");
         }
     }
-
 }

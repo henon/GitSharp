@@ -37,20 +37,17 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Text;
 using GitSharp.Exceptions;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-	[TestFixture]
-	public class ObjectCheckerTests
+	public class ObjectCheckerTests : XunitBaseFact
 	{
 		#region Setup/Teardown
 
-		[SetUp]
-		public void setUp()
+		protected override void SetUp()
 		{
 			_checker = new ObjectChecker();
 		}
@@ -59,7 +56,7 @@ namespace GitSharp.Tests
 
 		private ObjectChecker _checker;
 
-		private static void entry(StringBuilder b, string modeName)
+		private static void Entry(StringBuilder b, string modeName)
 		{
 			b.Append(modeName);
 			b.Append('\0');
@@ -69,7 +66,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testCheckBlob()
 		{
 			// Any blob should pass...
@@ -80,7 +77,7 @@ namespace GitSharp.Tests
 			_checker.check(Constants.OBJ_BLOB, new char[1]);
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidAuthor1()
 		{
 			var b = new StringBuilder();
@@ -95,17 +92,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("invalid author", e.Message);
+				Assert.Equal("invalid author", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidAuthor2()
 		{
 			var b = new StringBuilder();
@@ -120,17 +117,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("invalid author", e.Message);
+				Assert.Equal("invalid author", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidAuthor3()
 		{
 			var b = new StringBuilder();
@@ -145,17 +142,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("invalid author", e.Message);
+				Assert.Equal("invalid author", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidAuthor4()
 		{
 			var b = new StringBuilder();
@@ -170,17 +167,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("invalid author", e.Message);
+				Assert.Equal("invalid author", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidAuthor5()
 		{
 			var b = new StringBuilder();
@@ -195,17 +192,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("invalid author", e.Message);
+				Assert.Equal("invalid author", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidAuthor6()
 		{
 			var b = new StringBuilder();
@@ -220,17 +217,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("invalid author", e.Message);
+				Assert.Equal("invalid author", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidAuthor7()
 		{
 			var b = new StringBuilder();
@@ -245,17 +242,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("invalid author", e.Message);
+				Assert.Equal("invalid author", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidCommitter()
 		{
 			var b = new StringBuilder();
@@ -271,17 +268,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("invalid committer", e.Message);
+				Assert.Equal("invalid committer", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidParent1()
 		{
 			var b = new StringBuilder();
@@ -297,15 +294,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid parent", e.Message);
+				Assert.Equal("invalid parent", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidParent2()
 		{
 			var b = new StringBuilder();
@@ -322,15 +319,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid parent", e.Message);
+				Assert.Equal("invalid parent", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidParent3()
 		{
 			var b = new StringBuilder();
@@ -347,15 +344,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid parent", e.Message);
+				Assert.Equal("invalid parent", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidParent4()
 		{
 			var b = new StringBuilder();
@@ -372,15 +369,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid parent", e.Message);
+				Assert.Equal("invalid parent", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidParent5()
 		{
 			var b = new StringBuilder();
@@ -397,17 +394,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("no author", e.Message);
+				Assert.Equal("no author", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidTree1()
 		{
 			var b = new StringBuilder();
@@ -420,15 +417,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid tree", e.Message);
+				Assert.Equal("invalid tree", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidTree2()
 		{
 			var b = new StringBuilder();
@@ -441,15 +438,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid tree", e.Message);
+				Assert.Equal("invalid tree", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidTree3()
 		{
 			var b = new StringBuilder();
@@ -462,15 +459,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid tree", e.Message);
+				Assert.Equal("invalid tree", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitInvalidTree4()
 		{
 			var b = new StringBuilder();
@@ -483,15 +480,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid tree", e.Message);
+				Assert.Equal("invalid tree", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitNoAuthor()
 		{
 			var b = new StringBuilder();
@@ -506,17 +503,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("no author", e.Message);
+				Assert.Equal("no author", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitNoCommitter1()
 		{
 			var b = new StringBuilder();
@@ -531,17 +528,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("no committer", e.Message);
+				Assert.Equal("no committer", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitNoCommitter2()
 		{
 			var b = new StringBuilder();
@@ -557,17 +554,17 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
 				// Yes, really, we complain about author not being
 				// found as the invalid parent line wasn't consumed.
-				Assert.AreEqual("no committer", e.Message);
+				Assert.Equal("no committer", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitNoTree1()
 		{
 			var b = new StringBuilder();
@@ -580,15 +577,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no tree header", e.Message);
+				Assert.Equal("no tree header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitNoTree2()
 		{
 			var b = new StringBuilder();
@@ -601,15 +598,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no tree header", e.Message);
+				Assert.Equal("no tree header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitNoTree3()
 		{
 			var b = new StringBuilder();
@@ -622,15 +619,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no tree header", e.Message);
+				Assert.Equal("no tree header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidCommitNoTree4()
 		{
 			var b = new StringBuilder();
@@ -643,15 +640,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkCommit(data);
-				Assert.Fail("Did not catch corrupt object");
+				Assert.False(true, "Did not catch corrupt object");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no tree header", e.Message);
+				Assert.Equal("no tree header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagInvalidTaggerHeader1()
 		{
 			var b = new StringBuilder();
@@ -668,15 +665,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid tagger", e.Message);
+				Assert.Equal("invalid tagger", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagInvalidTaggerHeader3()
 		{
 			var b = new StringBuilder();
@@ -693,15 +690,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid tagger", e.Message);
+				Assert.Equal("invalid tagger", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoObject1()
 		{
 			var b = new StringBuilder();
@@ -710,15 +707,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no object header", e.Message);
+				Assert.Equal("no object header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoObject2()
 		{
 			var b = new StringBuilder();
@@ -731,15 +728,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no object header", e.Message);
+				Assert.Equal("no object header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoObject3()
 		{
 			var b = new StringBuilder();
@@ -752,15 +749,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no object header", e.Message);
+				Assert.Equal("no object header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoObject4()
 		{
 			var b = new StringBuilder();
@@ -773,15 +770,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid object", e.Message);
+				Assert.Equal("invalid object", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoObject5()
 		{
 			var b = new StringBuilder();
@@ -794,15 +791,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid object", e.Message);
+				Assert.Equal("invalid object", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoObject6()
 		{
 			var b = new StringBuilder();
@@ -814,15 +811,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid object", e.Message);
+				Assert.Equal("invalid object", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoTaggerHeader1()
 		{
 			var b = new StringBuilder();
@@ -838,15 +835,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no tagger header", e.Message);
+				Assert.Equal("no tagger header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoTagHeader1()
 		{
 			var b = new StringBuilder();
@@ -861,15 +858,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no tag header", e.Message);
+				Assert.Equal("no tag header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoTagHeader2()
 		{
 			var b = new StringBuilder();
@@ -885,15 +882,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no tag header", e.Message);
+				Assert.Equal("no tag header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoTagHeader3()
 		{
 			var b = new StringBuilder();
@@ -909,15 +906,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no tag header", e.Message);
+				Assert.Equal("no tag header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoTagHeader4()
 		{
 			var b = new StringBuilder();
@@ -933,15 +930,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no tagger header", e.Message);
+				Assert.Equal("no tagger header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoType1()
 		{
 			var b = new StringBuilder();
@@ -954,15 +951,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no type header", e.Message);
+				Assert.Equal("no type header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoType2()
 		{
 			var b = new StringBuilder();
@@ -977,15 +974,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no type header", e.Message);
+				Assert.Equal("no type header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoType3()
 		{
 			var b = new StringBuilder();
@@ -1000,15 +997,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no type header", e.Message);
+				Assert.Equal("no type header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTagNoType4()
 		{
 			var b = new StringBuilder();
@@ -1023,145 +1020,145 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
+				Assert.False(true, "incorrectly accepted invalid tag");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("no tag header", e.Message);
+				Assert.Equal("no tag header", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeBadSorting1()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 foobar");
-			entry(b, "100644 fooaaa");
+			Entry(b, "100644 foobar");
+			Entry(b, "100644 fooaaa");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("incorrectly sorted", e.Message);
+				Assert.Equal("incorrectly sorted", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeBadSorting2()
 		{
 			var b = new StringBuilder();
-			entry(b, "40000 a");
-			entry(b, "100644 a.c");
+			Entry(b, "40000 a");
+			Entry(b, "100644 a.c");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("incorrectly sorted", e.Message);
+				Assert.Equal("incorrectly sorted", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeBadSorting3()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 a0c");
-			entry(b, "40000 a");
+			Entry(b, "100644 a0c");
+			Entry(b, "40000 a");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("incorrectly sorted", e.Message);
+				Assert.Equal("incorrectly sorted", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeDuplicateNames1()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 a");
-			entry(b, "100644 a");
+			Entry(b, "100644 a");
+			Entry(b, "100644 a");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("duplicate entry names", e.Message);
+				Assert.Equal("duplicate entry names", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeDuplicateNames2()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 a");
-			entry(b, "100755 a");
+			Entry(b, "100644 a");
+			Entry(b, "100755 a");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("duplicate entry names", e.Message);
+				Assert.Equal("duplicate entry names", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeDuplicateNames3()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 a");
-			entry(b, "40000 a");
+			Entry(b, "100644 a");
+			Entry(b, "40000 a");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("duplicate entry names", e.Message);
+				Assert.Equal("duplicate entry names", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeDuplicateNames4()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 a");
-			entry(b, "100644 a.c");
-			entry(b, "100644 a.d");
-			entry(b, "100644 a.e");
-			entry(b, "40000 a");
-			entry(b, "100644 zoo");
+			Entry(b, "100644 a");
+			Entry(b, "100644 a.c");
+			Entry(b, "100644 a.d");
+			Entry(b, "100644 a.e");
+			Entry(b, "40000 a");
+			Entry(b, "100644 zoo");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("duplicate entry names", e.Message);
+				Assert.Equal("duplicate entry names", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeModeMissingName()
 		{
 			var b = new StringBuilder();
@@ -1170,203 +1167,203 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("truncated in mode", e.Message);
+				Assert.Equal("truncated in mode", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeModeNotOctal1()
 		{
 			var b = new StringBuilder();
-			entry(b, "8 a");
+			Entry(b, "8 a");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid mode character", e.Message);
+				Assert.Equal("invalid mode character", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeModeNotOctal2()
 		{
 			var b = new StringBuilder();
-			entry(b, "Z a");
+			Entry(b, "Z a");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid mode character", e.Message);
+				Assert.Equal("invalid mode character", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeModeNotSupportedMode1()
 		{
 			var b = new StringBuilder();
-			entry(b, "1 a");
+			Entry(b, "1 a");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid mode 1", e.Message);
+				Assert.Equal("invalid mode 1", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeModeNotSupportedMode2()
 		{
 			var b = new StringBuilder();
-			entry(b, "170000 a");
+			Entry(b, "170000 a");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid mode " + 0170000, e.Message);
+				Assert.Equal("invalid mode " + 0170000, e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeModeStartsWithZero1()
 		{
 			var b = new StringBuilder();
-			entry(b, "0 a");
+			Entry(b, "0 a");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("mode starts with '0'", e.Message);
+				Assert.Equal("mode starts with '0'", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeModeStartsWithZero2()
 		{
 			var b = new StringBuilder();
-			entry(b, "0100644 a");
+			Entry(b, "0100644 a");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("mode starts with '0'", e.Message);
+				Assert.Equal("mode starts with '0'", e.Message);
 			}
 		}
 
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeModeStartsWithZero3()
 		{
 			var b = new StringBuilder();
-			entry(b, "040000 a");
+			Entry(b, "040000 a");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("mode starts with '0'", e.Message);
+				Assert.Equal("mode starts with '0'", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeNameContainsSlash()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 a/b");
+			Entry(b, "100644 a/b");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("name contains '/'", e.Message);
+				Assert.Equal("name contains '/'", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeNameIsDot()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 .");
+			Entry(b, "100644 .");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid name '.'", e.Message);
+				Assert.Equal("invalid name '.'", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeNameIsDotDot()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 ..");
+			Entry(b, "100644 ..");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("invalid name '..'", e.Message);
+				Assert.Equal("invalid name '..'", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeNameIsEmpty()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 ");
+			Entry(b, "100644 ");
 			char[] data = b.ToString().ToCharArray();
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("zero length name", e.Message);
+				Assert.Equal("zero length name", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeTruncatedInName()
 		{
 			var b = new StringBuilder();
@@ -1375,15 +1372,15 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("truncated in name", e.Message);
+				Assert.Equal("truncated in name", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidTreeTruncatedInObjectId()
 		{
 			var b = new StringBuilder();
@@ -1392,30 +1389,30 @@ namespace GitSharp.Tests
 			try
 			{
 				_checker.checkTree(data);
-				Assert.Fail("incorrectly accepted an invalid tree");
+				Assert.False(true, "incorrectly accepted an invalid tree");
 			}
 			catch (CorruptObjectException e)
 			{
-				Assert.AreEqual("truncated in object id", e.Message);
+				Assert.Equal("truncated in object id", e.Message);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testInvalidType()
 		{
 			try
 			{
 				_checker.check(Constants.OBJ_BAD, new char[0]);
-				Assert.Fail("Did not throw CorruptObjectException");
+				Assert.False(true, "Did not throw CorruptObjectException");
 			}
 			catch (CorruptObjectException e)
 			{
 				string m = e.Message;
-				Assert.AreEqual("Invalid object type: " + Constants.OBJ_BAD, m);
+				Assert.Equal("Invalid object type: " + Constants.OBJ_BAD, m);
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testValidCommit128Parent()
 		{
 			var b = new StringBuilder();
@@ -1439,7 +1436,7 @@ namespace GitSharp.Tests
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidCommit1Parent()
 		{
 			var b = new StringBuilder();
@@ -1460,7 +1457,7 @@ namespace GitSharp.Tests
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidCommit2Parent()
 		{
 			var b = new StringBuilder();
@@ -1485,7 +1482,7 @@ namespace GitSharp.Tests
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidCommitBlankAuthor()
 		{
 			var b = new StringBuilder();
@@ -1502,7 +1499,7 @@ namespace GitSharp.Tests
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidCommitNoParent()
 		{
 			var b = new StringBuilder();
@@ -1519,7 +1516,7 @@ namespace GitSharp.Tests
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidCommitNormalTime()
 		{
 			var b = new StringBuilder();
@@ -1537,14 +1534,14 @@ namespace GitSharp.Tests
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidEmptyTree()
 		{
 			_checker.checkTree(new char[0]);
 			_checker.check(Constants.OBJ_TREE, new char[0]);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTag()
 		{
 			var b = new StringBuilder();
@@ -1562,138 +1559,138 @@ namespace GitSharp.Tests
 			_checker.check(Constants.OBJ_TAG, data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTree1()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 regular-file");
+			Entry(b, "100644 regular-file");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTree2()
 		{
 			var b = new StringBuilder();
-			entry(b, "100755 executable");
+			Entry(b, "100755 executable");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTree3()
 		{
 			var b = new StringBuilder();
-			entry(b, "40000 tree");
+			Entry(b, "40000 tree");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTree4()
 		{
 			var b = new StringBuilder();
-			entry(b, "120000 symlink");
+			Entry(b, "120000 symlink");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTree5()
 		{
 			var b = new StringBuilder();
-			entry(b, "160000 git link");
+			Entry(b, "160000 git link");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTree6()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 .a");
+			Entry(b, "100644 .a");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTreeSorting1()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 fooaaa");
-			entry(b, "100755 foobar");
+			Entry(b, "100644 fooaaa");
+			Entry(b, "100755 foobar");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTreeSorting2()
 		{
 			var b = new StringBuilder();
-			entry(b, "100755 fooaaa");
-			entry(b, "100644 foobar");
+			Entry(b, "100755 fooaaa");
+			Entry(b, "100644 foobar");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTreeSorting3()
 		{
 			var b = new StringBuilder();
-			entry(b, "40000 a");
-			entry(b, "100644 b");
+			Entry(b, "40000 a");
+			Entry(b, "100644 b");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTreeSorting4()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 a");
-			entry(b, "40000 b");
+			Entry(b, "100644 a");
+			Entry(b, "40000 b");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTreeSorting5()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 a.c");
-			entry(b, "40000 a");
-			entry(b, "100644 a0c");
+			Entry(b, "100644 a.c");
+			Entry(b, "40000 a");
+			Entry(b, "100644 a0c");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTreeSorting6()
 		{
 			var b = new StringBuilder();
-			entry(b, "40000 a");
-			entry(b, "100644 apple");
+			Entry(b, "40000 a");
+			Entry(b, "100644 apple");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTreeSorting7()
 		{
 			var b = new StringBuilder();
-			entry(b, "40000 an orang");
-			entry(b, "40000 an orange");
+			Entry(b, "40000 an orang");
+			Entry(b, "40000 an orange");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}
 
-		[Test]
+		[Fact]
 		public void testValidTreeSorting8()
 		{
 			var b = new StringBuilder();
-			entry(b, "100644 a");
-			entry(b, "100644 a0c");
-			entry(b, "100644 b");
+			Entry(b, "100644 a");
+			Entry(b, "100644 a0c");
+			Entry(b, "100644 b");
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTree(data);
 		}

@@ -38,15 +38,14 @@
  */
 
 using System.IO;
-using NUnit.Framework;
+using GitSharp.Tests.Util;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-	[TestFixture]
 	public class IndexDiffTest : RepositoryTestCase
 	{
-		// Methods
-		[Test]
+		[Fact]
 		public void testAdded()
 		{
 			var index = new GitIndex(db);
@@ -59,15 +58,15 @@ namespace GitSharp.Tests
 			var diff = new IndexDiff(tree, index);
 			diff.Diff();
 
-			Assert.AreEqual(2, diff.Added.Count);
-			Assert.IsTrue(diff.Added.Contains("file1"));
-			Assert.IsTrue(diff.Added.Contains("dir/subfile"));
-			Assert.AreEqual(0, diff.Changed.Count);
-			Assert.AreEqual(0, diff.Modified.Count);
-			Assert.AreEqual(0, diff.Removed.Count);
+			Assert.Equal(2, diff.Added.Count);
+			Assert.True(diff.Added.Contains("file1"));
+			Assert.True(diff.Added.Contains("dir/subfile"));
+			Assert.Equal(0, diff.Changed.Count);
+			Assert.Equal(0, diff.Modified.Count);
+			Assert.Equal(0, diff.Removed.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void testModified()
 		{
 			var index = new GitIndex(db);
@@ -80,24 +79,24 @@ namespace GitSharp.Tests
 			var t = new Tree(db);
 			t.AddFile("file2").Id = ObjectId.FromString("0123456789012345678901234567890123456789");
 			t.AddFile("dir/file3").Id = ObjectId.FromString("0123456789012345678901234567890123456789");
-			Assert.AreEqual(2, t.MemberCount);
+			Assert.Equal(2, t.MemberCount);
 
-			var tree2 = (Tree) t.findTreeMember("dir");
+			var tree2 = (Tree)t.findTreeMember("dir");
 			tree2.Id = new ObjectWriter(db).WriteTree(tree2);
 			t.Id = new ObjectWriter(db).WriteTree(t);
 			var diff = new IndexDiff(t, index);
 			diff.Diff();
-			Assert.AreEqual(2, diff.Changed.Count);
-			Assert.IsTrue(diff.Changed.Contains("file2"));
-			Assert.IsTrue(diff.Changed.Contains("dir/file3"));
-			Assert.AreEqual(1, diff.Modified.Count);
-			Assert.IsTrue(diff.Modified.Contains("dir/file3"));
-			Assert.AreEqual(0, diff.Added.Count);
-			Assert.AreEqual(0, diff.Removed.Count);
-			Assert.AreEqual(0, diff.Missing.Count);
+			Assert.Equal(2, diff.Changed.Count);
+			Assert.True(diff.Changed.Contains("file2"));
+			Assert.True(diff.Changed.Contains("dir/file3"));
+			Assert.Equal(1, diff.Modified.Count);
+			Assert.True(diff.Modified.Contains("dir/file3"));
+			Assert.Equal(0, diff.Added.Count);
+			Assert.Equal(0, diff.Removed.Count);
+			Assert.Equal(0, diff.Missing.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void testRemoved()
 		{
 			var index = new GitIndex(db);
@@ -107,24 +106,24 @@ namespace GitSharp.Tests
 			var t = new Tree(db);
 			t.AddFile("file2");
 			t.AddFile("dir/file3");
-			Assert.AreEqual(2, t.MemberCount);
+			Assert.Equal(2, t.MemberCount);
 			t.FindBlobMember("file2").Id = ObjectId.FromString("30d67d4672d5c05833b7192cc77a79eaafb5c7ad");
-			var tree2 = (Tree) t.findTreeMember("dir");
+			var tree2 = (Tree)t.findTreeMember("dir");
 			tree2.FindBlobMember("file3").Id = ObjectId.FromString("873fb8d667d05436d728c52b1d7a09528e6eb59b");
 			tree2.Id = new ObjectWriter(db).WriteTree(tree2);
 			t.Id = new ObjectWriter(db).WriteTree(t);
 
 			var diff = new IndexDiff(t, index);
 			diff.Diff();
-			Assert.AreEqual(2, diff.Removed.Count);
-			Assert.IsTrue(diff.Removed.Contains("file2"));
-			Assert.IsTrue(diff.Removed.Contains("dir/file3"));
-			Assert.AreEqual(0, diff.Changed.Count);
-			Assert.AreEqual(0, diff.Modified.Count);
-			Assert.AreEqual(0, diff.Added.Count);
+			Assert.Equal(2, diff.Removed.Count);
+			Assert.True(diff.Removed.Contains("file2"));
+			Assert.True(diff.Removed.Contains("dir/file3"));
+			Assert.Equal(0, diff.Changed.Count);
+			Assert.Equal(0, diff.Modified.Count);
+			Assert.Equal(0, diff.Added.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void testUnchangedComplex()
 		{
 			var index = new GitIndex(db);
@@ -135,7 +134,7 @@ namespace GitSharp.Tests
 			index.add(trash, writeTrashFile("a/c", "a/c"));
 			index.add(trash, writeTrashFile("a=c", "a=c"));
 			index.add(trash, writeTrashFile("a=d", "a=d"));
-			
+
 			var t = new Tree(db);
 			t.AddFile("a.b").Id = ObjectId.FromString("f6f28df96c2b40c951164286e08be7c38ec74851");
 			t.AddFile("a.c").Id = ObjectId.FromString("6bc0e647512d2a0bef4f26111e484dc87df7f5ca");
@@ -145,24 +144,24 @@ namespace GitSharp.Tests
 			t.AddFile("a=c").Id = ObjectId.FromString("06022365ddbd7fb126761319633bf73517770714");
 			t.AddFile("a=d").Id = ObjectId.FromString("fa6414df3da87840700e9eeb7fc261dd77ccd5c2");
 
-			var tree2 = (Tree) t.findTreeMember("a/b.b");
+			var tree2 = (Tree)t.findTreeMember("a/b.b");
 			tree2.Id = new ObjectWriter(db).WriteTree(tree2);
 
-			var tree3 = (Tree) t.findTreeMember("a");
+			var tree3 = (Tree)t.findTreeMember("a");
 			tree3.Id = new ObjectWriter(db).WriteTree(tree3);
 			t.Id = new ObjectWriter(db).WriteTree(t);
 
 			var diff = new IndexDiff(t, index);
 			diff.Diff();
 
-			Assert.AreEqual(0, diff.Changed.Count);
-			Assert.AreEqual(0, diff.Added.Count);
-			Assert.AreEqual(0, diff.Removed.Count);
-			Assert.AreEqual(0, diff.Missing.Count);
-			Assert.AreEqual(0, diff.Modified.Count);
+			Assert.Equal(0, diff.Changed.Count);
+			Assert.Equal(0, diff.Added.Count);
+			Assert.Equal(0, diff.Removed.Count);
+			Assert.Equal(0, diff.Missing.Count);
+			Assert.Equal(0, diff.Modified.Count);
 		}
 
-		[Test]
+		[Fact]
 		public void testUnchangedSimple()
 		{
 			var index = new GitIndex(db);
@@ -178,15 +177,15 @@ namespace GitSharp.Tests
 			t.AddFile("a=c").Id = ObjectId.FromString("06022365ddbd7fb126761319633bf73517770714");
 			t.AddFile("a=d").Id = ObjectId.FromString("fa6414df3da87840700e9eeb7fc261dd77ccd5c2");
 			t.Id = new ObjectWriter(db).WriteTree(t);
-			
+
 			var diff = new IndexDiff(t, index);
 			diff.Diff();
 
-			Assert.AreEqual(0, diff.Changed.Count);
-			Assert.AreEqual(0, diff.Added.Count);
-			Assert.AreEqual(0, diff.Removed.Count);
-			Assert.AreEqual(0, diff.Missing.Count);
-			Assert.AreEqual(0, diff.Modified.Count);
+			Assert.Equal(0, diff.Changed.Count);
+			Assert.Equal(0, diff.Added.Count);
+			Assert.Equal(0, diff.Removed.Count);
+			Assert.Equal(0, diff.Missing.Count);
+			Assert.Equal(0, diff.Modified.Count);
 		}
 	}
 }

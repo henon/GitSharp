@@ -38,21 +38,19 @@
 
 using System.Collections.Generic;
 using System.IO;
-using NUnit.Framework;
+using GitSharp.Tests.Util;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class IndexTreeWalkerTest : RepositoryTestCase
     {
-        // Fields
         private static readonly List<string> BothVisited = new List<string>();
         private static readonly List<string> IndexOnlyEntriesVisited = new List<string>();
         private static readonly AbstractIndexTreeVisitor TestIndexTreeVisitor;
         private static readonly AbstractIndexTreeVisitor TestTreeOnlyOneLevelTreeVisitor;
         private static readonly List<string> TreeOnlyEntriesVisited = new List<string>();
 
-        // Methods
         static IndexTreeWalkerTest()
         {
             TestIndexTreeVisitor = new AbstractIndexTreeVisitor
@@ -80,31 +78,31 @@ namespace GitSharp.Tests
                            		             	{
                            		             		if ((entry == null) || (indexEntry == null))
                            		             		{
-                           		             			Assert.Fail();
+                           		             			Assert.False(true, "Condition not expected.");
                            		             		}
                            		             	},
                            		FinishVisitTreeByIndex = delegate(Tree tree, int i, string curDir)
                            		                         	{
                            		                         		if (tree.MemberCount == 0)
                            		                         		{
-                           		                         			Assert.Fail();
+																	Assert.False(true, "Condition not expected.");
                            		                         		}
                            		                         		if (i == 0)
                            		                         		{
-                           		                         			Assert.Fail();
+                           		                         			Assert.False(true, "Condition not expected.");
                            		                         		}
                            		                         	}
                            	};
         }
 
-        public override void tearDown()
+        protected override void TearDown()
         {
             TreeOnlyEntriesVisited.Clear();
             BothVisited.Clear();
             IndexOnlyEntriesVisited.Clear();
         }
 
-        [Test]
+        [Fact]
         public void testBoth()
         {
             var index = new GitIndex(db);
@@ -116,12 +114,12 @@ namespace GitSharp.Tests
             mainTree.AddFile("c");
 
             new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
-            Assert.IsTrue(IndexOnlyEntriesVisited.Contains("a"));
-            Assert.IsTrue(TreeOnlyEntriesVisited.Contains("b/b"));
-            Assert.IsTrue(BothVisited.Contains("c"));
+            Assert.True(IndexOnlyEntriesVisited.Contains("a"));
+            Assert.True(TreeOnlyEntriesVisited.Contains("b/b"));
+            Assert.True(BothVisited.Contains("c"));
         }
 
-        [Test]
+        [Fact]
         public void testIndexOnlyOneLevel()
         {
             var index = new GitIndex(db);
@@ -131,12 +129,12 @@ namespace GitSharp.Tests
             index.add(trash, writeTrashFile("bar", "bar"));
             new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
 
-            Assert.AreEqual(2, IndexOnlyEntriesVisited.Count);
-            Assert.IsTrue(IndexOnlyEntriesVisited[0].Equals("bar"));
-            Assert.IsTrue(IndexOnlyEntriesVisited[1].Equals("foo"));
+            Assert.Equal(2, IndexOnlyEntriesVisited.Count);
+            Assert.True(IndexOnlyEntriesVisited[0].Equals("bar"));
+            Assert.True(IndexOnlyEntriesVisited[1].Equals("foo"));
         }
 
-        [Test]
+        [Fact]
         public void testIndexOnlySubDirs()
         {
             var index = new GitIndex(db);
@@ -146,11 +144,11 @@ namespace GitSharp.Tests
             index.add(trash, writeTrashFile("asdf", "asdf"));
             new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
 
-            Assert.AreEqual("asdf", IndexOnlyEntriesVisited[0]);
-            Assert.AreEqual("foo/bar/baz", IndexOnlyEntriesVisited[1]);
+            Assert.Equal("asdf", IndexOnlyEntriesVisited[0]);
+            Assert.Equal("foo/bar/baz", IndexOnlyEntriesVisited[1]);
         }
 
-        [Test]
+        [Fact]
         public void testLeavingTree()
         {
             var index = new GitIndex(db);
@@ -160,7 +158,7 @@ namespace GitSharp.Tests
             new IndexTreeWalker(index, db.MapTree(index.writeTree()), trash, TestTreeOnlyOneLevelTreeVisitor).Walk();
         }
 
-        [Test]
+        [Fact]
         public void testTreeOnlyOneLevel()
         {
             var index = new GitIndex(db);
@@ -168,8 +166,8 @@ namespace GitSharp.Tests
             mainTree.AddFile("foo");
             mainTree.AddFile("bar");
             new IndexTreeWalker(index, mainTree, trash, TestIndexTreeVisitor).Walk();
-            Assert.IsTrue(TreeOnlyEntriesVisited[0].Equals("bar"));
-            Assert.IsTrue(TreeOnlyEntriesVisited[1].Equals("foo"));
+            Assert.True(TreeOnlyEntriesVisited[0].Equals("bar"));
+            Assert.True(TreeOnlyEntriesVisited[1].Equals("foo"));
         }
     }
 }

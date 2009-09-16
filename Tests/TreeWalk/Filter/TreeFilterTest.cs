@@ -36,59 +36,57 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.TreeWalk;
+using GitSharp.Tests.Util;
 using GitSharp.TreeWalk.Filter;
-namespace GitSharp.Tests.TreeWalk
+using Xunit;
+
+namespace GitSharp.Tests.TreeWalk.Filter
 {
-    using NUnit.Framework;
-    [TestFixture]
-    public class TreeFilterTest : RepositoryTestCase
-    {
+	public class TreeFilterTest : RepositoryTestCase
+	{
+		[Fact]
+		public void testALL_IncludesAnything()
+		{
+			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			Assert.True(TreeFilter.ALL.include(tw));
+		}
 
-        [Test]
-        public void testALL_IncludesAnything()
-        {
-            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
-            Assert.IsTrue(TreeFilter.ALL.include(tw));
-        }
+		[Fact]
+		public void testALL_ShouldNotBeRecursive()
+		{
+			Assert.False(TreeFilter.ALL.shouldBeRecursive());
+		}
 
-        [Test]
-        public void testALL_ShouldNotBeRecursive()
-        {
-            Assert.IsFalse(TreeFilter.ALL.shouldBeRecursive());
-        }
+		[Fact]
+		public void testALL_IdentityClone()
+		{
+			Assert.Same(TreeFilter.ALL, TreeFilter.ALL.Clone());
+		}
 
-        [Test]
-        public void testALL_IdentityClone()
-        {
-            Assert.AreSame(TreeFilter.ALL, TreeFilter.ALL.Clone());
-        }
+		[Fact]
+		public void testNotALL_IncludesNothing()
+		{
+			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			Assert.False(TreeFilter.ALL.negate().include(tw));
+		}
 
-        [Test]
-        public void testNotALL_IncludesNothing()
-        {
-            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
-            Assert.IsFalse(TreeFilter.ALL.negate().include(tw));
-        }
+		[Fact]
+		public void testANY_DIFF_IncludesSingleTreeCase()
+		{
+			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			Assert.True(TreeFilter.ANY_DIFF.include(tw));
+		}
 
-        [Test]
-        public void testANY_DIFF_IncludesSingleTreeCase()
-        {
-            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
-            Assert.IsTrue(TreeFilter.ANY_DIFF.include(tw));
-        }
+		[Fact]
+		public void testANY_DIFF_ShouldNotBeRecursive()
+		{
+			Assert.False(TreeFilter.ANY_DIFF.shouldBeRecursive());
+		}
 
-        [Test]
-        public void testANY_DIFF_ShouldNotBeRecursive()
-        {
-            Assert.IsFalse(TreeFilter.ANY_DIFF.shouldBeRecursive());
-        }
-
-        [Test]
-        public void testANY_DIFF_IdentityClone()
-        {
-            Assert.AreSame(TreeFilter.ANY_DIFF, TreeFilter.ANY_DIFF.Clone());
-        }
-
-    }
+		[Fact]
+		public void testANY_DIFF_IdentityClone()
+		{
+			Assert.Same(TreeFilter.ANY_DIFF, TreeFilter.ANY_DIFF.Clone());
+		}
+	}
 }

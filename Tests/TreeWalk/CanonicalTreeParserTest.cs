@@ -39,37 +39,45 @@ using System.IO;
 using System.Text;
 using GitSharp.TreeWalk;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.TreeWalk
 {
-	[TestFixture]
-	public class CanonicalTreeParserTest
+	public class CanonicalTreeParserTest : XunitBaseFact
 	{
-		#region Setup/Teardown
-
-		[SetUp]
-		public void setUp()
-		{
-			tree1 = mkree(Entry(m644, "a", hash_a));
-			tree2 = mkree(Entry(m644, "a", hash_a), Entry(m644, "foo", hash_foo));
-			tree3 = mkree(Entry(m644, "a", hash_a), Entry(mt, "b_sometree", hash_sometree), Entry(m644, "foo", hash_foo));
-		}
-
-		#endregion
-
-		private readonly CanonicalTreeParser ctp = new CanonicalTreeParser();
-		private readonly FileMode m644 = FileMode.RegularFile;
-		private readonly FileMode mt = FileMode.Tree;
-		private readonly ObjectId hash_a = ObjectId.FromString("6b9c715d21d5486e59083fb6071566aa6ecd4d42");
-		private readonly ObjectId hash_foo = ObjectId.FromString("a213e8e25bb2442326e86cbfb9ef56319f482869");
-		private readonly ObjectId hash_sometree = ObjectId.FromString("daf4bdb0d7bb24319810fe0e73aa317663448c93");
+		private readonly CanonicalTreeParser _ctp;
+		private readonly FileMode _m644;
+		private readonly FileMode _mt;
+		private readonly ObjectId _hashA;
+		private readonly ObjectId _hashFoo;
+		private readonly ObjectId _hashSometree;
 
 		private byte[] tree1;
 		private byte[] tree2;
 		private byte[] tree3;
 
-		private static byte[] mkree(params byte[][] data)
+		#region Setup/Teardown
+
+		public CanonicalTreeParserTest()
+		{
+			_ctp = new CanonicalTreeParser();
+			_m644 = FileMode.RegularFile;
+			_mt = FileMode.Tree;
+			_hashA = ObjectId.FromString("6b9c715d21d5486e59083fb6071566aa6ecd4d42");
+			_hashFoo = ObjectId.FromString("a213e8e25bb2442326e86cbfb9ef56319f482869");
+			_hashSometree = ObjectId.FromString("daf4bdb0d7bb24319810fe0e73aa317663448c93");
+		}
+
+		protected override void SetUp()
+		{
+			tree1 = MkTree(Entry(_m644, "a", _hashA));
+			tree2 = MkTree(Entry(_m644, "a", _hashA), Entry(_m644, "foo", _hashFoo));
+			tree3 = MkTree(Entry(_m644, "a", _hashA), Entry(_mt, "b_sometree", _hashSometree), Entry(_m644, "foo", _hashFoo));
+		}
+
+		#endregion
+
+		private static byte[] MkTree(params byte[][] data)
 		{
 			var @out = new MemoryStream();
 			foreach (var e in data)
@@ -93,39 +101,39 @@ namespace GitSharp.Tests.TreeWalk
 
 		private string Path()
 		{
-			return RawParseUtils.decode(Constants.CHARSET, ctp.Path, ctp.PathOffset, ctp.PathLen);
+			return RawParseUtils.decode(Constants.CHARSET, _ctp.Path, _ctp.PathOffset, _ctp.PathLen);
 		}
 
-		[Test]
+		[Fact]
 		public void testBackwards_ConfusingPathName()
 		{
 			const string aVeryConfusingName = "confusing 644 entry 755 and others";
-			ctp.reset(mkree(Entry(m644, "a", hash_a), Entry(mt, aVeryConfusingName,
-			                                                hash_sometree), Entry(m644, "foo", hash_foo)));
-			ctp.next(3);
-			Assert.IsTrue(ctp.eof());
+			_ctp.reset(MkTree(Entry(_m644, "a", _hashA), Entry(_mt, aVeryConfusingName,
+			                                                _hashSometree), Entry(_m644, "foo", _hashFoo)));
+			_ctp.next(3);
+			Assert.True(_ctp.eof());
 
-			ctp.back(2);
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(mt.Bits, ctp.Mode);
-			Assert.AreEqual(aVeryConfusingName, Path());
-			Assert.AreEqual(hash_sometree, ctp.getEntryObjectId());
+			_ctp.back(2);
+			Assert.False(_ctp.eof());
+			Assert.Equal(_mt.Bits, _ctp.Mode);
+			Assert.Equal(aVeryConfusingName, Path());
+			Assert.Equal(_hashSometree, _ctp.getEntryObjectId());
 
-			ctp.back(1);
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.Mode);
-			Assert.AreEqual("a", Path());
-			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
+			_ctp.back(1);
+			Assert.False(_ctp.eof());
+			Assert.Equal(_m644.Bits, _ctp.Mode);
+			Assert.Equal("a", Path());
+			Assert.Equal(_hashA, _ctp.getEntryObjectId());
 		}
 
-		[Test]
+		[Fact]
 		public void testEmptyTree_AtEOF()
 		{
-			ctp.reset(new byte[0]);
-			Assert.IsTrue(ctp.eof());
+			_ctp.reset(new byte[0]);
+			Assert.True(_ctp.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testFreakingHugePathName()
 		{
 			int n = AbstractTreeIterator.DEFAULT_PATH_SIZE*4;
@@ -135,169 +143,169 @@ namespace GitSharp.Tests.TreeWalk
 				b.Append('q');
 			}
 			string name = b.ToString();
-			ctp.reset(Entry(m644, name, hash_a));
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(name, RawParseUtils.decode(Constants.CHARSET, ctp.Path, ctp.PathOffset, ctp.PathLen));
+			_ctp.reset(Entry(_m644, name, _hashA));
+			Assert.False(_ctp.eof());
+			Assert.Equal(name, RawParseUtils.decode(Constants.CHARSET, _ctp.Path, _ctp.PathOffset, _ctp.PathLen));
 		}
 
-		[Test]
+		[Fact]
 		public void testOneEntry_Backwards()
 		{
-			ctp.reset(tree1);
-			ctp.next(1);
-			Assert.IsFalse(ctp.first());
-			Assert.IsTrue(ctp.eof());
+			_ctp.reset(tree1);
+			_ctp.next(1);
+			Assert.False(_ctp.first());
+			Assert.True(_ctp.eof());
 
-			ctp.back(1);
-			Assert.IsTrue(ctp.first());
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.Mode);
-			Assert.AreEqual("a", Path());
-			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
+			_ctp.back(1);
+			Assert.True(_ctp.first());
+			Assert.False(_ctp.eof());
+			Assert.Equal(_m644.Bits, _ctp.Mode);
+			Assert.Equal("a", Path());
+			Assert.Equal(_hashA, _ctp.getEntryObjectId());
 		}
 
-		[Test]
+		[Fact]
 		public void testOneEntry_Forward()
 		{
-			ctp.reset(tree1);
+			_ctp.reset(tree1);
 
-			Assert.IsTrue(ctp.first());
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.Mode);
-			Assert.AreEqual("a", Path());
-			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
+			Assert.True(_ctp.first());
+			Assert.False(_ctp.eof());
+			Assert.Equal(_m644.Bits, _ctp.Mode);
+			Assert.Equal("a", Path());
+			Assert.Equal(_hashA, _ctp.getEntryObjectId());
 
-			ctp.next(1);
-			Assert.IsFalse(ctp.first());
-			Assert.IsTrue(ctp.eof());
+			_ctp.next(1);
+			Assert.False(_ctp.first());
+			Assert.True(_ctp.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testOneEntry_Seek1IsEOF()
 		{
-			ctp.reset(tree1);
-			ctp.next(1);
-			Assert.IsTrue(ctp.eof());
+			_ctp.reset(tree1);
+			_ctp.next(1);
+			Assert.True(_ctp.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testThreeEntries_BackwardsTwo()
 		{
-			ctp.reset(tree3);
-			ctp.next(3);
-			Assert.IsTrue(ctp.eof());
+			_ctp.reset(tree3);
+			_ctp.next(3);
+			Assert.True(_ctp.eof());
 
-			ctp.back(2);
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(mt.Bits, ctp.Mode);
-			Assert.AreEqual("b_sometree", Path());
-			Assert.AreEqual(hash_sometree, ctp.getEntryObjectId());
+			_ctp.back(2);
+			Assert.False(_ctp.eof());
+			Assert.Equal(_mt.Bits, _ctp.Mode);
+			Assert.Equal("b_sometree", Path());
+			Assert.Equal(_hashSometree, _ctp.getEntryObjectId());
 
-			ctp.next(1);
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.Mode);
-			Assert.AreEqual("foo", Path());
-			Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
+			_ctp.next(1);
+			Assert.False(_ctp.eof());
+			Assert.Equal(_m644.Bits, _ctp.Mode);
+			Assert.Equal("foo", Path());
+			Assert.Equal(_hashFoo, _ctp.getEntryObjectId());
 
-			ctp.next(1);
-			Assert.IsTrue(ctp.eof());
+			_ctp.next(1);
+			Assert.True(_ctp.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testThreeEntries_Seek2()
 		{
-			ctp.reset(tree3);
+			_ctp.reset(tree3);
 
-			ctp.next(2);
-			Assert.IsFalse(ctp.eof());
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.Mode);
-			Assert.AreEqual("foo", Path());
-			Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
+			_ctp.next(2);
+			Assert.False(_ctp.eof());
+			Assert.False(_ctp.eof());
+			Assert.Equal(_m644.Bits, _ctp.Mode);
+			Assert.Equal("foo", Path());
+			Assert.Equal(_hashFoo, _ctp.getEntryObjectId());
 
-			ctp.next(1);
-			Assert.IsTrue(ctp.eof());
+			_ctp.next(1);
+			Assert.True(_ctp.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testThreeEntries_Seek3IsEOF()
 		{
-			ctp.reset(tree3);
-			ctp.next(3);
-			Assert.IsTrue(ctp.eof());
+			_ctp.reset(tree3);
+			_ctp.next(3);
+			Assert.True(_ctp.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testTwoEntries_BackwardsOneAtATime()
 		{
-			ctp.reset(tree2);
-			ctp.next(2);
-			Assert.IsTrue(ctp.eof());
+			_ctp.reset(tree2);
+			_ctp.next(2);
+			Assert.True(_ctp.eof());
 
-			ctp.back(1);
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.Mode);
-			Assert.AreEqual("foo", Path());
-			Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
+			_ctp.back(1);
+			Assert.False(_ctp.eof());
+			Assert.Equal(_m644.Bits, _ctp.Mode);
+			Assert.Equal("foo", Path());
+			Assert.Equal(_hashFoo, _ctp.getEntryObjectId());
 
-			ctp.back(1);
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.Mode);
-			Assert.AreEqual("a", Path());
-			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
+			_ctp.back(1);
+			Assert.False(_ctp.eof());
+			Assert.Equal(_m644.Bits, _ctp.Mode);
+			Assert.Equal("a", Path());
+			Assert.Equal(_hashA, _ctp.getEntryObjectId());
 		}
 
-		[Test]
+		[Fact]
 		public void testTwoEntries_BackwardsTwo()
 		{
-			ctp.reset(tree2);
-			ctp.next(2);
-			Assert.IsTrue(ctp.eof());
+			_ctp.reset(tree2);
+			_ctp.next(2);
+			Assert.True(_ctp.eof());
 
-			ctp.back(2);
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.Mode);
-			Assert.AreEqual("a", Path());
-			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
+			_ctp.back(2);
+			Assert.False(_ctp.eof());
+			Assert.Equal(_m644.Bits, _ctp.Mode);
+			Assert.Equal("a", Path());
+			Assert.Equal(_hashA, _ctp.getEntryObjectId());
 
-			ctp.next(1);
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.Mode);
-			Assert.AreEqual("foo", Path());
-			Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
+			_ctp.next(1);
+			Assert.False(_ctp.eof());
+			Assert.Equal(_m644.Bits, _ctp.Mode);
+			Assert.Equal("foo", Path());
+			Assert.Equal(_hashFoo, _ctp.getEntryObjectId());
 
-			ctp.next(1);
-			Assert.IsTrue(ctp.eof());
+			_ctp.next(1);
+			Assert.True(_ctp.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testTwoEntries_ForwardOneAtATime()
 		{
-			ctp.reset(tree2);
+			_ctp.reset(tree2);
 
-			Assert.IsTrue(ctp.first());
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.Mode);
-			Assert.AreEqual("a", Path());
-			Assert.AreEqual(hash_a, ctp.getEntryObjectId());
+			Assert.True(_ctp.first());
+			Assert.False(_ctp.eof());
+			Assert.Equal(_m644.Bits, _ctp.Mode);
+			Assert.Equal("a", Path());
+			Assert.Equal(_hashA, _ctp.getEntryObjectId());
 
-			ctp.next(1);
-			Assert.IsFalse(ctp.eof());
-			Assert.AreEqual(m644.Bits, ctp.Mode);
-			Assert.AreEqual("foo", Path());
-			Assert.AreEqual(hash_foo, ctp.getEntryObjectId());
+			_ctp.next(1);
+			Assert.False(_ctp.eof());
+			Assert.Equal(_m644.Bits, _ctp.Mode);
+			Assert.Equal("foo", Path());
+			Assert.Equal(_hashFoo, _ctp.getEntryObjectId());
 
-			ctp.next(1);
-			Assert.IsFalse(ctp.first());
-			Assert.IsTrue(ctp.eof());
+			_ctp.next(1);
+			Assert.False(_ctp.first());
+			Assert.True(_ctp.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testTwoEntries_Seek2IsEOF()
 		{
-			ctp.reset(tree2);
-			ctp.next(2);
-			Assert.IsTrue(ctp.eof());
+			_ctp.reset(tree2);
+			_ctp.next(2);
+			Assert.True(_ctp.eof());
 		}
 	}
 }

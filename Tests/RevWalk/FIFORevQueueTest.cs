@@ -37,33 +37,32 @@
 
 using System.Collections.Generic;
 using GitSharp.RevWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.RevWalk
 {
-    [TestFixture]
     public class FIFORevQueueTest : RevQueueTestCase<FIFORevQueue>
     {
-        protected override FIFORevQueue create()
+        protected override FIFORevQueue Create()
         {
             return new FIFORevQueue();
         }
 
-        [Test]
+        [Fact]
         public override void testEmpty()
         {
             base.testEmpty();
-			Assert.AreEqual(Generator.GeneratorOutputType.None, q.OutputType);
+			Assert.Equal(Generator.GeneratorOutputType.None, q.OutputType);
         }
 
-        [Test]
+        [Fact]
         public void testCloneEmpty()
         {
             q = new FIFORevQueue(AbstractRevQueue.EmptyQueue);
-            Assert.IsNull(q.next());
+            Assert.Null(q.next());
         }
 
-        [Test]
+        [Fact]
         public void testAddLargeBlocks()
         {
             var lst = new List<RevCommit>();
@@ -74,10 +73,10 @@ namespace GitSharp.Tests.RevWalk
                 q.add(c);
             }
             for (int i = 0; i < lst.Count; i++)
-                Assert.AreSame(lst[i], q.next());
+                Assert.Same(lst[i], q.next());
         }
 
-        [Test]
+        [Fact]
         public void testUnpopAtFront()
         {
             RevCommit a = Commit();
@@ -88,9 +87,9 @@ namespace GitSharp.Tests.RevWalk
             q.unpop(b);
             q.unpop(c);
 
-            Assert.AreSame(c, q.next());
-            Assert.AreSame(b, q.next());
-            Assert.AreSame(a, q.next());
+            Assert.Same(c, q.next());
+            Assert.Same(b, q.next());
+            Assert.Same(a, q.next());
         }
     }
 }

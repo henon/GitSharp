@@ -38,11 +38,10 @@
 
 using System.IO;
 using GitSharp.Tests.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class PackIndexV2Tests : PackIndexTestCase
     {
     	protected override FileInfo GetFileForPack34Be9032()
@@ -58,18 +57,18 @@ namespace GitSharp.Tests
         /// <summary>
 		/// Verify CRC32 indexing.
         /// </summary>
-        [Test]
-        public override void testCRC32()
+        [Fact]
+        public override void TestCrc32()
         {
-            Assert.IsTrue(smallIdx.HasCRC32Support);
-            Assert.AreEqual(0x00000000C2B64258L, smallIdx.FindCRC32(ObjectId.FromString("4b825dc642cb6eb9a060e54bf8d69288fbee4904")));
-            Assert.AreEqual(0x0000000072AD57C2L, smallIdx.FindCRC32(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab")));
-            Assert.AreEqual(0x00000000FF10A479L, smallIdx.FindCRC32(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259")));
-            Assert.AreEqual(0x0000000034B27DDCL, smallIdx.FindCRC32(ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")));
-            Assert.AreEqual(0x000000004743F1E4L, smallIdx.FindCRC32(ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7")));
-            Assert.AreEqual(0x00000000640B358BL, smallIdx.FindCRC32(ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327")));
-            Assert.AreEqual(0x000000002A17CB5EL, smallIdx.FindCRC32(ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035")));
-            Assert.AreEqual(0x000000000B3B5BA6L, smallIdx.FindCRC32(ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799")));
+            Assert.True(SmallIdx.HasCRC32Support);
+            Assert.Equal(0x00000000C2B64258L, SmallIdx.FindCRC32(ObjectId.FromString("4b825dc642cb6eb9a060e54bf8d69288fbee4904")));
+            Assert.Equal(0x0000000072AD57C2L, SmallIdx.FindCRC32(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab")));
+            Assert.Equal(0x00000000FF10A479L, SmallIdx.FindCRC32(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259")));
+            Assert.Equal(0x0000000034B27DDCL, SmallIdx.FindCRC32(ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")));
+            Assert.Equal(0x000000004743F1E4L, SmallIdx.FindCRC32(ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7")));
+            Assert.Equal(0x00000000640B358BL, SmallIdx.FindCRC32(ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327")));
+            Assert.Equal(0x000000002A17CB5EL, SmallIdx.FindCRC32(ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035")));
+            Assert.Equal(0x000000000B3B5BA6L, SmallIdx.FindCRC32(ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799")));
         }
     }
 }

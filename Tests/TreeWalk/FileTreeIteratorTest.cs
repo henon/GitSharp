@@ -36,21 +36,21 @@
  */
 
 using System.IO;
+using GitSharp.Tests.Util;
 using GitSharp.TreeWalk;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.TreeWalk
 {
-	[TestFixture]
 	public class FileTreeIteratorTest : RepositoryTestCase
 	{
 		private static readonly string[] Paths = { "a,", "a,b", "a/b", "a0b" };
 		private long[] _mtime;
 
-		public override void setUp()
+		protected override void SetUp()
 		{
-			base.setUp();
+			base.SetUp();
 
 			// We build the entries backwards so that on POSIX systems we
 			// are likely to get the entries in the trash directory in the
@@ -68,97 +68,97 @@ namespace GitSharp.Tests.TreeWalk
 			}
 		}
 
-		[Test]
+		[Fact]
 		public void testEmptyIfRootIsFile()
 		{
 			string path = Path.Combine(trash.FullName, Paths[0]);
 			var di = new DirectoryInfo(path);
 			var fi = new FileInfo(path);
-			Assert.IsTrue(fi.Exists);
+			Assert.True(fi.Exists);
 
 			var fti = new FileTreeIterator(di);
-			Assert.IsTrue(fti.first());
-			Assert.IsTrue(fti.eof());
+			Assert.True(fti.first());
+			Assert.True(fti.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testEmptyIfRootDoesNotExist()
 		{
 			string path = Path.Combine(trash.FullName, "not-existing-File");
 			var di = new DirectoryInfo(path);
-			Assert.IsFalse(di.Exists);
+			Assert.False(di.Exists);
 
 			var fti = new FileTreeIterator(di);
-			Assert.IsTrue(fti.first());
-			Assert.IsTrue(fti.eof());
+			Assert.True(fti.first());
+			Assert.True(fti.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testEmptyIfRootIsEmpty()
 		{
 			string path = Path.Combine(trash.FullName, "not-existing-File");
 			var di = new DirectoryInfo(path);
-			Assert.IsFalse(di.Exists);
+			Assert.False(di.Exists);
 
 			di.Create();
 			di.Refresh();
-			Assert.IsTrue(di.Exists);
+			Assert.True(di.Exists);
 
 			var fti = new FileTreeIterator(di);
-			Assert.IsTrue(fti.first());
-			Assert.IsTrue(fti.eof());
+			Assert.True(fti.first());
+			Assert.True(fti.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testSimpleIterate()
 		{
 			var top = new FileTreeIterator(trash);
 
-			Assert.IsTrue(top.first());
-			Assert.IsFalse(top.eof());
-			Assert.IsTrue(FileMode.RegularFile == top.EntryFileMode);
-			Assert.AreEqual(Paths[0], NameOf(top));
-			Assert.AreEqual(Paths[0].Length, top.getEntryLength());
-			Assert.AreEqual(_mtime[0], top.getEntryLastModified());
+			Assert.True(top.first());
+			Assert.False(top.eof());
+			Assert.True(FileMode.RegularFile == top.EntryFileMode);
+			Assert.Equal(Paths[0], NameOf(top));
+			Assert.Equal(Paths[0].Length, top.getEntryLength());
+			Assert.Equal(_mtime[0], top.getEntryLastModified());
 
 			top.next(1);
-			Assert.IsFalse(top.first());
-			Assert.IsFalse(top.eof());
-			Assert.IsTrue(FileMode.RegularFile == top.EntryFileMode);
-			Assert.AreEqual(Paths[1], NameOf(top));
-			Assert.AreEqual(Paths[1].Length, top.getEntryLength());
-			Assert.AreEqual(_mtime[1], top.getEntryLastModified());
+			Assert.False(top.first());
+			Assert.False(top.eof());
+			Assert.True(FileMode.RegularFile == top.EntryFileMode);
+			Assert.Equal(Paths[1], NameOf(top));
+			Assert.Equal(Paths[1].Length, top.getEntryLength());
+			Assert.Equal(_mtime[1], top.getEntryLastModified());
 
 			top.next(1);
-			Assert.IsFalse(top.first());
-			Assert.IsFalse(top.eof());
-			Assert.IsTrue(FileMode.Tree == top.EntryFileMode);
+			Assert.False(top.first());
+			Assert.False(top.eof());
+			Assert.True(FileMode.Tree == top.EntryFileMode);
 
 			AbstractTreeIterator sub = top.createSubtreeIterator(db);
-			Assert.IsTrue(sub is FileTreeIterator);
+			Assert.True(sub is FileTreeIterator);
 			var subfti = (FileTreeIterator)sub;
-			Assert.IsTrue(sub.first());
-			Assert.IsFalse(sub.eof());
-			Assert.AreEqual(Paths[2], NameOf(sub));
-			Assert.AreEqual(Paths[2].Length, subfti.getEntryLength());
-			Assert.AreEqual(_mtime[2], subfti.getEntryLastModified());
+			Assert.True(sub.first());
+			Assert.False(sub.eof());
+			Assert.Equal(Paths[2], NameOf(sub));
+			Assert.Equal(Paths[2].Length, subfti.getEntryLength());
+			Assert.Equal(_mtime[2], subfti.getEntryLastModified());
 
 			sub.next(1);
-			Assert.IsTrue(sub.eof());
+			Assert.True(sub.eof());
 
 			top.next(1);
-			Assert.IsFalse(top.first());
-			Assert.IsFalse(top.eof());
-			Assert.IsTrue(FileMode.RegularFile == top.EntryFileMode);
-			Assert.AreEqual(Paths[3], NameOf(top));
-			Assert.AreEqual(Paths[3].Length, top.getEntryLength());
-			Assert.AreEqual(_mtime[3], top.getEntryLastModified());
+			Assert.False(top.first());
+			Assert.False(top.eof());
+			Assert.True(FileMode.RegularFile == top.EntryFileMode);
+			Assert.Equal(Paths[3], NameOf(top));
+			Assert.Equal(Paths[3].Length, top.getEntryLength());
+			Assert.Equal(_mtime[3], top.getEntryLastModified());
 
 			top.next(1);
-			Assert.IsTrue(top.eof());
+			Assert.True(top.eof());
 		}
 
-		[Test]
+		[Fact]
 		public void testComputeFileObjectId()
 		{
 			var top = new FileTreeIterator(trash);
@@ -171,11 +171,11 @@ namespace GitSharp.Tests.TreeWalk
 			md.Update(Constants.encode(Paths[0]));
 			ObjectId expect = ObjectId.FromRaw(md.Digest());
 
-			Assert.AreEqual(expect, top.getEntryObjectId());
+			Assert.Equal(expect, top.getEntryObjectId());
 
 			// Verify it was cached by removing the File and getting it again.
 			File.Delete(Path.Combine(trash.FullName, Paths[0]));
-			Assert.AreEqual(expect, top.getEntryObjectId());
+			Assert.Equal(expect, top.getEntryObjectId());
 		}
 
 		private static string NameOf(AbstractTreeIterator i)

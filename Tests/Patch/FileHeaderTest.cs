@@ -37,128 +37,127 @@
  */
 
 using GitSharp.Patch;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Patch
 {
-    [TestFixture]
     public class FileHeaderTest : BasePatchTest
     {
-        [Test]
+        [Fact]
 	    public void testParseGitFileName_Empty()
         {
 		    FileHeader fh = Data(string.Empty);
-			Assert.AreEqual(-1, fh.parseGitFileName(0, fh.Buffer.Length));
-		    Assert.IsNotNull(fh.Hunks);
-		    Assert.IsTrue(fh.Hunks.Count == 0);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+			Assert.Equal(-1, fh.parseGitFileName(0, fh.Buffer.Length));
+		    Assert.NotNull(fh.Hunks);
+		    Assert.True(fh.Hunks.Count == 0);
+		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseGitFileName_NoLF()
         {
 		    FileHeader fh = Data("a/ b/");
-			Assert.AreEqual(-1, fh.parseGitFileName(0, fh.Buffer.Length));
+			Assert.Equal(-1, fh.parseGitFileName(0, fh.Buffer.Length));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseGitFileName_NoSecondLine()
         {
 		    FileHeader fh = Data("\n");
-			Assert.AreEqual(-1, fh.parseGitFileName(0, fh.Buffer.Length));
+			Assert.Equal(-1, fh.parseGitFileName(0, fh.Buffer.Length));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseGitFileName_EmptyHeader()
         {
 		    FileHeader fh = Data("\n\n");
-			Assert.AreEqual(1, fh.parseGitFileName(0, fh.Buffer.Length));
+			Assert.Equal(1, fh.parseGitFileName(0, fh.Buffer.Length));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseGitFileName_Foo()
         {
 		    const string name = "foo";
 		    FileHeader fh = Header(name);
-			Assert.AreEqual(GitLine(name).Length, fh.parseGitFileName(0, fh.Buffer.Length));
-		    Assert.AreEqual(name, fh.OldName);
-		    Assert.AreSame(fh.OldName, fh.NewName);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+			Assert.Equal(GitLine(name).Length, fh.parseGitFileName(0, fh.Buffer.Length));
+		    Assert.Equal(name, fh.OldName);
+		    Assert.Same(fh.OldName, fh.NewName);
+		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseGitFileName_FailFooBar()
         {
 		    FileHeader fh = Data("a/foo b/bar\n-");
-			Assert.IsTrue(fh.parseGitFileName(0, fh.Buffer.Length) > 0);
-		    Assert.IsNull(fh.OldName);
-		    Assert.IsNull(fh.NewName);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+			Assert.True(fh.parseGitFileName(0, fh.Buffer.Length) > 0);
+		    Assert.Null(fh.OldName);
+		    Assert.Null(fh.NewName);
+		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseGitFileName_FooSpBar()
         {
 		    const string name = "foo bar";
 		    FileHeader fh = Header(name);
-		    Assert.AreEqual(GitLine(name).Length, fh.parseGitFileName(0,
+		    Assert.Equal(GitLine(name).Length, fh.parseGitFileName(0,
 					fh.Buffer.Length));
-		    Assert.AreEqual(name, fh.OldName);
-		    Assert.AreSame(fh.OldName, fh.NewName);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+		    Assert.Equal(name, fh.OldName);
+		    Assert.Same(fh.OldName, fh.NewName);
+		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseGitFileName_DqFooTabBar()
         {
 		    const string name = "foo\tbar";
 		    const string dqName = "foo\\tbar";
 		    FileHeader fh = DqHeader(dqName);
-		    Assert.AreEqual(DqGitLine(dqName).Length, fh.parseGitFileName(0,
+		    Assert.Equal(DqGitLine(dqName).Length, fh.parseGitFileName(0,
 					fh.Buffer.Length));
-		    Assert.AreEqual(name, fh.OldName);
-		    Assert.AreSame(fh.OldName, fh.NewName);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+		    Assert.Equal(name, fh.OldName);
+		    Assert.Same(fh.OldName, fh.NewName);
+		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseGitFileName_DqFooSpLfNulBar()
         {
 		    const string name = "foo \n\0bar";
 		    const string dqName = "foo \\n\\0bar";
 		    FileHeader fh = DqHeader(dqName);
-		    Assert.AreEqual(DqGitLine(dqName).Length, fh.parseGitFileName(0,
+		    Assert.Equal(DqGitLine(dqName).Length, fh.parseGitFileName(0,
 					fh.Buffer.Length));
-		    Assert.AreEqual(name, fh.OldName);
-		    Assert.AreSame(fh.OldName, fh.NewName);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+		    Assert.Equal(name, fh.OldName);
+		    Assert.Same(fh.OldName, fh.NewName);
+		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseGitFileName_SrcFooC()
         {
 		    const string name = "src/foo/bar/argh/code.c";
 		    FileHeader fh = Header(name);
-		    Assert.AreEqual(GitLine(name).Length, fh.parseGitFileName(0,
+		    Assert.Equal(GitLine(name).Length, fh.parseGitFileName(0,
 					fh.Buffer.Length));
-		    Assert.AreEqual(name, fh.OldName);
-		    Assert.AreSame(fh.OldName, fh.NewName);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+		    Assert.Equal(name, fh.OldName);
+		    Assert.Same(fh.OldName, fh.NewName);
+		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseGitFileName_SrcFooCNonStandardPrefix()
         {
 		    const string name = "src/foo/bar/argh/code.c";
 		    const string header = "project-v-1.0/" + name + " mydev/" + name + "\n";
 		    FileHeader fh = Data(header + "-");
-			Assert.AreEqual(header.Length, fh.parseGitFileName(0, fh.Buffer.Length));
-		    Assert.AreEqual(name, fh.OldName);
-		    Assert.AreSame(fh.OldName, fh.NewName);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+			Assert.Equal(header.Length, fh.parseGitFileName(0, fh.Buffer.Length));
+		    Assert.Equal(name, fh.OldName);
+		    Assert.Same(fh.OldName, fh.NewName);
+		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseUnicodeName_NewFile()
         {
 		    FileHeader fh = Data("diff --git \"a/\\303\\205ngstr\\303\\266m\" \"b/\\303\\205ngstr\\303\\266m\"\n"
@@ -169,23 +168,23 @@ namespace GitSharp.Tests.Patch
 				    + "@@ -0,0 +1 @@\n" + "+a\n");
 		    AssertParse(fh);
 
-		    Assert.AreEqual("/dev/null", fh.OldName);
-		    Assert.AreSame(FileHeader.DEV_NULL, fh.OldName);
-		    Assert.AreEqual("\u00c5ngstr\u00f6m", fh.NewName);
+		    Assert.Equal("/dev/null", fh.OldName);
+		    Assert.Same(FileHeader.DEV_NULL, fh.OldName);
+		    Assert.Equal("\u00c5ngstr\u00f6m", fh.NewName);
 
-            Assert.AreEqual(FileHeader.ChangeTypeEnum.ADD, fh.getChangeType());
-            Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
-		    Assert.IsTrue(fh.hasMetaDataChanges());
+            Assert.Equal(FileHeader.ChangeTypeEnum.ADD, fh.getChangeType());
+            Assert.Equal(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
+		    Assert.True(fh.hasMetaDataChanges());
 
-		    Assert.AreSame(FileMode.Missing, fh.GetOldMode());
-		    Assert.AreSame(FileMode.RegularFile, fh.NewMode);
+		    Assert.Same(FileMode.Missing, fh.GetOldMode());
+		    Assert.Same(FileMode.RegularFile, fh.NewMode);
 
-		    Assert.AreEqual("0000000", fh.getOldId().name());
-		    Assert.AreEqual("7898192", fh.getNewId().name());
-		    Assert.AreEqual(0, fh.getScore());
+		    Assert.Equal("0000000", fh.getOldId().name());
+		    Assert.Equal("7898192", fh.getNewId().name());
+		    Assert.Equal(0, fh.getScore());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseUnicodeName_DeleteFile()
         {
 		    FileHeader fh = Data("diff --git \"a/\\303\\205ngstr\\303\\266m\" \"b/\\303\\205ngstr\\303\\266m\"\n"
@@ -197,45 +196,45 @@ namespace GitSharp.Tests.Patch
 
 		    AssertParse(fh);
 
-		    Assert.AreEqual("\u00c5ngstr\u00f6m", fh.OldName);
-		    Assert.AreEqual("/dev/null", fh.NewName);
-		    Assert.AreSame(FileHeader.DEV_NULL, fh.NewName);
+		    Assert.Equal("\u00c5ngstr\u00f6m", fh.OldName);
+		    Assert.Equal("/dev/null", fh.NewName);
+		    Assert.Same(FileHeader.DEV_NULL, fh.NewName);
 
-            Assert.AreEqual(FileHeader.ChangeTypeEnum.DELETE, fh.getChangeType());
-            Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
-		    Assert.IsTrue(fh.hasMetaDataChanges());
+            Assert.Equal(FileHeader.ChangeTypeEnum.DELETE, fh.getChangeType());
+            Assert.Equal(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
+		    Assert.True(fh.hasMetaDataChanges());
 
-		    Assert.AreSame(FileMode.RegularFile, fh.GetOldMode());
-		    Assert.AreSame(FileMode.Missing, fh.NewMode);
+		    Assert.Same(FileMode.RegularFile, fh.GetOldMode());
+		    Assert.Same(FileMode.Missing, fh.NewMode);
 
-		    Assert.AreEqual("7898192", fh.getOldId().name());
-		    Assert.AreEqual("0000000", fh.getNewId().name());
-		    Assert.AreEqual(0, fh.getScore());
+		    Assert.Equal("7898192", fh.getOldId().name());
+		    Assert.Equal("0000000", fh.getNewId().name());
+		    Assert.Equal(0, fh.getScore());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseModeChange()
         {
 		    FileHeader fh = Data("diff --git a/a b b/a b\n"
 				    + "old mode 100644\n" + "new mode 100755\n");
 
 		    AssertParse(fh);
-		    Assert.AreEqual("a b", fh.OldName);
-		    Assert.AreEqual("a b", fh.NewName);
+		    Assert.Equal("a b", fh.OldName);
+		    Assert.Equal("a b", fh.NewName);
 
-		    Assert.AreEqual(FileHeader.ChangeTypeEnum.MODIFY, fh.getChangeType());
-            Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
-		    Assert.IsTrue(fh.hasMetaDataChanges());
+		    Assert.Equal(FileHeader.ChangeTypeEnum.MODIFY, fh.getChangeType());
+            Assert.Equal(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
+		    Assert.True(fh.hasMetaDataChanges());
 
-		    Assert.IsNull(fh.getOldId());
-		    Assert.IsNull(fh.getNewId());
+		    Assert.Null(fh.getOldId());
+		    Assert.Null(fh.getNewId());
 
-		    Assert.AreSame(FileMode.RegularFile, fh.GetOldMode());
-		    Assert.AreSame(FileMode.ExecutableFile, fh.NewMode);
-		    Assert.AreEqual(0, fh.getScore());
+		    Assert.Same(FileMode.RegularFile, fh.GetOldMode());
+		    Assert.Same(FileMode.ExecutableFile, fh.NewMode);
+		    Assert.Equal(0, fh.getScore());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseRename100_NewStyle()
         {
 		    FileHeader fh = Data("diff --git a/a b/ c/\\303\\205ngstr\\303\\266m\n"
@@ -244,30 +243,30 @@ namespace GitSharp.Tests.Patch
 				    + "rename to \" c/\\303\\205ngstr\\303\\266m\"\n");
 
 			int ptr = fh.parseGitFileName(0, fh.Buffer.Length);
-		    Assert.IsTrue(ptr > 0);
-		    Assert.IsNull(fh.OldName); // can't parse names on a rename
-		    Assert.IsNull(fh.NewName);
+		    Assert.True(ptr > 0);
+		    Assert.Null(fh.OldName); // can't parse names on a rename
+		    Assert.Null(fh.NewName);
 
 			ptr = fh.parseGitHeaders(ptr, fh.Buffer.Length);
-		    Assert.IsTrue(ptr > 0);
+		    Assert.True(ptr > 0);
 
-		    Assert.AreEqual("a", fh.OldName);
-		    Assert.AreEqual(" c/\u00c5ngstr\u00f6m", fh.NewName);
+		    Assert.Equal("a", fh.OldName);
+		    Assert.Equal(" c/\u00c5ngstr\u00f6m", fh.NewName);
 
-		    Assert.AreEqual(FileHeader.ChangeTypeEnum.RENAME, fh.getChangeType());
-            Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
-		    Assert.IsTrue(fh.hasMetaDataChanges());
+		    Assert.Equal(FileHeader.ChangeTypeEnum.RENAME, fh.getChangeType());
+            Assert.Equal(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
+		    Assert.True(fh.hasMetaDataChanges());
 
-		    Assert.IsNull(fh.getOldId());
-		    Assert.IsNull(fh.getNewId());
+		    Assert.Null(fh.getOldId());
+		    Assert.Null(fh.getNewId());
 
-		    Assert.IsNull(fh.GetOldMode());
-		    Assert.IsNull(fh.NewMode);
+		    Assert.Null(fh.GetOldMode());
+		    Assert.Null(fh.NewMode);
 
-		    Assert.AreEqual(100, fh.getScore());
+		    Assert.Equal(100, fh.getScore());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseRename100_OldStyle()
         {
 		    FileHeader fh = Data("diff --git a/a b/ c/\\303\\205ngstr\\303\\266m\n"
@@ -276,30 +275,30 @@ namespace GitSharp.Tests.Patch
 				    + "rename new \" c/\\303\\205ngstr\\303\\266m\"\n");
 
 			int ptr = fh.parseGitFileName(0, fh.Buffer.Length);
-		    Assert.IsTrue(ptr > 0);
-		    Assert.IsNull(fh.OldName); // can't parse names on a rename
-		    Assert.IsNull(fh.NewName);
+		    Assert.True(ptr > 0);
+		    Assert.Null(fh.OldName); // can't parse names on a rename
+		    Assert.Null(fh.NewName);
 
 			ptr = fh.parseGitHeaders(ptr, fh.Buffer.Length);
-		    Assert.IsTrue(ptr > 0);
+		    Assert.True(ptr > 0);
 
-		    Assert.AreEqual("a", fh.OldName);
-		    Assert.AreEqual(" c/\u00c5ngstr\u00f6m", fh.NewName);
+		    Assert.Equal("a", fh.OldName);
+		    Assert.Equal(" c/\u00c5ngstr\u00f6m", fh.NewName);
 
-            Assert.AreEqual(FileHeader.ChangeTypeEnum.RENAME, fh.getChangeType());
-            Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
-		    Assert.IsTrue(fh.hasMetaDataChanges());
+            Assert.Equal(FileHeader.ChangeTypeEnum.RENAME, fh.getChangeType());
+            Assert.Equal(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
+		    Assert.True(fh.hasMetaDataChanges());
 
-		    Assert.IsNull(fh.getOldId());
-		    Assert.IsNull(fh.getNewId());
+		    Assert.Null(fh.getOldId());
+		    Assert.Null(fh.getNewId());
 
-		    Assert.IsNull(fh.GetOldMode());
-		    Assert.IsNull(fh.NewMode);
+		    Assert.Null(fh.GetOldMode());
+		    Assert.Null(fh.NewMode);
 
-		    Assert.AreEqual(100, fh.getScore());
+		    Assert.Equal(100, fh.getScore());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseCopy100()
         {
 		    FileHeader fh = Data("diff --git a/a b/ c/\\303\\205ngstr\\303\\266m\n"
@@ -308,30 +307,30 @@ namespace GitSharp.Tests.Patch
 				    + "copy to \" c/\\303\\205ngstr\\303\\266m\"\n");
 
 			int ptr = fh.parseGitFileName(0, fh.Buffer.Length);
-		    Assert.IsTrue(ptr > 0);
-		    Assert.IsNull(fh.OldName); // can't parse names on a copy
-		    Assert.IsNull(fh.NewName);
+		    Assert.True(ptr > 0);
+		    Assert.Null(fh.OldName); // can't parse names on a copy
+		    Assert.Null(fh.NewName);
 
 			ptr = fh.parseGitHeaders(ptr, fh.Buffer.Length);
-		    Assert.IsTrue(ptr > 0);
+		    Assert.True(ptr > 0);
 
-		    Assert.AreEqual("a", fh.OldName);
-		    Assert.AreEqual(" c/\u00c5ngstr\u00f6m", fh.NewName);
+		    Assert.Equal("a", fh.OldName);
+		    Assert.Equal(" c/\u00c5ngstr\u00f6m", fh.NewName);
 
-		    Assert.AreEqual(FileHeader.ChangeTypeEnum.COPY, fh.getChangeType());
-		    Assert.AreEqual(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
-		    Assert.IsTrue(fh.hasMetaDataChanges());
+		    Assert.Equal(FileHeader.ChangeTypeEnum.COPY, fh.getChangeType());
+		    Assert.Equal(FileHeader.PatchTypeEnum.UNIFIED, fh.getPatchType());
+		    Assert.True(fh.hasMetaDataChanges());
 
-		    Assert.IsNull(fh.getOldId());
-		    Assert.IsNull(fh.getNewId());
+		    Assert.Null(fh.getOldId());
+		    Assert.Null(fh.getNewId());
 
-		    Assert.IsNull(fh.GetOldMode());
-		    Assert.IsNull(fh.NewMode);
+		    Assert.Null(fh.GetOldMode());
+		    Assert.Null(fh.NewMode);
 
-		    Assert.AreEqual(100, fh.getScore());
+		    Assert.Equal(100, fh.getScore());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseFullIndexLine_WithMode()
         {
 		    const string oid = "78981922613b2afb6025042ff6bd878ac1994e85";
@@ -341,23 +340,24 @@ namespace GitSharp.Tests.Patch
 
 		    AssertParse(fh);
 
-		    Assert.AreEqual("a", fh.OldName);
-		    Assert.AreEqual("a", fh.NewName);
+		    Assert.Equal("a", fh.OldName);
+		    Assert.Equal("a", fh.NewName);
 
-		    Assert.AreSame(FileMode.RegularFile, fh.GetOldMode());
-		    Assert.AreSame(FileMode.RegularFile, fh.NewMode);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+		    Assert.Same(FileMode.RegularFile, fh.GetOldMode());
+		    Assert.Same(FileMode.RegularFile, fh.NewMode);
+		    Assert.False(fh.hasMetaDataChanges());
 
-		    Assert.IsNotNull(fh.getOldId());
-		    Assert.IsNotNull(fh.getNewId());
+		    Assert.NotNull(fh.getOldId());
+		    Assert.NotNull(fh.getNewId());
 
-		    Assert.IsTrue(fh.getOldId().isComplete());
-		    Assert.IsTrue(fh.getNewId().isComplete());
+		    Assert.True(fh.getOldId().isComplete());
+		    Assert.True(fh.getNewId().isComplete());
 
-		    Assert.AreEqual(ObjectId.FromString(oid), fh.getOldId().ToObjectId());
-		    Assert.AreEqual(ObjectId.FromString(nid), fh.getNewId().ToObjectId());
+		    Assert.Equal(ObjectId.FromString(oid), fh.getOldId().ToObjectId());
+		    Assert.Equal(ObjectId.FromString(nid), fh.getNewId().ToObjectId());
 	    }
 
+		[Fact]
 	    public void testParseFullIndexLine_NoMode()
         {
 		    const string oid = "78981922613b2afb6025042ff6bd878ac1994e85";
@@ -367,24 +367,24 @@ namespace GitSharp.Tests.Patch
 
 		    AssertParse(fh);
 
-		    Assert.AreEqual("a", fh.OldName);
-		    Assert.AreEqual("a", fh.NewName);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+		    Assert.Equal("a", fh.OldName);
+		    Assert.Equal("a", fh.NewName);
+		    Assert.False(fh.hasMetaDataChanges());
 
-		    Assert.IsNull(fh.GetOldMode());
-		    Assert.IsNull(fh.NewMode);
+		    Assert.Null(fh.GetOldMode());
+		    Assert.Null(fh.NewMode);
 
-		    Assert.IsNotNull(fh.getOldId());
-		    Assert.IsNotNull(fh.getNewId());
+		    Assert.NotNull(fh.getOldId());
+		    Assert.NotNull(fh.getNewId());
 
-		    Assert.IsTrue(fh.getOldId().isComplete());
-		    Assert.IsTrue(fh.getNewId().isComplete());
+		    Assert.True(fh.getOldId().isComplete());
+		    Assert.True(fh.getNewId().isComplete());
 
-		    Assert.AreEqual(ObjectId.FromString(oid), fh.getOldId().ToObjectId());
-		    Assert.AreEqual(ObjectId.FromString(nid), fh.getNewId().ToObjectId());
+		    Assert.Equal(ObjectId.FromString(oid), fh.getOldId().ToObjectId());
+		    Assert.Equal(ObjectId.FromString(nid), fh.getNewId().ToObjectId());
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseAbbrIndexLine_WithMode()
         {
 		    const int a = 7;
@@ -396,27 +396,27 @@ namespace GitSharp.Tests.Patch
 
 		    AssertParse(fh);
 
-		    Assert.AreEqual("a", fh.OldName);
-		    Assert.AreEqual("a", fh.NewName);
+		    Assert.Equal("a", fh.OldName);
+		    Assert.Equal("a", fh.NewName);
 
-		    Assert.AreSame(FileMode.RegularFile, fh.GetOldMode());
-		    Assert.AreSame(FileMode.RegularFile, fh.NewMode);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+		    Assert.Same(FileMode.RegularFile, fh.GetOldMode());
+		    Assert.Same(FileMode.RegularFile, fh.NewMode);
+		    Assert.False(fh.hasMetaDataChanges());
 
-		    Assert.IsNotNull(fh.getOldId());
-		    Assert.IsNotNull(fh.getNewId());
+		    Assert.NotNull(fh.getOldId());
+		    Assert.NotNull(fh.getNewId());
 
-		    Assert.IsFalse(fh.getOldId().isComplete());
-		    Assert.IsFalse(fh.getNewId().isComplete());
+		    Assert.False(fh.getOldId().isComplete());
+		    Assert.False(fh.getNewId().isComplete());
 
-		    Assert.AreEqual(oid.Substring(0, a - 1), fh.getOldId().name());
-		    Assert.AreEqual(nid.Substring(0, a - 1), fh.getNewId().name());
+		    Assert.Equal(oid.Substring(0, a - 1), fh.getOldId().name());
+		    Assert.Equal(nid.Substring(0, a - 1), fh.getNewId().name());
 
-		    Assert.IsTrue(ObjectId.FromString(oid).startsWith(fh.getOldId()));
-		    Assert.IsTrue(ObjectId.FromString(nid).startsWith(fh.getNewId()));
+		    Assert.True(ObjectId.FromString(oid).startsWith(fh.getOldId()));
+		    Assert.True(ObjectId.FromString(nid).startsWith(fh.getNewId()));
 	    }
 
-        [Test]
+        [Fact]
 	    public void testParseAbbrIndexLine_NoMode()
         {
 		    const int a = 7;
@@ -428,32 +428,32 @@ namespace GitSharp.Tests.Patch
 
 		    AssertParse(fh);
 
-		    Assert.AreEqual("a", fh.OldName);
-		    Assert.AreEqual("a", fh.NewName);
+		    Assert.Equal("a", fh.OldName);
+		    Assert.Equal("a", fh.NewName);
 
-		    Assert.IsNull(fh.GetOldMode());
-		    Assert.IsNull(fh.NewMode);
-		    Assert.IsFalse(fh.hasMetaDataChanges());
+		    Assert.Null(fh.GetOldMode());
+		    Assert.Null(fh.NewMode);
+		    Assert.False(fh.hasMetaDataChanges());
 
-		    Assert.IsNotNull(fh.getOldId());
-		    Assert.IsNotNull(fh.getNewId());
+		    Assert.NotNull(fh.getOldId());
+		    Assert.NotNull(fh.getNewId());
 
-		    Assert.IsFalse(fh.getOldId().isComplete());
-		    Assert.IsFalse(fh.getNewId().isComplete());
+		    Assert.False(fh.getOldId().isComplete());
+		    Assert.False(fh.getNewId().isComplete());
 
-		    Assert.AreEqual(oid.Substring(0, a - 1), fh.getOldId().name());
-		    Assert.AreEqual(nid.Substring(0, a - 1), fh.getNewId().name());
+		    Assert.Equal(oid.Substring(0, a - 1), fh.getOldId().name());
+		    Assert.Equal(nid.Substring(0, a - 1), fh.getNewId().name());
 
-		    Assert.IsTrue(ObjectId.FromString(oid).startsWith(fh.getOldId()));
-		    Assert.IsTrue(ObjectId.FromString(nid).startsWith(fh.getNewId()));
+		    Assert.True(ObjectId.FromString(oid).startsWith(fh.getOldId()));
+		    Assert.True(ObjectId.FromString(nid).startsWith(fh.getNewId()));
 	    }
 
 	    private static void AssertParse(FileHeader fh)
         {
 			int ptr = fh.parseGitFileName(0, fh.Buffer.Length);
-		    Assert.IsTrue(ptr > 0);
+		    Assert.True(ptr > 0);
 			ptr = fh.parseGitHeaders(ptr, fh.Buffer.Length);
-		    Assert.IsTrue(ptr > 0);
+		    Assert.True(ptr > 0);
 	    }
 
 	    private static FileHeader Data(string inStr)

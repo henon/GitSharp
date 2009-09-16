@@ -36,255 +36,252 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class AbbreviatedIdTests
     {
-
-        [Test]
+        [Fact]
         public void testEmpty_FromByteArray()
         {
         	AbbreviatedObjectId i = AbbreviatedObjectId.FromString(new byte[] { }, 0, 0);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(0, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(string.Empty, i.name());
+            Assert.NotNull(i);
+            Assert.Equal(0, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(string.Empty, i.name());
         }
 
-        [Test]
+        [Fact]
         public void testEmpty_FromString()
         {
 			AbbreviatedObjectId i = AbbreviatedObjectId.FromString(string.Empty);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(0, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(string.Empty, i.name());
+            Assert.NotNull(i);
+            Assert.Equal(0, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(string.Empty, i.name());
         }
 
-        [Test]
+        [Fact]
         public void testFull_FromByteArray()
         {
             const string s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             byte[] b = Constants.encodeASCII(s);
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(b, 0, b.Length);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsTrue(i.isComplete());
-            Assert.AreEqual(s, i.name());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.True(i.isComplete());
+            Assert.Equal(s, i.name());
 
             ObjectId f = i.ToObjectId();
-            Assert.IsNotNull(f);
-            Assert.AreEqual(ObjectId.FromString(s), f);
-            Assert.AreEqual(f.GetHashCode(), i.GetHashCode());
+            Assert.NotNull(f);
+            Assert.Equal(ObjectId.FromString(s), f);
+            Assert.Equal(f.GetHashCode(), i.GetHashCode());
         }
 
-        [Test]
+        [Fact]
         public void testFull_FromString()
         {
             const string s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsTrue(i.isComplete());
-            Assert.AreEqual(s, i.name());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.True(i.isComplete());
+            Assert.Equal(s, i.name());
 
             ObjectId f = i.ToObjectId();
-            Assert.IsNotNull(f);
-            Assert.AreEqual(ObjectId.FromString(s), f);
-            Assert.AreEqual(f.GetHashCode(), i.GetHashCode());
+            Assert.NotNull(f);
+            Assert.Equal(ObjectId.FromString(s), f);
+            Assert.Equal(f.GetHashCode(), i.GetHashCode());
         }
 
-        [Test]
+        [Fact]
         public void test1_FromString()
         {
             const string s = "7";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.ToObjectId());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(s, i.name());
+            Assert.Null(i.ToObjectId());
         }
 
-        [Test]
+        [Fact]
         public void test2_FromString()
         {
             const string s = "7b";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.ToObjectId());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(s, i.name());
+            Assert.Null(i.ToObjectId());
         }
 
-        [Test]
+        [Fact]
         public void test3_FromString()
         {
             const string s = "7b6";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.ToObjectId());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(s, i.name());
+            Assert.Null(i.ToObjectId());
         }
 
-        [Test]
+        [Fact]
         public void test4_FromString()
         {
             const string s = "7b6e";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.ToObjectId());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(s, i.name());
+            Assert.Null(i.ToObjectId());
         }
 
-        [Test]
+        [Fact]
         public void test5_FromString()
         {
             const string s = "7b6e8";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.ToObjectId());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(s, i.name());
+            Assert.Null(i.ToObjectId());
         }
 
-        [Test]
+        [Fact]
         public void test6_FromString()
         {
             const string s = "7b6e80";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.ToObjectId());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(s, i.name());
+            Assert.Null(i.ToObjectId());
         }
 
-        [Test]
+        [Fact]
         public void test7_FromString()
         {
             const string s = "7b6e806";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.ToObjectId());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(s, i.name());
+            Assert.Null(i.ToObjectId());
         }
 
-        [Test]
+        [Fact]
         public void test8_FromString()
         {
             const string s = "7b6e8067";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.ToObjectId());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(s, i.name());
+            Assert.Null(i.ToObjectId());
         }
 
-        [Test]
+        [Fact]
         public void test9_FromString()
         {
             const string s = "7b6e8067e";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.ToObjectId());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(s, i.name());
+            Assert.Null(i.ToObjectId());
         }
 
-        [Test]
+        [Fact]
         public void test17_FromString()
         {
             const string s = "7b6e8067ec96acef9";
             AbbreviatedObjectId i = AbbreviatedObjectId.FromString(s);
-            Assert.IsNotNull(i);
-            Assert.AreEqual(s.Length, i.Length);
-            Assert.IsFalse(i.isComplete());
-            Assert.AreEqual(s, i.name());
-            Assert.IsNull(i.ToObjectId());
+            Assert.NotNull(i);
+            Assert.Equal(s.Length, i.Length);
+            Assert.False(i.isComplete());
+            Assert.Equal(s, i.name());
+            Assert.Null(i.ToObjectId());
         }
 
-        [Test]
+        [Fact]
         public void testEquals_Short()
         {
             const string s = "7b6e8067";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(s);
             AbbreviatedObjectId b = AbbreviatedObjectId.FromString(s);
-            Assert.AreNotSame(a, b);
-            Assert.IsTrue(a.GetHashCode() == b.GetHashCode());
-            Assert.IsTrue(a.Equals(b));
-            Assert.IsTrue(b.Equals(a));
+            Assert.NotSame(a, b);
+            Assert.True(a.GetHashCode() == b.GetHashCode());
+            Assert.True(a.Equals(b));
+            Assert.True(b.Equals(a));
         }
 
-        [Test]
+        [Fact]
         public void testEquals_Full()
         {
             const string s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(s);
             AbbreviatedObjectId b = AbbreviatedObjectId.FromString(s);
-            Assert.AreNotSame(a, b);
-            Assert.IsTrue(a.GetHashCode() == b.GetHashCode());
-            Assert.IsTrue(a.Equals(b));
-            Assert.IsTrue(b.Equals(a));
+            Assert.NotSame(a, b);
+            Assert.True(a.GetHashCode() == b.GetHashCode());
+            Assert.True(a.Equals(b));
+            Assert.True(b.Equals(a));
         }
 
-        [Test]
+        [Fact]
         public void testNotEquals_SameLength()
         {
             const string sa = "7b6e8067";
             const string sb = "7b6e806e";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
             AbbreviatedObjectId b = AbbreviatedObjectId.FromString(sb);
-            Assert.IsFalse(a.Equals(b));
-            Assert.IsFalse(b.Equals(a));
+            Assert.False(a.Equals(b));
+            Assert.False(b.Equals(a));
         }
 
-        [Test]
+        [Fact]
         public void testNotEquals_DiffLength()
         {
             const string sa = "7b6e8067abcd";
             const string sb = "7b6e8067";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(sa);
             AbbreviatedObjectId b = AbbreviatedObjectId.FromString(sb);
-            Assert.IsFalse(a.Equals(b));
-            Assert.IsFalse(b.Equals(a));
+            Assert.False(a.Equals(b));
+            Assert.False(b.Equals(a));
         }
 
-        [Test]
+        [Fact]
         public void testPrefixCompare_Full()
         {
             const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             AbbreviatedObjectId a = AbbreviatedObjectId.FromString(s1);
             ObjectId i1 = ObjectId.FromString(s1);
-            Assert.AreEqual(0, a.prefixCompare(i1));
-            Assert.IsTrue(i1.startsWith(a));
+            Assert.Equal(0, a.prefixCompare(i1));
+            Assert.True(i1.startsWith(a));
 
             const string s2 = "7b6e8067ec96acef9a4184b43210d583b6d2f99b";
             ObjectId i2 = ObjectId.FromString(s2);
-            Assert.IsTrue(a.prefixCompare(i2) < 0);
-            Assert.IsFalse(i2.startsWith(a));
+            Assert.True(a.prefixCompare(i2) < 0);
+            Assert.False(i2.startsWith(a));
 
             const string s3 = "7b6e8067ec96acef9a4184b43210d583b6d2f999";
             ObjectId i3 = ObjectId.FromString(s3);
-            Assert.IsTrue(a.prefixCompare(i3) > 0);
-            Assert.IsFalse(i3.startsWith(a));
+            Assert.True(a.prefixCompare(i3) > 0);
+            Assert.False(i3.startsWith(a));
         }
 
-        [Test]
+        [Fact]
         public void testPrefixCompare_1()
         {
             const string sa = "7";
@@ -292,21 +289,21 @@ namespace GitSharp.Tests
 
             const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
-            Assert.AreEqual(0, a.prefixCompare(i1));
-            Assert.IsTrue(i1.startsWith(a));
+            Assert.Equal(0, a.prefixCompare(i1));
+            Assert.True(i1.startsWith(a));
 
             const string s2 = "8b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i2 = ObjectId.FromString(s2);
-            Assert.IsTrue(a.prefixCompare(i2) < 0);
-            Assert.IsFalse(i2.startsWith(a));
+            Assert.True(a.prefixCompare(i2) < 0);
+            Assert.False(i2.startsWith(a));
 
             const string s3 = "6b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i3 = ObjectId.FromString(s3);
-            Assert.IsTrue(a.prefixCompare(i3) > 0);
-            Assert.IsFalse(i3.startsWith(a));
+            Assert.True(a.prefixCompare(i3) > 0);
+            Assert.False(i3.startsWith(a));
         }
 
-        [Test]
+        [Fact]
         public void testPrefixCompare_7()
         {
             const string sa = "7b6e806";
@@ -314,21 +311,21 @@ namespace GitSharp.Tests
 
             const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
-            Assert.AreEqual(0, a.prefixCompare(i1));
-            Assert.IsTrue(i1.startsWith(a));
+            Assert.Equal(0, a.prefixCompare(i1));
+            Assert.True(i1.startsWith(a));
 
             const string s2 = "7b6e8167ec86acef9a4184b43210d583b6d2f99a";
             ObjectId i2 = ObjectId.FromString(s2);
-            Assert.IsTrue(a.prefixCompare(i2) < 0);
-            Assert.IsFalse(i2.startsWith(a));
+            Assert.True(a.prefixCompare(i2) < 0);
+            Assert.False(i2.startsWith(a));
 
             const string s3 = "7b6e8057eca6acef9a4184b43210d583b6d2f99a";
             ObjectId i3 = ObjectId.FromString(s3);
-            Assert.IsTrue(a.prefixCompare(i3) > 0);
-            Assert.IsFalse(i3.startsWith(a));
+            Assert.True(a.prefixCompare(i3) > 0);
+            Assert.False(i3.startsWith(a));
         }
 
-        [Test]
+        [Fact]
         public void testPrefixCompare_8()
         {
             const string sa = "7b6e8067";
@@ -336,21 +333,21 @@ namespace GitSharp.Tests
 
             const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
-            Assert.AreEqual(0, a.prefixCompare(i1));
-            Assert.IsTrue(i1.startsWith(a));
+            Assert.Equal(0, a.prefixCompare(i1));
+            Assert.True(i1.startsWith(a));
 
             const string s2 = "7b6e8167ec86acef9a4184b43210d583b6d2f99a";
             ObjectId i2 = ObjectId.FromString(s2);
-            Assert.IsTrue(a.prefixCompare(i2) < 0);
-            Assert.IsFalse(i2.startsWith(a));
+            Assert.True(a.prefixCompare(i2) < 0);
+            Assert.False(i2.startsWith(a));
 
             const string s3 = "7b6e8057eca6acef9a4184b43210d583b6d2f99a";
             ObjectId i3 = ObjectId.FromString(s3);
-            Assert.IsTrue(a.prefixCompare(i3) > 0);
-            Assert.IsFalse(i3.startsWith(a));
+            Assert.True(a.prefixCompare(i3) > 0);
+            Assert.False(i3.startsWith(a));
         }
 
-        [Test]
+        [Fact]
         public void testPrefixCompare_9()
         {
             const string sa = "7b6e8067e";
@@ -358,21 +355,21 @@ namespace GitSharp.Tests
 
             const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
-            Assert.AreEqual(0, a.prefixCompare(i1));
-            Assert.IsTrue(i1.startsWith(a));
+            Assert.Equal(0, a.prefixCompare(i1));
+            Assert.True(i1.startsWith(a));
 
             const string s2 = "7b6e8167ec86acef9a4184b43210d583b6d2f99a";
             ObjectId i2 = ObjectId.FromString(s2);
-            Assert.IsTrue(a.prefixCompare(i2) < 0);
-            Assert.IsFalse(i2.startsWith(a));
+            Assert.True(a.prefixCompare(i2) < 0);
+            Assert.False(i2.startsWith(a));
 
             const string s3 = "7b6e8057eca6acef9a4184b43210d583b6d2f99a";
             ObjectId i3 = ObjectId.FromString(s3);
-            Assert.IsTrue(a.prefixCompare(i3) > 0);
-            Assert.IsFalse(i3.startsWith(a));
+            Assert.True(a.prefixCompare(i3) > 0);
+            Assert.False(i3.startsWith(a));
         }
 
-        [Test]
+        [Fact]
         public void testPrefixCompare_17()
         {
             const string sa = "7b6e8067ec96acef9";
@@ -380,18 +377,18 @@ namespace GitSharp.Tests
 
             const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
             ObjectId i1 = ObjectId.FromString(s1);
-            Assert.AreEqual(0, a.prefixCompare(i1));
-            Assert.IsTrue(i1.startsWith(a));
+            Assert.Equal(0, a.prefixCompare(i1));
+            Assert.True(i1.startsWith(a));
 
             const string s2 = "7b6e8067eca6acef9a4184b43210d583b6d2f99a";
             ObjectId i2 = ObjectId.FromString(s2);
-            Assert.IsTrue(a.prefixCompare(i2) < 0);
-            Assert.IsFalse(i2.startsWith(a));
+            Assert.True(a.prefixCompare(i2) < 0);
+            Assert.False(i2.startsWith(a));
 
             const string s3 = "7b6e8067ec86acef9a4184b43210d583b6d2f99a";
             ObjectId i3 = ObjectId.FromString(s3);
-            Assert.IsTrue(a.prefixCompare(i3) > 0);
-            Assert.IsFalse(i3.startsWith(a));
+            Assert.True(a.prefixCompare(i3) > 0);
+            Assert.False(i3.startsWith(a));
         }
     }
 }

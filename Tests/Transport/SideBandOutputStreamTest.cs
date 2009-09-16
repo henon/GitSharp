@@ -36,95 +36,89 @@
  */
 
 using System.IO;
-using System.Text;
 using GitSharp.Transport;
 using GitSharp.Util;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.Transport
 {
-    
-    [TestFixture]
-    public class SideBandOutputStreamTest
+    public class SideBandOutputStreamTest : XunitBaseFact
     {
-        private MemoryStream rawOut;
-        private PacketLineOut pckOut;
+        private MemoryStream _rawOut;
+        private PacketLineOut _pckOut;
 
-        [SetUp]
-        protected void setUp()
+        protected override void SetUp()
         {
-            rawOut = new MemoryStream();
-            pckOut = new PacketLineOut(rawOut);
+            _rawOut = new MemoryStream();
+            _pckOut = new PacketLineOut(_rawOut);
         }
 
-        private void assertBuffer(string exp)
+        private void AssertBuffer(string exp)
         {
-            byte[] res = rawOut.ToArray();
+            byte[] res = _rawOut.ToArray();
             string ress = Constants.CHARSET.GetString(res);
-            Assert.AreEqual(exp, ress);
+            Assert.Equal(exp, ress);
         }
 
-        [Test]
+        [Fact]
         public void testWrite_CH_DATA()
         {
-            SideBandOutputStream o;
-            o = new SideBandOutputStream(SideBandOutputStream.CH_DATA, pckOut);
-            byte[] b = new byte[] {(byte) 'a', (byte) 'b', (byte) 'c'};
+        	var o = new SideBandOutputStream(SideBandOutputStream.CH_DATA, _pckOut);
+            var b = new byte[] {(byte) 'a', (byte) 'b', (byte) 'c'};
             o.Write(b, 0, b.Length);
-            assertBuffer("0008\x01" + "abc");
+            AssertBuffer("0008\x01" + "abc");
         }
 
-        [Test]
+        [Fact]
         public void testWrite_CH_PROGRESS()
         {
-            SideBandOutputStream o;
-            o = new SideBandOutputStream(SideBandOutputStream.CH_PROGRESS, pckOut);
-            byte[] b = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
+        	var o = new SideBandOutputStream(SideBandOutputStream.CH_PROGRESS, _pckOut);
+            var b = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
             o.Write(b, 0, b.Length);
-            assertBuffer("0008\x02" + "abc");
+            AssertBuffer("0008\x02" + "abc");
         }
 
-        [Test]
+        [Fact]
         public void testWrite_CH_ERROR()
         {
-            SideBandOutputStream o;
-            o = new SideBandOutputStream(SideBandOutputStream.CH_ERROR, pckOut);
-            byte[] b = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
+            var o = new SideBandOutputStream(SideBandOutputStream.CH_ERROR, _pckOut);
+            var b = new byte[] { (byte)'a', (byte)'b', (byte)'c' };
             o.Write(b, 0, b.Length);
-            assertBuffer("0008\x03" + "abc");
+            AssertBuffer("0008\x03" + "abc");
         }
 
-        [Test]
+        [Fact]
         public void testWrite_Small()
         {
-            SideBandOutputStream o;
-            o = new SideBandOutputStream(SideBandOutputStream.CH_DATA, pckOut);
+            var o = new SideBandOutputStream(SideBandOutputStream.CH_DATA, _pckOut);
             o.WriteByte((byte)'a');
             o.WriteByte((byte)'b');
             o.WriteByte((byte)'c');
-            assertBuffer("0006\x01" + "a0006\x01" + "b0006\x01" + "c");
+            AssertBuffer("0006\x01" + "a0006\x01" + "b0006\x01" + "c");
         }
 
-        [Test]
+        [Fact]
         public void testWrite_Large()
         {
             const int buflen = SideBandOutputStream.MAX_BUF - SideBandOutputStream.HDR_SIZE;
-            byte[] buf = new byte[buflen];
+            var buf = new byte[buflen];
             for (int i = 0; i < buf.Length; i++)
-                buf[i] = (byte) i;
+            {
+            	buf[i] = (byte) i;
+            }
 
-            SideBandOutputStream o;
-            o = new SideBandOutputStream(SideBandOutputStream.CH_DATA, pckOut);
+            var o = new SideBandOutputStream(SideBandOutputStream.CH_DATA, _pckOut);
             o.Write(buf, 0, buf.Length);
 
-            byte[] act = rawOut.ToArray();
+            byte[] act = _rawOut.ToArray();
             string explen = NB.DecimalToBase(buf.Length + 5, 16);
-            Assert.AreEqual(5 + buf.Length, act.Length);
-            Assert.AreEqual(Constants.CHARSET.GetString(act, 0, 4).ToUpper(), explen.ToUpper());
-            Assert.AreEqual(1, act[4]);
+            Assert.Equal(5 + buf.Length, act.Length);
+            Assert.Equal(Constants.CHARSET.GetString(act, 0, 4).ToUpper(), explen.ToUpper());
+            Assert.Equal(1, act[4]);
             for (int i = 0, j = 5; i < buf.Length; i++, j++)
-                Assert.AreEqual(buf[i], act[j]);
+            {
+            	Assert.Equal(buf[i], act[j]);
+            }
         }
     }
-
 }

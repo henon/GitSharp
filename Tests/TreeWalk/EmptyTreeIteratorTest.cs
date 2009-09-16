@@ -35,100 +35,104 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.Tests.Util;
 using GitSharp.TreeWalk;
-using NUnit.Framework;
+using Xunit;
 
 namespace GitSharp.Tests.TreeWalk
 {
-	[TestFixture]
 	public class EmptyTreeIteratorTest : RepositoryTestCase
 	{
-		[Test]
+		[Fact]
 		public virtual void testAtEOF()
 		{
-			EmptyTreeIterator etp = new EmptyTreeIterator();
-			Assert.IsTrue(etp.first());
-			Assert.IsTrue(etp.eof());
+			var etp = new EmptyTreeIterator();
+			Assert.True(etp.first());
+			Assert.True(etp.eof());
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testCreateSubtreeIterator()
 		{
-			EmptyTreeIterator etp = new EmptyTreeIterator();
+			var etp = new EmptyTreeIterator();
 			AbstractTreeIterator sub = etp.createSubtreeIterator(db);
-			Assert.IsNotNull(sub);
-			Assert.IsTrue(sub.first());
-			Assert.IsTrue(sub.eof());
-			Assert.IsTrue(sub is EmptyTreeIterator);
+			Assert.NotNull(sub);
+			Assert.True(sub.first());
+			Assert.True(sub.eof());
+			Assert.True(sub is EmptyTreeIterator);
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testEntryObjectId()
 		{
-			EmptyTreeIterator etp = new EmptyTreeIterator();
-			Assert.AreSame(ObjectId.ZeroId, etp.getEntryObjectId());
-			Assert.IsNotNull(etp.idBuffer());
-			Assert.AreEqual(0, etp.idOffset());
-			Assert.AreEqual(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
+			var etp = new EmptyTreeIterator();
+			Assert.Same(ObjectId.ZeroId, etp.getEntryObjectId());
+			Assert.NotNull(etp.idBuffer());
+			Assert.Equal(0, etp.idOffset());
+			Assert.Equal(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testNextDoesNothing()
 		{
-			EmptyTreeIterator etp = new EmptyTreeIterator();
+			var etp = new EmptyTreeIterator();
 			etp.next(1);
-			Assert.IsTrue(etp.first());
-			Assert.IsTrue(etp.eof());
-			Assert.AreEqual(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
+			Assert.True(etp.first());
+			Assert.True(etp.eof());
+			Assert.Equal(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
 
 			etp.next(1);
-			Assert.IsTrue(etp.first());
-			Assert.IsTrue(etp.eof());
-			Assert.AreEqual(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
+			Assert.True(etp.first());
+			Assert.True(etp.eof());
+			Assert.Equal(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testBackDoesNothing()
 		{
-			EmptyTreeIterator etp = new EmptyTreeIterator();
+			var etp = new EmptyTreeIterator();
 			etp.back(1);
-			Assert.IsTrue(etp.first());
-			Assert.IsTrue(etp.eof());
-			Assert.AreEqual(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
+			Assert.True(etp.first());
+			Assert.True(etp.eof());
+			Assert.Equal(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
 
 			etp.back(1);
-			Assert.IsTrue(etp.first());
-			Assert.IsTrue(etp.eof());
-			Assert.AreEqual(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
+			Assert.True(etp.first());
+			Assert.True(etp.eof());
+			Assert.Equal(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
 		}
 
-		[Test]
+		[Fact]
 		public virtual void testStopWalkCallsParent()
 		{
-			bool[] called = new bool[1];
-			Assert.IsFalse(called[0]);
+			var called = new bool[1];
+			Assert.False(called[0]);
 
 			// [ammachado]: Anonymous inner classes are not convertable to .NET:
 			EmptyTreeIterator parent = new AnonymousTreeIterator(called);
 
 
 			parent.createSubtreeIterator(db).stopWalk();
-			Assert.IsTrue(called[0]);
+			Assert.True(called[0]);
 		}
+
+		#region Nested Types
 
 		class AnonymousTreeIterator : EmptyTreeIterator
 		{
-			private readonly bool[] called;
+			private readonly bool[] _called;
 
 			public AnonymousTreeIterator(bool[] called)
 			{
-				this.called = called;
+				_called = called;
 			}
 
 			public override void stopWalk()
 			{
-				called[0] = true;
+				_called[0] = true;
 			}
 		}
+
+		#endregion
 	}
 }

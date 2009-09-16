@@ -37,129 +37,129 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
+using GitSharp.Tests.Util;
+using Xunit;
 
 namespace GitSharp.Tests
 {
-    [TestFixture]
     public class ParseRevTests : RepositoryTestCase
     {
-        [Test]
+        [Fact]
         public void testObjectId_existing()
         {
-            Assert.AreEqual("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0").Name);
+            Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0").Name);
         }
 
-        [Test]
+        [Fact]
         public void testObjectId_nonexisting()
         {
-            Assert.AreEqual("49322bb17d3acc9146f98c97d078513228bbf3c1", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c1").Name);
+            Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c1", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c1").Name);
         }
 
-        [Test]
+        [Fact]
         public void testObjectId_objectid_implicit_firstparent()
         {
-            Assert.AreEqual("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^").Name);
-            Assert.AreEqual("1203b03dc816ccbb67773f28b3c19318654b0bc8", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^^").Name);
-            Assert.AreEqual("bab66b48f836ed950c99134ef666436fb07a09a0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^^^").Name);
+            Assert.Equal("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^").Name);
+            Assert.Equal("1203b03dc816ccbb67773f28b3c19318654b0bc8", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^^").Name);
+            Assert.Equal("bab66b48f836ed950c99134ef666436fb07a09a0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^^^").Name);
         }
 
-        [Test]
+        [Fact]
         public void testObjectId_objectid_self()
         {
-            Assert.AreEqual("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^0").Name);
-            Assert.AreEqual("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^0^0").Name);
-            Assert.AreEqual("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^0^0^0").Name);
+            Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^0").Name);
+            Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^0^0").Name);
+            Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^0^0^0").Name);
         }
 
-        [Test]
+        [Fact]
         public void testObjectId_objectid_explicit_firstparent()
         {
-            Assert.AreEqual("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^1").Name);
-            Assert.AreEqual("1203b03dc816ccbb67773f28b3c19318654b0bc8", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^1^1").Name);
-            Assert.AreEqual("bab66b48f836ed950c99134ef666436fb07a09a0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^1^1^1").Name);
+            Assert.Equal("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^1").Name);
+            Assert.Equal("1203b03dc816ccbb67773f28b3c19318654b0bc8", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^1^1").Name);
+            Assert.Equal("bab66b48f836ed950c99134ef666436fb07a09a0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^1^1^1").Name);
         }
 
-        [Test]
+        [Fact]
         public void testObjectId_objectid_explicit_otherparents()
         {
-            Assert.AreEqual("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^1").Name);
-            Assert.AreEqual("f73b95671f326616d66b2afb3bdfcdbbce110b44", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^2").Name);
-            Assert.AreEqual("d0114ab8ac326bab30e3a657a0397578c5a1af88", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^3").Name);
-            Assert.AreEqual("d0114ab8ac326bab30e3a657a0397578c5a1af88", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^03").Name);
+            Assert.Equal("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^1").Name);
+            Assert.Equal("f73b95671f326616d66b2afb3bdfcdbbce110b44", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^2").Name);
+            Assert.Equal("d0114ab8ac326bab30e3a657a0397578c5a1af88", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^3").Name);
+            Assert.Equal("d0114ab8ac326bab30e3a657a0397578c5a1af88", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^03").Name);
         }
 
-        [Test]
+        [Fact]
         public void testRef_refname()
         {
-            Assert.AreEqual("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("master^0").Name);
-            Assert.AreEqual("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("master^").Name);
-            Assert.AreEqual("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("refs/heads/master^1").Name);
+            Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("master^0").Name);
+            Assert.Equal("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("master^").Name);
+            Assert.Equal("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("refs/heads/master^1").Name);
         }
 
-        [Test]
+        [Fact]
         public void testDistance()
         {
-            Assert.AreEqual("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~0").Name);
-            Assert.AreEqual("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~1").Name);
-            Assert.AreEqual("1203b03dc816ccbb67773f28b3c19318654b0bc8", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~2").Name);
-            Assert.AreEqual("bab66b48f836ed950c99134ef666436fb07a09a0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~3").Name);
-            Assert.AreEqual("bab66b48f836ed950c99134ef666436fb07a09a0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~03").Name);
+            Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~0").Name);
+            Assert.Equal("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~1").Name);
+            Assert.Equal("1203b03dc816ccbb67773f28b3c19318654b0bc8", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~2").Name);
+            Assert.Equal("bab66b48f836ed950c99134ef666436fb07a09a0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~3").Name);
+            Assert.Equal("bab66b48f836ed950c99134ef666436fb07a09a0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~03").Name);
         }
 
-        [Test]
+        [Fact]
         public void testTree()
         {
-            Assert.AreEqual("6020a3b8d5d636e549ccbd0c53e2764684bb3125", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^{tree}").Name);
-            Assert.AreEqual("02ba32d3649e510002c21651936b7077aa75ffa9", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^^{tree}").Name);
+            Assert.Equal("6020a3b8d5d636e549ccbd0c53e2764684bb3125", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^{tree}").Name);
+            Assert.Equal("02ba32d3649e510002c21651936b7077aa75ffa9", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^^{tree}").Name);
         }
 
-        [Test]
+        [Fact]
         public void testHEAD()
         {
-            Assert.AreEqual("6020a3b8d5d636e549ccbd0c53e2764684bb3125", db.Resolve("HEAD^{tree}").Name);
+            Assert.Equal("6020a3b8d5d636e549ccbd0c53e2764684bb3125", db.Resolve("HEAD^{tree}").Name);
         }
 
-        [Test]
+        [Fact]
         public void testDerefCommit()
         {
-            Assert.AreEqual("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^{}").Name);
-            Assert.AreEqual("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^{commit}").Name);
+            Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^{}").Name);
+            Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^{commit}").Name);
             // double deref
-            Assert.AreEqual("6020a3b8d5d636e549ccbd0c53e2764684bb3125", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^{commit}^{tree}").Name);
+            Assert.Equal("6020a3b8d5d636e549ccbd0c53e2764684bb3125", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^{commit}^{tree}").Name);
         }
 
-        [Test]
+        [Fact]
         public void testDerefTag()
         {
-            Assert.AreEqual("17768080a2318cd89bba4c8b87834401e2095703", db.Resolve("refs/tags/B").Name);
-            Assert.AreEqual("d86a2aada2f5e7ccf6f11880bfb9ab404e8a8864", db.Resolve("refs/tags/B^{commit}").Name);
-            Assert.AreEqual("032c063ce34486359e3ee3d4f9e5c225b9e1a4c2", db.Resolve("refs/tags/B10th").Name);
-            Assert.AreEqual("d86a2aada2f5e7ccf6f11880bfb9ab404e8a8864", db.Resolve("refs/tags/B10th^{commit}").Name);
-            Assert.AreEqual("d86a2aada2f5e7ccf6f11880bfb9ab404e8a8864", db.Resolve("refs/tags/B10th^{}").Name);
-            Assert.AreEqual("d86a2aada2f5e7ccf6f11880bfb9ab404e8a8864", db.Resolve("refs/tags/B10th^0").Name);
-            Assert.AreEqual("d86a2aada2f5e7ccf6f11880bfb9ab404e8a8864", db.Resolve("refs/tags/B10th~0").Name);
-            Assert.AreEqual("0966a434eb1a025db6b71485ab63a3bfbea520b6", db.Resolve("refs/tags/B10th^").Name);
-            Assert.AreEqual("0966a434eb1a025db6b71485ab63a3bfbea520b6", db.Resolve("refs/tags/B10th^1").Name);
-            Assert.AreEqual("0966a434eb1a025db6b71485ab63a3bfbea520b6", db.Resolve("refs/tags/B10th~1").Name);
-            Assert.AreEqual("2c349335b7f797072cf729c4f3bb0914ecb6dec9", db.Resolve("refs/tags/B10th~2").Name);
+            Assert.Equal("17768080a2318cd89bba4c8b87834401e2095703", db.Resolve("refs/tags/B").Name);
+            Assert.Equal("d86a2aada2f5e7ccf6f11880bfb9ab404e8a8864", db.Resolve("refs/tags/B^{commit}").Name);
+            Assert.Equal("032c063ce34486359e3ee3d4f9e5c225b9e1a4c2", db.Resolve("refs/tags/B10th").Name);
+            Assert.Equal("d86a2aada2f5e7ccf6f11880bfb9ab404e8a8864", db.Resolve("refs/tags/B10th^{commit}").Name);
+            Assert.Equal("d86a2aada2f5e7ccf6f11880bfb9ab404e8a8864", db.Resolve("refs/tags/B10th^{}").Name);
+            Assert.Equal("d86a2aada2f5e7ccf6f11880bfb9ab404e8a8864", db.Resolve("refs/tags/B10th^0").Name);
+            Assert.Equal("d86a2aada2f5e7ccf6f11880bfb9ab404e8a8864", db.Resolve("refs/tags/B10th~0").Name);
+            Assert.Equal("0966a434eb1a025db6b71485ab63a3bfbea520b6", db.Resolve("refs/tags/B10th^").Name);
+            Assert.Equal("0966a434eb1a025db6b71485ab63a3bfbea520b6", db.Resolve("refs/tags/B10th^1").Name);
+            Assert.Equal("0966a434eb1a025db6b71485ab63a3bfbea520b6", db.Resolve("refs/tags/B10th~1").Name);
+            Assert.Equal("2c349335b7f797072cf729c4f3bb0914ecb6dec9", db.Resolve("refs/tags/B10th~2").Name);
         }
 
-        [Test]
+        [Fact]
         public void testDerefBlob()
         {
-            Assert.AreEqual("fd608fbe625a2b456d9f15c2b1dc41f252057dd7", db.Resolve("spearce-gpg-pub^{}").Name);
-            Assert.AreEqual("fd608fbe625a2b456d9f15c2b1dc41f252057dd7", db.Resolve("spearce-gpg-pub^{blob}").Name);
-            Assert.AreEqual("fd608fbe625a2b456d9f15c2b1dc41f252057dd7", db.Resolve("fd608fbe625a2b456d9f15c2b1dc41f252057dd7^{}").Name);
-            Assert.AreEqual("fd608fbe625a2b456d9f15c2b1dc41f252057dd7", db.Resolve("fd608fbe625a2b456d9f15c2b1dc41f252057dd7^{blob}").Name);
+            Assert.Equal("fd608fbe625a2b456d9f15c2b1dc41f252057dd7", db.Resolve("spearce-gpg-pub^{}").Name);
+            Assert.Equal("fd608fbe625a2b456d9f15c2b1dc41f252057dd7", db.Resolve("spearce-gpg-pub^{blob}").Name);
+            Assert.Equal("fd608fbe625a2b456d9f15c2b1dc41f252057dd7", db.Resolve("fd608fbe625a2b456d9f15c2b1dc41f252057dd7^{}").Name);
+            Assert.Equal("fd608fbe625a2b456d9f15c2b1dc41f252057dd7", db.Resolve("fd608fbe625a2b456d9f15c2b1dc41f252057dd7^{blob}").Name);
         }
 
-        [Test]
+        [Fact]
         public void testDerefTree()
         {
-            Assert.AreEqual("032c063ce34486359e3ee3d4f9e5c225b9e1a4c2", db.Resolve("refs/tags/B10th").Name);
-            Assert.AreEqual("856ec208ae6cadac25a6d74f19b12bb27a24fe24", db.Resolve("032c063ce34486359e3ee3d4f9e5c225b9e1a4c2^{tree}").Name);
-            Assert.AreEqual("856ec208ae6cadac25a6d74f19b12bb27a24fe24", db.Resolve("refs/tags/B10th^{tree}").Name);
+            Assert.Equal("032c063ce34486359e3ee3d4f9e5c225b9e1a4c2", db.Resolve("refs/tags/B10th").Name);
+            Assert.Equal("856ec208ae6cadac25a6d74f19b12bb27a24fe24", db.Resolve("032c063ce34486359e3ee3d4f9e5c225b9e1a4c2^{tree}").Name);
+            Assert.Equal("856ec208ae6cadac25a6d74f19b12bb27a24fe24", db.Resolve("refs/tags/B10th^{tree}").Name);
         }
     }
 }

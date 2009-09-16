@@ -180,7 +180,7 @@ namespace GitSharp.Tests.TreeWalk
 
 		private static string NameOf(AbstractTreeIterator i)
 		{
-			return RawParseUtils.decode(Constants.CHARSET, i.Path, 0, i.PathLen);
+			return Constants.CHARSET.GetString(i.Path, 0, i.PathLen);
 		}
 	}
 }

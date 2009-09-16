@@ -131,7 +131,7 @@ namespace GitSharp
 
 					var p = new MutableInteger();
 					_objectType = Constants.decodeTypeString(id, hdr, (byte)' ', p);
-					_objectSize = RawParseUtils.parseBase10(hdr, p.value, p);
+					_objectSize = RawParseUtils.ParseBase10(hdr, p.value, p);
 
 					if (_objectSize < 0)
 					{

@@ -120,11 +120,11 @@ namespace GitSharp.Patch
 
 		    if (RawParseUtils.match(buf, ptr, LITERAL) >= 0) {
 			    type = Type.LITERAL_DEFLATED;
-			    length = RawParseUtils.parseBase10(buf, ptr + LITERAL.Length, null);
+			    length = RawParseUtils.ParseBase10(buf, ptr + LITERAL.Length, null);
 
 		    } else if (RawParseUtils.match(buf, ptr, DELTA) >= 0) {
 			    type = Type.DELTA_DEFLATED;
-			    length = RawParseUtils.parseBase10(buf, ptr + DELTA.Length, null);
+			    length = RawParseUtils.ParseBase10(buf, ptr + DELTA.Length, null);
 
 		    } else {
 			    // Not a valid binary hunk. Signal to the caller that

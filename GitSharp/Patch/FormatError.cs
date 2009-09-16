@@ -124,7 +124,7 @@ namespace GitSharp.Patch
 		public string getLineText()
 		{
 			int eol = RawParseUtils.nextLF(_buf, _offset);
-			return RawParseUtils.decode(Constants.CHARSET, _buf, _offset, eol);
+			return Constants.CHARSET.GetString(_buf, _offset, eol);
 		}
 
 		public override string ToString()

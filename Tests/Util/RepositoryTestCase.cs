@@ -303,7 +303,6 @@ namespace GitSharp.Tests.Util
 			Assert.False(newTestRepo.Exists);
 			var newRepo = new Repository(newTestRepo);
 			newRepo.Create();
-			//string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
 			_repositoriesToClose.Add(newRepo);
 			return newRepo;
 		}

@@ -39,6 +39,7 @@
 
 // Note: this file originates from jgit's NB.java
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -154,121 +155,178 @@ namespace GitSharp.Util
 		/// </exception>
 		public static byte[] ReadFully(FileInfo path)
 		{
-			return ReadFully(path, int.MaxValue);
+			return File.ReadAllBytes(path.FullName);
 		}
 
-		/**
-		 * Read an entire local file into memory as a byte array.
-		 *
-		 * @param path
-		 *            location of the file to Read.
-		 * @param max
-		 *            maximum number of bytes to Read, if the file is larger than
-		 *            this limit an IOException is thrown.
-		 * @return complete contents of the requested local file.
-		 * @throws FileNotFoundException
-		 *             the file does not exist.
-		 * @throws IOException
-		 *             the file exists, but its contents cannot be Read.
-		 */
+		/// <summary>
+		/// Read an entire local file into memory as a byte array.
+		/// </summary>
+		/// <param name="path">Location of the file to read.</param>
+		/// <param name="max">
+		/// Maximum number of bytes to Read, if the file is larger than
+		/// this limit an IOException is thrown.
+		/// </param>
+		/// <returns>
+		/// Complete contents of the requested local file.
+		/// </returns>
+		/// <exception cref="FileNotFoundException">
+		/// The file exists, but its contents cannot be Read.
+		/// </exception>
+		/// <exception cref="IOException"></exception>
 		public static byte[] ReadFully(FileInfo path, int max)
 		{
-			using (var @in = new FileStream(path.FullName, System.IO.FileMode.Open, FileAccess.Read))
+			if (path == null)
 			{
-				long sz = @in.Length;
-				if (sz > max)
-					throw new IOException("File is too large: " + path);
-				var buf = new byte[(int)sz];
-				ReadFully(@in, buf, 0, buf.Length);
+				throw new ArgumentNullException("path");
+			}
+
+			if (!path.Exists)
+			{
+				throw new ArgumentException(
+					string.Format("The specified path does not exists: {0}", path.FullName), "path");
+			}
+
+			long fileSize = path.Length;
+			if (fileSize > max)
+			{
+				throw new IOException(string.Format("File is too large: {0}", path));
+			}
+
+			using (var stream = new FileStream(path.FullName, System.IO.FileMode.Open, FileAccess.Read))
+			{
+				var buf = new byte[(int)fileSize];
+				ReadFully(stream, buf, 0, buf.Length);
+				stream.Close();
 				return buf;
 			}
 		}
 
-		/**
-		 * Read the entire byte array into memory, or throw an exception.
-		 * 
-		 * @param fd
-		 *            input stream to Read the data from.
-		 * @param dst
-		 *            buffer that must be fully populated, [off, off+len).
-		 * @param off
-		 *            position within the buffer to start writing to.
-		 * @param len
-		 *            number of bytes that must be Read.
-		 * @throws EOFException
-		 *             the stream ended before dst was fully populated.
-		 * @throws IOException
-		 *             there was an error reading from the stream.
-		 */
-		public static void ReadFully(Stream fd, byte[] dst, int off, int len)
+		/// <summary>
+		/// Read the entire byte array into memory, or throw an exception.
+		/// </summary>
+		/// <param name="stream">Input stream to read the data from.</param>
+		/// <param name="buffer">buffer that must be fully populated</param>
+		/// <param name="offset">position within the buffer to start writing to.</param>
+		/// <param name="count">number of bytes that must be read.</param>
+		/// <exception cref="EndOfStreamException">
+		/// The stream ended before <paramref name="buffer"/> was fully populated.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// There was an error reading from the stream.
+		/// </exception>
+		public static void ReadFully(Stream stream, byte[] buffer, int offset, int count)
 		{
-			while (len > 0)
+			if (stream == null)
 			{
-				int r = fd.Read(dst, off, len);
-				if (r <= 0)
-					throw new EndOfStreamException("Short Read of block.");
-				off += r;
-				len -= r;
+				throw new ArgumentNullException("stream");
 			}
+
+			if (offset < 0)
+			{
+				throw new ArgumentOutOfRangeException("offset");
+			}
+
+			int numberOfBytesRead = stream.Read(buffer, offset, count);
+			Debug.Assert(numberOfBytesRead == count);
 		}
 
-		/**
-		 * Read the entire byte array into memory, or throw an exception.
-		 *
-		 * @param fd
-		 *            file to Read the data from.
-		 * @param pos
-		 *            position to Read from the file at.
-		 * @param dst
-		 *            buffer that must be fully populated, [off, off+len).
-		 * @param off
-		 *            position within the buffer to start writing to.
-		 * @param len
-		 *            number of bytes that must be Read.
-		 * @throws EOFException
-		 *             the stream ended before dst was fully populated.
-		 * @throws IOException
-		 *             there was an error reading from the stream.
-		 */
-		public static void ReadFully(Stream fd, long pos, byte[] dst, int off, int len)
+		/// <summary>
+		/// Read the entire byte array into memory, or throw an exception.
+		/// </summary>
+		/// <param name="stream">Stream to read the data from.</param>
+		/// <param name="position">Position to read from the file at.</param>
+		/// <param name="buffer">Buffer that must be fully populated, [off, off+len].</param>
+		/// <param name="offset">position within the buffer to start writing to.</param>
+		/// <param name="count">number of bytes that must be read.</param>
+		/// <exception cref="EndOfStreamException">
+		/// The <paramref name="stream"/> ended before the requested number of 
+		/// bytes were read.
+		/// </exception>
+		/// <exception cref="NotSupportedException">
+		/// The <paramref name="stream"/> does not supports seeking.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// There was an error reading from the stream.
+		/// </exception>
+		public static void ReadFully(Stream stream, long position, byte[] buffer, int offset, int count)
 		{
-			while (len > 0)
+			if (stream == null)
 			{
-				fd.Position = pos;
-				int r = fd.Read(dst, off, len);
-				if (r <= 0)
-					throw new EndOfStreamException("Short Read of block.");
-				pos += r;
-				off += r;
-				len -= r;
+				throw new ArgumentNullException("stream");
 			}
+
+			if (offset < 0)
+			{
+				throw new ArgumentOutOfRangeException("offset");
+			}
+
+			if (stream.CanSeek)
+			{
+				stream.Seek(position, SeekOrigin.Begin);
+			}
+			else
+			{
+				throw new NotSupportedException("The stream does not im");
+			}
+
+			int numberOfBytesRead = stream.Read(buffer, offset, count);
+			Debug.Assert(numberOfBytesRead == count);
 		}
 
-		/**
-		 * Skip an entire region of an input stream.
-		 * <para />
-		 * The input stream's position is moved forward by the number of requested
-		 * bytes, discarding them from the input. This method does not return until
-		 * the exact number of bytes requested has been skipped.
-		 *
-		 * @param fd
-		 *            the stream to skip bytes from.
-		 * @param toSkip
-		 *            total number of bytes to be discarded. Must be >= 0.
-		 * @throws EOFException
-		 *             the stream ended before the requested number of bytes were
-		 *             skipped.
-		 * @throws IOException
-		 *             there was an error reading from the stream.
-		 */
-		public static void skipFully(Stream fd, long toSkip)
+		/// <summary>
+		/// Skip an entire region of an input stream.
+		/// <para />
+		/// The input stream's position is moved forward by the number of requested
+		/// bytes, discarding them from the input. This method does not return until
+		/// the exact number of bytes requested has been skipped.
+		/// </summary>
+		/// <param name="stream">The stream to skip bytes from.</param>
+		/// <param name="toSkip">
+		/// Total number of bytes to be discarded. Must be >= 0.
+		/// </param>
+		/// <exception cref="EndOfStreamException">
+		/// The stream ended before the requested number of bytes were
+		/// skipped.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// There was an error reading from the stream.
+		/// </exception>
+		public static void SkipFully(Stream stream, long toSkip)
 		{
-			while (toSkip > 0)
+			if (stream == null)
 			{
-				var r = fd.Seek(toSkip, SeekOrigin.Current);
-				if (r <= 0)
-					throw new EndOfStreamException("Short skip of block");
-				toSkip -= r;
+				throw new ArgumentNullException("stream");
+			}
+
+			if (toSkip < 0)
+			{
+				throw new ArgumentOutOfRangeException("toSkip");
+			}
+
+			long finalPosition = stream.Position + toSkip;
+
+			if (finalPosition > stream.Length)
+			{
+				throw new EndOfStreamException("Cannot seek beyond stream limits.");
+			}
+
+			if (stream.CanSeek)
+			{
+				stream.Seek(toSkip, SeekOrigin.Current);
+				System.Diagnostics.Debug.Assert(stream.Position == finalPosition);
+			}
+			else
+			{
+				while (toSkip > 0)
+				{
+					var buffer = new byte[toSkip];
+					var r = stream.Read(buffer, 0, Convert.ToInt32(toSkip));
+					if (r <= 0)
+					{
+						throw new EndOfStreamException("Short skip of block.");
+					}
+					toSkip -= r;
+				}
 			}
 		}
 

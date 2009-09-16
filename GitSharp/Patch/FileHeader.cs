@@ -533,13 +533,13 @@ namespace GitSharp.Patch
 			// of the space matches the text to the right, excluding the part
 			// before the first slash.
 			//
-			int aStart = RawParseUtils.nextLF(Buffer, ptr, (byte)'/');
+			int aStart = RawParseUtils.nextLF(Buffer, ptr, '/');
 			if (aStart >= eol)
 				return eol;
 
 			while (ptr < eol)
 			{
-				int sp = RawParseUtils.nextLF(Buffer, ptr, (byte)' ');
+				int sp = RawParseUtils.nextLF(Buffer, ptr, ' ');
 				if (sp >= eol)
 				{
 					// We can't split the header, it isn't valid.
@@ -547,7 +547,7 @@ namespace GitSharp.Patch
 					//
 					return eol;
 				}
-				int bStart = RawParseUtils.nextLF(Buffer, sp, (byte)'/');
+				int bStart = RawParseUtils.nextLF(Buffer, sp, '/');
 				if (bStart >= eol)
 					return eol;
 
@@ -566,7 +566,7 @@ namespace GitSharp.Patch
 						{
 							return eol;
 						}
-						oldName = QuotedString.GitPathStyle.GIT_PATH.dequote(Buffer, bol, sp - 1);
+						oldName = QuotedString.GitPathStyle.GitPath.dequote(Buffer, bol, sp - 1);
 						oldName = P1(oldName);
 					}
 					else
@@ -656,11 +656,11 @@ namespace GitSharp.Patch
 				}
 				else if (RawParseUtils.match(Buffer, ptr, SimilarityIndex) >= 0)
 				{
-					_score = RawParseUtils.parseBase10(Buffer, ptr + SimilarityIndex.Length, null);
+					_score = RawParseUtils.ParseBase10(Buffer, ptr + SimilarityIndex.Length, null);
 				}
 				else if (RawParseUtils.match(Buffer, ptr, DissimilarityIndex) >= 0)
 				{
-					_score = RawParseUtils.parseBase10(Buffer, ptr + DissimilarityIndex.Length, null);
+					_score = RawParseUtils.ParseBase10(Buffer, ptr + DissimilarityIndex.Length, null);
 				}
 				else if (RawParseUtils.match(Buffer, ptr, Index) >= 0)
 				{
@@ -746,7 +746,7 @@ namespace GitSharp.Patch
 			{
 				// New style GNU diff format
 				//
-				r = QuotedString.GitPathStyle.GIT_PATH.dequote(Buffer, ptr, end - 1);
+				r = QuotedString.GitPathStyle.GitPath.dequote(Buffer, ptr, end - 1);
 			}
 			else
 			{
@@ -796,8 +796,8 @@ namespace GitSharp.Patch
 			// "index $asha1..$bsha1[ $mode]" where $asha1 and $bsha1
 			// can be unique abbreviations
 			//
-			int dot2 = RawParseUtils.nextLF(Buffer, ptr, (byte)'.');
-			int mode = RawParseUtils.nextLF(Buffer, dot2, (byte)' ');
+			int dot2 = RawParseUtils.nextLF(Buffer, ptr, '.');
+			int mode = RawParseUtils.nextLF(Buffer, dot2, ' ');
 
 			oldId = AbbreviatedObjectId.FromString(Buffer, ptr, dot2 - 1);
 			NewId = AbbreviatedObjectId.FromString(Buffer, dot2 + 1, mode - 1);
@@ -810,16 +810,11 @@ namespace GitSharp.Patch
 
 		private bool Eq(int aPtr, int aEnd, int bPtr, int bEnd)
 		{
-			if (aEnd - aPtr != bEnd - bPtr)
-			{
-				return false;
-			}
+			if (aEnd - aPtr != bEnd - bPtr) return false;
+
 			while (aPtr < aEnd)
 			{
-				if (Buffer[aPtr++] != Buffer[bPtr++])
-				{
-					return false;
-				}
+				if (Buffer[aPtr++] != Buffer[bPtr++]) return false;
 			}
 
 			return true;

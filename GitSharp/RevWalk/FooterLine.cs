@@ -104,7 +104,7 @@ namespace GitSharp.RevWalk
 		/// </summary>
 		public string Key
 		{
-			get { return RawParseUtils.decode(_enc, _buffer, _keyStart, _keyEnd); }
+			get { return _enc.GetString(_buffer, _keyStart, _keyEnd); }
 		}
 
 		/// <summary>
@@ -116,7 +116,7 @@ namespace GitSharp.RevWalk
 		/// </summary>
 		public string Value
 		{
-			get { return RawParseUtils.decode(_enc, _buffer, _valStart, _valEnd); }
+			get { return _enc.GetString(_buffer, _valStart, _valEnd); }
 		}
 
 		/// <summary>
@@ -131,10 +131,10 @@ namespace GitSharp.RevWalk
 		/// <returns>email address appearing in the value of this footer, or null.</returns>
 		public string getEmailAddress()
 		{
-			int lt = RawParseUtils.nextLF(_buffer, _valStart, (byte)'<');
+			int lt = RawParseUtils.nextLF(_buffer, _valStart, '<');
 			if (_valEnd <= lt)
 			{
-				int at = RawParseUtils.nextLF(_buffer, _valStart, (byte)'@');
+				int at = RawParseUtils.nextLF(_buffer, _valStart, '@');
 				if (_valStart < at && at < _valEnd)
 				{
 					return Value;
@@ -143,7 +143,7 @@ namespace GitSharp.RevWalk
 				return null;
 			}
 
-			int gt = RawParseUtils.nextLF(_buffer, lt, (byte)'>');
+			int gt = RawParseUtils.nextLF(_buffer, lt, '>');
 			if (_valEnd < gt) return null;
 			
 			return RawParseUtils.decode(_enc, _buffer, lt, gt - 1);

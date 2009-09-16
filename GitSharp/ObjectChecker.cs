@@ -185,14 +185,14 @@ namespace GitSharp
             if (emailE == raw.Length || raw[emailE] != ' ')
                 return -1;
 
-            RawParseUtils.parseBase10(raw, emailE + 1, ptrout); // when
+            RawParseUtils.ParseBase10(raw, emailE + 1, ptrout); // when
             ptr = ptrout.value;
             if (emailE + 1 == ptr)
                 return -1;
             if (ptr == raw.Length || raw[ptr] != ' ')
                 return -1;
 
-            RawParseUtils.parseBase10(raw, ptr + 1, ptrout); // tz offset
+            RawParseUtils.ParseBase10(raw, ptr + 1, ptrout); // tz offset
             if (ptr + 1 == ptrout.value)
                 return -1;
             return ptrout.value;
@@ -246,82 +246,98 @@ namespace GitSharp
             int ptr = 0;
 
             if ((ptr = RawParseUtils.match(raw, ptr, @object)) < 0)
-                throw new CorruptObjectException("no object header");
+            {
+            	throw new CorruptObjectException("no object header");
+            }
+
             if ((ptr = id(raw, ptr)) < 0 || raw[ptr++] != '\n')
-                throw new CorruptObjectException("invalid object");
+            {
+            	throw new CorruptObjectException("invalid object");
+            }
 
             if ((ptr = RawParseUtils.match(raw, ptr, type)) < 0)
-                throw new CorruptObjectException("no type header");
-            ptr = RawParseUtils.nextLF(raw, ptr);
+            {
+            	throw new CorruptObjectException("no type header");
+            }
 
+            ptr = RawParseUtils.nextLF(raw, ptr);
             if ((ptr = RawParseUtils.match(raw, ptr, tag)) < 0)
-                throw new CorruptObjectException("no tag header");
-            ptr = RawParseUtils.nextLF(raw, ptr);
+            {
+            	throw new CorruptObjectException("no tag header");
+            }
 
+            ptr = RawParseUtils.nextLF(raw, ptr);
             if ((ptr = RawParseUtils.match(raw, ptr, tagger)) < 0)
-                throw new CorruptObjectException("no tagger header");
+            {
+            	throw new CorruptObjectException("no tagger header");
+            }
+
             if ((ptr = personIdent(raw, ptr)) < 0 || raw[ptr++] != '\n')
-                throw new CorruptObjectException("invalid tagger");
+            {
+            	throw new CorruptObjectException("invalid tagger");
+            }
         }
 
         private static int lastPathChar(int mode)
         {
-            return (int)(FileMode.Tree.Equals(mode) ? '/' : '\0');
+            return FileMode.Tree.Equals(mode) ? '/' : '\0';
         }
 
-        private static int pathCompare(char[] raw, int aPos, int aEnd,                 int aMode, int bPos, int bEnd, int bMode)
+        private static int pathCompare(char[] raw, int aPos, int aEnd, int aMode, int bPos, int bEnd, int bMode)
         {
             while (aPos < aEnd && bPos < bEnd)
             {
                 int cmp = (((byte)raw[aPos++]) & 0xff) - (((byte)raw[bPos++]) & 0xff);
                 if (cmp != 0)
-                    return cmp;
+                {
+                	return cmp;
+                }
             }
 
             if (aPos < aEnd)
-                return (((byte)raw[aPos]) & 0xff) - lastPathChar(bMode);
+            {
+            	return (((byte)raw[aPos]) & 0xff) - lastPathChar(bMode);
+            }
+
             if (bPos < bEnd)
-                return lastPathChar(aMode) - (((byte)raw[bPos]) & 0xff);
-            return 0;
+            {
+            	return lastPathChar(aMode) - (((byte)raw[bPos]) & 0xff);
+            }
+            
+			return 0;
         }
 
         private static bool duplicateName(char[] raw, int thisNamePos, int thisNameEnd)
         {
             int sz = raw.Length;
             int nextPtr = thisNameEnd + 1 + Constants.OBJECT_ID_LENGTH;
-            for (; ; )
+            while (true)
             {
                 int nextMode = 0;
-                for (; ; )
+				while (true)
                 {
-                    if (nextPtr >= sz)
-                        return false;
+                    if (nextPtr >= sz) return false;
                     char c = raw[nextPtr++];
-                    if (' ' == c)
-                        break;
+                    if (' ' == c) break;
                     nextMode <<= 3;
                     nextMode += ((byte)c - (byte)'0');
                 }
 
                 int nextNamePos = nextPtr;
-                for (; ; )
+				while (true)
                 {
-                    if (nextPtr == sz)
-                        return false;
+                    if (nextPtr == sz) return false;
                     char c = raw[nextPtr++];
-                    if (c == '\0')
-                        break;
+                    if (c == '\0') break;
                 }
-                if (nextNamePos + 1 == nextPtr)
-                    return false;
+
+                if (nextNamePos + 1 == nextPtr) return false;
 
                 int cmp = pathCompare(raw, thisNamePos, thisNameEnd, FileMode.Tree.Bits, nextNamePos, nextPtr - 1, nextMode);
-                if (cmp < 0)
-                    return false;
-                else if (cmp == 0)
-                    return true;
+                if (cmp < 0) return false;
+				if (cmp == 0) return true;
 
-                nextPtr += Constants.OBJECT_ID_LENGTH;
+            	nextPtr += Constants.OBJECT_ID_LENGTH;
             }
         }
 
@@ -342,7 +358,7 @@ namespace GitSharp
             while (ptr < sz)
             {
                 int thisMode = 0;
-                for (; ; )
+				while (true)
                 {
                     if (ptr == sz)
                         throw new CorruptObjectException("truncated in mode");

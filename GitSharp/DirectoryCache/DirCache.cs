@@ -420,7 +420,7 @@ namespace GitSharp.DirectoryCache
 					case ExtTree:
 						var raw = new byte[NB.DecodeInt32(hdr, 4)];
 						md.Update(hdr, 0, 8);
-						NB.skipFully(inStream, 8);
+						NB.SkipFully(inStream, 8);
 						NB.ReadFully(inStream, raw, 0, raw.Length);
 						md.Update(raw, 0, raw.Length);
 						_cacheTree = new DirCacheTree(raw, new MutableInteger(), null);
@@ -433,7 +433,7 @@ namespace GitSharp.DirectoryCache
 							// a performance optimization. Since we do not
 							// understand it, we can safely skip past it.
 							//
-							NB.skipFully(inStream, NB.decodeUInt32(hdr, 4));
+							NB.SkipFully(inStream, NB.decodeUInt32(hdr, 4));
 						}
 						else
 						{
@@ -558,7 +558,7 @@ namespace GitSharp.DirectoryCache
 			else
 			{
 				var smudgeS = (int)(_lastModified.ToGitInternalTime());
-				var smudgeNs = _lastModified.Millisecond * Constants.TICKS_PER_MILLISECOND; // [henon] <--- this could be done with much more precision in C# since DateTime has 100 nanosec ticks
+				var smudgeNs = _lastModified.Millisecond * Constants.TicksPerMillisecond; // [henon] <--- this could be done with much more precision in C# since DateTime has 100 nanosec ticks
 				for (int i = 0; i < _entryCnt; i++)
 				{
 					DirCacheEntry e = _sortedEntries[i];

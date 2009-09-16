@@ -35,7 +35,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Collections.Generic;
 using System.Globalization;
 using GitSharp.Tests.Util;
 using GitSharp.Util;
@@ -100,7 +99,7 @@ namespace GitSharp.Tests
             SetupReflog("logs/refs/heads/master", TwoLine);
 
             var reader = new ReflogReader(db, "refs/heads/master");
-            List<ReflogReader.Entry> reverseEntries = reader.getReverseEntries();
+            var reverseEntries = reader.getReverseEntries();
             Assert.Equal(2, reverseEntries.Count);
             ReflogReader.Entry e = reverseEntries[0];
 
@@ -138,7 +137,7 @@ namespace GitSharp.Tests
         {
             SetupReflog("logs/refs/heads/master", TwoLineWithAppendInProgress);
             var reader = new ReflogReader(db, "refs/heads/master");
-            List<ReflogReader.Entry> reverseEntries = reader.getReverseEntries();
+            var reverseEntries = reader.getReverseEntries();
             Assert.Equal(2, reverseEntries.Count);
             ReflogReader.Entry e = reverseEntries[0];
 

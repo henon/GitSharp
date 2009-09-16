@@ -45,239 +45,282 @@ using System.Diagnostics;
 
 namespace GitSharp
 {
-    public class LockFile
-    {
-        private readonly FileInfo _refFile;
-        private FileInfo _lockFile;
-        private FileStream _os;
-        private FileLock _fLck;
-        private bool _haveLock;
-        
-        public DateTime CommitLastModified { get; private set; }
-        public bool NeedStatInformation { get; set; }
+/// <summary> * Git style file locking and replacement.
+/// * <p>
+/// * To modify a ref file Git tries to use an atomic update approach: we write the
+/// * new data into a brand new file, then rename it in place over the old name.
+/// * This way we can just delete the temporary file if anything goes wrong, and
+/// * nothing has been damaged. To coordinate access from multiple processes at
+/// * once Git tries to atomically create the new temporary file under a well-known
+/// * name. </summary>
+	public class LockFile
+	{
+		private readonly FileInfo _refFile;
+		private FileInfo _lockFile;
+		private FileStream _os;
+		private FileLock _fLck;
+		private bool _haveLock;
+		
+		public DateTime CommitLastModified { get; private set; }
+		public bool NeedStatInformation { get; set; }
 
-        public LockFile(FileInfo file)
-        {
-            _refFile = file;
-            _lockFile = PathUtil.CombineFilePath(_refFile.Directory, _refFile.Name + ".lock");
-        }
+///	 <summary> * Create a new lock for any file.
+///	 *  </summary>
+///	 * <param name="f">
+///	 *            the file that will be locked. </param>
+		public LockFile(FileInfo file)
+		{
+			_refFile = file;
+			_lockFile = PathUtil.CombineFilePath(_refFile.Directory, _refFile.Name + ".lock");
+		}
 
-        public bool Lock()
-        {
-        	if (_lockFile.Directory != null) _lockFile.Directory.Create();
+///	 <summary> * Try to establish the lock.
+///	 *  </summary>
+///	 * <returns> true if the lock is now held by the caller; false if it is held
+///	 *         by someone else. </returns>
+///	 * <exception cref="IOException">
+///	 *             the temporary output file could not be created. The caller
+///	 *             does not hold the lock. </exception>
+		public bool Lock()
+		{
+			if (_lockFile.Directory != null) _lockFile.Directory.Create();
 
-        	if (_lockFile.Exists)
-            {
-                return false;
-            }
+			if (_lockFile.Exists)
+			{
+				return false;
+			}
 
-            try
-            {
-                _haveLock = true;
-                _os = _lockFile.Create();
+			try
+			{
+				_haveLock = true;
+				_os = _lockFile.Create();
 
-                _fLck = FileLock.TryLock(_os, _lockFile);
+				_fLck = FileLock.TryLock(_os, _lockFile);
 
-                if (_fLck == null)
-                {
-                    // We cannot use unlock() here as this file is not
-                    // held by us, but we thought we created it. We must
-                    // not delete it, as it belongs to some other process.
-                    _haveLock = false;
-                    try
-                    {
-                        _os.Close();
-                    }
-                    catch (IOException)
-                    {
-                        // Fail by returning haveLck = false.
-                    }
-                    _os = null;
-                }
-            }
-            catch (Exception)
-            {
-                Unlock();
-                throw;
-            }
+				if (_fLck == null)
+				{
+					// We cannot use unlock() here as this file is not
+					// held by us, but we thought we created it. We must
+					// not delete it, as it belongs to some other process.
+					_haveLock = false;
+					try
+					{
+						_os.Close();
+					}
+					catch (IOException)
+					{
+						// Fail by returning haveLck = false.
+					}
+					_os = null;
+				}
+			}
+			catch (Exception)
+			{
+				Unlock();
+				throw;
+			}
 
-            return _haveLock;
-        }
+			return _haveLock;
+		}
 
-        public bool LockForAppend()
-        {
-            if (!Lock())
-            {
-                return false;
-            }
+///	 <summary> * Try to establish the lock for appending.
+///	 *  </summary>
+///	 * <returns> true if the lock is now held by the caller; false if it is held
+///	 *         by someone else. </returns>
+///	 * <exception cref="IOException">
+///	 *             the temporary output file could not be created. The caller
+///	 *             does not hold the lock. </exception>
+		public bool LockForAppend()
+		{
+			if (!Lock())
+			{
+				return false;
+			}
 
-            CopyCurrentContent();
+			CopyCurrentContent();
 
-            return true;
-        }
+			return true;
+		}
 
 
-        public void CopyCurrentContent()
-        {
-            RequireLock();
-            try
-            {
-                FileStream fis = _refFile.OpenRead();
-                try
-                {
-                    var buf = new byte[2048];
-                    int r;
-                    while ((r = fis.Read(buf, 0, buf.Length)) >= 0)
-                        _os.Write(buf, 0, r);
-                }
-                finally
-                {
-                    fis.Close();
-                }
-            }
-            catch (FileNotFoundException)
-            {
-                // Don't worry about a file that doesn't exist yet, it
-                // conceptually has no current content to copy.
-                //
-            }
-            catch (Exception)
-            {
-                Unlock();
-                throw;
-            }
-        }
+///	 <summary> * Copy the current file content into the temporary file.
+///	 * <p>
+///	 * This method saves the current file content by inserting it into the
+///	 * temporary file, so that the caller can safely append rather than replace
+///	 * the primary file.
+///	 * <p>
+///	 * This method does nothing if the current file does not exist, or exists
+///	 * but is empty.
+///	 *  </summary>
+///	 * <exception cref="IOException">
+///	 *             the temporary file could not be written, or a read error
+///	 *             occurred while reading from the current file. The lock is
+///	 *             released before throwing the underlying IO exception to the
+///	 *             caller. </exception>
+///	 * <exception cref="RuntimeException">
+///	 *             the temporary file could not be written. The lock is released
+///	 *             before throwing the underlying exception to the caller. </exception>
+		public void CopyCurrentContent()
+		{
+			RequireLock();
+			try
+			{
+				FileStream fis = _refFile.OpenRead();
+				try
+				{
+					var buf = new byte[2048];
+					int r;
+					while ((r = fis.Read(buf, 0, buf.Length)) >= 0)
+						_os.Write(buf, 0, r);
+				}
+				finally
+				{
+					fis.Close();
+				}
+			}
+			catch (FileNotFoundException)
+			{
+				// Don't worry about a file that doesn't exist yet, it
+				// conceptually has no current content to copy.
+				//
+			}
+			catch (Exception)
+			{
+				Unlock();
+				throw;
+			}
+		}
 
-        public void Unlock()
-        {
-            if (_os != null)
-            {
-                if (_fLck != null)
-                {
-                    try
-                    {
-                        _fLck.Release();
-                    }
-                    catch (IOException)
-                    {
-                        // Huh?
-                    }
-                    _fLck = null;
-                }
-                try
-                {
-                    _os.Close();
-                }
-                catch (IOException)
-                {
-                    // Ignore this
-                }
-                _os = null;
-            }
+		public void Unlock()
+		{
+			if (_os != null)
+			{
+				if (_fLck != null)
+				{
+					try
+					{
+						_fLck.Release();
+					}
+					catch (IOException)
+					{
+						// Huh?
+					}
+					_fLck = null;
+				}
+				try
+				{
+					_os.Close();
+				}
+				catch (IOException)
+				{
+					// Ignore this
+				}
+				_os = null;
+			}
 
-            if (_haveLock)
-            {
-                _haveLock = false;
-                _lockFile.Delete();
-            }
-        }
+			if (_haveLock)
+			{
+				_haveLock = false;
+				_lockFile.Delete();
+			}
+		}
 
-        public bool Commit()
-        {
-            if (_os != null)
-            {
-                Unlock();
-                throw new InvalidOperationException("Lock on " + _refFile + " not closed.");
-            }
+		public bool Commit()
+		{
+			if (_os != null)
+			{
+				Unlock();
+				throw new InvalidOperationException("Lock on " + _refFile + " not closed.");
+			}
 
-            SaveStatInformation();
-            string lockFileName = _lockFile.FullName;
+			SaveStatInformation();
+			string lockFileName = _lockFile.FullName;
 
-            try
-            {
-                var copy = new FileInfo(_lockFile.FullName);
-                _lockFile.MoveTo(_refFile.FullName);
-                _lockFile = copy;
-                return true;
-            }
-            catch (Exception)
-            {
-                try
-                {
-                    if (_refFile.Exists) _refFile.Delete();
+			try
+			{
+				var copy = new FileInfo(_lockFile.FullName);
+				_lockFile.MoveTo(_refFile.FullName);
+				_lockFile = copy;
+				return true;
+			}
+			catch (Exception)
+			{
+				try
+				{
+					if (_refFile.Exists) _refFile.Delete();
 
-                    var copy = new FileInfo(_lockFile.FullName);
-                    _lockFile.MoveTo(_refFile.FullName);
-                    _lockFile = copy;
-                    return true;
-                }
-                catch (IOException)
-                {
-                }
-            }
-            finally
-            {
-              _lockFile = new FileInfo(lockFileName);
-            }
+					var copy = new FileInfo(_lockFile.FullName);
+					_lockFile.MoveTo(_refFile.FullName);
+					_lockFile = copy;
+					return true;
+				}
+				catch (IOException)
+				{
+				}
+			}
+			finally
+			{
+			  _lockFile = new FileInfo(lockFileName);
+			}
 
-            Unlock();
-            return false;
-        }
+			Unlock();
+			return false;
+		}
 
-        public void Write(byte[] content)
-        {
-            RequireLock();
-            try
-            {
-                _os.Write(content, 0, content.Length);
-                _os.Flush();
-                _fLck.Release();
-                _os.Close();
-                _os = null;
-            }
-            catch (Exception)
-            {
-                Unlock();
-                throw;
-            }
-        }
+		public void Write(byte[] content)
+		{
+			RequireLock();
+			try
+			{
+				_os.Write(content, 0, content.Length);
+				_os.Flush();
+				_fLck.Release();
+				_os.Close();
+				_os = null;
+			}
+			catch (Exception)
+			{
+				Unlock();
+				throw;
+			}
+		}
 
-        public void Write(ObjectId id)
-        {
-            RequireLock();
-            try
-            {
-                var b = new BinaryWriter(_os);
-                id.CopyTo(b);
-                b.Write('\n');
-                b.Flush();
-                _fLck.Release();
-                b.Close();
-                _os = null;
-            }
-            catch (Exception)
-            {
-                Unlock();
-                throw;
-            }
-        }
+		public void Write(ObjectId id)
+		{
+			RequireLock();
+			try
+			{
+				var b = new BinaryWriter(_os);
+				id.CopyTo(b);
+				b.Write('\n');
+				b.Flush();
+				_fLck.Release();
+				b.Close();
+				_os = null;
+			}
+			catch (Exception)
+			{
+				Unlock();
+				throw;
+			}
+		}
 
-        private void RequireLock()
-        {
-            if (_os == null)
-            {
-                Unlock();
-                throw new InvalidOperationException("Lock on " + _refFile + " not held.");
-            }
-        }
+		private void RequireLock()
+		{
+			if (_os == null)
+			{
+				Unlock();
+				throw new InvalidOperationException("Lock on " + _refFile + " not held.");
+			}
+		}
 
-        private void SaveStatInformation()
-        {
-            if (NeedStatInformation)
-            {
-                CommitLastModified = _lockFile.LastWriteTime;
-            }
-        }
+		private void SaveStatInformation()
+		{
+			if (NeedStatInformation)
+			{
+				CommitLastModified = _lockFile.LastWriteTime;
+			}
+		}
 
 		/// <summary>
 		/// Obtain the direct output stream for this lock.
@@ -290,165 +333,165 @@ namespace GitSharp
 		/// A stream to write to the new file. The stream is unbuffered.
 		/// </returns>
 		public Stream GetOutputStream()
-        {
-            RequireLock();
-            return new LockFileOutputStream(this);
+		{
+			RequireLock();
+			return new LockFileOutputStream(this);
 		}
 
 		#region Nested Types
 
-    	private class LockFileOutputStream : Stream
-        {
-            private readonly LockFile _lockFile;
+		private class LockFileOutputStream : Stream
+		{
+			private readonly LockFile _lockFile;
 
-            public LockFileOutputStream(LockFile lockfile)
-            {
+			public LockFileOutputStream(LockFile lockfile)
+			{
 				_lockFile = lockfile;
-            }
+			}
 
-            public override void Write(byte[] b, int o, int n)
-            {
+			public override void Write(byte[] b, int o, int n)
+			{
 				_lockFile._os.Write(b, o, n);
-            }
+			}
 
-            public override void Flush()
-            {
+			public override void Flush()
+			{
 				_lockFile._os.Flush();
-            }
+			}
 
-            public override void Close()
-            {
-                try
-                {
+			public override void Close()
+			{
+				try
+				{
 					_lockFile._os.Flush();
 					_lockFile._fLck.Release();
 					_lockFile._os.Close();
 					_lockFile._os = null;
-                }
-                catch (Exception)
-                {
+				}
+				catch (Exception)
+				{
 					_lockFile.Unlock();
-                    throw;
-                }
-            }
+					throw;
+				}
+			}
 
-            public override bool CanRead
-            {
-                get { return false; }
-            }
+			public override bool CanRead
+			{
+				get { return false; }
+			}
 
-            public override bool CanSeek
-            {
-                get { return false; }
-            }
+			public override bool CanSeek
+			{
+				get { return false; }
+			}
 
-            public override bool CanWrite
-            {
-                get { return true; }
-            }
+			public override bool CanWrite
+			{
+				get { return true; }
+			}
 
-            public override long Length
-            {
-                get { throw new NotImplementedException(); }
-            }
+			public override long Length
+			{
+				get { throw new NotImplementedException(); }
+			}
 
-            public override long Position
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-                set
-                {
-                    throw new NotImplementedException();
-                }
-            }
+			public override long Position
+			{
+				get
+				{
+					throw new NotImplementedException();
+				}
+				set
+				{
+					throw new NotImplementedException();
+				}
+			}
 
-            public override int Read(byte[] buffer, int offset, int count)
-            {
-                throw new NotImplementedException();
-            }
+			public override int Read(byte[] buffer, int offset, int count)
+			{
+				throw new NotImplementedException();
+			}
 
-            public override long Seek(long offset, SeekOrigin origin)
-            {
-                throw new NotImplementedException();
-            }
+			public override long Seek(long offset, SeekOrigin origin)
+			{
+				throw new NotImplementedException();
+			}
 
-            public override void SetLength(long value)
-            {
-                throw new NotImplementedException();
-            }
-        }
+			public override void SetLength(long value)
+			{
+				throw new NotImplementedException();
+			}
+		}
 
-        /// <summary>
-        /// Wraps a FileStream and tracks its locking status
-        /// </summary>
-        public class FileLock : IDisposable
-        {
-        	private FileStream FileStream { get; set; }
-        	private bool Locked { get; set; }
-        	private string File { get; set; }
+		/// <summary>
+		/// Wraps a FileStream and tracks its locking status
+		/// </summary>
+		public class FileLock : IDisposable
+		{
+			private FileStream FileStream { get; set; }
+			private bool Locked { get; set; }
+			private string File { get; set; }
 
-            private FileLock(FileStream fs, string file)
-            {
-                File = file;
-                FileStream = fs;
-                FileStream.Lock(0, long.MaxValue);
-                Locked = true;
-            }
+			private FileLock(FileStream fs, string file)
+			{
+				File = file;
+				FileStream = fs;
+				FileStream.Lock(0, long.MaxValue);
+				Locked = true;
+			}
 
-            public static FileLock TryLock(FileStream fs, FileInfo file)
-            {
-                try
-                {
-                    return new FileLock(fs, file.FullName);
-                }
-                catch (IOException e)
-                {
-                    Debug.WriteLine("Could not lock " + file.FullName);
-                    Debug.WriteLine(e.Message);
-                    return null;
-                }
-            }
+			public static FileLock TryLock(FileStream fs, FileInfo file)
+			{
+				try
+				{
+					return new FileLock(fs, file.FullName);
+				}
+				catch (IOException e)
+				{
+					Debug.WriteLine("Could not lock " + file.FullName);
+					Debug.WriteLine(e.Message);
+					return null;
+				}
+			}
 
-            public void Dispose()
-            {
-                if (Locked == false)
-                {
-                    return;
-                }
-                Release();
-            }
+			public void Dispose()
+			{
+				if (Locked == false)
+				{
+					return;
+				}
+				Release();
+			}
 
-            public void Release()
-            {
-                if (Locked == false)
-                {
-                    return;
-                }
-                try
-                {
-                    FileStream.Unlock(0, long.MaxValue);
+			public void Release()
+			{
+				if (Locked == false)
+				{
+					return;
+				}
+				try
+				{
+					FileStream.Unlock(0, long.MaxValue);
 #if DEBUG
-                    GC.SuppressFinalize(this); // [henon] disarm lock-release checker
+					GC.SuppressFinalize(this); // [henon] disarm lock-release checker
 #endif
-                }
-                catch (IOException)
-                {
-                    // unlocking went wrong
-                    Debug.WriteLine(GetType().Name + ": tried to unlock an unlocked filelock " + File);
-                    throw;
-                }
-                Locked = false;
-                Dispose();
-            }
+				}
+				catch (IOException)
+				{
+					// unlocking went wrong
+					Debug.WriteLine(GetType().Name + ": tried to unlock an unlocked filelock " + File);
+					throw;
+				}
+				Locked = false;
+				Dispose();
+			}
 
 #if DEBUG
-            // [henon] this : a debug mode warning if the filelock has not been disposed properly
-            ~FileLock()
-            {
-                Debug.WriteLine(GetType().Name + " has not been properly disposed: " + File);
-            }
+			// [henon] this : a debug mode warning if the filelock has not been disposed properly
+			~FileLock()
+			{
+				Debug.WriteLine(GetType().Name + " has not been properly disposed: " + File);
+			}
 #endif
 		}
 

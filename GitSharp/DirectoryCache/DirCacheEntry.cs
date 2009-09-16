@@ -153,7 +153,7 @@ namespace GitSharp.DirectoryCache
 			int padLen = expLen - actLen - skipped;
 			if (padLen > 0)
 			{
-				NB.skipFully(@in, padLen);
+				NB.SkipFully(@in, padLen);
 				md.Update(NullPad, 0, padLen);
 			}
 		}
@@ -263,7 +263,7 @@ namespace GitSharp.DirectoryCache
 
 			if (smudgeS == mtime)
 			{
-				return smudgeNs <= NB.DecodeInt32(_info, @base + 4)/Constants.TICKS_PER_MILLISECOND;
+				return smudgeNs <= NB.DecodeInt32(_info, @base + 4)/Constants.TicksPerMillisecond;
 			}
 
 			return false;
@@ -503,7 +503,7 @@ namespace GitSharp.DirectoryCache
 		{
 			int baseOffset = _infoOffset + pIdx;
 			int sec = NB.DecodeInt32(_info, baseOffset);
-			int ms = NB.DecodeInt32(_info, baseOffset + 4) / Constants.TICKS_PER_MILLISECOND;
+			int ms = NB.DecodeInt32(_info, baseOffset + 4) / Constants.TicksPerMillisecond;
 			return 1000L * sec + ms;
 		}
 
@@ -518,7 +518,7 @@ namespace GitSharp.DirectoryCache
 		{
 			int baseOffset = _infoOffset + pIdx;
 			NB.encodeInt32(_info, baseOffset, (int)(when / 1000));
-			NB.encodeInt32(_info, baseOffset + 4, ((int)(when % 1000)) * Constants.TICKS_PER_MILLISECOND);
+			NB.encodeInt32(_info, baseOffset + 4, ((int)(when % 1000)) * Constants.TicksPerMillisecond);
 		}
 
 		public byte[] Path

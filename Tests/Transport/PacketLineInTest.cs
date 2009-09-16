@@ -226,7 +226,7 @@ namespace GitSharp.Tests.Transport
             actid.FromString(expid.Name);
 
             init("0008NAK\n");
-            Assert.Equal(PacketLineIn.AckNackResult.NAK, pckIn.readACK(actid));
+            Assert.Equal(PacketLineIn.AckNackResult.Nak, pckIn.ReadAck(actid));
             Assert.True(actid.Equals(expid));
             assertEOF();
         }
@@ -239,7 +239,7 @@ namespace GitSharp.Tests.Transport
             actid.FromString(expid.Name);
 
             init("0031ACK fcfcfb1fd94829c1a1704f894fc111d14770d34e\n");
-            Assert.Equal(PacketLineIn.AckNackResult.ACK, pckIn.readACK(actid));
+            Assert.Equal(PacketLineIn.AckNackResult.Ack, pckIn.ReadAck(actid));
             Assert.True(actid.Equals(expid));
             assertEOF();
         }
@@ -252,7 +252,7 @@ namespace GitSharp.Tests.Transport
             actid.FromString(expid.Name);
 
             init("003aACK fcfcfb1fd94829c1a1704f894fc111d14770d34e continue\n");
-            Assert.Equal(PacketLineIn.AckNackResult.ACK_CONTINUE, pckIn.readACK(actid));
+            Assert.Equal(PacketLineIn.AckNackResult.AckContinue, pckIn.ReadAck(actid));
             Assert.True(actid.Equals(expid));
             assertEOF();
         }
@@ -263,7 +263,7 @@ namespace GitSharp.Tests.Transport
             init("HELO");
             try
             {
-                pckIn.readACK(new MutableObjectId());
+                pckIn.ReadAck(new MutableObjectId());
                 Assert.False(true, "incorrectly accepted invalid packet header");
             }
             catch (IOException e)
@@ -278,7 +278,7 @@ namespace GitSharp.Tests.Transport
             init("0009HELO\n");
             try
             {
-                pckIn.readACK(new MutableObjectId());
+                pckIn.ReadAck(new MutableObjectId());
                 Assert.False(true, "incorrectly accepted invalid ACK/NAK");
             }
             catch (IOException e)
@@ -293,7 +293,7 @@ namespace GitSharp.Tests.Transport
             init("0000");
             try
             {
-                pckIn.readACK(new MutableObjectId());
+                pckIn.ReadAck(new MutableObjectId());
                 Assert.False(true, "incorrectly accepted no ACK/NAK");
             }
             catch (IOException e)

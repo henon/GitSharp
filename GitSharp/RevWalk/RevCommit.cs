@@ -162,10 +162,10 @@ namespace GitSharp.RevWalk
 			ptr = RawParseUtils.committer(raw, ptr);
 			if (ptr > 0)
 			{
-				ptr = RawParseUtils.nextLF(raw, ptr, (byte)'>');
+				ptr = RawParseUtils.nextLF(raw, ptr, '>');
 
 				// In 2038 commitTime will overflow unless it is changed to long.
-				CommitTime = RawParseUtils.parseBase10(raw, ptr, null);
+				CommitTime = RawParseUtils.ParseBase10(raw, ptr, null);
 			}
 
 			if (walk.isRetainBody())

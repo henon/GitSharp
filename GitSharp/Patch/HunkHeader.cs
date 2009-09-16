@@ -187,11 +187,11 @@ namespace GitSharp.Patch
 							value = RawParseUtils.nextLF(buf, _startOffset, (byte)' ')
 						};
 
-			_oldImage.StartLine = -1 * RawParseUtils.parseBase10(buf, ptr.value, ptr);
+			_oldImage.StartLine = -1 * RawParseUtils.ParseBase10(buf, ptr.value, ptr);
 
-			_oldImage.LineCount = buf[ptr.value] == ',' ? RawParseUtils.parseBase10(buf, ptr.value + 1, ptr) : 1;
-			NewStartLine = RawParseUtils.parseBase10(buf, ptr.value + 1, ptr);
-			NewLineCount = buf[ptr.value] == ',' ? RawParseUtils.parseBase10(buf, ptr.value + 1, ptr) : 1;
+			_oldImage.LineCount = buf[ptr.value] == ',' ? RawParseUtils.ParseBase10(buf, ptr.value + 1, ptr) : 1;
+			NewStartLine = RawParseUtils.ParseBase10(buf, ptr.value + 1, ptr);
+			NewLineCount = buf[ptr.value] == ',' ? RawParseUtils.ParseBase10(buf, ptr.value + 1, ptr) : 1;
 		}
 
 		public virtual int parseBody(Patch script, int end)

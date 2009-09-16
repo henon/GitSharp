@@ -84,7 +84,7 @@ namespace GitSharp.RevWalk.Filter
 			byte[] raw = cmit.RawBuffer;
 			int b = RawParseUtils.author(raw, 0);
 			if (b < 0) return string.Empty;
-			int e = RawParseUtils.nextLF(raw, b, (byte)'>');
+			int e = RawParseUtils.nextLF(raw, b, '>');
 			return Constants.CHARSET.GetString(raw, b, e);
 		}
 

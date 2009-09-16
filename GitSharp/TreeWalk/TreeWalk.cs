@@ -645,7 +645,7 @@ namespace GitSharp.TreeWalk
 			AbstractTreeIterator t = _currentHead;
 			int off = t.PathOffset;
 			int end = t.PathLen;
-			return RawParseUtils.decode(Constants.CHARSET, t.Path, off, end);
+			return Constants.CHARSET.GetString(t.Path, off, end);
 		}
 
 		/**

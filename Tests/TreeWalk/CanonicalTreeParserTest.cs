@@ -45,20 +45,20 @@ namespace GitSharp.Tests.TreeWalk
 {
 	public class CanonicalTreeParserTest : XunitBaseFact
 	{
-		private readonly CanonicalTreeParser _ctp;
-		private readonly FileMode _m644;
-		private readonly FileMode _mt;
-		private readonly ObjectId _hashA;
-		private readonly ObjectId _hashFoo;
-		private readonly ObjectId _hashSometree;
+		private CanonicalTreeParser _ctp;
+		private FileMode _m644;
+		private FileMode _mt;
+		private ObjectId _hashA;
+		private ObjectId _hashFoo;
+		private ObjectId _hashSometree;
 
-		private byte[] tree1;
-		private byte[] tree2;
-		private byte[] tree3;
+		private byte[] _tree1;
+		private byte[] _tree2;
+		private byte[] _tree3;
 
 		#region Setup/Teardown
 
-		public CanonicalTreeParserTest()
+		protected override void SetUp()
 		{
 			_ctp = new CanonicalTreeParser();
 			_m644 = FileMode.RegularFile;
@@ -66,13 +66,10 @@ namespace GitSharp.Tests.TreeWalk
 			_hashA = ObjectId.FromString("6b9c715d21d5486e59083fb6071566aa6ecd4d42");
 			_hashFoo = ObjectId.FromString("a213e8e25bb2442326e86cbfb9ef56319f482869");
 			_hashSometree = ObjectId.FromString("daf4bdb0d7bb24319810fe0e73aa317663448c93");
-		}
 
-		protected override void SetUp()
-		{
-			tree1 = MkTree(Entry(_m644, "a", _hashA));
-			tree2 = MkTree(Entry(_m644, "a", _hashA), Entry(_m644, "foo", _hashFoo));
-			tree3 = MkTree(Entry(_m644, "a", _hashA), Entry(_mt, "b_sometree", _hashSometree), Entry(_m644, "foo", _hashFoo));
+			_tree1 = MkTree(Entry(_m644, "a", _hashA));
+			_tree2 = MkTree(Entry(_m644, "a", _hashA), Entry(_m644, "foo", _hashFoo));
+			_tree3 = MkTree(Entry(_m644, "a", _hashA), Entry(_mt, "b_sometree", _hashSometree), Entry(_m644, "foo", _hashFoo));
 		}
 
 		#endregion
@@ -101,7 +98,7 @@ namespace GitSharp.Tests.TreeWalk
 
 		private string Path()
 		{
-			return RawParseUtils.decode(Constants.CHARSET, _ctp.Path, _ctp.PathOffset, _ctp.PathLen);
+			return Constants.CHARSET.GetString(_ctp.Path, _ctp.PathOffset, _ctp.PathLen);
 		}
 
 		[Fact]
@@ -109,7 +106,8 @@ namespace GitSharp.Tests.TreeWalk
 		{
 			const string aVeryConfusingName = "confusing 644 entry 755 and others";
 			_ctp.reset(MkTree(Entry(_m644, "a", _hashA), Entry(_mt, aVeryConfusingName,
-			                                                _hashSometree), Entry(_m644, "foo", _hashFoo)));
+                _hashSometree), Entry(_m644, "foo", _hashFoo)));
+
 			_ctp.next(3);
 			Assert.True(_ctp.eof());
 
@@ -151,7 +149,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Fact]
 		public void testOneEntry_Backwards()
 		{
-			_ctp.reset(tree1);
+			_ctp.reset(_tree1);
 			_ctp.next(1);
 			Assert.False(_ctp.first());
 			Assert.True(_ctp.eof());
@@ -167,7 +165,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Fact]
 		public void testOneEntry_Forward()
 		{
-			_ctp.reset(tree1);
+			_ctp.reset(_tree1);
 
 			Assert.True(_ctp.first());
 			Assert.False(_ctp.eof());
@@ -183,7 +181,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Fact]
 		public void testOneEntry_Seek1IsEOF()
 		{
-			_ctp.reset(tree1);
+			_ctp.reset(_tree1);
 			_ctp.next(1);
 			Assert.True(_ctp.eof());
 		}
@@ -191,7 +189,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Fact]
 		public void testThreeEntries_BackwardsTwo()
 		{
-			_ctp.reset(tree3);
+			_ctp.reset(_tree3);
 			_ctp.next(3);
 			Assert.True(_ctp.eof());
 
@@ -214,7 +212,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Fact]
 		public void testThreeEntries_Seek2()
 		{
-			_ctp.reset(tree3);
+			_ctp.reset(_tree3);
 
 			_ctp.next(2);
 			Assert.False(_ctp.eof());
@@ -230,7 +228,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Fact]
 		public void testThreeEntries_Seek3IsEOF()
 		{
-			_ctp.reset(tree3);
+			_ctp.reset(_tree3);
 			_ctp.next(3);
 			Assert.True(_ctp.eof());
 		}
@@ -238,7 +236,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Fact]
 		public void testTwoEntries_BackwardsOneAtATime()
 		{
-			_ctp.reset(tree2);
+			_ctp.reset(_tree2);
 			_ctp.next(2);
 			Assert.True(_ctp.eof());
 
@@ -258,7 +256,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Fact]
 		public void testTwoEntries_BackwardsTwo()
 		{
-			_ctp.reset(tree2);
+			_ctp.reset(_tree2);
 			_ctp.next(2);
 			Assert.True(_ctp.eof());
 
@@ -281,7 +279,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Fact]
 		public void testTwoEntries_ForwardOneAtATime()
 		{
-			_ctp.reset(tree2);
+			_ctp.reset(_tree2);
 
 			Assert.True(_ctp.first());
 			Assert.False(_ctp.eof());
@@ -303,7 +301,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Fact]
 		public void testTwoEntries_Seek2IsEOF()
 		{
-			_ctp.reset(tree2);
+			_ctp.reset(_tree2);
 			_ctp.next(2);
 			Assert.True(_ctp.eof());
 		}

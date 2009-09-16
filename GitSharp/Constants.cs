@@ -568,8 +568,9 @@ namespace GitSharp
             return CHARSET.GetBytes(str);
         }
 
-		public const long TICKS_PER_SECOND = 10000000L;
-    	public const int TICKS_PER_MILLISECOND = 1000000;
-    	public const long TICKS_PER_NANOSECOND = 1000000000L;
+		internal static readonly long EpochTicks = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
+		public const long TicksPerSecond = 10000000L;
+    	public const int TicksPerMillisecond = 1000000;
+    	public const long TicksPerNanosecond = 1000000000L;
     }
 }

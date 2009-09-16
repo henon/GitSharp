@@ -179,11 +179,11 @@ namespace GitSharp.Transport
                     case CH_DATA:
                         return;
                     case CH_PROGRESS:
-                        progress(readString(available));
+                        progress(ReadString(available));
                         continue;
                     case CH_ERROR:
                         eof = true;
-                        throw new TransportException("remote: " + readString(available));
+                        throw new TransportException("remote: " + ReadString(available));
                     default:
                         throw new TransportException("Invalid channel " + channel);
                 }
@@ -254,12 +254,11 @@ namespace GitSharp.Transport
             return false;
         }
 
-        private string readString(int len)
+        private string ReadString(int len)
         {
-            byte[] raw = new byte[len];
+            var raw = new byte[len];
             NB.ReadFully(ins, raw, 0, len);
-            return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
+            return Constants.CHARSET.GetString(raw, 0, len);
         }
     }
-
 }

@@ -18,7 +18,7 @@
 			<TestAssemblies Include="$(MSBuildProjectDirectory)\Tests\bin\Debug\GitSharp.Tests.dll"/>
 		</ItemGroup>
 		
-		<Gallio IgnoreFailures="true" Files="@(TestAssemblies)" ReportTypes="html;xml">
+		<Gallio IgnoreFailures="true" Files="@(TestAssemblies)" ReportTypes="xml">
 			<Output TaskParameter="ExitCode" PropertyName="ExitCode"/>
 		</Gallio>
 		

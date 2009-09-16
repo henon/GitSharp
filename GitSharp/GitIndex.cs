@@ -491,7 +491,7 @@ namespace GitSharp
 				}
 			}
 
-			e.Mtime = file.LastWriteTime.Ticks * Constants.TICKS_PER_MILLISECOND;
+			e.Mtime = file.LastWriteTime.Ticks * Constants.TicksPerMillisecond;
 			e.Ctime = e.Mtime;
 		}
 
@@ -667,7 +667,7 @@ namespace GitSharp
 			internal Entry(Repository repository, byte[] key, FileInfo f, int stage, byte[] newContent)
 				: this(repository)
 			{
-				Ctime = f.LastWriteTime.Ticks * Constants.TICKS_PER_MILLISECOND;
+				Ctime = f.LastWriteTime.Ticks * Constants.TicksPerMillisecond;
 				Mtime = Ctime; // we use same here
 				_dev = -1;
 				_ino = -1;
@@ -727,8 +727,8 @@ namespace GitSharp
 				using (var b = new BinaryReader(buffer))
 				{
 					long startposition = b.BaseStream.Position;
-					Ctime = b.ReadInt32() * Constants.TICKS_PER_NANOSECOND + (b.ReadInt32() % Constants.TICKS_PER_NANOSECOND);
-					Mtime = b.ReadInt32() * Constants.TICKS_PER_NANOSECOND + (b.ReadInt32() % Constants.TICKS_PER_NANOSECOND);
+					Ctime = b.ReadInt32() * Constants.TicksPerNanosecond + (b.ReadInt32() % Constants.TicksPerNanosecond);
+					Mtime = b.ReadInt32() * Constants.TicksPerNanosecond + (b.ReadInt32() % Constants.TicksPerNanosecond);
 					_dev = b.ReadInt32();
 					_ino = b.ReadInt32();
 					Mode = b.ReadInt32();
@@ -791,7 +791,7 @@ namespace GitSharp
 			/// <exception cref="IOException"></exception>
 			public bool update(FileInfo f)
 			{
-				long lm = f.LastWriteTime.Ticks * Constants.TICKS_PER_MILLISECOND;
+				long lm = f.LastWriteTime.Ticks * Constants.TicksPerMillisecond;
 				bool modified = Mtime != lm;
 				Mtime = lm;
 
@@ -854,10 +854,10 @@ namespace GitSharp
 				using (var buf = new BinaryWriter(ms))
 				{
 					long startposition = buf.BaseStream.Position;
-					buf.Write((int)(Ctime / Constants.TICKS_PER_NANOSECOND));
-					buf.Write((int)(Ctime % Constants.TICKS_PER_NANOSECOND));
-					buf.Write((int)(Mtime / Constants.TICKS_PER_NANOSECOND));
-					buf.Write((int)(Mtime % Constants.TICKS_PER_NANOSECOND));
+					buf.Write((int)(Ctime / Constants.TicksPerNanosecond));
+					buf.Write((int)(Ctime % Constants.TicksPerNanosecond));
+					buf.Write((int)(Mtime / Constants.TicksPerNanosecond));
+					buf.Write((int)(Mtime % Constants.TicksPerNanosecond));
 					buf.Write(_dev);
 					buf.Write(_ino);
 					buf.Write(Mode);
@@ -979,7 +979,7 @@ namespace GitSharp
 				// Git under windows only stores seconds so we round the timestamp
 				// Java gives us if it looks like the timestamp in index is seconds
 				// only. Otherwise we compare the timestamp at millisecond prevision.
-				long javamtime = Mtime / Constants.TICKS_PER_MILLISECOND;
+				long javamtime = Mtime / Constants.TicksPerMillisecond;
 				long lastm = file.LastWriteTime.Ticks;
 
 				if (javamtime % 1000 == 0)
@@ -1048,8 +1048,8 @@ namespace GitSharp
 			{
 				return Name + "/SHA-1(" +
 					   ObjectId.Name + ")/M:" +
-					   new DateTime(Ctime / Constants.TICKS_PER_MILLISECOND) + "/C:" +
-					   new DateTime(Mtime / Constants.TICKS_PER_MILLISECOND) + "/d" +
+					   new DateTime(Ctime / Constants.TicksPerMillisecond) + "/C:" +
+					   new DateTime(Mtime / Constants.TicksPerMillisecond) + "/d" +
 					   _dev +
 					   "/i" + _ino +
 					   "/m" + Convert.ToString(Mode, 8) +

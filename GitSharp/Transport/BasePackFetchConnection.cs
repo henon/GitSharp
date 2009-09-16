@@ -306,15 +306,15 @@ namespace GitSharp.Transport
 
                 for (; ; )
                 {
-                    PacketLineIn.AckNackResult anr = pckIn.readACK(ackId);
+                    PacketLineIn.AckNackResult anr = pckIn.ReadAck(ackId);
 
-                    if (anr == PacketLineIn.AckNackResult.NAK)
+                    if (anr == PacketLineIn.AckNackResult.Nak)
                     {
                         resultsPending--;
                         break;
                     }
 
-                    if (anr == PacketLineIn.AckNackResult.ACK)
+                    if (anr == PacketLineIn.AckNackResult.Ack)
                     {
                         _multiAck = false;
                         resultsPending = 0;
@@ -323,7 +323,7 @@ namespace GitSharp.Transport
                         break;
                     }
 
-                    if (anr == PacketLineIn.AckNackResult.ACK_CONTINUE)
+                    if (anr == PacketLineIn.AckNackResult.AckContinue)
                     {
                         MarkCommon(_walk.parseAny(ackId));
                         receivedAck = true;
@@ -354,13 +354,13 @@ namespace GitSharp.Transport
 
             while (resultsPending > 0 || _multiAck)
             {
-                PacketLineIn.AckNackResult anr = pckIn.readACK(ackId);
+                PacketLineIn.AckNackResult anr = pckIn.ReadAck(ackId);
                 resultsPending--;
 
-                if (anr == PacketLineIn.AckNackResult.ACK)
+                if (anr == PacketLineIn.AckNackResult.Ack)
                     break;
 
-                if (anr == PacketLineIn.AckNackResult.ACK_CONTINUE)
+                if (anr == PacketLineIn.AckNackResult.AckContinue)
                     _multiAck = true;
 
                 if (monitor.IsCancelled)
@@ -436,7 +436,7 @@ namespace GitSharp.Transport
 
         private void ReceivePack(ProgressMonitor monitor)
         {
-            IndexPack ip = IndexPack.Create(local, _sideband ? pckIn.sideband(monitor) : stream);
+            IndexPack ip = IndexPack.Create(local, _sideband ? pckIn.Sideband(monitor) : stream);
             ip.setFixThin(_thinPack);
             ip.setObjectChecking(transport.CheckFetchedObjects);
             ip.index(monitor);

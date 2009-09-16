@@ -37,7 +37,6 @@
  */
 
 using System;
-using System.Text;
 using GitSharp.Util;
 using Xunit;
 
@@ -45,11 +44,9 @@ namespace GitSharp.Tests.Util
 {
 	public class QuotedStringGitPathStyleTest
 	{
-		private static readonly QuotedString.GitPathStyle GitPath = QuotedString.GitPathStyle.GIT_PATH;
-
-		private static void AssertQuote(string exp, String inStr)
+		private static void AssertQuote(string exp, string inStr)
 		{
-			string r = GitPath.quote(inStr);
+			string r = QuotedString.GitPath.quote(inStr);
 			Assert.NotSame(inStr, r);
 			Assert.False(inStr.Equals(r));
 			Assert.Equal('"' + exp + '"', r);
@@ -58,39 +55,39 @@ namespace GitSharp.Tests.Util
 		private static void AssertDequote(string exp, string inStr)
 		{
 			byte[] b = Constants.encodeASCII('"' + inStr + '"');
-			string r = GitPath.dequote(b, 0, b.Length);
+			string r = QuotedString.GitPath.dequote(b, 0, b.Length);
 			Assert.Equal(exp, r);
 		}
 
 		[Fact]
 		public void testQuote_Empty()
 		{
-			Assert.Equal("\"\"", GitPath.quote(string.Empty));
+			Assert.Equal("\"\"", QuotedString.GitPath.quote(string.Empty));
 		}
 
 		[Fact]
 		public void testDequote_Empty1()
 		{
-			Assert.Equal(string.Empty, GitPath.dequote(new byte[0], 0, 0));
+			Assert.Equal(string.Empty, QuotedString.GitPath.dequote(new byte[0], 0, 0));
 		}
 
 		[Fact]
 		public void testDequote_Empty2()
 		{
-			Assert.Equal(string.Empty, GitPath.dequote(new byte[] { (byte)'"', (byte)'"' }, 0, 2));
+			Assert.Equal(string.Empty, QuotedString.GitPath.dequote(new[] { (byte)'"', (byte)'"' }, 0, 2));
 		}
 
 		[Fact]
 		public void testDequote_SoleDq()
 		{
-			Assert.Equal("\"", GitPath.dequote(new byte[] { (byte)'"' }, 0, 1));
+			Assert.Equal("\"", QuotedString.GitPath.dequote(new[] { (byte)'"' }, 0, 1));
 		}
 
 		[Fact]
 		public void testQuote_BareA()
 		{
 			const string inStr = "a";
-			Assert.Same(inStr, GitPath.quote(inStr));
+			Assert.Same(inStr, QuotedString.GitPath.quote(inStr));
 		}
 
 		[Fact]
@@ -98,7 +95,7 @@ namespace GitSharp.Tests.Util
 		{
 			const string inStr = "a";
 			byte[] b = Constants.encode(inStr);
-			Assert.Equal(inStr, GitPath.dequote(b, 0, b.Length));
+			Assert.Equal(inStr, QuotedString.GitPath.dequote(b, 0, b.Length));
 		}
 
 		[Fact]
@@ -107,7 +104,7 @@ namespace GitSharp.Tests.Util
 			const string inStr = "abcz";
 			byte[] b = Constants.encode(inStr);
 			int p = inStr.IndexOf('b');
-			Assert.Equal("bc", GitPath.dequote(b, p, p + 2));
+			Assert.Equal("bc", QuotedString.GitPath.dequote(b, p, p + 2));
 		}
 
 		[Fact]

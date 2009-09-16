@@ -145,8 +145,8 @@ namespace GitSharp.DirectoryCache
 				_encodedName = NoName;
 			}
 
-			_entrySpan = RawParseUtils.parseBase10(@in, ptr, off);
-			int subcnt = RawParseUtils.parseBase10(@in, off.value, off);
+			_entrySpan = RawParseUtils.ParseBase10(@in, ptr, off);
+			int subcnt = RawParseUtils.ParseBase10(@in, off.value, off);
 			off.value = RawParseUtils.next(@in, off.value, (byte)'\n');
 
 			if (_entrySpan >= 0)

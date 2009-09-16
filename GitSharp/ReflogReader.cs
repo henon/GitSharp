@@ -42,27 +42,47 @@ using GitSharp.Util;
 
 namespace GitSharp
 {
+	/// <summary>
+	/// Utility for reading reflog entries.
+	/// </summary>
 	public class ReflogReader
 	{
 		private readonly FileInfo _logName;
 
+		///	<summary>
+		/// Parsed reflog entry.
+		/// </summary>
 		public ReflogReader(Repository db, string refname)
 		{
-			_logName = new FileInfo(Path.Combine(db.Directory.ToString(), "logs/" + refname));
+			_logName = new FileInfo(
+				Path.Combine(db.Directory.FullName, 
+					Path.Combine("logs", refname.Replace("/", Path.DirectorySeparatorChar.ToString()))));
 		}
 
+		///	<summary>
+		/// Get the last entry in the reflog.
+		/// </summary>
+		/// <returns>The latest reflog entry, or null if no log.</returns>
+		/// <exception cref="IOException"></exception>
 		public Entry getLastEntry()
 		{
-			List<Entry> entries = getReverseEntries(1);
+			var entries = getReverseEntries(1);
 			return entries.Count > 0 ? entries[0] : null;
 		}
 
-		public List<Entry> getReverseEntries()
+		/// <summary></summary>
+		/// <returns> all reflog entries in reverse order.
+		/// </returns>
+		/// <exception cref="IOException"></exception>
+		public IList<Entry> getReverseEntries()
 		{
 			return getReverseEntries(int.MaxValue);
 		}
 
-		public List<Entry> getReverseEntries(int max)
+		///	<param name="max">Max number of entries to read.</param>
+		///	<returns>All reflog entries in reverse order.</returns>
+		///	<exception cref="IOException"></exception>
+		public IList<Entry> getReverseEntries(int max)
 		{
 			byte[] log;
 
@@ -81,7 +101,8 @@ namespace GitSharp
 			while (rs >= 0 && max-- > 0)
 			{
 				rs = RawParseUtils.prevLF(log, rs);
-				var entry = new Entry(log, rs < 0 ? 0 : rs + 2);
+				rs = rs < 0 ? 0 : rs + 2;
+				var entry = new Entry(log, rs);
 				ret.Add(entry);
 			}
 
@@ -114,7 +135,7 @@ namespace GitSharp
 				}
 
 				_who = RawParseUtils.parsePersonIdentOnly(raw, pos);
-				int p0 = RawParseUtils.next(raw, pos, (byte)'\t');
+				int p0 = RawParseUtils.next(raw, pos, '\t');
 
 				if (p0 == -1)
 				{
@@ -130,21 +151,33 @@ namespace GitSharp
 				_comment = RawParseUtils.decode(raw, p0, p1 - 1);
 			}
 
+			/// <summary>
+			/// Gets the commit id before the change.
+			/// </summary>
 			public ObjectId OldId
 			{
 				get { return _oldId; }
 			}
 
+			/// <summary>
+			/// Gets the commit id after the change.
+			/// </summary>
 			public ObjectId NewId
 			{
 				get { return _newId; }
 			}
 
+			/// <summary>
+			/// Gets the user performing the change.
+			/// </summary>
 			public PersonIdent Who
 			{
 				get { return _who; }
 			}
 
+			/// <summary>
+			/// Gets the textual description of the change.
+			/// </summary>
 			public string Comment
 			{
 				get { return _comment; }

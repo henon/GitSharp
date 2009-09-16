@@ -87,10 +87,13 @@ namespace GitSharp.RevWalk
 
 			int p = pos.value += 4; // "tag "
 			int nameEnd = RawParseUtils.nextLF(rawTag, p) - 1;
-			_name = RawParseUtils.decode(Constants.CHARSET, rawTag, p, nameEnd);
+			_name = Constants.CHARSET.GetString(rawTag, p, nameEnd);
 
-            if (walk.isRetainBody())
-			    _buffer = rawTag;
+			if (walk.isRetainBody())
+			{
+				_buffer = rawTag;
+			}
+
 			Flags |= PARSED;
 		}
 

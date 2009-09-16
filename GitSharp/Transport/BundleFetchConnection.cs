@@ -132,20 +132,24 @@ namespace GitSharp.Transport
             int cnt = bin.Read(hdrbuf, 0, hdrbuf.Length);
             int lf = 0;
             while (lf < cnt && hdrbuf[lf] != '\n')
-                lf++;
+            {
+            	lf++;
+            }
+
             bin.Position = mark;
-            NB.skipFully(bin, lf);
+            NB.SkipFully(bin, lf);
+
             if (lf < cnt && hdrbuf[lf] == '\n')
-                NB.skipFully(bin, 1);
+            {
+            	NB.SkipFully(bin, 1);
+            }
+
             return RawParseUtils.decode(Constants.CHARSET, hdrbuf, 0, lf);
         }
 
         public override bool DidFetchTestConnectivity
         {
-            get
-            {
-                return false;
-            }
+            get { return false; }
         }
 
         protected override void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)

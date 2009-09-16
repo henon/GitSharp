@@ -91,13 +91,13 @@ namespace GitSharp.Patch
 
 			_old.ForEach(coi =>
 							{
-								coi.StartLine = -1 * RawParseUtils.parseBase10(Buffer, ptr.value, ptr);
+								coi.StartLine = -1 * RawParseUtils.ParseBase10(Buffer, ptr.value, ptr);
 								coi.LineCount = buf[ptr.value] == ',' ?
-									RawParseUtils.parseBase10(buf, ptr.value + 1, ptr) : 1;
+									RawParseUtils.ParseBase10(buf, ptr.value + 1, ptr) : 1;
 							});
 
-			NewStartLine = RawParseUtils.parseBase10(buf, ptr.value + 1, ptr);
-			NewLineCount = buf[ptr.value] == ',' ? RawParseUtils.parseBase10(buf, ptr.value + 1, ptr) : 1;
+			NewStartLine = RawParseUtils.ParseBase10(buf, ptr.value + 1, ptr);
+			NewLineCount = buf[ptr.value] == ',' ? RawParseUtils.ParseBase10(buf, ptr.value + 1, ptr) : 1;
 		}
 
 		public override int parseBody(Patch script, int end)

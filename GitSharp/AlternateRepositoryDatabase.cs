@@ -50,12 +50,12 @@ namespace GitSharp
             _objectDatabase = _repository.ObjectDatabase;
         }
 
-        public Repository getRepository()
-        {
-            return _repository;
-        }
+    	public Repository Repository
+    	{
+    		get { return _repository; }
+    	}
 
-        public override void CloseSelf()
+    	public override void CloseSelf()
         {
             _repository.Close();
         }
@@ -95,9 +95,9 @@ namespace GitSharp
             return _objectDatabase.OpenObject2(curs, objectName, objectId);
         }
 
-		public override void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
+		public override void OpenObjectInAllPacks1(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
         {
-			_objectDatabase.OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
+			_objectDatabase.OpenObjectInAllPacks1(@out, windowCursor, objectId);
         }
 
     	protected override ObjectDatabase[] LoadAlternates()

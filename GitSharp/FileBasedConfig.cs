@@ -75,12 +75,11 @@ namespace GitSharp
             }
             catch (FileNotFoundException)
             {
-                clear();
+                Clear();
             }
             catch (IOException e)
             {
-                IOException e2 = new IOException("Cannot read " + getFile(), e);
-                throw e2;
+                throw new IOException("Cannot read " + getFile(), e);
             }
             catch (ConfigInvalidException e)
             {

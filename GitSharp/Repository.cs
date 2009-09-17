@@ -123,10 +123,10 @@ namespace GitSharp
 
 				string repositoryFormatVersion = Config.getString("core", null, "repositoryFormatVersion");
 
-				if (!"0".Equals(repositoryFormatVersion))
+				if (!Constants.RepositoryFormatVersion.Equals(repositoryFormatVersion))
 				{
-					throw new IOException("Unknown repository format \""
-										  + repositoryFormatVersion + "\"; expected \"0\".");
+					throw new IOException(
+						string.Format("Unknown repository format \"{0}\"; expected \"0\".", repositoryFormatVersion));
 				}
 			}
 			else
@@ -192,6 +192,7 @@ namespace GitSharp
 
 			Config.setInt("core", null, "repositoryformatversion", 0);
 			Config.setBoolean("core", null, "filemode", true);
+
 			if (bare)
 			{
 				Config.setBoolean("core", null, "bare", true);

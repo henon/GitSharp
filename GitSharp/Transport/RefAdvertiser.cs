@@ -114,7 +114,7 @@ namespace GitSharp.Transport
 		{
 			if (db is AlternateRepositoryDatabase)
 			{
-				additionalHaves(((AlternateRepositoryDatabase)db).getRepository());
+				additionalHaves(((AlternateRepositoryDatabase)db).Repository);
 			}
 
 			foreach (ObjectDatabase alt in db.GetAlternates())

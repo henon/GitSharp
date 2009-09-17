@@ -852,7 +852,7 @@ namespace GitSharp.Util
 				tz = 0;
 			}
 
-			return new PersonIdent(name, email, when * 1000L, tz);
+			return new PersonIdent(name, email, when, tz);
 		}
 
 		///	<summary>

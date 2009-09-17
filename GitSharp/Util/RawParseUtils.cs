@@ -44,7 +44,7 @@ using System.Text;
 
 namespace GitSharp.Util
 {
-	public static class RawParseUtils
+	internal static class RawParseUtils
 	{
 		private static readonly byte[] Digits16 = Gen16();
 		private static readonly byte[] FooterLineKeyChars = GenerateFooterLineKeyChars();
@@ -366,7 +366,7 @@ namespace GitSharp.Util
 		///	<exception cref="IndexOutOfRangeException">
 		///	if the string is not hex formatted.
 		/// </exception>
-		public static int parseHexInt32(sbyte[] bs, int p)
+		public static int ParseHexInt32(byte[] bs, int p)
 		{
 			int r = Digits16[bs[p]] << 4;
 
@@ -401,10 +401,10 @@ namespace GitSharp.Util
 		///	</summary>
 		///	<param name="digit">Hex character to parse.</param>
 		///	<returns>Numeric value, in the range 0-15.</returns>
-		///	<exception cref="IndexOutOfBoundsException">
+		///	<exception cref="IndexOutOfRangeException">
 		///	If the input digit is not a valid hex digit.
 		/// </exception>
-		public static int parseHexInt4(byte digit)
+		public static int ParseHexInt4(byte digit)
 		{
 			byte r = Digits16[digit];
 
@@ -426,7 +426,7 @@ namespace GitSharp.Util
 		///	<param name="ptr">
 		///	Position within buffer to start parsing digits at. </param>
 		///	<returns> the timezone at this location, expressed in minutes. </returns>
-		public static int parseTimeZoneOffset(byte[] b, int ptr)
+		public static int ParseTimeZoneOffset(byte[] b, int ptr)
 		{
 			int v = ParseBase10(b, ptr, null);
 			int tzMins = v % 100;
@@ -490,7 +490,7 @@ namespace GitSharp.Util
 
 			while (ptr < sz)
 			{
-				byte c = b[ptr++];
+				var c = b[ptr++];
 				if (c == chrA || c == '\n')
 				{
 					return ptr;
@@ -646,7 +646,7 @@ namespace GitSharp.Util
 				ptr += 48; // skip this parent.
 			}
 
-			return match(b, ptr, ObjectChecker.author_bytes);
+			return match(b, ptr, ObjectChecker.author);
 		}
 
 		///	<summary> * Locate the "committer " header line data.
@@ -680,7 +680,7 @@ namespace GitSharp.Util
 				ptr = nextLF(b, ptr);
 			}
 
-			return match(b, ptr, ObjectChecker.committer_bytes);
+			return match(b, ptr, ObjectChecker.committer);
 		}
 
 		///	<summary> * Locate the "tagger " header line data.
@@ -708,7 +708,7 @@ namespace GitSharp.Util
 			{
 				if (b[ptr] == (byte)'\n') return -1;
 
-				int m = match(b, ptr, ObjectChecker.tagger_bytes);
+				int m = match(b, ptr, ObjectChecker.tagger);
 				if (m >= 0)
 				{
 					return m;
@@ -719,19 +719,20 @@ namespace GitSharp.Util
 			return -1;
 		}
 
-		///
-		///	 <summary> * Locate the "encoding " header line.
-		///	 *  </summary>
-		///	 * <param name="b">
-		///	 *            buffer to scan. </param>
-		///	 * <param name="ptr">
-		///	 *            position in buffer to start the scan at. Most callers should
-		///	 *            pass 0 to ensure the scan starts from the beginning of the
-		///	 *            buffer and does not accidentally look at the message body. </param>
-		///	 * <returns> position just after the space in "encoding ", so the first
-		///	 *         character of the encoding's name. If no encoding header can be
-		///	 *         located -1 is returned (and UTF-8 should be assumed). </returns>
-		///
+		///	<summary>
+		/// Locate the "encoding " header line.
+		/// </summary>
+		///	<param name="b">Buffer to scan.</param>
+		/// <param name="ptr">
+		/// Position in buffer to start the scan at. Most callers should
+		/// pass 0 to ensure the scan starts from the beginning of the
+		/// buffer and does not accidentally look at the message body.
+		/// </param>
+		/// <returns>
+		/// Position just after the space in "encoding ", so the first
+		/// character of the encoding's name. If no encoding header can be
+		/// located -1 is returned (and UTF-8 should be assumed).
+		/// </returns>
 		public static int encoding(byte[] b, int ptr)
 		{
 			int sz = b.Length;
@@ -746,22 +747,20 @@ namespace GitSharp.Util
 
 				ptr = nextLF(b, ptr);
 			}
-			return match(b, ptr, ObjectChecker.encoding_bytes);
+			return match(b, ptr, ObjectChecker.encoding);
 		}
 
-		///
-		///	 <summary> * Parse the "encoding " header into a character set reference.
-		///	 * <p>
-		///	 * Locates the "encoding " header (if present) by first calling
-		///	 * <seealso cref="#encoding(byte[], int)"/> and then returns the proper character set
-		///	 * to apply to this buffer to evaluate its contents as character data.
-		///	 * <p>
-		///	 * If no encoding header is present, <seealso cref="Constants#CHARSET"/> is assumed.
-		///	 *  </summary>
-		///	 * <param name="b">
-		///	 *            buffer to scan. </param>
-		///	 * <returns> the Java character set representation. Never null. </returns>
-		///
+		/// <summary>
+		/// Parse the "encoding " header into a character set reference.
+		/// <para />
+		/// Locates the "encoding " header (if present) by first calling
+		/// <seealso cref="encoding(byte[], int)"/> and then returns the proper character set
+		/// to apply to this buffer to evaluate its contents as character data.
+		/// <para />
+		/// If no encoding header is present, <seealso cref="Constants#CHARSET"/> is assumed.
+		/// </summary>
+		/// <param name="b">Buffer to scan.</param>
+		/// <returns>The <see cref="Encoding"/> representation. Never null.</returns>
 		public static Encoding parseEncoding(byte[] b)
 		{
 			int enc = encoding(b, 0);
@@ -807,7 +806,7 @@ namespace GitSharp.Util
 
 			var ptrout = new MutableInteger();
 			long when = ParseLongBase10(raw, emailE + 1, ptrout);
-			int tz = parseTimeZoneOffset(raw, ptrout.value);
+			int tz = ParseTimeZoneOffset(raw, ptrout.value);
 
 			return new PersonIdent(name, email, when, tz);
 		}
@@ -845,7 +844,7 @@ namespace GitSharp.Util
 			if (emailE < stop)
 			{
 				when = ParseLongBase10(raw, emailE + 1, ptrout);
-				tz = parseTimeZoneOffset(raw, ptrout.value);
+				tz = ParseTimeZoneOffset(raw, ptrout.value);
 			}
 			else
 			{
@@ -856,23 +855,24 @@ namespace GitSharp.Util
 			return new PersonIdent(name, email, when * 1000L, tz);
 		}
 
-		///
-		///	 <summary> * Locate the end of a footer line key string.
-		///	 * <p>
-		///	 * If the region at {@code raw[ptr]} matches {@code ^[A-Za-z0-9-]+:} (e.g.
-		///	 * "Signed-off-by: A. U. Thor\n") then this method returns the position of
-		///	 * the first ':'.
-		///	 * <p>
-		///	 * If the region at {@code raw[ptr]} does not match {@code ^[A-Za-z0-9-]+:}
-		///	 * then this method returns -1.
-		///	 * </summary>
-		///	 * <param name="raw">
-		///	 *            buffer to scan. </param>
-		///	 * <param name="ptr">
-		///	 *            first position within raw to consider as a footer line key. </param>
-		///	 * <returns> position of the ':' which terminates the footer line key if this
-		///	 *         is otherwise a valid footer line key; otherwise -1. </returns>
-		///
+		///	<summary>
+		/// Locate the end of a footer line key string.
+		/// <para />
+		/// If the region at {@code raw[ptr]} matches {@code ^[A-Za-z0-9-]+:} (e.g.
+		/// "Signed-off-by: A. U. Thor\n") then this method returns the position of
+		/// the first ':'.
+		/// <para />
+		/// If the region at {@code raw[ptr]} does not match {@code ^[A-Za-z0-9-]+:}
+		/// then this method returns -1.
+		/// </summary>
+		/// <param name="raw">Buffer to scan.</param>
+		/// <param name="ptr">
+		/// First position within raw to consider as a footer line key.
+		/// </param>
+		///	<returns>
+		/// Position of the ':' which terminates the footer line key if this
+		/// is otherwise a valid footer line key; otherwise -1.
+		/// </returns>
 		public static int endOfFooterLineKey(byte[] raw, int ptr)
 		{
 			try
@@ -913,63 +913,61 @@ namespace GitSharp.Util
 			return decode(buffer, 0, buffer.Length);
 		}
 
-		///
-		///	 <summary> * Decode a buffer under UTF-8, if possible.
-		///	 *
-		///	 * If the byte stream cannot be decoded that way, the platform default is
-		///	 * tried and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
-		///	 * </summary>
-		///	 * <param name="buffer">
-		///	 *            buffer to pull raw bytes from. </param>
-		///	 * <param name="start">
-		///	 *            start position in buffer </param>
-		///	 * <param name="end">
-		///	 *            one position past the last location within the buffer to take
-		///	 *            data from. </param>
-		///	 * <returns> a string representation of the range <code>[start,end)</code>,
-		///	 *         after decoding the region through the specified character set. </returns>
-		///
+		/// <summary>
+		/// Decode a buffer under UTF-8, if possible.
+		/// <para />
+		/// If the byte stream cannot be decoded that way, the platform default is
+		/// tried and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
+		/// </summary>
+		/// <param name="buffer">Buffer to pull raw bytes from.</param>
+		/// <param name="start">Start position in buffer.</param>
+		/// <param name="end">
+		/// One position past the last location within the buffer to take
+		/// data from.
+		/// </param>
+		/// <returns>
+		/// A string representation of the range <code>[start,end)</code>,
+		/// after decoding the region through the specified character set.
+		/// </returns>
 		public static string decode(byte[] buffer, int start, int end)
 		{
 			return decode(Constants.CHARSET, buffer, start, end);
 		}
 
-		///
-		///	 <summary> * Decode a buffer under the specified character set if possible.
-		///	 *
-		///	 * If the byte stream cannot be decoded that way, the platform default is tried
-		///	 * and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
-		///	 *  </summary>
-		///	 * <param name="cs">
-		///	 *            character set to use when decoding the buffer. </param>
-		///	 * <param name="buffer">
-		///	 *            buffer to pull raw bytes from. </param>
-		///	 * <returns> a string representation of the range <code>[start,end)</code>,
-		///	 *         after decoding the region through the specified character set. </returns>
-		///
+		///	<summary>
+		/// Decode a buffer under the specified character set if possible.
+		/// <para />
+		/// If the byte stream cannot be decoded that way, the platform default is tried
+		/// and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
+		/// </summary>
+		/// <param name="cs">Character set to use when decoding the buffer.</param>
+		/// <param name="buffer">Buffer to pull raw bytes from.</param>
+		/// <returns>
+		/// A string representation of the range <code>[start,end)</code>,
+		/// after decoding the region through the specified character set.
+		/// </returns>
 		public static string decode(Encoding cs, byte[] buffer)
 		{
 			return decode(cs, buffer, 0, buffer.Length);
 		}
 
-		///
-		///	 <summary> * Decode a region of the buffer under the specified character set if possible.
-		///	 *
-		///	 * If the byte stream cannot be decoded that way, the platform default is tried
-		///	 * and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
-		///	 *  </summary>
-		///	 * <param name="cs">
-		///	 *            character set to use when decoding the buffer. </param>
-		///	 * <param name="buffer">
-		///	 *            buffer to pull raw bytes from. </param>
-		///	 * <param name="start">
-		///	 *            first position within the buffer to take data from. </param>
-		///	 * <param name="end">
-		///	 *            one position past the last location within the buffer to take
-		///	 *            data from. </param>
-		///	 * <returns> a string representation of the range <code>[start,end)</code>,
-		///	 *         after decoding the region through the specified character set. </returns>
-		///
+		///	<summary>
+		/// Decode a region of the buffer under the specified character set if possible.
+		/// <para />
+		///	If the char stream cannot be decoded that way, the platform default is tried
+		/// and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
+		/// </summary>
+		/// <param name="cs">Character set to use when decoding the buffer.</param>
+		///	<param name="buffer">Buffer to pull raw bytes from.</param>
+		///	<param name="start">First position within the buffer to take data from.</param>
+		///	<param name="end">
+		/// One position past the last location within the buffer to take
+		/// data from.
+		/// </param>
+		///	<returns>
+		/// A string representation of the range <code>[start,end]</code>,
+		/// after decoding the region through the specified character set.
+		/// </returns>
 		public static string decode(Encoding cs, byte[] buffer, int start, int end)
 		{
 			try
@@ -985,27 +983,27 @@ namespace GitSharp.Util
 			}
 		}
 
-		///
-		///	 <summary> * Decode a region of the buffer under the specified character set if
-		///	 * possible.
-		///	 *
-		///	 * If the byte stream cannot be decoded that way, the platform default is
-		///	 * tried and if that too fails, an exception is thrown.
-		///	 * </summary>
-		///	 * <param name="cs">
-		///	 *            character set to use when decoding the buffer. </param>
-		///	 * <param name="buffer">
-		///	 *            buffer to pull raw bytes from. </param>
-		///	 * <param name="start">
-		///	 *            first position within the buffer to take data from. </param>
-		///	 * <param name="end">
-		///	 *            one position past the last location within the buffer to take
-		///	 *            data from. </param>
-		///	 * <returns> a string representation of the range <code>[start,end)</code>,
-		///	 *         after decoding the region through the specified character set. </returns>
-		///	 * <exception cref="CharacterCodingException">
-		///	 *             the input is not in any of the tested character sets. </exception>
-		///
+		///	<summary>
+		/// Decode a region of the buffer under the specified character set if
+		/// possible.
+		/// <para />
+		/// If the byte stream cannot be decoded that way, the platform default is
+		/// tried and if that too fails, an exception is thrown.
+		/// </summary>
+		/// <param name="cs">Character set to use when decoding the buffer.</param>
+		/// <param name="buffer">Buffer to pull raw bytes from.</param>
+		/// <param name="start">First position within the buffer to take data from.</param>
+		/// <param name="end">
+		/// One position past the last location within the buffer to take
+		/// data from.
+		/// </param>
+		/// <returns>
+		/// A string representation of the range <code>[start,end]</code>,
+		/// after decoding the region through the specified character set.
+		/// </returns>
+		///	<exception cref="CharacterCodingException">
+		/// The input is not in any of the tested character sets.
+		/// </exception>
 		public static string decodeNoFallback(Encoding cs, byte[] buffer, int start, int end)
 		{
 			var b = new byte[end - start];

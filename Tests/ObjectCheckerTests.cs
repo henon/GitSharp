@@ -70,11 +70,11 @@ namespace GitSharp.Tests
 		public void testCheckBlob()
 		{
 			// Any blob should pass...
-			_checker.checkBlob(new char[0]);
-			_checker.checkBlob(new char[1]);
+			_checker.checkBlob(new byte[0]);
+			_checker.checkBlob(new byte[1]);
 
-			_checker.check(Constants.OBJ_BLOB, new char[0]);
-			_checker.check(Constants.OBJ_BLOB, new char[1]);
+			_checker.check(Constants.OBJ_BLOB, new byte[0]);
+			_checker.check(Constants.OBJ_BLOB, new byte[1]);
 		}
 
 		[Fact]

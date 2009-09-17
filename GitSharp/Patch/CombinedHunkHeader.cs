@@ -86,7 +86,7 @@ namespace GitSharp.Patch
 			byte[] buf = File.Buffer;
 			var ptr = new MutableInteger
 						{
-							value = RawParseUtils.nextLF(buf, StartOffset, (byte)' ')
+							value = RawParseUtils.nextLF(buf, StartOffset, ' ')
 						};
 
 			_old.ForEach(coi =>

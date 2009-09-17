@@ -184,7 +184,7 @@ namespace GitSharp.Patch
 			byte[] buf = _file.Buffer;
 			var ptr = new MutableInteger
 						{
-							value = RawParseUtils.nextLF(buf, _startOffset, (byte)' ')
+							value = RawParseUtils.nextLF(buf, _startOffset, ' ')
 						};
 
 			_oldImage.StartLine = -1 * RawParseUtils.ParseBase10(buf, ptr.value, ptr);

@@ -133,7 +133,7 @@ namespace GitSharp.DirectoryCache
 		{
 			_parent = myParent;
 
-			int ptr = RawParseUtils.next(@in, off.value, (byte)'\0');
+			int ptr = RawParseUtils.next(@in, off.value, '\0');
 			int nameLen = ptr - off.value - 1;
 			if (nameLen > 0)
 			{
@@ -147,7 +147,7 @@ namespace GitSharp.DirectoryCache
 
 			_entrySpan = RawParseUtils.ParseBase10(@in, ptr, off);
 			int subcnt = RawParseUtils.ParseBase10(@in, off.value, off);
-			off.value = RawParseUtils.next(@in, off.value, (byte)'\n');
+			off.value = RawParseUtils.next(@in, off.value, '\n');
 
 			if (_entrySpan >= 0)
 			{

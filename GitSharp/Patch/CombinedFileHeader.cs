@@ -177,7 +177,7 @@ namespace GitSharp.Patch
             var ids = new List<AbbreviatedObjectId>();
             while (ptr < eol)
             {
-				int comma = RawParseUtils.nextLF(Buffer, ptr, (byte)',');
+				int comma = RawParseUtils.nextLF(Buffer, ptr, ',');
                 if (eol <= comma) break;
 				ids.Add(AbbreviatedObjectId.FromString(Buffer, ptr, comma - 1));
                 ptr = comma;
@@ -185,7 +185,7 @@ namespace GitSharp.Patch
 
             _oldIds = new AbbreviatedObjectId[ids.Count + 1];
             ids.CopyTo(_oldIds);
-			int dot2 = RawParseUtils.nextLF(Buffer, ptr, (byte)'.');
+			int dot2 = RawParseUtils.nextLF(Buffer, ptr, '.');
 			_oldIds[_oldIds.Length - 1] = AbbreviatedObjectId.FromString(Buffer, ptr, dot2 - 1);
 			NewId = AbbreviatedObjectId.FromString(Buffer, dot2 + 1, eol - 1);
             _oldModes = new FileMode[_oldIds.Length];
@@ -212,13 +212,13 @@ namespace GitSharp.Patch
             int n = 0;
             while (ptr < eol)
             {
-				int comma = RawParseUtils.nextLF(Buffer, ptr, (byte)',');
-                if (eol <= comma)
-                    break;
+				int comma = RawParseUtils.nextLF(Buffer, ptr, ',');
+                if (eol <= comma) break;
                 _oldModes[n++] = ParseFileMode(ptr, comma);
                 ptr = comma;
             }
-			int dot2 = RawParseUtils.nextLF(Buffer, ptr, (byte)'.');
+
+			int dot2 = RawParseUtils.nextLF(Buffer, ptr, '.');
             _oldModes[n] = ParseFileMode(ptr, dot2);
             NewMode = ParseFileMode(dot2 + 1, eol);
         }
@@ -231,12 +231,12 @@ namespace GitSharp.Patch
             int n = 0;
             while (ptr < eol)
             {
-				int comma = RawParseUtils.nextLF(Buffer, ptr, (byte)',');
-                if (eol <= comma)
-                    break;
+				int comma = RawParseUtils.nextLF(Buffer, ptr, ',');
+                if (eol <= comma) break;
                 _oldModes[n++] = ParseFileMode(ptr, comma);
                 ptr = comma;
             }
+
             _oldModes[n] = ParseFileMode(ptr, eol);
             NewMode = FileMode.Missing;
         }

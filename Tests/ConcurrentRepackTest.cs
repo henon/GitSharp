@@ -249,13 +249,13 @@ namespace GitSharp.Tests
 
 		private FileInfo FullPackFileName(AnyObjectId name)
 		{
-			var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
+			var packdir = Path.Combine(db.ObjectDatabase.Directory().FullName, "pack");
 			return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetPackFileName(name.Name)));
 		}
 
 		private FileInfo FullIndexFileName(AnyObjectId name)
 		{
-			var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
+			var packdir = Path.Combine(db.ObjectDatabase.Directory().FullName, "pack");
 			return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetIndexFileName(name.Name)));
 		}
 

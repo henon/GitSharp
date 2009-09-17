@@ -43,6 +43,7 @@ using System.Linq;
 using GitSharp.Exceptions;
 using GitSharp.Transport;
 using GitSharp.Util;
+using System.Diagnostics;
 
 namespace GitSharp
 {
@@ -78,10 +79,10 @@ namespace GitSharp
 			_packList = new AtomicReference<PackFile[]>();
 		}
 
-		/**
-		 * @return the location of the <code>objects</code> directory.
-		 */
-		public DirectoryInfo getDirectory()
+		/// <summary>
+		/// Gets the location of the <code>objects</code> directory.
+		/// </summary>
+		public DirectoryInfo Directory()
 		{
 			return _objects;
 		}
@@ -110,37 +111,29 @@ namespace GitSharp
 			}
 		}
 
-		/**
-		 * Compute the location of a loose object file.
-		 *
-		 * @param objectId
-		 *            identity of the loose object to map to the directory.
-		 * @return location of the object, if it were to exist as a loose object.
-		 */
-		public FileInfo fileFor(AnyObjectId objectId)
+		/// <summary>
+		/// Compute the location of a loose object file.
+		/// </summary>
+		/// <param name="objectId">Identity of the loose object to map to the directory.</param>
+		/// <returns>Location of the object, if it were to exist as a loose object.</returns>
+		public FileInfo FileFor(AnyObjectId objectId)
 		{
-			return fileFor(objectId.ToString());
+			return FileFor(objectId.ToString());
 		}
 
-		private FileInfo fileFor(string objectName)
+		private FileInfo FileFor(string objectName)
 		{
 			string d = objectName.Slice(0, 2);
 			string f = objectName.Substring(2);
 			return new FileInfo(_objects.FullName + "/" + d + "/" + f);
 		}
 
-		/**
-		 * Add a single existing pack to the list of available pack files.
-		 *
-		 * @param pack
-		 *            path of the pack file to open.
-		 * @param idx
-		 *            path of the corresponding index file.
-		 * @
-		 *             index file could not be opened, read, or is not recognized as
-		 *             a Git pack file index.
-		 */
-		public void openPack(FileInfo pack, FileInfo idx)
+		/// <summary>
+		/// Add a single existing pack to the list of available pack files.
+		/// </summary>
+		/// <param name="pack">Path of the pack file to open.</param>
+		/// <param name="idx">Path of the corresponding index file.</param>
+		public void OpenPack(FileInfo pack, FileInfo idx)
 		{
 			string p = pack.Name;
 			string i = idx.Name;
@@ -165,7 +158,7 @@ namespace GitSharp
 
 		public override string ToString()
 		{
-			return "ObjectDirectory[" + getDirectory() + "]";
+			return "ObjectDirectory[" + Directory() + "]";
 		}
 
 		public override bool hasObject1(AnyObjectId objectId)
@@ -267,14 +260,14 @@ namespace GitSharp
 
 		public override bool hasObject2(string objectName)
 		{
-			return fileFor(objectName).Exists;
+			return FileFor(objectName).Exists;
 		}
 
 		public override ObjectLoader openObject2(WindowCursor curs, string objectName, AnyObjectId objectId)
 		{
 			try
 			{
-				return new UnpackedObjectLoader(fileFor(objectName), objectId);
+				return new UnpackedObjectLoader(FileFor(objectName), objectId);
 			}
 			catch (FileNotFoundException)
 			{
@@ -438,14 +431,16 @@ namespace GitSharp
 				}
 
 				PackFile prior = forReuse[p.File.Name] = p;
+
+				// This should never occur. It should be impossible for us
+				// to have two pack files with the same name, as all of them
+				// came out of the same directory. If it does, we promised to
+				// close any PackFiles we did not reuse, so close the one we
+				// just evicted out of the reuse map.
+				//
+				Debug.Assert(prior == null);
 				if (prior != null)
 				{
-					// This should never occur. It should be impossible for us
-					// to have two pack files with the same name, as all of them
-					// came out of the same directory. If it does, we promised to
-					// close any PackFiles we did not reuse, so close the one we
-					// just evicted out of the reuse map.
-					//
 					prior.Close();
 				}
 			}

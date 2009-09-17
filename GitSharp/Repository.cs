@@ -845,7 +845,7 @@ namespace GitSharp
 
 		public void OpenPack(FileInfo pack, FileInfo idx)
 		{
-			_objectDatabase.openPack(pack, idx);
+			_objectDatabase.OpenPack(pack, idx);
 		}
 
 		public ObjectDirectory ObjectDatabase

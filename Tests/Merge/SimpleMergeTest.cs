@@ -53,6 +53,11 @@ namespace GitSharp.Tests.Merge
 			Merger ourMerger = MergeStrategy.Ours.NewMerger(db);
 			bool merge = ourMerger.Merge(new[] { db.Resolve("a"), db.Resolve("c") });
 			Assert.True(merge);
+			
+			var mappedTree = db.MapTree("a");
+			var ourMergerResult = ourMerger.GetResultTreeId();
+			Assert.Equal(mappedTree.Id, ourMergerResult);
+
 			Assert.Equal(db.MapTree("a").Id, ourMerger.GetResultTreeId());
 		}
 

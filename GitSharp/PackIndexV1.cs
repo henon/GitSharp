@@ -167,7 +167,7 @@ namespace GitSharp
 
 			lbase = levelOne > 0 ? _idxHeader[levelOne - 1] : 0;
 			var p = (int)(nthPosition - lbase);
-			int dataIdx = ((4 + AnyObjectId.ObjectIdLength) * p) + 4;
+			int dataIdx = ((4 + Constants.OBJECT_ID_LENGTH) * p) + 4;
 			return ObjectId.FromRaw(_idxdata[levelOne], dataIdx);
 		}
 
@@ -180,13 +180,13 @@ namespace GitSharp
 				return -1;
 			}
 
-			int high = data.Length / (4 + AnyObjectId.ObjectIdLength);
+			int high = data.Length / (4 + Constants.OBJECT_ID_LENGTH);
 			int low = 0;
 
 			do
 			{
 				int mid = (low + high) / 2;
-				int pos = ((4 + AnyObjectId.ObjectIdLength) * mid) + 4;
+				int pos = ((4 + Constants.OBJECT_ID_LENGTH) * mid) + 4;
 				int cmp = objId.CompareTo(data, pos);
 				if (cmp < 0)
 				{
@@ -235,7 +235,7 @@ namespace GitSharp
 
             protected override MutableObjectId IdBufferBuilder(MutableObjectId idBuffer)
             {
-                idBuffer.FromRaw(_index._idxdata[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength);
+				idBuffer.FromRaw(_index._idxdata[_levelOne], _levelTwo - Constants.OBJECT_ID_LENGTH);
                 return idBuffer;
             }
 
@@ -251,7 +251,7 @@ namespace GitSharp
                     if (_levelTwo < _index._idxdata[_levelOne].Length)
                     {
                         entry.Offset = NB.DecodeUInt32(_index._idxdata[_levelOne], _levelTwo);
-                        _levelTwo += AnyObjectId.ObjectIdLength + 4;
+						_levelTwo += Constants.OBJECT_ID_LENGTH + 4;
                         ReturnedNumber++;
                         return entry;
                     }

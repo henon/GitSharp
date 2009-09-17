@@ -107,7 +107,7 @@ namespace GitSharp
 					continue;
 				}
 
-				long nameLen = bucketCnt * AnyObjectId.ObjectIdLength;
+				long nameLen = bucketCnt * Constants.OBJECT_ID_LENGTH;
 				if (nameLen > int.MaxValue)
 				{
 					throw new IOException("Index file is too large");
@@ -290,7 +290,7 @@ namespace GitSharp
 
             protected override MutableObjectId IdBufferBuilder(MutableObjectId idBuffer)
             {
-                idBuffer.FromRaw(_index._names[_levelOne], _levelTwo - AnyObjectId.ObjectIdLength / 4);
+				idBuffer.FromRaw(_index._names[_levelOne], _levelTwo - Constants.OBJECT_ID_LENGTH / 4);
                 return idBuffer;
             }
 
@@ -300,7 +300,7 @@ namespace GitSharp
                 {
                     if (_levelTwo < _index._names[_levelOne].Length)
                     {
-                        int idx = _levelTwo / (AnyObjectId.ObjectIdLength / 4) * 4;
+						int idx = _levelTwo / (Constants.OBJECT_ID_LENGTH / 4) * 4;
                         long offset = NB.DecodeUInt32(_index._offset32[_levelOne], idx);
                         if ((offset & IS_O64) != 0)
                         {
@@ -309,7 +309,7 @@ namespace GitSharp
                         }
                         entry.Offset = offset;
 
-                        _levelTwo += AnyObjectId.ObjectIdLength / 4;
+						_levelTwo += Constants.OBJECT_ID_LENGTH / 4;
                         ReturnedNumber++;
                         return entry;
                     }

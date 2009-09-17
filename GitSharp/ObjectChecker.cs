@@ -171,12 +171,12 @@ namespace GitSharp
 			}
 		}
 
-		private int id(byte[] raw, int ptr)
+		private int Id(byte[] raw, int ptr)
 		{
 			try
 			{
 				_tempId.FromString(raw, ptr);
-				return ptr + AnyObjectId.StringLength;
+				return ptr + Constants.OBJECT_ID_STRING_LENGTH;
 			}
 			catch (ArgumentException)
 			{
@@ -184,7 +184,7 @@ namespace GitSharp
 			}
 		}
 
-		private int personIdent(byte[] raw, int ptr)
+		private int PersonIdent(byte[] raw, int ptr)
 		{
 			int emailB = RawParseUtils.nextLF(raw, ptr, '<');
 			if (emailB == ptr || raw[emailB - 1] != '<') return -1;
@@ -228,7 +228,7 @@ namespace GitSharp
 				throw new CorruptObjectException("no tree header");
 			}
 
-			if ((ptr = id(raw, ptr)) < 0 || raw[ptr++] != '\n')
+			if ((ptr = Id(raw, ptr)) < 0 || raw[ptr++] != '\n')
 			{
 				throw new CorruptObjectException("invalid tree");
 			}
@@ -236,7 +236,7 @@ namespace GitSharp
 			while (RawParseUtils.match(raw, ptr, parent) >= 0)
 			{
 				ptr += parent.Length;
-				if ((ptr = id(raw, ptr)) < 0 || raw[ptr++] != '\n')
+				if ((ptr = Id(raw, ptr)) < 0 || raw[ptr++] != '\n')
 					throw new CorruptObjectException("invalid parent");
 			}
 
@@ -245,7 +245,7 @@ namespace GitSharp
 				throw new CorruptObjectException("no author");
 			}
 
-			if ((ptr = personIdent(raw, ptr)) < 0 || raw[ptr++] != '\n')
+			if ((ptr = PersonIdent(raw, ptr)) < 0 || raw[ptr++] != '\n')
 			{
 				throw new CorruptObjectException("invalid author");
 			}
@@ -255,7 +255,7 @@ namespace GitSharp
 				throw new CorruptObjectException("no committer");
 			}
 
-			if ((ptr = personIdent(raw, ptr)) < 0 || raw[ptr++] != '\n')
+			if ((ptr = PersonIdent(raw, ptr)) < 0 || raw[ptr++] != '\n')
 			{
 				throw new CorruptObjectException("invalid committer");
 			}
@@ -285,7 +285,7 @@ namespace GitSharp
 				throw new CorruptObjectException("no object header");
 			}
 
-			if ((ptr = id(raw, ptr)) < 0 || raw[ptr++] != '\n')
+			if ((ptr = Id(raw, ptr)) < 0 || raw[ptr++] != '\n')
 			{
 				throw new CorruptObjectException("invalid object");
 			}
@@ -307,7 +307,7 @@ namespace GitSharp
 				throw new CorruptObjectException("no tagger header");
 			}
 
-			if ((ptr = personIdent(raw, ptr)) < 0 || raw[ptr++] != '\n')
+			if ((ptr = PersonIdent(raw, ptr)) < 0 || raw[ptr++] != '\n')
 			{
 				throw new CorruptObjectException("invalid tagger");
 			}

@@ -102,7 +102,7 @@ namespace GitSharp
 
 		public void FromString(string str)
 		{
-			if (str.Length != StringLength)
+			if (str.Length != Constants.OBJECT_ID_STRING_LENGTH)
 			{
 				throw new ArgumentException("Invalid id: " + str);
 			}
@@ -124,7 +124,7 @@ namespace GitSharp
 			{
 				try
 				{
-					var str = new string(Encoding.ASCII.GetChars(bs, p, StringLength));
+					var str = new string(Encoding.ASCII.GetChars(bs, p, Constants.OBJECT_ID_STRING_LENGTH));
 					throw new ArgumentException("Invalid id: " + str);
 				}
 				catch

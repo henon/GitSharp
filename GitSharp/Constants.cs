@@ -125,6 +125,7 @@ namespace GitSharp
 		/// Length of an object hash.
         /// </summary>
         public const int OBJECT_ID_LENGTH = 20;
+		public const int OBJECT_ID_STRING_LENGTH = Constants.OBJECT_ID_LENGTH * 2;
 
         /// <summary>
 		/// Special name for the "HEAD" symbolic-ref.

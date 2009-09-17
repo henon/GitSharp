@@ -400,14 +400,14 @@ namespace GitSharp
 					}
 				}
 
-				if (duplicateName(raw, thisNameB, ptr - 1))
+				if (DuplicateName(raw, thisNameB, ptr - 1))
 				{
 					throw new CorruptObjectException("duplicate entry names");
 				}
 
 				if (lastNameB != 0)
 				{
-					int cmp = pathCompare(raw, lastNameB, lastNameE, lastMode, thisNameB, ptr - 1, thisMode);
+					int cmp = PathCompare(raw, lastNameB, lastNameE, lastMode, thisNameB, ptr - 1, thisMode);
 					if (cmp > 0)
 					{
 						throw new CorruptObjectException("incorrectly sorted");
@@ -446,12 +446,12 @@ namespace GitSharp
 			// We can always assume the blob is valid.
 		}
 
-		private static int lastPathChar(int mode)
+		private static int LastPathChar(int mode)
 		{
 			return FileMode.Tree.Equals(mode) ? '/' : '\0';
 		}
 
-		private static int pathCompare(byte[] raw, int aPos, int aEnd, int aMode, int bPos, int bEnd, int bMode)
+		private static int PathCompare(byte[] raw, int aPos, int aEnd, int aMode, int bPos, int bEnd, int bMode)
 		{
 			while (aPos < aEnd && bPos < bEnd)
 			{
@@ -464,18 +464,18 @@ namespace GitSharp
 
 			if (aPos < aEnd)
 			{
-				return (((byte)raw[aPos]) & 0xff) - lastPathChar(bMode);
+				return (((byte)raw[aPos]) & 0xff) - LastPathChar(bMode);
 			}
 
 			if (bPos < bEnd)
 			{
-				return lastPathChar(aMode) - (((byte)raw[bPos]) & 0xff);
+				return LastPathChar(aMode) - (((byte)raw[bPos]) & 0xff);
 			}
 
 			return 0;
 		}
 
-		private static bool duplicateName(byte[] raw, int thisNamePos, int thisNameEnd)
+		private static bool DuplicateName(byte[] raw, int thisNamePos, int thisNameEnd)
 		{
 			int sz = raw.Length;
 			int nextPtr = thisNameEnd + 1 + Constants.OBJECT_ID_LENGTH;
@@ -502,7 +502,7 @@ namespace GitSharp
 
 				if (nextNamePos + 1 == nextPtr) return false;
 
-				int cmp = pathCompare(raw, thisNamePos, thisNameEnd, FileMode.Tree.Bits, nextNamePos, nextPtr - 1, nextMode);
+				int cmp = PathCompare(raw, thisNamePos, thisNameEnd, FileMode.Tree.Bits, nextNamePos, nextPtr - 1, nextMode);
 				if (cmp < 0) return false;
 				if (cmp == 0) return true;
 

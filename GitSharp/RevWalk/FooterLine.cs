@@ -104,7 +104,7 @@ namespace GitSharp.RevWalk
 		/// </summary>
 		public string Key
 		{
-			get { return _enc.GetString(_buffer, _keyStart, _keyEnd); }
+			get { return RawParseUtils.decode(_enc, _buffer, _keyStart, _keyEnd); }
 		}
 
 		/// <summary>
@@ -116,7 +116,7 @@ namespace GitSharp.RevWalk
 		/// </summary>
 		public string Value
 		{
-			get { return _enc.GetString(_buffer, _valStart, _valEnd); }
+			get { return RawParseUtils.decode(_enc, _buffer, _valStart, _valEnd); }
 		}
 
 		/// <summary>

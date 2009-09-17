@@ -59,7 +59,7 @@ namespace GitSharp.Tests.RevWalk
 			_ow = new ObjectWriter(db);
 			rw = createRevWalk();
 			emptyTree = rw.parseTree(_ow.WriteTree(new Tree(db)));
-			nowTick = 1236977987L;
+			nowTick = 12369779870000L;
 		}
 
 		protected virtual GitSharp.RevWalk.RevWalk createRevWalk()
@@ -142,8 +142,8 @@ namespace GitSharp.Tests.RevWalk
 			        	{
 			        		TreeId = tree,
 			        		ParentIds = parents,
-							Author = new PersonIdent(jauthor, nowTick.GitTimeToDateTimeOffset(0)), // [henon] offset?
-			        		Committer = new PersonIdent(jcommitter, nowTick.GitTimeToDateTimeOffset(0)),
+							Author = new PersonIdent(jauthor, (nowTick / 1000).UnixTimeToDateTime()), // [henon] offset?
+			        		Committer = new PersonIdent(jcommitter, (nowTick / 1000).UnixTimeToDateTime()),
 			        		Message = string.Empty
 			        	};
 
@@ -157,7 +157,7 @@ namespace GitSharp.Tests.RevWalk
 							TagType = Constants.typeString(dst.Type),
 							Id = dst.ToObjectId(),
 							TagName = name,
-							Tagger = new PersonIdent(jcommitter, nowTick.GitTimeToDateTimeOffset(0)),
+                            Tagger = new PersonIdent(jcommitter, (nowTick / 1000).UnixTimeToDateTime()),
 							Message = string.Empty
 						};
 

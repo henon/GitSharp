@@ -42,56 +42,51 @@ namespace GitSharp.Util
     public static class DateTimeExtensions
     {
     	private static readonly long EPOCH_TICKS = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
-        public const long TICKS_PER_SECOND = 10000000L;
 
         /// <summary>
-        /// Calculates the git time from a DateTimeOffset instance.
-        /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT. 
-        /// C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
+        /// Calculates the Unix time representation of a given DateTime.
+        /// Unix time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
         /// </summary>
-        /// <param name="time"></param>
         /// <returns></returns>
-        public static long ToGitInternalTime(this DateTimeOffset time)
+        public static int ToUnixTime(this DateTime datetime)
         {
-            return (time.Ticks - time.Offset.Ticks - EPOCH_TICKS) / TICKS_PER_SECOND;
+            return new DateTimeOffset(DateTime.SpecifyKind(datetime, DateTimeKind.Utc), TimeSpan.Zero).ToUnixTime();
         }
 
         /// <summary>
-        /// Calculates the git time from a DateTimeOffset instance.
-        /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT.
-        /// C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
+        /// Calculates the Unix time representation of a given DateTimeOffset.
+        /// Unix time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
         /// </summary>
-        /// <param name="time"></param>
         /// <returns></returns>
-        public static long ToGitInternalTime(this DateTime time)
+        public static int ToUnixTime(this DateTimeOffset dateTimeOffset)
         {
-            return new DateTimeOffset(time, TimeSpan.Zero).ToGitInternalTime();
+            return (int)((dateTimeOffset.Ticks - dateTimeOffset.Offset.Ticks - EPOCH_TICKS) / TimeSpan.TicksPerSecond);
         }
 
         /// <summary>
-        /// Calculates the DateTimeOffset of a given git time and time zone offset in minutes.
-        /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
+        /// Calculates the DateTimeOffset of a given Unix time and time zone offset in minutes.
+        /// Unix time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
         /// </summary>
-		/// <param name="gitTime"></param>
+		/// <param name="secondsSinceEpoch"></param>
 		/// <param name="offsetMinutes"></param>
         /// <returns></returns>
-        public static DateTimeOffset GitTimeToDateTimeOffset(this long gitTime, long offsetMinutes)
+        public static DateTimeOffset UnixTimeToDateTimeOffset(this long secondsSinceEpoch, long offsetMinutes)
         {
             var offset = TimeSpan.FromMinutes(offsetMinutes);
-			var utc_ticks = EPOCH_TICKS + gitTime * TICKS_PER_SECOND;
-            return new DateTimeOffset(utc_ticks + offset.Ticks, offset);
+            var utcTicks = EPOCH_TICKS + secondsSinceEpoch * TimeSpan.TicksPerSecond;
+            return new DateTimeOffset(utcTicks + offset.Ticks, offset);
         }
 
         /// <summary>
-        /// Calculates the UTC DateTime of a given git time.
-        /// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
+        /// Calculates the DateTime of a given Unix time and time zone offset in minutes.
+        /// Unix time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
         /// </summary>
-		/// <param name="gitTime"></param>
+        /// <param name="secondsSinceEpoch"></param>
         /// <returns></returns>
-		public static DateTime GitTimeToDateTime(this long gitTime)
+        public static DateTime UnixTimeToDateTime(this long secondsSinceEpoch)
         {
-			var utc_ticks = EPOCH_TICKS + gitTime * TICKS_PER_SECOND;
-            return new DateTime(utc_ticks);
+            var utcTicks = EPOCH_TICKS + secondsSinceEpoch * TimeSpan.TicksPerSecond;
+            return new DateTime(utcTicks);
         }
     }
 }

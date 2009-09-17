@@ -186,7 +186,7 @@ namespace GitSharp
 			new DirectoryInfo(Path.Combine(Directory.FullName, "branches")).Create();
 			new DirectoryInfo(Path.Combine(Directory.FullName, "remote")).Create();
 
-			string master = Constants.RefsHeads + Constants.Master;
+			const string master = Constants.RefsHeads + Constants.Master;
 
 			_refDb.Link(Constants.Head, master);
 
@@ -210,7 +210,7 @@ namespace GitSharp
 		/// </returns>
 		public bool HasObject(AnyObjectId objectId)
 		{
-			return _objectDatabase.hasObject(objectId);
+			return _objectDatabase.HasObject(objectId);
 		}
 
 		private static List<DirectoryInfo> ReadObjectsDirs(string objectsDir, ref List<DirectoryInfo> ret)
@@ -279,7 +279,7 @@ namespace GitSharp
 		/// </returns>
 		public ObjectLoader OpenObject(WindowCursor windowCursor, AnyObjectId id)
 		{
-			return _objectDatabase.openObject(windowCursor, id);
+			return _objectDatabase.OpenObject(windowCursor, id);
 		}
 
 		/// <summary>
@@ -839,7 +839,7 @@ namespace GitSharp
 			int usageCount = Interlocked.Decrement(ref _useCnt);
 			if (usageCount == 0)
 			{
-				_objectDatabase.close();
+				_objectDatabase.Close();
 			}
 		}
 
@@ -915,13 +915,12 @@ namespace GitSharp
 			return bytes;
 		}
 
-		/**
-		 * string work dir and return normalized repository path
-		 *
-		 * @param wd Work dir
-		 * @param f File whose path shall be stripp off it's workdir
-		 * @return normalized repository relative path
-		 */
+		/// <summary>
+		/// Strip work dir and return normalized repository path
+		/// </summary>
+		/// <param name="wd">Work directory</param>
+		/// <param name="f">File whose path shall be stripp off it's workdir</param>
+		/// <returns>Normalized repository relative path</returns>
 		public static string StripWorkDir(FileSystemInfo wd, FileSystemInfo f)
 		{
 			string relName = f.FullName.Substring(wd.FullName.Length + 1);

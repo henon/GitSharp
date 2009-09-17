@@ -152,11 +152,15 @@ namespace GitSharp
 		{
 			string str = getString(section, subsection, name);
 			if (str == null)
+			{
 				return defaultValue;
+			}
 
 			string n = str.Trim();
 			if (n.Length == 0)
+			{
 				return defaultValue;
+			}
 
 			long mul = 1;
 			switch (StringUtils.toLowerCase(n[n.Length - 1]))
@@ -173,10 +177,16 @@ namespace GitSharp
 					mul = KiB;
 					break;
 			}
+
 			if (mul > 1)
+			{
 				n = n.Slice(0, n.Length - 1).Trim();
+			}
+
 			if (n.Length == 0)
+			{
 				return defaultValue;
+			}
 
 			try
 			{
@@ -199,18 +209,19 @@ namespace GitSharp
 			if (n == null)
 				return defaultValue;
 
-			if (MagicEmptyValue == n || StringUtils.equalsIgnoreCase("yes", n)
-				|| StringUtils.equalsIgnoreCase("true", n)
-				|| StringUtils.equalsIgnoreCase("1", n)
-				|| StringUtils.equalsIgnoreCase("on", n))
+			if (MagicEmptyValue == n
+				|| "yes".Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| "true".Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| "1".Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| "on".Equals(n, StringComparison.InvariantCultureIgnoreCase))
 			{
 				return true;
 			}
 
-			if (StringUtils.equalsIgnoreCase("no", n)
-				|| StringUtils.equalsIgnoreCase("false", n)
-				|| StringUtils.equalsIgnoreCase("0", n)
-				|| StringUtils.equalsIgnoreCase("off", n))
+			if ("no".Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| "false".Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| Constants.RepositoryFormatVersion.Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| "off".Equals(n, StringComparison.InvariantCultureIgnoreCase))
 			{
 				return false;
 			}
@@ -250,13 +261,13 @@ namespace GitSharp
 			return get(new SubsectionNames(section));
 		}
 
-		public T get<T>(SectionParser<T> parser)
+		public T get<T>(ISectionParser<T> parser)
 		{
 			State myState = getState();
 			T obj;
 			if (!myState.Cache.ContainsKey(parser))
 			{
-				obj = parser.parse(this);
+				obj = parser.Parse(this);
 				myState.Cache.Add(parser, obj);
 			}
 			else
@@ -266,7 +277,7 @@ namespace GitSharp
 			return obj;
 		}
 
-		public void uncache<T>(SectionParser<T> parser)
+		public void uncache<T>(ISectionParser<T> parser)
 		{
 			_state.Cache.Remove(parser);
 		}
@@ -286,8 +297,8 @@ namespace GitSharp
 			List<string> r = null;
 			foreach (Entry e in _state.EntryList)
 			{
-				if (e.match(section, subsection, name))
-					r = add(r, e.value);
+				if (e.Match(section, subsection, name))
+					r = add(r, e.Value);
 			}
 			return r;
 		}
@@ -305,7 +316,7 @@ namespace GitSharp
 		{
 			State cur = _state;
 			State @base = getBaseState();
-			if (cur.baseState == @base)
+			if (cur.BaseState == @base)
 				return cur;
 			var upd = new State(cur.EntryList, @base);
 			_state = upd;
@@ -369,9 +380,9 @@ namespace GitSharp
 			while (entryIndex < entries.Count && valueIndex < values.Count)
 			{
 				Entry e = entries[entryIndex];
-				if (e.match(section, subsection, name))
+				if (e.Match(section, subsection, name))
 				{
-					entries[entryIndex] = e.forValue(values[valueIndex++]);
+					entries[entryIndex] = e.ForValue(values[valueIndex++]);
 					insertPosition = entryIndex + 1;
 				}
 				entryIndex++;
@@ -382,7 +393,7 @@ namespace GitSharp
 				while (entryIndex < entries.Count)
 				{
 					Entry e = entries[entryIndex++];
-					if (e.match(section, subsection, name))
+					if (e.Match(section, subsection, name))
 					{
 						entries.RemoveAt(--entryIndex);
 					}
@@ -398,7 +409,7 @@ namespace GitSharp
 
 				if (insertPosition < 0)
 				{
-					var e = new Entry { section = section, subsection = subsection };
+					var e = new Entry { Section = section, Subsection = subsection };
 					entries.Add(e);
 					insertPosition = entries.Count;
 				}
@@ -407,10 +418,10 @@ namespace GitSharp
 				{
 					var e = new Entry
 								{
-									section = section,
-									subsection = subsection,
-									name = name,
-									value = values[valueIndex++]
+									Section = section,
+									Subsection = subsection,
+									Name = name,
+									Value = values[valueIndex++]
 								};
 					entries.Insert(insertPosition++, e);
 				}
@@ -432,13 +443,13 @@ namespace GitSharp
 			for (int i = 0; i < entries.Count; i++)
 			{
 				Entry e = entries[i];
-				if (e.match(section, subsection, null))
+				if (e.Match(section, subsection, null))
 				{
 					i++;
 					while (i < entries.Count)
 					{
 						e = entries[i];
-						if (e.match(section, subsection, e.name))
+						if (e.Match(section, subsection, e.Name))
 							i++;
 						else
 							break;
@@ -454,49 +465,49 @@ namespace GitSharp
 			var o = new StringBuilder();
 			foreach (Entry e in _state.EntryList)
 			{
-				if (e.prefix != null)
-					o.Append(e.prefix);
-				if (e.section != null && e.name == null)
+				if (e.Prefix != null)
+					o.Append(e.Prefix);
+				if (e.Section != null && e.Name == null)
 				{
 					o.Append('[');
-					o.Append(e.section);
+					o.Append(e.Section);
 
-					if (e.subsection != null)
+					if (e.Subsection != null)
 					{
 						o.Append(' ');
 						o.Append('"');
-						o.Append(EscapeValue(e.subsection));
+						o.Append(EscapeValue(e.Subsection));
 						o.Append('"');
 					}
 
 					o.Append(']');
 				}
-				else if (e.section != null && e.name != null)
+				else if (e.Section != null && e.Name != null)
 				{
-					if (e.prefix == null || string.Empty.Equals(e.prefix))
+					if (e.Prefix == null || string.Empty.Equals(e.Prefix))
 					{
 						o.Append('\t');
 					}
 
-					o.Append(e.name);
+					o.Append(e.Name);
 
-					if (e.value != null)
+					if (e.Value != null)
 					{
-						if (MagicEmptyValue != e.value)
+						if (MagicEmptyValue != e.Value)
 						{
 							o.Append(" = ");
-							o.Append(EscapeValue(e.value));
+							o.Append(EscapeValue(e.Value));
 						}
 					}
 
-					if (e.suffix != null)
+					if (e.Suffix != null)
 					{
 						o.Append(' ');
 					}
 				}
 
-				if (e.suffix != null)
-					o.Append(e.suffix);
+				if (e.Suffix != null)
+					o.Append(e.Suffix);
 				{
 					o.Append('\n');
 				}
@@ -528,33 +539,33 @@ namespace GitSharp
 				if ('\n' == c)
 				{
 					newEntries.Add(e);
-					if (e.section != null)
+					if (e.Section != null)
 						last = e;
 					e = new Entry();
 				}
-				else if (e.suffix != null)
+				else if (e.Suffix != null)
 				{
-					e.suffix += c;
+					e.Suffix += c;
 				}
 				else if (';' == c || '#' == c)
 				{
-					e.suffix = new string(c, 1);
+					e.Suffix = new string(c, 1);
 				}
-				else if (e.section == null && char.IsWhiteSpace(c))
+				else if (e.Section == null && char.IsWhiteSpace(c))
 				{
-					if (e.prefix == null)
+					if (e.Prefix == null)
 					{
-						e.prefix = string.Empty;
+						e.Prefix = string.Empty;
 					}
-					e.prefix += c;
+					e.Prefix += c;
 				}
 				else if ('[' == c)
 				{
-					e.section = readSectionName(i);
+					e.Section = readSectionName(i);
 					input = i.Read();
 					if ('"' == input)
 					{
-						e.subsection = ReadValue(i, true, '"');
+						e.Subsection = ReadValue(i, true, '"');
 						input = i.Read();
 					}
 
@@ -563,22 +574,22 @@ namespace GitSharp
 						throw new ConfigInvalidException("Bad group header");
 					}
 
-					e.suffix = string.Empty;
+					e.Suffix = string.Empty;
 				}
 				else if (last != null)
 				{
-					e.section = last.section;
-					e.subsection = last.subsection;
+					e.Section = last.Section;
+					e.Subsection = last.Subsection;
 					i.Reset();
-					e.name = readKeyName(i);
-					if (e.name.EndsWith("\n"))
+					e.Name = readKeyName(i);
+					if (e.Name.EndsWith("\n"))
 					{
-						e.name = e.name.Slice(0, e.name.Length - 1);
-						e.value = MagicEmptyValue;
+						e.Name = e.Name.Slice(0, e.Name.Length - 1);
+						e.Value = MagicEmptyValue;
 					}
 					else
 					{
-						e.value = ReadValue(i, false, -1);
+						e.Value = ReadValue(i, false, -1);
 					}
 				}
 				else
@@ -837,60 +848,58 @@ namespace GitSharp
 
 		protected class Entry
 		{
-			public string name;
-			public string prefix;
-			public string section;
-			public string subsection;
-			public string suffix;
-			public string value;
+			public string Name;
+			public string Prefix;
+			public string Section;
+			public string Subsection;
+			public string Suffix;
+			public string Value;
 
-			public Entry forValue(string newValue)
+			public Entry ForValue(string newValue)
 			{
 				var e = new Entry
 							{
-								prefix = prefix,
-								section = section,
-								subsection = subsection,
-								name = name,
-								value = newValue,
-								suffix = suffix
+								Prefix = Prefix,
+								Section = Section,
+								Subsection = Subsection,
+								Name = Name,
+								Value = newValue,
+								Suffix = Suffix
 							};
 				return e;
 			}
 
-			public bool match(string aSection, string aSubsection, string aKey)
+			public bool Match(string aSection, string aSubsection, string aKey)
 			{
-				return eqIgnoreCase(section, aSection)
-					   && eqSameCase(subsection, aSubsection)
-					   && eqIgnoreCase(name, aKey);
+				return EqualsIgnoreCase(Section, aSection)
+					   && EqualsSameCase(Subsection, aSubsection)
+					   && EqualsIgnoreCase(Name, aKey);
 			}
 
-			private static bool eqIgnoreCase(string a, string b)
+			private static bool EqualsIgnoreCase(string a, string b)
 			{
-				if (a == null && b == null)
-					return true;
-				if (a == null || b == null)
-					return false;
-				return StringUtils.equalsIgnoreCase(a, b);
+				if (a == null && b == null) return true;
+				if (a == null || b == null) return false;
+
+				return a.Equals(b, StringComparison.InvariantCultureIgnoreCase);
 			}
 
-			private static bool eqSameCase(string a, string b)
+			private static bool EqualsSameCase(string a, string b)
 			{
-				if (a == null && b == null)
-					return true;
-				if (a == null || b == null)
-					return false;
-				return a.Equals(b);
+				if (a == null && b == null) return true;
+				if (a == null || b == null) return false;
+
+				return a.Equals(b, StringComparison.InvariantCulture);
 			}
 		}
 
 		#endregion
 
-		#region Nested type: SectionParser
+		#region Nested type: ISectionParser
 
-		public interface SectionParser<T>
+		public interface ISectionParser<T>
 		{
-			T parse(Config cfg);
+			T Parse(Config cfg);
 		}
 
 		#endregion
@@ -899,15 +908,15 @@ namespace GitSharp
 
 		private class State
 		{
-			public readonly State baseState;
+			public readonly State BaseState;
 			public readonly Dictionary<object, object> Cache;
 			public readonly List<Entry> EntryList;
 
-			public State(List<Entry> entries, State @base)
+			public State(List<Entry> entries, State baseState)
 			{
 				EntryList = entries;
 				Cache = new Dictionary<object, object>();
-				baseState = @base;
+				BaseState = baseState;
 			}
 		}
 
@@ -915,26 +924,29 @@ namespace GitSharp
 
 		#region Nested type: SubsectionNames
 
-		private class SubsectionNames : SectionParser<List<string>>
+		private class SubsectionNames : ISectionParser<List<string>>
 		{
-			private readonly string section;
+			private readonly string _section;
 
 			public SubsectionNames(string sectionName)
 			{
-				section = sectionName;
+				_section = sectionName;
 			}
 
-			#region SectionParser<List<string>> Members
+			#region ISectionParser<List<string>> Members
 
-			public List<string> parse(Config cfg)
+			public List<string> Parse(Config cfg)
 			{
 				var result = new List<string>();
 				while (cfg != null)
 				{
 					foreach (Entry e in cfg._state.EntryList)
 					{
-						if (e.subsection != null && e.name == null && StringUtils.equalsIgnoreCase(section, e.section))
-							result.Add(e.subsection);
+						if (e.Subsection != null && e.Name == null && 
+							_section.Equals(e.Section, StringComparison.InvariantCultureIgnoreCase))
+						{
+							result.Add(e.Subsection);
+						}
 					}
 					cfg = cfg._baseConfig;
 				}
@@ -945,13 +957,16 @@ namespace GitSharp
 
 			public override int GetHashCode()
 			{
-				return section.GetHashCode();
+				return _section.GetHashCode();
 			}
 
 			public override bool Equals(object obj)
 			{
 				if (obj is SubsectionNames)
-					return section.Equals(((SubsectionNames)obj).section);
+				{
+					return _section.Equals(((SubsectionNames)obj)._section);
+				}
+
 				return false;
 			}
 		}

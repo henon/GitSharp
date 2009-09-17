@@ -42,15 +42,15 @@ namespace GitSharp
 {
     public class CoreConfig
     {
-        private class SectionParser : Config.SectionParser<CoreConfig>
+        private class SectionParser : Config.ISectionParser<CoreConfig>
         {
-            public CoreConfig parse(Config cfg)
+            public CoreConfig Parse(Config cfg)
             {
                 return new CoreConfig(cfg);
             }
         }
 
-        public static Config.SectionParser<CoreConfig> KEY = new SectionParser();
+        public static Config.ISectionParser<CoreConfig> KEY = new SectionParser();
 
         private readonly int compression;
         private readonly int packIndexVersion;

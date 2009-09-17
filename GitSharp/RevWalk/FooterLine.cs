@@ -74,7 +74,7 @@ namespace GitSharp.RevWalk
 		/// Key to test this line's key name against.
 		/// </param>
 		/// <returns>
-		/// true if {@code key.getName().equalsIgnorecase(getKey())}.
+		/// true if <code>code key.Name.Equals(Key, StringComparison.InvariantCultureIgnoreCase))</code>.
 		/// </returns>
 		public bool Matches(FooterKey key)
 		{

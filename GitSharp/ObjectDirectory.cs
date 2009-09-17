@@ -43,7 +43,6 @@ using System.Linq;
 using GitSharp.Exceptions;
 using GitSharp.Transport;
 using GitSharp.Util;
-using System.Diagnostics;
 
 namespace GitSharp
 {
@@ -73,10 +72,14 @@ namespace GitSharp
 		public ObjectDirectory(DirectoryInfo dir)
 		{
 			_objects = dir;
-			_infoDirectory = new DirectoryInfo(_objects.FullName + "/info");
-			_packDirectory = new DirectoryInfo(_objects.FullName + "/pack");
-			_alternatesFile = new FileInfo(_infoDirectory + "/alternates");
+			_infoDirectory = new DirectoryInfo(Path.Combine(_objects.FullName, "info"));
+			_packDirectory = new DirectoryInfo(Path.Combine(_objects.FullName, "pack"));
+			_alternatesFile = new FileInfo(Path.Combine(_infoDirectory.FullName, "alternates"));
 			_packList = new AtomicReference<PackFile[]>();
+			
+			// Make sure that the directories exists.
+			if (!_infoDirectory.Exists) _infoDirectory.Mkdirs();
+			if (!_packDirectory.Exists) _packDirectory.Mkdirs();
 		}
 
 		/// <summary>
@@ -87,19 +90,19 @@ namespace GitSharp
 			return _objects;
 		}
 
-		public override bool exists()
+		public override bool Exists()
 		{
 			return _objects.Exists;
 		}
 
-		public override void create()
+		public override void Create()
 		{
 			_objects.Create();
 			_infoDirectory.Create();
 			_packDirectory.Create();
 		}
 
-		public override void closeSelf()
+		public override void CloseSelf()
 		{
 			PackFile[] packs = _packList.get();
 			if (packs == null) return;
@@ -161,7 +164,7 @@ namespace GitSharp
 			return "ObjectDirectory[" + Directory() + "]";
 		}
 
-		public override bool hasObject1(AnyObjectId objectId)
+		protected internal override bool HasObject1(AnyObjectId objectId)
 		{
 			foreach (PackFile p in Packs())
 			{
@@ -174,7 +177,7 @@ namespace GitSharp
 				}
 				catch (IOException)
 				{
-					// The hasObject call should have only touched the index,
+					// The HasObject call should have only touched the index,
 					// so any failure here indicates the index is unreadable
 					// by this process, and the pack is likewise not readable.
 					//
@@ -186,13 +189,14 @@ namespace GitSharp
 			return false;
 		}
 
-		public override ObjectLoader openObject1(WindowCursor curs, AnyObjectId objectId)
+		protected internal override ObjectLoader OpenObject1(WindowCursor curs, AnyObjectId objectId)
 		{
 			PackFile[] pList = Packs();
 
+			bool breakLoop = false;
+
 			while (true)
 			{
-                SEARCH:
 				foreach (PackFile p in pList)
 				{
 					try
@@ -209,13 +213,18 @@ namespace GitSharp
 						// Pack was modified; refresh the entire pack list.
 						//
 						pList = ScanPacks(pList);
-						goto SEARCH;
+						breakLoop = true;
 					}
 					catch (IOException)
 					{
 						// Assume the pack is corrupted.
 						//
 						RemovePack(p);
+					}
+
+					if (breakLoop)
+					{
+						break;
 					}
 				}
 
@@ -258,12 +267,12 @@ namespace GitSharp
 			}
 		}
 
-		public override bool hasObject2(string objectName)
+		protected internal override bool HasObject2(string objectName)
 		{
 			return FileFor(objectName).Exists;
 		}
 
-		public override ObjectLoader openObject2(WindowCursor curs, string objectName, AnyObjectId objectId)
+		protected internal override ObjectLoader OpenObject2(WindowCursor curs, string objectName, AnyObjectId objectId)
 		{
 			try
 			{
@@ -279,7 +288,7 @@ namespace GitSharp
 			}
 		}
 
-		public override bool tryAgain1()
+		protected internal override bool TryAgain1()
 		{
 			PackFile[] old = _packList.get();
             _packDirectory.Refresh();
@@ -374,16 +383,17 @@ namespace GitSharp
 			Dictionary<string, PackFile> forReuse = ReuseMap(old);
 			string[] idxList = ListPackIdx();
 			var list = new List<PackFile>(idxList.Length);
+
 			foreach (string indexName in idxList)
 			{
-				string @base = indexName.Slice(0, indexName.Length - 4);
-				string packName = IndexPack.GetPackFileName(@base);
+				string baseFileName = indexName.Slice(0, indexName.Length - 4);
+				string packName = IndexPack.GetPackFileName(baseFileName);
 
 				PackFile oldPack;
-				forReuse.TryGetValue(packName, out oldPack);
-				forReuse.Remove(packName);
-				if (oldPack != null)
+
+				if (forReuse.TryGetValue(packName, out oldPack))
 				{
+					forReuse.Remove(packName);
 					list.Add(oldPack);
 					continue;
 				}
@@ -398,7 +408,7 @@ namespace GitSharp
 					continue;
 				}
 
-				var idxFile = new FileInfo(_packDirectory + "/" + indexName);
+				var idxFile = new FileInfo(Path.Combine(_packDirectory.FullName, indexName));
 				list.Add(new PackFile(idxFile, packFile));
 			}
 
@@ -411,6 +421,7 @@ namespace GitSharp
 			{
 				return NoPacks;
 			}
+
 			PackFile[] r = list.ToArray();
 			Array.Sort(r, PackFile.PackFileSortComparison);
 			return r;
@@ -431,16 +442,14 @@ namespace GitSharp
 				}
 
 				PackFile prior = forReuse[p.File.Name] = p;
-
-				// This should never occur. It should be impossible for us
-				// to have two pack files with the same name, as all of them
-				// came out of the same directory. If it does, we promised to
-				// close any PackFiles we did not reuse, so close the one we
-				// just evicted out of the reuse map.
-				//
-				Debug.Assert(prior == null);
 				if (prior != null)
 				{
+					// This should never occur. It should be impossible for us
+					// to have two pack files with the same name, as all of them
+					// came out of the same directory. If it does, we promised to
+					// close any PackFiles we did not reuse, so close the one we
+					// just evicted out of the reuse map.
+					//
 					prior.Close();
 				}
 			}
@@ -461,7 +470,7 @@ namespace GitSharp
 			return idxList;  // idxList != null ? idxList : "";
 		}
 
-		public override ObjectDatabase[] loadAlternates()
+		protected override ObjectDatabase[] LoadAlternates()
 		{
 			StreamReader br = Open(_alternatesFile);
 			var l = new List<ObjectDirectory>(4);

@@ -52,7 +52,7 @@ namespace GitSharp
         public const string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
 
         /// <summary>
-        ///   Special name for the "HEAD" symbolic ref
+        /// Special name for the "HEAD" symbolic ref
         /// </summary>
         public const string Head = "HEAD";
 
@@ -431,7 +431,7 @@ namespace GitSharp
         /// </summary>
         /// <param name="id">
         /// <see cref="ObjectId" /> this type string came from; may be null if 
-        /// that is not known at the time the parse is occurring.
+        /// that is not known at the time the Parse is occurring.
         /// </param>
         /// <param name="typeString">string version of the type code.</param>
         /// <param name="endMark">
@@ -439,9 +439,9 @@ namespace GitSharp
         /// (space) or '\n' (line feed).
         /// </param>
         /// <param name="offset">
-		/// Position within <paramref name="typeString"/> where the parse
+		/// Position within <paramref name="typeString"/> where the Parse
 		/// should start. Updated with the new position (just past
-		/// <paramref name="endMark"/> when the parse is successful).
+		/// <paramref name="endMark"/> when the Parse is successful).
         /// </param>
         /// <returns>
         /// A type code constant (one of <see cref="OBJ_BLOB"/>,
@@ -573,5 +573,7 @@ namespace GitSharp
 		public const long TicksPerSecond = 10000000L;
     	public const int TicksPerMillisecond = 1000000;
     	public const long TicksPerNanosecond = 1000000000L;
+
+    	internal const string RepositoryFormatVersion = "0";
     }
 }

@@ -117,7 +117,7 @@ namespace GitSharp.Transport
 				additionalHaves(((AlternateRepositoryDatabase)db).getRepository());
 			}
 
-			foreach (ObjectDatabase alt in db.getAlternates())
+			foreach (ObjectDatabase alt in db.GetAlternates())
 			{
 				additionalHaves(alt);
 			}

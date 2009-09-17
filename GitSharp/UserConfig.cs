@@ -43,15 +43,15 @@ namespace GitSharp
 
     public class UserConfig
     {
-        private class SectionParser : Config.SectionParser<UserConfig>
+        private class SectionParser : Config.ISectionParser<UserConfig>
         {
-            public UserConfig parse(Config cfg)
+            public UserConfig Parse(Config cfg)
             {
                 return new UserConfig(cfg);
             }
         }
 
-        public static Config.SectionParser<UserConfig> KEY = new SectionParser();
+        public static Config.ISectionParser<UserConfig> KEY = new SectionParser();
 
         private readonly string authorName;
         private readonly string authorEmail;

@@ -49,13 +49,13 @@ namespace GitSharp
 {
 	public class PackWriter
 	{
-		public const string COUNTING_OBJECTS_PROGRESS = "Counting objects";
-		public const string SEARCHING_REUSE_PROGRESS = "Compressing objects";
-		public const string WRITING_OBJECTS_PROGRESS = "Writing objects";
-		public const bool DEFAULT_REUSE_DELTAS = true;
-		public const bool DEFAULT_REUSE_OBJECTS = true;
-		public const bool DEFAULT_DELTA_BASE_AS_OFFSET = false;
-		public const int DEFAULT_MAX_DELTA_DEPTH = 50;
+		private const string CountingObjectsProgress = "Counting objects";
+		private const string SearchingReuseProgress = "Compressing objects";
+		private const string WritingObjectsProgress = "Writing objects";
+		private const bool DefaultReuseDeltas = true;
+		private const bool DefaultReuseObjects = true;
+		private const bool DefaultDeltaBaseAsOffset = false;
+		private const int DefaultMaxDeltaDepth = 50;
 
 		private const int PackVersionGenerated = 2;
 		
@@ -98,10 +98,10 @@ namespace GitSharp
 			_windowCursor = new WindowCursor();
 
 			IgnoreMissingUninteresting = true;
-			MaxDeltaDepth = DEFAULT_MAX_DELTA_DEPTH;
-			DeltaBaseAsOffset = DEFAULT_DELTA_BASE_AS_OFFSET;
-			ReuseObjects = DEFAULT_REUSE_OBJECTS;
-			ReuseDeltas = DEFAULT_REUSE_DELTAS;
+			MaxDeltaDepth = DefaultMaxDeltaDepth;
+			DeltaBaseAsOffset = DefaultDeltaBaseAsOffset;
+			ReuseObjects = DefaultReuseObjects;
+			ReuseDeltas = DefaultReuseDeltas;
 			_db = repo;
 			_initMonitor = imonitor;
 			_writeMonitor = wmonitor;
@@ -202,7 +202,7 @@ namespace GitSharp
 
 			_pos = new PackOutputStream(packStream);
 
-			_writeMonitor.BeginTask(WRITING_OBJECTS_PROGRESS, getObjectsNumber());
+			_writeMonitor.BeginTask(WritingObjectsProgress, getObjectsNumber());
 			WriteHeader();
 			WriteObjects();
 			WriteChecksum();
@@ -214,7 +214,7 @@ namespace GitSharp
 
 		private void SearchForReuse()
 		{
-			_initMonitor.BeginTask(SEARCHING_REUSE_PROGRESS, getObjectsNumber());
+			_initMonitor.BeginTask(SearchingReuseProgress, getObjectsNumber());
 			var reuseLoaders = new List<PackedObjectLoader>();
 			foreach (List<ObjectToPack> list in _objectsLists)
 			{
@@ -375,6 +375,7 @@ namespace GitSharp
 			{
 				WriteWholeObjectDeflate(otp);
 			}
+
 			otp.CRC = _pos.getCRC32();
 			_writeMonitor.Update(1);
 		}
@@ -451,6 +452,7 @@ namespace GitSharp
 			int size = 0;
 			_buf[size++] = (byte)((nextLength > 0 ? (byte)0x80 : (byte)0x00) | (byte)(objectType << 4) | (byte)(dataLength & 0x0F));
 			dataLength = nextLength;
+
 			while (dataLength > 0)
 			{
 				nextLength = (long)(((ulong)nextLength) >> 7);
@@ -489,6 +491,7 @@ namespace GitSharp
 				foreach (T id in uninterestingObjects)
 				{
 					RevObject o;
+
 					try
 					{
 						o = walker.parseAny(id);
@@ -498,6 +501,7 @@ namespace GitSharp
 						if (IgnoreMissingUninteresting) continue;
 						throw;
 					}
+
 					walker.markUninteresting(o);
 				}
 			}
@@ -507,7 +511,7 @@ namespace GitSharp
 
 		private void FindObjectsToPack(ObjectWalk walker)
 		{
-			_initMonitor.BeginTask(COUNTING_OBJECTS_PROGRESS, ProgressMonitor.UNKNOWN);
+			_initMonitor.BeginTask(CountingObjectsProgress, ProgressMonitor.UNKNOWN);
 			RevObject o;
 
 			while ((o = walker.next()) != null)
@@ -515,6 +519,7 @@ namespace GitSharp
 				addObject(o);
 				_initMonitor.Update(1);
 			}
+
 			while ((o = walker.nextObject()) != null)
 			{
 				addObject(o);

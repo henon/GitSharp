@@ -75,10 +75,10 @@ namespace GitSharp
 
 		/// <summary>
 		/// Gets if this database is already created; If it returns false, the caller
-		/// should invoke <see cref="create"/> to create this database location.
+		/// should invoke <see cref="Create"/> to create this database location.
 		/// </summary>
 		/// <returns></returns>
-        public virtual bool exists()
+        public virtual bool Exists()
         {
             return true;
         }
@@ -86,7 +86,7 @@ namespace GitSharp
         /// <summary>
 		/// Initialize a new object database at this location.
         /// </summary>
-        public virtual void create()
+        public virtual void Create()
         {
             // Assume no action is required.
         }
@@ -94,19 +94,19 @@ namespace GitSharp
         /// <summary>
 		/// Close any resources held by this database and its active alternates.
         /// </summary>
-        public void close()
+        public void Close()
         {
-            closeSelf();
-            closeAlternates();
+            CloseSelf();
+            CloseAlternates();
         }
 
         /// <summary>
         /// Close any resources held by this database only; ignoring alternates.
 		/// <para />
 		/// To fully close this database and its referenced alternates, the caller
-		/// should instead invoke <see cref="close()"/>.
+		/// should instead invoke <see cref="Close"/>.
         /// </summary>
-        public virtual void closeSelf()
+        public virtual void CloseSelf()
         {
             // Assume no action is required.
         }
@@ -114,7 +114,7 @@ namespace GitSharp
         /// <summary>
 		/// Fully close all loaded alternates and clear the alternate list.
         /// </summary>
-        public virtual void closeAlternates()
+        public virtual void CloseAlternates()
         {
             ObjectDatabase[] alt = _alternates.get();
             if (alt != null)
@@ -122,7 +122,7 @@ namespace GitSharp
                 _alternates.set(null);
                 foreach (ObjectDatabase d in alt)
                 {
-                    d.close();
+                    d.Close();
                 }
             }
         }
@@ -137,36 +137,35 @@ namespace GitSharp
         /// True if the specified object is stored in this database, or any
 		/// of the alternate databases.
         /// </returns>
-        public bool hasObject(AnyObjectId objectId)
+        public bool HasObject(AnyObjectId objectId)
         {
-            return hasObjectImpl1(objectId) || hasObjectImpl2(objectId.ToString());
+            return HasObjectImpl1(objectId) || HasObjectImpl2(objectId.ToString());
         }
 
-        private bool hasObjectImpl1(AnyObjectId objectId)
+        private bool HasObjectImpl1(AnyObjectId objectId)
         {
-            if (hasObject1(objectId))
+            if (HasObject1(objectId)) return true;
+            
+			foreach (ObjectDatabase alt in GetAlternates())
             {
-                return true;
-            }
-            foreach (ObjectDatabase alt in getAlternates())
-            {
-                if (alt.hasObjectImpl1(objectId))
+                if (alt.HasObjectImpl1(objectId))
                 {
                     return true;
                 }
             }
-            return tryAgain1() && hasObject1(objectId);
+
+            return TryAgain1() && HasObject1(objectId);
         }
 
-        private bool hasObjectImpl2(string objectId)
+        private bool HasObjectImpl2(string objectId)
         {
-            if (hasObject2(objectId))
+            if (HasObject2(objectId))
             {
                 return true;
             }
-            foreach (ObjectDatabase alt in getAlternates())
+            foreach (ObjectDatabase alt in GetAlternates())
             {
-                if (alt.hasObjectImpl2(objectId))
+                if (alt.HasObjectImpl2(objectId))
                 {
                     return true;
                 }
@@ -175,7 +174,7 @@ namespace GitSharp
         }
 
         /// <summary>
-		/// Fast half of <see cref="hasObject(AnyObjectId)"/>.
+		/// Fast half of <see cref="HasObject"/>.
         /// </summary>
         /// <param name="objectId">
         /// Identity of the object to test for existence of.
@@ -183,10 +182,10 @@ namespace GitSharp
         /// <returns>
         /// true if the specified object is stored in this database.
         /// </returns>
-        public abstract bool hasObject1(AnyObjectId objectId);
+		protected internal abstract bool HasObject1(AnyObjectId objectId);
 
 		/// <summary>
-		/// Slow half of <see cref="hasObject(AnyObjectId)"/>.
+		/// Slow half of <see cref="HasObject"/>.
 		/// </summary>
 		/// <param name="objectName">
 		/// Identity of the object to test for existence of.
@@ -194,9 +193,9 @@ namespace GitSharp
 		/// <returns>
 		/// true if the specified object is stored in this database.
 		/// </returns>
-        public virtual bool hasObject2(string objectName)
+		protected internal virtual bool HasObject2(string objectName)
         {
-            // Assume the search took place during hasObject1.
+            // Assume the search took place during HasObject1.
             return false;
         }
 
@@ -205,7 +204,7 @@ namespace GitSharp
 		/// <para />
 		/// Alternates (if present) are searched automatically.
         /// </summary>
-        /// <param name="curs">
+        /// <param name="windowCursor">
         /// Temporary working space associated with the calling thread.
         /// </param>
         /// <param name="objectId">Identity of the object to open.</param>
@@ -213,17 +212,17 @@ namespace GitSharp
         /// A <see cref="ObjectLoader"/> for accessing the data of the named
 		/// object, or null if the object does not exist.
         /// </returns>
-        public ObjectLoader openObject(WindowCursor curs, AnyObjectId objectId)
+        public ObjectLoader OpenObject(WindowCursor windowCursor, AnyObjectId objectId)
         {
             if (objectId == null) return null;
 
-        	ObjectLoader ldr = OpenObjectImpl1(curs, objectId);
+        	ObjectLoader ldr = OpenObjectImpl1(windowCursor, objectId);
             if (ldr != null)
             {
                 return ldr;
             }
 
-            ldr = OpenObjectImpl2(curs, objectId.Name, objectId);
+            ldr = OpenObjectImpl2(windowCursor, objectId.Name, objectId);
             if (ldr != null)
             {
                 return ldr;
@@ -231,27 +230,26 @@ namespace GitSharp
             return null;
         }
 
-        private ObjectLoader OpenObjectImpl1(WindowCursor curs,
-                 AnyObjectId objectId)
+        private ObjectLoader OpenObjectImpl1(WindowCursor windowCursor, AnyObjectId objectId)
         {
-        	ObjectLoader ldr = openObject1(curs, objectId);
+        	ObjectLoader ldr = OpenObject1(windowCursor, objectId);
             if (ldr != null)
             {
                 return ldr;
             }
 
-            foreach (ObjectDatabase alt in getAlternates())
+            foreach (ObjectDatabase alt in GetAlternates())
             {
-                ldr = alt.OpenObjectImpl1(curs, objectId);
+                ldr = alt.OpenObjectImpl1(windowCursor, objectId);
                 if (ldr != null)
                 {
                     return ldr;
                 }
             }
 
-            if (tryAgain1())
+            if (TryAgain1())
             {
-                ldr = openObject1(curs, objectId);
+                ldr = OpenObject1(windowCursor, objectId);
                 if (ldr != null)
                 {
                     return ldr;
@@ -261,17 +259,17 @@ namespace GitSharp
             return null;
         }
 
-        private ObjectLoader OpenObjectImpl2(WindowCursor curs, string objectName, AnyObjectId objectId)
+        private ObjectLoader OpenObjectImpl2(WindowCursor windowCursor, string objectName, AnyObjectId objectId)
         {
-        	ObjectLoader ldr = openObject2(curs, objectName, objectId);
+        	ObjectLoader ldr = OpenObject2(windowCursor, objectName, objectId);
             if (ldr != null)
             {
                 return ldr;
             }
 
-            foreach (ObjectDatabase alt in getAlternates())
+            foreach (ObjectDatabase alt in GetAlternates())
             {
-                ldr = alt.OpenObjectImpl2(curs, objectName, objectId);
+                ldr = alt.OpenObjectImpl2(windowCursor, objectName, objectId);
                 if (ldr != null)
                 {
                     return ldr;
@@ -282,9 +280,9 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// Fast half of <see cref="openObject(WindowCursor, AnyObjectId)"/>.
+        /// Fast half of <see cref="OpenObject"/>.
         /// </summary>
-        /// <param name="curs">
+        /// <param name="windowCursor">
         /// temporary working space associated with the calling thread.
         /// </param>
         /// <param name="objectId">identity of the object to open.</param>
@@ -292,13 +290,12 @@ namespace GitSharp
         /// A <see cref="ObjectLoader"/> for accessing the data of the named
 		/// object, or null if the object does not exist.
         /// </returns>
-        public abstract ObjectLoader openObject1(WindowCursor curs,
-                AnyObjectId objectId);
+		protected internal abstract ObjectLoader OpenObject1(WindowCursor windowCursor, AnyObjectId objectId);
 
 		/// <summary>
-		/// Slow half of <see cref="openObject(WindowCursor, AnyObjectId)"/>.
+		/// Slow half of <see cref="OpenObject"/>.
 		/// </summary>
-		/// <param name="curs">
+		/// <param name="windowCursor">
 		/// temporary working space associated with the calling thread.
 		/// </param>
 		/// <param name="objectName">Name of the object to open.</param>
@@ -307,10 +304,9 @@ namespace GitSharp
 		/// A <see cref="ObjectLoader"/> for accessing the data of the named
 		/// object, or null if the object does not exist.
 		/// </returns>
-        public virtual ObjectLoader openObject2(WindowCursor curs, string objectName,
-                AnyObjectId objectId)
+		protected internal virtual ObjectLoader OpenObject2(WindowCursor windowCursor, string objectName, AnyObjectId objectId)
         {
-            // Assume the search took place during openObject1.
+            // Assume the search took place during OpenObject1.
             return null;
         }
 
@@ -330,7 +326,7 @@ namespace GitSharp
         public void OpenObjectInAllPacks(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
         {
             OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
-            foreach (ObjectDatabase alt in getAlternates())
+            foreach (ObjectDatabase alt in GetAlternates())
             {
                 alt.OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
             }
@@ -358,7 +354,7 @@ namespace GitSharp
 		/// true if the fast-half search should be tried again.
         /// </summary>
         /// <returns></returns>
-        public virtual bool tryAgain1()
+		protected internal virtual bool TryAgain1()
         {
             return false;
         }
@@ -369,7 +365,7 @@ namespace GitSharp
         /// <returns>
 		/// The alternate list. Never null, but may be an empty array.
         /// </returns>
-        public ObjectDatabase[] getAlternates()
+        public ObjectDatabase[] GetAlternates()
         {
             ObjectDatabase[] r = _alternates.get();
             if (r == null)
@@ -381,7 +377,7 @@ namespace GitSharp
                     {
                         try
                         {
-                            r = loadAlternates();
+                            r = LoadAlternates();
                         }
                         catch (IOException)
                         {
@@ -397,8 +393,8 @@ namespace GitSharp
         /// <summary>
         /// Load the list of alternate databases into memory.
 		/// <para />
-		/// This method is invoked by <see cref="getAlternates()"/> if the alternate list
-		/// has not yet been populated, or if <see cref="closeAlternates()"/> has been
+		/// This method is invoked by <see cref="GetAlternates"/> if the alternate list
+		/// has not yet been populated, or if <see cref="CloseAlternates"/> has been
 		/// called on this instance and the alternate list is needed again.
 		/// <para />
 		/// If the alternate array is empty, implementors should consider using the
@@ -409,7 +405,7 @@ namespace GitSharp
         /// The alternate list could not be accessed. The empty alternate
 		/// array <see cref="NoAlternates"/> will be assumed by the caller.
         /// </exception>
-        public virtual ObjectDatabase[] loadAlternates()
+        protected virtual ObjectDatabase[] LoadAlternates()
         {
             return NoAlternates;
         }

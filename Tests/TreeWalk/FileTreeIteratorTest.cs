@@ -78,7 +78,7 @@ namespace GitSharp.Tests.TreeWalk
 
 			var fti = new FileTreeIterator(di);
 			Assert.IsTrue(fti.first());
-			Assert.IsTrue(fti.eof());
+			Assert.IsTrue(fti.eof(),"Test fails under mono due to http://bugzilla.novell.com/show_bug.cgi?id=539791,Fixed upstream");
 		}
 
 		[Test]

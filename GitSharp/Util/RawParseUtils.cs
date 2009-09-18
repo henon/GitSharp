@@ -838,7 +838,7 @@ namespace GitSharp.Util
 
 			if (encodingName.Contains("_"))
 			{
-				encodingName = encodingName.Replace("_", "-");
+				encodingName = encodingName.Replace('_', '-');
 			}
 
 			return Encoding.GetEncoding(encodingName);

@@ -309,7 +309,7 @@
 	<target name="common.find-tools">
 		<!-- Where is nunit-console executable(win/mono) ? -->
 		<property name="nunit-console2" value="nunit-console2" overwrite="false" />
-		<property name="nunit-console" value="${root.dir}/extern/Xunit/xunit.console.exe" overwrite="false" />
+		<property name="nunit-console" value="${root.dir}/extern/Xunit/xunit.console.x86.exe" overwrite="false" />
 
 		<!-- Where is NCover? (on 64-bit Windows NAnt's get-folder-path() returns the x86 directory which is not what we want) -->
 		<property name="ncover.dir" value="C:\Program Files\NCover" overwrite="false" />

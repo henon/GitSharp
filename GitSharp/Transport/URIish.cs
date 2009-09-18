@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -95,13 +95,13 @@ namespace GitSharp.Transport
 			if (matcher.Success)
 			{
 				Scheme = matcher.Groups[1].Value;
-				Scheme = Scheme == string.Empty ? null : Scheme;
+				Scheme = Scheme.Length == 0 ? null : Scheme;
 				User = matcher.Groups[2].Value;
-				User = User == string.Empty ? null : User;
+				User = User.Length == 0 ? null : User;
 				Pass = matcher.Groups[3].Value;
-				Pass = Pass == string.Empty ? null : Pass;
+				Pass = Pass.Length == 0 ? null : Pass;
 				Host = matcher.Groups[4].Value;
-				Host = Host == string.Empty ? null : Host;
+				Host = Host.Length == 0 ? null : Host;
 				if (matcher.Groups[5].Success)
 				{
 					Port = int.Parse(matcher.Groups[5].Value);
@@ -118,11 +118,11 @@ namespace GitSharp.Transport
 				if (matcher.Success)
 				{
 					User = matcher.Groups[1].Value;
-					User = User == string.Empty ? null : User;
+					User = User.Length == 0 ? null : User;
 					Host = matcher.Groups[2].Value;
-					Host = Host == string.Empty ? null : Host;
+					Host = Host.Length == 0 ? null : Host;
 					Path = matcher.Groups[3].Value;
-					Path = Path == string.Empty ? null : Path;
+					Path = Path.Length == 0 ? null : Path;
 				}
 				else
 				{

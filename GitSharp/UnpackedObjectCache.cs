@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -41,7 +41,7 @@ using System.Runtime.CompilerServices;
 
 namespace GitSharp
 {
-    public class UnpackedObjectCache
+    public static class UnpackedObjectCache
     {
         private const int CacheSize = 1024;
 

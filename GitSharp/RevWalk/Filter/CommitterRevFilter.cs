@@ -45,7 +45,7 @@ namespace GitSharp.RevWalk.Filter
 	/// <summary>
 	/// Matches only commits whose committer name matches the pattern.
 	/// </summary>
-	public class CommitterRevFilter
+	public static class CommitterRevFilter
 	{
 		///	<summary>
 		/// Create a new committer filter.
@@ -75,11 +75,6 @@ namespace GitSharp.RevWalk.Filter
 			}
 
 			return new PatternSearch(pattern);
-		}
-
-		private CommitterRevFilter()
-		{
-			// Don't permit us to be created.
 		}
 
 		private static string TextFor(RevCommit cmit)

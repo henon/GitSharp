@@ -52,11 +52,10 @@ namespace GitSharp
 		///	<summary>
 		/// Parsed reflog entry.
 		/// </summary>
-		public ReflogReader(Repository db, string refname)
+		public ReflogReader(Repository db, string refName)
 		{
-			_logName = new FileInfo(
-				Path.Combine(db.Directory.FullName, 
-					Path.Combine("logs", refname.Replace("/", Path.DirectorySeparatorChar.ToString()))));
+			_logName = new FileInfo(Path.Combine(db.Directory.FullName,
+                Path.Combine("logs", refName.Replace("/", Path.DirectorySeparatorChar.ToString()))));
 		}
 
 		///	<summary>
@@ -86,14 +85,12 @@ namespace GitSharp
 		{
 			byte[] log;
 
-			try
-			{
-				log = NB.ReadFully(_logName);
-			}
-			catch (FileNotFoundException)
+			if (!_logName.Exists)
 			{
 				return new List<Entry>();
 			}
+
+			log = NB.ReadFully(_logName);
 
 			var ret = new List<Entry>();
 			int rs = RawParseUtils.prevLF(log, log.Length);
@@ -101,8 +98,8 @@ namespace GitSharp
 			while (rs >= 0 && max-- > 0)
 			{
 				rs = RawParseUtils.prevLF(log, rs);
-				rs = rs < 0 ? 0 : rs + 2;
-				var entry = new Entry(log, rs);
+				var position = rs < 0 ? 0 : rs + 2;
+				var entry = new Entry(log, position);
 				ret.Add(entry);
 			}
 

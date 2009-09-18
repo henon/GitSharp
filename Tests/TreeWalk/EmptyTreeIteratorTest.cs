@@ -43,7 +43,7 @@ namespace GitSharp.Tests.TreeWalk
 {
 	public class EmptyTreeIteratorTest : RepositoryTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testAtEOF()
 		{
 			var etp = new EmptyTreeIterator();
@@ -51,7 +51,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(etp.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testCreateSubtreeIterator()
 		{
 			var etp = new EmptyTreeIterator();
@@ -62,7 +62,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(sub is EmptyTreeIterator);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testEntryObjectId()
 		{
 			var etp = new EmptyTreeIterator();
@@ -72,7 +72,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.Equal(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testNextDoesNothing()
 		{
 			var etp = new EmptyTreeIterator();
@@ -87,7 +87,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.Equal(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testBackDoesNothing()
 		{
 			var etp = new EmptyTreeIterator();
@@ -102,7 +102,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.Equal(ObjectId.ZeroId, ObjectId.FromRaw(etp.idBuffer()));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testStopWalkCallsParent()
 		{
 			var called = new bool[1];

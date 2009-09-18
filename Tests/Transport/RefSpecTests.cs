@@ -43,7 +43,7 @@ namespace GitSharp.Tests.Transport
 {
     public class RefSpecTests
     {
-        [Fact]
+        [StrictFactAttribute]
         public void test000_MasterMaster()
         {
             const string sn = "refs/heads/master";
@@ -65,7 +65,7 @@ namespace GitSharp.Tests.Transport
             Assert.False(rs.MatchDestination(r));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test001_SplitLastColon()
         {
             const string lhs = ":m:a:i:n:t";
@@ -79,7 +79,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(rs, new RefSpec(rs.ToString()));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test002_ForceMasterMaster()
         {
             const string sn = "refs/heads/master";
@@ -101,7 +101,7 @@ namespace GitSharp.Tests.Transport
             Assert.False(rs.MatchDestination(r));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test003_Master()
         {
             const string sn = "refs/heads/master";
@@ -123,7 +123,7 @@ namespace GitSharp.Tests.Transport
             Assert.False(rs.MatchDestination(r));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test004_ForceMaster()
         {
             const string sn = "refs/heads/master";
@@ -145,7 +145,7 @@ namespace GitSharp.Tests.Transport
             Assert.False(rs.MatchDestination(r));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test005_DeleteMaster()
         {
             const string sn = "refs/heads/master";
@@ -167,7 +167,7 @@ namespace GitSharp.Tests.Transport
             Assert.False(rs.MatchDestination(r));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test006_ForceRemotesOrigin()
         {
             const string srcn = "refs/heads/*";
@@ -199,7 +199,7 @@ namespace GitSharp.Tests.Transport
             Assert.False(rs.MatchDestination(r));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test007_CreateEmpty()
         {
             var rs = new RefSpec();
@@ -210,7 +210,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal("HEAD", rs.ToString());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test008_SetForceUpdate()
         {
             const string s = "refs/heads/*:refs/remotes/origin/*";
@@ -224,7 +224,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal("+" + s, b.ToString());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test009_SetSource()
         {
             var a = new RefSpec();
@@ -234,7 +234,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal("refs/heads/master", b.ToString());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test010_SetDestination()
         {
             var a = new RefSpec();
@@ -244,7 +244,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal("HEAD:refs/heads/master", b.ToString());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test010_SetDestination_SourceNull()
         {
             var a = new RefSpec();
@@ -256,7 +256,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(":refs/heads/master", b.ToString());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test011_SetSourceDestination()
         {
             var a = new RefSpec();
@@ -266,7 +266,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal("refs/heads/*:refs/remotes/origin/*", b.ToString());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test012_ExpandFromDestination_NonWildcard()
         {
             const string src = "refs/heads/master";
@@ -279,7 +279,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(dst, r.Destination);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test012_ExpandFromDestination_Wildcard()
         {
             const string src = "refs/heads/master";

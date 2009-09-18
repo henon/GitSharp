@@ -42,7 +42,7 @@ namespace GitSharp.Tests.RevWalk
 {
     public class RevWalkSortTest : RevWalkTestCase
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testSort_Default()
         {
             RevCommit a = Commit();
@@ -58,7 +58,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSort_COMMIT_TIME_DESC()
         {
             RevCommit a = Commit();
@@ -75,7 +75,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSort_REVERSE()
         {
             RevCommit a = Commit();
@@ -92,7 +92,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSort_COMMIT_TIME_DESC_OutOfOrder1()
         {
             // Despite being out of order time-wise, a strand-of-pearls must
@@ -114,7 +114,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSort_COMMIT_TIME_DESC_OutOfOrder2()
         {
             // c1 is back dated before its parent.
@@ -135,7 +135,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSort_TOPO()
         {
             // c1 is back dated before its parent.
@@ -156,7 +156,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSort_TOPO_REVERSE()
         {
             // c1 is back dated before its parent.

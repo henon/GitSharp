@@ -47,7 +47,7 @@ namespace GitSharp.Tests
 {
 	public class RepositoryConfigTest
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void ReadBareKey()
 		{
 			Config c = Parse("[foo]\nbar\n");
@@ -55,7 +55,7 @@ namespace GitSharp.Tests
 			Assert.Equal(string.Empty, c.getString("foo", null, "bar"));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void ReadWithSubsection()
 		{
 			Config c = Parse("[foo \"zip\"]\nbar\n[foo \"zap\"]\nbar=false\nn=3\n");
@@ -67,7 +67,7 @@ namespace GitSharp.Tests
 			Assert.Equal(4, c.getInt("foo", "zap", "m", 4));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void PutRemote()
 		{
 			var c = new Config();
@@ -77,7 +77,7 @@ namespace GitSharp.Tests
 			Assert.Equal(expText, c.toText());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void PutGetSimple()
 		{
 			var c = new Config();
@@ -86,7 +86,7 @@ namespace GitSharp.Tests
 			Assert.Equal("[my]\n\tsomename = false\n", c.toText());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void PutGetStringList()
 		{
 			var c = new Config();
@@ -101,7 +101,7 @@ namespace GitSharp.Tests
 			Assert.Equal(expText, c.toText());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void ReadCaseInsensitive()
 		{
 			Config c = Parse("[Foo]\nBar\n");
@@ -109,7 +109,7 @@ namespace GitSharp.Tests
 			Assert.Equal(string.Empty, c.getString("foo", null, "bar"));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void ReadBooleanTrueFalse1()
 		{
 			Config c = Parse("[s]\na = true\nb = false\n");
@@ -120,7 +120,7 @@ namespace GitSharp.Tests
 			Assert.False(c.getBoolean("s", "b", true));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void ReadLong()
 		{
 			AssertReadLong(1L);

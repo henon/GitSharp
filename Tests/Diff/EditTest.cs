@@ -43,7 +43,7 @@ namespace GitSharp.Tests.Diff
 {
 	public class EditTest
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testCreate()
 		{
 			var e = new Edit(1, 2, 3, 4);
@@ -53,7 +53,7 @@ namespace GitSharp.Tests.Diff
 			Assert.Equal(4, e.EndB);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testCreateEmpty()
 		{
 			var e = new Edit(1, 3);
@@ -63,7 +63,7 @@ namespace GitSharp.Tests.Diff
 			Assert.Equal(3, e.EndB);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testSwap()
 		{
 			var e = new Edit(1, 2, 3, 4);
@@ -74,42 +74,42 @@ namespace GitSharp.Tests.Diff
 			Assert.Equal(2, e.EndB);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testType_Insert()
 		{
 			var e = new Edit(1, 1, 1, 2);
 			Assert.Equal(Edit.Type.INSERT, e.EditType);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testType_Delete()
 		{
 			var e = new Edit(1, 2, 1, 1);
 			Assert.Equal(Edit.Type.DELETE, e.EditType);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testType_Replace()
 		{
 			var e = new Edit(1, 2, 1, 4);
 			Assert.Equal(Edit.Type.REPLACE, e.EditType);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testType_Empty() 
 		{
 			Assert.Equal(Edit.Type.EMPTY, new Edit(1, 1, 2, 2).EditType);
 			Assert.Equal(Edit.Type.EMPTY, new Edit(1, 2).EditType);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testToString()
 		{
 			var e = new Edit(1, 2, 1, 4);
 			Assert.Equal("REPLACE(1-2,1-4)", e.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEquals1()
 		{
 			var e1 = new Edit(1, 2, 3, 4);
@@ -122,31 +122,31 @@ namespace GitSharp.Tests.Diff
 			Assert.False(e1.Equals(""));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNotEquals1()
 		{
 			Assert.False(new Edit(1, 2, 3, 4).Equals(new Edit(0, 2, 3, 4)));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNotEquals2()
 		{
 			Assert.False(new Edit(1, 2, 3, 4).Equals(new Edit(1, 0, 3, 4)));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNotEquals3()
 		{
 			Assert.False(new Edit(1, 2, 3, 4).Equals(new Edit(1, 2, 0, 4)));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNotEquals4()
 		{
 			Assert.False(new Edit(1, 2, 3, 4).Equals(new Edit(1, 2, 3, 0)));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testExtendA()
 		{
 			var e = new Edit(1, 2, 1, 1);
@@ -158,7 +158,7 @@ namespace GitSharp.Tests.Diff
 			Assert.Equal(new Edit(1, 4, 1, 1), e);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testExtendB()
 		{
 			var e = new Edit(1, 2, 1, 1);

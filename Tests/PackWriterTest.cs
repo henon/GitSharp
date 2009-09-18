@@ -49,8 +49,8 @@ namespace GitSharp.Tests
 {
 	public class PackWriterTest : RepositoryTestCase
 	{
-		private static readonly IList<ObjectId> EMPTY_LIST_OBJECT = new List<ObjectId>();
-		private static readonly IList<RevObject> EMPTY_LIST_REVS = new List<RevObject>();
+		private static readonly IList<ObjectId> EmptyListObject = new List<ObjectId>();
+		private static readonly IList<RevObject> EmptyListRevs = new List<RevObject>();
 
 		private PackWriter _writer;
 		private MemoryStream _os;
@@ -80,11 +80,11 @@ namespace GitSharp.Tests
 		/// Try to pass non-existing object as uninteresting, with ignoring setting.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testIgnoreNonExistingObjects()
 		{
 			ObjectId nonExisting = ObjectId.FromString("0000000000000000000000000000000000000001");
-			CreateVerifyOpenPack(EMPTY_LIST_OBJECT, Enumerable.Repeat(nonExisting, 1), false, true);
+			CreateVerifyOpenPack(EmptyListObject, Enumerable.Repeat(nonExisting, 1), false, true);
 			// shouldn't throw anything
 		}
 
@@ -93,7 +93,7 @@ namespace GitSharp.Tests
 		///	content. No delta reuse here.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWritePack1()
 		{
 			_writer.ReuseDeltas = false;
@@ -107,7 +107,7 @@ namespace GitSharp.Tests
 		/// The pack with delta bases written as offsets should be smaller.
 		///	</summary>
 		///	<exception cref="Exception"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWritePack2SizeOffsetsVsRefs()
 		{
 			testWritePack2DeltasReuseRefs();
@@ -127,7 +127,7 @@ namespace GitSharp.Tests
 		/// Obviously, the thin pack should be smaller.
 		///	</summary>
 		///	<exception cref="Exception"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWritePack4SizeThinVsNoThin()
 		{
 			testWritePack4();
@@ -141,7 +141,7 @@ namespace GitSharp.Tests
 			Assert.True(sizePack4 > sizePack4Thin);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testWriteIndex()
 		{
 			_writer.setIndexVersion(2);
@@ -184,7 +184,7 @@ namespace GitSharp.Tests
 		{
 			var interestings = new LinkedList<ObjectId>();
 			interestings.AddLast(ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"));
-			CreateVerifyOpenPack(interestings, EMPTY_LIST_OBJECT, false, false);
+			CreateVerifyOpenPack(interestings, EmptyListObject, false, false);
 
 			var expectedOrder = new[]
 			                    	{
@@ -331,7 +331,7 @@ namespace GitSharp.Tests
 		///	 <summary>
 		/// Test constructor for exceptions, default settings, initialization.
 		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testContructor()
 		{
 			Assert.Equal(false, _writer.DeltaBaseAsOffset);
@@ -343,7 +343,7 @@ namespace GitSharp.Tests
 		///	<summary>
 		/// Change default settings and verify them.
 		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testModifySettings()
 		{
 			_writer.DeltaBaseAsOffset = true;
@@ -360,13 +360,13 @@ namespace GitSharp.Tests
 		///	setting.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testNotIgnoreNonExistingObjects()
 		{
 			Assert.Throws<MissingObjectException>(() =>
 								{
 									ObjectId nonExisting = ObjectId.FromString("0000000000000000000000000000000000000001");
-									CreateVerifyOpenPack(EMPTY_LIST_OBJECT, Enumerable.Repeat(nonExisting, 1), false, false);
+									CreateVerifyOpenPack(EmptyListObject, Enumerable.Repeat(nonExisting, 1), false, false);
 								});
 		}
 
@@ -375,10 +375,10 @@ namespace GitSharp.Tests
 		///	objects and check for correct format.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWriteEmptyPack1()
 		{
-			CreateVerifyOpenPack(EMPTY_LIST_OBJECT, EMPTY_LIST_OBJECT, false, false);
+			CreateVerifyOpenPack(EmptyListObject, EmptyListObject, false, false);
 
 			Assert.Equal(0, _writer.getObjectsNumber());
 			Assert.Equal(0, _pack.ObjectCount);
@@ -390,10 +390,10 @@ namespace GitSharp.Tests
 		/// check for correct format.
 		/// </summary>
 		/// <exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWriteEmptyPack2()
 		{
-			CreateVerifyOpenPack(EMPTY_LIST_REVS);
+			CreateVerifyOpenPack(EmptyListRevs);
 
 			Assert.Equal(0, _writer.getObjectsNumber());
 			Assert.Equal(0, _pack.ObjectCount);
@@ -404,7 +404,7 @@ namespace GitSharp.Tests
 		///	<seealso cref="testWritePack1()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testWritePack1NoObjectReuse()
 		{
 			_writer.ReuseDeltas = false;
@@ -417,7 +417,7 @@ namespace GitSharp.Tests
 		///	precisely verify content. No delta reuse here.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWritePack2()
 		{
 			WriteVerifyPack2(false);
@@ -429,7 +429,7 @@ namespace GitSharp.Tests
 		///	<seealso cref="testWritePack2DeltasReuseRefs()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWritePack2DeltasCRC32Copy()
 		{
 			var packDir = new FileInfo(Path.Combine(db.ObjectsDirectory.FullName, "pack"));
@@ -447,7 +447,7 @@ namespace GitSharp.Tests
 		///	configuration as in <seealso cref="testWritePack2DeltasReuseRefs()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWritePack2DeltasReuseOffsets()
 		{
 			_writer.DeltaBaseAsOffset = true;
@@ -459,7 +459,7 @@ namespace GitSharp.Tests
 		///	content/preparation as in <seealso cref="testWritePack2()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWritePack2DeltasReuseRefs()
 		{
 			WriteVerifyPack2(true);
@@ -471,7 +471,7 @@ namespace GitSharp.Tests
 		///	be smaller.
 		///	</summary>
 		///	<exception cref="Exception"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWritePack2SizeDeltasVsNoDeltas()
 		{
 			testWritePack2();
@@ -492,7 +492,7 @@ namespace GitSharp.Tests
 		///	<exception cref="IOException"> </exception>
 		///	<exception cref="MissingObjectException">
 		///	</exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWritePack3()
 		{
 			_writer.ReuseDeltas = false;
@@ -526,7 +526,7 @@ namespace GitSharp.Tests
 		///	write only 1 commit, associated with 1 tree, 1 blob.
 		///	</summary>
 		///	 <exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWritePack4()
 		{
 			WriteVerifyPack4(false);
@@ -537,7 +537,7 @@ namespace GitSharp.Tests
 		///	configuration as in <seealso cref="testWritePack4()"/>.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testWritePack4ThinPack()
 		{
 			WriteVerifyPack4(true);

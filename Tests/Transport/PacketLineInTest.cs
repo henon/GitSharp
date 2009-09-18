@@ -52,7 +52,7 @@ namespace GitSharp.Tests.Transport
             pckIn = new PacketLineIn(rawIn);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadString1()
         {
             init("0006a\n0007bc\n");
@@ -61,7 +61,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadString2()
         {
             init("0032want fcfcfb1fd94829c1a1704f894fc111d14770d34e\n");
@@ -70,7 +70,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadString4()
         {
             init("0005a0006bc");
@@ -79,7 +79,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadString5()
         {
             init("000Fhi i am a s");
@@ -91,7 +91,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadString_LenHELO()
         {
             init("HELO");
@@ -106,7 +106,7 @@ namespace GitSharp.Tests.Transport
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadString_Len0001()
         {
             init("0001");
@@ -121,7 +121,7 @@ namespace GitSharp.Tests.Transport
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadString_Len0002()
         {
             init("0002");
@@ -136,7 +136,7 @@ namespace GitSharp.Tests.Transport
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadString_Len0003()
         {
             init("0003");
@@ -151,7 +151,7 @@ namespace GitSharp.Tests.Transport
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadString_Len0004()
         {
             init("0004");
@@ -160,7 +160,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadString_End()
         {
             init("0000");
@@ -168,7 +168,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadStringRaw1()
         {
             init("0005a0006bc");
@@ -177,7 +177,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadStringRaw2()
         {
             init("0031want fcfcfb1fd94829c1a1704f894fc111d14770d34e");
@@ -186,7 +186,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadStringRaw3()
         {
             init("0004");
@@ -195,7 +195,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadStringRaw4()
         {
             init("HELO");
@@ -210,7 +210,7 @@ namespace GitSharp.Tests.Transport
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadStringRaw_End()
         {
             init("0000");
@@ -218,7 +218,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadACK_NAK()
         {
             ObjectId expid = ObjectId.FromString("fcfcfb1fd94829c1a1704f894fc111d14770d34e");
@@ -231,7 +231,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadACK_ACK1()
         {
             ObjectId expid = ObjectId.FromString("fcfcfb1fd94829c1a1704f894fc111d14770d34e");
@@ -244,7 +244,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadACK_ACKcontinue1()
         {
             ObjectId expid = ObjectId.FromString("fcfcfb1fd94829c1a1704f894fc111d14770d34e");
@@ -257,7 +257,7 @@ namespace GitSharp.Tests.Transport
             assertEOF();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadACK_Invalid1()
         {
             init("HELO");
@@ -272,7 +272,7 @@ namespace GitSharp.Tests.Transport
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadACK_Invalid2()
         {
             init("0009HELO\n");
@@ -287,7 +287,7 @@ namespace GitSharp.Tests.Transport
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadACK_Invalid3()
         {
             init("0000");

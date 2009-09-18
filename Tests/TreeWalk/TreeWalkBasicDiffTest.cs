@@ -44,7 +44,7 @@ namespace GitSharp.Tests.TreeWalk
 {
 	public class TreeWalkBasicDiffTest : RepositoryTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testMissingSubtree_DetectFileAdded_FileModified()
 		{
 			var ow = new ObjectWriter(db);

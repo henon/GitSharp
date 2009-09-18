@@ -44,7 +44,7 @@ namespace GitSharp.Tests
 {
     public class ConstantsEncodingTest
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testEncodeASCII_SimpleASCII()
         {
             const string src = "abc";
@@ -54,7 +54,7 @@ namespace GitSharp.Tests
             Assert.Equal(src, Constants.CHARSET.GetString(res, 0, res.Length));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEncodeASCII_FailOnNonASCII()
         {
         	const string src = "ÅªnÄ­cÅdeÌ½";
@@ -69,7 +69,7 @@ namespace GitSharp.Tests
             }
         }
 
-    	[Fact]
+    	[StrictFactAttribute]
         public void testEncodeASCII_Number13()
         {
             const long src = 13;
@@ -78,7 +78,7 @@ namespace GitSharp.Tests
             Assert.True(exp.SequenceEqual(res));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEncode_SimpleASCII()
         {
             const string src = "abc";
@@ -88,7 +88,7 @@ namespace GitSharp.Tests
             Assert.Equal(src, Constants.CHARSET.GetString(res, 0, res.Length));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEncode_Unicode()
         {
             const string src = "Ūnĭcōde̽"; 

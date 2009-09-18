@@ -46,21 +46,21 @@ namespace GitSharp.Tests
 			Assert.Equal(exp, Repository.IsValidRefName(name));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmptyString()
 		{
 			AssertValid(false, string.Empty);
 			AssertValid(false, "/");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testMustHaveTwoComponents()
 		{
 			AssertValid(false, "master");
 			AssertValid(true, "heads/master");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidHead()
 		{
 			AssertValid(true, "refs/heads/master");
@@ -69,38 +69,38 @@ namespace GitSharp.Tests
 			AssertValid(true, "refs/heads/FoO");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTag()
 		{
 			AssertValid(true, "refs/tags/v1.0");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoLockSuffix()
 		{
 			AssertValid(false, "refs/heads/master.lock");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoDirectorySuffix()
 		{
 			AssertValid(false, "refs/heads/master/");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoSpace()
 		{
 			AssertValid(false, "refs/heads/i haz space");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoAsciiControlCharacters()
 		{
 			for (char c = '\0'; c < ' '; c++)
 				AssertValid(false, "refs/heads/mast" + c + "er");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoBareDot()
 		{
 			AssertValid(false, "refs/heads/.");
@@ -109,7 +109,7 @@ namespace GitSharp.Tests
 			AssertValid(false, "refs/heads/../master");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoLeadingOrTrailingDot()
 		{
 			AssertValid(false, ".");
@@ -118,14 +118,14 @@ namespace GitSharp.Tests
 			AssertValid(false, "refs/heads/bar.");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testContainsDot()
 		{
 			AssertValid(true, "refs/heads/m.a.s.t.e.r");
 			AssertValid(false, "refs/heads/master..pu");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoMagicRefCharacters()
 		{
 			AssertValid(false, "refs/heads/master^");
@@ -141,7 +141,7 @@ namespace GitSharp.Tests
 			AssertValid(false, ":refs/heads/master");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testShellGlob()
 		{
 			AssertValid(false, "refs/heads/master?");
@@ -157,7 +157,7 @@ namespace GitSharp.Tests
 			AssertValid(false, "*refs/heads/master");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidSpecialCharacters()
 		{
 			AssertValid(true, "refs/heads/!");
@@ -190,13 +190,13 @@ namespace GitSharp.Tests
 			AssertValid(false, "refs/heads/\\");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testUnicodeNames()
 		{
 			AssertValid(true, "refs/heads/\u00e5ngstr\u00f6m");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testRefLogQueryIsValidRef()
 		{
 			AssertValid(false, "refs/heads/master@{1}");

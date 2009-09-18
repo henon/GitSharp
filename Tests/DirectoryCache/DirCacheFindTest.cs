@@ -44,7 +44,7 @@ namespace GitSharp.Tests.DirectoryCache
 {
     public class DirCacheFindTest : RepositoryTestCase
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testEntriesWithin()
         {
             DirCache dc = DirCache.read(db);

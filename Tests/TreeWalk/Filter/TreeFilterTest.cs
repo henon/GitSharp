@@ -44,46 +44,46 @@ namespace GitSharp.Tests.TreeWalk.Filter
 {
 	public class TreeFilterTest : RepositoryTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testALL_IncludesAnything()
 		{
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
 			Assert.True(TreeFilter.ALL.include(tw));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testALL_ShouldNotBeRecursive()
 		{
 			Assert.False(TreeFilter.ALL.shouldBeRecursive());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testALL_IdentityClone()
 		{
 			Assert.Same(TreeFilter.ALL, TreeFilter.ALL.Clone());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNotALL_IncludesNothing()
 		{
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
 			Assert.False(TreeFilter.ALL.negate().include(tw));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testANY_DIFF_IncludesSingleTreeCase()
 		{
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
 			Assert.True(TreeFilter.ANY_DIFF.include(tw));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testANY_DIFF_ShouldNotBeRecursive()
 		{
 			Assert.False(TreeFilter.ANY_DIFF.shouldBeRecursive());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testANY_DIFF_IdentityClone()
 		{
 			Assert.Same(TreeFilter.ANY_DIFF, TreeFilter.ANY_DIFF.Clone());

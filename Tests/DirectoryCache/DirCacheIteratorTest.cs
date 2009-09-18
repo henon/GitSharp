@@ -45,7 +45,7 @@ namespace GitSharp.Tests.DirectoryCache
 {
     public class DirCacheIteratorTest : RepositoryTestCase
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testEmptyTree_NoTreeWalk()
         {
             DirCache dc = DirCache.read(db);
@@ -55,7 +55,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.True(i.eof());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEmptyTree_WithTreeWalk()
         {
             DirCache dc = DirCache.read(db);
@@ -67,7 +67,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.False(tw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testNoSubtree_NoTreeWalk()
         {
             DirCache dc = DirCache.read(db);
@@ -100,7 +100,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.Equal(paths.Length, pathIdx);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testNoSubtree_WithTreeWalk()
         {
             DirCache dc = DirCache.read(db);
@@ -139,7 +139,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.Equal(paths.Length, pathIdx);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSingleSubtree_NoRecursion()
         {
             DirCache dc = DirCache.read(db);
@@ -191,7 +191,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.Equal(expPaths.Length, pathIdx);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSingleSubtree_Recursive()
         {
             DirCache dc = DirCache.read(db);
@@ -233,7 +233,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.Equal(paths.Length, pathIdx);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTwoLevelSubtree_Recursive()
         {
             DirCache dc = DirCache.read(db);
@@ -274,7 +274,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.Equal(paths.Length, pathIdx);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTwoLevelSubtree_FilterPath()
         {
             DirCache dc = DirCache.read(db);

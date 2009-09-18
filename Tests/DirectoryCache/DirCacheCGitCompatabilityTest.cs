@@ -49,7 +49,7 @@ namespace GitSharp.Tests.DirectoryCache
 	{
 		private readonly FileInfo _index = new FileInfo("Resources/gitgit.index");
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadIndex_LsFiles()
 		{
 			Dictionary<string, CGitIndexRecord> ls = ReadLsFiles();
@@ -66,7 +66,7 @@ namespace GitSharp.Tests.DirectoryCache
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testTreeWalk_LsFiles()
 		{
 			Dictionary<string, CGitIndexRecord> ls = ReadLsFiles();
@@ -89,7 +89,7 @@ namespace GitSharp.Tests.DirectoryCache
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadIndex_DirCacheTree()
 		{
 			Dictionary<string, CGitIndexRecord> cList = ReadLsFiles();

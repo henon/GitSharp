@@ -46,7 +46,7 @@ namespace GitSharp.Tests.Patch
 {
     public class GetTextTest : BasePatchTest
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testGetText_BothISO88591()
         {
             Encoding cs = Encoding.GetEncoding("ISO-8859-1");
@@ -58,7 +58,7 @@ namespace GitSharp.Tests.Patch
             Assert.Equal(ReadTestPatchFile(cs), fh.getScriptText(cs, cs));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testGetText_NoBinary()
         {
             Encoding cs = Encoding.GetEncoding("ISO-8859-1");
@@ -70,7 +70,7 @@ namespace GitSharp.Tests.Patch
             Assert.Equal(ReadTestPatchFile(cs), fh.getScriptText(cs, cs));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testGetText_Convert()
         {
             Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
@@ -91,7 +91,7 @@ namespace GitSharp.Tests.Patch
             Assert.Equal(exp, fh.getScriptText(csOld, csNew));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testGetText_DiffCc()
         {
             Encoding csOld = Encoding.GetEncoding("ISO-8859-1");

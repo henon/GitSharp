@@ -43,7 +43,7 @@ namespace GitSharp.Tests.Patch
 {
     public class PatchCcErrorTest : BasePatchTest
     {
-        [Fact]
+        [StrictFactAttribute]
 	    public void testError_CcTruncatedOld()
         {
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_CcTruncatedOld.patch");

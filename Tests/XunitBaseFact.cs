@@ -1,9 +1,12 @@
 using System;
+using Xunit;
 
 namespace GitSharp.Tests
 {
 	public abstract class XunitBaseFact : IDisposable
 	{
+		public const int TestTimeout = 3000;
+
 		protected XunitBaseFact()
 		{
 			SetUp();
@@ -33,5 +36,17 @@ namespace GitSharp.Tests
 		}
 
 		#endregion
+	}
+
+	/// <summary>
+	/// This modified attribute is just to make sure that every test does not
+	/// take more than <see cref="XunitBaseFact.TestTimeout"/> to run.
+	/// </summary>
+	public class StrictFactAttribute : FactAttribute
+	{
+		public StrictFactAttribute()
+		{
+			Timeout = XunitBaseFact.TestTimeout;
+		}
 	}
 }

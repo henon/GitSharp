@@ -42,7 +42,7 @@ namespace GitSharp.Tests.Patch
 {
 	public class PatchTest : BasePatchTest
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmpty()
 		{
 			var patch = new GitSharp.Patch.Patch();
@@ -50,7 +50,7 @@ namespace GitSharp.Tests.Patch
 			Assert.True(patch.getErrors().Count == 0);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_ConfigCaseInsensitive()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_ConfigCaseInsensitive.patch");
@@ -143,7 +143,7 @@ namespace GitSharp.Tests.Patch
 			Assert.Equal(3035, h.EndOffset);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_NoBinary()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_NoBinary.patch");
@@ -181,7 +181,7 @@ namespace GitSharp.Tests.Patch
 			Assert.Equal(272, fh2.Hunks[0].OldImage.StartLine);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_GitBinaryLiteral()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_GitBinaryLiteral.patch");
@@ -229,7 +229,7 @@ namespace GitSharp.Tests.Patch
 			Assert.Equal(272, fh2.Hunks[0].OldImage.StartLine);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_GitBinaryDelta()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_GitBinaryDelta.patch");
@@ -268,7 +268,7 @@ namespace GitSharp.Tests.Patch
 			Assert.Equal(496, fh.EndOffset);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_FixNoNewline()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_FixNoNewline.patch");
@@ -303,7 +303,7 @@ namespace GitSharp.Tests.Patch
 			Assert.Equal(363, h.EndOffset);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_AddNoNewline()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_AddNoNewline.patch");

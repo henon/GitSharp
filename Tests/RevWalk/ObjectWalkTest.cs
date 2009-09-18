@@ -49,14 +49,14 @@ namespace GitSharp.Tests.RevWalk
             return _objw = new ObjectWalk(db);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testNoCommits()
         {
             Assert.Null(_objw.next());
             Assert.Null(_objw.nextObject());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTwoCommitsEmptyTree()
         {
             RevCommit a = Commit();
@@ -71,7 +71,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(_objw.nextObject());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testOneCommitOneTreeTwoBlob()
         {
             RevBlob f0 = Blob("0");
@@ -89,7 +89,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(_objw.nextObject());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTwoCommitTwoTreeTwoBlob()
         {
             RevBlob f0 = Blob("0");
@@ -115,7 +115,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(_objw.nextObject());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTwoCommitDeepTree1()
         {
             RevBlob f0 = Blob("0");
@@ -143,7 +143,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(_objw.nextObject());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTwoCommitDeepTree2()
         {
             RevBlob f1 = Blob("1");
@@ -170,7 +170,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(_objw.nextObject());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testCull()
         {
             RevBlob f1 = Blob("1");

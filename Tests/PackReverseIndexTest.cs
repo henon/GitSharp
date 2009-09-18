@@ -65,7 +65,7 @@ namespace GitSharp.Tests
 		///	<summary>
 		/// Test findObject() for all index entries.
 		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testFindObject()
 		{
 			foreach (PackIndex.MutableEntry me in _idx)
@@ -77,7 +77,7 @@ namespace GitSharp.Tests
 		///	<summary>
 		/// Test findObject() with illegal argument.
 		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testFindObjectWrongOffset()
 		{
 			Assert.Null(_reverseIdx.FindObject(0));
@@ -86,7 +86,7 @@ namespace GitSharp.Tests
 		///	<summary>
 		/// Test findNextOffset() for all index entries.
 		///	</summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testFindNextOffset()
 		{
 			long offset = FindFirstOffset();
@@ -113,7 +113,7 @@ namespace GitSharp.Tests
 		///	<summary>
 		/// Test findNextOffset() with wrong illegal argument as offset.
 		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testFindNextOffsetWrongOffset()
 		{
 			Assert.Throws<CorruptObjectException>(() => _reverseIdx.FindNextOffset(0, long.MaxValue));

@@ -102,7 +102,7 @@ namespace GitSharp.Tests
             IndexOnlyEntriesVisited.Clear();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testBoth()
         {
             var index = new GitIndex(db);
@@ -119,7 +119,7 @@ namespace GitSharp.Tests
             Assert.True(BothVisited.Contains("c"));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testIndexOnlyOneLevel()
         {
             var index = new GitIndex(db);
@@ -134,7 +134,7 @@ namespace GitSharp.Tests
             Assert.True(IndexOnlyEntriesVisited[1].Equals("foo"));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testIndexOnlySubDirs()
         {
             var index = new GitIndex(db);
@@ -148,7 +148,7 @@ namespace GitSharp.Tests
             Assert.Equal("foo/bar/baz", IndexOnlyEntriesVisited[1]);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testLeavingTree()
         {
             var index = new GitIndex(db);
@@ -158,7 +158,7 @@ namespace GitSharp.Tests
             new IndexTreeWalker(index, db.MapTree(index.writeTree()), trash, TestTreeOnlyOneLevelTreeVisitor).Walk();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTreeOnlyOneLevel()
         {
             var index = new GitIndex(db);

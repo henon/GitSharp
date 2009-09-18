@@ -80,7 +80,7 @@ namespace GitSharp.Tests
 			Assert.Equal(96, _toLoad.Count);
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void testCache_Defaults()
 		{
 			var cfg = new WindowCacheConfig();
@@ -93,7 +93,7 @@ namespace GitSharp.Tests
 			Assert.Equal(17346, cache.getOpenBytes());
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void testCache_TooFewFiles()
 		{
 			var cfg = new WindowCacheConfig { PackedGitOpenFiles = 2 };
@@ -102,7 +102,7 @@ namespace GitSharp.Tests
 			CheckLimits(cfg);
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void testCache_TooSmallLimit()
 		{
 			var cfg = new WindowCacheConfig { PackedGitWindowSize = 4096, PackedGitLimit = 4096 };

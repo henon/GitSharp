@@ -7,7 +7,7 @@ namespace GitSharp.Tests
 {
     public class StringExtensionsFixture
     {
-        [Fact]
+        [StrictFactAttribute]
         public void GetBytesShouldNotGenerateABOMWhenWorkingInUTF8()
         {
             string filePath = Path.GetTempFileName();
@@ -17,32 +17,32 @@ namespace GitSharp.Tests
             Assert.Equal(1, new FileInfo(filePath).Length);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void GetBytesShouldThrowIfPassedAnUnknownEncodingAlias()
         {
             Assert.Throws<ArgumentException>(() => "a".getBytes("Dummy"));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void SliceShouldReturnExpectedResult()
         {
             Assert.Equal("urge", "hamburger".Slice(4, 8));
             Assert.Equal("mile", "smiles".Slice(1, 5));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void SliceShouldThrowIfBeginIndexIsNegative()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => "hamburger".Slice(-1, 8));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void SliceShouldThrowIfEndIndexIsGreaterThanTheLengthOfTheString()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => "hamburger".Slice(4, 42));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void SliceShouldThrowIfBeginIndexIsGreaterThanEndIndex()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => "hamburger".Slice(8, 4));

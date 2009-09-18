@@ -52,7 +52,7 @@ namespace GitSharp.Tests.Util
             return ToString();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEmpty()
         {
             var b = new TemporaryBuffer();
@@ -70,7 +70,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testOneByte()
         {
             var b = new TemporaryBuffer();
@@ -98,7 +98,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testOneBlock_BulkWrite()
         {
             var b = new TemporaryBuffer();
@@ -131,7 +131,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testOneBlockAndHalf_BulkWrite()
         {
             var b = new TemporaryBuffer();
@@ -162,7 +162,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testOneBlockAndHalf_SingleWrite()
         {
             var b = new TemporaryBuffer();
@@ -196,7 +196,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testOneBlockAndHalf_Copy()
         {
             var b = new TemporaryBuffer();
@@ -230,7 +230,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testLarge_SingleWrite()
         {
             var b = new TemporaryBuffer();
@@ -258,7 +258,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testInCoreLimit_SwitchOnAppendByte()
         {
             var b = new TemporaryBuffer();
@@ -289,7 +289,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testInCoreLimit_SwitchBeforeAppendByte()
         {
             var b = new TemporaryBuffer();
@@ -320,7 +320,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testInCoreLimit_SwitchOnCopy()
         {
             var b = new TemporaryBuffer();
@@ -353,7 +353,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDestroyWhileOpen()
         {
             var b = new TemporaryBuffer();
@@ -368,7 +368,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testRandomWrites()
         {
             var b = new TemporaryBuffer();

@@ -43,14 +43,14 @@ namespace GitSharp.Tests
 {
     public class WindowCacheReconfigureTest : RepositoryTestCase
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testConfigureCache_PackedGitLimit_0()
         {
             var cfg = new WindowCacheConfig { PackedGitLimit = 0 };
             Assert.Throws<ArgumentException>(() => WindowCache.reconfigure(cfg));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testConfigureCache_PackedGitWindowSize_0()
         {
             try
@@ -65,7 +65,7 @@ namespace GitSharp.Tests
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testConfigureCache_PackedGitWindowSize_512()
         {
             try
@@ -80,7 +80,7 @@ namespace GitSharp.Tests
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testConfigureCache_PackedGitWindowSize_4097()
         {
             try
@@ -95,7 +95,7 @@ namespace GitSharp.Tests
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testConfigureCache_PackedGitOpenFiles_0()
         {
             try
@@ -110,7 +110,7 @@ namespace GitSharp.Tests
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testConfigureCache_PackedGitWindowSizeAbovePackedGitLimit()
         {
             try
@@ -125,7 +125,7 @@ namespace GitSharp.Tests
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testConfigureCache_Limits1()
         {
             // This test is just to force coverage over some lower bounds for

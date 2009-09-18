@@ -45,7 +45,7 @@ namespace GitSharp.Tests.RevWalk
 	{
 		private readonly AbstractRevQueue _q = AbstractRevQueue.EmptyQueue;
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmpty()
 		{
 			Assert.Null(_q.next());
@@ -54,14 +54,14 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(Generator.GeneratorOutputType.None, _q.OutputType);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testClear()
 		{
 			_q.clear();
 			testEmpty();
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAddFails()
 		{
 			Assert.Throws<InvalidOperationException>(() => _q.add(Commit()));

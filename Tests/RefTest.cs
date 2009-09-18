@@ -49,7 +49,7 @@ namespace GitSharp.Tests
 	/// </summary>
 	public class RefTest : RepositoryTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testReadAllIncludingSymrefs()
 		{
 			ObjectId masterId = db.Resolve("refs/heads/master");
@@ -75,7 +75,7 @@ namespace GitSharp.Tests
 			Assert.Null(refmaster.PeeledObjectId);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testReadSymRefToPacked()
 		{
 			db.WriteSymref("HEAD", "refs/heads/b");
@@ -83,7 +83,7 @@ namespace GitSharp.Tests
 			Assert.Equal(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadSymRefToLoosePacked()
 		{
 			ObjectId pid = db.Resolve("refs/heads/master^");
@@ -98,7 +98,7 @@ namespace GitSharp.Tests
 			Assert.Equal(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadLooseRef()
 		{
 			RefUpdate updateRef = db.UpdateRef("ref/heads/new");
@@ -112,7 +112,7 @@ namespace GitSharp.Tests
 		/// <summary>
 		/// Let an "outsider" Create a loose ref with the same name as a packed one
 		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadLoosePackedRef()
 		{
 			Ref @ref = db.getRef("refs/heads/master");
@@ -131,7 +131,7 @@ namespace GitSharp.Tests
 		///	<summary>
 		/// Modify a packed ref using the API. This creates a loose ref too, ie. LOOSE_PACKED
 		///	</summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadSimplePackedRefSameRepo()
 		{
 			Ref @ref = db.getRef("refs/heads/master");

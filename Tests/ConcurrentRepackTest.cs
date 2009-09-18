@@ -63,7 +63,7 @@ namespace GitSharp.Tests
 			WindowCache.reconfigure(windowCacheConfig);
 		}
 
-		[Fact]
+		[StrictFact]
 		public void testObjectInNewPack()
 		{
 			// Create a new object in a new pack, and test that it is present.
@@ -74,7 +74,7 @@ namespace GitSharp.Tests
 			Assert.Equal(o1.Name, Parse(o1).Name);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testObjectMovedToNewPack1()
 		{
 			// Create an object and pack it. Then remove that pack and put the
@@ -101,7 +101,7 @@ namespace GitSharp.Tests
 			Assert.Equal(o1.Name, Parse(o1).Name);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testObjectMovedWithinPack()
 		{
 			// Create an object and pack it.
@@ -133,7 +133,7 @@ namespace GitSharp.Tests
 			Assert.Equal(o2.Name, Parse(o2).Name);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testObjectMovedToNewPack2()
 		{
 			// Create an object and pack it. Then remove that pack and put the

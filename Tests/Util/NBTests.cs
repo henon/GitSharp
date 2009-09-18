@@ -43,7 +43,7 @@ namespace GitSharp.Tests.Util
 {
     public class NBTest
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testCompareUInt32()
         {
             Assert.True(NB.CompareUInt32(0, 0) == 0);
@@ -55,7 +55,7 @@ namespace GitSharp.Tests.Util
             Assert.True(NB.CompareUInt32(1, -1) < 0);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDecodeUInt16()
         {
             Assert.Equal(0, NB.decodeUInt16(b(0, 0), 0));
@@ -74,7 +74,7 @@ namespace GitSharp.Tests.Util
             Assert.Equal(0xffff, NB.decodeUInt16(Padb(3, 0xff, 0xff), 3));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public  void testDecodeInt32()
         {
             Assert.Equal(0, NB.DecodeInt32(b(0, 0, 0, 0), 0));
@@ -96,7 +96,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDecodeUInt32()
         {
             Assert.Equal(0L, NB.decodeUInt32(b(0, 0, 0, 0), 0));
@@ -118,7 +118,7 @@ namespace GitSharp.Tests.Util
                     0xff), 3));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDecodeUInt64()
         {
             Assert.Equal(0L, NB.DecodeUInt64(b(0, 0, 0, 0, 0, 0, 0, 0), 0));
@@ -150,7 +150,7 @@ namespace GitSharp.Tests.Util
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEncodeInt16()
         {
             var @out = new byte[16];
@@ -184,7 +184,7 @@ namespace GitSharp.Tests.Util
             AssertOutput(b(0xff, 0xff), @out, 3);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEncodeInt32()
         {
             var @out = new byte[16];
@@ -232,7 +232,7 @@ namespace GitSharp.Tests.Util
             AssertOutput(b(0xff, 0xff, 0xff, 0xff), @out, 3);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEncodeInt64()
         {
             var @out = new byte[16];
@@ -288,7 +288,7 @@ namespace GitSharp.Tests.Util
             AssertOutput(b(0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff), @out, 3);
         }
 
-		[Fact]
+		[StrictFactAttribute]
 		public void TestDecimalToBase()
 		{
 			string x = NB.DecimalToBase(15, 16);

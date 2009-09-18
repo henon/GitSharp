@@ -44,19 +44,19 @@ namespace GitSharp.Tests
 {
     public class ParseRevTests : RepositoryTestCase
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testObjectId_existing()
         {
             Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testObjectId_nonexisting()
         {
             Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c1", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c1").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testObjectId_objectid_implicit_firstparent()
         {
             Assert.Equal("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^").Name);
@@ -64,7 +64,7 @@ namespace GitSharp.Tests
             Assert.Equal("bab66b48f836ed950c99134ef666436fb07a09a0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^^^").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testObjectId_objectid_self()
         {
             Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^0").Name);
@@ -72,7 +72,7 @@ namespace GitSharp.Tests
             Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^0^0^0").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testObjectId_objectid_explicit_firstparent()
         {
             Assert.Equal("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^1").Name);
@@ -80,7 +80,7 @@ namespace GitSharp.Tests
             Assert.Equal("bab66b48f836ed950c99134ef666436fb07a09a0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^1^1^1").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testObjectId_objectid_explicit_otherparents()
         {
             Assert.Equal("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^1").Name);
@@ -89,7 +89,7 @@ namespace GitSharp.Tests
             Assert.Equal("d0114ab8ac326bab30e3a657a0397578c5a1af88", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^03").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testRef_refname()
         {
             Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("master^0").Name);
@@ -97,7 +97,7 @@ namespace GitSharp.Tests
             Assert.Equal("6e1475206e57110fcef4b92320436c1e9872a322", db.Resolve("refs/heads/master^1").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDistance()
         {
             Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~0").Name);
@@ -107,20 +107,20 @@ namespace GitSharp.Tests
             Assert.Equal("bab66b48f836ed950c99134ef666436fb07a09a0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0~03").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTree()
         {
             Assert.Equal("6020a3b8d5d636e549ccbd0c53e2764684bb3125", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^{tree}").Name);
             Assert.Equal("02ba32d3649e510002c21651936b7077aa75ffa9", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^^{tree}").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testHEAD()
         {
             Assert.Equal("6020a3b8d5d636e549ccbd0c53e2764684bb3125", db.Resolve("HEAD^{tree}").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDerefCommit()
         {
             Assert.Equal("49322bb17d3acc9146f98c97d078513228bbf3c0", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^{}").Name);
@@ -129,7 +129,7 @@ namespace GitSharp.Tests
             Assert.Equal("6020a3b8d5d636e549ccbd0c53e2764684bb3125", db.Resolve("49322bb17d3acc9146f98c97d078513228bbf3c0^{commit}^{tree}").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDerefTag()
         {
             Assert.Equal("17768080a2318cd89bba4c8b87834401e2095703", db.Resolve("refs/tags/B").Name);
@@ -145,7 +145,7 @@ namespace GitSharp.Tests
             Assert.Equal("2c349335b7f797072cf729c4f3bb0914ecb6dec9", db.Resolve("refs/tags/B10th~2").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDerefBlob()
         {
             Assert.Equal("fd608fbe625a2b456d9f15c2b1dc41f252057dd7", db.Resolve("spearce-gpg-pub^{}").Name);
@@ -154,7 +154,7 @@ namespace GitSharp.Tests
             Assert.Equal("fd608fbe625a2b456d9f15c2b1dc41f252057dd7", db.Resolve("fd608fbe625a2b456d9f15c2b1dc41f252057dd7^{blob}").Name);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDerefTree()
         {
             Assert.Equal("032c063ce34486359e3ee3d4f9e5c225b9e1a4c2", db.Resolve("refs/tags/B10th").Name);

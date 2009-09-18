@@ -47,7 +47,7 @@ namespace GitSharp.Tests.Merge
 {
 	public class SimpleMergeTest : RepositoryTestCase
 	{
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestOurs()
 		{
 			Merger ourMerger = MergeStrategy.Ours.NewMerger(db);
@@ -61,7 +61,7 @@ namespace GitSharp.Tests.Merge
 			Assert.Equal(db.MapTree("a").Id, ourMerger.GetResultTreeId());
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTheirs()
 		{
 			Merger ourMerger = MergeStrategy.Theirs.NewMerger(db);
@@ -70,7 +70,7 @@ namespace GitSharp.Tests.Merge
 			Assert.Equal(db.MapTree("c").Id, ourMerger.GetResultTreeId());
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTrivialTwoWay()
 		{
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
@@ -79,7 +79,7 @@ namespace GitSharp.Tests.Merge
 			Assert.Equal("02ba32d3649e510002c21651936b7077aa75ffa9", ourMerger.GetResultTreeId().Name);
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTrivialTwoWayDisjointHistories()
 		{
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
@@ -88,7 +88,7 @@ namespace GitSharp.Tests.Merge
 			Assert.Equal("86265c33b19b2be71bdd7b8cb95823f2743d03a8", ourMerger.GetResultTreeId().Name);
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTrivialTwoWayOk()
 		{
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
@@ -97,7 +97,7 @@ namespace GitSharp.Tests.Merge
 			Assert.Equal(db.MapTree("a^0^0").Id, ourMerger.GetResultTreeId());
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTrivialTwoWayConflict()
 		{
 			Merger ourMerger = MergeStrategy.SimpleTwoWayInCore.NewMerger(db);
@@ -105,7 +105,7 @@ namespace GitSharp.Tests.Merge
 			Assert.False(merge);
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTrivialTwoWayValidSubtreeSort()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -158,7 +158,7 @@ namespace GitSharp.Tests.Merge
 			Assert.False(tw.next());
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTrivialTwoWayConcurrentSubtreeChange()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -206,7 +206,7 @@ namespace GitSharp.Tests.Merge
 			Assert.False(tw.next());
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTrivialTwoWayConflictSubtreeChange()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -241,7 +241,7 @@ namespace GitSharp.Tests.Merge
 			Assert.False(merge);
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTrivialTwoWayLeftDFconflict1()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -275,7 +275,7 @@ namespace GitSharp.Tests.Merge
 			Assert.False(merge);
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTrivialTwoWayRightDFconflict1()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -309,7 +309,7 @@ namespace GitSharp.Tests.Merge
 			Assert.False(merge);
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTrivialTwoWayLeftDFconflict2()
 		{
 			DirCache treeB = DirCache.read(db);
@@ -341,7 +341,7 @@ namespace GitSharp.Tests.Merge
 			Assert.False(merge);
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void TestTrivialTwoWayRightDFconflict2()
 		{
 			DirCache treeB = DirCache.read(db);

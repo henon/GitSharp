@@ -48,7 +48,7 @@ namespace GitSharp.Tests
 {
 	public class WriteTests : RepositoryTestCase // [henon] was BasicTests but I think this name is better
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void test001_Initalize()
 		{
 			var gitdir = new DirectoryInfo(trash.FullName + "/.git");
@@ -73,7 +73,7 @@ namespace GitSharp.Tests
 		}
 
 
-		[Fact]
+		[StrictFactAttribute]
 		public void ComputeSha()
 		{
 			byte[] data = Encoding.GetEncoding("ISO-8859-1").GetBytes("test025 some data, more than 16 bytes to get good coverage");
@@ -81,7 +81,7 @@ namespace GitSharp.Tests
 			Assert.Equal("4f561df5ecf0dfbd53a0dc0f37262fef075d9dde", id.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void WriteBlob()
 		{
 			ObjectId id = new ObjectWriter(db).WriteBlob(new FileInfo("Resources/single_file_commit/i-am-a-file"));
@@ -93,7 +93,7 @@ namespace GitSharp.Tests
 			Assert.Equal("95ea6a6859af6791464bd8b6de76ad5a6f9fad81", id.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void WriteTree()
 		{
 			var t = new Tree(db);
@@ -131,7 +131,7 @@ namespace GitSharp.Tests
 			Assert.Equal(sGit, s);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test002_WriteEmptyTree()
 		{
 			// One of our test packs contains the empty tree object. If the pack is
@@ -147,7 +147,7 @@ namespace GitSharp.Tests
 			Assert.True(o.IsReadOnly);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test002_WriteEmptyTree2()
 		{
 			// File shouldn't exist as it is in a test pack.
@@ -159,7 +159,7 @@ namespace GitSharp.Tests
 			Assert.False(o.Exists);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test003_WriteShouldBeEmptyTree()
 		{
 			var t = new Tree(db);
@@ -179,7 +179,7 @@ namespace GitSharp.Tests
 			Assert.True(o.IsReadOnly);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void Write_Simple_Commit()
 		{
 			var t = new Tree(db);
@@ -229,7 +229,7 @@ namespace GitSharp.Tests
 			Assert.Equal(c.Committer, c2.Committer);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test009_CreateCommitOldFormat()
 		{
 			writeTrashFile(".git/config", "[core]\n" + "legacyHeaders=1\n");
@@ -284,7 +284,7 @@ namespace GitSharp.Tests
 			Assert.Equal(c.Committer, c2.Committer);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test012_SubtreeExternalSorting()
 		{
 			ObjectId emptyBlob = new ObjectWriter(db).WriteBlob(new byte[0]);
@@ -305,7 +305,7 @@ namespace GitSharp.Tests
 			Assert.Equal(ObjectId.FromString("b47a8f0a4190f7572e11212769090523e23eb1ea"), t.Id);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test020_createBlobTag()
 		{
 			ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
@@ -328,7 +328,7 @@ namespace GitSharp.Tests
 			Assert.Equal("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag.Id.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test020b_createBlobPlainTag()
 		{
 			test020_createBlobTag();
@@ -345,7 +345,7 @@ namespace GitSharp.Tests
 			// We do not repeat the plain tag test for other object types
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test021_createTreeTag()
 		{
 			ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
@@ -372,7 +372,7 @@ namespace GitSharp.Tests
 			Assert.Equal("417c01c8795a35b8e835113a85a5c0c1c77f67fb", mapTag.Id.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test022_createCommitTag()
 		{
 			ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
@@ -409,7 +409,7 @@ namespace GitSharp.Tests
 			Assert.Equal("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag.Id.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test023_createCommitNonAnullii()
 		{
 			ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
@@ -430,7 +430,7 @@ namespace GitSharp.Tests
 			Assert.Equal("4680908112778718f37e686cbebcc912730b3154", cid.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test024_createCommitNonAscii()
 		{
 			ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
@@ -452,7 +452,7 @@ namespace GitSharp.Tests
 			Assert.Equal("2979b39d385014b33287054b87f77bcb3ecb5ebf", cid.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test025_packedRefs()
 		{
 			test020_createBlobTag();
@@ -502,7 +502,7 @@ namespace GitSharp.Tests
 			Assert.Equal("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag22.Id.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test026_CreateCommitMultipleparents()
 		{
 			db.Config.load();
@@ -600,7 +600,7 @@ namespace GitSharp.Tests
 			Assert.Equal(c3.CommitId, rm4.ParentIds[2]);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test027_UnpackedRefHigherPriorityThanPacked()
 		{
 			const string unpackedId = "7f822839a2fe9760f386cbbbcb3f92c5fe81def7";
@@ -612,7 +612,7 @@ namespace GitSharp.Tests
 			Assert.Equal(unpackedId, resolved.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test028_LockPackedRef()
 		{
 			writeTrashFile(".git/packed-refs", "7f822839a2fe9760f386cbbbcb3f92c5fe81def7 refs/heads/foobar");
@@ -639,7 +639,7 @@ namespace GitSharp.Tests
 			Assert.Equal(newId2, db.Resolve("refs/heads/foobar"));
 		}
 
-		[Fact(Timeout = 30000)]
+		[StrictFactAttribute]
 		public void test029_mapObject()
 		{
 			Assert.Equal((new byte[0].GetType()), db.MapObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"), null).GetType());

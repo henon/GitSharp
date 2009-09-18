@@ -45,7 +45,7 @@ namespace GitSharp.Tests.RevWalk
 {
 	public class FooterLineTest : RepositoryTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoFooters_EmptyBody()
 		{
 			RevCommit commit = Parse(string.Empty);
@@ -54,7 +54,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(0, footers.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoFooters_NewlineOnlyBody1()
 		{
 			RevCommit commit = Parse("\n");
@@ -63,7 +63,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(0, footers.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoFooters_NewlineOnlyBody5()
 		{
 			RevCommit commit = Parse("\n\n\n\n\n");
@@ -72,7 +72,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(0, footers.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoFooters_OneLineBodyNoLF()
 		{
 			RevCommit commit = Parse("this is a commit");
@@ -81,7 +81,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(0, footers.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoFooters_OneLineBodyWithLF()
 		{
 			RevCommit commit = Parse("this is a commit\n");
@@ -90,7 +90,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(0, footers.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoFooters_ShortBodyNoLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit");
@@ -99,7 +99,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(0, footers.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testNoFooters_ShortBodyWithLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n");
@@ -108,7 +108,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(0, footers.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testSignedOffBy_OneUserNoLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Signed-off-by: A. U. Thor <a@example.com>");
@@ -123,7 +123,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal("a@example.com", f.getEmailAddress());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testSignedOffBy_OneUserWithLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Signed-off-by: A. U. Thor <a@example.com>\n");
@@ -138,7 +138,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal("a@example.com", f.getEmailAddress());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testSignedOffBy_IgnoreWhitespace()
 		{
 			// We only ignore leading whitespace on the value, trailing
@@ -156,7 +156,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal("a@example.com", f.getEmailAddress());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmptyValueNoLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Signed-off-by:");
@@ -171,7 +171,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(f.getEmailAddress());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmptyValueWithLF()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Signed-off-by:\n");
@@ -186,7 +186,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(f.getEmailAddress());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testShortKey()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "K:V\n");
@@ -201,7 +201,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(f.getEmailAddress());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNonDelimtedEmail()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Acked-by: re@example.com\n");
@@ -216,7 +216,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal("re@example.com", f.getEmailAddress());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNotEmail()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "\n" + "Acked-by: Main Tain Er\n");
@@ -231,7 +231,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(f.getEmailAddress());
 		}
 		
-		[Fact]
+		[StrictFactAttribute]
 		public void testSignedOffBy_ManyUsers()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "Not-A-Footer-Line: this line must not be read as a footer\n" + "\n" + "Signed-off-by: A. U. Thor <a@example.com>\n" + "CC:            <some.mailing.list@example.com>\n" + "Acked-by: Some Reviewer <sr@example.com>\n" + "Signed-off-by: Main Tain Er <mte@example.com>\n");
@@ -261,7 +261,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal("mte@example.com", f.getEmailAddress());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testSignedOffBy_SkipNonFooter()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "Not-A-Footer-Line: this line must not be read as a footer\n" + "\n" + "Signed-off-by: A. U. Thor <a@example.com>\n" + "CC:            <some.mailing.list@example.com>\n" + "not really a footer line but we'll skip it anyway\n" + "Acked-by: Some Reviewer <sr@example.com>\n" + "Signed-off-by: Main Tain Er <mte@example.com>\n");
@@ -287,7 +287,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal("Main Tain Er <mte@example.com>", f.Value);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testFilterFootersIgnoreCase()
 		{
 			RevCommit commit = Parse("subject\n\nbody of commit\n" + "Not-A-Footer-Line: this line must not be read as a footer\n" + "\n" + "Signed-Off-By: A. U. Thor <a@example.com>\n" + "CC:            <some.mailing.list@example.com>\n" + "Acked-by: Some Reviewer <sr@example.com>\n" + "signed-off-by: Main Tain Er <mte@example.com>\n");

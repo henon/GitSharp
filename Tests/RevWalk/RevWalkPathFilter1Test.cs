@@ -49,7 +49,7 @@ namespace GitSharp.Tests.RevWalk
 				.create(PathFilterGroup.createFromStrings(new[] { path }), TreeFilter.ANY_DIFF));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmpty_EmptyTree()
 		{
 			RevCommit a = Commit();
@@ -58,7 +58,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(Rw.next());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmpty_NoMatch()
 		{
 			RevCommit a = Commit(Tree(File("0", Blob("0"))));
@@ -67,7 +67,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(Rw.next());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testSimple1()
 		{
 			RevCommit a = Commit(Tree(File("0", Blob("0"))));
@@ -77,7 +77,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(Rw.next());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEdits_MatchNone()
 		{
 			RevCommit a = Commit(Tree(File("0", Blob("a"))));
@@ -89,7 +89,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(Rw.next());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEdits_MatchAll()
 		{
 			RevCommit a = Commit(Tree(File("0", Blob("a"))));
@@ -105,7 +105,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(Rw.next());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testStringOfPearls_FilePath1()
 		{
 			RevCommit a = Commit(Tree(File("d/f", Blob("a"))));
@@ -123,7 +123,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(Rw.next());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testStringOfPearls_FilePath2()
 		{
 			RevCommit a = Commit(Tree(File("d/f", Blob("a"))));
@@ -143,7 +143,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(Rw.next());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testStringOfPearls_DirPath2()
 		{
 			RevCommit a = Commit(Tree(File("d/f", Blob("a"))));
@@ -163,7 +163,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Null(Rw.next());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testStringOfPearls_FilePath3()
 		{
 			RevCommit a = Commit(Tree(File("d/f", Blob("a"))));

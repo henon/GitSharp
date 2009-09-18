@@ -54,7 +54,7 @@ namespace GitSharp.Tests.Transport
             o = new PacketLineOut(rawOut);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWriteString1()
         {
             o.WriteString("a");
@@ -62,7 +62,7 @@ namespace GitSharp.Tests.Transport
             assertBuffer("0005a0006bc");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWriteString2()
         {
             o.WriteString("a\n");
@@ -70,28 +70,28 @@ namespace GitSharp.Tests.Transport
             assertBuffer("0006a\n0007bc\n");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWriteString3()
         {
             o.WriteString(string.Empty);
             assertBuffer("0004");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWritePacket1()
         {
             o.WritePacket(Encoding.ASCII.GetBytes("a"));
             assertBuffer("0005a");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWritePacket2()
         {
             o.WritePacket(Encoding.ASCII.GetBytes("abcd"));
             assertBuffer("0008abcd");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWritePacket3()
         {
             const int buflen = SideBandOutputStream.MAX_BUF - SideBandOutputStream.HDR_SIZE;
@@ -111,21 +111,21 @@ namespace GitSharp.Tests.Transport
                 Assert.Equal(buf[i], act[j]);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWriteChannelPacket1()
         {
             o.WriteChannelPacket(1, new[] { (byte)'a' }, 0, 1);
             assertBuffer("0006\x01" + "a");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWriteChannelPacket2()
         {
             o.WriteChannelPacket(2, new[] { (byte)'b' }, 0, 1);
             assertBuffer("0006\x02" + "b");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWriteChannelPacket3()
         {
             o.WriteChannelPacket(3, new[] { (byte)'c' }, 0, 1);

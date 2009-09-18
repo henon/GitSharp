@@ -44,7 +44,7 @@ namespace GitSharp.Tests.Patch
 {
     public class EditListTest : BasePatchTest
     {
-        [Fact]
+        [StrictFactAttribute]
 	    public void testHunkHeader()
         {
             GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_BothISO88591.patch");
@@ -59,7 +59,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.Equal(new Edit(16 - 1, 17 - 1, 16 - 1, 17 - 1), list1.get(0));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testFileHeader()
         {
             GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_BothISO88591.patch");
@@ -70,7 +70,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.Equal(new Edit(16 - 1, 17 - 1, 16 - 1, 17 - 1), e.get(1));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testTypes()
         {
             GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testEditList_Types.patch");

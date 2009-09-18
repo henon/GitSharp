@@ -45,7 +45,7 @@ namespace GitSharp.Tests
 {
 	public class PersonIdentTests
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void GitTimeToDateTimeOffset()
 		{
 			var dateOffset = 1245589493L.GitTimeToDateTimeOffset(2 * 60);
@@ -61,7 +61,7 @@ namespace GitSharp.Tests
 			Assert.Equal(dateOffset.ToGitInternalTime(), 1241055677L);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test001_NewIdent()
 		{
 			var p = new PersonIdent("A U Thor", "author@example.com", 1142878501, 0);
@@ -71,7 +71,7 @@ namespace GitSharp.Tests
 			Assert.Equal("A U Thor <author@example.com> 1142878501 +0000", p.ToExternalString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test002_ParseIdent()
 		{
 			const string i = "A U Thor <author@example.com> 1142878501 -0500";
@@ -82,7 +82,7 @@ namespace GitSharp.Tests
 			Assert.Equal(1142878501L, p.When.ToGitInternalTime());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test003_ParseIdent()
 		{
 			const string i = "A U Thor <author@example.com> 1142878501 +0230";
@@ -93,7 +93,7 @@ namespace GitSharp.Tests
 			Assert.Equal(1142878501L, p.When.ToGitInternalTime());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test004_ParseIdent()
 		{
 			const string i = "A U Thor<author@example.com> 1142878501 +0230";
@@ -103,7 +103,7 @@ namespace GitSharp.Tests
 			Assert.Equal(1142878501L, p.When.ToGitInternalTime());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test005_ParseIdent()
 		{
 			const string i = "A U Thor<author@example.com>1142878501 +0230";
@@ -113,7 +113,7 @@ namespace GitSharp.Tests
 			Assert.Equal(1142878501L, p.When.ToGitInternalTime());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test006_ParseIdent()
 		{
 			const string i = "A U Thor   <author@example.com>1142878501 +0230";
@@ -123,7 +123,7 @@ namespace GitSharp.Tests
 			Assert.Equal(1142878501L, p.When.ToGitInternalTime());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test007_ParseIdent()
 		{
 			const string i = "A U Thor<author@example.com>1142878501 +0230 ";

@@ -59,38 +59,38 @@ namespace GitSharp.Tests
 		    Assert.Equal(exp, r);
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testQuote_Empty()
         {
             Assert.Equal("''", QuotedString.BOURNE_USER_PATH.quote(string.Empty));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testDequote_Empty1()
         {
             Assert.Equal(string.Empty, QuotedString.BOURNE.dequote(new byte[0], 0, 0));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testDequote_Empty2()
         {
             Assert.Equal(string.Empty, QuotedString.BOURNE_USER_PATH.dequote(new byte[] { (byte)'\'', (byte)'\'' }, 0,
 				    2));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testDequote_SoleSq()
         {
             Assert.Equal(string.Empty, QuotedString.BOURNE_USER_PATH.dequote(new byte[] { (byte)'\'' }, 0, 1));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testQuote_BareA()
         {
 		    AssertQuote("a", "a");
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testDequote_BareA()
         {
 		    const string inStr = "a";
@@ -98,7 +98,7 @@ namespace GitSharp.Tests
             Assert.Equal(inStr, QuotedString.BOURNE_USER_PATH.dequote(b, 0, b.Length));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testDequote_BareABCZ_OnlyBC()
         {
 		    const string inStr = "abcz";
@@ -107,13 +107,13 @@ namespace GitSharp.Tests
             Assert.Equal("bc", QuotedString.BOURNE_USER_PATH.dequote(b, p, p + 2));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testDequote_LoneBackslash()
         {
 		    AssertDequote("\\", "\\");
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testQuote_NamedEscapes()
         {
 		    AssertQuote("'", "'\\''");
@@ -123,7 +123,7 @@ namespace GitSharp.Tests
 		    AssertQuote("a!b", "a'\\!'b");
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testDequote_NamedEscapes()
         {
 		    AssertDequote("'", "'\\''");
@@ -133,7 +133,7 @@ namespace GitSharp.Tests
 		    AssertDequote("a!b", "a'\\!'b");
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testQuote_User()
         {
             Assert.Equal("~foo/", QuotedString.BOURNE_USER_PATH.quote("~foo"));
@@ -144,7 +144,7 @@ namespace GitSharp.Tests
             Assert.Equal("~/'a'", QuotedString.BOURNE_USER_PATH.quote("~/a"));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testDequote_User()
         {
             Assert.Equal("~foo", QuotedString.BOURNE_USER_PATH.dequote("~foo"));

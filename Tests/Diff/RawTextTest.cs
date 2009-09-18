@@ -45,14 +45,14 @@ namespace GitSharp.Tests.Diff
 {
 	public class RawTextTest
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmpty()
 		{
 			var r = new RawText(new byte[0]);
 			Assert.Equal(0, r.size());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEquals()
 		{
 			var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
@@ -70,7 +70,7 @@ namespace GitSharp.Tests.Diff
 			Assert.True(b.equals(0, a, 1));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testWriteLine1()
 		{
 			var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b\n"));
@@ -80,7 +80,7 @@ namespace GitSharp.Tests.Diff
 			Assert.Equal("foo-a", RawParseUtils.decode(r));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testWriteLine2()
 		{
 			var a = new RawText(Constants.encodeASCII("foo-a\nfoo-b"));
@@ -90,7 +90,7 @@ namespace GitSharp.Tests.Diff
 			Assert.Equal("foo-b", RawParseUtils.decode(r));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testWriteLine3()
 		{
 			var a = new RawText(Constants.encodeASCII("a\n\nb\n"));

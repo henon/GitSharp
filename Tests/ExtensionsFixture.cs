@@ -7,7 +7,7 @@ namespace GitSharp.Tests
 {
     public class ExtensionsFixture
     {
-        [Fact]
+        [StrictFactAttribute]
         public void IsDirectory()
         {
             var filePath = Assembly.GetExecutingAssembly().Location;
@@ -21,7 +21,7 @@ namespace GitSharp.Tests
             Assert.False(new DirectoryInfo(filePath).IsDirectory());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void IsFile()
         {
             var filePath = Assembly.GetExecutingAssembly().Location;

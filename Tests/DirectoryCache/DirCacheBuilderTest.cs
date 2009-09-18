@@ -50,7 +50,7 @@ namespace GitSharp.Tests.DirectoryCache
 		const long lastModified = 1218123387057L;
 		const int Length = 1342;
 
-        [Fact]
+        [StrictFactAttribute]
         public void testBuildEmpty()
         {
 			DirCache dc = DirCache.Lock(db);
@@ -64,7 +64,7 @@ namespace GitSharp.Tests.DirectoryCache
 			Assert.Equal(0, dc.getEntryCount());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testBuildOneFile_FinishWriteCommit()
         {
         	DirCache dc = DirCache.Lock(db);
@@ -107,7 +107,7 @@ namespace GitSharp.Tests.DirectoryCache
 			Assert.False(entOrig.isAssumeValid());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testBuildOneFile_Commit()
         {
         	DirCache dc = DirCache.Lock(db);
@@ -148,7 +148,7 @@ namespace GitSharp.Tests.DirectoryCache
 			Assert.False(entOrig.isAssumeValid());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFindSingleFile()
         {
             DirCache dc = DirCache.read(db);
@@ -174,7 +174,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.Same(entOrig, dc.getEntry(path));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testAdd_InGitSortOrder()
         {
             DirCache dc = DirCache.read(db);
@@ -203,7 +203,7 @@ namespace GitSharp.Tests.DirectoryCache
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testAdd_ReverseGitSortOrder()
         {
             DirCache dc = DirCache.read(db);
@@ -232,7 +232,7 @@ namespace GitSharp.Tests.DirectoryCache
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testBuilderClear()
         {
             DirCache dc = DirCache.read(db);

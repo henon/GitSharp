@@ -209,7 +209,7 @@ namespace GitSharp.Tests
             _theIndex = BuildIndex(indexEntries);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testCheckoutOutChanges()
         {
             SetupCase(MakeMap("foo"), MakeMap("foo/bar"), MakeMap("foo"));
@@ -227,7 +227,7 @@ namespace GitSharp.Tests
         	Assert.Throws<CheckoutConflictException>(Checkout);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testCloseNameConflicts1()
         {
             SetupCase(MakeMap(new[] { "a/a", "a/a-c" }), MakeMap(new[] { "a/a", "a/a", "a.a/a.a", "a.a/a.a" }),
@@ -237,7 +237,7 @@ namespace GitSharp.Tests
             AssertNoConflicts();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testCloseNameConflictsX0()
         {
             SetupCase(MakeMap(new[] { "a/a", "a/a-c" }),
@@ -248,7 +248,7 @@ namespace GitSharp.Tests
             AssertNoConflicts();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_1()
         {
             DoIt(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF/DF"));
@@ -257,7 +257,7 @@ namespace GitSharp.Tests
             AssertRemoved("DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_10()
         {
             CleanUpDF();
@@ -265,14 +265,14 @@ namespace GitSharp.Tests
             AssertNoConflicts();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_11()
         {
             DoIt(MakeMap("DF"), MakeMap("DF/DF"), MakeMap(new[] { "DF/DF", "asdf" }));
             AssertConflict("DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_12()
         {
             CleanUpDF();
@@ -281,7 +281,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_13()
         {
             CleanUpDF();
@@ -292,7 +292,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_14()
         {
             CleanUpDF();
@@ -301,7 +301,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_15()
         {
             DoIt(MakeMap(new string[0]), MakeMap("DF/DF"), MakeMap("DF"));
@@ -309,7 +309,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_15b()
         {
             DoIt(MakeMap(new string[0]), MakeMap("DF/DF/DF/DF"), MakeMap("DF"));
@@ -317,7 +317,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF/DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_16()
         {
             CleanUpDF();
@@ -326,7 +326,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_17()
         {
             CleanUpDF();
@@ -337,7 +337,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_18()
         {
             CleanUpDF();
@@ -346,7 +346,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF/DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_19()
         {
             CleanUpDF();
@@ -355,7 +355,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_2()
         {
             SetupCase(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF/DF"));
@@ -364,7 +364,7 @@ namespace GitSharp.Tests
             AssertConflict("DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_3()
         {
             DoIt(MakeMap("DF/DF"), MakeMap("DF/DF"), MakeMap("DF"));
@@ -372,7 +372,7 @@ namespace GitSharp.Tests
             AssertRemoved("DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_4()
         {
             DoIt(MakeMap("DF/DF"), MakeMap(new[] { "DF/DF", "foo" }), MakeMap("DF"));
@@ -380,14 +380,14 @@ namespace GitSharp.Tests
             AssertRemoved("DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_5()
         {
             DoIt(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF"));
             AssertRemoved("DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_6()
         {
             SetupCase(MakeMap("DF/DF"), MakeMap("DF"), MakeMap("DF"));
@@ -396,7 +396,7 @@ namespace GitSharp.Tests
             AssertRemoved("DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_7()
         {
             DoIt(MakeMap("DF"), MakeMap("DF"), MakeMap("DF/DF"));
@@ -417,7 +417,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF/DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileConflicts_9()
         {
             DoIt(MakeMap("DF"), MakeMap(new[] { "DF", "QP" }), MakeMap("DF/DF"));
@@ -425,7 +425,7 @@ namespace GitSharp.Tests
             AssertUpdated("DF");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDirectoryFileSimple()
         {
             _theIndex = new GitIndex(db);
@@ -454,7 +454,7 @@ namespace GitSharp.Tests
             Assert.True(_theReadTree.Updated.ContainsKey("DF"));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testRules1thru3_NoIndexEntry()
         {
             var index = new GitIndex(db);
@@ -476,7 +476,7 @@ namespace GitSharp.Tests
             Assert.Equal(id2, checkout.Updated["foo"]);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testRules4thru13_IndexEntryNotInHead()
         {
             // rule 4 and 5
@@ -554,7 +554,7 @@ namespace GitSharp.Tests
             Assert.True(_theReadTree.Conflicts.Contains("foo"));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUntrackedConflicts()
         {
             SetupCase(null, MakeMap("foo"), null);

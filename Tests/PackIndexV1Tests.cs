@@ -58,7 +58,7 @@ namespace GitSharp.Tests
         /// <summary>
 		/// Verify CRC32 - V1 should not index anything.
         /// </summary>
-        [Fact]
+        [StrictFactAttribute]
         public override void TestCrc32()
         {
         	Assert.Throws<NotSupportedException>(() => 

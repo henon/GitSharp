@@ -48,21 +48,21 @@ namespace GitSharp.Tests.RevWalk
             return new FIFORevQueue();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public override void testEmpty()
         {
             base.testEmpty();
 			Assert.Equal(Generator.GeneratorOutputType.None, q.OutputType);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testCloneEmpty()
         {
             q = new FIFORevQueue(AbstractRevQueue.EmptyQueue);
             Assert.Null(q.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testAddLargeBlocks()
         {
             var lst = new List<RevCommit>();
@@ -76,7 +76,7 @@ namespace GitSharp.Tests.RevWalk
                 Assert.Same(lst[i], q.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUnpopAtFront()
         {
             RevCommit a = Commit();

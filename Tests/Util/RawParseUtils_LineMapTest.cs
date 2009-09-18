@@ -43,7 +43,7 @@ namespace GitSharp.Tests
 {
     public class RawParseUtils_LineMapTest
     {
-        [Fact]
+        [StrictFactAttribute]
 	    public void testEmpty()
         {
 		    IntList map = RawParseUtils.lineMap(new byte[] {}, 0, 0);
@@ -53,7 +53,7 @@ namespace GitSharp.Tests
 		    Assert.Equal(0, map.get(1));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testOneBlankLine()
         {
 		    IntList map = RawParseUtils.lineMap(new byte[] { (byte)'\n' }, 0, 1);
@@ -63,7 +63,7 @@ namespace GitSharp.Tests
 		    Assert.Equal(1, map.get(2));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testTwoLineFooBar()
         {
             byte[] buf = "foo\nbar\n".getBytes("ISO-8859-1");
@@ -75,7 +75,7 @@ namespace GitSharp.Tests
 		    Assert.Equal(buf.Length, map.get(3));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testTwoLineNoLF()
         {
             byte[] buf = "foo\nbar".getBytes("ISO-8859-1");
@@ -87,7 +87,7 @@ namespace GitSharp.Tests
 		    Assert.Equal(buf.Length, map.get(3));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testFourLineBlanks()
         {
             byte[] buf = "foo\n\n\nbar\n".getBytes("ISO-8859-1");

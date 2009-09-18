@@ -59,38 +59,38 @@ namespace GitSharp.Tests.Util
 			Assert.Equal(exp, r);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testQuote_Empty()
 		{
 			Assert.Equal("\"\"", QuotedString.GitPath.quote(string.Empty));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_Empty1()
 		{
 			Assert.Equal(string.Empty, QuotedString.GitPath.dequote(new byte[0], 0, 0));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_Empty2()
 		{
 			Assert.Equal(string.Empty, QuotedString.GitPath.dequote(new[] { (byte)'"', (byte)'"' }, 0, 2));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_SoleDq()
 		{
 			Assert.Equal("\"", QuotedString.GitPath.dequote(new[] { (byte)'"' }, 0, 1));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testQuote_BareA()
 		{
 			const string inStr = "a";
 			Assert.Same(inStr, QuotedString.GitPath.quote(inStr));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_BareA()
 		{
 			const string inStr = "a";
@@ -98,7 +98,7 @@ namespace GitSharp.Tests.Util
 			Assert.Equal(inStr, QuotedString.GitPath.dequote(b, 0, b.Length));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_BareABCZ_OnlyBC()
 		{
 			const string inStr = "abcz";
@@ -107,13 +107,13 @@ namespace GitSharp.Tests.Util
 			Assert.Equal("bc", QuotedString.GitPath.dequote(b, p, p + 2));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_LoneBackslash()
 		{
 			AssertDequote("\\", "\\");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testQuote_NamedEscapes()
 		{
 			AssertQuote("\\a", "\u0007");
@@ -127,7 +127,7 @@ namespace GitSharp.Tests.Util
 			AssertQuote("\\\"", "\"");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_NamedEscapes()
 		{
 			AssertDequote("\u0007", "\\a");
@@ -141,7 +141,7 @@ namespace GitSharp.Tests.Util
 			AssertDequote("\"", "\\\"");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_OctalAll()
 		{
 			for (int i = 0; i < 127; i++)
@@ -167,7 +167,7 @@ namespace GitSharp.Tests.Util
 			return "\\"+s;
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testQuote_OctalAll()
 		{
 			AssertQuote("\\001", new string((char)1,1));
@@ -175,43 +175,43 @@ namespace GitSharp.Tests.Util
 			AssertQuote("\\303\\277", "\u00ff"); // \u00ff in UTF-8
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_UnknownEscapeQ()
 		{
 			AssertDequote("\\q", "\\q");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_FooTabBar()
 		{
 			AssertDequote("foo\tbar", "foo\\tbar");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_Latin1()
 		{
 			AssertDequote("\u00c5ngstr\u00f6m", "\\305ngstr\\366m"); // Latin1
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_UTF8()
 		{
 			AssertDequote("\u00c5ngstr\u00f6m", "\\303\\205ngstr\\303\\266m");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_RawUTF8()
 		{
 			AssertDequote("\u00c5ngstr\u00f6m", "\\303\\205ngstr\\303\\266m");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDequote_RawLatin1()
 		{
 			AssertDequote("\u00c5ngstr\u00f6m", "\\305ngstr\\366m");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testQuote_Ang()
 		{
 			AssertQuote("\\303\\205ngstr\\303\\266m", "\u00c5ngstr\u00f6m");

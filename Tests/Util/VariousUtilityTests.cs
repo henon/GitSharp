@@ -5,7 +5,7 @@ namespace GitSharp.Tests.Util
 {
     public class VariousUtilityTests
     {
-        [Fact]
+        [StrictFactAttribute]
         public void TestBitCount()
         {
             Assert.Equal(1, (2 << 5).BitCount());
@@ -13,7 +13,7 @@ namespace GitSharp.Tests.Util
             Assert.Equal(2, 3.BitCount());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void TestNumberOfTrailingZeros()
         {
             Assert.Equal(0, 1.NumberOfTrailingZeros());

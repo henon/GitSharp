@@ -101,7 +101,7 @@ namespace GitSharp.Tests.TreeWalk
 			return Constants.CHARSET.GetString(_ctp.Path, _ctp.PathOffset, _ctp.PathLen);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testBackwards_ConfusingPathName()
 		{
 			const string aVeryConfusingName = "confusing 644 entry 755 and others";
@@ -124,14 +124,14 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.Equal(_hashA, _ctp.getEntryObjectId());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmptyTree_AtEOF()
 		{
 			_ctp.reset(new byte[0]);
 			Assert.True(_ctp.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testFreakingHugePathName()
 		{
 			int n = AbstractTreeIterator.DEFAULT_PATH_SIZE*4;
@@ -146,7 +146,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.Equal(name, RawParseUtils.decode(Constants.CHARSET, _ctp.Path, _ctp.PathOffset, _ctp.PathLen));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testOneEntry_Backwards()
 		{
 			_ctp.reset(_tree1);
@@ -162,7 +162,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.Equal(_hashA, _ctp.getEntryObjectId());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testOneEntry_Forward()
 		{
 			_ctp.reset(_tree1);
@@ -178,7 +178,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(_ctp.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testOneEntry_Seek1IsEOF()
 		{
 			_ctp.reset(_tree1);
@@ -186,7 +186,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(_ctp.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testThreeEntries_BackwardsTwo()
 		{
 			_ctp.reset(_tree3);
@@ -209,7 +209,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(_ctp.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testThreeEntries_Seek2()
 		{
 			_ctp.reset(_tree3);
@@ -225,7 +225,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(_ctp.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testThreeEntries_Seek3IsEOF()
 		{
 			_ctp.reset(_tree3);
@@ -233,7 +233,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(_ctp.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testTwoEntries_BackwardsOneAtATime()
 		{
 			_ctp.reset(_tree2);
@@ -253,7 +253,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.Equal(_hashA, _ctp.getEntryObjectId());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testTwoEntries_BackwardsTwo()
 		{
 			_ctp.reset(_tree2);
@@ -276,7 +276,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(_ctp.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testTwoEntries_ForwardOneAtATime()
 		{
 			_ctp.reset(_tree2);
@@ -298,7 +298,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(_ctp.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testTwoEntries_Seek2IsEOF()
 		{
 			_ctp.reset(_tree2);

@@ -75,7 +75,7 @@ namespace GitSharp.Tests.Util
         /// Test contracts of Iterator methods and this implementation remove()
 		/// limitations.
         /// </summary>
-        [Fact]
+        [StrictFactAttribute]
         public void testIteratorMethodsContract()
         {
             IEnumerator<PackIndex.MutableEntry> iter = SmallIdx.GetEnumerator();
@@ -90,7 +90,7 @@ namespace GitSharp.Tests.Util
         /// Test results of iterator comparing to content of well-known (prepared)
 		/// small index.
         /// </summary>
-        [Fact]
+        [StrictFactAttribute]
         public void testIteratorReturnedValues1()
         {
             IEnumerator<PackIndex.MutableEntry> iter = SmallIdx.GetEnumerator();
@@ -116,7 +116,7 @@ namespace GitSharp.Tests.Util
         /// <summary>
 		/// Compare offset from iterator entries with output of findOffset() method.
         /// </summary>
-        [Fact]
+        [StrictFactAttribute]
         public void testCompareEntriesOffsetsWithFindOffsets()
         {
             foreach (var me in SmallIdx)
@@ -134,7 +134,7 @@ namespace GitSharp.Tests.Util
         /// Test partial results of iterator comparing to content of well-known
 		/// (prepared) dense index, that may need multi-level indexing.
         /// </summary>
-        [Fact]
+        [StrictFactAttribute]
         public void testIteratorReturnedValues2()
         {
             IEnumerator<PackIndex.MutableEntry> iter = _denseIdx.GetEnumerator();

@@ -49,7 +49,7 @@ namespace GitSharp.Tests.RevWalk
 		private readonly Encoding _isoEnc = Encoding.GetEncoding("ISO-8859-1");
 		private readonly Encoding _eucJpEnc = Encoding.GetEncoding("EUC-JP");
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_NoParents()
 		{
 			ObjectId treeId = Id("9788669ad918b6fcce64af8882fc9a81cb6aba67");
@@ -125,7 +125,7 @@ namespace GitSharp.Tests.RevWalk
 			return c;
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_WeirdHeaderOnlyCommit()
 		{
 			var b = new StringBuilder();
@@ -141,7 +141,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(string.Empty, c.getShortMessage());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_implicit_UTF8_encoded()
 		{
 			RevCommit c;
@@ -163,7 +163,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_implicit_mixed_encoded()
 		{
 			RevCommit c;
@@ -189,7 +189,7 @@ namespace GitSharp.Tests.RevWalk
 		/// <summary>
 		/// Test parsing of a commit whose encoding is given and works.
 		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_explicit_encoded()
 		{
 			RevCommit c;
@@ -219,7 +219,7 @@ namespace GitSharp.Tests.RevWalk
 		/// What happens here is that an encoding us given, but data is not encoded
 		/// that way (and we can detect it), so we try other encodings.
 		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_explicit_bad_encoded()
 		{
 			RevCommit c;
@@ -250,7 +250,7 @@ namespace GitSharp.Tests.RevWalk
 		/// that way (and we can detect it), so we try other encodings. Here data could
 		/// actually be decoded in the stated encoding, but we override using UTF-8.
 		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_explicit_bad_encoded2()
 		{
 			RevCommit c;
@@ -274,7 +274,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_NoMessage()
 		{
 			string msg = string.Empty;
@@ -283,7 +283,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(msg, c.getShortMessage());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_OnlyLFMessage()
 		{
 			RevCommit c = Create("\n");
@@ -291,7 +291,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(string.Empty, c.getShortMessage());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_ShortLineOnlyNoLF()
 		{
 			const string shortMsg = "This is a short message.";
@@ -300,7 +300,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(shortMsg, c.getShortMessage());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_ShortLineOnlyEndLF()
 		{
 			const string shortMsg = "This is a short message.";
@@ -310,7 +310,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(shortMsg, c.getShortMessage());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_ShortLineOnlyEmbeddedLF()
 		{
 			const string fullMsg = "This is a\nshort message.";
@@ -320,7 +320,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(shortMsg, c.getShortMessage());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_ShortLineOnlyEmbeddedAndEndingLF()
 		{
 			const string fullMsg = "This is a\nshort message.\n";
@@ -330,7 +330,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(shortMsg, c.getShortMessage());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_GitStyleMessage()
 		{
 			const string shortMsg = "This fixes a bug.";

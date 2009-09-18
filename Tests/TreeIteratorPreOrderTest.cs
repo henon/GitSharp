@@ -47,7 +47,7 @@ namespace GitSharp.Tests
 		/// <summary>
 		/// Empty tree
 		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmpty()
 		{
 			var tree = new Tree(db);
@@ -61,7 +61,7 @@ namespace GitSharp.Tests
 		/// one file
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testSimpleF1()
 		{
 			var tree = new Tree(db);
@@ -78,7 +78,7 @@ namespace GitSharp.Tests
 		/// two files
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testSimpleF2()
 		{
 			var tree = new Tree(db);
@@ -97,7 +97,7 @@ namespace GitSharp.Tests
 		/// Empty tree
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testSimpleT()
 		{
 			var tree = new Tree(db);
@@ -110,7 +110,7 @@ namespace GitSharp.Tests
             Assert.False(i.hasNext());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testTricky()
 		{
 			var tree = new Tree(db);

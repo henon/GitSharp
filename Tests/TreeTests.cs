@@ -69,20 +69,20 @@ namespace GitSharp.Tests
 			return Tree.CompareNames(abytes, bbytes, lasta, lastb);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test000_sort_01()
 		{
 			Assert.Equal(0, CompareNamesUsingSpecialCompare("a", "a"));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test000_sort_02()
 		{
 			Assert.Equal(-1, CompareNamesUsingSpecialCompare("a", "b"));
 			Assert.Equal(1, CompareNamesUsingSpecialCompare("b", "a"));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test000_sort_03()
 		{
 			Assert.Equal(1, CompareNamesUsingSpecialCompare("a:", "a"));
@@ -93,21 +93,21 @@ namespace GitSharp.Tests
 			Assert.Equal(-1, CompareNamesUsingSpecialCompare("a/", "a:"));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test000_sort_04()
 		{
 			Assert.Equal(-1, CompareNamesUsingSpecialCompare("a.a", "a/a"));
 			Assert.Equal(1, CompareNamesUsingSpecialCompare("a/a", "a.a"));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test000_sort_05()
 		{
 			Assert.Equal(-1, CompareNamesUsingSpecialCompare("a.", "a/"));
 			Assert.Equal(1, CompareNamesUsingSpecialCompare("a/", "a."));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test001_createEmpty()
 		{
 			var t = new Tree(db);
@@ -127,7 +127,7 @@ namespace GitSharp.Tests
 			Assert.True(t.FindBlobMember("foo") == null);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test002_addFile()
 		{
 			var t = new Tree(db) { Id = SomeFakeId };
@@ -152,7 +152,7 @@ namespace GitSharp.Tests
 			Assert.True(i != null && i.Length == 1);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test004_addTree()
 		{
 			var t = new Tree(db) {Id = SomeFakeId};
@@ -182,7 +182,7 @@ namespace GitSharp.Tests
 			Assert.True(i.Length == 1);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test005_addRecursiveFile()
 		{
 			var t = new Tree(db);
@@ -194,7 +194,7 @@ namespace GitSharp.Tests
 			Assert.True(t == f.Parent.Parent.Parent, "t is great-grandparent");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test005_addRecursiveTree()
 		{
 			var t = new Tree(db);
@@ -206,7 +206,7 @@ namespace GitSharp.Tests
 			Assert.True(t == f.Parent.Parent.Parent, "t is great-grandparent");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test006_addDeepTree()
 		{
 			var t = new Tree(db);
@@ -257,7 +257,7 @@ namespace GitSharp.Tests
 			Assert.True(t.Id == null);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test007_manyFileLookup()
 		{
 			var t = new Tree(db);
@@ -283,7 +283,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test008_SubtreeInternalSorting()
 		{
 			var t = new Tree(db);

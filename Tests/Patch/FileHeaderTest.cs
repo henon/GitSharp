@@ -43,7 +43,7 @@ namespace GitSharp.Tests.Patch
 {
     public class FileHeaderTest : BasePatchTest
     {
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseGitFileName_Empty()
         {
 		    FileHeader fh = Data(string.Empty);
@@ -53,28 +53,28 @@ namespace GitSharp.Tests.Patch
 		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseGitFileName_NoLF()
         {
 		    FileHeader fh = Data("a/ b/");
 			Assert.Equal(-1, fh.parseGitFileName(0, fh.Buffer.Length));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseGitFileName_NoSecondLine()
         {
 		    FileHeader fh = Data("\n");
 			Assert.Equal(-1, fh.parseGitFileName(0, fh.Buffer.Length));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseGitFileName_EmptyHeader()
         {
 		    FileHeader fh = Data("\n\n");
 			Assert.Equal(1, fh.parseGitFileName(0, fh.Buffer.Length));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseGitFileName_Foo()
         {
 		    const string name = "foo";
@@ -85,7 +85,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseGitFileName_FailFooBar()
         {
 		    FileHeader fh = Data("a/foo b/bar\n-");
@@ -95,7 +95,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseGitFileName_FooSpBar()
         {
 		    const string name = "foo bar";
@@ -107,7 +107,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseGitFileName_DqFooTabBar()
         {
 		    const string name = "foo\tbar";
@@ -120,7 +120,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseGitFileName_DqFooSpLfNulBar()
         {
 		    const string name = "foo \n\0bar";
@@ -133,7 +133,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseGitFileName_SrcFooC()
         {
 		    const string name = "src/foo/bar/argh/code.c";
@@ -145,7 +145,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseGitFileName_SrcFooCNonStandardPrefix()
         {
 		    const string name = "src/foo/bar/argh/code.c";
@@ -157,7 +157,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.False(fh.hasMetaDataChanges());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseUnicodeName_NewFile()
         {
 		    FileHeader fh = Data("diff --git \"a/\\303\\205ngstr\\303\\266m\" \"b/\\303\\205ngstr\\303\\266m\"\n"
@@ -184,7 +184,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.Equal(0, fh.getScore());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseUnicodeName_DeleteFile()
         {
 		    FileHeader fh = Data("diff --git \"a/\\303\\205ngstr\\303\\266m\" \"b/\\303\\205ngstr\\303\\266m\"\n"
@@ -212,7 +212,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.Equal(0, fh.getScore());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseModeChange()
         {
 		    FileHeader fh = Data("diff --git a/a b b/a b\n"
@@ -234,7 +234,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.Equal(0, fh.getScore());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseRename100_NewStyle()
         {
 		    FileHeader fh = Data("diff --git a/a b/ c/\\303\\205ngstr\\303\\266m\n"
@@ -266,7 +266,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.Equal(100, fh.getScore());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseRename100_OldStyle()
         {
 		    FileHeader fh = Data("diff --git a/a b/ c/\\303\\205ngstr\\303\\266m\n"
@@ -298,7 +298,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.Equal(100, fh.getScore());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseCopy100()
         {
 		    FileHeader fh = Data("diff --git a/a b/ c/\\303\\205ngstr\\303\\266m\n"
@@ -330,7 +330,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.Equal(100, fh.getScore());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseFullIndexLine_WithMode()
         {
 		    const string oid = "78981922613b2afb6025042ff6bd878ac1994e85";
@@ -357,7 +357,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.Equal(ObjectId.FromString(nid), fh.getNewId().ToObjectId());
 	    }
 
-		[Fact]
+		[StrictFactAttribute]
 	    public void testParseFullIndexLine_NoMode()
         {
 		    const string oid = "78981922613b2afb6025042ff6bd878ac1994e85";
@@ -384,7 +384,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.Equal(ObjectId.FromString(nid), fh.getNewId().ToObjectId());
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseAbbrIndexLine_WithMode()
         {
 		    const int a = 7;
@@ -416,7 +416,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.True(ObjectId.FromString(nid).startsWith(fh.getNewId()));
 	    }
 
-        [Fact]
+        [StrictFactAttribute]
 	    public void testParseAbbrIndexLine_NoMode()
         {
 		    const int a = 7;

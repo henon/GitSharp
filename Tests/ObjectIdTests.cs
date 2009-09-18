@@ -48,7 +48,7 @@ namespace GitSharp.Tests
 		const string ff00eedd0 = "ff00eedd003713bb1bb26b808ec9312548e73946";
 // ReSharper restore InconsistentNaming
 
-		[Fact]
+		[StrictFactAttribute]
 		public void ObjectIdToStringTest()
 		{
 			var id = ObjectId.FromString("003ae55c8f6f23aaee66acd2e1c35523fa6ddc33");
@@ -56,7 +56,7 @@ namespace GitSharp.Tests
 			Assert.Equal(0, id.GetFirstByte());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void GetFirstByteTest()
 		{
 			for (var i = 0; i < 255; i++)
@@ -71,21 +71,21 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test001_toString()
 		{
 			ObjectId oid = ObjectId.FromString(def4c620b);
 			Assert.Equal(def4c620b, oid.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test002_toString()
 		{
 			ObjectId oid = ObjectId.FromString(ff00eedd0);
 			Assert.Equal(ff00eedd0, oid.ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test003_equals()
 		{
 			ObjectId a = ObjectId.FromString(def4c620b);
@@ -94,44 +94,44 @@ namespace GitSharp.Tests
 			Assert.True(a.Equals(b), "a and b are same");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test004_isId()
 		{
 			Assert.True(ObjectId.IsId(def4c620b), "valid id");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test005_notIsId()
 		{
 			Assert.False(ObjectId.IsId("bob"), "bob is not an id");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test006_notIsId()
 		{
 			Assert.False(ObjectId.IsId("def4c620bc3713bb1bb26b808ec9312548e7394"), "39 digits is not an id");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test007_notIsId()
 		{
 			Assert.False(ObjectId.IsId("Def4c620bc3713bb1bb26b808ec9312548e73946"), "uppercase is not accepted");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test008_notIsId()
 		{
 			Assert.False(ObjectId.IsId("gef4c620bc3713bb1bb26b808ec9312548e73946"), "g is not a valid hex digit");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test009_toString()
 		{
 			ObjectId oid = ObjectId.FromString(ff00eedd0);
 			Assert.Equal(ff00eedd0, ObjectId.ToString(oid));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test010_toString()
 		{
 			Assert.Equal(ObjectId.ZeroId.ToString(), ObjectId.ToString(null));

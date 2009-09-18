@@ -60,7 +60,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(exp, ress);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWrite_CH_DATA()
         {
         	var o = new SideBandOutputStream(SideBandOutputStream.CH_DATA, _pckOut);
@@ -69,7 +69,7 @@ namespace GitSharp.Tests.Transport
             AssertBuffer("0008\x01" + "abc");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWrite_CH_PROGRESS()
         {
         	var o = new SideBandOutputStream(SideBandOutputStream.CH_PROGRESS, _pckOut);
@@ -78,7 +78,7 @@ namespace GitSharp.Tests.Transport
             AssertBuffer("0008\x02" + "abc");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWrite_CH_ERROR()
         {
             var o = new SideBandOutputStream(SideBandOutputStream.CH_ERROR, _pckOut);
@@ -87,7 +87,7 @@ namespace GitSharp.Tests.Transport
             AssertBuffer("0008\x03" + "abc");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWrite_Small()
         {
             var o = new SideBandOutputStream(SideBandOutputStream.CH_DATA, _pckOut);
@@ -97,7 +97,7 @@ namespace GitSharp.Tests.Transport
             AssertBuffer("0006\x01" + "a0006\x01" + "b0006\x01" + "c");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWrite_Large()
         {
             const int buflen = SideBandOutputStream.MAX_BUF - SideBandOutputStream.HDR_SIZE;

@@ -59,14 +59,14 @@ namespace GitSharp.Tests.Diff
 			_fmt = new DiffFormatter();
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNegativeContextFails()
 		{
 			Init("X");
 		    Assert.Throws<ArgumentException>(() => _fmt.setContext(-1));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testContext0()
 		{
 			Init("X");
@@ -74,7 +74,7 @@ namespace GitSharp.Tests.Diff
             AssertFormatted("testContext0.out");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testContext1()
 		{
 			Init("X");
@@ -82,7 +82,7 @@ namespace GitSharp.Tests.Diff
             AssertFormatted("testContext1.out");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testContext3()
 		{
 			Init("X");
@@ -90,7 +90,7 @@ namespace GitSharp.Tests.Diff
             AssertFormatted("testContext3.out");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testContext5()
 		{
 			Init("X");
@@ -98,7 +98,7 @@ namespace GitSharp.Tests.Diff
             AssertFormatted("testContext5.out");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testContext10()
 		{
 			Init("X");
@@ -106,7 +106,7 @@ namespace GitSharp.Tests.Diff
             AssertFormatted("testContext10.out");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testContext100()
 		{
 			Init("X");
@@ -114,21 +114,21 @@ namespace GitSharp.Tests.Diff
             AssertFormatted("testContext100.out");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmpty1()
 		{
 			Init("E");
 			AssertFormatted("E.patch");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoNewLine1()
 		{
 			Init("Y");
 			AssertFormatted("Y.patch");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoNewLine2()
 		{
 			Init("Z");

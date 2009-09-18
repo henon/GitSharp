@@ -44,7 +44,7 @@ namespace GitSharp.Tests.Util
 {
 	public class IntListTest
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmpty_DefaultCapacity()
 		{
 			var i = new IntList();
@@ -60,7 +60,7 @@ namespace GitSharp.Tests.Util
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmpty_SpecificCapacity()
 		{
 			var i = new IntList(5);
@@ -76,7 +76,7 @@ namespace GitSharp.Tests.Util
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAdd_SmallGroup()
 		{
 			var i = new IntList();
@@ -104,7 +104,7 @@ namespace GitSharp.Tests.Util
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAdd_ZeroCapacity()
 		{
 			var i = new IntList(0);
@@ -113,7 +113,7 @@ namespace GitSharp.Tests.Util
 			Assert.Equal(1, i.get(0));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAdd_LargeGroup()
 		{
 			const int n = 500;
@@ -141,7 +141,7 @@ namespace GitSharp.Tests.Util
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testFillTo0()
 		{
 			var i = new IntList();
@@ -149,7 +149,7 @@ namespace GitSharp.Tests.Util
 			Assert.Equal(0, i.size());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testFillTo1()
 		{
 			var i = new IntList();
@@ -160,7 +160,7 @@ namespace GitSharp.Tests.Util
 			Assert.Equal(0, i.get(1));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testFillTo100()
 		{
 			var i = new IntList();
@@ -171,7 +171,7 @@ namespace GitSharp.Tests.Util
 			Assert.Equal(3, i.get(100));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testClear()
 		{
 			var i = new IntList();
@@ -196,7 +196,7 @@ namespace GitSharp.Tests.Util
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testToString()
 		{
 			var i = new IntList();

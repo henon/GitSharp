@@ -45,7 +45,7 @@ namespace GitSharp.Tests.RevWalk
 {
     public class RevWalkMergeBaseTest : RevWalkTestCase
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testNone()
         {
             RevCommit c1 = Commit(Commit(Commit()));
@@ -57,7 +57,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testDisallowTreeFilter()
         {
             RevCommit c1 = Commit();
@@ -71,7 +71,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Throws<InvalidOperationException>(() => Assert.Null(Rw.next()));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSimple()
         {
             RevCommit a = Commit();
@@ -86,7 +86,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testMultipleHeads_SameBase1()
         {
             RevCommit a = Commit();
@@ -103,7 +103,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testMultipleHeads_SameBase2()
         {
             RevCommit a = Commit();
@@ -121,7 +121,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testCrissCross()
         {
             // See http://marc.info/?l=git&m=111463358500362&w=2 for a nice

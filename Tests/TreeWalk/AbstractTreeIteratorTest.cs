@@ -61,7 +61,7 @@ namespace GitSharp.Tests.TreeWalk
 
     	#endregion
 
-		[Fact]
+		[StrictFactAttribute]
         public void testPathCompare()
         {
             Assert.True(new FakeTreeIterator("a", FileMode.RegularFile).pathCompare(new FakeTreeIterator("a", FileMode.Tree)) < 0);

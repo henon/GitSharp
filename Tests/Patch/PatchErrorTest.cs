@@ -43,7 +43,7 @@ namespace GitSharp.Tests.Patch
 {
 	public class PatchErrorTest : BasePatchTest
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testError_DisconnectedHunk()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_DisconnectedHunk.patch");
@@ -62,7 +62,7 @@ namespace GitSharp.Tests.Patch
 			Assert.True(e.getLineText().StartsWith("@@ -109,4 +109,11 @@ assert"));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testError_TruncatedOld()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_TruncatedOld.patch");
@@ -76,7 +76,7 @@ namespace GitSharp.Tests.Patch
 			Assert.True(e.getLineText().StartsWith("@@ -236,9 +236,9 @@ protected "));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testError_TruncatedNew()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_TruncatedNew.patch");
@@ -90,7 +90,7 @@ namespace GitSharp.Tests.Patch
 			Assert.True(e.getLineText().StartsWith("@@ -236,9 +236,9 @@ protected "));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testError_BodyTooLong()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_BodyTooLong.patch");
@@ -104,7 +104,7 @@ namespace GitSharp.Tests.Patch
 			Assert.True(e.getLineText().StartsWith("@@ -109,4 +109,11 @@ assert"));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testError_GarbageBetweenFiles()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_GarbageBetweenFiles.patch");
@@ -126,7 +126,7 @@ namespace GitSharp.Tests.Patch
 			Assert.Equal("I AM NOT HERE\n", e.getLineText());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testError_GitBinaryNoForwardHunk()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_GitBinaryNoForwardHunk.patch");

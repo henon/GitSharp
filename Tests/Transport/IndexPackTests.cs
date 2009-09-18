@@ -48,7 +48,7 @@ namespace GitSharp.Tests.Transport
 		/// <summary>
 		/// Test indexing one of the test packs in the egit repo. It has deltas.
 		/// </summary>
-        [Fact]
+        [StrictFactAttribute]
 		public void test1()
         {
 			FileInfo packFile = GetPack("pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.pack");
@@ -85,7 +85,7 @@ namespace GitSharp.Tests.Transport
 		/// This is just another pack. It so happens that we have two convenient pack to
 		/// test with in the repository.
 		/// </summary>
-        [Fact]
+        [StrictFactAttribute]
 		public void test2()
         {
             FileInfo packFile = GetPack("pack-df2982f284bbabb6bdb59ee3fcc6eb0983e20371.pack");

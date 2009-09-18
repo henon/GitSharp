@@ -44,7 +44,7 @@ namespace GitSharp.Tests.Diff
 {
 	public class EditListTest
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmpty()
 		{
 			var l = new EditList();
@@ -58,7 +58,7 @@ namespace GitSharp.Tests.Diff
 			Assert.Equal(l.GetHashCode(), new EditList().GetHashCode());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAddOne()
 		{
 			var e = new Edit(1, 2, 1, 1);
@@ -80,7 +80,7 @@ namespace GitSharp.Tests.Diff
 			Assert.Equal(l.GetHashCode(), l2.GetHashCode());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAddTwo()
 		{
 			var e1 = new Edit(1, 2, 1, 1);
@@ -106,7 +106,7 @@ namespace GitSharp.Tests.Diff
 			Assert.Equal(l.GetHashCode(), l2.GetHashCode());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testSet()
 		{
 			var e1 = new Edit(1, 2, 1, 1);
@@ -117,7 +117,7 @@ namespace GitSharp.Tests.Diff
 			Assert.Same(e2, l.get(0));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testRemove()
 		{
 			var e1 = new Edit(1, 2, 1, 1);

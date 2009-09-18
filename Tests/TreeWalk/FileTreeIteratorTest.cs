@@ -68,7 +68,7 @@ namespace GitSharp.Tests.TreeWalk
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmptyIfRootIsFile()
 		{
 			string path = Path.Combine(trash.FullName, Paths[0]);
@@ -81,7 +81,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(fti.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmptyIfRootDoesNotExist()
 		{
 			string path = Path.Combine(trash.FullName, "not-existing-File");
@@ -93,7 +93,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(fti.eof(), "Test fails under mono due to http://bugzilla.novell.com/show_bug.cgi?id=539791,Fixed upstream");
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmptyIfRootIsEmpty()
 		{
 			string path = Path.Combine(trash.FullName, "not-existing-File");
@@ -109,7 +109,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(fti.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testSimpleIterate()
 		{
 			var top = new FileTreeIterator(trash);
@@ -158,7 +158,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.True(top.eof());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testComputeFileObjectId()
 		{
 			var top = new FileTreeIterator(trash);

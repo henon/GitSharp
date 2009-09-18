@@ -44,14 +44,14 @@ namespace GitSharp.Tests.DirectoryCache
 {
     public class DirCacheTreeTest : RepositoryTestCase
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testEmptyCache_NoCacheTree()
         {
             DirCache dc = DirCache.read(db);
             Assert.Null(dc.getCacheTree(false));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEmptyCache_CreateEmptyCacheTree()
         {
             DirCache dc = DirCache.read(db);
@@ -66,7 +66,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.False(tree.isValid());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEmptyCache_Clear_NoCacheTree()
         {
             DirCache dc = DirCache.read(db);
@@ -77,7 +77,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.NotSame(tree, dc.getCacheTree(true));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSingleSubtree()
         {
             DirCache dc = DirCache.read(db);
@@ -120,7 +120,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.False(aTree.isValid());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTwoLevelSubtree()
         {
             DirCache dc = DirCache.read(db);
@@ -179,7 +179,7 @@ namespace GitSharp.Tests.DirectoryCache
 		/// the DirCache unable to Read the extensions when index size exceeded the
 		/// buffer size (in some cases at least).
         /// </summary>
-        [Fact]
+        [StrictFactAttribute]
         public void testWriteReadTree()
         {
             DirCache dc = DirCache.Lock(db);

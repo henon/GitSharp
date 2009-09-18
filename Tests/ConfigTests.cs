@@ -53,7 +53,7 @@ namespace GitSharp.Tests
 						 + "    defaultCheckInComment = a many line\\n\\\ncomment\\n\\\n"
 						 + " to test\n";
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test004_CheckNewConfig()
 		{
 			RepositoryConfig c = db.Config;
@@ -66,7 +66,7 @@ namespace GitSharp.Tests
 			c.load();
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test005_ReadSimpleConfig()
 		{
 			RepositoryConfig c = db.Config;
@@ -79,7 +79,7 @@ namespace GitSharp.Tests
 			Assert.Null(c.getString("notavalue", null, "reallyNotAValue"));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test006_ReadUglyConfig()
 		{
 			RepositoryConfig c = db.Config;
@@ -98,7 +98,7 @@ namespace GitSharp.Tests
 			Assert.Equal(ConfigStr, configStr1);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test007_Open()
 		{
 			var db2 = new Repository(db.Directory);
@@ -107,7 +107,7 @@ namespace GitSharp.Tests
 			Assert.NotSame(db.Config, db2.Config);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test008_FailOnWrongVersion()
 		{
 			string cfg = db.Directory.FullName + "/config";

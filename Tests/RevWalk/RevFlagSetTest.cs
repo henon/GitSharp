@@ -42,7 +42,7 @@ namespace GitSharp.Tests.RevWalk
 {
 	public class RevFlagSetTest : RevWalkTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmpty()
 		{
 			var flagSet = new RevFlagSet();
@@ -52,7 +52,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.False(flagSet.GetEnumerator().MoveNext());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAddOne()
 		{
 			const string flagName = "flag";
@@ -71,7 +71,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.False(i.MoveNext());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAddTwo()
 		{
 			RevFlag flag1 = Rw.newFlag("flag_1");
@@ -85,7 +85,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(2, flagSet.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testContainsAll()
 		{
 			RevFlag flag1 = Rw.newFlag("flag_1");
@@ -101,7 +101,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.False(set1.ContainsAll(set2));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEquals()
 		{
 			RevFlag flag1 = Rw.newFlag("flag_1");
@@ -114,7 +114,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.True(new RevFlagSet(new[] { flag1, flag2 }).Equals(flagSet));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testRemove()
 		{
 			RevFlag flag1 = Rw.newFlag("flag_1");
@@ -129,7 +129,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.False(flagSet.Contains(flag1));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testContains()
 		{
 			RevFlag flag1 = Rw.newFlag("flag_1");

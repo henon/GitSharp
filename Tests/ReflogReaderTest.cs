@@ -64,7 +64,7 @@ namespace GitSharp.Tests
 		static readonly byte[] HeadLine = "3333333333333333333333333333333333333333 3e7549db262d1e836d9bf0af7e22355468f1717c A U Thor <thor@committer.au> 1243028201 -0100\tbranch: change to HEAD\n"
 				.getBytes();
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadOneLine()
 		{
 			SetupReflog("logs/refs/heads/master", OneLine);
@@ -84,7 +84,7 @@ namespace GitSharp.Tests
 			Assert.Equal("commit: Add a toString for debugging to RemoteRefUpdate", e.Comment);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadTwoLine()
 		{
 			SetupReflog("logs/refs/heads/master", TwoLine);
@@ -118,7 +118,7 @@ namespace GitSharp.Tests
 			Assert.Equal("branch: Created from rr/renamebranchv4", e.Comment);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadWhileAppendIsInProgress()
 		{
 			SetupReflog("logs/refs/heads/master", TwoLineWithAppendInProgress);
@@ -142,7 +142,7 @@ namespace GitSharp.Tests
 			// right, everything else is too
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadRightLog()
 		{
 			SetupReflog("logs/refs/heads/a", ALine);
@@ -153,7 +153,7 @@ namespace GitSharp.Tests
 			Assert.Equal("branch: change to HEAD", db.ReflogReader("HEAD").getLastEntry().Comment);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoLog()
 		{
 			Assert.Equal(0, db.ReflogReader("master").getReverseEntries().Count);

@@ -44,14 +44,14 @@ namespace GitSharp.Tests.TreeWalk
 {
 	public class PostOrderTreeWalkTest : RepositoryTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testInitialize_NoPostOrder()
 		{
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
 			Assert.False(tw.PostOrderTraversal);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInitialize_TogglePostOrder()
 		{
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
@@ -62,7 +62,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.False(tw.PostOrderTraversal);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testResetDoesNotAffectPostOrder()
 		{
 			var tw = new GitSharp.TreeWalk.TreeWalk(db) { PostOrderTraversal = true };
@@ -76,7 +76,7 @@ namespace GitSharp.Tests.TreeWalk
 			Assert.False(tw.PostOrderTraversal);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoPostOrder()
 		{
 			DirCache tree = DirCache.read(db);
@@ -105,7 +105,7 @@ namespace GitSharp.Tests.TreeWalk
 			AssertModes("q", FileMode.RegularFile, tw);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testWithPostOrder_EnterSubtree()
 		{
 			DirCache tree = DirCache.read(db);
@@ -140,7 +140,7 @@ namespace GitSharp.Tests.TreeWalk
 			AssertModes("q", FileMode.RegularFile, tw);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testWithPostOrder_NoEnterSubtree()
 		{
 			DirCache tree = DirCache.read(db);

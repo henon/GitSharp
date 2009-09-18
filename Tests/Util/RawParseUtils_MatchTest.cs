@@ -43,7 +43,7 @@ namespace GitSharp.Tests.Util
 {
 	public class RawParseUtils_MatchTest
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testMatch_Equal()
 		{
 			byte[] src = Constants.encodeASCII(" differ\n");
@@ -51,7 +51,7 @@ namespace GitSharp.Tests.Util
 			Assert.True(RawParseUtils.match(dst, 3, src) == 3 + src.Length);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testMatch_NotEqual()
 		{
 			byte[] src = Constants.encodeASCII(" differ\n");
@@ -59,7 +59,7 @@ namespace GitSharp.Tests.Util
 			Assert.True(RawParseUtils.match(dst, 2, src) < 0);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testMatch_Prefix()
 		{
 			byte[] src = Constants.encodeASCII("author ");
@@ -68,7 +68,7 @@ namespace GitSharp.Tests.Util
 			Assert.True(RawParseUtils.match(dst, 1, src) < 0);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testMatch_TooSmall()
 		{
 			byte[] src = Constants.encodeASCII("author ");

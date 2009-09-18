@@ -61,7 +61,7 @@ namespace GitSharp.Tests.Transport
             db.Config.load();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test000_Simple()
         {
             WriteConfig("[remote \"spearce\"]\n" + "url = http://www.spearce.org/egit.git\n" +
@@ -90,7 +90,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(0, rc.Push.Count);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test001_SimpleNoTags()
         {
             WriteConfig("[remote \"spearce\"]\n"
@@ -101,7 +101,7 @@ namespace GitSharp.Tests.Transport
             Assert.Same(TagOpt.NO_TAGS, rc.TagOpt);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test002_SimpleAlwaysTags()
         {
             WriteConfig("[remote \"spearce\"]\n"
@@ -112,7 +112,7 @@ namespace GitSharp.Tests.Transport
             Assert.Same(TagOpt.FETCH_TAGS, rc.TagOpt);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test003_Mirror()
         {
             WriteConfig("[remote \"spearce\"]\n"
@@ -148,7 +148,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(0, rc.Push.Count);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test004_Backup()
         {
             WriteConfig("[remote \"backup\"]\n"
@@ -185,7 +185,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal("refs/tags/*", spec.Destination);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test005_UploadPack()
         {
             WriteConfig("[remote \"example\"]\n"
@@ -218,7 +218,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal("/path/to/git/git-receive-pack", rc.ReceivePack);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test006_Unknown()
         {
             WriteConfig(string.Empty);
@@ -231,7 +231,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal("git-receive-pack", rc.ReceivePack);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test007_AddURI()
         {
             WriteConfig(string.Empty);
@@ -248,7 +248,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(1, rc.URIs.Count);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test008_RemoveFirstURI()
         {
             WriteConfig(string.Empty);
@@ -271,7 +271,7 @@ namespace GitSharp.Tests.Transport
             Assert.Same(c, rc.URIs[1]);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test009_RemoveMiddleURI()
         {
             WriteConfig(string.Empty);
@@ -295,7 +295,7 @@ namespace GitSharp.Tests.Transport
             Assert.Same(c, rc.URIs[1]);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test010_RemoveLastURI()
         {
             WriteConfig(string.Empty);
@@ -319,7 +319,7 @@ namespace GitSharp.Tests.Transport
             Assert.Same(b, rc.URIs[1]);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test011_RemoveOnlyURI()
         {
             WriteConfig(string.Empty);
@@ -335,7 +335,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(0, rc.URIs.Count);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test012_CreateOrigin()
         {
             var rc = new RemoteConfig(db.Config, "origin");
@@ -354,7 +354,7 @@ namespace GitSharp.Tests.Transport
                       "\tfetch = +refs/heads/*:refs/remotes/origin/*\n");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test013_SaveAddURI()
         {
             WriteConfig("[remote \"spearce\"]\n"
@@ -376,7 +376,7 @@ namespace GitSharp.Tests.Transport
                       + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test014_SaveRemoveLastURI()
         {
             WriteConfig("[remote \"spearce\"]\n"
@@ -399,7 +399,7 @@ namespace GitSharp.Tests.Transport
                       + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test015_SaveRemoveFirstURI()
         {
             WriteConfig("[remote \"spearce\"]\n"
@@ -421,7 +421,7 @@ namespace GitSharp.Tests.Transport
                       + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test016_SaveNoTags()
         {
             var rc = new RemoteConfig(db.Config, "origin");
@@ -439,7 +439,7 @@ namespace GitSharp.Tests.Transport
                       + "\ttagopt = --no-tags\n");
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test017_SaveAllTags()
         {
             var rc = new RemoteConfig(db.Config, "origin");

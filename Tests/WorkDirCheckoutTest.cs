@@ -46,7 +46,7 @@ namespace GitSharp.Tests
 {
     public class WorkDirCheckoutTest : RepositoryTestCase
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testCheckingOutWithConflicts()
         {
             var index = new GitIndex(db);
@@ -85,7 +85,7 @@ namespace GitSharp.Tests
             Assert.Null(index2.GetEntry("foo"));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFindingConflicts()
         {
             var index = new GitIndex(db);

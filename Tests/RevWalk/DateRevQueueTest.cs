@@ -47,7 +47,7 @@ namespace GitSharp.Tests.RevWalk
             return new DateRevQueue();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public override void testEmpty()
         {
             base.testEmpty();
@@ -55,14 +55,14 @@ namespace GitSharp.Tests.RevWalk
             Assert.Equal(Generator.GeneratorOutputType.SortCommitTimeDesc, q.OutputType);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testCloneEmpty()
         {
             q = new DateRevQueue(AbstractRevQueue.EmptyQueue);
             Assert.Null(q.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testInsertOutOfOrder()
         {
             RevCommit a = Parse(Commit());
@@ -82,7 +82,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(q.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testInsertTie()
         {
             RevCommit a = Parse(Commit());
@@ -107,7 +107,7 @@ namespace GitSharp.Tests.RevWalk
             }
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testCloneFIFO()
         {
             RevCommit a = Parse(Commit());

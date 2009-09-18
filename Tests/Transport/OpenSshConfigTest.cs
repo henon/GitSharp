@@ -72,7 +72,7 @@ namespace GitSharp.Tests.Transport
 			fw.Close();
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoConfig()
 		{
 			OpenSshConfig.Host h = _osc.lookup("repo.or.cz");
@@ -83,7 +83,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Null(h.getIdentityFile());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testSeperatorParsing()
 		{
 			Config("Host\tfirst\n" +
@@ -110,7 +110,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Equal("last.tld", _osc.lookup("last").getHostName());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testQuoteParsing()
 		{
 			Config("Host \"good\"\n" +
@@ -139,7 +139,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Equal("bad.tld\"", _osc.lookup("bad").getHostName());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAlias_DoesNotMatch()
 		{
 			Config("Host orcz\n" + "\tHostName repo.or.cz\n");
@@ -151,7 +151,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Null(h.getIdentityFile());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAlias_OptionsSet()
 		{
 			Config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\tPort 2222\n"
@@ -166,7 +166,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Equal(new FileInfo(Path.Combine(_home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAlias_OptionsKeywordCaseInsensitive()
 		{
 			Config("hOsT orcz\n" + "\thOsTnAmE repo.or.cz\n" + "\tPORT 2222\n"
@@ -181,7 +181,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Equal(new FileInfo(Path.Combine(_home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAlias_OptionsInherit()
 		{
 			Config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"
@@ -197,7 +197,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Equal(new FileInfo(Path.Combine(_home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAlias_PreferredAuthenticationsDefault()
 		{
 			OpenSshConfig.Host h = _osc.lookup("orcz");
@@ -205,7 +205,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Null(h.getPreferredAuthentications());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAlias_PreferredAuthentications()
 		{
 			Config("Host orcz\n" + "\tPreferredAuthentications publickey\n");
@@ -214,7 +214,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Equal("publickey", h.getPreferredAuthentications());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAlias_InheritPreferredAuthentications()
 		{
 			Config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"
@@ -224,7 +224,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Equal("publickey,hostbased", h.getPreferredAuthentications());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAlias_BatchModeDefault()
 		{
 			OpenSshConfig.Host h = _osc.lookup("orcz");
@@ -232,7 +232,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Equal(false, h.isBatchMode());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAlias_BatchModeYes()
 		{
 			Config("Host orcz\n" + "\tBatchMode yes\n");
@@ -241,7 +241,7 @@ namespace GitSharp.Tests.Transport
 			Assert.Equal(true, h.isBatchMode());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAlias_InheritBatchMode()
 		{
 			Config("Host orcz\n" + "\tHostName repo.or.cz\n" + "\n" + "Host *\n"

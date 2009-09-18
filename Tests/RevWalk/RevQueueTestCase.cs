@@ -53,7 +53,7 @@ namespace GitSharp.Tests.RevWalk
 
         protected abstract T Create();
 
-        [Fact]
+        [StrictFactAttribute]
         public virtual void testEmpty()
         {
             Assert.Null(q.next());
@@ -61,7 +61,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.False(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testClear()
         {
             RevCommit a = Parse(Commit());
@@ -73,7 +73,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(q.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testHasFlags()
         {
             RevCommit a = Parse(Commit());

@@ -50,7 +50,7 @@ namespace GitSharp.Tests.Util
 			_map = new LongMap<long>();
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEmptyMap()
 		{
 			Assert.False(_map.ContainsKey(0));
@@ -63,7 +63,7 @@ namespace GitSharp.Tests.Util
 			Assert.False(_map.Remove(1));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInsertMinValue()
 		{
 			const long min = long.MinValue;
@@ -73,7 +73,7 @@ namespace GitSharp.Tests.Util
 			Assert.False(_map.ContainsKey(int.MinValue));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReplaceMaxValue()
 		{
 			long min = Convert.ToInt64(long.MaxValue);
@@ -83,7 +83,7 @@ namespace GitSharp.Tests.Util
 			Assert.Equal(one, _map[long.MaxValue] = one);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testRemoveOne()
 		{
 			const long start = 1;
@@ -92,7 +92,7 @@ namespace GitSharp.Tests.Util
 			Assert.False(_map.ContainsKey(start));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testRemoveCollision1()
 		{
 			// This test relies upon the fact that we always >>> 1 the value
@@ -110,7 +110,7 @@ namespace GitSharp.Tests.Util
 			Assert.True(_map.ContainsKey(1));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testRemoveCollision2()
 		{
 			// This test relies upon the fact that we always >>> 1 the value
@@ -128,7 +128,7 @@ namespace GitSharp.Tests.Util
 			Assert.False(_map.ContainsKey(1));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testSmallMap()
 		{
 			const long start = 12;
@@ -145,7 +145,7 @@ namespace GitSharp.Tests.Util
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testLargeMap()
 		{
 			const long start = int.MaxValue;

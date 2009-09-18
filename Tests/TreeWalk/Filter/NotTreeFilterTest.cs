@@ -44,7 +44,7 @@ namespace GitSharp.Tests.TreeWalk.Filter
 {
 	public class NotTreeFilterTest : RepositoryTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testWrap()
 		{
 			var tw = new GitSharp.TreeWalk.TreeWalk(db);
@@ -55,7 +55,7 @@ namespace GitSharp.Tests.TreeWalk.Filter
 			Assert.False(n.include(tw));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNegateIsUnwrap()
 		{
 			TreeFilter a = PathFilter.create("a/b");
@@ -63,7 +63,7 @@ namespace GitSharp.Tests.TreeWalk.Filter
 			Assert.Same(a, n.negate());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testShouldBeRecursive_ALL()
 		{
 			TreeFilter a = TreeFilter.ALL;
@@ -71,7 +71,7 @@ namespace GitSharp.Tests.TreeWalk.Filter
 			Assert.Equal(a.shouldBeRecursive(), n.shouldBeRecursive());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testShouldBeRecursive_PathFilter()
 		{
 			TreeFilter a = PathFilter.create("a/b");
@@ -80,7 +80,7 @@ namespace GitSharp.Tests.TreeWalk.Filter
 			Assert.True(n.shouldBeRecursive());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testCloneIsDeepClone()
 		{
 			TreeFilter a = new AlwaysCloneTreeFilter();
@@ -89,7 +89,7 @@ namespace GitSharp.Tests.TreeWalk.Filter
 			Assert.NotSame(n, n.Clone());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testCloneIsSparseWhenPossible()
 		{
 			TreeFilter a = TreeFilter.ALL;

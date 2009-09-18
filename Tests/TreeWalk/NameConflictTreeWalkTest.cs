@@ -45,7 +45,7 @@ namespace GitSharp.Tests.TreeWalk
 {	
 	public class NameConflictTreeWalkTest : RepositoryTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testNoDF_NoGap()
 		{
 			DirCache tree0 = DirCache.read(db);
@@ -76,7 +76,7 @@ namespace GitSharp.Tests.TreeWalk
 			AssertModes("a0b", FileMode.Symlink, FileMode.Missing, tw);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testDF_NoGap()
 		{
 			DirCache tree0 = DirCache.read(db);
@@ -107,7 +107,7 @@ namespace GitSharp.Tests.TreeWalk
 			AssertModes("a0b", FileMode.Symlink, FileMode.Missing, tw);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testDF_GapByOne()
 		{
 			DirCache tree0 = DirCache.read(db);
@@ -139,7 +139,7 @@ namespace GitSharp.Tests.TreeWalk
 			AssertModes("a0b", FileMode.Symlink, FileMode.Missing, tw);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testDF_SkipsSeenSubtree()
 		{
 			DirCache tree0 = DirCache.read(db);

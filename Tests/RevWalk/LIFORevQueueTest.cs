@@ -48,21 +48,21 @@ namespace GitSharp.Tests.RevWalk
             return new LIFORevQueue();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public override void testEmpty()
         {
             base.testEmpty();
 			Assert.Equal(Generator.GeneratorOutputType.None, q.OutputType);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testCloneEmpty()
         {
             q = new LIFORevQueue(AbstractRevQueue.EmptyQueue);
             Assert.Null(q.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testAddLargeBlocks()
         {
             var lst = new List<RevCommit>();

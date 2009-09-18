@@ -45,7 +45,7 @@ namespace GitSharp.Tests.RevWalk
     {
         private static readonly MyAll MY_ALL = new MyAll();
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_ALL()
         {
             RevCommit a = Commit();
@@ -60,7 +60,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_Negate_ALL()
         {
             RevCommit a = Commit();
@@ -72,7 +72,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_NOT_ALL()
         {
             RevCommit a = Commit();
@@ -84,7 +84,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_NONE()
         {
             RevCommit a = Commit();
@@ -96,7 +96,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_NOT_NONE()
         {
             RevCommit a = Commit();
@@ -111,7 +111,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_ALL_And_NONE()
         {
             RevCommit a = Commit();
@@ -123,7 +123,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_NONE_And_ALL()
         {
             RevCommit a = Commit();
@@ -135,7 +135,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_ALL_Or_NONE()
         {
             RevCommit a = Commit();
@@ -150,7 +150,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_NONE_Or_ALL()
         {
             RevCommit a = Commit();
@@ -165,7 +165,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_MY_ALL_And_NONE()
         {
             RevCommit a = Commit();
@@ -177,7 +177,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_NONE_And_MY_ALL()
         {
             RevCommit a = Commit();
@@ -189,7 +189,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_MY_ALL_Or_NONE()
         {
             RevCommit a = Commit();
@@ -204,7 +204,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_NONE_Or_MY_ALL()
         {
             RevCommit a = Commit();
@@ -219,7 +219,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFilter_NO_MERGES()
         {
             RevCommit a = Commit();

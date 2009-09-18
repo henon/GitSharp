@@ -66,7 +66,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testCheckBlob()
 		{
 			// Any blob should pass...
@@ -77,7 +77,7 @@ namespace GitSharp.Tests
 			_checker.check(ObjectType.Blob, new byte[1]);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidAuthor1()
 		{
 			var b = new StringBuilder();
@@ -102,7 +102,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidAuthor2()
 		{
 			var b = new StringBuilder();
@@ -127,7 +127,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidAuthor3()
 		{
 			var b = new StringBuilder();
@@ -152,7 +152,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidAuthor4()
 		{
 			var b = new StringBuilder();
@@ -177,7 +177,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidAuthor5()
 		{
 			var b = new StringBuilder();
@@ -202,7 +202,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidAuthor6()
 		{
 			var b = new StringBuilder();
@@ -227,7 +227,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidAuthor7()
 		{
 			var b = new StringBuilder();
@@ -252,7 +252,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidCommitter()
 		{
 			var b = new StringBuilder();
@@ -278,7 +278,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidParent1()
 		{
 			var b = new StringBuilder();
@@ -302,7 +302,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidParent2()
 		{
 			var b = new StringBuilder();
@@ -327,7 +327,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidParent3()
 		{
 			var b = new StringBuilder();
@@ -352,7 +352,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidParent4()
 		{
 			var b = new StringBuilder();
@@ -377,7 +377,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidParent5()
 		{
 			var b = new StringBuilder();
@@ -404,7 +404,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidTree1()
 		{
 			var b = new StringBuilder();
@@ -425,7 +425,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidTree2()
 		{
 			var b = new StringBuilder();
@@ -446,7 +446,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidTree3()
 		{
 			var b = new StringBuilder();
@@ -467,7 +467,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitInvalidTree4()
 		{
 			var b = new StringBuilder();
@@ -488,7 +488,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitNoAuthor()
 		{
 			var b = new StringBuilder();
@@ -513,7 +513,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitNoCommitter1()
 		{
 			var b = new StringBuilder();
@@ -538,7 +538,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitNoCommitter2()
 		{
 			var b = new StringBuilder();
@@ -564,7 +564,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitNoTree1()
 		{
 			var b = new StringBuilder();
@@ -585,7 +585,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitNoTree2()
 		{
 			var b = new StringBuilder();
@@ -606,7 +606,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitNoTree3()
 		{
 			var b = new StringBuilder();
@@ -627,7 +627,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidCommitNoTree4()
 		{
 			var b = new StringBuilder();
@@ -648,7 +648,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagInvalidTaggerHeader1()
 		{
 			var b = new StringBuilder();
@@ -673,7 +673,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagInvalidTaggerHeader3()
 		{
 			var b = new StringBuilder();
@@ -698,7 +698,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoObject1()
 		{
 			var b = new StringBuilder();
@@ -715,7 +715,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoObject2()
 		{
 			var b = new StringBuilder();
@@ -736,7 +736,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoObject3()
 		{
 			var b = new StringBuilder();
@@ -757,7 +757,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoObject4()
 		{
 			var b = new StringBuilder();
@@ -778,7 +778,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoObject5()
 		{
 			var b = new StringBuilder();
@@ -799,7 +799,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoObject6()
 		{
 			var b = new StringBuilder();
@@ -819,7 +819,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoTaggerHeader1()
 		{
 			var b = new StringBuilder();
@@ -843,7 +843,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoTagHeader1()
 		{
 			var b = new StringBuilder();
@@ -866,7 +866,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoTagHeader2()
 		{
 			var b = new StringBuilder();
@@ -890,7 +890,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoTagHeader3()
 		{
 			var b = new StringBuilder();
@@ -914,7 +914,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoTagHeader4()
 		{
 			var b = new StringBuilder();
@@ -938,7 +938,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoType1()
 		{
 			var b = new StringBuilder();
@@ -959,7 +959,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoType2()
 		{
 			var b = new StringBuilder();
@@ -982,7 +982,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoType3()
 		{
 			var b = new StringBuilder();
@@ -1005,7 +1005,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTagNoType4()
 		{
 			var b = new StringBuilder();
@@ -1028,7 +1028,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeBadSorting1()
 		{
 			var b = new StringBuilder();
@@ -1046,7 +1046,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeBadSorting2()
 		{
 			var b = new StringBuilder();
@@ -1064,7 +1064,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeBadSorting3()
 		{
 			var b = new StringBuilder();
@@ -1082,7 +1082,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeDuplicateNames1()
 		{
 			var b = new StringBuilder();
@@ -1100,7 +1100,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeDuplicateNames2()
 		{
 			var b = new StringBuilder();
@@ -1118,7 +1118,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeDuplicateNames3()
 		{
 			var b = new StringBuilder();
@@ -1136,7 +1136,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeDuplicateNames4()
 		{
 			var b = new StringBuilder();
@@ -1158,7 +1158,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeModeMissingName()
 		{
 			var b = new StringBuilder();
@@ -1175,7 +1175,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeModeNotOctal1()
 		{
 			var b = new StringBuilder();
@@ -1192,7 +1192,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeModeNotOctal2()
 		{
 			var b = new StringBuilder();
@@ -1209,7 +1209,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeModeNotSupportedMode1()
 		{
 			var b = new StringBuilder();
@@ -1226,7 +1226,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeModeNotSupportedMode2()
 		{
 			var b = new StringBuilder();
@@ -1243,7 +1243,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeModeStartsWithZero1()
 		{
 			var b = new StringBuilder();
@@ -1260,7 +1260,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeModeStartsWithZero2()
 		{
 			var b = new StringBuilder();
@@ -1278,7 +1278,7 @@ namespace GitSharp.Tests
 		}
 
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeModeStartsWithZero3()
 		{
 			var b = new StringBuilder();
@@ -1295,7 +1295,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeNameContainsSlash()
 		{
 			var b = new StringBuilder();
@@ -1312,7 +1312,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeNameIsDot()
 		{
 			var b = new StringBuilder();
@@ -1329,7 +1329,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeNameIsDotDot()
 		{
 			var b = new StringBuilder();
@@ -1346,7 +1346,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeNameIsEmpty()
 		{
 			var b = new StringBuilder();
@@ -1363,7 +1363,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeTruncatedInName()
 		{
 			var b = new StringBuilder();
@@ -1380,7 +1380,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidTreeTruncatedInObjectId()
 		{
 			var b = new StringBuilder();
@@ -1397,7 +1397,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testInvalidType()
 		{
 			try
@@ -1412,7 +1412,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidCommit128Parent()
 		{
 			var b = new StringBuilder();
@@ -1436,7 +1436,7 @@ namespace GitSharp.Tests
 			_checker.check(ObjectType.Commit, data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidCommit1Parent()
 		{
 			var b = new StringBuilder();
@@ -1457,7 +1457,7 @@ namespace GitSharp.Tests
 			_checker.check(ObjectType.Commit, data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidCommit2Parent()
 		{
 			var b = new StringBuilder();
@@ -1482,7 +1482,7 @@ namespace GitSharp.Tests
 			_checker.check(ObjectType.Commit, data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidCommitBlankAuthor()
 		{
 			var b = new StringBuilder();
@@ -1499,7 +1499,7 @@ namespace GitSharp.Tests
 			_checker.check(ObjectType.Commit, data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidCommitNoParent()
 		{
 			var b = new StringBuilder();
@@ -1516,7 +1516,7 @@ namespace GitSharp.Tests
 			_checker.check(ObjectType.Commit, data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidCommitNormalTime()
 		{
 			var b = new StringBuilder();
@@ -1534,14 +1534,14 @@ namespace GitSharp.Tests
 			_checker.check(ObjectType.Commit, data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidEmptyTree()
 		{
 			_checker.checkTree(new char[0]);
 			_checker.check(ObjectType.Tree, new char[0]);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTag()
 		{
 			var b = new StringBuilder();
@@ -1559,7 +1559,7 @@ namespace GitSharp.Tests
 			_checker.check(ObjectType.Tag, data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTree1()
 		{
 			var b = new StringBuilder();
@@ -1568,7 +1568,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTree2()
 		{
 			var b = new StringBuilder();
@@ -1577,7 +1577,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTree3()
 		{
 			var b = new StringBuilder();
@@ -1586,7 +1586,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTree4()
 		{
 			var b = new StringBuilder();
@@ -1595,7 +1595,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTree5()
 		{
 			var b = new StringBuilder();
@@ -1604,7 +1604,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTree6()
 		{
 			var b = new StringBuilder();
@@ -1613,7 +1613,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTreeSorting1()
 		{
 			var b = new StringBuilder();
@@ -1623,7 +1623,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTreeSorting2()
 		{
 			var b = new StringBuilder();
@@ -1633,7 +1633,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTreeSorting3()
 		{
 			var b = new StringBuilder();
@@ -1643,7 +1643,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTreeSorting4()
 		{
 			var b = new StringBuilder();
@@ -1653,7 +1653,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTreeSorting5()
 		{
 			var b = new StringBuilder();
@@ -1664,7 +1664,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTreeSorting6()
 		{
 			var b = new StringBuilder();
@@ -1674,7 +1674,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTreeSorting7()
 		{
 			var b = new StringBuilder();
@@ -1684,7 +1684,7 @@ namespace GitSharp.Tests
 			_checker.checkTree(data);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testValidTreeSorting8()
 		{
 			var b = new StringBuilder();

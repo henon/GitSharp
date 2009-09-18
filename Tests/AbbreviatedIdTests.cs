@@ -42,7 +42,7 @@ namespace GitSharp.Tests
 {
     public class AbbreviatedIdTests
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testEmpty_FromByteArray()
         {
         	AbbreviatedObjectId i = AbbreviatedObjectId.FromString(new byte[] { }, 0, 0);
@@ -52,7 +52,7 @@ namespace GitSharp.Tests
             Assert.Equal(string.Empty, i.name());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEmpty_FromString()
         {
 			AbbreviatedObjectId i = AbbreviatedObjectId.FromString(string.Empty);
@@ -62,7 +62,7 @@ namespace GitSharp.Tests
             Assert.Equal(string.Empty, i.name());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFull_FromByteArray()
         {
             const string s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
@@ -79,7 +79,7 @@ namespace GitSharp.Tests
             Assert.Equal(f.GetHashCode(), i.GetHashCode());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFull_FromString()
         {
             const string s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
@@ -95,7 +95,7 @@ namespace GitSharp.Tests
             Assert.Equal(f.GetHashCode(), i.GetHashCode());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test1_FromString()
         {
             const string s = "7";
@@ -107,7 +107,7 @@ namespace GitSharp.Tests
             Assert.Null(i.ToObjectId());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test2_FromString()
         {
             const string s = "7b";
@@ -119,7 +119,7 @@ namespace GitSharp.Tests
             Assert.Null(i.ToObjectId());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test3_FromString()
         {
             const string s = "7b6";
@@ -131,7 +131,7 @@ namespace GitSharp.Tests
             Assert.Null(i.ToObjectId());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test4_FromString()
         {
             const string s = "7b6e";
@@ -143,7 +143,7 @@ namespace GitSharp.Tests
             Assert.Null(i.ToObjectId());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test5_FromString()
         {
             const string s = "7b6e8";
@@ -155,7 +155,7 @@ namespace GitSharp.Tests
             Assert.Null(i.ToObjectId());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test6_FromString()
         {
             const string s = "7b6e80";
@@ -167,7 +167,7 @@ namespace GitSharp.Tests
             Assert.Null(i.ToObjectId());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test7_FromString()
         {
             const string s = "7b6e806";
@@ -179,7 +179,7 @@ namespace GitSharp.Tests
             Assert.Null(i.ToObjectId());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test8_FromString()
         {
             const string s = "7b6e8067";
@@ -191,7 +191,7 @@ namespace GitSharp.Tests
             Assert.Null(i.ToObjectId());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test9_FromString()
         {
             const string s = "7b6e8067e";
@@ -203,7 +203,7 @@ namespace GitSharp.Tests
             Assert.Null(i.ToObjectId());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void test17_FromString()
         {
             const string s = "7b6e8067ec96acef9";
@@ -215,7 +215,7 @@ namespace GitSharp.Tests
             Assert.Null(i.ToObjectId());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEquals_Short()
         {
             const string s = "7b6e8067";
@@ -227,7 +227,7 @@ namespace GitSharp.Tests
             Assert.True(b.Equals(a));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testEquals_Full()
         {
             const string s = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
@@ -239,7 +239,7 @@ namespace GitSharp.Tests
             Assert.True(b.Equals(a));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testNotEquals_SameLength()
         {
             const string sa = "7b6e8067";
@@ -250,7 +250,7 @@ namespace GitSharp.Tests
             Assert.False(b.Equals(a));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testNotEquals_DiffLength()
         {
             const string sa = "7b6e8067abcd";
@@ -261,7 +261,7 @@ namespace GitSharp.Tests
             Assert.False(b.Equals(a));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testPrefixCompare_Full()
         {
             const string s1 = "7b6e8067ec96acef9a4184b43210d583b6d2f99a";
@@ -281,7 +281,7 @@ namespace GitSharp.Tests
             Assert.False(i3.startsWith(a));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testPrefixCompare_1()
         {
             const string sa = "7";
@@ -303,7 +303,7 @@ namespace GitSharp.Tests
             Assert.False(i3.startsWith(a));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testPrefixCompare_7()
         {
             const string sa = "7b6e806";
@@ -325,7 +325,7 @@ namespace GitSharp.Tests
             Assert.False(i3.startsWith(a));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testPrefixCompare_8()
         {
             const string sa = "7b6e8067";
@@ -347,7 +347,7 @@ namespace GitSharp.Tests
             Assert.False(i3.startsWith(a));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testPrefixCompare_9()
         {
             const string sa = "7b6e8067e";
@@ -369,7 +369,7 @@ namespace GitSharp.Tests
             Assert.False(i3.startsWith(a));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testPrefixCompare_17()
         {
             const string sa = "7b6e8067ec96acef9";

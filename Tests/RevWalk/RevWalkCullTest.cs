@@ -42,7 +42,7 @@ namespace GitSharp.Tests.RevWalk
 {
     public class RevWalkCullTest : RevWalkTestCase
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testProperlyCullAllAncestors1()
         {
             // Credit goes to Junio C Hamano <gitster@pobox.com> for this
@@ -60,7 +60,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testProperlyCullAllAncestors2()
         {
             // Despite clock skew on c1 being very old it should not
@@ -79,7 +79,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.Null(Rw.next());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testProperlyCullAllAncestors_LongHistory()
         {
             RevCommit a = Commit();

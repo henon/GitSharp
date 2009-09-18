@@ -68,7 +68,7 @@ namespace GitSharp.Tests.Transport
             base.TearDown();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFindRemoteRefUpdatesNoWilcardNoTracking()
         {
             _transport = GitSharp.Transport.Transport.Open(db, _remoteConfig);
@@ -84,7 +84,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal("refs/heads/x", rru.RemoteName);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFindRemoteRefUpdatesNoWildcardNoDestination()
         {
             _transport = GitSharp.Transport.Transport.Open(db, _remoteConfig);
@@ -100,7 +100,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal("refs/heads/master", rru.RemoteName);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFindRemoteRefUpdatesWildcardNoTracking()
         {
             _transport = GitSharp.Transport.Transport.Open(db, _remoteConfig);
@@ -125,7 +125,7 @@ namespace GitSharp.Tests.Transport
             Assert.True(foundB);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFindRemoteRefUpdatesTwoRefSpecs()
         {
             _transport = GitSharp.Transport.Transport.Open(db, _remoteConfig);
@@ -148,7 +148,7 @@ namespace GitSharp.Tests.Transport
             Assert.True(foundC);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFindRemoteRefUpdatesTrackingRef()
         {
             _remoteConfig.AddFetchRefSpec(new RefSpec("refs/heads/*:refs/remotes/test/*"));

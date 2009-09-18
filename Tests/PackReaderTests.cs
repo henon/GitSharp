@@ -50,7 +50,7 @@ namespace GitSharp.Tests
 		private static readonly string TestPack = "Resources/" + GitSharp.Transport.IndexPack.GetPackFileName(PackName);
 		private static readonly string TestIdx = "Resources/" + GitSharp.Transport.IndexPack.GetIndexFileName(PackName);
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test003_lookupCompressedObject()
 		{
 			ObjectId id = ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327");
@@ -63,7 +63,7 @@ namespace GitSharp.Tests
 			pr.Close();
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test004_lookupDeltifiedObject()
 		{
 			ObjectId id = ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259");
@@ -75,7 +75,7 @@ namespace GitSharp.Tests
 			Assert.Equal(537, ((PackedObjectLoader)or).DataOffset);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
         public void test005_todopack()
         {
             var todopack = new FileInfo("Resources/todopack");

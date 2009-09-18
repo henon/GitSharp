@@ -45,7 +45,7 @@ namespace GitSharp.Tests
 {
 	public class PackIndexTests : XunitBaseFact
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void ObjectList()
 		{
 			var knownOffsets = new long[] { 370, 349, 304, 12, 175, 414 };

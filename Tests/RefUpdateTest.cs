@@ -63,14 +63,14 @@ namespace GitSharp.Tests
 			Assert.Equal(!removed, db.getRef(@ref.Name) != null);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testDeleteFastForward()
 		{
 			RefUpdate @ref = UpdateRef("refs/heads/a");
 			Delete(@ref, RefUpdate.RefUpdateResult.FastForward);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDeleteForce()
 		{
 			RefUpdate @ref = db.UpdateRef("refs/heads/b");
@@ -80,7 +80,7 @@ namespace GitSharp.Tests
 			Delete(@ref, RefUpdate.RefUpdateResult.Forced);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testDeleteHead()
 		{
 			RefUpdate @ref = UpdateRef(Constants.HEAD);
@@ -91,7 +91,7 @@ namespace GitSharp.Tests
 		/// Delete a ref that is pointed to by HEAD
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testDeleteHEADreferencedRef()
 		{
 			ObjectId pid = db.Resolve("refs/heads/master^");
@@ -112,7 +112,7 @@ namespace GitSharp.Tests
 		///	and the reflog dir too
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testDeleteLooseAndItsDirectory()
 		{
 			ObjectId pid = db.Resolve("refs/heads/c^");
@@ -140,7 +140,7 @@ namespace GitSharp.Tests
 		///	cannot be resolved After delete.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testDeleteLoosePacked()
 		{
 			ObjectId pid = db.Resolve("refs/heads/c^");
@@ -162,7 +162,7 @@ namespace GitSharp.Tests
 		/// Try to delete a ref. Delete requires force.
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testDeleteLoosePackedRejected()
 		{
 			ObjectId pid = db.Resolve("refs/heads/c^");
@@ -174,14 +174,14 @@ namespace GitSharp.Tests
 			Assert.Equal(oldpid, db.Resolve("refs/heads/c"));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDeleteNotFound()
 		{
 			RefUpdate @ref = UpdateRef("refs/heads/xyz");
 			Delete(@ref, RefUpdate.RefUpdateResult.New, false, true);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testLooseDelete()
 		{
 			const string newRef = "refs/heads/abc";
@@ -191,7 +191,7 @@ namespace GitSharp.Tests
 			Delete(@ref, RefUpdate.RefUpdateResult.NoChange);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testNoCacheObjectIdSubclass()
 		{
 			const string newRef = "refs/heads/abc";
@@ -219,7 +219,7 @@ namespace GitSharp.Tests
 			//Assert.Equal(0, reverseEntries2.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public virtual void testRefKeySameAsOrigName()
 		{
 			foreach (var e in db.getAllRefs())
@@ -232,7 +232,7 @@ namespace GitSharp.Tests
 		/// Try modify a ref forward, fast forward
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testUpdateRefForward()
 		{
 			ObjectId ppid = db.Resolve("refs/heads/master^");
@@ -256,7 +256,7 @@ namespace GitSharp.Tests
  		/// <summary>
 		/// Try modify a ref forward, fast forward, checking old value first.
  		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testUpdateRefForwardWithCheck1() 
 		{
 			ObjectId ppid = db.Resolve("refs/heads/master^");
@@ -281,7 +281,7 @@ namespace GitSharp.Tests
 		/// <summary>
 		/// Try modify a ref forward, fast forward, checking old commit first
 		/// </summary>
-		[Fact]
+		[StrictFactAttribute]
 		public void testUpdateRefForwardWithCheck2()
 		{
 			ObjectId ppid = db.Resolve("refs/heads/master^");
@@ -308,7 +308,7 @@ namespace GitSharp.Tests
 		/// Try modify a ref that is locked
 		/// </summary>
 		/// <exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testUpdateRefLockFailureLocked()
 		{
 			ObjectId opid = db.Resolve("refs/heads/master");
@@ -328,7 +328,7 @@ namespace GitSharp.Tests
 		/// Try modify a ref, but get wrong expected old value
 		/// </summary>
 		/// <exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testUpdateRefLockFailureWrongOldValue()
 		{
 			ObjectId pid = db.Resolve("refs/heads/master");
@@ -344,7 +344,7 @@ namespace GitSharp.Tests
 		/// Try modify a ref to same
 		///	</summary>
 		///	<exception cref="IOException"> </exception>
-		[Fact]
+		[StrictFactAttribute]
 		public void testUpdateRefNoChange()
 		{
 			ObjectId pid = db.Resolve("refs/heads/master");

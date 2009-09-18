@@ -47,7 +47,7 @@ namespace GitSharp.Tests.Transport
 {
     public class BundleWriterTest : RepositoryTestCase
     {
-		[Fact]
+		[StrictFactAttribute]
         public void testWrite0()
         {
             // Create a tiny bundle, (well one of) the first commits only
@@ -66,7 +66,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal("42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", newRepo.Resolve(("refs/heads/firstcommit")).Name);
         }
 
-    	[Fact]					
+    	[StrictFactAttribute]					
         public void testWrite1()
         {
         	// Create a small bundle, an early commit

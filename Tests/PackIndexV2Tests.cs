@@ -57,7 +57,7 @@ namespace GitSharp.Tests
         /// <summary>
 		/// Verify CRC32 indexing.
         /// </summary>
-        [Fact]
+        [StrictFactAttribute]
         public override void TestCrc32()
         {
             Assert.True(SmallIdx.HasCRC32Support);

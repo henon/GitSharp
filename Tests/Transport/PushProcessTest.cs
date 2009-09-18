@@ -143,7 +143,7 @@ namespace GitSharp.Tests.Transport
             return _process.execute(new TextProgressMonitor());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateFastForward()
         {
             var rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
@@ -153,7 +153,7 @@ namespace GitSharp.Tests.Transport
             TestOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, true, true);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateNonFastForwardUnknownObject()
         {
             var rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
@@ -163,7 +163,7 @@ namespace GitSharp.Tests.Transport
             TestOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_NONFASTFORWARD, false, false);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateNonFastForward()
         {
             var rru = new RemoteRefUpdate(db, "ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
@@ -173,7 +173,7 @@ namespace GitSharp.Tests.Transport
             TestOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_NONFASTFORWARD, false, false);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateNonFastForwardForced()
         {
             var rru = new RemoteRefUpdate(db, "ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
@@ -183,7 +183,7 @@ namespace GitSharp.Tests.Transport
             TestOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, true, false);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateCreateRef()
         {
             var rru = new RemoteRefUpdate(db, "ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
@@ -192,7 +192,7 @@ namespace GitSharp.Tests.Transport
             TestOneUpdateStatus(rru, null, RemoteRefUpdate.UpdateStatus.OK, true, true);
         }
         
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateDelete()
         {
             var rru = new RemoteRefUpdate(db, null, "refs/heads/master", false, null, null);
@@ -200,14 +200,14 @@ namespace GitSharp.Tests.Transport
             TestOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, true, true);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateDeleteNonExisting()
         {
             var rru = new RemoteRefUpdate(db, null, "refs/heads/master", false, null, null);
             TestOneUpdateStatus(rru, null, RemoteRefUpdate.UpdateStatus.NON_EXISTING, false, false);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateUpToDate()
         {
             var rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9", 
@@ -217,7 +217,7 @@ namespace GitSharp.Tests.Transport
             TestOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.UP_TO_DATE, false, false);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateExpectedRemote()
         {
 			var rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
@@ -227,7 +227,7 @@ namespace GitSharp.Tests.Transport
             TestOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, true, true);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateUnexpectedRemote()
         {
             var rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
@@ -237,7 +237,7 @@ namespace GitSharp.Tests.Transport
             TestOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_REMOTE_CHANGED, false, false);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateUnexpectedRemoteVsForce()
         {
             var rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
@@ -247,7 +247,7 @@ namespace GitSharp.Tests.Transport
             TestOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_REMOTE_CHANGED, false, false);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateRejectedByConnection()
         {
             _connectionUpdateStatus = RemoteRefUpdate.UpdateStatus.REJECTED_OTHER_REASON;
@@ -258,7 +258,7 @@ namespace GitSharp.Tests.Transport
             TestOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_OTHER_REASON, false, false);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUpdateMixedCases()
         {
             var rruOk = new RemoteRefUpdate(db, null, "refs/heads/master", false, null, null);
@@ -273,7 +273,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(RemoteRefUpdate.UpdateStatus.NON_EXISTING, rruReject.Status);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTrackingRefUpdateEnabled()
         {
             var rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9", "refs/heads/master", false, "refs/remotes/test/master", null);
@@ -287,7 +287,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(RefUpdate.RefUpdateResult.New, tru.Result);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTrackingRefUpdateDisabled()
         {
             var rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9", "refs/heads/master", false, null, null);
@@ -298,7 +298,7 @@ namespace GitSharp.Tests.Transport
             Assert.True(result.TrackingRefUpdates.Count == 0);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testTrackingRefUpdateOnReject()
         {
             var rru = new RemoteRefUpdate(db, "ac7e7e44c1885efb472ad54a78327d66bfc4ecef", "refs/heads/master", false, null, null);
@@ -308,7 +308,7 @@ namespace GitSharp.Tests.Transport
             Assert.True(result.TrackingRefUpdates.Count == 0);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testPushResult()
         {
             var rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",

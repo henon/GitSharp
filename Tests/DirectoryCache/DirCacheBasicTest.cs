@@ -45,7 +45,7 @@ namespace GitSharp.Tests.DirectoryCache
 {
     public class DirCacheBasicTest : RepositoryTestCase
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testReadMissing_RealIndex()
         {
             var idx = new FileInfo(db.Directory + "/index");
@@ -56,7 +56,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.Equal(0, dc.getEntryCount());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testReadMissing_TempIndex()
         {
             var idx = new FileInfo(db.Directory + "/tmp_index");
@@ -67,7 +67,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.Equal(0, dc.getEntryCount());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testLockMissing_RealIndex()
         {
             var idx = new FileInfo(db.Directory + "/index");
@@ -86,7 +86,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.False(File.Exists(lck.FullName));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testLockMissing_TempIndex()
         {
             var idx = new FileInfo(db.Directory + "/tmp_index");
@@ -105,7 +105,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.False(File.Exists(lck.FullName));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWriteEmptyUnlock_RealIndex()
         {
             var idx = new FileInfo(db.Directory + "/index");
@@ -123,7 +123,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.False(File.Exists(lck.FullName));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWriteEmptyCommit_RealIndex()
         {
             var idx = new FileInfo(db.Directory + "/index");
@@ -142,7 +142,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.Equal(12 + 20, new FileInfo(idx.FullName).Length);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWriteEmptyReadEmpty_RealIndex()
         {
             var idx = new FileInfo(db.Directory + "/index");
@@ -159,7 +159,7 @@ namespace GitSharp.Tests.DirectoryCache
 			Assert.Equal(0, dc.getEntryCount());
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWriteEmptyLockEmpty_RealIndex()
         {
             var idx = new FileInfo(db.Directory + "/index");
@@ -179,7 +179,7 @@ namespace GitSharp.Tests.DirectoryCache
 			dc.unlock();
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testBuildThenClear()
         {
             DirCache dc = DirCache.read(db);
@@ -205,7 +205,7 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.Equal(0, dc.getEntryCount());
         }
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testFindOnEmpty()
 		{
 			DirCache dc = DirCache.newInCore();

@@ -45,7 +45,7 @@ namespace GitSharp.Tests.DirectoryCache
 {
 	public class DirCacheBuilderIteratorTest : RepositoryTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testPathFilterGroup_DoesNotSkipTail()
 		{
 			DirCache dc = DirCache.read(db);

@@ -43,7 +43,7 @@ namespace GitSharp.Tests.Transport
 {
     public class URIishTest : XunitBaseFact
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testUnixFile()
         {
             const string str = "/home/m y";
@@ -55,7 +55,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWindowsFile()
         {
             const string str = "D:/m y";
@@ -67,7 +67,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testWindowsFile2()
         {
             const string str = "D:\\m y";
@@ -79,7 +79,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testUNC()
         {
             const string str = "\\\\some\\place";
@@ -91,7 +91,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFileProtoUnix()
         {
             const string str = "file:///home/m y";
@@ -103,7 +103,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testFileProtoWindows()
         {
             const string str = "file:///D:/m y";
@@ -115,7 +115,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testGitProtoUnix()
         {
             const string str = "git://example.com/home/m y";
@@ -128,7 +128,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testGitProtoUnixPort()
         {
             const string str = "git://example.com:333/home/m y";
@@ -142,7 +142,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testGitProtoWindowsPort()
         {
             const string str = "git://example.com:338/D:/m y";
@@ -156,7 +156,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testGitProtoWindows()
         {
             const string str = "git://example.com/D:/m y";
@@ -170,7 +170,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testScpStyleWithoutUser()
         {
             const string str = "example.com:some/p ath";
@@ -184,7 +184,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testScpStyleWithUser()
         {
             const string str = "user@example.com:some/p ath";
@@ -199,7 +199,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testGitSshProto()
         {
             const string str = "git+ssh://example.com/some/p ath";
@@ -213,7 +213,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSshGitProto()
         {
             const string str = "ssh+git://example.com/some/p ath";
@@ -227,7 +227,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSshProto()
         {
             const string str = "ssh://example.com/some/p ath";
@@ -241,7 +241,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSshProtoWithUserAndPort()
         {
             const string str = "ssh://user@example.com:33/some/p ath";
@@ -257,7 +257,7 @@ namespace GitSharp.Tests.Transport
             Assert.Equal(u, new URIish(str));
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testSshProtoWithUserPassAndPort()
         {
             const string str = "ssh://user:pass@example.com:33/some/p ath";

@@ -170,7 +170,7 @@ namespace GitSharp.Tests
 			 */
 		}
 
-		[Fact(Skip = "Not ported yet")]
+		[StrictFact(Skip = "Not ported yet")]
 		public void test030_executeBit_coreModeTrue()
 		{
 			/*
@@ -233,7 +233,7 @@ namespace GitSharp.Tests
 			*/
 		}
 
-		[Fact(Skip = "Not ported yet")]
+		[StrictFact(Skip = "Not ported yet")]
 		public void test031_executeBit_coreModeFalse()
 		{
 			/*
@@ -297,7 +297,7 @@ namespace GitSharp.Tests
 			 * */
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testCheckout()
 		{
 			// Prepare tree, remote it and checkout
@@ -331,7 +331,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testCreateEmptyIndex()
 		{
 			var index = new GitIndex(db);
@@ -344,7 +344,7 @@ namespace GitSharp.Tests
 			Assert.Equal(0, indexr.Members.Length);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testCreateSimpleSortTestIndex()
 		{
 			var index = new GitIndex(db);
@@ -375,7 +375,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testDelete()
 		{
 			var index = new GitIndex(db);
@@ -403,7 +403,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadTree()
 		{
 			// Prepare tree
@@ -444,7 +444,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadTree2()
 		{
 			// Prepare a larger tree to test some odd cases in tree writing
@@ -490,7 +490,7 @@ namespace GitSharp.Tests
 			Assert.Equal("a:b", membersr[5].Name);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testReadWithNoIndex()
 		{
 			var index = new GitIndex(db);
@@ -498,7 +498,7 @@ namespace GitSharp.Tests
 			Assert.Equal(0, index.Members.Length);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testUpdateSimpleSortTestIndex()
 		{
 			var index = new GitIndex(db);
@@ -518,7 +518,7 @@ namespace GitSharp.Tests
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testWriteTree()
 		{
 			var index = new GitIndex(db);

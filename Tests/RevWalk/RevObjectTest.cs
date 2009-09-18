@@ -42,14 +42,14 @@ namespace GitSharp.Tests.RevWalk
 {
 	public class RevObjectTest : RevWalkTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testId()
 		{
 			RevCommit a = Commit();
 			Assert.Same(a, a.getId());
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testEqualsIsIdentity()
 		{
 			RevCommit a1 = Commit();
@@ -79,7 +79,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.True(AnyObjectId.equals(b1, b2));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testRevObjectTypes()
 		{
 			Assert.Equal(ObjectType.Tree, EmptyTree.Type);
@@ -88,7 +88,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(ObjectType.Tag, Tag("emptyTree", EmptyTree).Type);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testHasRevFlag()
 		{
 			RevCommit a = Commit();
@@ -97,7 +97,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.True(a.has(RevFlag.UNINTERESTING));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testHasAnyFlag()
 		{
 			RevCommit a = Commit();
@@ -110,7 +110,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.True(a.hasAny(s));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testHasAllFlag()
 		{
 			RevCommit a = Commit();
@@ -125,7 +125,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.True(a.hasAll(s));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAddRevFlag()
 		{
 			RevCommit a = Commit();
@@ -140,7 +140,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(flag1.Mask | flag2.Mask, a.Flags);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testAddRevFlagSet()
 		{
 			RevCommit a = Commit();
@@ -154,7 +154,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(flag1.Mask | flag2.Mask, a.Flags);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testRemoveRevFlag()
 		{
 			RevCommit a = Commit();
@@ -167,7 +167,7 @@ namespace GitSharp.Tests.RevWalk
 			Assert.Equal(flag1.Mask, a.Flags);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testRemoveRevFlagSet()
 		{
 			RevCommit a = Commit();

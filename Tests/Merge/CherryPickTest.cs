@@ -47,7 +47,7 @@ namespace GitSharp.Tests.Merge
 {
 	public class CherryPickTest : RepositoryTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void TestPick()
 		{
 			// B---O

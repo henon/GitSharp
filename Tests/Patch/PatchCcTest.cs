@@ -43,7 +43,7 @@ namespace GitSharp.Tests.Patch
 {
 	public class PatchCcTest : BasePatchTest
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_OneFileCc()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_OneFileCc.patch");
@@ -99,7 +99,7 @@ namespace GitSharp.Tests.Patch
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_CcNewFile()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_CcNewFile.patch");
@@ -155,7 +155,7 @@ namespace GitSharp.Tests.Patch
 			}
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testParse_CcDeleteFile()
 		{
 			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_CcDeleteFile.patch");

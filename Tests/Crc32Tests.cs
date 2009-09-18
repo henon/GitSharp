@@ -5,7 +5,7 @@ namespace GitSharp.Tests
 {
     public class Crc32Tests
     {
-        [Fact]
+        [StrictFactAttribute]
         public void Tests()
         {
             var crc = new Crc32();

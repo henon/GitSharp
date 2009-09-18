@@ -45,31 +45,31 @@ namespace GitSharp.Tests.DirectoryCache
 {
     public class DirCacheLargePathTest : RepositoryTestCase
     {
-        [Fact]
+        [StrictFactAttribute]
         public void testPath_4090()
         {
             testLongPath(4090);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testPath_4094()
         {
             testLongPath(4094);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testPath_4095()
         {
             testLongPath(4095);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testPath_4096()
         {
             testLongPath(4096);
         }
 
-        [Fact]
+        [StrictFactAttribute]
         public void testPath_16384()
         {
             testLongPath(16384);

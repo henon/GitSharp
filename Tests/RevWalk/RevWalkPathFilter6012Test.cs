@@ -124,14 +124,14 @@ namespace GitSharp.Tests.RevWalk
 			Rw.setTreeFilter(AndTreeFilter.create(PathFilterGroup.createFromStrings(Enumerable.Repeat(path, 1)), TreeFilter.ANY_DIFF));
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test1()
 		{
 			// TODO --full-history
 			Check(i, h, g, f, e, d, c, b, a);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test2()
 		{
 			// TODO --full-history
@@ -140,7 +140,7 @@ namespace GitSharp.Tests.RevWalk
 			//Check(i, h, e, c, b, a);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test3()
 		{
 			// TODO --full-history
@@ -150,7 +150,7 @@ namespace GitSharp.Tests.RevWalk
 			//Check(i, h, e, c, b, a);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test4()
 		{
 			// TODO --full-history
@@ -160,7 +160,7 @@ namespace GitSharp.Tests.RevWalk
 			//Check(i, h, e, c, b, a);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test5()
 		{
 			// TODO --simplify-merges
@@ -169,14 +169,14 @@ namespace GitSharp.Tests.RevWalk
 			//Check(i, e, c, b, a);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test6()
 		{
 			Filter(pF);
 			Check(i, b, a);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void test7()
 		{
 			Rw.sort(RevSort.TOPO);

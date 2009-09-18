@@ -45,7 +45,7 @@ namespace GitSharp.Tests
 {
 	public class IndexDiffTest : RepositoryTestCase
 	{
-		[Fact]
+		[StrictFactAttribute]
 		public void testAdded()
 		{
 			var index = new GitIndex(db);
@@ -66,7 +66,7 @@ namespace GitSharp.Tests
 			Assert.Equal(0, diff.Removed.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testModified()
 		{
 			var index = new GitIndex(db);
@@ -96,7 +96,7 @@ namespace GitSharp.Tests
 			Assert.Equal(0, diff.Missing.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testRemoved()
 		{
 			var index = new GitIndex(db);
@@ -123,7 +123,7 @@ namespace GitSharp.Tests
 			Assert.Equal(0, diff.Added.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testUnchangedComplex()
 		{
 			var index = new GitIndex(db);
@@ -161,7 +161,7 @@ namespace GitSharp.Tests
 			Assert.Equal(0, diff.Modified.Count);
 		}
 
-		[Fact]
+		[StrictFactAttribute]
 		public void testUnchangedSimple()
 		{
 			var index = new GitIndex(db);

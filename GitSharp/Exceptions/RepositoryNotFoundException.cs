@@ -57,8 +57,8 @@ namespace GitSharp.Exceptions
          * @param location
          *            description of the repository not found, usually file path.
          */
-        public RepositoryNotFoundException(FileInfo location)
-            : this(location.FullName)
+        public RepositoryNotFoundException(DirectoryInfo location)
+            : this(location.ToString())
         {
         }
 

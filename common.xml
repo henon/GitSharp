@@ -301,43 +301,6 @@
 		<echo message="INFO: Using Subversion revision number: ${svn.revision}"/>
 	</target>
 
-	<target name="common.find-nunit">
-		<if test="${not property::exists('nunit.found')}">
-			<property name="nunit.found" value="-1" />
-			<if test="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}">
-				<exec
-					program="${nunit-console2}" 
-					resultproperty="nunit.found"
-					output="_nunit.txt"
-					failonerror="false" />
-
-				<property name="nunit-console" value="${nunit-console2}" if="${nunit.found == '0'}" />
-			</if>
-
-			<exec unless="${nunit.found == '0'}"
-				program="${nunit-console}" 
-				commandline="/help"
-				resultproperty="nunit.found"
-				output='_nunit.txt'
-				failonerror="false" />
-
-			<property name="nunit.found" value="${nunit.found == '0'}" readonly="true" />
-			
-			<fail message="ERROR: NUnit not found, cannot continue." unless="${nunit.found}"/>
-
-			<if test="${nunit.found}"> <!-- Determine if we can use this version of NUnit -->
-				<loadfile file="_nunit.txt" property="nunit_txt" />
-				<delete file="_nunit.txt" failonerror="false" />
-				<property name="nunit_findtxt" value="NUnit version " />
-				<property name="nunit_version" value="" />
-				<if test="${string::index-of( nunit_txt, nunit_findtxt) >= 0}">
-					<property name="nunit_version" value="${string::trim(string::substring(nunit_txt, string::index-of( nunit_txt, nunit_findtxt) + string::get-length(nunit_findtxt),6 ))}" />
-				</if>
-				<echo if="${string::get-length(nunit_version) == 0}">WARNING: Unable to determine NUnit version, unit tests may fail unpredictably with your version of NUnit</echo>
-				<echo if="${string::get-length(nunit_version) > 0}">INFO: Found NUnit ${nunit_version} in ${nunit-console}</echo>
-			</if>
-		</if>
-	</target>
 
 	<target name="common.check-nant-version">
 		<fail if="${nant-version.current&lt;nant-version.required}" message="Not using minimum required Nant version: ${nant-version.required} (current version: ${nant-version.current}). Please upgrade your copy of nant." />
@@ -346,7 +309,7 @@
 	<target name="common.find-tools">
 		<!-- Where is nunit-console executable(win/mono) ? -->
 		<property name="nunit-console2" value="nunit-console2" overwrite="false" />
-		<property name="nunit-console" value="${root.dir}/extern/nunit/nunit-console.exe" overwrite="false" />
+		<property name="nunit-console" value="${root.dir}/extern/Xunit/xunit.console.exe" overwrite="false" />
 
 		<!-- Where is NCover? (on 64-bit Windows NAnt's get-folder-path() returns the x86 directory which is not what we want) -->
 		<property name="ncover.dir" value="C:\Program Files\NCover" overwrite="false" />

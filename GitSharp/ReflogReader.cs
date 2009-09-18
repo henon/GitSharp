@@ -101,11 +101,11 @@ namespace GitSharp
             }
         }
 
-        private readonly FileInfo logName;
+        private readonly FileInfo _logName;
 
         public ReflogReader(Repository db, string refname)
         {
-            logName = new FileInfo(Path.Combine(db.Directory.ToString(), "logs/" + refname));
+            _logName = new FileInfo(Path.Combine(db.Directory.FullName, "logs/" + refname));
         }
 
         public Entry getLastEntry()
@@ -122,17 +122,16 @@ namespace GitSharp
         public List<Entry> getReverseEntries(int max)
         {
             byte[] log;
-            try
-            {
-                log = NB.ReadFully(logName);
-            }
-            catch (FileNotFoundException)
+            
+            if (!_logName.IsFile())
             {
                 return new List<Entry>();
             }
+            
+            log = NB.ReadFully(_logName);
 
             int rs = RawParseUtils.prevLF(log, log.Length);
-            List<Entry> ret = new List<Entry>();
+            var ret = new List<Entry>();
             while (rs >= 0 && max-- > 0)
             {
                 rs = RawParseUtils.prevLF(log, rs);

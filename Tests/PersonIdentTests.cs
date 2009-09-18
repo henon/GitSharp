@@ -53,19 +53,19 @@ namespace GitSharp.Tests
         [Test]
         public void GitTimeToDateTimeOffset()
         {
-            Assert.AreEqual("06/21/2009 15:04:53 +02:00", 1245589493L.GitTimeToDateTimeOffset(2 * 60).ToString(CultureInfo.InvariantCulture));
-            Assert.AreEqual("04/29/2009 18:41:17 -07:00", 1241055677L.GitTimeToDateTimeOffset(-7 * 60).ToString(CultureInfo.InvariantCulture));
-            Assert.AreEqual(new DateTimeOffset(2009, 06, 21, 15, 04, 53, new TimeSpan(2, 0, 0)).ToGitInternalTime(), 1245589493L);
-            Assert.AreEqual(new DateTimeOffset(2009, 04, 29, 18, 41, 17, new TimeSpan(-7, 0, 0)).ToGitInternalTime(), 1241055677L);
+            Assert.AreEqual("06/21/2009 15:04:53 +02:00", 1245589493L.UnixTimeToDateTimeOffset(2 * 60).ToString(CultureInfo.InvariantCulture));
+            Assert.AreEqual("04/29/2009 18:41:17 -07:00", 1241055677L.UnixTimeToDateTimeOffset(-7 * 60).ToString(CultureInfo.InvariantCulture));
+            Assert.AreEqual(1245589493L, new DateTimeOffset(2009, 06, 21, 15, 04, 53, new TimeSpan(2, 0, 0)).ToUnixTime());
+            Assert.AreEqual(1241055677L, new DateTimeOffset(2009, 04, 29, 18, 41, 17, new TimeSpan(-7, 0, 0)).ToUnixTime());
         }
 
         [Test]
         public void test001_NewIdent()
         {
-            var p = new PersonIdent("A U Thor", "author@example.com", 1142878501L, 0);
+            var p = new PersonIdent("A U Thor", "author@example.com", 1142878501L * 1000, 0);
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
-            Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());
+            Assert.AreEqual(1142878501L * 1000, p.When);
             Assert.AreEqual("A U Thor <author@example.com> 1142878501 +0000", p.ToExternalString());
         }
 
@@ -77,7 +77,7 @@ namespace GitSharp.Tests
             Assert.AreEqual(i, p.ToExternalString());
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
-            Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());
+            Assert.AreEqual(1142878501L * 1000, p.When);
         }
 
         [Test]
@@ -88,7 +88,7 @@ namespace GitSharp.Tests
             Assert.AreEqual(i, p.ToExternalString());
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
-            Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());
+            Assert.AreEqual(1142878501L * 1000, p.When);
         }
 
         [Test]
@@ -98,7 +98,7 @@ namespace GitSharp.Tests
             var p = new PersonIdent(i);
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
-            Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());
+            Assert.AreEqual(1142878501L * 1000, p.When);
         }
 
         [Test]
@@ -108,7 +108,7 @@ namespace GitSharp.Tests
             var p = new PersonIdent(i);
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
-            Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());
+            Assert.AreEqual(1142878501L * 1000, p.When);
         }
 
         [Test]
@@ -118,7 +118,7 @@ namespace GitSharp.Tests
             var p = new PersonIdent(i);
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
-            Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());
+            Assert.AreEqual(1142878501L * 1000, p.When);
         }
 
         [Test]
@@ -128,7 +128,7 @@ namespace GitSharp.Tests
             var p = new PersonIdent(i);
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
-            Assert.AreEqual(1142878501L, p.When.ToGitInternalTime());
+            Assert.AreEqual(1142878501L * 1000, p.When);
         }
     }
 }

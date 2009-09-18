@@ -84,7 +84,7 @@ namespace GitSharp.Tests
                     .getNewId());
             Assert.AreEqual("A O Thor Too", e.getWho().Name);
             Assert.AreEqual("authortoo@wri.tr", e.getWho().EmailAddress);
-            Assert.AreEqual(120, e.getWho().TimeZone);
+            Assert.AreEqual(120, e.getWho().TimeZoneOffset);
             Assert.AreEqual("2009-05-22T23:36:40", iso(e.getWho()));
             Assert.AreEqual("commit: Add a toString for debugging to RemoteRefUpdate",
                     e.getComment());
@@ -92,10 +92,11 @@ namespace GitSharp.Tests
 
         private String iso(PersonIdent id)
         {
+            return id.When.UnixTimeToDateTimeOffset(id.TimeZoneOffset).ToString("yyyy-MM-dd'T'HH:mm:ss");
             return id.When.ToString("yyyy-MM-dd'T'HH:mm:ss");
             //SimpleDateFormat fmt;
             //fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-            //fmt.setTimeZone(id.TimeZone);
+            //fmt.setTimeZone(id.TimeZoneOffset);
             //return fmt.format(id.When);
         }
 
@@ -116,7 +117,7 @@ namespace GitSharp.Tests
                     .getNewId());
             Assert.AreEqual("Same A U Thor", e.getWho().Name);
             Assert.AreEqual("same.author@example.com", e.getWho().EmailAddress);
-            Assert.AreEqual(60, e.getWho().TimeZone);
+            Assert.AreEqual(60, e.getWho().TimeZoneOffset);
             Assert.AreEqual("2009-05-22T22:36:42", iso(e.getWho()));
             Assert.AreEqual(
                     "rebase finished: refs/heads/rr/renamebranch5 onto c6e3b9fe2da0293f11eae202ec35fb343191a82d",
@@ -131,7 +132,7 @@ namespace GitSharp.Tests
                     .getNewId());
             Assert.AreEqual("A U Thor", e.getWho().Name);
             Assert.AreEqual("thor@committer.au", e.getWho().EmailAddress);
-            Assert.AreEqual(-60, e.getWho().TimeZone);
+            Assert.AreEqual(-60, e.getWho().TimeZoneOffset);
             Assert.AreEqual("2009-05-22T20:36:41", iso(e.getWho()));
             Assert.AreEqual("branch: Created from rr/renamebranchv4", e.getComment());
         }
@@ -152,7 +153,7 @@ namespace GitSharp.Tests
                     .getNewId());
             Assert.AreEqual("Same A U Thor", e.getWho().Name);
             Assert.AreEqual("same.author@example.com", e.getWho().EmailAddress);
-            Assert.AreEqual(60, e.getWho().TimeZone);
+            Assert.AreEqual(60, e.getWho().TimeZoneOffset);
             Assert.AreEqual("2009-05-22T22:36:42", iso(e.getWho()));
             Assert.AreEqual(
                     "rebase finished: refs/heads/rr/renamebranch5 onto c6e3b9fe2da0293f11eae202ec35fb343191a82d",

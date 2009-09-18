@@ -58,7 +58,7 @@ namespace GitSharp.RevWalk.Filter
 		/// </returns>
 		public static RevFilter Before(DateTime ts)
 		{
-			return new BeforeCommitTimeRevFilter(ts.ToGitInternalTime());
+            return new BeforeCommitTimeRevFilter(ts.ToUnixTime() * 1000);
 		}
 
 		/// <summary>
@@ -70,12 +70,12 @@ namespace GitSharp.RevWalk.Filter
 		/// </returns>
 		public static RevFilter After(DateTime ts)
 		{
-			return new AfterCommitTimeRevFilter(ts.ToGitInternalTime());
+			return new AfterCommitTimeRevFilter(ts.ToUnixTime() * 1000);
 		}
 
 		private CommitTimeRevFilter(long ts)
 		{
-			_when = (int)(ts);
+			_when = (int)(ts / 1000);
 		}
 
 		public override RevFilter Clone()
@@ -85,7 +85,7 @@ namespace GitSharp.RevWalk.Filter
 
 		public override string ToString()
 		{
-			return base.ToString() + "(" + ((long)_when).GitTimeToDateTime() + ")";
+			return base.ToString() + "(" + ((long)_when).UnixTimeToDateTime() + ")";
 		}
 
 		#region Nested Types

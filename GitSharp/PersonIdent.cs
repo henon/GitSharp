@@ -140,7 +140,7 @@ namespace GitSharp
 		{
 			Name = name;
 			EmailAddress = emailAddress;
-			_when = (when * 1000).GitTimeToDateTimeOffset(tz);
+			_when = when.GitTimeToDateTimeOffset(tz);
 			_tzOffset = TimeSpan.FromMinutes(tz);
 		}
 
@@ -192,7 +192,7 @@ namespace GitSharp
 				_tzOffset = TimeSpan.FromMinutes(offsetInMinutes);
 
 				string ticksString = str.Substring(gt + 1, sp - gt).Trim();
-				long ticks = Convert.ToInt64(ticksString) * 1000;
+				long ticks = Convert.ToInt64(ticksString);
 				_when = ticks.GitTimeToDateTimeOffset(offsetInMinutes);
 			}
 

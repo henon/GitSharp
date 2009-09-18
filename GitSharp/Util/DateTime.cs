@@ -77,7 +77,7 @@ namespace GitSharp.Util
 		public static DateTimeOffset GitTimeToDateTimeOffset(this long gitTime, long offsetMinutes)
 		{
 			var offset = TimeSpan.FromMinutes(offsetMinutes);
-			var utcTicks = Constants.EpochTicks + gitTime * 10000;
+			var utcTicks = Constants.EpochTicks + gitTime * Constants.TicksPerSecond;
 			return new DateTimeOffset(utcTicks + offset.Ticks, offset);
 		}
 

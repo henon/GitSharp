@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Robin Rosenberg
  *
  * All rights reserved.
@@ -93,7 +93,7 @@ namespace GitSharp.Tests
         private String iso(PersonIdent id)
         {
             return id.When.UnixTimeToDateTimeOffset(id.TimeZoneOffset).ToString("yyyy-MM-dd'T'HH:mm:ss");
-            return id.When.ToString("yyyy-MM-dd'T'HH:mm:ss");
+            //return id.When.ToString("yyyy-MM-dd'T'HH:mm:ss");
             //SimpleDateFormat fmt;
             //fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             //fmt.setTimeZone(id.TimeZoneOffset);

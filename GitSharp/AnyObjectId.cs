@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -99,7 +99,11 @@ namespace GitSharp
 
         public override bool Equals(object obj)
         {
-            return Equals(((AnyObjectId)obj));
+            if ( obj is AnyObjectId)
+            {
+                return Equals((AnyObjectId)obj);
+            }
+            return false;
         }
 
         public void CopyTo(BinaryWriter s)

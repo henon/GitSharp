@@ -62,15 +62,16 @@ namespace GitSharp
         {
             WriteFanOutTable();
 
-            foreach (PackedObjectInfo oe in entries)
+			foreach (PackedObjectInfo oe in Entries)
             {
                 if (!CanStore(oe))
                 {
                 	throw new IOException("Pack too large for index version 1");
                 }
-                NB.encodeInt32(tmp, 0, (int)oe.Offset);
-                oe.copyRawTo(tmp, 4);
-                _stream.Write(tmp, 0, tmp.Length);
+
+				NB.encodeInt32(Tmp, 0, (int)oe.Offset);
+				oe.copyRawTo(Tmp, 4);
+				Stream.Write(Tmp, 0, Tmp.Length);
             }
 
             WriteChecksumFooter();

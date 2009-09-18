@@ -36,16 +36,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace GitSharp.Util
 {
     /** Miscellaneous string comparison utility methods. */
-    public class StringUtils
+    public static class StringUtils
     {
         private static readonly char[] LC;
 
@@ -74,55 +68,5 @@ namespace GitSharp.Util
         {
             return c <= 'Z' ? LC[c] : c;
         }
-
-        /**
-         * Convert the input string to lower case, according to the "C" locale.
-         * <para />
-         * This method does not honor the JVM locale, but instead always behaves as
-         * though it is in the US-ASCII locale. Only characters in the range 'A'
-         * through 'Z' are converted, all other characters are left as-is, even if
-         * they otherwise would have a lowercase character equivilant.
-         *
-         * @param in
-         *            the input string. Must not be null.
-         * @return a copy of the input string, After converting characters in the
-         *         range 'A'..'Z' to 'a'..'z'.
-         */
-        public static string toLowerCase(string @in)
-        {
-            StringBuilder r = new StringBuilder(@in.Length);
-            for (int i = 0; i < @in.Length; i++)
-                r.Append(toLowerCase(@in[i]));
-            return r.ToString();
-        }
-
-        /**
-         * Test if two strings are equal, ignoring case.
-         * <para />
-         * This method does not honor the JVM locale, but instead always behaves as
-         * though it is in the US-ASCII locale.
-         *
-         * @param a
-         *            first string to compare.
-         * @param b
-         *            second string to compare.
-         * @return true if a equals b
-         */
-        public static bool equalsIgnoreCase(string a, string b)
-        {
-            if (a == b)
-                return true;
-            if (a.Length != b.Length)
-                return false;
-            for (int i = 0; i < a.Length; i++)
-            {
-                if (toLowerCase(a[i]) != toLowerCase(b[i]))
-                    return false;
-            }
-            return true;
-        }
-
-
     }
-
 }

@@ -64,48 +64,49 @@ namespace GitSharp
 
         private void WriteObjectNames()
         {
-            foreach (PackedObjectInfo oe in entries)
+            foreach (PackedObjectInfo oe in Entries)
             {
-                oe.copyRawTo(_stream.BaseStream);
+                oe.copyRawTo(Stream.BaseStream);
             }
         }
 
         private void WriteCRCs()
         {
-            foreach (PackedObjectInfo oe in entries)
+            foreach (PackedObjectInfo oe in Entries)
             {
-                NB.encodeInt32(tmp, 0, oe.CRC);
-            	_stream.BaseStream.Write(tmp, 0, 4);
+                NB.encodeInt32(Tmp, 0, oe.CRC);
+            	Stream.BaseStream.Write(Tmp, 0, 4);
             }
         }
 
         private void WriteOffset32()
         {
             int o64 = 0;
-            foreach (PackedObjectInfo oe in entries)
+            foreach (PackedObjectInfo oe in Entries)
             {
                 long o = oe.Offset;
                 if (o < int.MaxValue)
                 {
-                    NB.encodeInt32(tmp, 0, (int)o);
+                    NB.encodeInt32(Tmp, 0, (int)o);
                 }
                 else
                 {
-                    NB.encodeInt32(tmp, 0, (1 << 31) | o64++);
+                    NB.encodeInt32(Tmp, 0, (1 << 31) | o64++);
                 }
-                _stream.BaseStream.Write(tmp, 0, 4);
+
+                Stream.BaseStream.Write(Tmp, 0, 4);
             }
         }
 
         private void WriteOffset64()
         {
-            foreach (PackedObjectInfo oe in entries)
+            foreach (PackedObjectInfo oe in Entries)
             {
                 long o = oe.Offset;
                 if (o > int.MaxValue)
                 {
-                    NB.encodeInt64(tmp, 0, o);
-                	_stream.BaseStream.Write(tmp, 0, 8);
+                    NB.encodeInt64(Tmp, 0, o);
+                	Stream.BaseStream.Write(Tmp, 0, 8);
                 }
             }
         }

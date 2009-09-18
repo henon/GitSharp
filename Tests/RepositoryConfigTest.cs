@@ -91,7 +91,7 @@ namespace GitSharp.Tests
 		{
 			var c = new Config();
 			var values = new List<string> { "value1", "value2" };
-			c.setStringList("my", null, "somename", values);
+			c.SetStringList("my", null, "somename", values);
 
 			object[] expArr = values.ToArray();
 			string[] actArr = c.getStringList("my", null, "somename");

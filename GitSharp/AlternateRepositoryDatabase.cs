@@ -50,62 +50,62 @@ namespace GitSharp
             _objectDatabase = _repository.ObjectDatabase;
         }
 
-        public Repository getRepository()
-        {
-            return _repository;
-        }
+    	public Repository Repository
+    	{
+    		get { return _repository; }
+    	}
 
-        public override void closeSelf()
+    	public override void CloseSelf()
         {
             _repository.Close();
         }
 
-		public override void create()
+		public override void Create()
         {
             _repository.Create();
         }
 
-		public override bool exists()
+		public override bool Exists()
         {
-            return _objectDatabase.exists();
+            return _objectDatabase.Exists();
         }
 
-        public override bool hasObject1(AnyObjectId objectId)
+		protected internal override bool HasObject1(AnyObjectId objectId)
         {
-            return _objectDatabase.hasObject1(objectId);
+            return _objectDatabase.HasObject1(objectId);
         }
 
-        public override bool tryAgain1()
+		protected internal override bool TryAgain1()
         {
-            return _objectDatabase.tryAgain1();
+            return _objectDatabase.TryAgain1();
         }
 
-        public override bool hasObject2(string objectName)
+		protected internal override bool HasObject2(string objectName)
         {
-            return _objectDatabase.hasObject2(objectName);
+            return _objectDatabase.HasObject2(objectName);
         }
 
-        public override ObjectLoader openObject1(WindowCursor curs, AnyObjectId objectId)
+		protected internal override ObjectLoader OpenObject1(WindowCursor curs, AnyObjectId objectId)
         {
-            return _objectDatabase.openObject1(curs, objectId);
+            return _objectDatabase.OpenObject1(curs, objectId);
         }
 
-        public override ObjectLoader openObject2(WindowCursor curs, string objectName, AnyObjectId objectId)
+		protected internal override ObjectLoader OpenObject2(WindowCursor curs, string objectName, AnyObjectId objectId)
         {
-            return _objectDatabase.openObject2(curs, objectName, objectId);
+            return _objectDatabase.OpenObject2(curs, objectName, objectId);
         }
 
-		public override void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
+		public override void OpenObjectInAllPacks1(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
         {
-			_objectDatabase.OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
+			_objectDatabase.OpenObjectInAllPacks1(@out, windowCursor, objectId);
         }
 
-        public override ObjectDatabase[] loadAlternates()
+    	protected override ObjectDatabase[] LoadAlternates()
         {
-            return _objectDatabase.getAlternates();
+            return _objectDatabase.GetAlternates();
         }
 
-        public override void closeAlternates()
+        public override void CloseAlternates()
         {
         }
     }

@@ -272,7 +272,7 @@ namespace GitSharp.RevWalk
 		/// this method requires the commit to be parsed before it can be added as a
 		/// root for the traversal.
 		/// <para />
-		/// The method will automatically parse an unparsed commit, but error
+		/// The method will automatically Parse an unparsed commit, but error
 		/// handling may be more difficult for the application to explain why a
 		/// <see cref="RevCommit"/> is not actually a commit. The object pool of this 
 		/// walker would also be 'poisoned' by the non-commit RevCommit.
@@ -313,7 +313,7 @@ namespace GitSharp.RevWalk
 		/// this method requires the commit to be parsed before it can be added as a
 		/// root for the traversal.
 		/// <para />
-		/// The method will automatically parse an unparsed commit, but error
+		/// The method will automatically Parse an unparsed commit, but error
 		/// handling may be more difficult for the application to explain why a
 		/// <see cref="RevCommit"/> is not actually a commit. The object pool of this 
 		/// walker would also be 'poisoned' by the non-commit RevCommit.
@@ -354,7 +354,7 @@ namespace GitSharp.RevWalk
 		/// this method requires the commit to be parsed before it can be added as a
 		/// root for the traversal.
 		/// <para />
-		/// The method will automatically parse an unparsed commit, but error
+		/// The method will automatically Parse an unparsed commit, but error
 		/// handling may be more difficult for the application to explain why a
 		/// RevCommit is not actually a commit. The object pool of this walker would
 		/// also be 'poisoned' by the non-commit RevCommit.
@@ -742,7 +742,7 @@ namespace GitSharp.RevWalk
 		}
 
 		///	<summary>
-		/// Locate a reference to a commit and immediately parse its content.
+		/// Locate a reference to a commit and immediately Parse its content.
 		/// <para />
 		/// Unlike <seealso cref="lookupCommit(AnyObjectId)"/> this method only returns
 		/// successfully if the commit object exists, is verified to be a commit, and
@@ -825,7 +825,7 @@ namespace GitSharp.RevWalk
 		}
 
 		///	<summary>
-		/// Locate a reference to any object and immediately parse its headers.
+		/// Locate a reference to any object and immediately Parse its headers.
 		/// <para />
 		/// This method only returns successfully if the object exists and was parsed
 		/// without error. Parsing an object can be expensive as the type must be
@@ -854,40 +854,38 @@ namespace GitSharp.RevWalk
 				switch (type)
 				{
 					case Constants.OBJ_COMMIT:
-						{
-							RevCommit c = createCommit(id);
-							c.parseCanonical(this, data);
-							r = c;
-							break;
-						}
+						RevCommit c = createCommit(id);
+						c.parseCanonical(this, data);
+						r = c;
+						break;
+
 					case Constants.OBJ_TREE:
-						{
-							r = new RevTree(id);
-							r.Flags |= PARSED;
-							break;
-						}
+						r = new RevTree(id);
+						r.Flags |= PARSED;
+						break;
+
 					case Constants.OBJ_BLOB:
-						{
-							r = new RevBlob(id);
-							r.Flags |= PARSED;
-							break;
-						}
+						r = new RevBlob(id);
+						r.Flags |= PARSED;
+						break;
+
 					case Constants.OBJ_TAG:
-						{
-							var t = new RevTag(id);
-							t.parseCanonical(this, data);
-							r = t;
-							break;
-						}
+						var t = new RevTag(id);
+						t.parseCanonical(this, data);
+						r = t;
+						break;
+
 					default:
 						throw new ArgumentException("Bad object type: " + type);
 				}
+
 				_objects.Add(r);
 			}
 			else
 			{
 				parseHeaders(r);
 			}
+
 			return r;
 		}
 

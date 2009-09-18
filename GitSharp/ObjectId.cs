@@ -38,7 +38,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 using GitSharp.Util;
 
@@ -76,7 +75,7 @@ namespace GitSharp
 		/// </returns>
 		public static bool IsId(string id)
 		{
-			if (id.Length != 2 * ObjectIdLength)
+			if (id.Length != Constants.OBJECT_ID_STRING_LENGTH)
 			{
 				return false;
 			}
@@ -176,7 +175,7 @@ namespace GitSharp
 		/// <returns> the converted object id. </returns>
 		public static ObjectId FromString(string s)
 		{
-			if (string.IsNullOrEmpty(s) || s.Length != StringLength) return null;
+			if (string.IsNullOrEmpty(s) || s.Length != Constants.OBJECT_ID_STRING_LENGTH) return null;
 			return FromHexString(Constants.encodeASCII(s), 0);
 		}
 
@@ -193,7 +192,7 @@ namespace GitSharp
 			}
 			catch (IndexOutOfRangeException)
 			{
-				var s = new string(Encoding.ASCII.GetChars(bs, offset, StringLength));
+				var s = new string(Encoding.ASCII.GetChars(bs, offset, Constants.OBJECT_ID_STRING_LENGTH));
 				throw new ArgumentException("Invalid id: " + s, "bs");
 			}
 		}

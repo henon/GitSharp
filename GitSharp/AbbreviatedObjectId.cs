@@ -78,7 +78,7 @@ namespace GitSharp
 		/// <returns>the converted object id.</returns>
 		public static AbbreviatedObjectId FromString(byte[] buf, int offset, int end)
 		{
-			if (end - offset > AnyObjectId.StringLength)
+			if (end - offset > Constants.OBJECT_ID_STRING_LENGTH)
 			{
 				throw new ArgumentException("Invalid id");
 			}
@@ -95,7 +95,7 @@ namespace GitSharp
 		/// <returns>the converted object id.</returns>
 		public static AbbreviatedObjectId FromString(string str)
 		{
-			if (str.Length > AnyObjectId.StringLength)
+			if (str.Length > Constants.OBJECT_ID_STRING_LENGTH)
 			{
 				throw new ArgumentException("Invalid id: " + str);
 			}
@@ -151,7 +151,7 @@ namespace GitSharp
 		/// </returns>
 		public bool isComplete()
 		{
-			return Length == AnyObjectId.ObjectIdLength * 2;
+			return Length == Constants.OBJECT_ID_LENGTH * 2;
 		}
 
 		/// <summary>
@@ -233,7 +233,7 @@ namespace GitSharp
 		/// <returns>string form of the abbreviation, in lower case hexadecimal.</returns>
 		public string name()
 		{
-			var b = new char[AnyObjectId.StringLength];
+			var b = new char[Constants.OBJECT_ID_STRING_LENGTH];
 
 			Hex.FillHexCharArray(b, 0, _w1);
 			if (_nibbles <= 8)

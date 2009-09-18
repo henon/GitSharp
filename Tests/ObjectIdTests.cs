@@ -43,8 +43,10 @@ namespace GitSharp.Tests
 {
 	public class ObjectIdTests : XunitBaseFact
 	{
+// ReSharper disable InconsistentNaming
 		const string def4c620b = "def4c620bc3713bb1bb26b808ec9312548e73946";
 		const string ff00eedd0 = "ff00eedd003713bb1bb26b808ec9312548e73946";
+// ReSharper restore InconsistentNaming
 
 		[Fact]
 		public void ObjectIdToStringTest()

@@ -42,40 +42,74 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using GitSharp.Exceptions;
 using GitSharp.Util;
-using Tamir.SharpSsh.java.lang;
 
 namespace GitSharp
 {
+	/// <summary>
+	/// Git style <code>.config</code>, <code>.gitconfig</code>, <code>.gitmodules</code> file.
+	/// </summary>
 	public class Config
 	{
+		private static readonly string[] EmptyStringArray = new string[] { };
+
 		private const long GiB = 1024 * MiB;
 		private const long KiB = 1024;
 		private const long MiB = 1024 * KiB;
-		private static readonly string[] EmptyStringArray = new string[0];
+
+		///	<summary>
+		/// Immutable current state of the configuration data.
+		///	<para />
+		/// This state is copy-on-write. It should always contain an immutable list
+		/// of the configuration keys/values.
+		/// </summary>
+		private State _state;
+
+		/// Magic value indicating a missing entry.
+		///	<para />
+		///	This value is tested for reference equality in some contexts, so we
+		///	must ensure it is a special copy of the empty string.  It also must
+		///	be treated like the empty string.
+		/// </summary>
 		private static readonly string MagicEmptyValue = string.Empty;
 
 		private readonly Config _baseConfig;
-		private State _state;
 
+		/// <summary>
+		/// Create a configuration with no default fallback.
+		/// </summary>
 		public Config()
 			: this(null)
 		{
 		}
 
+		///	<summary>
+		/// Create an empty configuration with a fallback for missing keys.
+		///	</summary>
+		///	<param name="defaultConfig">
+		///	the base configuration to be consulted when a key is missing
+		/// from this configuration instance.
+		/// </param>
 		public Config(Config defaultConfig)
 		{
 			_baseConfig = defaultConfig;
-			_state = newState();
+			_state = NewState();
 		}
 
+		///	<summary>
+		/// Escape the value before saving
+		/// </summary>
+		/// <param name="x">The value to escape.</param>
+		///	<returns>The escaped value.</returns>
 		private static string EscapeValue(string x)
 		{
 			bool inquote = false;
 			int lineStart = 0;
 			var r = new StringBuilder(x.Length);
+
 			for (int k = 0; k < x.Length; k++)
 			{
 				char c = x[k];
@@ -131,32 +165,82 @@ namespace GitSharp
 						break;
 				}
 			}
-			if (inquote) r.Append('"');
+
+			if (inquote)
+			{
+				r.Append('"');
+			}
+
 			return r.ToString();
 		}
 
+		///	<summary>
+		/// Obtain an integer value from the configuration.
+		///	</summary>
+		///	<param name="section">Section the key is grouped within.</param>
+		///	<param name="name">Name of the key to get.</param>
+		///	<param name="defaultValue">
+		///	Default value to return if no value was present.
+		/// </param>
+		///	<returns>
+		/// An integer value from the configuration, or <paramref name="defaultValue"/>.
+		/// </returns>
 		public int getInt(string section, string name, int defaultValue)
 		{
 			return getInt(section, null, name, defaultValue);
 		}
 
+		///	<summary>
+		/// Obtain an integer value from the configuration.
+		///	</summary>
+		///	<param name="section">Section the key is grouped within.</param>
+		///	<param name="subsection">
+		/// Subsection name, such a remote or branch name.
+		/// </param>
+		///	<param name="name">Name of the key to get.</param>
+		///	<param name="defaultValue">
+		/// Default value to return if no value was present. </param>
+		///	<returns>
+		/// An integer value from the configuration, or <paramref name="defaultValue"/>.
+		/// </returns>
 		public int getInt(string section, string subsection, string name, int defaultValue)
 		{
 			long val = getLong(section, subsection, name, defaultValue);
 			if (int.MinValue <= val && val <= int.MaxValue)
-				return (int)val;
+			{
+				return (int) val;
+			}
+			
 			throw new ArgumentException("Integer value " + section + "." + name + " out of range");
 		}
 
+		///	<summary>
+		/// Obtain an integer value from the configuration.
+		/// </summary>
+		///	<param name="section">Section the key is grouped within.</param>
+		///	<param name="subsection">
+		/// Subsection name, such a remote or branch name.
+		/// </param>
+		///	<param name="name">Name of the key to get.</param>
+		///	<param name="defaultValue">
+		/// Default value to return if no value was present.
+		/// </param>
+		///	<returns>
+		/// An integer value from the configuration, or <paramref name="defaultValue"/>.
+		/// </returns>
 		public long getLong(string section, string subsection, string name, long defaultValue)
 		{
 			string str = getString(section, subsection, name);
 			if (str == null)
+			{
 				return defaultValue;
+			}
 
 			string n = str.Trim();
 			if (n.Length == 0)
+			{
 				return defaultValue;
+			}
 
 			long mul = 1;
 			switch (StringUtils.toLowerCase(n[n.Length - 1]))
@@ -173,10 +257,16 @@ namespace GitSharp
 					mul = KiB;
 					break;
 			}
+
 			if (mul > 1)
+			{
 				n = n.Slice(0, n.Length - 1).Trim();
+			}
+
 			if (n.Length == 0)
+			{
 				return defaultValue;
+			}
 
 			try
 			{
@@ -188,29 +278,59 @@ namespace GitSharp
 			}
 		}
 
+		///	<summary>
+		/// Get a boolean value from the git config.
+		/// </summary>
+		/// <param name="section">Section the key is grouped within.</param>
+		///	<param name="name">Name of the key to get.</param>
+		///	<param name="defaultValue">
+		/// Default value to return if no value was present.
+		/// </param>
+		///	<returns>
+		/// True if any value or <paramref name="defaultValue"/> is true, false 
+		/// for missing or explicit false.
+		/// </returns>
 		public bool getBoolean(string section, string name, bool defaultValue)
 		{
 			return getBoolean(section, null, name, defaultValue);
 		}
 
+		///	<summary>
+		/// Get a boolean value from the git config.
+		/// </summary>
+		///	<param name="section">Section the key is grouped within.</param>
+		///	<param name="subsection">
+		/// Subsection name, such a remote or branch name.
+		/// </param>
+		///	<param name="name">Name of the key to get.</param>
+		///	<param name="defaultValue">
+		/// Default value to return if no value was present.
+		/// </param>
+		///	<returns>
+		/// True if any value or defaultValue is true, false for missing or
+		/// explicit false.
+		/// </returns>
 		public bool getBoolean(string section, string subsection, string name, bool defaultValue)
 		{
-			string n = getRawString(section, subsection, name);
+			string n = GetRawString(section, subsection, name);
 			if (n == null)
+			{
 				return defaultValue;
+			}
 
-			if (MagicEmptyValue == n || StringUtils.equalsIgnoreCase("yes", n)
-				|| StringUtils.equalsIgnoreCase("true", n)
-				|| StringUtils.equalsIgnoreCase("1", n)
-				|| StringUtils.equalsIgnoreCase("on", n))
+			if (MagicEmptyValue == n
+				|| "yes".Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| "true".Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| "1".Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| "on".Equals(n, StringComparison.InvariantCultureIgnoreCase))
 			{
 				return true;
 			}
 
-			if (StringUtils.equalsIgnoreCase("no", n)
-				|| StringUtils.equalsIgnoreCase("false", n)
-				|| StringUtils.equalsIgnoreCase("0", n)
-				|| StringUtils.equalsIgnoreCase("off", n))
+			if ("no".Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| "false".Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| Constants.RepositoryFormatVersion.Equals(n, StringComparison.InvariantCultureIgnoreCase)
+				|| "off".Equals(n, StringComparison.InvariantCultureIgnoreCase))
 			{
 				return false;
 			}
@@ -218,16 +338,33 @@ namespace GitSharp
 			throw new ArgumentException("Invalid boolean value: " + section + "." + name + "=" + n);
 		}
 
+		///	<summary>
+		/// Get string value.
+		///	</summary>
+		///	<param name="section">The section.</param>
+		///	<param name="subsection">The subsection for the value.</param>
+		///	<param name="name">The key name.</param>
+		///	<returns>A <see cref="String"/> value from git config.</returns>
 		public string getString(string section, string subsection, string name)
 		{
-			return getRawString(section, subsection, name);
+			return GetRawString(section, subsection, name);
 		}
 
+		///	<summary>
+		/// Get a list of string values
+		///	<para />
+		/// If this instance was created with a base, the base's values are returned
+		/// first (if any).
+		/// </summary>
+		/// <param name="section">The section.</param>
+		///	<param name="subsection">The subsection for the value.</param>
+		///	<param name="name">The key name.</param>
+		///	<returns>Array of zero or more values from the configuration.</returns>
 		public string[] getStringList(string section, string subsection, string name)
 		{
 			string[] baseList = _baseConfig != null ? _baseConfig.getStringList(section, subsection, name) : EmptyStringArray;
 
-			List<string> lst = getRawStringList(section, subsection, name);
+			IList<string> lst = GetRawStringList(section, subsection, name);
 			if (lst != null)
 			{
 				var res = new string[baseList.Length + lst.Count];
@@ -239,24 +376,43 @@ namespace GitSharp
 				{
 					res[idx++] = val;
 				}
+
 				return res;
 			}
 
 			return baseList;
 		}
 
+		///	<param name="section">Section to search for. </param>
+		///	<returns> set of all subsections of specified section within this
+		/// configuration and its base configuration; may be empty if no
+		/// subsection exists.
+		/// </returns>
 		public List<string> getSubsections(string section)
 		{
 			return get(new SubsectionNames(section));
 		}
 
-		public T get<T>(SectionParser<T> parser)
+		///	<summary>
+		/// Obtain a handle to a parsed set of configuration values.
+		/// </summary>
+		///	<param name="parser">
+		/// Parser which can create the model if it is not already
+		/// available in this configuration file. The parser is also used
+		/// as the key into a cache and must obey the hashCode and equals
+		/// contract in order to reuse a parsed model.
+		/// </param>
+		///	<returns>
+		/// The parsed object instance, which is cached inside this config.
+		/// </returns>
+		/// <typeparam name="T">Type of configuration model to return.</typeparam>
+		public T get<T>(ISectionParser<T> parser)
 		{
-			State myState = getState();
+			State myState = GetState();
 			T obj;
 			if (!myState.Cache.ContainsKey(parser))
 			{
-				obj = parser.parse(this);
+				obj = parser.Parse(this);
 				myState.Cache.Add(parser, obj);
 			}
 			else
@@ -266,139 +422,258 @@ namespace GitSharp
 			return obj;
 		}
 
-		public void uncache<T>(SectionParser<T> parser)
+		/// <summary>
+		/// Remove a cached configuration object.
+		///	<para />
+		/// If the associated configuration object has not yet been cached, this
+		/// method has no effect.
+		/// </summary>
+		///	<param name="parser">Parser used to obtain the configuration object.</param>
+		///	<seealso cref= get(SectionParser)"/>
+		public void uncache<T>(ISectionParser<T> parser)
 		{
 			_state.Cache.Remove(parser);
 		}
 
-		private string getRawString(string section, string subsection, string name)
+		private string GetRawString(string section, string subsection, string name)
 		{
-			List<string> lst = getRawStringList(section, subsection, name);
+			List<string> lst = GetRawStringList(section, subsection, name);
+
 			if (lst != null && lst.Count > 0)
+			{
 				return lst[0];
+			}
+
 			if (_baseConfig != null)
-				return _baseConfig.getRawString(section, subsection, name);
+			{
+				return _baseConfig.GetRawString(section, subsection, name);
+			}
+
 			return null;
 		}
 
-		private List<string> getRawStringList(string section, string subsection, string name)
+		private List<string> GetRawStringList(string section, string subsection, string name)
 		{
 			List<string> r = null;
 			foreach (Entry e in _state.EntryList)
 			{
-				if (e.match(section, subsection, name))
-					r = add(r, e.value);
+				if (e.Match(section, subsection, name))
+				{
+					r = Add(r, e.Value);
+				}
 			}
+
 			return r;
 		}
 
-		private static List<string> add(List<string> curr, string value)
+		private static List<string> Add(List<string> curr, string value)
 		{
 			if (curr == null)
+			{
 				return new List<string> { value };
+			}
+
+			if (curr.Count == 1)
+			{
+				return new List<string>(2) {curr[0], value};
+			}
 
 			curr.Add(value);
 			return curr;
 		}
 
-		private State getState()
+		private State GetState()
 		{
 			State cur = _state;
-			State @base = getBaseState();
-			if (cur.baseState == @base)
+			State @base = GetBaseState();
+			if (cur.BaseState == @base)
+			{
 				return cur;
+			}
+
 			var upd = new State(cur.EntryList, @base);
 			_state = upd;
+
 			return upd;
 		}
 
-		private State getBaseState()
+		private State GetBaseState()
 		{
 			return _baseConfig != null ? _baseConfig._state : null;
 		}
 
+		/// <summary>
+		/// Add or modify a configuration value. The parameters will result in a
+		/// configuration entry like this.
+		/// <para />
+		/// <pre>
+		/// [section &quot;subsection&quot;]
+		/// name = value
+		/// </pre>
+		///	</summary>
+		///	<param name="section">Section name, e.g "branch"</param>
+		///	<param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		///	<param name="name">Parameter name, e.g. "filemode".</param>
+		///	<param name="value">Parameter value.</param>
 		public void setInt(string section, string subsection, string name, int value)
 		{
 			setLong(section, subsection, name, value);
 		}
 
+		///	<summary>
+		/// Add or modify a configuration value. The parameters will result in a
+		///	configuration entry like this.
+		/// <para />
+		/// <pre>
+		/// [section &quot;subsection&quot;]
+		/// name = value
+		/// </pre>
+		///	</summary>
+		///	<param name="section">Section name, e.g "branch"</param>
+		///	<param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		///	<param name="name">Parameter name, e.g. "filemode".</param>
+		///	<param name="value">Parameter value.</param>
 		public void setLong(string section, string subsection, string name, long value)
 		{
 			string s;
 			if (value >= GiB && (value % GiB) == 0)
+			{
 				s = (value / GiB) + " g";
+			}
 			else if (value >= MiB && (value % MiB) == 0)
+			{
 				s = (value / MiB) + " m";
+			}
 			else if (value >= KiB && (value % KiB) == 0)
+			{
 				s = (value / KiB) + " k";
+			}
 			else
+			{
 				s = value.ToString();
+			}
 
 			setString(section, subsection, name, s);
 		}
 
+		///	<summary>
+		/// Add or modify a configuration value. The parameters will result in a
+		///	configuration entry like this.
+		/// <para />
+		/// <pre>
+		/// [section &quot;subsection&quot;]
+		/// name = value
+		/// </pre>
+		///	</summary>
+		///	<param name="section">Section name, e.g "branch"</param>
+		///	<param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		///	<param name="name">Parameter name, e.g. "filemode".</param>
+		///	<param name="value">Parameter value.</param>
 		public void setBoolean(string section, string subsection, string name, bool value)
 		{
 			setString(section, subsection, name, value ? "true" : "false");
 		}
 
+		///	<summary>
+		/// Add or modify a configuration value. The parameters will result in a
+		///	configuration entry like this.
+		/// <para />
+		/// <pre>
+		/// [section &quot;subsection&quot;]
+		/// name = value
+		/// </pre>
+		///	</summary>
+		///	<param name="section">Section name, e.g "branch"</param>
+		///	<param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		///	<param name="name">Parameter name, e.g. "filemode".</param>
+		///	<param name="value">Parameter value.</param>
 		public void setString(string section, string subsection, string name, string value)
 		{
-			setStringList(section, subsection, name, new List<string> { value });
+			SetStringList(section, subsection, name, new List<string> { value });
 		}
 
+		///	<summary>
+		/// Remove a configuration value.
+		/// </summary>
+		/// <param name="section">Section name, e.g "branch".</param>
+		/// <param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		/// <param name="name">Parameter name, e.g. "filemode".</param>
 		public void unset(string section, string subsection, string name)
 		{
-			setStringList(section, subsection, name, new List<string>());
+			SetStringList(section, subsection, name, new List<string>());
 		}
 
-		public void setStringList(string section, string subsection, string name, List<string> values)
+		///	<summary>
+		/// Set a configuration value.
+		/// <para />
+		/// <pre>
+		/// [section &quot;subsection&quot;]
+		/// name = value
+		/// </pre>
+		///	</summary><param name="section">Section name, e.g "branch".</param>
+		///	<param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		/// <param name="name">Parameter name, e.g. "filemode".</param>
+		/// <param name="values">List of zero or more values for this key.</param>
+		public void SetStringList(string section, string subsection, string name, List<string> values)
 		{
 			State src = _state;
-			State res = replaceStringList(src, section, subsection, name, values);
+			State res = ReplaceStringList(src, section, subsection, name, values);
 			_state = res;
 		}
 
-		private State replaceStringList(State srcState, string section, string subsection, string name, IList<string> values)
+		private State ReplaceStringList(State srcState, string section, string subsection, string name, IList<string> values)
 		{
-			List<Entry> entries = copy(srcState, values);
+			IList<Entry> entries = Copy(srcState, values);
 			int entryIndex = 0;
 			int valueIndex = 0;
 			int insertPosition = -1;
 
+			// Reset the first n Entry objects that match this input name.
+			//
 			while (entryIndex < entries.Count && valueIndex < values.Count)
 			{
 				Entry e = entries[entryIndex];
-				if (e.match(section, subsection, name))
+				if (e.Match(section, subsection, name))
 				{
-					entries[entryIndex] = e.forValue(values[valueIndex++]);
+					entries[entryIndex] = e.ForValue(values[valueIndex++]);
 					insertPosition = entryIndex + 1;
 				}
 				entryIndex++;
 			}
 
+			// Remove any extra Entry objects that we no longer need.
+			//
 			if (valueIndex == values.Count && entryIndex < entries.Count)
 			{
 				while (entryIndex < entries.Count)
 				{
 					Entry e = entries[entryIndex++];
-					if (e.match(section, subsection, name))
+					if (e.Match(section, subsection, name))
 					{
 						entries.RemoveAt(--entryIndex);
 					}
 				}
 			}
 
+			// Insert new Entry objects for additional/new values.
+			//
 			if (valueIndex < values.Count && entryIndex == entries.Count)
 			{
 				if (insertPosition < 0)
 				{
-					insertPosition = findSectionEnd(entries, section, subsection);
+					// We didn't find a matching key above, but maybe there
+					// is already a section available that matches. Insert
+					// after the last key of that section.
+					//
+					insertPosition = FindSectionEnd(entries, section, subsection);
 				}
 
 				if (insertPosition < 0)
 				{
-					var e = new Entry { section = section, subsection = subsection };
+					// We didn't find any matching section header for this key,
+					// so we must create a new section header at the end.
+					//
+					var e = new Entry { Section = section, Subsection = subsection };
 					entries.Add(e);
 					insertPosition = entries.Count;
 				}
@@ -407,96 +682,112 @@ namespace GitSharp
 				{
 					var e = new Entry
 								{
-									section = section,
-									subsection = subsection,
-									name = name,
-									value = values[valueIndex++]
+									Section = section,
+									Subsection = subsection,
+									Name = name,
+									Value = values[valueIndex++]
 								};
+
 					entries.Insert(insertPosition++, e);
 				}
 			}
 
-			return newState(entries);
+			return NewState(entries);
 		}
 
-		private static List<Entry> copy(State src, ICollection<string> values)
+		private static List<Entry> Copy(State src, ICollection<string> values)
 		{
+			// At worst we need to insert 1 line for each value, plus 1 line
+			// for a new section header. Assume that and allocate the space.
+			//
 			int max = src.EntryList.Count + values.Count + 1;
 			var r = new List<Entry>(max);
 			r.AddRange(src.EntryList);
 			return r;
 		}
 
-		private static int findSectionEnd(IList<Entry> entries, string section, string subsection)
+		private static int FindSectionEnd(IList<Entry> entries, string section, string subsection)
 		{
 			for (int i = 0; i < entries.Count; i++)
 			{
 				Entry e = entries[i];
-				if (e.match(section, subsection, null))
+				if (e.Match(section, subsection, null))
 				{
 					i++;
 					while (i < entries.Count)
 					{
 						e = entries[i];
-						if (e.match(section, subsection, e.name))
+						if (e.Match(section, subsection, e.Name))
+						{
 							i++;
+						}
 						else
+						{
 							break;
+						}
 					}
+
 					return i;
 				}
 			}
+
 			return -1;
 		}
 
+		///	<returns>
+		/// This configuration, formatted as a Git style text file.
+		/// </returns>
 		public string toText()
 		{
 			var o = new StringBuilder();
 			foreach (Entry e in _state.EntryList)
 			{
-				if (e.prefix != null)
-					o.Append(e.prefix);
-				if (e.section != null && e.name == null)
+				if (e.Prefix != null)
+				{
+					o.Append(e.Prefix);
+				}
+
+				if (e.Section != null && e.Name == null)
 				{
 					o.Append('[');
-					o.Append(e.section);
+					o.Append(e.Section);
 
-					if (e.subsection != null)
+					if (e.Subsection != null)
 					{
 						o.Append(' ');
 						o.Append('"');
-						o.Append(EscapeValue(e.subsection));
+						o.Append(EscapeValue(e.Subsection));
 						o.Append('"');
 					}
 
 					o.Append(']');
 				}
-				else if (e.section != null && e.name != null)
+				else if (e.Section != null && e.Name != null)
 				{
-					if (e.prefix == null || string.Empty.Equals(e.prefix))
+					if (e.Prefix == null || string.Empty.Equals(e.Prefix))
 					{
 						o.Append('\t');
 					}
 
-					o.Append(e.name);
+					o.Append(e.Name);
 
-					if (e.value != null)
+					if (e.Value != null)
 					{
-						if (MagicEmptyValue != e.value)
+						if (MagicEmptyValue != e.Value)
 						{
 							o.Append(" = ");
-							o.Append(EscapeValue(e.value));
+							o.Append(EscapeValue(e.Value));
 						}
 					}
 
-					if (e.suffix != null)
+					if (e.Suffix != null)
 					{
 						o.Append(' ');
 					}
 				}
 
-				if (e.suffix != null)
-					o.Append(e.suffix);
+				if (e.Suffix != null)
+					o.Append(e.Suffix);
 				{
 					o.Append('\n');
 				}
@@ -504,11 +795,15 @@ namespace GitSharp
 			return o.ToString();
 		}
 
-		protected void AddEntry(Entry e)
-		{
-			_state.EntryList.Add(e);
-		}
-
+		/// <summary>
+		/// Clear this configuration and reset to the contents of the parsed string.
+		///	</summary>
+		///	<param name="text">
+		/// Git style text file listing configuration properties.
+		/// </param>
+		///	<exception cref="ConfigInvalidException">
+		/// The text supplied is not formatted correctly. No changes were
+		/// made to this.</exception>
 		public void fromText(string text)
 		{
 			var newEntries = new List<Entry>();
@@ -528,33 +823,40 @@ namespace GitSharp
 				if ('\n' == c)
 				{
 					newEntries.Add(e);
-					if (e.section != null)
+					if (e.Section != null)
+					{
 						last = e;
+					}
+
 					e = new Entry();
 				}
-				else if (e.suffix != null)
+				else if (e.Suffix != null)
 				{
-					e.suffix += c;
+					// Everything up until the end-of-line is in the suffix.
+					e.Suffix += c;
 				}
 				else if (';' == c || '#' == c)
 				{
-					e.suffix = new string(c, 1);
+					// The rest of this line is a comment; put into suffix.
+					e.Suffix = Convert.ToString(c);
 				}
-				else if (e.section == null && char.IsWhiteSpace(c))
+				else if (e.Section == null && char.IsWhiteSpace(c))
 				{
-					if (e.prefix == null)
+					// Save the leading whitespace (if any).
+					if (e.Prefix == null)
 					{
-						e.prefix = string.Empty;
+						e.Prefix = string.Empty;
 					}
-					e.prefix += c;
+					e.Prefix += c;
 				}
 				else if ('[' == c)
 				{
-					e.section = readSectionName(i);
+					// This is a section header.
+					e.Section = ReadSectionName(i);
 					input = i.Read();
 					if ('"' == input)
 					{
-						e.subsection = ReadValue(i, true, '"');
+						e.Subsection = ReadValue(i, true, '"');
 						input = i.Read();
 					}
 
@@ -563,23 +865,26 @@ namespace GitSharp
 						throw new ConfigInvalidException("Bad group header");
 					}
 
-					e.suffix = string.Empty;
+					e.Suffix = string.Empty;
 				}
 				else if (last != null)
 				{
-					e.section = last.section;
-					e.subsection = last.subsection;
+					// Read a value.
+					e.Section = last.Section;
+					e.Subsection = last.Subsection;
 					i.Reset();
-					e.name = readKeyName(i);
-					if (e.name.EndsWith("\n"))
+
+					e.Name = ReadKeyName(i);
+					if (e.Name.EndsWith("\n"))
 					{
-						e.name = e.name.Slice(0, e.name.Length - 1);
-						e.value = MagicEmptyValue;
+						e.Name = e.Name.Slice(0, e.Name.Length - 1);
+						e.Value = MagicEmptyValue;
 					}
 					else
 					{
-						e.value = ReadValue(i, false, -1);
+						e.Value = ReadValue(i, false, -1);
 					}
+
 				}
 				else
 				{
@@ -587,33 +892,172 @@ namespace GitSharp
 				}
 			}
 
-			_state = newState(newEntries);
+			_state = NewState(newEntries);
+		}
+
+		private State NewState()
+		{
+			return new State(new List<Entry>(), GetBaseState());
+		}
+
+		private State NewState(IEnumerable<Entry> entries)
+		{
+			return new State(new List<Entry>(entries), GetBaseState());
+		}
+
+		///	<summary>
+		/// Clear the configuration file
+		/// </summary>
+		protected void Clear()
+		{
+			_state = NewState();
+		}
+
+		private static string ReadSectionName(ConfigReader i)
+		{
+			var name = new StringBuilder();
+
+			while (true)
+			{
+				int c = i.Read();
+				if (c < 0)
+					throw new ConfigInvalidException("Unexpected end of config file");
+
+				if (']' == c)
+				{
+					i.Reset();
+					break;
+				}
+
+				if (' ' == c || '\t' == c)
+				{
+					while (true)
+					{
+						c = i.Read();
+						if (c < 0)
+						{
+							throw new ConfigInvalidException("Unexpected end of config file");
+						}
+
+						if ('"' == c)
+						{
+							i.Reset();
+							break;
+						}
+
+						if (' ' == c || '\t' == c) continue; // Skipped...
+
+						throw new ConfigInvalidException("Bad section entry: " + name);
+					}
+
+					break;
+				}
+
+				if (char.IsLetterOrDigit((char) c) || '.' == c || '-' == c)
+				{
+					name.Append((char) c);
+				}
+				else
+				{
+					throw new ConfigInvalidException("Bad section entry: " + name);
+				}
+			}
+
+			return name.ToString();
+		}
+
+		private static string ReadKeyName(ConfigReader i)
+		{
+			var name = new StringBuilder();
+
+			while (true)
+			{
+				int c = i.Read();
+				if (c < 0)
+				{
+					throw new ConfigInvalidException("Unexpected end of config file");
+				}
+
+				if ('=' == c) break;
+
+				if (' ' == c || '\t' == c)
+				{
+					while (true)
+					{
+						c = i.Read();
+						if (c < 0)
+						{
+							throw new ConfigInvalidException("Unexpected end of config file");
+						}
+
+						if ('=' == c) break;
+
+						if (';' == c || '#' == c || '\n' == c)
+						{
+							i.Reset();
+							break;
+						}
+
+						if (' ' == c || '\t' == c) continue; // Skipped...
+
+						throw new ConfigInvalidException("Bad entry delimiter");
+					}
+
+					break;
+				}
+
+				if (char.IsLetterOrDigit((char) c) || c == '-')
+				{
+					// From the git-config man page:
+					// The variable names are case-insensitive and only
+					// alphanumeric characters and - are allowed.
+					name.Append((char) c);
+				}
+				else if ('\n' == c)
+				{
+					i.Reset();
+					name.Append((char) c);
+					break;
+				}
+				else
+				{
+					throw new ConfigInvalidException("Bad entry name: " + name);
+				}
+			}
+
+			return name.ToString();
 		}
 
 		private static string ReadValue(ConfigReader i, bool quote, int eol)
 		{
 			var value = new StringBuilder();
 			bool space = false;
-			for (; ; )
+
+			while (true)
 			{
 				int c = i.Read();
 				if (c < 0)
 				{
 					if (value.Length == 0)
+					{
 						throw new ConfigInvalidException("Unexpected end of config file");
+					}
+
 					break;
 				}
 
 				if ('\n' == c)
 				{
 					if (quote)
+					{
 						throw new ConfigInvalidException("Newline in quotes not allowed");
+					}
+
 					i.Reset();
 					break;
 				}
 
-				if (eol == c)
-					break;
+				if (eol == c) break;
 
 				if (!quote)
 				{
@@ -633,7 +1077,10 @@ namespace GitSharp
 				if (space)
 				{
 					if (value.Length > 0)
+					{
 						value.Append(' ');
+					}
+
 					space = false;
 				}
 
@@ -645,26 +1092,26 @@ namespace GitSharp
 						case -1:
 							throw new ConfigInvalidException("End of file in escape");
 
-						case '\n':
+						case (byte)'\n':
 							continue;
 
-						case 't':
+						case (byte)'t':
 							value.Append('\t');
 							continue;
 
-						case 'b':
+						case (byte)'b':
 							value.Append('\b');
 							continue;
 
-						case 'n':
+						case (byte)'n':
 							value.Append('\n');
 							continue;
 
-						case '\\':
+						case (byte)'\\':
 							value.Append('\\');
 							continue;
 
-						case '"':
+						case (byte)'"':
 							value.Append('"');
 							continue;
 
@@ -681,278 +1128,203 @@ namespace GitSharp
 
 				value.Append((char)c);
 			}
+
 			return value.Length > 0 ? value.ToString() : null;
 		}
 
-		private State newState()
+		#region Nested Types
+
+		///	<summary>
+		/// Parses a section of the configuration into an application model object.
+		///	<para />
+		///	Instances must implement hashCode and equals such that model objects can
+		///	be cached by using the <see cref="ISectionParser{T}"/> as a key of a
+		/// Dictionary.
+		///	<para />
+		///	As the <see cref="ISectionParser{T}"/> itself is used as the key of the internal
+		///	Dictionary applications should be careful to ensure the SectionParser key
+		///	does not retain unnecessary application state which may cause memory to
+		///	be held longer than expected.
+		///	</summary>
+		/// <typeparam name="T">type of the application model created by the parser.</typeparam>
+		public interface ISectionParser<T>
 		{
-			return new State(new List<Entry>(), getBaseState());
+			///	<summary>
+			/// Create a model object from a configuration.
+			///	</summary>
+			///	<param name="cfg">
+			///	The configuration to read values from.
+			/// </param>
+			///	<returns>The application model instance.</returns>
+			T Parse(Config cfg);
 		}
 
-		private State newState(List<Entry> entries)
+		private class SubsectionNames : ISectionParser<List<string>>
 		{
-			return new State(entries, getBaseState());
-		}
+			private readonly string _section;
 
-		protected void clear()
-		{
-			_state = newState();
-		}
-
-		private static string readSectionName(ConfigReader i)
-		{
-			var name = new StringBuilder();
-			for (; ; )
+			public SubsectionNames(string sectionName)
 			{
-				int c = i.Read();
-				if (c < 0)
-					throw new ConfigInvalidException("Unexpected end of config file");
-
-				if (']' == c)
-				{
-					i.Reset();
-					break;
-				}
-
-				if (' ' == c || '\t' == c)
-				{
-					for (; ; )
-					{
-						c = i.Read();
-						if (c < 0)
-							throw new ConfigInvalidException("Unexpected end of config file");
-
-						if ('"' == c)
-						{
-							i.Reset();
-							break;
-						}
-
-						if (' ' == c || '\t' == c)
-						{
-							continue;
-						}
-						throw new ConfigInvalidException("Bad section entry: " + name);
-					}
-					break;
-				}
-
-				if (char.IsLetterOrDigit((char)c) || '.' == c || '-' == c)
-					name.Append((char)c);
-				else
-					throw new ConfigInvalidException("Bad section entry: " + name);
-			}
-			return name.ToString();
-		}
-
-		private static string readKeyName(ConfigReader i)
-		{
-			var name = new StringBuffer();
-			for (; ; )
-			{
-				int c = i.Read();
-				if (c < 0)
-					throw new ConfigInvalidException("Unexpected end of config file");
-
-				if ('=' == c)
-					break;
-
-				if (' ' == c || '\t' == c)
-				{
-					for (; ; )
-					{
-						c = i.Read();
-						if (c < 0)
-							throw new ConfigInvalidException("Unexpected end of config file");
-
-						if ('=' == c)
-							break;
-
-						if (';' == c || '#' == c || '\n' == c)
-						{
-							i.Reset();
-							break;
-						}
-
-						if (' ' == c || '\t' == c)
-							continue;
-						throw new ConfigInvalidException("Bad entry delimiter");
-					}
-					break;
-				}
-
-				if (char.IsLetterOrDigit((char)c) || c == '-')
-				{
-					name.append((char)c);
-				}
-				else if ('\n' == c)
-				{
-					i.Reset();
-					name.append((char)c);
-					break;
-				}
-				else
-					throw new ConfigInvalidException("Bad entry name: " + name);
+				_section = sectionName;
 			}
 
-			return name.ToString();
+			public override int GetHashCode()
+			{
+				return _section.GetHashCode();
+			}
+
+			public override bool Equals(object other)
+			{
+				if (other is SubsectionNames)
+				{
+					return _section.Equals(((SubsectionNames) other)._section);
+				}
+
+				return false;
+			}
+
+			#region ISectionParser<List<string>> Members
+
+			public List<string> Parse(Config cfg)
+			{
+				var result = new HashSet<string>();
+				while (cfg != null)
+				{
+					foreach (Entry e in cfg._state.EntryList)
+					{
+						if (e.Subsection != null && e.Name == null &&
+							_section.Equals(e.Section, StringComparison.InvariantCultureIgnoreCase))
+						{
+							result.Add(e.Subsection);
+						}
+					}
+
+					cfg = cfg._baseConfig;
+				}
+
+				return result.ToList();
+			}
+
+			#endregion
 		}
 
-		#region Nested type: ConfigReader
+		private class State
+		{
+			public readonly State BaseState;
+			public readonly Dictionary<object, object> Cache;
+			public readonly List<Entry> EntryList;
+
+			public State(List<Entry> entries, State baseState)
+			{
+				EntryList = entries;
+				Cache = new Dictionary<object, object>();
+				BaseState = baseState;
+			}
+		}
+
+		/// <summary>
+		/// The configuration file entry.
+		/// </summary>
+		protected class Entry
+		{
+			/// <summary>
+			/// The text content before entry.
+			/// </summary>
+			public string Prefix;
+
+			/// <summary>
+			/// The section name for the entry.
+			/// </summary>
+			public string Section;
+
+			/// <summary>
+			/// Subsection name.
+			/// </summary>
+			public string Subsection;
+
+			/// <summary>
+			/// The key name.
+			/// </summary>
+			public string Name;
+
+			/// <summary>
+			/// The value
+			/// </summary>
+			public string Value;
+
+			/// <summary>
+			/// The text content after entry.
+			/// </summary>
+			public string Suffix;
+
+			public Entry ForValue(string newValue)
+			{
+				var e = new Entry
+							{
+								Prefix = Prefix,
+								Section = Section,
+								Subsection = Subsection,
+								Name = Name,
+								Value = newValue,
+								Suffix = Suffix
+							};
+				return e;
+			}
+
+			public bool Match(string aSection, string aSubsection, string aKey)
+			{
+				return EqualsIgnoreCase(Section, aSection)
+					   && EqualsSameCase(Subsection, aSubsection)
+					   && EqualsIgnoreCase(Name, aKey);
+			}
+
+			private static bool EqualsIgnoreCase(string a, string b)
+			{
+				if (a == null && b == null) return true;
+				if (a == null || b == null) return false;
+
+				return a.Equals(b, StringComparison.InvariantCultureIgnoreCase);
+			}
+
+			private static bool EqualsSameCase(string a, string b)
+			{
+				if (a == null && b == null) return true;
+				if (a == null || b == null) return false;
+
+				return a.Equals(b, StringComparison.InvariantCulture);
+			}
+		}
 
 		private class ConfigReader
 		{
-			private readonly string data;
-			private readonly int len;
-			private int position;
+			private readonly char[] _buf;
+			private readonly int _length;
+			private int _position;
 
 			public ConfigReader(string text)
 			{
-				data = text;
-				len = data.Length;
+				_buf = text.ToCharArray();
+				_length = _buf.Length;
 			}
 
 			public int Read()
 			{
 				int ret = -1;
-				if (position < len)
+
+				if (_position < _length)
 				{
-					ret = data[position];
-					position++;
+					ret = _buf[_position];
+					_position++;
 				}
+
 				return ret;
 			}
 
 			public void Reset()
 			{
 				// no idea what the java pendant actually does..
-				//position = 0;
-				--position;
-			}
-		}
-
-		#endregion
-
-		#region Nested type: Entry
-
-		protected class Entry
-		{
-			public string name;
-			public string prefix;
-			public string section;
-			public string subsection;
-			public string suffix;
-			public string value;
-
-			public Entry forValue(string newValue)
-			{
-				var e = new Entry
-							{
-								prefix = prefix,
-								section = section,
-								subsection = subsection,
-								name = name,
-								value = newValue,
-								suffix = suffix
-							};
-				return e;
-			}
-
-			public bool match(string aSection, string aSubsection, string aKey)
-			{
-				return eqIgnoreCase(section, aSection)
-					   && eqSameCase(subsection, aSubsection)
-					   && eqIgnoreCase(name, aKey);
-			}
-
-			private static bool eqIgnoreCase(string a, string b)
-			{
-				if (a == null && b == null)
-					return true;
-				if (a == null || b == null)
-					return false;
-				return StringUtils.equalsIgnoreCase(a, b);
-			}
-
-			private static bool eqSameCase(string a, string b)
-			{
-				if (a == null && b == null)
-					return true;
-				if (a == null || b == null)
-					return false;
-				return a.Equals(b);
-			}
-		}
-
-		#endregion
-
-		#region Nested type: SectionParser
-
-		public interface SectionParser<T>
-		{
-			T parse(Config cfg);
-		}
-
-		#endregion
-
-		#region Nested type: State
-
-		private class State
-		{
-			public readonly State baseState;
-			public readonly Dictionary<object, object> Cache;
-			public readonly List<Entry> EntryList;
-
-			public State(List<Entry> entries, State @base)
-			{
-				EntryList = entries;
-				Cache = new Dictionary<object, object>();
-				baseState = @base;
-			}
-		}
-
-		#endregion
-
-		#region Nested type: SubsectionNames
-
-		private class SubsectionNames : SectionParser<List<string>>
-		{
-			private readonly string section;
-
-			public SubsectionNames(string sectionName)
-			{
-				section = sectionName;
-			}
-
-			#region SectionParser<List<string>> Members
-
-			public List<string> parse(Config cfg)
-			{
-				var result = new List<string>();
-				while (cfg != null)
-				{
-					foreach (Entry e in cfg._state.EntryList)
-					{
-						if (e.subsection != null && e.name == null && StringUtils.equalsIgnoreCase(section, e.section))
-							result.Add(e.subsection);
-					}
-					cfg = cfg._baseConfig;
-				}
-				return result;
-			}
-
-			#endregion
-
-			public override int GetHashCode()
-			{
-				return section.GetHashCode();
-			}
-
-			public override bool Equals(object obj)
-			{
-				if (obj is SubsectionNames)
-					return section.Equals(((SubsectionNames)obj).section);
-				return false;
+				//_position = 0;
+				_position--;
 			}
 		}
 

@@ -48,7 +48,7 @@ namespace GitSharp
 	/// <para />
 	/// An object database stores one or more Git objects, indexed by their unique
 	/// <see cref="ObjectId"/>. Optionally an object database can reference one or more
-	/// alternates; other <see cref="ObjectDatabase"/> instances that are searched in 
+	/// alternates; other <see cref="ObjectDatabase"/> instances that are searched in
 	/// addition to the current database.
 	/// <para />
 	/// Databases are usually divided into two halves: a half that is considered to
@@ -57,136 +57,132 @@ namespace GitSharp
 	/// all alternates) before the slow half is considered.
 	/// </summary>
 	public abstract class ObjectDatabase
-    {
-        /// <summary>
+	{
+		/// <summary>
 		/// Constant indicating no alternate databases exist.
-        /// </summary>
-        protected static readonly ObjectDatabase[] NoAlternates = { };
+		/// </summary>
+		protected static readonly ObjectDatabase[] NoAlternates = { };
 
-        private readonly AtomicReference<ObjectDatabase[]> _alternates;
+		private readonly AtomicReference<ObjectDatabase[]> _alternates;
 
-        /// <summary>
+		/// <summary>
 		/// Initialize a new database instance for access.
-        /// </summary>
-    	protected ObjectDatabase()
-        {
-            _alternates = new AtomicReference<ObjectDatabase[]>();
-        }
+		/// </summary>
+		protected ObjectDatabase()
+		{
+			_alternates = new AtomicReference<ObjectDatabase[]>();
+		}
 
 		/// <summary>
 		/// Gets if this database is already created; If it returns false, the caller
-		/// should invoke <see cref="create"/> to create this database location.
+		/// should invoke <see cref="Create"/> to create this database location.
 		/// </summary>
 		/// <returns></returns>
-        public virtual bool exists()
-        {
-            return true;
-        }
-
-        /// <summary>
-		/// Initialize a new object database at this location.
-        /// </summary>
-        public virtual void create()
-        {
-            // Assume no action is required.
-        }
-
-        /// <summary>
-		/// Close any resources held by this database and its active alternates.
-        /// </summary>
-        public void close()
-        {
-            closeSelf();
-            closeAlternates();
-        }
-
-        /// <summary>
-        /// Close any resources held by this database only; ignoring alternates.
-		/// <para />
-		/// To fully close this database and its referenced alternates, the caller
-		/// should instead invoke <see cref="close()"/>.
-        /// </summary>
-        public virtual void closeSelf()
-        {
-            // Assume no action is required.
-        }
-
-        /// <summary>
-		/// Fully close all loaded alternates and clear the alternate list.
-        /// </summary>
-        public virtual void closeAlternates()
-        {
-            ObjectDatabase[] alt = _alternates.get();
-            if (alt != null)
-            {
-                _alternates.set(null);
-                foreach (ObjectDatabase d in alt)
-                {
-                    d.close();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Does the requested object exist in this database?
-		/// <para />
-		/// Alternates (if present) are searched automatically.
-        /// </summary>
-        /// <param name="objectId">identity of the object to test for existence of.</param>
-        /// <returns>
-        /// True if the specified object is stored in this database, or any
-		/// of the alternate databases.
-        /// </returns>
-        public bool hasObject(AnyObjectId objectId)
-        {
-            return hasObjectImpl1(objectId) || hasObjectImpl2(objectId.ToString());
-        }
-
-        private bool hasObjectImpl1(AnyObjectId objectId)
-        {
-            if (hasObject1(objectId))
-            {
-                return true;
-            }
-            foreach (ObjectDatabase alt in getAlternates())
-            {
-                if (alt.hasObjectImpl1(objectId))
-                {
-                    return true;
-                }
-            }
-            return tryAgain1() && hasObject1(objectId);
-        }
-
-        private bool hasObjectImpl2(string objectId)
-        {
-            if (hasObject2(objectId))
-            {
-                return true;
-            }
-            foreach (ObjectDatabase alt in getAlternates())
-            {
-                if (alt.hasObjectImpl2(objectId))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
-		/// Fast half of <see cref="hasObject(AnyObjectId)"/>.
-        /// </summary>
-        /// <param name="objectId">
-        /// Identity of the object to test for existence of.
-        /// </param>
-        /// <returns>
-        /// true if the specified object is stored in this database.
-        /// </returns>
-        public abstract bool hasObject1(AnyObjectId objectId);
+		public virtual bool Exists()
+		{
+			return true;
+		}
 
 		/// <summary>
-		/// Slow half of <see cref="hasObject(AnyObjectId)"/>.
+		/// Initialize a new object database at this location.
+		/// </summary>
+		public virtual void Create()
+		{
+			// Assume no action is required.
+		}
+
+		/// <summary>
+		/// Close any resources held by this database and its active alternates.
+		/// </summary>
+		public void Close()
+		{
+			CloseSelf();
+			CloseAlternates();
+		}
+
+		/// <summary>
+		/// Close any resources held by this database only; ignoring alternates.
+		/// <para />
+		/// To fully close this database and its referenced alternates, the caller
+		/// should instead invoke <see cref="Close"/>.
+		/// </summary>
+		public virtual void CloseSelf()
+		{
+			// Assume no action is required.
+		}
+
+		/// <summary>
+		/// Fully close all loaded alternates and clear the alternate list.
+		/// </summary>
+		public virtual void CloseAlternates()
+		{
+			ObjectDatabase[] alt = _alternates.get();
+			if (alt != null)
+			{
+				_alternates.set(null);
+				CloseAlternates(alt);
+			}
+		}
+
+		/// <summary>
+		/// Does the requested object exist in this database?
+		/// <para />
+		/// Alternates (if present) are searched automatically.
+		/// </summary>
+		/// <param name="objectId">identity of the object to test for existence of.</param>
+		/// <returns>
+		/// True if the specified object is stored in this database, or any
+		/// of the alternate databases.
+		/// </returns>
+		public bool HasObject(AnyObjectId objectId)
+		{
+			return HasObjectImpl1(objectId) || HasObjectImpl2(objectId.ToString());
+		}
+
+		private bool HasObjectImpl1(AnyObjectId objectId)
+		{
+			if (HasObject1(objectId)) return true;
+
+			foreach (ObjectDatabase alt in GetAlternates())
+			{
+				if (alt.HasObjectImpl1(objectId))
+				{
+					return true;
+				}
+			}
+
+			return TryAgain1() && HasObject1(objectId);
+		}
+
+		private bool HasObjectImpl2(string objectId)
+		{
+			if (HasObject2(objectId))
+			{
+				return true;
+			}
+			foreach (ObjectDatabase alt in GetAlternates())
+			{
+				if (alt.HasObjectImpl2(objectId))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		/// <summary>
+		/// Fast half of <see cref="HasObject"/>.
+		/// </summary>
+		/// <param name="objectId">
+		/// Identity of the object to test for existence of.
+		/// </param>
+		/// <returns>
+		/// true if the specified object is stored in this database.
+		/// </returns>
+		protected internal abstract bool HasObject1(AnyObjectId objectId);
+
+		/// <summary>
+		/// Slow half of <see cref="HasObject"/>.
 		/// </summary>
 		/// <param name="objectName">
 		/// Identity of the object to test for existence of.
@@ -194,111 +190,107 @@ namespace GitSharp
 		/// <returns>
 		/// true if the specified object is stored in this database.
 		/// </returns>
-        public virtual bool hasObject2(string objectName)
-        {
-            // Assume the search took place during hasObject1.
-            return false;
-        }
-
-        /// <summary>
-        /// Open an object from this database.
-		/// <para />
-		/// Alternates (if present) are searched automatically.
-        /// </summary>
-        /// <param name="curs">
-        /// Temporary working space associated with the calling thread.
-        /// </param>
-        /// <param name="objectId">Identity of the object to open.</param>
-        /// <returns>
-        /// A <see cref="ObjectLoader"/> for accessing the data of the named
-		/// object, or null if the object does not exist.
-        /// </returns>
-        public ObjectLoader openObject(WindowCursor curs, AnyObjectId objectId)
-        {
-            if (objectId == null) return null;
-
-        	ObjectLoader ldr = OpenObjectImpl1(curs, objectId);
-            if (ldr != null)
-            {
-                return ldr;
-            }
-
-            ldr = OpenObjectImpl2(curs, objectId.Name, objectId);
-            if (ldr != null)
-            {
-                return ldr;
-            }
-            return null;
-        }
-
-        private ObjectLoader OpenObjectImpl1(WindowCursor curs,
-                 AnyObjectId objectId)
-        {
-        	ObjectLoader ldr = openObject1(curs, objectId);
-            if (ldr != null)
-            {
-                return ldr;
-            }
-
-            foreach (ObjectDatabase alt in getAlternates())
-            {
-                ldr = alt.OpenObjectImpl1(curs, objectId);
-                if (ldr != null)
-                {
-                    return ldr;
-                }
-            }
-
-            if (tryAgain1())
-            {
-                ldr = openObject1(curs, objectId);
-                if (ldr != null)
-                {
-                    return ldr;
-                }
-            }
-
-            return null;
-        }
-
-        private ObjectLoader OpenObjectImpl2(WindowCursor curs, string objectName, AnyObjectId objectId)
-        {
-        	ObjectLoader ldr = openObject2(curs, objectName, objectId);
-            if (ldr != null)
-            {
-                return ldr;
-            }
-
-            foreach (ObjectDatabase alt in getAlternates())
-            {
-                ldr = alt.OpenObjectImpl2(curs, objectName, objectId);
-                if (ldr != null)
-                {
-                    return ldr;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Fast half of <see cref="openObject(WindowCursor, AnyObjectId)"/>.
-        /// </summary>
-        /// <param name="curs">
-        /// temporary working space associated with the calling thread.
-        /// </param>
-        /// <param name="objectId">identity of the object to open.</param>
-        /// <returns>
-        /// A <see cref="ObjectLoader"/> for accessing the data of the named
-		/// object, or null if the object does not exist.
-        /// </returns>
-        public abstract ObjectLoader openObject1(WindowCursor curs,
-                AnyObjectId objectId);
+		protected internal virtual bool HasObject2(string objectName)
+		{
+			// Assume the search took place during HasObject1.
+			return false;
+		}
 
 		/// <summary>
-		/// Slow half of <see cref="openObject(WindowCursor, AnyObjectId)"/>.
+		/// Open an object from this database.
+		/// <para />
+		/// Alternates (if present) are searched automatically.
 		/// </summary>
-		/// <param name="curs">
+		/// <param name="windowCursor">
+		/// Temporary working space associated with the calling thread.
+		/// </param>
+		/// <param name="objectId">Identity of the object to open.</param>
+		/// <returns>
+		/// A <see cref="ObjectLoader"/> for accessing the data of the named
+		/// object, or null if the object does not exist.
+		/// </returns>
+		public ObjectLoader OpenObject(WindowCursor windowCursor, AnyObjectId objectId)
+		{
+			ObjectLoader ldr = OpenObjectImpl1(windowCursor, objectId);
+			if (ldr != null)
+			{
+				return ldr;
+			}
+
+			ldr = OpenObjectImpl2(windowCursor, objectId.Name, objectId);
+			if (ldr != null)
+			{
+				return ldr;
+			}
+			return null;
+		}
+
+		private ObjectLoader OpenObjectImpl1(WindowCursor windowCursor, AnyObjectId objectId)
+		{
+			ObjectLoader ldr = OpenObject1(windowCursor, objectId);
+			if (ldr != null)
+			{
+				return ldr;
+			}
+
+			foreach (ObjectDatabase alt in GetAlternates())
+			{
+				ldr = alt.OpenObjectImpl1(windowCursor, objectId);
+				if (ldr != null)
+				{
+					return ldr;
+				}
+			}
+
+			if (TryAgain1())
+			{
+				ldr = OpenObject1(windowCursor, objectId);
+				if (ldr != null)
+				{
+					return ldr;
+				}
+			}
+
+			return null;
+		}
+
+		private ObjectLoader OpenObjectImpl2(WindowCursor windowCursor, string objectName, AnyObjectId objectId)
+		{
+			ObjectLoader ldr = OpenObject2(windowCursor, objectName, objectId);
+			if (ldr != null)
+			{
+				return ldr;
+			}
+
+			foreach (ObjectDatabase alt in GetAlternates())
+			{
+				ldr = alt.OpenObjectImpl2(windowCursor, objectName, objectId);
+				if (ldr != null)
+				{
+					return ldr;
+				}
+			}
+
+			return null;
+		}
+
+		/// <summary>
+		/// Fast half of <see cref="OpenObject"/>.
+		/// </summary>
+		/// <param name="windowCursor">
+		/// temporary working space associated with the calling thread.
+		/// </param>
+		/// <param name="objectId">identity of the object to open.</param>
+		/// <returns>
+		/// A <see cref="ObjectLoader"/> for accessing the data of the named
+		/// object, or null if the object does not exist.
+		/// </returns>
+		protected internal abstract ObjectLoader OpenObject1(WindowCursor windowCursor, AnyObjectId objectId);
+
+		/// <summary>
+		/// Slow half of <see cref="OpenObject"/>.
+		/// </summary>
+		/// <param name="windowCursor">
 		/// temporary working space associated with the calling thread.
 		/// </param>
 		/// <param name="objectName">Name of the object to open.</param>
@@ -307,12 +299,11 @@ namespace GitSharp
 		/// A <see cref="ObjectLoader"/> for accessing the data of the named
 		/// object, or null if the object does not exist.
 		/// </returns>
-        public virtual ObjectLoader openObject2(WindowCursor curs, string objectName,
-                AnyObjectId objectId)
-        {
-            // Assume the search took place during openObject1.
-            return null;
-        }
+		protected internal virtual ObjectLoader OpenObject2(WindowCursor windowCursor, string objectName, AnyObjectId objectId)
+		{
+			// Assume the search took place during OpenObject1.
+			return null;
+		}
 
 		/// <summary>
 		/// Open the object from all packs containing it.
@@ -327,14 +318,14 @@ namespace GitSharp
 		/// Temporary working space associated with the calling thread.
 		/// </param>
 		/// <param name="objectId"><see cref="ObjectId"/> of object to search for.</param>
-        public void OpenObjectInAllPacks(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
-        {
-            OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
-            foreach (ObjectDatabase alt in getAlternates())
-            {
-                alt.OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
-            }
-        }
+		public void OpenObjectInAllPacks(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
+		{
+			OpenObjectInAllPacks1(@out, windowCursor, objectId);
+			foreach (ObjectDatabase alt in GetAlternates())
+			{
+				alt.OpenObjectInAllPacks1(@out, windowCursor, objectId);
+			}
+		}
 
 		/// <summary>
 		/// Open the object from all packs containing it.
@@ -349,69 +340,84 @@ namespace GitSharp
 		/// Temporary working space associated with the calling thread.
 		/// </param>
 		/// <param name="objectId"><see cref="ObjectId"/> of object to search for.</param>
-        public virtual void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
-        {
-            // Assume no pack support
-        }
+		public virtual void OpenObjectInAllPacks1(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
+		{
+			// Assume no pack support
+		}
 
-        /// <summary>
+		/// <summary>
 		/// true if the fast-half search should be tried again.
-        /// </summary>
-        /// <returns></returns>
-        public virtual bool tryAgain1()
-        {
-            return false;
-        }
+		/// </summary>
+		/// <returns></returns>
+		protected internal virtual bool TryAgain1()
+		{
+			return false;
+		}
 
-        /// <summary>
-        /// Get the alternate databases known to this database.
-        /// </summary>
-        /// <returns>
+		/// <summary>
+		/// Get the alternate databases known to this database.
+		/// </summary>
+		/// <returns>
 		/// The alternate list. Never null, but may be an empty array.
-        /// </returns>
-        public ObjectDatabase[] getAlternates()
-        {
-            ObjectDatabase[] r = _alternates.get();
-            if (r == null)
-            {
-                lock (_alternates)
-                {
-                    r = _alternates.get();
-                    if (r == null)
-                    {
-                        try
-                        {
-                            r = loadAlternates();
-                        }
-                        catch (IOException)
-                        {
-                            r = NoAlternates;
-                        }
-                        _alternates.set(r); // [henon] possible deadlock?
-                    }
-                }
-            }
-            return r;
-        }
+		/// </returns>
+		public ObjectDatabase[] GetAlternates()
+		{
+			ObjectDatabase[] r = _alternates.get();
+			if (r == null)
+			{
+				lock (_alternates)
+				{
+					r = _alternates.get();
+					if (r == null)
+					{
+						try
+						{
+							r = LoadAlternates();
+						}
+						catch (IOException)
+						{
+							r = NoAlternates;
+						}
 
-        /// <summary>
-        /// Load the list of alternate databases into memory.
+						_alternates.set(r); // [henon] possible deadlock?
+					}
+				}
+			}
+			return r;
+		}
+
+		/// <summary>
+		/// Load the list of alternate databases into memory.
 		/// <para />
-		/// This method is invoked by <see cref="getAlternates()"/> if the alternate list
-		/// has not yet been populated, or if <see cref="closeAlternates()"/> has been
+		/// This method is invoked by <see cref="GetAlternates"/> if the alternate list
+		/// has not yet been populated, or if <see cref="CloseAlternates"/> has been
 		/// called on this instance and the alternate list is needed again.
 		/// <para />
 		/// If the alternate array is empty, implementors should consider using the
 		/// constant <see cref="NoAlternates"/>.
-        /// </summary>
-        /// <returns>The alternate list for this database.</returns>
-        /// <exception cref="Exception">
-        /// The alternate list could not be accessed. The empty alternate
+		/// </summary>
+		/// <returns>The alternate list for this database.</returns>
+		/// <exception cref="Exception">
+		/// The alternate list could not be accessed. The empty alternate
 		/// array <see cref="NoAlternates"/> will be assumed by the caller.
-        /// </exception>
-        public virtual ObjectDatabase[] loadAlternates()
-        {
-            return NoAlternates;
-        }
-    }
+		/// </exception>
+		protected virtual ObjectDatabase[] LoadAlternates()
+		{
+			return NoAlternates;
+		}
+
+		///	<summary>
+		/// Close the list of alternates returned by <seealso cref="LoadAlternates()"/>.
+		///	</summary>
+		///	<param name="alt">
+		/// The alternate list, from <seealso cref="LoadAlternates()"/>.
+		/// </param>
+		protected virtual void CloseAlternates(ObjectDatabase[] alt)
+		{
+			foreach (ObjectDatabase d in alt)
+			{
+				d.Close();
+			}
+		}
+	}
 }

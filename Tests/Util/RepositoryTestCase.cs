@@ -131,8 +131,11 @@ namespace GitSharp.Tests.Util
 
 			foreach (var packname in packs)
 			{
-				new FileInfo("Resources/" + GitSharp.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir + "/" + GitSharp.Transport.IndexPack.GetPackFileName(packname), true);
-				new FileInfo("Resources/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir + "/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname), true);
+				new FileInfo("Resources/" + GitSharp.Transport.IndexPack.GetPackFileName(packname))
+					.CopyTo(packDir + "/" + GitSharp.Transport.IndexPack.GetPackFileName(packname), true);
+
+				new FileInfo("Resources/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname))
+					.CopyTo(packDir + "/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname), true);
 			}
 
 			new FileInfo("Resources/packed-refs").CopyTo(trash_git.FullName + "/packed-refs", true);

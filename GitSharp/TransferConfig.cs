@@ -40,15 +40,15 @@ namespace GitSharp
 
     public class TransferConfig
     {
-        private class SectionParser : Config.SectionParser<TransferConfig>
+        private class SectionParser : Config.ISectionParser<TransferConfig>
         {
-            public TransferConfig parse(Config cfg)
+            public TransferConfig Parse(Config cfg)
             {
                 return new TransferConfig(cfg);
             }
         }
 
-        public static Config.SectionParser<TransferConfig> KEY = new SectionParser();
+        public static Config.ISectionParser<TransferConfig> KEY = new SectionParser();
 
         private readonly bool fsckObjects;
 

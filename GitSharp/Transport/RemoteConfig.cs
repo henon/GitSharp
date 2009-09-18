@@ -164,26 +164,26 @@ namespace GitSharp.Transport
 			{
 				vlst.Add(u.ToPrivateString());
 			}
-			rc.setStringList(Section, Name, KeyUrl, vlst);
+			rc.SetStringList(Section, Name, KeyUrl, vlst);
 
 			vlst.Clear();
 			foreach (URIish u in PushURIs)
 				vlst.Add(u.ToPrivateString());
-			rc.setStringList(Section, Name, KeyPushurl, vlst);
+			rc.SetStringList(Section, Name, KeyPushurl, vlst);
 
 			vlst.Clear();
 			foreach (RefSpec u in Fetch)
 			{
 				vlst.Add(u.ToString());
 			}
-			rc.setStringList(Section, Name, KeyFetch, vlst);
+			rc.SetStringList(Section, Name, KeyFetch, vlst);
 
 			vlst.Clear();
 			foreach (RefSpec u in Push)
 			{
 				vlst.Add(u.ToString());
 			}
-			rc.setStringList(Section, Name, KeyPush, vlst);
+			rc.SetStringList(Section, Name, KeyPush, vlst);
 
 			Set(rc, KeyUploadpack, UploadPack, DEFAULT_UPLOAD_PACK);
 			Set(rc, KeyReceivepack, ReceivePack, DEFAULT_RECEIVE_PACK);

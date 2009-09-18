@@ -58,9 +58,6 @@ namespace GitSharp
 #endif
  IComparable
     {
-        public static readonly int ObjectIdLength = Constants.OBJECT_ID_LENGTH;
-        public static readonly int StringLength = ObjectIdLength * 2;
-
         public static bool operator ==(AnyObjectId a, AnyObjectId b)
         {
             if ((object)a == null)
@@ -119,19 +116,19 @@ namespace GitSharp
         public void CopyTo(char[] tmp, StringBuilder w)
         {
             ToHexCharArray(tmp);
-            w.Append(tmp, 0, StringLength);
+			w.Append(tmp, 0, Constants.OBJECT_ID_STRING_LENGTH);
         }
 
         public void CopyTo(char[] tmp, StreamWriter w)
         {
             ToHexCharArray(tmp);
-            w.Write(tmp, 0, StringLength);
+			w.Write(tmp, 0, Constants.OBJECT_ID_STRING_LENGTH);
         }
 
         public void CopyTo(char[] tmp, Encoding e, Stream w)
         {
             ToHexCharArray(tmp);
-            var data = e.GetBytes(tmp, 0, StringLength);
+			var data = e.GetBytes(tmp, 0, Constants.OBJECT_ID_STRING_LENGTH);
             w.Write(data, 0, data.Length);
         }
 
@@ -176,7 +173,7 @@ namespace GitSharp
 
         private byte[] ToHexByteArray()
         {
-            var dst = new byte[StringLength];
+            var dst = new byte[Constants.OBJECT_ID_STRING_LENGTH];
 
             Hex.FillHexByteArray(dst, 0, W1);
             Hex.FillHexByteArray(dst, 8, W2);
@@ -334,7 +331,7 @@ namespace GitSharp
 
         private char[] ToHexCharArray()
         {
-            var dest = new char[StringLength];
+            var dest = new char[Constants.OBJECT_ID_STRING_LENGTH];
             ToHexCharArray(dest);
             return dest;
         }

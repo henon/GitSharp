@@ -36,6 +36,7 @@
  */
 
 using System;
+using System.Globalization;
 
 namespace GitSharp.Util
 {
@@ -67,7 +68,8 @@ namespace GitSharp.Util
 
 		/// <summary>
 		/// Calculates the DateTimeOffset of a given git time and time zone offset in minutes.
-		/// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00.
+		/// Git's internal time representation are the seconds since 1970.1.1 00:00:00 GMT.
+		/// C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00.
 		/// </summary>
 		/// <param name="gitTime"></param>
 		/// <param name="offsetMinutes"></param>
@@ -75,7 +77,7 @@ namespace GitSharp.Util
 		public static DateTimeOffset GitTimeToDateTimeOffset(this long gitTime, long offsetMinutes)
 		{
 			var offset = TimeSpan.FromMinutes(offsetMinutes);
-			var utcTicks = Constants.EpochTicks + (gitTime * Constants.TicksPerSecond);
+			var utcTicks = Constants.EpochTicks + gitTime * 10000;
 			return new DateTimeOffset(utcTicks + offset.Ticks, offset);
 		}
 
@@ -91,6 +93,26 @@ namespace GitSharp.Util
 		{
 			var utcTicks = Constants.EpochTicks + gitTime * Constants.TicksPerSecond;
 			return new DateTime(utcTicks);
+		}
+
+		/// <summary>
+		/// Gets the DateTime in the sortable ISO format.
+		/// </summary>
+		/// <param name="when"></param>
+		/// <returns></returns>
+		public static string ToIsoFormatDate(this DateTime when)
+		{
+			return when.ToString("s", CultureInfo.InvariantCulture);
+		}
+
+		/// <summary>
+		/// Gets the DateTimeOffset in the sortable ISO format.
+		/// </summary>
+		/// <param name="when"></param>
+		/// <returns></returns>
+		public static string ToIsoFormatDate(this DateTimeOffset when)
+		{
+			return when.ToString("s", CultureInfo.InvariantCulture);
 		}
 	}
 }

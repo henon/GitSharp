@@ -82,15 +82,10 @@ namespace GitSharp.Tests
             Assert.Equal("A O Thor Too", e.Who.Name);
             Assert.Equal("authortoo@wri.tr", e.Who.EmailAddress);
             Assert.Equal("120", e.Who.TimeZone.ToString());
-            Assert.Equal("2009-05-22T23:36:40", ToIsoFormatDate(e.Who));
+            Assert.Equal("2009-05-22T23:36:40", e.Who.When.ToIsoFormatDate());
 
             Assert.Equal("commit: Add a toString for debugging to RemoteRefUpdate",
                     e.Comment);
-        }
-
-        private static string ToIsoFormatDate(PersonIdent id)
-        {
-            return id.When.ToString("s", CultureInfo.InvariantCulture);
         }
 
         [Fact]
@@ -112,7 +107,7 @@ namespace GitSharp.Tests
             Assert.Equal("Same A U Thor", e.Who.Name);
             Assert.Equal("same.author@example.com", e.Who.EmailAddress);
             Assert.Equal("60", e.Who.TimeZone.ToString());
-            Assert.Equal("2009-05-22T22:36:42", ToIsoFormatDate(e.Who));
+            Assert.Equal("2009-05-22T22:36:42", e.Who.When.ToIsoFormatDate());
             Assert.Equal(
                     "rebase finished: refs/heads/rr/renamebranch5 onto c6e3b9fe2da0293f11eae202ec35fb343191a82d",
                     e.Comment);
@@ -128,7 +123,7 @@ namespace GitSharp.Tests
             Assert.Equal("A U Thor", e.Who.Name);
             Assert.Equal("thor@committer.au", e.Who.EmailAddress);
             Assert.Equal("-60", e.Who.TimeZone.ToString());
-            Assert.Equal("2009-05-22T20:36:41", ToIsoFormatDate(e.Who));
+            Assert.Equal("2009-05-22T20:36:41", e.Who.When.ToIsoFormatDate());
             Assert.Equal("branch: Created from rr/renamebranchv4", e.Comment);
         }
 
@@ -150,7 +145,7 @@ namespace GitSharp.Tests
             Assert.Equal("Same A U Thor", e.Who.Name);
             Assert.Equal("same.author@example.com", e.Who.EmailAddress);
             Assert.Equal("60", e.Who.TimeZone.ToString());
-            Assert.Equal("2009-05-22T22:36:42", ToIsoFormatDate(e.Who));
+            Assert.Equal("2009-05-22T22:36:42", e.Who.When.ToIsoFormatDate());
             Assert.Equal(
                     "rebase finished: refs/heads/rr/renamebranch5 onto c6e3b9fe2da0293f11eae202ec35fb343191a82d",
                     e.Comment);

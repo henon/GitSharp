@@ -123,10 +123,10 @@ namespace GitSharp
 
 				string repositoryFormatVersion = Config.getString("core", null, "repositoryFormatVersion");
 
-				if (!"0".Equals(repositoryFormatVersion))
+				if (!Constants.RepositoryFormatVersion.Equals(repositoryFormatVersion))
 				{
-					throw new IOException("Unknown repository format \""
-										  + repositoryFormatVersion + "\"; expected \"0\".");
+					throw new IOException(
+						string.Format("Unknown repository format \"{0}\"; expected \"0\".", repositoryFormatVersion));
 				}
 			}
 			else
@@ -186,12 +186,13 @@ namespace GitSharp
 			new DirectoryInfo(Path.Combine(Directory.FullName, "branches")).Create();
 			new DirectoryInfo(Path.Combine(Directory.FullName, "remote")).Create();
 
-			string master = Constants.RefsHeads + Constants.Master;
+			const string master = Constants.RefsHeads + Constants.Master;
 
 			_refDb.Link(Constants.Head, master);
 
 			Config.setInt("core", null, "repositoryformatversion", 0);
 			Config.setBoolean("core", null, "filemode", true);
+
 			if (bare)
 			{
 				Config.setBoolean("core", null, "bare", true);
@@ -210,7 +211,7 @@ namespace GitSharp
 		/// </returns>
 		public bool HasObject(AnyObjectId objectId)
 		{
-			return _objectDatabase.hasObject(objectId);
+			return _objectDatabase.HasObject(objectId);
 		}
 
 		private static List<DirectoryInfo> ReadObjectsDirs(string objectsDir, ref List<DirectoryInfo> ret)
@@ -279,7 +280,7 @@ namespace GitSharp
 		/// </returns>
 		public ObjectLoader OpenObject(WindowCursor windowCursor, AnyObjectId id)
 		{
-			return _objectDatabase.openObject(windowCursor, id);
+			return _objectDatabase.OpenObject(windowCursor, id);
 		}
 
 		/// <summary>
@@ -839,13 +840,13 @@ namespace GitSharp
 			int usageCount = Interlocked.Decrement(ref _useCnt);
 			if (usageCount == 0)
 			{
-				_objectDatabase.close();
+				_objectDatabase.Close();
 			}
 		}
 
 		public void OpenPack(FileInfo pack, FileInfo idx)
 		{
-			_objectDatabase.openPack(pack, idx);
+			_objectDatabase.OpenPack(pack, idx);
 		}
 
 		public ObjectDirectory ObjectDatabase
@@ -915,13 +916,12 @@ namespace GitSharp
 			return bytes;
 		}
 
-		/**
-		 * string work dir and return normalized repository path
-		 *
-		 * @param wd Work dir
-		 * @param f File whose path shall be stripp off it's workdir
-		 * @return normalized repository relative path
-		 */
+		/// <summary>
+		/// Strip work dir and return normalized repository path
+		/// </summary>
+		/// <param name="wd">Work directory</param>
+		/// <param name="f">File whose path shall be stripp off it's workdir</param>
+		/// <returns>Normalized repository relative path</returns>
 		public static string StripWorkDir(FileSystemInfo wd, FileSystemInfo f)
 		{
 			string relName = f.FullName.Substring(wd.FullName.Length + 1);

@@ -58,8 +58,8 @@ namespace GitSharp.Tests
 		{
 			RepositoryConfig c = db.Config;
 			Assert.NotNull(c);
-			Assert.Equal("0", c.getString("core", null, "repositoryformatversion"));
-			Assert.Equal("0", c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
+			Assert.Equal(Constants.RepositoryFormatVersion, c.getString("core", null, "repositoryformatversion"));
+			Assert.Equal(Constants.RepositoryFormatVersion, c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
 			Assert.Equal("true", c.getString("core", null, "filemode"));
 			Assert.Equal("true", c.getString("cOrE", null, "fIlEModE"));
 			Assert.Null(c.getString("notavalue", null, "reallyNotAValue"));
@@ -72,8 +72,8 @@ namespace GitSharp.Tests
 			RepositoryConfig c = db.Config;
 			Assert.NotNull(c);
 			c.load();
-			Assert.Equal("0", c.getString("core", null, "repositoryformatversion"));
-			Assert.Equal("0", c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
+			Assert.Equal(Constants.RepositoryFormatVersion, c.getString("core", null, "repositoryformatversion"));
+			Assert.Equal(Constants.RepositoryFormatVersion, c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
 			Assert.Equal("true", c.getString("core", null, "filemode"));
 			Assert.Equal("true", c.getString("cOrE", null, "fIlEModE"));
 			Assert.Null(c.getString("notavalue", null, "reallyNotAValue"));

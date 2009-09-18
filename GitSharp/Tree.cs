@@ -40,8 +40,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using GitSharp.Exceptions;
 
@@ -111,81 +109,62 @@ namespace GitSharp
             return CompareNames(a, b, 0, b.Length, lasta, lastb);
         }
 
-
-        /**
-         * Compare two names represented as bytes. Since git treats names of trees and
-         * blobs differently we have one parameter that represents a '/' for trees. For
-         * other objects the value should be NUL. The names are compare by their positive
-         * byte value (0..255).
-         *
-         * A blob and a tree with the same name will not compare equal.
-         *
-         * @param a name
-         * @param b name
-         * @param lasta '/' if a is a tree, else NUL
-         * @param lastb '/' if b is a tree, else NUL
-         *
-         * @return &lt; 0 if a is sorted before b, 0 if they are the same, else b
-         */
+		/// <summary>
+		/// Compare two names represented as bytes. Since git treats names of trees and
+		/// blobs differently we have one parameter that represents a '/' for trees. For
+		/// other objects the value should be NUL. The names are compare by their positive
+		/// byte value (0..255).
+		/// <para />
+		/// A blob and a tree with the same name will not compare equal.
+		/// </summary>
+		/// <param name="a"></param>
+		/// <param name="nameUTF8"></param>
+		/// <param name="nameStart"></param>
+		/// <param name="nameEnd"></param>
+		/// <param name="lasta">'/' if a is a tree, else NULL</param>
+		/// <param name="lastb">'/' if b is a tree, else NULL</param>
+		/// <returns>Return &lt; 0 if a is sorted before b, 0 if they are the same, else b</returns>
         private static int CompareNames(byte[] a, byte[] nameUTF8, int nameStart, int nameEnd, int lasta, int lastb)
         {
             // There must be a .NET way of doing this! I assume there are both UTF8 names, 
             // perhaps Constants.CHARSET.GetString on both then .Compare on the strings?
             // I'm pretty sure this is just doing that but the long way round, however 
             // I could be wrong so we'll leave it at this for now. - NR
-            int j = 0;
-            int k = 0;
+            int j;
+            int k;
 
             for (j = 0, k = nameStart; j < a.Length && k < nameEnd; j++, k++)
             {
                 int aj = a[j] & 0xff;
                 int bk = nameUTF8[k] & 0xff;
-                if (aj < bk)
-                    return -1;
-                else if (aj > bk)
-                    return 1;
+                				if (aj < bk) return -1;
+				if (aj > bk) return 1;
             }
 
             if (j < a.Length)
             {
                 int aj = a[j] & 0xff;
-                if (aj < lastb)
-                    return -1;
-                else if (aj > lastb)
-                    return 1;
-                else
-                    if (j == a.Length - 1)
-                        return 0;
-                    else
-                        return -1;
+
+                if (aj < lastb) return -1;				if (aj > lastb) return 1;				if (j == a.Length - 1) return 0;
+            	return -1;
             }
 
-            if (k < nameEnd)
+            if (k < nameEnd)                               
             {
                 int bk = nameUTF8[k] & 0xff;
-                if (lasta < bk)
-                    return -1;
-                else if (lasta > bk)
-                    return 1;
-                else
-                    if (k == nameEnd - 1)
-                        return 0;
-                    else
-                        return -1;
+
+                if (lasta < bk) return -1;				if (lasta > bk) return 1;
+				if (k == nameEnd - 1) return 0;
+
+           		return -1;
             }
 
-            if (lasta < lastb)
-                return -1;
-            else if (lasta > lastb)
-                return 1;
+            if (lasta < lastb) return -1;
+			if (lasta > lastb) return 1;
 
-            int nameLength = nameEnd - nameStart;
-            if (a.Length == nameLength)
-                return 0;
-            else if (a.Length < nameLength)
-                return -1;
-            else
-                return 1;
+			int nameLength = nameEnd - nameStart;
+            if (a.Length == nameLength) return 0;
+			return a.Length < nameLength ? -1 : 1;
         }
 
         private static byte[] SubString(byte[] s, int nameStart, int nameEnd)
@@ -193,40 +172,42 @@ namespace GitSharp
             if (nameStart == 0 && nameStart == s.Length)
                 return new byte[] { };
 
-            byte[] n = new byte[nameEnd - nameStart];
+            var n = new byte[nameEnd - nameStart];
             Array.Copy(s, nameStart, n, 0, n.Length);
             return n;
         }
 
-        private static int BinarySearch(TreeEntry[] entries, byte[] nameUTF8, int nameUTF8last, int nameStart, int nameEnd)
+        private static int BinarySearch(TreeEntry[] entries, byte[] nameUTF8, int nameUTF8Last, int nameStart, int nameEnd)
         {
-            if (entries.Length == 0)
-                return -1;
+            if (entries.Length == 0) return -1;
+
             int high = entries.Length;
             int low = 0;
             do
             {
                 int mid = (low + high) / 2;
                 int cmp = CompareNames(entries[mid].NameUTF8, nameUTF8,
-                    nameStart, nameEnd, GitSharp.TreeEntry.LastChar(entries[mid]), nameUTF8last);
+                    nameStart, nameEnd, GitSharp.TreeEntry.LastChar(entries[mid]), nameUTF8Last);
 
                 if (cmp < 0)
-                    low = mid + 1;
+                {
+                	low = mid + 1;
+                }
                 else if (cmp == 0)
-                    return mid;
+                {
+                	return mid;
+                }
                 else
-                    high = mid;
+                {
+                	high = mid;
+                }
 
             } while (low < high);
             return -(low + 1);
         }
 
         public override void Accept(TreeVisitor tv, int flags)
-        {
-            TreeEntry[] c;
-
-            if ((MODIFIED_ONLY & flags) == MODIFIED_ONLY && !IsModified)
-                return;
+        {        	if ((MODIFIED_ONLY & flags) == MODIFIED_ONLY && !IsModified) return;
 
             if ((LOADED_ONLY & flags) == LOADED_ONLY && !IsLoaded)
             {
@@ -238,20 +219,19 @@ namespace GitSharp
             EnsureLoaded();
             tv.StartVisitTree(this);
 
-            if ((CONCURRENT_MODIFICATION & flags) == CONCURRENT_MODIFICATION)
-                c = Members;
-            else
-                c = _contents;
+            TreeEntry[] c = (CONCURRENT_MODIFICATION & flags) == CONCURRENT_MODIFICATION ? Members : _contents;
 
             for (int k = 0; k < c.Length; k++)
-                c[k].Accept(tv, flags);
+            {
+            	c[k].Accept(tv, flags);
+            }
 
             tv.EndVisitTree(this);
         }
 
         public FileTreeEntry AddFile(string name)
         {
-            return AddFile(GitSharp.Repository.GitInternalSlash(Constants.CHARSET.GetBytes(name)), 0);
+            return AddFile(Repository.GitInternalSlash(Constants.CHARSET.GetBytes(name)), 0);
         }
 
         public FileTreeEntry AddFile(byte[] s, int offset)
@@ -266,26 +246,28 @@ namespace GitSharp
             }
 
             EnsureLoaded();
-            byte xlast = (byte)(slash < s.Length ? '/' : 0);
+            var xlast = (byte)(slash < s.Length ? '/' : 0);
             p = BinarySearch(_contents, s, xlast, offset, slash);
             if (p >= 0 && slash < s.Length && _contents[p] is Tree)
-                return ((Tree)_contents[p]).AddFile(s, slash + 1);
+            {
+            	return ((Tree)_contents[p]).AddFile(s, slash + 1);
+            }
 
             byte[] newName = SubString(s, offset, slash);
             if (p >= 0)
-                throw new EntryExistsException(Constants.CHARSET.GetString(newName));
-            else if (slash < s.Length)
             {
-                Tree t = new Tree(this, newName);
-                InsertEntry(p, t);
-                return t.AddFile(s, slash + 1);
+            	throw new EntryExistsException(Constants.CHARSET.GetString(newName));
             }
-            else
-            {
-                FileTreeEntry f = new FileTreeEntry(this, null, newName, false);
-                InsertEntry(p, f);
-                return f;
-            }
+
+        	if (slash < s.Length)
+        	{
+        		var t = new Tree(this, newName);
+        		InsertEntry(p, t);
+        		return t.AddFile(s, slash + 1);
+        	}
+        	var f = new FileTreeEntry(this, null, newName, false);
+        	InsertEntry(p, f);
+        	return f;
         }
 
         public Tree AddTree(string name)
@@ -296,23 +278,26 @@ namespace GitSharp
         public Tree AddTree(byte[] s, int offset)
         {
             int slash;
-            int p;
 
-            for (slash = offset; slash < s.Length && s[slash] != '/'; slash++)
+        	for (slash = offset; slash < s.Length && s[slash] != '/'; slash++)
             {
                 // search for path component terminator
             }
 
             EnsureLoaded();
-            p = BinarySearch(_contents, s, (byte)'/', offset, slash);
+            int p = BinarySearch(_contents, s, (byte)'/', offset, slash);
             if (p >= 0 && slash < s.Length && _contents[p] is Tree)
-                return ((Tree)_contents[p]).AddTree(s, slash + 1);
+            {
+            	return ((Tree)_contents[p]).AddTree(s, slash + 1);
+            }
 
             byte[] newName = SubString(s, offset, slash);
             if (p >= 0)
-                throw new EntryExistsException(Constants.CHARSET.GetString(newName));
+            {
+            	throw new EntryExistsException(Constants.CHARSET.GetString(newName));
+            }
 
-            Tree t = new Tree(this, newName);
+            var t = new Tree(this, newName);
             InsertEntry(p, t);
             return slash == s.Length ? t : t.AddTree(s, slash + 1);
         }
@@ -320,25 +305,34 @@ namespace GitSharp
         private void InsertEntry(int p, TreeEntry e)
         {
             TreeEntry[] c = _contents;
-            TreeEntry[] n = new TreeEntry[c.Length + 1];
+            var n = new TreeEntry[c.Length + 1];
+
             p = -(p + 1);
             for (int k = c.Length - 1; k >= p; k--)
-                n[k + 1] = c[k];
+            {
+            	n[k + 1] = c[k];
+            }
+
             n[p] = e;
             for (int k = p - 1; k >= 0; k--)
-                n[k] = c[k];
+            {
+            	n[k] = c[k];
+            }
+
             _contents = n;
             SetModified();
         }
 
         private void EnsureLoaded()
         {
-            if (IsLoaded)
-                return;
+            if (IsLoaded) return;
 
-            ObjectLoader or = _db.OpenTree(this.Id);
+            ObjectLoader or = _db.OpenTree(Id);
             if (or == null)
-                throw new MissingObjectException(this.Id, ObjectType.Tree);
+            {
+            	throw new MissingObjectException(Id, ObjectType.Tree);
+            }
+
             ReadTree(or.Bytes);
         }
 
@@ -346,62 +340,83 @@ namespace GitSharp
         {
             int rawSize = raw.Length;
             int rawPtr = 0;
-            TreeEntry[] temp;
-            int nextIndex = 0;
+        	int nextIndex = 0;
 
             while (rawPtr < rawSize)
             {
                 while (rawPtr < rawSize && raw[rawPtr] != 0)
-                    rawPtr++;
+                {
+                	rawPtr++;
+                }
+
                 rawPtr++;
-                rawPtr += ObjectId.ObjectIdLength;
+				rawPtr += Constants.OBJECT_ID_LENGTH;
                 nextIndex++;
             }
 
-            temp = new TreeEntry[nextIndex];
+            var temp = new TreeEntry[nextIndex];
             rawPtr = 0;
             nextIndex = 0;
+
             while (rawPtr < rawSize)
             {
                 int c = raw[rawPtr++];
                 if (c < '0' || c > '7')
-                    throw new CorruptObjectException(this.Id, "invalid entry mode");
+                {
+                	throw new CorruptObjectException(Id, "invalid entry mode");
+                }
+
                 int mode = c - '0';
-                for (; ; )
+                
+				while (true)
                 {
                     c = raw[rawPtr++];
-                    if (' ' == c)
-                        break;
-                    else if (c < '0' || c > '7')
-                        throw new CorruptObjectException(this.Id, "invalid mode");
+                    if (' ' == c) break;
+
+                    if (c < '0' || c > '7')
+                    {
+                    	throw new CorruptObjectException(Id, "invalid mode");
+                    }
+
                     mode <<= 3;
                     mode += c - '0';
                 }
 
                 int nameLen = 0;
                 while (raw[rawPtr + nameLen] != 0)
-                    nameLen++;
-                byte[] name = new byte[nameLen];
+                {
+                	nameLen++;
+                }
+
+                var name = new byte[nameLen];
                 Array.Copy(raw, rawPtr, name, 0, nameLen);
                 rawPtr += nameLen + 1;
 
                 ObjectId id = ObjectId.FromRaw(raw, rawPtr);
-                rawPtr += ObjectId.ObjectIdLength;
+				rawPtr += Constants.OBJECT_ID_LENGTH;
 
                 TreeEntry ent;
                 if (FileMode.RegularFile.Equals(mode))
-                    ent = new FileTreeEntry(this, id, name, false);
+                {
+                	ent = new FileTreeEntry(this, id, name, false);
+                }
                 else if (FileMode.ExecutableFile.Equals(mode))
-                    ent = new FileTreeEntry(this, id, name, true);
+                {
+                	ent = new FileTreeEntry(this, id, name, true);
+                }
                 else if (FileMode.Tree.Equals(mode))
                 {
                     ent = new Tree(this, id, name);
                 }
                 else if (FileMode.Symlink.Equals(mode))
-                    ent = new SymlinkTreeEntry(this, id, name);
+                {
+                	ent = new SymlinkTreeEntry(this, id, name);
+                }
                 else
-                    throw new CorruptObjectException(this.Id, "Invalid mode: "
-                            + Convert.ToString(mode, 8));
+                {
+                	throw new CorruptObjectException(Id, "Invalid mode: " + Convert.ToString(mode, 8));
+                }
+
                 temp[nextIndex++] = ent;
             }
 
@@ -432,22 +447,26 @@ namespace GitSharp
             int p = BinarySearch(c, e.NameUTF8, GitSharp.TreeEntry.LastChar(e), 0, e.NameUTF8.Length);
             if (p >= 0)
             {
-                TreeEntry[] n = new TreeEntry[c.Length - 1];
+                var n = new TreeEntry[c.Length - 1];
                 for (int k = c.Length - 1; k > p; k--)
-                    n[k - 1] = c[k];
-                for (int k = p - 1; k >= 0; k--)
-                    n[k] = c[k];
-                _contents = n;
+                {
+                	n[k - 1] = c[k];
+                }
+
+            	for (int k = p - 1; k >= 0; k--)
+            	{
+            		n[k] = c[k];
+            	}
+
+            	_contents = n;
                 SetModified();
             }
         }
 
         public void AddEntry(TreeEntry e)
         {
-            int p;
-
-            EnsureLoaded();
-            p = BinarySearch(_contents, e.NameUTF8, GitSharp.TreeEntry.LastChar(e), 0, e.NameUTF8.Length);
+			EnsureLoaded();
+            int p = BinarySearch(_contents, e.NameUTF8, GitSharp.TreeEntry.LastChar(e), 0, e.NameUTF8.Length);
             if (p < 0)
             {
                 e.AttachParent(this);
@@ -461,16 +480,16 @@ namespace GitSharp
 
         public bool IsLoaded
         {
-            get
-            {
-                return _contents != null;
-            }
+            get { return _contents != null; }
         }
 
         public void Unload()
         {
             if (IsModified)
-                throw new InvalidOperationException("Cannot unload a modified tree.");
+			{
+				throw new InvalidOperationException("Cannot unload a modified tree.");
+			}
+
             _contents = null;
         }
 
@@ -491,13 +510,16 @@ namespace GitSharp
                 TreeEntry[] c = _contents;
                 if (c.Length != 0)
                 {
-                    TreeEntry[] r = new TreeEntry[c.Length];
+                    var r = new TreeEntry[c.Length];
                     for (int k = c.Length - 1; k >= 0; k--)
+					{
                         r[k] = c[k];
+					}
+
                     return r;
                 }
-                else
-                    return c;
+                
+				return c;
             }
         }
 
@@ -511,15 +533,17 @@ namespace GitSharp
             return Exists(path, (byte)'/');
         }
 
-        /**
-         * @param path
-         * @return true if a blob or symlink with the specified name can be found
-         *         under this tree.
-         * @
-         */
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>
+        /// True if a blob or symlink with the specified name can be found
+		/// under this tree.
+        /// </returns>
         public bool ExistsBlob(string path)
         {
-            return Exists(path, (byte)0);
+            return Exists(path, 0);
         }
 
         private TreeEntry FindMember(string s, byte slast)
@@ -527,13 +551,11 @@ namespace GitSharp
             return FindMember(Repository.GitInternalSlash(Constants.CHARSET.GetBytes(s)), slast, 0);
         }
 
-
         private TreeEntry FindMember(byte[] s, byte slast, int offset)
         {
             int slash;
-            int p;
 
-            for (slash = offset; slash < s.Length && s[slash] != '/'; slash++)
+        	for (slash = offset; slash < s.Length && s[slash] != '/'; slash++)
             {
                 // search for path component terminator
                 // [henon] body is intentionally empty!
@@ -541,46 +563,47 @@ namespace GitSharp
 
             EnsureLoaded();
             byte xlast = slash < s.Length ? (byte)'/' : slast;
-            p = BinarySearch(_contents, s, xlast, offset, slash);
+            int p = BinarySearch(_contents, s, xlast, offset, slash);
             if (p >= 0)
             {
                 TreeEntry r = _contents[p];
                 if (slash < s.Length - 1)
-                    return r is Tree ? ((Tree)r).FindMember(s, slast, slash + 1) : null;
-                return r;
+                {
+                	return r is Tree ? ((Tree) r).FindMember(s, slast, slash + 1) : null;
+                }
+
+            	return r;
             }
             return null;
         }
 
-
-        /**
-         * @param s
-         *            blob name
-         * @return a {@link TreeEntry} representing an object with the specified
-         *         relative path.
-         * @
-         */
-        public TreeEntry FindBlobMember(string s)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="blobName"></param>
+		/// <returns>
+		/// a <see cref="TreeEntry"/> representing an object with the specified
+		/// relative path.
+		/// </returns>
+        public TreeEntry FindBlobMember(string blobName)
         {
-            return FindMember(s, (byte)0);
+            return FindMember(blobName, 0);
         }
 
-
-
-        /**
-         * @param s Tree Name
-         * @return a Tree with the name s or null
-         * @
-         */
-        public TreeEntry findTreeMember(string s)
+        /// <summary>
+        /// 
+        /// </summary>
+		/// <param name="treeName">Tree name</param>
+        /// <returns>return a <see cref="Tree"/> with the name treeName or null</returns>
+        public TreeEntry findTreeMember(string treeName)
         {
-            return FindMember(s, (byte)'/');
+            return FindMember(treeName, (byte)'/');
         }
 
         public override string ToString()
         {
             var r = new StringBuilder();
-            r.Append(ObjectId.ToString(this.Id));
+            r.Append(ObjectId.ToString(Id));
             r.Append(" T ");
             r.Append(FullName);
             return r.ToString();

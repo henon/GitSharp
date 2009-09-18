@@ -35,6 +35,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Exceptions;
@@ -76,12 +78,12 @@ namespace GitSharp
             cache.clearAll();
         }
 
-        private readonly Dictionary<Key, Repository> cacheMap;
+        private readonly Dictionary<Key, WeakReference<Repository>> cacheMap;
         private readonly Lock[] openLocks;
 
         public RepositoryCache()
         {
-            cacheMap = new Dictionary<Key, Repository>();
+            cacheMap = new Dictionary<Key, WeakReference<Repository>>();
             openLocks = new Lock[4];
             for (int i = 0; i < openLocks.Length; i++)
                 openLocks[i] = new Lock();
@@ -89,59 +91,59 @@ namespace GitSharp
 
         private Repository openRepository(Key location, bool mustExist)
         {
-            Repository r = null;
-            if (cacheMap.ContainsKey(location))
-            {
-                r = cacheMap[location];
-            }
-            if (r == null)
+            WeakReference<Repository> @ref = cacheMap.GetValue(location);
+            Repository db = @ref != null ? @ref.get() : null;
+            if (db == null)
             {
                 lock (lockFor(location))
                 {
-                    r = location.open(mustExist);
-                    cacheMap.Add(location, r);
+                    @ref = cacheMap.GetValue(location);
+                    db = @ref != null ? @ref.get() : null;
+                    if (db == null)
+                    {
+                        db = location.open(mustExist);
+                        @ref = new WeakReference<Repository>(db);
+                        cacheMap.AddOrReplace(location, @ref);
+                    }
                 }
             }
-            r.IncrementOpen();
-            return r;
+            db.IncrementOpen();
+            return db;
         }
 
         private void registerRepository(Key location, Repository db)
         {
             db.IncrementOpen();
-            if (cacheMap.ContainsKey(location))
-            {
-                cacheMap[location].Close();
-                cacheMap[location] = db;
-            }
-            else
-            {
-                cacheMap.Add(location, db);
-            }
+            WeakReference<Repository> newRef = new WeakReference<Repository>(db);
+            WeakReference<Repository> oldRef = cacheMap.put(location, newRef);
+            Repository oldDb = oldRef != null ? oldRef.get() : null;
+            if (oldDb != null)
+                oldDb.Close();
+
         }
 
         private void unregisterRepository(Key location)
         {
-            if (cacheMap.ContainsKey(location))
-            {
-                cacheMap[location].Close();
-                cacheMap.Remove(location);
-            }
+            WeakReference<Repository> oldRef = cacheMap.GetValue(location);
+            cacheMap.Remove(location);
+            Repository oldDb = oldRef != null ? oldRef.get() : null;
+            if (oldDb != null)
+                oldDb.Close();
         }
 
         private void clearAll()
         {
             for (int stage = 0; stage < 2; stage++)
             {
-                var enumerator = cacheMap.GetEnumerator();
-                while (enumerator.MoveNext())
+                foreach (KeyValuePair<Key, WeakReference<Repository>> e in cacheMap)
                 {
-                    KeyValuePair<Key, Repository> pair = enumerator.Current;
-                    Repository db = pair.Value;
+                    Repository db = e.Value.get();
                     if (db != null)
                         db.Close();
-                    cacheMap.Remove(pair.Key);
+
+                    cacheMap.Remove(e.Key);
                 }
+
             }
         }
 
@@ -176,7 +178,7 @@ namespace GitSharp
 
             public FileKey(DirectoryInfo dir)
             {
-                path = new DirectoryInfo(Path.GetFullPath(dir.ToString()));
+                path = dir;
             }
 
             public DirectoryInfo getFile()
@@ -187,35 +189,35 @@ namespace GitSharp
             public Repository open(bool mustExist)
             {
                 if (mustExist && !isGitRepository(path))
-                    throw new RepositoryNotFoundException(path.ToString());
+                    throw new RepositoryNotFoundException(path);
                 return new Repository(path);
             }
 
             public override int GetHashCode()
             {
-                return path.ToString().GetHashCode();
+                return path.FullName.GetHashCode();
             }
 
             public override bool Equals(object obj)
             {
-                return obj is FileKey && path.ToString().Equals(((FileKey) obj).path.ToString());
+                return obj is FileKey && path.FullName.Equals(((FileKey) obj).path.FullName);
             }
 
             public override string ToString()
             {
-                return path.ToString();
+                return path.FullName;
             }
 
             public static bool isGitRepository(DirectoryInfo dir)
             {
                 return FS.resolve(dir, "objects").Exists && FS.resolve(dir, "refs").Exists &&
-                       isValidHead(new FileInfo(Path.Combine(dir.ToString(), Constants.HEAD)));
+                       isValidHead(new FileInfo(Path.Combine(dir.FullName, Constants.HEAD)));
             }
 
             private static bool isValidHead(FileInfo head)
             {
                 string r = readFirstLine(head);
-                return head.Exists && r != null && (r.StartsWith("ref: refs/") || ObjectId.IsId(r));
+                return r != null && (r.StartsWith("ref: refs/") || ObjectId.IsId(r));
             }
 
             private static string readFirstLine(FileInfo head)
@@ -236,12 +238,17 @@ namespace GitSharp
                 }
             }
 
-            public static DirectoryInfo resolve(DirectoryInfo dir)
+            public static DirectoryInfo resolve(DirectoryInfo directory)
             {
-                if (isGitRepository(dir))
-                    return dir;
-                if (isGitRepository(new DirectoryInfo(Path.Combine(dir.ToString(), ".git"))))
-                    return new DirectoryInfo(Path.Combine(dir.ToString(), ".git"));
+                if (isGitRepository(directory))
+                    return directory;
+                if (isGitRepository(new DirectoryInfo(Path.Combine(directory.ToString(), ".git"))))
+                    return new DirectoryInfo(Path.Combine(directory.FullName, ".git"));
+
+                string name = directory.Name;
+                DirectoryInfo parent = directory.Parent;
+                if (isGitRepository(new DirectoryInfo(Path.Combine(directory.FullName, ".git"))))
+                    return new DirectoryInfo(Path.Combine(parent.FullName, name + ".git"));
 
                 return null;
             }

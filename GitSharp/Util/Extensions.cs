@@ -76,14 +76,32 @@ namespace GitSharp
         /// <param name="value">The value.</param>
         public static void AddOrReplace<K, V>(this Dictionary<K, V> dict, K key, V value)
         {
+            dict.put(key, value);
+        }
+
+        /// <summary>
+        /// Adds or replaces the a value based on a key.
+        /// </summary>
+        /// <typeparam name="K"></typeparam>
+        /// <typeparam name="V"></typeparam>
+        /// <param name="dict">The dict.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>the previous value of the specified key in this dictionary, or null if it did not have one. </returns>
+        public static V put<K, V>(this Dictionary<K, V> dict, K key, V value)
+        {
+            V previous = default(V);
             if (dict.ContainsKey(key))
             {
+                previous = dict[key];
                 dict[key] = value;
             }
             else
             {
                 dict.Add(key, value);
             }
+
+            return previous;
         }
 
         /// <summary>

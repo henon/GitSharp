@@ -311,15 +311,20 @@ namespace GitSharp.Tests
             Assert.AreEqual(checkData, readData);
         }
 
+        protected Repository createNewEmptyRepo()
+        {
+            return createNewEmptyRepo(false);
+        }
+
         /// <summary>
         /// Helper for creating extra empty repos
         /// </summary>
         /// <returns>
         /// A new empty git repository for testing purposes
         /// </returns>
-        protected Repository createNewEmptyRepo()
+        protected Repository createNewEmptyRepo(bool bare)  
         {
-            var newTestRepo = new DirectoryInfo(trashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) + "/.git");
+            var newTestRepo = new DirectoryInfo(trashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) + (bare ? "" : "/") + ".git");
             Assert.IsFalse(newTestRepo.Exists);
             var newRepo = new Repository(newTestRepo);
             newRepo.Create();

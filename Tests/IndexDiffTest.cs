@@ -81,7 +81,7 @@ namespace GitSharp.Tests
 			t.AddFile("dir/file3").Id = ObjectId.FromString("0123456789012345678901234567890123456789");
 			Assert.Equal(2, t.MemberCount);
 
-			var tree2 = (Tree)t.findTreeMember("dir");
+			var tree2 = (Tree)t.FindTreeMember("dir");
 			tree2.Id = new ObjectWriter(db).WriteTree(tree2);
 			t.Id = new ObjectWriter(db).WriteTree(t);
 			var diff = new IndexDiff(t, index);
@@ -108,7 +108,7 @@ namespace GitSharp.Tests
 			t.AddFile("dir/file3");
 			Assert.Equal(2, t.MemberCount);
 			t.FindBlobMember("file2").Id = ObjectId.FromString("30d67d4672d5c05833b7192cc77a79eaafb5c7ad");
-			var tree2 = (Tree)t.findTreeMember("dir");
+			var tree2 = (Tree)t.FindTreeMember("dir");
 			tree2.FindBlobMember("file3").Id = ObjectId.FromString("873fb8d667d05436d728c52b1d7a09528e6eb59b");
 			tree2.Id = new ObjectWriter(db).WriteTree(tree2);
 			t.Id = new ObjectWriter(db).WriteTree(t);
@@ -144,10 +144,10 @@ namespace GitSharp.Tests
 			t.AddFile("a=c").Id = ObjectId.FromString("06022365ddbd7fb126761319633bf73517770714");
 			t.AddFile("a=d").Id = ObjectId.FromString("fa6414df3da87840700e9eeb7fc261dd77ccd5c2");
 
-			var tree2 = (Tree)t.findTreeMember("a/b.b");
+			var tree2 = (Tree)t.FindTreeMember("a/b.b");
 			tree2.Id = new ObjectWriter(db).WriteTree(tree2);
 
-			var tree3 = (Tree)t.findTreeMember("a");
+			var tree3 = (Tree)t.FindTreeMember("a");
 			tree3.Id = new ObjectWriter(db).WriteTree(tree3);
 			t.Id = new ObjectWriter(db).WriteTree(t);
 

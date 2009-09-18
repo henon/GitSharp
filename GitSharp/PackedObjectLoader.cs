@@ -75,7 +75,7 @@ namespace GitSharp
 		/// <param name="curs">temporary thread storage during data access.</param>
 		public abstract void Materialize(WindowCursor curs);
 
-		public override int Type { get; protected set; }
+		public override ObjectType Type { get; protected set; }
 
 		public override long Size { get; protected set; }
 

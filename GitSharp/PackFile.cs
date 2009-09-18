@@ -224,7 +224,7 @@ namespace GitSharp
 			return UnpackedObjectCache.get(this, position);
 		}
 
-		public void saveCache(long position, byte[] data, int type)
+		public void saveCache(long position, byte[] data, ObjectType type)
 		{
 			UnpackedObjectCache.store(this, position, data, type);
 		}
@@ -513,7 +513,7 @@ namespace GitSharp
 			byte[] ib = curs.TempId; // Reader.ReadBytes(ObjectId.ObjectIdLength);
 			ReadFully(pos, ib, 0, 20, curs);
 			int c = ib[p++] & 0xff;
-			int typeCode = (c >> 4) & 7;
+			var typeCode = ObjectTypeExtensions.FromFlag(c);
 			long dataSize = c & 15;
 			int shift = 4;
 			while ((c & 0x80) != 0)
@@ -526,13 +526,13 @@ namespace GitSharp
 
 			switch (typeCode)
 			{
-				case Constants.OBJ_COMMIT:
-				case Constants.OBJ_TREE:
-				case Constants.OBJ_BLOB:
-				case Constants.OBJ_TAG:
+				case ObjectType.Commit:
+				case ObjectType.Tree:
+				case ObjectType.Blob:
+				case ObjectType.Tag:
 					return new WholePackedObjectLoader(this, pos, objOffset, typeCode, (int)dataSize);
 
-				case Constants.OBJ_OFS_DELTA:
+				case ObjectType.OffsetDelta:
 					ReadFully(pos, ib, 0, 20, curs);
 					p = 0;
 					c = ib[p++] & 0xff;
@@ -546,7 +546,7 @@ namespace GitSharp
 					}
 					return new DeltaOfsPackedObjectLoader(this, pos + p, objOffset, (int)dataSize, objOffset - ofs);
 
-				case Constants.OBJ_REF_DELTA:
+				case ObjectType.ReferenceDelta:
 					ReadFully(pos, ib, 0, 20, curs);
 					return new DeltaRefPackedObjectLoader(this, pos + ib.Length, objOffset, (int)dataSize, ObjectId.FromRaw(ib));
 

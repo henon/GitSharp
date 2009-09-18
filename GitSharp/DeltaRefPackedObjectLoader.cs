@@ -64,9 +64,9 @@ namespace GitSharp
             return or;
         }
 
-    	public override int RawType
+    	public override ObjectType RawType
     	{
-    		get { return Constants.OBJ_REF_DELTA; }
+    		get { return ObjectType.ReferenceDelta; }
     	}
 
     	public override ObjectId DeltaBase

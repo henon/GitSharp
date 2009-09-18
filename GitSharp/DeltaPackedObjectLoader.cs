@@ -47,13 +47,12 @@ namespace GitSharp
     /// </summary>
     public abstract class DeltaPackedObjectLoader : PackedObjectLoader
     {
-        private const int ObjCommit = Constants.OBJ_COMMIT;
         private readonly int _deltaSize;
 
     	protected DeltaPackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int deltaSz)
             : base(pr, dataOffset, objectOffset)
         {
-            Type = -1;
+    		Type = ObjectType.Bad;
             _deltaSize = deltaSz;
         }
 
@@ -64,7 +63,7 @@ namespace GitSharp
                 return;
             }
 
-            if (Type != ObjCommit)
+            if (Type != ObjectType.Commit)
             {
                 UnpackedObjectCache.Entry cache = PackFile.readCache(DataOffset);
                 if (cache != null)
@@ -85,7 +84,7 @@ namespace GitSharp
                 curs.Release();
                 Type = baseLoader.Type;
                 Size = CachedBytes.Length;
-                if (Type != ObjCommit)
+				if (Type != ObjectType.Commit)
                 {
                 	PackFile.saveCache(DataOffset, CachedBytes, Type);
                 }

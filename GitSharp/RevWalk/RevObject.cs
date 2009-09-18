@@ -89,7 +89,7 @@ namespace GitSharp.RevWalk
 		/// Get Git object type. See <see cref="Constants"/>.
 		/// </summary>
 		/// <returns></returns>
-		public abstract int Type { get; }
+		public abstract ObjectType Type { get; }
 
 		/// <summary>
 		/// Get the name of this object.
@@ -196,7 +196,7 @@ namespace GitSharp.RevWalk
 		public override string ToString()
 		{
 			var s = new StringBuilder();
-			s.Append(Constants.typeString(Type));
+			s.Append(Type.ObjectTypeToString());
 			s.Append(' ');
 			s.Append(GetType().Name);
 			s.Append(' ');

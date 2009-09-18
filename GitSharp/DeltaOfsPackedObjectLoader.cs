@@ -57,9 +57,9 @@ namespace GitSharp
             return PackFile.ResolveBase(curs, _deltaBase);
         }
 
-    	public override int RawType
+    	public override ObjectType RawType
     	{
-    		get { return Constants.OBJ_OFS_DELTA; }
+    		get { return ObjectType.OffsetDelta; }
     	}
 
     	public override ObjectId DeltaBase

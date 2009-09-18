@@ -52,33 +52,33 @@ namespace GitSharp.Tests.RevWalk
         [Fact]
         public void testTagBlob()
         {
-            testOneType(Constants.OBJ_BLOB);
+            testOneType(ObjectType.Blob);
         }
 
         [Fact]
         public void testTagTree()
         {
-            testOneType(Constants.OBJ_TREE);
+            testOneType(ObjectType.Tree);
         }
 
         [Fact]
         public void testTagCommit()
         {
-            testOneType(Constants.OBJ_COMMIT);
+            testOneType(ObjectType.Commit);
         }
 
         [Fact]
         public void testTagTag()
         {
-            testOneType(Constants.OBJ_TAG);
+            testOneType(ObjectType.Tag);
         }
 
-        private void testOneType(int typeCode)
+        private void testOneType(ObjectType typeCode)
         {
             ObjectId locId = Id("9788669ad918b6fcce64af8882fc9a81cb6aba67");
             var b = new StringBuilder();
             b.Append("object " + locId.Name + "\n");
-            b.Append("type " + Constants.typeString(typeCode) + "\n");
+			b.Append("type " + typeCode.ObjectTypeToString() + "\n");
             b.Append("tag v1.2.3.4.5\n");
             b.Append("tagger A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
             b.Append("\n");

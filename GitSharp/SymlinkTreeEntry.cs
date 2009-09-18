@@ -37,14 +37,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace GitSharp
 {
-    [Complete]
     public class SymlinkTreeEntry : TreeEntry
     {
         public SymlinkTreeEntry(Tree parent, ObjectId id, byte[] nameUTF8)
@@ -54,15 +50,12 @@ namespace GitSharp
 
         public override FileMode Mode
         {
-            get
-            {
-                return FileMode.Symlink;
-            }
+            get { return FileMode.Symlink; }
         }
 
-        public override void Accept(TreeVisitor tv, int flags)
+        public override void Accept(ITreeVisitor tv, int flags)
         {
-            if ((MODIFIED_ONLY & flags) == MODIFIED_ONLY && !this.IsModified)
+            if ((MODIFIED_ONLY & flags) == MODIFIED_ONLY && !IsModified)
             {
                 return;
             }
@@ -72,10 +65,10 @@ namespace GitSharp
 
         public override string ToString()
         {
-            StringBuilder r = new StringBuilder();
-            r.Append(ObjectId.ToString(this.Id));
+            var r = new StringBuilder();
+            r.Append(ObjectId.ToString(Id));
             r.Append(" S ");
-            r.Append(this.FullName);
+            r.Append(FullName);
             return r.ToString();
         }
     }

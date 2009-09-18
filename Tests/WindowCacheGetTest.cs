@@ -127,7 +127,7 @@ namespace GitSharp.Tests
 				ObjectLoader or = db.OpenObject(new WindowCursor(), o.Id);
 				Assert.NotNull(or);
 				Assert.True(or is PackedObjectLoader);
-				Assert.Equal(o.Type, Constants.typeString(or.Type));
+				Assert.Equal(o.Type, or.Type.ObjectTypeToString());
 				Assert.Equal(o.RawSize, or.RawSize);
 				Assert.Equal(o.Offset, ((PackedObjectLoader)or).ObjectOffset);
 			}
@@ -152,7 +152,7 @@ namespace GitSharp.Tests
 					_type = value;
 					byte[] typeRaw = Constants.encode(value + " ");
 					var ptr = new MutableInteger();
-					Constants.decodeTypeString(Id, typeRaw, (byte)' ', ptr);
+					ObjectTypeExtensions.DecodeTypeString(Id, typeRaw, (byte)' ', ptr);
 				}
 			}
 

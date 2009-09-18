@@ -47,9 +47,7 @@ namespace GitSharp
     /// </summary>
     public class WholePackedObjectLoader : PackedObjectLoader
     {
-        private const int ObjCommit = Constants.OBJ_COMMIT;
-
-        public WholePackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, int type, int size)
+        public WholePackedObjectLoader(PackFile pr, long dataOffset, long objectOffset, ObjectType type, int size)
             : base(pr, dataOffset, objectOffset)
         {
             Type = type;
@@ -63,7 +61,7 @@ namespace GitSharp
                 return;
             }
 
-            if (Type != ObjCommit)
+            if (Type != ObjectType.Commit)
             {
                 UnpackedObjectCache.Entry cache = PackFile.readCache(DataOffset);
                 if (cache != null)
@@ -78,7 +76,7 @@ namespace GitSharp
             {
 				CachedBytes = PackFile.decompress(DataOffset, Size, curs);
                 curs.Release();
-                if (Type != ObjCommit)
+                if (Type != ObjectType.Commit)
                 {
 					PackFile.saveCache(DataOffset, CachedBytes, Type);
                 }
@@ -97,7 +95,7 @@ namespace GitSharp
 
     	#region Overrides of ObjectLoader
 
-    	public override int RawType
+		public override ObjectType RawType
     	{
     		get { return Type; }
     	}

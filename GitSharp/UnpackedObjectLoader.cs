@@ -50,7 +50,7 @@ namespace GitSharp
 	/// </summary>
 	public class UnpackedObjectLoader : ObjectLoader
 	{
-		private readonly int _objectType;
+		private readonly ObjectType _objectType;
 		private readonly int _objectSize;
 		private readonly byte[] _bytes;
 
@@ -59,6 +59,12 @@ namespace GitSharp
 		/// </summary>
 		/// <param name="path">location of the loose object to read.</param>
 		/// <param name="id">Expected identity of the object being loaded, if known.</param>
+		///	<exception cref="FileNotFoundException">
+		/// The loose object file does not exist.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// The loose object file exists, but is corrupt.
+		/// </exception>
 		public UnpackedObjectLoader(FileSystemInfo path, AnyObjectId id)
 			: this(ReadCompressed(path), id)
 		{
@@ -70,6 +76,10 @@ namespace GitSharp
 		/// <param name="compressed">
 		/// Entire content of the loose object file.
 		/// </param>
+		///	<exception cref="CorruptObjectException">
+		///	The compressed data supplied does not match the format for a
+		///	valid loose object.
+		/// </exception>
 		public UnpackedObjectLoader(byte[] compressed)
 			: this(compressed, null)
 		{
@@ -118,9 +128,8 @@ namespace GitSharp
 						}
 						catch (IOException dfe)
 						{
-							var coe = new CorruptObjectException(id, "bad stream", dfe);
 							//inflater.end();
-							throw coe;
+							throw new CorruptObjectException(id, "bad stream", dfe);
 						}
 					}
 
@@ -130,7 +139,7 @@ namespace GitSharp
 					}
 
 					var p = new MutableInteger();
-					_objectType = Constants.decodeTypeString(id, hdr, (byte)' ', p);
+					_objectType = ObjectTypeExtensions.DecodeTypeString(id, hdr, (byte)' ', p);
 					_objectSize = RawParseUtils.ParseBase10(hdr, p.value, p);
 
 					if (_objectSize < 0)
@@ -156,7 +165,7 @@ namespace GitSharp
 				{
 					int p = 0;
 					int c = compressed[p++] & 0xff;
-					int typeCode = (c >> 4) & 7;
+					var typeCode = ObjectTypeExtensions.FromFlag(c);
 					int size = c & 15;
 					int shift = 4;
 					while ((c & 0x80) != 0)
@@ -168,10 +177,10 @@ namespace GitSharp
 
 					switch (typeCode)
 					{
-						case Constants.OBJ_COMMIT:
-						case Constants.OBJ_TREE:
-						case Constants.OBJ_BLOB:
-						case Constants.OBJ_TAG:
+						case ObjectType.Commit:
+						case ObjectType.Tree:
+						case ObjectType.Blob:
+						case ObjectType.Tag:
 							_objectType = typeCode;
 							break;
 
@@ -202,17 +211,16 @@ namespace GitSharp
 			}
 			catch (IOException dfe)
 			{
-				var coe = new CorruptObjectException(id, "bad stream", dfe);
-				throw coe;
+				throw new CorruptObjectException(id, "bad stream", dfe);
 			}
 
 			if (p != _objectSize)
 			{
-				throw new CorruptObjectException(id, "incorrect Length");
+				throw new CorruptObjectException(id, "incorrect length");
 			}
 		}
 
-		public override int Type
+		public override ObjectType Type
 		{
 			get { return _objectType; }
 			protected set { }
@@ -224,24 +232,13 @@ namespace GitSharp
 			protected set { }
 		}
 
-		// [ammachado]: I've changed here to return a copy of the bytes
 		public override byte[] CachedBytes
 		{
-			get
-			{
-				if (_bytes != null)
-				{
-					var newBytes = new byte[_bytes.Length];
-					Array.Copy(_bytes, 0, newBytes, 0, _bytes.Length);
-					return newBytes;
-				}
-
-				throw new InvalidOperationException("The CachedBytes property was not initialized yet.");
-			}
+			get { return _bytes; }
 			protected set { }
 		}
 
-		public override int RawType
+		public override ObjectType RawType
 		{
 			get { return _objectType; }
 		}

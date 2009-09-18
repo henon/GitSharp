@@ -173,9 +173,9 @@ namespace GitSharp.RevWalk
 			Flags |= PARSED;
 		}
 
-		public override int Type
+		public override ObjectType Type
 		{
-			get { return Constants.OBJ_COMMIT; }
+			get { return ObjectType.Commit; }
 		}
 
 		public static void carryFlags(RevCommit c, int carry)
@@ -551,7 +551,7 @@ namespace GitSharp.RevWalk
 		public override string ToString()
 		{
 			var s = new StringBuilder();
-			s.Append(Constants.typeString(Type));
+			s.Append(Type.EncodedTypeString());
 			s.Append(' ');
 			s.Append(GetType().Name);
 			s.Append(' ');

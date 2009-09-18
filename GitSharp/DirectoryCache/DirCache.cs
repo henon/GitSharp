@@ -850,7 +850,7 @@ namespace GitSharp.DirectoryCache
 		/// </exception>
 		public ObjectId writeTree(ObjectWriter ow)
 		{
-			return getCacheTree(true).writeTree(_sortedEntries, 0, 0, ow);
+			return getCacheTree(true).WriteTree(_sortedEntries, 0, 0, ow);
 		}
 	}
 }

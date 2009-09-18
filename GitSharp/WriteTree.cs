@@ -37,55 +37,59 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using GitSharp.Util;
 using GitSharp.Exceptions;
 
 namespace GitSharp
 {
-    [Complete]
-    public class WriteTree : TreeVisitorWithCurrentDirectory
-    {
-        private ObjectWriter ow;
-        public WriteTree(DirectoryInfo sourceDirectory, Repository db)
-            : base(sourceDirectory)
-        {
-            ow = new ObjectWriter(db);
-        }
+	/// <summary>
+	/// A tree visitor for writing a directory tree to the git object database.
+	/// Blob data is fetched from the files, not the cached blobs.
+	/// </summary>
+	public class WriteTree : TreeVisitorWithCurrentDirectory
+	{
+		private readonly ObjectWriter _ow;
 
-        public override void VisitFile(FileTreeEntry f)
-        {
-            f.Id = ow.WriteBlob(PathUtil.CombineFilePath(GetCurrentDirectory(), f.Name));
-        }
+		///	<summary>
+		/// Construct a WriteTree for a given directory
+		///	</summary>
+		///	<param name="sourceDirectory"> </param>
+		///	<param name="db"> </param>
+		public WriteTree(DirectoryInfo sourceDirectory, Repository db)
+			: base(sourceDirectory)
+		{
+			_ow = new ObjectWriter(db);
+		}
 
-        public override void VisitSymlink(SymlinkTreeEntry s)
-        {
-            if (s.IsModified)
-            {
-                throw new SymlinksNotSupportedException("Symlink \""
-                        + s.FullName
-                        + "\" cannot be written as the link target"
-                        + " cannot be read from within Java.");
-            }
-        }
+		public override void VisitFile(FileTreeEntry f)
+		{
+			f.Id = _ow.WriteBlob(PathUtil.CombineFilePath(GetCurrentDirectory(), f.Name));
+		}
 
-        public override void VisitGitlink(GitLinkTreeEntry e)
-        {
-            if (e.IsModified)
-            {
-                throw new GitlinksNotSupportedException(e.FullName);
-            }
-        }
+		public override void VisitSymlink(SymlinkTreeEntry s)
+		{
+			if (s.IsModified)
+			{
+				throw new SymlinksNotSupportedException("Symlink \""
+						+ s.FullName
+						+ "\" cannot be written as the link target"
+						+ " cannot be read from within Java.");
+			}
+		}
 
-        public override void EndVisitTree(Tree t)
-        {
-            base.EndVisitTree(t);            
-            t.Id = ow.WriteTree(t);
-        }
+		public override void EndVisitTree(Tree t)
+		{
+			base.EndVisitTree(t);
+			t.Id = _ow.WriteTree(t);
+		}
 
-    }
+		public override void VisitGitlink(GitLinkTreeEntry s)
+		{
+			if (s.IsModified)
+			{
+				throw new GitlinksNotSupportedException(s.FullName);
+			}
+		}
+	}
 }

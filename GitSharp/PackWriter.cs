@@ -61,12 +61,12 @@ namespace GitSharp
 		
 		private static List<ObjectToPack>[] CreateObjectsLists()
 		{
-			var ret = new List<ObjectToPack>[Constants.OBJ_TAG + 1];
+			var ret = new List<ObjectToPack>[Convert.ToInt32(ObjectType.Tag) + 1];
 			ret[0] = new List<ObjectToPack>();
-			ret[Constants.OBJ_COMMIT] = new List<ObjectToPack>();
-			ret[Constants.OBJ_TREE] = new List<ObjectToPack>();
-			ret[Constants.OBJ_BLOB] = new List<ObjectToPack>();
-			ret[Constants.OBJ_TAG] = new List<ObjectToPack>();
+			ret[Convert.ToInt32(ObjectType.Commit)] = new List<ObjectToPack>();
+			ret[Convert.ToInt32(ObjectType.Tree)] = new List<ObjectToPack>();
+			ret[Convert.ToInt32(ObjectType.Blob)] = new List<ObjectToPack>();
+			ret[Convert.ToInt32(ObjectType.Tag)] = new List<ObjectToPack>();
 			return ret;
 		}
 
@@ -423,7 +423,7 @@ namespace GitSharp
 		{
 			if (DeltaBaseAsOffset && otp.DeltaBase != null)
 			{
-				WriteObjectHeader(Constants.OBJ_OFS_DELTA, reuse.RawSize);
+				WriteObjectHeader(ObjectType.OffsetDelta, reuse.RawSize);
 
 				ObjectToPack deltaBase = otp.DeltaBase;
 				long offsetDiff = otp.Offset - deltaBase.Offset;
@@ -438,7 +438,7 @@ namespace GitSharp
 			}
 			else
 			{
-				WriteObjectHeader(Constants.OBJ_REF_DELTA, reuse.RawSize);
+				WriteObjectHeader(ObjectType.ReferenceDelta, reuse.RawSize);
 				otp.DeltaBaseId.copyRawTo(_buf, 0);
 				_pos.Write(_buf, 0, Constants.OBJECT_ID_LENGTH);
 			}
@@ -446,11 +446,11 @@ namespace GitSharp
 			reuse.CopyRawData(_pos, _buf, _windowCursor);
 		}
 
-		private void WriteObjectHeader(int objectType, long dataLength)
+		private void WriteObjectHeader(ObjectType objectType, long dataLength)
 		{
 			var nextLength = (long)(((ulong)dataLength) >> 4);
 			int size = 0;
-			_buf[size++] = (byte)((nextLength > 0 ? (byte)0x80 : (byte)0x00) | (byte)(objectType << 4) | (byte)(dataLength & 0x0F));
+			_buf[size++] = (byte)((nextLength > 0 ? (byte)0x80 : (byte)0x00) | (byte)(Convert.ToInt32(objectType) << 4) | (byte)(dataLength & 0x0F));
 			dataLength = nextLength;
 
 			while (dataLength > 0)
@@ -540,7 +540,7 @@ namespace GitSharp
 			var otp = new ObjectToPack(robject, robject.Type);
 			try
 			{
-				_objectsLists[robject.Type].Add(otp);
+				_objectsLists[Convert.ToInt32(robject.Type)].Add(otp);
 			}
 			catch (IndexOutOfRangeException)
 			{
@@ -556,10 +556,10 @@ namespace GitSharp
 			private PackedObjectLoader _reuseLoader;
 			private int _flags;
 
-			public ObjectToPack(AnyObjectId src, int type)
+			public ObjectToPack(AnyObjectId src, ObjectType type)
 				: base(src)
 			{
-				_flags |= type << 1;
+				_flags |= Convert.ToInt32(type) << 1;
 			}
 
 			public ObjectId DeltaBaseId { get; set; }
@@ -588,16 +588,11 @@ namespace GitSharp
 				get { return _reuseLoader != null; }
 			}
 
-			public int Type
+			public ObjectType Type
 			{
-				get { return (_flags >> 1) & 0x7; }
+				get { return ObjectTypeExtensions.FromInteger((_flags >> 1) & 0x7); }
 			}
-			/*
-			public int DeltaDepth
-			{
-				get { return (int)(((uint)_flags) >> 4); }
-			}
-			*/
+
 			public bool WantWrite
 			{
 				get { return (_flags & 1) == 1; }

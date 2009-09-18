@@ -52,9 +52,9 @@ namespace GitSharp.RevWalk
         {
         }
 
-    	public override int Type
+		public override ObjectType Type
     	{
-    		get { return Constants.OBJ_TREE; }
+			get { return ObjectType.Tree; }
     	}
     }
 }

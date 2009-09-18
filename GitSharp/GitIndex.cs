@@ -535,7 +535,7 @@ namespace GitSharp
 					}
 					else
 					{
-						current = (Tree)current.findTreeMember(newName[trees.Count - 1]);
+						current = (Tree)current.FindTreeMember(newName[trees.Count - 1]);
 						trees.Push(current);
 					}
 				}

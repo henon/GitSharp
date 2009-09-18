@@ -37,56 +37,50 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Collections;
 
 namespace GitSharp
 {
-    [Complete]
-    public abstract class TreeVisitorWithCurrentDirectory : TreeVisitor
-    {
-        private Stack<DirectoryInfo> stack;
+	/// <summary>
+	/// Abstract TreeVisitor for visiting all files known by a Tree.
+	/// </summary>
+	public abstract class TreeVisitorWithCurrentDirectory : ITreeVisitor
+	{
+		private readonly Stack<DirectoryInfo> _stack;
+		private DirectoryInfo _currentDirectory;
 
-        private DirectoryInfo currentDirectory;
+		internal TreeVisitorWithCurrentDirectory(DirectoryInfo rootDirectory)
+		{
+			_stack = new Stack<DirectoryInfo>(16);
+			_currentDirectory = rootDirectory;
+		}
 
-        internal TreeVisitorWithCurrentDirectory(DirectoryInfo rootDirectory)
-        {
-            stack = new Stack<DirectoryInfo>(16);
-            currentDirectory = rootDirectory;
-        }
+		internal DirectoryInfo GetCurrentDirectory()
+		{
+			return _currentDirectory;
+		}
 
-        internal DirectoryInfo GetCurrentDirectory()
-        {
-            return currentDirectory;
-        }
+		#region TreeVisitor Members
 
+		public void StartVisitTree(Tree t)
+		{
+			_stack.Push(_currentDirectory);
+			if (!t.IsRoot)
+			{
+				_currentDirectory = new DirectoryInfo(Path.Combine(_currentDirectory.FullName, t.Name));
+			}
+		}
 
-        #region TreeVisitor Members
+		public virtual void EndVisitTree(Tree t)
+		{
+			_currentDirectory = _stack.Pop();
+		}
 
-        public void StartVisitTree(Tree t)
-        {
-            stack.Push(currentDirectory);
-            if (!t.IsRoot)
-            {
-                currentDirectory = new DirectoryInfo(Path.Combine(currentDirectory.FullName, t.Name));
-            }
-        }
+		public abstract void VisitFile(FileTreeEntry f);
+		public abstract void VisitSymlink(SymlinkTreeEntry s);
+		public abstract void VisitGitlink(GitLinkTreeEntry s);
 
-        public virtual void EndVisitTree(Tree t)
-        {
-            currentDirectory = stack.Pop();
-        }
-
-        public abstract void VisitFile(FileTreeEntry f);
-
-        public abstract void VisitSymlink(SymlinkTreeEntry s);
-
-        public abstract void VisitGitlink(GitLinkTreeEntry e);
-
-        #endregion
-    }
+		#endregion
+	}
 }

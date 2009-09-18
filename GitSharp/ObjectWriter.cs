@@ -48,273 +48,366 @@ using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
 namespace GitSharp
 {
-    public class ObjectWriter
-    {
-        // Fields
-        private static readonly byte[] HAuthor = Encoding.ASCII.GetBytes("author");
-        private static readonly byte[] HCommitter = Encoding.ASCII.GetBytes("committer");
-        private static readonly byte[] HEncoding = Encoding.ASCII.GetBytes("encoding");
-        private static readonly byte[] HParent = Encoding.ASCII.GetBytes("parent");
-        private static readonly byte[] HTree = Encoding.ASCII.GetBytes("tree");
-        private readonly byte[] _buf;
-        private readonly Deflater _def;
-        private readonly MessageDigest _md;
-        private readonly Repository _r;
+	public class ObjectWriter
+	{
+		// Fields
+		private static readonly byte[] HAuthor = Encoding.ASCII.GetBytes("author");
+		private static readonly byte[] HCommitter = Encoding.ASCII.GetBytes("committer");
+		private static readonly byte[] HEncoding = Encoding.ASCII.GetBytes("encoding");
+		private static readonly byte[] HParent = Encoding.ASCII.GetBytes("parent");
+		private static readonly byte[] HTree = Encoding.ASCII.GetBytes("tree");
+		private readonly Repository _r;
+		private readonly byte[] _buf;
+		private readonly MessageDigest _md;
+		private readonly Deflater _def;
 
-        // Methods
-        public ObjectWriter(Repository repo)
-        {
-            _r = repo;
-            _buf = new byte[0x2000];
-            _md = new MessageDigest();
-            _def = new Deflater(_r.Config.getCore().getCompression());
-        }
+		///	<summary>
+		/// Construct an object writer for the specified repository.
+		/// </summary>
+		///	<param name="repo"> </param>
+		public ObjectWriter(Repository repo)
+		{
+			_r = repo;
+			_buf = new byte[8192];
+			_md = new MessageDigest();
+			_def = new Deflater(_r.Config.getCore().getCompression());
+		}
 
-        public ObjectId ComputeBlobSha1(long length, Stream input)
-        {
-            return WriteObject(ObjectType.Blob, length, input, false);
-        }
+		///	<summary>
+		/// Write a blob with the specified data.
+		///	</summary>
+		///	<param name="b">Bytes of the blob.</param>
+		///	<returns>SHA-1 of the blob.</returns>
+		///	<exception cref="IOException"></exception>
+		public ObjectId WriteBlob(byte[] b)
+		{
+			return WriteBlob(b.Length, new MemoryStream(b));
+		}
 
-        public ObjectId WriteBlob(FileInfo fileInfo)
-        {
-            using (FileStream stream = fileInfo.OpenRead())
-            {
-                return WriteBlob(fileInfo.Length, stream);
-            }
-        }
+		/// <summary>
+		/// Write a blob with the data in the specified file
+		/// </summary>
+		/// <param name="fileInfo">A file containing blob data.</param>
+		///	<returns>SHA-1 of the blob.</returns>
+		///	<exception cref="IOException"></exception>
+		public ObjectId WriteBlob(FileInfo fileInfo)
+		{
+			using (FileStream stream = fileInfo.OpenRead())
+			{
+				return WriteBlob(fileInfo.Length, stream);
+			}
+		}
 
-        public ObjectId WriteBlob(byte[] b)
-        {
-            return WriteBlob(b.Length, new MemoryStream(b));
-        }
+		///	<summary>
+		/// Write a blob with data from a stream
+		///	</summary>
+		///	<param name="len">Number of bytes to consume from the stream.</param>
+		///	<param name="inputStream">Stream with blob data.</param>
+		///	<returns>SHA-1 of the blob.</returns>
+		///	<exception cref="IOException"></exception>
+		public ObjectId WriteBlob(long len, Stream inputStream)
+		{
+			return WriteObject(ObjectType.Blob, len, inputStream, true);
+		}
 
-        public ObjectId WriteBlob(long len, Stream input)
-        {
-            return WriteObject(ObjectType.Blob, len, input, true);
-        }
+		///	<summary>
+		/// Write a Tree to the object database.
+		/// </summary>
+		/// <param name="t">Tree</param>
+		///	<returns>SHA-1 of the tree.</returns>
+		///	<exception cref="IOException"></exception>
+		public ObjectId WriteTree(Tree t)
+		{
+			var output = new MemoryStream();
+			var writer = new BinaryWriter(output);
+			foreach (TreeEntry entry in t.Members)
+			{
+				ObjectId id = entry.Id;
+				if (id == null)
+				{
+					throw new ObjectWritingException("object at path \"" + entry.FullName +
+						"\" does not have an id assigned.  All object ids must be assigned prior to writing a tree.");
+				}
 
-        public ObjectId WriteCanonicalTree(byte[] buffer)
-        {
-            return WriteTree(buffer.Length, new MemoryStream(buffer));
-        }
+				entry.Mode.CopyTo(output);
+				writer.Write((byte) 0x20);
+				writer.Write(entry.NameUTF8);
+				writer.Write((byte) 0);
+				id.copyRawTo(output);
+			}
 
-        public ObjectId WriteCommit(Commit c)
-        {
-            Encoding encoding = c.Encoding ?? Constants.CHARSET;
-            var output = new MemoryStream();
-            var s = new BinaryWriter(output, encoding);
-            s.Write(HTree);
-            s.Write(' ');
-            c.TreeId.CopyTo(s);
-            s.Write('\n');
-            ObjectId[] parentIds = c.ParentIds;
-            for (int i = 0; i < parentIds.Length; i++)
-            {
-                s.Write(HParent);
-                s.Write(' ');
-                parentIds[i].CopyTo(s);
-                s.Write('\n');
-            }
-            s.Write(HAuthor);
-            s.Write(' ');
-            s.Write(c.Author.ToExternalString().ToCharArray());
-            s.Write('\n');
-            s.Write(HCommitter);
-            s.Write(' ');
-            s.Write(c.Committer.ToExternalString().ToCharArray());
-            s.Write('\n');
-            if (encoding != Constants.CHARSET)
-            {
-                s.Write(HEncoding);
-                s.Write(' ');
-                s.Write(Constants.encodeASCII(encoding.HeaderName.ToUpper()));
-                s.Write('\n');
-            }
-            s.Write('\n');
-            s.Write(c.Message.ToCharArray());
-            return WriteCommit(output.ToArray());
-        }
+			return WriteCanonicalTree(output.ToArray());
+		}
 
-        private ObjectId WriteCommit(byte[] b)
-        {
-            return WriteCommit(b.Length, new MemoryStream(b));
-        }
+		///	<summary>
+		/// Write a canonical tree to the object database.
+		/// </summary>
+		/// <param name="b">The canonical encoding of the tree object.</param>
+		///	<returns>SHA-1 of the tree.</returns>
+		///	<exception cref="IOException"></exception>
+		public ObjectId WriteCanonicalTree(byte[] b)
+		{
+			return WriteTree(b.Length, new MemoryStream(b));
+		}
 
-        private ObjectId WriteCommit(long len, Stream input)
-        {
-            return WriteObject(ObjectType.Commit, len, input, true);
-        }
+		private ObjectId WriteTree(long len, Stream inputStream)
+		{
+			return WriteObject(ObjectType.Tree, len, inputStream, true);
+		}
 
-        internal ObjectId WriteObject(ObjectType type, long len, Stream input, bool store)
-        {
-            FileInfo info;
-            DeflaterOutputStream stream;
-            FileStream stream2;
-            ObjectId objectId = null;
-            if (store)
-            {
-                info = _r.ObjectsDirectory.CreateTempFile("noz");
-                stream2 = info.OpenWrite();
-            }
-            else
-            {
-                info = null;
-                stream2 = null;
-            }
-            _md.Reset();
-            if (store)
-            {
-                _def.Reset();
-                stream = new DeflaterOutputStream(stream2, _def);
-            }
-            else
-            {
-                stream = null;
-            }
-            try
-            {
-                int num;
-                byte[] bytes = Codec.EncodedTypeString(type);
-                _md.Update(bytes);
-                if (stream != null)
-                {
-                    stream.Write(bytes, 0, bytes.Length);
-                }
-                _md.Update(0x20);
-                if (stream != null)
-                {
-                    stream.WriteByte(0x20);
-                }
-                bytes = Encoding.ASCII.GetBytes(len.ToString());
-                _md.Update(bytes);
-                if (stream != null)
-                {
-                    stream.Write(bytes, 0, bytes.Length);
-                }
-                _md.Update(0);
-                if (stream != null)
-                {
-                    stream.WriteByte(0);
-                }
-                while ((len > 0L) && ((num = input.Read(_buf, 0, (int) Math.Min(len, _buf.Length))) > 0))
-                {
-                    _md.Update(_buf, 0, num);
-                    if (stream != null)
-                    {
-                        stream.Write(_buf, 0, num);
-                    }
-                    len -= num;
-                }
-                if (len != 0L)
-                {
-                    throw new IOException("Input did not match supplied Length. " + len + " bytes are missing.");
-                }
-                if (stream != null)
-                {
-                    stream.Close();
-                    if (info != null)
-                    {
-                        info.IsReadOnly = true;
-                    }
-                }
-                objectId = ObjectId.FromRaw(_md.Digest());
-            }
-            finally
-            {
-                if ((objectId == null) && (stream != null))
-                {
-                    try
-                    {
-                        stream.Close();
-                    }
-                    finally
-                    {
-                        info.DeleteFile();
-                    }
-                }
-            }
-            if (info != null)
-            {
-                if (_r.HasObject(objectId))
-                {
-                  info.DeleteFile();
-                }
-                else
-                {
-                    FileInfo info2 = _r.ToFile(objectId);
-                    if (!info.RenameTo(info2.FullName))
-                    {
-                        if (info2.Directory != null)
-                        {
-                            info2.Directory.Create();
-                        }
-                        if (!info.RenameTo(info2.FullName) && !_r.HasObject(objectId))
-                        {
-                            info.DeleteFile();
-                            throw new ObjectWritingException("Unable to create new object: " + info2);
-                        }
-                    }
-                }
-            }
-            return objectId;
-        }
+		///	<summary>
+		/// Write a Commit to the object database
+		///	</summary>
+		///	<param name="c">Commit to store.</param>
+		///	<returns>SHA-1 of the commit.</returns>
+		///	<exception cref="IOException"></exception>
+		public ObjectId WriteCommit(Commit c)
+		{
+			Encoding encoding = c.Encoding ?? Constants.CHARSET;
+			var output = new MemoryStream();
+			var s = new BinaryWriter(output, encoding);
+			s.Write(HTree);
+			s.Write(' ');
+			c.TreeId.CopyTo(s);
+			s.Write('\n');
+			ObjectId[] parentIds = c.ParentIds;
+			for (int i = 0; i < parentIds.Length; i++)
+			{
+				s.Write(HParent);
+				s.Write(' ');
+				parentIds[i].CopyTo(s);
+				s.Write('\n');
+			}
+			s.Write(HAuthor);
+			s.Write(' ');
+			s.Write(c.Author.ToExternalString().ToCharArray());
+			s.Write('\n');
+			s.Write(HCommitter);
+			s.Write(' ');
+			s.Write(c.Committer.ToExternalString().ToCharArray());
+			s.Write('\n');
 
-        public ObjectId WriteTag(Tag tag)
-        {
-            var output = new MemoryStream();
-            var s = new BinaryWriter(output);
-            s.Write("object ".ToCharArray());
-            tag.Id.CopyTo(s);
-            s.Write('\n');
-            s.Write("type ".ToCharArray());
-            s.Write(tag.TagType.ToCharArray());
-            s.Write('\n');
-            s.Write("tag ".ToCharArray());
-            s.Write(tag.TagName.ToCharArray());
-            s.Write('\n');
-            s.Write("tagger ".ToCharArray());
-            s.Write(tag.Author.ToExternalString().ToCharArray());
-            s.Write('\n');
-            s.Write('\n');
-            s.Write(tag.Message.ToCharArray());
-            s.Close();
-            return WriteTag(output.ToArray());
-        }
+			if (encoding != Constants.CHARSET)
+			{
+				s.Write(HEncoding);
+				s.Write(' ');
+				s.Write(Constants.encodeASCII(encoding.HeaderName.ToUpperInvariant()));
+				s.Write('\n');
+			}
 
-        private ObjectId WriteTag(byte[] b)
-        {
-            return WriteTag(b.Length, new MemoryStream(b));
-        }
+			s.Write('\n');
+			s.Write(c.Message.ToCharArray());
 
-        private ObjectId WriteTag(long len, Stream input)
-        {
-            return WriteObject(ObjectType.Tag, len, input, true);
-        }
+			return WriteCommit(output.ToArray());
+		}
 
-        public ObjectId WriteTree(Tree t)
-        {
-            var output = new MemoryStream();
-            var writer = new BinaryWriter(output);
-            foreach (TreeEntry entry in t.Members)
-            {
-                ObjectId id = entry.Id;
-                if (id == null)
-                {
-                    throw new ObjectWritingException("object at path \"" + entry.FullName +
-                                                     "\" does not have an id assigned.  All object ids must be assigned prior to writing a tree.");
-                }
-                entry.Mode.CopyTo(output);
-                writer.Write((byte) 0x20);
-                writer.Write(entry.NameUTF8);
-                writer.Write((byte) 0);
-                id.copyRawTo(output);
-            }
-            return WriteCanonicalTree(output.ToArray());
-        }
+		private ObjectId WriteTag(byte[] b)
+		{
+			return WriteTag(b.Length, new MemoryStream(b));
+		}
 
-        private ObjectId WriteTree(long len, Stream input)
-        {
-            return WriteObject(ObjectType.Tree, len, input, true);
-        }
-    }
+		///	<summary>
+		/// Write an annotated Tag to the object database
+		///	</summary>
+		///	<param name="tag">Tag</param>
+		///	<returns>SHA-1 of the tag.</returns>
+		///	<exception cref="IOException"></exception>
+		public ObjectId WriteTag(Tag tag)
+		{
+			var output = new MemoryStream();
+			var s = new BinaryWriter(output);
+			s.Write("object ".ToCharArray());
+			tag.Id.CopyTo(s);
+			s.Write('\n');
+			s.Write("type ".ToCharArray());
+			s.Write(tag.TagType.ToCharArray());
+			s.Write('\n');
+			s.Write("tag ".ToCharArray());
+			s.Write(tag.TagName.ToCharArray());
+			s.Write('\n');
+			s.Write("tagger ".ToCharArray());
+			s.Write(tag.Author.ToExternalString().ToCharArray());
+			s.Write('\n');
+			s.Write('\n');
+			s.Write(tag.Message.ToCharArray());
+			s.Close();
+			return WriteTag(output.ToArray());
+		}
+
+		private ObjectId WriteCommit(byte[] b)
+		{
+			return WriteCommit(b.Length, new MemoryStream(b));
+		}
+
+		private ObjectId WriteCommit(long len, Stream input)
+		{
+			return WriteObject(ObjectType.Commit, len, input, true);
+		}
+
+		private ObjectId WriteTag(long len, Stream inputStream)
+		{
+			return WriteObject(ObjectType.Tag, len, inputStream, true);
+		}
+
+		///	<summary>
+		/// Compute the SHA-1 of a blob without creating an object. This is for
+		///	figuring out if we already have a blob or not.
+		///	</summary>
+		///	<param name="len"> number of bytes to consume.</param>
+		///	<param name="inputStream"> stream for read blob data from.</param>
+		///	<returns>SHA-1 of a looked for blob.</returns>
+		///	<exception cref="IOException"></exception>
+		public ObjectId ComputeBlobSha1(long len, Stream inputStream)
+		{
+			return WriteObject(ObjectType.Blob, len, inputStream, false);
+		}
+
+		internal ObjectId WriteObject(ObjectType type, long len, Stream inputStream, bool store)
+		{
+			FileInfo t;
+			DeflaterOutputStream deflateStream;
+			FileStream fileStream;
+			ObjectId id = null;
+
+			if (store)
+			{
+				t = _r.ObjectsDirectory.CreateTempFile("noz");
+				fileStream = t.OpenWrite();
+			}
+			else
+			{
+				t = null;
+				fileStream = null;
+			}
+
+			_md.Reset();
+			if (store)
+			{
+				_def.Reset();
+				deflateStream = new DeflaterOutputStream(fileStream, _def);
+			}
+			else
+			{
+				deflateStream = null;
+			}
+
+			try
+			{
+				int num;
+				byte[] header = Codec.EncodedTypeString(type);
+
+				_md.Update(header);
+
+				if (deflateStream != null)
+				{
+					deflateStream.Write(header, 0, header.Length);
+				}
+
+				_md.Update(0x20);
+
+				if (deflateStream != null)
+				{
+					deflateStream.WriteByte(0x20);
+				}
+
+				header = Constants.encodeASCII(len);
+
+				_md.Update(header);
+
+				if (deflateStream != null)
+				{
+					deflateStream.Write(header, 0, header.Length);
+				}
+
+				_md.Update(0);
+
+				if (deflateStream != null)
+				{
+					deflateStream.WriteByte(0);
+				}
+
+				while ((len > 0L) && ((num = inputStream.Read(_buf, 0, (int) Math.Min(len, _buf.Length))) > 0))
+				{
+					_md.Update(_buf, 0, num);
+					if (deflateStream != null)
+					{
+						deflateStream.Write(_buf, 0, num);
+					}
+					len -= num;
+				}
+
+				if (len != 0)
+				{
+					throw new IOException("Input did not match supplied Length. " + len + " bytes are missing.");
+				}
+
+				if (deflateStream != null)
+				{
+					deflateStream.Close();
+					if (t.Exists)
+					{
+						t.IsReadOnly = true;
+					}
+				}
+
+				id = ObjectId.FromRaw(_md.Digest());
+			}
+			finally
+			{
+				if (id == null && deflateStream != null)
+				{
+					try
+					{
+						deflateStream.Close();
+					}
+					finally
+					{
+						t.DeleteFile();
+					}
+				}
+			}
+
+			if (t == null)
+			{
+				return id;
+			}
+
+			if (_r.HasObject(id))
+			{
+				// Object is already in the repository so remove
+				// the temporary file.
+				//
+				t.DeleteFile();
+			}
+			else
+			{
+				FileInfo o = _r.ToFile(id);
+				if (!t.RenameTo(o.FullName))
+				{
+					// Maybe the directory doesn't exist yet as the object
+					// directories are always lazily created. Note that we
+					// try the rename first as the directory likely does exist.
+					//
+					if (o.DirectoryName != null && o.Directory != null)
+					{
+						Directory.CreateDirectory(o.DirectoryName);
+					}
+
+					if (!t.RenameTo(o.FullName) && !_r.HasObject(id))
+					{
+						// The object failed to be renamed into its proper
+						// location and it doesn't exist in the repository
+						// either. We really don't know what went wrong, so
+						// fail.
+						//
+						t.DeleteFile();
+						throw new ObjectWritingException("Unable to create new object: " + o);
+					}
+				}
+			}
+
+			return id;
+		}
+
+	}
 }

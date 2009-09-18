@@ -123,7 +123,7 @@ namespace GitSharp.Tests
 			Assert.True(t.Id == null);
 			Assert.True(t.TreeEntry == t);
 			Assert.True(t.Repository == db);
-			Assert.True(t.findTreeMember("foo") == null);
+			Assert.True(t.FindTreeMember("foo") == null);
 			Assert.True(t.FindBlobMember("foo") == null);
 		}
 
@@ -174,7 +174,7 @@ namespace GitSharp.Tests
 			Assert.True(f.TreeEntry == f);
 			Assert.True(t.IsModified);
 			Assert.True(t.Id == null);
-			Assert.True(t.findTreeMember(f.Name) == f);
+			Assert.True(t.FindTreeMember(f.Name) == f);
 
 			TreeEntry[] i = t.Members;
 			Assert.True(i.Length > 0);
@@ -236,7 +236,7 @@ namespace GitSharp.Tests
 			Assert.True(!t.IsModified);
 
 			Assert.Equal("f/g/h", h.FullName);
-			Assert.True(t.findTreeMember(h.FullName) == h);
+			Assert.True(t.FindTreeMember(h.FullName) == h);
 			Assert.True(t.FindBlobMember("f/z") == null);
 			Assert.True(t.FindBlobMember("y/z") == null);
 

@@ -200,7 +200,7 @@ namespace GitSharp.TreeWalk
 				throw new MissingObjectException(me, Constants.TYPE_TREE);
 			}
 			byte[] subtreeData = ldr.CachedBytes;
-			if (ldr.Type != Constants.OBJ_TREE)
+			if (ldr.Type != ObjectType.Tree)
 			{
 				ObjectId me = id.ToObjectId();
 				throw new IncorrectObjectTypeException(me, Constants.TYPE_TREE);

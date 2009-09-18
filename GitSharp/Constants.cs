@@ -51,11 +51,6 @@ namespace GitSharp
     {
         public const string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
 
-        /// <summary>
-        /// Special name for the "HEAD" symbolic ref
-        /// </summary>
-        public const string Head = "HEAD";
-
         public const string Master = "master";
 
         public static class ObjectTypes
@@ -125,7 +120,7 @@ namespace GitSharp
 		/// Length of an object hash.
         /// </summary>
         public const int OBJECT_ID_LENGTH = 20;
-		public const int OBJECT_ID_STRING_LENGTH = Constants.OBJECT_ID_LENGTH * 2;
+		public const int OBJECT_ID_STRING_LENGTH = OBJECT_ID_LENGTH * 2;
 
         /// <summary>
 		/// Special name for the "HEAD" symbolic-ref.
@@ -166,100 +161,10 @@ namespace GitSharp
         /// </summary>
         public static string TYPE_TAG = "tag";
 
-        private static readonly byte[] EncodedTypeCommit = encodeASCII(TYPE_COMMIT);
-        private static readonly byte[] EncodedTypeBlob = encodeASCII(TYPE_BLOB);
-        private static readonly byte[] EncodedTypeTree = encodeASCII(TYPE_TREE);
-        private static readonly byte[] EncodedTypeTag = encodeASCII(TYPE_TAG);
-
-        /// <summary>
-		/// An unknown or invalid object type code.
-        /// </summary>
-        public const int OBJ_BAD = -1;
-
-        /// <summary>
-        /// In-pack object type: extended types.
-		/// <para />
-		/// This header code is reserved for future expansion. It is currently
-		/// undefined/unsupported.
-        /// </summary>
-        public const int OBJ_EXT = 0;
-
-        /// <summary>
-        /// In-pack object type: commit.
-		/// <para />
-		/// Indicates the associated object is a commit.
-		/// <para />
-		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
-		/// <seealso cref="TYPE_COMMIT"/>
-        /// </summary>
-        public const int OBJ_COMMIT = 1;
-
-        /// <summary>
-        /// In-pack object type: tree.
-		/// <para />
-		/// Indicates the associated object is a tree.
-		/// <para />
-		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
-        /// </summary>
-		/// <seealso cref="TYPE_BLOB"/>
-        public const int OBJ_TREE = 2;
-
-        /// <summary>
-        /// In-pack object type: blob.
-		/// <para />
-		/// Indicates the associated object is a blob.
-		/// <para />
-		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
-        /// </summary>
-		/// <seealso cref="TYPE_BLOB"/>
-        public const int OBJ_BLOB = 3;
-
-        /// <summary>
-        /// In-pack object type: annotated tag.
-		/// <para />
-		/// Indicates the associated object is an annotated tag.
-		/// <para />
-		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
-        /// </summary>
-		/// <seealso cref="TYPE_TAG"/>
-        public const int OBJ_TAG = 4;
-
-        /// <summary>
-		/// In-pack object type: reserved for future use.
-        /// </summary>
-        public const int OBJ_TYPE_5 = 5;
-
-        /// <summary>
-        /// In-pack object type: offset delta
-		/// <para />
-		/// Objects stored with this type actually have a different type which must
-		/// be obtained from their delta base object. Delta objects store only the
-		/// changes needed to apply to the base object in order to recover the
-		/// original object.
-		/// <para />
-		/// An offset delta uses a negative offset from the start of this object to
-		/// refer to its delta base. The base object must exist in this packfile
-		/// (even in the case of a thin pack).
-		/// <para />
-		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
-        /// </summary>
-        public const int OBJ_OFS_DELTA = 6;
-
-        /// <summary>
-        /// In-pack object type: reference delta
-		/// <para />
-		/// Objects stored with this type actually have a different type which must
-		/// be obtained from their delta base object. Delta objects store only the
-		/// changes needed to apply to the base object in order to recover the
-		/// original object.
-		/// <para />
-		/// A reference delta uses a full object id (hash) to reference the delta
-		/// base. The base object is allowed to be omitted from the packfile, but
-		/// only in the case of a thin pack being transferred over the network.
-		/// <para />
-		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
-        /// </summary>
-        public const int OBJ_REF_DELTA = 7;
+        internal static readonly byte[] EncodedTypeCommit = encodeASCII(TYPE_COMMIT);
+		internal static readonly byte[] EncodedTypeBlob = encodeASCII(TYPE_BLOB);
+		internal static readonly byte[] EncodedTypeTree = encodeASCII(TYPE_TREE);
+		internal static readonly byte[] EncodedTypeTag = encodeASCII(TYPE_TAG);
 
         /// <summary>
         /// Pack file signature that occurs at file header - identifies file as Git
@@ -269,17 +174,12 @@ namespace GitSharp
         /// </summary>
         public static readonly byte[] PACK_SIGNATURE = { (byte)'P', (byte)'A', (byte)'C', (byte)'K' };
 		
-        private static readonly Encoding _charset = new UTF8Encoding(false, true);
+        private static readonly Encoding Charset = new UTF8Encoding(false, true);
 
         /// <summary>
         /// Native character encoding for commit messages, file names...
         /// </summary>
-        public static Encoding CHARSET
-        {
-            get
-            {
-                return _charset;
-            }
+        public static Encoding CHARSET { get { return Charset; }
         }
   
         /// <summary>
@@ -371,144 +271,6 @@ namespace GitSharp
             //            + HASH_FUNCTION + " not available.", nsae);
             //}
             return new MessageDigest();
-        }
-
-		/// <summary>
-		/// Convert an OBJ_* type constant to a TYPE_* type constant.
-		/// </summary>
-		/// <param name="typeCode">
-		/// typeCode the type code, from a pack representation.
-		/// </param>
-		/// <returns>The canonical string name of this type.</returns>
-        public static string typeString(int typeCode)
-        {
-            switch (typeCode)
-            {
-                case OBJ_COMMIT:
-                    return TYPE_COMMIT;
-                case OBJ_TREE:
-                    return TYPE_TREE;
-                case OBJ_BLOB:
-                    return TYPE_BLOB;
-                case OBJ_TAG:
-                    return TYPE_TAG;
-                default:
-                    throw new ArgumentException("Bad object type: " + typeCode);
-            }
-        }
-
-        /// <summary>
-        /// Convert an OBJ_* type constant to an ASCII encoded string constant.
-        /// <para />
-		/// The ASCII encoded string is often the canonical representation of
-		/// the type within a loose object header, or within a tag header.
-        /// </summary>
-        /// <param name="typeCode">
-        /// typeCode the type code, from a pack representation.
-        /// </param>
-        /// <returns>
-		/// The canonical ASCII encoded name of this type.
-        /// </returns>
-        public static byte[] encodedTypeString(int typeCode)
-        {
-            switch (typeCode)
-            {
-                case OBJ_COMMIT:
-                    return EncodedTypeCommit;
-                case OBJ_TREE:
-                    return EncodedTypeTree;
-                case OBJ_BLOB:
-                    return EncodedTypeBlob;
-                case OBJ_TAG:
-                    return EncodedTypeTag;
-                default:
-                    throw new ArgumentException("Bad object type: " + typeCode);
-            }
-        }
-
-        /// <summary>
-        /// Parse an encoded type string into a type constant.
-        /// </summary>
-        /// <param name="id">
-        /// <see cref="ObjectId" /> this type string came from; may be null if 
-        /// that is not known at the time the Parse is occurring.
-        /// </param>
-        /// <param name="typeString">string version of the type code.</param>
-        /// <param name="endMark">
-        /// Character immediately following the type string. Usually ' '
-        /// (space) or '\n' (line feed).
-        /// </param>
-        /// <param name="offset">
-		/// Position within <paramref name="typeString"/> where the Parse
-		/// should start. Updated with the new position (just past
-		/// <paramref name="endMark"/> when the Parse is successful).
-        /// </param>
-        /// <returns>
-        /// A type code constant (one of <see cref="OBJ_BLOB"/>,
-		/// <see cref="OBJ_COMMIT"/>, <see cref="OBJ_TAG"/>, <see cref="OBJ_TREE"/>
-		/// </returns>
-		/// <exception cref="CorruptObjectException"></exception>
-        public static int decodeTypeString(AnyObjectId id, byte[] typeString, byte endMark, MutableInteger offset)
-        {
-            try
-            {
-                int position = offset.value;
-                switch (typeString[position])
-                {
-                    case (byte)'b':
-                        if (typeString[position + 1] != (byte)'l'
-                            || typeString[position + 2] != (byte)'o'
-                            || typeString[position + 3] != (byte)'b'
-                            || typeString[position + 4] != endMark)
-                        {
-                        	throw new CorruptObjectException(id, "invalid type");
-                        }
-                        offset.value = position + 5;
-                        return OBJ_BLOB;
-
-                    case (byte)'c':
-                        if (typeString[position + 1] != (byte)'o'
-                                || typeString[position + 2] != (byte)'m'
-                                || typeString[position + 3] != (byte)'m'
-                                || typeString[position + 4] != (byte)'i'
-                                || typeString[position + 5] != (byte)'t'
-                                || typeString[position + 6] != endMark)
-                        {
-                        	throw new CorruptObjectException(id, "invalid type");
-                        }
-                        offset.value = position + 7;
-                        return OBJ_COMMIT;
-
-                    case (byte)'t':
-                        switch (typeString[position + 1])
-                        {
-                            case (byte)'a':
-                                if (typeString[position + 2] != (byte)'g'
-                                    || typeString[position + 3] != endMark)
-                                    throw new CorruptObjectException(id, "invalid type");
-                                offset.value = position + 4;
-                                return OBJ_TAG;
-
-                            case (byte)'r':
-                                if (typeString[position + 2] != (byte)'e'
-                                        || typeString[position + 3] != (byte)'e'
-                                        || typeString[position + 4] != endMark)
-                                    throw new CorruptObjectException(id, "invalid type");
-                                offset.value = position + 5;
-                                return OBJ_TREE;
-
-                            default:
-                                throw new CorruptObjectException(id, "invalid type");
-                        }
-
-                    default:
-                        throw new CorruptObjectException(id, "invalid type");
-                }
-            }
-            catch (IndexOutOfRangeException)
-            {
-                throw new CorruptObjectException(id, "invalid type");
-            }
         }
 
         /// <summary>

@@ -73,8 +73,8 @@ namespace GitSharp.Tests
 			_checker.checkBlob(new byte[0]);
 			_checker.checkBlob(new byte[1]);
 
-			_checker.check(Constants.OBJ_BLOB, new byte[0]);
-			_checker.check(Constants.OBJ_BLOB, new byte[1]);
+			_checker.check(ObjectType.Blob, new byte[0]);
+			_checker.check(ObjectType.Blob, new byte[1]);
 		}
 
 		[Fact]
@@ -1402,13 +1402,13 @@ namespace GitSharp.Tests
 		{
 			try
 			{
-				_checker.check(Constants.OBJ_BAD, new char[0]);
+				_checker.check(ObjectType.Bad, new char[0]);
 				Assert.False(true, "Did not throw CorruptObjectException");
 			}
 			catch (CorruptObjectException e)
 			{
 				string m = e.Message;
-				Assert.Equal("Invalid object type: " + Constants.OBJ_BAD, m);
+				Assert.Equal("Invalid object type: " + ObjectType.Bad, m);
 			}
 		}
 
@@ -1433,7 +1433,7 @@ namespace GitSharp.Tests
 
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkCommit(data);
-			_checker.check(Constants.OBJ_COMMIT, data);
+			_checker.check(ObjectType.Commit, data);
 		}
 
 		[Fact]
@@ -1454,7 +1454,7 @@ namespace GitSharp.Tests
 
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkCommit(data);
-			_checker.check(Constants.OBJ_COMMIT, data);
+			_checker.check(ObjectType.Commit, data);
 		}
 
 		[Fact]
@@ -1479,7 +1479,7 @@ namespace GitSharp.Tests
 
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkCommit(data);
-			_checker.check(Constants.OBJ_COMMIT, data);
+			_checker.check(ObjectType.Commit, data);
 		}
 
 		[Fact]
@@ -1496,7 +1496,7 @@ namespace GitSharp.Tests
 
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkCommit(data);
-			_checker.check(Constants.OBJ_COMMIT, data);
+			_checker.check(ObjectType.Commit, data);
 		}
 
 		[Fact]
@@ -1513,7 +1513,7 @@ namespace GitSharp.Tests
 
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkCommit(data);
-			_checker.check(Constants.OBJ_COMMIT, data);
+			_checker.check(ObjectType.Commit, data);
 		}
 
 		[Fact]
@@ -1531,14 +1531,14 @@ namespace GitSharp.Tests
 
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkCommit(data);
-			_checker.check(Constants.OBJ_COMMIT, data);
+			_checker.check(ObjectType.Commit, data);
 		}
 
 		[Fact]
 		public void testValidEmptyTree()
 		{
 			_checker.checkTree(new char[0]);
-			_checker.check(Constants.OBJ_TREE, new char[0]);
+			_checker.check(ObjectType.Tree, new char[0]);
 		}
 
 		[Fact]
@@ -1556,7 +1556,7 @@ namespace GitSharp.Tests
 
 			char[] data = b.ToString().ToCharArray();
 			_checker.checkTag(data);
-			_checker.check(Constants.OBJ_TAG, data);
+			_checker.check(ObjectType.Tag, data);
 		}
 
 		[Fact]

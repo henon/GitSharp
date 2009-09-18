@@ -38,56 +38,56 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace GitSharp
 {
-    [Complete]
-    public interface IndexTreeVisitor
-    {
-        /**
- * Visit a blob, and corresponding tree and index entries.
- *
- * @param treeEntry
- * @param indexEntry
- * @param file
- * @
- */
-        void VisitEntry(TreeEntry treeEntry, GitIndex.Entry indexEntry, FileInfo file);
+	/// <summary>
+	/// Visitor interface for traversing the index and two trees in parallel.
+	/// <para />
+	/// When merging we deal with up to two tree nodes and a base node. Then
+	/// we figure out what to do.
+	///<para />
+	/// A File argument is supplied to allow us to check for modifications in
+	/// a work tree or update the file.
+	///</summary>
+	public interface IndexTreeVisitor
+	{
+		///	<summary>
+		/// Visit a blob, and corresponding tree and index entries.
+		///	</summary>
+		///	<param name="treeEntry"></param>
+		///	<param name="indexEntry"></param>
+		///	<param name="file"></param>
+		///	<exception cref="IOException"></exception>
+		void VisitEntry(TreeEntry treeEntry, GitIndex.Entry indexEntry, FileInfo file);
 
-        /**
-         * Visit a blob, and corresponding tree nodes and associated index entry.
-         *
-         * @param treeEntry
-         * @param auxEntry
-         * @param indexEntry
-         * @param file
-         * @
-         */
-        void VisitEntry(TreeEntry treeEntry, TreeEntry auxEntry, GitIndex.Entry indexEntry, FileInfo file);
+		///	<summary>
+		/// Visit a blob, and corresponding tree nodes and associated index entry.
+		/// </summary>
+		/// <param name="treeEntry"></param>
+		/// <param name="auxEntry"></param>
+		/// <param name="indexEntry"></param>
+		/// <param name="file"></param>
+		/// <exception cref="IOException"></exception>
+		void VisitEntry(TreeEntry treeEntry, TreeEntry auxEntry, GitIndex.Entry indexEntry, FileInfo file);
 
-        /**
-         * Invoked after handling all child nodes of a tree, during a three way merge
-         *
-         * @param tree
-         * @param auxTree
-         * @param curDir
-         * @
-         */
-        void FinishVisitTree(Tree tree, Tree auxTree, string curDir);
+		///	<summary>
+		/// Invoked after handling all child nodes of a tree, during a three way merge
+		///	</summary>
+		///	<param name="tree"></param>
+		///	<param name="auxTree"></param>
+		///	<param name="curDir"></param>
+		///	<exception cref="IOException"></exception>
+		void FinishVisitTree(Tree tree, Tree auxTree, string curDir);
 
-        /**
-         * Invoked after handling all child nodes of a tree, during two way merge.
-         *
-         * @param tree
-         * @param i
-         * @param curDir
-         * @
-         */
-        void FinishVisitTree(Tree tree, int i, string curDir);
-    }
+		///	<summary>
+		/// Invoked after handling all child nodes of a tree, during two way merge.
+		///	</summary>
+		///	<param name="tree"></param>
+		///	<param name="i"></param>
+		///	<param name="curDir"></param>
+		///	<exception cref="IOException"></exception>
+		void FinishVisitTree(Tree tree, int i, string curDir);
+	}
 }

@@ -37,9 +37,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace GitSharp
@@ -49,7 +46,7 @@ namespace GitSharp
         public FileTreeEntry(Tree parent, ObjectId id, byte[] nameUTF8, bool execute)
             : base(parent,id, nameUTF8)
         {
-            this.SetExecutable(execute);
+            SetExecutable(execute);
         }
 
         private FileMode _mode;
@@ -58,7 +55,7 @@ namespace GitSharp
             get { return _mode ; }
         }
 
-        public override void Accept(TreeVisitor tv, int flags)
+        public override void Accept(ITreeVisitor tv, int flags)
         {
             if ((MODIFIED_ONLY & flags) == MODIFIED_ONLY && !IsModified)
                 return;

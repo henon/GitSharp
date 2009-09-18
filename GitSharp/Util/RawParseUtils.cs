@@ -230,7 +230,7 @@ namespace GitSharp.Util
 				{
 					char d = Convert.ToChar(b[ptr]);
 					if (!char.IsDigit(d)) break;
-					r = r * 10 + ((byte)d - ZeroByte);
+					r = (r * 10) + ((byte)d - ZeroByte);
 					ptr++;
 				}
 			}
@@ -300,7 +300,7 @@ namespace GitSharp.Util
 				{
 					byte d = b[ptr];
 					if (!char.IsDigit(Convert.ToChar(d))) break;
-					r = r * 10 + (d - ZeroByte);
+					r = (r * 10) + (d - ZeroByte);
 					ptr++;
 				}
 			}
@@ -784,7 +784,7 @@ namespace GitSharp.Util
 		///	<para />
 		///	When passing in a value for <paramref name="nameB"/> callers should use the
 		///	return value of <seealso cref="author(byte[], int)"/> or
-		///	<seealso cref="committer(byte[], int)"/>, as these methods provide 
+		///	<seealso cref="committer(byte[], int)"/>, as these methods provide
 		/// the proper position within the buffer.
 		///	</summary>
 		///	<param name="raw">The buffer to parse character data from.</param>
@@ -858,11 +858,11 @@ namespace GitSharp.Util
 		///	<summary>
 		/// Locate the end of a footer line key string.
 		/// <para />
-		/// If the region at {@code raw[ptr]} matches {@code ^[A-Za-z0-9-]+:} (e.g.
+		/// If the region at <code>raw[ptr]</code> matches <code> ^[A-Za-z0-9-]+:</code> (e.g.
 		/// "Signed-off-by: A. U. Thor\n") then this method returns the position of
 		/// the first ':'.
 		/// <para />
-		/// If the region at {@code raw[ptr]} does not match {@code ^[A-Za-z0-9-]+:}
+		/// If the region at <code>raw[ptr]</code> does not match <code> ^[A-Za-z0-9-]+:</code>
 		/// then this method returns -1.
 		/// </summary>
 		/// <param name="raw">Buffer to scan.</param>
@@ -903,10 +903,10 @@ namespace GitSharp.Util
 		///	If the byte stream cannot be decoded that way, the platform default is tried
 		///	and if that too fails, the fail-safe ISO-8859-1 encoding is tried.
 		///	</summary>
-		///	<param name="buffer">Vuffer to pull raw bytes from.</param>
+		///	<param name="buffer">Buffer to pull raw bytes from.</param>
 		///	<returns>
-		/// A string representation of the range <code>[start,end]</code>,
-		///	 after decoding the region through the specified character set.
+		/// A string representation of the range <code>[start,end)</code>,
+		///	after decoding the region through the specified character set.
 		/// </returns>
 		public static string decode(byte[] buffer)
 		{
@@ -1006,15 +1006,17 @@ namespace GitSharp.Util
 		/// </exception>
 		public static string decodeNoFallback(Encoding cs, byte[] buffer, int start, int end)
 		{
-			var b = new byte[end - start];
-			for (int i = 0; i < end - start; i++)
+			var newBuffer = new byte[end - start];
+			Array.Copy(buffer, start, newBuffer, 0, end - start);
+
+			if (cs == null)
 			{
-				b[i] = buffer[start + i];
+				cs = Constants.CHARSET;
 			}
 
 			try
 			{
-				return cs != null ? cs.GetString(b) : Constants.CHARSET.GetString(b);
+				return cs.GetString(newBuffer);
 			}
 			catch (DecoderFallbackException)
 			{

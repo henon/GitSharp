@@ -41,63 +41,66 @@ using System;
 
 namespace GitSharp
 {
-    /// <summary>
-    /// Base class for a set of loaders for different representations of Git objects.
+	/// <summary>
+	/// Base class for a set of loaders for different representations of Git objects.
 	/// New loaders are constructed for every object.
 	/// </summary>
-    public abstract class ObjectLoader
-    {
-    	/// <summary>
-    	/// Git in pack object type, see {@link Constants}.
-    	/// </summary>
-    	/// <returns></returns>
-		public abstract int Type { get; protected set; }
+	public abstract class ObjectLoader
+	{
+		/// <summary>
+		/// Git in pack object type, see <seealso cref="Constants"/>.
+		/// </summary>
+		/// <returns></returns>
+		public abstract ObjectType Type { get; protected set; }
 
-    	/// <summary>
-    	/// Size of object in bytes
-    	/// </summary>
-    	/// <returns></returns>
+		/// <summary>
+		/// Size of object in bytes
+		/// </summary>
+		/// <returns></returns>
 		public abstract long Size { get; protected set; }
 
-    	/// <summary>
-    	/// Obtain a copy of the bytes of this object.
-    	/// </summary>
-    	/// <returns>A copy of the bytes of this object.</returns>
-    	public byte[] Bytes
-    	{
-    		get
-    		{
-    			byte[] data = CachedBytes;
-    			var copy = new byte[data.Length];
-    			Array.Copy(data, 0, copy, 0, data.Length);
-    			return copy;
-    		}
-    	}
+		/// <summary>
+		/// Obtain a copy of the bytes of this object.
+		/// <para />
+		/// Unlike <seealso cref="CachedBytes"/> this method returns an array that might
+		///	be modified by the caller.
+		/// </summary>
+		/// <returns>The bytes of this object.</returns>
+		public byte[] Bytes
+		{
+			get
+			{
+				byte[] data = CachedBytes;
+				var copy = new byte[data.Length];
+				Array.Copy(data, 0, copy, 0, data.Length);
+				return copy;
+			}
+		}
 
-    	/// <summary>
-    	/// Obtain a reference to the (possibly cached) bytes of this object.
-    	/// <para />
-    	/// This method offers direct access to the internal caches, potentially
-    	/// saving on data copies between the internal cache and higher level code.
-    	/// Callers who receive this reference <b>must not</b> modify its contents.
-    	/// Changes (if made) will affect the cache but not the repository itself.
-    	/// </summary>
-    	/// <returns>A copy of the cached bytes of this object.</returns>
+		/// <summary>
+		/// Obtain a reference to the (possibly cached) bytes of this object.
+		/// <para />
+		/// This method offers direct access to the internal caches, potentially
+		/// saving on data copies between the internal cache and higher level code.
+		/// Callers who receive this reference <b>must not</b> modify its contents.
+		/// Changes (if made) will affect the cache but not the repository itself.
+		/// </summary>
+		/// <returns>A copy of the cached bytes of this object.</returns>
 		public abstract byte[] CachedBytes { get; protected set; }
 
-    	/// <summary>
-    	/// Raw object type from object header, as stored in storage (pack,
-    	/// loose file). This may be different from <see cref="Type"/> result
+		/// <summary>
+		/// Raw object type from object header, as stored in storage (pack,
+		/// loose file). This may be different from <see cref="Type"/> result
 		/// for packs (see <see cref="Constants"/>).
-    	/// </summary>
-    	/// <returns></returns>
-    	public abstract int RawType { get; }
+		/// </summary>
+		/// <returns></returns>
+		public abstract ObjectType RawType { get; }
 
-    	/// <summary>
-    	/// Raw size of object from object header (pack, loose file).
+		/// <summary>
+		/// Raw size of object from object header (pack, loose file).
 		/// Interpretation of this value depends on <see cref="RawType"/>.
-    	/// </summary>
-    	/// <returns></returns>
-    	public abstract long RawSize { get; }
-    }
+		/// </summary>
+		/// <returns></returns>
+		public abstract long RawSize { get; }
+	}
 }

@@ -57,7 +57,7 @@ namespace GitSharp.Tests
 			var pr = new PackFile(TestIdx, TestPack);
 			PackedObjectLoader or = pr.Get(new WindowCursor(), id);
 			Assert.NotNull(or);
-			Assert.Equal(Constants.OBJ_TREE, or.Type);
+			Assert.Equal(ObjectType.Tree, or.Type);
 			Assert.Equal(35, or.Size);
 			Assert.Equal(7738, or.DataOffset);
 			pr.Close();
@@ -70,7 +70,7 @@ namespace GitSharp.Tests
 			ObjectLoader or = db.OpenObject(id);
 			Assert.NotNull(or);
 			Assert.True(or is PackedObjectLoader);
-			Assert.Equal(Constants.OBJ_BLOB, or.Type);
+			Assert.Equal(ObjectType.Blob, or.Type);
 			Assert.Equal(18009, or.Size);
 			Assert.Equal(537, ((PackedObjectLoader)or).DataOffset);
 		}

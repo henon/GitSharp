@@ -37,7 +37,6 @@
  */
 
 using System.Text;
-using GitSharp.Exceptions;
 using GitSharp.Util;
 
 namespace GitSharp.RevWalk
@@ -81,7 +80,7 @@ namespace GitSharp.RevWalk
 		{
 			var pos = new MutableInteger { value = 53 };
 
-			int oType = Constants.decodeTypeString(this, rawTag, (byte)'\n', pos);
+			var oType = ObjectTypeExtensions.DecodeTypeString(this, rawTag, (byte)'\n', pos);
 			walk.IdBuffer.FromString(rawTag, 7);
 			_object = walk.lookupAny(walk.IdBuffer, oType);
 
@@ -97,9 +96,9 @@ namespace GitSharp.RevWalk
 			Flags |= PARSED;
 		}
 
-		public override int Type
+		public override ObjectType Type
 		{
-			get { return Constants.OBJ_TAG; }
+			get { return ObjectType.Tag; }
 		}
 
 		/// <summary>

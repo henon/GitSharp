@@ -37,15 +37,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace GitSharp
 {
-    [Complete]
-    public class ForceModified : TreeVisitor
+    public class ForceModified : ITreeVisitor
     {
         public void StartVisitTree(Tree t)
         {

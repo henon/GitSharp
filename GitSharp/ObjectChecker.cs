@@ -109,23 +109,23 @@ namespace GitSharp
 		/// <see cref="ObjectId"/> of the object). The array is never modified.
 		/// </param>
 		/// <exception cref="CorruptObjectException">If any error is identified.</exception>
-		public void check(int objType, char[] raw)
+		public void check(ObjectType objType, char[] raw)
 		{
 			switch (objType)
 			{
-				case Constants.OBJ_COMMIT:
+				case ObjectType.Commit:
 					checkCommit(raw);
 					break;
 
-				case Constants.OBJ_TAG:
+				case ObjectType.Tag:
 					checkTag(raw);
 					break;
 
-				case Constants.OBJ_TREE:
+				case ObjectType.Tree:
 					checkTree(raw);
 					break;
 
-				case Constants.OBJ_BLOB:
+				case ObjectType.Blob:
 					checkBlob(raw);
 					break;
 
@@ -146,23 +146,23 @@ namespace GitSharp
 		/// <see cref="ObjectId"/> of the object). The array is never modified.
 		/// </param>
 		/// <exception cref="CorruptObjectException">If any error is identified.</exception>
-		public void check(int objType, byte[] raw)
+		public void check(ObjectType objType, byte[] raw)
 		{
 			switch (objType)
 			{
-				case Constants.OBJ_COMMIT:
+				case ObjectType.Commit:
 					checkCommit(raw);
 					break;
 
-				case Constants.OBJ_TAG:
+				case ObjectType.Tag:
 					checkTag(raw);
 					break;
 
-				case Constants.OBJ_TREE:
+				case ObjectType.Tree:
 					checkTree(raw);
 					break;
 
-				case Constants.OBJ_BLOB:
+				case ObjectType.Blob:
 					checkBlob(raw);
 					break;
 

@@ -111,7 +111,7 @@ namespace GitSharp.Tests.RevWalk
 				}
 				ObjectId entid = tw.getObjectId(0);
 				FileMode entmode = tw.getFileMode(0);
-				return Rw.lookupAny(entid, (int)entmode.ObjectType);
+				return Rw.lookupAny(entid, entmode.ObjectType);
 			}
 
 			Assert.False(true, "Can't find " + path + " in tree " + tree.Name);
@@ -153,14 +153,14 @@ namespace GitSharp.Tests.RevWalk
 		{
 			var t = new Tag(db)
 						{
-							TagType = Constants.typeString(dst.Type),
+							TagType = dst.Type.ObjectTypeToString(),
 							Id = dst.ToObjectId(),
 							TagName = name,
 							Tagger = new PersonIdent(JCommitter, _nowTick.GitTimeToDateTimeOffset(0)),
 							Message = string.Empty
 						};
 
-			return (RevTag)Rw.lookupAny(_ow.WriteTag(t), Constants.OBJ_TAG);
+			return (RevTag)Rw.lookupAny(_ow.WriteTag(t), ObjectType.Tag);
 		}
 
 		protected T Parse<T>(T t)

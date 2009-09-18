@@ -41,13 +41,11 @@ using System.Text;
 
 namespace GitSharp
 {
-
     public class GitLinkTreeEntry : TreeEntry
     {
         public GitLinkTreeEntry(Tree parent, ObjectId id, byte[] nameUTF8)
             : base(parent, id, nameUTF8)
         {
-            
         }
 
         public override FileMode Mode
@@ -55,7 +53,7 @@ namespace GitSharp
             get { return FileMode.GitLink; }
         }
 
-        public override void Accept(TreeVisitor tv, int flags)
+        public override void Accept(ITreeVisitor tv, int flags)
         {
             if ((MODIFIED_ONLY & flags) == MODIFIED_ONLY && !IsModified)
             {
@@ -67,12 +65,11 @@ namespace GitSharp
 
         public override string ToString()
         {
-            StringBuilder r = new StringBuilder();
+            var r = new StringBuilder();
             r.Append(ObjectId.ToString(Id));
             r.Append(" G ");
             r.Append(FullName);
             return r.ToString();
         }
     }
-
 }

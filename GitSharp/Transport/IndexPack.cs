@@ -259,16 +259,16 @@ namespace GitSharp.Transport
 			if (_baseById.Get(objectInfo) != null || _baseByPos.ContainsKey(objectInfo.Offset))
 			{
 				int oldCrc = objectInfo.CRC;
-				ResolveDeltas(objectInfo.Offset, oldCrc, Constants.OBJ_BAD, null, objectInfo);
+				ResolveDeltas(objectInfo.Offset, oldCrc, ObjectType.Bad, null, objectInfo);
 			}
 		}
 
-		private void ResolveDeltas(long pos, int oldCrc, int type, byte[] data, PackedObjectInfo oe)
+		private void ResolveDeltas(long pos, int oldCrc, ObjectType type, byte[] data, PackedObjectInfo oe)
 		{
 			_crc.Reset();
 			Position(pos);
 			int c = ReadFromFile();
-			int typecode = (c >> 4) & 7;
+			var typecode = ObjectTypeExtensions.FromFlag(c);
 			long sz = c & 15;
 			int shift = 4;
 			while ((c & 0x80) != 0)
@@ -280,15 +280,15 @@ namespace GitSharp.Transport
 
 			switch (typecode)
 			{
-				case Constants.OBJ_COMMIT:
-				case Constants.OBJ_TREE:
-				case Constants.OBJ_BLOB:
-				case Constants.OBJ_TAG:
+				case ObjectType.Commit:
+				case ObjectType.Tree:
+				case ObjectType.Blob:
+				case ObjectType.Tag:
 					type = typecode;
 					data = InflateFromFile((int)sz);
 					break;
 
-				case Constants.OBJ_OFS_DELTA:
+				case ObjectType.OffsetDelta:
 					c = ReadFromFile() & 0xff;
 					while ((c & 128) != 0)
 					{
@@ -297,7 +297,7 @@ namespace GitSharp.Transport
 					data = BinaryDelta.Apply(data, InflateFromFile((int)sz));
 					break;
 
-				case Constants.OBJ_REF_DELTA:
+				case ObjectType.ReferenceDelta:
 					_crc.Update(_buffer, FillFromFile(20), 20);
 					Use(20);
 					data = BinaryDelta.Apply(data, InflateFromFile((int)sz));
@@ -315,7 +315,7 @@ namespace GitSharp.Transport
 
 			if (oe == null)
 			{
-				_objectDigest.Update(Constants.encodedTypeString(type));
+				_objectDigest.Update(type.EncodedTypeString());
 				_objectDigest.Update((byte)' ');
 				_objectDigest.Update(Constants.encodeASCII(data.Length));
 				_objectDigest.Update(0);
@@ -336,7 +336,7 @@ namespace GitSharp.Transport
 			return d != null ? d.Remove() : null;
 		}
 
-		private void ResolveChildDeltas(long pos, int type, byte[] data, AnyObjectId objectId)
+		private void ResolveChildDeltas(long pos, ObjectType type, byte[] data, AnyObjectId objectId)
 		{
 			UnresolvedDelta a = Reverse(RemoveBaseById(objectId));
 			UnresolvedDelta b;
@@ -369,7 +369,7 @@ namespace GitSharp.Transport
 			ResolveChildDeltaChain(type, data, b);
 		}
 
-		private void ResolveChildDeltaChain(int type, byte[] data, UnresolvedDelta a)
+		private void ResolveChildDeltaChain(ObjectType type, byte[] data, UnresolvedDelta a)
 		{
 			while (a != null)
 			{
@@ -404,7 +404,7 @@ namespace GitSharp.Transport
 				}
 
 				byte[] data = ldr.CachedBytes;
-				int typeCode = ldr.Type;
+				var typeCode = ldr.Type;
 
 				_crc.Reset();
 				_packOut.Seek(end, SeekOrigin.Begin);
@@ -433,24 +433,27 @@ namespace GitSharp.Transport
 			FixHeaderFooter(_packcsum, _packDigest.Digest());
 		}
 
-		private void WriteWhole(Deflater def, int typeCode, byte[] data)
+		private void WriteWhole(Deflater def, ObjectType typeCode, byte[] data)
 		{
 			int sz = data.Length;
 			int hdrlen = 0;
-			_buffer[hdrlen++] = (byte)((typeCode << 4) | sz & 15);
+			_buffer[hdrlen++] = (byte)((Convert.ToInt32(typeCode) << 4) | sz & 15);
 			sz = (int)(((uint)sz) >> 4);
+
 			while (sz > 0)
 			{
 				_buffer[hdrlen - 1] |= 0x80;
 				_buffer[hdrlen++] = (byte)(sz & 0x7f);
 				sz = (int)(((uint)sz) >> 7);
 			}
+			
 			_packDigest.Update(_buffer, 0, hdrlen);
 			_crc.Update(_buffer, 0, hdrlen);
 			_packOut.Write(_buffer, 0, hdrlen);
 			def.Reset();
 			def.SetInput(data);
 			def.Finish();
+			
 			while (!def.IsFinished)
 			{
 				int datlen = def.Deflate(_buffer);
@@ -606,7 +609,7 @@ namespace GitSharp.Transport
 			long pos = Position();
 			_crc.Reset();
 			int c = ReadFromInput();
-			int typeCode = (c >> 4) & 7;
+			var typeCode = ObjectTypeExtensions.FromFlag(c);
 			long sz = c & 15;
 			int shift = 4;
 			while ((c & 0x80) != 0)
@@ -618,14 +621,14 @@ namespace GitSharp.Transport
 
 			switch (typeCode)
 			{
-				case Constants.OBJ_COMMIT:
-				case Constants.OBJ_TREE:
-				case Constants.OBJ_BLOB:
-				case Constants.OBJ_TAG:
+				case ObjectType.Commit:
+				case ObjectType.Tree:
+				case ObjectType.Blob:
+				case ObjectType.Tag:
 					Whole(typeCode, pos, sz);
 					break;
 
-				case Constants.OBJ_OFS_DELTA:
+				case ObjectType.OffsetDelta:
 					c = ReadFromInput();
 					long ofs = c & 127;
 					while ((c & 128) != 0)
@@ -650,7 +653,7 @@ namespace GitSharp.Transport
 					_deltaCount++;
 					break;
 
-				case Constants.OBJ_REF_DELTA:
+				case ObjectType.ReferenceDelta:
 					c = FillFromInput(20);
 					_crc.Update(_buffer, c, 20);
 					ObjectId baseId = ObjectId.FromRaw(_buffer, c);
@@ -671,22 +674,22 @@ namespace GitSharp.Transport
 			}
 		}
 
-		private void Whole(int type, long pos, long sz)
+		private void Whole(ObjectType objectType, long pos, long sz)
 		{
 			byte[] data = InflateFromInput((int)sz);
-			_objectDigest.Update(Constants.encodedTypeString(type));
+			_objectDigest.Update(objectType.EncodedTypeString());
 			_objectDigest.Update((byte)' ');
 			_objectDigest.Update(Constants.encodeASCII(sz));
 			_objectDigest.Update(0);
 			_objectDigest.Update(data);
 			_tempObjectId.FromRaw(_objectDigest.Digest(), 0);
 
-			VerifySafeObject(_tempObjectId, type, data);
+			VerifySafeObject(_tempObjectId, objectType, data);
 			var crc32 = (int)_crc.Value;
 			_entries[_entryCount++] = new PackedObjectInfo(pos, crc32, _tempObjectId);
 		}
 
-		private void VerifySafeObject(AnyObjectId id, int type, byte[] data)
+		private void VerifySafeObject(AnyObjectId id, ObjectType type, byte[] data)
 		{
 			if (_objCheck != null)
 			{
@@ -696,7 +699,7 @@ namespace GitSharp.Transport
 				}
 				catch (CorruptObjectException e)
 				{
-					throw new IOException("Invalid " + Constants.typeString(type) + " " + id + ": " + e.Message, e);
+					throw new IOException("Invalid " + type.EncodedTypeString() + " " + id + ": " + e.Message, e);
 				}
 			}
 

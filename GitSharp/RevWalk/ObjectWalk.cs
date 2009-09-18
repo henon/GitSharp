@@ -209,7 +209,7 @@ namespace GitSharp.RevWalk
             	o.Flags |= UNINTERESTING;
             }
 
-            if (o.Type != Constants.OBJ_COMMIT && hasRevSort(RevSort.BOUNDARY))
+            if (o.Type != ObjectType.Commit && hasRevSort(RevSort.BOUNDARY))
             {
                 AddObject(o);
             }
@@ -270,11 +270,10 @@ namespace GitSharp.RevWalk
             while (!_treeWalk.eof())
             {
                 FileMode mode = _treeWalk.EntryFileMode;
-                var sType = (int)mode.ObjectType;
 
-                switch (sType)
+				switch (mode.ObjectType)
                 {
-                    case Constants.OBJ_BLOB:
+                    case ObjectType.Blob:
 						_treeWalk.getEntryObjectId(IdBuffer);
 
 						RevBlob blob = lookupBlob(IdBuffer);
@@ -286,7 +285,7 @@ namespace GitSharp.RevWalk
 						_fromTreeWalk = true;
 						return blob;
 
-                    case Constants.OBJ_TREE:
+                    case ObjectType.Tree:
 						_treeWalk.getEntryObjectId(IdBuffer);
 
 						RevTree tree = lookupTree(IdBuffer);
@@ -303,10 +302,8 @@ namespace GitSharp.RevWalk
                         if (FileMode.GitLink.Equals(mode.Bits)) break;
 						_treeWalk.getEntryObjectId(IdBuffer);
 
-                        throw new CorruptObjectException("Invalid mode " + mode
-								+ " for " + IdBuffer + " "
-                                + _treeWalk.EntryPathString + " in " + _currentTree
-                                + ".");
+                        throw new CorruptObjectException("Invalid mode " + mode + " for " + IdBuffer + " "
+                            + _treeWalk.EntryPathString + " in " + _currentTree + ".");
                 }
 
                 _treeWalk = _treeWalk.next();
@@ -431,16 +428,15 @@ namespace GitSharp.RevWalk
             while (!_treeWalk.eof())
             {
                 FileMode mode = _treeWalk.EntryFileMode;
-                var sType = (int)mode.ObjectType;
 
-                switch (sType)
+                switch (mode.ObjectType)
                 {
-                    case Constants.OBJ_BLOB:
+                    case ObjectType.Blob:
 						_treeWalk.getEntryObjectId(IdBuffer);
 						lookupBlob(IdBuffer).Flags |= UNINTERESTING;
 						break;
 
-                    case Constants.OBJ_TREE:
+                    case ObjectType.Tree:
 						_treeWalk.getEntryObjectId(IdBuffer);
 						RevTree t = lookupTree(IdBuffer);
 						if ((t.Flags & UNINTERESTING) == 0)

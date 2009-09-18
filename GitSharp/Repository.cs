@@ -188,7 +188,7 @@ namespace GitSharp
 
 			const string master = Constants.RefsHeads + Constants.Master;
 
-			_refDb.Link(Constants.Head, master);
+			_refDb.Link(Constants.HEAD, master);
 
 			Config.setInt("core", null, "repositoryformatversion", 0);
 			Config.setBoolean("core", null, "filemode", true);
@@ -387,7 +387,7 @@ namespace GitSharp
 			if (or == null) return null;
 
 			byte[] raw = or.Bytes;
-			if (Constants.OBJ_COMMIT == or.Type)
+			if (ObjectType.Commit == or.Type)
 			{
 				return new Commit(this, id, raw);
 			}
@@ -404,8 +404,14 @@ namespace GitSharp
 		public object MapObject(ObjectId id, string refName)
 		{
 			ObjectLoader or = OpenObject(id);
+
+			if (or == null)
+			{
+				return null;
+			}
+
 			byte[] raw = or.Bytes;
-			switch ((ObjectType)(or.Type))
+			switch (or.Type)
 			{
 				case ObjectType.Tree:
 					return MakeTree(id, raw);
@@ -454,7 +460,7 @@ namespace GitSharp
 			if (or == null) return null;
 
 			byte[] raw = or.Bytes;
-			switch (((ObjectType)or.Type))
+			switch (or.Type)
 			{
 				case ObjectType.Tree:
 					return new Tree(this, id, raw);
@@ -499,7 +505,8 @@ namespace GitSharp
 			if (or == null) return null;
 
 			byte[] raw = or.Bytes;
-			if (ObjectType.Tag == (ObjectType)or.Type)
+			
+			if (ObjectType.Tag == or.Type)
 			{
 				return new Tag(this, id, refName, raw);
 			}

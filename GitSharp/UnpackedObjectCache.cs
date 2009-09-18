@@ -97,8 +97,7 @@ namespace GitSharp
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public static void store(PackFile pack, long position,
-                 byte[] data, int objectType)
+        public static void store(PackFile pack, long position, byte[] data, ObjectType objectType)
         {
             if (data.Length > _maxByteCount)
                 return; // Too large to cache.
@@ -197,28 +196,22 @@ namespace GitSharp
         public class Entry
         {
             public byte[] data;
+			public ObjectType type;
 
-            public int type;
-
-            public Entry(byte[] aData, int aType)
+            public Entry(byte[] aData, ObjectType objectType)
             {
                 data = aData;
-                type = aType;
+                type = objectType;
             }
         }
 
         private class Slot
         {
             public Slot lruPrev;
-
             public Slot lruNext;
-
             public PackFile provider;
-
             public long position;
-
             public int sz;
-
             public WeakReference<Entry> data = Dead;
         }
 

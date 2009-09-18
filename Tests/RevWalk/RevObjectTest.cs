@@ -82,10 +82,10 @@ namespace GitSharp.Tests.RevWalk
 		[Fact]
 		public void testRevObjectTypes()
 		{
-			Assert.Equal(Constants.OBJ_TREE, EmptyTree.Type);
-			Assert.Equal(Constants.OBJ_COMMIT, Commit().Type);
-			Assert.Equal(Constants.OBJ_BLOB, Blob(string.Empty).Type);
-			Assert.Equal(Constants.OBJ_TAG, Tag("emptyTree", EmptyTree).Type);
+			Assert.Equal(ObjectType.Tree, EmptyTree.Type);
+			Assert.Equal(ObjectType.Commit, Commit().Type);
+			Assert.Equal(ObjectType.Blob, Blob(string.Empty).Type);
+			Assert.Equal(ObjectType.Tag, Tag("emptyTree", EmptyTree).Type);
 		}
 
 		[Fact]

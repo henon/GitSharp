@@ -206,19 +206,19 @@ namespace GitSharp.Transport
 
 			switch (obj.Type)
 			{
-				case Constants.OBJ_BLOB:
+				case ObjectType.Blob:
 					ProcessBlob(obj);
 					break;
 
-				case Constants.OBJ_TREE:
+				case ObjectType.Tree:
 					ProcessTree(obj);
 					break;
 
-				case Constants.OBJ_COMMIT:
+				case ObjectType.Commit:
 					ProcessCommit(obj);
 					break;
 
-				case Constants.OBJ_TAG:
+				case ObjectType.Tag:
 					ProcessTag(obj);
 					break;
 
@@ -246,12 +246,12 @@ namespace GitSharp.Transport
 				while (_treeWalk.next())
 				{
 					FileMode mode = _treeWalk.getFileMode(0);
-					int sType = mode.Bits;
+					var sType = ObjectTypeExtensions.FromInteger(mode.Bits);
 
 					switch (sType)
 					{
-						case Constants.OBJ_BLOB:
-						case Constants.OBJ_TREE:
+						case ObjectType.Blob:
+						case ObjectType.Tree:
 							_treeWalk.getObjectId(_idBuffer, 0);
 							Needs(_revWalk.lookupAny(_idBuffer, sType));
 							continue;
@@ -506,7 +506,7 @@ namespace GitSharp.Transport
 			}
 
 			_objectDigest.Reset();
-			_objectDigest.Update(Constants.encodedTypeString(uol.Type));
+			_objectDigest.Update(uol.Type.EncodedTypeString());
 			_objectDigest.Update((byte)' ');
 			_objectDigest.Update(Constants.encodeASCII(uol.Size));
 			_objectDigest.Update(0);
@@ -516,7 +516,7 @@ namespace GitSharp.Transport
 			if (!id.Equals(_idBuffer))
 			{
 				throw new TransportException("Incorrect hash for " + id.Name + "; computed " + _idBuffer.Name + " as a " +
-											 Constants.typeString(uol.Type) + " from " + compressed.Length +
+											 uol.Type.EncodedTypeString() + " from " + compressed.Length +
 											 " bytes.");
 			}
 			if (_objCheck != null)
@@ -527,7 +527,7 @@ namespace GitSharp.Transport
 				}
 				catch (CorruptObjectException e)
 				{
-					throw new TransportException("Invalid " + Constants.typeString(uol.Type) + " " + id.Name + ": " + e.Message);
+					throw new TransportException("Invalid " + uol.Type.EncodedTypeString() + " " + id.Name + ": " + e.Message);
 				}
 			}
 		}
@@ -623,7 +623,7 @@ namespace GitSharp.Transport
 
 		private void MarkLocalObjComplete(RevObject obj)
 		{
-			while (obj.Type == Constants.OBJ_TAG)
+			while (obj.Type == ObjectType.Tag)
 			{
 				obj.add(COMPLETE);
 				obj.DisposeBody();
@@ -633,15 +633,15 @@ namespace GitSharp.Transport
 
 			switch (obj.Type)
 			{
-				case Constants.OBJ_BLOB:
+				case ObjectType.Blob:
 					obj.add(COMPLETE);
 					break;
 
-				case Constants.OBJ_COMMIT:
+				case ObjectType.Commit:
 					PushLocalCommit((RevCommit)obj);
 					break;
 
-				case Constants.OBJ_TREE:
+				case ObjectType.Tree:
 					MarkTreeComplete(obj);
 					break;
 			}
@@ -690,16 +690,16 @@ namespace GitSharp.Transport
 			while (_treeWalk.next())
 			{
 				FileMode mode = _treeWalk.getFileMode(0);
-				int sType = mode.Bits;
+				var sType = ObjectTypeExtensions.FromInteger(mode.Bits);
 
-				switch (sType)
+				switch (ObjectTypeExtensions.FromInteger(mode.Bits))
 				{
-					case Constants.OBJ_BLOB:
+					case ObjectType.Blob:
 						_treeWalk.getObjectId(_idBuffer, 0);
 						_revWalk.lookupAny(_idBuffer, sType).add(COMPLETE);
 						continue;
 
-					case Constants.OBJ_TREE:
+					case ObjectType.Tree:
 						{
 							_treeWalk.getObjectId(_idBuffer, 0);
 							RevObject o = _revWalk.lookupAny(_idBuffer, sType);

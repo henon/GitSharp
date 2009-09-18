@@ -45,13 +45,11 @@ namespace GitSharp
 {
     public abstract class TreeEntry : IComparable, IComparable<TreeEntry>
     {
-        // Fields
-        public static int CONCURRENT_MODIFICATION = 4;
-        public static int LOADED_ONLY = 2;
+    	protected static int CONCURRENT_MODIFICATION = 4;
+    	protected static int LOADED_ONLY = 2;
         public static int MODIFIED_ONLY = 1;
         private ObjectId _id;
 
-        // Methods
         protected TreeEntry(Tree myParent, ObjectId id, byte[] nameUTF8)
         {
             NameUTF8 = nameUTF8;
@@ -158,12 +156,12 @@ namespace GitSharp
 
         #endregion
 
-        public void Accept(TreeVisitor tv)
+        public void Accept(ITreeVisitor tv)
         {
             Accept(tv, 0);
         }
 
-        public abstract void Accept(TreeVisitor tv, int flags);
+        public abstract void Accept(ITreeVisitor tv, int flags);
 
         private void AppendFullName(StringBuilder r)
         {

@@ -59,7 +59,7 @@ namespace GitSharp.TreeWalk
     public abstract class WorkingTreeIterator : AbstractTreeIterator
     {
         private static readonly byte[] Digits = { (byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5', (byte)'6', (byte)'7', (byte)'8', (byte)'9' };
-        private static readonly byte[] HBlob = Constants.encodedTypeString(Constants.OBJ_BLOB);
+        private static readonly byte[] HBlob = ObjectType.Blob.EncodedTypeString();
         private static readonly Comparison<Entry> EntryComparison = (o1, o2) =>
         {
             byte[] a = o1.EncodedName;

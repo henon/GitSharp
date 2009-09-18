@@ -236,7 +236,7 @@ namespace GitSharp.RevWalk
 			_roots = new List<RevCommit>();
 			Queue = new DateRevQueue();
 			Pending = new StartGenerator(this);
-			_sorting = new HashSet<RevSort.Strategy>() { RevSort.NONE };
+			_sorting = new HashSet<RevSort.Strategy> { RevSort.NONE };
 			_filter = RevFilter.ALL;
 			_treeFilter = TreeFilter.ALL;
 		    _retainBody = true;
@@ -709,26 +709,26 @@ namespace GitSharp.RevWalk
 		/// </param>
 		/// <returns>Reference to the object. Never null.
 		/// </returns>
-		public RevObject lookupAny(AnyObjectId id, int type)
+		public RevObject lookupAny(AnyObjectId id, ObjectType type)
 		{
 			RevObject r = _objects.Get(id);
 			if (r == null)
 			{
 				switch (type)
 				{
-					case Constants.OBJ_COMMIT:
+					case ObjectType.Commit:
 						r = createCommit(id);
 						break;
 
-					case Constants.OBJ_TREE:
+					case ObjectType.Tree:
 						r = new RevTree(id);
 						break;
 
-					case Constants.OBJ_BLOB:
+					case ObjectType.Blob:
 						r = new RevBlob(id);
 						break;
 
-					case Constants.OBJ_TAG:
+					case ObjectType.Tag:
 						r = new RevTag(id);
 						break;
 
@@ -738,6 +738,7 @@ namespace GitSharp.RevWalk
 
 				_objects.Add(r);
 			}
+
 			return r;
 		}
 
@@ -850,26 +851,26 @@ namespace GitSharp.RevWalk
 				}
 
 				byte[] data = ldr.CachedBytes;
-				int type = ldr.Type;
+				ObjectType type = ldr.Type;
 				switch (type)
 				{
-					case Constants.OBJ_COMMIT:
+					case ObjectType.Commit:
 						RevCommit c = createCommit(id);
 						c.parseCanonical(this, data);
 						r = c;
 						break;
 
-					case Constants.OBJ_TREE:
+					case ObjectType.Tree:
 						r = new RevTree(id);
 						r.Flags |= PARSED;
 						break;
 
-					case Constants.OBJ_BLOB:
+					case ObjectType.Blob:
 						r = new RevBlob(id);
 						r.Flags |= PARSED;
 						break;
 
-					case Constants.OBJ_TAG:
+					case ObjectType.Tag:
 						var t = new RevTag(id);
 						t.parseCanonical(this, data);
 						r = t;

@@ -63,7 +63,7 @@ namespace GitSharp
 		private readonly DirectoryInfo _infoDirectory;
 		private readonly DirectoryInfo _packDirectory;
 		private readonly FileInfo _alternatesFile;
-		private readonly AtomicReference<PackList> _packList;
+		private PackList _packList;
 
 		/// <summary>
 		/// Initialize a reference to an on-disk object directory.
@@ -75,7 +75,7 @@ namespace GitSharp
 			_infoDirectory = new DirectoryInfo(Path.Combine(_objects.FullName, "info"));
 			_packDirectory = new DirectoryInfo(Path.Combine(_objects.FullName, "pack"));
 			_alternatesFile = new FileInfo(Path.Combine(_infoDirectory.FullName, "alternates"));
-			_packList = new AtomicReference<PackList>();
+			_packList = NO_PACKS;
 		}
 
 		/// <summary>
@@ -100,11 +100,9 @@ namespace GitSharp
 
 		public override void CloseSelf()
 		{
-			PackList packs = _packList.get();
+			PackList packs = _packList;
 
-			_packList.set(NO_PACKS);
-
-			if (packs == null) return;
+			_packList = NO_PACKS;
 
 			foreach (PackFile p in packs)
 			{
@@ -168,7 +166,7 @@ namespace GitSharp
 
 		protected internal override bool HasObject1(AnyObjectId objectId)
 		{
-			foreach (PackFile p in _packList.get())
+			foreach (PackFile p in _packList)
 			{
 				try
 				{
@@ -193,7 +191,7 @@ namespace GitSharp
 
 		protected internal override ObjectLoader OpenObject1(WindowCursor curs, AnyObjectId objectId)
 		{
-			PackList pList = _packList.get();
+			PackList pList = _packList;
 
 			while (true)
 			{
@@ -239,7 +237,7 @@ namespace GitSharp
 
 		public override void OpenObjectInAllPacks1(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
 		{
-			PackList pList = _packList.get();
+			PackList pList = _packList;
 
 			while (true)
 			{
@@ -297,7 +295,7 @@ namespace GitSharp
 
 		protected internal override bool TryAgain1()
 		{
-			PackList old = _packList.get();
+			PackList old = _packList;
 
 			if (/*old == null && */old.TryAgain(_packDirectory.LastWriteTime.Ticks))
 			{
@@ -310,15 +308,16 @@ namespace GitSharp
 		private void InsertPack(PackFile pf)
 		{
 			PackList o, n;
+
 			do
 			{
-				o = _packList.get();
+				o = _packList;
 				PackFile[] oldList = o.Packs;
 				var newList = new PackFile[1 + oldList.Length];
 				newList[0] = pf;
 				Array.Copy(oldList, 0, newList, 1, oldList.Length);
 				n = new PackList(o.LastRead, o.LastModified, newList);
-			} while (!_packList.compareAndSet(o, n));
+			} while (!CompareAndSet(ref _packList, o, n));
 		}
 
 		private void RemovePack(PackFile deadPack)
@@ -326,7 +325,7 @@ namespace GitSharp
 			PackList o, n;
 			do
 			{
-				o = _packList.get();
+				o = _packList;
 
 				var oldList = o.Packs;
 				int j = IndexOf(oldList, deadPack);
@@ -336,7 +335,7 @@ namespace GitSharp
 				Array.Copy(oldList, 0, newList, 0, j);
 				Array.Copy(oldList, j + 1, newList, j, newList.Length - j);
 				n = new PackList(o.LastRead, o.LastModified, newList);
-			} while (!_packList.compareAndSet(o, n));
+			} while (!CompareAndSet(ref _packList, o, n));
 
 			deadPack.Close();
 		}
@@ -354,7 +353,7 @@ namespace GitSharp
 				PackList o, n;
 				do
 				{
-					o = _packList.get();
+					o = _packList;
 					if (o != original)
 					{
 						// Another thread did the scan for us, while we
@@ -367,7 +366,7 @@ namespace GitSharp
 					{
 						return n;
 					}
-				} while (!_packList.compareAndSet(o, n));
+				} while (!CompareAndSet(ref _packList, o, n));
 
 				return n;
 			}
@@ -520,6 +519,23 @@ namespace GitSharp
 			}
 
 			return new ObjectDirectory(objdir);
+		}
+
+		private bool CompareAndSet<T>(ref T reference, T expected, T update)
+		{
+			lock (this)
+			{
+				bool b1 = Equals(reference, default(T)) && Equals(expected, default(T));
+				bool b2 = !Equals(reference, default(T)) && reference.Equals(expected);
+
+				if (b1 || b2)
+				{
+					reference = update;
+					return true;
+				}
+
+				return false;
+			}
 		}
 
 		#region Nested Types

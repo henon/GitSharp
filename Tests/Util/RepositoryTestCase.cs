@@ -123,7 +123,7 @@ namespace GitSharp.Tests
             recursiveDelete(new DirectoryInfo(trashParent.FullName), true, name, false);
 
             trash = new DirectoryInfo(trashParent + "/trash" + DateTime.Now.Ticks + "." + (_testcount++));
-            trash_git = new DirectoryInfo(trash + "/.git");
+            trash_git = new DirectoryInfo(Path.GetFullPath(trash + "/.git"));
 
             var gitConfigFile = new FileInfo(trash_git + "/usergitconfig").FullName;
             var gitConfig = new RepositoryConfig(null, new FileInfo(gitConfigFile));
@@ -324,7 +324,7 @@ namespace GitSharp.Tests
         /// </returns>
         protected Repository createNewEmptyRepo(bool bare)  
         {
-            var newTestRepo = new DirectoryInfo(trashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) + (bare ? "" : "/") + ".git");
+            var newTestRepo = new DirectoryInfo(Path.GetFullPath(trashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) + (bare ? "" : "/") + ".git"));
             Assert.IsFalse(newTestRepo.Exists);
             var newRepo = new Repository(newTestRepo);
             newRepo.Create();

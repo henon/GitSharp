@@ -46,7 +46,7 @@ namespace GitSharp.Tests
 	{
 		public StrictFactAttribute()
 		{
-			if (System.Diagnostics.Debugger.IsAttached)
+			if (!System.Diagnostics.Debugger.IsAttached)
 			{
 				Timeout = XunitBaseFact.TestTimeout;
 			}

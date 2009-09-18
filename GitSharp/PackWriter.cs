@@ -344,7 +344,7 @@ namespace GitSharp
 
 			Debug.Assert(!otp.IsWritten);
 
-			_pos.resetCRC32();
+			_pos.ResetCrc32();
 			otp.Offset = _pos.Length;
 
 			PackedObjectLoader reuse = Open(otp);
@@ -376,7 +376,7 @@ namespace GitSharp
 				WriteWholeObjectDeflate(otp);
 			}
 
-			otp.CRC = _pos.getCRC32();
+			otp.CRC = _pos.Crc32;
 			_writeMonitor.Update(1);
 		}
 
@@ -464,7 +464,7 @@ namespace GitSharp
 
 		private void WriteChecksum()
 		{
-			_packChecksum = _pos.getDigest();
+			_packChecksum = _pos.Digest;
 			_pos.Write(_packChecksum, 0, _packChecksum.Length);
 		}
 

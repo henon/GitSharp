@@ -36,6 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
 using GitSharp.Util;
 
@@ -65,17 +66,17 @@ namespace GitSharp
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public override void SetLength(long value)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public override bool CanRead
@@ -95,8 +96,8 @@ namespace GitSharp
 
         public override long Position
         {
-            get { throw new System.NotImplementedException(); }
-            set { throw new System.NotImplementedException(); }
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         public override void Flush()
@@ -109,20 +110,23 @@ namespace GitSharp
             get { return _count; }
         }
 
-        public int getCRC32()
-        {
-            // [caytchen] TODO: REVISIT: C# seperates signed/unsigned, all ported code doesn't seem to resemble this CRC-wise
-            return (int)_crc.Value;
-        }
+    	public int Crc32
+    	{
+    		get
+    		{
+    			// [caytchen] TODO: REVISIT: C# seperates signed/unsigned, all ported code doesn't seem to resemble this CRC-wise
+    			return (int) _crc.Value;
+    		}
+    	}
 
-        public void resetCRC32()
+		public byte[] Digest
+		{
+			get { return _md.Digest(); }
+		}
+
+    	public void ResetCrc32()
         {
             _crc.Reset();
-        }
-
-        public byte[] getDigest()
-        {
-            return _md.Digest();
         }
     }
 }

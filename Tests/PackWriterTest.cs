@@ -76,6 +76,78 @@ namespace GitSharp.Tests
 
 		#endregion
 
+
+		///	 <summary>
+		/// Test constructor for exceptions, default settings, initialization.
+		/// </summary>
+		[StrictFactAttribute]
+		public void testContructor()
+		{
+			Assert.Equal(false, _writer.DeltaBaseAsOffset);
+			Assert.Equal(true, _writer.ReuseDeltas);
+			Assert.Equal(true, _writer.ReuseObjects);
+			Assert.Equal(0, _writer.getObjectsNumber());
+		}
+
+		///	<summary>
+		/// Change default settings and verify them.
+		/// </summary>
+		[StrictFactAttribute]
+		public void testModifySettings()
+		{
+			_writer.DeltaBaseAsOffset = true;
+			_writer.ReuseDeltas = false;
+			_writer.ReuseObjects = false;
+
+			Assert.Equal(true, _writer.DeltaBaseAsOffset);
+			Assert.Equal(false, _writer.ReuseDeltas);
+			Assert.Equal(false, _writer.ReuseObjects);
+		}
+
+		///	<summary>
+		/// Write empty pack by providing empty sets of interesting/uninteresting
+		///	objects and check for correct format.
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[StrictFactAttribute]
+		public void testWriteEmptyPack1()
+		{
+			CreateVerifyOpenPack(EmptyListObject, EmptyListObject, false, false);
+
+			Assert.Equal(0, _writer.getObjectsNumber());
+			Assert.Equal(0, _pack.ObjectCount);
+			Assert.Equal("da39a3ee5e6b4b0d3255bfef95601890afd80709", _writer.computeName().Name);
+		}
+
+		/// <summary>
+		/// Write empty pack by providing empty iterator of objects to write and
+		/// check for correct format.
+		/// </summary>
+		/// <exception cref="IOException"> </exception>
+		[StrictFactAttribute]
+		public void testWriteEmptyPack2()
+		{
+			CreateVerifyOpenPack(EmptyListRevs);
+
+			Assert.Equal(0, _writer.getObjectsNumber());
+			Assert.Equal(0, _pack.ObjectCount);
+		}
+
+		///	<summary>
+		/// Try to pass non-existing object as uninteresting, with non-ignoring
+		///	setting.
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[StrictFactAttribute]
+		public void testNotIgnoreNonExistingObjects()
+		{
+			Assert.Throws<MissingObjectException>(() =>
+								{
+									ObjectId nonExisting = ObjectId.FromString("0000000000000000000000000000000000000001");
+									CreateVerifyOpenPack(EmptyListObject, Enumerable.Repeat(nonExisting, 1), false, false);
+								});
+		}
+
 		///	<summary>
 		/// Try to pass non-existing object as uninteresting, with ignoring setting.
 		///	</summary>
@@ -101,9 +173,154 @@ namespace GitSharp.Tests
 		}
 
 		///	<summary>
+		/// Test writing pack without object reuse. Pack content/preparation as in
+		///	<seealso cref="testWritePack1()"/>.
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[StrictFactAttribute]
+		public virtual void testWritePack1NoObjectReuse()
+		{
+			_writer.ReuseDeltas = false;
+			_writer.ReuseObjects = false;
+			WriteVerifyPack1();
+		}
+
+		///	<summary>
+		/// Create pack basing on both interesting and uninteresting objects, then
+		///	precisely verify content. No delta reuse here.
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[StrictFactAttribute]
+		public void testWritePack2()
+		{
+			WriteVerifyPack2(false);
+		}
+
+		///	<summary>
+		/// Test pack writing with deltas reuse, delta-base first rule. Pack
+		///	content/preparation as in <seealso cref="testWritePack2()"/>.
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[StrictFactAttribute]
+		public void testWritePack2DeltasReuseRefs()
+		{
+			WriteVerifyPack2(true);
+		}
+
+		///	<summary>
+		/// Test pack writing with delta reuse. Delta bases referred as offsets. Pack
+		///	configuration as in <seealso cref="testWritePack2DeltasReuseRefs()"/>.
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[StrictFactAttribute]
+		public void testWritePack2DeltasReuseOffsets()
+		{
+			_writer.DeltaBaseAsOffset = true;
+			WriteVerifyPack2(true);
+		}
+
+
+		///	<summary>
+		/// Test pack writing with delta reuse. Raw-data copy (reuse) is made on a
+		///	pack with CRC32 index. Pack configuration as in
+		///	<seealso cref="testWritePack2DeltasReuseRefs()"/>.
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[StrictFactAttribute]
+		public void testWritePack2DeltasCRC32Copy()
+		{
+			var packDir = new FileInfo(Path.Combine(db.ObjectsDirectory.FullName, "pack"));
+			var crc32Pack = new FileInfo(Path.Combine(packDir.DirectoryName, "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.pack"));
+			var crc32Idx = new FileInfo(Path.Combine(packDir.DirectoryName, "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.idx"));
+			var packFile = new FileInfo("Resources/pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.idxV2");
+			packFile.CopyTo(crc32Idx.FullName);
+			db.OpenPack(crc32Pack, crc32Idx);
+
+			WriteVerifyPack2(true);
+		}
+
+		///	<summary>
+		/// Create pack basing on fixed objects list, then precisely verify content.
+		///	No delta reuse here.
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		///	<exception cref="MissingObjectException">
+		///	</exception>
+		[StrictFactAttribute]
+		public void testWritePack3()
+		{
+			_writer.ReuseDeltas = false;
+			var forcedOrder = new[]
+								{
+									ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"),
+									ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799"),
+									ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"),
+									ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327"),
+									ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"),
+									ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")
+								};
+			var parser = new GitSharp.RevWalk.RevWalk(db);
+			var forcedOrderRevs = new RevObject[forcedOrder.Length];
+
+			for (int i = 0; i < forcedOrder.Length; i++)
+			{
+				forcedOrderRevs[i] = parser.parseAny(forcedOrder[i]);
+			}
+
+			CreateVerifyOpenPack(forcedOrderRevs.AsEnumerable());
+
+			Assert.Equal(forcedOrder.Length, _writer.getObjectsNumber());
+			VerifyObjectsOrder(forcedOrder);
+			Assert.Equal("ed3f96b8327c7c66b0f8f70056129f0769323d86", _writer.computeName().Name);
+		}
+
+		///	<summary>
+		/// Another pack creation: basing on both interesting and uninteresting
+		///	objects. No delta reuse possible here, as this is a specific case when we
+		///	write only 1 commit, associated with 1 tree, 1 blob.
+		///	</summary>
+		///	 <exception cref="IOException"> </exception>
+		[StrictFactAttribute]
+		public void testWritePack4()
+		{
+			WriteVerifyPack4(false);
+		}
+
+		///	<summary>
+		/// Test thin pack writing: 1 blob delta base is on objects edge. Pack
+		///	configuration as in <seealso cref="testWritePack4()"/>.
+		///	</summary>
+		///	<exception cref="IOException"> </exception>
+		[StrictFactAttribute]
+		public void testWritePack4ThinPack()
+		{
+			WriteVerifyPack4(true);
+		}
+
+		///	<summary>
+		/// Compare sizes of packs created using <seealso cref="testWritePack2()"/> and
+		///	<seealso cref="testWritePack2DeltasReuseRefs()"/>. The pack using deltas should
+		///	be smaller.
+		///	</summary>
+		///	<exception cref="Exception"> </exception>
+		[StrictFactAttribute]
+		public void testWritePack2SizeDeltasVsNoDeltas()
+		{
+			testWritePack2();
+			long sizePack2NoDeltas = _cos.Length;
+#warning This might not work
+			base.TearDown();
+			base.SetUp();
+			testWritePack2DeltasReuseRefs();
+			long sizePack2DeltasRefs = _cos.Length;
+
+			Assert.True(sizePack2NoDeltas > sizePack2DeltasRefs);
+		}
+
+		///	<summary>
 		/// Compare sizes of packs created using
 		///	<seealso cref="testWritePack2DeltasReuseRefs()"/> and
-		///	<seealso cref="testWritePack2DeltasReuseOffsets()"/>. 
+		///	<seealso cref="testWritePack2DeltasReuseOffsets()"/>.
 		/// The pack with delta bases written as offsets should be smaller.
 		///	</summary>
 		///	<exception cref="Exception"> </exception>
@@ -123,7 +340,7 @@ namespace GitSharp.Tests
 
 		///	<summary>
 		/// Compare sizes of packs created using <seealso cref="testWritePack4()"/> and
-		///	<seealso cref="testWritePack4ThinPack()"/>. 
+		///	<seealso cref="testWritePack4ThinPack()"/>.
 		/// Obviously, the thin pack should be smaller.
 		///	</summary>
 		///	<exception cref="Exception"> </exception>
@@ -187,16 +404,16 @@ namespace GitSharp.Tests
 			CreateVerifyOpenPack(interestings, EmptyListObject, false, false);
 
 			var expectedOrder = new[]
-			                    	{
-			                    		ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"),
-			                    		ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799"),
-			                    		ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab"),
-			                    		ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"),
-			                    		ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327"),
-			                    		ObjectId.FromString("4b825dc642cb6eb9a060e54bf8d69288fbee4904"),
-			                    		ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"),
-			                    		ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")
-			                    	};
+									{
+										ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"),
+										ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799"),
+										ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab"),
+										ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"),
+										ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327"),
+										ObjectId.FromString("4b825dc642cb6eb9a060e54bf8d69288fbee4904"),
+										ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"),
+										ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")
+									};
 
 			Assert.Equal(expectedOrder.Length, _writer.getObjectsNumber());
 			VerifyObjectsOrder(expectedOrder);
@@ -213,14 +430,14 @@ namespace GitSharp.Tests
 			CreateVerifyOpenPack(interestings, uninterestings, false, false);
 
 			var expectedOrder = new[]
-			                    	{
-			                    		ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"),
-			                    		ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799"),
-			                    		ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"),
-			                    		ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327"),
-			                    		ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"),
-			                    		ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")
-			                    	};
+									{
+										ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"),
+										ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799"),
+										ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"),
+										ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327"),
+										ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"),
+										ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")
+									};
 			if (deltaReuse)
 			{
 				// objects order influenced (swapped) by delta-base first rule
@@ -243,11 +460,11 @@ namespace GitSharp.Tests
 			CreateVerifyOpenPack(interestings, uninterestings, thin, false);
 
 			var writtenObjects = new[]
-			                     	{
-			                     		ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"),
-			                     		ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"),
-			                     		ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259")
-			                     	};
+									{
+										ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"),
+										ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"),
+										ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259")
+									};
 
 			Assert.Equal(writtenObjects.Length, _writer.getObjectsNumber());
 			ObjectId[] expectedObjects;
@@ -286,12 +503,12 @@ namespace GitSharp.Tests
 		private void VerifyOpenPack(bool thin)
 		{
 			IndexPack indexer;
-			Stream @is;
+			Stream inputStream;
 
 			if (thin)
 			{
-				@is = new MemoryStream(_os.ToArray());
-				indexer = new IndexPack(db, @is, _packBase);
+				inputStream = new MemoryStream(_os.ToArray());
+				indexer = new IndexPack(db, inputStream, _packBase);
 				try
 				{
 					indexer.index(new TextProgressMonitor());
@@ -303,8 +520,8 @@ namespace GitSharp.Tests
 				}
 			}
 
-			@is = new MemoryStream(_os.ToArray());
-			indexer = new IndexPack(db, @is, _packBase);
+			inputStream = new MemoryStream(_os.ToArray());
+			indexer = new IndexPack(db, inputStream, _packBase);
 			indexer.setKeepEmpty(true);
 			indexer.setFixThin(thin);
 			indexer.setIndexVersion(2);
@@ -326,221 +543,6 @@ namespace GitSharp.Tests
 			{
 				Assert.Equal(objectsOrder[i++].ToObjectId(), me.ToObjectId());
 			}
-		}
-
-		///	 <summary>
-		/// Test constructor for exceptions, default settings, initialization.
-		/// </summary>
-		[StrictFactAttribute]
-		public void testContructor()
-		{
-			Assert.Equal(false, _writer.DeltaBaseAsOffset);
-			Assert.Equal(true, _writer.ReuseDeltas);
-			Assert.Equal(true, _writer.ReuseObjects);
-			Assert.Equal(0, _writer.getObjectsNumber());
-		}
-
-		///	<summary>
-		/// Change default settings and verify them.
-		/// </summary>
-		[StrictFactAttribute]
-		public void testModifySettings()
-		{
-			_writer.DeltaBaseAsOffset = true;
-			_writer.ReuseDeltas = false;
-			_writer.ReuseObjects = false;
-
-			Assert.Equal(true, _writer.DeltaBaseAsOffset);
-			Assert.Equal(false, _writer.ReuseDeltas);
-			Assert.Equal(false, _writer.ReuseObjects);
-		}
-
-		///	<summary>
-		/// Try to pass non-existing object as uninteresting, with non-ignoring
-		///	setting.
-		///	</summary>
-		///	<exception cref="IOException"> </exception>
-		[StrictFactAttribute]
-		public void testNotIgnoreNonExistingObjects()
-		{
-			Assert.Throws<MissingObjectException>(() =>
-								{
-									ObjectId nonExisting = ObjectId.FromString("0000000000000000000000000000000000000001");
-									CreateVerifyOpenPack(EmptyListObject, Enumerable.Repeat(nonExisting, 1), false, false);
-								});
-		}
-
-		///	<summary>
-		/// Write empty pack by providing empty sets of interesting/uninteresting
-		///	objects and check for correct format.
-		///	</summary>
-		///	<exception cref="IOException"> </exception>
-		[StrictFactAttribute]
-		public void testWriteEmptyPack1()
-		{
-			CreateVerifyOpenPack(EmptyListObject, EmptyListObject, false, false);
-
-			Assert.Equal(0, _writer.getObjectsNumber());
-			Assert.Equal(0, _pack.ObjectCount);
-			Assert.Equal("da39a3ee5e6b4b0d3255bfef95601890afd80709", _writer.computeName().Name);
-		}
-
-		/// <summary>
-		/// Write empty pack by providing empty iterator of objects to write and
-		/// check for correct format.
-		/// </summary>
-		/// <exception cref="IOException"> </exception>
-		[StrictFactAttribute]
-		public void testWriteEmptyPack2()
-		{
-			CreateVerifyOpenPack(EmptyListRevs);
-
-			Assert.Equal(0, _writer.getObjectsNumber());
-			Assert.Equal(0, _pack.ObjectCount);
-		}
-
-		///	<summary>
-		/// Test writing pack without object reuse. Pack content/preparation as in
-		///	<seealso cref="testWritePack1()"/>.
-		///	</summary>
-		///	<exception cref="IOException"> </exception>
-		[StrictFactAttribute]
-		public virtual void testWritePack1NoObjectReuse()
-		{
-			_writer.ReuseDeltas = false;
-			_writer.ReuseObjects = false;
-			WriteVerifyPack1();
-		}
-
-		///	<summary>
-		/// Create pack basing on both interesting and uninteresting objects, then
-		///	precisely verify content. No delta reuse here.
-		///	</summary>
-		///	<exception cref="IOException"> </exception>
-		[StrictFactAttribute]
-		public void testWritePack2()
-		{
-			WriteVerifyPack2(false);
-		}
-
-		///	<summary>
-		/// Test pack writing with delta reuse. Raw-data copy (reuse) is made on a
-		///	pack with CRC32 index. Pack configuration as in
-		///	<seealso cref="testWritePack2DeltasReuseRefs()"/>.
-		///	</summary>
-		///	<exception cref="IOException"> </exception>
-		[StrictFactAttribute]
-		public void testWritePack2DeltasCRC32Copy()
-		{
-			var packDir = new FileInfo(Path.Combine(db.ObjectsDirectory.FullName, "pack"));
-			var crc32Pack = new FileInfo(Path.Combine(packDir.DirectoryName, "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.pack"));
-			var crc32Idx = new FileInfo(Path.Combine(packDir.DirectoryName, "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.idx"));
-			var packFile = new FileInfo("Resources/pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f.idxV2");
-			packFile.CopyTo(crc32Idx.FullName);
-			db.OpenPack(crc32Pack, crc32Idx);
-
-			WriteVerifyPack2(true);
-		}
-
-		///	<summary> 
-		/// Test pack writing with delta reuse. Delta bases referred as offsets. Pack
-		///	configuration as in <seealso cref="testWritePack2DeltasReuseRefs()"/>.
-		///	</summary>
-		///	<exception cref="IOException"> </exception>
-		[StrictFactAttribute]
-		public void testWritePack2DeltasReuseOffsets()
-		{
-			_writer.DeltaBaseAsOffset = true;
-			WriteVerifyPack2(true);
-		}
-
-		///	<summary>
-		/// Test pack writing with deltas reuse, delta-base first rule. Pack
-		///	content/preparation as in <seealso cref="testWritePack2()"/>.
-		///	</summary>
-		///	<exception cref="IOException"> </exception>
-		[StrictFactAttribute]
-		public void testWritePack2DeltasReuseRefs()
-		{
-			WriteVerifyPack2(true);
-		}
-
-		///	<summary>
-		/// Compare sizes of packs created using <seealso cref="testWritePack2()"/> and
-		///	<seealso cref="testWritePack2DeltasReuseRefs()"/>. The pack using deltas should
-		///	be smaller.
-		///	</summary>
-		///	<exception cref="Exception"> </exception>
-		[StrictFactAttribute]
-		public void testWritePack2SizeDeltasVsNoDeltas()
-		{
-			testWritePack2();
-			long sizePack2NoDeltas = _cos.Length;
-#warning This might not work
-			base.TearDown();
-			base.SetUp();
-			testWritePack2DeltasReuseRefs();
-			long sizePack2DeltasRefs = _cos.Length;
-
-			Assert.True(sizePack2NoDeltas > sizePack2DeltasRefs);
-		}
-
-		///	<summary>
-		/// Create pack basing on fixed objects list, then precisely verify content.
-		///	No delta reuse here.
-		///	</summary>
-		///	<exception cref="IOException"> </exception>
-		///	<exception cref="MissingObjectException">
-		///	</exception>
-		[StrictFactAttribute]
-		public void testWritePack3()
-		{
-			_writer.ReuseDeltas = false;
-			var forcedOrder = new[]
-			                  	{
-			                  		ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7"),
-			                  		ObjectId.FromString("c59759f143fb1fe21c197981df75a7ee00290799"),
-			                  		ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"),
-			                  		ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327"),
-			                  		ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"),
-			                  		ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")
-			                  	};
-			var parser = new GitSharp.RevWalk.RevWalk(db);
-			var forcedOrderRevs = new RevObject[forcedOrder.Length];
-
-			for (int i = 0; i < forcedOrder.Length; i++)
-			{
-				forcedOrderRevs[i] = parser.parseAny(forcedOrder[i]);
-			}
-
-			CreateVerifyOpenPack(forcedOrderRevs.AsEnumerable());
-
-			Assert.Equal(forcedOrder.Length, _writer.getObjectsNumber());
-			VerifyObjectsOrder(forcedOrder);
-			Assert.Equal("ed3f96b8327c7c66b0f8f70056129f0769323d86", _writer.computeName().Name);
-		}
-
-		///	<summary>
-		/// Another pack creation: basing on both interesting and uninteresting
-		///	objects. No delta reuse possible here, as this is a specific case when we
-		///	write only 1 commit, associated with 1 tree, 1 blob.
-		///	</summary>
-		///	 <exception cref="IOException"> </exception>
-		[StrictFactAttribute]
-		public void testWritePack4()
-		{
-			WriteVerifyPack4(false);
-		}
-
-		///	<summary>
-		/// Test thin pack writing: 1 blob delta base is on objects edge. Pack
-		///	configuration as in <seealso cref="testWritePack4()"/>.
-		///	</summary>
-		///	<exception cref="IOException"> </exception>
-		[StrictFactAttribute]
-		public void testWritePack4ThinPack()
-		{
-			WriteVerifyPack4(true);
 		}
 	}
 }

@@ -37,6 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -256,7 +257,14 @@ namespace GitSharp.Transport
             IDictionary<ObjectId, Ref> avail = new Dictionary<ObjectId, Ref>();
             foreach (Ref r in _connection.Refs)
             {
-                avail.Add(r.ObjectId, r);
+                if (avail.ContainsKey(r.ObjectId))
+                {
+                    avail[r.ObjectId] = r;
+                }
+                else
+                {
+                    avail.Add(r.ObjectId, r);
+                }
             }
 
             ICollection<Ref> wants = new List<Ref>(_askFor.Values);

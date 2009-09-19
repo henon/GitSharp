@@ -69,7 +69,7 @@ namespace GitSharp.CLI
                 gitdir = bare ? Environment.CurrentDirectory : Path.Combine(Environment.CurrentDirectory, ".git");
             db = new Repository(new DirectoryInfo(gitdir));
             db.Create(bare);
-            Console.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
+            streamOut.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
         }
     }
 

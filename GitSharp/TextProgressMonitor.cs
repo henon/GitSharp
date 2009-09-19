@@ -84,7 +84,7 @@ namespace GitSharp
 			int cmp = _lastWorked + completed;
 			if (!_output && ((DateTime.Now - _taskBeganAt).TotalMilliseconds < 500)) return;
 
-			if (_totalWork == 0)
+			if (_totalWork == UNKNOWN)
 			{
 				Display(cmp);
 				_writer.Flush();
@@ -110,7 +110,7 @@ namespace GitSharp
 				m.Append(' ');
 			}
 
-			if (_totalWork == 0)
+			if (_totalWork == UNKNOWN)
 			{
 				m.Append(cmp);
 			}
@@ -150,7 +150,7 @@ namespace GitSharp
 		{
 			if (_output)
 			{
-				if (_totalWork != 0)
+				if (_totalWork != UNKNOWN)
 				{
 					Display(_totalWork);
 				}

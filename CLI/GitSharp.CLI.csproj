@@ -61,8 +61,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractFetchCommand.cs" />
     <Compile Include="Add.cs" />
     <Compile Include="Checkout.cs" />
+    <Compile Include="Clone.cs" />
     <Compile Include="CmdParserOptionSet.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="CommandCatalog.cs" />

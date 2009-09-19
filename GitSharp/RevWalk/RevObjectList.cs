@@ -95,7 +95,7 @@ namespace GitSharp.RevWalk
 			while (index >> s.Shift >= BLOCK_SIZE)
 			{
 				s = new Block(s.Shift + BLOCK_SHIFT);
-				s.Contents[0] = Contents;
+			    s.Contents[0] = Contents;
 				Contents = s;
 			}
 
@@ -141,7 +141,7 @@ namespace GitSharp.RevWalk
 			Size = 0;
 		}
 
-		public class Block : IEnumerable<object>
+		public class Block : IEnumerable<T>
 		{
 			public object[] Contents { get; private set; }
 			public int Shift { get; private set; }
@@ -161,9 +161,25 @@ namespace GitSharp.RevWalk
 			/// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
 			/// </returns>
 			/// <filterpriority>1</filterpriority>
-			public IEnumerator<object> GetEnumerator()
+			public IEnumerator<T> GetEnumerator()
 			{
-				return Contents.AsEnumerable().GetEnumerator();
+			    foreach (object o in Contents)
+			    {
+                    if (o == null) continue;
+                    if (o is Block)
+                    {
+                        Block s = (Block) o;
+                        foreach (object os in s.Contents)
+                        {
+                            if (os == null) continue;
+                            yield return (T) os;
+                        }
+                    }
+                    else
+                    {
+                        yield return (T) o;
+                    }
+			    }
 			}
 
 			#endregion
@@ -189,7 +205,7 @@ namespace GitSharp.RevWalk
 
 		public IEnumerator<T> GetEnumerator()
 		{
-			throw new NotImplementedException();
+		    return Contents.GetEnumerator();
 		}
 
 		#endregion

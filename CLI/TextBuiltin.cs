@@ -227,7 +227,7 @@ public abstract class TextBuiltin
 		return new Die(why);
 	}
 
-	String AbbreviateRef(String dst, bool abbreviateRemote) {
+	public string AbbreviateRef(String dst, bool abbreviateRemote) {
         if (dst.StartsWith(Constants.R_HEADS))
 			dst = dst.Substring(Constants.R_HEADS.Length);
         else if (dst.StartsWith(Constants.R_TAGS))

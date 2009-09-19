@@ -120,7 +120,6 @@ namespace GitSharp.CLI
 
         private static void execute(string[] argv)
         {
-            argv = new string[] { "clone", "git://github.com/caytchen/GitSharp.git" };
             if (argv.Count() == 0)
             {
                 ShowHelp();

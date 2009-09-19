@@ -54,7 +54,9 @@ namespace GitSharp.Tests
             Assert.AreEqual(other, RepositoryCache.FileKey.exact(other).getFile());
 
             Assert.AreEqual(gitdir, RepositoryCache.FileKey.lenient(gitdir).getFile());
-            Assert.AreEqual(gitdir, RepositoryCache.FileKey.lenient(parent).getFile());
+            
+            // Test was "fixed" because DirectoryInfo.Equals() compares two different references
+            Assert.AreEqual(gitdir.FullName, RepositoryCache.FileKey.lenient(parent).getFile().FullName);
             Assert.AreEqual(other, RepositoryCache.FileKey.lenient(other).getFile());
         }
 
@@ -71,7 +73,9 @@ namespace GitSharp.Tests
             Assert.AreEqual(gitdir, RepositoryCache.FileKey.exact(gitdir).getFile());
 
             Assert.AreEqual(gitdir, RepositoryCache.FileKey.lenient(gitdir).getFile());
-            Assert.AreEqual(gitdir, RepositoryCache.FileKey.lenient(new DirectoryInfo(Path.Combine(parent.FullName, name))).getFile());
+
+            // Test was "fixed" because DirectoryInfo.Equals() compares two different references
+            Assert.AreEqual(gitdir.FullName, RepositoryCache.FileKey.lenient(new DirectoryInfo(Path.Combine(parent.FullName, name))).getFile().FullName);
         }
 
         [Test]

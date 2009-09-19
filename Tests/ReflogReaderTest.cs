@@ -106,15 +106,18 @@ namespace GitSharp.Tests
             setupReflog("logs/refs/heads/master", twoLine);
 
             ReflogReader reader = new ReflogReader(db, "refs/heads/master");
-            List<ReflogReader.Entry> reverseEntries = reader.getReverseEntries();
+            var reverseEntries = reader.getReverseEntries();
             Assert.AreEqual(2, reverseEntries.Count);
             ReflogReader.Entry e = reverseEntries[0];
+
             Assert.AreEqual(ObjectId
                     .FromString("c6734895958052a9dbc396cff4459dc1a25029ab"), e
                     .getOldId());
+
             Assert.AreEqual(ObjectId
                     .FromString("54794942a18a237c57a80719afed44bb78172b10"), e
                     .getNewId());
+
             Assert.AreEqual("Same A U Thor", e.getWho().Name);
             Assert.AreEqual("same.author@example.com", e.getWho().EmailAddress);
             Assert.AreEqual(60, e.getWho().TimeZoneOffset);
@@ -127,9 +130,11 @@ namespace GitSharp.Tests
             Assert.AreEqual(ObjectId
                     .FromString("0000000000000000000000000000000000000000"), e
                     .getOldId());
+
             Assert.AreEqual(ObjectId
                     .FromString("c6734895958052a9dbc396cff4459dc1a25029ab"), e
                     .getNewId());
+
             Assert.AreEqual("A U Thor", e.getWho().Name);
             Assert.AreEqual("thor@committer.au", e.getWho().EmailAddress);
             Assert.AreEqual(-60, e.getWho().TimeZoneOffset);
@@ -142,15 +147,18 @@ namespace GitSharp.Tests
         {
             setupReflog("logs/refs/heads/master", twoLineWithAppendInProgress);
             ReflogReader reader = new ReflogReader(db, "refs/heads/master");
-            List<ReflogReader.Entry> reverseEntries = reader.getReverseEntries();
+            var reverseEntries = reader.getReverseEntries();
             Assert.AreEqual(2, reverseEntries.Count);
             ReflogReader.Entry e = reverseEntries[0];
+
             Assert.AreEqual(ObjectId
                     .FromString("c6734895958052a9dbc396cff4459dc1a25029ab"), e
                     .getOldId());
+
             Assert.AreEqual(ObjectId
                     .FromString("54794942a18a237c57a80719afed44bb78172b10"), e
                     .getNewId());
+
             Assert.AreEqual("Same A U Thor", e.getWho().Name);
             Assert.AreEqual("same.author@example.com", e.getWho().EmailAddress);
             Assert.AreEqual(60, e.getWho().TimeZoneOffset);

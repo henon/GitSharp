@@ -37,6 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.IO;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -45,8 +46,8 @@ namespace GitSharp.Tests
 	public class PackReaderTests : RepositoryTestCase
 	{
 		private const string PackName = "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f";
-		private static readonly string TestPack = "Resources/" + GitSharp.Transport.IndexPack.GetPackFileName(PackName);
-		private static readonly string TestIdx = "Resources/" + GitSharp.Transport.IndexPack.GetIndexFileName(PackName);
+		private static readonly FileInfo TestPack = new FileInfo(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "Resources/"), GitSharp.Transport.IndexPack.GetPackFileName(PackName)).Replace('/', Path.DirectorySeparatorChar));
+		private static readonly FileInfo TestIdx = new FileInfo(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "Resources/"), GitSharp.Transport.IndexPack.GetIndexFileName(PackName)).Replace('/', Path.DirectorySeparatorChar));
 
 		[Test]
 		public void test003_lookupCompressedObject()

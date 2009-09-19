@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
@@ -48,7 +48,7 @@ namespace GitSharp
 	/// GIT project. The original delta patching code was written by Nicolas Pitre
 	/// (&lt;nico@cam.org&gt;).
 	/// </summary>
-	public class BinaryDelta
+	public static class BinaryDelta
 	{
 		///	<summary>
 		/// Apply the changes defined by delta to the data in base, yielding a new

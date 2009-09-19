@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2006, Shawn O. Pearce <spearce@spearce.org>
@@ -47,7 +47,7 @@ using GitSharp.Util;
 
 namespace GitSharp
 {
-	public class RefLogWriter
+	public static class RefLogWriter
 	{
 		internal static void append(RefUpdate u, String msg)
 		{

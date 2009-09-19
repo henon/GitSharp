@@ -45,7 +45,7 @@ namespace GitSharp.RevWalk.Filter
 	/// <summary>
 	/// Matches only commits whose message matches the pattern.
 	/// </summary>
-	public class MessageRevFilter
+	public static class MessageRevFilter
 	{
 		/// <summary>
 		/// Create a message filter.
@@ -75,11 +75,6 @@ namespace GitSharp.RevWalk.Filter
 			}
 
 			return new PatternSearch(pattern);
-		}
-
-		private MessageRevFilter()
-		{
-			// Don't permit us to be created.
 		}
 
 		private static string TextFor(RevCommit cmit)

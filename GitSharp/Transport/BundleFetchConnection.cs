@@ -76,7 +76,7 @@ namespace GitSharp.Transport
             catch (TransportException err)
             {
                 Close();
-                throw err;
+                throw;
             }
             catch (IOException err)
             {

@@ -75,6 +75,7 @@ namespace GitSharp.RevWalk
 	{
 		#region Enums
 
+		[Flags]
 		public enum RevWalkState
 		{
 			/// <summary>

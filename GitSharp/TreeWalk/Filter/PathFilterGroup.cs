@@ -58,7 +58,7 @@ namespace GitSharp.TreeWalk.Filter
      * This filter is effectively an OR group around paths, with the early abort
      * feature described above.
      */
-    public class PathFilterGroup
+    public static class PathFilterGroup
     {
         /**
          * Create a collection of path filters from Java strings.

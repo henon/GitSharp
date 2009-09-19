@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
@@ -57,11 +57,11 @@ namespace GitSharp.Transport
 
         protected void validateImpl(HttpWebRequest u, string p, string version, string name)
         {
-            string v = u.Headers.Get(p + JETS3T_CRYPTO_VER) ?? "";
+            string v = u.Headers.Get(p + JETS3T_CRYPTO_VER) ?? string.Empty;
             if (!version.Equals(v))
                 throw new IOException("Unsupported encryption version: " + v);
 
-            v = u.Headers.Get(p + JETS3T_CRYPTO_ALG) ?? "";
+            v = u.Headers.Get(p + JETS3T_CRYPTO_ALG) ?? string.Empty;
             if (!name.Equals(v))
                 throw new IOException("Unsupported encryption algorithm: " + v);
         }

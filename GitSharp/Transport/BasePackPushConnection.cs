@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
@@ -102,7 +102,7 @@ namespace GitSharp.Transport
             }
             catch (TransportException e)
             {
-                throw e;
+                throw;
             }
             catch (Exception e)
             {

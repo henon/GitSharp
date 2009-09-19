@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -71,7 +71,7 @@ namespace GitSharp.Transport
         public AckNackResult readACK(MutableObjectId returnedId)
         {
             string line = ReadString();
-            if (line == string.Empty)
+            if (line.Length  == 0)
                 throw new PackProtocolException("Expected ACK/NAK, found EOF");
             if ("NAK".Equals(line))
                 return AckNackResult.NAK;

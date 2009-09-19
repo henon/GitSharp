@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -45,7 +45,7 @@ using System.Text;
 namespace GitSharp.Util
 {
     /** Miscellaneous string comparison utility methods. */
-    public class StringUtils
+    public static class StringUtils
     {
         private static readonly char[] LC;
 

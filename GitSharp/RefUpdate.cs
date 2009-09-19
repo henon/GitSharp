@@ -181,6 +181,14 @@ namespace GitSharp
 		}
 
 		/// <summary>
+		/// The originally resolved name
+		/// </summary>
+		public string OriginalName
+		{
+			get { return _ref.OriginalName; }
+		}
+
+		/// <summary>
 		/// Gets the new value the ref will be (or was) updated to.
 		/// </summary>
 		public ObjectId NewObjectId
@@ -314,22 +322,9 @@ namespace GitSharp
 
 		private RefUpdateResult UpdateImpl(RevWalk.RevWalk walk, StoreBase store)
 		{
-			int lastSlash = Name.LastIndexOf('/');
-			if (lastSlash > 0)
+			if (IsNameConflicting())
 			{
-				if (Repository.getAllRefs().ContainsKey(Name.Slice(0, lastSlash)))
-				{
-					return RefUpdateResult.LockFailure;
-				}
-			}
-
-			string rName = Name + "/";
-			foreach (Ref r in Repository.getAllRefs().Values)
-			{
-				if (r.Name.StartsWith(rName))
-				{
-					return RefUpdateResult.LockFailure;
-				}
+				return RefUpdateResult.LockFailure;
 			}
 
 			var @lock = new LockFile(_looseFile);
@@ -344,7 +339,7 @@ namespace GitSharp
 				if (_expValue != null)
 				{
 					ObjectId o = OldObjectId ?? ObjectId.ZeroId;
-					if (!_expValue.Equals(o))
+					if (!AnyObjectId.equals(_expValue, o))
 					{
 						return RefUpdateResult.LockFailure;
 					}
@@ -425,6 +420,26 @@ namespace GitSharp
 				Result = RefUpdateResult.IOFailure;
 				throw;
 			}
+		}
+
+		private bool IsNameConflicting()
+		{
+			int lastSlash = Name.LastIndexOf('/');
+			if (lastSlash > 0)
+			{
+				if (Repository.getAllRefs().ContainsKey(Name.Slice(0, lastSlash)))
+				{
+					return true;
+				}
+			}
+
+			string rName = Name + "/";
+			foreach (Ref r in Repository.getAllRefs().Values)
+			{
+				if (r.Name.StartsWith(rName)) return true;
+			}
+
+			return false;
 		}
 
 		private static RevObject SafeParse(RevWalk.RevWalk rw, AnyObjectId id)

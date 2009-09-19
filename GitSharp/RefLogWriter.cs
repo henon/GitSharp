@@ -43,13 +43,15 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading;
-using GitSharp.Util;
 
 namespace GitSharp
 {
-	public class RefLogWriter
+	/// <summary>
+	/// Utility class to work with reflog files
+	/// </summary>
+	public static class RefLogWriter
 	{
-		internal static void append(RefUpdate u, String msg)
+		internal static void append(RefUpdate u, string msg)
 		{
 			ObjectId oldId = u.OldObjectId;
 			ObjectId newId = u.NewObjectId;
@@ -57,17 +59,22 @@ namespace GitSharp
 			PersonIdent ident = u.RefLogIdent;
 
 			AppendOneRecord(oldId, newId, ident, msg, db, u.Name);
+
+			if (!u.Name.Equals(u.OriginalName))
+			{
+				AppendOneRecord(oldId, newId, ident, msg, db, u.OriginalName);
+			}
 		}
 
-		internal static void append(RefRename refRename, String msg)
+		internal static void append(RefRename refRename, string logName, string msg)
 		{
 			ObjectId id = refRename.ObjectId;
 			Repository db = refRename.Repository;
 			PersonIdent ident = refRename.RefLogIdent;
-			AppendOneRecord(id, id, ident, msg, db, refRename.ToName);
+			AppendOneRecord(id, id, ident, msg, db, logName);
 		}
 
-		internal static void renameTo(Repository db, RefUpdate from, RefUpdate to) 
+		internal static void renameTo(Repository db, RefUpdate from, RefUpdate to)
 		{
 			var logdir = new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.LOGS));
 			var reflogFrom = new FileInfo(Path.Combine(logdir.FullName, from.Name));
@@ -82,7 +89,7 @@ namespace GitSharp
 			}
 
 			RefUpdate.DeleteEmptyDir(reflogFrom.Directory, RefUpdate.Count(from.Name, '/'));
-			if (reflogToDir != null && !reflogToDir.Exists) 
+			if (reflogToDir != null && !reflogToDir.Exists)
 			{
 				try { reflogToDir.Create(); }
 				catch(IOException)
@@ -138,61 +145,19 @@ namespace GitSharp
 			}
 		}
 
-
-		/**
-		 * Writes reflog entry for ref specified by refName
-		 * 
-		 * @param repo
-		 *            repository to use
-		 * @param oldCommit
-		 *            previous commit
-		 * @param commit
-		 *            new commit
-		 * @param message
-		 *            reflog message
-		 * @param refName
-		 *            full ref name         
-		 */
+		///	<summary>
+		/// Writes reflog entry for ref specified by refName
+		///	</summary>
+		///	<param name="repo">Repository to use.</param>
+		///	<param name="oldCommit">Previous commit.</param>
+		///	<param name="commit">New commit.</param>
+		///	<param name="message">Reflog message</param>
+		///	<param name="refName">Full ref name</param>
+		///	<exception cref="IOException"></exception>
+		[Obsolete("Rely upon RefUpdate's automatic logging instead.")]
 		public static void WriteReflog(Repository repo, ObjectId oldCommit, ObjectId commit, string message, string refName)
 		{
-			string entry = BuildReflogString(repo, oldCommit, commit, message);
-
-			DirectoryInfo directory = repo.Directory;
-
-			FileInfo reflogfile = PathUtil.CombineFilePath(directory, "logs/" + refName);
-			DirectoryInfo reflogdir = reflogfile.Directory;
-			if (!reflogdir.Exists)
-			{
-				try
-				{
-					reflogdir.Create();
-				}
-				catch (Exception)
-				{
-					throw new IOException("Cannot create directory " + reflogdir);
-				}
-			}
-			
-			var writer = new StreamWriter(reflogfile.OpenWrite());
-			writer.WriteLine(entry);
-			writer.Close();
-		}
-
-		private static string BuildReflogString(Repository repo, ObjectId oldCommit, ObjectId commit, string message)
-		{
-			var me = new PersonIdent(repo);
-			string initial = string.Empty;
-
-			if (oldCommit == null)
-			{
-				oldCommit = ObjectId.ZeroId;
-				initial = " (initial)";
-			}
-			
-			string s = oldCommit + " " + commit + " "
-					+ me.ToExternalString() + "\t" + message + initial;
-
-			return s;
+			AppendOneRecord(oldCommit, commit, null, message, repo, refName);
 		}
 	}
 }

@@ -38,8 +38,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using GitSharp.Util;
 
@@ -47,6 +45,8 @@ namespace GitSharp
 {
     public class PersonIdent
     {
+		private readonly DateTimeOffset _whenTime;
+
         public string Name { get; private set; }
         public string EmailAddress { get; private set; }
         
@@ -108,12 +108,14 @@ namespace GitSharp
                 throw new ArgumentException("Malformed PersonIdent string"
                         + " (no < was found): " + str);
             }
+
             int gt = str.IndexOf('>', lt);
             if (gt == -1)
             {
                 throw new ArgumentException("Malformed PersonIdent string"
                         + " (no > was found): " + str);
             }
+
             int sp = str.IndexOf(' ', gt + 2);
             if (sp == -1)
             {
@@ -123,15 +125,8 @@ namespace GitSharp
             else
             {
                 string tzHoursStr = str.Slice(sp + 1, sp + 4).Trim();
-                int tzHours;
-                if (tzHoursStr[0] == '+')
-                {
-                    tzHours = int.Parse(tzHoursStr.Substring(1));
-                }
-                else
-                {
-                    tzHours = int.Parse(tzHoursStr);
-                }
+            	int tzHours = tzHoursStr[0] == '+' ? int.Parse(tzHoursStr.Substring(1)) : int.Parse(tzHoursStr);
+
                 int tzMins = int.Parse(str.Substring(sp + 4).Trim());
                 When = long.Parse(str.Slice(gt + 1, sp).Trim()) * 1000;
                 tzOffset = tzHours * 60 + tzMins;
@@ -190,10 +185,8 @@ namespace GitSharp
         {
             int offset = tzOffset;
             char sign;
-            int offsetHours;
-            int offsetMins;
 
-            if (offset < 0)
+        	if (offset < 0)
             {
                 sign = '-';
                 offset = -offset;
@@ -203,8 +196,8 @@ namespace GitSharp
                 sign = '+';
             }
 
-            offsetHours = offset / 60;
-            offsetMins = offset % 60;
+            int offsetHours = offset / 60;
+            int offsetMins = offset % 60;
 
             r.Append(sign);
             if (offsetHours < 10)

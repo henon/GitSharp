@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
 using System.IO;
 using GitSharp.RevWalk;
 using NUnit.Framework;
@@ -207,6 +208,16 @@ namespace GitSharp.Tests
 			Assert.AreNotSame(newid, r.ObjectId);
 			Assert.AreSame(typeof(ObjectId), r.ObjectId.GetType());
 			Assert.AreEqual(newid.Copy(), r.ObjectId);
+
+			//var reverseEntries1 = db.GetReflogReader("refs/heads/abc").getReverseEntries();
+			//var entry1 = reverseEntries1[0];
+			//Assert.AreEqual(1, reverseEntries1.Count);
+			//Assert.AreEqual(ObjectId.ZeroId, entry1.OldId);
+			//Assert.AreEqual(r.getObjectId(), entry1.NewId);
+			//Assert.AreEqual(new PersonIdent(db).toString(), entry1.Who.toString());
+			//Assert.AreEqual(string.Empty, entry1.Comment);
+			//var reverseEntries2 = db.getReflogReader("HEAD").getReverseEntries();
+			//Assert.AreEqual(0, reverseEntries2.Count);
 		}
 
 		[Test]
@@ -237,6 +248,57 @@ namespace GitSharp.Tests
 
 			// real test
 			RefUpdate updateRef2 = db.UpdateRef("refs/heads/master");
+			updateRef2.NewObjectId = pid;
+			RefUpdate.RefUpdateResult update2 = updateRef2.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update2);
+			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+		}
+
+ 		/// <summary>
+		/// Try modify a ref forward, fast forward, checking old value first.
+ 		/// </summary>
+		[Test]
+		public void testUpdateRefForwardWithCheck1() 
+		{
+			ObjectId ppid = db.Resolve("refs/heads/master^");
+			ObjectId pid = db.Resolve("refs/heads/master");
+
+			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+			updateRef.NewObjectId = ppid;
+			updateRef.IsForceUpdate = true;
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
+			Assert.AreEqual(ppid, db.Resolve("refs/heads/master"));
+
+			// real test
+			RefUpdate updateRef2 = db.UpdateRef("refs/heads/master");
+			updateRef2.ExpectedOldObjectId = ppid;
+			updateRef2.NewObjectId = pid;
+			RefUpdate.RefUpdateResult update2 = updateRef2.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update2);
+			Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+		}
+
+		/// <summary>
+		/// Try modify a ref forward, fast forward, checking old commit first
+		/// </summary>
+		[Test]
+		public void testUpdateRefForwardWithCheck2()
+		{
+			ObjectId ppid = db.Resolve("refs/heads/master^");
+			ObjectId pid = db.Resolve("refs/heads/master");
+
+			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+			updateRef.NewObjectId = ppid;
+			updateRef.IsForceUpdate = true;
+			RefUpdate.RefUpdateResult update = updateRef.Update();
+			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
+			Assert.AreEqual(ppid, db.Resolve("refs/heads/master"));
+
+			// real test
+			RevCommit old = new GitSharp.RevWalk.RevWalk(db).parseCommit(ppid);
+			RefUpdate updateRef2 = db.UpdateRef("refs/heads/master");
+			updateRef2.ExpectedOldObjectId = old;
 			updateRef2.NewObjectId = pid;
 			RefUpdate.RefUpdateResult update2 = updateRef2.Update();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update2);

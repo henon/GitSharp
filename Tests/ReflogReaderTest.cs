@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2009, Robin Rosenberg
  *
  * All rights reserved.

@@ -62,31 +62,32 @@ namespace GitSharp
             string email = config.getString("user", null, "email");
             Name = username;
             EmailAddress = email;
-            DateTimeOffset now = DateTimeOffset.Now;
-            When = now.Millisecond;
-            tzOffset = now.Offset.Minutes;
         }
 
-        public PersonIdent(PersonIdent pi) :
-            this(pi.Name, pi.EmailAddress) 
-        {}
-
-        public PersonIdent(string name, string emailAddress) :
-            this(name, emailAddress, DateTime.Now, TimeZoneInfo.Local)
-        {}
-
-        public PersonIdent(PersonIdent pi, DateTime when, TimeZoneInfo tz) :
-            this(pi.Name, pi.EmailAddress, when, tz)
-        {}
-
-        public PersonIdent(PersonIdent pi, DateTime when) :
-            this(pi.Name, pi.EmailAddress, when.ToUnixTime() * 1000, pi.tzOffset)
+        public PersonIdent(PersonIdent pi)
+			: this(pi.Name, pi.EmailAddress)
         {
         }
 
-        public PersonIdent(string name, string emailAddress, DateTime when, TimeZoneInfo tz) :
-            this (name, emailAddress, when.ToUnixTime() * 1000, tz.GetUtcOffset(when).Minutes)
-        { }
+        public PersonIdent(string name, string emailAddress) 
+			: this(name, emailAddress, DateTime.Now, TimeZoneInfo.Local)
+        {
+        }
+
+        public PersonIdent(PersonIdent pi, DateTime when, TimeZoneInfo tz)
+			: this(pi.Name, pi.EmailAddress, when, tz)
+        {
+        }
+
+        public PersonIdent(PersonIdent pi, DateTime when)
+			: this(pi.Name, pi.EmailAddress, when.ToUnixTime() * 1000, pi.tzOffset)
+        {
+        }
+
+        public PersonIdent(string name, string emailAddress, DateTime when, TimeZoneInfo tz)
+			: this(name, emailAddress, when.ToUnixTime() * 1000, tz.GetUtcOffset(when).Minutes)
+        {
+        }
 
         public PersonIdent(string name, string emailAddress, long when, int tz)
         {
@@ -96,8 +97,10 @@ namespace GitSharp
             tzOffset = tz;
         }
 
-        public PersonIdent(PersonIdent pi, long git_time, int offset_in_minutes) : this(pi.Name, pi.EmailAddress, git_time, offset_in_minutes)
-        {}
+        public PersonIdent(PersonIdent pi, long git_time, int offset_in_minutes) 
+			: this(pi.Name, pi.EmailAddress, git_time, offset_in_minutes)
+        {
+        }
 
         public PersonIdent(string str)
         {

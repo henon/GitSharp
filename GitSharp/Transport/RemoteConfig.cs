@@ -155,7 +155,7 @@ namespace GitSharp.Transport
 			Timeout = rc.getInt(Section, Name, KeyTimeout, 0);
 		}
 
-		public void Update(RepositoryConfig rc)
+		public void Update(Config rc)
 		{
 			var vlst = new List<string>();
 

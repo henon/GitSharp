@@ -588,7 +588,7 @@ namespace GitSharp.Tests
 				AssertExists(false, "logs/" + toName + ".lock");
 				Assert.AreEqual(oldHeadId, db.Resolve(Constants.HEAD));
 				Assert.AreEqual(oldfromId, db.Resolve(fromName));
-				Assert.IsNotNull(db.Resolve(toName));
+				Assert.IsNull(db.Resolve(toName));
 				Assert.AreEqual(oldFromLog.ToString(), db.ReflogReader(fromName).getReverseEntries().ToString());
 				if (oldHeadId != null)
 				{

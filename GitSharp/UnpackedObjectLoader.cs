@@ -59,6 +59,12 @@ namespace GitSharp
 		/// </summary>
 		/// <param name="path">location of the loose object to read.</param>
 		/// <param name="id">Expected identity of the object being loaded, if known.</param>
+		///	<exception cref="FileNotFoundException">
+		/// The loose object file does not exist.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// The loose object file exists, but is corrupt.
+		/// </exception>
 		public UnpackedObjectLoader(FileSystemInfo path, AnyObjectId id)
 			: this(ReadCompressed(path), id)
 		{
@@ -70,6 +76,10 @@ namespace GitSharp
 		/// <param name="compressed">
 		/// Entire content of the loose object file.
 		/// </param>
+		///	<exception cref="CorruptObjectException">
+		///	The compressed data supplied does not match the format for a
+		///	valid loose object.
+		/// </exception>
 		public UnpackedObjectLoader(byte[] compressed)
 			: this(compressed, null)
 		{
@@ -224,20 +234,9 @@ namespace GitSharp
 			protected set { }
 		}
 
-		// [ammachado]: I've changed here to return a copy of the bytes
 		public override byte[] CachedBytes
 		{
-			get
-			{
-				if (_bytes != null)
-				{
-					var newBytes = new byte[_bytes.Length];
-					Array.Copy(_bytes, 0, newBytes, 0, _bytes.Length);
-					return newBytes;
-				}
-
-				throw new InvalidOperationException("The CachedBytes property was not initialized yet.");
-			}
+			get { return _bytes; }
 			protected set { }
 		}
 

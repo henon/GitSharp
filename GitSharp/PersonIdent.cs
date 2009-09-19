@@ -45,8 +45,6 @@ namespace GitSharp
 {
     public class PersonIdent
     {
-		private readonly DateTimeOffset _whenTime;
-
         public string Name { get; private set; }
         public string EmailAddress { get; private set; }
         

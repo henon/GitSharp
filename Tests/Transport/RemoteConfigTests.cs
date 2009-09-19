@@ -65,7 +65,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test000_Simple()
+        public void testSimple()
         {
             readConfig("[remote \"spearce\"]\n" + "url = http://www.spearce.org/egit.git\n" +
                         "fetch = +refs/heads/*:refs/remotes/spearce/*\n");
@@ -95,7 +95,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test001_SimpleNoTags()
+        public void testSimpleNoTags()
         {
             readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
@@ -106,7 +106,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test002_SimpleAlwaysTags()
+        public void testSimpleAlwaysTags()
         {
             readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
@@ -117,7 +117,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test003_Mirror()
+        public void testMirror()
         {
             readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
@@ -153,7 +153,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test004_Backup()
+        public void testBackup()
         {
             readConfig("[remote \"backup\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
@@ -190,7 +190,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test005_UploadPack()
+        public void testUploadPack()
         {
             readConfig("[remote \"example\"]\n"
                         + "url = user@example.com:egit.git\n"
@@ -223,7 +223,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test006_Unknown()
+        public void testUnknown()
         {
             readConfig(string.Empty);
 
@@ -236,7 +236,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test007_AddURI()
+        public void testAddURI()
         {
             readConfig(string.Empty);
 
@@ -253,7 +253,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test008_RemoveFirstURI()
+        public void testRemoveFirstURI()
         {
             readConfig(string.Empty);
 
@@ -276,7 +276,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test009_RemoveMiddleURI()
+        public void testRemoveMiddleURI()
         {
             readConfig(string.Empty);
 
@@ -300,7 +300,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test010_RemoveLastURI()
+        public void testRemoveLastURI()
         {
             readConfig(string.Empty);
 
@@ -324,7 +324,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test011_RemoveOnlyURI()
+        public void testRemoveOnlyURI()
         {
             readConfig(string.Empty);
 
@@ -340,7 +340,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test012_CreateOrigin()
+        public void testCreateOrigin()
         {
             RemoteConfig rc = new RemoteConfig(config, "origin");
             rc.AddURI(new URIish("/some/dir"));
@@ -352,7 +352,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test013_SaveAddURI()
+        public void testSaveAddURI()
         {
             readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
@@ -370,7 +370,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test014_SaveRemoveLastURI()
+        public void testSaveRemoveLastURI()
         {
             readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
@@ -389,7 +389,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test015_SaveRemoveFirstURI()
+        public void testSaveRemoveFirstURI()
         {
             readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
@@ -407,7 +407,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test016_SaveNoTags()
+        public void testSaveNoTags()
         {
             RemoteConfig rc = new RemoteConfig(config, "origin");
             rc.AddURI(new URIish("/some/dir"));
@@ -421,7 +421,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test017_SaveAllTags()
+        public void testSaveAllTags()
         {
             RemoteConfig rc = new RemoteConfig(config, "origin");
             rc.AddURI(new URIish("/some/dir"));
@@ -435,7 +435,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test018_SimpleTimeout()
+        public void testSimpleTimeout()
         {
             readConfig("[remote \"spearce\"]\n"
                     + "url = http://www.spearce.org/egit.git\n"
@@ -447,7 +447,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test019_SaveTimeout()
+        public void testSaveTimeout()
         {
             RemoteConfig rc = new RemoteConfig(config, "origin");
             rc.AddURI(new URIish("/some/dir"));

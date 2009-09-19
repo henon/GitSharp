@@ -37,20 +37,25 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using GitSharp.Util;
 using GitSharp.Exceptions;
 
 namespace GitSharp
 {
-    [Complete]
+	/// <summary>
+	/// A tree visitor for writing a directory tree to the git object database.
+	/// Blob data is fetched from the files, not the cached blobs.
+	/// </summary>
     public class WriteTree : TreeVisitorWithCurrentDirectory
     {
-        private ObjectWriter ow;
+        private readonly ObjectWriter ow;
+
+		///	<summary>
+		/// Construct a WriteTree for a given directory
+		///	</summary>
+		///	<param name="sourceDirectory"> </param>
+		///	<param name="db"> </param>
         public WriteTree(DirectoryInfo sourceDirectory, Repository db)
             : base(sourceDirectory)
         {
@@ -73,19 +78,18 @@ namespace GitSharp
             }
         }
 
-        public override void VisitGitlink(GitLinkTreeEntry e)
-        {
-            if (e.IsModified)
-            {
-                throw new GitlinksNotSupportedException(e.FullName);
-            }
-        }
+		public override void EndVisitTree(Tree t)
+		{
+			base.EndVisitTree(t);
+			t.Id = _ow.WriteTree(t);
+		}
 
-        public override void EndVisitTree(Tree t)
-        {
-            base.EndVisitTree(t);            
-            t.Id = ow.WriteTree(t);
-        }
-
-    }
+		public override void VisitGitlink(GitLinkTreeEntry s)
+		{
+			if (s.IsModified)
+			{
+				throw new GitlinksNotSupportedException(s.FullName);
+			}
+		}
+	}
 }

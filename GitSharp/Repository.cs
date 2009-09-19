@@ -915,13 +915,12 @@ namespace GitSharp
 			return bytes;
 		}
 
-		/**
-		 * string work dir and return normalized repository path
-		 *
-		 * @param wd Work dir
-		 * @param f File whose path shall be stripp off it's workdir
-		 * @return normalized repository relative path
-		 */
+		/// <summary>
+		/// Strip work dir and return normalized repository path
+		/// </summary>
+		/// <param name="wd">Work directory</param>
+		/// <param name="f">File whose path shall be stripp off it's workdir</param>
+		/// <returns>Normalized repository relative path</returns>
 		public static string StripWorkDir(FileSystemInfo wd, FileSystemInfo f)
 		{
 			string relName = f.FullName.Substring(wd.FullName.Length + 1);
@@ -1170,8 +1169,9 @@ namespace GitSharp
 		/// <param name="refName"></param>
 		/// <returns>
 		/// A <see cref="ReflogReader"/> for the supplied <paramref name="refName"/>,
-		/// or null if the /// named ref does not exist.
+		/// or null if the named ref does not exist.
 		/// </returns>
+		/// <exception cref="IOException">The <see cref="Ref"/> could not be accessed.</exception>
 		public ReflogReader ReflogReader(string refName)
 		{
 			Ref @ref = getRef(refName);

@@ -70,29 +70,23 @@ namespace GitSharp
     /// An index can also contain a tree cache which we ignore for now. We drop the
     /// tree cache when writing the index.
     /// </summary>
-    public class GitIndex
+    //[Obsolete("Use DirCache instead.")]
+	public class GitIndex
     {
         /// <summary>
         /// Stage 0 represents merged entries.
         /// </summary>
-        public const int STAGE_0 = 0;
+        private const int STAGE_0 = 0;
+        private static bool? filemode;
 
-        private static bool? filemode = null;
-
-        private readonly IDictionary<byte[], Entry> _entries =
-            new SortedDictionary<byte[], Entry>(new ByteVectorComparer());
-
-        private readonly FileInfo cacheFile;
+		private readonly IDictionary<byte[], Entry> _entries;
+        private readonly FileInfo _cacheFile;
 
         // Index is modified
-        private bool changed;
-
-        // Stat information updated
-
-        private Header header;
-
-        private long lastCacheTime;
-        private bool statDirty;
+        private bool _changed;
+        private Header _header;
+        private long _lastCacheTime;
+        private bool _statDirty;
 
         ///	<summary>
         /// Construct a Git index representation.
@@ -100,8 +94,9 @@ namespace GitSharp
         ///	<param name="db"> </param>
         public GitIndex(Repository db)
         {
+			_entries = new SortedDictionary<byte[], Entry>(new ByteVectorComparer());
             Repository = db;
-            cacheFile = new FileInfo(Path.Combine(db.Directory.FullName, "index"));
+            _cacheFile = new FileInfo(Path.Combine(db.Directory.FullName, "index"));
         }
 
         public Repository Repository { get; private set; }
@@ -111,7 +106,7 @@ namespace GitSharp
         /// </returns>
         public bool IsChanged
         {
-            get { return changed || statDirty; }
+            get { return _changed || _statDirty; }
         }
 
         ///	<summary>
@@ -137,7 +132,7 @@ namespace GitSharp
         ///	<exception cref="IOException"> </exception>
         public void RereadIfNecessary()
         {
-            if (cacheFile.Exists && cacheFile.LastWriteTime.Ticks != lastCacheTime)
+            if (_cacheFile.Exists && _cacheFile.LastWriteTime.Ticks != _lastCacheTime)
             {
                 Read();
                 Repository.OnIndexChanged();
@@ -166,7 +161,7 @@ namespace GitSharp
         /// <exception cref="IOException"> </exception>
         public Entry add(FileSystemInfo wd, FileInfo f, byte[] content)
         {
-            byte[] key = makeKey(wd, f);
+            byte[] key = MakeKey(wd, f);
             Entry e;
 
             if (!_entries.TryGetValue(key, out e))
@@ -191,7 +186,7 @@ namespace GitSharp
         /// <exception cref="IOException">  </exception>
         public bool remove(FileSystemInfo wd, FileSystemInfo f)
         {
-            byte[] key = makeKey(wd, f);
+            byte[] key = MakeKey(wd, f);
             return _entries.Remove(key);
         }
 
@@ -201,31 +196,31 @@ namespace GitSharp
         ///	<exception cref="IOException"> </exception>
         public void Read()
         {
-            changed = false;
-            statDirty = false;
+            _changed = false;
+            _statDirty = false;
 
-            if (!cacheFile.Exists)
+            if (!_cacheFile.Exists)
             {
-                header = null;
+                _header = null;
                 _entries.Clear();
-                lastCacheTime = 0;
+                _lastCacheTime = 0;
                 return;
             }
 
-            using (var cache = new FileStream(cacheFile.FullName, System.IO.FileMode.Open))
+            using (var cache = new FileStream(_cacheFile.FullName, System.IO.FileMode.Open))
             {
                 try
                 {
-                    header = new Header(new BinaryReader(cache));
+                    _header = new Header(new BinaryReader(cache));
                     _entries.Clear();
 
-                    for (int i = 0; i < header.Entries; ++i)
+                    for (int i = 0; i < _header.Entries; ++i)
                     {
                         var entry = new Entry(Repository, cache);
                         _entries[Constants.encode(entry.Name)] = entry;
                     }
 
-                    lastCacheTime = cacheFile.LastWriteTime.Ticks;
+                    _lastCacheTime = _cacheFile.LastWriteTime.Ticks;
                 }
                 finally
                 {
@@ -241,8 +236,8 @@ namespace GitSharp
         public void write()
         {
             CheckWriteOk();
-            var tmpIndex = new FileInfo(cacheFile.FullName + ".tmp");
-            var @lock = new FileInfo(cacheFile.FullName + ".lock");
+            var tmpIndex = new FileInfo(_cacheFile.FullName + ".tmp");
+            var @lock = new FileInfo(_cacheFile.FullName + ".lock");
 
             try
             {
@@ -262,8 +257,8 @@ namespace GitSharp
                     MessageDigest newMessageDigest = Constants.newMessageDigest();
                     var ms = new MemoryStream();
 
-                    header = new Header(_entries.Values as ICollection);
-                    header.Write(ms);
+                    _header = new Header(_entries.Values as ICollection);
+                    _header.Write(ms);
 
                     newMessageDigest.Update(ms.ToArray());
                     ms.WriteTo(fileOutputStream);
@@ -284,11 +279,11 @@ namespace GitSharp
                     fileOutputStream.Close();
                 }
 
-                if (cacheFile.Exists)
+                if (_cacheFile.Exists)
                 {
                     try
                     {
-                        cacheFile.Delete();
+                        _cacheFile.Delete();
                     }
                     catch (IOException)
                     {
@@ -296,14 +291,14 @@ namespace GitSharp
                     }
                 }
 
-                if (!tmpIndex.RenameTo(cacheFile.FullName))
+                if (!tmpIndex.RenameTo(_cacheFile.FullName))
                 {
                     throw new IOException("Could not rename temporary index file to index");
                 }
 
-                changed = false;
-                statDirty = false;
-                lastCacheTime = cacheFile.LastWriteTime.Ticks;
+                _changed = false;
+                _statDirty = false;
+                _lastCacheTime = _cacheFile.LastWriteTime.Ticks;
                 Repository.OnIndexChanged();
             }
             finally
@@ -343,22 +338,22 @@ namespace GitSharp
             }
         }
 
-        internal static bool File_canExecute(FileInfo f)
+    	private static bool FileCanExecute(FileSystemInfo f)
         {
             return FS.canExecute(f);
         }
 
-        internal static bool File_setExecute(FileInfo f, bool @value)
+    	private static bool FileSetExecute(FileInfo f, bool @value)
         {
             return FS.setExecute(f, @value);
         }
 
-        internal static bool File_hasExecute()
+    	private static bool FileHasExecute()
         {
             return FS.supportsExecute();
         }
 
-        internal static byte[] makeKey(FileSystemInfo wd, FileSystemInfo f)
+    	private static byte[] MakeKey(FileSystemInfo wd, FileSystemInfo f)
         {
             if (!string.IsNullOrEmpty(f.DirectoryName()) &&
                 wd.IsDirectory() && wd.Exists &&
@@ -371,7 +366,7 @@ namespace GitSharp
             return Constants.encode(relName);
         }
 
-        private static bool config_filemode(Repository repository)
+        private static bool ConfigFilemode(Repository repository)
         {
             // temporary til we can actually set parameters. We need to be able
             // to change this for testing.
@@ -384,20 +379,18 @@ namespace GitSharp
             return config.getBoolean("core", null, "filemode", true);
         }
 
-        ///    
-        ///	 <summary> * Read a Tree recursively into the index
-        ///	 * </summary>
-        ///	 * <param name="t"> The tree to read
-        ///	 * </param>
-        ///	 * <exception cref="IOException"> </exception>
-        ///	 
+        ///	<summary>
+        /// Read a Tree recursively into the index
+        /// </summary>
+        /// <param name="t">The tree to read</param>
+        ///	<exception cref="IOException"></exception>
         public void ReadTree(Tree t)
         {
             _entries.Clear();
             ReadTree(string.Empty, t);
         }
 
-        internal void ReadTree(string prefix, Tree t)
+    	private void ReadTree(string prefix, Tree t)
         {
             TreeEntry[] members = t.Members;
             for (int i = 0; i < members.Length; ++i)
@@ -483,18 +476,18 @@ namespace GitSharp
                 fs.Close();
             }
 
-            if (config_filemode(Repository) && File_hasExecute())
+            if (ConfigFilemode(Repository) && FileHasExecute())
             {
                 if (FileMode.ExecutableFile.Equals(e.Mode))
                 {
-                    if (!File_canExecute(file))
+                    if (!FileCanExecute(file))
                     {
-                        File_setExecute(file, true);
+                        FileSetExecute(file, true);
                     }
                 }
-                else if (File_canExecute(file))
+                else if (FileCanExecute(file))
                 {
-                    File_setExecute(file, false);
+                    FileSetExecute(file, false);
                 }
             }
 
@@ -679,7 +672,7 @@ namespace GitSharp
                 _dev = -1;
                 _ino = -1;
 
-                if (config_filemode(Repository) && File_canExecute(f))
+                if (ConfigFilemode(Repository) && FileCanExecute(f))
                 {
                     Mode = FileMode.ExecutableFile.Bits;
                 }
@@ -754,7 +747,7 @@ namespace GitSharp
             private Entry(Repository repository)
             {
                 Repository = repository;
-                ConfigFileMode = config_filemode(repository);
+                ConfigFileMode = ConfigFilemode(repository);
             }
 
             public ObjectId ObjectId { get; private set; }
@@ -809,7 +802,7 @@ namespace GitSharp
 
                 if (ConfigFileMode)
                 {
-                    if (File_canExecute(f) != FileMode.ExecutableFile.Equals(Mode))
+                    if (FileCanExecute(f) != FileMode.ExecutableFile.Equals(Mode))
                     {
                         Mode = FileMode.ExecutableFile.Bits;
                         modified = true;
@@ -944,14 +937,14 @@ namespace GitSharp
 
                 if (ConfigFileMode && FileMode.ExecutableFile.Equals(Mode))
                 {
-                    if (!File_canExecute(file) && File_hasExecute())
+                    if (!FileCanExecute(file) && FileHasExecute())
                         return true;
                 }
                 else
                 {
                     if (FileMode.RegularFile.Equals(Mode & ~exebits))
                     {
-                        if (!File.Exists(file.FullName) || ConfigFileMode && File_canExecute(file) && File_hasExecute())
+                        if (!File.Exists(file.FullName) || ConfigFileMode && FileCanExecute(file) && FileHasExecute())
                         {
                             return true;
                         }

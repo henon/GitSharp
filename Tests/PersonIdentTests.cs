@@ -38,12 +38,9 @@
 
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
 using GitSharp.Util;
+using NUnit.Framework;
 
 namespace GitSharp.Tests
 {

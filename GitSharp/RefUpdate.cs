@@ -154,13 +154,13 @@ namespace GitSharp
 		// If non-null, the value that the old object id must have to continue.
 		private ObjectId _expValue;
 
-
 		public RefUpdate(RefDatabase refDb, Ref r, FileInfo f)
 		{
 			_db = refDb;
 			_ref = r;
 			OldObjectId = r.ObjectId;
 			_looseFile = f;
+			_refLogMessage = string.Empty;
 			Result = RefUpdateResult.NotAttempted;
 		}
 
@@ -178,6 +178,14 @@ namespace GitSharp
 		public string Name
 		{
 			get { return _ref.Name; }
+		}
+
+		/// <summary>
+		/// The originally resolved name
+		/// </summary>
+		public string OriginalName
+		{
+			get { return _ref.OriginalName; }
 		}
 
 		/// <summary>
@@ -314,22 +322,9 @@ namespace GitSharp
 
 		private RefUpdateResult UpdateImpl(RevWalk.RevWalk walk, StoreBase store)
 		{
-			int lastSlash = Name.LastIndexOf('/');
-			if (lastSlash > 0)
+			if (IsNameConflicting())
 			{
-				if (Repository.getAllRefs().ContainsKey(Name.Slice(0, lastSlash)))
-				{
-					return RefUpdateResult.LockFailure;
-				}
-			}
-
-			string rName = Name + "/";
-			foreach (Ref r in Repository.getAllRefs().Values)
-			{
-				if (r.Name.StartsWith(rName))
-				{
-					return RefUpdateResult.LockFailure;
-				}
+				return RefUpdateResult.LockFailure;
 			}
 
 			var @lock = new LockFile(_looseFile);
@@ -344,7 +339,7 @@ namespace GitSharp
 				if (_expValue != null)
 				{
 					ObjectId o = OldObjectId ?? ObjectId.ZeroId;
-					if (!_expValue.Equals(o))
+					if (!AnyObjectId.equals(_expValue, o))
 					{
 						return RefUpdateResult.LockFailure;
 					}
@@ -427,6 +422,26 @@ namespace GitSharp
 			}
 		}
 
+		private bool IsNameConflicting()
+		{
+			int lastSlash = Name.LastIndexOf('/');
+			if (lastSlash > 0)
+			{
+				if (Repository.getAllRefs().ContainsKey(Name.Slice(0, lastSlash)))
+				{
+					return true;
+				}
+			}
+
+			string rName = Name + "/";
+			foreach (Ref r in Repository.getAllRefs().Values)
+			{
+				if (r.Name.StartsWith(rName)) return true;
+			}
+
+			return false;
+		}
+
 		private static RevObject SafeParse(RevWalk.RevWalk rw, AnyObjectId id)
 		{
 			try
@@ -453,16 +468,17 @@ namespace GitSharp
 
 			string msg = GetRefLogMessage();
 
-			if (!string.IsNullOrEmpty(msg))
+			if (msg != null)
 			{
 				if (_refLogIncludeResult)
 				{
-					String strResult = ToResultString(status);
+					string strResult = ToResultString(status);
 					if (strResult != null)
 					{
 						msg = !string.IsNullOrEmpty(msg) ? msg + ": " + strResult : strResult;
 					}
 				}
+
 				RefLogWriter.append(this, msg);
 			}
 

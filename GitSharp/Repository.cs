@@ -186,12 +186,13 @@ namespace GitSharp
 			new DirectoryInfo(Path.Combine(Directory.FullName, "branches")).Create();
 			new DirectoryInfo(Path.Combine(Directory.FullName, "remote")).Create();
 
-			string master = Constants.RefsHeads + Constants.Master;
+			const string master = Constants.RefsHeads + Constants.Master;
 
-			_refDb.Link(Constants.Head, master);
+			_refDb.Link(Constants.HEAD, master);
 
 			Config.setInt("core", null, "repositoryformatversion", 0);
 			Config.setBoolean("core", null, "filemode", true);
+
 			if (bare)
 			{
 				Config.setBoolean("core", null, "bare", true);
@@ -403,6 +404,12 @@ namespace GitSharp
 		public object MapObject(ObjectId id, string refName)
 		{
 			ObjectLoader or = OpenObject(id);
+
+			if (or == null)
+			{
+				return null;
+			}
+
 			byte[] raw = or.Bytes;
 			switch ((ObjectType)(or.Type))
 			{
@@ -498,6 +505,7 @@ namespace GitSharp
 			if (or == null) return null;
 
 			byte[] raw = or.Bytes;
+
 			if (ObjectType.Tag == (ObjectType)or.Type)
 			{
 				return new Tag(this, id, refName, raw);
@@ -520,6 +528,20 @@ namespace GitSharp
 		public RefUpdate UpdateRef(string refName)
 		{
 			return _refDb.NewUpdate(refName);
+		}
+
+		///	<summary>
+		/// Create a command to rename a ref in this repository
+		///	</summary>
+		///	<param name="fromRef">Name of ref to rename from.</param>
+		///	<param name="toRef">Name of ref to rename to.</param>
+		///	<returns>
+		/// An update command that knows how to rename a branch to another.
+		/// </returns>
+		///	<exception cref="IOException">The rename could not be performed.</exception>
+		public RefRename RenameRef(string fromRef, string toRef)
+		{
+			return _refDb.NewRename(fromRef, toRef);
 		}
 
 		///	<summary>
@@ -915,13 +937,12 @@ namespace GitSharp
 			return bytes;
 		}
 
-		/**
-		 * string work dir and return normalized repository path
-		 *
-		 * @param wd Work dir
-		 * @param f File whose path shall be stripp off it's workdir
-		 * @return normalized repository relative path
-		 */
+		/// <summary>
+		/// Strip work dir and return normalized repository path
+		/// </summary>
+		/// <param name="wd">Work directory</param>
+		/// <param name="f">File whose path shall be stripp off it's workdir</param>
+		/// <returns>Normalized repository relative path</returns>
 		public static string StripWorkDir(FileSystemInfo wd, FileSystemInfo f)
 		{
 			string relName = f.FullName.Substring(wd.FullName.Length + 1);
@@ -1170,14 +1191,15 @@ namespace GitSharp
 		/// <param name="refName"></param>
 		/// <returns>
 		/// A <see cref="ReflogReader"/> for the supplied <paramref name="refName"/>,
-		/// or null if the /// named ref does not exist.
+		/// or null if the named ref does not exist.
 		/// </returns>
+		/// <exception cref="IOException">The <see cref="Ref"/> could not be accessed.</exception>
 		public ReflogReader ReflogReader(string refName)
 		{
-			Ref @ref = getRef(refName);
-			if (@ref != null)
+			Ref gitRef = getRef(refName);
+			if (gitRef != null)
 			{
-				return new ReflogReader(this, @ref.OriginalName);
+				return new ReflogReader(this, gitRef.OriginalName);
 			}
 
 			return null;

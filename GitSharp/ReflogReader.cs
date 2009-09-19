@@ -42,15 +42,19 @@ using GitSharp.Util;
 
 namespace GitSharp
 {
-
+	/// <summary>
+	/// Utility for reading reflog entries.
+	/// </summary>
     public class ReflogReader
     {
+		#region Nested Types
+
         public class Entry
         {
-            private readonly ObjectId oldId;
-            private readonly ObjectId newId;
-            private readonly PersonIdent who;
-            private readonly string comment;
+			private readonly ObjectId oldId;
+			private readonly ObjectId newId;
+			private readonly PersonIdent who;
+			private readonly string comment;
 
             public Entry(byte[] raw, int pos)
             {
@@ -101,35 +105,63 @@ namespace GitSharp
             }
         }
 
-        private readonly FileInfo _logName;
+		#endregion
 
-        public ReflogReader(Repository db, string refname)
-        {
-            _logName = new FileInfo(Path.Combine(db.Directory.FullName, "logs/" + refname));
+		private readonly FileInfo _logName;
+
+		///	<summary>
+		/// Parsed reflog entry.
+		/// </summary>
+		public ReflogReader(Repository db, string refName)
+		{
+			_logName = new FileInfo(
+				Path.Combine(
+					db.Directory.FullName,
+						Path.Combine("logs", refName)).Replace('/', Path.DirectorySeparatorChar));
+
+			_logName.Refresh();
         }
 
+		///	<summary>
+		/// Get the last entry in the reflog.
+		/// </summary>
+		/// <returns>The latest reflog entry, or null if no log.</returns>
+		/// <exception cref="IOException"></exception>
         public Entry getLastEntry()
         {
-            List<Entry> entries = getReverseEntries(1);
+            var entries = getReverseEntries(1);
             return entries.Count > 0 ? entries[0] : null;
         }
 
-        public List<Entry> getReverseEntries()
-        {
-            return getReverseEntries(int.MaxValue);
-        }
+		/// <summary></summary>
+		/// <returns> all reflog entries in reverse order.
+		/// </returns>
+		/// <exception cref="IOException"></exception>
+		public IList<Entry> getReverseEntries()
+		{
+			return getReverseEntries(int.MaxValue);
+		}
 
-        public List<Entry> getReverseEntries(int max)
+		///	<param name="max">Max number of entries to read.</param>
+		///	<returns>All reflog entries in reverse order.</returns>
+		///	<exception cref="IOException"></exception>
+		public IList<Entry> getReverseEntries(int max)
         {
-            byte[] log;
-            
-            if (!_logName.IsFile())
-            {
-                return new List<Entry>();
-            }
-            
-            log = NB.ReadFully(_logName);
+			byte[] log;
 
+			try
+			{
+				log = NB.ReadFully(_logName);
+			}
+			catch (DirectoryNotFoundException)
+			{
+				return new List<Entry>();
+			}
+			catch (FileNotFoundException)
+			{
+				return new List<Entry>();
+			}
+            
             int rs = RawParseUtils.prevLF(log, log.Length);
             var ret = new List<Entry>();
             while (rs >= 0 && max-- > 0)
@@ -138,8 +170,8 @@ namespace GitSharp
                 Entry entry = new Entry(log, rs < 0 ? 0 : rs + 2);
                 ret.Add(entry);
             }
+
             return ret;
         }
     }
-
 }

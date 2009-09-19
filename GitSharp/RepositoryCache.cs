@@ -35,8 +35,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Exceptions;
@@ -46,11 +44,11 @@ namespace GitSharp
 {
     public class RepositoryCache
     {
-        private static readonly RepositoryCache cache = new RepositoryCache();
+        private static readonly RepositoryCache Cache = new RepositoryCache();
 
         public static RepositoryCache Instance
         {
-            get { return cache; }
+            get { return Cache; }
         }
 
         public static Repository open(Key location)
@@ -60,22 +58,22 @@ namespace GitSharp
 
         public static Repository open(Key location, bool mustExist)
         {
-            return cache.openRepository(location, mustExist);
+            return Cache.openRepository(location, mustExist);
         }
 
         public static void register(Repository db)
         {
-            cache.registerRepository(FileKey.exact(db.Directory), db);
+            Cache.registerRepository(FileKey.exact(db.Directory), db);
         }
 
         public static void close(Repository db)
         {
-            cache.unregisterRepository(FileKey.exact(db.Directory));
+            Cache.unregisterRepository(FileKey.exact(db.Directory));
         }
 
         public static void clear()
         {
-            cache.clearAll();
+            Cache.clearAll();
         }
 
         private readonly Dictionary<Key, WeakReference<Repository>> cacheMap;
@@ -93,6 +91,7 @@ namespace GitSharp
         {
             WeakReference<Repository> @ref = cacheMap.GetValue(location);
             Repository db = @ref != null ? @ref.get() : null;
+
             if (db == null)
             {
                 lock (lockFor(location))
@@ -107,6 +106,7 @@ namespace GitSharp
                     }
                 }
             }
+
             db.IncrementOpen();
             return db;
         }
@@ -143,7 +143,6 @@ namespace GitSharp
 
                     cacheMap.Remove(e.Key);
                 }
-
             }
         }
 
@@ -217,7 +216,7 @@ namespace GitSharp
             private static bool isValidHead(FileInfo head)
             {
                 string r = readFirstLine(head);
-                return r != null && (r.StartsWith("ref: refs/") || ObjectId.IsId(r));
+                return head.Exists && r != null && (r.StartsWith("ref: refs/") || ObjectId.IsId(r));
             }
 
             private static string readFirstLine(FileInfo head)
@@ -238,21 +237,27 @@ namespace GitSharp
                 }
             }
 
-            public static DirectoryInfo resolve(DirectoryInfo directory)
+        	private static DirectoryInfo resolve(DirectoryInfo directory)
             {
                 if (isGitRepository(directory))
+                {
                     return directory;
-                if (isGitRepository(new DirectoryInfo(Path.Combine(directory.FullName, ".git"))))
+                }
+
+				if (isGitRepository(new DirectoryInfo(Path.Combine(directory.FullName, ".git"))))
+				{
                     return new DirectoryInfo(Path.Combine(directory.FullName, ".git"));
+				}
 
                 string name = directory.Name;
                 DirectoryInfo parent = directory.Parent;
                 if (isGitRepository(new DirectoryInfo(Path.Combine(parent.FullName, name + ".git"))))
+                {
                     return new DirectoryInfo(Path.Combine(parent.FullName, name + ".git"));
+                }
 
                 return null;
             }
-
         }
     }
 

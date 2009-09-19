@@ -36,6 +36,7 @@
  */
 
 using System;
+using System.Globalization;
 
 namespace GitSharp.Util
 {
@@ -88,5 +89,25 @@ namespace GitSharp.Util
             var utcTicks = EPOCH_TICKS + secondsSinceEpoch * TimeSpan.TicksPerSecond;
             return new DateTime(utcTicks);
         }
+
+		/// <summary>
+		/// Gets the DateTime in the sortable ISO format.
+		/// </summary>
+		/// <param name="when"></param>
+		/// <returns></returns>
+		public static string ToIsoDateFormat(this DateTime when)
+		{
+			return when.ToString("s", CultureInfo.InvariantCulture);
+		}
+
+		/// <summary>
+		/// Gets the DateTimeOffset in the sortable ISO format.
+		/// </summary>
+		/// <param name="when"></param>
+		/// <returns></returns>
+		public static string ToIsoDateFormat(this DateTimeOffset when)
+		{
+			return when.ToString("s", CultureInfo.InvariantCulture);
+		}
     }
 }

@@ -36,14 +36,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.DirectoryCache;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
-    using GitSharp.DirectoryCache;
     [TestFixture]
     public class DirCacheTreeTest : RepositoryTestCase
     {
-
         [Test]
         public void testEmptyCache_NoCacheTree()
         {
@@ -162,15 +162,12 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.IsFalse(acTree.isValid());
         }
 
-        /**
-         * We had bugs related to buffer size in the DirCache. This test creates an
-         * index larger than the default BufferedInputStream buffer size. This made
-         * the DirCache unable to Read the extensions when index size exceeded the
-         * buffer size (in some cases at least).
-         * 
-         * @throws CorruptObjectException
-         * @throws IOException
-         */
+        /// <summary>
+        /// We had bugs related to buffer size in the DirCache. This test creates an
+		/// index larger than the default BufferedInputStream buffer size. This made
+		/// the DirCache unable to Read the extensions when index size exceeded the
+		/// buffer size (in some cases at least).
+        /// </summary>
         [Test]
         public void testWriteReadTree()
         {

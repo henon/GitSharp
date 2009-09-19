@@ -36,15 +36,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.DirectoryCache;
+using GitSharp.TreeWalk.Filter;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
-    using GitSharp.DirectoryCache;
-    using GitSharp.TreeWalk.Filter;
     [TestFixture]
     public class DirCacheIteratorTest : RepositoryTestCase
     {
-
         [Test]
         public void testEmptyTree_NoTreeWalk()
         {
@@ -229,6 +229,7 @@ namespace GitSharp.Tests.DirectoryCache
                 Assert.AreSame(mode, tw.getFileMode(0));
                 pathIdx++;
             }
+
             Assert.AreEqual(paths.Length, pathIdx);
         }
 
@@ -269,6 +270,7 @@ namespace GitSharp.Tests.DirectoryCache
                 Assert.AreSame(mode, tw.getFileMode(0));
                 pathIdx++;
             }
+
             Assert.AreEqual(paths.Length, pathIdx);
         }
 

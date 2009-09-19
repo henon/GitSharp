@@ -63,7 +63,6 @@ namespace GitSharp.Transport
 		public bool Run { get; private set; }
 
 		private Thread acceptThread;
-		private int timeout;
 
 		/// <summary>
 		///  Configure a daemon to listen on any available network port.

@@ -38,11 +38,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 using NUnit.Framework;
@@ -652,31 +647,28 @@ namespace GitSharp.Tests
         [Test]
         public void test30_stripWorkDir()
         {
-            Assert.Fail("To be ported");
-            /*
-            File relCwd = new File(".");
-            File absCwd = relCwd.getAbsoluteFile();
-            File absBase = new File(new File(absCwd, "repo"), "workdir");
-            File relBase = new File(new File(relCwd, "repo"), "workdir");
-            assertEquals(absBase.getAbsolutePath(), relBase.getAbsolutePath());
+            DirectoryInfo relCwd = new DirectoryInfo(Directory.GetCurrentDirectory());
+            DirectoryInfo absCwd = new DirectoryInfo(relCwd.FullName);
+            FileInfo absBase = new FileInfo(Path.Combine(new FileInfo(Path.Combine(absCwd.FullName, "repo")).FullName, "workdir"));
+            FileInfo relBase = new FileInfo(Path.Combine(new FileInfo(Path.Combine(relCwd.FullName, "repo")).FullName, "workdir"));
+            Assert.AreEqual(absBase.FullName, relBase.FullName);
 
-            File relBaseFile = new File(new File(relBase, "other"), "module.c");
-            File absBaseFile = new File(new File(absBase, "other"), "module.c");
-            assertEquals("other/module.c", Repository.stripWorkDir(relBase, relBaseFile));
-            assertEquals("other/module.c", Repository.stripWorkDir(relBase, absBaseFile));
-            assertEquals("other/module.c", Repository.stripWorkDir(absBase, relBaseFile));
-            assertEquals("other/module.c", Repository.stripWorkDir(absBase, absBaseFile));
+            FileInfo relBaseFile = new FileInfo(Path.Combine(new FileInfo(Path.Combine(relBase.FullName, "other")).FullName, "module.c"));
+            FileInfo absBaseFile = new FileInfo(Path.Combine(new FileInfo(Path.Combine(absBase.FullName, "other")).FullName, "module.c"));
+            Assert.AreEqual("other/module.c", Repository.StripWorkDir(relBase, relBaseFile));
+            Assert.AreEqual("other/module.c", Repository.StripWorkDir(relBase, absBaseFile));
+            Assert.AreEqual("other/module.c", Repository.StripWorkDir(absBase, relBaseFile));
+            Assert.AreEqual("other/module.c", Repository.StripWorkDir(absBase, absBaseFile));
 
-            File relNonFile = new File(new File(relCwd, "not-repo"), ".gitignore");
-            File absNonFile = new File(new File(absCwd, "not-repo"), ".gitignore");
-            assertEquals("", Repository.stripWorkDir(relBase, relNonFile));
-            assertEquals("", Repository.stripWorkDir(absBase, absNonFile));
+            FileInfo relNonFile = new FileInfo(Path.Combine(new FileInfo(Path.Combine(relCwd.FullName, "not-repo")).FullName, ".gitignore"));
+            FileInfo absNonFile = new FileInfo(Path.Combine(new FileInfo(Path.Combine(absCwd.FullName, "not-repo")).FullName, ".gitignore"));
+            Assert.AreEqual("", Repository.StripWorkDir(relBase, relNonFile));
+            Assert.AreEqual("", Repository.StripWorkDir(absBase, absNonFile));
 
-            assertEquals("", Repository.stripWorkDir(db.getWorkDir(), db.getWorkDir()));
+            Assert.AreEqual("", Repository.StripWorkDir(db.WorkingDirectory, db.WorkingDirectory));
 
-            File file = new File(new File(db.getWorkDir(), "subdir"), "File.java");
-            assertEquals("subdir/File.java", Repository.stripWorkDir(db.getWorkDir(), file));
-            */
+            FileInfo file = new FileInfo(Path.Combine(new FileInfo(Path.Combine(db.WorkingDirectory.FullName, "subdir")).FullName, "File.java"));
+            Assert.AreEqual("subdir/File.java", Repository.StripWorkDir(db.WorkingDirectory, file));
         }
     }
 }

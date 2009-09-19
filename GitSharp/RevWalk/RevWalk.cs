@@ -237,7 +237,7 @@ namespace GitSharp.RevWalk
 			_roots = new List<RevCommit>();
 			Queue = new DateRevQueue();
 			Pending = new StartGenerator(this);
-			_sorting = new HashSet<RevSort.Strategy>() { RevSort.NONE };
+			_sorting = new HashSet<RevSort.Strategy> { RevSort.NONE };
 			_filter = RevFilter.ALL;
 			_treeFilter = TreeFilter.ALL;
 		    _retainBody = true;

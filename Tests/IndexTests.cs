@@ -40,6 +40,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using GitSharp.Exceptions;
+using GitSharp.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -164,9 +165,16 @@ namespace GitSharp.Tests
 			 */
 		}
 
-		[Test, Ignore("Not ported yet")]
+		[Test]
 		public void test030_executeBit_coreModeTrue()
 		{
+			if (!FS.supportsExecute())
+			{
+				Assert.Ignore("Test ignored since platform FS does not support the execute permission");
+			}
+
+			Assert.Fail("Not ported yet.");
+
 			/*
 		if (!FS.INSTANCE.supportsExecute())
 		{
@@ -227,9 +235,16 @@ namespace GitSharp.Tests
 			*/
 		}
 
-		[Test, Ignore("Not ported yet")]
+		[Test]
 		public void test031_executeBit_coreModeFalse()
 		{
+			if (!FS.supportsExecute())
+			{
+				Assert.Ignore("Test ignored since platform FS does not support the execute permission");
+			}
+
+			Assert.Fail("Not ported yet.");
+
 			/*
 		if (!FS.INSTANCE.supportsExecute())
 		{

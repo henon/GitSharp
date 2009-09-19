@@ -35,9 +35,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 
@@ -46,6 +43,7 @@ namespace GitSharp.Util
     public class Inspector
     {
         Repository db;
+
         public Inspector(Repository db)
         {
             this.db = db;
@@ -74,7 +72,6 @@ namespace GitSharp.Util
         public static Stream ContentStream(string path, string id)
         {
             return ContentStream(path + "/" + id, ObjectId.FromString(id));
-
         }
 
         private static Stream ContentStream(string filename, ObjectId id)

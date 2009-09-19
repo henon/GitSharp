@@ -45,7 +45,6 @@ using System.Threading;
 
 namespace GitSharp
 {
-
 	/// <summary>
 	/// Utility class to work with reflog files
 	/// </summary>
@@ -63,7 +62,7 @@ namespace GitSharp
 			if (!u.Name.Equals(u.OriginalName))
 			{
 				AppendOneRecord(oldId, newId, ident, msg, db, u.OriginalName);
-		}
+			}
 		}
 
 		internal static void append(RefRename refRename, string logName, string msg)
@@ -158,6 +157,6 @@ namespace GitSharp
 		public static void WriteReflog(Repository repo, ObjectId oldCommit, ObjectId commit, string message, string refName)
 		{
 			AppendOneRecord(oldCommit, commit, null, message, repo, refName);
-				}
-				}
+		}
+	}
 }

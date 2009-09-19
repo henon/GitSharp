@@ -37,46 +37,46 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Exceptions
 {
-    /**
-  * An expected object is missing.
-  */
+	/// <summary>
+	/// An expected object is missing.
+	/// </summary>
     public class MissingObjectException : IOException
     {
-
-        /**
-         * Construct a MissingObjectException for the specified object id.
-         * Expected type is reported to simplify tracking down the problem.
-         *
-         * @param id SHA-1
-         * @param type object type
-         */
+		/// <summary>
+		/// Construct a MissingObjectException for the specified object id.
+		/// Expected type is reported to simplify tracking down the problem.
+		/// </summary>
+		/// <param name="id">SHA-1</param>
+		/// <param name="type">Object type</param>
         public MissingObjectException(ObjectId id, ObjectType type)
             : base("Missing " + type + " " + id)
         {
         }
 
+		/// <summary>
+		/// Construct a MissingObjectException for the specified object id.
+		/// Expected type is reported to simplify tracking down the problem.
+		/// </summary>
+		/// <param name="id">SHA-1</param>
+		/// <param name="type">Object type</param>
         public MissingObjectException(ObjectId id, string type)
             : base("Missing " + type + " " + id)
         {
         }
 
+		/// <summary>
+		/// Construct a MissingObjectException for the specified object id.
+		/// Expected type is reported to simplify tracking down the problem.
+		/// </summary>
+		/// <param name="id">SHA-1</param>
+		/// <param name="type">Object type</param>
 
-        /**
-         * Construct a MissingObjectException for the specified object id.
-         * Expected type is reported to simplify tracking down the problem.
-         *
-         * @param id SHA-1
-         * @param type object type
-         */
         public MissingObjectException(ObjectId id, int type)
             : this(id, Constants.typeString(type))
         {

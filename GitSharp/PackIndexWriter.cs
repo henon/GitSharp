@@ -110,23 +110,26 @@ namespace GitSharp
             return CreateVersion(dst, version);
         }
 
-
-        /**
-     * Create a new writer instance for a specific index format version.
-     *
-     * @param dst
-     *            the stream the index data will be written to. If not already
-     *            buffered it will be automatically wrapped in a buffered
-     *            stream. Callers are always responsible for closing the stream.
-     * @param version
-     *            index format version number required by the caller. Exactly
-     *            this formatted version will be written.
-     * @return a new writer to output an index file of the requested format to
-     *         the supplied stream.
-     * @throws ArgumentException
-     *             the version requested is not supported by this
-     *             implementation.
-     */
+		/// <summary>
+		/// Create a new writer instance for a specific index format version.
+		/// </summary>
+		/// <param name="dst">
+		/// The stream the index data will be written to. If not already
+		/// buffered it will be automatically wrapped in a buffered
+		/// stream. Callers are always responsible for closing the stream.
+		/// </param>
+		/// <param name="version">
+		/// Index format version number required by the caller. Exactly
+		/// this formatted version will be written.
+		/// </param>
+		/// <returns>
+		/// A new writer to output an index file of the requested format to
+		/// the supplied stream.
+		/// </returns>
+		/// <exception cref="ArgumentException">
+		/// The version requested is not supported by this
+		/// implementation.
+		/// </exception>
         public static PackIndexWriter CreateVersion(Stream dst, int version)
         {
             switch (version)
@@ -140,49 +143,48 @@ namespace GitSharp
             }
         }
 
-        /** The index data stream we are responsible for creating. */
+		// The index data stream we are responsible for creating.
         internal readonly BinaryWriter _stream;
 
-        /** A temporary buffer for use during IO to {link #out}. */
+		// A temporary buffer for use during IO to out.
         internal byte[] tmp = new byte[4 + ObjectId.ObjectIdLength];
 
-        /** The entries this writer must pack. */
+		// The entries this writer must pack.
         internal List<PackedObjectInfo> entries;
 
-        /** SHA-1 checksum for the entire pack data. */
+		// SHA-1 checksum for the entire pack data.
         internal byte[] packChecksum;
 
-        /**
-	     * Create a new writer instance.
-	     *
-	     * @param dst
-	     *            the stream this instance outputs to. If not already buffered
-	     *            it will be automatically wrapped in a buffered stream.
-	     */
+		/// <summary>
+		/// Create a new writer instance.
+		/// </summary>
+		/// <param name="stream">
+		/// The stream this instance outputs to. If not already buffered
+		/// it will be automatically wrapped in a buffered stream.
+		/// </param>
         internal PackIndexWriter(Stream stream)
         {
             _stream = new BinaryWriter(stream);
         }
-
-
-        /**
-         * Write all object entries to the index stream.
-         * <para />
-         * After writing the stream passed to the factory is flushed but remains
-         * open. Callers are always responsible for closing the output stream.
-         *
-         * @param toStore
-         *            sorted list of objects to store in the index. The caller must
-         *            have previously sorted the list using {@link PackedObjectInfo}'s
-         *            native {@link Comparable} implementation.
-         * @param packDataChecksum
-         *            checksum signature of the entire pack data content. This is
-         *            traditionally the last 20 bytes of the pack file's own stream.
-         * @
-         *             an error occurred while writing to the output stream, or this
-         *             index format cannot store the object data supplied.
-         */
-        public void Write<T>(List<T> toStore, byte[] packDataChecksum) where T : PackedObjectInfo
+        
+		/// <summary>
+		///  Write all object entries to the index stream.
+		///  <para />
+		///  After writing the stream passed to the factory is flushed but remains
+		///  open. Callers are always responsible for closing the output stream.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="toStore">
+		/// Sorted list of objects to store in the index. The caller must
+		/// have previously sorted the list using <see cref="PackedObjectInfo"/>'s
+		/// native {@link Comparable} implementation.
+		/// </param>
+		/// <param name="packDataChecksum">
+		/// Checksum signature of the entire pack data content. This is
+		/// traditionally the last 20 bytes of the pack file's own stream.
+		/// </param>
+		public void Write<T>(List<T> toStore, byte[] packDataChecksum) 
+			where T : PackedObjectInfo
         {
             entries = new List<PackedObjectInfo>();
             foreach (T e in toStore) entries.Add(e);
@@ -191,43 +193,35 @@ namespace GitSharp
             _stream.Flush();
         }
 
-        /**
-         * Writes the index file to {@link #out}.
-         * <para />
-         * Implementations should go something like:
-         *
-         * <pre>
-         * writeFanOutTable();
-         * for ( PackedObjectInfo po : entries)
-         * 	writeOneEntry(po);
-         * writeChecksumFooter();
-         * </pre>
-         *
-         * <para />
-         * Where the logic for <code>writeOneEntry</code> is specific to the index
-         * format in use. Additional headers/footers may be used if necessary and
-         * the {@link #entries} collection may be iterated over more than once if
-         * necessary. Implementors therefore have complete control over the data.
-         *
-         * @
-         *             an error occurred while writing to the output stream, or this
-         *             index format cannot store the object data supplied.
-         */
+		/// <summary>
+		///  Writes the index file to out.
+		///  <para />
+		///  Implementations should go something like:
+		/// <example>
+		/// WriteFanOutTable();
+		/// foreach (PackedObjectInfo po in entries)
+		/// {
+		///		WriteOneEntry(po);
+		/// }
+		/// WriteChecksumFooter();
+		/// </example>
+		/// <para />
+		/// Where the logic for <code>writeOneEntry</code> is specific to the index
+		/// format in use. Additional headers/footers may be used if necessary and
+		/// the entries collection may be iterated over more than once if
+		/// necessary. Implementors therefore have complete control over the data.
+		/// </summary>
         internal abstract void WriteInternal();
 
-        /**
-         * Output the version 2 (and later) TOC header, with version number.
-         * <para />
-         * Post version 1 all index files start with a TOC header that makes the
-         * file an invalid version 1 file, and then includes the version number.
-         * This header is necessary to recognize a version 1 from a version 2
-         * formatted index.
-         *
-         * @param version
-         *            version number of this index format being written.
-         * @
-         *             an error occurred while writing to the output stream.
-         */
+		/// <summary>
+		/// Output the version 2 (and later) TOC header, with version number.
+		/// <para />
+		/// Post version 1 all index files start with a TOC header that makes the
+		/// file an invalid version 1 file, and then includes the version number.
+		/// This header is necessary to recognize a version 1 from a version 2
+		/// formatted index.
+		/// </summary>
+		/// <param name="version">Version number of this index format being written.</param>
         internal void WriteTOC(int version)
         {
             _stream.Write(TOC);
@@ -235,17 +229,14 @@ namespace GitSharp
             _stream.Write(tmp, 0 , 4);
         }
 
-        /**
-	     * Output the standard 256 entry first-level fan-out table.
-	     * <para />
-	     * The fan-out table is 4 KB in size, holding 256 32-bit unsigned integer
-	     * counts. Each count represents the number of objects within this index
-	     * whose {@link ObjectId#getFirstByte()} matches the count's position in the
-	     * fan-out table.
-	     *
-	     * @
-	     *             an error occurred while writing to the output stream.
-	     */
+		/// <summary>
+		/// utput the standard 256 entry first-level fan-out table.
+		/// <para />
+		/// The fan-out table is 4 KB in size, holding 256 32-bit unsigned integer
+		/// counts. Each count represents the number of objects within this index
+		/// whose <see cref="ObjectId.GetFirstByte()"/> matches the count's position in the
+		/// fan-out table.
+		/// </summary>
 	    internal void WriteFanOutTable() 
         {
 		    int[] fanout = new int[256];
@@ -263,19 +254,16 @@ namespace GitSharp
 
         }
 
-	    /**
-	     * Output the standard two-checksum index footer.
-	     * <para />
-	     * The standard footer contains two checksums (20 byte SHA-1 values):
-	     * <ol>
-	     * <li>Pack data checksum - taken from the last 20 bytes of the pack file.</li>
-	     * <li>Index data checksum - checksum of all index bytes written, including
-	     * the pack data checksum above.</li>
-	     * </ol>
-	     *
-	     * @
-	     *             an error occurred while writing to the output stream.
-	     */
+		/// <summary>
+		/// Output the standard two-checksum index footer.
+		/// <para />
+		/// The standard footer contains two checksums (20 byte SHA-1 values):
+		/// <ol>
+		/// <li>Pack data checksum - taken from the last 20 bytes of the pack file.</li>
+		/// <li>Index data checksum - checksum of all index bytes written, including
+		/// the pack data checksum above.</li>
+		/// </ol>
+		/// </summary>
 	    internal void WriteChecksumFooter() {
 		    _stream.Write(packChecksum);
             var sha = new SHA1CryptoServiceProvider();

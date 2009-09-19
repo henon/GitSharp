@@ -439,18 +439,21 @@ namespace GitSharp.Transport
 			int hdrlen = 0;
 			_buffer[hdrlen++] = (byte)((typeCode << 4) | sz & 15);
 			sz = (int)(((uint)sz) >> 4);
+
 			while (sz > 0)
 			{
 				_buffer[hdrlen - 1] |= 0x80;
 				_buffer[hdrlen++] = (byte)(sz & 0x7f);
 				sz = (int)(((uint)sz) >> 7);
 			}
+			
 			_packDigest.Update(_buffer, 0, hdrlen);
 			_crc.Update(_buffer, 0, hdrlen);
 			_packOut.Write(_buffer, 0, hdrlen);
 			def.Reset();
 			def.SetInput(data);
 			def.Finish();
+			
 			while (!def.IsFinished)
 			{
 				int datlen = def.Deflate(_buffer);

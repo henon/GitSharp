@@ -137,15 +137,13 @@ namespace GitSharp.Transport
             NB.skipFully(bin, lf);
             if (lf < cnt && hdrbuf[lf] == '\n')
                 NB.skipFully(bin, 1);
+
             return RawParseUtils.decode(Constants.CHARSET, hdrbuf, 0, lf);
         }
 
         public override bool DidFetchTestConnectivity
         {
-            get
-            {
-                return false;
-            }
+            get { return false; }
         }
 
         protected override void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)

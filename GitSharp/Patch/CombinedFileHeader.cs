@@ -218,6 +218,7 @@ namespace GitSharp.Patch
                 _oldModes[n++] = ParseFileMode(ptr, comma);
                 ptr = comma;
             }
+
 			int dot2 = RawParseUtils.nextLF(Buffer, ptr, (byte)'.');
             _oldModes[n] = ParseFileMode(ptr, dot2);
             NewMode = ParseFileMode(dot2 + 1, eol);
@@ -237,6 +238,7 @@ namespace GitSharp.Patch
                 _oldModes[n++] = ParseFileMode(ptr, comma);
                 ptr = comma;
             }
+
             _oldModes[n] = ParseFileMode(ptr, eol);
             NewMode = FileMode.Missing;
         }

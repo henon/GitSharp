@@ -42,8 +42,6 @@ using GitSharp.Util;
 
 namespace GitSharp.RevWalk.Filter
 {
-
-
 	/// <summary>
 	/// Matches only commits whose author name matches the pattern.
 	/// </summary>

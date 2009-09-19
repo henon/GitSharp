@@ -43,94 +43,99 @@ using System.Text.RegularExpressions;
 
 namespace GitSharp.Util
 {
-    /** Utility functions related to quoted string handling. */
+	/// <summary>
+	/// Utility functions related to quoted string handling.
+	/// </summary>
     public abstract class QuotedString
     {
-	    /**
-	     * Quoting style used by the Bourne shell.
-	     * <para />
-	     * Quotes are unconditionally inserted during {@link #quote(String)}. This
-	     * protects shell meta-characters like <code>$</code> or <code>~</code> from
-	     * being recognized as special.
-	     */
+		/// <summary>
+		/// Quoting style that obeys the rules Git applies to file names.
+		/// </summary>
+		public static readonly GitPathStyle GIT_PATH = new GitPathStyle();
+
+		/// <summary>
+		/// Quoting style used by the Bourne shell.
+		/// <para />
+		/// Quotes are unconditionally inserted during <see cref="quote(string)"/>. This
+		/// protects shell meta-characters like <code>$</code> or <code>~</code> from
+		/// being recognized as special.
+		/// </summary>
 	    public static readonly BourneStyle BOURNE = new BourneStyle();
 
-	    /** Bourne style, but permits <code>~user</code> at the start of the string. */
+		/// <summary>
+		/// Bourne style, but permits <code>~user</code> at the start of the string.
+		/// </summary>
 	    public static readonly BourneUserPathStyle BOURNE_USER_PATH = new BourneUserPathStyle();
 
-	    /**
-	     * Quote an input string by the quoting rules.
-	     * <para />
-	     * If the input string does not require any quoting, the same String
-	     * reference is returned to the caller.
-	     * <para />
-	     * Otherwise a quoted string is returned, including the opening and closing
-	     * quotation marks at the start and end of the string. If the style does not
-	     * permit raw Unicode characters then the string will first be encoded in
-	     * UTF-8, with unprintable sequences possibly escaped by the rules.
-	     *
-	     * @param in
-	     *            any non-null Unicode string.
-	     * @return a quoted string. See above for details.
-	     */
-	    public abstract String quote(String in_str);
+		/// <summary>
+		/// Quote an input string by the quoting rules.
+		/// <para />
+		/// If the input string does not require any quoting, the same String
+		/// reference is returned to the caller.
+		/// <para />
+		/// Otherwise a quoted string is returned, including the opening and closing
+		/// quotation marks at the start and end of the string. If the style does not
+		/// permit raw Unicode characters then the string will first be encoded in
+		/// UTF-8, with unprintable sequences possibly escaped by the rules.
+		/// </summary>
+		/// <param name="in_str">any non-null Unicode string</param>
+		/// <returns>a quoted <see cref="string"/>. See above for details.</returns>
+	    public abstract string quote(string in_str);
 
-	    /**
-	     * Clean a previously quoted input, decoding the result via UTF-8.
-	     * <para />
-	     * This method must match quote such that:
-	     *
-	     * <pre>
-	     * a.equals(dequote(quote(a)));
-	     * </pre>
-	     *
-	     * is true for any <code>a</code>.
-	     *
-	     * @param in
-	     *            a Unicode string to remove quoting from.
-	     * @return the cleaned string.
-	     * @see #dequote(byte[], int, int)
-	     */
-	    public String dequote(String in_str)
+		/// <summary>
+		/// Clean a previously quoted input, decoding the result via UTF-8.
+		/// <para />
+		/// This method must match quote such that:
+		/// <para />
+		/// <example>
+		/// a.Equals(qequote(quote(a)));
+		/// </example>
+		/// is true for any <code>a</code>.
+		/// </summary>
+		/// <param name="in_str">a Unicode string to remove quoting from.</param>
+		/// <returns>the cleaned string.</returns>
+		/// <seealso cref="dequote(byte[], int, int)"/>
+	    public string dequote(string in_str)
         {
 		    byte[] b = Constants.encode(in_str);
 		    return dequote(b, 0, b.Length);
 	    }
 
-	    /**
-	     * Decode a previously quoted input, scanning a UTF-8 encoded buffer.
-	     * <para />
-	     * This method must match quote such that:
-	     *
-	     * <pre>
-	     * a.equals(dequote(Constants.encode(quote(a))));
-	     * </pre>
-	     *
-	     * is true for any <code>a</code>.
-	     * <para />
-	     * This method removes any opening/closing quotation marks added by
-	     * {@link #quote(String)}.
-	     *
-	     * @param in
-	     *            the input buffer to parse.
-	     * @param offset
-	     *            first position within <code>in</code> to scan.
-	     * @param end
-	     *            one position past in <code>in</code> to scan.
-	     * @return the cleaned string.
-	     */
-	    public abstract String dequote(byte[] in_str, int offset, int end);
+		/// <summary>
+		/// Decode a previously quoted input, scanning a UTF-8 encoded buffer.
+		/// <para />
+		/// This method must match quote such that:
+		/// <para />
+		/// <example>
+		/// a.Equals(Dequote(Constants.encode(quote(a))));
+		/// </example>
+		/// is true for any <code>a</code>.
+		/// <para />
+		/// This method removes any opening/closing quotation marks added by
+		/// </summary>
+		/// <param name="in_str">
+		/// The input buffer to parse.
+		/// </param>
+		/// <param name="offset">
+		/// First position within <paramref name="in_str"/> to scan.
+		/// </param>
+		/// <param name="end">
+		/// One position past in <paramref name="in_str"/> to scan.
+		/// </param>
+		/// <returns>The cleaned string.</returns>
+		/// <seealso cref="quote(string)"/>.
+	    public abstract string dequote(byte[] in_str, int offset, int end);
 
-	    /**
-	     * Quoting style used by the Bourne shell.
-	     * <para />
-	     * Quotes are unconditionally inserted during {@link #quote(String)}. This
-	     * protects shell meta-characters like <code>$</code> or <code>~</code> from
-	     * being recognized as special.
-	     */
+		/// <summary>
+		/// Quoting style used by the Bourne shell.
+		/// <para />
+		/// Quotes are unconditionally inserted during <see cref="quote(string)"/>. This
+		/// protects shell meta-characters like <code>$</code> or <code>~</code> from
+		/// being recognized as special.
+		/// </summary>
 	    public class BourneStyle : QuotedString
         {
-		    public override String quote(String in_str)
+		    public override string quote(string in_str)
             {
 			    StringBuilder r = new StringBuilder();
 			    r.Append('\'');
@@ -154,7 +159,7 @@ namespace GitSharp.Util
 			    return r.ToString();
 		    }
 
-		    public override String dequote(byte[] in_str, int ip, int ie)
+		    public override string dequote(byte[] in_str, int ip, int ie)
             {
 			    bool inquote = false;
 			    byte[] r = new byte[ie - ip];
@@ -182,10 +187,12 @@ namespace GitSharp.Util
 		    }
 	    }
 
-	    /** Bourne style, but permits <code>~user</code> at the start of the string. */
+		/// <summary>
+		/// Bourne style, but permits <code>~user</code> at the start of the string.
+		/// </summary>
         public sealed class BourneUserPathStyle : BourneStyle
         {
-		    public override String quote(String in_str)
+		    public override string quote(string in_str)
             {
                 if (new Regex("^~[A-Za-z0-9_-]+$").IsMatch(in_str))
                 {
@@ -210,7 +217,9 @@ namespace GitSharp.Util
 		    }
 	    }
 
-	    /** Quoting style that obeys the rules Git applies to file names */
+		/// <summary>
+		/// Quoting style that obeys the rules Git applies to file names
+		/// </summary>
 	    public sealed class GitPathStyle : QuotedString
         {
 		    private static readonly int[] quote_m;
@@ -229,6 +238,7 @@ namespace GitSharp.Util
                     quote_m[i] = 0;
 			    for (int i = 'A'; i <= 'Z'; i++)
                     quote_m[i] = 0;
+
                 quote_m[' '] = 0;
                 quote_m['+'] = 0;
                 quote_m[','] = 0;
@@ -250,7 +260,7 @@ namespace GitSharp.Util
                 quote_m['"'] = (int)'"';
 		    }
 
-		    public override String quote(String instr)
+		    public override string quote(string instr)
             {
 			    if (instr.Length == 0)
 				    return "\"\"";
@@ -287,14 +297,14 @@ namespace GitSharp.Util
 			    return r.ToString();
 		    }
 
-		    public override String dequote(byte[] in_str, int inPtr, int inEnd)
+		    public override string dequote(byte[] in_str, int inPtr, int inEnd)
             {
 			    if (2 <= inEnd - inPtr && in_str[inPtr] == '"' && in_str[inEnd - 1] == '"')
 				    return dq(in_str, inPtr + 1, inEnd - 1);
 			    return RawParseUtils.decode(Constants.CHARSET, in_str, inPtr, inEnd);
 		    }
 
-		    private static String dq(byte[] in_str, int inPtr, int inEnd)
+		    private static string dq(byte[] in_str, int inPtr, int inEnd)
             {
 			    byte[] r = new byte[inEnd - inPtr];
 			    int rPtr = 0;
@@ -372,12 +382,10 @@ namespace GitSharp.Util
 			    return RawParseUtils.decode(Constants.CHARSET, r, 0, rPtr);
 		    }
 
-		    private GitPathStyle() {
+		    internal GitPathStyle()
+			{
 			    // Singleton
 		    }
-
-            /** Quoting style that obeys the rules Git applies to file names */
-            public static readonly GitPathStyle GIT_PATH = new GitPathStyle();
 	    }
     }
 }

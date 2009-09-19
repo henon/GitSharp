@@ -48,7 +48,7 @@ namespace GitSharp
 	/// <para />
 	/// An object database stores one or more Git objects, indexed by their unique
 	/// <see cref="ObjectId"/>. Optionally an object database can reference one or more
-	/// alternates; other <see cref="ObjectDatabase"/> instances that are searched in 
+	/// alternates; other <see cref="ObjectDatabase"/> instances that are searched in
 	/// addition to the current database.
 	/// <para />
 	/// Databases are usually divided into two halves: a half that is considered to
@@ -387,10 +387,12 @@ namespace GitSharp
                         {
                             r = NoAlternates;
                         }
+
                         _alternates.set(r); // [henon] possible deadlock?
                     }
                 }
             }
+
             return r;
         }
 

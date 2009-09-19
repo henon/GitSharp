@@ -41,13 +41,11 @@ using System.Text;
 
 namespace GitSharp
 {
-
     public class GitLinkTreeEntry : TreeEntry
     {
         public GitLinkTreeEntry(Tree parent, ObjectId id, byte[] nameUTF8)
             : base(parent, id, nameUTF8)
         {
-            
         }
 
         public override FileMode Mode
@@ -74,5 +72,4 @@ namespace GitSharp
             return r.ToString();
         }
     }
-
 }

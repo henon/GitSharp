@@ -78,9 +78,9 @@ namespace GitSharp
 			_packList = new AtomicReference<PackFile[]>();
 		}
 
-		/**
-		 * @return the location of the <code>objects</code> directory.
-		 */
+		/// <summary>
+		/// Gets the location of the <code>objects</code> directory.
+		/// </summary>
 		public DirectoryInfo getDirectory()
 		{
 			return _objects;
@@ -110,13 +110,11 @@ namespace GitSharp
 			}
 		}
 
-		/**
-		 * Compute the location of a loose object file.
-		 *
-		 * @param objectId
-		 *            identity of the loose object to map to the directory.
-		 * @return location of the object, if it were to exist as a loose object.
-		 */
+		/// <summary>
+		/// Compute the location of a loose object file.
+		/// </summary>
+		/// <param name="objectId">Identity of the loose object to map to the directory.</param>
+		/// <returns>Location of the object, if it were to exist as a loose object.</returns>
 		public FileInfo fileFor(AnyObjectId objectId)
 		{
 			return fileFor(objectId.ToString());
@@ -129,17 +127,15 @@ namespace GitSharp
 			return new FileInfo(_objects.FullName + "/" + d + "/" + f);
 		}
 
-		/**
-		 * Add a single existing pack to the list of available pack files.
-		 *
-		 * @param pack
-		 *            path of the pack file to open.
-		 * @param idx
-		 *            path of the corresponding index file.
-		 * @
-		 *             index file could not be opened, read, or is not recognized as
-		 *             a Git pack file index.
-		 */
+		/// <summary>
+		/// Add a single existing pack to the list of available pack files.
+		/// </summary>
+		/// <param name="pack">Path of the pack file to open.</param>
+		/// <param name="idx">Path of the corresponding index file.</param>
+		///	<exception cref="IOException">
+		/// Index file could not be opened, read, or is not recognized as
+		/// a Git pack file index.
+		/// </exception>
 		public void openPack(FileInfo pack, FileInfo idx)
 		{
 			string p = pack.Name;
@@ -418,6 +414,7 @@ namespace GitSharp
 			{
 				return NoPacks;
 			}
+
 			PackFile[] r = list.ToArray();
 			Array.Sort(r, PackFile.PackFileSortComparison);
 			return r;

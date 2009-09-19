@@ -49,33 +49,67 @@ using Tamir.SharpSsh.java.lang;
 
 namespace GitSharp
 {
+	/// <summary>
+	/// Git style <code>.config</code>, <code>.gitconfig</code>, <code>.gitmodules</code> file.
+	/// </summary>
 	public class Config
 	{
+		private static readonly string[] EmptyStringArray = new string[0];
+
 		private const long GiB = 1024 * MiB;
 		private const long KiB = 1024;
 		private const long MiB = 1024 * KiB;
-		private static readonly string[] EmptyStringArray = new string[0];
+
+		///	<summary>
+		/// Immutable current state of the configuration data.
+		///	<para />
+		/// This state is copy-on-write. It should always contain an immutable list
+		/// of the configuration keys/values.
+		/// </summary>
+		private State _state;
+
+		/// Magic value indicating a missing entry.
+		///	<para />
+		///	This value is tested for reference equality in some contexts, so we
+		///	must ensure it is a special copy of the empty string.  It also must
+		///	be treated like the empty string.
+		/// </summary>
 		private static readonly string MagicEmptyValue = string.Empty;
 
 		private readonly Config _baseConfig;
-		private State _state;
 
+		/// <summary>
+		/// Create a configuration with no default fallback.
+		/// </summary>
 		public Config()
 			: this(null)
 		{
 		}
 
+		///	<summary>
+		/// Create an empty configuration with a fallback for missing keys.
+		///	</summary>
+		///	<param name="defaultConfig">
+		///	the base configuration to be consulted when a key is missing
+		/// from this configuration instance.
+		/// </param>
 		public Config(Config defaultConfig)
 		{
 			_baseConfig = defaultConfig;
 			_state = newState();
 		}
 
+		///	<summary>
+		/// Escape the value before saving
+		/// </summary>
+		/// <param name="x">The value to escape.</param>
+		///	<returns>The escaped value.</returns>
 		private static string EscapeValue(string x)
 		{
 			bool inquote = false;
 			int lineStart = 0;
 			var r = new StringBuilder(x.Length);
+
 			for (int k = 0; k < x.Length; k++)
 			{
 				char c = x[k];
@@ -131,15 +165,44 @@ namespace GitSharp
 						break;
 				}
 			}
-			if (inquote) r.Append('"');
+
+			if (inquote)
+			{
+				r.Append('"');
+			}
+
 			return r.ToString();
 		}
 
+		///	<summary>
+		/// Obtain an integer value from the configuration.
+		///	</summary>
+		///	<param name="section">Section the key is grouped within.</param>
+		///	<param name="name">Name of the key to get.</param>
+		///	<param name="defaultValue">
+		///	Default value to return if no value was present.
+		/// </param>
+		///	<returns>
+		/// An integer value from the configuration, or <paramref name="defaultValue"/>.
+		/// </returns>
 		public int getInt(string section, string name, int defaultValue)
 		{
 			return getInt(section, null, name, defaultValue);
 		}
 
+		///	<summary>
+		/// Obtain an integer value from the configuration.
+		///	</summary>
+		///	<param name="section">Section the key is grouped within.</param>
+		///	<param name="subsection">
+		/// Subsection name, such a remote or branch name.
+		/// </param>
+		///	<param name="name">Name of the key to get.</param>
+		///	<param name="defaultValue">
+		/// Default value to return if no value was present. </param>
+		///	<returns>
+		/// An integer value from the configuration, or <paramref name="defaultValue"/>.
+		/// </returns>
 		public int getInt(string section, string subsection, string name, int defaultValue)
 		{
 			long val = getLong(section, subsection, name, defaultValue);
@@ -148,6 +211,20 @@ namespace GitSharp
 			throw new ArgumentException("Integer value " + section + "." + name + " out of range");
 		}
 
+		///	<summary>
+		/// Obtain an integer value from the configuration.
+		/// </summary>
+		///	<param name="section">Section the key is grouped within.</param>
+		///	<param name="subsection">
+		/// Subsection name, such a remote or branch name.
+		/// </param>
+		///	<param name="name">Name of the key to get.</param>
+		///	<param name="defaultValue">
+		/// Default value to return if no value was present.
+		/// </param>
+		///	<returns>
+		/// An integer value from the configuration, or <paramref name="defaultValue"/>.
+		/// </returns>
 		public long getLong(string section, string subsection, string name, long defaultValue)
 		{
 			string str = getString(section, subsection, name);
@@ -173,8 +250,10 @@ namespace GitSharp
 					mul = KiB;
 					break;
 			}
+
 			if (mul > 1)
 				n = n.Slice(0, n.Length - 1).Trim();
+
 			if (n.Length == 0)
 				return defaultValue;
 
@@ -188,11 +267,38 @@ namespace GitSharp
 			}
 		}
 
+		///	<summary>
+		/// Get a boolean value from the git config.
+		/// </summary>
+		/// <param name="section">Section the key is grouped within.</param>
+		///	<param name="name">Name of the key to get.</param>
+		///	<param name="defaultValue">
+		/// Default value to return if no value was present.
+		/// </param>
+		///	<returns>
+		/// True if any value or <paramref name="defaultValue"/> is true, false 
+		/// for missing or explicit false.
+		/// </returns>
 		public bool getBoolean(string section, string name, bool defaultValue)
 		{
 			return getBoolean(section, null, name, defaultValue);
 		}
 
+		///	<summary>
+		/// Get a boolean value from the git config.
+		/// </summary>
+		///	<param name="section">Section the key is grouped within.</param>
+		///	<param name="subsection">
+		/// Subsection name, such a remote or branch name.
+		/// </param>
+		///	<param name="name">Name of the key to get.</param>
+		///	<param name="defaultValue">
+		/// Default value to return if no value was present.
+		/// </param>
+		///	<returns>
+		/// True if any value or defaultValue is true, false for missing or
+		/// explicit false.
+		/// </returns>
 		public bool getBoolean(string section, string subsection, string name, bool defaultValue)
 		{
 			string n = getRawString(section, subsection, name);
@@ -218,11 +324,28 @@ namespace GitSharp
 			throw new ArgumentException("Invalid boolean value: " + section + "." + name + "=" + n);
 		}
 
+		///	<summary>
+		/// Get string value.
+		///	</summary>
+		///	<param name="section">The section.</param>
+		///	<param name="subsection">The subsection for the value.</param>
+		///	<param name="name">The key name.</param>
+		///	<returns>A <see cref="String"/> value from git config.</returns>
 		public string getString(string section, string subsection, string name)
 		{
 			return getRawString(section, subsection, name);
 		}
 
+		///	<summary>
+		/// Get a list of string values
+		///	<para />
+		/// If this instance was created with a base, the base's values are returned
+		/// first (if any).
+		/// </summary>
+		/// <param name="section">The section.</param>
+		///	<param name="subsection">The subsection for the value.</param>
+		///	<param name="name">The key name.</param>
+		///	<returns>Array of zero or more values from the configuration.</returns>
 		public string[] getStringList(string section, string subsection, string name)
 		{
 			string[] baseList = _baseConfig != null ? _baseConfig.getStringList(section, subsection, name) : EmptyStringArray;
@@ -239,17 +362,36 @@ namespace GitSharp
 				{
 					res[idx++] = val;
 				}
+
 				return res;
 			}
 
 			return baseList;
 		}
 
+		///	<param name="section">Section to search for. </param>
+		///	<returns> set of all subsections of specified section within this
+		/// configuration and its base configuration; may be empty if no
+		/// subsection exists.
+		/// </returns>
 		public List<string> getSubsections(string section)
 		{
 			return get(new SubsectionNames(section));
 		}
 
+		///	<summary>
+		/// Obtain a handle to a parsed set of configuration values.
+		/// </summary>
+		///	<param name="parser">
+		/// Parser which can create the model if it is not already
+		/// available in this configuration file. The parser is also used
+		/// as the key into a cache and must obey the hashCode and equals
+		/// contract in order to reuse a parsed model.
+		/// </param>
+		///	<returns>
+		/// The parsed object instance, which is cached inside this config.
+		/// </returns>
+		/// <typeparam name="T">Type of configuration model to return.</typeparam>
 		public T get<T>(SectionParser<T> parser)
 		{
 			State myState = getState();
@@ -266,6 +408,14 @@ namespace GitSharp
 			return obj;
 		}
 
+		/// <summary>
+		/// Remove a cached configuration object.
+		///	<para />
+		/// If the associated configuration object has not yet been cached, this
+		/// method has no effect.
+		/// </summary>
+		///	<param name="parser">Parser used to obtain the configuration object.</param>
+		///	<seealso cref= get(SectionParser)"/>
 		public void uncache<T>(SectionParser<T> parser)
 		{
 			_state.Cache.Remove(parser);
@@ -274,10 +424,13 @@ namespace GitSharp
 		private string getRawString(string section, string subsection, string name)
 		{
 			List<string> lst = getRawStringList(section, subsection, name);
+
 			if (lst != null && lst.Count > 0)
 				return lst[0];
+
 			if (_baseConfig != null)
 				return _baseConfig.getRawString(section, subsection, name);
+
 			return null;
 		}
 
@@ -289,6 +442,7 @@ namespace GitSharp
 				if (e.match(section, subsection, name))
 					r = add(r, e.value);
 			}
+
 			return r;
 		}
 
@@ -307,8 +461,10 @@ namespace GitSharp
 			State @base = getBaseState();
 			if (cur.baseState == @base)
 				return cur;
+
 			var upd = new State(cur.EntryList, @base);
 			_state = upd;
+
 			return upd;
 		}
 
@@ -317,11 +473,37 @@ namespace GitSharp
 			return _baseConfig != null ? _baseConfig._state : null;
 		}
 
+		/// <summary>
+		/// Add or modify a configuration value. The parameters will result in a
+		/// configuration entry like this.
+		/// <para />
+		/// <pre>
+		/// [section &quot;subsection&quot;]
+		/// name = value
+		/// </pre>
+		///	</summary>
+		///	<param name="section">Section name, e.g "branch"</param>
+		///	<param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		///	<param name="name">Parameter name, e.g. "filemode".</param>
+		///	<param name="value">Parameter value.</param>
 		public void setInt(string section, string subsection, string name, int value)
 		{
 			setLong(section, subsection, name, value);
 		}
 
+		///	<summary>
+		/// Add or modify a configuration value. The parameters will result in a
+		///	configuration entry like this.
+		/// <para />
+		/// <pre>
+		/// [section &quot;subsection&quot;]
+		/// name = value
+		/// </pre>
+		///	</summary>
+		///	<param name="section">Section name, e.g "branch"</param>
+		///	<param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		///	<param name="name">Parameter name, e.g. "filemode".</param>
+		///	<param name="value">Parameter value.</param>
 		public void setLong(string section, string subsection, string name, long value)
 		{
 			string s;
@@ -337,21 +519,64 @@ namespace GitSharp
 			setString(section, subsection, name, s);
 		}
 
+		///	<summary>
+		/// Add or modify a configuration value. The parameters will result in a
+		///	configuration entry like this.
+		/// <para />
+		/// <pre>
+		/// [section &quot;subsection&quot;]
+		/// name = value
+		/// </pre>
+		///	</summary>
+		///	<param name="section">Section name, e.g "branch"</param>
+		///	<param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		///	<param name="name">Parameter name, e.g. "filemode".</param>
+		///	<param name="value">Parameter value.</param>
 		public void setBoolean(string section, string subsection, string name, bool value)
 		{
 			setString(section, subsection, name, value ? "true" : "false");
 		}
 
+		///	<summary>
+		/// Add or modify a configuration value. The parameters will result in a
+		///	configuration entry like this.
+		/// <para />
+		/// <pre>
+		/// [section &quot;subsection&quot;]
+		/// name = value
+		/// </pre>
+		///	</summary>
+		///	<param name="section">Section name, e.g "branch"</param>
+		///	<param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		///	<param name="name">Parameter name, e.g. "filemode".</param>
+		///	<param name="value">Parameter value.</param>
 		public void setString(string section, string subsection, string name, string value)
 		{
 			setStringList(section, subsection, name, new List<string> { value });
 		}
 
+		///	<summary>
+		/// Remove a configuration value.
+		/// </summary>
+		/// <param name="section">Section name, e.g "branch".</param>
+		/// <param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		/// <param name="name">Parameter name, e.g. "filemode".</param>
 		public void unset(string section, string subsection, string name)
 		{
 			setStringList(section, subsection, name, new List<string>());
 		}
 
+		///	<summary>
+		/// Set a configuration value.
+		/// <para />
+		/// <pre>
+		/// [section &quot;subsection&quot;]
+		/// name = value
+		/// </pre>
+		///	</summary><param name="section">Section name, e.g "branch".</param>
+		///	<param name="subsection">Optional subsection value, e.g. a branch name.</param>
+		/// <param name="name">Parameter name, e.g. "filemode".</param>
+		/// <param name="values">List of zero or more values for this key.</param>
 		public void setStringList(string section, string subsection, string name, List<string> values)
 		{
 			State src = _state;
@@ -366,6 +591,8 @@ namespace GitSharp
 			int valueIndex = 0;
 			int insertPosition = -1;
 
+			// Reset the first n Entry objects that match this input name.
+			//
 			while (entryIndex < entries.Count && valueIndex < values.Count)
 			{
 				Entry e = entries[entryIndex];
@@ -377,6 +604,8 @@ namespace GitSharp
 				entryIndex++;
 			}
 
+			// Remove any extra Entry objects that we no longer need.
+			//
 			if (valueIndex == values.Count && entryIndex < entries.Count)
 			{
 				while (entryIndex < entries.Count)
@@ -389,15 +618,24 @@ namespace GitSharp
 				}
 			}
 
+			// Insert new Entry objects for additional/new values.
+			//
 			if (valueIndex < values.Count && entryIndex == entries.Count)
 			{
 				if (insertPosition < 0)
 				{
+					// We didn't find a matching key above, but maybe there
+					// is already a section available that matches. Insert
+					// after the last key of that section.
+					//
 					insertPosition = findSectionEnd(entries, section, subsection);
 				}
 
 				if (insertPosition < 0)
 				{
+					// We didn't find any matching section header for this key,
+					// so we must create a new section header at the end.
+					//
 					var e = new Entry { section = section, subsection = subsection };
 					entries.Add(e);
 					insertPosition = entries.Count;
@@ -412,6 +650,7 @@ namespace GitSharp
 									name = name,
 									value = values[valueIndex++]
 								};
+
 					entries.Insert(insertPosition++, e);
 				}
 			}
@@ -421,6 +660,9 @@ namespace GitSharp
 
 		private static List<Entry> copy(State src, ICollection<string> values)
 		{
+			// At worst we need to insert 1 line for each value, plus 1 line
+			// for a new section header. Assume that and allocate the space.
+			//
 			int max = src.EntryList.Count + values.Count + 1;
 			var r = new List<Entry>(max);
 			r.AddRange(src.EntryList);
@@ -449,6 +691,9 @@ namespace GitSharp
 			return -1;
 		}
 
+		///	<returns>
+		/// This configuration, formatted as a Git style text file.
+		/// </returns>
 		public string toText()
 		{
 			var o = new StringBuilder();
@@ -509,6 +754,14 @@ namespace GitSharp
 			_state.EntryList.Add(e);
 		}
 
+		/// Clear this configuration and reset to the contents of the parsed string.
+		///	</summary>
+		///	<param name="text">
+		/// Git style text file listing configuration properties.
+		/// </param>
+		///	<exception cref="ConfigInvalidException">
+		/// The text supplied is not formatted correctly. No changes were
+		/// made to this.</exception>
 		public void fromText(string text)
 		{
 			var newEntries = new List<Entry>();
@@ -534,14 +787,17 @@ namespace GitSharp
 				}
 				else if (e.suffix != null)
 				{
+					// Everything up until the end-of-line is in the suffix.
 					e.suffix += c;
 				}
 				else if (';' == c || '#' == c)
 				{
+					// The rest of this line is a comment; put into suffix.
 					e.suffix = new string(c, 1);
 				}
 				else if (e.section == null && char.IsWhiteSpace(c))
 				{
+					// Save the leading whitespace (if any).
 					if (e.prefix == null)
 					{
 						e.prefix = string.Empty;
@@ -550,6 +806,7 @@ namespace GitSharp
 				}
 				else if ('[' == c)
 				{
+					// This is a section header.
 					e.section = readSectionName(i);
 					input = i.Read();
 					if ('"' == input)
@@ -567,6 +824,7 @@ namespace GitSharp
 				}
 				else if (last != null)
 				{
+					// Read a value.
 					e.section = last.section;
 					e.subsection = last.subsection;
 					i.Reset();
@@ -681,6 +939,7 @@ namespace GitSharp
 
 				value.Append((char)c);
 			}
+
 			return value.Length > 0 ? value.ToString() : null;
 		}
 
@@ -835,13 +1094,39 @@ namespace GitSharp
 
 		#region Nested type: Entry
 
+		/// <summary>
+		/// The configuration file entry.
+		/// </summary>
 		protected class Entry
 		{
+			/// <summary>
+			/// The key name.
+			/// </summary>
 			public string name;
+
+			/// <summary>
+			/// The text content before entry.
+			/// </summary>
 			public string prefix;
+
+			/// <summary>
+			/// The section name for the entry.
+			/// </summary>
 			public string section;
+
+			/// <summary>
+			/// Subsection name.
+			/// </summary>
 			public string subsection;
+
+			/// <summary>
+			/// The text content after entry.
+			/// </summary>
 			public string suffix;
+
+			/// <summary>
+			/// The value
+			/// </summary>
 			public string value;
 
 			public Entry forValue(string newValue)
@@ -888,8 +1173,28 @@ namespace GitSharp
 
 		#region Nested type: SectionParser
 
+		///	<summary>
+		/// Parses a section of the configuration into an application model object.
+		///	<para />
+		///	Instances must implement hashCode and equals such that model objects can
+		///	be cached by using the <see cref="ISectionParser{T}"/> as a key of a
+		/// Dictionary.
+		///	<para />
+		///	As the <see cref="ISectionParser{T}"/> itself is used as the key of the internal
+		///	Dictionary applications should be careful to ensure the SectionParser key
+		///	does not retain unnecessary application state which may cause memory to
+		///	be held longer than expected.
+		///	</summary>
+		/// <typeparam name="T">type of the application model created by the parser.</typeparam>
 		public interface SectionParser<T>
 		{
+			///	<summary>
+			/// Create a model object from a configuration.
+			///	</summary>
+			///	<param name="cfg">
+			///	The configuration to read values from.
+			/// </param>
+			///	<returns>The application model instance.</returns>
 			T parse(Config cfg);
 		}
 

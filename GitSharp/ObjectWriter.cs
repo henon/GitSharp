@@ -61,7 +61,10 @@ namespace GitSharp
         private readonly MessageDigest _md;
         private readonly Repository _r;
 
-        // Methods
+		///	<summary>
+		/// Construct an object writer for the specified repository.
+		/// </summary>
+		///	<param name="repo"> </param>
         public ObjectWriter(Repository repo)
         {
             _r = repo;
@@ -70,11 +73,25 @@ namespace GitSharp
             _def = new Deflater(_r.Config.getCore().getCompression());
         }
 
+		///	<summary>
+		/// Compute the SHA-1 of a blob without creating an object. This is for
+		///	figuring out if we already have a blob or not.
+		///	</summary>
+		///	<param name="len"> number of bytes to consume.</param>
+		///	<param name="inputStream"> stream for read blob data from.</param>
+		///	<returns>SHA-1 of a looked for blob.</returns>
+		///	<exception cref="IOException"></exception>
         public ObjectId ComputeBlobSha1(long length, Stream input)
         {
             return WriteObject(ObjectType.Blob, length, input, false);
         }
 
+		/// <summary>
+		/// Write a blob with the data in the specified file
+		/// </summary>
+		/// <param name="fileInfo">A file containing blob data.</param>
+		///	<returns>SHA-1 of the blob.</returns>
+		///	<exception cref="IOException"></exception>
         public ObjectId WriteBlob(FileInfo fileInfo)
         {
             using (FileStream stream = fileInfo.OpenRead())
@@ -83,21 +100,46 @@ namespace GitSharp
             }
         }
 
+		///	<summary>
+		/// Write a blob with the specified data.
+		///	</summary>
+		///	<param name="b">Bytes of the blob.</param>
+		///	<returns>SHA-1 of the blob.</returns>
+		///	<exception cref="IOException"></exception>
         public ObjectId WriteBlob(byte[] b)
         {
             return WriteBlob(b.Length, new MemoryStream(b));
         }
 
+		///	<summary>
+		/// Write a blob with data from a stream
+		///	</summary>
+		///	<param name="len">Number of bytes to consume from the stream.</param>
+		///	<param name="inputStream">Stream with blob data.</param>
+		///	<returns>SHA-1 of the blob.</returns>
+		///	<exception cref="IOException"></exception>
         public ObjectId WriteBlob(long len, Stream input)
         {
             return WriteObject(ObjectType.Blob, len, input, true);
         }
 
+		///	<summary>
+		/// Write a canonical tree to the object database.
+		/// </summary>
+		/// <param name="b">The canonical encoding of the tree object.</param>
+		///	<returns>SHA-1 of the tree.</returns>
+		///	<exception cref="IOException"></exception>
         public ObjectId WriteCanonicalTree(byte[] buffer)
         {
             return WriteTree(buffer.Length, new MemoryStream(buffer));
         }
 
+		///	<summary>
+		/// Write a Commit to the object database
+		///	</summary>
+		///	<param name="c">Commit to store.</param>
+		///	<returns>SHA-1 of the commit.</returns>
+		///	<exception cref="IOException"></exception>
         public ObjectId WriteCommit(Commit c)
         {
             Encoding encoding = c.Encoding ?? Constants.CHARSET;
@@ -123,15 +165,18 @@ namespace GitSharp
             s.Write(' ');
             s.Write(c.Committer.ToExternalString().ToCharArray());
             s.Write('\n');
+
             if (encoding != Constants.CHARSET)
             {
                 s.Write(HEncoding);
                 s.Write(' ');
-                s.Write(Constants.encodeASCII(encoding.HeaderName.ToUpper()));
+				s.Write(Constants.encodeASCII(encoding.HeaderName.ToUpperInvariant()));
                 s.Write('\n');
             }
+
             s.Write('\n');
             s.Write(c.Message.ToCharArray());
+
             return WriteCommit(output.ToArray());
         }
 
@@ -151,6 +196,7 @@ namespace GitSharp
             DeflaterOutputStream stream;
             FileStream stream2;
             ObjectId objectId = null;
+
             if (store)
             {
                 info = _r.ObjectsDirectory.CreateTempFile("noz");
@@ -161,6 +207,7 @@ namespace GitSharp
                 info = null;
                 stream2 = null;
             }
+
             _md.Reset();
             if (store)
             {
@@ -171,6 +218,7 @@ namespace GitSharp
             {
                 stream = null;
             }
+
             try
             {
                 int num;
@@ -180,17 +228,20 @@ namespace GitSharp
                 {
                     stream.Write(bytes, 0, bytes.Length);
                 }
+
                 _md.Update(0x20);
                 if (stream != null)
                 {
                     stream.WriteByte(0x20);
                 }
+
                 bytes = Encoding.ASCII.GetBytes(len.ToString());
                 _md.Update(bytes);
                 if (stream != null)
                 {
                     stream.Write(bytes, 0, bytes.Length);
                 }
+
                 _md.Update(0);
                 if (stream != null)
                 {
@@ -205,10 +256,12 @@ namespace GitSharp
                     }
                     len -= num;
                 }
+
                 if (len != 0L)
                 {
                     throw new IOException("Input did not match supplied Length. " + len + " bytes are missing.");
                 }
+
                 if (stream != null)
                 {
                     stream.Close();
@@ -237,6 +290,9 @@ namespace GitSharp
             {
                 if (_r.HasObject(objectId))
                 {
+				// Object is already in the repository so remove
+				// the temporary file.
+				//
                   info.DeleteFile();
                 }
                 else
@@ -244,12 +300,21 @@ namespace GitSharp
                     FileInfo info2 = _r.ToFile(objectId);
                     if (!info.RenameTo(info2.FullName))
                     {
+					// Maybe the directory doesn't exist yet as the object
+					// directories are always lazily created. Note that we
+					// try the rename first as the directory likely does exist.
+					//
                         if (info2.Directory != null)
                         {
                             info2.Directory.Create();
                         }
                         if (!info.RenameTo(info2.FullName) && !_r.HasObject(objectId))
                         {
+						// The object failed to be renamed into its proper
+						// location and it doesn't exist in the repository
+						// either. We really don't know what went wrong, so
+						// fail.
+						//
                             info.DeleteFile();
                             throw new ObjectWritingException("Unable to create new object: " + info2);
                         }
@@ -259,6 +324,12 @@ namespace GitSharp
             return objectId;
         }
 
+		///	<summary>
+		/// Write an annotated Tag to the object database
+		///	</summary>
+		///	<param name="tag">Tag</param>
+		///	<returns>SHA-1 of the tag.</returns>
+		///	<exception cref="IOException"></exception>
         public ObjectId WriteTag(Tag tag)
         {
             var output = new MemoryStream();

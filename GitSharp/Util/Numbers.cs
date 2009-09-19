@@ -157,20 +157,21 @@ namespace GitSharp.Util
 			return ReadFully(path, int.MaxValue);
 		}
 
-		/**
-		 * Read an entire local file into memory as a byte array.
-		 *
-		 * @param path
-		 *            location of the file to Read.
-		 * @param max
-		 *            maximum number of bytes to Read, if the file is larger than
-		 *            this limit an IOException is thrown.
-		 * @return complete contents of the requested local file.
-		 * @throws FileNotFoundException
-		 *             the file does not exist.
-		 * @throws IOException
-		 *             the file exists, but its contents cannot be Read.
-		 */
+		/// <summary>
+		/// Read an entire local file into memory as a byte array.
+		/// </summary>
+		/// <param name="path">Location of the file to read.</param>
+		/// <param name="max">
+		/// Maximum number of bytes to Read, if the file is larger than
+		/// this limit an IOException is thrown.
+		/// </param>
+		/// <returns>
+		/// Complete contents of the requested local file.
+		/// </returns>
+		/// <exception cref="FileNotFoundException">
+		/// The file exists, but its contents cannot be Read.
+		/// </exception>
+		/// <exception cref="IOException"></exception>
 		public static byte[] ReadFully(FileInfo path, int max)
 		{
 			using (var @in = new FileStream(path.FullName, System.IO.FileMode.Open, FileAccess.Read))
@@ -184,22 +185,19 @@ namespace GitSharp.Util
 			}
 		}
 
-		/**
-		 * Read the entire byte array into memory, or throw an exception.
-		 * 
-		 * @param fd
-		 *            input stream to Read the data from.
-		 * @param dst
-		 *            buffer that must be fully populated, [off, off+len).
-		 * @param off
-		 *            position within the buffer to start writing to.
-		 * @param len
-		 *            number of bytes that must be Read.
-		 * @throws EOFException
-		 *             the stream ended before dst was fully populated.
-		 * @throws IOException
-		 *             there was an error reading from the stream.
-		 */
+		/// <summary>
+		/// Read the entire byte array into memory, or throw an exception.
+		/// </summary>
+		/// <param name="fd">Input stream to read the data from.</param>
+		/// <param name="dst">buffer that must be fully populated</param>
+		/// <param name="off">position within the buffer to start writing to.</param>
+		/// <param name="len">number of bytes that must be read.</param>
+		/// <exception cref="EndOfStreamException">
+		/// The stream ended before <paramref name="dst"/> was fully populated.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// There was an error reading from the stream.
+		/// </exception>
 		public static void ReadFully(Stream fd, byte[] dst, int off, int len)
 		{
 			while (len > 0)
@@ -212,24 +210,24 @@ namespace GitSharp.Util
 			}
 		}
 
-		/**
-		 * Read the entire byte array into memory, or throw an exception.
-		 *
-		 * @param fd
-		 *            file to Read the data from.
-		 * @param pos
-		 *            position to Read from the file at.
-		 * @param dst
-		 *            buffer that must be fully populated, [off, off+len).
-		 * @param off
-		 *            position within the buffer to start writing to.
-		 * @param len
-		 *            number of bytes that must be Read.
-		 * @throws EOFException
-		 *             the stream ended before dst was fully populated.
-		 * @throws IOException
-		 *             there was an error reading from the stream.
-		 */
+		/// <summary>
+		/// Read the entire byte array into memory, or throw an exception.
+		/// </summary>
+		/// <param name="fd">Stream to read the data from.</param>
+		/// <param name="pos">Position to read from the file at.</param>
+		/// <param name="dst">Buffer that must be fully populated, [off, off+len].</param>
+		/// <param name="off">position within the buffer to start writing to.</param>
+		/// <param name="len">number of bytes that must be read.</param>
+		/// <exception cref="EndOfStreamException">
+		/// The <paramref name="stream"/> ended before the requested number of 
+		/// bytes were read.
+		/// </exception>
+		/// <exception cref="NotSupportedException">
+		/// The <paramref name="stream"/> does not supports seeking.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// There was an error reading from the stream.
+		/// </exception>
 		public static void ReadFully(Stream fd, long pos, byte[] dst, int off, int len)
 		{
 			while (len > 0)
@@ -244,23 +242,25 @@ namespace GitSharp.Util
 			}
 		}
 
-		/**
-		 * Skip an entire region of an input stream.
-		 * <para />
-		 * The input stream's position is moved forward by the number of requested
-		 * bytes, discarding them from the input. This method does not return until
-		 * the exact number of bytes requested has been skipped.
-		 *
-		 * @param fd
-		 *            the stream to skip bytes from.
-		 * @param toSkip
-		 *            total number of bytes to be discarded. Must be >= 0.
-		 * @throws EOFException
-		 *             the stream ended before the requested number of bytes were
-		 *             skipped.
-		 * @throws IOException
-		 *             there was an error reading from the stream.
-		 */
+
+		/// <summary>
+		/// Skip an entire region of an input stream.
+		/// <para />
+		/// The input stream's position is moved forward by the number of requested
+		/// bytes, discarding them from the input. This method does not return until
+		/// the exact number of bytes requested has been skipped.
+		/// </summary>
+		/// <param name="fd">The stream to skip bytes from.</param>
+		/// <param name="toSkip">
+		/// Total number of bytes to be discarded. Must be >= 0.
+		/// </param>
+		/// <exception cref="EndOfStreamException">
+		/// The stream ended before the requested number of bytes were
+		/// skipped.
+		/// </exception>
+		/// <exception cref="IOException">
+		/// There was an error reading from the stream.
+		/// </exception>
 		public static void skipFully(Stream fd, long toSkip)
 		{
 			while (toSkip > 0)

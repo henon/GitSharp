@@ -37,55 +37,49 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 
 namespace GitSharp
 {
-    [Complete]
+	/// <summary>
+	/// A TreeVisitor is invoked depth first for every node in a tree and is expected
+	/// to perform different actions.
+	/// </summary>
     public interface TreeVisitor
     {
-        /**
-         * Visit to a tree node before child nodes are visited.
-         *
-         * @param t
-         *            Tree
-         * @
-         */
+		///	<summary>
+		/// Visit to a tree node before child nodes are visited.
+		///	</summary>
+		///	<param name="t">Tree</param>
+		///	<exception cref="IOException"></exception>
         void StartVisitTree(Tree t);
 
-        /**
-         * Visit to a tree node. after child nodes have been visited.
-         *
-         * @param t Tree
-         * @
-         */
+		///	<summary>
+		/// Visit to a tree node. after child nodes have been visited.
+		///	</summary>
+		///	<param name="t"> Tree </param>
+		///	<exception cref="IOException"> </exception>
         void EndVisitTree(Tree t);
 
-        /**
-         * Visit to a blob.
-         *
-         * @param f Blob
-         * @
-         */
+		///	<summary>
+		/// Visit to a blob.
+		///	</summary>
+		///	<param name="f">Blob</param>
+		///	<exception cref="IOException"></exception>
         void VisitFile(FileTreeEntry f);
 
-        /**
-         * Visit to a symlink.
-         *
-         * @param s Symlink entry
-         * @
-         */
+		///	<summary>
+		/// Visit to a symlink.
+		///	</summary>
+		///	<param name="s">Symlink entry.</param>
+		///	<exception cref="IOException"></exception>
         void VisitSymlink(SymlinkTreeEntry s);
 
-        /**
-        * Visit to a gitlink.
-         *
-         * @param s Gitlink entry
-         * @throws IOException
-         */
+		///	<summary>
+		/// Visit to a gitlink.
+		///	</summary>
+		///	<param name="s">Gitlink entry.</param>
+		///	<exception cref="IOException"></exception>
         void VisitGitlink(GitLinkTreeEntry s);
     }
 }

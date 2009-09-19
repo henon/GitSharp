@@ -81,7 +81,7 @@ namespace GitSharp
 		public override void EndVisitTree(Tree t)
 		{
 			base.EndVisitTree(t);
-			t.Id = _ow.WriteTree(t);
+			t.Id = ow.WriteTree(t);
 		}
 
 		public override void VisitGitlink(GitLinkTreeEntry s)

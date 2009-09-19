@@ -114,14 +114,9 @@ namespace GitSharp
         /// <returns>default(V) or item if Key is found</returns>
         public static V GetValue<K, V>(this Dictionary<K, V> dict, K key)
         {
-            try
-            {
-                return dict[key];
-            }
-            catch (Exception)
-            {
-                return default(V);
-            }
+        	V v;
+			if (dict.TryGetValue(key, out v)) return v;
+        	return default(V);
         }
 
         public static void Write(this BinaryWriter writer, ObjectId o)

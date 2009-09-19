@@ -104,7 +104,7 @@ namespace GitSharp
 			}
 		}
 
-		private static void AppendOneRecord(ObjectId oldId, ObjectId newId, PersonIdent ident, String msg, Repository db, String refName)
+		private static void AppendOneRecord(ObjectId oldId, ObjectId newId, PersonIdent ident, string msg, Repository db, string refName)
 		{
 			ident = ident == null ? new PersonIdent(db) : new PersonIdent(ident);
 
@@ -119,10 +119,10 @@ namespace GitSharp
 			r.Append('\n');
 
 			byte[] rec = Constants.encode(r.ToString());
-			var logdir = new DirectoryInfo(db.Directory + "/" + Constants.LOGS);
-			var reflog = new DirectoryInfo(logdir + "/" + refName);
-			var refdir = reflog.Parent;
+			var logdir = new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.LOGS));
+			var reflog = new DirectoryInfo(Path.Combine(logdir.FullName, refName));
 
+			var refdir = reflog.Parent;
 			if (refdir != null)
 			{
 				refdir.Create();

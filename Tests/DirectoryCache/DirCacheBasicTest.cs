@@ -36,17 +36,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using NUnit.Framework;
 using System.IO;
 using GitSharp.DirectoryCache;
+using NUnit.Framework;
 
 namespace GitSharp.Tests.DirectoryCache
 {
-
     [TestFixture]
     public class DirCacheBasicTest : RepositoryTestCase
     {
-
         [Test]
         public void testReadMissing_RealIndex()
         {
@@ -170,19 +168,17 @@ namespace GitSharp.Tests.DirectoryCache
             FileInfo lck = new FileInfo(db.Directory + "/index.lock");
             Assert.IsFalse(File.Exists(idx.FullName));
             Assert.IsFalse(File.Exists(lck.FullName));
-            {
-                DirCache dc = DirCache.Lock(db);
-                dc.write();
-                Assert.IsTrue(dc.commit());
-                Assert.IsTrue(File.Exists(idx.FullName));
-            }
-            {
-                DirCache dc = DirCache.Lock(db);
-                Assert.AreEqual(0, dc.getEntryCount());
-                Assert.IsTrue(File.Exists(idx.FullName));
-                Assert.IsTrue(File.Exists(lck.FullName));
-                dc.unlock();
-            }
+
+            DirCache dc = DirCache.Lock(db);
+            dc.write();
+            Assert.IsTrue(dc.commit());
+            Assert.IsTrue(File.Exists(idx.FullName));
+
+            dc = DirCache.Lock(db);
+            Assert.AreEqual(0, dc.getEntryCount());
+            Assert.IsTrue(File.Exists(idx.FullName));
+            Assert.IsTrue(File.Exists(lck.FullName));
+            dc.unlock();
         }
 
         [Test]
@@ -205,5 +201,12 @@ namespace GitSharp.Tests.DirectoryCache
             Assert.AreEqual(0, dc.getEntryCount());
         }
 
+		[Test]
+		public void testFindOnEmpty()
+		{
+			DirCache dc = DirCache.newInCore();
+			byte[] path = Constants.encode("a");
+			Assert.AreEqual(-1, dc.findEntry(path, path.Length));
+		}
     }
 }

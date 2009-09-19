@@ -377,6 +377,7 @@ namespace GitSharp.DirectoryCache
 
 				_id = ow.WriteCanonicalTree(@out.ToArray());
 			}
+
 			return _id;
 		}
 
@@ -600,7 +601,7 @@ namespace GitSharp.DirectoryCache
 			_children[n] = null;
 		}
 
-		public static bool peq(byte[] a, byte[] b, int aLen)
+		internal static bool peq(byte[] a, byte[] b, int aLen)
 		{
 			if (b.Length < aLen) return false;
 

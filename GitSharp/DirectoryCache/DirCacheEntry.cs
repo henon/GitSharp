@@ -504,6 +504,13 @@ namespace GitSharp.DirectoryCache
 			return 1000L * sec + ms;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="pIdx"></param>
+		/// <param name="when">
+		/// New cached modification date of the file, in milliseconds.
+		/// </param>
 		private void EncodeTimestamp(int pIdx, long when)
 		{
 			int @base = _infoOffset + pIdx;

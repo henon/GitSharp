@@ -36,11 +36,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.DirectoryCache;
+using GitSharp.TreeWalk.Filter;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-	using NUnit.Framework;
-	using GitSharp.DirectoryCache;
-	using GitSharp.TreeWalk.Filter;
 	[TestFixture]
 	public class DirCacheBuilderIteratorTest : RepositoryTestCase
 	{
@@ -57,14 +58,13 @@ namespace GitSharp.Tests.DirectoryCache
 				ents[i] = new DirCacheEntry(paths[i]);
 				ents[i].setFileMode(mode);
 			}
+
+			DirCacheBuilder builder = dc.builder();
+			for (int i = 0; i < ents.Length; i++)
 			{
-				DirCacheBuilder builder = dc.builder();
-				for (int i = 0; i < ents.Length; i++)
-				{
-					builder.add(ents[i]);
-				}
-				builder.finish();
+				builder.add(ents[i]);
 			}
+			builder.finish();
 
 			const int expIdx = 2;
 			DirCacheBuilder b = dc.builder();

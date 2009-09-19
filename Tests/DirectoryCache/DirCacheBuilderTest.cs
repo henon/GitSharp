@@ -36,12 +36,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.IO;
+using GitSharp.DirectoryCache;
+using NUnit.Framework;
+
 namespace GitSharp.Tests.DirectoryCache
 {
-    using NUnit.Framework;
-    using GitSharp.DirectoryCache;
-    using System.IO;
-
     [TestFixture]
     public class DirCacheBuilderTest : RepositoryTestCase
     {
@@ -49,18 +49,15 @@ namespace GitSharp.Tests.DirectoryCache
         [Test]
         public void testBuildEmpty()
         {
-            {
-                DirCache dc = DirCache.Lock(db);
-                DirCacheBuilder b = dc.builder();
-                Assert.IsNotNull(b);
-                b.finish();
-                dc.write();
-                Assert.IsTrue(dc.commit());
-            }
-            {
-                DirCache dc = DirCache.read(db);
-                Assert.AreEqual(0, dc.getEntryCount());
-            }
+            DirCache dc = DirCache.Lock(db);
+            DirCacheBuilder b = dc.builder();
+            Assert.IsNotNull(b);
+            b.finish();
+            dc.write();
+            Assert.IsTrue(dc.commit());
+
+            dc = DirCache.read(db);
+            Assert.AreEqual(0, dc.getEntryCount());
         }
 
         [Test]
@@ -71,47 +68,45 @@ namespace GitSharp.Tests.DirectoryCache
             long lastModified = 1218123387057L;
             int Length = 1342;
             DirCacheEntry entOrig;
-            {
-                DirCache dc = DirCache.Lock(db);
-                DirCacheBuilder b = dc.builder();
-                Assert.IsNotNull(b);
 
-                entOrig = new DirCacheEntry(path);
-                entOrig.setFileMode(mode);
-                entOrig.setLastModified(lastModified);
-                entOrig.setLength(Length);
+            DirCache dc = DirCache.Lock(db);
+            DirCacheBuilder b = dc.builder();
+            Assert.IsNotNull(b);
 
-                Assert.AreNotSame(path, entOrig.getPathString());
-                Assert.AreEqual(path, entOrig.getPathString());
-                Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
-                Assert.AreEqual(mode.Bits, entOrig.getRawMode());
-                Assert.AreEqual(0, entOrig.getStage());
-                Assert.AreEqual(lastModified, entOrig.getLastModified());
-                Assert.AreEqual(Length, entOrig.getLength());
-                Assert.IsFalse(entOrig.isAssumeValid());
-                b.add(entOrig);
+            entOrig = new DirCacheEntry(path);
+            entOrig.setFileMode(mode);
+            entOrig.setLastModified(lastModified);
+            entOrig.setLength(Length);
 
-                b.finish();
-                Assert.AreEqual(1, dc.getEntryCount());
-                Assert.AreSame(entOrig, dc.getEntry(0));
+            Assert.AreNotSame(path, entOrig.getPathString());
+            Assert.AreEqual(path, entOrig.getPathString());
+            Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
+            Assert.AreEqual(mode.Bits, entOrig.getRawMode());
+            Assert.AreEqual(0, entOrig.getStage());
+            Assert.AreEqual(lastModified, entOrig.getLastModified());
+            Assert.AreEqual(Length, entOrig.getLength());
+            Assert.IsFalse(entOrig.isAssumeValid());
+            b.add(entOrig);
 
-                dc.write();
-                Assert.IsTrue(dc.commit());
-            }
-            {
-                DirCache dc = DirCache.read(db);
-                Assert.AreEqual(1, dc.getEntryCount());
+            b.finish();
+            Assert.AreEqual(1, dc.getEntryCount());
+            Assert.AreSame(entOrig, dc.getEntry(0));
 
-                DirCacheEntry entRead = dc.getEntry(0);
-                Assert.AreNotSame(entOrig, entRead);
-                Assert.AreEqual(path, entRead.getPathString());
-                Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
-                Assert.AreEqual(mode.Bits, entOrig.getRawMode());
-                Assert.AreEqual(0, entOrig.getStage());
-                Assert.AreEqual(lastModified, entOrig.getLastModified());
-                Assert.AreEqual(Length, entOrig.getLength());
-                Assert.IsFalse(entOrig.isAssumeValid());
-            }
+            dc.write();
+            Assert.IsTrue(dc.commit());
+
+            dc = DirCache.read(db);
+            Assert.AreEqual(1, dc.getEntryCount());
+
+            DirCacheEntry entRead = dc.getEntry(0);
+            Assert.AreNotSame(entOrig, entRead);
+            Assert.AreEqual(path, entRead.getPathString());
+            Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
+            Assert.AreEqual(mode.Bits, entOrig.getRawMode());
+            Assert.AreEqual(0, entOrig.getStage());
+            Assert.AreEqual(lastModified, entOrig.getLastModified());
+            Assert.AreEqual(Length, entOrig.getLength());
+            Assert.IsFalse(entOrig.isAssumeValid());
         }
 
         [Test]
@@ -122,45 +117,43 @@ namespace GitSharp.Tests.DirectoryCache
             long lastModified = 1218123387057L;
             int Length = 1342;
             DirCacheEntry entOrig;
-            {
-                DirCache dc = DirCache.Lock(db);
-                DirCacheBuilder b = dc.builder();
-                Assert.IsNotNull(b);
 
-                entOrig = new DirCacheEntry(path);
-                entOrig.setFileMode(mode);
-                entOrig.setLastModified(lastModified);
-                entOrig.setLength(Length);
+            DirCache dc = DirCache.Lock(db);
+            DirCacheBuilder b = dc.builder();
+            Assert.IsNotNull(b);
 
-                Assert.AreNotSame(path, entOrig.getPathString());
-                Assert.AreEqual(path, entOrig.getPathString());
-                Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
-                Assert.AreEqual(mode.Bits, entOrig.getRawMode());
-                Assert.AreEqual(0, entOrig.getStage());
-                Assert.AreEqual(lastModified, entOrig.getLastModified());
-                Assert.AreEqual(Length, entOrig.getLength());
-                Assert.IsFalse(entOrig.isAssumeValid());
-                b.add(entOrig);
+            entOrig = new DirCacheEntry(path);
+            entOrig.setFileMode(mode);
+            entOrig.setLastModified(lastModified);
+            entOrig.setLength(Length);
 
-                Assert.IsTrue(b.commit());
-                Assert.AreEqual(1, dc.getEntryCount());
-                Assert.AreSame(entOrig, dc.getEntry(0));
-                Assert.IsFalse(new FileInfo(db.Directory+ "/index.lock").Exists);
-            }
-            {
-                DirCache dc = DirCache.read(db);
-                Assert.AreEqual(1, dc.getEntryCount());
+            Assert.AreNotSame(path, entOrig.getPathString());
+            Assert.AreEqual(path, entOrig.getPathString());
+            Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
+            Assert.AreEqual(mode.Bits, entOrig.getRawMode());
+            Assert.AreEqual(0, entOrig.getStage());
+            Assert.AreEqual(lastModified, entOrig.getLastModified());
+            Assert.AreEqual(Length, entOrig.getLength());
+            Assert.IsFalse(entOrig.isAssumeValid());
+            b.add(entOrig);
 
-                DirCacheEntry entRead = dc.getEntry(0);
-                Assert.AreNotSame(entOrig, entRead);
-                Assert.AreEqual(path, entRead.getPathString());
-                Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
-                Assert.AreEqual(mode.Bits, entOrig.getRawMode());
-                Assert.AreEqual(0, entOrig.getStage());
-                Assert.AreEqual(lastModified, entOrig.getLastModified());
-                Assert.AreEqual(Length, entOrig.getLength());
-                Assert.IsFalse(entOrig.isAssumeValid());
-            }
+            Assert.IsTrue(b.commit());
+            Assert.AreEqual(1, dc.getEntryCount());
+            Assert.AreSame(entOrig, dc.getEntry(0));
+            Assert.IsFalse(new FileInfo(db.Directory+ "/index.lock").Exists);
+
+            dc = DirCache.read(db);
+            Assert.AreEqual(1, dc.getEntryCount());
+
+            DirCacheEntry entRead = dc.getEntry(0);
+            Assert.AreNotSame(entOrig, entRead);
+            Assert.AreEqual(path, entRead.getPathString());
+            Assert.AreEqual(ObjectId.ZeroId, entOrig.getObjectId());
+            Assert.AreEqual(mode.Bits, entOrig.getRawMode());
+            Assert.AreEqual(0, entOrig.getStage());
+            Assert.AreEqual(lastModified, entOrig.getLastModified());
+            Assert.AreEqual(Length, entOrig.getLength());
+            Assert.IsFalse(entOrig.isAssumeValid());
         }
 
         [Test]
@@ -269,6 +262,5 @@ namespace GitSharp.Tests.DirectoryCache
                 eIdx = -(eIdx + 1);
             return eIdx;
         }
-
     }
 }

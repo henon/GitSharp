@@ -41,7 +41,7 @@ using System.IO;
 namespace GitSharp.CLI
 {
 
-    [Command(common=true, complete=false, usage = "Create an empty git repository")]
+    [Command(common = true, complete = false, usage = "Create an empty git repository")]
     class Init : TextBuiltin
     {
         private bool bare;
@@ -54,7 +54,7 @@ namespace GitSharp.CLI
                           };
 
             arguments = options.Parse(args);
- 
+
             create();
         }
 
@@ -69,7 +69,7 @@ namespace GitSharp.CLI
                 gitdir = bare ? Environment.CurrentDirectory : Path.Combine(Environment.CurrentDirectory, ".git");
             db = new Repository(new DirectoryInfo(gitdir));
             db.Create(bare);
-            streamOut.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
+            Console.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
         }
     }
 

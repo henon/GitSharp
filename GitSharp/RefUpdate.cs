@@ -601,8 +601,18 @@ namespace GitSharp
 		{
 			for (; depth > 0 && dir != null; depth--)
 			{
-				dir.Delete();
-				if (dir.Exists) break;
+                if (dir.Exists)
+                {
+                    try
+                    {
+                        dir.Delete();
+                    }
+                    catch (IOException)
+                    {
+                        break;
+                    }
+                }
+
 				dir = dir.Parent;
 			}
 		}

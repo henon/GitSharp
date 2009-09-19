@@ -148,16 +148,16 @@ namespace GitSharp.Util
 
 		/// <summary>
 		/// Format a base 10 numeric into a temporary buffer.
-		/// 
+		/// <para />
 		/// Formatting is performed backwards. The method starts at offset
 		/// <code>o-1</code> and ends at <code>o-1-digits</code>, where
 		/// <code>digits</code> is the number of positions necessary to store the
 		/// base 10 value.
-		/// 
+		/// <para />
 		/// The argument and return values from this method make it easy to chain
 		/// writing, for example:
-		/// 
-		/// <code>
+		/// <para />
+		/// <example>
 		/// byte[] tmp = new byte[64];
 		/// int ptr = tmp.Length;
 		/// tmp[--ptr] = '\n';
@@ -166,7 +166,7 @@ namespace GitSharp.Util
 		/// ptr = RawParseUtils.formatBase10(tmp, ptr, 18);
 		/// tmp[--ptr] = 0;
 		/// string str = new string(tmp, ptr, tmp.Length - ptr);
-		/// </code>
+		/// </example>
 		/// </summary>
 		/// <param name="b">buffer to write into.</param>
 		/// <param name="o">
@@ -205,7 +205,7 @@ namespace GitSharp.Util
 
 		/// <summary>
 		/// Parse a base 10 numeric from a sequence of ASCII digits into an int.
-		/// 
+		/// <para />
 		/// Digit sequences can begin with an optional run of spaces before the
 		/// sequence, and may start with a '+' or a '-' to indicate sign position.
 		/// Any other characters will cause the method to stop and return the current
@@ -320,24 +320,26 @@ namespace GitSharp.Util
 			return sign < 0 ? -r : r;
 		}
 
-		/**
-     * Parse a base 10 numeric from a sequence of ASCII digits into a long.
-     * <para />
-     * Digit sequences can begin with an optional run of spaces before the
-     * sequence, and may start with a '+' or a '-' to indicate sign position.
-     * Any other characters will cause the method to stop and return the current
-     * result to the caller.
-     * 
-     * @param b
-     *            buffer to scan.
-     * @param ptr
-     *            position within buffer to start parsing digits at.
-     * @param ptrResult
-     *            optional location to return the new ptr value through. If null
-     *            the ptr value will be discarded.
-     * @return the value at this location; 0 if the location is not a valid
-     *         numeric.
-     */
+		/// <summary>
+		/// Parse a base 10 numeric from a sequence of ASCII digits into a long.
+		/// <para />
+		/// Digit sequences can begin with an optional run of spaces before the
+		/// sequence, and may start with a '+' or a '-' to indicate sign position.
+		/// Any other characters will cause the method to stop and return the current
+		/// result to the caller.
+		/// </summary>
+		/// <param name="b">Buffer to scan.</param>
+		/// <param name="ptr">
+		/// Position within buffer to start parsing digits at.
+		/// </param>
+		/// <param name="ptrResult">
+		/// Optional location to return the new ptr value through. If null
+		/// the ptr value will be discarded.
+		/// </param>
+		/// <returns>
+		/// The value at this location; 0 if the location is not a valid
+		/// numeric.
+		/// </returns>
 		public static long parseLongBase10(byte[] b, int ptr, MutableInteger ptrResult)
 		{
 			long r = 0;
@@ -379,22 +381,21 @@ namespace GitSharp.Util
 			return sign < 0 ? -r : r;
 		}
 
-
-		/**
-         * Parse 4 character base 16 (hex) formatted string to unsigned integer.
-         * <para />
-         * The number is Read in network byte order, that is, most significant
-         * nybble first.
-         *
-         * @param bs
-         *            buffer to parse digits from; positions {@code [p, p+4)} will
-         *            be parsed.
-         * @param p
-         *            first position within the buffer to parse.
-         * @return the integer value.
-         * @throws IndexOutOfRangeException
-         *             if the string is not hex formatted.
-         */
+		///	<summary>
+		/// Parse 4 character base 16 (hex) formatted string to unsigned integer.
+		/// <para />
+		/// The number is read in network byte order, that is, most significant
+		/// nibble first.
+		/// </summary>
+		/// <param name="bs">
+		/// buffer to parse digits from; positions <code>[p, p+4]</code> will
+		/// be parsed.
+		/// </param>
+		/// <param name="p">First position within the buffer to parse.</param>
+		///	<returns>The integer value.</returns>
+		/// <exception cref="IndexOutOfRangeException">
+		/// If the string is not hex formatted.
+		/// </exception>
 		public static int parseHexInt16(byte[] bs, int p)
 		{
             if (!bs.All(isHex))
@@ -414,21 +415,21 @@ namespace GitSharp.Util
 			return r;
 		}
 
-		/**
-         * Parse 8 character base 16 (hex) formatted string to unsigned integer.
-         * <para />
-         * The number is Read in network byte order, that is, most significant
-         * nybble first.
-         *
-         * @param bs
-         *            buffer to parse digits from; positions {@code [p, p+8)} will
-         *            be parsed.
-         * @param p
-         *            first position within the buffer to parse.
-         * @return the integer value.
-         * @throws IndexOutOfRangeException
-         *             if the string is not hex formatted.
-         */
+		///	<summary>
+		/// Parse 8 character base 16 (hex) formatted string to unsigned integer.
+		///	<para />
+		///	The number is read in network byte order, that is, most significant
+		///	nibble first.
+		///	</summary>
+		///	<param name="bs">
+		/// Buffer to parse digits from; positions <code>[p, p+8]</code> will
+		/// be parsed.
+		/// </param>
+		///	<param name="p">First position within the buffer to parse.</param>
+		///	<returns> the integer value.</returns>
+		///	<exception cref="IndexOutOfRangeException">
+		///	if the string is not hex formatted.
+		/// </exception>
 		public static int parseHexInt32(byte[] bs, int p)
 		{
             if (!bs.All(isHex))
@@ -459,15 +460,14 @@ namespace GitSharp.Util
 			return (r << 4) | last;
 		}
 
-		/**
-         * Parse a single hex digit to its numeric value (0-15).
-         *
-         * @param digit
-         *            hex character to parse.
-         * @return numeric value, in the range 0-15.
-         * @throws IndexOutOfRangeException
-         *             if the input digit is not a valid hex digit.
-         */
+		///	<summary>
+		/// Parse a single hex digit to its numeric value (0-15).
+		///	</summary>
+		///	<param name="digit">Hex character to parse.</param>
+		///	<returns>Numeric value, in the range 0-15.</returns>
+		///	<exception cref="IndexOutOfRangeException">
+		///	If the input digit is not a valid hex digit.
+		/// </exception>
 		public static int parseHexInt4(byte digit)
 		{
             if (!isHex(digit))
@@ -484,18 +484,16 @@ namespace GitSharp.Util
             return ((d >= '0' && d <= '9') || (d >= 'a' && d <= 'z') || (d >= 'A' && d <= 'Z'));
         }
 
-		/**
-         * Parse a Git style timezone string.
-         * <para />
-         * The sequence "-0315" will be parsed as the numeric value -195, as the
-         * lower two positions count minutes, not 100ths of an hour.
-         * 
-         * @param b
-         *            buffer to scan.
-         * @param ptr
-         *            position within buffer to start parsing digits at.
-         * @return the timezone at this location, expressed in minutes.
-         */
+		/// <summary>
+		/// Parse a Git style timezone string.
+		///	<para />
+		///	The sequence "-0315" will be parsed as the numeric value -195, as the
+		///	lower two positions count minutes, not 100ths of an hour.
+		///	</summary>
+		///	<param name="b">Buffer to scan.</param>
+		///	<param name="ptr">
+		///	Position within buffer to start parsing digits at. </param>
+		///	<returns> the timezone at this location, expressed in minutes. </returns>
 		public static int parseTimeZoneOffset(byte[] b, int ptr)
 		{
 			int v = parseBase10(b, ptr, null);
@@ -504,17 +502,15 @@ namespace GitSharp.Util
 			return tzHours * 60 + tzMins;
 		}
 
-		/**
-         * Locate the first position After a given character.
-         * 
-         * @param b
-         *            buffer to scan.
-         * @param ptr
-         *            position within buffer to start looking for chrA at.
-         * @param chrA
-         *            character to find.
-         * @return new position just After chrA.
-         */
+		/// <summary>
+		/// Locate the first position after a given character.
+		/// </summary>
+		/// <param name="b">buffer to scan.</param>
+		/// <param name="ptr">
+		/// position within buffer to start looking for <paramref name="chrA"/> at.
+		/// </param>
+		/// <param name="chrA">character to find.</param>
+		/// <returns>New position just after <paramref name="chrA"/>.</returns>
 		public static int next(char[] b, int ptr, char chrA)
 		{
 			int sz = b.Length;
@@ -553,35 +549,32 @@ namespace GitSharp.Util
 			return next(b, ptr, '\n');
 		}
 
-		/**
-         * Locate the first position After the next LF.
-         * <para />
-         * This method stops on the first '\n' it finds.
-         *
-         * @param b
-         *            buffer to scan.
-         * @param ptr
-         *            position within buffer to start looking for LF at.
-         * @return new position just After the first LF found.
-         */
+		/// <summary>
+		/// Locate the first position after LF.
+		/// </summary>
+		/// <param name="b">buffer to scan.</param>
+		/// <param name="ptr">
+		/// position within buffer to start looking for LF at.
+		/// </param>
+		/// <returns>New position just after LF.</returns>
 		public static int nextLF(byte[] b, int ptr)
 		{
 			return next(b, ptr, (byte)'\n');
 		}
 
-		/**
-         * Locate the first position After either the given character or LF.
-         * <para />
-         * This method stops on the first match it finds from either chrA or '\n'.
-         * 
-         * @param b
-         *            buffer to scan.
-         * @param ptr
-         *            position within buffer to start looking for chrA or LF at.
-         * @param chrA
-         *            character to find.
-         * @return new position just After the first chrA or LF to be found.
-         */
+		///	<summary>
+		/// Locate the first position after either the given character or LF.
+		///	<para />
+		///	This method stops on the first match it finds from either chrA or '\n'.
+		///	</summary>
+		///	<param name="b">Buffer to scan.</param>
+		///	<param name="ptr">
+		///	Position within buffer to start looking for chrA or LF at.
+		/// </param>
+		///	<param name="chrA"><see cref="char"/> to find.</param>
+		///	<returns>
+		/// New position just after the first chrA or LF to be found.
+		/// </returns>
 		public static int nextLF(char[] b, int ptr, char chrA)
 		{
 			int sz = b.Length;

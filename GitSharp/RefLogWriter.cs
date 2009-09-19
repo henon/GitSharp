@@ -39,14 +39,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.IO;
 using System.Text;
 using System.Threading;
 
 namespace GitSharp
 {
-
 	/// <summary>
 	/// Utility class to work with reflog files
 	/// </summary>
@@ -64,7 +62,7 @@ namespace GitSharp
 			if (!u.Name.Equals(u.OriginalName))
 			{
 				AppendOneRecord(oldId, newId, ident, msg, db, u.OriginalName);
-		}
+			}
 		}
 
 		internal static void append(RefRename refRename, string logName, string msg)
@@ -77,11 +75,11 @@ namespace GitSharp
 
 		internal static void renameTo(Repository db, RefUpdate from, RefUpdate to)
 		{
-			var logdir = new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.LOGS));
-			var reflogFrom = new FileInfo(Path.Combine(logdir.FullName, from.Name));
+			var logdir = new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.LOGS).Replace('/', Path.DirectorySeparatorChar));
+			var reflogFrom = new FileInfo(Path.Combine(logdir.FullName, from.Name).Replace('/', Path.DirectorySeparatorChar));
 			if (!reflogFrom.Exists) return;
 
-			var reflogTo = new FileInfo(Path.Combine(logdir.FullName, to.Name));
+			var reflogTo = new FileInfo(Path.Combine(logdir.FullName, to.Name).Replace('/', Path.DirectorySeparatorChar));
 			var reflogToDir = reflogTo.Directory;
 			var tmp = new FileInfo(Path.Combine(logdir.FullName, "tmp-renamed-log.." + Thread.CurrentThread.ManagedThreadId));
 			if (!reflogFrom.RenameTo(tmp.FullName))
@@ -89,7 +87,7 @@ namespace GitSharp
 				throw new IOException("Cannot rename " + reflogFrom + " to (" + tmp + ")" + reflogTo);
 			}
 
-			RefUpdate.DeleteEmptyDir(reflogFrom.Directory, RefUpdate.Count(from.Name, '/'));
+			RefUpdate.DeleteEmptyDir(reflogFrom.Directory, RefUpdate.Count(from.Name, Path.DirectorySeparatorChar));
 			if (reflogToDir != null && !reflogToDir.Exists)
 			{
 				try { reflogToDir.Create(); }
@@ -159,6 +157,6 @@ namespace GitSharp
 		public static void WriteReflog(Repository repo, ObjectId oldCommit, ObjectId commit, string message, string refName)
 		{
 			AppendOneRecord(oldCommit, commit, null, message, repo, refName);
-				}
-				}
+		}
+	}
 }

@@ -261,5 +261,4 @@ namespace GitSharp.Transport
             return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
         }
     }
-
 }

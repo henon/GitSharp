@@ -354,7 +354,7 @@ namespace GitSharp
 			_looseRefs.TryGetValue(name, out @ref);
 			FileInfo loose = FileForRef(name);
 			loose.Refresh();
-			DateTime mtime = loose.LastWriteTime;
+			DateTime mtime = loose.Exists ? loose.LastWriteTime : DateTime.MinValue;	// [ammachado] If the file does not exists, LastWriteTimes returns '1600-12-31 22:00:00'
 
 			if (@ref != null)
 			{

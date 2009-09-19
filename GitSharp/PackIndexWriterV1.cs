@@ -68,6 +68,7 @@ namespace GitSharp
                 {
                 	throw new IOException("Pack too large for index version 1");
                 }
+
                 NB.encodeInt32(tmp, 0, (int)oe.Offset);
                 oe.copyRawTo(tmp, 4);
                 _stream.Write(tmp, 0, tmp.Length);

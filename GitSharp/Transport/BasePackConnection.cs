@@ -80,7 +80,7 @@ namespace GitSharp.Transport
             {
                 readAdvertisedRefsImpl();
             }
-            catch (TransportException err)
+            catch (TransportException)
             {
                 Close();
                 throw;

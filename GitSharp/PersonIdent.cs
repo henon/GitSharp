@@ -55,6 +55,12 @@ namespace GitSharp
         public long When { get; private set; } // local date time in milliseconds (since Epoch)
         private readonly int tzOffset; // offset in minutes to UTC
 
+		///	<summary>
+		/// Creates new PersonIdent from config info in repository, with current time.
+		///	This new PersonIdent gets the info from the default committer as available
+		///	from the configuration.
+		///	</summary>
+		///	<param name="repo"></param>
         public PersonIdent(Repository repo)
         {
             RepositoryConfig config = repo.Config;
@@ -64,31 +70,65 @@ namespace GitSharp
             EmailAddress = email;
         }
 
-        public PersonIdent(PersonIdent pi)
+		///	<summary>
+		/// Copy a <seealso cref="PersonIdent"/>.
+		///	</summary>
+		///	<param name="pi">Original <seealso cref="PersonIdent"/>.</param>
+		public PersonIdent(PersonIdent pi)
 			: this(pi.Name, pi.EmailAddress)
         {
         }
 
+		///	<summary>
+		/// Construct a new <seealso cref="PersonIdent"/> with current time.
+		///	</summary>
+		///	<param name="name"> </param>
+		///	<param name="emailAddress"></param>
         public PersonIdent(string name, string emailAddress) 
 			: this(name, emailAddress, DateTime.Now, TimeZoneInfo.Local)
         {
         }
 
+		///	<summary>
+		/// Copy a PersonIdent, but alter the clone's time stamp
+		///	</summary>
+		///	<param name="pi">Original <seealso cref="PersonIdent"/>.</param>
+		///	<param name="when">Local time.</param>
+		///	<param name="tz">Time zone.</param>
         public PersonIdent(PersonIdent pi, DateTime when, TimeZoneInfo tz)
 			: this(pi.Name, pi.EmailAddress, when, tz)
         {
         }
 
+		/// <summary>
+		/// Copy a <seealso cref="PersonIdent"/>, but alter the clone's time stamp
+		/// </summary>
+		/// <param name="pi">Original <seealso cref="PersonIdent"/>.</param>
+		///	<param name="when">Local time stamp.</param>
         public PersonIdent(PersonIdent pi, DateTime when)
 			: this(pi.Name, pi.EmailAddress, when.ToUnixTime() * 1000, pi.tzOffset)
         {
         }
 
+		///	<summary>
+		/// Construct a PersonIdent from simple data
+		///	</summary>
+		///	<param name="name"></param>
+		///	<param name="emailAddress"></param>
+		///	<param name="when">Local time stamp.</param>
+		///	<param name="tz">Time zone.</param>
         public PersonIdent(string name, string emailAddress, DateTime when, TimeZoneInfo tz)
 			: this(name, emailAddress, when.ToUnixTime() * 1000, tz.GetUtcOffset(when).Minutes)
         {
         }
 
+		///	<summary>
+		/// Construct a <seealso cref="PersonIdent"/>
+		///	</summary>
+		///	<param name="name"></param>
+		///	<param name="emailAddress"> </param>
+		///	<param name="when">Local time stamp.</param>
+		///	<param name="tz">Time zone.</param>
         public PersonIdent(string name, string emailAddress, long when, int tz)
         {
             Name = name;
@@ -97,11 +137,22 @@ namespace GitSharp
             tzOffset = tz;
         }
 
+		///	<summary>
+		/// Copy a PersonIdent, but alter the clone's time stamp
+		///	</summary>
+		///	<param name="pi">Original <seealso cref="PersonIdent"/>.</param>
+		///	<param name="when">Local time stamp.</param>
+		///	<param name="tz">Time zone.</param>
         public PersonIdent(PersonIdent pi, long git_time, int offset_in_minutes) 
 			: this(pi.Name, pi.EmailAddress, git_time, offset_in_minutes)
         {
         }
 
+		///	<summary>
+		/// Construct a PersonIdent from a string with full name, email, time time
+		///	zone string. The input string must be valid.
+		///	</summary>
+		///	<param name="str">A Git internal format author/committer string.</param>
         public PersonIdent(string str)
         {
             int lt = str.IndexOf('<');
@@ -168,6 +219,10 @@ namespace GitSharp
                 && When == p.When;
         }
 
+		///	<summary>
+		/// Format for Git storage.
+		///	</summary>
+		///	<returns>A string in the git author format.</returns>
         public string ToExternalString()
         {
             var r = new StringBuilder();

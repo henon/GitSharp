@@ -37,18 +37,100 @@
 
 namespace GitSharp
 {
-    public enum ObjectType
-    {
-        Bad = -1,
-        Extension = 0,
-        Commit = 1,
-        Tree = 2,
-        Blob = 3,
-        Tag = 4,
-        ObjectType5 = 5,
-        OffsetDelta = 6,
-        ReferenceDelta = 7,
-        DeltaBase = 254,
-        Unknown = 255
-    }
+	public enum ObjectType
+	{
+		/// <summary>
+		/// An unknown or invalid object type code.
+		/// </summary>
+		Bad = -1,
+
+		/// <summary>
+		/// In-pack object type: extended types.
+		/// <para />
+		/// This header code is reserved for future expansion. It is currently
+		/// undefined/unsupported.
+		/// </summary>
+		Extension = 0,
+
+		/// <summary>
+		/// In-pack object type: commit.
+		/// <para />
+		/// Indicates the associated object is a commit.
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+		/// <seealso cref="Constants.TYPE_COMMIT"/>
+		/// </summary>
+		Commit = 1,
+
+		/// <summary>
+		/// In-pack object type: tree.
+		/// <para />
+		/// Indicates the associated object is a tree.
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+		/// </summary>
+		/// <seealso cref="Constants.TYPE_BLOB"/>
+		Tree = 2,
+
+		/// <summary>
+		/// In-pack object type: blob.
+		/// <para />
+		/// Indicates the associated object is a blob.
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+		/// </summary>
+		/// <seealso cref="Constants.TYPE_BLOB"/>
+		Blob = 3,
+
+		/// <summary>
+		/// In-pack object type: annotated tag.
+		/// <para />
+		/// Indicates the associated object is an annotated tag.
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+		/// </summary>
+		/// <seealso cref="Constants.TYPE_TAG"/>
+		Tag = 4,
+
+		/// <summary>
+		/// In-pack object type: reserved for future use.
+		/// </summary>
+		ObjectType5 = 5,
+
+		/// <summary>
+		/// In-pack object type: offset delta
+		/// <para />
+		/// Objects stored with this type actually have a different type which must
+		/// be obtained from their delta base object. Delta objects store only the
+		/// changes needed to apply to the base object in order to recover the
+		/// original object.
+		/// <para />
+		/// An offset delta uses a negative offset from the start of this object to
+		/// refer to its delta base. The base object must exist in this packfile
+		/// (even in the case of a thin pack).
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+		/// </summary>
+		OffsetDelta = 6,
+
+		/// <summary>
+		/// In-pack object type: reference delta
+		/// <para />
+		/// Objects stored with this type actually have a different type which must
+		/// be obtained from their delta base object. Delta objects store only the
+		/// changes needed to apply to the base object in order to recover the
+		/// original object.
+		/// <para />
+		/// A reference delta uses a full object id (hash) to reference the delta
+		/// base. The base object is allowed to be omitted from the packfile, but
+		/// only in the case of a thin pack being transferred over the network.
+		/// <para />
+		/// <b>This constant is fixed and is defined by the Git packfile format.</b>
+		/// </summary>
+		ReferenceDelta = 7,
+
+		DeltaBase = 254,
+
+		Unknown = 255
+	}
 }

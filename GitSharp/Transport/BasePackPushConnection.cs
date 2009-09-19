@@ -100,7 +100,7 @@ namespace GitSharp.Transport
                 if (_sentCommand && _capableReport)
                     readStatusReport(refUpdates);
             }
-            catch (TransportException e)
+            catch (TransportException)
             {
                 throw;
             }

@@ -79,21 +79,33 @@ namespace GitSharp
                 comment = RawParseUtils.decode(raw, p0, p1 - 1);
             }
 
+			/// <summary>
+			/// Gets the commit id before the change.
+			/// </summary>
             public ObjectId getOldId()
             {
                 return oldId;
             }
 
+			/// <summary>
+			/// Gets the commit id after the change.
+			/// </summary>
             public ObjectId getNewId()
             {
                 return newId;
             }
 
+			/// <summary>
+			/// Gets the user performing the change.
+			/// </summary>
             public PersonIdent getWho()
             {
                 return who;
             }
 
+			/// <summary>
+			/// Gets the textual description of the change.
+			/// </summary>
             public string getComment()
             {
                 return comment;

@@ -375,6 +375,7 @@ namespace GitSharp
 			{
 				WriteWholeObjectDeflate(otp);
 			}
+
 			otp.CRC = _pos.getCRC32();
 			_writeMonitor.Update(1);
 		}
@@ -451,6 +452,7 @@ namespace GitSharp
 			int size = 0;
 			_buf[size++] = (byte)((nextLength > 0 ? (byte)0x80 : (byte)0x00) | (byte)(objectType << 4) | (byte)(dataLength & 0x0F));
 			dataLength = nextLength;
+
 			while (dataLength > 0)
 			{
 				nextLength = (long)(((ulong)nextLength) >> 7);
@@ -489,6 +491,7 @@ namespace GitSharp
 				foreach (T id in uninterestingObjects)
 				{
 					RevObject o;
+
 					try
 					{
 						o = walker.parseAny(id);
@@ -498,6 +501,7 @@ namespace GitSharp
 						if (IgnoreMissingUninteresting) continue;
 						throw;
 					}
+
 					walker.markUninteresting(o);
 				}
 			}
@@ -515,6 +519,7 @@ namespace GitSharp
 				addObject(o);
 				_initMonitor.Update(1);
 			}
+
 			while ((o = walker.nextObject()) != null)
 			{
 				addObject(o);
@@ -587,12 +592,7 @@ namespace GitSharp
 			{
 				get { return (_flags >> 1) & 0x7; }
 			}
-			/*
-			public int DeltaDepth
-			{
-				get { return (int)(((uint)_flags) >> 4); }
-			}
-			*/
+
 			public bool WantWrite
 			{
 				get { return (_flags & 1) == 1; }

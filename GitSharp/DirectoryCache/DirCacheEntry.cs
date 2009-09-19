@@ -263,6 +263,7 @@ namespace GitSharp.DirectoryCache
 
 			if (smudge_s == mtime)
 				return smudge_ns <= NB.DecodeInt32(_info, @base + 4) / 1000000;
+
 			return false;
 		}
 

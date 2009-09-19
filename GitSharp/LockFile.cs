@@ -45,10 +45,19 @@ using System.Diagnostics;
 
 namespace GitSharp
 {
-    [Complete]
-    public class LockFile
-    {
-        private FileInfo _refFile;
+	/// <summary>
+	/// Git style file locking and replacement.
+	/// <para />
+	/// To modify a ref file Git tries to use an atomic update approach: we write the
+	/// new data into a brand new file, then rename it in place over the old name.
+	/// This way we can just delete the temporary file if anything goes wrong, and
+	/// nothing has been damaged. To coordinate access from multiple processes at
+	/// once Git tries to atomically create the new temporary file under a well-known
+	/// name.
+	/// </summary>
+	public class LockFile
+	{
+		private readonly FileInfo _refFile;
         private FileInfo _lockFile;
         private FileStream _os;
         private FileLock _fLck;
@@ -58,12 +67,25 @@ namespace GitSharp
         public DateTime CommitLastModified { get; private set; }
         public bool NeedStatInformation { get; set; }
 
+		/// <summary>
+		/// Create a new lock for any file.
+		///	</summary>
+		///	<param name="f">the file that will be locked.</param>
         public LockFile(FileInfo file)
         {
             _refFile = file;
             _lockFile = PathUtil.CombineFilePath(_refFile.Directory, _refFile.Name + ".lock");
         }
 
+		///	<summary> * Try to establish the lock.
+		///	</summary>
+		///	<returns>
+		/// True if the lock is now held by the caller; false if it is held
+		///	by someone else. </returns>
+		/// <exception cref="IOException">
+		/// the temporary output file could not be created. The caller
+		///	does not hold the lock.
+		/// </exception>
         public bool Lock()
         {
             _lockFile.Directory.Create();
@@ -104,6 +126,17 @@ namespace GitSharp
             return _haveLock;
         }
 
+		/// <summary>
+		/// Try to establish the lock for appending.
+		/// </summary>
+		/// <returns>
+		/// True if the lock is now held by the caller; false if it is held
+		///	by someone else.
+		/// </returns>
+		///	<exception cref="IOException">
+		///	The temporary output file could not be created. The caller
+		///	does not hold the lock.
+		/// </exception>
         public bool LockForAppend()
         {
             if (!Lock())
@@ -117,6 +150,22 @@ namespace GitSharp
         }
 
 
+		///	<summary>
+		/// Copy the current file content into the temporary file.
+		/// <para />
+		///	This method saves the current file content by inserting it into the
+		///	temporary file, so that the caller can safely append rather than replace
+		///	the primary file.
+		///	<para />
+		///	This method does nothing if the current file does not exist, or exists
+		///	but is empty.
+		///	</summary>
+		///	<exception cref="IOException">
+		///	The temporary file could not be written, or a read error
+		///	occurred while reading from the current file. The lock is
+		///	released before throwing the underlying IO exception to the
+		///	caller. 
+		/// </exception>
         public void CopyCurrentContent()
         {
             RequireLock();
@@ -210,9 +259,8 @@ namespace GitSharp
                     _lockFile = copy;
                     return true;
                 }
-                catch (Exception)
+				catch (IOException)
                 {
-
                 }
             }
             finally

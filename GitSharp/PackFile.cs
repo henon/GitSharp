@@ -44,7 +44,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using GitSharp.Exceptions;
 using GitSharp.Util;
 using Winterdom.IO.FileMap;
@@ -62,19 +61,22 @@ namespace GitSharp
 		/// Sorts PackFiles to be most recently created to least recently created.
 		/// </summary>
 		internal static readonly Comparison<PackFile> PackFileSortComparison = (a, b) => b._packLastModified - a._packLastModified;
-		private volatile bool _invalid;
 
 		private readonly FileInfo _idxFile;
-		private readonly int _packLastModified;
+		private readonly FileInfo _packFile;
 		private readonly int _hash;
+		private readonly int _packLastModified;
 
 		private MemoryMappedFile _fdMap;
 		private FileStream _fd;
 		private int _activeWindows;
 		private int _activeCopyRawData;
-		private PackReverseIndex _reverseIndex;
+
+		
+		private volatile bool _invalid;
 		private byte[] _packChecksum;
 		private PackIndex _loadedIdx;
+		private PackReverseIndex _reverseIdx;
 
 		/// <summary>
 		/// Construct a Reader for an existing, pre-indexed packfile.
@@ -84,7 +86,7 @@ namespace GitSharp
 		public PackFile(FileInfo idxFile, FileInfo packFile)
 		{
 			_idxFile = idxFile;
-			File = packFile;
+			_packFile = packFile;
 
 			// [henon] why the heck right shift by 10 ?? ... seems to have to do with the SORT comparison
 			_packLastModified = (int)(packFile.LastAccessTime.Ticks >> 10);
@@ -95,57 +97,64 @@ namespace GitSharp
 			_hash = GetHashCode() * 31;
 
 			Length = long.MaxValue;
-			//ReadPackHeader();
 		}
 
-		public PackFile(string idxFile, string packFile)
-			: this(new FileInfo(idxFile), new FileInfo(packFile))
+		private PackIndex LoadPackIndex()
 		{
+			lock (this)
+			{
+				if (_loadedIdx == null)
+				{
+					if (_invalid)
+					{
+						throw new PackInvalidException(_packFile.FullName);
+					}
+
+					try
+					{
+						PackIndex idx = PackIndex.Open(_idxFile);
+
+						if (_packChecksum == null)
+						{
+							_packChecksum = idx.PackChecksum;
+						}
+						else if (_packChecksum.SequenceEqual(idx.PackChecksum))
+						{
+							throw new PackMismatchException("Pack checksum mismatch");
+						}
+
+						_loadedIdx = idx;
+					}
+					catch (IOException)
+					{
+						_invalid = true;
+						throw;
+					}
+				}
+			}
+
+			return _loadedIdx;
 		}
-
-		// [henon]: was getPackFile()
-		public FileInfo File { get; private set; }
-
-		public long Length { get; private set; }
 
 		/// <summary>
-		/// Obtain the total number of objects available in this pack. This method
-		/// relies on pack index, giving number of effectively available objects.
+		///
 		/// </summary>
-		/// <remarks>
-		/// Returns the number of objects in index of this pack, likewise in this pack.
-		/// </remarks>
-		public long ObjectCount
-		{
-			get { return LoadPackIndex().ObjectCount; }
-		}
-
-		public bool SupportsFastCopyRawData
-		{
-			get { return LoadPackIndex().HasCRC32Support; }
-		}
-
-		internal bool IsInvalid
-		{
-			get { return _invalid; }
-		}
-
-		internal int Hash
-		{
-			get { return _hash; }
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="curs"></param>
+		/// <param name="windowCursor"></param>
 		/// <param name="offset"></param>
 		/// <returns>
 		/// The file object which locates this pack on disk.
 		/// </returns>
-		internal PackedObjectLoader ResolveBase(WindowCursor curs, long offset)
+		internal PackedObjectLoader ResolveBase(WindowCursor windowCursor, long offset)
 		{
-			return Reader(curs, offset);
+			return Reader(windowCursor, offset);
+		}
+
+		/// <summary>
+		/// The <see cref="FileInfo"/> object which locates this pack on disk.
+		/// </summary>
+		public FileInfo File
+		{
+			get { return _packFile; }
 		}
 
 		/// <summary>
@@ -173,7 +182,6 @@ namespace GitSharp
 		/// </returns>
 		public PackedObjectLoader Get(WindowCursor curs, AnyObjectId id)
 		{
-			if (id == null) return null;
 			long offset = LoadPackIndex().FindOffset(id);
 			return 0 < offset ? Reader(curs, offset) : null;
 		}
@@ -189,6 +197,7 @@ namespace GitSharp
 			lock (this)
 			{
 				_loadedIdx = null;
+				_reverseIdx = null;
 			}
 		}
 
@@ -196,15 +205,38 @@ namespace GitSharp
 
 		public IEnumerator<PackIndex.MutableEntry> GetEnumerator()
 		{
-			return LoadPackIndex().GetEnumerator();
+			try
+			{
+				return LoadPackIndex().GetEnumerator();
+			}
+			catch (IOException)
+			{
+				return new List<PackIndex.MutableEntry>().GetEnumerator();
+			}
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return LoadPackIndex().GetEnumerator();
+			return GetEnumerator();
 		}
 
 		#endregion
+
+		///	<summary>
+		/// Obtain the total number of objects available in this pack. This method
+		///	relies on pack index, giving number of effectively available objects.
+		/// </summary>
+		///	<returns>
+		/// Number of objects in index of this pack, likewise in this pack.
+		/// </returns>
+		///	<exception cref="IOException">
+		///	The index file cannot be loaded into memory.
+		/// </exception>
+		public long ObjectCount
+		{
+			get { return LoadPackIndex().ObjectCount; }
+		}
+
 
 		/// <summary>
 		/// Search for object id with the specified start offset in associated pack
@@ -239,90 +271,6 @@ namespace GitSharp
 			}
 
 			return dstbuf;
-		}
-
-		[MethodImpl(MethodImplOptions.Synchronized)]
-		public void beginCopyRawData()
-		{
-			if (++_activeCopyRawData == 1 && _activeWindows == 0)
-			{
-				DoOpen();
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.Synchronized)]
-		public void endCopyRawData()
-		{
-			if (--_activeCopyRawData == 0 && _activeWindows == 0)
-			{
-				DoClose();
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.Synchronized)]
-		public bool beginWindowCache()
-		{
-			if (++_activeWindows == 1)
-			{
-				if (_activeCopyRawData == 0)
-				{
-					DoOpen();
-				}
-				return true;
-			}
-
-			return false;
-		}
-
-		[MethodImpl(MethodImplOptions.Synchronized)]
-		public bool endWindowCache()
-		{
-			bool r = --_activeWindows == 0;
-			if (r && _activeCopyRawData == 0)
-			{
-				DoClose();
-			}
-			return r;
-		}
-
-		internal ByteArrayWindow Read(long pos, int size)
-		{
-			if (Length < pos + size)
-			{
-				size = (int)(Length - pos);
-			}
-
-			var buf = new byte[size];
-			NB.ReadFully(_fd, pos, buf, 0, size);
-			return new ByteArrayWindow(this, pos, buf);
-		}
-
-		internal ByteWindow MemoryMappedByteWindow(long pos, int size)
-		{
-			if (Length < pos + size)
-			{
-				size = (int)(Length - pos);
-			}
-
-			Stream map;
-
-			try
-			{
-				_fdMap = MemoryMappedFile.Create(File.FullName, MapProtection.PageReadOnly);
-				map = _fdMap.MapView(MapAccess.FileMapRead, pos, size); // was: map = _fd.map(MapMode.READ_ONLY, pos, size);
-			}
-			catch (IOException)
-			{
-				// The most likely reason this failed is the process has run out
-				// of virtual memory. We need to discard quickly, and try to
-				// force the GC to finalize and release any existing mappings.
-				//
-				GC.Collect();
-				GC.WaitForPendingFinalizers();
-				map = _fdMap.MapView(MapAccess.FileMapRead, pos, size);
-			}
-
-			return new ByteBufferWindow(this, pos, map);
 		}
 
 		internal void CopyRawData<T>(PackedObjectLoader loader, T @out, byte[] buf, WindowCursor cursor)
@@ -368,39 +316,15 @@ namespace GitSharp
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.Synchronized)]
-		private PackIndex LoadPackIndex()
+		public bool SupportsFastCopyRawData
 		{
-			if (_loadedIdx == null)
-			{
-				if (_invalid)
-				{
-					throw new PackInvalidException(File.FullName);
-				}
+			get { return LoadPackIndex().HasCRC32Support; }
+		}
 
-				try
-				{
-					PackIndex idx = PackIndex.Open(_idxFile);
 
-					if (_packChecksum == null)
-					{
-						_packChecksum = idx.PackChecksum;
-					}
-					else if (_packChecksum.SequenceEqual(idx.PackChecksum))
-					{
-						throw new PackMismatchException("Pack checksum mismatch");
-					}
-
-					_loadedIdx = idx;
-				}
-				catch (IOException)
-				{
-					_invalid = true;
-					throw;
-				}
-			}
-
-			return _loadedIdx;
+		internal bool IsInvalid
+		{
+			get { return _invalid; }
 		}
 
 		private void ReadFully(long position, byte[] dstbuf, int dstoff, int cnt, WindowCursor curs)
@@ -423,6 +347,61 @@ namespace GitSharp
 			}
 		}
 
+		public void beginCopyRawData()
+		{
+			lock (this)
+			{
+				if (++_activeCopyRawData == 1 && _activeWindows == 0)
+				{
+					DoOpen();
+				}
+			}
+		}
+
+		public void endCopyRawData()
+		{
+			lock (this)
+			{
+				if (--_activeCopyRawData == 0 && _activeWindows == 0)
+				{
+					DoClose();
+				}
+			}
+		}
+
+		public bool beginWindowCache()
+		{
+			lock (this)
+			{
+				if (++_activeWindows == 1)
+				{
+					if (_activeCopyRawData == 0)
+					{
+						DoOpen();
+					}
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public bool endWindowCache()
+		{
+			lock (this)
+			{
+				bool r = --_activeWindows == 0;
+
+				if (r && _activeCopyRawData == 0)
+				{
+					DoClose();
+				}
+
+				return r;
+			}
+		}
+
 		private void DoOpen()
 		{
 			try
@@ -433,7 +412,7 @@ namespace GitSharp
 				}
 
 				_fd = new FileStream(File.FullName, System.IO.FileMode.Open, FileAccess.Read);
-			    Length = _fd.Length;
+				Length = _fd.Length;
 				OnOpenPack();
 			}
 			catch (Exception)
@@ -469,6 +448,53 @@ namespace GitSharp
 			_fd = null;
 		}
 
+		internal ByteArrayWindow Read(long pos, int size)
+		{
+			if (Length < pos + size)
+			{
+				size = (int)(Length - pos);
+			}
+
+			var buf = new byte[size];
+			NB.ReadFully(_fd, pos, buf, 0, size);
+			return new ByteArrayWindow(this, pos, buf);
+		}
+
+		internal ByteWindow MemoryMappedByteWindow(long pos, int size)
+		{
+			if (Length < pos + size)
+			{
+				size = (int)(Length - pos);
+			}
+
+			Stream map;
+
+			try
+			{
+				_fdMap = MemoryMappedFile.Create(File.FullName, MapProtection.PageReadOnly);
+				map = _fdMap.MapView(MapAccess.FileMapRead, pos, size); // was: map = _fd.map(MapMode.READ_ONLY, pos, size);
+			}
+			catch (IOException)
+			{
+				// The most likely reason this failed is the process has run out
+				// of virtual memory. We need to discard quickly, and try to
+				// force the GC to finalize and release any existing mappings.
+				//
+				GC.Collect();
+				GC.WaitForPendingFinalizers();
+				map = _fdMap.MapView(MapAccess.FileMapRead, pos, size);
+			}
+
+			byte[] mapArray = map != null ? map.toArray() : new byte[0];
+
+			if (mapArray.Length > 0)
+			{
+				return new ByteArrayWindow(this, pos, mapArray);
+			}
+
+			return new ByteBufferWindow(this, pos, map);
+		}
+
 		private void OnOpenPack()
 		{
 			PackIndex idx = LoadPackIndex();
@@ -490,9 +516,9 @@ namespace GitSharp
 			if (packCnt != idx.ObjectCount)
 			{
 				throw new PackMismatchException("Pack object count mismatch:"
-												+ " pack " + packCnt
-												+ " index " + idx.ObjectCount
-												+ ": " + File.FullName);
+					+ " pack " + packCnt
+					+ " index " + idx.ObjectCount
+					+ ": " + File.FullName);
 			}
 
 			NB.ReadFully(_fd, Length - 20, buf, 0, 20);
@@ -500,9 +526,9 @@ namespace GitSharp
 			if (!buf.SequenceEqual(_packChecksum))
 			{
 				throw new PackMismatchException("Pack checksum mismatch:"
-												+ " pack " + ObjectId.FromRaw(buf)
-												+ " index " + ObjectId.FromRaw(idx.PackChecksum)
-												+ ": " + File.FullName);
+					+ " pack " + ObjectId.FromRaw(buf)
+					+ " index " + ObjectId.FromRaw(idx.PackChecksum)
+					+ ": " + File.FullName);
 			}
 		}
 
@@ -537,6 +563,7 @@ namespace GitSharp
 					p = 0;
 					c = ib[p++] & 0xff;
 					long ofs = c & 127;
+
 					while ((c & 128) != 0)
 					{
 						ofs += 1;
@@ -544,6 +571,7 @@ namespace GitSharp
 						ofs <<= 7;
 						ofs += (c & 127);
 					}
+
 					return new DeltaOfsPackedObjectLoader(this, pos + p, objOffset, (int)dataSize, objOffset - ofs);
 
 				case Constants.OBJ_REF_DELTA:
@@ -561,15 +589,24 @@ namespace GitSharp
 			return GetReverseIdx().FindNextOffset(startOffset, maxOffset);
 		}
 
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		private PackReverseIndex GetReverseIdx()
 		{
-			if (_reverseIndex == null)
+			lock (this)
 			{
-				_reverseIndex = new PackReverseIndex(LoadPackIndex());
+				if (_reverseIdx == null)
+				{
+					_reverseIdx = new PackReverseIndex(LoadPackIndex());
+				}
 			}
 
-			return _reverseIndex;
+			return _reverseIdx;
+		}
+
+		public long Length { get; private set; }
+
+		internal int Hash
+		{
+			get { return _hash; }
 		}
 	}
 }

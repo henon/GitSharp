@@ -117,24 +117,35 @@ namespace GitSharp
 
         private MutableInteger ptrout = new MutableInteger();
 
+		/// <summary>
+		/// Check an object for parsing errors.
+		/// </summary>
+		/// <param name="objType">
+		/// Type of the object. Must be a valid object type code in
+		/// <see cref="Constants"/>.</param>
+		/// <param name="raw">
+		/// The raw data which comprises the object. This should be in the
+		/// canonical format (that is the format used to generate the
+		/// <see cref="ObjectId"/> of the object). The array is never modified.
+		/// </param>
+		/// <exception cref="CorruptObjectException">If any error is identified.</exception>
         public void check(int objType, byte[] raw)
         {
             check(objType, Constants.CHARSET.GetChars(raw));
         }
 
-        /**
-         * Check an object for parsing errors.
-         *
-         * @param objType
-         *            type of the object. Must be a valid object type code in
-         *            {@link Constants}.
-         * @param raw
-         *            the raw data which comprises the object. This should be in the
-         *            canonical format (that is the format used to generate the
-         *            ObjectId of the object). The array is never modified.
-         * @throws CorruptObjectException
-         *             if an error is identified.
-         */
+		/// <summary>
+		/// Check an object for parsing errors.
+		/// </summary>
+		/// <param name="objType">
+		/// Type of the object. Must be a valid object type code in
+		/// <see cref="Constants"/>.</param>
+		/// <param name="raw">
+		/// The raw data which comprises the object. This should be in the
+		/// canonical format (that is the format used to generate the
+		/// <see cref="ObjectId"/> of the object). The array is never modified.
+		/// </param>
+		/// <exception cref="CorruptObjectException">If any error is identified.</exception>
         public void check(int objType, char[] raw)
         {
             switch (objType)
@@ -198,14 +209,11 @@ namespace GitSharp
             return ptrout.value;
         }
 
-        /**
-         * Check a commit for errors.
-         *
-         * @param raw
-         *            the commit data. The array is never modified.
-         * @throws CorruptObjectException
-         *             if any error was detected.
-         */
+		/// <summary>
+		/// Check a commit for errors.
+		/// </summary>
+		/// <param name="raw">The commit data. The array is never modified.</param>
+		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
         public void checkCommit(char[] raw)
         {
             int ptr = 0;
@@ -233,14 +241,11 @@ namespace GitSharp
                 throw new CorruptObjectException("invalid committer");
         }
 
-        /**
-         * Check an annotated tag for errors.
-         *
-         * @param raw
-         *            the tag data. The array is never modified.
-         * @throws CorruptObjectException
-         *             if any error was detected.
-         */
+		/// <summary>
+		/// Check an annotated tag for errors.
+		/// </summary>
+		/// <param name="raw">The tag data. The array is never modified.</param>
+		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
         public void checkTag(char[] raw)
         {
             int ptr = 0;
@@ -325,14 +330,10 @@ namespace GitSharp
             }
         }
 
-        /**
-         * Check a canonical formatted tree for errors.
-         *
-         * @param raw
-         *            the raw tree data. The array is never modified.
-         * @throws CorruptObjectException
-         *             if any error was detected.
-         */
+		/// Check a canonical formatted tree for errors.
+		/// </summary>
+		/// <param name="raw">The raw tree data. The array is never modified.</param>
+		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
         public void checkTree(char[] raw)
         {
             int sz = raw.Length;
@@ -402,14 +403,11 @@ namespace GitSharp
             }
         }
 
-        /**
-         * Check a blob for errors.
-         *
-         * @param raw
-         *            the blob data. The array is never modified.
-         * @throws CorruptObjectException
-         *             if any error was detected.
-         */
+		/// <summary>
+		/// Check a blob for errors.
+		/// </summary>
+		/// <param name="raw">The blob data. The array is never modified.</param>
+		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
         public void checkBlob(char[] raw)
         {
             // We can always assume the blob is valid.

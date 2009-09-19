@@ -47,10 +47,10 @@ namespace GitSharp
 	/// </summary>
     public abstract class ObjectLoader
     {
-    	/// <summary>
-    	/// Git in pack object type, see {@link Constants}.
-    	/// </summary>
-    	/// <returns></returns>
+		/// <summary>
+		/// Git in pack object type, see <seealso cref="Constants"/>.
+		/// </summary>
+		/// <returns></returns>
 		public abstract int Type { get; protected set; }
 
     	/// <summary>
@@ -59,10 +59,13 @@ namespace GitSharp
     	/// <returns></returns>
 		public abstract long Size { get; protected set; }
 
-    	/// <summary>
-    	/// Obtain a copy of the bytes of this object.
-    	/// </summary>
-    	/// <returns>A copy of the bytes of this object.</returns>
+		/// <summary>
+		/// Obtain a copy of the bytes of this object.
+		/// <para />
+		/// Unlike <seealso cref="CachedBytes"/> this method returns an array that might
+		///	be modified by the caller.
+		/// </summary>
+		/// <returns>The bytes of this object.</returns>
     	public byte[] Bytes
     	{
     		get

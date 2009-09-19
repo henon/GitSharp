@@ -70,7 +70,7 @@ namespace GitSharp
     /// An index can also contain a tree cache which we ignore for now. We drop the
     /// tree cache when writing the index.
     /// </summary>
-    [Obsolete("Use DirCache instead.")]
+    //[Obsolete("Use DirCache instead.")]
 	public class GitIndex
     {
         /// <summary>

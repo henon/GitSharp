@@ -154,7 +154,7 @@ namespace GitSharp
 		///	<param name="message">Reflog message</param>
 		///	<param name="refName">Full ref name</param>
 		///	<exception cref="IOException"></exception>
-		[Obsolete("Rely upon RefUpdate's automatic logging instead.")]
+		//[Obsolete("Rely upon RefUpdate's automatic logging instead.")]
 		public static void WriteReflog(Repository repo, ObjectId oldCommit, ObjectId commit, string message, string refName)
 		{
 			AppendOneRecord(oldCommit, commit, null, message, repo, refName);

@@ -333,9 +333,11 @@ namespace GitSharp
 
 		private FileInfo FileForRef(string name)
 		{
-			return name.StartsWith(Constants.Refs) ?
-				PathUtil.CombineFilePath(_refsDir, name.Substring(Constants.Refs.Length)) :
-				PathUtil.CombineFilePath(_gitDir, name);
+			string fileName = name.StartsWith(Constants.Refs) ?
+				Path.Combine(_refsDir.FullName, name.Substring(Constants.Refs.Length)) :
+				Path.Combine(_gitDir.FullName, name);
+
+			return new FileInfo(fileName.Replace('/', Path.DirectorySeparatorChar));
 		}
 
 		private Ref ReadRefBasic(string name, int depth)
@@ -520,6 +522,7 @@ namespace GitSharp
 				_packedRefsLastModified = currTime;
 				_packedRefsLength = currLen;
 				_packedRefs = newPackedRefs;
+				SetModified();
 			}
 			catch (FileNotFoundException)
 			{

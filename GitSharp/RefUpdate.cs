@@ -154,13 +154,13 @@ namespace GitSharp
 		// If non-null, the value that the old object id must have to continue.
 		private ObjectId _expValue;
 
-
 		public RefUpdate(RefDatabase refDb, Ref r, FileInfo f)
 		{
 			_db = refDb;
 			_ref = r;
 			OldObjectId = r.ObjectId;
 			_looseFile = f;
+			_refLogMessage = string.Empty;
 			Result = RefUpdateResult.NotAttempted;
 		}
 
@@ -468,16 +468,17 @@ namespace GitSharp
 
 			string msg = GetRefLogMessage();
 
-			if (!string.IsNullOrEmpty(msg))
+			if (msg != null)
 			{
 				if (_refLogIncludeResult)
 				{
-					String strResult = ToResultString(status);
+					string strResult = ToResultString(status);
 					if (strResult != null)
 					{
 						msg = !string.IsNullOrEmpty(msg) ? msg + ": " + strResult : strResult;
 					}
 				}
+
 				RefLogWriter.append(this, msg);
 			}
 

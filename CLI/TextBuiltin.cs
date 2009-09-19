@@ -100,7 +100,7 @@ public abstract class TextBuiltin
         return commandHelp;
     }
 	/** @return true if {@link #db}/{@link #getRepository()} is required. */
-	public bool RequiresRepository() {
+	public virtual bool RequiresRepository() {
 		return false;
 	}
 

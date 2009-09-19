@@ -120,7 +120,6 @@ namespace GitSharp.CLI
 
         private static void execute(string[] argv)
         {
-            
             if (argv.Count() == 0)
             {
                 ShowHelp();
@@ -146,7 +145,7 @@ namespace GitSharp.CLI
                     }
                     else
                     {
-                        cmd.Init(null, "");
+                        cmd.Init(null, null);
                     }
                     try
                     {

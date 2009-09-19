@@ -41,6 +41,7 @@
 
 using System;
 using System.Text;
+using System.Linq;
 
 namespace GitSharp.Util
 {
@@ -396,6 +397,9 @@ namespace GitSharp.Util
          */
 		public static int parseHexInt16(byte[] bs, int p)
 		{
+            if (!bs.All(isHex))
+                throw new IndexOutOfRangeException();
+
 			int r = digits16[bs[p]] << 4;
 
 			r |= digits16[bs[p + 1]];
@@ -427,6 +431,9 @@ namespace GitSharp.Util
          */
 		public static int parseHexInt32(byte[] bs, int p)
 		{
+            if (!bs.All(isHex))
+                throw new IndexOutOfRangeException();
+
 			int r = digits16[bs[p]] << 4;
 
 			r |= digits16[bs[p + 1]];
@@ -463,12 +470,19 @@ namespace GitSharp.Util
          */
 		public static int parseHexInt4(byte digit)
 		{
+            if (!isHex(digit))
+                throw new IndexOutOfRangeException();
+
 			byte r = digits16[digit];
 			if (r < 0)
 				throw new IndexOutOfRangeException();
 			return r;
 		}
 
+        private static bool isHex(byte d)
+        {
+            return ((d >= '0' && d <= '9') || (d >= 'a' && d <= 'z') || (d >= 'A' && d <= 'Z'));
+        }
 
 		/**
          * Parse a Git style timezone string.

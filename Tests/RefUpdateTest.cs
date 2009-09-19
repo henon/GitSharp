@@ -126,7 +126,7 @@ namespace GitSharp.Tests
 			ru.NewObjectId = newid;
 			RefUpdate.RefUpdateResult update = ru.Update();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.LockFailure, update);
-			Assert.IsNotNull(db.ReflogReader("refs/heads/master/x"));
+			Assert.IsNull(db.ReflogReader("refs/heads/master/x"));
 			Assert.AreEqual(0, db.ReflogReader("HEAD").getReverseEntries().Count);
 		}
 
@@ -150,7 +150,7 @@ namespace GitSharp.Tests
 			RefUpdate.RefUpdateResult update2 = ru2.Update();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.LockFailure, update2);
 			Assert.AreEqual(1, db.ReflogReader("refs/heads/z/a").getReverseEntries().Count);
-			Assert.IsNotNull(db.ReflogReader("refs/heads/z"));
+			Assert.IsNull(db.ReflogReader("refs/heads/z"));
 			Assert.AreEqual(0, db.ReflogReader("HEAD").getReverseEntries().Count);
 		}
 
@@ -164,7 +164,7 @@ namespace GitSharp.Tests
 			ru.NewObjectId = newid;
 			RefUpdate.RefUpdateResult update = ru.Update();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.LockFailure, update);
-			Assert.IsNotNull(db.ReflogReader("refs/heads/prefix"));
+			Assert.IsNull(db.ReflogReader("refs/heads/prefix"));
 			Assert.AreEqual(0, db.ReflogReader("HEAD").getReverseEntries().Count);
 		}
 
@@ -198,7 +198,7 @@ namespace GitSharp.Tests
 			@ref.Update(); // Create loose ref
 			@ref = UpdateRef(newRef); // refresh
 			Delete(@ref, RefUpdate.RefUpdateResult.NoChange);
-			Assert.IsNotNull(db.ReflogReader("refs/heads/abc"));
+			Assert.IsNull(db.ReflogReader("refs/heads/abc"));
 		}
 
 		[Test]
@@ -233,7 +233,7 @@ namespace GitSharp.Tests
 			updateRef2.IsForceUpdate = true;
 			RefUpdate.RefUpdateResult delete = updateRef2.Delete();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, delete);
-			Assert.IsNotNull(db.Resolve("refs/heads/z/c"));
+			Assert.IsNull(db.Resolve("refs/heads/z/c"));
 			Assert.IsFalse(new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.R_HEADS + "z")).Exists);
 			Assert.IsFalse(new DirectoryInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/z")).Exists);
 		}
@@ -316,7 +316,7 @@ namespace GitSharp.Tests
 			updateRef2.IsForceUpdate = true;
 			RefUpdate.RefUpdateResult delete = updateRef2.Delete();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, delete);
-			Assert.IsNotNull(db.Resolve("refs/heads/c"));
+			Assert.IsNull(db.Resolve("refs/heads/c"));
 		}
 
 		///	<summary>
@@ -466,7 +466,7 @@ namespace GitSharp.Tests
 			RefUpdate.RefUpdateResult result = renameRef.Rename();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Renamed, result);
 			Assert.AreEqual(rb, db.Resolve("refs/heads/new/name"));
-			Assert.IsNotNull(db.Resolve("refs/heads/b"));
+			Assert.IsNull(db.Resolve("refs/heads/b"));
 			Assert.AreEqual(1, db.ReflogReader("new/name").getReverseEntries().Count);
 			Assert.AreEqual("Branch: renamed b to new/name", db.ReflogReader("new/name").getLastEntry().getComment());
 			Assert.IsFalse(new FileInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/b")).Exists);
@@ -485,7 +485,7 @@ namespace GitSharp.Tests
 			RefUpdate.RefUpdateResult result = renameRef.Rename();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Renamed, result);
 			Assert.AreEqual(rb, db.Resolve("refs/heads/new/name"));
-			Assert.IsNotNull(db.Resolve("refs/heads/b"));
+			Assert.IsNull(db.Resolve("refs/heads/b"));
 			Assert.AreEqual(2, db.ReflogReader("new/name").getReverseEntries().Count);
 			Assert.AreEqual("Branch: renamed b to new/name", db.ReflogReader("new/name").getLastEntry().getComment());
 			Assert.AreEqual("Just a message", db.ReflogReader("new/name").getReverseEntries()[1].getComment());
@@ -506,7 +506,7 @@ namespace GitSharp.Tests
 			RefUpdate.RefUpdateResult result = renameRef.Rename();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Renamed, result);
 			Assert.AreEqual(rb, db.Resolve("refs/heads/new/name"));
-			Assert.IsNotNull(db.Resolve("refs/heads/b"));
+			Assert.IsNull(db.Resolve("refs/heads/b"));
 			Assert.AreEqual("Branch: renamed b to new/name", db.ReflogReader("new/name").getLastEntry().getComment());
 			Assert.IsFalse(new FileInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/b")).Exists);
 			Assert.AreEqual(rb, db.Resolve(Constants.HEAD));
@@ -533,7 +533,7 @@ namespace GitSharp.Tests
 			RefUpdate.RefUpdateResult result = renameRef.Rename();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Renamed, result);
 			Assert.AreEqual(rb2, db.Resolve("refs/heads/new/name"));
-			Assert.IsNotNull(db.Resolve("refs/heads/b"));
+			Assert.IsNull(db.Resolve("refs/heads/b"));
 			Assert.AreEqual("Branch: renamed b to new/name", db.ReflogReader("new/name").getLastEntry().getComment());
 			Assert.AreEqual(3, db.ReflogReader("refs/heads/new/name").getReverseEntries().Count);
 			Assert.AreEqual("Branch: renamed b to new/name", db.ReflogReader("refs/heads/new/name").getReverseEntries()[0].getComment());
@@ -546,7 +546,7 @@ namespace GitSharp.Tests
 			// assumptions are persistent.
 			var ndb = new Repository(db.Directory);
 			Assert.AreEqual(rb2, ndb.Resolve("refs/heads/new/name"));
-			Assert.IsNotNull(ndb.Resolve("refs/heads/b"));
+			Assert.IsNull(ndb.Resolve("refs/heads/b"));
 		}
 
 		public void tryRenameWhenLocked(string toLock, string fromName, string toName, string headPointsTo)
@@ -679,7 +679,7 @@ namespace GitSharp.Tests
 			RefRename renameRef = db.RenameRef("refs/heads/a", "refs/heads/a/b");
 			RefUpdate.RefUpdateResult result = renameRef.Rename();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Renamed, result);
-			Assert.IsNotNull(db.Resolve("refs/heads/a"));
+			Assert.IsNull(db.Resolve("refs/heads/a"));
 			Assert.AreEqual(rb, db.Resolve("refs/heads/a/b"));
 			Assert.AreEqual(3, db.ReflogReader("a/b").getReverseEntries().Count);
 			Assert.AreEqual("Branch: renamed a to a/b", db.ReflogReader("a/b").getReverseEntries()[0].getComment());

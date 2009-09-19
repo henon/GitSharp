@@ -48,14 +48,13 @@ namespace GitSharp.CLI
 
         public override void Run(string[] args)
         {
-            /*options = new CmdParserOptionSet
+            options = new CmdParserOptionSet
                           {
                               {"bare", "Create a bare repository", v => bare = true}
                           };
 
             arguments = options.Parse(args);
-             * */
-            if (args.Length > 0 && args[0] == "--bare") bare = true;
+ 
             create();
         }
 

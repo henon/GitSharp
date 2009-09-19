@@ -242,7 +242,7 @@ namespace GitSharp
             {
                 if (isGitRepository(directory))
                     return directory;
-                if (isGitRepository(new DirectoryInfo(Path.Combine(directory.ToString(), ".git"))))
+                if (isGitRepository(new DirectoryInfo(Path.Combine(directory.FullName, ".git"))))
                     return new DirectoryInfo(Path.Combine(directory.FullName, ".git"));
 
                 string name = directory.Name;

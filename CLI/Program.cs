@@ -52,10 +52,7 @@ namespace GitSharp.CLI
     /** Command line entry point. */
     public class Program
     {
-        private static OptionSet options;
-
-        //@Option(name = "--help", usage = "display this help text", aliases = { "-h" })
-        private static bool help;
+        private static CmdParserOptionSet options;
 
         //@Option(name = "--show-stack-trace", usage = "display the Java stack trace on exceptions")
         private static bool showStackTrace;
@@ -64,12 +61,12 @@ namespace GitSharp.CLI
         private static DirectoryInfo gitdir;
 
 #if missing_reference
-        //@Argument(index = 0, metaVar = "command", required = true, handler = SubcommandHandler.class)
-        private static TextBuiltin subcommand;
+        @Argument(index = 0, metaVar = "command", required = true, handler = SubcommandHandler.class)
+        private static string subcommand;
 #endif
 
         //@Argument(index = 1, metaVar = "ARG")
-        private List<String> arguments = new List<String>();
+        private static List<String> arguments = new List<String>();
 
         /**
 	     * Execute the command line.
@@ -79,16 +76,20 @@ namespace GitSharp.CLI
 	     */
         public static void Main(string[] args)
         {
-            options = new OptionSet()
+            options = new CmdParserOptionSet()
             {
+                { "complete", "display the complete commands", v => ShowComplete() },    
+                { "git-dir", "set the git repository to operate on", v => gitdir=new DirectoryInfo(v) },    
                 { "help|h", "display this help text", v => ShowHelp() },
-                { "show-stack-trace", "display the C# stack trace on exceptions", v => showStackTrace=true },
-                { "git-dir", "set the git repository to operate on", v => gitdir=new DirectoryInfo(v) },
+                { "incomplete", "display the incomplete commands", v => ShowIncomplete() },
+                { "show-stack-trace", "display the C# stack trace on exceptions", v => showStackTrace=true }
             };
             try
             {
-                //			AwtAuthenticator.install();
+#if ported
+                //AwtAuthenticator.install();
                 //HttpSupport.configureHttpProxy();
+#endif
                 execute(args);
             }
             catch (Die err)
@@ -119,87 +120,118 @@ namespace GitSharp.CLI
 
         private static void execute(string[] argv)
         {
-            try
+            
+            if (argv.Count() == 0)
             {
-                options.Parse(argv);
+                ShowHelp();
             }
-            catch (OptionException err)
+            else if (!argv[0].StartsWith("--") && !argv[0].StartsWith("-"))
             {
-                if (argv.Length > 0 && !help)
-                {
-                    Console.Error.WriteLine("fatal: " + err.Message);
-                    Exit(1);
-                }
-            }
 
-            if (argv.Length == 0 || help)
-            {
-                Console.Error.Write("usage: git ");
-                Console.Error.Write(string.Join( " ",options.Select(o => "[--" + string.Join("|-", o.Names) + "]").ToArray()));
-                Console.Error.WriteLine("\nCOMMAND [ARGS]\n\nThe most commonly used git commands are:\nTODO ...");
-                if (help)
+                CommandCatalog catalog = new CommandCatalog();
+                CommandRef subcommand = catalog.Get(argv[0]);
+                if (subcommand != null)
+                {
+                    TextBuiltin cmd = subcommand.create();
+                    if (cmd.RequiresRepository())
+                    {
+                        if (gitdir == null)
+                            gitdir = findGitDir();
+                        if (gitdir == null || !gitdir.IsDirectory())
+                        {
+                            Console.Error.WriteLine("error: can't find git directory");
+                            Exit(1);
+                        }
+                        cmd.Init(new Repository(gitdir), gitdir.FullName);
+                    }
+                    else
+                    {
+                        cmd.Init(null, "");
+                    }
+                    try
+                    {
+                        List<String> args = argv.ToList();
+                        args.RemoveAt(0);
+                        cmd.Execute(args.ToArray());
+                    }
+                    finally
+                    {
+                        if (Console.Out != null)
+                            Console.Out.Flush();
+                    }
+                }
+                else
                 {
                     ShowHelp();
                 }
-#if ported
-                else if (subcommand == null)
-                {
-                    Console.Error.WriteLine();
-                    Console.Error.WriteLine("The most commonly used commands are:");
-
-				 CommandRef[] common = CommandCatalog.common();
-				int width = 0;
-				for ( CommandRef c : common)
-					width = Math.max(width, c.getName().length());
-				width += 2;
-
-				for ( CommandRef c : common) {
-					System.err.print(' ');
-					System.err.print(c.getName());
-					for (int i = c.getName().length(); i < width; i++)
-						System.err.print(' ');
-					System.err.print(c.getUsage());
-					Console.Error.WriteLine();
-				}
-                    Console.Error.WriteLine();
-                }
-#endif
-                Console.Error.Write(@"
-                
-See 'git help COMMAND' for more information on a specific command.
-");
-                Exit(1);
             }
-
-#if ported
-		 TextBuiltin cmd = subcommand;
-		if (cmd.requiresRepository()) {
-			if (gitdir == null)
-				gitdir = findGitDir();
-			if (gitdir == null || !gitdir.isDirectory()) {
-				Console.Error.WriteLine("error: can't find git directory");
-				Exit(1);
-			}
-			cmd.init(new Repository(gitdir), gitdir);
-		} else {
-			cmd.init(null, gitdir);
-		}
-		try {
-			cmd.execute(arguments.toArray(new String[arguments.size()]));
-		} finally {
-			if (cmd.out != null)
-				cmd.out.flush();
-		}
-#endif
+            else
+            {
+                try
+                {
+                    arguments = options.Parse(argv);
+                }
+                catch (OptionException err)
+                {
+                    if (arguments.Count > 0)
+                    {
+                        Console.Error.WriteLine("fatal: " + err.Message);
+                        Exit(1);
+                    }
+                }
+            }
             Exit(0);
         }
 
         private static void ShowHelp()
         {
-            help = true;
-            Console.Error.WriteLine();
+            Console.Write("usage: git ");
+            Console.Write(string.Join(" ", options.Select(o => "[-" + string.Join("|--", o.Names) + "]").ToArray()));
+            Console.WriteLine("\nCOMMAND [ARGS]\n\nThe most commonly used git commands are:\n");
+            Console.WriteLine();
             options.WriteOptionDescriptions(Console.Error);
+            Console.WriteLine();
+
+            CommandCatalog catalog = new CommandCatalog();
+            foreach (CommandRef c in catalog.Common())
+            {
+                Console.Write("      ");
+                Console.Write(c.getName());
+                for (int i = c.getName().Length + 8; i < 31; i++)
+                    Console.Write(" ");
+                Console.Write(c.getUsage());
+                Console.WriteLine();
+            }
             Console.Error.WriteLine();
+            Console.Error.Write(@"See 'git help COMMAND' for more information on a specific command.");
+        }
+
+        private static void ShowIncomplete()
+        {
+            CommandCatalog catalog = new CommandCatalog();
+            foreach (CommandRef c in catalog.Incomplete())
+            {
+                Console.Write("      ");
+                Console.Write(c.getName());
+                for (int i = c.getName().Length + 8; i < 31; i++)
+                    Console.Write(" ");
+                Console.Write(c.getUsage());
+                Console.WriteLine();
+            }
+        }
+
+        private static void ShowComplete()
+        {
+            CommandCatalog catalog = new CommandCatalog();
+            foreach (CommandRef c in catalog.Complete())
+            {
+                Console.Write("      ");
+                Console.Write(c.getName());
+                for (int i = c.getName().Length + 8; i < 31; i++)
+                    Console.Write(" ");
+                Console.Write(c.getUsage());
+                Console.WriteLine();
+            }
         }
 
         private static DirectoryInfo findGitDir()
@@ -219,7 +251,7 @@ See 'git help COMMAND' for more information on a specific command.
         /// Wait for Enter key if in DEBUG mode
         /// </summary>
         /// <param name="exit_code"></param>
-        static void Exit(int exit_code)
+        static public void Exit(int exit_code)
         {
 #if DEBUG
             Console.WriteLine("\n\nrunning in DEBUG mode, press any key to exit.");

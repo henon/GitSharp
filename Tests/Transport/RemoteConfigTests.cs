@@ -36,8 +36,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.IO;
-using System.Text;
 using GitSharp.Transport;
 using NUnit.Framework;
 
@@ -47,44 +45,47 @@ namespace GitSharp.Tests.Transport
     [TestFixture]
     public class RemoteConfigTests : RepositoryTestCase
     {
-        private void writeConfig(string dat)
+        private Config config;
+
+        public override void setUp()
         {
-            FileInfo f = new FileInfo(Path.Combine(db.Directory.ToString(), "config"));
-            FileStream stream = new FileStream(f.ToString(), System.IO.FileMode.Append);
-            try
-            {
-                byte[] data = Constants.CHARSET.GetBytes(dat);
-                stream.Write(data, 0, data.Length);
-            }
-            finally
-            {
-                stream.Close();
-            }
-            db.Config.load();
+            base.setUp();
+            config = new Config();
+        }
+
+        private void readConfig(string dat)
+        {
+            config = new Config();
+            config.fromText(dat);
+        }
+
+        private void checkConfig(string exp)
+        {
+            Assert.AreEqual(exp, config.toText());
         }
 
         [Test]
         public void test000_Simple()
         {
-            writeConfig("[remote \"spearce\"]\n" + "url = http://www.spearce.org/egit.git\n" +
+            readConfig("[remote \"spearce\"]\n" + "url = http://www.spearce.org/egit.git\n" +
                         "fetch = +refs/heads/*:refs/remotes/spearce/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
+            RemoteConfig rc = new RemoteConfig(config, "spearce");
             System.Collections.Generic.List<URIish> allURIs = rc.URIs;
-            RefSpec spec;
 
             Assert.AreEqual("spearce", rc.Name);
             Assert.IsNotNull(allURIs);
             Assert.IsNotNull(rc.Fetch);
             Assert.IsNotNull(rc.Push);
             Assert.IsNotNull(rc.TagOpt);
+            Assert.AreEqual(0, rc.Timeout);
             Assert.AreSame(TagOpt.AUTO_FOLLOW, rc.TagOpt);
 
             Assert.AreEqual(1, allURIs.Count);
             Assert.AreEqual("http://www.spearce.org/egit.git", allURIs[0].ToString());
 
             Assert.AreEqual(1, rc.Fetch.Count);
-            spec = rc.Fetch[0];
+            RefSpec spec = rc.Fetch[0];
             Assert.IsTrue(spec.Force);
             Assert.IsTrue(spec.Wildcard);
             Assert.AreEqual("refs/heads/*", spec.Source);
@@ -96,36 +97,35 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test001_SimpleNoTags()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "fetch = +refs/heads/*:refs/remotes/spearce/*\n"
                         + "tagopt = --no-tags\n");
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
+            RemoteConfig rc = new RemoteConfig(config, "spearce");
             Assert.AreSame(TagOpt.NO_TAGS, rc.TagOpt);
         }
 
         [Test]
         public void test002_SimpleAlwaysTags()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "fetch = +refs/heads/*:refs/remotes/spearce/*\n"
                         + "tagopt = --tags\n");
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
+            RemoteConfig rc = new RemoteConfig(config, "spearce");
             Assert.AreSame(TagOpt.FETCH_TAGS, rc.TagOpt);
         }
 
         [Test]
         public void test003_Mirror()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "fetch = +refs/heads/*:refs/heads/*\n"
                         + "fetch = refs/tags/*:refs/tags/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
+            RemoteConfig rc = new RemoteConfig(config, "spearce");
             System.Collections.Generic.List<URIish> allURIs = rc.URIs;
-            RefSpec spec;
 
             Assert.AreEqual("spearce", rc.Name);
             Assert.IsNotNull(allURIs);
@@ -137,7 +137,7 @@ namespace GitSharp.Tests.Transport
 
             Assert.AreEqual(2, rc.Fetch.Count);
 
-            spec = rc.Fetch[0];
+            RefSpec spec = rc.Fetch[0];
             Assert.IsTrue(spec.Force);
             Assert.IsTrue(spec.Wildcard);
             Assert.AreEqual("refs/heads/*", spec.Source);
@@ -155,15 +155,14 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test004_Backup()
         {
-            writeConfig("[remote \"backup\"]\n"
+            readConfig("[remote \"backup\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "url = user@repo.or.cz:/srv/git/egit.git\n"
                         + "push = +refs/heads/*:refs/heads/*\n"
                         + "push = refs/tags/*:refs/tags/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
+            RemoteConfig rc = new RemoteConfig(config, "backup");
             System.Collections.Generic.List<URIish> allURIs = rc.URIs;
-            RefSpec spec;
 
             Assert.AreEqual("backup", rc.Name);
             Assert.IsNotNull(allURIs);
@@ -177,7 +176,7 @@ namespace GitSharp.Tests.Transport
             Assert.AreEqual(0, rc.Fetch.Count);
 
             Assert.AreEqual(2, rc.Push.Count);
-            spec = rc.Push[0];
+            RefSpec spec = rc.Push[0];
             Assert.IsTrue(spec.Force);
             Assert.IsTrue(spec.Wildcard);
             Assert.AreEqual("refs/heads/*", spec.Source);
@@ -193,15 +192,14 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test005_UploadPack()
         {
-            writeConfig("[remote \"example\"]\n"
+            readConfig("[remote \"example\"]\n"
                         + "url = user@example.com:egit.git\n"
                         + "fetch = +refs/heads/*:refs/remotes/example/*\n"
                         + "uploadpack = /path/to/git/git-upload-pack\n"
                         + "receivepack = /path/to/git/git-receive-pack\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "example");
+            RemoteConfig rc = new RemoteConfig(config, "example");
             System.Collections.Generic.List<URIish> allURIs = rc.URIs;
-            RefSpec spec;
 
             Assert.AreEqual("example", rc.Name);
             Assert.IsNotNull(allURIs);
@@ -212,7 +210,7 @@ namespace GitSharp.Tests.Transport
             Assert.AreEqual("user@example.com:egit.git", allURIs[0].ToString());
 
             Assert.AreEqual(1, rc.Fetch.Count);
-            spec = rc.Fetch[0];
+            RefSpec spec = rc.Fetch[0];
             Assert.IsTrue(spec.Force);
             Assert.IsTrue(spec.Wildcard);
             Assert.AreEqual("refs/heads/*", spec.Source);
@@ -227,9 +225,9 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test006_Unknown()
         {
-            writeConfig(string.Empty);
+            readConfig(string.Empty);
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
+            RemoteConfig rc = new RemoteConfig(config, "backup");
             Assert.AreEqual(0, rc.URIs.Count);
             Assert.AreEqual(0, rc.Fetch.Count);
             Assert.AreEqual(0, rc.Push.Count);
@@ -240,10 +238,10 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test007_AddURI()
         {
-            writeConfig(string.Empty);
+            readConfig(string.Empty);
 
             URIish uri = new URIish("/some/dir");
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
+            RemoteConfig rc = new RemoteConfig(config, "backup");
             Assert.AreEqual(0, rc.URIs.Count);
 
             Assert.IsTrue(rc.AddURI(uri));
@@ -257,12 +255,12 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test008_RemoveFirstURI()
         {
-            writeConfig(string.Empty);
+            readConfig(string.Empty);
 
             URIish a = new URIish("/some/dir");
             URIish b = new URIish("/another/dir");
             URIish c = new URIish("/more/dirs");
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
+            RemoteConfig rc = new RemoteConfig(config, "backup");
             Assert.IsTrue(rc.AddURI(a));
             Assert.IsTrue(rc.AddURI(b));
             Assert.IsTrue(rc.AddURI(c));
@@ -280,12 +278,12 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test009_RemoveMiddleURI()
         {
-            writeConfig(string.Empty);
+            readConfig(string.Empty);
 
             URIish a = new URIish("/some/dir");
             URIish b = new URIish("/another/dir");
             URIish c = new URIish("/more/dirs");
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
+            RemoteConfig rc = new RemoteConfig(config, "backup");
             Assert.IsTrue(rc.AddURI(a));
             Assert.IsTrue(rc.AddURI(b));
             Assert.IsTrue(rc.AddURI(c));
@@ -304,12 +302,12 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test010_RemoveLastURI()
         {
-            writeConfig(string.Empty);
+            readConfig(string.Empty);
 
             URIish a = new URIish("/some/dir");
             URIish b = new URIish("/another/dir");
             URIish c = new URIish("/more/dirs");
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
+            RemoteConfig rc = new RemoteConfig(config, "backup");
             Assert.IsTrue(rc.AddURI(a));
             Assert.IsTrue(rc.AddURI(b));
             Assert.IsTrue(rc.AddURI(c));
@@ -328,10 +326,10 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test011_RemoveOnlyURI()
         {
-            writeConfig(string.Empty);
+            readConfig(string.Empty);
 
             URIish a = new URIish("/some/dir");
-            RemoteConfig rc = new RemoteConfig(db.Config, "backup");
+            RemoteConfig rc = new RemoteConfig(config, "backup");
             Assert.IsTrue(rc.AddURI(a));
 
             Assert.AreEqual(1, rc.URIs.Count);
@@ -344,123 +342,121 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void test012_CreateOrigin()
         {
-            RemoteConfig rc = new RemoteConfig(db.Config, "origin");
+            RemoteConfig rc = new RemoteConfig(config, "origin");
             rc.AddURI(new URIish("/some/dir"));
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
-            rc.Update(db.Config);
-            db.Config.save();
+            rc.Update(config);
 
-            checkFile(db.Config.getFile(),
-                      "[core]\n"
-                      + "\trepositoryformatversion = 0\n" +
-                      "\tfilemode = true\n"
-                      + "[remote \"origin\"]\n" +
-                      "\turl = /some/dir\n"
-                      +
-                      "\tfetch = +refs/heads/*:refs/remotes/origin/*\n");
+            checkConfig("[remote \"origin\"]\n" + "\turl = /some/dir\n"
+                    + "\tfetch = +refs/heads/*:refs/remotes/origin/*\n");
         }
 
         [Test]
         public void test013_SaveAddURI()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "fetch = +refs/heads/*:refs/remotes/spearce/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
+            RemoteConfig rc = new RemoteConfig(config, "spearce");
             rc.AddURI(new URIish("/some/dir"));
             Assert.AreEqual(2, rc.URIs.Count);
-            rc.Update(db.Config);
-            db.Config.save();
+            rc.Update(config);
 
-            checkFile(db.Config.getFile(),
-                      "[core]\n"
-                      + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
-                      + "[remote \"spearce\"]\n"
-                      + "\turl = http://www.spearce.org/egit.git\n"
-                      + "\turl = /some/dir\n"
-                      + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
+            checkConfig("[remote \"spearce\"]\n"
+                    + "\turl = http://www.spearce.org/egit.git\n"
+                    + "\turl = /some/dir\n"
+                    + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
         }
 
         [Test]
         public void test014_SaveRemoveLastURI()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "url = /some/dir\n"
                         + "fetch = +refs/heads/*:refs/remotes/spearce/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
+            RemoteConfig rc = new RemoteConfig(config, "spearce");
             Assert.AreEqual(2, rc.URIs.Count);
             rc.RemoveURI(new URIish("/some/dir"));
             Assert.AreEqual(1, rc.URIs.Count);
-            rc.Update(db.Config);
-            db.Config.save();
+            rc.Update(config);
 
-            checkFile(db.Config.getFile(),
-                      "[core]\n"
-                      + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
-                      + "[remote \"spearce\"]\n"
-                      + "\turl = http://www.spearce.org/egit.git\n"
-                      + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
+            checkConfig("[remote \"spearce\"]\n"
+                    + "\turl = http://www.spearce.org/egit.git\n"
+                    + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
         }
 
         [Test]
         public void test015_SaveRemoveFirstURI()
         {
-            writeConfig("[remote \"spearce\"]\n"
+            readConfig("[remote \"spearce\"]\n"
                         + "url = http://www.spearce.org/egit.git\n"
                         + "url = /some/dir\n"
                         + "fetch = +refs/heads/*:refs/remotes/spearce/*\n");
 
-            RemoteConfig rc = new RemoteConfig(db.Config, "spearce");
+            RemoteConfig rc = new RemoteConfig(config, "spearce");
             Assert.AreEqual(2, rc.URIs.Count);
             rc.RemoveURI(new URIish("http://www.spearce.org/egit.git"));
             Assert.AreEqual(1, rc.URIs.Count);
-            rc.Update(db.Config);
-            db.Config.save();
+            rc.Update(config);
 
-            checkFile(db.Config.getFile(),
-                      "[core]\n"
-                      + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
-                      + "[remote \"spearce\"]\n" + "\turl = /some/dir\n"
-                      + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
+            checkConfig("[remote \"spearce\"]\n" + "\turl = /some/dir\n"
+                    + "\tfetch = +refs/heads/*:refs/remotes/spearce/*\n");
         }
 
         [Test]
         public void test016_SaveNoTags()
         {
-            RemoteConfig rc = new RemoteConfig(db.Config, "origin");
+            RemoteConfig rc = new RemoteConfig(config, "origin");
             rc.AddURI(new URIish("/some/dir"));
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.SetTagOpt(TagOpt.NO_TAGS);
-            rc.Update(db.Config);
-            db.Config.save();
+            rc.Update(config);
 
-            checkFile(db.Config.getFile(),
-                      "[core]\n"
-                      + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
-                      + "[remote \"origin\"]\n" + "\turl = /some/dir\n"
-                      + "\tfetch = +refs/heads/*:refs/remotes/origin/*\n"
-                      + "\ttagopt = --no-tags\n");
+            checkConfig("[remote \"origin\"]\n" + "\turl = /some/dir\n"
+                    + "\tfetch = +refs/heads/*:refs/remotes/origin/*\n"
+                    + "\ttagopt = --no-tags\n");
         }
 
         [Test]
         public void test017_SaveAllTags()
         {
-            RemoteConfig rc = new RemoteConfig(db.Config, "origin");
+            RemoteConfig rc = new RemoteConfig(config, "origin");
             rc.AddURI(new URIish("/some/dir"));
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.SetTagOpt(TagOpt.FETCH_TAGS);
-            rc.Update(db.Config);
-            db.Config.save();
+            rc.Update(config);
 
-            checkFile(db.Config.getFile(),
-                      "[core]\n"
-                      + "\trepositoryformatversion = 0\n" + "\tfilemode = true\n"
-                      + "[remote \"origin\"]\n" + "\turl = /some/dir\n"
-                      + "\tfetch = +refs/heads/*:refs/remotes/origin/*\n"
-                      + "\ttagopt = --tags\n");
+            checkConfig("[remote \"origin\"]\n" + "\turl = /some/dir\n"
+                    + "\tfetch = +refs/heads/*:refs/remotes/origin/*\n"
+                    + "\ttagopt = --tags\n");
+        }
+
+        [Test]
+        public void test018_SimpleTimeout()
+        {
+            readConfig("[remote \"spearce\"]\n"
+                    + "url = http://www.spearce.org/egit.git\n"
+                    + "fetch = +refs/heads/*:refs/remotes/spearce/*\n"
+                    + "timeout = 12\n");
+
+            RemoteConfig rc = new RemoteConfig(config, "spearce");
+            Assert.AreEqual(12, rc.Timeout);
+        }
+
+        [Test]
+        public void test019_SaveTimeout()
+        {
+            RemoteConfig rc = new RemoteConfig(config, "origin");
+            rc.AddURI(new URIish("/some/dir"));
+            rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
+            rc.Timeout = 60;
+            rc.Update(config);
+            checkConfig("[remote \"origin\"]\n" + "\turl = /some/dir\n"
+                    + "\tfetch = +refs/heads/*:refs/remotes/origin/*\n"
+                    + "\ttimeout = 60\n");
         }
     }
 

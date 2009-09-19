@@ -136,8 +136,10 @@
     <Compile Include="Util\QuotedStringBourneStyleTest.cs" />
     <Compile Include="Util\QuotedStringBourneUserPathStyleTest.cs" />
     <Compile Include="Util\QuotedStringGitPathStyleTest.cs" />
+    <Compile Include="Util\RawParseUtils_HexParseTest.cs" />
     <Compile Include="Util\RawParseUtils_LineMapTest.cs" />
     <Compile Include="Util\RawParseUtils_MatchTest.cs" />
+    <Compile Include="Util\StringUtilsTest.cs" />
     <Compile Include="Util\TemporaryBufferTest.cs" />
     <Compile Include="Util\TestRng.cs" />
     <Compile Include="Util\XInputStream.cs" />

@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using GitSharp.RevWalk;
@@ -548,7 +549,6 @@ namespace GitSharp.Tests
 			Assert.IsNotNull(ndb.Resolve("refs/heads/b"));
 		}
 
-		[Test]
 		public void tryRenameWhenLocked(string toLock, string fromName, string toName, string headPointsTo)
 		{
 			// Setup
@@ -556,8 +556,8 @@ namespace GitSharp.Tests
 			ObjectId oldfromId = db.Resolve(fromName);
 			ObjectId oldHeadId = db.Resolve(Constants.HEAD);
 			RefLogWriter.WriteReflog(db, oldfromId, oldfromId, "Just a message", fromName);
-			var oldFromLog = db.ReflogReader(fromName).getReverseEntries();
-			var oldHeadLog = oldHeadId != null ? db.ReflogReader(Constants.HEAD).getReverseEntries() : null;
+			IList<ReflogReader.Entry> oldFromLog = db.ReflogReader(fromName).getReverseEntries();
+			IList<ReflogReader.Entry> oldHeadLog = oldHeadId != null ? db.ReflogReader(Constants.HEAD).getReverseEntries() : null;
 
 			Assert.IsTrue(new FileInfo(Path.Combine(db.Directory.FullName, "logs/" + fromName)).Exists, "internal check, we have a log");
 

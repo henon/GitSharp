@@ -90,14 +90,9 @@ namespace GitSharp.Tests
                     e.getComment());
         }
 
-        private String iso(PersonIdent id)
+        private string iso(PersonIdent id)
         {
-            return id.When.UnixTimeToDateTimeOffset(id.TimeZoneOffset).ToString("yyyy-MM-dd'T'HH:mm:ss");
-            //return id.When.ToString("yyyy-MM-dd'T'HH:mm:ss");
-            //SimpleDateFormat fmt;
-            //fmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-            //fmt.setTimeZone(id.TimeZoneOffset);
-            //return fmt.format(id.When);
+            return id.When.UnixTimeToDateTimeOffset(id.TimeZoneOffset).ToIsoDateFormat();
         }
 
         [Test]

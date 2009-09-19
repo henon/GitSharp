@@ -38,6 +38,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 using System;
+using System.Globalization;
 using System.Text;
 using GitSharp.Util;
 
@@ -179,54 +180,40 @@ namespace GitSharp
             return r.ToString();
         }
 
-        private void appendTimezone(StringBuilder r)
-        {
-            int offset = tzOffset;
-            char sign;
+		private void appendTimezone(StringBuilder r)
+		{
+			int offset = tzOffset;
+			char sign;
 
-        	if (offset < 0)
-            {
-                sign = '-';
-                offset = -offset;
-            }
-            else
-            {
-                sign = '+';
-            }
+			if (offset < 0)
+			{
+				sign = '-';
+				offset *= -1;
+			}
+			else
+			{
+				sign = '+';
+			}
 
-            int offsetHours = offset / 60;
-            int offsetMins = offset % 60;
+			int offsetHours = offset / 60;
+			int offsetMins = offset % 60;
 
-            r.Append(sign);
-            if (offsetHours < 10)
-            {
-                r.Append('0');
-            }
-            r.Append(offsetHours);
-            if (offsetMins < 10)
-            {
-                r.Append('0');
-            }
-            r.Append(offsetMins);
-        }
+			r.AppendFormat(CultureInfo.InvariantCulture, "{0}{1:D2}{2:D2}", sign, offsetHours, offsetMins);
+		}
 
-        public override string ToString()
-        {
-#warning : to be finalized
-		var r = new StringBuilder();
-        //SimpleDateFormat dtfmt;
-        //dtfmt = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.US);
-        //dtfmt.setTimeZone(getTimeZone());
+		public override string ToString()
+		{
+			var r = new StringBuilder();
 
-		r.Append("PersonIdent[");
-        r.Append(Name);
-        r.Append(", ");
-        r.Append(EmailAddress);
-        r.Append(", ");
-        //r.Append(dtfmt.format(Long.valueOf(when)));
-        r.Append("]");
+			r.Append("PersonIdent[");
+			r.Append(Name);
+			r.Append(", ");
+			r.Append(EmailAddress);
+			r.Append(", ");
+			r.Append(When.UnixTimeToDateTimeOffset(tzOffset).ToIsoDateFormat());
+			r.Append("]");
 
-		return r.ToString();
-        }
+			return r.ToString();
+		}
     }
 }

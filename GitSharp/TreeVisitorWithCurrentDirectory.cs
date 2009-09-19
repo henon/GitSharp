@@ -37,20 +37,17 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Collections;
 
 namespace GitSharp
 {
-    [Complete]
+	/// <summary>
+	/// Abstract TreeVisitor for visiting all files known by a Tree.
+	/// </summary>
     public abstract class TreeVisitorWithCurrentDirectory : TreeVisitor
     {
-        private Stack<DirectoryInfo> stack;
-
+        private readonly Stack<DirectoryInfo> stack;
         private DirectoryInfo currentDirectory;
 
         internal TreeVisitorWithCurrentDirectory(DirectoryInfo rootDirectory)

@@ -118,8 +118,6 @@ namespace GitSharp
 				Path.Combine(
 					db.Directory.FullName,
 						Path.Combine("logs", refName)).Replace('/', Path.DirectorySeparatorChar));
-
-			_logName.Refresh();
         }
 
 		///	<summary>

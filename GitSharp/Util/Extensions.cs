@@ -115,7 +115,11 @@ namespace GitSharp
         public static V GetValue<K, V>(this Dictionary<K, V> dict, K key)
         {
         	V v;
-			if (dict.TryGetValue(key, out v)) return v;
+			if (dict.TryGetValue(key, out v))
+			{
+			    return v;
+			}
+
         	return default(V);
         }
 

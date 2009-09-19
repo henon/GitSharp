@@ -575,20 +575,14 @@ namespace GitSharp
 
 		private static string ReadLine(FileSystemInfo file)
 		{
-			using (StreamReader sr = OpenReader(file))
-			{
-				string line = sr.ReadLine();
-
-				if (line != null)
-				{
-					line = line.Trim();
-				}
-
-				return line;
-			}
+		    using (StreamReader sr = OpenReader(file))
+		    {
+		        string line = sr.ReadLine();
+		        return line;
+		    }
 		}
 
-		private static StreamReader OpenReader(FileSystemInfo file)
+	    private static StreamReader OpenReader(FileSystemInfo file)
 		{
 			return new StreamReader(file.FullName);
 		}

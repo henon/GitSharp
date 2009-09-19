@@ -73,7 +73,7 @@ namespace GitSharp.Transport
                         throw new TransportException(transport.Uri, "not a bundle");
                 }
             }
-            catch (TransportException err)
+            catch (TransportException)
             {
                 Close();
                 throw;

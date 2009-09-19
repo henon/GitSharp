@@ -147,7 +147,7 @@ namespace GitSharp.Transport
                     if (prior.PeeledObjectId != null)
                         throw duplicateAdvertisement(name + "^{}");
 
-                    avail.Add(name, new Ref(Ref.Storage.Network, name, prior.ObjectId, id, true));
+                    avail[name] = new Ref(Ref.Storage.Network, name, prior.ObjectId, id, true);
                 }
                 else
                 {

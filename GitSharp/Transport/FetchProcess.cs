@@ -390,7 +390,7 @@ namespace GitSharp.Transport
                     continue;
                 }
 
-                Ref local = haveRefs[r.Name];
+                Ref local = haveRefs.ContainsKey(r.Name) ? haveRefs[r.Name] : null;
                 if (local != null)
                 {
                     if (!r.ObjectId.Equals(local.ObjectId))

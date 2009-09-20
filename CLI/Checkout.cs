@@ -45,16 +45,17 @@ namespace GitSharp.CLI
     [Command(complete = false, common = true, usage = "Checkout a branch or paths to the working tree")]
     class Checkout : TextBuiltin
     {
+        private static Boolean isHelp = false;
 
 #if ported
-        Boolean isQuiet = false;
-        Boolean isForced = false;
-        Boolean isTracked = false;
-        Boolean isNoTrack = false;
-        Boolean isMerging = false;
-        Boolean isOurs = false;
-        Boolean isTheirs = false;
-        Boolean isConflict = false;
+        private static Boolean isQuiet = false;
+        private static Boolean isForced = false;
+        private static Boolean isTracked = false;
+        private static Boolean isNoTrack = false;
+        private static Boolean isMerging = false;
+        private static Boolean isOurs = false;
+        private static Boolean isTheirs = false;
+        private static Boolean isConflict = false;
         private static string branchName = "";
 #endif
 
@@ -103,15 +104,19 @@ namespace GitSharp.CLI
 
         private static void OfflineHelp()
         {
-            Console.WriteLine("usage:");
-            Console.WriteLine("       git checkout [-q] [-f] [-m] [<branch>]");
-            Console.WriteLine("       git checkout [-q] [-f] [-m] [-b <new_branch>] [<start_point>]");
-            Console.WriteLine("       git checkout [-f|--ours|--theirs|-m|--conflict=<style>] [<tree-ish>] [--] <paths>...");
-            Console.WriteLine("       git checkout --patch [<tree-ish>] [--] [<paths>...]");
-            Console.WriteLine("\nThe available options for this command are:\n");
-            Console.WriteLine();
-            options.WriteOptionDescriptions(Console.Out);
-            Console.WriteLine();
+            if (!isHelp)
+            {
+                isHelp = true;
+                Console.WriteLine("usage:");
+                Console.WriteLine("       git checkout [-q] [-f] [-m] [<branch>]");
+                Console.WriteLine("       git checkout [-q] [-f] [-m] [-b <new_branch>] [<start_point>]");
+                Console.WriteLine("       git checkout [-f|--ours|--theirs|-m|--conflict=<style>] [<tree-ish>] [--] <paths>...");
+                Console.WriteLine("       git checkout --patch [<tree-ish>] [--] [<paths>...]");
+                Console.WriteLine("\nThe available options for this command are:\n");
+                Console.WriteLine();
+                options.WriteOptionDescriptions(Console.Out);
+                Console.WriteLine();
+            }
         }
 
         private static void RefLog()

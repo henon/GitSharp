@@ -47,7 +47,7 @@ using GitSharp;
 namespace GitSharp.Tests
 {
     [TestFixture]
-    public class ObjectIdTests
+    public class T0001_ObjectId
     {
         [Test]
         public void ObjectIdToStringTest()
@@ -142,6 +142,14 @@ namespace GitSharp.Tests
         {
             string x = "0000000000000000000000000000000000000000";
             Assert.AreEqual(x, ObjectId.ToString(null));
+        }
+
+        [Test]
+        public void test011_toString()
+        {
+            string x = "0123456789ABCDEFabcdef1234567890abcdefAB";
+            ObjectId oid = ObjectId.FromString(x);
+            Assert.AreEqual(x.ToLower(), oid.Name);
         }
     }
 }

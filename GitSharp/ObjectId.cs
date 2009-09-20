@@ -168,32 +168,35 @@ namespace GitSharp
 		///	<summary>
 		/// Convert an ObjectId from raw binary representation.
 		/// </summary>
-		/// <param name="s">
+		/// <param name="str">
 		/// The raw byte buffer to read from. At least 20 bytes must be
 		/// available within this byte array.
 		/// </param>
 		/// <returns> the converted object id. </returns>
-		public static ObjectId FromString(string s)
+		public static ObjectId FromString(string str)
 		{
-			if (string.IsNullOrEmpty(s) || s.Length != StringLength) return null;
-			return FromHexString(Constants.encodeASCII(s), 0);
+			if (str.Length != StringLength)
+			{
+                throw new ArgumentException("Invalid id: " + str, str);
+			}
+			return FromHexString(Constants.encodeASCII(str), 0);
 		}
 
-		public static ObjectId FromHexString(byte[] bs, int offset)
+		public static ObjectId FromHexString(byte[] bs, int p)
 		{
 			try
 			{
-				int a = Hex.HexStringToUInt32(bs, offset);
-				int b = Hex.HexStringToUInt32(bs, offset + 8);
-				int c = Hex.HexStringToUInt32(bs, offset + 16);
-				int d = Hex.HexStringToUInt32(bs, offset + 24);
-				int e = Hex.HexStringToUInt32(bs, offset + 32);
+				int a = RawParseUtils.parseHexInt32(bs, p);
+                int b = RawParseUtils.parseHexInt32(bs, p + 8);
+                int c = RawParseUtils.parseHexInt32(bs, p + 16);
+                int d = RawParseUtils.parseHexInt32(bs, p + 24);
+                int e = RawParseUtils.parseHexInt32(bs, p + 32);
 				return new ObjectId(a, b, c, d, e);
 			}
-			catch (IndexOutOfRangeException)
+			catch (IndexOutOfRangeException e)
 			{
-				var s = new string(Encoding.ASCII.GetChars(bs, offset, StringLength));
-				throw new ArgumentException("Invalid id: " + s, "bs");
+				var s = new string(Encoding.ASCII.GetChars(bs, p, StringLength));
+				throw new ArgumentException("Invalid id: " + s, "bs", e);
 			}
 		}
 

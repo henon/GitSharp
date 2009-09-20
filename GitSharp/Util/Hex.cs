@@ -71,12 +71,12 @@ namespace GitSharp.Util
             return _hexCharToValue[c];
         }
 
-        public static byte HexCharToValue(byte c)
+        private static byte HexCharToValue(byte c)
         {
             return _hexCharToValue[c];
         }
 
-        public static int HexStringToUInt32(byte[] bs, int offset)
+        private static int HexStringToUInt32(byte[] bs, int offset)
         {
             int r = _hexCharToValue[bs[offset]];
             r <<= Nibble; // push one nibble

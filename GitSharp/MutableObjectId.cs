@@ -104,7 +104,7 @@ namespace GitSharp
 		{
 			if (str.Length != StringLength)
 			{
-				throw new ArgumentException("Invalid id: " + str);
+				throw new ArgumentException("Invalid id: " + str, str);
 			}
 
 			FromHexString(Constants.encodeASCII(str), 0);
@@ -114,24 +114,17 @@ namespace GitSharp
 		{
 			try
 			{
-				W1 = Hex.HexStringToUInt32(bs, p);
-				W2 = Hex.HexStringToUInt32(bs, p + 8);
-				W3 = Hex.HexStringToUInt32(bs, p + 16);
-				W4 = Hex.HexStringToUInt32(bs, p + 24);
-				W5 = Hex.HexStringToUInt32(bs, p + 32);
+                W1 = RawParseUtils.parseHexInt32(bs, p);
+                W2 = RawParseUtils.parseHexInt32(bs, p + 8);
+                W3 = RawParseUtils.parseHexInt32(bs, p + 16);
+                W4 = RawParseUtils.parseHexInt32(bs, p + 24);
+                W5 = RawParseUtils.parseHexInt32(bs, p + 32);
 			}
-			catch (IndexOutOfRangeException)
-			{
-				try
-				{
-					var str = new string(Encoding.ASCII.GetChars(bs, p, StringLength));
-					throw new ArgumentException("Invalid id: " + str);
-				}
-				catch
-				{
-					throw new ArgumentException("Invalid id");
-				}
-			}
+            catch (IndexOutOfRangeException e)
+            {
+                var s = new string(Encoding.ASCII.GetChars(bs, p, StringLength));
+                throw new ArgumentException("Invalid id: " + s, "bs", e);
+            }
 		}
 
 		public override ObjectId ToObjectId()

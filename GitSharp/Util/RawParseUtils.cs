@@ -53,8 +53,8 @@ namespace GitSharp.Util
 
 		private static byte[] gen16()
 		{
-			byte[] ret = new byte['f' + 1];
-
+			var ret = new byte['f' + 1];
+            
 			for (char i = '0'; i <= '9'; i++)
 			{
 				ret[i] = (byte)(i - '0');
@@ -398,7 +398,7 @@ namespace GitSharp.Util
 		/// </exception>
 		public static int parseHexInt16(byte[] bs, int p)
 		{
-            if (!bs.All(isHex))
+            if (!isHex(bs, p, 4))
                 throw new IndexOutOfRangeException();
 
 			int r = digits16[bs[p]] << 4;
@@ -432,7 +432,7 @@ namespace GitSharp.Util
 		/// </exception>
 		public static int parseHexInt32(byte[] bs, int p)
 		{
-            if (!bs.All(isHex))
+            if (!isHex(bs, p, 8))
                 throw new IndexOutOfRangeException();
 
 			int r = digits16[bs[p]] << 4;
@@ -479,9 +479,22 @@ namespace GitSharp.Util
 			return r;
 		}
 
+        private static bool isHex(byte[] bs, int p, int length)
+        {
+            for (int i = 0; i < length; i ++)
+            {
+                if (!isHex(bs[p + i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private static bool isHex(byte d)
         {
-            return ((d >= '0' && d <= '9') || (d >= 'a' && d <= 'z') || (d >= 'A' && d <= 'Z'));
+            return ((d >= '0' && d <= '9') || (d >= 'a' && d <= 'f') || (d >= 'A' && d <= 'F'));
         }
 
 		/// <summary>
@@ -735,7 +748,7 @@ namespace GitSharp.Util
 				ptr += 46; // skip the "tree ..." line.
 			while (ptr < sz && b[ptr] == (byte)'p')
 				ptr += 48; // skip this parent.
-			return match(b, ptr, ObjectChecker.author_bytes);
+			return match(b, ptr, ObjectChecker.author);
 		}
 
 		/**
@@ -760,7 +773,7 @@ namespace GitSharp.Util
 				ptr += 48; // skip this parent.
 			if (ptr < sz && b[ptr] == (byte)'a')
 				ptr = nextLF(b, ptr);
-			return match(b, ptr, ObjectChecker.committer_bytes);
+			return match(b, ptr, ObjectChecker.committer);
 		}
 
 		/**
@@ -785,7 +798,7 @@ namespace GitSharp.Util
 			{
 				if (b[ptr] == (byte)'\n')
 					return -1;
-				int m = match(b, ptr, ObjectChecker.tagger_bytes);
+				int m = match(b, ptr, ObjectChecker.tagger);
 				if (m >= 0)
 					return m;
 				ptr = nextLF(b, ptr);
@@ -817,7 +830,7 @@ namespace GitSharp.Util
 					break;
 				ptr = nextLF(b, ptr);
 			}
-			return match(b, ptr, ObjectChecker.encoding_bytes);
+			return match(b, ptr, ObjectChecker.encoding);
 		}
 
 		/**

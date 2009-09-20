@@ -56,12 +56,12 @@ namespace GitSharp
         private static volatile WindowCache _cache;
 
         private readonly int _maxFiles;
-        private readonly int _maxBytes;
+        private readonly long _maxBytes;
         private readonly bool _memoryMap;
         private readonly int _windowSizeShift;
         private readonly int _windowSize;
         private readonly AtomicValue<int> _openFiles;
-        private readonly AtomicValue<int> _openBytes;
+        private readonly AtomicValue<long> _openBytes;
 
         static WindowCache()
         {
@@ -176,7 +176,7 @@ namespace GitSharp
             _windowSize = 1 << _windowSizeShift;
 
             _openFiles = new AtomicValue<int>(0);
-            _openBytes = new AtomicValue<int>(0);
+            _openBytes = new AtomicValue<long>(0);
 
             if (_maxFiles < 1)
             {
@@ -194,7 +194,7 @@ namespace GitSharp
             return _openFiles.get();
         }
 
-        public int getOpenBytes()
+        public long getOpenBytes()
         {
             return _openBytes.get();
         }
@@ -230,14 +230,14 @@ namespace GitSharp
         internal override WindowRef createRef(PackFile p, long o, ByteWindow v)
         {
             var @ref = new WindowRef(p, o, v, queue);
-            int c = _openBytes.get();
+            long c = _openBytes.get();
             _openBytes.compareAndSet(c, c + @ref.Size);
             return @ref;
         }
 
         internal override void clear(WindowRef @ref)
         {
-            int c = _openBytes.get();
+            long c = _openBytes.get();
             _openBytes.compareAndSet(c, c - @ref.Size);
             Close(@ref.pack);
         }
@@ -262,7 +262,7 @@ namespace GitSharp
         private static int TableSize(WindowCacheConfig cfg)
         {
             int wsz = cfg.PackedGitWindowSize;
-            int limit = cfg.PackedGitLimit;
+            long limit = cfg.PackedGitLimit;
             
             if (wsz <= 0)
             {
@@ -274,7 +274,7 @@ namespace GitSharp
                 throw new ArgumentException("Window size must be < limit");
             }
 
-            return 5 * (limit / wsz) / 2;
+            return (int) Math.Min(5*(limit/wsz)/2, 2000000000);
         }
 
         private static int LockCount(WindowCacheConfig cfg)

@@ -299,42 +299,41 @@ namespace GitSharp
 			r.lastAccess = c;
 		}
 
-		private void Evict()
-		{
-			int start = Rng.Next(_tableSize);
-			int ptr = start;
-			while (isFull())
-			{
-				Entry<V> old = null;
-				int slot = 0;
-				for (int b = _evictBatch - 1; b >= 0; b--)
-				{
-					if (_tableSize <= ptr)
-						ptr = 0;
-					for (Entry<V> e = _table.get(ptr); e != null; e = e.Next)
-					{
-						if (e.Dead) continue;
+        private void Evict()
+        {
+            while (isFull())
+            {
+                int ptr = Rng.Next(_tableSize);
+                Entry<V> old = null;
+                int slot = 0;
+                for (int b = _evictBatch - 1; b >= 0; b--, ptr++)
+                {
+                    if (_tableSize <= ptr)
+                        ptr = 0;
+                    for (Entry<V> e = _table.get(ptr); e != null; e = e.Next)
+                    {
+                        if (e.Dead)
+                            continue;
 
-						if (old == null || e.Ref.lastAccess < old.Ref.lastAccess)
-						{
-							old = e;
-							slot = ptr;
-						}
-					}
-          if (++ptr == start) return;
-				}
+                        if (old == null || e.Ref.lastAccess < old.Ref.lastAccess)
+                        {
+                            old = e;
+                            slot = ptr;
+                        }
+                    }
+                }
 
-				if (old != null)
-				{
-					old.Kill();
-					Gc();
-					Entry<V> e1 = _table.get(slot);
-					_table.compareAndSet(slot, e1, Clean(e1));
-				}
-			}
-		}
+                if (old != null)
+                {
+                    old.Kill();
+                    Gc();
+                    Entry<V> e1 = _table.get(slot);
+                    _table.compareAndSet(slot, e1, Clean(e1));
+                }
+            }
+        }
 
-		/// <summary>
+	    /// <summary>
 		/// Clear every entry from the cache.
 		/// <para />
 		/// This is a last-ditch effort to clear out the cache, such as before it
@@ -559,18 +558,15 @@ namespace GitSharp
 			/// </summary>
 			public readonly Ref<T> Ref;
 
-			/// <summary>
-			/// Marked true when <see cref="Ref"/> returns null and the <see cref="Ref"/> 
-			/// is garbage collected.
-			/// <para />
-			/// A true here indicates that the @ref is no longer accessible, and that
-			/// we therefore need to eventually purge this Entry object out of the
-			/// bucket's chain.
-			/// </summary>
-			public bool Dead
-			{
-				get { return !Ref.IsAlive; }
-			}
+		    /// <summary>
+		    /// Marked true when <see cref="Ref"/> returns null and the <see cref="Ref"/> 
+		    /// is garbage collected.
+		    /// <para />
+		    /// A true here indicates that the @ref is no longer accessible, and that
+		    /// we therefore need to eventually purge this Entry object out of the
+		    /// bucket's chain.
+		    /// </summary>
+		    public bool Dead;
 
 			public Entry(Entry<T> n, Ref<T> r)
 			{
@@ -580,6 +576,7 @@ namespace GitSharp
 
 			public void Kill()
 			{
+			    Dead = true;
 				Ref.enqueue();
 			}
 		}
@@ -615,7 +612,8 @@ namespace GitSharp
 			[MethodImpl(MethodImplOptions.Synchronized)]
 			public bool canClear()
 			{
-				if (cleared) return false;
+				if (cleared)
+                    return false;
 				cleared = true;
 				return true;
 			}

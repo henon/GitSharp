@@ -123,26 +123,16 @@ namespace GitSharp
 			var reflog = new DirectoryInfo(Path.Combine(logdir.FullName, refName));
 
 			var refdir = reflog.Parent;
-			if (refdir != null)
+
+			if (!refdir.Exists && !refdir.Mkdirs())
 			{
-				refdir.Create();
-				if (!refdir.Exists)
-				{
-					throw new IOException("Cannot create directory " + refdir);
-				}
+				throw new IOException("Cannot create directory " + refdir);
 			}
 
-			using (var @out = new FileStream(reflog.FullName, System.IO.FileMode.OpenOrCreate, FileAccess.Write))
-			{
-				try
-				{
-					@out.Write(rec, 0, rec.Length);
-				}
-				finally
-				{
-					@out.Close();
-				}
-			}
+		    using (var @out = new FileStream(reflog.FullName, System.IO.FileMode.OpenOrCreate, FileAccess.Write))
+		    {
+		        @out.Write(rec, 0, rec.Length);
+		    }
 		}
 
 		///	<summary>

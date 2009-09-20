@@ -150,7 +150,7 @@
     <Compile Include="WorkDirCheckoutTest.cs" />
     <Compile Include="WriteTests.cs" />
     <Compile Include="ObjectCheckerTests.cs" />
-    <Compile Include="ObjectIdTests.cs" />
+    <Compile Include="T0001_ObjectId.cs" />
     <Compile Include="PersonIdentTests.cs" />
     <Compile Include="PackIndexTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

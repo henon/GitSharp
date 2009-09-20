@@ -79,7 +79,7 @@ namespace GitSharp
         /// </summary>
         /// <returns> maximum number bytes of heap memory to dedicate to caching pack
         /// file data. <b>Default is 10 MB.</b></returns>
-        public int PackedGitLimit { get; set; }
+        public long PackedGitLimit { get; set; }
 
         /// <summary>
         /// Gets/Sets the size in bytes of a single window read in from the pack file.
@@ -110,7 +110,7 @@ namespace GitSharp
         public void FromConfig(RepositoryConfig rc)
         {
             PackedGitOpenFiles = rc.getInt("core", null, "packedgitopenfiles", PackedGitOpenFiles);
-            PackedGitLimit = rc.getInt("core", null, "packedgitlimit", PackedGitLimit);
+            PackedGitLimit = rc.getLong("core", null, "packedgitlimit", PackedGitLimit);
             PackedGitWindowSize = rc.getInt("core", null, "packedgitwindowsize", PackedGitWindowSize);
             PackedGitMMAP = rc.getBoolean("core", null, "packedgitmmap", PackedGitMMAP);
             DeltaBaseCacheLimit = rc.getInt("core", null, "deltabasecachelimit", DeltaBaseCacheLimit);

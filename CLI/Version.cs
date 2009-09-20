@@ -1,6 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
  *

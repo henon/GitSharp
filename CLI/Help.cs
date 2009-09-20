@@ -48,11 +48,18 @@ namespace GitSharp.CLI.Nonstandard
         override public void Run(String[] args)
         {
             CommandCatalog catalog = new CommandCatalog();
-            CommandRef subcommand = catalog.Get(args[0]);
-            if (subcommand != null)
+            if (args.Length > 0)
             {
-                TextBuiltin cmd = subcommand.create();
-                cmd.OnlineHelp();
+                CommandRef subcommand = catalog.Get(args[0]);
+                if (subcommand != null)
+                {
+                    TextBuiltin cmd = subcommand.Create();
+                    cmd.OnlineHelp();
+                }
+                else
+                {
+                    OfflineHelp();
+                }
             }
             else
             {

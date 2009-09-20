@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  *
  * All rights reserved.
  *
@@ -46,65 +46,107 @@ using NDesk.Options;
 
 namespace GitSharp.CLI
 {
-/**
- * Abstract command which can be invoked from the command line.
- * <p>
- * Commands are configured with a single "current" repository and then the
- * {@link #execute(String[])} method is invoked with the arguments that appear
- * on the command line after the command name.
- * <p>
- * Command constructors should perform as little work as possible as they may be
- * invoked very early during process loading, and the command may not execute
- * even though it was constructed.
- */
 
+/// <summary>
+/// Abstract command which can be invoked from the command line.
+/// 
+/// Commands are configured with a single "current" repository and then the
+/// execute(String[]) method is invoked with the arguments that appear
+/// after the subcommand.
+/// 
+/// Command constructors should perform as little work as possible as they may be
+/// invoked very early during process loading, and the command may not execute
+/// even though it was constructed.
+/// </summary>
 public abstract class TextBuiltin 
 {
+    /// <summary>
+    /// Name of the command in use
+    /// </summary>
 	private String commandName;
+
+    /// <summary>
+    /// Website address of the command help file
+    /// </summary>
     private String commandHelp;
 
-	//@Option(name = "--help", usage = "display this help text", aliases = { "-h" })
-	//private bool help;
-
-	/** Stream to output to, typically this is standard output. */
+	/// <summary>
+    /// Stream to output to, typically this is standard output
+    /// </summary>
 	protected StreamWriter streamOut;
 
-	/** Git repository the command was invoked within. */
+	/// <summary>
+    /// Git repository the command was invoked within.
+	/// </summary>
 	protected Repository db;
 
-	/** Directory supplied via --git-dir command line option. */
+	/// <summary>
+    /// Directory supplied via --git-dir command line option.
+	/// </summary>
     protected String gitdir;
 
-	/** RevWalk used during command line parsing, if it was required. */
+	/// <summary>
+    /// RevWalk used during command line parsing, if it was required.
+	/// </summary>
     protected GitSharp.RevWalk.RevWalk argWalk;
 
+    /// <summary>
+    /// Contains the remaining arguments after the options listed in the command line.
+    /// </summary>
     public List<String> arguments = new List<String>();
+
+    /// <summary>
+    /// Custom OptionSet to allow special option handling rules such as --option dir
+    /// </summary>
     public static CmdParserOptionSet options;
 
+    /// <summary>
+    /// Used by CommandCatalog and CommandRef to set the command name during initial creation.
+    /// </summary>
+    /// <param name="name">The command name.</param>
 	public void setCommandName(String name) {
 		commandName = name;
 	}
 
+    /// <summary>
+    /// Used by CommandRef to get the command name during initial creation.
+    /// </summary>
     public string getCommandName()
     {
         return commandName;
     }
 
+    /// <summary>
+    /// Used by CommandCatalog and CommandRef to set the website address of the command help during initial creation.
+    /// </summary>
+    /// <param name="cmdHelp">The website address of the command help.</param>
     internal void setCommandHelp(String cmdHelp)
     {
         commandHelp = cmdHelp;
     }
 
+    /// <summary>
+    /// Used by CommandRef to get the command help website during initial creation.
+    /// </summary>
     public string getCommandHelp()
     {
         return commandHelp;
     }
-	/** @return true if {@link #db}/{@link #getRepository()} is required. */
+
+    /// <summary>
+    /// Determines if a repository is required.
+    /// </summary>
+    /// <returns>Returns true if a repository is required.</returns>
 	public virtual bool RequiresRepository() {
 		return false;
 	}
 
-	public void Init(Repository repo, String gd) {
+    /// <summary>
+    /// Initializes a command for use including the repository and output support.
+    /// </summary>
+    /// <param name="repo">Specifies the repository to use.</param>
+    /// <param name="gitDirectory">Specifies the git directory.</param>
+	public void Init(Repository repo, String gitDirectory) {
 		try {
 
 #if ported
@@ -118,36 +160,37 @@ public abstract class TextBuiltin
 			else
             {
 #endif
-
+            //Initialize the output stream for all console-based messages.
             streamOut = new StreamWriter(Console.OpenStandardOutput());
             Console.SetOut(streamOut);
 		} catch (IOException) {
 			throw die("cannot create output stream");
 		}
 
+        // Initialize the repository in use.
 		if (repo != null) {
 			db = repo;
 			gitdir = repo.Directory.FullName;
 		} else {
 			db = null;
-			gitdir = gd;
+			gitdir = gitDirectory;
 		}
 	}
 
-	/**
-	 * Parse arguments and run this command.
-	 *
-	 * @param args
-	 *            command line arguments passed after the command name.
-	 * @throws Exception
-	 *             an error occurred while processing the command. The main
-	 *             framework will catch the exception and print a message on
-	 *             standard error.
-	 */
-	public void Execute(String[] args) {
+	
+	/// <summary>
+	/// Parses the command line and runs the corresponding subcommand 
+	/// </summary>
+    /// <param name="args">Specifies the command line arguments passed after the command name.</param>
+    public void Execute(String[] args) {
 		Run(args);
 	}
 
+    /// <summary>
+    /// Parses the options for all subcommands and executes the corresponding code for each option.
+    /// </summary>
+    /// <param name="args">Specifies the string from the options to the end of the command line.</param>
+    /// <returns>Returns the arguments remaining after the options on the command line. Often, these are directories or paths.</returns>
     public List<String> ParseOptions(string[] args)
     {
         try
@@ -162,6 +205,10 @@ public abstract class TextBuiltin
         return arguments;
     }
 
+    /// <summary>
+    /// Returns the current command for lightweight referencing.
+    /// </summary>
+    /// <returns>Returns this command.</returns>
     public Command GetCommand()
     {
         Type type = Type.GetType(this.ToString());
@@ -175,16 +222,10 @@ public abstract class TextBuiltin
         return null;
     }
 
-	/**
-	 * Perform the actions of this command.
-	 * <p>
-	 * This method should only be invoked by {@link #execute(String[])}.
-	 *
-	 * @throws Exception
-	 *             an error occurred while processing the command. The main
-	 *             framework will catch the exception and print a message on
-	 *             standard error.
-	 */
+	/// <summary>
+	/// Provides an abstract layer to perform the action of this command.
+    /// This method should only be invoked by the  Execute(String[] args) method.
+    /// </summary>
 	public abstract void Run(String[] args);
 
     /// <summary>
@@ -204,9 +245,10 @@ public abstract class TextBuiltin
         }
     }
 
-	/**
-	 * @return the repository this command accesses.
-	 */
+    
+	/// <summary>
+	/// Returns the repository this command accesses.
+	/// </summary>
 	public Repository GetRepository() {
 		return db;
 	}
@@ -218,12 +260,12 @@ public abstract class TextBuiltin
 		return r;
 	}
 
-	/**
-	 * @param why
-	 *            textual explanation
-	 * @return a runtime exception the caller is expected to throw
-	 */
-	protected static Die die(String why) {
+	/// <summary>
+	/// Generic method used to return an exception during fatal conditions. 
+	/// </summary>
+    /// <param name="why">Specifies the textual explanation of why the exception was thrown.</param>
+    /// <returns>Returns a runtime exception the caller is expected to throw.</returns>
+    protected static Die die(String why) {
 		return new Die(why);
 	}
 

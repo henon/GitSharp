@@ -946,14 +946,37 @@ namespace GitSharp
 		/// <summary>
 		/// Strip work dir and return normalized repository path
 		/// </summary>
-		/// <param name="wd">Work directory</param>
-		/// <param name="f">File whose path shall be stripp off it's workdir</param>
+		/// <param name="workDir">Work directory</param>
+		/// <param name="file">File whose path shall be stripp off it's workdir</param>
 		/// <returns>Normalized repository relative path</returns>
-		public static string StripWorkDir(FileSystemInfo wd, FileSystemInfo f)
+		public static string StripWorkDir(FileSystemInfo workDir, FileSystemInfo file)
 		{
-			string relName = f.FullName.Substring(wd.FullName.Length + 1);
-			relName = relName.Replace(Path.DirectorySeparatorChar, '/');
-			return relName;
+			string filePath = file.DirectoryName();
+			string workDirPath = workDir.DirectoryName();
+
+			if (filePath.Length <= workDirPath.Length ||
+                filePath[workDirPath.Length] != Path.DirectorySeparatorChar ||
+                !filePath.StartsWith(workDirPath)) 
+			{
+				FileSystemInfo absWd = new DirectoryInfo(workDir.DirectoryName());
+				FileSystemInfo absFile = new FileInfo(file.FullName);
+
+				if (absWd.FullName == workDir.FullName && absFile.FullName == file.FullName)
+				{
+					return string.Empty;
+				}
+				
+				return StripWorkDir(absWd, absFile);
+			}
+
+			string relName = filePath.Substring(workDirPath.Length + 1);
+			
+			if (Path.DirectorySeparatorChar != '/')
+			{
+				relName = relName.Replace(Path.DirectorySeparatorChar, '/');
+			}
+
+ 			return relName;
 		}
 
 		/// <summary>

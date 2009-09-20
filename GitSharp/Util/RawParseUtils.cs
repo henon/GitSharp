@@ -103,31 +103,6 @@ namespace GitSharp.Util
 		/// <param name="ptr">first position within b, this should match src[0].</param>
 		/// <param name="src">the buffer to test for equality with b.</param>
 		/// <returns>ptr + src.Length if b[ptr..src.Length] == src; else -1.</returns>
-		public static int match(char[] b, int ptr, char[] src)
-		{
-			if (ptr + src.Length > b.Length)
-			{
-				return -1;
-			}
-
-			for (int i = 0; i < src.Length; i++, ptr++)
-			{
-				if (b[ptr] != src[i])
-				{
-					return -1;
-				}
-			}
-
-			return ptr;
-		}
-
-		/// <summary>
-		/// Determine if b[ptr] matches src.
-		/// </summary>
-		/// <param name="b">the buffer to scan.</param>
-		/// <param name="ptr">first position within b, this should match src[0].</param>
-		/// <param name="src">the buffer to test for equality with b.</param>
-		/// <returns>ptr + src.Length if b[ptr..src.Length] == src; else -1.</returns>
 		public static int match(byte[] b, int ptr, byte[] src)
 		{
 			if (ptr + src.Length > b.Length)
@@ -201,64 +176,6 @@ namespace GitSharp.Util
 			}
 
 			return o;
-		}
-
-		/// <summary>
-		/// Parse a base 10 numeric from a sequence of ASCII digits into an int.
-		/// <para />
-		/// Digit sequences can begin with an optional run of spaces before the
-		/// sequence, and may start with a '+' or a '-' to indicate sign position.
-		/// Any other characters will cause the method to stop and return the current
-		/// result to the caller.
-		/// </summary>
-		/// <param name="b">Buffer to scan.</param>
-		/// <param name="ptr">Position within buffer to start parsing digits at.</param>
-		/// <param name="ptrResult">
-		/// Optional location to return the new ptr value through. If null
-		/// the ptr value will be discarded.
-		/// </param>
-		/// <returns>
-		/// the value at this location; 0 if the location is not a valid numeric.
-		/// </returns>
-		public static int parseBase10(char[] b, int ptr, MutableInteger ptrResult)
-		{
-			int r = 0;
-			int sign = 0;
-			try
-			{
-				int sz = b.Length;
-				while (ptr < sz && b[ptr] == ' ')
-					ptr++;
-				if (ptr >= sz)
-					return 0;
-
-				switch (b[ptr])
-				{
-					case ('-'):
-						sign = -1;
-						ptr++;
-						break;
-					case ('+'):
-						ptr++;
-						break;
-				}
-
-				while (ptr < sz)
-				{
-					char d = b[ptr];
-					if ((d < '0') || (d > '9'))
-						break;
-					r = r * 10 + ((byte)d - (byte)'0');
-					ptr++;
-				}
-			}
-			catch (IndexOutOfRangeException)
-			{
-				// Not a valid digit.
-			}
-			if (ptrResult != null)
-				ptrResult.value = ptr;
-			return sign < 0 ? -r : r;
 		}
 
 		/**
@@ -515,26 +432,6 @@ namespace GitSharp.Util
 			return tzHours * 60 + tzMins;
 		}
 
-		/// <summary>
-		/// Locate the first position after a given character.
-		/// </summary>
-		/// <param name="b">buffer to scan.</param>
-		/// <param name="ptr">
-		/// position within buffer to start looking for <paramref name="chrA"/> at.
-		/// </param>
-		/// <param name="chrA">character to find.</param>
-		/// <returns>New position just after <paramref name="chrA"/>.</returns>
-		public static int next(char[] b, int ptr, char chrA)
-		{
-			int sz = b.Length;
-			while (ptr < sz)
-			{
-				if (b[ptr++] == chrA)
-					return ptr;
-			}
-			return ptr;
-		}
-
 		public static int next(byte[] b, int ptr, byte chrA)
 		{
 			int sz = b.Length;
@@ -544,22 +441,6 @@ namespace GitSharp.Util
 					return ptr;
 			}
 			return ptr;
-		}
-
-		/**
-         * Locate the first position After the next LF.
-         * <para />
-         * This method stops on the first '\n' it finds.
-         *
-         * @param b
-         *            buffer to scan.
-         * @param ptr
-         *            position within buffer to start looking for LF at.
-         * @return new position just After the first LF found.
-         */
-		public static int nextLF(char[] b, int ptr)
-		{
-			return next(b, ptr, '\n');
 		}
 
 		/// <summary>
@@ -573,31 +454,6 @@ namespace GitSharp.Util
 		public static int nextLF(byte[] b, int ptr)
 		{
 			return next(b, ptr, (byte)'\n');
-		}
-
-		///	<summary>
-		/// Locate the first position after either the given character or LF.
-		///	<para />
-		///	This method stops on the first match it finds from either chrA or '\n'.
-		///	</summary>
-		///	<param name="b">Buffer to scan.</param>
-		///	<param name="ptr">
-		///	Position within buffer to start looking for chrA or LF at.
-		/// </param>
-		///	<param name="chrA"><see cref="char"/> to find.</param>
-		///	<returns>
-		/// New position just after the first chrA or LF to be found.
-		/// </returns>
-		public static int nextLF(char[] b, int ptr, char chrA)
-		{
-			int sz = b.Length;
-			while (ptr < sz)
-			{
-				char c = b[ptr++];
-				if (c == chrA || c == '\n')
-					return ptr;
-			}
-			return ptr;
 		}
 
 		/**

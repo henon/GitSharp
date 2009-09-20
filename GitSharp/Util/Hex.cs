@@ -143,7 +143,7 @@ namespace GitSharp.Util
 		{
 			if (8 <= end - p)
 			{
-				return Hex.HexStringToUInt32(bs, p);
+				return HexStringToUInt32(bs, p);
 			}
 
 			int r = 0, n = 0;

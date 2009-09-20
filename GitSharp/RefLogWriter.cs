@@ -77,7 +77,8 @@ namespace GitSharp
 		{
 			var logdir = new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.LOGS).Replace('/', Path.DirectorySeparatorChar));
 			var reflogFrom = new FileInfo(Path.Combine(logdir.FullName, from.Name).Replace('/', Path.DirectorySeparatorChar));
-			if (!reflogFrom.Exists) return;
+		    DirectoryInfo refLogFromDir = reflogFrom.Directory;
+            if (!reflogFrom.Exists) return;
 
 			var reflogTo = new FileInfo(Path.Combine(logdir.FullName, to.Name).Replace('/', Path.DirectorySeparatorChar));
 			var reflogToDir = reflogTo.Directory;
@@ -87,7 +88,7 @@ namespace GitSharp
 				throw new IOException("Cannot rename " + reflogFrom + " to (" + tmp + ")" + reflogTo);
 			}
 
-			RefUpdate.DeleteEmptyDir(reflogFrom.Directory, RefUpdate.Count(from.Name, Path.DirectorySeparatorChar));
+            RefUpdate.DeleteEmptyDir(refLogFromDir, RefUpdate.Count(from.Name, '/') - 1);
 			if (reflogToDir != null && !reflogToDir.Exists)
 			{
 				try { reflogToDir.Create(); }

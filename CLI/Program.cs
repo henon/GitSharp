@@ -49,31 +49,32 @@ using NDesk.Options;
 // [henon] ported from org.spearce.jgit.pgm\src\org\spearce\jgit\pgm
 namespace GitSharp.CLI
 {
-    /** Command line entry point. */
+    /// <summary>
+    /// Command line entry point.
+    /// </summary>
     public class Program
     {
         private static CmdParserOptionSet options;
 
-        //@Option(name = "--show-stack-trace", usage = "display the Java stack trace on exceptions")
+        /// <summary>
+        /// Display the stack trace on exceptions
+        /// </summary>
         private static bool showStackTrace;
 
-        //@Option(name = "--git-dir", metaVar = "GIT_DIR", usage = "set the git repository to operate on")
+        /// <summary>
+        /// The git repository to operate on
+        /// </summary>
         private static DirectoryInfo gitdir;
 
-#if missing_reference
-        @Argument(index = 0, metaVar = "command", required = true, handler = SubcommandHandler.class)
-        private static string subcommand;
-#endif
-
-        //@Argument(index = 1, metaVar = "ARG")
+        /// <summary>
+        /// 
+        /// </summary>
         private static List<String> arguments = new List<String>();
 
-        /**
-	     * Execute the command line.
-	     * 
-	     * @param argv
-	     *            arguments.
-	     */
+        /// <summary>
+        /// Load the parser options and 
+        /// </summary>
+        /// <param name="args"></param>
         public static void Main(string[] args)
         {
             options = new CmdParserOptionSet()
@@ -118,6 +119,10 @@ namespace GitSharp.CLI
 
         }
 
+        /// <summary>
+        /// Execute the command line
+        /// </summary>
+        /// <param name="argv"></param>
         private static void execute(string[] argv)
         {
             if (argv.Count() == 0)
@@ -131,7 +136,7 @@ namespace GitSharp.CLI
                 CommandRef subcommand = catalog.Get(argv[0]);
                 if (subcommand != null)
                 {
-                    TextBuiltin cmd = subcommand.create();
+                    TextBuiltin cmd = subcommand.Create();
                     if (cmd.RequiresRepository())
                     {
                         if (gitdir == null)
@@ -147,8 +152,10 @@ namespace GitSharp.CLI
                     {
                         cmd.Init(null, null);
                     }
+
                     try
                     {
+                        // Remove the subcommand from the command line
                         List<String> args = argv.ToList();
                         args.RemoveAt(0);
                         cmd.Execute(args.ToArray());
@@ -161,11 +168,17 @@ namespace GitSharp.CLI
                 }
                 else
                 {
-                    ShowHelp();
+                    // List all available commands starting with argv[0] if the command
+                    // specified does not exist.
+                    // If no commands exist starting with argv[0], show the help screen.
+                    if (!ShowCommandMatches(argv[0]))
+                        ShowHelp();
                 }
             }
             else
             {
+                // If the first argument in the command line is an option (denoted by starting with - or --), 
+                // no subcommand has been specified in the command line.
                 try
                 {
                     arguments = options.Parse(argv);
@@ -182,6 +195,9 @@ namespace GitSharp.CLI
             Exit(0);
         }
 
+        /// <summary>
+        /// Display the main offline help screen.
+        /// </summary>
         private static void ShowHelp()
         {
             Console.Write("usage: git ");
@@ -205,6 +221,9 @@ namespace GitSharp.CLI
             Console.Error.Write(@"See 'git help COMMAND' for more information on a specific command.");
         }
 
+        /// <summary>
+        /// Display the incomplete commands in GitSharp. Primarily for development use.
+        /// </summary>
         private static void ShowIncomplete()
         {
             CommandCatalog catalog = new CommandCatalog();
@@ -219,6 +238,9 @@ namespace GitSharp.CLI
             }
         }
 
+        /// <summary>
+        /// Display the complete commands in GitSharp.
+        /// </summary>
         private static void ShowComplete()
         {
             CommandCatalog catalog = new CommandCatalog();
@@ -230,6 +252,37 @@ namespace GitSharp.CLI
                     Console.Write(" ");
                 Console.Write(c.getUsage());
                 Console.WriteLine();
+            }
+        }
+
+        /// <summary>
+        /// Display the commands that start with the specified string.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns>Returns true if matches exist, otherwise false.</returns>
+        private static bool ShowCommandMatches(String s)
+        {
+            CommandCatalog catalog = new CommandCatalog();
+            List<CommandRef> matches = catalog.StartsWith(s);
+            if (matches.Count > 0)
+            {
+                foreach (CommandRef c in matches)
+                {
+                    Console.WriteLine("git: '"+s+"' is not a git command. See 'git --help'.");
+                    Console.WriteLine();
+                    Console.WriteLine("Did you mean this?");
+                    Console.Write("      ");
+                    Console.Write(c.getName());
+                    for (int i = c.getName().Length + 8; i < 31; i++)
+                        Console.Write(" ");
+                    Console.Write(c.getUsage());
+                    Console.WriteLine();
+                }
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 

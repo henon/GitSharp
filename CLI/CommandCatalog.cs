@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  *
  * All rights reserved.
  *
@@ -44,106 +45,30 @@ using System.Text;
 using System.Xml;
 using GitSharp;
 
-/**
- * List of all commands known by jgit's command line tools.
- * <p>
- * Commands are implementations of {@link TextBuiltin}, with an optional
- * {@link Command} class annotation to insert additional documentation or
- * override the default command name (which is guessed from the class name).
- * <p>
- * Commands may be registered by adding them to a services file in the same JAR
- * (or classes directory) as the command implementation. The service file name
- * is <code>META-INF/services/org.spearce.jgit.pgm.TextBuiltin</code> and it
- * contains one concrete implementation class name per line.
- * <p>
- * Command registration is identical to Java 6's services, however the catalog
- * uses a lightweight wrapper to delay creating a command instance as much as
- * possible. This avoids initializing the AWT or SWT GUI toolkits even if the
- * command's constructor might require them.
- */
-
 namespace GitSharp.CLI
 {
 
+    /// <summary>
+    ///  List of all commands known by the command line tools.
+    ///  Commands are implementations of the TextBuiltin class, with a required
+    ///  command attribute to insert additional documentation and add some extra
+    ///  information such as if the command is common and completed.
+    ///  
+    ///  Commands may be registered by adding them to the Commands.xml file.
+    ///  The Commands.xml file should contain:
+    ///      a. The command name including namespace.
+    ///      b. The website address for command specific online help.(optional)
+    /// </summary>
     public class CommandCatalog
     {
-
-        /**
-         * Locate a single command by its user friendly name.
-         *
-         * @param name
-         *            name of the command. Typically in dash-lower-case-form, which
-         *            was derived from the DashLowerCaseForm class name.
-         * @return the command instance; null if no command exists by that name.
-         */
-
-        public CommandRef Get(String name)
-        {
-            CommandRef value = null;
-            commands.TryGetValue(name, out value);
-            return value;
-        }
-
-        /**
-         * @return all known commands, sorted by command name.
-         */
-        public IList<CommandRef> All()
-        {
-            return commands.Values;
-        }
-
-        /**
-         * @return all common commands, sorted by command name.
-         */
-        public List<CommandRef> Common()
-        {
-            List<CommandRef> common = new List<CommandRef>();
-            foreach (CommandRef c in commands.Values)
-            {
-                if (c.isCommon())
-                    common.Add(c);
-            }
-
-            return toSortedArray(common);
-        }
-
-        public List<CommandRef> Incomplete()
-        {
-            List<CommandRef> incomplete = new List<CommandRef>();
-            foreach (CommandRef c in commands.Values)
-            {
-                if (!c.isComplete())
-                    incomplete.Add(c);
-            }
-
-            return toSortedArray(incomplete);
-        }
-        
-        public List<CommandRef> Complete()
-        {
-            List<CommandRef> complete = new List<CommandRef>();
-            foreach (CommandRef c in commands.Values)
-            {
-                if (c.isComplete())
-                    complete.Add(c);
-            }
-
-            return toSortedArray(complete);
-        }
-
-        private List<CommandRef> toSortedArray(List<CommandRef> c)
-        {
-            c.Sort(
-                delegate(CommandRef ref1, CommandRef ref2)
-                {
-                    return ref1.getName().CompareTo(ref2.getName());
-                }
-            );
-            return c;
-        }
-
+        /// <summary>
+        /// Stores the command catalog.
+        /// </summary>
         private SortedList<String, CommandRef> commands = new SortedList<string, CommandRef>();
 
+        /// <summary>
+        /// Creates the command catalog from the Commands.xml file.
+        /// </summary>
         public CommandCatalog()
         {
             XmlDocument doc = new XmlDocument();
@@ -155,11 +80,31 @@ namespace GitSharp.CLI
                 XmlElement nameElement = node["Name"];
                 XmlElement helpElement = node["Help"];
                 if (nameElement != null)
-                    load(nameElement.InnerText, helpElement.InnerText);
+                    Load(nameElement.InnerText, helpElement.InnerText);
             }
         }
 
-        public void load(String commandName, String commandHelp)
+        /// <summary>
+        /// Returns all commands starting with a specified string, sorted by command name.
+        /// </summary>
+        public List<CommandRef> StartsWith(String s)
+        {
+            List<CommandRef> matches = new List<CommandRef>();
+            foreach (CommandRef c in commands.Values)
+            {
+                if (c.getName().StartsWith(s))
+                    matches.Add(c);
+            }
+
+            return toSortedArray(matches);
+        }
+
+        /// <summary>
+        /// Create and loads the command name into the command catalog.
+        /// </summary>
+        /// <param name="commandName">Specifies the command name to load.</param>
+        /// <param name="commandHelp">Specifies the command's website for faster reference.</param>
+        public void Load(String commandName, String commandHelp)
         {
             TextBuiltin clazz;
 
@@ -179,6 +124,87 @@ namespace GitSharp.CLI
             CommandRef cr = new CommandRef(clazz);
             if (cr != null)
                 commands.Add(cr.getName(), cr);
+        }
+
+        /// <summary>
+        /// Locates a single command by its user friendly name.
+        /// </summary>
+        /// <param name="name">Specifies the name of the command.</param>
+        /// <returns>Returns the CommandRef containing the command's information.</returns>
+        public CommandRef Get(String name)
+        {
+            CommandRef value = null;
+            commands.TryGetValue(name, out value);
+            return value;
+        }
+
+        /// <summary>
+        /// Returns all known commands, sorted by command name.
+        /// </summary>
+        public IList<CommandRef> All()
+        {
+            return commands.Values;
+        }
+
+        /// <summary>
+        /// Returns all common commands, sorted by command name.
+        /// </summary>
+        public List<CommandRef> Common()
+        {
+            List<CommandRef> common = new List<CommandRef>();
+            foreach (CommandRef c in commands.Values)
+            {
+                if (c.isCommon())
+                    common.Add(c);
+            }
+
+            return toSortedArray(common);
+        }
+
+        /// <summary>
+        /// Returns all incomplete commands, sorted by command name.
+        /// </summary>
+        public List<CommandRef> Incomplete()
+        {
+            List<CommandRef> incomplete = new List<CommandRef>();
+            foreach (CommandRef c in commands.Values)
+            {
+                if (!c.isComplete())
+                    incomplete.Add(c);
+            }
+
+            return toSortedArray(incomplete);
+        }
+        
+        /// <summary>
+        /// Returns all complete commands, sorted by command name.
+        /// </summary>
+        public List<CommandRef> Complete()
+        {
+            List<CommandRef> complete = new List<CommandRef>();
+            foreach (CommandRef c in commands.Values)
+            {
+                if (c.isComplete())
+                    complete.Add(c);
+            }
+
+            return toSortedArray(complete);
+        }
+
+        /// <summary>
+        /// Sorts a list of specified commands by command name.
+        /// </summary>
+        /// <param name="c">Specifies the list of commands to be sorted.</param>
+        /// <returns>Returns the sorted list of commands.</returns>
+        private List<CommandRef> toSortedArray(List<CommandRef> c)
+        {
+            c.Sort(
+                delegate(CommandRef ref1, CommandRef ref2)
+                {
+                    return ref1.getName().CompareTo(ref2.getName());
+                }
+            );
+            return c;
         }
     }
 }

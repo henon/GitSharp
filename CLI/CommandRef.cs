@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  *
  * All rights reserved.
  *
@@ -38,15 +39,17 @@
 using System;
 using System.Text;
 
-/**
- * Description of a command (a {@link TextBuiltin} subclass.
- * <p>
- * These descriptions are lightweight compared to creating a command instance
- * and are therefore suitable for catalogs of "known" commands without linking
- * the command's implementation and creating a dummy instance of the command.
- */
+
 namespace GitSharp.CLI
 {
+
+    /// <summary>
+    /// Description of a command subcommand.
+    ///
+    /// These descriptions are lightweight compared to creating a command instance
+    /// and are therefore suitable for catalogs of "known" commands without linking
+    /// the command's implementation and creating a dummy instance of the command.
+    /// </summary>
     public class CommandRef
     {
         private TextBuiltin impl;
@@ -57,18 +60,11 @@ namespace GitSharp.CLI
         bool common;
 
         public CommandRef(TextBuiltin clazz)
-            : this(clazz, clazz.getCommandName()) //guessName(clazz))
+            : this(clazz, clazz.getCommandName())
         {
 
         }
-#if ported
-        /*public CommandRef(TextBuiltin clazz, Command cmd) //final Class<? extends TextBuiltin> clazz, final Command cmd) {
-            : this(clazz, cmd.Name().Length > 0 ? cmd.Name() : guessName(clazz))
-        {
-            usage = cmd.Usage();
-            common = cmd.Common();
-        }*/
-#endif
+
         public CommandRef(TextBuiltin clazz, String cn) 
         {
             impl = (TextBuiltin)clazz;
@@ -83,94 +79,66 @@ namespace GitSharp.CLI
             }
         }
 
-#if ported
-        private static String guessName(TextBuiltin clazz)
-        {
-            StringBuilder s = new StringBuilder();
-            //if (clazz.GetName().startsWith("org.spearce.jgit.pgm.debug."))
-            //		s.Append("debug-");
-
-            bool lastWasDash = true;
-            foreach (Char c in clazz.GetType().ToString())
-            {
-                if (Char.IsUpper(c))
-                {
-                    if (!lastWasDash)
-                        s.Append('-');
-                    lastWasDash = !lastWasDash;
-                    s.Append(Char.ToLower(c));
-                }
-                else
-                {
-                    s.Append(c);
-                }
-            }
-            return s.ToString();
-        }
-#endif
-        /**
-         * @return name the command is invoked as from the command line.
-         */
+        /// <summary>
+        /// Returns the friendly command name. The command as invoked from the command line.
+        /// </summary>
         public String getName()
         {
             return name;
         }
 
-        /**
-         * @return one line description of the command's feature set.
-         */
+        /// <summary>
+        /// Returns a one line description of the command's feature set.
+        /// </summary>
         public String getUsage()
         {
             return usage;
         }
-
-        /**
-         * @return true if this command is considered to be commonly used.
-         */
+         
+        /// <summary>
+        /// Returns true if this command is considered to be commonly used.
+        /// </summary>
+        /// <returns></returns>
         public bool isCommon()
         {
             return common;
         }
 
+        /// <summary>
+        /// Returns true if this command is considered to be completed.
+        /// </summary>
+        /// <returns></returns>
         public bool isComplete()
         {
             return complete;
         }
 
-        /**
-         * @return name of the Java class which implements this command.
-         */
+        
+        /// <summary>
+        /// Returns the name of the class which implements this command.
+        /// </summary>
+        /// <returns></returns>
         public String getImplementationClassName()
         {
             return impl.ToString();
         }
 
-        /**
-         * @return loader for {@link #getImplementationClassName()}.
-         */
-        //public ClassLoader getImplementationClassLoader() {
-        //	return impl.getClassLoader();
-        //}
-
-        /**
-         * @return a new instance of the command implementation.
-         */
-        public TextBuiltin create()
+        /// <summary>
+        /// Returns a new instance of the command implementation.
+        /// </summary>
+        /// <returns></returns>
+        public TextBuiltin Create()
         {
-            TextBuiltin c;
-
-            try
+            TextBuiltin c = Activator.CreateInstance(Type.GetType(impl.ToString())) as TextBuiltin;
+            if (c != null)
             {
-                c = (TextBuiltin)Activator.CreateInstance(Type.GetType(impl.ToString()));
                 c.setCommandHelp(cmdHelp);
+                return c;
             }
-            catch (Exception)
+            else
             {
-
                 return null;
             }
-
-            return c;
         }
     }
 }

@@ -99,8 +99,8 @@ namespace GitSharp.Tests.Util
         {
             Assert.AreEqual(0x00000000, parse32("00000000"));
             Assert.AreEqual(0x00000001, parse32("00000001"));
-            Assert.AreEqual(0xc0ffEE42, parse32("c0ffEE42"));
-            Assert.AreEqual(0xffffffff, parse32("ffffffff"));
+            Assert.AreEqual(0xc0ffEE42, (uint)parse32("c0ffEE42"));
+            Assert.AreEqual(0xffffffff, (uint)parse32("ffffffff"));
             Assert.AreEqual(-1, parse32("ffffffff"));
 
             AssertHelper.Throws<IndexOutOfRangeException>(() => parse32("noth"));

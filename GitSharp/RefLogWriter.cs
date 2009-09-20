@@ -129,7 +129,7 @@ namespace GitSharp
 				throw new IOException("Cannot create directory " + refdir);
 			}
 
-		    using (var @out = new FileStream(reflog.FullName, System.IO.FileMode.OpenOrCreate, FileAccess.Write))
+		    using (var @out = new FileStream(reflog.FullName, System.IO.FileMode.Append, FileAccess.Write))
 		    {
 		        @out.Write(rec, 0, rec.Length);
 		    }

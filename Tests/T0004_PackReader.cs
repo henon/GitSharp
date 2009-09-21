@@ -43,7 +43,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests
 {
 	[TestFixture]
-	public class PackReaderTests : RepositoryTestCase
+    public class T0004_PackReader : RepositoryTestCase
 	{
 		private const string PackName = "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f";
 		private static readonly FileInfo TestPack = new FileInfo(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "Resources/"), GitSharp.Transport.IndexPack.GetPackFileName(PackName)).Replace('/', Path.DirectorySeparatorChar));

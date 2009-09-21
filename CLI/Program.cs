@@ -201,9 +201,8 @@ namespace GitSharp.CLI
         private static void ShowHelp()
         {
             Console.Write("usage: git ");
-            Console.Write(string.Join(" ", options.Select(o => "[-" + string.Join("|--", o.Names) + "]").ToArray()));
-            Console.WriteLine("\nCOMMAND [ARGS]\n\nThe most commonly used git commands are:\n");
-            Console.WriteLine();
+            Console.Write(string.Join(" ", options.Select(o => "[--" + string.Join("|-", o.Names) + "]").ToArray()));
+            Console.WriteLine("\nCOMMAND [ARGS]\n\nThe most commonly used git commands are:");
             options.WriteOptionDescriptions(Console.Error);
             Console.WriteLine();
 

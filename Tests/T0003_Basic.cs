@@ -47,7 +47,7 @@ using GitSharp.Util;
 namespace GitSharp.Tests
 {
     [TestFixture]
-    public class WriteTests : RepositoryTestCase // [henon] was BasicTests but I think this name is better
+    public class T0003_Basic : RepositoryTestCase
     {
         [Test]
         public void test001_Initalize()

@@ -50,7 +50,7 @@
     <Compile Include="StringExtensionsFixture.cs" />
     <Compile Include="ExtensionsFixture.cs" />
     <Compile Include="ConcurrentRepackTest.cs" />
-    <Compile Include="ConfigTests.cs" />
+    <Compile Include="T0003_Basic_Config.cs" />
     <Compile Include="Diff\DiffFormatterReflowTest.cs" />
     <Compile Include="Diff\EditListTest.cs" />
     <Compile Include="Diff\EditTest.cs" />
@@ -149,7 +149,7 @@
     <Compile Include="WindowCacheGetTest.cs" />
     <Compile Include="WindowCacheReconfigureTest.cs" />
     <Compile Include="WorkDirCheckoutTest.cs" />
-    <Compile Include="T0003_Basic.cs" />
+    <Compile Include="T0003_Basic_Write.cs" />
     <Compile Include="ObjectCheckerTests.cs" />
     <Compile Include="T0001_ObjectId.cs" />
     <Compile Include="T0001_PersonIdent.cs" />

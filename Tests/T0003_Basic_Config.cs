@@ -48,9 +48,8 @@ using System.IO;
 namespace GitSharp.Tests
 {
     [TestFixture]
-   public class ConfigTests : RepositoryTestCase
+    public class T0003_Basic_Config : RepositoryTestCase
     {
-
         [Test]
         public void test004_CheckNewConfig()
         {
@@ -64,13 +63,12 @@ namespace GitSharp.Tests
             c.load();
         }
 
-
         [Test]
         public void test005_ReadSimpleConfig()
         {
             RepositoryConfig c = db.Config;
             Assert.IsNotNull(c);
-            c.load();
+            c.load(); //  (nulltoken] Not sure about this, which doesn't appear in original jgit code. Howver removing thi statement would make test004 and test005 performing the same tests... :-|
             Assert.AreEqual("0", c.getString("core", null, "repositoryformatversion"));
             Assert.AreEqual("0", c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
             Assert.AreEqual("true", c.getString("core", null, "filemode"));
@@ -82,8 +80,8 @@ namespace GitSharp.Tests
         public void test006_ReadUglyConfig()
         {
             RepositoryConfig c = db.Config;
-            string cfg = c.getFile().FullName; // db.Directory.FullName + "config";
-            //FileWriter pw = new FileWriter(cfg);
+            string cfg = Path.Combine(db.Directory.FullName, "config");
+            
             string configStr = "  [core];comment\n\tfilemode = yes\n"
                    + "[user]\n"
                    + "  email = A U Thor <thor@example.com> # Just an example...\n"
@@ -118,19 +116,18 @@ namespace GitSharp.Tests
 
             string badvers = "ihopethisisneveraversion";
             string configStr = "[core]\n" + "\trepositoryFormatVersion="
-                   + badvers + "\n";
+                               + badvers + "\n";
             File.WriteAllText(cfg, configStr);
 
-            try
-            {
-                new Repository(db.Directory);
-                Assert.Fail("incorrectly opened a bad repository");
-            }
-            catch (IOException ioe)
-            {
-                Assert.IsTrue(ioe.Message.IndexOf("format") > 0);
-                Assert.IsTrue(ioe.Message.IndexOf(badvers) > 0);
-            }
+            var ioe = AssertHelper.Throws<IOException>(() =>
+                                                           {
+                                                               new Repository(db.Directory);
+                                                               Assert.Fail("incorrectly opened a bad repository");
+                                                           }
+                );
+
+            Assert.IsTrue(ioe.Message.IndexOf("format") > 0);
+            Assert.IsTrue(ioe.Message.IndexOf(badvers) > 0);
         }
     }
 }

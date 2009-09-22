@@ -315,21 +315,19 @@ namespace GitSharp.Util
 		/// </exception>
 		public static int parseHexInt16(byte[] bs, int p)
 		{
-            if (!isHex(bs, p, 4))
-                throw new IndexOutOfRangeException();
-
-			int r = digits16[bs[p]] << 4;
-
-			r |= digits16[bs[p + 1]];
-			r <<= 4;
-
-			r |= digits16[bs[p + 2]];
-			r <<= 4;
-
-			r |= digits16[bs[p + 3]];
-			if (r < 0)
-				throw new IndexOutOfRangeException();
-			return r;
+			try 
+			{
+				string hex = Constants.CHARSET.GetString(bs).Substring(p,4);
+				if (hex.Length < 4)
+					throw new ArgumentException("Not a 16 bit Hex value");
+				
+				hex = hex.Substring(p);
+				return (int)UInt16.Parse(hex,System.Globalization.NumberStyles.HexNumber);
+			}
+			catch (Exception e)
+			{
+				throw new IndexOutOfRangeException("Exception Parsing Hex",e);
+			}
 		}
 
 		///	<summary>
@@ -349,32 +347,19 @@ namespace GitSharp.Util
 		/// </exception>
 		public static int parseHexInt32(byte[] bs, int p)
 		{
-            if (!isHex(bs, p, 8))
-                throw new IndexOutOfRangeException();
-
-			int r = digits16[bs[p]] << 4;
-
-			r |= digits16[bs[p + 1]];
-			r <<= 4;
-
-			r |= digits16[bs[p + 2]];
-			r <<= 4;
-
-			r |= digits16[bs[p + 3]];
-			r <<= 4;
-
-			r |= digits16[bs[p + 4]];
-			r <<= 4;
-
-			r |= digits16[bs[p + 5]];
-			r <<= 4;
-
-			r |= digits16[bs[p + 6]];
-
-			int last = digits16[bs[p + 7]];
-			if (r < 0 || last < 0)
-				throw new IndexOutOfRangeException();
-			return (r << 4) | last;
+			try 
+			{
+				string hex = Encoding.ASCII.GetString(bs).Substring(p,8);
+				
+				if (hex.Length < 8)
+					throw new ArgumentException("Not a 32 bit Hex value");
+				
+				return (int)UInt32.Parse(hex,System.Globalization.NumberStyles.HexNumber);
+			}
+			catch (Exception e)
+			{
+				throw new IndexOutOfRangeException("Exception Parsing Hex",e);
+			}
 		}
 
 		///	<summary>
@@ -387,13 +372,20 @@ namespace GitSharp.Util
 		/// </exception>
 		public static int parseHexInt4(byte digit)
 		{
-            if (!isHex(digit))
-                throw new IndexOutOfRangeException();
-
-			byte r = digits16[digit];
-			if (r < 0)
-				throw new IndexOutOfRangeException();
-			return r;
+			try 
+			{
+				char c = (char)digit;
+				UInt16 result = UInt16.Parse(c.ToString(),System.Globalization.NumberStyles.HexNumber);
+				
+				if (result > 15)
+					throw new OverflowException();
+				
+				return (int)result;
+			}
+			catch (Exception e)
+			{
+				throw new IndexOutOfRangeException("Exception Parsing Hex",e);
+			}
 		}
 
         private static bool isHex(byte[] bs, int p, int length)

@@ -47,31 +47,8 @@ namespace GitSharp.Util
 {
 	public static class RawParseUtils
 	{
-		private static readonly byte[] digits16 = gen16();
 		private static readonly byte[] footerLineKeyChars = GenerateFooterLineKeyChars();
 		private static readonly byte[] Base10Byte = { (byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5', (byte)'6', (byte)'7', (byte)'8', (byte)'9' };
-
-		private static byte[] gen16()
-		{
-			var ret = new byte['f' + 1];
-            
-			for (char i = '0'; i <= '9'; i++)
-			{
-				ret[i] = (byte)(i - '0');
-			}
-
-			for (char i = 'a'; i <= 'f'; i++)
-			{
-				ret[i] = (byte)((i - 'a') + 10);
-			}
-
-			for (char i = 'A'; i <= 'F'; i++)
-			{
-				ret[i] = (byte)((i - 'A') + 10);
-			}
-
-			return ret;
-		}
 
 		private static byte[] GenerateFooterLineKeyChars()
 		{
@@ -387,24 +364,6 @@ namespace GitSharp.Util
 				throw new IndexOutOfRangeException("Exception Parsing Hex",e);
 			}
 		}
-
-        private static bool isHex(byte[] bs, int p, int length)
-        {
-            for (int i = 0; i < length; i ++)
-            {
-                if (!isHex(bs[p + i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool isHex(byte d)
-        {
-            return ((d >= '0' && d <= '9') || (d >= 'a' && d <= 'f') || (d >= 'A' && d <= 'F'));
-        }
 
 		/// <summary>
 		/// Parse a Git style timezone string.

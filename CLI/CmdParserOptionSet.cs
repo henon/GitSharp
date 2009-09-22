@@ -46,8 +46,6 @@ namespace GitSharp.CLI
     {
         protected override void InsertItem(int index, Option item) 
         {
-            if (item.Prototype.ToLower () != item.Prototype)
-                throw new ArgumentException ("prototypes must be lower-case!");
             base.InsertItem (index, item);     
         }     
         
@@ -65,9 +63,8 @@ namespace GitSharp.CLI
       
             if (haveParts) 
             {             
-                string nl = n.ToLower ();             
-                nextOption = Contains (nl) ? this [nl] : null;             
-                newOption = f + n.ToLower () + (v != null ? s + v : "");         
+                nextOption = Contains (n) ? this [n] : null;             
+                newOption = f + n + (v != null ? s + v : "");         
             }   
       
             if (c.Option != null) 

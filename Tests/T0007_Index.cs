@@ -137,15 +137,15 @@ namespace GitSharp.Tests
         {
             var index = new GitIndex(db);
             writeTrashFile("a/b", "data:a/b");
-            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a@b", "data:a:b");
             writeTrashFile("a.b", "data:a.b");
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a@b")));
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
             index.write();
 
             Assert.AreEqual("a/b", index.GetEntry("a/b").Name);
-            Assert.AreEqual("a:b", index.GetEntry("a:b").Name);
+            Assert.AreEqual("a@b", index.GetEntry("a@b").Name);
             Assert.AreEqual("a.b", index.GetEntry("a.b").Name);
             Assert.IsNull(index.GetEntry("a*b"));
 
@@ -153,7 +153,7 @@ namespace GitSharp.Tests
             var indexr = new GitIndex(db);
             indexr.Read();
             Assert.AreEqual("a/b", indexr.GetEntry("a/b").Name);
-            Assert.AreEqual("a:b", indexr.GetEntry("a:b").Name);
+            Assert.AreEqual("a@b", indexr.GetEntry("a@b").Name);
             Assert.AreEqual("a.b", indexr.GetEntry("a.b").Name);
             Assert.IsNull(indexr.GetEntry("a*b"));
 
@@ -169,10 +169,10 @@ namespace GitSharp.Tests
         {
             var index = new GitIndex(db);
             writeTrashFile("a/b", "data:a/b");
-            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a@b", "data:a:b");
             writeTrashFile("a.b", "data:a.b");
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a@b")));
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
             writeTrashFile("a/b", "data:a/b modified");
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
@@ -189,15 +189,15 @@ namespace GitSharp.Tests
         {
             var index = new GitIndex(db);
             writeTrashFile("a/b", "data:a/b");
-            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a@b", "data:a:b");
             writeTrashFile("a.b", "data:a.b");
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a@b")));
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
             index.write();
 
             ObjectId id = index.writeTree();
-            Assert.AreEqual("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
+            Assert.AreEqual("0036d433dc4f10ec47b61abc3ec5033c78d34f84", id.Name);
 
             writeTrashFile("a/b", "data:a/b");
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
@@ -214,24 +214,24 @@ namespace GitSharp.Tests
             // Prepare tree
             var index = new GitIndex(db);
             writeTrashFile("a/b", "data:a/b");
-            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a@b", "data:a:b");
             writeTrashFile("a.b", "data:a.b");
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a@b")));
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
             index.write();
 
             ObjectId id = index.writeTree();
             Console.WriteLine("wrote id " + id);
-            Assert.AreEqual("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
+            Assert.AreEqual("0036d433dc4f10ec47b61abc3ec5033c78d34f84", id.Name);
             var index2 = new GitIndex(db);
 
-            index2.ReadTree(db.MapTree(ObjectId.FromString("c696abc3ab8e091c665f49d00eb8919690b3aec3")));
+            index2.ReadTree(db.MapTree(ObjectId.FromString("0036d433dc4f10ec47b61abc3ec5033c78d34f84")));
             GitIndex.Entry[] members = index2.Members;
             Assert.AreEqual(3, members.Length);
             Assert.AreEqual("a.b", members[0].Name);
             Assert.AreEqual("a/b", members[1].Name);
-            Assert.AreEqual("a:b", members[2].Name);
+            Assert.AreEqual("a@b", members[2].Name);
             Assert.AreEqual(3, members.Length);
 
             var indexr = new GitIndex(db);
@@ -240,7 +240,7 @@ namespace GitSharp.Tests
             Assert.AreEqual(3, membersr.Length);
             Assert.AreEqual("a.b", membersr[0].Name);
             Assert.AreEqual("a/b", membersr[1].Name);
-            Assert.AreEqual("a:b", membersr[2].Name);
+            Assert.AreEqual("a@b", membersr[2].Name);
             Assert.AreEqual(3, membersr.Length);
 
             if (CanRunGitStatus)
@@ -257,7 +257,7 @@ namespace GitSharp.Tests
             FileInfo f1 = writeTrashFile("a/a/a/a", "data:a/a/a/a");
             FileInfo f2 = writeTrashFile("a/c/c", "data:a/c/c");
             FileInfo f3 = writeTrashFile("a/b", "data:a/b");
-            FileInfo f4 = writeTrashFile("a:b", "data:a:b");
+            FileInfo f4 = writeTrashFile("a@b", "data:a:b");
             FileInfo f5 = writeTrashFile("a/d", "data:a/d");
             FileInfo f6 = writeTrashFile("a.b", "data:a.b");
             index.add(trash, f1);
@@ -269,10 +269,10 @@ namespace GitSharp.Tests
             index.write();
             ObjectId id = index.writeTree();
             Console.WriteLine("wrote id " + id);
-            Assert.AreEqual("ba78e065e2c261d4f7b8f42107588051e87e18e9", id.Name);
+            Assert.AreEqual("5e0bf0aad57706894c15fdf0681c9bc7343274fc", id.Name);
             var index2 = new GitIndex(db);
 
-            index2.ReadTree(db.MapTree(ObjectId.FromString("ba78e065e2c261d4f7b8f42107588051e87e18e9")));
+            index2.ReadTree(db.MapTree(ObjectId.FromString("5e0bf0aad57706894c15fdf0681c9bc7343274fc")));
             GitIndex.Entry[] members = index2.Members;
             Assert.AreEqual(6, members.Length);
             Assert.AreEqual("a.b", members[0].Name);
@@ -280,7 +280,7 @@ namespace GitSharp.Tests
             Assert.AreEqual("a/b", members[2].Name);
             Assert.AreEqual("a/c/c", members[3].Name);
             Assert.AreEqual("a/d", members[4].Name);
-            Assert.AreEqual("a:b", members[5].Name);
+            Assert.AreEqual("a@b", members[5].Name);
 
             // reread and test
             var indexr = new GitIndex(db);
@@ -292,7 +292,7 @@ namespace GitSharp.Tests
             Assert.AreEqual("a/b", membersr[2].Name);
             Assert.AreEqual("a/c/c", membersr[3].Name);
             Assert.AreEqual("a/d", membersr[4].Name);
-            Assert.AreEqual("a:b", membersr[5].Name);
+            Assert.AreEqual("a@b", membersr[5].Name);
         }
 
         [Test]
@@ -300,14 +300,14 @@ namespace GitSharp.Tests
         {
             var index = new GitIndex(db);
             writeTrashFile("a/b", "data:a/b");
-            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a@b", "data:a:b");
             writeTrashFile("a.b", "data:a.b");
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a@b")));
             index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
             index.write();
             index.writeTree();
-            index.remove(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.remove(trash, new FileInfo(Path.Combine(trash.FullName, "a@b")));
             index.write();
             Assert.AreEqual("a.b", index.Members[0].Name);
             Assert.AreEqual("a/b", index.Members[1].Name);
@@ -329,7 +329,7 @@ namespace GitSharp.Tests
             // Prepare tree, remote it and checkout
             var index = new GitIndex(db);
             FileInfo aslashb = writeTrashFile("a/b", "data:a/b");
-            FileInfo acolonb = writeTrashFile("a:b", "data:a:b");
+            FileInfo acolonb = writeTrashFile("a@b", "data:a:b");
             FileInfo adotb = writeTrashFile("a.b", "data:a.b");
             index.add(trash, aslashb);
             index.add(trash, acolonb);
@@ -344,7 +344,7 @@ namespace GitSharp.Tests
             var index2 = new GitIndex(db);
             Assert.AreEqual(0, index2.Members.Length);
 
-            index2.ReadTree(db.MapTree(ObjectId.FromString("c696abc3ab8e091c665f49d00eb8919690b3aec3")));
+            index2.ReadTree(db.MapTree(ObjectId.FromString("0036d433dc4f10ec47b61abc3ec5033c78d34f84")));
 
             index2.checkout(trash);
             Assert.AreEqual("data:a/b", Content(aslashb));

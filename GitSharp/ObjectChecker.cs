@@ -59,58 +59,31 @@ namespace GitSharp
     public class ObjectChecker
     {
         /** Header "tree " */
-        public static char[] tree = "tree ".ToCharArray();
+        public static byte[] tree = Constants.encodeASCII("tree ");
 
         /** Header "parent " */
-        public static char[] parent = "parent ".ToCharArray();
+        public static byte[] parent = Constants.encodeASCII("parent ");
 
         /** Header "author " */
-        public static char[] author = "author ".ToCharArray();
+        public static byte[] author = Constants.encodeASCII("author ");
 
         /** Header "committer " */
-        public static char[] committer = "committer ".ToCharArray();
+        public static byte[] committer = Constants.encodeASCII("committer ");
 
         /** Header "encoding " */
-        public static char[] encoding = "encoding ".ToCharArray();
+        public static byte[] encoding = Constants.encodeASCII("encoding ");
 
         /** Header "object " */
-        public static char[] @object = "object ".ToCharArray();
+        public static byte[] @object = Constants.encodeASCII("object ");
 
         /** Header "type " */
-        public static char[] type = "type ".ToCharArray();
+        public static byte[] type = Constants.encodeASCII("type ");
 
         /** Header "tag " */
-        public static char[] tag = "tag ".ToCharArray();
+        public static byte[] tag = Constants.encodeASCII("tag ");
 
         /** Header "tagger " */
-        public static char[] tagger = "tagger ".ToCharArray();
-
-        /** Header "tree " */
-        public static byte[] tree_bytes = Encoding.ASCII.GetBytes("tree ");
-
-        /** Header "parent " */
-        public static byte[] parent_bytes = Encoding.ASCII.GetBytes("parent ");
-
-        /** Header "author " */
-        public static byte[] author_bytes = Encoding.ASCII.GetBytes("author ");
-
-        /** Header "committer " */
-        public static byte[] committer_bytes = Encoding.ASCII.GetBytes("committer ");
-
-        /** Header "encoding " */
-        public static byte[] encoding_bytes = Encoding.ASCII.GetBytes("encoding ");
-
-        /** Header "object " */
-        public static byte[] @object_bytes = Encoding.ASCII.GetBytes("object ");
-
-        /** Header "type " */
-        public static byte[] type_bytes = Encoding.ASCII.GetBytes("type ");
-
-        /** Header "tag " */
-        public static byte[] tag_bytes = Encoding.ASCII.GetBytes("tag ");
-
-        /** Header "tagger " */
-        public static byte[] tagger_bytes = Encoding.ASCII.GetBytes("tagger ");
+        public static byte[] tagger = Constants.encodeASCII("tagger ");
 
 
         private MutableObjectId tempId = new MutableObjectId();
@@ -130,23 +103,6 @@ namespace GitSharp
 		/// </param>
 		/// <exception cref="CorruptObjectException">If any error is identified.</exception>
         public void check(int objType, byte[] raw)
-        {
-            check(objType, Constants.CHARSET.GetChars(raw));
-        }
-
-		/// <summary>
-		/// Check an object for parsing errors.
-		/// </summary>
-		/// <param name="objType">
-		/// Type of the object. Must be a valid object type code in
-		/// <see cref="Constants"/>.</param>
-		/// <param name="raw">
-		/// The raw data which comprises the object. This should be in the
-		/// canonical format (that is the format used to generate the
-		/// <see cref="ObjectId"/> of the object). The array is never modified.
-		/// </param>
-		/// <exception cref="CorruptObjectException">If any error is identified.</exception>
-        public void check(int objType, char[] raw)
         {
             switch (objType)
             {
@@ -171,11 +127,11 @@ namespace GitSharp
             }
         }
 
-        private int id(char[] raw, int ptr)
+        private int id(byte[] raw, int ptr)
         {
             try
             {
-                tempId.FromString(Encoding.ASCII.GetBytes(raw), ptr);
+                tempId.FromString(raw, ptr);
                 return ptr + AnyObjectId.StringLength;
             }
             catch (ArgumentException)
@@ -184,13 +140,13 @@ namespace GitSharp
             }
         }
 
-        private int personIdent(char[] raw, int ptr)
+        private int personIdent(byte[] raw, int ptr)
         {
-            int emailB = RawParseUtils.nextLF(raw, ptr, '<');
+            int emailB = RawParseUtils.nextLF(raw, ptr, (byte)'<');
             if (emailB == ptr || raw[emailB - 1] != '<')
                 return -1;
 
-            int emailE = RawParseUtils.nextLF(raw, emailB, '>');
+            int emailE = RawParseUtils.nextLF(raw, emailB, (byte)'>');
             if (emailE == emailB || raw[emailE - 1] != '>')
                 return -1;
             if (emailE == raw.Length || raw[emailE] != ' ')
@@ -214,7 +170,7 @@ namespace GitSharp
 		/// </summary>
 		/// <param name="raw">The commit data. The array is never modified.</param>
 		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
-        public void checkCommit(char[] raw)
+        public void checkCommit(byte[] raw)
         {
             int ptr = 0;
 
@@ -246,7 +202,7 @@ namespace GitSharp
 		/// </summary>
 		/// <param name="raw">The tag data. The array is never modified.</param>
 		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
-        public void checkTag(char[] raw)
+        public void checkTag(byte[] raw)
         {
             int ptr = 0;
 
@@ -271,26 +227,26 @@ namespace GitSharp
 
         private static int lastPathChar(int mode)
         {
-            return (int)(FileMode.Tree.Equals(mode) ? '/' : '\0');
+            return FileMode.Tree.Equals(mode) ? '/' : '\0';
         }
 
-        private static int pathCompare(char[] raw, int aPos, int aEnd,                 int aMode, int bPos, int bEnd, int bMode)
+        private static int pathCompare(byte[] raw, int aPos, int aEnd,                 int aMode, int bPos, int bEnd, int bMode)
         {
             while (aPos < aEnd && bPos < bEnd)
             {
-                int cmp = (((byte)raw[aPos++]) & 0xff) - (((byte)raw[bPos++]) & 0xff);
+                int cmp = (raw[aPos++] & 0xff) - (raw[bPos++] & 0xff);
                 if (cmp != 0)
                     return cmp;
             }
 
             if (aPos < aEnd)
-                return (((byte)raw[aPos]) & 0xff) - lastPathChar(bMode);
+                return (raw[aPos] & 0xff) - lastPathChar(bMode);
             if (bPos < bEnd)
-                return lastPathChar(aMode) - (((byte)raw[bPos]) & 0xff);
+                return lastPathChar(aMode) - (raw[bPos] & 0xff);
             return 0;
         }
 
-        private static bool duplicateName(char[] raw, int thisNamePos, int thisNameEnd)
+        private static bool duplicateName(byte[] raw, int thisNamePos, int thisNameEnd)
         {
             int sz = raw.Length;
             int nextPtr = thisNameEnd + 1 + Constants.OBJECT_ID_LENGTH;
@@ -301,11 +257,11 @@ namespace GitSharp
                 {
                     if (nextPtr >= sz)
                         return false;
-                    char c = raw[nextPtr++];
+                    byte c = raw[nextPtr++];
                     if (' ' == c)
                         break;
                     nextMode <<= 3;
-                    nextMode += ((byte)c - (byte)'0');
+                    nextMode += (c - (byte)'0');
                 }
 
                 int nextNamePos = nextPtr;
@@ -313,7 +269,7 @@ namespace GitSharp
                 {
                     if (nextPtr == sz)
                         return false;
-                    char c = raw[nextPtr++];
+                    byte c = raw[nextPtr++];
                     if (c == '\0')
                         break;
                 }
@@ -334,7 +290,7 @@ namespace GitSharp
 		/// </summary>
 		/// <param name="raw">The raw tree data. The array is never modified.</param>
 		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
-        public void checkTree(char[] raw)
+        public void checkTree(byte[] raw)
         {
             int sz = raw.Length;
             int ptr = 0;
@@ -347,7 +303,7 @@ namespace GitSharp
                 {
                     if (ptr == sz)
                         throw new CorruptObjectException("truncated in mode");
-                    char c = raw[ptr++];
+                    byte c = raw[ptr++];
                     if (' ' == c)
                         break;
                     if (c < '0' || c > '7')
@@ -355,7 +311,7 @@ namespace GitSharp
                     if (thisMode == 0 && c == '0')
                         throw new CorruptObjectException("mode starts with '0'");
                     thisMode <<= 3;
-                    thisMode += ((byte)c - (byte)'0');
+                    thisMode += (c - (byte)'0');
                 }
 
                 if (FileMode.FromBits(thisMode).ObjectType == ObjectType.Bad)
@@ -366,7 +322,7 @@ namespace GitSharp
                 {
                     if (ptr == sz)
                         throw new CorruptObjectException("truncated in name");
-                    char c = raw[ptr++];
+                    byte c = raw[ptr++];
                     if (c == '\0')
                         break;
                     if (c == '/')
@@ -408,7 +364,7 @@ namespace GitSharp
 		/// </summary>
 		/// <param name="raw">The blob data. The array is never modified.</param>
 		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
-        public void checkBlob(char[] raw)
+        public void checkBlob(byte[] raw)
         {
             // We can always assume the blob is valid.
         }

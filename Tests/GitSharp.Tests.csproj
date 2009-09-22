@@ -84,6 +84,7 @@
     <Compile Include="RefUpdateTest.cs" />
     <Compile Include="RepositoryConfigTest.cs" />
     <Compile Include="RevWalk\FooterLineTest.cs" />
+    <Compile Include="T0002_Tree.cs" />
     <Compile Include="Transport\BundleWriterTest.cs" />
     <Compile Include="Transport\LongMapTest.cs" />
     <Compile Include="Transport\OpenSshConfigTest.cs" />
@@ -150,13 +151,12 @@
     <Compile Include="WorkDirCheckoutTest.cs" />
     <Compile Include="WriteTests.cs" />
     <Compile Include="ObjectCheckerTests.cs" />
-    <Compile Include="ObjectIdTests.cs" />
-    <Compile Include="PersonIdentTests.cs" />
+    <Compile Include="T0001_ObjectId.cs" />
+    <Compile Include="T0001_PersonIdent.cs" />
     <Compile Include="PackIndexTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Crc32Tests.cs" />
     <Compile Include="Util\RepositoryTestCase.cs" />
-    <Compile Include="TreeTests.cs" />
     <Compile Include="Patch\EditListTest.cs" />
     <Compile Include="AssertHelper.cs" />
   </ItemGroup>

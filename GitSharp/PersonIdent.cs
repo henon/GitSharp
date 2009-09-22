@@ -118,7 +118,7 @@ namespace GitSharp
 		///	<param name="when">Local time stamp.</param>
 		///	<param name="tz">Time zone.</param>
         public PersonIdent(string name, string emailAddress, DateTime when, TimeZoneInfo tz)
-			: this(name, emailAddress, when.ToUnixTime() * 1000, tz.GetUtcOffset(when).Minutes)
+            : this(name, emailAddress, when.ToUnixTime() * 1000L, (int)tz.GetUtcOffset(when).TotalMinutes)
         {
         }
 

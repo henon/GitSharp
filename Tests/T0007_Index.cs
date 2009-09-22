@@ -66,19 +66,6 @@ namespace GitSharp.Tests
 			}
 		}
 
-		private static string Content(FileSystemInfo f)
-		{
-			using (var sr = new StreamReader(f.FullName))
-			{
-				return sr.ReadToEnd();
-			}
-		}
-
-		private static void Delete(FileSystemInfo f)
-		{
-			f.Delete();
-		}
-
 		private static int System(FileSystemInfo dir, string cmd)
 		{
 			int exitCode = -1;
@@ -123,6 +110,252 @@ namespace GitSharp.Tests
 
 			return exitCode;
 		}
+
+        [Test]
+        public void testCreateEmptyIndex()
+        {
+            var index = new GitIndex(db);
+            index.write();
+            // native git doesn't like an empty index
+            // Assert.AreEqual(0,System(trash,"git status"));
+
+            var indexr = new GitIndex(db);
+            indexr.Read();
+            Assert.AreEqual(0, indexr.Members.Length);
+        }
+
+        [Test]
+        public void testReadWithNoIndex()
+        {
+            var index = new GitIndex(db);
+            index.Read();
+            Assert.AreEqual(0, index.Members.Length);
+        }
+
+        [Test]
+        public void testCreateSimpleSortTestIndex()
+        {
+            var index = new GitIndex(db);
+            writeTrashFile("a/b", "data:a/b");
+            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a.b", "data:a.b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
+            index.write();
+
+            Assert.AreEqual("a/b", index.GetEntry("a/b").Name);
+            Assert.AreEqual("a:b", index.GetEntry("a:b").Name);
+            Assert.AreEqual("a.b", index.GetEntry("a.b").Name);
+            Assert.IsNull(index.GetEntry("a*b"));
+
+            // Repeat test for re-Read index
+            var indexr = new GitIndex(db);
+            indexr.Read();
+            Assert.AreEqual("a/b", indexr.GetEntry("a/b").Name);
+            Assert.AreEqual("a:b", indexr.GetEntry("a:b").Name);
+            Assert.AreEqual("a.b", indexr.GetEntry("a.b").Name);
+            Assert.IsNull(indexr.GetEntry("a*b"));
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, System(trash, "git status"));
+            }
+        }
+
+
+        [Test]
+        public void testUpdateSimpleSortTestIndex()
+        {
+            var index = new GitIndex(db);
+            writeTrashFile("a/b", "data:a/b");
+            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a.b", "data:a.b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
+            writeTrashFile("a/b", "data:a/b modified");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.write();
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, System(trash, "git status"));
+            }
+        }
+
+        [Test]
+        public void testWriteTree()
+        {
+            var index = new GitIndex(db);
+            writeTrashFile("a/b", "data:a/b");
+            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a.b", "data:a.b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
+            index.write();
+
+            ObjectId id = index.writeTree();
+            Assert.AreEqual("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
+
+            writeTrashFile("a/b", "data:a/b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, System(trash, "git status"));
+            }
+        }
+
+        [Test]
+        public void testReadTree()
+        {
+            // Prepare tree
+            var index = new GitIndex(db);
+            writeTrashFile("a/b", "data:a/b");
+            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a.b", "data:a.b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
+            index.write();
+
+            ObjectId id = index.writeTree();
+            Console.WriteLine("wrote id " + id);
+            Assert.AreEqual("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
+            var index2 = new GitIndex(db);
+
+            index2.ReadTree(db.MapTree(ObjectId.FromString("c696abc3ab8e091c665f49d00eb8919690b3aec3")));
+            GitIndex.Entry[] members = index2.Members;
+            Assert.AreEqual(3, members.Length);
+            Assert.AreEqual("a.b", members[0].Name);
+            Assert.AreEqual("a/b", members[1].Name);
+            Assert.AreEqual("a:b", members[2].Name);
+            Assert.AreEqual(3, members.Length);
+
+            var indexr = new GitIndex(db);
+            indexr.Read();
+            GitIndex.Entry[] membersr = indexr.Members;
+            Assert.AreEqual(3, membersr.Length);
+            Assert.AreEqual("a.b", membersr[0].Name);
+            Assert.AreEqual("a/b", membersr[1].Name);
+            Assert.AreEqual("a:b", membersr[2].Name);
+            Assert.AreEqual(3, membersr.Length);
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, System(trash, "git status"));
+            }
+        }
+
+        [Test]
+        public void testReadTree2()
+        {
+            // Prepare a larger tree to test some odd cases in tree writing
+            var index = new GitIndex(db);
+            FileInfo f1 = writeTrashFile("a/a/a/a", "data:a/a/a/a");
+            FileInfo f2 = writeTrashFile("a/c/c", "data:a/c/c");
+            FileInfo f3 = writeTrashFile("a/b", "data:a/b");
+            FileInfo f4 = writeTrashFile("a:b", "data:a:b");
+            FileInfo f5 = writeTrashFile("a/d", "data:a/d");
+            FileInfo f6 = writeTrashFile("a.b", "data:a.b");
+            index.add(trash, f1);
+            index.add(trash, f2);
+            index.add(trash, f3);
+            index.add(trash, f4);
+            index.add(trash, f5);
+            index.add(trash, f6);
+            index.write();
+            ObjectId id = index.writeTree();
+            Console.WriteLine("wrote id " + id);
+            Assert.AreEqual("ba78e065e2c261d4f7b8f42107588051e87e18e9", id.Name);
+            var index2 = new GitIndex(db);
+
+            index2.ReadTree(db.MapTree(ObjectId.FromString("ba78e065e2c261d4f7b8f42107588051e87e18e9")));
+            GitIndex.Entry[] members = index2.Members;
+            Assert.AreEqual(6, members.Length);
+            Assert.AreEqual("a.b", members[0].Name);
+            Assert.AreEqual("a/a/a/a", members[1].Name);
+            Assert.AreEqual("a/b", members[2].Name);
+            Assert.AreEqual("a/c/c", members[3].Name);
+            Assert.AreEqual("a/d", members[4].Name);
+            Assert.AreEqual("a:b", members[5].Name);
+
+            // reread and test
+            var indexr = new GitIndex(db);
+            indexr.Read();
+            GitIndex.Entry[] membersr = indexr.Members;
+            Assert.AreEqual(6, membersr.Length);
+            Assert.AreEqual("a.b", membersr[0].Name);
+            Assert.AreEqual("a/a/a/a", membersr[1].Name);
+            Assert.AreEqual("a/b", membersr[2].Name);
+            Assert.AreEqual("a/c/c", membersr[3].Name);
+            Assert.AreEqual("a/d", membersr[4].Name);
+            Assert.AreEqual("a:b", membersr[5].Name);
+        }
+
+        [Test]
+        public void testDelete()
+        {
+            var index = new GitIndex(db);
+            writeTrashFile("a/b", "data:a/b");
+            writeTrashFile("a:b", "data:a:b");
+            writeTrashFile("a.b", "data:a.b");
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
+            index.write();
+            index.writeTree();
+            index.remove(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
+            index.write();
+            Assert.AreEqual("a.b", index.Members[0].Name);
+            Assert.AreEqual("a/b", index.Members[1].Name);
+
+            var indexr = new GitIndex(db);
+            indexr.Read();
+            Assert.AreEqual("a.b", indexr.Members[0].Name);
+            Assert.AreEqual("a/b", indexr.Members[1].Name);
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, System(trash, "git status"));
+            }
+        }
+
+        [Test]
+        public void testCheckout()
+        {
+            // Prepare tree, remote it and checkout
+            var index = new GitIndex(db);
+            FileInfo aslashb = writeTrashFile("a/b", "data:a/b");
+            FileInfo acolonb = writeTrashFile("a:b", "data:a:b");
+            FileInfo adotb = writeTrashFile("a.b", "data:a.b");
+            index.add(trash, aslashb);
+            index.add(trash, acolonb);
+            index.add(trash, adotb);
+            index.write();
+            index.writeTree();
+            Delete(aslashb);
+            Delete(acolonb);
+            Delete(adotb);
+            Delete(Directory.GetParent(aslashb.FullName));
+
+            var index2 = new GitIndex(db);
+            Assert.AreEqual(0, index2.Members.Length);
+
+            index2.ReadTree(db.MapTree(ObjectId.FromString("c696abc3ab8e091c665f49d00eb8919690b3aec3")));
+
+            index2.checkout(trash);
+            Assert.AreEqual("data:a/b", Content(aslashb));
+            Assert.AreEqual("data:a:b", Content(acolonb));
+            Assert.AreEqual("data:a.b", Content(adotb));
+
+            if (CanRunGitStatus)
+            {
+                Assert.AreEqual(0, System(trash, "git status"));
+            }
+        }
 
 		[Test]
 		public void test030_executeBit_coreModeTrue()
@@ -265,249 +498,24 @@ namespace GitSharp.Tests
 			 * */
 		}
 
-		[Test]
-		public void testCheckout()
-		{
-			// Prepare tree, remote it and checkout
-			var index = new GitIndex(db);
-			FileInfo aslashb = writeTrashFile("a/b", "data:a/b");
-			FileInfo acolonb = writeTrashFile("a:b", "data:a:b");
-			FileInfo adotb = writeTrashFile("a.b", "data:a.b");
-			index.add(trash, aslashb);
-			index.add(trash, acolonb);
-			index.add(trash, adotb);
-			index.write();
-			index.writeTree();
-			Delete(aslashb);
-			Delete(acolonb);
-			Delete(adotb);
-			Delete(Directory.GetParent(aslashb.FullName));
 
-			var index2 = new GitIndex(db);
-			Assert.AreEqual(0, index2.Members.Length);
+        private static string Content(FileSystemInfo f)
+        {
+            using (var sr = new StreamReader(f.FullName))
+            {
+                return sr.ReadToEnd();
+            }
+        }
 
-			index2.ReadTree(db.MapTree(ObjectId.FromString("c696abc3ab8e091c665f49d00eb8919690b3aec3")));
+        private static void Delete(FileSystemInfo f)
+        {
+            f.Delete();
+        }
 
-			index2.checkout(trash);
-			Assert.AreEqual("data:a/b", Content(aslashb));
-			Assert.AreEqual("data:a:b", Content(acolonb));
-			Assert.AreEqual("data:a.b", Content(adotb));
 
-			if (CanRunGitStatus)
-			{
-				Assert.AreEqual(0, System(trash, "git status"));
-			}
-		}
 
-		[Test]
-		public void testCreateEmptyIndex()
-		{
-			var index = new GitIndex(db);
-			index.write();
-			// native git doesn't like an empty index
-			// Assert.AreEqual(0,System(trash,"git status"));
 
-			var indexr = new GitIndex(db);
-			indexr.Read();
-			Assert.AreEqual(0, indexr.Members.Length);
-		}
-
-		[Test]
-		public void testCreateSimpleSortTestIndex()
-		{
-			var index = new GitIndex(db);
-			writeTrashFile("a/b", "data:a/b");
-			writeTrashFile("a:b", "data:a:b");
-			writeTrashFile("a.b", "data:a.b");
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
-			index.write();
-
-			Assert.AreEqual("a/b", index.GetEntry("a/b").Name);
-			Assert.AreEqual("a:b", index.GetEntry("a:b").Name);
-			Assert.AreEqual("a.b", index.GetEntry("a.b").Name);
-			Assert.IsNull(index.GetEntry("a*b"));
-
-			// Repeat test for re-Read index
-			var indexr = new GitIndex(db);
-			indexr.Read();
-			Assert.AreEqual("a/b", indexr.GetEntry("a/b").Name);
-			Assert.AreEqual("a:b", indexr.GetEntry("a:b").Name);
-			Assert.AreEqual("a.b", indexr.GetEntry("a.b").Name);
-			Assert.IsNull(indexr.GetEntry("a*b"));
-
-			if (CanRunGitStatus)
-			{
-				Assert.AreEqual(0, System(trash, "git status"));
-			}
-		}
-
-		[Test]
-		public void testDelete()
-		{
-			var index = new GitIndex(db);
-			writeTrashFile("a/b", "data:a/b");
-			writeTrashFile("a:b", "data:a:b");
-			writeTrashFile("a.b", "data:a.b");
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
-			index.write();
-			index.writeTree();
-			index.remove(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
-			index.write();
-			Assert.AreEqual("a.b", index.Members[0].Name);
-			Assert.AreEqual("a/b", index.Members[1].Name);
-
-			var indexr = new GitIndex(db);
-			indexr.Read();
-			Assert.AreEqual("a.b", indexr.Members[0].Name);
-			Assert.AreEqual("a/b", indexr.Members[1].Name);
-
-			if (CanRunGitStatus)
-			{
-				Assert.AreEqual(0, System(trash, "git status"));
-			}
-		}
-
-		[Test]
-		public void testReadTree()
-		{
-			// Prepare tree
-			var index = new GitIndex(db);
-			writeTrashFile("a/b", "data:a/b");
-			writeTrashFile("a:b", "data:a:b");
-			writeTrashFile("a.b", "data:a.b");
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
-			index.write();
-
-			ObjectId id = index.writeTree();
-			Console.WriteLine("wrote id " + id);
-			Assert.AreEqual("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
-			var index2 = new GitIndex(db);
-
-			index2.ReadTree(db.MapTree(ObjectId.FromString("c696abc3ab8e091c665f49d00eb8919690b3aec3")));
-			GitIndex.Entry[] members = index2.Members;
-			Assert.AreEqual(3, members.Length);
-			Assert.AreEqual("a.b", members[0].Name);
-			Assert.AreEqual("a/b", members[1].Name);
-			Assert.AreEqual("a:b", members[2].Name);
-			Assert.AreEqual(3, members.Length);
-
-			var indexr = new GitIndex(db);
-			indexr.Read();
-			GitIndex.Entry[] membersr = indexr.Members;
-			Assert.AreEqual(3, membersr.Length);
-			Assert.AreEqual("a.b", membersr[0].Name);
-			Assert.AreEqual("a/b", membersr[1].Name);
-			Assert.AreEqual("a:b", membersr[2].Name);
-			Assert.AreEqual(3, membersr.Length);
-
-			if (CanRunGitStatus)
-			{
-				Assert.AreEqual(0, System(trash, "git status"));
-			}
-		}
-
-		[Test]
-		public void testReadTree2()
-		{
-			// Prepare a larger tree to test some odd cases in tree writing
-			var index = new GitIndex(db);
-			FileInfo f1 = writeTrashFile("a/a/a/a", "data:a/a/a/a");
-			FileInfo f2 = writeTrashFile("a/c/c", "data:a/c/c");
-			FileInfo f3 = writeTrashFile("a/b", "data:a/b");
-			FileInfo f4 = writeTrashFile("a:b", "data:a:b");
-			FileInfo f5 = writeTrashFile("a/d", "data:a/d");
-			FileInfo f6 = writeTrashFile("a.b", "data:a.b");
-			index.add(trash, f1);
-			index.add(trash, f2);
-			index.add(trash, f3);
-			index.add(trash, f4);
-			index.add(trash, f5);
-			index.add(trash, f6);
-			index.write();
-			ObjectId id = index.writeTree();
-			Console.WriteLine("wrote id " + id);
-			Assert.AreEqual("ba78e065e2c261d4f7b8f42107588051e87e18e9", id.Name);
-			var index2 = new GitIndex(db);
-
-			index2.ReadTree(db.MapTree(ObjectId.FromString("ba78e065e2c261d4f7b8f42107588051e87e18e9")));
-			GitIndex.Entry[] members = index2.Members;
-			Assert.AreEqual(6, members.Length);
-			Assert.AreEqual("a.b", members[0].Name);
-			Assert.AreEqual("a/a/a/a", members[1].Name);
-			Assert.AreEqual("a/b", members[2].Name);
-			Assert.AreEqual("a/c/c", members[3].Name);
-			Assert.AreEqual("a/d", members[4].Name);
-			Assert.AreEqual("a:b", members[5].Name);
-
-			// reread and test
-			var indexr = new GitIndex(db);
-			indexr.Read();
-			GitIndex.Entry[] membersr = indexr.Members;
-			Assert.AreEqual(6, membersr.Length);
-			Assert.AreEqual("a.b", membersr[0].Name);
-			Assert.AreEqual("a/a/a/a", membersr[1].Name);
-			Assert.AreEqual("a/b", membersr[2].Name);
-			Assert.AreEqual("a/c/c", membersr[3].Name);
-			Assert.AreEqual("a/d", membersr[4].Name);
-			Assert.AreEqual("a:b", membersr[5].Name);
-		}
-
-		[Test]
-		public void testReadWithNoIndex()
-		{
-			var index = new GitIndex(db);
-			index.Read();
-			Assert.AreEqual(0, index.Members.Length);
-		}
-
-		[Test]
-		public void testUpdateSimpleSortTestIndex()
-		{
-			var index = new GitIndex(db);
-			writeTrashFile("a/b", "data:a/b");
-			writeTrashFile("a:b", "data:a:b");
-			writeTrashFile("a.b", "data:a.b");
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
-			writeTrashFile("a/b", "data:a/b modified");
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-			index.write();
-
-			if (CanRunGitStatus)
-			{
-				Assert.AreEqual(0, System(trash, "git status"));
-			}
-		}
-
-		[Test]
-		public void testWriteTree()
-		{
-			var index = new GitIndex(db);
-			writeTrashFile("a/b", "data:a/b");
-			writeTrashFile("a:b", "data:a:b");
-			writeTrashFile("a.b", "data:a.b");
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a:b")));
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a.b")));
-			index.write();
-
-			ObjectId id = index.writeTree();
-			Assert.AreEqual("c696abc3ab8e091c665f49d00eb8919690b3aec3", id.Name);
-
-			writeTrashFile("a/b", "data:a/b");
-			index.add(trash, new FileInfo(Path.Combine(trash.FullName, "a/b")));
-
-			if (CanRunGitStatus)
-			{
-				Assert.AreEqual(0, System(trash, "git status"));
-			}
-		}
+		
+		
 	}
 }

@@ -122,47 +122,6 @@ namespace GitSharp.Tests
 			}
 
 			return exitCode;
-
-			/*
-					final Process process = Runtime.getRuntime().exec(cmd, null, dir);
-					new Thread() {
-						public void run() {
-							try {
-								InputStream s = process.getErrorStream();
-								for (int c = s.Read(); c != -1; c = s.Read()) {
-									System.err.print((char) c);
-								}
-								s.close();
-							} catch (IOException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-						}
-					}.start();
-
-					final Thread t2 = new Thread() {
-						public void run() {
-							synchronized (this) {
-								try {
-									InputStream e = process.getInputStream();
-									for (int c = e.Read(); c != -1; c = e.Read()) {
-										System.out.print((char) c);
-									}
-									e.close();
-								} catch (IOException e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
-								}
-							}
-						}
-					};
-					t2.start();
-					process.getOutputStream().close();
-					int ret = process.waitFor();
-					synchronized (t2) {
-						return ret;
-					}
-			 */
 		}
 
 		[Test]

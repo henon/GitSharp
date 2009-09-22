@@ -66,7 +66,7 @@
     <Compile Include="EncodingTests.cs" />
     <Compile Include="FnMatch\FileNameMatcherTest.cs" />
     <Compile Include="IndexDiffTest.cs" />
-    <Compile Include="IndexTests.cs" />
+    <Compile Include="T0007_Index.cs" />
     <Compile Include="IndexTreeWalkerTest.cs" />
     <Compile Include="Merge\CherryPickTest.cs" />
     <Compile Include="Merge\SimpleMergeTest.cs" />
@@ -100,7 +100,7 @@
     <Compile Include="PackIndexV1Tests.cs" />
     <Compile Include="PackIndexV2Tests.cs" />
     <Compile Include="T0004_PackReader.cs" />
-    <Compile Include="ParseRefTests.cs" />
+    <Compile Include="T0008_testparserev.cs" />
     <Compile Include="RevWalk\AlwaysEmptyRevQueueTest.cs" />
     <Compile Include="RevWalk\DateRevQueueTest.cs" />
     <Compile Include="RevWalk\FIFORevQueueTest.cs" />

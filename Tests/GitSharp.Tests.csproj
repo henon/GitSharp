@@ -96,6 +96,7 @@
     <Compile Include="TreeIteratorLeafOnlyTest.cs" />
     <Compile Include="TreeIteratorPostOrderTest.cs" />
     <Compile Include="TreeIteratorPreOrderTest.cs" />
+    <Compile Include="MockSystemReader.cs" />
     <Compile Include="Util\NBTests.cs" />
     <Compile Include="PackIndexV1Tests.cs" />
     <Compile Include="PackIndexV2Tests.cs" />
@@ -156,7 +157,7 @@
     <Compile Include="PackIndexTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Crc32Tests.cs" />
-    <Compile Include="Util\RepositoryTestCase.cs" />
+    <Compile Include="RepositoryTestCase.cs" />
     <Compile Include="Patch\EditListTest.cs" />
     <Compile Include="AssertHelper.cs" />
   </ItemGroup>

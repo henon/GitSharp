@@ -69,8 +69,6 @@ namespace GitSharp.Tests
         /// Unit test can control the returned values by manipulating
         /// <see cref="FakeSystemReader.Values"/>
         /// </summary>
-        private static readonly FakeSystemReader SystemReader = new FakeSystemReader();
-
         private int _testcount;
         private readonly List<Repository> _repositoriesToClose;
 
@@ -85,7 +83,6 @@ namespace GitSharp.Tests
 
         static RepositoryTestCase()
         {
-            GitSharpSystemReader.SetInstance(SystemReader);
             Microsoft.Win32.SystemEvents.SessionEnded += (o, args) => // cleanup
                                                          recursiveDelete(new DirectoryInfo(trashParent.FullName), false, null, false);
         }
@@ -128,7 +125,10 @@ namespace GitSharp.Tests
             var gitConfigFile = new FileInfo(trash_git + "/usergitconfig").FullName;
             var gitConfig = new RepositoryConfig(null, new FileInfo(gitConfigFile));
 
-            SystemReader.setUserGitConfig(gitConfig);
+            var mockSystemReader = new MockSystemReader();
+            mockSystemReader.userGitConfig = new FileBasedConfig(
+                new FileInfo(Path.Combine(trash_git.FullName, "usergitconfig")));
+            SystemReader.setInstance(mockSystemReader);
 
             db = new Repository(trash_git);
             db.Create();
@@ -151,14 +151,6 @@ namespace GitSharp.Tests
             }
 
             new FileInfo("Resources/packed-refs").CopyTo(trash_git.FullName + "/packed-refs", true);
-
-            // Read fake user configuration values
-            SystemReader.Values.Clear();
-            SystemReader.Values[Constants.OS_USER_NAME_KEY] = Constants.OS_USER_NAME_KEY;
-            SystemReader.Values[Constants.GIT_AUTHOR_NAME_KEY] = Constants.GIT_AUTHOR_NAME_KEY;
-            SystemReader.Values[Constants.GIT_AUTHOR_EMAIL_KEY] = Constants.GIT_AUTHOR_EMAIL_KEY;
-            SystemReader.Values[Constants.GIT_COMMITTER_NAME_KEY] = Constants.GIT_COMMITTER_NAME_KEY;
-            SystemReader.Values[Constants.GIT_COMMITTER_EMAIL_KEY] = Constants.GIT_COMMITTER_EMAIL_KEY;
         }
 
         [TearDown]
@@ -360,49 +352,6 @@ namespace GitSharp.Tests
             File.WriteAllBytes(logfile.FullName, data);
         }
 
-        #region Nested Types
-
-        internal class FakeSystemReader : ISystemReader
-        {
-            private RepositoryConfig _userGitConfig;
-
-            public FakeSystemReader()
-            {
-                Values = new Dictionary<string, string>();
-            }
-
-            public Dictionary<string, string> Values { get; private set; }
-
-            #region Implementation of ISystemReader
-
-            public string getHostname()
-            {
-                return Dns.GetHostName();
-            }
-
-            public string getenv(string variable)
-            {
-                return Values[variable];
-            }
-
-            public string getProperty(string key)
-            {
-                return Values[key];
-            }
-
-            public RepositoryConfig openUserConfig()
-            {
-                return _userGitConfig;
-            }
-
-            #endregion
-
-            public void setUserGitConfig(RepositoryConfig userGitConfig)
-            {
-                _userGitConfig = userGitConfig;
-            }
-        }
-
-        #endregion
+ 
     }
 }

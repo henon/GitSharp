@@ -5,7 +5,7 @@ namespace GitSharp.Tests
 {
     public class MockSystemReader : SystemReader
     {
-        readonly IDictionary<String, String> values = new Dictionary<String, String>();
+        public readonly IDictionary<String, String> values = new Dictionary<String, String>();
 
         public FileBasedConfig userGitConfig;
 

@@ -41,16 +41,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GitSharp.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
-    
     [TestFixture]
     public class RepositoryConfigTest
     {
         [Test]
-        public void ReadBareKey()
+        public void test001_ReadBareKey()
         {
             Config c = parse("[foo]\nbar\n");
             Assert.AreEqual(true, c.getBoolean("foo", null, "bar", false));
@@ -58,7 +58,7 @@ namespace GitSharp.Tests
         }
 
         [Test]
-        public void ReadWithSubsection()
+        public void test002_ReadWithSubsection()
         {
             Config c = parse("[foo \"zip\"]\nbar\n[foo \"zap\"]\nbar=false\nn=3\n");
             Assert.AreEqual(true, c.getBoolean("foo", "zip", "bar", false));
@@ -70,7 +70,7 @@ namespace GitSharp.Tests
         }
 
         [Test]
-        public void PutRemote()
+        public void test003_PutRemote()
         {
             Config c = new Config();
             c.setString("sec", "ext", "name", "value");
@@ -80,7 +80,7 @@ namespace GitSharp.Tests
         }
 
         [Test]
-        public void PutGetSimple()
+        public void test004_PutGetSimple()
         {
             Config c = new Config();
             c.setString("my", null, "somename", "false");
@@ -89,7 +89,7 @@ namespace GitSharp.Tests
         }
 
         [Test]
-        public void PutGetStringList()
+        public void test005_PutGetStringList()
         {
             Config c = new Config();
             List<string> values = new List<string>();
@@ -106,7 +106,7 @@ namespace GitSharp.Tests
         }
 
         [Test]
-        public void ReadCaseInsensitive()
+        public void test006_readCaseInsensitive()
         {
             Config c = parse("[Foo]\nBar\n");
             Assert.AreEqual(true, c.getBoolean("foo", null, "bar", false));
@@ -114,7 +114,69 @@ namespace GitSharp.Tests
         }
 
         [Test]
-        public void ReadBooleanTrueFalse1()
+        public void test007_readUserConfig()
+        {
+            MockSystemReader mockSystemReader = new MockSystemReader();
+            SystemReader.setInstance(mockSystemReader);
+            string hostname = mockSystemReader.getHostname();
+            Config userGitConfig = mockSystemReader.userGitConfig;
+            Config localConfig = new Config(userGitConfig);
+            mockSystemReader.values.Clear();
+
+            string authorName;
+            string authorEmail;
+
+            // no values defined nowhere
+            authorName = localConfig.get(UserConfig.KEY).getAuthorName();
+            authorEmail = localConfig.get(UserConfig.KEY).getAuthorEmail();
+            Assert.AreEqual(Constants.UNKNOWN_USER_DEFAULT, authorName);
+            Assert.AreEqual(Constants.UNKNOWN_USER_DEFAULT + "@" + hostname, authorEmail);
+
+            // the system user name is defined
+            mockSystemReader.values.put(Constants.OS_USER_NAME_KEY, "os user name");
+            localConfig.uncache(UserConfig.KEY);
+            authorName = localConfig.get(UserConfig.KEY).getAuthorName();
+            Assert.AreEqual("os user name", authorName);
+
+            if (hostname != null && hostname.Length != 0)
+            {
+                authorEmail = localConfig.get(UserConfig.KEY).getAuthorEmail();
+                Assert.AreEqual("os user name@" + hostname, authorEmail);
+            }
+
+            // the git environment variables are defined
+            mockSystemReader.values.put(Constants.GIT_AUTHOR_NAME_KEY, "git author name");
+            mockSystemReader.values.put(Constants.GIT_AUTHOR_EMAIL_KEY, "author@email");
+            localConfig.uncache(UserConfig.KEY);
+            authorName = localConfig.get(UserConfig.KEY).getAuthorName();
+            authorEmail = localConfig.get(UserConfig.KEY).getAuthorEmail();
+            Assert.AreEqual("git author name", authorName);
+            Assert.AreEqual("author@email", authorEmail);
+
+            // the values are defined in the global configuration
+            userGitConfig.setString("user", null, "name", "global username");
+            userGitConfig.setString("user", null, "email", "author@globalemail");
+            authorName = localConfig.get(UserConfig.KEY).getAuthorName();
+            authorEmail = localConfig.get(UserConfig.KEY).getAuthorEmail();
+            Assert.AreEqual("global username", authorName);
+            Assert.AreEqual("author@globalemail", authorEmail);
+
+            // the values are defined in the local configuration
+            localConfig.setString("user", null, "name", "local username");
+            localConfig.setString("user", null, "email", "author@localemail");
+            authorName = localConfig.get(UserConfig.KEY).getAuthorName();
+            authorEmail = localConfig.get(UserConfig.KEY).getAuthorEmail();
+            Assert.AreEqual("local username", authorName);
+            Assert.AreEqual("author@localemail", authorEmail);
+
+            authorName = localConfig.get(UserConfig.KEY).getCommitterName();
+            authorEmail = localConfig.get(UserConfig.KEY).getCommitterEmail();
+            Assert.AreEqual("local username", authorName);
+            Assert.AreEqual("author@localemail", authorEmail);
+        }
+
+        [Test]
+        public void testReadBoolean_TrueFalse1()
         {
             Config c = parse("[s]\na = true\nb = false\n");
             Assert.AreEqual("true", c.getString("s", null, "a"));
@@ -125,7 +187,62 @@ namespace GitSharp.Tests
         }
 
         [Test]
-        public void ReadLong()
+        public void testReadBoolean_TrueFalse2()
+        {
+            Config c = parse("[s]\na = TrUe\nb = fAlSe\n");
+            Assert.AreEqual("TrUe", c.getString("s", null, "a"));
+            Assert.AreEqual("fAlSe", c.getString("s", null, "b"));
+
+            Assert.IsTrue(c.getBoolean("s", "a", false));
+            Assert.IsFalse(c.getBoolean("s", "b", true));
+        }
+
+        [Test]
+        public void testReadBoolean_YesNo1()
+        {
+            Config c = parse("[s]\na = yes\nb = no\n");
+            Assert.AreEqual("yes", c.getString("s", null, "a"));
+            Assert.AreEqual("no", c.getString("s", null, "b"));
+
+            Assert.IsTrue(c.getBoolean("s", "a", false));
+            Assert.IsFalse(c.getBoolean("s", "b", true));
+        }
+
+        [Test]
+        public void testReadBoolean_YesNo2()
+        {
+            Config c = parse("[s]\na = yEs\nb = NO\n");
+            Assert.AreEqual("yEs", c.getString("s", null, "a"));
+            Assert.AreEqual("NO", c.getString("s", null, "b"));
+
+            Assert.IsTrue(c.getBoolean("s", "a", false));
+            Assert.IsFalse(c.getBoolean("s", "b", true));
+        }
+
+        [Test]
+        public void testReadBoolean_OnOff1()
+        {
+            Config c = parse("[s]\na = on\nb = off\n");
+            Assert.AreEqual("on", c.getString("s", null, "a"));
+            Assert.AreEqual("off", c.getString("s", null, "b"));
+
+            Assert.IsTrue(c.getBoolean("s", "a", false));
+            Assert.IsFalse(c.getBoolean("s", "b", true));
+        }
+
+        [Test]
+        public void testReadBoolean_OnOff2()
+        {
+            Config c = parse("[s]\na = ON\nb = OFF\n");
+            Assert.AreEqual("ON", c.getString("s", null, "a"));
+            Assert.AreEqual("OFF", c.getString("s", null, "b"));
+
+            Assert.IsTrue(c.getBoolean("s", "a", false));
+            Assert.IsFalse(c.getBoolean("s", "b", true));
+        }
+
+        [Test]
+        public void testReadLong()
         {
             assertReadLong(1L);
             assertReadLong(-1L);
@@ -164,5 +281,4 @@ namespace GitSharp.Tests
             return c;
         }
     }
-
-}
+ }

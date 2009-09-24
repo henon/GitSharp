@@ -191,7 +191,7 @@ namespace GitSharp.Util
 
             var platform = (int)Environment.OSVersion.Platform;
 
-            if (platform == (int)PlatformID.Unix || platform == (int)PlatformID.MacOSX 
+            if (platform == (int)PlatformID.Unix || platform  == 6 /* (int)PlatformID.MacOSX */
                 || platform == 128) // [nulltoken] when can _this_ equals 128 ?
             {
                 userHomeFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);

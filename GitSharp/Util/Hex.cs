@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
  *
  * All rights reserved.
@@ -43,7 +43,7 @@ using System.Text;
 
 namespace GitSharp.Util
 {
-    public sealed class Hex
+    public static class Hex
     {
         private static readonly byte[] _hexCharToValue;
         private static char[] _valueToHexChar;
@@ -78,33 +78,7 @@ namespace GitSharp.Util
 
         private static int HexStringToUInt32(byte[] bs, int offset)
         {
-            int r = _hexCharToValue[bs[offset]];
-            r <<= Nibble; // push one nibble
-
-            r |= _hexCharToValue[bs[offset + 1]];
-            r <<= Nibble;
-
-            r |= _hexCharToValue[bs[offset + 2]];
-            r <<= Nibble;
-
-            r |= _hexCharToValue[bs[offset + 3]];
-            r <<= Nibble;
-
-            r |= _hexCharToValue[bs[offset + 4]];
-            r <<= Nibble;
-
-            r |= _hexCharToValue[bs[offset + 5]];
-            r <<= Nibble;
-
-            r |= _hexCharToValue[bs[offset + 6]];
-
-            int last = _hexCharToValue[bs[offset + 7]];
-            if (r < 0 || last < 0)
-            {
-            	throw new IndexOutOfRangeException();
-            }
-
-            return (r << Nibble) | last;
+            return RawParseUtils.parseHexInt32(bs,offset);
         }
         
         public static void FillHexByteArray(byte[] dest, int offset, int value)

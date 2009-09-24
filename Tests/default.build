@@ -21,6 +21,11 @@
           <include name="*" />
       </fileset>
     </copy>
+    <copy todir="${build.dir}/sample.git">
+      <fileset basedir="sample.git">
+          <include name="*" />
+      </fileset>
+    </copy>    
 		<assemblyfileset id="project.references">
 			<include name="../extern/nunit.framework.dll" />
 			<include name="../GitSharp/build/${nant.settings.currentframework}/${project.config}/*.dll" />

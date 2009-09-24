@@ -275,45 +275,123 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Diff\Resources\E.patch" />
-    <None Include="Diff\Resources\E_PostImage" />
-    <None Include="Diff\Resources\E_PreImage" />
-    <None Include="Diff\Resources\testContext0.out" />
-    <None Include="Diff\Resources\testContext1.out" />
-    <None Include="Diff\Resources\testContext10.out" />
-    <None Include="Diff\Resources\testContext100.out" />
-    <None Include="Diff\Resources\testContext3.out" />
-    <None Include="Diff\Resources\testContext5.out" />
-    <None Include="Diff\Resources\X.patch" />
-    <None Include="Diff\Resources\X_PostImage" />
-    <None Include="Diff\Resources\X_PreImage" />
-    <None Include="Diff\Resources\Y.patch" />
-    <None Include="Diff\Resources\Y_PostImage" />
-    <None Include="Diff\Resources\Y_PreImage" />
-    <None Include="Diff\Resources\Z.patch" />
-    <None Include="Diff\Resources\Z_PostImage" />
-    <None Include="Diff\Resources\Z_PreImage" />
-    <None Include="Patch\Resources\testEditList_Types.patch" />
-    <None Include="Patch\Resources\testError_BodyTooLong.patch" />
-    <None Include="Patch\Resources\testError_CcTruncatedOld.patch" />
-    <None Include="Patch\Resources\testError_DisconnectedHunk.patch" />
-    <None Include="Patch\Resources\testError_GarbageBetweenFiles.patch" />
-    <None Include="Patch\Resources\testError_GitBinaryNoForwardHunk.patch" />
-    <None Include="Patch\Resources\testError_TruncatedNew.patch" />
-    <None Include="Patch\Resources\testError_TruncatedOld.patch" />
-    <None Include="Patch\Resources\testGetText_BothISO88591.patch" />
-    <None Include="Patch\Resources\testGetText_Convert.patch" />
-    <None Include="Patch\Resources\testGetText_DiffCc.patch" />
-    <None Include="Patch\Resources\testGetText_NoBinary.patch" />
-    <None Include="Patch\Resources\testParse_AddNoNewline.patch" />
-    <None Include="Patch\Resources\testParse_CcDeleteFile.patch" />
-    <None Include="Patch\Resources\testParse_CcNewFile.patch" />
-    <None Include="Patch\Resources\testParse_ConfigCaseInsensitive.patch" />
-    <None Include="Patch\Resources\testParse_FixNoNewline.patch" />
-    <None Include="Patch\Resources\testParse_GitBinaryDelta.patch" />
-    <None Include="Patch\Resources\testParse_GitBinaryLiteral.patch" />
-    <None Include="Patch\Resources\testParse_NoBinary.patch" />
-    <None Include="Patch\Resources\testParse_OneFileCc.patch" />
+    <None Include="Diff\Resources\E.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\E_PostImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\E_PreImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext0.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext1.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext10.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext100.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext3.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext5.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\X.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\X_PostImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\X_PreImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Y.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Y_PostImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Y_PreImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Z.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Z_PostImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Z_PreImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testEditList_Types.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_BodyTooLong.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_CcTruncatedOld.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_DisconnectedHunk.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_GarbageBetweenFiles.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_GitBinaryNoForwardHunk.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_TruncatedNew.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_TruncatedOld.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testGetText_BothISO88591.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testGetText_Convert.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testGetText_DiffCc.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testGetText_NoBinary.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_AddNoNewline.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_CcDeleteFile.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_CcNewFile.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_ConfigCaseInsensitive.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_FixNoNewline.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_GitBinaryDelta.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_GitBinaryLiteral.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_NoBinary.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_OneFileCc.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\create-second-pack">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

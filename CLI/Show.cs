@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,14 +37,74 @@
  */
 
 using System;
+using System.Collections.Generic;
+using NDesk.Options;
 
 namespace GitSharp.CLI
 {
     [Command(complete = false, common = true, usage = "Show various types of objects")]
     class Show : TextBuiltin
     {
+
+        private static Boolean isHelp = false;
+
+#if ported
+        private static string prettyFormat = "";
+        private static string abbrevCommit = "";
+        private static Boolean isOneLine = false;
+        private static string encoding = "";
+#endif
+
         override public void Run(String[] args)
         {
+
+            options = new CmdParserOptionSet()
+            {
+                { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
+#if ported
+                { "pretty|format", "Pretty print the contents of the commit logs in a specified {format}", (string v) => prettyFormat = v},
+                { "abbrev-commit", "Show only a commit object's partial name", (string v) => abbrevCommit = v},
+                { "oneline", "Shorthand for --pretty=online and --abbrev-commit together", v=>{isOneLine = true;}},
+                { "encoding", "Display the commit log message(s) using the specified {encoding}", (string v) => encoding = v},
+#endif
+            };
+
+            try
+            {
+                List<String> arguments = ParseOptions(args);
+                if (arguments.Count > 0)
+                {
+                    DoShow(arguments);
+                }
+                else if (args.Length <= 0)
+                {
+                    //Do show with preset arguments
+                    DoShow(arguments);
+                }
+                else
+                {
+                    OfflineHelp();
+                }
+            } catch (OptionException e) {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        private static void OfflineHelp()
+        {
+            if (!isHelp)
+            {
+                isHelp = true;
+                Console.WriteLine("usage: git show [options] <object>...");
+               Console.WriteLine();
+                options.WriteOptionDescriptions(Console.Out);
+                Console.WriteLine();
+            }
+        }
+
+        private static void DoShow(List<String> args)
+        {
+            Console.WriteLine("This command still needs to be implemented.");
         }
     }
 }

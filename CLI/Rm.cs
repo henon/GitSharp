@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,14 +37,74 @@
  */
 
 using System;
+using System.Collections.Generic;
+using NDesk.Options;
 
 namespace GitSharp.CLI
 {
     [Command(complete = false, common = true, usage = "Remove files from the working tree and from the index")]
     class Rm : TextBuiltin
     {
+
+        private static Boolean isHelp = false;
+
+#if ported
+        private static Boolean isDryRun = false;
+        private static Boolean isForced = false;
+        private static Boolean isQuiet = false;
+        private static Boolean isCached = false;
+        private static Boolean allowRecursiveRemoval = false;
+        private static Boolean ignoreUnmatch = false;
+#endif
+
         override public void Run(String[] args)
         {
+
+            options = new CmdParserOptionSet()
+            {
+                { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
+#if ported
+                { "n|dry-run", "Dry run", v=> {isDryRun = true;}},
+                { "f|force", "Override the up-to-date check", v=>{isForced = true;}},
+                { "q|quiet", "Be quiet", v=>{isQuiet = true;}},
+                { "cached", "Only remove from the index", v=>{isCached = true;}},
+                { "r", "Allow recursive removal", v=>{allowRecursiveRemoval = true;}},
+                { "ignore-match", "Exit with a zero status even if nothing is matched", v=>{ignoreUnmatch = true;}},
+#endif
+            };
+
+            try
+            {
+                List<String> arguments = ParseOptions(args);
+                if (arguments.Count > 0)
+                {
+                    DoRm(arguments);
+                }
+                else
+                {
+                    OfflineHelp();
+                }
+            } catch (OptionException e) {
+                Console.WriteLine(e.Message);
+            }
         }
+
+        private static void OfflineHelp()
+        {
+            if (!isHelp)
+            {
+                isHelp = true;
+                Console.WriteLine("usage: git rm [options] [--] <file>...");
+               Console.WriteLine();
+                options.WriteOptionDescriptions(Console.Out);
+                Console.WriteLine();
+            }
+        }
+
+        private static void DoRm(List<String> args)
+        {
+            Console.WriteLine("This command still needs to be implemented.");
+        }
+
     }
 }

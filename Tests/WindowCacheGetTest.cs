@@ -102,7 +102,7 @@ namespace GitSharp.Tests
 			CheckLimits(cfg);
 		}
 
-    [Test, Ignore("Seems to be some threading issues, that makes the test hang")]
+    [Test]
     public void testCache_TooSmallLimit()
 		{
 			var cfg = new WindowCacheConfig { PackedGitWindowSize = 4096, PackedGitLimit = 4096 };

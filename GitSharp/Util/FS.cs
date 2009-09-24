@@ -187,16 +187,21 @@ namespace GitSharp.Util
          */
         private static DirectoryInfo userHomeImpl()
         {
-            throw new NotImplementedException();
-            //string home = AccessController
-            //        .doPrivileged(new PrivilegedAction<string>() {
-            //            public string run() {
-            //                return System.getProperty("user.home");
-            //            }
-            //        });
-            //if (home == null || home.Length() == 0)
-            //    return null;
-            //return new File(home).getAbsoluteFile();
+            string userHomeFolderPath;
+
+            var platform = (int)Environment.OSVersion.Platform;
+
+            if (platform == (int)PlatformID.Unix || platform == (int)PlatformID.MacOSX 
+                || platform == 128) // [nulltoken] when can _this_ equals 128 ?
+            {
+                userHomeFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            }
+            else
+            {
+                userHomeFolderPath = Environment.GetEnvironmentVariable("USERPROFILE");
+            }
+
+            return new DirectoryInfo(userHomeFolderPath);
         }
 
 

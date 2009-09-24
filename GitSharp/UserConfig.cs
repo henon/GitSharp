@@ -128,9 +128,9 @@ namespace GitSharp
             return email;
         }
 
-        private ISystemReader system()
+        private SystemReader system()
         {
-            return GitSharpSystemReader.Instance;
+            return SystemReader.getInstance();
         }
     }
 

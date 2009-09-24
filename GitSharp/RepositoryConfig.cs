@@ -50,7 +50,7 @@ namespace GitSharp
         public const string BRANCH_SECTION = "branch";
 
         public RepositoryConfig(Repository repo)
-            : this(GitSharpSystemReader.Instance.openUserConfig(), new FileInfo(Path.Combine(repo.Directory.FullName, "config")))
+            : this(SystemReader.getInstance().openUserConfig(), new FileInfo(Path.Combine(repo.Directory.FullName, "config")))
         {
             
         }

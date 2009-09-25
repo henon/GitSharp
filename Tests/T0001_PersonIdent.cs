@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -60,7 +60,7 @@ namespace GitSharp.Tests
         public void test001_NewIdent()
         {
             var p = new PersonIdent("A U Thor", "author@example.com", 1142878501L.UnixTimeToDateTime(),
-                                    TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+                                    TimeZoneInfo.FindSystemTimeZoneById("US/Eastern"));
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
             Assert.AreEqual(1142878501000L, p.When);

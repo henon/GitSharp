@@ -295,8 +295,6 @@ namespace GitSharp.Util
 			try 
 			{
 				string hex = Constants.CHARSET.GetString(bs).Substring(p,4);
-				if (hex.Length < 4)
-					throw new ArgumentException("Not a 16 bit Hex value");
 				
 				hex = hex.Substring(p);
 				return (int)UInt16.Parse(hex,System.Globalization.NumberStyles.HexNumber);
@@ -327,9 +325,6 @@ namespace GitSharp.Util
 			try 
 			{
 				string hex = Encoding.ASCII.GetString(bs).Substring(p,8);
-				
-				if (hex.Length < 8)
-					throw new ArgumentException("Not a 32 bit Hex value");
 				
 				return (int)UInt32.Parse(hex,System.Globalization.NumberStyles.HexNumber);
 			}

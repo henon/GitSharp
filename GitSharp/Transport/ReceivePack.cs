@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
@@ -515,18 +515,20 @@ namespace GitSharp.Transport
 
         private void CheckConnectivity()
         {
-            var ow = new ObjectWalk(db);
-            foreach (ReceiveCommand cmd in commands)
-            {
-                if (cmd.getResult() != ReceiveCommand.Result.NOT_ATTEMPTED) continue;
-                if (cmd.getType() == ReceiveCommand.Type.DELETE) continue;
-                ow.markStart(ow.parseAny(cmd.getNewId()));
-            }
-            foreach (Ref @ref in refs.Values)
-            {
-            	ow.markUninteresting(ow.parseAny(@ref.ObjectId));
-            }
-            ow.checkConnectivity();
+            using(var ow = new ObjectWalk(db))
+			{
+	            foreach (ReceiveCommand cmd in commands)
+	            {
+	                if (cmd.getResult() != ReceiveCommand.Result.NOT_ATTEMPTED) continue;
+	                if (cmd.getType() == ReceiveCommand.Type.DELETE) continue;
+	                ow.markStart(ow.parseAny(cmd.getNewId()));
+	            }
+	            foreach (Ref @ref in refs.Values)
+	            {
+	            	ow.markUninteresting(ow.parseAny(@ref.ObjectId));
+	            }
+	            ow.checkConnectivity();
+			}
         }
 
         private void ValidateCommands()

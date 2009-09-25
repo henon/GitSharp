@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  *
  * All rights reserved.
@@ -137,8 +137,10 @@ namespace GitSharp
 		public void preparePack<T>(IEnumerable<T> interestingObjects, IEnumerable<T> uninterestingObjects)
 			where T : ObjectId
 		{
-			ObjectWalk walker = SetUpWalker(interestingObjects, uninterestingObjects);
+			using (ObjectWalk walker = SetUpWalker(interestingObjects, uninterestingObjects))
+			{
 			FindObjectsToPack(walker);
+			}
 		}
 
 		public bool willInclude(AnyObjectId id)

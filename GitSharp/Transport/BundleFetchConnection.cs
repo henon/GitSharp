@@ -185,74 +185,76 @@ namespace GitSharp.Transport
             if (prereqs.isEmpty())
                 return;
 
-            RevWalk.RevWalk rw = new RevWalk.RevWalk(transport.Local);
-            RevFlag PREREQ = rw.newFlag("PREREQ");
-            RevFlag SEEN = rw.newFlag("SEEN");
-
-            List<ObjectId> missing = new List<ObjectId>();
-            List<RevObject> commits = new List<RevObject>();
-            foreach (ObjectId p in prereqs)
+            using(RevWalk.RevWalk rw = new RevWalk.RevWalk(transport.Local))
             {
-                try
-                {
-                    RevCommit c = rw.parseCommit(p);
-                    if (!c.has(PREREQ))
-                    {
-                        c.add(PREREQ);
-                        commits.Add(c);
-                    }
-                }
-                catch (MissingObjectException)
-                {
-                    missing.Add(p);
-                }
-                catch (IOException err)
-                {
-                    throw new TransportException(transport.Uri, "Cannot Read commit " + p.Name, err);
-                }
-            }
-
-            if (!missing.isEmpty())
-                throw new MissingBundlePrerequisiteException(transport.Uri, missing);
-
-            foreach (Ref r in transport.Local.getAllRefs().Values)
-            {
-                try
-                {
-                    rw.markStart(rw.parseCommit(r.ObjectId));
-                }
-                catch (IOException)
-                {
-                }
-            }
-
-            int remaining = commits.Count;
-            try
-            {
-                RevCommit c;
-                while ((c = rw.next()) != null)
-                {
-                    if (c.has(PREREQ))
-                    {
-                        c.add(SEEN);
-                        if (--remaining == 0)
-                            break;
-                    }
-                }
-            }
-            catch (IOException err)
-            {
-                throw new TransportException(transport.Uri, "Cannot Read object", err);
-            }
-
-            if (remaining > 0)
-            {
-                foreach (RevObject o in commits)
-                {
-                    if (!o.has(SEEN))
-                        missing.Add(o);
-                }
-                throw new MissingBundlePrerequisiteException(transport.Uri, missing);
+	            RevFlag PREREQ = rw.newFlag("PREREQ");
+	            RevFlag SEEN = rw.newFlag("SEEN");
+	
+	            List<ObjectId> missing = new List<ObjectId>();
+	            List<RevObject> commits = new List<RevObject>();
+	            foreach (ObjectId p in prereqs)
+	            {
+	                try
+	                {
+	                    RevCommit c = rw.parseCommit(p);
+	                    if (!c.has(PREREQ))
+	                    {
+	                        c.add(PREREQ);
+	                        commits.Add(c);
+	                    }
+	                }
+	                catch (MissingObjectException)
+	                {
+	                    missing.Add(p);
+	                }
+	                catch (IOException err)
+	                {
+	                    throw new TransportException(transport.Uri, "Cannot Read commit " + p.Name, err);
+	                }
+	            }
+	
+	            if (!missing.isEmpty())
+	                throw new MissingBundlePrerequisiteException(transport.Uri, missing);
+	
+	            foreach (Ref r in transport.Local.getAllRefs().Values)
+	            {
+	                try
+	                {
+	                    rw.markStart(rw.parseCommit(r.ObjectId));
+	                }
+	                catch (IOException)
+	                {
+	                }
+	            }
+	
+	            int remaining = commits.Count;
+	            try
+	            {
+	                RevCommit c;
+	                while ((c = rw.next()) != null)
+	                {
+	                    if (c.has(PREREQ))
+	                    {
+	                        c.add(SEEN);
+	                        if (--remaining == 0)
+	                            break;
+	                    }
+	                }
+	            }
+	            catch (IOException err)
+	            {
+	                throw new TransportException(transport.Uri, "Cannot Read object", err);
+	            }
+	
+	            if (remaining > 0)
+	            {
+	                foreach (RevObject o in commits)
+	                {
+	                    if (!o.has(SEEN))
+	                        missing.Add(o);
+	                }
+	                throw new MissingBundlePrerequisiteException(transport.Uri, missing);
+	            }
             }
         }
 

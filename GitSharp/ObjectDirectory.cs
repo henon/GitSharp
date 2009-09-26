@@ -472,7 +472,7 @@ namespace GitSharp
 				string line;
 				while ((line = br.ReadLine()) != null)
 				{
-					l.Add(new ObjectDirectory(FS.resolve(_objects, line)));
+					l.Add(new ObjectDirectory((DirectoryInfo)FS.resolve(_objects, line)));
 				}
 			}
 			finally

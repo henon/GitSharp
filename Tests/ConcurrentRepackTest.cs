@@ -228,13 +228,7 @@ namespace GitSharp.Tests
             long begin = list[0].Directory.LastAccessTime.Ticks;
             foreach (var fi in list)
             {
-                try
-                {
-                    fi.Delete();
-                }
-                catch (IOException)
-                {
-                }
+                fi.Delete();
                 Assert.IsFalse(File.Exists(fi.FullName), fi + " was not removed");
             }
 
@@ -245,14 +239,7 @@ namespace GitSharp.Tests
         {
             while (begin >= dir.LastAccessTime.Ticks)
             {
-                try
-                {
-                    Thread.Sleep(25);
-                }
-                catch (IOException)
-                {
-                    //
-                }
+                Thread.Sleep(25);
                 dir.LastAccessTime = DateTime.Now;
             }
         }

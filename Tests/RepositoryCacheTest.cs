@@ -53,9 +53,9 @@ namespace GitSharp.Tests
 			Assert.IsNotNull(parent);
 
             var other = new DirectoryInfo(Path.Combine(parent.FullName, "notagit"));
-			Assert.AreEqual(gitdir.FullName, RepositoryCache.FileKey.exact(gitdir).getFile().FullName);
-			Assert.AreEqual(parent.FullName, RepositoryCache.FileKey.exact(parent).getFile().FullName);
-			Assert.AreEqual(other.FullName, RepositoryCache.FileKey.exact(other).getFile().FullName);
+			Assert.AreEqual(gitdir, RepositoryCache.FileKey.exact(gitdir).getFile());
+			Assert.AreEqual(parent, RepositoryCache.FileKey.exact(parent).getFile());
+			Assert.AreEqual(other, RepositoryCache.FileKey.exact(other).getFile());
 
             Assert.AreEqual(gitdir, RepositoryCache.FileKey.lenient(gitdir).getFile());
             
@@ -107,15 +107,8 @@ namespace GitSharp.Tests
             recursiveDelete(gitdir);
             Assert.IsFalse(gitdir.Exists);
 
-			try
-			{
-                new RepositoryCache.FileKey(gitdir).open(true);
-                Assert.Fail("incorrectly opened a non existant repository");
-			}
-			catch (RepositoryNotFoundException e)
-			{
-                Assert.AreEqual("repository not found: " + gitdir, e.Message);
-            }
+            var e = AssertHelper.Throws<RepositoryNotFoundException>(() => new RepositoryCache.FileKey(gitdir).open(true));
+            Assert.AreEqual("repository not found: " + gitdir, e.Message);
 
             Repository o = new RepositoryCache.FileKey(gitdir).open(false);
             Assert.IsNotNull(o);

@@ -77,9 +77,13 @@ namespace GitSharp
             {
                 clear();
             }
+            catch (DirectoryNotFoundException)
+            {
+                clear();
+            }
             catch (IOException e)
             {
-                IOException e2 = new IOException("Cannot read " + getFile(), e);
+                var e2 = new IOException("Cannot read " + getFile(), e);
                 throw e2;
             }
             catch (ConfigInvalidException e)

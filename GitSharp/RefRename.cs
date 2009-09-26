@@ -147,7 +147,7 @@ namespace GitSharp
 			}
 			else
 			{
-				db.OnRefsChanged();
+				db.fireRefsMaybeChanged();
 			}
 
 			RefLogWriter.append(this, _newToUpdate.Name, "Branch: renamed "

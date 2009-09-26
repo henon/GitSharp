@@ -63,6 +63,7 @@
     <Compile Include="ByteArrayWindow.cs" />
     <Compile Include="ByteBufferWindow.cs" />
     <Compile Include="ByteWindow.cs" />
+    <Compile Include="RepositoryListener.cs" />
     <Compile Include="CompleteAttribute.cs" />
     <Compile Include="DeltaOfsPackedObjectLoader.cs" />
     <Compile Include="DeltaPackedObjectLoader.cs">

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  *
  * All rights reserved.
  *
@@ -35,34 +35,24 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Linq;
-using System.Reflection;
-
-namespace GitSharp.CLI.Nonstandard
+namespace GitSharp
 {
-    [Command(complete = true, common = true, usage = "Display the version of GitSharp")]
-    class Version : TextBuiltin
+    public interface RepositoryListener
     {
+        /**
+	 * Invoked when a ref changes
+	 *
+	 * @param e
+	 *            information about the changes.
+	 */
+        void refsChanged(RefsChangedEventArgs e);
 
-        override public void Run(String[] args) 
-        {
-            Assembly myAsm = Assembly.Load("git");
-            AssemblyName aName = myAsm.GetName();
-            System.Version ver = aName.Version;
-
-		    if (ver == null)
-			    throw die("Cannot read package information.");
-
-		    streamOut.Write("GitSharp version ");
-		    streamOut.Write(ver);
-            streamOut.WriteLine();
-            streamOut.Flush();
-	    }
-
-        private static void OfflineHelp()
-        {
-            Console.WriteLine("usage: git version");
-        }
+        /**
+         * Invoked when the index changes
+         *
+         * @param e
+         *            information about the changes.
+         */
+        void indexChanged(IndexChangedEventArgs e);
     }
 }

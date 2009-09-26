@@ -8,22 +8,22 @@
 	<target name="build" depends="common.init">
     <copy todir="${build.dir}/Resources">
       <fileset basedir="Resources">
-          <include name="*" />
+          <include name="**" />
       </fileset>
     </copy>
     <copy todir="${build.dir}/Diff/Resources">
       <fileset basedir="Diff/Resources">
-          <include name="*" />
+          <include name="**" />
       </fileset>
     </copy>
     <copy todir="${build.dir}/Patch/Resources">
       <fileset basedir="Patch/Resources">
-          <include name="*" />
+          <include name="**" />
       </fileset>
     </copy>
     <copy todir="${build.dir}/sample.git">
       <fileset basedir="sample.git">
-          <include name="*" />
+          <include name="**" />
       </fileset>
     </copy>    
 		<assemblyfileset id="project.references">

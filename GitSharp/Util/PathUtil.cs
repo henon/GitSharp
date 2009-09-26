@@ -75,22 +75,24 @@ namespace GitSharp.Util
         /// Delete file without complaining about readonly status
         /// </summary>
         /// <param name="path"></param>
-        public static void DeleteFile(this FileSystemInfo path)
+        public static bool DeleteFile(this FileSystemInfo path)
         {
             DeleteFile(path.FullName);
+            return true;
         }
 
         /// <summary>
         /// Delete file without complaining about readonly status
         /// </summary>
         /// <param name="path"></param>
-        public static void DeleteFile(string path)
+        public static bool DeleteFile(string path)
         {
             var file = new FileInfo(path);
-            if (!file.Exists) return;
+            if (!file.Exists) return false;
 
             file.IsReadOnly = false;
             file.Delete();
+            return true;
         }
     }
 }

@@ -62,9 +62,10 @@ namespace GitSharp
         private FileStream _os;
         private FileLock _fLck;
         private bool _haveLock;
+	    private string _lockFilePath;
 
 
-        public DateTime CommitLastModified { get; private set; }
+	    public DateTime CommitLastModified { get; private set; }
         public bool NeedStatInformation { get; set; }
 
 		/// <summary>
@@ -75,6 +76,8 @@ namespace GitSharp
         {
             _refFile = file;
             _lockFile = PathUtil.CombineFilePath(_refFile.Directory, _refFile.Name + ".lock");
+            _lockFilePath = _lockFile.FullName;
+        
         }
 
 		///	<summary> * Try to establish the lock.
@@ -88,7 +91,7 @@ namespace GitSharp
 		/// </exception>
         public bool Lock()
         {
-            _lockFile.Directory.Create();
+            _lockFile.Directory.Mkdirs();
             if (_lockFile.Exists)
             {
                 return false;
@@ -227,50 +230,32 @@ namespace GitSharp
             if (_haveLock)
             {
                 _haveLock = false;
-                _lockFile.Delete();
+                File.Delete(_lockFilePath);
             }
         }
 
-        public bool Commit()
-        {
-            if (_os != null)
-            {
-                Unlock();
-                throw new InvalidOperationException("Lock on " + _refFile + " not closed.");
-            }
+	    public bool Commit()
+	    {
+	        if (_os != null)
+	        {
+	            Unlock();
+	            throw new InvalidOperationException("Lock on " + _refFile + " not closed.");
+	        }
 
-            SaveStatInformation();
-            string lockFileName = _lockFile.FullName;
-            try
-            {
-                FileInfo copy = new FileInfo(_lockFile.FullName);
-                _lockFile.MoveTo(_refFile.FullName);
-                _lockFile = copy;
-                return true;
-            }
-            catch (Exception)
-            {
-                try
-                {
-                    if (_refFile.Exists) _refFile.Delete();
+	        SaveStatInformation();
 
-                    FileInfo copy = new FileInfo(_lockFile.FullName);
-                    _lockFile.MoveTo(_refFile.FullName);
-                    _lockFile = copy;
-                    return true;
-                }
-				catch (IOException)
-                {
-                }
-            }
-            finally
-            {
-              _lockFile = new FileInfo(lockFileName);
-            }
+	        if (_lockFile.RenameTo(_refFile.FullName))
+	        {
+	            return true;
+	        }
 
-            Unlock();
-            return false;
-        }
+            _refFile.Refresh();
+	        if (!_refFile.Exists || _refFile.DeleteFile())
+	            if (_lockFile.RenameTo(_refFile.FullName))
+	                return true;
+	        Unlock();
+	        return false;
+	    }
 
         public void Write(byte[] content)
         {

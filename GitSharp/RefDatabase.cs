@@ -74,7 +74,7 @@ namespace GitSharp
 
 		public Repository Repository { get; private set; }
 		public int LastRefModification { get; private set; }
-		public int LastNotifiedRefModification { get; private set; }
+		public int LastNotifiedRefModification { get; set; }
 
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void ClearCache()

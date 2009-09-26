@@ -60,7 +60,6 @@ namespace GitSharp.Tests
             Assert.AreEqual("true", c.getString("core", null, "filemode"));
             Assert.AreEqual("true", c.getString("cOrE", null, "fIlEModE"));
             Assert.IsNull(c.getString("notavalue", null, "reallyNotAValue"));
-            c.load();
         }
 
         [Test]
@@ -68,7 +67,6 @@ namespace GitSharp.Tests
         {
             RepositoryConfig c = db.Config;
             Assert.IsNotNull(c);
-            c.load(); //  (nulltoken] Not sure about this, which doesn't appear in original jgit code. Howver removing thi statement would make test004 and test005 performing the same tests... :-|
             Assert.AreEqual("0", c.getString("core", null, "repositoryformatversion"));
             Assert.AreEqual("0", c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
             Assert.AreEqual("true", c.getString("core", null, "filemode"));

@@ -45,6 +45,7 @@ using System.IO;
 using System.Threading;
 using GitSharp.Exceptions;
 using GitSharp.Util;
+using Tamir.SharpSsh.java.util;
 
 namespace GitSharp
 {
@@ -73,88 +74,73 @@ namespace GitSharp
 	/// </summary>
 	public class Repository
 	{
+        private int _useCnt = 1;
 		private readonly RefDatabase _refDb;
-		private readonly List<DirectoryInfo> _objectsDirs;
+	
 		private readonly ObjectDirectory _objectDatabase;
 
-		private int _useCnt;
 		private GitIndex _index;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Repository"/> class.
-		/// Assumes parent directory is the working directory.
-		/// </summary>
-		/// <param name="gitDirectory">The git directory.</param>
-		public Repository(DirectoryInfo gitDirectory)
-			: this(gitDirectory, gitDirectory.Parent)
-		{
-		}
+        private readonly List<DirectoryInfo> _objectsDirs;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Repository"/> class.
-		/// </summary>
-		/// <param name="gitDirectory">The git directory.</param>
-		/// <param name="workingDirectory">The working directory.</param>
-		private Repository(DirectoryInfo gitDirectory, DirectoryInfo workingDirectory)
-		{
-			_useCnt = 1;
-			_objectsDirs = new List<DirectoryInfo>();
+        private List<RepositoryListener> listeners = new List<RepositoryListener>(); //TODO: make thread safe
+        static private List<RepositoryListener> allListeners = new List<RepositoryListener>(); //TODO: make thread safe
 
-			Directory = gitDirectory;
-			WorkingDirectory = workingDirectory;
-			_objectDatabase = new ObjectDirectory(FS.resolve(gitDirectory, "objects"));
-			_objectsDirs = new List<DirectoryInfo>();
-			_objectsDirs = ReadObjectsDirs(Path.Combine(gitDirectory.FullName, "objects"), ref _objectsDirs);
-
-			Config = new RepositoryConfig(this);
-			_refDb = new RefDatabase(this);
-
-			bool isExisting = _objectsDirs[0].Exists;
-			if (isExisting)
+        /**
+         * Construct a representation of a Git repository.
+         * 
+         * @param d
+         *            GIT_DIR (the location of the repository metadata).
+         * @throws IOException
+         *             the repository appears to already exist but cannot be
+         *             accessed.
+         */
+		public  Repository(DirectoryInfo gitDirectory)
 			{
-				try
-				{
-					Config.load();
-				}
-				catch (ConfigInvalidException e1)
-				{
-					throw new IOException("Unknown repository format", e1);
-				}
+            Directory = gitDirectory;
+            _refDb = new RefDatabase(this);
+            _objectDatabase = new ObjectDirectory(new DirectoryInfo(FS.resolve(gitDirectory, "objects").FullName));
 
-				string repositoryFormatVersion = Config.getString("core", null, "repositoryFormatVersion");
+		    var userConfig = SystemReader.getInstance().openUserConfig();
 
-				if (!"0".Equals(repositoryFormatVersion))
-				{
-					throw new IOException("Unknown repository format \""
-										  + repositoryFormatVersion + "\"; expected \"0\".");
-				}
+		    try
+		    {
+                userConfig.load();
+		    }
+		    catch (ConfigInvalidException e1)
+		    {
+                throw new IOException("User config file "
+                    + userConfig.getFile().FullName + " invalid: "
+                    + e1, e1);
+		    }
+
+            Config = new RepositoryConfig(userConfig, (FileInfo)FS.resolve(gitDirectory, "config"));
+
+
+
+			WorkingDirectory = gitDirectory.Parent;
+
+
+            if (_objectDatabase.exists())
+            {
+                try
+                {
+                    Config.load();
+                }
+                catch (ConfigInvalidException e1)
+                {
+                    throw new IOException("Unknown repository format", e1);
+                }
+
+                string repositoryFormatVersion = Config.getString("core", null, "repositoryFormatVersion");
+
+                if (!"0".Equals(repositoryFormatVersion))
+                {
+                    throw new IOException("Unknown repository format \""
+                                          + repositoryFormatVersion + "\"; expected \"0\".");
+                }
+            }
 			}
-			else
-			{
-				Create();
-			}
-		}
-
-		public event EventHandler<RefsChangedEventArgs> RefsChanged;
-		public event EventHandler<IndexChangedEventArgs> IndexChanged;
-
-		internal void OnRefsChanged()
-		{
-			var handler = RefsChanged;
-			if (handler != null)
-			{
-				handler(this, new RefsChangedEventArgs(this));
-			}
-		}
-
-		internal void OnIndexChanged()
-		{
-			var handler = IndexChanged;
-			if (handler != null)
-			{
-				handler(this, new IndexChangedEventArgs(this));
-			}
-		}
 
 		/// <summary>
 		/// Create a new Git repository initializing the necessary files and
@@ -172,69 +158,35 @@ namespace GitSharp
 		/// <param name="bare">if true, a bare repository is created.</param>
 		public void Create(bool bare)
 		{
-			if (Directory.Exists)
+			if (Config.getFile().Exists)
 			{
-				throw new GitException("Unable to create repository. Directory already exists.");
+				throw new InvalidOperationException("Repository already exists : " + Directory.FullName);
 			}
 
-			Directory.Create();
-			_refDb.Create();
+		    Directory.Mkdirs();
+            _refDb.Create();
+            _objectDatabase.create();
 
-			_objectsDirs[0].Create();
-			new DirectoryInfo(Path.Combine(_objectsDirs[0].FullName, "pack")).Create();
-			new DirectoryInfo(Path.Combine(_objectsDirs[0].FullName, "info")).Create();
-			new DirectoryInfo(Path.Combine(Directory.FullName, "branches")).Create();
-			new DirectoryInfo(Path.Combine(Directory.FullName, "remote")).Create();
+            new DirectoryInfo(Path.Combine(Directory.FullName, "branches")).Mkdirs();
+            new DirectoryInfo(Path.Combine(Directory.FullName, "remote")).Mkdirs();
 
-			const string master = Constants.RefsHeads + Constants.Master;
+            const string master = Constants.RefsHeads + Constants.Master;
+            _refDb.Link(Constants.HEAD, master);
 
-			_refDb.Link(Constants.HEAD, master);
+            Config.setInt("core", null, "repositoryformatversion", 0);
+            Config.setBoolean("core", null, "filemode", true);
 
-			Config.setInt("core", null, "repositoryformatversion", 0);
-			Config.setBoolean("core", null, "filemode", true);
+            if (bare)
+            {
+                Config.setBoolean("core", null, "bare", true);
+            }
 
-			if (bare)
-			{
-				Config.setBoolean("core", null, "bare", true);
-			}
-
-			Config.save();
-		}
-
-		/// <summary>
-		///
-		/// </summary>
-		/// <param name="objectId"></param>
-		/// <returns>
-		/// true if the specified object is stored in this repo or any of the
-		/// known shared repositories.
-		/// </returns>
-		public bool HasObject(AnyObjectId objectId)
-		{
-			return _objectDatabase.hasObject(objectId);
-		}
-
-		private static List<DirectoryInfo> ReadObjectsDirs(string objectsDir, ref List<DirectoryInfo> ret)
-		{
-			ret.Add(new DirectoryInfo(objectsDir));
-			var altFile = new FileInfo(Path.Combine(Path.Combine(objectsDir, "info"), "alternates"));
-			if (altFile.Exists)
-			{
-				using (StreamReader reader = altFile.OpenText())
-				{
-					for (string alt = reader.ReadLine(); alt != null; alt = reader.ReadLine())
-					{
-						ReadObjectsDirs(Path.Combine(objectsDir, alt), ref ret);
-					}
-				}
-			}
-
-			return ret;
+            Config.save();
 		}
 
 		public DirectoryInfo ObjectsDirectory
 		{
-			get { return _objectsDirs[0]; }
+			get { return _objectDatabase.getDirectory(); }
 		}
 
 		public DirectoryInfo Directory { get; private set; }
@@ -252,20 +204,21 @@ namespace GitSharp
 		/// <returns>Suggested file name</returns>
 		public FileInfo ToFile(AnyObjectId objectId)
 		{
-			string n = objectId.ToString();
-			string d = n.Slice(0, 2);
-			string f = n.Substring(2);
-			for (int i = 0; i < _objectsDirs.Count; ++i)
-			{
-				var ret = new FileInfo(PathUtil.Combine(_objectsDirs[i].FullName, d, f));
-				if (ret.Exists)
-				{
-					return ret;
-				}
-			}
-
-			return new FileInfo(PathUtil.Combine(_objectsDirs[0].FullName, d, f));
+		    return _objectDatabase.fileFor(objectId);
 		}
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="objectId"></param>
+        /// <returns>
+        /// true if the specified object is stored in this repo or any of the
+        /// known shared repositories.
+        /// </returns>
+        public bool HasObject(AnyObjectId objectId)
+        {
+            return _objectDatabase.hasObject(objectId);
+        }
 
 		/// <summary>
 		///
@@ -384,7 +337,10 @@ namespace GitSharp
 		public Commit MapCommit(ObjectId id)
 		{
 			ObjectLoader or = OpenObject(id);
-			if (or == null) return null;
+			if (or == null)
+			{
+			    return null;
+			}
 
 			byte[] raw = or.Bytes;
 			if (Constants.OBJ_COMMIT == or.Type)
@@ -457,7 +413,10 @@ namespace GitSharp
 		public Tree MapTree(ObjectId id)
 		{
 			ObjectLoader or = OpenObject(id);
-			if (or == null) return null;
+			if (or == null)
+			{
+			    return null;
+			}
 
 			byte[] raw = or.Bytes;
 			switch (((ObjectType)or.Type))
@@ -472,15 +431,16 @@ namespace GitSharp
 			throw new IncorrectObjectTypeException(id, ObjectType.Tree);
 		}
 
+        private Tree MakeTree(ObjectId id, byte[] raw)
+        {
+            return new Tree(this, id, raw);
+        }
+
 		private Tag MakeTag(ObjectId id, string refName, byte[] raw)
 		{
 			return new Tag(this, id, refName, raw);
 		}
 
-		private Tree MakeTree(ObjectId id, byte[] raw)
-		{
-			return new Tree(this, id, raw);
-		}
 
 		/// <summary>
 		/// Access a tag by symbolic name.
@@ -630,13 +590,25 @@ namespace GitSharp
 									var parentnum = new string(revision.ToCharArray(i + 1, j - i - 1));
 
 									int pnum;
-									if (int.TryParse(parentnum, out pnum) && pnum != 0)
+
+                                    try
+                                    {
+                                        pnum = Convert.ToInt32(parentnum);
+                                    }
+                                    catch(FormatException)
+                                    {
+                                        throw new RevisionSyntaxException(revision, "Invalid commit parent number");
+                                    }
+									if (pnum != 0)
 									{
-										ObjectId[] parents = ((Commit)oref).ParentIds;
-										refId = pnum > parents.Length ? null : parents[pnum - 1];
+									    ObjectId[] parents = ((Commit)oref).ParentIds;
+									    if (pnum > parents.Length) 
+                                            refId = null;
+									    else 
+                                            refId = parents[pnum - 1];
 									}
 
-									i = j - 1;
+							        i = j - 1;
 									break;
 
 								case '{':
@@ -979,6 +951,100 @@ namespace GitSharp
  			return relName;
 		}
 
+        /**
+	     * Register a {@link RepositoryListener} which will be notified
+	     * when ref changes are detected.
+	     *
+	     * @param l
+	     */	    public void addRepositoryChangedListener(RepositoryListener l)
+	    {
+	        listeners.Add(l);
+	    }
+
+	    /**
+	     * Remove a registered {@link RepositoryListener}
+	     * @param l
+	     */	    public void removeRepositoryChangedListener(RepositoryListener l)
+	    {
+	        listeners.Remove(l);
+	    }
+
+	    /**
+	     * Register a global {@link RepositoryListener} which will be notified
+	     * when a ref changes in any repository are detected.
+	     *
+	     * @param l
+	     */	    public static void addAnyRepositoryChangedListener(RepositoryListener l)
+	    {
+	        allListeners.Add(l);
+	    }
+
+	    /**
+	     * Remove a globally registered {@link RepositoryListener}
+	     * @param l
+	     */	    public static void removeAnyRepositoryChangedListener(RepositoryListener l)
+	    {
+	        allListeners.Remove(l);
+	    }
+
+	    internal void fireRefsMaybeChanged()
+	    {
+	        OnRefsChanged();
+	    }
+
+	    internal void OnRefsChanged()
+	    {
+	        if (_refDb.LastRefModification != _refDb.LastNotifiedRefModification)
+	        {
+	            _refDb.LastNotifiedRefModification = _refDb.LastRefModification;
+	            var @event = new RefsChangedEventArgs(this);
+	            List<RepositoryListener> all;
+	            lock (listeners)
+	            {
+	                all = new List<RepositoryListener>(listeners);
+	            }
+	            lock (allListeners)
+	            {
+	                all.AddRange(allListeners);
+	            }
+	            foreach (RepositoryListener l in all)
+	            {
+	                l.refsChanged(@event);
+	            }
+	        }
+	    }
+
+	    internal void fireIndexChanged()
+	    {
+	        OnIndexChanged();
+	    }
+	    internal void OnIndexChanged()
+	    {
+	        var @event = new IndexChangedEventArgs(this);
+	        List<RepositoryListener> all;
+	        lock (listeners)
+	        {
+	            all = new List<RepositoryListener>(listeners);
+	        }
+	        lock (allListeners)
+	        {
+	            all.AddRange(allListeners);
+	        }
+	        foreach (RepositoryListener l in all)
+	        {
+	            l.indexChanged(@event);
+	        }
+	}
+
+        	/**
+	 * Force a scan for changed refs.
+	 *
+	 * @throws IOException
+	 */
+	public void scanForRepoChanges() {
+		getAllRefs(); // This will look for changes to refs
+		var index = Index; // This will detect changes in the index
+	}
 		/// <summary>
 		/// Gets the <see cref="Repository"/> state
 		/// </summary>
@@ -987,49 +1053,50 @@ namespace GitSharp
 			get
 			{
 				// Pre Git-1.6 logic
-				if (WorkingDirectory.GetFiles(".dotest").Length > 0)
+				if (new FileInfo(Path.Combine(WorkingDirectory.FullName, ".dotest")).Exists)
 				{
 					return RepositoryState.Rebasing;
 				}
 
-				if (WorkingDirectory.GetFiles(".dotest-merge").Length > 0)
+                if (new FileInfo(Path.Combine(WorkingDirectory.FullName, ".dotest-merge")).Exists)
 				{
 					return RepositoryState.RebasingInteractive;
 				}
 
 				// From 1.6 onwards
-				if (WorkingDirectory.GetFiles("rebase-apply/rebasing").Length > 0)
+                if (new FileInfo(Path.Combine(WorkingDirectory.FullName, "rebase-apply/rebasing")).Exists)
 				{
 					return RepositoryState.RebasingRebasing;
 				}
 
-				if (WorkingDirectory.GetFiles("rebase-apply/applying").Length > 0)
+                if (new FileInfo(Path.Combine(WorkingDirectory.FullName, "rebase-apply/applying")).Exists)
 				{
 					return RepositoryState.Apply;
 				}
 
-				if (WorkingDirectory.GetFiles("rebase-apply").Length > 0)
+                if (new FileInfo(Path.Combine(WorkingDirectory.FullName, "rebase-apply")).Exists)
 				{
 					return RepositoryState.Rebasing;
 				}
 
-				if (WorkingDirectory.GetFiles("rebase-merge/interactive").Length > 0)
+
+                if (new FileInfo(Path.Combine(WorkingDirectory.FullName, "rebase-merge/interactive")).Exists)
 				{
 					return RepositoryState.RebasingInteractive;
 				}
 
-				if (WorkingDirectory.GetFiles("rebase-merge").Length > 0)
+                if (new FileInfo(Path.Combine(WorkingDirectory.FullName, "rebase-merge")).Exists)
 				{
 					return RepositoryState.RebasingMerge;
 				}
 
 				// Both versions
-				if (WorkingDirectory.GetFiles("MERGE_HEAD").Length > 0)
+                if (new FileInfo(Path.Combine(WorkingDirectory.FullName, "MERGE_HEAD")).Exists)
 				{
 					return RepositoryState.Merging;
 				}
 
-				if (WorkingDirectory.GetFiles("BISECT_LOG").Length > 0)
+                if (new FileInfo(Path.Combine(WorkingDirectory.FullName, "BISECT_LOG")).Exists)
 				{
 					return RepositoryState.Bisecting;
 				}
@@ -1067,6 +1134,34 @@ namespace GitSharp
 		{
 			return _refDb.Peel(pRef);
 		}
+
+        /**
+	     * @return a map with all objects referenced by a peeled ref.
+	     */
+        public Dictionary<AnyObjectId, List<Ref>> getAllRefsByPeeledObjectId() {
+		Dictionary<String, Ref> allRefs = getAllRefs();
+		var ret = new Dictionary<AnyObjectId, List<Ref>>(allRefs.Count);
+		foreach (Ref @ref in allRefs.Values) {
+		    Ref ref2 = @ref;
+			if (!ref2.Peeled)
+				ref2 = Peel(ref2);
+			AnyObjectId target = ref2.PeeledObjectId;
+			if (target == null)
+				target = ref2.ObjectId;
+			// We assume most Sets here are singletons
+			List<Ref> oset = ret.put(target, new List<Ref>{ref2});
+			if (oset != null) {
+				// that was not the case (rare)
+				if (oset.Count == 1) {
+					// Was a read-only singleton, we must copy to a new Set
+					oset = new List<Ref>(oset);
+				}
+				ret.put(target, oset);
+				oset.Add(ref2);
+			}
+		}
+		return ret;
+	}
 
 		public static Repository Open(string directory)
 		{
@@ -1169,16 +1264,11 @@ namespace GitSharp
 			get
 			{
 				var ptr = new FileInfo(Path.Combine(Directory.FullName, Constants.HEAD));
-				var sr = new StreamReader(ptr.FullName);
-				string reference;
-				try
-				{
-					reference = sr.ReadLine();
-				}
-				finally
-				{
-					sr.Close();
-				}
+                string reference;
+                using (var sr = new StreamReader(ptr.FullName))
+                {
+                    reference = sr.ReadLine();
+                }
 
 				if (reference.StartsWith("ref: "))
 				{
@@ -1188,6 +1278,39 @@ namespace GitSharp
 				return reference;
 			}
 		}
+
+        public string getBranch()
+        {
+            try
+            {
+                var ptr = new FileInfo(Path.Combine(Directory.FullName, Constants.HEAD));
+                string reference;
+                using (var sr = new StreamReader(ptr.FullName))
+                {
+                    reference = sr.ReadLine();
+                }
+
+                if (reference.StartsWith("ref: "))
+                {
+                    reference = reference.Substring(5);
+                }
+                if (reference.StartsWith("refs/heads/"))
+                {
+                    reference = reference.Substring(11);
+                }
+                return reference;
+            }
+            catch (FileNotFoundException e)
+            {
+                var ptr = new FileInfo(Path.Combine(Directory.FullName, "head-name"));
+                string reference;
+                using (var sr = new StreamReader(ptr.FullName))
+                {
+                    reference = sr.ReadLine();
+                }
+                return reference;
+            }
+        }
 
 		/// <summary>
 		///

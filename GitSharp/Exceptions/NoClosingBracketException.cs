@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Florian Köberle <florianskarten@web.de>
  * Copyright (C) 2009, Adriano Machado <adriano.m.machado@hotmail.com>
  *
@@ -37,6 +37,7 @@
  */
 
 using System;
+using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
 {
@@ -54,10 +55,20 @@ namespace GitSharp.Exceptions
             : base(CreateMessage(indexOfOpeningBracket, openingBracket, closingBracket), pattern)
         {
         }
+		
+		public NoClosingBracketException(int indexOfOpeningBracket, string openingBracket, string closingBracket, string pattern, Exception inner)
+            : base(CreateMessage(indexOfOpeningBracket, openingBracket, closingBracket), pattern, inner)
+        {
+        }
 
         private static string CreateMessage(int indexOfOpeningBracket, string openingBracket, string closingBracket)
         {
             return string.Format("No closing {0} found for {1} at index {2}.", closingBracket, openingBracket, Convert.ToInt32(indexOfOpeningBracket));
+        }
+
+        protected NoClosingBracketException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
         }
     }
 }

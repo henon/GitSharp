@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyrigth (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -38,6 +38,7 @@
  */
 
 using System;
+using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
 {
@@ -50,6 +51,7 @@ namespace GitSharp.Exceptions
 	/// is the original checked exception that we really wanted to throw back to the
 	/// application for handling and recovery.
 	/// </summary>
+	[Serializable]
 	public class RevWalkException : Exception
 	{
 		/// <summary>
@@ -60,5 +62,10 @@ namespace GitSharp.Exceptions
 			: base("Walk failure.", cause)
 		{
 		}
+
+        protected RevWalkException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
 	}
 }

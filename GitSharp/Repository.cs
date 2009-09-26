@@ -989,11 +989,6 @@ namespace GitSharp
 
 	    internal void fireRefsMaybeChanged()
 	    {
-	        OnRefsChanged();
-	    }
-
-	    internal void OnRefsChanged()
-	    {
 	        if (_refDb.LastRefModification != _refDb.LastNotifiedRefModification)
 	        {
 	            _refDb.LastNotifiedRefModification = _refDb.LastRefModification;
@@ -1015,10 +1010,6 @@ namespace GitSharp
 	    }
 
 	    internal void fireIndexChanged()
-	    {
-	        OnIndexChanged();
-	    }
-	    internal void OnIndexChanged()
 	    {
 	        var @event = new IndexChangedEventArgs(this);
 	        List<RepositoryListener> all;

@@ -135,7 +135,7 @@ namespace GitSharp
             if (_cacheFile.Exists && _cacheFile.LastWriteTime.Ticks != _lastCacheTime)
             {
                 Read();
-                Repository.OnIndexChanged();
+                Repository.fireIndexChanged();
             }
         }
 
@@ -294,7 +294,7 @@ namespace GitSharp
                 _changed = false;
                 _statDirty = false;
                 _lastCacheTime = _cacheFile.LastWriteTime.Ticks;
-                Repository.OnIndexChanged();
+                Repository.fireIndexChanged();
             }
             finally
             {

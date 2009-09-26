@@ -57,6 +57,7 @@ namespace GitSharp.CLI.Nonstandard
 		    streamOut.Write("GitSharp version ");
 		    streamOut.Write(ver);
             streamOut.WriteLine();
+            streamOut.Flush();
 	    }
 
         private static void OfflineHelp()

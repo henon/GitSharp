@@ -1,5 +1,4 @@
 ﻿/*
- * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -37,46 +36,51 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.IO;
-using GitSharp.API;
 
-namespace GitSharp.CLI
+namespace GitSharp.API.Commands
 {
-
-    [Command(common = true, complete = false, usage = "Create an empty git repository")]
-    class Init : TextBuiltin
+    /// <summary>
+    /// Abstract base class of all git commands. It provides basic infrastructure
+    /// </summary>
+    public abstract class BaseCommand
     {
-        private GitSharp.API.Commands.Init cmd = new GitSharp.API.Commands.Init();
-
-        public override void Run(string[] args)
+        /// <summary>
+        /// Returns the value of the process' environment variable GIT_DIR
+        /// </summary>
+        protected string GIT_DIR
         {
-            cmd.OutputStream = this.streamOut;
-            options = new CmdParserOptionSet
-                          {
-                              {"bare", "Create a bare repository", v => cmd.Bare = true},
-                              {"quiet|q", "Only print error and warning messages, all other output will be suppressed.", v => cmd.Quiet = true},
-                              {"template", "Not supported.", var => streamOut.WriteLine("--template=<template dir> is not supported")},
-                              {"shared", "Not supported.", var => streamOut.WriteLine("--shared is not supported")},
-                          };
-
-            arguments = options.Parse(args);
-
-            cmd.Execute();
+            get
+            {
+                return System.Environment.GetEnvironmentVariable("GIT_DIR");
+            }
         }
 
-        public override bool RequiresRepository()
+        /// <summary>
+        /// This command's output stream. If not explicitly set, the command writes to Git.OutputStream out.
+        /// </summary>
+        public StreamWriter OutputStream
         {
-            return false;
+            get {
+                if (_output==null)
+                    return Git.OutputStream;
+                return _output;
+            }
+            set
+            {
+                _output = value;
+            }
         }
+        StreamWriter _output = null;
 
-        //private void create()
+        //Repository _repo;
+
+        //public virtual void Execute(Repository repo)
         //{
-        //    if (gitdir == null)
-        //        gitdir = bare ? Environment.CurrentDirectory : Path.Combine(Environment.CurrentDirectory, ".git");
-        //    db = new Repository(new DirectoryInfo(gitdir));
-        //    db.Create(bare);
-        //    Console.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
+        //    _repo = repo;
         //}
     }
-
 }

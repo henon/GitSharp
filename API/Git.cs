@@ -1,5 +1,4 @@
 ﻿/*
- * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -37,46 +36,51 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using GitSharp.API.Commands;
 using System.IO;
-using GitSharp.API;
 
-namespace GitSharp.CLI
+namespace GitSharp.API
 {
-
-    [Command(common = true, complete = false, usage = "Create an empty git repository")]
-    class Init : TextBuiltin
+    public static class Git
     {
-        private GitSharp.API.Commands.Init cmd = new GitSharp.API.Commands.Init();
-
-        public override void Run(string[] args)
+        /// <summary>
+        /// Get or set the output stream that all git commands are writing to. Per default this returns a StreamWriter wrapping the standard output stream.
+        /// </summary>
+        public static StreamWriter OutputStream
         {
-            cmd.OutputStream = this.streamOut;
-            options = new CmdParserOptionSet
-                          {
-                              {"bare", "Create a bare repository", v => cmd.Bare = true},
-                              {"quiet|q", "Only print error and warning messages, all other output will be suppressed.", v => cmd.Quiet = true},
-                              {"template", "Not supported.", var => streamOut.WriteLine("--template=<template dir> is not supported")},
-                              {"shared", "Not supported.", var => streamOut.WriteLine("--shared is not supported")},
-                          };
+            get
+            {
+                if (_output == null)
+                {
+                    //Initialize the output stream for all console-based messages.
+                    _output = new StreamWriter(Console.OpenStandardOutput());
+                    Console.SetOut(_output);
+                }
+                return _output;
+            }
+            set
+            {
+                _output = value;
+            }
+        }
+        private static StreamWriter _output;
 
-            arguments = options.Parse(args);
-
-            cmd.Execute();
+        public static void Init()
+        {
+            Repository.Init();
         }
 
-        public override bool RequiresRepository()
+        public static void Init(string path)
         {
-            return false;
+            Repository.Init(path);
         }
 
-        //private void create()
-        //{
-        //    if (gitdir == null)
-        //        gitdir = bare ? Environment.CurrentDirectory : Path.Combine(Environment.CurrentDirectory, ".git");
-        //    db = new Repository(new DirectoryInfo(gitdir));
-        //    db.Create(bare);
-        //    Console.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
-        //}
+        public static void Init(Init command)
+        {
+            command.Execute();
+        }
     }
-
 }

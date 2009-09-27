@@ -1,5 +1,4 @@
 ﻿/*
- * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -36,47 +35,39 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.IO;
-using GitSharp.API;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-namespace GitSharp.CLI
-{
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("GitSharp.API")]
+[assembly: AssemblyDescription("User friendly API to git. Licensed under BSD")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("The Git development community")]
+[assembly: AssemblyProduct("GitSharp.API")]
+[assembly: AssemblyCopyright("Copyright © 2009")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCulture("")]
 
-    [Command(common = true, complete = false, usage = "Create an empty git repository")]
-    class Init : TextBuiltin
-    {
-        private GitSharp.API.Commands.Init cmd = new GitSharp.API.Commands.Init();
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
 
-        public override void Run(string[] args)
-        {
-            cmd.OutputStream = this.streamOut;
-            options = new CmdParserOptionSet
-                          {
-                              {"bare", "Create a bare repository", v => cmd.Bare = true},
-                              {"quiet|q", "Only print error and warning messages, all other output will be suppressed.", v => cmd.Quiet = true},
-                              {"template", "Not supported.", var => streamOut.WriteLine("--template=<template dir> is not supported")},
-                              {"shared", "Not supported.", var => streamOut.WriteLine("--shared is not supported")},
-                          };
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("059dbcc1-cc69-468a-a164-2cac429f4e2e")]
 
-            arguments = options.Parse(args);
-
-            cmd.Execute();
-        }
-
-        public override bool RequiresRepository()
-        {
-            return false;
-        }
-
-        //private void create()
-        //{
-        //    if (gitdir == null)
-        //        gitdir = bare ? Environment.CurrentDirectory : Path.Combine(Environment.CurrentDirectory, ".git");
-        //    db = new Repository(new DirectoryInfo(gitdir));
-        //    db.Create(bare);
-        //    Console.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
-        //}
-    }
-
-}
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("0.1.0.*")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

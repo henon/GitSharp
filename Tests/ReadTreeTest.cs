@@ -161,12 +161,11 @@ namespace GitSharp.Tests
 
         private ObjectId GenSha1(string data)
         {
-            byte[] buffer = Constants.encode(data);
-            var input = new MemoryStream(buffer);
+            var input = new MemoryStream(data.getBytes());
             var writer = new ObjectWriter(db);
             try
             {
-                return writer.WriteObject(ObjectType.Blob, buffer.Length, input, true);
+                return writer.WriteObject(ObjectType.Blob, data.getBytes().Length, input, true);
             }
             catch (IOException exception)
             {

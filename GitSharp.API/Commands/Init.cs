@@ -1,0 +1,137 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+
+namespace GitSharp.API.Commands
+{
+    /// <summary>
+    /// git-init - Create an empty git repository or reinitialize an existing one 
+    /// </summary>
+    public class Init : BaseCommand
+    {
+        public Init()
+        {
+            Shared = "false";
+        }
+
+        #region Properties / Options
+
+
+        /// <summary>
+        /// Get or set path to a directory that shall be initialized as a git repository. If Bare==false a ".git" subdirectory will be created in that directory.
+        /// Path overrides usage of GIT_DIR environment variable if set, otherwise Init uses the value of ActualPath.
+        /// </summary>
+        public string Path
+        {
+            get
+            {
+                return _path;
+            }
+            set
+            {
+                var dir = new DirectoryInfo(value);
+                if (!dir.Exists)
+                    throw new ArgumentException("Path does not exist or is not a directory.");
+                _path = dir.FullName;
+            }
+        }
+        private string _path = null;
+
+        /// <summary>
+        /// Get the path where the Init command shall initialize the repository. Returns GIT_DIR environment variable (if set) or the current directory if Path is null. 
+        /// Returns the same value as Path otherwise.
+        /// </summary>
+        public string ActualPath
+        {
+            get
+            {
+                string git_dir = null;
+                if (string.IsNullOrEmpty(Path))
+                    if (string.IsNullOrEmpty(GIT_DIR))
+                        git_dir = System.Environment.CurrentDirectory;
+                    else
+                        git_dir = GIT_DIR;
+                else
+                    git_dir = Path;
+                if (!Bare)
+                    git_dir = System.IO.Path.Combine(git_dir, ".git");
+                return git_dir;
+            }
+        }
+
+        /// <summary>
+        /// Only print error and warning messages, all other output will be suppressed.
+        /// </summary>
+        public bool Quiet
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Create a bare repository. If GIT_DIR environment is not set, it is set to the current working directory. 
+        /// </summary>
+        public bool Bare
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// NOT IMPLEMENTED!
+        /// Provide the directory from which templates will be used. The default template directory is /usr/share/git-core/templates.
+        ///     
+        /// When specified, <template_directory> is used as the source of the template files rather than the default. The template files include some directory structure, some suggested "exclude patterns", and copies of non-executing "hook" files. The suggested patterns and hook files are all modifiable and extensible.
+        /// </summary>
+        public string Template
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// NOT IMPLEMENTED!
+        ///     Specify that the git repository is to be shared amongst several users. This allows users belonging to the same group to push into that repository. When specified, the config variable "core.sharedRepository" is set so that files and directories under $GIT_DIR are created with the requested permissions. When not specified, git will use permissions reported by umask(2).
+        ///     The option can have the following values, defaulting to group if no value is given:
+        ///     * umask (or false): Use permissions reported by umask(2). The default, when --shared is not specified.
+        ///     * group (or true): Make the repository group-writable, (and g+sx, since the git group may be not the primary group of all users). This is used to loosen the permissions of an otherwise safe umask(2) value. Note that the umask still applies to the other permission bits (e.g. if umask is 0022, using group will not remove read privileges from other (non-group) users). See 0xxx for how to exactly specify the repository permissions.
+        ///     * all (or world or everybody): Same as group, but make the repository readable by all users.
+        ///     * 0xxx: 0xxx is an octal number and each file will have mode 0xxx. 0xxx will override users' umask(2) value (and not only loosen permissions as group and all does). 0640 will create a repository which is group-readable, but not group-writable or accessible to others. 0660 will create a repo that is readable and writable to the current user and group, but inaccessible to others.
+        ///     By default, the configuration flag receive.denyNonFastForwards is enabled in shared repositories, so that you cannot force a non fast-forwarding push into it.
+        /// </summary>
+        public string Shared
+        {
+            get;
+            set;
+        }
+
+
+        #endregion
+
+        /// <summary>
+        /// Execute the command.
+        /// </summary>
+        public void Execute()
+        {
+            var repo = new GitSharp.Repository(new DirectoryInfo(ActualPath));
+            repo.Create(Bare);
+            if (!Quiet)
+            {
+                OutputStream.WriteLine("Initialized empty Git repository in " + repo.Directory.FullName);
+                OutputStream.Flush();
+            }
+            InitializedRepository = new Repository(repo);
+        }
+
+        /// <summary>
+        /// The repository that has been initialized. This property is only set after Execute has been called.
+        /// </summary>
+        public Repository InitializedRepository
+        {
+            get;
+            set;
+        }
+    }
+}

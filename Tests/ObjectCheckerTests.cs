@@ -1387,7 +1387,7 @@ namespace GitSharp.Tests
 		public void testInvalidTreeTruncatedInObjectId()
 		{
 			var b = new StringBuilder();
-			b.Append("100644 b\012");
+			b.Append("100644 b" + '\0' + (char)1 + (char)2);
 			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{

@@ -68,9 +68,14 @@ namespace GitSharp.API.Commands
             }
             set
             {
+                if (value == null)
+                {
+                    _path = null;
+                    return;
+                }
                 var dir = new DirectoryInfo(value);
-                if (!dir.Exists)
-                    throw new ArgumentException("Path does not exist or is not a directory.");
+                //if (!dir.Exists)
+                //    throw new ArgumentException("Path does not exist or is not a directory.");
                 _path = dir.FullName;
             }
         }

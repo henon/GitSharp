@@ -65,7 +65,7 @@ namespace GitSharp.Tests
 									Id = ObjectId.FromString(parts[0]),
 									Type = parts[1],
 									RawSize = Convert.ToInt32(parts[2]),
-									Size = Convert.ToInt64(parts[3]),
+                                    // parts[3] is the size-in-pack
 									Offset = Convert.ToInt64(parts[4])
 								};
 
@@ -142,7 +142,6 @@ namespace GitSharp.Tests
 			public ObjectId Id { get; set; }
 			public int RawSize { get; set; }
 			public long Offset { get; set; }
-			public long Size { private get; set; }
 
 			public string Type
 			{
@@ -154,12 +153,6 @@ namespace GitSharp.Tests
 					var ptr = new MutableInteger();
 					Constants.decodeTypeString(Id, typeRaw, (byte)' ', ptr);
 				}
-			}
-
-			public override string ToString()
-			{
-				// 4b825dc642cb6eb9a060e54bf8d69288fbee4904 tree   0 9 7782
-				return Id + " " + Type + " " + Size + " " + RawSize + " " + Offset;
 			}
 		}
 

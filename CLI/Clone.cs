@@ -123,12 +123,12 @@ namespace GitSharp.CLI
         {
             //Determine if repository is local or remote.
 
-            //URIish source = new URIish(repository);
+            URIish source = new URIish(repository);
             //Console.WriteLine(source.Path);
-            Console.WriteLine("Path = " + Path.GetFullPath(repository));
-            Console.WriteLine("Is path relative = " + Path.IsPathRooted(repository));
+            //Console.WriteLine("Path = " + Path.GetFullPath(repository));
             //Console.WriteLine("Is path relative = " + Path.IsPathRooted(repository));
-            throw die("test");
+            //Console.WriteLine("Is path relative = " + Path.IsPathRooted(repository));
+            
             // guess a name
             string p = source.Path;
             while (p.EndsWith("/"))
@@ -142,7 +142,8 @@ namespace GitSharp.CLI
 
             if (gitdir == null)
                 gitdir = Path.Combine(localName, ".git");
-
+            Console.WriteLine(source.Path);
+            throw die("test");
             db = new Repository(new DirectoryInfo(gitdir));
             db.Create();
             db.Config.setBoolean("core", null, "bare", false);

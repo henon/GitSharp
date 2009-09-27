@@ -93,8 +93,11 @@ namespace GitSharp.Transport
 
             // If the string passes local paths such as .\dir1 or ..\dir1,
             // get the full path for future processing.
-            if (!System.IO.Path.IsPathRooted(s))
-                s = System.IO.Path.GetFullPath(s);
+            try
+            {
+                if (!System.IO.Path.IsPathRooted(s))
+                    s = System.IO.Path.GetFullPath(s);
+            } catch (NotSupportedException) {}
 
 			s = s.Replace('\\', '/');
 			Match matcher = FullUri.Match(s);

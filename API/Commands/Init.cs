@@ -168,7 +168,7 @@ namespace GitSharp.API.Commands
         public Repository InitializedRepository
         {
             get;
-            set;
+            private set;
         }
     }
 }

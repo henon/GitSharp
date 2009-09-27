@@ -144,7 +144,7 @@
     <Compile Include="Util\StringUtilsTest.cs" />
     <Compile Include="Util\TemporaryBufferTest.cs" />
     <Compile Include="Util\TestRng.cs" />
-    <Compile Include="Util\XInputStream.cs" />
+    <Compile Include="XInputStream.cs" />
     <Compile Include="Util\VariousUtilityTests.cs" />
     <Compile Include="ValidRefNameTest.cs" />
     <Compile Include="WindowCacheGetTest.cs" />

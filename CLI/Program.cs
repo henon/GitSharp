@@ -83,7 +83,8 @@ namespace GitSharp.CLI
                 { "git-dir", "set the git repository to operate on", v => gitdir=new DirectoryInfo(v) },    
                 { "help|h", "display this help text", v => ShowHelp() },
                 { "incomplete", "display the incomplete commands", v => ShowIncomplete() },
-                { "show-stack-trace", "display the C# stack trace on exceptions", v => showStackTrace=true }
+                { "show-stack-trace", "display the C# stack trace on exceptions", v => showStackTrace=true },
+                { "version", "", v => ShowVersion() },
             };
             try
             {
@@ -201,9 +202,8 @@ namespace GitSharp.CLI
         private static void ShowHelp()
         {
             Console.Write("usage: git ");
-            Console.Write(string.Join(" ", options.Select(o => "[-" + string.Join("|--", o.Names) + "]").ToArray()));
-            Console.WriteLine("\nCOMMAND [ARGS]\n\nThe most commonly used git commands are:\n");
-            Console.WriteLine();
+            Console.Write(string.Join(" ", options.Select(o => "[--" + string.Join("|-", o.Names) + "]").ToArray()));
+            Console.WriteLine("\nCOMMAND [ARGS]\n\nThe most commonly used git commands are:");
             options.WriteOptionDescriptions(Console.Error);
             Console.WriteLine();
 
@@ -219,6 +219,16 @@ namespace GitSharp.CLI
             }
             Console.Error.WriteLine();
             Console.Error.Write(@"See 'git help COMMAND' for more information on a specific command.");
+        }
+
+        /// <summary>
+        /// Implementation of --version
+        /// </summary>
+        private static void ShowVersion()
+        {
+            var version_command = new GitSharp.CLI.Nonstandard.Version();
+            version_command.Init(null, null);
+            version_command.Execute(new string[0]);
         }
 
         /// <summary>

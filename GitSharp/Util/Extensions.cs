@@ -74,7 +74,7 @@ namespace GitSharp
         /// <param name="dict">The dict.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        public static void AddOrReplace<K, V>(this Dictionary<K, V> dict, K key, V value)
+        public static void AddOrReplace<K, V>(this IDictionary<K, V> dict, K key, V value)
         {
             dict.put(key, value);
         }
@@ -88,7 +88,7 @@ namespace GitSharp
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         /// <returns>the previous value of the specified key in this dictionary, or null if it did not have one. </returns>
-        public static V put<K, V>(this Dictionary<K, V> dict, K key, V value)
+        public static V put<K, V>(this IDictionary<K, V> dict, K key, V value)
         {
             V previous = default(V);
             if (dict.ContainsKey(key))
@@ -112,7 +112,7 @@ namespace GitSharp
         /// <param name="dict">dictionary to search</param>
         /// <param name="key">Key to search for</param>
         /// <returns>default(V) or item if Key is found</returns>
-        public static V GetValue<K, V>(this Dictionary<K, V> dict, K key)
+        public static V GetValue<K, V>(this IDictionary<K, V> dict, K key)
         {
         	V v;
 			if (dict.TryGetValue(key, out v))

@@ -141,7 +141,7 @@ namespace GitSharp.Tests.Util
             IEnumerator<PackIndex.MutableEntry> iter = _denseIdx.GetEnumerator();
             iter.MoveNext();
 
-            while (!iter.Current.ToString().Equals("0a3d7772488b6b106fb62813c4d6d627918d9181"))
+            while (!iter.Current.Name.Equals("0a3d7772488b6b106fb62813c4d6d627918d9181"))
             {
 				// just iterating
                 iter.MoveNext();

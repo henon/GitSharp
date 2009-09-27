@@ -47,7 +47,7 @@ using GitSharp.Util;
 namespace GitSharp.Tests
 {
     [TestFixture]
-    public class WriteTests : RepositoryTestCase // [henon] was BasicTests but I think this name is better
+    public class T0003_Basic_Write : RepositoryTestCase
     {
         [Test]
         public void test001_Initalize()
@@ -61,26 +61,18 @@ namespace GitSharp.Tests
             var refs_tags = new DirectoryInfo(refs.FullName + "/tags");
             var HEAD = new FileInfo(gitdir.FullName + "/HEAD");
 
-            Assert.IsTrue(trash.Exists);
-            Assert.IsTrue(objects.Exists);
-            Assert.IsTrue(objects_pack.Exists);
-            Assert.IsTrue(objects_info.Exists);
-            Assert.AreEqual(2, objects.GetDirectories().Length);
-            Assert.IsTrue(refs.Exists);
-            Assert.IsTrue(refs_heads.Exists);
-            Assert.IsTrue(refs_tags.Exists);
-            Assert.IsTrue(HEAD.Exists);
+            Assert.IsTrue(trash.IsDirectory(), "Exists " + trash);
+            Assert.IsTrue(objects.IsDirectory(), "Exists " + objects);
+            Assert.IsTrue(objects_pack.IsDirectory(), "Exists " + objects_pack);
+            Assert.IsTrue(objects_info.IsDirectory(), "Exists " + objects_info);
+            Assert.AreEqual(2, objects.ListFiles().Length);
+            Assert.IsTrue(refs.IsDirectory(), "Exists " + refs);
+            Assert.IsTrue(refs_heads.IsDirectory(), "Exists " + refs_heads);
+            Assert.IsTrue(refs_tags.IsDirectory(), "Exists " + refs_tags);
+            Assert.IsTrue(HEAD.IsFile(), "Exists " + HEAD);
             Assert.AreEqual(23, HEAD.Length);
         }
 
-
-        [Test]
-        public void Compute_SHA()
-        {
-            byte[] data = Encoding.GetEncoding("ISO-8859-1").GetBytes("test025 some data, more than 16 bytes to get good coverage");
-            ObjectId id = new ObjectWriter(db).ComputeBlobSha1(data.Length, new MemoryStream(data));
-            Assert.AreEqual("4f561df5ecf0dfbd53a0dc0f37262fef075d9dde", id.ToString());
-        }
 
         [Test]
         public void Write_Blob()
@@ -142,10 +134,10 @@ namespace GitSharp.Tests
             Repository newdb = createNewEmptyRepo();
             var t = new Tree(newdb);
             t.Accept(new WriteTree(trash, newdb), TreeEntry.MODIFIED_ONLY);
-            Assert.AreEqual("4b825dc642cb6eb9a060e54bf8d69288fbee4904", t.Id.ToString());
+            Assert.AreEqual("4b825dc642cb6eb9a060e54bf8d69288fbee4904", t.Id.Name);
             var o = new FileInfo(newdb.Directory + "/objects/4b/825dc642cb6eb9a060e54bf8d69288fbee4904");
-            Assert.IsTrue(o.Exists);
-            Assert.IsTrue(o.IsReadOnly);
+            Assert.IsTrue(o.IsFile(), "Exists " + o);
+            Assert.IsTrue(o.IsReadOnly, "Read-only " + o);
         }
 
         [Test]
@@ -155,9 +147,9 @@ namespace GitSharp.Tests
             //
             var t = new Tree(db);
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
-            Assert.AreEqual("4b825dc642cb6eb9a060e54bf8d69288fbee4904", t.Id.ToString());
+            Assert.AreEqual("4b825dc642cb6eb9a060e54bf8d69288fbee4904", t.Id.Name);
             var o = new FileInfo(trash_git + "/objects/4b/825dc642cb6eb9a060e54bf8d69288fbee4904");
-            Assert.IsFalse(o.Exists);
+            Assert.IsFalse(o.IsFile(), "Exists " + o);
         }
 
         [Test]
@@ -165,17 +157,17 @@ namespace GitSharp.Tests
         {
             Tree t = new Tree(db);
             ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
-            t.AddFile("should-be-empty").Id = (emptyId);
+            t.AddFile("should-be-empty").Id = emptyId;
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
-            Assert.AreEqual("7bb943559a305bdd6bdee2cef6e5df2413c3d30a", t.Id.ToString());
+            Assert.AreEqual("7bb943559a305bdd6bdee2cef6e5df2413c3d30a", t.Id.Name);
 
             var o = new FileInfo(trash_git + "/objects/7b/b943559a305bdd6bdee2cef6e5df2413c3d30a");
-            Assert.IsTrue(o.Exists);
-            Assert.IsTrue(o.IsReadOnly);
+            Assert.IsTrue(o.IsFile(), "Exists " + o);
+            Assert.IsTrue(o.IsReadOnly, "Read-only " + o);
 
             o = new FileInfo(trash_git + "/objects/e6/9de29bb2d1d6434b8b29ae775ad8c2e48c5391");
-            Assert.IsTrue(o.Exists);
-            Assert.IsTrue(o.IsReadOnly);
+            Assert.IsTrue(o.IsFile(), "Exists " + o);
+            Assert.IsTrue(o.IsReadOnly, "Read-only " + o);
         }
 
         [Test]
@@ -233,16 +225,14 @@ namespace GitSharp.Tests
         {
             writeTrashFile(".git/config", "[core]\n" + "legacyHeaders=1\n");
             db.Config.load();
-            Assert.AreEqual(db.Config.getBoolean("core", "legacyHeaders", false), true);
+            Assert.AreEqual(true, db.Config.getBoolean("core", "legacyHeaders", false));
 
             var t = new Tree(db);
             FileTreeEntry f = t.AddFile("i-am-a-file");
             writeTrashFile(f.Name, "and this is the data in me\n");
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
 
-            var s = new Inspector(db).Inspect(t.Id);
-
-            Assert.AreEqual(ObjectId.FromString("00b1f73724f493096d1ffa0b0f1f1482dbb8c936"), t.Id);
+            Assert.AreEqual(ObjectId.FromString("00b1f73724f493096d1ffa0b0f1f1482dbb8c936"), t.TreeId);
             
 
             var c = new Commit(db)
@@ -250,12 +240,10 @@ namespace GitSharp.Tests
                     		Author = (new PersonIdent(jauthor, 1154236443000L, -4*60)),
                     		Committer = (new PersonIdent(jcommitter, 1154236443000L, -4*60)),
                     		Message = ("A Commit\n"),
-                    		TreeEntry = (t)
+                    		TreeEntry = t
                     	};
         	Assert.AreEqual(t.TreeId, c.TreeId);
             c.Save();
-
-            var sc = new Inspector(db).Inspect(c.CommitId);
 
             ObjectId cmtid = ObjectId.FromString("803aec4aba175e8ab1d666873c984c0308179099");
             Assert.AreEqual(cmtid, c.CommitId);
@@ -274,7 +262,7 @@ namespace GitSharp.Tests
             }
 
             // Verify we can Read it.
-            Commit c2 = db.MapCommit(cmtid.ToString());
+            Commit c2 = db.MapCommit(cmtid);
             Assert.IsNotNull(c2);
             Assert.AreEqual(c.Message, c2.Message);
             Assert.AreEqual(c.TreeId, c2.TreeId);
@@ -294,11 +282,11 @@ namespace GitSharp.Tests
             FileTreeEntry e3 = t.AddFile("a=");
             FileTreeEntry e4 = t.AddFile("a=b");
 
-            e0.Id = (emptyBlob);
-            e1.Id = (emptyBlob);
-            e2.Id = (emptyBlob);
-            e3.Id = (emptyBlob);
-            e4.Id = (emptyBlob);
+            e0.Id = emptyBlob;
+            e1.Id = emptyBlob;
+            e2.Id = emptyBlob;
+            e3.Id = emptyBlob;
+            e4.Id = emptyBlob;
 
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
             Assert.AreEqual(ObjectId.FromString("b47a8f0a4190f7572e11212769090523e23eb1ea"), t.Id);
@@ -310,20 +298,20 @@ namespace GitSharp.Tests
             ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             var t = new Tag(db)
                     	{
-                    		Id = (emptyId),
-                    		TagType = ("blob"),
-                    		TagName = ("test020"),
-                    		Author = (new PersonIdent(jauthor, 1154236443000L, -4*60)),
-                    		Message = ("test020 tagged\n")
+                    		Id = emptyId,
+                    		TagType = "blob",
+                    		TagName = "test020",
+                    		Author = new PersonIdent(jauthor, 1154236443000L, -4*60),
+                    		Message = "test020 tagged\n"
                     	};
         	t.Save();
-            Assert.AreEqual("6759556b09fbb4fd8ae5e315134481cc25d46954", t.TagId.ToString());
+            Assert.AreEqual("6759556b09fbb4fd8ae5e315134481cc25d46954", t.TagId.Name);
 
             Tag MapTag = db.MapTag("test020");
             Assert.AreEqual("blob", MapTag.TagType);
             Assert.AreEqual("test020 tagged\n", MapTag.Message);
             Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), MapTag.Author);
-            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", MapTag.Id.ToString());
+            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", MapTag.Id.Name);
         }
 
         [Test]
@@ -332,13 +320,13 @@ namespace GitSharp.Tests
             test020_createBlobTag();
             var t = new Tag(db)
                     	{
-                    		TagName = ("test020b"),
-                    		Id = (ObjectId.FromString("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"))
+                    		TagName = "test020b",
+                    		Id = ObjectId.FromString("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391")
                     	};
         	t.Save();
 
             Tag MapTag = db.MapTag("test020b");
-            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", MapTag.Id.ToString());
+            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", MapTag.Id.Name);
 
             // We do not repeat the plain tag test for other object types
         }
@@ -348,7 +336,7 @@ namespace GitSharp.Tests
         {
             ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             var almostEmptyTree = new Tree(db);
-            almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Encoding.ASCII.GetBytes("empty"), false));
+            almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
             
 			var t = new Tag(db)
@@ -361,13 +349,13 @@ namespace GitSharp.Tests
                     	};
         	
 			t.Save();
-            Assert.AreEqual("b0517bc8dbe2096b419d42424cd7030733f4abe5", t.TagId.ToString());
+            Assert.AreEqual("b0517bc8dbe2096b419d42424cd7030733f4abe5", t.TagId.Name);
 
             Tag MapTag = db.MapTag("test021");
             Assert.AreEqual("tree", MapTag.TagType);
             Assert.AreEqual("test021 tagged\n", MapTag.Message);
             Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), MapTag.Author);
-            Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", MapTag.Id.ToString());
+            Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", MapTag.Id.Name);
         }
 
         [Test]
@@ -375,7 +363,7 @@ namespace GitSharp.Tests
         {
             ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             var almostEmptyTree = new Tree(db);
-            almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Constants.encodeASCII("empty"), false));
+            almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
 
             var almostEmptyCommit = new Commit(db)
@@ -398,13 +386,13 @@ namespace GitSharp.Tests
                     	};
 
         	t.Save();
-            Assert.AreEqual("0ce2ebdb36076ef0b38adbe077a07d43b43e3807", t.TagId.ToString());
+            Assert.AreEqual("0ce2ebdb36076ef0b38adbe077a07d43b43e3807", t.TagId.Name);
 
             Tag mapTag = db.MapTag("test022");
             Assert.AreEqual("commit", mapTag.TagType);
             Assert.AreEqual("test022 tagged\n", mapTag.Message);
             Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag.Author);
-            Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag.Id.ToString());
+            Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag.Id.Name);
         }
 
         [Test]
@@ -412,7 +400,7 @@ namespace GitSharp.Tests
         {
             ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             var almostEmptyTree = new Tree(db);
-			almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Constants.encodeASCII("empty"), false));
+			almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
             
 			var commit = new Commit(db)
@@ -425,7 +413,7 @@ namespace GitSharp.Tests
                          	};
         	
 			ObjectId cid = new ObjectWriter(db).WriteCommit(commit);
-            Assert.AreEqual("4680908112778718f37e686cbebcc912730b3154", cid.ToString());
+            Assert.AreEqual("4680908112778718f37e686cbebcc912730b3154", cid.Name);
         }
 
         [Test]
@@ -433,7 +421,7 @@ namespace GitSharp.Tests
         {
             ObjectId emptyId = new ObjectWriter(db).WriteBlob(new byte[0]);
             var almostEmptyTree = new Tree(db);
-			almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, Constants.encodeASCII("empty"), false));
+			almostEmptyTree.AddEntry(new FileTreeEntry(almostEmptyTree, emptyId, "empty".getBytes(), false));
             ObjectId almostEmptyTreeId = new ObjectWriter(db).WriteTree(almostEmptyTree);
             var commit = new Commit(db)
                          	{
@@ -479,23 +467,31 @@ namespace GitSharp.Tests
             w.Close();
 
             Tag mapTag20 = db.MapTag("test020");
-            Assert.IsNotNull(mapTag20);
+            Assert.IsNotNull(mapTag20, "have tag test020");
             Assert.AreEqual("blob", mapTag20.TagType);
             Assert.AreEqual("test020 tagged\n", mapTag20.Message);
             Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag20.Author);
-            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag20.Id.ToString());
+            Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag20.Id.Name);
 
             Tag mapTag21 = db.MapTag("test021");
             Assert.AreEqual("tree", mapTag21.TagType);
             Assert.AreEqual("test021 tagged\n", mapTag21.Message);
             Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag21.Author);
-            Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", mapTag21.Id.ToString());
+            Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", mapTag21.Id.Name);
 
             Tag mapTag22 = db.MapTag("test022");
             Assert.AreEqual("commit", mapTag22.TagType);
             Assert.AreEqual("test022 tagged\n", mapTag22.Message);
             Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag22.Author);
-            Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag22.Id.ToString());
+            Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag22.Id.Name);
+        }
+
+        [Test]
+        public void test025_computeSha1NoStore()
+        {
+            byte[] data = "test025 some data, more than 16 bytes to get good coverage".getBytes("ISO-8859-1");
+            ObjectId id = new ObjectWriter(db).ComputeBlobSha1(data.Length, new MemoryStream(data));
+            Assert.AreEqual("4f561df5ecf0dfbd53a0dc0f37262fef075d9dde", id.Name);
         }
 
         [Test]
@@ -601,11 +597,12 @@ namespace GitSharp.Tests
         {
 			const string unpackedId = "7f822839a2fe9760f386cbbbcb3f92c5fe81def7";
             var writer = new StreamWriter(new FileStream(db.Directory.FullName + "/refs/heads/a", System.IO.FileMode.CreateNew));
-            writer.WriteLine(unpackedId);
+            writer.Write(unpackedId);
+            writer.Write('\n');
             writer.Close();
 
             ObjectId resolved = db.Resolve("refs/heads/a");
-            Assert.AreEqual(unpackedId, resolved.ToString());
+            Assert.AreEqual(unpackedId, resolved.Name);
         }
 
         [Test]
@@ -615,7 +612,7 @@ namespace GitSharp.Tests
             writeTrashFile(".git/HEAD", "ref: refs/heads/foobar\n");
 
             ObjectId resolve = db.Resolve("HEAD");
-            Assert.AreEqual("7f822839a2fe9760f386cbbbcb3f92c5fe81def7", resolve.ToString());
+            Assert.AreEqual("7f822839a2fe9760f386cbbbcb3f92c5fe81def7", resolve.Name);
 
             RefUpdate lockRef = db.UpdateRef("HEAD");
             ObjectId newId = ObjectId.FromString("07f822839a2fe9760f386cbbbcb3f92c5fe81def");
@@ -635,7 +632,7 @@ namespace GitSharp.Tests
             Assert.AreEqual(newId2, db.Resolve("refs/heads/foobar"));
         }
 
-        [Test, Ignore("Seem to be some threading issues that make the test hang when run with all other tests by Gallio Icarius")]
+        [Test]
         public void test029_mapObject()
         {
             Assert.AreEqual((new byte[0].GetType()), db.MapObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"), null).GetType());
@@ -647,7 +644,7 @@ namespace GitSharp.Tests
         [Test]
         public void test30_stripWorkDir()
         {
-            DirectoryInfo relCwd = new DirectoryInfo(Directory.GetCurrentDirectory());
+            DirectoryInfo relCwd = new DirectoryInfo(".");
             DirectoryInfo absCwd = new DirectoryInfo(relCwd.FullName);
             FileInfo absBase = new FileInfo(Path.Combine(new FileInfo(Path.Combine(absCwd.FullName, "repo")).FullName, "workdir"));
             FileInfo relBase = new FileInfo(Path.Combine(new FileInfo(Path.Combine(relCwd.FullName, "repo")).FullName, "workdir"));

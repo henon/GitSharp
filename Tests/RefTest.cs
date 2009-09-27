@@ -39,6 +39,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using GitSharp.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -120,7 +121,7 @@ namespace GitSharp.Tests
 			Assert.AreEqual(Ref.Storage.Packed, @ref.StorageFormat);
 			string path = Path.Combine(db.Directory.FullName, "refs/heads/master");
 			FileStream os = new FileStream(path, System.IO.FileMode.OpenOrCreate);
-            byte[] buffer = Constants.CHARSET.GetBytes(@ref.ObjectId.Name);
+            byte[] buffer = @ref.ObjectId.Name.getBytes();
 			os.Write(buffer, 0, buffer.Length);
 			os.WriteByte(Convert.ToByte('\n'));
 			os.Close();
@@ -147,5 +148,21 @@ namespace GitSharp.Tests
 			@ref = db.getRef("refs/heads/master");
 			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
+
+	    [Test]
+	    public void testOrigResolvedNamesBranch()
+	    {
+	        Ref @ref = db.getRef("a");
+	        Assert.AreEqual("refs/heads/a", @ref.Name);
+	        Assert.AreEqual("refs/heads/a", @ref.OriginalName);
+	    }
+
+	    [Test]
+	    public void testOrigResolvedNamesSymRef()
+	    {
+	        Ref @ref = db.getRef("HEAD");
+	        Assert.AreEqual("refs/heads/master", @ref.Name);
+            Assert.AreEqual("HEAD", @ref.OriginalName);
+	    }
 	}
 }

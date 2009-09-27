@@ -43,14 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbbreviatedIdTests.cs" />
+    <Compile Include="AbbreviatedObjectIdTest.cs" />
     <Compile Include="AssertHelperFixture.cs" />
     <Compile Include="RepositoryCacheTest.cs" />
     <Compile Include="ReflogReaderTest.cs" />
     <Compile Include="StringExtensionsFixture.cs" />
     <Compile Include="ExtensionsFixture.cs" />
     <Compile Include="ConcurrentRepackTest.cs" />
-    <Compile Include="ConfigTests.cs" />
+    <Compile Include="T0003_Basic_Config.cs" />
     <Compile Include="Diff\DiffFormatterReflowTest.cs" />
     <Compile Include="Diff\EditListTest.cs" />
     <Compile Include="Diff\EditTest.cs" />
@@ -63,10 +63,10 @@
     <Compile Include="DirectoryCache\DirCacheIteratorTest.cs" />
     <Compile Include="DirectoryCache\DirCacheLargePathTest.cs" />
     <Compile Include="DirectoryCache\DirCacheTreeTest.cs" />
-    <Compile Include="EncodingTests.cs" />
+    <Compile Include="ConstantsEncodingTest.cs" />
     <Compile Include="FnMatch\FileNameMatcherTest.cs" />
     <Compile Include="IndexDiffTest.cs" />
-    <Compile Include="IndexTests.cs" />
+    <Compile Include="T0007_Index.cs" />
     <Compile Include="IndexTreeWalkerTest.cs" />
     <Compile Include="Merge\CherryPickTest.cs" />
     <Compile Include="Merge\SimpleMergeTest.cs" />
@@ -84,6 +84,7 @@
     <Compile Include="RefUpdateTest.cs" />
     <Compile Include="RepositoryConfigTest.cs" />
     <Compile Include="RevWalk\FooterLineTest.cs" />
+    <Compile Include="T0002_Tree.cs" />
     <Compile Include="Transport\BundleWriterTest.cs" />
     <Compile Include="Transport\LongMapTest.cs" />
     <Compile Include="Transport\OpenSshConfigTest.cs" />
@@ -95,11 +96,12 @@
     <Compile Include="TreeIteratorLeafOnlyTest.cs" />
     <Compile Include="TreeIteratorPostOrderTest.cs" />
     <Compile Include="TreeIteratorPreOrderTest.cs" />
+    <Compile Include="MockSystemReader.cs" />
     <Compile Include="Util\NBTests.cs" />
     <Compile Include="PackIndexV1Tests.cs" />
     <Compile Include="PackIndexV2Tests.cs" />
-    <Compile Include="PackReaderTests.cs" />
-    <Compile Include="ParseRefTests.cs" />
+    <Compile Include="T0004_PackReader.cs" />
+    <Compile Include="T0008_testparserev.cs" />
     <Compile Include="RevWalk\AlwaysEmptyRevQueueTest.cs" />
     <Compile Include="RevWalk\DateRevQueueTest.cs" />
     <Compile Include="RevWalk\FIFORevQueueTest.cs" />
@@ -131,7 +133,7 @@
     <Compile Include="TreeWalk\TreeWalkBasicDiffTest.cs" />
     <Compile Include="Util\IntListTest.cs" />
     <Compile Include="Transport\URIishTests.cs" />
-    <Compile Include="Util\PackIndexTestCase.cs" />
+    <Compile Include="PackIndexTestCase.cs" />
     <Compile Include="RevWalk\RevWalkTestCase.cs" />
     <Compile Include="Util\QuotedStringBourneStyleTest.cs" />
     <Compile Include="Util\QuotedStringBourneUserPathStyleTest.cs" />
@@ -142,21 +144,20 @@
     <Compile Include="Util\StringUtilsTest.cs" />
     <Compile Include="Util\TemporaryBufferTest.cs" />
     <Compile Include="Util\TestRng.cs" />
-    <Compile Include="Util\XInputStream.cs" />
+    <Compile Include="XInputStream.cs" />
     <Compile Include="Util\VariousUtilityTests.cs" />
     <Compile Include="ValidRefNameTest.cs" />
     <Compile Include="WindowCacheGetTest.cs" />
     <Compile Include="WindowCacheReconfigureTest.cs" />
     <Compile Include="WorkDirCheckoutTest.cs" />
-    <Compile Include="WriteTests.cs" />
+    <Compile Include="T0003_Basic_Write.cs" />
     <Compile Include="ObjectCheckerTests.cs" />
     <Compile Include="T0001_ObjectId.cs" />
-    <Compile Include="PersonIdentTests.cs" />
+    <Compile Include="T0001_PersonIdent.cs" />
     <Compile Include="PackIndexTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Crc32Tests.cs" />
-    <Compile Include="Util\RepositoryTestCase.cs" />
-    <Compile Include="TreeTests.cs" />
+    <Compile Include="RepositoryTestCase.cs" />
     <Compile Include="Patch\EditListTest.cs" />
     <Compile Include="AssertHelper.cs" />
   </ItemGroup>
@@ -274,45 +275,123 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Diff\Resources\E.patch" />
-    <None Include="Diff\Resources\E_PostImage" />
-    <None Include="Diff\Resources\E_PreImage" />
-    <None Include="Diff\Resources\testContext0.out" />
-    <None Include="Diff\Resources\testContext1.out" />
-    <None Include="Diff\Resources\testContext10.out" />
-    <None Include="Diff\Resources\testContext100.out" />
-    <None Include="Diff\Resources\testContext3.out" />
-    <None Include="Diff\Resources\testContext5.out" />
-    <None Include="Diff\Resources\X.patch" />
-    <None Include="Diff\Resources\X_PostImage" />
-    <None Include="Diff\Resources\X_PreImage" />
-    <None Include="Diff\Resources\Y.patch" />
-    <None Include="Diff\Resources\Y_PostImage" />
-    <None Include="Diff\Resources\Y_PreImage" />
-    <None Include="Diff\Resources\Z.patch" />
-    <None Include="Diff\Resources\Z_PostImage" />
-    <None Include="Diff\Resources\Z_PreImage" />
-    <None Include="Patch\Resources\testEditList_Types.patch" />
-    <None Include="Patch\Resources\testError_BodyTooLong.patch" />
-    <None Include="Patch\Resources\testError_CcTruncatedOld.patch" />
-    <None Include="Patch\Resources\testError_DisconnectedHunk.patch" />
-    <None Include="Patch\Resources\testError_GarbageBetweenFiles.patch" />
-    <None Include="Patch\Resources\testError_GitBinaryNoForwardHunk.patch" />
-    <None Include="Patch\Resources\testError_TruncatedNew.patch" />
-    <None Include="Patch\Resources\testError_TruncatedOld.patch" />
-    <None Include="Patch\Resources\testGetText_BothISO88591.patch" />
-    <None Include="Patch\Resources\testGetText_Convert.patch" />
-    <None Include="Patch\Resources\testGetText_DiffCc.patch" />
-    <None Include="Patch\Resources\testGetText_NoBinary.patch" />
-    <None Include="Patch\Resources\testParse_AddNoNewline.patch" />
-    <None Include="Patch\Resources\testParse_CcDeleteFile.patch" />
-    <None Include="Patch\Resources\testParse_CcNewFile.patch" />
-    <None Include="Patch\Resources\testParse_ConfigCaseInsensitive.patch" />
-    <None Include="Patch\Resources\testParse_FixNoNewline.patch" />
-    <None Include="Patch\Resources\testParse_GitBinaryDelta.patch" />
-    <None Include="Patch\Resources\testParse_GitBinaryLiteral.patch" />
-    <None Include="Patch\Resources\testParse_NoBinary.patch" />
-    <None Include="Patch\Resources\testParse_OneFileCc.patch" />
+    <None Include="Diff\Resources\E.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\E_PostImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\E_PreImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext0.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext1.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext10.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext100.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext3.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\testContext5.out">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\X.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\X_PostImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\X_PreImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Y.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Y_PostImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Y_PreImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Z.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Z_PostImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Diff\Resources\Z_PreImage">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testEditList_Types.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_BodyTooLong.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_CcTruncatedOld.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_DisconnectedHunk.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_GarbageBetweenFiles.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_GitBinaryNoForwardHunk.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_TruncatedNew.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testError_TruncatedOld.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testGetText_BothISO88591.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testGetText_Convert.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testGetText_DiffCc.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testGetText_NoBinary.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_AddNoNewline.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_CcDeleteFile.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_CcNewFile.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_ConfigCaseInsensitive.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_FixNoNewline.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_GitBinaryDelta.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_GitBinaryLiteral.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_NoBinary.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Patch\Resources\testParse_OneFileCc.patch">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\create-second-pack">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

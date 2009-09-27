@@ -152,17 +152,13 @@ namespace GitSharp.Tests
 			Assert.AreEqual(0x4743F1E4L, idx1.FindCRC32(ObjectId.FromString("82c6b885ff600be425b4ea96dee75dca255b69e7")));
 
 			// Validate that an index written by PackWriter is the same.
-			FileInfo idx2File = new FileInfo(_indexFile.DirectoryName+ ".2");
-			var @is = new FileStream(idx2File.FullName, System.IO.FileMode.CreateNew);
-			try
+			FileInfo idx2File = new FileInfo(_indexFile.FullName+ ".2");
+			using (var @is = new FileStream(idx2File.FullName, System.IO.FileMode.CreateNew))
 			{
 				_writer.writeIndex(@is);
 			}
-			finally
-			{
-				@is.Close();
-			}
-			PackIndex idx2 = PackIndex.Open(idx2File);
+	
+            PackIndex idx2 = PackIndex.Open(idx2File);
 			Assert.IsInstanceOfType(typeof (PackIndexV2), idx2);
 			Assert.AreEqual(idx1.ObjectCount, idx2.ObjectCount);
 			Assert.AreEqual(idx1.Offset64Count, idx2.Offset64Count);

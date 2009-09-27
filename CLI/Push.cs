@@ -1,7 +1,7 @@
 ﻿/*
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
- *
+ * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
+ * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
+ * 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -37,14 +37,101 @@
  */
 
 using System;
+using System.Collections.Generic;
+using NDesk.Options;
 
 namespace GitSharp.CLI
 {
     [Command(complete = false, common = true, usage = "Update remote refs along with associated objects")]
     class Push : TextBuiltin
     {
+        private static Boolean isHelp = false;
+
+#if ported
+        private static Boolean isVerbose = false;
+        private static string repo = "";
+        private static Boolean pushAllRefs = false;
+        private static Boolean mirrorAllRefs = false;
+        private static Boolean pushTags = false;
+        private static Boolean isDryRun = false;
+        private static Boolean isForced = false;
+        private static Boolean useThinPack = false;
+        private static string receivePack = "";
+#endif
+
         override public void Run(String[] args)
         {
+            options = new CmdParserOptionSet()
+            {
+                { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
+#if ported
+                
+                { "v|verbose", "Be verbose", v=> {isVerbose = true;}},
+                { "repo=", "{repository}", (string v) => repo = v},
+                { "all", "Push all refs", v=> {pushAllRefs = true;}},
+                { "mirror", "Mirror all refs", v=> {mirrorAllRefs = true;}},
+                { "tags", "Push tags", v=> {pushTags = true;}},
+                { "n|dry-run", "Dry run", v=>{isDryRun = true;}},
+                { "f|force", "Force updates", v=> {isForced = true;}},
+                { "thin", "Use thin pack", v=> {useThinPack = true;}},
+                { "receive-pack=", "{Receive pack} program", (string v) => receivePack = v},
+                { "exec=", "{Receive pack} program", (string v) => receivePack = v},
+#endif
+            };
+
+            try
+            {
+                List<String> arguments = ParseOptions(args);
+                if (arguments.Count > 0)
+                {
+                    //Add the file(s)
+                    DoPush(arguments);
+                }
+                else if (args.Length <= 0)
+                {
+                    //Display the modified files for the existing repository
+                    Console.WriteLine("Warning: You did not specify any refspecs to push, and the current remote");
+                    Console.WriteLine("Warning: has not configured any push refspecs. The default action in this");
+                    Console.WriteLine("Warning: case is to push all matching refspecs, that is, all branches");
+                    Console.WriteLine("Warning: that exist both locally and remotely will be updated. This may");
+                    Console.WriteLine("Warning: not necessarily be what you want to happen.");
+                    Console.WriteLine("Warning:");
+                    Console.WriteLine("Warning: You can specify what action you want to take in this case, and");
+                    Console.WriteLine("Warning: avoid seeing this message again, by configuring 'push.default' to:");
+                    Console.WriteLine("Warning:   'nothing'  : Do not push anything");
+                    Console.WriteLine("Warning:   'matching' : Push all matching branches (default)");
+                    Console.WriteLine("Warning:   'tracking' : Push the current branch to whatever it is tracking");
+                    Console.WriteLine("Warning:   'current'  : Push the current branch");
+                    
+                    // Enter passphrase
+                    Console.WriteLine("This command still needs to be implemented.");
+
+                }
+                else
+                {
+                    OfflineHelp();
+                }
+            }
+            catch (OptionException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        private static void OfflineHelp()
+        {
+            if (!isHelp)
+            {
+                isHelp = true;
+                Console.WriteLine("usage: git push [options] [<repository> <refspec>...]");
+                Console.WriteLine();
+                options.WriteOptionDescriptions(Console.Out);
+            }
+        }
+
+        private static void DoPush(List<String> filesAdded)
+        {
+            Console.WriteLine("This command still needs to be implemented.");
         }
     }
 }

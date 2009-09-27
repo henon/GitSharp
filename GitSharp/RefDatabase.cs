@@ -74,7 +74,7 @@ namespace GitSharp
 
 		public Repository Repository { get; private set; }
 		public int LastRefModification { get; private set; }
-		public int LastNotifiedRefModification { get; private set; }
+		public int LastNotifiedRefModification { get; set; }
 
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void ClearCache()
@@ -131,7 +131,7 @@ namespace GitSharp
 				_looseRefsMTime[name] = time;
 				SetModified();
 			}
-			Repository.OnRefsChanged();
+			Repository.fireRefsMaybeChanged();
 		}
 
 		///	<summary>
@@ -163,7 +163,7 @@ namespace GitSharp
 			byte[] content = Constants.encode("ref: " + target + "\n");
 			LockAndWriteFile(FileForRef(name), content);
 			UncacheSymRef(name);
-			Repository.OnRefsChanged();
+			Repository.fireRefsMaybeChanged();
 		}
 
 		private void UncacheSymRef(string name)
@@ -246,7 +246,7 @@ namespace GitSharp
 				// ignore here
 			}
 
-			Repository.OnRefsChanged();
+			Repository.fireRefsMaybeChanged();
 			return avail;
 		}
 

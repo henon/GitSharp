@@ -73,11 +73,11 @@ namespace GitSharp.Tests
 		public void testCheckBlob()
 		{
 			// Any blob should pass...
-			_checker.checkBlob(new char[0]);
-			_checker.checkBlob(new char[1]);
+			_checker.checkBlob(new byte[0]);
+			_checker.checkBlob(new byte[1]);
 
-			_checker.check(Constants.OBJ_BLOB, new char[0]);
-			_checker.check(Constants.OBJ_BLOB, new char[1]);
+			_checker.check(Constants.OBJ_BLOB, new byte[0]);
+			_checker.check(Constants.OBJ_BLOB, new byte[1]);
 		}
 
 		[Test]
@@ -91,7 +91,7 @@ namespace GitSharp.Tests
 
 			b.Append("author A. U. Thor <foo 1 +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+            byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -116,7 +116,7 @@ namespace GitSharp.Tests
 
 			b.Append("author A. U. Thor foo> 1 +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -141,7 +141,7 @@ namespace GitSharp.Tests
 
 			b.Append("author 1 +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -166,7 +166,7 @@ namespace GitSharp.Tests
 
 			b.Append("author a <b> +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -191,7 +191,7 @@ namespace GitSharp.Tests
 
 			b.Append("author a <b>\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -216,7 +216,7 @@ namespace GitSharp.Tests
 
 			b.Append("author a <b> z");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -241,7 +241,7 @@ namespace GitSharp.Tests
 
 			b.Append("author a <b> 1 z");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -267,7 +267,7 @@ namespace GitSharp.Tests
 			b.Append("author a <b> 1 +0000\n");
 			b.Append("committer a <");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -293,7 +293,7 @@ namespace GitSharp.Tests
 			b.Append("parent ");
 			b.Append("\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -318,7 +318,7 @@ namespace GitSharp.Tests
 			b.Append("zzzzfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append("\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -343,7 +343,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append("\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -368,7 +368,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append("z\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -393,7 +393,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append("\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -416,7 +416,7 @@ namespace GitSharp.Tests
 			b.Append("zzzzfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append('\n');
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -437,7 +437,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append("z\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -458,7 +458,7 @@ namespace GitSharp.Tests
 			b.Append("be9b");
 			b.Append("\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -479,7 +479,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append('\n');
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -502,7 +502,7 @@ namespace GitSharp.Tests
 
 			b.Append("committer A. U. Thor <author@localhost> 1 +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -527,7 +527,7 @@ namespace GitSharp.Tests
 
 			b.Append("author A. U. Thor <author@localhost> 1 +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -553,7 +553,7 @@ namespace GitSharp.Tests
 			b.Append("author A. U. Thor <author@localhost> 1 +0000\n");
 			b.Append("\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -576,7 +576,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append('\n');
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -597,7 +597,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append('\n');
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -618,7 +618,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append('\n');
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -639,7 +639,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append('\n');
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkCommit(data);
@@ -664,7 +664,7 @@ namespace GitSharp.Tests
 			b.Append("tag foo\n");
 			b.Append("tagger \n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -689,7 +689,7 @@ namespace GitSharp.Tests
 			b.Append("tag foo\n");
 			b.Append("tagger a < 1 +000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -706,7 +706,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -727,7 +727,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append('\n');
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -748,7 +748,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append('\n');
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -769,7 +769,7 @@ namespace GitSharp.Tests
 			b.Append("zz9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append('\n');
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -790,7 +790,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append(" \n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -810,7 +810,7 @@ namespace GitSharp.Tests
 			b.Append("object ");
 			b.Append("be9");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -834,7 +834,7 @@ namespace GitSharp.Tests
 			b.Append("type commit\n");
 			b.Append("tag foo\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -857,7 +857,7 @@ namespace GitSharp.Tests
 
 			b.Append("type commit\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -881,7 +881,7 @@ namespace GitSharp.Tests
 			b.Append("type commit\n");
 			b.Append("tag\tfoo\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -905,7 +905,7 @@ namespace GitSharp.Tests
 			b.Append("type commit\n");
 			b.Append("tga foo\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -929,7 +929,7 @@ namespace GitSharp.Tests
 			b.Append("type commit\n");
 			b.Append("tag foo");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -950,7 +950,7 @@ namespace GitSharp.Tests
 			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
 			b.Append('\n');
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -973,7 +973,7 @@ namespace GitSharp.Tests
 
 			b.Append("type\tcommit\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -996,7 +996,7 @@ namespace GitSharp.Tests
 
 			b.Append("tpye commit\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -1019,7 +1019,7 @@ namespace GitSharp.Tests
 
 			b.Append("type commit");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTag(data);
@@ -1037,7 +1037,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "100644 foobar");
 			entry(b, "100644 fooaaa");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1055,7 +1055,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "40000 a");
 			entry(b, "100644 a.c");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1073,7 +1073,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "100644 a0c");
 			entry(b, "40000 a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1091,7 +1091,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "100644 a");
 			entry(b, "100644 a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1109,7 +1109,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "100644 a");
 			entry(b, "100755 a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1127,7 +1127,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "100644 a");
 			entry(b, "40000 a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1149,7 +1149,7 @@ namespace GitSharp.Tests
 			entry(b, "100644 a.e");
 			entry(b, "40000 a");
 			entry(b, "100644 zoo");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1166,7 +1166,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			b.Append("100644");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1183,7 +1183,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "8 a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1200,7 +1200,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "Z a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1217,7 +1217,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "1 a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1234,7 +1234,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "170000 a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1251,7 +1251,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "0 a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1268,7 +1268,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "0100644 a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1286,7 +1286,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "040000 a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1303,7 +1303,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "100644 a/b");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1320,7 +1320,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "100644 .");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1337,7 +1337,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "100644 ..");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1354,7 +1354,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "100644 ");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1371,7 +1371,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			b.Append("100644 b");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1387,8 +1387,8 @@ namespace GitSharp.Tests
 		public void testInvalidTreeTruncatedInObjectId()
 		{
 			var b = new StringBuilder();
-			b.Append("100644 b\012");
-			char[] data = b.ToString().ToCharArray();
+			b.Append("100644 b" + '\0' + (char)1 + (char)2);
+			byte[] data = Constants.encodeASCII(b.ToString());
 			try
 			{
 				_checker.checkTree(data);
@@ -1405,7 +1405,7 @@ namespace GitSharp.Tests
 		{
 			try
 			{
-				_checker.check(Constants.OBJ_BAD, new char[0]);
+				_checker.check(Constants.OBJ_BAD, new byte[0]);
 				Assert.Fail("Did not throw CorruptObjectException");
 			}
 			catch (CorruptObjectException e)
@@ -1434,7 +1434,7 @@ namespace GitSharp.Tests
 			b.Append("author A. U. Thor <author@localhost> 1 +0000\n");
 			b.Append("committer A. U. Thor <author@localhost> 1 +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkCommit(data);
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
@@ -1455,7 +1455,7 @@ namespace GitSharp.Tests
 			b.Append("author A. U. Thor <author@localhost> 1 +0000\n");
 			b.Append("committer A. U. Thor <author@localhost> 1 +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkCommit(data);
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
@@ -1480,7 +1480,7 @@ namespace GitSharp.Tests
 			b.Append("author A. U. Thor <author@localhost> 1 +0000\n");
 			b.Append("committer A. U. Thor <author@localhost> 1 +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkCommit(data);
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
@@ -1497,7 +1497,7 @@ namespace GitSharp.Tests
 			b.Append("author <> 0 +0000\n");
 			b.Append("committer <> 0 +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkCommit(data);
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
@@ -1514,7 +1514,7 @@ namespace GitSharp.Tests
 			b.Append("author A. U. Thor <author@localhost> 1 +0000\n");
 			b.Append("committer A. U. Thor <author@localhost> 1 +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkCommit(data);
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
@@ -1532,7 +1532,7 @@ namespace GitSharp.Tests
 			b.Append("author A. U. Thor <author@localhost> " + when + "\n");
 			b.Append("committer A. U. Thor <author@localhost> " + when + "\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkCommit(data);
 			_checker.check(Constants.OBJ_COMMIT, data);
 		}
@@ -1540,8 +1540,8 @@ namespace GitSharp.Tests
 		[Test]
 		public void testValidEmptyTree()
 		{
-			_checker.checkTree(new char[0]);
-			_checker.check(Constants.OBJ_TREE, new char[0]);
+			_checker.checkTree(new byte[0]);
+			_checker.check(Constants.OBJ_TREE, new byte[0]);
 		}
 
 		[Test]
@@ -1557,7 +1557,7 @@ namespace GitSharp.Tests
 			b.Append("tag test-tag\n");
 			b.Append("tagger A. U. Thor <author@localhost> 1 +0000\n");
 
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTag(data);
 			_checker.check(Constants.OBJ_TAG, data);
 		}
@@ -1567,7 +1567,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "100644 regular-file");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1576,7 +1576,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "100755 executable");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1585,7 +1585,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "40000 tree");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1594,7 +1594,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "120000 symlink");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1603,7 +1603,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "160000 git link");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1612,7 +1612,7 @@ namespace GitSharp.Tests
 		{
 			var b = new StringBuilder();
 			entry(b, "100644 .a");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1622,7 +1622,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "100644 fooaaa");
 			entry(b, "100755 foobar");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1632,7 +1632,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "100755 fooaaa");
 			entry(b, "100644 foobar");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1642,7 +1642,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "40000 a");
 			entry(b, "100644 b");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1652,7 +1652,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "100644 a");
 			entry(b, "40000 b");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1663,7 +1663,7 @@ namespace GitSharp.Tests
 			entry(b, "100644 a.c");
 			entry(b, "40000 a");
 			entry(b, "100644 a0c");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1673,7 +1673,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "40000 a");
 			entry(b, "100644 apple");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1683,7 +1683,7 @@ namespace GitSharp.Tests
 			var b = new StringBuilder();
 			entry(b, "40000 an orang");
 			entry(b, "40000 an orange");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 
@@ -1694,7 +1694,7 @@ namespace GitSharp.Tests
 			entry(b, "100644 a");
 			entry(b, "100644 a0c");
 			entry(b, "100644 b");
-			char[] data = b.ToString().ToCharArray();
+			byte[] data = Constants.encodeASCII(b.ToString());
 			_checker.checkTree(data);
 		}
 	}

@@ -1,5 +1,4 @@
 ﻿/*
- * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -37,46 +36,62 @@
  */
 
 using System;
-using System.IO;
-using GitSharp.API;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using GitSharp.API.Commands;
 
-namespace GitSharp.CLI
+namespace GitSharp.API
 {
-
-    [Command(common = true, complete = false, usage = "Create an empty git repository")]
-    class Init : TextBuiltin
+    /// <summary>
+    /// Represents a git repository
+    /// </summary>
+    public class Repository
     {
-        private GitSharp.API.Commands.Init cmd = new GitSharp.API.Commands.Init();
+        internal GitSharp.Repository _repo;
 
-        public override void Run(string[] args)
+        internal Repository(GitSharp.Repository repo)
         {
-            cmd.OutputStream = this.streamOut;
-            options = new CmdParserOptionSet
-                          {
-                              {"bare", "Create a bare repository", v => cmd.Bare = true},
-                              {"quiet|q", "Only print error and warning messages, all other output will be suppressed.", v => cmd.Quiet = true},
-                              {"template", "Not supported.", var => streamOut.WriteLine("--template=<template dir> is not supported")},
-                              {"shared", "Not supported.", var => streamOut.WriteLine("--shared is not supported")},
-                          };
+            _repo = repo;
+        }
 
-            arguments = options.Parse(args);
+        /// <summary>
+        /// Initializes the Repository object.
+        /// </summary>
+        /// <param name="path">Path to the local git repository.</param>
+        public Repository(string path) : this( new GitSharp.Repository(new System.IO.DirectoryInfo(path)))
+        {
+        }
 
+        /// <summary>
+        /// Initializes a non-bare git repository in the current directory if GIT_DIR is not set.
+        /// </summary>
+        /// <returns>The initialized repository</returns>
+        public static Repository Init()
+        {
+            return Init(null, false);
+        }
+
+        /// <summary>
+        /// Initializes a non-bare git repository in the location path points to.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>The initialized repository</returns>
+        public static Repository Init(string path)
+        {
+            return Init(path, false);
+        }
+
+        /// <summary>
+        /// Initializes a directory in the current location.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="bare"></param>
+        /// <returns></returns>
+        public static Repository Init(string path, bool bare) {
+            var cmd = new Init() { Bare = bare, Path = path };
             cmd.Execute();
+            return cmd.InitializedRepository;
         }
-
-        public override bool RequiresRepository()
-        {
-            return false;
-        }
-
-        //private void create()
-        //{
-        //    if (gitdir == null)
-        //        gitdir = bare ? Environment.CurrentDirectory : Path.Combine(Environment.CurrentDirectory, ".git");
-        //    db = new Repository(new DirectoryInfo(gitdir));
-        //    db.Create(bare);
-        //    Console.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
-        //}
     }
-
 }

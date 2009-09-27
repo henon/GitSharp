@@ -43,6 +43,7 @@ using System;
 using System.IO;
 using System.Text;
 using GitSharp.Exceptions;
+using GitSharp.Util;
 
 namespace GitSharp
 {
@@ -124,8 +125,7 @@ namespace GitSharp
 				if (lastA < bk) return -1;
 				if (lastA > bk) return 1;
 				if (k == nameEnd - 1) return 0;
-
-				return -1;
+				return 1;
 			}
 
 			if (lastA < lastB) return -1;
@@ -156,7 +156,7 @@ namespace GitSharp
 			int low = 0;
 			do
 			{
-				int mid = (low + high) / 2;
+			    int mid = (int) (((uint) (low + high)) >> 1);
 				int cmp = CompareNames(entries[mid].NameUTF8, nameUTF8,
 					nameStart, nameEnd, GitSharp.TreeEntry.LastChar(entries[mid]), nameUTF8Last);
 
@@ -273,7 +273,7 @@ namespace GitSharp
 
 		public FileTreeEntry AddFile(string name)
 		{
-			return AddFile(Repository.GitInternalSlash(Constants.CHARSET.GetBytes(name)), 0);
+			return AddFile(Repository.GitInternalSlash(Constants.encode(name)), 0);
 		}
 
 		/// <summary>
@@ -296,7 +296,7 @@ namespace GitSharp
 			}
 
 			EnsureLoaded();
-            byte xlast = (byte)(slash < s.Length ? '/' : 0);
+            byte xlast = slash < s.Length ? (byte)'/' : (byte)0;
 			int p = BinarySearch(_contents, s, xlast, offset, slash);
 			if (p >= 0 && slash < s.Length && _contents[p] is Tree)
 			{
@@ -306,7 +306,7 @@ namespace GitSharp
 			byte[] newName = SubString(s, offset, slash);
 			if (p >= 0)
 			{
-				throw new EntryExistsException(Constants.CHARSET.GetString(newName));
+				throw new EntryExistsException(RawParseUtils.decode(newName));
 			}
 
 			if (slash < s.Length)
@@ -330,7 +330,7 @@ namespace GitSharp
 		///	<exception cref="IOException"> </exception>
 		public Tree AddTree(string name)
 		{
-			return AddTree(Repository.GitInternalSlash(Constants.CHARSET.GetBytes(name)), 0);
+			return AddTree(Repository.GitInternalSlash(Constants.encode(name)), 0);
 		}
 
 		///	<summary>
@@ -360,7 +360,7 @@ namespace GitSharp
 			byte[] newName = SubString(s, offset, slash);
 			if (p >= 0)
 			{
-				throw new EntryExistsException(Constants.CHARSET.GetString(newName));
+				throw new EntryExistsException(RawParseUtils.decode(newName));
 			}
 
             Tree t = new Tree(this, newName);
@@ -407,7 +407,7 @@ namespace GitSharp
 
 			_contents = n;
 
-			Id = null;
+			SetModified();
 		}
 
 		internal void RemoveEntry(TreeEntry e)
@@ -507,7 +507,7 @@ namespace GitSharp
 
 		private TreeEntry FindMember(string s, byte slast)
 		{
-			return FindMember(Repository.GitInternalSlash(Constants.CHARSET.GetBytes(s)), slast, 0);
+			return FindMember(Repository.GitInternalSlash(Constants.encode(s)), slast, 0);
 		}
 
 		private TreeEntry FindMember(byte[] s, byte slast, int offset)
@@ -666,10 +666,14 @@ namespace GitSharp
 				{
 					ent = new Tree(this, id, name);
 				}
-				else if (FileMode.Symlink.Equals(mode))
-				{
-					ent = new SymlinkTreeEntry(this, id, name);
-				}
+                else if (FileMode.Symlink.Equals(mode))
+                {
+                    ent = new SymlinkTreeEntry(this, id, name);
+                }
+                else if (FileMode.GitLink.Equals(mode))
+                {
+                    ent = new GitLinkTreeEntry(this, id, name);
+                }
 				else
 				{
 					throw new CorruptObjectException(Id, "Invalid mode: " + Convert.ToString(mode, 8));

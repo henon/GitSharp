@@ -59,16 +59,11 @@ namespace GitSharp.Tests
         [Test]
         public void testEncodeASCII_FailOnNonASCII()
         {
-        	const string src = "ÅªnÄ­cÅdeÌ½";
-        	try
-            {
-                Constants.encodeASCII(src);
-                Assert.Fail("Incorrectly accepted a Unicode character");
-            }
-            catch (ArgumentException err)
-            {
-                Assert.AreEqual("Not ASCII string: " + src, err.Message);
-            }
+            const string src = "Ūnĭcōde̽";
+
+            var err = AssertHelper.Throws<ArgumentException>(() => Constants.encodeASCII(src));
+
+            Assert.AreEqual("Not ASCII string: " + src, err.Message);
         }
 
     	[Test]

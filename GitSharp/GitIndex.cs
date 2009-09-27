@@ -135,7 +135,7 @@ namespace GitSharp
             if (_cacheFile.Exists && _cacheFile.LastWriteTime.Ticks != _lastCacheTime)
             {
                 Read();
-                Repository.OnIndexChanged();
+                Repository.fireIndexChanged();
             }
         }
 
@@ -208,24 +208,18 @@ namespace GitSharp
             }
 
             using (var cache = new FileStream(_cacheFile.FullName, System.IO.FileMode.Open))
+            using (var buffer = new BinaryReader(cache))
             {
-                try
-                {
-                    _header = new Header(new BinaryReader(cache));
-                    _entries.Clear();
+                _header = new Header(buffer);
+                _entries.Clear();
 
-                    for (int i = 0; i < _header.Entries; ++i)
-                    {
-                        var entry = new Entry(Repository, cache);
-                        _entries[Constants.encode(entry.Name)] = entry;
-                    }
-
-                    _lastCacheTime = _cacheFile.LastWriteTime.Ticks;
-                }
-                finally
+                for (int i = 0; i < _header.Entries; ++i)
                 {
-                    cache.Close();
+                    var entry = new Entry(Repository, buffer);
+                    _entries[Constants.encode(entry.Name)] = entry;
                 }
+
+                _lastCacheTime = _cacheFile.LastWriteTime.Ticks;
             }
         }
 
@@ -279,6 +273,7 @@ namespace GitSharp
                     fileOutputStream.Close();
                 }
 
+                _cacheFile.Refresh();
                 if (_cacheFile.Exists)
                 {
                     try
@@ -299,7 +294,7 @@ namespace GitSharp
                 _changed = false;
                 _statDirty = false;
                 _lastCacheTime = _cacheFile.LastWriteTime.Ticks;
-                Repository.OnIndexChanged();
+                Repository.fireIndexChanged();
             }
             finally
             {
@@ -314,6 +309,7 @@ namespace GitSharp
 
                 try
                 {
+                    tmpIndex = new FileInfo(_cacheFile.FullName + ".tmp");
                     if (tmpIndex.Exists)
                     {
                         tmpIndex.Delete();
@@ -721,11 +717,9 @@ namespace GitSharp
                 _flags = (short)((stage << 12) | _name.Length); // TODO: fix _flags
             }
 
-            internal Entry(Repository repository, Stream buffer)
+            internal Entry(Repository repository, BinaryReader b)
                 : this(repository)
             {
-                using (var b = new BinaryReader(buffer))
-                {
                     long startposition = b.BaseStream.Position;
                     Ctime = b.ReadInt32() * 1000000000L + (b.ReadInt32() % 1000000000L);
                     Mtime = b.ReadInt32() * 1000000000L + (b.ReadInt32() % 1000000000L);
@@ -741,7 +735,6 @@ namespace GitSharp
                     _name = b.ReadBytes(_flags & 0xFFF);
                     b.BaseStream.Position = startposition +
                                             ((8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 20 + 2 + _name.Length + 8) & ~7);
-                }
             }
 
             private Entry(Repository repository)

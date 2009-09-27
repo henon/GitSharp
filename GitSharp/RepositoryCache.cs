@@ -135,13 +135,20 @@ namespace GitSharp
         {
             for (int stage = 0; stage < 2; stage++)
             {
+                var keysToRemove = new List<Key>();
+
                 foreach (KeyValuePair<Key, WeakReference<Repository>> e in cacheMap)
                 {
                     Repository db = e.Value.get();
                     if (db != null)
                         db.Close();
 
-                    cacheMap.Remove(e.Key);
+                    keysToRemove.Add(e.Key);
+                }
+
+                foreach (Key key in keysToRemove)
+                {
+                    cacheMap.Remove(key);
                 }
             }
         }

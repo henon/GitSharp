@@ -129,7 +129,7 @@ namespace GitSharp.Util
          * @return the translated path. <code>new File(dir,name)</code> if this
          *         platform does not require path name translation.
          */
-        public static DirectoryInfo resolve(DirectoryInfo dir, string name)
+        public static FileSystemInfo resolve(DirectoryInfo dir, string name)
         {
             return resolveImpl(dir, name);
         }
@@ -152,11 +152,15 @@ namespace GitSharp.Util
          * @return the translated path. <code>new File(dir,name)</code> if this
          *         platform does not require path name translation.
          */
-        private static DirectoryInfo resolveImpl(DirectoryInfo dir, string name)
+        private static FileSystemInfo resolveImpl(DirectoryInfo dir, string name)
         {
-            if (Path.IsPathRooted(name))
-                return new DirectoryInfo(name);
-            return PathUtil.CombineDirectoryPath(dir, name);
+            string fullname = Path.Combine(dir.FullName, name);
+            if (Directory.Exists(fullname))
+            {
+                return new DirectoryInfo(fullname);
+            }
+            
+            return new FileInfo(fullname);
         }
 
         /**
@@ -187,16 +191,21 @@ namespace GitSharp.Util
          */
         private static DirectoryInfo userHomeImpl()
         {
-            throw new NotImplementedException();
-            //string home = AccessController
-            //        .doPrivileged(new PrivilegedAction<string>() {
-            //            public string run() {
-            //                return System.getProperty("user.home");
-            //            }
-            //        });
-            //if (home == null || home.Length() == 0)
-            //    return null;
-            //return new File(home).getAbsoluteFile();
+            string userHomeFolderPath;
+
+            var platform = (int)Environment.OSVersion.Platform;
+
+            if (platform == (int)PlatformID.Unix || platform  == 6 /* (int)PlatformID.MacOSX */
+                || platform == 128) // [nulltoken] when can _this_ equals 128 ?
+            {
+                userHomeFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            }
+            else
+            {
+                userHomeFolderPath = Environment.GetEnvironmentVariable("USERPROFILE");
+            }
+
+            return new DirectoryInfo(userHomeFolderPath);
         }
 
 

@@ -46,7 +46,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests
 {
 	[TestFixture]
-	public class TreeTests : RepositoryTestCase
+    public class T0002_Tree : RepositoryTestCase
 	{
 		private static readonly ObjectId SomeFakeId = ObjectId.FromString("0123456789abcdef0123456789abcdef01234567");
 
@@ -301,5 +301,13 @@ namespace GitSharp.Tests
 			Assert.AreSame(e2, ents[4]);
 		}
 
+        [Test]
+	    public void test009_SymlinkAndGitlink()
+	    {
+	        Tree symlinkTree = db.MapTree("symlink");
+	        Assert.IsTrue(symlinkTree.ExistsBlob("symlink.txt"), "Symlink entry exists");
+	        Tree gitlinkTree = db.MapTree("gitlink");
+	        Assert.IsTrue(gitlinkTree.ExistsBlob("submodule"), "Gitlink entry exists");
+	    }
 	}
 }

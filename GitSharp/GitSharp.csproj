@@ -63,6 +63,7 @@
     <Compile Include="ByteArrayWindow.cs" />
     <Compile Include="ByteBufferWindow.cs" />
     <Compile Include="ByteWindow.cs" />
+    <Compile Include="RepositoryListener.cs" />
     <Compile Include="CompleteAttribute.cs" />
     <Compile Include="DeltaOfsPackedObjectLoader.cs" />
     <Compile Include="DeltaPackedObjectLoader.cs">
@@ -103,7 +104,7 @@
     <Compile Include="FnMatch\RestrictedWildCardHead.cs" />
     <Compile Include="FnMatch\WildCardHead.cs" />
     <Compile Include="GitlinkTreeEntry.cs" />
-    <Compile Include="GitSharpSystemReader.cs" />
+    <Compile Include="SystemReader.cs" />
     <Compile Include="Merge\Merger.cs" />
     <Compile Include="Merge\MergeStrategy.cs" />
     <Compile Include="Merge\StrategyOneSided.cs" />
@@ -209,7 +210,6 @@
     <Compile Include="Util\GenericComparer.cs" />
     <Compile Include="Util\Inspect.cs" />
     <Compile Include="Util\Int32.cs" />
-    <Compile Include="Util\ISystemReader.cs" />
     <Compile Include="Util\MutableInteger.cs" />
     <Compile Include="Util\StringExtension.cs" />
     <Compile Include="Util\CheckedOutputStream.cs" />

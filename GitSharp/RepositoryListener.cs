@@ -1,7 +1,6 @@
 ﻿/*
- * Copyright (C) 2009, Yann Simon <yann.simon.fr@gmail.com>
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
- * 
+ * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -36,37 +35,24 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.Util
+namespace GitSharp
 {
-    /// <summary>
-    /// Interface to read values from the system.
-	/// <para />
-	/// When writing unit tests, extending this interface with a custom class
-	/// permits to simulate an access to a system variable or property and
-	/// permits to control the user's global configuration.
-    /// </summary>
-    public interface ISystemReader
+    public interface RepositoryListener
     {
-        string getHostname();
+        /**
+	 * Invoked when a ref changes
+	 *
+	 * @param e
+	 *            information about the changes.
+	 */
+        void refsChanged(RefsChangedEventArgs e);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="variable">variable system variable to read</param>
-        /// <returns>value of the system variable</returns>
-        string getenv(string variable); // [henon] todo: rename later
-
-        /// <summary>
-        /// key of the system property to read
-        /// </summary>
-		/// <param name="key">value of the system property</param>
-        /// <returns></returns>
-        string getProperty(string key);  // [henon] todo: rename later
-
-        /// <summary>
-		/// The git configuration found in the user home
-        /// </summary>
-        /// <returns></returns>
-        RepositoryConfig openUserConfig();  // [henon] todo: rename later
+        /**
+         * Invoked when the index changes
+         *
+         * @param e
+         *            information about the changes.
+         */
+        void indexChanged(IndexChangedEventArgs e);
     }
 }

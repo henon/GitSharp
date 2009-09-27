@@ -39,6 +39,7 @@
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.IO;
 using GitSharp.Util;
 
 namespace GitSharp.Transport
@@ -89,6 +90,12 @@ namespace GitSharp.Transport
 		/// <param name="s"></param>
 		public URIish(string s)
 		{
+
+            // If the string passes local paths such as .\dir1 or ..\dir1,
+            // get the full path for future processing.
+            if (!System.IO.Path.IsPathRooted(s))
+                s = System.IO.Path.GetFullPath(s);
+
 			s = s.Replace('\\', '/');
 			Match matcher = FullUri.Match(s);
 			Port = -1;

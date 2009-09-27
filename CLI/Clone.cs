@@ -34,10 +34,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+using System;
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Transport;
+using NDesk.Options;
 
 namespace GitSharp.CLI
 {
@@ -45,19 +46,89 @@ namespace GitSharp.CLI
     [Command(common=true, usage = "Clone a repository into a new directory")]
     public class Clone : AbstractFetchCommand
     {
-        private string remoteName = "origin";
+        private static Boolean isHelp = false;
+        private static Boolean isQuiet = false;
+        private static Boolean isVerbose = false;
+        private static Boolean isNoCheckout = false;
+        private static Boolean isCreateBareRepo = false;
+        private static Boolean isCreateMirrorRepo = false;
+        private static Boolean isCloneLocal = false;
+        private static Boolean isNoHardLinks = false;
+        private static Boolean isShared = false;
+        private static String templateRepo = "";
+        private static String referenceRepo = "";
+        private static String optionOrigin = "";
+        private static String uploadPack = "";
+        private static Int32 depth = 0;
 
-        public override bool RequiresRepository()
-        {
-            return false;
-        }
+        private string remoteName = "origin";
 
         public override void Run(string[] args)
         {
-            if (args.Length == 0) return;
-            
-            URIish source = new URIish(args[0]);
-            
+
+            options = new CmdParserOptionSet()
+            {
+                { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
+//#if ported
+                { "q|quiet", "Be quiet", v=> {isQuiet = true;}},
+                { "v|verbose", "Be verbose", v=> {isVerbose = true;}},
+                { "n|no-checkout", "Don't create a checkout", v=> {isNoCheckout = true;}},
+                { "bare", "Create a bare repository", v=> {isCreateBareRepo = true;}},
+                { "naked", "Create a bare repository", v=> {isCreateBareRepo = true;}},
+                { "mirror", "Create a mirror repository (implies bare)", v=> {isCreateMirrorRepo = true;}},
+                { "l|local", "To clone from a local repository", v=> {isCloneLocal = true;}},
+                { "no-hardlinks", "Do not use hard links, always copy", v=> {isNoHardLinks = true;}},
+                { "s|shared", "Setup as shared repository", v=> {isShared = true;} },
+                { "template=", "{Path} the template repository",(string v) => templateRepo = v },
+                { "reference=", "Reference {repo}sitory",(string v) => referenceRepo = v },
+                { "o|origin=", "Use <{branch}> instead of 'origin' to track upstream",(string v) => optionOrigin = v },
+                { "u|upload-pack=", "{Path} to git-upload-pack on the remote",(string v) => uploadPack = v },
+                { "depth=", "Create a shallow clone of that {depth}",(int v) => depth = v },
+//#endif
+            };
+
+            try
+            {
+                List<String> arguments = ParseOptions(args);
+                if (arguments.Count > 0)
+                {
+                    if (isCreateBareRepo && (optionOrigin.Length > 0))
+                    {
+                        throw die("--bare and --origin "+optionOrigin+" options are incompatible.");
+                    }
+                    if (optionOrigin.Length <= 0)
+                        optionOrigin = "origin";
+                    
+                    //Clone the specified repository
+                    DoClone(arguments[0]);
+                }
+                else if (args.Length <= 0)
+                {
+                    throw die("fatal: You must specify a repository to clone.");
+                }
+                else
+                {
+                    OfflineHelp();
+                }
+            }
+            catch (OptionException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+
+
+        private void DoClone(String repository)
+        {
+            //Determine if repository is local or remote.
+
+            //URIish source = new URIish(repository);
+            //Console.WriteLine(source.Path);
+            Console.WriteLine("Path = " + Path.GetFullPath(repository));
+            Console.WriteLine("Is path relative = " + Path.IsPathRooted(repository));
+            //Console.WriteLine("Is path relative = " + Path.IsPathRooted(repository));
+            throw die("test");
             // guess a name
             string p = source.Path;
             while (p.EndsWith("/"))
@@ -152,6 +223,18 @@ namespace GitSharp.CLI
             WorkDirCheckout co = new WorkDirCheckout(db, db.WorkingDirectory, index, tree);
             co.checkout();
             index.write();
+        }
+
+        private static void OfflineHelp()
+        {
+            if (!isHelp)
+            {
+                isHelp = true;
+                Console.WriteLine("usage: git clone [options] [--] <repo> [<dir>]");
+                Console.WriteLine();
+                options.WriteOptionDescriptions(Console.Out);
+                Console.WriteLine();
+            }
         }
     }
 

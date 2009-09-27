@@ -63,7 +63,7 @@
     <Compile Include="DirectoryCache\DirCacheIteratorTest.cs" />
     <Compile Include="DirectoryCache\DirCacheLargePathTest.cs" />
     <Compile Include="DirectoryCache\DirCacheTreeTest.cs" />
-    <Compile Include="EncodingTests.cs" />
+    <Compile Include="ConstantsEncodingTest.cs" />
     <Compile Include="FnMatch\FileNameMatcherTest.cs" />
     <Compile Include="IndexDiffTest.cs" />
     <Compile Include="T0007_Index.cs" />

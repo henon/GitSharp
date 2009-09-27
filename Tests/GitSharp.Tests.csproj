@@ -43,7 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbbreviatedIdTests.cs" />
+    <Compile Include="AbbreviatedObjectIdTest.cs" />
     <Compile Include="AssertHelperFixture.cs" />
     <Compile Include="RepositoryCacheTest.cs" />
     <Compile Include="ReflogReaderTest.cs" />

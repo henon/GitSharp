@@ -42,7 +42,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests
 {
     [TestFixture]
-    public class AbbreviatedIdTests
+    public class AbbreviatedObjectIdTest
     {
 
         [Test]

@@ -133,7 +133,7 @@
     <Compile Include="TreeWalk\TreeWalkBasicDiffTest.cs" />
     <Compile Include="Util\IntListTest.cs" />
     <Compile Include="Transport\URIishTests.cs" />
-    <Compile Include="Util\PackIndexTestCase.cs" />
+    <Compile Include="PackIndexTestCase.cs" />
     <Compile Include="RevWalk\RevWalkTestCase.cs" />
     <Compile Include="Util\QuotedStringBourneStyleTest.cs" />
     <Compile Include="Util\QuotedStringBourneUserPathStyleTest.cs" />

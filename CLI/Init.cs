@@ -37,6 +37,7 @@
 
 using System;
 using System.IO;
+using GitSharp.API;
 
 namespace GitSharp.CLI
 {
@@ -44,18 +45,22 @@ namespace GitSharp.CLI
     [Command(common = true, complete = false, usage = "Create an empty git repository")]
     class Init : TextBuiltin
     {
-        private bool bare;
+        private GitSharp.API.Commands.Init cmd = new GitSharp.API.Commands.Init();
 
         public override void Run(string[] args)
         {
+            cmd.OutputStream = this.streamOut;
             options = new CmdParserOptionSet
                           {
-                              {"bare", "Create a bare repository", v => bare = true}
+                              {"bare", "Create a bare repository", v => cmd.Bare = true},
+                              {"quiet|q", "Only print error and warning messages, all other output will be suppressed.", v => cmd.Quiet = true},
+                              {"template", "Not supported.", var => streamOut.WriteLine("--template=<template dir> is not supported")},
+                              {"shared", "Not supported.", var => streamOut.WriteLine("--shared is not supported")},
                           };
 
             arguments = options.Parse(args);
 
-            create();
+            cmd.Execute();
         }
 
         public override bool RequiresRepository()
@@ -63,14 +68,14 @@ namespace GitSharp.CLI
             return false;
         }
 
-        private void create()
-        {
-            if (gitdir == null)
-                gitdir = bare ? Environment.CurrentDirectory : Path.Combine(Environment.CurrentDirectory, ".git");
-            db = new Repository(new DirectoryInfo(gitdir));
-            db.Create(bare);
-            Console.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
-        }
+        //private void create()
+        //{
+        //    if (gitdir == null)
+        //        gitdir = bare ? Environment.CurrentDirectory : Path.Combine(Environment.CurrentDirectory, ".git");
+        //    db = new Repository(new DirectoryInfo(gitdir));
+        //    db.Create(bare);
+        //    Console.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
+        //}
     }
 
 }

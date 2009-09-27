@@ -51,6 +51,7 @@ namespace GitSharp.CLI
         public override void Run(string[] args)
         {
             cmd.OutputStream = this.streamOut;
+            cmd.Quiet = false; // [henon] the api defines the commands quiet by default. thus we need to override with git's default here.
             options = new CmdParserOptionSet
                           {
                               {"bare", "Create a bare repository", v => cmd.Bare = true},

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
@@ -266,10 +266,12 @@ namespace GitSharp
 		/// </summary>
 	    internal void WriteChecksumFooter() {
 		    _stream.Write(packChecksum);
-            var sha = new SHA1CryptoServiceProvider();
-            var hash = sha.ComputeHash(_stream.BaseStream);
+            using (var sha = new SHA1CryptoServiceProvider())
+			{
+			var hash = sha.ComputeHash(_stream.BaseStream);
 #warning this should be tested better
-		    _stream.Write(hash);
+				_stream.Write(hash);
+			}
 	    }
     }
 }

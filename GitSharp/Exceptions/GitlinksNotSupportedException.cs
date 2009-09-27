@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Jonas Fonseca <fonseca@diku.dk>
@@ -38,33 +38,50 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
-{/**
- * An exception thrown when a gitlink entry is found and cannot be
- * handled.
- */
+{
+	/// <summary>
+	/// An exception thrown when a gitlink entry is found and cannot be
+	/// handled.
+	/// </summary>
+	[Serializable]
     public class GitlinksNotSupportedException : IOException
     {
         //private static  long serialVersionUID = 1L;
 
-        /**
-         * Construct a GitlinksNotSupportedException for the specified link
-         *
-         * @param s name of link in tree or workdir
-         */
+        /// <summary>
+		/// Construct a GitlinksNotSupportedException for the specified link
+		/// </summary>
+		/// <param name="s">
+		/// Name of link in tree or workdir
+		/// </param>
         public GitlinksNotSupportedException(string s)
             : base(s)
         {
         }
+
+		/// <summary>
+		/// Construct a GitlinksNotSupportedException for the specified link
+		/// </summary>
+		/// <param name="s">
+		/// Name of link in tree or workdir
+		/// </param>
+        public GitlinksNotSupportedException(string s, Exception inner)
+            : base(s, inner)
+        {
+        }
+		
+		protected GitlinksNotSupportedException(SerializationInfo info, StreamingContext context) 
+			: base(info, context)
+		{
+		}
     }
 
 }

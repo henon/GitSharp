@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Florian Köberle <florianskarten@web.de>
  * Copyright (C) 2009, Adriano Machado <adriano.m.machado@hotmail.com>
  *
@@ -66,6 +66,12 @@ namespace GitSharp.Exceptions
         public InvalidPatternException(string message, Exception inner)
             : base(message, inner)
         {
+        }
+		
+        public InvalidPatternException(string message, string pattern, Exception inner)
+            : base(message, inner)
+        {
+            _pattern = pattern;
         }
 
         protected InvalidPatternException(SerializationInfo info, StreamingContext context)

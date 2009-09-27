@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -36,40 +36,69 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
 {
-    /** Indicates a local repository does not exist. */
-    public class RepositoryNotFoundException : TransportException
+	/// <summary>
+	/// Indicates a local repository does not exist
+	/// </summary>
+    [Serializable]
+	public class RepositoryNotFoundException : TransportException
     {
         //private static  long serialVersionUID = 1L;
 
-        /**
-         * Constructs an exception indicating a local repository does not exist.
-         *
-         * @param location
-         *            description of the repository not found, usually file path.
-         */
+		/// <summary>
+		/// Constructs an exception indicating a local repository does not exist
+		/// </summary>
+		/// <param name="location">
+		/// Description of the repository not found, usually file path
+		/// </param>
         public RepositoryNotFoundException(DirectoryInfo location)
             : this(location.ToString())
         {
         }
 
-        /**
-         * Constructs an exception indicating a local repository does not exist.
-         *
-         * @param location
-         *            description of the repository not found, usually file path.
-         */
+        /// <summary>
+		/// Constructs an exception indicating a local repository does not exist
+		/// </summary>
+		/// <param name="location">
+		/// Description of the repository not found, usually file path
+		/// </param>
         public RepositoryNotFoundException(string location)
             : base("repository not found: " + location)
+        {
+        }
+		
+		/// <summary>
+		/// Constructs an exception indicating a local repository does not exist
+		/// </summary>
+		/// <param name="location">
+		/// Description of the repository not found, usually file path
+		/// </param>
+        public RepositoryNotFoundException(DirectoryInfo location, Exception inner)
+            : this(location.ToString(),inner)
+        {
+        }
+
+        /// <summary>
+		/// Constructs an exception indicating a local repository does not exist
+		/// </summary>
+		/// <param name="location">
+		/// Description of the repository not found, usually file path
+		/// </param>
+        public RepositoryNotFoundException(string location, Exception inner)
+            : base("repository not found: " + location, inner)
+        {
+        }
+
+        protected RepositoryNotFoundException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }

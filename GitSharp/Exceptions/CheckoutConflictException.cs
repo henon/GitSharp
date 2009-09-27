@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
 {
+    [Serializable]
     public class CheckoutConflictException : Exception
     {
         /// <summary>
@@ -11,6 +13,13 @@ namespace GitSharp.Exceptions
         /// </summary>
         public CheckoutConflictException(string file)
             : base("Checkout conflict with file: " + file)
+        {
+        }
+        /// <summary>
+        /// Construct a <see cref="CheckoutConflictException"/> for the specified file
+        /// </summary>
+        public CheckoutConflictException(string file, Exception inner)
+            : base("Checkout conflict with file: " + file, inner)
         {
         }
 
@@ -34,5 +43,10 @@ namespace GitSharp.Exceptions
 
             return builder.ToString();
         }
+		
+		protected CheckoutConflictException(SerializationInfo info, StreamingContext context) 
+			: base(info, context)
+		{
+		}
     }
 }

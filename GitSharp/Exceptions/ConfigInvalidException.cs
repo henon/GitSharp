@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -37,12 +37,14 @@
  */
 
 using System;
+using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
 {
     /// <summary>
 	/// Indicates a text string is not a valid Git style configuration.
     /// </summary>
+    [Serializable]
     public class ConfigInvalidException : Exception
     {
 		/// <summary>
@@ -63,5 +65,10 @@ namespace GitSharp.Exceptions
             : base(message, inner_exception)
         {
         }
+		
+		protected ConfigInvalidException(SerializationInfo info, StreamingContext context) 
+			: base(info, context)
+		{
+		}
     }
 }

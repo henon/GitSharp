@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
@@ -46,13 +46,12 @@ using GitSharp;
 
 namespace GitSharp.Exceptions
 {
-
-    /**
-     * An inconsistency with respect to handling different object types.
-     *
-     * This most likely signals a programming error rather than a corrupt
-     * object database.
-     */
+	/// <summary>
+	/// An inconsistency with respect to handling different object types.
+    ///
+    /// This most likely signals a programming error rather than a corrupt
+    /// object database.
+	/// </summary>
     [global::System.Serializable]
     public class IncorrectObjectTypeException : Exception
     {
@@ -63,21 +62,48 @@ namespace GitSharp.Exceptions
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
         //
 
+		/// <summary>
+		/// Construct and IncorrectObjectTypeException for the specified object id.
+		///
+		/// Provide the type to make it easier to track down the problem.
+		/// </summary>
+		/// <param name="id">
+		/// SHA-1
+		/// </param>
+		/// <param name="type">
+		/// Object type
+		/// </param>
         public IncorrectObjectTypeException(ObjectId id, ObjectType type)
             : base(string.Format("object {0} is not a {1}.", id, type))
         {
 
         }
-        public IncorrectObjectTypeException(ObjectId id, ObjectType type, Exception inner) : base(string.Format("object {0} is not a {1}.", id, type), inner) { }
-
-        /**
-         * Construct and IncorrectObjectTypeException for the specified object id.
-         *
-         * Provide the type to make it easier to track down the problem.
-         *
-         * @param id SHA-1
-         * @param type object type
-         */
+		
+		/// <summary>
+		/// Construct and IncorrectObjectTypeException for the specified object id.
+		///
+		/// Provide the type to make it easier to track down the problem.
+		/// </summary>
+		/// <param name="id">
+		/// SHA-1
+		/// </param>
+		/// <param name="type">
+		/// Object type
+		/// </param>
+        public IncorrectObjectTypeException(ObjectId id, ObjectType type, Exception inner) 
+			: base(string.Format("object {0} is not a {1}.", id, type), inner) { }
+		
+		/// <summary>
+		/// Construct and IncorrectObjectTypeException for the specified object id.
+		///
+		/// Provide the type to make it easier to track down the problem.
+		/// </summary>
+		/// <param name="id">
+		/// SHA-1
+		/// </param>
+		/// <param name="type">
+		/// Object type
+		/// </param>
         public IncorrectObjectTypeException(ObjectId id, int type)
             : base(string.Format("object {0} is not a {1}.", id, (ObjectType)type))
         {
@@ -87,20 +113,38 @@ namespace GitSharp.Exceptions
 
         public IncorrectObjectTypeException(ObjectId id, string type, Exception inner) : base(string.Format("object {0} is not a {1}.", id, type), inner) { }
 
-        /**
-         * Construct and IncorrectObjectTypeException for the specified object id.
-         *
-         * Provide the type to make it easier to track down the problem.
-         *
-         * @param id SHA-1
-         * @param type object type
-         */        public IncorrectObjectTypeException(ObjectId id, string type)
+        /// <summary>
+		/// Construct and IncorrectObjectTypeException for the specified object id.
+		///
+		/// Provide the type to make it easier to track down the problem.
+		/// </summary>
+		/// <param name="id">
+		/// SHA-1
+		/// </param>
+		/// <param name="type">
+		/// Object type
+		/// </param>
+        public IncorrectObjectTypeException(ObjectId id, string type)
             : base(string.Format("object {0} is not a {1}.", id, type))
         {
 
         }
-        public IncorrectObjectTypeException(ObjectId id, int type, Exception inner) : base(string.Format("object {0} is not a {1}.", id, (ObjectType)type), inner) { }
-        internal IncorrectObjectTypeException(
+		
+		/// <summary>
+		/// Construct and IncorrectObjectTypeException for the specified object id.
+		///
+		/// Provide the type to make it easier to track down the problem.
+		/// </summary>
+		/// <param name="id">
+		/// SHA-1
+		/// </param>
+		/// <param name="type">
+		/// Object type
+		/// </param>
+        public IncorrectObjectTypeException(ObjectId id, int type, Exception inner) 
+		    : base(string.Format("object {0} is not a {1}.", id, (ObjectType)type), inner) { }
+        
+		protected IncorrectObjectTypeException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }

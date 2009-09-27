@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
@@ -35,11 +35,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+using System.Runtime.Serialization;
 using GitSharp.Transport;
 
 namespace GitSharp.Exceptions
 {
-
+	[Serializable]
     public class NoRemoteRepositoryException : TransportException
     {
         private const long serialVersionUID = 1L;
@@ -47,7 +49,16 @@ namespace GitSharp.Exceptions
         public NoRemoteRepositoryException(URIish uri, string s)
             : base(uri, s)
         {
-            
+        }
+		
+		public NoRemoteRepositoryException(URIish uri, string s, Exception inner)
+            : base(uri, s, inner)
+        {
+        }
+
+        protected NoRemoteRepositoryException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
         }
     }
 

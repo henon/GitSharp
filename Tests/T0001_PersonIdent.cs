@@ -59,13 +59,21 @@ namespace GitSharp.Tests
         [Test]
         public void test001_NewIdent()
         {
-            var p = new PersonIdent("A U Thor", "author@example.com", 1142878501L.UnixTimeToDateTime(),
-                                    TimeZoneInfo.FindSystemTimeZoneById("US/Eastern"));
+			PersonIdent p;
+			try 
+			{
+				p = new PersonIdent("A U Thor", "author@example.com", 1142878501L.UnixTimeToDateTime(),
+				                        TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+			}
+			catch (TimeZoneNotFoundException)
+			{
+				p = new PersonIdent("A U Thor", "author@example.com", 1142878501L.UnixTimeToDateTime(),
+				                        TimeZoneInfo.FindSystemTimeZoneById("US/Eastern"));
+			}
             Assert.AreEqual("A U Thor", p.Name);
             Assert.AreEqual("author@example.com", p.EmailAddress);
             Assert.AreEqual(1142878501000L, p.When);
-            Assert.AreEqual("A U Thor <author@example.com> 1142878501 -0500", p
-                                                                                  .ToExternalString());
+            Assert.AreEqual("A U Thor <author@example.com> 1142878501 -0500", p.ToExternalString());
         }
 
         [Test]

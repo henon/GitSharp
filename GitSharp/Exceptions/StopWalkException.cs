@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -36,22 +36,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
 {
-
-    /**
-    * Stops the driver loop of walker and finish with current results.
-    * 
-    * @see GitSharp.RevWalk.Filter.RevFilter
-    */
+	/// <summary>
+	/// Stops the driver loop of walker and finish with current result
+	/// </summary>
+	[Serializable]
     public class StopWalkException : Exception
     {
 
@@ -61,6 +57,11 @@ namespace GitSharp.Exceptions
         private StopWalkException()
         {
             // Nothing.
+        }
+
+        protected StopWalkException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
         }
     }
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -38,10 +38,12 @@
 
 using System;
 using System.IO;
+using System.Runtime.Serialization;
 using GitSharp.Transport;
 
 namespace GitSharp.Exceptions
 {
+	[Serializable]
     public class TransportException : IOException
     {
         public TransportException(URIish uri, string s)
@@ -60,6 +62,11 @@ namespace GitSharp.Exceptions
 
         public TransportException(string s, Exception cause)
             : base(s, cause)
+        {
+        }
+
+        protected TransportException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }

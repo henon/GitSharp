@@ -99,6 +99,7 @@
     <Compile Include="TreeIteratorPostOrderTest.cs" />
     <Compile Include="TreeIteratorPreOrderTest.cs" />
     <Compile Include="MockSystemReader.cs" />
+    <Compile Include="TreeWalk\Filter\PathSuffixFilterTestCase.cs" />
     <Compile Include="Util\NBTests.cs" />
     <Compile Include="PackIndexV1Tests.cs" />
     <Compile Include="PackIndexV2Tests.cs" />

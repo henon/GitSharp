@@ -28,8 +28,7 @@
     </copy>    
 		<assemblyfileset id="project.references">
 			<include name="../extern/nunit.framework.dll" />
-			<include name="../API/build/${nant.settings.currentframework}/${project.config}/*.dll" />
-			<!--include name="../GitSharp/build/${nant.settings.currentframework}/${project.config}/*.dll" /-->
+			<include name="../GitSharp/build/${nant.settings.currentframework}/${project.config}/*.dll" />
 		</assemblyfileset>
 		<call target="common.copy-references"/>
 		<call target="common.compile-dll"/>

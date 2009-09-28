@@ -1,4 +1,4 @@
-<project name="GitSharp.API" default="build" xmlns="http://nant.sf.net/release/0.85/nant.xsd">
+<project name="GitSharp" default="build" xmlns="http://nant.sf.net/release/0.85/nant.xsd">
 	<include buildfile="../common-project.xml" />
 	
 	<property name="root.dir" value="."/>
@@ -7,7 +7,7 @@
 	
 	<target name="build" depends="common.init">
 		<assemblyfileset id="project.references">
-			<include name="../GitSharp/build/${nant.settings.currentframework}/${project.config}/*.dll" />
+			<include name="../Core/build/${nant.settings.currentframework}/${project.config}/*.dll" />
 		</assemblyfileset>
 		<call target="common.copy-references"/>
 		<call target="common.compile-dll"/>

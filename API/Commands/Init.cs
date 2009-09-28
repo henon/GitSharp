@@ -50,6 +50,7 @@ namespace GitSharp.API.Commands
     {
         public Init()
         {
+            Quiet = true; // <-- [henon] since this command will be used not only by CLI but also from code, quiet=true is the better default, i think.
             Shared = "false";
         }
 
@@ -68,9 +69,14 @@ namespace GitSharp.API.Commands
             }
             set
             {
+                if (value == null)
+                {
+                    _path = null;
+                    return;
+                }
                 var dir = new DirectoryInfo(value);
-                if (!dir.Exists)
-                    throw new ArgumentException("Path does not exist or is not a directory.");
+                //if (!dir.Exists)
+                //    throw new ArgumentException("Path does not exist or is not a directory.");
                 _path = dir.FullName;
             }
         }
@@ -99,7 +105,7 @@ namespace GitSharp.API.Commands
         }
 
         /// <summary>
-        /// Only print error and warning messages, all other output will be suppressed.
+        /// Only print error and warning messages, all other output will be suppressed. Is True by default.
         /// </summary>
         public bool Quiet
         {
@@ -108,7 +114,7 @@ namespace GitSharp.API.Commands
         }
 
         /// <summary>
-        /// Create a bare repository. If GIT_DIR environment is not set, it is set to the current working directory. 
+        /// Create a bare repository. If GIT_DIR environment is not set, it is set to the current working directory. Is False by default.
         /// </summary>
         public bool Bare
         {
@@ -168,7 +174,7 @@ namespace GitSharp.API.Commands
         public Repository InitializedRepository
         {
             get;
-            set;
+            private set;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿/* Copyright (C) 2008, Google Inc.
+/* Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
  *
@@ -34,13 +34,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+using System;
 using System.Collections.Generic;
 using System.Text;
 using GitSharp.Transport;
+using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
 {
+	[Serializable]
     public class MissingBundlePrerequisiteException : TransportException
     {
         private static string format(List<ObjectId> ids)
@@ -57,6 +59,16 @@ namespace GitSharp.Exceptions
 
         public MissingBundlePrerequisiteException(URIish uri, List<ObjectId> ids)
         : base(uri, format(ids))
+        {
+        }
+		
+        public MissingBundlePrerequisiteException(URIish uri, List<ObjectId> ids, Exception inner)
+        : base(uri, format(ids), inner)
+        {
+        }
+
+        protected MissingBundlePrerequisiteException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }

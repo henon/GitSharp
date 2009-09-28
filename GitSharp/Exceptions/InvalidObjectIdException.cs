@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Jonas Fonseca <fonseca@diku.dk>
@@ -40,13 +40,15 @@
 
 using System;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
 {
 	/// <summary>
 	/// Thrown when an invalid object id is passed in as an argument.
 	/// </summary>
-    public class InvalidObjectIdException : ArgumentException
+    [Serializable]
+	public class InvalidObjectIdException : ArgumentException
     {
 		/// <summary>
 		/// Create exception with bytes of the invalid object id.
@@ -56,6 +58,17 @@ namespace GitSharp.Exceptions
 		/// <param name="length">length of the sequence of invalid bytes.</param>
         public InvalidObjectIdException(byte[] bytes, int offset, int length)
             : base("Invalid id" + AsAscii(bytes, offset, length))
+        {
+        }
+		
+		/// <summary>
+		/// Create exception with bytes of the invalid object id.
+		/// </summary>
+		/// <param name="bytes">containing the invalid id.</param>
+		/// <param name="offset">offset in the byte array where the error occurred.</param>
+		/// <param name="length">length of the sequence of invalid bytes.</param>
+        public InvalidObjectIdException(byte[] bytes, int offset, int length, Exception inner)
+            : base("Invalid id" + AsAscii(bytes, offset, length), inner)
         {
         }
 
@@ -74,5 +87,8 @@ namespace GitSharp.Exceptions
 				return string.Empty;
             }
         }
+		
+		protected InvalidObjectIdException(SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
     }
 }

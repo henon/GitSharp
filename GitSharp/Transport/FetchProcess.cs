@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
@@ -181,22 +181,24 @@ namespace GitSharp.Transport
                 closeConnection();
             }
 
-            RevWalk.RevWalk walk = new RevWalk.RevWalk(_transport.Local);
-            if (_transport.RemoveDeletedRefs)
+            using( RevWalk.RevWalk walk = new RevWalk.RevWalk(_transport.Local))
             {
-                deleteStaleTrackingRefs(result, walk);
-            }
-
-            foreach (TrackingRefUpdate u in _localUpdates)
-            {
-                try
+                if (_transport.RemoveDeletedRefs)
                 {
-                    u.Update(walk);
-                    result.Add(u);
+                    deleteStaleTrackingRefs(result, walk);
                 }
-                catch (IOException err)
+
+                foreach (TrackingRefUpdate u in _localUpdates)
                 {
-                    throw new TransportException("Failure updating tracking ref " + u.LocalName + ": " + err.Message, err);
+                    try
+                    {
+                        u.Update(walk);
+                        result.Add(u);
+                    }
+                    catch (IOException err)
+                    {
+                        throw new TransportException("Failure updating tracking ref " + u.LocalName + ": " + err.Message, err);
+                    }
                 }
             }
 
@@ -329,17 +331,19 @@ namespace GitSharp.Transport
 		{
 			try
 			{
-				ObjectWalk ow = new ObjectWalk(_transport.Local);
-				foreach (ObjectId want in _askFor.Keys)
+				using(ObjectWalk ow = new ObjectWalk(_transport.Local))
 				{
-				    ow.markStart(ow.parseAny(want));
+					foreach (ObjectId want in _askFor.Keys)
+					{
+					    ow.markStart(ow.parseAny(want));
+					}
+					foreach (Ref @ref in _transport.Local.getAllRefs().Values)
+					{
+					    ow.markUninteresting(ow.parseAny(@ref.ObjectId));
+					}
+					ow.checkConnectivity();
+					return true;
 				}
-				foreach (Ref @ref in _transport.Local.getAllRefs().Values)
-				{
-				    ow.markUninteresting(ow.parseAny(@ref.ObjectId));
-				}
-				ow.checkConnectivity();
-				return true;
 			}
 			catch (MissingObjectException)
 			{

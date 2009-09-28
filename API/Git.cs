@@ -41,6 +41,7 @@ using System.Linq;
 using System.Text;
 using GitSharp.API.Commands;
 using System.IO;
+using System.Reflection;
 
 namespace GitSharp.API
 {
@@ -55,7 +56,6 @@ namespace GitSharp.API
             {
                 if (_output == null)
                 {
-                    //Initialize the output stream for all console-based messages.
                     _output = new StreamWriter(Console.OpenStandardOutput());
                     Console.SetOut(_output);
                 }
@@ -81,6 +81,21 @@ namespace GitSharp.API
         public static void Init(Init command)
         {
             command.Execute();
+        }
+
+        /// <summary>
+        /// Returns the version of GitSharp.
+        /// </summary>
+        public static string Version
+        {
+            get
+            {
+                var assembly = Assembly.Load("GitSharp");
+                var version = assembly.GetName().Version;
+                if (version == null)
+                    return null;
+                return version.ToString();
+            }
         }
     }
 }

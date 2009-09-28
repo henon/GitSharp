@@ -38,6 +38,7 @@
 using System.IO;
 using System.Text;
 using GitSharp.RevWalk;
+using GitSharp.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -45,10 +46,6 @@ namespace GitSharp.Tests.RevWalk
     [TestFixture]
     public class RevCommitParseTest : RepositoryTestCase
     {
-        private readonly Encoding _utf8Enc = Constants.CHARSET;
-        private readonly Encoding _isoEnc = Encoding.GetEncoding("ISO-8859-1");
-        private readonly Encoding _eucJpEnc = Encoding.GetEncoding("EUC-JP");
-
         [Test]
         public void testParse_NoParents()
         {
@@ -90,7 +87,7 @@ namespace GitSharp.Tests.RevWalk
             Assert.IsNull(c.Tree);
             Assert.IsNull(c.Parents);
 
-            c.parseCanonical(rw, _utf8Enc.GetBytes(body.ToString()));
+            c.parseCanonical(rw, body.ToString().getBytes("UTF-8"));
             Assert.IsNotNull(c.Tree);
             Assert.AreEqual(treeId, c.Tree.getId());
             Assert.AreSame(rw.lookupTree(treeId), c.Tree);
@@ -121,7 +118,7 @@ namespace GitSharp.Tests.RevWalk
 
         	var c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-            c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), _utf8Enc.GetBytes(b.ToString()));
+            c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), b.ToString().getBytes("UTF-8"));
             return c;
         }
 
@@ -135,7 +132,7 @@ namespace GitSharp.Tests.RevWalk
 
         	var c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-            c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), _utf8Enc.GetBytes(b.ToString()));
+            c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), b.ToString().getBytes("UTF-8"));
 
             Assert.AreEqual(string.Empty, c.getFullMessage());
             Assert.AreEqual(string.Empty, c.getShortMessage());
@@ -147,17 +144,18 @@ namespace GitSharp.Tests.RevWalk
             RevCommit c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
-                b.Write(_utf8Enc.GetBytes("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
-                b.Write(_utf8Enc.GetBytes("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
-                b.Write(_utf8Enc.GetBytes("committer C O. Miter <c@example.com> 1218123390 -0500\n"));
-                b.Write(_utf8Enc.GetBytes("\n"));
-                b.Write(_utf8Enc.GetBytes("Sm\u00f6rg\u00e5sbord\n"));
-                b.Write(_utf8Enc.GetBytes("\n"));
-                b.Write(_utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
+                b.Write("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
+                b.Write("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("UTF-8"));
+                b.Write("committer C O. Miter <c@example.com> 1218123390 -0500\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("Sm\u00f6rg\u00e5sbord\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
+            Assert.AreSame(Constants.CHARSET, c.Encoding);
             Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
@@ -169,18 +167,19 @@ namespace GitSharp.Tests.RevWalk
             RevCommit c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
-                b.Write(_utf8Enc.GetBytes("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
-                b.Write(_isoEnc.GetBytes("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
-                b.Write(_utf8Enc.GetBytes("committer C O. Miter <c@example.com> 1218123390 -0500\n"));
-                b.Write(_utf8Enc.GetBytes("\n"));
-                b.Write(_utf8Enc.GetBytes("Sm\u00f6rg\u00e5sbord\n"));
-                b.Write(_utf8Enc.GetBytes("\n"));
-                b.Write(_utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
+                b.Write("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
+                b.Write("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("ISO-8859-1"));
+                b.Write("committer C O. Miter <c@example.com> 1218123390 -0500\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("Sm\u00f6rg\u00e5sbord\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
 
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
+            Assert.AreSame(Constants.CHARSET, c.Encoding);
             Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
@@ -195,18 +194,19 @@ namespace GitSharp.Tests.RevWalk
             RevCommit c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
-                b.Write(_eucJpEnc.GetBytes("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
-                b.Write(_eucJpEnc.GetBytes("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
-                b.Write(_eucJpEnc.GetBytes("committer C O. Miter <c@example.com> 1218123390 -0500\n"));
-                b.Write(_eucJpEnc.GetBytes("encoding euc_JP\n"));
-                b.Write(_eucJpEnc.GetBytes("\n"));
-                b.Write(_eucJpEnc.GetBytes("\u304d\u308c\u3044\n"));
-                b.Write(_eucJpEnc.GetBytes("\n"));
-                b.Write(_eucJpEnc.GetBytes("Hi\n"));
+                b.Write("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("EUC-JP"));
+                b.Write("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("EUC-JP"));
+                b.Write("committer C O. Miter <c@example.com> 1218123390 -0500\n".getBytes("EUC-JP"));
+                b.Write("encoding euc_JP\n".getBytes("EUC-JP"));
+                b.Write("\n".getBytes("EUC-JP"));
+                b.Write("\u304d\u308c\u3044\n".getBytes("EUC-JP"));
+                b.Write("\n".getBytes("EUC-JP"));
+                b.Write("Hi\n".getBytes("EUC-JP"));
 
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
+            Assert.AreEqual("EUC-JP", c.Encoding.WebName.ToUpperInvariant()); //Hacked as Windows uses a lowercased naming convention
             Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
             Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
@@ -225,18 +225,20 @@ namespace GitSharp.Tests.RevWalk
             RevCommit c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
-                b.Write(_utf8Enc.GetBytes("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
-                b.Write(_isoEnc.GetBytes("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
-                b.Write(_utf8Enc.GetBytes("committer C O. Miter <c@example.com> 1218123390 -0500\n"));
-                b.Write(_utf8Enc.GetBytes("encoding EUC-JP\n"));
-                b.Write(_utf8Enc.GetBytes("\n"));
-                b.Write(_utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
-                b.Write(_utf8Enc.GetBytes("\n"));
-                b.Write(_utf8Enc.GetBytes("Hi\n"));
+                b.Write("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
+                b.Write("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("ISO-8859-1"));
+                b.Write("committer C O. Miter <c@example.com> 1218123390 -0500\n".getBytes("UTF-8"));
+                b.Write("encoding EUC-JP\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("Hi\n".getBytes("UTF-8"));
 
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
+
+            Assert.AreEqual("EUC-JP", c.Encoding.WebName.ToUpperInvariant()); //Hacked as Windows uses a lowercased naming convention
             Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
             Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
@@ -256,18 +258,20 @@ namespace GitSharp.Tests.RevWalk
             RevCommit c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
-                b.Write(_utf8Enc.GetBytes("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
-                b.Write(_utf8Enc.GetBytes("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
-                b.Write(_utf8Enc.GetBytes("committer C O. Miter <c@example.com> 1218123390 -0500\n"));
-                b.Write(_utf8Enc.GetBytes("encoding ISO-8859-1\n"));
-                b.Write(_utf8Enc.GetBytes("\n"));
-                b.Write(_utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
-                b.Write(_utf8Enc.GetBytes("\n"));
-                b.Write(_utf8Enc.GetBytes("Hi\n"));
+                b.Write("tree 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
+                b.Write("author F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("UTF-8"));
+                b.Write("committer C O. Miter <c@example.com> 1218123390 -0500\n".getBytes("UTF-8"));
+                b.Write("encoding ISO-8859-1\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("Hi\n".getBytes("UTF-8"));
 
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
                 c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
+
+            Assert.AreEqual("ISO-8859-1", c.Encoding.WebName.ToUpperInvariant()); //Hacked as Windows uses a lowercased naming convention
             Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
             Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());

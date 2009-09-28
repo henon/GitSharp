@@ -651,17 +651,19 @@ namespace GitSharp.Util
 		public static Encoding parseEncoding(byte[] b)
 		{
 			int enc = encoding(b, 0);
-			if (enc < 0) return Constants.CHARSET;
+			if (enc < 0)
+			{
+			    return Constants.CHARSET;
+			}
 
 			int lf = nextLF(b, enc);
-			string encodingName = decode(Constants.CHARSET, b, enc, lf - 1).ToUpperInvariant();
+			string encodingName = decode(Constants.CHARSET, b, enc, lf - 1);
 
-			if (string.IsNullOrEmpty(encodingName)) return Constants.CHARSET;
-
-			if (encodingName.Contains("_"))
-			{
-				encodingName = encodingName.Replace('_', '-');
-			}
+            if (encodingName == "euc_JP")
+            {
+                encodingName = "EUC-JP"; // Hacked as euc_JP is not valid from the IANA perspective (http://www.iana.org/assignments/character-sets)
+                                         // See also http://tagunov.tripod.com/i18n/jdk11enc.html for further historical information
+            }
 
 			return Encoding.GetEncoding(encodingName);
 		}

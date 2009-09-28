@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
@@ -40,13 +40,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
 {
 	/// <summary>
 	/// An expected object is missing.
 	/// </summary>
-    public class MissingObjectException : IOException
+    [Serializable]
+	public class MissingObjectException : IOException
     {
 		/// <summary>
 		/// Construct a MissingObjectException for the specified object id.
@@ -76,9 +78,46 @@ namespace GitSharp.Exceptions
 		/// </summary>
 		/// <param name="id">SHA-1</param>
 		/// <param name="type">Object type</param>
-
         public MissingObjectException(ObjectId id, int type)
             : this(id, Constants.typeString(type))
+        {
+        }
+		
+		/// <summary>
+		/// Construct a MissingObjectException for the specified object id.
+		/// Expected type is reported to simplify tracking down the problem.
+		/// </summary>
+		/// <param name="id">SHA-1</param>
+		/// <param name="type">Object type</param>
+        public MissingObjectException(ObjectId id, ObjectType type, Exception inner)
+            : base("Missing " + type + " " + id, inner)
+        {
+        }
+
+		/// <summary>
+		/// Construct a MissingObjectException for the specified object id.
+		/// Expected type is reported to simplify tracking down the problem.
+		/// </summary>
+		/// <param name="id">SHA-1</param>
+		/// <param name="type">Object type</param>
+        public MissingObjectException(ObjectId id, string type, Exception inner)
+            : base("Missing " + type + " " + id, inner)
+        {
+        }
+
+		/// <summary>
+		/// Construct a MissingObjectException for the specified object id.
+		/// Expected type is reported to simplify tracking down the problem.
+		/// </summary>
+		/// <param name="id">SHA-1</param>
+		/// <param name="type">Object type</param>
+        public MissingObjectException(ObjectId id, int type, Exception inner)
+            : this(id, Constants.typeString(type), inner)
+        {
+        }
+
+        protected MissingObjectException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }

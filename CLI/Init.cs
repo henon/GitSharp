@@ -38,7 +38,6 @@
 
 using System;
 using System.IO;
-using GitSharp.API;
 
 namespace GitSharp.CLI
 {
@@ -46,7 +45,7 @@ namespace GitSharp.CLI
     [Command(common = true, complete = false, usage = "Create an empty git repository")]
     class Init : TextBuiltin
     {
-        private GitSharp.API.Commands.Init cmd = new GitSharp.API.Commands.Init();
+        private Commands.Init cmd = new Commands.Init();
 
         public override void Run(string[] args)
         {

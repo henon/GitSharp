@@ -148,7 +148,7 @@ namespace GitSharp.CLI
                             Console.Error.WriteLine("error: can't find git directory");
                             Exit(1);
                         }
-                        cmd.Init(new Repository(gitdir), gitdir.FullName);
+                        cmd.Init(new Core.Repository(gitdir), gitdir.FullName);
                     }
                     else
                     {

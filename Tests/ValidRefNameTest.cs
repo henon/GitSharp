@@ -45,7 +45,7 @@ namespace GitSharp.Tests
 	{
 		private static void assertValid(bool exp, string name)
 		{
-			Assert.AreEqual(exp, Repository.IsValidRefName(name), "\"" + name + "\"");
+			Assert.AreEqual(exp, Core.Repository.IsValidRefName(name), "\"" + name + "\"");
 		}
 
 		[Test]

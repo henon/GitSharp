@@ -53,7 +53,7 @@ namespace GitSharp.Tests.TreeWalk
                 PathLen -= 1; // Get rid of extra '/'
             }
 
-            public override AbstractTreeIterator createSubtreeIterator(Repository repo)
+            public override AbstractTreeIterator createSubtreeIterator(Core.Repository repo)
             {
                 return null;
             }

@@ -38,7 +38,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using GitSharp.API;
 
 namespace GitSharp.CLI.Nonstandard
 {

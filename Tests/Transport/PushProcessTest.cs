@@ -58,7 +58,7 @@ namespace GitSharp.Tests.Transport
         {
             private readonly List<Ref> advertised;
 
-            public MockTransport(Repository local, URIish uri, List<Ref> advertisedRefs)
+            public MockTransport(Core.Repository local, URIish uri, List<Ref> advertisedRefs)
                 : base(local, uri)
             {
                 advertised = advertisedRefs;

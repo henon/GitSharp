@@ -74,9 +74,9 @@ namespace GitSharp.Tests
 
         protected bool packedGitMMAP;
 
-        protected Repository db;
+        protected Core.Repository db;
         private int _testcount;
-        private readonly List<Repository> _repositoriesToClose = new List<Repository>();
+        private readonly List<Core.Repository> _repositoriesToClose = new List<Core.Repository>();
 
         static RepositoryTestCase()
         {
@@ -233,7 +233,7 @@ namespace GitSharp.Tests
                 new FileInfo(Path.Combine(trash_git.FullName, "usergitconfig")));
             SystemReader.setInstance(mockSystemReader);
 
-            db = new Repository(trash_git);
+            db = new Core.Repository(trash_git);
             db.Create();
 
             string[] packs = {
@@ -286,7 +286,7 @@ namespace GitSharp.Tests
 
         #endregion
 
-        protected Repository createNewEmptyRepo()
+        protected Core.Repository createNewEmptyRepo()
         {
             return createNewEmptyRepo(false);
         }
@@ -297,11 +297,11 @@ namespace GitSharp.Tests
         /// <returns>
         /// A new empty git repository for testing purposes
         /// </returns>
-        protected Repository createNewEmptyRepo(bool bare)  
+        protected Core.Repository createNewEmptyRepo(bool bare)  
         {
             var newTestRepo = new DirectoryInfo(Path.GetFullPath(trashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) + (bare ? "" : "/") + ".git"));
             Assert.IsFalse(newTestRepo.Exists);
-            var newRepo = new Repository(newTestRepo);
+            var newRepo = new Core.Repository(newTestRepo);
             newRepo.Create();
             string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
 

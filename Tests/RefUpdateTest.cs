@@ -492,7 +492,7 @@ namespace GitSharp.Tests
 
             // Create new Repository instance, to reread caches and make sure our
             // assumptions are persistent.
-            Repository ndb = new Repository(db.Directory);
+            Core.Repository ndb = new Core.Repository(db.Directory);
             Assert.AreEqual(rb2, ndb.Resolve("refs/heads/new/name"));
             Assert.IsNull(ndb.Resolve("refs/heads/b"));
         }

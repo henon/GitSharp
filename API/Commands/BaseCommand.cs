@@ -41,7 +41,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace GitSharp.API.Commands
+namespace GitSharp.Commands
 {
     /// <summary>
     /// Abstract base class of all git commands. It provides basic infrastructure

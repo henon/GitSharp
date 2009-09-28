@@ -40,7 +40,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp.API.Commands
+namespace GitSharp.Commands
 {
     public class Clone : BaseCommand
     {

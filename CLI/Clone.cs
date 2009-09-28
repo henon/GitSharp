@@ -73,7 +73,7 @@ namespace GitSharp.CLI
             if (gitdir == null)
                 gitdir = Path.Combine(localName, ".git");
 
-            db = new Repository(new DirectoryInfo(gitdir));
+            db = new Core.Repository(new DirectoryInfo(gitdir));
             db.Create();
             db.Config.setBoolean("core", null, "bare", false);
             db.Config.save();

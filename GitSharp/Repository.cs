@@ -166,20 +166,20 @@ namespace GitSharp
 		    Directory.Mkdirs();
             _refDb.Create();
             _objectDatabase.create();
-
-            new DirectoryInfo(Path.Combine(Directory.FullName, "branches")).Mkdirs();
-            new DirectoryInfo(Path.Combine(Directory.FullName, "remote")).Mkdirs();
-
+            
+            if (!bare)
+            {
+                new DirectoryInfo(Path.Combine(Directory.FullName, "branches")).Mkdirs();
+                new DirectoryInfo(Path.Combine(Directory.FullName, "remote")).Mkdirs();
+            }
             const string master = Constants.RefsHeads + Constants.Master;
+            
+            //Add .git/HEAD directory
             _refDb.Link(Constants.HEAD, master);
-
+            
             Config.setInt("core", null, "repositoryformatversion", 0);
             Config.setBoolean("core", null, "filemode", true);
-
-            if (bare)
-            {
-                Config.setBoolean("core", null, "bare", true);
-            }
+            Config.setBoolean("core", null, "bare", bare);
 
             Config.save();
 		}

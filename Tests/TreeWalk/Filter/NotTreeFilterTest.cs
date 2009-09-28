@@ -36,8 +36,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.TreeWalk;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core.TreeWalk;
+using GitSharp.Core.TreeWalk.Filter;
 namespace GitSharp.Tests.TreeWalk
 {
     using NUnit.Framework;
@@ -48,7 +48,7 @@ namespace GitSharp.Tests.TreeWalk
         [Test]
         public void testWrap()
         {
-            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+            GitSharp.Core.TreeWalk.TreeWalk tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             TreeFilter a = TreeFilter.ALL;
             TreeFilter n = NotTreeFilter.create(a);
             Assert.IsNotNull(n);

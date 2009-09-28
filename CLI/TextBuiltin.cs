@@ -41,8 +41,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using GitSharp;
-using GitSharp.RevWalk;
+using GitSharp.Core;
+using GitSharp.Core.RevWalk;
 using NDesk.Options;
+using Repository=GitSharp.Core.Repository;
 
 namespace GitSharp.CLI
 {
@@ -78,7 +80,7 @@ public abstract class TextBuiltin
 	/// <summary>
     /// Git repository the command was invoked within.
 	/// </summary>
-	protected Repository db;
+	protected Core.Repository db;
 
 	/// <summary>
     /// Directory supplied via --git-dir command line option.
@@ -88,7 +90,7 @@ public abstract class TextBuiltin
 	/// <summary>
     /// RevWalk used during command line parsing, if it was required.
 	/// </summary>
-    protected GitSharp.RevWalk.RevWalk argWalk;
+    protected GitSharp.Core.RevWalk.RevWalk argWalk;
 
     /// <summary>
     /// Contains the remaining arguments after the options listed in the command line.
@@ -146,7 +148,7 @@ public abstract class TextBuiltin
     /// </summary>
     /// <param name="repo">Specifies the repository to use.</param>
     /// <param name="gitDirectory">Specifies the git directory.</param>
-	public void Init(Repository repo, String gitDirectory) {
+	public void Init(Core.Repository repo, String gitDirectory) {
 		try {
 
 #if ported
@@ -249,7 +251,7 @@ public abstract class TextBuiltin
 	/// <summary>
 	/// Returns the repository this command accesses.
 	/// </summary>
-	public Repository GetRepository() {
+	public Core.Repository GetRepository() {
 		return db;
 	}
 

@@ -39,8 +39,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using GitSharp.RevWalk;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.TreeWalk.Filter;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk

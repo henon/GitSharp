@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Patch;
+using GitSharp.Core.Patch;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Patch
@@ -47,7 +47,7 @@ namespace GitSharp.Tests.Patch
         [Test]
 	    public void testError_CcTruncatedOld()
         {
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_CcTruncatedOld.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_CcTruncatedOld.patch");
 		    Assert.AreEqual(1, p.getFiles().Count);
 		    Assert.AreEqual(3, p.getErrors().Count);
 		    {

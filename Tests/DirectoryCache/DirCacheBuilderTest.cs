@@ -37,7 +37,8 @@
  */
 
 using System.IO;
-using GitSharp.DirectoryCache;
+using GitSharp.Core;
+using GitSharp.Core.DirectoryCache;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.DirectoryCache
@@ -64,7 +65,7 @@ namespace GitSharp.Tests.DirectoryCache
         public void testBuildOneFile_FinishWriteCommit()
         {
             string path = "a-File-path";
-            var mode = GitSharp.FileMode.RegularFile;
+            var mode = GitSharp.Core.FileMode.RegularFile;
             long lastModified = 1218123387057L;
             int Length = 1342;
             DirCacheEntry entOrig;
@@ -113,7 +114,7 @@ namespace GitSharp.Tests.DirectoryCache
         public void testBuildOneFile_Commit()
         {
             string path = "a-File-path";
-            var mode = GitSharp.FileMode.RegularFile;
+            var mode = GitSharp.Core.FileMode.RegularFile;
             long lastModified = 1218123387057L;
             int Length = 1342;
             DirCacheEntry entOrig;

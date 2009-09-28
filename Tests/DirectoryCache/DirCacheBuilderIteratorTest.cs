@@ -36,8 +36,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.DirectoryCache;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core;
+using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.TreeWalk.Filter;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.DirectoryCache
@@ -68,7 +69,7 @@ namespace GitSharp.Tests.DirectoryCache
 
 			const int expIdx = 2;
 			DirCacheBuilder b = dc.builder();
-			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
 			tw.reset();
 			tw.addTree(new DirCacheBuildIterator(b));
 			tw.Recursive = true;

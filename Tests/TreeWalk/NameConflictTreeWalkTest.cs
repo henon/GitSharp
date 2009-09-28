@@ -35,10 +35,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 using System.IO;
-using GitSharp.DirectoryCache;
-using GitSharp.TreeWalk;
+using GitSharp.Core;
+using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.TreeWalk;
 using NUnit.Framework;
+using FileMode=GitSharp.Core.FileMode;
 
 namespace GitSharp.Tests.TreeWalk
 {	
@@ -75,7 +78,7 @@ namespace GitSharp.Tests.TreeWalk
 				Assert.AreEqual(1, tree1.getEntryCount());
 			}
 
-			GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+			GitSharp.Core.TreeWalk.TreeWalk tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
 			tw.reset();
 			tw.addTree(new DirCacheIterator(tree0));
 			tw.addTree(new DirCacheIterator(tree1));
@@ -198,7 +201,7 @@ namespace GitSharp.Tests.TreeWalk
 			return ent;
 		}
 
-		private static void assertModes(string path, FileMode mode0, FileMode mode1, GitSharp.TreeWalk.TreeWalk tw)
+		private static void assertModes(string path, FileMode mode0, FileMode mode1, GitSharp.Core.TreeWalk.TreeWalk tw)
 		{
 			Assert.IsTrue(tw.next(), "has " + path);
 			Assert.AreEqual(path, tw.getPathString());

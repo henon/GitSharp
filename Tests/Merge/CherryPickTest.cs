@@ -38,11 +38,13 @@
  */
 
 using System.IO;
-using GitSharp.DirectoryCache;
-using GitSharp.Merge;
+using GitSharp.Core;
+using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.Merge;
 using NUnit.Framework;
 
 using System;
+using FileMode = GitSharp.Core.FileMode;
 
 namespace GitSharp.Tests.Merge
 {
@@ -96,7 +98,7 @@ namespace GitSharp.Tests.Merge
 			bool merge = twm.Merge(new[] { O, T });
 			Assert.IsTrue(merge);
 
-			var tw = new GitSharp.TreeWalk.TreeWalk(db) { Recursive = true };
+			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db) { Recursive = true };
 			tw.reset(twm.GetResultTreeId());
 
 			Assert.IsTrue(tw.next());
@@ -114,7 +116,7 @@ namespace GitSharp.Tests.Merge
 			Assert.IsFalse(tw.next());
 		}
 
-		private static void AssertCorrectId(DirCache treeT, GitSharp.TreeWalk.TreeWalk tw)
+		private static void AssertCorrectId(DirCache treeT, GitSharp.Core.TreeWalk.TreeWalk tw)
 		{
 			Assert.AreEqual(treeT.getEntry(tw.getPathString()).getObjectId(), tw.getObjectId(0));
 		}

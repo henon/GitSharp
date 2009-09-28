@@ -41,7 +41,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 using System.IO;
 

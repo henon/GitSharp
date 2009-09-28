@@ -36,7 +36,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Patch;
+using GitSharp.Core;
+using GitSharp.Core.Patch;
 using NUnit.Framework;
 using System.IO;
 using System.Text;
@@ -51,7 +52,7 @@ namespace GitSharp.Tests.Patch
         public void testGetText_BothISO88591()
         {
             Encoding cs = Encoding.GetEncoding("ISO-8859-1");
-            GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_BothISO88591.patch");
+            GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_BothISO88591.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
             FileHeader fh = p.getFiles()[0];
@@ -63,7 +64,7 @@ namespace GitSharp.Tests.Patch
         public void testGetText_NoBinary()
         {
             Encoding cs = Encoding.GetEncoding("ISO-8859-1");
-            GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_NoBinary.patch");
+            GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_NoBinary.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
             FileHeader fh = p.getFiles()[0];
@@ -76,7 +77,7 @@ namespace GitSharp.Tests.Patch
         {
             Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
             Encoding csNew = Constants.CHARSET;
-            GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_Convert.patch");
+            GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_Convert.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
             FileHeader fh = p.getFiles()[0];
@@ -97,7 +98,7 @@ namespace GitSharp.Tests.Patch
         {
             Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
             Encoding csNew = Constants.CHARSET;
-            GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_DiffCc.patch");
+            GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_DiffCc.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
             var fh = (CombinedFileHeader)p.getFiles()[0];

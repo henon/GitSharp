@@ -38,9 +38,12 @@
 
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.DirectoryCache;
-using GitSharp.Util;
+using GitSharp.Core;
+using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.Util;
 using NUnit.Framework;
+using FileMode=GitSharp.Core.FileMode;
+
 
 namespace GitSharp.Tests.DirectoryCache
 {
@@ -76,7 +79,7 @@ namespace GitSharp.Tests.DirectoryCache
 			Assert.AreEqual(ls.Count, dc.getEntryCount());
 
 			var rItr = ls.Values.GetEnumerator();
-			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
 			tw.reset();
 			tw.Recursive = true;
 			tw.addTree(new DirCacheIterator(dc));

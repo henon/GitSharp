@@ -35,7 +35,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Transport;
+using GitSharp.Core;
+using GitSharp.Core.Transport;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +46,7 @@ namespace GitSharp.Tests.Transport
     [TestFixture]
     public class TransportTest : RepositoryTestCase
     {
-        private GitSharp.Transport.Transport transport;
+        private GitSharp.Core.Transport.Transport transport;
         private RemoteConfig remoteConfig;
 
         public override void setUp()
@@ -70,7 +71,7 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void testFindRemoteRefUpdatesNoWilcardNoTracking()
         {
-            transport = GitSharp.Transport.Transport.Open(db, remoteConfig);
+            transport = GitSharp.Core.Transport.Transport.Open(db, remoteConfig);
             ICollection<RemoteRefUpdate> result =
                 transport.findRemoteRefUpdatesFor(new List<RefSpec> {new RefSpec("refs/heads/master:refs/heads/x")});
 
@@ -86,7 +87,7 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void testFindRemoteRefUpdatesNoWildcardNoDestination()
         {
-            transport = GitSharp.Transport.Transport.Open(db, remoteConfig);
+            transport = GitSharp.Core.Transport.Transport.Open(db, remoteConfig);
             ICollection<RemoteRefUpdate> result =
                 transport.findRemoteRefUpdatesFor(new List<RefSpec> {new RefSpec("+refs/heads/master")});
 
@@ -102,7 +103,7 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void testFindRemoteRefUpdatesWildcardNoTracking()
         {
-            transport = GitSharp.Transport.Transport.Open(db, remoteConfig);
+            transport = GitSharp.Core.Transport.Transport.Open(db, remoteConfig);
             ICollection<RemoteRefUpdate> result =
                 transport.findRemoteRefUpdatesFor(new List<RefSpec> { new RefSpec("+refs/heads/*:refs/heads/test/*") });
 
@@ -127,7 +128,7 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void testFindRemoteRefUpdatesTwoRefSpecs()
         {
-            transport = GitSharp.Transport.Transport.Open(db, remoteConfig);
+            transport = GitSharp.Core.Transport.Transport.Open(db, remoteConfig);
             RefSpec specA = new RefSpec("+refs/heads/a:refs/heads/b");
             RefSpec specC = new RefSpec("+refs/heads/c:refs/heads/d");
             List<RefSpec> specs = new List<RefSpec>{specA, specC};
@@ -151,7 +152,7 @@ namespace GitSharp.Tests.Transport
         public void testFindRemoteRefUpdatesTrackingRef()
         {
             remoteConfig.AddFetchRefSpec(new RefSpec("refs/heads/*:refs/remotes/test/*"));
-            transport = GitSharp.Transport.Transport.Open(db, remoteConfig);
+            transport = GitSharp.Core.Transport.Transport.Open(db, remoteConfig);
             ICollection<RemoteRefUpdate> result =
                 transport.findRemoteRefUpdatesFor(new List<RefSpec> {new RefSpec("+refs/heads/a:refs/heads/a")});
 

@@ -37,7 +37,7 @@
  */
 
 using NUnit.Framework;
-using GitSharp.Diff;
+using GitSharp.Core.Diff;
 using System.Collections;
 
 namespace GitSharp.Tests

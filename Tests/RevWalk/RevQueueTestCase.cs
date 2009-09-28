@@ -35,7 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.RevWalk;
+using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -58,8 +58,8 @@ namespace GitSharp.Tests.RevWalk
         public virtual void testEmpty()
         {
             Assert.IsNull(q.next());
-            Assert.IsTrue(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-            Assert.IsFalse(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+            Assert.IsTrue(q.everbodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
+            Assert.IsFalse(q.anybodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
         }
 
         [Test]
@@ -83,16 +83,16 @@ namespace GitSharp.Tests.RevWalk
             q.add(a);
             q.add(b);
 
-            Assert.IsFalse(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-            Assert.IsFalse(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+            Assert.IsFalse(q.everbodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
+            Assert.IsFalse(q.anybodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
 
-            a.Flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
-            Assert.IsFalse(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-            Assert.IsTrue(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+            a.Flags |= GitSharp.Core.RevWalk.RevWalk.UNINTERESTING;
+            Assert.IsFalse(q.everbodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
+            Assert.IsTrue(q.anybodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
 
-            b.Flags |= GitSharp.RevWalk.RevWalk.UNINTERESTING;
-            Assert.IsTrue(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-            Assert.IsTrue(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+            b.Flags |= GitSharp.Core.RevWalk.RevWalk.UNINTERESTING;
+            Assert.IsTrue(q.everbodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
+            Assert.IsTrue(q.anybodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
         }
     }
 }

@@ -37,8 +37,8 @@
  */
 
 using System;
-using GitSharp.Exceptions;
-using GitSharp.FnMatch;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.FnMatch;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.FnMatch

@@ -42,9 +42,10 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.IO;
+using GitSharp.Core;
 using NUnit.Framework;
 using System.Diagnostics;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Tests
 {
@@ -73,9 +74,9 @@ namespace GitSharp.Tests
 
         protected bool packedGitMMAP;
 
-        protected Repository db;
+        protected Core.Repository db;
         private int _testcount;
-        private readonly List<Repository> _repositoriesToClose = new List<Repository>();
+        private readonly List<Core.Repository> _repositoriesToClose = new List<Core.Repository>();
 
         static RepositoryTestCase()
         {
@@ -232,7 +233,7 @@ namespace GitSharp.Tests
                 new FileInfo(Path.Combine(trash_git.FullName, "usergitconfig")));
             SystemReader.setInstance(mockSystemReader);
 
-            db = new Repository(trash_git);
+            db = new Core.Repository(trash_git);
             db.Create();
 
             string[] packs = {
@@ -248,8 +249,8 @@ namespace GitSharp.Tests
 
             foreach (var packname in packs)
             {
-                new FileInfo("Resources/" + GitSharp.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir + "/" + GitSharp.Transport.IndexPack.GetPackFileName(packname), true);
-                new FileInfo("Resources/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir + "/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname), true);
+                new FileInfo("Resources/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir + "/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname), true);
+                new FileInfo("Resources/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir + "/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname), true);
             }
 
             new FileInfo("Resources/packed-refs").CopyTo(trash_git.FullName + "/packed-refs", true);
@@ -285,7 +286,7 @@ namespace GitSharp.Tests
 
         #endregion
 
-        protected Repository createNewEmptyRepo()
+        protected Core.Repository createNewEmptyRepo()
         {
             return createNewEmptyRepo(false);
         }
@@ -296,11 +297,11 @@ namespace GitSharp.Tests
         /// <returns>
         /// A new empty git repository for testing purposes
         /// </returns>
-        protected Repository createNewEmptyRepo(bool bare)  
+        protected Core.Repository createNewEmptyRepo(bool bare)  
         {
             var newTestRepo = new DirectoryInfo(Path.GetFullPath(trashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) + (bare ? "" : "/") + ".git"));
             Assert.IsFalse(newTestRepo.Exists);
-            var newRepo = new Repository(newTestRepo);
+            var newRepo = new Core.Repository(newTestRepo);
             newRepo.Create();
             string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
 

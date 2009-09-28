@@ -40,8 +40,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
+using GitSharp.Core;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -68,7 +69,7 @@ namespace GitSharp.Tests
         {
             // Create a new object in a new pack, and test that it is present.
             //
-            Repository eden = createNewEmptyRepo();
+            Core.Repository eden = createNewEmptyRepo();
             RevObject o1 = WriteBlob(eden, "o1");
             Pack(eden, o1);
             Assert.AreEqual(o1.Name, Parse(o1).Name);
@@ -81,7 +82,7 @@ namespace GitSharp.Tests
             // object into a different pack file, with some other object. We
             // still should be able to access the objects.
             //
-            Repository eden = createNewEmptyRepo();
+            Core.Repository eden = createNewEmptyRepo();
             RevObject o1 = WriteBlob(eden, "o1");
             FileInfo[] out1 = Pack(eden, o1);
             Assert.AreEqual(o1.Name, Parse(o1).Name);
@@ -106,7 +107,7 @@ namespace GitSharp.Tests
         {
             // Create an object and pack it.
             //
-            Repository eden = createNewEmptyRepo();
+            Core.Repository eden = createNewEmptyRepo();
             RevObject o1 = WriteBlob(eden, "o1");
             FileInfo[] out1 = Pack(eden, o1);
             Assert.AreEqual(o1.Name, Parse(o1).Name);
@@ -140,7 +141,7 @@ namespace GitSharp.Tests
             // object into a different pack file, with some other object. We
             // still should be able to access the objects.
             //
-            Repository eden = createNewEmptyRepo();
+            Core.Repository eden = createNewEmptyRepo();
             RevObject o1 = WriteBlob(eden, "o1");
             FileInfo[] out1 = Pack(eden, o1);
             Assert.AreEqual(o1.Name, Parse(o1).Name);
@@ -181,10 +182,10 @@ namespace GitSharp.Tests
 
         private RevObject Parse(AnyObjectId id)
         {
-            return new GitSharp.RevWalk.RevWalk(db).parseAny(id);
+            return new GitSharp.Core.RevWalk.RevWalk(db).parseAny(id);
         }
 
-        private FileInfo[] Pack(Repository src, params RevObject[] list)
+        private FileInfo[] Pack(Core.Repository src, params RevObject[] list)
         {
             var pw = new PackWriter(src, NullProgressMonitor.Instance);
             foreach (RevObject o in list)
@@ -247,18 +248,18 @@ namespace GitSharp.Tests
         private FileInfo FullPackFileName(AnyObjectId name)
         {
             var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
-            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetPackFileName(name.Name)));
+            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Core.Transport.IndexPack.GetPackFileName(name.Name)));
         }
 
         private FileInfo FullIndexFileName(AnyObjectId name)
         {
             var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
-            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetIndexFileName(name.Name)));
+            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(name.Name)));
         }
 
-        private RevObject WriteBlob(Repository repo, string data)
+        private RevObject WriteBlob(Core.Repository repo, string data)
         {
-            var revWalk = new GitSharp.RevWalk.RevWalk(repo);
+            var revWalk = new GitSharp.Core.RevWalk.RevWalk(repo);
             byte[] bytes = Constants.encode(data);
             var ow = new ObjectWriter(repo);
             ObjectId id = ow.WriteBlob(bytes);

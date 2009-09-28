@@ -36,9 +36,11 @@
  */
 
 using System.IO;
-using GitSharp.TreeWalk;
-using GitSharp.Util;
+using GitSharp.Core;
+using GitSharp.Core.TreeWalk;
+using GitSharp.Core.Util;
 using NUnit.Framework;
+using FileMode=GitSharp.Core.FileMode;
 
 namespace GitSharp.Tests.TreeWalk
 {

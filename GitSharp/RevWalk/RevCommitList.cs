@@ -302,7 +302,7 @@ namespace GitSharp.RevWalk
 			if (_walker == null || Size > highMark) return;
 
 			Generator p = _walker.Pending;
-			RevCommit c = p.next();
+			T c = (T)p.next();
 			if (c == null)
 			{
 				_walker.Pending = EndGenerator.Instance;
@@ -310,8 +310,8 @@ namespace GitSharp.RevWalk
 				return;
 			}
 
-			enter(Size, (T)c);
-			add((T)c);
+			enter(Size, c);
+			add(c);
 			p = _walker.Pending;
 
 			while (Size <= highMark)
@@ -340,14 +340,14 @@ namespace GitSharp.RevWalk
 				object[] dst = s.Contents;
 				while (Size <= highMark && index < BLOCK_SIZE)
 				{
-					c = p.next();
+					c = (T)p.next();
 					if (c == null)
 					{
 						_walker.Pending = EndGenerator.Instance;
 						_walker = null;
 						return;
 					}
-					enter(Size++, (T)c);
+					enter(Size++, c);
 					dst[index++] = c;
 				}
 			}

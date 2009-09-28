@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
@@ -284,7 +284,7 @@ namespace GitSharp
 				{
 					Encoding = Encoding.GetEncoding(n.Substring("encoding ".Length));
 				}
-				else if (n == null || !n.Equals(string.Empty))
+				else if (n == null || n.Length!=0)
 				{
 					throw new CorruptObjectException(CommitId, "malformed header:" + n);
 				}

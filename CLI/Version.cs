@@ -38,6 +38,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using GitSharp.API;
 
 namespace GitSharp.CLI.Nonstandard
 {
@@ -47,12 +48,12 @@ namespace GitSharp.CLI.Nonstandard
 
         override public void Run(String[] args) 
         {
-            Assembly myAsm = Assembly.Load("git");
-            AssemblyName aName = myAsm.GetName();
-            System.Version ver = aName.Version;
-
-		    if (ver == null)
-			    throw die("Cannot read package information.");
+            //Assembly myAsm = Assembly.Load("git");
+            //AssemblyName aName = myAsm.GetName();
+            //System.Version ver = aName.Version;
+            var ver = Git.Version;
+            if (ver == null)
+                throw die("Cannot read package information.");
 
 		    streamOut.Write("GitSharp version ");
 		    streamOut.Write(ver);

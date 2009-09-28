@@ -1,7 +1,4 @@
-/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2009, Jonas Fonseca <fonseca@diku.dk>
+﻿/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -42,46 +39,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NUnit.Framework;
+using GitSharp.API;
 using System.IO;
-using System.Runtime.Serialization;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.API.Tests
 {
-	/// <summary>
-	/// An exception thrown when a gitlink entry is found and cannot be
-	/// handled.
-	/// </summary>
-	[Serializable]
-    public class GitlinksNotSupportedException : IOException
+    [TestFixture]
+    public class InitTests : GitSharp.Tests.RepositoryTestCase
     {
-        //private static  long serialVersionUID = 1L;
-
-        /// <summary>
-		/// Construct a GitlinksNotSupportedException for the specified link
-		/// </summary>
-		/// <param name="s">
-		/// Name of link in tree or workdir
-		/// </param>
-        public GitlinksNotSupportedException(string s)
-            : base(s)
+        [Test]
+        public void Honors_GIT_DIR_before_initializing_current_dir()
         {
+            //var real_git_dir = System.Environment.GetEnvironmentVariable("GIT_DIR");
+            System.Environment.SetEnvironmentVariable("GIT_DIR", Path.Combine(trash.FullName, "git_dir"));
+            Git.Init();
+            Assert.IsTrue(Repository.IsValid( System.Environment.GetEnvironmentVariable("GIT_DIR")));
+            System.Environment.SetEnvironmentVariable("GIT_DIR", "");
+            var dir = Path.Combine(trash.FullName, "current_directory");
+            var current = Directory.GetCurrentDirectory();
+            try
+            {
+                Directory.CreateDirectory(dir);
+                Directory.SetCurrentDirectory(dir);
+                Git.Init();
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(current);
+            }
+            Assert.IsTrue(Repository.IsValid(dir));
         }
-
-		/// <summary>
-		/// Construct a GitlinksNotSupportedException for the specified link
-		/// </summary>
-		/// <param name="s">
-		/// Name of link in tree or workdir
-		/// </param>
-        public GitlinksNotSupportedException(string s, Exception inner)
-            : base(s, inner)
-        {
-        }
-		
-		protected GitlinksNotSupportedException(SerializationInfo info, StreamingContext context) 
-			: base(info, context)
-		{
-		}
     }
-
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -36,7 +36,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
+using System.Runtime.Serialization;
 using GitSharp.DirectoryCache;
 
 namespace GitSharp.Exceptions
@@ -44,7 +46,8 @@ namespace GitSharp.Exceptions
 	/// <summary>
 	/// Indicates one or more paths in a DirCache have non-zero stages present.
 	/// </summary>
-    public class UnmergedPathException : IOException
+    [Serializable]
+	public class UnmergedPathException : IOException
     {
         private readonly DirCacheEntry _entry;
 
@@ -57,6 +60,16 @@ namespace GitSharp.Exceptions
         {
             _entry = entry;
         }
+		
+		/// <summary>
+		/// Create a new unmerged path exception.
+		/// </summary>
+		/// <param name="entry">The first non-zero stage of the unmerged path.</param>
+        public UnmergedPathException(DirCacheEntry entry, Exception inner) 
+            : base("Unmerged path: " + entry.getPathString(), inner)
+        {
+            _entry = entry;
+        }
 
         /// <summary>
 		/// Returns the first non-zero stage of the unmerged path.
@@ -65,6 +78,11 @@ namespace GitSharp.Exceptions
         public DirCacheEntry DirCacheEntry
         {
             get { return _entry; }
+        }
+
+        protected UnmergedPathException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
         }
     }
 }

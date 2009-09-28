@@ -40,6 +40,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GitSharp.API.Commands;
+using System.IO;
 
 namespace GitSharp.API
 {
@@ -48,6 +49,9 @@ namespace GitSharp.API
     /// </summary>
     public class Repository
     {
+        #region Constructors
+
+
         internal GitSharp.Repository _repo;
 
         internal Repository(GitSharp.Repository repo)
@@ -59,9 +63,104 @@ namespace GitSharp.API
         /// Initializes the Repository object.
         /// </summary>
         /// <param name="path">Path to the local git repository.</param>
-        public Repository(string path) : this( new GitSharp.Repository(new System.IO.DirectoryInfo(path)))
+        public Repository(string path)
+            : this(new GitSharp.Repository(new System.IO.DirectoryInfo(path)))
         {
         }
+
+
+        #endregion
+
+        #region Public properties
+
+
+        /// <summary>
+        /// Returns the path to the repository database (i.e. the .git directory).
+        /// </summary>
+        public string Directory
+        {
+            get
+            {
+                if (_repo == null)
+                    throw new InvalidOperationException("Invalid repository");
+                return _repo.Directory.FullName;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if this repository is a bare repository
+        /// </summary>
+        public bool IsBare
+        {
+            get
+            {
+                if (_repo == null)
+                    throw new InvalidOperationException("Invalid repository");
+                return _repo.Config.getBoolean("core", "bare", false);
+            }
+        }
+
+        /// <summary>
+        /// Returns the path to the working directory (i.e. the parent of the .git directory of a non-bare repo). Returns null if it is a bare repository.
+        /// </summary>
+        public string WorkingDirectory
+        {
+            get
+            {
+                if (IsBare)
+                    return null;
+                return _repo.WorkingDirectory.FullName;
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Checks if the directory given by the path is a valid git repository.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
+        public static bool IsValid(string path)
+        {
+            var git = Path.Combine(path, ".git");
+            if (!DirExists(path))
+                return false;
+            if (!DirExists(Path.Combine(path, "branches")) && !DirExists(Path.Combine(git, "branches")))
+                return false;
+            if (!DirExists(Path.Combine(path, "objects")) && !DirExists(Path.Combine(git, "objects")))
+                return false;
+            if (!DirExists(Path.Combine(path, "refs")) && !DirExists(Path.Combine(git, "refs")))
+                return false;
+            if (!DirExists(Path.Combine(path, "remote")) && !DirExists(Path.Combine(git, "remote")))
+                return false;
+            if (!FileExists(Path.Combine(path, "config")) && !FileExists(Path.Combine(git, "config")))
+                return false;
+            if (!FileExists(Path.Combine(path, "HEAD")) && !FileExists(Path.Combine(git, "HEAD")))
+                return false;
+            try
+            {
+                new Repository(path);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private static bool DirExists(string path)
+        {
+            return new DirectoryInfo(path).Exists;
+        }
+
+        private static bool FileExists(string path)
+        {
+            return new FileInfo(path).Exists;
+        }
+
+
+        #region Repository initialization (git init)
+
 
         /// <summary>
         /// Initializes a non-bare git repository in the current directory if GIT_DIR is not set.
@@ -88,10 +187,14 @@ namespace GitSharp.API
         /// <param name="path"></param>
         /// <param name="bare"></param>
         /// <returns></returns>
-        public static Repository Init(string path, bool bare) {
+        public static Repository Init(string path, bool bare)
+        {
             var cmd = new Init() { Bare = bare, Path = path };
             cmd.Execute();
             return cmd.InitializedRepository;
         }
+
+
+        #endregion
     }
 }

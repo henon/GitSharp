@@ -1,7 +1,4 @@
-/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2009, Jonas Fonseca <fonseca@diku.dk>
+﻿/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -42,46 +39,47 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NUnit.Framework;
+using GitSharp.API;
 using System.IO;
-using System.Runtime.Serialization;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.API.Tests
 {
-	/// <summary>
-	/// An exception thrown when a gitlink entry is found and cannot be
-	/// handled.
-	/// </summary>
-	[Serializable]
-    public class GitlinksNotSupportedException : IOException
+    [TestFixture]
+    public class RepositoryTests : GitSharp.Tests.RepositoryTestCase
     {
-        //private static  long serialVersionUID = 1L;
-
-        /// <summary>
-		/// Construct a GitlinksNotSupportedException for the specified link
-		/// </summary>
-		/// <param name="s">
-		/// Name of link in tree or workdir
-		/// </param>
-        public GitlinksNotSupportedException(string s)
-            : base(s)
+        [Test]
+        public void IsBare()
         {
+            var repo = new GitSharp.API.Repository(trash_git.FullName);
+            Assert.IsFalse(repo.IsBare);
+            var bare_repo = GitSharp.API.Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
+            Assert.IsTrue(bare_repo.IsBare);
         }
 
-		/// <summary>
-		/// Construct a GitlinksNotSupportedException for the specified link
-		/// </summary>
-		/// <param name="s">
-		/// Name of link in tree or workdir
-		/// </param>
-        public GitlinksNotSupportedException(string s, Exception inner)
-            : base(s, inner)
+        [Test]
+        public void IsValid()
         {
+            var repo = GitSharp.API.Repository.Init(Path.Combine(trash.FullName, "test"));
+            Assert.IsTrue(Repository.IsValid(repo.WorkingDirectory));
+            Assert.IsTrue(Repository.IsValid(repo.Directory));
+            var bare_repo = GitSharp.API.Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
+            Assert.IsTrue(Repository.IsValid(bare_repo.Directory));
+            var dir = Path.Combine(trash.FullName, "empty_dir");
+            Assert.IsFalse(Repository.IsValid(dir));
+            Directory.CreateDirectory(dir);
+            Assert.IsFalse(Repository.IsValid(dir));
         }
-		
-		protected GitlinksNotSupportedException(SerializationInfo info, StreamingContext context) 
-			: base(info, context)
-		{
-		}
+
+        [Test]
+        public void Directory_and_WorkingDirectory()
+        {
+            var repo = GitSharp.API.Repository.Init(Path.Combine(trash.FullName, "test"));
+            Assert.AreEqual(Path.Combine(trash.FullName, "test"), repo.WorkingDirectory);
+            Assert.AreEqual(Path.Combine(trash.FullName, Path.Combine("test", ".git")), repo.Directory);
+            var bare_repo = GitSharp.API.Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
+            Assert.IsNull(bare_repo.WorkingDirectory);
+            Assert.AreEqual(Path.Combine(trash.FullName, "test.git"), bare_repo.Directory);
+        }
     }
-
 }

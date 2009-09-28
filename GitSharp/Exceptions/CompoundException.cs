@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -40,12 +40,14 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace GitSharp.Exceptions
 {
 	/// <summary>
 	/// An exception detailing multiple reasons for failure.
 	/// </summary>
+	[Serializable]
 	public class CompoundException : GitException
 	{
 		private readonly IList<Exception> _causeList;
@@ -86,6 +88,11 @@ namespace GitSharp.Exceptions
 		public IEnumerable<Exception> AllCauses
 		{
 			get { return new ReadOnlyCollection<Exception>(_causeList); }
+		}
+		
+		protected CompoundException(SerializationInfo info, StreamingContext context) 
+			: base(info, context)
+		{
 		}
 	}
 }

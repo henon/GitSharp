@@ -53,7 +53,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GitSharp\GitSharp.Core.csproj">
+    <ProjectReference Include="..\Core\GitSharp.Core.csproj">
       <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
       <Name>GitSharp.Core</Name>
     </ProjectReference>

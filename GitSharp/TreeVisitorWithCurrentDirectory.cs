@@ -40,7 +40,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Abstract TreeVisitor for visiting all files known by a Tree.

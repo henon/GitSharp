@@ -41,8 +41,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using GitSharp;
-using GitSharp.RevWalk;
+using GitSharp.Core;
+using GitSharp.Core.RevWalk;
 using NDesk.Options;
+using Repository=GitSharp.Core.Repository;
 
 namespace GitSharp.CLI
 {
@@ -88,7 +90,7 @@ public abstract class TextBuiltin
 	/// <summary>
     /// RevWalk used during command line parsing, if it was required.
 	/// </summary>
-    protected GitSharp.RevWalk.RevWalk argWalk;
+    protected GitSharp.Core.RevWalk.RevWalk argWalk;
 
     /// <summary>
     /// Contains the remaining arguments after the options listed in the command line.

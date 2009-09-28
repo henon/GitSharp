@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.TreeWalk
+namespace GitSharp.Core.TreeWalk
 {
     /**
      * Specialized TreeWalk to detect directory-file (D/F) name conflicts.

@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.Merge
+namespace GitSharp.Core.Merge
 {
 	/// <summary>
 	/// A merge strategy to merge 2 trees, using a common base ancestor tree.

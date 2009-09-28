@@ -1,4 +1,4 @@
-﻿using GitSharp.Util;
+﻿using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests

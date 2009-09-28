@@ -37,7 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.TreeWalk
+namespace GitSharp.Core.TreeWalk
 {
     /// <summary>
 	/// Iterator over an empty tree (a directory with no files).

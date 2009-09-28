@@ -40,7 +40,7 @@ using System.IO;
 using System.Linq;
 using System.Security;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public static class Extensions
     {

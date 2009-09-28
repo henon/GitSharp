@@ -37,10 +37,10 @@
 
 using System;
 using System.IO;
-using GitSharp.Diff;
-using GitSharp.Patch;
+using GitSharp.Core.Diff;
+using GitSharp.Core.Patch;
 using GitSharp.Tests.Patch;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Diff

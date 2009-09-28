@@ -37,7 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     /// <summary>
     /// Marker interface for transports that supports fetching from a git bundle

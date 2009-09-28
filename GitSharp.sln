@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.Tests", "Tests\Git
 		{C46EDD61-C202-465A-93F1-ADE20A83BB59} = {C46EDD61-C202-465A-93F1-ADE20A83BB59}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp", "GitSharp\GitSharp.csproj", "{C46EDD61-C202-465A-93F1-ADE20A83BB59}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.Core", "GitSharp\GitSharp.Core.csproj", "{C46EDD61-C202-465A-93F1-ADE20A83BB59}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A2CD2048-48D8-4641-ACBF-5199613EE281}"
 	ProjectSection(SolutionItems) = preProject

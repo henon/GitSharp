@@ -36,11 +36,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Exceptions;
-using GitSharp.TreeWalk;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.TreeWalk;
+using GitSharp.Core.TreeWalk.Filter;
 
-namespace GitSharp.DirectoryCache
+namespace GitSharp.Core.DirectoryCache
 {
 	/// <summary>
 	/// Iterate and update a <see cref="DirCache"/> as part of a <see cref="TreeWalk"/>.

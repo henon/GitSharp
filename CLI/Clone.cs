@@ -37,7 +37,8 @@
 
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Transport;
+using GitSharp.Core.Transport;
+using GitSharp.Core;
 
 namespace GitSharp.CLI
 {
@@ -98,7 +99,7 @@ namespace GitSharp.CLI
 
         private FetchResult runFetch()
         {
-            Transport.Transport tn = Transport.Transport.Open(db, remoteName);
+            Transport tn = Transport.Open(db, remoteName);
             FetchResult r;
             try
             {
@@ -141,7 +142,7 @@ namespace GitSharp.CLI
             if (!Constants.HEAD.Equals(branch.Name))
                 db.WriteSymref(Constants.HEAD, branch.Name);
 
-            GitSharp.Commit commit = db.MapCommit(branch.ObjectId);
+            GitSharp.Core.Commit commit = db.MapCommit(branch.ObjectId);
             RefUpdate u = db.UpdateRef(Constants.HEAD);
             u.NewObjectId = commit.CommitId;
             u.ForceUpdate();

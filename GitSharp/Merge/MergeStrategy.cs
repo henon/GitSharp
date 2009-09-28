@@ -41,7 +41,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace GitSharp.Merge
+namespace GitSharp.Core.Merge
 {
 	/// <summary>
 	/// A method of combining two or more trees together to form an output tree.

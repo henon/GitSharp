@@ -39,10 +39,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 
-namespace GitSharp.FnMatch
+namespace GitSharp.Core.FnMatch
 {
 	/// <summary>
 	/// This class can be used to match filenames against fnmatch like patterns. 

@@ -43,7 +43,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
     public static class PathUtil
     {

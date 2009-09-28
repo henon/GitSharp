@@ -37,9 +37,9 @@
 
 using System;
 using System.Text;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     /**
  * Describes how refs in one repository copy into another repository.

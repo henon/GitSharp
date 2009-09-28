@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Text;
-using GitSharp.Patch;
+using GitSharp.Core.Patch;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Patch
@@ -10,13 +10,13 @@ namespace GitSharp.Tests.Patch
 		protected const string DiffsDir = "Diff/Resources/";
 		protected const string PatchsDir = "Patch/Resources/";
 
-		protected static GitSharp.Patch.Patch ParseTestPatchFile(string patchFile)
+		protected static GitSharp.Core.Patch.Patch ParseTestPatchFile(string patchFile)
 		{
 			try
 			{
 				using (var inStream = new FileStream(patchFile, System.IO.FileMode.Open))
 				{
-					var p = new GitSharp.Patch.Patch();
+					var p = new GitSharp.Core.Patch.Patch();
 					p.parse(inStream);
 					return p;
 				}
@@ -28,7 +28,7 @@ namespace GitSharp.Tests.Patch
 			}
 		}
 
-		protected static string GetAllErrorsFromPatch(GitSharp.Patch.Patch patch)
+		protected static string GetAllErrorsFromPatch(GitSharp.Core.Patch.Patch patch)
 		{
 			if (patch == null || patch.getErrors().Count == 0)
 			{

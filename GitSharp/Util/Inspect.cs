@@ -38,7 +38,7 @@
 using System.Text;
 using System.IO;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
     public class Inspector
     {

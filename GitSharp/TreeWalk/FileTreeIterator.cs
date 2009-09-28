@@ -38,9 +38,9 @@
  */
 
 using System.IO;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.TreeWalk
+namespace GitSharp.Core.TreeWalk
 {
     /// <summary>
     /// Working directory iterator for standard Java IO.

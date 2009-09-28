@@ -41,7 +41,7 @@
 using System;
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     [Serializable]
     public class FileMode : IEquatable<FileMode>

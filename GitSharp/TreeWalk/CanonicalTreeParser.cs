@@ -38,10 +38,10 @@
  */
 
 using System;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 
-namespace GitSharp.TreeWalk
+namespace GitSharp.Core.TreeWalk
 {
 	/// <summary>
 	/// Parses raw Git trees from the canonical semi-text/semi-binary format.

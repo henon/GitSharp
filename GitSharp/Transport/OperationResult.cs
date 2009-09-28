@@ -39,7 +39,7 @@
 
 using System.Collections.Generic;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public abstract class OperationResult

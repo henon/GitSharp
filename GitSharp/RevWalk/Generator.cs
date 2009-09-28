@@ -38,7 +38,7 @@
 
 using System;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 
 	/**

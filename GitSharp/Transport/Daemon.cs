@@ -44,7 +44,7 @@ using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 	/// <summary>
 	/// Basic daemon for the anonymous <code>git://</code> transport protocol.

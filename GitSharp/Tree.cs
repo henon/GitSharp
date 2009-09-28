@@ -42,10 +42,10 @@
 using System;
 using System.IO;
 using System.Text;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// A representation of a Git tree entry. A Tree is a directory in Git.
@@ -158,7 +158,7 @@ namespace GitSharp
 			{
 			    int mid = (int) (((uint) (low + high)) >> 1);
 				int cmp = CompareNames(entries[mid].NameUTF8, nameUTF8,
-					nameStart, nameEnd, GitSharp.TreeEntry.LastChar(entries[mid]), nameUTF8Last);
+					nameStart, nameEnd, GitSharp.Core.TreeEntry.LastChar(entries[mid]), nameUTF8Last);
 
 				if (cmp < 0)
 				{
@@ -376,7 +376,7 @@ namespace GitSharp
 		public void AddEntry(TreeEntry e)
 		{
 			EnsureLoaded();
-			int p = BinarySearch(_contents, e.NameUTF8, GitSharp.TreeEntry.LastChar(e), 0, e.NameUTF8.Length);
+			int p = BinarySearch(_contents, e.NameUTF8, GitSharp.Core.TreeEntry.LastChar(e), 0, e.NameUTF8.Length);
 			if (p < 0)
 			{
 				e.AttachParent(this);
@@ -413,7 +413,7 @@ namespace GitSharp
 		internal void RemoveEntry(TreeEntry e)
 		{
 			TreeEntry[] c = _contents;
-			int p = BinarySearch(c, e.NameUTF8, GitSharp.TreeEntry.LastChar(e), 0, e.NameUTF8.Length);
+			int p = BinarySearch(c, e.NameUTF8, GitSharp.Core.TreeEntry.LastChar(e), 0, e.NameUTF8.Length);
 			if (p >= 0)
 			{
 				var n = new TreeEntry[c.Length - 1];

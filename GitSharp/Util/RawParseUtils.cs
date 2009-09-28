@@ -43,7 +43,7 @@ using System;
 using System.Text;
 using System.Linq;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
 	public static class RawParseUtils
 	{

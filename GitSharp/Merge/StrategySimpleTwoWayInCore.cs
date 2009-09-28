@@ -36,11 +36,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.DirectoryCache;
-using GitSharp.Exceptions;
-using GitSharp.TreeWalk;
+using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.TreeWalk;
 
-namespace GitSharp.Merge
+namespace GitSharp.Core.Merge
 {
     /// <summary>
     /// Merges two commits together in-memory, ignoring any working directory.

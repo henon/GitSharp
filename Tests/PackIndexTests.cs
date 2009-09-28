@@ -38,6 +38,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.Core;
 using NUnit.Framework;
 using System.IO;
 

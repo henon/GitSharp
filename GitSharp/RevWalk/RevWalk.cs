@@ -40,12 +40,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk.Filter;
-using GitSharp.TreeWalk.Filter;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk.Filter;
+using GitSharp.Core.TreeWalk.Filter;
+using GitSharp.Core.Util;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 	/// <summary>
 	/// Walks a commit graph and produces the matching commits in order.

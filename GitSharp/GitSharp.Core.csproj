@@ -8,8 +8,8 @@
     <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GitSharp</RootNamespace>
-    <AssemblyName>GitSharp</AssemblyName>
+    <RootNamespace>GitSharp.Core</RootNamespace>
+    <AssemblyName>GitSharp.Core</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkSubset>

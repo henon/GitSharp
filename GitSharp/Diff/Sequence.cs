@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.Diff
+namespace GitSharp.Core.Diff
 {
 	/// <summary>
 	/// Arbitrary sequence of elements with fast comparison support.

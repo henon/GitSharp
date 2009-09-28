@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.Serialization;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
 	[Serializable]
     public class EntryExistsException : Exception

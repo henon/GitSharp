@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
     public static class IListUtil
     {

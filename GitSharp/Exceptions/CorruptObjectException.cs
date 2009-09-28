@@ -45,7 +45,7 @@ using System.Text;
 using GitSharp;
 using System.IO;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
     [global::System.Serializable]
     public class CorruptObjectException : IOException

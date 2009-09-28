@@ -38,10 +38,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     public abstract class WalkRemoteObjectDatabase
     {

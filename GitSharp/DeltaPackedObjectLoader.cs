@@ -38,9 +38,9 @@
  */
 
 using System.IO;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     /// <summary>
 	/// Reader for a deltified object Stored in a pack file.

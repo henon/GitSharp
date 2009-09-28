@@ -41,9 +41,9 @@ using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Least frequently used cache for objects specified by PackFile positions.

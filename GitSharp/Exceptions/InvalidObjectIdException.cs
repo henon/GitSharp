@@ -42,7 +42,7 @@ using System;
 using System.Text;
 using System.Runtime.Serialization;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
 	/// <summary>
 	/// Thrown when an invalid object id is passed in as an argument.

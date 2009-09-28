@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Transport;
+using GitSharp.Core.Transport;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Transport

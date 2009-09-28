@@ -39,10 +39,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Patch;
-using GitSharp.Util;
+using GitSharp.Core.Patch;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Diff
+namespace GitSharp.Core.Diff
 {
 	/// <summary>
 	/// Format an <seealso cref="EditList"/> as a Git style unified patch script.

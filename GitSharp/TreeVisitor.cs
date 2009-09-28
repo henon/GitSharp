@@ -39,7 +39,7 @@
 
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// A TreeVisitor is invoked depth first for every node in a tree and is expected

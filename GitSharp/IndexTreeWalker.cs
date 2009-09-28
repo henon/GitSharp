@@ -41,7 +41,7 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public class IndexTreeWalker
     {

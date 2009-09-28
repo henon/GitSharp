@@ -38,9 +38,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using GitSharp.RevWalk;
+using GitSharp.Core.RevWalk;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 	public class RefAdvertiser
 	{

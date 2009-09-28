@@ -38,7 +38,7 @@
 
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public class CoreConfig
     {

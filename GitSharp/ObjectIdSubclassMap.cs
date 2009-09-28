@@ -39,7 +39,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Fast, efficient map specifically for {@link ObjectId} subclasses.

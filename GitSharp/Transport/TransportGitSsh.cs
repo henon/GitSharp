@@ -42,11 +42,11 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 using Tamir.SharpSsh.jsch;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 	public class TransportGitSsh : SshTransport, IPackTransport
 	{

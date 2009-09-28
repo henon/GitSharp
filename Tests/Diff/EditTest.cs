@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Diff;
+using GitSharp.Core.Diff;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Diff

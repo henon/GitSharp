@@ -39,7 +39,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GitSharp.FnMatch
+namespace GitSharp.Core.FnMatch
 {
     internal abstract class AbstractHead : IHead
     {

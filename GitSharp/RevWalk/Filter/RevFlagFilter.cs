@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.RevWalk.Filter
+namespace GitSharp.Core.RevWalk.Filter
 {
 	/// <summary>
 	/// Matches only commits with some/all RevFlags already set.

@@ -40,7 +40,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 	/// <summary>
 	/// Multiple application level mark bits for <see cref="RevObject"/>s.

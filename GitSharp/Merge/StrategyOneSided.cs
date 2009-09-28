@@ -38,7 +38,7 @@
 
 using System;
 
-namespace GitSharp.Merge
+namespace GitSharp.Core.Merge
 {
 	/// <summary>
 	/// Trivial merge strategy to make the resulting tree exactly match an input.

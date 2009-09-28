@@ -39,9 +39,9 @@
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 	/// <summary>
 	/// This URI like construct used for referencing Git archives over the net, as

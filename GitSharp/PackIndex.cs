@@ -42,10 +42,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Access path to locate objects by <see cref="ObjectId"/> in a <see cref="PackFile"/>.

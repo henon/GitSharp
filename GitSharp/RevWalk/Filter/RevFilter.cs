@@ -37,9 +37,9 @@
  */
 
 using System;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp.RevWalk.Filter
+namespace GitSharp.Core.RevWalk.Filter
 {
 	/// <summary>
 	/// Selects interesting revisions during walking.

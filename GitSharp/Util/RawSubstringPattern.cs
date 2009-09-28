@@ -45,9 +45,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
     /**
      * Searches text using only substring search.

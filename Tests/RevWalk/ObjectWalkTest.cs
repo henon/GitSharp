@@ -35,7 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.RevWalk;
+using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -45,7 +45,7 @@ namespace GitSharp.Tests.RevWalk
     {
         protected ObjectWalk objw;
 
-        protected override GitSharp.RevWalk.RevWalk createRevWalk()
+        protected override GitSharp.Core.RevWalk.RevWalk createRevWalk()
         {
             return objw = new ObjectWalk(db);
         }

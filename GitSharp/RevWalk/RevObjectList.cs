@@ -41,7 +41,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 	/// <summary>
 	/// An ordered list of <see cref="RevObject"/> subclasses.

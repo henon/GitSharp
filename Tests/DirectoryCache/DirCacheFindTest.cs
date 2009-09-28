@@ -39,7 +39,7 @@
 namespace GitSharp.Tests.DirectoryCache
 {
     using NUnit.Framework;
-    using GitSharp.DirectoryCache;
+    using GitSharp.Core.DirectoryCache;
     [TestFixture]
     public class DirCacheFindTest : RepositoryTestCase
     {

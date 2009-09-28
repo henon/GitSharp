@@ -38,10 +38,10 @@
  */
 
 using System.IO;
-using GitSharp.Util;
-using GitSharp.Exceptions;
+using GitSharp.Core.Util;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// A tree visitor for writing a directory tree to the git object database.

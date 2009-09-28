@@ -35,7 +35,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.TreeWalk;
+using GitSharp.Core;
+using GitSharp.Core.TreeWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.TreeWalk

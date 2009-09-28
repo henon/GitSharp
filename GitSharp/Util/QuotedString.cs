@@ -41,7 +41,7 @@ using System.Text;
 using System;
 using System.Text.RegularExpressions;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
 	/// <summary>
 	/// Utility functions related to quoted string handling.

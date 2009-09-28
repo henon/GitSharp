@@ -43,10 +43,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Instances of this class represent a Commit object. It represents a snapshot

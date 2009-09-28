@@ -41,7 +41,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	public class TextProgressMonitor : ProgressMonitor
 	{

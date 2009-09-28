@@ -39,7 +39,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 	/// <summary>
 	/// A remembered remote repository, including URLs and RefSpecs.

@@ -39,7 +39,7 @@ using System;
 using System.IO;
 using System.Net;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public abstract class WalkEncryption

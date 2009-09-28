@@ -39,7 +39,7 @@
 
 using System;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	
 	

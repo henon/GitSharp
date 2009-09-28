@@ -42,7 +42,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
-namespace GitSharp.RevWalk.Filter
+namespace GitSharp.Core.RevWalk.Filter
 {
 
 

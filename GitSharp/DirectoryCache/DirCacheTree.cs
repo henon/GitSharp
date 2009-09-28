@@ -40,10 +40,10 @@
 using System;
 using System.Text;
 using System.IO;
-using GitSharp.Util;
-using GitSharp.Exceptions;
+using GitSharp.Core.Util;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp.DirectoryCache
+namespace GitSharp.Core.DirectoryCache
 {
 	/// <summary>
 	/// Single tree record from the 'TREE' <seealso cref="DirCache"/> extension.

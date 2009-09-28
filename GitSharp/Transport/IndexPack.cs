@@ -40,11 +40,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 	public class IndexPack
 	{

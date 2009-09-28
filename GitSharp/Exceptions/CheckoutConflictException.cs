@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.Serialization;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
     [Serializable]
     public class CheckoutConflictException : Exception

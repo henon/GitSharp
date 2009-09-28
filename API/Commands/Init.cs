@@ -158,7 +158,7 @@ namespace GitSharp.API.Commands
         /// </summary>
         public void Execute()
         {
-            var repo = new GitSharp.Repository(new DirectoryInfo(ActualPath));
+            var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualPath));
             repo.Create(Bare);
             if (!Quiet)
             {

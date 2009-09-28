@@ -40,7 +40,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
 	/// <summary>
 	/// Indicates a checked exception was thrown inside of <see cref="RevWalk"/>.

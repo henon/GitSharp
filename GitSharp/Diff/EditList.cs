@@ -38,7 +38,7 @@
 
 using System.Collections.Generic;
 
-namespace GitSharp.Diff
+namespace GitSharp.Core.Diff
 {
 	/// <summary>
 	/// Specialized list of <seealso cref="Edit"/>s in a document.

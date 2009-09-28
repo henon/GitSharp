@@ -38,9 +38,9 @@
 
 using System;
 using System.IO;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     /// <summary>
 	/// Reader for a non-delta (just deflated) object in a pack file.

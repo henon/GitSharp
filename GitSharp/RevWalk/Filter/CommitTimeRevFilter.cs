@@ -37,10 +37,10 @@
  */
 
 using System;
-using GitSharp.Util;
-using GitSharp.Exceptions;
+using GitSharp.Core.Util;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp.RevWalk.Filter
+namespace GitSharp.Core.RevWalk.Filter
 {
 	/// <summary>
 	/// Selects commits based upon the commit time field.

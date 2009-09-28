@@ -40,11 +40,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using GitSharp.Exceptions;
-using GitSharp.Transport;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Transport;
+using GitSharp.Core.Util;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Traditional file system based <see cref="ObjectDatabase"/>.

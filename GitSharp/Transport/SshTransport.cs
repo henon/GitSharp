@@ -38,10 +38,10 @@
 
 using System;
 using System.Net.Sockets;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 using Tamir.SharpSsh.jsch;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     public abstract class SshTransport : TcpTransport
     {

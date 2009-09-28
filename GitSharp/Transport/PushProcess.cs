@@ -37,10 +37,10 @@
 
 using System;
 using System.Collections.Generic;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     /// <summary>
     /// Class performing push operation on remote repository.

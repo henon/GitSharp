@@ -39,7 +39,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
     /// <summary>
 	/// Indicates a text string is not a valid Git style configuration.

@@ -39,10 +39,10 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public class SideBandInputStream : Stream

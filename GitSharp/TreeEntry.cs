@@ -41,7 +41,7 @@
 using System;
 using System.Text;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public abstract class TreeEntry : IComparable, IComparable<TreeEntry>
     {

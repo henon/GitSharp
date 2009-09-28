@@ -38,9 +38,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     class DeltaOfsPackedObjectLoader : DeltaPackedObjectLoader
     {

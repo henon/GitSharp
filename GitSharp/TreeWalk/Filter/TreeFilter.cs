@@ -37,7 +37,7 @@
  */
 
 using System;
-namespace GitSharp.TreeWalk.Filter
+namespace GitSharp.Core.TreeWalk.Filter
 {
 
 

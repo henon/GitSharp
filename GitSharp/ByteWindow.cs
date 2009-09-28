@@ -40,7 +40,7 @@
 using System;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// A window of data currently stored within a cache.

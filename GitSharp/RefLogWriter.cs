@@ -43,7 +43,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Utility class to work with reflog files

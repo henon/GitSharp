@@ -38,7 +38,7 @@
 
 using System.Collections.Generic;
 
-namespace GitSharp.FnMatch
+namespace GitSharp.Core.FnMatch
 {
     public interface IHead
     {

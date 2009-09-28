@@ -37,10 +37,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using GitSharp.Transport;
+using GitSharp.Core.Transport;
 using System.Runtime.Serialization;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
 	[Serializable]
     public class MissingBundlePrerequisiteException : TransportException

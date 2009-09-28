@@ -44,7 +44,7 @@ using System.Linq;
 using System.Text;
 
 
-namespace GitSharp.TreeWalk.Filter
+namespace GitSharp.Core.TreeWalk.Filter
 {
 
     /**

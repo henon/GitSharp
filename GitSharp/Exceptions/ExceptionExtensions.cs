@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
     public static class ExceptionExtensions
     {

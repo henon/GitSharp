@@ -37,7 +37,7 @@
 
 using System;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     /** Specification of annotated tag behavior during fetch. */

@@ -38,9 +38,9 @@
 
 using System.Collections.Generic;
 using System.Text;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Patch
+namespace GitSharp.Core.Patch
 {
     /**
      * A file in the Git "diff --cc" or "diff --combined" format.

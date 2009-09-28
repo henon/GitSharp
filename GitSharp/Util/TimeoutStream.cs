@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
 	/// <summary>
 	/// A normal Stream might provide a timeout on a specific read opreation.

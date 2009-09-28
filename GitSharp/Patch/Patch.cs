@@ -39,9 +39,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Patch
+namespace GitSharp.Core.Patch
 {
 	/// <summary>
 	/// A parsed collection of <seealso cref="FileHeader"/>s from a unified diff patch file.

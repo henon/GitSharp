@@ -41,11 +41,11 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using GitSharp.Exceptions;
-using GitSharp.FnMatch;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.FnMatch;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public class OpenSshConfig

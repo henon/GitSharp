@@ -39,7 +39,7 @@
 
 using System.Text;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public class FileTreeEntry : TreeEntry 
     {

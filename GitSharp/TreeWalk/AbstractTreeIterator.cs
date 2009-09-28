@@ -39,10 +39,10 @@
  */
 
 using System;
-using GitSharp.Exceptions;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.TreeWalk.Filter;
 
-namespace GitSharp.TreeWalk
+namespace GitSharp.Core.TreeWalk
 {
 	/// <summary>
 	/// Walks a Git tree (directory) in Git sort order.

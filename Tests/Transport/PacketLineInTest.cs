@@ -36,7 +36,8 @@
  */
 
 using System.IO;
-using GitSharp.Transport;
+using GitSharp.Core;
+using GitSharp.Core.Transport;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Transport

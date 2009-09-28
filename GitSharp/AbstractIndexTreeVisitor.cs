@@ -40,7 +40,7 @@
 
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public class AbstractIndexTreeVisitor : IndexTreeVisitor
     {

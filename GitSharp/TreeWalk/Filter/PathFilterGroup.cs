@@ -41,9 +41,9 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp.TreeWalk.Filter
+namespace GitSharp.Core.TreeWalk.Filter
 {
 
 

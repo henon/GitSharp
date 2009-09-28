@@ -41,9 +41,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.TreeWalk
+namespace GitSharp.Core.TreeWalk
 {
     /// <summary>
     /// Walks a working directory tree as part of a {@link TreeWalk}.

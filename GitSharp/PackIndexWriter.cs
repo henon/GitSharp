@@ -41,10 +41,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
-using GitSharp.Transport;
-using GitSharp.Util;
+using GitSharp.Core.Transport;
+using GitSharp.Core.Util;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public abstract class PackIndexWriter
     {

@@ -37,7 +37,7 @@
 
 using System.Collections.Generic;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public sealed class AlternateRepositoryDatabase : ObjectDatabase
     {

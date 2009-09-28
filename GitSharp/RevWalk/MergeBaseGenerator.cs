@@ -37,9 +37,9 @@
  */
 
 using System;
-using GitSharp.RevWalk.Filter;
+using GitSharp.Core.RevWalk.Filter;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
     /// <summary>
     /// Computes the merge base(s) of the starting commits.

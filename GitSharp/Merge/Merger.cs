@@ -37,12 +37,12 @@
  */
 
 using System.IO;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
-using GitSharp.RevWalk.Filter;
-using GitSharp.TreeWalk;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.RevWalk.Filter;
+using GitSharp.Core.TreeWalk;
 
-namespace GitSharp.Merge
+namespace GitSharp.Core.Merge
 {
 	/// <summary>
 	/// Instance of a specific <seealso cref="MergeStrategy"/> for a single <seealso cref="Repository"/>.

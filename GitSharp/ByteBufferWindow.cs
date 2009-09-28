@@ -41,7 +41,7 @@ using System;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// A window for accessing git packs using a <see cref="Stream"/> for storage.

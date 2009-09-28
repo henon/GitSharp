@@ -38,6 +38,7 @@
  */
 
 using System.IO;
+using GitSharp.Core;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -46,8 +47,8 @@ namespace GitSharp.Tests
     public class T0004_PackReader : RepositoryTestCase
 	{
 		private const string PackName = "pack-34be9032ac282b11fa9babdc2b2a93ca996c9c2f";
-		private static readonly FileInfo TestPack = new FileInfo(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "Resources/"), GitSharp.Transport.IndexPack.GetPackFileName(PackName)).Replace('/', Path.DirectorySeparatorChar));
-		private static readonly FileInfo TestIdx = new FileInfo(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "Resources/"), GitSharp.Transport.IndexPack.GetIndexFileName(PackName)).Replace('/', Path.DirectorySeparatorChar));
+		private static readonly FileInfo TestPack = new FileInfo(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "Resources/"), GitSharp.Core.Transport.IndexPack.GetPackFileName(PackName)).Replace('/', Path.DirectorySeparatorChar));
+		private static readonly FileInfo TestIdx = new FileInfo(Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "Resources/"), GitSharp.Core.Transport.IndexPack.GetIndexFileName(PackName)).Replace('/', Path.DirectorySeparatorChar));
 
 		[Test]
 		public void test003_lookupCompressedObject()
@@ -87,8 +88,8 @@ namespace GitSharp.Tests
             var packDir = new DirectoryInfo(Path.Combine(db.ObjectsDirectory.FullName, "pack"));
             string packname = "pack-2e71952edc41f3ce7921c5e5dd1b64f48204cf35";
             
-            new FileInfo(todopack.FullName + "/" + GitSharp.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir.FullName + "/" + GitSharp.Transport.IndexPack.GetPackFileName(packname));
-            new FileInfo(todopack.FullName + "/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir.FullName + "/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname));
+            new FileInfo(todopack.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname));
+            new FileInfo(todopack.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname));
 
             Tree t;
 

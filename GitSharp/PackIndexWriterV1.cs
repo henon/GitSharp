@@ -39,10 +39,10 @@
  */
 
 using System.IO;
-using GitSharp.Transport;
-using GitSharp.Util;
+using GitSharp.Core.Transport;
+using GitSharp.Core.Util;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public class PackIndexWriterV1 : PackIndexWriter
     {

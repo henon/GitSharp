@@ -44,7 +44,7 @@ using System.Linq;
 using System.Text;
 using GitSharp;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
 	/// <summary>
 	/// An inconsistency with respect to handling different object types.

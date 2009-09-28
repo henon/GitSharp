@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.FnMatch
+namespace GitSharp.Core.FnMatch
 {
     internal sealed class WildCardHead : AbstractHead
     {

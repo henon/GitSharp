@@ -43,7 +43,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
 	/// <summary>
 	/// Conversion utilities for network byte order handling.

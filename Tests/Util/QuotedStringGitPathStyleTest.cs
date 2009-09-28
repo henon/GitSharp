@@ -38,7 +38,8 @@
 
 using System;
 using GitSharp;
-using GitSharp.Util;
+using GitSharp.Core;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 using System.Text;
 

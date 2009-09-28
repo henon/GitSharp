@@ -37,10 +37,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Exceptions;
-using GitSharp.RevWalk.Filter;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk.Filter;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 	/// <summary>
 	/// Default (and first pass) RevCommit Generator implementation for RevWalk.

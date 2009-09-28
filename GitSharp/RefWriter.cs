@@ -44,7 +44,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     /**
      * Writes out refs to the {@link Constants#INFO_REFS} and

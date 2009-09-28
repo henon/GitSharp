@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     /// <summary>
     /// The base class for transports that use HTTP as underlying protocol. This class

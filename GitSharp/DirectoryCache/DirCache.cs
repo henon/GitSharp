@@ -39,10 +39,10 @@
 using System;
 using System.IO;
 using System.Linq;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 
-namespace GitSharp.DirectoryCache
+namespace GitSharp.Core.DirectoryCache
 {
 	/// <summary>
 	/// Support for the Git dircache (aka index file).

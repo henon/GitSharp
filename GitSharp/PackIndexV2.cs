@@ -40,10 +40,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Util;
-using GitSharp.Exceptions;
+using GitSharp.Core.Util;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Support for the pack index v2 format.

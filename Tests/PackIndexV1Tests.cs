@@ -38,6 +38,7 @@
 
 using System;
 using System.IO;
+using GitSharp.Core;
 using GitSharp.Tests.Util;
 using NUnit.Framework;
 

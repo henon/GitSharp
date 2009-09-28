@@ -36,7 +36,7 @@
  */
 
 using System;
-using GitSharp.RevWalk;
+using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -50,8 +50,8 @@ namespace GitSharp.Tests.RevWalk
 		public void testEmpty()
 		{
 			Assert.IsNull(_q.next());
-			Assert.IsTrue(_q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-			Assert.IsFalse(_q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+			Assert.IsTrue(_q.everbodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
+			Assert.IsFalse(_q.anybodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
 			Assert.AreEqual(Generator.GeneratorOutputType.None, _q.OutputType);
 		}
 

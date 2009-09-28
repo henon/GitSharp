@@ -40,7 +40,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
     /// <summary>
     /// Java style iterator with remove capability (which is not supported by IEnumerator).

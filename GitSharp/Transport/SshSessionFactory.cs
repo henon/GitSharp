@@ -38,7 +38,7 @@
 
 using Tamir.SharpSsh.jsch;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public abstract class SshSessionFactory

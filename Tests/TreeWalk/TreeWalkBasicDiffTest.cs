@@ -36,7 +36,8 @@
  */
 
 using System;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core;
+using GitSharp.Core.TreeWalk.Filter;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.TreeWalk
@@ -89,7 +90,7 @@ namespace GitSharp.Tests.TreeWalk
 			                         		return ow.WriteTree(root);
 			                         	};
 
-			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
 			tw.reset(new[] { oldTree.Invoke(), newTree.Invoke() });
 			tw.Recursive = true;
 			tw.setFilter(TreeFilter.ANY_DIFF);

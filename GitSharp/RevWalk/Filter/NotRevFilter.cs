@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.RevWalk.Filter
+namespace GitSharp.Core.RevWalk.Filter
 {
 	/// <summary>
 	/// Includes a commit only if the subfilter does not include the commit.

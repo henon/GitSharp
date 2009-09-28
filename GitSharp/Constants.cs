@@ -42,10 +42,10 @@
 
 using System.Text;
 using System;
-using GitSharp.Util;
-using GitSharp.Exceptions;
+using GitSharp.Core.Util;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public static class Constants
     {

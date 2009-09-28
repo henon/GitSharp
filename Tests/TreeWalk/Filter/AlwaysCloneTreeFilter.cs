@@ -36,8 +36,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.TreeWalk;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core.TreeWalk;
+using GitSharp.Core.TreeWalk.Filter;
 namespace GitSharp.Tests.TreeWalk
 {
 
@@ -48,7 +48,7 @@ namespace GitSharp.Tests.TreeWalk
             return new AlwaysCloneTreeFilter();
         }
 
-        public override bool include(GitSharp.TreeWalk.TreeWalk walker)
+        public override bool include(GitSharp.Core.TreeWalk.TreeWalk walker)
         {
             return false;
         }

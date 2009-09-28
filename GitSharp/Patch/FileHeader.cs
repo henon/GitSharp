@@ -40,10 +40,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using GitSharp.Diff;
-using GitSharp.Util;
+using GitSharp.Core.Diff;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Patch
+namespace GitSharp.Core.Patch
 {
 	/// <summary>
 	/// Patch header describing an action for a single file path.

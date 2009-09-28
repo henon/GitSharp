@@ -36,7 +36,7 @@
 
 using System;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
 	public class Crc32
 	{

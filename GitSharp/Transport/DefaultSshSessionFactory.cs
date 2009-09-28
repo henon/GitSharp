@@ -39,7 +39,7 @@
 using System;
 using Tamir.SharpSsh.jsch;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     public class DefaultSshSessionFactory : SshConfigSessionFactory
     {

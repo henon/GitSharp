@@ -35,8 +35,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Patch;
-using GitSharp.Util;
+using GitSharp.Core.Patch;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Patch
@@ -47,7 +47,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testError_DisconnectedHunk()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_DisconnectedHunk.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_DisconnectedHunk.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.AreEqual(1, p.getErrors().Count);
 
@@ -66,7 +66,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testError_TruncatedOld()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_TruncatedOld.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_TruncatedOld.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.AreEqual(1, p.getErrors().Count);
 
@@ -80,7 +80,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testError_TruncatedNew()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_TruncatedNew.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_TruncatedNew.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.AreEqual(1, p.getErrors().Count);
 
@@ -94,7 +94,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testError_BodyTooLong()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_BodyTooLong.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_BodyTooLong.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.AreEqual(1, p.getErrors().Count);
 
@@ -108,7 +108,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testError_GarbageBetweenFiles()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_GarbageBetweenFiles.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_GarbageBetweenFiles.patch");
 			Assert.AreEqual(2, p.getFiles().Count);
 
 			FileHeader fh0 = p.getFiles()[0];
@@ -130,7 +130,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testError_GitBinaryNoForwardHunk()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_GitBinaryNoForwardHunk.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testError_GitBinaryNoForwardHunk.patch");
 			Assert.AreEqual(2, p.getFiles().Count);
 
 			FileHeader fh0 = p.getFiles()[0];

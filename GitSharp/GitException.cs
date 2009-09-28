@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     [Serializable]
     public class GitException : Exception

@@ -39,12 +39,12 @@
 
 using System;
 using System.Collections.Generic;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
-using GitSharp.TreeWalk.Filter;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.TreeWalk.Filter;
+using GitSharp.Core.Util;
 
-namespace GitSharp.TreeWalk
+namespace GitSharp.Core.TreeWalk
 {
 	/**
 	 * Walks one or more {@link AbstractTreeIterator}s in parallel.

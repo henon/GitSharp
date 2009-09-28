@@ -40,7 +40,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
     /// <summary>
     /// A fully buffered output stream using local disk storage for large data.

@@ -39,9 +39,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Abstraction of arbitrary object storage.

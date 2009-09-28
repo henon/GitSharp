@@ -45,7 +45,7 @@ using System.Text;
 using System.IO;
 using System.Runtime.Serialization;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
 	/// <summary>
 	/// An exception thrown when a gitlink entry is found and cannot be

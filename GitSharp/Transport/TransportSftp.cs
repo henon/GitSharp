@@ -37,11 +37,11 @@
 
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 using Tamir.SharpSsh.jsch;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     public class TransportSftp : SshTransport, IWalkTransport
     {

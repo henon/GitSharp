@@ -35,7 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	public enum ObjectType
 	{

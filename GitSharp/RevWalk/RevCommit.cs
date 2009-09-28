@@ -39,10 +39,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using GitSharp.RevWalk.Filter;
-using GitSharp.Util;
+using GitSharp.Core.RevWalk.Filter;
+using GitSharp.Core.Util;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 	/// <summary>
 	/// A commit reference to a commit in the DAG.

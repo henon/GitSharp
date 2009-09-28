@@ -40,10 +40,10 @@
 
 using System;
 using System.IO;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 using System.Diagnostics;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Git style file locking and replacement.

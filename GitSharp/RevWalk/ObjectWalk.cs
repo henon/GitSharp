@@ -37,10 +37,10 @@
  */
 
 using System;
-using GitSharp.TreeWalk;
-using GitSharp.Exceptions;
+using GitSharp.Core.TreeWalk;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 	/// <summary>
 	/// Specialized subclass of RevWalk to include trees, blobs and tags.

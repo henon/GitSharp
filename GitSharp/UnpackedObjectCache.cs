@@ -36,10 +36,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Util;
+using GitSharp.Core.Util;
 using System.Runtime.CompilerServices;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public static class UnpackedObjectCache
     {

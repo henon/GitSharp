@@ -39,7 +39,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-namespace GitSharp.RevWalk.Filter
+namespace GitSharp.Core.RevWalk.Filter
 {
 	/// <summary>
 	/// Abstract filter that searches text using only substring search.

@@ -36,9 +36,10 @@
  */
 
 using System.Collections.Generic;
-using GitSharp.DirectoryCache;
-using GitSharp.TreeWalk.Filter;
-using GitSharp.Util;
+using GitSharp.Core;
+using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.TreeWalk.Filter;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.TreeWalk.Filter
@@ -65,7 +66,7 @@ namespace GitSharp.Tests.TreeWalk.Filter
             ObjectId treeId = dc.writeTree(ow);
 
 
-            var tw = new GitSharp.TreeWalk.TreeWalk(db);
+            var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             tw.setFilter(PathSuffixFilter.create(".txt"));
             tw.addTree(treeId);
 
@@ -111,7 +112,7 @@ namespace GitSharp.Tests.TreeWalk.Filter
             ObjectId treeId = dc.writeTree(ow);
 
 
-            var tw = new GitSharp.TreeWalk.TreeWalk(db);
+            var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             tw.Recursive = true;
             tw.setFilter(PathSuffixFilter.create(".txt"));
             tw.addTree(treeId);

@@ -39,9 +39,9 @@
 
 using System.Net.Sockets;
 using System.Text;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     public class TransportGitAnon : TcpTransport, IPackTransport
     {

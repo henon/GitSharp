@@ -52,9 +52,9 @@ namespace GitSharp.API
         #region Constructors
 
 
-        internal GitSharp.Repository _repo;
+        internal GitSharp.Core.Repository _repo;
 
-        internal Repository(GitSharp.Repository repo)
+        internal Repository(GitSharp.Core.Repository repo)
         {
             _repo = repo;
         }
@@ -64,7 +64,7 @@ namespace GitSharp.API
         /// </summary>
         /// <param name="path">Path to the local git repository.</param>
         public Repository(string path)
-            : this(new GitSharp.Repository(new System.IO.DirectoryInfo(path)))
+            : this(new GitSharp.Core.Repository(new System.IO.DirectoryInfo(path)))
         {
         }
 

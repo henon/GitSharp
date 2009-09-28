@@ -37,7 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     [Complete]
     public class NullProgressMonitor : ProgressMonitor 

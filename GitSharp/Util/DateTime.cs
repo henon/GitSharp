@@ -38,7 +38,7 @@
 using System;
 using System.Globalization;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
     public static class DateTimeExtensions
     {

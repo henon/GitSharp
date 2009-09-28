@@ -42,7 +42,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
     /** Miscellaneous string comparison utility methods. */
     public static class StringUtils

@@ -40,7 +40,7 @@
 using System;
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Base class for a set of object loader classes for packed objects.

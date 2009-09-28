@@ -39,9 +39,9 @@
 using System;
 using System.IO;
 using System.Runtime.Serialization;
-using GitSharp.DirectoryCache;
+using GitSharp.Core.DirectoryCache;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
 	/// <summary>
 	/// Indicates one or more paths in a DirCache have non-zero stages present.

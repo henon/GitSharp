@@ -37,9 +37,9 @@
 
 using System.IO;
 using System.Threading;
-using RefResult = GitSharp.RefUpdate.RefUpdateResult;
+using RefResult = GitSharp.Core.RefUpdate.RefUpdateResult;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	public class RefRename
 	{

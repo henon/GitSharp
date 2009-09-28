@@ -37,9 +37,9 @@
 
 using System.IO;
 using System.Net;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public class DaemonClient

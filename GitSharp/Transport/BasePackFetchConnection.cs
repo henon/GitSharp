@@ -40,11 +40,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
-using GitSharp.RevWalk.Filter;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.RevWalk.Filter;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     public class BasePackFetchConnection : BasePackConnection, IFetchConnection
     {
@@ -384,7 +384,7 @@ namespace GitSharp.Transport
                 return this;
             }
 
-            public override bool include(GitSharp.RevWalk.RevWalk walker, RevCommit cmit)
+            public override bool include(GitSharp.Core.RevWalk.RevWalk walker, RevCommit cmit)
             {
                 bool remoteKnowsIsCommon = cmit.has(_common);
                 if (cmit.has(_advertised))

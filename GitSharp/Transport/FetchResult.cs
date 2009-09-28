@@ -38,7 +38,7 @@
 
 using System.Collections.Generic;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public class FetchResult : OperationResult

@@ -42,9 +42,10 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.IO;
+using GitSharp.Core;
 using NUnit.Framework;
 using System.Diagnostics;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Tests
 {
@@ -248,8 +249,8 @@ namespace GitSharp.Tests
 
             foreach (var packname in packs)
             {
-                new FileInfo("Resources/" + GitSharp.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir + "/" + GitSharp.Transport.IndexPack.GetPackFileName(packname), true);
-                new FileInfo("Resources/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir + "/" + GitSharp.Transport.IndexPack.GetIndexFileName(packname), true);
+                new FileInfo("Resources/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir + "/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname), true);
+                new FileInfo("Resources/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir + "/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname), true);
             }
 
             new FileInfo("Resources/packed-refs").CopyTo(trash_git.FullName + "/packed-refs", true);

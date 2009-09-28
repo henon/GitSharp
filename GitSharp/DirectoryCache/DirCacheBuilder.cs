@@ -38,10 +38,10 @@
 
 using System;
 using System.IO;
-using GitSharp.TreeWalk;
-using GitSharp.Util;
+using GitSharp.Core.TreeWalk;
+using GitSharp.Core.Util;
 
-namespace GitSharp.DirectoryCache
+namespace GitSharp.Core.DirectoryCache
 {
 	/// <summary>
 	/// Updates a <seealso cref="DirCache"/> by adding individual <seealso cref="DirCacheEntry"/>s.

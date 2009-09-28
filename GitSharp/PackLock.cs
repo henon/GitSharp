@@ -36,9 +36,9 @@
  */
 
 using System.IO;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     /// <summary>
 	/// Keeps track of a <see cref="PackFile"/> associated <code>.keep</code> file.

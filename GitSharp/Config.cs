@@ -43,11 +43,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 using Tamir.SharpSsh.java.lang;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Git style <code>.config</code>, <code>.gitconfig</code>, <code>.gitmodules</code> file.

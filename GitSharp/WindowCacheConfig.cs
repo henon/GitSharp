@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     /// <summary>
     /// Configuration parameters for <see cref="WindowCache" />.

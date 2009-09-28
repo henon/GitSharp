@@ -40,7 +40,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     [Complete]
     public class IndexDiff

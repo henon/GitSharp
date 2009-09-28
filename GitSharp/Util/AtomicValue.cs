@@ -37,7 +37,7 @@
 
 using System;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
 	public class AtomicValue<T>
 		where T : IConvertible

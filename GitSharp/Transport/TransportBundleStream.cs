@@ -39,9 +39,9 @@
 
 using System;
 using System.IO;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     /// <summary>
     /// Single shot fetch from a streamed Git bundle.

@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Util;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests

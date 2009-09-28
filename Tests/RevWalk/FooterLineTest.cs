@@ -37,7 +37,8 @@
 
 using System.Collections.Generic;
 using System.Text;
-using GitSharp.RevWalk;
+using GitSharp.Core;
+using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -309,7 +310,7 @@ namespace GitSharp.Tests.RevWalk
 			buf.Append("\n");
 			buf.Append(msg);
 
-			var walk = new GitSharp.RevWalk.RevWalk(db);
+			var walk = new GitSharp.Core.RevWalk.RevWalk(db);
 			walk.setRetainBody(true);
 			var c = new RevCommit(ObjectId.ZeroId);
 			c.parseCanonical(walk, Constants.encode(buf.ToString()));

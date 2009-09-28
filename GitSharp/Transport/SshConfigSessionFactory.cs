@@ -40,10 +40,10 @@
 
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 using Tamir.SharpSsh.jsch;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public abstract class SshConfigSessionFactory : SshSessionFactory

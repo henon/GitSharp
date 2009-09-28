@@ -41,7 +41,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     [Complete]
     public sealed class RepositoryState

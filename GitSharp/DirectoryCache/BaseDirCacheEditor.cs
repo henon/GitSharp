@@ -40,7 +40,7 @@
 using System;
 using System.IO;
 
-namespace GitSharp.DirectoryCache
+namespace GitSharp.Core.DirectoryCache
 {
 	/// <summary>
 	/// Generic update/editing support for <seealso cref="DirCache"/>.

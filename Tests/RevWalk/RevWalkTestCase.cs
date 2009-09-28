@@ -37,11 +37,12 @@
  */
 
 using System;
-using GitSharp.RevWalk;
-using GitSharp.DirectoryCache;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.TreeWalk.Filter;
 using NUnit.Framework;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Tests.RevWalk
 {
@@ -50,7 +51,7 @@ namespace GitSharp.Tests.RevWalk
 		private ObjectWriter _ow;
 		protected RevTree emptyTree;
 		private long nowTick; // [henon] this are seconds in git internal time representaiton
-		protected GitSharp.RevWalk.RevWalk rw;
+		protected GitSharp.Core.RevWalk.RevWalk rw;
 
 		[SetUp]
 		public override void setUp()
@@ -62,9 +63,9 @@ namespace GitSharp.Tests.RevWalk
 			nowTick = 12369779870000L;
 		}
 
-		protected virtual GitSharp.RevWalk.RevWalk createRevWalk()
+		protected virtual GitSharp.Core.RevWalk.RevWalk createRevWalk()
 		{
-			return new GitSharp.RevWalk.RevWalk(db);
+			return new GitSharp.Core.RevWalk.RevWalk(db);
 		}
 
 		private void Tick(int secDelta)
@@ -99,7 +100,7 @@ namespace GitSharp.Tests.RevWalk
 
 		protected RevObject get(RevTree tree, string path)
 		{
-			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
 			tw.setFilter(PathFilterGroup.createFromStrings(new[] { path }));
 			tw.reset(tree);
 			

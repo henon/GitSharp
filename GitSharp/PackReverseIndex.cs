@@ -37,9 +37,9 @@
  */
 
 using System;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Reverse index for forward pack index. Provides operations based on offset

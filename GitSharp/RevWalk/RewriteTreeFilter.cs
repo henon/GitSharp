@@ -37,10 +37,10 @@
  */
 
 using System;
-using GitSharp.RevWalk.Filter;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core.RevWalk.Filter;
+using GitSharp.Core.TreeWalk.Filter;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
     /// <summary>
     /// First phase of a path limited revision walk.

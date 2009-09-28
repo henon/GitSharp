@@ -39,7 +39,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using GitSharp.RevWalk;
+using GitSharp.Core;
+using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests

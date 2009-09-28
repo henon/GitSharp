@@ -40,7 +40,7 @@
 using System;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// A <seealso cref="ByteWindow"/> with an underlying byte array for storage.

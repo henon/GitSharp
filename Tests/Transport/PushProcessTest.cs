@@ -35,9 +35,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Transport;
+using GitSharp.Core.Transport;
 using NUnit.Framework;
-
+using GitSharp.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +54,7 @@ namespace GitSharp.Tests.Transport
         private List<Ref> advertisedRefs;
         public static RemoteRefUpdate.UpdateStatus connectionUpdateStatus;
 
-        private class MockTransport : GitSharp.Transport.Transport
+        private class MockTransport : GitSharp.Core.Transport.Transport
         {
             private readonly List<Ref> advertised;
 

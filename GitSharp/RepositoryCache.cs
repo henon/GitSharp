@@ -37,10 +37,10 @@
 
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public class RepositoryCache
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = false)]
     sealed class CompleteAttribute : Attribute

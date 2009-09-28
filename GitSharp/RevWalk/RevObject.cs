@@ -38,9 +38,9 @@
 
 using System;
 using System.Text;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 	/// <summary>
 	/// Base object type accessed during revision walking.

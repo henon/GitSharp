@@ -37,11 +37,11 @@
  */
 
 using System.IO;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
-using GitSharp.TreeWalk;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.TreeWalk;
 
-namespace GitSharp.Merge
+namespace GitSharp.Core.Merge
 {
 	/// <summary>
 	/// A merge of 2 trees, using a common base ancestor tree.

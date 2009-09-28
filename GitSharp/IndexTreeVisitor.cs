@@ -40,7 +40,7 @@
 
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Visitor interface for traversing the index and two trees in parallel.

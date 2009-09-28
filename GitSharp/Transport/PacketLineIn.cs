@@ -38,11 +38,11 @@
 
 using System;
 using System.IO;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 using ICSharpCode.SharpZipLib.Tar;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public class PacketLineIn

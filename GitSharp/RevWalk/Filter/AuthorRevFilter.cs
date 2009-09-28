@@ -38,9 +38,9 @@
 
 using System;
 using System.Text.RegularExpressions;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.RevWalk.Filter
+namespace GitSharp.Core.RevWalk.Filter
 {
 	/// <summary>
 	/// Matches only commits whose author name matches the pattern.

@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.Diff
+namespace GitSharp.Core.Diff
 {
 	/// <summary>
 	/// A modified region detected between two versions of roughly the same content.

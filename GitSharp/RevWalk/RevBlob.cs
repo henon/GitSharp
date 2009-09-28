@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
     /// <summary>
 	/// A binary file, or a symbolic link.

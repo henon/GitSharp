@@ -39,7 +39,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public class SideBandProgressMonitor : ProgressMonitor

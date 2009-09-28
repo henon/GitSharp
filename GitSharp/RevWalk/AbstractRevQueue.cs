@@ -39,7 +39,7 @@
 using System;
 using System.Text;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
     public abstract class AbstractRevQueue : Generator
     {

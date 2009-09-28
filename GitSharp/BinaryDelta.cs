@@ -39,7 +39,7 @@
 
 using System;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Recreate a stream from a base stream and a GIT pack delta.

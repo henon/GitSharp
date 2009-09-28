@@ -37,7 +37,7 @@
 
 using System;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
     public static class ArrayExtension
     {

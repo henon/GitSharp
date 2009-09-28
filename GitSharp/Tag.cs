@@ -40,9 +40,9 @@
 using System;
 using System.IO;
 using System.Text;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public class Tag
     {

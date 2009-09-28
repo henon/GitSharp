@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.TreeWalk.Filter
+namespace GitSharp.Core.TreeWalk.Filter
 {
 
 

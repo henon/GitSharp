@@ -39,13 +39,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
-using GitSharp.Transport;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.Transport;
+using GitSharp.Core.Util;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	public class PackWriter
 	{

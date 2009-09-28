@@ -44,7 +44,7 @@ using System.Text;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using System.Runtime.CompilerServices;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 
     public class InflaterCache

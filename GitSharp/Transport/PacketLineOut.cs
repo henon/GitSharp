@@ -39,7 +39,7 @@
 using System;
 using System.IO;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public class PacketLineOut

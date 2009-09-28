@@ -38,10 +38,10 @@
 
 using System;
 using System.Text;
-using GitSharp.Diff;
-using GitSharp.Util;
+using GitSharp.Core.Diff;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Patch
+namespace GitSharp.Core.Patch
 {
 	/// <summary>
 	/// Hunk header describing the layout of a single block of lines.

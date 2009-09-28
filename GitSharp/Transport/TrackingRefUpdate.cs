@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 
     public class TrackingRefUpdate

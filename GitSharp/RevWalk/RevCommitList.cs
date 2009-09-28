@@ -39,9 +39,9 @@
 
 using System;
 using System.IO;
-using GitSharp.RevWalk.Filter;
+using GitSharp.Core.RevWalk.Filter;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 	/// <summary>
 	/// An ordered list of <see cref="RevCommit"/> subclasses.

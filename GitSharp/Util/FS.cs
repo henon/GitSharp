@@ -46,7 +46,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
 
     /** Abstraction to support various file system operations not in Java. */

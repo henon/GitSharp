@@ -41,10 +41,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 	public class TransportHttp : HttpTransport, IWalkTransport
 	{

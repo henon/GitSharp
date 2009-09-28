@@ -40,7 +40,7 @@
 using System;
 using System.IO;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
 
     public static class FileStreamExtensions

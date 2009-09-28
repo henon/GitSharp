@@ -39,9 +39,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Patch
+namespace GitSharp.Core.Patch
 {
 	/// <summary>
 	/// Hunk header for a hunk appearing in a "diff --cc" style patch.

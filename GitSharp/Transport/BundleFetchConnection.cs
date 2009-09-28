@@ -41,11 +41,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     public class BundleFetchConnection : BaseFetchConnection
     {

@@ -41,7 +41,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
 
     /// <summary>

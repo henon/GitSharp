@@ -35,7 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
 	public class AtomicReference<T>
 	{

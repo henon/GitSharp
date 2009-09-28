@@ -41,10 +41,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     internal class FetchProcess
     {

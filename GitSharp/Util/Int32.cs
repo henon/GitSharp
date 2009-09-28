@@ -41,7 +41,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
     public static class Int32Extensions
     {

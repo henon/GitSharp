@@ -38,7 +38,7 @@
 using System;
 using System.Text;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
     public static class StringExtension
     {

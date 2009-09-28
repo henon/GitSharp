@@ -38,7 +38,7 @@
 
 using System.Collections.Generic;
 
-namespace GitSharp.FnMatch
+namespace GitSharp.Core.FnMatch
 {
     internal sealed class LastHead : IHead
     {

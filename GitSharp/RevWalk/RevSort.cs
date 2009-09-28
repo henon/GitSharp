@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 
     /** Sorting strategies supported by {@link RevWalk} and {@link ObjectWalk}. */

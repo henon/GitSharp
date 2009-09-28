@@ -39,7 +39,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GitSharp.DirectoryCache
+namespace GitSharp.Core.DirectoryCache
 {
 	/// <summary>
 	/// Updates a <see cref="DirCache"/> by supplying discrete edit commands.

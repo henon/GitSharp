@@ -35,8 +35,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.RevWalk.Filter;
-using GitSharp.RevWalk;
+using GitSharp.Core.RevWalk.Filter;
+using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -247,7 +247,7 @@ namespace GitSharp.Tests.RevWalk
                 return this;
             }
 
-            public override bool include(GitSharp.RevWalk.RevWalk walker, RevCommit cmit)
+            public override bool include(GitSharp.Core.RevWalk.RevWalk walker, RevCommit cmit)
             {
                 return true;
             }

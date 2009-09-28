@@ -38,9 +38,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Utility for reading reflog entries.

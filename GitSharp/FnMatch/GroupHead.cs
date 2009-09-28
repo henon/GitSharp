@@ -37,9 +37,9 @@
  */
 
 using System.Text.RegularExpressions;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp.FnMatch
+namespace GitSharp.Core.FnMatch
 {
     using System.Collections.Generic;
 

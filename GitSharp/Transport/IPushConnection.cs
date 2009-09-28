@@ -37,9 +37,9 @@
  */
 
 using System.Collections.Generic;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
 	public interface IPushConnection : IConnection
 	{

@@ -37,7 +37,8 @@
 
 using System.IO;
 using System.Text;
-using GitSharp.RevWalk;
+using GitSharp.Core;
+using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -83,7 +84,7 @@ namespace GitSharp.Tests.RevWalk
             b.Append("tagger A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
             b.Append("\n");
 
-            var rw = new GitSharp.RevWalk.RevWalk(db);
+            var rw = new GitSharp.Core.RevWalk.RevWalk(db);
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
             Assert.IsNull(c.getObject());
@@ -126,7 +127,7 @@ namespace GitSharp.Tests.RevWalk
 
             body.Append("\n");
 
-            var rw = new GitSharp.RevWalk.RevWalk(db);
+            var rw = new GitSharp.Core.RevWalk.RevWalk(db);
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
             Assert.IsNull(c.getObject());
@@ -159,7 +160,7 @@ namespace GitSharp.Tests.RevWalk
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-            c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), utf8Enc.GetBytes(b.ToString()));
+            c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), utf8Enc.GetBytes(b.ToString()));
             return c;
         }
 
@@ -179,7 +180,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
@@ -202,7 +203,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
@@ -233,7 +234,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write(eucJpEnc.GetBytes("Hi\n"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
@@ -267,7 +268,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write(utf8Enc.GetBytes("Hi\n"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
@@ -304,7 +305,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write(utf8Enc.GetBytes("Hi\n"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());

@@ -42,11 +42,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Util;
-using GitSharp.Exceptions;
+using GitSharp.Core.Util;
+using GitSharp.Core.Exceptions;
 using System.Runtime.CompilerServices;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	public class RefDatabase
 	{

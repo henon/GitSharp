@@ -37,11 +37,11 @@
  */
 
 using System;
-using GitSharp.TreeWalk;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.TreeWalk;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 
-namespace GitSharp.DirectoryCache
+namespace GitSharp.Core.DirectoryCache
 {
 	/// <summary>
 	/// Iterate a <see cref="DirCache"/> as part of a <see cref="TreeWalk"/>.

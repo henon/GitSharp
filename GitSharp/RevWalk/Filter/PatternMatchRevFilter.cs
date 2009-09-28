@@ -39,9 +39,9 @@
 using System.Text.RegularExpressions;
 using System;
 using System.Text;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.RevWalk.Filter
+namespace GitSharp.Core.RevWalk.Filter
 {
 	/// <summary>
 	/// Abstract filter that searches text using extended regular expressions.

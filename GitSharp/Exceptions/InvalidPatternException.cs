@@ -39,7 +39,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
     [Serializable]
     public class InvalidPatternException : Exception

@@ -41,7 +41,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	public class TreeIterator
 	{

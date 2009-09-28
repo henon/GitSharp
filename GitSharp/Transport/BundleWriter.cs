@@ -39,9 +39,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.RevWalk;
+using GitSharp.Core.RevWalk;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     public class BundleWriter
     {

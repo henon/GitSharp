@@ -39,7 +39,7 @@
 
 using System;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     /// <summary>
     /// Base class for a set of loaders for different representations of Git objects.

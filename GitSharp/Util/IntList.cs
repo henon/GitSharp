@@ -40,7 +40,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace GitSharp.Util
+namespace GitSharp.Core.Util
 {
 	/// <summary>
 	/// A more efficient <see cref="List{Int32}"/> using a primitive integer array.

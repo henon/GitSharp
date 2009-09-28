@@ -41,12 +41,12 @@
 using System;
 using System.IO;
 using System.Text;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public class ObjectWriter
     {

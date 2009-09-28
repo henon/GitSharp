@@ -37,8 +37,9 @@
 
 using System.IO;
 using System.Text;
-using GitSharp.RevWalk;
-using GitSharp.Util;
+using GitSharp.Core;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -81,7 +82,7 @@ namespace GitSharp.Tests.RevWalk
 
             body.Append("\n");
 
-            var rw = new GitSharp.RevWalk.RevWalk(db);
+            var rw = new GitSharp.Core.RevWalk.RevWalk(db);
 
         	var c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
             Assert.IsNull(c.Tree);
@@ -118,7 +119,7 @@ namespace GitSharp.Tests.RevWalk
 
         	var c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-            c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), b.ToString().getBytes("UTF-8"));
+            c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), b.ToString().getBytes("UTF-8"));
             return c;
         }
 
@@ -132,7 +133,7 @@ namespace GitSharp.Tests.RevWalk
 
         	var c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-            c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), b.ToString().getBytes("UTF-8"));
+            c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), b.ToString().getBytes("UTF-8"));
 
             Assert.AreEqual(string.Empty, c.getFullMessage());
             Assert.AreEqual(string.Empty, c.getShortMessage());
@@ -152,7 +153,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write("\n".getBytes("UTF-8"));
                 b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
             Assert.AreSame(Constants.CHARSET, c.Encoding);
@@ -176,7 +177,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
 
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
             Assert.AreSame(Constants.CHARSET, c.Encoding);
@@ -204,7 +205,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write("Hi\n".getBytes("EUC-JP"));
 
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("EUC-JP", c.Encoding.WebName.ToUpperInvariant()); //Hacked as Windows uses a lowercased naming convention
             Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
@@ -235,7 +236,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write("Hi\n".getBytes("UTF-8"));
 
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
             Assert.AreEqual("EUC-JP", c.Encoding.WebName.ToUpperInvariant()); //Hacked as Windows uses a lowercased naming convention
@@ -268,7 +269,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write("Hi\n".getBytes("UTF-8"));
 
                 c = new RevCommit(id("9473095c4cb2f12aefe1db8a355fe3fafba42f67")); // bogus id
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
             Assert.AreEqual("ISO-8859-1", c.Encoding.WebName.ToUpperInvariant()); //Hacked as Windows uses a lowercased naming convention

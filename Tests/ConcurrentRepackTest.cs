@@ -40,8 +40,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
+using GitSharp.Core;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -181,7 +182,7 @@ namespace GitSharp.Tests
 
         private RevObject Parse(AnyObjectId id)
         {
-            return new GitSharp.RevWalk.RevWalk(db).parseAny(id);
+            return new GitSharp.Core.RevWalk.RevWalk(db).parseAny(id);
         }
 
         private FileInfo[] Pack(Repository src, params RevObject[] list)
@@ -247,18 +248,18 @@ namespace GitSharp.Tests
         private FileInfo FullPackFileName(AnyObjectId name)
         {
             var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
-            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetPackFileName(name.Name)));
+            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Core.Transport.IndexPack.GetPackFileName(name.Name)));
         }
 
         private FileInfo FullIndexFileName(AnyObjectId name)
         {
             var packdir = Path.Combine(db.ObjectDatabase.getDirectory().FullName, "pack");
-            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Transport.IndexPack.GetIndexFileName(name.Name)));
+            return new FileInfo(Path.Combine(packdir, "pack-" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(name.Name)));
         }
 
         private RevObject WriteBlob(Repository repo, string data)
         {
-            var revWalk = new GitSharp.RevWalk.RevWalk(repo);
+            var revWalk = new GitSharp.Core.RevWalk.RevWalk(repo);
             byte[] bytes = Constants.encode(data);
             var ow = new ObjectWriter(repo);
             ObjectId id = ow.WriteBlob(bytes);

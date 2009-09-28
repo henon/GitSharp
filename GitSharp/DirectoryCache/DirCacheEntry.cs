@@ -38,9 +38,9 @@
 
 using System;
 using System.IO;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.DirectoryCache
+namespace GitSharp.Core.DirectoryCache
 {
 	/// <summary>
 	/// A single file (or stage of a file) in a <seealso cref="DirCache"/>.

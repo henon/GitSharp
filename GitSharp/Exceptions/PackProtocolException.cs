@@ -38,9 +38,9 @@
 
 using System;
 using System.Runtime.Serialization;
-using GitSharp.Transport;
+using GitSharp.Core.Transport;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
 	[Serializable]
     public class PackProtocolException : TransportException

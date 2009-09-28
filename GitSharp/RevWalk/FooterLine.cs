@@ -36,9 +36,9 @@
  */
 
 using System.Text;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 	/// <summary>
 	/// Single line at the end of a message, such as a "Signed-off-by: someone".

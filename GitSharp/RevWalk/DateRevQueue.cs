@@ -38,7 +38,7 @@
 
 using System.Text;
 
-namespace GitSharp.RevWalk
+namespace GitSharp.Core.RevWalk
 {
 	/// <summary>
 	/// A queue of commits sorted by commit time order.

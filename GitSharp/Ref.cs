@@ -36,7 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Pairing of a name and the <seealso cref="ObjectId"/> it currently has.

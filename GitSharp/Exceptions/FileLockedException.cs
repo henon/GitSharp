@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
     [global::System.Serializable]
     public class FileLockedException : IOException

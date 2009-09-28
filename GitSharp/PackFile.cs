@@ -44,11 +44,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 using Winterdom.IO.FileMap;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// A Git version 2 pack file representation. A pack file contains Git objects in

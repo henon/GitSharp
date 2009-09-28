@@ -43,11 +43,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 using Tamir.SharpSsh.java.util;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Represents a Git repository. A repository holds all objects and refs used for

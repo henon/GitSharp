@@ -38,12 +38,12 @@
  */
 
 using System;
-using GitSharp.Exceptions;
+using GitSharp.Core.Exceptions;
 using System.IO;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 using ICSharpCode.SharpZipLib.Zip.Compression;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
 	/// <summary>
 	/// Loose object loader. This class loads an object not stored in a pack.

@@ -37,9 +37,9 @@
  */
 
 using System;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Patch
+namespace GitSharp.Core.Patch
 {
     /** Part of a "GIT binary patch" to describe the pre-image or post-image */
 	[Serializable]

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public static class Ensure
     {

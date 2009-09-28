@@ -38,9 +38,9 @@
 
 using System;
 using System.Text;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
-namespace GitSharp.Patch
+namespace GitSharp.Core.Patch
 {
 	/// <summary>
 	/// An error in a patch script.

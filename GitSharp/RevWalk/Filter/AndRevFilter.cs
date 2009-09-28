@@ -42,7 +42,7 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace GitSharp.RevWalk.Filter
+namespace GitSharp.Core.RevWalk.Filter
 {
 	/// <summary>
 	/// Includes a commit only if all subfilters include the same commit.

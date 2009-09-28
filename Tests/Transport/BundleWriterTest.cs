@@ -39,9 +39,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
-using GitSharp.Transport;
+using GitSharp.Core;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.Transport;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Transport
@@ -103,7 +104,7 @@ namespace GitSharp.Tests.Transport
             bundle = makeBundle(
                     "refs/heads/cc",
                     db.Resolve("c").Name,
-                    new GitSharp.RevWalk.RevWalk(db).parseCommit(db.Resolve("a").ToObjectId()));
+                    new GitSharp.Core.RevWalk.RevWalk(db).parseCommit(db.Resolve("a").ToObjectId()));
 
             fetchResult = fetchFromBundle(newRepo, bundle);
             advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/cc");

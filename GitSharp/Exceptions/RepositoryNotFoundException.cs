@@ -43,7 +43,7 @@ using System.Text;
 using System.IO;
 using System.Runtime.Serialization;
 
-namespace GitSharp.Exceptions
+namespace GitSharp.Core.Exceptions
 {
 	/// <summary>
 	/// Indicates a local repository does not exist

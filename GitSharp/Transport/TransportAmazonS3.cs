@@ -39,7 +39,7 @@
 
 using System;
 
-namespace GitSharp.Transport
+namespace GitSharp.Core.Transport
 {
     public class TransportAmazonS3 : HttpTransport
     {

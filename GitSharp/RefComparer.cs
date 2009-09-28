@@ -41,7 +41,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp
+namespace GitSharp.Core
 {
     public class RefComparer : Comparer<Ref>
     {

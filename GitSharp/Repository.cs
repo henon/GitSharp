@@ -41,6 +41,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using GitSharp.Commands;
+using System.Diagnostics;
 
 namespace GitSharp
 {
@@ -81,21 +82,19 @@ namespace GitSharp
         {
             get
             {
-                if (_repo == null)
-                    throw new InvalidOperationException("Invalid repository");
+                Debug.Assert(_repo != null, "Repository not initialized correctly.");
                 return _repo.Directory.FullName;
             }
         }
 
         /// <summary>
-        /// Returns true if this repository is a bare repository
+        /// Returns true if this repository is a bare repository. Bare repositories don't have a working directory and thus do not support some operations.
         /// </summary>
         public bool IsBare
         {
             get
             {
-                if (_repo == null)
-                    throw new InvalidOperationException("Invalid repository");
+                Debug.Assert(_repo != null, "Repository not initialized correctly.");
                 return _repo.Config.getBoolean("core", "bare", false);
             }
         }
@@ -107,6 +106,7 @@ namespace GitSharp
         {
             get
             {
+                Debug.Assert(_repo != null, "Repository not initialized correctly.");
                 if (IsBare)
                     return null;
                 return _repo.WorkingDirectory.FullName;
@@ -139,6 +139,7 @@ namespace GitSharp
                 return false;
             try
             {
+                // let's see if it loads without throwing an exception
                 new Repository(path);
             }
             catch (Exception)

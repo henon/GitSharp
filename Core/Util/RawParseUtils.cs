@@ -917,32 +917,42 @@ namespace GitSharp.Core.Util
 				b[i] = buffer[start + i];
 
 
-            if (cs != null)
-            {
-                // Try the suggested encoding, it might be right since it was
-                // provided by the caller.
-                //
-                try
-                {
-                    return decode(b, cs);
-                }
-				catch (DecoderFallbackException)
-                {
-                    //b.reset();
-                }
-            }
-            // No encoding specified or decoding failed, try default charset
-            //
-            try
-            {
-                return decode(b, Constants.CHARSET);
-            }
-			catch (DecoderFallbackException)
-            {
-                //b.reset();
-            }
+              // Try our built-in favorite. The assumption here is that
+                 // decoding will fail if the data is not actually encoded
+                 // using that encoder.
+                 //
+                 try {
+                         return decode(b, Constants.CHARSET);
+                 } catch (DecoderFallbackException e) {
+                         //b.reset();
+                 }
 
-			throw new DecoderFallbackException("decoding failed with encoding: " + cs.HeaderName);
+                 if (!cs.Equals(Constants.CHARSET)) {
+                         // Try the suggested encoding, it might be right since it was
+                         // provided by the caller.
+                         //
+                         try {
+                                 return decode(b, cs);
+                         } catch (DecoderFallbackException e) {
+                                 //b.reset();
+                         }
+                 }
+
+                 // Try the default character set. A small group of people
+                 // might actually use the same (or very similar) locale.
+                 //
+                 Encoding defcs = Encoding.Default;
+                 if (!defcs.Equals(cs) && !defcs.Equals(Constants.CHARSET)) {
+                         try {
+                                 return decode(b, defcs);
+                         }
+                         catch (DecoderFallbackException e)
+                         {
+                                 //b.reset();
+                         }
+                 }
+
+                 throw new DecoderFallbackException(string.Format("Unable to decode provided buffer using encoder '{0}'.", cs.WebName) );
 		}
 
 		/**

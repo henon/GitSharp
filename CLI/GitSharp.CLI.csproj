@@ -93,7 +93,7 @@
     <Content Include="README.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\API\GitSharp.csproj">
+    <ProjectReference Include="..\GitSharp\GitSharp.csproj">
       <Project>{7311850F-619A-4241-B09F-157792C75FBA}</Project>
       <Name>GitSharp</Name>
     </ProjectReference>

@@ -268,7 +268,7 @@ namespace GitSharp.Core
         /// </summary>
         public static readonly byte[] PACK_SIGNATURE = { (byte)'P', (byte)'A', (byte)'C', (byte)'K' };
 		
-        private static readonly Encoding _charset = new UTF8Encoding(false, true);
+        private static readonly Encoding _charset = Charset.forName("UTF-8");
 
         /// <summary>
         /// Native character encoding for commit messages, file names...

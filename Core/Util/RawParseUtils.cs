@@ -659,13 +659,7 @@ namespace GitSharp.Core.Util
 			int lf = nextLF(b, enc);
 			string encodingName = decode(Constants.CHARSET, b, enc, lf - 1);
 
-            if (encodingName == "euc_JP")
-            {
-                encodingName = "EUC-JP"; // Hacked as euc_JP is not valid from the IANA perspective (http://www.iana.org/assignments/character-sets)
-                                         // See also http://tagunov.tripod.com/i18n/jdk11enc.html for further historical information
-            }
-
-			return Encoding.GetEncoding(encodingName);
+			return Charset.forName(encodingName);
 		}
 
 		/**

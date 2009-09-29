@@ -297,7 +297,7 @@ namespace GitSharp.Core.Util
 				string hex = Constants.CHARSET.GetString(bs).Substring(p,4);
 				
 				hex = hex.Substring(p);
-				return (int)UInt16.Parse(hex,System.Globalization.NumberStyles.HexNumber);
+				return (int)UInt16.Parse(hex,System.Globalization.NumberStyles.AllowHexSpecifier);
 			}
 			catch (Exception e)
 			{
@@ -326,7 +326,7 @@ namespace GitSharp.Core.Util
 			{
 				string hex = Encoding.ASCII.GetString(bs).Substring(p,8);
 				
-				return (int)UInt32.Parse(hex,System.Globalization.NumberStyles.HexNumber);
+				return (int)UInt32.Parse(hex,System.Globalization.NumberStyles.AllowHexSpecifier);
 			}
 			catch (Exception e)
 			{
@@ -347,7 +347,7 @@ namespace GitSharp.Core.Util
 			try 
 			{
 				char c = (char)digit;
-				UInt16 result = UInt16.Parse(c.ToString(),System.Globalization.NumberStyles.HexNumber);
+				UInt16 result = UInt16.Parse(c.ToString(),System.Globalization.NumberStyles.AllowHexSpecifier);
 				
 				if (result > 15)
 					throw new OverflowException();

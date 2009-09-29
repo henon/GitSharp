@@ -1211,6 +1211,7 @@ namespace GitSharp.Core.RevWalk
 				_first = null;
 				_next = null;
 				_revwalk.Dispose();
+			    _revwalk = null;
 			}
 
 			#endregion

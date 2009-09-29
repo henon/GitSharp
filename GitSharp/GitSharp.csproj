@@ -45,15 +45,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Author.cs" />
     <Compile Include="BaseCommand.cs" />
     <Compile Include="CloneCommand.cs" />
     <Compile Include="IGitCommand.cs" />
-    <Compile Include="Init.cs" />
     <Compile Include="Commit.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="AbstractObject.cs" />
+    <Compile Include="InitCommand.cs" />
     <Compile Include="Options.cs" />
-    <Compile Include="Person.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

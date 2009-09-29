@@ -3,12 +3,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7311850F-619A-4241-B09F-157792C75FBA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GitSharp</RootNamespace>
+    <RootNamespace>Git</RootNamespace>
     <AssemblyName>GitSharp</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -45,12 +45,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\BaseCommand.cs" />
-    <Compile Include="Commands\Clone.cs" />
-    <Compile Include="Commands\Init.cs" />
-    <Compile Include="Git.cs" />
+    <Compile Include="BaseCommand.cs" />
+    <Compile Include="CloneCommand.cs" />
+    <Compile Include="IGitCommand.cs" />
+    <Compile Include="Init.cs" />
+    <Compile Include="Commit.cs" />
+    <Compile Include="Commands.cs" />
+    <Compile Include="AbstractObject.cs" />
+    <Compile Include="Options.cs" />
+    <Compile Include="Person.cs" />
+    <Compile Include="Ref.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tree.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\GitSharp.Core.csproj">

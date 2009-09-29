@@ -40,14 +40,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp.Commands
+namespace Git
 {
-    public class Clone : BaseCommand
+    public class Author
     {
-
-        public void Execute()
-        {
-            
-        }
+        public string Name { get; set; }
+        public string EmailAddress { get; set; }
     }
 }

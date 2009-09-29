@@ -46,6 +46,7 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Tests.RevWalk
 {
+    
 	public abstract class RevWalkTestCase : RepositoryTestCase
 	{
 		private ObjectWriter _ow;

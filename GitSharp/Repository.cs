@@ -40,10 +40,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using GitSharp.Commands;
 using System.Diagnostics;
 
-namespace GitSharp
+using CoreRepository = GitSharp.Core.Repository;
+
+namespace Git
 {
     /// <summary>
     /// Represents a git repository
@@ -53,11 +54,11 @@ namespace GitSharp
         #region Constructors
 
 
-        internal GitSharp.Core.Repository _repo;
+        internal CoreRepository _internal_repo;
 
-        internal Repository(GitSharp.Core.Repository repo)
+        internal Repository(CoreRepository repo)
         {
-            _repo = repo;
+            _internal_repo = repo;
         }
 
         /// <summary>
@@ -82,8 +83,20 @@ namespace GitSharp
         {
             get
             {
-                Debug.Assert(_repo != null, "Repository not initialized correctly.");
-                return _repo.Directory.FullName;
+                Debug.Assert(_internal_repo != null, "Repository not initialized correctly.");
+                return _internal_repo.Directory.FullName;
+            }
+        }
+
+        /// <summary>
+        /// Head is a symbolic reference to the active commit on the active branch. You can dereference it to a commit.
+        /// </summary>
+        public Ref Head
+        {
+            get
+            {
+                Debug.Assert(_internal_repo != null, "Repository not initialized correctly.");
+                return new Ref(this, "HEAD");
             }
         }
 
@@ -94,8 +107,8 @@ namespace GitSharp
         {
             get
             {
-                Debug.Assert(_repo != null, "Repository not initialized correctly.");
-                return _repo.Config.getBoolean("core", "bare", false);
+                Debug.Assert(_internal_repo != null, "Repository not initialized correctly.");
+                return _internal_repo.Config.getBoolean("core", "bare", false);
             }
         }
 
@@ -106,10 +119,10 @@ namespace GitSharp
         {
             get
             {
-                Debug.Assert(_repo != null, "Repository not initialized correctly.");
+                Debug.Assert(_internal_repo != null, "Repository not initialized correctly.");
                 if (IsBare)
                     return null;
-                return _repo.WorkingDirectory.FullName;
+                return _internal_repo.WorkingDirectory.FullName;
             }
         }
 
@@ -159,6 +172,10 @@ namespace GitSharp
             return new FileInfo(path).Exists;
         }
 
+        public override string ToString()
+        {
+            return "Repository[" + Directory + "]";
+        }
 
         #region Repository initialization (git init)
 
@@ -190,12 +207,24 @@ namespace GitSharp
         /// <returns></returns>
         public static Repository Init(string path, bool bare)
         {
-            var cmd = new Init() { Bare = bare, Path = path };
+            var cmd = new InitCommand() { Bare = bare, Path = path };
             cmd.Execute();
             return cmd.InitializedRepository;
         }
 
+        /// <summary>
+        /// Initializes a directory in the current location using the provided git command's options.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="bare"></param>
+        /// <returns></returns>
+        public static Repository Init(InitCommand cmd)
+        {
+            cmd.Execute();
+            return cmd.InitializedRepository;
+        }
 
         #endregion
+
     }
 }

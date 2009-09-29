@@ -39,46 +39,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
-using System.IO;
 
-namespace Git.Tests
+namespace Git
 {
-    [TestFixture]
-    public class RepositoryTests : GitSharp.Tests.RepositoryTestCase
+    public class CloneCommand
+        : BaseCommand
     {
-        [Test]
-        public void IsBare()
-        {
-            var repo = new Repository(trash_git.FullName);
-            Assert.IsFalse(repo.IsBare);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(bare_repo.IsBare);
-        }
 
-        [Test]
-        public void IsValid()
+        public override void Execute()
         {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.IsTrue(Repository.IsValid(repo.WorkingDirectory));
-            Assert.IsTrue(Repository.IsValid(repo.Directory));
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(Repository.IsValid(bare_repo.Directory));
-            var dir = Path.Combine(trash.FullName, "empty_dir");
-            Assert.IsFalse(Repository.IsValid(dir));
-            Directory.CreateDirectory(dir);
-            Assert.IsFalse(Repository.IsValid(dir));
-        }
 
-        [Test]
-        public void Directory_and_WorkingDirectory()
-        {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.AreEqual(Path.Combine(trash.FullName, "test"), repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, Path.Combine("test", ".git")), repo.Directory);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsNull(bare_repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, "test.git"), bare_repo.Directory);
         }
     }
 }

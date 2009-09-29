@@ -41,16 +41,16 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace GitSharp.Commands
+namespace Git
 {
     /// <summary>
     /// git-init - Create an empty git repository or reinitialize an existing one 
     /// </summary>
-    public class Init : BaseCommand
+    public class InitCommand : BaseCommand
     {
-        public Init()
+        public InitCommand()
         {
-            Quiet = true; // <-- [henon] since this command will be used not only by CLI but also from code, quiet=true is the better default, i think.
+            Quiet = true; // <-- [henon] since this command will be used more often programmatically than by CLI quiet=true is the better default.
             Shared = "false";
         }
 
@@ -156,7 +156,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Execute the command.
         /// </summary>
-        public void Execute()
+        public override void Execute()
         {
             var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualPath));
             repo.Create(Bare);

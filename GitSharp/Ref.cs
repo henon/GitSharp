@@ -39,46 +39,66 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
-using System.IO;
 
-namespace Git.Tests
+using ObjectId = GitSharp.Core.ObjectId;
+using CoreRef = GitSharp.Core.Ref;
+using CoreCommit = GitSharp.Core.Commit;
+using CoreTree = GitSharp.Core.Tree;
+using CoreRepository = GitSharp.Core.Repository;
+
+namespace Git
 {
-    [TestFixture]
-    public class RepositoryTests : GitSharp.Tests.RepositoryTestCase
+
+    /// <summary>
+    /// Ref is a named symbolic reference that is a pointing to a specific git object. You can use Ref to dereference names 
+    /// such as "HEAD" or any branch or tag name.
+    /// </summary>
+    public class Ref
     {
-        [Test]
-        public void IsBare()
+        internal Repository _repo;
+
+        public Ref(Repository repo, string name)
         {
-            var repo = new Repository(trash_git.FullName);
-            Assert.IsFalse(repo.IsBare);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(bare_repo.IsBare);
+            _repo = repo;
+            Name = name;
         }
 
-        [Test]
-        public void IsValid()
+        public string Name
         {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.IsTrue(Repository.IsValid(repo.WorkingDirectory));
-            Assert.IsTrue(Repository.IsValid(repo.Directory));
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(Repository.IsValid(bare_repo.Directory));
-            var dir = Path.Combine(trash.FullName, "empty_dir");
-            Assert.IsFalse(Repository.IsValid(dir));
-            Directory.CreateDirectory(dir);
-            Assert.IsFalse(Repository.IsValid(dir));
+            get;
+            private set;
         }
 
-        [Test]
-        public void Directory_and_WorkingDirectory()
+        public AbstractObject Resolve()
         {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.AreEqual(Path.Combine(trash.FullName, "test"), repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, Path.Combine("test", ".git")), repo.Directory);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsNull(bare_repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, "test.git"), bare_repo.Directory);
+            var internal_ref=_repo._internal_repo.getRef(Name);
+            return new Commit(_repo, internal_ref);
+        }
+
+        public bool IsCommit // can a ref be something different too??? [henon]
+        {
+            get { 
+                var internal_ref = _repo._internal_repo.getRef(Name);
+                return _repo._internal_repo.MapCommit(internal_ref.ObjectId) is CoreCommit;
+            }
+        }
+
+        /// <summary>
+        /// Check validity of a ref name. It must not contain character that has
+        /// a special meaning in a Git object reference expression. Some other
+        /// dangerous characters are also excluded.
+        /// </summary>
+        /// <param name="refName"></param>
+        /// <returns>
+        /// Returns true if <paramref name="refName"/> is a valid ref name.
+        /// </returns>
+        public static bool IsValidName(string name) {
+            return CoreRepository.IsValidRefName(name);
+        }
+
+        public override string ToString()
+        {
+            return "Ref[" + Name + "]";
         }
     }
 }

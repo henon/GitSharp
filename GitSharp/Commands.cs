@@ -41,11 +41,10 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Reflection;
-using GitSharp.Commands;
 
-namespace GitSharp
+namespace Git
 {
-    public static class Git
+    public static class Commands
     {
         /// <summary>
         /// Get or set the output stream that all git commands are writing to. Per default this returns a StreamWriter wrapping the standard output stream.
@@ -78,24 +77,10 @@ namespace GitSharp
             Repository.Init(path);
         }
 
-        public static void Init(Init command)
+        public static void Init(InitCommand command)
         {
             command.Execute();
         }
 
-        /// <summary>
-        /// Returns the version of GitSharp.
-        /// </summary>
-        public static string Version
-        {
-            get
-            {
-                var assembly = Assembly.Load("GitSharp");
-                var version = assembly.GetName().Version;
-                if (version == null)
-                    return null;
-                return version.ToString();
-            }
-        }
     }
 }

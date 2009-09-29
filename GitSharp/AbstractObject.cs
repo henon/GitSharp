@@ -39,46 +39,78 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
-using System.IO;
+using ObjectId = GitSharp.Core.ObjectId;
 
-namespace Git.Tests
+namespace Git
 {
-    [TestFixture]
-    public class RepositoryTests : GitSharp.Tests.RepositoryTestCase
+    public abstract class AbstractObject
     {
-        [Test]
-        public void IsBare()
+        protected Repository _repo;
+        protected ObjectId _id; // <--- the git object is lazy loaded. only a _id is required until properties are accessed.
+
+        internal AbstractObject(Repository repo, ObjectId id)
         {
-            var repo = new Repository(trash_git.FullName);
-            Assert.IsFalse(repo.IsBare);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(bare_repo.IsBare);
+             _repo = repo;
+             _id = id;
         }
 
-        [Test]
-        public void IsValid()
+        internal AbstractObject(Repository repo, string name)
         {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.IsTrue(Repository.IsValid(repo.WorkingDirectory));
-            Assert.IsTrue(Repository.IsValid(repo.Directory));
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(Repository.IsValid(bare_repo.Directory));
-            var dir = Path.Combine(trash.FullName, "empty_dir");
-            Assert.IsFalse(Repository.IsValid(dir));
-            Directory.CreateDirectory(dir);
-            Assert.IsFalse(Repository.IsValid(dir));
+            _repo = repo;
+            _id = _repo._internal_repo.Resolve(name);
         }
 
-        [Test]
-        public void Directory_and_WorkingDirectory()
+        /// <summary>
+        /// The object's SHA1 hash.
+        /// </summary>
+        public string Hash
         {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.AreEqual(Path.Combine(trash.FullName, "test"), repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, Path.Combine("test", ".git")), repo.Directory);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsNull(bare_repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, "test.git"), bare_repo.Directory);
+            get
+            {
+                return _id.ToString();
+            }
         }
+
+        /// <summary>
+        /// the object's abbreviated SHA1 hash
+        /// </summary>
+        public string ShortHash
+        {
+            get
+            {
+                return _id.Abbreviate(_repo._internal_repo).ToString();
+            }
+        }
+
+        public bool IsBlob
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public bool IsCommit
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public bool IsTag
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public bool IsTree
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+#if implemented
+        public Diff Diff(AbstractObject other) { }
+
+        public ?? Grep(?? pattern) { }
+
+        public Byte[] Content { get; }
+
+        public long Size { get; }
+#endif
+
     }
 }

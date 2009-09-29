@@ -39,46 +39,52 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
-using System.IO;
 
-namespace Git.Tests
+using ObjectId = GitSharp.Core.ObjectId;
+using CoreRef = GitSharp.Core.Ref;
+using CoreCommit = GitSharp.Core.Commit;
+using CoreTree = GitSharp.Core.Tree;
+
+namespace Git
 {
-    [TestFixture]
-    public class RepositoryTests : GitSharp.Tests.RepositoryTestCase
+
+    /// <summary>
+    /// Represents a directory in the git repository.
+    /// </summary>
+    public class Tree : AbstractObject
     {
-        [Test]
-        public void IsBare()
+        internal Tree(Repository repo, CoreTree tree)
+            : base(repo, tree.Id)
         {
-            var repo = new Repository(trash_git.FullName);
-            Assert.IsFalse(repo.IsBare);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(bare_repo.IsBare);
+            _internal_tree = tree;
         }
 
-        [Test]
-        public void IsValid()
+        private CoreTree _internal_tree;
+
+        private CoreTree InternalTree
         {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.IsTrue(Repository.IsValid(repo.WorkingDirectory));
-            Assert.IsTrue(Repository.IsValid(repo.Directory));
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(Repository.IsValid(bare_repo.Directory));
-            var dir = Path.Combine(trash.FullName, "empty_dir");
-            Assert.IsFalse(Repository.IsValid(dir));
-            Directory.CreateDirectory(dir);
-            Assert.IsFalse(Repository.IsValid(dir));
+            get
+            {
+                if (_internal_tree == null)
+                    try
+                    {
+                        _internal_tree = _repo._internal_repo.MapTree(_id);
+                    }
+                    catch (Exception)
+                    {
+                        // the commit object is invalid. however, we can not allow exceptions here because they would not be expected.
+                    }
+                return _internal_tree;
+            }
         }
 
-        [Test]
-        public void Directory_and_WorkingDirectory()
+        // IsRoot
+        // Members
+        // Size
+
+        public override string ToString()
         {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.AreEqual(Path.Combine(trash.FullName, "test"), repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, Path.Combine("test", ".git")), repo.Directory);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsNull(bare_repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, "test.git"), bare_repo.Directory);
+            return "Tree[" + ShortHash + "]";
         }
     }
 }

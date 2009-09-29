@@ -146,6 +146,7 @@
     <Compile Include="UserConfig.cs" />
     <Compile Include="Util\ArrayExtensions.cs" />
     <Compile Include="Util\AtomicReference.cs" />
+    <Compile Include="Util\Charset.cs" />
     <Compile Include="Util\DateTime.cs" />
     <Compile Include="Util\Extensions.cs" />
     <Compile Include="AbstractIndexTreeVisitor.cs" />

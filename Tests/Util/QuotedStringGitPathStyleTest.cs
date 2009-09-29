@@ -60,7 +60,7 @@ namespace GitSharp.Tests
 
 	    private static void AssertDequote(string exp, string inStr)
         {
-	    	byte[] b = (new ASCIIEncoding()).GetBytes('"' + inStr + '"');
+            byte[] b = ('"' + inStr + '"').getBytes("ISO-8859-1");
 		    
 		    String r = GitPath.dequote(b, 0, b.Length);
 		    Assert.AreEqual(exp, r);

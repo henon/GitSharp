@@ -208,13 +208,13 @@ namespace GitSharp.Tests
         [Test]
 	    public void testDequote_RawUTF8()
         {
-		    AssertDequote("\u00c5ngstr\u00f6m", "\\303\\205ngstr\\303\\266m");
+		    AssertDequote("\u00c5ngstr\u00f6m", @"\303\205ngstr\303\266m");
 	    }
 
         [Test]
 	    public void testDequote_RawLatin1()
         {
-		    AssertDequote("\u00c5ngstr\u00f6m", "\\305ngstr\\366m");
+		    AssertDequote("\u00c5ngstr\u00f6m", @"\305ngstr\366m");
 	    }
 
         [Test]

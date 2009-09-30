@@ -53,9 +53,9 @@ namespace GitSharp.Tests.TreeWalk
 		[SetUp]
 		public void setUp()
 		{
-			tree1 = mkree(Entry(m644, "a", hash_a));
-			tree2 = mkree(Entry(m644, "a", hash_a), Entry(m644, "foo", hash_foo));
-			tree3 = mkree(Entry(m644, "a", hash_a), Entry(mt, "b_sometree", hash_sometree), Entry(m644, "foo", hash_foo));
+			tree1 = mktree(Entry(m644, "a", hash_a));
+			tree2 = mktree(Entry(m644, "a", hash_a), Entry(m644, "foo", hash_foo));
+			tree3 = mktree(Entry(m644, "a", hash_a), Entry(mt, "b_sometree", hash_sometree), Entry(m644, "foo", hash_foo));
 		}
 
 		#endregion
@@ -71,7 +71,7 @@ namespace GitSharp.Tests.TreeWalk
 		private byte[] tree2;
 		private byte[] tree3;
 
-		private static byte[] mkree(params byte[][] data)
+		private static byte[] mktree(params byte[][] data)
 		{
 			var @out = new MemoryStream();
 			foreach (var e in data)
@@ -102,7 +102,7 @@ namespace GitSharp.Tests.TreeWalk
 		public void testBackwards_ConfusingPathName()
 		{
 			const string aVeryConfusingName = "confusing 644 entry 755 and others";
-			ctp.reset(mkree(Entry(m644, "a", hash_a), Entry(mt, aVeryConfusingName,
+			ctp.reset(mktree(Entry(m644, "a", hash_a), Entry(mt, aVeryConfusingName,
 			                                                hash_sometree), Entry(m644, "foo", hash_foo)));
 			ctp.next(3);
 			Assert.IsTrue(ctp.eof());
@@ -301,5 +301,77 @@ namespace GitSharp.Tests.TreeWalk
 			ctp.next(2);
 			Assert.IsTrue(ctp.eof());
 		}
+
+	    [Test]
+	    public void testBackwords_Prebuilts1()
+	    {
+	        // What is interesting about this test is the ObjectId for the
+	        // "darwin-x86" path entry ends in an octal digit (37 == '7').
+	        // Thus when scanning backwards we could over scan and consume
+	        // part of the SHA-1, and miss the path terminator.
+	        //
+	        ObjectId common = ObjectId
+	            .FromString("af7bf97cb9bce3f60f1d651a0ef862e9447dd8bc");
+	        ObjectId darwinx86 = ObjectId
+	            .FromString("e927f7398240f78face99e1a738dac54ef738e37");
+	        ObjectId linuxx86 = ObjectId
+	            .FromString("ac08dd97120c7cb7d06e98cd5b152011183baf21");
+	        ObjectId windows = ObjectId
+	            .FromString("6c4c64c221a022bb973165192cca4812033479df");
+
+	        ctp.reset(mktree(Entry(mt, "common", common), Entry(mt, "darwin-x86", darwinx86),
+                Entry(mt, "linux-x86", linuxx86), Entry(mt, "windows", windows)));
+	        ctp.next(3);
+	        Assert.AreEqual("windows", ctp.EntryPathString);
+	        Assert.AreSame(mt, ctp.EntryFileMode);
+	        Assert.AreEqual(windows, ctp.getEntryObjectId());
+
+	        ctp.back(1);
+	        Assert.AreEqual("linux-x86", ctp.EntryPathString);
+	        Assert.AreSame(mt, ctp.EntryFileMode);
+	        Assert.AreEqual(linuxx86, ctp.getEntryObjectId());
+
+	        ctp.next(1);
+	        Assert.AreEqual("windows", ctp.EntryPathString);
+	        Assert.AreSame(mt, ctp.EntryFileMode);
+	        Assert.AreEqual(windows, ctp.getEntryObjectId());
+	    }
+
+	    [Test]
+	    public void testBackwords_Prebuilts2()
+	    {
+	        // What is interesting about this test is the ObjectId for the
+	        // "darwin-x86" path entry ends in an octal digit (37 == '7').
+	        // Thus when scanning backwards we could over scan and consume
+	        // part of the SHA-1, and miss the path terminator.
+	        //
+	        ObjectId common = ObjectId
+	            .FromString("af7bf97cb9bce3f60f1d651a0ef862e9447dd8bc");
+	        ObjectId darwinx86 = ObjectId
+	            .FromString("0000000000000000000000000000000000000037");
+	        ObjectId linuxx86 = ObjectId
+	            .FromString("ac08dd97120c7cb7d06e98cd5b152011183baf21");
+	        ObjectId windows = ObjectId
+	            .FromString("6c4c64c221a022bb973165192cca4812033479df");
+
+	        ctp.reset(mktree(Entry(mt, "common", common), 
+                Entry(mt, "darwin-x86", darwinx86), Entry(mt, "linux-x86", linuxx86), 
+                Entry(mt, "windows", windows)));
+	        ctp.next(3);
+	        Assert.AreEqual("windows", ctp.EntryPathString);
+	        Assert.AreSame(mt, ctp.EntryFileMode);
+	        Assert.AreEqual(windows, ctp.getEntryObjectId());
+
+	        ctp.back(1);
+	        Assert.AreEqual("linux-x86", ctp.EntryPathString);
+	        Assert.AreSame(mt, ctp.EntryFileMode);
+	        Assert.AreEqual(linuxx86, ctp.getEntryObjectId());
+
+	        ctp.next(1);
+	        Assert.AreEqual("windows", ctp.EntryPathString);
+	        Assert.AreSame(mt, ctp.EntryFileMode);
+	        Assert.AreEqual(windows, ctp.getEntryObjectId());
+	    }
+
 	}
 }

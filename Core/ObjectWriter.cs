@@ -51,11 +51,11 @@ namespace GitSharp.Core
     public class ObjectWriter
     {
         // Fields
-        private static readonly byte[] HAuthor = Encoding.ASCII.GetBytes("author");
-        private static readonly byte[] HCommitter = Encoding.ASCII.GetBytes("committer");
-        private static readonly byte[] HEncoding = Encoding.ASCII.GetBytes("encoding");
-        private static readonly byte[] HParent = Encoding.ASCII.GetBytes("parent");
-        private static readonly byte[] HTree = Encoding.ASCII.GetBytes("tree");
+        private static readonly byte[] HAuthor = Constants.encodeASCII("author");
+        private static readonly byte[] HCommitter = Constants.encodeASCII("committer");
+        private static readonly byte[] HEncoding = Constants.encodeASCII("encoding");
+        private static readonly byte[] HParent = Constants.encodeASCII("parent");
+        private static readonly byte[] HTree = Constants.encodeASCII("tree");
         private readonly byte[] _buf;
         private readonly Deflater _def;
         private readonly MessageDigest _md;
@@ -235,7 +235,7 @@ namespace GitSharp.Core
                     stream.WriteByte(0x20);
                 }
 
-                bytes = Encoding.ASCII.GetBytes(len.ToString());
+                bytes = Constants.encodeASCII(len.ToString());
                 _md.Update(bytes);
                 if (stream != null)
                 {

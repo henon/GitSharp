@@ -41,6 +41,7 @@
 using System;
 using System.Text;
 using System.Runtime.Serialization;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Exceptions
 {
@@ -76,7 +77,7 @@ namespace GitSharp.Core.Exceptions
         {
             try
             {
-                return ": " + Encoding.ASCII.GetString(bytes, offset, length);
+                return ": " + Charset.forName("US-ASCII").GetString(bytes, offset, length);
             }
             catch (DecoderFallbackException)
             {

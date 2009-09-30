@@ -96,12 +96,11 @@ namespace GitSharp.Core.Util
 
         public override string ToString()
         {
-            // int n = Length();
-            // StringBuilder b = new StringBuilder(n);
-            //for (int i = 0; i < n; i++)
-            //    b.append(CharAt(i));
-            //return b.toString();
-            return Encoding.ASCII.GetString(buffer); // [henon] hmm, why return the whole buffer not only from start to end?
+            int n = Length();
+            StringBuilder b = new StringBuilder(n);
+            for (int i = 0; i < n; i++)
+                b.Append(CharAt(i));
+            return b.ToString();
         }
     }
 }

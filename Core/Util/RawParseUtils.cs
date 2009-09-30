@@ -294,10 +294,10 @@ namespace GitSharp.Core.Util
 		{
 			try 
 			{
-				string hex = Constants.CHARSET.GetString(bs).Substring(p,4);
+                string hex = Charset.forName("US-ASCII").GetString(bs, p, 4);
 				
 				hex = hex.Substring(p);
-				return (int)UInt16.Parse(hex,System.Globalization.NumberStyles.AllowHexSpecifier);
+				return UInt16.Parse(hex,System.Globalization.NumberStyles.AllowHexSpecifier);
 			}
 			catch (Exception e)
 			{
@@ -324,7 +324,8 @@ namespace GitSharp.Core.Util
 		{
 			try 
 			{
-				string hex = Encoding.ASCII.GetString(bs).Substring(p,8);
+                string hex = Charset.forName("US-ASCII").GetString(bs, p, 8);
+                //string hex = Encoding.ASCII.GetString(bs).Substring(p, 8);
 				
 				return (int)UInt32.Parse(hex,System.Globalization.NumberStyles.AllowHexSpecifier);
 			}

@@ -40,6 +40,7 @@
 
 using System;
 using System.Text;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core
 {
@@ -120,7 +121,12 @@ namespace GitSharp.Core
 
         public string Name
         {
-            get { return ((NameUTF8 != null) ? new string(Encoding.ASCII.GetChars(NameUTF8)) : null); }
+            get
+            {
+                if (NameUTF8 != null)
+                    return RawParseUtils.decode(NameUTF8);
+                return null;
+            }
         }
 
         public byte[] NameUTF8 { get; private set; }
@@ -215,7 +221,7 @@ namespace GitSharp.Core
 
         public void Rename(string n)
         {
-            Rename(Encoding.ASCII.GetBytes(n));
+            Rename(Constants.encode(n));
         }
 
         public void Rename(byte[] n)

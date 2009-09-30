@@ -45,6 +45,7 @@ using System.Linq;
 using System.Text;
 using GitSharp.Core.Exceptions;
 using System.IO;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core
 {
@@ -282,7 +283,7 @@ namespace GitSharp.Core
 
 				if (n != null && n.StartsWith("encoding"))
 				{
-					Encoding = Encoding.GetEncoding(n.Substring("encoding ".Length));
+					Encoding = Charset.forName(n.Substring("encoding ".Length));
 				}
 				else if (n == null || n.Length!=0)
 				{

@@ -102,8 +102,8 @@ namespace GitSharp.Tests.TreeWalk
 			var di = new DirectoryInfo(path);
 			Assert.IsFalse(di.Exists);
 
-			di.Create();
-			di.Refresh();
+			di.Mkdirs();
+            di.Refresh();
 			Assert.IsTrue(di.Exists);
 
 			var fti = new FileTreeIterator(di);

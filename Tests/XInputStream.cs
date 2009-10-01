@@ -38,7 +38,7 @@
 
 using System;
 using System.IO;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Tests.Util
 {

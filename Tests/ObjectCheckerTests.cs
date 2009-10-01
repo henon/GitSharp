@@ -39,7 +39,8 @@
 
 using System;
 using System.Text;
-using GitSharp.Exceptions;
+using GitSharp.Core;
+using GitSharp.Core.Exceptions;
 using NUnit.Framework;
 
 namespace GitSharp.Tests

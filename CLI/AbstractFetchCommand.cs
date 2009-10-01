@@ -35,7 +35,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Transport;
+using GitSharp.Core;
+using GitSharp.Core.Transport;
 
 namespace GitSharp.CLI
 {
@@ -44,7 +45,7 @@ namespace GitSharp.CLI
     {
         protected bool verbose;
 
-        protected void showFetchResult(Transport.Transport tn, FetchResult r)
+        protected void showFetchResult(GitSharp.Core.Transport.Transport tn, FetchResult r)
         {
             bool shownURI = false;
             foreach (TrackingRefUpdate u in r.TrackingRefUpdates)

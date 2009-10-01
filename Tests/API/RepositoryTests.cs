@@ -40,10 +40,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using GitSharp.API;
 using System.IO;
 
-namespace GitSharp.API.Tests
+namespace Git.Tests
 {
     [TestFixture]
     public class RepositoryTests : GitSharp.Tests.RepositoryTestCase
@@ -51,19 +50,19 @@ namespace GitSharp.API.Tests
         [Test]
         public void IsBare()
         {
-            var repo = new GitSharp.API.Repository(trash_git.FullName);
+            var repo = new Repository(trash_git.FullName);
             Assert.IsFalse(repo.IsBare);
-            var bare_repo = GitSharp.API.Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
+            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
             Assert.IsTrue(bare_repo.IsBare);
         }
 
         [Test]
         public void IsValid()
         {
-            var repo = GitSharp.API.Repository.Init(Path.Combine(trash.FullName, "test"));
+            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
             Assert.IsTrue(Repository.IsValid(repo.WorkingDirectory));
             Assert.IsTrue(Repository.IsValid(repo.Directory));
-            var bare_repo = GitSharp.API.Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
+            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
             Assert.IsTrue(Repository.IsValid(bare_repo.Directory));
             var dir = Path.Combine(trash.FullName, "empty_dir");
             Assert.IsFalse(Repository.IsValid(dir));
@@ -74,10 +73,10 @@ namespace GitSharp.API.Tests
         [Test]
         public void Directory_and_WorkingDirectory()
         {
-            var repo = GitSharp.API.Repository.Init(Path.Combine(trash.FullName, "test"));
+            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
             Assert.AreEqual(Path.Combine(trash.FullName, "test"), repo.WorkingDirectory);
             Assert.AreEqual(Path.Combine(trash.FullName, Path.Combine("test", ".git")), repo.Directory);
-            var bare_repo = GitSharp.API.Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
+            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
             Assert.IsNull(bare_repo.WorkingDirectory);
             Assert.AreEqual(Path.Combine(trash.FullName, "test.git"), bare_repo.Directory);
         }

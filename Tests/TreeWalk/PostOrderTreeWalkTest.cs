@@ -35,9 +35,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 using System.IO;
-using GitSharp.DirectoryCache;
+using GitSharp.Core;
+using GitSharp.Core.DirectoryCache;
 using NUnit.Framework;
+using FileMode=GitSharp.Core.FileMode;
 
 namespace GitSharp.Tests.TreeWalk
 {
@@ -47,14 +50,14 @@ namespace GitSharp.Tests.TreeWalk
 		[Test]
 		public void testInitialize_NoPostOrder()
 		{
-			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
 			Assert.IsFalse(tw.PostOrderTraversal);
 		}
 
 		[Test]
 		public void testInitialize_TogglePostOrder()
 		{
-			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
 			Assert.IsFalse(tw.PostOrderTraversal);
 			tw.PostOrderTraversal = true;
 			Assert.IsTrue(tw.PostOrderTraversal);
@@ -65,7 +68,7 @@ namespace GitSharp.Tests.TreeWalk
 		[Test]
 		public void testResetDoesNotAffectPostOrder()
 		{
-			var tw = new GitSharp.TreeWalk.TreeWalk(db) { PostOrderTraversal = true };
+			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db) { PostOrderTraversal = true };
 			Assert.IsTrue(tw.PostOrderTraversal);
 			tw.reset();
 			Assert.IsTrue(tw.PostOrderTraversal);
@@ -92,7 +95,7 @@ namespace GitSharp.Tests.TreeWalk
 				Assert.AreEqual(4, tree.getEntryCount());
 			}
 
-			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
 			tw.reset();
 			tw.PostOrderTraversal = false;
 			tw.addTree(new DirCacheIterator(tree));
@@ -123,7 +126,7 @@ namespace GitSharp.Tests.TreeWalk
 				Assert.AreEqual(4, tree.getEntryCount());
 			}
 
-			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
 			tw.reset();
 			tw.PostOrderTraversal = true;
 			tw.addTree(new DirCacheIterator(tree));
@@ -160,7 +163,7 @@ namespace GitSharp.Tests.TreeWalk
 				Assert.AreEqual(4, tree.getEntryCount());
 			}
 
-			var tw = new GitSharp.TreeWalk.TreeWalk(db);
+			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
 			tw.reset();
 			tw.PostOrderTraversal = true;
 			tw.addTree(new DirCacheIterator(tree));
@@ -183,7 +186,7 @@ namespace GitSharp.Tests.TreeWalk
 			return ent;
 		}
 
-		private static void assertModes(string path, FileMode mode0, GitSharp.TreeWalk.TreeWalk tw)
+		private static void assertModes(string path, FileMode mode0, GitSharp.Core.TreeWalk.TreeWalk tw)
 		{
 			Assert.IsTrue(tw.next(), "has " + path);
 			Assert.AreEqual(path, tw.getPathString());

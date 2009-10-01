@@ -39,9 +39,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
-using GitSharp.Transport;
+using GitSharp.Core;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.Transport;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Transport
@@ -62,7 +63,7 @@ namespace GitSharp.Tests.Transport
             // Then we clone a new repo from that bundle and do a simple test. This
             // makes sure
             // we could Read the bundle we created.
-            Repository newRepo = createNewEmptyRepo();
+            Core.Repository newRepo = createNewEmptyRepo();
             FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
             Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/firstcommit");
 
@@ -91,7 +92,7 @@ namespace GitSharp.Tests.Transport
             // Then we clone a new repo from that bundle and do a simple test. This
             // makes sure
             // we could Read the bundle we created.
-            Repository newRepo = createNewEmptyRepo();
+            Core.Repository newRepo = createNewEmptyRepo();
             FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
             Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/aa");
 
@@ -103,7 +104,7 @@ namespace GitSharp.Tests.Transport
             bundle = makeBundle(
                     "refs/heads/cc",
                     db.Resolve("c").Name,
-                    new GitSharp.RevWalk.RevWalk(db).parseCommit(db.Resolve("a").ToObjectId()));
+                    new GitSharp.Core.RevWalk.RevWalk(db).parseCommit(db.Resolve("a").ToObjectId()));
 
             fetchResult = fetchFromBundle(newRepo, bundle);
             advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/cc");
@@ -115,7 +116,7 @@ namespace GitSharp.Tests.Transport
             try
             {
                 // Check that we actually needed the first bundle
-                Repository newRepo2 = createNewEmptyRepo();
+                Core.Repository newRepo2 = createNewEmptyRepo();
                 fetchResult = fetchFromBundle(newRepo2, bundle);
                 Assert.Fail("We should not be able to fetch from bundle with prerequisites that are not fulfilled");
             }
@@ -133,7 +134,7 @@ namespace GitSharp.Tests.Transport
 
         #region fetchFromBundle
 
-        private FetchResult fetchFromBundle(Repository newRepo, byte[] bundle)
+        private FetchResult fetchFromBundle(Core.Repository newRepo, byte[] bundle)
         {
             var uri = new URIish("in-memory://");
             var @in = new MemoryStream(bundle);

@@ -36,8 +36,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.TreeWalk;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core.TreeWalk;
+using GitSharp.Core.TreeWalk.Filter;
 namespace GitSharp.Tests.TreeWalk
 {
     using NUnit.Framework;
@@ -48,7 +48,7 @@ namespace GitSharp.Tests.TreeWalk
         [Test]
         public void testALL_IncludesAnything()
         {
-            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+            GitSharp.Core.TreeWalk.TreeWalk tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             Assert.IsTrue(TreeFilter.ALL.include(tw));
         }
 
@@ -67,14 +67,14 @@ namespace GitSharp.Tests.TreeWalk
         [Test]
         public void testNotALL_IncludesNothing()
         {
-            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+            GitSharp.Core.TreeWalk.TreeWalk tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             Assert.IsFalse(TreeFilter.ALL.negate().include(tw));
         }
 
         [Test]
         public void testANY_DIFF_IncludesSingleTreeCase()
         {
-            GitSharp.TreeWalk.TreeWalk tw = new GitSharp.TreeWalk.TreeWalk(db);
+            GitSharp.Core.TreeWalk.TreeWalk tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             Assert.IsTrue(TreeFilter.ANY_DIFF.include(tw));
         }
 

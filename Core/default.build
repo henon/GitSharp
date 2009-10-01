@@ -1,0 +1,16 @@
+<project name="GitSharp.Core" default="build" xmlns="http://nant.sf.net/release/0.85/nant.xsd">
+	<include buildfile="../common-project.xml" />
+	
+	<property name="root.dir" value="."/>
+	<property name="build.warnaserrors" value="false"/>
+		
+	<target name="build" depends="common.init">
+		<fileset id="project.references" basedir="../extern">
+			<include name="ICSharpCode.SharpZipLib.dll" />
+			<include name="FileMap/Winterdom.IO.FileMap.dll" />
+			<include name="Tamir.SharpSSH.dll" />
+		</fileset>
+		<call target="common.copy-references"/>
+		<call target="common.compile-dll"/>
+	</target>
+</project>

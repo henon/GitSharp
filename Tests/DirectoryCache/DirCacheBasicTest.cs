@@ -37,7 +37,8 @@
  */
 
 using System.IO;
-using GitSharp.DirectoryCache;
+using GitSharp.Core;
+using GitSharp.Core.DirectoryCache;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.DirectoryCache

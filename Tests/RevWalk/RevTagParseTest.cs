@@ -37,7 +37,9 @@
 
 using System.IO;
 using System.Text;
-using GitSharp.RevWalk;
+using GitSharp.Core;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -45,10 +47,6 @@ namespace GitSharp.Tests.RevWalk
     [TestFixture]
     public class RevTagParseTest : RepositoryTestCase
     {
-        private readonly Encoding utf8Enc = Constants.CHARSET;
-        private readonly Encoding isoEnc = Encoding.GetEncoding("ISO-8859-1");
-        private readonly Encoding eucJpEnc = Encoding.GetEncoding("EUC-JP");
-
         [Test]
         public void testTagBlob()
         {
@@ -83,13 +81,13 @@ namespace GitSharp.Tests.RevWalk
             b.Append("tagger A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
             b.Append("\n");
 
-            var rw = new GitSharp.RevWalk.RevWalk(db);
+            var rw = new GitSharp.Core.RevWalk.RevWalk(db);
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
             Assert.IsNull(c.getObject());
             Assert.IsNull(c.getName());
 
-            c.parseCanonical(rw, utf8Enc.GetBytes(b.ToString()));
+            c.parseCanonical(rw, b.ToString().getBytes("UTF-8"));
             Assert.IsNotNull(c.getObject());
             Assert.AreEqual(locId, c.getObject().getId());
             Assert.AreSame(rw.lookupAny(locId, typeCode), c.getObject());
@@ -126,13 +124,13 @@ namespace GitSharp.Tests.RevWalk
 
             body.Append("\n");
 
-            var rw = new GitSharp.RevWalk.RevWalk(db);
+            var rw = new GitSharp.Core.RevWalk.RevWalk(db);
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
             Assert.IsNull(c.getObject());
             Assert.IsNull(c.getName());
 
-            c.parseCanonical(rw, utf8Enc.GetBytes(body.ToString()));
+            c.parseCanonical(rw, body.ToString().getBytes("UTF-8"));
             Assert.IsNotNull(c.getObject());
             Assert.AreEqual(treeId, c.getObject().getId());
             Assert.AreSame(rw.lookupTree(treeId), c.getObject());
@@ -159,7 +157,7 @@ namespace GitSharp.Tests.RevWalk
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-            c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), utf8Enc.GetBytes(b.ToString()));
+            c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), b.ToString().getBytes("UTF-8"));
             return c;
         }
 
@@ -169,17 +167,17 @@ namespace GitSharp.Tests.RevWalk
             RevTag c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
-                b.Write(utf8Enc.GetBytes("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
-                b.Write(utf8Enc.GetBytes("type tree\n"));
-                b.Write(utf8Enc.GetBytes("tag v1.2.3.4.5\n"));
-                b.Write(utf8Enc.GetBytes("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
-                b.Write(utf8Enc.GetBytes("\n"));
-                b.Write(utf8Enc.GetBytes("Sm\u00f6rg\u00e5sbord\n"));
-                b.Write(utf8Enc.GetBytes("\n"));
-                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
+                b.Write("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
+                b.Write("type tree\n".getBytes("UTF-8"));
+                b.Write("tag v1.2.3.4.5\n".getBytes("UTF-8"));
+                b.Write("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("Sm\u00f6rg\u00e5sbord\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
@@ -192,17 +190,17 @@ namespace GitSharp.Tests.RevWalk
             RevTag c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
-                b.Write(utf8Enc.GetBytes("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
-                b.Write(utf8Enc.GetBytes("type tree\n"));
-                b.Write(utf8Enc.GetBytes("tag v1.2.3.4.5\n"));
-                b.Write(isoEnc.GetBytes("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
-                b.Write(utf8Enc.GetBytes("\n"));
-                b.Write(utf8Enc.GetBytes("Sm\u00f6rg\u00e5sbord\n"));
-                b.Write(utf8Enc.GetBytes("\n"));
-                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
+                b.Write("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
+                b.Write("type tree\n".getBytes("UTF-8"));
+                b.Write("tag v1.2.3.4.5\n".getBytes("UTF-8"));
+                b.Write("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("ISO-8859-1"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("Sm\u00f6rg\u00e5sbord\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
@@ -222,18 +220,18 @@ namespace GitSharp.Tests.RevWalk
             RevTag c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
-                b.Write(eucJpEnc.GetBytes("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
-                b.Write(eucJpEnc.GetBytes("type tree\n"));
-                b.Write(eucJpEnc.GetBytes("tag v1.2.3.4.5\n"));
-                b.Write(eucJpEnc.GetBytes("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
-                b.Write(eucJpEnc.GetBytes("encoding euc_JP\n"));
-                b.Write(eucJpEnc.GetBytes("\n"));
-                b.Write(eucJpEnc.GetBytes("\u304d\u308c\u3044\n"));
-                b.Write(eucJpEnc.GetBytes("\n"));
-                b.Write(eucJpEnc.GetBytes("Hi\n"));
+                b.Write("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("EUC-JP"));
+                b.Write("type tree\n".getBytes("EUC-JP"));
+                b.Write("tag v1.2.3.4.5\n".getBytes("EUC-JP"));
+                b.Write("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("EUC-JP"));
+                b.Write("encoding euc_JP\n".getBytes("EUC-JP"));
+                b.Write("\n".getBytes("EUC-JP"));
+                b.Write("\u304d\u308c\u3044\n".getBytes("EUC-JP"));
+                b.Write("\n".getBytes("EUC-JP"));
+                b.Write("Hi\n".getBytes("EUC-JP"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
@@ -256,18 +254,18 @@ namespace GitSharp.Tests.RevWalk
             RevTag c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
-                b.Write(utf8Enc.GetBytes("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
-                b.Write(utf8Enc.GetBytes("type tree\n"));
-                b.Write(utf8Enc.GetBytes("tag v1.2.3.4.5\n"));
-                b.Write(isoEnc.GetBytes("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
-                b.Write(utf8Enc.GetBytes("encoding EUC-JP\n"));
-                b.Write(utf8Enc.GetBytes("\n"));
-                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
-                b.Write(utf8Enc.GetBytes("\n"));
-                b.Write(utf8Enc.GetBytes("Hi\n"));
+                b.Write("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
+                b.Write("type tree\n".getBytes("UTF-8"));
+                b.Write("tag v1.2.3.4.5\n".getBytes("UTF-8"));
+                b.Write("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("ISO-8859-1"));
+                b.Write("encoding EUC-JP\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("Hi\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
@@ -293,18 +291,18 @@ namespace GitSharp.Tests.RevWalk
             RevTag c;
             using (var b = new BinaryWriter(new MemoryStream()))
             {
-                b.Write(utf8Enc.GetBytes("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n"));
-                b.Write(utf8Enc.GetBytes("type tree\n"));
-                b.Write(utf8Enc.GetBytes("tag v1.2.3.4.5\n"));
-                b.Write(utf8Enc.GetBytes("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n"));
-                b.Write(utf8Enc.GetBytes("encoding ISO-8859-1\n"));
-                b.Write(utf8Enc.GetBytes("\n"));
-                b.Write(utf8Enc.GetBytes("\u304d\u308c\u3044\n"));
-                b.Write(utf8Enc.GetBytes("\n"));
-                b.Write(utf8Enc.GetBytes("Hi\n"));
+                b.Write("object 9788669ad918b6fcce64af8882fc9a81cb6aba67\n".getBytes("UTF-8"));
+                b.Write("type tree\n".getBytes("UTF-8"));
+                b.Write("tag v1.2.3.4.5\n".getBytes("UTF-8"));
+                b.Write("tagger F\u00f6r fattare <a_u_thor@example.com> 1218123387 +0700\n".getBytes("UTF-8"));
+                b.Write("encoding ISO-8859-1\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
+                b.Write("\n".getBytes("UTF-8"));
+                b.Write("Hi\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());

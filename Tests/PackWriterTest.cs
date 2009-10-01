@@ -39,9 +39,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using GitSharp.Exceptions;
-using GitSharp.RevWalk;
-using GitSharp.Transport;
+using GitSharp.Core;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.Transport;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -499,7 +500,7 @@ namespace GitSharp.Tests
 			                  		ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"),
 			                  		ObjectId.FromString("6ff87c4664981e4397625791c8ea3bbb5f2279a3")
 			                  	};
-			var parser = new GitSharp.RevWalk.RevWalk(db);
+			var parser = new GitSharp.Core.RevWalk.RevWalk(db);
 			var forcedOrderRevs = new RevObject[forcedOrder.Length];
 
 			for (int i = 0; i < forcedOrder.Length; i++)

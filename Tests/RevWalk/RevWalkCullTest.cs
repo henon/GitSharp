@@ -35,7 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.RevWalk;
+using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk

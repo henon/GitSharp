@@ -40,9 +40,10 @@
 
 using System.Text;
 using System.IO;
+using GitSharp.Core;
 using NUnit.Framework;
 using GitSharp.Tests.Util;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Tests
 {
@@ -131,7 +132,7 @@ namespace GitSharp.Tests
             // open when we Create it we won't write the object file out as a loose
             // object (as it already exists in the pack).
             //
-            Repository newdb = createNewEmptyRepo();
+            Core.Repository newdb = createNewEmptyRepo();
             var t = new Tree(newdb);
             t.Accept(new WriteTree(trash, newdb), TreeEntry.MODIFIED_ONLY);
             Assert.AreEqual("4b825dc642cb6eb9a060e54bf8d69288fbee4904", t.Id.Name);
@@ -652,20 +653,20 @@ namespace GitSharp.Tests
 
             FileInfo relBaseFile = new FileInfo(Path.Combine(new FileInfo(Path.Combine(relBase.FullName, "other")).FullName, "module.c"));
             FileInfo absBaseFile = new FileInfo(Path.Combine(new FileInfo(Path.Combine(absBase.FullName, "other")).FullName, "module.c"));
-            Assert.AreEqual("other/module.c", Repository.StripWorkDir(relBase, relBaseFile));
-            Assert.AreEqual("other/module.c", Repository.StripWorkDir(relBase, absBaseFile));
-            Assert.AreEqual("other/module.c", Repository.StripWorkDir(absBase, relBaseFile));
-            Assert.AreEqual("other/module.c", Repository.StripWorkDir(absBase, absBaseFile));
+            Assert.AreEqual("other/module.c", Core.Repository.StripWorkDir(relBase, relBaseFile));
+            Assert.AreEqual("other/module.c", Core.Repository.StripWorkDir(relBase, absBaseFile));
+            Assert.AreEqual("other/module.c", Core.Repository.StripWorkDir(absBase, relBaseFile));
+            Assert.AreEqual("other/module.c", Core.Repository.StripWorkDir(absBase, absBaseFile));
 
             FileInfo relNonFile = new FileInfo(Path.Combine(new FileInfo(Path.Combine(relCwd.FullName, "not-repo")).FullName, ".gitignore"));
             FileInfo absNonFile = new FileInfo(Path.Combine(new FileInfo(Path.Combine(absCwd.FullName, "not-repo")).FullName, ".gitignore"));
-            Assert.AreEqual("", Repository.StripWorkDir(relBase, relNonFile));
-            Assert.AreEqual("", Repository.StripWorkDir(absBase, absNonFile));
+            Assert.AreEqual("", Core.Repository.StripWorkDir(relBase, relNonFile));
+            Assert.AreEqual("", Core.Repository.StripWorkDir(absBase, absNonFile));
 
-            Assert.AreEqual("", Repository.StripWorkDir(db.WorkingDirectory, db.WorkingDirectory));
+            Assert.AreEqual("", Core.Repository.StripWorkDir(db.WorkingDirectory, db.WorkingDirectory));
 
             FileInfo file = new FileInfo(Path.Combine(new FileInfo(Path.Combine(db.WorkingDirectory.FullName, "subdir")).FullName, "File.java"));
-            Assert.AreEqual("subdir/File.java", Repository.StripWorkDir(db.WorkingDirectory, file));
+            Assert.AreEqual("subdir/File.java", Core.Repository.StripWorkDir(db.WorkingDirectory, file));
         }
     }
 }

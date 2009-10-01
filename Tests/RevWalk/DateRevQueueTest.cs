@@ -36,7 +36,7 @@
  */
 
 using GitSharp.Tests.Util;
-using GitSharp.RevWalk;
+using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -122,8 +122,8 @@ namespace GitSharp.Tests.RevWalk
             src.add(c);
 
             q = new DateRevQueue(src);
-            Assert.IsFalse(q.everbodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
-            Assert.IsFalse(q.anybodyHasFlag(GitSharp.RevWalk.RevWalk.UNINTERESTING));
+            Assert.IsFalse(q.everbodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
+            Assert.IsFalse(q.anybodyHasFlag(GitSharp.Core.RevWalk.RevWalk.UNINTERESTING));
             AssertCommit(c, q.peek());
             AssertCommit(c, q.peek());
 

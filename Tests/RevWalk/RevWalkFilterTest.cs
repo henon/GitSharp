@@ -35,8 +35,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.RevWalk.Filter;
-using GitSharp.RevWalk;
+using System;
+using GitSharp.Core.RevWalk.Filter;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk
@@ -240,6 +242,65 @@ namespace GitSharp.Tests.RevWalk
             Assert.IsNull(rw.next());
         }
 
+        [Test]
+        public void testCommitTimeRevFilter()
+        {
+            RevCommit a = Commit();
+            Tick(100);
+
+            RevCommit b = Commit(a);
+            Tick(100);
+
+            DateTime since = (nowTick/1000).UnixTimeToDateTime();
+            RevCommit c1 = Commit(b);
+            Tick(100);
+
+            RevCommit c2 = Commit(b);
+            Tick(100);
+
+            DateTime until = (nowTick/1000).UnixTimeToDateTime();
+            RevCommit d = Commit(c1, c2);
+            Tick(100);
+
+            RevCommit e = Commit(d);
+
+            {
+                RevFilter after = CommitTimeRevFilter.After(since);
+                Assert.IsNotNull(after);
+                rw.setRevFilter(after);
+                MarkStart(e);
+                AssertCommit(e, rw.next());
+                AssertCommit(d, rw.next());
+                AssertCommit(c2, rw.next());
+                AssertCommit(c1, rw.next());
+                Assert.IsNull(rw.next());
+            }
+
+            {
+                RevFilter before = CommitTimeRevFilter.Before(until);
+                Assert.IsNotNull(before);
+                rw.reset();
+                rw.setRevFilter(before);
+                MarkStart(e);
+                AssertCommit(c2, rw.next());
+                AssertCommit(c1, rw.next());
+                AssertCommit(b, rw.next());
+                AssertCommit(a, rw.next());
+                Assert.IsNull(rw.next());
+            }
+
+            {
+                RevFilter between = CommitTimeRevFilter.Between(since, until);
+                Assert.IsNotNull(between);
+                rw.reset();
+                rw.setRevFilter(between);
+                MarkStart(e);
+                AssertCommit(c2, rw.next());
+                AssertCommit(c1, rw.next());
+                Assert.IsNull(rw.next());
+            }
+        }
+
         private class MyAll : RevFilter
         {
             public override RevFilter Clone()
@@ -247,7 +308,7 @@ namespace GitSharp.Tests.RevWalk
                 return this;
             }
 
-            public override bool include(GitSharp.RevWalk.RevWalk walker, RevCommit cmit)
+            public override bool include(GitSharp.Core.RevWalk.RevWalk walker, RevCommit cmit)
             {
                 return true;
             }

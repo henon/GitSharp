@@ -35,8 +35,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.RevWalk;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core.RevWalk;
+using GitSharp.Core.TreeWalk.Filter;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk

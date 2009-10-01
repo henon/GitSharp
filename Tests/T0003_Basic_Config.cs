@@ -42,6 +42,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GitSharp.Core;
 using NUnit.Framework;
 using System.IO;
 
@@ -101,7 +102,7 @@ namespace GitSharp.Tests
         [Test]
         public void test007_Open()
         {
-            Repository db2 = new Repository(db.Directory);
+            Core.Repository db2 = new Core.Repository(db.Directory);
             Assert.AreEqual(db.Directory, db2.Directory);
             Assert.AreEqual(db.ObjectsDirectory.FullName, db2.ObjectsDirectory.FullName);
             Assert.AreNotSame(db.Config, db2.Config);
@@ -119,7 +120,7 @@ namespace GitSharp.Tests
 
             var ioe = AssertHelper.Throws<IOException>(() =>
                                                            {
-                                                               new Repository(db.Directory);
+                                                               new Core.Repository(db.Directory);
                                                                Assert.Fail("incorrectly opened a bad repository");
                                                            }
                 );

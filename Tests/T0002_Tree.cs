@@ -40,7 +40,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using GitSharp.Util;
+using GitSharp.Core;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -58,14 +59,14 @@ namespace GitSharp.Tests
 				lasta = '/';
 				a = a.Slice(0, a.Length - 1);
 			}
-			byte[] abytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(a);
+			byte[] abytes = a.getBytes("ISO-8859-1");
 			char lastb = '\0';
 			if (b.Length > 0 && b[b.Length - 1] == '/')
 			{
 				lastb = '/';
 				b = b.Slice(0, b.Length - 1);
 			}
-			byte[] bbytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(b);
+			byte[] bbytes = b.getBytes("ISO-8859-1");
 			return Tree.CompareNames(abytes, bbytes, lasta, lastb);
 		}
 

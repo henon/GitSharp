@@ -36,8 +36,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.DirectoryCache;
-using GitSharp.TreeWalk.Filter;
+using GitSharp.Core;
+using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.TreeWalk.Filter;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.DirectoryCache
@@ -61,7 +62,7 @@ namespace GitSharp.Tests.DirectoryCache
             DirCache dc = DirCache.read(db);
             Assert.AreEqual(0, dc.getEntryCount());
 
-            var tw = new GitSharp.TreeWalk.TreeWalk(db);
+            var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             tw.reset();
             tw.addTree(new DirCacheIterator(dc));
             Assert.IsFalse(tw.next());
@@ -122,7 +123,7 @@ namespace GitSharp.Tests.DirectoryCache
             b.finish();
 
             var iter = new DirCacheIterator(dc);
-            var tw = new GitSharp.TreeWalk.TreeWalk(db);
+            var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             tw.reset();
             tw.addTree(iter);
             int pathIdx = 0;
@@ -164,7 +165,7 @@ namespace GitSharp.Tests.DirectoryCache
             var expPos = new[] { 0, -1, 4 };
 
             var iter = new DirCacheIterator(dc);
-            var tw = new GitSharp.TreeWalk.TreeWalk(db);
+            var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             tw.reset();
             tw.addTree(iter);
             tw.Recursive = false;
@@ -213,7 +214,7 @@ namespace GitSharp.Tests.DirectoryCache
             b.finish();
 
             var iter = new DirCacheIterator(dc);
-            var tw = new GitSharp.TreeWalk.TreeWalk(db);
+            var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             tw.reset();
             tw.addTree(iter);
             tw.Recursive = true;
@@ -254,7 +255,7 @@ namespace GitSharp.Tests.DirectoryCache
             }
             b.finish();
 
-            var tw = new GitSharp.TreeWalk.TreeWalk(db);
+            var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             tw.reset();
             tw.addTree(new DirCacheIterator(dc));
             tw.Recursive = true;
@@ -295,7 +296,7 @@ namespace GitSharp.Tests.DirectoryCache
             }
             b.finish();
 
-            var tw = new GitSharp.TreeWalk.TreeWalk(db);
+            var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
             for (int victimIdx = 0; victimIdx < paths.Length; victimIdx++)
             {
                 tw.reset();

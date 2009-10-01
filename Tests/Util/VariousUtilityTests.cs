@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using GitSharp.Util;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Tests.Util
 {

@@ -40,8 +40,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests

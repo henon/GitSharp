@@ -36,8 +36,9 @@
  */
 
 using System.IO;
-using GitSharp.Exceptions;
-using GitSharp.Util;
+using GitSharp.Core;
+using GitSharp.Core.Exceptions;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -67,7 +68,7 @@ namespace GitSharp.Tests
         [Test]
         public void testBareFileKey()
         {
-            Repository bare = createNewEmptyRepo(true);
+            Core.Repository bare = createNewEmptyRepo(true);
             DirectoryInfo gitdir = bare.Directory;
             DirectoryInfo parent = gitdir.Parent;
 			Assert.IsNotNull(parent);
@@ -87,7 +88,7 @@ namespace GitSharp.Tests
         [Test]
         public void testFileKeyOpenExisting()
         {
-			Repository r = new RepositoryCache.FileKey(db.Directory).open(true);
+			Core.Repository r = new RepositoryCache.FileKey(db.Directory).open(true);
             Assert.IsNotNull(r);
 			Assert.AreEqual(db.Directory.FullName, r.Directory.FullName);
             r.Close();
@@ -101,7 +102,7 @@ namespace GitSharp.Tests
         [Test]
         public void testFileKeyOpenNew()
         {
-            Repository n = createNewEmptyRepo(true);
+            Core.Repository n = createNewEmptyRepo(true);
             DirectoryInfo gitdir = n.Directory;
             n.Close();
             recursiveDelete(gitdir);
@@ -110,7 +111,7 @@ namespace GitSharp.Tests
             var e = AssertHelper.Throws<RepositoryNotFoundException>(() => new RepositoryCache.FileKey(gitdir).open(true));
             Assert.AreEqual("repository not found: " + gitdir, e.Message);
 
-            Repository o = new RepositoryCache.FileKey(gitdir).open(false);
+            Core.Repository o = new RepositoryCache.FileKey(gitdir).open(false);
             Assert.IsNotNull(o);
 			Assert.AreEqual(gitdir.FullName, o.Directory.FullName);
             Assert.IsFalse(gitdir.Exists);
@@ -133,7 +134,7 @@ namespace GitSharp.Tests
         public void testCacheOpen()
         {
             RepositoryCache.FileKey loc = RepositoryCache.FileKey.exact(db.Directory);
-            Repository d2 = RepositoryCache.open(loc);
+            Core.Repository d2 = RepositoryCache.open(loc);
             Assert.AreNotSame(db, d2);
             Assert.AreSame(d2, RepositoryCache.open(RepositoryCache.FileKey.exact(loc.getFile())));
             d2.Close();

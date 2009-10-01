@@ -43,7 +43,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using GitSharp.Exceptions;
+using GitSharp.Core;
+using GitSharp.Core.Exceptions;
 using NDesk.Options;
 
 // [henon] ported from org.spearce.jgit.pgm\src\org\spearce\jgit\pgm
@@ -147,7 +148,7 @@ namespace GitSharp.CLI
                             Console.Error.WriteLine("error: can't find git directory");
                             Exit(1);
                         }
-                        cmd.Init(new Repository(gitdir), gitdir.FullName);
+                        cmd.Init(new Core.Repository(gitdir), gitdir.FullName);
                     }
                     else
                     {

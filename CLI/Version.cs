@@ -38,7 +38,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using GitSharp.API;
 
 namespace GitSharp.CLI.Nonstandard
 {
@@ -51,7 +50,7 @@ namespace GitSharp.CLI.Nonstandard
             //Assembly myAsm = Assembly.Load("git");
             //AssemblyName aName = myAsm.GetName();
             //System.Version ver = aName.Version;
-            var ver = Git.Version;
+            var ver = Git.Options.Version;
             if (ver == null)
                 throw die("Cannot read package information.");
 

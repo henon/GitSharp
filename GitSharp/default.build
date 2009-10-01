@@ -2,15 +2,15 @@
 	<include buildfile="../common-project.xml" />
 	
 	<property name="root.dir" value="."/>
+	<property name="common.testrunner.enabled" value="true"/>
 	<property name="build.warnaserrors" value="false"/>
-		
+	
 	<target name="build" depends="common.init">
-		<fileset id="project.references" basedir="../extern">
-			<include name="ICSharpCode.SharpZipLib.dll" />
-			<include name="FileMap/Winterdom.IO.FileMap.dll" />
-			<include name="Tamir.SharpSSH.dll" />
-		</fileset>
+		<assemblyfileset id="project.references">
+			<include name="../Core/build/${nant.settings.currentframework}/${project.config}/*.dll" />
+		</assemblyfileset>
 		<call target="common.copy-references"/>
 		<call target="common.compile-dll"/>
+		<call target="common.run-tests"/>
 	</target>
 </project>

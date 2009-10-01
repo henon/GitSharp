@@ -35,7 +35,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using GitSharp.Patch;
+using GitSharp.Core;
+using GitSharp.Core.Patch;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Patch
@@ -46,7 +47,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testEmpty()
 		{
-			var patch = new GitSharp.Patch.Patch();
+			var patch = new GitSharp.Core.Patch.Patch();
 			Assert.IsTrue(patch.getFiles().Count == 0);
 			Assert.IsTrue(patch.getErrors().Count == 0);
 		}
@@ -54,7 +55,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testParse_ConfigCaseInsensitive()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_ConfigCaseInsensitive.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_ConfigCaseInsensitive.patch");
 			Assert.AreEqual(2, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().Count == 0);
 
@@ -151,7 +152,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testParse_NoBinary()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_NoBinary.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_NoBinary.patch");
 			Assert.AreEqual(5, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().Count == 0);
 
@@ -191,7 +192,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testParse_GitBinaryLiteral()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_GitBinaryLiteral.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_GitBinaryLiteral.patch");
 			int[] binsizes = { 359, 393, 372, 404 };
 			Assert.AreEqual(5, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().Count == 0);
@@ -241,7 +242,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testParse_GitBinaryDelta()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_GitBinaryDelta.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_GitBinaryDelta.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().Count == 0);
 
@@ -280,7 +281,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testParse_FixNoNewline()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_FixNoNewline.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_FixNoNewline.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().Count == 0);
 
@@ -316,7 +317,7 @@ namespace GitSharp.Tests.Patch
 		[Test]
 		public void testParse_AddNoNewline()
 		{
-			GitSharp.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_AddNoNewline.patch");
+			GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testParse_AddNoNewline.patch");
 			Assert.AreEqual(1, p.getFiles().Count);
 			Assert.IsTrue(p.getErrors().Count == 0, GetAllErrorsFromPatch(p));
 

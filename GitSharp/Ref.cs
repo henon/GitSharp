@@ -1,6 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -36,197 +35,70 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace GitSharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using ObjectId = GitSharp.Core.ObjectId;
+using CoreRef = GitSharp.Core.Ref;
+using CoreCommit = GitSharp.Core.Commit;
+using CoreTree = GitSharp.Core.Tree;
+using CoreRepository = GitSharp.Core.Repository;
+
+namespace Git
 {
-	/// <summary>
-	/// Pairing of a name and the <seealso cref="ObjectId"/> it currently has.
-	/// <para />
-	/// A ref in Git is (more or less) a variable that holds a single object
-	/// identifier. The object identifier can be any valid Git object (blob, tree,
-	/// commit, annotated tag, ...).
-	/// <para />
-	/// The ref name has the attributes of the ref that was asked for as well as
-	/// the ref it was resolved to for symbolic refs plus the object id it points
-	/// to and (for tags) the peeled target object id, i.e. the tag resolved
-	/// recursively until a non-tag object is referenced. 
-	/// </summary>
-	public class Ref
-	{
-		/// <summary>
-		/// Location where a <see cref="Ref"/> is Stored.
-		/// </summary>
-		public sealed class Storage
-		{		
-			/// <summary>
-			/// The ref does not exist yet, updating it may create it.
-			/// <para />
-			/// Creation is likely to choose <see cref="Loose"/> storage.
-			/// </summary>
-			public static readonly Storage New = new Storage("New", true, false);
 
-			/// <summary>
-			/// The ref is Stored in a file by itself.
-			/// <para />
-			/// Updating this ref affects only this ref.
-			/// </summary>
-			public static readonly Storage Loose = new Storage("Loose", true, false);
+    /// <summary>
+    /// Ref is a named symbolic reference that is a pointing to a specific git object. You can use Ref to dereference names 
+    /// such as "HEAD" or any branch or tag name.
+    /// </summary>
+    public class Ref
+    {
+        internal Repository _repo;
 
-			/// <summary>
-			/// The ref is Stored in the <code>packed-refs</code> file, with others.
-			/// <para />
-			/// Updating this ref requires rewriting the file, with perhaps many
-			/// other refs being included at the same time.
-			/// </summary>
-			public static readonly Storage Packed = new Storage("Packed", false, true);
+        public Ref(Repository repo, string name)
+        {
+            _repo = repo;
+            Name = name;
+        }
 
-			/// <summary>
-			/// The ref is both <see cref="Loose"/> and <see cref="Packed"/>.
-			/// <para />
-			/// Updating this ref requires only updating the loose file, but deletion
-			/// requires updating both the loose file and the packed refs file.
-			/// </summary>
-			public static readonly Storage LoosePacked = new Storage("LoosePacked", true, true);
+        public string Name
+        {
+            get;
+            private set;
+        }
 
-			/// <summary>
-			/// The ref came from a network advertisement and storage is unknown.
-			/// <para />
-			/// This ref cannot be updated without Git-aware support on the remote
-			/// side, as Git-aware code consolidate the remote refs and reported them
-			/// to this process.
-			/// </summary>
-			public static readonly Storage Network = new Storage("Network", false, false);
+        public AbstractObject Resolve()
+        {
+            var internal_ref=_repo._internal_repo.getRef(Name);
+            return new Commit(_repo, internal_ref);
+        }
 
-			public bool IsLoose { get; private set; }
-			public bool IsPacked { get; private set; }
-			public string Name { get; private set; }
+        public bool IsCommit // can a ref be something different too??? [henon]
+        {
+            get { 
+                var internal_ref = _repo._internal_repo.getRef(Name);
+                return _repo._internal_repo.MapCommit(internal_ref.ObjectId) is CoreCommit;
+            }
+        }
 
-			private Storage(string name, bool loose, bool packed)
-			{
-				Name = name;
-				IsLoose = loose;
-				IsPacked = packed;
-			}
-		}
+        /// <summary>
+        /// Check validity of a ref name. It must not contain character that has
+        /// a special meaning in a Git object reference expression. Some other
+        /// dangerous characters are also excluded.
+        /// </summary>
+        /// <param name="refName"></param>
+        /// <returns>
+        /// Returns true if <paramref name="refName"/> is a valid ref name.
+        /// </returns>
+        public static bool IsValidName(string name) {
+            return CoreRepository.IsValidRefName(name);
+        }
 
-		/// <summary>
-		/// Create a new ref pairing.
-		/// </summary>
-		/// <param name="storage">method used to store this ref.</param>
-		/// <param name="origName">The name used to resolve this ref</param>
-		/// <param name="refName">name of this ref.</param>
-		/// <param name="id">
-		/// Current value of the ref. May be null to indicate a ref that
-		/// does not exist yet.
-		/// </param>
-		public Ref(Storage storage, string origName, string refName, ObjectId id)
-			: this(storage, origName, refName, id, null, false)
-		{
-		}
-
-		/// <summary>
-		/// Create a new ref pairing.
-		/// </summary>
-		/// <param name="storage">method used to store this ref.</param>
-		/// <param name="refName">name of this ref.</param>
-		/// <param name="id">
-		/// Current value of the ref. May be null to indicate a ref that
-		/// does not exist yet.
-		/// </param>
-		public Ref(Storage storage, string refName, ObjectId id)
-			: this(storage, refName, refName, id, null, false)
-		{
-		}
-
-		/// <summary>
-		/// Create a new ref pairing.
-		/// </summary>
-		/// <param name="storage">method used to store this ref.</param>
-		/// <param name="refName">name of this ref.</param>
-		/// <param name="id">
-		/// Current value of the ref. May be null to indicate a ref that
-		/// does not exist yet.
-		/// </param>
-		/// <param name="peeledObjectId">
-		/// Peeled value of the ref's tag. May be null if this is not a
-		/// tag or not yet peeled (in which case the next parameter should be null)
-		/// </param>
-		/// <param name="peeled">
-		/// true if <paramref name="peeledObjectId"/> represents a the peeled value of the object
-		/// </param>
-		public Ref(Storage storage, string refName, ObjectId id, ObjectId peeledObjectId, bool peeled)
-			: this(storage, refName, refName, id, peeledObjectId, peeled)
-		{
-		}
-
-		/// <summary>
-		/// Create a new ref pairing.
-		/// </summary>
-		/// <param name="storage">method used to store this ref.</param>
-		/// <param name="origName">The name used to resolve this ref</param>
-		/// <param name="refName">name of this ref.</param>
-		/// <param name="id">
-		/// Current value of the ref. May be null to indicate a ref that
-		/// does not exist yet.
-		/// </param>
-		/// <param name="peeledObjectId">
-		/// Peeled value of the ref's tag. May be null if this is not a
-		/// tag or not yet peeled (in which case the next parameter should be null)
-		/// </param>
-		/// <param name="peeled">
-		/// true if <paramref name="peeledObjectId"/> represents a the peeled value of the object
-		/// </param>
-		public Ref(Storage storage, string origName, string refName, ObjectId id, ObjectId peeledObjectId, bool peeled)
-		{
-			StorageFormat = storage;
-			OriginalName = origName;
-			Name = refName;
-			ObjectId = id;
-			PeeledObjectId = peeledObjectId;
-			Peeled = peeled;
-		}
-
-		/// <summary>
-		/// What this ref is called within the repository.
-		/// </summary>
-		public string Name { get; private set; }
-
-		/// <summary>
-		/// The originally resolved name
-		/// </summary>
-		public string OriginalName { get; private set; }
-
-		/// <summary>
-		/// How was this ref obtained?
-		/// <para>
-		/// The current storage model of a <see cref="Ref"/> may influence how the ref must be
-		/// updated or deleted from the repository.
-		/// </para>
-		/// </summary>
-		public Storage StorageFormat { get; private set; }
-
-		/// <summary>
-		/// Cached value of this ref.
-		/// </summary>
-		public ObjectId ObjectId { get; private set; }
-
-		/// <summary>
-		/// Cached value of <see cref="Ref"/> (the ref peeled to commit).
-		/// <para>
-		/// if this ref is an annotated tag the id of the commit (or tree or
-		/// blob) that the annotated tag refers to; null if this ref does not
-		/// refer to an annotated tag.
-		/// </para>
-		/// </summary>
-		public ObjectId PeeledObjectId { get; private set; }
-
-		/// <summary>
-		/// Whether this <see cref="Ref"/> represents a peeled tag.
-		/// </summary>
-		public bool Peeled { get; private set; }
-
-		public override string ToString()
-		{
-			return "Ref[" + (OriginalName == Name ? string.Empty : "(" + OriginalName + ")") + Name + "=" + ObjectId + "]";
-		}
-	}
+        public override string ToString()
+        {
+            return "Ref[" + Name + "]";
+        }
+    }
 }

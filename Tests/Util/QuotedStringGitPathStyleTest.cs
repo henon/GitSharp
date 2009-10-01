@@ -38,7 +38,8 @@
 
 using System;
 using GitSharp;
-using GitSharp.Util;
+using GitSharp.Core;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 using System.Text;
 
@@ -59,7 +60,7 @@ namespace GitSharp.Tests
 
 	    private static void AssertDequote(string exp, string inStr)
         {
-	    	byte[] b = (new ASCIIEncoding()).GetBytes('"' + inStr + '"');
+            byte[] b = ('"' + inStr + '"').getBytes("ISO-8859-1");
 		    
 		    String r = GitPath.dequote(b, 0, b.Length);
 		    Assert.AreEqual(exp, r);
@@ -207,13 +208,13 @@ namespace GitSharp.Tests
         [Test]
 	    public void testDequote_RawUTF8()
         {
-		    AssertDequote("\u00c5ngstr\u00f6m", "\\303\\205ngstr\\303\\266m");
+		    AssertDequote("\u00c5ngstr\u00f6m", @"\303\205ngstr\303\266m");
 	    }
 
         [Test]
 	    public void testDequote_RawLatin1()
         {
-		    AssertDequote("\u00c5ngstr\u00f6m", "\\305ngstr\\366m");
+		    AssertDequote("\u00c5ngstr\u00f6m", @"\305ngstr\366m");
 	    }
 
         [Test]

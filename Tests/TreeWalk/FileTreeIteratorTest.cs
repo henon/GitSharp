@@ -36,9 +36,11 @@
  */
 
 using System.IO;
-using GitSharp.TreeWalk;
-using GitSharp.Util;
+using GitSharp.Core;
+using GitSharp.Core.TreeWalk;
+using GitSharp.Core.Util;
 using NUnit.Framework;
+using FileMode=GitSharp.Core.FileMode;
 
 namespace GitSharp.Tests.TreeWalk
 {
@@ -100,8 +102,8 @@ namespace GitSharp.Tests.TreeWalk
 			var di = new DirectoryInfo(path);
 			Assert.IsFalse(di.Exists);
 
-			di.Create();
-			di.Refresh();
+			di.Mkdirs();
+            di.Refresh();
 			Assert.IsTrue(di.Exists);
 
 			var fti = new FileTreeIterator(di);

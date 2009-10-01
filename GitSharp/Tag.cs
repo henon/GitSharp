@@ -44,69 +44,92 @@ using ObjectId = GitSharp.Core.ObjectId;
 using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
-using CoreRepository = GitSharp.Core.Repository;
+using CoreTag = GitSharp.Core.Tag;
 
 namespace Git
 {
-
     /// <summary>
-    /// Ref is a named symbolic reference that is a pointing to a specific git object. It is not resolved
-    /// until you explicitly retrieve the link target. The Target is not cached.
+    /// Represents a git tag.
     /// </summary>
-    public class Ref : IReferenceObject
+    public class Tag : AbstractObject, IReferenceObject
     {
-        internal Repository _repo;
-        //private _internal_ref;
 
-        public Ref(Repository repo, string name)
+        public Tag(Repository repo, string name)
+            : base(repo, name)
         {
-            _repo = repo;
-            Name = name;
+            _name = name;
         }
 
-        internal Ref(Repository repo, CoreRef @ref)
-            : this(repo, @ref.Name)
+        private string _name; // <--- need the name for resolving purposes only. once the internal tag is resolved, this field is not used any more.
+
+        internal Tag(Repository repo, CoreRef @ref)
+            : base(repo, @ref.ObjectId)
         {
+            _name = @ref.Name;
         }
 
-        public string Name
+        internal Tag(Repository repo, CoreTag internal_tag)
+            : base(repo, internal_tag.Id)
         {
-            get;
-            private set;
+            _internal_tag = internal_tag;
+        }
+
+        internal Tag(Repository repo, ObjectId id, string name) 
+            : base(repo, id)
+        {
+            _name = name;
+        }
+
+        private CoreTag _internal_tag;
+
+        private CoreTag InternalTag
+        {
+            get
+            {
+                if (_internal_tag == null)
+                    try
+                    {
+                        _internal_tag = _repo._internal_repo.MapTag(_name,_id);
+                    }
+                    catch (Exception)
+                    {
+                        // the object is invalid. however, we can not allow exceptions here because they would not be expected.
+                    }
+                return _internal_tag;
+            }
         }
 
         /// <summary>
-        /// Resolve the symbolic reference and return the object that it is currently pointing at. Target is not cached
-        /// in order to match the behavior of a real git ref.
+        /// The tag name.
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                if (InternalTag == null)
+                    return _name;
+                return InternalTag.TagName;
+            }
+        }
+
+        /// <summary>
+        /// The object that has been tagged.
         /// </summary>
         public AbstractObject Target
         {
             get
             {
-                var internal_ref = _repo._internal_repo.getRef(Name);
-                if (internal_ref == null)
+                if (InternalTag == null)
                     return null;
-                return AbstractObject.Wrap(_repo, internal_ref.ObjectId);
+                if (InternalTag.TagId == InternalTag.Id) // <--- it can happen!
+                    return this;
+                return AbstractObject.Wrap(_repo, InternalTag.TagId);
             }
-        }
-
-        /// <summary>
-        /// Check validity of a ref name. It must not contain character that has
-        /// a special meaning in a Git object reference expression. Some other
-        /// dangerous characters are also excluded.
-        /// </summary>
-        /// <param name="refName"></param>
-        /// <returns>
-        /// Returns true if <paramref name="refName"/> is a valid ref name.
-        /// </returns>
-        public static bool IsValidName(string name)
-        {
-            return CoreRepository.IsValidRefName(name);
         }
 
         public override string ToString()
         {
-            return "Ref[" + Name + "]";
+            return "Tag[" + ShortHash + "]";
         }
     }
 }

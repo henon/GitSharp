@@ -46,7 +46,7 @@ namespace Git
     /// <summary>
     /// git-init - Create an empty git repository or reinitialize an existing one 
     /// </summary>
-    public class InitCommand : BaseCommand
+    public class InitCommand : AbstractCommand
     {
         public InitCommand()
         {

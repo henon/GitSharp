@@ -42,13 +42,12 @@ using System.Text;
 
 namespace Git
 {
-    public class CloneCommand
-        : AbstractCommand
+    /// <summary>
+    /// Interface for objects like Ref and Tag, which point to a different object.
+    /// </summary>
+    public interface IReferenceObject
     {
-
-        public override void Execute()
-        {
-
-        }
+        string Name { get; }
+        AbstractObject Target { get; }
     }
 }

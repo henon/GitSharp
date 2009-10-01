@@ -39,48 +39,49 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.IO;
+
+using ObjectId = GitSharp.Core.ObjectId;
+using CoreRef = GitSharp.Core.Ref;
+using CoreCommit = GitSharp.Core.Commit;
+using CoreTree = GitSharp.Core.Tree;
+using CoreTag = GitSharp.Core.Tag;
 
 namespace Git
 {
-    /// <summary>
-    /// Abstract base class of all git commands. It provides basic infrastructure
-    /// </summary>
-    public abstract class BaseCommand : IGitCommand
+    public class Blob : AbstractObject
     {
-        /// <summary>
-        /// Returns the value of the process' environment variable GIT_DIR
-        /// </summary>
-        protected string GIT_DIR
+        internal Blob(Repository repo, ObjectId id)
+            : base(repo, id)
+        {
+        }
+
+        internal Blob(Repository repo, ObjectId id, byte[] blob)
+            : base(repo, id)
+        {
+            _blob = blob;
+        }
+
+        private byte[] _blob;
+
+        public string Data
         {
             get
             {
-                return System.Environment.GetEnvironmentVariable("GIT_DIR");
+                if (_blob == null)
+                {
+                    var loader = _repo._internal_repo.OpenBlob(_id);
+                    if (loader == null)
+                        return null;
+                    _blob = loader.Bytes;
+                }
+                return Encoding.UTF8.GetString(_blob);
             }
         }
 
-        /// <summary>
-        /// This command's output stream. If not explicitly set, the command writes to Git.OutputStream out.
-        /// </summary>
-        public StreamWriter OutputStream
+        public override string ToString()
         {
-            get
-            {
-                if (_output == null)
-                    return Git.Commands.OutputStream;
-                return _output;
-            }
-            set
-            {
-                _output = value;
-            }
+            return "Blob[" + ShortHash + "]";
         }
-        StreamWriter _output = null;
-
-        /// <summary>
-        /// Execute the git command.
-        /// </summary>
-        public abstract void Execute();
 
     }
 }

@@ -44,6 +44,7 @@ using ObjectId = GitSharp.Core.ObjectId;
 using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
+using FileTreeEntry = GitSharp.Core.FileTreeEntry;
 
 namespace Git
 {
@@ -51,7 +52,7 @@ namespace Git
     /// <summary>
     /// Represents a directory in the git repository.
     /// </summary>
-    public class Tree : AbstractObject
+    public class Tree : AbstractObject, ITreeNode
     {
         internal Tree(Repository repo, CoreTree tree)
             : base(repo, tree.Id)
@@ -78,9 +79,75 @@ namespace Git
             }
         }
 
-        // IsRoot
-        // Members
-        // Size
+        public string Name
+        {
+            get
+            {
+                if (InternalTree == null)
+                    return null;
+                return InternalTree.Name;
+            }
+        }
+
+        /// <summary>
+        /// True if the tree has no parent.
+        /// </summary>
+        public bool IsRoot
+        {
+            get
+            {
+                if (InternalTree == null)
+                    return true;
+                return InternalTree.IsRoot;
+            }
+        }
+
+        public Tree Parent
+        {
+            get
+            {
+                if (InternalTree == null)
+                    return null;
+                return new Tree(_repo, InternalTree.Parent);
+            }
+        }
+
+        public IEnumerable<AbstractObject> Children
+        {
+            get
+            {
+                if (InternalTree == null)
+                    return new Leaf[0];
+                return InternalTree.Members.Select(tree_entry =>
+                {
+                    if (tree_entry is FileTreeEntry)
+                        return new Leaf(_repo, tree_entry as FileTreeEntry) as AbstractObject;
+                    else
+                        return new Tree(_repo, tree_entry as CoreTree) as AbstractObject; // <--- is this always correct? we'll see :P
+                }).ToArray();
+            }
+        }
+
+        public string Path
+        {
+            get
+            {
+                if (InternalTree == null)
+                    return null;
+                return InternalTree.FullName;
+            }
+        }
+
+        public int Permissions
+        {
+
+            get
+            {
+                if (InternalTree == null)
+                    return 0;
+                return InternalTree.Mode.Bits;
+            }
+        }
 
         public override string ToString()
         {

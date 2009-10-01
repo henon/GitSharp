@@ -66,7 +66,7 @@ namespace Git
         /// </summary>
         /// <param name="path">Path to the local git repository.</param>
         public Repository(string path)
-            : this(new GitSharp.Core.Repository(new System.IO.DirectoryInfo(path)))
+            : this(GitSharp.Core.Repository.Open(path))
         {
         }
 
@@ -170,6 +170,30 @@ namespace Git
         private static bool FileExists(string path)
         {
             return new FileInfo(path).Exists;
+        }
+
+        public IDictionary<string, Ref> Refs
+        {
+            get
+            {
+                var internal_refs = _internal_repo.getAllRefs();
+                var dict = new Dictionary<string, Ref>(internal_refs.Count);
+                foreach (var pair in internal_refs)
+                    dict[pair.Key] = new Ref(this, pair.Value);
+                return dict;
+            }
+        }
+
+        public IDictionary<string, Tag> Tags
+        {
+            get
+            {
+                var internal_tags = _internal_repo.getTags();
+                var dict = new Dictionary<string, Tag>(internal_tags.Count);
+                foreach (var pair in internal_tags)
+                    dict[pair.Key] = new Tag(this, pair.Value);
+                return dict;
+            }
         }
 
         public override string ToString()

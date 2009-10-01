@@ -39,7 +39,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using ObjectId = GitSharp.Core.ObjectId;
+using CoreRef = GitSharp.Core.Ref;
+using CoreCommit = GitSharp.Core.Commit;
+using CoreTree = GitSharp.Core.Tree;
+using CoreTag = GitSharp.Core.Tag;
 
 namespace Git
 {
@@ -50,8 +55,8 @@ namespace Git
 
         internal AbstractObject(Repository repo, ObjectId id)
         {
-             _repo = repo;
-             _id = id;
+            _repo = repo;
+            _id = id;
         }
 
         internal AbstractObject(Repository repo, string name)
@@ -78,28 +83,60 @@ namespace Git
         {
             get
             {
-                return _id.Abbreviate(_repo._internal_repo).ToString();
+                return _id.Abbreviate(_repo._internal_repo).name();
             }
         }
 
+        /// <summary>
+        /// True if the internal object is a blob. May be used for checking if the API object type correctly represents the internal object.
+        /// </summary>
         public bool IsBlob
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return _repo._internal_repo.MapObject(_id, null) is byte[];
+            }
         }
 
+        /// <summary>
+        /// True if the internal object is a blob. May be used for checking if the API object type correctly represents the internal object.
+        /// </summary>
         public bool IsCommit
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return _repo._internal_repo.MapObject(_id, null) is CoreCommit;
+            }
         }
 
+        /// <summary>
+        /// True if the internal object is a blob. May be used for checking if the API object type correctly represents the internal object.
+        /// </summary>
         public bool IsTag
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return _repo._internal_repo.MapObject(_id, null) is CoreTag;
+            }
         }
 
+        /// <summary>
+        /// True if the internal object is a blob. May be used for checking if the API object type correctly represents the internal object.
+        /// </summary>
         public bool IsTree
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return _repo._internal_repo.MapObject(_id, null) is CoreTree;
+            }
+        }
+
+        public Repository Repository
+        {
+            get
+            {
+                return _repo;
+            }
         }
 
 #if implemented
@@ -112,5 +149,25 @@ namespace Git
         public long Size { get; }
 #endif
 
+        /// <summary>
+        /// Internal helper function to create the right object instance for a given hash
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="objectId"></param>
+        /// <returns></returns>
+        internal static AbstractObject Wrap(Repository repo, ObjectId objectId)
+        {
+            var obj = repo._internal_repo.MapObject(objectId, null);
+            if (obj is CoreCommit)
+                return new Commit(repo, obj as CoreCommit);
+            else if (obj is CoreTag)
+                return new Tag(repo, obj as CoreTag);
+            else if (obj is CoreTree)
+                return new Tree(repo, obj as CoreTree);
+            else if (obj is byte[])
+                return new Blob(repo, objectId, obj as byte[]);
+            else
+                return null;
+        }
     }
 }

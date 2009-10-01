@@ -1,4 +1,41 @@
-﻿using System;
+﻿/*
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * - Redistributions in binary form must reproduce the above
+ *   copyright notice, this list of conditions and the following
+ *   disclaimer in the documentation and/or other materials provided
+ *   with the distribution.
+ *
+ * - Neither the name of the Git Development Community nor the
+ *   names of its contributors may be used to endorse or promote
+ *   products derived from this software without specific prior
+ *   written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -218,6 +255,32 @@ namespace Git
                 {
                     return null; // relieve the client of having to catch the exception! If tree is null it is obvious that the tree could not be found.
                 }
+            }
+        }
+
+        /// <summary>
+        ///  Returns all ancestor-commits of this commit. 
+        ///  Be careful, in a big repository this can be quite a long list and you might go out of memory. Use for small repo's only.
+        ///  
+        /// Todo: reimplement this with an iterator instead of recursion.
+        /// </summary>
+        public IEnumerable<Commit> Ancestors
+        {
+            get
+            {
+                var ancestors = new Dictionary<ObjectId, Commit>();
+                CollectAncestorIdsRecursive(this, ancestors);
+                return ancestors.Values.ToArray();
+            }
+        }
+
+        private static void CollectAncestorIdsRecursive(Commit commit, IDictionary<ObjectId, Commit> ancestors)
+        {
+            foreach (var parent in commit.InternalCommit.ParentIds.Where(id => !ancestors.ContainsKey(id)).Select(id => new Commit(commit._repo, id)))
+            {
+                var parentCommit = parent;
+                ancestors[parentCommit._id] = parentCommit;
+                CollectAncestorIdsRecursive(parentCommit, ancestors);
             }
         }
 

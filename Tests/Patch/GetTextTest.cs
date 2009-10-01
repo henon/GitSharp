@@ -78,7 +78,7 @@ namespace GitSharp.Tests.Patch
         public void testGetText_Convert()
         {
             Encoding csOld = Charset.forName("ISO-8859-1");
-            Encoding csNew = Constants.CHARSET;
+            Encoding csNew = Charset.forName("UTF-8");
             GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_Convert.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
@@ -90,7 +90,7 @@ namespace GitSharp.Tests.Patch
             // string match what we really expect to get back.
             //
             string exp = ReadTestPatchFile(csOld);
-            exp = exp.Replace("\u00c3\u0085ngstr\u00c3\u00b6m", "\u00c5ngstr\u00f6m");
+            exp = exp.Replace(@"\303\205ngstr\303\266m", "\u00c5ngstr\u00f6m");
 
             Assert.AreEqual(exp, fh.getScriptText(csOld, csNew));
         }
@@ -99,7 +99,7 @@ namespace GitSharp.Tests.Patch
         public void testGetText_DiffCc()
         {
             Encoding csOld = Charset.forName("ISO-8859-1");
-            Encoding csNew = Constants.CHARSET;
+            Encoding csNew = Charset.forName("UTF-8");
             GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_DiffCc.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
@@ -111,7 +111,7 @@ namespace GitSharp.Tests.Patch
             // string match what we really expect to get back.
             //
             string exp = ReadTestPatchFile(csOld);
-            exp = exp.Replace("\u00c3\u0085ngstr\u00c3\u00b6m", "\u00c5ngstr\u00f6m");
+             exp = exp.Replace(@"\303\205ngstr\303\266m", "\u00c5ngstr\u00f6m");
 
             Assert.AreEqual(exp, fh.getScriptText(new[] { csNew, csOld, csNew }));
         }

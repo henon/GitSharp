@@ -40,9 +40,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using GitSharp.Commands;
+using System.Diagnostics;
 
-namespace GitSharp
+using CoreRepository = GitSharp.Core.Repository;
+
+namespace Git
 {
     /// <summary>
     /// Represents a git repository
@@ -52,11 +54,11 @@ namespace GitSharp
         #region Constructors
 
 
-        internal GitSharp.Core.Repository _repo;
+        internal CoreRepository _internal_repo;
 
-        internal Repository(GitSharp.Core.Repository repo)
+        internal Repository(CoreRepository repo)
         {
-            _repo = repo;
+            _internal_repo = repo;
         }
 
         /// <summary>
@@ -64,7 +66,7 @@ namespace GitSharp
         /// </summary>
         /// <param name="path">Path to the local git repository.</param>
         public Repository(string path)
-            : this(new GitSharp.Core.Repository(new System.IO.DirectoryInfo(path)))
+            : this(GitSharp.Core.Repository.Open(path))
         {
         }
 
@@ -81,22 +83,32 @@ namespace GitSharp
         {
             get
             {
-                if (_repo == null)
-                    throw new InvalidOperationException("Invalid repository");
-                return _repo.Directory.FullName;
+                Debug.Assert(_internal_repo != null, "Repository not initialized correctly.");
+                return _internal_repo.Directory.FullName;
             }
         }
 
         /// <summary>
-        /// Returns true if this repository is a bare repository
+        /// Head is a symbolic reference to the active commit on the active branch. You can dereference it to a commit.
+        /// </summary>
+        public Ref Head
+        {
+            get
+            {
+                Debug.Assert(_internal_repo != null, "Repository not initialized correctly.");
+                return new Ref(this, "HEAD");
+            }
+        }
+
+        /// <summary>
+        /// Returns true if this repository is a bare repository. Bare repositories don't have a working directory and thus do not support some operations.
         /// </summary>
         public bool IsBare
         {
             get
             {
-                if (_repo == null)
-                    throw new InvalidOperationException("Invalid repository");
-                return _repo.Config.getBoolean("core", "bare", false);
+                Debug.Assert(_internal_repo != null, "Repository not initialized correctly.");
+                return _internal_repo.Config.getBoolean("core", "bare", false);
             }
         }
 
@@ -107,9 +119,10 @@ namespace GitSharp
         {
             get
             {
+                Debug.Assert(_internal_repo != null, "Repository not initialized correctly.");
                 if (IsBare)
                     return null;
-                return _repo.WorkingDirectory.FullName;
+                return _internal_repo.WorkingDirectory.FullName;
             }
         }
 
@@ -139,6 +152,7 @@ namespace GitSharp
                 return false;
             try
             {
+                // let's see if it loads without throwing an exception
                 new Repository(path);
             }
             catch (Exception)
@@ -158,6 +172,34 @@ namespace GitSharp
             return new FileInfo(path).Exists;
         }
 
+        public IDictionary<string, Ref> Refs
+        {
+            get
+            {
+                var internal_refs = _internal_repo.getAllRefs();
+                var dict = new Dictionary<string, Ref>(internal_refs.Count);
+                foreach (var pair in internal_refs)
+                    dict[pair.Key] = new Ref(this, pair.Value);
+                return dict;
+            }
+        }
+
+        public IDictionary<string, Tag> Tags
+        {
+            get
+            {
+                var internal_tags = _internal_repo.getTags();
+                var dict = new Dictionary<string, Tag>(internal_tags.Count);
+                foreach (var pair in internal_tags)
+                    dict[pair.Key] = new Tag(this, pair.Value);
+                return dict;
+            }
+        }
+
+        public override string ToString()
+        {
+            return "Repository[" + Directory + "]";
+        }
 
         #region Repository initialization (git init)
 
@@ -189,12 +231,24 @@ namespace GitSharp
         /// <returns></returns>
         public static Repository Init(string path, bool bare)
         {
-            var cmd = new Init() { Bare = bare, Path = path };
+            var cmd = new InitCommand() { Bare = bare, Path = path };
             cmd.Execute();
             return cmd.InitializedRepository;
         }
 
+        /// <summary>
+        /// Initializes a directory in the current location using the provided git command's options.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="bare"></param>
+        /// <returns></returns>
+        public static Repository Init(InitCommand cmd)
+        {
+            cmd.Execute();
+            return cmd.InitializedRepository;
+        }
 
         #endregion
+
     }
 }

@@ -73,6 +73,20 @@ namespace GitSharp.Core.RevWalk.Filter
 			return new AfterCommitTimeRevFilter(ts.ToUnixTime() * 1000);
 		}
 
+	    /// <summary>
+	    /// Create a new filter to select commits after or equal a given date/time <code>since</code>
+	    /// and before or equal a given date/time <code>until</code>.
+	    /// <summary>
+	    /// <param name="since"> the point in time to cut on.
+	    /// <param name="until"> the point in time to cut off.
+	    /// <returns>
+	    ///  a new filter to select commits between the given date/times.
+	    ///</returns>
+	    public static RevFilter Between(DateTime since, DateTime until)
+	    {
+	        return new BetweenCommitTimeRevFilter(since.ToUnixTime()*1000, until.ToUnixTime()*1000);
+	    }
+
 		private CommitTimeRevFilter(long ts)
 		{
 			_when = (int)(ts / 1000);
@@ -138,11 +152,12 @@ namespace GitSharp.Core.RevWalk.Filter
 			}
 		}
 
-		private class Between : CommitTimeRevFilter
+		private class BetweenCommitTimeRevFilter : CommitTimeRevFilter
 		{
 			private readonly int _until;
 
-			internal Between(long since, long until) : base(since)
+            internal BetweenCommitTimeRevFilter(long since, long until)
+                : base(since)
 			{
 				_until = (int)(until / 1000);
 			}

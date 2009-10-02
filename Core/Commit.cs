@@ -45,6 +45,7 @@ using System.Linq;
 using System.Text;
 using GitSharp.Core.Exceptions;
 using System.IO;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core
 {
@@ -200,27 +201,6 @@ namespace GitSharp.Core
 		public Encoding Encoding { get; set; }
 		public Repository Repository { get; private set; }
 
-		// Returns all ancestor-commits of this commit
-		public IEnumerable<Commit> Ancestors
-		{
-			get
-			{
-				var ancestors = new Dictionary<ObjectId, Commit>();
-				CollectAncestorIdsRecursive(this, ancestors);
-				return ancestors.Values.ToArray();
-			}
-		}
-
-		private static void CollectAncestorIdsRecursive(Commit commit, IDictionary<ObjectId, Commit> ancestors)
-		{
-			foreach (var parent in commit.ParentIds.Where(id => !ancestors.ContainsKey(id)).Select(id => commit.Repository.OpenCommit(id)))
-			{
-				var parentCommit = parent;
-				ancestors[parentCommit.CommitId] = parentCommit;
-				CollectAncestorIdsRecursive(parentCommit, ancestors);
-			}
-		}
-
 		public string Message
 		{
 			get
@@ -282,7 +262,7 @@ namespace GitSharp.Core
 
 				if (n != null && n.StartsWith("encoding"))
 				{
-					Encoding = Encoding.GetEncoding(n.Substring("encoding ".Length));
+					Encoding = Charset.forName(n.Substring("encoding ".Length));
 				}
 				else if (n == null || n.Length!=0)
 				{

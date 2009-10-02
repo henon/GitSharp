@@ -64,7 +64,7 @@ namespace GitSharp.Tests.DirectoryCache
 			int i = 0;
 			foreach (var val in ls.Values)
 			{
-				Assert.IsTrue(CGitIndexRecord.Equals(val, dc.getEntry(i)), "Invalid index: " + i);
+                AssertAreEqual(val, dc.getEntry(i));
 				i++;
 			}
 		}
@@ -190,14 +190,6 @@ namespace GitSharp.Tests.DirectoryCache
 				Id = ObjectId.FromString(line.Slice(sp1 + 1, sp2));
 				Stage = int.Parse(line.Slice(sp2 + 1, tab));
 				Path = line.Substring(tab + 1);
-			}
-
-			public static bool Equals(CGitIndexRecord cgir, DirCacheEntry dirCacheEntry)
-			{
-				return cgir.Mode == dirCacheEntry.getRawMode() &&
-				       cgir.Id == dirCacheEntry.getObjectId() &&
-				       cgir.Stage == dirCacheEntry.getStage() &&
-				       cgir.Path == dirCacheEntry.getPathString();
 			}
 		}
 

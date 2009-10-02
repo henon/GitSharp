@@ -39,63 +39,74 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.IO;
-using System.Reflection;
-using GitSharp.Commands;
 
-namespace GitSharp
+using ObjectId = GitSharp.Core.ObjectId;
+using CoreRef = GitSharp.Core.Ref;
+using CoreCommit = GitSharp.Core.Commit;
+using CoreTree = GitSharp.Core.Tree;
+using CoreRepository = GitSharp.Core.Repository;
+
+namespace Git
 {
-    public static class Git
+
+    /// <summary>
+    /// Ref is a named symbolic reference that is a pointing to a specific git object. It is not resolved
+    /// until you explicitly retrieve the link target. The Target is not cached.
+    /// </summary>
+    public class Ref : IReferenceObject
     {
-        /// <summary>
-        /// Get or set the output stream that all git commands are writing to. Per default this returns a StreamWriter wrapping the standard output stream.
-        /// </summary>
-        public static StreamWriter OutputStream
-        {
-            get
-            {
-                if (_output == null)
-                {
-                    _output = new StreamWriter(Console.OpenStandardOutput());
-                    Console.SetOut(_output);
-                }
-                return _output;
-            }
-            set
-            {
-                _output = value;
-            }
-        }
-        private static StreamWriter _output;
+        internal Repository _repo;
+        //private _internal_ref;
 
-        public static void Init()
+        public Ref(Repository repo, string name)
         {
-            Repository.Init();
+            _repo = repo;
+            Name = name;
         }
 
-        public static void Init(string path)
+        internal Ref(Repository repo, CoreRef @ref)
+            : this(repo, @ref.Name)
         {
-            Repository.Init(path);
         }
 
-        public static void Init(Init command)
+        public string Name
         {
-            command.Execute();
+            get;
+            private set;
         }
 
         /// <summary>
-        /// Returns the version of GitSharp.
+        /// Resolve the symbolic reference and return the object that it is currently pointing at. Target is not cached
+        /// in order to match the behavior of a real git ref.
         /// </summary>
-        public static string Version
+        public AbstractObject Target
         {
             get
             {
-                var assembly = Assembly.Load("GitSharp");
-                var version = assembly.GetName().Version;
-                if (version == null)
+                var internal_ref = _repo._internal_repo.getRef(Name);
+                if (internal_ref == null)
                     return null;
-                return version.ToString();
+                return AbstractObject.Wrap(_repo, internal_ref.ObjectId);
             }
+        }
+
+        /// <summary>
+        /// Check validity of a ref name. It must not contain character that has
+        /// a special meaning in a Git object reference expression. Some other
+        /// dangerous characters are also excluded.
+        /// </summary>
+        /// <param name="refName"></param>
+        /// <returns>
+        /// Returns true if <paramref name="refName"/> is a valid ref name.
+        /// </returns>
+        public static bool IsValidName(string name)
+        {
+            return CoreRepository.IsValidRefName(name);
+        }
+
+        public override string ToString()
+        {
+            return "Ref[" + Name + "]";
         }
     }
 }

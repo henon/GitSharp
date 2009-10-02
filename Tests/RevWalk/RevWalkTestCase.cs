@@ -46,11 +46,12 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Tests.RevWalk
 {
+    
 	public abstract class RevWalkTestCase : RepositoryTestCase
 	{
 		private ObjectWriter _ow;
 		protected RevTree emptyTree;
-		private long nowTick; // [henon] this are seconds in git internal time representaiton
+		protected long nowTick; // [henon] this are seconds in git internal time representaiton
 		protected GitSharp.Core.RevWalk.RevWalk rw;
 
 		[SetUp]
@@ -68,7 +69,7 @@ namespace GitSharp.Tests.RevWalk
 			return new GitSharp.Core.RevWalk.RevWalk(db);
 		}
 
-		private void Tick(int secDelta)
+		protected void Tick(int secDelta)
 		{
 			nowTick += secDelta * 1000L;
 		}

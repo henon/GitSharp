@@ -40,10 +40,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using GitSharp.API;
+
 using System.IO;
 
-namespace GitSharp.API.Tests
+namespace Git.Tests
 {
     [TestFixture]
     public class InitTests : GitSharp.Tests.RepositoryTestCase
@@ -53,7 +53,7 @@ namespace GitSharp.API.Tests
         {
             //var real_git_dir = System.Environment.GetEnvironmentVariable("GIT_DIR");
             System.Environment.SetEnvironmentVariable("GIT_DIR", Path.Combine(trash.FullName, "git_dir"));
-            Git.Init();
+            Git.Commands.Init();
             Assert.IsTrue(Repository.IsValid( System.Environment.GetEnvironmentVariable("GIT_DIR")));
             System.Environment.SetEnvironmentVariable("GIT_DIR", "");
             var dir = Path.Combine(trash.FullName, "current_directory");
@@ -62,7 +62,7 @@ namespace GitSharp.API.Tests
             {
                 Directory.CreateDirectory(dir);
                 Directory.SetCurrentDirectory(dir);
-                Git.Init();
+                Git.Commands.Init();
             }
             finally
             {

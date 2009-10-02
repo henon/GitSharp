@@ -39,46 +39,48 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
 using System.IO;
 
-namespace Git.Tests
+namespace Git
 {
-    [TestFixture]
-    public class RepositoryTests : GitSharp.Tests.RepositoryTestCase
+    /// <summary>
+    /// Abstract base class of all git commands. It provides basic infrastructure
+    /// </summary>
+    public abstract class AbstractCommand : IGitCommand
     {
-        [Test]
-        public void IsBare()
+        /// <summary>
+        /// Returns the value of the process' environment variable GIT_DIR
+        /// </summary>
+        protected string GIT_DIR
         {
-            var repo = new Repository(trash_git.FullName);
-            Assert.IsFalse(repo.IsBare);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(bare_repo.IsBare);
+            get
+            {
+                return System.Environment.GetEnvironmentVariable("GIT_DIR");
+            }
         }
 
-        [Test]
-        public void IsValid()
+        /// <summary>
+        /// This command's output stream. If not explicitly set, the command writes to Git.OutputStream out.
+        /// </summary>
+        public StreamWriter OutputStream
         {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.IsTrue(Repository.IsValid(repo.WorkingDirectory));
-            Assert.IsTrue(Repository.IsValid(repo.Directory));
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(Repository.IsValid(bare_repo.Directory));
-            var dir = Path.Combine(trash.FullName, "empty_dir");
-            Assert.IsFalse(Repository.IsValid(dir));
-            Directory.CreateDirectory(dir);
-            Assert.IsFalse(Repository.IsValid(dir));
+            get
+            {
+                if (_output == null)
+                    return Git.Commands.OutputStream;
+                return _output;
+            }
+            set
+            {
+                _output = value;
+            }
         }
+        StreamWriter _output = null;
 
-        [Test]
-        public void Directory_and_WorkingDirectory()
-        {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.AreEqual(Path.Combine(trash.FullName, "test"), repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, Path.Combine("test", ".git")), repo.Directory);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsNull(bare_repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, "test.git"), bare_repo.Directory);
-        }
+        /// <summary>
+        /// Execute the git command.
+        /// </summary>
+        public abstract void Execute();
+
     }
 }

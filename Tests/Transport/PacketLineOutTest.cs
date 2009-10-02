@@ -84,14 +84,14 @@ namespace GitSharp.Tests.Transport
         [Test]
         public void testWritePacket1()
         {
-            o.WritePacket(Encoding.ASCII.GetBytes("a"));
+            o.WritePacket(new[] { (byte)'a' });
             assertBuffer("0005a");
         }
 
         [Test]
         public void testWritePacket2()
         {
-            o.WritePacket(Encoding.ASCII.GetBytes("abcd"));
+            o.WritePacket(new[] { (byte)'a', (byte)'b', (byte)'c', (byte)'d' });
             assertBuffer("0008abcd");
         }
 

@@ -39,6 +39,7 @@
 
 using System;
 using System.Text;
+using GitSharp.Core.Exceptions;
 using GitSharp.Core.Util;
 
 namespace GitSharp.Core
@@ -122,8 +123,7 @@ namespace GitSharp.Core
 			}
             catch (IndexOutOfRangeException e)
             {
-                var s = new string(Encoding.ASCII.GetChars(bs, p, StringLength));
-                throw new ArgumentException("Invalid id: " + s, "bs", e);
+                throw new InvalidObjectIdException(bs, p, StringLength, e);
             }
 		}
 

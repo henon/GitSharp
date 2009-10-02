@@ -39,6 +39,7 @@
 
 using System;
 using System.Text;
+using GitSharp.Core.Exceptions;
 using GitSharp.Core.Util;
 
 namespace GitSharp.Core
@@ -279,10 +280,9 @@ namespace GitSharp.Core
 				int e = Hex.HexUInt32(bs, ptr + 32, end);
 				return new AbbreviatedObjectId(end - ptr, a, b, c, d, e);
 			}
-			catch (IndexOutOfRangeException)
+			catch (IndexOutOfRangeException e)
 			{
-				string str = Encoding.GetEncoding("US-ASCII").GetString(bs, ptr, end - ptr);
-				throw new ArgumentException("Invalid id: " + str);
+                throw new InvalidObjectIdException(bs, ptr, end - ptr, e);
 			}
 		}
 	}

@@ -294,10 +294,10 @@ namespace GitSharp.Core.Util
 		{
 			try 
 			{
-				string hex = Constants.CHARSET.GetString(bs).Substring(p,4);
+                string hex = Charset.forName("US-ASCII").GetString(bs, p, 4);
 				
 				hex = hex.Substring(p);
-				return (int)UInt16.Parse(hex,System.Globalization.NumberStyles.HexNumber);
+				return UInt16.Parse(hex,System.Globalization.NumberStyles.AllowHexSpecifier);
 			}
 			catch (Exception e)
 			{
@@ -324,9 +324,10 @@ namespace GitSharp.Core.Util
 		{
 			try 
 			{
-				string hex = Encoding.ASCII.GetString(bs).Substring(p,8);
+                string hex = Charset.forName("US-ASCII").GetString(bs, p, 8);
+                //string hex = Encoding.ASCII.GetString(bs).Substring(p, 8);
 				
-				return (int)UInt32.Parse(hex,System.Globalization.NumberStyles.HexNumber);
+				return (int)UInt32.Parse(hex,System.Globalization.NumberStyles.AllowHexSpecifier);
 			}
 			catch (Exception e)
 			{
@@ -347,7 +348,7 @@ namespace GitSharp.Core.Util
 			try 
 			{
 				char c = (char)digit;
-				UInt16 result = UInt16.Parse(c.ToString(),System.Globalization.NumberStyles.HexNumber);
+				UInt16 result = UInt16.Parse(c.ToString(),System.Globalization.NumberStyles.AllowHexSpecifier);
 				
 				if (result > 15)
 					throw new OverflowException();
@@ -659,13 +660,7 @@ namespace GitSharp.Core.Util
 			int lf = nextLF(b, enc);
 			string encodingName = decode(Constants.CHARSET, b, enc, lf - 1);
 
-            if (encodingName == "euc_JP")
-            {
-                encodingName = "EUC-JP"; // Hacked as euc_JP is not valid from the IANA perspective (http://www.iana.org/assignments/character-sets)
-                                         // See also http://tagunov.tripod.com/i18n/jdk11enc.html for further historical information
-            }
-
-			return Encoding.GetEncoding(encodingName);
+			return Charset.forName(encodingName);
 		}
 
 		/**
@@ -917,32 +912,42 @@ namespace GitSharp.Core.Util
 				b[i] = buffer[start + i];
 
 
-            if (cs != null)
-            {
-                // Try the suggested encoding, it might be right since it was
-                // provided by the caller.
-                //
-                try
-                {
-                    return decode(b, cs);
-                }
-				catch (DecoderFallbackException)
-                {
-                    //b.reset();
-                }
-            }
-            // No encoding specified or decoding failed, try default charset
-            //
-            try
-            {
-                return decode(b, Constants.CHARSET);
-            }
-			catch (DecoderFallbackException)
-            {
-                //b.reset();
-            }
+              // Try our built-in favorite. The assumption here is that
+                 // decoding will fail if the data is not actually encoded
+                 // using that encoder.
+                 //
+                 try {
+                         return decode(b, Constants.CHARSET);
+                 } catch (DecoderFallbackException e) {
+                         //b.reset();
+                 }
 
-			throw new DecoderFallbackException("decoding failed with encoding: " + cs.HeaderName);
+                 if (!cs.Equals(Constants.CHARSET)) {
+                         // Try the suggested encoding, it might be right since it was
+                         // provided by the caller.
+                         //
+                         try {
+                                 return decode(b, cs);
+                         } catch (DecoderFallbackException e) {
+                                 //b.reset();
+                         }
+                 }
+
+                 // Try the default character set. A small group of people
+                 // might actually use the same (or very similar) locale.
+                 //
+                 Encoding defcs = Encoding.Default;
+                 if (!defcs.Equals(cs) && !defcs.Equals(Constants.CHARSET)) {
+                         try {
+                                 return decode(b, defcs);
+                         }
+                         catch (DecoderFallbackException e)
+                         {
+                                 //b.reset();
+                         }
+                 }
+
+                 throw new DecoderFallbackException(string.Format("Unable to decode provided buffer using encoder '{0}'.", cs.WebName) );
 		}
 
 		/**

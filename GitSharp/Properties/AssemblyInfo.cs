@@ -42,12 +42,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("GitSharp.API")]
-[assembly: AssemblyDescription("User friendly API to git. Licensed under BSD")]
+[assembly: AssemblyTitle("GitSharp")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("The Git development community")]
-[assembly: AssemblyProduct("GitSharp.API")]
-[assembly: AssemblyCopyright("Copyright © 2009")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("GitSharp")]
+[assembly: AssemblyCopyright("Copyright © 2009 The GitSharp Team")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -71,3 +71,5 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("0.1.0.*")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+
+[assembly: InternalsVisibleTo("GitSharp.Tests")]

@@ -39,46 +39,49 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
-using System.IO;
 
-namespace Git.Tests
+using ObjectId = GitSharp.Core.ObjectId;
+using CoreRef = GitSharp.Core.Ref;
+using CoreCommit = GitSharp.Core.Commit;
+using CoreTree = GitSharp.Core.Tree;
+using CoreTag = GitSharp.Core.Tag;
+
+namespace Git
 {
-    [TestFixture]
-    public class RepositoryTests : GitSharp.Tests.RepositoryTestCase
+    public class Blob : AbstractObject
     {
-        [Test]
-        public void IsBare()
+        internal Blob(Repository repo, ObjectId id)
+            : base(repo, id)
         {
-            var repo = new Repository(trash_git.FullName);
-            Assert.IsFalse(repo.IsBare);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(bare_repo.IsBare);
         }
 
-        [Test]
-        public void IsValid()
+        internal Blob(Repository repo, ObjectId id, byte[] blob)
+            : base(repo, id)
         {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.IsTrue(Repository.IsValid(repo.WorkingDirectory));
-            Assert.IsTrue(Repository.IsValid(repo.Directory));
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(Repository.IsValid(bare_repo.Directory));
-            var dir = Path.Combine(trash.FullName, "empty_dir");
-            Assert.IsFalse(Repository.IsValid(dir));
-            Directory.CreateDirectory(dir);
-            Assert.IsFalse(Repository.IsValid(dir));
+            _blob = blob;
         }
 
-        [Test]
-        public void Directory_and_WorkingDirectory()
+        private byte[] _blob;
+
+        public string Data
         {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            Assert.AreEqual(Path.Combine(trash.FullName, "test"), repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, Path.Combine("test", ".git")), repo.Directory);
-            var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsNull(bare_repo.WorkingDirectory);
-            Assert.AreEqual(Path.Combine(trash.FullName, "test.git"), bare_repo.Directory);
+            get
+            {
+                if (_blob == null)
+                {
+                    var loader = _repo._internal_repo.OpenBlob(_id);
+                    if (loader == null)
+                        return null;
+                    _blob = loader.Bytes;
+                }
+                return Encoding.UTF8.GetString(_blob);
+            }
         }
+
+        public override string ToString()
+        {
+            return "Blob[" + ShortHash + "]";
+        }
+
     }
 }

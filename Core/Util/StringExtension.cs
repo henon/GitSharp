@@ -65,20 +65,16 @@ namespace GitSharp.Core.Util
 
         public static byte[] getBytes(this string plainString, string encodingAlias)
         {
-            Encoding encoder;
+            Encoding encoder = Charset.forName(encodingAlias);
 
-            switch (encodingAlias.ToUpperInvariant())
+            try
             {
-                case "UTF-8":
-                    encoder = Constants.CHARSET;
-                    break;
-
-                default:
-                    encoder = Encoding.GetEncoding(encodingAlias);
-                    break;
+                return encoder.GetBytes(plainString);
             }
-
-            return encoder.GetBytes(plainString);
+            catch (EncoderFallbackException e)
+            {
+                throw new EncoderFallbackException(string.Format("A problem occured while encoding '{0}' using encoder '{1}'.", plainString, encoder.WebName), e);
+            }
         }
 
         public static byte[] getBytes(this string plainString)

@@ -203,7 +203,7 @@ namespace GitSharp.Tests
 
         protected static void checkFile(FileInfo f, string checkData)
         {
-            var readData = File.ReadAllText(f.FullName, Encoding.GetEncoding("ISO-8859-1"));
+            var readData = File.ReadAllText(f.FullName, Charset.forName("ISO-8859-1"));
 
             if (checkData.Length != readData.Length)
             {

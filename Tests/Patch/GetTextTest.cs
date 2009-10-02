@@ -38,10 +38,12 @@
 
 using GitSharp.Core;
 using GitSharp.Core.Patch;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 using System.IO;
 using System.Text;
 using System.Diagnostics;
+using FileMode=System.IO.FileMode;
 
 namespace GitSharp.Tests.Patch
 {
@@ -51,8 +53,8 @@ namespace GitSharp.Tests.Patch
         [Test]
         public void testGetText_BothISO88591()
         {
-            Encoding cs = Encoding.GetEncoding("ISO-8859-1");
-            GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_BothISO88591.patch");
+            Encoding cs = Charset.forName("ISO-8859-1");
+            Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_BothISO88591.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
             FileHeader fh = p.getFiles()[0];
@@ -63,7 +65,7 @@ namespace GitSharp.Tests.Patch
         [Test]
         public void testGetText_NoBinary()
         {
-            Encoding cs = Encoding.GetEncoding("ISO-8859-1");
+            Encoding cs = Charset.forName("ISO-8859-1");
             GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_NoBinary.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
@@ -75,8 +77,8 @@ namespace GitSharp.Tests.Patch
         [Test]
         public void testGetText_Convert()
         {
-            Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
-            Encoding csNew = Constants.CHARSET;
+            Encoding csOld = Charset.forName("ISO-8859-1");
+            Encoding csNew = Charset.forName("UTF-8");
             GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_Convert.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
@@ -88,7 +90,7 @@ namespace GitSharp.Tests.Patch
             // string match what we really expect to get back.
             //
             string exp = ReadTestPatchFile(csOld);
-            exp = exp.Replace("\u00c3\u0085ngstr\u00c3\u00b6m", "\u00c5ngstr\u00f6m");
+            exp = exp.Replace(@"\303\205ngstr\303\266m", "\u00c5ngstr\u00f6m");
 
             Assert.AreEqual(exp, fh.getScriptText(csOld, csNew));
         }
@@ -96,8 +98,8 @@ namespace GitSharp.Tests.Patch
         [Test]
         public void testGetText_DiffCc()
         {
-            Encoding csOld = Encoding.GetEncoding("ISO-8859-1");
-            Encoding csNew = Constants.CHARSET;
+            Encoding csOld = Charset.forName("ISO-8859-1");
+            Encoding csNew = Charset.forName("UTF-8");
             GitSharp.Core.Patch.Patch p = ParseTestPatchFile(PatchsDir + "testGetText_DiffCc.patch");
             Assert.IsTrue(p.getErrors().Count == 0);
             Assert.AreEqual(1, p.getFiles().Count);
@@ -109,7 +111,7 @@ namespace GitSharp.Tests.Patch
             // string match what we really expect to get back.
             //
             string exp = ReadTestPatchFile(csOld);
-            exp = exp.Replace("\u00c3\u0085ngstr\u00c3\u00b6m", "\u00c5ngstr\u00f6m");
+             exp = exp.Replace(@"\303\205ngstr\303\266m", "\u00c5ngstr\u00f6m");
 
             Assert.AreEqual(exp, fh.getScriptText(new[] { csNew, csOld, csNew }));
         }
@@ -117,11 +119,10 @@ namespace GitSharp.Tests.Patch
         private static string ReadTestPatchFile(Encoding cs)
         {
             string patchFile = (new StackFrame(1, true)).GetMethod().Name + ".patch";
-            Stream inStream = new FileStream(PatchsDir + patchFile, System.IO.FileMode.Open);
 
-            try
+            using (Stream inStream = new FileStream(PatchsDir + patchFile, FileMode.Open))
+            using (var r = new StreamReader(inStream, cs))
             {
-                var r = new StreamReader(inStream, cs);
                 var tmp = new char[2048];
                 var s = new StringBuilder();
                 int n;
@@ -130,10 +131,6 @@ namespace GitSharp.Tests.Patch
                     s.Append(tmp, 0, n);
                 }
                 return s.ToString();
-            }
-            finally
-            {
-                inStream.Close();
             }
         }
     }

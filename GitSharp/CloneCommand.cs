@@ -40,14 +40,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp.Commands
+namespace Git
 {
-    public class Clone : BaseCommand
+    public class CloneCommand
+        : AbstractCommand
     {
 
-        public void Execute()
+        public override void Execute()
         {
-            
+
         }
     }
 }

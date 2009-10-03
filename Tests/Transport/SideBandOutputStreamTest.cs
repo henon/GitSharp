@@ -161,6 +161,11 @@ namespace GitSharp.Tests.Transport
             Assert.Fail("should not write");
         }
 
+        public override void WriteByte(byte value)
+        {
+            Assert.Fail("should not write");
+        }
+
         public override void Flush()
         {
             _flushCnt[0]++;

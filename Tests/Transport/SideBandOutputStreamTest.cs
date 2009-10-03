@@ -121,11 +121,49 @@ namespace GitSharp.Tests.Transport
             byte[] act = rawOut.ToArray();
             string explen = NB.DecimalToBase(buf.Length + 5, 16);
             Assert.AreEqual(5 + buf.Length, act.Length);
-            Assert.AreEqual(Constants.CHARSET.GetString(act, 0, 4).ToUpper(), explen.ToUpper());
+            Assert.AreEqual(Charset.forName("UTF-8").GetString(act, 0, 4), explen);
             Assert.AreEqual(1, act[4]);
             for (int i = 0, j = 5; i < buf.Length; i++, j++)
                 Assert.AreEqual(buf[i], act[j]);
         }
+
+        [Test]
+        public void testFlush()
+        {
+            var flushCnt = new int[1];
+            var mockout = new FlushCounterFailWriterStream(flushCnt);
+
+            new SideBandOutputStream(SideBandOutputStream.CH_DATA,
+                                     new PacketLineOut(mockout)).Flush();
+            Assert.AreEqual(0, flushCnt[0]);
+
+            new SideBandOutputStream(SideBandOutputStream.CH_ERROR,
+                                     new PacketLineOut(mockout)).Flush();
+            Assert.AreEqual(1, flushCnt[0]);
+
+            new SideBandOutputStream(SideBandOutputStream.CH_PROGRESS,
+                                     new PacketLineOut(mockout)).Flush();
+            Assert.AreEqual(2, flushCnt[0]);
+        }
     }
 
+    internal class FlushCounterFailWriterStream : MemoryStream
+    {
+        private readonly int[] _flushCnt;
+
+        public FlushCounterFailWriterStream(int[] flushCnt)
+        {
+            _flushCnt = flushCnt;
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            Assert.Fail("should not write");
+        }
+
+        public override void Flush()
+        {
+            _flushCnt[0]++;
+        }
+    }
 }

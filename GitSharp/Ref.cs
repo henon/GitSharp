@@ -90,8 +90,27 @@ namespace Git
             }
         }
 
+        public bool IsBranch
+        {
+            get
+            {
+                var branches=_repo._internal_repo._refDb.GetBranches();
+                return branches.ContainsKey(Name);
+            }
+        }
+
+        //public T As<T>()
+        //    where T : Ref, new()
+        //{
+        //    if (this is T)
+        //        return this as T;
+        //    else
+        //        return new T(this);
+        //}
+
+
         /// <summary>
-        /// Check validity of a ref name. It must not contain character that has
+        /// Check validity of a ref name. It must not contain a character that has
         /// a special meaning in a Git object reference expression. Some other
         /// dangerous characters are also excluded.
         /// </summary>

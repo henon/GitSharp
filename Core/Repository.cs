@@ -75,7 +75,7 @@ namespace GitSharp.Core
 	public class Repository
 	{
         private int _useCnt = 1;
-		private readonly RefDatabase _refDb;
+		internal readonly RefDatabase _refDb; // [henon] need internal for API
 	
 		private readonly ObjectDirectory _objectDatabase;
 

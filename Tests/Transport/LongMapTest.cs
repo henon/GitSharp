@@ -35,129 +35,116 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
+
+using GitSharp.Core.Transport;
 using NUnit.Framework;
 
-namespace GitSharp.Tests.Transport
-{
-	[TestFixture]
-	public class LongMapTest
-	{
-		private LongMap<long> _map;
+[TestFixture]
+public class LongMapTest {
+	private LongMap<long> map;
 
-		[SetUp]
-		public void setUp()
-		{
-			_map = new LongMap<long>();
-		}
+    [SetUp]
+    protected void setUp()
+    {
+        map = new LongMap<long>();
+    }
 
-		[Test]
-		public void testEmptyMap()
-		{
-			Assert.IsFalse(_map.ContainsKey(0));
-			Assert.IsFalse(_map.ContainsKey(1));
+    [Test]
+    public void testEmptyMap()
+    {
+        Assert.IsFalse(map.containsKey(0));
+        Assert.IsFalse(map.containsKey(1));
 
-			AssertHelper.Throws<KeyNotFoundException>(() => { var number = _map[0]; });
-			AssertHelper.Throws<KeyNotFoundException>(() => { var number = _map[1]; });
+        Assert.IsNull(map.get(0));
+        Assert.IsNull(map.get(1));
 
-			Assert.IsFalse(_map.Remove(0));
-			Assert.IsFalse(_map.Remove(1));
-		}
+        Assert.IsNull(map.remove(0));
+        Assert.IsNull(map.remove(1));
+    }
 
-		[Test]
-		public void testInsertMinValue()
-		{
-			long min = long.MinValue;
-			Assert.AreEqual(min, _map[long.MinValue] = min);
-			Assert.IsTrue(_map.ContainsKey(long.MinValue));
-			Assert.AreEqual(min, _map[long.MinValue]);
-			Assert.IsFalse(_map.ContainsKey(int.MinValue));
-		}
+    [Test]
+    public void testInsertMinValue()
+    {
+        long min = long.MinValue;
+        Assert.IsNull(map.put(long.MinValue, min));
+        Assert.IsTrue(map.containsKey(long.MinValue));
+        Assert.AreSame(min, map.get(long.MinValue));
+        Assert.IsFalse(map.containsKey(int.MinValue));
+    }
 
-		[Test]
-		public void testReplaceMaxValue()
-		{
-			long min = Convert.ToInt64(long.MaxValue);
-			long one = Convert.ToInt64(1);
-			Assert.AreEqual(min, _map[long.MaxValue] = min);
-			Assert.AreEqual(min, _map[long.MaxValue]);
-			Assert.AreEqual(one, _map[long.MaxValue] = one);
-		}
+    [Test]
+    public void testReplaceMaxValue()
+    {
+        long min = long.MaxValue;
+        long one = 1L;
+        Assert.IsNull(map.put(long.MaxValue, min));
+        Assert.AreSame(min, map.get(long.MaxValue));
+        Assert.AreSame(min, map.put(long.MaxValue, one));
+        Assert.AreSame(one, map.get(long.MaxValue));
+    }
 
-		[Test]
-		public void testRemoveOne()
-		{
-			const long start = 1;
-			Assert.AreEqual(1, _map[start] = Convert.ToInt64(start));
-			Assert.IsTrue(_map.Remove(start));
-			Assert.IsFalse(_map.ContainsKey(start));
-		}
+    [Test]
+    public void testRemoveOne()
+    {
+        long start = 1;
+        Assert.IsNull(map.put(start, start));
+        Assert.AreEqual(start, map.remove(start));
+        Assert.IsFalse(map.containsKey(start));
+    }
 
-		[Test]
-		public void testRemoveCollision1()
-		{
-			// This test relies upon the fact that we always >>> 1 the value
-			// to derive an unsigned hash code. Thus, 0 and 1 fall into the
-			// same hash bucket. Further it relies on the fact that we add
-			// the 2nd put at the top of the chain, so removing the 1st will
-			// cause a different code path.
-			//
-			Assert.AreEqual(0, _map[0] = Convert.ToInt64(0));
-			Assert.AreEqual(1, _map[1] = Convert.ToInt64(1));
-			Assert.AreEqual(Convert.ToInt64(0), _map[0]);
-			Assert.IsTrue(_map.Remove(0));
+    [Test]
+    public void testRemoveCollision1()
+    {
+        // This test relies upon the fact that we always >>> 1 the value
+        // to derive an unsigned hash code. Thus, 0 and 1 fall into the
+        // same hash bucket. Further it relies on the fact that we add
+        // the 2nd put at the top of the chain, so removing the 1st will
+        // cause a different code path.
+        //
+        Assert.IsNull(map.put(0L, 0L));
+        Assert.IsNull(map.put(1, 1L));
+        Assert.AreEqual(0L, map.remove(0));
 
-			Assert.IsFalse(_map.ContainsKey(0));
-			Assert.IsTrue(_map.ContainsKey(1));
-		}
+        Assert.IsFalse(map.containsKey(0));
+        Assert.IsTrue(map.containsKey(1));
+    }
 
-		[Test]
-		public void testRemoveCollision2()
-		{
-			// This test relies upon the fact that we always >>> 1 the value
-			// to derive an unsigned hash code. Thus, 0 and 1 fall into the
-			// same hash bucket. Further it relies on the fact that we add
-			// the 2nd put at the top of the chain, so removing the 2nd will
-			// cause a different code path.
-			//
-			Assert.AreEqual(0, _map[0] = Convert.ToInt64(0));
-			Assert.AreEqual(1, _map[1] = Convert.ToInt64(1));
-			Assert.AreEqual(Convert.ToInt64(1), _map[1]);
-			Assert.IsTrue(_map.Remove(1));
+    [Test]
+    public void testRemoveCollision2()
+    {
+        // This test relies upon the fact that we always >>> 1 the value
+        // to derive an unsigned hash code. Thus, 0 and 1 fall into the
+        // same hash bucket. Further it relies on the fact that we add
+        // the 2nd put at the top of the chain, so removing the 2nd will
+        // cause a different code path.
+        //
+        Assert.IsNull(map.put(0, 0L));
+        Assert.IsNull(map.put(1, 1L));
+        Assert.AreEqual(1L, map.remove(1));
 
-			Assert.IsTrue(_map.ContainsKey(0));
-			Assert.IsFalse(_map.ContainsKey(1));
-		}
+        Assert.IsTrue(map.containsKey(0));
+        Assert.IsFalse(map.containsKey(1));
+    }
 
-		[Test]
-		public void testSmallMap()
-		{
-			const long start = 12;
-			const long n = 8;
-			for (long i = start; i < start + n; i++)
-				Assert.AreEqual(i, _map[i] = Convert.ToInt64(i));
-			for (long i = start; i < start + n; i++)
-				Assert.AreEqual(Convert.ToInt64(i), _map[i]);
-		}
+    [Test]
+    public void testSmallMap()
+    {
+        long start = 12;
+        long n = 8;
+        for (long i = start; i < start + n; i++)
+            Assert.IsNull(map.put(i, i));
+        for (long i = start; i < start + n; i++)
+            Assert.AreEqual(i, map.get(i));
+    }
 
-		[Test]
-		public void testLargeMap()
-		{
-			const long start = int.MaxValue;
-			const long n = 100000;
-			for (long i = start; i < start + n; i++)
-			{
-				Assert.AreEqual(i, _map[i] = Convert.ToInt64(i));
-			}
-			for (long i = start; i < start + n; i++)
-			{
-				Assert.AreEqual(Convert.ToInt64(i), _map[i]);
-			}
-		}
-	}
-
-	public class LongMap<T> : Dictionary<long, T>
-	{
-	}
+    [Test]
+    public void testLargeMap()
+    {
+        long start = int.MaxValue;
+        long n = 100000;
+        for (long i = start; i < start + n; i++)
+            Assert.IsNull(map.put(i, i));
+        for (long i = start; i < start + n; i++)
+            Assert.AreEqual(i, map.get(i));
+    }
 }

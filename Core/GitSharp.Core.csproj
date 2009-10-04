@@ -121,6 +121,7 @@
     <Compile Include="RevWalk\FooterLine.cs" />
     <Compile Include="TransferConfig.cs" />
     <Compile Include="Transport\BundleWriter.cs" />
+    <Compile Include="Transport\LongMap.cs" />
     <Compile Include="Transport\DefaultSshSessionFactory.cs" />
     <Compile Include="Transport\FetchProcess.cs" />
     <Compile Include="Transport\OpenSshConfig.cs" />

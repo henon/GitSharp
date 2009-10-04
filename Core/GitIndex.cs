@@ -469,7 +469,6 @@ namespace GitSharp.Core
             {
                 var ms = new MemoryStream(bytes);
                 ms.WriteTo(fs);
-                fs.Close();
             }
 
             if (ConfigFilemode(Repository) && FileHasExecute())

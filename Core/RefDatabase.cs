@@ -591,7 +591,7 @@ namespace GitSharp.Core
 			{
 				if (r.Name.StartsWith(Constants.RefsHeads))
 				{
-					branches.Add(r.Name.Substring(Constants.RefsTags.Length), r);
+					branches[r.Name.Substring(Constants.RefsTags.Length)]=r; // [henon] it may happen, for some reason, that the same branch is added twice. In this case we better silently overwrite instead of throwing.
 				}
 			}
 			return branches;
@@ -604,7 +604,7 @@ namespace GitSharp.Core
 			{
 				if (r.Name.StartsWith(Constants.RefsRemotes))
 				{
-					remotes.Add(r.Name.Substring(Constants.RefsRemotes.Length), r);
+					remotes[r.Name.Substring(Constants.RefsRemotes.Length)]=r; // [henon] same here.
 				}
 			}
 			return remotes;

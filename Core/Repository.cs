@@ -81,7 +81,7 @@ namespace GitSharp.Core
 
 		private GitIndex _index;
 
-        private readonly List<DirectoryInfo> _objectsDirs;
+        // private readonly List<DirectoryInfo> _objectsDirs; // never used.
 
         private List<RepositoryListener> listeners = new List<RepositoryListener>(); //TODO: make thread safe
         static private List<RepositoryListener> allListeners = new List<RepositoryListener>(); //TODO: make thread safe
@@ -1290,7 +1290,7 @@ namespace GitSharp.Core
                 }
                 return reference;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 var ptr = new FileInfo(Path.Combine(Directory.FullName, "head-name"));
                 string reference;

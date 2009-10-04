@@ -83,10 +83,10 @@ namespace Git
         {
             get
             {
-                var internal_ref = _repo._internal_repo.getRef(Name);
-                if (internal_ref == null)
+                var id = _repo._internal_repo.Resolve(Name);
+                if (id == null)
                     return null;
-                return AbstractObject.Wrap(_repo, internal_ref.ObjectId);
+                return AbstractObject.Wrap(_repo, id);
             }
         }
 
@@ -99,6 +99,20 @@ namespace Git
             }
         }
 
+        /// <summary>
+        /// Overwrites this ref by forwarding it to the given ref.
+        /// </summary>
+        /// <param name="other">The ref this object shall reference.</param>
+        public void Update(Ref other)
+        {
+            var db = _repo._internal_repo;
+            var updateRef = db.UpdateRef(this.Name);
+            updateRef.NewObjectId = other.Target._id;
+            updateRef.IsForceUpdate = true;
+            updateRef.Update();
+            db.WriteSymref(Name, other.Name);
+        }
+
         //public T As<T>()
         //    where T : Ref, new()
         //{
@@ -107,7 +121,6 @@ namespace Git
         //    else
         //        return new T(this);
         //}
-
 
         /// <summary>
         /// Check validity of a ref name. It must not contain a character that has
@@ -122,6 +135,39 @@ namespace Git
         {
             return CoreRepository.IsValidRefName(name);
         }
+
+        #region Equality overrides
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Ref)
+            {
+                var other = obj as Ref;
+                return _repo._internal_repo.Resolve(Name) == _repo._internal_repo.Resolve(other.Name);
+            }
+            else
+                return false;
+        }
+
+        public static bool operator ==(Ref self, object other)
+        {
+            return self.Equals(other);
+        }
+
+        public static bool operator !=(Ref self, object other)
+        {
+            return !self.Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            var id = _repo._internal_repo.Resolve(Name);
+            if (id != null)
+                return id.GetHashCode();
+            return base.GetHashCode();
+        }
+
+        #endregion
 
         public override string ToString()
         {

@@ -56,7 +56,7 @@ namespace GitSharp.Core.Transport
         {
             DirectoryInfo home = FS.userHome() ?? new DirectoryInfo(Path.GetFullPath("."));
 
-            FileInfo config = new FileInfo(Path.Combine(home.ToString(), ".ssh\\config"));
+            FileInfo config = new FileInfo(Path.Combine(home.FullName, ".ssh" + Path.DirectorySeparatorChar + "config"));
             OpenSshConfig osc = new OpenSshConfig(home, config);
             osc.refresh();
             return osc;
@@ -114,7 +114,7 @@ namespace GitSharp.Core.Transport
             {
                 try
                 {
-                    FileStream s = new FileStream(configFile.ToString(), System.IO.FileMode.Open, FileAccess.Read);
+                    FileStream s = new FileStream(configFile.FullName, System.IO.FileMode.Open, FileAccess.Read);
                     try
                     {
                         hosts = parse(s);
@@ -301,11 +301,16 @@ namespace GitSharp.Core.Transport
         private FileInfo toFile(string path)
         {
             if (path.StartsWith("~/"))
-                return new FileInfo(Path.Combine(home.ToString(), path.Substring(2)));
-            FileInfo ret = new FileInfo(path);
-            if (Path.IsPathRooted(ret.ToString()))
-                return ret;
-            return new FileInfo(Path.Combine(home.ToString(), path));
+            {
+                return new FileInfo(Path.Combine(home.FullName, path.Substring(2)));
+            }
+
+            if (Path.IsPathRooted(path))
+            {
+                return new FileInfo(path);
+            }
+
+            return new FileInfo(Path.Combine(home.FullName, path));
         }
 
         public class Host

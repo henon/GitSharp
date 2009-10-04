@@ -45,6 +45,7 @@ using ObjectId = GitSharp.Core.ObjectId;
 using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
+using System.IO;
 
 namespace Git
 {
@@ -282,6 +283,36 @@ namespace Git
                 ancestors[parentCommit._id] = parentCommit;
                 CollectAncestorIdsRecursive(parentCommit, ancestors);
             }
+        }
+
+        /// <summary>
+        /// Checkout this commit into the repositorie's working directory. Does not reset HEAD.
+        /// </summary>
+        public void Checkout()
+        {
+            Checkout(_repo.WorkingDirectory);
+        }
+
+        /// <summary>
+        /// Checkout this commit into the given directory. Does not reset HEAD!
+        /// </summary>
+        /// <param name="working_directory">The directory to put the sources into</param>
+        public void Checkout(string working_directory)
+        {
+            // Todo: what happens with a bare repo here ??
+            if (InternalCommit == null)
+                throw new InvalidOperationException("Unable to checkout this commit. It was not initialized properly (i.e. the hash is not pointing to a commit object).");
+            if (working_directory == null)
+                throw new ArgumentException("Path to checkout directory must not be null");
+            if (new DirectoryInfo(working_directory).Exists == false)
+                throw new IOException("Cannot checkout into non-existent directory: " + working_directory);
+            var db = _repo._internal_repo;
+            var index = new GitSharp.Core.GitIndex(db);
+            CoreTree tree = InternalCommit.TreeEntry;
+            var co = new GitSharp.Core.WorkDirCheckout(db, new DirectoryInfo(working_directory), index, tree);
+            co.checkout();
+            if (working_directory == Repository.WorkingDirectory) // we wouldn't want to write index if the checkout was not done into the working directory or if the repo is bare, right?
+                index.write();
         }
 
         public override string ToString()

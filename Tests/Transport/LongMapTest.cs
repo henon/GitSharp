@@ -40,13 +40,14 @@ using GitSharp.Core.Transport;
 using NUnit.Framework;
 
 [TestFixture]
-public class LongMapTest {
-	private LongMap<long> map;
+public class LongMapTest
+{
+	private LongMap<long?> map;
 
     [SetUp]
     protected void setUp()
     {
-        map = new LongMap<long>();
+        map = new LongMap<long?>();
     }
 
     [Test]
@@ -68,7 +69,7 @@ public class LongMapTest {
         long min = long.MinValue;
         Assert.IsNull(map.put(long.MinValue, min));
         Assert.IsTrue(map.containsKey(long.MinValue));
-        Assert.AreSame(min, map.get(long.MinValue));
+        Assert.AreEqual(min, map.get(long.MinValue));  // Switch from AreSame to AreEqual as valuetype as passed by value
         Assert.IsFalse(map.containsKey(int.MinValue));
     }
 
@@ -78,9 +79,9 @@ public class LongMapTest {
         long min = long.MaxValue;
         long one = 1L;
         Assert.IsNull(map.put(long.MaxValue, min));
-        Assert.AreSame(min, map.get(long.MaxValue));
-        Assert.AreSame(min, map.put(long.MaxValue, one));
-        Assert.AreSame(one, map.get(long.MaxValue));
+        Assert.AreEqual(min, map.get(long.MaxValue));
+        Assert.AreEqual(min, map.put(long.MaxValue, one));
+        Assert.AreEqual(one, map.get(long.MaxValue));
     }
 
     [Test]

@@ -7,24 +7,26 @@ namespace GitSharp.Core.Transport
 {
     public class LongMap<V>
     {
+        Dictionary<long, V> _map = new Dictionary<long, V>();
+
         public bool containsKey(long key)
         {
-            throw new NotImplementedException();
+            return _map.ContainsKey(key);
         }
 
         public V get(long key)
         {
-            throw new NotImplementedException();
+            return _map.GetValue(key);
         }
 
         public V remove(long key)
         {
-            throw new NotImplementedException();
+            return _map.RemoveValue(key);
         }
 
         public V put(long key, V value)
         {
-            throw new NotImplementedException();
+            return _map.put(key, value);
         }
     }
 }

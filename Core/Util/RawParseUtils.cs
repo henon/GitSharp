@@ -918,7 +918,7 @@ namespace GitSharp.Core.Util
                  //
                  try {
                          return decode(b, Constants.CHARSET);
-                 } catch (DecoderFallbackException e) {
+                 } catch (DecoderFallbackException) {
                          //b.reset();
                  }
 
@@ -928,7 +928,7 @@ namespace GitSharp.Core.Util
                          //
                          try {
                                  return decode(b, cs);
-                         } catch (DecoderFallbackException e) {
+                         } catch (DecoderFallbackException) {
                                  //b.reset();
                          }
                  }
@@ -941,7 +941,7 @@ namespace GitSharp.Core.Util
                          try {
                                  return decode(b, defcs);
                          }
-                         catch (DecoderFallbackException e)
+                         catch (DecoderFallbackException)
                          {
                                  //b.reset();
                          }

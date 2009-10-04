@@ -77,7 +77,7 @@ namespace GitSharp.Core
         /// Stage 0 represents merged entries.
         /// </summary>
         private const int STAGE_0 = 0;
-        private static bool? filemode;
+        private static bool? filemode=null; // needed for testing.
 
 		private readonly IDictionary<byte[], Entry> _entries;
         private readonly FileInfo _cacheFile;

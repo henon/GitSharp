@@ -89,14 +89,27 @@ namespace Git
         }
 
         /// <summary>
-        /// Head is a symbolic reference to the active commit on the active branch. You can dereference it to a commit.
+        /// Gets or sets Head which is a symbolic reference to the active branch. Note that setting head 
+        /// does not automatically check out that branch into the repositories working directory. 
         /// </summary>
-        public Ref Head
+        public Branch Head
         {
             get
             {
                 Debug.Assert(_internal_repo != null, "Repository not initialized correctly.");
-                return new Ref(this, "HEAD");
+                return new Branch(this, "HEAD");
+            }
+            set
+            {
+                // Todo: what should we do with null?
+                if (Head.Name != value.Name)
+                {
+                    if (Branches.ContainsKey(value.Name))
+                        _internal_repo.WriteSymref(GitSharp.Core.Constants.HEAD, value.Name);
+                    else
+                        throw new ArgumentException("Trying to set HEAD to non existent branch: " + value.Name);
+                }
+
             }
         }
 

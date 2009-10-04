@@ -58,11 +58,11 @@ namespace GitSharp.Tests.Transport
 		{
 			base.setUp();
 
-			_home = new DirectoryInfo(Path.Combine(trash.ToString(), "home"));
-			_configFile = new FileInfo(Path.Combine(_home.ToString(), ".ssh"));
-			Directory.CreateDirectory(_configFile.ToString());
+			_home = new DirectoryInfo(Path.Combine(trash.FullName, "home"));
+			_configFile = new FileInfo(Path.Combine(_home.FullName, ".ssh"));
+			Directory.CreateDirectory(_configFile.FullName);
 
-			_configFile = new FileInfo(Path.Combine(_configFile.ToString(), "config"));
+			_configFile = new FileInfo(Path.Combine(_configFile.FullName, "config"));
 
 			// can't do
 			//Environment.UserName = "jex_junit";
@@ -72,9 +72,10 @@ namespace GitSharp.Tests.Transport
 
 		private void Config(string data)
 		{
-			var fw = new StreamWriter(new FileStream(_configFile.ToString(), System.IO.FileMode.Create, FileAccess.ReadWrite), Constants.CHARSET);
-			fw.Write(data);
-			fw.Close();
+			using (var fw = new StreamWriter(new FileStream(_configFile.FullName, System.IO.FileMode.Create, FileAccess.ReadWrite), Constants.CHARSET))
+			{
+			    fw.Write(data);
+			}
 		}
 
 		[Test]
@@ -168,7 +169,7 @@ namespace GitSharp.Tests.Transport
 			Assert.AreEqual("repo.or.cz", h.getHostName());
 			Assert.AreEqual("jex", h.getUser());
 			Assert.AreEqual(2222, h.getPort());
-			Assert.AreEqual(new FileInfo(Path.Combine(_home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
+			Assert.AreEqual(new FileInfo(Path.Combine(_home.FullName, ".ssh/id_jex")).FullName, h.getIdentityFile().FullName);
 		}
 
 		[Test]
@@ -183,7 +184,7 @@ namespace GitSharp.Tests.Transport
 			Assert.AreEqual("repo.or.cz", h.getHostName());
 			Assert.AreEqual("jex", h.getUser());
 			Assert.AreEqual(2222, h.getPort());
-			Assert.AreEqual(new FileInfo(Path.Combine(_home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
+			Assert.AreEqual(new FileInfo(Path.Combine(_home.FullName, ".ssh/id_jex")).FullName, h.getIdentityFile().FullName);
 		}
 
 		[Test]
@@ -199,7 +200,7 @@ namespace GitSharp.Tests.Transport
 			Assert.AreEqual("repo.or.cz", h.getHostName());
 			Assert.AreEqual("jex", h.getUser());
 			Assert.AreEqual(2222, h.getPort());
-			Assert.AreEqual(new FileInfo(Path.Combine(_home.ToString(), ".ssh/id_jex")).ToString(), h.getIdentityFile().ToString());
+			Assert.AreEqual(new FileInfo(Path.Combine(_home.FullName, ".ssh/id_jex")).FullName, h.getIdentityFile().FullName);
 		}
 
 		[Test]

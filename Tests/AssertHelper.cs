@@ -21,7 +21,7 @@ namespace GitSharp.Tests
                 return null;
             }
 
-            if (exception.GetType() != typeof(TException))
+            if (!(typeof(TException).IsAssignableFrom(exception.GetType())))
             {
                 string insteadMessage = string.Format(insteadFormat, exception.GetType());
                 Assert.Fail(string.Format("{0} {1}", expectedMessage, insteadMessage));

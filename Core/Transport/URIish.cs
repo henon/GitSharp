@@ -89,6 +89,17 @@ namespace GitSharp.Core.Transport
 		/// <param name="s"></param>
 		public URIish(string s)
 		{
+
+            // If the string passes relative paths such as .\dir1 or ..\dir1,
+            // get the absolute path for future processing.
+            try
+            {
+                if (!System.IO.Path.IsPathRooted(s))
+                    s = System.IO.Path.GetFullPath(s);
+            } 
+			catch (NotSupportedException) {}
+			catch (ArgumentException) {}
+		
 			s = s.Replace('\\', '/');
 			Match matcher = FullUri.Match(s);
 			Port = -1;

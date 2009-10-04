@@ -48,6 +48,7 @@
     <Compile Include="Author.cs" />
     <Compile Include="AbstractCommand.cs" />
     <Compile Include="Blob.cs" />
+    <Compile Include="Branch.cs" />
     <Compile Include="CloneCommand.cs" />
     <Compile Include="IGitCommand.cs" />
     <Compile Include="Commit.cs" />

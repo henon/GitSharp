@@ -224,6 +224,42 @@ namespace Git
             }
         }
 
+        public IDictionary<string, Branch> Branches
+        {
+            get
+            {
+                var internal_refs = _internal_repo._refDb.GetBranches();
+                var dict = new Dictionary<string, Branch>(internal_refs.Count);
+                foreach (var pair in internal_refs)
+                    dict[pair.Key] = new Branch(this, pair.Value);
+                return dict;
+            }
+        }
+
+        public Branch CurrentBranch
+        {
+            get
+            {
+                return new Branch(this, _internal_repo.getBranch());
+            }
+        }
+
+        public IDictionary<string, Branch> RemoteBranches
+        {
+            get
+            {
+                var internal_refs = _internal_repo._refDb.GetRemotes();
+                var dict = new Dictionary<string, Branch>(internal_refs.Count);
+                foreach (var pair in internal_refs)
+                {
+                    var branch = new Branch(this, pair.Value);
+                    branch.IsRemote = true;
+                    dict[pair.Key] = branch;
+                }
+                return dict;
+            }
+        }
+
         public override string ToString()
         {
             return "Repository[" + Directory + "]";

@@ -72,7 +72,7 @@ namespace GitSharp.Tests
                 Assert.Fail("No -03:30 TimeZone has been found");
             }
 
-            return (int)newFoundLandTimeZoneInfo.GetUtcOffset(when.MillisToDateTime()).TotalMilliseconds;
+            return (int)newFoundLandTimeZoneInfo.GetUtcOffset(when.MillisToDateTime()).TotalMinutes;
         }
     }
 }

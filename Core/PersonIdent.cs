@@ -268,7 +268,7 @@ namespace GitSharp.Core
 			r.Append(", ");
 			r.Append(EmailAddress);
 			r.Append(", ");
-			r.Append(When.UnixTimeToDateTimeOffset(tzOffset).ToIsoDateFormat());
+			r.Append(When.MillisToDateTimeOffset(tzOffset).ToIsoDateFormat());
 			r.Append("]");
 
 			return r.ToString();

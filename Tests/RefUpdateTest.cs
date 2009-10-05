@@ -336,6 +336,72 @@ namespace GitSharp.Tests
         }
 
         /**
+        * Test case originating from
+        * <a href="http://bugs.eclipse.org/285991">bug 285991</a>
+        *
+        * Make sure the in memory cache is updated properly after
+        * update of symref. This one did not fail because the
+        * ref was packed due to implementation issues.
+        *
+        * @throws Exception
+        */
+        [Test]
+        public void testRefsCacheAfterUpdate()
+        {
+            // Do not use the defalt repo for this case.
+            Dictionary<string, Ref> allRefs = db.getAllRefs();
+            ObjectId oldValue = db.Resolve("HEAD");
+            ObjectId newValue = db.Resolve("HEAD^");
+            // first make HEAD refer to loose ref
+            RefUpdate updateRef = db.UpdateRef(Constants.HEAD);
+            updateRef.IsForceUpdate = true;
+            updateRef.NewObjectId = newValue;
+            RefUpdate.RefUpdateResult update = updateRef.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
+
+            // now update that ref
+            updateRef = db.UpdateRef(Constants.HEAD);
+            updateRef.IsForceUpdate = true;
+            updateRef.NewObjectId = oldValue;
+            update = updateRef.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update);
+            allRefs = db.getAllRefs();
+            Assert.AreEqual("refs/heads/master", allRefs.GetValue("refs/heads/master").Name);
+            Assert.AreEqual("refs/heads/master", allRefs.GetValue("refs/heads/master").OriginalName);
+            Assert.AreEqual("refs/heads/master", allRefs.GetValue("HEAD").Name);
+            Assert.AreEqual("HEAD", allRefs.GetValue("HEAD").OriginalName);
+        }
+
+        /**
+        * Test case originating from
+        * <a href="http://bugs.eclipse.org/285991">bug 285991</a>
+        *
+        * Make sure the in memory cache is updated properly after
+        * update of symref.
+        *
+        * @throws Exception
+        */
+
+        [Test]
+        public void testRefsCacheAfterUpdateLoosOnly()
+        {
+            // Do not use the defalt repo for this case.
+            Dictionary<string, Ref> allRefs = db.getAllRefs();
+            ObjectId oldValue = db.Resolve("HEAD");
+            db.WriteSymref(Constants.HEAD, "refs/heads/newref");
+            RefUpdate updateRef = db.UpdateRef(Constants.HEAD);
+            updateRef.IsForceUpdate = true;
+            updateRef.NewObjectId = oldValue;
+            RefUpdate.RefUpdateResult update = updateRef.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
+            allRefs = db.getAllRefs();
+            Assert.AreEqual("refs/heads/newref", allRefs.GetValue("HEAD").Name);
+            Assert.AreEqual("HEAD", allRefs.GetValue("HEAD").OriginalName);
+            Assert.AreEqual("refs/heads/newref", allRefs.GetValue("refs/heads/newref").Name);
+            Assert.AreEqual("refs/heads/newref", allRefs.GetValue("refs/heads/newref").OriginalName);
+        }
+
+        /**
          * Try modify a ref, but get wrong expected old value
          *
          * @throws IOException

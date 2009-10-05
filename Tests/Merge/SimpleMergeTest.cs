@@ -204,7 +204,7 @@ namespace GitSharp.Tests.Merge
 		}
 
 		[Test]
-		public void TestTrivialTwoWayConflictSubtreeChange()
+        public void testTrivialTwoWay_conflictSubtreeChange()
 		{
 			DirCache treeB = DirCache.read(db);
 			DirCache treeO = DirCache.read(db);
@@ -239,7 +239,7 @@ namespace GitSharp.Tests.Merge
 		}
 
 		[Test]
-		public void TestTrivialTwoWayLeftDFconflict1()
+        public void testTrivialTwoWay_leftDFconflict1()
 		{
 			DirCache treeB = DirCache.read(db);
 			DirCache treeO = DirCache.read(db);
@@ -273,7 +273,7 @@ namespace GitSharp.Tests.Merge
 		}
 
 		[Test]
-		public void TestTrivialTwoWayRightDFconflict1()
+        public void testTrivialTwoWay_rightDFconflict1()
 		{
 			DirCache treeB = DirCache.read(db);
 			DirCache treeO = DirCache.read(db);
@@ -307,7 +307,7 @@ namespace GitSharp.Tests.Merge
 		}
 
 		[Test]
-		public void TestTrivialTwoWayLeftDFconflict2()
+        public void testTrivialTwoWay_leftDFconflict2()
 		{
 			DirCache treeB = DirCache.read(db);
 			DirCache treeO = DirCache.read(db);
@@ -339,7 +339,7 @@ namespace GitSharp.Tests.Merge
 		}
 
 		[Test]
-		public void TestTrivialTwoWayRightDFconflict2()
+        public void testTrivialTwoWay_rightDFconflict2()
 		{
 			DirCache treeB = DirCache.read(db);
 			DirCache treeO = DirCache.read(db);

@@ -64,10 +64,10 @@ namespace GitSharp.Core
         public PersonIdent(Repository repo)
         {
             RepositoryConfig config = repo.Config;
-            string username = config.getString("user", null, "name");
-            string email = config.getString("user", null, "email");
-            Name = username;
-            EmailAddress = email;
+            Name = config.getCommitterName();
+            EmailAddress = config.getCommitterEmail();
+            When = SystemReader.getInstance().getCurrentTime();
+            tzOffset = SystemReader.getInstance().getTimezone(When);
         }
 
 		///	<summary>
@@ -106,7 +106,7 @@ namespace GitSharp.Core
 		/// <param name="pi">Original <seealso cref="PersonIdent"/>.</param>
 		///	<param name="when">Local time stamp.</param>
         public PersonIdent(PersonIdent pi, DateTime when)
-			: this(pi.Name, pi.EmailAddress, when.ToUnixTime() * 1000, pi.tzOffset)
+			: this(pi.Name, pi.EmailAddress, when.currentTimeMillis(), pi.tzOffset)
         {
         }
 
@@ -118,7 +118,7 @@ namespace GitSharp.Core
 		///	<param name="when">Local time stamp.</param>
 		///	<param name="tz">Time zone.</param>
         public PersonIdent(string name, string emailAddress, DateTime when, TimeZoneInfo tz)
-            : this(name, emailAddress, when.ToUnixTime() * 1000L, (int)tz.GetUtcOffset(when).TotalMinutes)
+            : this(name, emailAddress, when.currentTimeMillis(), (int)tz.GetUtcOffset(when).TotalMinutes)
         {
         }
 

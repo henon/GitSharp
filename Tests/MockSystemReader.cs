@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using GitSharp.Core;
+using GitSharp.Core.Util;
+using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
@@ -43,6 +45,34 @@ namespace GitSharp.Tests
         public override string getHostname()
         {
             return "fake.host.example.com";
+        }
+
+        public override long getCurrentTime()
+        {
+            return 1250379778668L; // Sat Aug 15 20:12:58 GMT-03:30 2009
+        }
+
+        public override int getTimezone(long when)
+        {
+            TimeZoneInfo newFoundLandTimeZoneInfo = null;
+            var expectedOffset = new TimeSpan(-3, -30, 0);
+            foreach (TimeZoneInfo timeZoneInfo in TimeZoneInfo.GetSystemTimeZones())
+            {
+                if (timeZoneInfo.BaseUtcOffset != expectedOffset)
+                {
+                    continue;
+                }
+
+                newFoundLandTimeZoneInfo = timeZoneInfo;
+                break;
+            }
+
+            if (newFoundLandTimeZoneInfo == null)
+            {
+                Assert.Fail("No -03:30 TimeZone has been found");
+            }
+
+            return (int)newFoundLandTimeZoneInfo.GetUtcOffset(when.MillisToDateTime()).TotalMilliseconds;
         }
     }
 }

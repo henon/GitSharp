@@ -58,7 +58,7 @@ namespace GitSharp.Core.RevWalk.Filter
 		/// </returns>
 		public static RevFilter Before(DateTime ts)
 		{
-            return new BeforeCommitTimeRevFilter(ts.ToUnixTime() * 1000);
+            return new BeforeCommitTimeRevFilter(ts.currentTimeMillis());
 		}
 
 		/// <summary>
@@ -70,7 +70,7 @@ namespace GitSharp.Core.RevWalk.Filter
 		/// </returns>
 		public static RevFilter After(DateTime ts)
 		{
-			return new AfterCommitTimeRevFilter(ts.ToUnixTime() * 1000);
+			return new AfterCommitTimeRevFilter(ts.currentTimeMillis());
 		}
 
 	    /// <summary>
@@ -84,7 +84,7 @@ namespace GitSharp.Core.RevWalk.Filter
 	    ///</returns>
 	    public static RevFilter Between(DateTime since, DateTime until)
 	    {
-	        return new BetweenCommitTimeRevFilter(since.ToUnixTime()*1000, until.ToUnixTime()*1000);
+	        return new BetweenCommitTimeRevFilter(since.currentTimeMillis(), until.currentTimeMillis());
 	    }
 
 		private CommitTimeRevFilter(long ts)
@@ -148,7 +148,7 @@ namespace GitSharp.Core.RevWalk.Filter
 
 			public override string ToString()
 			{
-				return base.ToString() + "(" + new DateTime(_when * 1000L) + ")";
+                return base.ToString() + "(" + ((long)_when).UnixTimeToDateTime() + ")";
 			}
 		}
 
@@ -169,7 +169,7 @@ namespace GitSharp.Core.RevWalk.Filter
 
 			public override string ToString()
 			{
-				return base.ToString() + "(" + new DateTime(_when * 1000L) + " - " + new DateTime(_until * 1000L) + ")";
+                return base.ToString() + "(" + ((long)_when).UnixTimeToDateTime() + " - " + ((long)_until).UnixTimeToDateTime() + ")";
 			}
 		}
 

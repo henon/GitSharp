@@ -119,9 +119,9 @@ namespace GitSharp.Tests
         }
 
         [Test]
-        public void test007_notIsId()
+        public void test007_isId()
         {
-            Assert.IsFalse(ObjectId.IsId("Def4c620bc3713bb1bb26b808ec9312548e73946"), "uppercase is not accepted");
+            Assert.IsTrue(ObjectId.IsId("Def4c620bc3713bb1bb26b808ec9312548e73946"), "uppercase is accepted");
         }
 
         [Test]

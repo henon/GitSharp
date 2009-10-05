@@ -90,7 +90,7 @@ namespace GitSharp.Tests.Transport
 		}
 
 		[Test]
-		public void testSeperatorParsing()
+		public void testSeparatorParsing()
 		{
 			Config("Host\tfirst\n" +
 				   "\tHostName\tfirst.tld\n" +

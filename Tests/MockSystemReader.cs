@@ -11,7 +11,8 @@ namespace GitSharp.Tests
         public readonly IDictionary<String, String> values = new Dictionary<String, String>();
 
         public FileBasedConfig userGitConfig;
-
+		public PlatformType operatingSystem;
+		
         public MockSystemReader()
         {
             init(Constants.OS_USER_NAME_KEY);
@@ -20,6 +21,7 @@ namespace GitSharp.Tests
             init(Constants.GIT_COMMITTER_NAME_KEY);
             init(Constants.GIT_COMMITTER_EMAIL_KEY);
             userGitConfig = new FileBasedConfig(null);
+			operatingSystem = SystemReader.getInstance().getOperatingSystem();
         }
 
         private void init(string n)
@@ -82,7 +84,7 @@ namespace GitSharp.Tests
 
         public override PlatformType getOperatingSystem()
         {
-            return SystemReader.getInstance().getOperatingSystem();
+            return operatingSystem;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net;
 using GitSharp.Core.Util;
@@ -146,9 +146,9 @@ namespace GitSharp.Core
                     case PlatformID.Unix:
                         pType = PlatformType.Unix;
                         break;
-                    case PlatformID.MacOSX:
-                        pType = PlatformType.MacOSX;
-                        break;
+                    //case PlatformID.MacOSX:
+                    //    pType = PlatformType.MacOSX;
+                    //    break;
                     //case PlatformID.Xbox:
                     //    pType = PlatformType.Xbox;
                     //    break;

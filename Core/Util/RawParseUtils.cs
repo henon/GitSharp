@@ -693,7 +693,7 @@ namespace GitSharp.Core.Util
 			long when = parseLongBase10(raw, emailE + 1, ptrout);
 			int tz = parseTimeZoneOffset(raw, ptrout.value);
 
-			return new PersonIdent(name, email, when, tz);
+			return new PersonIdent(name, email, when * 1000, tz);
 		}
 
 
@@ -747,7 +747,7 @@ namespace GitSharp.Core.Util
 				when = 0;
 				tz = 0;
 			}
-			return new PersonIdent(name, email, when, tz);
+			return new PersonIdent(name, email, when * 1000, tz);
 		}
 
 		/**

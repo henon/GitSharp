@@ -74,5 +74,15 @@ namespace GitSharp.Tests
 
             return (int)newFoundLandTimeZoneInfo.GetUtcOffset(when.MillisToDateTime()).TotalMinutes;
         }
+
+        public override FileBasedConfig getConfigFile(string gitdir)
+        {
+            return SystemReader.getInstance().getConfigFile(gitdir);
+        }
+
+        public override PlatformType getOperatingSystem()
+        {
+            return SystemReader.getInstance().getOperatingSystem();
+        }
     }
 }

@@ -45,6 +45,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using GitSharp.Core;
 
 namespace GitSharp.Core.Util
 {
@@ -196,7 +197,7 @@ namespace GitSharp.Core.Util
             var platform = (int)Environment.OSVersion.Platform;
 
             if (platform == (int)PlatformID.Unix || platform  == 6 /* (int)PlatformID.MacOSX */
-                || platform == 128) // [nulltoken] when can _this_ equals 128 ?
+                || platform == (int)PlatformType.UnixMono)
             {
                 userHomeFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             }
@@ -208,7 +209,81 @@ namespace GitSharp.Core.Util
             return new DirectoryInfo(userHomeFolderPath);
         }
 
+        /// <summary>
+        /// Returns the global (user-specific) path for application settings based on OS
+        /// </summary>
+        /// <returns>Value of the global path</returns>
+        public static string getLocalAppDataPath()
+        {
+            string path = "";
+            PlatformType ptype = SystemReader.getInstance().getOperatingSystem();
+            
+            switch (ptype)
+            {
+                case PlatformType.Windows:
+                    path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                    break;
+                case PlatformType.Unix:
+                    path = "~/";
+                    break;
+                case PlatformType.MacOSX:
+                    path = "~/";
+                    break;
+                case PlatformType.Xbox:
+                default:
+                    throw new ArgumentException("LocalAppData support for '" + Environment.OSVersion.VersionString + " ' is not implemented.");
+            }
 
+            return path;
+        }
+
+        /// <summary>
+        /// Returns the system-wide path for application settings based on OS
+        /// </summary>
+        /// <returns></returns>
+        public static string getCommonAppDataPath()
+        {
+            string path = "";
+            PlatformType ptype = SystemReader.getInstance().getOperatingSystem();
+
+            switch (ptype)
+            {
+                case PlatformType.Windows:
+                    path = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                    break;
+                case PlatformType.Unix:
+                    path = "~(prefix)/etc";
+                    break;
+                case PlatformType.MacOSX:
+                    path = "~(prefix)/etc";
+                    break;
+                case PlatformType.Xbox:
+                default:
+                    throw new ArgumentException("CommonAppData support for '" + Environment.OSVersion.VersionString + " ' is not implemented.");
+            }
+
+            return path;
+        }
+
+        public static string getAppStorePrefix()
+        {
+            string prefix = "";
+            PlatformType ptype = SystemReader.getInstance().getOperatingSystem();
+
+            switch (ptype)
+            {
+                case PlatformType.Windows:
+                    prefix = "GitSharp";
+                    break;
+                case PlatformType.Unix:
+                case PlatformType.MacOSX:
+                case PlatformType.Xbox:
+                default:
+                    break;
+            }
+
+            return prefix;
+        }
     }
 
 }

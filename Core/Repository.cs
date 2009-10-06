@@ -167,12 +167,6 @@ namespace GitSharp.Core
             _refDb.Create();
             _objectDatabase.create();
 
-            if (!bare)
-            {
-                new DirectoryInfo(Path.Combine(Directory.FullName, "branches")).Mkdirs();
-                new DirectoryInfo(Path.Combine(Directory.FullName, "remote")).Mkdirs();
-            }
-
             const string master = Constants.RefsHeads + Constants.Master;
             _refDb.Link(Constants.HEAD, master);
 

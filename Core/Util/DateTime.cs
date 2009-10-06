@@ -44,6 +44,16 @@ namespace GitSharp.Core.Util
     {
     	private static readonly long EPOCH_TICKS = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
 
+        public static long currentTimeMillis(this DateTimeOffset dateTimeOffset)
+        {
+            return ((dateTimeOffset.Ticks - dateTimeOffset.Offset.Ticks - EPOCH_TICKS) / TimeSpan.TicksPerMillisecond);
+        }
+
+        public static long currentTimeMillis(this DateTime dateTime)
+        {
+            return new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc), TimeSpan.Zero).currentTimeMillis();
+        }
+
         /// <summary>
         /// Calculates the Unix time representation of a given DateTime.
         /// Unix time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
@@ -61,7 +71,7 @@ namespace GitSharp.Core.Util
         /// <returns></returns>
         public static int ToUnixTime(this DateTimeOffset dateTimeOffset)
         {
-            return (int)((dateTimeOffset.Ticks - dateTimeOffset.Offset.Ticks - EPOCH_TICKS) / TimeSpan.TicksPerSecond);
+            return (int)(dateTimeOffset.currentTimeMillis() / 1000);
         }
 
         /// <summary>
@@ -73,9 +83,7 @@ namespace GitSharp.Core.Util
         /// <returns></returns>
         public static DateTimeOffset UnixTimeToDateTimeOffset(this long secondsSinceEpoch, long offsetMinutes)
         {
-            var offset = TimeSpan.FromMinutes(offsetMinutes);
-            var utcTicks = EPOCH_TICKS + secondsSinceEpoch * TimeSpan.TicksPerSecond;
-            return new DateTimeOffset(utcTicks + offset.Ticks, offset);
+            return (secondsSinceEpoch*1000).MillisToDateTimeOffset(offsetMinutes);
         }
 
         /// <summary>
@@ -86,8 +94,19 @@ namespace GitSharp.Core.Util
         /// <returns></returns>
         public static DateTime UnixTimeToDateTime(this long secondsSinceEpoch)
         {
-            var utcTicks = EPOCH_TICKS + secondsSinceEpoch * TimeSpan.TicksPerSecond;
-            return new DateTime(utcTicks);
+            return (secondsSinceEpoch*1000).MillisToDateTime();
+        }
+
+        public static DateTime MillisToDateTime(this long milliSecondsSinceEpoch)
+        {
+            return milliSecondsSinceEpoch.MillisToDateTimeOffset(0).UtcDateTime;
+        }
+
+        public static DateTimeOffset MillisToDateTimeOffset(this long milliSecondsSinceEpoch, long offsetMinutes)
+        {
+            var offset = TimeSpan.FromMinutes(offsetMinutes);
+            var utcTicks = EPOCH_TICKS + milliSecondsSinceEpoch * TimeSpan.TicksPerMillisecond;
+            return new DateTimeOffset(utcTicks + offset.Ticks, offset);
         }
 
 		/// <summary>

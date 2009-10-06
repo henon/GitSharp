@@ -77,7 +77,7 @@ namespace GitSharp.Core.Transport
 		private int _deltaCount;
 		private int _entryCount;
 		private ObjectIdSubclassMap<DeltaChain> _baseById;
-		private Dictionary<long, UnresolvedDelta> _baseByPos;
+		private LongMap<UnresolvedDelta> _baseByPos;
 		private byte[] _objectData;
 		private MessageDigest _packDigest;
 		private byte[] _packcsum;
@@ -101,8 +101,8 @@ namespace GitSharp.Core.Transport
 			{
 				DirectoryInfo dir = dstBase.Directory;
 				string nam = dstBase.Name;
-				_dstPack = new FileInfo(Path.Combine(dir.ToString(), GetPackFileName(nam)));
-				_dstIdx = new FileInfo(Path.Combine(dir.ToString(), GetIndexFileName(nam)));
+				_dstPack = new FileInfo(Path.Combine(dir.FullName, GetPackFileName(nam)));
+				_dstIdx = new FileInfo(Path.Combine(dir.FullName, GetIndexFileName(nam)));
 				_packOut = _dstPack.Create();
 			}
 			else
@@ -148,7 +148,7 @@ namespace GitSharp.Core.Transport
 
 					_entries = new PackedObjectInfo[(int)_objectCount];
 					_baseById = new ObjectIdSubclassMap<DeltaChain>();
-					_baseByPos = new Dictionary<long, UnresolvedDelta>();
+					_baseByPos = new LongMap<UnresolvedDelta>();
 
 					progress.BeginTask(PROGRESS_DOWNLOAD, (int)_objectCount);
 					for (int done = 0; done < _objectCount; done++)
@@ -256,7 +256,7 @@ namespace GitSharp.Core.Transport
 
 		private void ResolveDeltas(PackedObjectInfo objectInfo)
 		{
-			if (_baseById.Get(objectInfo) != null || _baseByPos.ContainsKey(objectInfo.Offset))
+			if (_baseById.Get(objectInfo) != null || _baseByPos.containsKey(objectInfo.Offset))
 			{
 				int oldCrc = objectInfo.CRC;
 				ResolveDeltas(objectInfo.Offset, oldCrc, Constants.OBJ_BAD, null, objectInfo);
@@ -339,17 +339,7 @@ namespace GitSharp.Core.Transport
 		private void ResolveChildDeltas(long pos, int type, byte[] data, AnyObjectId objectId)
 		{
 			UnresolvedDelta a = Reverse(RemoveBaseById(objectId));
-			UnresolvedDelta b;
-
-			if (_baseByPos.ContainsKey(pos))
-			{
-				b = Reverse(_baseByPos[pos]);
-				_baseByPos.Remove(pos);
-			}
-			else
-			{
-				b = Reverse(null);
-			}
+            UnresolvedDelta b = Reverse(_baseByPos.remove(pos));
 
 			while (a != null && b != null)
 			{
@@ -392,7 +382,6 @@ namespace GitSharp.Core.Transport
 			{
 				if (baseId.Head == null)
 				{
-					missing.Add(baseId);
 					continue;
 				}
 
@@ -540,20 +529,13 @@ namespace GitSharp.Core.Transport
 				list.RemoveRange(_entryCount, _entries.Length - _entryCount);
 			}
 
-			FileStream os = _dstIdx.Create();
-			try
-			{
-				PackIndexWriter iw = _outputVersion <= 0 ?
-					PackIndexWriter.CreateOldestPossible(os, list) :
-					PackIndexWriter.CreateVersion(os, _outputVersion);
+		    using (FileStream os = _dstIdx.Create())
+		    {
+		        PackIndexWriter iw = _outputVersion <= 0 ? PackIndexWriter.CreateOldestPossible(os, list) : PackIndexWriter.CreateVersion(os, _outputVersion);
 
-				iw.Write(list, _packcsum);
-				os.Flush();
-			}
-			finally
-			{
-				os.Close();
-			}
+		        iw.Write(list, _packcsum);
+		        os.Flush();
+		    }
 		}
 
 		private void ReadPackHeader()
@@ -641,15 +623,7 @@ namespace GitSharp.Core.Transport
 					long pbase = pos - ofs;
 					SkipInflateFromInput(sz);
 					var n = new UnresolvedDelta(pos, (int)_crc.Value);
-					if (_baseByPos.ContainsKey(pbase))
-					{
-						n.Next = _baseByPos[pbase];
-						_baseByPos[pbase] = n;
-					}
-					else
-					{
-						_baseByPos.Add(pbase, n);
-					}
+                    n.Next = _baseByPos.put(pbase, n);
 					_deltaCount++;
 					break;
 
@@ -950,11 +924,6 @@ namespace GitSharp.Core.Transport
 					n += inf.Inflate(dst, n, dst.Length - n);
 				}
 				
-				if (n != size)
-				{
-					throw new IOException("wrong decompressed length");
-				}
-
 				n = _bAvail - inf.RemainingInput;
 				if (n > 0)
 				{
@@ -1001,15 +970,11 @@ namespace GitSharp.Core.Transport
 			var finalIdx = new FileInfo(Path.Combine(packDir.ToString(), "pack-" + GetIndexFileName(name)));
 			var keep = new PackLock(finalPack);
 
-			if (!packDir.Exists)
-			{
-				packDir.Create();
-				if (!packDir.Exists)
-				{
-					CleanupTemporaryFiles();
-					throw new IOException("Cannot Create " + packDir);
-				}
-			}
+		    if (!packDir.Exists && !packDir.Mkdirs() && !packDir.Exists)
+		    {
+		        CleanupTemporaryFiles();
+		        throw new IOException("Cannot Create " + packDir);
+		    }
 
 			if (finalPack.Exists)
 			{
@@ -1046,7 +1011,7 @@ namespace GitSharp.Core.Transport
 				keep.Unlock();
 				finalPack.Delete();
 				//if (finalPack.Exists)
-				// [caytchen] TODO: finalPack.deleteOnExit();
+                // TODO: [caytchen]  finalPack.deleteOnExit();
 				throw new IOException("Cannot move index to " + finalIdx);
 			}
 
@@ -1069,16 +1034,18 @@ namespace GitSharp.Core.Transport
 		{
 			_dstIdx.Delete();
 			//if (_dstIdx.Exists)
-			// [caytchen] TODO: _dstIdx.deleteOnExit();
+            //  TODO: [caytchen] _dstIdx.deleteOnExit();
 			_dstPack.Delete();
 			//if (_dstPack.Exists)
-			// [caytchen] TODO: _dstPack.deleteOnExit();
+            //  TODO: [caytchen] _dstPack.deleteOnExit();
 		}
 
 		private static FileInfo CreateTempFile(string pre, string suf, DirectoryInfo dir)
 		{
-			string p = Path.Combine(dir.ToString(), pre + Path.GetRandomFileName() + suf);
-			File.Create(p).Close();
+			string p = Path.Combine(dir.FullName, pre + Path.GetRandomFileName() + suf);
+			
+            using (var f = File.Create(p)) 
+            {}
 			return new FileInfo(p);
 		}
 
@@ -1106,7 +1073,7 @@ namespace GitSharp.Core.Transport
 			FileInfo tmp = CreateTempFile("incoming_", PackSuffix, objdir);
 			string n = tmp.Name;
 
-			var basef = new FileInfo(Path.Combine(objdir.ToString(), n.Slice(0, n.Length - PackSuffix.Length)));
+			var basef = new FileInfo(Path.Combine(objdir.FullName, n.Slice(0, n.Length - PackSuffix.Length)));
 			var ip = new IndexPack(db, stream, basef);
 			ip.setIndexVersion(db.Config.getCore().getPackIndexVersion());
 			return ip;

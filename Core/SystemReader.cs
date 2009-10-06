@@ -49,6 +49,17 @@ namespace GitSharp.Core
     	 */
         public abstract FileBasedConfig openUserConfig();
 
+        /**
+        * @return the current system time
+        */
+        public abstract long getCurrentTime();
+
+        /**
+        * @param when TODO
+        * @return the local time zone
+        */
+        public abstract int getTimezone(long when);
+
 
     private class InternalSystemReader : SystemReader
     {
@@ -71,7 +82,18 @@ namespace GitSharp.Core
         {
             return Dns.GetHostName();
         }
-    }
+
+        public override long getCurrentTime()
+        {
+            return DateTime.Now.currentTimeMillis();
+        }
+
+
+        public override int getTimezone(long when)
+        {
+            return (int)TimeZone.CurrentTimeZone.GetUtcOffset(when.MillisToDateTime()).TotalMilliseconds/(60*1000);
+        }
+   }
 
     }
 }

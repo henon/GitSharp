@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -89,14 +89,33 @@ namespace Git
         }
 
         /// <summary>
-        /// Head is a symbolic reference to the active commit on the active branch. You can dereference it to a commit.
+        /// Gets or sets Head which is a symbolic reference to the active branch. Note that setting head 
+        /// does not automatically check out that branch into the repositories working directory. 
         /// </summary>
-        public Ref Head
+        public Branch Head
         {
             get
             {
                 Debug.Assert(_internal_repo != null, "Repository not initialized correctly.");
-                return new Ref(this, "HEAD");
+                return new Branch(this, "HEAD");
+            }
+            set
+            {
+                // Todo: what should we do with null?
+                if (Head.Name != value.Name)
+                {
+                    if (Branches.ContainsKey(value.Name))
+                    {
+                        var updateRef = _internal_repo.UpdateRef("HEAD");
+                        updateRef.NewObjectId = value.Target._id;
+                        updateRef.IsForceUpdate = true;
+                        updateRef.Update();
+                        _internal_repo.WriteSymref(GitSharp.Core.Constants.HEAD, value.Name);
+                    }
+                    else
+                        throw new ArgumentException("Trying to set HEAD to non existent branch: " + value.Name);
+                }
+
             }
         }
 
@@ -129,27 +148,55 @@ namespace Git
         #endregion
 
         /// <summary>
-        /// Checks if the directory given by the path is a valid git repository.
+        /// Checks if the directory given by the path is a valid git repository. Bare repository is false.
         /// </summary>
         /// <param name="path"></param>
         /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
         public static bool IsValid(string path)
         {
+            return IsValid(path, false);
+        }
+
+        /// <summary>
+        /// Checks if the directory given by the path is a valid git repository.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="bare"></param>
+        /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
+        public static bool IsValid(string path, bool bare)
+        {
             var git = Path.Combine(path, ".git");
             if (!DirExists(path))
-                return false;
-            if (!DirExists(Path.Combine(path, "branches")) && !DirExists(Path.Combine(git, "branches")))
                 return false;
             if (!DirExists(Path.Combine(path, "objects")) && !DirExists(Path.Combine(git, "objects")))
                 return false;
             if (!DirExists(Path.Combine(path, "refs")) && !DirExists(Path.Combine(git, "refs")))
                 return false;
-            if (!DirExists(Path.Combine(path, "remote")) && !DirExists(Path.Combine(git, "remote")))
-                return false;
             if (!FileExists(Path.Combine(path, "config")) && !FileExists(Path.Combine(git, "config")))
                 return false;
             if (!FileExists(Path.Combine(path, "HEAD")) && !FileExists(Path.Combine(git, "HEAD")))
                 return false;
+
+            if (!bare)
+            {
+                if (!DirExists(Path.Combine(path, "branches")) && !DirExists(Path.Combine(git, "branches")))
+                    return false;
+                if (!DirExists(Path.Combine(path, "remote")) && !DirExists(Path.Combine(git, "remote")))
+                    return false;
+            }
+            else
+            {
+                //In progress
+                //if (!DirExists(Path.Combine(path, "description")) && !DirExists(Path.Combine(git, "description")))
+                //    return false;
+                //if (!DirExists(Path.Combine(path, "hooks")) && !DirExists(Path.Combine(git, "hooks")))
+                //    return false;
+                //if (!DirExists(Path.Combine(path, "info")) && !DirExists(Path.Combine(git, "info")))
+                //    return false;
+                //if (!DirExists(Path.Combine(path, "packed_refs")) && !DirExists(Path.Combine(git, "packed_refs")))
+                //    return false;
+            }
+
             try
             {
                 // let's see if it loads without throwing an exception
@@ -192,6 +239,42 @@ namespace Git
                 var dict = new Dictionary<string, Tag>(internal_tags.Count);
                 foreach (var pair in internal_tags)
                     dict[pair.Key] = new Tag(this, pair.Value);
+                return dict;
+            }
+        }
+
+        public IDictionary<string, Branch> Branches
+        {
+            get
+            {
+                var internal_refs = _internal_repo._refDb.GetBranches();
+                var dict = new Dictionary<string, Branch>(internal_refs.Count);
+                foreach (var pair in internal_refs)
+                    dict[pair.Key] = new Branch(this, pair.Value);
+                return dict;
+            }
+        }
+
+        public Branch CurrentBranch
+        {
+            get
+            {
+                return new Branch(this, _internal_repo.getBranch());
+            }
+        }
+
+        public IDictionary<string, Branch> RemoteBranches
+        {
+            get
+            {
+                var internal_refs = _internal_repo._refDb.GetRemotes();
+                var dict = new Dictionary<string, Branch>(internal_refs.Count);
+                foreach (var pair in internal_refs)
+                {
+                    var branch = new Branch(this, pair.Value);
+                    branch.IsRemote = true;
+                    dict[pair.Key] = branch;
+                }
                 return dict;
             }
         }

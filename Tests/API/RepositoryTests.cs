@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -63,7 +63,7 @@ namespace Git.Tests
             Assert.IsTrue(Repository.IsValid(repo.WorkingDirectory));
             Assert.IsTrue(Repository.IsValid(repo.Directory));
             var bare_repo = Repository.Init(Path.Combine(trash.FullName, "test.git"), true);
-            Assert.IsTrue(Repository.IsValid(bare_repo.Directory));
+            Assert.IsTrue(Repository.IsValid(bare_repo.Directory, true));
             var dir = Path.Combine(trash.FullName, "empty_dir");
             Assert.IsFalse(Repository.IsValid(dir));
             Directory.CreateDirectory(dir);

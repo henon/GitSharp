@@ -47,7 +47,7 @@ namespace GitSharp.Tests.Transport
     {
         
         [Test]
-        public void test000_MasterMaster()
+        public void testMasterMaster()
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec(sn + ":" + sn);
@@ -69,7 +69,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test001_SplitLastColon()
+        public void testSplitLastColon()
         {
             string lhs = ":m:a:i:n:t";
             string rhs = "refs/heads/maint";
@@ -83,7 +83,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test002_ForceMasterMaster()
+        public void testForceMasterMaster()
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec("+" + sn + ":" + sn);
@@ -105,7 +105,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test003_Master()
+        public void testMaster()
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec(sn);
@@ -127,7 +127,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test004_ForceMaster()
+        public void testForceMaster()
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec("+" + sn);
@@ -149,7 +149,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test005_DeleteMaster()
+        public void testDeleteMaster()
         {
             string sn = "refs/heads/master";
             RefSpec rs = new RefSpec(":" + sn);
@@ -171,7 +171,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test006_ForceRemotesOrigin()
+        public void testForceRemotesOrigin()
         {
             string srcn = "refs/heads/*";
             string dstn = "refs/remotes/origin/*";
@@ -206,7 +206,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test007_CreateEmpty()
+        public void testCreateEmpty()
         {
             RefSpec rs = new RefSpec();
             Assert.IsFalse(rs.Force);
@@ -217,7 +217,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test008_SetForceUpdate()
+        public void testSetForceUpdate()
         {
             string s = "refs/heads/*:refs/remotes/origin/*";
             RefSpec a = new RefSpec(s);
@@ -231,7 +231,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test009_SetSource()
+        public void testSetSource()
         {
             RefSpec a = new RefSpec();
             RefSpec b = a.SetSource("refs/heads/master");
@@ -241,7 +241,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test010_SetDestination()
+        public void testSetDestination()
         {
             RefSpec a = new RefSpec();
             RefSpec b = a.SetDestination("refs/heads/master");
@@ -251,7 +251,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test010_SetDestination_SourceNull()
+        public void testSetDestination_SourceNull()
         {
             RefSpec a = new RefSpec();
             RefSpec b;
@@ -264,7 +264,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test011_SetSourceDestination()
+        public void testSetSourceDestination()
         {
             RefSpec a = new RefSpec();
             RefSpec b;
@@ -275,7 +275,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test012_ExpandFromDestination_NonWildcard()
+        public void testExpandFromDestination_NonWildcard()
         {
             string src = "refs/heads/master";
             string dst = "refs/remotes/origin/master";
@@ -288,7 +288,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void test012_ExpandFromDestination_Wildcard()
+        public void testExpandFromDestination_Wildcard()
         {
             string src = "refs/heads/master";
             string dst = "refs/remotes/origin/master";

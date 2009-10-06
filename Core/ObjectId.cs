@@ -83,10 +83,10 @@ namespace GitSharp.Core
 
 			try
 			{
-				for (int k = id.Length - 1; k >= 0; k--)
-				{
-					if (Hex.HexCharToValue(id[k]) == byte.MaxValue) return false;
-				}
+                for (int i = 0; i < StringLength; i++)
+                {
+                    RawParseUtils.parseHexInt4((byte)id[i]);
+                }
 
 				return true;
 			}

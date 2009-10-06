@@ -69,7 +69,7 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
-        public void testFindRemoteRefUpdatesNoWilcardNoTracking()
+        public void testFindRemoteRefUpdatesNoWildcardNoTracking()
         {
             transport = GitSharp.Core.Transport.Transport.Open(db, remoteConfig);
             ICollection<RemoteRefUpdate> result =

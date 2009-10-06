@@ -48,7 +48,7 @@ namespace GitSharp.Tests.Util
     {
         
         [Test]
-        public void testInt4()
+        public void testInt4_1()
         {
             Assert.AreEqual(0, RawParseUtils.parseHexInt4((byte)'0'));
             Assert.AreEqual(1, RawParseUtils.parseHexInt4((byte)'1'));

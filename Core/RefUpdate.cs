@@ -181,7 +181,7 @@ namespace GitSharp.Core
 		}
 
 		/// <summary>
-		/// The originally resolved name
+        /// Get the requested name of the ref thit update will operate on
 		/// </summary>
 		public string OriginalName
 		{

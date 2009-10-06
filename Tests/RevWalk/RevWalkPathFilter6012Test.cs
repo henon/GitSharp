@@ -122,7 +122,7 @@ namespace GitSharp.Tests.RevWalk
 
 		private void Filter(string path)
 		{
-			rw.setTreeFilter(AndTreeFilter.create(PathFilterGroup.createFromStrings(Enumerable.Repeat(path, 1)), TreeFilter.ANY_DIFF));
+			rw.setTreeFilter(AndTreeFilter.create(PathFilterGroup.createFromStrings(new[]{path}), TreeFilter.ANY_DIFF));
 		}
 
 		[Test]

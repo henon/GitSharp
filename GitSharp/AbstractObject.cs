@@ -51,7 +51,7 @@ namespace Git
     public abstract class AbstractObject
     {
         protected Repository _repo;
-        protected ObjectId _id; // <--- the git object is lazy loaded. only a _id is required until properties are accessed.
+        internal ObjectId _id; // <--- the git object is lazy loaded. only a _id is required until properties are accessed.
 
         internal AbstractObject(Repository repo, ObjectId id)
         {
@@ -169,5 +169,40 @@ namespace Git
             else
                 return null;
         }
+
+        #region Equality overrides
+
+        /// <summary>
+        /// Overriding equals to reflect that different AbstractObject instances with the same hash are in fact equal.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            if (obj is AbstractObject)
+                return _id == (obj as AbstractObject)._id;
+            else
+                return false;
+        }
+
+        public static bool operator ==(AbstractObject self, object other)
+        {
+            return self.Equals(other);
+        }
+
+        public static bool operator !=(AbstractObject self, object other)
+        {
+            return !self.Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            if (_id != null)
+                return _id.GetHashCode();
+            return base.GetHashCode();
+        }
+
+        #endregion
+
     }
 }

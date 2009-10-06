@@ -82,6 +82,44 @@ namespace GitSharp.Tests.Transport
         }
 
         [Test]
+        public void testWriteEnd()
+        {
+            var flushCnt = new int[1];
+            var mockout = new FlushCounterStream(rawOut, flushCnt);
+
+            new PacketLineOut(mockout).End();
+            assertBuffer("0000");
+            Assert.AreEqual(1, flushCnt[0]);
+        }
+
+        internal class FlushCounterStream : MemoryStream
+        {
+            private readonly Stream _rawout;
+            private readonly int[] _flushCnt;
+
+            public FlushCounterStream(Stream rawout, int[] flushCnt)
+            {
+                _rawout = rawout;
+                _flushCnt = flushCnt;
+            }
+
+            public override void WriteByte(byte value)
+            {
+                _rawout.WriteByte(value);
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                _rawout.Write(buffer, offset, count);
+            }
+
+            public override void Flush()
+            {
+                _flushCnt[0]++;
+            }
+        }
+
+        [Test]
         public void testWritePacket1()
         {
             o.WritePacket(new[] { (byte)'a' });
@@ -110,7 +148,7 @@ namespace GitSharp.Tests.Transport
             byte[] act = rawOut.ToArray();
             string explen = NB.DecimalToBase(buf.Length + 4, 16);
             Assert.AreEqual(4 + buf.Length, act.Length);
-            Assert.AreEqual(Constants.CHARSET.GetString(act, 0, 4).ToUpper(), explen.ToUpper());
+            Assert.AreEqual(Charset.forName("UTF-8").GetString(act, 0, 4), explen);
             for (int i = 0, j = 4; i < buf.Length; i++, j++)
                 Assert.AreEqual(buf[i], act[j]);
         }
@@ -134,6 +172,16 @@ namespace GitSharp.Tests.Transport
         {
             o.WriteChannelPacket(3, new[] { (byte)'c' }, 0, 1);
             assertBuffer("0006\x03" + "c");
+        }
+
+        [Test]
+        public void testFlush()
+        {
+            var flushCnt = new int[1];
+            var mockout = new FlushCounterFailWriterStream(flushCnt);
+
+            new PacketLineOut(mockout).Flush();
+            Assert.AreEqual(1, flushCnt[0]);
         }
 
         private void assertBuffer(string exp)

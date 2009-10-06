@@ -63,7 +63,7 @@ public class AbstractTreeIteratorTest
             PathLen = PathOffset + name.Length;
         }
 
-        public void ensurePathCapacity(int capacity, int length)
+        public new void ensurePathCapacity(int capacity, int length)
         {
             base.ensurePathCapacity(capacity, length);
         }

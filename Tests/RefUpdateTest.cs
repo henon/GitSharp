@@ -79,7 +79,6 @@ namespace GitSharp.Tests
                 // empty
             };
 
-
             ru.NewObjectId = newid;
             RefUpdate.RefUpdateResult update = ru.Update();
             Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
@@ -88,8 +87,17 @@ namespace GitSharp.Tests
             Assert.AreEqual(newRef, r.Name);
             Assert.IsNotNull(r.ObjectId);
             Assert.AreNotSame(newid, r.ObjectId);
-            Assert.AreSame(typeof(ObjectId), r.ObjectId.GetType());
+            Assert.AreSame(typeof (ObjectId), r.ObjectId.GetType());
             Assert.AreEqual(newid.Copy(), r.ObjectId);
+            IList<ReflogReader.Entry> reverseEntries1 = db.ReflogReader("refs/heads/abc").getReverseEntries();
+            ReflogReader.Entry entry1 = reverseEntries1[0];
+            Assert.AreEqual(1, reverseEntries1.Count);
+            Assert.AreEqual(ObjectId.ZeroId, entry1.getOldId());
+            Assert.AreEqual(r.ObjectId, entry1.getNewId());
+            Assert.AreEqual(new PersonIdent(db).ToString(), entry1.getWho().ToString());
+            Assert.AreEqual("", entry1.getComment());
+            IList<ReflogReader.Entry> reverseEntries2 = db.ReflogReader("HEAD").getReverseEntries();
+            Assert.AreEqual(0, reverseEntries2.Count);
         }
 
         [Test]
@@ -114,6 +122,8 @@ namespace GitSharp.Tests
             ru.NewObjectId = newid2;
             RefUpdate.RefUpdateResult update2 = ru2.Update();
             Assert.AreEqual(RefUpdate.RefUpdateResult.LockFailure, update2);
+            Assert.AreEqual(1, db.ReflogReader("refs/heads/z").getReverseEntries().Count);
+            Assert.AreEqual(0, db.ReflogReader("HEAD").getReverseEntries().Count);
         }
 
         [Test]
@@ -128,6 +138,8 @@ namespace GitSharp.Tests
             ru.NewObjectId = newid;
             RefUpdate.RefUpdateResult update = ru.Update();
             Assert.AreEqual(RefUpdate.RefUpdateResult.LockFailure, update);
+            Assert.IsNull(db.ReflogReader("refs/heads/master/x"));
+            Assert.AreEqual(0, db.ReflogReader("HEAD").getReverseEntries().Count);
         }
 
         [Test]
@@ -152,6 +164,9 @@ namespace GitSharp.Tests
             ru.NewObjectId = newid2;
             RefUpdate.RefUpdateResult update2 = ru2.Update();
             Assert.AreEqual(RefUpdate.RefUpdateResult.LockFailure, update2);
+            Assert.AreEqual(1, db.ReflogReader("refs/heads/z/a").getReverseEntries().Count);
+            Assert.IsNull(db.ReflogReader("refs/heads/z"));
+            Assert.AreEqual(0, db.ReflogReader("HEAD").getReverseEntries().Count);
         }
 
         [Test]
@@ -166,6 +181,8 @@ namespace GitSharp.Tests
             ru.NewObjectId = newid;
             RefUpdate.RefUpdateResult update = ru.Update();
             Assert.AreEqual(RefUpdate.RefUpdateResult.LockFailure, update);
+            Assert.IsNull(db.ReflogReader("refs/heads/prefix"));
+            Assert.AreEqual(0, db.ReflogReader("HEAD").getReverseEntries().Count);
         }
 
         /**
@@ -187,6 +204,8 @@ namespace GitSharp.Tests
             RefUpdate.RefUpdateResult delete = updateRef2.Delete();
             Assert.AreEqual(RefUpdate.RefUpdateResult.RejectedCurrentBranch, delete);
             Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+            Assert.AreEqual(1, db.ReflogReader("refs/heads/master").getReverseEntries().Count);
+            Assert.AreEqual(0, db.ReflogReader("HEAD").getReverseEntries().Count);
         }
 
         [Test]
@@ -197,6 +216,7 @@ namespace GitSharp.Tests
             @ref.Update(); // create loose ref
             @ref = updateRef(newRef); // refresh
             delete(@ref, RefUpdate.RefUpdateResult.NoChange);
+            Assert.IsNull(db.ReflogReader("refs/heads/abc"));
         }
 
         [Test]
@@ -204,6 +224,8 @@ namespace GitSharp.Tests
         {
             RefUpdate @ref = updateRef(Constants.HEAD);
             delete(@ref, RefUpdate.RefUpdateResult.RejectedCurrentBranch, true, false);
+            Assert.AreEqual(0, db.ReflogReader("refs/heads/master").getReverseEntries().Count);
+            Assert.AreEqual(0, db.ReflogReader("HEAD").getReverseEntries().Count);
         }
 
         /**
@@ -333,6 +355,72 @@ namespace GitSharp.Tests
             RefUpdate.RefUpdateResult update = updateRef.Update();
             Assert.AreEqual(RefUpdate.RefUpdateResult.NoChange, update);
             Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+        }
+
+        /**
+        * Test case originating from
+        * <a href="http://bugs.eclipse.org/285991">bug 285991</a>
+        *
+        * Make sure the in memory cache is updated properly after
+        * update of symref. This one did not fail because the
+        * ref was packed due to implementation issues.
+        *
+        * @throws Exception
+        */
+        [Test]
+        public void testRefsCacheAfterUpdate()
+        {
+            // Do not use the defalt repo for this case.
+            Dictionary<string, Ref> allRefs = db.getAllRefs();
+            ObjectId oldValue = db.Resolve("HEAD");
+            ObjectId newValue = db.Resolve("HEAD^");
+            // first make HEAD refer to loose ref
+            RefUpdate updateRef = db.UpdateRef(Constants.HEAD);
+            updateRef.IsForceUpdate = true;
+            updateRef.NewObjectId = newValue;
+            RefUpdate.RefUpdateResult update = updateRef.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
+
+            // now update that ref
+            updateRef = db.UpdateRef(Constants.HEAD);
+            updateRef.IsForceUpdate = true;
+            updateRef.NewObjectId = oldValue;
+            update = updateRef.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update);
+            allRefs = db.getAllRefs();
+            Assert.AreEqual("refs/heads/master", allRefs.GetValue("refs/heads/master").Name);
+            Assert.AreEqual("refs/heads/master", allRefs.GetValue("refs/heads/master").OriginalName);
+            Assert.AreEqual("refs/heads/master", allRefs.GetValue("HEAD").Name);
+            Assert.AreEqual("HEAD", allRefs.GetValue("HEAD").OriginalName);
+        }
+
+        /**
+        * Test case originating from
+        * <a href="http://bugs.eclipse.org/285991">bug 285991</a>
+        *
+        * Make sure the in memory cache is updated properly after
+        * update of symref.
+        *
+        * @throws Exception
+        */
+
+        [Test]
+        public void testRefsCacheAfterUpdateLoosOnly()
+        {
+            // Do not use the defalt repo for this case.
+            Dictionary<string, Ref> allRefs = db.getAllRefs();
+            ObjectId oldValue = db.Resolve("HEAD");
+            db.WriteSymref(Constants.HEAD, "refs/heads/newref");
+            RefUpdate updateRef = db.UpdateRef(Constants.HEAD);
+            updateRef.IsForceUpdate = true;
+            updateRef.NewObjectId = oldValue;
+            RefUpdate.RefUpdateResult update = updateRef.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
+            allRefs = db.getAllRefs();
+            Assert.AreEqual("refs/heads/newref", allRefs.GetValue("HEAD").Name);
+            Assert.AreEqual("HEAD", allRefs.GetValue("HEAD").OriginalName);
+            Assert.AreEqual("refs/heads/newref", allRefs.GetValue("refs/heads/newref").Name);
+            Assert.AreEqual("refs/heads/newref", allRefs.GetValue("refs/heads/newref").OriginalName);
         }
 
         /**
@@ -488,6 +576,10 @@ namespace GitSharp.Tests
             Assert.IsNull(db.Resolve("refs/heads/b"));
             Assert.AreEqual("Branch: renamed b to new/name", db.ReflogReader(
                     "new/name").getLastEntry().getComment());
+            Assert.AreEqual(3, db.ReflogReader("refs/heads/new/name").getReverseEntries().Count);
+            Assert.AreEqual("Branch: renamed b to new/name", db.ReflogReader("refs/heads/new/name").getReverseEntries()[0].getComment());
+            Assert.AreEqual(0, db.ReflogReader("HEAD").getReverseEntries().Count);
+            // make sure b's log file is gone too.
             Assert.IsFalse(new FileInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/b")).Exists);
 
             // Create new Repository instance, to reread caches and make sure our
@@ -644,6 +736,9 @@ namespace GitSharp.Tests
                     .getReverseEntries()[1].getComment());
             Assert.AreEqual("Setup", db.ReflogReader("a/b").getReverseEntries()
                     [2].getComment());
+             // same thing was logged to HEAD
+            Assert.AreEqual("Branch: renamed a to a/b", db.ReflogReader("HEAD")
+                               .getReverseEntries()[0].getComment());
         }
 
         [Test]
@@ -676,8 +771,9 @@ namespace GitSharp.Tests
                     "prefix").getReverseEntries()[0].getComment());
             Assert.AreEqual("Just a message", db.ReflogReader("prefix")
                     .getReverseEntries()[1].getComment());
-            Assert.AreEqual("Setup", db.ReflogReader("prefix").getReverseEntries()
-                    [2].getComment());
+            Assert.AreEqual("Setup", db.ReflogReader("prefix").getReverseEntries()[2].getComment());
+            Assert.AreEqual("Branch: renamed prefix/a to prefix", db.ReflogReader(
+                       "HEAD").getReverseEntries()[0].getComment());
         }
     }
 }

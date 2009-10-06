@@ -123,6 +123,18 @@ namespace GitSharp.Core
         	return default(V);
         }
 
+        public static V RemoveValue<K, V>(this IDictionary<K, V> dict, K key)
+        {
+            V v;
+            if (dict.TryGetValue(key, out v))
+            {
+                dict.Remove(key);
+                return v;
+            }
+
+            return default(V);
+        }
+
         public static void Write(this BinaryWriter writer, ObjectId o)
         {
             o.CopyTo(writer);

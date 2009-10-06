@@ -359,6 +359,7 @@ namespace GitSharp.Tests.Patch
 		    Assert.AreEqual(ObjectId.FromString(nid), fh.getNewId().ToObjectId());
 	    }
 
+        [Test]
 	    public void testParseFullIndexLine_NoMode()
         {
 		    const string oid = "78981922613b2afb6025042ff6bd878ac1994e85";

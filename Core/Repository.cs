@@ -75,13 +75,13 @@ namespace GitSharp.Core
 	public class Repository
 	{
         private int _useCnt = 1;
-		private readonly RefDatabase _refDb;
+		internal readonly RefDatabase _refDb; // [henon] need internal for API
 	
 		private readonly ObjectDirectory _objectDatabase;
 
 		private GitIndex _index;
 
-        private readonly List<DirectoryInfo> _objectsDirs;
+        // private readonly List<DirectoryInfo> _objectsDirs; // never used.
 
         private List<RepositoryListener> listeners = new List<RepositoryListener>(); //TODO: make thread safe
         static private List<RepositoryListener> allListeners = new List<RepositoryListener>(); //TODO: make thread safe
@@ -167,19 +167,18 @@ namespace GitSharp.Core
             _refDb.Create();
             _objectDatabase.create();
 
-            new DirectoryInfo(Path.Combine(Directory.FullName, "branches")).Mkdirs();
-            new DirectoryInfo(Path.Combine(Directory.FullName, "remote")).Mkdirs();
+            if (!bare)
+            {
+                new DirectoryInfo(Path.Combine(Directory.FullName, "branches")).Mkdirs();
+                new DirectoryInfo(Path.Combine(Directory.FullName, "remote")).Mkdirs();
+            }
 
             const string master = Constants.RefsHeads + Constants.Master;
             _refDb.Link(Constants.HEAD, master);
 
             Config.setInt("core", null, "repositoryformatversion", 0);
             Config.setBoolean("core", null, "filemode", true);
-
-            if (bare)
-            {
-                Config.setBoolean("core", null, "bare", true);
-            }
+            Config.setBoolean("core", null, "bare", bare);
 
             Config.save();
 		}
@@ -1291,7 +1290,7 @@ namespace GitSharp.Core
                 }
                 return reference;
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 var ptr = new FileInfo(Path.Combine(Directory.FullName, "head-name"));
                 string reference;

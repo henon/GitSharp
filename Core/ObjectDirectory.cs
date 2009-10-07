@@ -372,6 +372,7 @@ namespace GitSharp.Core
 			}
 		}
 
+#warning Implementation differs from jgit / PackList to be ported
 		private PackFile[] ScanPacksImpl(IEnumerable<PackFile> old)
 		{
 			Dictionary<string, PackFile> forReuse = ReuseMap(old);
@@ -466,13 +467,13 @@ namespace GitSharp.Core
 		public override ObjectDatabase[] loadAlternates()
 		{
 			StreamReader br = Open(_alternatesFile);
-			var l = new List<ObjectDirectory>(4);
+            var l = new List<ObjectDatabase>(4);
 			try
 			{
 				string line;
 				while ((line = br.ReadLine()) != null)
 				{
-					l.Add(new ObjectDirectory((DirectoryInfo)FS.resolve(_objects, line)));
+                    l.Add(openAlternate(line));
 				}
 			}
 			finally
@@ -480,12 +481,29 @@ namespace GitSharp.Core
 				br.Close();
 			}
 
-			return l.Count == 0 ? NoAlternates : l.ToArray();
+		    if (l.isEmpty())
+		    {
+		        return NoAlternates;
+		    }
+
+		    return l.ToArray();
 		}
 
 		private static StreamReader Open(FileSystemInfo f)
 		{
 			return new StreamReader(new FileStream(f.FullName, System.IO.FileMode.Open));
 		}
+
+	    private ObjectDatabase openAlternate(String location)
+	    {
+	        var objdir = (DirectoryInfo) FS.resolve(_objects, location);
+	        DirectoryInfo parent = objdir.Parent;
+	        if (RepositoryCache.FileKey.isGitRepository(parent))
+	        {
+	            Repository db = RepositoryCache.open(RepositoryCache.FileKey.exact(parent));
+	            return new AlternateRepositoryDatabase(db);
+	        }
+	        return new ObjectDirectory(objdir);
+	    }
 	}
 }

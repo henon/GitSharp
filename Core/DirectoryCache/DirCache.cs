@@ -653,6 +653,8 @@ namespace GitSharp.Core.DirectoryCache
 		///
 		public int findEntry(string path)
 		{
+		    if (_entryCnt == 0)
+		        return -1;
 			byte[] p = Constants.encode(path);
 			return findEntry(p, p.Length);
 		}

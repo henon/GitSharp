@@ -570,14 +570,20 @@ namespace GitSharp.Core
 			new ExtendedRefWriter(_packedRefs.Values, this).writePackedRefs();
 		}
 
-		private static string ReadLine(FileSystemInfo file)
-		{
-		    using (StreamReader sr = OpenReader(file))
-		    {
-		        string line = sr.ReadLine();
-		        return line;
-		    }
-		}
+	    private static string ReadLine(FileInfo file)
+	    {
+	        byte[] buf = NB.ReadFully(file, 4096);
+	        int n = buf.Length;
+	        if (n == 0)
+	            return null;
+
+            
+	        // remove trailing whitespaces
+	        while (n > 0 && char.IsWhiteSpace((char)buf[n - 1]))
+	            n--;
+
+	        return RawParseUtils.decode(buf, 0, n);
+	    }
 
 	    private static StreamReader OpenReader(FileSystemInfo file)
 		{

@@ -574,13 +574,13 @@ namespace GitSharp.Core
 	    {
 	        byte[] buf = NB.ReadFully(file, 4096);
 	        int n = buf.Length;
-	        if (n == 0)
-	            return null;
-
             
 	        // remove trailing whitespaces
 	        while (n > 0 && char.IsWhiteSpace((char)buf[n - 1]))
 	            n--;
+
+            if (n == 0)
+                return null;
 
 	        return RawParseUtils.decode(buf, 0, n);
 	    }

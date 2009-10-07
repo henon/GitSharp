@@ -376,13 +376,25 @@ namespace GitSharp.Core
 		private PackFile[] ScanPacksImpl(IEnumerable<PackFile> old)
 		{
 			Dictionary<string, PackFile> forReuse = ReuseMap(old);
-			string[] idxList = ListPackIdx();
-			var list = new List<PackFile>(idxList.Length);
-			foreach (string indexName in idxList)
-			{
-				string @base = indexName.Slice(0, indexName.Length - 4);
-				string packName = IndexPack.GetPackFileName(@base);
+               HashSet<String> names = listPackDirectory();
+               List<PackFile> list = new List<PackFile>(names.Count >> 2);
+               foreach (string indexName in names)
+               {
+                   // Must match "pack-[0-9a-f]{40}.idx" to be an index.
+                   //
+                   if (indexName.Length != 49 || !indexName.EndsWith(".idx"))
+                       continue;
+                   string @base = indexName.Slice(0, indexName.Length - 4);
+                   string packName = IndexPack.GetPackFileName(@base);
 
+                   if (!names.Contains(packName))
+                   {
+                       // Sometimes C Git's HTTP fetch transport leaves a
+                       // .idx file behind and does not download the .pack.
+                       // We have to skip over such useless indexes.
+                       //
+                       continue;
+                   }
 				PackFile oldPack;
 				forReuse.TryGetValue(packName, out oldPack);
 				forReuse.Remove(packName);
@@ -393,14 +405,6 @@ namespace GitSharp.Core
 				}
 
 				var packFile = new FileInfo(_packDirectory.FullName + "/" + packName);
-				if (!packFile.Exists)
-				{
-					// Sometimes C Git's HTTP fetch transport leaves a
-					// .idx file behind and does not download the .pack.
-					// We have to skip over such useless indexes.
-					//
-					continue;
-				}
 
 				var idxFile = new FileInfo(_packDirectory + "/" + indexName);
 				list.Add(new PackFile(idxFile, packFile));
@@ -451,20 +455,23 @@ namespace GitSharp.Core
 			return forReuse;
 		}
 
-		private string[] ListPackIdx()
-		{
-            _packDirectoryLastModified = _packDirectory.LastAccessTime.Ticks;
-			// Must match "pack-[0-9a-f]{40}.idx" to be an index.
-
-			string[] idxList = _packDirectory.GetFiles()
-				.Select(file => file.Name)
-				.Where(n => n.Length == 49 && n.EndsWith(IndexPack.IndexSuffix) && n.StartsWith("pack-"))
-				.ToArray();
-
-			return idxList;  // idxList != null ? idxList : "";
-		}
-
-		public override ObjectDatabase[] loadAlternates()
+        private HashSet<string> listPackDirectory()
+        {
+            {
+                _packDirectoryLastModified = _packDirectory.LastWriteTime.Ticks;
+                var nameList = new List<string>(_packDirectory.GetFileSystemInfos().Select(x => x.FullName));
+                if (nameList.Count == 0)
+                    return new HashSet<string>();
+                var nameSet = new HashSet<String>();
+                foreach (string name in nameList)
+                {
+                    if (name.StartsWith("pack-"))
+                        nameSet.Add(name);
+                }
+                return nameSet;
+            }
+        }
+	    public override ObjectDatabase[] loadAlternates()
 		{
 			StreamReader br = Open(_alternatesFile);
             var l = new List<ObjectDatabase>(4);

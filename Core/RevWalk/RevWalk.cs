@@ -1149,18 +1149,24 @@ namespace GitSharp.Core.RevWalk
 		{
 			private T _first;
 			private T _next;
+		    private T _current;
 			private RevWalk _revwalk;
 
 			public Iterator(RevWalk revwalk)
 			{
 				_revwalk = revwalk;
+
 				try
 				{
 					_first = _next = (T)revwalk.next();
-					//} catch (MissingObjectException e) {
-					//    throw new RevWalkException(e);
-					//} catch (IncorrectObjectTypeException e) {
-					//    throw new RevWalkException(e);
+                }
+                catch (MissingObjectException e)
+                {
+                    throw new RevWalkException(e);
+                }
+                catch (IncorrectObjectTypeException e)
+                {
+                    throw new RevWalkException(e);
 				}
 				catch (IOException e)
 				{
@@ -1170,38 +1176,57 @@ namespace GitSharp.Core.RevWalk
 
 			public T Current
 			{
-				get { return _next; }
+				get { return _current; }
 			}
 
 			object System.Collections.IEnumerator.Current
 			{
-				get { return _next; }
+				get { return Current; }
 			}
 
-			public bool MoveNext()
-			{
-				try
-				{
-					_next = (T)_revwalk.next();
-					return _next != null;
-				}
-				catch (MissingObjectException e)
-				{
-					throw new RevWalkException(e);
-				}
-				catch (IncorrectObjectTypeException e)
-				{
-					throw new RevWalkException(e);
-				}
-				catch (IOException e)
-				{
-					throw new RevWalkException(e);
-				}
-			}
+            public bool MoveNext()
+            {
+                if (!hasNext())
+                {
+                    _current = null;
+                    return false;
+                }
+
+                _current = (T)next();
+                return true;
+            }
+
+            public bool hasNext()
+            {
+                return _next != default(T);
+            }
+
+		    public RevCommit next()
+		    {
+		        try
+		        {
+		            RevCommit r = _next;
+		            _next = (T)_revwalk.next();
+		            return r;
+		        }
+		        catch (MissingObjectException e)
+		        {
+		            throw new RevWalkException(e);
+		        }
+		        catch (IncorrectObjectTypeException e)
+		        {
+		            throw new RevWalkException(e);
+		        }
+		        catch (IOException e)
+		        {
+		            throw new RevWalkException(e);
+		        }
+		    }
 
 			public void Reset()
 			{
 				_next = _first;
+                _current = null;
 			}
 
 			#region IDisposable Members

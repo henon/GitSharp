@@ -2,7 +2,7 @@
 	<include buildfile="../common-project.xml" />
 	
 	<property name="root.dir" value="."/>
-	<property name="common.testrunner.enabled" value="true"/>
+	<property name="common.testrunner.enabled" value="false"/>
 	<property name="build.warnaserrors" value="false"/>
 	
 	<target name="build" depends="common.init">

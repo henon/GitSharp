@@ -278,18 +278,15 @@ namespace GitSharp.Core
 			}
 		}
 
-		public override bool tryAgain1()
-		{
-			PackList old = _packList.get();
-            _packDirectory.Refresh();
-            if (old.tryAgain(_packDirectory.LastWriteTime.Ticks))
-			{
-				ScanPacks(old);
-				return true;
-			}
+	    public override bool tryAgain1()
+	    {
+	        PackList old = _packList.get();
+	        _packDirectory.Refresh();
+	        if (old.tryAgain(_packDirectory.LastWriteTime.Ticks))
+	            return old != ScanPacks(old);
 
-			return false;
-		}
+	        return false;
+	    }
 
 	    private void InsertPack(PackFile pf)
 	    {
@@ -349,65 +346,76 @@ namespace GitSharp.Core
 						return o;
 					}
 					n = ScanPacksImpl(o);
-
+				    if (n == o)
+				        return n;
 				} while (!_packList.compareAndSet(o, n));
 
 				return n;
 			}
 		}
 
-		private PackList ScanPacksImpl(PackList old)
-		{
-			Dictionary<string, PackFile> forReuse = ReuseMap(old);
-            long lastModified = _packDirectory.LastWriteTime.Ticks;
-               HashSet<String> names = listPackDirectory();
-               List<PackFile> list = new List<PackFile>(names.Count >> 2);
-               foreach (string indexName in names)
-               {
-                   // Must match "pack-[0-9a-f]{40}.idx" to be an index.
-                   //
-                   if (indexName.Length != 49 || !indexName.EndsWith(".idx"))
-                       continue;
-                   string @base = indexName.Slice(0, indexName.Length - 4);
-                   string packName = IndexPack.GetPackFileName(@base);
+	    private PackList ScanPacksImpl(PackList old)
+	    {
+	        Dictionary<string, PackFile> forReuse = ReuseMap(old);
+	        long lastModified = _packDirectory.LastWriteTime.Ticks;
+	        HashSet<String> names = listPackDirectory();
+	        var list = new List<PackFile>(names.Count >> 2);
+	        bool foundNew = false;
+	        foreach (string indexName in names)
+	        {
+	            // Must match "pack-[0-9a-f]{40}.idx" to be an index.
+	            //
+	            if (indexName.Length != 49 || !indexName.EndsWith(".idx"))
+	                continue;
+	            string @base = indexName.Slice(0, indexName.Length - 4);
+	            string packName = IndexPack.GetPackFileName(@base);
 
-                   if (!names.Contains(packName))
-                   {
-                       // Sometimes C Git's HTTP fetch transport leaves a
-                       // .idx file behind and does not download the .pack.
-                       // We have to skip over such useless indexes.
-                       //
-                       continue;
-                   }
-				PackFile oldPack;
-				forReuse.TryGetValue(packName, out oldPack);
-				forReuse.Remove(packName);
-				if (oldPack != null)
-				{
-					list.Add(oldPack);
-					continue;
-				}
+	            if (!names.Contains(packName))
+	            {
+	                // Sometimes C Git's HTTP fetch transport leaves a
+	                // .idx file behind and does not download the .pack.
+	                // We have to skip over such useless indexes.
+	                //
+	                continue;
+	            }
+	            PackFile oldPack;
+	            forReuse.TryGetValue(packName, out oldPack);
+	            forReuse.Remove(packName);
+	            if (oldPack != null)
+	            {
+	                list.Add(oldPack);
+	                continue;
+	            }
 
-				var packFile = new FileInfo(_packDirectory.FullName + "/" + packName);
+	            var packFile = new FileInfo(_packDirectory.FullName + "/" + packName);
 
-				var idxFile = new FileInfo(_packDirectory + "/" + indexName);
-				list.Add(new PackFile(idxFile, packFile));
-			}
+	            var idxFile = new FileInfo(_packDirectory + "/" + indexName);
+	            list.Add(new PackFile(idxFile, packFile));
+	            foundNew = true;
+	        }
 
-			foreach (PackFile p in forReuse.Values)
-			{
-				p.Close();
-			}
+	        // If we did not discover any new files, the modification time was not
+	        // changed, and we did not remove any files, then the set of files is
+	        // the same as the set we were given. Instead of building a new object
+	        // return the same collection.
+	        //
+	        if (!foundNew && lastModified == old.lastModified && forReuse.isEmpty())
+	            return old;
 
-			if (list.Count == 0)
-			{
-				return new PackList(lastModified, NoPacks.packs);
-			}
+	        foreach (PackFile p in forReuse.Values)
+	        {
+	            p.Close();
+	        }
 
-			PackFile[] r = list.ToArray();
-			Array.Sort(r, PackFile.PackFileSortComparison);
-			return new PackList(lastModified, r);
-		}
+	        if (list.Count == 0)
+	        {
+	            return new PackList(lastModified, NoPacks.packs);
+	        }
+
+	        PackFile[] r = list.ToArray();
+	        Array.Sort(r, PackFile.PackFileSortComparison);
+	        return new PackList(lastModified, r);
+	    }
 
 		private static Dictionary<string, PackFile> ReuseMap(PackList old)
 		{

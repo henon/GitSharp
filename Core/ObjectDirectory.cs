@@ -56,7 +56,7 @@ namespace GitSharp.Core
 	/// </summary>
 	public class ObjectDirectory : ObjectDatabase
 	{
-        private static readonly PackList NoPacks = new PackList(-1, new PackFile[0]);
+        private static readonly PackList NoPacks = new PackList(-1, -1, new PackFile[0]);
 		private readonly DirectoryInfo _objects;
 		private readonly DirectoryInfo _infoDirectory;
 		private readonly DirectoryInfo _packDirectory;
@@ -298,7 +298,7 @@ namespace GitSharp.Core
 	            var newList = new PackFile[1 + oldList.Length];
 	            newList[0] = pf;
 	            Array.Copy(oldList, 0, newList, 1, oldList.Length);
-	            n = new PackList(o.lastModified, newList);
+	            n = new PackList(o.lastRead, o.lastModified, newList);
 	        } while (!_packList.compareAndSet(o, n));
 	    }
 
@@ -315,7 +315,7 @@ namespace GitSharp.Core
 	            var newList = new PackFile[oldList.Length - 1];
 	            Array.Copy(oldList, 0, newList, 0, j);
 	            Array.Copy(oldList, j + 1, newList, j, newList.Length - j);
-	            n = new PackList(o.lastModified, newList);
+	            n = new PackList(o.lastRead, o.lastModified, newList);
 	        } while (!_packList.compareAndSet(o, n));
 	        deadPack.Close();
 	    }
@@ -357,6 +357,7 @@ namespace GitSharp.Core
 	    private PackList ScanPacksImpl(PackList old)
 	    {
 	        Dictionary<string, PackFile> forReuse = ReuseMap(old);
+            long lastRead = DateTime.Now.currentTimeMillis();
 	        long lastModified = _packDirectory.LastWriteTime.Ticks;
 	        HashSet<String> names = listPackDirectory();
 	        var list = new List<PackFile>(names.Count >> 2);
@@ -400,7 +401,7 @@ namespace GitSharp.Core
 	        // return the same collection.
 	        //
 	        if (!foundNew && lastModified == old.lastModified && forReuse.isEmpty())
-	            return old;
+	            return old.updateLastRead(lastRead);
 
 	        foreach (PackFile p in forReuse.Values)
 	        {
@@ -409,12 +410,12 @@ namespace GitSharp.Core
 
 	        if (list.Count == 0)
 	        {
-	            return new PackList(lastModified, NoPacks.packs);
+	            return new PackList(lastRead, lastModified, NoPacks.packs);
 	        }
 
 	        PackFile[] r = list.ToArray();
 	        Array.Sort(r, PackFile.PackFileSortComparison);
-	        return new PackList(lastModified, r);
+	        return new PackList(lastRead, lastModified, r);
 	    }
 
 		private static Dictionary<string, PackFile> ReuseMap(PackList old)
@@ -506,22 +507,78 @@ namespace GitSharp.Core
 
 	    private class PackList
 	    {
-	        /** Last modification time of {@link ObjectDirectory#packDirectory}. */
+	        /** Last wall-clock time the directory was read. */
+	        private volatile LongWrapper _lastRead = new LongWrapper();
+            public long lastRead { get { return _lastRead.Value; } }
+	       
+            /** Last modification time of {@link ObjectDirectory#packDirectory}. */
 	        public readonly long lastModified;
 
 	        /** All known packs, sorted by {@link PackFile#SORT}. */
 	        public readonly PackFile[] packs;
 
-	        public PackList(long lastModified, PackFile[] packs)
+            private bool cannotBeRacilyClean;
+
+            public PackList(long lastRead, long lastModified, PackFile[] packs)
 	        {
+                this._lastRead.Value = lastRead;
 	            this.lastModified = lastModified;
-	            this.packs = packs;
+                this.packs = packs;
+                this.cannotBeRacilyClean = notRacyClean(lastRead);
+	        }
+
+	        private bool notRacyClean(long read)
+	        {
+	            return read - lastModified > 2*60*1000L;
+	        }
+
+	        public PackList updateLastRead(long now)
+	        {
+	            if (notRacyClean(now))
+	                cannotBeRacilyClean = true;
+	            _lastRead.Value = now;
+	            return this;
 	        }
 
 	        public bool tryAgain(long currLastModified)
 	        {
-	            return lastModified < currLastModified;
+	            // Any difference indicates the directory was modified.
+	            //
+	            if (lastModified != currLastModified)
+	                return true;
+
+	            // We have already determined the last read was far enough
+	            // after the last modification that any new modifications
+	            // are certain to change the last modified time.
+	            //
+	            if (cannotBeRacilyClean)
+	                return false;
+
+	            if (notRacyClean(lastRead))
+	            {
+	                // Our last read should have marked cannotBeRacilyClean,
+	                // but this thread may not have seen the change. The read
+	                // of the volatile field lastRead should have fixed that.
+	                //
+	                return false;
+	            }
+
+	            // We last read this directory too close to its last observed
+	            // modification time. We may have missed a modification. Scan
+	            // the directory again, to ensure we still see the same state.
+	            //
+	            return true;
 	        }
+
+            private class LongWrapper
+            {
+                public LongWrapper()
+                {
+                    Value = -1;
+                }
+
+                public long Value { get; set; }
+            }
 	    }
 	}
 }

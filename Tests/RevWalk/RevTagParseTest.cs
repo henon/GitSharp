@@ -85,7 +85,7 @@ namespace GitSharp.Tests.RevWalk
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
             Assert.IsNull(c.getObject());
-            Assert.IsNull(c.getName());
+            Assert.IsNull(c.getTagName());
 
             c.parseCanonical(rw, b.ToString().getBytes("UTF-8"));
             Assert.IsNotNull(c.getObject());
@@ -128,15 +128,15 @@ namespace GitSharp.Tests.RevWalk
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
             Assert.IsNull(c.getObject());
-            Assert.IsNull(c.getName());
+            Assert.IsNull(c.getTagName());
 
             c.parseCanonical(rw, body.ToString().getBytes("UTF-8"));
             Assert.IsNotNull(c.getObject());
             Assert.AreEqual(treeId, c.getObject().getId());
             Assert.AreSame(rw.lookupTree(treeId), c.getObject());
 
-            Assert.IsNotNull(c.getName());
-            Assert.AreEqual(name, c.getName());
+            Assert.IsNotNull(c.getTagName());
+            Assert.AreEqual(name, c.getTagName());
             Assert.AreEqual(string.Empty, c.getFullMessage());
 
             PersonIdent cTagger = c.getTaggerIdent();

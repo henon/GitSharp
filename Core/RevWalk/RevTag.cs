@@ -49,7 +49,7 @@ namespace GitSharp.Core.RevWalk
 	{
 		private RevObject _object;
 		private byte[] _buffer;
-		private string _name;
+		private string _tagName;
 
 		/// <summary>
 		/// Create a new tag reference.
@@ -87,7 +87,7 @@ namespace GitSharp.Core.RevWalk
 
 			int p = pos.value += 4; // "tag "
 			int nameEnd = RawParseUtils.nextLF(rawTag, p) - 1;
-			_name = RawParseUtils.decode(Constants.CHARSET, rawTag, p, nameEnd);
+			_tagName = RawParseUtils.decode(Constants.CHARSET, rawTag, p, nameEnd);
 
             if (walk.isRetainBody())
 			    _buffer = rawTag;
@@ -182,7 +182,7 @@ namespace GitSharp.Core.RevWalk
 		/// <returns>parsed tag.</returns>
 		public Tag asTag(RevWalk walk)
 		{
-			return new Tag(walk.Repository, this, _name, _buffer);
+			return new Tag(walk.Repository, this, _tagName, _buffer);
 		}
 
 		/// <summary>
@@ -202,9 +202,9 @@ namespace GitSharp.Core.RevWalk
 		/// <returns>
 		/// Name of the tag, according to the tag header.
 		/// </returns>
-		public string getName()
+		public string getTagName()
 		{
-			return _name;
+			return _tagName;
 		}
 
         public new void DisposeBody()

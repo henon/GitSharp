@@ -204,7 +204,7 @@ namespace GitSharp.Tests
         private static void Write(FileInfo[] files, PackWriter pw)
         {
             FileInfo file = files[0];
-            long begin = file.Directory.LastAccessTime.Ticks;
+            long begin = file.Directory.LastWriteTime.Ticks;
 
             using (var stream = file.Create())
             {
@@ -226,7 +226,7 @@ namespace GitSharp.Tests
 
         private static void Delete(FileInfo[] list)
         {
-            long begin = list[0].Directory.LastAccessTime.Ticks;
+            long begin = list[0].Directory.LastWriteTime.Ticks;
             foreach (var fi in list)
             {
                 fi.Delete();
@@ -238,10 +238,10 @@ namespace GitSharp.Tests
 
         private static void Touch(long begin, FileSystemInfo dir)
         {
-            while (begin >= dir.LastAccessTime.Ticks)
+            while (begin >= dir.LastWriteTime.Ticks)
             {
                 Thread.Sleep(25);
-                dir.LastAccessTime = DateTime.Now;
+                dir.LastWriteTime = DateTime.Now;
             }
         }
 

@@ -198,7 +198,7 @@ namespace GitSharp.Core.RevWalk
 			var s = new StringBuilder();
 			s.Append(Constants.typeString(Type));
 			s.Append(' ');
-			s.Append(GetType().Name);
+			s.Append(Name);
 			s.Append(' ');
 			appendCoreFlags(s);
 			return s.ToString();

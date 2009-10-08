@@ -91,9 +91,9 @@ namespace GitSharp.Core
 
 		public override void create()
 		{
-			_objects.Create();
-			_infoDirectory.Create();
-			_packDirectory.Create();
+			_objects.Mkdirs();
+			_infoDirectory.Mkdirs();
+			_packDirectory.Mkdirs();
 		}
 
 		public override void closeSelf()
@@ -113,7 +113,7 @@ namespace GitSharp.Core
 		/// <returns>Location of the object, if it were to exist as a loose object.</returns>
 		public FileInfo fileFor(AnyObjectId objectId)
 		{
-			return fileFor(objectId.ToString());
+			return fileFor(objectId.Name);
 		}
 
 		private FileInfo fileFor(string objectName)
@@ -357,7 +357,7 @@ namespace GitSharp.Core
 	    private PackList ScanPacksImpl(PackList old)
 	    {
 	        Dictionary<string, PackFile> forReuse = ReuseMap(old);
-            long lastRead = DateTime.Now.currentTimeMillis();
+            long lastRead = DateTime.Now.Ticks;
 	        long lastModified = _packDirectory.LastWriteTime.Ticks;
 	        HashSet<String> names = listPackDirectory();
 	        var list = new List<PackFile>(names.Count >> 2);
@@ -451,7 +451,7 @@ namespace GitSharp.Core
         private HashSet<string> listPackDirectory()
         {
             {
-                var nameList = new List<string>(_packDirectory.GetFileSystemInfos().Select(x => x.FullName));
+                var nameList = new List<string>(_packDirectory.GetFileSystemInfos().Select(x => x.Name));
                 if (nameList.Count == 0)
                     return new HashSet<string>();
                 var nameSet = new HashSet<String>();

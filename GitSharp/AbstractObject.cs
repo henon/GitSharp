@@ -187,12 +187,12 @@ namespace Git
 
         public static bool operator ==(AbstractObject self, object other)
         {
-            return self.Equals(other);
+            return Equals(self, other);
         }
 
         public static bool operator !=(AbstractObject self, object other)
         {
-            return !self.Equals(other);
+            return !(self == other);
         }
 
         public override int GetHashCode()

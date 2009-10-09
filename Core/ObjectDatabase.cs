@@ -120,10 +120,7 @@ namespace GitSharp.Core
             if (alt != null)
             {
                 _alternates.set(null);
-                foreach (ObjectDatabase d in alt)
-                {
-                    d.close();
-                }
+                closeAlternates(alt);
             }
         }
 
@@ -415,5 +412,20 @@ namespace GitSharp.Core
         {
             return NoAlternates;
         }
+
+	    /**
+         * Close the list of alternates returned by {@link #loadAlternates()}.
+         *
+         * @param alt
+         *            the alternate list, from {@link #loadAlternates()}.
+         */
+
+	    protected void closeAlternates(ObjectDatabase[] alt)
+	    {
+	        foreach (ObjectDatabase d in alt)
+	        {
+	            d.close();
+	        }
+	    }
     }
 }

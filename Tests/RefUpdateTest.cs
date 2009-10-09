@@ -441,6 +441,61 @@ namespace GitSharp.Tests
         }
 
         /**
+          * Try modify a ref forward, fast forward, checking old value first
+          *
+          * @throws IOException
+          */
+        [Test]
+        public void testUpdateRefForwardWithCheck1()
+        {
+            ObjectId ppid = db.Resolve("refs/heads/master^");
+            ObjectId pid = db.Resolve("refs/heads/master");
+
+            RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+            updateRef.NewObjectId = ppid;
+            updateRef.IsForceUpdate = true;
+            RefUpdate.RefUpdateResult update = updateRef.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
+            Assert.AreEqual(ppid, db.Resolve("refs/heads/master"));
+
+            // real test
+            RefUpdate updateRef2 = db.UpdateRef("refs/heads/master");
+            updateRef2.ExpectedOldObjectId = ppid;
+            updateRef2.NewObjectId = pid;
+            RefUpdate.RefUpdateResult update2 = updateRef2.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update2);
+            Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+        }
+
+        /**
+          * Try modify a ref forward, fast forward, checking old commit first
+          *
+          * @throws IOException
+          */
+        [Test]
+        public void testUpdateRefForwardWithCheck2()
+        {
+            ObjectId ppid = db.Resolve("refs/heads/master^");
+            ObjectId pid = db.Resolve("refs/heads/master");
+
+            RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+            updateRef.NewObjectId = ppid;
+            updateRef.IsForceUpdate = true;
+            RefUpdate.RefUpdateResult update = updateRef.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
+            Assert.AreEqual(ppid, db.Resolve("refs/heads/master"));
+
+            // real test
+            RevCommit old = new Core.RevWalk.RevWalk(db).parseCommit(ppid);
+            RefUpdate updateRef2 = db.UpdateRef("refs/heads/master");
+            updateRef2.ExpectedOldObjectId = old;
+            updateRef2.NewObjectId = pid;
+            RefUpdate.RefUpdateResult update2 = updateRef2.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update2);
+            Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+        }
+ 
+        /**
          * Try modify a ref that is locked
          *
          * @throws IOException

@@ -92,14 +92,17 @@ namespace GitSharp.Core.Transport
 
             // If the string passes relative paths such as .\dir1 or ..\dir1,
             // get the absolute path for future processing.
-            try
+            if (system().getOperatingSystem() == GitSharp.Core.PlatformType.Windows)
             {
-                if (!System.IO.Path.IsPathRooted(s))
-                    s = System.IO.Path.GetFullPath(s);
-            } 
-			catch (NotSupportedException) {}
-			catch (ArgumentException) {}
-		
+                try
+                {
+                    if (!System.IO.Path.IsPathRooted(s))
+                        s = System.IO.Path.GetFullPath(s);
+                } 
+			    catch (NotSupportedException) {}
+			    catch (ArgumentException) {}
+            }
+
 			s = s.Replace('\\', '/');
 			Match matcher = FullUri.Match(s);
 			Port = -1;
@@ -354,5 +357,10 @@ namespace GitSharp.Core.Transport
 
 			return r.ToString();
 		}
+
+        private SystemReader system()
+        {
+            return SystemReader.getInstance();
+        }
 	}
 }

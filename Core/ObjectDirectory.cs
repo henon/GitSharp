@@ -56,14 +56,12 @@ namespace GitSharp.Core
 	/// </summary>
 	public class ObjectDirectory : ObjectDatabase
 	{
-		private static readonly PackFile[] NoPacks = { };
+        private static readonly PackList NoPacks = new PackList(-1, -1, new PackFile[0]);
 		private readonly DirectoryInfo _objects;
 		private readonly DirectoryInfo _infoDirectory;
 		private readonly DirectoryInfo _packDirectory;
 		private readonly FileInfo _alternatesFile;
-		private readonly AtomicReference<PackFile[]> _packList;
-
-		private long _packDirectoryLastModified;
+		private readonly AtomicReference<PackList> _packList;
 
 		/// <summary>
 		/// Initialize a reference to an on-disk object directory.
@@ -75,7 +73,7 @@ namespace GitSharp.Core
 			_infoDirectory = new DirectoryInfo(_objects.FullName + "/info");
 			_packDirectory = new DirectoryInfo(_objects.FullName + "/pack");
 			_alternatesFile = new FileInfo(_infoDirectory + "/alternates");
-			_packList = new AtomicReference<PackFile[]>();
+			_packList = new AtomicReference<PackList>(NoPacks);
 		}
 
 		/// <summary>
@@ -93,18 +91,16 @@ namespace GitSharp.Core
 
 		public override void create()
 		{
-			_objects.Create();
-			_infoDirectory.Create();
-			_packDirectory.Create();
+			_objects.Mkdirs();
+			_infoDirectory.Mkdirs();
+			_packDirectory.Mkdirs();
 		}
 
 		public override void closeSelf()
 		{
-			PackFile[] packs = _packList.get();
-			if (packs == null) return;
-
-			_packList.set(null);
-			foreach (PackFile p in packs)
+			PackList packs = _packList.get();
+			_packList.set(NoPacks);
+			foreach (PackFile p in packs.packs)
 			{
 				p.Close();
 			}
@@ -117,7 +113,7 @@ namespace GitSharp.Core
 		/// <returns>Location of the object, if it were to exist as a loose object.</returns>
 		public FileInfo fileFor(AnyObjectId objectId)
 		{
-			return fileFor(objectId.ToString());
+			return fileFor(objectId.Name);
 		}
 
 		private FileInfo fileFor(string objectName)
@@ -166,7 +162,7 @@ namespace GitSharp.Core
 
 		public override bool hasObject1(AnyObjectId objectId)
 		{
-			foreach (PackFile p in Packs())
+			foreach (PackFile p in _packList.get().packs)
 			{
 				try
 				{
@@ -191,12 +187,12 @@ namespace GitSharp.Core
 
 		public override ObjectLoader openObject1(WindowCursor curs, AnyObjectId objectId)
 		{
-			PackFile[] pList = Packs();
+			PackList pList = _packList.get();
 
 			while (true)
 			{
                 SEARCH:
-				foreach (PackFile p in pList)
+				foreach (PackFile p in pList.packs)
 				{
 					try
 					{
@@ -228,11 +224,11 @@ namespace GitSharp.Core
 
 		public override void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
 		{
-			PackFile[] pList = Packs();
+			PackList pList = _packList.get();
 			while (true)
 			{
                 SEARCH:
-				foreach (PackFile p in pList)
+				foreach (PackFile p in pList.packs)
 				{
 					try
 					{
@@ -282,78 +278,63 @@ namespace GitSharp.Core
 			}
 		}
 
-		public override bool tryAgain1()
-		{
-			PackFile[] old = _packList.get();
-            _packDirectory.Refresh();
-            if (_packDirectoryLastModified < _packDirectory.LastAccessTime.Ticks)
-			{
-				ScanPacks(old);
-				return true;
-			}
+	    public override bool tryAgain1()
+	    {
+	        PackList old = _packList.get();
+	        _packDirectory.Refresh();
+	        if (old.tryAgain(_packDirectory.LastWriteTime.Ticks))
+	            return old != ScanPacks(old);
 
-			return false;
-		}
+	        return false;
+	    }
 
-		private void InsertPack(PackFile pf)
-		{
-			PackFile[] o, n;
-			do
-			{
-				o = Packs();
-				n = new PackFile[1 + o.Length];
-				n[0] = pf;
-				Array.Copy(o, 0, n, 1, o.Length);
-			} while (!_packList.compareAndSet(o, n));
-		}
+	    private void InsertPack(PackFile pf)
+	    {
+	        PackList o, n;
+	        do
+	        {
+	            o = _packList.get();
+	            PackFile[] oldList = o.packs;
+	            var newList = new PackFile[1 + oldList.Length];
+	            newList[0] = pf;
+	            Array.Copy(oldList, 0, newList, 1, oldList.Length);
+	            n = new PackList(o.lastRead, o.lastModified, newList);
+	        } while (!_packList.compareAndSet(o, n));
+	    }
 
-		private void RemovePack(PackFile deadPack)
-		{
-			PackFile[] o, n;
-			do
-			{
-				o = _packList.get();
-				if (o == null || !InList(o, deadPack))
-				{
-					break;
-				}
+	    private void RemovePack(PackFile deadPack)
+	    {
+	        PackList o, n;
+	        do
+	        {
+	            o = _packList.get();
+	            PackFile[] oldList = o.packs;
+	            int j = indexOf(oldList, deadPack);
+	            if (j < 0)
+	                break;
+	            var newList = new PackFile[oldList.Length - 1];
+	            Array.Copy(oldList, 0, newList, 0, j);
+	            Array.Copy(oldList, j + 1, newList, j, newList.Length - j);
+	            n = new PackList(o.lastRead, o.lastModified, newList);
+	        } while (!_packList.compareAndSet(o, n));
+	        deadPack.Close();
+	    }
 
-				if (o.Length == 1)
-				{
-					n = NoPacks;
-				}
-				else
-				{
-					n = new PackFile[o.Length - 1];
-					int j = 0;
-					foreach (PackFile p in o)
-					{
-						if (p != deadPack)
-						{
-							n[j++] = p;
-						}
-					}
-				}
-			} while (!_packList.compareAndSet(o, n));
-			deadPack.Close();
-		}
+	    private static int indexOf(PackFile[] list, PackFile pack)
+	    {
+	        for (int i = 0; i < list.Length; i++)
+	        {
+	            if (list[i] == pack)
+	                return i;
+	        }
+	        return -1;
+	    }
 
-		private static bool InList(IEnumerable<PackFile> list, PackFile pack)
-		{
-			return list != null && list.Contains(pack);
-		}
-
-		private PackFile[] Packs()
-		{
-			PackFile[] packFiles = _packList.get() ?? ScanPacks(null);
-			return packFiles;
-		}
-
-		private PackFile[] ScanPacks(PackFile[] original)
+		private PackList ScanPacks(PackList original)
 		{
 			lock (_packList)
 			{
-				PackFile[] o, n;
+				PackList o, n;
 				do
 				{
 					o = _packList.get();
@@ -364,66 +345,83 @@ namespace GitSharp.Core
 						//
 						return o;
 					}
-					n = ScanPacksImpl(o ?? NoPacks);
-
+					n = ScanPacksImpl(o);
+				    if (n == o)
+				        return n;
 				} while (!_packList.compareAndSet(o, n));
 
 				return n;
 			}
 		}
 
-		private PackFile[] ScanPacksImpl(IEnumerable<PackFile> old)
-		{
-			Dictionary<string, PackFile> forReuse = ReuseMap(old);
-			string[] idxList = ListPackIdx();
-			var list = new List<PackFile>(idxList.Length);
-			foreach (string indexName in idxList)
-			{
-				string @base = indexName.Slice(0, indexName.Length - 4);
-				string packName = IndexPack.GetPackFileName(@base);
+	    private PackList ScanPacksImpl(PackList old)
+	    {
+	        Dictionary<string, PackFile> forReuse = ReuseMap(old);
+            long lastRead = DateTime.Now.Ticks;
+	        long lastModified = _packDirectory.LastWriteTime.Ticks;
+	        HashSet<String> names = listPackDirectory();
+	        var list = new List<PackFile>(names.Count >> 2);
+	        bool foundNew = false;
+	        foreach (string indexName in names)
+	        {
+	            // Must match "pack-[0-9a-f]{40}.idx" to be an index.
+	            //
+	            if (indexName.Length != 49 || !indexName.EndsWith(".idx"))
+	                continue;
+	            string @base = indexName.Slice(0, indexName.Length - 4);
+	            string packName = IndexPack.GetPackFileName(@base);
 
-				PackFile oldPack;
-				forReuse.TryGetValue(packName, out oldPack);
-				forReuse.Remove(packName);
-				if (oldPack != null)
-				{
-					list.Add(oldPack);
-					continue;
-				}
+	            if (!names.Contains(packName))
+	            {
+	                // Sometimes C Git's HTTP fetch transport leaves a
+	                // .idx file behind and does not download the .pack.
+	                // We have to skip over such useless indexes.
+	                //
+	                continue;
+	            }
+	            PackFile oldPack;
+	            forReuse.TryGetValue(packName, out oldPack);
+	            forReuse.Remove(packName);
+	            if (oldPack != null)
+	            {
+	                list.Add(oldPack);
+	                continue;
+	            }
 
-				var packFile = new FileInfo(_packDirectory.FullName + "/" + packName);
-				if (!packFile.Exists)
-				{
-					// Sometimes C Git's HTTP fetch transport leaves a
-					// .idx file behind and does not download the .pack.
-					// We have to skip over such useless indexes.
-					//
-					continue;
-				}
+	            var packFile = new FileInfo(_packDirectory.FullName + "/" + packName);
 
-				var idxFile = new FileInfo(_packDirectory + "/" + indexName);
-				list.Add(new PackFile(idxFile, packFile));
-			}
+	            var idxFile = new FileInfo(_packDirectory + "/" + indexName);
+	            list.Add(new PackFile(idxFile, packFile));
+	            foundNew = true;
+	        }
 
-			foreach (PackFile p in forReuse.Values)
-			{
-				p.Close();
-			}
+	        // If we did not discover any new files, the modification time was not
+	        // changed, and we did not remove any files, then the set of files is
+	        // the same as the set we were given. Instead of building a new object
+	        // return the same collection.
+	        //
+	        if (!foundNew && lastModified == old.lastModified && forReuse.isEmpty())
+	            return old.updateLastRead(lastRead);
 
-			if (list.Count == 0)
-			{
-				return NoPacks;
-			}
+	        foreach (PackFile p in forReuse.Values)
+	        {
+	            p.Close();
+	        }
 
-			PackFile[] r = list.ToArray();
-			Array.Sort(r, PackFile.PackFileSortComparison);
-			return r;
-		}
+	        if (list.Count == 0)
+	        {
+	            return new PackList(lastRead, lastModified, NoPacks.packs);
+	        }
 
-		private static Dictionary<string, PackFile> ReuseMap(IEnumerable<PackFile> old)
+	        PackFile[] r = list.ToArray();
+	        Array.Sort(r, PackFile.PackFileSortComparison);
+	        return new PackList(lastRead, lastModified, r);
+	    }
+
+		private static Dictionary<string, PackFile> ReuseMap(PackList old)
 		{
 			var forReuse = new Dictionary<string, PackFile>();
-			foreach (PackFile p in old)
+			foreach (PackFile p in old.packs)
 			{
 				if (p.IsInvalid)
 				{
@@ -450,29 +448,31 @@ namespace GitSharp.Core
 			return forReuse;
 		}
 
-		private string[] ListPackIdx()
-		{
-            _packDirectoryLastModified = _packDirectory.LastAccessTime.Ticks;
-			// Must match "pack-[0-9a-f]{40}.idx" to be an index.
-
-			string[] idxList = _packDirectory.GetFiles()
-				.Select(file => file.Name)
-				.Where(n => n.Length == 49 && n.EndsWith(IndexPack.IndexSuffix) && n.StartsWith("pack-"))
-				.ToArray();
-
-			return idxList;  // idxList != null ? idxList : "";
-		}
-
-		public override ObjectDatabase[] loadAlternates()
+        private HashSet<string> listPackDirectory()
+        {
+            {
+                var nameList = new List<string>(_packDirectory.GetFileSystemInfos().Select(x => x.Name));
+                if (nameList.Count == 0)
+                    return new HashSet<string>();
+                var nameSet = new HashSet<String>();
+                foreach (string name in nameList)
+                {
+                    if (name.StartsWith("pack-"))
+                        nameSet.Add(name);
+                }
+                return nameSet;
+            }
+        }
+	    public override ObjectDatabase[] loadAlternates()
 		{
 			StreamReader br = Open(_alternatesFile);
-			var l = new List<ObjectDirectory>(4);
+            var l = new List<ObjectDatabase>(4);
 			try
 			{
 				string line;
 				while ((line = br.ReadLine()) != null)
 				{
-					l.Add(new ObjectDirectory((DirectoryInfo)FS.resolve(_objects, line)));
+                    l.Add(openAlternate(line));
 				}
 			}
 			finally
@@ -480,12 +480,105 @@ namespace GitSharp.Core
 				br.Close();
 			}
 
-			return l.Count == 0 ? NoAlternates : l.ToArray();
+		    if (l.isEmpty())
+		    {
+		        return NoAlternates;
+		    }
+
+		    return l.ToArray();
 		}
 
 		private static StreamReader Open(FileSystemInfo f)
 		{
 			return new StreamReader(new FileStream(f.FullName, System.IO.FileMode.Open));
 		}
+
+	    private ObjectDatabase openAlternate(String location)
+	    {
+	        var objdir = (DirectoryInfo) FS.resolve(_objects, location);
+	        DirectoryInfo parent = objdir.Parent;
+	        if (RepositoryCache.FileKey.isGitRepository(parent))
+	        {
+	            Repository db = RepositoryCache.open(RepositoryCache.FileKey.exact(parent));
+	            return new AlternateRepositoryDatabase(db);
+	        }
+	        return new ObjectDirectory(objdir);
+	    }
+
+	    private class PackList
+	    {
+	        /** Last wall-clock time the directory was read. */
+	        private volatile LongWrapper _lastRead = new LongWrapper();
+            public long lastRead { get { return _lastRead.Value; } }
+	       
+            /** Last modification time of {@link ObjectDirectory#packDirectory}. */
+	        public readonly long lastModified;
+
+	        /** All known packs, sorted by {@link PackFile#SORT}. */
+	        public readonly PackFile[] packs;
+
+            private bool cannotBeRacilyClean;
+
+            public PackList(long lastRead, long lastModified, PackFile[] packs)
+	        {
+                this._lastRead.Value = lastRead;
+	            this.lastModified = lastModified;
+                this.packs = packs;
+                this.cannotBeRacilyClean = notRacyClean(lastRead);
+	        }
+
+	        private bool notRacyClean(long read)
+	        {
+	            return read - lastModified > 2*60*1000L;
+	        }
+
+	        public PackList updateLastRead(long now)
+	        {
+	            if (notRacyClean(now))
+	                cannotBeRacilyClean = true;
+	            _lastRead.Value = now;
+	            return this;
+	        }
+
+	        public bool tryAgain(long currLastModified)
+	        {
+	            // Any difference indicates the directory was modified.
+	            //
+	            if (lastModified != currLastModified)
+	                return true;
+
+	            // We have already determined the last read was far enough
+	            // after the last modification that any new modifications
+	            // are certain to change the last modified time.
+	            //
+	            if (cannotBeRacilyClean)
+	                return false;
+
+	            if (notRacyClean(lastRead))
+	            {
+	                // Our last read should have marked cannotBeRacilyClean,
+	                // but this thread may not have seen the change. The read
+	                // of the volatile field lastRead should have fixed that.
+	                //
+	                return false;
+	            }
+
+	            // We last read this directory too close to its last observed
+	            // modification time. We may have missed a modification. Scan
+	            // the directory again, to ensure we still see the same state.
+	            //
+	            return true;
+	        }
+
+            private class LongWrapper
+            {
+                public LongWrapper()
+                {
+                    Value = -1;
+                }
+
+                public long Value { get; set; }
+            }
+	    }
 	}
 }

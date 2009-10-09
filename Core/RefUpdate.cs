@@ -322,7 +322,7 @@ namespace GitSharp.Core
 
 		private RefUpdateResult UpdateImpl(RevWalk.RevWalk walk, StoreBase store)
 		{
-			if (IsNameConflicting())
+			if (isNameConflicting())
 			{
 				return RefUpdateResult.LockFailure;
 			}
@@ -422,25 +422,22 @@ namespace GitSharp.Core
 			}
 		}
 
-		private bool IsNameConflicting()
-		{
-			int lastSlash = Name.LastIndexOf('/');
-			if (lastSlash > 0)
-			{
-				if (Repository.getAllRefs().ContainsKey(Name.Slice(0, lastSlash)))
-				{
-					return true;
-				}
-			}
+	    private bool isNameConflicting()
+	    {
+	        string myName = Name;
+	        int lastSlash = myName.LastIndexOf('/');
+	        if (lastSlash > 0)
+	            if (_db.Repository.getRef(myName.Slice(0, lastSlash)) != null)
+	                return true;
 
-			string rName = Name + "/";
-			foreach (Ref r in Repository.getAllRefs().Values)
-			{
-				if (r.Name.StartsWith(rName)) return true;
-			}
-
-			return false;
-		}
+	        string rName = myName + "/";
+	        foreach (Ref r in _db.GetAllRefs().Values)
+	        {
+	            if (r.Name.StartsWith(rName))
+	                return true;
+	        }
+	        return false;
+	    }
 
 		private static RevObject SafeParse(RevWalk.RevWalk rw, AnyObjectId id)
 		{

@@ -20,17 +20,12 @@ namespace GitSharp.Tests
         }
 
         [Test]
-        public void ThrownExceptionCannotBeDerivedFromExpected()
+        public void ThrownExceptionCanBeDerivedFromExpected()
         {
-            try
-            {
-                AssertHelper.Throws<Exception>(() => { throw new InvalidOperationException(); });
-            }
-            catch (AssertionException e)
-            {
-                StringAssert.Contains(typeof (Exception).FullName, e.Message);
-                StringAssert.Contains(typeof (InvalidOperationException).FullName, e.Message);
-            }
+            var e = AssertHelper.Throws<Exception>(() => { throw new InvalidOperationException("Was invalid."); });
+
+            var castE = (InvalidOperationException)e;
+            Assert.AreEqual("Was invalid.", castE.Message);
         }
 
         [Test]
@@ -44,7 +39,10 @@ namespace GitSharp.Tests
             {
                 StringAssert.Contains(typeof (ArgumentOutOfRangeException).FullName, e.Message);
                 StringAssert.Contains(typeof (InvalidOperationException).FullName, e.Message);
+                return;
             }
+
+            Assert.Fail();
         }
 
         [Test]
@@ -57,7 +55,10 @@ namespace GitSharp.Tests
             catch (AssertionException e)
             {
                 StringAssert.Contains(typeof (ArgumentOutOfRangeException).FullName, e.Message);
+                return;
             }
+
+            Assert.Fail();
         }
     }
 }

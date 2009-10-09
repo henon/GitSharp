@@ -319,7 +319,7 @@ namespace GitSharp.Core.DirectoryCache
 			{
 				clear();
 			}
-			else if (_liveFile.LastAccessTime != _lastModified)
+			else if (_liveFile.LastWriteTime != _lastModified)
 			{
 				try
 				{
@@ -397,7 +397,7 @@ namespace GitSharp.Core.DirectoryCache
 			{
 				_sortedEntries[i] = new DirCacheEntry(infos, i * InfoLen, inStream, md);
 			}
-			_lastModified = _liveFile.LastAccessTime;
+			_lastModified = _liveFile.LastWriteTime;
 
 			// After the file entries are index extensions, and then a footer.
 			//
@@ -653,6 +653,8 @@ namespace GitSharp.Core.DirectoryCache
 		///
 		public int findEntry(string path)
 		{
+		    if (_entryCnt == 0)
+		        return -1;
 			byte[] p = Constants.encode(path);
 			return findEntry(p, p.Length);
 		}

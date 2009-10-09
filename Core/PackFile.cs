@@ -89,7 +89,7 @@ namespace GitSharp.Core
 			_packFile = packFile;
 
 			// [henon] why the heck right shift by 10 ?? ... seems to have to do with the SORT comparison
-			_packLastModified = (int)(packFile.LastAccessTime.Ticks >> 10);
+			_packLastModified = (int)(packFile.LastWriteTime.Ticks >> 10);
 
 			// Multiply by 31 here so we can more directly combine with another
 			// value in WindowCache.hash(), without doing the multiply there.

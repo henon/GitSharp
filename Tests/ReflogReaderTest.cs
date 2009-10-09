@@ -93,7 +93,7 @@ namespace GitSharp.Tests
 
         private string iso(PersonIdent id)
         {
-            return id.When.UnixTimeToDateTimeOffset(id.TimeZoneOffset).ToIsoDateFormat();
+            return id.When.MillisToDateTimeOffset(id.TimeZoneOffset).ToIsoDateFormat();
         }
 
         [Test]

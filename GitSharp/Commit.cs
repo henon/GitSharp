@@ -167,7 +167,7 @@ namespace Git
             {
                 if (InternalCommit == null) // this might happen if the object was created with an incorrect reference
                     return DateTimeOffset.MinValue;
-                return InternalCommit.Author.When.UnixTimeToDateTimeOffset(InternalCommit.Author.TimeZoneOffset); // leave optimizations to the compiler.
+                return InternalCommit.Author.When.MillisToDateTimeOffset(InternalCommit.Author.TimeZoneOffset);
             }
         }
 
@@ -183,7 +183,7 @@ namespace Git
                 var committer = InternalCommit.Committer;
                 if (committer == null) // this is null if the author committed himself
                      committer = InternalCommit.Author;
-                return committer.When.UnixTimeToDateTimeOffset(committer.TimeZoneOffset);
+                return committer.When.MillisToDateTimeOffset(committer.TimeZoneOffset);
             }
         }
 

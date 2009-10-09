@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="AbbreviatedObjectIdTest.cs" />
     <Compile Include="API\InitTests.cs" />
+    <Compile Include="API\ObjectEqualityTests.cs" />
     <Compile Include="API\RefModelTests.cs" />
     <Compile Include="API\RepositoryTests.cs" />
     <Compile Include="AssertHelperFixture.cs" />

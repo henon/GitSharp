@@ -46,6 +46,9 @@ using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
 using System.IO;
+using GitSharp.Core.TreeWalk;
+using GitSharp.Core.TreeWalk.Filter;
+using System.Diagnostics;
 
 namespace Git
 {
@@ -182,7 +185,7 @@ namespace Git
                     return DateTimeOffset.MinValue;
                 var committer = InternalCommit.Committer;
                 if (committer == null) // this is null if the author committed himself
-                     committer = InternalCommit.Author;
+                    committer = InternalCommit.Author;
                 return committer.When.MillisToDateTimeOffset(committer.TimeZoneOffset);
             }
         }
@@ -313,6 +316,84 @@ namespace Git
             co.checkout();
             if (working_directory == Repository.WorkingDirectory) // we wouldn't want to write index if the checkout was not done into the working directory or if the repo is bare, right?
                 index.write();
+        }
+
+        //public class Diff
+        //{
+        //    public List<AbstractObject> Modified = new List<AbstractObject>();
+        //    public List<AbstractObject> Added = new List<AbstractObject>();
+        //    public List<AbstractObject> Deleted = new List<AbstractObject>();
+        //    public List<AbstractObject> TypeChanged = new List<AbstractObject>();
+        //}
+
+        /// <summary>
+        /// Compares this commit against another one and returns all changes between the two.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public IEnumerable<Change> CompareAgainst(Commit other)
+        {
+            var changes = new List<Change>();
+            var db = _repo._internal_repo;
+            var pathFilter = TreeFilter.ALL;
+            var walk = new TreeWalk(db);
+            walk.reset(new GitSharp.Core.AnyObjectId[] { this.Tree._id, other.Tree._id });
+            walk.Recursive = true;
+            walk.setFilter(AndTreeFilter.create(TreeFilter.ANY_DIFF, pathFilter));
+            Debug.Assert(walk.getTreeCount() == 2);
+            while (walk.next())
+            {
+                //for (int i = 1; i < nTree; i++)
+                //    out.print(':');
+                //for (int i = 0; i < nTree; i++) {
+                //     var m = walk.getFileMode(i);
+                //     String s = m.toString();
+                //    for (int pad = 6 - s.length(); pad > 0; pad--)
+                //        out.print('0');
+                //    out.print(s);
+                //    out.print(' ');
+                //}
+
+                //for (int i = 0; i < nTree; i++) {
+                //    out.print(walk.getObjectId(i).name());
+                //    out.print(' ');
+                //}
+
+                //char chg = 'M';
+                int m0 = walk.getRawMode(0);
+                int m1 = walk.getRawMode(1);
+                var change = new Change()
+                {
+                    ReferenceCommit = this,
+                    ComparedCommit = other,
+                    Name = walk.getNameString(),
+                    Path = walk.getPathString(),
+                };
+                changes.Add(change);
+                if (m0 == 0 && m1 != 0)
+                {
+                    change.ChangeName = "Added";
+                    change.ComparedObject = AbstractObject.Wrap(_repo, walk.getObjectId(1));
+                }
+                else if (m0 != 0 && m1 == 0)
+                {
+                    change.ChangeName = "Deleted";
+                    change.ReferenceObject = AbstractObject.Wrap(_repo, walk.getObjectId(0));
+                }
+                else if (m0 != m1 && walk.idEqual(0, 1))
+                {
+                    change.ChangeName = "Type changed";
+                    change.ReferenceObject = AbstractObject.Wrap(_repo, walk.getObjectId(0));
+                    change.ComparedObject = AbstractObject.Wrap(_repo, walk.getObjectId(1));
+                }
+                else
+                {
+                    change.ChangeName = "Modified";
+                    change.ReferenceObject = AbstractObject.Wrap(_repo, walk.getObjectId(0));
+                    change.ComparedObject = AbstractObject.Wrap(_repo, walk.getObjectId(1));
+                }
+            }
+            return changes;
         }
 
         public override string ToString()

@@ -62,7 +62,7 @@ namespace Git
 
         private CoreTree _internal_tree;
 
-        private CoreTree InternalTree
+        internal CoreTree InternalTree
         {
             get
             {

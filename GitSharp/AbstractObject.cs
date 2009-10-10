@@ -45,6 +45,7 @@ using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
 using CoreTag = GitSharp.Core.Tag;
+using System.Diagnostics;
 
 namespace Git
 {
@@ -157,6 +158,8 @@ namespace Git
         /// <returns></returns>
         internal static AbstractObject Wrap(Repository repo, ObjectId objectId)
         {
+            Debug.Assert(objectId != null);
+            Debug.Assert(repo != null);
             var obj = repo._internal_repo.MapObject(objectId, null);
             if (obj is CoreCommit)
                 return new Commit(repo, obj as CoreCommit);
@@ -167,7 +170,10 @@ namespace Git
             else if (obj is byte[])
                 return new Blob(repo, objectId, obj as byte[]);
             else
+            {
+                //Debug.Assert(false, "What kind of object do we have here?");
                 return null;
+            }
         }
 
         #region Equality overrides

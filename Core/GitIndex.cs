@@ -47,6 +47,8 @@ using System.IO;
 using System.Linq;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.Util;
+using MiscUtil.Conversion;
+using MiscUtil.IO;
 
 namespace GitSharp.Core
 {
@@ -208,7 +210,7 @@ namespace GitSharp.Core
             }
 
             using (var cache = new FileStream(_cacheFile.FullName, System.IO.FileMode.Open))
-            using (var buffer = new BinaryReader(cache))
+            using (var buffer = new EndianBinaryReader(new BigEndianBitConverter(), cache))
             {
                 _header = new Header(buffer);
                 _entries.Clear();
@@ -716,7 +718,7 @@ namespace GitSharp.Core
                 _flags = (short)((stage << 12) | _name.Length); // TODO: fix _flags
             }
 
-            internal Entry(Repository repository, BinaryReader b)
+            internal Entry(Repository repository, EndianBinaryReader b)
                 : this(repository)
             {
                     long startposition = b.BaseStream.Position;
@@ -1115,7 +1117,7 @@ namespace GitSharp.Core
             private int _signature;
             private int _version;
 
-            internal Header(BinaryReader map)
+            internal Header(EndianBinaryReader map)
             {
                 Read(map);
             }
@@ -1129,7 +1131,7 @@ namespace GitSharp.Core
 
             internal int Entries { get; private set; }
 
-            private void Read(BinaryReader buf)
+            private void Read(EndianBinaryReader buf)
             {
                 _signature = buf.ReadInt32();
                 _version = buf.ReadInt32();

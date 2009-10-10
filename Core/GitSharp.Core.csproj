@@ -147,8 +147,13 @@
     <Compile Include="UserConfig.cs" />
     <Compile Include="Util\ArrayExtensions.cs" />
     <Compile Include="Util\AtomicReference.cs" />
+    <Compile Include="Util\BigEndianBitConverter.cs" />
     <Compile Include="Util\Charset.cs" />
     <Compile Include="Util\DateTime.cs" />
+    <Compile Include="Util\EndianBinaryReader.cs" />
+    <Compile Include="Util\EndianBinaryWriter.cs" />
+    <Compile Include="Util\EndianBitConverter.cs" />
+    <Compile Include="Util\Endianness.cs" />
     <Compile Include="Util\Extensions.cs" />
     <Compile Include="AbstractIndexTreeVisitor.cs" />
     <Compile Include="AnyObjectId.cs" />
@@ -207,6 +212,7 @@
     <Compile Include="UnpackedObjectLoader.cs" />
     <Compile Include="Util\AtomicReferenceArray.cs" />
     <Compile Include="Util\AtomicValue.cs" />
+    <Compile Include="Util\LittleEndianBitConverter.cs" />
     <Compile Include="Util\Stream.cs" />
     <Compile Include="Util\FS.cs" />
     <Compile Include="Util\GenericComparer.cs" />

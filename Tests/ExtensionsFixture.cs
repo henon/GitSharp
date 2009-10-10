@@ -13,6 +13,21 @@ namespace GitSharp.Tests
     [TestFixture]
     public class ExtensionsFixture
     {
+        private string _extensionlessFilePath;
+
+        [TestFixtureSetUp]
+        public void InitFixtureContext()
+        {
+            _extensionlessFilePath = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid().ToString());
+            File.WriteAllText(_extensionlessFilePath, "dummy");
+        }
+
+        [TestFixtureTearDown]
+        public void CleanUpFixtureContext()
+        {
+            File.Delete(_extensionlessFilePath);
+        }
+        
         [Test]
         public void IsDirectory()
         {
@@ -21,8 +36,12 @@ namespace GitSharp.Tests
 
             Assert.IsTrue(new FileInfo(directoryPath).IsDirectory());
             Assert.IsTrue(new DirectoryInfo(directoryPath).IsDirectory());
+
             Assert.IsFalse(new FileInfo(filePath).IsDirectory());
             Assert.IsFalse(new DirectoryInfo(filePath).IsDirectory());
+            
+            Assert.IsFalse(new DirectoryInfo(_extensionlessFilePath).IsDirectory());
+            Assert.IsFalse(new FileInfo(_extensionlessFilePath).IsDirectory());
         }
 
         [Test]
@@ -33,8 +52,12 @@ namespace GitSharp.Tests
 
             Assert.IsTrue(new FileInfo(filePath).IsFile());
             Assert.IsTrue(new DirectoryInfo(filePath).IsFile());
+
             Assert.IsFalse(new FileInfo(directoryPath).IsFile());
             Assert.IsFalse(new DirectoryInfo(directoryPath).IsFile());
+
+            Assert.IsTrue(new DirectoryInfo(_extensionlessFilePath).IsFile());
+            Assert.IsTrue(new FileInfo(_extensionlessFilePath).IsFile());
         }
 
         [Test]

@@ -20,7 +20,7 @@ namespace GitSharp.Tests
 
             var entry = index.GetEntry("extensionless-file");
 
-            Assert.IsFalse(entry.IsModified(file, true));
+            Assert.IsFalse(entry.IsModified(trash, true));
         }
 
         [Test]
@@ -36,7 +36,7 @@ namespace GitSharp.Tests
 
             var entry = index.GetEntry("extensionless-file");
 
-            Assert.IsFalse(entry.IsModified(file));
+            Assert.IsFalse(entry.IsModified(trash));
         }
     }
 }

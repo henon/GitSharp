@@ -888,7 +888,7 @@ namespace GitSharp.Core
             /// </summary>
             /// <param name="wd"> working directory to compare content with </param>
             /// <returns> true if content is most likely different. </returns>	 
-            public bool IsModified(FileInfo wd)
+            public bool IsModified(DirectoryInfo wd)
             {
                 return IsModified(wd, false);
             }
@@ -906,7 +906,7 @@ namespace GitSharp.Core
             /// True if the actual file content should be checked if modification time differs.
             /// </param>
             /// <returns> true if content is most likely different. </returns>
-            public bool IsModified(FileSystemInfo wd, bool forceContentCheck)
+            public bool IsModified(DirectoryInfo wd, bool forceContentCheck)
             {
                 if (isAssumedValid())
                 {
@@ -1033,11 +1033,8 @@ namespace GitSharp.Core
                 Mtime = -1;
             }
 
-            private FileInfo getFile(FileSystemInfo wd)
+            private FileInfo getFile(DirectoryInfo wd)
             {
-                if (wd.IsFile() && !Path.HasExtension(wd.FullName))
-                    return new FileInfo(wd.FullName);
-
                 return new FileInfo(Path.Combine(wd.FullName, Name));
             }
 

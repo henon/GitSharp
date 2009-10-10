@@ -58,10 +58,10 @@ namespace GitSharp.Core
         private readonly Tree _head;
         private readonly GitIndex _index;
         private readonly Tree _merge;
-        private readonly FileSystemInfo _root;
+        private readonly DirectoryInfo _root;
         private Repository _repo;
 
-        internal WorkDirCheckout(Repository repo, FileSystemInfo workDir, GitIndex oldIndex, GitIndex newIndex)
+        internal WorkDirCheckout(Repository repo, DirectoryInfo workDir, GitIndex oldIndex, GitIndex newIndex)
             : this()
         {
             _repo = repo;
@@ -77,7 +77,7 @@ namespace GitSharp.Core
         ///	<param name="root"> workdir </param>
         ///	<param name="index"> current index </param>
         ///	<param name="merge"> tree to check out </param>
-        public WorkDirCheckout(Repository repo, FileSystemInfo root, GitIndex index, Tree merge)
+        public WorkDirCheckout(Repository repo, DirectoryInfo root, GitIndex index, Tree merge)
             : this()
         {
             this._repo = repo;
@@ -94,7 +94,7 @@ namespace GitSharp.Core
         ///	<param name="head"> </param>
         ///	<param name="index"> </param>
         ///	<param name="merge"> </param>
-        public WorkDirCheckout(Repository repo, FileSystemInfo root, Tree head, GitIndex index, Tree merge)
+        public WorkDirCheckout(Repository repo, DirectoryInfo root, Tree head, GitIndex index, Tree merge)
             : this(repo, root, index, merge)
         {
             this._head = head;

@@ -1035,6 +1035,9 @@ namespace GitSharp.Core
 
             private FileInfo getFile(FileSystemInfo wd)
             {
+                if (wd.IsFile() && !Path.HasExtension(wd.FullName))
+                    return new FileInfo(wd.FullName);
+
                 return new FileInfo(Path.Combine(wd.FullName, Name));
             }
 

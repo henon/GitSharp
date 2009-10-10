@@ -102,3 +102,7 @@ C based implementation can be obtained from the GIT websites:
 
 More information about the Java implemetation which Git# stems from:
   http://git.or.cz/gitwiki/EclipsePlugin
+
+
+This product includes software developed by Jon Skeet and Marc Gravell.
+  Contact skeet@pobox.com, or see http://www.pobox.com/~skeet/).

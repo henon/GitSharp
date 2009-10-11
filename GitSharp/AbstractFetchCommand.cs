@@ -132,15 +132,5 @@ namespace Git
             }
         }
 
-        public string AbbreviateRef(String dst, bool abbreviateRemote)
-        {
-            if (dst.StartsWith(Constants.R_HEADS))
-                dst = dst.Substring(Constants.R_HEADS.Length);
-            else if (dst.StartsWith(Constants.R_TAGS))
-                dst = dst.Substring(Constants.R_TAGS.Length);
-            else if (abbreviateRemote && dst.StartsWith(Constants.R_REMOTES))
-                dst = dst.Substring(Constants.R_REMOTES.Length);
-            return dst;
-        }
     }
 }

@@ -987,7 +987,7 @@ namespace GitSharp.Core
                 // Java gives us if it looks like the timestamp in index is seconds
                 // only. Otherwise we compare the timestamp at millisecond prevision.
                 long javamtime = Mtime / 1000000L;
-                long lastm = file.LastWriteTime.Ticks;
+                long lastm = file.LastWriteTime.ToMillisecondsSinceEpoch();
 
                 if (javamtime % 1000 == 0)
                 {

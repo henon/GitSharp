@@ -89,7 +89,17 @@ namespace GitSharp.Core
         /// <returns>Operating System name</returns>
         public abstract PlatformType getOperatingSystem();
 
-        
+        /// <summary>
+        /// Returns the repository based on the specified directory using upward recursive directory verification.
+        /// </summary>
+        /// <returns></returns>
+        public abstract Repository getRepositoryRoot(string directory);
+
+        /// <summary>
+        /// Returns the root git directory based on the specified directory using upward recursive directory verification.
+        /// </summary>
+        /// <returns></returns>
+        public abstract string getDirectoryRoot(string directory);
         /// <summary>
         /// Returns the GitSharp configuration file from the OS-dependant location.
         /// </summary>
@@ -105,8 +115,24 @@ namespace GitSharp.Core
             public override string getProperty(string key)
             {
                 //[java] return  System.getProperty(key);
-                throw new NotImplementedException();
+                string result = "";
+
+                switch (key)
+                {
+                    case Constants.OS_USER_NAME_KEY:
+                        System.Security.Principal.WindowsIdentity ident = System.Security.Principal.WindowsIdentity.GetCurrent();
+                        result = ident.Name;
+                        int index = result.LastIndexOf('\\');
+                        if (result.Length >= index+1)
+                            result = result.Substring(index+1);
+                        break;
+                    default:
+                        throw new NotImplementedException("The " + key + " property has not been implemented. This was a Java feature.");        
+                }
+                
+                return result;
             }
+
             public override FileBasedConfig openUserConfig()
             {
                 DirectoryInfo home = FS.userHome();
@@ -170,6 +196,45 @@ namespace GitSharp.Core
                 }
 
                 return pType;
+            }
+
+            public override string getDirectoryRoot(string directory)
+            {
+                // Make a reference to a directory.
+                DirectoryInfo di = new DirectoryInfo(directory);
+                if (di.Exists != false)
+                {
+                    while (di != null)
+                    {
+                        DirectoryInfo gitdir = new DirectoryInfo(Path.Combine(di.DirectoryName(), ".git"));
+                        if (gitdir.Exists == false)
+                            di = di.Parent;
+                        else
+                            return di.DirectoryName();
+                    }
+                }
+
+                return null;
+            }
+
+            public override Repository getRepositoryRoot(string directory)
+            {
+                Repository repo = null;
+                // Make a reference to a directory.
+                DirectoryInfo di = new DirectoryInfo(directory);
+                if (di.Exists != false)
+                {
+                    while (di != null && repo == null)
+                    {
+                        DirectoryInfo gitdir = new DirectoryInfo(Path.Combine(di.DirectoryName(), ".git"));
+                        if (gitdir.Exists == false)
+                            di = di.Parent;
+                        else
+                            repo = new Repository(gitdir);
+                    }
+                }
+
+                return repo;
             }
 
             public override FileBasedConfig getConfigFile(string gitdir)

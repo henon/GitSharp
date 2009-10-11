@@ -1,6 +1,9 @@
 ﻿/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
- *
+ * Copyright (C) 2008, Google Inc
+ * Copyright (C) 2008, Caytchen 
+ * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
+ * 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -37,13 +40,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using GitSharp.Core.Transport;
+using GitSharp.Core;
 
 namespace Git
 {
     public class CloneCommand
-        : AbstractCommand
+        : AbstractFetchCommand
     {
 
         public CloneCommand() {
@@ -162,6 +168,142 @@ namespace Git
         public override void Execute()
         {
 
+            if (Repository.Length <= 0)
+                throw new ArgumentNullException("Repository","fatal: You must specify a repository to clone.");
+
+            URIish source = new URIish(Repository);
+
+            if (Mirror)
+                Bare = true;
+            if (Bare)
+            {
+                if (OriginName != null)
+                    throw new ArgumentException("Bare+Origin", "--bare and --origin " + OriginName + " options are incompatible.");
+                NoCheckout = true;
+            }
+            if (OriginName == null)
+                OriginName = "origin";
+
+            // guess a name            
+            string p = source.Path;
+
+            while (p.EndsWith("/"))
+                p = p.Substring(0, p.Length - 1);
+
+            int s = p.LastIndexOf('/');
+            if (s < 0)
+                throw new ArgumentException("Cannot guess local name from " + source);
+            string localName = p.Substring(s + 1);
+
+            if (!Bare)
+            {
+                if (localName.EndsWith(".git"))
+                    localName = localName.Substring(0, localName.Length - 4);
+                if (Directory == null)
+                {
+                    DirectoryInfo di = new DirectoryInfo(localName);
+                    Directory = Path.Combine(di.FullName, ".git");
+                }
+            }
+            else
+            {
+                Directory = localName;
+            }
+            GitRepository = new GitSharp.Core.Repository(new DirectoryInfo(Directory));
+            GitRepository.Create(Bare);
+            GitRepository.Config.setBoolean("core", null, "bare", Bare);
+            GitRepository.Config.save();
+            OutputStream.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(Directory)).FullName);
+            OutputStream.Flush();
+            if (!Bare)
+            {
+                saveRemote(source);
+                FetchResult r = runFetch();
+                GitSharp.Core.Ref branch = guessHEAD(r);
+                if (!NoCheckout)
+                    doCheckout(branch);
+            }
+            else
+            {
+                //Add description directory
+                OutputStream.WriteLine("Description directory still needs to be implemented.");
+                //Add hooks directory
+                OutputStream.WriteLine("Hooks directory still needs to be implemented.");
+                //Add info directory
+                OutputStream.WriteLine("Info directory still needs to be implemented.");
+                //Add packed_refs directory
+                OutputStream.WriteLine("Packed_refs directory still needs to be implemented.");
+            }
+        }
+
+        private void saveRemote(URIish uri)
+        {
+            RemoteConfig rc = new RemoteConfig(GitRepository.Config, OriginName);
+            rc.AddURI(uri);
+            rc.AddFetchRefSpec(new RefSpec().SetForce(true).SetSourceDestination(Constants.R_HEADS + "*",
+                Constants.R_REMOTES + OriginName + "/*"));
+            rc.Update(GitRepository.Config);
+            GitRepository.Config.save();
+        }
+
+        private FetchResult runFetch()
+        {
+            Transport tn = Transport.Open(GitRepository, OriginName);
+            FetchResult r;
+
+            try
+            {
+                r = tn.fetch(new TextProgressMonitor(OutputStream), null);
+            }
+            finally
+            {
+                tn.close();
+            }
+
+            showFetchResult(tn, r);
+            return r;
+        }
+
+        private static GitSharp.Core.Ref guessHEAD(FetchResult result)
+        {
+            GitSharp.Core.Ref idHEAD = result.GetAdvertisedRef(Constants.HEAD);
+            List<GitSharp.Core.Ref> availableRefs = new List<GitSharp.Core.Ref>();
+            GitSharp.Core.Ref head = null;
+
+            foreach (GitSharp.Core.Ref r in result.AdvertisedRefs.Values)
+            {
+                string n = r.Name;
+                if (!n.StartsWith(Constants.R_HEADS))
+                    continue;
+                availableRefs.Add(r);
+                if (idHEAD == null || head != null)
+                    continue;
+
+                if (r.ObjectId.Equals(idHEAD.ObjectId))
+                    head = r;
+            }
+            availableRefs.Sort(RefComparator.INSTANCE);
+            if (idHEAD != null && head == null)
+                head = idHEAD;
+            return head;
+        }
+
+        private void doCheckout(GitSharp.Core.Ref branch)
+        {
+            if (branch == null)
+                throw new ArgumentNullException("branch", "Cannot checkout; no HEAD advertised by remote");
+
+            if (!Constants.HEAD.Equals(branch.Name))
+                GitRepository.WriteSymref(Constants.HEAD, branch.Name);
+            GitSharp.Core.Commit commit = GitRepository.MapCommit(branch.ObjectId);
+            RefUpdate u = GitRepository.UpdateRef(Constants.HEAD);
+            u.NewObjectId = commit.CommitId;
+            u.ForceUpdate();
+            GitIndex index = new GitIndex(GitRepository);
+            GitSharp.Core.Tree tree = commit.TreeEntry;
+            WorkDirCheckout co = new WorkDirCheckout(GitRepository, GitRepository.WorkingDirectory, index, tree);
+            co.checkout();
+            index.write();
         }
     }
 }

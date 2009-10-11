@@ -67,6 +67,58 @@ namespace Git
         }
         private static StreamWriter _output;
 
+        /// <summary>
+        /// Get or set the root git repository. By default, this returns the git repository the command is initialized in. Overriden by using --git-dir or $GITDIR respectively.
+        /// </summary>
+        public static GitSharp.Core.Repository GitRepository
+        {
+            get
+            {
+                if (_gitRepository == null)
+                {
+                    string gitdir = "";
+                    string envGitDir = GitSharp.Core.SystemReader.getInstance().getenv("GIT_DIR");
+
+                    //Determine which git directory to use
+                    if (GitDirectory != null)    //Directory specified by --git-dir 
+                        gitdir = GitDirectory;
+                    else if (envGitDir != null)  //Directory specified by $GIT_DIR
+                        gitdir = envGitDir;
+                    else                         //Local Directory
+                        gitdir = ".";
+
+                    DirectoryInfo di = new DirectoryInfo(gitdir);
+                    if (di.Exists == false)
+                        throw new ArgumentException("--git-dir specified a non-existent directory", "GitDirectory");
+                    
+                    _gitRepository = GitSharp.Core.SystemReader.getInstance().getRepositoryRoot(gitdir);
+
+                }
+                return _gitRepository;
+            }
+            set
+            {
+                _gitRepository = value;
+            }
+        }
+        private static GitSharp.Core.Repository _gitRepository = null;
+
+        /// <summary>
+        /// Get or set the root git directory. Per default, this returns the root git directory the command is initialized in.
+        /// </summary>
+        public static String GitDirectory
+        {
+            get
+            {
+                return _gitDirectory;
+            }
+            set
+            {
+                _gitDirectory = value;
+            }
+        }
+        private static String _gitDirectory = null;
+
         public static void Init()
         {
             Repository.Init();

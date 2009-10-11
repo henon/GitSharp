@@ -54,10 +54,10 @@ namespace GitSharp.CLI.Nonstandard
             if (ver == null)
                 throw die("Cannot read package information.");
 
-		    streamOut.Write("GitSharp version ");
-		    streamOut.Write(ver);
-            streamOut.WriteLine();
-            streamOut.Flush();
+		    OutputStream.Write("GitSharp version ");
+            OutputStream.Write(ver);
+            OutputStream.WriteLine();
+            OutputStream.Flush();
 	    }
 
         private static void OfflineHelp()

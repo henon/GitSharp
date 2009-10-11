@@ -508,6 +508,12 @@
     <None Include="Resources\pack-9fb5b411fe6dfa89cc2e6b89d2bd8e5de02b5745.pack">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Resources\pack-cbdeda40019ae0e6e789088ea0f51f164f489d14.idx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\pack-cbdeda40019ae0e6e789088ea0f51f164f489d14.pack">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\pack-df2982f284bbabb6bdb59ee3fcc6eb0983e20371.idx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

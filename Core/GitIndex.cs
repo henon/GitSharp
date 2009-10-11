@@ -249,6 +249,7 @@ namespace GitSharp.Core
             try
             {
                 using (var fileOutputStream = new FileStream(tmpIndex.FullName, System.IO.FileMode.CreateNew))
+                using (var writer = new EndianBinaryWriter(new BigEndianBitConverter(), fileOutputStream))
                 {
                     MessageDigest newMessageDigest = Constants.newMessageDigest();
                     var ms = new MemoryStream();
@@ -257,22 +258,20 @@ namespace GitSharp.Core
                     _header.Write(ms);
 
                     newMessageDigest.Update(ms.ToArray());
-                    ms.WriteTo(fileOutputStream);
+                    writer.Write(ms.ToArray());
                     ms.Clear();
 
                     foreach (Entry entry in _entries.Values)
                     {
                         entry.Write(ms);
                         newMessageDigest.Update(ms.ToArray());
-                        ms.WriteTo(fileOutputStream);
+                        writer.Write(ms.ToArray());
                         ms.Clear();
                     }
 
                     byte[] digestBuffer = newMessageDigest.Digest();
                     ms.Write(digestBuffer, 0, digestBuffer.Length);
-                    ms.WriteTo(fileOutputStream);
-
-                    fileOutputStream.Close();
+                    writer.Write(ms.ToArray(), 0, digestBuffer.Length);
                 }
 
                 _cacheFile.Refresh();
@@ -664,7 +663,7 @@ namespace GitSharp.Core
             internal Entry(Repository repository, byte[] key, FileInfo f, int stage, byte[] newContent)
                 : this(repository)
             {
-                Ctime = f.LastWriteTime.Ticks * 1000000L;
+                Ctime = f.LastWriteTime.ToMillisecondsSinceEpoch() * 1000000L;
                 Mtime = Ctime; // we use same here
                 _dev = -1;
                 _ino = -1;
@@ -840,42 +839,56 @@ namespace GitSharp.Core
                 return modified;
             }
 
-            internal void Write(MemoryStream buffer)
+            internal void Write(MemoryStream buf)
             {
-				byte[] tmpBuffer;
-				
-				using (var ms = new MemoryStream())
-                using (var buf = new BinaryWriter(ms))
+                var t = new BigEndianBitConverter();
+
+                long startposition = buf.Position;
+
+                var tmpBuffer = t.GetBytes((int)(Ctime / 1000000000L));
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+                tmpBuffer = t.GetBytes((int)(Ctime % 1000000000L));
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+                
+                tmpBuffer = t.GetBytes((int)(Mtime / 1000000000L));
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+                tmpBuffer = t.GetBytes((int)(Mtime % 1000000000L));
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+                tmpBuffer = t.GetBytes((_dev));
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+                tmpBuffer = t.GetBytes((_ino));
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+                tmpBuffer = t.GetBytes((Mode));
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+                tmpBuffer = t.GetBytes((_uid));
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+                tmpBuffer = t.GetBytes((_gid));
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+                tmpBuffer = t.GetBytes((_size));
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+                ObjectId.copyRawTo(buf);
+
+                tmpBuffer = t.GetBytes((_flags));
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+
+                buf.Write(_name, 0, _name.Length);
+
+                long end = startposition
+                        + ((8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 20 + 2 + _name.Length + 8) & ~7);
+                long remain = end - buf.Position;
+                while (remain-- > 0)
                 {
-                    long startposition = buf.BaseStream.Position;
-                    buf.Write((int)(Ctime / 1000000000L));
-                    buf.Write((int)(Ctime % 1000000000L));
-                    buf.Write((int)(Mtime / 1000000000L));
-                    buf.Write((int)(Mtime % 1000000000L));
-                    buf.Write(_dev);
-                    buf.Write(_ino);
-                    buf.Write(Mode);
-                    buf.Write(_uid);
-                    buf.Write(_gid);
-                    buf.Write(_size);
-                    ObjectId.copyRawTo(buf.BaseStream);
-                    buf.Write(_flags);
-                    buf.Write(_name);
-                    long end = startposition + ((8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 20 + 2 + _name.Length + 8) & ~7);
-                    long remain = end - buf.BaseStream.Position;
-                    while (remain-- > 0)
-                    {
-                        buf.Write((byte)0);
-                    }
-
-					// Write a copy of the bytes in the original stream, because
-					// BinaryWriter disposes the underlying stream when it disposes.
-					tmpBuffer = ms.ToArray();
+                    buf.WriteByte(0);
                 }
-
-				// Then, write the buffer created inside the loop
-				// to the original one.
-				buffer.Write(tmpBuffer, 0, tmpBuffer.Length);
             }
 
             ///	<summary>
@@ -1042,8 +1055,8 @@ namespace GitSharp.Core
             {
                 return Name + "/SHA-1(" +
                        ObjectId.Name + ")/M:" +
-                       new DateTime(Ctime / 1000000L) + "/C:" +
-                       new DateTime(Mtime / 1000000L) + "/d" +
+                       (Ctime / 1000000L).MillisToDateTime() + "/C:" +
+                       (Mtime / 1000000L).MillisToDateTime() + "/d" +
                        _dev +
                        "/i" + _ino +
                        "/m" + Convert.ToString(Mode, 8) +
@@ -1150,13 +1163,14 @@ namespace GitSharp.Core
 
             internal void Write(Stream buf)
             {
-            	var tmpBuffer = BitConverter.GetBytes(_signature);
+                var t = new BigEndianBitConverter();
+            	var tmpBuffer = t.GetBytes(_signature);
 				buf.Write(tmpBuffer, 0, tmpBuffer.Length);
 
-            	tmpBuffer = BitConverter.GetBytes(_version);
+                tmpBuffer = t.GetBytes(_version);
 				buf.Write(tmpBuffer, 0, tmpBuffer.Length);
 
-				tmpBuffer = BitConverter.GetBytes(Entries);
+                tmpBuffer = t.GetBytes(Entries);
 				buf.Write(tmpBuffer, 0, tmpBuffer.Length);
             }
         }

@@ -58,7 +58,7 @@ namespace GitSharp.Core.RevWalk.Filter
 		/// </returns>
 		public static RevFilter Before(DateTime ts)
 		{
-            return new BeforeCommitTimeRevFilter(ts.currentTimeMillis());
+            return new BeforeCommitTimeRevFilter(ts.ToMillisecondsSinceEpoch());
 		}
 
 		/// <summary>
@@ -70,7 +70,7 @@ namespace GitSharp.Core.RevWalk.Filter
 		/// </returns>
 		public static RevFilter After(DateTime ts)
 		{
-			return new AfterCommitTimeRevFilter(ts.currentTimeMillis());
+			return new AfterCommitTimeRevFilter(ts.ToMillisecondsSinceEpoch());
 		}
 
 	    /// <summary>
@@ -84,7 +84,7 @@ namespace GitSharp.Core.RevWalk.Filter
 	    ///</returns>
 	    public static RevFilter Between(DateTime since, DateTime until)
 	    {
-	        return new BetweenCommitTimeRevFilter(since.currentTimeMillis(), until.currentTimeMillis());
+	        return new BetweenCommitTimeRevFilter(since.ToMillisecondsSinceEpoch(), until.ToMillisecondsSinceEpoch());
 	    }
 
 		private CommitTimeRevFilter(long ts)

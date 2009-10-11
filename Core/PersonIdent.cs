@@ -106,7 +106,7 @@ namespace GitSharp.Core
 		/// <param name="pi">Original <seealso cref="PersonIdent"/>.</param>
 		///	<param name="when">Local time stamp.</param>
         public PersonIdent(PersonIdent pi, DateTime when)
-			: this(pi.Name, pi.EmailAddress, when.currentTimeMillis(), pi.tzOffset)
+			: this(pi.Name, pi.EmailAddress, when.ToMillisecondsSinceEpoch(), pi.tzOffset)
         {
         }
 
@@ -118,7 +118,7 @@ namespace GitSharp.Core
 		///	<param name="when">Local time stamp.</param>
 		///	<param name="tz">Time zone.</param>
         public PersonIdent(string name, string emailAddress, DateTime when, TimeZoneInfo tz)
-            : this(name, emailAddress, when.currentTimeMillis(), (int)tz.GetUtcOffset(when).TotalMinutes)
+            : this(name, emailAddress, when.ToMillisecondsSinceEpoch(), (int)tz.GetUtcOffset(when).TotalMinutes)
         {
         }
 

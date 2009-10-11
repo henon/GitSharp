@@ -120,7 +120,7 @@ namespace GitSharp.Core
 
             public override long getCurrentTime()
             {
-                return DateTime.Now.currentTimeMillis();
+                return DateTime.Now.ToMillisecondsSinceEpoch();
             }
 
 

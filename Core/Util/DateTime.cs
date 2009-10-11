@@ -44,14 +44,14 @@ namespace GitSharp.Core.Util
     {
     	private static readonly long EPOCH_TICKS = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks;
 
-        public static long currentTimeMillis(this DateTimeOffset dateTimeOffset)
+        public static long ToMillisecondsSinceEpoch(this DateTimeOffset dateTimeOffset)
         {
             return ((dateTimeOffset.Ticks - dateTimeOffset.Offset.Ticks - EPOCH_TICKS) / TimeSpan.TicksPerMillisecond);
         }
 
-        public static long currentTimeMillis(this DateTime dateTime)
+        public static long ToMillisecondsSinceEpoch(this DateTime dateTime)
         {
-            return new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc), TimeSpan.Zero).currentTimeMillis();
+            return new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc), TimeSpan.Zero).ToMillisecondsSinceEpoch();
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace GitSharp.Core.Util
         /// <returns></returns>
         public static int ToUnixTime(this DateTimeOffset dateTimeOffset)
         {
-            return (int)(dateTimeOffset.currentTimeMillis() / 1000);
+            return (int)(dateTimeOffset.ToMillisecondsSinceEpoch() / 1000);
         }
 
         /// <summary>

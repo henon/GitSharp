@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GitSharp.Core;
 using NUnit.Framework;
 
@@ -25,6 +27,17 @@ namespace GitSharp.Tests
             GitIndex index = repository.Index;
 
             Assert.IsNotNull(index);
+            List<GitIndex.Entry> entries = index.Members.ToList();
+            Assert.AreEqual(1, entries.Count);
+
+            GitIndex.Entry entry = entries[0];
+
+            Assert.AreEqual("dummy.txt", entry.Name);
+
+            Ref headRef = repository.Head;
+
+            Assert.AreEqual("refs/heads/master", headRef.Name);
+            Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", headRef.ObjectId.Name);
         }
 
         public static void CopyDirectory(string sourceDirectoryPath, string targetDirectoryPath)

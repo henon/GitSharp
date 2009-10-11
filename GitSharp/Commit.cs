@@ -366,29 +366,31 @@ namespace Git
                 {
                     ReferenceCommit = this,
                     ComparedCommit = other,
+                    ReferencePermissions = walk.getFileMode(0).Bits,
+                    ComparedPermissions = walk.getFileMode(1).Bits,
                     Name = walk.getNameString(),
                     Path = walk.getPathString(),
                 };
                 changes.Add(change);
                 if (m0 == 0 && m1 != 0)
                 {
-                    change.ChangeName = "Added";
+                    change.ChangeType = ChangeType.Added;
                     change.ComparedObject = AbstractObject.Wrap(_repo, walk.getObjectId(1));
                 }
                 else if (m0 != 0 && m1 == 0)
                 {
-                    change.ChangeName = "Deleted";
+                    change.ChangeType = ChangeType.Deleted;
                     change.ReferenceObject = AbstractObject.Wrap(_repo, walk.getObjectId(0));
                 }
                 else if (m0 != m1 && walk.idEqual(0, 1))
                 {
-                    change.ChangeName = "Type changed";
+                    change.ChangeType = ChangeType.TypeChanged;
                     change.ReferenceObject = AbstractObject.Wrap(_repo, walk.getObjectId(0));
                     change.ComparedObject = AbstractObject.Wrap(_repo, walk.getObjectId(1));
                 }
                 else
                 {
-                    change.ChangeName = "Modified";
+                    change.ChangeType = ChangeType.Modified;
                     change.ReferenceObject = AbstractObject.Wrap(_repo, walk.getObjectId(0));
                     change.ComparedObject = AbstractObject.Wrap(_repo, walk.getObjectId(1));
                 }

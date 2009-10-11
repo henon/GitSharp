@@ -42,6 +42,12 @@ using System.Text;
 
 namespace Git
 {
+
+    public enum ChangeType
+    {
+        Added, Deleted, Modified, TypeChanged, Renamed, Copied
+    }
+
     /// <summary>
     /// Represents a change between two commits
     /// </summary>
@@ -67,22 +73,25 @@ namespace Git
         }
 
         /// <summary>
-        /// The kind of change i.e. Added, Deleted, Modified, etc.
+        /// The kind of change
         /// </summary>
-        public string ChangeName { get; internal set; }
+        public ChangeType ChangeType { get; internal set; }
 
         /// <summary>
-        /// The changed object in the ReferenceCommit. It may be null in some cases i.e. for "Added"-Change
+        /// The changed object in the ReferenceCommit. It may be null in some cases i.e. for ChangeType.Added
         /// </summary>
         public AbstractObject ReferenceObject { get; internal set; }
 
         /// <summary>
-        /// The changed object in the ComparedCommit. It may be null in some cases i.e. for "Removed"-Change
+        /// The changed object in the ComparedCommit. It may be null in some cases i.e. for ChangeType.Removed
         /// </summary>
         public AbstractObject ComparedObject { get; internal set; }
 
         /// <summary>
-        /// Always returns an object, no matter what kind of change. Except for "Removed"-Change it always returns the ComparedCommit's version of the object.
+        /// Always returns an object, no matter what kind of change. It normally returns the ComparedCommit's version of the changed 
+        /// object except for ChangeType.Removed where it returns the ReferenceCommit's version of the object.
+        /// 
+        /// This property is designed to release the calling code from null checking and version selection and may be especially useful for GUI bindings.
         /// </summary>
         public AbstractObject ChangedObject
         {
@@ -104,6 +113,54 @@ namespace Git
         /// The filename of the ChangedObject
         /// </summary>
         public string Name { get; internal set; }
+
+        /// <summary>
+        /// Unix file permissions of the ReferenceCommit's version of the object
+        /// </summary>
+        public int ReferencePermissions
+        {
+            get;
+            internal set;
+        }
+
+        /// <summary>
+        /// Unix file permissions of the ComparedCommit's version of the object
+        /// </summary>
+        public int ComparedPermissions { get; internal set; }
+
+        /// <summary>
+        /// Returns ReferenceCommit and ComparedCommit as array
+        /// </summary>
+        public Commit[] Commits
+        {
+            get
+            {
+                return new Commit[] { ReferenceCommit, ComparedCommit };
+            }
+        }
+
+        /// <summary>
+        /// Returns ReferenceObject and ComparedObject as array
+        /// </summary>
+        public AbstractObject[] Objects
+        {
+            get
+            {
+                return new AbstractObject[] { ReferenceObject, ComparedObject };
+            }
+        }
+
+        /// <summary>
+        /// Returns ReferenceObject's and ComparedObject's permissions
+        /// </summary>
+        public int[] Permissions
+        {
+            get
+            {
+                return new int[] { ReferencePermissions, ComparedPermissions };
+            }
+        }
+
     }
 
 }

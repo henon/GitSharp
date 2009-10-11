@@ -49,14 +49,14 @@ namespace GitSharp.CLI
 
         public override void Run(string[] args)
         {
-            cmd.OutputStream = this.streamOut;
+            cmd.OutputStream = this.OutputStream;
             cmd.Quiet = false; // [henon] the api defines the commands quiet by default. thus we need to override with git's default here.
             options = new CmdParserOptionSet
                           {
                               {"bare", "Create a bare repository", v => cmd.Bare = true},
                               {"quiet|q", "Only print error and warning messages, all other output will be suppressed.", v => cmd.Quiet = true},
-                              {"template", "Not supported.", var => streamOut.WriteLine("--template=<template dir> is not supported")},
-                              {"shared", "Not supported.", var => streamOut.WriteLine("--shared is not supported")},
+                              {"template", "Not supported.", var => OutputStream.WriteLine("--template=<template dir> is not supported")},
+                              {"shared", "Not supported.", var => OutputStream.WriteLine("--shared is not supported")},
                           };
 
             arguments = options.Parse(args);

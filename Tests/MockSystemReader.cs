@@ -86,5 +86,15 @@ namespace GitSharp.Tests
         {
             return operatingSystem;
         }
+
+        public override Repository getRepositoryRoot(string directory)
+        {
+            return SystemReader.getInstance().getRepositoryRoot(directory);
+        }
+
+        public override string getDirectoryRoot(string directory)
+        {
+            return SystemReader.getInstance().getDirectoryRoot(directory);
+        }
     }
 }

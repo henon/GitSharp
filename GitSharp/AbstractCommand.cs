@@ -78,6 +78,42 @@ namespace Git
         StreamWriter _output = null;
 
         /// <summary>
+        /// The root git repository. If not explicitly set, the command uses Git.GitRepository.
+        /// </summary>
+        public GitSharp.Core.Repository GitRepository
+        {
+            get
+            {
+                if (_gitRepository == null)
+                    return Git.Commands.GitRepository;
+                return _gitRepository;
+            }
+            set
+            {
+                _gitRepository = value;
+            }
+        }
+        GitSharp.Core.Repository _gitRepository = null;
+
+        /// <summary>
+        /// The root git directory. If not explicitly set, the command uses Git.GitDirectory. Set using --git-dir.
+        /// </summary>
+        public String GitDirectory
+        {
+            get
+            {
+                if (_gitDirectory == null)
+                    return Git.Commands.GitDirectory;
+                return _gitDirectory;
+            }
+            set
+            {
+                _gitDirectory = value;
+            }
+        }
+        String _gitDirectory = null;
+
+        /// <summary>
         /// Execute the git command.
         /// </summary>
         public abstract void Execute();

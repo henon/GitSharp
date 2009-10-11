@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractFetchCommand.cs" />
     <Compile Include="Author.cs" />
     <Compile Include="AbstractCommand.cs" />
     <Compile Include="Blob.cs" />

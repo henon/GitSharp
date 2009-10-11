@@ -34,14 +34,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+using System;
 using GitSharp.Core;
 using GitSharp.Core.Transport;
 
-namespace GitSharp.CLI
+namespace Git
 {
-
-    public abstract class AbstractFetchCommand : TextBuiltin
+    public abstract class AbstractFetchCommand : AbstractCommand
     {
         protected bool verbose;
 
@@ -60,12 +59,12 @@ namespace GitSharp.CLI
 
                 if (!shownURI)
                 {
-                    streamOut.Write("From ");
-                    streamOut.WriteLine(tn.Uri);
+                    OutputStream.Write("From ");
+                    OutputStream.WriteLine(tn.Uri);
                     shownURI = true;
                 }
 
-                streamOut.WriteLine(" " + type + " " + longType + " " + src + " -> " + dst);
+                OutputStream.WriteLine(" " + type + " " + longType + " " + src + " -> " + dst);
             }
         }
 
@@ -92,15 +91,15 @@ namespace GitSharp.CLI
 
             if (r == RefUpdate.RefUpdateResult.Forced)
             {
-                string aOld = u.OldObjectId.Abbreviate(db).name();
-                string aNew = u.NewObjectId.Abbreviate(db).name();
+                string aOld = u.OldObjectId.Abbreviate(GitRepository).name();
+                string aNew = u.NewObjectId.Abbreviate(GitRepository).name();
                 return aOld + "..." + aNew;
             }
 
             if (r == RefUpdate.RefUpdateResult.FastForward)
             {
-                string aOld = u.OldObjectId.Abbreviate(db).name();
-                string aNew = u.NewObjectId.Abbreviate(db).name();
+                string aOld = u.OldObjectId.Abbreviate(GitRepository).name();
+                string aNew = u.NewObjectId.Abbreviate(GitRepository).name();
                 return aOld + ".." + aNew;
             }
 
@@ -132,6 +131,16 @@ namespace GitSharp.CLI
                     return ' ';
             }
         }
-    }
 
+        public string AbbreviateRef(String dst, bool abbreviateRemote)
+        {
+            if (dst.StartsWith(Constants.R_HEADS))
+                dst = dst.Substring(Constants.R_HEADS.Length);
+            else if (dst.StartsWith(Constants.R_TAGS))
+                dst = dst.Substring(Constants.R_TAGS.Length);
+            else if (abbreviateRemote && dst.StartsWith(Constants.R_REMOTES))
+                dst = dst.Substring(Constants.R_REMOTES.Length);
+            return dst;
+        }
+    }
 }

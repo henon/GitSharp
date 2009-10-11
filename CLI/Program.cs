@@ -63,11 +63,6 @@ namespace GitSharp.CLI
         private static bool showStackTrace;
 
         /// <summary>
-        /// The git repository to operate on
-        /// </summary>
-        private static DirectoryInfo gitdir;
-
-        /// <summary>
         /// 
         /// </summary>
         private static List<String> arguments = new List<String>();
@@ -81,7 +76,7 @@ namespace GitSharp.CLI
             options = new CmdParserOptionSet()
             {
                 { "complete", "display the complete commands", v => ShowComplete() },    
-                { "git-dir", "set the git repository to operate on", v => gitdir=new DirectoryInfo(v) },    
+
                 { "help|h", "display this help text", v => ShowHelp() },
                 { "incomplete", "display the incomplete commands", v => ShowIncomplete() },
                 { "show-stack-trace", "display the C# stack trace on exceptions", v => showStackTrace=true },
@@ -139,16 +134,41 @@ namespace GitSharp.CLI
                 if (subcommand != null)
                 {
                     TextBuiltin cmd = subcommand.Create();
+                    List<String> args = argv.ToList();
+
                     if (cmd.RequiresRepository())
                     {
-                        if (gitdir == null)
-                            gitdir = findGitDir();
-                        if (gitdir == null || !gitdir.IsDirectory())
+                        
+                        try
                         {
-                            Console.Error.WriteLine("error: can't find git directory");
+                            for (int x = 0; x < args.Count; x++)
+                            {
+                                if (args[x].IndexOf("--git-dir=") > -1)
+                                {
+                                    if (args[x].Length > 10)
+                                    {
+                                        string str = args[x].Substring(11);
+                                        Git.Commands.GitDirectory = SystemReader.getInstance().getDirectoryRoot(str);
+                                        args.RemoveAt(x);
+                                        break;
+                                        
+                                    }
+                                }
+                            }
+                            
+                        }
+                        catch (ArgumentException)
+                        {
+                            Git.Commands.OutputStream.WriteLine("error: can't find git directory");
+                            Git.Commands.OutputStream.Flush();
                             Exit(1);
                         }
-                        cmd.Init(new Core.Repository(gitdir), gitdir.FullName);
+
+                        Repository gitdir = Git.Commands.GitRepository;
+                        if (gitdir != null)
+                            cmd.Init(gitdir, gitdir.Directory.FullName);
+                        else
+                            cmd.Init(null, null);
                     }
                     else
                     {
@@ -158,14 +178,13 @@ namespace GitSharp.CLI
                     try
                     {
                         // Remove the subcommand from the command line
-                        List<String> args = argv.ToList();
                         args.RemoveAt(0);
                         cmd.Execute(args.ToArray());
                     }
                     finally
                     {
-                        if (Console.Out != null)
-                            Console.Out.Flush();
+                        if (Git.Commands.OutputStream != null)
+                            Git.Commands.OutputStream.Flush();
                     }
                 }
                 else
@@ -218,6 +237,7 @@ namespace GitSharp.CLI
                 Console.Write(c.getUsage());
                 Console.WriteLine();
             }
+            Console.WriteLine("--git-dir    set the git repository to operate on");    
             Console.Error.WriteLine();
             Console.Error.Write(@"See 'git help COMMAND' for more information on a specific command.");
         }

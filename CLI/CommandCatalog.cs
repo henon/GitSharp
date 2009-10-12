@@ -41,6 +41,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using GitSharp;
@@ -72,7 +73,8 @@ namespace GitSharp.CLI
         public CommandCatalog()
         {
             XmlDocument doc = new XmlDocument();
-            doc.Load("Commands.xml");
+            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetName().CodeBase),"Commands.xml");
+            doc.Load(path);
 
             XmlNodeList xmlNodeList = doc.SelectNodes("/root/CommandList/Command");
             foreach (XmlNode node in xmlNodeList)

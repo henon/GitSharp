@@ -40,6 +40,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using GitSharp.Core;
 
 namespace Git
 {
@@ -48,6 +49,23 @@ namespace Git
     /// </summary>
     public abstract class AbstractCommand : IGitCommand
     {
+        /// <summary>
+        /// Abbreviates a ref-name, used in internal output
+        /// </summary>
+        /// <param name="dst">long ref</param>
+        /// <param name="abbreviateRemote">abbreviate as remote</param>
+        /// <returns></returns>
+        protected string AbbreviateRef(String dst, bool abbreviateRemote)
+        {
+            if (dst.StartsWith(Constants.R_HEADS))
+                dst = dst.Substring(Constants.R_HEADS.Length);
+            else if (dst.StartsWith(Constants.R_TAGS))
+                dst = dst.Substring(Constants.R_TAGS.Length);
+            else if (abbreviateRemote && dst.StartsWith(Constants.R_REMOTES))
+                dst = dst.Substring(Constants.R_REMOTES.Length);
+            return dst;
+        }
+
         /// <summary>
         /// Returns the value of the process' environment variable GIT_DIR
         /// </summary>

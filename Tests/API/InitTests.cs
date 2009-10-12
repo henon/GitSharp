@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -51,24 +51,28 @@ namespace Git.Tests
         [Test]
         public void Honors_GIT_DIR_before_initializing_current_dir()
         {
-            //var real_git_dir = System.Environment.GetEnvironmentVariable("GIT_DIR");
-            System.Environment.SetEnvironmentVariable("GIT_DIR", Path.Combine(trash.FullName, "git_dir"));
-            Git.Commands.Init();
+            //Verify Environment Variable GIT_DIR 
+			System.Environment.SetEnvironmentVariable("GIT_DIR", Path.Combine(trash.FullName, "git_dir"));
+            Git.Commands.GitRepository = Git.Commands.SelectRepository();
+			Git.Commands.Init();
             Assert.IsTrue(Repository.IsValid( System.Environment.GetEnvironmentVariable("GIT_DIR")));
             System.Environment.SetEnvironmentVariable("GIT_DIR", "");
-            var dir = Path.Combine(trash.FullName, "current_directory");
-            var current = Directory.GetCurrentDirectory();
-            try
-            {
-                Directory.CreateDirectory(dir);
-                Directory.SetCurrentDirectory(dir);
-                Git.Commands.Init();
-            }
-            finally
-            {
-                Directory.SetCurrentDirectory(current);
-            }
-            Assert.IsTrue(Repository.IsValid(dir));
-        }
-    }
+            
+            //Verify specified directory
+            string p = Path.Combine(trash.FullName, "current_directory");
+			Git.Commands.GitDirectory = p;
+			Git.Commands.GitRepository = Git.Commands.SelectRepository();
+			Git.Commands.Init();
+			Assert.IsTrue(Repository.IsValid(p));
+			Git.Commands.GitDirectory = null;
+			
+			//Verify current directory (default, if the other two tests are empty)
+			p = Directory.GetCurrentDirectory();
+			Git.Commands.GitRepository = Git.Commands.SelectRepository();
+			Git.Commands.Init();
+            Assert.IsTrue(Repository.IsValid(Directory.GetCurrentDirectory()));
+			Directory.Delete(Path.Combine(p, ".git"),true);
+			Git.Commands.GitRepository = null;
+			}
+	}
 }

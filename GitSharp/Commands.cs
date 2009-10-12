@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -67,6 +67,35 @@ namespace Git
         }
         private static StreamWriter _output;
 
+        public static GitSharp.Core.Repository SelectRepository()
+        {
+            string gitdir = "";
+            string envGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
+            GitSharp.Core.Repository repo;
+
+            //Determine which git directory to use
+            if (GitDirectory != null)    //Directory specified by --git-dir 
+                gitdir = GitDirectory;
+            else if (envGitDir != null)  //Directory specified by $GIT_DIR
+                gitdir = envGitDir;
+            else                         //Local Directory
+                gitdir = Path.Combine(Directory.GetCurrentDirectory(), ".git");
+
+			if (Directory.Exists(gitdir))
+				throw new ArgumentException("Directory: "+gitdir+" already exists. Cannot create a new directory.", "GitRepository");
+			
+            DirectoryInfo di = Directory.CreateDirectory(gitdir);
+            if (!Directory.Exists(gitdir))
+                throw new ArgumentException("No valid directory is available.", "GitRepository");
+			
+            if (!GitRequiresRoot)
+                repo = new GitSharp.Core.Repository(di);
+            else
+                repo = GitSharp.Core.SystemReader.getInstance().getRepositoryRoot(gitdir);
+
+            return repo;
+        }
+
         /// <summary>
         /// Get or set the root git repository. By default, this returns the git repository the command is initialized in. Overriden by using --git-dir or $GITDIR respectively.
         /// </summary>
@@ -74,26 +103,6 @@ namespace Git
         {
             get
             {
-                if (_gitRepository == null)
-                {
-                    string gitdir = "";
-                    string envGitDir = GitSharp.Core.SystemReader.getInstance().getenv("GIT_DIR");
-
-                    //Determine which git directory to use
-                    if (GitDirectory != null)    //Directory specified by --git-dir 
-                        gitdir = GitDirectory;
-                    else if (envGitDir != null)  //Directory specified by $GIT_DIR
-                        gitdir = envGitDir;
-                    else                         //Local Directory
-                        gitdir = ".";
-
-                    DirectoryInfo di = new DirectoryInfo(gitdir);
-                    if (di.Exists == false)
-                        throw new ArgumentException("--git-dir specified a non-existent directory", "GitDirectory");
-                    
-                    _gitRepository = GitSharp.Core.SystemReader.getInstance().getRepositoryRoot(gitdir);
-
-                }
                 return _gitRepository;
             }
             set
@@ -104,7 +113,7 @@ namespace Git
         private static GitSharp.Core.Repository _gitRepository = null;
 
         /// <summary>
-        /// Get or set the root git directory. Per default, this returns the root git directory the command is initialized in.
+        /// Get or set the git directory. Per default, this returns the root git directory the command is initialized in.
         /// </summary>
         public static String GitDirectory
         {
@@ -118,6 +127,23 @@ namespace Git
             }
         }
         private static String _gitDirectory = null;
+
+        /// <summary>
+        /// If a repository is required, this property determines if the root repository is needed. Default is false.
+        /// </summary>
+        public static Boolean GitRequiresRoot
+        {
+            get
+            {
+                return _gitRequiresRoot;
+            }
+
+            set
+            {
+                _gitRequiresRoot = value;
+            }
+        }
+        private static Boolean _gitRequiresRoot = false;
 
         public static void Init()
         {

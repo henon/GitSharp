@@ -131,6 +131,21 @@ namespace Git
         }
         String _gitDirectory = null;
 
+        public Boolean GitRequiresRoot
+        {
+            get
+            {
+                if (_gitRequiresRoot == false)
+                    return Git.Commands.GitRequiresRoot;
+                return _gitRequiresRoot;
+            }
+            set
+            {
+                _gitRequiresRoot = value;
+            }
+        }
+        Boolean _gitRequiresRoot = false;
+
         /// <summary>
         /// Execute the git command.
         /// </summary>

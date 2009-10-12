@@ -98,7 +98,7 @@ namespace GitSharp.CLI
                 List<String> arguments = ParseOptions(args);
                 if (arguments.Count > 0)
                 {
-                    cmd.Repository = arguments[0];
+                    cmd.Path = arguments[0];
                     cmd.Execute();
                 }
                 else

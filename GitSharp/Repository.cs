@@ -177,14 +177,7 @@ namespace Git
             if (!FileExists(Path.Combine(path, "HEAD")) && !FileExists(Path.Combine(git, "HEAD")))
                 return false;
 
-            if (!bare)
-            {
-                if (!DirExists(Path.Combine(path, "branches")) && !DirExists(Path.Combine(git, "branches")))
-                    return false;
-                if (!DirExists(Path.Combine(path, "remote")) && !DirExists(Path.Combine(git, "remote")))
-                    return false;
-            }
-            else
+            if (bare)
             {
                 //In progress
                 //if (!DirExists(Path.Combine(path, "description")) && !DirExists(Path.Combine(git, "description")))

@@ -31,7 +31,7 @@ namespace GitSharp.Tests
 
         public override string getenv(String variable)
         {
-            return values.GetValue(variable);
+            return SystemReader.getInstance().getenv(variable);
         }
 
         public override string getProperty(String key)

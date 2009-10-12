@@ -54,6 +54,7 @@ namespace Git
 
         public CloneCommand() {
             Quiet=true;
+            Git.Commands.GitRequiresRoot = true;
         }
 
         // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.
@@ -61,7 +62,7 @@ namespace Git
         /// <summary>
         /// The (possibly remote) repository to clone from.
         /// </summary>
-        public string Repository { get; set; }
+        public string Path { get; set; }
 
         /// <summary>
         /// The name of a new directory to clone into. The "humanish" part of the source repository is used if no directory is explicitly given 
@@ -168,10 +169,10 @@ namespace Git
         public override void Execute()
         {
 
-            if (Repository.Length <= 0)
+            if (Path.Length <= 0)
                 throw new ArgumentNullException("Repository","fatal: You must specify a repository to clone.");
 
-            URIish source = new URIish(Repository);
+            URIish source = new URIish(Path);
 
             if (Mirror)
                 Bare = true;
@@ -199,10 +200,10 @@ namespace Git
             {
                 if (localName.EndsWith(".git"))
                     localName = localName.Substring(0, localName.Length - 4);
-                if (Directory == null)
+                if (GitDirectory == null)
                 {
                     DirectoryInfo di = new DirectoryInfo(localName);
-                    Directory = Path.Combine(di.FullName, ".git");
+                    GitDirectory = System.IO.Path.Combine(di.FullName, ".git");
                 }
             }
             else
@@ -213,8 +214,11 @@ namespace Git
             GitRepository.Create(Bare);
             GitRepository.Config.setBoolean("core", null, "bare", Bare);
             GitRepository.Config.save();
-            OutputStream.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(Directory)).FullName);
-            OutputStream.Flush();
+            if (!Quiet)
+            {
+                OutputStream.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(Directory)).FullName);
+                OutputStream.Flush();
+            }
             if (!Bare)
             {
                 saveRemote(source);

@@ -296,5 +296,17 @@ namespace GitSharp.CLI
                 Git.Commands.GitDirectory = value;
             }
         }
+
+        public Boolean GitRequiresRoot
+        {
+            get
+            {
+                return Git.Commands.GitRequiresRoot;
+            }
+            set
+            {
+                Git.Commands.GitRequiresRoot = value;
+            }
+        }
     }
 }

@@ -81,6 +81,7 @@ namespace GitSharp.CLI
                 { "incomplete", "display the incomplete commands", v => ShowIncomplete() },
                 { "show-stack-trace", "display the C# stack trace on exceptions", v => showStackTrace=true },
                 { "version", "", v => ShowVersion() },
+                { "git-dir", "", v => NoOp()},
             };
             try
             {
@@ -138,7 +139,8 @@ namespace GitSharp.CLI
 
                     if (cmd.RequiresRepository())
                     {
-                        
+                        string gitdir = null;
+
                         try
                         {
                             for (int x = 0; x < args.Count; x++)
@@ -148,7 +150,10 @@ namespace GitSharp.CLI
                                     if (args[x].Length > 10)
                                     {
                                         string str = args[x].Substring(11);
-                                        Git.Commands.GitDirectory = SystemReader.getInstance().getDirectoryRoot(str);
+                                        if (!Git.Commands.GitRequiresRoot)
+                                            gitdir = str;
+                                        else
+                                            gitdir = SystemReader.getInstance().getDirectoryRoot(str);
                                         args.RemoveAt(x);
                                         break;
                                         
@@ -164,11 +169,7 @@ namespace GitSharp.CLI
                             Exit(1);
                         }
 
-                        Repository gitdir = Git.Commands.GitRepository;
-                        if (gitdir != null)
-                            cmd.Init(gitdir, gitdir.Directory.FullName);
-                        else
-                            cmd.Init(null, null);
+                        cmd.Init(Git.Commands.SelectRepository(), gitdir);
                     }
                     else
                     {
@@ -237,7 +238,6 @@ namespace GitSharp.CLI
                 Console.Write(c.getUsage());
                 Console.WriteLine();
             }
-            Console.WriteLine("--git-dir    set the git repository to operate on");    
             Console.Error.WriteLine();
             Console.Error.Write(@"See 'git help COMMAND' for more information on a specific command.");
         }
@@ -341,6 +341,13 @@ namespace GitSharp.CLI
             Console.In.ReadLine();
 #endif
             Environment.Exit(exit_code);
+        }
+
+        /// <summary>
+        /// Placeholder for the --git-dir command-line option. It is handled before it reaches this method.
+        /// </summary>
+        static private void NoOp()
+        {
         }
 
     }

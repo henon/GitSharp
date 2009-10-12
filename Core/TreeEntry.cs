@@ -212,7 +212,7 @@ namespace GitSharp.Core
 
         public static int LastChar(TreeEntry treeEntry)
         {
-            if (treeEntry is FileTreeEntry)
+            if (!(treeEntry is Tree))
             {
                 return Convert.ToInt32('\0');
             }

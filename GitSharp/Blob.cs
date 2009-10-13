@@ -78,6 +78,14 @@ namespace Git
             }
         }
 
+        public byte[] RawData
+        {
+            get
+            {
+                return _blob;
+            }
+        }
+
         public override string ToString()
         {
             return "Blob[" + ShortHash + "]";

@@ -112,6 +112,9 @@ namespace Git
             }
         }
 
+        /// <summary>
+        /// Entries of the tree. These are either Tree or Leaf objects representing sub-directories or files.
+        /// </summary>
         public IEnumerable<AbstractObject> Children
         {
             get
@@ -125,6 +128,28 @@ namespace Git
                     else
                         return new Tree(_repo, tree_entry as CoreTree) as AbstractObject; // <--- is this always correct? we'll see :P
                 }).ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Tree entries representing this directory's subdirectories
+        /// </summary>
+        public IEnumerable<Tree> Trees
+        {
+            get
+            {
+                return Children.Where(child => child.IsTree).Cast<Tree>().ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Leaf entries representing this directory's files
+        /// </summary>
+        public IEnumerable<Leaf> Leaves
+        {
+            get
+            {
+                return Children.Where(child => child.IsBlob).Cast<Leaf>().ToArray();
             }
         }
 

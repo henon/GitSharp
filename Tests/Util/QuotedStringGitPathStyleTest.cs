@@ -214,7 +214,7 @@ namespace GitSharp.Tests
         [Test]
 	    public void testDequote_RawLatin1()
         {
-		    AssertDequote("\u00c5ngstr\u00f6m", @"\305ngstr\366m");
+            AssertDequote("\u00c5ngstr\u00f6m", (char)NB.BaseToDecimal("305", 8)  + "ngstr" + (char)NB.BaseToDecimal("366", 8) + "m");
 	    }
 
         [Test]

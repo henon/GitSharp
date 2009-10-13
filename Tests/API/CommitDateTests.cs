@@ -11,10 +11,18 @@ namespace GitSharp.Tests.API
         private static readonly DateTimeOffset _expectedDate = new DateTimeOffset(2005, 04, 07, 15, 32, 13, new TimeSpan(-7, 0, 0));
 
         [Test]
-        [Ignore("Doesn't pass on Mono because of 'System.NotImplementedException : The requested feature is not implemented.at System.DateTimeOffset.Parse'.")]
         public void ShouldBeAbleToReadAuthorDate()
         {
-            var expectedDate = DateTimeOffset.Parse("2005-04-07 15:32:13 -07:00");
+            var expectedDate = new DateTimeOffset();
+
+            try
+            {
+                expectedDate = DateTimeOffset.Parse("2005-04-07 15:32:13 -07:00");
+            }
+            catch (NotImplementedException)
+            {
+                Assert.Ignore("Doesn't pass on Mono because of 'System.NotImplementedException : The requested feature is not implemented.at System.DateTimeOffset.Parse'.");
+            }
 
             var repos = new Repository(db);
             var commit = new Commit(repos, KnownCommit);

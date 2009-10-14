@@ -90,7 +90,7 @@ namespace GitSharp.Tests.Patch
             // string match what we really expect to get back.
             //
             string exp = ReadTestPatchFile(csOld);
-            exp = exp.Replace(@"\303\205ngstr\303\266m", "\u00c5ngstr\u00f6m");
+            exp = exp.Replace("\u00C3\u0085ngstr\u00C3\u00B6m", "\u00c5ngstr\u00f6m");  // henon: octal character representation is not legal in c# literals: "\303\205ngstr\303\266m"
 
             Assert.AreEqual(exp, fh.getScriptText(csOld, csNew));
         }
@@ -111,8 +111,7 @@ namespace GitSharp.Tests.Patch
             // string match what we really expect to get back.
             //
             string exp = ReadTestPatchFile(csOld);
-             exp = exp.Replace(@"\303\205ngstr\303\266m", "\u00c5ngstr\u00f6m");
-
+            exp = exp.Replace("\u00C3\u0085ngstr\u00C3\u00B6m", "\u00c5ngstr\u00f6m");
             Assert.AreEqual(exp, fh.getScriptText(new[] { csNew, csOld, csNew }));
         }
 

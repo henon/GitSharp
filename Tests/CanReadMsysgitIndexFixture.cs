@@ -13,6 +13,7 @@ namespace GitSharp.Tests
         [Test]
         public void CanReadMsysgitIndex()
         {
+            //setup of .git directory
             var resource =
                 new DirectoryInfo(Path.Combine(Path.Combine(Environment.CurrentDirectory, "Resources"),
                                                "OneFileRepository"));
@@ -23,6 +24,8 @@ namespace GitSharp.Tests
             var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, ".git"));
             Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
 
+
+
             var repository = new Repository(repositoryPath);
             GitIndex index = repository.Index;
 
@@ -31,13 +34,21 @@ namespace GitSharp.Tests
             Assert.AreEqual(1, entries.Count);
 
             GitIndex.Entry entry = entries[0];
-
             Assert.AreEqual("dummy.txt", entry.Name);
 
             Ref headRef = repository.Head;
-
             Assert.AreEqual("refs/heads/master", headRef.Name);
             Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", headRef.ObjectId.Name);
+
+            object obj = repository.MapObject(headRef.ObjectId, headRef.OriginalName);
+            Assert.IsInstanceOfType(typeof(Commit), obj);
+            var commit = (Commit) obj;
+
+            Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", commit.CommitId.Name);
+            Assert.AreEqual(commit.Committer, commit.Author);
+            Assert.AreEqual("nulltoken <emeric.fermas@gmail.com> 1255117188 +0200", commit.Committer.ToExternalString());
+
+            Assert.AreEqual(0, commit.ParentIds.Length);
         }
 
         public static void CopyDirectory(string sourceDirectoryPath, string targetDirectoryPath)

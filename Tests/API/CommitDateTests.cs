@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009, nulltoken <emeric.fermas@gmail.com>
+ * Copyright (C) 2009, James Gregory
  *
  * All rights reserved.
  *

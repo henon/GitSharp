@@ -123,7 +123,7 @@ namespace GitSharp.Core
         ///	<returns> 
         /// The index entries sorted 
         /// </returns>
-        public List<Entry> Members
+        public IList<Entry> Members
         {
             get { return _entries.Values.ToList(); }
         }

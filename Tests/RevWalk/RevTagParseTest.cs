@@ -269,7 +269,7 @@ namespace GitSharp.Tests.RevWalk
                 c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
-            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
+            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name,"Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=547902");
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
             Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }

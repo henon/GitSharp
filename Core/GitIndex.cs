@@ -123,9 +123,9 @@ namespace GitSharp.Core
         ///	<returns> 
         /// The index entries sorted 
         /// </returns>
-        public Entry[] Members
+        public IList<Entry> Members
         {
-            get { return _entries.Values.ToArray(); }
+            get { return _entries.Values.ToList(); }
         }
 
         ///	<summary>

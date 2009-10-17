@@ -39,6 +39,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Collections.Generic;
 using GitSharp.Core;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.Util;
@@ -122,7 +123,7 @@ namespace GitSharp.Tests
 
             var indexr = new GitIndex(db);
             indexr.Read();
-            Assert.AreEqual(0, indexr.Members.Length);
+            Assert.AreEqual(0, indexr.Members.Count);
         }
 
         [Test]
@@ -130,7 +131,7 @@ namespace GitSharp.Tests
         {
             var index = new GitIndex(db);
             index.Read();
-            Assert.AreEqual(0, index.Members.Length);
+            Assert.AreEqual(0, index.Members.Count);
         }
 
         [Test]
@@ -228,21 +229,21 @@ namespace GitSharp.Tests
             var index2 = new GitIndex(db);
 
             index2.ReadTree(db.MapTree(ObjectId.FromString("0036d433dc4f10ec47b61abc3ec5033c78d34f84")));
-            GitIndex.Entry[] members = index2.Members;
-            Assert.AreEqual(3, members.Length);
+            IList<GitIndex.Entry> members = index2.Members;
+            Assert.AreEqual(3, members.Count);
             Assert.AreEqual("a.b", members[0].Name);
             Assert.AreEqual("a/b", members[1].Name);
             Assert.AreEqual("a@b", members[2].Name);
-            Assert.AreEqual(3, members.Length);
+            Assert.AreEqual(3, members.Count);
 
             var indexr = new GitIndex(db);
             indexr.Read();
-            GitIndex.Entry[] membersr = indexr.Members;
-            Assert.AreEqual(3, membersr.Length);
+            IList<GitIndex.Entry> membersr = indexr.Members;
+            Assert.AreEqual(3, membersr.Count);
             Assert.AreEqual("a.b", membersr[0].Name);
             Assert.AreEqual("a/b", membersr[1].Name);
             Assert.AreEqual("a@b", membersr[2].Name);
-            Assert.AreEqual(3, membersr.Length);
+            Assert.AreEqual(3, membersr.Count);
 
             if (CanRunGitStatus)
             {
@@ -274,8 +275,8 @@ namespace GitSharp.Tests
             var index2 = new GitIndex(db);
 
             index2.ReadTree(db.MapTree(ObjectId.FromString("5e0bf0aad57706894c15fdf0681c9bc7343274fc")));
-            GitIndex.Entry[] members = index2.Members;
-            Assert.AreEqual(6, members.Length);
+            IList<GitIndex.Entry> members = index2.Members;
+            Assert.AreEqual(6, members.Count);
             Assert.AreEqual("a.b", members[0].Name);
             Assert.AreEqual("a/a/a/a", members[1].Name);
             Assert.AreEqual("a/b", members[2].Name);
@@ -286,8 +287,8 @@ namespace GitSharp.Tests
             // reread and test
             var indexr = new GitIndex(db);
             indexr.Read();
-            GitIndex.Entry[] membersr = indexr.Members;
-            Assert.AreEqual(6, membersr.Length);
+            IList<GitIndex.Entry> membersr = indexr.Members;
+            Assert.AreEqual(6, membersr.Count);
             Assert.AreEqual("a.b", membersr[0].Name);
             Assert.AreEqual("a/a/a/a", membersr[1].Name);
             Assert.AreEqual("a/b", membersr[2].Name);
@@ -343,7 +344,7 @@ namespace GitSharp.Tests
             Delete(Directory.GetParent(aslashb.FullName));
 
             var index2 = new GitIndex(db);
-            Assert.AreEqual(0, index2.Members.Length);
+            Assert.AreEqual(0, index2.Members.Count);
 
             index2.ReadTree(db.MapTree(ObjectId.FromString("0036d433dc4f10ec47b61abc3ec5033c78d34f84")));
 

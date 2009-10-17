@@ -40,13 +40,14 @@
 
 using System.Diagnostics;
 using System.IO;
+using System.Collections.Generic;
 
 namespace GitSharp.Core
 {
     public class IndexTreeWalker
     {
         // Fields
-        private readonly GitIndex.Entry[] _indexMembers;
+        private readonly IList<GitIndex.Entry> _indexMembers;
         private readonly Tree _mainTree;
         private readonly Tree _newTree;
         private readonly FileSystemInfo _root;
@@ -236,7 +237,7 @@ namespace GitSharp.Core
 			TreeEntry m = mi.hasNext() ? mi.next() : null;
 			TreeEntry a = ai.hasNext() ? ai.next() : null;
 			int curIndexPos = IndexCounter;
-			GitIndex.Entry entry = (IndexCounter < _indexMembers.Length) ? _indexMembers[IndexCounter++] : null;
+			GitIndex.Entry entry = (IndexCounter < _indexMembers.Count) ? _indexMembers[IndexCounter++] : null;
 			while (((m != null) || (a != null)) || (entry != null))
 			{
 				int cmpma = Compare(m, a);
@@ -267,7 +268,7 @@ namespace GitSharp.Core
 
 				if (pi != null)
 				{
-                    entry = (IndexCounter < _indexMembers.Length) ? _indexMembers[IndexCounter++] : null;
+                    entry = (IndexCounter < _indexMembers.Count) ? _indexMembers[IndexCounter++] : null;
 				}
 			}
 		}

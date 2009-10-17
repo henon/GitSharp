@@ -92,7 +92,7 @@ namespace GitSharp.Core
 			ParentIds = parentIds;
 		}
 		///	<summary>
-		/// Create a commit object with the specified id and data from and existing
+		/// Create a commit object with the specified id and data from an existing
 		/// commit object in a repository.
 		/// </summary>
 		/// <param name="db">

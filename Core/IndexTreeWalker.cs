@@ -47,7 +47,7 @@ namespace GitSharp.Core
     public class IndexTreeWalker
     {
         // Fields
-        private readonly List<GitIndex.Entry> _indexMembers;
+        private readonly IList<GitIndex.Entry> _indexMembers;
         private readonly Tree _mainTree;
         private readonly Tree _newTree;
         private readonly FileSystemInfo _root;

@@ -55,30 +55,40 @@ namespace GitSharp.Tests.DirectoryCache
 		[Test]
 		public void testReadIndex_LsFiles()
 		{
-			Dictionary<string, CGitIndexRecord> ls = ReadLsFiles();
+			List<CGitIndexRecord> ls = ReadLsFiles();
 			var dc = new DirCache(_index);
 			Assert.AreEqual(0, dc.getEntryCount());
 			dc.read();
 			Assert.AreEqual(ls.Count, dc.getEntryCount());
 			
-			int i = 0;
-			foreach (var val in ls.Values)
+			var cache = new List<DirCacheEntry>();
+			
+			for (int i = 0; i < dc.getEntryCount(); i++)
 			{
-                AssertAreEqual(val, dc.getEntry(i));
-				i++;
+				cache.Add(dc.getEntry(i));
+			}
+			
+			ls.Sort((x, y) => x.Path.CompareTo(y.Path));
+			cache.Sort((x, y) => x.getPathString().CompareTo(y.getPathString()));
+			
+			int j = 0;
+			foreach (var val in ls)
+			{
+				AssertAreEqual(val, cache[j]);
+				j++;
 			}
 		}
 
 		[Test]
 		public void testTreeWalk_LsFiles()
 		{
-			Dictionary<string, CGitIndexRecord> ls = ReadLsFiles();
+			List<CGitIndexRecord> ls = ReadLsFiles();
 			var dc = new DirCache(_index);
 			Assert.AreEqual(0, dc.getEntryCount());
 			dc.read();
 			Assert.AreEqual(ls.Count, dc.getEntryCount());
 
-			var rItr = ls.Values.GetEnumerator();
+			var rItr = ls.GetEnumerator();
 			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
 			tw.reset();
 			tw.Recursive = true;
@@ -95,8 +105,8 @@ namespace GitSharp.Tests.DirectoryCache
 		[Test]
 		public void testReadIndex_DirCacheTree()
 		{
-			Dictionary<string, CGitIndexRecord> cList = ReadLsFiles();
-			Dictionary<string, CGitLsTreeRecord> cTree = ReadLsTree();
+			List<CGitIndexRecord> cList = ReadLsFiles();
+			List<CGitLsTreeRecord> cTree = ReadLsTree();
 			var dc = new DirCache(_index);
 			Assert.AreEqual(0, dc.getEntryCount());
 			dc.read();
@@ -113,7 +123,7 @@ namespace GitSharp.Tests.DirectoryCache
 			Assert.AreEqual(cList.Count, jTree.getEntrySpan());
 
 			var subtrees = new List<CGitLsTreeRecord>();
-			foreach (CGitLsTreeRecord r in cTree.Values)
+			foreach (CGitLsTreeRecord r in cTree)
 			{
 				if (FileMode.Tree.Equals(r.Mode))
 					subtrees.Add(r);
@@ -142,33 +152,33 @@ namespace GitSharp.Tests.DirectoryCache
 			Assert.AreEqual(c.Stage, j.getStage());
 		}
 
-		private static Dictionary<string, CGitIndexRecord> ReadLsFiles()
+		private static List<CGitIndexRecord> ReadLsFiles()
 		{
-			var r = new Dictionary<string, CGitIndexRecord>();
+			var r = new List<CGitIndexRecord>();
 			using (var br = new StreamReader(new FileStream("Resources/gitgit.lsfiles", System.IO.FileMode.Open, FileAccess.Read), Constants.CHARSET))
 			{
 				string line;
 				while (!string.IsNullOrEmpty(line = br.ReadLine()))
 				{
 					var cr = new CGitIndexRecord(line);
-					r.Add(cr.Path, cr);
+					r.Add(cr);
 				}
 			}
 			return r;
 		}
 
-		private static Dictionary<string, CGitLsTreeRecord> ReadLsTree()
+		private static List<CGitLsTreeRecord> ReadLsTree()
 		{
-			var r = new Dictionary<string, CGitLsTreeRecord>();
+			var r = new List<CGitLsTreeRecord>();
 			using (var br = new StreamReader(new FileStream("Resources/gitgit.lstree", System.IO.FileMode.Open, System.IO.FileAccess.Read), Constants.CHARSET))
 			{
 				string line;
 				while ((line = br.ReadLine()) != null)
 				{
-					var cr = new CGitLsTreeRecord(line);
-					r[cr.Path] = cr;
+					r.Add(new CGitLsTreeRecord(line));
 				}
 			}
+			
 			return r;
 		}
 

@@ -39,9 +39,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Text;
 using System.IO;
+using System.Linq;
 using GitSharp.Core;
 using NUnit.Framework;
 using System.Diagnostics;
@@ -74,15 +73,10 @@ namespace GitSharp.Tests
 
         protected bool packedGitMMAP;
 
-        protected Core.Repository db;
+        protected Repository db;
         private int _testcount;
-        private readonly List<Core.Repository> _repositoriesToClose = new List<Core.Repository>();
-
-        static RepositoryTestCase()
-        {
-            Microsoft.Win32.SystemEvents.SessionEnded += (o, args) => // cleanup
-                                                         recursiveDelete(new DirectoryInfo(trashParent.FullName), false, null, false);
-        }
+        private readonly List<Repository> _repositoriesToClose = new List<Repository>();
+        private readonly List<string> _directoriesToRemove = new List<string>();
 
         /// <summary>
         /// Configure Git before setting up test repositories.
@@ -148,14 +142,13 @@ namespace GitSharp.Tests
             }
             catch (IOException e)
             {
-                //ReportDeleteFailure(name, failOnError, fs);
-                Console.WriteLine(name + ": " + e.Message);
+                ReportDeleteFailure(name, failOnError, fs, e.Message);
             }
 
             return silent;
         }
 
-        private static void ReportDeleteFailure(string name, bool failOnError, FileSystemInfo fsi)
+        private static void ReportDeleteFailure(string name, bool failOnError, FileSystemInfo fsi, string message)
         {
             string severity = failOnError ? "Error" : "Warning";
             string msg = severity + ": Failed to delete " + fsi;
@@ -164,6 +157,9 @@ namespace GitSharp.Tests
             {
                 msg += " in " + name;
             }
+
+            msg += Environment.NewLine;
+            msg += message;
 
             if (failOnError)
             {
@@ -220,12 +216,10 @@ namespace GitSharp.Tests
         {
             Configure();
 
-            string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
-
-            // Cleanup old failed stuff
-            recursiveDelete(new DirectoryInfo(trashParent.FullName), true, name, false);
-
             trash = new DirectoryInfo(trashParent + "/trash" + DateTime.Now.Ticks + "." + (_testcount++));
+            
+            _directoriesToRemove.Add(trash.FullName);
+
             trash_git = new DirectoryInfo(Path.GetFullPath(trash + "/.git"));
 
             var mockSystemReader = new MockSystemReader();
@@ -233,7 +227,7 @@ namespace GitSharp.Tests
                 new FileInfo(Path.Combine(trash_git.FullName, "usergitconfig")));
             SystemReader.setInstance(mockSystemReader);
 
-            db = new Core.Repository(trash_git);
+            db = new Repository(trash_git);
             db.Create();
 
             string[] packs = {
@@ -250,8 +244,8 @@ namespace GitSharp.Tests
 
             foreach (var packname in packs)
             {
-                new FileInfo("Resources/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir + "/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname), true);
-                new FileInfo("Resources/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir + "/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname), true);
+                new FileInfo("Resources/" + Core.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir + "/" + Core.Transport.IndexPack.GetPackFileName(packname), true);
+                new FileInfo("Resources/" + Core.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir + "/" + Core.Transport.IndexPack.GetIndexFileName(packname), true);
             }
 
             new FileInfo("Resources/packed-refs").CopyTo(trash_git.FullName + "/packed-refs", true);
@@ -275,19 +269,12 @@ namespace GitSharp.Tests
                 GC.Collect();
             }
 
-            string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
-            recursiveDelete(new DirectoryInfo(trash.FullName), false, name, true);
-            foreach (var r in _repositoriesToClose)
-            {
-                recursiveDelete(new DirectoryInfo(r.WorkingDirectory.FullName), false, name, true);
-            }
-
             _repositoriesToClose.Clear();
         }
 
         #endregion
 
-        protected Core.Repository createNewEmptyRepo()
+        protected Repository createNewEmptyRepo()
         {
             return createNewEmptyRepo(false);
         }
@@ -298,17 +285,27 @@ namespace GitSharp.Tests
         /// <returns>
         /// A new empty git repository for testing purposes
         /// </returns>
-        protected Core.Repository createNewEmptyRepo(bool bare)  
+        protected Repository createNewEmptyRepo(bool bare)  
         {
-            var newTestRepo = new DirectoryInfo(Path.GetFullPath(trashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) + (bare ? "" : "/") + ".git"));
-            Assert.IsFalse(newTestRepo.Exists);
-            var newRepo = new Core.Repository(newTestRepo);
-            newRepo.Create();
-            string name = GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name;
+            var newTestRepoPath = Path.GetFullPath(trashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) );
+            var newTestRepoPathSuffix  = (bare ? "" : "/") + ".git";
+            var newTestRepo = new DirectoryInfo(newTestRepoPath + newTestRepoPathSuffix);
 
-            Microsoft.Win32.SystemEvents.SessionEnded += (o, args) => // cleanup
-                                                  recursiveDelete(new DirectoryInfo(newTestRepo.FullName), false, name, false);
+            Assert.IsFalse(newTestRepo.Exists);
+            var newRepo = new Repository(newTestRepo);
+            newRepo.Create();
+            
             _repositoriesToClose.Add(newRepo);
+
+            if (!bare)
+            {
+                _directoriesToRemove.Add(newTestRepoPath);
+            }
+            else
+            {
+                _directoriesToRemove.Add(newTestRepoPath + newTestRepoPathSuffix);
+            }
+
             return newRepo;
         }
 
@@ -326,6 +323,10 @@ namespace GitSharp.Tests
             File.WriteAllBytes(logfile.FullName, data);
         }
 
- 
+        [TestFixtureTearDown]
+        public void FixtureTearDown()
+        {
+            _directoriesToRemove.Any((directoryPath => recursiveDelete(new DirectoryInfo(directoryPath), false, null, false)));
+        }
     }
 }

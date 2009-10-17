@@ -241,7 +241,7 @@ namespace GitSharp.Tests.RevWalk
             }
 
             Assert.AreEqual("EUC-JP", c.Encoding.WebName.ToUpperInvariant()); //Hacked as Windows uses a lowercased naming convention
-            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
+            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name,"Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=547902");
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
             Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }

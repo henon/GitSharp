@@ -2,7 +2,14 @@
 <project name="GitSharp" default="run-tests">
 
   <property name="debug" value="true" overwrite="false" />
-  <property name="version.revision" value="0" overwrite="false"/>
+
+  <!-- Revision version detection. If build.vcs.number hasn't been passed through command line argument, version revision is set to 'local-build' -->
+  <property name="build.vcs.number" value="" overwrite="false"/>
+  <property name="version.revision" value="local-build" verbose="true" />
+
+  <if test="${(string::get-length(build.vcs.number) != 0)}">
+    <property name="version.revision" value="${build.vcs.number}" />
+  </if>
 
   <property name="version.major" value="${version::get-major(version::parse(version))}" dynamic="true"/>
   <property name="version.minor" value="${version::get-minor(version::parse(version))}" dynamic="true"/>

@@ -10,9 +10,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.Core", "Core\GitSh
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A2CD2048-48D8-4641-ACBF-5199613EE281}"
 	ProjectSection(SolutionItems) = preProject
+		build-GitSharp.cmd = build-GitSharp.cmd
 		GitSharp licence.txt = GitSharp licence.txt
+		GitSharp.build = GitSharp.build
 		MiscUtil licence.txt = MiscUtil licence.txt
+		package-GitSharp.cmd = package-GitSharp.cmd
 		README.txt = README.txt
+		version.txt = version.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.CLI", "CLI\GitSharp.CLI.csproj", "{2A467118-E885-44FC-B7AF-DFAD937F6012}"

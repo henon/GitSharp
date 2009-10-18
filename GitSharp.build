@@ -1,0 +1,43 @@
+﻿<?xml version="1.0"?>
+<project name="GitSharp" default="run-tests">
+
+  <property name="debug" value="true" overwrite="false" />
+  <property name="version.revision" value="0" overwrite="false"/>
+
+  <property name="version.major" value="${version::get-major(version::parse(version))}" dynamic="true"/>
+  <property name="version.minor" value="${version::get-minor(version::parse(version))}" dynamic="true"/>
+  <property name="version.build" value="${version::get-build(version::parse(version))}" dynamic="true"/>
+  <property name="build.version" value="${version.major}.${version.minor}.${version.build}.${version.revision}" dynamic="true"/>
+
+  <target name="rebuild" depends="clean, run-tests"/>
+
+  <target name="clean">
+  </target>
+
+  <target name="dist" depends="run-tests, package"/>
+  
+  <target name="compile-core" depends="init">
+  </target>
+
+  <target name="compile-cli" depends="compile-core">
+  </target>
+
+  <target name="compile-gitsharp" depends="compile-cli">
+  </target>
+
+  <target name="run-tests"  depends="compile-tests">
+  </target>
+
+  <target name="compile-tests" depends="compile-gitsharp">
+  </target>
+
+  <target name="init">
+    <loadfile file="version.txt" property="version" />
+  </target>
+
+  <target name="package">
+    <echo message="Packaging" />
+    <echo message="${build.version}" />
+  </target>
+  
+</project>

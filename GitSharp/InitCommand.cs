@@ -163,29 +163,16 @@ namespace Git
         /// </summary>
         public override void Execute()
         {
+        	if (GitDirectory == null)
+        	{
+        		DirectoryInfo path = null;
+        		GitDirectory = Git.Commands.FindGitDirectory(path, false, Bare);
+        	}
+        	
+        	if (GitRepository == null)
+				GitRepository = new GitSharp.Core.Repository(Git.Commands.GitDirectory);
 
-            if (!Bare)
-            {
-            	/*string p = "";
-				if (Git.Commands.GitRepository == null)
-                {
-                	string p = Directory.GetCurrentDirectory();
-					//Directory di = Directory.CreateDirectory(".");// = new Directory(".");
-                    //Directory
-					//OutputStream.WriteLine(di.FullName);
-					OutputStream.WriteLine(p);
-					Path = System.IO.Path.Combine(p, ".git");
-                }
-				else
-				{
-					if (Path.EndsWith(".git"))
-                    	Path = Path.Substring(0, Path.Length - 4);
-				}*/
-					
-			}
-			
-            //GitRepository = new GitSharp.Core.Repository(new DirectoryInfo(Path));
-            GitRepository.Create(Bare);
+			GitRepository.Create(Bare);
             GitRepository.Config.setBoolean("core", null, "bare", Bare);
             GitRepository.Config.save();
             if (!Quiet)

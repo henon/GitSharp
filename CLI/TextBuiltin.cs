@@ -73,6 +73,16 @@ namespace GitSharp.CLI
         private String commandHelp;
 
         /// <summary>
+        /// Specifies if the command requires a repository to execute
+        /// </summary>
+        private bool requiresRepository = false;
+        
+        /// <summary>
+        /// Specifies if the command requires an upward search for the git repository
+        /// </summary>
+        private bool requiresRecursive = false;
+        
+        /// <summary>
         /// RevWalk used during command line parsing, if it was required.
         /// </summary>
         protected GitSharp.Core.RevWalk.RevWalk argWalk;
@@ -122,20 +132,42 @@ namespace GitSharp.CLI
         }
 
         /// <summary>
-        /// Determines if a repository is required.
+        /// Determine if the command requires a repository
         /// </summary>
-        /// <returns>Returns true if a repository is required.</returns>
-        public virtual bool RequiresRepository()
+        public bool RequiresRepository
         {
-            return false;
+        	get
+        	{
+        		return requiresRepository;
+        	}
+        	
+        	protected set
+        	{
+        		requiresRepository = value;
+        	}
+        }
+
+        /// <summary>
+        /// Specifies if the command requires an upward search for the git repository
+        /// </summary>
+        public bool RequiresRecursive
+        {
+            get
+            {
+                return requiresRecursive;
+            }
+
+            set
+            {
+                requiresRecursive = value;
+            }
         }
 
         /// <summary>
         /// Initializes a command for use including the repository and output support.
         /// </summary>
         /// <param name="repo">Specifies the repository to use.</param>
-        /// <param name="gitDirectory">Specifies the git directory.</param>
-        public void Init(Core.Repository repo, String gitDirectory)
+        public void Init(Core.Repository repo, DirectoryInfo path)
         {
             try
             {
@@ -163,13 +195,14 @@ namespace GitSharp.CLI
             // Initialize the repository in use.
             if (repo != null)
             {
-                Git.Commands.GitRepository = repo;
-                Git.Commands.GitDirectory = repo.Directory.FullName;
+                GitRepository = repo;
+                GitDirectory = repo.Directory;
             }
             else
             {
-                Git.Commands.GitRepository = null;
-                Git.Commands.GitDirectory = gitDirectory;
+                GitRepository = null;
+            	GitDirectory = path;
+            	
             }
         }
 
@@ -285,7 +318,7 @@ namespace GitSharp.CLI
             }
         }
 
-        public String GitDirectory
+        public DirectoryInfo GitDirectory
         {
             get
             {
@@ -294,18 +327,6 @@ namespace GitSharp.CLI
             set
             {
                 Git.Commands.GitDirectory = value;
-            }
-        }
-
-        public Boolean GitRequiresRoot
-        {
-            get
-            {
-                return Git.Commands.GitRequiresRoot;
-            }
-            set
-            {
-                Git.Commands.GitRequiresRoot = value;
             }
         }
     }

@@ -65,11 +65,6 @@ namespace GitSharp.CLI
             try
             {
                 List<String> arguments = ParseOptions(args);
-                if (arguments.Count > 0)
-                    cmd.Path = arguments[0];
-                else
-                    cmd.Path = ".";
-                
                 cmd.Execute();
             }
             catch (Exception e)
@@ -77,11 +72,6 @@ namespace GitSharp.CLI
                 cmd.OutputStream.WriteLine(e.Message);
             }
 
-        }
-
-        public override bool RequiresRepository()
-        {
-            return true;
         }
 
         private void OfflineHelp()

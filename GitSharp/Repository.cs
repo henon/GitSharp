@@ -163,21 +163,27 @@ namespace Git
         /// <param name="path"></param>
         /// <param name="bare"></param>
         /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
-        public static bool IsValid(string path, bool bare)
+        public static bool IsValid(string gitdir, bool bare)
         {
-            var git = Path.Combine(path, ".git");
-            if (!DirExists(path))
-                return false;
-            if (!DirExists(Path.Combine(path, "objects")) && !DirExists(Path.Combine(git, "objects")))
-                return false;
-            if (!DirExists(Path.Combine(path, "refs")) && !DirExists(Path.Combine(git, "refs")))
-                return false;
-            if (!FileExists(Path.Combine(path, "config")) && !FileExists(Path.Combine(git, "config")))
-                return false;
-            if (!FileExists(Path.Combine(path, "HEAD")) && !FileExists(Path.Combine(git, "HEAD")))
-                return false;
-
-            if (bare)
+        	if (!bare)
+        	{
+        		//gitdir = Path.Combine(gitdir, ".git");
+            	if (!DirExists(gitdir))
+            	   return false;
+            	if (!DirExists(Path.Combine(gitdir, "objects")))
+             	   return false;
+            	if (!DirExists(Path.Combine(gitdir, "refs")))
+             	   return false;
+            	if (!FileExists(Path.Combine(gitdir, "config")))
+            	    return false;
+            	if (!FileExists(Path.Combine(gitdir, "HEAD")))
+            	    return false;
+            	
+            	//Set the root directory (the parent of the .git directory)
+            	//  for load testing
+            	//gitdir = gitdir.Substring(0,gitdir.Length-4);
+        	}
+			else
             {
                 //In progress
                 //if (!DirExists(Path.Combine(path, "description")) && !DirExists(Path.Combine(git, "description")))
@@ -193,7 +199,7 @@ namespace Git
             try
             {
                 // let's see if it loads without throwing an exception
-                new Repository(path);
+                new Repository(gitdir);
             }
             catch (Exception)
             {
@@ -281,39 +287,29 @@ namespace Git
 
 
         /// <summary>
-        /// Initializes a non-bare git repository in the current directory if GIT_DIR is not set.
+        /// Initializes a non-bare repository. Use GitDirectory to specify location.
         /// </summary>
         /// <returns>The initialized repository</returns>
         public static Repository Init()
         {
-            return Init(null, false);
+            return Init(false);
         }
 
         /// <summary>
-        /// Initializes a non-bare git repository in the location path points to.
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns>The initialized repository</returns>
-        public static Repository Init(string path)
-        {
-            return Init(path, false);
-        }
-
-        /// <summary>
-        /// Initializes a directory in the current location.
+        /// Initializes a repository. Use GitDirectory to specify the location. Default is the current directory.
         /// </summary>
         /// <param name="path"></param>
         /// <param name="bare"></param>
         /// <returns></returns>
-        public static Repository Init(string path, bool bare)
+        public static Repository Init(bool bare)
         {
-            var cmd = new InitCommand() { Bare = bare, Path = path };
+            var cmd = new InitCommand() { Bare = bare };
             cmd.Execute();
             return cmd.InitializedRepository;
         }
 
         /// <summary>
-        /// Initializes a directory in the current location using the provided git command's options.
+        /// Initializes a repository in the current location using the provided git command's options.
         /// </summary>
         /// <param name="path"></param>
         /// <param name="bare"></param>

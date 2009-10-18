@@ -132,49 +132,44 @@ namespace GitSharp.CLI
 
                 CommandCatalog catalog = new CommandCatalog();
                 CommandRef subcommand = catalog.Get(argv[0]);
+                DirectoryInfo gitdir = null;
+
                 if (subcommand != null)
                 {
                     TextBuiltin cmd = subcommand.Create();
                     List<String> args = argv.ToList();
 
-                    if (cmd.RequiresRepository())
+                    try
                     {
-                        string gitdir = null;
-
-                        try
+                        for (int x = 0; x < args.Count; x++)
                         {
-                            for (int x = 0; x < args.Count; x++)
+                            if (args[x].IndexOf("--git-dir=") > -1)
                             {
-                                if (args[x].IndexOf("--git-dir=") > -1)
+                                if (args[x].Length > 10)
                                 {
-                                    if (args[x].Length > 10)
-                                    {
-                                        string str = args[x].Substring(11);
-                                        if (!Git.Commands.GitRequiresRoot)
-                                            gitdir = str;
-                                        else
-                                            gitdir = SystemReader.getInstance().getDirectoryRoot(str);
-                                        args.RemoveAt(x);
-                                        break;
-                                        
-                                    }
+                                    gitdir = new DirectoryInfo(args[x].Substring(11));
+                                    args.RemoveAt(x);
+                                    break;
                                 }
                             }
-                            
                         }
-                        catch (ArgumentException)
-                        {
-                            Git.Commands.OutputStream.WriteLine("error: can't find git directory");
-                            Git.Commands.OutputStream.Flush();
-                            Exit(1);
-                        }
+                    }
+                    catch (ArgumentException)
+                    {
+                        Git.Commands.OutputStream.WriteLine("error: can't find git directory");
+                        Git.Commands.OutputStream.Flush();
+                        Exit(1);
+                    }
 
-                        cmd.Init(Git.Commands.SelectRepository(), gitdir);
+                    if (cmd.RequiresRepository)
+                    {
+                        if (gitdir == null)
+                            gitdir = Git.Commands.FindGitDirectory(gitdir, cmd.RequiresRecursive, false);
+
+                        cmd.Init(new Repository(gitdir), gitdir);
                     }
                     else
-                    {
-                        cmd.Init(null, null);
-                    }
+                        cmd.Init(null, gitdir);
 
                     try
                     {
@@ -319,6 +314,8 @@ namespace GitSharp.CLI
 
         private static DirectoryInfo findGitDir()
         {
+
+
             DirectoryInfo current = new DirectoryInfo(".");
             while (current != null)
             {

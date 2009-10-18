@@ -116,7 +116,7 @@ namespace Git
         /// <summary>
         /// The root git directory. If not explicitly set, the command uses Git.GitDirectory. Set using --git-dir.
         /// </summary>
-        public String GitDirectory
+        public DirectoryInfo GitDirectory
         {
             get
             {
@@ -129,22 +129,7 @@ namespace Git
                 _gitDirectory = value;
             }
         }
-        String _gitDirectory = null;
-
-        public Boolean GitRequiresRoot
-        {
-            get
-            {
-                if (_gitRequiresRoot == false)
-                    return Git.Commands.GitRequiresRoot;
-                return _gitRequiresRoot;
-            }
-            set
-            {
-                _gitRequiresRoot = value;
-            }
-        }
-        Boolean _gitRequiresRoot = false;
+        DirectoryInfo _gitDirectory = null;
 
         /// <summary>
         /// Execute the git command.

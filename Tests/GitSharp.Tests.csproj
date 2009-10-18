@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbbreviatedObjectIdTest.cs" />
+    <Compile Include="API\CloneTests.cs" />
     <Compile Include="API\CommitDateTests.cs" />
     <Compile Include="API\InitTests.cs" />
     <Compile Include="API\ObjectEqualityTests.cs" />

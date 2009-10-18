@@ -72,7 +72,8 @@ namespace GitSharp.CLI
         public override void Run(string[] args)
         {
             cmd.Quiet = false;
-
+			this.RequiresRepository = true;
+			
             options = new CmdParserOptionSet()
             {
                 { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
@@ -122,11 +123,6 @@ namespace GitSharp.CLI
                 options.WriteOptionDescriptions(Console.Out);
                 cmd.OutputStream.WriteLine();
             }
-        }
-
-        public override bool RequiresRepository()
-        {
-            return true;
         }
     }
 }

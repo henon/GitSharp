@@ -49,30 +49,53 @@ namespace Git.Tests
     public class InitTests : GitSharp.Tests.RepositoryTestCase
     {
         [Test]
-        public void Honors_GIT_DIR_before_initializing_current_dir()
+        public void IsBare()
         {
-            //Verify Environment Variable GIT_DIR 
-			System.Environment.SetEnvironmentVariable("GIT_DIR", Path.Combine(trash.FullName, "git_dir"));
-            Git.Commands.GitRepository = Git.Commands.SelectRepository();
-			Git.Commands.Init();
-            Assert.IsTrue(Repository.IsValid( System.Environment.GetEnvironmentVariable("GIT_DIR")));
-            System.Environment.SetEnvironmentVariable("GIT_DIR", "");
-            
-            //Verify specified directory
-            string p = Path.Combine(trash.FullName, "current_directory");
-			Git.Commands.GitDirectory = p;
-			Git.Commands.GitRepository = Git.Commands.SelectRepository();
-			Git.Commands.Init();
-			Assert.IsTrue(Repository.IsValid(p));
-			Git.Commands.GitDirectory = null;
-			
-			//Verify current directory (default, if the other two tests are empty)
-			p = Directory.GetCurrentDirectory();
-			Git.Commands.GitRepository = Git.Commands.SelectRepository();
-			Git.Commands.Init();
-            Assert.IsTrue(Repository.IsValid(Directory.GetCurrentDirectory()));
-			Directory.Delete(Path.Combine(p, ".git"),true);
-			Git.Commands.GitRepository = null;
-			}
+            //Test bare repository
+            bool bare = true;
+            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test.git"));
+            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
+        	Git.Repository repo = Git.Repository.Init(bare);
+            Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
+            Assert.IsTrue(repo.IsBare);
+            Git.Commands.GitDirectory = null;
+        }
+
+        [Test]
+        public void IsNonBare()
+        {
+            //Test non-bare repository
+            bool bare = false;
+            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test"));
+            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
+            Git.Repository repo = Git.Repository.Init(bare);
+            Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
+            Assert.IsFalse(repo.IsBare);
+            Git.Commands.GitDirectory = null;
+        }
+
+        [Test]
+        public void IsBareValid()
+        {
+            //Test bare repository
+            bool bare = true;
+            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test.git"));
+        	Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
+            Git.Repository repo = Git.Repository.Init(bare);
+            Assert.IsTrue(repo.IsBare);
+            Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
+        }
+
+        [Test]
+        public void IsNonBareValid()
+        {
+            //Test non-bare repository
+            bool bare = false;
+            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test"));
+        	Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
+            Git.Repository repo = Git.Repository.Init(bare);
+            Assert.IsFalse(repo.IsBare);
+            Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
+        }
 	}
 }

@@ -54,7 +54,6 @@ namespace Git
 
         public CloneCommand() {
             Quiet=true;
-            Git.Commands.GitRequiresRoot = true;
         }
 
         // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.
@@ -202,8 +201,7 @@ namespace Git
                     localName = localName.Substring(0, localName.Length - 4);
                 if (GitDirectory == null)
                 {
-                    DirectoryInfo di = new DirectoryInfo(localName);
-                    GitDirectory = System.IO.Path.Combine(di.FullName, ".git");
+                    GitDirectory = new DirectoryInfo(System.IO.Path.Combine(localName, ".git"));
                 }
             }
             else
@@ -257,7 +255,7 @@ namespace Git
 
             try
             {
-                r = tn.fetch(new TextProgressMonitor(OutputStream), null);
+                	r = tn.fetch(new TextProgressMonitor(OutputStream), null);
             }
             finally
             {

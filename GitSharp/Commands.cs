@@ -161,16 +161,21 @@ namespace Git
         private static DirectoryInfo _gitDirectory = null;
 
         #region CloneCommand
-        public static void Clone(string fromUrl, DirectoryInfo toPath, bool isQuiet)
+        public static void Clone(string fromUrl, string toPath, bool isQuiet)
         {
             CloneCommand cmd = new CloneCommand();
             if (cmd != null)
             {
         		cmd.Path = fromUrl;
-        		cmd.Directory = toPath.FullName;
+        		cmd.Directory = toPath;
         		cmd.Quiet = isQuiet;
         		cmd.Execute();
             }
+        }
+        
+        public static void Clone(CloneCommand command)
+        {
+        	command.Execute();
         }
         #endregion
         

@@ -90,17 +90,6 @@ namespace GitSharp.Core
         public abstract PlatformType getOperatingSystem();
 
         /// <summary>
-        /// Returns the repository based on the specified directory using upward recursive directory verification.
-        /// </summary>
-        /// <returns></returns>
-        public abstract Repository getRepositoryRoot(string directory);
-
-        /// <summary>
-        /// Returns the root git directory based on the specified directory using upward recursive directory verification.
-        /// </summary>
-        /// <returns></returns>
-        public abstract string getDirectoryRoot(string directory);
-        /// <summary>
         /// Returns the GitSharp configuration file from the OS-dependant location.
         /// </summary>
         /// <returns></returns>
@@ -196,45 +185,6 @@ namespace GitSharp.Core
                 }
 
                 return pType;
-            }
-
-            public override string getDirectoryRoot(string directory)
-            {
-                // Make a reference to a directory.
-                DirectoryInfo di = new DirectoryInfo(directory);
-                if (di.Exists != false)
-                {
-                    while (di != null)
-                    {
-                        DirectoryInfo gitdir = new DirectoryInfo(Path.Combine(di.DirectoryName(), ".git"));
-                        if (gitdir.Exists == false)
-                            di = di.Parent;
-                        else
-                            return di.DirectoryName();
-                    }
-                }
-
-                return null;
-            }
-
-            public override Repository getRepositoryRoot(string directory)
-            {
-                Repository repo = null;
-                // Make a reference to a directory.
-                DirectoryInfo di = new DirectoryInfo(directory);
-                if (di.Exists != false)
-                {
-                    while (di != null && repo == null)
-                    {
-                        DirectoryInfo gitdir = new DirectoryInfo(Path.Combine(di.DirectoryName(), ".git"));
-                        if (gitdir.Exists == false)
-                            di = di.Parent;
-                        else
-                            repo = new Repository(gitdir);
-                    }
-                }
-
-                return repo;
             }
 
             public override FileBasedConfig getConfigFile(string gitdir)

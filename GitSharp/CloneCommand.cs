@@ -255,7 +255,10 @@ namespace Git
 
             try
             {
+            	if (!Quiet)
                 	r = tn.fetch(new TextProgressMonitor(OutputStream), null);
+            	else
+            		r = tn.fetch(null,null);
             }
             finally
             {

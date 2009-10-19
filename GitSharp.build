@@ -1,7 +1,20 @@
 ﻿<?xml version="1.0"?>
 <project name="GitSharp" default="run-tests">
 
-  <property name="debug" value="true" overwrite="false" />
+  <property name="build.config" value="debug" overwrite="false" />
+  <property name="build.platform" value="net3.5" overwrite="false" />
+  <property name="build.debug" value="${build.config == 'debug'}" overwrite="false" />
+  <property name="build.optimize" value="${build.config != 'debug'}" overwrite="false"/>
+
+  <property name="path.base" value="${project::get-base-directory()}"/>
+  <property name="path.build" value="${path.base}/build"/>
+  <property name="path.lib" value="${path.base}/extern"/>
+  <property name="path.dist" value="${path.base}/dist"/>
+  <property name="path.src" value="${path.base}/src"/>
+  <property name="path.tools" value="${path.base}/extern"/>
+  <property name="path.tools.nunit" value="${path.tools}/extern/nunit"/>
+
+  <echo message="path.base = ${path.base}" />
 
   <!-- Revision version detection. If build.vcs.number hasn't been passed through command line argument, version revision is set to 'local-build' -->
   <property name="build.vcs.number" value="" overwrite="false"/>
@@ -19,10 +32,12 @@
   <target name="rebuild" depends="clean, run-tests"/>
 
   <target name="clean">
+    <delete dir="${path.build}" if="${directory::exists(path.build)}"/>
+    <delete dir="${path.dist}" if="${directory::exists(path.dist)}"/>
   </target>
 
   <target name="dist" depends="run-tests, package"/>
-  
+
   <target name="compile-core" depends="init">
   </target>
 
@@ -40,11 +55,24 @@
 
   <target name="init">
     <loadfile file="version.txt" property="version" />
+
+    <mkdir dir="${path.build}" if="${not(directory::exists(path.build))}"/>
+
+    <property name="current.path.build" value="${path.build}/${build.platform}/${build.config}"/>
+    <property name="current.path.build.lib" value="${path.build}/${build.platform}/${build.config}/lib"/>
+    <property name="current.path.testresults" value="${path.build}/${build.platform}/test-results" />
+
+    <echo message="build.version = ${build.version}"/>
+    <echo message="current.path.build = ${current.path.build}"/>
+    <echo message="current.path.build.lib = ${current.path.build.lib}"/>
+    <echo message="current.path.testresults = ${current.path.testresults}"/>
+
+    <mkdir dir="${current.path.build}" if="${not(directory::exists(current.path.build))}"/>
+    <mkdir dir="${current.path.build.lib}" if="${not(directory::exists(current.path.build.lib))}"/>
   </target>
 
   <target name="package">
-    <echo message="Packaging" />
-    <echo message="${build.version}" />
+    <mkdir dir="${path.dist}" if="${not(directory::exists(path.dist))}"/>
   </target>
-  
+
 </project>

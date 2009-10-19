@@ -227,14 +227,17 @@ namespace Git
             }
             else
             {
-                //Add description directory
-                OutputStream.WriteLine("Description directory still needs to be implemented.");
-                //Add hooks directory
-                OutputStream.WriteLine("Hooks directory still needs to be implemented.");
-                //Add info directory
-                OutputStream.WriteLine("Info directory still needs to be implemented.");
-                //Add packed_refs directory
-                OutputStream.WriteLine("Packed_refs directory still needs to be implemented.");
+            	if (!Quiet)
+            	{
+                	//Add description directory
+                	OutputStream.WriteLine("Description directory still needs to be implemented.");
+                	//Add hooks directory
+                	OutputStream.WriteLine("Hooks directory still needs to be implemented.");
+                	//Add info directory
+                	OutputStream.WriteLine("Info directory still needs to be implemented.");
+                	//Add packed_refs directory
+                	OutputStream.WriteLine("Packed_refs directory still needs to be implemented.");
+            	}
             }
         }
 
@@ -255,7 +258,10 @@ namespace Git
 
             try
             {
+            	if (!Quiet)
                 	r = tn.fetch(new TextProgressMonitor(OutputStream), null);
+            	else
+            		r = tn.fetch(new NullProgressMonitor(),null);
             }
             finally
             {

@@ -77,14 +77,9 @@ namespace Git
         {
             get
             {
-                if (_blob == null)
-                {
-                    var loader = _repo._internal_repo.OpenBlob(_id);
-                    if (loader == null)
-                        return null;
-                    _blob = loader.Bytes;
-                }
-                return Encoding.UTF8.GetString(_blob);
+                if (RawData == null)
+                    return null;
+                return Encoding.UTF8.GetString(RawData);
             }
         }
 
@@ -95,6 +90,13 @@ namespace Git
         {
             get
             {
+                if (_blob == null)
+                {
+                    var loader = _repo._internal_repo.OpenBlob(_id);
+                    if (loader == null)
+                        return null;
+                    _blob = loader.Bytes;
+                }
                 return _blob;
             }
         }

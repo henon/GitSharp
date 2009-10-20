@@ -74,17 +74,19 @@ namespace Git.Tests
             Git.Commands.GitDirectory = null;
         }
 
-        [Test]
-        public void IsBareValid()
-        {
-            //Test bare repository
-            bool bare = true;
-            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test.git"));
-        	Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
-            Git.Repository repo = Git.Repository.Init(bare);
-            Assert.IsTrue(repo.IsBare);
-            Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
-        }
+        // [henon] commented out below. they are actually the same as above.
+
+        //[Test]
+        //public void IsBareValid()
+        //{
+        //    //Test bare repository
+        //    bool bare = true;
+        //    DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test.git"));
+        //    Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
+        //    Git.Repository repo = Git.Repository.Init(bare);
+        //    Assert.IsTrue(repo.IsBare);
+        //    Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
+        //}
 
         [Test]
         public void IsNonBareValid()
@@ -92,10 +94,10 @@ namespace Git.Tests
             //Test non-bare repository
             bool bare = false;
             DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test"));
-        	Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
+//            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
             Git.Repository repo = Git.Repository.Init(bare);
             Assert.IsFalse(repo.IsBare);
-            Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
+            Assert.IsTrue(Repository.IsValid(path.FullName, bare));
         }
 	}
 }

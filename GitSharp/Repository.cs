@@ -43,6 +43,7 @@ using System.IO;
 using System.Diagnostics;
 
 using CoreRepository = GitSharp.Core.Repository;
+using System.Text.RegularExpressions;
 
 namespace Git
 {
@@ -148,7 +149,8 @@ namespace Git
         #endregion
 
         /// <summary>
-        /// Checks if the directory given by the path is a valid git repository. Bare repository is false.
+        /// Checks if the directory given by the path is a valid non-bare git repository. The given path may either point to 
+        /// the repository or the repository's inner .git directory.
         /// </summary>
         /// <param name="path"></param>
         /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
@@ -167,18 +169,26 @@ namespace Git
         {
         	if (!bare)
         	{
-        		//gitdir = Path.Combine(gitdir, ".git");
+                if (!bare && !Regex.IsMatch(gitdir, "\\.git[/\\\\]?$"))
+                    gitdir = Path.Combine(gitdir, ".git");
             	if (!DirExists(gitdir))
             	   return false;
             	if (!DirExists(Path.Combine(gitdir, "objects")))
              	   return false;
+                if (!DirExists(Path.Combine(gitdir, "objects/info")))
+                    return false;
+                if (!DirExists(Path.Combine(gitdir, "objects/pack")))
+                    return false;
             	if (!DirExists(Path.Combine(gitdir, "refs")))
              	   return false;
-            	if (!FileExists(Path.Combine(gitdir, "config")))
+                if (!DirExists(Path.Combine(gitdir, "refs/heads")))
+                    return false;
+                if (!DirExists(Path.Combine(gitdir, "refs/tags")))
+                    return false;
+                if (!FileExists(Path.Combine(gitdir, "config")))
             	    return false;
             	if (!FileExists(Path.Combine(gitdir, "HEAD")))
             	    return false;
-            	
             	//Set the root directory (the parent of the .git directory)
             	//  for load testing
             	//gitdir = gitdir.Substring(0,gitdir.Length-4);
@@ -186,6 +196,7 @@ namespace Git
 			else
             {
                 //In progress
+                throw new NotImplementedException();
                 //if (!DirExists(Path.Combine(path, "description")) && !DirExists(Path.Combine(git, "description")))
                 //    return false;
                 //if (!DirExists(Path.Combine(path, "hooks")) && !DirExists(Path.Combine(git, "hooks")))

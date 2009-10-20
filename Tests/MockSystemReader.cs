@@ -31,7 +31,7 @@ namespace GitSharp.Tests
 
         public override string getenv(String variable)
         {
-        	return System.Environment.GetEnvironmentVariable(variable);
+        	return values.GetValue(variable);
         }
 
         public override string getProperty(String key)
@@ -85,16 +85,6 @@ namespace GitSharp.Tests
         public override PlatformType getOperatingSystem()
         {
             return operatingSystem;
-        }
-
-        public override Repository getRepositoryRoot(string directory)
-        {
-            return SystemReader.getInstance().getRepositoryRoot(directory);
-        }
-
-        public override string getDirectoryRoot(string directory)
-        {
-            return SystemReader.getInstance().getDirectoryRoot(directory);
         }
     }
 }

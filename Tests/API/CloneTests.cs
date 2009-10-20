@@ -51,10 +51,10 @@ namespace Git.Tests
         [Test]
         public void IsNonBareValid()
         {
-           DirectoryInfo toPath = new DirectoryInfo(Path.Combine(trash.FullName, "test"));
+           string toPath = Path.Combine(trash.FullName, "test");
            string fromUrl = "git://github.com/henon/jgit.git";
            Git.Commands.Clone(fromUrl, toPath, true);
-           Assert.IsTrue(Repository.IsValid(toPath.FullName, false));
+           Assert.IsTrue(Repository.IsValid(toPath, false));
            //Todo: Assert.IsTrue(Verify Repository against fromUrl)
            
         }

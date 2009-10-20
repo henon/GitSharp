@@ -52,32 +52,22 @@ namespace GitSharp.Tests.DirectoryCache
 	{
 		private readonly FileInfo _index = new FileInfo("Resources/gitgit.index");
 
-		[Test]
-		public void testReadIndex_LsFiles()
-		{
-			List<CGitIndexRecord> ls = ReadLsFiles();
-			var dc = new DirCache(_index);
-			Assert.AreEqual(0, dc.getEntryCount());
-			dc.read();
-			Assert.AreEqual(ls.Count, dc.getEntryCount());
-			
-			var cache = new List<DirCacheEntry>();
-			
-			for (int i = 0; i < dc.getEntryCount(); i++)
-			{
-				cache.Add(dc.getEntry(i));
-			}
-			
-			ls.Sort((x, y) => x.Path.CompareTo(y.Path));
-			cache.Sort((x, y) => x.getPathString().CompareTo(y.getPathString()));
-			
-			int j = 0;
-			foreach (var val in ls)
-			{
-				AssertAreEqual(val, cache[j]);
-				j++;
-			}
-		}
+        [Test]
+        public void testReadIndex_LsFiles()
+        {
+            List<CGitIndexRecord> ls = ReadLsFiles();
+            var dc = new DirCache(_index);
+            Assert.AreEqual(0, dc.getEntryCount());
+            dc.read();
+            Assert.AreEqual(ls.Count, dc.getEntryCount());
+
+            int i = 0;
+            foreach (var val in ls)
+            {
+                AssertAreEqual(val, dc.getEntry(i));
+                i++;
+            }
+        }
 
 		[Test]
 		public void testTreeWalk_LsFiles()

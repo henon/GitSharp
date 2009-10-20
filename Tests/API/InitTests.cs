@@ -88,16 +88,16 @@ namespace Git.Tests
         //    Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
         //}
 
-        //[Test]
-        //public void IsNonBareValid()
-        //{
-        //    //Test non-bare repository
-        //    bool bare = false;
-        //    DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test"));
-        //    Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
-        //    Git.Repository repo = Git.Repository.Init(bare);
-        //    Assert.IsFalse(repo.IsBare);
-        //    Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
-        //}
+        [Test]
+        public void IsNonBareValid()
+        {
+            //Test non-bare repository
+            bool bare = false;
+            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test"));
+//            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
+            Git.Repository repo = Git.Repository.Init(bare);
+            Assert.IsFalse(repo.IsBare);
+            Assert.IsTrue(Repository.IsValid(path.FullName, bare));
+        }
 	}
 }

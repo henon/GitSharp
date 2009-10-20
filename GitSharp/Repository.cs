@@ -43,6 +43,7 @@ using System.IO;
 using System.Diagnostics;
 
 using CoreRepository = GitSharp.Core.Repository;
+using System.Text.RegularExpressions;
 
 namespace Git
 {
@@ -148,7 +149,8 @@ namespace Git
         #endregion
 
         /// <summary>
-        /// Checks if the directory given by the path is a valid git repository. Bare repository is false.
+        /// Checks if the directory given by the path is a valid non-bare git repository. The given path may either point to 
+        /// the repository or the repository's inner .git directory.
         /// </summary>
         /// <param name="path"></param>
         /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
@@ -167,7 +169,8 @@ namespace Git
         {
         	if (!bare)
         	{
-        		//gitdir = Path.Combine(gitdir, ".git");
+                if (!bare && !Regex.IsMatch(gitdir, "\\.git[/\\\\]?$"))
+                    gitdir = Path.Combine(gitdir, ".git");
             	if (!DirExists(gitdir))
             	   return false;
             	if (!DirExists(Path.Combine(gitdir, "objects")))

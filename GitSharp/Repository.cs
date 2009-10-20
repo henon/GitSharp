@@ -172,13 +172,20 @@ namespace Git
             	   return false;
             	if (!DirExists(Path.Combine(gitdir, "objects")))
              	   return false;
+                if (!DirExists(Path.Combine(gitdir, "objects/info")))
+                    return false;
+                if (!DirExists(Path.Combine(gitdir, "objects/pack")))
+                    return false;
             	if (!DirExists(Path.Combine(gitdir, "refs")))
              	   return false;
-            	if (!FileExists(Path.Combine(gitdir, "config")))
+                if (!DirExists(Path.Combine(gitdir, "refs/heads")))
+                    return false;
+                if (!DirExists(Path.Combine(gitdir, "refs/tags")))
+                    return false;
+                if (!FileExists(Path.Combine(gitdir, "config")))
             	    return false;
             	if (!FileExists(Path.Combine(gitdir, "HEAD")))
             	    return false;
-            	
             	//Set the root directory (the parent of the .git directory)
             	//  for load testing
             	//gitdir = gitdir.Substring(0,gitdir.Length-4);
@@ -186,6 +193,7 @@ namespace Git
 			else
             {
                 //In progress
+                throw new NotImplementedException();
                 //if (!DirExists(Path.Combine(path, "description")) && !DirExists(Path.Combine(git, "description")))
                 //    return false;
                 //if (!DirExists(Path.Combine(path, "hooks")) && !DirExists(Path.Combine(git, "hooks")))

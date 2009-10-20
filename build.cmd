@@ -1,3 +1,3 @@
-extern\nant\NAnt.exe
+build-ci.cmd
 pause
 

@@ -1,1 +1,1 @@
-extern\nant\NAnt.exe
+tools\nant\NAnt.exe

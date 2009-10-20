@@ -1,3 +1,3 @@
-extern\nant\NAnt.exe
+tools\nant\nant.exe
 pause
 

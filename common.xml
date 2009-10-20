@@ -33,7 +33,7 @@
 		Path to the folder that contain the external assemblies.  For net-2.0 the values will
 		be lib, lib/net, and lib/net/2.0 respectively.
 	-->
-	<property name="lib.dir" value="extern" dynamic="true" />
+	<property name="lib.dir" value="lib" dynamic="true" />
 	<property name="lib.family.dir" value="${path::combine(lib.dir, framework::get-family(framework::get-target-framework()))}" dynamic="true" />
 
 	<if test="${nant-version.current != nant-version.beta1_086 or framework::get-target-framework() != 'net-3.5'}">
@@ -346,7 +346,7 @@
 	<target name="common.find-tools">
 		<!-- Where is nunit-console executable(win/mono) ? -->
 		<property name="nunit-console2" value="nunit-console2" overwrite="false" />
-		<property name="nunit-console" value="${root.dir}/extern/nunit/nunit-console.exe" overwrite="false" />
+		<property name="nunit-console" value="${root.dir}/tools/nunit/nunit-console.exe" overwrite="false" />
 
 		<!-- Where is NCover? (on 64-bit Windows NAnt's get-folder-path() returns the x86 directory which is not what we want) -->
 		<property name="ncover.dir" value="C:\Program Files\NCover" overwrite="false" />

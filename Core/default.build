@@ -5,9 +5,9 @@
 	<property name="build.warnaserrors" value="false"/>
 		
 	<target name="build" depends="common.init">
-		<fileset id="project.references" basedir="../extern">
+		<fileset id="project.references" basedir="../lib">
 			<include name="ICSharpCode.SharpZipLib.dll" />
-			<include name="FileMap/Winterdom.IO.FileMap.dll" />
+			<include name="Winterdom.IO.FileMap.dll" />
 			<include name="Tamir.SharpSSH.dll" />
 		</fileset>
 		<call target="common.copy-references"/>

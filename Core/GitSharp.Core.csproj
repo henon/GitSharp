@@ -37,23 +37,22 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.85.4.369, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\extern\ICSharpCode.SharpZipLib.dll</HintPath>
+      <HintPath>..\lib\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="Tamir.SharpSSH, Version=1.1.1.13, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\extern\Tamir.SharpSSH.dll</HintPath>
+      <HintPath>..\lib\Tamir.SharpSSH.dll</HintPath>
     </Reference>
-    <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5">
+    <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\extern\FileMap\Winterdom.IO.FileMap.dll</HintPath>
+      <HintPath>..\lib\Winterdom.IO.FileMap.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

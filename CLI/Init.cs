@@ -37,6 +37,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace GitSharp.CLI
@@ -47,28 +48,43 @@ namespace GitSharp.CLI
     {
         private Git.InitCommand cmd = new Git.InitCommand();
 
+        private static Boolean isHelp = false;
+
         public override void Run(string[] args)
         {
-            cmd.OutputStream = this.OutputStream;
             cmd.Quiet = false; // [henon] the api defines the commands quiet by default. thus we need to override with git's default here.
+            
             options = new CmdParserOptionSet
-                          {
-                              {"bare", "Create a bare repository", v => cmd.Bare = true},
-                              {"quiet|q", "Only print error and warning messages, all other output will be suppressed.", v => cmd.Quiet = true},
-                              {"template", "Not supported.", var => OutputStream.WriteLine("--template=<template dir> is not supported")},
-                              {"shared", "Not supported.", var => OutputStream.WriteLine("--shared is not supported")},
-                          };
+            {
+                {"bare", "Create a bare repository", v => cmd.Bare = true},
+                {"quiet|q", "Only print error and warning messages, all other output will be suppressed.", v => cmd.Quiet = true},
+                {"template", "Not supported.", var => OutputStream.WriteLine("--template=<template dir> is not supported")},
+                {"shared", "Not supported.", var => OutputStream.WriteLine("--shared is not supported")},
+            };
 
-            arguments = options.Parse(args);
+            try
+            {
+                List<String> arguments = ParseOptions(args);
+                cmd.Execute();
+            }
+            catch (Exception e)
+            {
+                cmd.OutputStream.WriteLine(e.Message);
+            }
 
-            cmd.Execute();
         }
 
-        public override bool RequiresRepository()
+        private void OfflineHelp()
         {
-            return false;
+            if (!isHelp)
+            {
+                isHelp = true;
+                cmd.OutputStream.WriteLine("usage: git init [options] [directory]");
+                cmd.OutputStream.WriteLine();
+                options.WriteOptionDescriptions(Console.Out);
+                cmd.OutputStream.WriteLine();
+            }
         }
-
         //private void create()
         //{
         //    if (gitdir == null)

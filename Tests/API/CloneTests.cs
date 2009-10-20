@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -40,49 +40,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+
 using System.IO;
 
 namespace Git.Tests
 {
     [TestFixture]
-    public class RepositoryTests : GitSharp.Tests.RepositoryTestCase
+    public class CloneTests : GitSharp.Tests.RepositoryTestCase
     {
-
-        
         [Test]
-        public void Honors_EnvVar_GIT_DIR()
+        public void IsNonBareValid()
         {
-            //Store GIT_DIR value temporarily
-            string tempGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
-
-            //Verify Environment Variable GIT_DIR
-            DirectoryInfo path = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "test1"));
-            System.Environment.SetEnvironmentVariable("GIT_DIR", path.FullName);
-            DirectoryInfo result = Git.Commands.FindGitDirectory(path, false, false);
-            Assert.AreEqual(result.FullName, Path.Combine(path.FullName, ".git"));
-
-            //Reset GIT_DIR value to initial value before the test
-            System.Environment.SetEnvironmentVariable("GIT_DIR", tempGitDir);
+           DirectoryInfo toPath = new DirectoryInfo(Path.Combine(trash.FullName, "test"));
+           string fromUrl = "git://github.com/henon/jgit.git";
+           Git.Commands.Clone(fromUrl, toPath, true);
+           Assert.IsTrue(Repository.IsValid(toPath.FullName, false));
+           //Todo: Assert.IsTrue(Verify Repository against fromUrl)
+           
         }
-        
-        [Test]
-        public void Honors_CLI_Option_GIT_DIR()
-        {
-        	//Verify specified directory
-            DirectoryInfo path = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "test"));
-            Git.Commands.GitDirectory = path;
-            DirectoryInfo result = Git.Commands.FindGitDirectory(path, false, false);
-            Assert.AreEqual(Path.Combine(path.FullName,".git"), result.FullName);
-        	Git.Commands.GitDirectory = null;
-        }
-        
-        [Test]
-        public void Honors_CurrentDirectory()
-        {
-        	//Verify current directory (default, if the other three tests are empty)
-            DirectoryInfo path = new DirectoryInfo(Directory.GetCurrentDirectory());
-            DirectoryInfo result = Git.Commands.FindGitDirectory(path, false, false);
-        	Assert.AreEqual(result.FullName, Path.Combine(path.FullName,".git"));
-		}
-    }
+	}
 }

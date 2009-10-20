@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -68,32 +68,73 @@ namespace Git
         private static StreamWriter _output;
 
         /// <summary>
+        /// Performs upward recursive lookup to return git directory. Usage of GIT_DIR and --git-dir apply.
+        /// </summary>
+        /// <param name="useRoot"></param>
+        /// <returns></returns>
+        public static DirectoryInfo FindGitDirectory(DirectoryInfo rootDirectory, bool recursive, bool isBare)
+        {
+            DirectoryInfo directory = null;
+            DirectoryInfo gitDir = null;
+            string envGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
+            
+            //Determine which git directory to use
+            if (rootDirectory != null)         	//Directory specified by --git-dir 
+                directory = rootDirectory;
+            else if (envGitDir != null) 		//Directory specified by $GIT_DIR
+            	directory = new DirectoryInfo(envGitDir);
+            else                        		//Current Directory
+            {
+                DirectoryInfo current = new DirectoryInfo(Directory.GetCurrentDirectory());
+
+                if (recursive)
+                {
+                    //Check for non-bare repositories
+                    if (!isBare)
+                    {
+                    	while (current != null)
+                    	{
+                        	gitDir = new DirectoryInfo(Path.Combine(current.FullName, ".git"));
+                        	if (gitDir.Exists)
+                            	return current.Parent;
+
+                        	current = current.Parent;
+                    	}
+                    }
+                    else
+                    {
+                    	//Check for bare repositories
+                    	while (current != null)
+                    	{
+                    	    gitDir = new DirectoryInfo(current.FullName);
+                     	   	if (gitDir.FullName.EndsWith(".git") && gitDir.Exists)
+                     	       return current;
+
+                        	current = current.Parent;
+                    	}
+                    }
+                }
+            }
+            
+            if (!directory.FullName.EndsWith(".git"))
+            {
+            	if (!isBare)
+            		directory = new DirectoryInfo(Path.Combine(directory.FullName,".git"));
+            	else
+            		directory = new DirectoryInfo(directory.FullName+".git");
+            }
+
+            
+            return directory;
+        }
+
+        /// <summary>
         /// Get or set the root git repository. By default, this returns the git repository the command is initialized in. Overriden by using --git-dir or $GITDIR respectively.
         /// </summary>
         public static GitSharp.Core.Repository GitRepository
         {
             get
             {
-                if (_gitRepository == null)
-                {
-                    string gitdir = "";
-                    string envGitDir = GitSharp.Core.SystemReader.getInstance().getenv("GIT_DIR");
-
-                    //Determine which git directory to use
-                    if (GitDirectory != null)    //Directory specified by --git-dir 
-                        gitdir = GitDirectory;
-                    else if (envGitDir != null)  //Directory specified by $GIT_DIR
-                        gitdir = envGitDir;
-                    else                         //Local Directory
-                        gitdir = ".";
-
-                    DirectoryInfo di = new DirectoryInfo(gitdir);
-                    if (di.Exists == false)
-                        throw new ArgumentException("--git-dir specified a non-existent directory", "GitDirectory");
-                    
-                    _gitRepository = GitSharp.Core.SystemReader.getInstance().getRepositoryRoot(gitdir);
-
-                }
                 return _gitRepository;
             }
             set
@@ -104,9 +145,9 @@ namespace Git
         private static GitSharp.Core.Repository _gitRepository = null;
 
         /// <summary>
-        /// Get or set the root git directory. Per default, this returns the root git directory the command is initialized in.
+        /// Get or set the git directory. Per default, this returns the root git directory the command is initialized in.
         /// </summary>
-        public static String GitDirectory
+        public static DirectoryInfo GitDirectory
         {
             get
             {
@@ -117,22 +158,40 @@ namespace Git
                 _gitDirectory = value;
             }
         }
-        private static String _gitDirectory = null;
+        private static DirectoryInfo _gitDirectory = null;
 
+        #region CloneCommand
+        public static void Clone(string fromUrl, DirectoryInfo toPath, bool isQuiet)
+        {
+            CloneCommand cmd = new CloneCommand();
+            if (cmd != null)
+            {
+        		cmd.Path = fromUrl;
+        		cmd.Directory = toPath.FullName;
+        		cmd.Quiet = isQuiet;
+        		cmd.Execute();
+            }
+        }
+        #endregion
+        
+        #region InitCommand
         public static void Init()
         {
             Repository.Init();
         }
 
-        public static void Init(string path)
+        public static void Init(bool bare)
         {
-            Repository.Init(path);
+        	Repository.Init(bare);
         }
-
+        
         public static void Init(InitCommand command)
         {
             command.Execute();
         }
+        
+        #endregion
+        
 
     }
 }

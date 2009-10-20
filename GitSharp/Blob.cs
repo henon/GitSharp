@@ -45,11 +45,16 @@ using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
 using CoreTag = GitSharp.Core.Tag;
+using System.IO;
 
 namespace Git
 {
+    /// <summary>
+    /// Represents a specific version of the content of a file tracked by git.
+    /// </summary>
     public class Blob : AbstractObject
     {
+
         internal Blob(Repository repo, ObjectId id)
             : base(repo, id)
         {
@@ -61,8 +66,13 @@ namespace Git
             _blob = blob;
         }
 
+        public Blob(Repository repo, string hash) : base(repo, hash) { }
+
         private byte[] _blob;
 
+        /// <summary>
+        /// Get the uncompressed contents of this blob
+        /// </summary>
         public string Data
         {
             get
@@ -78,6 +88,9 @@ namespace Git
             }
         }
 
+        /// <summary>
+        /// Get the compressed raw data of the blob
+        /// </summary>
         public byte[] RawData
         {
             get
@@ -89,6 +102,54 @@ namespace Git
         public override string ToString()
         {
             return "Blob[" + ShortHash + "]";
+        }
+
+        /// <summary>
+        /// Create a new Blob containing the given string data as content. The string will be encoded as UTF8
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public static Blob Create(Repository repo, string content)
+        {
+            return Create(repo, content, Encoding.UTF8);
+        }
+
+        /// <summary>
+        /// Create a new Blob containing the given string data as content. The string will be encoded by the submitted encoding
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public static Blob Create(Repository repo, string content, Encoding encoding)
+        {
+            return Create(repo, encoding.GetBytes(content));
+        }
+
+        /// <summary>
+        /// Create a new Blob containing the contents of the given file.
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public static Blob CreateFromFile(Repository repo, string path)
+        {
+            if (new FileInfo(path).Exists == false)
+                throw new ArgumentException("File does not exist", "path");
+            return Create(repo, File.ReadAllBytes(path)); 
+        }
+
+        /// <summary>
+        /// Create a new Blob containing exactly the bytes given.
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public static Blob Create(Repository repo, byte[] content)
+        {
+            var db = repo._internal_repo;
+            var id = new GitSharp.Core.ObjectWriter(db).WriteBlob(content);
+            return new Blob(repo, id, content);
         }
 
     }

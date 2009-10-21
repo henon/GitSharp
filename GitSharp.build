@@ -37,11 +37,7 @@
   <target name="dist" depends="run-tests, package"/>
 
   <target name="compile-core" depends="init">
-    <property name="project.dir" value="${path.base}/Core" />
-
-    <fileset id="project.sources" failonempty="true">
-      <include name="${project.dir}/**/*.cs" />
-    </fileset>
+    <property name="assembly.name.suffix" value="Core" />
 
     <fileset id="project.references" basedir="${path.lib}" >
       <include name="ICSharpCode.SharpZipLib.dll" />
@@ -49,30 +45,33 @@
       <include name="Tamir.SharpSSH.dll" />
     </fileset>
 
-    <csc target="library"
-         debug="Enable"
-         optimize="${build.optimize}"
-         output="${path.build.output}/${project::get-name()}.dll"
-         doc="${path.build.output}/${project::get-name()}.xml" >
-      <sources refid="project.sources" />
-      <references refid="project.references" />
-      <nowarn>
-        <!-- No warning when public members lack XML comments -->
-        <warning number="1591" />
-      </nowarn>
-    </csc>
+    <call target="compile-dll" />
   </target>
 
-  <target name="compile-cli" depends="compile-core">
+  <target name="compile-cli" depends="compile-gitsharp">
+    <property name="assembly.name.suffix" value="CLI" />
+
+    <fileset id="project.references" basedir="${path.build.output}" >
+      <include name="*.dll" />
+    </fileset>
+
+    <call target="compile-dll" />
   </target>
 
-  <target name="compile-gitsharp" depends="compile-cli">
+  <target name="compile-gitsharp" depends="compile-core">
+    <property name="assembly.name.suffix" value="" />
+
+    <fileset id="project.references" basedir="${path.build.output}" >
+      <include name="*.dll" />
+    </fileset>
+
+    <call target="compile-dll" />
   </target>
 
   <target name="run-tests"  depends="compile-tests">
   </target>
 
-  <target name="compile-tests" depends="compile-gitsharp">
+  <target name="compile-tests" depends="compile-cli">
   </target>
 
   <target name="init">
@@ -104,4 +103,30 @@
     <property name="build.optimize"	value="true" />
   </target>
 
+  <target name="compile-dll">
+    <property name="assembly.name" value="GitSharp"/>
+    <property name="assembly.name" value="${assembly.name}.${assembly.name.suffix}" unless="${string::get-length(assembly.name.suffix) == 0}" />
+
+    <property name="project.directory" value="GitSharp"/>
+    <property name="project.directory" value="${assembly.name.suffix}" unless="${string::get-length(assembly.name.suffix) == 0}" />
+
+    <property name="project.sources.path" value="${path.base}/${project.directory}"/>
+
+    <fileset id="project.sources" failonempty="true">
+      <include name="${project.sources.path}/**/*.cs" />
+    </fileset>
+
+    <csc target="library"
+         debug="Enable"
+         optimize="${build.optimize}"
+         output="${path.build.output}/${assembly.name}.dll"
+         doc="${path.build.output}/${assembly.name}.xml" >
+      <sources refid="project.sources" />
+      <references refid="project.references" />
+      <nowarn>
+        <!-- No warning when public members lack XML comments -->
+        <warning number="1591" />
+      </nowarn>
+    </csc>
+  </target> 
 </project>

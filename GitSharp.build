@@ -2,23 +2,21 @@
 <project name="GitSharp" default="run-tests">
 
   <property name="build.config" value="debug" overwrite="false" />
-  <property name="build.platform" value="net3.5" overwrite="false" />
-  <property name="build.debug" value="${build.config == 'debug'}" overwrite="false" />
-  <property name="build.optimize" value="${build.config != 'debug'}" overwrite="false"/>
+  <property name="build.platform" value="${nant.settings.currentframework}" />
+  <property name="build.defines" value="TRACE" />
 
   <property name="path.base" value="${project::get-base-directory()}"/>
   <property name="path.build" value="${path.base}/build"/>
-  <property name="path.lib" value="${path.base}/extern"/>
+  <property name="path.lib" value="${path.base}/lib"/>
   <property name="path.dist" value="${path.base}/dist"/>
-  <property name="path.src" value="${path.base}/src"/>
-  <property name="path.tools" value="${path.base}/extern"/>
-  <property name="path.tools.nunit" value="${path.tools}/extern/nunit"/>
+  <property name="path.tools" value="${path.base}/tools"/>
+  <property name="path.tools.nunit" value="${path.tools}/nunit"/>
 
   <echo message="path.base = ${path.base}" />
 
   <!-- Revision version detection. If build.vcs.number hasn't been passed through command line argument, version revision is set to 'local-build' -->
   <property name="build.vcs.number" value="" overwrite="false"/>
-  <property name="version.revision" value="local-build" verbose="true" />
+  <property name="version.revision" value="local-build" />
 
   <if test="${(string::get-length(build.vcs.number) != 0)}">
     <property name="version.revision" value="${build.vcs.number}" />
@@ -39,6 +37,30 @@
   <target name="dist" depends="run-tests, package"/>
 
   <target name="compile-core" depends="init">
+    <property name="project.dir" value="${path.base}/Core" />
+
+    <fileset id="project.sources" failonempty="true">
+      <include name="${project.dir}/**/*.cs" />
+    </fileset>
+
+    <fileset id="project.references" basedir="${path.lib}" >
+      <include name="ICSharpCode.SharpZipLib.dll" />
+      <include name="Winterdom.IO.FileMap.dll" />
+      <include name="Tamir.SharpSSH.dll" />
+    </fileset>
+
+    <csc target="library"
+         debug="Enable"
+         optimize="${build.optimize}"
+         output="${path.build.output}/${project::get-name()}.dll"
+         doc="${path.build.output}/${project::get-name()}.xml" >
+      <sources refid="project.sources" />
+      <references refid="project.references" />
+      <nowarn>
+        <!-- No warning when public members lack XML comments -->
+        <warning number="1591" />
+      </nowarn>
+    </csc>
   </target>
 
   <target name="compile-cli" depends="compile-core">
@@ -58,21 +80,28 @@
 
     <mkdir dir="${path.build}" if="${not(directory::exists(path.build))}"/>
 
-    <property name="current.path.build" value="${path.build}/${build.platform}/${build.config}"/>
-    <property name="current.path.build.lib" value="${path.build}/${build.platform}/${build.config}/lib"/>
-    <property name="current.path.testresults" value="${path.build}/${build.platform}/test-results" />
+    <property name="path.build.output" value="${path.build}/${build.platform}/${build.config}/bin"/>
+    <property name="path.testresults" value="${path.build}/${build.platform}/${build.config}/test-results" />
 
     <echo message="build.version = ${build.version}"/>
-    <echo message="current.path.build = ${current.path.build}"/>
-    <echo message="current.path.build.lib = ${current.path.build.lib}"/>
-    <echo message="current.path.testresults = ${current.path.testresults}"/>
+    <echo message="path.build.output = ${path.build.output}"/>
+    <echo message="path.testresults = ${path.testresults}"/>
 
-    <mkdir dir="${current.path.build}" if="${not(directory::exists(current.path.build))}"/>
-    <mkdir dir="${current.path.build.lib}" if="${not(directory::exists(current.path.build.lib))}"/>
+    <mkdir dir="${path.build.output}" if="${not(directory::exists(path.build.output))}"/>
+
+    <call target="set-${build.config}-project-configuration" />
   </target>
 
   <target name="package">
     <mkdir dir="${path.dist}" if="${not(directory::exists(path.dist))}"/>
+  </target>
+
+  <target name="set-debug-project-configuration" >
+    <property name="build.optimize"	value="false" />
+  </target>
+
+  <target name="set-release-project-configuration" >
+    <property name="build.optimize"	value="true" />
   </target>
 
 </project>

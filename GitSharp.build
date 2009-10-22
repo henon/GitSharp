@@ -15,11 +15,11 @@
   <echo message="path.base = ${path.base}" />
 
   <!-- Revision version detection. If build.vcs.number hasn't been passed through command line argument, version revision is set to 'local-build' -->
-  <property name="build.vcs.number" value="" overwrite="false"/>
+  <property name="build.vcs.number.1" value="" overwrite="false"/>
   <property name="version.revision" value="local-build" />
 
-  <if test="${(string::get-length(build.vcs.number) != 0)}">
-    <property name="version.revision" value="${build.vcs.number}" />
+  <if test="${(string::get-length(build.vcs.number.1) != 0)}">
+    <property name="version.revision" value="${build.vcs.number.1}" />
   </if>
 
   <!--<property name="version.major" value="${version::get-major(version::parse(version))}" dynamic="true"/>

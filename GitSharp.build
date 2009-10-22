@@ -22,9 +22,6 @@
     <property name="version.revision" value="${build.vcs.number.1}" />
   </if>
 
-  <!--<property name="version.major" value="${version::get-major(version::parse(version))}" dynamic="true"/>
-  <property name="version.minor" value="${version::get-minor(version::parse(version))}" dynamic="true"/>
-  <property name="version.build" value="${version::get-build(version::parse(version))}" dynamic="true"/>-->
   <property name="build.version" value="${version}.${version.revision}" dynamic="true"/>
 
   <target name="rebuild" depends="clean, run-tests"/>
@@ -104,6 +101,9 @@
   </target>
 
   <target name="compile-dll">
+
+    <call target="copy-references"/>
+    
     <property name="assembly.name" value="GitSharp"/>
     <property name="assembly.name" value="${assembly.name}.${assembly.name.suffix}" unless="${string::get-length(assembly.name.suffix) == 0}" />
 
@@ -129,4 +129,16 @@
       </nowarn>
     </csc>
   </target>
+
+  <target name="copy-references">
+    <foreach item="File" property="reference">
+      <in>
+        <items refid="project.references" />
+      </in>
+      <do>
+        <copy file="${reference}" todir="${path.build.output}" overwrite="true" />
+      </do>
+    </foreach>
+  </target>
+
 </project>

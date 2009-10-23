@@ -109,12 +109,14 @@ namespace GitSharp.Core
                 switch (key)
                 {
                     case Constants.OS_USER_NAME_KEY:
-                        System.Security.Principal.WindowsIdentity ident = System.Security.Principal.WindowsIdentity.GetCurrent();
-                        result = ident.Name;
-                        int index = result.LastIndexOf('\\');
-                        if (result.Length >= index+1)
-                            result = result.Substring(index+1);
-                        break;
+                        using (System.Security.Principal.WindowsIdentity ident = System.Security.Principal.WindowsIdentity.GetCurrent())
+					    {
+						    result = ident.Name;
+                            int index = result.LastIndexOf('\\');
+                            if (result.Length >= index+1)
+                                result = result.Substring(index+1);
+                            break;
+				        }
                     default:
                         throw new NotImplementedException("The " + key + " property has not been implemented. This was a Java feature.");        
                 }

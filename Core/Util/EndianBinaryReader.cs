@@ -345,9 +345,9 @@ namespace MiscUtil.IO
 		public int Read(char[] data, int index, int count)
 		{
 			CheckDisposed();
-			if (buffer==null)
+			if (data==null)
 			{
-				throw new ArgumentNullException("buffer");
+				throw new ArgumentNullException("data");
 			}
 			if (index < 0)
 			{

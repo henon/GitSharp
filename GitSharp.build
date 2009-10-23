@@ -104,23 +104,23 @@
 
 
 
-    <property name="nunitcommandline" value="${path.build.output}/GitSharp.Tests.dll /xml:${path.testresults}/GitSharp.Tests.dll-results.xml /noshadow " />
+    <!--<property name="nunitcommandline" value="${path.build.output}/GitSharp.Tests.dll /xml:${path.testresults}/GitSharp.Tests.dll-results.xml /noshadow " />
     <if test="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}">
       <property name="nunitcommandline" value="${path.build.output}/GitSharp.Tests.dll -xml:${path.testresults}/GitSharp.Tests.dll-results.xml -noshadow " />
-    </if>
+    </if>-->
 
-    <!--<nunit2>
-      <formatter type="Xml" usefile="true" extension=".xml"
+    <nunit2>
+      <formatter type="Plain" usefile="true" extension=".txt"
 				outputdir="${path.testresults}"/>
       <test assemblyname="${path.build.output}/GitSharp.Tests.dll"/>
-    </nunit2>-->
+    </nunit2>
 
-    <exec
+    <!--<exec
       program="${path.tools.nunit}/nunit-console.exe"
       workingdir="${path.build.output}"
       commandline="${nunitcommandline}"
       failonerror="true"
-			/>
+			/>-->
   </target>
 
   <target name="init">

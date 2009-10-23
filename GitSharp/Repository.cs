@@ -167,33 +167,33 @@ namespace Git
         /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
         public static bool IsValid(string gitdir, bool bare)
         {
-        	if (!bare)
-        	{
+            if (!bare)
+            {
                 if (!bare && !Regex.IsMatch(gitdir, "\\.git[/\\\\]?$"))
                     gitdir = Path.Combine(gitdir, ".git");
-            	if (!DirExists(gitdir))
-            	   return false;
-            	if (!DirExists(Path.Combine(gitdir, "objects")))
-             	   return false;
+                if (!DirExists(gitdir))
+                    return false;
+                if (!DirExists(Path.Combine(gitdir, "objects")))
+                    return false;
                 if (!DirExists(Path.Combine(gitdir, "objects/info")))
                     return false;
                 if (!DirExists(Path.Combine(gitdir, "objects/pack")))
                     return false;
-            	if (!DirExists(Path.Combine(gitdir, "refs")))
-             	   return false;
+                if (!DirExists(Path.Combine(gitdir, "refs")))
+                    return false;
                 if (!DirExists(Path.Combine(gitdir, "refs/heads")))
                     return false;
                 if (!DirExists(Path.Combine(gitdir, "refs/tags")))
                     return false;
                 if (!FileExists(Path.Combine(gitdir, "config")))
-            	    return false;
-            	if (!FileExists(Path.Combine(gitdir, "HEAD")))
-            	    return false;
-            	//Set the root directory (the parent of the .git directory)
-            	//  for load testing
-            	//gitdir = gitdir.Substring(0,gitdir.Length-4);
-        	}
-			else
+                    return false;
+                if (!FileExists(Path.Combine(gitdir, "HEAD")))
+                    return false;
+                //Set the root directory (the parent of the .git directory)
+                //  for load testing
+                //gitdir = gitdir.Substring(0,gitdir.Length-4);
+            }
+            else
             {
                 //In progress
                 throw new NotImplementedException();
@@ -323,8 +323,7 @@ namespace Git
         public static Repository Init(bool bare)
         {
             var cmd = new InitCommand() { Bare = bare };
-            cmd.Execute();
-            return cmd.InitializedRepository;
+            return Init(cmd);
         }
 
         /// <summary>
@@ -335,6 +334,7 @@ namespace Git
         /// <returns></returns>
         public static Repository Init(InitCommand cmd)
         {
+            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(new DirectoryInfo(cmd.Path), false, cmd.Bare);
             cmd.Execute();
             return cmd.InitializedRepository;
         }

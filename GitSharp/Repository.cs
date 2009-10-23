@@ -334,7 +334,6 @@ namespace Git
         /// <returns></returns>
         public static Repository Init(InitCommand cmd)
         {
-            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(new DirectoryInfo(cmd.Path), false, cmd.Bare);
             cmd.Execute();
             return cmd.InitializedRepository;
         }

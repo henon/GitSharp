@@ -12,8 +12,6 @@
   <property name="path.tools" value="${path.base}/tools"/>
   <property name="path.tools.nunit" value="${path.tools}/nunit"/>
 
-  <echo message="path.base = ${path.base}" />
-
   <!-- Revision version detection. If build.vcs.number hasn't been passed through command line argument, version revision is set to 'local-build' -->
   <property name="build.vcs.number.1" value="" overwrite="false"/>
   <property name="version.revision" value="local-build" />
@@ -49,7 +47,8 @@
     <property name="assembly.name.suffix" value="CLI" />
 
     <fileset id="project.references" basedir="${path.build.output}" >
-      <include name="*.dll" />
+      <include name="GitSharp.dll" />
+      <include name="GitSharp.Core.dll" />
     </fileset>
 
     <call target="compile-dll" />
@@ -59,7 +58,19 @@
     <property name="assembly.name.suffix" value="" />
 
     <fileset id="project.references" basedir="${path.build.output}" >
-      <include name="*.dll" />
+      <include name="GitSharp.Core.dll" />
+    </fileset>
+
+    <call target="compile-dll" />
+  </target>
+
+  <target name="compile-tests" depends="compile-cli">
+    <property name="assembly.name.suffix" value="Tests" />
+
+    <fileset id="project.references" >
+      <include name="${path.build.output}/GitSharp.dll" />
+      <include name="${path.build.output}/GitSharp.Core.dll" />
+      <include name="${path.tools.nunit}/nunit.framework.dll" />
     </fileset>
 
     <call target="compile-dll" />
@@ -68,16 +79,13 @@
   <target name="run-tests"  depends="compile-tests">
   </target>
 
-  <target name="compile-tests" depends="compile-cli">
-  </target>
-
   <target name="init">
     <loadfile file="version.txt" property="version" />
 
     <mkdir dir="${path.build}" if="${not(directory::exists(path.build))}"/>
 
-    <property name="path.build.output" value="${path.build}/${build.platform}/${build.config}/bin"/>
-    <property name="path.testresults" value="${path.build}/${build.platform}/${build.config}/test-results" />
+    <property name="path.build.output" value="${path.build}/${build.platform}-${build.config}/bin"/>
+    <property name="path.testresults" value="${path.build}/${build.platform}-${build.config}/test-results" />
 
     <echo message="build.version = ${build.version}"/>
     <echo message="path.build.output = ${path.build.output}"/>
@@ -136,7 +144,8 @@
         <items refid="project.references" />
       </in>
       <do>
-        <copy file="${reference}" todir="${path.build.output}" overwrite="true" />
+        <echo message="reference = ${reference}"/>
+        <copy file="${reference}" todir="${path.build.output}" />
       </do>
     </foreach>
   </target>

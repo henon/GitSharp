@@ -105,9 +105,9 @@
 
 
     <property name="nunitcommandline" value="${path.build.output}/GitSharp.Tests.dll /xml:${path.testresults}/GitSharp.Tests.dll-results.xml /noshadow " />
-    <!--<if test="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}">
+    <if test="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}">
       <property name="nunitcommandline" value="${path.build.output}/GitSharp.Tests.dll -xml:${path.testresults}/GitSharp.Tests.dll-results.xml -noshadow " />
-    </if>-->
+    </if>
 
     <!--<nunit2>
       <formatter type="Xml" usefile="true" extension=".xml"

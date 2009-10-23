@@ -1,0 +1,144 @@
+﻿<?xml version="1.0"?>
+<project name="GitSharp" default="run-tests">
+
+  <property name="build.config" value="debug" overwrite="false" />
+  <property name="build.platform" value="${nant.settings.currentframework}" />
+  <property name="build.defines" value="TRACE" />
+
+  <property name="path.base" value="${project::get-base-directory()}"/>
+  <property name="path.build" value="${path.base}/build"/>
+  <property name="path.lib" value="${path.base}/lib"/>
+  <property name="path.dist" value="${path.base}/dist"/>
+  <property name="path.tools" value="${path.base}/tools"/>
+  <property name="path.tools.nunit" value="${path.tools}/nunit"/>
+
+  <echo message="path.base = ${path.base}" />
+
+  <!-- Revision version detection. If build.vcs.number hasn't been passed through command line argument, version revision is set to 'local-build' -->
+  <property name="build.vcs.number.1" value="" overwrite="false"/>
+  <property name="version.revision" value="local-build" />
+
+  <if test="${(string::get-length(build.vcs.number.1) != 0)}">
+    <property name="version.revision" value="${build.vcs.number.1}" />
+  </if>
+
+  <property name="build.version" value="${version}.${version.revision}" dynamic="true"/>
+
+  <target name="rebuild" depends="clean, run-tests"/>
+
+  <target name="clean">
+    <delete dir="${path.build}" if="${directory::exists(path.build)}"/>
+    <delete dir="${path.dist}" if="${directory::exists(path.dist)}"/>
+  </target>
+
+  <target name="dist" depends="run-tests, package"/>
+
+  <target name="compile-core" depends="init">
+    <property name="assembly.name.suffix" value="Core" />
+
+    <fileset id="project.references" basedir="${path.lib}" >
+      <include name="ICSharpCode.SharpZipLib.dll" />
+      <include name="Winterdom.IO.FileMap.dll" />
+      <include name="Tamir.SharpSSH.dll" />
+    </fileset>
+
+    <call target="compile-dll" />
+  </target>
+
+  <target name="compile-cli" depends="compile-gitsharp">
+    <property name="assembly.name.suffix" value="CLI" />
+
+    <fileset id="project.references" basedir="${path.build.output}" >
+      <include name="*.dll" />
+    </fileset>
+
+    <call target="compile-dll" />
+  </target>
+
+  <target name="compile-gitsharp" depends="compile-core">
+    <property name="assembly.name.suffix" value="" />
+
+    <fileset id="project.references" basedir="${path.build.output}" >
+      <include name="*.dll" />
+    </fileset>
+
+    <call target="compile-dll" />
+  </target>
+
+  <target name="run-tests"  depends="compile-tests">
+  </target>
+
+  <target name="compile-tests" depends="compile-cli">
+  </target>
+
+  <target name="init">
+    <loadfile file="version.txt" property="version" />
+
+    <mkdir dir="${path.build}" if="${not(directory::exists(path.build))}"/>
+
+    <property name="path.build.output" value="${path.build}/${build.platform}/${build.config}/bin"/>
+    <property name="path.testresults" value="${path.build}/${build.platform}/${build.config}/test-results" />
+
+    <echo message="build.version = ${build.version}"/>
+    <echo message="path.build.output = ${path.build.output}"/>
+    <echo message="path.testresults = ${path.testresults}"/>
+
+    <mkdir dir="${path.build.output}" if="${not(directory::exists(path.build.output))}"/>
+
+    <call target="set-${build.config}-project-configuration" />
+  </target>
+
+  <target name="package">
+    <mkdir dir="${path.dist}" if="${not(directory::exists(path.dist))}"/>
+  </target>
+
+  <target name="set-debug-project-configuration" >
+    <property name="build.optimize"	value="false" />
+  </target>
+
+  <target name="set-release-project-configuration" >
+    <property name="build.optimize"	value="true" />
+  </target>
+
+  <target name="compile-dll">
+
+    <call target="copy-references"/>
+    
+    <property name="assembly.name" value="GitSharp"/>
+    <property name="assembly.name" value="${assembly.name}.${assembly.name.suffix}" unless="${string::get-length(assembly.name.suffix) == 0}" />
+
+    <property name="project.directory" value="GitSharp"/>
+    <property name="project.directory" value="${assembly.name.suffix}" unless="${string::get-length(assembly.name.suffix) == 0}" />
+
+    <property name="project.sources.path" value="${path.base}/${project.directory}"/>
+
+    <fileset id="project.sources" failonempty="true">
+      <include name="${project.sources.path}/**/*.cs" />
+    </fileset>
+
+    <csc target="library"
+         debug="Enable"
+         optimize="${build.optimize}"
+         output="${path.build.output}/${assembly.name}.dll"
+         doc="${path.build.output}/${assembly.name}.xml" >
+      <sources refid="project.sources" />
+      <references refid="project.references" />
+      <nowarn>
+        <!-- No warning when public members lack XML comments -->
+        <warning number="1591" />
+      </nowarn>
+    </csc>
+  </target>
+
+  <target name="copy-references">
+    <foreach item="File" property="reference">
+      <in>
+        <items refid="project.references" />
+      </in>
+      <do>
+        <copy file="${reference}" todir="${path.build.output}" overwrite="true" />
+      </do>
+    </foreach>
+  </target>
+
+</project>

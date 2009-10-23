@@ -289,6 +289,14 @@ namespace Git
             }
         }
 
+        public Config Config
+        {
+            get
+            {
+                return new Config(this);
+            }
+        }
+
         public override string ToString()
         {
             return "Repository[" + Directory + "]";

@@ -66,7 +66,7 @@ namespace GitSharp.Core
 		/// This state is copy-on-write. It should always contain an immutable list
 		/// of the configuration keys/values.
 		/// </summary>
-		private State _state;
+		internal State _state;
 
 		/// Magic value indicating a missing entry.
 		///	<para />
@@ -455,7 +455,7 @@ namespace GitSharp.Core
 			return curr;
 		}
 
-		private State getState()
+		internal State getState()
 		{
 			State cur = _state;
 			State @base = getBaseState();
@@ -749,7 +749,7 @@ namespace GitSharp.Core
 			return o.ToString();
 		}
 
-		protected void AddEntry(Entry e)
+		internal void AddEntry(Entry e)
 		{
 			_state.EntryList.Add(e);
 		}
@@ -1097,7 +1097,7 @@ namespace GitSharp.Core
 		/// <summary>
 		/// The configuration file entry.
 		/// </summary>
-		protected class Entry
+		internal class Entry
 		{
 			/// <summary>
 			/// The key name.
@@ -1202,7 +1202,7 @@ namespace GitSharp.Core
 
 		#region Nested type: State
 
-		private class State
+		internal class State
 		{
 			public readonly State baseState;
 			public readonly Dictionary<object, object> Cache;

@@ -77,6 +77,50 @@
   </target>
 
   <target name="run-tests"  depends="compile-tests">
+    <property name="path.testresults" value="${path.build}/${build.platform}-${build.config}/test-results" />
+    <mkdir dir="${path.testresults}" if="${not(directory::exists(path.testresults))}"/>
+    <echo message="path.testresults = ${path.testresults}"/>
+
+    <copy todir="${path.build.output}/Resources">
+      <fileset basedir="${path.base}/Tests/Resources">
+        <include name="**" />
+      </fileset>
+    </copy>
+    <copy todir="${path.build.output}/Diff/Resources">
+      <fileset basedir="${path.base}/Tests/Diff/Resources">
+        <include name="**" />
+      </fileset>
+    </copy>
+    <copy todir="${path.build.output}/Patch/Resources">
+      <fileset basedir="${path.base}/Tests/Patch/Resources">
+        <include name="**" />
+      </fileset>
+    </copy>
+    <copy todir="${path.build.output}/sample.git">
+      <fileset basedir="${path.base}/Tests/sample.git">
+        <include name="**" />
+      </fileset>
+    </copy>
+
+
+
+    <!--<property name="nunitcommandline" value="${path.build.output}/GitSharp.Tests.dll /xml:${path.testresults}/GitSharp.Tests.dll-results.xml /noshadow " />
+    <if test="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}">
+      <property name="nunitcommandline" value="${path.build.output}/GitSharp.Tests.dll -xml:${path.testresults}/GitSharp.Tests.dll-results.xml -noshadow " />
+    </if>-->
+
+    <nunit2>
+      <formatter type="Xml" usefile="true" extension=".xml"
+				outputdir="${path.testresults}"/>
+      <test assemblyname="${path.build.output}/GitSharp.Tests.dll"/>
+    </nunit2>
+
+    <exec
+      program="${path.tools.nunit}/nunit-console.exe"
+      workingdir="${path.build.output}"
+      commandline="${nunitcommandline}"
+      failonerror="true"
+			/>
   </target>
 
   <target name="init">
@@ -85,11 +129,9 @@
     <mkdir dir="${path.build}" if="${not(directory::exists(path.build))}"/>
 
     <property name="path.build.output" value="${path.build}/${build.platform}-${build.config}/bin"/>
-    <property name="path.testresults" value="${path.build}/${build.platform}-${build.config}/test-results" />
 
     <echo message="build.version = ${build.version}"/>
     <echo message="path.build.output = ${path.build.output}"/>
-    <echo message="path.testresults = ${path.testresults}"/>
 
     <mkdir dir="${path.build.output}" if="${not(directory::exists(path.build.output))}"/>
 

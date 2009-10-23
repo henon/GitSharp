@@ -115,12 +115,12 @@
       <test assemblyname="${path.build.output}/GitSharp.Tests.dll"/>
     </nunit2>
 
-    <exec
+    <!--<exec
       program="${path.tools.nunit}/nunit-console.exe"
       workingdir="${path.build.output}"
       commandline="${nunitcommandline}"
       failonerror="true"
-			/>
+			/>-->
   </target>
 
   <target name="init">

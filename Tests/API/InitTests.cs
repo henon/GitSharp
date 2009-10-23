@@ -48,37 +48,10 @@ namespace Git.Tests
     [TestFixture]
     public class InitTests : GitSharp.Tests.RepositoryTestCase
     {
-        [Test]
-        public void IsBare()
-        {
-            //Test bare repository
-            bool bare = true;
-            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test.git"));
-            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
-        	Git.Repository repo = Git.Repository.Init(bare);
-            //Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));  // [henon] validity is checked below
-            Assert.IsTrue(repo.IsBare);
-            Git.Commands.GitDirectory = null;
-        }
 
-        [Test]
-        public void IsNonBare()
-        {
-            //Test non-bare repository
-            bool bare = false;
-            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test"));
-            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
-            Git.Repository repo = Git.Repository.Init(bare);
-            //Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare)); // [henon] validity is checked below
-            Assert.IsFalse(repo.IsBare);
-            Git.Commands.GitDirectory = null;
-        }
-
-
-        [Test]
+    	[Test]
         public void IsBareValid()
         {
-            Assert.Ignore("Bare repo validity check is not yet implemented");
             //Test bare repository
             bool bare = true;
             DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test.git"));
@@ -86,6 +59,7 @@ namespace Git.Tests
             Git.Repository repo = Git.Repository.Init(bare);
             Assert.IsTrue(repo.IsBare);
             Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
+            Git.Commands.GitDirectory = null;
         }
 
         [Test]
@@ -97,7 +71,8 @@ namespace Git.Tests
             Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
             Git.Repository repo = Git.Repository.Init(bare);
             Assert.IsFalse(repo.IsBare);
-            Assert.IsTrue(Repository.IsValid(path.FullName, bare));
+            Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
+            Git.Commands.GitDirectory = null;
         }
 	}
 }

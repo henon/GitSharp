@@ -169,43 +169,36 @@ namespace Git
         {
             if (!bare)
             {
-                if (!bare && !Regex.IsMatch(gitdir, "\\.git[/\\\\]?$"))
+                if (!Regex.IsMatch(gitdir, "\\.git[/\\\\]?$"))
                     gitdir = Path.Combine(gitdir, ".git");
-                if (!DirExists(gitdir))
-                    return false;
-                if (!DirExists(Path.Combine(gitdir, "objects")))
-                    return false;
-                if (!DirExists(Path.Combine(gitdir, "objects/info")))
-                    return false;
-                if (!DirExists(Path.Combine(gitdir, "objects/pack")))
-                    return false;
-                if (!DirExists(Path.Combine(gitdir, "refs")))
-                    return false;
-                if (!DirExists(Path.Combine(gitdir, "refs/heads")))
-                    return false;
-                if (!DirExists(Path.Combine(gitdir, "refs/tags")))
-                    return false;
-                if (!FileExists(Path.Combine(gitdir, "config")))
-                    return false;
-                if (!FileExists(Path.Combine(gitdir, "HEAD")))
-                    return false;
-                //Set the root directory (the parent of the .git directory)
-                //  for load testing
-                //gitdir = gitdir.Substring(0,gitdir.Length-4);
             }
-            else
-            {
-                //In progress
-                throw new NotImplementedException();
-                //if (!DirExists(Path.Combine(path, "description")) && !DirExists(Path.Combine(git, "description")))
-                //    return false;
-                //if (!DirExists(Path.Combine(path, "hooks")) && !DirExists(Path.Combine(git, "hooks")))
-                //    return false;
-                //if (!DirExists(Path.Combine(path, "info")) && !DirExists(Path.Combine(git, "info")))
-                //    return false;
-                //if (!DirExists(Path.Combine(path, "packed_refs")) && !DirExists(Path.Combine(git, "packed_refs")))
-                //    return false;
-            }
+
+            if (!DirExists(gitdir))
+                return false;
+			if (!FileExists(Path.Combine(gitdir, "HEAD")))
+                return false;
+			if (!FileExists(Path.Combine(gitdir, "config")))
+                return false;
+			//if (!DirExists(Path.Combine(gitdir, "description")))
+            //    return false;
+			//if (!DirExists(Path.Combine(gitdir, "hooks")))
+            //   return false;
+            //if (!DirExists(Path.Combine(gitdir, "info")))
+            //    return false;
+            //if (!DirExists(Path.Combine(gitdir, "info/exclude")))
+            //    return false;
+ 			if (!DirExists(Path.Combine(gitdir, "objects")))
+                return false;
+            if (!DirExists(Path.Combine(gitdir, "objects/info")))
+                return false;
+            if (!DirExists(Path.Combine(gitdir, "objects/pack")))
+                return false;
+            if (!DirExists(Path.Combine(gitdir, "refs")))
+                return false;
+            if (!DirExists(Path.Combine(gitdir, "refs/heads")))
+                return false;
+            if (!DirExists(Path.Combine(gitdir, "refs/tags")))
+                return false;
 
             try
             {
@@ -219,12 +212,12 @@ namespace Git
             return true;
         }
 
-        private static bool DirExists(string path)
+        public static bool DirExists(string path)
         {
             return new DirectoryInfo(path).Exists;
         }
 
-        private static bool FileExists(string path)
+        public static bool FileExists(string path)
         {
             return new FileInfo(path).Exists;
         }

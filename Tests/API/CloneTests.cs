@@ -48,15 +48,23 @@ namespace Git.Tests
     [TestFixture]
     public class CloneTests : GitSharp.Tests.RepositoryTestCase
     {
+    	[Test]
+        public void IsLocalValid()
+        {
+        	Assert.Ignore("This test has not been implemented yet.");
+        }
+        
         [Test]
-        public void IsNonBareValid()
+        public void IsRemoteValid()
         {
            string toPath = Path.Combine(trash.FullName, "test");
            string fromUrl = "git://github.com/henon/jgit.git";
-           Git.Commands.Clone(fromUrl, toPath, true);
-           Assert.IsTrue(Repository.IsValid(toPath, false));
-           //Todo: Assert.IsTrue(Verify Repository against fromUrl)
-           
+           Git.Commands.Clone(fromUrl, toPath, false, true);
+           Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, false));
+           //Verify content is in the proper location
+           FileInfo fileInfo = new FileInfo(Path.Combine(Git.Commands.GitDirectory.FullName, "README"));
+           Assert.IsTrue(fileInfo.Exists);
         }
+        
 	}
 }

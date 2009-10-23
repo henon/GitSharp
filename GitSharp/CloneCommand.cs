@@ -67,7 +67,21 @@ namespace Git
         /// The name of a new directory to clone into. The "humanish" part of the source repository is used if no directory is explicitly given 
         /// ("repo" for "/path/to/repo.git" and "foo" for "host.xz:foo/.git"). Cloning into an existing directory is only allowed if the directory is empty. 
         /// </summary>
-        public string Directory { get; set; }
+        public string Directory 
+        {
+        	get
+        	{
+        		return Git.Commands.GitDirectory.FullName;
+        	}
+        	
+        	set
+        	{
+        		if (value != null)
+	        		Git.Commands.GitDirectory = new DirectoryInfo(value);
+        		else
+        			Git.Commands.GitDirectory = null;
+        	}
+        }
 
         /// <summary>
         /// Not implemented
@@ -184,61 +198,22 @@ namespace Git
             if (OriginName == null)
                 OriginName = "origin";
 
-            // guess a name            
-            string p = source.Path;
-
-            while (p.EndsWith("/"))
-                p = p.Substring(0, p.Length - 1);
-
-            int s = p.LastIndexOf('/');
-            if (s < 0)
-                throw new ArgumentException("Cannot guess local name from " + source);
-            string localName = p.Substring(s + 1);
-
-            if (!Bare)
-            {
-                if (localName.EndsWith(".git"))
-                    localName = localName.Substring(0, localName.Length - 4);
-                if (GitDirectory == null)
-                {
-                    GitDirectory = new DirectoryInfo(System.IO.Path.Combine(localName, ".git"));
-                }
-            }
-            else
-            {
-                Directory = localName;
-            }
-            GitRepository = new GitSharp.Core.Repository(new DirectoryInfo(Directory));
+            GitDirectory = Git.Commands.FindGitDirectory(GitDirectory, false, Bare);
+            GitRepository = new GitSharp.Core.Repository(GitDirectory);
             GitRepository.Create(Bare);
             GitRepository.Config.setBoolean("core", null, "bare", Bare);
             GitRepository.Config.save();
             if (!Quiet)
             {
-                OutputStream.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(Directory)).FullName);
+                OutputStream.WriteLine("Initialized empty Git repository in " + (GitDirectory).FullName);
                 OutputStream.Flush();
             }
-            if (!Bare)
-            {
-                saveRemote(source);
-                FetchResult r = runFetch();
-                GitSharp.Core.Ref branch = guessHEAD(r);
-                if (!NoCheckout)
-                    doCheckout(branch);
-            }
-            else
-            {
-            	if (!Quiet)
-            	{
-                	//Add description directory
-                	OutputStream.WriteLine("Description directory still needs to be implemented.");
-                	//Add hooks directory
-                	OutputStream.WriteLine("Hooks directory still needs to be implemented.");
-                	//Add info directory
-                	OutputStream.WriteLine("Info directory still needs to be implemented.");
-                	//Add packed_refs directory
-                	OutputStream.WriteLine("Packed_refs directory still needs to be implemented.");
-            	}
-            }
+
+            saveRemote(source);
+            FetchResult r = runFetch();
+            GitSharp.Core.Ref branch = guessHEAD(r);
+            if (!NoCheckout)
+                doCheckout(branch);
         }
 
         private void saveRemote(URIish uri)

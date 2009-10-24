@@ -49,7 +49,7 @@ namespace Git.Tests
     public class CloneTests : GitSharp.Tests.RepositoryTestCase
     {
         [Test]
-        public void IsNonBareValid()
+        public void CloneJGit()
         {
            string toPath = Path.Combine(trash.FullName, "test");
            string fromUrl = "git://github.com/henon/jgit.git";

@@ -141,46 +141,48 @@ namespace Git
         }
 
         /// <summary>
-        /// Get or set the root git repository. By default, this returns the git repository the command is initialized in. Overriden by using --git-dir or $GITDIR respectively.
+        /// Get or set the default git repository for all commands. A command can override this by
+        /// setting it's own Repository property.
+        /// 
+        /// Note: Init and Clone do not respect Repository since they create a Repository as a result of Execute.
         /// </summary>
-        public static Repository Repository
-        {
-            get
-            {
-                return _repository;
-            }
-            set
-            {
-                _repository = value;
-            }
-        }
-        private static Repository _repository = null;
+        public static Repository Repository { get; set; }
 
         /// <summary>
-        /// Get or set the git directory. Per default, this returns the root git directory the command is initialized in.
+        /// Get or set the default git directory for all commands. A command can override this, however, 
+        /// by setting it's GitDirectory property.
         /// </summary>
-        public static string GitDirectory
-        {
-            get
-            {
-                return _gitDirectory;
-            }
-            set
-            {
-                _gitDirectory = value;
-            }
-        }
-        private static string _gitDirectory = null;
+        public static string GitDirectory { get; set; }
+
 
         #region CloneCommand
 
-
+        /// <summary>
+        /// Clone a repository and checkout the working directory.
+        /// </summary>
+        /// <param name="fromUrl"></param>
+        /// <param name="toPath"></param>
+        /// <returns></returns>
         public static Repository Clone(string fromUrl, string toPath)
+        {
+            bool bare = false;
+            return Clone(fromUrl, toPath, bare);
+        }
+
+        /// <summary>
+        /// Clone a repository and checkout the working directory only if bare == false
+        /// </summary>
+        /// <param name="fromUrl"></param>
+        /// <param name="toPath"></param>
+        /// <param name="bare"></param>
+        /// <returns></returns>
+        public static Repository Clone(string fromUrl, string toPath, bool bare)
         {
             CloneCommand cmd = new CloneCommand()
             {
                 Source = fromUrl,
                 GitDirectory = toPath,
+                Bare=bare,
             };
             return Clone(cmd);
         }

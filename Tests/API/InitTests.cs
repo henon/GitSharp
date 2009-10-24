@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  *
  * All rights reserved.
  *
@@ -143,7 +144,6 @@ namespace Git.Tests
         [Test]
         public void IsBareValid()
         {
-            Assert.Ignore("Bare repo validity check is not yet implemented");
             //Test bare repository
             bool bare = true;
             var path = Path.Combine(trash.FullName, "test.git");

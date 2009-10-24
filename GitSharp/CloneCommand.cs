@@ -58,16 +58,21 @@ namespace Git
 
         // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.
 
+        /// Get the directory where the Init command will initialize the repository. if GitDirectory is null ActualDirectory is used to initialize the repository.
+        /// </summary>
+        public override string ActualDirectory
+        {
+            get
+            {
+                return Commands.FindGitDirectory(GitDirectory, false, Bare);
+            }
+        }
+
         /// <summary>
         /// The (possibly remote) repository to clone from.
         /// </summary>
-        public string Path { get; set; }
+        public string Source { get; set; }
 
-        /// <summary>
-        /// The name of a new directory to clone into. The "humanish" part of the source repository is used if no directory is explicitly given 
-        /// ("repo" for "/path/to/repo.git" and "foo" for "host.xz:foo/.git"). Cloning into an existing directory is only allowed if the directory is empty. 
-        /// </summary>
-        public string Directory { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -168,10 +173,10 @@ namespace Git
         public override void Execute()
         {
 
-            if (Path.Length <= 0)
+            if (Source.Length <= 0)
                 throw new ArgumentNullException("Repository","fatal: You must specify a repository to clone.");
 
-            URIish source = new URIish(Path);
+            URIish source = new URIish(Source);
 
             if (Mirror)
                 Bare = true;
@@ -194,28 +199,21 @@ namespace Git
             if (s < 0)
                 throw new ArgumentException("Cannot guess local name from " + source);
             string localName = p.Substring(s + 1);
-
+            
             if (!Bare)
             {
                 if (localName.EndsWith(".git"))
                     localName = localName.Substring(0, localName.Length - 4);
-                if (GitDirectory == null)
-                {
-                    GitDirectory = System.IO.Path.Combine(localName, ".git");
-                }
             }
-            else
-            {
-                Directory = localName;
-            }
-            var repo = new GitSharp.Core.Repository(new DirectoryInfo(Directory));
+
+            var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualDirectory));
             repo.Create(Bare);
             repo.Config.setBoolean("core", null, "bare", Bare);
             repo.Config.save();
             Repository = new Repository(repo);
             if (!Quiet)
             {
-                OutputStream.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(Directory)).FullName);
+                OutputStream.WriteLine("Initialized empty Git repository in " + repo.Directory.FullName);
                 OutputStream.Flush();
             }
             if (!Bare)

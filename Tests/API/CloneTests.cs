@@ -52,9 +52,9 @@ namespace Git.Tests
         public void CloneJGit()
         {
            string toPath = Path.Combine(trash.FullName, "test");
-           string fromUrl = "git://github.com/henon/jgit.git";
-           Git.Commands.Clone(fromUrl, toPath, true);
-           Assert.IsTrue(Repository.IsValid(toPath, false));
+           string fromUrl = "git://github.com/henon/test.git";
+           var repo=Git.Commands.Clone(fromUrl, toPath);
+           Assert.IsTrue(Repository.IsValid(repo.Directory));
            //Todo: Assert.IsTrue(Verify Repository against fromUrl)
            
         }

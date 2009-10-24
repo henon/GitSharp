@@ -59,7 +59,7 @@ namespace Git.Tests
                 System.Environment.SetEnvironmentVariable("GIT_DIR", path);
                 var init = new InitCommand();
                 Commands.GitDirectory = null; // override fallback
-                Assert.AreEqual(Path.Combine(path, ".git"), init.ActualPath);
+                Assert.AreEqual(Path.Combine(path, ".git"), init.ActualDirectory);
             }
             finally
             {
@@ -75,7 +75,7 @@ namespace Git.Tests
             var path = Path.Combine(Directory.GetCurrentDirectory(), "test");
             Git.Commands.GitDirectory = path; // <--- cli option --git_dir sets this global variable. it is a fallback value for all commands
             var init = new InitCommand();
-            Assert.AreEqual(Path.Combine(path, ".git"), init.ActualPath);
+            Assert.AreEqual(Path.Combine(path, ".git"), init.ActualDirectory);
         }
 
         [Test]
@@ -89,7 +89,7 @@ namespace Git.Tests
                 System.Environment.SetEnvironmentVariable("GIT_DIR", null); // override environment
                 var path = Directory.GetCurrentDirectory();
                 var init = new InitCommand();
-                Assert.AreEqual(Path.Combine(Directory.GetCurrentDirectory(), ".git"), init.ActualPath);
+                Assert.AreEqual(Path.Combine(Directory.GetCurrentDirectory(), ".git"), init.ActualDirectory);
             }
             finally
             {
@@ -98,19 +98,20 @@ namespace Git.Tests
         }
 
         [Test]
-        public void Explicitely_set_path_overrides_everything()
+        public void Explicit_path_is_preferred()
         {
-            // override global fallback
+            // it should override global fallback
             Git.Commands.GitDirectory = "abc/def/ghi";
-            var init = new InitCommand() { Path = "xyz" };
-            Assert.AreEqual(Path.Combine(init.Path, ".git"), init.ActualPath);
+            var init = new InitCommand() { GitDirectory = "xyz" };
+            Assert.AreEqual(Path.GetFullPath(Path.Combine(init.GitDirectory, ".git")), init.ActualDirectory);
 
-            // override env var
+            // it should override env var
             Git.Commands.GitDirectory = null;
             string tempGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
             try
             {
-                Assert.AreEqual(Path.Combine(init.Path, ".git"), init.ActualPath);
+                System.Environment.SetEnvironmentVariable("GIT_DIR", "uvw");
+                Assert.AreEqual(Path.GetFullPath(Path.Combine(init.GitDirectory, ".git")), init.ActualDirectory);
             }
             finally
             {

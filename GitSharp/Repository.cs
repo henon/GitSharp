@@ -330,7 +330,7 @@ namespace Git
         /// <returns></returns>
         public static Repository Init(string path, bool bare)
         {
-            var cmd = new InitCommand() { Path=path, Bare = bare };
+            var cmd = new InitCommand() { GitDirectory=path, Bare = bare };
             return Init(cmd);
         }
 

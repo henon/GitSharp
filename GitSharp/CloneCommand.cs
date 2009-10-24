@@ -201,17 +201,18 @@ namespace Git
                     localName = localName.Substring(0, localName.Length - 4);
                 if (GitDirectory == null)
                 {
-                    GitDirectory = new DirectoryInfo(System.IO.Path.Combine(localName, ".git"));
+                    GitDirectory = System.IO.Path.Combine(localName, ".git");
                 }
             }
             else
             {
                 Directory = localName;
             }
-            GitRepository = new GitSharp.Core.Repository(new DirectoryInfo(Directory));
-            GitRepository.Create(Bare);
-            GitRepository.Config.setBoolean("core", null, "bare", Bare);
-            GitRepository.Config.save();
+            var repo = new GitSharp.Core.Repository(new DirectoryInfo(Directory));
+            repo.Create(Bare);
+            repo.Config.setBoolean("core", null, "bare", Bare);
+            repo.Config.save();
+            Repository = new Repository(repo);
             if (!Quiet)
             {
                 OutputStream.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(Directory)).FullName);
@@ -243,17 +244,18 @@ namespace Git
 
         private void saveRemote(URIish uri)
         {
-            RemoteConfig rc = new RemoteConfig(GitRepository.Config, OriginName);
+            var repo = Repository._internal_repo;
+            RemoteConfig rc = new RemoteConfig(repo.Config, OriginName);
             rc.AddURI(uri);
             rc.AddFetchRefSpec(new RefSpec().SetForce(true).SetSourceDestination(Constants.R_HEADS + "*",
                 Constants.R_REMOTES + OriginName + "/*"));
-            rc.Update(GitRepository.Config);
-            GitRepository.Config.save();
+            rc.Update(repo.Config);
+            repo.Config.save();
         }
 
         private FetchResult runFetch()
         {
-            Transport tn = Transport.Open(GitRepository, OriginName);
+            Transport tn = Transport.Open(Repository._internal_repo, OriginName);
             FetchResult r;
 
             try
@@ -300,16 +302,16 @@ namespace Git
         {
             if (branch == null)
                 throw new ArgumentNullException("branch", "Cannot checkout; no HEAD advertised by remote");
-
+            var repo = Repository._internal_repo;
             if (!Constants.HEAD.Equals(branch.Name))
-                GitRepository.WriteSymref(Constants.HEAD, branch.Name);
-            GitSharp.Core.Commit commit = GitRepository.MapCommit(branch.ObjectId);
-            RefUpdate u = GitRepository.UpdateRef(Constants.HEAD);
+                repo.WriteSymref(Constants.HEAD, branch.Name);
+            GitSharp.Core.Commit commit = repo.MapCommit(branch.ObjectId);
+            RefUpdate u = repo.UpdateRef(Constants.HEAD);
             u.NewObjectId = commit.CommitId;
             u.ForceUpdate();
-            GitIndex index = new GitIndex(GitRepository);
+            GitIndex index = new GitIndex(repo);
             GitSharp.Core.Tree tree = commit.TreeEntry;
-            WorkDirCheckout co = new WorkDirCheckout(GitRepository, GitRepository.WorkingDirectory, index, tree);
+            WorkDirCheckout co = new WorkDirCheckout(repo, repo.WorkingDirectory, index, tree);
             co.checkout();
             index.write();
         }

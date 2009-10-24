@@ -52,7 +52,7 @@ namespace Git
         {
             Quiet = true; // <-- [henon] since this command will be used more often programmatically than by CLI quiet=true is the better default.
             Shared = "false";
-		}
+        }
 
         #region Properties / Options
 
@@ -65,25 +65,25 @@ namespace Git
         {
             get
             {
-                return _path;
+                return _path ?? GitDirectory;
             }
             set
             {
                 if (value == null)
                 {
-					_path = null;
-				}
-				else 
-				{
-					//var dir = new DirectoryInfo(value);
-					//dir.Refresh();
-					DirectoryInfo dir = Directory.CreateDirectory(value);
-					//if (!dir.Exists)
-					if (!Directory.Exists(dir.FullName))
-					throw new ArgumentException("Path:"+dir.FullName+" does not exist or is not a directory.");
-    	            _path = dir.FullName;
-       	        }
-			}
+                    _path = null;
+                }
+                else
+                {
+                    //var dir = new DirectoryInfo(value);
+                    //dir.Refresh();
+                    DirectoryInfo dir = Directory.CreateDirectory(value);
+                    //if (!dir.Exists)
+                    if (!Directory.Exists(dir.FullName))
+                        throw new ArgumentException("Path:" + dir.FullName + " does not exist or is not a directory.");
+                    _path = dir.FullName;
+                }
+            }
         }
         private string _path = null;
 
@@ -95,17 +95,8 @@ namespace Git
         {
             get
             {
-                string git_dir = null;
-                if (string.IsNullOrEmpty(Path))
-                    if (string.IsNullOrEmpty(GIT_DIR))
-                        git_dir = System.Environment.CurrentDirectory;
-                    else
-                        git_dir = GIT_DIR;
-                else
-                    git_dir = Path;
-                if (!Bare)
-                    git_dir = System.IO.Path.Combine(git_dir, ".git");
-                return git_dir;
+                DirectoryInfo path = (Path == null ? null : new DirectoryInfo(Path));
+                return Commands.FindGitDirectory(path, false, Bare).FullName;
             }
         }
 
@@ -163,33 +154,16 @@ namespace Git
         /// </summary>
         public override void Execute()
         {
-        	if (GitDirectory == null)
-        	{
-        		DirectoryInfo path = null;
-        		GitDirectory = Git.Commands.FindGitDirectory(path, false, Bare);
-        	}
-        	
-        	if (GitRepository == null)
-				GitRepository = new GitSharp.Core.Repository(Git.Commands.GitDirectory);
-
-			GitRepository.Create(Bare);
-            GitRepository.Config.setBoolean("core", null, "bare", Bare);
-            GitRepository.Config.save();
+            var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualPath));
+            repo.Create(Bare);
+            repo.Config.setBoolean("core", null, "bare", Bare);
+            repo.Config.save();
             if (!Quiet)
             {
-                OutputStream.WriteLine("Initialized empty Git repository in " + GitRepository.Directory.FullName);
+                OutputStream.WriteLine("Initialized empty Git repository in " + repo.Directory.FullName);
                 OutputStream.Flush();
             }
-            InitializedRepository = new Repository(GitRepository.Directory.FullName);
-        }
-
-        /// <summary>
-        /// The repository that has been initialized. This property is only set after Execute has been called.
-        /// </summary>
-        public Repository InitializedRepository
-        {
-            get;
-            private set;
+            Repository = new Repository(repo.Directory.FullName);
         }
     }
 }

@@ -98,25 +98,25 @@ namespace Git
         /// <summary>
         /// The root git repository. If not explicitly set, the command uses Git.GitRepository.
         /// </summary>
-        public GitSharp.Core.Repository GitRepository
+        public Repository Repository
         {
             get
             {
-                if (_gitRepository == null)
-                    return Git.Commands.GitRepository;
-                return _gitRepository;
+                if (_repository == null)
+                    return Commands.Repository;
+                return _repository;
             }
             set
             {
-                _gitRepository = value;
+                _repository = value;
             }
         }
-        GitSharp.Core.Repository _gitRepository = null;
+        Repository _repository = null;
 
         /// <summary>
         /// The root git directory. If not explicitly set, the command uses Git.GitDirectory. Set using --git-dir.
         /// </summary>
-        public DirectoryInfo GitDirectory
+        public string GitDirectory
         {
             get
             {
@@ -129,7 +129,7 @@ namespace Git
                 _gitDirectory = value;
             }
         }
-        DirectoryInfo _gitDirectory = null;
+        string _gitDirectory = null;
 
         /// <summary>
         /// Execute the git command.

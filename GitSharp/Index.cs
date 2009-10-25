@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using GitSharp.Core.DirectoryCache;
+using System.Diagnostics;
 
 namespace Git
 {
@@ -10,25 +12,21 @@ namespace Git
     /// <summary>
     /// Represents the index of a git repository which keeps track of changes that are about to be committed.
     /// </summary>
-    public class Index
+    public class Index : IDisposable
     {
         private Repository _repo;
+        private DirCache _index;
 
         public Index(Repository repo)
         {
+            if (repo.IsBare)
+                throw new ArgumentException("Bare repositories have not got an index.");
             _repo = repo;
-        }
-
-        private GitSharp.Core.GitIndex GitIndex
-        {
-            get
-            {
-                return _repo._internal_repo.Index;
-            }
+            _index = DirCache.read(_repo._internal_repo);
         }
 
         /// <summary>
-        /// Add all untracked files to the index (like git add .)
+        /// Add all untracked files to the index and writes the index to the disk (like "git add .")
         /// </summary>
         public void AddAll()
         {
@@ -36,35 +34,51 @@ namespace Git
         }
 
         /// <summary>
-        /// Add an untracked file or directory to the index (like git add)
+        /// Adds untracked files or directories to the index and writes the index to the disk (like "git add")
+        /// 
+        /// Note: Add as many files as possible by one call of this method for best performance.
         /// </summary>
-        /// <param name="path"></param>
-        public void Add(string path)
+        /// <param name="paths">Paths to add to the index</param>
+        public void Add(params string[] paths)
         {
-            if (new FileInfo(path).Exists)
-                AddFile(path);
-            else if (new DirectoryInfo(path).Exists)
-                AddDirectory(path);
-            else
-                throw new ArgumentException("File or directory at <"+path+"> doesn't seem to exist.", "path");
+            try
+            {
+                var builder = _index.builder();
+                foreach (var path in paths)
+                {
+                    if (new FileInfo(path).Exists)
+                        AddFile(new FileInfo(path), builder);
+                    else if (new DirectoryInfo(path).Exists)
+                        AddDirectory(new DirectoryInfo(path), builder);
+                    else
+                        throw new ArgumentException("File or directory at <" + path + "> doesn't seem to exist.", "path");
+                }
+                builder.finish();
+                _index.write();
+            }
+            finally
+            {
+                _index.unlock();
+            }
         }
 
-        /// <summary>
-        /// Add an untracked file to the index (like git add)
-        /// </summary>
-        /// <param name="path"></param>
-        public void AddFile(string path)
+        private void AddFile(FileInfo path, DirCacheBuilder builder)
         {
-            GitIndex.add(_repo._internal_repo.WorkingDirectory, new FileInfo(path));
+            builder.add(new DirCacheEntry(GitSharp.Core.Constants.encode(path.FullName)));
+            //GitIndex.add(_repo._internal_repo.WorkingDirectory, new FileInfo(path));
         }
 
-        /// <summary>
-        /// Add an untracked directory to the index (like git add)
-        /// </summary>
-        /// <param name="path"></param>
-        public void AddDirectory(string path)
+        private void AddDirectory(DirectoryInfo path, DirCacheBuilder builder)
         {
-            throw new NotImplementedException("we need to recursively add files here, but be careful ... .gitignore must be respected");
+             AddRecursively(path, builder);
+        }
+
+        private void AddRecursively(DirectoryInfo dir, DirCacheBuilder builder)
+        {
+            foreach (var file in dir.GetFiles())
+                AddFile(file, builder);
+            foreach (var subdir in dir.GetDirectories())
+                AddDirectory(subdir, builder);
         }
 
         /// <summary>
@@ -72,7 +86,7 @@ namespace Git
         /// </summary>
         public void Write()
         {
-            GitIndex.write();
+            _index.write();
         }
 
         /// <summary>
@@ -80,7 +94,20 @@ namespace Git
         /// </summary>
         public void Read()
         {
-            GitIndex.Read();
+            _index.read();
         }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            if (_index == null)
+                return;
+            _index.unlock();
+            _index = null;
+            _repo = null;
+        }
+
+        #endregion
     }
 }

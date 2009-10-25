@@ -49,7 +49,7 @@
     <Compile Include="API\CloneTests.cs" />
     <Compile Include="API\CommitDateTests.cs" />
     <Compile Include="API\FindGitDirectoryTests.cs" />
-    <Compile Include="API\IndexTest.cs" />
+    <Compile Include="API\IndexTest.cs" />    <Compile Include="API\IgnoreTests.cs" />
     <Compile Include="API\InitTests.cs" />
     <Compile Include="API\ObjectEqualityTests.cs" />
     <Compile Include="API\RefModelTests.cs" />

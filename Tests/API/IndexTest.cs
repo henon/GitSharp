@@ -103,7 +103,9 @@ namespace Git.Tests
             var index_path = Path.Combine(repo.Directory, "index");
             new FileInfo("Resources/index_originating_from_msysgit").CopyTo(index_path);
             var a=writeTrashFile("a.txt", "Data:a");
+            // msysgit status should work here
             repo.Index.Add(a.FullName);
+            // msysgit status doesn't work any more
         }
     }
 }

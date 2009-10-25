@@ -41,7 +41,9 @@ namespace GitSharp.Tests
             Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", headRef.ObjectId.Name);
 
             object obj = repository.MapObject(headRef.ObjectId, headRef.OriginalName);
-            Assert.IsInstanceOfType(typeof(Commit), obj);
+#pragma warning disable 0612
+            Assert.IsInstanceOfType(typeof(Commit), obj); // [henon] IsInstanceOfType is obsolete
+#pragma warning restore 0612
             var commit = (Commit) obj;
 
             Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", commit.CommitId.Name);

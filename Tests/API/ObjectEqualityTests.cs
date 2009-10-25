@@ -64,8 +64,9 @@ namespace GitSharp.Tests.API
         {
             var repos = new Repository(db);
             var obj = repos.CurrentBranch.CurrentCommit;
-
-            Assert.IsTrue(obj == obj);
+#pragma warning disable 1718
+            Assert.IsTrue(obj == obj); // [henon] this equality comparison of the same instance is intended
+#pragma warning restore 1718
         }
 
         [Test]

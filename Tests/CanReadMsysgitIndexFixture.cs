@@ -112,10 +112,10 @@ namespace GitSharp.Tests
             index.write();
 
 
-            Assert.AreEqual(3, diff.Added.Count);
-            Assert.IsTrue(diff.Added.Contains("a.txt"));
-            Assert.IsTrue(diff.Added.Contains("b.txt"));
-            Assert.IsTrue(diff.Added.Contains("c.txt"));
+            Assert.AreEqual(2, diff.Added.Count);
+            Assert.IsFalse(diff.Added.Contains("a.txt"), "Should not contain a.txt because it is already committed.");
+            Assert.IsTrue(diff.Added.Contains("b.txt"), "Should contain b.txt since it was added by msysgit, but not committed");
+            Assert.IsTrue(diff.Added.Contains("c.txt"), "Should contain c.txt since it was added by this test, but not committed");
             Assert.AreEqual(0, diff.Changed.Count);
             Assert.AreEqual(0, diff.Modified.Count);
             Assert.AreEqual(0, diff.Removed.Count);

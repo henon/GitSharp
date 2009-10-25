@@ -41,7 +41,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 
-namespace GitSharp.Tests.API
+namespace Git.Tests
 {
     [TestFixture]
     public class IgnoreTests

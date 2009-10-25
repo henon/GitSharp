@@ -39,30 +39,27 @@ namespace Git
         /// Add an untracked file or directory to the index (like git add)
         /// </summary>
         /// <param name="path"></param>
-        public void Add(string path)
+        public void Add(params string[] paths)
         {
-            if (new FileInfo(path).Exists)
-                AddFile(path);
-            else if (new DirectoryInfo(path).Exists)
-                AddDirectory(path);
-            else
-                throw new ArgumentException("File or directory at <"+path+"> doesn't seem to exist.", "path");
+            GitIndex.Read();
+            foreach (var path in paths)
+            {
+                if (new FileInfo(path).Exists)
+                    AddFile(new FileInfo(path));
+                else if (new DirectoryInfo(path).Exists)
+                    AddDirectory(path);
+                else
+                    throw new ArgumentException("File or directory at <" + path + "> doesn't seem to exist.", "path");
+            }
+            GitIndex.write();
         }
 
-        /// <summary>
-        /// Add an untracked file to the index (like git add)
-        /// </summary>
-        /// <param name="path"></param>
-        public void AddFile(string path)
+        private void AddFile(FileInfo path)
         {
-            GitIndex.add(_repo._internal_repo.WorkingDirectory, new FileInfo(path));
+            GitIndex.add(_repo._internal_repo.WorkingDirectory, path);
         }
 
-        /// <summary>
-        /// Add an untracked directory to the index (like git add)
-        /// </summary>
-        /// <param name="path"></param>
-        public void AddDirectory(string path)
+        private void AddDirectory(string path)
         {
             throw new NotImplementedException("we need to recursively add files here, but be careful ... .gitignore must be respected");
         }

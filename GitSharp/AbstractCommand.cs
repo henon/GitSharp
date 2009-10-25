@@ -96,27 +96,30 @@ namespace Git
         StreamWriter _output = null;
 
         /// <summary>
-        /// The root git repository. If not explicitly set, the command uses Git.GitRepository.
+        /// The git repository that is either result of the command (init, clone) or subject to alteration (all other commands). 
+        /// If not explicitly set, the command uses Git.Commands.Repository.
+        /// 
+        /// Note: InitCommand and CloneCommand ignore this property and overwrite it as a result of Execute.
         /// </summary>
-        public GitSharp.Core.Repository GitRepository
+        public Repository Repository
         {
             get
             {
-                if (_gitRepository == null)
-                    return Git.Commands.GitRepository;
-                return _gitRepository;
+                if (_repository == null)
+                    return Commands.Repository;
+                return _repository;
             }
             set
             {
-                _gitRepository = value;
+                _repository = value;
             }
         }
-        GitSharp.Core.Repository _gitRepository = null;
+        Repository _repository = null;
 
         /// <summary>
-        /// The root git directory. If not explicitly set, the command uses Git.GitDirectory. Set using --git-dir.
+        /// The git directory. If not explicitly set, the command uses Git.GitDirectory.
         /// </summary>
-        public DirectoryInfo GitDirectory
+        public virtual string GitDirectory
         {
             get
             {
@@ -129,7 +132,18 @@ namespace Git
                 _gitDirectory = value;
             }
         }
-        DirectoryInfo _gitDirectory = null;
+        protected string _gitDirectory = null;
+
+        /// <summary>
+        /// Get the directory where the Init command will initialize the repository. if GitDirectory is null ActualDirectory is used to initialize the repository.
+        /// </summary>
+        public virtual string ActualDirectory
+        {
+            get
+            {
+                return Commands.FindGitDirectory(GitDirectory, false, false);
+            }
+        }
 
         /// <summary>
         /// Execute the git command.

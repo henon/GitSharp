@@ -67,5 +67,20 @@ namespace Git
             throw new NotImplementedException("we need to recursively add files here, but be careful ... .gitignore must be respected");
         }
 
+        /// <summary>
+        /// Writes the index to the disk.
+        /// </summary>
+        public void Write()
+        {
+            GitIndex.write();
+        }
+
+        /// <summary>
+        /// Reads the index from the disk
+        /// </summary>
+        public void Read()
+        {
+            GitIndex.Read();
+        }
     }
 }

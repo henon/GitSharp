@@ -275,9 +275,9 @@ namespace GitSharp.CLI
             }
         }
 
-        ObjectId Resolve(String s)
+        ObjectId Resolve(string s)
         {
-            ObjectId r = Git.Commands.GitRepository.Resolve(s);
+            ObjectId r = Git.Commands.Repository._internal_repo.Resolve(s);
             if (r == null)
                 throw die("Not a revision: " + s);
             return r;
@@ -310,11 +310,11 @@ namespace GitSharp.CLI
         {
             get
             {
-                return Git.Commands.GitRepository;
+                return Git.Commands.Repository._internal_repo;
             }
             set
             {
-                Git.Commands.GitRepository = value;
+                Git.Commands.Repository = new Git.Repository(value);
             }
         }
 
@@ -322,11 +322,11 @@ namespace GitSharp.CLI
         {
             get
             {
-                return Git.Commands.GitDirectory;
+                return new DirectoryInfo(Git.Commands.GitDirectory);
             }
             set
             {
-                Git.Commands.GitDirectory = value;
+                Git.Commands.GitDirectory = (value==null ? null : value.FullName);
             }
         }
     }

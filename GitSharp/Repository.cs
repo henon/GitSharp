@@ -120,6 +120,14 @@ namespace Git
             }
         }
 
+        public Index Index
+        {
+            get
+            {
+                return new Index(this); // <--- this is just a wrapper around the internal repo's GitIndex instance so need not cache it here
+            }
+        }
+
         /// <summary>
         /// Returns true if this repository is a bare repository. Bare repositories don't have a working directory and thus do not support some operations.
         /// </summary>
@@ -150,7 +158,7 @@ namespace Git
 
         /// <summary>
         /// Checks if the directory given by the path is a valid non-bare git repository. The given path may either point to 
-        /// the repository or the repository's inner .git directory.
+        /// the working directory or the repository's .git directory.
         /// </summary>
         /// <param name="path"></param>
         /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
@@ -302,9 +310,9 @@ namespace Git
         /// Initializes a non-bare repository. Use GitDirectory to specify location.
         /// </summary>
         /// <returns>The initialized repository</returns>
-        public static Repository Init()
+        public static Repository Init(string path)
         {
-            return Init(false);
+            return Init(path, false);
         }
 
         /// <summary>
@@ -313,9 +321,9 @@ namespace Git
         /// <param name="path"></param>
         /// <param name="bare"></param>
         /// <returns></returns>
-        public static Repository Init(bool bare)
+        public static Repository Init(string path, bool bare)
         {
-            var cmd = new InitCommand() { Bare = bare };
+            var cmd = new InitCommand() { GitDirectory=path, Bare = bare };
             return Init(cmd);
         }
 
@@ -328,7 +336,7 @@ namespace Git
         public static Repository Init(InitCommand cmd)
         {
             cmd.Execute();
-            return cmd.InitializedRepository;
+            return cmd.Repository;
         }
 
         #endregion

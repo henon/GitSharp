@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  *
  * All rights reserved.
  *
@@ -48,23 +49,22 @@ namespace Git.Tests
     [TestFixture]
     public class CloneTests : GitSharp.Tests.RepositoryTestCase
     {
-    	[Test]
-        public void IsLocalValid()
-        {
+        [Test]
+		public void Check_cloned_bare_repo()        {
         	Assert.Ignore("This test has not been implemented yet.");
         }
         
         [Test]
-        public void IsRemoteValid()
+        public void Check_cloned_repo()
         {
            string toPath = Path.Combine(trash.FullName, "test");
-           string fromUrl = "git://github.com/henon/jgit.git";
-           Git.Commands.Clone(fromUrl, toPath, false, true);
-           Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, false));
+           string fromUrl = "git://github.com/henon/test.git";
+           var repo=Git.Commands.Clone(fromUrl, toPath);
+           Assert.IsTrue(Repository.IsValid(repo.Directory));
            //Verify content is in the proper location
-           FileInfo fileInfo = new FileInfo(Path.Combine(Git.Commands.GitDirectory.FullName, "README"));
-           Assert.IsTrue(fileInfo.Exists);
+           var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
+           Assert.IsTrue(new FileInfo(readme).Exists);
         }
-        
-	}
+           
+        }
 }

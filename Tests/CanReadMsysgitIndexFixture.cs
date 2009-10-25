@@ -76,6 +76,49 @@ namespace GitSharp.Tests
                 File.Copy(fileSystemElement, targetDirectoryPath + Path.GetFileName(fileSystemElement), true);
             }
         }
+
+        [Test]
+        public void CanAddAFileToAMSysGitIndexWhereAFileIsAlreadyWaitingToBeCommitted()
+        {
+            //setup of .git directory
+            var resource =
+                new DirectoryInfo(Path.Combine(Path.Combine(Environment.CurrentDirectory, "Resources"),
+                                               "CorruptIndex"));
+            var tempRepository =
+                new DirectoryInfo(Path.Combine(trash.FullName, "CorruptIndex" + Path.GetRandomFileName()));
+            CopyDirectory(resource.FullName, tempRepository.FullName);
+
+            var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, ".git"));
+            Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
+
+
+
+            var repository = new Repository(repositoryPath);
+            GitIndex index = repository.Index;
+
+            Assert.IsNotNull(index);
+
+            writeTrashFile(Path.Combine(repository.WorkingDirectory.FullName, "c.txt"), "c");
+
+            var tree = new Tree(repository);
+
+            index.add(repository.WorkingDirectory, new FileInfo(Path.Combine(repository.WorkingDirectory.FullName, "c.txt")));
+
+            var diff = new IndexDiff(tree, index);
+            diff.Diff();
+
+            index.write();
+
+
+            Assert.AreEqual(3, diff.Added.Count);
+            Assert.IsTrue(diff.Added.Contains("a.txt"));
+            Assert.IsTrue(diff.Added.Contains("b.txt"));
+            Assert.IsTrue(diff.Added.Contains("c.txt"));
+            Assert.AreEqual(0, diff.Changed.Count);
+            Assert.AreEqual(0, diff.Modified.Count);
+            Assert.AreEqual(0, diff.Removed.Count);
+        }
+
     }
 }
 

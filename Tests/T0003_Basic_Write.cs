@@ -668,5 +668,68 @@ namespace GitSharp.Tests
             FileInfo file = new FileInfo(Path.Combine(new FileInfo(Path.Combine(db.WorkingDirectory.FullName, "subdir")).FullName, "File.java"));
             Assert.AreEqual("subdir/File.java", Core.Repository.StripWorkDir(db.WorkingDirectory, file));
         }
+
+        [Test]
+        public void testTwoSuccessiveCommitsLinkedToHead()
+        {
+            var repo = createNewEmptyRepo();
+            var workingDirectory = repo.WorkingDirectory;
+            repo.Create();
+
+            var objectWriter = new ObjectWriter(repo);
+
+            FileInfo project1_a_txt = writeTrashFile(Path.Combine(workingDirectory.FullName, "Project-1/A.txt"), "A.txt - first version\n");
+            FileInfo project1_b_txt = writeTrashFile(Path.Combine(workingDirectory.FullName, "Project-1/B.txt"), "B.txt - first version\n");
+
+            var tree = new Tree(repo);
+            Tree projectTree = tree.AddTree("Project-1");
+            addFile(projectTree, project1_a_txt, objectWriter);
+            projectTree.Id = (objectWriter.WriteTree(projectTree));
+            addFile(projectTree, project1_b_txt, objectWriter);
+            projectTree.Id = (objectWriter.WriteTree(projectTree));
+            tree.Id = (objectWriter.WriteTree(tree));
+
+            var commit = new Commit(repo)
+            {
+                Author = new PersonIdent(jauthor, (0L), 60),
+                Committer = new PersonIdent(jcommitter, (0L), 60),
+                Message = "Foo\n\nMessage",
+                TreeEntry = tree
+            };
+            commit.Save();
+            var commitId = commit.CommitId;
+
+            FileInfo project1_b_v2_txt = writeTrashFile(Path.Combine(workingDirectory.FullName, "Project-1/B.txt"), "B.txt - second version\n");
+
+            tree = new Tree(repo);
+            projectTree = tree.AddTree("Project-1");
+            addFile(projectTree, project1_a_txt, objectWriter);
+            projectTree.Id = (objectWriter.WriteTree(projectTree));
+            addFile(projectTree, project1_b_v2_txt, objectWriter);
+            projectTree.Id = (objectWriter.WriteTree(projectTree));
+            tree.Id = (objectWriter.WriteTree(tree));
+
+            commit = new Commit(repo)
+            {
+                Author = new PersonIdent(jauthor, (0L), 60),
+                Committer = new PersonIdent(jcommitter, (0L), 60),
+                Message = "Modified",
+                ParentIds = new[] { commitId },
+                TreeEntry = tree
+            };
+            commit.Save();
+            commitId = commit.CommitId;
+
+            RefUpdate lck = repo.UpdateRef("refs/heads/master");
+            Assert.IsNotNull(lck, "obtained lock");
+            lck.NewObjectId = commitId;
+            Assert.AreEqual(RefUpdate.RefUpdateResult.New, lck.ForceUpdate());
+        }
+
+        private void addFile(Tree t, FileInfo f, ObjectWriter objectWriter)
+        {
+            ObjectId id = objectWriter.WriteBlob(f);
+            t.AddEntry(new FileTreeEntry(t, id, f.Name.getBytes("UTF-8"), false));
+        }
     }
 }

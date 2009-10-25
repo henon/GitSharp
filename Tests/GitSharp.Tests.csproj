@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{37052DA4-F6A9-47D0-94AA-96F4A7E0462C}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -47,6 +47,7 @@
     <Compile Include="API\BlobTests.cs" />
     <Compile Include="API\CloneTests.cs" />
     <Compile Include="API\CommitDateTests.cs" />
+    <Compile Include="API\FindGitDirectoryTests.cs" />
     <Compile Include="API\InitTests.cs" />
     <Compile Include="API\ObjectEqualityTests.cs" />
     <Compile Include="API\RefModelTests.cs" />
@@ -184,6 +185,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Resource Include="README.txt" />
+    <Content Include="Resources\CorruptIndex\.gitted\objects\info\marker.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\CorruptIndex\.gitted\objects\pack\marker.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\CorruptIndex\a.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\CorruptIndex\b.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\OneFileRepository\.gitted\objects\info\marker.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -411,6 +424,75 @@
     <None Include="Patch\Resources\testParse_OneFileCc.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Resources\CorruptIndex\.gitted\COMMIT_EDITMSG">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\description">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\HEAD">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\hooks\applypatch-msg.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\hooks\commit-msg.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\hooks\post-commit.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\hooks\post-receive.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\hooks\post-update.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\hooks\pre-applypatch.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\hooks\pre-commit.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\hooks\pre-rebase.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\hooks\prepare-commit-msg.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\hooks\update.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\index">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\info\exclude">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\logs\HEAD">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\logs\refs\heads\master">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\objects\1a\602d9bd07ce5272ddaa64e21da12dbca2b8c9f">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\objects\2e\65efe2a145dda7ee51d1741299f848e5bf752e">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\objects\63\d8dbd40c23542e740659a7168a0ce3138ea748">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\objects\dc\8d7f3d2d19bdf3a6daa007102bc7bef76aa8ac">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\CorruptIndex\.gitted\refs\heads\master">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\create-second-pack">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -565,6 +647,9 @@
       <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
       <Name>GitSharp.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\CorruptIndex\.gitted\refs\tags\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

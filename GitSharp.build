@@ -31,6 +31,9 @@
 
   <target name="dist" depends="run-tests, package"/>
 
+  <!-- ********************************************** -->
+  <!-- GitSharp.Core.dll -->
+  <!-- ********************************************** -->
   <target name="compile-core" depends="init">
     <property name="assembly.name.suffix" value="Core" />
 
@@ -43,6 +46,9 @@
     <call target="compile-dll" />
   </target>
 
+  <!-- ********************************************** -->
+  <!-- git.exe -->
+  <!-- ********************************************** -->
   <target name="compile-cli" depends="compile-gitsharp">
     <property name="assembly.name.suffix" value="CLI" />
 
@@ -54,6 +60,9 @@
     <call target="compile-dll" />
   </target>
 
+  <!-- ********************************************** -->
+  <!-- GitSharp.dll -->
+  <!-- ********************************************** -->
   <target name="compile-gitsharp" depends="compile-core">
     <property name="assembly.name.suffix" value="" />
 
@@ -64,6 +73,9 @@
     <call target="compile-dll" />
   </target>
 
+  <!-- ********************************************** -->
+  <!-- GitSharp.Tests.dll -->
+  <!-- ********************************************** -->
   <target name="compile-tests" depends="compile-cli">
     <property name="assembly.name.suffix" value="Tests" />
 
@@ -76,6 +88,9 @@
     <call target="compile-dll" />
   </target>
 
+  <!-- ********************************************** -->
+  <!-- run tests -->
+  <!-- ********************************************** -->
   <target name="run-tests"  depends="compile-tests">
     <property name="path.testresults" value="${path.build}/${build.platform}-${build.config}/test-results" />
     <mkdir dir="${path.testresults}" if="${not(directory::exists(path.testresults))}"/>
@@ -102,20 +117,13 @@
       </fileset>
     </copy>
 
-
     <property name="nunit.consolerunner" value="${path.tools.nunit}/nunit-console.exe" />
     <property name="nunit.commandline" value="${path.build.output}/GitSharp.Tests.dll /xml:${path.testresults}/GitSharp.Tests.dll-results.xml /noshadow " />
     <if test="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}">
       <property name="nunit.consolerunner" value="nunit-console2" />
       <property name="nunit.commandline" value="${path.build.output}/GitSharp.Tests.dll -xml:${path.testresults}/GitSharp.Tests.dll-results.xml -noshadow " />
     </if>
-
-    <!--<nunit2>
-      <formatter type="Plain" usefile="true" extension=".txt"
-				outputdir="${path.testresults}"/>
-      <test assemblyname="${path.build.output}/GitSharp.Tests.dll"/>
-    </nunit2>-->
-
+    
     <exec
       program="${nunit.consolerunner}"
       workingdir="${path.build.output}"

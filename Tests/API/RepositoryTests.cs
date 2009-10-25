@@ -49,40 +49,6 @@ namespace Git.Tests
     {
 
         
-        [Test]
-        public void Honors_EnvVar_GIT_DIR()
-        {
-            //Store GIT_DIR value temporarily
-            string tempGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
 
-            //Verify Environment Variable GIT_DIR
-            DirectoryInfo path = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "test1"));
-            System.Environment.SetEnvironmentVariable("GIT_DIR", path.FullName);
-            DirectoryInfo result = Git.Commands.FindGitDirectory(path, false, false);
-            Assert.AreEqual(result.FullName, Path.Combine(path.FullName, ".git"));
-
-            //Reset GIT_DIR value to initial value before the test
-            System.Environment.SetEnvironmentVariable("GIT_DIR", tempGitDir);
-        }
-        
-        [Test]
-        public void Honors_CLI_Option_GIT_DIR()
-        {
-        	//Verify specified directory
-            DirectoryInfo path = new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "test"));
-            Git.Commands.GitDirectory = path;
-            DirectoryInfo result = Git.Commands.FindGitDirectory(path, false, false);
-            Assert.AreEqual(Path.Combine(path.FullName,".git"), result.FullName);
-        	Git.Commands.GitDirectory = null;
-        }
-        
-        [Test]
-        public void Honors_CurrentDirectory()
-        {
-        	//Verify current directory (default, if the other three tests are empty)
-            DirectoryInfo path = new DirectoryInfo(Directory.GetCurrentDirectory());
-            DirectoryInfo result = Git.Commands.FindGitDirectory(path, false, false);
-        	Assert.AreEqual(result.FullName, Path.Combine(path.FullName,".git"));
-		}
     }
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Kevin Thompson <kevin.thompson@theautomaters.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -46,7 +46,7 @@ using System.IO;
 
 namespace GitSharp.Core.Util
 {
-    public class MessageDigest : ICloneable
+    public class MessageDigest : ICloneable, IDisposable
     {
         private MemoryStream _stream;
 
@@ -101,6 +101,11 @@ namespace GitSharp.Core.Util
             _stream.Write(input, index, count);
         }
 
+		public void Dispose ()
+		{
+			_stream.Dispose();
+		}
+		
 
         //public static MessageDigest GetInstance(string algorithm)
         //{

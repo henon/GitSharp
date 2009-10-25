@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -50,7 +50,7 @@ namespace GitSharp.Core
 	/// is very low and has paged part of this process out to disk. Therefore copying
 	/// bytes from a window is very inexpensive.
 	/// </summary>
-	internal abstract class ByteWindow
+	internal abstract class ByteWindow : IDisposable
 	{
 		protected static readonly byte[] VerifyGarbageBuffer = new byte[2048];
 
@@ -206,5 +206,11 @@ namespace GitSharp.Core
 		{
 			get { return (int)(_end - _start); }
 		}
+		
+		public void Dispose ()
+		{
+			_pack.Dispose();
+		}
+		
 	}
 }

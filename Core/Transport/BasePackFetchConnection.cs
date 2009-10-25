@@ -368,7 +368,7 @@ namespace GitSharp.Core.Transport
             }
         }
 
-        private class NegotiateBeginRevFilter : RevFilter
+        private class NegotiateBeginRevFilter : RevFilter, IDisposable
         {
             private readonly RevFlag _common;
             private readonly RevFlag _advertised;
@@ -393,6 +393,13 @@ namespace GitSharp.Core.Transport
                 }
                 return !remoteKnowsIsCommon;
             }
+			
+			public void Dispose ()
+			{
+				_advertised.Dispose();
+				_common.Dispose();
+			}
+			
         }
 
         private void NegotiateBegin()

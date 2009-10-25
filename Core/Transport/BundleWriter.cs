@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -43,7 +43,7 @@ using GitSharp.Core.RevWalk;
 
 namespace GitSharp.Core.Transport
 {
-    public class BundleWriter
+    public class BundleWriter : IDisposable
     {
 	    private readonly PackWriter _packWriter;
 	    private readonly Dictionary<String, ObjectId> _include;
@@ -195,5 +195,11 @@ namespace GitSharp.Core.Transport
 
 		    _packWriter.writePack(os);
 	    }
+		
+		public void Dispose ()
+		{
+			_packWriter.Dispose();
+		}
+		
     }
 }

@@ -104,7 +104,7 @@ namespace GitSharp.Core
             public override string getProperty(string key)
             {
                 //[java] return  System.getProperty(key);
-                string result = "";
+                string result = string.Empty;
 
                 switch (key)
                 {
@@ -191,7 +191,7 @@ namespace GitSharp.Core
 
             public override FileBasedConfig getConfigFile(string gitdir)
             {
-                string path = "";
+                string path = string.Empty;
 
                 //Determine which file is valid based on overrides.
                 ConfigFileType cType = ConfigFileType.Global;

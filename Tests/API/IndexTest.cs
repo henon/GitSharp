@@ -153,10 +153,10 @@ namespace Git.Tests
                 "New Folder/New Ruby Program.rb",
                 "for henon.txt",
                 "test.cmd", 
-            }.Select(s => Path.Combine(repo.WorkingDirectory, s)).ToArray();
+            };
             var deleted = new[] {
                   "a/a1", "a/a1.txt", "a/a2.txt", "b/b1.txt", "b/b2.txt", "c/c1.txt", "c/c2.txt", "master.txt" 
-            }.Select(s => Path.Combine(repo.WorkingDirectory, s)).ToArray();
+            };
 
 
             AssertContains(status.Added, added);

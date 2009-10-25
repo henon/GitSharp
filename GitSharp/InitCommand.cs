@@ -56,47 +56,14 @@ namespace Git
 
         #region Properties / Options
 
-
         /// <summary>
-        /// Get or set path to a directory that shall be initialized as a git repository. If Bare==false a ".git" subdirectory will be created in that directory.
-        /// Path overrides usage of GIT_DIR environment variable if set, otherwise Init uses the value of ActualPath.
+        /// Get the directory where the Init command will initialize the repository. if GitDirectory is null ActualDirectory is used to initialize the repository.
         /// </summary>
-        public string Path
+        public override string ActualDirectory
         {
             get
             {
-                return _path ?? GitDirectory;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    _path = null;
-                }
-                else
-                {
-                    //var dir = new DirectoryInfo(value);
-                    //dir.Refresh();
-                    DirectoryInfo dir = Directory.CreateDirectory(value);
-                    //if (!dir.Exists)
-                    if (!Directory.Exists(dir.FullName))
-                        throw new ArgumentException("Path:" + dir.FullName + " does not exist or is not a directory.");
-                    _path = dir.FullName;
-                }
-            }
-        }
-        private string _path = null;
-
-        /// <summary>
-        /// Get the path where the Init command shall initialize the repository. Returns GIT_DIR environment variable (if set) or the current directory if Path is null. 
-        /// Returns the same value as Path otherwise.
-        /// </summary>
-        public string ActualPath
-        {
-            get
-            {
-                DirectoryInfo path = (Path == null ? null : new DirectoryInfo(Path));
-                return Commands.FindGitDirectory(path, false, Bare).FullName;
+                return Commands.FindGitDirectory(GitDirectory, false, Bare);
             }
         }
 
@@ -154,7 +121,7 @@ namespace Git
         /// </summary>
         public override void Execute()
         {
-            var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualPath));
+            var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualDirectory));
             repo.Create(Bare);
             repo.Config.setBoolean("core", null, "bare", Bare);
             repo.Config.save();

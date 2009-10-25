@@ -96,7 +96,10 @@ namespace Git
         StreamWriter _output = null;
 
         /// <summary>
-        /// The root git repository. If not explicitly set, the command uses Git.GitRepository.
+        /// The git repository that is either result of the command (init, clone) or subject to alteration (all other commands). 
+        /// If not explicitly set, the command uses Git.Commands.Repository.
+        /// 
+        /// Note: InitCommand and CloneCommand ignore this property and overwrite it as a result of Execute.
         /// </summary>
         public Repository Repository
         {
@@ -114,9 +117,9 @@ namespace Git
         Repository _repository = null;
 
         /// <summary>
-        /// The root git directory. If not explicitly set, the command uses Git.GitDirectory. Set using --git-dir.
+        /// The git directory. If not explicitly set, the command uses Git.GitDirectory.
         /// </summary>
-        public string GitDirectory
+        public virtual string GitDirectory
         {
             get
             {
@@ -129,7 +132,18 @@ namespace Git
                 _gitDirectory = value;
             }
         }
-        string _gitDirectory = null;
+        protected string _gitDirectory = null;
+
+        /// <summary>
+        /// Get the directory where the Init command will initialize the repository. if GitDirectory is null ActualDirectory is used to initialize the repository.
+        /// </summary>
+        public virtual string ActualDirectory
+        {
+            get
+            {
+                return Commands.FindGitDirectory(GitDirectory, false, false);
+            }
+        }
 
         /// <summary>
         /// Execute the git command.

@@ -83,7 +83,7 @@ namespace GitSharp.CLI
                 { "bare", "Create a bare repository", v=> cmd.Bare = true},
                 { "naked", "Create a bare repository", v => cmd.Bare = true},
                 { "mirror", "Create a mirror repository (implies bare)", v => cmd.Mirror = true},
-                { "l|local", "To clone from a local repository", v => die("--local is the default behavior. This option is no-op.")},
+                { "l|local", "To clone from a local repository", v => {}}, // was: die("--local is the default behavior. This option is no-op.").  [henon] I think we should silently ignore that switch instead of exiting.
                 { "no-hardlinks", "(No-op) Do not use hard links, always copy", v => die("--no-hardlinks is not supported")},
                 { "s|shared", "(No-op) Setup as shared repository", v => die("--shared is not supported")},
                 { "template=", "{Path} the template repository",(string v) => cmd.TemplateDirectory = v },
@@ -91,7 +91,7 @@ namespace GitSharp.CLI
                 { "o|origin=", "Use <{branch}> instead of 'origin' to track upstream",(string v) => cmd.OriginName = v },
                 { "u|upload-pack=", "{Path} to git-upload-pack on the remote",(string v) => cmd.UploadPack = v },
                 { "depth=", "Create a shallow clone of that {depth}",(int v) => cmd.Depth = v },
-                { "git-dir", "Set the new directory to clone into", (string v) => cmd.Directory = v },
+                { "git-dir", "Set the new directory to clone into", (string v) => cmd.GitDirectory = v },
             };
 
             try
@@ -99,7 +99,7 @@ namespace GitSharp.CLI
                 List<String> arguments = ParseOptions(args);
                 if (arguments.Count > 0)
                 {
-                    cmd.Path = arguments[0];
+                    cmd.Source = arguments[0];
                     cmd.Execute();
                 }
                 else

@@ -95,5 +95,15 @@ namespace Git.Tests
             Assert.IsTrue(new FileInfo(index_path).Exists);
             Assert.AreEqual(File.ReadAllBytes(old_index), File.ReadAllBytes(index_path));
         }
+
+        [Test]
+        public void Change_special_msysgit_index()
+        {
+            var repo = GetTrashRepository();
+            var index_path = Path.Combine(repo.Directory, "index");
+            new FileInfo("Resources/index_originating_from_msysgit").CopyTo(index_path);
+            var a=writeTrashFile("a.txt", "Data:a");
+            repo.Index.Add(a.FullName);
+        }
     }
 }

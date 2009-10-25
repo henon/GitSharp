@@ -19,7 +19,7 @@ namespace Git
             _repo = repo;
         }
 
-        private GitSharp.Core.GitIndex GitIndex
+        internal GitSharp.Core.GitIndex GitIndex
         {
             get
             {
@@ -88,6 +88,25 @@ namespace Git
         public void Read()
         {
             GitIndex.Read();
+        }
+
+        public RepositoryStatus CompareAgainstWorkingDirectory()
+        {
+            return CompareAgainstWorkingDirectory(true);
+        }
+
+        public RepositoryStatus CompareAgainstWorkingDirectory(bool honor_ignore_rules)
+        {
+            if (honor_ignore_rules)
+                throw new NotImplementedException("Ignore rules are not implemented");
+            var tree = new GitSharp.Core.Tree(_repo._internal_repo);
+            var diff = new GitSharp.Core.IndexDiff(tree, GitIndex);
+            return new RepositoryStatus(diff);
+        }
+
+        public override string ToString()
+        {
+            return "Index[" + Path.Combine(_repo.Directory, "index") + "]";
         }
     }
 }

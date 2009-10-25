@@ -76,7 +76,15 @@ namespace Git.Tests
             index.Add(filepath1);
             Assert.AreNotEqual(File.ReadAllBytes(index_1), File.ReadAllBytes(index_path));
             Assert.DoesNotThrow(() => repo.Index.Read());
-            // todo: get changes and verify that for henon.txt has been added
+
+            var status = repo.Status;
+            Assert.IsTrue(status.Added.Contains("for henon.txt"));
+            Assert.IsTrue(status.Added.Contains("for nulltoken.txt"));
+            Assert.AreEqual(2, status.Added.Count);
+            Assert.AreEqual(0, status.Changed.Count);
+            Assert.AreEqual(0, status.Missing.Count);
+            Assert.AreEqual(0, status.Modified.Count);
+            Assert.AreEqual(0, status.Removed.Count);
         }
 
         [Test]
@@ -102,10 +110,71 @@ namespace Git.Tests
             var repo = GetTrashRepository();
             var index_path = Path.Combine(repo.Directory, "index");
             new FileInfo("Resources/index_originating_from_msysgit").CopyTo(index_path);
-            var a=writeTrashFile("a.txt", "Data:a");
+            var a = writeTrashFile("a.txt", "Data:a");
             // msysgit status should work here
             repo.Index.Add(a.FullName);
             // msysgit status doesn't work any more
+        }
+
+        [Test]
+        public void Diff_special_msysgit_index()
+        {
+            var repo = GetTrashRepository();
+            var index_path = Path.Combine(repo.Directory, "index");
+            new FileInfo("Resources/index_originating_from_msysgit").CopyTo(index_path);
+
+            // [henon] this is output from msysgit for "git status" with that index in an empty repository
+            //# Changes to be committed:
+            //#   (use "git reset HEAD <file>..." to unstage)
+            //#
+            //#       new file:   New Folder/New Ruby Program.rb
+            //#       deleted:    a/a1
+            //#       deleted:    a/a1.txt
+            //#       deleted:    a/a2.txt
+            //#       deleted:    b/b1.txt
+            //#       deleted:    b/b2.txt
+            //#       deleted:    c/c1.txt
+            //#       deleted:    c/c2.txt
+            //#       new file:   for henon.txt
+            //#       deleted:    master.txt
+            //#       new file:   test.cmd
+            //#
+            //# Changed but not updated:
+            //#   (use "git add/rm <file>..." to update what will be committed)
+            //#   (use "git checkout -- <file>..." to discard changes in working directory)
+            //#
+            //#       deleted:    New Folder/New Ruby Program.rb
+            //#       deleted:    for henon.txt
+            //#       deleted:    test.cmd
+            //#
+
+            var status = repo.Status;
+            var added = new[] {            
+                "New Folder/New Ruby Program.rb",
+                "for henon.txt",
+                "test.cmd", 
+            }.Select(s => Path.Combine(repo.WorkingDirectory, s)).ToArray();
+            var deleted = new[] {
+                  "a/a1", "a/a1.txt", "a/a2.txt", "b/b1.txt", "b/b2.txt", "c/c1.txt", "c/c2.txt", "master.txt" 
+            }.Select(s => Path.Combine(repo.WorkingDirectory, s)).ToArray();
+
+
+            AssertContains(status.Added, added);
+            AssertContains(status.Removed, deleted);
+            Assert.AreEqual(0, status.Changed.Count);
+            AssertContains(status.Missing, added);
+            Assert.AreEqual(0, status.Modified.Count);
+
+            //var a = writeTrashFile("a.txt", "Data:a");
+            // msysgit status should work here
+            //repo.Index.Add(a.FullName);
+            // msysgit status doesn't work any more
+        }
+
+        private void AssertContains<T>(HashSet<T> set, params T[] items)
+        {
+            foreach (var item in items)
+                Assert.IsTrue(set.Contains(item), "set does not contain item:" + item.ToString());
         }
     }
 }

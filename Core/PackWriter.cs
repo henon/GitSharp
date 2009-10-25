@@ -47,7 +47,7 @@ using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace GitSharp.Core
 {
-	public class PackWriter
+	public class PackWriter : IDisposable
 	{
 		public const string COUNTING_OBJECTS_PROGRESS = "Counting objects";
 		public const string SEARCHING_REUSE_PROGRESS = "Compressing objects";
@@ -550,6 +550,12 @@ namespace GitSharp.Core
 			}
 			_objectsMap.Add(otp);
 		}
+		
+		public void Dispose ()
+		{
+			_pos.Dispose();
+		}
+		
 
 		#region Nested Types
 

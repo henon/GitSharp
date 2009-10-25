@@ -47,7 +47,7 @@ namespace GitSharp.Core.RevWalk
 	/// An ordered list of <see cref="RevCommit"/> subclasses.
 	/// </summary>
 	/// <typeparam name="T">type of subclass of RevCommit the list is storing.</typeparam>
-	public class RevCommitList<T> : RevObjectList<T>
+	public class RevCommitList<T> : RevObjectList<T>, IDisposable
 		where T : RevCommit
 	{
 		private RevWalk _walker;
@@ -364,5 +364,11 @@ namespace GitSharp.Core.RevWalk
 		{
 			// Do nothing by default.
 		}
+		
+		public void Dispose ()
+		{
+			_walker.Dispose();
+		}
+		
 	}
 }

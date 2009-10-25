@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
@@ -55,7 +55,7 @@ namespace GitSharp.Core
 	/// once Git tries to atomically create the new temporary file under a well-known
 	/// name.
 	/// </summary>
-	public class LockFile
+	public class LockFile : IDisposable
 	{
 		private readonly FileInfo _refFile;
         private FileInfo _lockFile;
@@ -327,6 +327,13 @@ namespace GitSharp.Core
             RequireLock();
             return new LockFileOutputStream(this);
 		}
+		
+		public void Dispose ()
+		{
+			_os.Dispose();
+			_fLck.Dispose();
+		}
+		
 
 		#region Nested Types
 

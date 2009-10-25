@@ -37,6 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.RevWalk.Filter;
 
@@ -51,7 +52,7 @@ namespace GitSharp.Core.RevWalk
 	/// commit graph to be walked. A <see cref="RevFilter"/> may be used to select a subset
 	/// of the commits and return them to the caller.
 	/// </summary>
-	public class PendingGenerator : Generator
+	public class PendingGenerator : Generator, IDisposable
 	{
 		private static readonly RevCommit InitLast;
 
@@ -180,5 +181,11 @@ namespace GitSharp.Core.RevWalk
 				return null;
 			}
 		}
+		
+		public void Dispose ()
+		{
+			_walker.Dispose();
+		}
+		
 	}
 }

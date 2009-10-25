@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
@@ -43,7 +43,7 @@ using System.Text;
 
 namespace GitSharp.Core
 {
-	public class TextProgressMonitor : ProgressMonitor
+	public class TextProgressMonitor : ProgressMonitor, IDisposable
 	{
 		private readonly TextWriter _writer;
 		private DateTime _taskBeganAt;
@@ -168,5 +168,11 @@ namespace GitSharp.Core
 		}
 
 		#endregion
+		
+		public void Dispose ()
+		{
+			_writer.Dispose();
+		}
+		
 	}
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
@@ -42,7 +42,7 @@ using System.Text;
 namespace GitSharp.Core.Transport
 {
 
-    public class SideBandProgressMonitor : ProgressMonitor
+    public class SideBandProgressMonitor : ProgressMonitor, IDisposable
     {
         private readonly StreamWriter writer;
         private bool output;
@@ -152,6 +152,12 @@ namespace GitSharp.Core.Transport
             output = false;
             msg = null;
         }
+		
+		public void Dispose ()
+		{
+			writer.Dispose();
+		}
+		
     }
 
 }

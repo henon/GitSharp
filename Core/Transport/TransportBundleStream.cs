@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
@@ -50,7 +50,7 @@ namespace GitSharp.Core.Transport
     /// transport to opening at most one FetchConnection before needing to recreate
     /// the transport instance.
     /// </summary>
-    public class TransportBundleStream : Transport, ITransportBundle
+    public class TransportBundleStream : Transport, ITransportBundle, IDisposable
     {
         private Stream _inputStream;
 
@@ -115,5 +115,11 @@ namespace GitSharp.Core.Transport
                 }
             };
         }
+		
+		public void Dispose ()
+		{
+			_inputStream.Dispose();
+		}
+		
     }
 }

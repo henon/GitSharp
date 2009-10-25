@@ -40,6 +40,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GitSharp.Core;
 using NUnit.Framework;
 using GitSharp.Tests;
 using System.IO;
@@ -74,6 +75,43 @@ namespace Git.Tests
             File.WriteAllText(filepath1, "Rotwein");
             index = new Index(repo);
             index.Add(filepath1);
+            Assert.AreNotEqual(File.ReadAllBytes(index_1), File.ReadAllBytes(index_path));
+            Assert.DoesNotThrow(() => repo.Index.Read());
+            // todo: get changes and verify that for henon.txt has been added
+        }
+
+        [Test]
+        public void IndexAddThroughCore()
+        {
+            var workingDirectory = Path.Combine(trash.FullName, "test");
+            var gitRepo = Repository.Init(workingDirectory);
+
+            var index_path = Path.Combine(gitRepo.Directory, "index");
+            var old_index = Path.Combine(gitRepo.Directory, "old_index");
+
+            var repo = new GitSharp.Core.Repository(new DirectoryInfo(workingDirectory + "/.git"));
+
+            var index = repo.Index;
+            index.write(); // write empty index
+            new FileInfo(index_path).CopyTo(old_index);
+            string filepath = Path.Combine(workingDirectory, "for henon.txt");
+            File.WriteAllText(filepath, "Weißbier");
+            repo.Index.add(new DirectoryInfo(workingDirectory), new FileInfo(filepath));
+            repo.Index.write();
+            // now verify
+            Assert.IsTrue(new FileInfo(index_path).Exists);
+            var new_index = new GitSharp.Core.Repository(repo.Directory).Index;
+            Assert.AreNotEqual(File.ReadAllBytes(old_index), File.ReadAllBytes(index_path));
+
+            // make another addition
+            var index_1 = Path.Combine(gitRepo.Directory, "index_1");
+            new FileInfo(index_path).CopyTo(index_1);
+            string filepath1 = Path.Combine(workingDirectory, "for nulltoken.txt");
+            File.WriteAllText(filepath1, "Rotwein");
+            index = new GitIndex(repo);
+            index.Read();
+            index.add(new DirectoryInfo(workingDirectory), new FileInfo(filepath1));
+            index.write();
             Assert.AreNotEqual(File.ReadAllBytes(index_1), File.ReadAllBytes(index_path));
             Assert.DoesNotThrow(() => repo.Index.Read());
             // todo: get changes and verify that for henon.txt has been added

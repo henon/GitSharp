@@ -211,7 +211,7 @@ namespace GitSharp.Core.Transport
                 }
                 else if (refLine.StartsWith("ng "))
                 {
-                    refNameEnd = refLine.IndexOf(" ", 3);
+                    refNameEnd = refLine.IndexOf(' ', 3);
                 }
                 if (refNameEnd == -1)
                 {

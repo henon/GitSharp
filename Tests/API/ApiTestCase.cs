@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -35,56 +35,18 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
-using GitSharp.Core;
-using GitSharp.Core.Transport;
+using System.Linq;
+using System.Text;
 
-namespace Git
+namespace Git.Tests
 {
-
-    public class FetchCommand : AbstractFetchCommand
+    public class ApiTestCase : GitSharp.Tests.RepositoryTestCase
     {
-        public string Remote { get; set; }
-        public List<RefSpec> RefSpecs { get; set; }
-        public ProgressMonitor ProgressMonitor { get; set; }
-
-        public bool? Prune { get; set; }
-        public bool DryRun { get; set; }
-        public bool? Thin { get; set; }
-
-        public FetchResult Result
+        protected Repository GetTrashRepository()
         {
-            get; private set;
-        }
-
-        public FetchCommand()
-        {
-            Remote = "origin";
-            ProgressMonitor = NullProgressMonitor.Instance;
-        }
-
-        public override void Execute()
-        {
-            Transport tn = Transport.Open(Repository._internal_repo, Remote);
-
-            if (Prune != null)
-                tn.RemoveDeletedRefs = Prune.Value;
-            if (Thin != null)
-                tn.FetchThin = Thin.Value;
-            tn.DryRun = DryRun;
-
-            try
-            {
-                Result = tn.fetch(ProgressMonitor, RefSpecs);
-                if (Result.TrackingRefUpdates.Count == 0)
-                    return;
-            }
-            finally
-            {
-                tn.close();
-            }
-            showFetchResult(tn, Result);
+            return new Repository(trash_git.FullName);
         }
     }
-
 }

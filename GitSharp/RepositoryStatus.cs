@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -35,56 +35,39 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
-using GitSharp.Core;
-using GitSharp.Core.Transport;
+using System.Linq;
+using System.Text;
 
 namespace Git
 {
-
-    public class FetchCommand : AbstractFetchCommand
+    /// <summary>
+    /// A summary of changes made to the working directory of a repository with respect to its index.
+    /// </summary>
+    public class RepositoryStatus
     {
-        public string Remote { get; set; }
-        public List<RefSpec> RefSpecs { get; set; }
-        public ProgressMonitor ProgressMonitor { get; set; }
+        private GitSharp.Core.IndexDiff _diff;
 
-        public bool? Prune { get; set; }
-        public bool DryRun { get; set; }
-        public bool? Thin { get; set; }
-
-        public FetchResult Result
+        public RepositoryStatus(Repository repo)
         {
-            get; private set;
+            _diff = new GitSharp.Core.IndexDiff(repo._internal_repo);
+            AnyDifferences = _diff.Diff();
         }
 
-        public FetchCommand()
+        internal RepositoryStatus(GitSharp.Core.IndexDiff diff)
         {
-            Remote = "origin";
-            ProgressMonitor = NullProgressMonitor.Instance;
+            _diff = diff;
+            AnyDifferences = _diff.Diff();
         }
 
-        public override void Execute()
-        {
-            Transport tn = Transport.Open(Repository._internal_repo, Remote);
+        public bool AnyDifferences { get; private set; }
 
-            if (Prune != null)
-                tn.RemoveDeletedRefs = Prune.Value;
-            if (Thin != null)
-                tn.FetchThin = Thin.Value;
-            tn.DryRun = DryRun;
+        public HashSet<string> Added { get { return _diff.Added; } }
+        public HashSet<string> Changed { get { return _diff.Changed; } }
+        public HashSet<string> Removed { get { return _diff.Removed; } }
+        public HashSet<string> Missing { get { return _diff.Missing; } }
+        public HashSet<string> Modified { get { return _diff.Modified; } }
 
-            try
-            {
-                Result = tn.fetch(ProgressMonitor, RefSpecs);
-                if (Result.TrackingRefUpdates.Count == 0)
-                    return;
-            }
-            finally
-            {
-                tn.close();
-            }
-            showFetchResult(tn, Result);
-        }
     }
-
 }

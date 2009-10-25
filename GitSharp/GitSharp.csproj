@@ -58,6 +58,7 @@
     <Compile Include="Commit.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="AbstractObject.cs" />
+    <Compile Include="IgnoreRules.cs" />
     <Compile Include="Index.cs" />
     <Compile Include="InitCommand.cs" />
     <Compile Include="IReferenceObject.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tag.cs" />
     <Compile Include="Tree.cs" />
+    <Compile Include="RepositoryStatus.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\GitSharp.Core.csproj">

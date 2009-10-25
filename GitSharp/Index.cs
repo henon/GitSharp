@@ -19,7 +19,7 @@ namespace Git
             _repo = repo;
         }
 
-        private GitSharp.Core.GitIndex GitIndex
+        internal GitSharp.Core.GitIndex GitIndex
         {
             get
             {
@@ -36,35 +36,42 @@ namespace Git
         }
 
         /// <summary>
-        /// Add an untracked file or directory to the index (like git add)
+        /// Adds untracked files or directories to the index and writes the index to the disk (like "git add")
+        /// 
+        /// Note: Add as many files as possible by one call of this method for best performance.
         /// </summary>
-        /// <param name="path"></param>
-        public void Add(string path)
+        /// <param name="paths">Paths to add to the index</param>
+        public void Add(params string[] paths)
         {
-            if (new FileInfo(path).Exists)
-                AddFile(path);
-            else if (new DirectoryInfo(path).Exists)
-                AddDirectory(path);
-            else
-                throw new ArgumentException("File or directory at <"+path+"> doesn't seem to exist.", "path");
+            GitIndex.Read();
+            foreach (var path in paths)
+            {
+                if (new FileInfo(path).Exists)
+                    AddFile(new FileInfo(path));
+                else if (new DirectoryInfo(path).Exists)
+                    AddDirectory(new DirectoryInfo(path));
+                else
+                    throw new ArgumentException("File or directory at <" + path + "> doesn't seem to exist.", "path");
+            }
+            GitIndex.write();
         }
 
-        /// <summary>
-        /// Add an untracked file to the index (like git add)
-        /// </summary>
-        /// <param name="path"></param>
-        public void AddFile(string path)
+        private void AddFile(FileInfo path)
         {
-            GitIndex.add(_repo._internal_repo.WorkingDirectory, new FileInfo(path));
+            GitIndex.add(_repo._internal_repo.WorkingDirectory, path);
         }
 
-        /// <summary>
-        /// Add an untracked directory to the index (like git add)
-        /// </summary>
-        /// <param name="path"></param>
-        public void AddDirectory(string path)
+        private void AddDirectory(DirectoryInfo path)
         {
-            throw new NotImplementedException("we need to recursively add files here, but be careful ... .gitignore must be respected");
+            AddRecursively(path);
+        }
+
+        private void AddRecursively(DirectoryInfo dir)
+        {
+            foreach (var file in dir.GetFiles())
+                AddFile(file);
+            foreach (var subdir in dir.GetDirectories())
+                AddDirectory(subdir);
         }
 
         /// <summary>
@@ -81,6 +88,25 @@ namespace Git
         public void Read()
         {
             GitIndex.Read();
+        }
+
+        public RepositoryStatus CompareAgainstWorkingDirectory()
+        {
+            return CompareAgainstWorkingDirectory(true);
+        }
+
+        public RepositoryStatus CompareAgainstWorkingDirectory(bool honor_ignore_rules)
+        {
+            if (honor_ignore_rules)
+                throw new NotImplementedException("Ignore rules are not implemented");
+            var tree = new GitSharp.Core.Tree(_repo._internal_repo);
+            var diff = new GitSharp.Core.IndexDiff(tree, GitIndex);
+            return new RepositoryStatus(diff);
+        }
+
+        public override string ToString()
+        {
+            return "Index[" + Path.Combine(_repo.Directory, "index") + "]";
         }
     }
 }

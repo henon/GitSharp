@@ -160,8 +160,10 @@ namespace GitSharp.Tests
 			}
 	
             PackIndex idx2 = PackIndex.Open(idx2File);
-			Assert.IsInstanceOfType(typeof (PackIndexV2), idx2);
-			Assert.AreEqual(idx1.ObjectCount, idx2.ObjectCount);
+#pragma warning disable 0612
+            Assert.IsInstanceOfType(typeof(PackIndexV2), idx2); // [henon] IsInstanceOfType is obsolete
+#pragma warning restore 0612
+            Assert.AreEqual(idx1.ObjectCount, idx2.ObjectCount);
 			Assert.AreEqual(idx1.Offset64Count, idx2.Offset64Count);
 
 			for (int i = 0; i < idx1.ObjectCount; i++)

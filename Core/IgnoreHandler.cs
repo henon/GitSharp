@@ -88,19 +88,26 @@ namespace GitSharp.Core
             }
         }
 
-        private static bool IsIgnored(string path, IEnumerable<IPattern> patterns)
+        private static bool IsIgnored(string path, IEnumerable<IPattern> patterns, bool ret)
         {
-            return patterns.Any(p => p.IsIgnored(path));
+            // if ret is true, path was marked as ignored by a previous pattern, so only NegatedPatterns can still change this
+            if (ret)
+            {
+                return !patterns.Any(p => (p is NegatedPattern) && p.IsIgnored(path));
+            }
+
+            return patterns.Any(p => !(p is NegatedPattern) && p.IsIgnored(path));
         }
 
         public bool IsIgnored(string path)
         {
+            bool ret = false;
+
             //TODO: read path specific patterns
 
-            if (IsIgnored(path, _excludePatterns))
-                return true;
+            ret = IsIgnored(path, _excludePatterns, ret);
 
-            return false;
+            return ret;
         }
 
         private static void AddPattern(string line, ICollection<IPattern> to)
@@ -151,7 +158,7 @@ namespace GitSharp.Core
 
             public bool IsIgnored(string path)
             {
-                return !(_original.IsIgnored(path));
+                return _original.IsIgnored(path);
             }
         }
     }

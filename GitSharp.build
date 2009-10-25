@@ -31,6 +31,9 @@
 
   <target name="dist" depends="run-tests, package"/>
 
+  <!-- ********************************************** -->
+  <!-- GitSharp.Core.dll -->
+  <!-- ********************************************** -->
   <target name="compile-core" depends="init">
     <property name="assembly.name.suffix" value="Core" />
 
@@ -43,6 +46,9 @@
     <call target="compile-dll" />
   </target>
 
+  <!-- ********************************************** -->
+  <!-- git.exe -->
+  <!-- ********************************************** -->
   <target name="compile-cli" depends="compile-gitsharp">
     <property name="assembly.name.suffix" value="CLI" />
 
@@ -54,6 +60,9 @@
     <call target="compile-dll" />
   </target>
 
+  <!-- ********************************************** -->
+  <!-- GitSharp.dll -->
+  <!-- ********************************************** -->
   <target name="compile-gitsharp" depends="compile-core">
     <property name="assembly.name.suffix" value="" />
 
@@ -64,6 +73,9 @@
     <call target="compile-dll" />
   </target>
 
+  <!-- ********************************************** -->
+  <!-- GitSharp.Tests.dll -->
+  <!-- ********************************************** -->
   <target name="compile-tests" depends="compile-cli">
     <property name="assembly.name.suffix" value="Tests" />
 
@@ -76,7 +88,48 @@
     <call target="compile-dll" />
   </target>
 
+  <!-- ********************************************** -->
+  <!-- run tests -->
+  <!-- ********************************************** -->
   <target name="run-tests"  depends="compile-tests">
+    <property name="path.testresults" value="${path.build}/${build.platform}-${build.config}/test-results" />
+    <mkdir dir="${path.testresults}" if="${not(directory::exists(path.testresults))}"/>
+    <echo message="path.testresults = ${path.testresults}"/>
+
+    <copy todir="${path.build.output}/Resources">
+      <fileset basedir="${path.base}/Tests/Resources">
+        <include name="**" />
+      </fileset>
+    </copy>
+    <copy todir="${path.build.output}/Diff/Resources">
+      <fileset basedir="${path.base}/Tests/Diff/Resources">
+        <include name="**" />
+      </fileset>
+    </copy>
+    <copy todir="${path.build.output}/Patch/Resources">
+      <fileset basedir="${path.base}/Tests/Patch/Resources">
+        <include name="**" />
+      </fileset>
+    </copy>
+    <copy todir="${path.build.output}/sample.git">
+      <fileset basedir="${path.base}/Tests/sample.git">
+        <include name="**" />
+      </fileset>
+    </copy>
+
+    <property name="nunit.consolerunner" value="${path.tools.nunit}/nunit-console.exe" />
+    <property name="nunit.commandline" value="${path.build.output}/GitSharp.Tests.dll /xml:${path.testresults}/GitSharp.Tests.dll-results.xml /noshadow " />
+    <if test="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}">
+      <property name="nunit.consolerunner" value="nunit-console2" />
+      <property name="nunit.commandline" value="${path.build.output}/GitSharp.Tests.dll -xml:${path.testresults}/GitSharp.Tests.dll-results.xml -noshadow " />
+    </if>
+    
+    <exec
+      program="${nunit.consolerunner}"
+      workingdir="${path.build.output}"
+      commandline="${nunit.commandline}"
+      failonerror="true"
+			/>
   </target>
 
   <target name="init">
@@ -85,11 +138,9 @@
     <mkdir dir="${path.build}" if="${not(directory::exists(path.build))}"/>
 
     <property name="path.build.output" value="${path.build}/${build.platform}-${build.config}/bin"/>
-    <property name="path.testresults" value="${path.build}/${build.platform}-${build.config}/test-results" />
 
     <echo message="build.version = ${build.version}"/>
     <echo message="path.build.output = ${path.build.output}"/>
-    <echo message="path.testresults = ${path.testresults}"/>
 
     <mkdir dir="${path.build.output}" if="${not(directory::exists(path.build.output))}"/>
 

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  *
  * All rights reserved.
  *
@@ -49,16 +50,84 @@ namespace Git.Tests
     public class InitTests : GitSharp.Tests.RepositoryTestCase
     {
         [Test]
+        public void Init_honors_environment_variable_GIT_DIR()
+        {
+            //Store GIT_DIR value temporarily
+            string tempGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
+            try
+            {
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "test1");
+                System.Environment.SetEnvironmentVariable("GIT_DIR", path);
+                var init = new InitCommand();
+                Commands.GitDirectory = null; // override fallback
+                Assert.AreEqual(Path.Combine(path, ".git"), init.ActualDirectory);
+            }
+            finally
+            {
+                //Reset GIT_DIR value to initial value before the test
+                System.Environment.SetEnvironmentVariable("GIT_DIR", tempGitDir);
+            }
+        }
+
+        [Test]
+        public void Init_honors_global_fallback_gitdir()
+        {
+            //Verify specified directory
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "test");
+            Git.Commands.GitDirectory = path; // <--- cli option --git_dir sets this global variable. it is a fallback value for all commands
+            var init = new InitCommand();
+            Assert.AreEqual(Path.Combine(path, ".git"), init.ActualDirectory);
+        }
+
+        [Test]
+        public void Init_Honors_CurrentDirectory()
+        {
+            string tempGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
+            try
+            {
+                //current directory is returned only if global fallback and envvar are null
+                Git.Commands.GitDirectory = null; // override fallback
+                System.Environment.SetEnvironmentVariable("GIT_DIR", null); // override environment
+                var path = Directory.GetCurrentDirectory();
+                var init = new InitCommand();
+                Assert.AreEqual(Path.Combine(Directory.GetCurrentDirectory(), ".git"), init.ActualDirectory);
+            }
+            finally
+            {
+                System.Environment.SetEnvironmentVariable("GIT_DIR", tempGitDir);
+            }
+        }
+
+        [Test]
+        public void Explicit_path_is_preferred()
+        {
+            // it should override global fallback
+            Git.Commands.GitDirectory = "abc/def/ghi";
+            var init = new InitCommand() { GitDirectory = "xyz" };
+            Assert.AreEqual(Path.GetFullPath(Path.Combine(init.GitDirectory, ".git")), init.ActualDirectory);
+
+            // it should override env var
+            Git.Commands.GitDirectory = null;
+            string tempGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
+            try
+            {
+                System.Environment.SetEnvironmentVariable("GIT_DIR", "uvw");
+                Assert.AreEqual(Path.GetFullPath(Path.Combine(init.GitDirectory, ".git")), init.ActualDirectory);
+            }
+            finally
+            {
+                System.Environment.SetEnvironmentVariable("GIT_DIR", tempGitDir);
+            }
+        }
+
+        [Test]
         public void IsBare()
         {
             //Test bare repository
             bool bare = true;
-            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test.git"));
-            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
-        	Git.Repository repo = Git.Repository.Init(bare);
-            //Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));  // [henon] validity is checked below
+            var path = Path.Combine(trash.FullName, "test.git");
+            var repo = Repository.Init(path, bare);
             Assert.IsTrue(repo.IsBare);
-            Git.Commands.GitDirectory = null;
         }
 
         [Test]
@@ -66,26 +135,21 @@ namespace Git.Tests
         {
             //Test non-bare repository
             bool bare = false;
-            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test"));
-            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
-            Git.Repository repo = Git.Repository.Init(bare);
-            //Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare)); // [henon] validity is checked below
+            var path = Path.Combine(trash.FullName, "test");
+            var repo = Repository.Init(path, bare);
             Assert.IsFalse(repo.IsBare);
-            Git.Commands.GitDirectory = null;
         }
 
 
         [Test]
         public void IsBareValid()
         {
-            Assert.Ignore("Bare repo validity check is not yet implemented");
             //Test bare repository
             bool bare = true;
-            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test.git"));
-            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
-            Git.Repository repo = Git.Repository.Init(bare);
+            var path = Path.Combine(trash.FullName, "test.git");
+            var repo = Repository.Init(path, bare);
             Assert.IsTrue(repo.IsBare);
-            Assert.IsTrue(Repository.IsValid(Git.Commands.GitDirectory.FullName, bare));
+            Assert.IsTrue(Repository.IsValid(repo.Directory, bare));
         }
 
         [Test]
@@ -93,11 +157,10 @@ namespace Git.Tests
         {
             //Test non-bare repository
             bool bare = false;
-            DirectoryInfo path = new DirectoryInfo(Path.Combine(trash.FullName, "test"));
-            Git.Commands.GitDirectory = Git.Commands.FindGitDirectory(path, false, bare);
-            Git.Repository repo = Git.Repository.Init(bare);
+            var path = Path.Combine(trash.FullName, "test");
+            var repo = Repository.Init(path, bare);
             Assert.IsFalse(repo.IsBare);
-            Assert.IsTrue(Repository.IsValid(path.FullName, bare));
+            Assert.IsTrue(Repository.IsValid(repo.Directory, bare));
         }
-	}
+    }
 }

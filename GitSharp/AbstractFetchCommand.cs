@@ -91,15 +91,15 @@ namespace Git
 
             if (r == RefUpdate.RefUpdateResult.Forced)
             {
-                string aOld = u.OldObjectId.Abbreviate(GitRepository).name();
-                string aNew = u.NewObjectId.Abbreviate(GitRepository).name();
+                string aOld = u.OldObjectId.Abbreviate(Repository._internal_repo).name();
+                string aNew = u.NewObjectId.Abbreviate(Repository._internal_repo).name();
                 return aOld + "..." + aNew;
             }
 
             if (r == RefUpdate.RefUpdateResult.FastForward)
             {
-                string aOld = u.OldObjectId.Abbreviate(GitRepository).name();
-                string aNew = u.NewObjectId.Abbreviate(GitRepository).name();
+                string aOld = u.OldObjectId.Abbreviate(Repository._internal_repo).name();
+                string aNew = u.NewObjectId.Abbreviate(Repository._internal_repo).name();
                 return aOld + ".." + aNew;
             }
 

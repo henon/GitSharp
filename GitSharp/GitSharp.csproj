@@ -58,6 +58,7 @@
     <Compile Include="Commit.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="AbstractObject.cs" />
+    <Compile Include="Index.cs" />
     <Compile Include="InitCommand.cs" />
     <Compile Include="IReferenceObject.cs" />
     <Compile Include="ITreeNode.cs" />

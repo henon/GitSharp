@@ -52,60 +52,18 @@ namespace Git
         {
             Quiet = true; // <-- [henon] since this command will be used more often programmatically than by CLI quiet=true is the better default.
             Shared = "false";
-		}
+        }
 
         #region Properties / Options
 
-
         /// <summary>
-        /// Get or set path to a directory that shall be initialized as a git repository. If Bare==false a ".git" subdirectory will be created in that directory.
-        /// Path overrides usage of GIT_DIR environment variable if set, otherwise Init uses the value of ActualPath.
+        /// Get the directory where the Init command will initialize the repository. if GitDirectory is null ActualDirectory is used to initialize the repository.
         /// </summary>
-        public string Path
+        public override string ActualDirectory
         {
             get
             {
-                return _path;
-            }
-            set
-            {
-                if (value == null)
-                {
-					_path = null;
-				}
-				else 
-				{
-					//var dir = new DirectoryInfo(value);
-					//dir.Refresh();
-					DirectoryInfo dir = Directory.CreateDirectory(value);
-					//if (!dir.Exists)
-					if (!Directory.Exists(dir.FullName))
-					throw new ArgumentException("Path:"+dir.FullName+" does not exist or is not a directory.");
-    	            _path = dir.FullName;
-       	        }
-			}
-        }
-        private string _path = null;
-
-        /// <summary>
-        /// Get the path where the Init command shall initialize the repository. Returns GIT_DIR environment variable (if set) or the current directory if Path is null. 
-        /// Returns the same value as Path otherwise.
-        /// </summary>
-        public string ActualPath
-        {
-            get
-            {
-                string git_dir = null;
-                if (string.IsNullOrEmpty(Path))
-                    if (string.IsNullOrEmpty(GIT_DIR))
-                        git_dir = System.Environment.CurrentDirectory;
-                    else
-                        git_dir = GIT_DIR;
-                else
-                    git_dir = Path;
-                if (!Bare)
-                    git_dir = System.IO.Path.Combine(git_dir, ".git");
-                return git_dir;
+                return Commands.FindGitDirectory(GitDirectory, false, Bare);
             }
         }
 
@@ -163,33 +121,16 @@ namespace Git
         /// </summary>
         public override void Execute()
         {
-        	if (GitDirectory == null)
-        	{
-        		DirectoryInfo path = null;
-        		GitDirectory = Git.Commands.FindGitDirectory(path, false, Bare);
-        	}
-        	
-        	if (GitRepository == null)
-				GitRepository = new GitSharp.Core.Repository(Git.Commands.GitDirectory);
-
-			GitRepository.Create(Bare);
-            GitRepository.Config.setBoolean("core", null, "bare", Bare);
-            GitRepository.Config.save();
+            var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualDirectory));
+            repo.Create(Bare);
+            repo.Config.setBoolean("core", null, "bare", Bare);
+            repo.Config.save();
             if (!Quiet)
             {
-                OutputStream.WriteLine("Initialized empty Git repository in " + GitRepository.Directory.FullName);
+                OutputStream.WriteLine("Initialized empty Git repository in " + repo.Directory.FullName);
                 OutputStream.Flush();
             }
-            InitializedRepository = new Repository(GitRepository.Directory.FullName);
-        }
-
-        /// <summary>
-        /// The repository that has been initialized. This property is only set after Execute has been called.
-        /// </summary>
-        public Repository InitializedRepository
-        {
-            get;
-            private set;
+            Repository = new Repository(repo.Directory.FullName);
         }
     }
 }

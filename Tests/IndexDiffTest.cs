@@ -68,6 +68,24 @@ namespace GitSharp.Tests
 			Assert.AreEqual(0, diff.Removed.Count);
 		}
 
+        [Test]
+        public void testAdded2()
+        {
+            var index = new GitIndex(db);
+            writeTrashFile("test/für henon.txt", "Weißebier");
+            var tree = new Tree(db);
+
+            index.add(trash, new FileInfo(Path.Combine(trash.FullName, "test/für henon.txt")));
+            var diff = new IndexDiff(tree, index);
+            diff.Diff();
+
+            Assert.AreEqual(1, diff.Added.Count);
+            Assert.IsTrue(diff.Added.Contains("test/für henon.txt"));
+            Assert.AreEqual(0, diff.Changed.Count);
+            Assert.AreEqual(0, diff.Modified.Count);
+            Assert.AreEqual(0, diff.Removed.Count);
+        }
+
 		[Test]
 		public void testModified()
 		{

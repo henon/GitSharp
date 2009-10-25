@@ -98,6 +98,8 @@ namespace Git
         /// <summary>
         /// The git repository that is either result of the command (init, clone) or subject to alteration (all other commands). 
         /// If not explicitly set, the command uses Git.Commands.Repository.
+        /// 
+        /// Note: InitCommand and CloneCommand ignore this property and overwrite it as a result of Execute.
         /// </summary>
         public Repository Repository
         {

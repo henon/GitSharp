@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  *
  * All rights reserved.
  *
@@ -49,14 +50,21 @@ namespace Git.Tests
     public class CloneTests : GitSharp.Tests.RepositoryTestCase
     {
         [Test]
-        public void CloneJGit()
+		public void Check_cloned_bare_repo()        {
+        	Assert.Ignore("This test has not been implemented yet.");
+        }
+        
+        [Test]
+        public void Check_cloned_repo()
         {
            string toPath = Path.Combine(trash.FullName, "test");
            string fromUrl = "git://github.com/henon/test.git";
            var repo=Git.Commands.Clone(fromUrl, toPath);
            Assert.IsTrue(Repository.IsValid(repo.Directory));
-           //Todo: Assert.IsTrue(Verify Repository against fromUrl)
+           //Verify content is in the proper location
+           var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
+           Assert.IsTrue(new FileInfo(readme).Exists);
+        }
            
         }
-	}
 }

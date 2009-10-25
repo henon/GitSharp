@@ -58,6 +58,7 @@ namespace Git
 
         // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.
 
+        /// <summary>
         /// Get the directory where the Init command will initialize the repository. if GitDirectory is null ActualDirectory is used to initialize the repository.
         /// </summary>
         public override string ActualDirectory
@@ -189,23 +190,6 @@ namespace Git
             if (OriginName == null)
                 OriginName = "origin";
 
-            // guess a name            
-            string p = source.Path;
-
-            while (p.EndsWith("/"))
-                p = p.Substring(0, p.Length - 1);
-
-            int s = p.LastIndexOf('/');
-            if (s < 0)
-                throw new ArgumentException("Cannot guess local name from " + source);
-            string localName = p.Substring(s + 1);
-            
-            if (!Bare)
-            {
-                if (localName.EndsWith(".git"))
-                    localName = localName.Substring(0, localName.Length - 4);
-            }
-
             var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualDirectory));
             repo.Create(Bare);
             repo.Config.setBoolean("core", null, "bare", Bare);
@@ -216,29 +200,13 @@ namespace Git
                 OutputStream.WriteLine("Initialized empty Git repository in " + repo.Directory.FullName);
                 OutputStream.Flush();
             }
-            if (!Bare)
-            {
+
                 saveRemote(source);
                 FetchResult r = runFetch();
                 GitSharp.Core.Ref branch = guessHEAD(r);
                 if (!NoCheckout)
                     doCheckout(branch);
             }
-            else
-            {
-            	if (!Quiet)
-            	{
-                	//Add description directory
-                	OutputStream.WriteLine("Description directory still needs to be implemented.");
-                	//Add hooks directory
-                	OutputStream.WriteLine("Hooks directory still needs to be implemented.");
-                	//Add info directory
-                	OutputStream.WriteLine("Info directory still needs to be implemented.");
-                	//Add packed_refs directory
-                	OutputStream.WriteLine("Packed_refs directory still needs to be implemented.");
-            	}
-            }
-        }
 
         private void saveRemote(URIish uri)
         {

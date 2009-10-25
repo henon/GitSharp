@@ -121,6 +121,30 @@ namespace GitSharp.Tests
             Assert.AreEqual(0, diff.Removed.Count);
         }
 
+
+        [Test]
+        public void Check_entries_of_msysgit_index()
+        {
+            var repo = new Repository(trash_git);
+            var index_path = Path.Combine(repo.Directory.FullName, "index");
+            new FileInfo("Resources/index_originating_from_msysgit").CopyTo(index_path);
+
+            var index = repo.Index;
+            index.RereadIfNecessary();
+
+            var paths = new[] {            
+                "New Folder/New Ruby Program.rb",
+                "for henon.txt",
+                "test.cmd", 
+                "a/a1", "a/a1.txt", "a/a2.txt", "b/b1.txt", "b/b2.txt", "c/c1.txt", "c/c2.txt", "master.txt" 
+            };
+
+            var dict = index.Members.ToDictionary(entry => entry.Name);
+            Assert.AreEqual(11, dict.Count);
+            foreach (var path in paths)
+                Assert.IsTrue(dict.ContainsKey(path));
+        }
+
     }
 }
 

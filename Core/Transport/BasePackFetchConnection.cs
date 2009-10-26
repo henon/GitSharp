@@ -453,6 +453,10 @@ namespace GitSharp.Core.Transport
 		public void Dispose ()
 		{
 			_walk.Dispose();
+			REACHABLE.Dispose();
+			COMMON.Dispose();
+			ADVERTISED.Dispose();
+			_reachableCommits.Dispose();
 		}
 		
     }

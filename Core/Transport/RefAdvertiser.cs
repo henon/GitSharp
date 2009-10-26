@@ -214,6 +214,7 @@ namespace GitSharp.Core.Transport
 		public void Dispose ()
 		{
 			_walk.Dispose();
+			ADVERTISED.Dispose();
 		}
 		
 	}

@@ -1,4 +1,5 @@
 ﻿using System;
+using GitSharp.Core;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -29,7 +30,24 @@ namespace GitSharp.Tests
 
             return (TException)exception;
         }
+        
+        public static void IgnoreOnMono(Action codeBlock, string ignoreExplaination)
+        {
+            try
+            {
+                codeBlock();
+            }
+            catch (AssertionException)
+            {
+                if (SystemReader.getInstance().getOperatingSystem() == PlatformType.Windows)
+                {
+                    throw;
+                }
 
+                Assert.Ignore(ignoreExplaination);
+            }   
+        }
+        
         private static Exception GetExceptionFrom(Action code)
         {
             try

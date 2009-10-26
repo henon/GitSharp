@@ -856,6 +856,10 @@ namespace GitSharp.Core.Transport
 		public void Dispose ()
 		{
 			_revWalk.Dispose();
+			COMPLETE.Dispose();
+			IN_WORK_QUEUE.Dispose();
+			LOCALLY_SEEN.Dispose();
+			_objectDigest.Dispose();
 		}
 		
 	}

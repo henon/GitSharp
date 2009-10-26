@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Charles O'Farrell <charleso@charleso.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -63,7 +63,7 @@ namespace GitSharp.Core
          *            the complete set of references. This should have been computed
          *            by applying updates to the advertised refs already discovered.
          */
-        public RefWriter(IEnumerable<Ref> refs)
+        protected RefWriter(IEnumerable<Ref> refs)
         {
             this.refs = RefComparator.Sort(refs);
         }

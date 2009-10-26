@@ -81,7 +81,7 @@ namespace GitSharp.Tests.RevWalk
             b.Append("tagger A U. Thor <a_u_thor@example.com> 1218123387 +0700\n");
             b.Append("\n");
 
-            var rw = new GitSharp.Core.RevWalk.RevWalk(db);
+            var rw = new Core.RevWalk.RevWalk(db);
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
             Assert.IsNull(c.getObject());
@@ -124,7 +124,7 @@ namespace GitSharp.Tests.RevWalk
 
             body.Append("\n");
 
-            var rw = new GitSharp.Core.RevWalk.RevWalk(db);
+            var rw = new Core.RevWalk.RevWalk(db);
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
             Assert.IsNull(c.getObject());
@@ -157,7 +157,7 @@ namespace GitSharp.Tests.RevWalk
 
         	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
-            c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), b.ToString().getBytes("UTF-8"));
+            c.parseCanonical(new Core.RevWalk.RevWalk(db), b.ToString().getBytes("UTF-8"));
             return c;
         }
 
@@ -177,7 +177,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
@@ -200,12 +200,11 @@ namespace GitSharp.Tests.RevWalk
                 b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
-            Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c
-                                                                                 .getFullMessage());
+            Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
         }
 
         /**
@@ -232,7 +231,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write("Hi\n".getBytes("EUC-JP"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
@@ -266,10 +265,11 @@ namespace GitSharp.Tests.RevWalk
                 b.Write("Hi\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
 
-            Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name,"Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=547902");
+            AssertHelper.IgnoreOnMono(() => Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=547902");
+
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
             Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
@@ -303,7 +303,7 @@ namespace GitSharp.Tests.RevWalk
                 b.Write("Hi\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new GitSharp.Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());

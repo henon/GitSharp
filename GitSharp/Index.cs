@@ -43,7 +43,7 @@ namespace Git
         /// <param name="paths">Paths to add to the index</param>
         public void Add(params string[] paths)
         {
-            GitIndex.Read();
+            GitIndex.RereadIfNecessary();
             foreach (var path in paths)
             {
                 if (new FileInfo(path).Exists)
@@ -99,7 +99,8 @@ namespace Git
         {
             if (honor_ignore_rules)
                 throw new NotImplementedException("Ignore rules are not implemented");
-            var tree = new GitSharp.Core.Tree(_repo._internal_repo);
+            var commit = _repo.Head.CurrentCommit;
+            var tree = commit != null ? commit.Tree.InternalTree : new GitSharp.Core.Tree(_repo._internal_repo);
             var diff = new GitSharp.Core.IndexDiff(tree, GitIndex);
             return new RepositoryStatus(diff);
         }

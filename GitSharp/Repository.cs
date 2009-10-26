@@ -314,6 +314,11 @@ namespace Git
             }
         }
 
+        public static implicit operator CoreRepository(Repository repo)
+        {
+            return repo._internal_repo;
+        }
+
         public override string ToString()
         {
             return "Repository[" + Directory + "]";

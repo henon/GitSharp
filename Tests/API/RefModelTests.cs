@@ -46,13 +46,13 @@ using GitSharp.Tests;
 namespace Git.Tests
 {
     [TestFixture]
-    public class RefModelTests : RepositoryTestCase
+    public class RefModelTests : ApiTestCase
     {
 
         [Test]
         public void UpdateBranch()
         {
-            var repo = new Repository(db);
+            var repo = GetTrashRepository();
             var master = new Branch(repo, "refs/heads/master");
             var origin_master = new Branch(repo, "refs/remotes/origin/master");
             origin_master.Update(master);
@@ -64,7 +64,7 @@ namespace Git.Tests
         [Test]
         public void RefNameResolution()
         {
-            var repo = new Repository(db);
+            var repo = GetTrashRepository();
             var master = new Ref(repo, "refs/heads/master");
             var previous = new Ref(repo,"refs/heads/master^");
             Assert.AreNotEqual(master.Target.Hash, previous.Target.Hash);
@@ -74,7 +74,7 @@ namespace Git.Tests
         [Test]
         public void RefEquality()
         {
-            var repo = new Repository(db);
+            var repo = GetTrashRepository();
             Assert.IsTrue(new Ref(repo, "a") == new Ref(repo, "refs/heads/a"));
             Assert.IsTrue(new Ref(repo, "HEAD") == new Ref(repo, "refs/heads/master"));
         }

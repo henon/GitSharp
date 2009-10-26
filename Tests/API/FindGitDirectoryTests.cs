@@ -11,39 +11,66 @@ namespace Git.Tests
     public class FindGitDirectoryTests : GitSharp.Tests.RepositoryTestCase
     {
         [Test]
-        public void Honors_EnvVar_GIT_DIR()
+        public void Honors_environment_variable_GIT_DIR()
         {
             //Store GIT_DIR value temporarily
             string tempGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
-
-            //Verify Environment Variable GIT_DIR
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "test1");
-            System.Environment.SetEnvironmentVariable("GIT_DIR", path);
-            var result = Git.Commands.FindGitDirectory(path, false, false);
-            Assert.AreEqual(result, Path.Combine(path, ".git"));
-
-            //Reset GIT_DIR value to initial value before the test
-            System.Environment.SetEnvironmentVariable("GIT_DIR", tempGitDir);
-        }
-
-        [Test]
-        public void Honors_CLI_Option_GIT_DIR()
-        {
-            //Verify specified directory
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "test");
-            Git.Commands.GitDirectory = path; // <--- cli option --git_dir sets this global variable
-            var result = Git.Commands.FindGitDirectory(path, false, false);
-            Assert.AreEqual(Path.Combine(path, ".git"), result);
+            try
+            {
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "test1");
+                System.Environment.SetEnvironmentVariable("GIT_DIR", path);
+                Commands.GitDirectory = null; // override fallback
+                Assert.AreEqual(path + ".git", AbstractCommand.FindGitDirectory(null, false, true));
+                Assert.AreEqual(Path.Combine(path, ".git"), AbstractCommand.FindGitDirectory(null, false, false));
+            }
+            finally
+            {
+                //Reset GIT_DIR value to initial value before the test
+                System.Environment.SetEnvironmentVariable("GIT_DIR", tempGitDir);
+            }
         }
 
         [Test]
         public void Honors_CurrentDirectory()
         {
-            //Verify current directory (default, if the other three tests are empty)
+            string tempGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
+            try
+            {
+                //current directory is returned only if path, global fallback and envvar are all null
+                Git.Commands.GitDirectory = null; // override fallback
+                System.Environment.SetEnvironmentVariable("GIT_DIR", null); // override environment
+                var path = Directory.GetCurrentDirectory();
+                Assert.IsFalse(path.EndsWith("git")); // <--- this should be the case anyway, but if not the next assertion would not pass correctly
+                Assert.AreEqual(Directory.GetCurrentDirectory() + ".git", AbstractCommand.FindGitDirectory(null, false, true));
+                Assert.AreEqual(Path.Combine(Directory.GetCurrentDirectory(), ".git"), AbstractCommand.FindGitDirectory(null, false, false));
+            }
+            finally
+            {
+                System.Environment.SetEnvironmentVariable("GIT_DIR", tempGitDir);
+            }
+        }
+
+        [Test]
+        public void Explicit_path_is_preferred()
+        {
+            // it should override global fallback
+            Git.Commands.GitDirectory = "abc/def/ghi";
+            Assert.AreEqual("xyz.git", AbstractCommand.FindGitDirectory("xyz", false, true));
+            Assert.AreEqual(Path.Combine("xyz",".git"), AbstractCommand.FindGitDirectory("xyz", false, false));
+
+            // it should override env var
             Git.Commands.GitDirectory = null;
-            var path = Directory.GetCurrentDirectory();
-            var result = Git.Commands.FindGitDirectory(path, false, false);
-            Assert.AreEqual(Path.Combine(path, ".git"), result);
+            string tempGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
+            try
+            {
+                System.Environment.SetEnvironmentVariable("GIT_DIR", "uvw");
+                Assert.AreEqual("xyz.git", AbstractCommand.FindGitDirectory("xyz", false, true));
+                Assert.AreEqual(Path.Combine("xyz", ".git"), AbstractCommand.FindGitDirectory("xyz", false, false));
+            }
+            finally
+            {
+                System.Environment.SetEnvironmentVariable("GIT_DIR", tempGitDir);
+            }
         }
     }
 }

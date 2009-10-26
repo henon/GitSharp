@@ -69,78 +69,6 @@ namespace Git
         private static StreamWriter _output;
 
         /// <summary>
-        /// Performs upward recursive lookup to return git directory. Honors the environment variable GIT_DIR.
-        /// </summary>
-        /// <returns></returns>
-        public static string FindGitDirectory(string rootDirectory, bool recursive, bool isBare)
-        {
-            var root = (rootDirectory == null ? null : new DirectoryInfo(rootDirectory));
-            var git_dir = FindGitDirectory(root, recursive, isBare);
-            Debug.Assert(git_dir != null, "The result of FindGitDirectory must not be null");
-            return git_dir.FullName;
-        }
-
-        /// <summary>
-        /// Performs upward recursive lookup to return git directory. Honors the environment variable GIT_DIR.
-        /// </summary>
-        /// <returns></returns>
-        public static DirectoryInfo FindGitDirectory(DirectoryInfo rootDirectory, bool recursive, bool isBare)
-        {
-            DirectoryInfo directory = null;
-            DirectoryInfo gitDir = null;
-            string envGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
-
-            //Determine which git directory to use
-            if (rootDirectory != null)         	//Directory specified by --git-dir 
-                directory = rootDirectory;
-            else if (envGitDir != null) 		//Directory specified by $GIT_DIR
-                directory = new DirectoryInfo(envGitDir);
-            else                        		//Current Directory
-            {
-                DirectoryInfo current = directory = new DirectoryInfo(Directory.GetCurrentDirectory());
-
-                if (recursive)
-                {
-                    //Check for non-bare repositories
-                    if (!isBare)
-                    {
-                        while (current != null)
-                        {
-                            gitDir = new DirectoryInfo(Path.Combine(current.FullName, ".git"));
-                            if (gitDir.Exists)
-                                return current.Parent;
-
-                            current = current.Parent;
-                        }
-                    }
-                    else
-                    {
-                        //Check for bare repositories
-                        while (current != null)
-                        {
-                            gitDir = new DirectoryInfo(current.FullName);
-                            if (gitDir.FullName.EndsWith(".git") && gitDir.Exists)
-                                return current;
-
-                            current = current.Parent;
-                        }
-                    }
-                }
-            }
-
-            if (!directory.FullName.EndsWith(".git"))
-            {
-                if (!isBare)
-                    directory = new DirectoryInfo(Path.Combine(directory.FullName, ".git"));
-                else
-                    directory = new DirectoryInfo(directory.FullName + ".git");
-            }
-
-
-            return directory;
-        }
-
-        /// <summary>
         /// Get or set the default git repository for all commands. A command can override this by
         /// setting it's own Repository property.
         /// 
@@ -155,7 +83,7 @@ namespace Git
         public static string GitDirectory { get; set; }
 
 
-        #region CloneCommand
+        #region Clone
 
         /// <summary>
         /// Clone a repository and checkout the working directory.
@@ -182,7 +110,7 @@ namespace Git
             {
                 Source = fromUrl,
                 GitDirectory = toPath,
-                Bare=bare,
+                Bare = bare,
             };
             return Clone(cmd);
         }
@@ -196,7 +124,7 @@ namespace Git
 
         #endregion
 
-        #region InitCommand
+        #region Init
 
 
         public static void Init(string path)

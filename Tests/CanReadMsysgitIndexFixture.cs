@@ -112,13 +112,37 @@ namespace GitSharp.Tests
             index.write();
 
 
-            Assert.AreEqual(3, diff.Added.Count);
-            Assert.IsTrue(diff.Added.Contains("a.txt"));
-            Assert.IsTrue(diff.Added.Contains("b.txt"));
-            Assert.IsTrue(diff.Added.Contains("c.txt"));
+            Assert.AreEqual(2, diff.Added.Count);
+            Assert.IsFalse(diff.Added.Contains("a.txt"), "Should not contain a.txt because it is already committed.");
+            Assert.IsTrue(diff.Added.Contains("b.txt"), "Should contain b.txt since it was added by msysgit, but not committed");
+            Assert.IsTrue(diff.Added.Contains("c.txt"), "Should contain c.txt since it was added by this test, but not committed");
             Assert.AreEqual(0, diff.Changed.Count);
             Assert.AreEqual(0, diff.Modified.Count);
             Assert.AreEqual(0, diff.Removed.Count);
+        }
+
+
+        [Test]
+        public void Check_entries_of_msysgit_index()
+        {
+            var repo = new Repository(trash_git);
+            var index_path = Path.Combine(repo.Directory.FullName, "index");
+            new FileInfo("Resources/index_originating_from_msysgit").CopyTo(index_path);
+
+            var index = repo.Index;
+            index.RereadIfNecessary();
+
+            var paths = new[] {            
+                "New Folder/New Ruby Program.rb",
+                "for henon.txt",
+                "test.cmd", 
+                "a/a1", "a/a1.txt", "a/a2.txt", "b/b1.txt", "b/b2.txt", "c/c1.txt", "c/c2.txt", "master.txt" 
+            };
+
+            var dict = index.Members.ToDictionary(entry => entry.Name);
+            Assert.AreEqual(11, dict.Count);
+            foreach (var path in paths)
+                Assert.IsTrue(dict.ContainsKey(path));
         }
 
     }

@@ -290,11 +290,27 @@ namespace Git
             }
         }
 
+        /// <summary>
+        /// Returns the git configuration containing repository-specific, user-specific and global 
+        /// settings.
+        /// </summary>
         public Config Config
         {
             get
             {
                 return new Config(this);
+            }
+        }
+
+        /// <summary>
+        /// Get the differences between the working directory and the index.
+        /// Returns a data structure containing the results (like "git status").
+        /// </summary>
+        public RepositoryStatus Status
+        {
+            get
+            {
+                return Index.CompareAgainstWorkingDirectory(false); // todo: change this to true, once the ignore rules are implemented.
             }
         }
 

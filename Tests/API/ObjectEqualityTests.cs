@@ -38,10 +38,10 @@
 using Git;
 using NUnit.Framework;
 
-namespace GitSharp.Tests.API
+namespace Git.Tests
 {
     [TestFixture]
-    public class ObjectEqualityTests : RepositoryTestCase
+    public class ObjectEqualityTests : ApiTestCase
     {
         [Test]
         public void ShouldBeAbleToCompareNullObjects()
@@ -62,7 +62,7 @@ namespace GitSharp.Tests.API
         [Test]
         public void SameInstanceShouldBeEqual()
         {
-            var repos = new Repository(db);
+            var repos = GetTrashRepository(); 
             var obj = repos.CurrentBranch.CurrentCommit;
 #pragma warning disable 1718
             Assert.IsTrue(obj == obj); // [henon] this equality comparison of the same instance is intended
@@ -72,7 +72,7 @@ namespace GitSharp.Tests.API
         [Test]
         public void DifferentInstancesShouldntBeEqual()
         {
-            var repos = new Repository(db);
+            var repos = GetTrashRepository();
             var obj = repos.CurrentBranch.CurrentCommit;
             var obj2 = repos.CurrentBranch.CurrentCommit.Parent;
 

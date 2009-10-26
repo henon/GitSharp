@@ -45,7 +45,7 @@ using System.IO;
 namespace Git.Tests
 {
     [TestFixture]
-    public class RepositoryTests : GitSharp.Tests.RepositoryTestCase
+    public class RepositoryTests : ApiTestCase
     {
 
         [Test]
@@ -55,6 +55,15 @@ namespace Git.Tests
             Assert.DoesNotThrow(() => status=repo.Status);
             Assert.IsFalse(repo.Status.AnyDifferences);
             Assert.AreEqual(0, status.Added.Count + status.Changed.Count + status.Missing.Count + status.Modified.Count + status.Removed.Count);
+        }
+
+        [Test]
+        public void ImplicitConversionToCoreRepo()
+        {
+            var repo = this.GetTrashRepository();
+            Assert.IsTrue(repo is Repository);
+            GitSharp.Core.Repository core_repo = repo;
+            Assert.IsTrue(core_repo is GitSharp.Core.Repository);
         }
     }
 }

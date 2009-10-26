@@ -44,22 +44,22 @@ using GitSharp;
 using GitSharp.Core;
 using GitSharp.Core.RevWalk;
 using NDesk.Options;
-using Repository=GitSharp.Core.Repository;
+using Repository = GitSharp.Core.Repository;
 
 namespace GitSharp.CLI
 {
 
-/// <summary>
-/// Abstract command which can be invoked from the command line.
-/// 
-/// Commands are configured with a single "current" repository and then the
-/// execute(String[]) method is invoked with the arguments that appear
-/// after the subcommand.
-/// 
-/// Command constructors should perform as little work as possible as they may be
-/// invoked very early during process loading, and the command may not execute
-/// even though it was constructed.
-/// </summary>
+    /// <summary>
+    /// Abstract command which can be invoked from the command line.
+    /// 
+    /// Commands are configured with a single "current" repository and then the
+    /// execute(String[]) method is invoked with the arguments that appear
+    /// after the subcommand.
+    /// 
+    /// Command constructors should perform as little work as possible as they may be
+    /// invoked very early during process loading, and the command may not execute
+    /// even though it was constructed.
+    /// </summary>
     public abstract class TextBuiltin
     {
         /// <summary>
@@ -76,12 +76,12 @@ namespace GitSharp.CLI
         /// Specifies if the command requires a repository to execute
         /// </summary>
         private bool requiresRepository = false;
-        
+
         /// <summary>
         /// Specifies if the command requires an upward search for the git repository
         /// </summary>
         private bool requiresRecursive = false;
-        
+
         /// <summary>
         /// RevWalk used during command line parsing, if it was required.
         /// </summary>
@@ -136,15 +136,15 @@ namespace GitSharp.CLI
         /// </summary>
         public bool RequiresRepository
         {
-        	get
-        	{
-        		return requiresRepository;
-        	}
-        	
-        	protected set
-        	{
-        		requiresRepository = value;
-        	}
+            get
+            {
+                return requiresRepository;
+            }
+
+            protected set
+            {
+                requiresRepository = value;
+            }
         }
 
         /// <summary>
@@ -201,8 +201,8 @@ namespace GitSharp.CLI
             else
             {
                 GitRepository = null;
-            	GitDirectory = path;
-            	
+                GitDirectory = path;
+
             }
         }
 
@@ -277,7 +277,8 @@ namespace GitSharp.CLI
 
         ObjectId Resolve(string s)
         {
-            ObjectId r = Git.Commands.Repository._internal_repo.Resolve(s);
+            Core.Repository repo = Git.Commands.Repository;
+            ObjectId r = repo.Resolve(s);
             if (r == null)
                 throw die("Not a revision: " + s);
             return r;
@@ -310,11 +311,16 @@ namespace GitSharp.CLI
         {
             get
             {
-                return Git.Commands.Repository._internal_repo;
+                return Git.Commands.Repository;
             }
             set
             {
-                Git.Commands.Repository = new Git.Repository(value);
+                if (value == null)
+                {
+                    Git.Commands.Repository = null;
+                    return;
+                }
+                Git.Commands.Repository = new Git.Repository(value.Directory.FullName);
             }
         }
 
@@ -326,7 +332,7 @@ namespace GitSharp.CLI
             }
             set
             {
-                Git.Commands.GitDirectory = (value==null ? null : value.FullName);
+                Git.Commands.GitDirectory = (value == null ? null : value.FullName);
             }
         }
     }

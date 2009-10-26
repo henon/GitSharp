@@ -47,13 +47,13 @@ using System.IO;
 namespace Git.Tests
 {
     [TestFixture]
-    public class BlobTests : RepositoryTestCase
+    public class BlobTests : ApiTestCase
     {
 
         [Test]
         public void WriteBlob() // corresponds to T0003_Basic_Write.Write_Blob
         {
-            var repo = new Repository(db);
+            var repo = GetTrashRepository(); ;
             {
                 var blob = Blob.CreateFromFile(repo, "Resources/single_file_commit/i-am-a-file");
                 Assert.AreEqual("95ea6a6859af6791464bd8b6de76ad5a6f9fad81", blob.Hash);

@@ -44,7 +44,7 @@ using System.Text.RegularExpressions;
 
 namespace Git
 {
-    class IgnoreRules
+    public class IgnoreRules
     {
         private struct Rule
         {

@@ -324,16 +324,7 @@ namespace GitSharp.CLI
             }
         }
 
-        public DirectoryInfo GitDirectory
-        {
-            get
-            {
-                return new DirectoryInfo(Git.Commands.GitDirectory);
-            }
-            set
-            {
-                Git.Commands.GitDirectory = (value == null ? null : value.FullName);
-            }
-        }
+        public DirectoryInfo GitDirectory { get; set; }
+
     }
 }

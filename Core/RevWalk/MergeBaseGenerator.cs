@@ -57,7 +57,7 @@ namespace GitSharp.Core.RevWalk
 	/// should not have any impact as this generator should be run alone, and without
 	/// any other generators wrapped around it.
 	/// </summary>
-    public class MergeBaseGenerator : Generator
+    public class MergeBaseGenerator : Generator, IDisposable
     {
         private const int Parsed = RevWalk.PARSED;
         private const int InPending = RevWalk.SEEN;
@@ -221,5 +221,11 @@ namespace GitSharp.Core.RevWalk
             //
             return haveAll;
         }
+		
+		public void Dispose ()
+		{
+			_walker.Dispose();
+		}
+		
     }
 }

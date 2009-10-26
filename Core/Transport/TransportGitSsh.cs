@@ -48,7 +48,7 @@ using Tamir.SharpSsh.jsch;
 
 namespace GitSharp.Core.Transport
 {
-	public class TransportGitSsh : SshTransport, IPackTransport
+	public class TransportGitSsh : SshTransport, IPackTransport, IDisposable
 	{
 		public static bool canHandle(URIish uri)
 		{
@@ -344,5 +344,11 @@ namespace GitSharp.Core.Transport
 		}
 
 		#endregion
+		
+		public void Dispose ()
+		{
+			_errStream.Dispose();
+		}
+		
 	}
 }

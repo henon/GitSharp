@@ -36,6 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using GitSharp.Core.Util;
 using System.Runtime.CompilerServices;
 
@@ -207,7 +208,7 @@ namespace GitSharp.Core
             }
         }
 
-        private class Slot
+        private class Slot : IDisposable
         {
             public Slot lruPrev;
 
@@ -220,6 +221,12 @@ namespace GitSharp.Core
             public int sz;
 
             public WeakReference<Entry> data = Dead;
+			
+			public void Dispose ()
+			{
+				provider.Dispose();
+			}
+			
         }
 
         #endregion

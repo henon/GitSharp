@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -46,7 +46,7 @@ using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace GitSharp.Core.Transport
 {
-	public class IndexPack
+	public class IndexPack : IDisposable
 	{
 		public const string PROGRESS_DOWNLOAD = "Receiving objects";
 		public const string PROGRESS_RESOLVE_DELTA = "Resolving deltas";
@@ -1096,6 +1096,13 @@ namespace GitSharp.Core.Transport
 			}
 			return fileName + IndexSuffix;
 		}
+		
+		public void Dispose ()
+		{
+			_packOut.Dispose();
+			_stream.Dispose();
+		}
+		
 
 		#region Nested Types
 

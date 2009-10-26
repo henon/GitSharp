@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -45,7 +45,7 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
-	public class WalkFetchConnection : BaseFetchConnection
+	public class WalkFetchConnection : BaseFetchConnection, IDisposable
 	{
 		private readonly RevFlag COMPLETE;
 		private readonly RevFlag IN_WORK_QUEUE;
@@ -852,5 +852,11 @@ namespace GitSharp.Core.Transport
 		}
 
 		#endregion
+		
+		public void Dispose ()
+		{
+			_revWalk.Dispose();
+		}
+		
 	}
 }

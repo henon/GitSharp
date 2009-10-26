@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
@@ -52,7 +52,7 @@ namespace GitSharp.Core.Transport
  * prove that we already have (or will have when the fetch completes) the
  * object the annotated tag peels (dereferences) to.
  */
-        public static readonly TagOpt AUTO_FOLLOW = new TagOpt("");
+        public static readonly TagOpt AUTO_FOLLOW = new TagOpt(string.Empty);
 
         /**
  * Never fetch tags, even if we have the thing it points at.

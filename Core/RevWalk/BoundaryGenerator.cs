@@ -36,6 +36,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+
 namespace GitSharp.Core.RevWalk
 {
 	public class BoundaryGenerator : Generator
@@ -64,7 +66,7 @@ namespace GitSharp.Core.RevWalk
 
 		#region Nested Types
 
-		private class InitialGenerator : Generator
+		private class InitialGenerator : Generator, IDisposable
 		{
 			private static readonly int Parsed = RevWalk.PARSED;
 			private static readonly int Duplicate = RevWalk.TEMP_MARK;
@@ -127,6 +129,12 @@ namespace GitSharp.Core.RevWalk
 				_parent._generator = boundary;
 				return boundary.next();
 			}
+			
+			public void Dispose ()
+			{
+				_walk.Dispose();
+			}
+			
 		}
 
 		#endregion

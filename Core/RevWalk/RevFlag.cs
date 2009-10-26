@@ -43,7 +43,7 @@ namespace GitSharp.Core.RevWalk
 	/// <summary>
 	/// Application level mark bit for <see cref="RevObject"/>s.
 	/// </summary>
-    public class RevFlag
+    public class RevFlag : IDisposable
     {
 		/// <summary>
 		/// Uninteresting by <see cref="RevWalk.markUninteresting(RevCommit)"/>.
@@ -76,6 +76,12 @@ namespace GitSharp.Core.RevWalk
         {
             return Name;
         }   
+		
+		public void Dispose ()
+		{
+			Walker.Dispose();
+		}
+		
     }
 
 	public class StaticRevFlag : RevFlag

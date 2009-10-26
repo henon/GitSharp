@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
@@ -55,7 +55,7 @@ namespace GitSharp.Core
 	/// delta packed format yielding high compression of lots of object where some
 	/// objects are similar.
 	/// </summary>
-	public class PackFile : IEnumerable<PackIndex.MutableEntry>
+	public class PackFile : IEnumerable<PackIndex.MutableEntry>, IDisposable
 	{
 		/// <summary>
 		/// Sorts PackFiles to be most recently created to least recently created.
@@ -608,5 +608,12 @@ namespace GitSharp.Core
 		{
 			get { return _hash; }
 		}
+		
+		public void Dispose ()
+		{
+			_fd.Dispose();
+			_fdMap.Dispose();
+		}
+		
 	}
 }

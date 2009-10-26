@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, 2009, Google Inc.
  *
  * All rights reserved.
@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -42,7 +43,7 @@ using GitSharp.Core.RevWalk;
 
 namespace GitSharp.Core.Transport
 {
-	public class RefAdvertiser
+	public class RefAdvertiser : IDisposable
 	{
 		private readonly PacketLineOut _pckOut;
 		private readonly RevWalk.RevWalk _walk;
@@ -209,5 +210,11 @@ namespace GitSharp.Core.Transport
 			_tmpLine.Append('\n');
 			_pckOut.WriteString(_tmpLine.ToString());
 		}
+		
+		public void Dispose ()
+		{
+			_walk.Dispose();
+		}
+		
 	}
 }

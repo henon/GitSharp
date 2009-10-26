@@ -207,7 +207,7 @@ namespace GitSharp.Core
 			get { return (int)(_end - _start); }
 		}
 		
-		public void Dispose ()
+		public virtual void Dispose ()
 		{
 			_pack.Dispose();
 		}

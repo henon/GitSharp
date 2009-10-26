@@ -103,8 +103,9 @@ namespace GitSharp.Core
                 inf.Inflate(VerifyGarbageBuffer, 0, VerifyGarbageBuffer.Length);
         }
 		
-		public void Dispose ()
+		public override void Dispose ()
 		{
+            base.Dispose();
 			_stream.Dispose();
 		}
 		

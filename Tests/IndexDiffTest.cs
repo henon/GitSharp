@@ -86,6 +86,24 @@ namespace GitSharp.Tests
             Assert.AreEqual(0, diff.Removed.Count);
         }
 
+        [Test]
+        public void testUpdateExistingMsysgitIndex()
+        {
+            var index_path = Path.Combine(trash.FullName + "/.git", "index");
+            new FileInfo("Resources/index_originating_from_msysgit").CopyTo(index_path); 
+            
+            var index = new GitIndex(db);
+            index.Read();
+            var a = writeTrashFile("a.txt", "Data:a");
+            // msysgit status should work here
+            index.add(trash, a);
+            index.write();
+            // msysgit status doesn't work any more
+            index.Read();
+        }
+
+
+
 		[Test]
 		public void testModified()
 		{

@@ -259,15 +259,17 @@ namespace GitSharp.Core
 
                     newMessageDigest.Update(ms.ToArray());
                     writer.Write(ms.ToArray());
-                    ms.Clear();
 
                     foreach (Entry entry in _entries.Values)
                     {
+                        ms = new MemoryStream();
+                        
                         entry.Write(ms);
                         newMessageDigest.Update(ms.ToArray());
                         writer.Write(ms.ToArray());
-                        ms.Clear();
                     }
+
+                    ms = new MemoryStream();
 
                     byte[] digestBuffer = newMessageDigest.Digest();
                     ms.Write(digestBuffer, 0, digestBuffer.Length);

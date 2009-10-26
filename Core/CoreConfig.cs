@@ -54,11 +54,18 @@ namespace GitSharp.Core
 
         private readonly int compression;
         private readonly int packIndexVersion;
+        private readonly string excludeFile;
 
         private CoreConfig(Config rc)
         {
             compression = rc.getInt("core", "compression", Deflater.DEFAULT_COMPRESSION);
             packIndexVersion = rc.getInt("pack", "indexversion", 2);
+            excludeFile = rc.getString("core", null, "excludesfile");
+        }
+
+        public string getExcludeFile()
+        {
+            return excludeFile;
         }
 
         public int getCompression()

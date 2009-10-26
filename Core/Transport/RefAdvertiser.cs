@@ -84,9 +84,10 @@ namespace GitSharp.Core.Transport
 				if (obj != null)
 				{
 					advertiseAny(obj, r.OriginalName);
-					if (_derefTags && obj is RevTag)
+					RevTag rt = (obj as RevTag);
+					if (_derefTags && rt != null)
 					{
-						advertiseTag((RevTag)obj, r.OriginalName + "^{}");
+						advertiseTag(rt, r.OriginalName + "^{}");
 					}
 				}
 			}
@@ -100,9 +101,10 @@ namespace GitSharp.Core.Transport
 				advertiseAnyOnce(obj, ".have");
 			}
 
-			if (obj is RevTag)
+			RevTag rt = (obj as RevTag);
+			if (rt != null)
 			{
-				advertiseAnyOnce(((RevTag)obj).getObject(), ".have");
+				advertiseAnyOnce(rt.getObject(), ".have");
 			}
 		}
 
@@ -167,10 +169,10 @@ namespace GitSharp.Core.Transport
 
 		private void advertiseTag(RevTag tag, string refName)
 		{
-			RevObject o = tag;
+			RevTag o = (tag as RevTag);
 			do
 			{
-				RevObject target = ((RevTag)o).getObject();
+				RevTag target = (o.getObject() as RevTag);
 				try
 				{
 					_walk.parseHeaders(target);
@@ -181,7 +183,7 @@ namespace GitSharp.Core.Transport
 				}
 				target.add(ADVERTISED);
 				o = target;
-			} while (o is RevTag);
+			} while (o != null);
 			advertiseAny(tag.getObject(), refName);
 		}
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2006, Shawn O. Pearce <spearce@spearce.org>
@@ -156,12 +156,14 @@ namespace GitSharp.Core
                 file = new FileInfo(Path.Combine(_root.FullName, fileName));
             }
 
-            if (t1 is Tree || t2 is Tree)
+			Tree tr1 = (t1 as Tree);
+			Tree tr2 = (t2 as Tree);
+            if (tr1 != null || tr2 != null)
             {
                 if (_threeTrees)
-                    _visitor.FinishVisitTree((Tree)t1, (Tree)t2, fileName);
+                    _visitor.FinishVisitTree(tr1, tr2, fileName);
                 else
-                    _visitor.FinishVisitTree((Tree)t1, IndexCounter - curIndexPos, fileName);
+                    _visitor.FinishVisitTree(tr1, IndexCounter - curIndexPos, fileName);
             }
             else if (t1 != null || t2 != null)
             {

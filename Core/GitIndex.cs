@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2007, Robin Rosenberg <me@lathund.dewire.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
@@ -404,9 +404,10 @@ namespace GitSharp.Core
                 {
                     name = te.Name;
                 }
-                if (te is Tree)
+				Tree tr = (te as Tree);
+                if (tr != null)
                 {
-                    ReadTree(name, (Tree)te);
+                    ReadTree(name, tr);
                 }
                 else
                 {

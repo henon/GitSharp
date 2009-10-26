@@ -143,7 +143,8 @@ namespace GitSharp.Core.Transport
 			{
 				ObjectId id = _workQueue.First.Value;
 				_workQueue.RemoveFirst();
-				if (!(id is RevObject) || !((RevObject)id).has(COMPLETE))
+				RevObject ro = (id as RevObject);
+				if (ro == null || !ro.has(COMPLETE))
 				{
 					DownloadObject(monitor, id);
 				}
@@ -183,9 +184,10 @@ namespace GitSharp.Core.Transport
 			RevObject obj;
 			try
 			{
-				if (id is RevObject)
+				RevObject ro = (id as RevObject);
+				if (ro != null)
 				{
-					obj = (RevObject)id;
+					obj = ro;
 					if (obj.has(COMPLETE))
 						return;
 					_revWalk.parseHeaders(obj);

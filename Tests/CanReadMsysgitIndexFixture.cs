@@ -102,7 +102,7 @@ namespace GitSharp.Tests
 
             writeTrashFile(Path.Combine(repository.WorkingDirectory.FullName, "c.txt"), "c");
 
-            var tree = new Tree(repository);
+            var tree = repository.MapTree(repository.Head.ObjectId);
 
             index.add(repository.WorkingDirectory, new FileInfo(Path.Combine(repository.WorkingDirectory.FullName, "c.txt")));
 

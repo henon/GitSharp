@@ -48,7 +48,13 @@ namespace Git.Tests
     public class RepositoryTests : GitSharp.Tests.RepositoryTestCase
     {
 
-        
-
+        [Test]
+        public void StatusEvenWorksWithHeadLessRepo() {
+            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
+            RepositoryStatus status = null;
+            Assert.DoesNotThrow(() => status=repo.Status);
+            Assert.IsFalse(repo.Status.AnyDifferences);
+            Assert.AreEqual(0, status.Added.Count + status.Changed.Count + status.Missing.Count + status.Modified.Count + status.Removed.Count);
+        }
     }
 }

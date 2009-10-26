@@ -1101,6 +1101,8 @@ namespace GitSharp.Core.Transport
 		{
 			_packOut.Dispose();
 			_stream.Dispose();
+			_objectDigest.Dispose();
+			_packDigest.Dispose();
 		}
 		
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
@@ -45,7 +45,7 @@ namespace GitSharp.Core.Transport
         public bool Enabled { get; set; }
         public bool Overridable { get; set; }
 
-        public DaemonService(string cmdName, string cfgName)
+        protected DaemonService(string cmdName, string cfgName)
         {
             Command = cmdName.StartsWith("git-") ? cmdName : "git-" + cmdName;
             Config = cfgName;

@@ -225,6 +225,8 @@ namespace GitSharp.Core
 			public void Dispose ()
 			{
 				provider.Dispose();
+				lruNext.Dispose();
+				lruPrev.Dispose();
 			}
 			
         }

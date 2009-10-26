@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
@@ -196,7 +196,7 @@ namespace GitSharp.Tests
         [Test]
 	    public void testDequote_Latin1()
         {
-		    AssertDequote("\u00c5ngstr\u00f6m", "\\305ngstr\\366m"); // Latin1
+			AssertHelper.IgnoreOnMono(() => AssertDequote("\u00c5ngstr\u00f6m", "\\305ngstr\\366m"), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
 	    }
 
         [Test]
@@ -214,8 +214,8 @@ namespace GitSharp.Tests
         [Test]
 	    public void testDequote_RawLatin1()
         {
-            AssertDequote("\u00c5ngstr\u00f6m", (char)NB.BaseToDecimal("305", 8)  + "ngstr" + (char)NB.BaseToDecimal("366", 8) + "m");
-	    }
+			AssertHelper.IgnoreOnMono(() => AssertDequote("\u00c5ngstr\u00f6m", (char)NB.BaseToDecimal("305", 8)  + "ngstr" + (char)NB.BaseToDecimal("366", 8) + "m"), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
+		}
 
         [Test]
 	    public void testQuote_Ang()

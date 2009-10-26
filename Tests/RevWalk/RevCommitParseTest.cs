@@ -181,7 +181,7 @@ namespace GitSharp.Tests.RevWalk
             }
 
             Assert.AreSame(Constants.CHARSET, c.Encoding);
-            Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name);
+			AssertHelper.IgnoreOnMono(() => Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
         }

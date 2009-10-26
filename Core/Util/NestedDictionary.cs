@@ -126,11 +126,11 @@ namespace GitSharp.Core.Util
 
         #region Constructors
 
-        public NestedDictionaryBase()
+        protected NestedDictionaryBase()
         {
         }
 
-        public NestedDictionaryBase(V value)
+        protected NestedDictionaryBase(V value)
         {
             this._value = value;
         }

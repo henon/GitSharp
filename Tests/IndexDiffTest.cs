@@ -95,11 +95,13 @@ namespace GitSharp.Tests
             var index = new GitIndex(db);
             index.Read();
             var a = writeTrashFile("a.txt", "Data:a");
-            // msysgit status should work here
             index.add(trash, a);
             index.write();
-            // msysgit status doesn't work any more
             index.Read();
+
+            byte[] content = File.ReadAllBytes(index_path);
+
+            Assert.AreEqual(352, content.Length);
         }
 
 

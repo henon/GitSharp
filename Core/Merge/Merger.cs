@@ -36,6 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.RevWalk;
@@ -47,7 +48,7 @@ namespace GitSharp.Core.Merge
 	/// <summary>
 	/// Instance of a specific <seealso cref="MergeStrategy"/> for a single <seealso cref="Repository"/>.
 	/// </summary>
-	public abstract class Merger
+	public abstract class Merger : IDisposable
 	{
 		private readonly Repository _db;
 		private readonly RevWalk.RevWalk _walk;
@@ -264,5 +265,11 @@ namespace GitSharp.Core.Merge
 		/// Resulting tree, if <seealso cref="Merge(AnyObjectId[])"/> returned true. 
 		/// </returns>
 		public abstract ObjectId GetResultTreeId();
+		
+		public void Dispose ()
+		{
+			_walk.Dispose();
+		}
+		
 	}
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -215,7 +215,7 @@ namespace GitSharp.Core.Util
         /// <returns>Value of the global path</returns>
         public static string getLocalAppDataPath()
         {
-            string path = "";
+            string path = string.Empty;
             PlatformType ptype = SystemReader.getInstance().getOperatingSystem();
             
             switch (ptype)
@@ -243,7 +243,7 @@ namespace GitSharp.Core.Util
         /// <returns></returns>
         public static string getCommonAppDataPath()
         {
-            string path = "";
+            string path = string.Empty;
             PlatformType ptype = SystemReader.getInstance().getOperatingSystem();
 
             switch (ptype)
@@ -267,7 +267,7 @@ namespace GitSharp.Core.Util
 
         public static string getAppStorePrefix()
         {
-            string prefix = "";
+            string prefix = string.Empty;
             PlatformType ptype = SystemReader.getInstance().getOperatingSystem();
 
             switch (ptype)

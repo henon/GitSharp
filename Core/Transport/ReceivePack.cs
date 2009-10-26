@@ -46,7 +46,7 @@ using GitSharp.Core.Util;
 namespace GitSharp.Core.Transport
 {
 
-    public class ReceivePack
+    public class ReceivePack : IDisposable
     {
         private const string CAPABILITY_REPORT_STATUS = BasePackPushConnection.CAPABILITY_REPORT_STATUS;
         private const string CAPABILITY_DELETE_REFS = BasePackPushConnection.CAPABILITY_DELETE_REFS;
@@ -716,6 +716,14 @@ namespace GitSharp.Core.Transport
                     break;
             }
 		}
+		
+		public void Dispose ()
+		{
+			walk.Dispose();
+			raw.Dispose();
+			msgs.Dispose();
+		}
+		
 
 		#region Nested Types
 

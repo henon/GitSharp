@@ -345,9 +345,9 @@ namespace MiscUtil.IO
 		public int Read(char[] data, int index, int count)
 		{
 			CheckDisposed();
-			if (buffer==null)
+			if (data==null)
 			{
-				throw new ArgumentNullException("buffer");
+				throw new ArgumentNullException("data");
 			}
 			if (index < 0)
 			{
@@ -601,7 +601,7 @@ namespace MiscUtil.IO
 				{
 					throw new EndOfStreamException
 						(String.Format("End of stream reached with {0} byte{1} left to read.", size-index,
-						size-index==1 ? "s" : ""));
+						size-index==1 ? "s" : string.Empty));
 				}
 				index += read;
 			}

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -45,7 +45,7 @@ namespace GitSharp.Core
 	/// <summary>
 	/// Base class for a set of object loader classes for packed objects.
 	/// </summary>
-	public abstract class PackedObjectLoader : ObjectLoader
+	public abstract class PackedObjectLoader : ObjectLoader, IDisposable
 	{
 		private readonly PackFile _packFile;
 		private readonly long _dataOffset;
@@ -180,5 +180,11 @@ namespace GitSharp.Core
 		{
 			_packFile.CopyRawData(this, @out, buf, curs);
 		}
+		
+		public void Dispose ()
+		{
+			_packFile.Dispose();
+		}
+		
 	}
 }

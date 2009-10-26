@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Core.Exceptions;
@@ -43,7 +44,7 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
-	public class UploadPack
+	public class UploadPack : IDisposable
 	{
 		private const string OptionIncludeTag = BasePackFetchConnection.OPTION_INCLUDE_TAG;
 		private const string OptionMultiAck = BasePackFetchConnection.OPTION_MULTI_ACK;
@@ -454,5 +455,17 @@ namespace GitSharp.Core.Transport
 				_rawOut.Flush();
 			}
 		}
+		
+		public void Dispose ()
+		{
+			_walk.Dispose();
+			ADVERTISED.Dispose();
+			WANT.Dispose();
+			PEER_HAS.Dispose();
+			COMMON.Dispose();
+			_rawIn.Dispose();
+			_rawOut.Dispose();
+		}
+		
 	}
 }

@@ -51,7 +51,7 @@ namespace GitSharp.Core.RevWalk
 	/// the best <see cref="Generator"/> implementation available based upon the 
 	/// current configuration.
 	/// </summary>
-	public class StartGenerator : Generator
+	public class StartGenerator : Generator, IDisposable
 	{
 		private readonly RevWalk _walker;
 
@@ -182,5 +182,11 @@ namespace GitSharp.Core.RevWalk
 			w.Pending = g;
 			return g.next();
 		}
+		
+		public void Dispose ()
+		{
+			_walker.Dispose();
+		}
+		
 	}
 }

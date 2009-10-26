@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -46,7 +46,7 @@ namespace GitSharp.Core
 	/// <summary>
 	/// A window for accessing git packs using a <see cref="Stream"/> for storage.
 	/// </summary>
-    internal class ByteBufferWindow : ByteWindow
+    internal class ByteBufferWindow : ByteWindow, IDisposable
     {
         private readonly Stream _stream;
 
@@ -102,5 +102,11 @@ namespace GitSharp.Core
             while (!inf.IsFinished && !inf.IsNeedingInput)
                 inf.Inflate(VerifyGarbageBuffer, 0, VerifyGarbageBuffer.Length);
         }
+		
+		public void Dispose ()
+		{
+			_stream.Dispose();
+		}
+		
     }
 }

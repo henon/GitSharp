@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Roger C. Soares <rogersoares@intelinet.com.br>
@@ -480,12 +480,12 @@ namespace GitSharp.Core
 
         private static bool HasParentBlob(Tree t, string name)
         {
-            if (name.IndexOf("/") == -1)
+            if (name.IndexOf('/') == -1)
             {
                 return false;
             }
 
-            string parent = name.Slice(0, name.LastIndexOf("/"));
+            string parent = name.Slice(0, name.LastIndexOf('/'));
             return t.FindBlobMember(parent) != null || HasParentBlob(t, parent);
         }
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
@@ -46,7 +46,7 @@ namespace GitSharp.Core.Transport
     /// Class performing push operation on remote repository.
     /// </summary>
 	/// <seealso cref="Transport.push(ProgressMonitor, ICollection{RemoteRefUpdate})"/>
-    public class PushProcess
+    public class PushProcess : IDisposable
     {
         /// <summary> Task name for <seealso cref="ProgressMonitor"/> used during opening connection.  </summary>
         internal const string PROGRESS_OPENING_CONNECTION = "Opening connection";
@@ -251,5 +251,11 @@ namespace GitSharp.Core.Transport
             }
             return result;
         }
+		
+		public void Dispose ()
+		{
+			_walker.Dispose();
+		}
+		
     }
 }

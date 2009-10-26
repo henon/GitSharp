@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -46,7 +46,7 @@ using GitSharp.Core.RevWalk.Filter;
 
 namespace GitSharp.Core.Transport
 {
-    public class BasePackFetchConnection : BasePackConnection, IFetchConnection
+    public class BasePackFetchConnection : BasePackConnection, IFetchConnection, IDisposable
     {
         private const int MAX_HAVES = 256;
         protected const int MIN_CLIENT_BUFFER = 2 * 32 * 46 + 8;
@@ -368,7 +368,7 @@ namespace GitSharp.Core.Transport
             }
         }
 
-        private class NegotiateBeginRevFilter : RevFilter
+        private class NegotiateBeginRevFilter : RevFilter, IDisposable
         {
             private readonly RevFlag _common;
             private readonly RevFlag _advertised;
@@ -393,6 +393,13 @@ namespace GitSharp.Core.Transport
                 }
                 return !remoteKnowsIsCommon;
             }
+			
+			public void Dispose ()
+			{
+				_advertised.Dispose();
+				_common.Dispose();
+			}
+			
         }
 
         private void NegotiateBegin()
@@ -442,5 +449,11 @@ namespace GitSharp.Core.Transport
             ip.index(monitor);
             _packLock = ip.renameAndOpenPack(_lockMessage);
         }
+		
+		public void Dispose ()
+		{
+			_walk.Dispose();
+		}
+		
     }
 }

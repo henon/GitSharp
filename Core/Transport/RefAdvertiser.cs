@@ -115,9 +115,10 @@ namespace GitSharp.Core.Transport
 
 		private void additionalHaves(ObjectDatabase db)
 		{
-			if (db is AlternateRepositoryDatabase)
+			AlternateRepositoryDatabase b = (db as AlternateRepositoryDatabase);
+			if (b != null)
 			{
-				additionalHaves(((AlternateRepositoryDatabase)db).getRepository());
+				additionalHaves(b.getRepository());
 			}
 
 			foreach (ObjectDatabase alt in db.getAlternates())

@@ -136,11 +136,10 @@ namespace GitSharp.Tests
                 "New Folder/New Ruby Program.rb",
                 "for henon.txt",
                 "test.cmd", 
-                "a/a1", "a/a1.txt", "a/a2.txt", "b/b1.txt", "b/b2.txt", "c/c1.txt", "c/c2.txt", "master.txt" 
             };
 
             var dict = index.Members.ToDictionary(entry => entry.Name);
-            Assert.AreEqual(11, dict.Count);
+            Assert.AreEqual(3, dict.Count);
             foreach (var path in paths)
                 Assert.IsTrue(dict.ContainsKey(path));
         }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
@@ -218,9 +218,9 @@ namespace GitSharp.Core
 
 		public override bool Equals(object o)
 		{
-			if (o is AbbreviatedObjectId)
+			AbbreviatedObjectId b = (o as AbbreviatedObjectId);
+			if (b != null)
 			{
-				var b = (AbbreviatedObjectId)o;
 				return _nibbles == b._nibbles && _w1 == b._w1 && _w2 == b._w2
 						&& _w3 == b._w3 && _w4 == b._w4 && _w5 == b._w5;
 			}

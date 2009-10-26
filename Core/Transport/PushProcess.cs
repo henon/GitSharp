@@ -175,9 +175,9 @@ namespace GitSharp.Core.Transport
                 bool fastForward = true;
                 try
                 {
-                    RevObject oldRev = _walker.parseAny(advertisedOld);
-                    RevObject newRev = _walker.parseAny(rru.NewObjectId);
-                    if (!(oldRev is RevCommit) || !(newRev is RevCommit) || !_walker.isMergedInto((RevCommit)oldRev, (RevCommit)newRev))
+                    RevCommit oldRev = (_walker.parseAny(advertisedOld) as RevCommit);
+                    RevCommit newRev = (_walker.parseAny(rru.NewObjectId) as RevCommit);
+                    if (oldRev == null || newRev == null || !_walker.isMergedInto(oldRev, newRev))
                         fastForward = false;
                 }
                 catch (MissingObjectException)

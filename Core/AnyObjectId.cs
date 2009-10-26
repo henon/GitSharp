@@ -99,9 +99,10 @@ namespace GitSharp.Core
 
         public override bool Equals(object obj)
         {
-            if ( obj is AnyObjectId)
+			AnyObjectId a = (obj as AnyObjectId);
+            if ( a != null)
             {
-                return Equals((AnyObjectId)obj);
+                return Equals(a);
             }
             return false;
         }

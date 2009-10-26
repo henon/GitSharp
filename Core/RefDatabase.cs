@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
@@ -306,16 +306,15 @@ namespace GitSharp.Core
 			ObjectId peeled = null;
 			try
 			{
-				object target = Repository.MapObject(dref.ObjectId, dref.Name);
+				Tag target = (Repository.MapObject(dref.ObjectId, dref.Name) as Tag);
 
-				while (target is Tag)
+				while (target != null)
 				{
-					var tag = (Tag)target;
-					peeled = tag.Id;
+					peeled = target.Id;
 
-					if (tag.TagType == Constants.TYPE_TAG)
+					if (target.TagType == Constants.TYPE_TAG)
 					{
-						target = Repository.MapObject(tag.Id, dref.Name);
+						target = (Repository.MapObject(target.Id, dref.Name) as Tag);
 					}
 					else
 					{

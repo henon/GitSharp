@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  *
  * All rights reserved.
@@ -206,7 +206,13 @@ namespace GitSharp.Core
 
             public override bool Equals(object obj)
             {
-                return obj is FileKey && path.FullName.Equals(((FileKey) obj).path.FullName);
+				FileKey fk = (obj as FileKey);
+				if ( fk != null)
+				{
+					return path.FullName.Equals(fk.path.FullName);
+				}
+				
+                return false;
             }
 
             public override string ToString()

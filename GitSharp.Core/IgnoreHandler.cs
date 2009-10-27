@@ -51,21 +51,13 @@ namespace GitSharp.Core
     public class IgnoreHandler
     {
         private readonly Repository _repo;
+        private readonly List<IPattern> _commandLinePatterns = new List<IPattern>();
         private readonly List<IPattern> _excludePatterns = new List<IPattern>();
         private readonly Dictionary<string, List<IPattern>> _directoryPatterns = new Dictionary<string, List<IPattern>>();
 
         public IgnoreHandler(Repository repo)
         {
             _repo = repo;
-
-            try
-            {
-                ReadPatternsFromFile(Path.Combine(repo.Directory.FullName, "info/exclude"), _excludePatterns);
-            }
-            catch (Exception)
-            {
-                // optional
-            }
 
             try
             {
@@ -79,6 +71,15 @@ namespace GitSharp.Core
             {
                 //optional
             }
+
+            try
+            {
+                ReadPatternsFromFile(Path.Combine(repo.Directory.FullName, "info/exclude"), _excludePatterns);
+            }
+            catch (Exception)
+            {
+                // optional
+            }
         }
 
         private static List<string> GetPathDirectories(string path)
@@ -86,10 +87,8 @@ namespace GitSharp.Core
             if (path.StartsWith("/"))
                 path = path.Substring(1);
 
-            var ret = new List<string>();
-
-            // always check our repository directory sice path is relative to this
-            ret.Add(".");
+            // always check our repository directory since path is relative to this
+            var ret = new List<string> {"."};
 
             // this ensures top down
             for (int i = 0; i < path.Length; i++)
@@ -149,9 +148,16 @@ namespace GitSharp.Core
             return patterns.Any(p => !(p is NegatedPattern) && p.IsIgnored(path));
         }
 
+        public void AddCommandLinePattern(string pattern)
+        {
+            AddPattern(pattern, _commandLinePatterns);
+        }
+
         public bool IsIgnored(string path)
         {
             bool ret = false;
+
+            ret = IsIgnored(path, _excludePatterns, ret);
 
             var dirs = GetPathDirectories(path);
             LoadDirectoryPatterns(dirs);
@@ -161,7 +167,7 @@ namespace GitSharp.Core
                 ret = IsIgnored(path, _directoryPatterns[p], ret);
             }
 
-            ret = IsIgnored(path, _excludePatterns, ret);
+            ret = IsIgnored(path, _commandLinePatterns, ret);
 
             return ret;
         }

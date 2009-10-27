@@ -97,22 +97,22 @@
     <echo message="path.testresults = ${path.testresults}"/>
 
     <copy todir="${path.build.output}/Resources">
-      <fileset basedir="${path.base}/Tests/Resources">
+      <fileset basedir="${path.base}/GitSharp.Tests/Resources">
         <include name="**" />
       </fileset>
     </copy>
     <copy todir="${path.build.output}/Diff/Resources">
-      <fileset basedir="${path.base}/Tests/Diff/Resources">
+      <fileset basedir="${path.base}/GitSharp.Tests/Diff/Resources">
         <include name="**" />
       </fileset>
     </copy>
     <copy todir="${path.build.output}/Patch/Resources">
-      <fileset basedir="${path.base}/Tests/Patch/Resources">
+      <fileset basedir="${path.base}/GitSharp.Tests/Patch/Resources">
         <include name="**" />
       </fileset>
     </copy>
     <copy todir="${path.build.output}/sample.git">
-      <fileset basedir="${path.base}/Tests/sample.git">
+      <fileset basedir="${path.base}/GitSharp.Tests/sample.git">
         <include name="**" />
       </fileset>
     </copy>

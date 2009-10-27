@@ -56,6 +56,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="AbbreviatedObjectId.cs" />
     <Compile Include="AlternateRepositoryDatabase.cs" />
     <Compile Include="BlobBasedConfig.cs" />

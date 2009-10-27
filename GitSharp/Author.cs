@@ -44,6 +44,13 @@ namespace Git
 {
     public class Author
     {
+        public Author() { }
+        public Author(string name, string email)
+        {
+            Name = name;
+            EmailAddress = email;
+        }
+
         public string Name { get; set; }
         public string EmailAddress { get; set; }
     }

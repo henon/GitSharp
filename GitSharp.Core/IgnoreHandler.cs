@@ -57,19 +57,27 @@ namespace GitSharp.Core
         public IgnoreHandler(Repository repo)
         {
             _repo = repo;
+
             try
             {
                 ReadPatternsFromFile(Path.Combine(repo.Directory.FullName, "info/exclude"), _excludePatterns);
-
-                string excludeFile = repo.Config.getCore().getExcludesFile();
-                if (!string.IsNullOrEmpty(excludeFile))
-                {
-                    ReadPatternsFromFile(excludeFile, _excludePatterns);
-                }
             }
             catch (Exception)
             {
                 // optional
+            }
+
+            try
+            {
+                string excludeFile = repo.Config.getCore().getExcludesFile();
+                if (!string.IsNullOrEmpty(excludeFile))
+                {
+                    ReadPatternsFromFile(Path.Combine(repo.WorkingDirectory.FullName, excludeFile), _excludePatterns);
+                }
+            }
+            catch (Exception)
+            {
+                //optional
             }
         }
 

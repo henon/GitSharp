@@ -45,24 +45,43 @@ namespace GitSharp.Tests
     [TestFixture]
     public class IgnoreHandlerTests : RepositoryTestCase
     {
-        private IgnoreHandler handler;
+        private IgnoreHandler _handler;
 
         [Test]
         public void HonorsExcludeFile()
         {
             WriteExclude("*.html");
-            handler = new IgnoreHandler(db);
+            _handler = new IgnoreHandler(db);
 
-            Assert.IsTrue(handler.IsIgnored("test.html"));
+            Assert.IsTrue(_handler.IsIgnored("test.html"));
+        }
+
+        [Test]
+        public void HonorsConfigExcludes()
+        {
+            WriteConfigExcludes("ignoreHandler", "*.a");
+            _handler = new IgnoreHandler(db);
+
+            Assert.IsTrue(_handler.IsIgnored("test.a"));
         }
 
         [Test]
         public void HonorsTopLevelIgnore()
         {
             WriteIgnore(".", "*.o");
-            handler = new IgnoreHandler(db);
+            _handler = new IgnoreHandler(db);
 
-            Assert.IsTrue(handler.IsIgnored("test.o"));
+            Assert.IsTrue(_handler.IsIgnored("test.o"));
+        }
+
+        [Test]
+        public void TestNegated()
+        {
+            WriteIgnore(".", "*.o");
+            WriteIgnore("test", "!*.o");
+            _handler = new IgnoreHandler(db);
+
+            Assert.IsFalse(_handler.IsIgnored("test/test.o"));
         }
 
         private void WriteExclude(string data)

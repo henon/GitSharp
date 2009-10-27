@@ -241,25 +241,19 @@ namespace GitSharp.Core.Transport
 			o.add(WANT);
 			_wantAll.Add(o);
 
-			RevCommit oComm = (o as RevCommit);
 			RevTag oTag = (o as RevTag);
+			while ( oTag != null)
+			{
+				o = oTag.getObject();
+				oTag = (o as RevTag);
+			}
+			
+			RevCommit oComm = (o as RevCommit);
 			if (oComm != null)
 			{
 				_wantCommits.Add(oComm);
 			}
-			else if (oTag != null)
-			{
-				do
-				{
-					o = oTag.getObject();
-					oTag = (o as RevTag);
-				} while (oTag != null);
-
-				if (o is RevCommit)
-				{
-					Want(o);
-				}
-			}
+			
 		}
 
 		private void Negotiate()

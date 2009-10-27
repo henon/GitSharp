@@ -103,40 +103,47 @@
   <!-- ********************************************** -->
   <target name="run-tests"  depends="compile-tests">
     <property name="path.testresults" value="${path.build}/${build.platform}-${build.config}/test-results" />
+    
     <mkdir dir="${path.testresults}" if="${not(directory::exists(path.testresults))}"/>
     <echo message="path.testresults = ${path.testresults}"/>
 
-    <copy todir="${path.build.output}/Resources">
+    <copy todir="${path.testresults}">
+      <fileset basedir="${path.base}/GitSharp.Tests/Resources">
+        <include name="${path.build.output}/*.dll" />
+      </fileset>
+    </copy>
+    
+    <copy todir="${path.testresults}/Resources">
       <fileset basedir="${path.base}/GitSharp.Tests/Resources">
         <include name="**" />
       </fileset>
     </copy>
-    <copy todir="${path.build.output}/Diff/Resources">
+    <copy todir="${path.testresults}/Diff/Resources">
       <fileset basedir="${path.base}/GitSharp.Tests/Diff/Resources">
         <include name="**" />
       </fileset>
     </copy>
-    <copy todir="${path.build.output}/Patch/Resources">
+    <copy todir="${path.testresults}/Patch/Resources">
       <fileset basedir="${path.base}/GitSharp.Tests/Patch/Resources">
         <include name="**" />
       </fileset>
     </copy>
-    <copy todir="${path.build.output}/sample.git">
+    <copy todir="${path.testresults}/sample.git">
       <fileset basedir="${path.base}/GitSharp.Tests/sample.git">
         <include name="**" />
       </fileset>
     </copy>
 
     <property name="nunit.consolerunner" value="${path.tools.nunit}/nunit-console.exe" />
-    <property name="nunit.commandline" value="${path.build.output}/GitSharp.Tests.dll /xml:${path.testresults}/GitSharp.Tests.dll-results.xml /noshadow " />
+    <property name="nunit.commandline" value="${path.testresults}/GitSharp.Tests.dll /xml:${path.testresults}/GitSharp.Tests.dll-results.xml /noshadow " />
     <if test="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}">
       <property name="nunit.consolerunner" value="nunit-console2" />
-      <property name="nunit.commandline" value="${path.build.output}/GitSharp.Tests.dll -xml:${path.testresults}/GitSharp.Tests.dll-results.xml -noshadow " />
+      <property name="nunit.commandline" value="${path.testresults}/GitSharp.Tests.dll -xml:${path.testresults}/GitSharp.Tests.dll-results.xml -noshadow " />
     </if>
     
     <exec
       program="${nunit.consolerunner}"
-      workingdir="${path.build.output}"
+      workingdir="${path.testresults}"
       commandline="${nunit.commandline}"
       failonerror="true"
 			/>

@@ -37,7 +37,7 @@
   <target name="compile-core" depends="init">
     <property name="assembly.name" value="GitSharp.Core" />
     <property name="assembly.type" value="library" />
-    
+
     <fileset id="project.references" basedir="${path.lib}" >
       <include name="ICSharpCode.SharpZipLib.dll" />
       <include name="Winterdom.IO.FileMap.dll" />
@@ -64,7 +64,7 @@
         <include name="Commands.xml" />
       </fileset>
     </copy>
-    
+
     <call target="compile-dll" />
   </target>
 
@@ -103,7 +103,7 @@
   <!-- ********************************************** -->
   <target name="run-tests"  depends="compile-tests">
     <property name="path.testresults" value="${path.build}/${build.platform}-${build.config}/test-results" />
-    
+
     <mkdir dir="${path.testresults}" if="${not(directory::exists(path.testresults))}"/>
     <echo message="path.testresults = ${path.testresults}"/>
 
@@ -112,7 +112,7 @@
         <include name="${path.build.output}/*.dll" />
       </fileset>
     </copy>
-    
+
     <copy todir="${path.testresults}/Resources">
       <fileset basedir="${path.base}/GitSharp.Tests/Resources">
         <include name="**" />
@@ -140,7 +140,7 @@
       <property name="nunit.consolerunner" value="nunit-console2" />
       <property name="nunit.commandline" value="${path.testresults}/GitSharp.Tests.dll -xml:${path.testresults}/GitSharp.Tests.dll-results.xml -noshadow " />
     </if>
-    
+
     <exec
       program="${nunit.consolerunner}"
       workingdir="${path.testresults}"
@@ -178,16 +178,12 @@
 
   <target name="compile-dll">
     <call target="copy-references"/>
-    
+
     <property name="project.directory" value="${assembly.name}" />
     <property name="project.sources.path" value="${path.base}/${project.directory}"/>
 
-    <copy todir="${project.sources.path}">
-      <fileset>
-        <include name="${path.base}/SharedAssemblyInfo.cs" />
-      </fileset>
-    </copy>
-    
+    <call target="create-assembly-info"/>
+
     <fileset id="project.sources" failonempty="true">
       <include name="${project.sources.path}/**/*.cs" />
     </fileset>
@@ -208,8 +204,32 @@
       </nowarn>
     </csc>
 
+    <call target="cleanup-assembly-info"/>
+  </target>
+
+  <target name="cleanup-assembly-info">
     <delete file="${project.sources.path}/SharedAssemblyInfo.cs" />
-    
+    <delete file="${project.sources.path}/VersionAssemblyInfo.cs" />
+  </target>
+
+  <target name="create-assembly-info">
+    <copy todir="${project.sources.path}">
+      <fileset>
+        <include name="${path.base}/SharedAssemblyInfo.cs" />
+      </fileset>
+    </copy>
+
+    <asminfo output="${project.sources.path}/VersionAssemblyInfo.cs" language="CSharp">
+      <imports>
+        <import namespace="System"/>
+        <import namespace="System.Reflection"/>
+        <import namespace="System.Runtime.InteropServices"/>
+      </imports>
+      <attributes>
+        <attribute type="AssemblyVersionAttribute" value="${version}"/>
+        <attribute type="AssemblyProductAttribute" value="GitSharp [${version.revision}]"/>
+      </attributes>
+    </asminfo>
   </target>
 
   <target name="copy-references">

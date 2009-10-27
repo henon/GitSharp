@@ -109,18 +109,23 @@ namespace Git
         public Commit CommitChanges(string message, Author author)
         {
             GitIndex.RereadIfNecessary();
-            var tree = GitIndex.writeTree();
+            var tree_id = GitIndex.writeTree();
             // check if tree is different from current commit's tree
             var parent = _repo.CurrentBranch.CurrentCommit;
-            if (GitIndex.Members.Count == 0 || (parent != null && parent.Tree._id == tree))
+            if (GitIndex.Members.Count == 0 || (parent != null && parent.Tree._id == tree_id))
                 throw new InvalidOperationException("There are no changes to commit");
             var corecommit = new CoreCommit(_repo._internal_repo);
             if (parent != null)
                 corecommit.ParentIds = new GitSharp.Core.ObjectId[] { parent._id };
             corecommit.Author = new GitSharp.Core.PersonIdent(author.Name, author.EmailAddress, DateTime.Now, TimeZoneInfo.Local);
+            corecommit.Committer = corecommit.Author;
             corecommit.Message = message;
-            corecommit.TreeId = tree;
+            corecommit.TreeEntry = _repo._internal_repo.MapTree(tree_id);
             corecommit.Save();
+            var newRef =  _repo._internal_repo.UpdateRef("HEAD");
+            newRef.NewObjectId =corecommit.CommitId;
+            newRef.IsForceUpdate = true;
+            newRef.Update();
             return new Commit(_repo, corecommit);
         }
 

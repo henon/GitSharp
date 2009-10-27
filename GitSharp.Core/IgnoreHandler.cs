@@ -59,7 +59,7 @@ namespace GitSharp.Core
             _repo = repo;
             try
             {
-                ReadPatternsFromFile(Path.Combine(repo.Directory.FullName, "/info/exclude"), _excludePatterns);
+                ReadPatternsFromFile(Path.Combine(repo.Directory.FullName, "info/exclude"), _excludePatterns);
 
                 string excludeFile = repo.Config.getCore().getExcludesFile();
                 if (!string.IsNullOrEmpty(excludeFile))

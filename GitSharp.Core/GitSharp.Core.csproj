@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -104,6 +104,7 @@
     <Compile Include="FnMatch\RestrictedWildCardHead.cs" />
     <Compile Include="FnMatch\WildCardHead.cs" />
     <Compile Include="GitlinkTreeEntry.cs" />
+    <Compile Include="SubmoduleConfig.cs" />
     <Compile Include="SystemReader.cs" />
     <Compile Include="Merge\Merger.cs" />
     <Compile Include="Merge\MergeStrategy.cs" />

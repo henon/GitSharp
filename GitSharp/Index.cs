@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using CoreCommit = GitSharp.Core.Commit;
 
 namespace Git
 {
@@ -103,6 +104,24 @@ namespace Git
             var tree = commit != null ? commit.Tree.InternalTree : new GitSharp.Core.Tree(_repo._internal_repo);
             var diff = new GitSharp.Core.IndexDiff(tree, GitIndex);
             return new RepositoryStatus(diff);
+        }
+
+        public Commit CommitChanges(string message, Author author)
+        {
+            GitIndex.RereadIfNecessary();
+            var tree = GitIndex.writeTree();
+            // check if tree is different from current commit's tree
+            var parent = _repo.CurrentBranch.CurrentCommit;
+            if (GitIndex.Members.Count == 0 || (parent != null && parent.Tree._id == tree))
+                throw new InvalidOperationException("There are no changes to commit");
+            var corecommit = new CoreCommit(_repo._internal_repo);
+            if (parent != null)
+                corecommit.ParentIds = new GitSharp.Core.ObjectId[] { parent._id };
+            corecommit.Author = new GitSharp.Core.PersonIdent(author.Name, author.EmailAddress, DateTime.Now, TimeZoneInfo.Local);
+            corecommit.Message = message;
+            corecommit.TreeId = tree;
+            corecommit.Save();
+            return new Commit(_repo, corecommit);
         }
 
         public override string ToString()

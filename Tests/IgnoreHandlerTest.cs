@@ -1,6 +1,5 @@
 ﻿/*
- * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
  *
  * All rights reserved.
  *
@@ -36,47 +35,51 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using ICSharpCode.SharpZipLib.Zip.Compression;
+using System.IO;
+using GitSharp.Core;
+using NUnit.Framework;
 
-namespace GitSharp.Core
+namespace GitSharp.Tests
 {
-    public class CoreConfig
+
+    [TestFixture]
+    public class IgnoreHandlerTests : RepositoryTestCase
     {
-        private class SectionParser : Config.SectionParser<CoreConfig>
+        private IgnoreHandler handler;
+
+        [Test]
+        public void HonorsExcludeFile()
         {
-            public CoreConfig parse(Config cfg)
-            {
-                return new CoreConfig(cfg);
-            }
+            WriteExclude("*.html");
+            handler = new IgnoreHandler(db);
+
+            Assert.IsTrue(handler.IsIgnored("test.html"));
         }
 
-        public static Config.SectionParser<CoreConfig> KEY = new SectionParser();
-
-        private readonly int compression;
-        private readonly int packIndexVersion;
-        private readonly string excludesFile;
-
-        private CoreConfig(Config rc)
+        [Test]
+        public void HonorsTopLevelIgnore()
         {
-            compression = rc.getInt("core", "compression", Deflater.DEFAULT_COMPRESSION);
-            packIndexVersion = rc.getInt("pack", "indexversion", 2);
-            excludesFile = rc.getString("core", null, "excludesfile");
+            WriteIgnore(".", "*.o");
+            handler = new IgnoreHandler(db);
+
+            Assert.IsTrue(handler.IsIgnored("test.o"));
         }
 
-        public string getExcludesFile()
+        private void WriteExclude(string data)
         {
-            return excludesFile;
+            writeTrashFile(".git/info/exclude", data);
         }
 
-        public int getCompression()
+        private void WriteConfigExcludes(string path, string data)
         {
-            return compression;
+            db.Config.setString("core", null, "excludesfile", path);
+            writeTrashFile(path, data);
         }
 
-        public int getPackIndexVersion()
+        private void WriteIgnore(string dir, string data)
         {
-            return packIndexVersion;
+            writeTrashFile(Path.Combine(dir, ".gitignore"), data);
         }
-            
     }
+
 }

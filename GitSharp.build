@@ -35,7 +35,7 @@
   <!-- GitSharp.Core.dll -->
   <!-- ********************************************** -->
   <target name="compile-core" depends="init">
-    <property name="assembly.name.suffix" value="Core" />
+    <property name="assembly.name" value="GitSharp.Core" />
 
     <fileset id="project.references" basedir="${path.lib}" >
       <include name="ICSharpCode.SharpZipLib.dll" />
@@ -50,7 +50,7 @@
   <!-- git.exe -->
   <!-- ********************************************** -->
   <target name="compile-cli" depends="compile-gitsharp">
-    <property name="assembly.name.suffix" value="CLI" />
+    <property name="assembly.name" value="Git" />
 
     <fileset id="project.references" basedir="${path.build.output}" >
       <include name="GitSharp.dll" />
@@ -64,7 +64,7 @@
   <!-- GitSharp.dll -->
   <!-- ********************************************** -->
   <target name="compile-gitsharp" depends="compile-core">
-    <property name="assembly.name.suffix" value="" />
+    <property name="assembly.name" value="GitSharp" />
 
     <fileset id="project.references" basedir="${path.build.output}" >
       <include name="GitSharp.Core.dll" />
@@ -77,7 +77,7 @@
   <!-- GitSharp.Tests.dll -->
   <!-- ********************************************** -->
   <target name="compile-tests" depends="compile-cli">
-    <property name="assembly.name.suffix" value="Tests" />
+    <property name="assembly.name" value="GitSharp.Tests" />
 
     <fileset id="project.references" >
       <include name="${path.build.output}/GitSharp.dll" />
@@ -163,11 +163,7 @@
 
     <call target="copy-references"/>
     
-    <property name="assembly.name" value="GitSharp"/>
-    <property name="assembly.name" value="${assembly.name}.${assembly.name.suffix}" unless="${string::get-length(assembly.name.suffix) == 0}" />
-
-    <property name="project.directory" value="GitSharp"/>
-    <property name="project.directory" value="${assembly.name.suffix}" unless="${string::get-length(assembly.name.suffix) == 0}" />
+    <property name="project.directory" value="${assembly.name}" />
 
     <property name="project.sources.path" value="${path.base}/${project.directory}"/>
 

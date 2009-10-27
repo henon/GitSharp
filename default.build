@@ -5,10 +5,10 @@
 	
 	<fileset id="buildfiles.all">
 		<!-- Files have to be in dependency order -->
-		<include name="Core/default.build"/>
+		<include name="GitSharp.Core/default.build"/>
 		<include name="GitSharp/default.build" />
-		<include name="Cli/default.build"/>
-		<include name="Tests/default.build"/>
+		<include name="Git/default.build"/>
+		<include name="GitSharp.Tests/default.build"/>
 	</fileset>	
 	
 	<target name="build">

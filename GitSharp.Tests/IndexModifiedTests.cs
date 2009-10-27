@@ -1,6 +1,7 @@
 using System.IO;
 using GitSharp.Core;
 using NUnit.Framework;
+using FileMode=GitSharp.Core.FileMode;
 
 namespace GitSharp.Tests
 {
@@ -37,6 +38,25 @@ namespace GitSharp.Tests
             var entry = index.GetEntry("extensionless-file");
 
             Assert.IsFalse(entry.IsModified(trash));
+        }
+        
+        [Test]
+        public void ShouldAllowComparingOfAlreadyOpenedFile()
+        {
+            var index = new GitIndex(db);
+            var file = writeTrashFile("extensionless-file", "contents");
+
+            index.add(trash, file);
+
+            var entry = index.GetEntry("extensionless-file");
+
+            // replace contents of file (with same size so it passes the size check)
+            using (var writer = file.CreateText())
+                writer.Write("stnetnoc");
+
+            // opening the file for reading shoudn't block us from checking the contents
+            using (file.OpenRead())
+                Assert.IsTrue(entry.IsModified(trash, true));
         }
     }
 }

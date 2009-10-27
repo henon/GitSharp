@@ -182,6 +182,12 @@
     <property name="project.directory" value="${assembly.name}" />
     <property name="project.sources.path" value="${path.base}/${project.directory}"/>
 
+    <copy todir="${project.sources.path}">
+      <fileset>
+        <include name="${path.base}/SharedAssemblyInfo.cs" />
+      </fileset>
+    </copy>
+    
     <fileset id="project.sources" failonempty="true">
       <include name="${project.sources.path}/**/*.cs" />
     </fileset>
@@ -201,6 +207,9 @@
         <warning number="1591" />
       </nowarn>
     </csc>
+
+    <delete file="${project.sources.path}/SharedAssemblyInfo.cs" />
+    
   </target>
 
   <target name="copy-references">

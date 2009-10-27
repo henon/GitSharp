@@ -50,21 +50,63 @@ namespace GitSharp.Core
 
     public class IgnoreHandler
     {
+        private readonly Repository _repo;
         private readonly List<IPattern> _excludePatterns = new List<IPattern>();
+        private readonly Dictionary<string, List<IPattern>> _directoryPatterns = new Dictionary<string, List<IPattern>>();
 
         public IgnoreHandler(Repository repo)
         {
+            _repo = repo;
             try
             {
                 ReadPatternsFromFile(Path.Combine(repo.Directory.FullName, "/info/exclude"), _excludePatterns);
-                if (!string.IsNullOrEmpty(repo.Config.getCore().getExcludeFile()))
+
+                string excludeFile = repo.Config.getCore().getExcludesFile();
+                if (!string.IsNullOrEmpty(excludeFile))
                 {
-                    ReadPatternsFromFile(repo.Config.getCore().getExcludeFile(), _excludePatterns);
+                    ReadPatternsFromFile(excludeFile, _excludePatterns);
                 }
             }
             catch (Exception)
             {
                 // optional
+            }
+        }
+
+        private static List<string> GetPathDirectories(string path)
+        {
+            if (path.StartsWith("/"))
+                path = path.Substring(1);
+
+            var ret = new List<string>();
+
+            // always check our repository directory sice path is relative to this
+            ret.Add(".");
+
+            // this ensures top down
+            for (int i = 0; i < path.Length; i++)
+            {
+                char c = path[i];
+                if (c == '/')
+                    ret.Add(path.Substring(0, i));
+            }
+            return ret;
+        }
+
+        private void LoadDirectoryPatterns(IEnumerable<string> dirs)
+        {
+            foreach (string p in dirs)
+            {
+                if (_directoryPatterns.ContainsKey(p))
+                    continue;
+
+                _directoryPatterns.Add(p, new List<IPattern>());
+                string ignorePath = Path.Combine(_repo.WorkingDirectory.FullName, p);
+                ignorePath = Path.Combine(ignorePath, ".gitignore");
+                if (File.Exists(ignorePath))
+                {
+                    ReadPatternsFromFile(ignorePath, _directoryPatterns[p]);
+                }
             }
         }
 
@@ -75,9 +117,9 @@ namespace GitSharp.Core
 
             try
             {
-                using (FileStream s = new FileStream(path, System.IO.FileMode.Open, FileAccess.Read))
+                using (var s = new FileStream(path, System.IO.FileMode.Open, FileAccess.Read))
                 {
-                    StreamReader reader = new StreamReader(s);
+                    var reader = new StreamReader(s);
                     while (!reader.EndOfStream)
                         AddPattern(reader.ReadLine(), to);
                 }
@@ -103,7 +145,13 @@ namespace GitSharp.Core
         {
             bool ret = false;
 
-            //TODO: read path specific patterns
+            var dirs = GetPathDirectories(path);
+            LoadDirectoryPatterns(dirs);
+            
+            foreach (string p in dirs)
+            {
+                ret = IsIgnored(path, _directoryPatterns[p], ret);
+            }
 
             ret = IsIgnored(path, _excludePatterns, ret);
 

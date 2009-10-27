@@ -57,6 +57,7 @@
     <Compile Include="API\RepositoryTests.cs" />
     <Compile Include="AssertHelperFixture.cs" />
     <Compile Include="CanReadMsysgitIndexFixture.cs" />
+    <Compile Include="IgnoreHandlerTest.cs" />
     <Compile Include="IndexModifiedTests.cs" />
     <Compile Include="RepositoryCacheTest.cs" />
     <Compile Include="ReflogReaderTest.cs" />

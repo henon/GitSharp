@@ -36,7 +36,8 @@
   <!-- ********************************************** -->
   <target name="compile-core" depends="init">
     <property name="assembly.name" value="GitSharp.Core" />
-
+    <property name="assembly.type" value="library" />
+    
     <fileset id="project.references" basedir="${path.lib}" >
       <include name="ICSharpCode.SharpZipLib.dll" />
       <include name="Winterdom.IO.FileMap.dll" />
@@ -51,12 +52,19 @@
   <!-- ********************************************** -->
   <target name="compile-cli" depends="compile-gitsharp">
     <property name="assembly.name" value="Git" />
+    <property name="assembly.type" value="exe" />
 
     <fileset id="project.references" basedir="${path.build.output}" >
       <include name="GitSharp.dll" />
       <include name="GitSharp.Core.dll" />
     </fileset>
 
+    <copy todir="${path.build.output}">
+      <fileset basedir="${path.base}/Git">
+        <include name="Commands.xml" />
+      </fileset>
+    </copy>
+    
     <call target="compile-dll" />
   </target>
 
@@ -65,6 +73,7 @@
   <!-- ********************************************** -->
   <target name="compile-gitsharp" depends="compile-core">
     <property name="assembly.name" value="GitSharp" />
+    <property name="assembly.type" value="library" />
 
     <fileset id="project.references" basedir="${path.build.output}" >
       <include name="GitSharp.Core.dll" />
@@ -78,6 +87,7 @@
   <!-- ********************************************** -->
   <target name="compile-tests" depends="compile-cli">
     <property name="assembly.name" value="GitSharp.Tests" />
+    <property name="assembly.type" value="library" />
 
     <fileset id="project.references" >
       <include name="${path.build.output}/GitSharp.dll" />
@@ -160,21 +170,22 @@
   </target>
 
   <target name="compile-dll">
-
     <call target="copy-references"/>
     
     <property name="project.directory" value="${assembly.name}" />
-
     <property name="project.sources.path" value="${path.base}/${project.directory}"/>
 
     <fileset id="project.sources" failonempty="true">
       <include name="${project.sources.path}/**/*.cs" />
     </fileset>
 
-    <csc target="library"
-         debug="Enable"
+    <property name="assembly.extension" value="dll" />
+    <property name="assembly.extension" value="exe" if="${assembly.type == 'exe'}" />
+
+    <csc target="${assembly.type}"
+         debug="Full"
          optimize="${build.optimize}"
-         output="${path.build.output}/${assembly.name}.dll"
+         output="${path.build.output}/${assembly.name}.${assembly.extension}"
          doc="${path.build.output}/${assembly.name}.xml" >
       <sources refid="project.sources" />
       <references refid="project.references" />

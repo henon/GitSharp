@@ -230,6 +230,17 @@ namespace Git
             return new FileInfo(path).Exists;
         }
 
+        /// <summary>
+        /// Commit staged changes and updates HEAD
+        /// </summary>
+        /// <param name="message">The commit message</param>
+        /// <param name="author">The author of the content to be committed</param>
+        /// <returns>Returns the newly created commit</returns>
+        public Commit Commit(string message, Author author)
+        {
+            return Index.CommitChanges(message, author);
+        }
+
         public IDictionary<string, Ref> Refs
         {
             get

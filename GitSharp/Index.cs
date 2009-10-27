@@ -108,6 +108,10 @@ namespace Git
 
         public Commit CommitChanges(string message, Author author)
         {
+            if (string.IsNullOrEmpty(message))
+                throw new ArgumentException("Commit message must not be null or empty!", "message");
+            if (string.IsNullOrEmpty(author.Name))
+                throw new ArgumentException("Author name must not be null or empty!", "author");
             GitIndex.RereadIfNecessary();
             var tree_id = GitIndex.writeTree();
             // check if tree is different from current commit's tree

@@ -607,11 +607,13 @@ namespace GitSharp.Core.Transport
                         continue;
                     }
 
-                    if (oldObj is RevCommit && newObj is RevCommit)
+					RevCommit oldComm = (oldObj as RevCommit);
+					RevCommit newComm = (newObj as RevCommit);
+                    if (oldComm != null && newComm != null)
                     {
                         try
                         {
-                            if (!walk.isMergedInto((RevCommit)oldObj, (RevCommit)newObj))
+                            if (!walk.isMergedInto(oldComm, newComm))
                             {
                                 cmd.setType(ReceiveCommand.Type.UPDATE_NONFASTFORWARD);   
                             }

@@ -130,27 +130,7 @@ namespace Git.Tests
             // Todo: modify, remove, change, add files and see how missing goes away
         }
 
-        [Test]
-        public void Commit_changes()
-        {
-            var workingDirectory = Path.Combine(trash.FullName, "test");
-            var repo = Repository.Init(workingDirectory);
-            string filepath = Path.Combine(workingDirectory, "for henon.txt");
-            File.WriteAllText(filepath, "Weißbier");
-            repo.Index.Add(filepath);
-            string filepath1 = Path.Combine(workingDirectory, "for nulltoken.txt");
-            File.WriteAllText(filepath1, "Rotwein");
-            repo.Index.Add(filepath1);
-            var commit = repo.Index.CommitChanges("Hello World!", new Author( "A. U. Thor",  "au@thor.com" ));
-            Assert.NotNull(commit);
-            Assert.IsTrue(commit.IsCommit);
-            Assert.IsNull(commit.Parent);
-            Assert.AreEqual("A. U. Thor", commit.Author.Name);
-            Assert.AreEqual("au@thor.com", commit.Author.EmailAddress);
-            Assert.AreEqual("Hello World!", commit.Message);
-            // check if tree contains for henon and for nulltoken, get the blobs and check  the content.
-            Assert.AreEqual(commit, repo.Head.CurrentCommit);
-        }
-
+        // TODO: test add's behavior on wrong input data
+        // TODO: test recursive add of directories
     }
 }

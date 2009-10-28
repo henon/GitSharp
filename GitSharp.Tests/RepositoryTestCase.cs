@@ -59,7 +59,7 @@ namespace GitSharp.Tests
      * is used. Memory mapping has an effect on the file system, in that memory
      * mapped files in java cannot be deleted as long as they mapped arrays have not
      * been reclaimed by the garbage collector. The programmer cannot control this
-     * with precision, though hinting using <em><see cref="java.lang.System#gc}</em>
+     * with precision, though hinting using <em>java.lang.System#gc</em>
      * often helps.
      */
     public abstract class RepositoryTestCase
@@ -100,7 +100,7 @@ namespace GitSharp.Tests
         /// also used internally. If a file or directory cannot be removed
         /// it throws an AssertionFailure.
         /// </summary>
-        /// <param name="dir"></param>
+        /// <param name="fs"></param>
         protected void recursiveDelete(FileSystemInfo fs)
         {
             recursiveDelete(fs, false, GetType().Name + "." + ToString(), true);

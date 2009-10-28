@@ -131,9 +131,9 @@ namespace GitSharp
         /// <returns>
         /// Returns true if <paramref name="refName"/> is a valid ref name.
         /// </returns>
-        public static bool IsValidName(string name)
+        public static bool IsValidName(string refName)
         {
-            return CoreRepository.IsValidRefName(name);
+            return CoreRepository.IsValidRefName(refName);
         }
 
         #region Equality overrides

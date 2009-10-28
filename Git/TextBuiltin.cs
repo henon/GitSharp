@@ -167,6 +167,7 @@ namespace GitSharp.CLI
         /// Initializes a command for use including the repository and output support.
         /// </summary>
         /// <param name="repo">Specifies the repository to use.</param>
+        /// <param name="path"></param>
         public void Init(Core.Repository repo, DirectoryInfo path)
         {
             try
@@ -261,7 +262,6 @@ namespace GitSharp.CLI
         /// <summary>
         /// Opens the default webbrowser to display the command specific help.
         /// </summary>
-        /// <param name="url">Specifies the web address to navigate to.</param>
         public void OnlineHelp()
         {
             if (commandHelp.Length > 0)

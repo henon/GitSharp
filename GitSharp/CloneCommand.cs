@@ -132,7 +132,7 @@ namespace GitSharp
         public bool NoCheckout { get; set; }
 
         /// <summary>
-        /// Make a bare GIT repository. That is, instead of creating <directory> and placing the administrative files in <directory>/.git, make the <directory>  itself the $GIT_DIR. 
+        /// Make a bare GIT repository. That is, instead of creating "directory" and placing the administrative files in "directory"/.git, make the "directory"  itself the $GIT_DIR. 
         /// This obviously implies the -n  because there is nowhere to check out the working tree. Also the branch heads at the remote are copied directly to corresponding local 
         /// branch heads, without mapping them to refs/remotes/origin/. When this option is used, neither remote-tracking branches nor the related configuration variables are created. 
         /// </summary>
@@ -144,7 +144,7 @@ namespace GitSharp
         public bool Mirror { get; set; }
 
         /// <summary>
-        /// Instead of using the remote name origin to keep track of the upstream repository, use <name>. 
+        /// Instead of using the remote name origin to keep track of the upstream repository, use "name". 
         /// </summary>
         public string OriginName { get; set; }               
 

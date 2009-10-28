@@ -242,18 +242,13 @@ namespace GitSharp.Core
             }
         }
 
+        /// <summary>
+        /// the SHA'1 of the object this tag refers to
+        /// </summary>
         public string TagName { get; set; }
 
-        /**
-         * @return the SHA'1 of the object this tag refers to.
-         */
 
+        /// <summary>Id of the object this tag refers to</summary>
         public ObjectId Id { get; set; }
-
-        /**
-         * Set the id of the object this tag refers to.
-         *
-         * @param objId
-         */
     }
 }

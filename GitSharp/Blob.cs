@@ -122,6 +122,7 @@ namespace GitSharp
         /// </summary>
         /// <param name="repo"></param>
         /// <param name="content"></param>
+        /// <param name="encoding"></param>
         /// <returns></returns>
         public static Blob Create(Repository repo, string content, Encoding encoding)
         {
@@ -132,7 +133,7 @@ namespace GitSharp
         /// Create a new Blob containing the contents of the given file.
         /// </summary>
         /// <param name="repo"></param>
-        /// <param name="content"></param>
+        /// <param name="path"></param>
         /// <returns></returns>
         public static Blob CreateFromFile(Repository repo, string path)
         {

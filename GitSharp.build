@@ -141,7 +141,11 @@
       <property name="nunit.commandline" value="${path.testresults}/GitSharp.Tests.dll -xml:${path.testresults}/GitSharp.Tests.dll-results.xml -noshadow " />
     </if>
 
-    <exec
+    <echo message="nunit.consolerunner = ${nunit.consolerunner}"/>
+    <echo message="path.testresults = ${path.testresults}"/>
+    <echo message="nunit.commandline = ${nunit.commandline}"/>
+
+    <exec verbose="true"
       program="${nunit.consolerunner}"
       workingdir="${path.testresults}"
       commandline="${nunit.commandline}"

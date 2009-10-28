@@ -68,6 +68,7 @@ namespace GitSharp.Core.Exceptions
 		/// <param name="bytes">containing the invalid id.</param>
 		/// <param name="offset">offset in the byte array where the error occurred.</param>
 		/// <param name="length">length of the sequence of invalid bytes.</param>
+        /// <param name="inner">Inner Exception.</param>
         public InvalidObjectIdException(byte[] bytes, int offset, int length, Exception inner)
             : base("Invalid id" + AsAscii(bytes, offset, length), inner)
         {

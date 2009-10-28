@@ -38,7 +38,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 
@@ -89,6 +88,7 @@ namespace GitSharp.Core.Exceptions
 		/// </summary>
 		/// <param name="id">SHA-1</param>
 		/// <param name="type">Object type</param>
+        /// <param name="inner">Inner Exception.</param>
         public MissingObjectException(ObjectId id, ObjectType type, Exception inner)
             : base("Missing " + type + " " + id, inner)
         {
@@ -100,6 +100,7 @@ namespace GitSharp.Core.Exceptions
 		/// </summary>
 		/// <param name="id">SHA-1</param>
 		/// <param name="type">Object type</param>
+        /// <param name="inner">Inner Exception.</param>
         public MissingObjectException(ObjectId id, string type, Exception inner)
             : base("Missing " + type + " " + id, inner)
         {
@@ -111,6 +112,7 @@ namespace GitSharp.Core.Exceptions
 		/// </summary>
 		/// <param name="id">SHA-1</param>
 		/// <param name="type">Object type</param>
+        /// <param name="inner">Inner Exception.</param>
         public MissingObjectException(ObjectId id, int type, Exception inner)
             : this(id, Constants.typeString(type), inner)
         {

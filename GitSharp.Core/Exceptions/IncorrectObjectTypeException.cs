@@ -39,10 +39,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using GitSharp;
 
 namespace GitSharp.Core.Exceptions
 {
@@ -52,7 +48,7 @@ namespace GitSharp.Core.Exceptions
     /// This most likely signals a programming error rather than a corrupt
     /// object database.
 	/// </summary>
-    [global::System.Serializable]
+    [Serializable]
     public class IncorrectObjectTypeException : Exception
     {
         //
@@ -81,15 +77,11 @@ namespace GitSharp.Core.Exceptions
 		
 		/// <summary>
 		/// Construct and IncorrectObjectTypeException for the specified object id.
-		///
 		/// Provide the type to make it easier to track down the problem.
 		/// </summary>
-		/// <param name="id">
-		/// SHA-1
-		/// </param>
-		/// <param name="type">
-		/// Object type
-		/// </param>
+		/// <param name="id">SHA-1</param>
+		/// <param name="type">Object type</param>
+        /// <param name="inner">Inner Exception.</param>
         public IncorrectObjectTypeException(ObjectId id, ObjectType type, Exception inner) 
 			: base(string.Format("object {0} is not a {1}.", id, type), inner) { }
 		
@@ -132,15 +124,11 @@ namespace GitSharp.Core.Exceptions
 		
 		/// <summary>
 		/// Construct and IncorrectObjectTypeException for the specified object id.
-		///
 		/// Provide the type to make it easier to track down the problem.
 		/// </summary>
-		/// <param name="id">
-		/// SHA-1
-		/// </param>
-		/// <param name="type">
-		/// Object type
-		/// </param>
+		/// <param name="id">SHA-1</param>
+		/// <param name="type">Object type</param>
+        /// <param name="inner">Inner Exception.</param>
         public IncorrectObjectTypeException(ObjectId id, int type, Exception inner) 
 		    : base(string.Format("object {0} is not a {1}.", id, (ObjectType)type), inner) { }
         

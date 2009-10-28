@@ -37,9 +37,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Runtime.Serialization;
 
@@ -78,9 +75,8 @@ namespace GitSharp.Core.Exceptions
 		/// <summary>
 		/// Constructs an exception indicating a local repository does not exist
 		/// </summary>
-		/// <param name="location">
-		/// Description of the repository not found, usually file path
-		/// </param>
+		/// <param name="location">Description of the repository not found, usually file path</param>
+        /// <param name="inner">Inner Exception.</param>
         public RepositoryNotFoundException(DirectoryInfo location, Exception inner)
             : this(location.ToString(),inner)
         {
@@ -89,9 +85,8 @@ namespace GitSharp.Core.Exceptions
         /// <summary>
 		/// Constructs an exception indicating a local repository does not exist
 		/// </summary>
-		/// <param name="location">
-		/// Description of the repository not found, usually file path
-		/// </param>
+		/// <param name="location">Description of the repository not found, usually file path</param>
+        /// <param name="inner">Inner Exception.</param>
         public RepositoryNotFoundException(string location, Exception inner)
             : base("repository not found: " + location, inner)
         {

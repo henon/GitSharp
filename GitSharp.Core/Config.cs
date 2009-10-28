@@ -69,11 +69,9 @@ namespace GitSharp.Core
 		internal State _state;
 
 		/// Magic value indicating a missing entry.
-		///	<para />
 		///	This value is tested for reference equality in some contexts, so we
 		///	must ensure it is a special copy of the empty string.  It also must
 		///	be treated like the empty string.
-		/// </summary>
 		private static readonly string MagicEmptyValue = string.Empty;
 
 		private readonly Config _baseConfig;
@@ -415,7 +413,7 @@ namespace GitSharp.Core
 		/// method has no effect.
 		/// </summary>
 		///	<param name="parser">Parser used to obtain the configuration object.</param>
-		///	<seealso cref= get(SectionParser)"/>
+		///	<seealso cref="get{T}"/>
 		public void uncache<T>(SectionParser<T> parser)
 		{
 			_state.Cache.Remove(parser);
@@ -754,6 +752,7 @@ namespace GitSharp.Core
 			_state.EntryList.Add(e);
 		}
 
+        /// <summary>
 		/// Clear this configuration and reset to the contents of the parsed string.
 		///	</summary>
 		///	<param name="text">
@@ -1177,10 +1176,10 @@ namespace GitSharp.Core
 		/// Parses a section of the configuration into an application model object.
 		///	<para />
 		///	Instances must implement hashCode and equals such that model objects can
-		///	be cached by using the <see cref="ISectionParser{T}"/> as a key of a
+		///	be cached by using the <see cref="SectionParser{T}"/> as a key of a
 		/// Dictionary.
 		///	<para />
-		///	As the <see cref="ISectionParser{T}"/> itself is used as the key of the internal
+		///	As the <see cref="SectionParser{T}"/> itself is used as the key of the internal
 		///	Dictionary applications should be careful to ensure the SectionParser key
 		///	does not retain unnecessary application state which may cause memory to
 		///	be held longer than expected.

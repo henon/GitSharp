@@ -286,6 +286,7 @@ namespace GitSharp.Core
             }
         }
 
+        /// <summary>
 		/// Check a canonical formatted tree for errors.
 		/// </summary>
 		/// <param name="raw">The raw tree data. The array is never modified.</param>

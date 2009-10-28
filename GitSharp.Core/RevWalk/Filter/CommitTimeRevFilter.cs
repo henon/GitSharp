@@ -76,12 +76,10 @@ namespace GitSharp.Core.RevWalk.Filter
 	    /// <summary>
 	    /// Create a new filter to select commits after or equal a given date/time <code>since</code>
 	    /// and before or equal a given date/time <code>until</code>.
-	    /// <summary>
-	    /// <param name="since"> the point in time to cut on.
-	    /// <param name="until"> the point in time to cut off.
-	    /// <returns>
-	    ///  a new filter to select commits between the given date/times.
-	    ///</returns>
+	    /// </summary>
+	    /// <param name="since"> the point in time to cut on.</param>
+	    /// <param name="until"> the point in time to cut off.</param>
+	    /// <returns>a new filter to select commits between the given date/times.</returns>
 	    public static RevFilter Between(DateTime since, DateTime until)
 	    {
 	        return new BetweenCommitTimeRevFilter(since.ToMillisecondsSinceEpoch(), until.ToMillisecondsSinceEpoch());

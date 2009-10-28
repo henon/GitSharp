@@ -43,7 +43,7 @@ using System.IO;
 using System.Reflection;
 using System.Diagnostics;
 
-namespace Git
+namespace GitSharp
 {
     public static class Commands
     {

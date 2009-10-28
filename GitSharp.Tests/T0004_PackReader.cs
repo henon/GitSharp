@@ -91,7 +91,7 @@ namespace GitSharp.Tests
             new FileInfo(todopack.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname));
             new FileInfo(todopack.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname));
 
-            Tree t;
+            Core.Tree t;
 
             t = db
                     .MapTree(ObjectId.FromString(

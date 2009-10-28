@@ -59,7 +59,7 @@ namespace GitSharp.Tests
      * is used. Memory mapping has an effect on the file system, in that memory
      * mapped files in java cannot be deleted as long as they mapped arrays have not
      * been reclaimed by the garbage collector. The programmer cannot control this
-     * with precision, though hinting using <em><see cref="java.lang.System#gc}</em>
+     * with precision, though hinting using <em>java.lang.System#gc</em>
      * often helps.
      */
     public abstract class RepositoryTestCase
@@ -73,9 +73,9 @@ namespace GitSharp.Tests
 
         protected bool packedGitMMAP;
 
-        protected Repository db;
+        protected Core.Repository db;
         private int _testcount;
-        private readonly List<Repository> _repositoriesToClose = new List<Repository>();
+        private readonly List<Core.Repository> _repositoriesToClose = new List<Core.Repository>();
         private readonly List<string> _directoriesToRemove = new List<string>();
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace GitSharp.Tests
         /// also used internally. If a file or directory cannot be removed
         /// it throws an AssertionFailure.
         /// </summary>
-        /// <param name="dir"></param>
+        /// <param name="fs"></param>
         protected void recursiveDelete(FileSystemInfo fs)
         {
             recursiveDelete(fs, false, GetType().Name + "." + ToString(), true);
@@ -151,7 +151,7 @@ namespace GitSharp.Tests
         private static void ReportDeleteFailure(string name, bool failOnError, FileSystemInfo fsi, string message)
         {
             string severity = failOnError ? "Error" : "Warning";
-            string msg = severity + ": Failed to delete " + fsi;
+            string msg = severity + ": Failed to delete " + fsi.FullName;
 
             if (name != null)
             {
@@ -160,6 +160,8 @@ namespace GitSharp.Tests
 
             msg += Environment.NewLine;
             msg += message;
+            msg += Environment.NewLine;
+            msg += new StackTrace().ToString();
 
             if (failOnError)
             {
@@ -227,7 +229,7 @@ namespace GitSharp.Tests
                 new FileInfo(Path.Combine(trash_git.FullName, "usergitconfig")));
             SystemReader.setInstance(mockSystemReader);
 
-            db = new Repository(trash_git);
+            db = new Core.Repository(trash_git);
             db.Create();
 
             string[] packs = {
@@ -274,7 +276,7 @@ namespace GitSharp.Tests
 
         #endregion
 
-        protected Repository createNewEmptyRepo()
+        protected Core.Repository createNewEmptyRepo()
         {
             return createNewEmptyRepo(false);
         }
@@ -285,14 +287,14 @@ namespace GitSharp.Tests
         /// <returns>
         /// A new empty git repository for testing purposes
         /// </returns>
-        protected Repository createNewEmptyRepo(bool bare)  
+        protected Core.Repository createNewEmptyRepo(bool bare)  
         {
             var newTestRepoPath = Path.GetFullPath(trashParent + "/new" + DateTime.Now.Ticks + "." + (_testcount++) );
             var newTestRepoPathSuffix  = (bare ? "" : "/") + ".git";
             var newTestRepo = new DirectoryInfo(newTestRepoPath + newTestRepoPathSuffix);
 
             Assert.IsFalse(newTestRepo.Exists);
-            var newRepo = new Repository(newTestRepo);
+            var newRepo = new Core.Repository(newTestRepo);
             newRepo.Create();
             
             _repositoriesToClose.Add(newRepo);

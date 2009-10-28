@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Git.Tests;
 using NUnit.Framework;
 using System.IO;
-using Git;
 
 namespace GitSharp.Tests.API
 {

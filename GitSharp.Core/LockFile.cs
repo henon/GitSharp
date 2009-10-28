@@ -71,7 +71,7 @@ namespace GitSharp.Core
 		/// <summary>
 		/// Create a new lock for any file.
 		///	</summary>
-		///	<param name="f">the file that will be locked.</param>
+		///	<param name="file">the file that will be locked.</param>
         public LockFile(FileInfo file)
         {
             _refFile = file;

@@ -5,7 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using System.IO;
 
-namespace Git.Tests
+namespace GitSharp.Tests.API
 {
     [TestFixture]
     public class FindGitDirectoryTests : GitSharp.Tests.RepositoryTestCase
@@ -37,7 +37,7 @@ namespace Git.Tests
             try
             {
                 //current directory is returned only if path, global fallback and envvar are all null
-                Git.Commands.GitDirectory = null; // override fallback
+                GitSharp.Commands.GitDirectory = null; // override fallback
                 System.Environment.SetEnvironmentVariable("GIT_DIR", null); // override environment
                 var path = Directory.GetCurrentDirectory();
                 Assert.IsFalse(path.EndsWith("git")); // <--- this should be the case anyway, but if not the next assertion would not pass correctly
@@ -54,12 +54,12 @@ namespace Git.Tests
         public void Explicit_path_is_preferred()
         {
             // it should override global fallback
-            Git.Commands.GitDirectory = "abc/def/ghi";
+            GitSharp.Commands.GitDirectory = "abc/def/ghi";
             Assert.AreEqual("xyz.git", AbstractCommand.FindGitDirectory("xyz", false, true));
             Assert.AreEqual(Path.Combine("xyz",".git"), AbstractCommand.FindGitDirectory("xyz", false, false));
 
             // it should override env var
-            Git.Commands.GitDirectory = null;
+            GitSharp.Commands.GitDirectory = null;
             string tempGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
             try
             {

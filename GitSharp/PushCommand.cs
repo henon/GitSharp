@@ -39,7 +39,7 @@ using System.Collections.Generic;
 using GitSharp.Core;
 using GitSharp.Core.Transport;
 
-namespace Git
+namespace GitSharp
 {
 
     public class PushCommand : AbstractCommand

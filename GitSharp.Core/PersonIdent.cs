@@ -141,8 +141,8 @@ namespace GitSharp.Core
 		/// Copy a PersonIdent, but alter the clone's time stamp
 		///	</summary>
 		///	<param name="pi">Original <seealso cref="PersonIdent"/>.</param>
-		///	<param name="when">Local time stamp.</param>
-		///	<param name="tz">Time zone.</param>
+        ///	<param name="git_time">Local time stamp.</param>
+        ///	<param name="offset_in_minutes">Time zone.</param>
         public PersonIdent(PersonIdent pi, long git_time, int offset_in_minutes) 
 			: this(pi.Name, pi.EmailAddress, git_time, offset_in_minutes)
         {

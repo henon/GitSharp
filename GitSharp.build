@@ -135,13 +135,13 @@
     </copy>
 
     <property name="nunit.consolerunner" value="${path.tools.nunit}/nunit-console.exe" />
-    <property name="nunit.commandline" value="${path.testresults}/GitSharp.Tests.dll /xml:${path.testresults}/GitSharp.Tests.dll-results.xml /noshadow " />
+    <property name="nunit.commandline" value="GitSharp.Tests.dll /xml:GitSharp.Tests.dll-results.xml /noshadow " />
     <if test="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}">
       <property name="nunit.consolerunner" value="nunit-console2" />
-      <property name="nunit.commandline" value="${path.testresults}/GitSharp.Tests.dll -xml:${path.testresults}/GitSharp.Tests.dll-results.xml -noshadow " />
+      <property name="nunit.commandline" value="GitSharp.Tests.dll -xml:GitSharp.Tests.dll-results.xml -noshadow " />
     </if>
 
-    <exec
+    <exec verbose="true"
       program="${nunit.consolerunner}"
       workingdir="${path.testresults}"
       commandline="${nunit.commandline}"
@@ -171,7 +171,6 @@
       <fileset>
         <include name="${path.base}/*.txt" />
         <exclude name="${path.base}/version.txt" />
-
       </fileset>
     </copy>
     

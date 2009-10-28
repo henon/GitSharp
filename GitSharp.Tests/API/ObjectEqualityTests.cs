@@ -35,10 +35,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using Git;
 using NUnit.Framework;
 
-namespace Git.Tests
+namespace GitSharp.Tests.API
 {
     [TestFixture]
     public class ObjectEqualityTests : ApiTestCase

@@ -65,6 +65,7 @@ namespace GitSharp.Core.Exceptions
 		/// Create a new unmerged path exception.
 		/// </summary>
 		/// <param name="entry">The first non-zero stage of the unmerged path.</param>
+        /// <param name="inner">Inner Exception.</param>
         public UnmergedPathException(DirCacheEntry entry, Exception inner) 
             : base("Unmerged path: " + entry.getPathString(), inner)
         {

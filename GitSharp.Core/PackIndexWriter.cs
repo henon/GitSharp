@@ -234,7 +234,7 @@ namespace GitSharp.Core
 		/// <para />
 		/// The fan-out table is 4 KB in size, holding 256 32-bit unsigned integer
 		/// counts. Each count represents the number of objects within this index
-		/// whose <see cref="ObjectId.GetFirstByte()"/> matches the count's position in the
+		/// whose <see cref="AnyObjectId.GetFirstByte()"/> matches the count's position in the
 		/// fan-out table.
 		/// </summary>
 	    internal void WriteFanOutTable() 

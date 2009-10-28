@@ -65,14 +65,14 @@ namespace GitSharp.Tests
 			ObjectId r = db.Resolve("refs/remotes/origin/HEAD");
 			Assert.AreEqual(masterId, r);
 
-			IDictionary<string, Ref> allRefs = db.getAllRefs();
-			Ref refHEAD = allRefs["refs/remotes/origin/HEAD"];
+            IDictionary<string, Core.Ref> allRefs = db.getAllRefs();
+            Core.Ref refHEAD = allRefs["refs/remotes/origin/HEAD"];
 			Assert.IsNotNull(refHEAD);
 			Assert.AreEqual(masterId, refHEAD.ObjectId);
 			Assert.IsTrue(refHEAD.Peeled);
 			Assert.IsNull(refHEAD.PeeledObjectId);
 
-			Ref refmaster = allRefs["refs/remotes/origin/master"];
+            Core.Ref refmaster = allRefs["refs/remotes/origin/master"];
 			Assert.AreEqual(masterId, refmaster.ObjectId);
 			Assert.IsFalse(refmaster.Peeled);
 			Assert.IsNull(refmaster.PeeledObjectId);
@@ -82,8 +82,8 @@ namespace GitSharp.Tests
 		public virtual void testReadSymRefToPacked()
 		{
 			db.WriteSymref("HEAD", "refs/heads/b");
-			Ref @ref = db.getRef("HEAD");
-			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+            Core.Ref @ref = db.getRef("HEAD");
+            Assert.AreEqual(Core.Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
 		[Test]
@@ -97,8 +97,8 @@ namespace GitSharp.Tests
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update); // internal
 
 			db.WriteSymref("HEAD", "refs/heads/master");
-			Ref @ref = db.getRef("HEAD");
-			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+            Core.Ref @ref = db.getRef("HEAD");
+            Assert.AreEqual(Core.Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
 		[Test]
@@ -108,8 +108,8 @@ namespace GitSharp.Tests
 			updateRef.NewObjectId = db.Resolve("refs/heads/master");
 			RefUpdate.RefUpdateResult update = updateRef.Update();
 			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
-			Ref @ref = db.getRef("ref/heads/new");
-			Assert.AreEqual(Ref.Storage.Loose, @ref.StorageFormat);
+            Core.Ref @ref = db.getRef("ref/heads/new");
+            Assert.AreEqual(Core.Ref.Storage.Loose, @ref.StorageFormat);
 		}
 
 		/// <summary>
@@ -118,8 +118,8 @@ namespace GitSharp.Tests
 		[Test]
 		public void testReadLoosePackedRef()
 		{
-			Ref @ref = db.getRef("refs/heads/master");
-			Assert.AreEqual(Ref.Storage.Packed, @ref.StorageFormat);
+            Core.Ref @ref = db.getRef("refs/heads/master");
+            Assert.AreEqual(Core.Ref.Storage.Packed, @ref.StorageFormat);
 			string path = Path.Combine(db.Directory.FullName, "refs/heads/master");
 			FileStream os = new FileStream(path, System.IO.FileMode.OpenOrCreate);
             byte[] buffer = @ref.ObjectId.Name.getBytes();
@@ -128,7 +128,7 @@ namespace GitSharp.Tests
 			os.Close();
 
 			@ref = db.getRef("refs/heads/master");
-			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+            Assert.AreEqual(Core.Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
 		///	<summary>
@@ -137,9 +137,9 @@ namespace GitSharp.Tests
 		[Test]
 		public void testReadSimplePackedRefSameRepo()
 		{
-			Ref @ref = db.getRef("refs/heads/master");
+            Core.Ref @ref = db.getRef("refs/heads/master");
 			ObjectId pid = db.Resolve("refs/heads/master^");
-			Assert.AreEqual(Ref.Storage.Packed, @ref.StorageFormat);
+            Assert.AreEqual(Core.Ref.Storage.Packed, @ref.StorageFormat);
 			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
 			updateRef.NewObjectId = pid;
 			updateRef.IsForceUpdate = true;
@@ -147,13 +147,13 @@ namespace GitSharp.Tests
 			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
 
 			@ref = db.getRef("refs/heads/master");
-			Assert.AreEqual(Ref.Storage.LoosePacked, @ref.StorageFormat);
+            Assert.AreEqual(Core.Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 
 	    [Test]
 	    public void testOrigResolvedNamesBranch()
 	    {
-	        Ref @ref = db.getRef("a");
+            Core.Ref @ref = db.getRef("a");
 	        Assert.AreEqual("refs/heads/a", @ref.Name);
 	        Assert.AreEqual("refs/heads/a", @ref.OriginalName);
 	    }
@@ -161,7 +161,7 @@ namespace GitSharp.Tests
 	    [Test]
 	    public void testOrigResolvedNamesSymRef()
 	    {
-	        Ref @ref = db.getRef("HEAD");
+            Core.Ref @ref = db.getRef("HEAD");
 	        Assert.AreEqual("refs/heads/master", @ref.Name);
             Assert.AreEqual("HEAD", @ref.OriginalName);
 	    }

@@ -41,7 +41,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Git
+namespace GitSharp
 {
     /// <summary>
     /// git-init - Create an empty git repository or reinitialize an existing one 
@@ -89,7 +89,7 @@ namespace Git
         /// NOT IMPLEMENTED!
         /// Provide the directory from which templates will be used. The default template directory is /usr/share/git-core/templates.
         ///     
-        /// When specified, <template_directory> is used as the source of the template files rather than the default. The template files include some directory structure, some suggested "exclude patterns", and copies of non-executing "hook" files. The suggested patterns and hook files are all modifiable and extensible.
+        /// When specified, <see cref="Template"/> is used as the source of the template files rather than the default. The template files include some directory structure, some suggested "exclude patterns", and copies of non-executing "hook" files. The suggested patterns and hook files are all modifiable and extensible.
         /// </summary>
         public string Template
         {

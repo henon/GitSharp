@@ -40,7 +40,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Git.Tests
+namespace GitSharp.Tests.API
 {
     public class ApiTestCase : GitSharp.Tests.RepositoryTestCase
     {

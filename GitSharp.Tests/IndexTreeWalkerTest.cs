@@ -91,7 +91,7 @@ namespace GitSharp.Tests
                            		             			Assert.Fail();
                            		             		}
                            		             	},
-                           		FinishVisitTreeByIndex = delegate(Tree tree, int i, string curDir)
+                                FinishVisitTreeByIndex = delegate(Core.Tree tree, int i, string curDir)
                            		                         	{
                            		                         		if (tree.MemberCount == 0)
                            		                         		{
@@ -110,7 +110,7 @@ namespace GitSharp.Tests
         public void testTreeOnlyOneLevel()
         {
             var index = new GitIndex(db);
-            var mainTree = new Tree(db);
+            var mainTree = new Core.Tree(db);
             mainTree.AddFile("foo");
             mainTree.AddFile("bar");
 
@@ -124,7 +124,7 @@ namespace GitSharp.Tests
         public void testIndexOnlyOneLevel()
         {
             var index = new GitIndex(db);
-            var mainTree = new Tree(db);
+            var mainTree = new Core.Tree(db);
 
             index.add(trash, writeTrashFile("foo", "foo"));
             index.add(trash, writeTrashFile("bar", "bar"));
@@ -139,7 +139,7 @@ namespace GitSharp.Tests
         public void testBoth()
         {
             var index = new GitIndex(db);
-            var mainTree = new Tree(db);
+            var mainTree = new Core.Tree(db);
 
             index.add(trash, writeTrashFile("a", "a"));
             mainTree.AddFile("b/b");
@@ -156,7 +156,7 @@ namespace GitSharp.Tests
         public void testIndexOnlySubDirs()
         {
             var index = new GitIndex(db);
-            var mainTree = new Tree(db);
+            var mainTree = new Core.Tree(db);
 
             index.add(trash, writeTrashFile("foo/bar/baz", "foobar"));
             index.add(trash, writeTrashFile("asdf", "asdf"));

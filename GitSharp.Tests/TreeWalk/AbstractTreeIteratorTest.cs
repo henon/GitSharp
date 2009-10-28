@@ -70,7 +70,7 @@ namespace GitSharp.Tests
 	            base.ensurePathCapacity(capacity, length);
 	        }
 	
-	        public override AbstractTreeIterator createSubtreeIterator(Repository repo)
+	        public override AbstractTreeIterator createSubtreeIterator(Core.Repository repo)
 	        {
 	            return null;
 	        }

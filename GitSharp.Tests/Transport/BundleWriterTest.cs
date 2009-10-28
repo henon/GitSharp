@@ -65,7 +65,7 @@ namespace GitSharp.Tests.Transport
             // we could Read the bundle we created.
             Core.Repository newRepo = createNewEmptyRepo();
             FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
-            Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/firstcommit");
+            Core.Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/firstcommit");
 
             // We expect firstcommit to appear by id
             Assert.AreEqual("42e4e7c5e507e113ebbb7801b16b52cf867b7ce1", advertisedRef.ObjectId.Name);
@@ -94,7 +94,7 @@ namespace GitSharp.Tests.Transport
             // we could Read the bundle we created.
             Core.Repository newRepo = createNewEmptyRepo();
             FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
-            Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/aa");
+            Core.Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/aa");
 
             Assert.AreEqual(db.Resolve("a").Name, advertisedRef.ObjectId.Name);
             Assert.AreEqual(db.Resolve("a").Name, newRepo.Resolve("refs/heads/aa").Name);

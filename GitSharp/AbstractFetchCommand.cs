@@ -38,7 +38,7 @@ using System;
 using GitSharp.Core;
 using GitSharp.Core.Transport;
 
-namespace Git
+namespace GitSharp
 {
     public abstract class AbstractFetchCommand : AbstractCommand
     {

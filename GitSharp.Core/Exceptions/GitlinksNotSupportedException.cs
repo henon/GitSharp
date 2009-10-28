@@ -39,9 +39,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Runtime.Serialization;
 
@@ -70,9 +67,8 @@ namespace GitSharp.Core.Exceptions
 		/// <summary>
 		/// Construct a GitlinksNotSupportedException for the specified link
 		/// </summary>
-		/// <param name="s">
-		/// Name of link in tree or workdir
-		/// </param>
+		/// <param name="s">Name of link in tree or workdir</param>
+        /// <param name="inner">Inner Exception</param>
         public GitlinksNotSupportedException(string s, Exception inner)
             : base(s, inner)
         {

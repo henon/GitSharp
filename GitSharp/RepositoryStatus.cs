@@ -40,7 +40,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Git
+namespace GitSharp
 {
     /// <summary>
     /// A summary of changes made to the working directory of a repository with respect to its index.

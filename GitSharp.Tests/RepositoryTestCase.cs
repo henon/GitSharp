@@ -160,8 +160,6 @@ namespace GitSharp.Tests
 
             msg += Environment.NewLine;
             msg += message;
-            msg += Environment.NewLine;
-            msg += new StackTrace().ToString();
 
             if (failOnError)
             {

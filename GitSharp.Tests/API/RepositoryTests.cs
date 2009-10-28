@@ -49,21 +49,28 @@ namespace GitSharp.Tests.API
     {
 
         [Test]
-        public void StatusEvenWorksWithHeadLessRepo() {
-            var repo = Repository.Init(Path.Combine(trash.FullName, "test"));
-            RepositoryStatus status = null;
-            Assert.DoesNotThrow(() => status=repo.Status);
-            Assert.IsFalse(repo.Status.AnyDifferences);
-            Assert.AreEqual(0, status.Added.Count + status.Changed.Count + status.Missing.Count + status.Modified.Count + status.Removed.Count);
+        public void StatusEvenWorksWithHeadLessRepo()
+        {
+            using (var repo = Repository.Init(Path.Combine(trash.FullName, "test")))
+            {
+                RepositoryStatus status = null;
+                Assert.DoesNotThrow(() => status = repo.Status);
+                Assert.IsFalse(repo.Status.AnyDifferences);
+                Assert.AreEqual(0,
+                                status.Added.Count + status.Changed.Count + status.Missing.Count + status.Modified.Count +
+                                status.Removed.Count);
+            }
         }
 
         [Test]
         public void ImplicitConversionToCoreRepo()
         {
-            var repo = this.GetTrashRepository();
-            Assert.IsTrue(repo is Repository);
-            GitSharp.Core.Repository core_repo = repo;
-            Assert.IsTrue(core_repo is GitSharp.Core.Repository);
+            using (var repo = this.GetTrashRepository())
+            {
+                Assert.IsTrue(repo is Repository);
+                GitSharp.Core.Repository core_repo = repo;
+                Assert.IsTrue(core_repo is GitSharp.Core.Repository);
+            }
         }
     }
 }

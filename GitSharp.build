@@ -171,7 +171,6 @@
       <fileset>
         <include name="${path.base}/*.txt" />
         <exclude name="${path.base}/version.txt" />
-
       </fileset>
     </copy>
     

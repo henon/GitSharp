@@ -44,7 +44,7 @@ using NUnit.Framework;
 using GitSharp.Tests;
 using System.IO;
 
-namespace Git.Tests
+namespace GitSharp.Tests.API
 {
     [TestFixture]
     public class IndexTest : ApiTestCase
@@ -111,15 +111,15 @@ namespace Git.Tests
             var index_path = Path.Combine(repo.Directory, "index");
             new FileInfo("Resources/index_originating_from_msysgit").CopyTo(index_path);
 
-           var status = repo.Status;
+            var status = repo.Status;
             var added = new HashSet<string> {            
-                "New Folder/New Ruby Program.rb",
-                "for henon.txt",
-                "test.cmd", 
-            };
+                                                "New Folder/New Ruby Program.rb",
+                                                "for henon.txt",
+                                                "test.cmd", 
+                                            };
             var removed = new HashSet<string> {
-                "a/a1","a/a1.txt","a/a2.txt","b/b1.txt","b/b2.txt","c/c1.txt","c/c2.txt","master.txt"
-            };
+                                                  "a/a1","a/a1.txt","a/a2.txt","b/b1.txt","b/b2.txt","c/c1.txt","c/c2.txt","master.txt"
+                                              };
 
             Assert.IsTrue(added.SetEquals(status.Added));
             Assert.AreEqual(0, status.Changed.Count);

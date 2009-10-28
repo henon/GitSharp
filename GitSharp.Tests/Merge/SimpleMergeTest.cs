@@ -377,7 +377,7 @@ namespace GitSharp.Tests.Merge
 
 		private ObjectId Commit(ObjectWriter ow, DirCache treeB, ObjectId[] parentIds)
 		{
-			var c = new Commit(db) { TreeId = treeB.writeTree(ow), Author = new PersonIdent("A U Thor", "a.u.thor", 1L, 0) };
+            var c = new Core.Commit(db) { TreeId = treeB.writeTree(ow), Author = new PersonIdent("A U Thor", "a.u.thor", 1L, 0) };
 			c.Committer = c.Author;
 			c.ParentIds = parentIds;
 			c.Message = "Tree " + c.TreeId.Name;

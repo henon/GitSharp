@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 
-namespace Git
+namespace GitSharp
 {
     /// <summary>
     /// Represents repository-, user-, and global-configuration for git

@@ -46,7 +46,7 @@ using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
 using CoreRepository = GitSharp.Core.Repository;
 
-namespace Git
+namespace GitSharp
 {
 
     /// <summary>

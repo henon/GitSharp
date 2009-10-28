@@ -40,7 +40,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Git
+namespace GitSharp
 {
     /// <summary>
     /// Interface for objects like Ref and Tag, which point to a different object.

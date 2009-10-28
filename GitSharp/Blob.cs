@@ -47,7 +47,7 @@ using CoreTree = GitSharp.Core.Tree;
 using CoreTag = GitSharp.Core.Tag;
 using System.IO;
 
-namespace Git
+namespace GitSharp
 {
     /// <summary>
     /// Represents a specific version of the content of a file tracked by git.

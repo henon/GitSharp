@@ -44,7 +44,7 @@ using NUnit.Framework;
 
 using System.IO;
 
-namespace Git.Tests
+namespace GitSharp.Tests.API
 {
     [TestFixture]
     public class InitTests : GitSharp.Tests.RepositoryTestCase

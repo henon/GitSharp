@@ -46,7 +46,7 @@ using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
 using CoreTag = GitSharp.Core.Tag;
 
-namespace Git
+namespace GitSharp
 {
     /// <summary>
     /// Represents a git tag.

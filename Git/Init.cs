@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common = true, complete = false, usage = "Create an empty git repository")]
     class Init : TextBuiltin
     {
-        private Git.InitCommand cmd = new Git.InitCommand();
+        private InitCommand cmd = new InitCommand();
 
         private static Boolean isHelp = false;
 

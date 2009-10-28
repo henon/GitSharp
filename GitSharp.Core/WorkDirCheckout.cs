@@ -94,7 +94,7 @@ namespace GitSharp.Core
         ///	<param name="head"> </param>
         ///	<param name="index"> </param>
         ///	<param name="merge"> </param>
-        public WorkDirCheckout(Repository repo, DirectoryInfo root, Tree head, GitIndex index, Tree merge)
+        public WorkDirCheckout(Repository repo, DirectoryInfo root, Core.Tree head, GitIndex index, Core.Tree merge)
             : this(repo, root, index, merge)
         {
             this._head = head;

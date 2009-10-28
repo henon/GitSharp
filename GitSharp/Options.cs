@@ -19,12 +19,29 @@ namespace Git
         {
             get
             {
-                var assembly = Assembly.Load("GitSharp");
-                var version = assembly.GetName().Version;
+                Assembly assembly = Assembly.Load("GitSharp");
+
+                Version version = assembly.GetName().Version;
                 if (version == null)
                     return null;
-                return version.ToString();
+
+                object[] attributes = assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), false);
+                if (attributes.Length == 0)
+                {
+                    // No AssemblyProduct attribute to parse, no commit hash to extract
+                    return version.ToString();
+                }
+
+                string commitHash = ExtractCommitHashFrom(((AssemblyProductAttribute) attributes[0]).Product);
+                return string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, commitHash);
             }
+        }
+
+        private static string ExtractCommitHashFrom(string product)
+        {
+            // TODO: Maybe should we switch to a regEx capture ?
+            string[] parts = product.Split(new[] {'['});
+            return parts[1].TrimEnd(']');
         }
     }
 }

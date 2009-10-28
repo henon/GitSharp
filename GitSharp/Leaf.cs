@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using FileTreeEntry = GitSharp.Core.FileTreeEntry;
 
-namespace Git
+namespace GitSharp
 {
 
     /// <summary>

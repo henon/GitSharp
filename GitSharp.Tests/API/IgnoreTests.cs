@@ -41,7 +41,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 
-namespace Git.Tests
+namespace GitSharp.Tests.API
 {
     [TestFixture]
     public class IgnoreTests
@@ -49,16 +49,16 @@ namespace Git.Tests
         [Test]
         public void TestIgnore()
         {
-            var rules = new Git.IgnoreRules(new string[] {
-                "*.[oa]", // ignore all *.o and *.a files
-                "#!*.[oa]", // make sure comments are followed
-                "*.html", // ignore all *.html
-                "!foo.html", // except when they're foo.html
-                "!Documentation/index.html", // and except when they're the index file in any Documentation directory
-                "/Documentation/index.html", // unless it's the root's Documentation/index.html
-                "bin/", // ignore bin directories and all paths under them
-                "!/bin/", // except if it's in the root
-            });
+            var rules = new GitSharp.IgnoreRules(new string[] {
+                                                                  "*.[oa]", // ignore all *.o and *.a files
+                                                                  "#!*.[oa]", // make sure comments are followed
+                                                                  "*.html", // ignore all *.html
+                                                                  "!foo.html", // except when they're foo.html
+                                                                  "!Documentation/index.html", // and except when they're the index file in any Documentation directory
+                                                                  "/Documentation/index.html", // unless it's the root's Documentation/index.html
+                                                                  "bin/", // ignore bin directories and all paths under them
+                                                                  "!/bin/", // except if it's in the root
+                                                              });
 
             Assert.AreEqual(false, rules.IgnoreFile("project/", "project/Documentation/foo.html"));
             Assert.AreEqual(true, rules.IgnoreFile("project/", "project/Documentation/gitignore.html"));

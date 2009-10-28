@@ -184,8 +184,8 @@ namespace GitSharp.CLI
             {
 #endif
                 //Initialize the output stream for all console-based messages.
-                Git.Commands.OutputStream = new StreamWriter(Console.OpenStandardOutput());
-                Console.SetOut(Git.Commands.OutputStream);
+                GitSharp.Commands.OutputStream = new StreamWriter(Console.OpenStandardOutput());
+                Console.SetOut(GitSharp.Commands.OutputStream);
             }
             catch (IOException)
             {
@@ -277,7 +277,7 @@ namespace GitSharp.CLI
 
         ObjectId Resolve(string s)
         {
-            Core.Repository repo = Git.Commands.Repository;
+            Core.Repository repo = GitSharp.Commands.Repository;
             ObjectId r = repo.Resolve(s);
             if (r == null)
                 throw die("Not a revision: " + s);
@@ -298,12 +298,12 @@ namespace GitSharp.CLI
         {
             get
             {
-                return Git.Commands.OutputStream;
+                return GitSharp.Commands.OutputStream;
             }
 
             set
             {
-                Git.Commands.OutputStream = value;
+                GitSharp.Commands.OutputStream = value;
             }
         }
 
@@ -311,16 +311,16 @@ namespace GitSharp.CLI
         {
             get
             {
-                return Git.Commands.Repository;
+                return GitSharp.Commands.Repository;
             }
             set
             {
                 if (value == null)
                 {
-                    Git.Commands.Repository = null;
+                    GitSharp.Commands.Repository = null;
                     return;
                 }
-                Git.Commands.Repository = new Git.Repository(value.Directory.FullName);
+                GitSharp.Commands.Repository = new GitSharp.Repository(value.Directory.FullName);
             }
         }
 

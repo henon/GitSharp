@@ -26,7 +26,7 @@ namespace GitSharp.Tests
 
 
 
-            var repository = new Repository(repositoryPath);
+            var repository = new Core.Repository(repositoryPath);
             GitIndex index = repository.Index;
 
             Assert.IsNotNull(index);
@@ -36,15 +36,15 @@ namespace GitSharp.Tests
             GitIndex.Entry entry = entries[0];
             Assert.AreEqual("dummy.txt", entry.Name);
 
-            Ref headRef = repository.Head;
+            Core.Ref headRef = repository.Head;
             Assert.AreEqual("refs/heads/master", headRef.Name);
             Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", headRef.ObjectId.Name);
 
             object obj = repository.MapObject(headRef.ObjectId, headRef.OriginalName);
 #pragma warning disable 0612
-            Assert.IsInstanceOfType(typeof(Commit), obj); // [henon] IsInstanceOfType is obsolete
+            Assert.IsInstanceOfType(typeof(Core.Commit), obj); // [henon] IsInstanceOfType is obsolete
 #pragma warning restore 0612
-            var commit = (Commit) obj;
+            var commit = (Core.Commit) obj;
 
             Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", commit.CommitId.Name);
             Assert.AreEqual(commit.Committer, commit.Author);
@@ -95,7 +95,7 @@ namespace GitSharp.Tests
 
 
 
-            var repository = new Repository(repositoryPath);
+            var repository = new Core.Repository(repositoryPath);
             GitIndex index = repository.Index;
 
             Assert.IsNotNull(index);
@@ -125,7 +125,7 @@ namespace GitSharp.Tests
         [Test]
         public void Check_entries_of_msysgit_index()
         {
-            var repo = new Repository(trash_git);
+            var repo = new Core.Repository(trash_git);
             var index_path = Path.Combine(repo.Directory.FullName, "index");
             new FileInfo("Resources/index_originating_from_msysgit").CopyTo(index_path);
 

@@ -60,7 +60,7 @@ namespace GitSharp.Tests.RevWalk
 			base.setUp();
 			_ow = new ObjectWriter(db);
 			rw = createRevWalk();
-			emptyTree = rw.parseTree(_ow.WriteTree(new Tree(db)));
+            emptyTree = rw.parseTree(_ow.WriteTree(new Core.Tree(db)));
 			nowTick = 1236977987000L;
 		}
 
@@ -140,7 +140,7 @@ namespace GitSharp.Tests.RevWalk
 		{
 			Tick(secDelta);
 
-			var c = new Commit(db)
+            var c = new Core.Commit(db)
 			        	{
 			        		TreeId = tree,
 			        		ParentIds = parents,
@@ -154,7 +154,7 @@ namespace GitSharp.Tests.RevWalk
 
 		protected RevTag Tag(string name, RevObject dst)
 		{
-			var t = new Tag(db)
+            var t = new Core.Tag(db)
 						{
 							TagType = Constants.typeString(dst.Type),
 							Id = dst.ToObjectId(),

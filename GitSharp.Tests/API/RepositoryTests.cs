@@ -42,7 +42,7 @@ using System.Text;
 using NUnit.Framework;
 using System.IO;
 
-namespace Git.Tests
+namespace GitSharp.Tests.API
 {
     [TestFixture]
     public class RepositoryTests : ApiTestCase

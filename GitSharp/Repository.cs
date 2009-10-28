@@ -45,7 +45,7 @@ using System.Diagnostics;
 using CoreRepository = GitSharp.Core.Repository;
 using System.Text.RegularExpressions;
 
-namespace Git
+namespace GitSharp
 {
     /// <summary>
     /// Represents a git repository

@@ -156,17 +156,17 @@ namespace GitSharp.CLI
                     }
                     catch (ArgumentException)
                     {
-                        Git.Commands.OutputStream.WriteLine("error: can't find git directory");
-                        Git.Commands.OutputStream.Flush();
+                        GitSharp.Commands.OutputStream.WriteLine("error: can't find git directory");
+                        GitSharp.Commands.OutputStream.Flush();
                         Exit(1);
                     }
 
                     if (cmd.RequiresRepository)
                     {
                         if (gitdir == null)
-                            gitdir = new DirectoryInfo(Git.AbstractCommand.FindGitDirectory(gitdir.FullName, cmd.RequiresRecursive, false));
+                            gitdir = new DirectoryInfo(GitSharp.AbstractCommand.FindGitDirectory(gitdir.FullName, cmd.RequiresRecursive, false));
 
-                        cmd.Init(new Repository(gitdir), gitdir);
+                        cmd.Init(new GitSharp.Core.Repository(gitdir), gitdir);
                     }
                     else
                         cmd.Init(null, gitdir);
@@ -179,8 +179,8 @@ namespace GitSharp.CLI
                     }
                     finally
                     {
-                        if (Git.Commands.OutputStream != null)
-                            Git.Commands.OutputStream.Flush();
+                        if (GitSharp.Commands.OutputStream != null)
+                            GitSharp.Commands.OutputStream.Flush();
                     }
                 }
                 else

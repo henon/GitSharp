@@ -50,7 +50,7 @@ namespace GitSharp.CLI
     [Command(common=true, usage = "Clone a repository into a new directory")]
     public class Clone : TextBuiltin
     {
-        private Git.CloneCommand cmd = new Git.CloneCommand();
+        private CloneCommand cmd = new CloneCommand();
 
         /*
          * private static Boolean isHelp = false;              //Complete        

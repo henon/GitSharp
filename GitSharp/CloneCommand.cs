@@ -46,7 +46,7 @@ using System.Text;
 using GitSharp.Core.Transport;
 using GitSharp.Core;
 
-namespace Git
+namespace GitSharp
 {
     public class CloneCommand
         : AbstractFetchCommand

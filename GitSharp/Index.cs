@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using CoreCommit = GitSharp.Core.Commit;
 
-namespace Git
+namespace GitSharp
 {
 
     /// <summary>

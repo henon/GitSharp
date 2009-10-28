@@ -82,7 +82,7 @@ namespace GitSharp.Tests
             ru.NewObjectId = newid;
             RefUpdate.RefUpdateResult update = ru.Update();
             Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
-            Ref r = db.getAllRefs()[newRef];
+            Core.Ref r = db.getAllRefs()[newRef];
             Assert.IsNotNull(r);
             Assert.AreEqual(newRef, r.Name);
             Assert.IsNotNull(r.ObjectId);
@@ -371,7 +371,7 @@ namespace GitSharp.Tests
         public void testRefsCacheAfterUpdate()
         {
             // Do not use the defalt repo for this case.
-            Dictionary<string, Ref> allRefs = db.getAllRefs();
+            Dictionary<string, Core.Ref> allRefs = db.getAllRefs();
             ObjectId oldValue = db.Resolve("HEAD");
             ObjectId newValue = db.Resolve("HEAD^");
             // first make HEAD refer to loose ref
@@ -408,7 +408,7 @@ namespace GitSharp.Tests
         public void testRefsCacheAfterUpdateLoosOnly()
         {
             // Do not use the defalt repo for this case.
-            Dictionary<string, Ref> allRefs = db.getAllRefs();
+            Dictionary<string, Core.Ref> allRefs = db.getAllRefs();
             ObjectId oldValue = db.Resolve("HEAD");
             db.WriteSymref(Constants.HEAD, "refs/heads/newref");
             RefUpdate updateRef = db.UpdateRef(Constants.HEAD);
@@ -613,13 +613,13 @@ namespace GitSharp.Tests
         {
             ObjectId rb = db.Resolve("refs/heads/b");
             ObjectId rb2 = db.Resolve("refs/heads/b~1");
-            Assert.AreEqual(Ref.Storage.Packed, db.getRef("refs/heads/b").StorageFormat);
+            Assert.AreEqual(Core.Ref.Storage.Packed, db.getRef("refs/heads/b").StorageFormat);
             RefUpdate updateRef = db.UpdateRef("refs/heads/b");
             updateRef.NewObjectId = rb2;
             updateRef.IsForceUpdate = true;
             RefUpdate.RefUpdateResult update = updateRef.Update();
             Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update, "internal check new ref is loose");
-            Assert.AreEqual(Ref.Storage.LoosePacked, db.getRef("refs/heads/b")
+            Assert.AreEqual(Core.Ref.Storage.LoosePacked, db.getRef("refs/heads/b")
                     .StorageFormat);
             RefLogWriter.WriteReflog(db, rb, rb, "Just a message", "refs/heads/b");
             Assert.IsTrue(new FileInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/b")).Exists, "no log on old branch");

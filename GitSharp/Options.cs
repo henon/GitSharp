@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 
-namespace Git
+namespace GitSharp
 {
     /// <summary>
     /// Represents git command line options such as --version.

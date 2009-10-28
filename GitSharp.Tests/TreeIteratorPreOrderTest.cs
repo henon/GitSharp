@@ -51,7 +51,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testEmpty()
 		{
-			Tree tree = new Tree(db);
+            Core.Tree tree = new Core.Tree(db);
 			TreeIterator i = MakeIterator(tree);
             Assert.IsTrue(i.hasNext());
 			Assert.AreEqual("", i.next().FullName);
@@ -65,7 +65,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testSimpleF1()
 		{
-			Tree tree = new Tree(db);
+            Core.Tree tree = new Core.Tree(db);
 			tree.AddFile("x");
 			TreeIterator i = MakeIterator(tree);
             Assert.IsTrue(i.hasNext());
@@ -82,7 +82,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testSimpleF2()
 		{
-			Tree tree = new Tree(db);
+            Core.Tree tree = new Core.Tree(db);
 			tree.AddFile("a");
 			tree.AddFile("x");
 			TreeIterator i = MakeIterator(tree);
@@ -101,7 +101,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testSimpleT()
 		{
-			Tree tree = new Tree(db);
+            Core.Tree tree = new Core.Tree(db);
 			tree.AddTree("a");
 			TreeIterator i = MakeIterator(tree);
             Assert.IsTrue(i.hasNext());
@@ -114,7 +114,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void testTricky()
 		{
-			Tree tree = new Tree(db);
+            Core.Tree tree = new Core.Tree(db);
 			tree.AddFile("a.b");
 			tree.AddFile("a.c");
 			tree.AddFile("a/b.b/b");
@@ -147,7 +147,7 @@ namespace GitSharp.Tests
             Assert.IsFalse(i.hasNext());
 		}
 
-		private static TreeIterator MakeIterator(Tree tree)
+        private static TreeIterator MakeIterator(Core.Tree tree)
 		{
 			return new TreeIterator(tree, TreeIterator.Order.PREORDER);
 		}

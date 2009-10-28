@@ -151,7 +151,7 @@ namespace GitSharp.Tests
         private static void ReportDeleteFailure(string name, bool failOnError, FileSystemInfo fsi, string message)
         {
             string severity = failOnError ? "Error" : "Warning";
-            string msg = severity + ": Failed to delete " + fsi;
+            string msg = severity + ": Failed to delete " + fsi.FullName;
 
             if (name != null)
             {
@@ -160,6 +160,8 @@ namespace GitSharp.Tests
 
             msg += Environment.NewLine;
             msg += message;
+            msg += Environment.NewLine;
+            msg += new StackTrace().ToString();
 
             if (failOnError)
             {

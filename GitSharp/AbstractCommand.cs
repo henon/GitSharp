@@ -67,6 +67,63 @@ namespace Git
         }
 
         /// <summary>
+        /// Performs upward recursive lookup to return git directory. Honors the environment variable GIT_DIR.
+        /// </summary>
+        /// <returns></returns>
+        public static string FindGitDirectory(string rootDirectory, bool recursive, bool isBare)
+        {
+            string directory = null;
+            DirectoryInfo gitDir = null;
+            string envGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
+
+            //Determine which git directory to use
+            if (rootDirectory != null)         	//Directory specified by --git-dir 
+                directory = rootDirectory;
+            else if (envGitDir != null) 		//Directory specified by $GIT_DIR
+                directory = envGitDir;
+            else                        		//Current Directory
+            {
+                var current = new DirectoryInfo(Directory.GetCurrentDirectory());
+                directory = current.FullName;
+                if (recursive)
+                {
+                    //Check for non-bare repositories
+                    if (!isBare)
+                    {
+                        while (current != null)
+                        {
+                            gitDir = new DirectoryInfo(Path.Combine(current.FullName, ".git"));
+                            if (gitDir.Exists)
+                                return current.Parent.FullName;
+
+                            current = current.Parent;
+                        }
+                    }
+                    else
+                    {
+                        //Check for bare repositories
+                        while (current != null)
+                        {
+                            gitDir = new DirectoryInfo(current.FullName);
+                            if (gitDir.FullName.EndsWith(".git") && gitDir.Exists)
+                                return current.FullName;
+
+                            current = current.Parent;
+                        }
+                    }
+                }
+            }
+            if (!directory.EndsWith(".git"))
+            {
+                if (!isBare)
+                    directory = Path.Combine(directory, ".git");
+                else
+                    directory += ".git";
+            }
+            return directory;
+        }
+
+        /// <summary>
         /// Returns the value of the process' environment variable GIT_DIR
         /// </summary>
         protected string GIT_DIR
@@ -141,7 +198,7 @@ namespace Git
         {
             get
             {
-                return Commands.FindGitDirectory(GitDirectory, false, false);
+                return FindGitDirectory(GitDirectory, false, false);
             }
         }
 

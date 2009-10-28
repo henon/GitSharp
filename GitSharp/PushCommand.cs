@@ -47,7 +47,6 @@ namespace Git
         private bool shownUri;
 
         public ProgressMonitor ProgressMonitor { get; set; }
-        public Repository Repository { get; set; }
         public string Remote { get; set; }
         public List<RefSpec> RefSpecs { get; set; }
         public bool Force { get; set; }

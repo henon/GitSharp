@@ -230,6 +230,17 @@ namespace Git
             return new FileInfo(path).Exists;
         }
 
+        /// <summary>
+        /// Commit staged changes and updates HEAD
+        /// </summary>
+        /// <param name="message">The commit message</param>
+        /// <param name="author">The author of the content to be committed</param>
+        /// <returns>Returns the newly created commit</returns>
+        public Commit Commit(string message, Author author)
+        {
+            return Index.CommitChanges(message, author);
+        }
+
         public IDictionary<string, Ref> Refs
         {
             get
@@ -290,12 +301,33 @@ namespace Git
             }
         }
 
+        /// <summary>
+        /// Returns the git configuration containing repository-specific, user-specific and global 
+        /// settings.
+        /// </summary>
         public Config Config
         {
             get
             {
                 return new Config(this);
             }
+        }
+
+        /// <summary>
+        /// Get the differences between the working directory and the index.
+        /// Returns a data structure containing the results (like "git status").
+        /// </summary>
+        public RepositoryStatus Status
+        {
+            get
+            {
+                return Index.CompareAgainstWorkingDirectory(false); // todo: change this to true, once the ignore rules are implemented.
+            }
+        }
+
+        public static implicit operator CoreRepository(Repository repo)
+        {
+            return repo._internal_repo;
         }
 
         public override string ToString()

@@ -44,7 +44,6 @@ namespace Git
 
     public class FetchCommand : AbstractFetchCommand
     {
-        public Repository Repository { get; set; }
         public string Remote { get; set; }
         public List<RefSpec> RefSpecs { get; set; }
         public ProgressMonitor ProgressMonitor { get; set; }

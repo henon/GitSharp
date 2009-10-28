@@ -65,7 +65,7 @@ namespace Git
         {
             get
             {
-                return Commands.FindGitDirectory(GitDirectory, false, Bare);
+                return FindGitDirectory(GitDirectory, false, Bare);
             }
         }
 

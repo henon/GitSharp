@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <me@lathund.dewire.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
@@ -528,7 +528,8 @@ namespace GitSharp.Core
 				TreeEntry r = _contents[p];
 				if (slash < s.Length - 1)
 				{
-					return r is Tree ? ((Tree)r).FindMember(s, slast, slash + 1) : null;
+					Tree oTree = (r as Tree);
+					return oTree != null ? oTree.FindMember(s, slast, slash + 1) : null;
 				}
 
 				return r;

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
@@ -1255,8 +1255,9 @@ namespace GitSharp.Core
 
 			public override bool Equals(object obj)
 			{
-				if (obj is SubsectionNames)
-					return section.Equals(((SubsectionNames)obj).section);
+				SubsectionNames  oSub = ( obj as SubsectionNames);
+				if (oSub != null)
+					return section.Equals(oSub.section);
 				return false;
 			}
 		}

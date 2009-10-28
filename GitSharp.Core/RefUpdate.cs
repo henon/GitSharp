@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -357,9 +357,11 @@ namespace GitSharp.Core
 					return store.Store(@lock, RefUpdateResult.NoChange);
 				}
 
-				if (newObj is RevCommit && oldObj is RevCommit)
+				RevCommit newCom = (newObj as RevCommit);
+				RevCommit oldCom = (oldObj as RevCommit);
+				if (newCom != null && oldCom != null)
 				{
-					if (walk.isMergedInto((RevCommit)oldObj, (RevCommit)newObj))
+					if (walk.isMergedInto(oldCom, newCom))
 					{
 						return store.Store(@lock, RefUpdateResult.FastForward);
 					}

@@ -154,10 +154,10 @@ namespace GitSharp.Core.Transport
             {
                 try
                 {
-                    RevObject obj = _walk.parseAny(r.ObjectId);
-                    if (obj is RevCommit)
+                    RevCommit obj = (_walk.parseAny(r.ObjectId) as RevCommit);
+                    if (obj != null)
                     {
-                        int cTime = ((RevCommit)obj).CommitTime;
+                        int cTime = obj.CommitTime;
                         if (maxTime < cTime)
                             maxTime = cTime;
                     }
@@ -435,9 +435,10 @@ namespace GitSharp.Core.Transport
         private void MarkCommon(RevObject obj)
         {
             obj.add(COMMON);
-            if (obj is RevCommit)
+			RevCommit oComm = (obj as RevCommit);
+            if (oComm != null)
             {
-                ((RevCommit)obj).carry(COMMON);
+                oComm.carry(COMMON);
             }
         }
 

@@ -1006,7 +1006,7 @@ namespace GitSharp.Core
 
                     try
                     {
-                        using (Stream @is = new FileStream(file.FullName, System.IO.FileMode.Open))
+                        using (Stream @is = new FileStream(file.FullName, System.IO.FileMode.Open, FileAccess.Read))
                         {
                             try
                             {

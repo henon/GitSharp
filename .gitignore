@@ -14,3 +14,4 @@ Reports
 *.userprefs
 *.orig
 test-results
+dist

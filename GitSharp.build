@@ -167,6 +167,14 @@
   <target name="package">
     <mkdir dir="${path.dist}" if="${not(directory::exists(path.dist))}"/>
 
+    <copy todir="${path.build.output}">
+      <fileset>
+        <include name="${path.base}/*.txt" />
+        <exclude name="${path.base}/version.txt" />
+
+      </fileset>
+    </copy>
+    
     <zip zipfile="${path.dist}/GitSharp-${build.version}-${build.config}-${build.platform}.zip" ziplevel="9">
       <fileset basedir="${path.build.output}">
         <include name="*.*"/>

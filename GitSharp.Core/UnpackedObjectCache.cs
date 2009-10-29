@@ -52,6 +52,8 @@ namespace GitSharp.Core
         private static Slot _lruHead;
         private static Slot _lruTail;
         private static int _openByteCount;
+		
+		private static Object locker = new Object();
 
         private static int Hash(long position)
         {
@@ -70,51 +72,57 @@ namespace GitSharp.Core
             }
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public static void Reconfigure(WindowCacheConfig cfg)
         {
-            int dbLimit = cfg.DeltaBaseCacheLimit;
-            if (_maxByteCount != dbLimit)
-            {
-                _maxByteCount = dbLimit;
-                ReleaseMemory();
-            }
+			lock(locker)
+			{
+	            int dbLimit = cfg.DeltaBaseCacheLimit;
+	            if (_maxByteCount != dbLimit)
+	            {
+	                _maxByteCount = dbLimit;
+	                ReleaseMemory();
+	            }
+			}
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public static Entry get(PackFile pack, long position)
         {
-            Slot e = Cache[Hash(position)];
-            if (e.provider == pack && e.position == position)
-            {
-                Entry buf = e.data.get();
-                if (buf != null)
-                {
-                    MoveToHead(e);
-                    return buf;
-                }
-            }
-            return null;
+			lock(locker)
+			{
+	            Slot e = Cache[Hash(position)];
+	            if (e.provider == pack && e.position == position)
+	            {
+	                Entry buf = e.data.get();
+	                if (buf != null)
+	                {
+	                    MoveToHead(e);
+	                    return buf;
+	                }
+	            }
+	            return null;
+			}
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public static void store(PackFile pack, long position,
                  byte[] data, int objectType)
         {
-            if (data.Length > _maxByteCount)
-                return; // Too large to cache.
-
-            Slot e = Cache[Hash(position)];
-            ClearEntry(e);
-
-            _openByteCount += data.Length;
-            ReleaseMemory();
-
-            e.provider = pack;
-            e.position = position;
-            e.sz = data.Length;
-            e.data = new WeakReference<Entry>(new Entry(data, objectType));
-            MoveToHead(e);
+			lock(locker)
+			{
+	            if (data.Length > _maxByteCount)
+	                return; // Too large to cache.
+	
+	            Slot e = Cache[Hash(position)];
+	            ClearEntry(e);
+	
+	            _openByteCount += data.Length;
+	            ReleaseMemory();
+	
+	            e.provider = pack;
+	            e.position = position;
+	            e.sz = data.Length;
+	            e.data = new WeakReference<Entry>(new Entry(data, objectType));
+	            MoveToHead(e);
+			}
         }
 
         private static void ReleaseMemory()
@@ -141,17 +149,19 @@ namespace GitSharp.Core
             }
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public static void purge(PackFile file)
         {
-            foreach (Slot e in Cache)
-            {
-                if (e.provider == file)
-                {
-                    ClearEntry(e);
-                    Unlink(e);
-                }
-            }
+			lock(locker)
+			{
+	            foreach (Slot e in Cache)
+	            {
+	                if (e.provider == file)
+	                {
+	                    ClearEntry(e);
+	                    Unlink(e);
+	                }
+	            }
+			}
         }
 
         private static void MoveToHead(Slot e)

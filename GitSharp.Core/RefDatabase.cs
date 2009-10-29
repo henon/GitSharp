@@ -78,15 +78,17 @@ namespace GitSharp.Core
 		public int LastRefModification { get; private set; }
 		public int LastNotifiedRefModification { get; set; }
 
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void ClearCache()
 		{
-			_looseRefs = new Dictionary<string, Ref>();
-			_looseRefsMTime = new Dictionary<string, DateTime>();
-			_looseSymRefs = new Dictionary<string, string>();
-			_packedRefs = new Dictionary<string, Ref>();
-			_packedRefsLastModified = DateTime.MinValue;
-			_packedRefsLength = 0;
+			lock(locker)
+			{
+				_looseRefs = new Dictionary<string, Ref>();
+				_looseRefsMTime = new Dictionary<string, DateTime>();
+				_looseSymRefs = new Dictionary<string, string>();
+				_packedRefs = new Dictionary<string, Ref>();
+				_packedRefsLastModified = DateTime.MinValue;
+				_packedRefsLength = 0;
+			}
 		}
 
 		public void Create()
@@ -124,7 +126,6 @@ namespace GitSharp.Core
 			return new RefUpdate(this, r, FileForRef(r.Name));
 		}
 
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		internal void Stored(string origName, string name, ObjectId id, DateTime time)
 		{
 			lock (locker)
@@ -159,13 +160,15 @@ namespace GitSharp.Core
 		/// </summary>
 		/// <param name="name">symref name</param>
 		/// <param name="target">pointed to ref</param>
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void Link(string name, string target)
 		{
-			byte[] content = Constants.encode("ref: " + target + "\n");
-			LockAndWriteFile(FileForRef(name), content);
-			UncacheSymRef(name);
-			Repository.fireRefsMaybeChanged();
+			lock(locker)
+			{
+				byte[] content = Constants.encode("ref: " + target + "\n");
+				LockAndWriteFile(FileForRef(name), content);
+				UncacheSymRef(name);
+				Repository.fireRefsMaybeChanged();
+			}
 		}
 
 		private void UncacheSymRef(string name)
@@ -252,13 +255,15 @@ namespace GitSharp.Core
 			return avail;
 		}
 
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		private void ReadPackedRefs(ICollection<KeyValuePair<string, Ref>> avail)
 		{
-			RefreshPackedRefs();
-			foreach (KeyValuePair<string, Ref> kv in _packedRefs)
+			lock(locker)
 			{
-				avail.Add(kv);
+				RefreshPackedRefs();
+				foreach (KeyValuePair<string, Ref> kv in _packedRefs)
+				{
+					avail.Add(kv);
+				}
 			}
 		}
 
@@ -467,72 +472,74 @@ namespace GitSharp.Core
 			return @ref;
 		}
 
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		private void RefreshPackedRefs()
 		{
-			_packedRefsFile.Refresh();
-			if (!_packedRefsFile.Exists) return;
-
-			DateTime currTime = _packedRefsFile.LastWriteTime;
-			long currLen = currTime == DateTime.MinValue ? 0 : _packedRefsFile.Length;
-			if (currTime == _packedRefsLastModified && currLen == _packedRefsLength) return;
-
-			if (currTime == DateTime.MinValue)
+			lock(locker)
 			{
-				_packedRefsLastModified = DateTime.MinValue;
-				_packedRefsLength = 0;
-				_packedRefs = new Dictionary<string, Ref>();
-				return;
-			}
-
-			var newPackedRefs = new Dictionary<string, Ref>();
-			try
-			{
-				using (var b = OpenReader(_packedRefsFile))
+				_packedRefsFile.Refresh();
+				if (!_packedRefsFile.Exists) return;
+	
+				DateTime currTime = _packedRefsFile.LastWriteTime;
+				long currLen = currTime == DateTime.MinValue ? 0 : _packedRefsFile.Length;
+				if (currTime == _packedRefsLastModified && currLen == _packedRefsLength) return;
+	
+				if (currTime == DateTime.MinValue)
 				{
-					string p;
-					Ref last = null;
-					while ((p = b.ReadLine()) != null)
-					{
-						if (p[0] == '#') continue;
-
-						if (p[0] == '^')
-						{
-							if (last == null)
-							{
-								throw new IOException("Peeled line before ref.");
-							}
-
-							ObjectId id = ObjectId.FromString(p.Substring(1));
-							last = new Ref(Ref.Storage.Packed, last.Name, last.Name, last.ObjectId, id, true);
-							newPackedRefs.put(last.Name,  last); 
-							continue;
-						}
-
-						int sp = p.IndexOf(' ');
-						ObjectId id2 = ObjectId.FromString(p.Slice(0, sp));
-						string name = p.Substring(sp + 1);
-						last = new Ref(Ref.Storage.Packed, name, name, id2);
-						newPackedRefs.Add(last.Name, last);
-					}
+					_packedRefsLastModified = DateTime.MinValue;
+					_packedRefsLength = 0;
+					_packedRefs = new Dictionary<string, Ref>();
+					return;
 				}
-
-				_packedRefsLastModified = currTime;
-				_packedRefsLength = currLen;
-				_packedRefs = newPackedRefs;
-				SetModified();
-			}
-			catch (FileNotFoundException)
-			{
-				// Ignore it and leave the new map empty.
-				//
-				_packedRefsLastModified = DateTime.MinValue;
-				_packedRefsLength = 0;
-				_packedRefs = newPackedRefs;
-			}
-			catch (IOException e)
-			{
-				throw new GitException("Cannot read packed refs", e);
+	
+				var newPackedRefs = new Dictionary<string, Ref>();
+				try
+				{
+					using (var b = OpenReader(_packedRefsFile))
+					{
+						string p;
+						Ref last = null;
+						while ((p = b.ReadLine()) != null)
+						{
+							if (p[0] == '#') continue;
+	
+							if (p[0] == '^')
+							{
+								if (last == null)
+								{
+									throw new IOException("Peeled line before ref.");
+								}
+	
+								ObjectId id = ObjectId.FromString(p.Substring(1));
+								last = new Ref(Ref.Storage.Packed, last.Name, last.Name, last.ObjectId, id, true);
+								newPackedRefs.put(last.Name,  last); 
+								continue;
+							}
+	
+							int sp = p.IndexOf(' ');
+							ObjectId id2 = ObjectId.FromString(p.Slice(0, sp));
+							string name = p.Substring(sp + 1);
+							last = new Ref(Ref.Storage.Packed, name, name, id2);
+							newPackedRefs.Add(last.Name, last);
+						}
+					}
+	
+					_packedRefsLastModified = currTime;
+					_packedRefsLength = currLen;
+					_packedRefs = newPackedRefs;
+					SetModified();
+				}
+				catch (FileNotFoundException)
+				{
+					// Ignore it and leave the new map empty.
+					//
+					_packedRefsLastModified = DateTime.MinValue;
+					_packedRefsLength = 0;
+					_packedRefs = newPackedRefs;
+				}
+				catch (IOException e)
+				{
+					throw new GitException("Cannot read packed refs", e);
+				}
 			}
 		}
 
@@ -559,11 +566,13 @@ namespace GitSharp.Core
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public void RemovePackedRef(String name)
 		{
-			_packedRefs.Remove(name);
-			WritePackedRefs();
+			lock(locker)
+			{
+				_packedRefs.Remove(name);
+				WritePackedRefs();
+			}
 		}
 
 		private void WritePackedRefs()

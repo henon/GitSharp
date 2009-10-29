@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
@@ -51,6 +51,7 @@ namespace GitSharp.Core.Transport
     public class OpenSshConfig
     {
         public const int SSH_PORT = 22;
+		private Object locker = new Object();
 
         public static OpenSshConfig get()
         {
@@ -106,35 +107,37 @@ namespace GitSharp.Core.Transport
             return h;
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         private Dictionary<string, Host> refresh()
         {
-            long mtime = configFile.LastWriteTime.ToBinary();
-            if (mtime != lastModified)
-            {
-                try
-                {
-                    FileStream s = new FileStream(configFile.FullName, System.IO.FileMode.Open, FileAccess.Read);
-                    try
-                    {
-                        hosts = parse(s);
-                    }
-                    finally
-                    {
-                        s.Close();
-                    }
-                }
-                catch (FileNotFoundException)
-                {
-                    hosts = new Dictionary<string, Host>();
-                }
-                catch (IOException)
-                {
-                    hosts = new Dictionary<string, Host>();
-                }
-                lastModified = mtime;
-            }
-            return hosts;
+			lock(locker)
+			{
+	            long mtime = configFile.LastWriteTime.ToBinary();
+	            if (mtime != lastModified)
+	            {
+	                try
+	                {
+	                    FileStream s = new FileStream(configFile.FullName, System.IO.FileMode.Open, FileAccess.Read);
+	                    try
+	                    {
+	                        hosts = parse(s);
+	                    }
+	                    finally
+	                    {
+	                        s.Close();
+	                    }
+	                }
+	                catch (FileNotFoundException)
+	                {
+	                    hosts = new Dictionary<string, Host>();
+	                }
+	                catch (IOException)
+	                {
+	                    hosts = new Dictionary<string, Host>();
+	                }
+	                lastModified = mtime;
+	            }
+	            return hosts;
+			}
         }
 
         private Dictionary<string, Host> parse(Stream stream)

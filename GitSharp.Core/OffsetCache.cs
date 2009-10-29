@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  * Copyrigth (C) 2009, Henon <meinrad.recheis@gmail.com>
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
@@ -588,6 +588,7 @@ namespace GitSharp.Core
 		internal class Ref<T> : WeakReference
 		{
 			private readonly Queue _queue;	
+			private Object locker = new Object();
 
 			public Ref(PackFile pack, long position, T v, Queue queue)
 				: base(v)
@@ -609,13 +610,15 @@ namespace GitSharp.Core
 				return true;
 			}
 
-			[MethodImpl(MethodImplOptions.Synchronized)]
 			public bool canClear()
 			{
-				if (cleared)
-                    return false;
-				cleared = true;
-				return true;
+				lock(locker)
+				{
+					if (cleared)
+	                    return false;
+					cleared = true;
+					return true;
+				}
 			}
 
 			public T get()

@@ -72,5 +72,49 @@ namespace GitSharp.Tests.API
                 Assert.IsTrue(core_repo is GitSharp.Core.Repository);
             }
         }
+
+        [Test]
+        public void RepositoryStatusTracksAddedFiles()
+        {
+            //setup of .git directory
+            var resource =
+                new DirectoryInfo(Path.Combine(Path.Combine(Environment.CurrentDirectory, "Resources"),
+                                               "CorruptIndex"));
+            var tempRepository =
+                new DirectoryInfo(Path.Combine(trash.FullName, "CorruptIndex" + Path.GetRandomFileName()));
+            CopyDirectory(resource.FullName, tempRepository.FullName);
+
+            var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, ".git"));
+            Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
+
+            using (var repository = new Repository(repositoryPath.FullName))
+            {
+                var status = repository.Status;
+
+                Assert.IsTrue(status.AnyDifferences);
+                Assert.AreEqual(1, status.Added.Count);
+                Assert.IsTrue(status.Added.Contains("b.txt")); // the file already exists in the index (eg. has been previously git added)
+                Assert.AreEqual(0, status.Changed.Count);
+                Assert.AreEqual(0, status.Missing.Count);
+                Assert.AreEqual(0, status.Modified.Count);
+                Assert.AreEqual(0, status.Removed.Count);
+
+                string filepath = Path.Combine(repository.WorkingDirectory, "c.txt");
+                writeTrashFile(filepath, "c");
+                repository.Index.Add(filepath);
+
+                status = repository.Status;
+
+                Assert.IsTrue(status.AnyDifferences);
+                Assert.AreEqual(2, status.Added.Count);
+                Assert.IsTrue(status.Added.Contains("b.txt"));
+                Assert.IsTrue(status.Added.Contains("c.txt"));
+                Assert.AreEqual(0, status.Changed.Count);
+                Assert.AreEqual(0, status.Missing.Count);
+                Assert.AreEqual(0, status.Modified.Count);
+                Assert.AreEqual(0, status.Removed.Count);
+
+            }
+        }
     }
 }

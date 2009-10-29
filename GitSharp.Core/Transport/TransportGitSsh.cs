@@ -345,9 +345,10 @@ namespace GitSharp.Core.Transport
 
 		#endregion
 		
-		public void Dispose ()
+		public override void Dispose ()
 		{
 			_errStream.Dispose();
+			base.Dispose();
 		}
 		
 	}

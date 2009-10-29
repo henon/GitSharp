@@ -570,7 +570,8 @@ namespace GitSharp.Core
 										oref = MapObject(refId, null);
 									}
 
-									if (!(oref is Commit))
+									Commit oCom = (oref as Commit);
+									if (oCom == null)
 									{
 										throw new IncorrectObjectTypeException(refId, ObjectType.Commit);
 									}
@@ -594,7 +595,7 @@ namespace GitSharp.Core
                                     }
 									if (pnum != 0)
 									{
-									    ObjectId[] parents = ((Commit)oref).ParentIds;
+									    ObjectId[] parents = oCom.ParentIds;
 									    if (pnum > parents.Length) 
                                             refId = null;
 									    else 
@@ -626,9 +627,10 @@ namespace GitSharp.Core
 												refId = t.Id;
 												oref = MapObject(refId, null);
 											}
-											if (oref is Treeish)
+											Treeish oTree = (oref as Treeish);
+											if (oTree != null)
 											{
-												refId = ((Treeish)oref).TreeId;
+												refId = oTree.TreeId;
 											}
 											else
 											{
@@ -686,9 +688,10 @@ namespace GitSharp.Core
 
 								default:
 									oref = MapObject(refId, null);
-									if (oref is Commit)
+									Commit oComm = (oref as Commit);
+									if (oComm != null)
 									{
-										ObjectId[] parents = ((Commit)oref).ParentIds;
+										ObjectId[] parents = oComm.ParentIds;
 										refId = parents.Length == 0 ? null : parents[0];
 									}
 									else
@@ -708,9 +711,10 @@ namespace GitSharp.Core
 								oref = MapObject(refId, null);
 							}
 
-							if (oref is Commit)
+							Commit oCom = (oref as Commit);
+							if (oCom != null)
 							{
-								ObjectId[] parents = ((Commit)oref).ParentIds;
+								ObjectId[] parents = oCom.ParentIds;
 								refId = parents.Length == 0 ? null : parents[0];
 							}
 							else

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyrigth (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -43,6 +43,7 @@ namespace GitSharp.Core.Util
 		where T : IConvertible
 	{
 		private T _value;
+		private Object locker = new Object();
 
 		public AtomicValue(T init)
 		{
@@ -51,7 +52,7 @@ namespace GitSharp.Core.Util
 
 		public bool compareAndSet(T expect, T update)
 		{
-			lock (this)
+			lock (locker)
 			{
 				if (_value.Equals(expect))
 				{

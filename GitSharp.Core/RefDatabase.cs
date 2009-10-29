@@ -62,6 +62,8 @@ namespace GitSharp.Core
 		private DateTime _packedRefsLastModified;
 		private long _packedRefsLength;
 		private int _refModificationCounter;
+		
+		private Object locker = new Object();
 
 		public RefDatabase(Repository repo)
 		{
@@ -125,7 +127,7 @@ namespace GitSharp.Core
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		internal void Stored(string origName, string name, ObjectId id, DateTime time)
 		{
-			lock (this)
+			lock (locker)
 			{
 				_looseRefs[name] = new Ref(Ref.Storage.Loose, origName, name, id);
 				_looseRefsMTime[name] = time;
@@ -168,7 +170,7 @@ namespace GitSharp.Core
 
 		private void UncacheSymRef(string name)
 		{
-			lock (this)
+			lock (locker)
 			{
 				_looseSymRefs.Remove(name);
 				SetModified();

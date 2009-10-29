@@ -77,6 +77,8 @@ namespace GitSharp.Core
 		private byte[] _packChecksum;
 		private PackIndex _loadedIdx;
 		private PackReverseIndex _reverseIdx;
+		
+		private Object locker = new Object();
 
 		/// <summary>
 		/// Construct a Reader for an existing, pre-indexed packfile.
@@ -101,7 +103,7 @@ namespace GitSharp.Core
 
 		private PackIndex LoadPackIndex()
 		{
-			lock (this)
+			lock (locker)
 			{
 				if (_loadedIdx == null)
 				{
@@ -194,7 +196,7 @@ namespace GitSharp.Core
 			UnpackedObjectCache.purge(this);
 			WindowCache.Purge(this);
 
-			lock (this)
+			lock (locker)
 			{
 				_loadedIdx = null;
 				_reverseIdx = null;
@@ -349,7 +351,7 @@ namespace GitSharp.Core
 
 		public void beginCopyRawData()
 		{
-			lock (this)
+			lock (locker)
 			{
 				if (++_activeCopyRawData == 1 && _activeWindows == 0)
 				{
@@ -360,7 +362,7 @@ namespace GitSharp.Core
 
 		public void endCopyRawData()
 		{
-			lock (this)
+			lock (locker)
 			{
 				if (--_activeCopyRawData == 0 && _activeWindows == 0)
 				{
@@ -371,7 +373,7 @@ namespace GitSharp.Core
 
 		public bool beginWindowCache()
 		{
-			lock (this)
+			lock (locker)
 			{
 				if (++_activeWindows == 1)
 				{
@@ -389,7 +391,7 @@ namespace GitSharp.Core
 
 		public bool endWindowCache()
 		{
-			lock (this)
+			lock (locker)
 			{
 				bool r = --_activeWindows == 0;
 
@@ -591,7 +593,7 @@ namespace GitSharp.Core
 
 		private PackReverseIndex GetReverseIdx()
 		{
-			lock (this)
+			lock (locker)
 			{
 				if (_reverseIdx == null)
 				{

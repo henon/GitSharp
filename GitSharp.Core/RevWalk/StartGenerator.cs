@@ -110,13 +110,9 @@ namespace GitSharp.Core.RevWalk
 				boundary = false;
 			}
 
-			DateRevQueue pending;
+			DateRevQueue pending = (q as DateRevQueue);
 			GeneratorOutputType pendingOutputType = 0;
-			if (q is DateRevQueue)
-			{
-				pending = (DateRevQueue)q;
-			}
-			else
+			if (pending == null)
 			{
 				pending = new DateRevQueue(q);
 			}

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
@@ -244,10 +244,10 @@ namespace GitSharp.Core.Transport
 
         public override bool Equals(object obj)
         {
-            if (!(obj is RefSpec))
+			RefSpec b = (obj as RefSpec);
+            if (b == null)
                 return false;
 
-            RefSpec b = (RefSpec)obj;
             if (Force != b.Force) return false;
             if (Wildcard != b.Wildcard) return false;
             if (!eq(Source, b.Source)) return false;

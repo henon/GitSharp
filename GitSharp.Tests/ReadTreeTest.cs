@@ -82,9 +82,9 @@ namespace GitSharp.Tests
         */
 
         // Fields
-        private Tree _theHead;
+        private Core.Tree _theHead;
         private GitIndex _theIndex;
-        private Tree _theMerge;
+        private Core.Tree _theMerge;
         private WorkDirCheckout _theReadTree;
 
         // Methods
@@ -128,9 +128,9 @@ namespace GitSharp.Tests
             return index;
         }
 
-        private Tree BuildTree(Dictionary<string, string> headEntries)
+        private Core.Tree BuildTree(Dictionary<string, string> headEntries)
         {
-            var tree = new Tree(db);
+            var tree = new Core.Tree(db);
             if (headEntries != null)
             {
                 foreach (var pair in headEntries)
@@ -436,12 +436,12 @@ namespace GitSharp.Tests
         {
             _theIndex = new GitIndex(db);
             _theIndex.add(trash, writeTrashFile("DF", "DF"));
-            Tree head = db.MapTree(_theIndex.writeTree());
+            Core.Tree head = db.MapTree(_theIndex.writeTree());
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "DF")));
 
             _theIndex = new GitIndex(db);
             _theIndex.add(trash, writeTrashFile("DF/DF", "DF/DF"));
-            Tree merge = db.MapTree(_theIndex.writeTree());
+            Core.Tree merge = db.MapTree(_theIndex.writeTree());
             _theIndex = new GitIndex(db);
             recursiveDelete(new DirectoryInfo(Path.Combine(trash.FullName, "DF")));
 
@@ -464,11 +464,11 @@ namespace GitSharp.Tests
         public void testRules1thru3_NoIndexEntry()
         {
             var index = new GitIndex(db);
-            var head = new Tree(db);
+            var head = new Core.Tree(db);
             FileTreeEntry entry = head.AddFile("foo");
             ObjectId expected = ObjectId.FromString("ba78e065e2c261d4f7b8f42107588051e87e18e9");
             entry.Id = expected;
-            var merge = new Tree(db);
+            var merge = new Core.Tree(db);
             var checkout = new WorkDirCheckout(db, trash, head, index, merge);
             checkout.PrescanTwoTrees();
             Assert.IsTrue(checkout.Removed.Contains("foo"));

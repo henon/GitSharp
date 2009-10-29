@@ -1,1 +1,0 @@
-tools\nant\NAnt.exe /t:net-3.5

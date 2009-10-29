@@ -50,10 +50,10 @@ using GitSharp.Core;
 namespace GitSharp.Core.Util
 {
 
-    /** Abstraction to support various file system operations not in Java. */
+    /* Abstraction to support various file system operations not in Java. */
     public static class FS
     {
-        /** The implementation selected for this operating system and JRE. */
+        /* The implementation selected for this operating system and JRE. */
         //public static FS INSTANCE = new FS_Win32;
 
         //static {

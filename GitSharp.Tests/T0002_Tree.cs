@@ -67,7 +67,7 @@ namespace GitSharp.Tests
 				b = b.Slice(0, b.Length - 1);
 			}
 			byte[] bbytes = b.getBytes("ISO-8859-1");
-			return Tree.CompareNames(abytes, bbytes, lasta, lastb);
+            return Core.Tree.CompareNames(abytes, bbytes, lasta, lastb);
 		}
 
 		[Test]
@@ -111,7 +111,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void test001_createEmpty()
 		{
-			var t = new Tree(db);
+            var t = new Core.Tree(db);
 			Assert.IsTrue(t.IsLoaded);
 			Assert.IsTrue(t.IsModified);
 			Assert.IsTrue(t.Parent == null);
@@ -131,7 +131,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void test002_addFile()
 		{
-			var t = new Tree(db) { Id = SomeFakeId };
+            var t = new Core.Tree(db) { Id = SomeFakeId };
 			Assert.IsTrue(t.Id != null);
 			Assert.IsFalse(t.IsModified);
 
@@ -156,12 +156,12 @@ namespace GitSharp.Tests
 		[Test]
 		public void test004_addTree()
 		{
-			var t = new Tree(db) {Id = SomeFakeId};
+            var t = new Core.Tree(db) { Id = SomeFakeId };
 			Assert.IsTrue(t.Id != null);
 			Assert.IsFalse(t.IsModified);
 
 			const string n = "bob";
-			Tree f = t.AddTree(n);
+            Core.Tree f = t.AddTree(n);
 			Assert.IsNotNull(f);
 			Assert.AreEqual(n, f.Name);
             Assert.AreEqual(f.Name, Constants.CHARSET.GetString(f.NameUTF8));
@@ -186,7 +186,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void test005_addRecursiveFile()
 		{
-			var t = new Tree(db);
+            var t = new Core.Tree(db);
 			FileTreeEntry f = t.AddFile("a/b/c");
 			Assert.IsNotNull(f);
 			Assert.AreEqual(f.Name, "c");
@@ -198,8 +198,8 @@ namespace GitSharp.Tests
 		[Test]
 		public void test005_addRecursiveTree()
 		{
-			var t = new Tree(db);
-			Tree f = t.AddTree("a/b/c");
+            var t = new Core.Tree(db);
+            Core.Tree f = t.AddTree("a/b/c");
 			Assert.IsNotNull(f);
 			Assert.AreEqual(f.Name, "c");
 			Assert.AreEqual(f.Parent.Name, "b");
@@ -210,18 +210,18 @@ namespace GitSharp.Tests
 		[Test]
 		public void test006_addDeepTree()
 		{
-			var t = new Tree(db);
+            var t = new Core.Tree(db);
 
-			Tree e = t.AddTree("e");
+            Core.Tree e = t.AddTree("e");
 			Assert.IsNotNull(e);
 			Assert.IsTrue(e.Parent == t);
-			Tree f = t.AddTree("f");
+            Core.Tree f = t.AddTree("f");
 			Assert.IsNotNull(f);
 			Assert.IsTrue(f.Parent == t);
-			Tree g = f.AddTree("g");
+            Core.Tree g = f.AddTree("g");
 			Assert.IsNotNull(g);
 			Assert.IsTrue(g.Parent == f);
-			Tree h = g.AddTree("h");
+            Core.Tree h = g.AddTree("h");
 			Assert.IsNotNull(h);
 			Assert.IsTrue(h.Parent == g);
 
@@ -261,7 +261,7 @@ namespace GitSharp.Tests
 		[Test]
 		public void test007_manyFileLookup()
 		{
-			var t = new Tree(db);
+            var t = new Core.Tree(db);
 			var files = new List<FileTreeEntry>(26 * 26);
 			for (char level1 = 'a'; level1 <= 'z'; level1++)
 			{
@@ -287,11 +287,11 @@ namespace GitSharp.Tests
 		[Test]
 		public void test008_SubtreeInternalSorting()
 		{
-			var t = new Tree(db);
+            var t = new Core.Tree(db);
 			FileTreeEntry e0 = t.AddFile("a-b");
 			FileTreeEntry e1 = t.AddFile("a-");
 			FileTreeEntry e2 = t.AddFile("a=b");
-			Tree e3 = t.AddTree("a");
+            Core.Tree e3 = t.AddTree("a");
 			FileTreeEntry e4 = t.AddFile("a=");
 
 			TreeEntry[] ents = t.Members;
@@ -305,9 +305,9 @@ namespace GitSharp.Tests
         [Test]
 	    public void test009_SymlinkAndGitlink()
 	    {
-	        Tree symlinkTree = db.MapTree("symlink");
+            Core.Tree symlinkTree = db.MapTree("symlink");
 	        Assert.IsTrue(symlinkTree.ExistsBlob("symlink.txt"), "Symlink entry exists");
-	        Tree gitlinkTree = db.MapTree("gitlink");
+            Core.Tree gitlinkTree = db.MapTree("gitlink");
 	        Assert.IsTrue(gitlinkTree.ExistsBlob("submodule"), "Gitlink entry exists");
 	    }
 	}

@@ -126,16 +126,18 @@ namespace GitSharp.Core.RevWalk
 		/// </exception>
         public void markStart(RevObject o)
         {
-            while (o is RevTag)
+			RevTag  oTag = ( o  as RevTag);
+            while (oTag != null)
             {
                 AddObject(o);
-                o = ((RevTag)o).getObject();
+                o = oTag.getObject();
 				parseHeaders(o);
             }
 
-            if (o is RevCommit)
+			RevCommit oComm = (o as RevCommit);
+            if (oComm != null)
             {
-            	base.markStart((RevCommit)o);
+            	base.markStart(oComm);
             }
             else
             {
@@ -185,20 +187,22 @@ namespace GitSharp.Core.RevWalk
 		/// </exception>
         public void markUninteresting(RevObject o)
         {
-            while (o is RevTag)
+			RevTag  oTag = ( o  as RevTag);
+            while (oTag != null)
             {
                 o.Flags |= UNINTERESTING;
                 if (hasRevSort(RevSort.BOUNDARY))
                 {
                 	AddObject(o);
                 }
-                o = ((RevTag)o).getObject();
+                o = oTag.getObject();
 				parseHeaders(o);
             }
 
-            if (o is RevCommit)
+			RevCommit oComm = (o as RevCommit);
+            if (oComm != null)
             {
-            	base.markUninteresting((RevCommit)o);
+            	base.markUninteresting(oComm);
             }
             else if (o is RevTree)
             {
@@ -321,9 +325,10 @@ namespace GitSharp.Core.RevWalk
 				obj.Flags |= SEEN;
                 if (ShouldSkipObject(obj)) continue;
                 
-				if (obj is RevTree)
+				RevTree oTree = (obj as RevTree);
+				if (oTree != null)
                 {
-                    _currentTree = (RevTree)obj;
+                    _currentTree = oTree;
                     _treeWalk = _treeWalk.resetRoot(Repository, _currentTree, WindowCursor);
                 }
 

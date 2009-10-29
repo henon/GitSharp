@@ -269,13 +269,14 @@ namespace GitSharp.Core.TreeWalk
 				{
 					iterator = iterator.Parent;
 				}
-
-				if (iterator is CanonicalTreeParser)
+				
+				CanonicalTreeParser oParse = (iterator as CanonicalTreeParser);
+				if (oParse != null)
 				{
 					iterator.Matches = null;
 					iterator.MatchShift = 0;
 
-					((CanonicalTreeParser)iterator).reset(_db, id, _cursor);
+					oParse.reset(_db, id, _cursor);
 					_trees[0] = iterator;
 				}
 				else
@@ -327,11 +328,12 @@ namespace GitSharp.Core.TreeWalk
 						iterator = iterator.Parent;
 					}
 
-					if (iterator is CanonicalTreeParser && iterator.PathOffset == 0)
+					CanonicalTreeParser oParse = (iterator as CanonicalTreeParser);
+					if (oParse != null && iterator.PathOffset == 0)
 					{
 						iterator.Matches = null;
 						iterator.MatchShift = 0;
-						((CanonicalTreeParser)iterator).reset(_db, ids[i], _cursor);
+						oParse.reset(_db, ids[i], _cursor);
 						r[i] = iterator;
 						continue;
 					}

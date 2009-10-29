@@ -77,8 +77,8 @@ namespace GitSharp.Core
 		/// Compute the SHA-1 of a blob without creating an object. This is for
 		///	figuring out if we already have a blob or not.
 		///	</summary>
-		///	<param name="len"> number of bytes to consume.</param>
-		///	<param name="inputStream"> stream for read blob data from.</param>
+		///	<param name="length"> number of bytes to consume.</param>
+		///	<param name="input"> stream for read blob data from.</param>
 		///	<returns>SHA-1 of a looked for blob.</returns>
 		///	<exception cref="IOException"></exception>
         public ObjectId ComputeBlobSha1(long length, Stream input)
@@ -115,7 +115,7 @@ namespace GitSharp.Core
 		/// Write a blob with data from a stream
 		///	</summary>
 		///	<param name="len">Number of bytes to consume from the stream.</param>
-		///	<param name="inputStream">Stream with blob data.</param>
+		///	<param name="input">Stream with blob data.</param>
 		///	<returns>SHA-1 of the blob.</returns>
 		///	<exception cref="IOException"></exception>
         public ObjectId WriteBlob(long len, Stream input)
@@ -126,7 +126,7 @@ namespace GitSharp.Core
 		///	<summary>
 		/// Write a canonical tree to the object database.
 		/// </summary>
-		/// <param name="b">The canonical encoding of the tree object.</param>
+		/// <param name="buffer">The canonical encoding of the tree object.</param>
 		///	<returns>SHA-1 of the tree.</returns>
 		///	<exception cref="IOException"></exception>
         public ObjectId WriteCanonicalTree(byte[] buffer)

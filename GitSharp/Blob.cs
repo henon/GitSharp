@@ -47,7 +47,7 @@ using CoreTree = GitSharp.Core.Tree;
 using CoreTag = GitSharp.Core.Tag;
 using System.IO;
 
-namespace Git
+namespace GitSharp
 {
     /// <summary>
     /// Represents a specific version of the content of a file tracked by git.
@@ -122,6 +122,7 @@ namespace Git
         /// </summary>
         /// <param name="repo"></param>
         /// <param name="content"></param>
+        /// <param name="encoding"></param>
         /// <returns></returns>
         public static Blob Create(Repository repo, string content, Encoding encoding)
         {
@@ -132,7 +133,7 @@ namespace Git
         /// Create a new Blob containing the contents of the given file.
         /// </summary>
         /// <param name="repo"></param>
-        /// <param name="content"></param>
+        /// <param name="path"></param>
         /// <returns></returns>
         public static Blob CreateFromFile(Repository repo, string path)
         {

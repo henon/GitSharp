@@ -46,7 +46,7 @@ using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
 using FileTreeEntry = GitSharp.Core.FileTreeEntry;
 
-namespace Git
+namespace GitSharp
 {
 
     /// <summary>

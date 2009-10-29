@@ -59,7 +59,7 @@ namespace GitSharp.Core.Transport
 	/// Transport instances and the connections they Create are not thread-safe.
 	/// Callers must ensure a transport is accessed by only one thread at a time.
 	/// </summary>
-	public abstract class Transport
+	public abstract class Transport : IDisposable
 	{
 		#region Enums
 
@@ -382,5 +382,9 @@ namespace GitSharp.Core.Transport
 			}
 			return result;
 		}
+	    public virtual void Dispose()
+	    {
+	        close();
+	    }
 	}
 }

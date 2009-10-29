@@ -72,7 +72,7 @@ namespace GitSharp.Core
 	/// <para />
 	/// This implementation only handles a subtly undocumented subset of git features.
 	/// </summary>
-	public class Repository
+	public class Repository : IDisposable
 	{
         private int _useCnt = 1;
 		internal readonly RefDatabase _refDb; // [henon] need internal for API
@@ -1243,7 +1243,12 @@ namespace GitSharp.Core
 			return "Repository[" + Directory + "]";
 		}
 
-		public string FullBranch
+	    public void Dispose()
+	    {
+	        Close();
+        }
+
+	    public string FullBranch
 		{
 			get
 			{

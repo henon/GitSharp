@@ -36,35 +36,32 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
-
 using System.IO;
 
-namespace Git.Tests
+namespace GitSharp.Tests.API
 {
     [TestFixture]
-    public class CloneTests : GitSharp.Tests.RepositoryTestCase
+    public class CloneTests : RepositoryTestCase
     {
         [Test]
-		public void Check_cloned_bare_repo()        {
-        	Assert.Ignore("This test has not been implemented yet.");
+        public void Check_cloned_bare_repo()        {
+            Assert.Ignore("This test has not been implemented yet.");
         }
         
         [Test]
         public void Check_cloned_repo()
         {
-           string toPath = Path.Combine(trash.FullName, "test");
-           string fromUrl = "git://github.com/henon/test.git";
-           var repo=Git.Commands.Clone(fromUrl, toPath);
-           Assert.IsTrue(Repository.IsValid(repo.Directory));
-           //Verify content is in the proper location
-           var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
-           Assert.IsTrue(new FileInfo(readme).Exists);
+            string toPath = Path.Combine(trash.FullName, "test");
+            string fromUrl = "git://github.com/henon/test.git";
+            
+            using (Repository repo = Commands.Clone(fromUrl, toPath))
+            {
+                Assert.IsTrue(Repository.IsValid(repo.Directory));
+                //Verify content is in the proper location
+                var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
+                Assert.IsTrue(new FileInfo(readme).Exists);
+            }
         }
-           
-        }
+    }
 }

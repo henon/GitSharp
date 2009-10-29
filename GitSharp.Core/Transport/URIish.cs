@@ -277,9 +277,9 @@ namespace GitSharp.Core.Transport
 
 		public override bool Equals(object obj)
 		{
-			if (!(obj is URIish)) return false;
+			URIish b = (obj as URIish);
+			if (b == null) return false;
 
-			var b = (URIish)obj;
 			if (!Eq(Scheme, b.Scheme)) return false;
 			if (!Eq(User, b.User)) return false;
 			if (!Eq(Pass, b.Pass)) return false;

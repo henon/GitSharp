@@ -50,7 +50,7 @@ using GitSharp.Core.TreeWalk;
 using GitSharp.Core.TreeWalk.Filter;
 using System.Diagnostics;
 
-namespace Git
+namespace GitSharp
 {
     /// <summary>
     /// Represents a revision of the content tracked in the repository.

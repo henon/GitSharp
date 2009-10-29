@@ -53,7 +53,7 @@ namespace GitSharp.Tests
         [Test]
         public void test001_ReadBareKey()
         {
-            Config c = parse("[foo]\nbar\n");
+            Core.Config c = parse("[foo]\nbar\n");
             Assert.AreEqual(true, c.getBoolean("foo", null, "bar", false));
             Assert.AreEqual(string.Empty, c.getString("foo", null, "bar"));
         }
@@ -61,7 +61,7 @@ namespace GitSharp.Tests
         [Test]
         public void test002_ReadWithSubsection()
         {
-            Config c = parse("[foo \"zip\"]\nbar\n[foo \"zap\"]\nbar=false\nn=3\n");
+            Core.Config c = parse("[foo \"zip\"]\nbar\n[foo \"zap\"]\nbar=false\nn=3\n");
             Assert.AreEqual(true, c.getBoolean("foo", "zip", "bar", false));
             Assert.AreEqual(string.Empty, c.getString("foo", "zip", "bar"));
             Assert.AreEqual(false, c.getBoolean("foo", "zap", "bar", true));
@@ -73,7 +73,7 @@ namespace GitSharp.Tests
         [Test]
         public void test003_PutRemote()
         {
-            Config c = new Config();
+            Core.Config c = new Core.Config();
             c.setString("sec", "ext", "name", "value");
             c.setString("sec", "ext", "name2", "value2");
             string expText = "[sec \"ext\"]\n\tname = value\n\tname2 = value2\n";
@@ -83,7 +83,7 @@ namespace GitSharp.Tests
         [Test]
         public void test004_PutGetSimple()
         {
-            Config c = new Config();
+            Core.Config c = new Core.Config();
             c.setString("my", null, "somename", "false");
             Assert.AreEqual("false", c.getString("my", null, "somename"));
             Assert.AreEqual("[my]\n\tsomename = false\n", c.toText());
@@ -92,7 +92,7 @@ namespace GitSharp.Tests
         [Test]
         public void test005_PutGetStringList()
         {
-            Config c = new Config();
+            Core.Config c = new Core.Config();
             List<string> values = new List<string>();
             values.Add("value1");
             values.Add("value2");
@@ -109,7 +109,7 @@ namespace GitSharp.Tests
         [Test]
         public void test006_readCaseInsensitive()
         {
-            Config c = parse("[Foo]\nBar\n");
+            Core.Config c = parse("[Foo]\nBar\n");
             Assert.AreEqual(true, c.getBoolean("foo", null, "bar", false));
             Assert.AreEqual(string.Empty, c.getString("foo", null, "bar"));
         }
@@ -120,8 +120,8 @@ namespace GitSharp.Tests
             MockSystemReader mockSystemReader = new MockSystemReader();
             SystemReader.setInstance(mockSystemReader);
             string hostname = mockSystemReader.getHostname();
-            Config userGitConfig = mockSystemReader.userGitConfig;
-            Config localConfig = new Config(userGitConfig);
+            Core.Config userGitConfig = mockSystemReader.userGitConfig;
+            Core.Config localConfig = new Core.Config(userGitConfig);
             mockSystemReader.values.Clear();
 
             string authorName;
@@ -179,7 +179,7 @@ namespace GitSharp.Tests
         [Test]
         public void testReadBoolean_TrueFalse1()
         {
-            Config c = parse("[s]\na = true\nb = false\n");
+            Core.Config c = parse("[s]\na = true\nb = false\n");
             Assert.AreEqual("true", c.getString("s", null, "a"));
             Assert.AreEqual("false", c.getString("s", null, "b"));
 
@@ -190,7 +190,7 @@ namespace GitSharp.Tests
         [Test]
         public void testReadBoolean_TrueFalse2()
         {
-            Config c = parse("[s]\na = TrUe\nb = fAlSe\n");
+            Core.Config c = parse("[s]\na = TrUe\nb = fAlSe\n");
             Assert.AreEqual("TrUe", c.getString("s", null, "a"));
             Assert.AreEqual("fAlSe", c.getString("s", null, "b"));
 
@@ -201,7 +201,7 @@ namespace GitSharp.Tests
         [Test]
         public void testReadBoolean_YesNo1()
         {
-            Config c = parse("[s]\na = yes\nb = no\n");
+            Core.Config c = parse("[s]\na = yes\nb = no\n");
             Assert.AreEqual("yes", c.getString("s", null, "a"));
             Assert.AreEqual("no", c.getString("s", null, "b"));
 
@@ -212,7 +212,7 @@ namespace GitSharp.Tests
         [Test]
         public void testReadBoolean_YesNo2()
         {
-            Config c = parse("[s]\na = yEs\nb = NO\n");
+            Core.Config c = parse("[s]\na = yEs\nb = NO\n");
             Assert.AreEqual("yEs", c.getString("s", null, "a"));
             Assert.AreEqual("NO", c.getString("s", null, "b"));
 
@@ -223,7 +223,7 @@ namespace GitSharp.Tests
         [Test]
         public void testReadBoolean_OnOff1()
         {
-            Config c = parse("[s]\na = on\nb = off\n");
+            Core.Config c = parse("[s]\na = on\nb = off\n");
             Assert.AreEqual("on", c.getString("s", null, "a"));
             Assert.AreEqual("off", c.getString("s", null, "b"));
 
@@ -234,7 +234,7 @@ namespace GitSharp.Tests
         [Test]
         public void testReadBoolean_OnOff2()
         {
-            Config c = parse("[s]\na = ON\nb = OFF\n");
+            Core.Config c = parse("[s]\na = ON\nb = OFF\n");
             Assert.AreEqual("ON", c.getString("s", null, "a"));
             Assert.AreEqual("OFF", c.getString("s", null, "b"));
 
@@ -271,13 +271,13 @@ namespace GitSharp.Tests
 
         private void assertReadLong(long exp, string act)
         {
-            Config c = parse("[s]\na = " + act + "\n");
+            Core.Config c = parse("[s]\na = " + act + "\n");
             Assert.AreEqual(exp, c.getLong("s", null, "a", 0L));
         }
 
-        private Config parse(string content)
+        private Core.Config parse(string content)
         {
-            Config c = new Config(null);
+            Core.Config c = new Core.Config(null);
             c.fromText(content);
             return c;
         }

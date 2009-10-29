@@ -241,22 +241,19 @@ namespace GitSharp.Core.Transport
 			o.add(WANT);
 			_wantAll.Add(o);
 
-			if (o is RevCommit)
+			RevTag oTag = (o as RevTag);
+			while ( oTag != null)
 			{
-				_wantCommits.Add((RevCommit)o);
+				o = oTag.getObject();
+				oTag = (o as RevTag);
 			}
-			else if (o is RevTag)
+			
+			RevCommit oComm = (o as RevCommit);
+			if (oComm != null)
 			{
-				do
-				{
-					o = ((RevTag)o).getObject();
-				} while (o is RevTag);
-
-				if (o is RevCommit)
-				{
-					Want(o);
-				}
+				_wantCommits.Add(oComm);
 			}
+			
 		}
 
 		private void Negotiate()
@@ -334,9 +331,10 @@ namespace GitSharp.Core.Transport
 			if (!o.has(PEER_HAS))
 			{
 				o.add(PEER_HAS);
-				if (o is RevCommit)
+				RevCommit oComm = (o as RevCommit);
+				if (oComm != null)
 				{
-					((RevCommit)o).carry(PEER_HAS);
+					oComm.carry(PEER_HAS);
 				}
 				AddCommonBase(o);
 			}
@@ -435,9 +433,9 @@ namespace GitSharp.Core.Transport
 					{
 						continue;
 					}
-					if (o.has(WANT) || !(o is RevTag)) continue;
+					RevTag t = (o as RevTag);
+					if (o.has(WANT) || (t == null)) continue;
 
-					var t = (RevTag)o;
 					if (!pw.willInclude(t) && pw.willInclude(t.getObject()))
 						pw.addObject(t);
 				}

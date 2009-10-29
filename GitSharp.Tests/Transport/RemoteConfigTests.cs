@@ -46,17 +46,17 @@ namespace GitSharp.Tests.Transport
     [TestFixture]
     public class RemoteConfigTests : RepositoryTestCase
     {
-        private Config config;
+        private Core.Config config;
 
         public override void setUp()
         {
             base.setUp();
-            config = new Config();
+            config = new Core.Config();
         }
 
         private void readConfig(string dat)
         {
-            config = new Config();
+            config = new Core.Config();
             config.fromText(dat);
         }
 

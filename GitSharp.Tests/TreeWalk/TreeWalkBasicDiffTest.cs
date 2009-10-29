@@ -57,13 +57,13 @@ namespace GitSharp.Tests.TreeWalk
 			// Create sub-a/empty, sub-c/empty = hello.
 			Func<ObjectId> oldTree = () =>
 			                         	{
-			                         		var root = new Tree(db);
+                                            var root = new Core.Tree(db);
 
-			                         		Tree subA = root.AddTree("sub-a");
+                                            Core.Tree subA = root.AddTree("sub-a");
 			                         		subA.AddFile("empty").Id = aFileId;
 			                         		subA.Id = ow.WriteTree(subA);
 
-			                         		Tree subC = root.AddTree("sub-c");
+                                            Core.Tree subC = root.AddTree("sub-c");
 			                         		subC.AddFile("empty").Id = cFileId1;
 			                         		subC.Id = ow.WriteTree(subC);
 
@@ -73,17 +73,17 @@ namespace GitSharp.Tests.TreeWalk
 			// Create sub-a/empty, sub-b/empty, sub-c/empty.
 			Func<ObjectId> newTree = () =>
 			                         	{
-			                         		var root = new Tree(db);
+                                            var root = new Core.Tree(db);
 
-			                         		Tree subA = root.AddTree("sub-a");
+                                            Core.Tree subA = root.AddTree("sub-a");
 			                         		subA.AddFile("empty").Id = aFileId;
 			                         		subA.Id = ow.WriteTree(subA);
 
-			                         		Tree subB = root.AddTree("sub-b");
+                                            Core.Tree subB = root.AddTree("sub-b");
 			                         		subB.AddFile("empty").Id = bFileId;
 			                         		subB.Id = ow.WriteTree(subB);
 
-			                         		Tree subC = root.AddTree("sub-c");
+                                            Core.Tree subC = root.AddTree("sub-c");
 			                         		subC.AddFile("empty").Id = cFileId2;
 			                         		subC.Id = ow.WriteTree(subC);
 

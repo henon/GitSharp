@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * Copyright (C) 2008, Charles O'Farrell <charleso@charleso.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *

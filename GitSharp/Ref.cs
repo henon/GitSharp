@@ -46,7 +46,7 @@ using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
 using CoreRepository = GitSharp.Core.Repository;
 
-namespace Git
+namespace GitSharp
 {
 
     /// <summary>
@@ -131,9 +131,9 @@ namespace Git
         /// <returns>
         /// Returns true if <paramref name="refName"/> is a valid ref name.
         /// </returns>
-        public static bool IsValidName(string name)
+        public static bool IsValidName(string refName)
         {
-            return CoreRepository.IsValidRefName(name);
+            return CoreRepository.IsValidRefName(refName);
         }
 
         #region Equality overrides

@@ -510,8 +510,8 @@ namespace GitSharp.Core.RevWalk
 		/// Add or remove a sorting strategy for the returned commits.
 		/// <para />
 		/// Multiple strategies can be applied at once, in which case some strategies
-		/// may take precedence over others. As an example, <seealso cref="GitSharp.RevWalk.RevSort.TOPO"/> must
-		/// take precedence over <seealso cref="GitSharp.RevWalk.RevSort.NONE"/>, otherwise it
+		/// may take precedence over others. As an example, <seealso cref="RevSort.TOPO"/> must
+		/// take precedence over <seealso cref="RevSort.NONE"/>, otherwise it
 		/// cannot enforce its ordering.
 		/// </summary>
 		/// <param name="s">A sorting strategy to enable or disable.</param>

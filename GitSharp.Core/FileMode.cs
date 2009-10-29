@@ -58,7 +58,7 @@ namespace GitSharp.Core
         // 57344 ... 0160000
         // 73 ... 0111
 
-        /**
+        /*
          * Mask to apply to a file mode to obtain its type bits.
          *
          * @see #TYPE_TREE

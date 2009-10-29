@@ -35,10 +35,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using Git;
 using NUnit.Framework;
 
-namespace Git.Tests
+namespace GitSharp.Tests.API
 {
     [TestFixture]
     public class ObjectEqualityTests : ApiTestCase
@@ -72,11 +71,13 @@ namespace Git.Tests
         [Test]
         public void DifferentInstancesShouldntBeEqual()
         {
-            var repos = GetTrashRepository();
-            var obj = repos.CurrentBranch.CurrentCommit;
-            var obj2 = repos.CurrentBranch.CurrentCommit.Parent;
+            using (var repos = GetTrashRepository())
+            {
+                var obj = repos.CurrentBranch.CurrentCommit;
+                var obj2 = repos.CurrentBranch.CurrentCommit.Parent;
 
-            Assert.IsTrue(obj != obj2);
+                Assert.IsTrue(obj != obj2);
+            }
         }
     }
 }

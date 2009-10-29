@@ -47,7 +47,7 @@ using CoreTree = GitSharp.Core.Tree;
 using CoreTag = GitSharp.Core.Tag;
 using System.Diagnostics;
 
-namespace Git
+namespace GitSharp
 {
     public abstract class AbstractObject
     {

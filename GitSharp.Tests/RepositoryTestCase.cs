@@ -328,5 +328,31 @@ namespace GitSharp.Tests
         {
             _directoriesToRemove.Any((directoryPath => recursiveDelete(new DirectoryInfo(directoryPath), false, null, false)));
         }
+
+        public static void CopyDirectory(string sourceDirectoryPath, string targetDirectoryPath)
+        {
+            if (!targetDirectoryPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                targetDirectoryPath += Path.DirectorySeparatorChar;
+            }
+
+            if (!Directory.Exists(targetDirectoryPath))
+            {
+                Directory.CreateDirectory(targetDirectoryPath);
+            }
+
+            string[] files = Directory.GetFileSystemEntries(sourceDirectoryPath);
+
+            foreach (string fileSystemElement in files)
+            {
+                if (Directory.Exists(fileSystemElement))
+                {
+                    CopyDirectory(fileSystemElement, targetDirectoryPath + Path.GetFileName(fileSystemElement));
+                    continue;
+                }
+
+                File.Copy(fileSystemElement, targetDirectoryPath + Path.GetFileName(fileSystemElement), true);
+            }
+        }
     }
 }

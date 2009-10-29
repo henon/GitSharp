@@ -50,10 +50,9 @@ namespace GitSharp
     /// <summary>
     /// Represents a git repository
     /// </summary>
-    public class Repository
+    public class Repository : IDisposable
     {
         #region Constructors
-
 
         internal CoreRepository _internal_repo;
 
@@ -333,6 +332,17 @@ namespace GitSharp
         public override string ToString()
         {
             return "Repository[" + Directory + "]";
+        }
+
+
+        public void Close()
+        {
+            _internal_repo.Dispose();
+        }
+
+        public void Dispose()
+        {
+            Close();
         }
 
         #region Repository initialization (git init)

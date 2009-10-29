@@ -71,11 +71,13 @@ namespace GitSharp.Tests.API
         [Test]
         public void DifferentInstancesShouldntBeEqual()
         {
-            var repos = GetTrashRepository();
-            var obj = repos.CurrentBranch.CurrentCommit;
-            var obj2 = repos.CurrentBranch.CurrentCommit.Parent;
+            using (var repos = GetTrashRepository())
+            {
+                var obj = repos.CurrentBranch.CurrentCommit;
+                var obj2 = repos.CurrentBranch.CurrentCommit.Parent;
 
-            Assert.IsTrue(obj != obj2);
+                Assert.IsTrue(obj != obj2);
+            }
         }
     }
 }

@@ -35,12 +35,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using GitSharp.Tests;
 using System.IO;
 
 namespace GitSharp.Tests.API
@@ -52,23 +48,20 @@ namespace GitSharp.Tests.API
         [Test]
         public void WriteBlob() // corresponds to T0003_Basic_Write.Write_Blob
         {
-            var repo = GetTrashRepository(); ;
+            using (var repo = GetTrashRepository())
             {
                 var blob = Blob.CreateFromFile(repo, "Resources/single_file_commit/i-am-a-file");
                 Assert.AreEqual("95ea6a6859af6791464bd8b6de76ad5a6f9fad81", blob.Hash);
                 Assert.AreEqual(File.ReadAllText("Resources/single_file_commit/i-am-a-file"), blob.Data);
                 var same_blob = new Blob(repo, blob.Hash);
                 Assert.AreEqual(File.ReadAllBytes("Resources/single_file_commit/i-am-a-file"), same_blob.RawData);
-            }
-            {
-                var blob = Blob.Create(repo, "and this is the data in me\r\n\r\n");
+
+                blob = Blob.Create(repo, "and this is the data in me\r\n\r\n");
                 Assert.AreEqual("95ea6a6859af6791464bd8b6de76ad5a6f9fad81", blob.Hash);
-            }
-            {
-                var blob = Blob.Create(repo, Encoding.UTF8.GetBytes("and this is the data in me\r\n\r\n"));
+
+                blob = Blob.Create(repo, Encoding.UTF8.GetBytes("and this is the data in me\r\n\r\n"));
                 Assert.AreEqual("95ea6a6859af6791464bd8b6de76ad5a6f9fad81", blob.Hash);
             }
         }
-
     }
 }

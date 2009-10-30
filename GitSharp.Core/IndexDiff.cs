@@ -99,13 +99,6 @@ namespace GitSharp.Core
                           	{
                           		VisitEntry = delegate(TreeEntry treeEntry, GitIndex.Entry indexEntry, FileInfo file)
                           		             	{
-                                                    // untracked
-                                                    if (treeEntry == null && indexEntry == null)
-                                                    {
-                                                        Untracked.Add(file.FullName);
-                                                        return;
-                                                    }
-
                           		             		if (treeEntry == null)
                           		             		{
                           		             			Added.Add(indexEntry.Name);

@@ -344,6 +344,5 @@ namespace GitSharp.Core.Transport
 		}
 
 		#endregion
-
 	}
 }

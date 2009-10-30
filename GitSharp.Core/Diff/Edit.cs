@@ -36,6 +36,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+
 namespace GitSharp.Core.Diff
 {
 	/// <summary>
@@ -57,6 +59,7 @@ namespace GitSharp.Core.Diff
 		/// <summary>
 		/// Type of edit
 		/// </summary>
+		[Serializable]
 		public enum Type
 		{
 			/// <summary>

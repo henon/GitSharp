@@ -56,6 +56,7 @@ namespace GitSharp.Core
 		/// <summary>
 		/// Traversal order
 		/// </summary>
+		[Serializable]
 		public enum Order
 		{
 			/// <summary>

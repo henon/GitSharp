@@ -57,6 +57,7 @@ namespace GitSharp.Core.RevWalk
 		#region Enums
 
 		[Flags]
+		[Serializable]
 		public enum GeneratorOutputType
 		{
 			None = 0,

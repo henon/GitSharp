@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  *
  * All rights reserved.
@@ -43,6 +43,7 @@ namespace GitSharp.Core.Transport
 
     public class RemoteRefUpdate
     {
+		[Serializable]
         public enum UpdateStatus
         {
             NOT_ATTEMPTED,

@@ -177,7 +177,7 @@ namespace GitSharp.Core.RevWalk.Filter
 
 		private class RevFilterAll : RevFilter
 		{
-			public override bool include(RevWalk walker, RevCommit c)
+			public override bool include(RevWalk walker, RevCommit cmit)
 			{
 				return true;
 			}
@@ -198,7 +198,7 @@ namespace GitSharp.Core.RevWalk.Filter
 		/// </summary>
 		private class RevFilterNone : RevFilter
 		{
-			public override bool include(RevWalk walker, RevCommit c)
+			public override bool include(RevWalk walker, RevCommit cmit)
 			{
 				return false;
 			}
@@ -219,9 +219,9 @@ namespace GitSharp.Core.RevWalk.Filter
 		/// </summary>
 		private class RevFilterNoMerges : RevFilter
 		{
-			public override bool include(RevWalk walker, RevCommit c)
+			public override bool include(RevWalk walker, RevCommit cmit)
 			{
-				return c.ParentCount < 2;
+				return cmit.ParentCount < 2;
 			}
 
 			public override RevFilter Clone()
@@ -244,7 +244,7 @@ namespace GitSharp.Core.RevWalk.Filter
 		///	supplied commit is a merge base. </summary>
 		private class RevFilterMergeBase : RevFilter
 		{
-			public override bool include(RevWalk walker, RevCommit c)
+			public override bool include(RevWalk walker, RevCommit cmit)
 			{
 				throw new InvalidOperationException("Cannot be combined.");
 			}

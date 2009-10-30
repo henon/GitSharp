@@ -64,7 +64,7 @@ namespace GitSharp.Core
 			return cnt;
         }
 
-    	protected override int Inflate(int pos, byte[] b, int o, Inflater inf)
+    	protected override int Inflate(int pos, byte[] dstbuf, int dstoff, Inflater inf)
         {
             var tmp = new byte[512];
             var s = _stream;
@@ -77,11 +77,11 @@ namespace GitSharp.Core
                     s.Read(tmp, 0, n);
                     inf.SetInput(tmp, 0, n);
                 }
-                o += inf.Inflate(b, o, b.Length - o);
+                dstoff += inf.Inflate(dstbuf, dstoff, dstbuf.Length - dstoff);
             }
             while (!inf.IsFinished && !inf.IsNeedingInput)
-                o += inf.Inflate(b, o, b.Length - o);
-            return o;
+                dstoff += inf.Inflate(dstbuf, dstoff, dstbuf.Length - dstoff);
+            return dstoff;
         }
 
         protected override void inflateVerify(int pos, Inflater inf)

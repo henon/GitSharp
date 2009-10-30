@@ -551,7 +551,7 @@ namespace GitSharp.Core
 		{
 			public DeleteStore(RefUpdate refUpdate) : base(refUpdate) { }
 
-			public override RefUpdateResult Store(LockFile @lock, RefUpdateResult status)
+			public override RefUpdateResult Store(LockFile @lockFile, RefUpdateResult status)
 			{
 				var storage = RefUpdate._ref.StorageFormat;
 				if (storage == Ref.Storage.New)
@@ -572,7 +572,7 @@ namespace GitSharp.Core
 				DeleteFileAndEmptyDir(new FileInfo(logDir + "/" + RefUpdate._ref.Name), levels);
 
 				// We have to unlock before (maybe) deleting the parent directories
-				@lock.Unlock();
+				lockFile.Unlock();
 				if (storage.IsLoose)
 				{
 					DeleteFileAndEmptyDir(RefUpdate._looseFile, levels);

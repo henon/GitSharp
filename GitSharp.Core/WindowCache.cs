@@ -199,9 +199,9 @@ namespace GitSharp.Core
             return _openBytes.get();
         }
 
-        internal override int hash(int packHash, long off)
+        internal override int hash(int packHash, long position)
         {
-            return packHash + (int)((ulong)off >> _windowSizeShift);
+            return packHash + (int)((ulong)position >> _windowSizeShift);
         }
 
         internal override ByteWindow load(PackFile pack, long offset)

@@ -67,9 +67,9 @@ namespace GitSharp.Core.RevWalk.Filter
 			return _a;
 		}
 
-		public override bool include(RevWalk walker, RevCommit c)
+		public override bool include(RevWalk walker, RevCommit cmit)
 		{
-			return !_a.include(walker, c);
+			return !_a.include(walker, cmit);
 		}
 
 		public override RevFilter Clone()

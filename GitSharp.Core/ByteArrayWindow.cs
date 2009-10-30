@@ -55,14 +55,14 @@ namespace GitSharp.Core
             _array = b;
         }
 
-		protected override int copy(int p, byte[] b, int o, int n)
+		protected override int copy(int pos, byte[] dstbuf, int dstoff, int cnt)
 		{
-			n = Math.Min(_array.Length - p, n);
-			Array.Copy(_array, p, b, o, n);
-			return n;
+			cnt = Math.Min(_array.Length - pos, cnt);
+			Array.Copy(_array, pos, dstbuf, dstoff, cnt);
+			return cnt;
 		}
 
-		protected override int Inflate(int pos, byte[] b, int o, Inflater inf)
+		protected override int Inflate(int pos, byte[] dstbuf, int dstoff, Inflater inf)
         {
             while (!inf.IsFinished)
             {
@@ -71,11 +71,11 @@ namespace GitSharp.Core
                     inf.SetInput(_array, pos, _array.Length - pos);
                     break;
                 }
-                o += inf.Inflate(b, o, b.Length - o);
+                dstoff += inf.Inflate(dstbuf, dstoff, dstbuf.Length - dstoff);
             }
             while (!inf.IsFinished && !inf.IsNeedingInput)
-                o += inf.Inflate(b, o, b.Length - o);
-            return o;
+                dstoff += inf.Inflate(dstbuf, dstoff, dstbuf.Length - dstoff);
+            return dstoff;
         }
 
 		protected override void inflateVerify(int pos, Inflater inf)

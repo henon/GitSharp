@@ -74,18 +74,18 @@ namespace GitSharp.Core.RevWalk
             throw new InvalidOperationException();
         }
 
-        public override bool include(RevWalk walker, RevCommit c)
+        public override bool include(RevWalk walker, RevCommit cmit)
         {
             // Reset the tree filter to scan this commit and parents.
             //
-            RevCommit[] pList = c.Parents;
+            RevCommit[] pList = cmit.Parents;
             int nParents = pList.Length;
             TreeWalk.TreeWalk tw = _pathFilter;
             var trees = new ObjectId[nParents + 1];
 
             for (int i = 0; i < nParents; i++)
             {
-                RevCommit p = c.Parents[i];
+                RevCommit p = cmit.Parents[i];
                 if ((p.Flags & Parsed) == 0)
                 {
                 	p.parseHeaders(walker);
@@ -93,7 +93,7 @@ namespace GitSharp.Core.RevWalk
                 trees[i] = p.Tree;
             }
 
-            trees[nParents] = c.Tree;
+            trees[nParents] = cmit.Tree;
             tw.reset(trees);
 
             if (nParents == 1)
@@ -115,7 +115,7 @@ namespace GitSharp.Core.RevWalk
                     // No changes, so our tree is effectively the same as
                     // our parent tree. We pass the buck to our parent.
                     //
-                    c.Flags |= Rewrite;
+                    cmit.Flags |= Rewrite;
                     return false;
                 }
 
@@ -132,7 +132,7 @@ namespace GitSharp.Core.RevWalk
         		//
         		if (tw.next()) return true;
 
-        		c.Flags |= Rewrite;
+        		cmit.Flags |= Rewrite;
         		return false;
         	}
 
@@ -181,8 +181,8 @@ namespace GitSharp.Core.RevWalk
                         continue;
                     }
 
-                    c.Flags |= Rewrite;
-                    c.Parents = new[] { p };
+                    cmit.Flags |= Rewrite;
+                    cmit.Parents = new[] { p };
                     return false;
                 }
 
@@ -214,7 +214,7 @@ namespace GitSharp.Core.RevWalk
             // as they are and allow those parents to flow into pending
             // for further scanning.
             //
-            c.Flags |= Rewrite;
+            cmit.Flags |= Rewrite;
             return false;
         }
     }

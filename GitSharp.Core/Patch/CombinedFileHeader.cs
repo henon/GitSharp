@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
@@ -107,14 +107,14 @@ namespace GitSharp.Core.Patch
             return _oldIds[nthParent];
         }
 
-        public override string getScriptText(Encoding ocs, Encoding ncs)
+        public override string getScriptText(Encoding oldCharset, Encoding newCharset)
         {
             var cs = new Encoding[ParentCount + 1];
             for (int i = 0; i < cs.Length; i++)
             {
-            	cs[i] = ocs;
+            	cs[i] = oldCharset;
             }
-            cs[ParentCount] = ncs;
+            cs[ParentCount] = newCharset;
             return getScriptText(cs);
         }
         
@@ -170,15 +170,15 @@ namespace GitSharp.Core.Patch
             return ptr;
         }
 
-    	protected override void ParseIndexLine(int ptr, int eol)
+    	protected override void ParseIndexLine(int ptr, int end)
         {
             // "index $asha1,$bsha1..$csha1"
             //
             var ids = new List<AbbreviatedObjectId>();
-            while (ptr < eol)
+            while (ptr < end)
             {
 				int comma = RawParseUtils.nextLF(Buffer, ptr, (byte)',');
-                if (eol <= comma) break;
+                if (end <= comma) break;
 				ids.Add(AbbreviatedObjectId.FromString(Buffer, ptr, comma - 1));
                 ptr = comma;
             }
@@ -187,7 +187,7 @@ namespace GitSharp.Core.Patch
             ids.CopyTo(_oldIds);
 			int dot2 = RawParseUtils.nextLF(Buffer, ptr, (byte)'.');
 			_oldIds[_oldIds.Length - 1] = AbbreviatedObjectId.FromString(Buffer, ptr, dot2 - 1);
-			NewId = AbbreviatedObjectId.FromString(Buffer, dot2 + 1, eol - 1);
+			NewId = AbbreviatedObjectId.FromString(Buffer, dot2 + 1, end - 1);
             _oldModes = new FileMode[_oldIds.Length];
         }
 

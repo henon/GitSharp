@@ -139,9 +139,9 @@ namespace GitSharp.Core.RevWalk.Filter
 			{
 			}
 
-			public override bool include(RevWalk walker, RevCommit c)
+			public override bool include(RevWalk walker, RevCommit cmit)
 			{
-				return c.hasAll(_flags);
+				return cmit.hasAll(_flags);
 			}
 		}
 
@@ -152,9 +152,9 @@ namespace GitSharp.Core.RevWalk.Filter
 			{
 			}
 
-			public override bool include(RevWalk walker, RevCommit c)
+			public override bool include(RevWalk walker, RevCommit cmit)
 			{
-				return c.hasAny(_flags);
+				return cmit.hasAny(_flags);
 			}
 		}
 

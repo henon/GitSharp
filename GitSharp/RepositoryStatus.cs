@@ -68,6 +68,6 @@ namespace GitSharp
         public HashSet<string> Removed { get { return _diff.Removed; } }
         public HashSet<string> Missing { get { return _diff.Missing; } }
         public HashSet<string> Modified { get { return _diff.Modified; } }
-
+        public HashSet<string> Untracked { get { return _diff.Untracked; } }
     }
 }

@@ -72,7 +72,7 @@ namespace GitSharp.Core.Transport
         /// exception reporting.
         /// </param>
         /// <param name="inputStream">the stream to Read the bundle from.</param>
-        public TransportBundleStream(Repository local, URIish uri, Stream inputStream) 
+        public TransportBundleStream(Repository local, URIish uri, Stream inputStream)
             : base(local, uri)
         {
             _inputStream = inputStream;
@@ -115,12 +115,11 @@ namespace GitSharp.Core.Transport
                 }
             };
         }
-		
-		public override void Dispose ()
-		{
-			_inputStream.Dispose();
-			base.Dispose();
-		}
-		
+
+        public override void Dispose()
+        {
+            _inputStream.Dispose();
+            base.Dispose();
+        }
     }
 }

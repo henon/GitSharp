@@ -330,8 +330,8 @@ namespace GitSharp.Core
 		
 		public void Dispose ()
 		{
-			_os.Dispose();
-			_fLck.Dispose();
+			if(_haveLock)
+				this.Unlock();
 		}
 		
 

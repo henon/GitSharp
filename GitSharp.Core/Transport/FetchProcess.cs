@@ -298,8 +298,7 @@ namespace GitSharp.Core.Transport
 
         private void updateFETCH_HEAD(FetchResult result)
 		{
-			LockFile @lock = new LockFile(new FileInfo(Path.Combine(_transport.Local.Directory.FullName, "FETCH_HEAD")));
-			try
+			using(LockFile @lock = new LockFile(new FileInfo(Path.Combine(_transport.Local.Directory.FullName, "FETCH_HEAD"))))
 			{
 				if (@lock.Lock())
 				{
@@ -320,10 +319,6 @@ namespace GitSharp.Core.Transport
 
 					@lock.Commit();
 				}
-			}
-			finally
-			{
-				@lock.Unlock();
 			}
 		}
 

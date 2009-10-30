@@ -546,23 +546,25 @@ namespace GitSharp.Core
 		private static void LockAndWriteFile(FileInfo file, byte[] content)
 		{
 			string name = file.Name;
-			var lck = new LockFile(file);
-			if (!lck.Lock())
+			using (LockFile lck = new LockFile(file))
 			{
-				throw new ObjectWritingException("Unable to lock " + name);
-			}
-
-			try
-			{
-				lck.Write(content);
-			}
-			catch (IOException ioe)
-			{
-				throw new ObjectWritingException("Unable to write " + name, ioe);
-			}
-			if (!lck.Commit())
-			{
-				throw new ObjectWritingException("Unable to write " + name);
+				if (!lck.Lock())
+				{
+					throw new ObjectWritingException("Unable to lock " + name);
+				}
+	
+				try
+				{
+					lck.Write(content);
+				}
+				catch (IOException ioe)
+				{
+					throw new ObjectWritingException("Unable to write " + name, ioe);
+				}
+				if (!lck.Commit())
+				{
+					throw new ObjectWritingException("Unable to write " + name);
+				}
 			}
 		}
 

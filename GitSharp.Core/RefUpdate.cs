@@ -328,14 +328,13 @@ namespace GitSharp.Core
 				return RefUpdateResult.LockFailure;
 			}
 
-			var @lock = new LockFile(_looseFile);
-			if (!@lock.Lock())
+			using (LockFile @lock = new LockFile(_looseFile))
 			{
-				return RefUpdateResult.LockFailure;
-			}
-
-			try
-			{
+				if (!@lock.Lock())
+				{
+					return RefUpdateResult.LockFailure;
+				}
+	
 				OldObjectId = _db.IdOf(Name);
 				if (_expValue != null)
 				{
@@ -374,10 +373,6 @@ namespace GitSharp.Core
 				}
 
 				return RefUpdateResult.Rejected;
-			}
-			finally
-			{
-				@lock.Unlock();
 			}
 		}
 

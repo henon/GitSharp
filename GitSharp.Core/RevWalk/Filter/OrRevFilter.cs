@@ -137,9 +137,9 @@ namespace GitSharp.Core.RevWalk.Filter
 				_b = two;
 			}
 
-			public override bool include(RevWalk walker, RevCommit c)
+			public override bool include(RevWalk walker, RevCommit cmit)
 			{
-				return _a.include(walker, c) || _b.include(walker, c);
+				return _a.include(walker, cmit) || _b.include(walker, cmit);
 			}
 
 			public override RevFilter Clone()
@@ -162,11 +162,11 @@ namespace GitSharp.Core.RevWalk.Filter
 				_subfilters = list;
 			}
 
-			public override bool include(RevWalk walker, RevCommit c)
+			public override bool include(RevWalk walker, RevCommit cmit)
 			{
 				foreach (RevFilter f in _subfilters)
 				{
-					if (f.include(walker, c))
+					if (f.include(walker, cmit))
 						return true;
 				}
 				return false;

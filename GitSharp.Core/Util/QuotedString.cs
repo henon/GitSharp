@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
@@ -80,7 +80,7 @@ namespace GitSharp.Core.Util
 		/// </summary>
 		/// <param name="in_str">any non-null Unicode string</param>
 		/// <returns>a quoted <see cref="string"/>. See above for details.</returns>
-	    public abstract string quote(string in_str);
+	    public abstract string quote(string instr);
 
 		/// <summary>
 		/// Clean a previously quoted input, decoding the result via UTF-8.
@@ -92,12 +92,12 @@ namespace GitSharp.Core.Util
 		/// </example>
 		/// is true for any <code>a</code>.
 		/// </summary>
-		/// <param name="in_str">a Unicode string to remove quoting from.</param>
+		/// <param name="instr">a Unicode string to remove quoting from.</param>
 		/// <returns>the cleaned string.</returns>
 		/// <seealso cref="dequote(byte[], int, int)"/>
-	    public string dequote(string in_str)
+	    public string dequote(string instr)
         {
-		    byte[] b = Constants.encode(in_str);
+		    byte[] b = Constants.encode(instr);
 		    return dequote(b, 0, b.Length);
 	    }
 
@@ -113,18 +113,18 @@ namespace GitSharp.Core.Util
 		/// <para />
 		/// This method removes any opening/closing quotation marks added by
 		/// </summary>
-		/// <param name="in_str">
+		/// <param name="instr">
 		/// The input buffer to parse.
 		/// </param>
 		/// <param name="offset">
-		/// First position within <paramref name="in_str"/> to scan.
+		/// First position within <paramref name="instr"/> to scan.
 		/// </param>
 		/// <param name="end">
-		/// One position past in <paramref name="in_str"/> to scan.
+		/// One position past in <paramref name="instr"/> to scan.
 		/// </param>
 		/// <returns>The cleaned string.</returns>
 		/// <seealso cref="quote(string)"/>.
-	    public abstract string dequote(byte[] in_str, int offset, int end);
+	    public abstract string dequote(byte[] instr, int offset, int end);
 
 		/// <summary>
 		/// Quoting style used by the Bourne shell.
@@ -135,48 +135,48 @@ namespace GitSharp.Core.Util
 		/// </summary>
 	    public class BourneStyle : QuotedString
         {
-		    public override string quote(string in_str)
+		    public override string quote(string instr)
             {
 			    StringBuilder r = new StringBuilder();
 			    r.Append('\'');
 			    int start = 0, i = 0;
-			    for (; i < in_str.Length; i++) {
-				    switch (in_str[i]) {
+			    for (; i < instr.Length; i++) {
+				    switch (instr[i]) {
 				    case '\'':
 				    case '!':
-					    r.Append(in_str, start, i - start);
+					    r.Append(instr, start, i - start);
 					    r.Append('\'');
 					    r.Append('\\');
-					    r.Append(in_str[i]);
+					    r.Append(instr[i]);
 					    r.Append('\'');
 					    start = i + 1;
 					    break;
 				    }
 			    }
 
-                r.Append(in_str, start, i - start);
+                r.Append(instr, start, i - start);
 			    r.Append('\'');
 			    return r.ToString();
 		    }
 
-		    public override string dequote(byte[] in_str, int ip, int ie)
+		    public override string dequote(byte[] instr, int offset, int end)
             {
 			    bool inquote = false;
-			    byte[] r = new byte[ie - ip];
+			    byte[] r = new byte[end - offset];
 			    int rPtr = 0;
-			    while (ip < ie)
+			    while (offset < end)
                 {
-				    byte b = in_str[ip++];
+				    byte b = instr[offset++];
 				    switch (b)
                     {
 				    case (byte)'\'':
 					    inquote = !inquote;
 					    continue;
 				    case (byte)'\\':
-					    if (inquote || ip == ie)
+					    if (inquote || offset == end)
 						    r[rPtr++] = b; // literal within a quote
 					    else
-						    r[rPtr++] = in_str[ip++];
+						    r[rPtr++] = instr[offset++];
 					    continue;
 				    default:
 					    r[rPtr++] = b;
@@ -192,28 +192,28 @@ namespace GitSharp.Core.Util
 		/// </summary>
         public sealed class BourneUserPathStyle : BourneStyle
         {
-		    public override string quote(string in_str)
+		    public override string quote(string instr)
             {
-                if (new Regex("^~[A-Za-z0-9_-]+$").IsMatch(in_str))
+                if (new Regex("^~[A-Za-z0-9_-]+$").IsMatch(instr))
                 {
 				    // If the string is just "~user" we can assume they
 				    // mean "~user/".
 				    //
-				    return in_str + "/";
+				    return instr + "/";
 			    }
 
-			    if (new Regex("^~[A-Za-z0-9_-]*/.*$").IsMatch(in_str))
+			    if (new Regex("^~[A-Za-z0-9_-]*/.*$").IsMatch(instr))
                 {
 				    // If the string is of "~/path" or "~user/path"
 				    // we must not escape ~/ or ~user/ from the shell.
 				    //
-				    int i = in_str.IndexOf('/') + 1;
-				    if (i == in_str.Length)
-					    return in_str;
-				    return in_str.Slice(0, i) + base.quote(in_str.Substring(i));
+				    int i = instr.IndexOf('/') + 1;
+				    if (i == instr.Length)
+					    return instr;
+				    return instr.Slice(0, i) + base.quote(instr.Substring(i));
 			    }
 
-			    return base.quote(in_str);
+			    return base.quote(instr);
 		    }
 	    }
 
@@ -297,33 +297,33 @@ namespace GitSharp.Core.Util
 			    return r.ToString();
 		    }
 
-		    public override string dequote(byte[] in_str, int inPtr, int inEnd)
+		    public override string dequote(byte[] instr, int offset, int end)
             {
-			    if (2 <= inEnd - inPtr && in_str[inPtr] == '"' && in_str[inEnd - 1] == '"')
-				    return dq(in_str, inPtr + 1, inEnd - 1);
-			    return RawParseUtils.decode(Constants.CHARSET, in_str, inPtr, inEnd);
+			    if (2 <= end - offset && instr[offset] == '"' && instr[end - 1] == '"')
+				    return dq(instr, offset + 1, end - 1);
+			    return RawParseUtils.decode(Constants.CHARSET, instr, offset, end);
 		    }
 
-		    private static string dq(byte[] in_str, int inPtr, int inEnd)
+		    private static string dq(byte[] instr, int offset, int end)
             {
-			    byte[] r = new byte[inEnd - inPtr];
+			    byte[] r = new byte[end - offset];
 			    int rPtr = 0;
-			    while (inPtr < inEnd)
+			    while (offset < end)
                 {
-				    byte b = in_str[inPtr++];
+				    byte b = instr[offset++];
 				    if (b != '\\') {
 					    r[rPtr++] = b;
 					    continue;
 				    }
 
-				    if (inPtr == inEnd) {
+				    if (offset == end) {
 					    // Lone trailing backslash. Treat it as a literal.
 					    //
 					    r[rPtr++] = (byte)'\\';
 					    break;
 				    }
 
-				    switch (in_str[inPtr++]) {
+				    switch (instr[offset++]) {
 				    case (byte)'a':
 					    r[rPtr++] = 0x07 /* \a = BEL */;
 					    continue;
@@ -348,20 +348,20 @@ namespace GitSharp.Core.Util
 
 				    case (byte)'\\':
 				    case (byte)'"':
-					    r[rPtr++] = in_str[inPtr - 1];
+					    r[rPtr++] = instr[offset - 1];
 					    continue;
 
 				    case (byte)'0':
 				    case (byte)'1':
 				    case (byte)'2':
 				    case (byte)'3': {
-					    int cp = in_str[inPtr - 1] - '0';
-					    while (inPtr < inEnd) {
-						    byte c = in_str[inPtr];
+					    int cp = instr[offset - 1] - '0';
+					    while (offset < end) {
+						    byte c = instr[offset];
 						    if ('0' <= c && c <= '7') {
 							    cp <<= 3;
 							    cp |= c - '0';
-							    inPtr++;
+							    offset++;
 						    } else {
 							    break;
 						    }
@@ -374,7 +374,7 @@ namespace GitSharp.Core.Util
 					    // Any other code is taken literally.
 					    //
 					    r[rPtr++] = (byte)'\\';
-					    r[rPtr++] = in_str[inPtr - 1];
+					    r[rPtr++] = instr[offset - 1];
 					    continue;
 				    }
 			    }

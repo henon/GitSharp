@@ -346,9 +346,9 @@ namespace GitSharp.Core
 				_lockFile = lockfile;
             }
 
-            public override void Write(byte[] b, int o, int n)
+            public override void Write(byte[] buffer, int offset, int count)
             {
-				_lockFile._os.Write(b, o, n);
+				_lockFile._os.Write(buffer, offset, count);
             }
 
             public void write(byte[] b)

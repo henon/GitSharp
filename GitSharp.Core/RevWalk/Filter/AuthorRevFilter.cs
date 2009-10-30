@@ -94,9 +94,9 @@ namespace GitSharp.Core.RevWalk.Filter
 			{
 			}
 
-			protected override string text(RevCommit commit)
+			protected override string text(RevCommit cmit)
 			{
-				return TextFor(commit);
+				return TextFor(cmit);
 			}
 
 			public override RevFilter Clone()

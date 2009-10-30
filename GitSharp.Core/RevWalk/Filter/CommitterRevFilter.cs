@@ -111,9 +111,9 @@ namespace GitSharp.Core.RevWalk.Filter
 			{
 			}
 
-			protected override string Text(RevCommit commit)
+			protected override string Text(RevCommit cmit)
 			{
-				return TextFor(commit);
+				return TextFor(cmit);
 			}
 		}
 	}

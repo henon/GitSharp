@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
@@ -208,9 +208,9 @@ namespace GitSharp.Core
             }
         }
 
-        public override bool Equals(object o)
+        public override bool Equals(object obj)
         {
-            var p = o as PersonIdent;
+            var p = obj as PersonIdent;
             if (p == null)
                 return false;
 

@@ -307,7 +307,7 @@ namespace MiscUtil.Conversion
 		/// <param name="startIndex">The index of the first byte to convert</param>
 		/// <param name="bytesToConvert">The number of bytes to use in the conversion</param>
 		/// <returns>The converted number</returns>
-		protected abstract long FromBytes(byte[] value, int startIndex, int bytesToConvert);
+		protected abstract long FromBytes(byte[] buffer, int startIndex, int bytesToConvert);
 		#endregion
 
 		#region ToString conversions

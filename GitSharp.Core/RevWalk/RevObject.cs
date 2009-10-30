@@ -220,10 +220,10 @@ namespace GitSharp.Core.RevWalk
 			s.Append((Flags & RevWalk.PARSED) != 0 ? 'p' : '-');
 		}
 
-		public override bool Equals(AnyObjectId o)
+		public override bool Equals(AnyObjectId obj)
 		{
-            if (o.GetType() != typeof(RevObject)) return false;
-			return this == o;
+            if (obj.GetType() != typeof(RevObject)) return false;
+			return this == obj;
 		}
 
 		public override int GetHashCode()
@@ -231,18 +231,18 @@ namespace GitSharp.Core.RevWalk
 			return base.GetHashCode();
 		}
 
-		public override bool Equals(object o)
+		public override bool Equals(object obj)
 		{
-			if (ReferenceEquals(null, o))
+			if (ReferenceEquals(null, obj))
 			{
 				return false;
 			}
 
-			if (ReferenceEquals(this, o))
+			if (ReferenceEquals(this, obj))
 			{
 				return true;
 			}
-			return Equals(o as RevObject);
+			return Equals(obj as RevObject);
 		}
 
 		public bool Equals(RevObject other)

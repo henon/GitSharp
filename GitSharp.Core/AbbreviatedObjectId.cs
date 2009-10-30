@@ -216,9 +216,9 @@ namespace GitSharp.Core
 			return _w2;
 		}
 
-		public override bool Equals(object o)
+		public override bool Equals(object obj)
 		{
-			AbbreviatedObjectId b = (o as AbbreviatedObjectId);
+			AbbreviatedObjectId b = (obj as AbbreviatedObjectId);
 			if (b != null)
 			{
 				return _nibbles == b._nibbles && _w1 == b._w1 && _w2 == b._w2

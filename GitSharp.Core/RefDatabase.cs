@@ -638,9 +638,9 @@ namespace GitSharp.Core
 				_refDb = db;
 			}
 
-			protected override void writeFile(string name, byte[] content)
+			protected override void writeFile(string file, byte[] content)
 			{
-				LockAndWriteFile(new FileInfo(_refDb.Repository.Directory + "/" + name), content);
+				LockAndWriteFile(new FileInfo(_refDb.Repository.Directory + "/" + file), content);
 			}
 		}
 

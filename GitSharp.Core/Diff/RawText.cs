@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Johannes E. Schindelin <johannes.schindelin@gmx.de>
  * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
@@ -92,9 +92,9 @@ namespace GitSharp.Core.Diff
 			return lines.size() - 2;
 		}
 
-		public bool equals(int i, Sequence other, int j)
+		public bool equals(int thisIdx, Sequence other, int otherIdx)
 		{
-			return equals(this, i + 1, (RawText) other, j + 1);
+			return equals(this, thisIdx + 1, (RawText) other, otherIdx + 1);
 		}
 
 		private static bool equals(RawText a, int ai, RawText b, int bi)

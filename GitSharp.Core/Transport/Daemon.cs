@@ -357,10 +357,10 @@ namespace GitSharp.Core.Transport
 				Enabled = true;
 			}
 
-			public override void Execute(DaemonClient dc, Repository db)
+			public override void Execute(DaemonClient client, Repository db)
 			{
 				var rp = new UploadPack(db);
-				Stream stream = dc.Stream;
+				Stream stream = client.Stream;
 				rp.Upload(stream, null, null);
 			}
 		}
@@ -373,9 +373,9 @@ namespace GitSharp.Core.Transport
 				Enabled = false;
 			}
 
-			public override void Execute(DaemonClient dc, Repository db)
+			public override void Execute(DaemonClient client, Repository db)
 			{
-				EndPoint peer = dc.Peer;
+				EndPoint peer = client.Peer;
 
 				var ipEndpoint = peer as IPEndPoint;
 				if (ipEndpoint == null)
@@ -385,7 +385,7 @@ namespace GitSharp.Core.Transport
 
 				string host = Dns.GetHostEntry(ipEndpoint.Address).HostName ?? ipEndpoint.Address.ToString();
 				var rp = new ReceivePack(db);
-				Stream stream = dc.Stream;
+				Stream stream = client.Stream;
 				const string name = "anonymous";
 				string email = name + "@" + host;
 				rp.setRefLogIdent(new PersonIdent(name, email));

@@ -255,6 +255,7 @@ namespace GitSharp.Core.Transport
 		public void Dispose ()
 		{
 			_walker.Dispose();
+			_transport.Dispose();
 		}
 		
     }

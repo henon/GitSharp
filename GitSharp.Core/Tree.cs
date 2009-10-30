@@ -242,9 +242,9 @@ namespace GitSharp.Core
 			_db = parent.Repository;
 		}
 
-		/// <Summary>
+		/// <summary>
 		/// Returns true of the data of this Tree is loaded.
-		/// </returns>
+		/// </summary>
 		public bool IsLoaded
 		{
 			get { return _contents != null; }

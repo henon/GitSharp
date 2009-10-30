@@ -50,10 +50,9 @@ namespace GitSharp
     /// <summary>
     /// Represents a git repository
     /// </summary>
-    public class Repository
+    public class Repository : IDisposable
     {
         #region Constructors
-
 
         internal CoreRepository _internal_repo;
 
@@ -173,45 +172,45 @@ namespace GitSharp
         /// <param name="path"></param>
         /// <param name="bare"></param>
         /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
-        public static bool IsValid(string gitdir, bool bare)
+        public static bool IsValid(string path, bool bare)
         {
             if (!bare)
             {
-                if (!Regex.IsMatch(gitdir, "\\.git[/\\\\]?$"))
-                    gitdir = Path.Combine(gitdir, ".git");
+                if (!Regex.IsMatch(path, "\\.git[/\\\\]?$"))
+                    path = Path.Combine(path, ".git");
             }
 
-            if (!DirExists(gitdir))
+            if (!DirExists(path))
                 return false;
-			if (!FileExists(Path.Combine(gitdir, "HEAD")))
+			if (!FileExists(Path.Combine(path, "HEAD")))
                 return false;
-			if (!FileExists(Path.Combine(gitdir, "config")))
+			if (!FileExists(Path.Combine(path, "config")))
                 return false;
-			//if (!DirExists(Path.Combine(gitdir, "description")))
+			//if (!DirExists(Path.Combine(path, "description")))
             //    return false;
-			//if (!DirExists(Path.Combine(gitdir, "hooks")))
+			//if (!DirExists(Path.Combine(path, "hooks")))
             //   return false;
-            //if (!DirExists(Path.Combine(gitdir, "info")))
+            //if (!DirExists(Path.Combine(path, "info")))
             //    return false;
-            //if (!DirExists(Path.Combine(gitdir, "info/exclude")))
+            //if (!DirExists(Path.Combine(path, "info/exclude")))
             //    return false;
- 			if (!DirExists(Path.Combine(gitdir, "objects")))
+ 			if (!DirExists(Path.Combine(path, "objects")))
                 return false;
-            if (!DirExists(Path.Combine(gitdir, "objects/info")))
+            if (!DirExists(Path.Combine(path, "objects/info")))
                 return false;
-            if (!DirExists(Path.Combine(gitdir, "objects/pack")))
+            if (!DirExists(Path.Combine(path, "objects/pack")))
                 return false;
-            if (!DirExists(Path.Combine(gitdir, "refs")))
+            if (!DirExists(Path.Combine(path, "refs")))
                 return false;
-            if (!DirExists(Path.Combine(gitdir, "refs/heads")))
+            if (!DirExists(Path.Combine(path, "refs/heads")))
                 return false;
-            if (!DirExists(Path.Combine(gitdir, "refs/tags")))
+            if (!DirExists(Path.Combine(path, "refs/tags")))
                 return false;
 
             try
             {
                 // let's see if it loads without throwing an exception
-                new Repository(gitdir);
+                new Repository(path);
             }
             catch (Exception)
             {
@@ -335,6 +334,17 @@ namespace GitSharp
             return "Repository[" + Directory + "]";
         }
 
+
+        public void Close()
+        {
+            _internal_repo.Dispose();
+        }
+
+        public void Dispose()
+        {
+            Close();
+        }
+
         #region Repository initialization (git init)
 
 
@@ -362,8 +372,7 @@ namespace GitSharp
         /// <summary>
         /// Initializes a repository in the current location using the provided git command's options.
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="bare"></param>
+        /// <param name="cmd"></param>
         /// <returns></returns>
         public static Repository Init(InitCommand cmd)
         {

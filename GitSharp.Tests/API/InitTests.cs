@@ -56,8 +56,10 @@ namespace GitSharp.Tests.API
             //Test bare repository
             bool bare = true;
             var path = Path.Combine(trash.FullName, "test.git");
-            var repo = Repository.Init(path, bare);
-            Assert.IsTrue(repo.IsBare);
+            using (var repo = Repository.Init(path, bare))
+            {
+                Assert.IsTrue(repo.IsBare);
+            }
         }
 
         [Test]
@@ -66,8 +68,10 @@ namespace GitSharp.Tests.API
             //Test non-bare repository
             bool bare = false;
             var path = Path.Combine(trash.FullName, "test");
-            var repo = Repository.Init(path, bare);
-            Assert.IsFalse(repo.IsBare);
+            using (var repo = Repository.Init(path, bare))
+            {
+                Assert.IsFalse(repo.IsBare);
+            }
         }
 
 
@@ -77,9 +81,11 @@ namespace GitSharp.Tests.API
             //Test bare repository
             bool bare = true;
             var path = Path.Combine(trash.FullName, "test.git");
-            var repo = Repository.Init(path, bare);
-            Assert.IsTrue(repo.IsBare);
-            Assert.IsTrue(Repository.IsValid(repo.Directory, bare));
+            using (var repo = Repository.Init(path, bare))
+            {
+                Assert.IsTrue(repo.IsBare);
+                Assert.IsTrue(Repository.IsValid(repo.Directory, bare));
+            }
         }
 
         [Test]
@@ -88,9 +94,11 @@ namespace GitSharp.Tests.API
             //Test non-bare repository
             bool bare = false;
             var path = Path.Combine(trash.FullName, "test");
-            var repo = Repository.Init(path, bare);
-            Assert.IsFalse(repo.IsBare);
-            Assert.IsTrue(Repository.IsValid(repo.Directory, bare));
+            using (var repo = Repository.Init(path, bare))
+            {
+                Assert.IsFalse(repo.IsBare);
+                Assert.IsTrue(Repository.IsValid(repo.Directory, bare));
+            }
         }
     }
 }

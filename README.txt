@@ -1,14 +1,13 @@
 == Git# --> Git for .NET ==
 ... a native Windows version of the fast & free open source version control system
 
-Git# is the most advanced C# implementation of git for Windows and the .NET framework. 
+Git# is the most advanced C# implementation of git for the .NET framework and Mono. 
 It is aimed to be fully compatible to the original git for linux and can be used as stand 
-alone command line application (potentially replacing msysGit) or as library for windows 
-applications such as gui frontends or plugins for IDEs.
+alone command line application or as library for windows applications such as gui 
+frontends or plugins for IDEs.
 
 Git# is released under the BSD license. It is derived from the Java version jgit.
-Please refer to the LICENSE.txt files for the complete license, and please refer to the 
-individual source file header to determine who contributed.
+Please refer to the LICENSE.txt files for the complete license.
 
 For more info check out the Git# website at http://www.eqqon.com/index.php/GitSharp
 
@@ -31,7 +30,7 @@ For more info check out the Git# website at http://www.eqqon.com/index.php/GitSh
 
     * Read objects from shared repositories
 
-    * Write loose commits, trees, blobs.
+    * Add files to the index and commit changes
 
     * Copy trees to local directory, or local directory to a tree.
 
@@ -41,26 +40,20 @@ For more info check out the Git# website at http://www.eqqon.com/index.php/GitSh
 
     * Create a new repository.
 
-    * Read and write refs, including walking through symrefs. (not ported yet)
-
-    * Read, update and write the Git index. (updating and writing not ported yet)
-
-    * Checkout in dirty working directory if trivial. (not ported yet)
+    * Checkout in dirty working directory if trivial.
 
     * Walk the history from a given set of commits looking for commits
       introducing changes in files under a specified path.
 
-    * Object transport  (not ported yet)
-      Fetch via ssh, git, http, Amazon S3 and bundles.
-      Push via ssh, git and Amazon S3. Git# does not yet deltify
+    * Object transport  
+      Fetch via ssh, git, http and bundles.
+      Push via ssh, git. Git# does not yet deltify
       the pushed packs so they may be a lot larger than C Git packs.
 
 == Missing Features ==
 
-There are a lot of missing features in jgit and thus also in Git#. You need the real Git 
-for those. For some operations it may just be the preferred solution also. There
-are not just a command line, there is e.g. git-gui that makes committing
-partial files simple.
+There are a lot of missing features in GitSharp. You need the real Git 
+for those.
 
 - Merging. 
 
@@ -84,12 +77,24 @@ partial files simple.
   Post question, comments or patches to the official Git# mailing list at 
   http://groups.google.com/group/gitsharp/.
 
+== Tools and Dependencies ==
 
-== Contributing ==
+GitSharp contains the following open source components:
 
-  Feel free to fork the source at github and start coding. We will pull your commits regularly.
-  However, feedback and bug reports or linking to the website from your blog are also 
-  contributions.
+Included as Source:
+* MiscUtil by Jon Skeet and Marc Gravell
+* NDesk.Options 
+
+Binary Dependencies:
+* DiffieHellman
+* ICSharpCode.SharpZipLib
+* Org.Mentalis.Security
+* Tamir.SharpSSH
+* Winterdom.IO.Filemap
+
+Tools:
+* NAnt 
+* NUnit
 
 == About GIT itself ==
 
@@ -102,7 +107,3 @@ C based implementation can be obtained from the GIT websites:
 
 More information about the Java implemetation which Git# stems from:
   http://git.or.cz/gitwiki/EclipsePlugin
-
-
-This product includes software developed by Jon Skeet and Marc Gravell.
-  Contact skeet@pobox.com, or see http://www.pobox.com/~skeet/).

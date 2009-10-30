@@ -51,31 +51,37 @@ namespace GitSharp.Tests.API
         [Test]
         public void UpdateBranch()
         {
-            var repo = GetTrashRepository();
-            var master = new Branch(repo, "refs/heads/master");
-            var origin_master = new Branch(repo, "refs/remotes/origin/master");
-            origin_master.Update(master);
-            Assert.AreEqual(master.CurrentCommit.Hash, origin_master.CurrentCommit.Hash);
-            var remote_head = repo.Refs["refs/remotes/origin/master"];
-            Assert.AreEqual(master.CurrentCommit.Hash, remote_head.Target.Hash);
+            using (var repo = GetTrashRepository())
+            {
+                var master = new Branch(repo, "refs/heads/master");
+                var origin_master = new Branch(repo, "refs/remotes/origin/master");
+                origin_master.Update(master);
+                Assert.AreEqual(master.CurrentCommit.Hash, origin_master.CurrentCommit.Hash);
+                var remote_head = repo.Refs["refs/remotes/origin/master"];
+                Assert.AreEqual(master.CurrentCommit.Hash, remote_head.Target.Hash);
+            }
         }
 
         [Test]
         public void RefNameResolution()
         {
-            var repo = GetTrashRepository();
-            var master = new Ref(repo, "refs/heads/master");
-            var previous = new Ref(repo,"refs/heads/master^");
-            Assert.AreNotEqual(master.Target.Hash, previous.Target.Hash);
-            Assert.AreEqual((master.Target as Commit).Parent.Hash, previous.Target.Hash);
+            using (var repo = GetTrashRepository())
+            {
+                var master = new Ref(repo, "refs/heads/master");
+                var previous = new Ref(repo, "refs/heads/master^");
+                Assert.AreNotEqual(master.Target.Hash, previous.Target.Hash);
+                Assert.AreEqual((master.Target as Commit).Parent.Hash, previous.Target.Hash);
+            }
         }
 
         [Test]
         public void RefEquality()
         {
-            var repo = GetTrashRepository();
-            Assert.IsTrue(new Ref(repo, "a") == new Ref(repo, "refs/heads/a"));
-            Assert.IsTrue(new Ref(repo, "HEAD") == new Ref(repo, "refs/heads/master"));
+            using (var repo = GetTrashRepository())
+            {
+                Assert.IsTrue(new Ref(repo, "a") == new Ref(repo, "refs/heads/a"));
+                Assert.IsTrue(new Ref(repo, "HEAD") == new Ref(repo, "refs/heads/master"));
+            }
         }
     }
 }

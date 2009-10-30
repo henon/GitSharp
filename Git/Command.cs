@@ -39,7 +39,7 @@ using System;
 
    /**
      * Annotation to document a {@link TextBuiltin}.
-     * <p>
+     * 
      * This is an optional annotation for TextBuiltin subclasses and it carries
      * documentation forward into the runtime system describing what the command is
      * and why users may want to invoke it.

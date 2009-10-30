@@ -61,28 +61,34 @@ namespace GitSharp.Tests.API
                 Assert.Ignore("Doesn't pass on Mono because of 'System.NotImplementedException : The requested feature is not implemented.at System.DateTimeOffset.Parse'.");
             }
 
-            var repos = GetTrashRepository(); 
-            var commit = new Commit(repos, KnownCommit);
-
-            Assert.AreEqual(expectedDate, commit.AuthorDate);
+            using (var repos = GetTrashRepository())
+            {
+                var commit = new Commit(repos, KnownCommit);
+             
+                Assert.AreEqual(expectedDate, commit.AuthorDate);
+            }
         }
 
         [Test]
         public void ShouldBeAbleToReadAuthorDate2()
         {
-            var repos = GetTrashRepository(); 
-            var commit = new Commit(repos, KnownCommit);
+            using (var repos = GetTrashRepository())
+            {
+                var commit = new Commit(repos, KnownCommit);
 
-            Assert.AreEqual(_expectedDate, commit.AuthorDate);
+                Assert.AreEqual(_expectedDate, commit.AuthorDate);
+            }
         }
 
         [Test]
         public void ShouldBeAbleToReadCommitDate()
         {
-            var repos = GetTrashRepository(); 
-            var commit = new Commit(repos, KnownCommit);
+            using (var repos = GetTrashRepository())
+            {
+                var commit = new Commit(repos, KnownCommit);
 
-            Assert.AreEqual(_expectedDate, commit.CommitDate);
+                Assert.AreEqual(_expectedDate, commit.CommitDate);
+            }
         }
     }
 }

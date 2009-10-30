@@ -59,7 +59,7 @@ namespace GitSharp.Tests
      * is used. Memory mapping has an effect on the file system, in that memory
      * mapped files in java cannot be deleted as long as they mapped arrays have not
      * been reclaimed by the garbage collector. The programmer cannot control this
-     * with precision, though hinting using <em><see cref="java.lang.System#gc}</em>
+     * with precision, though hinting using <em>java.lang.System#gc</em>
      * often helps.
      */
     public abstract class RepositoryTestCase
@@ -100,7 +100,7 @@ namespace GitSharp.Tests
         /// also used internally. If a file or directory cannot be removed
         /// it throws an AssertionFailure.
         /// </summary>
-        /// <param name="dir"></param>
+        /// <param name="fs"></param>
         protected void recursiveDelete(FileSystemInfo fs)
         {
             recursiveDelete(fs, false, GetType().Name + "." + ToString(), true);
@@ -151,7 +151,7 @@ namespace GitSharp.Tests
         private static void ReportDeleteFailure(string name, bool failOnError, FileSystemInfo fsi, string message)
         {
             string severity = failOnError ? "Error" : "Warning";
-            string msg = severity + ": Failed to delete " + fsi;
+            string msg = severity + ": Failed to delete " + fsi.FullName;
 
             if (name != null)
             {
@@ -327,6 +327,32 @@ namespace GitSharp.Tests
         public void FixtureTearDown()
         {
             _directoriesToRemove.Any((directoryPath => recursiveDelete(new DirectoryInfo(directoryPath), false, null, false)));
+        }
+
+        public static void CopyDirectory(string sourceDirectoryPath, string targetDirectoryPath)
+        {
+            if (!targetDirectoryPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                targetDirectoryPath += Path.DirectorySeparatorChar;
+            }
+
+            if (!Directory.Exists(targetDirectoryPath))
+            {
+                Directory.CreateDirectory(targetDirectoryPath);
+            }
+
+            string[] files = Directory.GetFileSystemEntries(sourceDirectoryPath);
+
+            foreach (string fileSystemElement in files)
+            {
+                if (Directory.Exists(fileSystemElement))
+                {
+                    CopyDirectory(fileSystemElement, targetDirectoryPath + Path.GetFileName(fileSystemElement));
+                    continue;
+                }
+
+                File.Copy(fileSystemElement, targetDirectoryPath + Path.GetFileName(fileSystemElement), true);
+            }
         }
     }
 }

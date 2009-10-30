@@ -36,18 +36,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
-
 using System.IO;
 
 namespace GitSharp.Tests.API
 {
     [TestFixture]
-    public class CloneTests : GitSharp.Tests.RepositoryTestCase
+    public class CloneTests : RepositoryTestCase
     {
         [Test]
         public void Check_cloned_bare_repo()        {
@@ -59,12 +54,14 @@ namespace GitSharp.Tests.API
         {
             string toPath = Path.Combine(trash.FullName, "test");
             string fromUrl = "git://github.com/henon/test.git";
-            var repo=GitSharp.Commands.Clone(fromUrl, toPath);
-            Assert.IsTrue(Repository.IsValid(repo.Directory));
-            //Verify content is in the proper location
-            var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
-            Assert.IsTrue(new FileInfo(readme).Exists);
+            
+            using (Repository repo = Commands.Clone(fromUrl, toPath))
+            {
+                Assert.IsTrue(Repository.IsValid(repo.Directory));
+                //Verify content is in the proper location
+                var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
+                Assert.IsTrue(new FileInfo(readme).Exists);
+            }
         }
-           
     }
 }

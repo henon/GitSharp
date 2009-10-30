@@ -115,11 +115,5 @@ namespace GitSharp.Core.Transport
                 }
             };
         }
-		
-		public void Dispose ()
-		{
-			_inputStream.Dispose();
-		}
-		
     }
 }

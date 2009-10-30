@@ -344,11 +344,6 @@ namespace GitSharp.Core.Transport
 		}
 
 		#endregion
-		
-		public void Dispose ()
-		{
-			_errStream.Dispose();
-		}
-		
+
 	}
 }

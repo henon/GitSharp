@@ -116,5 +116,18 @@ namespace GitSharp.Tests.API
 
             }
         }
+
+        [Test]
+        public void RepositoryStatusTracksUntrackedFiles()
+        {
+            var repo = new Repository(trash.FullName);
+            var a = writeTrashFile("untracked.txt", "");
+            var b = writeTrashFile("someDirectory/untracked2.txt", "");
+
+            var status = repo.Status;
+            Assert.AreEqual(status.Untracked.Count, 2);
+            Assert.IsTrue(status.Untracked.Contains(a.FullName));
+            Assert.IsTrue(status.Untracked.Contains(b.FullName));
+        }
     }
 }

@@ -39,6 +39,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace GitSharp.Core
 {
@@ -54,6 +55,29 @@ namespace GitSharp.Core
         {
         }
 
+        private void CheckUntrackedDirectory(string path)
+        {
+            var files = Directory.GetFiles(path);
+            foreach (string file in files)
+                CheckUntrackedFile(new FileInfo(file));
+
+            var dirs = Directory.GetDirectories(path);
+            foreach (string dir in dirs)
+            {
+                if (new DirectoryInfo(dir).Name.StartsWith(".git"))
+                    continue;
+                CheckUntrackedDirectory(dir);
+            }
+        }
+
+        private void CheckUntrackedFile(FileInfo f)
+        {
+            if (!_index.Members.Any(e => e.Name == f.Name))
+            {
+                Untracked.Add(f.FullName);
+            }
+        }
+
         public IndexDiff(Tree tree, GitIndex index)
         {
 			_anyChanges = false;
@@ -65,6 +89,7 @@ namespace GitSharp.Core
 			Removed = new HashSet<string>();
 			Missing = new HashSet<string>();
 			Modified = new HashSet<string>();
+            Untracked = new HashSet<string>();
         }
 
         public bool Diff()
@@ -74,6 +99,13 @@ namespace GitSharp.Core
                           	{
                           		VisitEntry = delegate(TreeEntry treeEntry, GitIndex.Entry indexEntry, FileInfo file)
                           		             	{
+                                                    // untracked
+                                                    if (treeEntry == null && indexEntry == null)
+                                                    {
+                                                        Untracked.Add(file.FullName);
+                                                        return;
+                                                    }
+
                           		             		if (treeEntry == null)
                           		             		{
                           		             			Added.Add(indexEntry.Name);
@@ -116,6 +148,8 @@ namespace GitSharp.Core
                           	};
         	new IndexTreeWalker(_index, _tree, root, visitor).Walk();
 
+            CheckUntrackedDirectory(root.FullName);
+
             return _anyChanges;
         }
 
@@ -124,5 +158,6 @@ namespace GitSharp.Core
         public HashSet<string> Removed { get; private set; }
         public HashSet<string> Missing { get; private set; }
         public HashSet<string> Modified { get; private set; }
+        public HashSet<string> Untracked { get; private set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
@@ -50,6 +50,7 @@ namespace GitSharp.Core.Patch
 	    private static readonly byte[] DELTA = Constants.encodeASCII("delta ");
 
 	    /** Type of information stored in a binary hunk. */
+		[Serializable]
 	    public enum Type
         {
 		    /** The full content is stored, deflated. */

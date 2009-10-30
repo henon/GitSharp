@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
  *
  * All rights reserved.
@@ -35,8 +35,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+
 namespace GitSharp.Core
 {
+	[Serializable]
 	public enum ObjectType
 	{
 		/// <summary>

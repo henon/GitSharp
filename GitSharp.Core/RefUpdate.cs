@@ -48,6 +48,7 @@ namespace GitSharp.Core
 {
 	public class RefUpdate
 	{
+		[Serializable]
 		public enum RefUpdateResult
 		{
 			/// <summary>

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
@@ -35,11 +35,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+
 namespace GitSharp.Core.Transport
 {
 
     public class ReceiveCommand
     {
+		[Serializable]
         public enum Type
         {
             CREATE,
@@ -48,6 +51,7 @@ namespace GitSharp.Core.Transport
             DELETE
         }
 
+		[Serializable]
         public enum Result
         {
             NOT_ATTEMPTED,

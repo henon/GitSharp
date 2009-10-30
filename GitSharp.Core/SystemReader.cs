@@ -5,6 +5,7 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Core
 {
+	[Serializable]
     public enum PlatformType
     {
         
@@ -19,6 +20,7 @@ namespace GitSharp.Core
         UnixMono = 128
     }
 
+	[Serializable]
     public enum ConfigFileType
     {
 

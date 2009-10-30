@@ -47,6 +47,7 @@ namespace GitSharp.Core.Transport
 
     public class PacketLineIn
     {
+		[Serializable]
         public enum AckNackResult
         {
             NAK,

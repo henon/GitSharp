@@ -35,9 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 
 namespace GitSharp.Core
 {
@@ -70,8 +68,8 @@ namespace GitSharp.Core
 
         public override bool promptYesNo(string message)
         {
-            // TODO: YesNoForm
-            return false;
+            var result = MessageBox.Show(message, "Prompt", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            return result == DialogResult.Yes;
         }
 
         public override void showMessage(string message)

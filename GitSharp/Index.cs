@@ -62,17 +62,44 @@ namespace GitSharp
             GitIndex.add(_repo._internal_repo.WorkingDirectory, path);
         }
 
-        private void AddDirectory(DirectoryInfo path)
-        {
-            AddRecursively(path);
-        }
-
-        private void AddRecursively(DirectoryInfo dir)
+        private void AddDirectory(DirectoryInfo dir)
         {
             foreach (var file in dir.GetFiles())
                 AddFile(file);
             foreach (var subdir in dir.GetDirectories())
                 AddDirectory(subdir);
+        }
+
+        /// <summary>
+        /// Removes files or directories from the index which are no longer to be tracked.
+        /// </summary>
+        /// <param name="paths"></param>
+        public void Remove(params string[] paths)
+        {
+            GitIndex.RereadIfNecessary();
+            foreach (var path in paths)
+            {
+                if (new FileInfo(path).Exists)
+                    RemoveFile(new FileInfo(path));
+                else if (new DirectoryInfo(path).Exists)
+                    RemoveDirectory(new DirectoryInfo(path));
+                else
+                    throw new ArgumentException("File or directory at <" + path + "> doesn't seem to exist.", "path");
+            }
+            GitIndex.write();
+        }
+
+        private void RemoveFile(FileInfo path)
+        {
+            GitIndex.remove((FileSystemInfo)_repo._internal_repo.WorkingDirectory, (FileSystemInfo)path); // Todo: change GitIndex.Remove to remove(DirectoryInfo , FileInfo) ??
+        }
+
+        private void RemoveDirectory(DirectoryInfo dir)
+        {
+            foreach (var file in dir.GetFiles())
+                RemoveFile(file);
+            foreach (var subdir in dir.GetDirectories())
+                RemoveDirectory(subdir);
         }
 
         /// <summary>

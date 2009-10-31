@@ -105,6 +105,7 @@
     <Compile Include="FnMatch\RestrictedWildCardHead.cs" />
     <Compile Include="FnMatch\WildCardHead.cs" />
     <Compile Include="GitlinkTreeEntry.cs" />
+    <Compile Include="SubmoduleConfig.cs" />
     <Compile Include="SystemReader.cs" />
     <Compile Include="Merge\Merger.cs" />
     <Compile Include="Merge\MergeStrategy.cs" />

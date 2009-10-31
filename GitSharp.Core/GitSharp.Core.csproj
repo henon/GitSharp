@@ -63,6 +63,7 @@
     <Compile Include="ByteArrayWindow.cs" />
     <Compile Include="ByteBufferWindow.cs" />
     <Compile Include="ByteWindow.cs" />
+    <Compile Include="ConsoleUserInfoProvider.cs" />
     <Compile Include="IgnoreHandler.cs" />
     <Compile Include="RepositoryListener.cs" />
     <Compile Include="CompleteAttribute.cs" />
@@ -147,6 +148,7 @@
     <Compile Include="TreeWalk\Filter\PathSuffixFilter.cs" />
     <Compile Include="UnpackedObjectCache.cs" />
     <Compile Include="UserConfig.cs" />
+    <Compile Include="UserInfoProvider.cs" />
     <Compile Include="Util\ArrayExtensions.cs" />
     <Compile Include="Util\AtomicReference.cs" />
     <Compile Include="Util\BigEndianBitConverter.cs" />

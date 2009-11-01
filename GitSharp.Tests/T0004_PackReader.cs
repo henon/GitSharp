@@ -74,36 +74,5 @@ namespace GitSharp.Tests
 			Assert.AreEqual(18009, or.Size);
 			Assert.AreEqual(537, ((PackedObjectLoader)or).DataOffset);
 		}
-
-        [Test]
-        public void test005_todopack()
-        {
-            FileInfo todopack = new FileInfo("Resources/todopack");
-            if (!todopack.Exists)
-            {
-                Assert.Ignore("Skipping " + "test005_todopack()" + ": no " + todopack.FullName);
-                return;
-            }
-
-            var packDir = new DirectoryInfo(Path.Combine(db.ObjectsDirectory.FullName, "pack"));
-            string packname = "pack-2e71952edc41f3ce7921c5e5dd1b64f48204cf35";
-            
-            new FileInfo(todopack.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname)).CopyTo(packDir.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetPackFileName(packname));
-            new FileInfo(todopack.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname)).CopyTo(packDir.FullName + "/" + GitSharp.Core.Transport.IndexPack.GetIndexFileName(packname));
-
-            Core.Tree t;
-
-            t = db
-                    .MapTree(ObjectId.FromString(
-                            "aac9df07f653dd18b935298deb813e02c32d2e6f"));
-            Assert.IsNotNull(t);
-            int count1 = t.MemberCount;
-
-            t = db
-                    .MapTree(ObjectId.FromString(
-                            "6b9ffbebe7b83ac6a61c9477ab941d999f5d0c96"));
-            Assert.IsNotNull(t);
-            int count2 = t.MemberCount;
-        }
 	}
 }

@@ -219,18 +219,28 @@ namespace GitSharp
             return true;
         }
 
-        public static bool DirExists(string path)
+        private static bool DirExists(string path)
         {
             return new DirectoryInfo(path).Exists;
         }
 
-        public static bool FileExists(string path)
+        private static bool FileExists(string path)
         {
             return new FileInfo(path).Exists;
         }
 
         /// <summary>
-        /// Commit staged changes and updates HEAD
+        /// Commit staged changes and update HEAD. The default git author is used.
+        /// </summary>
+        /// <param name="message">The commit message</param>
+        /// <returns>Returns the newly created commit</returns>
+        public Commit Commit(string message)
+        {
+            return Commit(message, new Author(Config["user.name"], Config["user.email"]));
+        }
+
+        /// <summary>
+        /// Commit staged changes and update HEAD
         /// </summary>
         /// <param name="message">The commit message</param>
         /// <param name="author">The author of the content to be committed</param>

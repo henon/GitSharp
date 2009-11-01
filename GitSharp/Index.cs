@@ -162,6 +162,19 @@ namespace GitSharp
             }
         }
 
+        /// <summary>
+        /// Returns true if the index has been changed, which means there are changes to be committed. This
+        /// is not to be confused with the status of the working directory. If changes in the working directory have not been
+        /// staged then IsChanged is false.
+        /// </summary>
+        public bool IsChanged
+        {
+            get
+            {
+                return GitIndex.IsChanged;
+            }
+        }
+
         public Commit CommitChanges(string message, Author author)
         {
             if (string.IsNullOrEmpty(message))
@@ -174,19 +187,13 @@ namespace GitSharp
             var parent = _repo.CurrentBranch.CurrentCommit;
             if (GitIndex.Members.Count == 0 || (parent != null && parent.Tree._id == tree_id))
                 throw new InvalidOperationException("There are no changes to commit");
-            var corecommit = new CoreCommit(_repo._internal_repo);
-            if (parent != null)
-                corecommit.ParentIds = new GitSharp.Core.ObjectId[] { parent._id };
-            corecommit.Author = new GitSharp.Core.PersonIdent(author.Name, author.EmailAddress, DateTime.Now, TimeZoneInfo.Local);
-            corecommit.Committer = corecommit.Author;
-            corecommit.Message = message;
-            corecommit.TreeEntry = _repo._internal_repo.MapTree(tree_id);
-            corecommit.Save();
+            var commit = Commit.Create(message, parent, new Tree(_repo, tree_id), author);
+
             var newRef =  _repo._internal_repo.UpdateRef("HEAD");
-            newRef.NewObjectId =corecommit.CommitId;
+            newRef.NewObjectId = commit._id;
             newRef.IsForceUpdate = true;
             newRef.Update();
-            return new Commit(_repo, corecommit);
+            return commit;
         }
 
         public override string ToString()

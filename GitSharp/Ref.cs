@@ -100,27 +100,32 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// Overwrites this ref by forwarding it to the given ref.
+        /// Updates this ref by linking it to the given ref's target.
+        /// </summary>
+        /// <param name="other">The ref this ref shall reference.</param>
+        public void Update(Ref reference)
+        {
+            Update(reference.Target);
+        }
+
+        /// <summary>
+        /// Updates this ref by forwarding it to the given object.
         /// </summary>
         /// <param name="other">The ref this object shall reference.</param>
-        public void Update(Ref other)
+        public void Update(AbstractObject reference)
         {
             var db = _repo._internal_repo;
             var updateRef = db.UpdateRef(this.Name);
-            updateRef.NewObjectId = other.Target._id;
+            updateRef.NewObjectId = reference._id;
             updateRef.IsForceUpdate = true;
             updateRef.Update();
-            db.WriteSymref(Name, other.Name);
+            //db.WriteSymref(Name, other.Name);
         }
 
-        //public T As<T>()
-        //    where T : Ref, new()
-        //{
-        //    if (this is T)
-        //        return this as T;
-        //    else
-        //        return new T(this);
-        //}
+        public static void Update(string name, AbstractObject reference)
+        {
+            new Ref(reference.Repository, name).Update(reference);
+        }
 
         /// <summary>
         /// Check validity of a ref name. It must not contain a character that has
@@ -173,5 +178,6 @@ namespace GitSharp
         {
             return "Ref[" + Name + "]";
         }
+
     }
 }

@@ -1,6 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,18 +36,40 @@
  */
 
 using System;
-using Tamir.SharpSsh.jsch;
 
-namespace GitSharp.Core.Transport
+namespace GitSharp.Core
 {
-    public class DefaultSshSessionFactory : SshConfigSessionFactory
+    
+    public class ConsoleUserInfoProvider : UserInfoProvider
     {
-        protected override void configure(OpenSshConfig.Host hc, Session session)
+        public override bool promptPassword(string message)
         {
-            if (!hc.isBatchMode())
-            {
-                session.setUserInfo(UserInfoProvider.Provider);
-            }
+            Console.Write(Environment.NewLine + message + ": ");
+            Password = Console.ReadLine();
+            Console.WriteLine();
+            return true;
+        }
+
+        public override bool promptPassphrase(string message)
+        {
+            Console.Write(Environment.NewLine + message + ": ");
+            Passphrase = Console.ReadLine();
+            Console.WriteLine();
+            return true;
+        }
+
+        public override bool promptYesNo(string message)
+        {
+            Console.Write(Environment.NewLine + message + ": ");
+            var answer = Console.ReadKey();
+            Console.WriteLine();
+            return answer.KeyChar == 'Y' || answer.KeyChar == 'y';
+        }
+
+        public override void showMessage(string message)
+        {
+            Console.WriteLine(message);
         }
     }
+
 }

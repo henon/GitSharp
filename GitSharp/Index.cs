@@ -71,7 +71,12 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// Removes files or directories from the index which are no longer to be tracked.
+        /// Removes files or directories from the index which are no longer to be tracked. 
+        /// Does not delete files from the working directory. Use Delete to remove and delete files.
+        /// 
+        /// Note: Remove requires the files and directories to be removed to be present in the working
+        /// directory in order to find out. TODO: make this not dependent of the working directory by
+        /// looking into the tree of the current commit.
         /// </summary>
         /// <param name="paths"></param>
         public void Remove(params string[] paths)
@@ -80,26 +85,50 @@ namespace GitSharp
             foreach (var path in paths)
             {
                 if (new FileInfo(path).Exists)
-                    RemoveFile(new FileInfo(path));
+                    RemoveFile(new FileInfo(path), false);
                 else if (new DirectoryInfo(path).Exists)
-                    RemoveDirectory(new DirectoryInfo(path));
+                    RemoveDirectory(new DirectoryInfo(path), false);
                 else
                     throw new ArgumentException("File or directory at <" + path + "> doesn't seem to exist.", "path");
             }
             GitIndex.write();
         }
 
-        private void RemoveFile(FileInfo path)
+        /// <summary>
+        /// Removes files or directories from the index and delete them from the working directory.
+        /// 
+        /// </summary>
+        /// <param name="paths"></param>
+        public void Delete(params string[] paths)
         {
-            GitIndex.remove((FileSystemInfo)_repo._internal_repo.WorkingDirectory, (FileSystemInfo)path); // Todo: change GitIndex.Remove to remove(DirectoryInfo , FileInfo) ??
+            GitIndex.RereadIfNecessary();
+            foreach (var path in paths)
+            {
+                if (new FileInfo(path).Exists)
+                    RemoveFile(new FileInfo(path), true);
+                else if (new DirectoryInfo(path).Exists)
+                    RemoveDirectory(new DirectoryInfo(path), true);
+                else
+                    throw new ArgumentException("File or directory at <" + path + "> doesn't seem to exist.", "path");
+            }
+            GitIndex.write();
         }
 
-        private void RemoveDirectory(DirectoryInfo dir)
+        private void RemoveFile(FileInfo path, bool delete_file)
+        {
+            GitIndex.remove((FileSystemInfo)_repo._internal_repo.WorkingDirectory, (FileSystemInfo)path); // Todo: change GitIndex.Remove to remove(DirectoryInfo , FileInfo) ??
+            if (delete_file)
+                path.Delete();
+        }
+
+        private void RemoveDirectory(DirectoryInfo dir, bool delete_dir)
         {
             foreach (var file in dir.GetFiles())
-                RemoveFile(file);
+                RemoveFile(file, delete_dir);
             foreach (var subdir in dir.GetDirectories())
-                RemoveDirectory(subdir);
+                RemoveDirectory(subdir, delete_dir);
+            if (delete_dir)
+                dir.Delete(true);
         }
 
         /// <summary>
@@ -118,19 +147,32 @@ namespace GitSharp
             GitIndex.Read();
         }
 
-        public RepositoryStatus CompareAgainstWorkingDirectory()
+         //public RepositoryStatus CompareAgainstWorkingDirectory(bool honor_ignore_rules)
+
+        public RepositoryStatus Status
         {
-            return CompareAgainstWorkingDirectory(true);
+            get
+            {
+                //if (honor_ignore_rules)
+                //    throw new NotImplementedException("Ignore rules are not implemented");
+                var commit = _repo.Head.CurrentCommit;
+                var tree = commit != null ? commit.Tree.InternalTree : new GitSharp.Core.Tree(_repo._internal_repo);
+                var diff = new GitSharp.Core.IndexDiff(tree, GitIndex);
+                return new RepositoryStatus(diff);
+            }
         }
 
-        public RepositoryStatus CompareAgainstWorkingDirectory(bool honor_ignore_rules)
+        /// <summary>
+        /// Returns true if the index has been changed, which means there are changes to be committed. This
+        /// is not to be confused with the status of the working directory. If changes in the working directory have not been
+        /// staged then IsChanged is false.
+        /// </summary>
+        public bool IsChanged
         {
-            if (honor_ignore_rules)
-                throw new NotImplementedException("Ignore rules are not implemented");
-            var commit = _repo.Head.CurrentCommit;
-            var tree = commit != null ? commit.Tree.InternalTree : new GitSharp.Core.Tree(_repo._internal_repo);
-            var diff = new GitSharp.Core.IndexDiff(tree, GitIndex);
-            return new RepositoryStatus(diff);
+            get
+            {
+                return GitIndex.IsChanged;
+            }
         }
 
         public Commit CommitChanges(string message, Author author)
@@ -145,19 +187,9 @@ namespace GitSharp
             var parent = _repo.CurrentBranch.CurrentCommit;
             if (GitIndex.Members.Count == 0 || (parent != null && parent.Tree._id == tree_id))
                 throw new InvalidOperationException("There are no changes to commit");
-            var corecommit = new CoreCommit(_repo._internal_repo);
-            if (parent != null)
-                corecommit.ParentIds = new GitSharp.Core.ObjectId[] { parent._id };
-            corecommit.Author = new GitSharp.Core.PersonIdent(author.Name, author.EmailAddress, DateTime.Now, TimeZoneInfo.Local);
-            corecommit.Committer = corecommit.Author;
-            corecommit.Message = message;
-            corecommit.TreeEntry = _repo._internal_repo.MapTree(tree_id);
-            corecommit.Save();
-            var newRef =  _repo._internal_repo.UpdateRef("HEAD");
-            newRef.NewObjectId =corecommit.CommitId;
-            newRef.IsForceUpdate = true;
-            newRef.Update();
-            return new Commit(_repo, corecommit);
+            var commit = Commit.Create(message, parent, new Tree(_repo, tree_id), author);
+            Ref.Update("HEAD", commit);
+            return commit;
         }
 
         public override string ToString()

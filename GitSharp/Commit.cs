@@ -443,6 +443,38 @@ namespace GitSharp
             }
         }
 
+        public static Commit Create(string message, Commit parent, Tree tree)
+        {
+            if (tree==null)
+                throw new ArgumentException("tree must not be null");
+            var repo=tree.Repository;
+            var author=new Author(repo.Config["user.name"], repo.Config["user.email"]);
+            return Create(message, parent, tree, author, author, DateTimeOffset.Now);
+        }
+
+        public static Commit Create(string message, Commit parent, Tree tree, Author author)
+        {
+            return Create(message, parent, tree, author, author, DateTimeOffset.Now);
+        }
+
+        public static Commit Create(string message, Commit parent, Tree tree, Author author, Author committer, DateTimeOffset time)
+        {
+            if (string.IsNullOrEmpty(message))
+                throw new ArgumentException("message must not be null or empty");
+            if (tree == null)
+                throw new ArgumentException("tree must not be null");
+            var repo = tree.Repository;
+            var corecommit = new CoreCommit(repo._internal_repo);
+            if (parent != null)
+                corecommit.ParentIds = new GitSharp.Core.ObjectId[] { parent._id };
+            corecommit.Author = new GitSharp.Core.PersonIdent(author.Name, author.EmailAddress, time.ToUnixTime(), (int)time.Offset.TotalMinutes);
+            corecommit.Committer = new GitSharp.Core.PersonIdent(committer.Name, committer.EmailAddress, time.ToUnixTime(), (int)time.Offset.TotalMinutes);
+            corecommit.Message = message;
+            corecommit.TreeEntry = tree.InternalTree;
+            corecommit.Save();
+            return new Commit(repo, corecommit);
+        }
+
         public override string ToString()
         {
             return "Commit[" + ShortHash + "]";

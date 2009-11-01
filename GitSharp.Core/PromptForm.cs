@@ -1,6 +1,5 @@
 ﻿/*
- * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
  *
  * All rights reserved.
  *
@@ -36,18 +35,34 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using Tamir.SharpSsh.jsch;
+using System.Windows.Forms;
 
-namespace GitSharp.Core.Transport
+namespace GitSharp.Core
 {
-    public class DefaultSshSessionFactory : SshConfigSessionFactory
+    public partial class PromptForm : Form
     {
-        protected override void configure(OpenSshConfig.Host hc, Session session)
+        public PromptForm()
         {
-            if (!hc.isBatchMode())
+            InitializeComponent();
+        }
+
+        public string Message
+        {
+            get
             {
-                session.setUserInfo(UserInfoProvider.Provider);
+                return Text;
+            }
+            set
+            {
+                Text = value;
+            }
+        }
+
+        public string Input
+        {
+            get
+            {
+                return input.Text;
             }
         }
     }

@@ -188,11 +188,7 @@ namespace GitSharp
             if (GitIndex.Members.Count == 0 || (parent != null && parent.Tree._id == tree_id))
                 throw new InvalidOperationException("There are no changes to commit");
             var commit = Commit.Create(message, parent, new Tree(_repo, tree_id), author);
-
-            var newRef =  _repo._internal_repo.UpdateRef("HEAD");
-            newRef.NewObjectId = commit._id;
-            newRef.IsForceUpdate = true;
-            newRef.Update();
+            Ref.Update("HEAD", commit);
             return commit;
         }
 

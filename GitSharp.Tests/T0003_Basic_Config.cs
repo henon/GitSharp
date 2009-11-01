@@ -52,18 +52,6 @@ namespace GitSharp.Tests
     public class T0003_Basic_Config : RepositoryTestCase
     {
         [Test]
-        public void test004_CheckNewConfig()
-        {
-            RepositoryConfig c = db.Config;
-            Assert.IsNotNull(c);
-            Assert.AreEqual("0", c.getString("core", null, "repositoryformatversion"));
-            Assert.AreEqual("0", c.getString("CoRe", null, "REPOSITORYFoRmAtVeRsIoN"));
-            Assert.AreEqual("true", c.getString("core", null, "filemode"));
-            Assert.AreEqual("true", c.getString("cOrE", null, "fIlEModE"));
-            Assert.IsNull(c.getString("notavalue", null, "reallyNotAValue"));
-        }
-
-        [Test]
         public void test005_ReadSimpleConfig()
         {
             RepositoryConfig c = db.Config;

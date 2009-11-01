@@ -15,7 +15,7 @@
  *   disclaimer in the documentation and/or other materials provided
  *   with the distribution.
  *
- * - Neither the name of the Git Development Community nor the
+ * - Neither the name of the TicGit project nor the
  *   names of its contributors may be used to endorse or promote
  *   products derived from this software without specific prior
  *   written permission.
@@ -320,7 +320,7 @@ namespace GitSharp
         {
             get
             {
-                return Index.CompareAgainstWorkingDirectory(false); // todo: change this to true, once the ignore rules are implemented.
+                return Index.Status;
             }
         }
 

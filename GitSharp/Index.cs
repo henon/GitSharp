@@ -71,7 +71,12 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// Removes files or directories from the index which are no longer to be tracked.
+        /// Removes files or directories from the index which are no longer to be tracked. 
+        /// Does not delete files from the working directory. Use Delete to remove and delete files.
+        /// 
+        /// Note: Remove requires the files and directories to be removed to be present in the working
+        /// directory in order to find out. TODO: make this not dependent of the working directory by
+        /// looking into the tree of the current commit.
         /// </summary>
         /// <param name="paths"></param>
         public void Remove(params string[] paths)
@@ -80,26 +85,50 @@ namespace GitSharp
             foreach (var path in paths)
             {
                 if (new FileInfo(path).Exists)
-                    RemoveFile(new FileInfo(path));
+                    RemoveFile(new FileInfo(path), false);
                 else if (new DirectoryInfo(path).Exists)
-                    RemoveDirectory(new DirectoryInfo(path));
+                    RemoveDirectory(new DirectoryInfo(path), false);
                 else
                     throw new ArgumentException("File or directory at <" + path + "> doesn't seem to exist.", "path");
             }
             GitIndex.write();
         }
 
-        private void RemoveFile(FileInfo path)
+        /// <summary>
+        /// Removes files or directories from the index and delete them from the working directory.
+        /// 
+        /// </summary>
+        /// <param name="paths"></param>
+        public void Delete(params string[] paths)
         {
-            GitIndex.remove((FileSystemInfo)_repo._internal_repo.WorkingDirectory, (FileSystemInfo)path); // Todo: change GitIndex.Remove to remove(DirectoryInfo , FileInfo) ??
+            GitIndex.RereadIfNecessary();
+            foreach (var path in paths)
+            {
+                if (new FileInfo(path).Exists)
+                    RemoveFile(new FileInfo(path), true);
+                else if (new DirectoryInfo(path).Exists)
+                    RemoveDirectory(new DirectoryInfo(path), true);
+                else
+                    throw new ArgumentException("File or directory at <" + path + "> doesn't seem to exist.", "path");
+            }
+            GitIndex.write();
         }
 
-        private void RemoveDirectory(DirectoryInfo dir)
+        private void RemoveFile(FileInfo path, bool delete_file)
+        {
+            GitIndex.remove((FileSystemInfo)_repo._internal_repo.WorkingDirectory, (FileSystemInfo)path); // Todo: change GitIndex.Remove to remove(DirectoryInfo , FileInfo) ??
+            if (delete_file)
+                path.Delete();
+        }
+
+        private void RemoveDirectory(DirectoryInfo dir, bool delete_dir)
         {
             foreach (var file in dir.GetFiles())
-                RemoveFile(file);
+                RemoveFile(file, delete_dir);
             foreach (var subdir in dir.GetDirectories())
-                RemoveDirectory(subdir);
+                RemoveDirectory(subdir, delete_dir);
+            if (delete_dir)
+                dir.Delete(true);
         }
 
         /// <summary>
@@ -118,19 +147,19 @@ namespace GitSharp
             GitIndex.Read();
         }
 
-        public RepositoryStatus CompareAgainstWorkingDirectory()
-        {
-            return CompareAgainstWorkingDirectory(true);
-        }
+         //public RepositoryStatus CompareAgainstWorkingDirectory(bool honor_ignore_rules)
 
-        public RepositoryStatus CompareAgainstWorkingDirectory(bool honor_ignore_rules)
+        public RepositoryStatus Status
         {
-            if (honor_ignore_rules)
-                throw new NotImplementedException("Ignore rules are not implemented");
-            var commit = _repo.Head.CurrentCommit;
-            var tree = commit != null ? commit.Tree.InternalTree : new GitSharp.Core.Tree(_repo._internal_repo);
-            var diff = new GitSharp.Core.IndexDiff(tree, GitIndex);
-            return new RepositoryStatus(diff);
+            get
+            {
+                //if (honor_ignore_rules)
+                //    throw new NotImplementedException("Ignore rules are not implemented");
+                var commit = _repo.Head.CurrentCommit;
+                var tree = commit != null ? commit.Tree.InternalTree : new GitSharp.Core.Tree(_repo._internal_repo);
+                var diff = new GitSharp.Core.IndexDiff(tree, GitIndex);
+                return new RepositoryStatus(diff);
+            }
         }
 
         public Commit CommitChanges(string message, Author author)

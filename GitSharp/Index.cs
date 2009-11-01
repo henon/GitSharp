@@ -29,7 +29,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// Add all untracked files to the index (like git add .)
+        /// Add all untracked files to the index and stage all changes (like git add .)
         /// </summary>
         public void AddAll()
         {
@@ -37,7 +37,9 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// Adds untracked files or directories to the index and writes the index to the disk (like "git add")
+        /// Adds untracked files or directories to the index and writes the index to the disk (like "git add").
+        /// For tracked files that were modified, it stages the modification. Is a no-op for tracked files that were
+        /// not modified.
         /// 
         /// Note: Add as many files as possible by one call of this method for best performance.
         /// </summary>
@@ -129,6 +131,21 @@ namespace GitSharp
                 RemoveDirectory(subdir, delete_dir);
             if (delete_dir)
                 dir.Delete(true);
+        }
+
+        /// <summary>
+        /// Stages the given files. Untracked files are added.
+        /// </summary>
+        /// <param name="paths"></param>
+        public void Stage(params string[] paths)
+        {
+            Add(paths);
+        }
+
+        public void Unstage(params string[] file)
+        {
+            // TODO: make sure it is tracked. then reset to the version in the current commit's tree.
+            throw new NotImplementedException();
         }
 
         /// <summary>

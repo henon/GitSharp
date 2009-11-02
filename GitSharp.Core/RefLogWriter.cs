@@ -120,11 +120,11 @@ namespace GitSharp.Core
 
             byte[] rec = Constants.encode(r.ToString());
             var logdir = new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.LOGS));
-            var reflog = new DirectoryInfo(Path.Combine(logdir.FullName, refName));
+            var reflog = new FileInfo(Path.Combine(logdir.FullName, refName));
 
             if (reflog.Exists || db.Config.getCore().isLogAllRefUpdates())
             {
-                DirectoryInfo refdir = reflog.Parent;
+                DirectoryInfo refdir = reflog.Directory;
 
                 if (!refdir.Exists && !refdir.Mkdirs())
                 {

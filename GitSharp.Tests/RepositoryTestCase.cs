@@ -309,20 +309,6 @@ namespace GitSharp.Tests
             return newRepo;
         }
 
-        protected void setupReflog(String logName, byte[] data)
-        {
-            var logfile = new FileInfo(Path.Combine(db.Directory.FullName, logName));
-            
-            if (!logfile.Directory.Mkdirs() && !logfile.Directory.IsDirectory())
-            {
-                throw new IOException(
-                    "oops, cannot create the directory for the test reflog file"
-                    + logfile);
-            }
-
-            File.WriteAllBytes(logfile.FullName, data);
-        }
-
         [TestFixtureTearDown]
         public void FixtureTearDown()
         {

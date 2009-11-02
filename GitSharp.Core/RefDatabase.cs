@@ -130,7 +130,7 @@ namespace GitSharp.Core
 		{
 			lock (locker)
 			{
-				_looseRefs[name] = new Ref(Ref.Storage.Loose, origName, name, id);
+				_looseRefs[name] = new Ref(Ref.Storage.Loose, name, name, id);
 				_looseRefsMTime[name] = time;
 				SetModified();
 			}

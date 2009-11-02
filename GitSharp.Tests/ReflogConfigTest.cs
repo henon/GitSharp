@@ -46,7 +46,6 @@ namespace GitSharp.Tests
     public class ReflogConfigTest : RepositoryTestCase
     {
         [Test]
-        [Ignore]
         public void testlogAllRefUpdates() {
             long commitTime = 1154236443000L;
             int tz = -4 * 60;

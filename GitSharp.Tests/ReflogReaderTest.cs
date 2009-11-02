@@ -37,6 +37,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using GitSharp.Core;
@@ -186,6 +187,20 @@ namespace GitSharp.Tests
         {
             Assert.AreEqual(0, db.ReflogReader("master").getReverseEntries().Count);
             Assert.IsNull(db.ReflogReader("master").getLastEntry());
+        }
+
+        protected void setupReflog(String logName, byte[] data)
+        {
+            var logfile = new FileInfo(Path.Combine(db.Directory.FullName, logName));
+
+            if (!logfile.Directory.Mkdirs() && !logfile.Directory.IsDirectory())
+            {
+                throw new IOException(
+                    "oops, cannot create the directory for the test reflog file"
+                    + logfile);
+            }
+
+            File.WriteAllBytes(logfile.FullName, data);
         }
     }
 }

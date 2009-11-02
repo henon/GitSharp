@@ -308,6 +308,7 @@ namespace GitSharp.Core
         {
             if (NeedStatInformation)
             {
+                _lockFile.Refresh();
                 CommitLastModified = _lockFile.LastWriteTime;
             }
         }

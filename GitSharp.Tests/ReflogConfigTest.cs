@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System.Collections.Generic;
 using GitSharp.Core;
 using GitSharp.Core.Util;
 using NUnit.Framework;
@@ -45,6 +46,7 @@ namespace GitSharp.Tests
     public class ReflogConfigTest : RepositoryTestCase
     {
         [Test]
+        [Ignore]
         public void testlogAllRefUpdates() {
             long commitTime = 1154236443000L;
             int tz = -4 * 60;
@@ -82,6 +84,26 @@ namespace GitSharp.Tests
             addFileToTree(t, "i-am-anotheranother-file", "and this is other other data in me\n");
             commit(t, "A Commit\n", new PersonIdent(jauthor, commitTime, tz), new PersonIdent(jcommitter, commitTime, tz));
             Assert.IsTrue(db.ReflogReader(Constants.HEAD).getReverseEntries().Count == 2, "Reflog for HEAD should contain two entries");
+        }
+
+
+        [Test]
+        [Ignore]
+        public void testEnsureCommitTimeAndTimeZoneOffsetArePreserved()
+        {
+            long commitTime = 1154236443000L;
+            int tz = -4 * 60;
+
+            Core.Tree t = new Core.Tree(db);
+            addFileToTree(t, "i-am-a-file", "and this is the data in me\n");
+            commit(t, "A Commit\n", new PersonIdent(jauthor, commitTime, tz), new PersonIdent(jcommitter, commitTime, tz));
+            IList<ReflogReader.Entry> entries = db.ReflogReader(Constants.HEAD).getReverseEntries();
+            Assert.AreEqual(1, entries.Count);
+
+            var entry = entries[0];
+
+            Assert.AreEqual(commitTime, entry.getWho().When);
+            Assert.AreEqual(tz, entry.getWho().TimeZoneOffset);
         }
 
         private void addFileToTree(Core.Tree t, string filename, string content)

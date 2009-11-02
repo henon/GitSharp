@@ -173,6 +173,7 @@ namespace GitSharp.Core
             Config.setInt("core", null, "repositoryformatversion", 0);
             Config.setBoolean("core", null, "filemode", true);
             Config.setBoolean("core", null, "bare", bare);
+            Config.setBoolean("core", null, "logallrefupdates", !bare);
 
             Config.save();
 		}

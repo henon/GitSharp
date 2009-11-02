@@ -50,6 +50,10 @@ namespace GitSharp.Core
         private readonly Tree _tree;
 		private bool _anyChanges;
 
+        /// <summary>
+        /// Construct an indexdiff for diffing the workdir against the index.
+        /// </summary>
+        /// <param name="repository"></param>
         public IndexDiff(Repository repository)
 			: this(repository.MapTree("HEAD"), repository.Index)
         {
@@ -78,6 +82,11 @@ namespace GitSharp.Core
             }
         }
 
+        /// <summary>
+        /// Construct an indexdiff for diffing the workdir against both the index and a tree.
+        /// </summary>
+        /// <param name="tree"></param>
+        /// <param name="index"></param>
         public IndexDiff(Tree tree, GitIndex index)
         {
 			_anyChanges = false;
@@ -92,6 +101,10 @@ namespace GitSharp.Core
             Untracked = new HashSet<string>();
         }
 
+        /// <summary>
+        /// Run the diff operation. Until this is called, all lists will be empty
+        /// </summary>
+        /// <returns>true if anything is different between index, tree, and workdir</returns>
         public bool Diff()
         {
             DirectoryInfo root = _index.Repository.WorkingDirectory;
@@ -146,11 +159,32 @@ namespace GitSharp.Core
             return _anyChanges;
         }
 
+        /// <summary>
+        /// List of files added to the index, not in the tree
+        /// </summary>
         public HashSet<string> Added { get; private set; }
+
+        /// <summary>
+        /// List of files changed from tree to index
+        /// </summary>
         public HashSet<string> Changed { get; private set; }
+
+        /// <summary>
+        /// List of files removed from index, but in tree
+        /// </summary>
         public HashSet<string> Removed { get; private set; }
+
+        /// <summary>
+        /// List of files in index, but not filesystem
+        /// </summary>
         public HashSet<string> Missing { get; private set; }
+
+        /// <summary>
+        /// List of files modified on disk relative to the index
+        /// </summary>
         public HashSet<string> Modified { get; private set; }
+
+
         public HashSet<string> Untracked { get; private set; }
     }
 }

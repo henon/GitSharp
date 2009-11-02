@@ -140,32 +140,6 @@ namespace GitSharp.Tests.API
                 Assert.IsTrue(added.SetEquals(status.Missing));
                 Assert.AreEqual(0, status.Modified.Count);
                 Assert.IsTrue(removed.SetEquals(status.Removed));
-
-                // Todo: modify, remove, change, add files and see how missing goes away
-            }
-        }
-
-        [Test]
-        public void TestModified_and_Staged()
-        {
-            using (var repo = GetTrashRepository())
-            {
-                var index = repo.Index;
-                index.Add(writeTrashFile("file2", "file2").FullName, writeTrashFile("dir/file3", "dir/file3").FullName);
-                repo.Commit("committing file2 and dir/file2", Author.Anonymous);
-                index.Add(writeTrashFile("file2", "file2 changed").FullName, writeTrashFile("dir/file3", "dir/file3 changed").FullName);
-                writeTrashFile("dir/file3", "modified");
-
-                var status = repo.Status;
-
-                Assert.AreEqual(2, status.Staged.Count);
-                Assert.IsTrue(status.Staged.Contains("file2"));
-                Assert.IsTrue(status.Staged.Contains("dir/file3"));
-                Assert.AreEqual(1, status.Modified.Count);
-                Assert.IsTrue(status.Modified.Contains("dir/file3"));
-                Assert.AreEqual(0, status.Added.Count);
-                Assert.AreEqual(0, status.Removed.Count);
-                Assert.AreEqual(0, status.Missing.Count);
             }
         }
 

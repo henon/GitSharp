@@ -49,20 +49,6 @@ namespace GitSharp.Tests.API
     {
 
         [Test]
-        public void StatusEvenWorksWithHeadLessRepo()
-        {
-            using (var repo = Repository.Init(Path.Combine(trash.FullName, "test")))
-            {
-                RepositoryStatus status = null;
-                Assert.DoesNotThrow(() => status = repo.Status);
-                Assert.IsFalse(repo.Status.AnyDifferences);
-                Assert.AreEqual(0,
-                                status.Added.Count + status.Staged.Count + status.Missing.Count + status.Modified.Count +
-                                status.Removed.Count);
-            }
-        }
-
-        [Test]
         public void ImplicitConversionToCoreRepo()
         {
             using (var repo = this.GetTrashRepository())
@@ -73,61 +59,5 @@ namespace GitSharp.Tests.API
             }
         }
 
-        [Test]
-        public void RepositoryStatusTracksAddedFiles()
-        {
-            //setup of .git directory
-            var resource =
-                new DirectoryInfo(Path.Combine(Path.Combine(Environment.CurrentDirectory, "Resources"),
-                                               "CorruptIndex"));
-            var tempRepository =
-                new DirectoryInfo(Path.Combine(trash.FullName, "CorruptIndex" + Path.GetRandomFileName()));
-            CopyDirectory(resource.FullName, tempRepository.FullName);
-
-            var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, ".git"));
-            Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
-
-            using (var repository = new Repository(repositoryPath.FullName))
-            {
-                var status = repository.Status;
-
-                Assert.IsTrue(status.AnyDifferences);
-                Assert.AreEqual(1, status.Added.Count);
-                Assert.IsTrue(status.Added.Contains("b.txt")); // the file already exists in the index (eg. has been previously git added)
-                Assert.AreEqual(0, status.Staged.Count);
-                Assert.AreEqual(0, status.Missing.Count);
-                Assert.AreEqual(0, status.Modified.Count);
-                Assert.AreEqual(0, status.Removed.Count);
-
-                string filepath = Path.Combine(repository.WorkingDirectory, "c.txt");
-                writeTrashFile(filepath, "c");
-                repository.Index.Add(filepath);
-
-                status = repository.Status;
-
-                Assert.IsTrue(status.AnyDifferences);
-                Assert.AreEqual(2, status.Added.Count);
-                Assert.IsTrue(status.Added.Contains("b.txt"));
-                Assert.IsTrue(status.Added.Contains("c.txt"));
-                Assert.AreEqual(0, status.Staged.Count);
-                Assert.AreEqual(0, status.Missing.Count);
-                Assert.AreEqual(0, status.Modified.Count);
-                Assert.AreEqual(0, status.Removed.Count);
-
-            }
-        }
-
-        [Test]
-        public void RepositoryStatusTracksUntrackedFiles()
-        {
-            var repo = new Repository(trash.FullName);
-            var a = writeTrashFile("untracked.txt", "");
-            var b = writeTrashFile("someDirectory/untracked2.txt", "");
-
-            var status = repo.Status;
-            Assert.AreEqual(status.Untracked.Count, 2);
-            Assert.IsTrue(status.Untracked.Contains(a.FullName));
-            Assert.IsTrue(status.Untracked.Contains(b.FullName));
-        }
     }
 }

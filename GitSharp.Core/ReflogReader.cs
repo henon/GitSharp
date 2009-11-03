@@ -161,7 +161,7 @@ namespace GitSharp.Core
 
 			try
 			{
-				log = NB.ReadFully(_logName);
+				log = IO.ReadFully(_logName);
 			}
 			catch (DirectoryNotFoundException)
 			{

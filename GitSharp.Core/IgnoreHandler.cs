@@ -109,7 +109,7 @@ namespace GitSharp.Core
 
                 _directoryPatterns.Add(p, new List<IPattern>());
                 string ignorePath = Path.Combine(_repo.WorkingDirectory.FullName, p);
-                ignorePath = Path.Combine(ignorePath, ".gitignore");
+                ignorePath = Path.Combine(ignorePath, Constants.GITIGNORE_FILENAME);
                 if (File.Exists(ignorePath))
                 {
                     ReadPatternsFromFile(ignorePath, _directoryPatterns[p]);

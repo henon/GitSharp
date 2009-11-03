@@ -51,6 +51,7 @@
     <Compile Include="AbbreviatedObjectIdTest.cs" />
     <Compile Include="API\ApiTestCase.cs" />
     <Compile Include="API\BlobTests.cs" />
+    <Compile Include="API\ChineseEncodingTests.cs" />
     <Compile Include="API\CloneTests.cs" />
     <Compile Include="API\CommitDateTests.cs" />
     <Compile Include="API\CommitTests.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="TreeIteratorPreOrderTest.cs" />
     <Compile Include="MockSystemReader.cs" />
     <Compile Include="TreeWalk\Filter\PathSuffixFilterTestCase.cs" />
+    <Compile Include="Util\ByteArrayExtensionsFixture.cs" />
     <Compile Include="Util\NBTests.cs" />
     <Compile Include="PackIndexV1Tests.cs" />
     <Compile Include="PackIndexV2Tests.cs" />

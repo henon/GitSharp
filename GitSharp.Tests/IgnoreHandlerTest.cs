@@ -97,7 +97,7 @@ namespace GitSharp.Tests
 
         private void WriteIgnore(string dir, string data)
         {
-            writeTrashFile(Path.Combine(dir, ".gitignore"), data);
+            writeTrashFile(Path.Combine(dir, Constants.GITIGNORE_FILENAME), data);
         }
     }
 

@@ -415,6 +415,10 @@ namespace GitSharp.Tests
         	
 			ObjectId cid = new ObjectWriter(db).WriteCommit(commit);
             Assert.AreEqual("4680908112778718f37e686cbebcc912730b3154", cid.Name);
+
+		    Core.Commit loadedCommit = db.MapCommit(cid);
+		    Assert.AreNotSame(loadedCommit, commit);
+		    Assert.AreEqual(commit.Message, loadedCommit.Message);
         }
 
         [Test]

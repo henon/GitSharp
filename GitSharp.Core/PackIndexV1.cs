@@ -56,7 +56,7 @@ namespace GitSharp.Core
 		{
 			byte[] fanoutTable = new byte[IdxHdrLen];
 			Array.Copy(hdr, 0, fanoutTable, 0, hdr.Length);
-			NB.ReadFully(fd, fanoutTable, hdr.Length, IdxHdrLen - hdr.Length);
+			IO.ReadFully(fd, fanoutTable, hdr.Length, IdxHdrLen - hdr.Length);
 
 			_idxHeader = new long[256];
 			for (int k = 0; k < _idxHeader.Length; k++)
@@ -73,13 +73,13 @@ namespace GitSharp.Core
 				if (n > 0)
 				{
 					_idxdata[k] = new byte[n * (Constants.OBJECT_ID_LENGTH + 4)];
-					NB.ReadFully(fd, _idxdata[k], 0, _idxdata[k].Length);
+					IO.ReadFully(fd, _idxdata[k], 0, _idxdata[k].Length);
 				}
 			}
 
 			ObjectCount = _idxHeader[255];
 			PackChecksum = new byte[20];
-			NB.ReadFully(fd, PackChecksum, 0, PackChecksum.Length);
+			IO.ReadFully(fd, PackChecksum, 0, PackChecksum.Length);
 
 
 

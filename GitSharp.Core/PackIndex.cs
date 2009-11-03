@@ -359,7 +359,7 @@ namespace GitSharp.Core
                 using (FileStream fs = idxFile.OpenRead())
                 {
                     byte[] hdr = new byte[8];
-                    NB.ReadFully(fs, hdr, 0, hdr.Length);
+                    IO.ReadFully(fs, hdr, 0, hdr.Length);
 
                     if (IsTOC(hdr))
                     {

@@ -356,6 +356,11 @@ namespace GitSharp.Core
         /// </summary>
         public const string SIGNED_OFF_BY_TAG = "Signed-off-by: ";
 
+        /// <summary>
+        /// A gitignore file name
+        /// </summary>
+	    public const string GITIGNORE_FILENAME = ".gitignore";
+
 
         /// <summary>
         /// Create a new digest function for objects.

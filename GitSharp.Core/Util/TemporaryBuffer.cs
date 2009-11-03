@@ -267,7 +267,7 @@ namespace GitSharp.Core.Util
             {
                 using (var @in = new FileStream(_onDiskFile.FullName, System.IO.FileMode.Open, FileAccess.Read))
                 {
-                    NB.ReadFully(@in, @out, 0, (int)len);
+                    IO.ReadFully(@in, @out, 0, (int)len);
                 }
             }
             return @out;

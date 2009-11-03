@@ -51,6 +51,7 @@
     <Compile Include="AbbreviatedObjectIdTest.cs" />
     <Compile Include="API\ApiTestCase.cs" />
     <Compile Include="API\BlobTests.cs" />
+    <Compile Include="API\ChineseEncodingTests.cs" />
     <Compile Include="API\CloneTests.cs" />
     <Compile Include="API\CommitDateTests.cs" />
     <Compile Include="API\CommitTests.cs" />

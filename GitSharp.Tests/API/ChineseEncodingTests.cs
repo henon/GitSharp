@@ -51,29 +51,42 @@ namespace GitSharp.Tests.API
         [Test]
         public void Commit_Chinese()
         {
-            var workingDirectory = Path.Combine(trash.FullName, "汉语repo");
+            var workingDirectory = Path.Combine(trash.FullName, "汉语repo"); // a chinese repository
             using (var repo = Repository.Init(workingDirectory))
             {
-                var index_path = Path.Combine(repo.Directory, "index");
                 var index = repo.Index;
-                index.Write(); // write empty index
-                string filepath = Path.Combine(workingDirectory, "欢迎 henon.txt");
-                File.WriteAllText(filepath, "我爱写汉字。");
-                string filepath1 = Path.Combine(workingDirectory, "好喝的啤酒.txt");
-                File.WriteAllText(filepath1, "青岛啤酒");
-                index.Add(filepath, filepath1);
+                string filepath = Path.Combine(workingDirectory, "henon喜欢什么.txt"); // what henon likes.txt
+                File.WriteAllText(filepath, "我爱写汉字。"); // i love writing chinese characters.
+                string filepath1 = Path.Combine(workingDirectory, "nulltoken喜欢什么.txt"); // what nulltoken likes.txt
+                File.WriteAllText(filepath1, "他爱法国红酒。"); // he loves french red wine.
+                var dir = Directory.CreateDirectory(Path.Combine(workingDirectory, "啤酒")).FullName; // creating a folder called "beer" 
+                string filepath2 = Path.Combine(dir, "好喝的啤酒.txt"); // creating a file called "good beer.txt" in folder "beer"
+                File.WriteAllText(filepath2, "青岛啤酒"); // the file contains a chinese beer called QingDao beer 
 
+                // adding the files and directories we created.
+                index.Add(filepath, filepath1, dir);
+
+                // checking index
                 var status = repo.Status;
-                Assert.IsTrue(status.Added.Contains("欢迎 henon.txt"));
-                Assert.IsTrue(status.Added.Contains("好喝的啤酒.txt"));
+                Assert.IsTrue(status.Added.Contains("henon喜欢什么.txt"));
+                Assert.IsTrue(status.Added.Contains("nulltoken喜欢什么.txt"));
+                Assert.IsTrue(status.Added.Contains("啤酒/好喝的啤酒.txt"));
 
-                var c=repo.Commit("中国很大。长城很长。上海很漂亮。", new Author("汉语学生", "meinrad.recheis@gmail.com"));
+                // committing, with the message; "China is very large. The great wall is very long. Shanghai is very pretty.", Author: "a student of the chinese language"
+                var c = repo.Commit("中国很大。长城很长。上海很漂亮。", new Author("汉语学生", "meinrad.recheis@gmail.com"));
+
+                // loading the commit from the repository and inspecting its contents
                 var commit = new Commit(repo, c.Hash);
                 Assert.AreEqual("中国很大。长城很长。上海很漂亮。", commit.Message);
                 Assert.AreEqual("汉语学生", commit.Author.Name);
-                var dict=commit.Tree.Leaves.ToDictionary(leaf => leaf.Name);
-                Assert.AreEqual("我爱写汉字。", dict["欢迎 henon.txt"].Data);
-                Assert.AreEqual("青岛啤酒", dict["好喝的啤酒.txt"].Data);
+                var dict = commit.Tree.Leaves.ToDictionary(leaf => leaf.Name);
+                Assert.AreEqual("我爱写汉字。", dict["henon喜欢什么.txt"].Data);
+                Assert.AreEqual("他爱法国红酒。", dict["nulltoken喜欢什么.txt"].Data);
+                Tree tree = commit.Tree.Trees.First();
+                Assert.AreEqual("啤酒", tree.Name);
+                Leaf good_beer = tree.Leaves.First();
+                Assert.AreEqual("好喝的啤酒.txt", good_beer.Name);
+                Assert.AreEqual(Encoding.UTF8.GetBytes("青岛啤酒"), good_beer.RawData);
             }
         }
     }

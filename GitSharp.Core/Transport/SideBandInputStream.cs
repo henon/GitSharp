@@ -257,7 +257,7 @@ namespace GitSharp.Core.Transport
         private string readString(int len)
         {
             byte[] raw = new byte[len];
-            NB.ReadFully(ins, raw, 0, len);
+            IO.ReadFully(ins, raw, 0, len);
             return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
         }
     }

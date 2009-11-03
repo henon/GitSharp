@@ -102,7 +102,7 @@ namespace GitSharp.Core.Transport
 
             try
             {
-                NB.ReadFully(ins, raw, 0, len);
+                IO.ReadFully(ins, raw, 0, len);
             }
             catch (IOException e)
             {
@@ -128,7 +128,7 @@ namespace GitSharp.Core.Transport
 
             try
             {
-                NB.ReadFully(ins, raw, 0, len);
+                IO.ReadFully(ins, raw, 0, len);
             }
             catch (IOException e)
             {
@@ -142,7 +142,7 @@ namespace GitSharp.Core.Transport
         {
             try
             {
-                NB.ReadFully(ins, lenbuffer, 0, 4);
+                IO.ReadFully(ins, lenbuffer, 0, 4);
             }
             catch (IOException e)
             {

@@ -134,9 +134,9 @@ namespace GitSharp.Core.Transport
             while (lf < cnt && hdrbuf[lf] != '\n')
                 lf++;
             bin.Position = mark;
-            NB.skipFully(bin, lf);
+            IO.skipFully(bin, lf);
             if (lf < cnt && hdrbuf[lf] == '\n')
-                NB.skipFully(bin, 1);
+                IO.skipFully(bin, 1);
 
             return RawParseUtils.decode(Constants.CHARSET, hdrbuf, 0, lf);
         }

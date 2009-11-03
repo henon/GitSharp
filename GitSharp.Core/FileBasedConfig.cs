@@ -71,7 +71,7 @@ namespace GitSharp.Core
         {
             try
             {
-                fromText(RawParseUtils.decode(NB.ReadFully(getFile())));
+                fromText(RawParseUtils.decode(IO.ReadFully(getFile())));
             }
             catch (FileNotFoundException)
             {

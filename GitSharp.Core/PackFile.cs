@@ -458,7 +458,7 @@ namespace GitSharp.Core
 			}
 
 			var buf = new byte[size];
-			NB.ReadFully(_fd, pos, buf, 0, size);
+			IO.ReadFully(_fd, pos, buf, 0, size);
 			return new ByteArrayWindow(this, pos, buf);
 		}
 
@@ -502,7 +502,7 @@ namespace GitSharp.Core
 			PackIndex idx = LoadPackIndex();
 			var buf = new byte[20];
 
-			NB.ReadFully(_fd, 0, buf, 0, 12);
+			IO.ReadFully(_fd, 0, buf, 0, 12);
 			if (RawParseUtils.match(buf, 0, Constants.PACK_SIGNATURE) != 4)
 			{
 				throw new IOException("Not a PACK file.");
@@ -523,7 +523,7 @@ namespace GitSharp.Core
 					+ ": " + File.FullName);
 			}
 
-			NB.ReadFully(_fd, Length - 20, buf, 0, 20);
+			IO.ReadFully(_fd, Length - 20, buf, 0, 20);
 
 			if (!buf.SequenceEqual(_packChecksum))
 			{

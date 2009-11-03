@@ -370,7 +370,7 @@ namespace GitSharp.Core.DirectoryCache
 			// Read the index header and verify we understand it.
 			//
 			var hdr = new byte[20];
-			NB.ReadFully(inStream, hdr, 0, 12);
+			IO.ReadFully(inStream, hdr, 0, 12);
 			md.Update(hdr, 0, 12);
 			if (!IsDIRC(hdr))
 			{
@@ -404,7 +404,7 @@ namespace GitSharp.Core.DirectoryCache
 			while (true)
 			{
 				var pos = inStream.Position;
-				NB.ReadFully(inStream, hdr, 0, 20);
+				IO.ReadFully(inStream, hdr, 0, 20);
 
 				int nextByte = @in.Read();
 				if (nextByte < 0 || inStream.Position == inStream.Length)
@@ -420,8 +420,8 @@ namespace GitSharp.Core.DirectoryCache
 					case ExtTree:
 						var raw = new byte[NB.DecodeInt32(hdr, 4)];
 						md.Update(hdr, 0, 8);
-						NB.skipFully(inStream, 8);
-						NB.ReadFully(inStream, raw, 0, raw.Length);
+						IO.skipFully(inStream, 8);
+						IO.ReadFully(inStream, raw, 0, raw.Length);
 						md.Update(raw, 0, raw.Length);
 						_cacheTree = new DirCacheTree(raw, new MutableInteger(), null);
 						break;
@@ -433,7 +433,7 @@ namespace GitSharp.Core.DirectoryCache
 							// a performance optimization. Since we do not
 							// understand it, we can safely skip past it.
 							//
-							NB.skipFully(inStream, NB.decodeUInt32(hdr, 4));
+							IO.skipFully(inStream, NB.decodeUInt32(hdr, 4));
 						}
 						else
 						{

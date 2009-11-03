@@ -236,7 +236,7 @@ namespace GitSharp.Core
             {
                 try
                 {
-                    byte[] buf = NB.ReadFully(head, 4096);
+                    byte[] buf = IO.ReadFully(head, 4096);
                     int n = buf.Length;
                     if (n == 0)
                         return null;

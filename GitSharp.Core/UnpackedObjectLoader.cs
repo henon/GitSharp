@@ -92,7 +92,7 @@ namespace GitSharp.Core
 				try
 				{
 					var compressed = new byte[(int)inStream.Length];
-					NB.ReadFully(inStream, compressed, 0, compressed.Length);
+					IO.ReadFully(inStream, compressed, 0, compressed.Length);
 					return compressed;
 				}
 				finally

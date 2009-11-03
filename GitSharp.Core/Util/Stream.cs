@@ -55,7 +55,7 @@ namespace GitSharp.Core.Util
                     if (stream.Length >= 0)
                     {
                         byte[] r = new byte[stream.Length];
-                        NB.ReadFully(stream, r, 0, r.Length);
+                        IO.ReadFully(stream, r, 0, r.Length);
                         return r;
                     }
                 }

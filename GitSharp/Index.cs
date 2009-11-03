@@ -202,7 +202,7 @@ namespace GitSharp
             var tree_id = GitIndex.writeTree();
             // check if tree is different from current commit's tree
             var parent = _repo.CurrentBranch.CurrentCommit;
-            if (GitIndex.Members.Count == 0 || (parent != null && parent.Tree._id == tree_id))
+            if ((parent==null && GitIndex.Members.Count == 0) || (parent != null && parent.Tree._id == tree_id))
                 throw new InvalidOperationException("There are no changes to commit");
             var commit = Commit.Create(message, parent, new Tree(_repo, tree_id), author);
             Ref.Update("HEAD", commit);

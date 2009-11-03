@@ -82,7 +82,7 @@ namespace GitSharp.Tests.API
                 Assert.IsTrue(status.Added.Contains("for henon.txt"));
                 Assert.IsTrue(status.Added.Contains("for nulltoken.txt"));
                 Assert.AreEqual(2, status.Added.Count);
-                Assert.AreEqual(0, status.Changed.Count);
+                Assert.AreEqual(0, status.Staged.Count);
                 Assert.AreEqual(0, status.Missing.Count);
                 Assert.AreEqual(0, status.Modified.Count);
                 Assert.AreEqual(0, status.Removed.Count);
@@ -136,16 +136,15 @@ namespace GitSharp.Tests.API
                                   };
 
                 Assert.IsTrue(added.SetEquals(status.Added));
-                Assert.AreEqual(0, status.Changed.Count);
+                Assert.AreEqual(0, status.Staged.Count);
                 Assert.IsTrue(added.SetEquals(status.Missing));
                 Assert.AreEqual(0, status.Modified.Count);
                 Assert.IsTrue(removed.SetEquals(status.Removed));
-
-                // Todo: modify, remove, change, add files and see how missing goes away
             }
         }
 
         // TODO: test add's behavior on wrong input data
+        // TODO: test add "."
         // TODO: test recursive add of directories
     }
 }

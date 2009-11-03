@@ -250,7 +250,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\Hex.cs" />
     <Compile Include="Util\NestedDictionary.cs" />
-    <Compile Include="Util\Numbers.cs" />
+    <Compile Include="Util\NB.cs" />
     <Compile Include="Util\PathUtil.cs" />
     <Compile Include="Util\RawParseUtils.cs" />
     <Compile Include="RepositoryChangedEventArgs.cs" />

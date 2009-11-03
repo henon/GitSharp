@@ -232,66 +232,86 @@ namespace GitSharp.Core
 			set { _author = value; }
 		}
 
-		private void Decode()
-		{
-			if (_raw == null) return;
+        private void Decode()
+        {
+            if (_raw == null) return;
 
-			using (var reader = new StreamReader(new MemoryStream(_raw)))
-			{
-				string n = reader.ReadLine();
-				if (n == null || !n.StartsWith("tree "))
-				{
-					throw new CorruptObjectException(CommitId, "no tree");
-				}
-				while ((n = reader.ReadLine()) != null && n.StartsWith("parent "))
-				{
-					// empty body
-				}
-				if (n == null || !n.StartsWith("author "))
-				{
-					throw new CorruptObjectException(CommitId, "no author");
-				}
-				string rawAuthor = n.Substring("author ".Length);
-				n = reader.ReadLine();
-				if (n == null || !n.StartsWith("committer "))
-				{
-					throw new CorruptObjectException(CommitId, "no committer");
-				}
-				string rawCommitter = n.Substring("committer ".Length);
-				n = reader.ReadLine();
+            int pos = 0;
 
-				if (n != null && n.StartsWith("encoding"))
-				{
-					Encoding = Charset.forName(n.Substring("encoding ".Length));
-				}
-				else if (n == null || n.Length!=0)
-				{
-					throw new CorruptObjectException(CommitId, "malformed header:" + n);
-				}
+            ByteArrayExtensions.ParsedLine res = _raw.ReadLine(pos);
+            if (res.Buffer == null || !res.Buffer.StartsWith("tree ".getBytes()))
+            {
+                throw new CorruptObjectException(CommitId, "no tree");
+            }
 
-#warning This does not currently support custom encodings
-				//byte[] readBuf = new byte[br.available()]; // in-memory stream so this is all bytes left
-				//br.Read(readBuf);
-				//int msgstart = readBuf.Length != 0 ? (readBuf[0] == '\n' ? 1 : 0) : 0;
+            bool skip;
+            do
+            {
+                skip = false;
 
-				if (Encoding != null)
-				{
-					// TODO: this isn't reliable so we need to guess the encoding from the actual content
-					throw new NotSupportedException("Custom Encoding is not currently supported.");
-					//_author = new PersonIdent(new string(this.Encoding.GetBytes(rawAuthor), this.Encoding));
-					//_committer = new PersonIdent(new string(rawCommitter.getBytes(), encoding.name()));
-					//_message = new string(readBuf, msgstart, readBuf.Length - msgstart, encoding.name());
-				}
+                res = _raw.ReadLine(res.NextIndex);
 
-				// TODO: use config setting / platform / ascii / iso-latin
-				_author = new PersonIdent(rawAuthor);
-				_committer = new PersonIdent(rawCommitter);
-				//_message = new string(readBuf, msgstart, readBuf.Length - msgstart);
-				_message = reader.ReadToEnd();
-			}
+                if ((res.Buffer == null) || !res.Buffer.StartsWith("parent ".getBytes()))
+                {
+                    skip = true;
+                }
 
-			_raw = null;
-		}
+            } while (!skip);
+
+            const string authorPrefix = "author ";
+            if (res.Buffer == null || !res.Buffer.StartsWith(authorPrefix.getBytes()))
+            {
+                throw new CorruptObjectException(CommitId, "no author");
+            }
+
+            byte[] rawAuthor = ExtractTrailingBytes(res.Buffer, authorPrefix);
+
+            res = _raw.ReadLine(res.NextIndex);
+
+            const string committerPrefix = "committer ";
+            if (res.Buffer == null || !res.Buffer.StartsWith(committerPrefix.getBytes()))
+            {
+                throw new CorruptObjectException(CommitId, "no committer");
+            }
+
+            byte[] rawCommitter = ExtractTrailingBytes(res.Buffer, committerPrefix);
+
+            res = _raw.ReadLine(res.NextIndex);
+
+            const string encodingPrefix = "encoding ";
+            if (res.Buffer != null && res.Buffer.StartsWith(encodingPrefix.getBytes()))
+            {
+                byte[] rawEncoding = ExtractTrailingBytes(res.Buffer, encodingPrefix);
+                Encoding = Charset.forName(new ASCIIEncoding().GetString(rawEncoding));
+            }
+            else if (res.Buffer == null || res.Buffer.Length != 0)
+            {
+                throw new CorruptObjectException(CommitId, "malformed header:" + new ASCIIEncoding().GetString(res.Buffer ?? new byte[0]));
+            }
+
+            pos = res.NextIndex;
+
+            var readBuf = new byte[_raw.Length - pos];
+            Array.Copy(_raw, pos, readBuf, 0, _raw.Length - pos);
+            int msgstart = readBuf.Length != 0 ? (readBuf[0] == '\n' ? 1 : 0) : 0;
+
+            // If encoding is not specified, the default for commit is UTF-8
+            if (Encoding == null) Encoding = Constants.CHARSET;
+
+            // TODO: this isn't reliable so we need to guess the encoding from the actual content
+            _author = new PersonIdent(Encoding.GetString(rawAuthor));
+            _committer = new PersonIdent(Encoding.GetString(rawCommitter));
+            _message = Encoding.GetString(readBuf, msgstart, readBuf.Length - msgstart);
+
+            _raw = null;
+        }
+
+        private static byte[] ExtractTrailingBytes(byte[] source, string prefix)
+        {
+            var rawAuthor2 = new byte[source.Length - prefix.Length];
+            Array.Copy(source, prefix.Length, rawAuthor2, 0, source.Length - prefix.Length);
+            return rawAuthor2;
+        }
 
 		///	<summary>
 		/// Persist this commit object

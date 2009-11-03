@@ -63,6 +63,7 @@
     <Compile Include="AbbreviatedObjectId.cs" />
     <Compile Include="AlternateRepositoryDatabase.cs" />
     <Compile Include="BlobBasedConfig.cs" />
+    <Compile Include="ByteArrayExtensions.cs" />
     <Compile Include="ByteArrayWindow.cs" />
     <Compile Include="ByteBufferWindow.cs" />
     <Compile Include="ByteWindow.cs" />

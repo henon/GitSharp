@@ -582,7 +582,7 @@ namespace GitSharp.Core
 
 	    private static string ReadLine(FileInfo file)
 	    {
-	        byte[] buf = NB.ReadFully(file, 4096);
+	        byte[] buf = IO.ReadFully(file, 4096);
 	        int n = buf.Length;
             
 	        // remove trailing whitespaces

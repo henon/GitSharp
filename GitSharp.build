@@ -41,6 +41,8 @@
     <property name="assembly.name" value="GitSharp.Core" />
     <property name="assembly.type" value="library" />
 
+    <property name="assembly.namespace" value="${assembly.name}" />
+    
     <fileset id="project.references" >
       <include name="System.dll" />
       <include name="System.Core.dll" />
@@ -62,6 +64,8 @@
     <property name="assembly.name" value="Git" />
     <property name="assembly.type" value="exe" />
 
+    <property name="assembly.namespace" value="GitSharp.CLI" />
+    
     <fileset id="project.references" basedir="${path.build.output}" >
       <include name="GitSharp.dll" />
       <include name="GitSharp.Core.dll" />
@@ -83,6 +87,8 @@
     <property name="assembly.name" value="GitSharp" />
     <property name="assembly.type" value="library" />
 
+    <property name="assembly.namespace" value="${assembly.name}" />
+
     <fileset id="project.references" basedir="${path.build.output}" >
       <include name="GitSharp.Core.dll" />
     </fileset>
@@ -96,6 +102,8 @@
   <target name="compile-tests" depends="compile-cli">
     <property name="assembly.name" value="GitSharp.Tests" />
     <property name="assembly.type" value="library" />
+
+    <property name="assembly.namespace" value="${assembly.name}" />
 
     <fileset id="project.references" >
       <include name="${path.build.output}/GitSharp.dll" />
@@ -219,6 +227,9 @@
          doc="${path.build.output}/${assembly.name}.xml" >
       <sources refid="project.sources" />
       <references refid="project.references" />
+      <resources prefix="${assembly.namespace}.Resources.">
+        <include name="${project.sources.path}/Resources/*.*"/>
+      </resources>
       <nowarn>
         <!-- No warning when public members lack XML comments -->
         <warning number="1591" />

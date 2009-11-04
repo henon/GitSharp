@@ -72,9 +72,10 @@ namespace GitSharp.CLI
         /// </summary>
         public CommandCatalog()
         {
-            XmlDocument doc = new XmlDocument();
-            string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetName().CodeBase),"Commands.xml");
-            doc.Load(path);
+            const string commandsXmlPath = "GitSharp.CLI.Resources.Commands.xml";
+            Stream fileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(commandsXmlPath);
+            var doc = new XmlDocument();
+            doc.Load(fileStream);
 
             XmlNodeList xmlNodeList = doc.SelectNodes("/root/CommandList/Command");
             foreach (XmlNode node in xmlNodeList)
@@ -177,7 +178,7 @@ namespace GitSharp.CLI
 
             return toSortedArray(incomplete);
         }
-        
+
         /// <summary>
         /// Returns all complete commands, sorted by command name.
         /// </summary>

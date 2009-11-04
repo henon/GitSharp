@@ -85,9 +85,9 @@
     <Compile Include="Version.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Commands.xml">
+    <EmbeddedResource Include="Resources\Commands.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </EmbeddedResource>
     <Content Include="README.txt" />
   </ItemGroup>
   <ItemGroup>

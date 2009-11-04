@@ -52,7 +52,7 @@ namespace GitSharp.Core
         /// <summary>
         /// Elapsed milliseconds since Epoch (1970.1.1 00:00:00 GMT)
         /// </summary>
-        public long When { get; private set; } // local date time in milliseconds (since Epoch)
+        public long When { get; private set; }
         private readonly int tzOffset; // offset in minutes to UTC
 
 		///	<summary>
@@ -85,7 +85,7 @@ namespace GitSharp.Core
 		///	<param name="name"> </param>
 		///	<param name="emailAddress"></param>
         public PersonIdent(string name, string emailAddress) 
-			: this(name, emailAddress, DateTime.Now, TimeZoneInfo.Local)
+			: this(name, emailAddress, DateTime.Now, (int)TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes)
         {
         }
 
@@ -93,9 +93,9 @@ namespace GitSharp.Core
 		/// Copy a PersonIdent, but alter the clone's time stamp
 		///	</summary>
 		///	<param name="pi">Original <seealso cref="PersonIdent"/>.</param>
-		///	<param name="when">Local time.</param>
-		///	<param name="tz">Time zone.</param>
-        public PersonIdent(PersonIdent pi, DateTime when, TimeZoneInfo tz)
+        ///	<param name="when">Local date time in milliseconds (since Epoch).</param>
+        ///	<param name="tz">Time zone offset in minutes.</param>
+        public PersonIdent(PersonIdent pi, DateTime when, int tz)
 			: this(pi.Name, pi.EmailAddress, when, tz)
         {
         }
@@ -104,7 +104,7 @@ namespace GitSharp.Core
 		/// Copy a <seealso cref="PersonIdent"/>, but alter the clone's time stamp
 		/// </summary>
 		/// <param name="pi">Original <seealso cref="PersonIdent"/>.</param>
-		///	<param name="when">Local time stamp.</param>
+        ///	<param name="when">Local date time in milliseconds (since Epoch).</param>
         public PersonIdent(PersonIdent pi, DateTime when)
 			: this(pi.Name, pi.EmailAddress, when.ToMillisecondsSinceEpoch(), pi.tzOffset)
         {
@@ -115,10 +115,10 @@ namespace GitSharp.Core
 		///	</summary>
 		///	<param name="name"></param>
 		///	<param name="emailAddress"></param>
-		///	<param name="when">Local time stamp.</param>
-		///	<param name="tz">Time zone.</param>
-        public PersonIdent(string name, string emailAddress, DateTime when, TimeZoneInfo tz)
-            : this(name, emailAddress, when.ToMillisecondsSinceEpoch(), (int)tz.GetUtcOffset(when).TotalMinutes)
+        ///	<param name="when">Local date time in milliseconds (since Epoch).</param>
+		///	<param name="tz">Time zone offset in minutes.</param>
+        public PersonIdent(string name, string emailAddress, DateTime when, int tz)
+            : this(name, emailAddress, when.ToMillisecondsSinceEpoch(), tz)
         {
         }
 
@@ -127,8 +127,8 @@ namespace GitSharp.Core
 		///	</summary>
 		///	<param name="name"></param>
 		///	<param name="emailAddress"> </param>
-		///	<param name="when">Local time stamp.</param>
-		///	<param name="tz">Time zone.</param>
+        ///	<param name="when">Local date time in milliseconds (since Epoch).</param>
+        ///	<param name="tz">Time zone offset in minutes.</param>
         public PersonIdent(string name, string emailAddress, long when, int tz)
         {
             Name = name;
@@ -141,10 +141,10 @@ namespace GitSharp.Core
 		/// Copy a PersonIdent, but alter the clone's time stamp
 		///	</summary>
 		///	<param name="pi">Original <seealso cref="PersonIdent"/>.</param>
-        ///	<param name="git_time">Local time stamp.</param>
-        ///	<param name="offset_in_minutes">Time zone.</param>
-        public PersonIdent(PersonIdent pi, long git_time, int offset_in_minutes) 
-			: this(pi.Name, pi.EmailAddress, git_time, offset_in_minutes)
+        ///	<param name="when">Local date time in milliseconds (since Epoch).</param>
+        ///	<param name="tz">Time zone offset in minutes.</param>
+        public PersonIdent(PersonIdent pi, long when, int tz) 
+			: this(pi.Name, pi.EmailAddress, when, tz)
         {
         }
 

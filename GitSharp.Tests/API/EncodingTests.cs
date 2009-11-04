@@ -46,10 +46,10 @@ using System.IO;
 namespace GitSharp.Tests.API
 {
     [TestFixture]
-    public class ChineseEncodingTests : ApiTestCase
+    public class EncodingTests : ApiTestCase
     {
         [Test]
-        public void Commit_Chinese()
+        public void Chinese_UTF8()
         {
             var workingDirectory = Path.Combine(trash.FullName, "汉语repo"); // a chinese repository
             using (var repo = Repository.Init(workingDirectory))

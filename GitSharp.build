@@ -41,10 +41,15 @@
     <property name="assembly.name" value="GitSharp.Core" />
     <property name="assembly.type" value="library" />
 
-    <fileset id="project.references" basedir="${path.lib}" >
-      <include name="ICSharpCode.SharpZipLib.dll" />
-      <include name="Winterdom.IO.FileMap.dll" />
-      <include name="Tamir.SharpSSH.dll" />
+    <fileset id="project.references" >
+      <include name="System.dll" />
+      <include name="System.Core.dll" />
+      <include name="System.Drawing.dll" />
+      <include name="System.Windows.Forms.dll" />
+      <include name="System.Xml.dll" />
+      <include name="${path.lib}/ICSharpCode.SharpZipLib.dll" />
+      <include name="${path.lib}/Winterdom.IO.FileMap.dll" />
+      <include name="${path.lib}/Tamir.SharpSSH.dll" />
     </fileset>
 
     <call target="compile-dll" />

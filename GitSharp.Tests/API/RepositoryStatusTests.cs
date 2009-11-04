@@ -202,7 +202,43 @@ namespace GitSharp.Tests.API
             }
         }
 
-        // TODO: Missing
+        [Test]
+        public void Missing()
+        {
+            using (var repo = GetTrashRepository())
+            {
+                var index = repo.Index;
+                index.Stage(writeTrashFile("file2", "file2").FullName, writeTrashFile("dir/file3", "dir/file3").FullName);
+                index.CommitChanges("...", Author.Anonymous);
+                index.Stage(writeTrashFile("file4", "file4").FullName, writeTrashFile("dir/file4", "dir/file4").FullName);
+
+                new FileInfo(Path.Combine(repo.WorkingDirectory, "file2")).Delete();
+                new FileInfo(Path.Combine(repo.WorkingDirectory, "file4")).Delete();
+                new DirectoryInfo(Path.Combine(repo.WorkingDirectory, "dir")).Delete(true);
+
+                var diff = index.Status;
+                Assert.AreEqual(2, diff.Added.Count);
+                Assert.AreEqual(0, diff.Staged.Count);
+                Assert.AreEqual(0, diff.Modified.Count);
+                Assert.AreEqual(0, diff.Untracked.Count);
+                Assert.AreEqual(4, diff.Missing.Count);
+                Assert.IsTrue(diff.Missing.Contains("file2"));
+                Assert.IsTrue(diff.Missing.Contains("file4"));
+                Assert.IsTrue(diff.Missing.Contains("dir/file3"));
+                Assert.IsTrue(diff.Missing.Contains("dir/file4"));
+
+
+                repo.Commit("committing the added files which are missing in the working directory", Author.Anonymous);
+                diff = repo.Status;
+
+                Assert.AreEqual(0, diff.Added.Count);
+                Assert.AreEqual(0, diff.Staged.Count);
+                Assert.AreEqual(0, diff.Modified.Count);
+                Assert.AreEqual(0, diff.Untracked.Count);
+                Assert.AreEqual(4, diff.Missing.Count);
+            }
+        }
+
 
     }
 }

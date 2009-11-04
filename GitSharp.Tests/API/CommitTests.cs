@@ -103,8 +103,11 @@ namespace GitSharp.Tests.API
                 var changes = commit.Changes.ToDictionary(change => change.Name);
                 Assert.AreEqual(ChangeType.Added, changes["Rabbitはウサギです.txt"].ChangeType);
                 Assert.AreEqual(ChangeType.Added, changes["新宿三丁目.txt"].ChangeType);
-                Assert.AreEqual("ラビットis usagi desu.", (changes["Rabbitはウサギです.txt"].ComparedObject as Blob).Data);
-                Assert.AreEqual("電車で行きます。", (changes["新宿三丁目.txt"].ComparedObject as Blob).Data);
+                Assert.AreEqual(System.Text.Encoding.GetEncoding("Shift_JIS").GetBytes("ラビットis usagi desu."), (changes["Rabbitはウサギです.txt"].ComparedObject as Blob).RawData);
+                Assert.AreEqual(System.Text.Encoding.GetEncoding("Shift_JIS").GetBytes("電車で行きます。"), (changes["新宿三丁目.txt"].ComparedObject as Blob).RawData);
+                Assert.AreNotEqual(System.Text.Encoding.GetEncoding("UTF-8").GetBytes("ラビットis usagi desu."), (changes["Rabbitはウサギです.txt"].ComparedObject as Blob).RawData);
+                Assert.AreNotEqual(System.Text.Encoding.GetEncoding("UTF-8").GetBytes("電車で行きます。"), (changes["新宿三丁目.txt"].ComparedObject as Blob).RawData);
+
                 Assert.AreEqual(2, changes.Count);
             }
         }

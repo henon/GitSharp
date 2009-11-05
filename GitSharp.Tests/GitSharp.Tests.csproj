@@ -211,6 +211,12 @@
     <Content Include="Resources\CorruptIndex\b.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\encodingTestData\Shift_JIS\ウサギちゃん\Rabbitはウサギです.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\encodingTestData\Shift_JIS\東京都\新宿三丁目.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\OneFileRepository\.gitted\objects\info\marker.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -268,7 +268,7 @@ namespace GitSharp.Core
         /// </summary>
         public static readonly byte[] PACK_SIGNATURE = { (byte)'P', (byte)'A', (byte)'C', (byte)'K' };
 		
-        private static readonly Encoding _charset = Charset.forName("UTF-8");
+        private static Encoding _charset = Charset.forName("UTF-8");
 
         /// <summary>
         /// Native character encoding for commit messages, file names...
@@ -375,6 +375,25 @@ namespace GitSharp.Core
             //            + HASH_FUNCTION + " not available.", nsae);
             //}
             return new MessageDigest();
+        }
+
+        /// <summary>
+        /// Set the encoding based on it's name
+        /// </summary>
+        /// <param name="charsetName">
+        /// Proper charset name. See http://www.iana.org/assignments/character-sets for further info.
+        /// </param>
+        public static void setCHARSET(string charsetName)
+        {
+            try
+            {
+                _charset = Charset.forName(charsetName);
+            }
+            catch (Exception ex)
+            {
+
+                throw new ArgumentException("Bad charset name: " + charsetName);
+            }
         }
 
 		/// <summary>

@@ -89,6 +89,124 @@ namespace GitSharp.Tests.API
                 Assert.AreEqual(Encoding.UTF8.GetBytes("青岛啤酒"), good_beer.RawData);
             }
         }
+
+        [Test]
+        public void Japanese_ShiftJIS()
+        {
+            var workingDirectory = Path.Combine(trash.FullName, "Shift_JIS_Repo");
+            using (Repository repo = Repository.Init(workingDirectory))
+            {
+                //repo.PreferredEncoding = Encoding.GetEncoding("Shift_JIS");
+                //Encoding shiftJIS = Encoding.GetEncoding("Shift_JIS");
+
+                var e = Encoding.Default;
+
+                //var rabbit = UTF8_to_ShiftJIS_filename("ウサギちゃん/Rabbitはウサギです.txt");
+                //var filepath = Path.Combine(workingDirectory, rabbit);
+                //Directory.CreateDirectory(Path.GetDirectoryName(filepath));
+                //File.Copy(Path.Combine(@"Resources\encodingTestData\Shift_JIS", rabbit), filepath);
+
+                // Adding an encoded file to the index without relying on the filesystem
+                repo.Index.Add(UTF8_to_ShiftJIS("ウサギちゃん/Rabbitはウサギです.txt"), new byte[0]);
+
+                var shinjuku_sanchome = UTF8_to_ShiftJIS_filename("東京都/新宿三丁目.txt");
+                var filepath1 = Path.Combine(workingDirectory, shinjuku_sanchome);
+                Directory.CreateDirectory(Path.GetDirectoryName(filepath1));
+                File.Copy(Path.Combine(@"Resources\encodingTestData\Shift_JIS", shinjuku_sanchome), filepath1);
+
+                // Adding an encoded file to the index from the filesystem
+                repo.Index.Add(filepath1);
+
+                var msg = Encoding.UTF8.GetString(UTF8_to_ShiftJIS("Hello World!日本からShift_JISのためをコミットしました"));
+                var name = Encoding.UTF8.GetString(UTF8_to_ShiftJIS("ポウルス"));
+                var commit = repo.Commit(msg, new Author(name, "paupaw@tokyo-dome.com"));
+
+                // TODO: set the breakpoint here and check out the test repository. Is it readable on your system with msysgit?
+            }
+        }
+
+        [Test]
+        public void Commit_into_empty_repository_forShiftJIS()
+        {
+            var workingDirectory = Path.Combine(trash.FullName, "Shift_JISEncodingTest");
+            using (Repository repo = Repository.Init(workingDirectory))
+            {
+                Encoding shiftJISEncoding = Encoding.GetEncoding("Shift_JIS");
+
+                string filepath = Path.Combine(workingDirectory, @"Resources\encodingTestData\Shift_JIS\ウサギちゃん\Rabbitはウサギです.txt");
+                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(filepath));
+                System.IO.File.Copy(@"Resources\encodingTestData\Shift_JIS\ウサギちゃん\Rabbitはウサギです.txt", filepath);
+                repo.Index.Add(filepath); //Add using UTF-8 params, but the file itself is Shift_JIS.. heh!?
+
+                string filepath1 = Path.Combine(workingDirectory, @"Resources\encodingTestData\Shift_JIS\東京都\新宿三丁目.txt");
+                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(filepath1));
+                System.IO.File.Copy(@"Resources\encodingTestData\Shift_JIS\東京都\新宿三丁目.txt", filepath1);
+                repo.Index.Add(filepath1); //Add using UTF-8 params, but the file itself is Shift_JIS.. heh!?
+
+                var commit = repo.Commit("Hello World!日本からShift_JISのためをコミットしました", new Author("ポウルス", "paupaw@tokyo-dome.com"));
+                Assert.NotNull(commit);
+                Assert.IsTrue(commit.IsCommit);
+                Assert.IsNull(commit.Parent);
+                Assert.AreEqual("ポウルス", commit.Author.Name);
+                Assert.AreEqual("paupaw@tokyo-dome.com", commit.Author.EmailAddress);
+                Assert.AreEqual("Hello World!日本からShift_JISのためをコミットしました", commit.Message);
+                // TODO: check if tree contains for henon and for nulltoken, get the blobs and check  the content.
+                Assert.AreEqual(commit, repo.Head.CurrentCommit);
+                var changes = commit.Changes.ToDictionary(change => change.Name);
+                Assert.AreEqual(ChangeType.Added, changes["Rabbitはウサギです.txt"].ChangeType);
+                Assert.AreEqual(ChangeType.Added, changes["新宿三丁目.txt"].ChangeType);
+                Assert.AreEqual(Encoding.UTF8.GetBytes("ラビットis usagi desu."), Encoding.Convert(shiftJISEncoding, Encoding.UTF8, (changes["Rabbitはウサギです.txt"].ComparedObject as Blob).RawData)); //Convert from Shift_JIS to UTF-8
+                Assert.AreEqual(Encoding.UTF8.GetBytes("電車で行きます。"), Encoding.Convert(shiftJISEncoding, Encoding.UTF8, (changes["新宿三丁目.txt"].ComparedObject as Blob).RawData)); //Convert from Shift_JIS to UTF-8
+                Assert.AreEqual(2, changes.Count);
+            }
+        }
+
+        //[Test]
+        //public void Commit_into_empty_repository_forShiftJis1()
+        //{
+        //    var workingDirectory = Path.Combine(trash.FullName, "test1");
+        //    using (Repository repo = Repository.Init(workingDirectory))
+        //    {
+        //        //GitSharp.Core.Constants.setCHARSET("Shift_JIS");
+        //        string filepath = Path.Combine(workingDirectory, "for henon.txt");
+        //        File.WriteAllText(filepath, "Weißbier");
+        //        repo.Index.Add(filepath);
+        //        string filepath1 = Path.Combine(workingDirectory, "for nulltoken.txt");
+        //        File.WriteAllText(filepath1, "Rotwein");
+        //        repo.Index.Add(filepath1);
+        //        string filepath2 = Path.Combine(workingDirectory, "俺のためだ.txt");
+        //        File.WriteAllText(filepath2, "西東京市");
+        //        repo.Index.Add(filepath2);
+        //        var commit = repo.Commit("Hello World!日本からShift_JISのためをコミットしました", new Author("ポウルス", "paupaw@tokyo-dome.com"));
+        //        Assert.NotNull(commit);
+        //        Assert.IsTrue(commit.IsCommit);
+        //        Assert.IsNull(commit.Parent);
+        //        Assert.AreEqual("ポウルス", commit.Author.Name);
+        //        Assert.AreEqual("paupaw@tokyo-dome.com", commit.Author.EmailAddress);
+        //        Assert.AreEqual("Hello World!日本からShift_JISのためをコミットしました", commit.Message);
+        //        // TODO: check if tree contains for henon and for nulltoken, get the blobs and check  the content.
+        //        Assert.AreEqual(commit, repo.Head.CurrentCommit);
+        //        var changes = commit.Changes.ToDictionary(change => change.Name);
+        //        Assert.AreEqual(ChangeType.Added, changes["for henon.txt"].ChangeType);
+        //        Assert.AreEqual(ChangeType.Added, changes["for nulltoken.txt"].ChangeType);
+        //        Assert.AreEqual(ChangeType.Added, changes["俺のためだ.txt"].ChangeType);
+        //        Assert.AreEqual("Weißbier", (changes["for henon.txt"].ComparedObject as Blob).Data);
+        //        Assert.AreEqual("Rotwein", (changes["for nulltoken.txt"].ComparedObject as Blob).Data);
+        //        Assert.AreEqual("西東京市", (changes["俺のためだ.txt"].ComparedObject as Blob).Data);
+        //        Assert.AreEqual(3, changes.Count);
+        //    }
+        //}
+
+        private static string UTF8_to_ShiftJIS_filename(string utf8_japanese)
+        {
+            Encoding shiftJISEncoding = Encoding.GetEncoding("Shift_JIS");
+            return Encoding.Default.GetString(Encoding.Convert(shiftJISEncoding, Encoding.Default, Encoding.Convert(Encoding.UTF8, shiftJISEncoding, Encoding.UTF8.GetBytes(utf8_japanese))));
+        }
+
+        private static byte[] UTF8_to_ShiftJIS(string utf8_japanese)
+        {
+            return Encoding.Convert(Encoding.UTF8,  Encoding.GetEncoding("Shift_JIS"), Encoding.UTF8.GetBytes(utf8_japanese));
+        }
     }
 }
 

@@ -58,6 +58,7 @@ namespace GitSharp
 
         internal Repository(CoreRepository repo)
         {
+            PreferredEncoding = Encoding.UTF8;
             _internal_repo = repo;
         }
 
@@ -344,6 +345,15 @@ namespace GitSharp
             return "Repository[" + Directory + "]";
         }
 
+        /// <summary>
+        /// If data in a repository (i.e. filenames, commit messages, etc. ) is to be decoded with a special encoding
+        /// set this property. Default setting is UTF8
+        /// </summary>
+        public Encoding PreferredEncoding
+        {
+            get;
+            set;
+        }
 
         public void Close()
         {

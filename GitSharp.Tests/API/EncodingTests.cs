@@ -97,7 +97,7 @@ namespace GitSharp.Tests.API
             using (Repository repo = Repository.Init(workingDirectory))
             {
                 //repo.PreferredEncoding = Encoding.GetEncoding("Shift_JIS");
-                //Encoding shiftJIS = Encoding.GetEncoding("Shift_JIS");
+                Encoding shiftJIS = Encoding.GetEncoding("Shift_JIS");
 
                 var e = Encoding.Default;
 
@@ -112,7 +112,7 @@ namespace GitSharp.Tests.API
                 var shinjuku_sanchome = UTF8_to_ShiftJIS_filename("東京都/新宿三丁目.txt");
                 var filepath1 = Path.Combine(workingDirectory, shinjuku_sanchome);
                 Directory.CreateDirectory(Path.GetDirectoryName(filepath1));
-                File.Copy(Path.Combine(@"Resources\encodingTestData\Shift_JIS", shinjuku_sanchome), filepath1);
+                File.WriteAllText(filepath1, "ラビットis usagi desu.", shiftJIS);
 
                 // Adding an encoded file to the index from the filesystem
                 repo.Index.Add(filepath1);
@@ -125,6 +125,7 @@ namespace GitSharp.Tests.API
             }
         }
 
+/* ... [henon] commented out because the shiftJIS encoded resource filenames are not portable accross cultures 
         [Test]
         public void Commit_into_empty_repository_forShiftJIS()
         {
@@ -161,6 +162,7 @@ namespace GitSharp.Tests.API
             }
         }
 
+ */
         //[Test]
         //public void Commit_into_empty_repository_forShiftJis1()
         //{
@@ -200,7 +202,7 @@ namespace GitSharp.Tests.API
         private static string UTF8_to_ShiftJIS_filename(string utf8_japanese)
         {
             Encoding shiftJISEncoding = Encoding.GetEncoding("Shift_JIS");
-            return Encoding.Default.GetString(Encoding.Convert(shiftJISEncoding, Encoding.Default, Encoding.Convert(Encoding.UTF8, shiftJISEncoding, Encoding.UTF8.GetBytes(utf8_japanese))));
+            return Encoding.Default.GetString(Encoding.Convert(Encoding.UTF8, shiftJISEncoding, Encoding.UTF8.GetBytes(utf8_japanese)));
         }
 
         private static byte[] UTF8_to_ShiftJIS(string utf8_japanese)

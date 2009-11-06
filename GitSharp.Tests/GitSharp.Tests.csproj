@@ -211,12 +211,6 @@
     <Content Include="Resources\CorruptIndex\b.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\encodingTestData\Shift_JIS\ƒEƒTƒM‚¿‚á‚ñ\Rabbit‚ÍƒEƒTƒM‚Å‚·.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\encodingTestData\Shift_JIS\“Œ‹ž“s\VhŽO’š–Ú.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\OneFileRepository\.gitted\objects\info\marker.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -18,6 +18,9 @@ namespace GitSharp
         public Index(Repository repo)
         {
             _repo = repo;
+            GitIndex.FilenameEncoding = repo.PreferredEncoding;
+            if (_repo.PreferredEncoding != Encoding.UTF8 && _repo.PreferredEncoding != Encoding.Default)
+                GitIndex.FilenameEncoding = Encoding.Default;
         }
 
         internal GitSharp.Core.GitIndex GitIndex
@@ -56,6 +59,18 @@ namespace GitSharp
                 else
                     throw new ArgumentException("File or directory at <" + path + "> doesn't seem to exist.", "path");
             }
+            GitIndex.write();
+        }
+
+        /// <summary>
+        /// Add content to the index directly without the need for a file in the working directory.
+        /// </summary>
+        /// <param name="encoded_relative_filepath">encoded file path (relative to working directory)</param>
+        /// <param name="encoded_content">encoded content</param>
+        public void Add(byte[] encoded_relative_filepath, byte[] encoded_content)
+        {
+            GitIndex.RereadIfNecessary();
+            GitIndex.add(encoded_relative_filepath, encoded_content);
             GitIndex.write();
         }
 
@@ -164,7 +179,7 @@ namespace GitSharp
             GitIndex.Read();
         }
 
-         //public RepositoryStatus CompareAgainstWorkingDirectory(bool honor_ignore_rules)
+        //public RepositoryStatus CompareAgainstWorkingDirectory(bool honor_ignore_rules)
 
         public RepositoryStatus Status
         {
@@ -202,7 +217,7 @@ namespace GitSharp
             var tree_id = GitIndex.writeTree();
             // check if tree is different from current commit's tree
             var parent = _repo.CurrentBranch.CurrentCommit;
-            if ((parent==null && GitIndex.Members.Count == 0) || (parent != null && parent.Tree._id == tree_id))
+            if ((parent == null && GitIndex.Members.Count == 0) || (parent != null && parent.Tree._id == tree_id))
                 throw new InvalidOperationException("There are no changes to commit");
             var commit = Commit.Create(message, parent, new Tree(_repo, tree_id), author);
             Ref.Update("HEAD", commit);

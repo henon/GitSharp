@@ -1,0 +1,11 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[gui]
+	geometry = 965x490+426+345 201 158
+[user]
+	email = paupawsan-learning@yahoo.com

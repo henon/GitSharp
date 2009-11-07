@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{37052DA4-F6A9-47D0-94AA-96F4A7E0462C}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -209,6 +209,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\CorruptIndex\b.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\JapaneseRepo\.gitted\objects\info\marker.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\JapaneseRepo\.gitted\objects\pack\marker.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\OneFileRepository\.gitted\objects\info\marker.txt">
@@ -522,6 +528,84 @@
     <None Include="Resources\index_originating_from_msysgit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Resources\JapaneseRepo\.gitted\config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\description">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\HEAD">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\applypatch-msg.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\commit-msg.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\post-commit.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\post-receive.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\post-update.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\pre-applypatch.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\pre-commit.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\pre-rebase.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\prepare-commit-msg.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\update.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\index">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\info\exclude">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\logs\HEAD">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\logs\refs\heads\master">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\24\ed0e20ceff5e2cdf768345b6853213f840ff8f">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\2f\3c75408acf76bb7122b91c418d015252708552">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\4b\825dc642cb6eb9a060e54bf8d69288fbee4904">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\54\75030f2b57d9956d23ef4ead6f9a4983c234b5">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\6d\c9b6c490154e9627a8aed8ca74039a34084677">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\9b\c63090dd221bace8b2e5f278580946be26efdd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\a8\a51035f70bec2d3e00c0a11a33ff709a6ab40e">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\fe\0856a5873decc1a8e47f63c5707520121b2e9e">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\refs\heads\master">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\OneFileRepository\.gitted\COMMIT_EDITMSG">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -667,6 +751,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\CorruptIndex\.gitted\refs\tags\" />
+    <Folder Include="Resources\JapaneseRepo\.gitted\refs\tags\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

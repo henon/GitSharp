@@ -117,8 +117,8 @@ namespace GitSharp.Tests.API
                 // Adding an encoded file to the index from the filesystem
                 repo.Index.Add(filepath1);
 
-                var msg = Encoding.UTF8.GetString(UTF8_to_ShiftJIS("Hello World!日本からShift_JISのためをコミットしました"));
-                var name = Encoding.UTF8.GetString(UTF8_to_ShiftJIS("ポウルス"));
+                var msg = "Hello World!日本からShift_JISのためをコミットしました";
+                var name = "ポウルス";
                 var commit = repo.Commit(msg, new Author(name, "paupaw@tokyo-dome.com"));
 
                 // TODO: set the breakpoint here and check out the test repository. Is it readable on your system with msysgit?

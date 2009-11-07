@@ -467,8 +467,8 @@ namespace GitSharp
             var corecommit = new CoreCommit(repo._internal_repo);
             if (parent != null)
                 corecommit.ParentIds = new GitSharp.Core.ObjectId[] { parent._id };
-            corecommit.Author = new GitSharp.Core.PersonIdent(author.Name, author.EmailAddress, time.ToUnixTime(), (int)time.Offset.TotalMinutes);
-            corecommit.Committer = new GitSharp.Core.PersonIdent(committer.Name, committer.EmailAddress, time.ToUnixTime(), (int)time.Offset.TotalMinutes);
+            corecommit.Author = new GitSharp.Core.PersonIdent(author.Name, author.EmailAddress, time.ToMillisecondsSinceEpoch(), (int)time.Offset.TotalMinutes);
+            corecommit.Committer = new GitSharp.Core.PersonIdent(committer.Name, committer.EmailAddress, time.ToMillisecondsSinceEpoch(), (int)time.Offset.TotalMinutes);
             corecommit.Message = message;
             corecommit.TreeEntry = tree.InternalTree;
             corecommit.Save();

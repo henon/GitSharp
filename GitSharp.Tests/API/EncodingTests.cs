@@ -164,6 +164,28 @@ namespace GitSharp.Tests.API
             }
         }
 
+        [Test]
+        public void CanReadFromMsysGitJapaneseRepository()
+        {
+            //setup of .git directory
+            var resource =
+                new DirectoryInfo(Path.Combine(Path.Combine(Environment.CurrentDirectory, "Resources"),
+                                               "JapaneseRepo"));
+            var tempRepository =
+                new DirectoryInfo(Path.Combine(trash.FullName, "JapaneseRepo" + Path.GetRandomFileName()));
+            CopyDirectory(resource.FullName, tempRepository.FullName);
+
+            var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, ".git"));
+            Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
+            using (Repository repo = new Repository(tempRepository.FullName))
+            {
+                string commitHash = "24ed0e20ceff5e2cdf768345b6853213f840ff8f";
+
+                var commit = new Commit(repo, commitHash);
+                Assert.AreEqual("コミットのメッセージも日本語でやてみました。\n", commit.Message);
+            }
+        }
+
 /* ... [henon] commented out because the shiftJIS encoded resource filenames are not portable accross cultures 
         [Test]
         public void Commit_into_empty_repository_forShiftJIS()

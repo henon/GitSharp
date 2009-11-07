@@ -90,6 +90,45 @@ namespace GitSharp.Tests.API
             }
         }
 
+
+        [Test]
+        public void French_UTF8()
+        {
+            var workingDirectory = Path.Combine(trash.FullName, "repo français"); // a french repository
+            using (var repo = Repository.Init(workingDirectory))
+            {
+                var index = repo.Index;
+                string filepath = Path.Combine(workingDirectory, "Émeric.txt"); // Emeric.txt
+                File.WriteAllText(filepath, "était ici..."); // was here.
+                var dir = Directory.CreateDirectory(Path.Combine(workingDirectory, "À moins")).FullName; // unless... 
+                string filepath2 = Path.Combine(dir, "qu'il ne fût là.txt"); // he's been there.txt
+                File.WriteAllText(filepath2, "éèçàù"); // the file contains a some random letters with accents 
+
+                // adding the files and directories we created.
+                index.Add(filepath, dir);
+
+                // checking index
+                var status = repo.Status;
+                Assert.IsTrue(status.Added.Contains("Émeric.txt"));
+                Assert.IsTrue(status.Added.Contains("À moins/qu'il ne fût là.txt"));
+
+                // committing, with the message; "A little french touch.", Author: "Emeric"
+                var c = repo.Commit("Une petite note française.", new Author("Émeric", "emeric.fermas@gmail.com"));
+
+                // loading the commit from the repository and inspecting its contents
+                var commit = new Commit(repo, c.Hash);
+                Assert.AreEqual("Une petite note française.", commit.Message);
+                Assert.AreEqual("Émeric", commit.Author.Name);
+                var dict = commit.Tree.Leaves.ToDictionary(leaf => leaf.Name);
+                Assert.AreEqual("était ici...", dict["Émeric.txt"].Data);
+                Tree tree = commit.Tree.Trees.First();
+                Assert.AreEqual("À moins", tree.Name);
+                Leaf file3 = tree.Leaves.First();
+                Assert.AreEqual("qu'il ne fût là.txt", file3.Name);
+                Assert.AreEqual(Encoding.UTF8.GetBytes("éèçàù"), file3.RawData);
+            }
+        }
+
         [Test]
         public void Japanese_ShiftJIS()
         {

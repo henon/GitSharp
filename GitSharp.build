@@ -134,21 +134,6 @@
         <include name="**" />
       </fileset>
     </copy>
-    <copy todir="${path.testresults}/Diff/Resources">
-      <fileset basedir="${path.base}/GitSharp.Tests/Diff/Resources">
-        <include name="**" />
-      </fileset>
-    </copy>
-    <copy todir="${path.testresults}/Patch/Resources">
-      <fileset basedir="${path.base}/GitSharp.Tests/Patch/Resources">
-        <include name="**" />
-      </fileset>
-    </copy>
-    <copy todir="${path.testresults}/sample.git">
-      <fileset basedir="${path.base}/GitSharp.Tests/sample.git">
-        <include name="**" />
-      </fileset>
-    </copy>
 
     <property name="nunit.consolerunner" value="${path.tools.nunit}/nunit-console.exe" />
     <property name="nunit.commandline" value="GitSharp.Tests.dll /xml:GitSharp.Tests.dll-results.xml /noshadow " />

@@ -186,6 +186,40 @@ namespace GitSharp.Tests.API
             }
         }
 
+        [Test]
+        public void CommitsHonorsConfigCommitEncoding()
+        {
+            string workingDirectory = Path.Combine(trash.FullName, Path.GetRandomFileName());
+            
+            // Creating a new repo
+            using (var repo = Repository.Init(workingDirectory))
+            {
+                Core.Repository coreRepo = repo;
+                
+                // Changing the commitencoding configuration entry
+                coreRepo.Config.setString("i18n", null, "commitencoding", "ISO-8859-1");
+                coreRepo.Config.save();
+            }
+
+            // Loading the repo (along with config change)
+            using (var repo = new Repository(workingDirectory))
+            {
+                // Adding a new file to the filesystem
+                string filepath = Path.Combine(workingDirectory, "dummy here.txt");
+                File.WriteAllText(filepath, "dummy there too...");
+
+                // Adding the new file to index
+                repo.Index.Add(filepath);
+
+                // Committing
+                Commit c = repo.Commit("Commit with ISO-8859-1 encoding.", new Author("nulltoken", "emeric.fermas@gmail.com"));
+
+                // Loading the commit
+                var commit = new Commit(repo, c.Hash);
+                Assert.AreEqual("ISO-8859-1", commit.Encoding.WebName.ToUpperInvariant());
+            }
+        }
+
 /* ... [henon] commented out because the shiftJIS encoded resource filenames are not portable accross cultures 
         [Test]
         public void Commit_into_empty_repository_forShiftJIS()

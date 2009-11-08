@@ -40,8 +40,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using GitSharp.Core.Exceptions;
 using System.IO;
@@ -58,13 +56,10 @@ namespace GitSharp.Core
 		private static readonly ObjectId[] EmptyObjectidList = new ObjectId[0];
 
 		private byte[] _raw;
-		private string _message;
-		private PersonIdent _committer;
-		private PersonIdent _author;
 		private ObjectId _treeId;
 		private Tree _treeEntry;
 
-		///	<summary>
+	    ///	<summary>
 		/// Create an empty commit object. More information must be fed to this
 		/// object to make it useful.
 		/// </summary>
@@ -155,6 +150,7 @@ namespace GitSharp.Core
 			}
 
 			_raw = raw;
+		    Decode();
 		}
 
 		#region Treeish Members
@@ -198,39 +194,16 @@ namespace GitSharp.Core
 
 		public ObjectId CommitId { get; private set; }
 		public ObjectId[] ParentIds { get; set; }
-		public Encoding Encoding { get; set; }
-		public Repository Repository { get; private set; }
+        
+        public Repository Repository { get; private set; }
 
-		public string Message
-		{
-			get
-			{
-				Decode();
-				return _message;
-			}
-			set { _message = value; }
-		}
-
-		public PersonIdent Committer
-		{
-			get
-			{
-				Decode();
-				return _committer;
-			}
-			set { _committer = value; }
-		}
-
-
-		public PersonIdent Author
-		{
-			get
-			{
-				Decode();
-				return _author;
-			}
-			set { _author = value; }
-		}
+        public Encoding Encoding { get; set; }
+        
+        public string Message { get; set; }  
+		
+        public PersonIdent Committer { get; set; }
+		
+        public PersonIdent Author { get; set; }
 
         private void Decode()
         {
@@ -299,9 +272,9 @@ namespace GitSharp.Core
             if (Encoding == null) Encoding = Constants.CHARSET;
 
             // TODO: this isn't reliable so we need to guess the encoding from the actual content
-            _author = new PersonIdent(Encoding.GetString(rawAuthor));
-            _committer = new PersonIdent(Encoding.GetString(rawCommitter));
-            _message = Encoding.GetString(readBuf, msgstart, readBuf.Length - msgstart);
+            Author = new PersonIdent(Encoding.GetString(rawAuthor));
+            Committer = new PersonIdent(Encoding.GetString(rawCommitter));
+            Message = Encoding.GetString(readBuf, msgstart, readBuf.Length - msgstart);
 
             _raw = null;
         }

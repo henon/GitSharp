@@ -119,18 +119,18 @@ namespace GitSharp
             }
         }
 
-        ///// <summary>
-        ///// The encoding of the commit message.
-        ///// </summary>
-        //public Encoding Encoding
-        //{
-        //    get
-        //    {
-        //        if (InternalCommit == null) // this might happen if the object was created with an incorrect reference
-        //            return null;
-        //        return InternalCommit.Encoding;
-        //    }
-        //}
+        /// <summary>
+        /// The encoding of the commit details.
+        /// </summary>
+        public Encoding Encoding
+        {
+            get
+            {
+                if (InternalCommit == null) // this might happen if the object was created with an incorrect reference
+                    return null;
+                return InternalCommit.Encoding;
+            }
+        }
 
         /// <summary>
         /// The author of the change set represented by this commit. 
@@ -471,8 +471,22 @@ namespace GitSharp
             corecommit.Committer = new GitSharp.Core.PersonIdent(committer.Name, committer.EmailAddress, time.ToMillisecondsSinceEpoch(), (int)time.Offset.TotalMinutes);
             corecommit.Message = message;
             corecommit.TreeEntry = tree.InternalTree;
+            corecommit.Encoding = ExtractOverridenEncodingCommitFromConfig(repo);
             corecommit.Save();
             return new Commit(repo, corecommit);
+        }
+
+        private static Encoding ExtractOverridenEncodingCommitFromConfig(Repository repository)
+        {
+            string encodingAlias = repository.Config["i18n.commitencoding"];
+
+            if (encodingAlias == null)
+            {
+                // No commitencoding has been specified in the config
+                return null;
+            }
+
+            return Charset.forName(encodingAlias);
         }
 
         public override string ToString()

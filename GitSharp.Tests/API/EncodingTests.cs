@@ -187,7 +187,7 @@ namespace GitSharp.Tests.API
         }
 
         [Test]
-        public void CommitsHonorsConfigCommitEncoding()
+        public void CommitHonorsConfigCommitEncoding()
         {
             string workingDirectory = Path.Combine(trash.FullName, Path.GetRandomFileName());
             
@@ -195,9 +195,9 @@ namespace GitSharp.Tests.API
             using (var repo = Repository.Init(workingDirectory))
             {
                 Core.Repository coreRepo = repo;
-                
+#warning This should be refactored when GitSharp.Repository handles Config changes
                 // Changing the commitencoding configuration entry
-                coreRepo.Config.setString("i18n", null, "commitencoding", "ISO-8859-1");
+                coreRepo.Config.setString("i18n", null, "commitencoding", "ISO-8859-2");
                 coreRepo.Config.save();
             }
 
@@ -205,18 +205,26 @@ namespace GitSharp.Tests.API
             using (var repo = new Repository(workingDirectory))
             {
                 // Adding a new file to the filesystem
-                string filepath = Path.Combine(workingDirectory, "dummy here.txt");
-                File.WriteAllText(filepath, "dummy there too...");
+                string filepath = Path.Combine(workingDirectory, "a file.txt");
+                File.WriteAllText(filepath, "content");
 
                 // Adding the new file to index
                 repo.Index.Add(filepath);
 
                 // Committing
-                Commit c = repo.Commit("Commit with ISO-8859-1 encoding.", new Author("nulltoken", "emeric.fermas@gmail.com"));
+                string message = "Jak se máš?\n\nMám se dobře.";
+                Commit c = repo.Commit(message, new Author("nulltoken", "emeric.fermas@gmail.com")); //How are you? I'm fine.
 
                 // Loading the commit
                 var commit = new Commit(repo, c.Hash);
-                Assert.AreEqual("ISO-8859-1", commit.Encoding.WebName.ToUpperInvariant());
+                
+                Assert.AreEqual("ISO-8859-2", commit.Encoding.WebName.ToUpperInvariant());
+
+                var blob = new Blob(repo, c.Hash);
+                var messageBytes = new byte[message.Length];
+                Array.Copy(blob.RawData, 190, messageBytes, 0, message.Length);
+                
+                Assert.IsTrue(Encoding.GetEncoding("ISO-8859-2").GetBytes(message).SequenceEqual(messageBytes));
             }
         }
 

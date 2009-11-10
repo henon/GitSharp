@@ -194,16 +194,9 @@ namespace GitSharp.Tests.API
             // Creating a new repo
             using (var repo = Repository.Init(workingDirectory))
             {
-                Core.Repository coreRepo = repo;
-#warning This should be refactored when GitSharp.Repository handles Config changes
-                // Changing the commitencoding configuration entry
-                coreRepo.Config.setString("i18n", null, "commitencoding", "ISO-8859-2");
-                coreRepo.Config.save();
-            }
+                // Setting the in-memory commitencoding configuration entry
+                repo.Config["i18n.commitencoding"] = "ISO-8859-2";
 
-            // Loading the repo (along with config change)
-            using (var repo = new Repository(workingDirectory))
-            {
                 // Adding a new file to the filesystem
                 string filepath = Path.Combine(workingDirectory, "a file.txt");
                 File.WriteAllText(filepath, "content");

@@ -39,7 +39,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using GitSharp.Core.Util;
 using ObjectId = GitSharp.Core.ObjectId;
 using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
@@ -79,7 +79,7 @@ namespace GitSharp
             {
                 if (RawData == null)
                     return null;
-                return Encoding.UTF8.GetString(RawData);
+                return RawParseUtils.decode(RawData);
             }
         }
 

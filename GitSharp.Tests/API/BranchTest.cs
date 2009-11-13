@@ -95,5 +95,17 @@ namespace GitSharp.Tests.API
                 Assert.AreEqual(commit3.Parent, commit);
             }
         }
+
+        [Test]
+        public void ResetHard1()
+        {
+            using (Repository repo = GetTrashRepository())
+            {
+                Assert.AreEqual(8, repo.Status.Removed.Count);
+                repo.Head.ResetHard();
+                Assert.AreEqual(0, repo.Status.Removed.Count);
+                Assert.AreEqual(0, repo.Status.Untracked.Count);
+            }
+        }
     }
 }

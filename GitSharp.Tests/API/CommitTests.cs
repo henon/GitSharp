@@ -75,5 +75,30 @@ namespace GitSharp.Tests.API
                 Assert.AreEqual(9, changes.Count);
             }
         }
+
+        [Test]
+        public void Export_Commit() 
+        {
+            using (var repo = GetTrashRepository())
+            {
+                var dir = Directory.CreateDirectory(repo.WorkingDirectory + "/test").FullName;
+                repo.Head.CurrentCommit.Checkout(dir);
+                Assert.IsTrue(new FileInfo(dir + "/a/a1").Exists);
+                Assert.IsTrue(new FileInfo(dir + "/a/a1.txt").Exists);
+                Assert.IsTrue(new FileInfo(dir + "/a/a2.txt").Exists);
+                Assert.IsTrue(new FileInfo(dir + "/b/b1.txt").Exists);
+                Assert.IsTrue(new FileInfo(dir + "/b/b2.txt").Exists);
+                Assert.IsTrue(new FileInfo(dir + "/c/c1.txt").Exists);
+                Assert.IsTrue(new FileInfo(dir + "/c/c2.txt").Exists);
+                Assert.IsTrue(new FileInfo(dir + "/master.txt").Exists);
+                var dir1 = Directory.CreateDirectory(repo.WorkingDirectory + "/test1").FullName;
+                repo.Head.CurrentCommit.Parent.Parent.Checkout(dir1);
+                Assert.IsTrue(new FileInfo(dir1 + "/a/a1.txt").Exists);
+                Assert.IsTrue(new FileInfo(dir1 + "/a/a2.txt").Exists);
+                Assert.IsTrue(new FileInfo(dir1 + "/c/c1.txt").Exists);
+                Assert.IsTrue(new FileInfo(dir1 + "/c/c2.txt").Exists);
+                Assert.IsTrue(new FileInfo(dir1 + "/master.txt").Exists);
+            }
+        }
     }
 }

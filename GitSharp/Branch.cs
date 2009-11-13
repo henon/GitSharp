@@ -104,18 +104,30 @@ namespace GitSharp
         /// </summary>
         public void Checkout()
         {
-            throw new NotImplementedException();
+            ResetHard();
         }
 
         public void ResetSoft(string hash)
         {
-            throw new NotImplementedException();
+            var c = new Commit(_repo, hash);
+            if (c.IsCommit)
+                ResetSoft(c);
+            else
+                throw new ArgumentException("The provided hash is not a commit.");
+        }
+
+        public void ResetSoft(Commit commit)
+        {
+            Ref.Update("HEAD", commit);
         }
 
         public void ResetHard(string hash)
         {
             var c = new Commit(_repo, hash);
-            ResetHard(c);
+            if (c.IsCommit)
+                ResetHard(c);
+            else
+                throw new ArgumentException("The provided hash is not a commit.");
         }
 
         public void ResetHard(Commit commit)
@@ -125,7 +137,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// Resets branch to the current commit of the branch
+        /// Resets branch to the current commit of the branch. This resets any local changes to tracked files in the working directory.
         /// </summary>
         public void ResetHard()
         {

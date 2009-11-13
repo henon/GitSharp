@@ -115,8 +115,8 @@ namespace GitSharp
         public void ResetHard(string hash)
         {
             var c = new Commit(_repo, hash);
-            c.Checkout(c.Repository.WorkingDirectory);
-            Ref.Update(this.Name, c);
+            c.Checkout(_repo.WorkingDirectory);
+            Ref.Update("HEAD", c);
         }
 
         public override string ToString()

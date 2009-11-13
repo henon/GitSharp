@@ -310,7 +310,8 @@ namespace GitSharp
             if (new DirectoryInfo(working_directory).Exists == false)
                 throw new IOException("Cannot checkout into non-existent directory: " + working_directory);
             var db = _repo._internal_repo;
-            var index = new GitSharp.Core.GitIndex(db);
+            var index = _repo.Index.GitIndex;
+            index.RereadIfNecessary();
             CoreTree tree = InternalCommit.TreeEntry;
             var co = new GitSharp.Core.WorkDirCheckout(db, new DirectoryInfo(working_directory), index, tree);
             co.checkout();

@@ -115,13 +115,29 @@ namespace GitSharp
         public void ResetHard(string hash)
         {
             var c = new Commit(_repo, hash);
-            c.Checkout(_repo.WorkingDirectory);
-            Ref.Update("HEAD", c);
+            ResetHard(c);
+        }
+
+        public void ResetHard(Commit commit)
+        {
+            commit.Checkout(_repo.WorkingDirectory);
+            Ref.Update("HEAD", commit);
+        }
+
+        /// <summary>
+        /// Resets branch to the current commit of the branch
+        /// </summary>
+        public void ResetHard()
+        {
+            if (this.CurrentCommit == null)
+                throw new InvalidOperationException("Can not reset branch with no commits");
+            ResetHard(this.CurrentCommit);
         }
 
         public override string ToString()
         {
             return "Branch[" + Name + "]";
         }
+
     }
 }

@@ -298,11 +298,12 @@ namespace GitSharp
 
         /// <summary>
         /// Checkout this commit into the given directory. Does not reset HEAD!
+        /// 
+        /// Note: do not confuse this with Branch.Checkout. Commit.Checkout( path)  is for exporting the tree of a commit into a directory.
         /// </summary>
         /// <param name="working_directory">The directory to put the sources into</param>
         public void Checkout(string working_directory)
         {
-            // Todo: what happens with a bare repo here ??
             if (InternalCommit == null)
                 throw new InvalidOperationException("Unable to checkout this commit. It was not initialized properly (i.e. the hash is not pointing to a commit object).");
             if (working_directory == null)
@@ -315,8 +316,6 @@ namespace GitSharp
             CoreTree tree = InternalCommit.TreeEntry;
             var co = new GitSharp.Core.WorkDirCheckout(db, new DirectoryInfo(working_directory), index, tree);
             co.checkout();
-            if (working_directory == Repository.WorkingDirectory) // we wouldn't want to write index if the checkout was not done into the working directory or if the repo is bare, right?
-                index.write();
         }
 
         /// <summary>

@@ -316,6 +316,7 @@ namespace GitSharp.Core
                 {
                     try
                     {
+                        _cacheFile.Attributes = FileAttributes.Normal; //need to set to normal before delete to avoid error
                         _cacheFile.Delete();
                     }
                     catch (IOException)
@@ -338,6 +339,7 @@ namespace GitSharp.Core
             {
                 try
                 {
+                    @lock.Attributes = FileAttributes.Normal; //need to set to normal before delete to avoid error
                     @lock.Delete();
                 }
                 catch (IOException)
@@ -350,6 +352,7 @@ namespace GitSharp.Core
                     tmpIndex = new FileInfo(_cacheFile.FullName + ".tmp");
                     if (tmpIndex.Exists)
                     {
+                        tmpIndex.Attributes = FileAttributes.Normal; //need to set to normal before delete to avoid error
                         tmpIndex.Delete();
                     }
                 }
@@ -499,6 +502,7 @@ namespace GitSharp.Core
 
             if (file.Exists)
             {
+                file.Attributes = FileAttributes.Normal; //need to set to normal before delete to avoid error
                 file.Delete();
             }
 

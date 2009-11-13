@@ -96,6 +96,7 @@ namespace GitSharp.Tests.API
             }
         }
 
+
         [Test]
         public void ResetHard1()
         {
@@ -105,6 +106,70 @@ namespace GitSharp.Tests.API
                 repo.Head.ResetHard();
                 Assert.AreEqual(0, repo.Status.Removed.Count);
                 Assert.AreEqual(0, repo.Status.Untracked.Count);
+            }
+        }
+
+
+        [Test]
+        public void ResetSoft()
+        {
+            using (Repository repo = GetTrashRepository())
+            {
+                string filepath = Path.Combine(repo.WorkingDirectory, "a present for paupaw.txt");
+                File.WriteAllText(filepath, "hey, paupaw gets new shoes!");
+                repo.Index.Add(filepath);
+                var commit = repo.Commit("You feeling lucky punk!?", new Author("IronHide", "transformers@cybertron.com"));
+
+                // now changing file from first commit
+                File.AppendAllText(filepath, "... and a new hat too.");
+                // and add new file
+                string filepath1 = Path.Combine(repo.WorkingDirectory, "Bintang Kecil.txt");
+                File.WriteAllText(filepath1, "Bintang Kecil, di langit yang biru, amat banyak menghias angkasa.");
+                repo.Index.Add(filepath, filepath1);
+                var commit2 = repo.Commit("Nyanyian anak bangsa", new Author("Legend", "hist@jakarta.id"));
+
+                // adding an untracked file which should not be removed by reset soft
+                var filepath2 = Path.Combine(repo.WorkingDirectory, "some untracked file");
+                File.WriteAllText(filepath2, "untracked content");
+
+                // git reset --soft ...
+                repo.CurrentBranch.ResetSoft(commit.Hash);
+
+                Assert.AreEqual(commit.Hash, repo.CurrentBranch.CurrentCommit.Hash);
+                Assert.IsTrue(new FileInfo(filepath1).Exists);
+                var status=repo.Status;
+                Assert.IsTrue(status.Added.Contains("Bintang Kecil.txt"));
+                Assert.IsTrue(status.Staged.Contains("a present for paupaw.txt"));
+                Assert.AreEqual(1, status.Added.Count);
+                Assert.AreEqual(0, status.Modified.Count);
+                Assert.AreEqual(0, status.Missing.Count);
+                Assert.AreEqual(0, status.Removed.Count);
+                Assert.AreEqual(1, status.Staged.Count);
+                Assert.AreEqual(1, status.Untracked.Count);
+                Assert.IsTrue(new FileInfo(filepath2).Exists);
+
+                var filepath3 = Path.Combine(repo.WorkingDirectory, "for me.txt");
+                File.WriteAllText(filepath3, "This should be fine if reset soft was working fine.");
+                repo.Index.Add(filepath3);
+                var commit3 = repo.Commit("commit after soft reset", new Author("paupaw", "paupaw@home.jp"));
+
+                Assert.AreEqual(commit3.Hash, repo.CurrentBranch.CurrentCommit.Hash);
+                Assert.AreEqual(commit3.Parent, commit);
+            }
+        }
+
+        [Test]
+        public void ResetSoft1()
+        {
+            using (Repository repo = GetTrashRepository())
+            {
+                var c1 = repo.Head.CurrentCommit;
+                Assert.AreEqual(8, repo.Status.Removed.Count);
+                repo.Head.ResetSoft(c1.Parent.Parent);
+                Assert.AreEqual(5, repo.Status.Removed.Count);
+                Assert.AreEqual(0, repo.Status.Untracked.Count);
+
+                Assert.AreEqual(c1.Parent.Parent, repo.Head.CurrentCommit);
             }
         }
     }

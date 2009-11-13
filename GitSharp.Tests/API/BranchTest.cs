@@ -29,6 +29,12 @@ namespace GitSharp.Tests.API
 
                 Assert.AreEqual(commit.Hash, repo.CurrentBranch.CurrentCommit.Hash);
 
+                filepath = Path.Combine(repo.WorkingDirectory, "for me.txt");
+                File.WriteAllText(filepath, "This should be fine if reset hard was working fine.");
+                repo.Index.Add(filepath);
+                var commit3 = repo.Commit("commit after hard reset", new Author("paupaw", "paupaw@home.jp"));
+
+                Assert.AreEqual(commit3.Hash, repo.CurrentBranch.CurrentCommit.Hash);
             }
         }
     }

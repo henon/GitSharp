@@ -72,7 +72,7 @@ namespace GitSharp.Tests.API
                 File.WriteAllText(filepath2, "untracked content");
 
                 // git reset --hard
-                repo.CurrentBranch.ResetHard(commit.Hash);
+                repo.CurrentBranch.Reset(commit.Hash, ResetBehavior.Hard);
 
                 Assert.AreEqual(commit.Hash, repo.CurrentBranch.CurrentCommit.Hash);
                 Assert.IsFalse(new FileInfo(filepath1).Exists);
@@ -103,7 +103,7 @@ namespace GitSharp.Tests.API
             using (Repository repo = GetTrashRepository())
             {
                 Assert.AreEqual(8, repo.Status.Removed.Count);
-                repo.Head.ResetHard();
+                repo.Head.Reset(ResetBehavior.Hard);
                 Assert.AreEqual(0, repo.Status.Removed.Count);
                 Assert.AreEqual(0, repo.Status.Untracked.Count);
             }
@@ -133,7 +133,7 @@ namespace GitSharp.Tests.API
                 File.WriteAllText(filepath2, "untracked content");
 
                 // git reset --soft ...
-                repo.CurrentBranch.ResetSoft(commit.Hash);
+                repo.CurrentBranch.Reset(commit.Hash, ResetBehavior.Soft);
 
                 Assert.AreEqual(commit.Hash, repo.CurrentBranch.CurrentCommit.Hash);
                 Assert.IsTrue(new FileInfo(filepath1).Exists);
@@ -165,7 +165,7 @@ namespace GitSharp.Tests.API
             {
                 var c1 = repo.Head.CurrentCommit;
                 Assert.AreEqual(8, repo.Status.Removed.Count);
-                repo.Head.ResetSoft(c1.Parent.Parent);
+                repo.Head.Reset(c1.Parent.Parent, ResetBehavior.Soft);
                 Assert.AreEqual(5, repo.Status.Removed.Count);
                 Assert.AreEqual(0, repo.Status.Untracked.Count);
 

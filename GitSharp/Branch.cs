@@ -37,11 +37,7 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-using ObjectId = GitSharp.Core.ObjectId;
 using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
@@ -51,6 +47,8 @@ namespace GitSharp
 {
     public class Branch : Ref
     {
+        private const ResetBehavior DEFAULT_RESET_BEHAVIOR = ResetBehavior.Mixed;
+
         public Branch(Ref @ref)
             : base(@ref._repo, @ref.Name)
         {
@@ -104,46 +102,93 @@ namespace GitSharp
         /// </summary>
         public void Checkout()
         {
-            ResetHard();
+            Reset(ResetBehavior.Hard);
         }
 
-        public void ResetSoft(string hash)
+        public void Reset()
         {
-            var c = new Commit(_repo, hash);
-            if (c.IsCommit)
-                ResetSoft(c);
-            else
-                throw new ArgumentException("The provided hash is not a commit.");
+            Commit commit = GetSafeCurrentCommit();
+            Reset(commit);
         }
 
-        public void ResetSoft(Commit commit)
+        public void Reset(string commitHash)
+        {
+            Commit commit = ResolveCommit(commitHash);
+            Reset(commit);
+        }
+
+        public void Reset(Commit commit)
+        {
+            Reset(commit, DEFAULT_RESET_BEHAVIOR);
+        }
+
+        public void Reset(ResetBehavior resetBehavior)
+        {
+            Commit commit = GetSafeCurrentCommit();
+            Reset(commit, resetBehavior);
+        }
+
+        public void Reset(string commitHash, ResetBehavior resetBehavior)
+        {
+            Commit commit = ResolveCommit(commitHash);
+            Reset(commit, resetBehavior);
+        }
+
+        public void Reset(Commit commit, ResetBehavior resetBehavior)
+        {
+            if (commit == null)
+            {
+                throw new ArgumentNullException("commit");
+            }
+
+            switch (resetBehavior)
+            {
+                case ResetBehavior.Hard:
+                    ResetHard(commit);
+                    break;
+
+                case ResetBehavior.Soft:
+                    ResetSoft(commit);
+                    break;
+
+                case ResetBehavior.Mixed:
+                case ResetBehavior.Merge:
+                    throw new NotImplementedException();
+
+                default:
+                    throw new NotSupportedException(string.Format("{0} is not supported.", resetBehavior));
+            }
+        }
+
+        private Commit ResolveCommit(string commitHash)
+        {
+            var commit = new Commit(_repo, commitHash);
+
+            if (!commit.IsCommit)
+            {
+                throw new ArgumentException(string.Format("The provided hash ({0}) does not point to a commit.", commitHash));
+            }
+
+            return commit;
+        }
+
+        private static void ResetSoft(Commit commit)
         {
             Ref.Update("HEAD", commit);
         }
 
-        public void ResetHard(string hash)
-        {
-            var c = new Commit(_repo, hash);
-            if (c.IsCommit)
-                ResetHard(c);
-            else
-                throw new ArgumentException("The provided hash is not a commit.");
-        }
-
-        public void ResetHard(Commit commit)
+        private void ResetHard(Commit commit)
         {
             commit.Checkout(_repo.WorkingDirectory);
             Ref.Update("HEAD", commit);
         }
 
-        /// <summary>
-        /// Resets branch to the current commit of the branch. This resets any local changes to tracked files in the working directory.
-        /// </summary>
-        public void ResetHard()
+        private Commit GetSafeCurrentCommit()
         {
             if (this.CurrentCommit == null)
-                throw new InvalidOperationException("Can not reset branch with no commits");
-            ResetHard(this.CurrentCommit);
+                throw new InvalidOperationException(string.Format("Branch '{0}' has no commit.", Name));
+
+            return this.CurrentCommit;
         }
 
         public override string ToString()

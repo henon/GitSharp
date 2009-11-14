@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{37052DA4-F6A9-47D0-94AA-96F4A7E0462C}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -67,6 +67,7 @@
     <Compile Include="API\RepositoryTests.cs" />
     <Compile Include="AssertHelperFixture.cs" />
     <Compile Include="CanReadMsysgitIndexFixture.cs" />
+    <Compile Include="Util\LocalDiskRepositoryTestCase.cs" />
     <Compile Include="ReflogConfigTest.cs" />
     <Compile Include="IgnoreHandlerTest.cs" />
     <Compile Include="IndexModifiedTests.cs" />

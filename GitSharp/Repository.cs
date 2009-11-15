@@ -282,7 +282,7 @@ namespace GitSharp
                 var internal_refs = _internal_repo._refDb.GetBranches();
                 var dict = new Dictionary<string, Branch>(internal_refs.Count);
                 foreach (var pair in internal_refs)
-                    dict[pair.Key] = new Branch(this, pair.Value);
+                    dict[pair.Key.TrimStart('/')] = new Branch(this, pair.Value);
                 return dict;
             }
         }

@@ -65,7 +65,6 @@ namespace GitSharp.Tests.API
                 repo.Index.Add(filepath);
                 // now verify
                 Assert.IsTrue(new FileInfo(index_path).Exists);
-                var new_index = new Repository(repo.Directory).Index;
                 Assert.AreNotEqual(File.ReadAllBytes(old_index), File.ReadAllBytes(index_path));
 
                 // make another addition
@@ -101,8 +100,13 @@ namespace GitSharp.Tests.API
                 Assert.IsTrue(new FileInfo(index_path).Exists);
                 new FileInfo(index_path).MoveTo(old_index);
                 Assert.IsFalse(new FileInfo(index_path).Exists);
-                var new_index = new Repository(repo.Directory).Index;
-                new_index.Write(); // see if the read index is rewritten identitcally
+                
+                using (var repo2 = new Repository(repo.Directory))
+                {
+                    Index new_index = repo2.Index;
+                    new_index.Write(); // see if the read index is rewritten identitcally
+                }
+
                 Assert.IsTrue(new FileInfo(index_path).Exists);
                 Assert.AreEqual(File.ReadAllBytes(old_index), File.ReadAllBytes(index_path));
             }

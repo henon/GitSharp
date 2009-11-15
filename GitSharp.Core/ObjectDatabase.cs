@@ -56,7 +56,7 @@ namespace GitSharp.Core
 	/// alternates are present the fast half is fully searched (recursively through
 	/// all alternates) before the slow half is considered.
 	/// </summary>
-	public abstract class ObjectDatabase
+	public abstract class ObjectDatabase : IDisposable
     {
         /// <summary>
 		/// Constant indicating no alternate databases exist.
@@ -89,6 +89,11 @@ namespace GitSharp.Core
         public virtual void create()
         {
             // Assume no action is required.
+        }
+        
+        public virtual void Dispose()
+        {
+            close();
         }
 
         /// <summary>

@@ -121,16 +121,18 @@ namespace GitSharp
         /// </summary>
         public override void Execute()
         {
-            var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualDirectory));
-            repo.Create(Bare);
-            repo.Config.setBoolean("core", null, "bare", Bare);
-            repo.Config.save();
-            if (!Quiet)
+            using (var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualDirectory)))
             {
-                OutputStream.WriteLine("Initialized empty Git repository in " + repo.Directory.FullName);
-                OutputStream.Flush();
+                repo.Create(Bare);
+                repo.Config.setBoolean("core", null, "bare", Bare);
+                repo.Config.save();
+                if (!Quiet)
+                {
+                    OutputStream.WriteLine("Initialized empty Git repository in " + repo.Directory.FullName);
+                    OutputStream.Flush();
+                }
+                Repository = new Repository(repo.Directory.FullName);
             }
-            Repository = new Repository(repo.Directory.FullName);
         }
     }
 }

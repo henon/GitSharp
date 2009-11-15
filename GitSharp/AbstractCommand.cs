@@ -166,7 +166,7 @@ namespace GitSharp
                     return Commands.Repository;
                 return _repository;
             }
-            set
+            protected set
             {
                 _repository = value;
             }
@@ -206,6 +206,5 @@ namespace GitSharp
         /// Execute the git command.
         /// </summary>
         public abstract void Execute();
-
     }
 }

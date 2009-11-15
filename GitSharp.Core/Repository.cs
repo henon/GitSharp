@@ -41,6 +41,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using GitSharp.Core.Exceptions;
@@ -837,9 +838,21 @@ namespace GitSharp.Core
 			int usageCount = Interlocked.Decrement(ref _useCnt);
 			if (usageCount == 0)
 			{
-				_objectDatabase.close();
+				_objectDatabase.Dispose();
+
+#if DEBUG
+                GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
 			}
 		}
+
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~Repository()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed: " + Directory);
+        }
+#endif
 
 		public void OpenPack(FileInfo pack, FileInfo idx)
 		{

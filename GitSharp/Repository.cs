@@ -208,14 +208,23 @@ namespace GitSharp
             if (!DirExists(Path.Combine(path, "refs/tags")))
                 return false;
 
+            Repository repo = null;
+
             try
             {
                 // let's see if it loads without throwing an exception
-                new Repository(path);
+                repo = new Repository(path);
             }
             catch (Exception)
             {
                 return false;
+            }
+            finally
+            {
+                if (repo != null)
+                {
+                    repo.Dispose();
+                }
             }
             return true;
         }

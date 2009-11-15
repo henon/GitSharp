@@ -83,8 +83,6 @@ public abstract class LocalDiskRepositoryTestCase  {
 	[SetUp]
 	public virtual void setUp(){
 
-		recursiveDelete(testName(), trash, true, false);
-
 		mockSystemReader = new MockSystemReader();
 		mockSystemReader.userGitConfig = new FileBasedConfig(new FileInfo(Path.Combine(trash.FullName, "usergitconfig")));
 		SystemReader.setInstance(mockSystemReader);
@@ -118,9 +116,13 @@ public abstract class LocalDiskRepositoryTestCase  {
 		//
 		if (useMMAP)
 			System.GC.Collect();
-
-		recursiveDelete(testName(), trash, false, true);
 	}
+
+    [TestFixtureTearDown]
+    public void FixtureTearDown()
+    {
+        recursiveDelete(testName(), trash, false, true);
+    }
 
 	/** Increment the {@link #author} and {@link #committer} times. */
 	protected void tick() {

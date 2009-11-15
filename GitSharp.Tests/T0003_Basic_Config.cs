@@ -90,10 +90,12 @@ namespace GitSharp.Tests
         [Test]
         public void test007_Open()
         {
-            Core.Repository db2 = new Core.Repository(db.Directory);
-            Assert.AreEqual(db.Directory, db2.Directory);
-            Assert.AreEqual(db.ObjectsDirectory.FullName, db2.ObjectsDirectory.FullName);
-            Assert.AreNotSame(db.Config, db2.Config);
+            using (Core.Repository db2 = new Core.Repository(db.Directory))
+            {
+                Assert.AreEqual(db.Directory, db2.Directory);
+                Assert.AreEqual(db.ObjectsDirectory.FullName, db2.ObjectsDirectory.FullName);
+                Assert.AreNotSame(db.Config, db2.Config);
+            }
         }
 
         [Test]

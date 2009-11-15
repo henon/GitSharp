@@ -639,9 +639,11 @@ namespace GitSharp.Tests
 
             // Create new Repository instance, to reread caches and make sure our
             // assumptions are persistent.
-            Core.Repository ndb = new Core.Repository(db.Directory);
-            Assert.AreEqual(rb2, ndb.Resolve("refs/heads/new/name"));
-            Assert.IsNull(ndb.Resolve("refs/heads/b"));
+            using (Core.Repository ndb = new Core.Repository(db.Directory))
+            {
+                Assert.AreEqual(rb2, ndb.Resolve("refs/heads/new/name"));
+                Assert.IsNull(ndb.Resolve("refs/heads/b"));
+            }
         }
 
         public void tryRenameWhenLocked(string toLock, string fromName,

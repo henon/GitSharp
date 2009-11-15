@@ -68,7 +68,7 @@ namespace GitSharp.Tests
         [Test]
         public void testBareFileKey()
         {
-            Core.Repository bare = createNewEmptyRepo(true);
+            Core.Repository bare = createBareRepository();
             DirectoryInfo gitdir = bare.Directory;
             DirectoryInfo parent = gitdir.Parent;
 			Assert.IsNotNull(parent);
@@ -102,7 +102,7 @@ namespace GitSharp.Tests
         [Test]
         public void testFileKeyOpenNew()
         {
-            Core.Repository n = createNewEmptyRepo(true);
+            Core.Repository n = createBareRepository();
             DirectoryInfo gitdir = n.Directory;
             n.Close();
             recursiveDelete(gitdir);

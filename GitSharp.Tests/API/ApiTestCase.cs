@@ -46,7 +46,7 @@ namespace GitSharp.Tests.API
     {
         protected Repository GetTrashRepository()
         {
-            return new Repository(trash_git.FullName);
+            return new Repository(db.WorkingDirectory.FullName);
         }
     }
 }

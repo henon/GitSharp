@@ -122,7 +122,7 @@
     <Compile Include="TreeIteratorLeafOnlyTest.cs" />
     <Compile Include="TreeIteratorPostOrderTest.cs" />
     <Compile Include="TreeIteratorPreOrderTest.cs" />
-    <Compile Include="MockSystemReader.cs" />
+    <Compile Include="Util\MockSystemReader.cs" />
     <Compile Include="TreeWalk\Filter\PathSuffixFilterTestCase.cs" />
     <Compile Include="Util\ByteArrayExtensionsFixture.cs" />
     <Compile Include="Util\NBTests.cs" />

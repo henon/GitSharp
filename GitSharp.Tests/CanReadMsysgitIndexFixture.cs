@@ -99,7 +99,7 @@ namespace GitSharp.Tests
         [Test]
         public void Check_entries_of_msysgit_index()
         {
-            var repo = new Core.Repository(trash_git);
+            var repo = new Core.Repository(db.Directory);
             var index_path = Path.Combine(repo.Directory.FullName, "index");
             new FileInfo("Resources/index_originating_from_msysgit").CopyTo(index_path);
 

@@ -59,7 +59,7 @@ namespace GitSharp.Tests
             // written
             Core.Tree t = new Core.Tree(db);
             addFileToTree(t, "i-am-a-file", "and this is the data in me\n");
-            commit(t, "A Commit\n", new PersonIdent(jauthor, commitTime, tz), new PersonIdent(jcommitter, commitTime, tz));
+            commit(t, "A Commit\n", new PersonIdent(author, commitTime, tz), new PersonIdent(committer, commitTime, tz));
             commitTime += 100;
             Assert.IsTrue(
 				
@@ -71,7 +71,7 @@ namespace GitSharp.Tests
 
             // do one commit and check that reflog size is increased to 1
             addFileToTree(t, "i-am-another-file", "and this is other data in me\n");
-            commit(t, "A Commit\n", new PersonIdent(jauthor, commitTime, tz), new PersonIdent(jcommitter, commitTime, tz));
+            commit(t, "A Commit\n", new PersonIdent(author, commitTime, tz), new PersonIdent(committer, commitTime, tz));
             commitTime += 100;
             Assert.IsTrue(db.ReflogReader(Constants.HEAD).getReverseEntries().Count == 1, "Reflog for HEAD should contain one entry");
 
@@ -81,7 +81,7 @@ namespace GitSharp.Tests
 
             // do one commit and check that reflog size is 2
             addFileToTree(t, "i-am-anotheranother-file", "and this is other other data in me\n");
-            commit(t, "A Commit\n", new PersonIdent(jauthor, commitTime, tz), new PersonIdent(jcommitter, commitTime, tz));
+            commit(t, "A Commit\n", new PersonIdent(author, commitTime, tz), new PersonIdent(committer, commitTime, tz));
             Assert.IsTrue(db.ReflogReader(Constants.HEAD).getReverseEntries().Count == 2, "Reflog for HEAD should contain two entries");
         }
 
@@ -95,7 +95,7 @@ namespace GitSharp.Tests
 
             Core.Tree t = new Core.Tree(db);
             addFileToTree(t, "i-am-a-file", "and this is the data in me\n");
-            commit(t, "A Commit\n", new PersonIdent(jauthor, commitTime, tz), new PersonIdent(jcommitter, commitTime, tz));
+            commit(t, "A Commit\n", new PersonIdent(author, commitTime, tz), new PersonIdent(committer, commitTime, tz));
             IList<ReflogReader.Entry> entries = db.ReflogReader(Constants.HEAD).getReverseEntries();
             Assert.AreEqual(1, entries.Count);
 

@@ -58,15 +58,14 @@ using System.Diagnostics;
 using System.IO;
 using GitSharp.Core;
 using GitSharp.Core.Util;
-using GitSharp.Tests;
+using GitSharp.Tests.Util;
 using NUnit.Framework;
 
 public abstract class LocalDiskRepositoryTestCase  {
-	private static int testCount;
-
-    private static bool useMMAP;
+    #warning setting useMMAP to true makes many tests fail. This has to be investigated.
+    private static bool useMMAP = false; 
     
-    // Below Java 
+    // Java line below has not been ported
     //useMMAP = "true".equals(System.getProperty("jgit.junit.usemmap"));
 
 	/** A fake (but stable) identity for author fields in the test. */
@@ -82,7 +81,7 @@ public abstract class LocalDiskRepositoryTestCase  {
 	private MockSystemReader mockSystemReader;
 
 	[SetUp]
-	protected virtual void setUp(){
+	public virtual void setUp(){
 
 		recursiveDelete(testName(), trash, true, false);
 
@@ -107,7 +106,7 @@ public abstract class LocalDiskRepositoryTestCase  {
 	}
 
 	[TearDown]
-	protected void tearDown()  {
+	public virtual void tearDown()  {
 		RepositoryCache.clear();
 		foreach (Repository r in toClose)
 			r.Close();
@@ -139,7 +138,7 @@ public abstract class LocalDiskRepositoryTestCase  {
 	 * @param dir
 	 *            the recursively directory to delete, if present.
 	 */
-	protected void recursiveDelete(DirectoryInfo dir) {
+	protected void recursiveDelete(FileSystemInfo dir) {
 		recursiveDelete(testName(), dir, false, true);
 	}
 
@@ -377,7 +376,7 @@ public abstract class LocalDiskRepositoryTestCase  {
 	}
 
 	private String testName() {
-        throw new NotImplementedException("Not ported yet.");
+        return this.GetType().FullName;
 		//return getClass().getName() + "." + getName();
 	}
 }

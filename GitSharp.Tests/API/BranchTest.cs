@@ -49,6 +49,143 @@ namespace GitSharp.Tests.API
     [TestFixture]
     public class BranchTest : ApiTestCase
     {
+
+        [Test]
+        public void Branch_from_HEAD()
+        {
+            using (Repository repo = GetTrashRepository())
+            {
+                var b = Branch.Create(repo, "foo");
+                Assert.AreEqual("foo", b.Name);
+                Assert.AreEqual("master", repo.CurrentBranch.Name); // creating a new branch does not switch to it by default.
+                Assert.AreEqual(repo.Head.CurrentCommit, b.CurrentCommit);
+                Assert.IsTrue(repo.Branches.ContainsKey("foo"));
+                Assert.AreEqual(new Branch(repo, "foo"), b);
+                Assert.AreEqual(b, repo.Branches["foo"]);
+            }
+        }
+
+        [Test]
+        public void Branch_from_a_commit_in_history()
+        {
+            using (Repository repo = GetTrashRepository())
+            {
+                var c = new Commit(repo, "master^^");
+                var b = Branch.Create(repo, "foo", c);
+                Assert.AreEqual(c, b.CurrentCommit);
+                Assert.AreEqual("master", repo.CurrentBranch.Name); // creating a new branch does not switch to it by default.
+            }
+        }
+
+        [Test]
+        public void Switch_to_Branch()
+        {
+            using (Repository repo = GetTrashRepository())
+            {
+                var master = repo.Branches["master"];
+                Assert.IsTrue(master.IsCurrent);
+                master.Reset(ResetBehavior.Hard);
+                var a = repo.Branches["a"];
+                var b = repo.Branches["b"];
+                var c = repo.Branches["c"];
+                var d = repo.Branches["d"];
+                var e = repo.Branches["e"];
+                var f = repo.Branches["f"];
+                var g = repo.Branches["g"];
+                var prefix_a = repo.Branches["prefix/a"];
+                var gitlink = repo.Branches["gitlink"];
+                var symlink = repo.Branches["symlink"];
+                var pa = repo.Branches["pa"];
+                Assert.AreEqual(12, repo.Branches.Count);
+                
+                Branch.SwitchTo(a);
+                Assert.IsTrue(a.IsCurrent);
+                Assert.IsFalse(master.IsCurrent);
+                Assert.IsTrue(GetFile(repo, "master.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a1.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a2.txt").Exists);
+                AssertRepoIsClean(repo);
+
+                Branch.SwitchTo(b);
+                Assert.IsTrue(b.IsCurrent);
+                Assert.IsFalse(a.IsCurrent);
+                Assert.IsTrue(GetFile(repo, "master.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a1.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a2.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "b/b1.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "b/b2.txt").Exists);
+                AssertRepoIsClean(repo);
+
+                repo.CheckoutBranch("c");
+                Assert.IsTrue(c.IsCurrent);
+                Assert.IsTrue(GetFile(repo, "master.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a1.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a2.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "b/b1.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "b/b2.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "c/c1.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "c/c2.txt").Exists);
+                AssertRepoIsClean(repo);
+
+                repo.CheckoutBranch(d);
+                Assert.IsTrue(d.IsCurrent);
+                Assert.IsTrue(GetFile(repo, "master.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a1").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a1.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a2.txt").Exists);
+                AssertRepoIsClean(repo);
+
+                repo.CheckoutBranch(e);
+
+                repo.CheckoutBranch(f);
+                Assert.IsTrue(f.IsCurrent);
+                Assert.IsTrue(GetFile(repo, "master.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "f/f").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a1.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a2.txt").Exists);
+                AssertRepoIsClean(repo);
+
+                repo.CheckoutBranch(prefix_a);
+                Assert.IsTrue(prefix_a.IsCurrent);
+                Assert.IsFalse(f.IsCurrent);
+                Assert.IsTrue(GetFile(repo, "master.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "f/f").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a1.txt").Exists);
+                Assert.IsTrue(GetFile(repo, "a/a2.txt").Exists);
+                AssertRepoIsClean(repo);
+
+                repo.CheckoutBranch(g);
+                repo.CheckoutBranch(pa);
+                AssertRepoIsClean(repo);
+
+                // [henon] not checking branches gitlink and symlink as there are obviously problems with them. these should be moved into their own test, once we understand gitlink and symlink better.
+
+                //repo.CheckoutBranch(gitlink);
+                //Assert.IsTrue(GetFile(repo, ".gitmodules").Exists);
+                //AssertRepoIsClean(repo);
+
+                //repo.CheckoutBranch("symlink");
+                //Assert.IsTrue(GetFile(repo, "symlink.txt").Exists);
+                //AssertRepoIsClean(repo);
+            }
+        }
+
+        private FileInfo GetFile(Repository r, string relative_path)
+        {
+            return new FileInfo(Path.Combine(r.WorkingDirectory, relative_path));
+        }
+
+        private void AssertRepoIsClean(Repository r)
+        {
+            var status = r.Status;
+            Assert.AreEqual(0, status.Added.Count);
+            Assert.AreEqual(0, status.Modified.Count);
+            Assert.AreEqual(0, status.Missing.Count);
+            Assert.AreEqual(0, status.Removed.Count);
+            Assert.AreEqual(0, status.Staged.Count);
+            Assert.AreEqual(0, status.Untracked.Count);
+        }
+
         [Test]
         public void ResetHard()
         {
@@ -137,7 +274,7 @@ namespace GitSharp.Tests.API
 
                 Assert.AreEqual(commit.Hash, repo.CurrentBranch.CurrentCommit.Hash);
                 Assert.IsTrue(new FileInfo(filepath1).Exists);
-                var status=repo.Status;
+                var status = repo.Status;
                 Assert.IsTrue(status.Added.Contains("Bintang Kecil.txt"));
                 Assert.IsTrue(status.Staged.Contains("a present for paupaw.txt"));
                 Assert.AreEqual(1, status.Added.Count);

@@ -231,6 +231,24 @@ namespace GitSharp
         }
 
         /// <summary>
+        /// Check out the branch with the given name
+        /// </summary>
+        /// <param name="name"></param>
+        public void CheckoutBranch(string name)
+        {
+            CheckoutBranch(new Branch(this, name));
+        }
+
+        /// <summary>
+        /// Check out the given branch
+        /// </summary>
+        /// <param name="branch"></param>
+        public void CheckoutBranch(Branch branch)
+        {
+            Branch.SwitchTo(branch);
+        }
+
+        /// <summary>
         /// Commit staged changes and update HEAD. The default git author is used.
         /// </summary>
         /// <param name="message">The commit message</param>

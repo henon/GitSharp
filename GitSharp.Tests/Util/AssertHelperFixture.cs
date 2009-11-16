@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Util
 {
     [TestFixture]
     public class AssertHelperFixture

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using GitSharp.Core;
+using GitSharp.Tests.Util;
 using NUnit.Framework;
 using FileMode=GitSharp.Core.FileMode;
 

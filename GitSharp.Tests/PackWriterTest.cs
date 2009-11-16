@@ -43,6 +43,7 @@ using GitSharp.Core;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.Transport;
+using GitSharp.Tests.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests

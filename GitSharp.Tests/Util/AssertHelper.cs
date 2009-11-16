@@ -2,7 +2,7 @@
 using GitSharp.Core;
 using NUnit.Framework;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Util
 {
     public static class AssertHelper
     {

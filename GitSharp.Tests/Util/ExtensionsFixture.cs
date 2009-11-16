@@ -8,7 +8,7 @@ using GitSharp.Core;
 using GitSharp.Core.Util;
 using NUnit.Framework;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Util
 {
     [TestFixture]
     public class ExtensionsFixture

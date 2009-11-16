@@ -65,7 +65,7 @@
     <Compile Include="API\RefModelTests.cs" />
     <Compile Include="API\RepositoryStatusTests.cs" />
     <Compile Include="API\RepositoryTests.cs" />
-    <Compile Include="AssertHelperFixture.cs" />
+    <Compile Include="Util\AssertHelperFixture.cs" />
     <Compile Include="CanReadMsysgitIndexFixture.cs" />
     <Compile Include="Util\LocalDiskRepositoryTestCase.cs" />
     <Compile Include="ReflogConfigTest.cs" />
@@ -73,8 +73,8 @@
     <Compile Include="IndexModifiedTests.cs" />
     <Compile Include="RepositoryCacheTest.cs" />
     <Compile Include="ReflogReaderTest.cs" />
-    <Compile Include="StringExtensionsFixture.cs" />
-    <Compile Include="ExtensionsFixture.cs" />
+    <Compile Include="Util\StringExtensionsFixture.cs" />
+    <Compile Include="Util\ExtensionsFixture.cs" />
     <Compile Include="ConcurrentRepackTest.cs" />
     <Compile Include="T0003_Basic_Config.cs" />
     <Compile Include="Diff\DiffFormatterReflowTest.cs" />
@@ -187,7 +187,7 @@
     <Compile Include="Crc32Tests.cs" />
     <Compile Include="RepositoryTestCase.cs" />
     <Compile Include="Patch\EditListTest.cs" />
-    <Compile Include="AssertHelper.cs" />
+    <Compile Include="Util\AssertHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="sample\README">

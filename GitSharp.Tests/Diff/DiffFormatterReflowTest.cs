@@ -41,6 +41,7 @@ using GitSharp.Core.Diff;
 using GitSharp.Core.Patch;
 using GitSharp.Tests.Patch;
 using GitSharp.Core.Util;
+using GitSharp.Tests.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.Diff

@@ -40,102 +40,102 @@ using NUnit.Framework;
 using GitSharp.Core.Diff;
 using System.Collections;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Diff
 {
     [TestFixture]
     public class EditListTest
     {
         [Test]
-	    public void testEmpty()
+        public void testEmpty()
         {
-		    EditList l = new EditList();
-		    Assert.AreEqual(0, l.size());
-		    Assert.IsTrue(l.isEmpty());
-		    Assert.AreEqual("EditList[]", l.ToString());
+            EditList l = new EditList();
+            Assert.AreEqual(0, l.size());
+            Assert.IsTrue(l.isEmpty());
+            Assert.AreEqual("EditList[]", l.ToString());
 
-		    Assert.IsTrue(l.Equals(l));
-		    Assert.IsTrue(l.Equals(new EditList()));
-		    Assert.IsFalse(l.Equals(string.Empty));
+            Assert.IsTrue(l.Equals(l));
+            Assert.IsTrue(l.Equals(new EditList()));
+            Assert.IsFalse(l.Equals(string.Empty));
             Assert.AreEqual(l.GetHashCode(), new EditList().GetHashCode());
-	    }
+        }
 
         [Test]
-	    public void testAddOne()
+        public void testAddOne()
         {
-		    Edit e = new Edit(1, 2, 1, 1);
-		    EditList l = new EditList();
-		    l.Add(e);
-		    Assert.AreEqual(1, l.size());
-		    Assert.IsFalse(l.isEmpty());
-		    Assert.AreSame(e, l.get(0));
+            Edit e = new Edit(1, 2, 1, 1);
+            EditList l = new EditList();
+            l.Add(e);
+            Assert.AreEqual(1, l.size());
+            Assert.IsFalse(l.isEmpty());
+            Assert.AreSame(e, l.get(0));
             IEnumerator i = l.GetEnumerator();
             i.Reset();
             i.MoveNext();
-		    Assert.AreSame(e, i.Current);
+            Assert.AreSame(e, i.Current);
 
-		    Assert.IsTrue(l.Equals(l));
-		    Assert.IsFalse(l.Equals(new EditList()));
+            Assert.IsTrue(l.Equals(l));
+            Assert.IsFalse(l.Equals(new EditList()));
 
-		    EditList l2 = new EditList();
-		    l2.Add(e);
-		    Assert.IsTrue(l.Equals(l2));
-		    Assert.IsTrue(l2.Equals(l));
-		    Assert.AreEqual(l.GetHashCode(), l2.GetHashCode());
-	    }
+            EditList l2 = new EditList();
+            l2.Add(e);
+            Assert.IsTrue(l.Equals(l2));
+            Assert.IsTrue(l2.Equals(l));
+            Assert.AreEqual(l.GetHashCode(), l2.GetHashCode());
+        }
 
         [Test]
-	    public void testAddTwo()
+        public void testAddTwo()
         {
-		    Edit e1 = new Edit(1, 2, 1, 1);
-		    Edit e2 = new Edit(8, 8, 8, 12);
-		    EditList l = new EditList();
-		    l.Add(e1);
-		    l.Add(e2);
-		    Assert.AreEqual(2, l.size());
-		    Assert.AreSame(e1, l.get(0));
-		    Assert.AreSame(e2, l.get(1));
+            Edit e1 = new Edit(1, 2, 1, 1);
+            Edit e2 = new Edit(8, 8, 8, 12);
+            EditList l = new EditList();
+            l.Add(e1);
+            l.Add(e2);
+            Assert.AreEqual(2, l.size());
+            Assert.AreSame(e1, l.get(0));
+            Assert.AreSame(e2, l.get(1));
 
-		    IEnumerator i = l.GetEnumerator();
+            IEnumerator i = l.GetEnumerator();
             i.Reset();
             i.MoveNext();
-		    Assert.AreSame(e1, i.Current);
+            Assert.AreSame(e1, i.Current);
             i.MoveNext();
-		    Assert.AreSame(e2, i.Current);
+            Assert.AreSame(e2, i.Current);
 
-		    Assert.IsTrue(l.Equals(l));
-		    Assert.IsFalse(l.Equals(new EditList()));
+            Assert.IsTrue(l.Equals(l));
+            Assert.IsFalse(l.Equals(new EditList()));
 
-		    EditList l2 = new EditList();
-		    l2.Add(e1);
-		    l2.Add(e2);
-		    Assert.IsTrue(l.Equals(l2));
-		    Assert.IsTrue(l2.Equals(l));
-		    Assert.AreEqual(l.GetHashCode(), l2.GetHashCode());
-	    }
-
-        [Test]
-	    public void testSet()
-        {
-		    Edit e1 = new Edit(1, 2, 1, 1);
-		    Edit e2 = new Edit(3, 4, 3, 3);
-		    EditList l = new EditList();
-		    l.Add(e1);
-		    Assert.AreSame(e1, l.get(0));
-		    Assert.AreSame(e1, l.set(0, e2));
-		    Assert.AreSame(e2, l.get(0));
-	    }
+            EditList l2 = new EditList();
+            l2.Add(e1);
+            l2.Add(e2);
+            Assert.IsTrue(l.Equals(l2));
+            Assert.IsTrue(l2.Equals(l));
+            Assert.AreEqual(l.GetHashCode(), l2.GetHashCode());
+        }
 
         [Test]
-	    public void testRemove()
+        public void testSet()
         {
-		    Edit e1 = new Edit(1, 2, 1, 1);
-		    Edit e2 = new Edit(8, 8, 8, 12);
-		    EditList l = new EditList();
-		    l.Add(e1);
-		    l.Add(e2);
-		    l.Remove(e1);
-		    Assert.AreEqual(1, l.size());
-		    Assert.AreSame(e2, l.get(0));
-	    }
+            Edit e1 = new Edit(1, 2, 1, 1);
+            Edit e2 = new Edit(3, 4, 3, 3);
+            EditList l = new EditList();
+            l.Add(e1);
+            Assert.AreSame(e1, l.get(0));
+            Assert.AreSame(e1, l.set(0, e2));
+            Assert.AreSame(e2, l.get(0));
+        }
+
+        [Test]
+        public void testRemove()
+        {
+            Edit e1 = new Edit(1, 2, 1, 1);
+            Edit e2 = new Edit(8, 8, 8, 12);
+            EditList l = new EditList();
+            l.Add(e1);
+            l.Add(e2);
+            l.Remove(e1);
+            Assert.AreEqual(1, l.size());
+            Assert.AreSame(e2, l.get(0));
+        }
     }
 }

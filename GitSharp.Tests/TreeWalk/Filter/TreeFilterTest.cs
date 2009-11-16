@@ -38,9 +38,10 @@
 
 using GitSharp.Core.TreeWalk;
 using GitSharp.Core.TreeWalk.Filter;
-namespace GitSharp.Tests.TreeWalk
+using NUnit.Framework;
+
+namespace GitSharp.Tests.TreeWalk.Filter
 {
-    using NUnit.Framework;
     [TestFixture]
     public class TreeFilterTest : RepositoryTestCase
     {

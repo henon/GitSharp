@@ -41,12 +41,12 @@ using System.IO;
 using GitSharp.Core;
 using NUnit.Framework;
 
-namespace GitSharp.Tests.Util
+namespace GitSharp.Tests
 {
     public abstract class PackIndexTestCase : RepositoryTestCase
     {
         protected PackIndex smallIdx;
-    	private PackIndex _denseIdx;
+        private PackIndex _denseIdx;
 
         [SetUp]
         public override void setUp()
@@ -57,25 +57,25 @@ namespace GitSharp.Tests.Util
         }
 
         /// <summary>
-		/// Return File with appropriate index version for prepared pack.
+        /// Return File with appropriate index version for prepared pack.
         /// </summary>
         /// <returns></returns>
-    	protected abstract FileInfo GetFileForPack34Be9032();
+        protected abstract FileInfo GetFileForPack34Be9032();
 
         /// <summary>
-		/// Return File with appropriate index version for prepared pack.
+        /// Return File with appropriate index version for prepared pack.
         /// </summary>
         /// <returns></returns>
         protected abstract FileInfo GetFileForPackdf2982F28();
 
         /// <summary>
-		/// Verify CRC32 support.
+        /// Verify CRC32 support.
         /// </summary>
         public abstract void testCRC32();
 
         /// <summary>
         /// Test contracts of Iterator methods and this implementation remove()
-		/// limitations.
+        /// limitations.
         /// </summary>
         [Test]
         public void testIteratorMethodsContract()
@@ -90,7 +90,7 @@ namespace GitSharp.Tests.Util
 
         /// <summary>
         /// Test results of iterator comparing to content of well-known (prepared)
-		/// small index.
+        /// small index.
         /// </summary>
         [Test]
         public void testIteratorReturnedValues1()
@@ -116,7 +116,7 @@ namespace GitSharp.Tests.Util
         }
 
         /// <summary>
-		/// Compare offset from iterator entries with output of findOffset() method.
+        /// Compare offset from iterator entries with output of findOffset() method.
         /// </summary>
         [Test]
         public void testCompareEntriesOffsetsWithFindOffsets()
@@ -134,7 +134,7 @@ namespace GitSharp.Tests.Util
 
         /// <summary>
         /// Test partial results of iterator comparing to content of well-known
-		/// (prepared) dense index, that may need multi-level indexing.
+        /// (prepared) dense index, that may need multi-level indexing.
         /// </summary>
         [Test]
         public void testIteratorReturnedValues2()
@@ -144,7 +144,7 @@ namespace GitSharp.Tests.Util
 
             while (!iter.Current.Name.Equals("0a3d7772488b6b106fb62813c4d6d627918d9181"))
             {
-				// just iterating
+                // just iterating
                 iter.MoveNext();
             }
 

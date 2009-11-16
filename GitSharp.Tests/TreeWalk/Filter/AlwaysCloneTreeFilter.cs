@@ -38,9 +38,9 @@
 
 using GitSharp.Core.TreeWalk;
 using GitSharp.Core.TreeWalk.Filter;
-namespace GitSharp.Tests.TreeWalk
-{
 
+namespace GitSharp.Tests.TreeWalk.Filter
+{
     class AlwaysCloneTreeFilter : TreeFilter
     {
         public override TreeFilter Clone()

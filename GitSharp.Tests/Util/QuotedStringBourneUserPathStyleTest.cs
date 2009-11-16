@@ -42,102 +42,102 @@ using GitSharp.Core;
 using GitSharp.Core.Util;
 using NUnit.Framework;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Util
 {
     [TestFixture]
     public class QuotedStringBourneUserPathStyleTest
     {
-	    private static void assertQuote(String in_str, String exp)
+        private static void assertQuote(String in_str, String exp)
         {
-		    String r = QuotedString.BOURNE_USER_PATH.quote(in_str);
-		    Assert.AreNotSame(in_str, r);
-		    Assert.IsFalse(in_str.Equals(r));
-		    Assert.AreEqual('\'' + exp + '\'', r);
-	    }
+            String r = QuotedString.BOURNE_USER_PATH.quote(in_str);
+            Assert.AreNotSame(in_str, r);
+            Assert.IsFalse(in_str.Equals(r));
+            Assert.AreEqual('\'' + exp + '\'', r);
+        }
 
-	    private static void assertDequote(String exp, String in_str)
+        private static void assertDequote(String exp, String in_str)
         {
-		    byte[] b = Constants.encode('\'' + in_str + '\'');
-		    string r = QuotedString.BOURNE_USER_PATH.dequote(b, 0, b.Length);
-		    Assert.AreEqual(exp, r);
-	    }
+            byte[] b = Constants.encode('\'' + in_str + '\'');
+            string r = QuotedString.BOURNE_USER_PATH.dequote(b, 0, b.Length);
+            Assert.AreEqual(exp, r);
+        }
 
         [Test]
-	    public void testQuote_Empty()
+        public void testQuote_Empty()
         {
             Assert.AreEqual("''", QuotedString.BOURNE_USER_PATH.quote(string.Empty));
-	    }
+        }
 
         [Test]
-	    public void testDequote_Empty1()
+        public void testDequote_Empty1()
         {
             Assert.AreEqual(string.Empty, QuotedString.BOURNE.dequote(new byte[0], 0, 0));
-	    }
+        }
 
         [Test]
-	    public void testDequote_Empty2()
+        public void testDequote_Empty2()
         {
             Assert.AreEqual(string.Empty, QuotedString.BOURNE_USER_PATH.dequote(new byte[] { (byte)'\'', (byte)'\'' }, 0,
-				    2));
-	    }
+                                                                                2));
+        }
 
         [Test]
-	    public void testDequote_SoleSq()
+        public void testDequote_SoleSq()
         {
             Assert.AreEqual(string.Empty, QuotedString.BOURNE_USER_PATH.dequote(new byte[] { (byte)'\'' }, 0, 1));
-	    }
+        }
 
         [Test]
-	    public void testQuote_BareA()
+        public void testQuote_BareA()
         {
-		    assertQuote("a", "a");
-	    }
+            assertQuote("a", "a");
+        }
 
         [Test]
-	    public void testDequote_BareA()
+        public void testDequote_BareA()
         {
-		    String in_str = "a";
-		    byte[] b = Constants.encode(in_str);
+            String in_str = "a";
+            byte[] b = Constants.encode(in_str);
             Assert.AreEqual(in_str, QuotedString.BOURNE_USER_PATH.dequote(b, 0, b.Length));
-	    }
+        }
 
         [Test]
-	    public void testDequote_BareABCZ_OnlyBC()
+        public void testDequote_BareABCZ_OnlyBC()
         {
-		    String in_str = "abcz";
-		    byte[] b = Constants.encode(in_str);
-		    int p = in_str.IndexOf('b');
+            String in_str = "abcz";
+            byte[] b = Constants.encode(in_str);
+            int p = in_str.IndexOf('b');
             Assert.AreEqual("bc", QuotedString.BOURNE_USER_PATH.dequote(b, p, p + 2));
-	    }
+        }
 
         [Test]
-	    public void testDequote_LoneBackslash()
+        public void testDequote_LoneBackslash()
         {
-		    assertDequote("\\", "\\");
-	    }
+            assertDequote("\\", "\\");
+        }
 
         [Test]
-	    public void testQuote_NamedEscapes()
+        public void testQuote_NamedEscapes()
         {
-		    assertQuote("'", "'\\''");
-		    assertQuote("!", "'\\!'");
+            assertQuote("'", "'\\''");
+            assertQuote("!", "'\\!'");
 
-		    assertQuote("a'b", "a'\\''b");
-		    assertQuote("a!b", "a'\\!'b");
-	    }
+            assertQuote("a'b", "a'\\''b");
+            assertQuote("a!b", "a'\\!'b");
+        }
 
         [Test]
-	    public void testDequote_NamedEscapes()
+        public void testDequote_NamedEscapes()
         {
-		    assertDequote("'", "'\\''");
-		    assertDequote("!", "'\\!'");
+            assertDequote("'", "'\\''");
+            assertDequote("!", "'\\!'");
 
-		    assertDequote("a'b", "a'\\''b");
-		    assertDequote("a!b", "a'\\!'b");
-	    }
+            assertDequote("a'b", "a'\\''b");
+            assertDequote("a!b", "a'\\!'b");
+        }
 
         [Test]
-	    public void testQuote_User()
+        public void testQuote_User()
         {
             Assert.AreEqual("~foo/", QuotedString.BOURNE_USER_PATH.quote("~foo"));
             Assert.AreEqual("~foo/", QuotedString.BOURNE_USER_PATH.quote("~foo/"));
@@ -145,10 +145,10 @@ namespace GitSharp.Tests
 
             Assert.AreEqual("~foo/'a'", QuotedString.BOURNE_USER_PATH.quote("~foo/a"));
             Assert.AreEqual("~/'a'", QuotedString.BOURNE_USER_PATH.quote("~/a"));
-	    }
+        }
 
         [Test]
-	    public void testDequote_User()
+        public void testDequote_User()
         {
             Assert.AreEqual("~foo", QuotedString.BOURNE_USER_PATH.dequote("~foo"));
             Assert.AreEqual("~foo/", QuotedString.BOURNE_USER_PATH.dequote("~foo/"));
@@ -156,6 +156,6 @@ namespace GitSharp.Tests
 
             Assert.AreEqual("~foo/a", QuotedString.BOURNE_USER_PATH.dequote("~foo/'a'"));
             Assert.AreEqual("~/a", QuotedString.BOURNE_USER_PATH.dequote("~/'a'"));
-	    }
+        }
     }
 }

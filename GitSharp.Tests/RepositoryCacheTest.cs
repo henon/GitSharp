@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
 using GitSharp.Core;
 using GitSharp.Core.Exceptions;
@@ -90,11 +91,13 @@ namespace GitSharp.Tests
         public void testFileKeyOpenExisting()
         {
 			Core.Repository r = new RepositoryCache.FileKey(db.Directory).open(true);
+            
             Assert.IsNotNull(r);
 			Assert.AreEqual(db.Directory.FullName, r.Directory.FullName);
             r.Close();
 
             r = new RepositoryCache.FileKey(db.Directory).open(false);
+
             Assert.IsNotNull(r);
 			Assert.AreEqual(db.Directory.FullName, r.Directory.FullName);
             r.Close();
@@ -104,18 +107,22 @@ namespace GitSharp.Tests
         public void testFileKeyOpenNew()
         {
             Core.Repository n = createBareRepository();
+
             DirectoryInfo gitdir = n.Directory;
             n.Close();
             recursiveDelete(gitdir);
             Assert.IsFalse(gitdir.Exists);
 
-            var e = AssertHelper.Throws<RepositoryNotFoundException>(() => new RepositoryCache.FileKey(gitdir).open(true));
+            var e =
+                AssertHelper.Throws<RepositoryNotFoundException>(() => new RepositoryCache.FileKey(gitdir).open(true));
             Assert.AreEqual("repository not found: " + gitdir, e.Message);
 
-            Core.Repository o = new RepositoryCache.FileKey(gitdir).open(false);
-            Assert.IsNotNull(o);
-			Assert.AreEqual(gitdir.FullName, o.Directory.FullName);
-            Assert.IsFalse(gitdir.Exists);
+            using (Core.Repository o = new RepositoryCache.FileKey(gitdir).open(false))
+            {
+                Assert.IsNotNull(o);
+                Assert.AreEqual(gitdir.FullName, o.Directory.FullName);
+                Assert.IsFalse(gitdir.Exists);
+            }
         }
 
         [Test]
@@ -123,12 +130,20 @@ namespace GitSharp.Tests
         {
             DirectoryInfo dir = db.Directory;
             RepositoryCache.register(db);
-            Assert.AreSame(db, RepositoryCache.open(RepositoryCache.FileKey.exact(dir)));
+            using (Core.Repository exact = RepositoryCache.open(RepositoryCache.FileKey.exact(dir)))
+            {
+                Assert.AreSame(db, exact);
+            }
 
 			Assert.IsTrue(dir.Name.EndsWith(".git"));
             Assert.AreEqual(".git", dir.Name);
             DirectoryInfo parent = dir.Parent;
-            Assert.AreSame(db, RepositoryCache.open(RepositoryCache.FileKey.lenient(parent)));
+            using (Core.Repository lenient = RepositoryCache.open(RepositoryCache.FileKey.lenient(parent)))
+            {
+                Assert.AreSame(db, lenient);
+            }
+
+            RepositoryCache.close(db);
         }
 
         [Test]

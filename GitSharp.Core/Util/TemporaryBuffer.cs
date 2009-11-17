@@ -205,18 +205,32 @@ namespace GitSharp.Core.Util
 
         public void close()
         {
-            if (diskOut != null)
+            if (diskOut == null)
             {
-                try
-                {
-                    diskOut.Close();
-                }
-                finally
-                {
-                    diskOut = null;
-                }
+                return;
             }
+ 
+            try
+            {
+                diskOut.Dispose();
+            }
+            finally
+            {
+                diskOut = null;
+            }
+
+#if DEBUG
+            GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
         }
+
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~TemporaryBuffer()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed.");
+        }
+#endif
 
         /**
          * Obtain the length (in bytes) of the buffer.
@@ -325,21 +339,7 @@ namespace GitSharp.Core.Util
         {
             _blocks = null;
 
-            if (diskOut != null)
-            {
-                try
-                {
-                    diskOut.Close();
-                }
-                catch (IOException)
-                {
-                    // We shouldn't encounter an error closing the file.
-                }
-                finally
-                {
-                    diskOut = null;
-                }
-            }
+            close();
 
             if (_onDiskFile != null)
             {

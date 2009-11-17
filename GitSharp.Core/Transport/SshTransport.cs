@@ -116,6 +116,18 @@ namespace GitSharp.Core.Transport
 			{
 				_sock = null;
 			}
+
+#if DEBUG
+            GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
         }
+
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~SshTransport()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed: {" + Local.Directory + "}/{" + Uri + "}");
+        }
+#endif
     }
 }

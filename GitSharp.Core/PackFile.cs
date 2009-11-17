@@ -201,8 +201,19 @@ namespace GitSharp.Core
 				_loadedIdx = null;
 				_reverseIdx = null;
 			}
+
+#if DEBUG
+            GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
 		}
 
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~PackFile()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed: {" + _packFile.FullName + "}/{" + _idxFile.FullName + "}");
+        }
+#endif
 		#region IEnumerable Implementation
 
 		public IEnumerator<PackIndex.MutableEntry> GetEnumerator()

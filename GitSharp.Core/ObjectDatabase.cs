@@ -103,8 +103,18 @@ namespace GitSharp.Core
         {
             closeSelf();
             closeAlternates();
+#if DEBUG
+            GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
         }
 
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~ObjectDatabase()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed.");
+        }
+#endif
         /// <summary>
         /// Close any resources held by this database only; ignoring alternates.
 		/// <para />

@@ -50,7 +50,7 @@ namespace GitSharp.Core.Transport
     /// transport to opening at most one FetchConnection before needing to recreate
     /// the transport instance.
     /// </summary>
-    public class TransportBundleStream : Transport, ITransportBundle, IDisposable
+    public class TransportBundleStream : Transport, ITransportBundle
     {
         private Stream _inputStream;
 
@@ -99,27 +99,35 @@ namespace GitSharp.Core.Transport
 
         public override void close()
         {
-            if (_inputStream != null)
+            if (_inputStream == null)
             {
-                try
-                {
-                    _inputStream.Close();
-                }
-                catch (IOException)
-                {
-                    // Ignore a close error.
-                }
-                finally
-                {
-                    _inputStream = null;
-                }
-            };
-        }
+                return;
+            }
+            try
+            {
+                _inputStream.Dispose();
+            }
+            catch (IOException)
+            {
+                // Ignore a close error.
+            }
+            finally
+            {
+                _inputStream = null;
+            }
+            
 
-        public override void Dispose()
-        {
-            _inputStream.Dispose();
-            base.Dispose();
+#if DEBUG
+            GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
+
         }
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~TransportBundleStream()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed: {" + Local.Directory + "}/{" + Uri + "}");
+        }
+#endif
     }
 }

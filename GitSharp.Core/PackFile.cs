@@ -67,11 +67,9 @@ namespace GitSharp.Core
 		private readonly int _hash;
 		private readonly int _packLastModified;
 
-		private MemoryMappedFile _fdMap;
 		private FileStream _fd;
 		private int _activeWindows;
 		private int _activeCopyRawData;
-
 		
 		private volatile bool _invalid;
 		private byte[] _packChecksum;
@@ -449,7 +447,7 @@ namespace GitSharp.Core
 
 			try
 			{
-				_fd.Close();
+				_fd.Dispose();
 			}
 			catch (IOException)
 			{
@@ -475,37 +473,40 @@ namespace GitSharp.Core
 
 		internal ByteWindow MemoryMappedByteWindow(long pos, int size)
 		{
-			if (Length < pos + size)
-			{
-				size = (int)(Length - pos);
-			}
+		    if (Length < pos + size)
+		    {
+		        size = (int) (Length - pos);
+		    }
 
-			Stream map;
+		    Stream map;
 
-			try
-			{
-				_fdMap = MemoryMappedFile.Create(File.FullName, MapProtection.PageReadOnly);
-				map = _fdMap.MapView(MapAccess.FileMapRead, pos, size); // was: map = _fd.map(MapMode.READ_ONLY, pos, size);
-			}
-			catch (IOException)
-			{
-				// The most likely reason this failed is the process has run out
-				// of virtual memory. We need to discard quickly, and try to
-				// force the GC to finalize and release any existing mappings.
-				//
-				GC.Collect();
-				GC.WaitForPendingFinalizers();
-				map = _fdMap.MapView(MapAccess.FileMapRead, pos, size);
-			}
+		    using (var _fdMap = MemoryMappedFile.Create(File.FullName, MapProtection.PageReadOnly))
+            {
+                try
+		        {
+		            map = _fdMap.MapView(MapAccess.FileMapRead, pos, size);
+		                // was: map = _fd.map(MapMode.READ_ONLY, pos, size);
+		        }
+		        catch (IOException)
+		        {
+		            // The most likely reason this failed is the process has run out
+		            // of virtual memory. We need to discard quickly, and try to
+		            // force the GC to finalize and release any existing mappings.
+		            //
+		            GC.Collect();
+		            GC.WaitForPendingFinalizers();
+		            map = _fdMap.MapView(MapAccess.FileMapRead, pos, size);
+		        }
 
-			byte[] mapArray = map != null ? map.toArray() : new byte[0];
+		        byte[] mapArray = map != null ? map.toArray() : new byte[0];
 
-			if (mapArray.Length > 0)
-			{
-				return new ByteArrayWindow(this, pos, mapArray);
-			}
+		        if (mapArray.Length > 0)
+		        {
+		            return new ByteArrayWindow(this, pos, mapArray);
+		        }
+		    }
 
-			return new ByteBufferWindow(this, pos, map);
+        	return new ByteBufferWindow(this, pos, map);
 		}
 
 		private void OnOpenPack()
@@ -624,9 +625,14 @@ namespace GitSharp.Core
 		
 		public void Dispose ()
 		{
-			_fd.Dispose();
-			_fdMap.Dispose();
+            if (_fd == null)
+            {
+                return;
+            }
+
+            Close();
+
+		    _fd.Dispose();}
 		}
 		
 	}
-}

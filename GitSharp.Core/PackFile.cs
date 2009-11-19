@@ -625,12 +625,12 @@ namespace GitSharp.Core
 		
 		public void Dispose ()
 		{
+            Close();
+
             if (_fd == null)
             {
                 return;
             }
-
-            Close();
 
 		    _fd.Dispose();}
 		}

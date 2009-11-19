@@ -76,7 +76,15 @@ namespace GitSharp.Tests
 			_indexFile = new FileInfo(Path.Combine(trash.FullName, "tmp_pack.idx"));
 			_writer = new PackWriter(db, new TextProgressMonitor());
 		}
+     
+        [TearDown]
+        public override void tearDown()
+        {
+            if (_pack != null)
+                _pack.Dispose();
 
+            base.tearDown();
+        }
 		#endregion
 
 		///	<summary>

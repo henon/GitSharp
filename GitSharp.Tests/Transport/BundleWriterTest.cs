@@ -50,9 +50,18 @@ namespace GitSharp.Tests.Transport
     [TestFixture]
     public class BundleWriterTest : RepositoryTestCase
     {
+        private List<TransportBundleStream>	 _transportBundleStreams = new List<TransportBundleStream>();
+
         #region Test methods
 
         #region testWrite0
+
+        public override void FixtureTearDown()
+        {
+            _transportBundleStreams.ForEach((t) => t.Dispose());
+
+            base.FixtureTearDown();
+        }
 
         [Test]
         public void testWrite0()
@@ -140,7 +149,11 @@ namespace GitSharp.Tests.Transport
             var @in = new MemoryStream(bundle);
             var rs = new RefSpec("refs/heads/*:refs/heads/*");
             var refs = new List<RefSpec>{rs};
-            return new TransportBundleStream(newRepo, uri, @in).fetch(NullProgressMonitor.Instance, refs);
+            var transportBundleStream = new TransportBundleStream(newRepo, uri, @in);
+            
+            _transportBundleStreams.Add(transportBundleStream);
+
+            return transportBundleStream.fetch(NullProgressMonitor.Instance, refs);
         }
 
         #endregion

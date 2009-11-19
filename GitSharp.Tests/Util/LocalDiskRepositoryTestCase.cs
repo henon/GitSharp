@@ -120,7 +120,7 @@ namespace GitSharp.Tests.Util
         }
 
         [TestFixtureTearDown]
-        public void FixtureTearDown()
+        public virtual void FixtureTearDown()
         {
             recursiveDelete(testName(), trash, false, true);
         }

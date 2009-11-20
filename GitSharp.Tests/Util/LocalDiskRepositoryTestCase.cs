@@ -83,6 +83,7 @@ namespace GitSharp.Tests.Util
 
         [SetUp]
         public virtual void setUp(){
+            recursiveDelete(testName() + " (SetUp)", trash, false, true);
 
             mockSystemReader = new MockSystemReader();
             mockSystemReader.userGitConfig = new FileBasedConfig(new FileInfo(Path.Combine(trash.FullName, "usergitconfig")));
@@ -117,12 +118,15 @@ namespace GitSharp.Tests.Util
             //
             if (useMMAP)
                 System.GC.Collect();
+
+            recursiveDelete(testName() + " (TearDown)", trash, false, true);
+
         }
 
         [TestFixtureTearDown]
         public virtual void FixtureTearDown()
         {
-            recursiveDelete(testName(), trash, false, true);
+            recursiveDelete(testName() + " (FixtureTearDown)", trash, false, true);
         }
 
         /** Increment the {@link #author} and {@link #committer} times. */

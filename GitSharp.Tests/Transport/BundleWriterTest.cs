@@ -56,11 +56,11 @@ namespace GitSharp.Tests.Transport
 
         #region testWrite0
 
-        public override void FixtureTearDown()
+        public override void tearDown()
         {
             _transportBundleStreams.ForEach((t) => t.Dispose());
 
-            base.FixtureTearDown();
+            base.tearDown();
         }
 
         [Test]

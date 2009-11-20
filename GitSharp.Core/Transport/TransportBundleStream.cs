@@ -99,23 +99,21 @@ namespace GitSharp.Core.Transport
 
         public override void close()
         {
-            if (_inputStream == null)
+            if (_inputStream != null)
             {
-                return;
+                try
+                {
+                    _inputStream.Dispose();
+                }
+                catch (IOException)
+                {
+                    // Ignore a close error.
+                }
+                finally
+                {
+                    _inputStream = null;
+                }
             }
-            try
-            {
-                _inputStream.Dispose();
-            }
-            catch (IOException)
-            {
-                // Ignore a close error.
-            }
-            finally
-            {
-                _inputStream = null;
-            }
-            
 
 #if DEBUG
             GC.SuppressFinalize(this); // Disarm lock-release checker

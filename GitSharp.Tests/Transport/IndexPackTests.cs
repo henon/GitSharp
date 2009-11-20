@@ -45,7 +45,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests.Transport
 {
     [TestFixture]
-    public class IndexPackTest : RepositoryTestCase
+    public class IndexPackTest : SampleDataRepositoryTestCase
     {
 		/// <summary>
 		/// Test indexing one of the test packs in the egit repo. It has deltas.

@@ -47,7 +47,7 @@ using GitSharp.Core.Util;
 namespace GitSharp.Tests
 {
     [TestFixture]
-    public class T0003_Basic_Write : RepositoryTestCase
+    public class T0003_Basic_Write : SampleDataRepositoryTestCase
     {
         [Test]
         public void test001_Initalize()

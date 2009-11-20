@@ -38,7 +38,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using GitSharp.Core;
 using GitSharp.Core.Util;
 using NUnit.Framework;
@@ -50,7 +49,7 @@ namespace GitSharp.Tests
 	 * test for a ref related method, does not mean it is untested.
 	 */
 	[TestFixture]
-	public class RefTest : RepositoryTestCase
+	public class RefTest : SampleDataRepositoryTestCase
 	{
 		[Test]
 		public virtual void testReadAllIncludingSymrefs()

@@ -36,10 +36,7 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using GitSharp.Core;
 using GitSharp.Core.Util;
 using NUnit.Framework;
@@ -47,7 +44,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests
 {
     [TestFixture]
-    public class ReflogReaderTest : RepositoryTestCase
+    public class ReflogReaderTest : SampleDataRepositoryTestCase
     {
 
         static byte[] oneLine = "da85355dfc525c9f6f3927b876f379f46ccf826e 3e7549db262d1e836d9bf0af7e22355468f1717c A O Thor Too <authortoo@wri.tr> 1243028200 +0200\tcommit: Add a toString for debugging to RemoteRefUpdate\n"

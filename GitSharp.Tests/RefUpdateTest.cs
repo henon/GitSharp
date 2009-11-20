@@ -46,7 +46,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests
 {
     [TestFixture]
-    public class RefUpdateTest : RepositoryTestCase
+    public class RefUpdateTest : SampleDataRepositoryTestCase
     {
 
         private RefUpdate updateRef(string name)

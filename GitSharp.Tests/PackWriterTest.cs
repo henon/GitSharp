@@ -49,7 +49,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests
 {
 	[TestFixture]
-	public class PackWriterTest : RepositoryTestCase
+    public class PackWriterTest : SampleDataRepositoryTestCase
 	{
 		private static readonly IList<ObjectId> EMPTY_LIST_OBJECT = new List<ObjectId>();
 		private static readonly IList<RevObject> EMPTY_LIST_REVS = new List<RevObject>();

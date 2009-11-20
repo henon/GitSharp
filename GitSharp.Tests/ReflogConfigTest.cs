@@ -43,7 +43,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests
 {
     [TestFixture]
-    public class ReflogConfigTest : RepositoryTestCase
+    public class ReflogConfigTest : SampleDataRepositoryTestCase
     {
         [Test]
         public void testlogAllRefUpdates() {

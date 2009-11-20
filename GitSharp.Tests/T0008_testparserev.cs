@@ -42,7 +42,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests
 {
     [TestFixture]
-    public class T0008_testparserev : RepositoryTestCase
+    public class T0008_testparserev : SampleDataRepositoryTestCase
     {
         [Test]
         public void testObjectId_existing()

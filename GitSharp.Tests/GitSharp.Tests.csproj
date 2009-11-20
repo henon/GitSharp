@@ -65,6 +65,7 @@
     <Compile Include="API\RefModelTests.cs" />
     <Compile Include="API\RepositoryStatusTests.cs" />
     <Compile Include="API\RepositoryTests.cs" />
+    <Compile Include="SampleDataRepositoryTestCase.cs" />
     <Compile Include="Util\AssertHelperFixture.cs" />
     <Compile Include="CanReadMsysgitIndexFixture.cs" />
     <Compile Include="Util\LocalDiskRepositoryTestCase.cs" />

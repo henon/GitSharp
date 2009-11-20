@@ -48,7 +48,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests.Transport
 {
     [TestFixture]
-    public class BundleWriterTest : RepositoryTestCase
+    public class BundleWriterTest : SampleDataRepositoryTestCase
     {
         private List<TransportBundleStream>	 _transportBundleStreams = new List<TransportBundleStream>();
 

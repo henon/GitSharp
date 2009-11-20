@@ -205,23 +205,26 @@ namespace GitSharp.Core.Util
 
         public void close()
         {
-            if (diskOut == null)
+            if (diskOut != null)
             {
-                return;
+                try
+                {
+                    diskOut.Dispose();
+                }
+                finally
+                {
+                    diskOut = null;
+                }
             }
- 
-            try
-            {
-                diskOut.Dispose();
-            }
-            finally
-            {
-                diskOut = null;
-            }
-
 #if DEBUG
             GC.SuppressFinalize(this); // Disarm lock-release checker
 #endif
+        }
+
+        public new void Dispose()
+        {
+            close();
+            base.Dispose();
         }
 
 #if DEBUG

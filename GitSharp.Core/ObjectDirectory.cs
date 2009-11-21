@@ -104,8 +104,19 @@ namespace GitSharp.Core
 			{
 				p.Close();
 			}
+
+#if DEBUG
+            GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
 		}
 
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~ObjectDirectory()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed {" + _objects.FullName + "}");
+        }
+#endif
 		/// <summary>
 		/// Compute the location of a loose object file.
 		/// </summary>

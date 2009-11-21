@@ -110,6 +110,8 @@ namespace GitSharp.Core
 		    }
 		    catch (ConfigInvalidException e1)
 		    {
+                Dispose();
+
                 throw new IOException("User config file "
                     + userConfig.getFile().FullName + " invalid: "
                     + e1, e1);
@@ -117,10 +119,7 @@ namespace GitSharp.Core
 
             Config = new RepositoryConfig(userConfig, (FileInfo)FS.resolve(gitDirectory, "config"));
 
-
-
 			WorkingDirectory = gitDirectory.Parent;
-
 
             if (_objectDatabase.exists())
             {
@@ -130,6 +129,7 @@ namespace GitSharp.Core
                 }
                 catch (ConfigInvalidException e1)
                 {
+                    Dispose();
                     throw new IOException("Unknown repository format", e1);
                 }
 
@@ -137,6 +137,7 @@ namespace GitSharp.Core
 
                 if (!"0".Equals(repositoryFormatVersion))
                 {
+                    Dispose();
                     throw new IOException("Unknown repository format \""
                                           + repositoryFormatVersion + "\"; expected \"0\".");
                 }

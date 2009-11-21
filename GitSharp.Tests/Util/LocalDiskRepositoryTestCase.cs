@@ -237,7 +237,7 @@ namespace GitSharp.Tests.Util
 	 *             the repository could not be created in the temporary area
 	 */
         private Core.Repository createRepository(bool bare) {
-            String uniqueId = Guid.NewGuid().ToString();
+            String uniqueId = GetType().Name + Guid.NewGuid().ToString();
             String gitdirName = "test" + uniqueId + (bare ? "" : "/") + ".git";
             DirectoryInfo gitdir = new DirectoryInfo(Path.Combine(trash.FullName, gitdirName));
             Core.Repository db = new Core.Repository(gitdir);

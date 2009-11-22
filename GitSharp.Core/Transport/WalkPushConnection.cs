@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Core.Exceptions;
@@ -137,7 +138,19 @@ namespace GitSharp.Core.Transport
         public override void Close()
         {
             _dest.close();
+#if DEBUG
+                GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
+		}
+
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~WalkPushConnection()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed: " + this._uri);
         }
+#endif
+
 
         private void Sendpack(IEnumerable<RemoteRefUpdate> updates, ProgressMonitor monitor)
         {

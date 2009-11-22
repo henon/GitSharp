@@ -37,6 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -275,7 +276,18 @@ namespace GitSharp.Core.Transport
                     bin = null;
                 }
             }
+#if DEBUG
+                GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
+			}
+
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~BundleFetchConnection()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed.");
         }
+#endif
     }
 
 }

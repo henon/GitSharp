@@ -236,7 +236,7 @@ namespace GitSharp.Core.Transport
                     _channel = instance.Exec(instance.OptionUploadPack);
 
                     if (_channel.isConnected())
-                        init(_channel.getOutputStream());
+                        init(_channel.getInputStream(), _channel.getOutputStream());
                     else
                         throw new TransportException(uri, instance._errStream.ToString());
                 }
@@ -294,7 +294,7 @@ namespace GitSharp.Core.Transport
 
                     if (_channel.isConnected())
                     {
-                        init(_channel.getOutputStream());
+                        init(_channel.getInputStream(), _channel.getOutputStream());
                     }
                     else
                     {

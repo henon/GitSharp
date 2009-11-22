@@ -68,10 +68,13 @@ namespace GitSharp.Core.Transport
 
         protected void init(Stream myStream)
         {
-            stream = myStream is BufferedStream ? myStream : new BufferedStream(myStream, IndexPack.BUFFER_SIZE);
+            init(myStream, myStream);
+        }
 
-            pckIn = new PacketLineIn(stream);
-            pckOut = new PacketLineOut(stream);
+        protected void init(Stream instream, Stream outstream)
+        {
+            pckIn = new PacketLineIn(instream is BufferedStream ? instream : new BufferedStream(instream, IndexPack.BUFFER_SIZE));
+            pckOut = new PacketLineOut(outstream is BufferedStream ? outstream : new BufferedStream(outstream, IndexPack.BUFFER_SIZE));
             outNeedsEnd = true;
         }
 

@@ -451,13 +451,14 @@ namespace GitSharp.Core.Transport
             _packLock = ip.renameAndOpenPack(_lockMessage);
         }
 		
-		public void Dispose ()
+		public override void Dispose ()
 		{
 			_walk.Dispose();
 			REACHABLE.Dispose();
 			COMMON.Dispose();
 			ADVERTISED.Dispose();
 			_reachableCommits.Dispose();
+            base.Dispose();
 		}
 		
     }

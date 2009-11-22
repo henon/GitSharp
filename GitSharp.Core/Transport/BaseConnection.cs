@@ -83,7 +83,7 @@ namespace GitSharp.Core.Transport
             startedOperation = true;
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             Close();
         }

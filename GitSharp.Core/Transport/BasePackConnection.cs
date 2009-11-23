@@ -52,7 +52,8 @@ namespace GitSharp.Core.Transport
         protected readonly Repository local;
         protected readonly URIish uri;
         protected readonly Transport transport;
-        protected Stream stream;
+        protected Stream outStream;
+        protected Stream inStream;
         protected PacketLineIn pckIn;
         protected PacketLineOut pckOut;
         protected bool outNeedsEnd;
@@ -73,8 +74,12 @@ namespace GitSharp.Core.Transport
 
         protected void init(Stream instream, Stream outstream)
         {
-            pckIn = new PacketLineIn(instream is BufferedStream ? instream : new BufferedStream(instream, IndexPack.BUFFER_SIZE));
-            pckOut = new PacketLineOut(outstream is BufferedStream ? outstream : new BufferedStream(outstream, IndexPack.BUFFER_SIZE));
+            this.inStream = instream is BufferedStream ? instream : new BufferedStream(instream, IndexPack.BUFFER_SIZE);
+            this.outStream = outstream is BufferedStream ? outstream : new BufferedStream(outstream, IndexPack.BUFFER_SIZE);
+
+            pckIn = new PacketLineIn(inStream);
+            pckOut = new PacketLineOut(outStream);
+            
             outNeedsEnd = true;
         }
 
@@ -190,13 +195,11 @@ namespace GitSharp.Core.Transport
 
         public override void Close()
         {
-            if (stream != null)
+            if (inStream != null)
             {
                 try
                 {
-                    if (outNeedsEnd)
-                        pckOut.End();
-                    stream.Close();
+                    inStream.Close();
                 }
                 catch (IOException)
                 {
@@ -204,7 +207,26 @@ namespace GitSharp.Core.Transport
                 }
                 finally
                 {
-                    stream = null;
+                    inStream = null;
+                    pckIn = null;
+                }
+            }
+
+            if (outStream != null)
+            {
+                try
+                {
+                    if (outNeedsEnd)
+                        pckOut.End();
+                    outStream.Close();
+                }
+                catch (IOException)
+                {
+
+                }
+                finally
+                {
+                    outStream = null;
                     pckOut = null;
                 }
             }

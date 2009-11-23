@@ -69,7 +69,7 @@ namespace GitSharp.Tests
         {
             // Create a new object in a new pack, and test that it is present.
             //
-            Core.Repository eden = createNewEmptyRepo();
+            Core.Repository eden = createBareRepository();
             RevObject o1 = WriteBlob(eden, "o1");
             Pack(eden, o1);
             Assert.AreEqual(o1.Name, Parse(o1).Name);
@@ -82,7 +82,7 @@ namespace GitSharp.Tests
             // object into a different pack file, with some other object. We
             // still should be able to access the objects.
             //
-            Core.Repository eden = createNewEmptyRepo();
+            Core.Repository eden = createBareRepository();
             RevObject o1 = WriteBlob(eden, "o1");
             FileInfo[] out1 = Pack(eden, o1);
             Assert.AreEqual(o1.Name, Parse(o1).Name);
@@ -107,7 +107,7 @@ namespace GitSharp.Tests
         {
             // Create an object and pack it.
             //
-            Core.Repository eden = createNewEmptyRepo();
+            Core.Repository eden = createBareRepository();
             RevObject o1 = WriteBlob(eden, "o1");
             FileInfo[] out1 = Pack(eden, o1);
             Assert.AreEqual(o1.Name, Parse(o1).Name);
@@ -141,7 +141,7 @@ namespace GitSharp.Tests
             // object into a different pack file, with some other object. We
             // still should be able to access the objects.
             //
-            Core.Repository eden = createNewEmptyRepo();
+            Core.Repository eden = createBareRepository();
             RevObject o1 = WriteBlob(eden, "o1");
             FileInfo[] out1 = Pack(eden, o1);
             Assert.AreEqual(o1.Name, Parse(o1).Name);

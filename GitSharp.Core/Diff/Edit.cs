@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Johannes E. Schindelin <johannes.schindelin@gmx.de>
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
@@ -203,9 +203,9 @@ namespace GitSharp.Core.Diff
 		/// <filterpriority>2</filterpriority>
 		public override bool Equals(object obj)
 		{
-			if (obj is Edit)
+			Edit e = (obj as Edit);
+			if (e != null)
 			{
-				var e = (Edit) obj;
 				return BeginA == e.BeginA && EndA == e.EndA && BeginB == e.BeginB && EndB == e.EndB;
 			}
 

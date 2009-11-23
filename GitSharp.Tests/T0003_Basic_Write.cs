@@ -42,13 +42,12 @@ using System.Text;
 using System.IO;
 using GitSharp.Core;
 using NUnit.Framework;
-using GitSharp.Tests.Util;
 using GitSharp.Core.Util;
 
 namespace GitSharp.Tests
 {
     [TestFixture]
-    public class T0003_Basic_Write : RepositoryTestCase
+    public class T0003_Basic_Write : SampleDataRepositoryTestCase
     {
         [Test]
         public void test001_Initalize()
@@ -83,7 +82,7 @@ namespace GitSharp.Tests
             Assert.AreEqual(Inspector.Inspect("Resources/single_file_commit", "95ea6a6859af6791464bd8b6de76ad5a6f9fad81"), new Inspector(db).Inspect(id));
 
             writeTrashFile("i-am-a-file", "and this is the data in me\r\n\r\n");
-            id = new ObjectWriter(db).WriteBlob(new FileInfo(trash+"/i-am-a-file"));
+            id = new ObjectWriter(db).WriteBlob(new FileInfo(db.WorkingDirectory.FullName + "/i-am-a-file"));
             Assert.AreEqual("95ea6a6859af6791464bd8b6de76ad5a6f9fad81", id.ToString());
         }
 
@@ -93,7 +92,7 @@ namespace GitSharp.Tests
             var t = new Core.Tree(db);
             FileTreeEntry f = t.AddFile("i-am-a-file");
             writeTrashFile(f.Name, "and this is the data in me\r\n\r\n");
-            Assert.AreEqual(File.ReadAllText("Resources/single_file_commit/i-am-a-file"), File.ReadAllText(trash + "/i-am-a-file"));
+            Assert.AreEqual(File.ReadAllText("Resources/single_file_commit/i-am-a-file"), File.ReadAllText(db.WorkingDirectory.FullName + "/i-am-a-file"));
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
             var id = t.Id;
 
@@ -132,7 +131,7 @@ namespace GitSharp.Tests
             // open when we Create it we won't write the object file out as a loose
             // object (as it already exists in the pack).
             //
-            Core.Repository newdb = createNewEmptyRepo();
+            Core.Repository newdb = createBareRepository();
             var t = new Core.Tree(newdb);
             t.Accept(new WriteTree(trash, newdb), TreeEntry.MODIFIED_ONLY);
             Assert.AreEqual("4b825dc642cb6eb9a060e54bf8d69288fbee4904", t.Id.Name);
@@ -149,7 +148,7 @@ namespace GitSharp.Tests
             var t = new Core.Tree(db);
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
             Assert.AreEqual("4b825dc642cb6eb9a060e54bf8d69288fbee4904", t.Id.Name);
-            var o = new FileInfo(trash_git + "/objects/4b/825dc642cb6eb9a060e54bf8d69288fbee4904");
+            var o = new FileInfo(db.Directory + "/objects/4b/825dc642cb6eb9a060e54bf8d69288fbee4904");
             Assert.IsFalse(o.IsFile(), "Exists " + o);
         }
 
@@ -162,11 +161,11 @@ namespace GitSharp.Tests
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
             Assert.AreEqual("7bb943559a305bdd6bdee2cef6e5df2413c3d30a", t.Id.Name);
 
-            var o = new FileInfo(trash_git + "/objects/7b/b943559a305bdd6bdee2cef6e5df2413c3d30a");
+            var o = new FileInfo(db.Directory + "/objects/7b/b943559a305bdd6bdee2cef6e5df2413c3d30a");
             Assert.IsTrue(o.IsFile(), "Exists " + o);
             Assert.IsTrue(o.IsReadOnly, "Read-only " + o);
 
-            o = new FileInfo(trash_git + "/objects/e6/9de29bb2d1d6434b8b29ae775ad8c2e48c5391");
+            o = new FileInfo(db.Directory + "/objects/e6/9de29bb2d1d6434b8b29ae775ad8c2e48c5391");
             Assert.IsTrue(o.IsFile(), "Exists " + o);
             Assert.IsTrue(o.IsReadOnly, "Read-only " + o);
         }
@@ -238,8 +237,8 @@ namespace GitSharp.Tests
 
             var c = new Core.Commit(db)
                     	{
-                    		Author = (new PersonIdent(jauthor, 1154236443000L, -4*60)),
-                    		Committer = (new PersonIdent(jcommitter, 1154236443000L, -4*60)),
+                    		Author = (new PersonIdent(author, 1154236443000L, -4*60)),
+                    		Committer = (new PersonIdent(committer, 1154236443000L, -4*60)),
                     		Message = ("A Commit\n"),
                     		TreeEntry = t
                     	};
@@ -302,7 +301,7 @@ namespace GitSharp.Tests
                     		Id = emptyId,
                     		TagType = "blob",
                     		TagName = "test020",
-                    		Author = new PersonIdent(jauthor, 1154236443000L, -4*60),
+                    		Author = new PersonIdent(author, 1154236443000L, -4*60),
                     		Message = "test020 tagged\n"
                     	};
         	t.Save();
@@ -311,7 +310,7 @@ namespace GitSharp.Tests
             Core.Tag MapTag = db.MapTag("test020");
             Assert.AreEqual("blob", MapTag.TagType);
             Assert.AreEqual("test020 tagged\n", MapTag.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), MapTag.Author);
+            Assert.AreEqual(new PersonIdent(author, 1154236443000L, -4 * 60), MapTag.Author);
             Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", MapTag.Id.Name);
         }
 
@@ -345,7 +344,7 @@ namespace GitSharp.Tests
                     		Id = almostEmptyTreeId,
                     		TagType = "tree",
                     		TagName = "test021",
-                    		Author = new PersonIdent(jauthor, 1154236443000L, -4*60),
+                    		Author = new PersonIdent(author, 1154236443000L, -4*60),
                     		Message = "test021 tagged\n"
                     	};
         	
@@ -355,7 +354,7 @@ namespace GitSharp.Tests
             Core.Tag MapTag = db.MapTag("test021");
             Assert.AreEqual("tree", MapTag.TagType);
             Assert.AreEqual("test021 tagged\n", MapTag.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), MapTag.Author);
+            Assert.AreEqual(new PersonIdent(author, 1154236443000L, -4 * 60), MapTag.Author);
             Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", MapTag.Id.Name);
         }
 
@@ -369,8 +368,8 @@ namespace GitSharp.Tests
 
             var almostEmptyCommit = new Core.Commit(db)
                                     	{
-                                    		Author = new PersonIdent(jauthor, 1154236443000L, -2*60),
-                                    		Committer = new PersonIdent(jauthor, 1154236443000L, -2*60),
+                                    		Author = new PersonIdent(author, 1154236443000L, -2*60),
+                                    		Committer = new PersonIdent(author, 1154236443000L, -2*60),
                                     		Message = "test022\n",
                                     		TreeId = almostEmptyTreeId
                                     	};
@@ -382,7 +381,7 @@ namespace GitSharp.Tests
                     		Id = almostEmptyCommitId,
                     		TagType = "commit",
                     		TagName = "test022",
-                    		Author = new PersonIdent(jauthor, 1154236443000L, -4*60),
+                    		Author = new PersonIdent(author, 1154236443000L, -4*60),
                     		Message = "test022 tagged\n"
                     	};
 
@@ -392,7 +391,7 @@ namespace GitSharp.Tests
             Core.Tag mapTag = db.MapTag("test022");
             Assert.AreEqual("commit", mapTag.TagType);
             Assert.AreEqual("test022 tagged\n", mapTag.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag.Author);
+            Assert.AreEqual(new PersonIdent(author, 1154236443000L, -4 * 60), mapTag.Author);
             Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag.Id.Name);
         }
 
@@ -415,6 +414,10 @@ namespace GitSharp.Tests
         	
 			ObjectId cid = new ObjectWriter(db).WriteCommit(commit);
             Assert.AreEqual("4680908112778718f37e686cbebcc912730b3154", cid.Name);
+
+		    Core.Commit loadedCommit = db.MapCommit(cid);
+		    Assert.AreNotSame(loadedCommit, commit);
+		    Assert.AreEqual(commit.Message, loadedCommit.Message);
         }
 
         [Test]
@@ -471,19 +474,19 @@ namespace GitSharp.Tests
             Assert.IsNotNull(mapTag20, "have tag test020");
             Assert.AreEqual("blob", mapTag20.TagType);
             Assert.AreEqual("test020 tagged\n", mapTag20.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag20.Author);
+            Assert.AreEqual(new PersonIdent(author, 1154236443000L, -4 * 60), mapTag20.Author);
             Assert.AreEqual("e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", mapTag20.Id.Name);
 
             Core.Tag mapTag21 = db.MapTag("test021");
             Assert.AreEqual("tree", mapTag21.TagType);
             Assert.AreEqual("test021 tagged\n", mapTag21.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag21.Author);
+            Assert.AreEqual(new PersonIdent(author, 1154236443000L, -4 * 60), mapTag21.Author);
             Assert.AreEqual("417c01c8795a35b8e835113a85a5c0c1c77f67fb", mapTag21.Id.Name);
 
             Core.Tag mapTag22 = db.MapTag("test022");
             Assert.AreEqual("commit", mapTag22.TagType);
             Assert.AreEqual("test022 tagged\n", mapTag22.Message);
-            Assert.AreEqual(new PersonIdent(jauthor, 1154236443000L, -4 * 60), mapTag22.Author);
+            Assert.AreEqual(new PersonIdent(author, 1154236443000L, -4 * 60), mapTag22.Author);
             Assert.AreEqual("b5d3b45a96b340441f5abb9080411705c51cc86c", mapTag22.Id.Name);
         }
 
@@ -509,8 +512,8 @@ namespace GitSharp.Tests
 
             var c1 = new Core.Commit(db)
                      	{
-                     		Author = new PersonIdent(jauthor, 1154236443000L, -4*60),
-                     		Committer = new PersonIdent(jcommitter, 1154236443000L, -4*60),
+                     		Author = new PersonIdent(author, 1154236443000L, -4*60),
+                     		Committer = new PersonIdent(committer, 1154236443000L, -4*60),
                      		Message = "A Commit\n",
                      		TreeEntry = t
                      	};
@@ -522,8 +525,8 @@ namespace GitSharp.Tests
 
             var c2 = new Core.Commit(db)
                      	{
-                     		Author = new PersonIdent(jauthor, 1154236443000L, -4*60),
-                     		Committer = new PersonIdent(jcommitter, 1154236443000L, -4*60),
+                     		Author = new PersonIdent(author, 1154236443000L, -4*60),
+                     		Committer = new PersonIdent(committer, 1154236443000L, -4*60),
                      		Message = "A Commit 2\n",
                      		TreeEntry = t
                      	};
@@ -545,8 +548,8 @@ namespace GitSharp.Tests
 
             var c3 = new Core.Commit(db)
                      	{
-                     		Author = new PersonIdent(jauthor, 1154236443000L, -4*60),
-                     		Committer = new PersonIdent(jcommitter, 1154236443000L, -4*60),
+                     		Author = new PersonIdent(author, 1154236443000L, -4*60),
+                     		Committer = new PersonIdent(committer, 1154236443000L, -4*60),
                      		Message = "A Commit 3\n",
                      		TreeEntry = t
                      	};
@@ -569,8 +572,8 @@ namespace GitSharp.Tests
 
             var c4 = new Core.Commit(db)
                      	{
-                     		Author = new PersonIdent(jauthor, 1154236443000L, -4*60),
-                     		Committer = new PersonIdent(jcommitter, 1154236443000L, -4*60),
+                     		Author = new PersonIdent(author, 1154236443000L, -4*60),
+                     		Committer = new PersonIdent(committer, 1154236443000L, -4*60),
                      		Message = "A Commit 4\n",
                      		TreeEntry = t
                      	};
@@ -672,7 +675,7 @@ namespace GitSharp.Tests
         [Test]
         public void testTwoSuccessiveCommitsLinkedToHead()
         {
-            var repo = createNewEmptyRepo();
+            var repo = createBareRepository();
             var workingDirectory = repo.WorkingDirectory;
             repo.Create();
 
@@ -691,8 +694,8 @@ namespace GitSharp.Tests
 
             var commit = new Core.Commit(repo)
             {
-                Author = new PersonIdent(jauthor, (0L), 60),
-                Committer = new PersonIdent(jcommitter, (0L), 60),
+                Author = new PersonIdent(author, (0L), 60),
+                Committer = new PersonIdent(committer, (0L), 60),
                 Message = "Foo\n\nMessage",
                 TreeEntry = tree
             };
@@ -711,8 +714,8 @@ namespace GitSharp.Tests
 
             commit = new Core.Commit(repo)
             {
-                Author = new PersonIdent(jauthor, (0L), 60),
-                Committer = new PersonIdent(jcommitter, (0L), 60),
+                Author = new PersonIdent(author, (0L), 60),
+                Committer = new PersonIdent(committer, (0L), 60),
                 Message = "Modified",
                 ParentIds = new[] { commitId },
                 TreeEntry = tree

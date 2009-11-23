@@ -37,6 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -51,7 +52,8 @@ namespace GitSharp.Core.Transport
         protected readonly Repository local;
         protected readonly URIish uri;
         protected readonly Transport transport;
-        protected Stream stream;
+        protected Stream outStream;
+        protected Stream inStream;
         protected PacketLineIn pckIn;
         protected PacketLineOut pckOut;
         protected bool outNeedsEnd;
@@ -67,10 +69,17 @@ namespace GitSharp.Core.Transport
 
         protected void init(Stream myStream)
         {
-            stream = myStream is BufferedStream ? myStream : new BufferedStream(myStream, IndexPack.BUFFER_SIZE);
+            init(myStream, myStream);
+        }
 
-            pckIn = new PacketLineIn(stream);
-            pckOut = new PacketLineOut(stream);
+        protected void init(Stream instream, Stream outstream)
+        {
+            this.inStream = instream is BufferedStream ? instream : new BufferedStream(instream, IndexPack.BUFFER_SIZE);
+            this.outStream = outstream is BufferedStream ? outstream : new BufferedStream(outstream, IndexPack.BUFFER_SIZE);
+
+            pckIn = new PacketLineIn(inStream);
+            pckOut = new PacketLineOut(outStream);
+            
             outNeedsEnd = true;
         }
 
@@ -186,13 +195,11 @@ namespace GitSharp.Core.Transport
 
         public override void Close()
         {
-            if (stream != null)
+            if (inStream != null)
             {
                 try
                 {
-                    if (outNeedsEnd)
-                        pckOut.End();
-                    stream.Close();
+                    inStream.Close();
                 }
                 catch (IOException)
                 {
@@ -200,11 +207,42 @@ namespace GitSharp.Core.Transport
                 }
                 finally
                 {
-                    stream = null;
+                    inStream = null;
+                    pckIn = null;
+                }
+            }
+
+            if (outStream != null)
+            {
+                try
+                {
+                    if (outNeedsEnd)
+                        pckOut.End();
+                    outStream.Close();
+                }
+                catch (IOException)
+                {
+
+                }
+                finally
+                {
+                    outStream = null;
                     pckOut = null;
                 }
             }
+		
+#if DEBUG
+                GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
+			}
+
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~BasePackConnection()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed: " + this.uri);
         }
+#endif
     }
 
 }

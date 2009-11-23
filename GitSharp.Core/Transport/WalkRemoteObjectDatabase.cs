@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -43,7 +44,7 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
-    public abstract class WalkRemoteObjectDatabase
+    public abstract class WalkRemoteObjectDatabase : IDisposable
     {
         public const string ROOT_DIR = "../";
         public const string INFO_PACKS = "info/packs";
@@ -57,6 +58,11 @@ namespace GitSharp.Core.Transport
         public abstract Stream open(string path);
         public abstract WalkRemoteObjectDatabase openAlternate(string location);
         public abstract void close();
+
+        public virtual void Dispose()
+        {
+            close();
+        }
 
         public virtual void deleteFile(string path)
         {

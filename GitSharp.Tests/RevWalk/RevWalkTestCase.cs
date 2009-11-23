@@ -144,8 +144,8 @@ namespace GitSharp.Tests.RevWalk
 			        	{
 			        		TreeId = tree,
 			        		ParentIds = parents,
-							Author = new PersonIdent(jauthor, (nowTick).MillisToDateTime()), // [henon] offset?
-			        		Committer = new PersonIdent(jcommitter, (nowTick).MillisToDateTime()),
+							Author = new PersonIdent(author, (nowTick).MillisToDateTime()), // [henon] offset?
+			        		Committer = new PersonIdent(committer, (nowTick).MillisToDateTime()),
 			        		Message = string.Empty
 			        	};
 
@@ -159,7 +159,7 @@ namespace GitSharp.Tests.RevWalk
 							TagType = Constants.typeString(dst.Type),
 							Id = dst.ToObjectId(),
 							TagName = name,
-                            Tagger = new PersonIdent(jcommitter, (nowTick).MillisToDateTime()),
+                            Tagger = new PersonIdent(committer, (nowTick).MillisToDateTime()),
 							Message = string.Empty
 						};
 

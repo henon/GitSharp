@@ -67,16 +67,16 @@ namespace GitSharp.Core
 		private readonly int _hash;
 		private readonly int _packLastModified;
 
-		private MemoryMappedFile _fdMap;
 		private FileStream _fd;
 		private int _activeWindows;
 		private int _activeCopyRawData;
-
 		
 		private volatile bool _invalid;
 		private byte[] _packChecksum;
 		private PackIndex _loadedIdx;
 		private PackReverseIndex _reverseIdx;
+		
+		private Object locker = new Object();
 
 		/// <summary>
 		/// Construct a Reader for an existing, pre-indexed packfile.
@@ -101,7 +101,7 @@ namespace GitSharp.Core
 
 		private PackIndex LoadPackIndex()
 		{
-			lock (this)
+			lock (locker)
 			{
 				if (_loadedIdx == null)
 				{
@@ -194,13 +194,24 @@ namespace GitSharp.Core
 			UnpackedObjectCache.purge(this);
 			WindowCache.Purge(this);
 
-			lock (this)
+			lock (locker)
 			{
 				_loadedIdx = null;
 				_reverseIdx = null;
 			}
+
+#if DEBUG
+            GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
 		}
 
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~PackFile()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed: {" + _packFile.FullName + "}/{" + _idxFile.FullName + "}");
+        }
+#endif
 		#region IEnumerable Implementation
 
 		public IEnumerator<PackIndex.MutableEntry> GetEnumerator()
@@ -349,7 +360,7 @@ namespace GitSharp.Core
 
 		public void beginCopyRawData()
 		{
-			lock (this)
+			lock (locker)
 			{
 				if (++_activeCopyRawData == 1 && _activeWindows == 0)
 				{
@@ -360,7 +371,7 @@ namespace GitSharp.Core
 
 		public void endCopyRawData()
 		{
-			lock (this)
+			lock (locker)
 			{
 				if (--_activeCopyRawData == 0 && _activeWindows == 0)
 				{
@@ -371,7 +382,7 @@ namespace GitSharp.Core
 
 		public bool beginWindowCache()
 		{
-			lock (this)
+			lock (locker)
 			{
 				if (++_activeWindows == 1)
 				{
@@ -389,7 +400,7 @@ namespace GitSharp.Core
 
 		public bool endWindowCache()
 		{
-			lock (this)
+			lock (locker)
 			{
 				bool r = --_activeWindows == 0;
 
@@ -436,7 +447,7 @@ namespace GitSharp.Core
 
 			try
 			{
-				_fd.Close();
+				_fd.Dispose();
 			}
 			catch (IOException)
 			{
@@ -456,43 +467,46 @@ namespace GitSharp.Core
 			}
 
 			var buf = new byte[size];
-			NB.ReadFully(_fd, pos, buf, 0, size);
+			IO.ReadFully(_fd, pos, buf, 0, size);
 			return new ByteArrayWindow(this, pos, buf);
 		}
 
 		internal ByteWindow MemoryMappedByteWindow(long pos, int size)
 		{
-			if (Length < pos + size)
-			{
-				size = (int)(Length - pos);
-			}
+		    if (Length < pos + size)
+		    {
+		        size = (int) (Length - pos);
+		    }
 
-			Stream map;
+		    Stream map;
 
-			try
-			{
-				_fdMap = MemoryMappedFile.Create(File.FullName, MapProtection.PageReadOnly);
-				map = _fdMap.MapView(MapAccess.FileMapRead, pos, size); // was: map = _fd.map(MapMode.READ_ONLY, pos, size);
-			}
-			catch (IOException)
-			{
-				// The most likely reason this failed is the process has run out
-				// of virtual memory. We need to discard quickly, and try to
-				// force the GC to finalize and release any existing mappings.
-				//
-				GC.Collect();
-				GC.WaitForPendingFinalizers();
-				map = _fdMap.MapView(MapAccess.FileMapRead, pos, size);
-			}
+		    using (var _fdMap = MemoryMappedFile.Create(File.FullName, MapProtection.PageReadOnly))
+            {
+                try
+		        {
+		            map = _fdMap.MapView(MapAccess.FileMapRead, pos, size);
+		                // was: map = _fd.map(MapMode.READ_ONLY, pos, size);
+		        }
+		        catch (IOException)
+		        {
+		            // The most likely reason this failed is the process has run out
+		            // of virtual memory. We need to discard quickly, and try to
+		            // force the GC to finalize and release any existing mappings.
+		            //
+		            GC.Collect();
+		            GC.WaitForPendingFinalizers();
+		            map = _fdMap.MapView(MapAccess.FileMapRead, pos, size);
+		        }
 
-			byte[] mapArray = map != null ? map.toArray() : new byte[0];
+		        byte[] mapArray = map != null ? map.toArray() : new byte[0];
 
-			if (mapArray.Length > 0)
-			{
-				return new ByteArrayWindow(this, pos, mapArray);
-			}
+		        if (mapArray.Length > 0)
+		        {
+		            return new ByteArrayWindow(this, pos, mapArray);
+		        }
+		    }
 
-			return new ByteBufferWindow(this, pos, map);
+        	return new ByteBufferWindow(this, pos, map);
 		}
 
 		private void OnOpenPack()
@@ -500,7 +514,7 @@ namespace GitSharp.Core
 			PackIndex idx = LoadPackIndex();
 			var buf = new byte[20];
 
-			NB.ReadFully(_fd, 0, buf, 0, 12);
+			IO.ReadFully(_fd, 0, buf, 0, 12);
 			if (RawParseUtils.match(buf, 0, Constants.PACK_SIGNATURE) != 4)
 			{
 				throw new IOException("Not a PACK file.");
@@ -521,7 +535,7 @@ namespace GitSharp.Core
 					+ ": " + File.FullName);
 			}
 
-			NB.ReadFully(_fd, Length - 20, buf, 0, 20);
+			IO.ReadFully(_fd, Length - 20, buf, 0, 20);
 
 			if (!buf.SequenceEqual(_packChecksum))
 			{
@@ -591,7 +605,7 @@ namespace GitSharp.Core
 
 		private PackReverseIndex GetReverseIdx()
 		{
-			lock (this)
+			lock (locker)
 			{
 				if (_reverseIdx == null)
 				{
@@ -611,9 +625,14 @@ namespace GitSharp.Core
 		
 		public void Dispose ()
 		{
-			_fd.Dispose();
-			_fdMap.Dispose();
+            Close();
+
+            if (_fd == null)
+            {
+                return;
+            }
+
+		    _fd.Dispose();}
 		}
 		
 	}
-}

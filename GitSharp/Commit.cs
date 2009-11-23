@@ -119,18 +119,18 @@ namespace GitSharp
             }
         }
 
-        ///// <summary>
-        ///// The encoding of the commit message.
-        ///// </summary>
-        //public Encoding Encoding
-        //{
-        //    get
-        //    {
-        //        if (InternalCommit == null) // this might happen if the object was created with an incorrect reference
-        //            return null;
-        //        return InternalCommit.Encoding;
-        //    }
-        //}
+        /// <summary>
+        /// The encoding of the commit details.
+        /// </summary>
+        public Encoding Encoding
+        {
+            get
+            {
+                if (InternalCommit == null) // this might happen if the object was created with an incorrect reference
+                    return null;
+                return InternalCommit.Encoding;
+            }
+        }
 
         /// <summary>
         /// The author of the change set represented by this commit. 
@@ -298,11 +298,12 @@ namespace GitSharp
 
         /// <summary>
         /// Checkout this commit into the given directory. Does not reset HEAD!
+        /// 
+        /// Note: do not confuse this with Branch.Checkout. Commit.Checkout( path)  is for exporting the tree of a commit into a directory.
         /// </summary>
         /// <param name="working_directory">The directory to put the sources into</param>
         public void Checkout(string working_directory)
         {
-            // Todo: what happens with a bare repo here ??
             if (InternalCommit == null)
                 throw new InvalidOperationException("Unable to checkout this commit. It was not initialized properly (i.e. the hash is not pointing to a commit object).");
             if (working_directory == null)
@@ -310,12 +311,11 @@ namespace GitSharp
             if (new DirectoryInfo(working_directory).Exists == false)
                 throw new IOException("Cannot checkout into non-existent directory: " + working_directory);
             var db = _repo._internal_repo;
-            var index = new GitSharp.Core.GitIndex(db);
+            var index = _repo.Index.GitIndex;
+            index.RereadIfNecessary();
             CoreTree tree = InternalCommit.TreeEntry;
             var co = new GitSharp.Core.WorkDirCheckout(db, new DirectoryInfo(working_directory), index, tree);
             co.checkout();
-            if (working_directory == Repository.WorkingDirectory) // we wouldn't want to write index if the checkout was not done into the working directory or if the repo is bare, right?
-                index.write();
         }
 
         /// <summary>
@@ -441,6 +441,52 @@ namespace GitSharp
                 else
                     return Parents.SelectMany(parent => parent.CompareAgainst(this)).ToArray();
             }
+        }
+
+        public static Commit Create(string message, Commit parent, Tree tree)
+        {
+            if (tree==null)
+                throw new ArgumentException("tree must not be null");
+            var repo=tree.Repository;
+            var author=new Author(repo.Config["user.name"], repo.Config["user.email"]);
+            return Create(message, parent, tree, author, author, DateTimeOffset.Now);
+        }
+
+        public static Commit Create(string message, Commit parent, Tree tree, Author author)
+        {
+            return Create(message, parent, tree, author, author, DateTimeOffset.Now);
+        }
+
+        public static Commit Create(string message, Commit parent, Tree tree, Author author, Author committer, DateTimeOffset time)
+        {
+            if (string.IsNullOrEmpty(message))
+                throw new ArgumentException("message must not be null or empty");
+            if (tree == null)
+                throw new ArgumentException("tree must not be null");
+            var repo = tree.Repository;
+            var corecommit = new CoreCommit(repo._internal_repo);
+            if (parent != null)
+                corecommit.ParentIds = new GitSharp.Core.ObjectId[] { parent._id };
+            corecommit.Author = new GitSharp.Core.PersonIdent(author.Name, author.EmailAddress, time.ToMillisecondsSinceEpoch(), (int)time.Offset.TotalMinutes);
+            corecommit.Committer = new GitSharp.Core.PersonIdent(committer.Name, committer.EmailAddress, time.ToMillisecondsSinceEpoch(), (int)time.Offset.TotalMinutes);
+            corecommit.Message = message;
+            corecommit.TreeEntry = tree.InternalTree;
+            corecommit.Encoding = ExtractOverridenEncodingCommitFromConfig(repo);
+            corecommit.Save();
+            return new Commit(repo, corecommit);
+        }
+
+        private static Encoding ExtractOverridenEncodingCommitFromConfig(Repository repository)
+        {
+            string encodingAlias = repository.Config["i18n.commitencoding"];
+
+            if (encodingAlias == null)
+            {
+                // No commitencoding has been specified in the config
+                return null;
+            }
+
+            return Charset.forName(encodingAlias);
         }
 
         public override string ToString()

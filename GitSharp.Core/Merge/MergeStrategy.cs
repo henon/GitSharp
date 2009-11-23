@@ -67,6 +67,8 @@ namespace GitSharp.Core.Merge
 		public static readonly ThreeWayMergeStrategy SimpleTwoWayInCore = new StrategySimpleTwoWayInCore();
 
 		private static readonly Dictionary<String, MergeStrategy> Strategies = new Dictionary<String, MergeStrategy>();
+		
+		private static Object locker = new Object();
 
 		static MergeStrategy()
 		{
@@ -96,15 +98,17 @@ namespace GitSharp.Core.Merge
 		/// <exception cref="ArgumentException">
 		/// a strategy by the same name has already been registered.
 		/// </exception>
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public static void Register(string name, MergeStrategy imp)
 		{
-			if (Strategies.ContainsKey(name))
+			lock(locker)
 			{
-				throw new ArgumentException("Merge strategy \"" + name + "\" already exists as a default strategy");
+				if (Strategies.ContainsKey(name))
+				{
+					throw new ArgumentException("Merge strategy \"" + name + "\" already exists as a default strategy");
+				}
+	
+				Strategies.Add(name, imp);
 			}
-
-			Strategies.Add(name, imp);
 		}
 
 		///	<summary>
@@ -114,10 +118,12 @@ namespace GitSharp.Core.Merge
 		/// <returns>
 		/// The strategy instance; null if no strategy matches the name.
 		/// </returns>
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public static MergeStrategy Get(string name)
 		{
-			return Strategies[name];
+			lock(locker)
+			{
+				return Strategies[name];
+			}
 		}
 
 		///	<summary>
@@ -128,10 +134,12 @@ namespace GitSharp.Core.Merge
 		/// the caller may modify (and/or sort) the returned array if
 		/// necessary to obtain a reasonable ordering.
 		/// </returns>
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public static MergeStrategy[] Get()
 		{
-			return Strategies.Values.ToArray();
+			lock(locker)
+			{
+				return Strategies.Values.ToArray();
+			}
 		}
 
 		/// <summary>

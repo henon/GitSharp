@@ -47,7 +47,7 @@ using FileMode=GitSharp.Core.FileMode;
 namespace GitSharp.Tests.Merge
 {
 	[TestFixture]
-	public class SimpleMergeTest : RepositoryTestCase
+	public class SimpleMergeTest : SampleDataRepositoryTestCase
 	{
 		[Test]
 		public void TestOurs()

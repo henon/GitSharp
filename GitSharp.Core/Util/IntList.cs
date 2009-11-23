@@ -59,66 +59,59 @@ namespace GitSharp.Core.Util
 		{
 		}
 
-		/**
-		 * Create an empty list with the specified capacity.
-		 *
-		 * @param capacity
-		 *            number of entries the list can initially hold.
-		 */
+        /// <summary>
+        /// Create an empty list with the specified capacity.
+        /// </summary>
+        /// <param name="capacity">number of entries the list can initially hold.</param>
 		public IntList(int capacity)
 		{
 			entries = new int[capacity];
 		}
 
-		/** @return number of entries in this list */
-		public int size()
+        /// <returns>
+        /// Number of entries in this list
+        /// </returns>
+        public int size()
 		{
 			return count;
 		}
 
-		/**
-		 * @param i
-		 *            index to Read, must be in the range [0, {@link #size()}).
-		 * @return the number at the specified index
-		 * @throws ArrayIndexOutOfBoundsException
-		 *             the index outside the valid range
-		 */
-		public int get(int i)
+		/// <summary>
+		/// 
+		/// </summary>
+        /// <param name="i">index to Read, must be in the range [0, <see cref="size"/>).</param>
+        /// <returns>the number at the specified index</returns>
+        public int get(int i)
 		{
 			if (count <= i)
 				throw new IndexOutOfRangeException();
 			return entries[i];
 		}
 
-		/** Empty this list */
-		public void clear()
+		/// <summary>
+		/// Empty this list
+		/// </summary>
+        public void clear()
 		{
 			count = 0;
 		}
 
-		/**
-		 * Add an entry to the end of the list.
-		 *
-		 * @param n
-		 *            the number to add.
-		 */
-		public void add(int n)
+		/// <summary>
+        /// Add an entry to the end of the list.
+		/// </summary>
+		/// <param name="n">The nbumber to add</param>
+        public void add(int n)
 		{
 			if (count == entries.Length)
 				grow();
 			entries[count++] = n;
 		}
 
-		/**
-		 * Pad the list with entries.
-		 *
-		 * @param toIndex
-		 *            index position to stop filling at. 0 inserts no filler. 1
-		 *            ensures the list has a size of 1, adding <code>val</code> if
-		 *            the list is currently empty.
-		 * @param val
-		 *            value to insert into padded positions.
-		 */
+        /// <summary>
+        /// Pad the list with entries.
+        /// </summary>
+        /// <param name="toIndex">index position to stop filling at. 0 inserts no filler. 1 ensures the list has a size of 1, adding <code>val</code> if the list is currently empty.</param>
+        /// <param name="val">value to insert into padded positions.</param>
 		public void fillTo(int toIndex, int val)
 		{
 			while (count < toIndex)

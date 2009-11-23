@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
@@ -123,14 +123,16 @@ namespace GitSharp.Core.Diff
 
 		public override bool Equals(object o)
 		{
-			if (o is EditList)
+			EditList e = (o as EditList);
+			if (e != null)
 			{
-				return isEqual((EditList)o);
+				return isEqual(e);
 			}
 
-			if (o is string)
+			string s = (o as string);
+			if (s != null)
 			{
-				return isEqual((string)o);
+				return isEqual(s);
 			}
 
 			return false;

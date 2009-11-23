@@ -2,7 +2,7 @@
 using GitSharp.Core;
 using NUnit.Framework;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Util
 {
     public static class AssertHelper
     {
@@ -31,6 +31,11 @@ namespace GitSharp.Tests
             return (TException)exception;
         }
         
+        public static bool IsRunningOnMono()
+        {
+            return !(SystemReader.getInstance().getOperatingSystem() == PlatformType.Windows);
+        }
+
         public static void IgnoreOnMono(Action codeBlock, string ignoreExplaination)
         {
             try
@@ -39,7 +44,7 @@ namespace GitSharp.Tests
             }
             catch (AssertionException)
             {
-                if (SystemReader.getInstance().getOperatingSystem() == PlatformType.Windows)
+                if (!IsRunningOnMono())
                 {
                     throw;
                 }

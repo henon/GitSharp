@@ -54,6 +54,8 @@ namespace GitSharp
     /// </summary>
     public class Tree : AbstractObject, ITreeNode
     {
+        internal Tree(Repository repo, ObjectId id) : base(repo, id) { }
+
         internal Tree(Repository repo, CoreTree tree)
             : base(repo, tree.Id)
         {

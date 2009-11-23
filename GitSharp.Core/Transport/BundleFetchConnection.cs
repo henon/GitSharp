@@ -37,6 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -134,9 +135,9 @@ namespace GitSharp.Core.Transport
             while (lf < cnt && hdrbuf[lf] != '\n')
                 lf++;
             bin.Position = mark;
-            NB.skipFully(bin, lf);
+            IO.skipFully(bin, lf);
             if (lf < cnt && hdrbuf[lf] == '\n')
-                NB.skipFully(bin, 1);
+                IO.skipFully(bin, 1);
 
             return RawParseUtils.decode(Constants.CHARSET, hdrbuf, 0, lf);
         }
@@ -275,7 +276,18 @@ namespace GitSharp.Core.Transport
                     bin = null;
                 }
             }
+#if DEBUG
+                GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
+			}
+
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~BundleFetchConnection()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed.");
         }
+#endif
     }
 
 }

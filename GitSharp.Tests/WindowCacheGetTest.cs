@@ -45,7 +45,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests
 {
 	[TestFixture]
-	public class WindowCacheGetTest : RepositoryTestCase
+	public class WindowCacheGetTest : SampleDataRepositoryTestCase
 	{
 		private IList<TestObject> _toLoad;
 

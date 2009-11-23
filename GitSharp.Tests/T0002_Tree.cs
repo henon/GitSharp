@@ -39,7 +39,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using GitSharp.Core;
 using GitSharp.Core.Util;
 using NUnit.Framework;
@@ -47,7 +46,7 @@ using NUnit.Framework;
 namespace GitSharp.Tests
 {
 	[TestFixture]
-    public class T0002_Tree : RepositoryTestCase
+    public class T0002_Tree : SampleDataRepositoryTestCase
 	{
 		private static readonly ObjectId SomeFakeId = ObjectId.FromString("0123456789abcdef0123456789abcdef01234567");
 

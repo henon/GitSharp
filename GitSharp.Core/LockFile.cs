@@ -308,6 +308,7 @@ namespace GitSharp.Core
         {
             if (NeedStatInformation)
             {
+                _lockFile.Refresh();
                 CommitLastModified = _lockFile.LastWriteTime;
             }
         }
@@ -463,10 +464,6 @@ namespace GitSharp.Core
 
             public void Dispose()
             {
-                if (Locked == false)
-                {
-                    return;
-                }
                 Release();
             }
 
@@ -486,18 +483,17 @@ namespace GitSharp.Core
                 catch (IOException)
                 {
                     // unlocking went wrong
-                    Debug.WriteLine(GetType().Name + ": tried to unlock an unlocked filelock " + File);
+                    Console.Error.WriteLine(GetType().Name + ": tried to unlock an unlocked filelock " + File);
                     throw;
                 }
                 Locked = false;
-                Dispose();
             }
 
 #if DEBUG
             // [henon] this : a debug mode warning if the filelock has not been disposed properly
             ~FileLock()
             {
-                Debug.WriteLine(GetType().Name + " has not been properly disposed: " + File);
+                Console.Error.WriteLine(GetType().Name + " has not been properly disposed: " + File);
             }
 #endif
 		}

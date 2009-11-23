@@ -48,11 +48,20 @@ using NUnit.Framework;
 namespace GitSharp.Tests.Transport
 {
     [TestFixture]
-    public class BundleWriterTest : RepositoryTestCase
+    public class BundleWriterTest : SampleDataRepositoryTestCase
     {
+        private List<TransportBundleStream>	 _transportBundleStreams = new List<TransportBundleStream>();
+
         #region Test methods
 
         #region testWrite0
+
+        public override void tearDown()
+        {
+            _transportBundleStreams.ForEach((t) => t.Dispose());
+
+            base.tearDown();
+        }
 
         [Test]
         public void testWrite0()
@@ -63,7 +72,7 @@ namespace GitSharp.Tests.Transport
             // Then we clone a new repo from that bundle and do a simple test. This
             // makes sure
             // we could Read the bundle we created.
-            Core.Repository newRepo = createNewEmptyRepo();
+            Core.Repository newRepo = createBareRepository();
             FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
             Core.Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/firstcommit");
 
@@ -92,7 +101,7 @@ namespace GitSharp.Tests.Transport
             // Then we clone a new repo from that bundle and do a simple test. This
             // makes sure
             // we could Read the bundle we created.
-            Core.Repository newRepo = createNewEmptyRepo();
+            Core.Repository newRepo = createBareRepository();
             FetchResult fetchResult = fetchFromBundle(newRepo, bundle);
             Core.Ref advertisedRef = fetchResult.GetAdvertisedRef("refs/heads/aa");
 
@@ -116,7 +125,7 @@ namespace GitSharp.Tests.Transport
             try
             {
                 // Check that we actually needed the first bundle
-                Core.Repository newRepo2 = createNewEmptyRepo();
+                Core.Repository newRepo2 = createBareRepository();
                 fetchResult = fetchFromBundle(newRepo2, bundle);
                 Assert.Fail("We should not be able to fetch from bundle with prerequisites that are not fulfilled");
             }
@@ -140,7 +149,11 @@ namespace GitSharp.Tests.Transport
             var @in = new MemoryStream(bundle);
             var rs = new RefSpec("refs/heads/*:refs/heads/*");
             var refs = new List<RefSpec>{rs};
-            return new TransportBundleStream(newRepo, uri, @in).fetch(NullProgressMonitor.Instance, refs);
+            var transportBundleStream = new TransportBundleStream(newRepo, uri, @in);
+            
+            _transportBundleStreams.Add(transportBundleStream);
+
+            return transportBundleStream.fetch(NullProgressMonitor.Instance, refs);
         }
 
         #endregion

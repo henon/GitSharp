@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{37052DA4-F6A9-47D0-94AA-96F4A7E0462C}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -51,6 +51,9 @@
     <Compile Include="AbbreviatedObjectIdTest.cs" />
     <Compile Include="API\ApiTestCase.cs" />
     <Compile Include="API\BlobTests.cs" />
+    <Compile Include="API\BranchTest.cs" />
+    <Compile Include="API\RepositoryConfigTest.cs" />
+    <Compile Include="API\EncodingTests.cs" />
     <Compile Include="API\CloneTests.cs" />
     <Compile Include="API\CommitDateTests.cs" />
     <Compile Include="API\CommitTests.cs" />
@@ -60,15 +63,21 @@
     <Compile Include="API\InitTests.cs" />
     <Compile Include="API\ObjectEqualityTests.cs" />
     <Compile Include="API\RefModelTests.cs" />
+    <Compile Include="API\RepositoryStatusTests.cs" />
     <Compile Include="API\RepositoryTests.cs" />
-    <Compile Include="AssertHelperFixture.cs" />
+    <Compile Include="SampleDataRepositoryTestCase.cs" />
+    <Compile Include="Transport\BaseConnectionTests.cs" />
+    <Compile Include="Transport\OperationResultTests.cs" />
+    <Compile Include="Util\AssertHelperFixture.cs" />
     <Compile Include="CanReadMsysgitIndexFixture.cs" />
+    <Compile Include="Util\LocalDiskRepositoryTestCase.cs" />
+    <Compile Include="ReflogConfigTest.cs" />
     <Compile Include="IgnoreHandlerTest.cs" />
     <Compile Include="IndexModifiedTests.cs" />
     <Compile Include="RepositoryCacheTest.cs" />
     <Compile Include="ReflogReaderTest.cs" />
-    <Compile Include="StringExtensionsFixture.cs" />
-    <Compile Include="ExtensionsFixture.cs" />
+    <Compile Include="Util\StringExtensionsFixture.cs" />
+    <Compile Include="Util\ExtensionsFixture.cs" />
     <Compile Include="ConcurrentRepackTest.cs" />
     <Compile Include="T0003_Basic_Config.cs" />
     <Compile Include="Diff\DiffFormatterReflowTest.cs" />
@@ -116,8 +125,9 @@
     <Compile Include="TreeIteratorLeafOnlyTest.cs" />
     <Compile Include="TreeIteratorPostOrderTest.cs" />
     <Compile Include="TreeIteratorPreOrderTest.cs" />
-    <Compile Include="MockSystemReader.cs" />
+    <Compile Include="Util\MockSystemReader.cs" />
     <Compile Include="TreeWalk\Filter\PathSuffixFilterTestCase.cs" />
+    <Compile Include="Util\ByteArrayExtensionsFixture.cs" />
     <Compile Include="Util\NBTests.cs" />
     <Compile Include="PackIndexV1Tests.cs" />
     <Compile Include="PackIndexV2Tests.cs" />
@@ -180,7 +190,7 @@
     <Compile Include="Crc32Tests.cs" />
     <Compile Include="RepositoryTestCase.cs" />
     <Compile Include="Patch\EditListTest.cs" />
-    <Compile Include="AssertHelper.cs" />
+    <Compile Include="Util\AssertHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="sample\README">
@@ -207,6 +217,12 @@
     <Content Include="Resources\CorruptIndex\b.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\JapaneseRepo\.gitted\objects\info\marker.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\JapaneseRepo\.gitted\objects\pack\marker.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\OneFileRepository\.gitted\objects\info\marker.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -216,222 +232,222 @@
     <Content Include="Resources\OneFileRepository\dummy.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\COMMIT_EDITMSG">
+    <Content Include="Resources\sample.git\COMMIT_EDITMSG">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\config">
+    <Content Include="Resources\sample.git\config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\description">
+    <Content Include="Resources\sample.git\description">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\gitk.cache">
+    <Content Include="Resources\sample.git\gitk.cache">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\HEAD">
+    <Content Include="Resources\sample.git\HEAD">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\hooks\applypatch-msg.sample">
+    <Content Include="Resources\sample.git\hooks\applypatch-msg.sample">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\hooks\commit-msg.sample">
+    <Content Include="Resources\sample.git\hooks\commit-msg.sample">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\hooks\post-commit.sample">
+    <Content Include="Resources\sample.git\hooks\post-commit.sample">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\hooks\post-receive.sample">
+    <Content Include="Resources\sample.git\hooks\post-receive.sample">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\hooks\post-update.sample">
+    <Content Include="Resources\sample.git\hooks\post-update.sample">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\hooks\pre-applypatch.sample">
+    <Content Include="Resources\sample.git\hooks\pre-applypatch.sample">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\hooks\pre-commit.sample">
+    <Content Include="Resources\sample.git\hooks\pre-commit.sample">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\hooks\pre-rebase.sample">
+    <Content Include="Resources\sample.git\hooks\pre-rebase.sample">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\hooks\prepare-commit-msg.sample">
+    <Content Include="Resources\sample.git\hooks\prepare-commit-msg.sample">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\hooks\update.sample">
+    <Content Include="Resources\sample.git\hooks\update.sample">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\index">
+    <Content Include="Resources\sample.git\index">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\info\exclude">
+    <Content Include="Resources\sample.git\info\exclude">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\info\refs">
+    <Content Include="Resources\sample.git\info\refs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\logs\HEAD">
+    <Content Include="Resources\sample.git\logs\HEAD">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\logs\refs\heads\first">
+    <Content Include="Resources\sample.git\logs\refs\heads\first">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\logs\refs\heads\master">
+    <Content Include="Resources\sample.git\logs\refs\heads\master">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\objects\3f\a4c1907a23c8c345ba65bd9bc17336b012259b">
+    <Content Include="Resources\sample.git\objects\3f\a4c1907a23c8c345ba65bd9bc17336b012259b">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\objects\66\d7e337f35ff98d6bddd7e730655080454c3fdd">
+    <Content Include="Resources\sample.git\objects\66\d7e337f35ff98d6bddd7e730655080454c3fdd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\objects\76\e984096c69db581a6d48eb444e5490d727ebac">
+    <Content Include="Resources\sample.git\objects\76\e984096c69db581a6d48eb444e5490d727ebac">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\objects\a1\3973bc29346193c4a023fc83cc5b0645784262">
+    <Content Include="Resources\sample.git\objects\a1\3973bc29346193c4a023fc83cc5b0645784262">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\objects\info\packs">
+    <Content Include="Resources\sample.git\objects\info\packs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\objects\pack\pack-845b2ba3349cc201321e752b01c5ada8102a9a08.idx">
+    <Content Include="Resources\sample.git\objects\pack\pack-845b2ba3349cc201321e752b01c5ada8102a9a08.idx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\objects\pack\pack-845b2ba3349cc201321e752b01c5ada8102a9a08.pack">
+    <Content Include="Resources\sample.git\objects\pack\pack-845b2ba3349cc201321e752b01c5ada8102a9a08.pack">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\ORIG_HEAD">
+    <Content Include="Resources\sample.git\ORIG_HEAD">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\packed-refs">
+    <Content Include="Resources\sample.git\packed-refs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\refs\heads\first">
+    <Content Include="Resources\sample.git\refs\heads\first">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\refs\heads\master">
+    <Content Include="Resources\sample.git\refs\heads\master">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sample.git\refs\tags\my_tag">
+    <Content Include="Resources\sample.git\refs\tags\my_tag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Diff\Resources\E.patch">
+    <None Include="Resources\Diff\E.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\E_PostImage">
+    <None Include="Resources\Diff\E_PostImage">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\E_PreImage">
+    <None Include="Resources\Diff\E_PreImage">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\testContext0.out">
+    <None Include="Resources\Diff\testContext0.out">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\testContext1.out">
+    <None Include="Resources\Diff\testContext1.out">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\testContext10.out">
+    <None Include="Resources\Diff\testContext10.out">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\testContext100.out">
+    <None Include="Resources\Diff\testContext100.out">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\testContext3.out">
+    <None Include="Resources\Diff\testContext3.out">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\testContext5.out">
+    <None Include="Resources\Diff\testContext5.out">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\X.patch">
+    <None Include="Resources\Diff\X.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\X_PostImage">
+    <None Include="Resources\Diff\X_PostImage">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\X_PreImage">
+    <None Include="Resources\Diff\X_PreImage">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\Y.patch">
+    <None Include="Resources\Diff\Y.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\Y_PostImage">
+    <None Include="Resources\Diff\Y_PostImage">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\Y_PreImage">
+    <None Include="Resources\Diff\Y_PreImage">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\Z.patch">
+    <None Include="Resources\Diff\Z.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\Z_PostImage">
+    <None Include="Resources\Diff\Z_PostImage">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Diff\Resources\Z_PreImage">
+    <None Include="Resources\Diff\Z_PreImage">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testEditList_Types.patch">
+    <None Include="Resources\Patch\testEditList_Types.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testError_BodyTooLong.patch">
+    <None Include="Resources\Patch\testError_BodyTooLong.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testError_CcTruncatedOld.patch">
+    <None Include="Resources\Patch\testError_CcTruncatedOld.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testError_DisconnectedHunk.patch">
+    <None Include="Resources\Patch\testError_DisconnectedHunk.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testError_GarbageBetweenFiles.patch">
+    <None Include="Resources\Patch\testError_GarbageBetweenFiles.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testError_GitBinaryNoForwardHunk.patch">
+    <None Include="Resources\Patch\testError_GitBinaryNoForwardHunk.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testError_TruncatedNew.patch">
+    <None Include="Resources\Patch\testError_TruncatedNew.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testError_TruncatedOld.patch">
+    <None Include="Resources\Patch\testError_TruncatedOld.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testGetText_BothISO88591.patch">
+    <None Include="Resources\Patch\testGetText_BothISO88591.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testGetText_Convert.patch">
+    <None Include="Resources\Patch\testGetText_Convert.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testGetText_DiffCc.patch">
+    <None Include="Resources\Patch\testGetText_DiffCc.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testGetText_NoBinary.patch">
+    <None Include="Resources\Patch\testGetText_NoBinary.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testParse_AddNoNewline.patch">
+    <None Include="Resources\Patch\testParse_AddNoNewline.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testParse_CcDeleteFile.patch">
+    <None Include="Resources\Patch\testParse_CcDeleteFile.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testParse_CcNewFile.patch">
+    <None Include="Resources\Patch\testParse_CcNewFile.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testParse_ConfigCaseInsensitive.patch">
+    <None Include="Resources\Patch\testParse_ConfigCaseInsensitive.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testParse_FixNoNewline.patch">
+    <None Include="Resources\Patch\testParse_FixNoNewline.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testParse_GitBinaryDelta.patch">
+    <None Include="Resources\Patch\testParse_GitBinaryDelta.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testParse_GitBinaryLiteral.patch">
+    <None Include="Resources\Patch\testParse_GitBinaryLiteral.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testParse_NoBinary.patch">
+    <None Include="Resources\Patch\testParse_NoBinary.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Patch\Resources\testParse_OneFileCc.patch">
+    <None Include="Resources\Patch\testParse_OneFileCc.patch">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Resources\CorruptIndex\.gitted\COMMIT_EDITMSG">
@@ -516,6 +532,84 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Resources\index_originating_from_msysgit">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\description">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\HEAD">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\applypatch-msg.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\commit-msg.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\post-commit.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\post-receive.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\post-update.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\pre-applypatch.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\pre-commit.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\pre-rebase.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\prepare-commit-msg.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\hooks\update.sample">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\index">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\info\exclude">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\logs\HEAD">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\logs\refs\heads\master">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\24\ed0e20ceff5e2cdf768345b6853213f840ff8f">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\2f\3c75408acf76bb7122b91c418d015252708552">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\4b\825dc642cb6eb9a060e54bf8d69288fbee4904">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\54\75030f2b57d9956d23ef4ead6f9a4983c234b5">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\6d\c9b6c490154e9627a8aed8ca74039a34084677">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\9b\c63090dd221bace8b2e5f278580946be26efdd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\a8\a51035f70bec2d3e00c0a11a33ff709a6ab40e">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\objects\fe\0856a5873decc1a8e47f63c5707520121b2e9e">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\JapaneseRepo\.gitted\refs\heads\master">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Resources\OneFileRepository\.gitted\COMMIT_EDITMSG">
@@ -663,6 +757,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\CorruptIndex\.gitted\refs\tags\" />
+    <Folder Include="Resources\JapaneseRepo\.gitted\refs\tags\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

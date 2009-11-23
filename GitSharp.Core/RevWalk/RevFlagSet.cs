@@ -115,9 +115,10 @@ namespace GitSharp.Core.RevWalk
 
 	  public bool ContainsAll(IEnumerable<RevFlag> c) // [henon] was Collection<?> in java
 		{
-			if (c is RevFlagSet)
+			RevFlagSet oFlag = (c as RevFlagSet);
+			if (oFlag != null)
 			{
-				int cMask = ((RevFlagSet)c).Mask;
+				int cMask = oFlag.Mask;
 				return (Mask & cMask) == cMask;
 			}
 

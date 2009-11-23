@@ -41,6 +41,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using GitSharp.Core.Exceptions;
@@ -109,6 +110,8 @@ namespace GitSharp.Core
 		    }
 		    catch (ConfigInvalidException e1)
 		    {
+                Dispose();
+
                 throw new IOException("User config file "
                     + userConfig.getFile().FullName + " invalid: "
                     + e1, e1);
@@ -116,10 +119,7 @@ namespace GitSharp.Core
 
             Config = new RepositoryConfig(userConfig, (FileInfo)FS.resolve(gitDirectory, "config"));
 
-
-
 			WorkingDirectory = gitDirectory.Parent;
-
 
             if (_objectDatabase.exists())
             {
@@ -129,6 +129,7 @@ namespace GitSharp.Core
                 }
                 catch (ConfigInvalidException e1)
                 {
+                    Dispose();
                     throw new IOException("Unknown repository format", e1);
                 }
 
@@ -136,6 +137,7 @@ namespace GitSharp.Core
 
                 if (!"0".Equals(repositoryFormatVersion))
                 {
+                    Dispose();
                     throw new IOException("Unknown repository format \""
                                           + repositoryFormatVersion + "\"; expected \"0\".");
                 }
@@ -173,6 +175,7 @@ namespace GitSharp.Core
             Config.setInt("core", null, "repositoryformatversion", 0);
             Config.setBoolean("core", null, "filemode", true);
             Config.setBoolean("core", null, "bare", bare);
+            Config.setBoolean("core", null, "logallrefupdates", !bare);
 
             Config.save();
 		}
@@ -570,7 +573,8 @@ namespace GitSharp.Core
 										oref = MapObject(refId, null);
 									}
 
-									if (!(oref is Commit))
+									Commit oCom = (oref as Commit);
+									if (oCom == null)
 									{
 										throw new IncorrectObjectTypeException(refId, ObjectType.Commit);
 									}
@@ -594,7 +598,7 @@ namespace GitSharp.Core
                                     }
 									if (pnum != 0)
 									{
-									    ObjectId[] parents = ((Commit)oref).ParentIds;
+									    ObjectId[] parents = oCom.ParentIds;
 									    if (pnum > parents.Length) 
                                             refId = null;
 									    else 
@@ -626,9 +630,10 @@ namespace GitSharp.Core
 												refId = t.Id;
 												oref = MapObject(refId, null);
 											}
-											if (oref is Treeish)
+											Treeish oTree = (oref as Treeish);
+											if (oTree != null)
 											{
-												refId = ((Treeish)oref).TreeId;
+												refId = oTree.TreeId;
 											}
 											else
 											{
@@ -686,9 +691,10 @@ namespace GitSharp.Core
 
 								default:
 									oref = MapObject(refId, null);
-									if (oref is Commit)
+									Commit oComm = (oref as Commit);
+									if (oComm != null)
 									{
-										ObjectId[] parents = ((Commit)oref).ParentIds;
+										ObjectId[] parents = oComm.ParentIds;
 										refId = parents.Length == 0 ? null : parents[0];
 									}
 									else
@@ -708,9 +714,10 @@ namespace GitSharp.Core
 								oref = MapObject(refId, null);
 							}
 
-							if (oref is Commit)
+							Commit oCom = (oref as Commit);
+							if (oCom != null)
 							{
-								ObjectId[] parents = ((Commit)oref).ParentIds;
+								ObjectId[] parents = oCom.ParentIds;
 								refId = parents.Length == 0 ? null : parents[0];
 							}
 							else
@@ -832,9 +839,21 @@ namespace GitSharp.Core
 			int usageCount = Interlocked.Decrement(ref _useCnt);
 			if (usageCount == 0)
 			{
-				_objectDatabase.close();
+				_objectDatabase.Dispose();
+
+#if DEBUG
+                GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
 			}
 		}
+
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~Repository()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed: " + Directory);
+        }
+#endif
 
 		public void OpenPack(FileInfo pack, FileInfo idx)
 		{

@@ -39,6 +39,7 @@
 using System;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.FnMatch;
+using GitSharp.Tests.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.FnMatch

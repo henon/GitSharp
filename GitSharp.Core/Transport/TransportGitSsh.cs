@@ -48,307 +48,307 @@ using Tamir.SharpSsh.jsch;
 
 namespace GitSharp.Core.Transport
 {
-	public class TransportGitSsh : SshTransport, IPackTransport, IDisposable
-	{
-		public static bool canHandle(URIish uri)
-		{
-			if (!uri.IsRemote)
-			{
-				return false;
-			}
+    public class TransportGitSsh : SshTransport, IPackTransport, IDisposable
+    {
+        public static bool canHandle(URIish uri)
+        {
+            if (!uri.IsRemote)
+            {
+                return false;
+            }
 
-			string scheme = uri.Scheme;
+            string scheme = uri.Scheme;
 
-			if ("ssh".Equals(scheme))
-			{
-				return true;
-			}
+            if ("ssh".Equals(scheme))
+            {
+                return true;
+            }
 
-			if ("ssh+git".Equals(scheme))
-			{
-				return true;
-			}
+            if ("ssh+git".Equals(scheme))
+            {
+                return true;
+            }
 
-			if ("git+ssh".Equals(scheme))
-			{
-				return true;
-			}
+            if ("git+ssh".Equals(scheme))
+            {
+                return true;
+            }
 
-			if (scheme == null && uri.Host != null && uri.Path != null)
-			{
-				return true;
-			}
+            if (scheme == null && uri.Host != null && uri.Path != null)
+            {
+                return true;
+            }
 
-			return false;
-		}
+            return false;
+        }
 
-		private Stream _errStream;
+        private Stream _errStream;
 
-		public TransportGitSsh(Repository local, URIish uri)
-			: base(local, uri)
-		{
-		}
+        public TransportGitSsh(Repository local, URIish uri)
+            : base(local, uri)
+        {
+        }
 
-		public override IFetchConnection openFetch()
-		{
-			return new SshFetchConnection(this);
-		}
+        public override IFetchConnection openFetch()
+        {
+            return new SshFetchConnection(this);
+        }
 
-		public override IPushConnection openPush()
-		{
-			return new SshPushConnection(this);
-		}
+        public override IPushConnection openPush()
+        {
+            return new SshPushConnection(this);
+        }
 
-		private static void SqMinimal(StringBuilder cmd, string val)
-		{
-			if (Regex.Matches(val, "^[a-zA-Z0-9._/-]*$").Count > 0)
-			{
-				cmd.Append(val);
-			}
-			else
-			{
-				Sq(cmd, val);
-			}
-		}
+        private static void SqMinimal(StringBuilder cmd, string val)
+        {
+            if (Regex.Matches(val, "^[a-zA-Z0-9._/-]*$").Count > 0)
+            {
+                cmd.Append(val);
+            }
+            else
+            {
+                Sq(cmd, val);
+            }
+        }
 
-		private static void SqAlways(StringBuilder cmd, string val)
-		{
-			Sq(cmd, val);
-		}
+        private static void SqAlways(StringBuilder cmd, string val)
+        {
+            Sq(cmd, val);
+        }
 
-		private static void Sq(StringBuilder cmd, string val)
-		{
-			if (val.Length > 0)
-			{
-				cmd.Append(QuotedString.BOURNE.quote(val));
-			}
-		}
+        private static void Sq(StringBuilder cmd, string val)
+        {
+            if (val.Length > 0)
+            {
+                cmd.Append(QuotedString.BOURNE.quote(val));
+            }
+        }
 
-		private ChannelExec Exec(string exe)
-		{
-			InitSession();
+        private ChannelExec Exec(string exe)
+        {
+            InitSession();
 
-			try
-			{
-				var channel = (ChannelExec)Sock.openChannel("exec");
-				string path = Uri.Path;
-				if (Uri.Scheme != null && Uri.Path.StartsWith("/~"))
-				{
-					path = (Uri.Path.Substring(1));
-				}
+            try
+            {
+                var channel = (ChannelExec)Sock.openChannel("exec");
+                string path = Uri.Path;
+                if (Uri.Scheme != null && Uri.Path.StartsWith("/~"))
+                {
+                    path = (Uri.Path.Substring(1));
+                }
 
-				var cmd = new StringBuilder();
-				int gitspace = exe.IndexOf("git ");
-				if (gitspace >= 0)
-				{
-					SqMinimal(cmd, exe.Slice(0, gitspace + 3));
-					cmd.Append(' ');
-					SqMinimal(cmd, exe.Substring(gitspace + 4));
-				}
-				else
-				{
-					SqMinimal(cmd, exe);
-				}
+                var cmd = new StringBuilder();
+                int gitspace = exe.IndexOf("git ");
+                if (gitspace >= 0)
+                {
+                    SqMinimal(cmd, exe.Slice(0, gitspace + 3));
+                    cmd.Append(' ');
+                    SqMinimal(cmd, exe.Substring(gitspace + 4));
+                }
+                else
+                {
+                    SqMinimal(cmd, exe);
+                }
 
-				cmd.Append(' ');
-				SqAlways(cmd, path);
-				channel.setCommand(cmd.ToString());
-				_errStream = CreateErrorStream();
-				channel.setErrStream(_errStream);
-				channel.connect();
-				return channel;
-			}
-			catch (JSchException e)
-			{
-				throw new TransportException(Uri, e.Message, e);
-			}
-		}
+                cmd.Append(' ');
+                SqAlways(cmd, path);
+                channel.setCommand(cmd.ToString());
+                _errStream = CreateErrorStream();
+                channel.setErrStream(_errStream);
+                channel.connect();
+                return channel;
+            }
+            catch (JSchException e)
+            {
+                throw new TransportException(Uri, e.Message, e);
+            }
+        }
 
-		private static Stream CreateErrorStream()
-		{
-			return new GitSshErrorStream();
-		}
+        private static Stream CreateErrorStream()
+        {
+            return new GitSshErrorStream();
+        }
 
-		public NoRemoteRepositoryException cleanNotFound(NoRemoteRepositoryException nf)
-		{
-			string why = _errStream.ToString();
-			if (string.IsNullOrEmpty(why))
-			{
-				return nf;
-			}
+        public NoRemoteRepositoryException cleanNotFound(NoRemoteRepositoryException nf)
+        {
+            string why = _errStream.ToString();
+            if (string.IsNullOrEmpty(why))
+            {
+                return nf;
+            }
 
-			string path = Uri.Path;
-			if (Uri.Scheme != null && Uri.Path.StartsWith("/~"))
-			{
-				path = Uri.Path.Substring(1);
-			}
+            string path = Uri.Path;
+            if (Uri.Scheme != null && Uri.Path.StartsWith("/~"))
+            {
+                path = Uri.Path.Substring(1);
+            }
 
-			var pfx = new StringBuilder();
-			pfx.Append("fatal: ");
-			SqAlways(pfx, path);
-			pfx.Append(":");
-			if (why.StartsWith(pfx.ToString()))
-			{
-				why = why.Substring(pfx.Length);
-			}
+            var pfx = new StringBuilder();
+            pfx.Append("fatal: ");
+            SqAlways(pfx, path);
+            pfx.Append(":");
+            if (why.StartsWith(pfx.ToString()))
+            {
+                why = why.Substring(pfx.Length);
+            }
 
-			return new NoRemoteRepositoryException(Uri, why);
-		}
+            return new NoRemoteRepositoryException(Uri, why);
+        }
 
-		#region Nested Types
+        #region Nested Types
 
-		private class GitSshErrorStream : MemoryStream
-		{
-			private readonly StringBuilder _all = new StringBuilder();
+        private class GitSshErrorStream : MemoryStream
+        {
+            private readonly StringBuilder _all = new StringBuilder();
 
-			public override void Write(byte[] buffer, int offset, int count)
-			{
-				for (int i = offset; i < count + offset; i++)
-				{
-					if (buffer[i] == '\n')
-					{
-						string line = Constants.CHARSET.GetString(ToArray());
-						_all.AppendLine(line);
-						SetLength(0);
-						Write(buffer, offset + (i - offset), count - (i - offset));
-						return;
-					}
-					WriteByte(buffer[i]);
-				}
-				base.Write(buffer, offset, count);
-			}
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                for (int i = offset; i < count + offset; i++)
+                {
+                    if (buffer[i] == '\n')
+                    {
+                        string line = Constants.CHARSET.GetString(ToArray());
+                        _all.AppendLine(line);
+                        SetLength(0);
+                        Write(buffer, offset + (i - offset), count - (i - offset));
+                        return;
+                    }
+                    WriteByte(buffer[i]);
+                }
+                base.Write(buffer, offset, count);
+            }
 
-			public override string ToString()
-			{
-				return _all + "\n" + Constants.CHARSET.GetString(ToArray());
-			}
-		}
+            public override string ToString()
+            {
+                return _all + "\n" + Constants.CHARSET.GetString(ToArray());
+            }
+        }
 
-		private class SshFetchConnection : BasePackFetchConnection
-		{
-			private ChannelExec _channel;
+        private class SshFetchConnection : BasePackFetchConnection
+        {
+            private ChannelExec _channel;
 
-			public SshFetchConnection(TransportGitSsh instance)
-				: base(instance)
-			{
-				try
-				{
-					_channel = instance.Exec(instance.OptionUploadPack);
+            public SshFetchConnection(TransportGitSsh instance)
+                : base(instance)
+            {
+                try
+                {
+                    _channel = instance.Exec(instance.OptionUploadPack);
 
-					if (_channel.isConnected())
-						init(_channel.getOutputStream());
-					else
-						throw new TransportException(uri, instance._errStream.ToString());
-				}
-				catch (TransportException)
-				{
-					Close();
-					throw;
-				}
-				catch (SocketException err)
-				{
-					Close();
-					throw new TransportException(uri, "remote hung up unexpectedly", err);
-				}
+                    if (_channel.isConnected())
+                        init(_channel.getInputStream(), _channel.getOutputStream());
+                    else
+                        throw new TransportException(uri, instance._errStream.ToString());
+                }
+                catch (TransportException)
+                {
+                    Close();
+                    throw;
+                }
+                catch (SocketException err)
+                {
+                    Close();
+                    throw new TransportException(uri, "remote hung up unexpectedly", err);
+                }
 
-				try
-				{
-					readAdvertisedRefs();
-				}
-				catch (NoRemoteRepositoryException notFound)
-				{
-					throw instance.cleanNotFound(notFound);
-				}
-			}
+                try
+                {
+                    readAdvertisedRefs();
+                }
+                catch (NoRemoteRepositoryException notFound)
+                {
+                    throw instance.cleanNotFound(notFound);
+                }
+            }
 
-			public override void Close()
-			{
-				base.Close();
+            public override void Close()
+            {
+                base.Close();
 
-				if (_channel == null) return;
+                if (_channel == null) return;
 
-				try
-				{
-					if (_channel.isConnected())
-					{
-						_channel.disconnect();
-					}
-				}
-				finally
-				{
-					_channel = null;
-				}
-			}
-		}
+                try
+                {
+                    if (_channel.isConnected())
+                    {
+                        _channel.disconnect();
+                    }
+                }
+                finally
+                {
+                    _channel = null;
+                }
+            }
+        }
 
-		private class SshPushConnection : BasePackPushConnection
-		{
-			private ChannelExec _channel;
+        private class SshPushConnection : BasePackPushConnection
+        {
+            private ChannelExec _channel;
 
-			public SshPushConnection(TransportGitSsh instance)
-				: base(instance)
-			{
-				try
-				{
-					_channel = instance.Exec(instance.OptionReceivePack);
+            public SshPushConnection(TransportGitSsh instance)
+                : base(instance)
+            {
+                try
+                {
+                    _channel = instance.Exec(instance.OptionReceivePack);
 
-					if (_channel.isConnected())
-					{
-						init(_channel.getOutputStream());
-					}
-					else
-					{
-						throw new TransportException(uri, instance._errStream.ToString());
-					}
-				}
-				catch (TransportException)
-				{
-					Close();
-					throw;
-				}
-				catch (SocketException err)
-				{
-					Close();
-					throw new TransportException(uri, "remote hung up unexpectedly", err);
-				}
+                    if (_channel.isConnected())
+                    {
+                        init(_channel.getInputStream(), _channel.getOutputStream());
+                    }
+                    else
+                    {
+                        throw new TransportException(uri, instance._errStream.ToString());
+                    }
+                }
+                catch (TransportException)
+                {
+                    Close();
+                    throw;
+                }
+                catch (SocketException err)
+                {
+                    Close();
+                    throw new TransportException(uri, "remote hung up unexpectedly", err);
+                }
 
-				try
-				{
-					readAdvertisedRefs();
-				}
-				catch (NoRemoteRepositoryException notFound)
-				{
-					throw instance.cleanNotFound(notFound);
-				}
-			}
+                try
+                {
+                    readAdvertisedRefs();
+                }
+                catch (NoRemoteRepositoryException notFound)
+                {
+                    throw instance.cleanNotFound(notFound);
+                }
+            }
 
-			public override void Close()
-			{
-				base.Close();
+            public override void Close()
+            {
+                base.Close();
 
-				if (_channel != null)
-				{
-					try
-					{
-						if (_channel.isConnected())
-						{
-							_channel.disconnect();
-						}
-					}
-					finally
-					{
-						_channel = null;
-					}
-				}
-			}
-		}
+                if (_channel != null)
+                {
+                    try
+                    {
+                        if (_channel.isConnected())
+                        {
+                            _channel.disconnect();
+                        }
+                    }
+                    finally
+                    {
+                        _channel = null;
+                    }
+                }
+            }
+        }
 
-		#endregion
-		
-		public void Dispose ()
-		{
-			_errStream.Dispose();
-		}
-		
-	}
+        #endregion
+
+        public override void Dispose()
+        {
+            _errStream.Dispose();
+            base.Dispose();
+        }
+    }
 }

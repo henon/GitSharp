@@ -47,8 +47,7 @@ namespace GitSharp.Core.Transport
         {
             if (!hc.isBatchMode())
             {
-#warning need something to replace jgit gui infrastructure as gitsharp is library only
-                throw new NotImplementedException("GUI Configuration is not available");
+                session.setUserInfo(UserInfoProvider.Provider);
             }
         }
     }

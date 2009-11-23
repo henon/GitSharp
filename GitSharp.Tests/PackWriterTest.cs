@@ -43,12 +43,13 @@ using GitSharp.Core;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.Transport;
+using GitSharp.Tests.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
 {
 	[TestFixture]
-	public class PackWriterTest : RepositoryTestCase
+    public class PackWriterTest : SampleDataRepositoryTestCase
 	{
 		private static readonly IList<ObjectId> EMPTY_LIST_OBJECT = new List<ObjectId>();
 		private static readonly IList<RevObject> EMPTY_LIST_REVS = new List<RevObject>();
@@ -75,7 +76,15 @@ namespace GitSharp.Tests
 			_indexFile = new FileInfo(Path.Combine(trash.FullName, "tmp_pack.idx"));
 			_writer = new PackWriter(db, new TextProgressMonitor());
 		}
+     
+        [TearDown]
+        public override void tearDown()
+        {
+            if (_pack != null)
+                _pack.Dispose();
 
+            base.tearDown();
+        }
 		#endregion
 
 		///	<summary>

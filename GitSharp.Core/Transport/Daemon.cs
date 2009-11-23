@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
@@ -63,6 +63,8 @@ namespace GitSharp.Core.Transport
 		public bool Run { get; private set; }
 
 		private Thread acceptThread;
+		
+		private Object locker = new Object();
 
 		/// <summary>
 		///  Configure a daemon to listen on any available network port.
@@ -98,17 +100,19 @@ namespace GitSharp.Core.Transport
 		/// The service; null if this daemon implementation doesn't support
 		///	the requested service type.
 		/// </returns>
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public DaemonService GetService(string name)
 		{
-			if (!name.StartsWith("git-"))
-				name = "git-" + name;
-			foreach (DaemonService s in Services)
+			lock(locker)
 			{
-				if (s.Command.Equals(name))
-					return s;
+				if (!name.StartsWith("git-"))
+					name = "git-" + name;
+				foreach (DaemonService s in Services)
+				{
+					if (s.Command.Equals(name))
+						return s;
+				}
+				return null;
 			}
-			return null;
 		}
 
 		///	<summary>
@@ -204,10 +208,12 @@ namespace GitSharp.Core.Transport
 		/// <returns>
 		/// true if this daemon is receiving connections.
 		/// </returns>
-		[MethodImpl(MethodImplOptions.Synchronized)]
 		public virtual bool isRunning()
 		{
-			return Run;
+			lock(locker)
+			{
+				return Run;
+			}
 		}
 
 		private void startClient(Socket s)

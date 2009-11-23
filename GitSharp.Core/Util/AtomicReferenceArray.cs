@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyrigth (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -45,6 +45,7 @@ namespace GitSharp.Core.Util
     public class AtomicReferenceArray<T>
     {
         T[] array;
+		private Object locker = new Object();
 
         public AtomicReferenceArray(int size)
         {
@@ -58,7 +59,7 @@ namespace GitSharp.Core.Util
 
         public bool compareAndSet(int slot, T expect, T update)
         {
-            lock(this) {
+            lock(locker) {
                 if ((array[slot] == null && expect==null) || (array[slot] != null && array[slot].Equals(expect)))
                 {
                     array[slot] = update;

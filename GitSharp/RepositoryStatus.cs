@@ -63,11 +63,34 @@ namespace GitSharp
 
         public bool AnyDifferences { get; private set; }
 
+        /// <summary>
+        /// List of files added to the index, which are not in the current commit
+        /// </summary>
         public HashSet<string> Added { get { return _diff.Added; } }
-        public HashSet<string> Changed { get { return _diff.Changed; } }
+
+        /// <summary>
+        /// List of files added to the index, which are already in the current commit with different content
+        /// </summary>
+        public HashSet<string> Staged { get { return _diff.Changed; } }
+
+        /// <summary>
+        /// List of files removed from the index but are existent in the current commit
+        /// </summary>
         public HashSet<string> Removed { get { return _diff.Removed; } }
+
+        /// <summary>
+        /// List of files existent in the index but are missing in the working directory
+        /// </summary>
         public HashSet<string> Missing { get { return _diff.Missing; } }
+
+        /// <summary>
+        /// List of files with unstaged modifications. A file may be modified and staged at the same time if it has been modified after adding.
+        /// </summary>
         public HashSet<string> Modified { get { return _diff.Modified; } }
 
+         /// <summary>
+         /// List of files existing in the working directory but are neither tracked in the index nor in the current commit.
+         /// </summary>
+        public HashSet<string> Untracked { get { return _diff.Untracked; } }
     }
 }

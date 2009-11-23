@@ -15,7 +15,7 @@
  *   disclaimer in the documentation and/or other materials provided
  *   with the distribution.
  *
- * - Neither the name of the Git Development Community nor the
+ * - Neither the name of the TicGit project nor the
  *   names of its contributors may be used to endorse or promote
  *   products derived from this software without specific prior
  *   written permission.
@@ -58,6 +58,7 @@ namespace GitSharp
 
         internal Repository(CoreRepository repo)
         {
+            PreferredEncoding = Encoding.UTF8;
             _internal_repo = repo;
         }
 
@@ -207,30 +208,67 @@ namespace GitSharp
             if (!DirExists(Path.Combine(path, "refs/tags")))
                 return false;
 
+            Repository repo = null;
+
             try
             {
                 // let's see if it loads without throwing an exception
-                new Repository(path);
+                repo = new Repository(path);
             }
             catch (Exception)
             {
                 return false;
             }
+            finally
+            {
+                if (repo != null)
+                {
+                    repo.Dispose();
+                }
+            }
             return true;
         }
 
-        public static bool DirExists(string path)
+        private static bool DirExists(string path)
         {
             return new DirectoryInfo(path).Exists;
         }
 
-        public static bool FileExists(string path)
+        private static bool FileExists(string path)
         {
             return new FileInfo(path).Exists;
         }
 
         /// <summary>
-        /// Commit staged changes and updates HEAD
+        /// Check out the branch with the given name
+        /// </summary>
+        /// <param name="name"></param>
+        public void CheckoutBranch(string name)
+        {
+            CheckoutBranch(new Branch(this, name));
+        }
+
+        /// <summary>
+        /// Check out the given branch
+        /// </summary>
+        /// <param name="branch"></param>
+        public void CheckoutBranch(Branch branch)
+        {
+            Branch.SwitchTo(branch);
+        }
+
+        /// <summary>
+        /// Commit staged changes and update HEAD. The default git author is used.
+        /// </summary>
+        /// <param name="message">The commit message</param>
+        /// <returns>Returns the newly created commit</returns>
+        public Commit Commit(string message)
+        {
+            return Commit(message, new Author(Config["user.name"], Config["user.email"]));
+        }
+
+        /// <summary>
+        /// Commit staged changes and update HEAD
         /// </summary>
         /// <param name="message">The commit message</param>
         /// <param name="author">The author of the content to be committed</param>
@@ -271,7 +309,7 @@ namespace GitSharp
                 var internal_refs = _internal_repo._refDb.GetBranches();
                 var dict = new Dictionary<string, Branch>(internal_refs.Count);
                 foreach (var pair in internal_refs)
-                    dict[pair.Key] = new Branch(this, pair.Value);
+                    dict[pair.Key.TrimStart('/')] = new Branch(this, pair.Value);
                 return dict;
             }
         }
@@ -320,7 +358,7 @@ namespace GitSharp
         {
             get
             {
-                return Index.CompareAgainstWorkingDirectory(false); // todo: change this to true, once the ignore rules are implemented.
+                return Index.Status;
             }
         }
 
@@ -334,6 +372,15 @@ namespace GitSharp
             return "Repository[" + Directory + "]";
         }
 
+        /// <summary>
+        /// If data in a repository (i.e. filenames, commit messages, etc. ) is to be decoded with a special encoding
+        /// set this property. Default setting is UTF8
+        /// </summary>
+        public Encoding PreferredEncoding
+        {
+            get;
+            set;
+        }
 
         public void Close()
         {

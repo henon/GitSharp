@@ -42,7 +42,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GitSharp.Core;
-using GitSharp.Core.Util;
+using GitSharp.Tests.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests
@@ -120,9 +120,9 @@ namespace GitSharp.Tests
             MockSystemReader mockSystemReader = new MockSystemReader();
             SystemReader.setInstance(mockSystemReader);
             string hostname = mockSystemReader.getHostname();
-            Core.Config userGitConfig = mockSystemReader.userGitConfig;
+            Core.Config userGitConfig = mockSystemReader.openUserConfig();
             Core.Config localConfig = new Core.Config(userGitConfig);
-            mockSystemReader.values.Clear();
+            mockSystemReader.clearProperties();
 
             string authorName;
             string authorEmail;
@@ -134,7 +134,7 @@ namespace GitSharp.Tests
             Assert.AreEqual(Constants.UNKNOWN_USER_DEFAULT + "@" + hostname, authorEmail);
 
             // the system user name is defined
-            mockSystemReader.values.put(Constants.OS_USER_NAME_KEY, "os user name");
+            mockSystemReader.setProperty(Constants.OS_USER_NAME_KEY, "os user name");
             localConfig.uncache(UserConfig.KEY);
             authorName = localConfig.get(UserConfig.KEY).getAuthorName();
             Assert.AreEqual("os user name", authorName);
@@ -146,8 +146,8 @@ namespace GitSharp.Tests
             }
 
             // the git environment variables are defined
-            mockSystemReader.values.put(Constants.GIT_AUTHOR_NAME_KEY, "git author name");
-            mockSystemReader.values.put(Constants.GIT_AUTHOR_EMAIL_KEY, "author@email");
+            mockSystemReader.setProperty(Constants.GIT_AUTHOR_NAME_KEY, "git author name");
+            mockSystemReader.setProperty(Constants.GIT_AUTHOR_EMAIL_KEY, "author@email");
             localConfig.uncache(UserConfig.KEY);
             authorName = localConfig.get(UserConfig.KEY).getAuthorName();
             authorEmail = localConfig.get(UserConfig.KEY).getAuthorEmail();

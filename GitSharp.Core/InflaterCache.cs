@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -55,6 +55,8 @@ namespace GitSharp.Core
         private static Inflater[] inflaterCache;
 
         private static int openInflaterCount;
+		
+		private static Object locker = new Object();
 
         private InflaterCache()
         {
@@ -85,16 +87,18 @@ namespace GitSharp.Core
             return r ?? new Inflater(false);
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         private Inflater getImpl()
         {
-            if (openInflaterCount > 0)
-            {
-                Inflater r = inflaterCache[--openInflaterCount];
-                inflaterCache[openInflaterCount] = null;
-                return r;
-            }
-            return null;
+			lock(locker)
+			{
+	            if (openInflaterCount > 0)
+	            {
+	                Inflater r = inflaterCache[--openInflaterCount];
+	                inflaterCache[openInflaterCount] = null;
+	                return r;
+	            }
+	            return null;
+			}
         }
 
         /**
@@ -113,15 +117,17 @@ namespace GitSharp.Core
              }
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         private static bool releaseImpl(Inflater i)
         {
-            if (openInflaterCount < SZ)
-            {
-                inflaterCache[openInflaterCount++] = i;
-                return false;
-            }
-            return true;
+			lock(locker)
+			{
+	            if (openInflaterCount < SZ)
+	            {
+	                inflaterCache[openInflaterCount++] = i;
+	                return false;
+	            }
+	            return true;
+			}
         }
 
     }

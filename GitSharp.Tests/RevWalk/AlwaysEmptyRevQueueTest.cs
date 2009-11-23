@@ -37,6 +37,7 @@
 
 using System;
 using GitSharp.Core.RevWalk;
+using GitSharp.Tests.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests.RevWalk

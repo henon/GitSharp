@@ -58,6 +58,8 @@ namespace GitSharp.Tests
             TreeOnlyEntriesVisited.Clear();
             BothVisited.Clear();
             IndexOnlyEntriesVisited.Clear();
+
+            base.tearDown();
         }
 
         // Methods

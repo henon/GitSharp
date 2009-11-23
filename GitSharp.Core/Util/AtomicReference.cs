@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyrigth (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -35,11 +35,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+
 namespace GitSharp.Core.Util
 {
 	public class AtomicReference<T>
 	{
 		private T _reference;
+		private Object locker = new Object();
 
 		public AtomicReference()
 		{
@@ -52,7 +55,7 @@ namespace GitSharp.Core.Util
 
 		public bool compareAndSet(T expected, T update)
 		{
-			lock (this)
+			lock (locker)
 			{
 				if ((_reference == null && expected == null) || (_reference != null && _reference.Equals(expected)))
 				{
@@ -65,7 +68,7 @@ namespace GitSharp.Core.Util
 
 		public void set(T update)
 		{
-			lock (this)
+			lock (locker)
 			{
 				_reference = update;
 			}

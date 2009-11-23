@@ -37,12 +37,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using GitSharp.Core.Exceptions;
 
 namespace GitSharp.Core.Transport
 {
-    public abstract class BaseConnection : IConnection
+    public abstract class BaseConnection : IConnection, IDisposable
     {
         private Dictionary<string, Ref> advertisedRefs = new Dictionary<string, Ref>();
         private bool startedOperation;
@@ -65,7 +66,10 @@ namespace GitSharp.Core.Transport
 
         public Ref GetRef(string name)
         {
-            return advertisedRefs[name];
+            if (advertisedRefs.ContainsKey(name))
+                return advertisedRefs[name];
+
+            return null;
         }
 
         public abstract void Close();
@@ -80,6 +84,11 @@ namespace GitSharp.Core.Transport
             if (startedOperation)
                 throw new TransportException("Only one operation call per connection is supported.");
             startedOperation = true;
+        }
+
+        public virtual void Dispose()
+        {
+            Close();
         }
     }
 

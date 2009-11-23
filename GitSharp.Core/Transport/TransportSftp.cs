@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Core.Exceptions;
@@ -455,8 +456,19 @@ namespace GitSharp.Core.Transport
     					_ftp = null;
     				}
     			}
-    		}
-    	}
+#if DEBUG
+                GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
+		    }
+
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~SftpObjectDatabase()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed: " + this.getURI());
+        }
+#endif    	
+        }
 
     	#endregion
     }

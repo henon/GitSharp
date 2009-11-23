@@ -40,13 +40,11 @@ using NUnit.Framework;
 using GitSharp.Core;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace GitSharp.Tests.Transport
 {
     [TestFixture]
-    public class PushProcessTest : RepositoryTestCase
+    public class PushProcessTest : SampleDataRepositoryTestCase
     {
         private PushProcess process;
         private MockTransport transport;

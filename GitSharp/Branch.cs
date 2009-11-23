@@ -37,11 +37,7 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-using ObjectId = GitSharp.Core.ObjectId;
 using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
@@ -51,6 +47,8 @@ namespace GitSharp
 {
     public class Branch : Ref
     {
+        private const ResetBehavior DEFAULT_RESET_BEHAVIOR = ResetBehavior.Mixed;
+
         public Branch(Ref @ref)
             : base(@ref._repo, @ref.Name)
         {
@@ -67,6 +65,17 @@ namespace GitSharp
         }
 
         /// <summary>
+        /// Get the branch's full path name relative to the .git directory
+        /// </summary>
+        public string Fullname
+        {
+            get
+            {
+                return "refs/heads/" + Name;
+            }
+        }
+
+        /// <summary>
         /// Returns the latest commit on this branch.
         /// </summary>
         public Commit CurrentCommit
@@ -74,6 +83,14 @@ namespace GitSharp
             get
             {
                 return Target as Commit;
+            }
+        }
+
+        public bool IsCurrent
+        {
+            get
+            {
+                return _repo.CurrentBranch == this;
             }
         }
 
@@ -104,22 +121,153 @@ namespace GitSharp
         /// </summary>
         public void Checkout()
         {
-            throw new NotImplementedException();
+            SwitchTo(this);
         }
 
-        public void ResetSoft(string hash)
+        public void Rename(string name)
         {
             throw new NotImplementedException();
         }
 
-        public void ResetHard(string hash)
+        #region --> Reset
+
+
+        public void Reset()
         {
-            throw new NotImplementedException();
+            Commit commit = GetSafeCurrentCommit();
+            Reset(commit);
+        }
+
+        public void Reset(string commitHash)
+        {
+            Commit commit = ResolveCommit(commitHash);
+            Reset(commit);
+        }
+
+        public void Reset(Commit commit)
+        {
+            Reset(commit, DEFAULT_RESET_BEHAVIOR);
+        }
+
+        public void Reset(ResetBehavior resetBehavior)
+        {
+            Commit commit = GetSafeCurrentCommit();
+            Reset(commit, resetBehavior);
+        }
+
+        public void Reset(string commitHash, ResetBehavior resetBehavior)
+        {
+            Commit commit = ResolveCommit(commitHash);
+            Reset(commit, resetBehavior);
+        }
+
+        public void Reset(Commit commit, ResetBehavior resetBehavior)
+        {
+            if (commit == null)
+            {
+                throw new ArgumentNullException("commit");
+            }
+
+            switch (resetBehavior)
+            {
+                case ResetBehavior.Hard:
+                    ResetHard(commit);
+                    break;
+
+                case ResetBehavior.Soft:
+                    ResetSoft(commit);
+                    break;
+
+                case ResetBehavior.Mixed:
+                case ResetBehavior.Merge:
+                    throw new NotImplementedException();
+
+                default:
+                    throw new NotSupportedException(string.Format("{0} is not supported.", resetBehavior));
+            }
+        }
+
+        private Commit ResolveCommit(string commitHash)
+        {
+            var commit = new Commit(_repo, commitHash);
+
+            if (!commit.IsCommit)
+            {
+                throw new ArgumentException(string.Format("The provided hash ({0}) does not point to a commit.", commitHash));
+            }
+
+            return commit;
+        }
+
+        private static void ResetSoft(Commit commit)
+        {
+            Ref.Update("HEAD", commit);
+        }
+
+        private void ResetHard(Commit commit)
+        {
+            commit.Checkout(_repo.WorkingDirectory);
+            _repo._internal_repo.Index.write();
+            Ref.Update("HEAD", commit);
+        }
+
+        private Commit GetSafeCurrentCommit()
+        {
+            if (this.CurrentCommit == null)
+                throw new InvalidOperationException(string.Format("Branch '{0}' has no commit.", Name));
+
+            return this.CurrentCommit;
+        }
+
+
+        #endregion
+
+        /// <summary>
+        /// Create a new branch from HEAD.
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="name">The name of the branch to create (i.e. "master", not "refs/heads/master")</param>
+        /// <returns>returns the newly created Branch object</returns>
+        public static Branch Create(Repository repo, string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentException("Branch name must not be null or empty");
+            Ref.Update("refs/heads/" + name, repo.Head.CurrentCommit);
+            return new Branch(repo, name);
+        }
+
+        /// <summary>
+        /// Create a new branch from the given commit
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="name">The name of the branch to create (i.e. "master", not "refs/heads/master")</param>
+        /// <param name="commit">The commit to base the branch on.</param>
+        /// <returns>returns the newly created Branch object</returns>
+        public static Branch Create(Repository repo, string name, Commit commit)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentException("Branch name must not be null or empty", "name");
+            if (commit == null || !commit.IsCommit)
+                throw new ArgumentException("Invalid commit", "commit");
+            Ref.Update("refs/heads/" + name, commit);
+            return new Branch(repo, name);
+        }
+
+        /// <summary>
+        /// Switch to the given branch
+        /// </summary>
+        /// <param name="branch"></param>
+        public static void SwitchTo(Branch branch)
+        {
+            var db = branch._repo._internal_repo;
+            db.WriteSymref(GitSharp.Core.Constants.HEAD, branch.Name);
+            branch.Reset(ResetBehavior.Hard);
         }
 
         public override string ToString()
         {
             return "Branch[" + Name + "]";
         }
+
     }
 }

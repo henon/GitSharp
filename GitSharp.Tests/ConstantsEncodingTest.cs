@@ -40,6 +40,7 @@ using System;
 using System.Linq;
 using System.Text;
 using GitSharp.Core;
+using GitSharp.Tests.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Tests

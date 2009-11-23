@@ -44,7 +44,7 @@ using System.Linq;
 namespace GitSharp.Tests.Transport
 {
     [TestFixture]
-    public class TransportTest : RepositoryTestCase
+    public class TransportTest : SampleDataRepositoryTestCase
     {
         private GitSharp.Core.Transport.Transport transport;
         private RemoteConfig remoteConfig;

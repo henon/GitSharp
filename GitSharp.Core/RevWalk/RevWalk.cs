@@ -763,18 +763,20 @@ namespace GitSharp.Core.RevWalk
 		public RevCommit parseCommit(AnyObjectId id)
 		{
 			RevObject c = parseAny(id);
-			while (c is RevTag)
+			RevTag oTag = (c as RevTag);
+			while (oTag != null)
 			{
-				c = ((RevTag)c).getObject();
+				c = oTag.getObject();
 				parseHeaders(c);
 			}
 
-			if (!(c is RevCommit))
+			RevCommit oComm = (c as RevCommit);
+			if (oComm == null)
 			{
 				throw new IncorrectObjectTypeException(id.ToObjectId(), Constants.TYPE_COMMIT);
 			}
 
-			return (RevCommit)c;
+			return oComm;
 		}
 
 		///	<summary>
@@ -800,24 +802,25 @@ namespace GitSharp.Core.RevWalk
 		public RevTree parseTree(AnyObjectId id)
 		{
 			RevObject c = parseAny(id);
-			while (c is RevTag)
+			RevTag oTag = (c as RevTag);
+			while (oTag != null)
 			{
-				c = ((RevTag)c).getObject();
+				c = oTag.getObject();
 				parseHeaders(c);
 			}
 
-			RevTree t;
-			if (c is RevCommit)
+			RevTree t = (c as RevTree);
+			if ( t == null)
 			{
-				t = ((RevCommit)c).Tree;
-			}
-			else if (!(c is RevTree))
-			{
-				throw new IncorrectObjectTypeException(id.ToObjectId(), Constants.TYPE_TREE);
-			}
-			else
-			{
-				t = (RevTree)c;
+				RevCommit oComm = (c as RevCommit);
+				if (oComm != null)
+				{
+					t = oComm.Tree;
+				}
+				else if (t == null)
+				{
+					throw new IncorrectObjectTypeException(id.ToObjectId(), Constants.TYPE_TREE);
+				}
 			}
 
 			parseHeaders(t);

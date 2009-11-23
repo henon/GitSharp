@@ -55,9 +55,17 @@ namespace GitSharp.Core.RevWalk
 		public static int BLOCK_SHIFT = 8;
 		public static int BLOCK_SIZE = 1 << BLOCK_SHIFT;
 
-		public Block Contents
+        /// <summary>
+        /// Items stored in this list.
+        /// <para>
+        /// If <see cref="Block.Shift"/> = 0 this block holds the list elements; otherwise
+        /// it holds pointers to other {@link Block} instances which use a shift that
+        /// is <see cref="BLOCK_SHIFT"/> smaller.
+        /// </para>
+        /// </summary>
+		protected Block Contents
 		{
-			get; protected set;
+			get; set;
 		}
 
 		/// <summary>
@@ -68,9 +76,12 @@ namespace GitSharp.Core.RevWalk
 			clear();
 		}
 
-		public int Size
+        /// <summary>
+        /// Current number of elements in the list.
+        /// </summary>
+		protected int Size
 		{
-			get; protected set;
+			get; set;
 		}
 
 		public void add(int index, T element)
@@ -141,6 +152,9 @@ namespace GitSharp.Core.RevWalk
 			Size = 0;
 		}
 
+        /// <summary>
+        /// One level of contents, either an intermediate level or a leaf level.
+        /// </summary>
 		public class Block : IEnumerable<T>
 		{
 			public object[] Contents { get; private set; }

@@ -65,7 +65,6 @@ namespace GitSharp.Tests.API
                 repo.Index.Add(filepath);
                 // now verify
                 Assert.IsTrue(new FileInfo(index_path).Exists);
-                var new_index = new Repository(repo.Directory).Index;
                 Assert.AreNotEqual(File.ReadAllBytes(old_index), File.ReadAllBytes(index_path));
 
                 // make another addition
@@ -82,7 +81,7 @@ namespace GitSharp.Tests.API
                 Assert.IsTrue(status.Added.Contains("for henon.txt"));
                 Assert.IsTrue(status.Added.Contains("for nulltoken.txt"));
                 Assert.AreEqual(2, status.Added.Count);
-                Assert.AreEqual(0, status.Changed.Count);
+                Assert.AreEqual(0, status.Staged.Count);
                 Assert.AreEqual(0, status.Missing.Count);
                 Assert.AreEqual(0, status.Modified.Count);
                 Assert.AreEqual(0, status.Removed.Count);
@@ -101,8 +100,13 @@ namespace GitSharp.Tests.API
                 Assert.IsTrue(new FileInfo(index_path).Exists);
                 new FileInfo(index_path).MoveTo(old_index);
                 Assert.IsFalse(new FileInfo(index_path).Exists);
-                var new_index = new Repository(repo.Directory).Index;
-                new_index.Write(); // see if the read index is rewritten identitcally
+                
+                using (var repo2 = new Repository(repo.Directory))
+                {
+                    Index new_index = repo2.Index;
+                    new_index.Write(); // see if the read index is rewritten identitcally
+                }
+
                 Assert.IsTrue(new FileInfo(index_path).Exists);
                 Assert.AreEqual(File.ReadAllBytes(old_index), File.ReadAllBytes(index_path));
             }
@@ -136,16 +140,15 @@ namespace GitSharp.Tests.API
                                   };
 
                 Assert.IsTrue(added.SetEquals(status.Added));
-                Assert.AreEqual(0, status.Changed.Count);
+                Assert.AreEqual(0, status.Staged.Count);
                 Assert.IsTrue(added.SetEquals(status.Missing));
                 Assert.AreEqual(0, status.Modified.Count);
                 Assert.IsTrue(removed.SetEquals(status.Removed));
-
-                // Todo: modify, remove, change, add files and see how missing goes away
             }
         }
 
         // TODO: test add's behavior on wrong input data
+        // TODO: test add "."
         // TODO: test recursive add of directories
     }
 }

@@ -43,184 +43,184 @@ using GitSharp.Core.Util;
 using NUnit.Framework;
 using System.Text;
 
-namespace GitSharp.Tests
+namespace GitSharp.Tests.Util
 {
     [TestFixture]
     public class QuotedStringGitPathStyleTest
     {
         private static readonly QuotedString.GitPathStyle GitPath = QuotedString.GitPathStyle.GIT_PATH;
 
-	    private static void AssertQuote(String exp, String in_str)
+        private static void AssertQuote(String exp, String in_str)
         {
-		    String r = GitPath.quote(in_str);
-		    Assert.AreNotSame(in_str, r);
-		    Assert.IsFalse(in_str.Equals(r));
-		    Assert.AreEqual('"' + exp + '"', r);
-	    }
+            String r = GitPath.quote(in_str);
+            Assert.AreNotSame(in_str, r);
+            Assert.IsFalse(in_str.Equals(r));
+            Assert.AreEqual('"' + exp + '"', r);
+        }
 
-	    private static void AssertDequote(string exp, string inStr)
+        private static void AssertDequote(string exp, string inStr)
         {
             byte[] b = ('"' + inStr + '"').getBytes("ISO-8859-1");
 		    
-		    String r = GitPath.dequote(b, 0, b.Length);
-		    Assert.AreEqual(exp, r);
-	    }
+            String r = GitPath.dequote(b, 0, b.Length);
+            Assert.AreEqual(exp, r);
+        }
 
         [Test]
-	    public void testQuote_Empty()
+        public void testQuote_Empty()
         {
-		    Assert.AreEqual("\"\"", GitPath.quote(string.Empty));
-	    }
+            Assert.AreEqual("\"\"", GitPath.quote(string.Empty));
+        }
 
         [Test]
-	    public void testDequote_Empty1()
+        public void testDequote_Empty1()
         {
-		    Assert.AreEqual(string.Empty, GitPath.dequote(new byte[0], 0, 0));
-	    }
+            Assert.AreEqual(string.Empty, GitPath.dequote(new byte[0], 0, 0));
+        }
 
         [Test]
-	    public void testDequote_Empty2()
+        public void testDequote_Empty2()
         {
-		    Assert.AreEqual(string.Empty, GitPath.dequote(new byte[] { (byte)'"', (byte)'"' }, 0, 2));
-	    }
+            Assert.AreEqual(string.Empty, GitPath.dequote(new byte[] { (byte)'"', (byte)'"' }, 0, 2));
+        }
 
         [Test]
-	    public void testDequote_SoleDq()
+        public void testDequote_SoleDq()
         {
-		    Assert.AreEqual("\"", GitPath.dequote(new byte[] { (byte)'"' }, 0, 1));
-	    }
+            Assert.AreEqual("\"", GitPath.dequote(new byte[] { (byte)'"' }, 0, 1));
+        }
 
         [Test]
-	    public void testQuote_BareA()
+        public void testQuote_BareA()
         {
-		    String in_str = "a";
-		    Assert.AreSame(in_str, GitPath.quote(in_str));
-	    }
+            String in_str = "a";
+            Assert.AreSame(in_str, GitPath.quote(in_str));
+        }
 
         [Test]
-	    public void testDequote_BareA()
+        public void testDequote_BareA()
         {
-		    String in_str = "a";
-		    byte[] b = Constants.encode(in_str);
-		    Assert.AreEqual(in_str, GitPath.dequote(b, 0, b.Length));
-	    }
+            String in_str = "a";
+            byte[] b = Constants.encode(in_str);
+            Assert.AreEqual(in_str, GitPath.dequote(b, 0, b.Length));
+        }
 
         [Test]
-	    public void testDequote_BareABCZ_OnlyBC()
+        public void testDequote_BareABCZ_OnlyBC()
         {
-		    String in_str = "abcz";
-		    byte[] b = Constants.encode(in_str);
-		    int p = in_str.IndexOf('b');
-		    Assert.AreEqual("bc", GitPath.dequote(b, p, p + 2));
-	    }
+            String in_str = "abcz";
+            byte[] b = Constants.encode(in_str);
+            int p = in_str.IndexOf('b');
+            Assert.AreEqual("bc", GitPath.dequote(b, p, p + 2));
+        }
 
         [Test]
-	    public void testDequote_LoneBackslash()
+        public void testDequote_LoneBackslash()
         {
-		    AssertDequote("\\", "\\");
-	    }
+            AssertDequote("\\", "\\");
+        }
 
         [Test]
-	    public void testQuote_NamedEscapes()
+        public void testQuote_NamedEscapes()
         {
-		    AssertQuote("\\a", "\u0007");
-		    AssertQuote("\\b", "\b");
-		    AssertQuote("\\f", "\f");
-		    AssertQuote("\\n", "\n");
-		    AssertQuote("\\r", "\r");
-		    AssertQuote("\\t", "\t");
-		    AssertQuote("\\v", "\u000B");
-		    AssertQuote("\\\\", "\\");
-		    AssertQuote("\\\"", "\"");
-	    }
+            AssertQuote("\\a", "\u0007");
+            AssertQuote("\\b", "\b");
+            AssertQuote("\\f", "\f");
+            AssertQuote("\\n", "\n");
+            AssertQuote("\\r", "\r");
+            AssertQuote("\\t", "\t");
+            AssertQuote("\\v", "\u000B");
+            AssertQuote("\\\\", "\\");
+            AssertQuote("\\\"", "\"");
+        }
 
         [Test]
-	    public void testDequote_NamedEscapes()
+        public void testDequote_NamedEscapes()
         {
-		    AssertDequote("\u0007", "\\a");
-		    AssertDequote("\b", "\\b");
-		    AssertDequote("\f", "\\f");
-		    AssertDequote("\n", "\\n");
-		    AssertDequote("\r", "\\r");
-		    AssertDequote("\t", "\\t");
-		    AssertDequote("\u000B", "\\v");
-		    AssertDequote("\\", "\\\\");
-		    AssertDequote("\"", "\\\"");
-	    }
+            AssertDequote("\u0007", "\\a");
+            AssertDequote("\b", "\\b");
+            AssertDequote("\f", "\\f");
+            AssertDequote("\n", "\\n");
+            AssertDequote("\r", "\\r");
+            AssertDequote("\t", "\\t");
+            AssertDequote("\u000B", "\\v");
+            AssertDequote("\\", "\\\\");
+            AssertDequote("\"", "\\\"");
+        }
 
         [Test]
-	    public void testDequote_OctalAll()
+        public void testDequote_OctalAll()
         {
-		    for (int i = 0; i < 127; i++)
+            for (int i = 0; i < 127; i++)
             {
-			    AssertDequote(string.Empty + (char) i, octalEscape(i));
-		    }
+                AssertDequote(string.Empty + (char) i, octalEscape(i));
+            }
 
-		    for (int i = 128; i < 256; i++)
+            for (int i = 128; i < 256; i++)
             {
-			    int f = 0xC0 | (i >> 6);
-			    int s = 0x80 | (i & 0x3f);
-			    AssertDequote(string.Empty + (char) i, octalEscape(f)+octalEscape(s));
-		    }
-	    }
+                int f = 0xC0 | (i >> 6);
+                int s = 0x80 | (i & 0x3f);
+                AssertDequote(string.Empty + (char) i, octalEscape(f)+octalEscape(s));
+            }
+        }
 
-	    private String octalEscape(int i)
+        private String octalEscape(int i)
         {
             String s = Convert.ToString(i, 8);
-		    while (s.Length < 3) {
-			    s = "0" + s;
-		    }
-		    return "\\"+s;
-	    }
+            while (s.Length < 3) {
+                s = "0" + s;
+            }
+            return "\\"+s;
+        }
 
         [Test]
-	    public void testQuote_OctalAll()
+        public void testQuote_OctalAll()
         {
-		    AssertQuote("\\001", new string((char)1,1));
-		    AssertQuote("\\176", "~");
-		    AssertQuote("\\303\\277", "\u00ff"); // \u00ff in UTF-8
-	    }
+            AssertQuote("\\001", new string((char)1,1));
+            AssertQuote("\\176", "~");
+            AssertQuote("\\303\\277", "\u00ff"); // \u00ff in UTF-8
+        }
 
         [Test]
-	    public void testDequote_UnknownEscapeQ()
+        public void testDequote_UnknownEscapeQ()
         {
-		    AssertDequote("\\q", "\\q");
-	    }
+            AssertDequote("\\q", "\\q");
+        }
 
         [Test]
-	    public void testDequote_FooTabBar()
+        public void testDequote_FooTabBar()
         {
-		    AssertDequote("foo\tbar", "foo\\tbar");
-	    }
+            AssertDequote("foo\tbar", "foo\\tbar");
+        }
 
         [Test]
-	    public void testDequote_Latin1()
+        public void testDequote_Latin1()
         {
-			AssertHelper.IgnoreOnMono(() => AssertDequote("\u00c5ngstr\u00f6m", "\\305ngstr\\366m"), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
-	    }
+            AssertHelper.IgnoreOnMono(() => AssertDequote("\u00c5ngstr\u00f6m", "\\305ngstr\\366m"), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
+        }
 
         [Test]
-	    public void testDequote_UTF8()
+        public void testDequote_UTF8()
         {
-		    AssertDequote("\u00c5ngstr\u00f6m", "\\303\\205ngstr\\303\\266m");
-	    }
+            AssertDequote("\u00c5ngstr\u00f6m", "\\303\\205ngstr\\303\\266m");
+        }
 
         [Test]
-	    public void testDequote_RawUTF8()
+        public void testDequote_RawUTF8()
         {
-		    AssertDequote("\u00c5ngstr\u00f6m", @"\303\205ngstr\303\266m");
-	    }
+            AssertDequote("\u00c5ngstr\u00f6m", @"\303\205ngstr\303\266m");
+        }
 
         [Test]
-	    public void testDequote_RawLatin1()
+        public void testDequote_RawLatin1()
         {
-			AssertHelper.IgnoreOnMono(() => AssertDequote("\u00c5ngstr\u00f6m", (char)NB.BaseToDecimal("305", 8)  + "ngstr" + (char)NB.BaseToDecimal("366", 8) + "m"), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
-		}
+            AssertHelper.IgnoreOnMono(() => AssertDequote("\u00c5ngstr\u00f6m", (char)NB.BaseToDecimal("305", 8)  + "ngstr" + (char)NB.BaseToDecimal("366", 8) + "m"), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
+        }
 
         [Test]
-	    public void testQuote_Ang()
+        public void testQuote_Ang()
         {
-		    AssertQuote("\\303\\205ngstr\\303\\266m", "\u00c5ngstr\u00f6m");
-	    }
+            AssertQuote("\\303\\205ngstr\\303\\266m", "\u00c5ngstr\u00f6m");
+        }
     }
 }

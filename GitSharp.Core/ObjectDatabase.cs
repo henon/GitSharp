@@ -56,7 +56,7 @@ namespace GitSharp.Core
 	/// alternates are present the fast half is fully searched (recursively through
 	/// all alternates) before the slow half is considered.
 	/// </summary>
-	public abstract class ObjectDatabase
+	public abstract class ObjectDatabase : IDisposable
     {
         /// <summary>
 		/// Constant indicating no alternate databases exist.
@@ -90,6 +90,11 @@ namespace GitSharp.Core
         {
             // Assume no action is required.
         }
+        
+        public virtual void Dispose()
+        {
+            close();
+        }
 
         /// <summary>
 		/// Close any resources held by this database and its active alternates.
@@ -98,8 +103,18 @@ namespace GitSharp.Core
         {
             closeSelf();
             closeAlternates();
+#if DEBUG
+            GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
         }
 
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~ObjectDatabase()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed.");
+        }
+#endif
         /// <summary>
         /// Close any resources held by this database only; ignoring alternates.
 		/// <para />

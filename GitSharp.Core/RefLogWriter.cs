@@ -104,36 +104,39 @@ namespace GitSharp.Core
 			}
 		}
 
-		private static void AppendOneRecord(ObjectId oldId, ObjectId newId, PersonIdent ident, string msg, Repository db, string refName)
-		{
-			ident = ident == null ? new PersonIdent(db) : new PersonIdent(ident);
+        private static void AppendOneRecord(ObjectId oldId, ObjectId newId, PersonIdent ident, string msg, Repository db, string refName)
+        {
+            ident = ident == null ? new PersonIdent(db) : new PersonIdent(ident);
 
-			var r = new StringBuilder();
-			r.Append(ObjectId.ToString(oldId));
-			r.Append(' ');
-			r.Append(ObjectId.ToString(newId));
-			r.Append(' ');
-			r.Append(ident.ToExternalString());
-			r.Append('\t');
-			r.Append(msg);
-			r.Append('\n');
+            var r = new StringBuilder();
+            r.Append(ObjectId.ToString(oldId));
+            r.Append(' ');
+            r.Append(ObjectId.ToString(newId));
+            r.Append(' ');
+            r.Append(ident.ToExternalString());
+            r.Append('\t');
+            r.Append(msg);
+            r.Append('\n');
 
-			byte[] rec = Constants.encode(r.ToString());
-			var logdir = new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.LOGS));
-			var reflog = new DirectoryInfo(Path.Combine(logdir.FullName, refName));
+            byte[] rec = Constants.encode(r.ToString());
+            var logdir = new DirectoryInfo(Path.Combine(db.Directory.FullName, Constants.LOGS));
+            var reflog = new FileInfo(Path.Combine(logdir.FullName, refName));
 
-			var refdir = reflog.Parent;
+            if (reflog.Exists || db.Config.getCore().isLogAllRefUpdates())
+            {
+                DirectoryInfo refdir = reflog.Directory;
 
-			if (!refdir.Exists && !refdir.Mkdirs())
-			{
-				throw new IOException("Cannot create directory " + refdir);
-			}
+                if (!refdir.Exists && !refdir.Mkdirs())
+                {
+                    throw new IOException("Cannot create directory " + refdir);
+                }
 
-		    using (var @out = new FileStream(reflog.FullName, System.IO.FileMode.Append, FileAccess.Write))
-		    {
-		        @out.Write(rec, 0, rec.Length);
-		    }
-		}
+                using (var @out = new FileStream(reflog.FullName, System.IO.FileMode.Append, FileAccess.Write))
+                {
+                    @out.Write(rec, 0, rec.Length);
+                }
+            }
+        }
 
 		///	<summary>
 		/// Writes reflog entry for ref specified by refName

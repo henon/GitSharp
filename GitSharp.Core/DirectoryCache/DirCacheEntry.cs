@@ -105,7 +105,7 @@ namespace GitSharp.Core.DirectoryCache
 			_info = sharedInfo;
 			_infoOffset = infoAt;
 
-			NB.ReadFully(@in, _info, _infoOffset, INFO_LEN);
+			IO.ReadFully(@in, _info, _infoOffset, INFO_LEN);
 			md.Update(_info, _infoOffset, INFO_LEN);
 
 			int pathLen = NB.decodeUInt16(_info, _infoOffset + PFlags) & NameMask;
@@ -113,7 +113,7 @@ namespace GitSharp.Core.DirectoryCache
 			if (pathLen < NameMask)
 			{
 				_path = new byte[pathLen];
-				NB.ReadFully(@in, _path, 0, pathLen);
+				IO.ReadFully(@in, _path, 0, pathLen);
 				md.Update(_path, 0, pathLen);
 			}
 			else
@@ -121,7 +121,7 @@ namespace GitSharp.Core.DirectoryCache
 				var tmp = new MemoryStream();
 				{
 					var buf = new byte[NameMask];
-					NB.ReadFully(@in, buf, 0, NameMask);
+					IO.ReadFully(@in, buf, 0, NameMask);
 					tmp.Write(buf, 0, buf.Length);
 				}
 
@@ -153,7 +153,7 @@ namespace GitSharp.Core.DirectoryCache
 			int padLen = expLen - actLen - skipped;
 			if (padLen > 0)
 			{
-				NB.skipFully(@in, padLen);
+				IO.skipFully(@in, padLen);
 				md.Update(NullPad, 0, padLen);
 			}
 		}

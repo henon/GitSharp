@@ -41,10 +41,17 @@
     <property name="assembly.name" value="GitSharp.Core" />
     <property name="assembly.type" value="library" />
 
-    <fileset id="project.references" basedir="${path.lib}" >
-      <include name="ICSharpCode.SharpZipLib.dll" />
-      <include name="Winterdom.IO.FileMap.dll" />
-      <include name="Tamir.SharpSSH.dll" />
+    <property name="assembly.namespace" value="${assembly.name}" />
+    
+    <fileset id="project.references" >
+      <include name="System.dll" />
+      <include name="System.Core.dll" />
+      <include name="System.Drawing.dll" />
+      <include name="System.Windows.Forms.dll" />
+      <include name="System.Xml.dll" />
+      <include name="${path.lib}/ICSharpCode.SharpZipLib.dll" />
+      <include name="${path.lib}/Winterdom.IO.FileMap.dll" />
+      <include name="${path.lib}/Tamir.SharpSSH.dll" />
     </fileset>
 
     <call target="compile-dll" />
@@ -57,6 +64,8 @@
     <property name="assembly.name" value="Git" />
     <property name="assembly.type" value="exe" />
 
+    <property name="assembly.namespace" value="GitSharp.CLI" />
+    
     <fileset id="project.references" basedir="${path.build.output}" >
       <include name="GitSharp.dll" />
       <include name="GitSharp.Core.dll" />
@@ -78,6 +87,8 @@
     <property name="assembly.name" value="GitSharp" />
     <property name="assembly.type" value="library" />
 
+    <property name="assembly.namespace" value="${assembly.name}" />
+
     <fileset id="project.references" basedir="${path.build.output}" >
       <include name="GitSharp.Core.dll" />
     </fileset>
@@ -91,6 +102,8 @@
   <target name="compile-tests" depends="compile-cli">
     <property name="assembly.name" value="GitSharp.Tests" />
     <property name="assembly.type" value="library" />
+
+    <property name="assembly.namespace" value="${assembly.name}" />
 
     <fileset id="project.references" >
       <include name="${path.build.output}/GitSharp.dll" />
@@ -118,21 +131,6 @@
 
     <copy todir="${path.testresults}/Resources">
       <fileset basedir="${path.base}/GitSharp.Tests/Resources">
-        <include name="**" />
-      </fileset>
-    </copy>
-    <copy todir="${path.testresults}/Diff/Resources">
-      <fileset basedir="${path.base}/GitSharp.Tests/Diff/Resources">
-        <include name="**" />
-      </fileset>
-    </copy>
-    <copy todir="${path.testresults}/Patch/Resources">
-      <fileset basedir="${path.base}/GitSharp.Tests/Patch/Resources">
-        <include name="**" />
-      </fileset>
-    </copy>
-    <copy todir="${path.testresults}/sample.git">
-      <fileset basedir="${path.base}/GitSharp.Tests/sample.git">
         <include name="**" />
       </fileset>
     </copy>
@@ -214,6 +212,9 @@
          doc="${path.build.output}/${assembly.name}.xml" >
       <sources refid="project.sources" />
       <references refid="project.references" />
+      <resources prefix="${assembly.namespace}.Resources.">
+        <include name="${project.sources.path}/Resources/*.*"/>
+      </resources>
       <nowarn>
         <!-- No warning when public members lack XML comments -->
         <warning number="1591" />

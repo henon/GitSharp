@@ -1,5 +1,8 @@
+using System;
 using System.IO;
+using System.Threading;
 using GitSharp.Core;
+using GitSharp.Tests.Util;
 using NUnit.Framework;
 using FileMode=GitSharp.Core.FileMode;
 
@@ -49,6 +52,12 @@ namespace GitSharp.Tests
             index.add(trash, file);
 
             var entry = index.GetEntry("extensionless-file");
+
+            if (AssertHelper.IsRunningOnMono())
+            {
+                // File timestamps on Unix based systems are only precise to the second
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+            }
 
             // replace contents of file (with same size so it passes the size check)
             using (var writer = file.CreateText())

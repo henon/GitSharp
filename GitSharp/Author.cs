@@ -53,5 +53,13 @@ namespace GitSharp
 
         public string Name { get; set; }
         public string EmailAddress { get; set; }
+
+        public static Author Anonymous
+        {
+            get
+            {
+                return new Author("anonymous", "anonymous@void");
+            }
+        }
     }
 }

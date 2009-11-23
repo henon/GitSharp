@@ -209,14 +209,31 @@ namespace GitSharp.Core.Util
             {
                 try
                 {
-                    diskOut.Close();
+                    diskOut.Dispose();
                 }
                 finally
                 {
                     diskOut = null;
                 }
             }
+#if DEBUG
+            GC.SuppressFinalize(this); // Disarm lock-release checker
+#endif
         }
+
+        public new void Dispose()
+        {
+            close();
+            base.Dispose();
+        }
+
+#if DEBUG
+        // A debug mode warning if the type has not been disposed properly
+        ~TemporaryBuffer()
+        {
+            Console.Error.WriteLine(GetType().Name + " has not been properly disposed.");
+        }
+#endif
 
         /**
          * Obtain the length (in bytes) of the buffer.
@@ -267,7 +284,7 @@ namespace GitSharp.Core.Util
             {
                 using (var @in = new FileStream(_onDiskFile.FullName, System.IO.FileMode.Open, FileAccess.Read))
                 {
-                    NB.ReadFully(@in, @out, 0, (int)len);
+                    IO.ReadFully(@in, @out, 0, (int)len);
                 }
             }
             return @out;
@@ -325,21 +342,7 @@ namespace GitSharp.Core.Util
         {
             _blocks = null;
 
-            if (diskOut != null)
-            {
-                try
-                {
-                    diskOut.Close();
-                }
-                catch (IOException)
-                {
-                    // We shouldn't encounter an error closing the file.
-                }
-                finally
-                {
-                    diskOut = null;
-                }
-            }
+            close();
 
             if (_onDiskFile != null)
             {

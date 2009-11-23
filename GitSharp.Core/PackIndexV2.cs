@@ -71,7 +71,7 @@ namespace GitSharp.Core
 		public PackIndexV2(Stream fd)
 		{
 			var fanoutRaw = new byte[4 * FANOUT];
-			NB.ReadFully(fd, fanoutRaw, 0, fanoutRaw.Length);
+			IO.ReadFully(fd, fanoutRaw, 0, fanoutRaw.Length);
 			_fanoutTable = new long[FANOUT];
 			for (int k = 0; k < FANOUT; k++)
 			{
@@ -116,7 +116,7 @@ namespace GitSharp.Core
 				var intNameLen = (int)nameLen;
 				var raw = new byte[intNameLen];
 				var bin = new int[intNameLen >> 2];
-				NB.ReadFully(fd, raw, 0, raw.Length);
+				IO.ReadFully(fd, raw, 0, raw.Length);
 				for (int i = 0; i < bin.Length; i++)
 				{
 					bin[i] = NB.DecodeInt32(raw, i << 2);
@@ -130,7 +130,7 @@ namespace GitSharp.Core
 			// CRC32 table.
 			for (int k = 0; k < FANOUT; k++)
 			{
-				NB.ReadFully(fd, _crc32[k], 0, _crc32[k].Length);
+				IO.ReadFully(fd, _crc32[k], 0, _crc32[k].Length);
 			}
 
 			// 32 bit offset table. Any entries with the most significant bit
@@ -140,7 +140,7 @@ namespace GitSharp.Core
 			for (int k = 0; k < FANOUT; k++)
 			{
 				byte[] ofs = _offset32[k];
-				NB.ReadFully(fd, ofs, 0, ofs.Length);
+				IO.ReadFully(fd, ofs, 0, ofs.Length);
 				for (int p = 0; p < ofs.Length; p += 4)
 				{
                     if (NB.ConvertUnsignedByteToSigned(ofs[p]) < 0)
@@ -155,7 +155,7 @@ namespace GitSharp.Core
 			if (o64cnt > 0)
 			{
 				_offset64 = new byte[o64cnt * 8];
-				NB.ReadFully(fd, _offset64, 0, _offset64.Length);
+				IO.ReadFully(fd, _offset64, 0, _offset64.Length);
 			}
 			else
 			{
@@ -163,7 +163,7 @@ namespace GitSharp.Core
 			}
 
 			PackChecksum = new byte[20];
-			NB.ReadFully(fd, PackChecksum, 0, PackChecksum.Length);
+			IO.ReadFully(fd, PackChecksum, 0, PackChecksum.Length);
 		}
 
 		public override IEnumerator<MutableEntry> GetEnumerator()

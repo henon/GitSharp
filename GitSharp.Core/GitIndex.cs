@@ -49,6 +49,7 @@ using GitSharp.Core.Exceptions;
 using GitSharp.Core.Util;
 using MiscUtil.Conversion;
 using MiscUtil.IO;
+using System.Text;
 
 namespace GitSharp.Core
 {
@@ -73,15 +74,15 @@ namespace GitSharp.Core
     /// tree cache when writing the index.
     /// </summary>
     //[Obsolete("Use DirCache instead.")]
-	public class GitIndex
+    public class GitIndex
     {
         /// <summary>
         /// Stage 0 represents merged entries.
         /// </summary>
         private const int STAGE_0 = 0;
-        private static bool? filemode=null; // needed for testing.
+        private static bool? filemode = null; // needed for testing.
 
-		private readonly IDictionary<byte[], Entry> _entries;
+        private readonly IDictionary<byte[], Entry> _entries;
         private readonly FileInfo _cacheFile;
 
         // Index is modified
@@ -90,13 +91,23 @@ namespace GitSharp.Core
         private long _lastCacheTime;
         private bool _statDirty;
 
+        /// <summary>
+        /// Encoding that is used for encoding / decoding filenames only
+        /// </summary>
+        public Encoding FilenameEncoding
+        {
+            get;
+            set;
+        }
+
         ///	<summary>
         /// Construct a Git index representation.
         /// </summary>
         ///	<param name="db"> </param>
         public GitIndex(Repository db)
         {
-			_entries = new SortedDictionary<byte[], Entry>(new ByteVectorComparer());
+            FilenameEncoding = Constants.CHARSET; //  defaults to UTF8 actually
+            _entries = new SortedDictionary<byte[], Entry>(new ByteVectorComparer());
             Repository = db;
             _cacheFile = new FileInfo(Path.Combine(db.Directory.FullName, "index"));
         }
@@ -174,6 +185,30 @@ namespace GitSharp.Core
             else
             {
                 e.update(f);
+            }
+
+            return e;
+        }
+
+        /// <summary>
+        /// Add the encoded filename and content of a file to the index.
+        /// </summary>
+        /// <param name="relative_filename">relative filename with respect to the working directory</param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public Entry add(byte[] relative_filename, byte[] content)
+        {
+            byte[] key = relative_filename;
+            Entry e;
+
+            if (!_entries.TryGetValue(key, out e))
+            {
+                e = new Entry(Repository, key, null, STAGE_0, content);
+                _entries[key] = e;
+            }
+            else
+            {
+                e.update(null, content);
             }
 
             return e;
@@ -263,7 +298,7 @@ namespace GitSharp.Core
                     foreach (Entry entry in _entries.Values)
                     {
                         ms = new MemoryStream();
-                        
+
                         entry.Write(ms);
                         newMessageDigest.Update(ms.ToArray());
                         writer.Write(ms.ToArray());
@@ -337,22 +372,22 @@ namespace GitSharp.Core
             }
         }
 
-    	private static bool FileCanExecute(FileSystemInfo f)
+        private static bool FileCanExecute(FileSystemInfo f)
         {
             return FS.canExecute(f);
         }
 
-    	private static bool FileSetExecute(FileInfo f, bool @value)
+        private static bool FileSetExecute(FileInfo f, bool @value)
         {
             return FS.setExecute(f, @value);
         }
 
-    	private static bool FileHasExecute()
+        private static bool FileHasExecute()
         {
             return FS.supportsExecute();
         }
 
-    	private static byte[] MakeKey(FileSystemInfo wd, FileSystemInfo f)
+        private byte[] MakeKey(FileSystemInfo wd, FileSystemInfo f)
         {
             if (!string.IsNullOrEmpty(f.DirectoryName()) &&
                 wd.IsDirectory() && wd.Exists &&
@@ -362,7 +397,7 @@ namespace GitSharp.Core
             }
 
             string relName = Repository.StripWorkDir(wd, f);
-            return Constants.encode(relName);
+            return FilenameEncoding.GetBytes(relName);
         }
 
         private static bool ConfigFilemode(Repository repository)
@@ -389,7 +424,7 @@ namespace GitSharp.Core
             ReadTree(string.Empty, t);
         }
 
-    	private void ReadTree(string prefix, Tree t)
+        private void ReadTree(string prefix, Tree t)
         {
             TreeEntry[] members = t.Members;
             for (int i = 0; i < members.Length; ++i)
@@ -404,7 +439,7 @@ namespace GitSharp.Core
                 {
                     name = te.Name;
                 }
-				Tree tr = (te as Tree);
+                Tree tr = (te as Tree);
                 if (tr != null)
                 {
                     ReadTree(name, tr);
@@ -461,7 +496,7 @@ namespace GitSharp.Core
             byte[] bytes = ol.Bytes;
 
             var file = new FileInfo(Path.Combine(workDir.DirectoryName(), e.Name));
-            
+
             if (file.Exists)
             {
                 file.Delete();
@@ -666,7 +701,14 @@ namespace GitSharp.Core
             internal Entry(Repository repository, byte[] key, FileInfo f, int stage, byte[] newContent)
                 : this(repository)
             {
-                Ctime = f.LastWriteTime.ToMillisecondsSinceEpoch() * 1000000L;
+                if (newContent == null && f == null)
+                    throw new ArgumentException("either file or newContent must be non-null");
+                if (f == null)
+                {
+                    Ctime = DateTime.Now.ToMillisecondsSinceEpoch() * 1000000L;
+                }
+                else
+                    Ctime = f.LastWriteTime.ToMillisecondsSinceEpoch() * 1000000L;
                 Mtime = Ctime; // we use same here
                 _dev = -1;
                 _ino = -1;
@@ -682,9 +724,9 @@ namespace GitSharp.Core
 
                 _uid = -1;
                 _gid = -1;
-                _size = (newContent == null || newContent.Length == 0) ? (int)f.Length : newContent.Length;
+                _size = ((newContent == null || newContent.Length == 0) && f != null) ? (int)(f).Length : newContent.Length;
                 var writer = new ObjectWriter(Repository);
-                if (newContent == null || newContent.Length == 0)
+                if ((newContent == null || newContent.Length == 0) && f != null)
                 {
                     ObjectId = writer.WriteBlob(f);
                 }
@@ -723,21 +765,21 @@ namespace GitSharp.Core
             internal Entry(Repository repository, EndianBinaryReader b)
                 : this(repository)
             {
-                    long startposition = b.BaseStream.Position;
-                    Ctime = b.ReadInt32() * 1000000000L + (b.ReadInt32() % 1000000000L);
-                    Mtime = b.ReadInt32() * 1000000000L + (b.ReadInt32() % 1000000000L);
-                    _dev = b.ReadInt32();
-                    _ino = b.ReadInt32();
-                    Mode = b.ReadInt32();
-                    _uid = b.ReadInt32();
-                    _gid = b.ReadInt32();
-                    _size = b.ReadInt32();
-                    byte[] sha1Bytes = b.ReadBytes(Constants.OBJECT_ID_LENGTH);
-                    ObjectId = ObjectId.FromRaw(sha1Bytes);
-                    _flags = b.ReadInt16();
-                    _name = b.ReadBytes(_flags & 0xFFF);
-                    b.BaseStream.Position = startposition +
-                                            ((8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 20 + 2 + _name.Length + 8) & ~7);
+                long startposition = b.BaseStream.Position;
+                Ctime = b.ReadInt32() * 1000000000L + (b.ReadInt32() % 1000000000L);
+                Mtime = b.ReadInt32() * 1000000000L + (b.ReadInt32() % 1000000000L);
+                _dev = b.ReadInt32();
+                _ino = b.ReadInt32();
+                Mode = b.ReadInt32();
+                _uid = b.ReadInt32();
+                _gid = b.ReadInt32();
+                _size = b.ReadInt32();
+                byte[] sha1Bytes = b.ReadBytes(Constants.OBJECT_ID_LENGTH);
+                ObjectId = ObjectId.FromRaw(sha1Bytes);
+                _flags = b.ReadInt16();
+                _name = b.ReadBytes(_flags & 0xFFF);
+                b.BaseStream.Position = startposition +
+                                        ((8 + 8 + 4 + 4 + 4 + 4 + 4 + 4 + 20 + 2 + _name.Length + 8) & ~7);
             }
 
             private Entry(Repository repository)
@@ -826,7 +868,7 @@ namespace GitSharp.Core
             /// <param name="newContent">the new content of the file </param>
             /// <returns> true if a change occurred </returns>
             /// <exception cref="IOException"></exception>
-            public bool update(FileInfo f, byte[] newContent)
+            public bool update(FileInfo f, byte[] newContent) //[henon] TODO: remove parameter f as it is useless
             {
                 bool modified = false;
                 _size = newContent.Length;
@@ -853,7 +895,7 @@ namespace GitSharp.Core
 
                 tmpBuffer = t.GetBytes((int)(Ctime % 1000000000L));
                 buf.Write(tmpBuffer, 0, tmpBuffer.Length);
-                
+
                 tmpBuffer = t.GetBytes((int)(Mtime / 1000000000L));
                 buf.Write(tmpBuffer, 0, tmpBuffer.Length);
 
@@ -1167,14 +1209,14 @@ namespace GitSharp.Core
             internal void Write(Stream buf)
             {
                 var t = new BigEndianBitConverter();
-            	var tmpBuffer = t.GetBytes(_signature);
-				buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+                var tmpBuffer = t.GetBytes(_signature);
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
 
                 tmpBuffer = t.GetBytes(_version);
-				buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
 
                 tmpBuffer = t.GetBytes(Entries);
-				buf.Write(tmpBuffer, 0, tmpBuffer.Length);
+                buf.Write(tmpBuffer, 0, tmpBuffer.Length);
             }
         }
 

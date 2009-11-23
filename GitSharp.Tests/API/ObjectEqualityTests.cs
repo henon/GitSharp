@@ -61,11 +61,13 @@ namespace GitSharp.Tests.API
         [Test]
         public void SameInstanceShouldBeEqual()
         {
-            var repos = GetTrashRepository(); 
-            var obj = repos.CurrentBranch.CurrentCommit;
+            using (var repos = GetTrashRepository())
+            {
+                var obj = repos.CurrentBranch.CurrentCommit;
 #pragma warning disable 1718
-            Assert.IsTrue(obj == obj); // [henon] this equality comparison of the same instance is intended
+                Assert.IsTrue(obj == obj); // [henon] this equality comparison of the same instance is intended
 #pragma warning restore 1718
+            }
         }
 
         [Test]

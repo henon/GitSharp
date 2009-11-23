@@ -30,10 +30,17 @@ namespace GitSharp
             {
                 var config = _repo._internal_repo.Config;
                 var token = key.Split('.');
+                
                 if (token.Count() == 2)
+                {
                     return config.getString(token[0], null, token[1]);
-                else if (token.Count() == 3)
+                }
+
+                if (token.Count() == 3)
+                {
                     return config.getString(token[0], token[1], token[2]);
+                }
+
                 return null;
             }
             set
@@ -90,5 +97,13 @@ namespace GitSharp
         }
 
         #endregion
+
+        /// <summary>
+        /// Saves the config to the file system.
+        /// </summary>
+        public void Persist()
+        {
+            _repo._internal_repo.Config.save();
+        }
     }
 }

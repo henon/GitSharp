@@ -444,20 +444,21 @@ namespace GitSharp.Core.Transport
 
         private void ReceivePack(ProgressMonitor monitor)
         {
-            IndexPack ip = IndexPack.Create(local, _sideband ? pckIn.sideband(monitor) : stream);
+            IndexPack ip = IndexPack.Create(local, _sideband ? pckIn.sideband(monitor) : inStream);
             ip.setFixThin(_thinPack);
             ip.setObjectChecking(transport.CheckFetchedObjects);
             ip.index(monitor);
             _packLock = ip.renameAndOpenPack(_lockMessage);
         }
 		
-		public void Dispose ()
+		public override void Dispose ()
 		{
 			_walk.Dispose();
 			REACHABLE.Dispose();
 			COMMON.Dispose();
 			ADVERTISED.Dispose();
 			_reachableCommits.Dispose();
+            base.Dispose();
 		}
 		
     }

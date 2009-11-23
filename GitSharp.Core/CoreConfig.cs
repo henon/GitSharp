@@ -54,12 +54,14 @@ namespace GitSharp.Core
 
         private readonly int compression;
         private readonly int packIndexVersion;
+        private readonly bool logAllRefUpdates;
         private readonly string excludesFile;
 
         private CoreConfig(Config rc)
         {
             compression = rc.getInt("core", "compression", Deflater.DEFAULT_COMPRESSION);
             packIndexVersion = rc.getInt("pack", "indexversion", 2);
+            logAllRefUpdates = rc.getBoolean("core", "logallrefupdates", true);
             excludesFile = rc.getString("core", null, "excludesfile");
         }
 
@@ -77,6 +79,13 @@ namespace GitSharp.Core
         {
             return packIndexVersion;
         }
-            
+
+        ///<summary>
+        ///Return whether to log all refUpdates
+        ///</summary>
+        public bool isLogAllRefUpdates()
+        {
+            return logAllRefUpdates;
+        }
     }
 }

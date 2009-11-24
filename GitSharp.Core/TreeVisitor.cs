@@ -78,7 +78,7 @@ namespace GitSharp.Core
 		///	<summary>
 		/// Visit to a gitlink.
 		///	</summary>
-		///	<param name="s">Gitlink entry.</param>
+		///	<param name="e">Gitlink entry.</param>
 		///	<exception cref="IOException"></exception>
         void VisitGitlink(GitLinkTreeEntry e);
     }

@@ -78,7 +78,7 @@ namespace GitSharp.Core.Util
 		/// permit raw Unicode characters then the string will first be encoded in
 		/// UTF-8, with unprintable sequences possibly escaped by the rules.
 		/// </summary>
-		/// <param name="in_str">any non-null Unicode string</param>
+        /// <param name="instr">any non-null Unicode string</param>
 		/// <returns>a quoted <see cref="string"/>. See above for details.</returns>
 	    public abstract string quote(string instr);
 

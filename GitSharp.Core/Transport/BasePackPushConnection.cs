@@ -183,7 +183,7 @@ namespace GitSharp.Core.Transport
             writer.Thin = _thinPack;
             writer.DeltaBaseAsOffset = _capableOfsDelta;
             writer.preparePack(newObjects, remoteObjects);
-            writer.writePack(stream);
+            writer.writePack(outStream);
         }
 
         private void readStatusReport(IDictionary<string, RemoteRefUpdate> refUpdates)

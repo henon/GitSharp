@@ -66,7 +66,10 @@ namespace GitSharp.Core.Transport
 
         public Ref GetRef(string name)
         {
-            return advertisedRefs[name];
+            if (advertisedRefs.ContainsKey(name))
+                return advertisedRefs[name];
+
+            return null;
         }
 
         public abstract void Close();

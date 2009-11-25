@@ -3,8 +3,8 @@
 
   <property name="build.config" value="debug" overwrite="false" />
   <property name="build.platform" value="${nant.settings.currentframework}" />
-  <property name="build.defines" value="TRACE" />
-
+  <property name="build.defines" value="TRACE;DEBUG" />
+  
   <property name="path.base" value="${project::get-base-directory()}"/>
   <property name="path.build" value="${path.base}/build"/>
   <property name="path.lib" value="${path.base}/lib"/>
@@ -188,6 +188,7 @@
 
   <target name="set-release-project-configuration" >
     <property name="build.optimize"	value="true" />
+    <property name="build.defines" value="TRACE" />
   </target>
 
   <target name="compile-dll">
@@ -207,6 +208,7 @@
 
     <csc target="${assembly.type}"
          debug="Full"
+         define="${build.defines}"
          optimize="${build.optimize}"
          output="${path.build.output}/${assembly.name}.${assembly.extension}"
          doc="${path.build.output}/${assembly.name}.xml" >

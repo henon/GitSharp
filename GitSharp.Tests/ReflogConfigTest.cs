@@ -87,8 +87,7 @@ namespace GitSharp.Tests
 
 
         [Test]
-        [Ignore]
-        public void testEnsureCommitTimeAndTimeZoneOffsetArePreserved()
+        public void testEnsureLogTimeAndTimeZoneOffsetAreCurrentValues()
         {
             long commitTime = 1154236443000L;
             int tz = -4 * 60;
@@ -101,8 +100,18 @@ namespace GitSharp.Tests
 
             var entry = entries[0];
 
-            Assert.AreEqual(commitTime, entry.getWho().When);
-            Assert.AreEqual(tz, entry.getWho().TimeZoneOffset);
+            SystemReader mockSystemReader = SystemReader.getInstance();
+            long fakeCurrentTime = mockSystemReader.getCurrentTime();
+            fakeCurrentTime = ConvertToUnixTime(fakeCurrentTime); // Second based Unix time format is used to store timetamps in the log. Thus, milliseconds are truncated.
+            fakeCurrentTime *= 1000;
+
+            Assert.AreEqual(fakeCurrentTime, entry.getWho().When);
+            Assert.AreEqual(mockSystemReader.getTimezone(fakeCurrentTime), entry.getWho().TimeZoneOffset);
+        }
+
+        private long ConvertToUnixTime(long fakeCurrentTime)
+        {
+            return fakeCurrentTime.MillisToDateTime().ToUnixTime();
         }
 
         private void addFileToTree(Core.Tree t, string filename, string content)

@@ -203,7 +203,7 @@ namespace GitSharp.Core.Transport
                     pw.writePack(os);
                 }
 
-                using (Stream os = _dest.writeFile(pathIdx, monitor, wt + "..idx"))
+                using (Stream os = _dest.writeFile(pathIdx, monitor, wt + "." + IndexPack.IndexSuffix))
                 {
                     pw.writeIndex(os);
                 }

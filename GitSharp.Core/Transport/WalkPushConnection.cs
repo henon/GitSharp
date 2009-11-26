@@ -198,24 +198,14 @@ namespace GitSharp.Core.Transport
                 }
 
                 string wt = "Put " + b.Slice(0, 12);
-                Stream os = _dest.writeFile(pathPack, monitor, wt + "." + IndexPack.PackSuffix);
-                try
+                using (Stream os = _dest.writeFile(pathPack, monitor, wt + "." + IndexPack.PackSuffix))
                 {
                     pw.writePack(os);
                 }
-                finally
-                {
-                    os.Close();
-                }
 
-                os = _dest.writeFile(pathIdx, monitor, wt + "..idx");
-                try
+                using (Stream os = _dest.writeFile(pathIdx, monitor, wt + "..idx"))
                 {
                     pw.writeIndex(os);
-                }
-                finally
-                {
-                    os.Close();
                 }
 
                 var infoPacks = new List<string> {packName};

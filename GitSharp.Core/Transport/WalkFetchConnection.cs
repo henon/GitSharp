@@ -130,7 +130,7 @@ namespace GitSharp.Core.Transport
 			}
 			foreach (WalkRemoteObjectDatabase r in _remotes)
 			{
-				r.close();
+				r.Dispose();
 			}
 		}
 
@@ -539,16 +539,12 @@ namespace GitSharp.Core.Transport
 			var tmp = new FileInfo(Path.Combine(_local.ObjectsDirectory.ToString(), Path.GetTempFileName()));
 			try
 			{
-				FileStream stream = File.Create(tmp.ToString());
-				try
+				using (FileStream stream = File.Create(tmp.ToString()))
 				{
 					stream.Write(compressed, 0, compressed.Length);
 				}
-				finally
-				{
-					stream.Close();
-				}
-				tmp.Attributes |= FileAttributes.ReadOnly;
+
+                tmp.Attributes |= FileAttributes.ReadOnly;
 			}
 			catch (IOException)
 			{
@@ -790,35 +786,30 @@ namespace GitSharp.Core.Transport
 
 				}
 
-				Stream s = _connection.open("pack/" + _idxName);
-				pm.BeginTask("Get " + _idxName.Slice(0, 12) + "..idx", s.Length < 0 ? -1 : (int)(s.Length / 1024));
-				try
-				{
-					var fos = new FileStream(TmpIdx.ToString(), System.IO.FileMode.Open, FileAccess.ReadWrite);
-					try
-					{
-						var buf = new byte[2048];
-						int cnt;
-						while (!pm.IsCancelled && (cnt = s.Read(buf, 0, buf.Length)) >= 0)
-						{
-							fos.Write(buf, 0, cnt);
-							pm.Update(cnt / 1024);
-						}
-					}
-					finally
-					{
-						fos.Close();
-					}
+				using(Stream s = _connection.open("pack/" + _idxName))
+                {
+                    pm.BeginTask("Get " + _idxName.Slice(0, 12) + "..idx", s.Length < 0 ? -1 : (int)(s.Length / 1024));
+
+                    try
+				    {
+					    using(var fos = new FileStream(TmpIdx.ToString(), System.IO.FileMode.Open, FileAccess.ReadWrite))
+					    {
+						    var buf = new byte[2048];
+						    int cnt;
+						    while (!pm.IsCancelled && (cnt = s.Read(buf, 0, buf.Length)) >= 0)
+						    {
+							    fos.Write(buf, 0, cnt);
+							    pm.Update(cnt / 1024);
+						    }
+					    }
+				    }
+				    catch (IOException)
+				    {
+					    TmpIdx.Delete();
+					    throw;
+				    }
 				}
-				catch (IOException)
-				{
-					TmpIdx.Delete();
-					throw;
-				}
-				finally
-				{
-					s.Close();
-				}
+
 				pm.EndTask();
 
 				if (pm.IsCancelled)

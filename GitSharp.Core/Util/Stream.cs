@@ -69,7 +69,7 @@ namespace GitSharp.Core.Util
             }
             finally
             {
-                stream.Close();
+                stream.Dispose(); // [nulltoken] Why the heck is the stream disposed here instead of in the caller method ? Weird.
             }
         }
 

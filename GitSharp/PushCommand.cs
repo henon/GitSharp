@@ -104,7 +104,7 @@ namespace GitSharp
                 }
                 finally
                 {
-                    transport.close();
+                    transport.Dispose();
                 }
                 printPushResult(uri, Result);
             }

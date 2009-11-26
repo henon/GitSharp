@@ -81,7 +81,7 @@ namespace GitSharp
             }
             finally
             {
-                tn.close();
+                tn.Dispose();
             }
             showFetchResult(tn, Result);
         }

@@ -89,16 +89,9 @@ namespace GitSharp.Core
 		{
 			using (var inStream = new FileStream(path.FullName, System.IO.FileMode.Open, FileAccess.Read))
 			{
-				try
-				{
-					var compressed = new byte[(int)inStream.Length];
-					IO.ReadFully(inStream, compressed, 0, compressed.Length);
-					return compressed;
-				}
-				finally
-				{
-					inStream.Close();
-				}
+				var compressed = new byte[(int)inStream.Length];
+				IO.ReadFully(inStream, compressed, 0, compressed.Length);
+				return compressed;
 			}
 		}
 

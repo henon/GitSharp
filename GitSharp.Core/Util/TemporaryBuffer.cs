@@ -52,7 +52,7 @@ namespace GitSharp.Core.Util
 	/// The content of this buffered stream may be sent to another OutputStream only
 	/// After this stream has been properly closed by <see cref="close()"/>.
     /// </summary>
-    public class TemporaryBuffer : Stream
+    public class TemporaryBuffer : IDisposable
     {
         public static int DEFAULT_IN_CORE_LIMIT = 1024 * 1024;
 
@@ -221,10 +221,9 @@ namespace GitSharp.Core.Util
 #endif
         }
 
-        public new void Dispose()
+        public void Dispose()
         {
             close();
-            base.Dispose();
         }
 
 #if DEBUG
@@ -242,7 +241,7 @@ namespace GitSharp.Core.Util
          *
          * @return total length of the buffer, in bytes.
          */
-        public override long Length
+        public long Length
         {
             get
             {
@@ -370,55 +369,7 @@ namespace GitSharp.Core.Util
             }
         }
 
-
-        public override bool CanRead
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override bool CanSeek
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override bool CanWrite
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override void Flush()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override long Position
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetLength(long value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void Write(byte[] buffer, int offset, int count)
+        public void Write(byte[] buffer, int offset, int count)
         {
             write(buffer, offset, count);
         }

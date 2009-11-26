@@ -192,7 +192,7 @@ namespace GitSharp.Core.DirectoryCache
 			_childCount = subcnt;
 		}
 
-		public void write(byte[] tmp, Stream os)
+		public void write(byte[] tmp, TemporaryBuffer os)
 		{
 			int ptr = tmp.Length;
 			tmp[--ptr] = (byte)'\n';

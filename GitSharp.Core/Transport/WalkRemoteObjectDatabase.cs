@@ -76,14 +76,9 @@ namespace GitSharp.Core.Transport
 
         public virtual void writeFile(string path, byte[] data)
         {
-            Stream fs = writeFile(path, null, null);
-            try
+            using (Stream fs = writeFile(path, null, null))
             {
                 fs.Write(data, 0, data.Length);
-            }
-            finally
-            {
-                fs.Close();
             }
         }
 
@@ -130,8 +125,7 @@ namespace GitSharp.Core.Transport
 
         public List<WalkRemoteObjectDatabase> readAlternates(string listPath)
         {
-            StreamReader sr = openReader(listPath);
-            try
+            using (StreamReader sr = openReader(listPath))
             {
                 List<WalkRemoteObjectDatabase> alts = new List<WalkRemoteObjectDatabase>();
                 for (;;)
@@ -144,24 +138,15 @@ namespace GitSharp.Core.Transport
                 }
                 return alts;
             }
-            finally
-            {
-                sr.Close();
-            }
         }
 
         public void readPackedRefs(Dictionary<string, Ref> avail)
         {
             try
             {
-                StreamReader sr = openReader(ROOT_DIR + Constants.PACKED_REFS);
-                try
+                using (StreamReader sr = openReader(ROOT_DIR + Constants.PACKED_REFS))
                 {
                     readPackedRefsImpl(avail, sr);
-                }
-                finally
-                {
-                    sr.Close();
                 }
             }
             catch (FileNotFoundException)

@@ -209,11 +209,31 @@ namespace GitSharp.Core.Util
             return new DirectoryInfo(userHomeFolderPath);
         }
 
+        /**
+         * Determine the global application directory (location where preferences are).
+         * Also known as the "all users" directory.
+         * <para />
+         * This method can be expensive on the first invocation if path name
+         * translation is required. Subsequent invocations return a cached result.
+         * <para />
+         * 
+         * @return the user's home directory; null if the user does not have one.
+         */
+        public static DirectoryInfo globalHome()
+        {
+            return GLOBAL_HOME.home;
+        }
+
+        private static class GLOBAL_HOME
+        {
+            public static DirectoryInfo home = globalHomeImpl();
+        }
+        
         /// <summary>
         /// Returns the global (user-specific) path for application settings based on OS
         /// </summary>
         /// <returns>Value of the global path</returns>
-        public static string getLocalAppDataPath()
+        public static DirectoryInfo globalHomeImpl()
         {
             string path = string.Empty;
             PlatformType ptype = SystemReader.getInstance().getOperatingSystem();
@@ -231,17 +251,37 @@ namespace GitSharp.Core.Util
                     break;
                 case PlatformType.Xbox:
                 default:
-                    throw new ArgumentException("LocalAppData support for '" + Environment.OSVersion.VersionString + " ' is not implemented.");
+                    throw new ArgumentException("GlobalHomeImpl support for '" + Environment.OSVersion.VersionString + " ' is not implemented.");
             }
 
-            return path;
+            return new DirectoryInfo(path);
         }
 
+        /**
+         * Determine the system-wide application directory (location where preferences are).
+         * Also known as the "all users" directory.
+         * <para />
+         * This method can be expensive on the first invocation if path name
+         * translation is required. Subsequent invocations return a cached result.
+         * <para />
+         * 
+         * @return the user's home directory; null if the user does not have one.
+         */
+        public static DirectoryInfo systemHome()
+        {
+            return SYSTEM_HOME.home;
+        }
+
+        private static class SYSTEM_HOME
+        {
+            public static DirectoryInfo home = systemHomeImpl();
+        }
+        
         /// <summary>
         /// Returns the system-wide path for application settings based on OS
         /// </summary>
         /// <returns></returns>
-        public static string getCommonAppDataPath()
+        public static DirectoryInfo systemHomeImpl()
         {
             string path = string.Empty;
             PlatformType ptype = SystemReader.getInstance().getOperatingSystem();
@@ -249,7 +289,7 @@ namespace GitSharp.Core.Util
             switch (ptype)
             {
                 case PlatformType.Windows:
-                    path = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            		path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "GitSharp");
                     break;
                 case PlatformType.Unix:
                     path = "~(prefix)/etc";
@@ -259,30 +299,10 @@ namespace GitSharp.Core.Util
                     break;
                 case PlatformType.Xbox:
                 default:
-                    throw new ArgumentException("CommonAppData support for '" + Environment.OSVersion.VersionString + " ' is not implemented.");
+                    throw new ArgumentException("SystemHomeImpl support for '" + Environment.OSVersion.VersionString + " ' is not implemented.");
             }
 
-            return path;
-        }
-
-        public static string getAppStorePrefix()
-        {
-            string prefix = string.Empty;
-            PlatformType ptype = SystemReader.getInstance().getOperatingSystem();
-
-            switch (ptype)
-            {
-                case PlatformType.Windows:
-                    prefix = "GitSharp";
-                    break;
-                case PlatformType.Unix:
-                case PlatformType.MacOSX:
-                case PlatformType.Xbox:
-                default:
-                    break;
-            }
-
-            return prefix;
+            return new DirectoryInfo(path);
         }
     }
 

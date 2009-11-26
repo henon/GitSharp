@@ -120,7 +120,7 @@ namespace GitSharp.Core.Transport
     			}
     			catch (TransportException)
     			{
-    				close();
+    				CleanUp();
     				throw;
     			}
     			catch (SftpException je)
@@ -141,7 +141,7 @@ namespace GitSharp.Core.Transport
     			}
     			catch (TransportException)
     			{
-    				close();
+    				CleanUp();
     				throw;
     			}
     			catch (SftpException je)
@@ -393,14 +393,9 @@ namespace GitSharp.Core.Transport
     			string line;
     			try
     			{
-    				StreamReader br = openReader(path);
-    				try
+    				using (StreamReader br = openReader(path))
     				{
     					line = br.ReadLine();
-    				}
-    				finally
-    				{
-    					br.Close();
     				}
     			}
     			catch (FileNotFoundException)
@@ -442,24 +437,28 @@ namespace GitSharp.Core.Transport
     			throw new TransportException("Bad ref: " + name + ": " + line);
     		}
 
-    		public override void close()
-    		{
-    			if (_ftp != null)
-    			{
-    				try
-    				{
-    					if (_ftp.isConnected())
-    						_ftp.disconnect();
-    				}
-    				finally
-    				{
-    					_ftp = null;
-    				}
-    			}
+            private void CleanUp()
+            {
+                if (_ftp != null)
+                {
+                    try
+                    {
+                        if (_ftp.isConnected())
+                            _ftp.disconnect();
+                    }
+                    finally
+                    {
+                        _ftp = null;
+                    }
+                }
 #if DEBUG
                 GC.SuppressFinalize(this); // Disarm lock-release checker
-#endif
-		    }
+#endif                
+            }
+    		public override void close()
+    		{
+                CleanUp();
+            }
 
 #if DEBUG
         // A debug mode warning if the type has not been disposed properly

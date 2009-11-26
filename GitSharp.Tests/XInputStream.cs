@@ -61,11 +61,18 @@ namespace GitSharp.Tests
 
         public void Dispose()
         {
-            if (_filestream != null)
+            CleanUp();
+        }
+
+        private void CleanUp()
+        {
+            if (_filestream == null)
             {
-                _filestream.Close();
-                _filestream = null;
+                return;
             }
+
+            _filestream.Dispose();
+            _filestream = null;
         }
 
         #endregion
@@ -109,7 +116,7 @@ namespace GitSharp.Tests
 
         internal void Close()
         {
-            _filestream.Close();
+            CleanUp();
         }
     }
 }

@@ -120,13 +120,14 @@ namespace GitSharp.Tests
             Core.Ref @ref = db.getRef("refs/heads/master");
             Assert.AreEqual(Core.Ref.Storage.Packed, @ref.StorageFormat);
 			string path = Path.Combine(db.Directory.FullName, "refs/heads/master");
-			FileStream os = new FileStream(path, System.IO.FileMode.OpenOrCreate);
-            byte[] buffer = @ref.ObjectId.Name.getBytes();
-			os.Write(buffer, 0, buffer.Length);
-			os.WriteByte(Convert.ToByte('\n'));
-			os.Close();
+			using (FileStream os = new FileStream(path, System.IO.FileMode.OpenOrCreate))
+			{
+			    byte[] buffer = @ref.ObjectId.Name.getBytes();
+			    os.Write(buffer, 0, buffer.Length);
+			    os.WriteByte(Convert.ToByte('\n'));
+			}
 
-			@ref = db.getRef("refs/heads/master");
+		    @ref = db.getRef("refs/heads/master");
             Assert.AreEqual(Core.Ref.Storage.LoosePacked, @ref.StorageFormat);
 		}
 

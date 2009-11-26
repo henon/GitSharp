@@ -54,8 +54,7 @@ namespace GitSharp.Tests
 			base.setUp();
 
 			_toLoad = new List<TestObject>();
-			var br = new StreamReader("Resources/all_packed_objects.txt", Constants.CHARSET);
-			try
+			using (var br = new StreamReader("Resources/all_packed_objects.txt", Constants.CHARSET))
 			{
 				string line;
 				while ((line = br.ReadLine()) != null)
@@ -72,10 +71,6 @@ namespace GitSharp.Tests
 
 					_toLoad.Add(testObject);
 				}
-			}
-			finally
-			{
-				br.Close();
 			}
 
 			Assert.AreEqual(96, _toLoad.Count);

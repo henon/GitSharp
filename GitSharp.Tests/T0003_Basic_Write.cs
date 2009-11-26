@@ -96,24 +96,28 @@ namespace GitSharp.Tests
             t.Accept(new WriteTree(trash, db), TreeEntry.MODIFIED_ONLY);
             var id = t.Id;
 
-            var b1 = new BinaryReader(new Inspector(db).ContentStream(id));
-            b1.BaseStream.Position = b1.BaseStream.Length - 21;
+            int git_w1;
+            int git_w2;
+            int w1;
+            int w2;
 
-            var b2 = new BinaryReader(Inspector.ContentStream("Resources/single_file_commit", "917c130bd4fa5bf2df0c399dc1b03401860aa448"));
-            b2.BaseStream.Position = b2.BaseStream.Length - 21;
-            Assert.AreEqual(b2.ReadByte(), b1.ReadByte());
+            using (var b1 = new BinaryReader(new Inspector(db).ContentStream(id)))
+            using (var b2 = new BinaryReader(Inspector.ContentStream("Resources/single_file_commit", "917c130bd4fa5bf2df0c399dc1b03401860aa448")))
+            {
+                b1.BaseStream.Position = b1.BaseStream.Length - 21;
+                b2.BaseStream.Position = b2.BaseStream.Length - 21;
+                Assert.AreEqual(b2.ReadByte(), b1.ReadByte());
 
-            var git_w1=b2.ReadInt32();
-            var git_w2=b2.ReadInt32();
-            var git_w3 = b2.ReadInt32();
-            var git_w4 = b2.ReadInt32();
-            var git_w5 = b2.ReadInt32(); 
-            b2.BaseStream.Position = b2.BaseStream.Length-20;
-            var git_id = ObjectId.FromRaw(b2.ReadBytes(20));
-            var w1 = b1.ReadInt32();
-            var w2= b1.ReadInt32();
-            b1.Close();
-            b2.Close();
+                git_w1 = b2.ReadInt32();
+                git_w2 = b2.ReadInt32();
+                var git_w3 = b2.ReadInt32();
+                var git_w4 = b2.ReadInt32();
+                var git_w5 = b2.ReadInt32();
+                b2.BaseStream.Position = b2.BaseStream.Length - 20;
+                var git_id = ObjectId.FromRaw(b2.ReadBytes(20));
+                w1 = b1.ReadInt32();
+                w2 = b1.ReadInt32();
+            }
 
             Assert.AreEqual(git_w1,w1);
             Assert.AreEqual(git_w2, w2);
@@ -249,16 +253,11 @@ namespace GitSharp.Tests
             Assert.AreEqual(cmtid, c.CommitId);
 
             // Verify the commit we just wrote is in the correct format.
-            var xis = new XInputStream(new FileStream(db.ToFile(cmtid).FullName, System.IO.FileMode.Open, FileAccess.Read));
-            try
+            using (var xis = new XInputStream(new FileStream(db.ToFile(cmtid).FullName, System.IO.FileMode.Open, FileAccess.Read)))
             {
                 Assert.AreEqual(0x78, xis.ReadUInt8());
                 Assert.AreEqual(0x9c, xis.ReadUInt8());
                 Assert.IsTrue(0x789c % 31 == 0);
-            }
-            finally
-            {
-                xis.Close();
             }
 
             // Verify we can Read it.
@@ -460,15 +459,16 @@ namespace GitSharp.Tests
 
             // Construct packed refs file
             var fs = new FileStream(db.Directory.FullName + "/packed-refs", System.IO.FileMode.Create);
-            var w = new StreamWriter(fs);
-            w.WriteLine("# packed-refs with: peeled");
-            w.WriteLine("6759556b09fbb4fd8ae5e315134481cc25d46954 refs/tags/test020");
-            w.WriteLine("^e69de29bb2d1d6434b8b29ae775ad8c2e48c5391");
-            w.WriteLine("b0517bc8dbe2096b419d42424cd7030733f4abe5 refs/tags/test021");
-            w.WriteLine("^417c01c8795a35b8e835113a85a5c0c1c77f67fb");
-            w.WriteLine("0ce2ebdb36076ef0b38adbe077a07d43b43e3807 refs/tags/test022");
-            w.WriteLine("^b5d3b45a96b340441f5abb9080411705c51cc86c");
-            w.Close();
+            using (var w = new StreamWriter(fs))
+            {
+                w.WriteLine("# packed-refs with: peeled");
+                w.WriteLine("6759556b09fbb4fd8ae5e315134481cc25d46954 refs/tags/test020");
+                w.WriteLine("^e69de29bb2d1d6434b8b29ae775ad8c2e48c5391");
+                w.WriteLine("b0517bc8dbe2096b419d42424cd7030733f4abe5 refs/tags/test021");
+                w.WriteLine("^417c01c8795a35b8e835113a85a5c0c1c77f67fb");
+                w.WriteLine("0ce2ebdb36076ef0b38adbe077a07d43b43e3807 refs/tags/test022");
+                w.WriteLine("^b5d3b45a96b340441f5abb9080411705c51cc86c");
+            }
 
             Core.Tag mapTag20 = db.MapTag("test020");
             Assert.IsNotNull(mapTag20, "have tag test020");
@@ -600,10 +600,11 @@ namespace GitSharp.Tests
         public void test027_UnpackedRefHigherPriorityThanPacked()
         {
 			const string unpackedId = "7f822839a2fe9760f386cbbbcb3f92c5fe81def7";
-            var writer = new StreamWriter(new FileStream(db.Directory.FullName + "/refs/heads/a", System.IO.FileMode.CreateNew));
-            writer.Write(unpackedId);
-            writer.Write('\n');
-            writer.Close();
+            using (var writer = new StreamWriter(new FileStream(db.Directory.FullName + "/refs/heads/a", System.IO.FileMode.CreateNew)))
+            {
+                writer.Write(unpackedId);
+                writer.Write('\n');
+            }
 
             ObjectId resolved = db.Resolve("refs/heads/a");
             Assert.AreEqual(unpackedId, resolved.Name);

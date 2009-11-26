@@ -58,11 +58,11 @@ namespace GitSharp.Tests.Transport
             transport = null;
         }
 
-        protected new void tearDown()
+        public override void tearDown()
         {
             if (transport != null)
             {
-                transport.close();
+                transport.Dispose();
                 transport = null;
             }
             base.tearDown();

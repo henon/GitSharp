@@ -90,26 +90,29 @@ namespace GitSharp.Tests
         [Test]
         public void testFileKeyOpenExisting()
         {
-			Core.Repository r = new RepositoryCache.FileKey(db.Directory).open(true);
-            
-            Assert.IsNotNull(r);
-			Assert.AreEqual(db.Directory.FullName, r.Directory.FullName);
-            r.Close();
+			using (Core.Repository r = new RepositoryCache.FileKey(db.Directory).open(true))
+			{
+			    Assert.IsNotNull(r);
+			    Assert.AreEqual(db.Directory.FullName, r.Directory.FullName);
+			}
 
-            r = new RepositoryCache.FileKey(db.Directory).open(false);
-
-            Assert.IsNotNull(r);
-			Assert.AreEqual(db.Directory.FullName, r.Directory.FullName);
-            r.Close();
+            using (Core.Repository r = new RepositoryCache.FileKey(db.Directory).open(false))
+            {
+                Assert.IsNotNull(r);
+                Assert.AreEqual(db.Directory.FullName, r.Directory.FullName);
+            }
         }
 
         [Test]
         public void testFileKeyOpenNew()
         {
-            Core.Repository n = createBareRepository();
+            DirectoryInfo gitdir;
 
-            DirectoryInfo gitdir = n.Directory;
-            n.Close();
+            using (Core.Repository n = createBareRepository())
+            {
+                gitdir = n.Directory;
+            }
+
             recursiveDelete(gitdir);
             Assert.IsFalse(gitdir.Exists);
 

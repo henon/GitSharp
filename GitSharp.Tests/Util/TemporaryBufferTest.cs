@@ -90,10 +90,12 @@ namespace GitSharp.Tests.Util
                     Assert.AreEqual(test, r[0]);
                 }
                 {
-                    var o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
+                    byte[] r;
+                    using (MemoryStream o = new MemoryStream())
+                    {
+                        b.writeTo(o, null);
+                        r = o.ToArray();
+                    } 
                     Assert.AreEqual(1, r.Length);
                     Assert.AreEqual(test, r[0]);
                 }
@@ -125,10 +127,12 @@ namespace GitSharp.Tests.Util
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
+                    byte[] r;
+                    using (MemoryStream o = new MemoryStream())
+                    {
+                        b.writeTo(o, null);
+                        r = o.ToArray();
+                    } 
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -159,10 +163,12 @@ namespace GitSharp.Tests.Util
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
+                    byte[] r;
+                    using (MemoryStream o = new MemoryStream())
+                    {
+                        b.writeTo(o, null);
+                        r = o.ToArray();
+                    }
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -192,10 +198,12 @@ namespace GitSharp.Tests.Util
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
+                    byte[] r;
+                    using (MemoryStream o = new MemoryStream())
+                    {
+                        b.writeTo(o, null);
+                        r = o.ToArray();
+                    }
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -228,10 +236,12 @@ namespace GitSharp.Tests.Util
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
+                    byte[] r;
+                    using (MemoryStream o = new MemoryStream())
+                    {
+                        b.writeTo(o, null);
+                        r = o.ToArray();
+                    }
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -259,10 +269,12 @@ namespace GitSharp.Tests.Util
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
+                    byte[] r;
+                    using (MemoryStream o = new MemoryStream())
+                    {
+                        b.writeTo(o, null);
+                        r = o.ToArray();
+                    }
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -292,10 +304,12 @@ namespace GitSharp.Tests.Util
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
+                    byte[] r;
+                    using (MemoryStream o = new MemoryStream())
+                    {
+                        b.writeTo(o, null);
+                        r = o.ToArray();
+                    }
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -325,10 +339,12 @@ namespace GitSharp.Tests.Util
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
+                    byte[] r;
+                    using (MemoryStream o = new MemoryStream())
+                    {
+                        b.writeTo(o, null);
+                        r = o.ToArray();
+                    }
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -361,10 +377,12 @@ namespace GitSharp.Tests.Util
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
                 {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
+                    byte[] r;
+                    using (MemoryStream o = new MemoryStream())
+                    {
+                        b.writeTo(o, null);
+                        r = o.ToArray();
+                    }
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -430,10 +448,12 @@ namespace GitSharp.Tests.Util
                     Assert.IsTrue(expect.SequenceEqual(r));
                 }
                 {
-                    MemoryStream o = new MemoryStream();
-                    b.writeTo(o, null);
-                    o.Close();
-                    byte[] r = o.ToArray();
+                    byte[] r;
+                    using (MemoryStream o = new MemoryStream())
+                    {
+                        b.writeTo(o, null);
+                        r = o.ToArray();
+                    }
                     Assert.AreEqual(expect.Length, r.Length);
                     Assert.IsTrue(expect.SequenceEqual(r));
                 }

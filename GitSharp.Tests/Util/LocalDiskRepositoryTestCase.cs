@@ -109,7 +109,7 @@ namespace GitSharp.Tests.Util
         public virtual void tearDown()  {
             RepositoryCache.clear();
             foreach (Core.Repository r in toClose)
-                r.Close();
+                r.Dispose();
             toClose.Clear();
 
             // Since memory mapping is controlled by the GC we need to

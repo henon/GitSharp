@@ -54,13 +54,14 @@ namespace GitSharp.Tests
 		public void test003_lookupCompressedObject()
 		{
 			ObjectId id = ObjectId.FromString("902d5476fa249b7abc9d84c611577a81381f0327");
-			var pr = new PackFile(TestIdx, TestPack);
-			PackedObjectLoader or = pr.Get(new WindowCursor(), id);
-			Assert.IsNotNull(or);
-			Assert.AreEqual(Constants.OBJ_TREE, or.Type);
-			Assert.AreEqual(35, or.Size);
-			Assert.AreEqual(7738, or.DataOffset);
-			pr.Close();
+			using (var pr = new PackFile(TestIdx, TestPack))
+			{
+			    PackedObjectLoader or = pr.Get(new WindowCursor(), id);
+			    Assert.IsNotNull(or);
+			    Assert.AreEqual(Constants.OBJ_TREE, or.Type);
+			    Assert.AreEqual(35, or.Size);
+			    Assert.AreEqual(7738, or.DataOffset);
+			}
 		}
 
 		[Test]

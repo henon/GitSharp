@@ -137,12 +137,12 @@ namespace GitSharp.Core.Transport
             }
             catch (CancelledException)
             {
-                Close();
+                Dispose();
                 return;
             }
             catch (IOException err)
             {
-                Close();
+                Dispose();
                 throw new TransportException(err.Message, err);
             }
         }

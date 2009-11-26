@@ -102,7 +102,7 @@ namespace GitSharp.Core
 			_packList.set(NoPacks);
 			foreach (PackFile p in packs.packs)
 			{
-				p.Close();
+				p.Dispose();
 			}
 
 #if DEBUG
@@ -328,7 +328,7 @@ namespace GitSharp.Core
 	            Array.Copy(oldList, j + 1, newList, j, newList.Length - j);
 	            n = new PackList(o.lastRead, o.lastModified, newList);
 	        } while (!_packList.compareAndSet(o, n));
-	        deadPack.Close();
+	        deadPack.Dispose();
 	    }
 
 	    private static int indexOf(PackFile[] list, PackFile pack)
@@ -416,7 +416,7 @@ namespace GitSharp.Core
 
 	        foreach (PackFile p in forReuse.Values)
 	        {
-	            p.Close();
+	            p.Dispose();
 	        }
 
 	        if (list.Count == 0)
@@ -439,7 +439,7 @@ namespace GitSharp.Core
 					// The pack instance is corrupted, and cannot be safely used
 					// again. Do not include it in our reuse map.
 					//
-					p.Close();
+					p.Dispose();
 					continue;
 				}
 
@@ -452,7 +452,7 @@ namespace GitSharp.Core
 					// close any PackFiles we did not reuse, so close the one we
 					// just evicted out of the reuse map.
 					//
-					prior.Close();
+					prior.Dispose();
 				}
 			}
 
@@ -476,19 +476,15 @@ namespace GitSharp.Core
         }
 	    public override ObjectDatabase[] loadAlternates()
 		{
-			StreamReader br = Open(_alternatesFile);
             var l = new List<ObjectDatabase>(4);
-			try
+            
+            using (StreamReader br = Open(_alternatesFile))
 			{
 				string line;
 				while ((line = br.ReadLine()) != null)
 				{
                     l.Add(openAlternate(line));
 				}
-			}
-			finally
-			{
-				br.Close();
 			}
 
 		    if (l.isEmpty())

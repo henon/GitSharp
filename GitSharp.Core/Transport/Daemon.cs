@@ -239,7 +239,7 @@ namespace GitSharp.Core.Transport
 										{
 											try
 											{
-												stream.Close();
+												stream.Dispose();
 												s.Close();
 											}
 											catch (IOException)

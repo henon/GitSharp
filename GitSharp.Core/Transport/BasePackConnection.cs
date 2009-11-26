@@ -91,12 +91,12 @@ namespace GitSharp.Core.Transport
             }
             catch (TransportException)
             {
-                Close();
+                Dispose();
                 throw;
             }
             catch (IOException err)
             {
-                Close();
+                Dispose();
                 throw new TransportException(err.Message, err);
             }
         }

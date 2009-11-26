@@ -118,7 +118,7 @@ namespace GitSharp.Core
             WeakReference<Repository> oldRef = cacheMap.put(location, newRef);
             Repository oldDb = oldRef != null ? oldRef.get() : null;
             if (oldDb != null)
-                oldDb.Close();
+                oldDb.Dispose();
 
         }
 
@@ -128,7 +128,7 @@ namespace GitSharp.Core
             cacheMap.Remove(location);
             Repository oldDb = oldRef != null ? oldRef.get() : null;
             if (oldDb != null)
-                oldDb.Close();
+                oldDb.Dispose();
         }
 
         private void clearAll()
@@ -141,7 +141,7 @@ namespace GitSharp.Core
                 {
                     Repository db = e.Value.get();
                     if (db != null)
-                        db.Close();
+                        db.Dispose();
 
                     keysToRemove.Add(e.Key);
                 }

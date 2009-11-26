@@ -57,7 +57,7 @@ namespace GitSharp.Core
 
         public override void closeSelf()
         {
-            _repository.Close();
+            _repository.Dispose();
         }
 
 		public override void create()

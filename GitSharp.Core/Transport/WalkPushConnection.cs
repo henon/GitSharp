@@ -137,9 +137,9 @@ namespace GitSharp.Core.Transport
 
         public override void Close()
         {
-            _dest.close();
+            _dest.Dispose();
 #if DEBUG
-                GC.SuppressFinalize(this); // Disarm lock-release checker
+            GC.SuppressFinalize(this); // Disarm lock-release checker
 #endif
 		}
 

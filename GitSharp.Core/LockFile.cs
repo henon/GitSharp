@@ -174,17 +174,12 @@ namespace GitSharp.Core
             RequireLock();
             try
             {
-                FileStream fis = _refFile.OpenRead();
-                try
+                using (FileStream fis = _refFile.OpenRead())
                 {
                     byte[] buf = new byte[2048];
                     int r;
                     while ((r = fis.Read(buf, 0, buf.Length)) >= 0)
                         _os.Write(buf, 0, r);
-                }
-                finally
-                {
-                    fis.Close();
                 }
             }
             catch (FileNotFoundException)
@@ -280,12 +275,13 @@ namespace GitSharp.Core
             RequireLock();
             try
             {
-                var b = new BinaryWriter(_os);
-                id.CopyTo(b);
-                b.Write('\n');
-                b.Flush();
-                _fLck.Release();
-                b.Close();
+                using (var b = new BinaryWriter(_os))
+                {
+                    id.CopyTo(b);
+                    b.Write('\n');
+                    b.Flush();
+                    _fLck.Release();
+                }
                 _os = null;
             }
             catch (Exception)

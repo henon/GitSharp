@@ -110,7 +110,7 @@ namespace GitSharp.Core.Transport
             }
             finally
             {
-                Close();
+                Dispose();
             }
         }
 

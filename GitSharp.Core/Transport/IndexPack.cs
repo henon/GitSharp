@@ -213,7 +213,7 @@ namespace GitSharp.Core.Transport
 					progress.EndTask();
 					if (_packOut != null)
 					{
-						_packOut.Close();
+						_packOut.Dispose();
 					}
 				}
 

@@ -145,8 +145,7 @@ namespace GitSharp.Core.Transport
 				var packs = new List<string>();
 				try
 				{
-					StreamReader br = openReader(INFO_PACKS);
-					try
+					using (StreamReader br = openReader(INFO_PACKS))
 					{
 						while (true)
 						{
@@ -161,10 +160,6 @@ namespace GitSharp.Core.Transport
 						}
 
 						return packs;
-					}
-					finally
-					{
-						br.Close();
 					}
 				}
 				catch (FileNotFoundException)
@@ -198,14 +193,9 @@ namespace GitSharp.Core.Transport
 			{
 				try
 				{
-					StreamReader br = openReader(INFO_REFS);
-					try
+					using (StreamReader br = openReader(INFO_REFS))
 					{
 						return ReadAdvertisedImpl(br);
-					}
-					finally
-					{
-						br.Close();
 					}
 				}
 				catch (IOException err)

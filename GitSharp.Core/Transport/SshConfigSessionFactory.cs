@@ -131,14 +131,9 @@ namespace GitSharp.Core.Transport
             FileInfo known_hosts = new FileInfo(Path.Combine(home.ToString(), ".ssh/known_hosts"));
             try
             {
-                FileStream s = new FileStream(known_hosts.ToString(), System.IO.FileMode.Open, FileAccess.Read);
-                try
+                using (FileStream s = new FileStream(known_hosts.ToString(), System.IO.FileMode.Open, FileAccess.Read))
                 {
                     sch.setKnownHosts(new StreamReader(s));
-                }
-                finally
-                {
-                    s.Close();
                 }
             }
             catch (FileNotFoundException)

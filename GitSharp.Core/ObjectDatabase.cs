@@ -439,7 +439,7 @@ namespace GitSharp.Core
 	    {
 	        foreach (ObjectDatabase d in alt)
 	        {
-	            d.close();
+	            d.Dispose();
 	        }
 	    }
     }

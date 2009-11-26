@@ -332,24 +332,26 @@ namespace GitSharp.Core
 		///	<exception cref="IOException"></exception>
         public ObjectId WriteTag(Tag tag)
         {
-            var output = new MemoryStream();
-            var s = new BinaryWriter(output);
-            s.Write("object ".ToCharArray());
-            tag.Id.CopyTo(s);
-            s.Write('\n');
-            s.Write("type ".ToCharArray());
-            s.Write(tag.TagType.ToCharArray());
-            s.Write('\n');
-            s.Write("tag ".ToCharArray());
-            s.Write(tag.TagName.ToCharArray());
-            s.Write('\n');
-            s.Write("tagger ".ToCharArray());
-            s.Write(tag.Author.ToExternalString().ToCharArray());
-            s.Write('\n');
-            s.Write('\n');
-            s.Write(tag.Message.ToCharArray());
-            s.Close();
-            return WriteTag(output.ToArray());
+            using (var output = new MemoryStream())
+            using (var s = new BinaryWriter(output))
+            {
+                s.Write("object ".ToCharArray());
+                tag.Id.CopyTo(s);
+                s.Write('\n');
+                s.Write("type ".ToCharArray());
+                s.Write(tag.TagType.ToCharArray());
+                s.Write('\n');
+                s.Write("tag ".ToCharArray());
+                s.Write(tag.TagName.ToCharArray());
+                s.Write('\n');
+                s.Write("tagger ".ToCharArray());
+                s.Write(tag.Author.ToExternalString().ToCharArray());
+                s.Write('\n');
+                s.Write('\n');
+                s.Write(tag.Message.ToCharArray());
+
+                return WriteTag(output.ToArray());
+            }
         }
 
         private ObjectId WriteTag(byte[] b)

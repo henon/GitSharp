@@ -116,14 +116,9 @@ namespace GitSharp.Core.Transport
 	            {
 	                try
 	                {
-	                    FileStream s = new FileStream(configFile.FullName, System.IO.FileMode.Open, FileAccess.Read);
-	                    try
+	                    using (FileStream s = new FileStream(configFile.FullName, System.IO.FileMode.Open, FileAccess.Read))
 	                    {
 	                        hosts = parse(s);
-	                    }
-	                    finally
-	                    {
-	                        s.Close();
 	                    }
 	                }
 	                catch (FileNotFoundException)

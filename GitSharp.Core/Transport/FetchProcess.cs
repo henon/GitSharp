@@ -302,19 +302,13 @@ namespace GitSharp.Core.Transport
 			{
 				if (@lock.Lock())
 				{
-					StreamWriter w = new StreamWriter(@lock.GetOutputStream());
-
-					try
+					using (StreamWriter w = new StreamWriter(@lock.GetOutputStream()))
 					{
 						foreach (FetchHeadRecord h in _fetchHeadUpdates)
 						{
 							h.Write(w);
 							result.Add(h);
 						}
-					}
-					finally
-					{
-						w.Close();
 					}
 
 					@lock.Commit();

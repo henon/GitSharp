@@ -158,7 +158,7 @@ namespace GitSharp.Core.Transport
             }
             catch (IOException err)
             {
-                Close();
+                Dispose();
                 throw new TransportException(transport.Uri, err.Message, err);
             }
         }
@@ -265,7 +265,7 @@ namespace GitSharp.Core.Transport
             {
                 try
                 {
-                    bin.Close();
+                    bin.Dispose();
                 }
                 catch (IOException)
                 {

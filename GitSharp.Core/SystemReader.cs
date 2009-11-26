@@ -95,7 +95,13 @@ namespace GitSharp.Core
         /// Returns the GitSharp configuration file from the OS-dependant location.
         /// </summary>
         /// <returns></returns>
-        public abstract FileBasedConfig getConfigFile(string gitdir);
+        public abstract FileBasedConfig getConfigFile(ConfigFileType configType);
+        
+        /// <summary>
+        /// Returns the GitSharp configuration file based on a user-specified location.
+        /// </summary>
+        /// <returns></returns>
+        public abstract FileBasedConfig getConfigFile(string fileLocation);
 
         private class InternalSystemReader : SystemReader
         {
@@ -191,32 +197,40 @@ namespace GitSharp.Core
                 return pType;
             }
 
-            public override FileBasedConfig getConfigFile(string gitdir)
+            public override FileBasedConfig getConfigFile(ConfigFileType configType)
             {
-                string path = string.Empty;
-
-                //Determine which file is valid based on overrides.
-                ConfigFileType cType = ConfigFileType.Global;
-
-                switch (cType)
-                {
-                    case ConfigFileType.System:
-                        path = Path.Combine(FS.getCommonAppDataPath(),FS.getAppStorePrefix());
-                        path = Path.Combine(path,"gitconfig");
-                        break;
-                    case ConfigFileType.Global:
-                        path = Path.Combine(FS.getLocalAppDataPath(), FS.getAppStorePrefix());
-                        path = Path.Combine(path, ".gitconfig");
-                        break;
-                    case ConfigFileType.Repo:
-                        DirectoryInfo current = new DirectoryInfo(".");
-                        path = Path.Combine(gitdir,".git/config");
-                        break;
-                    default:
-                        throw new ArgumentException("CommonAppData support for '" + cType.ToString() + " ' is not implemented.");
+            	string filename = "";
+            	
+               	switch (configType)
+            	{
+            		case ConfigFileType.Global:
+               			filename = Path.Combine(FS.globalHome().FullName, ".gitconfig");
+            			break;
+	           		case ConfigFileType.System:
+            			filename = Path.Combine(FS.systemHome().FullName, "gitconfig");
+           				break;	
+            		case ConfigFileType.Repo:
+           				filename = Path.Combine(FS.userHome().FullName, ".git");
+           				filename = Path.Combine(filename, "config");
+            			break;
+            		default:
+            			throw new ArgumentException("getConfigFile used unknown Config filetype.");
                 }
-
-                return (new FileBasedConfig(new FileInfo(path)));
+               	
+               	FileInfo info = new FileInfo(filename);
+               	if (info != null)
+            		return (new FileBasedConfig(info));
+               	else
+               		throw new FileNotFoundException();
+            }
+            
+            public override FileBasedConfig getConfigFile(string fileLocation)
+            {
+            	FileInfo info = new FileInfo(fileLocation);
+            	if (info != null)
+            		return (new FileBasedConfig(info));
+               	else
+               		throw new FileNotFoundException();
             }
         }
 

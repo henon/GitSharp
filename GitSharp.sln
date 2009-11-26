@@ -1,6 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
+# SharpDevelop 3.1.0.4977
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitSharp.Tests", "GitSharp.Tests\GitSharp.Tests.csproj", "{37052DA4-F6A9-47D0-94AA-96F4A7E0462C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C46EDD61-C202-465A-93F1-ADE20A83BB59} = {C46EDD61-C202-465A-93F1-ADE20A83BB59}

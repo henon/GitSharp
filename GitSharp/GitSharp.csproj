@@ -58,6 +58,7 @@
     <Compile Include="Change.cs" />
     <Compile Include="CloneCommand.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="ConfigCommand.cs" />
     <Compile Include="FetchCommand.cs" />
     <Compile Include="IGitCommand.cs" />
     <Compile Include="Commit.cs" />
@@ -70,6 +71,11 @@
     <Compile Include="ITreeNode.cs" />
     <Compile Include="Leaf.cs" />
     <Compile Include="Options.cs" />
+    <Compile Include="Platform\Linux.cs" />
+    <Compile Include="Platform\Mac.cs" />
+    <Compile Include="Platform\Platform.cs" />
+    <Compile Include="Platform\PlatformObject.cs" />
+    <Compile Include="Platform\Windows.cs" />
     <Compile Include="PushCommand.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="Repository.cs" />
@@ -84,6 +90,7 @@
       <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
       <Name>GitSharp.Core</Name>
     </ProjectReference>
+    <Folder Include="Platform" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

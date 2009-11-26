@@ -68,6 +68,7 @@
     <Compile Include="CommandCatalog.cs" />
     <Compile Include="CommandRef.cs" />
     <Compile Include="Commit.cs" />
+    <Compile Include="Config.cs" />
     <Compile Include="Die.cs" />
     <Compile Include="Fetch.cs" />
     <Compile Include="Help.cs" />

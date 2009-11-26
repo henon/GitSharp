@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -111,15 +111,15 @@ namespace GitSharp.Core.Util
             m_stream.SetLength(value);
         }
 
-        public override void Write(byte[] bytes, int offset, int count)
+        public override void Write(byte[] buffer, int offset, int count)
         {
-            m_digest.Update(bytes, offset, count);
-            m_stream.Write(bytes, offset, count);
+            m_digest.Update(buffer, offset, count);
+            m_stream.Write(buffer, offset, count);
         }
 
-        public void Write(byte[] bytes)
+        public void Write(byte[] buffer)
         {
-            Write(bytes, 0, bytes.Length);
+            Write(buffer, 0, buffer.Length);
         }
     }
 }

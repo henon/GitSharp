@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
@@ -95,19 +95,15 @@ namespace GitSharp.Core
         public void save()
         {
             byte[] o = Constants.encode(toText());
-            LockFile lf = new LockFile(getFile());
-            if (!lf.Lock())
-                throw new IOException("Cannot lock " + getFile());
-            try
-            {
+            using(LockFile lf = new LockFile(getFile()))
+			{
+	            if (!lf.Lock())
+	                throw new IOException("Cannot lock " + getFile());
+
                 lf.Write(o);
                 if (!lf.Commit())
                     throw new IOException("Cannot commit write to " + getFile());
-            }
-            finally
-            {
-                lf.Unlock();
-            }
+			}
         }
 
         public override string ToString()

@@ -34,7 +34,7 @@
 
 
 
-/**
+/*
  * JUnit TestCase with specialized support for temporary local repository.
  * <p>
  * A temporary directory is created for each test, allowing each test to use a

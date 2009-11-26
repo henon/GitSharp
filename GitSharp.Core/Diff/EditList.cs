@@ -121,15 +121,15 @@ namespace GitSharp.Core.Diff
 			return ToString().Equals(s);
 		}
 
-		public override bool Equals(object o)
+		public override bool Equals(object obj)
 		{
-			EditList e = (o as EditList);
+			EditList e = (obj as EditList);
 			if (e != null)
 			{
 				return isEqual(e);
 			}
 
-			string s = (o as string);
+			string s = (obj as string);
 			if (s != null)
 			{
 				return isEqual(s);

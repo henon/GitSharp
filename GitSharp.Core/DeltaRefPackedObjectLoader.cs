@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -54,9 +54,9 @@ namespace GitSharp.Core
             _deltaBase = @base;
         }
 
-        public override PackedObjectLoader GetBaseLoader(WindowCursor curs)
+        public override PackedObjectLoader GetBaseLoader(WindowCursor windowCursor)
         {
-            PackedObjectLoader or = PackFile.Get(curs, _deltaBase);
+            PackedObjectLoader or = PackFile.Get(windowCursor, _deltaBase);
             if (or == null)
             {
             	throw new MissingObjectException(_deltaBase, "delta base");

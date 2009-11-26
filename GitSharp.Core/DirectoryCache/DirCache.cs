@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -490,11 +490,10 @@ namespace GitSharp.Core.DirectoryCache
 				throw new IOException("DirCache does not have a backing file");
 			}
 
-			var tmp = new LockFile(_liveFile);
-			if (tmp.Lock())
+			_myLock = new LockFile(_liveFile);
+			if (_myLock.Lock())
 			{
-				tmp.NeedStatInformation = true;
-				_myLock = tmp;
+				_myLock.NeedStatInformation = true;
 				return true;
 			}
 

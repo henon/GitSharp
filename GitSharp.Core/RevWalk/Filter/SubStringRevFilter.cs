@@ -102,9 +102,9 @@ namespace GitSharp.Core.RevWalk.Filter
 			_pattern = new Regex(patternText);
 		}
 
-		public override bool include(RevWalk walker, RevCommit commit)
+		public override bool include(RevWalk walker, RevCommit cmit)
 		{
-			return _pattern.IsMatch(Text(commit));
+			return _pattern.IsMatch(Text(cmit));
 		}
 
 		///	<summary>

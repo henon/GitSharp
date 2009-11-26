@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
@@ -52,9 +52,9 @@ namespace GitSharp.Core
             _deltaBase = @base;
         }
 
-        public override PackedObjectLoader GetBaseLoader(WindowCursor curs)
+        public override PackedObjectLoader GetBaseLoader(WindowCursor windowCursor)
         {
-            return PackFile.ResolveBase(curs, _deltaBase);
+            return PackFile.ResolveBase(windowCursor, _deltaBase);
         }
 
     	public override int RawType

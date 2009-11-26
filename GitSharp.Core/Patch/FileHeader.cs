@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
@@ -87,6 +87,7 @@ namespace GitSharp.Core.Patch
 		/// <summary>
 		/// General type of change a single file-level patch describes.
 		/// </summary>
+		[Serializable]
 		public enum ChangeTypeEnum
 		{
 			/// <summary>
@@ -118,6 +119,7 @@ namespace GitSharp.Core.Patch
 		/// <summary>
 		/// Type of patch used by this file.
 		/// </summary>
+		[Serializable]
 		public enum PatchTypeEnum
 		{
 			/// <summary>

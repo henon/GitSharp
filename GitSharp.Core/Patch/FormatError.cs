@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
@@ -53,6 +53,7 @@ namespace GitSharp.Core.Patch
 		/// <summary>
 		/// Classification of an error.
 		/// </summary>
+		[Serializable]
 		public enum Severity
 		{
 			/// <summary>

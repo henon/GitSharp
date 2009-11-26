@@ -64,12 +64,12 @@ namespace GitSharp.Core.Transport
             lastOutput = taskBeganAt;
         }
 
-        public override void BeginTask(string title, int total)
+        public override void BeginTask(string title, int totalWork)
         {
             EndTask();
             msg = title;
             lastWorked = 0;
-            totalWork = total;
+            this.totalWork = totalWork;
         }
 
         public override void Update(int completed)

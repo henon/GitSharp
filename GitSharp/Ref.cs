@@ -102,7 +102,7 @@ namespace GitSharp
         /// <summary>
         /// Updates this ref by linking it to the given ref's target.
         /// </summary>
-        /// <param name="other">The ref this ref shall reference.</param>
+        /// <param name="reference">The ref this ref shall reference.</param>
         public void Update(Ref reference)
         {
             Update(reference.Target);
@@ -111,7 +111,7 @@ namespace GitSharp
         /// <summary>
         /// Updates this ref by forwarding it to the given object.
         /// </summary>
-        /// <param name="other">The ref this object shall reference.</param>
+        /// <param name="reference">The ref this object shall reference.</param>
         public void Update(AbstractObject reference)
         {
             var db = _repo._internal_repo;

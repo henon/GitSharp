@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
@@ -78,8 +78,8 @@ namespace GitSharp.Core
 		///	<summary>
 		/// Visit to a gitlink.
 		///	</summary>
-		///	<param name="s">Gitlink entry.</param>
+		///	<param name="e">Gitlink entry.</param>
 		///	<exception cref="IOException"></exception>
-        void VisitGitlink(GitLinkTreeEntry s);
+        void VisitGitlink(GitLinkTreeEntry e);
     }
 }

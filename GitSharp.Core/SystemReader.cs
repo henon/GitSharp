@@ -5,6 +5,7 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Core
 {
+	[Serializable]
     public enum PlatformType
     {
         
@@ -19,6 +20,7 @@ namespace GitSharp.Core
         UnixMono = 128
     }
 
+	[Serializable]
     public enum ConfigFileType
     {
 
@@ -143,7 +145,7 @@ namespace GitSharp.Core
 
             public override int getTimezone(long when)
             {
-                return (int)TimeZone.CurrentTimeZone.GetUtcOffset(when.MillisToDateTime()).TotalMilliseconds / (60 * 1000);
+                return (int)TimeZone.CurrentTimeZone.GetUtcOffset(when.MillisToDateTime()).TotalMinutes;
             }
 
             public override PlatformType getOperatingSystem()

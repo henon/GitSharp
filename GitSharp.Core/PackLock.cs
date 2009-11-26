@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  *
  * All rights reserved.
@@ -72,12 +72,17 @@ namespace GitSharp.Core
         /// </exception>
         public bool Lock(string msg)
         {
-            if (msg == null) return false;
+            if (msg == null) 
+				return false;
+			
             if (!msg.EndsWith("\n")) msg += "\n";
-            var lf = new LockFile(_keepFile);
-            if (!lf.Lock()) return false;
-            lf.Write(Constants.encode(msg));
-            return lf.Commit();
+            using(LockFile lf = new LockFile(_keepFile))
+			{
+	            if (!lf.Lock()) 
+					return false;
+	            lf.Write(Constants.encode(msg));
+	            return lf.Commit();
+			}
         }
 
         /// <summary>

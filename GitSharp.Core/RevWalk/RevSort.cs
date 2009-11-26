@@ -36,12 +36,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+
 namespace GitSharp.Core.RevWalk
 {
 
     /** Sorting strategies supported by {@link RevWalk} and {@link ObjectWalk}. */
     public static class RevSort
     {
+		[Serializable]
         public enum Strategy
         {
             /**

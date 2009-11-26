@@ -855,13 +855,15 @@ namespace GitSharp.Core.Transport
 
 		#endregion
 		
-		public void Dispose ()
+		public override void Dispose ()
 		{
 			_revWalk.Dispose();
 			COMPLETE.Dispose();
 			IN_WORK_QUEUE.Dispose();
 			LOCALLY_SEEN.Dispose();
 			_objectDigest.Dispose();
+
+            base.Dispose();
 		}
 		
 	}

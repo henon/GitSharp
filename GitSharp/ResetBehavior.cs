@@ -15,7 +15,7 @@ namespace GitSharp
         Soft,
     
         /// <summary>
-        /// Matches the working tree and index to that of the tree being switched to. Any changes to tracked files in the working tree since <commit> are lost.
+        /// Matches the working tree and index to that of the tree being switched to. Any changes to tracked files in the working tree since are lost.
         /// </summary>
         Hard,
 

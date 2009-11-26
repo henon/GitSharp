@@ -48,11 +48,14 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE. 
  */
 
+using System;
+
 namespace MiscUtil.Conversion
 {
 	/// <summary>
 	/// Endianness of a converter
 	/// </summary>
+	[Serializable]
 	public enum Endianness
 	{
 		/// <summary>

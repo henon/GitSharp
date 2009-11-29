@@ -520,7 +520,7 @@ namespace GitSharp.Core.RevWalk
 		/// true if this strategy should be used, false if it should be
 		/// removed.
 		/// </param>
-		public void sort(RevSort.Strategy s, bool use)
+		public virtual void sort(RevSort.Strategy s, bool use)
 		{
 			assertNotStarted();
 			if (use)
@@ -1268,7 +1268,7 @@ namespace GitSharp.Core.RevWalk
 		/// </param>
 		/// <returns> a new unparsed reference for the object.
 		/// </returns>
-		internal static RevCommit createCommit(AnyObjectId id)
+		protected virtual RevCommit createCommit(AnyObjectId id)
 		{
 			return new RevCommit(id);
 		}

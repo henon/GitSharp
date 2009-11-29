@@ -267,7 +267,7 @@ namespace GitSharp.Core.RevWalk
 		/// Set the revision walker this list populates itself from.
 		/// </summary>
 		/// <param name="walker">the walker to populate from.</param>
-		public void Source(RevWalk walker)
+		public virtual void Source(RevWalk walker)
 		{
 			_walker = walker;
 		}
@@ -360,7 +360,7 @@ namespace GitSharp.Core.RevWalk
 		/// </summary>
 		/// <param name="index">the list position this object will appear at.</param>
 		/// <param name="t">the object being added (or set) into the list.</param>
-		internal void enter(int index, T t)
+		protected virtual void enter(int index, T t)
 		{
 			// Do nothing by default.
 		}

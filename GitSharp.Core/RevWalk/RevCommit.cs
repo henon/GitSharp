@@ -538,7 +538,7 @@ namespace GitSharp.Core.RevWalk
 		/// Subclasses <b>must</b> call <code>base.reset()</code> to ensure the
 		/// basic information can be correctly cleared out.
 		/// </summary>
-		public void reset()
+		public virtual void reset()
 		{
 			InDegree = 0;
 		}

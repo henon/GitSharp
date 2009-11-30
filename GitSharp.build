@@ -4,6 +4,8 @@
   <property name="build.config" value="debug" overwrite="false" />
   <property name="build.platform" value="${nant.settings.currentframework}" />
   <property name="build.defines" value="TRACE;DEBUG" />
+
+  <property name="build.runs.on.mono" value="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}" />
   
   <property name="path.base" value="${project::get-base-directory()}"/>
   <property name="path.build" value="${path.base}/build"/>
@@ -143,7 +145,7 @@
 
     <property name="nunit.consolerunner" value="${path.tools.nunit}/nunit-console.exe" />
     <property name="nunit.commandline" value="GitSharp.Tests.dll /xml:GitSharp.Tests.dll-results.xml /noshadow " />
-    <if test="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}">
+    <if test="${build.runs.on.mono}">
       <property name="nunit.consolerunner" value="nunit-console2" />
       <property name="nunit.commandline" value="GitSharp.Tests.dll -xml:GitSharp.Tests.dll-results.xml -noshadow " />
     </if>
@@ -155,9 +157,16 @@
       failonerror="true"
 			/>
 
+
+    <property name="debugger.file.path.before" value="${path.build.output}/GitSharp.Git.pdb" />
+    <property name="debugger.file.path.after" value="${path.build.output}/Git.pdb"  />
+
+    <property name="debugger.file.path.before" value="${path.build.output}/GitSharp.Git.exe.mdb" if="${build.runs.on.mono}" />
+    <property name="debugger.file.path.after" value="${path.build.output}/Git.exe.mdb" if="${build.runs.on.mono}" />
+
+
     <move file="${path.build.output}/GitSharp.Git.exe" tofile="${path.build.output}/Git.exe" />
-    <move file="${path.build.output}/GitSharp.Git.pdb" tofile="${path.build.output}/Git.pdb" if="${file::exists(${path.build.output}/GitSharp.Git.pdb)}/>"/>
-    <move file="${path.build.output}/GitSharp.Git.exe.mdb" tofile="${path.build.output}/Git.exe.mdb" if="${file::exists(${path.build.output}/GitSharp.Git.exe.mdb)}/>"/>
+    <move file="${debugger.file.path.before}" tofile="${debugger.file.path.after}" />
     <move file="${path.build.output}/GitSharp.Git.xml" tofile="${path.build.output}/Git.xml" />
   </target>
 

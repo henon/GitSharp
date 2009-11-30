@@ -156,7 +156,8 @@
 			/>
 
     <move file="${path.build.output}/GitSharp.Git.exe" tofile="${path.build.output}/Git.exe" />
-    <move file="${path.build.output}/GitSharp.Git.pdb" tofile="${path.build.output}/Git.pdb" />
+    <move file="${path.build.output}/GitSharp.Git.pdb" tofile="${path.build.output}/Git.pdb" if="${file::exists(${path.build.output}/GitSharp.Git.pdb)}/>"/>
+    <move file="${path.build.output}/GitSharp.Git.exe.mdb" tofile="${path.build.output}/Git.exe.mdb" if="${file::exists(${path.build.output}/GitSharp.Git.exe.mdb)}/>"/>
     <move file="${path.build.output}/GitSharp.Git.xml" tofile="${path.build.output}/Git.xml" />
   </target>
 

@@ -40,6 +40,7 @@
   <target name="compile-core" depends="init">
     <property name="assembly.name" value="GitSharp.Core" />
     <property name="assembly.type" value="library" />
+    <property name="project.directory" value="${assembly.name}" />
 
     <property name="assembly.namespace" value="${assembly.name}" />
     
@@ -61,8 +62,9 @@
   <!-- git.exe -->
   <!-- ********************************************** -->
   <target name="compile-cli" depends="compile-gitsharp">
-    <property name="assembly.name" value="Git" />
+    <property name="assembly.name" value="GitSharp.Git" />
     <property name="assembly.type" value="exe" />
+    <property name="project.directory" value="Git" />
 
     <property name="assembly.namespace" value="GitSharp.CLI" />
     
@@ -86,6 +88,7 @@
   <target name="compile-gitsharp" depends="compile-core">
     <property name="assembly.name" value="GitSharp" />
     <property name="assembly.type" value="library" />
+    <property name="project.directory" value="${assembly.name}" />
 
     <property name="assembly.namespace" value="${assembly.name}" />
 
@@ -102,12 +105,14 @@
   <target name="compile-tests" depends="compile-cli">
     <property name="assembly.name" value="GitSharp.Tests" />
     <property name="assembly.type" value="library" />
+    <property name="project.directory" value="${assembly.name}" />
 
     <property name="assembly.namespace" value="${assembly.name}" />
 
     <fileset id="project.references" >
       <include name="${path.build.output}/GitSharp.dll" />
       <include name="${path.build.output}/GitSharp.Core.dll" />
+      <include name="${path.build.output}/GitSharp.Git.exe" />
       <include name="${path.tools.nunit}/nunit.framework.dll" />
     </fileset>
 
@@ -126,6 +131,7 @@
     <copy todir="${path.testresults}">
       <fileset basedir="${path.base}/GitSharp.Tests/Resources">
         <include name="${path.build.output}/*.dll" />
+        <include name="${path.build.output}/GitSharp.Git.exe" />
       </fileset>
     </copy>
 
@@ -148,6 +154,10 @@
       commandline="${nunit.commandline}"
       failonerror="true"
 			/>
+
+    <move file="${path.build.output}/GitSharp.Git.exe" tofile="${path.build.output}/Git.exe" />
+    <move file="${path.build.output}/GitSharp.Git.pdb" tofile="${path.build.output}/Git.pdb" />
+    <move file="${path.build.output}/GitSharp.Git.xml" tofile="${path.build.output}/Git.xml" />
   </target>
 
   <target name="init">
@@ -194,7 +204,6 @@
   <target name="compile-dll">
     <call target="copy-references"/>
 
-    <property name="project.directory" value="${assembly.name}" />
     <property name="project.sources.path" value="${path.base}/${project.directory}"/>
 
     <call target="create-assembly-info"/>

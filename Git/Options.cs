@@ -143,11 +143,11 @@ using System.Linq;
 using NDesk.Options;
 #endif
 
-#if NDESK_OPTIONS
+//#if NDESK_OPTIONS
 namespace NDesk.Options
-#else
-namespace Mono.Options
-#endif
+//#else
+//namespace Mono.Options
+//#endif
 {
 	public class OptionValueCollection : IList, IList<string> {
 

@@ -12,13 +12,17 @@
     <AssemblyName>GitSharp.Tests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <SourceAnalysisOverrideSettingsFile>C:\Users\rolenun\AppData\Roaming\ICSharpCode/SharpDevelop3.0\Settings.SourceAnalysis</SourceAnalysisOverrideSettingsFile>
+    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+    <NoStdLib>False</NoStdLib>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugType>Full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;NDESK_OPTIONS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\GitSharp.Tests.XML</DocumentationFile>
@@ -31,6 +35,15 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Platform)' == 'AnyCPU' ">
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <BaseAddress>4194304</BaseAddress>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework, Version=2.5.2.9222, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
@@ -48,157 +61,155 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AbbreviatedObjectIdTest.cs" />
-    <Compile Include="API\ApiTestCase.cs" />
-    <Compile Include="API\BlobTests.cs" />
-    <Compile Include="API\BranchTest.cs" />
-    <Compile Include="API\RepositoryConfigTest.cs" />
-    <Compile Include="API\EncodingTests.cs" />
-    <Compile Include="API\CloneTests.cs" />
-    <Compile Include="API\CommitDateTests.cs" />
-    <Compile Include="API\CommitTests.cs" />
-    <Compile Include="API\FindGitDirectoryTests.cs" />
-    <Compile Include="API\IndexTest.cs" />
-    <Compile Include="API\IgnoreTests.cs" />
-    <Compile Include="API\InitTests.cs" />
-    <Compile Include="API\ObjectEqualityTests.cs" />
-    <Compile Include="API\RefModelTests.cs" />
-    <Compile Include="API\RepositoryStatusTests.cs" />
-    <Compile Include="API\RepositoryTests.cs" />
-    <Compile Include="SampleDataRepositoryTestCase.cs" />
-    <Compile Include="Transport\BaseConnectionTests.cs" />
-    <Compile Include="Transport\OperationResultTests.cs" />
-    <Compile Include="Util\AssertHelperFixture.cs" />
-    <Compile Include="CanReadMsysgitIndexFixture.cs" />
-    <Compile Include="Util\LocalDiskRepositoryTestCase.cs" />
-    <Compile Include="ReflogConfigTest.cs" />
-    <Compile Include="IgnoreHandlerTest.cs" />
-    <Compile Include="IndexModifiedTests.cs" />
-    <Compile Include="RepositoryCacheTest.cs" />
-    <Compile Include="ReflogReaderTest.cs" />
-    <Compile Include="Util\StringExtensionsFixture.cs" />
-    <Compile Include="Util\ExtensionsFixture.cs" />
-    <Compile Include="ConcurrentRepackTest.cs" />
-    <Compile Include="T0003_Basic_Config.cs" />
-    <Compile Include="Diff\DiffFormatterReflowTest.cs" />
-    <Compile Include="Diff\EditListTest.cs" />
-    <Compile Include="Diff\EditTest.cs" />
-    <Compile Include="Diff\RawTextTest.cs" />
-    <Compile Include="DirectoryCache\DirCacheBasicTest.cs" />
-    <Compile Include="DirectoryCache\DirCacheBuilderIteratorTest.cs" />
-    <Compile Include="DirectoryCache\DirCacheBuilderTest.cs" />
-    <Compile Include="DirectoryCache\DirCacheCGitCompatabilityTest.cs" />
-    <Compile Include="DirectoryCache\DirCacheFindTest.cs" />
-    <Compile Include="DirectoryCache\DirCacheIteratorTest.cs" />
-    <Compile Include="DirectoryCache\DirCacheLargePathTest.cs" />
-    <Compile Include="DirectoryCache\DirCacheTreeTest.cs" />
-    <Compile Include="ConstantsEncodingTest.cs" />
-    <Compile Include="FnMatch\FileNameMatcherTest.cs" />
-    <Compile Include="IndexDiffTest.cs" />
-    <Compile Include="T0007_Index.cs" />
-    <Compile Include="IndexTreeWalkerTest.cs" />
-    <Compile Include="Merge\CherryPickTest.cs" />
-    <Compile Include="Merge\SimpleMergeTest.cs" />
-    <Compile Include="PackReverseIndexTest.cs" />
-    <Compile Include="PackWriterTest.cs" />
-    <Compile Include="Patch\BasePatchTest.cs" />
-    <Compile Include="Patch\FileHeaderTest.cs" />
-    <Compile Include="Patch\GetTextTest.cs" />
-    <Compile Include="Patch\PatchCcErrorTest.cs" />
-    <Compile Include="Patch\PatchCcTest.cs" />
-    <Compile Include="Patch\PatchErrorTest.cs" />
-    <Compile Include="Patch\PatchTest.cs" />
-    <Compile Include="ReadTreeTest.cs" />
-    <Compile Include="RefTest.cs" />
-    <Compile Include="RefUpdateTest.cs" />
-    <Compile Include="RepositoryConfigTest.cs" />
-    <Compile Include="RevWalk\FooterLineTest.cs" />
-    <Compile Include="T0002_Tree.cs" />
-    <Compile Include="Transport\BundleWriterTest.cs" />
-    <Compile Include="Transport\LongMapTest.cs" />
-    <Compile Include="Transport\OpenSshConfigTest.cs" />
-    <Compile Include="Transport\PacketLineInTest.cs" />
-    <Compile Include="Transport\PacketLineOutTest.cs" />
-    <Compile Include="Transport\PushProcessTest.cs" />
-    <Compile Include="Transport\SideBandOutputStreamTest.cs" />
-    <Compile Include="Transport\TransportTest.cs" />
-    <Compile Include="TreeIteratorLeafOnlyTest.cs" />
-    <Compile Include="TreeIteratorPostOrderTest.cs" />
-    <Compile Include="TreeIteratorPreOrderTest.cs" />
-    <Compile Include="Util\MockSystemReader.cs" />
-    <Compile Include="TreeWalk\Filter\PathSuffixFilterTestCase.cs" />
-    <Compile Include="Util\ByteArrayExtensionsFixture.cs" />
-    <Compile Include="Util\NBTests.cs" />
-    <Compile Include="PackIndexV1Tests.cs" />
-    <Compile Include="PackIndexV2Tests.cs" />
-    <Compile Include="T0004_PackReader.cs" />
-    <Compile Include="T0008_testparserev.cs" />
-    <Compile Include="RevWalk\AlwaysEmptyRevQueueTest.cs" />
-    <Compile Include="RevWalk\DateRevQueueTest.cs" />
-    <Compile Include="RevWalk\FIFORevQueueTest.cs" />
-    <Compile Include="RevWalk\LIFORevQueueTest.cs" />
-    <Compile Include="RevWalk\ObjectWalkTest.cs" />
-    <Compile Include="RevWalk\RevCommitParseTest.cs" />
-    <Compile Include="RevWalk\RevFlagSetTest.cs" />
-    <Compile Include="RevWalk\RevObjectTest.cs" />
-    <Compile Include="RevWalk\RevQueueTestCase.cs" />
-    <Compile Include="RevWalk\RevTagParseTest.cs" />
-    <Compile Include="RevWalk\RevWalkCullTest.cs" />
-    <Compile Include="RevWalk\RevWalkFilterTest.cs" />
-    <Compile Include="RevWalk\RevWalkMergeBaseTest.cs" />
-    <Compile Include="RevWalk\RevWalkPathFilter1Test.cs" />
-    <Compile Include="RevWalk\RevWalkPathFilter6012Test.cs" />
-    <Compile Include="RevWalk\RevWalkSortTest.cs" />
-    <Compile Include="Transport\IndexPackTests.cs" />
-    <Compile Include="Transport\RefSpecTests.cs" />
-    <Compile Include="Transport\RemoteConfigTests.cs" />
-    <Compile Include="TreeWalk\AbstractTreeIteratorTest.cs" />
-    <Compile Include="TreeWalk\CanonicalTreeParserTest.cs" />
-    <Compile Include="TreeWalk\EmptyTreeIteratorTest.cs" />
-    <Compile Include="TreeWalk\FileTreeIteratorTest.cs" />
-    <Compile Include="TreeWalk\Filter\AlwaysCloneTreeFilter.cs" />
-    <Compile Include="TreeWalk\Filter\NotTreeFilterTest.cs" />
-    <Compile Include="TreeWalk\Filter\TreeFilterTest.cs" />
-    <Compile Include="TreeWalk\NameConflictTreeWalkTest.cs" />
-    <Compile Include="TreeWalk\PostOrderTreeWalkTest.cs" />
-    <Compile Include="TreeWalk\TreeWalkBasicDiffTest.cs" />
-    <Compile Include="Util\IntListTest.cs" />
-    <Compile Include="Transport\URIishTests.cs" />
-    <Compile Include="PackIndexTestCase.cs" />
-    <Compile Include="RevWalk\RevWalkTestCase.cs" />
-    <Compile Include="Util\QuotedStringBourneStyleTest.cs" />
-    <Compile Include="Util\QuotedStringBourneUserPathStyleTest.cs" />
-    <Compile Include="Util\QuotedStringGitPathStyleTest.cs" />
-    <Compile Include="Util\RawParseUtils_HexParseTest.cs" />
-    <Compile Include="Util\RawParseUtils_LineMapTest.cs" />
-    <Compile Include="Util\RawParseUtils_MatchTest.cs" />
-    <Compile Include="Util\StringUtilsTest.cs" />
-    <Compile Include="Util\TemporaryBufferTest.cs" />
-    <Compile Include="Util\TestRng.cs" />
-    <Compile Include="XInputStream.cs" />
-    <Compile Include="Util\VariousUtilityTests.cs" />
-    <Compile Include="ValidRefNameTest.cs" />
-    <Compile Include="WindowCacheGetTest.cs" />
-    <Compile Include="WindowCacheReconfigureTest.cs" />
-    <Compile Include="WorkDirCheckoutTest.cs" />
-    <Compile Include="T0003_Basic_Write.cs" />
-    <Compile Include="ObjectCheckerTests.cs" />
-    <Compile Include="T0001_ObjectId.cs" />
-    <Compile Include="T0001_PersonIdent.cs" />
-    <Compile Include="PackIndexTests.cs" />
+    <Compile Include="GitSharp.Core\AbbreviatedObjectIdTest.cs" />
+    <Compile Include="GitSharp.Core\CanReadMsysgitIndexFixture.cs" />
+    <Compile Include="GitSharp.Core\ConcurrentRepackTest.cs" />
+    <Compile Include="GitSharp.Core\ConstantsEncodingTest.cs" />
+    <Compile Include="GitSharp.Core\Crc32Tests.cs" />
+    <Compile Include="GitSharp.Core\Diff\DiffFormatterReflowTest.cs" />
+    <Compile Include="GitSharp.Core\Diff\EditListTest.cs" />
+    <Compile Include="GitSharp.Core\Diff\EditTest.cs" />
+    <Compile Include="GitSharp.Core\Diff\RawTextTest.cs" />
+    <Compile Include="GitSharp.Core\DirectoryCache\DirCacheBasicTest.cs" />
+    <Compile Include="GitSharp.Core\DirectoryCache\DirCacheBuilderIteratorTest.cs" />
+    <Compile Include="GitSharp.Core\DirectoryCache\DirCacheBuilderTest.cs" />
+    <Compile Include="GitSharp.Core\DirectoryCache\DirCacheCGitCompatabilityTest.cs" />
+    <Compile Include="GitSharp.Core\DirectoryCache\DirCacheFindTest.cs" />
+    <Compile Include="GitSharp.Core\DirectoryCache\DirCacheIteratorTest.cs" />
+    <Compile Include="GitSharp.Core\DirectoryCache\DirCacheLargePathTest.cs" />
+    <Compile Include="GitSharp.Core\DirectoryCache\DirCacheTreeTest.cs" />
+    <Compile Include="GitSharp.Core\FnMatch\FileNameMatcherTest.cs" />
+    <Compile Include="GitSharp.Core\IgnoreHandlerTest.cs" />
+    <Compile Include="GitSharp.Core\IndexDiffTest.cs" />
+    <Compile Include="GitSharp.Core\IndexModifiedTests.cs" />
+    <Compile Include="GitSharp.Core\IndexTreeWalkerTest.cs" />
+    <Compile Include="GitSharp.Core\Merge\CherryPickTest.cs" />
+    <Compile Include="GitSharp.Core\Merge\SimpleMergeTest.cs" />
+    <Compile Include="GitSharp.Core\ObjectCheckerTests.cs" />
+    <Compile Include="GitSharp.Core\PackIndexTestCase.cs" />
+    <Compile Include="GitSharp.Core\PackIndexTests.cs" />
+    <Compile Include="GitSharp.Core\PackIndexV1Tests.cs" />
+    <Compile Include="GitSharp.Core\PackIndexV2Tests.cs" />
+    <Compile Include="GitSharp.Core\PackReverseIndexTest.cs" />
+    <Compile Include="GitSharp.Core\PackWriterTest.cs" />
+    <Compile Include="GitSharp.Core\Patch\BasePatchTest.cs" />
+    <Compile Include="GitSharp.Core\Patch\EditListTest.cs" />
+    <Compile Include="GitSharp.Core\Patch\FileHeaderTest.cs" />
+    <Compile Include="GitSharp.Core\Patch\GetTextTest.cs" />
+    <Compile Include="GitSharp.Core\Patch\PatchCcErrorTest.cs" />
+    <Compile Include="GitSharp.Core\Patch\PatchCcTest.cs" />
+    <Compile Include="GitSharp.Core\Patch\PatchErrorTest.cs" />
+    <Compile Include="GitSharp.Core\Patch\PatchTest.cs" />
+    <Compile Include="GitSharp.Core\ReadTreeTest.cs" />
+    <Compile Include="GitSharp.Core\ReflogConfigTest.cs" />
+    <Compile Include="GitSharp.Core\ReflogReaderTest.cs" />
+    <Compile Include="GitSharp.Core\RefTest.cs" />
+    <Compile Include="GitSharp.Core\RefUpdateTest.cs" />
+    <Compile Include="GitSharp.Core\RepositoryCacheTest.cs" />
+    <Compile Include="GitSharp.Core\RepositoryConfigTest.cs" />
+    <Compile Include="GitSharp.Core\RepositoryTestCase.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\AlwaysEmptyRevQueueTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\DateRevQueueTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\FIFORevQueueTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\FooterLineTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\LIFORevQueueTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\ObjectWalkTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevCommitParseTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevFlagSetTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevObjectTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevQueueTestCase.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevTagParseTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevWalkCullTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevWalkFilterTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevWalkMergeBaseTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevWalkPathFilter1Test.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevWalkPathFilter6012Test.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevWalkSortTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\RevWalkTestCase.cs" />
+    <Compile Include="GitSharp.Core\SampleDataRepositoryTestCase.cs" />
+    <Compile Include="GitSharp.Core\T0001_ObjectId.cs" />
+    <Compile Include="GitSharp.Core\T0001_PersonIdent.cs" />
+    <Compile Include="GitSharp.Core\T0002_Tree.cs" />
+    <Compile Include="GitSharp.Core\T0003_Basic_Config.cs" />
+    <Compile Include="GitSharp.Core\T0003_Basic_Write.cs" />
+    <Compile Include="GitSharp.Core\T0004_PackReader.cs" />
+    <Compile Include="GitSharp.Core\T0007_Index.cs" />
+    <Compile Include="GitSharp.Core\T0008_testparserev.cs" />
+    <Compile Include="GitSharp.Core\Transport\BaseConnectionTests.cs" />
+    <Compile Include="GitSharp.Core\Transport\BundleWriterTest.cs" />
+    <Compile Include="GitSharp.Core\Transport\IndexPackTests.cs" />
+    <Compile Include="GitSharp.Core\Transport\LongMapTest.cs" />
+    <Compile Include="GitSharp.Core\Transport\OpenSshConfigTest.cs" />
+    <Compile Include="GitSharp.Core\Transport\OperationResultTests.cs" />
+    <Compile Include="GitSharp.Core\Transport\PacketLineInTest.cs" />
+    <Compile Include="GitSharp.Core\Transport\PacketLineOutTest.cs" />
+    <Compile Include="GitSharp.Core\Transport\PushProcessTest.cs" />
+    <Compile Include="GitSharp.Core\Transport\RefSpecTests.cs" />
+    <Compile Include="GitSharp.Core\Transport\RemoteConfigTests.cs" />
+    <Compile Include="GitSharp.Core\Transport\SideBandOutputStreamTest.cs" />
+    <Compile Include="GitSharp.Core\Transport\TransportTest.cs" />
+    <Compile Include="GitSharp.Core\Transport\URIishTests.cs" />
+    <Compile Include="GitSharp.Core\TreeIteratorLeafOnlyTest.cs" />
+    <Compile Include="GitSharp.Core\TreeIteratorPostOrderTest.cs" />
+    <Compile Include="GitSharp.Core\TreeIteratorPreOrderTest.cs" />
+    <Compile Include="GitSharp.Core\TreeWalk\AbstractTreeIteratorTest.cs" />
+    <Compile Include="GitSharp.Core\TreeWalk\CanonicalTreeParserTest.cs" />
+    <Compile Include="GitSharp.Core\TreeWalk\EmptyTreeIteratorTest.cs" />
+    <Compile Include="GitSharp.Core\TreeWalk\FileTreeIteratorTest.cs" />
+    <Compile Include="GitSharp.Core\TreeWalk\Filter\AlwaysCloneTreeFilter.cs" />
+    <Compile Include="GitSharp.Core\TreeWalk\Filter\NotTreeFilterTest.cs" />
+    <Compile Include="GitSharp.Core\TreeWalk\Filter\PathSuffixFilterTestCase.cs" />
+    <Compile Include="GitSharp.Core\TreeWalk\Filter\TreeFilterTest.cs" />
+    <Compile Include="GitSharp.Core\TreeWalk\NameConflictTreeWalkTest.cs" />
+    <Compile Include="GitSharp.Core\TreeWalk\PostOrderTreeWalkTest.cs" />
+    <Compile Include="GitSharp.Core\TreeWalk\TreeWalkBasicDiffTest.cs" />
+    <Compile Include="GitSharp.Core\Util\AssertHelper.cs" />
+    <Compile Include="GitSharp.Core\Util\AssertHelperFixture.cs" />
+    <Compile Include="GitSharp.Core\Util\ByteArrayExtensionsFixture.cs" />
+    <Compile Include="GitSharp.Core\Util\ExtensionsFixture.cs" />
+    <Compile Include="GitSharp.Core\Util\IntListTest.cs" />
+    <Compile Include="GitSharp.Core\Util\LocalDiskRepositoryTestCase.cs" />
+    <Compile Include="GitSharp.Core\Util\MockSystemReader.cs" />
+    <Compile Include="GitSharp.Core\Util\NBTests.cs" />
+    <Compile Include="GitSharp.Core\Util\QuotedStringBourneStyleTest.cs" />
+    <Compile Include="GitSharp.Core\Util\QuotedStringBourneUserPathStyleTest.cs" />
+    <Compile Include="GitSharp.Core\Util\QuotedStringGitPathStyleTest.cs" />
+    <Compile Include="GitSharp.Core\Util\RawParseUtils_HexParseTest.cs" />
+    <Compile Include="GitSharp.Core\Util\RawParseUtils_LineMapTest.cs" />
+    <Compile Include="GitSharp.Core\Util\RawParseUtils_MatchTest.cs" />
+    <Compile Include="GitSharp.Core\Util\StringExtensionsFixture.cs" />
+    <Compile Include="GitSharp.Core\Util\StringUtilsTest.cs" />
+    <Compile Include="GitSharp.Core\Util\TemporaryBufferTest.cs" />
+    <Compile Include="GitSharp.Core\Util\TestRng.cs" />
+    <Compile Include="GitSharp.Core\Util\VariousUtilityTests.cs" />
+    <Compile Include="GitSharp.Core\ValidRefNameTest.cs" />
+    <Compile Include="GitSharp.Core\WindowCacheGetTest.cs" />
+    <Compile Include="GitSharp.Core\WindowCacheReconfigureTest.cs" />
+    <Compile Include="GitSharp.Core\WorkDirCheckoutTest.cs" />
+    <Compile Include="GitSharp.Core\XInputStream.cs" />
+    <Compile Include="GitSharp\ApiTestCase.cs" />
+    <Compile Include="GitSharp\BlobTests.cs" />
+    <Compile Include="GitSharp\BranchTest.cs" />
+    <Compile Include="GitSharp\CloneTests.cs" />
+    <Compile Include="GitSharp\CommitDateTests.cs" />
+    <Compile Include="GitSharp\CommitTests.cs" />
+    <Compile Include="GitSharp\EncodingTests.cs" />
+    <Compile Include="GitSharp\FindGitDirectoryTests.cs" />
+    <Compile Include="GitSharp\IgnoreTests.cs" />
+    <Compile Include="GitSharp\IndexTest.cs" />
+    <Compile Include="GitSharp\InitTests.cs" />
+    <Compile Include="GitSharp\ObjectEqualityTests.cs" />
+    <Compile Include="GitSharp\RefModelTests.cs" />
+    <Compile Include="GitSharp\RepositoryConfigTest.cs" />
+    <Compile Include="GitSharp\RepositoryStatusTests.cs" />
+    <Compile Include="GitSharp\RepositoryTests.cs" />
+    <Compile Include="Git\CLI\OptionContextTest.cs" />
+    <Compile Include="Git\CLI\OptionSetTest.cs" />
+    <Compile Include="Git\CLI\OptionTest.cs" />
+    <Compile Include="Git\CLI\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Crc32Tests.cs" />
-    <Compile Include="RepositoryTestCase.cs" />
-    <Compile Include="Patch\EditListTest.cs" />
-    <Compile Include="Util\AssertHelper.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="sample\README">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="sample\unpacked">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <None Include="GitSharp.Core\sample\README" />
+    <None Include="GitSharp.Core\sample\unpacked" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\all_packed_objects.txt">
@@ -754,7 +765,26 @@
       <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
       <Name>GitSharp.Core</Name>
     </ProjectReference>
-    <Folder Include="API\Platform" />
+    <ProjectReference Include="..\Git\Git.csproj">
+      <Project>{2A467118-E885-44FC-B7AF-DFAD937F6012}</Project>
+      <Name>Git</Name>
+    </ProjectReference>
+    <Folder Include="Git" />
+    <Folder Include="GitSharp" />
+    <Folder Include="GitSharp.Core" />
+    <Folder Include="GitSharp.Core\Diff" />
+    <Folder Include="GitSharp.Core\DirectoryCache" />
+    <Folder Include="GitSharp.Core\FnMatch" />
+    <Folder Include="GitSharp.Core\Merge" />
+    <Folder Include="GitSharp.Core\Patch" />
+    <Folder Include="GitSharp.Core\RevWalk" />
+    <Folder Include="GitSharp.Core\sample" />
+    <Folder Include="GitSharp.Core\Transport" />
+    <Folder Include="GitSharp.Core\TreeWalk" />
+    <Folder Include="GitSharp.Core\TreeWalk\Filter" />
+    <Folder Include="GitSharp.Core\Util" />
+    <Folder Include="Git\CLI" />
+    <Folder Include="Git\Platform" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\CorruptIndex\.gitted\refs\tags\" />

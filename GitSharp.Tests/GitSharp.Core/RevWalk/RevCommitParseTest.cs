@@ -35,12 +35,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
 using System.Text;
 using GitSharp.Core;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.Util;
 using GitSharp.Core.Tests.Util;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Core.Tests.RevWalk
@@ -182,7 +184,7 @@ namespace GitSharp.Core.Tests.RevWalk
             }
 
             Assert.AreSame(Constants.CHARSET, c.Encoding);
-			AssertHelper.IgnoreOnMono(() => Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
+            AssertHelper.IgnoreOn(AssertedPlatform.Mono, () => Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord\n\n\u304d\u308c\u3044\n", c.getFullMessage());
         }
@@ -242,8 +244,8 @@ namespace GitSharp.Core.Tests.RevWalk
             }
 
             Assert.AreEqual("EUC-JP", c.Encoding.WebName.ToUpperInvariant()); //Hacked as Windows uses a lowercased naming convention
-            AssertHelper.IgnoreOnMono(() => Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=547902");
-            Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
+		    AssertHelper.IgnoreOn(AssertedPlatform.Mono, () => Assert.AreEqual("F\u00f6r fattare", c.getAuthorIdent().Name), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=547902");
+		    Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
             Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
 

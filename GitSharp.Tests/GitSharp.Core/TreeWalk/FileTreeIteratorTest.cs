@@ -35,11 +35,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
 using GitSharp.Core;
 using GitSharp.Core.TreeWalk;
 using GitSharp.Core.Util;
 using GitSharp.Core.Tests.Util;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 using FileMode=GitSharp.Core.FileMode;
 
@@ -82,7 +84,7 @@ namespace GitSharp.Core.Tests.TreeWalk
 			var fti = new FileTreeIterator(di);
 			Assert.IsTrue(fti.first());
 
-            AssertHelper.IgnoreOnMono(() => Assert.IsTrue(fti.eof()), "Test fails under mono due to http://bugzilla.novell.com/show_bug.cgi?id=539791,Fixed upstream");
+		    AssertHelper.IgnoreOn(AssertedPlatform.Mono, () => Assert.IsTrue(fti.eof()), "Test fails under mono due to http://bugzilla.novell.com/show_bug.cgi?id=539791,Fixed upstream");
 		}
 
 		[Test]

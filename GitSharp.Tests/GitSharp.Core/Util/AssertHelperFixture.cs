@@ -1,4 +1,5 @@
 using System;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Core.Tests.Util

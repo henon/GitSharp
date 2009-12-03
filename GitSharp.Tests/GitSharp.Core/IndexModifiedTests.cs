@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using GitSharp.Core;
 using GitSharp.Core.Tests.Util;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 using FileMode=GitSharp.Core.FileMode;
 
@@ -53,7 +54,7 @@ namespace GitSharp.Core.Tests
 
             var entry = index.GetEntry("extensionless-file");
 
-            if (AssertHelper.IsRunningOnMono())
+            if (AssertHelper.IsRunningOn(AssertedPlatform.Mono))
             {
                 // File timestamps on Unix based systems are only precise to the second
                 Thread.Sleep(TimeSpan.FromSeconds(1));

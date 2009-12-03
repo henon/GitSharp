@@ -40,6 +40,7 @@ using System;
 using GitSharp;
 using GitSharp.Core;
 using GitSharp.Core.Util;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 using System.Text;
 
@@ -196,7 +197,7 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testDequote_Latin1()
         {
-            AssertHelper.IgnoreOnMono(() => AssertDequote("\u00c5ngstr\u00f6m", "\\305ngstr\\366m"), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
+            AssertHelper.IgnoreOn(AssertedPlatform.Mono, () => AssertDequote("\u00c5ngstr\u00f6m", "\\305ngstr\\366m"), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
         }
 
         [Test]
@@ -214,7 +215,7 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testDequote_RawLatin1()
         {
-            AssertHelper.IgnoreOnMono(() => AssertDequote("\u00c5ngstr\u00f6m", (char)NB.BaseToDecimal("305", 8)  + "ngstr" + (char)NB.BaseToDecimal("366", 8) + "m"), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
+            AssertHelper.IgnoreOn(AssertedPlatform.Mono, () => AssertDequote("\u00c5ngstr\u00f6m", (char)NB.BaseToDecimal("305", 8)  + "ngstr" + (char)NB.BaseToDecimal("366", 8) + "m"), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
         }
 
         [Test]

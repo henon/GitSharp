@@ -2,8 +2,14 @@
 using GitSharp.Core;
 using NUnit.Framework;
 
-namespace GitSharp.Core.Tests.Util
+namespace GitSharp.Tests.GitSharp.Core.Util
 {
+    public enum AssertedPlatform
+    {
+        Windows,
+        Mono
+    }
+
     public static class AssertHelper
     {
         public static TException Throws<TException>(Action codeBlock) where TException : Exception
@@ -31,28 +37,42 @@ namespace GitSharp.Core.Tests.Util
             return (TException)exception;
         }
         
-        public static bool IsRunningOnMono()
+        public static bool IsRunningOn(AssertedPlatform assertedPlatform)
         {
-            return !(SystemReader.getInstance().getOperatingSystem() == PlatformType.Windows);
-        }
-
-        public static void IgnoreOnMono(Action codeBlock, string ignoreExplaination)
-        {
-            try
+            SystemReader systemReader = SystemReader.getInstance();
+            
+            bool isRunningOnUnknownOS = (systemReader.getOperatingSystem() == PlatformType.Unknown);
+            if (isRunningOnUnknownOS)
             {
-                codeBlock();
+                return false;
             }
-            catch (AssertionException)
+            
+            
+            bool isRunningOnWindows = (systemReader.getOperatingSystem() == PlatformType.Windows);
+            if (isRunningOnWindows && assertedPlatform == AssertedPlatform.Windows)
             {
-                if (!IsRunningOnMono())
-                {
-                    throw;
-                }
+                return true;
+            }
 
-                Assert.Ignore(ignoreExplaination);
-            }   
+            if (!isRunningOnWindows && assertedPlatform == AssertedPlatform.Mono)
+            {
+                return true;
+            }
+
+            return false;
         }
-        
+
+        public static void IgnoreOn(AssertedPlatform assertedPlatform, Action codeBlock, string ignoreExplaination)
+        {
+            if (IsRunningOn(assertedPlatform))
+            {
+                Assert.Ignore(ignoreExplaination);
+                return;
+            }
+
+            codeBlock();
+        }
+
         private static Exception GetExceptionFrom(Action code)
         {
             try

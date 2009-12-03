@@ -27,6 +27,9 @@
 //
 
 using System;
+using System.Linq;
+using System.Reflection;
+using GitSharp.Tests.GitSharp.Core.Util;
 
 //#if NDESK_OPTIONS
 //namespace Tests.NDesk.Options
@@ -38,6 +41,17 @@ namespace Git.Tests.CLI
 	static class Utils {
 		public static void AssertException<T> (Type exception, string message, T a, Action<T> action)
 		{
+            if (exception == null)
+            {
+                action(a);
+                return;
+            }
+
+            MethodInfo method = typeof(AssertHelper).GetMethods(BindingFlags.Public | BindingFlags.Static).First(m => m.Name == "Throws" && m.GetParameters().Count() == 2);
+            MethodInfo methodInfo = method.MakeGenericMethod(new Type[] { exception, typeof(T) });
+            methodInfo.Invoke(null, new object[] { a, action });
+
+            /*
 			Type actualType = null;
 			string stack = null;
 			string actualMessage = null;
@@ -59,7 +73,8 @@ namespace Git.Tests.CLI
 				throw new InvalidOperationException (
 					string.Format ("Assertion failed:\n\tExpected: {0}\n\t  Actual: {1}",
 						message, actualMessage));
-		}
+		*/
+        }
 
 	}
 }

@@ -37,26 +37,28 @@
  */
 
 using GitSharp.Core;
+using GitSharp.Core.Tests;
 using GitSharp.Core.Transport;
 using NUnit.Framework;
+using CoreConfig = GitSharp.Core.Config;
 
-namespace GitSharp.Core.Tests.Transport
+namespace GitSharp.Tests.GitSharp.Core.Transport
 {
 
     [TestFixture]
     public class RemoteConfigTests : RepositoryTestCase
     {
-        private Core.Config config;
+        private CoreConfig config;
 
         public override void setUp()
         {
             base.setUp();
-            config = new Core.Config();
+            config = new CoreConfig();
         }
 
         private void readConfig(string dat)
         {
-            config = new Core.Config();
+            config = new CoreConfig();
             config.fromText(dat);
         }
 
@@ -343,7 +345,7 @@ namespace GitSharp.Core.Tests.Transport
         [Test]
         public void testCreateOrigin()
         {
-            RemoteConfig rc = new RemoteConfig(config, "origin");
+            RemoteConfig rc = new RemoteConfig(config, Constants.DEFAULT_REMOTE_NAME);
             rc.AddURI(new URIish("/some/dir"));
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.Update(config);
@@ -410,7 +412,7 @@ namespace GitSharp.Core.Tests.Transport
         [Test]
         public void testSaveNoTags()
         {
-            RemoteConfig rc = new RemoteConfig(config, "origin");
+            RemoteConfig rc = new RemoteConfig(config, Constants.DEFAULT_REMOTE_NAME);
             rc.AddURI(new URIish("/some/dir"));
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.SetTagOpt(TagOpt.NO_TAGS);
@@ -424,7 +426,7 @@ namespace GitSharp.Core.Tests.Transport
         [Test]
         public void testSaveAllTags()
         {
-            RemoteConfig rc = new RemoteConfig(config, "origin");
+            RemoteConfig rc = new RemoteConfig(config, Constants.DEFAULT_REMOTE_NAME);
             rc.AddURI(new URIish("/some/dir"));
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.SetTagOpt(TagOpt.FETCH_TAGS);
@@ -450,7 +452,7 @@ namespace GitSharp.Core.Tests.Transport
         [Test]
         public void testSaveTimeout()
         {
-            RemoteConfig rc = new RemoteConfig(config, "origin");
+            RemoteConfig rc = new RemoteConfig(config, Constants.DEFAULT_REMOTE_NAME);
             rc.AddURI(new URIish("/some/dir"));
             rc.AddFetchRefSpec(new RefSpec("+refs/heads/*:refs/remotes/" + rc.Name + "/*"));
             rc.Timeout = 60;

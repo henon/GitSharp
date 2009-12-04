@@ -349,6 +349,11 @@ namespace GitSharp.Core
         public const string SIGNED_OFF_BY_TAG = "Signed-off-by: ";
 
         /// <summary>
+        /// Default remote name used by clone, push and fetch operations
+        /// </summary>
+        public static string DEFAULT_REMOTE_NAME = "origin";
+
+        /// <summary>
         /// A gitignore file name
         /// </summary>
         public const string GITIGNORE_FILENAME = ".gitignore";

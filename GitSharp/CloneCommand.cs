@@ -188,7 +188,7 @@ namespace GitSharp
                 NoCheckout = true;
             }
             if (OriginName == null)
-                OriginName = "origin";
+                OriginName = Constants.DEFAULT_REMOTE_NAME;
 
             var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualDirectory));
             repo.Create(Bare);

@@ -62,7 +62,7 @@ namespace GitSharp
 
         public PushCommand()
         {
-            Remote = "origin";
+            Remote = Constants.DEFAULT_REMOTE_NAME;
             ProgressMonitor = NullProgressMonitor.Instance;
         }
 

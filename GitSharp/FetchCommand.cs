@@ -59,7 +59,7 @@ namespace GitSharp
 
         public FetchCommand()
         {
-            Remote = "origin";
+            Remote = Constants.DEFAULT_REMOTE_NAME;
             ProgressMonitor = NullProgressMonitor.Instance;
         }
 

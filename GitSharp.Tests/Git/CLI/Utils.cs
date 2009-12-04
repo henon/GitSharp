@@ -47,9 +47,12 @@ namespace Git.Tests.CLI
                 return;
             }
 
-            MethodInfo method = typeof(AssertHelper).GetMethods(BindingFlags.Public | BindingFlags.Static).First(m => m.Name == "Throws" && m.GetParameters().Count() == 2);
-            MethodInfo methodInfo = method.MakeGenericMethod(new Type[] { exception, typeof(T) });
-            methodInfo.Invoke(null, new object[] { a, action });
+            MethodInfo method = typeof(AssertHelper).GetMethods(BindingFlags.Public | BindingFlags.Static).Single(m => m.Name == "Throws" && m.GetParameters().Count() == 1);
+            MethodInfo methodInfo = method.MakeGenericMethod(new[] { exception });
+
+		    Action codeBlock = () => action(a);
+
+            methodInfo.Invoke(null, new object[] { codeBlock });
 
             /*
 			Type actualType = null;

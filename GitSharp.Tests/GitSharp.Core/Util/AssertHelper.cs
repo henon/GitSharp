@@ -12,11 +12,6 @@ namespace GitSharp.Tests.GitSharp.Core.Util
 
     public static class AssertHelper
     {
-        public static TException Throws<TException, TParam>(TParam param, Action<TParam> codeBlock) where TException : Exception
-        {
-            return Throws<TException>(() => codeBlock(param));
-        }
-
         public static TException Throws<TException>(Action codeBlock) where TException : Exception
         {
             const string expectedFormat = "Exception of type '{0}' was expected.";

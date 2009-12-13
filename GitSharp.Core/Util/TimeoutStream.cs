@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace GitSharp.Core.Util
@@ -89,7 +89,7 @@ namespace GitSharp.Core.Util
 		public override void Write(byte[] buffer, int offset, int count)
 		{
 			CheckTimeout();
-			Write(buffer, offset, count);
+			_stream.Write(buffer, offset, count);
 		}
 
 		#endregion Public

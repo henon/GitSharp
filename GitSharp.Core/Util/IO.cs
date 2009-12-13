@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
@@ -46,7 +46,7 @@ namespace GitSharp.Core.Util
     /// <summary>
     /// Input/Output utilities
     /// </summary>
-    public class IO
+    public static class IO
     {
         /// <summary>
         /// Read an entire local file into memory as a byte array.

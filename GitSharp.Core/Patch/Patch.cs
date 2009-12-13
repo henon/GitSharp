@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
@@ -53,10 +53,10 @@ namespace GitSharp.Core.Patch
 		private static readonly byte[] DiffCc = Constants.encodeASCII("diff --cc ");
 		private static readonly byte[] DiffCombined = Constants.encodeASCII("diff --combined ");
 		private static readonly byte[][] BinHeaders = new[] { Constants.encodeASCII("Binary files "), Constants.encodeASCII("Files ") };
-		private static readonly byte[] BinTrailer = Constants.encodeASCII(" differ\n");
-		private static readonly byte[] GitBinary = Constants.encodeASCII("GIT binary patch\n");
+		private static readonly byte[] BinTrailer = Constants.encodeASCII(" differ"+Environment.NewLine);
+		private static readonly byte[] GitBinary = Constants.encodeASCII("GIT binary patch"+Environment.NewLine);
 
-		public static readonly byte[] SigFooter = Constants.encodeASCII("-- \n");
+		public static readonly byte[] SigFooter = Constants.encodeASCII("-- "+Environment.NewLine);
 
 		// The files, in the order they were parsed out of the input.
 		private readonly List<FileHeader> _files;

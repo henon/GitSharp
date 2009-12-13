@@ -61,7 +61,7 @@ namespace GitSharp.Core.Exceptions
 			{
 				msg.Append("  ");
 				msg.Append(c.Message);
-				msg.Append("\n");
+				msg.Append(Environment.NewLine);
 			}
 
 			return msg.ToString();

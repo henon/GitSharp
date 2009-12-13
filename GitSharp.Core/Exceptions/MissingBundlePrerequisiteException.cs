@@ -51,7 +51,7 @@ namespace GitSharp.Core.Exceptions
             r.Append("missing prerequisite commits:");
             foreach (ObjectId p in ids)
             {
-                r.Append("\n  ");
+                r.Append(Environment.NewLine+"  ");
                 r.Append(p.Name);
             }
             return r.ToString();

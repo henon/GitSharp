@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
@@ -310,7 +310,7 @@ namespace GitSharp.Core.Transport
         {
             try
             {
-                string @ref = "ref: " + PickHead(updates) + "\n";
+                string @ref = "ref: " + PickHead(updates) + Environment.NewLine;
                 byte[] bytes = Constants.encode(@ref);
                 _dest.writeFile(WalkRemoteObjectDatabase.ROOT_DIR + Constants.HEAD, bytes);
             }

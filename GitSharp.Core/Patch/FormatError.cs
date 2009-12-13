@@ -136,7 +136,7 @@ namespace GitSharp.Core.Patch
 			r.Append(getOffset());
 			r.Append(": ");
 			r.Append(getMessage());
-			r.Append("\n");
+			r.Append(Environment.NewLine);
 			r.Append("  in ");
 			r.Append(getLineText());
 			return r.ToString();

@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
 using GitSharp.Core.Util;
 
@@ -75,7 +76,7 @@ namespace GitSharp.Core
             if (msg == null) 
 				return false;
 			
-            if (!msg.EndsWith("\n")) msg += "\n";
+            if (!msg.EndsWith(Environment.NewLine)) msg += Environment.NewLine;
             using(LockFile lf = new LockFile(_keepFile))
 			{
 	            if (!lf.Lock()) 

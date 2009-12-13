@@ -179,7 +179,7 @@ namespace GitSharp.Core.Transport
                     writeString(w, " ");
                     writeString(w, a.getShortMessage());
 			    }
-                writeString(w, "\n");
+                writeString(w, Environment.NewLine);
 		    }
 
             foreach(var entry in _include)
@@ -187,10 +187,10 @@ namespace GitSharp.Core.Transport
                 entry.Value.CopyTo(tmp, Constants.CHARSET, w);
                 writeString(w, " ");
                 writeString(w, entry.Key);
-                writeString(w, "\n");
+                writeString(w, Environment.NewLine);
             }
 
-            writeString(w, "\n");
+            writeString(w, Environment.NewLine);
 		    w.Flush();
 
 		    _packWriter.writePack(os);

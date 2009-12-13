@@ -220,7 +220,7 @@ namespace GitSharp.Core.Transport
 
             public override string ToString()
             {
-                return _all + "\n" + Constants.CHARSET.GetString(ToArray());
+                return _all + Environment.NewLine + Constants.CHARSET.GetString(ToArray());
             }
         }
 

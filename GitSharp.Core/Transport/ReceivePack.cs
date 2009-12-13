@@ -495,7 +495,7 @@ namespace GitSharp.Core.Transport
 
         private void WriteAdvertisedRef(StringBuilder m)
         {
-            m.Append('\n');
+            m.Append(Environment.NewLine);
             pckOut.WriteString(m.ToString());
         }
 
@@ -745,7 +745,7 @@ namespace GitSharp.Core.Transport
 
             public override void SendString(string s)
             {
-                _pckOut.WriteString(s + "\n");
+                _pckOut.WriteString(s + Environment.NewLine);
             }
         }
 

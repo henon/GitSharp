@@ -18,6 +18,10 @@ namespace GitSharp.Core
 
         public static bool StartsWith(this byte[] buffer, byte[] bufferToCompareWith)
         {
+			if (buffer == null)
+            {
+                throw new ArgumentNullException("buffer");
+            }
             if (bufferToCompareWith == null)
             {
                 throw new ArgumentNullException("bufferToCompareWith");
@@ -43,6 +47,10 @@ namespace GitSharp.Core
 
         public static ParsedLine ReadLine(this byte[] source, int startIndex)
         {
+			if (source == null)
+            {
+                throw new ArgumentNullException("source");
+            }
             if (startIndex < 0)
             {
                 throw new ArgumentOutOfRangeException("startIndex", "Parameter is expected gretaer or equal than zero.");

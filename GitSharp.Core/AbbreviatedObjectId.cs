@@ -179,6 +179,11 @@ namespace GitSharp.Core
 		/// </returns>
 		public int prefixCompare(AnyObjectId other)
 		{
+			if (other == null)
+			{
+				throw new ArgumentNullException("other");
+			}
+			
 			int cmp = NB.CompareUInt32(_w1, mask(1, other.W1));
 			if (cmp != 0)
 			{

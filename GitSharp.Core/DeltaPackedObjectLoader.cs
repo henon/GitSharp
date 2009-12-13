@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -59,6 +59,11 @@ namespace GitSharp.Core
 
         public override void Materialize(WindowCursor curs)
         {
+			if ( curs == null)
+			{
+				throw new System.ArgumentNullException("curs");
+			}
+			
             if (CachedBytes != null)
             {
                 return;

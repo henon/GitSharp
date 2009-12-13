@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
  *
  * All rights reserved.
@@ -57,6 +57,11 @@ namespace GitSharp.Core
 
         public IgnoreHandler(Repository repo)
         {
+			if ( repo == null)
+			{
+				throw new ArgumentNullException("repo");
+			}
+			
             _repo = repo;
 
             try

@@ -96,6 +96,15 @@ namespace GitSharp.Core.Diff
 		/// <param name="b">writing to the supplied stream failed.</param>
 		public void format(Stream @out, FileHeader head, RawText a, RawText b)
 		{
+			if ( head == null)
+			{
+				throw new System.ArgumentNullException("head");
+			}
+			if ( @out == null)
+			{
+				throw new System.ArgumentNullException("out");
+			}
+			
 			// Reuse the existing FileHeader as-is by blindly copying its
 			// header lines, but avoiding its hunks. Instead we recreate
 			// the hunks from the text instances we have been supplied.

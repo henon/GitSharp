@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -87,6 +87,10 @@ namespace GitSharp.Core.DirectoryCache
 		public DirCacheIterator(DirCacheIterator parentIterator, DirCacheTree cacheTree)
 			: base(parentIterator, parentIterator.Path, parentIterator.PathLen + 1)
 		{
+			if ( parentIterator == null)
+			{
+				throw new System.ArgumentNullException("parentIterator");
+			}
 			Cache = parentIterator.Cache;
 			Tree = cacheTree;
 			TreeStart = parentIterator._pointer;

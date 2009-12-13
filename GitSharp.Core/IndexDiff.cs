@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
@@ -131,7 +131,7 @@ namespace GitSharp.Core
                             };
             new IndexTreeWalker(_index, _tree, root, visitor).Walk();
 
-            CheckUntrackedDirectory(root.FullName, "");
+            CheckUntrackedDirectory(root.FullName, string.Empty);
 
             return _anyChanges;
         }

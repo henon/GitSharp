@@ -199,7 +199,7 @@ namespace GitSharp.Core
 
             public override FileBasedConfig getConfigFile(ConfigFileType configType)
             {
-            	string filename = "";
+            	string filename = string.Empty;
             	
                	switch (configType)
             	{

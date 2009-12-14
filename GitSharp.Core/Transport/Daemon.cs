@@ -224,29 +224,30 @@ namespace GitSharp.Core.Transport
 			var t = new Thread(
 				new ThreadStart(delegate
 									{
-										var stream = new NetworkStream(s);
-										try
-										{
-											dc.Execute(new BufferedStream(stream));
-										}
-										catch (IOException)
-										{
-										}
-										catch (SocketException)
-										{
-										}
-										finally
+										using(NetworkStream stream = new NetworkStream(s))
 										{
 											try
 											{
-												stream.Close();
-												s.Close();
+												dc.Execute(new BufferedStream(stream));
 											}
 											catch (IOException)
 											{
 											}
 											catch (SocketException)
 											{
+											}
+											finally
+											{
+												try
+												{
+													s.Close();
+												}
+												catch (IOException)
+												{
+												}
+												catch (SocketException)
+												{
+												}
 											}
 										}
 									}));

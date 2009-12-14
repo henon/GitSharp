@@ -641,9 +641,28 @@ namespace GitSharp.Core.Tests
         public void test029_mapObject()
         {
             Assert.AreEqual((new byte[0].GetType()), db.MapObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"), null).GetType());
-            Assert.AreEqual(typeof(Core.Commit), db.MapObject(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab"), null).GetType());
-            Assert.AreEqual(typeof(Core.Tree), db.MapObject(ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"), null).GetType());
-            Assert.AreEqual(typeof(Core.Tag), db.MapObject(ObjectId.FromString("17768080a2318cd89bba4c8b87834401e2095703"), null).GetType());
+            Assert.AreEqual(typeof(Commit), db.MapObject(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab"), null).GetType());
+            Assert.AreEqual(typeof(Tree), db.MapObject(ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"), null).GetType());
+            Assert.AreEqual(typeof(Tag), db.MapObject(ObjectId.FromString("17768080a2318cd89bba4c8b87834401e2095703"), null).GetType());
+        }
+
+        [Test]
+        [Ignore("Fails on both Windows and Mono. Mono issue is related to WinterDom.IO.FileMap internals relying on kernel32.dll calls (which is not that Mono compatible :) ). Windows issue has to be investigated.")]
+        public void test029_mapObject_using_memory_mapped_file()
+        {
+            WindowCacheConfig c = new WindowCacheConfig();
+            c.PackedGitLimit = (128 * WindowCacheConfig.Kb);
+            c.PackedGitWindowSize = (8 * WindowCacheConfig.Kb);
+            c.PackedGitMMAP = (true);
+            c.DeltaBaseCacheLimit = (8 * WindowCacheConfig.Kb);
+            WindowCache.reconfigure(c);
+
+            var repo = createWorkRepository();
+
+            Assert.AreEqual((new byte[0].GetType()), repo.MapObject(ObjectId.FromString("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259"), null).GetType());
+            Assert.AreEqual(typeof(Commit), repo.MapObject(ObjectId.FromString("540a36d136cf413e4b064c2b0e0a4db60f77feab"), null).GetType());
+            Assert.AreEqual(typeof(Tree), repo.MapObject(ObjectId.FromString("aabf2ffaec9b497f0950352b3e582d73035c2035"), null).GetType());
+            Assert.AreEqual(typeof(Tag), repo.MapObject(ObjectId.FromString("17768080a2318cd89bba4c8b87834401e2095703"), null).GetType());
         }
 
         [Test]

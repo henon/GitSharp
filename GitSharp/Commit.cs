@@ -49,6 +49,7 @@ using System.IO;
 using GitSharp.Core.TreeWalk;
 using GitSharp.Core.TreeWalk.Filter;
 using System.Diagnostics;
+using System.Collections;
 
 namespace GitSharp
 {
@@ -272,20 +273,32 @@ namespace GitSharp
         {
             get
             {
-                var ancestors = new Dictionary<ObjectId, Commit>();
-                CollectAncestorIdsRecursive(this, ancestors);
-                return ancestors.Values.ToArray();
+                return GetAncestorIds (this);
             }
         }
 
-        private static void CollectAncestorIdsRecursive(Commit commit, IDictionary<ObjectId, Commit> ancestors)
+        private static IList<Commit> GetAncestorIds(Commit commit)
         {
-            foreach (var parent in commit.InternalCommit.ParentIds.Where(id => !ancestors.ContainsKey(id)).Select(id => new Commit(commit._repo, id)))
+            Stack<Commit> ancestorsStack = new Stack<Commit> ();
+            Dictionary<ObjectId, Commit> ancestors = new Dictionary<ObjectId,Commit> ();
+
+            ancestorsStack.Push (commit);
+
+            while (ancestorsStack.Count > 0)
             {
-                var parentCommit = parent;
-                ancestors[parentCommit._id] = parentCommit;
-                CollectAncestorIdsRecursive(parentCommit, ancestors);
+                Commit currentCommit = ancestorsStack.Pop ();
+                var parentCommits = currentCommit.InternalCommit.ParentIds
+                                                .Where(id => !ancestors.ContainsKey(id))
+                                                .Select(id => new Commit(commit._repo, id));
+
+                foreach (Commit parentCommit in parentCommits)
+                {
+                	ancestorsStack.Push (parentCommit);
+                    ancestors[parentCommit._id] = parentCommit;
+                }
             }
+
+            return ancestors.Values.ToList ();
         }
 
         /// <summary>

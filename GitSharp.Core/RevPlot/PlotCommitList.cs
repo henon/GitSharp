@@ -89,10 +89,16 @@ namespace GitSharp.Core.RevPlot
         /// <param name="currCommit">the commit the caller needs to get the lanes from.</param>
         /// <param name="result">collection to add the passing lanes into.</param>
         public void findPassingThrough(PlotCommit<L> currCommit,
-                                       Collection<L> result) {
+                                       Collection<L> result) 
+		{
+			if (currCommit == null)
+				throw new ArgumentNullException ("currCommit");
+        	if (result == null)
+				throw new ArgumentNullException ("result");
+			
             foreach (PlotLane p in currCommit.passingLanes)
                 result.Add((L) p);
-                                       }
+        }
 
         protected override void enter(int index, PlotCommit<L> currCommit) {
             setupChildren(currCommit);

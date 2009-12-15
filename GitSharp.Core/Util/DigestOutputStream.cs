@@ -119,6 +119,8 @@ namespace GitSharp.Core.Util
 
         public void Write(byte[] buffer)
         {
+			if (buffer==null)
+				throw new ArgumentNullException("buffer");
             Write(buffer, 0, buffer.Length);
         }
     }

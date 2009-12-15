@@ -87,6 +87,9 @@ namespace GitSharp.Core.RevPlot
 	    /// <param name="commit">the commit to render in this cell. Must not be null.</param>
 	    /// <param name="h">total height (in pixels) of this cell.</param>
 	    protected void paintCommit(PlotCommit<TLane> commit, int h) {
+			if (commit == null)
+				throw new ArgumentNullException ("commit");
+			
 			int dotSize = computeDotSize(h);
 			TLane myLane = commit.getLane();
 			int myLaneX = laneC(myLane);

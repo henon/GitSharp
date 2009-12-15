@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -141,6 +141,9 @@ namespace GitSharp.Core.Util
 
         public void write(byte[] bytes)
         {
+			if (bytes == null)
+				throw new ArgumentNullException("bytes");
+			
             write(bytes, 0, bytes.Length);
         }
 
@@ -155,6 +158,9 @@ namespace GitSharp.Core.Util
          */
         public void copy(Stream @in)
         {
+			if (@in == null)
+				throw new ArgumentNullException ("in");
+			
             if (_blocks != null)
             {
                 for (; ; )
@@ -307,6 +313,8 @@ namespace GitSharp.Core.Util
          */
         public void writeTo(Stream os, ProgressMonitor pm)
         {
+			if (os == null)
+				throw new ArgumentNullException ("os");
             if (pm == null)
                 pm = new NullProgressMonitor();
             if (_blocks != null)

@@ -97,6 +97,9 @@ namespace GitSharp.Core.Util
 		/// <seealso cref="dequote(byte[], int, int)"/>
 	    public string dequote(string instr)
         {
+			if (instr == null)
+				throw new ArgumentNullException ("instr");
+			
 		    byte[] b = Constants.encode(instr);
 		    return dequote(b, 0, b.Length);
 	    }
@@ -137,6 +140,8 @@ namespace GitSharp.Core.Util
         {
 		    public override string quote(string instr)
             {
+				if (instr == null)
+					throw new ArgumentNullException ("instr");
 			    StringBuilder r = new StringBuilder();
 			    r.Append('\'');
 			    int start = 0, i = 0;
@@ -161,6 +166,8 @@ namespace GitSharp.Core.Util
 
 		    public override string dequote(byte[] instr, int offset, int end)
             {
+				if (instr==null)
+					throw new ArgumentNullException("instr");
 			    bool inquote = false;
 			    byte[] r = new byte[end - offset];
 			    int rPtr = 0;
@@ -262,6 +269,8 @@ namespace GitSharp.Core.Util
 
 		    public override string quote(string instr)
             {
+				if (instr == null)
+					throw new ArgumentNullException ("instr");
 			    if (instr.Length == 0)
 				    return "\"\"";
 			    bool reuse = true;
@@ -299,6 +308,8 @@ namespace GitSharp.Core.Util
 
 		    public override string dequote(byte[] instr, int offset, int end)
             {
+				if (instr==null)
+					throw new ArgumentNullException("instr");
 			    if (2 <= end - offset && instr[offset] == '"' && instr[end - 1] == '"')
 				    return dq(instr, offset + 1, end - 1);
 			    return RawParseUtils.decode(Constants.CHARSET, instr, offset, end);

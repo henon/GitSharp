@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
@@ -71,8 +71,10 @@ namespace GitSharp.Core.Util
          */
         public RawSubStringPattern(string patternText)
         {
+			if (patternText == null)
+				throw new ArgumentNullException ("patternText");
             if (patternText.Length == 0)
-                throw new ArgumentException("Cannot match on empty string.");
+                throw new ArgumentException("Cannot match on empty string.","patternText");
             needleString = patternText;
             byte[] b = Constants.encode(patternText);
             needle = new byte[b.Length];
@@ -92,6 +94,9 @@ namespace GitSharp.Core.Util
          */
         public int match(RawCharSequence rcs)
         {
+			if (rcs == null)
+				throw new ArgumentNullException ("rcs");
+			
             int needleLen = needle.Length;
             byte first = needle[0];
 

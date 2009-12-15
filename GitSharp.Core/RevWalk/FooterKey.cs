@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  *
  * All rights reserved.
@@ -66,6 +66,9 @@ namespace GitSharp.Core.RevWalk
 		/// <param _name="keyName">Name of the footer line.</param>
 		public FooterKey(string keyName)
 		{
+			if (keyName == null)
+				throw new System.ArgumentNullException ("keyName");
+			
 			_name = keyName;
 			_raw = Constants.encode(keyName.ToLowerInvariant());
 		}

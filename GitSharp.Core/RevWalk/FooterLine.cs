@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  *
  * All rights reserved.
@@ -78,6 +78,9 @@ namespace GitSharp.Core.RevWalk
 		/// </returns>
 		public bool Matches(FooterKey key)
 		{
+			if (key == null)
+				throw new System.ArgumentNullException ("key");
+			
 			byte[] kRaw = key.Raw;
 			int len = kRaw.Length;
 			int bPtr = _keyStart;

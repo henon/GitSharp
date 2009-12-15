@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -124,6 +124,9 @@ namespace GitSharp.Core
 		/// <returns>Location of the object, if it were to exist as a loose object.</returns>
 		public FileInfo fileFor(AnyObjectId objectId)
 		{
+			if (objectId == null)
+				throw new ArgumentNullException ("objectId");
+			
 			return fileFor(objectId.Name);
 		}
 
@@ -145,6 +148,11 @@ namespace GitSharp.Core
 		/// </exception>
 		public void openPack(FileInfo pack, FileInfo idx)
 		{
+			if (pack == null)
+				throw new ArgumentNullException ("pack");
+			if (idx == null)
+				throw new ArgumentNullException ("idx");
+			
 			string p = pack.Name;
 			string i = idx.Name;
 
@@ -235,6 +243,9 @@ namespace GitSharp.Core
 
 		public override void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
 		{
+			if (@out == null)
+				throw new ArgumentNullException ("out");
+			
 			PackList pList = _packList.get();
 			while (true)
 			{

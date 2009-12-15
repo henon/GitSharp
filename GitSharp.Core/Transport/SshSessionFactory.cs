@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -59,6 +59,9 @@ namespace GitSharp.Core.Transport
 
         public void releaseSession(Session session)
         {
+			if (session == null)
+				throw new System.ArgumentNullException ("session");
+			
             if (session.isConnected())
                 session.disconnect();
         }

@@ -73,6 +73,11 @@ namespace GitSharp.Core.Transport
         ///	 * <exception cref="TransportException"> </exception>
         public PushProcess(Transport transport, IEnumerable<RemoteRefUpdate> toPush)
         {
+			if (transport == null)
+				throw new ArgumentNullException ("transport");
+        	if (toPush == null)
+				throw new ArgumentNullException ("toPush");
+			
             _walker = new RevWalk.RevWalk(transport.Local);
             _transport = transport;
             _toPush = new Dictionary<string, RemoteRefUpdate>();
@@ -107,6 +112,9 @@ namespace GitSharp.Core.Transport
         /// </exception>
         public PushResult execute(ProgressMonitor monitor)
         {
+			if (monitor == null)
+				throw new ArgumentNullException ("monitor");
+			
             monitor.BeginTask(PROGRESS_OPENING_CONNECTION, ProgressMonitor.UNKNOWN);
             _connection = _transport.openPush();
 

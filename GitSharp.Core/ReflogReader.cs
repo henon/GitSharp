@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Robin Rosenberg
  *
  * All rights reserved.
@@ -126,6 +126,8 @@ namespace GitSharp.Core
 		/// </summary>
 		public ReflogReader(Repository db, string refName)
 		{
+			if (db == null)
+				throw new ArgumentNullException ("db");
 			_logName = new FileInfo(
 				Path.Combine(
 					db.Directory.FullName,

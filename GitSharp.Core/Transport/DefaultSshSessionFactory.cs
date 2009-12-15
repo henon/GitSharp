@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -45,6 +45,11 @@ namespace GitSharp.Core.Transport
     {
         protected override void configure(OpenSshConfig.Host hc, Session session)
         {
+			if (hc == null)
+				throw new ArgumentNullException ("hc");
+        	if (session == null)
+				throw new ArgumentNullException ("session");
+			
             if (!hc.isBatchMode())
             {
                 session.setUserInfo(UserInfoProvider.Provider);

@@ -63,11 +63,17 @@ namespace GitSharp.Core
 
         public static void register(Repository db)
         {
+			if (db == null)
+				throw new System.ArgumentNullException ("db");
+			
             Cache.registerRepository(FileKey.exact(db.Directory), db);
         }
 
         public static void close(Repository db)
         {
+			if (db == null)
+				throw new System.ArgumentNullException ("db");
+			
             Cache.unregisterRepository(FileKey.exact(db.Directory));
         }
 

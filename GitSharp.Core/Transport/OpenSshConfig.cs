@@ -324,6 +324,9 @@ namespace GitSharp.Core.Transport
 
             public void copyFrom(Host src)
             {
+				if (src == null)
+					throw new ArgumentNullException("src");
+				
                 if (hostName == null)
                     hostName = src.hostName;
                 if (port == 0)

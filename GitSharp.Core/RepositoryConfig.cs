@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
@@ -52,6 +52,8 @@ namespace GitSharp.Core
         public RepositoryConfig(Repository repo)
             : this(SystemReader.getInstance().openUserConfig(), new FileInfo(Path.Combine(repo.Directory.FullName, "config")))
         {
+			if (repo == null)
+				throw new System.ArgumentNullException ("repo");
             
         }
 

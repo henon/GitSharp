@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, JetBrains s.r.o.
@@ -80,6 +80,9 @@ namespace GitSharp.Core.Transport
 
         protected JSch getJSch(OpenSshConfig.Host hc)
         {
+			if (hc == null)
+				throw new System.ArgumentNullException ("hc");
+			
             JSch def = getDefaultJSch();
             FileInfo identityFile = hc.getIdentityFile();
             if (identityFile == null)

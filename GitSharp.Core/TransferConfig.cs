@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
@@ -54,6 +54,9 @@ namespace GitSharp.Core
 
         public TransferConfig(Config rc)
         {
+			if (rc == null)
+				throw new System.ArgumentNullException ("rc");
+			
             fsckObjects = rc.getBoolean("receive", "fsckobjects", false);
         }
 

@@ -75,6 +75,8 @@ namespace GitSharp.Core.Transport
         /// </param>
 	    public void include(String name, AnyObjectId id) 
         {
+			if (id == null)
+				throw new ArgumentNullException ("id");
 		    if (!Repository.IsValidRefName(name))
 		    {
 		    	throw new ArgumentException("Invalid ref name: " + name);
@@ -96,6 +98,9 @@ namespace GitSharp.Core.Transport
         /// <param name="r">the ref to include.</param>
 	    public void include(Ref r) 
         {
+			if (r == null)
+				throw new ArgumentNullException ("r");
+			
 		    include(r.Name, r.ObjectId);
 	    }
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
  *
  * All rights reserved.
@@ -112,6 +112,9 @@ namespace GitSharp.Core
 
         public void AddEntry(SubmoduleEntry entry)
         {
+			if (entry == null)
+				throw new System.ArgumentNullException ("entry");
+			
             setString("submodule", entry.Name, "path", entry.Path);
             setString("submodule", entry.Name, "url", entry.Url.ToPrivateString());
             if (entry.Update != SubmoduleEntry.UpdateMethod.Checkout)

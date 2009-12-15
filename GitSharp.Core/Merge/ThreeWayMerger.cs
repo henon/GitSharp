@@ -111,6 +111,9 @@ namespace GitSharp.Core.Merge
 
 		public override bool Merge(AnyObjectId[] tips)
 		{
+			if (tips == null)
+				throw new System.ArgumentNullException ("tips");
+			
 			return tips.Length != 2 ? false : base.Merge(tips);
 		}
 

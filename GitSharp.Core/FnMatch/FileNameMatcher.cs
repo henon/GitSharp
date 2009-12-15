@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Florian Köberle <florianskarten@web.de>
  * Copyright (C) 2009, Adriano Machado <adriano.m.machado@hotmail.com>
  *
@@ -135,6 +135,8 @@ namespace GitSharp.Core.FnMatch
 		public FileNameMatcher(FileNameMatcher other)
 			: this(other._headsStartValue, other._heads)
 		{
+			if (other == null)
+				throw new System.ArgumentNullException ("other");
 		}
 
 		private static IList<IHead> CreateHeadsStartValues(string patternString, char? invalidWildgetCharacter)
@@ -328,6 +330,9 @@ namespace GitSharp.Core.FnMatch
 		///  </param>
 		public void Append(string stringToMatch)
 		{
+			if (stringToMatch == null)
+				throw new System.ArgumentNullException ("stringToMatch");
+			
 			for (int i = 0; i < stringToMatch.Length; i++)
 			{
 				char c = stringToMatch[i];

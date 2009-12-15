@@ -106,6 +106,9 @@ namespace GitSharp.Core.DirectoryCache
         DirCacheBuildIterator(DirCacheBuildIterator parentIterator, DirCacheTree cacheTree)
             : base(parentIterator, cacheTree)
         {
+			if (parentIterator == null)
+				throw new System.ArgumentNullException ("parentIterator");
+			
             _builder = parentIterator._builder;
         }
 

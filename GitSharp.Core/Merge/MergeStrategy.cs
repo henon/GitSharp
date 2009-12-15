@@ -86,6 +86,9 @@ namespace GitSharp.Core.Merge
 		/// </exception>
 		public static void Register(MergeStrategy imp)
 		{
+			if (imp == null)
+				throw new ArgumentNullException ("imp");
+			
 			Register(imp.Name, imp);
 		}
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Jonas Fonseca <fonseca@diku.dk>
@@ -55,6 +55,9 @@ namespace GitSharp.Core
 
         public override void Accept(TreeVisitor tv, int flags)
         {
+            if (tv == null)
+                throw new System.ArgumentNullException ("tv");
+
             if ((MODIFIED_ONLY & flags) == MODIFIED_ONLY && !IsModified)
             {
                 return;

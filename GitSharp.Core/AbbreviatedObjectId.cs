@@ -96,6 +96,8 @@ namespace GitSharp.Core
 		/// <returns>the converted object id.</returns>
 		public static AbbreviatedObjectId FromString(string str)
 		{
+			if (str == null)
+				throw new ArgumentNullException ("str");
 			if (str.Length > AnyObjectId.StringLength)
 			{
 				throw new ArgumentException("Invalid id: " + str);

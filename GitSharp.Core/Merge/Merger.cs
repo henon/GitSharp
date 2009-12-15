@@ -142,6 +142,9 @@ namespace GitSharp.Core.Merge
 		/// </exception>
 		public virtual bool Merge(AnyObjectId[] tips)
 		{
+			if (tips == null)
+				throw new ArgumentNullException ("tips");
+			
 			_sourceObjects = new RevObject[tips.Length];
 			for (int i = 0; i < tips.Length; i++)
 				_sourceObjects[i] = _walk.parseAny(tips[i]);

@@ -268,7 +268,7 @@ namespace GitSharp.Core.Transport
 				{
 					if (_commonBase.Count == 0 || _multiAck)
 					{
-						_pckOut.WriteString("NAK"+Environment.NewLine);
+						_pckOut.WriteString("NAK\n");
 					}
 					_pckOut.Flush();
 				}
@@ -281,18 +281,18 @@ namespace GitSharp.Core.Transport
 						if (_multiAck)
 						{
 							lastName = name;
-							_pckOut.WriteString("ACK " + name + " continue"+Environment.NewLine);
+							_pckOut.WriteString("ACK " + name + " continue\n");
 						}
 						else if (_commonBase.Count == 1)
 						{
-							_pckOut.WriteString("ACK " + name + Environment.NewLine);
+							_pckOut.WriteString("ACK " + name + "\n");
 						}
 					}
 					else
 					{
 						if (_multiAck && OkToGiveUp())
 						{
-							_pckOut.WriteString("ACK " + name + " continue"+Environment.NewLine);
+							_pckOut.WriteString("ACK " + name + " continue\n");
 						}
 					}
 				}
@@ -300,11 +300,11 @@ namespace GitSharp.Core.Transport
 				{
 					if (_commonBase.Count == 0)
 					{
-						_pckOut.WriteString("NAK"+Environment.NewLine);
+						_pckOut.WriteString("NAK\n");
 					}
 					else if (_multiAck)
 					{
-						_pckOut.WriteString("ACK " + lastName + Environment.NewLine);
+						_pckOut.WriteString("ACK " + lastName + "\n");
 					}
 
 					break;

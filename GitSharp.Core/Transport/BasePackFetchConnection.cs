@@ -284,7 +284,7 @@ namespace GitSharp.Core.Transport
                 RevCommit c = _walk.next();
                 if (c == null) break;
 
-                pckOut.WriteString("have " + c.getId().Name + Environment.NewLine);
+                pckOut.WriteString("have " + c.getId().Name + "\n");
                 havesSent++;
                 havesSinceLastContinue++;
 
@@ -343,7 +343,7 @@ namespace GitSharp.Core.Transport
 
             if (monitor.IsCancelled)
                 throw new CancelledException();
-            pckOut.WriteString("done"+Environment.NewLine);
+            pckOut.WriteString("done\n");
             pckOut.Flush();
 
             if (!receivedAck)

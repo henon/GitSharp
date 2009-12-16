@@ -207,10 +207,10 @@ namespace GitSharp.Core.Merge
 			RevCommit base2 = _walk.next();
 			if (base2 != null)
 			{
-				throw new IOException("Multiple merge bases for:" +Environment.NewLine+ "  "
-						+ _sourceCommits[aIdx].Name +Environment.NewLine+ "  "
-						+ _sourceCommits[bIdx].Name + "found:" +Environment.NewLine +"  "
-						+ base1.Name +Environment.NewLine+ "  " + base2.Name);
+				throw new IOException("Multiple merge bases for:" + "\n  "
+						+ _sourceCommits[aIdx].Name + "\n  "
+						+ _sourceCommits[bIdx].Name + "found:" + "\n  "
+						+ base1.Name + "\n  " + base2.Name);
 			}
 
 			return OpenTree(base1.Tree);

@@ -97,14 +97,14 @@ namespace GitSharp.Core
                 r.ObjectId.CopyTo(tmp, w);
                 w.Append('\t');
                 w.Append(r.Name);
-                w.Append(Environment.NewLine);
+                w.Append('\n');
 
                 if (r.PeeledObjectId != null)
                 {
                     r.PeeledObjectId.CopyTo(tmp, w);
                     w.Append('\t');
                     w.Append(r.Name);
-                    w.Append("^{}"+Environment.NewLine);
+                    w.Append("^{}\n");
                 }
             }
             writeFile(Constants.INFO_REFS, Constants.encode(w.ToString()));
@@ -139,7 +139,7 @@ namespace GitSharp.Core
                 w.Append("# pack-refs with:");
                 if (peeled)
                     w.Append(" peeled");
-                w.Append(Environment.NewLine);
+                w.Append('\n');
             }
 
             char[] tmp = new char[Constants.OBJECT_ID_LENGTH * 2];
@@ -151,13 +151,13 @@ namespace GitSharp.Core
                 r.ObjectId.CopyTo(tmp, w);
                 w.Append(' ');
                 w.Append(r.Name);
-                w.Append(Environment.NewLine);
+                w.Append('\n');
 
                 if (r.PeeledObjectId != null)
                 {
                     w.Append('^');
                     r.PeeledObjectId.CopyTo(tmp, w);
-                    w.Append(Environment.NewLine);
+                    w.Append('\n');
                 }
             }
             writeFile(Constants.PACKED_REFS, Constants.encode(w.ToString()));

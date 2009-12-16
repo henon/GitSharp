@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2008, Johannes E. Schindelin <johannes.schindelin@gmx.de>
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
@@ -50,7 +50,7 @@ namespace GitSharp.Core.Diff
 	public class DiffFormatter
 	{
 		private static readonly byte[] NoNewLine = 
-			Constants.encodeASCII("\\ No newline at end of file"+Environment.NewLine);
+			Constants.encodeASCII("\\ No newline at end of file\n");
 
 		private int _context;
 

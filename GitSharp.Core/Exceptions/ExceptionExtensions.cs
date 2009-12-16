@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text;
 
 namespace GitSharp.Core.Exceptions
@@ -22,7 +22,7 @@ namespace GitSharp.Core.Exceptions
         {
             var stars = new string('*', 80);
             sb.AppendLine(indent + stars);
-			sb.AppendFormat(indent + "{0}: \"{1}\""+Environment.NewLine, exception.GetType().Name, exception.Message);
+			sb.AppendFormat(indent + "{0}: \"{1}\"\n", exception.GetType().Name, exception.Message);
 			sb.AppendLine(indent + new string('-', 80));
 
             if (exception.InnerException != null)
@@ -45,7 +45,7 @@ namespace GitSharp.Core.Exceptions
                     {
                         string srcFile = parts[0];
                         int lineNr = int.Parse(parts[1]);
-						sb.AppendFormat(indent + "  {0}({1},1):   {2}"+Environment.NewLine, srcFile.TrimEnd(':'), lineNr, classInfo);
+						sb.AppendFormat(indent + "  {0}({1},1):   {2}\n", srcFile.TrimEnd(':'), lineNr, classInfo);
                     }
                     else
                     {

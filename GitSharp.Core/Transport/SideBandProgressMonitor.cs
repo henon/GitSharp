@@ -129,7 +129,7 @@ namespace GitSharp.Core.Transport
                 m.Append(eol);
             else
             {
-                m.Append("   "+Environment.NewLine);
+                m.Append("   \r");
             }
             writer.Write(m.ToString());
             writer.Flush();
@@ -145,9 +145,9 @@ namespace GitSharp.Core.Transport
             if (output)
             {
                 if (totalWork < 0)
-                    display(lastWorked, ", done"+Environment.NewLine);
+                    display(lastWorked, ", done\n");
                 else
-                    display(totalWork, Environment.NewLine);
+                    display(totalWork, "\n");
             }
             output = false;
             msg = null;

@@ -164,7 +164,7 @@ namespace GitSharp.Core
 		{
 			lock(locker)
 			{
-				byte[] content = Constants.encode("ref: " + target + Environment.NewLine);
+				byte[] content = Constants.encode("ref: " + target + "\n");
 				LockAndWriteFile(FileForRef(name), content);
 				UncacheSymRef(name);
 				Repository.fireRefsMaybeChanged();

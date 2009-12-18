@@ -70,6 +70,8 @@ namespace GitSharp.Core.Transport
 
         public RemoteRefUpdate(Repository localDb, string srcRef, string remoteName, bool forceUpdate, string localName, ObjectId expectedOldObjectId)
         {
+			if (localDb == null)
+				throw new ArgumentNullException ("localDb");
             if (remoteName == null)
                 throw new ArgumentException("Remote name can't be null.");
 
@@ -97,6 +99,8 @@ namespace GitSharp.Core.Transport
         public RemoteRefUpdate(RemoteRefUpdate baseUpdate, ObjectId newExpectedOldObjectId)
             : this(baseUpdate._localDb, baseUpdate.SourceRef, baseUpdate.RemoteName, baseUpdate.ForceUpdate, (baseUpdate.TrackingRefUpdate == null ? null : baseUpdate.TrackingRefUpdate.LocalName), newExpectedOldObjectId)
         {
+			if (baseUpdate == null)
+				throw new ArgumentNullException ("baseUpdate");
         }
 
         public bool IsExpectingOldObjectId

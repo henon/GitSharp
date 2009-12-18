@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -88,6 +88,8 @@ namespace GitSharp.Core.Transport
 		/// </returns>
 		public static List<RemoteConfig> GetAllRemoteConfigs(RepositoryConfig rc)
 		{
+			if (rc == null)
+				throw new ArgumentNullException ("rc");
 			var names = new List<string>(rc.getSubsections(Section));
 			names.Sort();
 
@@ -112,6 +114,8 @@ namespace GitSharp.Core.Transport
 
 		public RemoteConfig(Config rc, string remoteName)
 		{
+			if (rc == null)
+				throw new ArgumentNullException ("rc");
 			Name = remoteName;
 
 			string[] vlst = rc.getStringList(Section, Name, KeyUrl);
@@ -157,6 +161,8 @@ namespace GitSharp.Core.Transport
 
 		public void Update(Config rc)
 		{
+			if (rc == null)
+				throw new ArgumentNullException ("rc");
 			var vlst = new List<string>();
 
 			vlst.Clear();

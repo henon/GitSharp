@@ -47,6 +47,8 @@ namespace GitSharp.Core.Transport
 
         public static bool CanHandle(URIish uri)
         {
+			if (uri == null)
+				throw new ArgumentNullException ("uri");
             if (uri.Host != null || uri.Port > 0 || uri.User != null || uri.Pass != null || uri.Path == null)
                 return false;
 

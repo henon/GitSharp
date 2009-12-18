@@ -69,6 +69,8 @@ namespace GitSharp.Core.Transport
 		/// <param name="u">The source URL to convert from.</param>
 		public URIish(Uri u)
 		{
+			if (u == null)
+				throw new ArgumentNullException ("u");
 			Scheme = u.Scheme;
 			Path = u.AbsolutePath;
 			Port = u.Port;

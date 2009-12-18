@@ -313,6 +313,8 @@ namespace GitSharp.Core.TreeWalk
 		 */
 		public void reset(AnyObjectId[] ids)
 		{
+			if (ids==null)
+				throw new ArgumentNullException("ids");
 			int oldLen = _trees.Length;
 			int newLen = ids.Length;
 			AbstractTreeIterator[] r = newLen == oldLen ? _trees : new AbstractTreeIterator[newLen];
@@ -398,6 +400,8 @@ namespace GitSharp.Core.TreeWalk
 		 */
 		public int addTree(AbstractTreeIterator parentIterator)
 		{
+			if (parentIterator == null)
+				throw new ArgumentNullException ("parentIterator");
 			int n = _trees.Length;
 			var newTrees = new AbstractTreeIterator[n + 1];
 
@@ -703,6 +707,8 @@ namespace GitSharp.Core.TreeWalk
 		 */
 		public int isPathPrefix(byte[] p, int pLen)
 		{
+			if (p==null)
+				throw new ArgumentNullException("p");
 			AbstractTreeIterator t = _currentHead;
 			byte[] c = t.Path;
 			int cLen = t.PathLen;
@@ -759,6 +765,8 @@ namespace GitSharp.Core.TreeWalk
 		 */
 		public bool isPathSuffix(byte[] p, int pLen)
 		{
+			if (p==null)
+				throw new ArgumentNullException("p");
 			AbstractTreeIterator t = _currentHead;
 			byte[] c = t.Path;
 			int cLen = t.PathLen;
@@ -957,6 +965,8 @@ namespace GitSharp.Core.TreeWalk
 
 		public static string pathOf(AbstractTreeIterator t)
 		{
+			if (t == null)
+				throw new ArgumentNullException ("t");
 			return RawParseUtils.decode(Constants.CHARSET, t.Path, 0, t.PathLen);
 		}
 	}

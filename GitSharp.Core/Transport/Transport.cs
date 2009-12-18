@@ -87,6 +87,8 @@ namespace GitSharp.Core.Transport
 
 		public static Transport Open(Repository local, string remote)
 		{
+			if (local == null)
+				throw new ArgumentNullException ("local");
 			var cfg = new RemoteConfig(local.Config, remote);
 			List<URIish> uris = cfg.URIs;
 			if (uris.Count == 0)
@@ -98,6 +100,8 @@ namespace GitSharp.Core.Transport
 
 		public static List<Transport> openAll(Repository local, string remote)
 		{
+			if (local == null)
+				throw new ArgumentNullException ("local");
 			var cfg = new RemoteConfig(local.Config, remote);
 			List<URIish> uris = cfg.URIs;
 			if (uris.isEmpty())
@@ -117,6 +121,8 @@ namespace GitSharp.Core.Transport
 		/// <returns></returns>
 		public static Transport Open(Repository local, RemoteConfig cfg)
 		{
+			if (cfg == null)
+				throw new ArgumentNullException ("cfg");
 			if (cfg.URIs.Count == 0)
 			{
 				throw new ArgumentException("Remote config \"" + cfg.Name + "\" has no URIs associated");
@@ -129,6 +135,8 @@ namespace GitSharp.Core.Transport
 
 		public static List<Transport> openAll(Repository local, RemoteConfig cfg)
 		{
+			if (cfg == null)
+				throw new ArgumentNullException ("cfg");
 			List<URIish> uris = cfg.URIs;
 			var tranports = new List<Transport>(uris.Count);
 			foreach (URIish uri in uris)
@@ -274,6 +282,8 @@ namespace GitSharp.Core.Transport
 
 		public void ApplyConfig(RemoteConfig cfg)
 		{
+			if (cfg == null)
+				throw new ArgumentNullException ("cfg");
 			OptionUploadPack = cfg.UploadPack;
 			_fetchSpecs = cfg.Fetch;
 			TagOpt = cfg.TagOpt;

@@ -71,6 +71,8 @@ namespace GitSharp.Core.TreeWalk.Filter
          */
         public static PathFilter create(string path)
         {
+			if (path == null)
+				throw new ArgumentNullException ("path");
             while (path.EndsWith("/"))
                 path = path.Slice(0, path.Length - 1);
             if (path.Length == 0)
@@ -90,6 +92,8 @@ namespace GitSharp.Core.TreeWalk.Filter
 
         public override bool include(TreeWalk walker)
         {
+			if (walker == null)
+				throw new ArgumentNullException ("walker");
             return walker.isPathPrefix(pathRaw, pathRaw.Length) == 0;
         }
 

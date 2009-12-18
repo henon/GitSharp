@@ -52,6 +52,8 @@ namespace GitSharp.Core.Transport
     {
         public static bool canHandle(URIish uri)
         {
+			if (uri == null)
+				throw new ArgumentNullException ("uri");
             if (!uri.IsRemote)
             {
                 return false;

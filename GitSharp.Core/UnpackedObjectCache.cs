@@ -74,6 +74,8 @@ namespace GitSharp.Core
 
         public static void Reconfigure(WindowCacheConfig cfg)
         {
+			if (cfg == null)
+				throw new ArgumentNullException ("cfg");
 			lock(locker)
 			{
 	            int dbLimit = cfg.DeltaBaseCacheLimit;
@@ -106,6 +108,8 @@ namespace GitSharp.Core
         public static void store(PackFile pack, long position,
                  byte[] data, int objectType)
         {
+			if (data==null)
+				throw new ArgumentNullException("data");
 			lock(locker)
 			{
 	            if (data.Length > _maxByteCount)

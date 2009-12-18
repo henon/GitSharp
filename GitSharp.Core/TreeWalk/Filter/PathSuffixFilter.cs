@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -66,6 +66,8 @@ namespace GitSharp.Core.TreeWalk.Filter
          */
         public static PathSuffixFilter create(string path)
         {
+			if (path == null)
+				throw new ArgumentNullException ("path");
             if (path.Length == 0)
                 throw new ArgumentException("Empty path not permitted.");
             return new PathSuffixFilter(path);
@@ -88,6 +90,8 @@ namespace GitSharp.Core.TreeWalk.Filter
 
         public override bool include(TreeWalk walker)
         {
+			if (walker == null)
+				throw new ArgumentNullException ("walker");
             if (walker.isSubtree())
                 return true;
             else

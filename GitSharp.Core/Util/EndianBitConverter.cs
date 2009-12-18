@@ -547,7 +547,7 @@ namespace MiscUtil.Conversion
 			}
 			if (buffer.Length < index+bytes)
 			{
-				throw new ArgumentOutOfRangeException("Buffer not big enough for value");
+				throw new ArgumentOutOfRangeException("buffer","Buffer not big enough for value");
 			}
 			CopyBytesImpl(value, bytes, buffer, index);
 		}

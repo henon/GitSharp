@@ -303,11 +303,11 @@ namespace MiscUtil.Conversion
 		/// position, into a long, using the bytes as the least significant part of the long.
 		/// By the time this is called, the arguments have been checked for validity.
 		/// </summary>
-		/// <param name="value">The bytes to convert</param>
+		/// <param name="buffer">The bytes to convert</param>
 		/// <param name="startIndex">The index of the first byte to convert</param>
 		/// <param name="bytesToConvert">The number of bytes to use in the conversion</param>
 		/// <returns>The converted number</returns>
-        protected abstract long FromBytes(byte[] value, int startIndex, int bytesToConvert);
+        protected abstract long FromBytes(byte[] buffer, int startIndex, int bytesToConvert);
 		#endregion
 
 		#region ToString conversions

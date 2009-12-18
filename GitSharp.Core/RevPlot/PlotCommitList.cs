@@ -71,10 +71,10 @@ namespace GitSharp.Core.RevPlot
             activeLanes.Clear();
         }
 
-        public override void Source(RevWalk.RevWalk w) {
-            if (!(w is PlotWalk))
+        public override void Source(RevWalk.RevWalk walker) {
+            if (!(walker is PlotWalk))
                 throw new ArgumentException("Not a " + typeof(PlotWalk).FullName);
-            base.Source(w);
+            base.Source(walker);
         }
         
         /// <summary>

@@ -35,6 +35,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.IO;
 using GitSharp.Core.Transport;
 
@@ -43,6 +44,7 @@ namespace GitSharp.Core
 
     public class SubmoduleEntry
     {
+		[Serializable]
         public enum UpdateMethod
         {
             Checkout,

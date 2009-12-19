@@ -45,6 +45,10 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Tamir.SharpSSH, Version=1.1.1.13, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\Tamir.SharpSSH.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs">
@@ -84,13 +88,13 @@
     <Compile Include="Tag.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="RepositoryStatus.cs" />
+    <Compile Include="UserInfoProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GitSharp.Core\GitSharp.Core.csproj">
       <Project>{C46EDD61-C202-465A-93F1-ADE20A83BB59}</Project>
       <Name>GitSharp.Core</Name>
     </ProjectReference>
-    <Folder Include="Platform" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

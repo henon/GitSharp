@@ -105,7 +105,7 @@ namespace GitSharp.Core.RevPlot
                     if (t1 < t2)
                         return 1;
                     return 0;
-                } catch (IOException e) {
+                } catch (IOException) {
                     // ignore
                     return 0;
                 }

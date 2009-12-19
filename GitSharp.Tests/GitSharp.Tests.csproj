@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{37052DA4-F6A9-47D0-94AA-96F4A7E0462C}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -127,6 +127,7 @@
     <Compile Include="GitSharp.Core\RevWalk\RevWalkSortTest.cs" />
     <Compile Include="GitSharp.Core\RevWalk\RevWalkTestCase.cs" />
     <Compile Include="GitSharp.Core\SampleDataRepositoryTestCase.cs" />
+    <Compile Include="GitSharp.Core\SubmoduleTest.cs" />
     <Compile Include="GitSharp.Core\T0001_ObjectId.cs" />
     <Compile Include="GitSharp.Core\T0001_PersonIdent.cs" />
     <Compile Include="GitSharp.Core\T0002_Tree.cs" />
@@ -769,24 +770,9 @@
       <Project>{2A467118-E885-44FC-B7AF-DFAD937F6012}</Project>
       <Name>Git</Name>
     </ProjectReference>
-    <Folder Include="Git" />
-    <Folder Include="GitSharp" />
-    <Folder Include="GitSharp.Core" />
-    <Folder Include="GitSharp.Core\Diff" />
-    <Folder Include="GitSharp.Core\DirectoryCache" />
-    <Folder Include="GitSharp.Core\FnMatch" />
-    <Folder Include="GitSharp.Core\Merge" />
-    <Folder Include="GitSharp.Core\Patch" />
-    <Folder Include="GitSharp.Core\RevWalk" />
-    <Folder Include="GitSharp.Core\sample" />
-    <Folder Include="GitSharp.Core\Transport" />
-    <Folder Include="GitSharp.Core\TreeWalk" />
-    <Folder Include="GitSharp.Core\TreeWalk\Filter" />
-    <Folder Include="GitSharp.Core\Util" />
-    <Folder Include="Git\CLI" />
-    <Folder Include="Git\Platform" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Git\Platform\" />
     <Folder Include="Resources\CorruptIndex\.gitted\refs\tags\" />
     <Folder Include="Resources\JapaneseRepo\.gitted\refs\tags\" />
   </ItemGroup>

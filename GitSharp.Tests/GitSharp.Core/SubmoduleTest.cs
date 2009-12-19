@@ -35,35 +35,31 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Windows.Forms;
+using System.IO;
+using NUnit.Framework;
 
-namespace GitSharp.Core
+namespace GitSharp.Core.Tests
 {
-    public partial class PromptForm : Form
+    
+    [TestFixture]
+    public class SubmoduleTest : RepositoryTestCase
     {
-        public PromptForm()
+        private static GitSharp.Repository SetupRepository()
         {
-            InitializeComponent();
+            return new GitSharp.Repository(Path.Combine(@"..\..\Resources", "SubmoduleRepository.git"));
         }
 
-        public string Message
+        [Test]
+        public void TestSimple()
         {
-            get
-            {
-                return Text;
-            }
-            set
-            {
-                Text = value;
-            }
-        }
+            var repo = SetupRepository();
+            var tree = repo.Head.CurrentCommit.Tree;
 
-        public string Input
-        {
-            get
+            // this should always be secure for a repository with git submodules in it
+            foreach (var leaf in tree.Leaves)
             {
-                return input.Text;
             }
         }
     }
+
 }

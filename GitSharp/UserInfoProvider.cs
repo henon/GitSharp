@@ -35,47 +35,23 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System.Windows.Forms;
-
-namespace GitSharp.Core
+namespace GitSharp
 {
 
-    public class FormUserInfoProvider : UserInfoProvider
+    public static class UserInfoProvider
     {
-        private static bool Prompt(string message, ref string input)
+        public static Core.UserInfoProvider Provider
         {
-            var form = new PromptForm {Message = message};
-
-            var result = form.ShowDialog();
-            if (result == DialogResult.OK)
+            get
             {
-                input = form.Input;
-                return true;
+                return Core.UserInfoProvider.Provider;
             }
-
-            return false;
-        }
-
-        public override bool promptPassword(string message)
-        {
-            return Prompt(message, ref Password);
-        }
-
-        public override bool promptPassphrase(string message)
-        {
-            return Prompt(message, ref Passphrase);
-        }
-
-        public override bool promptYesNo(string message)
-        {
-            var result = MessageBox.Show(message, "Prompt", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            return result == DialogResult.Yes;
-        }
-
-        public override void showMessage(string message)
-        {
-            MessageBox.Show(message);
+            
+            set
+            {
+                Core.UserInfoProvider.Provider = value;
+            }
         }
     }
-
+    
 }

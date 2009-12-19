@@ -64,7 +64,7 @@ namespace GitSharp.Core
 		///	<summary> * The constructor from object identifier
 		///	</summary>
 		///	<param name="base">the base configuration file </param>
-		///	<param name="r">the repository</param>
+		///	<param name="repo">the repository</param>
 		/// <param name="objectid">the object identifier</param>
 		/// <exception cref="IOException">
 		/// the blob cannot be read from the repository. </exception>

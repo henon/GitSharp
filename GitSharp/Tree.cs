@@ -39,7 +39,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using GitSharp.Core;
 using ObjectId = GitSharp.Core.ObjectId;
 using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
@@ -123,13 +123,16 @@ namespace GitSharp
             {
                 if (InternalTree == null)
                     return new Leaf[0];
-                return InternalTree.Members.Select(tree_entry =>
-                {
-                    if (tree_entry is FileTreeEntry)
-                        return new Leaf(_repo, tree_entry as FileTreeEntry) as AbstractObject;
-                    else
-                        return new Tree(_repo, tree_entry as CoreTree) as AbstractObject; // <--- is this always correct? we'll see :P
-                }).ToArray();
+
+                // no GitLink support in JGit, so just skip them here to not cause problems
+                return InternalTree.Members.Where(te => !(te is GitLinkTreeEntry)).Select(
+                    tree_entry =>
+                        {
+                            if (tree_entry is FileTreeEntry)
+                                return new Leaf(_repo, tree_entry as FileTreeEntry) as AbstractObject;
+
+                            return new Tree(_repo, tree_entry as CoreTree) as AbstractObject;
+                        }).ToArray();
             }
         }
 

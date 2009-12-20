@@ -52,12 +52,14 @@ namespace GitSharp.Core.Tests
         [Test]
         public void TestSimple()
         {
-            var repo = SetupRepository();
-            var tree = repo.Head.CurrentCommit.Tree;
-
-            // this should always be secure for a repository with git submodules in it
-            foreach (var leaf in tree.Leaves)
+            using (var repo = SetupRepository())
             {
+                var tree = repo.Head.CurrentCommit.Tree;
+
+                // this should always be secure for a repository with git submodules in it
+                foreach (var leaf in tree.Leaves)
+                {
+                }
             }
         }
     }

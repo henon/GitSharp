@@ -150,6 +150,8 @@ namespace GitSharp.Core.TreeWalk
 		/// <param name="p">parent tree iterator.</param>
 		protected AbstractTreeIterator(AbstractTreeIterator p)
 		{
+			if (p == null)
+				throw new ArgumentNullException ("p");
 			_parent = p;
 			Path = p.Path;
 			PathOffset = p.PathLen + 1;
@@ -248,6 +250,8 @@ namespace GitSharp.Core.TreeWalk
 		/// </returns>
 		public int pathCompare(AbstractTreeIterator treeIterator)
 		{
+			if (treeIterator == null)
+				throw new ArgumentNullException ("treeIterator");
 			return pathCompare(treeIterator, treeIterator.Mode);
 		}
 
@@ -266,6 +270,8 @@ namespace GitSharp.Core.TreeWalk
 		/// </returns>
 		public int pathCompare(AbstractTreeIterator treeIterator, int treeIteratorMode)
 		{
+			if (treeIterator == null)
+				throw new ArgumentNullException ("treeIterator");
 			byte[] a = Path;
 			byte[] b = treeIterator.Path;
 			int aLen = PathLen;
@@ -339,6 +345,8 @@ namespace GitSharp.Core.TreeWalk
 		/// </returns>
 		public virtual bool idEqual(AbstractTreeIterator otherIterator)
 		{
+			if (otherIterator == null)
+				throw new ArgumentNullException ("otherIterator");
 			return ObjectId.Equals(idBuffer(), idOffset(), otherIterator.idBuffer(), otherIterator.idOffset());
 		}
 
@@ -357,6 +365,8 @@ namespace GitSharp.Core.TreeWalk
 		/// <param name="objectId">buffer to copy the object id into.</param>
 		public virtual void getEntryObjectId(MutableObjectId objectId)
 		{
+			if (objectId == null)
+				throw new ArgumentNullException ("objectId");
 			objectId.FromRaw(idBuffer(), idOffset());
 		}
 

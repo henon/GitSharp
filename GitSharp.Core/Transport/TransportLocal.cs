@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
@@ -53,6 +53,9 @@ namespace GitSharp.Core.Transport
 
         public static bool canHandle(URIish uri)
         {
+			if (uri == null)
+				throw new ArgumentNullException ("uri");
+			
             if (uri.Host != null || uri.Port > 0 || uri.User != null || uri.Pass != null || uri.Path == null)
             {
                 return false;

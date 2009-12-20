@@ -84,6 +84,8 @@ namespace GitSharp.Core.TreeWalk.Filter
          */
         public static TreeFilter create(TreeFilter[] list)
         {
+			if (list == null)
+				throw new ArgumentNullException ("list");
             if (list.Length == 2)
                 return create(list[0], list[1]);
             if (list.Length < 2)

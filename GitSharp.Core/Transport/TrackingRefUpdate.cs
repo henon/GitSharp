@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -47,10 +47,16 @@ namespace GitSharp.Core.Transport
         public TrackingRefUpdate(Repository db, RefSpec spec, AnyObjectId nv, string msg)
             : this(db, spec.Destination, spec.Source, spec.Force, nv, msg)
         {
+			if (spec == null)
+				throw new System.ArgumentNullException ("spec");
         }
 
         public TrackingRefUpdate(Repository db, string localName, string remoteName, bool forceUpdate, AnyObjectId nv, string msg)
         {
+			if (db == null)
+				throw new System.ArgumentNullException ("db");
+        	if (nv == null)
+				throw new System.ArgumentNullException ("nv");
             RemoteName = remoteName;
             update = db.UpdateRef(localName);
             update.IsForceUpdate = forceUpdate;

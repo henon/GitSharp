@@ -57,6 +57,13 @@ namespace GitSharp.Core.Transport
 
         protected void validateImpl(HttpWebRequest u, string p, string version, string name)
         {
+			if (u == null)
+				throw new ArgumentNullException ("u");
+        	if (version == null)
+				throw new ArgumentNullException ("version");
+        	if (name == null)
+				throw new ArgumentNullException ("name");
+			
             string v = u.Headers.Get(p + JETS3T_CRYPTO_VER) ?? string.Empty;
             if (!version.Equals(v))
                 throw new IOException("Unsupported encryption version: " + v);
@@ -68,6 +75,9 @@ namespace GitSharp.Core.Transport
 
         public IOException error(Exception why)
         {
+			if (why == null)
+				throw new ArgumentNullException ("why");
+			
             IOException e;
             e = new IOException("Encryption error: " + why.Message, why);
             return e;

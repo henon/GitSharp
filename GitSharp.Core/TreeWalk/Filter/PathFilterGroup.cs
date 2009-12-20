@@ -128,6 +128,8 @@ namespace GitSharp.Core.TreeWalk.Filter
 
             public override bool include(TreeWalk walker)
             {
+				if (walker == null)
+					throw new ArgumentNullException ("walker");
                 int cmp = walker.isPathPrefix(raw, raw.Length);
                 if (cmp > 0)
                     throw StopWalkException.INSTANCE;
@@ -165,6 +167,8 @@ namespace GitSharp.Core.TreeWalk.Filter
 
             public override bool include(TreeWalk walker)
             {
+				if (walker == null)
+					throw new ArgumentNullException ("walker");
                 int n = paths.Length;
                 for (int i = 0; ; )
                 {

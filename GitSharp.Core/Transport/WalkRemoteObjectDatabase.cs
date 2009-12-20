@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
@@ -76,6 +76,9 @@ namespace GitSharp.Core.Transport
 
         public virtual void writeFile(string path, byte[] data)
         {
+			if (data == null)
+				throw new ArgumentNullException("data");
+			
             using (Stream fs = writeFile(path, null, null))
             {
                 fs.Write(data, 0, data.Length);
@@ -94,6 +97,9 @@ namespace GitSharp.Core.Transport
 
         public void writeRef(string name, ObjectId value)
         {
+			if (value == null)
+				throw new ArgumentNullException ("value");
+			
             MemoryStream m = new MemoryStream(Constants.OBJECT_ID_LENGTH * 2 + 1);
             BinaryWriter b = new BinaryWriter(m);
             value.CopyTo(b);
@@ -105,6 +111,9 @@ namespace GitSharp.Core.Transport
 
         public void writeInfoPacks(List<string> packNames)
         {
+			if (packNames == null)
+				throw new ArgumentNullException ("packNames");
+			
             StringBuilder w = new StringBuilder();
             foreach (string n in packNames)
             {

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
  * All rights reserved.
@@ -63,6 +63,9 @@ namespace GitSharp.Core.Transport
 
         public void Push(ProgressMonitor monitor, IDictionary<string, RemoteRefUpdate> refUpdates)
         {
+			if (refUpdates == null)
+				throw new ArgumentNullException ("refUpdates");
+			
             markStartedOperation();
             _packNames = null;
             _newRefs = new Dictionary<string, Ref>();

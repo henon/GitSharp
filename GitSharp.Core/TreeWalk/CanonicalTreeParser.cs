@@ -193,6 +193,8 @@ namespace GitSharp.Core.TreeWalk
 		 */
 		public void reset(Repository repo, AnyObjectId id, WindowCursor curs)
 		{
+			if (repo == null)
+				throw new ArgumentNullException ("repo");
 			ObjectLoader ldr = repo.OpenObject(curs, id);
 			if (ldr == null)
 			{
@@ -210,6 +212,8 @@ namespace GitSharp.Core.TreeWalk
 
 		public new CanonicalTreeParser createSubtreeIterator(Repository repo, MutableObjectId idBuffer, WindowCursor curs)
 		{
+			if (idBuffer == null)
+				throw new ArgumentNullException ("idBuffer");
 			idBuffer.FromRaw(this.idBuffer(), idOffset());
 			if (FileMode.Tree != EntryFileMode)
 			{

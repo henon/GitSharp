@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Mykola Nikishov <mn@mn.com.ua>
  *
  * All rights reserved.
  *
@@ -36,14 +37,19 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+using System;
 using GitSharp.Core.Transport;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 
-namespace GitSharp.Core.Tests.Transport
+namespace GitSharp.Tests.GitSharp.Core.Transport
 {
     [TestFixture]
     public class URIishTest
     {
+        private const string GIT_SCHEME = "git://";
+
         [Test]
         public void testUnixFile()
         {
@@ -273,6 +279,130 @@ namespace GitSharp.Core.Tests.Transport
             Assert.AreEqual(str, u.ToPrivateString());
             Assert.AreEqual(u.SetPass(null).ToPrivateString(), u.ToString());
             Assert.AreEqual(u, new URIish(str));
+        }
+
+        [Test]
+        public void testGetNullHumanishName()
+        {
+            AssertHelper.Throws<InvalidOperationException>(() => new URIish().getHumanishName(), "path must be not null");
+        }
+
+        [Test]
+        public void testGetEmptyHumanishName()
+        {
+            AssertHelper.Throws<InvalidOperationException>(() => new URIish(GIT_SCHEME).getHumanishName(), "empty path is useless");
+        }
+
+        [Test]
+        public void testGetAbsEmptyHumanishName()
+        {
+            AssertHelper.Throws<InvalidOperationException>(() => new URIish().getHumanishName(), "empty path is useless");
+        }
+
+        [Test]
+        public void testGetValidWithEmptySlashDotGitHumanishName()
+        {
+            string humanishName = new URIish("/a/b/.git").getHumanishName();
+            Assert.AreEqual("b", humanishName);
+        }
+
+        [Test]
+        public void testGetWithSlashDotGitHumanishName()
+        {
+            Assert.AreEqual("", new URIish("/.git").getHumanishName());
+        }
+
+        [Test]
+        public void testGetTwoSlashesDotGitHumanishName()
+        {
+            Assert.AreEqual("", new URIish("/.git").getHumanishName());
+        }
+
+        [Test]
+        public void testGetValidHumanishName()
+        {
+            string humanishName = new URIish(GIT_SCHEME + "abc").getHumanishName();
+            Assert.AreEqual("abc", humanishName);
+        }
+
+        [Test]
+        public void testGetValidSlashHumanishName()
+        {
+            string humanishName = new URIish(GIT_SCHEME + "abc/").getHumanishName();
+            Assert.AreEqual("abc", humanishName);
+        }
+
+        [Test]
+        public void testGetSlashValidSlashHumanishName()
+        {
+            string humanishName = new URIish("/abc/").getHumanishName();
+            Assert.AreEqual("abc", humanishName);
+        }
+
+        [Test]
+        public void testGetSlashValidSlashDotGitSlashHumanishName()
+        {
+            string humanishName = new URIish("/abc/.git").getHumanishName();
+            Assert.AreEqual("abc", humanishName);
+        }
+
+        [Test]
+        public void testGetSlashSlashDotGitSlashHumanishName()
+        {
+            string humanishName = new URIish(GIT_SCHEME + "/abc//.git")
+                .getHumanishName();
+            Assert.AreEqual("", humanishName, "may return an empty humanish name");
+        }
+
+        [Test]
+        public void testGetSlashesValidSlashHumanishName()
+        {
+            string humanishName = new URIish("/a/b/c/").getHumanishName();
+            Assert.AreEqual("c", humanishName);
+        }
+
+        [Test]
+        public void testGetValidDotGitHumanishName()
+        {
+            string humanishName = new URIish(GIT_SCHEME + "abc.git")
+                .getHumanishName();
+            Assert.AreEqual("abc", humanishName);
+        }
+
+        [Test]
+        public void testGetValidDotGitSlashHumanishName()
+        {
+            string humanishName = new URIish(GIT_SCHEME + "abc.git/")
+                .getHumanishName();
+            Assert.AreEqual("abc", humanishName);
+        }
+
+        [Test]
+        public void testGetValidWithSlashDotGitHumanishName()
+        {
+            string humanishName = new URIish("/abc.git").getHumanishName();
+            Assert.AreEqual("abc", humanishName);
+        }
+
+        [Test]
+        public void testGetValidWithSlashDotGitSlashHumanishName()
+        {
+            string humanishName = new URIish("/abc.git/").getHumanishName();
+            Assert.AreEqual("abc", humanishName);
+        }
+
+        [Test]
+        public void testGetValidWithSlashesDotGitHumanishName()
+        {
+            string humanishName = new URIish("/a/b/c.git").getHumanishName();
+            Assert.AreEqual("c", humanishName);
+        }
+
+        [Test]
+        public void testGetValidWithSlashesDotGitSlashHumanishName()
+        {
+            string humanishName = new URIish("/a/b/c.git/").getHumanishName();
+            Assert.AreEqual("c", humanishName);
         }
     }
 }

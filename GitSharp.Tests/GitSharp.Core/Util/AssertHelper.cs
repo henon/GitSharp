@@ -14,11 +14,19 @@ namespace GitSharp.Tests.GitSharp.Core.Util
     {
         public static TException Throws<TException>(Action codeBlock) where TException : Exception
         {
+            return Throws<TException>(codeBlock, null);
+        }
+
+        public static TException Throws<TException>(Action codeBlock, string failExplanation) where TException : Exception
+        {
             const string expectedFormat = "Exception of type '{0}' was expected.";
             const string insteadFormat = "Instead, exception of type '{0}' was thrown.";
 
             string expectedMessage = string.Format(expectedFormat, typeof(TException).FullName);
 
+            if (failExplanation != null)            {
+                expectedMessage = failExplanation + Environment.NewLine + expectedMessage;
+            }
 
             Exception exception = GetExceptionFrom(codeBlock);
 

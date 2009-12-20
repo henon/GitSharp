@@ -49,8 +49,6 @@
     <fileset id="project.references" >
       <include name="System.dll" />
       <include name="System.Core.dll" />
-      <include name="System.Drawing.dll" />
-      <include name="System.Windows.Forms.dll" />
       <include name="System.Xml.dll" />
       <include name="${path.lib}/ICSharpCode.SharpZipLib.dll" />
       <include name="${path.lib}/Winterdom.IO.FileMap.dll" />
@@ -95,7 +93,10 @@
     <property name="assembly.namespace" value="${assembly.name}" />
 
     <fileset id="project.references" basedir="${path.build.output}" >
+      <include name="System.dll" />
+      <include name="System.Core.dll" />
       <include name="GitSharp.Core.dll" />
+      <include name="${path.lib}/Tamir.SharpSSH.dll" />
     </fileset>
 
     <call target="compile-dll" />

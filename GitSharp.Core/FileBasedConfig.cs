@@ -67,7 +67,7 @@ namespace GitSharp.Core
             return configFile;
         }
 
-        public void load()
+        public virtual void load()
         {
             try
             {

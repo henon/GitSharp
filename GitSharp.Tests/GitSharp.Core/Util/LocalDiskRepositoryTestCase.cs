@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
@@ -58,6 +58,7 @@ using System.Diagnostics;
 using System.IO;
 using GitSharp.Core;
 using GitSharp.Core.Util;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Core.Tests.Util

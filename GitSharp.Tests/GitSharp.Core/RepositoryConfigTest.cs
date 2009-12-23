@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
@@ -43,6 +43,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GitSharp.Core;
 using GitSharp.Core.Tests.Util;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Core.Tests

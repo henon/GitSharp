@@ -39,7 +39,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using GitSharp.Core;
 using GitSharp.Core.RevWalk;
 using NUnit.Framework;
 
@@ -315,6 +314,68 @@ namespace GitSharp.Core.Tests
             RefUpdate.RefUpdateResult update2 = updateRef2.Update();
             Assert.AreEqual(RefUpdate.RefUpdateResult.FastForward, update2);
             Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+        }
+
+        /*
+        * Update the HEAD ref. Only it should be changed, not what it points to.
+        *
+        * @throws Exception
+        */
+        [Test]
+        public void testUpdateRefDetached()
+        {
+            ObjectId pid = db.Resolve("refs/heads/master");
+            ObjectId ppid = db.Resolve("refs/heads/master^");
+            RefUpdate updateRef = db.UpdateRef("HEAD", true);
+            updateRef.IsForceUpdate = true;
+            updateRef.NewObjectId = ppid;
+            RefUpdate.RefUpdateResult update = updateRef.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
+            Assert.AreEqual(ppid, db.Resolve("HEAD"));
+            Ref @ref = db.getRef("HEAD");
+            Assert.AreEqual("HEAD", @ref.Name);
+            Assert.AreEqual("HEAD", @ref.OriginalName);
+
+            // the branch HEAD referred to is left untouched
+            Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
+            ReflogReader reflogReader = new ReflogReader(db, "HEAD");
+            ReflogReader.Entry e = reflogReader.getReverseEntries()[0];
+            Assert.AreEqual(pid, e.getOldId());
+            Assert.AreEqual(ppid, e.getNewId());
+            Assert.AreEqual("GIT_COMMITTER_EMAIL", e.getWho().EmailAddress);
+            Assert.AreEqual("GIT_COMMITTER_NAME", e.getWho().Name);
+            Assert.AreEqual(1250379778000L, e.getWho().When);
+        }
+
+        /*
+         * Update the HEAD ref when the referenced branch is unborn
+         *
+         * @throws Exception
+         */
+        [Test]
+        public void testUpdateRefDetachedUnbornHead()
+        {
+            ObjectId ppid = db.Resolve("refs/heads/master^");
+            db.WriteSymref("HEAD", "refs/heads/unborn");
+            RefUpdate updateRef = db.UpdateRef("HEAD", true);
+            updateRef.IsForceUpdate = true;
+            updateRef.NewObjectId = ppid;
+            RefUpdate.RefUpdateResult update = updateRef.Update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
+            Assert.AreEqual(ppid, db.Resolve("HEAD"));
+            Ref @ref = db.getRef("HEAD");
+            Assert.AreEqual("HEAD", @ref.Name);
+            Assert.AreEqual("HEAD", @ref.OriginalName);
+
+            // the branch HEAD referred to is left untouched
+            Assert.IsNull(db.Resolve("refs/heads/unborn"));
+            ReflogReader reflogReader = new ReflogReader(db, "HEAD");
+            ReflogReader.Entry e = reflogReader.getReverseEntries()[0];
+            Assert.AreEqual(ObjectId.ZeroId, e.getOldId());
+            Assert.AreEqual(ppid, e.getNewId());
+            Assert.AreEqual("GIT_COMMITTER_EMAIL", e.getWho().EmailAddress);
+            Assert.AreEqual("GIT_COMMITTER_NAME", e.getWho().Name);
+            Assert.AreEqual(1250379778000L, e.getWho().When);
         }
 
         /**

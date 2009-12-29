@@ -121,9 +121,26 @@ namespace GitSharp.Core
 		/// </exception>
 		public RefUpdate NewUpdate(string name)
 		{
-			RefreshPackedRefs();
-			Ref r = ReadRefBasic(name, 0) ?? new Ref(Ref.Storage.New, name, null);
-			return new RefUpdate(this, r, FileForRef(r.Name));
+            return NewUpdate(name, false);
+        }
+
+        /// <summary>
+        /// Create a command to update, create or delete a ref in this repository.
+        /// </summary>
+        /// <param name="name">name of the ref the caller wants to modify.</param>
+        /// <param name="detach">true to detach the ref, i.e. replace symref with object ref</param>
+        /// <returns>An update command. The caller must finish populating this command  and then invoke one of the update methods to actually make a change.</returns>
+        public RefUpdate NewUpdate(string name, bool detach)
+        {
+            RefreshPackedRefs();
+			Ref r = ReadRefBasic(name, 0);
+            if (r == null)
+            {
+                r = new Ref(Ref.Storage.New, name, null);
+            }            else if (detach)            {
+                r = new Ref(Ref.Storage.New, name, r.ObjectId);
+            }
+            return new RefUpdate(this, r, FileForRef(r.Name));
 		}
 
 		internal void Stored(string origName, string name, ObjectId id, DateTime time)

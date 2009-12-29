@@ -486,6 +486,17 @@ namespace GitSharp.Core
 			return _refDb.NewUpdate(refName);
 		}
 
+        /// <summary>
+        /// Create a command to update, create or delete a ref in this repository.
+        /// </summary>
+        /// <param name="refName">name of the ref the caller wants to modify.</param>
+        /// <param name="detach">true to create a detached head</param>
+        /// <returns>An update command. The caller must finish populating this command and then invoke one of the update methods to actually make a change.</returns>
+        public RefUpdate UpdateRef(string refName, bool detach)
+        {
+		    return _refDb.NewUpdate(refName, detach);
+	    }
+
 		///	<summary>
 		/// Create a command to rename a ref in this repository
 		///	</summary>

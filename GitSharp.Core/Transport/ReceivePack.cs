@@ -734,8 +734,8 @@ namespace GitSharp.Core.Transport
 
                     if (@ref != null)
                     {
-                        // A well behaved client shouldn't have sent us an
-                        // update command for a ref we advertised to it.
+                        // A well behaved client shouldn't have sent us a
+                        // create command for a ref we advertised to it.
                         //
                         cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, "ref exists");
                         continue;

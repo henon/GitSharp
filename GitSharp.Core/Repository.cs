@@ -968,7 +968,8 @@ namespace GitSharp.Core
 	     * when ref changes are detected.
 	     *
 	     * @param l
-	     */	    public void addRepositoryChangedListener(RepositoryListener l)
+	     */
+	    public void addRepositoryChangedListener(RepositoryListener l)
 	    {
 	        listeners.Add(l);
 	    }
@@ -976,7 +977,8 @@ namespace GitSharp.Core
 	    /**
 	     * Remove a registered {@link RepositoryListener}
 	     * @param l
-	     */	    public void removeRepositoryChangedListener(RepositoryListener l)
+	     */
+	    public void removeRepositoryChangedListener(RepositoryListener l)
 	    {
 	        listeners.Remove(l);
 	    }
@@ -986,7 +988,8 @@ namespace GitSharp.Core
 	     * when a ref changes in any repository are detected.
 	     *
 	     * @param l
-	     */	    public static void addAnyRepositoryChangedListener(RepositoryListener l)
+	     */
+	    public static void addAnyRepositoryChangedListener(RepositoryListener l)
 	    {
 	        allListeners.Add(l);
 	    }
@@ -994,7 +997,8 @@ namespace GitSharp.Core
 	    /**
 	     * Remove a globally registered {@link RepositoryListener}
 	     * @param l
-	     */	    public static void removeAnyRepositoryChangedListener(RepositoryListener l)
+	     */
+	    public static void removeAnyRepositoryChangedListener(RepositoryListener l)
 	    {
 	        allListeners.Remove(l);
 	    }

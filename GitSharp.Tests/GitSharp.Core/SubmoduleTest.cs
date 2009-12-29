@@ -35,7 +35,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.IO;
 using NUnit.Framework;
 
@@ -47,7 +46,7 @@ namespace GitSharp.Core.Tests
     {
         private static GitSharp.Repository SetupRepository()
         {
-            return new GitSharp.Repository(Path.Combine(".."+Path.DirectorySeparatorChar+".."+Path.DirectorySeparatorChar+"Resources", "SubmoduleRepository.git"));
+            return new GitSharp.Repository(Path.Combine("Resources", "SubmoduleRepository.git"));
         }
 
         [Test]

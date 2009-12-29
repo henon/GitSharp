@@ -82,7 +82,7 @@ namespace GitSharp.Core
         public void writeInfoRefs()
         {
             StringBuilder w = new StringBuilder();
-            char[] tmp = new char[Constants.OBJECT_ID_LENGTH * 2];
+            char[] tmp = new char[Constants.OBJECT_ID_STRING_LENGTH];
             foreach (Ref r in refs)
             {
                 if (Constants.HEAD.Equals(r.Name))
@@ -142,7 +142,7 @@ namespace GitSharp.Core
                 w.Append('\n');
             }
 
-            char[] tmp = new char[Constants.OBJECT_ID_LENGTH * 2];
+            char[] tmp = new char[Constants.OBJECT_ID_STRING_LENGTH];
             foreach (Ref r in refs)
             {
                 if (r.StorageFormat != Ref.Storage.Packed)

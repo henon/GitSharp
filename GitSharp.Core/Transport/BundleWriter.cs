@@ -174,7 +174,7 @@ namespace GitSharp.Core.Transport
 		    writeString(w, Constants.V2_BUNDLE_SIGNATURE);
             writeString(w, "\n");
 
-	        char[] tmp = new char[Constants.OBJECT_ID_LENGTH*2];
+            char[] tmp = new char[Constants.OBJECT_ID_STRING_LENGTH];
 		    foreach (RevCommit a in _assume) 
             {
                 writeString(w, "-");

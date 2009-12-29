@@ -99,8 +99,8 @@ namespace GitSharp.Core.Transport
         {
 			if (value == null)
 				throw new ArgumentNullException ("value");
-			
-            MemoryStream m = new MemoryStream(Constants.OBJECT_ID_LENGTH * 2 + 1);
+
+            MemoryStream m = new MemoryStream(Constants.OBJECT_ID_STRING_LENGTH + 1);
             BinaryWriter b = new BinaryWriter(m);
             value.CopyTo(b);
             b.Write('\n');

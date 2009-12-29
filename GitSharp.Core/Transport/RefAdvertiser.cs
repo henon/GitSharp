@@ -57,7 +57,7 @@ namespace GitSharp.Core.Transport
 		public RefAdvertiser(PacketLineOut o, RevWalk.RevWalk protoWalk, RevFlag advertisedFlag)
 		{
 			_tmpLine = new StringBuilder(100);
-            _tmpId = new char[2 * Constants.OBJECT_ID_LENGTH];
+            _tmpId = new char[Constants.OBJECT_ID_STRING_LENGTH];
 			_capabilities = new List<string>();
 			_first = true;
 

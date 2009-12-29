@@ -529,7 +529,7 @@ namespace GitSharp.Core.Transport
                     case ReceiveCommand.Result.REJECTED_MISSING_OBJECT:
                         if (cmd.getMessage() == null)
                             r.Append("missing object(s)");
-                        else if (cmd.getMessage().Length == 2 * Constants.OBJECT_ID_LENGTH)
+                        else if (cmd.getMessage().Length == Constants.OBJECT_ID_STRING_LENGTH)
                             r.Append("object " + cmd.getMessage() + " missing");
                         else
                             r.Append(cmd.getMessage());

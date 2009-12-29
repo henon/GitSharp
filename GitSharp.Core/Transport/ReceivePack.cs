@@ -46,118 +46,259 @@ using GitSharp.Core.Util;
 namespace GitSharp.Core.Transport
 {
 
+    /// <summary>
+    /// Implements the server side of a push connection, receiving objects.
+    /// </summary>
     public class ReceivePack : IDisposable
     {
         private const string CAPABILITY_REPORT_STATUS = BasePackPushConnection.CAPABILITY_REPORT_STATUS;
         private const string CAPABILITY_DELETE_REFS = BasePackPushConnection.CAPABILITY_DELETE_REFS;
         private const string CAPABILITY_OFS_DELTA = BasePackPushConnection.CAPABILITY_OFS_DELTA;
 
+        /// <summary>
+        /// Database we write the stored objects into.
+        /// </summary>
         private readonly Repository db;
+
+        /// <summary>
+        /// Revision traversal support over <see cref="db"/>.
+        /// </summary>
         private readonly RevWalk.RevWalk walk;
+        
+        /// <summary>
+        /// Should an incoming transfer validate objects?
+        /// </summary>
         private bool checkReceivedObjects;
+
+        /// <summary>
+        /// Should an incoming transfer permit create requests?
+        /// </summary>
         private bool allowCreates;
+
+        /// <summary>
+        /// Should an incoming transfer permit delete requests?
+        /// </summary>
         private bool allowDeletes;
+
+        /// <summary>
+        /// Should an incoming transfer permit non-fast-forward requests?
+        /// </summary>
         private bool allowNonFastForwards;
+
         private bool allowOfsDelta;
+
+        /// <summary>
+        /// Identity to record action as within the reflog.
+        /// </summary>
         private PersonIdent refLogIdent;
+        
+        /// <summary>
+        /// Hook to validate the update commands before execution.
+        /// </summary>
         private IPreReceiveHook preReceive;
+
+        /// <summary>
+        /// Hook to report on the commands after execution.
+        /// </summary>
         private IPostReceiveHook postReceive;
         private Stream raw;
         private PacketLineIn pckIn;
         private PacketLineOut pckOut;
         private StreamWriter msgs;
+
+        /// <summary>
+        /// The refs we advertised as existing at the start of the connection.
+        /// </summary>
         private Dictionary<string, Ref> refs;
+
+        /// <summary>
+        /// Capabilities requested by the client.
+        /// </summary>
         private List<string> enabledCapabilities;
+
+        /// <summary>
+        /// Commands to execute, as received by the client.
+        /// </summary>
         private List<ReceiveCommand> commands;
+
+        /// <summary>
+        /// An exception caught while unpacking and fsck'ing the objects.
+        /// </summary>
         private Exception unpackError;
+
+        /// <summary>
+        /// if <see cref="enabledCapabilities"/> has <see cref="CAPABILITY_REPORT_STATUS"/>
+        /// </summary>
         private bool reportStatus;
+
+        /// <summary>
+        /// Lock around the received pack file, while updating refs.
+        /// </summary>
         private PackLock packLock;
 
+        /// <summary>
+        /// Returns the repository this receive completes into.
+        /// </summary>
+        /// <returns></returns>
         public Repository getRepository()
         {
             return db;
         }
 
+        /// <summary>
+        /// Returns the RevWalk instance used by this connection.
+        /// </summary>
+        /// <returns></returns>
         public RevWalk.RevWalk getRevWalk()
         {
             return walk;
         }
 
+        /// <summary>
+        /// Returns all refs which were advertised to the client.
+        /// </summary>
+        /// <returns></returns>
         public Dictionary<string, Ref> getAdvertisedRefs()
         {
             return refs;
         }
 
+        /// <summary>
+        /// Returns true if this instance will verify received objects are formatted correctly. 
+        /// Validating objects requires more CPU time on this side of the connection.
+        /// </summary>
+        /// <returns></returns>
         public bool isCheckReceivedObjects()
         {
             return checkReceivedObjects;
         }
 
+        /// <param name="check">true to enable checking received objects; false to assume all received objects are valid.</param>
         public void setCheckReceivedObjects(bool check)
         {
             checkReceivedObjects = check;
         }
 
+        /// <summary>
+        /// Returns true if the client can request refs to be created.
+        /// </summary>
+        /// <returns></returns>
         public bool isAllowCreates()
         {
             return allowCreates;
         }
 
+        /// <param name="canCreate">true to permit create ref commands to be processed.</param>
+        public void  setAllowCreates(bool canCreate)
+        {
+            allowCreates = canCreate;    
+        }
+
+        /// <summary>
+        /// Returns true if the client can request refs to be deleted.
+        /// </summary>
         public bool isAllowDeletes()
         {
             return allowDeletes;
         }
 
+        /// <param name="canDelete">true to permit delete ref commands to be processed.</param>
         public void setAllowDeletes(bool canDelete)
         {
             allowDeletes = canDelete;
         }
 
+        /// <summary>
+        /// Returns true if the client can request non-fast-forward updates of a ref, possibly making objects unreachable.
+        /// </summary>
         public bool isAllowNonFastForwards()
         {
             return allowNonFastForwards;
         }
 
+        /// <param name="canRewind">true to permit the client to ask for non-fast-forward updates of an existing ref.</param>
         public void setAllowNonFastForwards(bool canRewind)
         {
             allowNonFastForwards = canRewind;
         }
 
+        /// <summary>
+        /// Returns identity of the user making the changes in the reflog.
+        /// </summary>
         public PersonIdent getRefLogIdent()
         {
             return refLogIdent;
         }
 
+        /// <summary>
+        /// Set the identity of the user appearing in the affected reflogs.
+        /// <para>
+        /// The timestamp portion of the identity is ignored. A new identity with the
+        /// current timestamp will be created automatically when the updates occur
+        /// and the log records are written.
+        /// </para>
+        /// </summary>
+        /// <param name="pi">identity of the user. If null the identity will be
+        /// automatically determined based on the repository
+        ///configuration.</param>
         public void setRefLogIdent(PersonIdent pi)
         {
             refLogIdent = pi;
         }
 
+        /// <returns>the hook invoked before updates occur.</returns>
         public IPreReceiveHook getPreReceiveHook()
         {
             return preReceive;
         }
 
+        /// <summary>
+        /// Set the hook which is invoked prior to commands being executed.
+        /// <para>
+        /// Only valid commands (those which have no obvious errors according to the
+        /// received input and this instance's configuration) are passed into the
+        /// hook. The hook may mark a command with a result of any value other than
+        /// <see cref="ReceiveCommand.Result.NOT_ATTEMPTED"/> to block its execution.
+        /// </para><para>
+        /// The hook may be called with an empty command collection if the current
+        /// set is completely invalid.</para>
+        /// </summary>
+        /// <param name="h">the hook instance; may be null to disable the hook.</param>
         public void setPreReceiveHook(IPreReceiveHook h)
         {
             preReceive = h ?? PreReceiveHook.NULL;
         }
 
+        /// <returns>the hook invoked after updates occur.</returns>
         public IPostReceiveHook getPostReceiveHook()
         {
             return postReceive;
         }
 
+        /// <summary>
+        /// <para>
+        /// Only successful commands (type is <see cref="ReceiveCommand.Result.OK"/>) are passed into the
+        /// Set the hook which is invoked after commands are executed.
+        /// hook. The hook may be called with an empty command collection if the
+        /// current set all resulted in an error.
+        /// </para>
+        /// </summary>
+        /// <param name="h">the hook instance; may be null to disable the hook.</param>
         public void setPostReceiveHook(IPostReceiveHook h)
         {
             postReceive = h ?? PostReceiveHook.NULL;
         }
 
+        /// <returns>all of the command received by the current request.</returns>
         public List<ReceiveCommand> getAllCommands()
         {
             return commands;
         }
 
+        /// <summary>
+        /// Create a new pack receive for an open repository.
+        /// </summary>
+        /// <param name="into">the destination repository.</param>
         public ReceivePack(Repository into)
         {
             db = into;
@@ -173,6 +314,11 @@ namespace GitSharp.Core.Transport
             postReceive = PostReceiveHook.NULL;
         }
 
+        /// <summary>
+        /// Execute the receive task on the socket.
+        /// </summary>
+        /// <param name="stream">Raw input to read client commands and pack data from. Caller must ensure the input is buffered, otherwise read performance may suffer. Response back to the Git network client. Caller must ensure the output is buffered, otherwise write performance may suffer.</param>
+        /// <param name="messages">Secondary "notice" channel to send additional messages out through. When run over SSH this should be tied back to the standard error channel of the command execution. For most other network connections this should be null.</param>
         public void receive(Stream stream, Stream messages)
         {
             try
@@ -458,11 +604,35 @@ namespace GitSharp.Core.Transport
             }
         }
 
+
+        /// <summary>
+        /// Send an error message to the client, if it supports receiving them.
+        /// <para>
+        /// If the client doesn't support receiving messages, the message will be
+        /// discarded, with no other indication to the caller or to the client.
+        /// </para>
+        /// <para>
+        /// <see cref="PreReceiveHook"/>s should always try to use
+        /// <see cref="ReceiveCommand.setResult(GitSharp.Core.Transport.ReceiveCommand.Result,string)"/> with a result status of
+        /// <see cref="ReceiveCommand.Result.REJECTED_OTHER_REASON"/> to indicate any reasons for
+        /// rejecting an update. Messages attached to a command are much more likely
+        /// to be returned to the client.
+        /// </para>
+        /// </summary>
+        /// <param name="what">string describing the problem identified by the hook. The string must not end with an LF, and must not contain an LF.</param>
         public void sendError(string what)
         {
             SendMessage("error", what);
         }
 
+        /// <summary>
+        /// Send a message to the client, if it supports receiving them.
+        /// <para>
+        /// If the client doesn't support receiving messages, the message will be
+        /// discarded, with no other indication to the caller or to the client.
+        /// </para>
+        /// </summary>
+        /// <param name="what">string describing the problem identified by the hook. The string must not end with an LF, and must not contain an LF.</param>
         public void sendMessage(string what)
         {
             SendMessage("remote", what);
@@ -555,12 +725,18 @@ namespace GitSharp.Core.Transport
 
                     if (@ref != null && !isAllowNonFastForwards())
                     {
+                        // Creation over an existing ref is certainly not going
+                        // to be a fast-forward update. We can reject it early.
+                        //
                         cmd.setResult(ReceiveCommand.Result.REJECTED_NONFASTFORWARD);
                         continue;
                     }
 
                     if (@ref != null)
                     {
+                        // A well behaved client shouldn't have sent us an
+                        // update command for a ref we advertised to it.
+                        //
                         cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, "ref exists");
                         continue;
                     }
@@ -568,6 +744,10 @@ namespace GitSharp.Core.Transport
 
                 if (cmd.getType() == ReceiveCommand.Type.DELETE && @ref != null && !ObjectId.ZeroId.Equals(cmd.getOldId()) && !@ref.ObjectId.Equals(cmd.getOldId()))
                 {
+                    // Delete commands can be sent with the old id matching our
+                    // advertised value, *OR* with the old id being 0{40}. Any
+                    // other requested old id is invalid.
+                    //
                     cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, "invalid old id sent");
                     continue;
                 }
@@ -576,16 +756,23 @@ namespace GitSharp.Core.Transport
                 {
                     if (@ref == null)
                     {
+                        // The ref must have been advertised in order to be updated.
+                        //
                         cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, "no such ref");
                         continue;
                     }
 
                     if (!@ref.ObjectId.Equals(cmd.getOldId()))
                     {
+                        // A properly functioning client will send the same
+                        // object id we advertised.
+                        //
                         cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, "invalid old id sent");
                         continue;
                     }
 
+                    // Is this possibly a non-fast-forward style update?
+                    //
                     RevObject oldObj, newObj;
                     try
                     {
@@ -651,6 +838,10 @@ namespace GitSharp.Core.Transport
                     case ReceiveCommand.Type.DELETE:
                         if (!ObjectId.ZeroId.Equals(cmd.getOldId()))
                         {
+                            // We can only do a CAS style delete if the client
+                            // didn't bork its delete request by sending the
+                            // wrong zero id rather than the advertised one.
+                            //
                             ru.ExpectedOldObjectId = cmd.getOldId();
                         }
                         ru.IsForceUpdate = true;

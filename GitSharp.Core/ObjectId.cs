@@ -76,14 +76,14 @@ namespace GitSharp.Core
 		/// </returns>
 		public static bool IsId(string id)
 		{
-			if (id.Length != 2 * ObjectIdLength)
+            if (id.Length != Constants.OBJECT_ID_STRING_LENGTH)
 			{
 				return false;
 			}
 
 			try
 			{
-                for (int i = 0; i < StringLength; i++)
+                for (int i = 0; i < Constants.OBJECT_ID_STRING_LENGTH; i++)
                 {
                     RawParseUtils.parseHexInt4((byte)id[i]);
                 }
@@ -176,7 +176,7 @@ namespace GitSharp.Core
 		/// <returns> the converted object id. </returns>
 		public static ObjectId FromString(string str)
 		{
-			if (str.Length != StringLength)
+            if (str.Length != Constants.OBJECT_ID_STRING_LENGTH)
 			{
                 throw new ArgumentException("Invalid id: " + str, "str");
 			}
@@ -196,7 +196,7 @@ namespace GitSharp.Core
 			}
 			catch (IndexOutOfRangeException e)
 			{
-                throw new InvalidObjectIdException(bs, p, StringLength, e);
+                throw new InvalidObjectIdException(bs, p, Constants.OBJECT_ID_STRING_LENGTH, e);
 			}
 		}
 

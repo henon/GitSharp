@@ -122,9 +122,17 @@ namespace GitSharp.Core
         */
 
         /// <summary>
-        /// Length of an object hash.
+        /// A Git object hash is 160 bits, i.e. 20 bytes.
+        /// <para>
+        /// Changing this assumption is not going to be as easy as changing this declaration.
+        /// </para>
         /// </summary>
         public const int OBJECT_ID_LENGTH = 20;
+
+        /// <summary>
+        /// A Git object can be expressed as a 40 character string of hexadecimal digits. <see cref="OBJECT_ID_LENGTH"/>
+        /// </summary>
+        public const int OBJECT_ID_STRING_LENGTH = OBJECT_ID_LENGTH * 2;
 
         /// <summary>
         /// Special name for the "HEAD" symbolic-ref.

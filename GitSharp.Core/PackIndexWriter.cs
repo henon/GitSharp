@@ -147,7 +147,7 @@ namespace GitSharp.Core
         internal readonly BinaryWriter _stream;
 
 		// A temporary buffer for use during IO to out.
-        internal byte[] tmp = new byte[4 + ObjectId.ObjectIdLength];
+        internal byte[] tmp = new byte[4 + Constants.OBJECT_ID_LENGTH];
 
 		// The entries this writer must pack.
         internal List<PackedObjectInfo> entries;

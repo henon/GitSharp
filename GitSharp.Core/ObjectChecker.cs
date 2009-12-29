@@ -132,7 +132,7 @@ namespace GitSharp.Core
             try
             {
                 tempId.FromString(raw, ptr);
-                return ptr + AnyObjectId.StringLength;
+                return ptr + Constants.OBJECT_ID_STRING_LENGTH;
             }
             catch (ArgumentException)
             {

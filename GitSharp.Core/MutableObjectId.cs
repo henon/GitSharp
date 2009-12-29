@@ -103,7 +103,7 @@ namespace GitSharp.Core
 
 		public void FromString(string str)
 		{
-			if (str.Length != StringLength)
+            if (str.Length != Constants.OBJECT_ID_STRING_LENGTH)
 			{
 				throw new ArgumentException("Invalid id: " + str, "str");
 			}
@@ -123,7 +123,7 @@ namespace GitSharp.Core
 			}
             catch (IndexOutOfRangeException e)
             {
-                throw new InvalidObjectIdException(bs, p, StringLength, e);
+                throw new InvalidObjectIdException(bs, p, Constants.OBJECT_ID_STRING_LENGTH, e);
             }
 		}
 

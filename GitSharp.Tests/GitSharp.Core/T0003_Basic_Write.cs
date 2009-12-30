@@ -233,6 +233,7 @@ namespace GitSharp.Core.Tests
                 Assert.IsNotNull(r.MapCommit("6db9c2ebf75590eef973081736730a9ea169a0c4"));
                 // Must close or the default repo pack files created by this test gets
                 // locked via the alternate object directories on Windows.
+                r.Close();
             }
 
             GC.Collect(); // To be removed once the repository resource releasing is fixed.

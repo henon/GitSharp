@@ -100,7 +100,7 @@ namespace GitSharp.Core
 			_objectDatabase.OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
         }
 
-        public override ObjectDatabase[] loadAlternates()
+        protected override ObjectDatabase[] loadAlternates()
         {
             return _objectDatabase.getAlternates();
         }

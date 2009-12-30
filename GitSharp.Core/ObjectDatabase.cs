@@ -423,7 +423,7 @@ namespace GitSharp.Core
         /// The alternate list could not be accessed. The empty alternate
 		/// array <see cref="NoAlternates"/> will be assumed by the caller.
         /// </exception>
-        public virtual ObjectDatabase[] loadAlternates()
+        protected virtual ObjectDatabase[] loadAlternates()
         {
             return NoAlternates;
         }

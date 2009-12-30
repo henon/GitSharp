@@ -109,7 +109,7 @@ namespace GitSharp.Core
             FilenameEncoding = Constants.CHARSET; //  defaults to UTF8 actually
             _entries = new SortedDictionary<byte[], Entry>(new ByteVectorComparer());
             Repository = db;
-            _cacheFile = new FileInfo(Path.Combine(db.Directory.FullName, "index"));
+            _cacheFile = db.getIndexFile();
         }
 
         public Repository Repository { get; private set; }
@@ -235,6 +235,8 @@ namespace GitSharp.Core
         {
             _changed = false;
             _statDirty = false;
+
+            _cacheFile.Refresh();
 
             if (!_cacheFile.Exists)
             {

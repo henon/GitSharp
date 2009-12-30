@@ -347,6 +347,36 @@ namespace GitSharp.Core
         public const string GIT_COMMITTER_EMAIL_KEY = "GIT_COMMITTER_EMAIL";
 
         /// <summary>
+        /// The environment variable that limits how close to the root of the file systems JGit will traverse when looking for a repository root.
+        /// </summary>
+        public const string GIT_CEILING_DIRECTORIES_KEY = "GIT_CEILING_DIRECTORIES";
+
+        /// <summary>
+        /// The environment variable that tells us which directory is the ".git" directory
+        /// </summary>
+        public const string GIT_DIR_KEY = "GIT_DIR";
+
+        /// <summary>
+        /// The environment variable that tells us which directory is the working directory.
+        /// </summary>
+        public const string GIT_WORK_TREE_KEY = "GIT_WORK_TREE";
+
+        /// <summary>
+        /// The environment variable that tells us which file holds the Git index.
+        /// </summary>
+        public const string GIT_INDEX_KEY = "GIT_INDEX";
+
+        /// <summary>
+        /// The environment variable that tells us where objects are stored
+        /// </summary>
+        public const string GIT_OBJECT_DIRECTORY_KEY = "GIT_OBJECT_DIRECTORY";
+
+        /// <summary>
+        /// The environment variable that tells us where to look for objects, besides the default objects directory.
+        /// </summary>
+        public const string GIT_ALTERNATE_OBJECT_DIRECTORIES_KEY = "GIT_ALTERNATE_OBJECT_DIRECTORIES";
+
+        /// <summary>
         /// Default value for the user name if no other information is available
         /// </summary>
         public const string UNKNOWN_USER_DEFAULT = "unknown-user";
@@ -365,7 +395,6 @@ namespace GitSharp.Core
         /// A gitignore file name
         /// </summary>
         public const string GITIGNORE_FILENAME = ".gitignore";
-
 
         /// <summary>
         /// Create a new digest function for objects.

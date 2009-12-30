@@ -63,13 +63,14 @@ namespace GitSharp.Core
 		private readonly FileInfo _alternatesFile;
 		private readonly AtomicReference<PackList> _packList;
 
-		/// <summary>
-		/// Initialize a reference to an on-disk object directory.
-		/// </summary>
-		/// <param name="dir">the location of the <code>objects</code> directory.</param>
-		public ObjectDirectory(DirectoryInfo dir)
+        private DirectoryInfo[] _alternateObjectDir;
+
+	    /// <summary>	    /// Initialize a reference to an on-disk object directory.	    /// </summary>	    /// <param name="dir">the location of the <code>objects</code> directory.</param>
+        /// <param name="alternateObjectDir">a list of alternate object directories</param>
+	    public ObjectDirectory(DirectoryInfo dir, DirectoryInfo[] alternateObjectDir)
 		{
 			_objects = dir;
+	        _alternateObjectDir = alternateObjectDir;
 			_infoDirectory = new DirectoryInfo(_objects.FullName + "/info");
 			_packDirectory = new DirectoryInfo(_objects.FullName + "/pack");
 			_alternatesFile = new FileInfo(_infoDirectory + "/alternates");
@@ -485,20 +486,20 @@ namespace GitSharp.Core
                 return nameSet;
             }
         }
-	    public override ObjectDatabase[] loadAlternates()
-		{
-            var l = new List<ObjectDatabase>(4);
-            
-            using (StreamReader br = Open(_alternatesFile))
-			{
-				string line;
-				while ((line = br.ReadLine()) != null)
-				{
-                    l.Add(openAlternate(line));
-				}
-			}
-
-		    if (l.isEmpty())
+	    protected override ObjectDatabase[] loadAlternates()	    {
+	        var l = new List<ObjectDatabase>(4);
+            if (_alternateObjectDir != null) 
+            {
+			    foreach (DirectoryInfo d in _alternateObjectDir) {
+				    l.Add(openAlternate(d));
+			    }
+    		}
+            else 
+            {
+	            using (StreamReader br = Open(_alternatesFile))
+	            {	                string line;	                while ((line = br.ReadLine()) != null)	                {
+	                    l.Add(openAlternate(line));	                }	            }	        }
+    	    if (l.isEmpty())
 		    {
 		        return NoAlternates;
 		    }
@@ -511,16 +512,21 @@ namespace GitSharp.Core
 			return new StreamReader(new FileStream(f.FullName, System.IO.FileMode.Open));
 		}
 
-	    private ObjectDatabase openAlternate(String location)
+	    private ObjectDatabase openAlternate(string location)
 	    {
-	        var objdir = (DirectoryInfo) FS.resolve(_objects, location);
+            var objdir = (DirectoryInfo)FS.resolve(_objects, location);
+	        return openAlternate(objdir);
+	    }
+
+        private ObjectDatabase openAlternate(DirectoryInfo objdir)
+        {
 	        DirectoryInfo parent = objdir.Parent;
 	        if (RepositoryCache.FileKey.isGitRepository(parent))
 	        {
 	            Repository db = RepositoryCache.open(RepositoryCache.FileKey.exact(parent));
 	            return new AlternateRepositoryDatabase(db);
 	        }
-	        return new ObjectDirectory(objdir);
+	        return new ObjectDirectory(objdir, null);
 	    }
 
 	    private class PackList

@@ -73,7 +73,7 @@ namespace GitSharp
         public static string FindGitDirectory(string rootDirectory, bool recursive, bool isBare)
         {
             string directory = null;
-            DirectoryInfo gitDir = null;
+            string gitDir = null;
             string envGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
 
             //Determine which git directory to use
@@ -83,32 +83,30 @@ namespace GitSharp
                 directory = envGitDir;
             else                        		//Current Directory
             {
-                var current = new DirectoryInfo(Directory.GetCurrentDirectory());
-                directory = current.FullName;
+                directory = Directory.GetCurrentDirectory();
                 if (recursive)
                 {
                     //Check for non-bare repositories
                     if (!isBare)
                     {
-                        while (current != null)
+                        while (directory != null)
                         {
-                            gitDir = new DirectoryInfo(Path.Combine(current.FullName, ".git"));
-                            if (gitDir.Exists)
-                                return current.FullName;
+                            gitDir = Path.Combine(directory, ".git");
+                            if (Directory.Exists(gitDir))
+                                return directory;
 
-                            current = current.Parent;
+                            directory = Directory.GetParent(directory).FullName;
                         }
                     }
                     else
                     {
                         //Check for bare repositories
-                        while (current != null)
+                        while (directory != null)
                         {
-                            gitDir = new DirectoryInfo(current.FullName);
-                            if (gitDir.FullName.EndsWith(".git") && gitDir.Exists)
-                                return current.FullName;
+                            if (directory.EndsWith(".git") && Directory.Exists(directory))
+                                return directory;
 
-                            current = current.Parent;
+                            directory = Directory.GetParent(directory).FullName;
                         }
                     }
                 }

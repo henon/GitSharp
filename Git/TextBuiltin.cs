@@ -141,7 +141,7 @@ namespace GitSharp.CLI
                 return requiresRepository;
             }
 
-            protected set
+            internal set
             {
                 requiresRepository = value;
             }

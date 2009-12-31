@@ -164,7 +164,7 @@ namespace GitSharp.CLI
                     if (cmd.RequiresRepository)
                     {
                         if (gitdir == null)
-                            gitdir = new DirectoryInfo(GitSharp.AbstractCommand.FindGitDirectory(gitdir.FullName, cmd.RequiresRecursive, false));
+                            gitdir = new DirectoryInfo(GitSharp.AbstractCommand.FindGitDirectory(null, true, false));
 
                         cmd.Init(new GitSharp.Core.Repository(gitdir), gitdir);
                     }

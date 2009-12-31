@@ -56,6 +56,7 @@ namespace GitSharp.CLI
         private String name;
         private String usage;
         private String cmdHelp;
+        private bool requiresRepository;
         bool complete;
         bool common;
 
@@ -76,6 +77,7 @@ namespace GitSharp.CLI
                 complete = cmd.complete;
                 usage = cmd.usage;
                 cmdHelp = clazz.getCommandHelp();
+                requiresRepository = cmd.requiresRepository;
             }
         }
 
@@ -113,7 +115,15 @@ namespace GitSharp.CLI
             return complete;
         }
 
-        
+        /// <summary>
+        /// Returns true if this command requires a repository.
+        /// </summary>
+        /// <returns></returns>
+        public bool RequiresRepository()
+        {
+            return requiresRepository;
+        }
+
         /// <summary>
         /// Returns the name of the class which implements this command.
         /// </summary>
@@ -133,6 +143,7 @@ namespace GitSharp.CLI
             if (c != null)
             {
                 c.setCommandHelp(cmdHelp);
+                c.RequiresRepository = requiresRepository;
                 return c;
             }
             else

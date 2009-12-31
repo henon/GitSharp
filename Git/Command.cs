@@ -51,6 +51,7 @@ using System;
         public string usage;
         public bool common;
         public string helpUrl;
+        public bool requiresRepository;
 
         public Command()
         {
@@ -58,5 +59,6 @@ using System;
             this.common = false;
             this.usage = "";
             this.helpUrl = "";
+            this.requiresRepository = false;
         }
     }

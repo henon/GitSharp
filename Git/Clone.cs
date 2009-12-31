@@ -47,7 +47,7 @@ using NDesk.Options;
 namespace GitSharp.CLI
 {
 
-    [Command(common=true, usage = "Clone a repository into a new directory")]
+    [Command(common=true, requiresRepository=true, usage = "Clone a repository into a new directory")]
     public class Clone : TextBuiltin
     {
         private CloneCommand cmd = new CloneCommand();
@@ -72,7 +72,6 @@ namespace GitSharp.CLI
         public override void Run(string[] args)
         {
             cmd.Quiet = false;
-			this.RequiresRepository = true;
 			
             options = new CmdParserOptionSet()
             {

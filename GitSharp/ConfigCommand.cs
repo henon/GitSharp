@@ -142,10 +142,7 @@ namespace GitSharp
 			{
 				doDefault(Arg1, Arg2, Arg3);
 			}
-			
-                //OutputStream.WriteLine("Initialized empty Git repository in " + repo.Directory.FullName);
-               // OutputStream.Flush();
-            }
+        }
 
         #region Methods
         
@@ -193,10 +190,18 @@ namespace GitSharp
         {
         	throw new NotImplementedException();
         }
-        
+
+        /// <summary>
+        /// Displays list of all the variables set in the config file
+        /// </summary>
        	private void doList()
         {
-        	throw new NotImplementedException();
+            GitSharp.Config cfg = new GitSharp.Config(Repository);
+            foreach (KeyValuePair<string, string> pair in cfg)
+            {
+                OutputStream.WriteLine(pair.Key + "=" + pair.Value);
+            }
+            OutputStream.Flush();
         }
         
 		private void doGetColorBool(string color, string ouputToTerminal)

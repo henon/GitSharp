@@ -94,7 +94,7 @@ namespace GitSharp
                         {
                             gitDir = new DirectoryInfo(Path.Combine(current.FullName, ".git"));
                             if (gitDir.Exists)
-                                return current.Parent.FullName;
+                                return current.FullName;
 
                             current = current.Parent;
                         }

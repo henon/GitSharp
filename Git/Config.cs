@@ -45,7 +45,7 @@ using NDesk.Options;
 namespace GitSharp.CLI
 {
 
-    [Command(complete=false, common=true, usage = "Get and set repository or global options")]
+    [Command(complete=false, common=true, requiresRepository=true, usage = "Get and set repository or global options")]
     public class Config : TextBuiltin
     {
         private ConfigCommand cmd = new ConfigCommand();
@@ -54,12 +54,11 @@ namespace GitSharp.CLI
 
         public override void Run(string[] args)
         {
-			this.RequiresRepository = true;
 			
             options = new CmdParserOptionSet()
             {
                 { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
-                { "replace-all", "Replaces all lines matching the key (and optionally the value_regex).", v => cmd.ReplaceAll = true},
+/*                { "replace-all", "Replaces all lines matching the key (and optionally the value_regex).", v => cmd.ReplaceAll = true},
                 { "add", "Adds a new line to the option without altering any existing values.", v => cmd.Add = false},
                 { "get", "Get the value for a given key", v => cmd.Get = true},
                 { "get-all", "Like get, but can handle multiple values for the key.", v=> cmd.GetAll = true},
@@ -70,15 +69,15 @@ namespace GitSharp.CLI
                 { "remove-section", "Remove the given section from the configuration file", v => cmd.RemoveSection = true},
                 { "rename-section", "Rename the given section to a new name", v => cmd.RenameSection = true},
                 { "unset", "Remove the line matching the key from config file", v => cmd.UnSet = true},
-                { "unset-all", "Remove all lines matching the key from config file", v => cmd.UnSetAll = true},
+                { "unset-all", "Remove all lines matching the key from config file", v => cmd.UnSetAll = true},*/
                 { "l|list", "List all variables set in config file", v => cmd.List = true},
-                { "bool", "Ensure that the output is true or false", v => cmd.Bool = true },
+/*                { "bool", "Ensure that the output is true or false", v => cmd.Bool = true },
                 { "int", "Ensure that the output is a simple decimal number", v => cmd.Int = true },
                 { "bool-or-int", "Ensure that the output matches the format of either --bool or --int, as described above", v => cmd.BoolOrInt = true },
                 { "z|null", "Always end values with null character instead of newlines", v => cmd.Null = true },
                 { "get-colorbool", "Find the color setting for {name} and output as true or false", v => cmd.GetColorBool = true },
                 { "get-color", "Find the color configured for {name}", v => cmd.GetColor = true },
-                { "e|edit", "Opens an editor to modify the specified config file as --global, --system, or repository (default)", v => cmd.Edit = true },
+                { "e|edit", "Opens an editor to modify the specified config file as --global, --system, or repository (default)", v => cmd.Edit = true },*/
             };
 
             try
@@ -98,6 +97,10 @@ namespace GitSharp.CLI
                 	else
                 		cmd.Arg3 = "";
 
+                    cmd.Execute();
+                }
+                else if (cmd.List)
+                {
                     cmd.Execute();
                 }
                 else

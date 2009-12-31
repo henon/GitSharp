@@ -26,6 +26,10 @@
       <Help>http://www.kernel.org/pub/software/scm/git/docs/git-commit.html</Help>
     </Command>
     <Command>
+      <Name>GitSharp.CLI.Config</Name>
+      <Help>http://www.kernel.org/pub/software/scm/git/docs/git-config.html</Help>
+    </Command>
+    <Command>
       <Name>GitSharp.CLI.Daemon</Name>
       <Help>http://www.kernel.org/pub/software/scm/git/docs/git-daemon.html</Help>
     </Command>

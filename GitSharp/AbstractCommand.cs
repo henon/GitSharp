@@ -95,7 +95,9 @@ namespace GitSharp
                             if (Directory.Exists(gitDir))
                                 return directory;
 
-                            directory = Directory.GetParent(directory).FullName;
+                            //Get parent directory
+                            directory = Path.Combine(directory, "..");
+                            directory = Path.GetFullPath(directory);
                         }
                     }
                     else
@@ -106,7 +108,9 @@ namespace GitSharp
                             if (directory.EndsWith(".git") && Directory.Exists(directory))
                                 return directory;
 
-                            directory = Directory.GetParent(directory).FullName;
+                            //Get parent directory
+                            directory = Path.Combine(directory, "..");
+                            directory = Path.GetFullPath(directory);
                         }
                     }
                 }
@@ -204,5 +208,6 @@ namespace GitSharp
         /// Execute the git command.
         /// </summary>
         public abstract void Execute();
+
     }
 }

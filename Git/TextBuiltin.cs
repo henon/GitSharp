@@ -168,7 +168,7 @@ namespace GitSharp.CLI
         /// </summary>
         /// <param name="repo">Specifies the repository to use.</param>
         /// <param name="path"></param>
-        public void Init(Core.Repository repo, DirectoryInfo path)
+        public void Init(Core.Repository repo, string path)
         {
             try
             {
@@ -197,7 +197,7 @@ namespace GitSharp.CLI
             if (repo != null)
             {
                 GitRepository = repo;
-                GitDirectory = repo.Directory;
+                GitDirectory = repo.Directory.FullName;
             }
             else
             {
@@ -324,7 +324,7 @@ namespace GitSharp.CLI
             }
         }
 
-        public DirectoryInfo GitDirectory { get; set; }
+        public string GitDirectory { get; set; }
 
     }
 }

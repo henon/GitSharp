@@ -132,12 +132,13 @@ namespace GitSharp.CLI
 
                 CommandCatalog catalog = new CommandCatalog();
                 CommandRef subcommand = catalog.Get(argv[0]);
-                DirectoryInfo gitdir = null;
+                string gitdir = null;
 
                 if (subcommand != null)
                 {
                     TextBuiltin cmd = subcommand.Create();
                     List<String> args = argv.ToList();
+                    GitSharp.Core.Repository repo = null;
 
                     try
                     {
@@ -147,7 +148,7 @@ namespace GitSharp.CLI
                             {
                                 if (args[x].Length > 10)
                                 {
-                                    gitdir = new DirectoryInfo(args[x].Substring(11));
+                                    gitdir = args[x].Substring(11);
                                     args.RemoveAt(x);
                                     break;
                                 }
@@ -164,9 +165,10 @@ namespace GitSharp.CLI
                     if (cmd.RequiresRepository)
                     {
                         if (gitdir == null)
-                            gitdir = new DirectoryInfo(GitSharp.AbstractCommand.FindGitDirectory(null, true, false));
+                            gitdir = GitSharp.AbstractCommand.FindGitDirectory(null, true, false);
 
-                        cmd.Init(new GitSharp.Core.Repository(gitdir), gitdir);
+                        repo = new GitSharp.Core.Repository(new DirectoryInfo(gitdir));
+                        cmd.Init(repo, gitdir);
                     }
                     else
                         cmd.Init(null, gitdir);
@@ -181,6 +183,9 @@ namespace GitSharp.CLI
                     {
                         if (GitSharp.Commands.OutputStream != null)
                             GitSharp.Commands.OutputStream.Flush();
+
+                        if (repo != null)
+                            repo.Close();
                     }
                 }
                 else
@@ -312,27 +317,16 @@ namespace GitSharp.CLI
             }
         }
 
-        private static DirectoryInfo findGitDir()
-        {
-
-
-            DirectoryInfo current = new DirectoryInfo(".");
-            while (current != null)
-            {
-                DirectoryInfo gitDir = new DirectoryInfo(current + ".git");
-                if (gitDir.Exists)
-                    return gitDir;
-                current = current.Parent;
-            }
-            return null;
-        }
-
         /// <summary>
         /// Wait for Enter key if in DEBUG mode
         /// </summary>
         /// <param name="exit_code"></param>
         static public void Exit(int exit_code)
         {
+            //Close the static global repository before exiting
+            if (GitSharp.Commands.Repository != null)
+                GitSharp.Commands.Repository.Close();
+
 #if DEBUG
             Console.WriteLine("\n\nrunning in DEBUG mode, press any key to exit.");
             Console.In.ReadLine();

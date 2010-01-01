@@ -1,3 +1,30 @@
+o------------------------------------------------------------------------------o
++           .+::/.`                                                            +
++          `o.  `o-`                                                           +
++          .+    .+                                                            +
++         `+.    .o`                                                           +
++         .o     `o `-.                      ```                               +
++         .o     `s +-.+                    .NNm                               +
++          +      s`s  +`                   `sso    .//.                       +
++          +      s.+  +`                           sMM/         ..`   `..`    +
++          o      s`+  o`                           sMM/        :NNo   oNN:    +
++    `:-  `o      s:/  o       `:+ooooooo`  `oo+  /odMMyoo:     yMM-   mMN`    +
++   ./-s` `o      :.  `s      -mMMmmmmMMM-  .MMm  ymNMMNmm+    `NMm   -MMy     +
++  `o` o. `o         .o-      yMMs.```dMM-  .MMm  ``sMM+````...+MMy...sMM+..`  +
++   s  o. `o       ./-`       yMM/    dMM-  .MMm    sMM/   ymmmNMMNmmmNMMNmm:  +
++   s` +- `o      -+`         yMM/    dMM-  .MMm    sMM/   ://+MMm///sMMh///`  +
++   :/ /: `s      o.          yMM/    dMM-  .MMm    yMM/      +MMo   yMM:      +
++    o``+:-o      +.          yMM/    dMM-  .MMm    yMM/      dMM.  `NMN       +
++    .+  .-`      +-          yMM/    dMM-  .MMm    yMM/     .MMd   /MMs       +
++     +/`         +-          +MMdo+++mMM-  .MMm    sMMy+++++yMMh+++dMMy+++    +
++      -:/.       /-           /hmNNNNMMM-  .NNd    -dNNNNNNNMMMmmmNMMMmmmm    +
++        `o`      :-          `...````dMM-   ``       ``````-MMh```+MMs```     +
++         +-      ::          /MMy````dMM-                  oMM+   hMM-        +
++         ./      :/          -NMNmmmmMMN.                  mMM`  .MMm         +
++         `+      -:           -/++++++/.                  .NNh   +NN+         +
++          o      `/                                                           +
+o----------/:      s-----------------------------------------------------------s
+  Made by using http://www.text-image.com/convert/ascii.html
 == Git# --> Git for .NET ==
 ... a native Windows version of the fast & free open source version control system
 
@@ -11,66 +38,12 @@ Please refer to the LICENSE.txt files for the complete license.
 
 For more info check out the Git# website at http://www.eqqon.com/index.php/GitSharp
 
-== WARNINGS / CAVEATS   ==
+== Latest source code ==
+  http://github.com/henon/GitSharp
 
-- Symbolic links are not supported because Windows does not directly support them.
-  Such links could be damaged.
-
-- Only the timestamp of the index is used by git check if  the index
-  is dirty.
-
-- CRLF conversion is never performed. You should therefore
-  make sure your projects and workspaces are configured to save files
-  with Unix (LF) line endings.
-
-== Features ==
-
-    * Read loose and packed commits, trees, blobs, including
-      deltafied objects.
-
-    * Read objects from shared repositories
-
-    * Add files to the index and commit changes
-
-    * Copy trees to local directory, or local directory to a tree.
-
-    * Lazily loads objects as necessary.
-
-    * Read and write .git/config files.
-
-    * Create a new repository.
-
-    * Checkout in dirty working directory if trivial.
-
-    * Walk the history from a given set of commits looking for commits
-      introducing changes in files under a specified path.
-
-    * Object transport  
-      Fetch via ssh, git, http and bundles.
-      Push via ssh, git. Git# does not yet deltify
-      the pushed packs so they may be a lot larger than C Git packs.
-
-== Missing Features ==
-
-There are a lot of missing features in GitSharp. You need the real Git 
-for those.
-
-- Merging. 
-
-- Repacking.
-
-- Generate a GIT format patch.
-
-- Apply a GIT format patch.
-
-- Documentation. :-)
-
-- gitattributes support
-  In particular CRLF conversion is not implemented. Files are treated
-  as byte sequences.
-
-- submodule support
-  Submodules are not supported or even recognized.
+== Bugs, Tasks etc. ==
+  Submit bugs, read what we have to do or suggest new enhancements
+  http://code.google.com/p/gitsharp/
 
 == Support ==
 
@@ -101,9 +74,8 @@ Tools:
 More information about GIT, its repository format, and the canonical
 C based implementation can be obtained from the GIT websites:
 
-  http://git.or.cz/
-  http://www.kernel.org/pub/software/scm/git/
-  http://www.kernel.org/pub/software/scm/git/docs/
+  http://git-scm.com/ 
+  http://progit.org/book/ - free book about Git
 
 More information about the Java implemetation which Git# stems from:
-  http://git.or.cz/gitwiki/EclipsePlugin
+  http://www.jgit.org/

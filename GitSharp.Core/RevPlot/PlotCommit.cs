@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -44,30 +45,18 @@ namespace GitSharp.Core.RevPlot
     /// </summary>
     /// <typeparam name="L">type of lane being used by the plotter.</typeparam>
     /// <see cref="PlotCommitList{L}"/>
-    public class PlotCommit<L> : PlotCommit where L : PlotLane
+    public class PlotCommit : RevCommit
     {
-        /// <summary>
-        /// Create a new commit.
-        /// </summary>
-        /// <param name="id">the identity of this commit.</param>
-        /// <param name="tags">the tags associated with this commit, null for no tags</param>
-        protected PlotCommit(AnyObjectId id, Ref[] tags)
-            : base(id, tags)
-        {
-        }
 
         /// <summary>
         /// Obtain the lane this commit has been plotted into.
         /// </summary>
         /// <returns>the assigned lane for this commit.</returns>
-        public L getLane()
+        public PlotLane getLane()
         {
-            return (L)lane;
+            return lane;
         }
-    }
 
-    public class PlotCommit : RevCommit
-    {
         static PlotCommit[] NO_CHILDREN = { };
 
         static PlotLane[] NO_LANES = { };
@@ -80,6 +69,11 @@ namespace GitSharp.Core.RevPlot
 
         public Ref[] refs;
 
+        /// <summary>
+        /// Create a new commit.
+        /// </summary>
+        /// <param name="id">the identity of this commit.</param>
+        /// <param name="tags">the tags associated with this commit, null for no tags</param>
         public PlotCommit(AnyObjectId id, Ref[] tags) : base(id)
         {
             this.refs = tags;

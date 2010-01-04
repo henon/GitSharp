@@ -81,9 +81,7 @@ namespace GitSharp
                 r.exclude = !workingLine.StartsWith("!");
                 if (!r.exclude)
                     workingLine = workingLine.Substring(1);
-                r.isDirectoryOnly = workingLine.EndsWith("/");
-                if (r.isDirectoryOnly)
-                    workingLine = workingLine.Substring(0, workingLine.Length - 1);
+                r.isDirectoryOnly = !workingLine.Contains(".");
 
                 const string regexCharMatch = @"[^/\\]";
                 StringBuilder pattern = new StringBuilder();
@@ -152,16 +150,15 @@ namespace GitSharp
             {
                 throw new ArgumentException("fullDirectory must be a subdirectory of workingDirectory", "fullDirectory", null);
             }
+            string dirPath = Path.GetDirectoryName(path).Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
 
             bool ignore = false;
             foreach (Rule rule in rules)
             {
                 if (rule.exclude != ignore)
                 {
-                    if (rule.pattern.IsMatch(path))
-                    {
+                    if (rule.isDirectoryOnly && rule.pattern.IsMatch(dirPath))
                         ignore = rule.exclude;
-                    }
                 }
             }
             return ignore;
@@ -189,10 +186,8 @@ namespace GitSharp
             {
                 if (rule.exclude != ignore)
                 {
-                    if ((!rule.isDirectoryOnly && rule.pattern.IsMatch(path)) || (rule.isDirectoryOnly && rule.pattern.IsMatch(dirPath)))
-                    {
+                    if (!rule.isDirectoryOnly && rule.pattern.IsMatch(path))
                         ignore = rule.exclude;
-                    }
                 }
             }
             return ignore;

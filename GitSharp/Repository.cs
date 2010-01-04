@@ -175,6 +175,8 @@ namespace GitSharp
         /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
         public static bool IsValid(string path, bool bare)
         {
+            if (path == null)
+                return false;
             if (!bare)
             {
                 if (!Regex.IsMatch(path, "\\.git[/\\\\]?$"))

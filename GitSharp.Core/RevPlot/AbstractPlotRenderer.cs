@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -74,7 +75,7 @@ namespace GitSharp.Core.RevPlot
 	/// </summary>
 	/// <typeparam name="TLane">type of lane being used by the application.</typeparam>
 	/// <typeparam name="TColor">type of color object used by the graphics library.</typeparam>
-	public abstract class AbstractPlotRenderer<TLane, TColor> where TLane : PlotLane {
+	public abstract class AbstractPlotRenderer<TColor> {
 		private static int LANE_WIDTH = 14;
 	
 		private static int LINE_WIDTH = 2;
@@ -86,17 +87,17 @@ namespace GitSharp.Core.RevPlot
 	    /// </summary>
 	    /// <param name="commit">the commit to render in this cell. Must not be null.</param>
 	    /// <param name="h">total height (in pixels) of this cell.</param>
-	    protected void paintCommit(PlotCommit<TLane> commit, int h) {
+	    protected virtual void paintCommit(PlotCommit commit, int h) {
 			if (commit == null)
 				throw new ArgumentNullException ("commit");
 			
 			int dotSize = computeDotSize(h);
-			TLane myLane = commit.getLane();
+			PlotLane myLane = commit.getLane();
 			int myLaneX = laneC(myLane);
 			TColor myColor = laneColor(myLane);
 	
 			int maxCenter = 0;
-			foreach (TLane passingLane in (TLane[]) commit.passingLanes) {
+			foreach (PlotLane passingLane in (PlotLane[]) commit.passingLanes) {
 				int cx = laneC(passingLane);
 				TColor c = laneColor(passingLane);
 				drawLine(c, cx, 0, cx, h, LINE_WIDTH);
@@ -105,12 +106,12 @@ namespace GitSharp.Core.RevPlot
 	
 			int nParent = commit.ParentCount;
 			for (int i = 0; i < nParent; i++) {
-				PlotCommit<TLane> p;
-				TLane pLane;
+				PlotCommit p;
+				PlotLane pLane;
 				TColor pColor;
 				int cx;
 	
-				p = (PlotCommit<TLane>) commit.GetParent(i);
+				p = (PlotCommit) commit.GetParent(i);
 				pLane = p.getLane();
 				if (pLane == null)
 					continue;
@@ -184,7 +185,7 @@ namespace GitSharp.Core.RevPlot
 	    /// </summary>
 	    /// <param name="myLane">the current lane. May be null.</param>
 	    /// <returns>graphics specific color reference. Must be a valid color.</returns>
-	    protected abstract TColor laneColor(TLane myLane);
+	    protected abstract TColor laneColor(PlotLane myLane);
 	
 		/// <summary>
 	    /// Draw a single line within this cell. 

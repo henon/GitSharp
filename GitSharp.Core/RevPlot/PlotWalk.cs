@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -75,14 +76,10 @@ namespace GitSharp.Core.RevPlot
 
         /// <returns>the list of knows tags referring to this commit</returns>
         protected Ref[] getTags(AnyObjectId commitId) {
-            List<Ref> list = reverseRefMap[commitId];
-            Ref[] tags;
-            if (list == null)
-                tags = null;
-            else {
-                tags = list.ToArray();
-                Array.Sort(tags, new PlotRefComparator(Repository));
-            }
+            if (!reverseRefMap.ContainsKey(commitId))
+                return null;
+            Ref[] tags = reverseRefMap[commitId].ToArray();
+            Array.Sort(tags, new PlotRefComparator(Repository));
             return tags;
         }
 

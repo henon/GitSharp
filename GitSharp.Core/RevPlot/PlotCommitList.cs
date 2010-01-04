@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -38,6 +39,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using GitSharp.Core.RevWalk;
 
 namespace GitSharp.Core.RevPlot
@@ -54,8 +56,8 @@ namespace GitSharp.Core.RevPlot
     /// </para>
     /// </summary>
     /// <typeparam name="L">type of lane used by the application.</typeparam>
-    public class PlotCommitList<L> :
-        RevCommitList<PlotCommit<L>> where L : PlotLane {
+    public class PlotCommitList :
+        RevCommitList<PlotCommit> {
         static int MAX_LENGTH = 25;
 
         private int lanesAllocated;
@@ -88,8 +90,8 @@ namespace GitSharp.Core.RevPlot
         /// </summary>
         /// <param name="currCommit">the commit the caller needs to get the lanes from.</param>
         /// <param name="result">collection to add the passing lanes into.</param>
-        public void findPassingThrough(PlotCommit<L> currCommit,
-                                       Collection<L> result) 
+        public void findPassingThrough(PlotCommit currCommit,
+                                       Collection<PlotLane> result) 
 		{
 			if (currCommit == null)
 				throw new ArgumentNullException ("currCommit");
@@ -97,10 +99,10 @@ namespace GitSharp.Core.RevPlot
 				throw new ArgumentNullException ("result");
 			
             foreach (PlotLane p in currCommit.passingLanes)
-                result.Add((L) p);
+                result.Add((PlotLane) p);
         }
 
-        protected override void enter(int index, PlotCommit<L> currCommit) {
+        protected override void enter(int index, PlotCommit currCommit) {
             setupChildren(currCommit);
 
             int nChildren = currCommit.getChildCount();
@@ -135,7 +137,7 @@ namespace GitSharp.Core.RevPlot
                 for (int i = 0; i < nChildren; i++) {
                     PlotCommit c = currCommit.children[i];
                     if (activeLanes.Remove(c.lane)) {
-                        recycleLane((L) c.lane);
+                        recycleLane(c.lane);
                         freeLanes.Add(c.lane.getPosition(), c.lane.getPosition());
                     }
                 }
@@ -146,7 +148,7 @@ namespace GitSharp.Core.RevPlot
 
                 int remaining = nChildren;
                 for (int r = index - 1; r >= 0; r--) {
-                    PlotCommit<L> rObj = get(r);
+                    PlotCommit rObj = get(r);
                     if (currCommit.isChild(rObj)) {
                         if (--remaining == 0)
                             break;
@@ -156,10 +158,10 @@ namespace GitSharp.Core.RevPlot
             }
         }
 
-        private void setupChildren(PlotCommit<L> currCommit) {
+        private void setupChildren(PlotCommit currCommit) {
             int nParents = currCommit.ParentCount;
             for (int i = 0; i < nParents; i++)
-                ((PlotCommit<L>)currCommit.GetParent(i)).addChild(currCommit);
+                ((PlotCommit)currCommit.GetParent(i)).addChild(currCommit);
         }
 
         private PlotLane nextFreeLane() {
@@ -167,7 +169,7 @@ namespace GitSharp.Core.RevPlot
             if (freeLanes.Count == 0) {
                 p.position = lanesAllocated++;
             } else {
-                int min = freeLanes[0];
+                int min = freeLanes.First().Key;
                 p.position = min;
                 freeLanes.Remove(min);
             }
@@ -175,14 +177,16 @@ namespace GitSharp.Core.RevPlot
         }
 
         /// <returns>a new Lane appropriate for this particular PlotList.</returns>
-        protected L createLane() {
-            return (L) new PlotLane();
+        protected PlotLane createLane()
+        {
+            return new PlotLane();
         }
 
         /// <summary>
         /// Return colors and other reusable information to the plotter when a lane is no longer needed.
         /// </summary>
-        protected void recycleLane(L lane) {
+        protected void recycleLane(PlotLane lane)
+        {
             // Nothing.
         }
     }

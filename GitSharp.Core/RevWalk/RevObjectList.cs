@@ -162,7 +162,7 @@ namespace GitSharp.Core.RevWalk
 
 			public Block(int s)
 			{
-				Contents = new T[BLOCK_SIZE];
+				Contents = new object[BLOCK_SIZE];
 				Shift = s;
 			}
 

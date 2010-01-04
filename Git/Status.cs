@@ -42,9 +42,10 @@ using NDesk.Options;
 
 namespace GitSharp.CLI
 {
-    [Command(complete = false, common = true, usage = "Show the working tree status")]
+    [Command(complete = false, common = true, requiresRepository=true, usage = "Show the working tree status")]
     class Status : TextBuiltin
     {
+        private StatusCommand cmd = new StatusCommand();
 
         private static Boolean isHelp = false;
 
@@ -73,6 +74,7 @@ namespace GitSharp.CLI
 
         override public void Run(String[] args)
         {
+           
             // The command takes the same options as git-commit. It shows what would be 
             // committed if the same options are given.
             options = new CmdParserOptionSet()
@@ -109,13 +111,16 @@ namespace GitSharp.CLI
                 if (arguments.Count > 0)
                 {
                     //Execute the status using the specified file pattern
-                    DoStatus(arguments[0]);
+                    //cmd.Source = arguments[0];
+                    cmd.Execute();
+                   
                 }
                 else if (args.Length <= 0)
                 {
                     //Display status if no changes are added to commit
                     //If changes have been made, commit them?
-                    Console.WriteLine("These commands still need to be implemented.");
+                    //Console.WriteLine("These commands still need to be implemented.");
+                    cmd.Execute();
                 }
                 else
                 {
@@ -141,7 +146,9 @@ namespace GitSharp.CLI
 
         public static void DoStatus(String filepattern)
         {
+            
             Console.WriteLine("This command still needs to be implemented.");
         }
+
     }
 }

@@ -46,12 +46,15 @@ namespace GitSharp
 {
     public class StatusCommand : AbstractCommand
     {
+        private IgnoreHandler _ignoreHandler;
+
         public StatusCommand()
         {
         }
 
         public override void Execute()
         {
+            _ignoreHandler = new IgnoreHandler(Repository);
             RepositoryStatus status = new RepositoryStatus(Repository);
             OutputStream.WriteLine("# On branch ..."); //Todo: Insert branch detection here.
             //OutputStream.WriteLine("# Your branch is ahead of 'xxx' by x commits."); //Todo
@@ -227,12 +230,10 @@ namespace GitSharp
                 OutputStream.WriteLine("#");
                 List<string> sortUntracked = status.Untracked.OrderBy(v => v.ToString()).ToList();
 
-                //Read ignore file list and remove from the untracked list
-                IgnoreRules rules = new IgnoreRules(Path.Combine(Repository.WorkingDirectory, ".gitignore"));
               	foreach (string hash in sortUntracked)
               	{
                     string path = Path.Combine(Repository.WorkingDirectory, hash);
-                    if (!rules.IgnoreFile(Repository.WorkingDirectory, path) && !rules.IgnoreDir(Repository.WorkingDirectory, path))
+                    if (!_ignoreHandler.IsIgnored(path))
                     {
                         OutputStream.WriteLine("#       " + hash);
                     }

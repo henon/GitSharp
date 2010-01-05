@@ -46,6 +46,7 @@ namespace GitSharp
 {
     public class StatusCommand : AbstractCommand
     {
+
         public StatusCommand()
         {
         }
@@ -58,11 +59,8 @@ namespace GitSharp
             OutputStream.WriteLine("#");
             if (status.AnyDifferences)
             {
-                //There are two separate categories each file is added to. 
-                //Files should be listed exactly once in each category if they are 
-                // modified (due to the filename restriction explained below)
-                //  1) StatusType: staged, modified
-                //  2) FileState: removed, missing, added, and changed
+                // Files use the following states: removed, missing, added, and modified.
+                // If a file has been staged, it is also added to the RepositoryStatus.Staged HashSet.
                 //
                 // The remaining StatusType known as "Untracked" is determined by what is *not* staged or modified.
                 // It is then intersected with the .gitignore list to determine what should be listed as untracked.
@@ -81,33 +79,33 @@ namespace GitSharp
                 stagedMissing.IntersectWith(status.Missing);
                 HashSet<string> stagedAdded = new HashSet<string>(status.Staged);
                 stagedAdded.IntersectWith(status.Added);
-                //HashSet<string> stagedChanged = new HashSet<string>(status.Staged);
-                //stagedChanged.IntersectWith(status.Changed);
+                HashSet<string> stagedModified = new HashSet<string>(status.Staged);
+                stagedModified.IntersectWith(status.Modified);
 
-                HashSet<string> modifiedRemoved = new HashSet<string>(status.Modified);
-                modifiedRemoved.IntersectWith(status.Removed);
-                HashSet<string> modifiedMissing = new HashSet<string>(status.Modified);
-                modifiedMissing.IntersectWith(status.Missing);
-                HashSet<string> modifiedAdded = new HashSet<string>(status.Modified);
-                modifiedAdded.IntersectWith(status.Added);
-                //HashSet<string> modifiedChanged = new HashSet<string>(status.Modified);
-                //modifiedChanged.IntersectWith(status.Changed);
+                HashSet<string> Removed = new HashSet<string>(status.Removed);
+                Removed.ExceptWith(status.Staged);
+                HashSet<string> Missing = new HashSet<string>(status.Missing);
+                Missing.ExceptWith(status.Staged);
+                HashSet<string> Added = new HashSet<string>(status.Added);
+                Added.ExceptWith(status.Staged);
+                HashSet<string> Modified = new HashSet<string>(status.Modified);
+                Modified.ExceptWith(status.Staged);
 
                 // The output below is used to display both where the file is being added and specifying the file.
                 // Unit testing is still pending.
                 OutputStream.WriteLine("# Staged Tests: status.Staged + StageType");
                 OutputStream.WriteLine("# Staged Total: " + status.Staged.Count);
-                OutputStream.WriteLine("# Test:      Changed Object Count: No valid method");// + stagedChanged.Count);
+                OutputStream.WriteLine("# Test:     Modified Object Count: " + stagedModified.Count);
                 OutputStream.WriteLine("# Test:      Removed Object Count: " + stagedRemoved.Count);
                 OutputStream.WriteLine("# Test:      Missing Object Count: " + stagedMissing.Count);
                 OutputStream.WriteLine("# Test:        Added Object Count: " + stagedAdded.Count);
                 OutputStream.WriteLine("#");
                 OutputStream.WriteLine("# Modified Tests: status.Modified + StageType");
-                OutputStream.WriteLine("# Modified Total: " + status.Modified.Count);
-                OutputStream.WriteLine("# Test:      Changed Object Count: No valid method");// + modifiedChanged.Count);
-                OutputStream.WriteLine("# Test:      Removed Object Count: " + modifiedRemoved.Count);
-                OutputStream.WriteLine("# Test:      Missing Object Count: " + modifiedMissing.Count);
-                OutputStream.WriteLine("# Test:        Added Object Count: " + modifiedAdded.Count);
+                OutputStream.WriteLine("# Modified Total: " + (status.Modified.Count - status.Staged.Count));
+                OutputStream.WriteLine("# Test:      Changed Object Count: " + Modified.Count);
+                OutputStream.WriteLine("# Test:      Removed Object Count: " + Removed.Count);
+                OutputStream.WriteLine("# Test:      Missing Object Count: " + Missing.Count);
+                OutputStream.WriteLine("# Test:        Added Object Count: " + Added.Count);
                 OutputStream.WriteLine("#");
                 OutputStream.WriteLine("# UnTracked Tests: status.Untracked");
                 OutputStream.WriteLine("# Test:    Untracked Object Count: " + status.Untracked.Count);
@@ -129,52 +127,96 @@ namespace GitSharp
             throw new NotImplementedException();
         }
 
-        private Dictionary<string, int> GetOrderedList(RepositoryStatus status, HashSet<string> filter)
+        private Dictionary<string, int> GetModifiedList(RepositoryStatus status)
         {
-            //Create a single list to sort and display the unstaged files by filename.
-            //This causes additional speed overhead so should be considered optional.
+            //Create a single list to sort and display the modified (non-staged) files by filename.
+            //Sorting in this manner causes additional speed overhead so should be considered optional.
             //With all the additional testing currently added, please keep in mind it will run twice as fast
             //once the tests are removed.
-            Dictionary<string, int> orderedList = new Dictionary<string, int>();
+            Dictionary<string, int> modifiedList = new Dictionary<string, int>();
             HashSet<string> hset = null;
 
             if (status.Missing.Count > 0)
             {
-                hset = new HashSet<string>(filter);
-                hset.IntersectWith(status.Missing);
+                hset = new HashSet<string>(status.Missing);
+                hset.ExceptWith(status.Staged);
                 foreach (string hash in hset)
-                    orderedList.Add(hash, 1);
+                    modifiedList.Add(hash, 1);
             }
 
             if (status.Removed.Count > 0)
             {
-                hset = new HashSet<string>(filter);
-                hset.IntersectWith(status.Removed);
+                hset = new HashSet<string>(status.Removed);
+                hset.ExceptWith(status.Staged);
                 foreach (string hash in hset)
-                    orderedList.Add(hash, 2);
+                    modifiedList.Add(hash, 2);
             }
 
-            //This needs to be added once the method is created.
-            /*if (status.Changed.Count > 0)
+            if (status.Modified.Count > 0)
             {
-                hset = new HashSet<string>(filter);
-                hset.IntersectWith(status.Modified);
+                hset = new HashSet<string>(status.Modified);
+                hset.ExceptWith(status.Staged);
                 foreach (string hash in hset)
-                    unstagedList.Add(hash, 3);
-            }*/
+                    modifiedList.Add(hash, 3);
+            }
 
             if (status.Added.Count > 0)
             {
-                hset = new HashSet<string>(filter);
-                hset.IntersectWith(status.Added);
+                hset = new HashSet<string>(status.Added);
+                hset.ExceptWith(status.Staged);
                 foreach (string hash in hset)
-                    orderedList.Add(hash, 4);
+                    modifiedList.Add(hash, 4);
             }
 
-            orderedList.OrderBy(v => v.Key);
-            return orderedList;
+            modifiedList.OrderBy(v => v.Key);
+            return modifiedList;
         }
-        private void displayOrderedList(Dictionary<string, int> statusList)
+
+        private Dictionary<string, int> GetStagedList(RepositoryStatus status)
+        {
+            //Create a single list to sort and display the staged files by filename.
+            //Sorting in this manner causes additional speed overhead so should be considered optional.
+            //With all the additional testing currently added, please keep in mind it will run twice as fast
+            //once the tests are removed.
+            Dictionary<string, int> stagedList = new Dictionary<string, int>();
+            HashSet<string> hset = null;
+
+            if (status.Missing.Count > 0)
+            {
+                hset = new HashSet<string>(status.Staged);
+                hset.IntersectWith(status.Missing);
+                foreach (string hash in hset)
+                    stagedList.Add(hash, 1);
+            }
+
+            if (status.Removed.Count > 0)
+            {
+                hset = new HashSet<string>(status.Staged);
+                hset.IntersectWith(status.Removed);
+                foreach (string hash in hset)
+                    stagedList.Add(hash, 2);
+            }
+
+            if (status.Modified.Count > 0)
+            {
+                hset = new HashSet<string>(status.Staged);
+                hset.IntersectWith(status.Modified);
+                foreach (string hash in hset)
+                    stagedList.Add(hash, 3);
+            }
+
+            if (status.Added.Count > 0)
+            {
+                hset = new HashSet<string>(status.Staged);
+                hset.IntersectWith(status.Added);
+                foreach (string hash in hset)
+                    stagedList.Add(hash, 4);
+            }
+
+            stagedList.OrderBy(v => v.Key);
+            return stagedList;
+        }
+        private void displayStatusList(Dictionary<string, int> statusList)
         {
             foreach (KeyValuePair<string, int> pair in statusList)
             {
@@ -203,8 +245,8 @@ namespace GitSharp
             OutputStream.WriteLine("#   (use \"git add (file)...\" to update what will be committed)");
             OutputStream.WriteLine("#   (use \"git checkout -- (file)...\" to discard changes in working directory");
             OutputStream.WriteLine("#");
-            Dictionary<string, int> statusList = GetOrderedList(status, status.Modified);
-            displayOrderedList(statusList);
+            Dictionary<string, int> statusList = GetModifiedList(status);
+            displayStatusList(statusList);
             OutputStream.WriteLine("#");
         }
 
@@ -213,8 +255,8 @@ namespace GitSharp
             OutputStream.WriteLine("# Changes to be committed:");
             OutputStream.WriteLine("#   (use \"git reset HEAD (file)...\" to unstage)");
             OutputStream.WriteLine("#");
-            Dictionary<string, int> statusList = GetOrderedList(status, status.Staged);
-            displayOrderedList(statusList);
+            Dictionary<string, int> statusList = GetStagedList(status);
+            displayStatusList(statusList);
             OutputStream.WriteLine("#");
         }
 

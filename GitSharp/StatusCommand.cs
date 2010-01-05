@@ -54,7 +54,7 @@ namespace GitSharp
         public override void Execute()
         {
             RepositoryStatus status = new RepositoryStatus(Repository);
-            OutputStream.WriteLine("# On branch ..."); //Todo: Insert branch detection here.
+            OutputStream.WriteLine("# On branch " + Repository.CurrentBranch.Name);
             //OutputStream.WriteLine("# Your branch is ahead of 'xxx' by x commits."); //Todo
             OutputStream.WriteLine("#");
             if (status.AnyDifferences)
@@ -123,7 +123,7 @@ namespace GitSharp
                 OutputStream.WriteLine("# nothing to commit (working directory clean");
             }
             //Leave this in until completed. The command returns inaccurate results due to IndexDiff.
-            throw new NotImplementedException();
+            throw new NotImplementedException("The implementation is not yet complete. The command returns inaccurate results due to IndexDiff.");
         }
 
         private Dictionary<string, int> GetModifiedList(RepositoryStatus status)

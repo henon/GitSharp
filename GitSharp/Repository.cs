@@ -38,6 +38,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
@@ -155,91 +156,6 @@ namespace GitSharp
         }
 
         #endregion
-
-        /// <summary>
-        /// Checks if the directory given by the path is a valid non-bare git repository. The given path may either point to 
-        /// the working directory or the repository's .git directory.
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
-        public static bool IsValid(string path)
-        {
-            return IsValid(path, false);
-        }
-
-        /// <summary>
-        /// Checks if the directory given by the path is a valid git repository.
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="bare"></param>
-        /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
-        public static bool IsValid(string path, bool bare)
-        {
-            if (path == null)
-                return false;
-            if (!bare)
-            {
-                if (!Regex.IsMatch(path, "\\.git[/\\\\]?$"))
-                    path = Path.Combine(path, ".git");
-            }
-
-            if (!DirExists(path))
-                return false;
-			if (!FileExists(Path.Combine(path, "HEAD")))
-                return false;
-			if (!FileExists(Path.Combine(path, "config")))
-                return false;
-			//if (!DirExists(Path.Combine(path, "description")))
-            //    return false;
-			//if (!DirExists(Path.Combine(path, "hooks")))
-            //   return false;
-            //if (!DirExists(Path.Combine(path, "info")))
-            //    return false;
-            //if (!DirExists(Path.Combine(path, "info/exclude")))
-            //    return false;
- 			if (!DirExists(Path.Combine(path, "objects")))
-                return false;
-            if (!DirExists(Path.Combine(path, "objects/info")))
-                return false;
-            if (!DirExists(Path.Combine(path, "objects/pack")))
-                return false;
-            if (!DirExists(Path.Combine(path, "refs")))
-                return false;
-            if (!DirExists(Path.Combine(path, "refs/heads")))
-                return false;
-            if (!DirExists(Path.Combine(path, "refs/tags")))
-                return false;
-
-            Repository repo = null;
-
-            try
-            {
-                // let's see if it loads without throwing an exception
-                repo = new Repository(path);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-            finally
-            {
-                if (repo != null)
-                {
-                    repo.Dispose();
-                }
-            }
-            return true;
-        }
-
-        private static bool DirExists(string path)
-        {
-            return new DirectoryInfo(path).Exists;
-        }
-
-        private static bool FileExists(string path)
-        {
-            return new FileInfo(path).Exists;
-        }
 
         /// <summary>
         /// Check out the branch with the given name
@@ -431,5 +347,142 @@ namespace GitSharp
 
         #endregion
 
+        /// <summary>
+        /// Checks if the directory given by the path is a valid non-bare git repository. The given path may either point to 
+        /// the working directory or the repository's .git directory.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
+        public static bool IsValid(string path)
+        {
+            return IsValid(path, false);
+        }
+
+        /// <summary>
+        /// Checks if the directory given by the path is a valid git repository.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="bare"></param>
+        /// <returns>Returns true if the given path is a valid git repository, false otherwise.</returns>
+        public static bool IsValid(string path, bool bare)
+        {
+            if (path == null)
+                return false;
+            if (!bare)
+            {
+                if (!Regex.IsMatch(path, "\\.git[/\\\\]?$"))
+                    path = Path.Combine(path, ".git");
+            }
+
+            if (!DirExists(path))
+                return false;
+            if (!FileExists(Path.Combine(path, "HEAD")))
+                return false;
+            if (!FileExists(Path.Combine(path, "config")))
+                return false;
+            //if (!DirExists(Path.Combine(path, "description")))
+            //    return false;
+            //if (!DirExists(Path.Combine(path, "hooks")))
+            //   return false;
+            //if (!DirExists(Path.Combine(path, "info")))
+            //    return false;
+            //if (!DirExists(Path.Combine(path, "info/exclude")))
+            //    return false;
+            if (!DirExists(Path.Combine(path, "objects")))
+                return false;
+            if (!DirExists(Path.Combine(path, "objects/info")))
+                return false;
+            if (!DirExists(Path.Combine(path, "objects/pack")))
+                return false;
+            if (!DirExists(Path.Combine(path, "refs")))
+                return false;
+            if (!DirExists(Path.Combine(path, "refs/heads")))
+                return false;
+            if (!DirExists(Path.Combine(path, "refs/tags")))
+                return false;
+
+            Repository repo = null;
+
+            try
+            {
+                // let's see if it loads without throwing an exception
+                repo = new Repository(path);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            finally
+            {
+                if (repo != null)
+                {
+                    repo.Dispose();
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Searches for a git repository starting at the given path.
+        /// 
+        /// Starting at the given path, searches up the file hierarchy for the next .git directory.
+        /// </summary>
+        /// <param name="starting_directory">The path where the search should start or null to start at the current directory</param>
+        /// <returns>A path if a repository has been found or null otherwise</returns>
+        public static string FindRepository(string starting_directory)
+        {
+            var directory = starting_directory;
+            try
+            {
+                if (directory == null)
+                    directory = System.IO.Directory.GetCurrentDirectory();
+
+                while (true)
+                {
+                    var git = Path.Combine(directory, ".git");
+                    if (DirExists(git))
+                        return git;
+
+                    //Get parent directory
+                    var parent_directory = Path.Combine(Path.GetFullPath(directory), "..");
+                    parent_directory = Path.GetFullPath(parent_directory);
+                    if (parent_directory == directory) // <-- we have reached a toplevel directory which doesn't contain a .git dir.
+                        return null;
+                    directory = parent_directory;
+                }
+            }
+            catch (ArgumentException) // --> invalid path form
+            {
+                return null;
+            }
+            catch (SecurityException) // --> access denied
+            {
+                return null;
+            }
+            catch (UnauthorizedAccessException) // --> access denied
+            {
+                return null;
+            }
+            catch (PathTooLongException)
+            {
+                return null;
+            }
+            catch (NotSupportedException) // --> hmm?
+            {
+                return null;
+            }
+        }
+
+        private static bool DirExists(string path)
+        {
+            return new DirectoryInfo(path).Exists;
+        }
+
+        private static bool FileExists(string path)
+        {
+            return new FileInfo(path).Exists;
+        }
+
     }
+
 }

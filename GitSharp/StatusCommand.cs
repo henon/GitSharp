@@ -66,12 +66,11 @@ namespace GitSharp
                 // It is then intersected with the .gitignore list to determine what should be listed as untracked.
                 // Using intersections will accurately display the "bucket" each file was added to.
 
-                //Note: In standard git, they use cached references instead of filenames. 
-                //      With standard git, it is possible to have the following scenario:
+                // Note: In standard git, they use cached references so the following scenario is possible. 
                 //    1) Filename = a.txt; StatusType=staged; FileState=added
                 //    2) Filename = a.txt; StatusType=modified; FileState=added
                 // Notice that the same filename exists in two separate status's because it points to a reference
-                //
+                // Todo: This test has failed so far with this command.
 
                 HashSet<string> stagedRemoved = new HashSet<string>(status.Staged);
                 stagedRemoved.IntersectWith(status.Removed);
@@ -93,14 +92,14 @@ namespace GitSharp
 
                 // The output below is used to display both where the file is being added and specifying the file.
                 // Unit testing is still pending.
-                OutputStream.WriteLine("# Staged Tests: status.Staged + StageType");
+                OutputStream.WriteLine("# Staged Tests: StageType + status.Staged");
                 OutputStream.WriteLine("# Staged Total: " + status.Staged.Count);
                 OutputStream.WriteLine("# Test:     Modified Object Count: " + stagedModified.Count);
                 OutputStream.WriteLine("# Test:      Removed Object Count: " + stagedRemoved.Count);
                 OutputStream.WriteLine("# Test:      Missing Object Count: " + stagedMissing.Count);
                 OutputStream.WriteLine("# Test:        Added Object Count: " + stagedAdded.Count);
                 OutputStream.WriteLine("#");
-                OutputStream.WriteLine("# Modified Tests: status.Modified + StageType");
+                OutputStream.WriteLine("# Modified Tests: StageType w/o status.Staged");
                 OutputStream.WriteLine("# Modified Total: " + (status.Modified.Count - status.Staged.Count));
                 OutputStream.WriteLine("# Test:      Changed Object Count: " + Modified.Count);
                 OutputStream.WriteLine("# Test:      Removed Object Count: " + Removed.Count);

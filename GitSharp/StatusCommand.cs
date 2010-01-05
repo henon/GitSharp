@@ -46,15 +46,12 @@ namespace GitSharp
 {
     public class StatusCommand : AbstractCommand
     {
-        private IgnoreHandler _ignoreHandler;
-
         public StatusCommand()
         {
         }
 
         public override void Execute()
         {
-            _ignoreHandler = new IgnoreHandler(Repository);
             RepositoryStatus status = new RepositoryStatus(Repository);
             OutputStream.WriteLine("# On branch ..."); //Todo: Insert branch detection here.
             //OutputStream.WriteLine("# Your branch is ahead of 'xxx' by x commits."); //Todo
@@ -70,7 +67,7 @@ namespace GitSharp
                 // The remaining StatusType known as "Untracked" is determined by what is *not* staged or modified.
                 // It is then intersected with the .gitignore list to determine what should be listed as untracked.
                 // Using intersections will accurately display the "bucket" each file was added to.
-               
+
                 //Note: In standard git, they use cached references instead of filenames. 
                 //      With standard git, it is possible to have the following scenario:
                 //    1) Filename = a.txt; StatusType=staged; FileState=added
@@ -99,14 +96,14 @@ namespace GitSharp
                 // The output below is used to display both where the file is being added and specifying the file.
                 // Unit testing is still pending.
                 OutputStream.WriteLine("# Staged Tests: status.Staged + StageType");
-                OutputStream.WriteLine("# Staged Total: "+status.Staged.Count);
+                OutputStream.WriteLine("# Staged Total: " + status.Staged.Count);
                 OutputStream.WriteLine("# Test:      Changed Object Count: No valid method");// + stagedChanged.Count);
                 OutputStream.WriteLine("# Test:      Removed Object Count: " + stagedRemoved.Count);
                 OutputStream.WriteLine("# Test:      Missing Object Count: " + stagedMissing.Count);
                 OutputStream.WriteLine("# Test:        Added Object Count: " + stagedAdded.Count);
                 OutputStream.WriteLine("#");
                 OutputStream.WriteLine("# Modified Tests: status.Modified + StageType");
-                OutputStream.WriteLine("# Modified Total: "+status.Modified.Count);
+                OutputStream.WriteLine("# Modified Total: " + status.Modified.Count);
                 OutputStream.WriteLine("# Test:      Changed Object Count: No valid method");// + modifiedChanged.Count);
                 OutputStream.WriteLine("# Test:      Removed Object Count: " + modifiedRemoved.Count);
                 OutputStream.WriteLine("# Test:      Missing Object Count: " + modifiedMissing.Count);
@@ -116,7 +113,7 @@ namespace GitSharp
                 OutputStream.WriteLine("# Test:    Untracked Object Count: " + status.Untracked.Count);
                 OutputStream.WriteLine("# Test:      Ignored Object Count: Pending");
                 OutputStream.WriteLine("#");
-                
+
                 //Todo: merge conflict display
 
                 //Display the three stages of all files
@@ -173,7 +170,7 @@ namespace GitSharp
                 foreach (string hash in hset)
                     orderedList.Add(hash, 4);
             }
-            
+
             orderedList.OrderBy(v => v.Key);
             return orderedList;
         }
@@ -230,14 +227,16 @@ namespace GitSharp
                 OutputStream.WriteLine("#");
                 List<string> sortUntracked = status.Untracked.OrderBy(v => v.ToString()).ToList();
 
-              	foreach (string hash in sortUntracked)
-              	{
+                //Read ignore file list and remove from the untracked list
+                IgnoreRules rules = new IgnoreRules(Path.Combine(Repository.WorkingDirectory, ".gitignore"));
+                foreach (string hash in sortUntracked)
+                {
                     string path = Path.Combine(Repository.WorkingDirectory, hash);
-                    if (!_ignoreHandler.IsIgnored(path))
+                    if (!rules.IgnoreFile(Repository.WorkingDirectory, path) && !rules.IgnoreDir(Repository.WorkingDirectory, path))
                     {
                         OutputStream.WriteLine("#       " + hash);
                     }
-               	}
+                }
             }
         }
     }

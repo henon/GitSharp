@@ -1,0 +1,9 @@
+Git/
+GitSharp/
+GitSharp.Core/
+GitSharp.Tests/
+GitSharp.suo
+_ReSharper.GitSharp
+build/
+dist/
+GitSharp.4.5.resharper.user

@@ -1,7 +1,6 @@
-Git/
-GitSharp/
-GitSharp.Core/
-GitSharp.Tests/
+bin
+build
+obj
 GitSharp.suo
 _ReSharper.GitSharp
 build/

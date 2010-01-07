@@ -1,0 +1,344 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>Leaf -  Documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+    <link type="text/css" rel="stylesheet" href="../main.css"/>
+  </head>
+  <body>
+
+<div id="namespaces">
+	<h2 class="fixed">Namespaces</h2>
+	<div class="scroll">
+		<ul><li>
+          <a href="../GitSharp/index.htm" class="current">GitSharp</a>
+      </li><li>
+          <a href="../GitSharp.Platform/index.htm">GitSharp.Platform</a>
+      </li><li>
+          <a href="../GitSharp.Platform.Macintosh/index.htm">GitSharp.Platform.Macintosh</a>
+      </li><li>
+          <a href="../GitSharp.Platform.OSS/index.htm">GitSharp.Platform.OSS</a>
+      </li><li>
+          <a href="../GitSharp.Platform.Windows/index.htm">GitSharp.Platform.Windows</a>
+      </li>
+		</ul>
+	</div>
+</div><div id="types">
+	<h2 class="fixed">Types</h2>
+	<div class="scroll">
+		<ul><li>
+            <a href="../GitSharp/AbstractCommand.htm">AbstractCommand</a>
+        </li><li>
+            <a href="../GitSharp/AbstractFetchCommand.htm">AbstractFetchCommand</a>
+        </li><li>
+            <a href="../GitSharp/AbstractObject.htm">AbstractObject</a>
+        </li><li>
+            <a href="../GitSharp/Author.htm">Author</a>
+        </li><li>
+            <a href="../GitSharp/Blob.htm">Blob</a>
+        </li><li>
+            <a href="../GitSharp/Branch.htm">Branch</a>
+        </li><li>
+            <a href="../GitSharp/Change.htm">Change</a>
+        </li><li>
+            <a href="../GitSharp/ChangeType.htm">ChangeType</a>
+        </li><li>
+            <a href="../GitSharp/CloneCommand.htm">CloneCommand</a>
+        </li><li>
+            <a href="../GitSharp/Commands.htm">Commands</a>
+        </li><li>
+            <a href="../GitSharp/Commit.htm">Commit</a>
+        </li><li>
+            <a href="../GitSharp/Config.htm">Config</a>
+        </li><li>
+            <a href="../GitSharp/ConfigCommand.htm">ConfigCommand</a>
+        </li><li>
+            <a href="../GitSharp/FetchCommand.htm">FetchCommand</a>
+        </li><li>
+            <a href="../GitSharp/IGitCommand.htm">IGitCommand</a>
+        </li><li>
+            <a href="../GitSharp/IgnoreRules.htm">IgnoreRules</a>
+        </li><li>
+            <a href="../GitSharp/Index.htm">Index</a>
+        </li><li>
+            <a href="../GitSharp/InitCommand.htm">InitCommand</a>
+        </li><li>
+            <a href="../GitSharp/IReferenceObject.htm">IReferenceObject</a>
+        </li><li>
+            <a href="../GitSharp/ITreeNode.htm">ITreeNode</a>
+        </li><li>
+            <a href="../GitSharp/Leaf.htm" class="current">Leaf</a>
+        </li><li>
+            <a href="../GitSharp/Options.htm">Options</a>
+        </li><li>
+            <a href="../GitSharp/Patch.htm">Patch</a>
+        </li><li>
+            <a href="../GitSharp/PatchOptions.htm">PatchOptions</a>
+        </li><li>
+            <a href="../GitSharp/PushCommand.htm">PushCommand</a>
+        </li><li>
+            <a href="../GitSharp/Ref.htm">Ref</a>
+        </li><li>
+            <a href="../GitSharp/Repository.htm">Repository</a>
+        </li><li>
+            <a href="../GitSharp/RepositoryStatus.htm">RepositoryStatus</a>
+        </li><li>
+            <a href="../GitSharp/ResetBehavior.htm">ResetBehavior</a>
+        </li><li>
+            <a href="../GitSharp/StatusCommand.htm">StatusCommand</a>
+        </li><li>
+            <a href="../GitSharp/Tag.htm">Tag</a>
+        </li><li>
+            <a href="../GitSharp/Tree.htm">Tree</a>
+        </li><li>
+            <a href="../GitSharp/UserInfoProvider.htm">UserInfoProvider</a>
+        </li>
+		</ul>
+	</div>
+</div>
+    <div class="header">
+		<p class="class"><strong>Type</strong> Leaf</p>
+		<p><strong>Namespace</strong> GitSharp</p><p><strong>Parent</strong> <a href="../GitSharp/Blob.htm">Blob</a></p><p><strong>Interfaces</strong> <a href="../GitSharp/ITreeNode.htm">ITreeNode</a></p>
+	</div>
+    <div class="sub-header">
+			<div id="summary">
+				Leaf represents a file entry in a Tree.
+			</div>
+
+
+			<h3 class="section">Methods</h3>
+			<ul><li><a href="#Equals" class="type">Equals</a></li><li><a href="#GetHashCode" class="type">GetHashCode</a></li><li><a href="#GetType" class="type">GetType</a></li><li><a href="#ToString" class="type">ToString</a></li>
+			</ul>
+
+			<h3 class="section">Properties</h3>
+			<ul><li><a href="#Data" class="type">Data</a></li><li><a href="#Hash" class="type">Hash</a></li><li><a href="#IsBlob" class="type">IsBlob</a></li><li><a href="#IsCommit" class="type">IsCommit</a></li><li><a href="#IsExecutable" class="type">IsExecutable</a></li><li><a href="#IsTag" class="type">IsTag</a></li><li><a href="#IsTree" class="type">IsTree</a></li><li><a href="#Name" class="type">Name</a></li><li><a href="#Parent" class="type">Parent</a></li><li><a href="#Path" class="type">Path</a></li><li><a href="#Permissions" class="type">Permissions</a></li><li><a href="#RawData" class="type">RawData</a></li><li><a href="#Repository" class="type">Repository</a></li><li><a href="#ShortHash" class="type">ShortHash</a></li>
+			</ul>
+
+	</div>
+
+
+	<h3 class="section">Public instance methods</h3>
+<div id="Equals" class="method">
+		<h4>bool <strong>Equals</strong>(object obj)</h4>
+		<div class="content">
+			
+			<table><tr>
+					<td><code>return <span title="System.bool">bool</span></code></td>
+					<td></td>
+				</tr><tr>
+					<td><code><span title="System.object">object</span> obj</code></td>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+	</div><div id="GetHashCode" class="method">
+		<h4>int <strong>GetHashCode</strong>()</h4>
+		<div class="content">
+			
+			<table><tr>
+					<td><code>return <span title="System.int">int</span></code></td>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+	</div><div id="GetType" class="method">
+		<h4>Type <strong>GetType</strong>()</h4>
+		<div class="content">
+			
+			<table><tr>
+					<td><code>return <span title="System.Type">Type</span></code></td>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+	</div><div id="ToString" class="method">
+		<h4>string <strong>ToString</strong>()</h4>
+		<div class="content">
+			
+			<table><tr>
+					<td><code>return <span title="System.string">string</span></code></td>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
+
+  <h3 class="section">Public properties</h3>
+<div id="Data" class="method">
+    <h4>string <strong>Data</strong> get; </h4>
+    <div class="content">
+      
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.string">string</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="Hash" class="method">
+    <h4>string <strong>Hash</strong> get; </h4>
+    <div class="content">
+      
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.string">string</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="IsBlob" class="method">
+    <h4>bool <strong>IsBlob</strong> get; </h4>
+    <div class="content">
+      
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.bool">bool</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="IsCommit" class="method">
+    <h4>bool <strong>IsCommit</strong> get; </h4>
+    <div class="content">
+      
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.bool">bool</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="IsExecutable" class="method">
+    <h4>bool <strong>IsExecutable</strong> get; </h4>
+    <div class="content">
+      True if the file is executable (unix).
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.bool">bool</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="IsTag" class="method">
+    <h4>bool <strong>IsTag</strong> get; </h4>
+    <div class="content">
+      
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.bool">bool</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="IsTree" class="method">
+    <h4>bool <strong>IsTree</strong> get; </h4>
+    <div class="content">
+      
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.bool">bool</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="Name" class="method">
+    <h4>string <strong>Name</strong> get; </h4>
+    <div class="content">
+      The file name
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.string">string</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="Parent" class="method">
+    <h4>Tree <strong>Parent</strong> get; </h4>
+    <div class="content">
+      The parent Tree.
+      <table>
+        <tr>
+          <td>
+            <code>return <a href="../GitSharp/Tree.htm">Tree</a></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="Path" class="method">
+    <h4>string <strong>Path</strong> get; </h4>
+    <div class="content">
+      The full path relative to repostiory root
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.string">string</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="Permissions" class="method">
+    <h4>int <strong>Permissions</strong> get; </h4>
+    <div class="content">
+      The unix file permissions.
+Todo: model this with a permission object
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.int">int</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="RawData" class="method">
+    <h4>Byte[] <strong>RawData</strong> get; </h4>
+    <div class="content">
+      
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.Byte[]">Byte[]</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="Repository" class="method">
+    <h4>Repository <strong>Repository</strong> get; </h4>
+    <div class="content">
+      
+      <table>
+        <tr>
+          <td>
+            <code>return <a href="../GitSharp/Repository.htm">Repository</a></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div><div id="ShortHash" class="method">
+    <h4>string <strong>ShortHash</strong> get; </h4>
+    <div class="content">
+      
+      <table>
+        <tr>
+          <td>
+            <code>return <span title="System.string">string</span></code>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+<div id="footer">
+  <p>Based on v0.0.0.0 of </p>
+  <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
+</div>
+  </body>
+</html>

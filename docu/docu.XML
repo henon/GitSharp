@@ -1,0 +1,210 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>docu</name>
+    </assembly>
+    <members>
+        <member name="M:Docu.Console.ISwitch.Handle(System.String)">
+            <summary>
+            Handle the argument
+            </summary>
+            <param name="arg">argument</param>
+            <returns>Continue/true or exit/false</returns>
+        </member>
+        <member name="M:Docu.Output.PatternTemplateResolver.Resolve(System.String,System.Collections.Generic.IList{Docu.Documentation.Namespace})">
+            <summary>
+            Expands a path into a collection of output files
+            </summary>
+            <example>
+            given template path and a list of namespaces:
+            
+            test.htm.spark, null                  == [test.htm]
+            !namespace.htm.spark, [one, two]      == [one.htm, two.htm]
+            !namespace/test.htm.spark, [one, two] == [one/test.htm, two/test.htm]
+            </example>
+            <param name="path">Template path</param>
+            <param name="namespaces">Namespaces</param>
+            <returns>List of resolved output matches</returns>
+        </member>
+        <member name="T:Docu.Output.Rendering.SparkTemplateBase">
+            <summary>
+            All public or protected methods and properties on this class are available within documentation templates
+            </summary>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.SetMethodUrlFormat(System.String)">
+            <summary>
+            Configures the pattern that will be used to construct links to methods referenced in the documentation of other symbols
+            </summary>
+            <remarks>
+            The pattern can be constructed using the following placeholders:
+            <list type="definition">
+            <item><term>{type.namespace}</term><description>The namespace of the type that contains the method</description></item>
+            <item><term>{type}</term><description>The short name of the type that contains the method</description></item>
+            <item><term>{method}</term><description>The name of method</description></item>
+            </list>
+            <para>The default is {type.namespace}/{type}.htm#{method}</para></remarks>
+            <param name="format">The pattern used to construct the link</param>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.SetTypeUrlFormat(System.String)">
+            <summary>
+            Configures the pattern that will be used to construct links to types referenced in the documentation of other symbols
+            </summary>
+            <remarks>
+            The pattern can be constructed using the following placeholders:
+            <list type="definition">
+            <item><term>{type.namespace}</term><description>The namespace of the type</description></item>
+            <item><term>{type}</term><description>The short name of the type</description></item>
+            </list>
+            <para>The default is {type.namespace}/{type}.htm</para></remarks>
+            <param name="format">The pattern used to construct the link</param>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.SetPropertyUrlFormat(System.String)">
+            <summary>
+            Configures the pattern that will be used to construct links to properties referenced in the documentation of other symbols
+            </summary>
+            <remarks>
+            The pattern can be constructed using the following placeholders:
+            <list type="definition">
+            <item><term>{type.namespace}</term><description>The namespace of the type that contains the property</description></item>
+            <item><term>{type}</term><description>The short name of the type that contains the property</description></item>
+            <item><term>{property}</term><description>The name of the property</description></item>
+            </list>
+            <para>The default is {type.namespace}/{type}.htm#{property}</para></remarks>
+            <param name="format">The pattern used to construct the link</param>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.SetEventUrlFormat(System.String)">
+            <summary>
+            Configures the pattern that will be used to construct links to events referenced in the documentation of other symbols
+            </summary>
+            <remarks>
+            The pattern can be constructed using the following placeholders:
+            <list type="definition">
+            <item><term>{type.namespace}</term><description>The namespace of the type that contains the event</description></item>
+            <item><term>{type}</term><description>The short name of the type that contains the event</description></item>
+            <item><term>{event}</term><description>The name of the event</description></item>
+            </list>
+            <para>The default is {type.namespace}/{type}.htm#{event}</para></remarks>
+            <param name="format">The pattern used to construct the link</param>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.SetFieldUrlFormat(System.String)">
+            <summary>
+            Configures the pattern that will be used to construct links to fields referenced in the documentation of other symbols
+            </summary>
+            <remarks>
+            The pattern can be constructed using the following placeholders:
+            <list type="definition">
+            <item><term>{type.namespace}</term><description>The namespace of the type that contains the field</description></item>
+            <item><term>{type}</term><description>The short name of the type that contains the field</description></item>
+            <item><term>{field}</term><description>The name of the field</description></item>
+            </list>
+            <para>The default is {type.namespace}/{type}.htm#{field}</para></remarks>
+            <param name="format">The pattern used to construct the link</param>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.SetNamespaceUrlFormat(System.String)">
+            <summary>
+            Configures the pattern that will be used to construct links to namespaces referenced in the documentation of other symbols
+            </summary>
+            <remarks>
+            The pattern can be constructed using the following placeholders:
+            <list type="definition">
+            <item><term>{type.namespace}</term><description>The name of the namespace</description></item>
+            </list>
+            <para>The default is {namespace}.htm</para></remarks>
+            <param name="format">The pattern used to construct the link</param>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.WriteProductName(System.Reflection.Assembly)">
+            <summary>
+            Returns the product name of an assembly
+            </summary>
+            <param name="assembly"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.WriteFileDescription(System.Reflection.Assembly)">
+            <summary>
+            Returns the description of an assembly
+            </summary>
+            <param name="assembly"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.WriteAssemblyTitle(System.Reflection.Assembly)">
+            <summary>
+            Returns the title of an assembly
+            </summary>
+            <param name="assembly"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.WriteVersion(System.Reflection.Assembly)">
+            <summary>
+            Returns the version number of an assembly
+            </summary>
+            <param name="assembly"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.h(System.String)">
+            <summary>
+            HTML encodes the content
+            </summary>
+            <param name="content"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.Format(Docu.Documentation.Comments.IComment)">
+            <summary>
+            Returns the comments in a format suitable for display
+            </summary>
+            <param name="comment"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.Format(Docu.Documentation.IReferencable,System.Linq.Expressions.Expression{System.Func{System.Object,System.String}}[])">
+            <summary>
+            Returns a hyperlink to another symbol
+            </summary>
+            <remarks>The format of the URL in the returned hyperlink can be controlled by the methods <see cref="M:Docu.Output.Rendering.SparkTemplateBase.SetNamespaceUrlFormat(System.String)"/>, <see cref="M:Docu.Output.Rendering.SparkTemplateBase.SetTypeUrlFormat(System.String)"/>,  <see cref="M:Docu.Output.Rendering.SparkTemplateBase.SetPropertyUrlFormat(System.String)"/>, <see cref="M:Docu.Output.Rendering.SparkTemplateBase.SetMethodUrlFormat(System.String)"/>, <see cref="M:Docu.Output.Rendering.SparkTemplateBase.SetFieldUrlFormat(System.String)"/> and <see cref="M:Docu.Output.Rendering.SparkTemplateBase.SetEventUrlFormat(System.String)"/></remarks>
+            <param name="referencable"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.WriteInterfaces(System.Collections.Generic.IList{Docu.Documentation.IReferencable})">
+            <summary>
+            Returns a comma-delimited list of the interfaces impleted by a given type
+            </summary>
+            <param name="interfaces"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Docu.Output.Rendering.SparkTemplateBase.OutputMethodParams(Docu.Documentation.Method)">
+            <summary>
+            Returns a comma-delimited list of the parameters of a given method
+            </summary>
+            <param name="method"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Docu.Output.Rendering.SparkTemplateBase.Assemblies">
+            <summary>
+            All of the assemblies being documented
+            </summary>
+        </member>
+        <member name="P:Docu.Output.Rendering.SparkTemplateBase.Namespaces">
+            <summary>
+             All of the namespaces in the assemblies being documented
+            </summary>
+        </member>
+        <member name="P:Docu.Output.Rendering.SparkTemplateBase.Types">
+            <summary>
+            All of the types in the assemblies being documented
+            </summary>
+        </member>
+        <member name="P:Docu.Output.Rendering.SparkTemplateBase.Namespace">
+            <summary>
+            The current namespace being documented within the special !namespace template
+            </summary>
+        </member>
+        <member name="P:Docu.Output.Rendering.SparkTemplateBase.Type">
+            <summary>
+            The current type being documented withing the special !type template
+            </summary>
+        </member>
+        <member name="P:Docu.Output.Rendering.SparkTemplateBase.RelativeOutputPath">
+            <summary>
+            The path of the file that this view represents, relative to the output directory.
+            </summary>
+        </member>
+    </members>
+</doc>

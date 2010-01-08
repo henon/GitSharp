@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>AbstractCommand -  Documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+    <link type="text/css" rel="stylesheet" href="../main.css"/>
+    <script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.scrollTo-min.js"></script>
+    <script type="text/javascript" src="../js/navigation.js"></script>
+  </head>
+  <body>
+<div id="namespaces">
+	<h2 class="fixed">Namespaces</h2>
+	<div class="scroll">
+		<ul><li>
+          <a href="../GitSharp/index.html" class="current">GitSharp</a>
+      </li><li>
+          <a href="../GitSharp.Platform/index.html">GitSharp.Platform</a>
+      </li><li>
+          <a href="../GitSharp.Platform.Macintosh/index.html">GitSharp.Platform.Macintosh</a>
+      </li><li>
+          <a href="../GitSharp.Platform.OSS/index.html">GitSharp.Platform.OSS</a>
+      </li><li>
+          <a href="../GitSharp.Platform.Windows/index.html">GitSharp.Platform.Windows</a>
+      </li>
+		</ul>
+	</div>
+</div><div id="types">
+  <h2 class="fixed">Types in GitSharp</h2>
+	<div class="scroll">
+		<ul><li>
+            <a href="../GitSharp/AbstractCommand.htm" class="current">AbstractCommand</a>
+        </li><li>
+            <a href="../GitSharp/AbstractFetchCommand.htm">AbstractFetchCommand</a>
+        </li><li>
+            <a href="../GitSharp/AbstractObject.htm">AbstractObject</a>
+        </li><li>
+            <a href="../GitSharp/Author.htm">Author</a>
+        </li><li>
+            <a href="../GitSharp/Blob.htm">Blob</a>
+        </li><li>
+            <a href="../GitSharp/Branch.htm">Branch</a>
+        </li><li>
+            <a href="../GitSharp/Change.htm">Change</a>
+        </li><li>
+            <a href="../GitSharp/ChangeType.htm">ChangeType</a>
+        </li><li>
+            <a href="../GitSharp/CloneCommand.htm">CloneCommand</a>
+        </li><li>
+            <a href="../GitSharp/Commands.htm">Commands</a>
+        </li><li>
+            <a href="../GitSharp/Commit.htm">Commit</a>
+        </li><li>
+            <a href="../GitSharp/Config.htm">Config</a>
+        </li><li>
+            <a href="../GitSharp/ConfigCommand.htm">ConfigCommand</a>
+        </li><li>
+            <a href="../GitSharp/FetchCommand.htm">FetchCommand</a>
+        </li><li>
+            <a href="../GitSharp/IGitCommand.htm">IGitCommand</a>
+        </li><li>
+            <a href="../GitSharp/IgnoreRules.htm">IgnoreRules</a>
+        </li><li>
+            <a href="../GitSharp/Index.htm">Index</a>
+        </li><li>
+            <a href="../GitSharp/InitCommand.htm">InitCommand</a>
+        </li><li>
+            <a href="../GitSharp/IReferenceObject.htm">IReferenceObject</a>
+        </li><li>
+            <a href="../GitSharp/ITreeNode.htm">ITreeNode</a>
+        </li><li>
+            <a href="../GitSharp/Leaf.htm">Leaf</a>
+        </li><li>
+            <a href="../GitSharp/Options.htm">Options</a>
+        </li><li>
+            <a href="../GitSharp/Patch.htm">Patch</a>
+        </li><li>
+            <a href="../GitSharp/PatchOptions.htm">PatchOptions</a>
+        </li><li>
+            <a href="../GitSharp/PushCommand.htm">PushCommand</a>
+        </li><li>
+            <a href="../GitSharp/Ref.htm">Ref</a>
+        </li><li>
+            <a href="../GitSharp/Repository.htm">Repository</a>
+        </li><li>
+            <a href="../GitSharp/RepositoryStatus.htm">RepositoryStatus</a>
+        </li><li>
+            <a href="../GitSharp/ResetBehavior.htm">ResetBehavior</a>
+        </li><li>
+            <a href="../GitSharp/StatusCommand.htm">StatusCommand</a>
+        </li><li>
+            <a href="../GitSharp/Tag.htm">Tag</a>
+        </li><li>
+            <a href="../GitSharp/Tree.htm">Tree</a>
+        </li><li>
+            <a href="../GitSharp/UserInfoProvider.htm">UserInfoProvider</a>
+        </li>
+		</ul>
+	</div>
+</div>
+    <div class="header">
+		<p class="class"><strong>Type</strong> AbstractCommand</p>
+		<p><strong>Namespace</strong> GitSharp</p><p><strong>Interfaces</strong> <a href="../GitSharp/IGitCommand.htm">IGitCommand</a></p>
+	</div>
+    <div class="sub-header">
+			<div id="summary">Abstract base class of all git commands. It provides basic infrastructure
+			</div>
+
+
+			<h3 class="section">Methods</h3>
+			<ul><li><a href="../GitSharp/AbstractCommand.htm#FindGitDirectory">FindGitDirectory</a></li>
+			</ul>
+
+			<h3 class="section">Properties</h3>
+			<ul><li><a href="../GitSharp/AbstractCommand.htm#ActualDirectory">ActualDirectory</a></li><li><a href="../GitSharp/AbstractCommand.htm#GitDirectory">GitDirectory</a></li><li><a href="../GitSharp/AbstractCommand.htm#OutputStream">OutputStream</a></li><li><a href="../GitSharp/AbstractCommand.htm#Repository">Repository</a></li>
+			</ul>
+
+	</div>
+
+
+
+	<h3 class="section">Public static methods</h3>
+<div id="FindGitDirectory" class="method">
+		<h4><span title="System.string">string</span> <strong>FindGitDirectory</strong>(<span title="System.string">string</span> rootDirectory, <span title="System.bool">bool</span> recursive, <span title="System.bool">bool</span> isBare)</h4>
+		<div class="content">Performs upward recursive lookup to return git directory. Honors the environment variable GIT_DIR.
+
+
+
+
+		</div>
+	</div>
+
+  <h3 class="section">Public properties</h3>
+<div id="ActualDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>ActualDirectory</strong> get; </h4>
+    <div class="content">Get the directory where the Init command will initialize the repository. if GitDirectory is null ActualDirectory is used to initialize the repository.
+
+    </div>
+  </div><div id="GitDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>GitDirectory</strong> get; set;</h4>
+    <div class="content">The git directory. If not explicitly set, the command uses Git.GitDirectory.
+
+    </div>
+  </div><div id="OutputStream" class="method">
+    <h4><span title="System.IO.StreamWriter">StreamWriter</span> <strong>OutputStream</strong> get; set;</h4>
+    <div class="content">This command's output stream. If not explicitly set, the command writes to Git.OutputStream out.
+
+    </div>
+  </div><div id="Repository" class="method">
+    <h4><a href="../GitSharp/Repository.htm">Repository</a> <strong>Repository</strong> get; set;</h4>
+    <div class="content">The git repository that is either result of the command (init, clone) or subject to alteration (all other commands).
+If not explicitly set, the command uses Git.Commands.Repository.
+Note: InitCommand and CloneCommand ignore this property and overwrite it as a result of Execute.
+
+    </div>
+  </div>
+<div id="footer">
+  <p>Based on v0.0.0.0 of GitSharp</p>
+  <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
+</div>
+  </body>
+</html>

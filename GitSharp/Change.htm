@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
-    <title>Change -  Documentation</title>
+    <title>Change - GitSharp [local-build] Documentation</title>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
     <link type="text/css" rel="stylesheet" href="../main.css"/>
     <script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
@@ -73,10 +73,6 @@
         </li><li>
             <a href="../GitSharp/Options.htm">Options</a>
         </li><li>
-            <a href="../GitSharp/Patch.htm">Patch</a>
-        </li><li>
-            <a href="../GitSharp/PatchOptions.htm">PatchOptions</a>
-        </li><li>
             <a href="../GitSharp/PushCommand.htm">PushCommand</a>
         </li><li>
             <a href="../GitSharp/Ref.htm">Ref</a>
@@ -103,7 +99,7 @@
 		<p><strong>Namespace</strong> GitSharp</p>
 	</div>
     <div class="sub-header">
-			<div id="summary">Represents a change between two commits
+			<div id="summary">Represents a change of a single file between two commits. Use Commit.Diff to get a list of Change objects.
 			</div>
 
 
@@ -120,14 +116,15 @@
   <h3 class="section">Public properties</h3>
 <div id="ChangedObject" class="method">
     <h4><a href="../GitSharp/AbstractObject.htm">AbstractObject</a> <strong>ChangedObject</strong> get; </h4>
-    <div class="content">Always returns an object, no matter what kind of change. It normally returns the ComparedCommit's version of the changed
+    <div class="content">The file (i.e. Blob) this Change is according to.
+Always returns a non-null revision of the file, no matter what kind of change. It normally returns the ComparedCommit's version of the changed
 object except for ChangeType.Removed where it returns the ReferenceCommit's version of the object.
-This property is designed to release the calling code from null checking and version selection and may be especially useful for GUI bindings.
+This property is designed to release the calling code from null checking and revision selection and may be especially useful for GUI bindings.
 
     </div>
   </div><div id="ChangeType" class="method">
     <h4><a href="../GitSharp/ChangeType.htm">ChangeType</a> <strong>ChangeType</strong> get; set;</h4>
-    <div class="content">The kind of change
+    <div class="content">The kind of change (Added, Modified, Deleted, etc. )
 
     </div>
   </div><div id="Commits" class="method">
@@ -137,12 +134,12 @@ This property is designed to release the calling code from null checking and ver
     </div>
   </div><div id="ComparedCommit" class="method">
     <h4><a href="../GitSharp/Commit.htm">Commit</a> <strong>ComparedCommit</strong> get; set;</h4>
-    <div class="content">The compared commit
+    <div class="content">The commit which is compared against the ReferenceCommit.
 
     </div>
   </div><div id="ComparedObject" class="method">
     <h4><a href="../GitSharp/AbstractObject.htm">AbstractObject</a> <strong>ComparedObject</strong> get; set;</h4>
-    <div class="content">The changed object in the ComparedCommit. It may be null in some cases i.e. for ChangeType.Removed
+    <div class="content">The revision of the file from the ComparedCommit. It may be null in some cases i.e. for ChangeType.Removed
 
     </div>
   </div><div id="ComparedPermissions" class="method">
@@ -167,17 +164,17 @@ This property is designed to release the calling code from null checking and ver
     </div>
   </div><div id="Permissions" class="method">
     <h4><span title="System.Int32[]">Int32[]</span> <strong>Permissions</strong> get; </h4>
-    <div class="content">Returns ReferenceObject's and ComparedObject's permissions
+    <div class="content">Returns ReferenceObject's and ComparedObject's permissions as array
 
     </div>
   </div><div id="ReferenceCommit" class="method">
     <h4><a href="../GitSharp/Commit.htm">Commit</a> <strong>ReferenceCommit</strong> get; set;</h4>
-    <div class="content">The commit that the other commit is compared against
+    <div class="content">The commit that serves as reference for this comparison. The change reflects the difference of the other commit against this ReferenceCommit.
 
     </div>
   </div><div id="ReferenceObject" class="method">
     <h4><a href="../GitSharp/AbstractObject.htm">AbstractObject</a> <strong>ReferenceObject</strong> get; set;</h4>
-    <div class="content">The changed object in the ReferenceCommit. It may be null in some cases i.e. for ChangeType.Added
+    <div class="content">The revision of the file from the ReferenceCommit. It may be null in some cases i.e. for ChangeType.Added
 
     </div>
   </div><div id="ReferencePermissions" class="method">
@@ -187,7 +184,8 @@ This property is designed to release the calling code from null checking and ver
     </div>
   </div>
 <div id="footer">
-  <p>Based on v0.0.0.0 of GitSharp</p>
+  <p><b><big>Learn more about <a href="http://www.eqqon.com/index.php/GitSharp"> GitSharp. </a></big></b></p>
+  <p>Based on v0.2.0.0 of GitSharp (GitSharp [local-build])</p>
   <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
 </div>
   </body>

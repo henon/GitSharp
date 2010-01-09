@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
-    <title>Branch -  Documentation</title>
+    <title>Branch - GitSharp [local-build] Documentation</title>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
     <link type="text/css" rel="stylesheet" href="../main.css"/>
     <script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
@@ -73,10 +73,6 @@
         </li><li>
             <a href="../GitSharp/Options.htm">Options</a>
         </li><li>
-            <a href="../GitSharp/Patch.htm">Patch</a>
-        </li><li>
-            <a href="../GitSharp/PatchOptions.htm">PatchOptions</a>
-        </li><li>
             <a href="../GitSharp/PushCommand.htm">PushCommand</a>
         </li><li>
             <a href="../GitSharp/Ref.htm">Ref</a>
@@ -103,10 +99,14 @@
 		<p><strong>Namespace</strong> GitSharp</p><p><strong>Parent</strong> <a href="../GitSharp/Ref.htm">Ref</a></p>
 	</div>
     <div class="sub-header">
+			<div id="summary">Represents a branch in git. You can create and manipulate git branches and you can manipulate your working directory using Branch.
+Note, that new Branch( ...) does not create a new branch in the repository but rather constructs the object to manipulate an existing branch.
+To create a new branch use the static Branch.Create API.
+			</div>
 
 
 			<h3 class="section">Methods</h3>
-			<ul><li><a href="../GitSharp/Branch.htm#Create">Create</a></li><li><a href="../GitSharp/Branch.htm#Delete">Delete</a></li><li><a href="../GitSharp/Branch.htm#Merge">Merge</a></li><li><a href="../GitSharp/Branch.htm#Rename">Rename</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#SwitchTo">SwitchTo</a></li>
+			<ul><li><a href="../GitSharp/Branch.htm#Checkout">Checkout</a></li><li><a href="../GitSharp/Branch.htm#Create">Create</a></li><li><a href="../GitSharp/Branch.htm#Delete">Delete</a></li><li><a href="../GitSharp/Branch.htm#Merge">Merge</a></li><li><a href="../GitSharp/Branch.htm#Rename">Rename</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#Reset">Reset</a></li><li><a href="../GitSharp/Branch.htm#SwitchTo">SwitchTo</a></li>
 			</ul>
 
 			<h3 class="section">Properties</h3>
@@ -117,9 +117,18 @@
 
 
 	<h3 class="section">Public instance methods</h3>
-<div id="Delete" class="method">
+<div id="Checkout" class="method">
+		<h4><span title="System.void">void</span> <strong>Checkout</strong>()</h4>
+		<div class="content">Switch to this branch and check it out into the working directory.
+
+
+
+
+		</div>
+	</div><div id="Delete" class="method">
 		<h4><span title="System.void">void</span> <strong>Delete</strong>()</h4>
 		<div class="content">Delete this branch
+Not yet implemented!
 
 
 
@@ -127,7 +136,8 @@
 		</div>
 	</div><div id="Merge" class="method">
 		<h4><span title="System.void">void</span> <strong>Merge</strong>(<a href="../GitSharp/Branch.htm">Branch</a> other)</h4>
-		<div class="content">
+		<div class="content">Merge the given branch into this Branch.
+Not yet implemented!
 
 
 
@@ -135,7 +145,8 @@
 		</div>
 	</div><div id="Rename" class="method">
 		<h4><span title="System.void">void</span> <strong>Rename</strong>(<span title="System.string">string</span> name)</h4>
-		<div class="content">
+		<div class="content">Rename the Branch.
+Not yet implemented!
 
 
 
@@ -143,7 +154,7 @@
 		</div>
 	</div><div id="Reset" class="method">
 		<h4><span title="System.void">void</span> <strong>Reset</strong>(<span title="System.string">string</span> commitHash, <a href="../GitSharp/ResetBehavior.htm">ResetBehavior</a> resetBehavior)</h4>
-		<div class="content">
+		<div class="content">Reset this Branch to the named Commit using the given ResetBehavior.
 
 
 
@@ -151,7 +162,7 @@
 		</div>
 	</div><div id="Reset" class="method">
 		<h4><span title="System.void">void</span> <strong>Reset</strong>(<a href="../GitSharp/Commit.htm">Commit</a> commit, <a href="../GitSharp/ResetBehavior.htm">ResetBehavior</a> resetBehavior)</h4>
-		<div class="content">
+		<div class="content">Reset this Branch to the given Commit using the given ResetBehavior.
 
 
 
@@ -159,7 +170,7 @@
 		</div>
 	</div><div id="Reset" class="method">
 		<h4><span title="System.void">void</span> <strong>Reset</strong>(<a href="../GitSharp/ResetBehavior.htm">ResetBehavior</a> resetBehavior)</h4>
-		<div class="content">
+		<div class="content">Reset this Branch to the current Commit using the given ResetBehavior.
 
 
 
@@ -167,7 +178,7 @@
 		</div>
 	</div><div id="Reset" class="method">
 		<h4><span title="System.void">void</span> <strong>Reset</strong>()</h4>
-		<div class="content">
+		<div class="content">Reset this Branch to the current Commit without touching working directory or Index (ResetBehavior.Mixed).
 
 
 
@@ -175,7 +186,7 @@
 		</div>
 	</div><div id="Reset" class="method">
 		<h4><span title="System.void">void</span> <strong>Reset</strong>(<span title="System.string">string</span> commitHash)</h4>
-		<div class="content">
+		<div class="content">Reset this Branch to the named Commit without touching working directory or Index (ResetBehavior.Mixed).
 
 
 
@@ -183,7 +194,7 @@
 		</div>
 	</div><div id="Reset" class="method">
 		<h4><span title="System.void">void</span> <strong>Reset</strong>(<a href="../GitSharp/Commit.htm">Commit</a> commit)</h4>
-		<div class="content">
+		<div class="content">Reset this Branch to the given Commit without touching working directory or Index (ResetBehavior.Mixed).
 
 
 
@@ -194,7 +205,7 @@
 	<h3 class="section">Public static methods</h3>
 <div id="Create" class="method">
 		<h4><a href="../GitSharp/Branch.htm">Branch</a> <strong>Create</strong>(<a href="../GitSharp/Repository.htm">Repository</a> repo, <span title="System.string">string</span> name, <a href="../GitSharp/Commit.htm">Commit</a> commit)</h4>
-		<div class="content">Create a new branch from the given commit
+		<div class="content">Create a new branch basing on the given commit
 
 <div class="parameters">
         <h5>Parameters</h5>
@@ -223,7 +234,7 @@
   <h3 class="section">Public properties</h3>
 <div id="CurrentCommit" class="method">
     <h4><a href="../GitSharp/Commit.htm">Commit</a> <strong>CurrentCommit</strong> get; </h4>
-    <div class="content">Returns the latest commit on this branch.
+    <div class="content">Returns the latest commit on this branch, or in other words, the commit this branch is pointing to.
 
     </div>
   </div><div id="Fullname" class="method">
@@ -238,12 +249,12 @@
     </div>
   </div><div id="IsCurrent" class="method">
     <h4><span title="System.bool">bool</span> <strong>IsCurrent</strong> get; </h4>
-    <div class="content">
+    <div class="content">True if the branch is the current branch of the repository
 
     </div>
   </div><div id="IsRemote" class="method">
     <h4><span title="System.bool">bool</span> <strong>IsRemote</strong> get; set;</h4>
-    <div class="content">True if this ref points to a remote branch.
+    <div class="content">True if this Ref points to a remote branch.
 
     </div>
   </div><div id="Name" class="method">
@@ -258,7 +269,8 @@
     </div>
   </div>
 <div id="footer">
-  <p>Based on v0.0.0.0 of GitSharp</p>
+  <p><b><big>Learn more about <a href="http://www.eqqon.com/index.php/GitSharp"> GitSharp. </a></big></b></p>
+  <p>Based on v0.2.0.0 of GitSharp (GitSharp [local-build])</p>
   <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
 </div>
   </body>

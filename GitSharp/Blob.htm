@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
-    <title>Blob -  Documentation</title>
+    <title>Blob - GitSharp [local-build] Documentation</title>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
     <link type="text/css" rel="stylesheet" href="../main.css"/>
     <script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
@@ -73,10 +73,6 @@
         </li><li>
             <a href="../GitSharp/Options.htm">Options</a>
         </li><li>
-            <a href="../GitSharp/Patch.htm">Patch</a>
-        </li><li>
-            <a href="../GitSharp/PatchOptions.htm">PatchOptions</a>
-        </li><li>
             <a href="../GitSharp/PushCommand.htm">PushCommand</a>
         </li><li>
             <a href="../GitSharp/Ref.htm">Ref</a>
@@ -103,7 +99,14 @@
 		<p><strong>Namespace</strong> GitSharp</p><p><strong>Parent</strong> <a href="../GitSharp/AbstractObject.htm">AbstractObject</a></p>
 	</div>
     <div class="sub-header">
-			<div id="summary">Represents a specific version of the content of a file tracked by git.
+			<div id="summary">Represents a specific version of the content of a file tracked by git. Using a Blob you can access the contents of
+any git object as string or byte array. For tracked files (leaves of a git tree) it returns the content of the file. For git objects
+such as Commit, Tag or Tree the Blob API may be used to inspect the the uncompressed internal representation.
+To open a git object instantiate a Blob with the object's Hash or another valid reference (see Ref).
+var b=new Blob(repo, "e287f54");
+Note, that new Blob( ...) does not create a new blob in the repository but rather constructs the object to manipulate an existing blob.
+Advanced: To create a new Blob inside the repository you can use the static create function, however, you are advised to use
+higher level functionality to create new revisions of files, i.e. by using the Commit.Create API (see Commit).
 			</div>
 
 
@@ -122,9 +125,14 @@
 	<h3 class="section">Public static methods</h3>
 <div id="Create" class="method">
 		<h4><a href="../GitSharp/Blob.htm">Blob</a> <strong>Create</strong>(<a href="../GitSharp/Repository.htm">Repository</a> repo, <span title="System.Byte[]">Byte[]</span> content)</h4>
-		<div class="content">Create a new Blob containing exactly the bytes given.
+		<div class="content">Create a new Blob containing exactly the raw bytes given (before compression).
 
+<div class="parameters">
+        <h5>Parameters</h5>
 
+          <h6><code><a href="../GitSharp/Repository.htm">Repository</a></code> repo</h6>
+          <h6><code><span title="System.Byte[]">Byte[]</span></code> content</h6><p class="comments">Uncompressed, encoded raw data to be stored in the blob</p>
+      </div>
 
 
 		</div>
@@ -132,7 +140,13 @@
 		<h4><a href="../GitSharp/Blob.htm">Blob</a> <strong>Create</strong>(<a href="../GitSharp/Repository.htm">Repository</a> repo, <span title="System.string">string</span> content, <span title="System.Text.Encoding">Encoding</span> encoding)</h4>
 		<div class="content">Create a new Blob containing the given string data as content. The string will be encoded by the submitted encoding
 
+<div class="parameters">
+        <h5>Parameters</h5>
 
+          <h6><code><a href="../GitSharp/Repository.htm">Repository</a></code> repo</h6>
+          <h6><code><span title="System.string">string</span></code> content</h6><p class="comments">string to be stored in the blob</p>
+          <h6><code><span title="System.Text.Encoding">Encoding</span></code> encoding</h6>
+      </div>
 
 
 		</div>
@@ -140,7 +154,12 @@
 		<h4><a href="../GitSharp/Blob.htm">Blob</a> <strong>Create</strong>(<a href="../GitSharp/Repository.htm">Repository</a> repo, <span title="System.string">string</span> content)</h4>
 		<div class="content">Create a new Blob containing the given string data as content. The string will be encoded as UTF8
 
+<div class="parameters">
+        <h5>Parameters</h5>
 
+          <h6><code><a href="../GitSharp/Repository.htm">Repository</a></code> repo</h6>
+          <h6><code><span title="System.string">string</span></code> content</h6><p class="comments">string to be stored in the blob</p>
+      </div>
 
 
 		</div>
@@ -148,7 +167,12 @@
 		<h4><a href="../GitSharp/Blob.htm">Blob</a> <strong>CreateFromFile</strong>(<a href="../GitSharp/Repository.htm">Repository</a> repo, <span title="System.string">string</span> path)</h4>
 		<div class="content">Create a new Blob containing the contents of the given file.
 
+<div class="parameters">
+        <h5>Parameters</h5>
 
+          <h6><code><a href="../GitSharp/Repository.htm">Repository</a></code> repo</h6>
+          <h6><code><span title="System.string">string</span></code> path</h6><p class="comments">Path to the file that should be stored in the blob</p>
+      </div>
 
 
 		</div>
@@ -157,7 +181,7 @@
   <h3 class="section">Public properties</h3>
 <div id="Data" class="method">
     <h4><span title="System.string">string</span> <strong>Data</strong> get; </h4>
-    <div class="content">Get the uncompressed contents of this blob
+    <div class="content">Get the uncompressed contents of this Blob as string. This assumes that the contents are encoded in UTF8.
 
     </div>
   </div><div id="Hash" class="method">
@@ -187,7 +211,7 @@
     </div>
   </div><div id="RawData" class="method">
     <h4><span title="System.Byte[]">Byte[]</span> <strong>RawData</strong> get; </h4>
-    <div class="content">Get the compressed raw data of the blob
+    <div class="content">Get the uncompressed original encoded raw data of the Blob as byte array. This is useful if the contents of the blob are encoded in some legacy encoding instead of UTF8.
 
     </div>
   </div><div id="Repository" class="method">
@@ -202,7 +226,8 @@
     </div>
   </div>
 <div id="footer">
-  <p>Based on v0.0.0.0 of GitSharp</p>
+  <p><b><big>Learn more about <a href="http://www.eqqon.com/index.php/GitSharp"> GitSharp. </a></big></b></p>
+  <p>Based on v0.2.0.0 of GitSharp (GitSharp [local-build])</p>
   <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
 </div>
   </body>

@@ -45,6 +45,9 @@ using System.Diagnostics;
 
 namespace GitSharp
 {
+    /// <summary>
+    /// A collection of git command line interface commands.
+    /// </summary>
     public static class Commands
     {
         /// <summary>

@@ -48,6 +48,9 @@ using GitSharp.Core;
 
 namespace GitSharp
 {
+    /// <summary>
+    /// Represents git's clone command line interface command.
+    /// </summary>
     public class CloneCommand
         : AbstractFetchCommand
     {
@@ -170,7 +173,9 @@ namespace GitSharp
         /// </summary>
         public int Depth { get; set; } 
 
-
+        /// <summary>
+        /// Do it.
+        /// </summary>
         public override void Execute()
         {
 

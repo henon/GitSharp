@@ -59,5 +59,30 @@ namespace GitSharp.API.Tests
             }
         }
 
+        [Test]
+        public void FindRepository()
+        {
+            var was_here = Directory.GetCurrentDirectory();
+            try
+            {
+                using (var repo = this.GetTrashRepository())
+                {
+                    Assert.AreEqual(repo.Directory, Repository.FindRepository(repo.WorkingDirectory));
+                    Assert.AreEqual(repo.Directory, Repository.FindRepository(repo.Directory));
+                    var root = repo.WorkingDirectory;
+                    var hmm = Path.Combine(root, "hmm");
+                    Directory.CreateDirectory(hmm);
+                    Assert.AreEqual(repo.Directory, Repository.FindRepository(hmm));
+                    Assert.AreEqual(null, Repository.FindRepository("Q://a path that surely does not exist " + Path.GetRandomFileName()));
+                    Directory.SetCurrentDirectory(hmm);
+                    Assert.AreEqual(repo.Directory, Repository.FindRepository(null));
+                }
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(was_here);
+            }
+        }
+
     }
 }

@@ -45,15 +45,30 @@ using CoreRepository = GitSharp.Core.Repository;
 
 namespace GitSharp
 {
+    /// <summary>
+    /// Represents a branch in git. You can create and manipulate git branches and you can manipulate your working directory using Branch.
+    /// 
+    /// Note, that new Branch( ...) does not create a new branch in the repository but rather constructs the object to manipulate an existing branch.
+    /// To create a new branch use the static Branch.Create API.
+    /// </summary>
     public class Branch : Ref
     {
         private const ResetBehavior DEFAULT_RESET_BEHAVIOR = ResetBehavior.Mixed;
 
+        /// <summary>
+        /// Open a branch by resolving a reference (such as HEAD)
+        /// </summary>
+        /// <param name="ref"></param>
         public Branch(Ref @ref)
             : base(@ref._repo, @ref.Name)
         {
         }
 
+        /// <summary>
+        /// Open a branch by branch name (i.e. "master" or "origin/master")
+        /// </summary>
+        /// <param name="repo"></param>
+        /// <param name="name"></param>
         public Branch(Repository repo, string name)
             : base(repo, name)
         {
@@ -76,7 +91,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// Returns the latest commit on this branch.
+        /// Returns the latest commit on this branch, or in other words, the commit this branch is pointing to.
         /// </summary>
         public Commit CurrentCommit
         {
@@ -86,6 +101,9 @@ namespace GitSharp
             }
         }
 
+        /// <summary>
+        /// True if the branch is the current branch of the repository
+        /// </summary>
         public bool IsCurrent
         {
             get
@@ -95,7 +113,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// True if this ref points to a remote branch.
+        /// True if this Ref points to a remote branch.
         /// </summary>
         public bool IsRemote
         {
@@ -103,6 +121,12 @@ namespace GitSharp
             internal set;
         }
 
+        /// <summary>
+        /// Merge the given branch into this Branch. 
+        /// 
+        /// Not yet implemented!
+        /// </summary>
+        /// <param name="other"></param>
         public void Merge(Branch other)
         {
             throw new NotImplementedException();
@@ -110,6 +134,8 @@ namespace GitSharp
 
         /// <summary>
         /// Delete this branch
+        /// 
+        /// Not yet implemented!
         /// </summary>
         public void Delete()
         {
@@ -124,6 +150,11 @@ namespace GitSharp
             SwitchTo(this);
         }
 
+        /// <summary>
+        /// Rename the Branch. 
+        /// 
+        /// Not yet implemented!
+        /// </summary>
         public void Rename(string name)
         {
             throw new NotImplementedException();
@@ -131,36 +162,53 @@ namespace GitSharp
 
         #region --> Reset
 
-
+        /// <summary>
+        /// Reset this Branch to the current Commit without touching working directory or Index (ResetBehavior.Mixed).
+        /// </summary>
         public void Reset()
         {
             Commit commit = GetSafeCurrentCommit();
             Reset(commit);
         }
 
+        /// <summary>
+        /// Reset this Branch to the named Commit without touching working directory or Index (ResetBehavior.Mixed).
+        /// </summary>
         public void Reset(string commitHash)
         {
             Commit commit = ResolveCommit(commitHash);
             Reset(commit);
         }
 
+        /// <summary>
+        /// Reset this Branch to the given Commit without touching working directory or Index (ResetBehavior.Mixed).
+        /// </summary>
         public void Reset(Commit commit)
         {
             Reset(commit, DEFAULT_RESET_BEHAVIOR);
         }
 
+        /// <summary>
+        /// Reset this Branch to the current Commit using the given ResetBehavior.
+        /// </summary>
         public void Reset(ResetBehavior resetBehavior)
         {
             Commit commit = GetSafeCurrentCommit();
             Reset(commit, resetBehavior);
         }
 
+        /// <summary>
+        /// Reset this Branch to the named Commit using the given ResetBehavior.
+        /// </summary>
         public void Reset(string commitHash, ResetBehavior resetBehavior)
         {
             Commit commit = ResolveCommit(commitHash);
             Reset(commit, resetBehavior);
         }
 
+        /// <summary>
+        /// Reset this Branch to the given Commit using the given ResetBehavior.
+        /// </summary>
         public void Reset(Commit commit, ResetBehavior resetBehavior)
         {
             if (commit == null)
@@ -222,8 +270,10 @@ namespace GitSharp
 
         #endregion
 
+        #region --> Branch Creation API
+
         /// <summary>
-        /// Create a new branch from HEAD.
+        /// Create a new branch based on HEAD.
         /// </summary>
         /// <param name="repo"></param>
         /// <param name="name">The name of the branch to create (i.e. "master", not "refs/heads/master")</param>
@@ -237,7 +287,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// Create a new branch from the given commit
+        /// Create a new branch basing on the given commit
         /// </summary>
         /// <param name="repo"></param>
         /// <param name="name">The name of the branch to create (i.e. "master", not "refs/heads/master")</param>
@@ -252,6 +302,9 @@ namespace GitSharp
             Ref.Update("refs/heads/" + name, commit);
             return new Branch(repo, name);
         }
+
+
+        #endregion
 
         /// <summary>
         /// Switch to the given branch

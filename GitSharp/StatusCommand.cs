@@ -46,6 +46,7 @@ namespace GitSharp
 {
     public class StatusCommand : AbstractCommand
     {
+        private List<string> UntrackedList = new List<string>();
 
         public StatusCommand()
         {
@@ -54,10 +55,30 @@ namespace GitSharp
         public override void Execute()
         {
             RepositoryStatus status = new RepositoryStatus(Repository);
-            OutputStream.WriteLine("# On branch " + Repository.CurrentBranch.Name);
-            //OutputStream.WriteLine("# Your branch is ahead of 'xxx' by x commits."); //Todo
-            OutputStream.WriteLine("#");
-            if (status.AnyDifferences)
+            IgnoreRules rules;
+            
+            //Read ignore file list and remove from the untracked list
+            try
+            {
+                rules = new IgnoreRules(Path.Combine(Repository.WorkingDirectory, ".gitignore"));
+            }
+            catch (FileNotFoundException) 
+            {
+                //.gitignore file does not exist for a newly initialized repository.
+                string[] lines = {};
+                rules = new IgnoreRules(lines);
+            } 
+
+            foreach (string hash in status.Untracked)
+            {
+                string path = Path.Combine(Repository.WorkingDirectory, hash);
+                if (!rules.IgnoreFile(Repository.WorkingDirectory, path) && !rules.IgnoreDir(Repository.WorkingDirectory, path))
+                {
+                    UntrackedList.Add(hash);
+                }
+            }
+            
+            if (status.AnyDifferences || UntrackedList.Count > 0)
             {
                 // Files use the following states: removed, missing, added, and modified.
                 // If a file has been staged, it is also added to the RepositoryStatus.Staged HashSet.
@@ -80,6 +101,7 @@ namespace GitSharp
                 stagedAdded.IntersectWith(status.Added);
                 HashSet<string> stagedModified = new HashSet<string>(status.Staged);
                 stagedModified.IntersectWith(status.Modified);
+                stagedModified.ExceptWith(status.MergeConflict);
 
                 HashSet<string> Removed = new HashSet<string>(status.Removed);
                 Removed.ExceptWith(status.Staged);
@@ -92,48 +114,75 @@ namespace GitSharp
 
                 // The output below is used to display both where the file is being added and specifying the file.
                 // Unit testing is still pending.
-                OutputStream.WriteLine("# Staged Tests: StageType + status.Staged");
-                OutputStream.WriteLine("# Staged Total: " + status.Staged.Count);
+                /*OutputStream.WriteLine("# Staged Tests: StageType + status.Staged");
+                OutputStream.WriteLine("# Staged Total: " + (stagedModified.Count + stagedRemoved.Count + stagedMissing.Count + stagedAdded.Count));
                 OutputStream.WriteLine("# Test:     Modified Object Count: " + stagedModified.Count);
                 OutputStream.WriteLine("# Test:      Removed Object Count: " + stagedRemoved.Count);
                 OutputStream.WriteLine("# Test:      Missing Object Count: " + stagedMissing.Count);
                 OutputStream.WriteLine("# Test:        Added Object Count: " + stagedAdded.Count);
                 OutputStream.WriteLine("#");
                 OutputStream.WriteLine("# Modified Tests: StageType w/o status.Staged");
-                OutputStream.WriteLine("# Modified Total: " + (status.Modified.Count - status.Staged.Count));
+                OutputStream.WriteLine("# Modified Total: " + (Modified.Count+Removed.Count+Missing.Count+Added.Count));
                 OutputStream.WriteLine("# Test:      Changed Object Count: " + Modified.Count);
                 OutputStream.WriteLine("# Test:      Removed Object Count: " + Removed.Count);
                 OutputStream.WriteLine("# Test:      Missing Object Count: " + Missing.Count);
                 OutputStream.WriteLine("# Test:        Added Object Count: " + Added.Count);
                 OutputStream.WriteLine("#");
+                OutputStream.WriteLine("# MergeConflict Tests: " + status.MergeConflict.Count);
+                OutputStream.WriteLine("# Test:              Object Count: " + status.MergeConflict.Count);
+                OutputStream.WriteLine("#");
                 OutputStream.WriteLine("# UnTracked Tests: status.Untracked");
                 OutputStream.WriteLine("# Test:    Untracked Object Count: " + status.Untracked.Count);
                 OutputStream.WriteLine("# Test:      Ignored Object Count: Pending");
+                OutputStream.WriteLine("#");*/
+
+                //Display the stages of all files
+                doDisplayMergeConflict(status);
+                OutputStream.WriteLine("# On branch " + Repository.CurrentBranch.Name);
+                //OutputStream.WriteLine("# Your branch is ahead of 'xxx' by x commits."); //Todo
                 OutputStream.WriteLine("#");
 
-                //Todo: merge conflict display
-
-                //Display the three stages of all files
                 doDisplayStaged(status);
                 doDisplayUnstaged(status);
                 doDisplayUntracked(status);
+                if (status.Staged.Count <= 0)
+                {
+                    OutputStream.WriteLine("no changes added to commit (use \"git add\" and/or \"git commit -a\")");
+                }
+            }
+            else if (status.IndexSize <= 0)
+            {
+                OutputStream.WriteLine("# On branch " + Repository.CurrentBranch.Name);
+                OutputStream.WriteLine("#");
+                OutputStream.WriteLine("# Initial commit");
+                OutputStream.WriteLine("#");
+                OutputStream.WriteLine("# nothing to commit (create/copy files and use \"git add\" to track)");
             }
             else
             {
-                OutputStream.WriteLine("# nothing to commit (working directory clean");
+                OutputStream.WriteLine("# nothing to commit (working directory clean)");
             }
-            //Leave this in until completed. The command returns inaccurate results due to IndexDiff.
-            throw new NotImplementedException("The implementation is not yet complete. The command returns inaccurate results due to IndexDiff.");
+            //Leave this in until completed. 
+            throw new NotImplementedException("The implementation is not yet complete. autocrlf support is not added.");
         }
 
         private Dictionary<string, int> GetModifiedList(RepositoryStatus status)
         {
             //Create a single list to sort and display the modified (non-staged) files by filename.
-            //Sorting in this manner causes additional speed overhead so should be considered optional.
-            //With all the additional testing currently added, please keep in mind it will run twice as fast
-            //once the tests are removed.
+            //Sorting in this manner causes additional speed overhead. Performance enhancements should be considered.
             Dictionary<string, int> modifiedList = new Dictionary<string, int>();
             HashSet<string> hset = null;
+
+            if (status.MergeConflict.Count > 0)
+            {
+                hset = new HashSet<string>(status.MergeConflict);
+                foreach (string hash in hset)
+                {
+                    modifiedList.Add(hash, 5);
+                    status.Modified.Remove(hash);
+                    status.Staged.Remove(hash);
+                }
+            }
 
             if (status.Missing.Count > 0)
             {
@@ -180,6 +229,16 @@ namespace GitSharp
             Dictionary<string, int> stagedList = new Dictionary<string, int>();
             HashSet<string> hset = null;
 
+            if (status.MergeConflict.Count > 0)
+            {
+                hset = new HashSet<string>(status.MergeConflict);
+                foreach (string hash in hset)
+                {
+                    //Merge conflicts are only displayed in the modified non-staged area.
+                    status.Modified.Remove(hash);
+                    status.Staged.Remove(hash);
+                }
+            }
             if (status.Missing.Count > 0)
             {
                 hset = new HashSet<string>(status.Staged);
@@ -233,6 +292,9 @@ namespace GitSharp
                     case 4:
                         OutputStream.WriteLine("#       new file:   " + pair.Key);
                         break;
+                    case 5:
+                        OutputStream.WriteLine("#       unmerged:   " + pair.Key);
+                        break;
                 }
 
             }
@@ -240,44 +302,49 @@ namespace GitSharp
 
         private void doDisplayUnstaged(RepositoryStatus status)
         {
-            OutputStream.WriteLine("# Changed but not updated:");
-            OutputStream.WriteLine("#   (use \"git add (file)...\" to update what will be committed)");
-            OutputStream.WriteLine("#   (use \"git checkout -- (file)...\" to discard changes in working directory");
-            OutputStream.WriteLine("#");
             Dictionary<string, int> statusList = GetModifiedList(status);
-            displayStatusList(statusList);
-            OutputStream.WriteLine("#");
+            if (statusList.Count > 0)
+            {
+                OutputStream.WriteLine("# Changed but not updated:");
+                OutputStream.WriteLine("#   (use \"git add (file)...\" to update what will be committed)");
+                OutputStream.WriteLine("#   (use \"git checkout -- (file)...\" to discard changes in working directory)");
+                OutputStream.WriteLine("#");
+                displayStatusList(statusList);
+                OutputStream.WriteLine("#");
+            }
         }
 
         private void doDisplayStaged(RepositoryStatus status)
         {
-            OutputStream.WriteLine("# Changes to be committed:");
-            OutputStream.WriteLine("#   (use \"git reset HEAD (file)...\" to unstage)");
-            OutputStream.WriteLine("#");
             Dictionary<string, int> statusList = GetStagedList(status);
-            displayStatusList(statusList);
-            OutputStream.WriteLine("#");
+            if (statusList.Count > 0)
+            {
+                OutputStream.WriteLine("# Changes to be committed:");
+                OutputStream.WriteLine("#   (use \"git reset HEAD (file)...\" to unstage)");
+                OutputStream.WriteLine("#");
+                displayStatusList(statusList);
+                OutputStream.WriteLine("#");
+            }
         }
 
         private void doDisplayUntracked(RepositoryStatus status)
         {
-            if (status.Untracked.Count > 0)
+            if (UntrackedList.Count > 0)
             {
                 OutputStream.WriteLine("# Untracked files:");
                 OutputStream.WriteLine("#   (use \"git add (file)...\" to include in what will be committed)");
                 OutputStream.WriteLine("#");
-                List<string> sortUntracked = status.Untracked.OrderBy(v => v.ToString()).ToList();
+                UntrackedList.OrderBy(v => v.ToString());
+                foreach (string hash in UntrackedList)
+                    OutputStream.WriteLine("#       " + hash);
+            }
+        }
 
-                //Read ignore file list and remove from the untracked list
-                IgnoreRules rules = new IgnoreRules(Path.Combine(Repository.WorkingDirectory, ".gitignore"));
-                foreach (string hash in sortUntracked)
-                {
-                    string path = Path.Combine(Repository.WorkingDirectory, hash);
-                    if (!rules.IgnoreFile(Repository.WorkingDirectory, path) && !rules.IgnoreDir(Repository.WorkingDirectory, path))
-                    {
-                        OutputStream.WriteLine("#       " + hash);
-                    }
-                }
+        private void doDisplayMergeConflict(RepositoryStatus status)
+        {
+            foreach (string hash in status.MergeConflict)
+            {
+                OutputStream.WriteLine(hash+": needs merge");
             }
         }
     }

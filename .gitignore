@@ -16,3 +16,5 @@ Reports
 test-results
 dist
 docu/
+SharedAssemblyInfo.cs
+VersionAssemblyInfo.cs

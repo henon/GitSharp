@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>RebaseCommand -  Documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+    <link type="text/css" rel="stylesheet" href="../main.css"/>
+    <script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.scrollTo-min.js"></script>
+    <script type="text/javascript" src="../js/navigation.js"></script>
+  </head>
+  <body>
+<div id="namespaces">
+	<h2 class="fixed">Namespaces</h2>
+	<div class="scroll">
+		<ul><li>
+          <a href="../GitSharp/index.html">GitSharp</a>
+      </li><li>
+          <a href="../GitSharp.Commands/index.html" class="current">GitSharp.Commands</a>
+      </li>
+		</ul>
+	</div>
+</div><div id="types">
+  <h2 class="fixed">Types in GitSharp.Commands</h2>
+	<div class="scroll">
+		<ul><li>
+            <a href="../GitSharp.Commands/AbstractCommand.htm">AbstractCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AbstractFetchCommand.htm">AbstractFetchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ConfigCommand.htm">ConfigCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/InitCommand.htm">InitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PushCommand.htm">PushCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RebaseCommand.htm" class="current">RebaseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusCommand.htm">StatusCommand</a>
+        </li>
+		</ul>
+	</div>
+</div>
+    <div class="header">
+		<p class="class"><strong>Type</strong> RebaseCommand</p>
+		<p><strong>Namespace</strong> GitSharp.Commands</p><p><strong>Parent</strong> <a href="../GitSharp.Commands/AbstractCommand.htm">AbstractCommand</a></p>
+	</div>
+    <div class="sub-header">
+
+
+
+			<h3 class="section">Properties</h3>
+			<ul><li><a href="../GitSharp.Commands/RebaseCommand.htm#Abort">Abort</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#ActualDirectory">ActualDirectory</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Arguments">Arguments</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#CommitterDateIsAuthorDate">CommitterDateIsAuthorDate</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Context">Context</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Continue">Continue</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Forcerebase">Forcerebase</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#GitDirectory">GitDirectory</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#IgnoreDate">IgnoreDate</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#IgnoreWhitespace">IgnoreWhitespace</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Interactive">Interactive</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Merge">Merge</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#NoStat">NoStat</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#NoVerify">NoVerify</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#OutputStream">OutputStream</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#PreserveMerges">PreserveMerges</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Quiet">Quiet</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Repository">Repository</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Root">Root</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Skip">Skip</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Stat">Stat</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Strategy">Strategy</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Verbose">Verbose</a></li><li><a href="../GitSharp.Commands/RebaseCommand.htm#Whitespace">Whitespace</a></li>
+			</ul>
+
+	</div>
+
+
+
+
+  <h3 class="section">Public properties</h3>
+<div id="Abort" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Abort</strong> get; set;</h4>
+    <div class="content">Not implemented
+Restore the original branch and abort the rebase operation.
+
+    </div>
+  </div><div id="ActualDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>ActualDirectory</strong> get; </h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Arguments" class="method">
+    <h4><span title="System.Collections.Generic.List<string>">List&lt;string&gt;</span> <strong>Arguments</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="CommitterDateIsAuthorDate" class="method">
+    <h4><span title="System.bool">bool</span> <strong>CommitterDateIsAuthorDate</strong> get; set;</h4>
+    <div class="content">Not implemented
+These flags are passed to 'git-am' to easily change the dates
+of the rebased commits (see linkgit:git-am[1]).
+
+    </div>
+  </div><div id="Context" class="method">
+    <h4><span title="System.string">string</span> <strong>Context</strong> get; set;</h4>
+    <div class="content">Not implemented
+Ensure at least n lines of surrounding context match before
+and after each change.  When fewer lines of surrounding
+context exist they all must match.  By default no context is
+ever ignored.
+
+    </div>
+  </div><div id="Continue" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Continue</strong> get; set;</h4>
+    <div class="content">Not implemented
+Restart the rebasing process after having resolved a merge conflict.
+
+    </div>
+  </div><div id="Forcerebase" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Forcerebase</strong> get; set;</h4>
+    <div class="content">Not implemented
+Force the rebase even if the current branch is a descendant
+of the commit you are rebasing onto.  Normally the command will
+exit with the message "Current branch is up to date" in such a
+situation.
+
+    </div>
+  </div><div id="GitDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>GitDirectory</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="IgnoreDate" class="method">
+    <h4><span title="System.bool">bool</span> <strong>IgnoreDate</strong> get; set;</h4>
+    <div class="content">Not implemented
+These flags are passed to 'git-am' to easily change the dates
+of the rebased commits (see linkgit:git-am[1]).
+
+    </div>
+  </div><div id="IgnoreWhitespace" class="method">
+    <h4><span title="System.string">string</span> <strong>IgnoreWhitespace</strong> get; set;</h4>
+    <div class="content">Not implemented
+These flag are passed to the 'git-apply' program
+(see linkgit:git-apply[1]) that applies the patch.
+Incompatible with the --interactive option.
+
+    </div>
+  </div><div id="Interactive" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Interactive</strong> get; set;</h4>
+    <div class="content">Not implemented
+Make a list of the commits which are about to be rebased.  Let the
+user edit that list before rebasing.  This mode can also be used to
+split commits (see SPLITTING COMMITS below).
+
+    </div>
+  </div><div id="Merge" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Merge</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="NoStat" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NoStat</strong> get; set;</h4>
+    <div class="content">Not implemented
+Do not show a diffstat as part of the rebase process.
+
+    </div>
+  </div><div id="NoVerify" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NoVerify</strong> get; set;</h4>
+    <div class="content">Not implemented
+This option bypasses the pre-rebase hook.  See also linkgit:githooks[5].
+
+    </div>
+  </div><div id="OutputStream" class="method">
+    <h4><span title="System.IO.StreamWriter">StreamWriter</span> <strong>OutputStream</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="PreserveMerges" class="method">
+    <h4><span title="System.bool">bool</span> <strong>PreserveMerges</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of ignoring merges, try to recreate them.
+
+    </div>
+  </div><div id="Quiet" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Quiet</strong> get; set;</h4>
+    <div class="content">Not implemented
+Be quiet. Implies --no-stat.
+
+    </div>
+  </div><div id="Repository" class="method">
+    <h4><a href="../GitSharp/Repository.htm">Repository</a> <strong>Repository</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Root" class="method">
+    <h4><span title="System.string">string</span> <strong>Root</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Skip" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Skip</strong> get; set;</h4>
+    <div class="content">Not implemented
+Restart the rebasing process by skipping the current patch.
+
+    </div>
+  </div><div id="Stat" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Stat</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show a diffstat of what changed upstream since the last rebase. The
+diffstat is also controlled by the configuration option rebase.stat.
+
+    </div>
+  </div><div id="Strategy" class="method">
+    <h4><span title="System.string">string</span> <strong>Strategy</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Verbose" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Verbose</strong> get; set;</h4>
+    <div class="content">Not implemented
+Be verbose. Implies --stat.
+
+    </div>
+  </div><div id="Whitespace" class="method">
+    <h4><span title="System.string">string</span> <strong>Whitespace</strong> get; set;</h4>
+    <div class="content">Not implemented
+These flag are passed to the 'git-apply' program
+(see linkgit:git-apply[1]) that applies the patch.
+Incompatible with the --interactive option.
+
+    </div>
+  </div>
+<div id="footer">
+  <p><b><big>Learn more about <a href="http://www.eqqon.com/index.php/GitSharp"> GitSharp. </a></big></b></p>
+  <p>Based on v0.0.0.0 of GitSharp</p>
+  <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
+</div>
+  </body>
+</html>

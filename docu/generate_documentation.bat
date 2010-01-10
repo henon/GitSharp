@@ -2,7 +2,7 @@ rem ==========================
 rem Generates the documentation
 rem ==========================
 rem
-rem Note: this assumes, that you have built gitsharp using the build script before switching to gh-pages branch.
+rem Note: this assumes, that you have built the debug version of gitsharp with visual studio.
 
-docu ../build/net-3.5-debug/bin/GitSharp.dll
+docu ../GitSharp/bin/Debug/GitSharp.dll
 xcopy /S /Y output\*.* ..

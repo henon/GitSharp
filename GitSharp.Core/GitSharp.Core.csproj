@@ -380,6 +380,11 @@
     <Compile Include="Util\TemporaryBuffer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Platform\Linux.cs" />
+    <Compile Include="Platform\Mac.cs" />
+    <Compile Include="Platform\Platform.cs" />
+    <Compile Include="Platform\PlatformObject.cs" />
+    <Compile Include="Platform\Windows.cs" />
     <Compile Include="RevPlot\AbstractPlotRenderer.cs" />
     <Compile Include="RevPlot\PlotCommit.cs" />
     <Compile Include="RevPlot\PlotCommitList.cs" />

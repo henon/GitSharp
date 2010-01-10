@@ -42,7 +42,7 @@ using System.Security;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
-
+using GitSharp.Commands;
 using CoreRepository = GitSharp.Core.Repository;
 using System.Text.RegularExpressions;
 

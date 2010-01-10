@@ -41,7 +41,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace GitSharp
+namespace GitSharp.Commands
 {
     /// <summary>
     /// git-init - Create an empty git repository or reinitialize an existing one 

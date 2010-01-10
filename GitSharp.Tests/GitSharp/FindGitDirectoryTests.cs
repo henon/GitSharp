@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GitSharp.Commands;
 using NUnit.Framework;
 using System.IO;
 
@@ -19,7 +20,7 @@ namespace GitSharp.API.Tests
             {
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "test1");
                 System.Environment.SetEnvironmentVariable("GIT_DIR", path);
-                Commands.GitDirectory = null; // override fallback
+                Git.DefaultGitDirectory = null; // override fallback
                 Assert.AreEqual(path + ".git", AbstractCommand.FindGitDirectory(null, false, true));
                 Assert.AreEqual(Path.Combine(path, ".git"), AbstractCommand.FindGitDirectory(null, false, false));
             }
@@ -37,7 +38,7 @@ namespace GitSharp.API.Tests
             try
             {
                 //current directory is returned only if path, global fallback and envvar are all null
-                GitSharp.Commands.GitDirectory = null; // override fallback
+                Git.DefaultGitDirectory = null; // override fallback
                 System.Environment.SetEnvironmentVariable("GIT_DIR", null); // override environment
                 var path = Directory.GetCurrentDirectory();
                 Assert.IsFalse(path.EndsWith("git")); // <--- this should be the case anyway, but if not the next assertion would not pass correctly
@@ -54,12 +55,12 @@ namespace GitSharp.API.Tests
         public void Explicit_path_is_preferred()
         {
             // it should override global fallback
-            GitSharp.Commands.GitDirectory = "abc/def/ghi";
+            Git.DefaultGitDirectory = "abc/def/ghi";
             Assert.AreEqual("xyz.git", AbstractCommand.FindGitDirectory("xyz", false, true));
             Assert.AreEqual(Path.Combine("xyz",".git"), AbstractCommand.FindGitDirectory("xyz", false, false));
 
             // it should override env var
-            GitSharp.Commands.GitDirectory = null;
+            Git.DefaultGitDirectory = null;
             string tempGitDir = System.Environment.GetEnvironmentVariable("GIT_DIR");
             try
             {

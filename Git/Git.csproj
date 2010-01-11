@@ -74,14 +74,27 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Add.cs" />
+    <Compile Include="Am.cs" />
+    <Compile Include="Annotate.cs" />
+    <Compile Include="Apply.cs" />
+    <Compile Include="Archive.cs" />
+    <Compile Include="Blame.cs" />
+    <Compile Include="Branch.cs" />
+    <Compile Include="CatFile.cs" />
     <Compile Include="Checkout.cs" />
+    <Compile Include="CheckoutIndex.cs" />
+    <Compile Include="Cherry.cs" />
+    <Compile Include="CherryPick.cs" />
+    <Compile Include="Clean.cs" />
     <Compile Include="Clone.cs" />
     <Compile Include="CmdParserOptionSet.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="CommandCatalog.cs" />
     <Compile Include="CommandRef.cs" />
     <Compile Include="Commit.cs" />
+    <Compile Include="CommitTree.cs" />
     <Compile Include="Config.cs" />
+    <Compile Include="CountObjects.cs" />
     <Compile Include="Die.cs" />
     <Compile Include="Fetch.cs" />
     <Compile Include="Help.cs" />

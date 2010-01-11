@@ -77,6 +77,20 @@ namespace GitSharp.CLI
                     "and the new branch", v=>{isMerging = true;}},
                 { "conflict","Same as merge above, but changes how the conflicting hunks are presented", isConflict = true},
                 { "p|patch", "Creates a diff and applies it in reverse order to the working tree", v=>Patch()}
+
+               // [Mr Happy] this should be compatible w/ the CommandStub, haven't checked yet tho.
+               //{ "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
+               //{ "q|quiet", "Quiet, suppress feedback messages", v => cmd.Quiet = true },
+               //{ "f|force", "When switching branches, proceed even if the index or the working tree differs from HEAD", v => cmd.Force = true },
+               //{ "ours", "When checking out paths from the index, check out stage #2 ('ours') or #3 ('theirs') for unmerged paths", v => cmd.Ours = true },
+               //{ "theirs", "When checking out paths from the index, check out stage #2 ('ours') or #3 ('theirs') for unmerged paths", v => cmd.Theirs = true },
+               //{ "b=", "Create a new branch named <new_branch> and start it at <start_point>; see linkgit:git-branch[1] for details", v => cmd.B = v },
+               //{ "t|track", "When creating a new branch, set up "upstream" configuration", v => cmd.Track = true },
+               //{ "no-track", "Do not set up "upstream" configuration, even if the branch", v => cmd.Notrack = true },
+               //{ "l", "Create the new branch's reflog; see linkgit:git-branch[1] for details", v => cmd.L = true },
+               //{ "m|merge", "When switching branches, if you have local modifications to one or more files that are different between the current branch and the branch to which you are switching, the command refuses to switch branches in order to preserve your modifications in context", v => cmd.Merge = true },
+               //{ "conflict=", "The same as --merge option above, but changes the way the conflicting hunks are presented, overriding the merge", v => cmd.Conflict = v },
+               //{ "p|patch", "Interactively select hunks in the difference between the <tree-ish> (or the index, if unspecified) and the working tree", v => cmd.Patch = true },
 #endif
             };
 

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2010, Dominique van de Vorle <dvdvorle@gmail.com>
  *
  * All rights reserved.
@@ -37,48 +37,35 @@
 
 using System;
 using System.Collections.Generic;
-using GitSharp.Commands;
 using NDesk.Options;
-using GitSharp.CLI;
+using GitSharp.Commands;
 
 namespace GitSharp.CLI
 {
 
     [Command(common=true, requiresRepository=true, usage = "")]
-    public class Rebase : TextBuiltin
+    public class Cherrypick : TextBuiltin
     {
-        private RebaseCommand cmd = new RebaseCommand();
+        private CherrypickCommand cmd = new CherrypickCommand();
         private static Boolean isHelp;
+
         public override void Run(string[] args)
         {
-            cmd.Quiet = false;
 			
             options = new CmdParserOptionSet()
             {
-               { "continue", "Restart the rebasing process after having resolved a merge conflict", v => cmd.Continue = true },
-               { "abort", "Restore the original branch and abort the rebase operation", v => cmd.Abort = true },
-               { "skip", "Restart the rebasing process by skipping the current patch", v => cmd.Skip = true },
-               { "m|merge", "Use merging strategies to rebase", v => cmd.Merge = true },
-               { "s|strategy=", "Use the given merge strategy", v => cmd.Strategy = v },
-               { "q|quiet", "Be quiet", v => cmd.Quiet = true },
-               { "v|verbose", "Be verbose", v => cmd.Verbose = true },
-               { "stat", "Show a diffstat of what changed upstream since the last rebase", v => cmd.Stat = true },
-               { "n|no-stat", "Do not show a diffstat as part of the rebase process", v => cmd.NoStat = true },
-               { "no-verify", "This option bypasses the pre-rebase hook", v => cmd.NoVerify = true },
-               { "C=", "Ensure at least <n> lines of surrounding context match before and after each change", v => cmd.Context = v },
-               { "f|force-rebase", "Force the rebase even if the current branch is a descendant of the commit you are rebasing onto", v => cmd.Forcerebase = true },
-               { "ignore-whitespace=", "These flag are passed to the 'git-apply' program (see linkgit:git-apply[1]) that applies the patch", v => cmd.IgnoreWhitespace = v },
-               { "whitespace=", "These flag are passed to the 'git-apply' program (see linkgit:git-apply[1]) that applies the patch", v => cmd.Whitespace = v },
-               { "committer-date-is-author-date", "These flags are passed to 'git-am' to easily change the dates of the rebased commits (see linkgit:git-am[1])", v => cmd.CommitterDateIsAuthorDate = true },
-               { "ignore-date", "These flags are passed to 'git-am' to easily change the dates of the rebased commits (see linkgit:git-am[1])", v => cmd.IgnoreDate = true },
-               { "i|interactive", "Make a list of the commits which are about to be rebased", v => cmd.Interactive = true },
-               { "p|preserve-merges", "Instead of ignoring merges, try to recreate them", v => cmd.PreserveMerges = true },
-               { "root=", "Rebase all commits reachable from <branch>, instead of limiting them with an <upstream>", v => cmd.Root = v },
+               { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
+               { "e|edit", "With this option, 'git-cherry-pick' will let you edit the commit message prior to committing", v => cmd.Edit = true },
+               { "x", "When recording the commit, append to the original commit message a note that indicates which commit this change was cherry-picked from", v => cmd.X = true },
+               { "r", "It used to be that the command defaulted to do `-x` described above, and `-r` was to disable it", v => cmd.R = true },
+               { "m|mainline", "Usually you cannot cherry-pick a merge because you do not know which side of the merge should be considered the mainline", v => cmd.Mainline = true },
+               { "n|no-commit", "Usually the command automatically creates a commit", v => cmd.Nocommit = true },
+               { "s|signoff", "Add Signed-off-by line at the end of the commit message", v => cmd.Signoff = true },
             };
 
             try
             {
-                List<String> arguments = ParseOptions(args);
+                List<String> Arguments = ParseOptions(args);
                 if (arguments.Count > 0)
                 {
                     cmd.Arguments = arguments;
@@ -100,7 +87,7 @@ namespace GitSharp.CLI
             if (!isHelp)
             {
                 isHelp = true;
-                cmd.OutputStream.WriteLine("/*Usage*/");
+                cmd.OutputStream.WriteLine("Here should be the usage...");
                 cmd.OutputStream.WriteLine();
                 options.WriteOptionDescriptions(Console.Out);
                 cmd.OutputStream.WriteLine();

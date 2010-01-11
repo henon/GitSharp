@@ -96,6 +96,7 @@
     <Compile Include="Show.cs" />
     <Compile Include="Status.cs" />
     <Compile Include="TextBuiltin.cs" />
+    <Compile Include="Rebase.cs" />
     <Compile Include="Version.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
  *
  * All rights reserved.
@@ -36,6 +36,7 @@
  */
 
 using System.Collections.Generic;
+using GitSharp.Commands;
 using GitSharp.Core;
 using GitSharp.Core.Transport;
 

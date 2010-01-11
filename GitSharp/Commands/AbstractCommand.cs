@@ -42,7 +42,7 @@ using System.Text;
 using System.IO;
 using GitSharp.Core;
 
-namespace GitSharp
+namespace GitSharp.Commands
 {
     /// <summary>
     /// Abstract base class of all git commands. It provides basic infrastructure
@@ -144,7 +144,7 @@ namespace GitSharp
             get
             {
                 if (_output == null)
-                    return Commands.OutputStream;
+                    return Git.DefaultOutputStream;
                 return _output;
             }
             set
@@ -165,7 +165,7 @@ namespace GitSharp
             get
             {
                 if (_repository == null)
-                    return Commands.Repository;
+                    return Git.DefaultRepository;
                 return _repository;
             }
             protected set
@@ -183,7 +183,7 @@ namespace GitSharp
             get
             {
                 if (_gitDirectory == null)
-                    return Commands.GitDirectory;
+                    return Git.DefaultGitDirectory;
                 return _gitDirectory;
             }
             set

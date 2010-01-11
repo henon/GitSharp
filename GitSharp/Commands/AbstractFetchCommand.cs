@@ -38,7 +38,7 @@ using System;
 using GitSharp.Core;
 using GitSharp.Core.Transport;
 
-namespace GitSharp
+namespace GitSharp.Commands
 {
     public abstract class AbstractFetchCommand : AbstractCommand
     {
@@ -91,15 +91,15 @@ namespace GitSharp
 
             if (r == RefUpdate.RefUpdateResult.Forced)
             {
-                string aOld = u.OldObjectId.Abbreviate(Repository._internal_repo).name();
-                string aNew = u.NewObjectId.Abbreviate(Repository._internal_repo).name();
+                string aOld = u.OldObjectId.Abbreviate(Repository).name();
+                string aNew = u.NewObjectId.Abbreviate(Repository).name();
                 return aOld + "..." + aNew;
             }
 
             if (r == RefUpdate.RefUpdateResult.FastForward)
             {
-                string aOld = u.OldObjectId.Abbreviate(Repository._internal_repo).name();
-                string aNew = u.NewObjectId.Abbreviate(Repository._internal_repo).name();
+                string aOld = u.OldObjectId.Abbreviate(Repository).name();
+                string aNew = u.NewObjectId.Abbreviate(Repository).name();
                 return aOld + ".." + aNew;
             }
 

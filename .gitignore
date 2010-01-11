@@ -15,3 +15,6 @@ Reports
 *.orig
 test-results
 dist
+docu/
+SharedAssemblyInfo.cs
+VersionAssemblyInfo.cs

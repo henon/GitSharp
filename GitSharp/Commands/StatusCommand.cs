@@ -42,7 +42,7 @@ using System.Linq;
 using System.Text;
 using GitSharp.Core;
 
-namespace GitSharp
+namespace GitSharp.Commands
 {
     public class StatusCommand : AbstractCommand
     {

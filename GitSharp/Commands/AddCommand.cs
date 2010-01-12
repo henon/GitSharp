@@ -60,7 +60,7 @@ namespace GitSharp.Commands
         ///         Don't actually add the file(s), just show if they exist.
         /// 
         /// </summary>
-        public bool Dryrun { get; set; }
+        public bool DryRun { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -152,7 +152,7 @@ namespace GitSharp.Commands
         /// -a'.
         /// 
         /// </summary>
-        public bool Intenttoadd { get; set; }
+        public bool IntentToAdd { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -171,7 +171,7 @@ namespace GitSharp.Commands
         /// others. The command shall still exit with non-zero status.
         /// 
         /// </summary>
-        public bool Ignoreerrors { get; set; }
+        public bool IgnoreErrors { get; set; }
 
         #endregion
 

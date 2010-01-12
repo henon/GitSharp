@@ -72,7 +72,7 @@ namespace GitSharp.Commands
         /// when creating the commit.
         /// 
         /// </summary>
-        public string Reusemessage { get; set; }
+        public string ReuseMessage { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -81,7 +81,7 @@ namespace GitSharp.Commands
         /// the user can further edit the commit message.
         /// 
         /// </summary>
-        public string Reeditmessage { get; set; }
+        public string ReeditMessage { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -91,7 +91,7 @@ namespace GitSharp.Commands
         /// This also renews the author timestamp.
         /// 
         /// </summary>
-        public bool Resetauthor { get; set; }
+        public bool ResetAuthor { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -149,7 +149,7 @@ namespace GitSharp.Commands
         /// See also linkgit:githooks[5].
         /// 
         /// </summary>
-        public bool Noverify { get; set; }
+        public bool NoVerify { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -160,7 +160,7 @@ namespace GitSharp.Commands
         /// is primarily for use by foreign scm interface scripts.
         /// 
         /// </summary>
-        public bool Allowempty { get; set; }
+        public bool AllowEmpty { get; set; }
 
         /// <summary>
         /// Not implemented

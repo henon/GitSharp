@@ -52,7 +52,7 @@ namespace GitSharp.Commands
 
         // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.
 
-        #region Properties / Options
+      #region Properties / Options
         public List<string> Arguments { get; set; }
         /// <summary>
         /// Not implemented
@@ -78,7 +78,7 @@ namespace GitSharp.Commands
         /// Include additional statistics at the end of blame output.
         /// 
         /// </summary>
-        public bool Showstats { get; set; }
+        public bool ShowStats { get; set; }
 
         /// <summary>
         /// Not implemented

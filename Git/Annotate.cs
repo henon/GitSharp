@@ -57,8 +57,8 @@ namespace GitSharp.CLI
                { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
                { "b", "Show blank SHA-1 for boundary commits", v => cmd.B = true },
                { "root", "Do not treat root commits as boundaries", v => cmd.Root = true },
-               { "show-stats", "Include additional statistics at the end of blame output", v => cmd.Showstats = true },
-               { "L=", "Annotate only the given line range", v => cmd.L = v }, // 
+               { "show-stats", "Include additional statistics at the end of blame output", v => cmd.ShowStats = true },
+               { "L=", "Annotate only the given line range", v => cmd.L = v },
                { "l", "Show long rev (Default: off)", v => cmd.l = true },
                { "t", "Show raw timestamp (Default: off)", v => cmd.T = true },
                { "S=", "Use revisions from revs-file instead of calling linkgit:git-rev-list[1]", v => cmd.S = v },

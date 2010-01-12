@@ -59,7 +59,7 @@ namespace GitSharp.CLI
                { "v|verbose", "Report progress to stderr", v => cmd.Verbose = true },
                { "prefix=", "Prepend <prefix>/ to each filename in the archive", v => cmd.Prefix = v },
                { "o|output=", "Write the archive to <file> instead of stdout", v => cmd.Output = v },
-               { "worktree-attributes", "Look for attributes in", v => cmd.Worktreeattributes = true },
+               { "worktree-attributes", "Look for attributes in", v => cmd.WorktreeAttributes = true },
                { "remote=", "Instead of making a tar archive from the local repository, retrieve a tar archive from a remote repository", v => cmd.Remote = v },
                { "exec=", "Used with --remote to specify the path to the 'git-upload-archive' on the remote side", v => cmd.Exec = v },
             };

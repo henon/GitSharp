@@ -104,7 +104,7 @@ namespace GitSharp.Commands
         /// Look for attributes in .gitattributes in working directory too.
         /// 
         /// </summary>
-        public bool Worktreeattributes { get; set; }
+        public bool WorktreeAttributes { get; set; }
 
         /// <summary>
         /// Not implemented

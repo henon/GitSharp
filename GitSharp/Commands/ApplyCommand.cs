@@ -133,7 +133,7 @@ namespace GitSharp.Commands
         /// the information is read from the current index instead.
         /// 
         /// </summary>
-        public string Buildfakeancestor { get; set; }
+        public string BuildFakeAncestor { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -202,7 +202,7 @@ namespace GitSharp.Commands
         /// discouraged.
         /// 
         /// </summary>
-        public bool Unidiffzero { get; set; }
+        public bool UnidiffZero { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -226,7 +226,7 @@ namespace GitSharp.Commands
         /// deletion part but not the addition part.
         /// 
         /// </summary>
-        public bool Noadd { get; set; }
+        public bool NoAdd { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -237,7 +237,7 @@ namespace GitSharp.Commands
         /// patch application, so this is a no-op.
         /// 
         /// </summary>
-        public bool Allowbinaryreplacement { get; set; }
+        public bool AllowBinaryReplacement { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -285,7 +285,7 @@ namespace GitSharp.Commands
         /// `--whitespace` option. New lines will still be fixed, though.
         /// 
         /// </summary>
-        public bool Ignorespacechange { get; set; }
+        public bool IgnoreSpaceChange { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -297,7 +297,7 @@ namespace GitSharp.Commands
         /// `--whitespace` option. New lines will still be fixed, though.
         /// 
         /// </summary>
-        public bool Ignorewhitespace { get; set; }
+        public bool IgnoreWhitespace { get; set; }
 
         /// <summary>
         /// Not implemented

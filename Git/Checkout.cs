@@ -86,7 +86,7 @@ namespace GitSharp.CLI
                //{ "theirs", "When checking out paths from the index, check out stage #2 ('ours') or #3 ('theirs') for unmerged paths", v => cmd.Theirs = true },
                //{ "b=", "Create a new branch named <new_branch> and start it at <start_point>; see linkgit:git-branch[1] for details", v => cmd.B = v },
                //{ "t|track", "When creating a new branch, set up "upstream" configuration", v => cmd.Track = true },
-               //{ "no-track", "Do not set up "upstream" configuration, even if the branch", v => cmd.Notrack = true },
+               //{ "no-track", "Do not set up "upstream" configuration, even if the branch", v => cmd.NoTrack = true },
                //{ "l", "Create the new branch's reflog; see linkgit:git-branch[1] for details", v => cmd.L = true },
                //{ "m|merge", "When switching branches, if you have local modifications to one or more files that are different between the current branch and the branch to which you are switching, the command refuses to switch branches in order to preserve your modifications in context", v => cmd.Merge = true },
                //{ "conflict=", "The same as --merge option above, but changes the way the conflicting hunks are presented, overriding the merge", v => cmd.Conflict = v },

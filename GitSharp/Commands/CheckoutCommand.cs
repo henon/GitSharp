@@ -128,7 +128,7 @@ namespace GitSharp.Commands
         /// branch.autosetupmerge configuration variable is true.
         /// 
         /// </summary>
-        public bool Notrack { get; set; }
+        public bool NoTrack { get; set; }
 
         /// <summary>
         /// Not implemented

@@ -61,18 +61,18 @@ namespace GitSharp.CLI
                { "m", "Move/rename a branch and the corresponding reflog", v => cmd.m = true },
                { "M", "Move/rename a branch even if the new branch name already exists", v => cmd.M = true },
                { "color", "Color branches to highlight current, local, and remote branches", v => cmd.Color = true },
-               { "no-color", "Turn off branch colors, even when the configuration file gives the default to color output", v => cmd.Nocolor = true },
+               { "no-color", "Turn off branch colors, even when the configuration file gives the default to color output", v => cmd.NoColor = true },
                { "r", "List or delete (if used with -d) the remote-tracking branches", v => cmd.R = true },
                { "a", "List both remote-tracking branches and local branches", v => cmd.A = true },
                { "v|verbose", "Show sha1 and commit subject line for each head, along with relationship to upstream branch (if any)", v => cmd.Verbose = true },
                { "abbrev=", "Alter the sha1's minimum display length in the output listing", v => cmd.Abbrev = v },
-               { "no-abbrev", "Display the full sha1s in the output listing rather than abbreviating them", v => cmd.Noabbrev = true },
+               { "no-abbrev", "Display the full sha1s in the output listing rather than abbreviating them", v => cmd.NoAbbrev = true },
                { "t|track", "When creating a new branch, set up configuration to mark the start-point branch as \"upstream\" from the new branch", v => cmd.Track = true },
-               { "no-track", "Do not set up \"upstream\" configuration, even if the branch", v => cmd.Notrack = true },
+               { "no-track", "Do not set up \"upstream\" configuration, even if the branch", v => cmd.NoTrack = true },
                { "contains=", "Only list branches which contain the specified commit", v => cmd.Contains = v },
                { "merged=", "Only list branches whose tips are reachable from the specified commit (HEAD if not specified)", v => cmd.Merged = v },
-               { "no-merged=", "Only list branches whose tips are not reachable from the specified commit (HEAD if not specified)", v => cmd.Nomerged = v },
-            };
+               { "no-merged=", "Only list branches whose tips are not reachable from the specified commit (HEAD if not specified)", v => cmd.NoMerged = v },
+             };
 
             try
             {

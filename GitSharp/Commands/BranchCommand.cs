@@ -120,7 +120,7 @@ namespace GitSharp.Commands
         /// default to color output.
         /// 
         /// </summary>
-        public bool Nocolor { get; set; }
+        public bool NoColor { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -163,7 +163,7 @@ namespace GitSharp.Commands
         /// Display the full sha1s in the output listing rather than abbreviating them.
         /// 
         /// </summary>
-        public bool Noabbrev { get; set; }
+        public bool NoAbbrev { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -191,7 +191,7 @@ namespace GitSharp.Commands
         /// branch.autosetupmerge configuration variable is true.
         /// 
         /// </summary>
-        public bool Notrack { get; set; }
+        public bool NoTrack { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -217,7 +217,7 @@ namespace GitSharp.Commands
         /// specified commit (HEAD if not specified).
         /// 
         /// </summary>
-        public string Nomerged { get; set; }
+        public string NoMerged { get; set; }
 
         #endregion
 

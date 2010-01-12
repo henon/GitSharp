@@ -80,7 +80,7 @@ namespace GitSharp.Commands
         /// Don't actually remove anything, just show what would be done.
         /// 
         /// </summary>
-        public bool Dryrun { get; set; }
+        public bool DryRun { get; set; }
 
         /// <summary>
         /// Not implemented

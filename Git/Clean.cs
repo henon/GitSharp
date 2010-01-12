@@ -58,7 +58,7 @@ namespace GitSharp.CLI
                { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
                { "d", "Remove untracked directories in addition to untracked files", v => cmd.D = true },
                { "f|force", "If the git configuration specifies clean", v => cmd.Force = true },
-               { "n|dry-run", "Don't actually remove anything, just show what would be done", v => cmd.Dryrun = true },
+               { "n|dry-run", "Don't actually remove anything, just show what would be done", v => cmd.DryRun = true },
                { "q|quiet", "Be quiet, only report errors, but not the files that are successfully removed", v => cmd.Quiet = true },
                { "x", "Don't use the ignore rules", v => cmd.x = true },
                { "X", "Remove only files ignored by git", v => cmd.X = true },

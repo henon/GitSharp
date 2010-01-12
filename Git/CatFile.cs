@@ -59,7 +59,7 @@ namespace GitSharp.CLI
                { "e=", "Suppress all output; instead exit with zero status if <object> exists and is a valid object", v => cmd.E = v },
                { "p=", "Pretty-print the contents of <object> based on its type", v => cmd.P = v },
                { "batch", "Print the SHA1, type, size, and contents of each object provided on stdin", v => cmd.Batch = true },
-               { "batch-check", "Print the SHA1, type, and size of each object provided on stdin", v => cmd.Batchcheck = true },
+               { "batch-check", "Print the SHA1, type, and size of each object provided on stdin", v => cmd.BatchCheck = true },
             };
 
             try

@@ -104,7 +104,7 @@ namespace GitSharp.Commands
         /// Print the SHA1, type, and size of each object provided on stdin. May not
         /// be combined with any other options or arguments.
         /// </summary>
-        public bool Batchcheck { get; set; }
+        public bool BatchCheck { get; set; }
 
         #endregion
 

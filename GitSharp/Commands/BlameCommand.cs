@@ -74,7 +74,7 @@ namespace GitSharp.Commands
         /// of code to have been moved.
         /// 
         /// </summary>
-        public bool Scoredebug { get; set; }
+        public bool ScoreDebug { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -84,7 +84,7 @@ namespace GitSharp.Commands
         /// file with a different name, due to rename detection.
         /// 
         /// </summary>
-        public bool Showname { get; set; }
+        public bool ShowName { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -92,7 +92,7 @@ namespace GitSharp.Commands
         /// Show the line number in the original commit (Default: off).
         /// 
         /// </summary>
-        public bool Shownumber { get; set; }
+        public bool ShowNumber { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -135,7 +135,7 @@ namespace GitSharp.Commands
         /// Include additional statistics at the end of blame output.
         /// 
         /// </summary>
-        public bool Showstats { get; set; }
+        public bool ShowStats { get; set; }
 
         /// <summary>
         /// Not implemented

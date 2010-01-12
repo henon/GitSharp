@@ -118,7 +118,7 @@ namespace GitSharp.Commands
         /// effect to your index in a row.
         /// 
         /// </summary>
-        public bool Nocommit { get; set; }
+        public bool NoCommit { get; set; }
 
         /// <summary>
         /// Not implemented

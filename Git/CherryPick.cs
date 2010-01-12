@@ -59,7 +59,7 @@ namespace GitSharp.CLI
                { "x", "When recording the commit, append to the original commit message a note that indicates which commit this change was cherry-picked from", v => cmd.X = true },
                { "r", "It used to be that the command defaulted to do `-x` described above, and `-r` was to disable it", v => cmd.R = true },
                { "m|mainline", "Usually you cannot cherry-pick a merge because you do not know which side of the merge should be considered the mainline", v => cmd.Mainline = true },
-               { "n|no-commit", "Usually the command automatically creates a commit", v => cmd.Nocommit = true },
+               { "n|no-commit", "Usually the command automatically creates a commit", v => cmd.NoCommit = true },
                { "s|signoff", "Add Signed-off-by line at the end of the commit message", v => cmd.Signoff = true },
             };
 

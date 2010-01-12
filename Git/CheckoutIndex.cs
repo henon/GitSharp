@@ -60,7 +60,7 @@ namespace GitSharp.CLI
                { "q|quiet", "be quiet if files exist or are not in the index", v => cmd.Quiet = true },
                { "f|force", "forces overwrite of existing files", v => cmd.Force = true },
                { "a|all", "checks out all files in the index", v => cmd.All = true },
-               { "n|no-create", "Don't checkout new files, only refresh files already checked out", v => cmd.Nocreate = true },
+               { "n|no-create", "Don't checkout new files, only refresh files already checked out", v => cmd.NoCreate = true },
                { "prefix=", "When creating files, prepend <string> (usually a directory including a trailing /)", v => cmd.Prefix = v },
                { "stage=", "Instead of checking out unmerged entries, copy out the files from named stage", v => cmd.Stage = v },
                { "temp", "Instead of copying the files to the working directory write the content to temporary files", v => cmd.Temp = true },

@@ -95,7 +95,7 @@ namespace GitSharp.Commands
         /// out.
         /// 
         /// </summary>
-        public bool Nocreate { get; set; }
+        public bool NoCreate { get; set; }
 
         /// <summary>
         /// Not implemented

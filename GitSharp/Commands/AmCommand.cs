@@ -52,7 +52,7 @@ namespace GitSharp.Commands
 
         // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.
 
-        #region Properties / Options
+         #region Properties / Options
         public List<string> Arguments { get; set; }
         /// <summary>
         /// Not implemented
@@ -86,7 +86,7 @@ namespace GitSharp.Commands
         /// Ignore scissors lines (see linkgit:git-mailinfo[1]).
         /// 
         /// </summary>
-        public bool Noscissors { get; set; }
+        public bool NoScissors { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -118,7 +118,7 @@ namespace GitSharp.Commands
         /// linkgit:git-mailinfo[1]).
         /// 
         /// </summary>
-        public bool Noutf8 { get; set; }
+        public bool NoUtf8 { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -129,7 +129,7 @@ namespace GitSharp.Commands
         /// available locally.
         /// 
         /// </summary>
-        public bool Threeway { get; set; }
+        public bool ThreeWay { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -139,7 +139,7 @@ namespace GitSharp.Commands
         /// the patch.
         /// 
         /// </summary>
-        public bool Ignorespacechange { get; set; }
+        public bool IgnoreSpaceChange { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -149,7 +149,7 @@ namespace GitSharp.Commands
         /// the patch.
         /// 
         /// </summary>
-        public string Ignorewhitespace { get; set; }
+        public string IgnoreWhitespace { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -199,7 +199,7 @@ namespace GitSharp.Commands
         /// value as the author date.
         /// 
         /// </summary>
-        public bool Committerdateisauthordate { get; set; }
+        public bool CommitterDateIsAuthorDate { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -211,7 +211,7 @@ namespace GitSharp.Commands
         /// value as the committer date.
         /// 
         /// </summary>
-        public bool Ignoredate { get; set; }
+        public bool IgnoreDate { get; set; }
 
         /// <summary>
         /// Not implemented

@@ -95,7 +95,13 @@
     <Compile Include="CommitTree.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="CountObjects.cs" />
+    <Compile Include="Describe.cs" />
     <Compile Include="Die.cs" />
+    <Compile Include="Diff.cs" />
+    <Compile Include="DiffFiles.cs" />
+    <Compile Include="DiffIndex.cs" />
+    <Compile Include="Difftool.cs" />
+    <Compile Include="DiffTree.cs" />
     <Compile Include="Fetch.cs" />
     <Compile Include="Help.cs" />
     <Compile Include="Init.cs" />

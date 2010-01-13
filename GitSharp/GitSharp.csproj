@@ -71,6 +71,12 @@
     <Compile Include="Commands\CommitCommand.cs" />
     <Compile Include="Commands\CommitTreeCommand.cs" />
     <Compile Include="Commands\CountObjectsCommand.cs" />
+    <Compile Include="Commands\DescribeCommand.cs" />
+    <Compile Include="Commands\DiffCommand.cs" />
+    <Compile Include="Commands\DiffFilesCommand.cs" />
+    <Compile Include="Commands\DiffIndexCommand.cs" />
+    <Compile Include="Commands\DifftoolCommand.cs" />
+    <Compile Include="Commands\DiffTreeCommand.cs" />
     <Compile Include="Commands\RebaseCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Commands\ConfigCommand.cs" />

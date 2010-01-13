@@ -55,7 +55,6 @@ namespace GitSharp.Core.RevPlot
     /// must be used to populate the list.
     /// </para>
     /// </summary>
-    /// <typeparam name="L">type of lane used by the application.</typeparam>
     public class PlotCommitList :
         RevCommitList<PlotCommit> {
         static int MAX_LENGTH = 25;

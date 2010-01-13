@@ -67,8 +67,11 @@
     <Compile Include="GitSharp.Core\ConstantsEncodingTest.cs" />
     <Compile Include="GitSharp.Core\Crc32Tests.cs" />
     <Compile Include="GitSharp.Core\Diff\DiffFormatterReflowTest.cs" />
+    <Compile Include="GitSharp.Core\Diff\DiffTestDataGenerator.cs" />
     <Compile Include="GitSharp.Core\Diff\EditListTest.cs" />
     <Compile Include="GitSharp.Core\Diff\EditTest.cs" />
+    <Compile Include="GitSharp.Core\Diff\MyersDiffPerformanceTest.cs" />
+    <Compile Include="GitSharp.Core\Diff\MyersDiffTest.cs" />
     <Compile Include="GitSharp.Core\Diff\RawTextTest.cs" />
     <Compile Include="GitSharp.Core\DirectoryCache\DirCacheBasicTest.cs" />
     <Compile Include="GitSharp.Core\DirectoryCache\DirCacheBuilderIteratorTest.cs" />
@@ -84,6 +87,7 @@
     <Compile Include="GitSharp.Core\IndexModifiedTests.cs" />
     <Compile Include="GitSharp.Core\IndexTreeWalkerTest.cs" />
     <Compile Include="GitSharp.Core\Merge\CherryPickTest.cs" />
+    <Compile Include="GitSharp.Core\Merge\MergeAlgorithmTest.cs" />
     <Compile Include="GitSharp.Core\Merge\SimpleMergeTest.cs" />
     <Compile Include="GitSharp.Core\ObjectCheckerTests.cs" />
     <Compile Include="GitSharp.Core\PackIndexTestCase.cs" />
@@ -167,6 +171,7 @@
     <Compile Include="GitSharp.Core\Util\AssertHelper.cs" />
     <Compile Include="GitSharp.Core\Util\AssertHelperFixture.cs" />
     <Compile Include="GitSharp.Core\Util\ByteArrayExtensionsFixture.cs" />
+    <Compile Include="GitSharp.Core\Util\CPUTimeStopWatch.cs" />
     <Compile Include="GitSharp.Core\Util\ExtensionsFixture.cs" />
     <Compile Include="GitSharp.Core\Util\IntListTest.cs" />
     <Compile Include="GitSharp.Core\Util\LocalDiskRepositoryTestCase.cs" />

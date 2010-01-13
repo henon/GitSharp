@@ -38,6 +38,7 @@
 
 using System;
 using GitSharp.Core.Util;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Core.Tests.Util
@@ -84,7 +85,7 @@ namespace GitSharp.Core.Tests.Util
             int n = 5;
             for (int v = 0; v < n; v++)
                 i.add(10 + v);
-		    
+
             Assert.AreEqual(n, i.size());
 
             for (int v = 0; v < n; v++)
@@ -117,7 +118,7 @@ namespace GitSharp.Core.Tests.Util
             int n = 500;
             for (int v = 0; v < n; v++)
                 i.add(10 + v);
-            
+
             Assert.AreEqual(n, i.size());
 
             for (int v = 0; v < n; v++)
@@ -175,7 +176,7 @@ namespace GitSharp.Core.Tests.Util
 
             i.clear();
             Assert.AreEqual(0, i.size());
-		    
+
             try
             {
                 i.get(0);
@@ -185,6 +186,24 @@ namespace GitSharp.Core.Tests.Util
             {
                 Assert.IsTrue(true);
             }
+        }
+
+        [Test]
+        public void testSet()
+        {
+            IntList i = new IntList();
+            i.add(1);
+            Assert.AreEqual(1, i.size());
+            Assert.AreEqual(1, i.get(0));
+
+            i.set(0, 5);
+            Assert.AreEqual(5, i.get(0));
+
+            AssertHelper.Throws<ArgumentException>(() => i.set(5, 5), "accepted set of 5 beyond end of list");
+
+            i.set(1, 2);
+            Assert.AreEqual(2, i.size());
+            Assert.AreEqual(2, i.get(1));
         }
 
         [Test]

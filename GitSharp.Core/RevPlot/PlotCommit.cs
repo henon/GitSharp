@@ -43,8 +43,6 @@ namespace GitSharp.Core.RevPlot
     /// <summary>
     /// A commit reference to a commit in the DAG.
     /// </summary>
-    /// <typeparam name="L">type of lane being used by the plotter.</typeparam>
-    /// <see cref="PlotCommitList{L}"/>
     public class PlotCommit : RevCommit
     {
 

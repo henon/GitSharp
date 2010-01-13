@@ -73,7 +73,6 @@ namespace GitSharp.Core.RevPlot
 	/// various draw methods.
 	/// </para>
 	/// </summary>
-	/// <typeparam name="TLane">type of lane being used by the application.</typeparam>
 	/// <typeparam name="TColor">type of color object used by the graphics library.</typeparam>
 	public abstract class AbstractPlotRenderer<TColor> {
 		private static int LANE_WIDTH = 14;

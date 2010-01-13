@@ -384,7 +384,7 @@ namespace GitSharp.Core.Transport
 	    ///   /path//to -> an empty string
 	    /// </example>
 	    /// <returns>
-	    ///   the "humanish" part of the path. May be an empty string. Never null.<</returns>
+	    ///   the "humanish" part of the path. May be an empty string. Never null.</returns>
 	    public string getHumanishName()
 	    {
 	        if (string.IsNullOrEmpty(Path))

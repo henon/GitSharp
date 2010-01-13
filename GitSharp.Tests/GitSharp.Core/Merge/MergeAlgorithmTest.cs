@@ -37,6 +37,7 @@
 using System.IO;
 using GitSharp.Core;
 using GitSharp.Core.Diff;
+using GitSharp.Core.Merge;
 using GitSharp.Core.Util;
 using NUnit.Framework;
 

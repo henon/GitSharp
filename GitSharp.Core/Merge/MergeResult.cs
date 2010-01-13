@@ -55,151 +55,155 @@ using System.Collections.Generic;
 using GitSharp.Core.Diff;
 using GitSharp.Core.Util;
 
-public class MergeResult
+namespace GitSharp.Core.Merge
 {
-    public IEnumerator<MergeChunk> GetEnumerator()
-    {
-       return new MergeChunkIterator(this);
-    }
 
-    private List<Sequence> _sequences;
+	public class MergeResult
+	{
+		public IEnumerator<MergeChunk> GetEnumerator()
+		{
+			return new MergeChunkIterator(this);
+		}
 
-    private IntList _chunks = new IntList();
+		private List<Sequence> _sequences;
 
-    private bool _containsConflicts = false;
+		private IntList _chunks = new IntList();
 
-    /*
-     * Creates a new empty MergeResult
-     *
-     * @param sequences
-     *            contains the common predecessor sequence at position 0
-     *            followed by the merged sequences. This list should not be
-     *            modified anymore during the lifetime of this {@link MergeResult}.
-     */
-    public MergeResult(List<Sequence> sequences)
-    {
-        this._sequences = sequences;
-    }
+		private bool _containsConflicts = false;
 
-    /*
-     * Adds a new range from one of the merged sequences or from the common
-     * predecessor. This method can add conflicting and non-conflicting ranges
-     * controlled by the conflictState parameter
-     *
-     * @param srcIdx
-     *            determines from which sequence this range comes. An index of
-     *            x specifies the x+1 element in the list of sequences
-     *            specified to the constructor
-     * @param begin
-     *            the first element from the specified sequence which should be
-     *            included in the merge result. Indexes start with 0.
-     * @param end
-     *            specifies the end of the range to be added. The element this
-     *            index points to is the first element which not added to the
-     *            merge result. All elements between begin (including begin) and
-     *            this element are added.
-     * @param conflictState
-     *            when set to NO_CONLICT a non-conflicting range is added.
-     *            This will end implicitly all open conflicts added before.
-     */
-    public void add(int srcIdx, int begin, int end, MergeChunk.ConflictState conflictState)
-    {
-        _chunks.add((int)conflictState);
-        _chunks.add(srcIdx);
-        _chunks.add(begin);
-        _chunks.add(end);
-        if (conflictState != MergeChunk.ConflictState.NO_CONFLICT)
-            _containsConflicts = true;
-    }
+		/*
+		 * Creates a new empty MergeResult
+		 *
+		 * @param sequences
+		 *            contains the common predecessor sequence at position 0
+		 *            followed by the merged sequences. This list should not be
+		 *            modified anymore during the lifetime of this {@link MergeResult}.
+		 */
+		public MergeResult(List<Sequence> sequences)
+		{
+			this._sequences = sequences;
+		}
 
-    /*
-     * Returns the common predecessor sequence and the merged sequence in one
-     * list. The common predecessor is is the first element in the list
-     *
-     * @return the common predecessor at position 0 followed by the merged
-     *         sequences.
-     */
-    public List<Sequence> getSequences()
-    {
-        return _sequences;
-    }
+		/*
+		 * Adds a new range from one of the merged sequences or from the common
+		 * predecessor. This method can add conflicting and non-conflicting ranges
+		 * controlled by the conflictState parameter
+		 *
+		 * @param srcIdx
+		 *            determines from which sequence this range comes. An index of
+		 *            x specifies the x+1 element in the list of sequences
+		 *            specified to the constructor
+		 * @param begin
+		 *            the first element from the specified sequence which should be
+		 *            included in the merge result. Indexes start with 0.
+		 * @param end
+		 *            specifies the end of the range to be added. The element this
+		 *            index points to is the first element which not added to the
+		 *            merge result. All elements between begin (including begin) and
+		 *            this element are added.
+		 * @param conflictState
+		 *            when set to NO_CONLICT a non-conflicting range is added.
+		 *            This will end implicitly all open conflicts added before.
+		 */
+		public void add(int srcIdx, int begin, int end, MergeChunk.ConflictState conflictState)
+		{
+			_chunks.add((int)conflictState);
+			_chunks.add(srcIdx);
+			_chunks.add(begin);
+			_chunks.add(end);
+			if (conflictState != MergeChunk.ConflictState.NO_CONFLICT)
+				_containsConflicts = true;
+		}
 
-    /*
-     * @return an iterator over the MergeChunks. The iterator does not support
-     * the remove operation
-     */
-    public MergeChunkIterator iterator()
-    {
-        return new MergeChunkIterator(this);
-    }
+		/*
+		 * Returns the common predecessor sequence and the merged sequence in one
+		 * list. The common predecessor is is the first element in the list
+		 *
+		 * @return the common predecessor at position 0 followed by the merged
+		 *         sequences.
+		 */
+		public List<Sequence> getSequences()
+		{
+			return _sequences;
+		}
 
-    /*
-    * @return true if this merge result contains conflicts
-    */
-    public bool containsConflicts()
-    {
-        return _containsConflicts;
-    }
+		/*
+		 * @return an iterator over the MergeChunks. The iterator does not support
+		 * the remove operation
+		 */
+		public MergeChunkIterator iterator()
+		{
+			return new MergeChunkIterator(this);
+		}
 
-    public class MergeChunkIterator : IEnumerator<MergeChunk>
-    {
-        private readonly MergeResult _mergeResult;
-        int idx;
-        private MergeChunk _current;
+		/*
+		* @return true if this merge result contains conflicts
+		*/
+		public bool containsConflicts()
+		{
+			return _containsConflicts;
+		}
 
-        public MergeChunkIterator(MergeResult mergeResult)
-        {
-            _mergeResult = mergeResult;
-        }
+		public class MergeChunkIterator : IEnumerator<MergeChunk>
+		{
+			private readonly MergeResult _mergeResult;
+			int idx;
+			private MergeChunk _current;
 
-        public bool hasNext()
-        {
-            return (idx < _mergeResult._chunks.size());
-        }
+			public MergeChunkIterator(MergeResult mergeResult)
+			{
+				_mergeResult = mergeResult;
+			}
 
-        public MergeChunk next()
-        {
-            MergeChunk.ConflictState state = (MergeChunk.ConflictState)(_mergeResult._chunks.get(idx++));
-            int srcIdx = _mergeResult._chunks.get(idx++);
-            int begin = _mergeResult._chunks.get(idx++);
-            int end = _mergeResult._chunks.get(idx++);
-            return new MergeChunk(srcIdx, begin, end, state);
-        }
+			public bool hasNext()
+			{
+				return (idx < _mergeResult._chunks.size());
+			}
 
-        public void remove()
-        {
-            throw new NotSupportedException();
-        }
+			public MergeChunk next()
+			{
+				MergeChunk.ConflictState state = (MergeChunk.ConflictState)(_mergeResult._chunks.get(idx++));
+				int srcIdx = _mergeResult._chunks.get(idx++);
+				int begin = _mergeResult._chunks.get(idx++);
+				int end = _mergeResult._chunks.get(idx++);
+				return new MergeChunk(srcIdx, begin, end, state);
+			}
 
-        public bool MoveNext()
-        {
-            if (!hasNext())
-            {
-                return false;
-            }
+			public void remove()
+			{
+				throw new NotSupportedException();
+			}
 
-            _current = next();
-            return true;
-        }
+			public bool MoveNext()
+			{
+				if (!hasNext())
+				{
+					return false;
+				}
 
-        public void Reset()
-        {
-            throw new NotImplementedException();
-        }
+				_current = next();
+				return true;
+			}
 
-        public MergeChunk Current
-        {
-            get { return _current; }
-        }
+			public void Reset()
+			{
+				throw new NotImplementedException();
+			}
 
-        object IEnumerator.Current
-        {
-            get { return Current; }
-        }
+			public MergeChunk Current
+			{
+				get { return _current; }
+			}
 
-        public void Dispose()
-        {
-            // Nothing to dispose
-        }
-    }
+			object IEnumerator.Current
+			{
+				get { return Current; }
+			}
+
+			public void Dispose()
+			{
+				// Nothing to dispose
+			}
+		}
+	}
 }

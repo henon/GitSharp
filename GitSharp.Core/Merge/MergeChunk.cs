@@ -40,40 +40,42 @@
  * single sequence. In case of conflicts multiple chunks are reported for one
  * conflict. The conflictState tells when conflicts start and end.
  */
-public class MergeChunk {
-	/**
+namespace GitSharp.Core.Merge
+{
+	public class MergeChunk {
+		/**
 	 * A state telling whether a MergeChunk belongs to a conflict or not. The
 	 * first chunk of a conflict is reported with a special state to be able to
 	 * distinguish the border between two consecutive conflicts
 	 */
-	public enum ConflictState {
-		/**
+		public enum ConflictState {
+			/**
 		 * This chunk does not belong to a conflict
 		 */
-		NO_CONFLICT = 0,
+			NO_CONFLICT = 0,
 
-		/**
+			/**
 		 * This chunk does belong to a conflict and is the first one of the
 		 * conflicting chunks
 		 */
-		FIRST_CONFLICTING_RANGE = 1,
+			FIRST_CONFLICTING_RANGE = 1,
 
-		/**
+			/**
 		 * This chunk does belong to a conflict but is not the first one of the
 		 * conflicting chunks. It's a subsequent one.
 		 */
-		NEXT_CONFLICTING_RANGE = 2
-	}
+			NEXT_CONFLICTING_RANGE = 2
+		}
 
-	private int sequenceIndex;
+		private int sequenceIndex;
 
-	private int begin;
+		private int begin;
 
-	private int end;
+		private int end;
 
-	private ConflictState conflictState;
+		private ConflictState conflictState;
 
-	/**
+		/**
 	 * Creates a new empty MergeChunk
 	 *
 	 * @param sequenceIndex
@@ -91,45 +93,46 @@ public class MergeChunk {
 	 *            the state of this chunk. See {@link ConflictState}
 	 */
 
-    public MergeChunk(int sequenceIndex, int begin, int end,
+		public MergeChunk(int sequenceIndex, int begin, int end,
 			ConflictState conflictState) {
-		this.sequenceIndex = sequenceIndex;
-		this.begin = begin;
-		this.end = end;
-		this.conflictState = conflictState;
-	}
+			this.sequenceIndex = sequenceIndex;
+			this.begin = begin;
+			this.end = end;
+			this.conflictState = conflictState;
+			}
 
-	/**
+		/**
 	 * @return the index of the sequence to which sequence this chunks belongs
 	 *         to. Same as in
 	 *         {@link MergeResult#add(int, int, int, ConflictState)}
 	 */
-	public int getSequenceIndex() {
-		return sequenceIndex;
-	}
+		public int getSequenceIndex() {
+			return sequenceIndex;
+		}
 
-	/**
+		/**
 	 * @return the first element from the specified sequence which should be
 	 *         included in the merge result. Indexes start with 0.
 	 */
-	public int getBegin() {
-		return begin;
-	}
+		public int getBegin() {
+			return begin;
+		}
 
-	/**
+		/**
 	 * @return the end of the range of this chunk. The element this index
 	 *         points to is the first element which not added to the merge
 	 *         result. All elements between begin (including begin) and this
 	 *         element are added.
 	 */
-	public int getEnd() {
-		return end;
-	}
+		public int getEnd() {
+			return end;
+		}
 
-	/**
+		/**
 	 * @return the state of this chunk. See {@link ConflictState}
 	 */
-	public ConflictState getConflictState() {
-		return conflictState;
+		public ConflictState getConflictState() {
+			return conflictState;
+		}
 	}
 }

@@ -92,5 +92,15 @@ namespace GitSharp
          /// List of files existing in the working directory but are neither tracked in the index nor in the current commit.
          /// </summary>
         public HashSet<string> Untracked { get { return _diff.Untracked; } }
+
+        /// <summary>
+        /// List of files with staged modifications that conflict.
+        /// </summary>
+        public HashSet<string> MergeConflict { get { return _diff.MergeConflict; } }
+
+        /// <summary>
+        /// Returns the number of files checked into the git repository
+        /// </summary>
+        public int IndexSize { get { return _diff.IndexSize; } } 
     }
 }

@@ -38,6 +38,7 @@
 
 using System;
 using System.Collections.Generic;
+using GitSharp.Commands;
 using NDesk.Options;
 
 namespace GitSharp.CLI

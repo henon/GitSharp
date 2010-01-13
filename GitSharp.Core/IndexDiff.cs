@@ -76,6 +76,7 @@ namespace GitSharp.Core
             Missing = new HashSet<string>();
             Modified = new HashSet<string>();
             Untracked = new HashSet<string>();
+            MergeConflict = new HashSet<string>();
         }
 
         /// <summary>
@@ -125,6 +126,15 @@ namespace GitSharp.Core
                                                                 Modified.Add(indexEntry.Name);
                                                                 _anyChanges = true;
                                                             }
+                                                        }
+                                                    }
+
+                                                    if (indexEntry != null)
+                                                    {
+                                                        if (indexEntry.Stage != 0)
+                                                        {
+                                                            MergeConflict.Add(indexEntry.Name);
+                                                            _anyChanges = true;
                                                         }
                                                     }
                                                 }
@@ -190,5 +200,15 @@ namespace GitSharp.Core
 
 
         public HashSet<string> Untracked { get; private set; }
+
+        /// <summary>
+        /// List of files in index and have a merge conflict
+        /// </summary>
+        public HashSet<string> MergeConflict { get; private set; }
+
+        /// <summary>
+        /// Returns the number of files checked into the git repository
+        /// </summary>
+        public int IndexSize { get { return _index.Members.Count; } }
     }
 }

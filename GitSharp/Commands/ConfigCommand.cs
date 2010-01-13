@@ -44,7 +44,7 @@ using System.Text;
 using GitSharp.Core.Transport;
 using GitSharp.Core;
 
-namespace GitSharp
+namespace GitSharp.Commands
 {
     public class ConfigCommand : AbstractCommand
     {

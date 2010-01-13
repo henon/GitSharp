@@ -50,7 +50,7 @@ namespace GitSharp.CLI.Nonstandard
             //Assembly myAsm = Assembly.Load("git");
             //AssemblyName aName = myAsm.GetName();
             //System.Version ver = aName.Version;
-            var ver = GitSharp.Options.Version;
+            var ver = GitSharp.Git.Version;
             if (ver == null)
                 throw die("Cannot read package information.");
 

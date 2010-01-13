@@ -50,7 +50,18 @@ using System.IO;
 namespace GitSharp
 {
     /// <summary>
-    /// Represents a specific version of the content of a file tracked by git.
+    /// Represents a specific version of the content of a file tracked by git. Using a Blob you can access the contents of 
+    /// any git object as string or byte array. For tracked files (leaves of a git tree) it returns the content of the file. For git objects 
+    /// such as Commit, Tag or Tree the Blob API may be used to inspect the the uncompressed internal representation.
+    /// 
+    /// To open a git object instantiate a Blob with the object's Hash or another valid reference (see Ref).
+    /// 
+    /// var b=new Blob(repo, "e287f54");
+    /// 
+    /// Note, that new Blob( ...) does not create a new blob in the repository but rather constructs the object to manipulate an existing blob.
+    /// 
+    /// Advanced: To create a new Blob inside the repository you can use the static create function, however, you are advised to use 
+    /// higher level functionality to create new revisions of files, i.e. by using the Commit.Create API (see Commit).
     /// </summary>
     public class Blob : AbstractObject
     {
@@ -66,12 +77,17 @@ namespace GitSharp
             _blob = blob;
         }
 
+        /// <summary>
+        /// Create a Blob object which represents an existing blob in the git repository
+        /// </summary>
+        /// <param name="repo">The repository which owns the object to load</param>
+        /// <param name="hash">The SHA1 Hash of the object to load</param>
         public Blob(Repository repo, string hash) : base(repo, hash) { }
 
         private byte[] _blob;
 
         /// <summary>
-        /// Get the uncompressed contents of this blob
+        /// Get the uncompressed contents of this Blob as string. This assumes that the contents are encoded in UTF8. 
         /// </summary>
         public string Data
         {
@@ -84,7 +100,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// Get the compressed raw data of the blob
+        /// Get the uncompressed original encoded raw data of the Blob as byte array. This is useful if the contents of the blob are encoded in some legacy encoding instead of UTF8.
         /// </summary>
         public byte[] RawData
         {
@@ -110,7 +126,7 @@ namespace GitSharp
         /// Create a new Blob containing the given string data as content. The string will be encoded as UTF8
         /// </summary>
         /// <param name="repo"></param>
-        /// <param name="content"></param>
+        /// <param name="content">string to be stored in the blob</param>
         /// <returns></returns>
         public static Blob Create(Repository repo, string content)
         {
@@ -121,7 +137,7 @@ namespace GitSharp
         /// Create a new Blob containing the given string data as content. The string will be encoded by the submitted encoding
         /// </summary>
         /// <param name="repo"></param>
-        /// <param name="content"></param>
+        /// <param name="content">string to be stored in the blob</param>
         /// <param name="encoding"></param>
         /// <returns></returns>
         public static Blob Create(Repository repo, string content, Encoding encoding)
@@ -133,7 +149,7 @@ namespace GitSharp
         /// Create a new Blob containing the contents of the given file.
         /// </summary>
         /// <param name="repo"></param>
-        /// <param name="path"></param>
+        /// <param name="path">Path to the file that should be stored in the blob</param>
         /// <returns></returns>
         public static Blob CreateFromFile(Repository repo, string path)
         {
@@ -143,10 +159,10 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// Create a new Blob containing exactly the bytes given.
+        /// Create a new Blob containing exactly the raw bytes given (before compression).
         /// </summary>
         /// <param name="repo"></param>
-        /// <param name="content"></param>
+        /// <param name="content">Uncompressed, encoded raw data to be stored in the blob</param>
         /// <returns></returns>
         public static Blob Create(Repository repo, byte[] content)
         {

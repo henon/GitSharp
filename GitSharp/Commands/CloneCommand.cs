@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  * Copyright (C) 2008, Google Inc
  * Copyright (C) 2008, Caytchen 
@@ -43,11 +43,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using GitSharp.Commands;
 using GitSharp.Core.Transport;
 using GitSharp.Core;
 
 namespace GitSharp
 {
+    /// <summary>
+    /// Represents git's clone command line interface command.
+    /// </summary>
     public class CloneCommand
         : AbstractFetchCommand
     {
@@ -56,7 +60,7 @@ namespace GitSharp
             Quiet=true;
         }
 
-        // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.
+        // note: the naming of command parameters may not follow .NET conventions in favour of git command line parameter naming conventions.
 
         /// <summary>
         /// Get the directory where the Init command will initialize the repository. if GitDirectory is null ActualDirectory is used to initialize the repository.
@@ -170,7 +174,9 @@ namespace GitSharp
         /// </summary>
         public int Depth { get; set; } 
 
-
+        /// <summary>
+        /// Do it.
+        /// </summary>
         public override void Execute()
         {
 

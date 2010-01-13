@@ -385,6 +385,11 @@
     <Compile Include="Merge\MergeChunk.cs" />
     <Compile Include="Merge\MergeFormatter.cs" />
     <Compile Include="Merge\MergeResult.cs" />
+    <Compile Include="Platform\Linux.cs" />
+    <Compile Include="Platform\Mac.cs" />
+    <Compile Include="Platform\Platform.cs" />
+    <Compile Include="Platform\PlatformObject.cs" />
+    <Compile Include="Platform\Windows.cs" />
     <Compile Include="RevPlot\AbstractPlotRenderer.cs" />
     <Compile Include="RevPlot\PlotCommit.cs" />
     <Compile Include="RevPlot\PlotCommitList.cs" />

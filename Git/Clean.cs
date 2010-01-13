@@ -1,6 +1,5 @@
-﻿/*
- * Copyright (C) 2008, Google Inc.
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+/*
+ * Copyright (C) 2010, Dominique van de Vorle <dvdvorle@gmail.com>
  *
  * All rights reserved.
  *
@@ -38,41 +37,50 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using NDesk.Options;
 using GitSharp.Commands;
 
 namespace GitSharp.CLI
 {
 
-    [Command(common = true, complete = false, usage = "Create an empty git repository")]
-    class Init : TextBuiltin
+    [Command(common=true, requiresRepository=true, usage = "")]
+    public class Clean : TextBuiltin
     {
-        private InitCommand cmd = new InitCommand();
-
-        private static Boolean isHelp = false;
+        private CleanCommand cmd = new CleanCommand();
+        private static Boolean isHelp;
 
         public override void Run(string[] args)
         {
-            cmd.Quiet = false; // [henon] the api defines the commands quiet by default. thus we need to override with git's default here.
-            
-            options = new CmdParserOptionSet
+            cmd.Quiet = false;
+			
+            options = new CmdParserOptionSet()
             {
-                {"bare", "Create a bare repository", v => cmd.Bare = true},
-                {"quiet|q", "Only print error and warning messages, all other output will be suppressed.", v => cmd.Quiet = true},
-                {"template", "Not supported.", var => OutputStream.WriteLine("--template=<template dir> is not supported")},
-                {"shared", "Not supported.", var => OutputStream.WriteLine("--shared is not supported")},
+               { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
+               { "d", "Remove untracked directories in addition to untracked files", v => cmd.D = true },
+               { "f|force", "If the git configuration specifies clean", v => cmd.Force = true },
+               { "n|dry-run", "Don't actually remove anything, just show what would be done", v => cmd.DryRun = true },
+               { "q|quiet", "Be quiet, only report errors, but not the files that are successfully removed", v => cmd.Quiet = true },
+               { "x", "Don't use the ignore rules", v => cmd.x = true },
+               { "X", "Remove only files ignored by git", v => cmd.X = true },
             };
 
             try
             {
-                List<String> arguments = ParseOptions(args);
-                cmd.Execute();
+                List<String> Arguments = ParseOptions(args);
+                if (arguments.Count > 0)
+                {
+                    cmd.Arguments = arguments;
+                    cmd.Execute();
+                }
+                else
+                {
+                    OfflineHelp();
+                }
             }
-            catch (Exception e)
+            catch (Exception e)            
             {
                 cmd.OutputStream.WriteLine(e.Message);
             }
-
         }
 
         private void OfflineHelp()
@@ -80,20 +88,11 @@ namespace GitSharp.CLI
             if (!isHelp)
             {
                 isHelp = true;
-                cmd.OutputStream.WriteLine("usage: git init [options] [directory]");
+                cmd.OutputStream.WriteLine("Here should be the usage...");
                 cmd.OutputStream.WriteLine();
                 options.WriteOptionDescriptions(Console.Out);
                 cmd.OutputStream.WriteLine();
             }
         }
-        //private void create()
-        //{
-        //    if (gitdir == null)
-        //        gitdir = bare ? Environment.CurrentDirectory : Path.Combine(Environment.CurrentDirectory, ".git");
-        //    db = new Repository(new DirectoryInfo(gitdir));
-        //    db.Create(bare);
-        //    Console.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
-        //}
     }
-
 }

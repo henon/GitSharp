@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+/*
+ * Copyright (C) 2010, Dominique van de Vorle <dvdvorle@gmail.com>
  *
  * All rights reserved.
  *
@@ -37,44 +37,36 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp
+namespace GitSharp.Commands
 {
-    /// <summary>
-    /// Represents the Author or Committer of a Commit.
-    /// </summary>
-    public class Author
+    public class CherryCommand
+        : AbstractCommand
     {
 
-        /// <summary>
-        /// Creates an uninitialized Author. You may use the object initializer syntax with this constructor, i.e. new Author { Name="henon", EmailAddress="henon@gitsharp.com" }
-        /// </summary>
-        public Author() { }
-
-        /// <summary>
-        /// Creates an Author.
-        /// </summary>
-        public Author(string name, string email)
-        {
-            Name = name;
-            EmailAddress = email;
+        public CherryCommand() {
         }
 
-        public string Name { get; set; }
+        // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.
 
-        public string EmailAddress { get; set; }
-
+        #region Properties / Options
+        public List<string> Arguments { get; set; }
         /// <summary>
-        /// Preconfigured anonymous Author, which may be used by GitSharp if no Author has been configured.
+        /// Not implemented
+        /// 
+        /// Verbose.
+        /// 
         /// </summary>
-        public static Author Anonymous
+        public bool V { get; set; }
+
+        #endregion
+
+        public override void Execute()
         {
-            get
-            {
-                return new Author("anonymous", "anonymous@(none).com");
-            }
+            throw new NotImplementedException();
         }
     }
 }

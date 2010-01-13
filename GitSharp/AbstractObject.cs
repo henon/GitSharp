@@ -49,6 +49,11 @@ using System.Diagnostics;
 
 namespace GitSharp
 {
+    /// <summary>
+    /// AbstractObject is the base class for the classes Blob, Commit, Tag and Tree. It proviedes test methods
+    /// to identify its specialized type (i.e. IsBlob, IsCommit, etc). AbstractObject also defines comparison operators so you can
+    /// safely compare git objects by using the operators == or != which internally efficiently compare the objects hashes. 
+    /// </summary>
     public abstract class AbstractObject
     {
         protected Repository _repo;
@@ -67,7 +72,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// The object's SHA1 hash.
+        /// The git object's SHA1 hash. This is the long hash, See ShortHash for the abbreviated version.
         /// </summary>
         public string Hash
         {
@@ -78,7 +83,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// the object's abbreviated SHA1 hash
+        /// The git object's abbreviated SHA1 hash. 
         /// </summary>
         public string ShortHash
         {
@@ -89,7 +94,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// True if the internal object is a blob. May be used for checking if the API object type correctly represents the internal object.
+        /// True if this object is a Blob (or Leaf which is a subclass of Blob).
         /// </summary>
         public bool IsBlob
         {
@@ -100,7 +105,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// True if the internal object is a blob. May be used for checking if the API object type correctly represents the internal object.
+        /// True if this object is a Commit.
         /// </summary>
         public bool IsCommit
         {
@@ -111,7 +116,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// True if the internal object is a blob. May be used for checking if the API object type correctly represents the internal object.
+        /// True if this object is a Tag.
         /// </summary>
         public bool IsTag
         {
@@ -122,7 +127,7 @@ namespace GitSharp
         }
 
         /// <summary>
-        /// True if the internal object is a blob. May be used for checking if the API object type correctly represents the internal object.
+        /// True if the internal object is a Tree.
         /// </summary>
         public bool IsTree
         {
@@ -132,6 +137,9 @@ namespace GitSharp
             }
         }
 
+        /// <summary>
+        /// The repository where this git object belongs to.
+        /// </summary>
         public Repository Repository
         {
             get

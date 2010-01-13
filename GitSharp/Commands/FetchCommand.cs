@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+/*
+ * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
  *
  * All rights reserved.
  *
@@ -35,46 +35,57 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using GitSharp.Commands;
+using GitSharp.Core;
+using GitSharp.Core.Transport;
 
 namespace GitSharp
 {
-    /// <summary>
-    /// Represents the Author or Committer of a Commit.
-    /// </summary>
-    public class Author
+
+    public class FetchCommand : AbstractFetchCommand
     {
+        public string Remote { get; set; }
+        public List<RefSpec> RefSpecs { get; set; }
+        public ProgressMonitor ProgressMonitor { get; set; }
 
-        /// <summary>
-        /// Creates an uninitialized Author. You may use the object initializer syntax with this constructor, i.e. new Author { Name="henon", EmailAddress="henon@gitsharp.com" }
-        /// </summary>
-        public Author() { }
+        public bool? Prune { get; set; }
+        public bool DryRun { get; set; }
+        public bool? Thin { get; set; }
 
-        /// <summary>
-        /// Creates an Author.
-        /// </summary>
-        public Author(string name, string email)
+        public FetchResult Result
         {
-            Name = name;
-            EmailAddress = email;
+            get; private set;
         }
 
-        public string Name { get; set; }
-
-        public string EmailAddress { get; set; }
-
-        /// <summary>
-        /// Preconfigured anonymous Author, which may be used by GitSharp if no Author has been configured.
-        /// </summary>
-        public static Author Anonymous
+        public FetchCommand()
         {
-            get
+            Remote = Constants.DEFAULT_REMOTE_NAME;
+            ProgressMonitor = NullProgressMonitor.Instance;
+        }
+
+        public override void Execute()
+        {
+            Transport tn = Transport.Open(Repository._internal_repo, Remote);
+
+            if (Prune != null)
+                tn.RemoveDeletedRefs = Prune.Value;
+            if (Thin != null)
+                tn.FetchThin = Thin.Value;
+            tn.DryRun = DryRun;
+
+            try
             {
-                return new Author("anonymous", "anonymous@(none).com");
+                Result = tn.fetch(ProgressMonitor, RefSpecs);
+                if (Result.TrackingRefUpdates.Count == 0)
+                    return;
             }
+            finally
+            {
+                tn.Dispose();
+            }
+            showFetchResult(tn, Result);
         }
     }
+
 }

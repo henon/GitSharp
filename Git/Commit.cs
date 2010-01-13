@@ -97,7 +97,25 @@ namespace GitSharp.CLI
                 { "cleanup=", "How to strip spaces and #comments from message. Options are: " +
                     "verbatim, whitespace, strip, and default.", (string v) => cleanupOption = v },
                 { "dry-run", "Don't actually commit the files, just show if they exist.", v=>{isDryRun = true;}},
-#endif
+
+
+               // [Mr Happy] There are the options that should be compatible w/ the stub, placed for convenience only.
+ //              { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
+ //              { "a|all", "Tell the command to automatically stage files that have been modified and deleted, but new files you have not told git about are not affected", v => cmd.All = true },
+ //              { "C|reuse-message=", "Take an existing commit object, and reuse the log message and the authorship information (including the timestamp) when creating the commit", v => cmd.ReuseMessage = v },
+ //              { "c|reedit-message=", "Like '-C', but with '-c' the editor is invoked, so that the user can further edit the commit message", v => cmd.ReeditMessage = v },
+ //              { "reset-author", "When used with -C/-c/--amend options, declare that the authorship of the resulting commit now belongs of the committer", v => cmd.ResetAuthor = true },
+ //              { "F|file=", "Take the commit message from the given file", v => cmd.File = v },
+ //              { "author=", "Override the author name used in the commit", v => cmd.Author = v },
+ //              { "m|message=", "Use the given <msg> as the commit message", v => cmd.Message = v },
+ //              { "t|template=", "Use the contents of the given file as the initial version of the commit message", v => cmd.Template = v },
+ //              { "s|signoff", "Add Signed-off-by line by the committer at the end of the commit log message", v => cmd.Signoff = true },
+ //              { "n|no-verify", "This option bypasses the pre-commit and commit-msg hooks", v => cmd.NoVerify = true },
+ //              { "allow-empty", "Usually recording a commit that has the exact same tree as its sole parent commit is a mistake, and the command prevents you from making such a commit", v => cmd.AllowEmpty = true },
+ //              { "cleanup=", "This option sets how the commit message is cleaned up", v => cmd.Cleanup = v },
+ //              { "e|edit", "The message taken from file with `-F`, command line with `-m`, and from file with `-C` are usually used as the commit log message unmodified", v => cmd.Edit = true },
+ //              { "amend", "Used to amend the tip of the current branch", v => cmd.Amend = true },
+ #endif
             };
 
             try

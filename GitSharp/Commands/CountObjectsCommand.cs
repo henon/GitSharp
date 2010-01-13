@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
+/*
+ * Copyright (C) 2010, Dominique van de Vorle <dvdvorle@gmail.com>
  *
  * All rights reserved.
  *
@@ -35,56 +35,42 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
-using GitSharp.Core;
-using GitSharp.Core.Transport;
+using System.IO;
+using System.Linq;
+using System.Text;
 
-namespace GitSharp
+namespace GitSharp.Commands
 {
-
-    public class FetchCommand : AbstractFetchCommand
+    public class CountobjectsCommand
+        : AbstractCommand
     {
-        public string Remote { get; set; }
-        public List<RefSpec> RefSpecs { get; set; }
-        public ProgressMonitor ProgressMonitor { get; set; }
 
-        public bool? Prune { get; set; }
-        public bool DryRun { get; set; }
-        public bool? Thin { get; set; }
-
-        public FetchResult Result
-        {
-            get; private set;
+        public CountobjectsCommand() {
         }
 
-        public FetchCommand()
-        {
-            Remote = Constants.DEFAULT_REMOTE_NAME;
-            ProgressMonitor = NullProgressMonitor.Instance;
-        }
+        // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.
+
+        #region Properties / Options
+        public List<string> Arguments { get; set; }
+        /// <summary>
+        /// Not implemented
+        /// 
+        /// In addition to the number of loose objects and disk
+        /// space consumed, it reports the number of in-pack
+        /// objects, number of packs, disk space consumed by those packs,
+        /// and number of objects that can be removed by running
+        /// `git prune-packed`.
+        /// 
+        /// </summary>
+        public bool Verbose { get; set; }
+
+        #endregion
 
         public override void Execute()
         {
-            Transport tn = Transport.Open(Repository._internal_repo, Remote);
-
-            if (Prune != null)
-                tn.RemoveDeletedRefs = Prune.Value;
-            if (Thin != null)
-                tn.FetchThin = Thin.Value;
-            tn.DryRun = DryRun;
-
-            try
-            {
-                Result = tn.fetch(ProgressMonitor, RefSpecs);
-                if (Result.TrackingRefUpdates.Count == 0)
-                    return;
-            }
-            finally
-            {
-                tn.Dispose();
-            }
-            showFetchResult(tn, Result);
+            throw new NotImplementedException();
         }
     }
-
 }

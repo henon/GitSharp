@@ -157,17 +157,20 @@ namespace GitSharp.CLI
                     }
                     catch (ArgumentException)
                     {
-                        GitSharp.Commands.OutputStream.WriteLine("error: can't find git directory");
-                        GitSharp.Commands.OutputStream.Flush();
+                        if (Git.DefaultOutputStream != null)
+                        {
+                            Git.DefaultOutputStream.WriteLine("error: can't find git directory");
+                            Git.DefaultOutputStream.Flush();
+                        }
                         Exit(1);
                     }
 
                     if (cmd.RequiresRepository)
                     {
                         if (gitdir == null)
-                            gitdir = GitSharp.AbstractCommand.FindGitDirectory(null, true, false);
+                            gitdir = Commands.AbstractCommand.FindGitDirectory(null, true, false);
 
-                        repo = new GitSharp.Core.Repository(new DirectoryInfo(gitdir));
+                        repo = new Core.Repository(new DirectoryInfo(gitdir));
                         cmd.Init(repo, gitdir);
                     }
                     else
@@ -181,8 +184,8 @@ namespace GitSharp.CLI
                     }
                     finally
                     {
-                        if (GitSharp.Commands.OutputStream != null)
-                            GitSharp.Commands.OutputStream.Flush();
+                        if (Git.DefaultOutputStream != null)
+                            Git.DefaultOutputStream.Flush();
 
                         if (repo != null)
                             repo.Close();
@@ -299,7 +302,7 @@ namespace GitSharp.CLI
             {
                 foreach (CommandRef c in matches)
                 {
-                    Console.WriteLine("git: '"+s+"' is not a git command. See 'git --help'.");
+                    Console.WriteLine("git: '" + s + "' is not a git command. See 'git --help'.");
                     Console.WriteLine();
                     Console.WriteLine("Did you mean this?");
                     Console.Write("      ");
@@ -324,8 +327,8 @@ namespace GitSharp.CLI
         static public void Exit(int exit_code)
         {
             //Close the static global repository before exiting
-            if (GitSharp.Commands.Repository != null)
-                GitSharp.Commands.Repository.Close();
+            if (Git.DefaultRepository != null)
+                Git.DefaultRepository.Close();
 
 #if DEBUG
             Console.WriteLine("\n\nrunning in DEBUG mode, press any key to exit.");

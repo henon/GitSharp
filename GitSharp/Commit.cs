@@ -54,7 +54,7 @@ using System.Collections;
 namespace GitSharp
 {
     /// <summary>
-    /// Represents a revision of the content tracked in the repository.
+    /// Represents a revision of the files and directories tracked in the repository.
     /// </summary>
     public class Commit : AbstractObject
     {

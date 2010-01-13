@@ -1,6 +1,5 @@
-﻿/*
- * Copyright (C) 2008, Google Inc.
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+/*
+ * Copyright (C) 2010, Dominique van de Vorle <dvdvorle@gmail.com>
  *
  * All rights reserved.
  *
@@ -38,41 +37,49 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using NDesk.Options;
 using GitSharp.Commands;
 
 namespace GitSharp.CLI
 {
 
-    [Command(common = true, complete = false, usage = "Create an empty git repository")]
-    class Init : TextBuiltin
+    [Command(common=true, requiresRepository=true, usage = "")]
+    public class Cherrypick : TextBuiltin
     {
-        private InitCommand cmd = new InitCommand();
-
-        private static Boolean isHelp = false;
+        private CherrypickCommand cmd = new CherrypickCommand();
+        private static Boolean isHelp;
 
         public override void Run(string[] args)
         {
-            cmd.Quiet = false; // [henon] the api defines the commands quiet by default. thus we need to override with git's default here.
-            
-            options = new CmdParserOptionSet
+			
+            options = new CmdParserOptionSet()
             {
-                {"bare", "Create a bare repository", v => cmd.Bare = true},
-                {"quiet|q", "Only print error and warning messages, all other output will be suppressed.", v => cmd.Quiet = true},
-                {"template", "Not supported.", var => OutputStream.WriteLine("--template=<template dir> is not supported")},
-                {"shared", "Not supported.", var => OutputStream.WriteLine("--shared is not supported")},
+               { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
+               { "e|edit", "With this option, 'git-cherry-pick' will let you edit the commit message prior to committing", v => cmd.Edit = true },
+               { "x", "When recording the commit, append to the original commit message a note that indicates which commit this change was cherry-picked from", v => cmd.X = true },
+               { "r", "It used to be that the command defaulted to do `-x` described above, and `-r` was to disable it", v => cmd.R = true },
+               { "m|mainline", "Usually you cannot cherry-pick a merge because you do not know which side of the merge should be considered the mainline", v => cmd.Mainline = true },
+               { "n|no-commit", "Usually the command automatically creates a commit", v => cmd.NoCommit = true },
+               { "s|signoff", "Add Signed-off-by line at the end of the commit message", v => cmd.Signoff = true },
             };
 
             try
             {
-                List<String> arguments = ParseOptions(args);
-                cmd.Execute();
+                List<String> Arguments = ParseOptions(args);
+                if (arguments.Count > 0)
+                {
+                    cmd.Arguments = arguments;
+                    cmd.Execute();
+                }
+                else
+                {
+                    OfflineHelp();
+                }
             }
-            catch (Exception e)
+            catch (Exception e)            
             {
                 cmd.OutputStream.WriteLine(e.Message);
             }
-
         }
 
         private void OfflineHelp()
@@ -80,20 +87,11 @@ namespace GitSharp.CLI
             if (!isHelp)
             {
                 isHelp = true;
-                cmd.OutputStream.WriteLine("usage: git init [options] [directory]");
+                cmd.OutputStream.WriteLine("Here should be the usage...");
                 cmd.OutputStream.WriteLine();
                 options.WriteOptionDescriptions(Console.Out);
                 cmd.OutputStream.WriteLine();
             }
         }
-        //private void create()
-        //{
-        //    if (gitdir == null)
-        //        gitdir = bare ? Environment.CurrentDirectory : Path.Combine(Environment.CurrentDirectory, ".git");
-        //    db = new Repository(new DirectoryInfo(gitdir));
-        //    db.Create(bare);
-        //    Console.WriteLine("Initialized empty Git repository in " + (new DirectoryInfo(gitdir)).FullName);
-        //}
     }
-
 }

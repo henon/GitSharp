@@ -56,7 +56,7 @@ namespace GitSharp.API.Tests
             string toPath = Path.Combine(trash.FullName, "test");
             string fromUrl = "git://github.com/henon/test.git";
             
-            using (Repository repo = Commands.Clone(fromUrl, toPath))
+            using (Repository repo = Git.Clone(fromUrl, toPath))
             {
                 Assert.IsTrue(Repository.IsValid(repo.Directory));
                 //Verify content is in the proper location

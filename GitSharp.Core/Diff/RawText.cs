@@ -83,6 +83,15 @@ namespace GitSharp.Core.Diff
 			hashes = computeHashes();
 		}
 
+        /// <summary>
+        /// Create a new sequence from a file.
+        /// <para>The entire file contents are used.</para>
+        /// </summary>
+        /// <param name="file">the text file.</param>
+	    public RawText(FileInfo file) : this(readFile(file))
+	    {}
+
+
 		public int size()
 		{
 			// The line map is always 2 entries larger than the number of lines in
@@ -193,5 +202,9 @@ namespace GitSharp.Core.Diff
 			}
 			return hash;
 		}
+
+    	private static byte[] readFile(FileInfo file)
+        {    	    return File.ReadAllBytes(file.FullName);
+    	}
 	}
 }

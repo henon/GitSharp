@@ -36,111 +36,174 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace GitSharp.Core.Diff
 {
-	/// <summary>
-	/// Specialized list of <seealso cref="Edit"/>s in a document.
-	/// </summary>
-	public class EditList : List<Edit>
-	{
-		public int size()
-		{
-			return Count;
-		}
+    /// <summary>
+    ///   Specialized list of
+    ///   <seealso cref="Edit" />
+    ///   s in a document.
+    /// </summary>
+    public class EditList : List<Edit>
+    {
+        public int size()
+        {
+            return Count;
+        }
 
-		public Edit get(int index)
-		{
-			return this[index];
-		}
+        public Edit get(int index)
+        {
+            return this[index];
+        }
 
-		public Edit set(int index, Edit element)
-		{
-			Edit retval = this[index];
-			this[index] = element;
-			return retval;
-		}
+        public Edit set(int index, Edit element)
+        {
+            Edit retval = this[index];
+            this[index] = element;
+            return retval;
+        }
 
-		public void Add(int index, Edit element)
-		{
-			Insert(index, element);
-		}
+        public void Add(int index, Edit element)
+        {
+            Insert(index, element);
+        }
 
-		public void remove(int index)
-		{
-			RemoveAt(index);
-		}
+        public void remove(int index)
+        {
+            RemoveAt(index);
+        }
 
-		public override string ToString()
-		{
-			/* Unfortunately, C#'s List does not implement ToString the same
+        public override string ToString()
+        {
+            /* Unfortunately, C#'s List does not implement ToString the same
 			 * way Java's ArrayList does. It simply inherits from the base class
 			 * object. This means that ToString returns the string identifier of
 			 * the type.
 			 * Until a better solution is found, I'm implementing ToString myself.
 			 */
-			string retval = "EditList[";
-			foreach (Edit e in this)
-			{
-				retval = retval + e;
-			}
-			retval = retval + "]";
-			return retval;
-		}
+            string retval = "EditList[";
+            foreach (Edit e in this)
+            {
+                retval = retval + e;
+            }
+            retval = retval + "]";
+            return retval;
+        }
 
-		/* This method did not exist in the original Java code.
+        /* This method did not exist in the original Java code.
 		 * In Java, the AbstractList has a method named isEmpty
 		 * C#'s AbstractList has no such method
 		 */
-		public bool isEmpty()
-		{
-			return (Count == 0);
-		}
 
-		private bool isEqual(EditList o)
-		{
-			if (Count != o.Count)
-			{
-				return false;
-			}
+        public bool isEmpty()
+        {
+            return (Count == 0);
+        }
 
-			for (int i = 0; i < Count; i++)
-			{
-				if (!this[i].Equals(o[i]))
-				{
-					return false;
-				}
-			}
+        private bool isEqual(EditList o)
+        {
+            if (Count != o.Count)
+            {
+                return false;
+            }
 
-			return true;
-		}
+            for (int i = 0; i < Count; i++)
+            {
+                if (!this[i].Equals(o[i]))
+                {
+                    return false;
+                }
+            }
 
-		private bool isEqual(string s)
-		{
-			return ToString().Equals(s);
-		}
+            return true;
+        }
 
-		public override bool Equals(object obj)
-		{
-			EditList e = (obj as EditList);
-			if (e != null)
-			{
-				return isEqual(e);
-			}
+        private bool isEqual(string s)
+        {
+            return ToString().Equals(s);
+        }
 
-			string s = (obj as string);
-			if (s != null)
-			{
-				return isEqual(s);
-			}
+        public override bool Equals(object obj)
+        {
+            EditList e = (obj as EditList);
+            if (e != null)
+            {
+                return isEqual(e);
+            }
 
-			return false;
-		}
+            string s = (obj as string);
+            if (s != null)
+            {
+                return isEqual(s);
+            }
 
-		public override int GetHashCode()
-		{
-			return ToString().GetHashCode();
-		}
-	}
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+
+        public EditListIterator iterator()
+        {
+            return new EditListIterator(this);
+        }
+
+        public class EditListIterator : IEnumerator<Edit>
+        {
+            private readonly EditList _editList;
+            private int _index = -1;
+
+            public EditListIterator(EditList editList)
+            {
+                _editList = editList;
+            }
+
+            public void Dispose()
+            {
+                // Nothing to dispose
+            }
+
+            public bool MoveNext()
+            {
+                if (!hasNext())
+                {
+                    return false;
+                }
+
+                next();
+                return true;
+            }
+
+            public void Reset()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Edit Current
+            {
+                get { return _editList.get(_index); }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return Current; }
+            }
+
+            public bool hasNext()
+            {
+                return _index < _editList.size() - 1;
+            }
+
+            public Edit next()
+            {
+                _index++;
+                return Current;
+            }
+        }
+    }
 }

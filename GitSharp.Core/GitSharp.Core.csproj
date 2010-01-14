@@ -380,6 +380,11 @@
     <Compile Include="Util\TemporaryBuffer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Diff\MyersDiff.cs" />
+    <Compile Include="Merge\MergeAlgorithm.cs" />
+    <Compile Include="Merge\MergeChunk.cs" />
+    <Compile Include="Merge\MergeFormatter.cs" />
+    <Compile Include="Merge\MergeResult.cs" />
     <Compile Include="Platform\Linux.cs" />
     <Compile Include="Platform\Mac.cs" />
     <Compile Include="Platform\Platform.cs" />
@@ -390,6 +395,7 @@
     <Compile Include="RevPlot\PlotCommitList.cs" />
     <Compile Include="RevPlot\PlotLane.cs" />
     <Compile Include="RevPlot\PlotWalk.cs" />
+    <Compile Include="Util\LongList.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

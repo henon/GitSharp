@@ -84,6 +84,10 @@
     <Compile Include="Commands\ForEachRefCommand.cs" />
     <Compile Include="Commands\FormatPatchCommand.cs" />
     <Compile Include="Commands\FsckCommand.cs" />
+    <Compile Include="Commands\GcCommand.cs" />
+    <Compile Include="Commands\GrepCommand.cs" />
+    <Compile Include="Commands\HashObjectCommand.cs" />
+    <Compile Include="Commands\IndexPackCommand.cs" />
     <Compile Include="Commands\RebaseCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Commands\ConfigCommand.cs" />

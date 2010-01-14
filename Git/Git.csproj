@@ -111,7 +111,11 @@
     <Compile Include="ForEachRef.cs" />
     <Compile Include="FormatPatch.cs" />
     <Compile Include="Fsck.cs" />
+    <Compile Include="Gc.cs" />
+    <Compile Include="Grep.cs" />
+    <Compile Include="HashObject.cs" />
     <Compile Include="Help.cs" />
+    <Compile Include="IndexPack.cs" />
     <Compile Include="Init.cs" />
     <Compile Include="Merge.cs" />
     <Compile Include="Options.cs" />

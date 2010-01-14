@@ -14,18 +14,22 @@ namespace GitSharp.Core.Tests.Util
     public class ExtensionsFixture
     {
         private string _extensionlessFilePath;
+        private string _mkDirsPath;
 
         [TestFixtureSetUp]
         public void InitFixtureContext()
         {
-            _extensionlessFilePath = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid().ToString());
+            _extensionlessFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             File.WriteAllText(_extensionlessFilePath, "dummy");
+
+            _mkDirsPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()); 
         }
 
         [TestFixtureTearDown]
         public void CleanUpFixtureContext()
         {
             File.Delete(_extensionlessFilePath);
+            Directory.Delete(_mkDirsPath, true);
         }
         
         [Test]
@@ -65,6 +69,20 @@ namespace GitSharp.Core.Tests.Util
         {
             Assert.AreEqual(new DateTimeOffset(2009, 08, 15, 20, 12, 58, 668, new TimeSpan(-3, -30, 0)), 1250379778668L.MillisToDateTimeOffset((int)new TimeSpan(-3, -30, 0).TotalMinutes));
             Assert.AreEqual(new DateTime(2009, 08, 15, 23, 42, 58, 668), 1250379778668L.MillisToDateTime());
+        }
+
+        [Test]
+        public void MkDirs()
+        {
+            var dir = Path.Combine(_mkDirsPath, "subDir1/subDir2");
+
+            var dirInfo = new DirectoryInfo(dir);
+            Assert.IsFalse(dirInfo.Exists);
+
+            var ret = dirInfo.Mkdirs();
+
+            Assert.IsTrue(ret);
+            Assert.IsTrue(dirInfo.Exists);
         }
     }
 }

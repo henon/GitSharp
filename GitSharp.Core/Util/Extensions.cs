@@ -229,6 +229,8 @@ namespace GitSharp.Core
 
             directoryInfo.Create();
 
+			directoryInfo.Refresh();
+
             return true;
         }
     }

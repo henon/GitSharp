@@ -35,104 +35,92 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * One chunk from a merge result. Each chunk contains a range from a
- * single sequence. In case of conflicts multiple chunks are reported for one
- * conflict. The conflictState tells when conflicts start and end.
- */
 namespace GitSharp.Core.Merge
 {
-	public class MergeChunk {
-		/**
-	 * A state telling whether a MergeChunk belongs to a conflict or not. The
-	 * first chunk of a conflict is reported with a special state to be able to
-	 * distinguish the border between two consecutive conflicts
-	 */
-		public enum ConflictState {
-			/**
-		 * This chunk does not belong to a conflict
-		 */
-			NO_CONFLICT = 0,
+    /// <summary>
+    /// One chunk from a merge result. Each chunk contains a range from a
+    /// single sequence. In case of conflicts multiple chunks are reported for one
+    /// conflict. The conflictState tells when conflicts start and end.
+    /// </summary>
+    public class MergeChunk
+    {
 
-			/**
-		 * This chunk does belong to a conflict and is the first one of the
-		 * conflicting chunks
-		 */
-			FIRST_CONFLICTING_RANGE = 1,
+        /// <summary>
+        /// A state telling whether a MergeChunk belongs to a conflict or not. The
+        /// first chunk of a conflict is reported with a special state to be able to
+        /// distinguish the border between two consecutive conflicts
+        /// </summary>
+        public enum ConflictState
+        {
+            /// <summary>
+            /// This chunk does not belong to a conflict
+            /// </summary>
+            NO_CONFLICT = 0,
 
-			/**
-		 * This chunk does belong to a conflict but is not the first one of the
-		 * conflicting chunks. It's a subsequent one.
-		 */
-			NEXT_CONFLICTING_RANGE = 2
-		}
+            /// <summary>
+            /// This chunk does belong to a conflict and is the first one of the conflicting chunks
+            /// </summary>
+            FIRST_CONFLICTING_RANGE = 1,
 
-		private int sequenceIndex;
+            /// <summary>
+            /// This chunk does belong to a conflict but is not the first one of the conflicting chunks. It's a subsequent one.
+            /// </summary>
+            NEXT_CONFLICTING_RANGE = 2
+        }
 
-		private int begin;
+        private int sequenceIndex;
 
-		private int end;
+        private int begin;
 
-		private ConflictState conflictState;
+        private int end;
 
-		/**
-	 * Creates a new empty MergeChunk
-	 *
-	 * @param sequenceIndex
-	 *            determines to which sequence this chunks belongs to. Same as
-	 *            in {@link MergeResult#add(int, int, int, ConflictState)}
-	 * @param begin
-	 *            the first element from the specified sequence which should be
-	 *            included in the merge result. Indexes start with 0.
-	 * @param end
-	 *            specifies the end of the range to be added. The element this
-	 *            index points to is the first element which not added to the
-	 *            merge result. All elements between begin (including begin) and
-	 *            this element are added.
-	 * @param conflictState
-	 *            the state of this chunk. See {@link ConflictState}
-	 */
+        private ConflictState conflictState;
 
-		public MergeChunk(int sequenceIndex, int begin, int end,
-			ConflictState conflictState) {
-			this.sequenceIndex = sequenceIndex;
-			this.begin = begin;
-			this.end = end;
-			this.conflictState = conflictState;
-			}
+        /// <summary>
+        /// Creates a new empty MergeChunk
+        /// </summary>
+        /// <param name="sequenceIndex">determines to which sequence this chunks belongs to. Same as in <see cref="MergeResult.add"/>
+        /// </param>
+        /// <param name="begin">the first element from the specified sequence which should be included in the merge result. Indexes start with 0.</param>
+        /// <param name="end">
+        /// specifies the end of the range to be added. The element this index points to is the first element which not added to the
+        /// merge result. All elements between begin (including begin) and this element are added.
+        /// </param>
+        /// <param name="conflictState">the state of this chunk. See <see cref="ConflictState"/></param>
+        public MergeChunk(int sequenceIndex, int begin, int end,
+            ConflictState conflictState)
+        {
+            this.sequenceIndex = sequenceIndex;
+            this.begin = begin;
+            this.end = end;
+            this.conflictState = conflictState;
+        }
 
-		/**
-	 * @return the index of the sequence to which sequence this chunks belongs
-	 *         to. Same as in
-	 *         {@link MergeResult#add(int, int, int, ConflictState)}
-	 */
-		public int getSequenceIndex() {
-			return sequenceIndex;
-		}
+        /// <returns>the index of the sequence to which sequence this chunks belongs to. Same as in <see cref="MergeResult.add"/></returns>
+        public int getSequenceIndex()
+        {
+            return sequenceIndex;
+        }
 
-		/**
-	 * @return the first element from the specified sequence which should be
-	 *         included in the merge result. Indexes start with 0.
-	 */
-		public int getBegin() {
-			return begin;
-		}
+        /// <returns>the first element from the specified sequence which should be included in the merge result. Indexes start with 0.</returns>
+        public int getBegin()
+        {
+            return begin;
+        }
 
-		/**
-	 * @return the end of the range of this chunk. The element this index
-	 *         points to is the first element which not added to the merge
-	 *         result. All elements between begin (including begin) and this
-	 *         element are added.
-	 */
-		public int getEnd() {
-			return end;
-		}
+        /// <returns>
+        /// the end of the range of this chunk. The element this index points to is the first element which not added to the merge
+        /// result. All elements between begin (including begin) and this element are added.
+        /// </returns>
+        public int getEnd()
+        {
+            return end;
+        }
 
-		/**
-	 * @return the state of this chunk. See {@link ConflictState}
-	 */
-		public ConflictState getConflictState() {
-			return conflictState;
-		}
-	}
+        /// <returns>the state of this chunk. See <see cref="ConflictState"/></returns>
+        public ConflictState getConflictState()
+        {
+            return conflictState;
+        }
+    }
 }

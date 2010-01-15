@@ -70,8 +70,8 @@ namespace GitSharp.Core.Merge
 		 *            metadata
 		 * @throws IOException
 		 */
-		public void formatMerge(StreamWriter @out, MergeResult res,
-				List<String> seqName)
+		public void formatMerge(BinaryWriter @out, MergeResult res,
+				List<String> seqName, string charsetName)
 		{
 			String lastConflictingName = null; // is set to non-null whenever we are
 			// in a conflict
@@ -84,14 +84,14 @@ namespace GitSharp.Core.Merge
 						&& chunk.getConflictState() != MergeChunk.ConflictState.NEXT_CONFLICTING_RANGE)
 				{
 					// found the end of an conflict
-					@out.Write((">>>>>>> " + lastConflictingName + "\n"));
+                    @out.Write((">>>>>>> " + lastConflictingName + "\n").getBytes(charsetName));
 					lastConflictingName = null;
 				}
 				if (chunk.getConflictState() == MergeChunk.ConflictState.FIRST_CONFLICTING_RANGE)
 				{
 					// found the start of an conflict
 					@out.Write(("<<<<<<< " + seqName[chunk.getSequenceIndex()] +
-							"\n"));
+                            "\n").getBytes(charsetName));
 					lastConflictingName = seqName[chunk.getSequenceIndex()];
 				}
 				else if (chunk.getConflictState() == MergeChunk.ConflictState.NEXT_CONFLICTING_RANGE)
@@ -107,12 +107,11 @@ namespace GitSharp.Core.Merge
 					 */
 					lastConflictingName = seqName[chunk.getSequenceIndex()];
 					@out.Write((threeWayMerge ? "=======\n" : "======= "
-							+ lastConflictingName + "\n"));
+                            + lastConflictingName + "\n").getBytes(charsetName));
 				}
 				// the lines with conflict-metadata are written. Now write the chunk
 				for (int i = chunk.getBegin(); i < chunk.getEnd(); i++)
 				{
-					@out.Flush();
 					seq.writeLine(@out.BaseStream, i);
 					@out.Write('\n');
 
@@ -122,42 +121,41 @@ namespace GitSharp.Core.Merge
 			// have to close the last conflict here
 			if (lastConflictingName != null)
 			{
-				@out.Write((">>>>>>> " + lastConflictingName + "\n"));
+                @out.Write((">>>>>>> " + lastConflictingName + "\n").getBytes(charsetName));
 			}
-			@out.Flush();
 		}
 
-		/**
-		 * Formats the results of a merge of exactly two {@link RawText} objects in
-		 * a Git conformant way. This convenience method accepts the names for the
-		 * three sequences (base and the two merged sequences) as explicit
-		 * parameters and doesn't require the caller to specify a List
-		 *
-		 * @param out
-		 *            the {@link OutputStream} where to write the textual
-		 *            presentation
-		 * @param res
-		 *            the merge result which should be presented
-		 * @param baseName
-		 *            the name ranges from the base should get
-		 * @param oursName
-		 *            the name ranges from ours should get
-		 * @param theirsName
-		 *            the name ranges from theirs should get
-		 * @param charsetName
-		 *            the name of the characterSet used when writing conflict
-		 *            metadata
-		 * @throws IOException
-		 */
-		public void formatMerge(StreamWriter @out, MergeResult res, String baseName,
-				String oursName, String theirsName, String charsetName)
+        /**
+         * Formats the results of a merge of exactly two {@link RawText} objects in
+         * a Git conformant way. This convenience method accepts the names for the
+         * three sequences (base and the two merged sequences) as explicit
+         * parameters and doesn't require the caller to specify a List
+         *
+         * @param out
+         *            the {@link OutputStream} where to write the textual
+         *            presentation
+         * @param res
+         *            the merge result which should be presented
+         * @param baseName
+         *            the name ranges from the base should get
+         * @param oursName
+         *            the name ranges from ours should get
+         * @param theirsName
+         *            the name ranges from theirs should get
+         * @param charsetName
+         *            the name of the characterSet used when writing conflict
+         *            metadata
+        * 
+         * @throws IOException
+         */
+        public void formatMerge(BinaryWriter @out, MergeResult res, String baseName,
+				String oursName, String theirsName, string charsetName)
 		{
 			List<String> names = new List<String>(3);
 			names.Add(baseName);
 			names.Add(oursName);
 			names.Add(theirsName);
-			Debug.Assert(@out.Encoding.WebName == Charset.forName(charsetName).WebName);
-			formatMerge(@out, res, names);
+			formatMerge(@out, res, names, charsetName);
 		}
 	}
 }

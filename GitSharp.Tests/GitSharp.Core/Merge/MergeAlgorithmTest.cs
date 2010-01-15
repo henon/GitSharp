@@ -187,7 +187,7 @@ namespace GitSharp.Tests.GitSharp.Core.Merge
             MergeResult r=MergeAlgorithm.merge(new RawText(Constants.encode(commonBase)), new RawText(Constants.encode(ours)), new RawText(Constants.encode(theirs)));
 		
             using (var ms = new MemoryStream())
-            using (var bo = new StreamWriter(ms, Charset.forName(Constants.CHARSET.WebName)))
+            using (var bo = new BinaryWriter(ms))
             {
                 fmt.formatMerge(bo, r, "B", "O", "T", Constants.CHARSET.WebName);
                 return Constants.CHARSET.GetString(ms.ToArray());

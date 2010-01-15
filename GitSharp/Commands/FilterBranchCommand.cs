@@ -121,7 +121,7 @@ namespace GitSharp.Commands
         /// This is the filter for performing the commit.
         /// If this filter is specified, it will be called instead of the
         /// 'git-commit-tree' command, with arguments of the form
-        /// "<TREE_ID> [-p <PARENT_COMMIT_ID>]..." and the log message on
+        /// "&lt;TREE_ID&gt; [-p &lt;PARENT_COMMIT_ID&gt;]..." and the log message on
         /// stdin.  The commit id is expected on stdout.
         /// +
         /// As a special extension, the commit filter may emit multiple

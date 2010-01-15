@@ -56,12 +56,12 @@ namespace GitSharp.Commands
         public List<string> Arguments { get; set; }
 
         
-        /// <summary>
-        /// Not implemented
-        /// 
-        /// Limits the number of patches to prepare.
-        /// 
-        /// </summary>
+        // <summary>
+        // Not implemented
+        // 
+        // Limits the number of patches to prepare.
+        // 
+        // </summary>
         //  [Mr-Happy] This option should prolly be an integer(short?)
         //             need to think about how to implement while
         //             also keeping the CLI in mind...
@@ -70,7 +70,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Use <dir> to store the resulting files, instead of the
+        /// Use &lt;dir&gt; to store the resulting files, instead of the
         /// current working directory.
         /// 
         /// </summary>
@@ -95,7 +95,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Start numbering the patches at <n> instead of 1.
+        /// Start numbering the patches at &lt;n&gt; instead of 1.
         /// 
         /// </summary>
         public string StartNumber { get; set; }
@@ -173,7 +173,7 @@ namespace GitSharp.Commands
         /// first.  Also controls generation of the `Message-Id` header to
         /// reference.
         /// +
-        /// The optional <style> argument can be either `shallow` or `deep`.
+        /// The optional &lt;style&gt; argument can be either `shallow` or `deep`.
         /// 'shallow' threading makes every mail a reply to the head of the
         /// series, where the head is chosen from the cover letter, the
         /// `\--in-reply-to`, and the first patch mail, in this order.  'deep'
@@ -187,7 +187,7 @@ namespace GitSharp.Commands
         /// itself.  If you want `git format-patch` to take care of threading, you
         /// will want to ensure that threading is disabled for `git send-email`.
         /// 
-        /// </summary>
+        /// </summary>chrome
         public string Thread { get; set; }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace GitSharp.Commands
         /// first.  Also controls generation of the `Message-Id` header to
         /// reference.
         /// +
-        /// The optional <style> argument can be either `shallow` or `deep`.
+        /// The optional &lt;style&gt; argument can be either `shallow` or `deep`.
         /// 'shallow' threading makes every mail a reply to the head of the
         /// series, where the head is chosen from the cover letter, the
         /// `\--in-reply-to`, and the first patch mail, in this order.  'deep'
@@ -229,8 +229,8 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Do not include a patch that matches a commit in
-        /// <until>..<since>.  This will examine all patches reachable
-        /// from <since> but not from <until> and compare them with the
+        /// &lt;until&gt;..&lt;since&gt;.  This will examine all patches reachable
+        /// from &lt;since&gt; but not from &lt;until&gt; and compare them with the
         /// patches being generated, and any patch that matches is
         /// ignored.
         /// 
@@ -241,7 +241,7 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Instead of the standard '[PATCH]' prefix in the subject
-        /// line, instead use '[<Subject-Prefix>]'. This
+        /// line, instead use '[&lt;Subject-Prefix&gt;]'. This
         /// allows for useful naming of a patch series, and can be
         /// combined with the `--numbered` option.
         /// 
@@ -305,14 +305,14 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Treat the revision argument as a <revision range>, even if it
+        /// Treat the revision argument as a &lt;revision range&gt;, even if it
         /// is just a single commit (that would normally be treated as a
-        /// <since>).  Note that root commits included in the specified
+        /// &lt;since&gt;).  Note that root commits included in the specified
         /// range are always formatted as creation patches, independently
         /// of this flag.
         /// // Please don't remove this comment as asciidoc behaves badly when
         /// // the first non-empty line is ifdef/ifndef. The symptom is that
-        /// // without this comment the <git-diff-core> attribute conditionally
+        /// // without this comment the &lt;git-diff-core&gt; attribute conditionally
         /// // defined below ends up being defined unconditionally.
         /// // Last checked with asciidoc 7.0.2.
         /// 
@@ -354,7 +354,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Generate diffs with <n> lines of context instead of
+        /// Generate diffs with &lt;n&gt; lines of context instead of
         /// the usual three.
         /// ifndef::git-format-patch[]
         /// Implies `-p`.
@@ -506,7 +506,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Chose the output format for submodule differences. <format> can be one of
+        /// Chose the output format for submodule differences. &lt;format&gt; can be one of
         /// 'short' and 'log'. 'short' just shows pairs of commit names, this format
         /// is used when this option is not given. 'log' is the default value for this
         /// option and lists the commits in that commit range like the 'summary'
@@ -538,7 +538,7 @@ namespace GitSharp.Commands
         /// Show colored word diff, i.e., color words which have changed.
         /// By default, words are separated by whitespace.
         /// +
-        /// When a <regex> is specified, every non-overlapping match of the
+        /// When a &lt;regex&gt; is specified, every non-overlapping match of the
         /// considered whitespace and ignored(!) for the purposes of finding
         /// differences.  You may want to append `|[^[:space:]]` to your regular
         /// expression to make sure that it matches all non-whitespace characters.
@@ -603,7 +603,7 @@ namespace GitSharp.Commands
         /// lines, show only a partial prefix.  This is
         /// independent of the `--full-index` option above, which controls
         /// the diff-patch output format.  Non default number of
-        /// digits can be specified with `--abbrev=<n>`.
+        /// digits can be specified with `--abbrev=&lt;n&gt;`.
         /// 
         /// </summary>
         public string Abbrev { get; set; }
@@ -682,7 +682,7 @@ namespace GitSharp.Commands
         /// 
         /// ifndef::git-format-patch[]
         /// Look for differences that introduce or remove an instance of
-        /// <string>. Note that this is different than the string simply
+        /// &lt;string&gt;. Note that this is different than the string simply
         /// appearing in diff output; see the 'pickaxe' entry in
         /// linkgit:gitdiffcore[7] for more details.
         /// 
@@ -694,7 +694,7 @@ namespace GitSharp.Commands
         /// 
         /// When `-S` finds a change, show all the changes in that
         /// changeset, not just the files that contain the change
-        /// in <string>.
+        /// in &lt;string&gt;.
         /// 
         /// </summary>
         public bool PickaxeAll { get; set; }
@@ -702,7 +702,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Make the <string> not a plain string but an extended POSIX
+        /// Make the &lt;string&gt; not a plain string but an extended POSIX
         /// regex to match.
         /// endif::git-format-patch[]
         /// 
@@ -713,7 +713,7 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Output the patch in the order specified in the
-        /// <orderfile>, which has one shell glob pattern per line.
+        /// &lt;orderfile&gt;, which has one shell glob pattern per line.
         /// 
         /// </summary>
         public string O { get; set; }
@@ -721,7 +721,6 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// ifndef::git-format-patch[]
         /// Swap two inputs; that is, show differences from index or
         /// on-disk file to tree contents.
         /// 
@@ -736,8 +735,7 @@ namespace GitSharp.Commands
         /// pathnames relative to it with this option.  When you are
         /// not in a subdirectory (e.g. in a bare repository), you
         /// can name which subdirectory to make the output relative
-        /// to by giving a <path> as an argument.
-        /// endif::git-format-patch[]
+        /// to by giving a &lt;path&gt; as an argument.
         /// 
         /// </summary>
         public string Relative { get; set; }

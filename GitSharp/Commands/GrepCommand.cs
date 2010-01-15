@@ -91,7 +91,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// For each pathspec given on command line, descend at most <depth>
+        /// For each pathspec given on command line, descend at most &lt;depth&gt;
         /// levels of directories. A negative value means no limit.
         /// 
         /// </summary>
@@ -289,7 +289,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Read patterns from <file>, one per line.
+        /// Read patterns from &lt;file&gt;, one per line.
         /// 
         /// </summary>
         public string F { get; set; }

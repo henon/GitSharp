@@ -106,7 +106,7 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Override the author name used in the commit.  You can use the
-        /// standard `A U Thor <author@example.com>` format.  Otherwise,
+        /// standard `A U Thor &lt;author@example.com&gt;` format.  Otherwise,
         /// an existing commit that matches the given string and its author
         /// name is used.
         /// 
@@ -116,7 +116,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Use the given <msg> as the commit message.
+        /// Use the given &lt;msg&gt; as the commit message.
         /// 
         /// </summary>
         public string Message { get; set; }
@@ -166,7 +166,7 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// This option sets how the commit message is cleaned up.
-        /// The  '<mode>' can be one of 'verbatim', 'whitespace', 'strip',
+        /// The  '&lt;mode&gt;' can be one of 'verbatim', 'whitespace', 'strip',
         /// and 'default'. The 'default' mode will strip leading and
         /// trailing empty lines and #commentary from the commit message
         /// only if the message is to be edited. Otherwise only whitespace

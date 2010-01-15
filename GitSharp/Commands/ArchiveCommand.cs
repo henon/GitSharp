@@ -85,7 +85,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Prepend <prefix>/ to each filename in the archive.
+        /// Prepend &lt;prefix&gt;/ to each filename in the archive.
         /// 
         /// </summary>
         public string Prefix { get; set; }
@@ -93,7 +93,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Write the archive to <file> instead of stdout.
+        /// Write the archive to &lt;file&gt; instead of stdout.
         /// 
         /// </summary>
         public string Output { get; set; }

@@ -57,7 +57,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Insert 'progress' statements every <n> objects, to be shown by
+        /// Insert 'progress' statements every &lt;n&gt; objects, to be shown by
         /// 'git-fast-import' during import.
         /// 
         /// </summary>
@@ -123,12 +123,12 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Dumps the internal marks table to <file> when complete.
+        /// Dumps the internal marks table to &lt;file&gt; when complete.
         /// Marks are written one per line as `:markid SHA-1`. Only marks
         /// for revisions are dumped; marks for blobs are ignored.
         /// Backends can use this file to validate imports after they
         /// have been completed, or to save the marks table across
-        /// incremental runs.  As <file> is only opened and truncated
+        /// incremental runs.  As &lt;file&gt; is only opened and truncated
         /// at completion, the same path can also be safely given to
         /// \--import-marks.
         /// 
@@ -139,7 +139,7 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Before processing any input, load the marks specified in
-        /// <file>.  The input file must exist, must be readable, and
+        /// &lt;file&gt;.  The input file must exist, must be readable, and
         /// must use the same format as produced by \--export-marks.
         /// +
         /// Any commits that have already been marked will not be exported again.

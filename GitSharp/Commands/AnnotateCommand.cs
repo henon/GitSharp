@@ -83,7 +83,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Annotate only the given line range.  <start> and <end> can take
+        /// Annotate only the given line range.  &lt;start&gt; and &lt;end&gt; can take
         /// one of these forms:
         /// 
         /// </summary>
@@ -157,7 +157,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// When <rev> is not specified, the command annotates the
+        /// When &lt;rev&gt; is not specified, the command annotates the
         /// changes starting backwards from the working tree copy.
         /// This flag makes the command pretend as if the working
         /// tree copy has the contents of the named file (specify

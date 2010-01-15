@@ -108,11 +108,11 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Dumps the internal marks table to <file> when complete.
+        /// Dumps the internal marks table to &lt;file&gt; when complete.
         /// Marks are written one per line as `:markid SHA-1`.
         /// Frontends can use this file to validate imports after they
         /// have been completed, or to save the marks table across
-        /// incremental runs.  As <file> is only opened and truncated
+        /// incremental runs.  As &lt;file&gt; is only opened and truncated
         /// at checkpoint (or completion) the same path can also be
         /// safely given to \--import-marks.
         /// 
@@ -123,7 +123,7 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Before processing any input, load the marks specified in
-        /// <file>.  The input file must exist, must be readable, and
+        /// &lt;file&gt;.  The input file must exist, must be readable, and
         /// must use the same format as produced by \--export-marks.
         /// Multiple options may be supplied to import more than one
         /// set of marks.  If a mark is defined to different values,
@@ -136,7 +136,7 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// After creating a packfile, print a line of data to
-        /// <file> listing the filename of the packfile and the last
+        /// &lt;file&gt; listing the filename of the packfile and the last
         /// commit on each branch that was written to that packfile.
         /// This information may be useful after importing projects
         /// whose total object set exceeds the 4 GiB packfile limit,

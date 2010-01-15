@@ -75,7 +75,7 @@ namespace GitSharp.Commands
         /// 
         /// Create the branch's reflog.  This activates recording of
         /// all changes made to the branch ref, enabling use of date
-        /// based sha1 expressions such as "<branchname>@\{yesterday}".
+        /// based sha1 expressions such as "&lt;branchname&lt;@\{yesterday}".
         /// 
         /// </summary>
         public bool L { get; set; }
@@ -83,7 +83,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Reset <branchname> to <startpoint> if <branchname> exists
+        /// Reset &lt;branchname&gt; to &lt;startpoint&gt; if &lt;branchname&gt; exists
         /// already. Without `-f` 'git-branch' refuses to change an existing branch.
         /// 
         /// </summary>

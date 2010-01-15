@@ -58,7 +58,7 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Instead of the content, show the object type identified by
-        /// <object>.
+        /// &lt;object&gt;.
         /// 
         /// </summary>
         public bool T { get; set; }
@@ -67,7 +67,7 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Instead of the content, show the object size identified by
-        /// <object>.
+        /// &lt;object&lt;.
         /// 
         /// </summary>
         public bool S { get; set; }
@@ -75,7 +75,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Suppress all output; instead exit with zero status if <object>
+        /// Suppress all output; instead exit with zero status if &lt;object&gt;
         /// exists and is a valid object.
         /// 
         /// </summary>
@@ -84,7 +84,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Pretty-print the contents of <object> based on its type.
+        /// Pretty-print the contents of &lt;object&gt; based on its type.
         /// 
         /// </summary>
         public string P { get; set; }

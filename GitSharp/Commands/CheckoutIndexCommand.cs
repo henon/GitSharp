@@ -100,7 +100,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// When creating files, prepend <string> (usually a directory
+        /// When creating files, prepend &lt;string&gt; (usually a directory
         /// including a trailing /)
         /// 
         /// </summary>
@@ -110,7 +110,7 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Instead of checking out unmerged entries, copy out the
-        /// files from named stage.  <number> must be between 1 and 3.
+        /// files from named stage. &lt;number&gt; must be between 1 and 3.
         /// Note: --stage=all automatically implies --temp.
         /// 
         /// </summary>

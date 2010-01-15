@@ -164,7 +164,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Generate diffs with <n> lines of context instead of
+        /// Generate diffs with &lt;n&gt; lines of context instead of
         /// the usual three.
         /// ifndef::git-format-patch[]
         /// Implies `-p`.
@@ -316,7 +316,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Chose the output format for submodule differences. <format> can be one of
+        /// Chose the output format for submodule differences. &lt;format&gt; can be one of
         /// 'short' and 'log'. 'short' just shows pairs of commit names, this format
         /// is used when this option is not given. 'log' is the default value for this
         /// option and lists the commits in that commit range like the 'summary'
@@ -348,7 +348,7 @@ namespace GitSharp.Commands
         /// Show colored word diff, i.e., color words which have changed.
         /// By default, words are separated by whitespace.
         /// +
-        /// When a <regex> is specified, every non-overlapping match of the
+        /// When a &lt;regex&gt; is specified, every non-overlapping match of the
         /// considered whitespace and ignored(!) for the purposes of finding
         /// differences.  You may want to append `|[^[:space:]]` to your regular
         /// expression to make sure that it matches all non-whitespace characters.
@@ -413,7 +413,7 @@ namespace GitSharp.Commands
         /// lines, show only a partial prefix.  This is
         /// independent of the `--full-index` option above, which controls
         /// the diff-patch output format.  Non default number of
-        /// digits can be specified with `--abbrev=<n>`.
+        /// digits can be specified with `--abbrev=&lt;n&gt;`.
         /// 
         /// </summary>
         public string Abbrev { get; set; }
@@ -492,7 +492,7 @@ namespace GitSharp.Commands
         /// 
         /// ifndef::git-format-patch[]
         /// Look for differences that introduce or remove an instance of
-        /// <string>. Note that this is different than the string simply
+        /// &lt;string&gt;. Note that this is different than the string simply
         /// appearing in diff output; see the 'pickaxe' entry in
         /// linkgit:gitdiffcore[7] for more details.
         /// 
@@ -504,7 +504,7 @@ namespace GitSharp.Commands
         /// 
         /// When `-S` finds a change, show all the changes in that
         /// changeset, not just the files that contain the change
-        /// in <string>.
+        /// in &lt;string&gt;.
         /// 
         /// </summary>
         public bool PickaxeAll { get; set; }
@@ -512,7 +512,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Make the <string> not a plain string but an extended POSIX
+        /// Make the &lt;string&gt; not a plain string but an extended POSIX
         /// regex to match.
         /// endif::git-format-patch[]
         /// 
@@ -523,7 +523,7 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Output the patch in the order specified in the
-        /// <orderfile>, which has one shell glob pattern per line.
+        /// &lt;orderfile&gt;, which has one shell glob pattern per line.
         /// 
         /// </summary>
         public string O { get; set; }
@@ -546,7 +546,7 @@ namespace GitSharp.Commands
         /// pathnames relative to it with this option.  When you are
         /// not in a subdirectory (e.g. in a bare repository), you
         /// can name which subdirectory to make the output relative
-        /// to by giving a <path> as an argument.
+        /// to by giving a &lt;path&gt; as an argument.
         /// endif::git-format-patch[]
         /// 
         /// </summary>

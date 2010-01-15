@@ -96,8 +96,8 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Create a new branch named <new_branch> and start it at
-        /// <start_point>; see linkgit:git-branch[1] for details.
+        /// Create a new branch named &lt;new_branch&gt; and start it at
+        /// &lt;start_point&gt;; see linkgit:git-branch[1] for details.
         /// 
         /// </summary>
         public string B { get; set; }
@@ -178,9 +178,9 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Interactively select hunks in the difference between the
-        /// <tree-ish> (or the index, if unspecified) and the working
+        /// &lt;tree-ish&gt; (or the index, if unspecified) and the working
         /// tree.  The chosen hunks are then applied in reverse to the
-        /// working tree (and if a <tree-ish> was specified, the index).
+        /// working tree (and if a &lt;tree-ish&gt; was specified, the index).
         /// +
         /// This means that you can use `git checkout -p` to selectively discard
         /// edits from your current working tree.

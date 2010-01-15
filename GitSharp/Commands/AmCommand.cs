@@ -238,7 +238,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// When a patch failure occurs, <msg> will be printed
+        /// When a patch failure occurs, &lt;msg&gt; will be printed
         /// to the screen before exiting.  This overrides the
         /// standard message informing you to use `--resolved`
         /// or `--skip` to handle the failure.  This is solely

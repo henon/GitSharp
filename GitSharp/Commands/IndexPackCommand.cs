@@ -79,11 +79,11 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// When this flag is provided, the pack is read from stdin
-        /// instead and a copy is then written to <pack-file>. If
-        /// <pack-file> is not specified, the pack is written to
+        /// instead and a copy is then written to &lt;pack-file&gt;. If
+        /// &lt;pack-file&gt; is not specified, the pack is written to
         /// objects/pack/ directory of the current git repository with
         /// a default name determined from the pack content.  If
-        /// <pack-file> is not specified consider using --keep to
+        /// &lt;pack-file&gt; is not specified consider using --keep to
         /// prevent a race condition between this process and
         /// 'git-repack'.
         /// 

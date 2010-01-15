@@ -172,7 +172,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Remove <n> leading slashes from traditional diff paths. The
+        /// Remove &lt;n&gt; leading slashes from traditional diff paths. The
         /// default is 1.
         /// 
         /// </summary>
@@ -181,8 +181,8 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Ensure at least <n> lines of surrounding context match before
-        /// and after each change.  When fewer lines of surrounding
+        /// Ensure at least &lt;n&gt; lines of surrounding context match before
+        /// and after each change. When fewer lines of surrounding
         /// context exist they all must match.  By default no context is
         /// ever ignored.
         /// 
@@ -314,7 +314,7 @@ namespace GitSharp.Commands
         /// When `git-apply` is used for statistics and not applying a
         /// patch, it defaults to `nowarn`.
         /// +
-        /// You can use different `<action>` values to control this
+        /// You can use different `&lt;action&gt;` values to control this
         /// behavior:
         /// +
         /// * `nowarn` turns off the trailing whitespace warning.

@@ -122,7 +122,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Same as \--upload-pack=<git-upload-pack>.
+        /// Same as \--upload-pack=&lt;git-upload-pack&gt;.
         /// 
         /// </summary>
         public string Exec { get; set; }

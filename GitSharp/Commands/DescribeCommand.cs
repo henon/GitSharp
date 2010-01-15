@@ -89,8 +89,8 @@ namespace GitSharp.Commands
         /// Not implemented
         /// 
         /// Instead of using the default 7 hexadecimal digits as the
-        /// abbreviated object name, use <n> digits, or as many digits
-        /// as needed to form a unique object name.  An <n> of 0
+        /// abbreviated object name, use &lt;n&gt; digits, or as many digits
+        /// as needed to form a unique object name.  An &lt;n&gt; of 0
         /// will suppress long format, only showing the closest tag.
         /// 
         /// </summary>
@@ -101,9 +101,9 @@ namespace GitSharp.Commands
         /// 
         /// Instead of considering only the 10 most recent tags as
         /// candidates to describe the input committish consider
-        /// up to <n> candidates.  Increasing <n> above 10 will take
+        /// up to &lt;n&gt; candidates.  Increasing &lt;n&gt; above 10 will take
         /// slightly longer but may produce a more accurate result.
-        /// An <n> of 0 will cause only exact matches to be output.
+        /// An &lt;n&gt; of 0 will cause only exact matches to be output.
         /// 
         /// </summary>
         public string Candidates { get; set; }

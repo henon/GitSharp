@@ -75,7 +75,7 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Use the diff tool specified by <tool>.
+        /// Use the diff tool specified by &lt;tool&gt;.
         /// Valid merge tools are:
         /// kdiff3, kompare, tkdiff, meld, xxdiff, emerge, vimdiff, gvimdiff,
         /// ecmerge, diffuse, opendiff, p4merge and araxis.
@@ -86,7 +86,7 @@ namespace GitSharp.Commands
         /// will pick a suitable default.
         /// +
         /// You can explicitly provide a full path to the tool by setting the
-        /// configuration variable `difftool.<tool>.path`. For example, you
+        /// configuration variable `difftool.&lt;tool&gt;.path`. For example, you
         /// can configure the absolute path to kdiff3 by setting
         /// `difftool.kdiff3.path`. Otherwise, 'git-difftool' assumes the
         /// tool is available in PATH.
@@ -94,7 +94,7 @@ namespace GitSharp.Commands
         /// Instead of running one of the known diff tools,
         /// 'git-difftool' can be customized to run an alternative program
         /// by specifying the command line to invoke in a configuration
-        /// variable `difftool.<tool>.cmd`.
+        /// variable `difftool.&lt;tool&gt;.cmd`.
         /// +
         /// When 'git-difftool' is invoked with this tool (either through the
         /// `-t` or `--tool` option or the `diff.tool` configuration variable)

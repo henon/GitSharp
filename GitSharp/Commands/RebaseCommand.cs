@@ -50,9 +50,9 @@ namespace GitSharp.Commands
         /// upstream side.
         /// +
         /// Note that a rebase merge works by replaying each commit from the working
-        /// branch on top of the <upstream> branch.  Because of this, when a merge
+        /// branch on top of the &lt;upstream&gt; branch.  Because of this, when a merge
         /// conflict happens, the side reported as 'ours' is the so-far rebased
-        /// series, starting with <upstream>, and 'theirs' is the working branch.  In
+        /// series, starting with &lt;upstream&gt;, and 'theirs' is the working branch.  In
         /// other words, the sides are swapped.
         /// 
         /// </summary>
@@ -66,8 +66,8 @@ namespace GitSharp.Commands
         /// instead.  This implies --merge.
         /// +
         /// Because 'git-rebase' replays each commit from the working branch
-        /// on top of the <upstream> branch using the given strategy, using
-        /// the 'ours' strategy simply discards all patches from the <branch>,
+        /// on top of the &lt;upstream&gt; branch using the given strategy, using
+        /// the 'ours' strategy simply discards all patches from the &lt;branch&gt;,
         /// which makes little sense.
         /// 
         /// </summary>
@@ -195,12 +195,12 @@ namespace GitSharp.Commands
         /// <summary>
         /// Not implemented
         /// 
-        /// Rebase all commits reachable from <branch>, instead of
-        /// limiting them with an <upstream>.  This allows you to rebase
+        /// Rebase all commits reachable from &lt;branch&gt;, instead of
+        /// limiting them with an &lt;upstream&gt;.  This allows you to rebase
         /// the root commit(s) on a branch.  Must be used with --onto, and
-        /// will skip changes already contained in <newbase> (instead of
-        /// <upstream>).  When used together with --preserve-merges, 'all'
-        /// root commits will be rewritten to have <newbase> as parent
+        /// will skip changes already contained in &lt;newbase&gt; (instead of
+        /// &lt;upstream&gt;).  When used together with --preserve-merges, 'all'
+        /// root commits will be rewritten to have &lt;newbase&gt; as parent
         /// instead.
         /// 
         /// </summary>

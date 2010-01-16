@@ -46,46 +46,40 @@ using System.IO;
 
 namespace GitSharp.Core
 {
-    /**
-     * Writes out refs to the {@link Constants#INFO_REFS} and
-     * {@link Constants#PACKED_REFS} files.
-     * 
-     * This class is abstract as the writing of the files must be handled by the
-     * caller. This is because it is used by transport classes as well.
-     */
+    /// <summary>
+    /// Writes out refs to the <see cref="Constants.INFO_REFS"/> and
+    /// <see cref="Constants.PACKED_REFS"/> files.
+    /// 
+    /// This class is abstract as the writing of the files must be handled by the
+    /// caller. This is because it is used by transport classes as well.
+    /// </summary>
     public abstract class RefWriter
     {
 
         private IEnumerable<Ref> refs;
 
-        /**
-         * @param refs
-         *            the complete set of references. This should have been computed
-         *            by applying updates to the advertised refs already discovered.
-         */
+        /// <param name="refs">
+        /// the complete set of references. This should have been computed
+        /// by applying updates to the advertised refs already discovered.
+        /// </param>
         protected RefWriter(IEnumerable<Ref> refs)
         {
             this.refs = RefComparator.Sort(refs);
         }
 
-        /**
-         * Rebuild the {@link Constants#INFO_REFS}.
-         * <para />
-         * This method rebuilds the contents of the {@link Constants#INFO_REFS} file
-         * to match the passed list of references.
-         * 
-         * 
-         * @
-         *             writing is not supported, or attempting to write the file
-         *             failed, possibly due to permissions or remote disk full, etc.
-         */
+        /// <summary>
+        /// Rebuild the <see cref="Constants.INFO_REFS"/>.
+        /// <para />
+        /// This method rebuilds the contents of the <see cref="Constants.INFO_REFS"/> file
+        /// to match the passed list of references.
+        /// </summary>
         public void writeInfoRefs()
         {
             StringBuilder w = new StringBuilder();
             char[] tmp = new char[Constants.OBJECT_ID_STRING_LENGTH];
             foreach (Ref r in refs)
             {
-                if (Constants.HEAD.Equals(r.Name))
+                if (Constants.HEAD.Equals(r.OriginalName))
                 {
                     // Historically HEAD has never been published through
                     // the INFO_REFS file. This is a mistake, but its the
@@ -110,17 +104,13 @@ namespace GitSharp.Core
             writeFile(Constants.INFO_REFS, Constants.encode(w.ToString()));
         }
 
-        /**
-         * Rebuild the {@link Constants#PACKED_REFS} file.
-         * <para />
-         * This method rebuilds the contents of the {@link Constants#PACKED_REFS}
-         * file to match the passed list of references, including only those refs
-         * that have a storage type of {@link Ref.Storage#PACKED}.
-         * 
-         * @
-         *             writing is not supported, or attempting to write the file
-         *             failed, possibly due to permissions or remote disk full, etc.
-         */
+        /// <summary>
+        /// Rebuild the <see cref="Constants.PACKED_REFS"/> file.
+        /// <para />
+        /// This method rebuilds the contents of the <see cref="Constants.PACKED_REFS"/>
+        /// file to match the passed list of references, including only those refs
+        /// that have a storage type of <see cref="Ref.Storage.Packed"/>.
+        /// </summary>
         public void writePackedRefs()
         {
             bool peeled = false;
@@ -163,17 +153,12 @@ namespace GitSharp.Core
             writeFile(Constants.PACKED_REFS, Constants.encode(w.ToString()));
         }
 
-        /**
-         * Handles actual writing of ref files to the git repository, which may
-         * differ slightly depending on the destination and transport.
-         * 
-         * @param file
-         *            path to ref file.
-         * @param content
-         *            byte content of file to be written.
-         * @
-         */
-        protected abstract void writeFile(String file, byte[] content)
-                ;
+        /// <summary>
+        /// Handles actual writing of ref files to the git repository, which may
+        /// differ slightly depending on the destination and transport.
+        /// </summary>
+        /// <param name="file">path to ref file.</param>
+        /// <param name="content">byte content of file to be written.</param>
+        protected abstract void writeFile(String file, byte[] content);
     }
 }

@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Countobjects : TextBuiltin
     {
-        private CountobjectsCommand cmd = new CountobjectsCommand();
+        private CountObjectsCommand cmd = new CountObjectsCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

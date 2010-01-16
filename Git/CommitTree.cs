@@ -42,12 +42,12 @@ using GitSharp.Commands;
 
 namespace GitSharp.CLI
 {
-    // [Mr Happy] Maybe obsolete, end users should use commit accordnig to the documentation...
+    // [Mr Happy] May be obsolete, end users should use commit according to the documentation...
     //            (API might need it tho)
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Committree : TextBuiltin
     {
-        private CommittreeCommand cmd = new CommittreeCommand();
+        private CommitTreeCommand cmd = new CommitTreeCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

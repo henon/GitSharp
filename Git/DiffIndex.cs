@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Diffindex : TextBuiltin
     {
-        private DiffindexCommand cmd = new DiffindexCommand();
+        private DiffIndexCommand cmd = new DiffIndexCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Catfile : TextBuiltin
     {
-        private CatfileCommand cmd = new CatfileCommand();
+        private CatFileCommand cmd = new CatFileCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

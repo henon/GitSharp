@@ -43,11 +43,11 @@ using System.Text;
 
 namespace GitSharp.Commands
 {
-    public class CheckoutindexCommand
+    public class CheckoutIndexCommand
         : AbstractCommand
     {
 
-        public CheckoutindexCommand() {
+        public CheckoutIndexCommand() {
         }
 
         // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.

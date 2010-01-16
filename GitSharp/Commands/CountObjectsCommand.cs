@@ -43,11 +43,11 @@ using System.Text;
 
 namespace GitSharp.Commands
 {
-    public class CountobjectsCommand
+    public class CountObjectsCommand
         : AbstractCommand
     {
 
-        public CountobjectsCommand() {
+        public CountObjectsCommand() {
         }
 
         // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.

@@ -37,6 +37,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 using System;
 using System.Globalization;
 using System.Text;
@@ -48,19 +49,19 @@ namespace GitSharp.Core
     {
         public string Name { get; private set; }
         public string EmailAddress { get; private set; }
-        
+
         /// <summary>
         /// Elapsed milliseconds since Epoch (1970.1.1 00:00:00 GMT)
         /// </summary>
         public long When { get; private set; }
         private readonly int tzOffset; // offset in minutes to UTC
 
-		///	<summary>
-		/// Creates new PersonIdent from config info in repository, with current time.
-		///	This new PersonIdent gets the info from the default committer as available
-		///	from the configuration.
-		///	</summary>
-		///	<param name="repo"></param>
+        /// <summary>
+        /// Creates new PersonIdent from config info in repository, with current time.
+        /// This new PersonIdent gets the info from the default committer as available
+        /// from the configuration.
+        /// </summary>
+        /// <param name="repo"></param>
         public PersonIdent(Repository repo)
         {
             RepositoryConfig config = repo.Config;
@@ -70,65 +71,68 @@ namespace GitSharp.Core
             tzOffset = SystemReader.getInstance().getTimezone(When);
         }
 
-		///	<summary>
-		/// Copy a <seealso cref="PersonIdent"/>.
-		///	</summary>
-		///	<param name="pi">Original <seealso cref="PersonIdent"/>.</param>
-		public PersonIdent(PersonIdent pi)
-			: this(pi.Name, pi.EmailAddress)
+        /// <summary>
+        /// Copy a <seealso cref="PersonIdent"/>.
+        /// </summary>
+        /// <param name="pi">Original <seealso cref="PersonIdent"/>.</param>
+        public PersonIdent(PersonIdent pi)
+            : this(pi.Name, pi.EmailAddress)
         {
         }
 
-		///	<summary>
-		/// Construct a new <seealso cref="PersonIdent"/> with current time.
-		///	</summary>
-		///	<param name="name"> </param>
-		///	<param name="emailAddress"></param>
-        public PersonIdent(string name, string emailAddress) 
-			: this(name, emailAddress, DateTime.Now, (int)TimeZoneInfo.Local.BaseUtcOffset.TotalMinutes)
+        /// <summary>
+        /// Construct a new <seealso cref="PersonIdent"/> with current time.
+        /// </summary>
+        /// <param name="name"> </param>
+        /// <param name="emailAddress"></param>
+        public PersonIdent(string name, string emailAddress)
         {
+            Name = name;
+            EmailAddress = emailAddress;
+            When = SystemReader.getInstance().getCurrentTime();
+            tzOffset = SystemReader.getInstance().getTimezone(When);
         }
 
-		///	<summary>
-		/// Copy a PersonIdent, but alter the clone's time stamp
-		///	</summary>
-		///	<param name="pi">Original <seealso cref="PersonIdent"/>.</param>
-        ///	<param name="when">Local date time in milliseconds (since Epoch).</param>
-        ///	<param name="tz">Time zone offset in minutes.</param>
+        /// <summary>
+        /// Copy a PersonIdent, but alter the clone's time stamp
+        /// </summary>
+        /// <param name="pi">Original <seealso cref="PersonIdent"/>.</param>
+        /// <param name="when">Local date time in milliseconds (since Epoch).</param>
+        /// <param name="tz">Time zone offset in minutes.</param>
         public PersonIdent(PersonIdent pi, DateTime when, int tz)
-			: this(pi.Name, pi.EmailAddress, when, tz)
+            : this(pi.Name, pi.EmailAddress, when, tz)
         {
         }
 
-		/// <summary>
-		/// Copy a <seealso cref="PersonIdent"/>, but alter the clone's time stamp
-		/// </summary>
-		/// <param name="pi">Original <seealso cref="PersonIdent"/>.</param>
-        ///	<param name="when">Local date time in milliseconds (since Epoch).</param>
+        /// <summary>
+        /// Copy a <seealso cref="PersonIdent"/>, but alter the clone's time stamp
+        /// </summary>
+        /// <param name="pi">Original <seealso cref="PersonIdent"/>.</param>
+        /// <param name="when">Local date time in milliseconds (since Epoch).</param>
         public PersonIdent(PersonIdent pi, DateTime when)
-			: this(pi.Name, pi.EmailAddress, when.ToMillisecondsSinceEpoch(), pi.tzOffset)
+            : this(pi.Name, pi.EmailAddress, when.ToMillisecondsSinceEpoch(), pi.tzOffset)
         {
         }
 
-		///	<summary>
-		/// Construct a PersonIdent from simple data
-		///	</summary>
-		///	<param name="name"></param>
-		///	<param name="emailAddress"></param>
-        ///	<param name="when">Local date time in milliseconds (since Epoch).</param>
-		///	<param name="tz">Time zone offset in minutes.</param>
+        /// <summary>
+        /// Construct a PersonIdent from simple data
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="emailAddress"></param>
+        /// <param name="when">Local date time in milliseconds (since Epoch).</param>
+        /// <param name="tz">Time zone offset in minutes.</param>
         public PersonIdent(string name, string emailAddress, DateTime when, int tz)
             : this(name, emailAddress, when.ToMillisecondsSinceEpoch(), tz)
         {
         }
 
-		///	<summary>
-		/// Construct a <seealso cref="PersonIdent"/>
-		///	</summary>
-		///	<param name="name"></param>
-		///	<param name="emailAddress"> </param>
-        ///	<param name="when">Local date time in milliseconds (since Epoch).</param>
-        ///	<param name="tz">Time zone offset in minutes.</param>
+        /// <summary>
+        /// Construct a <seealso cref="PersonIdent"/>
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="emailAddress"> </param>
+        /// <param name="when">Local date time in milliseconds (since Epoch).</param>
+        /// <param name="tz">Time zone offset in minutes.</param>
         public PersonIdent(string name, string emailAddress, long when, int tz)
         {
             Name = name;
@@ -137,22 +141,22 @@ namespace GitSharp.Core
             tzOffset = tz;
         }
 
-		///	<summary>
-		/// Copy a PersonIdent, but alter the clone's time stamp
-		///	</summary>
-		///	<param name="pi">Original <seealso cref="PersonIdent"/>.</param>
-        ///	<param name="when">Local date time in milliseconds (since Epoch).</param>
-        ///	<param name="tz">Time zone offset in minutes.</param>
-        public PersonIdent(PersonIdent pi, long when, int tz) 
-			: this(pi.Name, pi.EmailAddress, when, tz)
+        /// <summary>
+        /// Copy a PersonIdent, but alter the clone's time stamp
+        /// </summary>
+        /// <param name="pi">Original <seealso cref="PersonIdent"/>.</param>
+        /// <param name="when">Local date time in milliseconds (since Epoch).</param>
+        /// <param name="tz">Time zone offset in minutes.</param>
+        public PersonIdent(PersonIdent pi, long when, int tz)
+            : this(pi.Name, pi.EmailAddress, when, tz)
         {
         }
 
-		///	<summary>
-		/// Construct a PersonIdent from a string with full name, email, time time
-		///	zone string. The input string must be valid.
-		///	</summary>
-		///	<param name="str">A Git internal format author/committer string.</param>
+        /// <summary>
+        /// Construct a PersonIdent from a string with full name, email, time time
+        /// zone string. The input string must be valid.
+        /// </summary>
+        /// <param name="str">A Git internal format author/committer string.</param>
         public PersonIdent(string str)
         {
             int lt = str.IndexOf('<');
@@ -178,7 +182,7 @@ namespace GitSharp.Core
             else
             {
                 string tzHoursStr = str.Slice(sp + 1, sp + 4).Trim();
-            	int tzHours = tzHoursStr[0] == '+' ? int.Parse(tzHoursStr.Substring(1)) : int.Parse(tzHoursStr);
+                int tzHours = tzHoursStr[0] == '+' ? int.Parse(tzHoursStr.Substring(1)) : int.Parse(tzHoursStr);
 
                 int tzMins = int.Parse(str.Substring(sp + 4).Trim());
                 When = long.Parse(str.Slice(gt + 1, sp).Trim()) * 1000;
@@ -219,10 +223,10 @@ namespace GitSharp.Core
                 && When == p.When;
         }
 
-		///	<summary>
-		/// Format for Git storage.
-		///	</summary>
-		///	<returns>A string in the git author format.</returns>
+        /// <summary>
+        /// Format for Git storage.
+        /// </summary>
+        /// <returns>A string in the git author format.</returns>
         public string ToExternalString()
         {
             var r = new StringBuilder();
@@ -234,44 +238,44 @@ namespace GitSharp.Core
             r.Append(When / 1000);
             r.Append(' ');
             appendTimezone(r);
-           
+
             return r.ToString();
         }
 
-		private void appendTimezone(StringBuilder r)
-		{
-			int offset = tzOffset;
-			char sign;
+        private void appendTimezone(StringBuilder r)
+        {
+            int offset = tzOffset;
+            char sign;
 
-			if (offset < 0)
-			{
-				sign = '-';
-				offset *= -1;
-			}
-			else
-			{
-				sign = '+';
-			}
+            if (offset < 0)
+            {
+                sign = '-';
+                offset *= -1;
+            }
+            else
+            {
+                sign = '+';
+            }
 
-			int offsetHours = offset / 60;
-			int offsetMins = offset % 60;
+            int offsetHours = offset / 60;
+            int offsetMins = offset % 60;
 
-			r.AppendFormat(CultureInfo.InvariantCulture, "{0}{1:D2}{2:D2}", sign, offsetHours, offsetMins);
-		}
+            r.AppendFormat(CultureInfo.InvariantCulture, "{0}{1:D2}{2:D2}", sign, offsetHours, offsetMins);
+        }
 
-		public override string ToString()
-		{
-			var r = new StringBuilder();
+        public override string ToString()
+        {
+            var r = new StringBuilder();
 
-			r.Append("PersonIdent[");
-			r.Append(Name);
-			r.Append(", ");
-			r.Append(EmailAddress);
-			r.Append(", ");
-			r.Append(When.MillisToDateTimeOffset(tzOffset).ToIsoDateFormat());
-			r.Append("]");
+            r.Append("PersonIdent[");
+            r.Append(Name);
+            r.Append(", ");
+            r.Append(EmailAddress);
+            r.Append(", ");
+            r.Append(When.MillisToDateTimeOffset(tzOffset).ToIsoDateFormat());
+            r.Append("]");
 
-			return r.ToString();
-		}
+            return r.ToString();
+        }
     }
 }

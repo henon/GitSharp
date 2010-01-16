@@ -57,41 +57,39 @@ namespace GitSharp.Core
         private static readonly byte[] HParent = Constants.encodeASCII("parent");
         private static readonly byte[] HTree = Constants.encodeASCII("tree");
         private readonly byte[] _buf;
-        private readonly Deflater _def;
         private readonly MessageDigest _md;
         private readonly Repository _r;
 
-		///	<summary>
-		/// Construct an object writer for the specified repository.
-		/// </summary>
-		///	<param name="repo"> </param>
+        ///	<summary>
+        /// Construct an object writer for the specified repository.
+        /// </summary>
+        ///	<param name="repo"> </param>
         public ObjectWriter(Repository repo)
         {
             _r = repo;
             _buf = new byte[0x2000];
             _md = new MessageDigest();
-            _def = new Deflater(_r.Config.getCore().getCompression());
         }
 
-		///	<summary>
-		/// Compute the SHA-1 of a blob without creating an object. This is for
-		///	figuring out if we already have a blob or not.
-		///	</summary>
-		///	<param name="length"> number of bytes to consume.</param>
-		///	<param name="input"> stream for read blob data from.</param>
-		///	<returns>SHA-1 of a looked for blob.</returns>
-		///	<exception cref="IOException"></exception>
+        ///	<summary>
+        /// Compute the SHA-1 of a blob without creating an object. This is for
+        ///	figuring out if we already have a blob or not.
+        ///	</summary>
+        ///	<param name="length"> number of bytes to consume.</param>
+        ///	<param name="input"> stream for read blob data from.</param>
+        ///	<returns>SHA-1 of a looked for blob.</returns>
+        ///	<exception cref="IOException"></exception>
         public ObjectId ComputeBlobSha1(long length, Stream input)
         {
             return WriteObject(ObjectType.Blob, length, input, false);
         }
 
-		/// <summary>
-		/// Write a blob with the data in the specified file
-		/// </summary>
-		/// <param name="fileInfo">A file containing blob data.</param>
-		///	<returns>SHA-1 of the blob.</returns>
-		///	<exception cref="IOException"></exception>
+        /// <summary>
+        /// Write a blob with the data in the specified file
+        /// </summary>
+        /// <param name="fileInfo">A file containing blob data.</param>
+        ///	<returns>SHA-1 of the blob.</returns>
+        ///	<exception cref="IOException"></exception>
         public ObjectId WriteBlob(FileInfo fileInfo)
         {
             using (FileStream stream = fileInfo.OpenRead())
@@ -100,46 +98,46 @@ namespace GitSharp.Core
             }
         }
 
-		///	<summary>
-		/// Write a blob with the specified data.
-		///	</summary>
-		///	<param name="b">Bytes of the blob.</param>
-		///	<returns>SHA-1 of the blob.</returns>
-		///	<exception cref="IOException"></exception>
+        ///	<summary>
+        /// Write a blob with the specified data.
+        ///	</summary>
+        ///	<param name="b">Bytes of the blob.</param>
+        ///	<returns>SHA-1 of the blob.</returns>
+        ///	<exception cref="IOException"></exception>
         public ObjectId WriteBlob(byte[] b)
         {
             return WriteBlob(b.Length, new MemoryStream(b));
         }
 
-		///	<summary>
-		/// Write a blob with data from a stream
-		///	</summary>
-		///	<param name="len">Number of bytes to consume from the stream.</param>
-		///	<param name="input">Stream with blob data.</param>
-		///	<returns>SHA-1 of the blob.</returns>
-		///	<exception cref="IOException"></exception>
+        ///	<summary>
+        /// Write a blob with data from a stream
+        ///	</summary>
+        ///	<param name="len">Number of bytes to consume from the stream.</param>
+        ///	<param name="input">Stream with blob data.</param>
+        ///	<returns>SHA-1 of the blob.</returns>
+        ///	<exception cref="IOException"></exception>
         public ObjectId WriteBlob(long len, Stream input)
         {
             return WriteObject(ObjectType.Blob, len, input, true);
         }
 
-		///	<summary>
-		/// Write a canonical tree to the object database.
-		/// </summary>
-		/// <param name="buffer">The canonical encoding of the tree object.</param>
-		///	<returns>SHA-1 of the tree.</returns>
-		///	<exception cref="IOException"></exception>
+        ///	<summary>
+        /// Write a canonical tree to the object database.
+        /// </summary>
+        /// <param name="buffer">The canonical encoding of the tree object.</param>
+        ///	<returns>SHA-1 of the tree.</returns>
+        ///	<exception cref="IOException"></exception>
         public ObjectId WriteCanonicalTree(byte[] buffer)
         {
             return WriteTree(buffer.Length, new MemoryStream(buffer));
         }
 
-		///	<summary>
-		/// Write a Commit to the object database
-		///	</summary>
-		///	<param name="c">Commit to store.</param>
-		///	<returns>SHA-1 of the commit.</returns>
-		///	<exception cref="IOException"></exception>
+        ///	<summary>
+        /// Write a Commit to the object database
+        ///	</summary>
+        ///	<param name="c">Commit to store.</param>
+        ///	<returns>SHA-1 of the commit.</returns>
+        ///	<exception cref="IOException"></exception>
         public ObjectId WriteCommit(Commit c)
         {
             Encoding encoding = c.Encoding ?? Constants.CHARSET;
@@ -170,7 +168,7 @@ namespace GitSharp.Core
             {
                 s.Write(HEncoding);
                 s.Write(' ');
-				s.Write(Constants.encodeASCII(encoding.HeaderName.ToUpperInvariant()));
+                s.Write(Constants.encodeASCII(encoding.HeaderName.ToUpperInvariant()));
                 s.Write('\n');
             }
 
@@ -196,6 +194,7 @@ namespace GitSharp.Core
             DeflaterOutputStream stream;
             FileStream stream2;
             ObjectId objectId = null;
+            Deflater def = null;
 
             if (store)
             {
@@ -211,8 +210,8 @@ namespace GitSharp.Core
             _md.Reset();
             if (store)
             {
-                _def.Reset();
-                stream = new DeflaterOutputStream(stream2, _def);
+                def = new Deflater(_r.Config.getCore().getCompression());
+                stream = new DeflaterOutputStream(stream2, def);
             }
             else
             {
@@ -247,7 +246,7 @@ namespace GitSharp.Core
                 {
                     stream.WriteByte(0);
                 }
-                while ((len > 0L) && ((num = input.Read(_buf, 0, (int) Math.Min(len, _buf.Length))) > 0))
+                while ((len > 0L) && ((num = input.Read(_buf, 0, (int)Math.Min(len, _buf.Length))) > 0))
                 {
                     _md.Update(_buf, 0, num);
                     if (stream != null)
@@ -284,37 +283,42 @@ namespace GitSharp.Core
                     {
                         info.DeleteFile();
                     }
+
+                    if (def != null)
+                    {
+                        def.Finish();
+                    }
                 }
             }
             if (info != null)
             {
                 if (_r.HasObject(objectId))
                 {
-				// Object is already in the repository so remove
-				// the temporary file.
-				//
-                  info.DeleteFile();
+                    // Object is already in the repository so remove
+                    // the temporary file.
+                    //
+                    info.DeleteFile();
                 }
                 else
                 {
                     FileInfo info2 = _r.ToFile(objectId);
                     if (!info.RenameTo(info2.FullName))
                     {
-					// Maybe the directory doesn't exist yet as the object
-					// directories are always lazily created. Note that we
-					// try the rename first as the directory likely does exist.
-					//
+                        // Maybe the directory doesn't exist yet as the object
+                        // directories are always lazily created. Note that we
+                        // try the rename first as the directory likely does exist.
+                        //
                         if (info2.Directory != null)
                         {
                             info2.Directory.Create();
                         }
                         if (!info.RenameTo(info2.FullName) && !_r.HasObject(objectId))
                         {
-						// The object failed to be renamed into its proper
-						// location and it doesn't exist in the repository
-						// either. We really don't know what went wrong, so
-						// fail.
-						//
+                            // The object failed to be renamed into its proper
+                            // location and it doesn't exist in the repository
+                            // either. We really don't know what went wrong, so
+                            // fail.
+                            //
                             info.DeleteFile();
                             throw new ObjectWritingException("Unable to create new object: " + info2);
                         }
@@ -324,12 +328,12 @@ namespace GitSharp.Core
             return objectId;
         }
 
-		///	<summary>
-		/// Write an annotated Tag to the object database
-		///	</summary>
-		///	<param name="tag">Tag</param>
-		///	<returns>SHA-1 of the tag.</returns>
-		///	<exception cref="IOException"></exception>
+        ///	<summary>
+        /// Write an annotated Tag to the object database
+        ///	</summary>
+        ///	<param name="tag">Tag</param>
+        ///	<returns>SHA-1 of the tag.</returns>
+        ///	<exception cref="IOException"></exception>
         public ObjectId WriteTag(Tag tag)
         {
             using (var output = new MemoryStream())
@@ -377,9 +381,9 @@ namespace GitSharp.Core
                                                      "\" does not have an id assigned.  All object ids must be assigned prior to writing a tree.");
                 }
                 entry.Mode.CopyTo(output);
-                writer.Write((byte) 0x20);
+                writer.Write((byte)0x20);
                 writer.Write(entry.NameUTF8);
-                writer.Write((byte) 0);
+                writer.Write((byte)0);
                 id.copyRawTo(output);
             }
             return WriteCanonicalTree(output.ToArray());

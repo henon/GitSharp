@@ -48,7 +48,9 @@ namespace GitSharp.Core.Transport
 	{
 		private const string OptionIncludeTag = BasePackFetchConnection.OPTION_INCLUDE_TAG;
 		private const string OptionMultiAck = BasePackFetchConnection.OPTION_MULTI_ACK;
-		private const string OptionThinPack = BasePackFetchConnection.OPTION_THIN_PACK;
+        private const string OPTION_MULTI_ACK_DETAILED = BasePackFetchConnection.OPTION_MULTI_ACK_DETAILED;
+
+        private const string OptionThinPack = BasePackFetchConnection.OPTION_THIN_PACK;
 		private const string OptionSideBand = BasePackFetchConnection.OPTION_SIDE_BAND;
 		private const string OptionSideBand64K = BasePackFetchConnection.OPTION_SIDE_BAND_64K;
 		private const string OptionOfsDelta = BasePackFetchConnection.OPTION_OFS_DELTA;
@@ -69,7 +71,7 @@ namespace GitSharp.Core.Transport
 		private readonly RevFlag COMMON;
 		private readonly RevFlagSet SAVE;
 
-		private bool _multiAck;
+        private BasePackFetchConnection.MultiAck _multiAck = BasePackFetchConnection.MultiAck.OFF;
 		private Stream _rawIn;
 		private Stream _rawOut;
 		private int _timeout;
@@ -158,7 +160,13 @@ namespace GitSharp.Core.Transport
 			SendAdvertisedRefs();
 			RecvWants();
 			if (_wantAll.Count == 0) return;
-			_multiAck = _options.Contains(OptionMultiAck);
+					if (_options.Contains(OPTION_MULTI_ACK_DETAILED))
+			_multiAck = BasePackFetchConnection.MultiAck.DETAILED;
+		else if (_options.Contains(OptionMultiAck))
+			_multiAck = BasePackFetchConnection.MultiAck.CONTINUE;
+		else
+			_multiAck = BasePackFetchConnection.MultiAck.OFF;
+
 			Negotiate();
 			SendPack();
 		}
@@ -169,6 +177,7 @@ namespace GitSharp.Core.Transport
 
 			var adv = new RefAdvertiser(_pckOut, _walk, ADVERTISED);
 			adv.advertiseCapability(OptionIncludeTag);
+            adv.advertiseCapability(OPTION_MULTI_ACK_DETAILED);
 			adv.advertiseCapability(OptionMultiAck);
 			adv.advertiseCapability(OptionOfsDelta);
 			adv.advertiseCapability(OptionSideBand);
@@ -266,7 +275,7 @@ namespace GitSharp.Core.Transport
 
 				if (line.Length == 0)
 				{
-					if (_commonBase.Count == 0 || _multiAck)
+					if (_commonBase.Count == 0 || _multiAck != BasePackFetchConnection.MultiAck.OFF)
 					{
 						_pckOut.WriteString("NAK\n");
 					}
@@ -278,22 +287,34 @@ namespace GitSharp.Core.Transport
 					ObjectId id = ObjectId.FromString(name);
 					if (MatchHave(id))
 					{
-						if (_multiAck)
-						{
-							lastName = name;
-							_pckOut.WriteString("ACK " + name + " continue\n");
-						}
-						else if (_commonBase.Count == 1)
-						{
+					lastName = name;
+					switch (_multiAck) {
+					case BasePackFetchConnection.MultiAck.OFF:
+						if (_commonBase.Count == 1)
 							_pckOut.WriteString("ACK " + name + "\n");
-						}
-					}
-					else
-					{
-						if (_multiAck && OkToGiveUp())
-						{
+						break;
+					case BasePackFetchConnection.MultiAck.CONTINUE:
+
 							_pckOut.WriteString("ACK " + name + " continue\n");
-						}
+						break;
+                    case BasePackFetchConnection.MultiAck.DETAILED:
+						_pckOut.WriteString("ACK " + name + " common\n");
+						break;
+					}
+				} else if (OkToGiveUp()) {
+
+ 					// They have this object; we don't.
+ 					//
+					switch (_multiAck) {
+                        case BasePackFetchConnection.MultiAck.OFF:
+						break;
+                        case BasePackFetchConnection.MultiAck.CONTINUE:
+ 						_pckOut.WriteString("ACK " + name + " continue\n");
+						break;
+                        case BasePackFetchConnection.MultiAck.DETAILED:
+						_pckOut.WriteString("ACK " + name + " ready\n");
+						break;
+					}
 					}
 				}
 				else if (line.Equals("done"))
@@ -302,7 +323,7 @@ namespace GitSharp.Core.Transport
 					{
 						_pckOut.WriteString("NAK\n");
 					}
-					else if (_multiAck)
+					else if (_multiAck != BasePackFetchConnection.MultiAck.OFF)
 					{
 						_pckOut.WriteString("ACK " + lastName + "\n");
 					}

@@ -261,6 +261,31 @@ namespace GitSharp.Core.Tests.Transport
         }
 
         [Test]
+        public void testReadACK_ACKcommon1()
+        {
+            ObjectId expid = ObjectId
+                   .FromString("fcfcfb1fd94829c1a1704f894fc111d14770d34e");
+            MutableObjectId actid = new MutableObjectId();
+
+            init("0038ACK fcfcfb1fd94829c1a1704f894fc111d14770d34e common\n");
+            Assert.AreEqual(PacketLineIn.AckNackResult.ACK_COMMON, pckIn.readACK(actid));
+            Assert.IsTrue(actid.Equals(expid));
+            assertEOF();
+        }
+        [Test]
+        public void testReadACK_ACKready1()
+        {
+            ObjectId expid = ObjectId
+                   .FromString("fcfcfb1fd94829c1a1704f894fc111d14770d34e");
+            MutableObjectId actid = new MutableObjectId();
+
+            init("0037ACK fcfcfb1fd94829c1a1704f894fc111d14770d34e ready\n");
+            Assert.AreEqual(PacketLineIn.AckNackResult.ACK_READY, pckIn.readACK(actid));
+            Assert.IsTrue(actid.Equals(expid));
+            assertEOF();
+        }
+
+        [Test]
         public void testReadACK_Invalid1()
         {
             init("HELO");
@@ -292,6 +317,21 @@ namespace GitSharp.Core.Tests.Transport
 
         [Test]
         public void testReadACK_Invalid3()
+        {
+            string s = "ACK fcfcfb1fd94829c1a1704f894fc111d14770d34e neverhappen";
+            init("003d" + s + "\n");
+            try
+            {
+                pckIn.readACK(new MutableObjectId());
+                Assert.Fail("incorrectly accepted unsupported ACK status");
+            }
+            catch (IOException e)
+            {
+                Assert.AreEqual("Expected ACK/NAK, got: " + s, e.Message);
+            }
+        }
+        [Test]
+        public void testReadACK_Invalid4()
         {
             init("0000");
             try

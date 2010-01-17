@@ -47,12 +47,14 @@ namespace GitSharp.Core.Transport
 
     public class PacketLineIn
     {
-		[Serializable]
+        [Serializable]
         public enum AckNackResult
         {
             NAK,
             ACK,
-            ACK_CONTINUE
+            ACK_CONTINUE,
+            ACK_COMMON,
+            ACK_READY
         }
 
         private readonly Stream ins;
@@ -72,18 +74,25 @@ namespace GitSharp.Core.Transport
         public AckNackResult readACK(MutableObjectId returnedId)
         {
             string line = ReadString();
-            if (line.Length  == 0)
+            if (line.Length == 0)
                 throw new PackProtocolException("Expected ACK/NAK, found EOF");
             if ("NAK".Equals(line))
                 return AckNackResult.NAK;
             if (line.StartsWith("ACK "))
             {
                 returnedId.FromString(line.Slice(4, 44));
-                if (line.IndexOf("continue", 44) != -1)
-                {
+
+
+                if (line.Length == 44)
+                    return AckNackResult.ACK;
+
+                string arg = line.Substring(44);
+                if (arg.Equals(" continue"))
                     return AckNackResult.ACK_CONTINUE;
-                }
-                return AckNackResult.ACK;
+                else if (arg.Equals(" common"))
+                    return AckNackResult.ACK_COMMON;
+                else if (arg.Equals(" ready"))
+                    return AckNackResult.ACK_READY;
             }
             throw new PackProtocolException("Expected ACK/NAK, got: " + line);
         }
@@ -95,7 +104,7 @@ namespace GitSharp.Core.Transport
                 return string.Empty;
 
             len -= 4; // length header (4 bytes)
-            
+
             if (len <= 0)
                 return string.Empty;
 

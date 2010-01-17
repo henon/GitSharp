@@ -1276,12 +1276,12 @@ namespace GitSharp.Core
         public static Repository Open(DirectoryInfo directory)
         {
             var name = directory.FullName;
-            if (name.EndsWith(".git"))
+            if (name.EndsWith(Constants.DOT_GIT_EXT))
             {
                 return new Repository(directory);
             }
 
-            var subDirectories = directory.GetDirectories(".git");
+            var subDirectories = directory.GetDirectories(Constants.DOT_GIT);
             if (subDirectories.Length > 0)
             {
                 return new Repository(subDirectories[0]);

@@ -54,8 +54,6 @@ namespace GitSharp.Core.Transport
 	/// </summary>
 	public class URIish
 	{
-        private static string DOT_GIT = ".git";
-
 		private static readonly Regex FullUri =
 			new Regex("^(?:([a-z][a-z0-9+-]+)://(?:([^/]+?)(?::([^/]+?))?@)?(?:([^/]+?))?(?::(\\d+))?)?((?:[A-Za-z]:)?/.+)$");
 
@@ -411,9 +409,9 @@ namespace GitSharp.Core.Transport
 	        {
 	            result = elements2[elements2.Length - 2];
 	        }
-	        else if (result.EndsWith(DOT_GIT))
+	        else if (result.EndsWith(Constants.DOT_GIT_EXT))
 	        {
-	            result = result.Slice(0, result.Length - DOT_GIT.Length);
+                result = result.Slice(0, result.Length - Constants.DOT_GIT_EXT.Length);
 	        }
 
 	        return result;

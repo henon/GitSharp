@@ -43,6 +43,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
@@ -127,8 +128,8 @@ namespace GitSharp.Core.Transport
 		///	<param name="db">the repository instance. </param>
 		public void ExportRepository(string name, Repository db)
 		{
-			if (!name.EndsWith(".git"))
-				name = name + ".git";
+            if (!name.EndsWith(Constants.DOT_GIT_EXT))
+                name = name + Constants.DOT_GIT_EXT;
 			Exports.Add(name, db);
 			RepositoryCache.register(db);
 		}
@@ -303,7 +304,7 @@ namespace GitSharp.Core.Transport
 
 			Repository db = Exports[name];
 			if (db != null) return db;
-			db = Exports[name + ".git"];
+            db = Exports[name + Constants.DOT_GIT_EXT];
 			if (db != null) return db;
 
 			DirectoryInfo[] search = ExportBase.ToArray();
@@ -315,10 +316,10 @@ namespace GitSharp.Core.Transport
 				db = OpenRepository(new DirectoryInfo(p + name));
 				if (db != null) return db;
 
-				db = OpenRepository(new DirectoryInfo(p + name + ".git"));
+                db = OpenRepository(new DirectoryInfo(p + name + Constants.DOT_GIT_EXT));
 				if (db != null) return db;
 
-				db = OpenRepository(new DirectoryInfo(p + name + "/.git"));
+                db = OpenRepository(new DirectoryInfo(p + name + "/" + Constants.DOT_GIT));
 				if (db != null) return db;
 			}
 			return null;

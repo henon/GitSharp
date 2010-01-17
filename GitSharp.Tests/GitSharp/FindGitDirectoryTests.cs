@@ -22,7 +22,7 @@ namespace GitSharp.API.Tests
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "test1");
                 System.Environment.SetEnvironmentVariable("GIT_DIR", path);
                 Git.DefaultGitDirectory = null; // override fallback
-                Assert.AreEqual(path + ".git", AbstractCommand.FindGitDirectory(null, false, true));
+                Assert.AreEqual(path + Constants.DOT_GIT_EXT, AbstractCommand.FindGitDirectory(null, false, true));
                 Assert.AreEqual(Path.Combine(path, Constants.DOT_GIT), AbstractCommand.FindGitDirectory(null, false, false));
             }
             finally

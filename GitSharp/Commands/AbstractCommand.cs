@@ -105,7 +105,7 @@ namespace GitSharp.Commands
                         //Check for bare repositories
                         while (directory != null)
                         {
-                            if (directory.EndsWith(".git") && Directory.Exists(directory))
+                            if (directory.EndsWith(Constants.DOT_GIT_EXT) && Directory.Exists(directory))
                                 return directory;
 
                             //Get parent directory
@@ -115,12 +115,12 @@ namespace GitSharp.Commands
                     }
                 }
             }
-            if (!directory.EndsWith(".git"))
+            if (!directory.EndsWith(Constants.DOT_GIT_EXT))
             {
                 if (!isBare)
                     directory = Path.Combine(directory, Constants.DOT_GIT);
                 else
-                    directory += ".git";
+                    directory += Constants.DOT_GIT_EXT;
             }
             return directory;
         }

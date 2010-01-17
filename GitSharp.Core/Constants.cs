@@ -397,6 +397,11 @@ namespace GitSharp.Core
         public const string DOT_GIT = ".git";
 
         /// <summary>
+        /// A bare repository typically ends with this string
+        /// </summary>
+        public const string DOT_GIT_EXT = ".git";
+
+        /// <summary>
         /// A gitignore file name
         /// </summary>
         public const string GITIGNORE_FILENAME = ".gitignore";

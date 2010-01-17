@@ -52,6 +52,7 @@ namespace GitSharp.Core.Transport
         protected const int MIN_CLIENT_BUFFER = 2 * 32 * 46 + 8;
         public const string OPTION_INCLUDE_TAG = "include-tag";
         public const string OPTION_MULTI_ACK = "multi_ack";
+        public const string OPTION_MULTI_ACK_DETAILED = "multi_ack_detailed";
         public const string OPTION_THIN_PACK = "thin-pack";
         public const string OPTION_SIDE_BAND = "side-band";
         public const string OPTION_SIDE_BAND_64K = "side-band-64k";
@@ -59,14 +60,21 @@ namespace GitSharp.Core.Transport
         public const string OPTION_SHALLOW = "shallow";
         public const string OPTION_NO_PROGRESS = "no-progress";
 
+        public enum MultiAck
+        {
+            OFF,
+            CONTINUE,
+            DETAILED
+        }
+
         private readonly RevWalk.RevWalk _walk;
-		private readonly bool _allowOfsDelta;
-        
+        private readonly bool _allowOfsDelta;
+
         public readonly RevFlag REACHABLE;
         public readonly RevFlag COMMON;
         public readonly RevFlag ADVERTISED;
-		private RevCommitList<RevCommit> _reachableCommits;
-        private bool _multiAck;
+        private RevCommitList<RevCommit> _reachableCommits;
+        private MultiAck _multiAck = MultiAck.OFF;
         private bool _thinPack;
         private bool _sideband;
         private bool _includeTags;
@@ -258,7 +266,14 @@ namespace GitSharp.Core.Transport
                 _includeTags = wantCapability(line, OPTION_INCLUDE_TAG);
             if (_allowOfsDelta)
                 wantCapability(line, OPTION_OFS_DELTA);
-            _multiAck = wantCapability(line, OPTION_MULTI_ACK);
+
+            if (wantCapability(line, OPTION_MULTI_ACK_DETAILED))
+                _multiAck = MultiAck.DETAILED;
+            else if (wantCapability(line, OPTION_MULTI_ACK))
+                _multiAck = MultiAck.CONTINUE;
+            else
+                _multiAck = MultiAck.OFF;
+
             if (_thinPack)
                 _thinPack = wantCapability(line, OPTION_THIN_PACK);
             if (wantCapability(line, OPTION_SIDE_BAND_64K))
@@ -276,13 +291,15 @@ namespace GitSharp.Core.Transport
             int havesSinceLastContinue = 0;
             bool receivedContinue = false;
             bool receivedAck = false;
-            bool sendHaves = true;
 
             NegotiateBegin();
-            while (sendHaves)
+            for (; ; )
             {
                 RevCommit c = _walk.next();
-                if (c == null) break;
+                if (c == null)
+                {
+                    goto END_SEND_HAVES;
+                }
 
                 pckOut.WriteString("have " + c.getId().Name + "\n");
                 havesSent++;
@@ -308,38 +325,53 @@ namespace GitSharp.Core.Transport
                 {
                     PacketLineIn.AckNackResult anr = pckIn.readACK(ackId);
 
-                    if (anr == PacketLineIn.AckNackResult.NAK)
+                    switch (anr)
                     {
-                        resultsPending--;
-                        break;
+                        case PacketLineIn.AckNackResult.NAK:
+                            // More have lines are necessary to compute the
+                            // pack on the remote side. Keep doing that.
+
+                            resultsPending--;
+                            goto END_READ_RESULT;
+
+                        case PacketLineIn.AckNackResult.ACK:
+                            // The remote side is happy and knows exactly what
+                            // to send us. There is no further negotiation and
+                            // we can break out immediately.
+
+                            _multiAck = MultiAck.OFF;
+                            resultsPending = 0;
+                            receivedAck = true;
+                            goto END_SEND_HAVES;
+
+                        case PacketLineIn.AckNackResult.ACK_CONTINUE:
+                        case PacketLineIn.AckNackResult.ACK_COMMON:
+                        case PacketLineIn.AckNackResult.ACK_READY:
+                            // The server knows this commit (ackId). We don't
+                            // need to send any further along its ancestry, but
+                            // we need to continue to talk about other parts of
+                            // our local history.
+
+                            MarkCommon(_walk.parseAny(ackId));
+                            receivedAck = true;
+                            receivedContinue = true;
+                            havesSinceLastContinue = 0;
+                            break;
                     }
 
-                    if (anr == PacketLineIn.AckNackResult.ACK)
-                    {
-                        _multiAck = false;
-                        resultsPending = 0;
-                        receivedAck = true;
-                        sendHaves = false;
-                        break;
-                    }
-
-                    if (anr == PacketLineIn.AckNackResult.ACK_CONTINUE)
-                    {
-                        MarkCommon(_walk.parseAny(ackId));
-                        receivedAck = true;
-                        receivedContinue = true;
-                        havesSinceLastContinue = 0;
-                    }
 
                     if (monitor.IsCancelled)
                         throw new CancelledException();
                 }
 
+            END_READ_RESULT:
                 if (receivedContinue && havesSinceLastContinue > MAX_HAVES)
                 {
                     break;
                 }
             }
+
+        END_SEND_HAVES:
 
             if (monitor.IsCancelled)
                 throw new CancelledException();
@@ -348,24 +380,44 @@ namespace GitSharp.Core.Transport
 
             if (!receivedAck)
             {
-                _multiAck = false;
+                _multiAck = MultiAck.OFF;
                 resultsPending++;
             }
 
-            while (resultsPending > 0 || _multiAck)
+            while (resultsPending > 0 || _multiAck != MultiAck.OFF)
             {
                 PacketLineIn.AckNackResult anr = pckIn.readACK(ackId);
                 resultsPending--;
 
-                if (anr == PacketLineIn.AckNackResult.ACK)
-                    break;
+                switch (anr)
+                {
+                    case PacketLineIn.AckNackResult.NAK:
+                        // A NAK is a response to an end we queued earlier
+                        // we eat it and look for another ACK/NAK message.
+                        //
+                        break;
 
-                if (anr == PacketLineIn.AckNackResult.ACK_CONTINUE)
-                    _multiAck = true;
+                    case PacketLineIn.AckNackResult.ACK:
+                        // A solitary ACK at this point means the remote won't
+                        // speak anymore, but is going to send us a pack now.
+                        //
+                        goto END_READ_RESULT_2;
+
+                    case PacketLineIn.AckNackResult.ACK_CONTINUE:
+                    case PacketLineIn.AckNackResult.ACK_COMMON:
+                    case PacketLineIn.AckNackResult.ACK_READY:
+                        // We will expect a normal ACK to break out of the loop.
+                        //
+                        _multiAck = MultiAck.CONTINUE;
+                        break;
+                }
 
                 if (monitor.IsCancelled)
                     throw new CancelledException();
             }
+
+        END_READ_RESULT_2:
+            ;
         }
 
         private class NegotiateBeginRevFilter : RevFilter, IDisposable
@@ -393,13 +445,13 @@ namespace GitSharp.Core.Transport
                 }
                 return !remoteKnowsIsCommon;
             }
-			
-			public void Dispose ()
-			{
-				_advertised.Dispose();
-				_common.Dispose();
-			}
-			
+
+            public void Dispose()
+            {
+                _advertised.Dispose();
+                _common.Dispose();
+            }
+
         }
 
         private void NegotiateBegin()
@@ -435,7 +487,7 @@ namespace GitSharp.Core.Transport
         private void MarkCommon(RevObject obj)
         {
             obj.add(COMMON);
-			RevCommit oComm = (obj as RevCommit);
+            RevCommit oComm = (obj as RevCommit);
             if (oComm != null)
             {
                 oComm.carry(COMMON);
@@ -450,16 +502,16 @@ namespace GitSharp.Core.Transport
             ip.index(monitor);
             _packLock = ip.renameAndOpenPack(_lockMessage);
         }
-		
-		public override void Dispose ()
-		{
-			_walk.Dispose();
-			REACHABLE.Dispose();
-			COMMON.Dispose();
-			ADVERTISED.Dispose();
-			_reachableCommits.Dispose();
+
+        public override void Dispose()
+        {
+            _walk.Dispose();
+            REACHABLE.Dispose();
+            COMMON.Dispose();
+            ADVERTISED.Dispose();
+            _reachableCommits.Dispose();
             base.Dispose();
-		}
-		
+        }
+
     }
 }

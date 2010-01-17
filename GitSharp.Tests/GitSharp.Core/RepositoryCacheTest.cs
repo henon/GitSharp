@@ -77,7 +77,7 @@ namespace GitSharp.Core.Tests
 			Assert.IsNotNull(parent);
 
             string name = gitdir.Name;
-            Assert.IsTrue(name.EndsWith(".git"));
+            Assert.IsTrue(name.EndsWith(Constants.DOT_GIT_EXT));
             name = name.Slice(0, name.Length - 4);
 
             Assert.AreEqual(gitdir, RepositoryCache.FileKey.exact(gitdir).getFile());
@@ -139,7 +139,7 @@ namespace GitSharp.Core.Tests
                 Assert.AreSame(db, exact);
             }
 
-			Assert.IsTrue(dir.Name.EndsWith(".git"));
+            Assert.IsTrue(dir.Name.EndsWith(Constants.DOT_GIT_EXT));
             Assert.AreEqual(Constants.DOT_GIT, dir.Name);
             DirectoryInfo parent = dir.Parent;
             using (Core.Repository lenient = RepositoryCache.open(RepositoryCache.FileKey.lenient(parent)))

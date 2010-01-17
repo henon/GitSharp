@@ -35,16 +35,6 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-/**
- * Test cases for the performance of the diff implementation. The tests test
- * that the performance of the MyersDiff algorithm is really O(N*D). Means the
- * time for computing the diff between a and b should depend on the product of
- * a.length+b.length and the number of found differences. The tests compute
- * diffs between chunks of different length, measure the needed time and check
- * that time/(N*D) does not differ more than a certain factor (currently 10)
- */
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -54,6 +44,14 @@ using NUnit.Framework;
 
 namespace GitSharp.Tests.GitSharp.Core.Diff
 {
+    /*
+     * Test cases for the performance of the diff implementation. The tests test
+     * that the performance of the MyersDiff algorithm is really O(N*D). Means the
+     * time for computing the diff between a and b should depend on the product of
+     * a.length+b.length and the number of found differences. The tests compute
+     * diffs between chunks of different length, measure the needed time and check
+     * that time/(N*D) does not differ more than a certain factor (currently 10)
+     */
     [TestFixture]
     public class MyersDiffPerformanceTest  {
         private static long longTaskBoundary = 5000000000L;

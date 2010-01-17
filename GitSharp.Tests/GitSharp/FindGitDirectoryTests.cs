@@ -43,7 +43,7 @@ namespace GitSharp.API.Tests
                 System.Environment.SetEnvironmentVariable("GIT_DIR", null); // override environment
                 var path = Directory.GetCurrentDirectory();
                 Assert.IsFalse(path.EndsWith("git")); // <--- this should be the case anyway, but if not the next assertion would not pass correctly
-                Assert.AreEqual(Directory.GetCurrentDirectory() + ".git", AbstractCommand.FindGitDirectory(null, false, true));
+                Assert.AreEqual(Directory.GetCurrentDirectory() + Constants.DOT_GIT_EXT, AbstractCommand.FindGitDirectory(null, false, true));
                 Assert.AreEqual(Path.Combine(Directory.GetCurrentDirectory(), Constants.DOT_GIT), AbstractCommand.FindGitDirectory(null, false, false));
             }
             finally

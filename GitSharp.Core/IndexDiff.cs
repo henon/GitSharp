@@ -157,7 +157,7 @@ namespace GitSharp.Core
             foreach (string dir in dirs)
             {
                 var dirname = new DirectoryInfo(dir).Name;
-                if (dirname.StartsWith(".git"))
+                if (dirname.StartsWith(Constants.DOT_GIT_EXT))
                     continue;
 
                 CheckUntrackedDirectory(dir, (relative_path.Length == 0 ? dirname : relative_path + "/" + dirname));

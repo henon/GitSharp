@@ -35,7 +35,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
+using System.Diagnostics;
+
+/*
  * A simple stopwatch which measures elapsed CPU time of the current thread. CPU
  * time is the time spent on executing your own code plus the time spent on
  * executing operating system calls triggered by your application.
@@ -44,8 +46,6 @@
  * current thread. The static method createInstance() will take care to return
  * only a new instance of this class if the VM is capable of returning CPU time.
  */
-using System.Diagnostics;
-
 public class CPUTimeStopWatch {
     private Stopwatch _stopWatch;
 	/**

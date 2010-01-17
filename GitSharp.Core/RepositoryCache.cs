@@ -270,9 +270,9 @@ namespace GitSharp.Core
 
                 string name = directory.Name;
                 DirectoryInfo parent = directory.Parent;
-                if (isGitRepository(new DirectoryInfo(Path.Combine(parent.FullName, name + ".git"))))
+                if (isGitRepository(new DirectoryInfo(Path.Combine(parent.FullName, name + Constants.DOT_GIT_EXT))))
                 {
-                    return new DirectoryInfo(Path.Combine(parent.FullName, name + ".git"));
+                    return new DirectoryInfo(Path.Combine(parent.FullName, name + Constants.DOT_GIT_EXT));
                 }
 
                 return null;

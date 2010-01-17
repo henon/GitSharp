@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Filterbranch : TextBuiltin
     {
-        private FilterbranchCommand cmd = new FilterbranchCommand();
+        private FilterBranchCommand cmd = new FilterBranchCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

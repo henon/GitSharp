@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Fmtmergemsg : TextBuiltin
     {
-        private FmtmergemsgCommand cmd = new FmtmergemsgCommand();
+        private FmtMergeMsgCommand cmd = new FmtMergeMsgCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

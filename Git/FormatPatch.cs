@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Formatpatch : TextBuiltin
     {
-        private FormatpatchCommand cmd = new FormatpatchCommand();
+        private FormatPatchCommand cmd = new FormatPatchCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

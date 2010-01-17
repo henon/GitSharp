@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Foreachref : TextBuiltin
     {
-        private ForeachrefCommand cmd = new ForeachrefCommand();
+        private ForEachRefCommand cmd = new ForEachRefCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

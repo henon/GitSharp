@@ -43,11 +43,11 @@ using System.Text;
 
 namespace GitSharp.Commands
 {
-    public class FormatpatchCommand
+    public class FormatPatchCommand
         : AbstractCommand
     {
 
-        public FormatpatchCommand() {
+        public FormatPatchCommand() {
         }
 
         // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.

@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Difffiles : TextBuiltin
     {
-        private DifffilesCommand cmd = new DifffilesCommand();
+        private DiffFilesCommand cmd = new DiffFilesCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Fastexport : TextBuiltin
     {
-        private FastexportCommand cmd = new FastexportCommand();
+        private FastExportCommand cmd = new FastExportCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

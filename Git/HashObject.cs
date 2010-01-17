@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Hashobject : TextBuiltin
     {
-        private HashobjectCommand cmd = new HashobjectCommand();
+        private HashObjectCommand cmd = new HashObjectCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

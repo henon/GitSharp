@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Checkoutindex : TextBuiltin
     {
-        private CheckoutindexCommand cmd = new CheckoutindexCommand();
+        private CheckoutIndexCommand cmd = new CheckoutIndexCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

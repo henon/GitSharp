@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Cherrypick : TextBuiltin
     {
-        private CherrypickCommand cmd = new CherrypickCommand();
+        private CherryPickCommand cmd = new CherryPickCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Difftree : TextBuiltin
     {
-        private DifftreeCommand cmd = new DifftreeCommand();
+        private DiffTreeCommand cmd = new DiffTreeCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

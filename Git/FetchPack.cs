@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Fetchpack : TextBuiltin
     {
-        private FetchpackCommand cmd = new FetchpackCommand();
+        private FetchPackCommand cmd = new FetchPackCommand();
         private static Boolean isHelp;
 
         public override void Run(string[] args)

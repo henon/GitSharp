@@ -168,7 +168,7 @@ namespace GitSharp.Commands
                     return Git.DefaultRepository;
                 return _repository;
             }
-            protected set
+            set // <--- for the time being this is public settable. we need to refactor in order to remove the Repository property from Clone and Init
             {
                 _repository = value;
             }

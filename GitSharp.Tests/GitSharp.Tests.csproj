@@ -187,6 +187,7 @@
     <Compile Include="GitSharp.Core\Util\StringExtensionsFixture.cs" />
     <Compile Include="GitSharp.Core\Util\StringUtilsTest.cs" />
     <Compile Include="GitSharp.Core\Util\TemporaryBufferTest.cs" />
+    <Compile Include="GitSharp.Core\Util\TestRepository.cs" />
     <Compile Include="GitSharp.Core\Util\TestRng.cs" />
     <Compile Include="GitSharp.Core\Util\VariousUtilityTests.cs" />
     <Compile Include="GitSharp.Core\ValidRefNameTest.cs" />

@@ -41,147 +41,147 @@ using NUnit.Framework;
 
 namespace GitSharp.Core.Tests.RevWalk
 {
-	[TestFixture]
-	public class RevObjectTest : RevWalkTestCase
-	{
-		[Test]
-		public void testId()
-		{
-			RevCommit a = Commit();
-			Assert.AreSame(a, a.getId());
-		}
+    [TestFixture]
+    public class RevObjectTest : RevWalkTestCase
+    {
+        [Test]
+        public void testId()
+        {
+            RevCommit a = Commit();
+            Assert.AreSame(a, a.getId());
+        }
 
-		[Test]
-		public void testEqualsIsIdentity()
-		{
-			RevCommit a1 = Commit();
-			RevCommit b1 = Commit();
+        [Test]
+        public void testEqualsIsIdentity()
+        {
+            RevCommit a1 = Commit();
+            RevCommit b1 = Commit();
 
-			Assert.IsTrue(a1.Equals(a1));
-			Assert.IsTrue(a1.Equals((object)a1));
-			Assert.IsFalse(a1.Equals(b1));
+            Assert.IsTrue(a1.Equals(a1));
+            Assert.IsTrue(a1.Equals((object)a1));
+            Assert.IsFalse(a1.Equals(b1));
 
-			Assert.IsFalse(a1.Equals(a1.Copy()));
-			Assert.IsFalse(a1.Equals((object)a1.Copy()));
-			Assert.IsFalse(a1.Equals(string.Empty));
+            Assert.IsFalse(a1.Equals(a1.Copy()));
+            Assert.IsFalse(a1.Equals((object)a1.Copy()));
+            Assert.IsFalse(a1.Equals(string.Empty));
 
-			var rw2 = new GitSharp.Core.RevWalk.RevWalk(db);
-			RevCommit a2 = rw2.parseCommit(a1);
-			RevCommit b2 = rw2.parseCommit(b1);
-			Assert.AreNotSame(a1, a2);
-			Assert.AreNotSame(b1, b2);
+            var rw2 = new GitSharp.Core.RevWalk.RevWalk(db);
+            RevCommit a2 = rw2.parseCommit(a1);
+            RevCommit b2 = rw2.parseCommit(b1);
+            Assert.AreNotSame(a1, a2);
+            Assert.AreNotSame(b1, b2);
 
-			Assert.IsFalse(a1.Equals(a2));
-			Assert.IsFalse(b1.Equals(b2));
+            Assert.IsFalse(a1.Equals(a2));
+            Assert.IsFalse(b1.Equals(b2));
 
-			Assert.AreEqual(a1.GetHashCode(), a2.GetHashCode());
-			Assert.AreEqual(b1.GetHashCode(), b2.GetHashCode());
+            Assert.AreEqual(a1.GetHashCode(), a2.GetHashCode());
+            Assert.AreEqual(b1.GetHashCode(), b2.GetHashCode());
 
-			Assert.IsTrue(AnyObjectId.equals(a1, a2));
-			Assert.IsTrue(AnyObjectId.equals(b1, b2));
-		}
+            Assert.IsTrue(AnyObjectId.equals(a1, a2));
+            Assert.IsTrue(AnyObjectId.equals(b1, b2));
+        }
 
-		[Test]
-		public void testRevObjectTypes()
-		{
-			Assert.AreEqual(Constants.OBJ_TREE, emptyTree.Type);
-			Assert.AreEqual(Constants.OBJ_COMMIT, Commit().Type);
-			Assert.AreEqual(Constants.OBJ_BLOB, blob(string.Empty).Type);
-			Assert.AreEqual(Constants.OBJ_TAG, Tag("emptyTree", emptyTree).Type);
-		}
+        [Test]
+        public void testRevObjectTypes()
+        {
+            Assert.AreEqual(Constants.OBJ_TREE, tree().Type);
+            Assert.AreEqual(Constants.OBJ_COMMIT, Commit().Type);
+            Assert.AreEqual(Constants.OBJ_BLOB, blob(string.Empty).Type);
+            Assert.AreEqual(Constants.OBJ_TAG, Tag("emptyTree", tree()).Type);
+        }
 
-		[Test]
-		public void testHasRevFlag()
-		{
-			RevCommit a = Commit();
-			Assert.IsFalse(a.has(RevFlag.UNINTERESTING));
-			a.Flags |= GitSharp.Core.RevWalk.RevWalk.UNINTERESTING;
-			Assert.IsTrue(a.has(RevFlag.UNINTERESTING));
-		}
+        [Test]
+        public void testHasRevFlag()
+        {
+            RevCommit a = Commit();
+            Assert.IsFalse(a.has(RevFlag.UNINTERESTING));
+            a.Flags |= GitSharp.Core.RevWalk.RevWalk.UNINTERESTING;
+            Assert.IsTrue(a.has(RevFlag.UNINTERESTING));
+        }
 
-		[Test]
-		public void testHasAnyFlag()
-		{
-			RevCommit a = Commit();
-			RevFlag flag1 = rw.newFlag("flag1");
-			RevFlag flag2 = rw.newFlag("flag2");
-			var s = new RevFlagSet { flag1, flag2 };
+        [Test]
+        public void testHasAnyFlag()
+        {
+            RevCommit a = Commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            var s = new RevFlagSet { flag1, flag2 };
 
-			Assert.IsFalse(a.hasAny(s));
-			a.Flags |= flag1.Mask;
-			Assert.IsTrue(a.hasAny(s));
-		}
+            Assert.IsFalse(a.hasAny(s));
+            a.Flags |= flag1.Mask;
+            Assert.IsTrue(a.hasAny(s));
+        }
 
-		[Test]
-		public void testHasAllFlag()
-		{
-			RevCommit a = Commit();
-			RevFlag flag1 = rw.newFlag("flag1");
-			RevFlag flag2 = rw.newFlag("flag2");
-			var s = new RevFlagSet { flag1, flag2 };
+        [Test]
+        public void testHasAllFlag()
+        {
+            RevCommit a = Commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            var s = new RevFlagSet { flag1, flag2 };
 
-			Assert.IsFalse(a.hasAll(s));
-			a.Flags |= flag1.Mask;
-			Assert.IsFalse(a.hasAll(s));
-			a.Flags |= flag2.Mask;
-			Assert.IsTrue(a.hasAll(s));
-		}
+            Assert.IsFalse(a.hasAll(s));
+            a.Flags |= flag1.Mask;
+            Assert.IsFalse(a.hasAll(s));
+            a.Flags |= flag2.Mask;
+            Assert.IsTrue(a.hasAll(s));
+        }
 
-		[Test]
-		public void testAddRevFlag()
-		{
-			RevCommit a = Commit();
-			RevFlag flag1 = rw.newFlag("flag1");
-			RevFlag flag2 = rw.newFlag("flag2");
-			Assert.AreEqual(0, a.Flags);
+        [Test]
+        public void testAddRevFlag()
+        {
+            RevCommit a = Commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            Assert.AreEqual(0, a.Flags);
 
-			a.add(flag1);
-			Assert.AreEqual(flag1.Mask, a.Flags);
+            a.add(flag1);
+            Assert.AreEqual(flag1.Mask, a.Flags);
 
-			a.add(flag2);
-			Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
-		}
+            a.add(flag2);
+            Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
+        }
 
-		[Test]
-		public void testAddRevFlagSet()
-		{
-			RevCommit a = Commit();
-			RevFlag flag1 = rw.newFlag("flag1");
-			RevFlag flag2 = rw.newFlag("flag2");
-			var s = new RevFlagSet { flag1, flag2 };
+        [Test]
+        public void testAddRevFlagSet()
+        {
+            RevCommit a = Commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            var s = new RevFlagSet { flag1, flag2 };
 
-			Assert.AreEqual(0, a.Flags);
+            Assert.AreEqual(0, a.Flags);
 
-			a.add(s);
-			Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
-		}
+            a.add(s);
+            Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
+        }
 
-		[Test]
-		public void testRemoveRevFlag()
-		{
-			RevCommit a = Commit();
-			RevFlag flag1 = rw.newFlag("flag1");
-			RevFlag flag2 = rw.newFlag("flag2");
-			a.add(flag1);
-			a.add(flag2);
-			Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
-			a.remove(flag2);
-			Assert.AreEqual(flag1.Mask, a.Flags);
-		}
+        [Test]
+        public void testRemoveRevFlag()
+        {
+            RevCommit a = Commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            a.add(flag1);
+            a.add(flag2);
+            Assert.AreEqual(flag1.Mask | flag2.Mask, a.Flags);
+            a.remove(flag2);
+            Assert.AreEqual(flag1.Mask, a.Flags);
+        }
 
-		[Test]
-		public void testRemoveRevFlagSet()
-		{
-			RevCommit a = Commit();
-			RevFlag flag1 = rw.newFlag("flag1");
-			RevFlag flag2 = rw.newFlag("flag2");
-			RevFlag flag3 = rw.newFlag("flag3");
-			var s = new RevFlagSet { flag1, flag2 };
-			a.add(flag3);
-			a.add(s);
-			Assert.AreEqual(flag1.Mask | flag2.Mask | flag3.Mask, a.Flags);
-			a.remove(s);
-			Assert.AreEqual(flag3.Mask, a.Flags);
-		}
-	}
+        [Test]
+        public void testRemoveRevFlagSet()
+        {
+            RevCommit a = Commit();
+            RevFlag flag1 = rw.newFlag("flag1");
+            RevFlag flag2 = rw.newFlag("flag2");
+            RevFlag flag3 = rw.newFlag("flag3");
+            var s = new RevFlagSet { flag1, flag2 };
+            a.add(flag3);
+            a.add(s);
+            Assert.AreEqual(flag1.Mask | flag2.Mask | flag3.Mask, a.Flags);
+            a.remove(s);
+            Assert.AreEqual(flag3.Mask, a.Flags);
+        }
+    }
 }

@@ -67,10 +67,10 @@ namespace GitSharp.Core.Tests.RevWalk
         [Test]
         public void testInsertOutOfOrder()
         {
-            RevCommit a = Parse(Commit());
-            RevCommit b = Parse(Commit(10, a));
-            RevCommit c1 = Parse(Commit(5, b));
-            RevCommit c2 = Parse(Commit(-50, b));
+            RevCommit a = parseBody(Commit());
+            RevCommit b = parseBody(Commit(10, a));
+            RevCommit c1 = parseBody(Commit(5, b));
+            RevCommit c2 = parseBody(Commit(-50, b));
 
             q.add(c2);
             q.add(a);
@@ -87,8 +87,8 @@ namespace GitSharp.Core.Tests.RevWalk
         [Test]
         public void testInsertTie()
         {
-            RevCommit a = Parse(Commit());
-            RevCommit b = Parse(Commit(0, a));
+            RevCommit a = parseBody(Commit());
+            RevCommit b = parseBody(Commit(0, a));
             {
                 q = create();
                 q.add(a);
@@ -112,9 +112,9 @@ namespace GitSharp.Core.Tests.RevWalk
         [Test]
         public void testCloneFIFO()
         {
-            RevCommit a = Parse(Commit());
-            RevCommit b = Parse(Commit(200, a));
-            RevCommit c = Parse(Commit(200, b));
+            RevCommit a = parseBody(Commit());
+            RevCommit b = parseBody(Commit(200, a));
+            RevCommit c = parseBody(Commit(200, b));
 
             var src = new FIFORevQueue();
             src.add(a);

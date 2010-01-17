@@ -68,7 +68,7 @@ namespace GitSharp.Core.Tests.RevWalk
             AssertCommit(a, objw.next());
             Assert.IsNull(objw.next());
 
-            Assert.AreSame(emptyTree, objw.nextObject());
+            Assert.AreSame(tree(), objw.nextObject());
             Assert.IsNull(objw.nextObject());
         }
 

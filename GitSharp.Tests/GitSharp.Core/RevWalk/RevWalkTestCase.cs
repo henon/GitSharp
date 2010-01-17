@@ -46,146 +46,98 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Tests.RevWalk
 {
-    
-	public abstract class RevWalkTestCase : RepositoryTestCase
-	{
-		private ObjectWriter _ow;
-		protected RevTree emptyTree;
-		protected long nowTick; // [henon] this are seconds in git internal time representaiton
-		protected GitSharp.Core.RevWalk.RevWalk rw;
 
-		[SetUp]
-		public override void setUp()
-		{
-			base.setUp();
-			_ow = new ObjectWriter(db);
-			rw = createRevWalk();
-            emptyTree = rw.parseTree(_ow.WriteTree(new Core.Tree(db)));
-			nowTick = 1236977987000L;
-		}
+    public abstract class RevWalkTestCase : RepositoryTestCase
+    {
+        private TestRepository util;
+        protected GitSharp.Core.RevWalk.RevWalk rw;
 
-		protected virtual GitSharp.Core.RevWalk.RevWalk createRevWalk()
-		{
-			return new GitSharp.Core.RevWalk.RevWalk(db);
-		}
+        [SetUp]
+        public override void setUp()
+        {
+            base.setUp();
+            util = new TestRepository(db, createRevWalk());
+            rw = util.getRevWalk();
+        }
 
-		protected void Tick(int secDelta)
-		{
-			nowTick += secDelta * 1000L;
-		}
+        protected virtual GitSharp.Core.RevWalk.RevWalk createRevWalk()
+        {
+            return new GitSharp.Core.RevWalk.RevWalk(db);
+        }
 
-		protected RevBlob blob(string content)
-		{
-			return rw.lookupBlob(_ow.WriteBlob(Constants.encode(content)));
-		}
+        protected DateTime getClock()
+        {
+            return util.getClock();
+        }
 
-		protected static DirCacheEntry File(string path, RevBlob blob)
-		{
-			var e = new DirCacheEntry(path);
-			e.setFileMode(FileMode.RegularFile);
-			e.setObjectId(blob);
-			return e;
-		}
+        protected void Tick(int secDelta)
+        {
+            util.tick(secDelta);
+        }
 
-		protected RevTree tree(params DirCacheEntry[] entries)
-		{
-			DirCache dc = DirCache.newInCore();
-			DirCacheBuilder b = dc.builder();
-			foreach (DirCacheEntry e in entries)
-			{
-				b.add(e);
-			}
-			b.finish();
-			return rw.lookupTree(dc.writeTree(_ow));
-		}
+        protected RevBlob blob(string content)
+        {
+            return util.blob(content);
+        }
 
-		protected RevObject get(RevTree tree, string path)
-		{
-			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
-			tw.setFilter(PathFilterGroup.createFromStrings(new[] { path }));
-			tw.reset(tree);
-			
-			while (tw.next())
-			{
-				if (tw.isSubtree() && !path.Equals(tw.getPathString()))
-				{
-					tw.enterSubtree();
-					continue;
-				}
-				ObjectId entid = tw.getObjectId(0);
-				FileMode entmode = tw.getFileMode(0);
-				return rw.lookupAny(entid, (int)entmode.ObjectType);
-			}
+        protected DirCacheEntry File(string path, RevBlob blob)
+        {
+            return util.file(path, blob);
+        }
 
-			Assert.Fail("Can't find " + path + " in tree " + tree.Name);
-			return null; // never reached.
-		}
+        protected RevTree tree(params DirCacheEntry[] entries)
+        {
+            return util.tree(entries);
+        }
 
-		protected RevCommit Commit(params RevCommit[] parents)
-		{
-			return Commit(1, emptyTree, parents);
-		}
+        protected RevObject get(RevTree tree, string path)
+        {
+            return util.get(tree, path);
+        }
 
-		protected RevCommit Commit(RevTree tree, params RevCommit[] parents)
-		{
-			return Commit(1, tree, parents);
-		}
+        protected RevCommit Commit(params RevCommit[] parents)
+        {
+            return util.commit(parents);
+        }
 
-		protected RevCommit Commit(int secDelta, params RevCommit[] parents)
-		{
-			return Commit(secDelta, emptyTree, parents);
-		}
+        protected RevCommit Commit(RevTree tree, params RevCommit[] parents)
+        {
+            return util.commit(tree, parents);
+        }
 
-		private RevCommit Commit(int secDelta, ObjectId tree, params RevCommit[] parents)
-		{
-			Tick(secDelta);
+        protected RevCommit Commit(int secDelta, params RevCommit[] parents)
+        {
+            return util.commit(secDelta, parents);
+        }
 
-            var c = new Core.Commit(db)
-			        	{
-			        		TreeId = tree,
-			        		ParentIds = parents,
-							Author = new PersonIdent(author, (nowTick).MillisToDateTime()), // [henon] offset?
-			        		Committer = new PersonIdent(committer, (nowTick).MillisToDateTime()),
-			        		Message = string.Empty
-			        	};
+        protected RevCommit Commit(int secDelta, RevTree tree, params RevCommit[] parents)
+        {
+            return util.commit(secDelta, tree, parents);
+        }
 
-			return rw.lookupCommit(_ow.WriteCommit(c));
-		}
+        protected RevTag Tag(string name, RevObject dst)
+        {
+            return util.tag(name, dst);
+        }
 
-		protected RevTag Tag(string name, RevObject dst)
-		{
-            var t = new Core.Tag(db)
-						{
-							TagType = Constants.typeString(dst.Type),
-							Id = dst.ToObjectId(),
-							TagName = name,
-                            Tagger = new PersonIdent(committer, (nowTick).MillisToDateTime()),
-							Message = string.Empty
-						};
+        protected T parseBody<T>(T t) where T : RevObject
+        {
+            return util.parseBody(t);
+        }
 
-			return (RevTag)rw.lookupAny(_ow.WriteTag(t), Constants.OBJ_TAG);
-		}
+        protected void MarkStart(RevCommit commit)
+        {
+            rw.markStart(commit);
+        }
 
-		protected T Parse<T>(T t)
-			where T : RevObject
-		{
-			rw.parseBody(t);
-			return t;
-		}
+        protected void MarkUninteresting(RevCommit commit)
+        {
+            rw.markUninteresting(commit);
+        }
 
-		protected void MarkStart(RevCommit commit)
-		{
-			rw.markStart(commit);
-		}
-
-		protected void MarkUninteresting(RevCommit commit)
-		{
-			rw.markUninteresting(commit);
-		}
-
-		protected static void AssertCommit(RevCommit exp, RevCommit act)
-		{
-			Assert.AreSame(exp, act);
-		}
-	}
+        protected static void AssertCommit(RevCommit exp, RevCommit act)
+        {
+            Assert.AreSame(exp, act);
+        }
+    }
 }

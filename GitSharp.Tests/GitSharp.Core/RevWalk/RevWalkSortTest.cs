@@ -103,8 +103,8 @@ namespace GitSharp.Core.Tests.RevWalk
             RevCommit b = Commit(a);
             RevCommit c = Commit(-5, b);
             RevCommit d = Commit(10, c);
-            Assert.IsTrue(Parse(a).CommitTime < Parse(d).CommitTime);
-            Assert.IsTrue(Parse(c).CommitTime < Parse(b).CommitTime);
+            Assert.IsTrue(parseBody(a).CommitTime < parseBody(d).CommitTime);
+            Assert.IsTrue(parseBody(c).CommitTime < parseBody(b).CommitTime);
 
             rw.sort(RevSort.COMMIT_TIME_DESC);
             MarkStart(d);

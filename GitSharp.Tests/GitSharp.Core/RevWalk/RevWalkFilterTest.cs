@@ -251,14 +251,14 @@ namespace GitSharp.Core.Tests.RevWalk
             RevCommit b = Commit(a);
             Tick(100);
 
-            DateTime since = (nowTick).MillisToDateTime();
+            DateTime since = getClock();
             RevCommit c1 = Commit(b);
             Tick(100);
 
             RevCommit c2 = Commit(b);
             Tick(100);
 
-            DateTime until = (nowTick).MillisToDateTime();
+            DateTime until = getClock();
             RevCommit d = Commit(c1, c2);
             Tick(100);
 

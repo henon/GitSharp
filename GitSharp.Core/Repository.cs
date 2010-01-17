@@ -171,21 +171,17 @@ namespace GitSharp.Core
 
             if (workDir == null)
             {
-                if (d != null)
+                String workTreeConfig = Config.getString("core", null, "worktree");
+                if (workTreeConfig != null)
                 {
-                    // Only read core.worktree if GIT_DIR is set explicitly. See
-                    // git-config(1).
-                    String workTreeConfig = Config.getString("core", null, "worktree");
-                    if (workTreeConfig != null)
-                    {
-                        workDir = (DirectoryInfo)FS.resolve(d, workTreeConfig);
-                    }
-                    else
-                    {
-                        workDir = Directory.Parent;
-                    }
+                    workDir = (DirectoryInfo)FS.resolve(d, workTreeConfig);
+                }
+                else
+                {
+                    workDir = Directory.Parent;
                 }
             }
+
             _refDb = new RefDatabase(this);
             if (objectDir != null)
                 _objectDatabase = new ObjectDirectory(PathUtil.CombineDirectoryPath(objectDir, ""),
@@ -928,10 +924,10 @@ namespace GitSharp.Core
             int usageCount = Interlocked.Decrement(ref _useCnt);
             if (usageCount == 0)
             {
-               if (_objectDatabase != null)
-               {
-                   _objectDatabase.Dispose();
-               }
+                if (_objectDatabase != null)
+                {
+                    _objectDatabase.Dispose();
+                }
 #if DEBUG
                 GC.SuppressFinalize(this); // Disarm lock-release checker
 #endif

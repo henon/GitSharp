@@ -36,15 +36,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace GitSharp.Core.Util
 {
-    /** Miscellaneous string comparison utility methods. */
+    /// <summary>
+    /// Miscellaneous string comparison utility methods.
+    /// </summary>
     public static class StringUtils
     {
         private static readonly char[] LC;
@@ -58,36 +56,33 @@ namespace GitSharp.Core.Util
                 LC[c] = (char)('a' + (c - 'A'));
         }
 
-        /**
-         * Convert the input to lowercase.
-         * <para />
-         * This method does not honor the JVM locale, but instead always behaves as
-         * though it is in the US-ASCII locale. Only characters in the range 'A'
-         * through 'Z' are converted. All other characters are left as-is, even if
-         * they otherwise would have a lowercase character equivilant.
-         *
-         * @param c
-         *            the input character.
-         * @return lowercase version of the input.
-         */
+        /// <summary>
+        /// Convert the input to lowercase.
+        /// <para>
+        /// This method does not honor the JVM locale, but instead always behaves as
+        /// though it is in the US-ASCII locale. Only characters in the range 'A'
+        /// through 'Z' are converted. All other characters are left as-is, even if
+        /// they otherwise would have a lowercase character equivalent.
+        /// </para>
+        /// </summary>
+        /// <param name="c">the input character.</param>
+        /// <returns>lowercase version of the input.</returns>
         public static char toLowerCase(char c)
         {
             return c <= 'Z' ? LC[c] : c;
         }
 
-        /**
-         * Convert the input string to lower case, according to the "C" locale.
-         * <para />
-         * This method does not honor the JVM locale, but instead always behaves as
-         * though it is in the US-ASCII locale. Only characters in the range 'A'
-         * through 'Z' are converted, all other characters are left as-is, even if
-         * they otherwise would have a lowercase character equivilant.
-         *
-         * @param in
-         *            the input string. Must not be null.
-         * @return a copy of the input string, After converting characters in the
-         *         range 'A'..'Z' to 'a'..'z'.
-         */
+        /// <summary>
+        /// Convert the input string to lower case, according to the "C" locale.
+        /// <para>
+        /// This method does not honor the JVM locale, but instead always behaves as
+        /// though it is in the US-ASCII locale. Only characters in the range 'A'
+        /// through 'Z' are converted, all other characters are left as-is, even if
+        /// they otherwise would have a lowercase character equivalent.
+        /// </para>
+        /// </summary>
+        /// <param name="in">the input string. Must not be null.</param>
+        /// <returns>a copy of the input string, After converting characters in the range 'A'..'Z' to 'a'..'z'.</returns>
         public static string toLowerCase(string @in)
         {
             StringBuilder r = new StringBuilder(@in.Length);
@@ -96,18 +91,16 @@ namespace GitSharp.Core.Util
             return r.ToString();
         }
 
-        /**
-         * Test if two strings are equal, ignoring case.
-         * <para />
-         * This method does not honor the JVM locale, but instead always behaves as
-         * though it is in the US-ASCII locale.
-         *
-         * @param a
-         *            first string to compare.
-         * @param b
-         *            second string to compare.
-         * @return true if a equals b
-         */
+        /// <summary>
+        /// Test if two strings are equal, ignoring case.
+        /// <para>
+        /// This method does not honor the JVM locale, but instead always behaves as
+        /// though it is in the US-ASCII locale.
+        /// </para>
+        /// </summary>
+        /// <param name="a">first string to compare.</param>
+        /// <param name="b">second string to compare.</param>
+        /// <returns>true if a equals b</returns>
         public static bool equalsIgnoreCase(string a, string b)
         {
             if (a == b)
@@ -121,8 +114,5 @@ namespace GitSharp.Core.Util
             }
             return true;
         }
-
-
     }
-
 }

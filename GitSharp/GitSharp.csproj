@@ -96,6 +96,7 @@
     <Compile Include="Commit.cs" />
     <Compile Include="AbstractObject.cs" />
     <Compile Include="Commands\FetchPackCommand.cs" />
+    <Compile Include="Diff.cs" />
     <Compile Include="IgnoreRules.cs" />
     <Compile Include="Index.cs" />
     <Compile Include="Commands\InitCommand.cs" />

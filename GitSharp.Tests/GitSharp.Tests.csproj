@@ -201,6 +201,7 @@
     <Compile Include="GitSharp\CloneTests.cs" />
     <Compile Include="GitSharp\CommitDateTests.cs" />
     <Compile Include="GitSharp\CommitTests.cs" />
+    <Compile Include="GitSharp\DiffTests.cs" />
     <Compile Include="GitSharp\EncodingTests.cs" />
     <Compile Include="GitSharp\FindGitDirectoryTests.cs" />
     <Compile Include="GitSharp\IgnoreTests.cs" />

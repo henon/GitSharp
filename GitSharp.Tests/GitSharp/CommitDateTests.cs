@@ -37,6 +37,7 @@
 
 
 using System;
+using GitSharp.Tests.GitSharp;
 using NUnit.Framework;
 
 namespace GitSharp.API.Tests

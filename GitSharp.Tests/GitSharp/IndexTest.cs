@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, nulltoken <emeric.fermas@gmail.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -40,6 +40,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GitSharp.Tests.GitSharp;
 using NUnit.Framework;
 using GitSharp.Core.Tests;
 using System.IO;
@@ -61,7 +62,7 @@ namespace GitSharp.API.Tests
                 index.Write(); // write empty index
                 new FileInfo(index_path).CopyTo(old_index);
                 string filepath = Path.Combine(workingDirectory, "for henon.txt");
-                File.WriteAllText(filepath, "Weißbier");
+                File.WriteAllText(filepath, "Wei�bier");
                 repo.Index.Add(filepath);
                 // now verify
                 Assert.IsTrue(new FileInfo(index_path).Exists);

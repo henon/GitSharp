@@ -1,4 +1,5 @@
-ï»¿using System.Linq;
+using System.Linq;
+using GitSharp.Tests.GitSharp;
 using NUnit.Framework;
 using System.IO;
 using System.Text;
@@ -15,7 +16,7 @@ namespace GitSharp.API.Tests
             using (Repository repo = Repository.Init(workingDirectory))
             {
                 string filepath = Path.Combine(workingDirectory, "for henon.txt");
-                File.WriteAllText(filepath, "WeiÃŸbier");
+                File.WriteAllText(filepath, "Weißbier");
                 repo.Index.Add(filepath);
                 string filepath1 = Path.Combine(workingDirectory, "for nulltoken.txt");
                 File.WriteAllText(filepath1, "Rotwein");
@@ -32,7 +33,7 @@ namespace GitSharp.API.Tests
                 var changes = commit.Changes.ToDictionary(change => change.Name);
                 Assert.AreEqual(ChangeType.Added, changes["for henon.txt"].ChangeType);
                 Assert.AreEqual(ChangeType.Added, changes["for nulltoken.txt"].ChangeType);
-                Assert.AreEqual("WeiÃŸbier", (changes["for henon.txt"].ComparedObject as Blob).Data);
+                Assert.AreEqual("Weißbier", (changes["for henon.txt"].ComparedObject as Blob).Data);
                 Assert.AreEqual("Rotwein", (changes["for nulltoken.txt"].ComparedObject as Blob).Data);
                 Assert.AreEqual(2, changes.Count);
             }
@@ -48,13 +49,13 @@ namespace GitSharp.API.Tests
                 File.WriteAllText(filepath, "This is a really short readme file\n\nWill write up some text here.");
                 repo.Index.Add(filepath);
                 //repo.Index.Remove(Path.Combine(workingDirectory, "a/a1"));
-                var commit = repo.Commit("Adding Ã¤ README\n\n", new Author("mÃ¼ller", "mÃ¼ller@gitsharp.org"));
+                var commit = repo.Commit("Adding ä README\n\n", new Author("müller", "müller@gitsharp.org"));
                 Assert.NotNull(commit);
                 Assert.IsTrue(commit.IsCommit);
                 Assert.AreEqual(commit.Parent.Hash, "49322bb17d3acc9146f98c97d078513228bbf3c0");
-                Assert.AreEqual("mÃ¼ller", commit.Author.Name);
-                Assert.AreEqual("mÃ¼ller@gitsharp.org", commit.Author.EmailAddress);
-                Assert.AreEqual("Adding Ã¤ README\n\n", commit.Message);
+                Assert.AreEqual("müller", commit.Author.Name);
+                Assert.AreEqual("müller@gitsharp.org", commit.Author.EmailAddress);
+                Assert.AreEqual("Adding ä README\n\n", commit.Message);
                 // check if tree contains the new file, get the blob and check  the content.
                 Assert.AreEqual(commit, repo.Head.CurrentCommit);
                 var previous = new Commit(repo, "HEAD^");

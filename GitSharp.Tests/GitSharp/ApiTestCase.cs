@@ -36,7 +36,7 @@
  */
 using GitSharp.Core.Tests;
 
-namespace GitSharp.API.Tests
+namespace GitSharp.Tests.GitSharp
 {
     public class ApiTestCase : SampleDataRepositoryTestCase
     {

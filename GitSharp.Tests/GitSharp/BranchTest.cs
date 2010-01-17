@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Paupaw <paupawsan@gmail.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -36,6 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.Tests.GitSharp;
 using NUnit.Framework;
 using System.IO;
 

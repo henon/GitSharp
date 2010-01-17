@@ -1,4 +1,5 @@
-﻿using System.IO;
+using System.IO;
+using GitSharp.Tests.GitSharp;
 using NUnit.Framework;
 
 namespace GitSharp.API.Tests

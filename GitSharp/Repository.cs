@@ -43,6 +43,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 using GitSharp.Commands;
+using GitSharp.Core;
 using CoreRepository = GitSharp.Core.Repository;
 using System.Text.RegularExpressions;
 
@@ -371,7 +372,7 @@ namespace GitSharp
             if (!bare)
             {
                 if (!Regex.IsMatch(path, "\\.git[/\\\\]?$"))
-                    path = Path.Combine(path, ".git");
+                    path = Path.Combine(path, Constants.DOT_GIT);
             }
 
             if (!DirExists(path))
@@ -439,7 +440,7 @@ namespace GitSharp
 
                 while (true)
                 {
-                    var git = Path.Combine(directory, ".git");
+                    var git = Path.Combine(directory, Constants.DOT_GIT);
                     if (DirExists(git))
                         return git;
 

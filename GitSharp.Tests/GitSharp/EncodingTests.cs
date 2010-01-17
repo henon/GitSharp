@@ -40,6 +40,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GitSharp.Core;
 using NUnit.Framework;
 using System.IO;
 
@@ -175,7 +176,7 @@ namespace GitSharp.API.Tests
                 new DirectoryInfo(Path.Combine(trash.FullName, "JapaneseRepo" + Path.GetRandomFileName()));
             CopyDirectory(resource.FullName, tempRepository.FullName);
 
-            var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, ".git"));
+            var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, Constants.DOT_GIT));
             Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
             using (Repository repo = new Repository(tempRepository.FullName))
             {

@@ -135,7 +135,7 @@ namespace GitSharp.Core.TreeWalk
 
 				if (_file.IsDirectory())
                 {
-					_mode = new DirectoryInfo(_file + "/.git").Exists ? FileMode.GitLink : FileMode.Tree;
+					_mode = PathUtil.CombineDirectoryPath((DirectoryInfo)_file, Constants.DOT_GIT).Exists ? FileMode.GitLink : FileMode.Tree;
                 }
 				else if (_file.IsFile())
                 {

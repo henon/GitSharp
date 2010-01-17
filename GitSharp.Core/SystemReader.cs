@@ -210,7 +210,7 @@ namespace GitSharp.Core
             			filename = Path.Combine(FS.systemHome().FullName, "gitconfig");
            				break;	
             		case ConfigFileType.Repo:
-           				filename = Path.Combine(FS.userHome().FullName, ".git");
+           				filename = Path.Combine(FS.userHome().FullName, Constants.DOT_GIT);
            				filename = Path.Combine(filename, "config");
             			break;
             		default:

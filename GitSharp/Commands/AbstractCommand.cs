@@ -91,7 +91,7 @@ namespace GitSharp.Commands
                     {
                         while (directory != null)
                         {
-                            gitDir = Path.Combine(directory, ".git");
+                            gitDir = Path.Combine(directory, Constants.DOT_GIT);
                             if (Directory.Exists(gitDir))
                                 return directory;
 
@@ -118,7 +118,7 @@ namespace GitSharp.Commands
             if (!directory.EndsWith(".git"))
             {
                 if (!isBare)
-                    directory = Path.Combine(directory, ".git");
+                    directory = Path.Combine(directory, Constants.DOT_GIT);
                 else
                     directory += ".git";
             }

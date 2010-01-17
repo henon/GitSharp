@@ -239,7 +239,7 @@ namespace GitSharp.Core.Tests.Util
 	 */
         private Core.Repository createRepository(bool bare) {
             String uniqueId = GetType().Name + Guid.NewGuid().ToString();
-            String gitdirName = "test" + uniqueId + (bare ? "" : "/") + ".git";
+            String gitdirName = "test" + uniqueId + (bare ? "" : "/") + Constants.DOT_GIT;
             DirectoryInfo gitdir = new DirectoryInfo(Path.Combine(trash.FullName, gitdirName));
             Core.Repository db = new Core.Repository(gitdir);
 

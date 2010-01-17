@@ -127,7 +127,7 @@ namespace GitSharp.Core
             {
                 workDir = workTree;
                 if (d == null)
-                    Directory = PathUtil.CombineDirectoryPath(workTree, ".git");
+                    Directory = PathUtil.CombineDirectoryPath(workTree, Constants.DOT_GIT);
                 else
                     Directory = d;
             }

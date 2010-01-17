@@ -263,9 +263,9 @@ namespace GitSharp.Core
                     return directory;
                 }
 
-				if (isGitRepository(new DirectoryInfo(Path.Combine(directory.FullName, ".git"))))
+                if (isGitRepository(PathUtil.CombineDirectoryPath(directory, Constants.DOT_GIT)))
 				{
-                    return new DirectoryInfo(Path.Combine(directory.FullName, ".git"));
+                    return PathUtil.CombineDirectoryPath(directory, Constants.DOT_GIT);
 				}
 
                 string name = directory.Name;

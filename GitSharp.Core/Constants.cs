@@ -389,7 +389,12 @@ namespace GitSharp.Core
         /// <summary>
         /// Default remote name used by clone, push and fetch operations
         /// </summary>
-        public static string DEFAULT_REMOTE_NAME = "origin";
+        public const string DEFAULT_REMOTE_NAME = "origin";
+
+        /// <summary>
+        /// Default name for the Git repository directory
+        /// </summary>
+        public const string DOT_GIT = ".git";
 
         /// <summary>
         /// A gitignore file name

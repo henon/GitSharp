@@ -140,7 +140,7 @@ namespace GitSharp.Core.Tests
             }
 
 			Assert.IsTrue(dir.Name.EndsWith(".git"));
-            Assert.AreEqual(".git", dir.Name);
+            Assert.AreEqual(Constants.DOT_GIT, dir.Name);
             DirectoryInfo parent = dir.Parent;
             using (Core.Repository lenient = RepositoryCache.open(RepositoryCache.FileKey.lenient(parent)))
             {

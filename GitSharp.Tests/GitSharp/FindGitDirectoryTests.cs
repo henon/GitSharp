@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GitSharp.Commands;
+using GitSharp.Core;
 using NUnit.Framework;
 using System.IO;
 
@@ -22,7 +23,7 @@ namespace GitSharp.API.Tests
                 System.Environment.SetEnvironmentVariable("GIT_DIR", path);
                 Git.DefaultGitDirectory = null; // override fallback
                 Assert.AreEqual(path + ".git", AbstractCommand.FindGitDirectory(null, false, true));
-                Assert.AreEqual(Path.Combine(path, ".git"), AbstractCommand.FindGitDirectory(null, false, false));
+                Assert.AreEqual(Path.Combine(path, Constants.DOT_GIT), AbstractCommand.FindGitDirectory(null, false, false));
             }
             finally
             {
@@ -43,7 +44,7 @@ namespace GitSharp.API.Tests
                 var path = Directory.GetCurrentDirectory();
                 Assert.IsFalse(path.EndsWith("git")); // <--- this should be the case anyway, but if not the next assertion would not pass correctly
                 Assert.AreEqual(Directory.GetCurrentDirectory() + ".git", AbstractCommand.FindGitDirectory(null, false, true));
-                Assert.AreEqual(Path.Combine(Directory.GetCurrentDirectory(), ".git"), AbstractCommand.FindGitDirectory(null, false, false));
+                Assert.AreEqual(Path.Combine(Directory.GetCurrentDirectory(), Constants.DOT_GIT), AbstractCommand.FindGitDirectory(null, false, false));
             }
             finally
             {
@@ -57,7 +58,7 @@ namespace GitSharp.API.Tests
             // it should override global fallback
             Git.DefaultGitDirectory = "abc/def/ghi";
             Assert.AreEqual("xyz.git", AbstractCommand.FindGitDirectory("xyz", false, true));
-            Assert.AreEqual(Path.Combine("xyz",".git"), AbstractCommand.FindGitDirectory("xyz", false, false));
+            Assert.AreEqual(Path.Combine("xyz",Constants.DOT_GIT), AbstractCommand.FindGitDirectory("xyz", false, false));
 
             // it should override env var
             Git.DefaultGitDirectory = null;
@@ -66,7 +67,7 @@ namespace GitSharp.API.Tests
             {
                 System.Environment.SetEnvironmentVariable("GIT_DIR", "uvw");
                 Assert.AreEqual("xyz.git", AbstractCommand.FindGitDirectory("xyz", false, true));
-                Assert.AreEqual(Path.Combine("xyz", ".git"), AbstractCommand.FindGitDirectory("xyz", false, false));
+                Assert.AreEqual(Path.Combine("xyz", Constants.DOT_GIT), AbstractCommand.FindGitDirectory("xyz", false, false));
             }
             finally
             {

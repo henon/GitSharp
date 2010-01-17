@@ -407,7 +407,7 @@ namespace GitSharp.Core.Transport
             }
             
             string result = elements2[elements2.Length - 1];
-	        if (DOT_GIT.Equals(result))
+            if (Constants.DOT_GIT.Equals(result))
 	        {
 	            result = elements2[elements2.Length - 2];
 	        }

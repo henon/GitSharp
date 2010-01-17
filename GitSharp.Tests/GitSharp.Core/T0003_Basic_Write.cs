@@ -54,14 +54,14 @@ namespace GitSharp.Core.Tests
         [Test]
         public void test001_Initalize()
         {
-            var gitdir = new DirectoryInfo(trash.FullName + "/.git");
-            var objects = new DirectoryInfo(gitdir.FullName + "/objects");
-            var objects_pack = new DirectoryInfo(objects.FullName + "/pack");
-            var objects_info = new DirectoryInfo(objects.FullName + "/info");
-            var refs = new DirectoryInfo(gitdir.FullName + "/refs");
-            var refs_heads = new DirectoryInfo(refs.FullName + "/heads");
-            var refs_tags = new DirectoryInfo(refs.FullName + "/tags");
-            var HEAD = new FileInfo(gitdir.FullName + "/HEAD");
+            var gitdir = PathUtil.CombineDirectoryPath(trash, Constants.DOT_GIT);
+            var objects = PathUtil.CombineDirectoryPath(gitdir, "objects");
+            var objects_pack = PathUtil.CombineDirectoryPath(objects, "pack");
+            var objects_info = PathUtil.CombineDirectoryPath(objects, "info");
+            var refs = PathUtil.CombineDirectoryPath(gitdir, "refs");
+            var refs_heads = PathUtil.CombineDirectoryPath(refs, "heads");
+            var refs_tags = PathUtil.CombineDirectoryPath(refs, "tags");
+            var HEAD = PathUtil.CombineFilePath(gitdir, "HEAD");
 
             Assert.IsTrue(trash.IsDirectory(), "Exists " + trash);
             Assert.IsTrue(objects.IsDirectory(), "Exists " + objects);
@@ -90,12 +90,12 @@ namespace GitSharp.Core.Tests
         public void test000_openrepo_default_gitDirSet()
         {
             DirectoryInfo repo1Parent = PathUtil.CombineDirectoryPath(trash.Parent, "r1");
-            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, ".git")))
+            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT)))
             {
                 repo1initial.Create();
             }
 
-            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, ".git");
+            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT);
             using (Repository r = new Repository(theDir, null))
             {
                 assertEqualsPath(theDir, r.Directory);
@@ -113,12 +113,12 @@ namespace GitSharp.Core.Tests
         public void test000_openrepo_default_gitDirAndWorkTreeSet()
         {
             DirectoryInfo repo1Parent = PathUtil.CombineDirectoryPath(trash.Parent, "r1");
-            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, ".git")))
+            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT)))
             {
                 repo1initial.Create();
             }
 
-            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, ".git");
+            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT);
             using (Repository r = new Repository(theDir, repo1Parent.Parent))
             {
                 assertEqualsPath(theDir, r.Directory);
@@ -136,12 +136,12 @@ namespace GitSharp.Core.Tests
         public void test000_openrepo_default_workDirSet()
         {
             DirectoryInfo repo1Parent = PathUtil.CombineDirectoryPath(trash.Parent, "r1");
-            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, ".git")))
+            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT)))
             {
                 repo1initial.Create();
             }
 
-            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, ".git");
+            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT);
             using (Repository r = new Repository(null, repo1Parent))
             {
                 assertEqualsPath(theDir, r.Directory);
@@ -161,14 +161,14 @@ namespace GitSharp.Core.Tests
             DirectoryInfo workdir = PathUtil.CombineDirectoryPath(trash.Parent, "rw");
             workdir.Mkdirs();
 
-            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, ".git")))
+            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT)))
             {
                 repo1initial.Create();
                 repo1initial.Config.setString("core", null, "worktree", workdir.FullName);
                 repo1initial.Config.save();
             }
 
-            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, ".git");
+            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT);
             using (Repository r = new Repository(theDir, null))
             {
                 assertEqualsPath(theDir, r.Directory);
@@ -188,14 +188,14 @@ namespace GitSharp.Core.Tests
             DirectoryInfo workdir = PathUtil.CombineDirectoryPath(trash.Parent, "rw");
             workdir.Mkdirs();
 
-            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, ".git")))
+            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT)))
             {
                 repo1initial.Create();
                 repo1initial.Config.setString("core", null, "worktree", "../../rw");
                 repo1initial.Config.save();
             }
 
-            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, ".git");
+            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT);
             using (Repository r = new Repository(theDir, null))
             {
                 assertEqualsPath(theDir, r.Directory);
@@ -218,12 +218,12 @@ namespace GitSharp.Core.Tests
             DirectoryInfo objDir = PathUtil.CombineDirectoryPath(trash, "../obj");
             DirectoryInfo[] altObjDirs = new[] { db.ObjectsDirectory };
 
-            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, ".git")))
+            using (Repository repo1initial = new Repository(PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT)))
             {
                 repo1initial.Create();
             }
 
-            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, ".git");
+            DirectoryInfo theDir = PathUtil.CombineDirectoryPath(repo1Parent, Constants.DOT_GIT);
             using (Repository r = new Repository(theDir, null, objDir, altObjDirs, indexFile))
             {
                 assertEqualsPath(theDir, r.Directory);

@@ -368,7 +368,7 @@ namespace GitSharp.Core.TreeWalk
         /// </param>
         protected void Init(Entry[] list)
         {
-            var treeEntries = new[] {".", "..", ".git"};
+            var treeEntries = new[] {".", "..", Constants.DOT_GIT};
 
             // Filter out nulls, . and .. as these are not valid tree entries,
             // also cache the encoded forms of the path names for efficient use

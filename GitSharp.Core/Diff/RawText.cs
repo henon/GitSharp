@@ -61,8 +61,31 @@ namespace GitSharp.Core.Diff
 		// The file content for this sequence.
 		private readonly byte[] content;
 
+        /// <summary>
+        /// The content of the raw text as byte array.
+        /// </summary>
+        public byte[] Content // <--- [henon] added accessor to be able to reuse the data structure from the api.
+	    {
+	        get
+	        {
+	            return content;
+	        }
+	    }
+
 		// Map of line number to starting position within content.
 		private readonly IntList lines;
+
+        /// <summary>
+        /// Represents starting points of lines in Content. Note: the line indices are 1-based and 
+        /// are mapped to 0-based positions in the Content byte array. As line indices are based on 1 the result of line 0 is undefined.
+        /// </summary>
+	    public IntList LineStartIndices // <--- [henon] added accessor to be able to reuse the data structure from the api.
+	    {
+	        get
+	        {
+	            return lines;
+	        }
+	    }
 
 		// Hash code for each line, for fast equality elimination.
 		private readonly IntList hashes;

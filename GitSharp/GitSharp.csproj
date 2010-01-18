@@ -111,6 +111,7 @@
     <Compile Include="ResetBehavior.cs" />
     <Compile Include="Commands\StatusCommand.cs" />
     <Compile Include="Tag.cs" />
+    <Compile Include="Text.cs" />
     <Compile Include="Tree.cs" />
     <Compile Include="RepositoryStatus.cs" />
     <Compile Include="UserInfoProvider.cs" />

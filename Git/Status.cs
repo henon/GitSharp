@@ -114,7 +114,7 @@ namespace GitSharp.CLI
                     //Execute the status using the specified file pattern
                     //cmd.Source = arguments[0];
                     cmd.Execute();
-                   
+                    Display();
                 }
                 else if (args.Length <= 0)
                 {
@@ -122,6 +122,7 @@ namespace GitSharp.CLI
                     //If changes have been made, commit them?
                     //Console.WriteLine("These commands still need to be implemented.");
                     cmd.Execute();
+                    Display();
                 }
                 else
                 {
@@ -130,25 +131,154 @@ namespace GitSharp.CLI
             }
             catch (OptionException e)
             {
-                Console.WriteLine(e.Message);
+                OutputStream.WriteLine(e.Message);
             }
         }
 
-        private static void OfflineHelp()
+        private void OfflineHelp()
         {
             if (!isHelp)
             {
                 isHelp = true;
-                Console.WriteLine("usage: git status [options] [--] <filepattern>...");
-                Console.WriteLine();
+                cmd.OutputStream.WriteLine("usage: git status [options] [--] <filepattern>...");
+                cmd.OutputStream.WriteLine();
                 options.WriteOptionDescriptions(Console.Out);
             }
         }
 
-        public static void DoStatus(String filepattern)
+        public void Display()
         {
-            
-            Console.WriteLine("This command still needs to be implemented.");
+            // The output below is used to display both where the file is being added and specifying the file.
+            // Unit testing is still pending.
+            /*OutputStream.WriteLine("# Staged Tests: StageType + status.Staged");
+            OutputStream.WriteLine("# Staged Total: " + (stagedModified.Count + stagedRemoved.Count + stagedMissing.Count + stagedAdded.Count));
+            OutputStream.WriteLine("# Test: Modified Object Count: " + stagedModified.Count);
+            OutputStream.WriteLine("# Test: Removed Object Count: " + stagedRemoved.Count);
+            OutputStream.WriteLine("# Test: Missing Object Count: " + stagedMissing.Count);
+            OutputStream.WriteLine("# Test: Added Object Count: " + stagedAdded.Count);
+            OutputStream.WriteLine("#");
+            OutputStream.WriteLine("# Modified Tests: StageType w/o status.Staged");
+            OutputStream.WriteLine("# Modified Total: " + (Modified.Count+Removed.Count+Missing.Count+Added.Count));
+            OutputStream.WriteLine("# Test: Changed Object Count: " + Modified.Count);
+            OutputStream.WriteLine("# Test: Removed Object Count: " + Removed.Count);
+            OutputStream.WriteLine("# Test: Missing Object Count: " + Missing.Count);
+            OutputStream.WriteLine("# Test: Added Object Count: " + Added.Count);
+            OutputStream.WriteLine("#");
+            OutputStream.WriteLine("# MergeConflict Tests: " + status.MergeConflict.Count);
+            OutputStream.WriteLine("# Test: Object Count: " + status.MergeConflict.Count);
+            OutputStream.WriteLine("#");
+            OutputStream.WriteLine("# UnTracked Tests: status.Untracked");
+            OutputStream.WriteLine("# Test: Untracked Object Count: " + status.Untracked.Count);
+            OutputStream.WriteLine("# Test: Ignored Object Count: Pending");
+            OutputStream.WriteLine("#");*/
+
+            //Display the stages of all files
+            doDisplayMergeConflict();
+            OutputStream.WriteLine("# On branch " + cmd.Repository.CurrentBranch.Name);
+            //OutputStream.WriteLine("# Your branch is ahead of 'xxx' by x commits."); //Todo
+            OutputStream.WriteLine("#");
+
+            doDisplayStaged();
+            doDisplayUnstaged();
+            doDisplayUntracked();
+
+            if (cmd.Results.StagedList.Count <= 0)
+            {
+                OutputStream.WriteLine("no changes added to commit (use \"git add\" and/or \"git commit -a\")");
+            }
+            else if (cmd.IndexSize <= 0)
+            {
+                OutputStream.WriteLine("# On branch " + cmd.Repository.CurrentBranch.Name);
+                OutputStream.WriteLine("#");
+                OutputStream.WriteLine("# Initial commit");
+                OutputStream.WriteLine("#");
+                OutputStream.WriteLine("# nothing to commit (create/copy files and use \"git add\" to track)");
+            }
+            else
+            {
+                OutputStream.WriteLine("# nothing to commit (working directory clean)");
+            }
+            //Leave this in until completed.
+            throw new NotImplementedException("The implementation is not yet complete. autocrlf support is not added.");
+        }
+
+        public void DoStatus(String filepattern)
+        {
+
+            OutputStream.WriteLine("This command still needs to be implemented.");
+        }
+
+        private void displayStatusList(Dictionary<string, int> statusList)
+        {
+            foreach (KeyValuePair<string, int> pair in statusList)
+            {
+                switch (pair.Value)
+                {
+                    case StatusType.Missing:
+                        OutputStream.WriteLine("# missing: " + pair.Key);
+                        break;
+                    case StatusType.Removed:
+                        OutputStream.WriteLine("# deleted: " + pair.Key);
+                        break;
+                    case StatusType.Modified:
+                        OutputStream.WriteLine("# modified: " + pair.Key);
+                        break;
+                    case StatusType.Added:
+                        OutputStream.WriteLine("# new file: " + pair.Key);
+                        break;
+                    case StatusType.MergeConflict:
+                        OutputStream.WriteLine("# unmerged: " + pair.Key);
+                        break;
+                }
+
+            }
+        }
+
+        private void doDisplayUnstaged()
+        {
+            if (cmd.Results.ModifiedList.Count > 0)
+            {
+                OutputStream.WriteLine("# Changed but not updated:");
+                OutputStream.WriteLine("# (use \"git add (file)...\" to update what will be committed)");
+                OutputStream.WriteLine("# (use \"git checkout -- (file)...\" to discard changes in working directory)");
+                OutputStream.WriteLine("#");
+                displayStatusList(cmd.Results.ModifiedList);
+                OutputStream.WriteLine("#");
+            }
+        }
+
+        private void doDisplayStaged()
+        {
+            if (cmd.Results.StagedList.Count > 0)
+            {
+                OutputStream.WriteLine("# Changes to be committed:");
+                OutputStream.WriteLine("# (use \"git reset HEAD (file)...\" to unstage)");
+                OutputStream.WriteLine("#");
+                displayStatusList(cmd.Results.StagedList);
+                OutputStream.WriteLine("#");
+            }
+        }
+
+        private void doDisplayUntracked()
+        {
+            if (cmd.Results.UntrackedList.Count > 0)
+            {
+                OutputStream.WriteLine("# Untracked files:");
+                OutputStream.WriteLine("# (use \"git add (file)...\" to include in what will be committed)");
+                OutputStream.WriteLine("#");
+                cmd.Results.UntrackedList.Sort();//.OrderBy(v => v.ToString());
+                foreach (string hash in cmd.Results.UntrackedList)
+                    OutputStream.WriteLine("# " + hash);
+            }
+        }
+
+        private void doDisplayMergeConflict()
+        {
+            foreach (KeyValuePair<string, int> hash in cmd.Results.ModifiedList)
+            {
+                if (hash.Value == 5)
+                    OutputStream.WriteLine(hash + ": needs merge");
+            }
         }
 
     }

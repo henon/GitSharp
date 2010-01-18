@@ -156,6 +156,16 @@ namespace GitSharp
 
         #endregion
 
+        #region Status
+
+        public static StatusResults Status(StatusCommand command)
+        {
+            //Populate the command with the status results
+            command.Execute();
+            return command.Results;
+        }
+
+        #endregion
 
     }
 }

@@ -79,14 +79,14 @@ namespace GitSharp
         /// <param name="b"></param>
         public Diff(byte[] a, byte[] b)
         {
-            m_sequence_a = a;
-            m_sequence_b = b;
-            var diff = new MyersDiff(new RawText(a), new RawText(b));
+            m_sequence_a = new Text(a);
+            m_sequence_b = new Text(b);
+            var diff = new MyersDiff((RawText)m_sequence_a, (RawText)m_sequence_b); // <--- using the undocumented cast operator of Text
             m_edits = diff.getEdits();
         }
 
-        private readonly byte[] m_sequence_a;
-        private readonly byte[] m_sequence_b;
+        private readonly Text m_sequence_a;
+        private readonly Text m_sequence_b;
 
         public bool HasDifferences
         {
@@ -109,16 +109,16 @@ namespace GitSharp
             {
                 if (m_edits.Count == 0)
                 {
-                    if (m_sequence_a.Length == 0 && m_sequence_b.Length == 0) // <-- no content so return no sections
+                    if (m_sequence_a.RawLength == 0 && m_sequence_b.RawLength == 0) // <-- no content so return no sections
                         yield break;
                     // there is content but no edits so return a single unchanged section.
-                    yield return new Section(m_sequence_a, m_sequence_b) { Status = SectionStatus.Unchanged, BeginA = 0, BeginB = 0, EndA = m_sequence_a.Length, EndB = m_sequence_b.Length };
+                    yield return new Section(m_sequence_a, m_sequence_b) { Status = SectionStatus.Unchanged, BeginA = 1, BeginB = 1, EndA = m_sequence_a.NumberOfLines + 1, EndB = m_sequence_b.NumberOfLines + 1 };
                     yield break;
                 }
                 if (m_edits.Count == 1 && m_edits[0].EditType == Edit.Type.EMPTY)
                     yield break;
-                if (m_edits[0].BeginA > 0 || m_edits[0].BeginB > 0) // <-- see if there is an unchanged section before the first edit
-                    yield return new Section(m_sequence_a, m_sequence_b) { Status = SectionStatus.Unchanged, BeginA = 0, BeginB = 0, EndA = m_edits[0].BeginA, EndB = m_edits[0].BeginB };
+                if (m_edits[0].BeginA > 1 || m_edits[0].BeginB > 1) // <-- see if there is an unchanged section before the first edit
+                    yield return new Section(m_sequence_a, m_sequence_b) { Status = SectionStatus.Unchanged, BeginA = 1, BeginB = 1, EndA = m_edits[0].BeginA+1, EndB = m_edits[0].BeginB+1 };
                 int index = 0;
                 Edit edit = null;
                 foreach (var e in m_edits)
@@ -130,14 +130,14 @@ namespace GitSharp
                     if (index + 1 >= m_edits.Count)
                         break;
                     var next_edit = m_edits[index + 1];
-                    if (next_edit.BeginA > edit.EndA || next_edit.BeginB > edit.EndB) // <-- see if there is a unchanged text block between the edits 
-                        yield return new Section(m_sequence_a, m_sequence_b, edit) { Status = SectionStatus.Unchanged, BeginA = edit.EndA, BeginB = edit.EndB, EndA = next_edit.BeginA, EndB = next_edit.BeginB };
+                    if (next_edit.BeginA > edit.EndA || next_edit.BeginB > edit.EndB) // <-- see if there is an unchanged text block between the edits 
+                        yield return new Section(m_sequence_a, m_sequence_b, edit) { Status = SectionStatus.Unchanged, BeginA = edit.EndA + 1, BeginB = edit.EndB + 1, EndA = next_edit.BeginA + 1, EndB = next_edit.BeginB + 1 };
                     index += 1;
                 }
                 if (edit == null)
                     yield break;
-                if (edit.EndA < m_sequence_a.Length || edit.EndB < m_sequence_b.Length) // <-- see if there is an unchanged section at the end
-                    yield return new Section(m_sequence_a, m_sequence_b) { Status = SectionStatus.Unchanged, BeginA = edit.EndA, BeginB = edit.EndB, EndA = m_sequence_a.Length, EndB = m_sequence_b.Length };
+                if (edit.EndA < m_sequence_a.NumberOfLines || edit.EndB < m_sequence_b.NumberOfLines) // <-- see if there is an unchanged section at the end
+                    yield return new Section(m_sequence_a, m_sequence_b) { Status = SectionStatus.Unchanged, BeginA = edit.EndA + 1, BeginB = edit.EndB + 1, EndA = m_sequence_a.NumberOfLines + 1, EndB = m_sequence_b.NumberOfLines + 1 };
             }
         }
 
@@ -183,30 +183,30 @@ namespace GitSharp
         /// </summary>
         public class Section
         {
-            public Section(byte[] a, byte[] b)
+            public Section(Text a, Text b)
             {
                 m_sequence_a = a;
                 m_sequence_b = b;
             }
 
-            private readonly byte[] m_sequence_a;
-            private readonly byte[] m_sequence_b;
+            private readonly Text m_sequence_a;
+            private readonly Text m_sequence_b;
 
-            internal Section(byte[] a, byte[] b, Edit edit)
+            internal Section(Text a, Text b, Edit edit)
                 : this(a, b)
             {
                 Status = SectionStatus.Different;
-                BeginA = edit.BeginA;
-                EndA = edit.EndA;
-                BeginB = edit.BeginB;
-                EndB = edit.EndB;
+                BeginA = edit.BeginA+1;
+                EndA = edit.EndA+1;
+                BeginB = edit.BeginB+1;
+                EndB = edit.EndB+1;
             }
 
             public byte[] RawTextA
             {
                 get
                 {
-                    return m_sequence_a.Skip(BeginA).Take(EndA - BeginA).ToArray();
+                    return m_sequence_a.GetRawBlock(BeginA, EndA);
                 }
             }
 
@@ -214,7 +214,7 @@ namespace GitSharp
             {
                 get
                 {
-                    return m_sequence_b.Skip(BeginB).Take(EndB - BeginB).ToArray();
+                    return m_sequence_b.GetRawBlock(BeginB, EndB);
                 }
             }
 
@@ -222,7 +222,7 @@ namespace GitSharp
             {
                 get
                 {
-                    return Encoding.UTF8.GetString(RawTextA);
+                    return m_sequence_a.GetBlock(BeginA, EndA);
                 }
             }
 
@@ -230,34 +230,49 @@ namespace GitSharp
             {
                 get
                 {
-                    return Encoding.UTF8.GetString(RawTextB);
+                    return m_sequence_b.GetBlock(BeginB, EndB);
                 }
             }
 
+            /// <summary>
+            /// Line index (1-based) of the begin of the block A. The block starts exactly at the beginning of the spedified line.
+            /// </summary>
             public int BeginA
             {
                 get;
                 internal set;
             }
 
+            /// <summary>
+            /// Line index (1-based) of the begin of the block B. The block starts exactly at the beginning of the spedified line.
+            /// </summary>
             public int BeginB
             {
                 get;
                 internal set;
             }
 
+            /// <summary>
+            /// Line index (1-based) of the end of the block A. The block ends exactly at the beginning of the specified line.
+            /// </summary>
             public int EndA
             {
                 get;
                 internal set;
             }
 
+            /// <summary>
+            /// Line index (1-based) of the end of the block B. The block ends exactly at the beginning of the specified line.
+            /// </summary>
             public int EndB
             {
                 get;
                 internal set;
             }
 
+            /// <summary>
+            /// Status of the diff section. Values may be Unchanged, Different and Conflicting
+            /// </summary>
             public SectionStatus Status
             {
                 get;

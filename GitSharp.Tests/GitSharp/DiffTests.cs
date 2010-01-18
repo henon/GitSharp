@@ -65,7 +65,7 @@ Madam, how like you this play?
 Queen:
 The lady doth protest too much, methinks.";
 
-        private static readonly byte[] RAW_TEXT = Encoding.UTF8.GetBytes(TEXT);
+        private static readonly Text Text = new Text(TEXT);
 
         [Test]
         public void EmptyDiffTest()
@@ -83,32 +83,64 @@ The lady doth protest too much, methinks.";
             Assert.AreEqual(1, diff.Sections.Count());
             var section = diff.Sections.First();
             Assert.AreEqual(Diff.SectionStatus.Unchanged, section.Status);
-            Assert.AreEqual(0, section.BeginA);
-            Assert.AreEqual(0, section.BeginB);
-            Assert.AreEqual(RAW_TEXT.Length, section.EndA);
-            Assert.AreEqual(RAW_TEXT.Length, section.EndB);
+            Assert.AreEqual(1, section.BeginA);
+            Assert.AreEqual(1, section.BeginB);
+            Assert.AreEqual(Text.NumberOfLines + 1, section.EndA);
+            Assert.AreEqual(Text.NumberOfLines + 1, section.EndB);
         }
 
         [Test]
-        public void DifferenceTest()
+        public void DifferenceAtTheBeginning()
         {
-            var diff = new Diff(TEXT, TEXT+"X");
-            foreach (var s in diff.Sections)
-            {
-                Console.WriteLine("==== A ====");
-                Console.WriteLine(s.TextA);
-                Console.WriteLine("==== B ====");
-                Console.WriteLine(s.TextB);
-                Console.WriteLine("-------------------\n");
-            }
+            var diff = new Diff(TEXT, "Quote from Hamlet:\n\n" + TEXT);
+            //DumpSections(diff);
+            Assert.IsTrue(diff.HasDifferences);
+            Assert.AreEqual(2, diff.Sections.Count());
+            var section = diff.Sections.First();
+            Assert.AreEqual(Diff.SectionStatus.Different, section.Status);
+            Assert.AreEqual(1, section.BeginA);
+            Assert.AreEqual(1, section.BeginB);
+            Assert.AreEqual(1, section.EndA);
+            Assert.AreEqual(3, section.EndB);
+            section = diff.Sections.Skip(1).First();
+            Assert.AreEqual(Diff.SectionStatus.Unchanged, section.Status);
+            Assert.AreEqual(1, section.BeginA);
+            Assert.AreEqual(3, section.BeginB);
+            Assert.AreEqual(Text.NumberOfLines + 1, section.EndA);
+            Assert.AreEqual(Text.NumberOfLines + 1 + 2, section.EndB);
+        }
+
+        [Test]
+        public void DifferenceAtTheEnd()
+        {
+            var diff = new Diff(TEXT, TEXT + "X");
+            //DumpSections(diff);
             Assert.IsTrue(diff.HasDifferences);
             Assert.AreEqual(2, diff.Sections.Count());
             var section = diff.Sections.First();
             Assert.AreEqual(Diff.SectionStatus.Unchanged, section.Status);
-            Assert.AreEqual(0, section.BeginA);
-            Assert.AreEqual(0, section.BeginB);
-            //Assert.AreEqual(RAW_TEXT.Length, section.EndA);
-            //Assert.AreEqual(RAW_TEXT.Length, section.EndB);
+            Assert.AreEqual(1, section.BeginA);
+            Assert.AreEqual(1, section.BeginB);
+            Assert.AreEqual(Text.NumberOfLines, section.EndA);
+            Assert.AreEqual(Text.NumberOfLines, section.EndB);
+            section = diff.Sections.Skip(1).First();
+            Assert.AreEqual(Diff.SectionStatus.Different, section.Status);
+            Assert.AreEqual(Text.NumberOfLines, section.BeginA);
+            Assert.AreEqual(Text.NumberOfLines, section.BeginB);
+            Assert.AreEqual(Text.NumberOfLines + 1, section.EndA);
+            Assert.AreEqual(Text.NumberOfLines + 1, section.EndB);
+        }
+
+        private static void DumpSections(Diff diff)
+        {
+            foreach (var s in diff.Sections)
+            {
+                Console.WriteLine("==== A ====");
+                Console.WriteLine("\"" + s.TextA + "\"");
+                Console.WriteLine("==== B ====");
+                Console.WriteLine("\"" + s.TextB + "\"");
+                Console.WriteLine("-------------------\n");
+            }
         }
     }
 }

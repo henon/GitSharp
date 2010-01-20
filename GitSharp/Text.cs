@@ -1,4 +1,41 @@
-﻿using System;
+﻿/*
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * - Redistributions in binary form must reproduce the above
+ *   copyright notice, this list of conditions and the following
+ *   disclaimer in the documentation and/or other materials provided
+ *   with the distribution.
+ *
+ * - Neither the name of the Git Development Community nor the
+ *   names of its contributors may be used to endorse or promote
+ *   products derived from this software without specific prior
+ *   written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,28 +46,45 @@ namespace GitSharp
 
     /// <summary>
     /// Represents a line-based text (delimited with standard line delimiters such as CR and/or LF) 
-    /// and allows access of lines by 1-based line number.
+    /// and allows access of lines by 1-based line number. Text holds a byte array internally which is used 
+    /// for the diff algorithms which work on byte level.
     /// <para/>
     /// Note: The first line number in the text is 1. 
     /// </summary>
     public class Text
     {
 
-        public Text(string text) : this(new RawText(Encoding.UTF8.GetBytes(text)))
+        /// <summary>
+        /// Create a text instance from a string. The encoding UTF8 is used as default for generating the underlying byte array. 
+        /// </summary>
+        /// <param name="text"></param>
+        public Text(string text) : this(text, Encoding.UTF8)
+        {
+        }
+
+        /// <summary>
+        /// Create a text instance from a string. The encoding is used for generating the underlying byte array. 
+        /// </summary>
+        /// <param name="text"></param>
+        public Text(string text, Encoding encoding)
+            : this(new RawText(encoding.GetBytes(text)), encoding)
         {
         }
 
         public Text(byte[] encoded_text)
-            : this(new RawText(encoded_text))
+            : this(new RawText(encoded_text), Encoding.UTF8)
         {
         }
 
-        internal Text(RawText raw_text)
+        internal Text(RawText raw_text, Encoding encoding)
         {
             m_raw_text = raw_text;
+            Encoding = encoding;
         }
 
         private readonly RawText m_raw_text;
+
+        public Encoding Encoding { get; set; }
 
         public static implicit operator RawText(Text text) // <-- [henon] undocumented cast operator to be able to get the wrapped core object.
         {
@@ -88,7 +142,7 @@ namespace GitSharp
 
         public string GetLine(int line)
         {
-            return Encoding.UTF8.GetString(GetRawLine(line));
+            return Encoding.GetString(GetRawLine(line));
         }
 
         /// <summary>
@@ -116,12 +170,12 @@ namespace GitSharp
 
         public string GetBlock(int start_line, int end_line)
         {
-            return Encoding.UTF8.GetString(GetRawBlock(start_line, end_line));
+            return Encoding.GetString(GetRawBlock(start_line, end_line));
         }
 
         public override string ToString()
         {
-            return Encoding.UTF8.GetString(RawContent);
+            return Encoding.GetString(RawContent);
         }
 
     }

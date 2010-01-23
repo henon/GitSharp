@@ -115,6 +115,7 @@ namespace GitSharp.Core.Tests
             }
 
             recursiveDelete(gitdir);
+            gitdir.Refresh();
             Assert.IsFalse(gitdir.Exists);
 
             var e =

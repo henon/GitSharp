@@ -46,201 +46,201 @@ using System.IO;
 
 namespace GitSharp.API.Tests
 {
-    [TestFixture]
-    public class RepositoryStatusTests : ApiTestCase
-    {
+	[TestFixture]
+	public class RepositoryStatusTests : ApiTestCase
+	{
 
-        [Test]
-        public void StatusEvenWorksWithHeadLessRepo()
-        {
-            using (var repo = Repository.Init(Path.Combine(trash.FullName, "test")))
-            {
-                RepositoryStatus status = null;
-                Assert.DoesNotThrow(() => status = repo.Status);
-                Assert.IsFalse(repo.Status.AnyDifferences);
-                Assert.AreEqual(0,
-                                status.Added.Count + status.Staged.Count + status.Missing.Count + status.Modified.Count +
-                                status.Removed.Count);
-            }
-        }
+		[Test]
+		public void StatusEvenWorksWithHeadLessRepo()
+		{
+			using (var repo = Repository.Init(Path.Combine(trash.FullName, "test")))
+			{
+				RepositoryStatus status = null;
+				Assert.DoesNotThrow(() => status = repo.Status);
+				Assert.IsFalse(repo.Status.AnyDifferences);
+				Assert.AreEqual(0,
+									 status.Added.Count + status.Staged.Count + status.Missing.Count + status.Modified.Count +
+									 status.Removed.Count);
+			}
+		}
 
-        [Test]
-        public void TracksAddedFiles()
-        {
-            //setup of .git directory
-            var resource =
-                new DirectoryInfo(Path.Combine(Path.Combine(Environment.CurrentDirectory, "Resources"),
-                                               "CorruptIndex"));
-            var tempRepository =
-                new DirectoryInfo(Path.Combine(trash.FullName, "CorruptIndex" + Path.GetRandomFileName()));
-            CopyDirectory(resource.FullName, tempRepository.FullName);
+		[Test]
+		public void TracksAddedFiles()
+		{
+			//setup of .git directory
+			var resource =
+				 new DirectoryInfo(Path.Combine(Path.Combine(Environment.CurrentDirectory, "Resources"),
+														  "CorruptIndex"));
+			var tempRepository =
+				 new DirectoryInfo(Path.Combine(trash.FullName, "CorruptIndex" + Path.GetRandomFileName()));
+			CopyDirectory(resource.FullName, tempRepository.FullName);
 
-            var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, Constants.DOT_GIT));
-            Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
+			var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, Constants.DOT_GIT));
+			Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
 
-            using (var repository = new Repository(repositoryPath.FullName))
-            {
-                var status = repository.Status;
+			using (var repository = new Repository(repositoryPath.FullName))
+			{
+				var status = repository.Status;
 
-                Assert.IsTrue(status.AnyDifferences);
-                Assert.AreEqual(1, status.Added.Count);
-                Assert.IsTrue(status.Added.Contains("b.txt")); // the file already exists in the index (eg. has been previously git added)
-                Assert.AreEqual(0, status.Staged.Count);
-                Assert.AreEqual(0, status.Missing.Count);
-                Assert.AreEqual(0, status.Modified.Count);
-                Assert.AreEqual(0, status.Removed.Count);
-                Assert.AreEqual(0, status.Untracked.Count);
+				Assert.IsTrue(status.AnyDifferences);
+				Assert.AreEqual(1, status.Added.Count);
+				Assert.IsTrue(status.Added.Contains("b.txt")); // the file already exists in the index (eg. has been previously git added)
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+				Assert.AreEqual(0, status.Untracked.Count);
 
-                string filepath = Path.Combine(repository.WorkingDirectory, "c.txt");
-                writeTrashFile(filepath, "c");
-                repository.Index.Add(filepath);
+				string filepath = Path.Combine(repository.WorkingDirectory, "c.txt");
+				writeTrashFile(filepath, "c");
+				repository.Index.Add(filepath);
 
-                status = repository.Status;
+				status = repository.Status;
 
-                Assert.IsTrue(status.AnyDifferences);
-                Assert.AreEqual(2, status.Added.Count);
-                Assert.IsTrue(status.Added.Contains("b.txt"));
-                Assert.IsTrue(status.Added.Contains("c.txt"));
-                Assert.AreEqual(0, status.Staged.Count);
-                Assert.AreEqual(0, status.Missing.Count);
-                Assert.AreEqual(0, status.Modified.Count);
-                Assert.AreEqual(0, status.Removed.Count);
-                Assert.AreEqual(0, status.Untracked.Count);
+				Assert.IsTrue(status.AnyDifferences);
+				Assert.AreEqual(2, status.Added.Count);
+				Assert.IsTrue(status.Added.Contains("b.txt"));
+				Assert.IsTrue(status.Added.Contains("c.txt"));
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+				Assert.AreEqual(0, status.Untracked.Count);
 
-                repository.Commit("after that no added files should remain", Author.Anonymous);
-                status = repository.Status;
+				repository.Commit("after that no added files should remain", Author.Anonymous);
+				status = repository.Status;
 
-                Assert.AreEqual(0, status.Added.Count);
-                Assert.AreEqual(0, status.Staged.Count);
-                Assert.AreEqual(0, status.Missing.Count);
-                Assert.AreEqual(0, status.Modified.Count);
-                Assert.AreEqual(0, status.Removed.Count);
-                Assert.AreEqual(0, status.Untracked.Count);
-                Assert.AreEqual(0, status.Untracked.Count);
-            }
-        }
+				Assert.AreEqual(0, status.Added.Count);
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+				Assert.AreEqual(0, status.Untracked.Count);
+				Assert.AreEqual(0, status.Untracked.Count);
+			}
+		}
 
-        [Test]
-        public void UntrackedFiles()
-        {
-            using (var repo = new Repository(trash.FullName))
-            {
-                var a = writeTrashFile("untracked.txt", "");
-                var b = writeTrashFile("someDirectory/untracked2.txt", "");
-                repo.Index.Add(writeTrashFile("untracked2.txt", "").FullName); // <-- adding a file with same name in higher directory to test the file name comparison.
-                var status = repo.Status;
-                Assert.AreEqual(2, status.Untracked.Count);
-                Assert.IsTrue(status.Untracked.Contains("untracked.txt"));
-                Assert.IsTrue(status.Untracked.Contains("someDirectory/untracked2.txt"));
-                Assert.IsTrue(status.Added.Contains("untracked2.txt"));
-                Assert.AreEqual(0, status.Staged.Count);
-                Assert.AreEqual(0, status.Missing.Count);
-                Assert.AreEqual(0, status.Modified.Count);
-                Assert.AreEqual(8, status.Removed.Count);
-            }
-        }
-
-
-        [Test]
-        public void Modified_and_Staged()
-        {
-            using (var repo = GetTrashRepository())
-            {
-                var index = repo.Index;
-                index.Add(writeTrashFile("file2", "file2").FullName, writeTrashFile("dir/file3", "dir/file3").FullName);
-                repo.Commit("committing file2 and dir/file2", Author.Anonymous);
-                index.Add(writeTrashFile("file2", "file2 changed").FullName, writeTrashFile("dir/file3", "dir/file3 changed").FullName);
-                writeTrashFile("dir/file3", "modified");
-
-                var status = repo.Status;
-
-                Assert.AreEqual(2, status.Staged.Count);
-                Assert.IsTrue(status.Staged.Contains("file2"));
-                Assert.IsTrue(status.Staged.Contains("dir/file3"));
-                Assert.AreEqual(1, status.Modified.Count);
-                Assert.IsTrue(status.Modified.Contains("dir/file3"));
-                Assert.AreEqual(0, status.Added.Count);
-                Assert.AreEqual(0, status.Removed.Count);
-                Assert.AreEqual(0, status.Missing.Count);
-                Assert.AreEqual(0, status.Untracked.Count);
-
-                repo.Commit("committing staged changes, modified files should still be modified", Author.Anonymous);
-                status = repo.Status;
-
-                Assert.AreEqual(0, status.Staged.Count);
-                Assert.AreEqual(1, status.Modified.Count);
-                Assert.IsTrue(status.Modified.Contains("dir/file3"));
-            }
-        }
-
-        [Test]
-        public void Removed()
-        {
-            using (var repo = GetTrashRepository())
-            {
-                var index = repo.Index;
-                index.Stage(writeTrashFile("file2", "file2").FullName, writeTrashFile("dir/file3", "dir/file3").FullName);
-                index.CommitChanges("...", Author.Anonymous);
-                index.Remove(Path.Combine(trash.FullName, "file2"), Path.Combine(trash.FullName, "dir"));
-
-                var diff = index.Status;
-                Assert.AreEqual(2, diff.Removed.Count);
-                Assert.IsTrue(diff.Removed.Contains("file2"));
-                Assert.IsTrue(diff.Removed.Contains("dir/file3"));
-                Assert.AreEqual(0, diff.Staged.Count);
-                Assert.AreEqual(0, diff.Modified.Count);
-                Assert.AreEqual(0, diff.Added.Count);
-                Assert.AreEqual(2, diff.Untracked.Count);
-                Assert.IsTrue(diff.Untracked.Contains("file2"));
-                Assert.IsTrue(diff.Untracked.Contains("dir/file3"));
-
-                repo.Commit("committing staged changes, this does not delete removed files from the working directory. they should be untracked now.", Author.Anonymous);
-                diff = repo.Status;
-
-                Assert.AreEqual(0, diff.Removed.Count);
-                Assert.AreEqual(2, diff.Untracked.Count);
-                Assert.IsTrue(diff.Untracked.Contains("file2"));
-                Assert.IsTrue(diff.Untracked.Contains("dir/file3"));
-            }
-        }
-
-        [Test]
-        public void Missing()
-        {
-            using (var repo = GetTrashRepository())
-            {
-                var index = repo.Index;
-                index.Stage(writeTrashFile("file2", "file2").FullName, writeTrashFile("dir/file3", "dir/file3").FullName);
-                index.CommitChanges("...", Author.Anonymous);
-                index.Stage(writeTrashFile("file4", "file4").FullName, writeTrashFile("dir/file4", "dir/file4").FullName);
-
-                new FileInfo(Path.Combine(repo.WorkingDirectory, "file2")).Delete();
-                new FileInfo(Path.Combine(repo.WorkingDirectory, "file4")).Delete();
-                new DirectoryInfo(Path.Combine(repo.WorkingDirectory, "dir")).Delete(true);
-
-                var diff = index.Status;
-                Assert.AreEqual(2, diff.Added.Count);
-                Assert.AreEqual(0, diff.Staged.Count);
-                Assert.AreEqual(0, diff.Modified.Count);
-                Assert.AreEqual(0, diff.Untracked.Count);
-                Assert.AreEqual(4, diff.Missing.Count);
-                Assert.IsTrue(diff.Missing.Contains("file2"));
-                Assert.IsTrue(diff.Missing.Contains("file4"));
-                Assert.IsTrue(diff.Missing.Contains("dir/file3"));
-                Assert.IsTrue(diff.Missing.Contains("dir/file4"));
+		[Test]
+		public void UntrackedFiles()
+		{
+			using (var repo = new Repository(trash.FullName))
+			{
+				var a = writeTrashFile("untracked.txt", "");
+				var b = writeTrashFile("someDirectory/untracked2.txt", "");
+				repo.Index.Add(writeTrashFile("untracked2.txt", "").FullName); // <-- adding a file with same name in higher directory to test the file name comparison.
+				var status = repo.Status;
+				Assert.AreEqual(2, status.Untracked.Count);
+				Assert.IsTrue(status.Untracked.Contains("untracked.txt"));
+				Assert.IsTrue(status.Untracked.Contains("someDirectory/untracked2.txt"));
+				Assert.IsTrue(status.Added.Contains("untracked2.txt"));
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(8, status.Removed.Count);
+			}
+		}
 
 
-                repo.Commit("committing the added files which are missing in the working directory", Author.Anonymous);
-                diff = repo.Status;
+		[Test]
+		public void Modified_and_Staged()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var index = repo.Index;
+				index.Add(writeTrashFile("file2", "file2").FullName, writeTrashFile("dir/file3", "dir/file3").FullName);
+				repo.Commit("committing file2 and dir/file2", Author.Anonymous);
+				index.Add(writeTrashFile("file2", "file2 changed").FullName, writeTrashFile("dir/file3", "dir/file3 changed").FullName);
+				writeTrashFile("dir/file3", "modified");
 
-                Assert.AreEqual(0, diff.Added.Count);
-                Assert.AreEqual(0, diff.Staged.Count);
-                Assert.AreEqual(0, diff.Modified.Count);
-                Assert.AreEqual(0, diff.Untracked.Count);
-                Assert.AreEqual(4, diff.Missing.Count);
-            }
-        }
+				var status = repo.Status;
+
+				Assert.AreEqual(2, status.Staged.Count);
+				Assert.IsTrue(status.Staged.Contains("file2"));
+				Assert.IsTrue(status.Staged.Contains("dir/file3"));
+				Assert.AreEqual(1, status.Modified.Count);
+				Assert.IsTrue(status.Modified.Contains("dir/file3"));
+				Assert.AreEqual(0, status.Added.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Untracked.Count);
+
+				repo.Commit("committing staged changes, modified files should still be modified", Author.Anonymous);
+				status = repo.Status;
+
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(1, status.Modified.Count);
+				Assert.IsTrue(status.Modified.Contains("dir/file3"));
+			}
+		}
+
+		[Test]
+		public void Removed()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var index = repo.Index;
+				index.Stage(writeTrashFile("file2", "file2").FullName, writeTrashFile("dir/file3", "dir/file3").FullName);
+				index.CommitChanges("...", Author.Anonymous);
+				index.Remove(Path.Combine(trash.FullName, "file2"), Path.Combine(trash.FullName, "dir"));
+
+				var diff = index.Status;
+				Assert.AreEqual(2, diff.Removed.Count);
+				Assert.IsTrue(diff.Removed.Contains("file2"));
+				Assert.IsTrue(diff.Removed.Contains("dir/file3"));
+				Assert.AreEqual(0, diff.Staged.Count);
+				Assert.AreEqual(0, diff.Modified.Count);
+				Assert.AreEqual(0, diff.Added.Count);
+				Assert.AreEqual(2, diff.Untracked.Count);
+				Assert.IsTrue(diff.Untracked.Contains("file2"));
+				Assert.IsTrue(diff.Untracked.Contains("dir/file3"));
+
+				repo.Commit("committing staged changes, this does not delete removed files from the working directory. they should be untracked now.", Author.Anonymous);
+				diff = repo.Status;
+
+				Assert.AreEqual(0, diff.Removed.Count);
+				Assert.AreEqual(2, diff.Untracked.Count);
+				Assert.IsTrue(diff.Untracked.Contains("file2"));
+				Assert.IsTrue(diff.Untracked.Contains("dir/file3"));
+			}
+		}
+
+		[Test]
+		public void Missing()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var index = repo.Index;
+				index.Stage(writeTrashFile("file2", "file2").FullName, writeTrashFile("dir/file3", "dir/file3").FullName);
+				index.CommitChanges("...", Author.Anonymous);
+				index.Stage(writeTrashFile("file4", "file4").FullName, writeTrashFile("dir/file4", "dir/file4").FullName);
+
+				new FileInfo(Path.Combine(repo.WorkingDirectory, "file2")).Delete();
+				new FileInfo(Path.Combine(repo.WorkingDirectory, "file4")).Delete();
+				new DirectoryInfo(Path.Combine(repo.WorkingDirectory, "dir")).Delete(true);
+
+				var diff = index.Status;
+				Assert.AreEqual(2, diff.Added.Count);
+				Assert.AreEqual(0, diff.Staged.Count);
+				Assert.AreEqual(0, diff.Modified.Count);
+				Assert.AreEqual(0, diff.Untracked.Count);
+				Assert.AreEqual(4, diff.Missing.Count);
+				Assert.IsTrue(diff.Missing.Contains("file2"));
+				Assert.IsTrue(diff.Missing.Contains("file4"));
+				Assert.IsTrue(diff.Missing.Contains("dir/file3"));
+				Assert.IsTrue(diff.Missing.Contains("dir/file4"));
 
 
-    }
+				repo.Commit("committing the added files which are missing in the working directory", Author.Anonymous);
+				diff = repo.Status;
+
+				Assert.AreEqual(0, diff.Added.Count);
+				Assert.AreEqual(0, diff.Staged.Count);
+				Assert.AreEqual(0, diff.Modified.Count);
+				Assert.AreEqual(0, diff.Untracked.Count);
+				Assert.AreEqual(4, diff.Missing.Count);
+			}
+		}
+
+
+	}
 }

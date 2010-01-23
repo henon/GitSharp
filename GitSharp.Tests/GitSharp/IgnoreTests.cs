@@ -43,13 +43,13 @@ using NUnit.Framework;
 
 namespace GitSharp.API.Tests
 {
-    [TestFixture]
-    public class IgnoreTests
-    {
-        [Test]
-        public void TestIgnore()
-        {
-            var rules = new GitSharp.IgnoreRules(new string[] {
+	[TestFixture]
+	public class IgnoreTests
+	{
+		[Test]
+		public void TestIgnore()
+		{
+			var rules = new GitSharp.IgnoreRules(new string[] {
                                                                   "*.[oa]", // ignore all *.o and *.a files
                                                                   "#!*.[oa]", // make sure comments are followed
                                                                   "*.html", // ignore all *.html
@@ -60,25 +60,25 @@ namespace GitSharp.API.Tests
                                                                   "!/bin/", // except if it's in the root
                                                               });
 
-            Assert.AreEqual(false, rules.IgnoreFile("project/", "project/Documentation/foo.html"));
-            Assert.AreEqual(true, rules.IgnoreFile("project/", "project/Documentation/gitignore.html"));
-            Assert.AreEqual(false, rules.IgnoreFile("project/", "project/src/Documentation/index.html"));
-            Assert.AreEqual(true, rules.IgnoreFile("project/", "project/Documentation/index.html"));
-            Assert.AreEqual(true, rules.IgnoreFile("project/", "project/gitignore.html"));
+			Assert.AreEqual(false, rules.IgnoreFile("project/", "project/Documentation/foo.html"));
+			Assert.AreEqual(true, rules.IgnoreFile("project/", "project/Documentation/gitignore.html"));
+			Assert.AreEqual(false, rules.IgnoreFile("project/", "project/src/Documentation/index.html"));
+			Assert.AreEqual(true, rules.IgnoreFile("project/", "project/Documentation/index.html"));
+			Assert.AreEqual(true, rules.IgnoreFile("project/", "project/gitignore.html"));
 
-            Assert.AreEqual(true, rules.IgnoreFile("project/", "project/file.o"));
-            Assert.AreEqual(true, rules.IgnoreFile("project/", "project/lib.a"));
-            Assert.AreEqual(true, rules.IgnoreFile("project/", "project/src/internal.o"));
+			Assert.AreEqual(true, rules.IgnoreFile("project/", "project/file.o"));
+			Assert.AreEqual(true, rules.IgnoreFile("project/", "project/lib.a"));
+			Assert.AreEqual(true, rules.IgnoreFile("project/", "project/src/internal.o"));
 
-            Assert.AreEqual(false, rules.IgnoreFile("project/", "project/Program.cs"));
-            Assert.AreEqual(false, rules.IgnoreFile("project/", "project/Program.suo"));
+			Assert.AreEqual(false, rules.IgnoreFile("project/", "project/Program.cs"));
+			Assert.AreEqual(false, rules.IgnoreFile("project/", "project/Program.suo"));
 
-            Assert.AreEqual(false, rules.IgnoreFile("project/", "project/bin"));
-            Assert.AreEqual(false, rules.IgnoreDir("project/", "project/bin"));
-            Assert.AreEqual(false, rules.IgnoreFile("project/", "project/data/bin"));
-            Assert.AreEqual(true, rules.IgnoreDir("project/", "project/src/bin"));
-            Assert.AreEqual(true, rules.IgnoreDir("project/", "project/src/bin/Project.dll"));
-            Assert.AreEqual(true, rules.IgnoreDir("project/", "project/src/bin/Project.pdb"));
-        }
-    }
+			Assert.AreEqual(false, rules.IgnoreFile("project/", "project/bin"));
+			Assert.AreEqual(false, rules.IgnoreDir("project/", "project/bin"));
+			Assert.AreEqual(false, rules.IgnoreFile("project/", "project/data/bin"));
+			Assert.AreEqual(true, rules.IgnoreDir("project/", "project/src/bin"));
+			Assert.AreEqual(true, rules.IgnoreDir("project/", "project/src/bin/Project.dll"));
+			Assert.AreEqual(true, rules.IgnoreDir("project/", "project/src/bin/Project.pdb"));
+		}
+	}
 }

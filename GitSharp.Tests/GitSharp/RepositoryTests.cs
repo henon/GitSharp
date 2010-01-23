@@ -45,45 +45,45 @@ using System.IO;
 
 namespace GitSharp.API.Tests
 {
-    [TestFixture]
-    public class RepositoryTests : ApiTestCase
-    {
+	[TestFixture]
+	public class RepositoryTests : ApiTestCase
+	{
 
-        [Test]
-        public void ImplicitConversionToCoreRepo()
-        {
-            using (var repo = this.GetTrashRepository())
-            {
-                Assert.IsTrue(repo is Repository);
-                GitSharp.Core.Repository core_repo = repo;
-                Assert.IsTrue(core_repo is GitSharp.Core.Repository);
-            }
-        }
+		[Test]
+		public void ImplicitConversionToCoreRepo()
+		{
+			using (var repo = this.GetTrashRepository())
+			{
+				Assert.IsTrue(repo is Repository);
+				GitSharp.Core.Repository core_repo = repo;
+				Assert.IsTrue(core_repo is GitSharp.Core.Repository);
+			}
+		}
 
-        [Test]
-        public void FindRepository()
-        {
-            var was_here = Directory.GetCurrentDirectory();
-            try
-            {
-                using (var repo = this.GetTrashRepository())
-                {
-                    Assert.AreEqual(repo.Directory, Repository.FindRepository(repo.WorkingDirectory));
-                    Assert.AreEqual(repo.Directory, Repository.FindRepository(repo.Directory));
-                    var root = repo.WorkingDirectory;
-                    var hmm = Path.Combine(root, "hmm");
-                    Directory.CreateDirectory(hmm);
-                    Assert.AreEqual(repo.Directory, Repository.FindRepository(hmm));
-                    Assert.AreEqual(null, Repository.FindRepository("Q://a path that surely does not exist " + Path.GetRandomFileName()));
-                    Directory.SetCurrentDirectory(hmm);
-                    Assert.AreEqual(repo.Directory, Repository.FindRepository(null));
-                }
-            }
-            finally
-            {
-                Directory.SetCurrentDirectory(was_here);
-            }
-        }
+		[Test]
+		public void FindRepository()
+		{
+			var was_here = Directory.GetCurrentDirectory();
+			try
+			{
+				using (var repo = this.GetTrashRepository())
+				{
+					Assert.AreEqual(repo.Directory, Repository.FindRepository(repo.WorkingDirectory));
+					Assert.AreEqual(repo.Directory, Repository.FindRepository(repo.Directory));
+					var root = repo.WorkingDirectory;
+					var hmm = Path.Combine(root, "hmm");
+					Directory.CreateDirectory(hmm);
+					Assert.AreEqual(repo.Directory, Repository.FindRepository(hmm));
+					Assert.AreEqual(null, Repository.FindRepository("Q://a path that surely does not exist " + Path.GetRandomFileName()));
+					Directory.SetCurrentDirectory(hmm);
+					Assert.AreEqual(repo.Directory, Repository.FindRepository(null));
+				}
+			}
+			finally
+			{
+				Directory.SetCurrentDirectory(was_here);
+			}
+		}
 
-    }
+	}
 }

@@ -43,54 +43,54 @@ using NUnit.Framework;
 
 namespace GitSharp.API.Tests
 {
-    [TestFixture]
-    class StatusTests : ApiTestCase
-    {
-        [Test]
-        public void IsFileUntracked()
-        {
-            bool bare = false;
-            var path = Path.Combine(trash.FullName, "test");
-            using (var repo = Repository.Init(path, bare))
-            {
-                StatusCommand cmd = new StatusCommand();
-                Assert.IsNotNull(cmd);
-                cmd.Repository = repo;
-                Assert.IsNotNull(cmd.Repository);
-                //Verify the file is not already created
-                string filename = "newfile.txt";
-                StatusResults results = Git.Status(cmd);
-                Assert.IsNotNull(results);
-                Assert.IsFalse(results.Contains(filename, StatusState.Untracked));
-                //Create the file and re-populate the status results
-                string filepath = Path.Combine(repo.WorkingDirectory, filename);
-                File.WriteAllText(filepath, "Just a simple test.");
-                StatusResults results1 = Git.Status(cmd);
-                Assert.IsNotNull(results1);
-                Assert.IsTrue(results1.Contains(filename, StatusState.Untracked));
-            }
-        }
+	[TestFixture]
+	class StatusTests : ApiTestCase
+	{
+		[Test]
+		public void IsFileUntracked()
+		{
+			bool bare = false;
+			var path = Path.Combine(trash.FullName, "test");
+			using (var repo = Repository.Init(path, bare))
+			{
+				StatusCommand cmd = new StatusCommand();
+				Assert.IsNotNull(cmd);
+				cmd.Repository = repo;
+				Assert.IsNotNull(cmd.Repository);
+				//Verify the file is not already created
+				string filename = "newfile.txt";
+				StatusResults results = Git.Status(cmd);
+				Assert.IsNotNull(results);
+				Assert.IsFalse(results.Contains(filename, StatusState.Untracked));
+				//Create the file and re-populate the status results
+				string filepath = Path.Combine(repo.WorkingDirectory, filename);
+				File.WriteAllText(filepath, "Just a simple test.");
+				StatusResults results1 = Git.Status(cmd);
+				Assert.IsNotNull(results1);
+				Assert.IsTrue(results1.Contains(filename, StatusState.Untracked));
+			}
+		}
 
-        [Test]
-        public void IsFileModified()
-        {
-            //Requires the add command to implement.
-            Assert.Ignore("This test has not been implemented yet.");
-        }
+		[Test]
+		public void IsFileModified()
+		{
+			//Requires the add command to implement.
+			Assert.Ignore("This test has not been implemented yet.");
+		}
 
-        [Test]
-        public void IsFileStaged()
-        {
-            //Requires the add command to implement.
-            Assert.Ignore("This test has not been implemented yet.");
-        }
+		[Test]
+		public void IsFileStaged()
+		{
+			//Requires the add command to implement.
+			Assert.Ignore("This test has not been implemented yet.");
+		}
 
-        //Tests if a file can be staged and modified at the same time.
-        //In git, this behavior is allowed. This behavior is still pending in GitSharp.
-        public void IsFileStagedAndModified()
-        {
-            //Requires the add command to implement.
-            Assert.Ignore("This test has not been implemented yet.");
-        }
-    }
+		//Tests if a file can be staged and modified at the same time.
+		//In git, this behavior is allowed. This behavior is still pending in GitSharp.
+		public void IsFileStagedAndModified()
+		{
+			//Requires the add command to implement.
+			Assert.Ignore("This test has not been implemented yet.");
+		}
+	}
 }

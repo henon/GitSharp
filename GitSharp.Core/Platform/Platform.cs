@@ -42,25 +42,36 @@ namespace GitSharp.Core.Platform
 {
     public static class Platform1
     {
+        enum GitPlatformID
+        {
+          Win32S = PlatformID.Win32S,
+          Win32Windows = PlatformID.Win32Windows,
+          Win32NT = PlatformID.Win32NT,
+          WinCE = PlatformID.WinCE,
+          Unix = PlatformID.Unix,
+          Xbox,
+          MacOSX,
+        }
+        
 	
         public static PlatformObject Load()
         {
-            System.OperatingSystem os = Environment.OSVersion;
-            PlatformID pid = os.Platform;
+           System.OperatingSystem os = Environment.OSVersion;
+           GitPlatformID pid = (GitPlatformID)os.Platform;
             PlatformObject obj;
 			
             switch (pid)
             {
-                case PlatformID.Unix:
+               case GitPlatformID.Unix:
                     obj = GitSharp.Platform.OSS.Linux.Load();
                     break;
-                case PlatformID.MacOSX:
+               case GitPlatformID.MacOSX:
                     obj = GitSharp.Platform.Macintosh.Mac.Load();
                     break;
-                case PlatformID.Win32NT:
-                case PlatformID.Win32S:
-                case PlatformID.Win32Windows:
-                case PlatformID.WinCE:
+               case GitPlatformID.Win32NT:
+               case GitPlatformID.Win32S:
+               case GitPlatformID.Win32Windows:
+               case GitPlatformID.WinCE:
                     obj = GitSharp.Platform.Windows.Win32.Load();
                     break;
                 default:
@@ -73,21 +84,21 @@ namespace GitSharp.Core.Platform
         public static bool IsHardlinkSupported()
         {
             System.OperatingSystem os = Environment.OSVersion;
-            PlatformID pid = os.Platform;
+            GitPlatformID pid = (GitPlatformID)os.Platform;
             bool isSupported = false;
 			
             switch (pid)
             {
-                case PlatformID.Unix:
+               case GitPlatformID.Unix:
                     isSupported = GitSharp.Platform.OSS.Linux.IsHardlinkSupported();
                     break;
-                case PlatformID.MacOSX:
+               case GitPlatformID.MacOSX:
                     isSupported = GitSharp.Platform.Macintosh.Mac.IsHardlinkSupported();
                     break;
-                case PlatformID.Win32NT:
-                case PlatformID.Win32S:
-                case PlatformID.Win32Windows:
-                case PlatformID.WinCE:
+                case GitPlatformID.Win32NT:
+                case GitPlatformID.Win32S:
+                case GitPlatformID.Win32Windows:
+                case GitPlatformID.WinCE:
                     isSupported = GitSharp.Platform.Windows.Win32.IsHardlinkSupported();
                     break;
                 default:
@@ -100,21 +111,21 @@ namespace GitSharp.Core.Platform
         public static bool IsSymlinkSupported()
         {
             System.OperatingSystem os = Environment.OSVersion;
-            PlatformID pid = os.Platform;
+            GitPlatformID pid = (GitPlatformID)os.Platform;
             bool isSupported = false;
 		
             switch (pid)
             {
-                case PlatformID.Unix:
+               case GitPlatformID.Unix:
                     isSupported = GitSharp.Platform.OSS.Linux.IsSymlinkSupported();
                     break;
-                case PlatformID.MacOSX:
+               case GitPlatformID.MacOSX:
                     isSupported = GitSharp.Platform.Macintosh.Mac.IsSymlinkSupported();
                     break;
-                case PlatformID.Win32NT:
-                case PlatformID.Win32S:
-                case PlatformID.Win32Windows:
-                case PlatformID.WinCE:
+               case GitPlatformID.Win32NT:
+               case GitPlatformID.Win32S:
+               case GitPlatformID.Win32Windows:
+               case GitPlatformID.WinCE:
                     isSupported = GitSharp.Platform.Windows.Win32.IsSymlinkSupported();
                     break;
                 default:
@@ -127,21 +138,21 @@ namespace GitSharp.Core.Platform
         public static bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory)
         {
             System.OperatingSystem os = Environment.OSVersion;
-            PlatformID pid = os.Platform;
+            GitPlatformID pid = (GitPlatformID)os.Platform;
             bool success = false;
 			
             switch (pid)
             {
-                case PlatformID.Unix:
+               case GitPlatformID.Unix:
                     success = GitSharp.Platform.OSS.Linux.CreateSymlink(symlinkFilename, existingFilename, isSymlinkDirectory);
                     break;
-                case PlatformID.MacOSX:
+               case GitPlatformID.MacOSX:
                     success = GitSharp.Platform.Macintosh.Mac.CreateSymlink(symlinkFilename, existingFilename, isSymlinkDirectory);
                     break;
-                case PlatformID.Win32NT:
-                case PlatformID.Win32S:
-                case PlatformID.Win32Windows:
-                case PlatformID.WinCE:
+               case GitPlatformID.Win32NT:
+               case GitPlatformID.Win32S:
+               case GitPlatformID.Win32Windows:
+               case GitPlatformID.WinCE:
                     success = GitSharp.Platform.Windows.Win32.CreateSymlink(symlinkFilename, existingFilename, isSymlinkDirectory);
                     break;
                 default:
@@ -154,21 +165,21 @@ namespace GitSharp.Core.Platform
         public static bool CreateHardlink(string hardlinkFilename, string exisitingFilename)
         {
             System.OperatingSystem os = Environment.OSVersion;
-            PlatformID pid = os.Platform;
+            GitPlatformID pid = (GitPlatformID)os.Platform;
             bool success = false;
 		
             switch (pid)
             {
-                case PlatformID.Unix:
+               case GitPlatformID.Unix:
                     success = GitSharp.Platform.OSS.Linux.CreateHardlink(hardlinkFilename, exisitingFilename);
                     break;
-                case PlatformID.MacOSX:
+               case GitPlatformID.MacOSX:
                     success = GitSharp.Platform.Macintosh.Mac.CreateHardlink(hardlinkFilename, exisitingFilename);
                     break;
-                case PlatformID.Win32NT:
-                case PlatformID.Win32S:
-                case PlatformID.Win32Windows:
-                case PlatformID.WinCE:
+               case GitPlatformID.Win32NT:
+               case GitPlatformID.Win32S:
+               case GitPlatformID.Win32Windows:
+               case GitPlatformID.WinCE:
                     success = GitSharp.Platform.Windows.Win32.CreateHardlink(hardlinkFilename, exisitingFilename);
                     break;
                 default:

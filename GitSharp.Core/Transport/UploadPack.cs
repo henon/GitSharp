@@ -78,6 +78,19 @@ namespace GitSharp.Core.Transport
         private PacketLineIn _pckIn;
         private PacketLineOut _pckOut;
 
+        /// <summary>
+        /// Is the client connection a bi-directional socket or pipe?
+        /// <para/>
+        /// If true, this class assumes it can perform multiple read and write cycles
+        /// with the client over the input and output streams. This matches the
+        /// functionality available with a standard TCP/IP connection, or a local
+        /// operating system or in-memory pipe.
+        /// <para/>
+        /// If false, this class runs in a read everything then output results mode,
+        /// making it suitable for single round-trip systems RPCs such as HTTP.
+        /// </summary>
+        private bool biDirectionalPipe = true;
+
         ///	<summary>
         /// Create a new pack upload for an open repository.
         /// </summary>
@@ -116,6 +129,29 @@ namespace GitSharp.Core.Transport
         {
             get { return _timeout; }
             set { _timeout = value; }
+        }
+
+        /// <returns>
+        /// true if this class expects a bi-directional pipe opened between
+        /// the client and itself. The default is true.
+        /// </returns>
+        public bool isBiDirectionalPipe()
+        {
+            return biDirectionalPipe;
+        }
+
+        /// <summary>
+        /// if true, this class will assume the socket is a fully
+        /// bidirectional pipe between the two peers and takes advantage
+        /// of that by first transmitting the known refs, then waiting to
+        /// read commands. If false, this class assumes it must read the
+        /// commands before writing output and does not perform the
+        /// initial advertising.
+        /// </summary>
+        /// <param name="twoWay"></param>
+        public void setBiDirectionalPipe(bool twoWay)
+        {
+            biDirectionalPipe = twoWay;
         }
 
         /// <summary>
@@ -157,7 +193,24 @@ namespace GitSharp.Core.Transport
 
         private void Service()
         {
-            SendAdvertisedRefs();
+            if (biDirectionalPipe)
+                SendAdvertisedRefs();
+            else
+            {
+                _refs = _db.getAllRefs();
+                foreach (Ref r in _refs.Values)
+                {
+                    try
+                    {
+                        _walk.parseAny(r.ObjectId).add(ADVERTISED);
+                    }
+                    catch (IOException e)
+                    {
+                        // Skip missing/corrupt objects
+                    }
+                }
+            }
+
             RecvWants();
             if (_wantAll.Count == 0) return;
             if (_options.Contains(OPTION_MULTI_ACK_DETAILED))
@@ -167,8 +220,8 @@ namespace GitSharp.Core.Transport
             else
                 _multiAck = BasePackFetchConnection.MultiAck.OFF;
 
-            Negotiate();
-            SendPack();
+            if (Negotiate())
+                SendPack();
         }
 
         private void SendAdvertisedRefs()
@@ -265,7 +318,7 @@ namespace GitSharp.Core.Transport
 
         }
 
-        private void Negotiate()
+        private bool Negotiate()
         {
             string lastName = string.Empty;
 
@@ -280,6 +333,9 @@ namespace GitSharp.Core.Transport
                         _pckOut.WriteString("NAK\n");
                     }
                     _pckOut.Flush();
+
+                    if (!biDirectionalPipe)
+                        return false;
                 }
                 else if (line.StartsWith("have ") && line.Length == 45)
                 {
@@ -332,7 +388,7 @@ namespace GitSharp.Core.Transport
                         _pckOut.WriteString("ACK " + lastName + "\n");
                     }
 
-                    break;
+                    return true;
                 }
                 else
                 {

@@ -11,11 +11,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A2CD2048-48D8-4641-ACBF-5199613EE281}"
 	ProjectSection(SolutionItems) = preProject
 		GitSharp licence.txt = GitSharp licence.txt
+		Indentation.txt = Indentation.txt
+		Indentation.vssettings = Indentation.vssettings
 		JGit licence.txt = JGit licence.txt
 		MiscUtil licence.txt = MiscUtil licence.txt
 		README.txt = README.txt
 		SharedAssemblyInfo.cs = SharedAssemblyInfo.cs
-		tab_indentation.vssettings = tab_indentation.vssettings
 		Winterdom.IO.FileMap License.txt = Winterdom.IO.FileMap License.txt
 	EndProjectSection
 EndProject

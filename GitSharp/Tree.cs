@@ -49,139 +49,139 @@ using FileTreeEntry = GitSharp.Core.FileTreeEntry;
 namespace GitSharp
 {
 
-    /// <summary>
-    /// Represents a directory in the git repository.
-    /// </summary>
-    public class Tree : AbstractObject, ITreeNode
-    {
-        internal Tree(Repository repo, ObjectId id) : base(repo, id) { }
+	/// <summary>
+	/// Represents a directory in the git repository.
+	/// </summary>
+	public class Tree : AbstractObject, ITreeNode
+	{
+		internal Tree(Repository repo, ObjectId id) : base(repo, id) { }
 
-        internal Tree(Repository repo, CoreTree tree)
-            : base(repo, tree.Id)
-        {
-            _internal_tree = tree;
-        }
+		internal Tree(Repository repo, CoreTree tree)
+			: base(repo, tree.Id)
+		{
+			_internal_tree = tree;
+		}
 
-        private CoreTree _internal_tree;
+		private CoreTree _internal_tree;
 
-        internal CoreTree InternalTree
-        {
-            get
-            {
-                if (_internal_tree == null)
-                    try
-                    {
-                        _internal_tree = _repo._internal_repo.MapTree(_id);
-                    }
-                    catch (Exception)
-                    {
-                        // the commit object is invalid. however, we can not allow exceptions here because they would not be expected.
-                    }
-                return _internal_tree;
-            }
-        }
+		internal CoreTree InternalTree
+		{
+			get
+			{
+				if (_internal_tree == null)
+					try
+					{
+						_internal_tree = _repo._internal_repo.MapTree(_id);
+					}
+					catch (Exception)
+					{
+						// the commit object is invalid. however, we can not allow exceptions here because they would not be expected.
+					}
+				return _internal_tree;
+			}
+		}
 
-        public string Name
-        {
-            get
-            {
-                if (InternalTree == null)
-                    return null;
-                return InternalTree.Name;
-            }
-        }
+		public string Name
+		{
+			get
+			{
+				if (InternalTree == null)
+					return null;
+				return InternalTree.Name;
+			}
+		}
 
-        /// <summary>
-        /// True if the tree has no parent.
-        /// </summary>
-        public bool IsRoot
-        {
-            get
-            {
-                if (InternalTree == null)
-                    return true;
-                return InternalTree.IsRoot;
-            }
-        }
+		/// <summary>
+		/// True if the tree has no parent.
+		/// </summary>
+		public bool IsRoot
+		{
+			get
+			{
+				if (InternalTree == null)
+					return true;
+				return InternalTree.IsRoot;
+			}
+		}
 
-        public Tree Parent
-        {
-            get
-            {
-                if (InternalTree == null)
-                    return null;
-                return new Tree(_repo, InternalTree.Parent);
-            }
-        }
+		public Tree Parent
+		{
+			get
+			{
+				if (InternalTree == null)
+					return null;
+				return new Tree(_repo, InternalTree.Parent);
+			}
+		}
 
-        /// <summary>
-        /// Entries of the tree. These are either Tree or Leaf objects representing sub-directories or files.
-        /// </summary>
-        public IEnumerable<AbstractObject> Children
-        {
-            get
-            {
-                if (InternalTree == null)
-                    return new Leaf[0];
+		/// <summary>
+		/// Entries of the tree. These are either Tree or Leaf objects representing sub-directories or files.
+		/// </summary>
+		public IEnumerable<AbstractObject> Children
+		{
+			get
+			{
+				if (InternalTree == null)
+					return new Leaf[0];
 
-                // no GitLink support in JGit, so just skip them here to not cause problems
-                return InternalTree.Members.Where(te => !(te is GitLinkTreeEntry)).Select(
-                    tree_entry =>
-                        {
-                            if (tree_entry is FileTreeEntry)
-                                return new Leaf(_repo, tree_entry as FileTreeEntry) as AbstractObject;
+				// no GitLink support in JGit, so just skip them here to not cause problems
+				return InternalTree.Members.Where(te => !(te is GitLinkTreeEntry)).Select(
+					 tree_entry =>
+					 {
+						 if (tree_entry is FileTreeEntry)
+							 return new Leaf(_repo, tree_entry as FileTreeEntry) as AbstractObject;
 
-                            return new Tree(_repo, tree_entry as CoreTree) as AbstractObject;
-                        }).ToArray();
-            }
-        }
+						 return new Tree(_repo, tree_entry as CoreTree) as AbstractObject;
+					 }).ToArray();
+			}
+		}
 
-        /// <summary>
-        /// Tree entries representing this directory's subdirectories
-        /// </summary>
-        public IEnumerable<Tree> Trees
-        {
-            get
-            {
-                return Children.Where(child => child.IsTree).Cast<Tree>().ToArray();
-            }
-        }
+		/// <summary>
+		/// Tree entries representing this directory's subdirectories
+		/// </summary>
+		public IEnumerable<Tree> Trees
+		{
+			get
+			{
+				return Children.Where(child => child.IsTree).Cast<Tree>().ToArray();
+			}
+		}
 
-        /// <summary>
-        /// Leaf entries representing this directory's files
-        /// </summary>
-        public IEnumerable<Leaf> Leaves
-        {
-            get
-            {
-                return Children.Where(child => child.IsBlob).Cast<Leaf>().ToArray();
-            }
-        }
+		/// <summary>
+		/// Leaf entries representing this directory's files
+		/// </summary>
+		public IEnumerable<Leaf> Leaves
+		{
+			get
+			{
+				return Children.Where(child => child.IsBlob).Cast<Leaf>().ToArray();
+			}
+		}
 
-        public string Path
-        {
-            get
-            {
-                if (InternalTree == null)
-                    return null;
-                return InternalTree.FullName;
-            }
-        }
+		public string Path
+		{
+			get
+			{
+				if (InternalTree == null)
+					return null;
+				return InternalTree.FullName;
+			}
+		}
 
-        public int Permissions
-        {
+		public int Permissions
+		{
 
-            get
-            {
-                if (InternalTree == null)
-                    return 0;
-                return InternalTree.Mode.Bits;
-            }
-        }
+			get
+			{
+				if (InternalTree == null)
+					return 0;
+				return InternalTree.Mode.Bits;
+			}
+		}
 
-        public override string ToString()
-        {
-            return "Tree[" + ShortHash + "]";
-        }
-    }
+		public override string ToString()
+		{
+			return "Tree[" + ShortHash + "]";
+		}
+	}
 }

@@ -48,88 +48,88 @@ using CoreTag = GitSharp.Core.Tag;
 
 namespace GitSharp
 {
-    /// <summary>
-    /// Represents a git tag.
-    /// </summary>
-    public class Tag : AbstractObject, IReferenceObject
-    {
+	/// <summary>
+	/// Represents a git tag.
+	/// </summary>
+	public class Tag : AbstractObject, IReferenceObject
+	{
 
-        public Tag(Repository repo, string name)
-            : base(repo, name)
-        {
-            _name = name;
-        }
+		public Tag(Repository repo, string name)
+			: base(repo, name)
+		{
+			_name = name;
+		}
 
-        private string _name; // <--- need the name for resolving purposes only. once the internal tag is resolved, this field is not used any more.
+		private string _name; // <--- need the name for resolving purposes only. once the internal tag is resolved, this field is not used any more.
 
-        internal Tag(Repository repo, CoreRef @ref)
-            : base(repo, @ref.ObjectId)
-        {
-            _name = @ref.Name;
-        }
+		internal Tag(Repository repo, CoreRef @ref)
+			: base(repo, @ref.ObjectId)
+		{
+			_name = @ref.Name;
+		}
 
-        internal Tag(Repository repo, CoreTag internal_tag)
-            : base(repo, internal_tag.Id)
-        {
-            _internal_tag = internal_tag;
-        }
+		internal Tag(Repository repo, CoreTag internal_tag)
+			: base(repo, internal_tag.Id)
+		{
+			_internal_tag = internal_tag;
+		}
 
-        internal Tag(Repository repo, ObjectId id, string name) 
-            : base(repo, id)
-        {
-            _name = name;
-        }
+		internal Tag(Repository repo, ObjectId id, string name)
+			: base(repo, id)
+		{
+			_name = name;
+		}
 
-        private CoreTag _internal_tag;
+		private CoreTag _internal_tag;
 
-        private CoreTag InternalTag
-        {
-            get
-            {
-                if (_internal_tag == null)
-                    try
-                    {
-                        _internal_tag = _repo._internal_repo.MapTag(_name,_id);
-                    }
-                    catch (Exception)
-                    {
-                        // the object is invalid. however, we can not allow exceptions here because they would not be expected.
-                    }
-                return _internal_tag;
-            }
-        }
+		private CoreTag InternalTag
+		{
+			get
+			{
+				if (_internal_tag == null)
+					try
+					{
+						_internal_tag = _repo._internal_repo.MapTag(_name, _id);
+					}
+					catch (Exception)
+					{
+						// the object is invalid. however, we can not allow exceptions here because they would not be expected.
+					}
+				return _internal_tag;
+			}
+		}
 
-        /// <summary>
-        /// The tag name.
-        /// </summary>
-        public string Name
-        {
-            get
-            {
-                if (InternalTag == null)
-                    return _name;
-                return InternalTag.TagName;
-            }
-        }
+		/// <summary>
+		/// The tag name.
+		/// </summary>
+		public string Name
+		{
+			get
+			{
+				if (InternalTag == null)
+					return _name;
+				return InternalTag.TagName;
+			}
+		}
 
-        /// <summary>
-        /// The object that has been tagged.
-        /// </summary>
-        public AbstractObject Target
-        {
-            get
-            {
-                if (InternalTag == null)
-                    return null;
-                if (InternalTag.TagId == InternalTag.Id) // <--- it can happen!
-                    return this;
-                return AbstractObject.Wrap(_repo, InternalTag.TagId);
-            }
-        }
+		/// <summary>
+		/// The object that has been tagged.
+		/// </summary>
+		public AbstractObject Target
+		{
+			get
+			{
+				if (InternalTag == null)
+					return null;
+				if (InternalTag.TagId == InternalTag.Id) // <--- it can happen!
+					return this;
+				return AbstractObject.Wrap(_repo, InternalTag.TagId);
+			}
+		}
 
-        public override string ToString()
-        {
-            return "Tag[" + ShortHash + "]";
-        }
-    }
+		public override string ToString()
+		{
+			return "Tag[" + ShortHash + "]";
+		}
+	}
 }

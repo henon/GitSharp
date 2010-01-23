@@ -43,125 +43,125 @@ using System.Text;
 namespace GitSharp
 {
 
-    public enum ChangeType
-    {
-        Added, Deleted, Modified, TypeChanged, Renamed, Copied
-    }
+	public enum ChangeType
+	{
+		Added, Deleted, Modified, TypeChanged, Renamed, Copied
+	}
 
-    /// <summary>
-    /// Represents a change of a single file between two commits. Use Commit.Diff to get a list of Change objects.
-    /// </summary>
-    public class Change
-    {
+	/// <summary>
+	/// Represents a change of a single file between two commits. Use Commit.Diff to get a list of Change objects.
+	/// </summary>
+	public class Change
+	{
 
-        /// <summary>
-        /// The commit that serves as reference for this comparison. The change reflects the difference of the other commit against this ReferenceCommit.
-        /// </summary>
-        public Commit ReferenceCommit
-        {
-            get;
-            internal set;
-        }
+		/// <summary>
+		/// The commit that serves as reference for this comparison. The change reflects the difference of the other commit against this ReferenceCommit.
+		/// </summary>
+		public Commit ReferenceCommit
+		{
+			get;
+			internal set;
+		}
 
-        /// <summary>
-        /// The commit which is compared against the ReferenceCommit.
-        /// </summary>
-        public Commit ComparedCommit
-        {
-            get;
-            internal set;
-        }
+		/// <summary>
+		/// The commit which is compared against the ReferenceCommit.
+		/// </summary>
+		public Commit ComparedCommit
+		{
+			get;
+			internal set;
+		}
 
-        /// <summary>
-        /// The kind of change (Added, Modified, Deleted, etc. )
-        /// </summary>
-        public ChangeType ChangeType { get; internal set; }
+		/// <summary>
+		/// The kind of change (Added, Modified, Deleted, etc. )
+		/// </summary>
+		public ChangeType ChangeType { get; internal set; }
 
-        /// <summary>
-        /// The revision of the file from the ReferenceCommit. It may be null in some cases i.e. for ChangeType.Added
-        /// </summary>
-        public AbstractObject ReferenceObject { get; internal set; }
+		/// <summary>
+		/// The revision of the file from the ReferenceCommit. It may be null in some cases i.e. for ChangeType.Added
+		/// </summary>
+		public AbstractObject ReferenceObject { get; internal set; }
 
-        /// <summary>
-        /// The revision of the file from the ComparedCommit. It may be null in some cases i.e. for ChangeType.Removed
-        /// </summary>
-        public AbstractObject ComparedObject { get; internal set; }
+		/// <summary>
+		/// The revision of the file from the ComparedCommit. It may be null in some cases i.e. for ChangeType.Removed
+		/// </summary>
+		public AbstractObject ComparedObject { get; internal set; }
 
-        /// <summary>
-        /// The file (i.e. Blob) this Change is according to.
-        /// Always returns a non-null revision of the file, no matter what kind of change. It normally returns the ComparedCommit's version of the changed 
-        /// object except for ChangeType.Removed where it returns the ReferenceCommit's version of the object.
-        /// 
-        /// This property is designed to release the calling code from null checking and revision selection and may be especially useful for GUI bindings.
-        /// </summary>
-        public AbstractObject ChangedObject
-        {
-            get
-            {
-                if (ComparedObject != null)
-                    return ComparedObject;
-                else
-                    return ReferenceObject;
-            }
-        }
+		/// <summary>
+		/// The file (i.e. Blob) this Change is according to.
+		/// Always returns a non-null revision of the file, no matter what kind of change. It normally returns the ComparedCommit's version of the changed 
+		/// object except for ChangeType.Removed where it returns the ReferenceCommit's version of the object.
+		/// 
+		/// This property is designed to release the calling code from null checking and revision selection and may be especially useful for GUI bindings.
+		/// </summary>
+		public AbstractObject ChangedObject
+		{
+			get
+			{
+				if (ComparedObject != null)
+					return ComparedObject;
+				else
+					return ReferenceObject;
+			}
+		}
 
-        /// <summary>
-        /// The filepath of the ChangedObject
-        /// </summary>
-        public string Path { get; internal set; }
+		/// <summary>
+		/// The filepath of the ChangedObject
+		/// </summary>
+		public string Path { get; internal set; }
 
-        /// <summary>
-        /// The filename of the ChangedObject
-        /// </summary>
-        public string Name { get; internal set; }
+		/// <summary>
+		/// The filename of the ChangedObject
+		/// </summary>
+		public string Name { get; internal set; }
 
-        /// <summary>
-        /// Unix file permissions of the ReferenceCommit's version of the object
-        /// </summary>
-        public int ReferencePermissions
-        {
-            get;
-            internal set;
-        }
+		/// <summary>
+		/// Unix file permissions of the ReferenceCommit's version of the object
+		/// </summary>
+		public int ReferencePermissions
+		{
+			get;
+			internal set;
+		}
 
-        /// <summary>
-        /// Unix file permissions of the ComparedCommit's version of the object
-        /// </summary>
-        public int ComparedPermissions { get; internal set; }
+		/// <summary>
+		/// Unix file permissions of the ComparedCommit's version of the object
+		/// </summary>
+		public int ComparedPermissions { get; internal set; }
 
-        /// <summary>
-        /// Returns ReferenceCommit and ComparedCommit as array
-        /// </summary>
-        public Commit[] Commits
-        {
-            get
-            {
-                return new Commit[] { ReferenceCommit, ComparedCommit };
-            }
-        }
+		/// <summary>
+		/// Returns ReferenceCommit and ComparedCommit as array
+		/// </summary>
+		public Commit[] Commits
+		{
+			get
+			{
+				return new Commit[] { ReferenceCommit, ComparedCommit };
+			}
+		}
 
-        /// <summary>
-        /// Returns ReferenceObject and ComparedObject as array
-        /// </summary>
-        public AbstractObject[] Objects
-        {
-            get
-            {
-                return new AbstractObject[] { ReferenceObject, ComparedObject };
-            }
-        }
+		/// <summary>
+		/// Returns ReferenceObject and ComparedObject as array
+		/// </summary>
+		public AbstractObject[] Objects
+		{
+			get
+			{
+				return new AbstractObject[] { ReferenceObject, ComparedObject };
+			}
+		}
 
-        /// <summary>
-        /// Returns ReferenceObject's and ComparedObject's permissions as array
-        /// </summary>
-        public int[] Permissions
-        {
-            get
-            {
-                return new int[] { ReferencePermissions, ComparedPermissions };
-            }
-        }
+		/// <summary>
+		/// Returns ReferenceObject's and ComparedObject's permissions as array
+		/// </summary>
+		public int[] Permissions
+		{
+			get
+			{
+				return new int[] { ReferencePermissions, ComparedPermissions };
+			}
+		}
 
-    }
+	}
 
 }

@@ -49,127 +49,127 @@ using System.IO;
 
 namespace GitSharp
 {
-    /// <summary>
-    /// Represents a specific version of the content of a file tracked by git. Using a Blob you can access the contents of 
-    /// any git object as string or byte array. For tracked files (leaves of a git tree) it returns the content of the file. For git objects 
-    /// such as Commit, Tag or Tree the Blob API may be used to inspect the the uncompressed internal representation.
-    /// 
-    /// To open a git object instantiate a Blob with the object's Hash or another valid reference (see Ref).
-    /// 
-    /// var b=new Blob(repo, "e287f54");
-    /// 
-    /// Note, that new Blob( ...) does not create a new blob in the repository but rather constructs the object to manipulate an existing blob.
-    /// 
-    /// Advanced: To create a new Blob inside the repository you can use the static create function, however, you are advised to use 
-    /// higher level functionality to create new revisions of files, i.e. by using the Commit.Create API (see Commit).
-    /// </summary>
-    public class Blob : AbstractObject
-    {
+	/// <summary>
+	/// Represents a specific version of the content of a file tracked by git. Using a Blob you can access the contents of 
+	/// any git object as string or byte array. For tracked files (leaves of a git tree) it returns the content of the file. For git objects 
+	/// such as Commit, Tag or Tree the Blob API may be used to inspect the the uncompressed internal representation.
+	/// 
+	/// To open a git object instantiate a Blob with the object's Hash or another valid reference (see Ref).
+	/// 
+	/// var b=new Blob(repo, "e287f54");
+	/// 
+	/// Note, that new Blob( ...) does not create a new blob in the repository but rather constructs the object to manipulate an existing blob.
+	/// 
+	/// Advanced: To create a new Blob inside the repository you can use the static create function, however, you are advised to use 
+	/// higher level functionality to create new revisions of files, i.e. by using the Commit.Create API (see Commit).
+	/// </summary>
+	public class Blob : AbstractObject
+	{
 
-        internal Blob(Repository repo, ObjectId id)
-            : base(repo, id)
-        {
-        }
+		internal Blob(Repository repo, ObjectId id)
+			: base(repo, id)
+		{
+		}
 
-        internal Blob(Repository repo, ObjectId id, byte[] blob)
-            : base(repo, id)
-        {
-            _blob = blob;
-        }
+		internal Blob(Repository repo, ObjectId id, byte[] blob)
+			: base(repo, id)
+		{
+			_blob = blob;
+		}
 
-        /// <summary>
-        /// Create a Blob object which represents an existing blob in the git repository
-        /// </summary>
-        /// <param name="repo">The repository which owns the object to load</param>
-        /// <param name="hash">The SHA1 Hash of the object to load</param>
-        public Blob(Repository repo, string hash) : base(repo, hash) { }
+		/// <summary>
+		/// Create a Blob object which represents an existing blob in the git repository
+		/// </summary>
+		/// <param name="repo">The repository which owns the object to load</param>
+		/// <param name="hash">The SHA1 Hash of the object to load</param>
+		public Blob(Repository repo, string hash) : base(repo, hash) { }
 
-        private byte[] _blob;
+		private byte[] _blob;
 
-        /// <summary>
-        /// Get the uncompressed contents of this Blob as string. This assumes that the contents are encoded in UTF8. 
-        /// </summary>
-        public string Data
-        {
-            get
-            {
-                if (RawData == null)
-                    return null;
-                return RawParseUtils.decode(RawData);
-            }
-        }
+		/// <summary>
+		/// Get the uncompressed contents of this Blob as string. This assumes that the contents are encoded in UTF8. 
+		/// </summary>
+		public string Data
+		{
+			get
+			{
+				if (RawData == null)
+					return null;
+				return RawParseUtils.decode(RawData);
+			}
+		}
 
-        /// <summary>
-        /// Get the uncompressed original encoded raw data of the Blob as byte array. This is useful if the contents of the blob are encoded in some legacy encoding instead of UTF8.
-        /// </summary>
-        public byte[] RawData
-        {
-            get
-            {
-                if (_blob == null)
-                {
-                    var loader = _repo._internal_repo.OpenBlob(_id);
-                    if (loader == null)
-                        return null;
-                    _blob = loader.Bytes;
-                }
-                return _blob;
-            }
-        }
+		/// <summary>
+		/// Get the uncompressed original encoded raw data of the Blob as byte array. This is useful if the contents of the blob are encoded in some legacy encoding instead of UTF8.
+		/// </summary>
+		public byte[] RawData
+		{
+			get
+			{
+				if (_blob == null)
+				{
+					var loader = _repo._internal_repo.OpenBlob(_id);
+					if (loader == null)
+						return null;
+					_blob = loader.Bytes;
+				}
+				return _blob;
+			}
+		}
 
-        public override string ToString()
-        {
-            return "Blob[" + ShortHash + "]";
-        }
+		public override string ToString()
+		{
+			return "Blob[" + ShortHash + "]";
+		}
 
-        /// <summary>
-        /// Create a new Blob containing the given string data as content. The string will be encoded as UTF8
-        /// </summary>
-        /// <param name="repo"></param>
-        /// <param name="content">string to be stored in the blob</param>
-        /// <returns></returns>
-        public static Blob Create(Repository repo, string content)
-        {
-            return Create(repo, content, Encoding.UTF8);
-        }
+		/// <summary>
+		/// Create a new Blob containing the given string data as content. The string will be encoded as UTF8
+		/// </summary>
+		/// <param name="repo"></param>
+		/// <param name="content">string to be stored in the blob</param>
+		/// <returns></returns>
+		public static Blob Create(Repository repo, string content)
+		{
+			return Create(repo, content, Encoding.UTF8);
+		}
 
-        /// <summary>
-        /// Create a new Blob containing the given string data as content. The string will be encoded by the submitted encoding
-        /// </summary>
-        /// <param name="repo"></param>
-        /// <param name="content">string to be stored in the blob</param>
-        /// <param name="encoding"></param>
-        /// <returns></returns>
-        public static Blob Create(Repository repo, string content, Encoding encoding)
-        {
-            return Create(repo, encoding.GetBytes(content));
-        }
+		/// <summary>
+		/// Create a new Blob containing the given string data as content. The string will be encoded by the submitted encoding
+		/// </summary>
+		/// <param name="repo"></param>
+		/// <param name="content">string to be stored in the blob</param>
+		/// <param name="encoding"></param>
+		/// <returns></returns>
+		public static Blob Create(Repository repo, string content, Encoding encoding)
+		{
+			return Create(repo, encoding.GetBytes(content));
+		}
 
-        /// <summary>
-        /// Create a new Blob containing the contents of the given file.
-        /// </summary>
-        /// <param name="repo"></param>
-        /// <param name="path">Path to the file that should be stored in the blob</param>
-        /// <returns></returns>
-        public static Blob CreateFromFile(Repository repo, string path)
-        {
-            if (new FileInfo(path).Exists == false)
-                throw new ArgumentException("File does not exist", "path");
-            return Create(repo, File.ReadAllBytes(path)); 
-        }
+		/// <summary>
+		/// Create a new Blob containing the contents of the given file.
+		/// </summary>
+		/// <param name="repo"></param>
+		/// <param name="path">Path to the file that should be stored in the blob</param>
+		/// <returns></returns>
+		public static Blob CreateFromFile(Repository repo, string path)
+		{
+			if (new FileInfo(path).Exists == false)
+				throw new ArgumentException("File does not exist", "path");
+			return Create(repo, File.ReadAllBytes(path));
+		}
 
-        /// <summary>
-        /// Create a new Blob containing exactly the raw bytes given (before compression).
-        /// </summary>
-        /// <param name="repo"></param>
-        /// <param name="content">Uncompressed, encoded raw data to be stored in the blob</param>
-        /// <returns></returns>
-        public static Blob Create(Repository repo, byte[] content)
-        {
-            var db = repo._internal_repo;
-            var id = new GitSharp.Core.ObjectWriter(db).WriteBlob(content);
-            return new Blob(repo, id, content);
-        }
+		/// <summary>
+		/// Create a new Blob containing exactly the raw bytes given (before compression).
+		/// </summary>
+		/// <param name="repo"></param>
+		/// <param name="content">Uncompressed, encoded raw data to be stored in the blob</param>
+		/// <returns></returns>
+		public static Blob Create(Repository repo, byte[] content)
+		{
+			var db = repo._internal_repo;
+			var id = new GitSharp.Core.ObjectWriter(db).WriteBlob(content);
+			return new Blob(repo, id, content);
+		}
 
-    }
+	}
 }

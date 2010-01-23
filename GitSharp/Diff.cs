@@ -117,7 +117,7 @@ namespace GitSharp
 				}
 				if (m_edits.Count == 1 && m_edits[0].EditType == Edit.Type.EMPTY)
 					yield break;
-				if (m_edits[0].BeginA > 1 || m_edits[0].BeginB > 1) // <-- see if there is an unchanged section before the first edit
+				if (m_edits[0].BeginA > 0 || m_edits[0].BeginB > 0) // <-- see if there is an unchanged section before the first edit
 					yield return new Section(m_sequence_a, m_sequence_b) { Status = SectionStatus.Unchanged, BeginA = 1, BeginB = 1, EndA = m_edits[0].BeginA + 1, EndB = m_edits[0].BeginB + 1 };
 				int index = 0;
 				Edit edit = null;

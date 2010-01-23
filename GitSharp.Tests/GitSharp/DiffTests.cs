@@ -90,6 +90,22 @@ The lady doth protest too much, methinks.";
 		}
 
 		[Test]
+		public void NothingAgainstEverythingTest()
+		{
+			var diff = new Diff("", TEXT);
+			Assert.IsTrue(diff.HasDifferences);
+			Assert.AreEqual(1, diff.Sections.Count());
+			var section = diff.Sections.First();
+			Assert.AreEqual(Diff.SectionStatus.Different, section.Status);
+			Assert.AreEqual(1, section.BeginA);
+			Assert.AreEqual(1, section.BeginB);
+			Assert.AreEqual(1, section.EndA);
+			Assert.AreEqual(Text.NumberOfLines + 1, section.EndB);
+			Assert.AreEqual("", section.TextA);
+			Assert.AreEqual(TEXT, section.TextB);
+		}
+
+		[Test]
 		public void DifferenceAtTheBeginning()
 		{
 			var diff = new Diff(TEXT, "Quote from Hamlet:\n\n" + TEXT);
@@ -149,22 +165,44 @@ blah blah
 Queen:
 blah blah.";
 			var diff = new Diff(TEXT, blahblah);
-			DumpSections(diff);
+			//DumpSections(diff);
 			Assert.IsTrue(diff.HasDifferences);
 			Assert.AreEqual(10, diff.Sections.Count());
-			//Assert.AreEqual(2, diff.Sections.Count());
-			//var section = diff.Sections.First();
-			//Assert.AreEqual(Diff.SectionStatus.Unchanged, section.Status);
-			//Assert.AreEqual(1, section.BeginA);
-			//Assert.AreEqual(1, section.BeginB);
-			//Assert.AreEqual(Text.NumberOfLines, section.EndA);
-			//Assert.AreEqual(Text.NumberOfLines, section.EndB);
-			//section = diff.Sections.Skip(1).First();
-			//Assert.AreEqual(Diff.SectionStatus.Different, section.Status);
-			//Assert.AreEqual(Text.NumberOfLines, section.BeginA);
-			//Assert.AreEqual(Text.NumberOfLines, section.BeginB);
-			//Assert.AreEqual(Text.NumberOfLines + 1, section.EndA);
-			//Assert.AreEqual(Text.NumberOfLines + 1, section.EndB);
+			var secs = diff.Sections.ToArray();
+			var section = secs[0];
+			Assert.AreEqual(Diff.SectionStatus.Unchanged, section.Status);
+			Assert.AreEqual("Player Queen:\r\n", section.TextA);
+			Assert.AreEqual("Player Queen:\r\n", section.TextB);
+			section = secs[1];
+			Assert.AreEqual(Diff.SectionStatus.Different, section.Status);
+			Assert.AreEqual("Both here and hence pursue me lasting strife,\r\nIf once I be a widow, ever I be a wife!\r\n", section.TextA);
+			Assert.AreEqual("blah blah\r\n", section.TextB);
+			section = secs[9];
+			Assert.AreEqual(Diff.SectionStatus.Different, section.Status);
+			Assert.AreEqual("The lady doth protest too much, methinks.", section.TextA);
+			Assert.AreEqual("blah blah.", section.TextB);
+		}
+
+		[Test]
+		public void EditType()
+		{
+			var a = "1\n2\n3\n5\n7\n8\n9\n";
+			var b = "1\n3\n4\n5\n6\n8\n9\n";
+			var diff = new Diff(a, b);
+			DumpSections(diff);
+			var secs = diff.Sections.ToArray();
+			var section = secs[0];
+			Assert.AreEqual(Diff.EditType.Unchanged, section.EditWithRespectToA);
+			Assert.AreEqual(Diff.EditType.Unchanged, section.EditWithRespectToB);
+			section = secs[1];
+			Assert.AreEqual(Diff.EditType.Deleted, section.EditWithRespectToA);
+			Assert.AreEqual(Diff.EditType.Inserted, section.EditWithRespectToB);
+			section = secs[3];
+			Assert.AreEqual(Diff.EditType.Inserted, section.EditWithRespectToA);
+			Assert.AreEqual(Diff.EditType.Deleted, section.EditWithRespectToB);
+			section = secs[5];
+			Assert.AreEqual(Diff.EditType.Replaced, section.EditWithRespectToA);
+			Assert.AreEqual(Diff.EditType.Replaced, section.EditWithRespectToB);
 		}
 
 		private static void DumpSections(Diff diff)

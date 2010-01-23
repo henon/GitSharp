@@ -64,7 +64,20 @@ namespace GitSharp.Core.Transport
         /// Revision traversal support over <see cref="db"/>.
         /// </summary>
         private readonly RevWalk.RevWalk walk;
-        
+
+        /// <summary>
+        /// Is the client connection a bi-directional socket or pipe?
+        /// <para/>
+        /// If true, this class assumes it can perform multiple read and write cycles
+        /// with the client over the input and output streams. This matches the
+        /// functionality available with a standard TCP/IP connection, or a local
+        /// operating system or in-memory pipe.
+        /// <para/>
+        /// If false, this class runs in a read everything then output results mode,
+        /// making it suitable for single round-trip systems RPCs such as HTTP.
+        /// </summary>
+        private bool biDirectionalPipe = true;
+
         /// <summary>
         /// Should an incoming transfer validate objects?
         /// </summary>
@@ -91,7 +104,7 @@ namespace GitSharp.Core.Transport
         /// Identity to record action as within the reflog.
         /// </summary>
         private PersonIdent refLogIdent;
-        
+
         /// <summary>
         /// Hook to validate the update commands before execution.
         /// </summary>
@@ -163,6 +176,28 @@ namespace GitSharp.Core.Transport
             return refs;
         }
 
+        /// <returns>
+        /// true if this class expects a bi-directional pipe opened between
+        /// the client and itself. The default is true.
+        /// </returns>
+        public bool isBiDirectionalPipe()
+        {
+            return biDirectionalPipe;
+        }
+
+        /// <param name="twoWay">
+        /// if true, this class will assume the socket is a fully
+        /// bidirectional pipe between the two peers and takes advantage
+        /// of that by first transmitting the known refs, then waiting to
+        /// read commands. If false, this class assumes it must read the
+        /// commands before writing output and does not perform the
+        /// initial advertising.
+        /// </param>
+        public void setBiDirectionalPipe(bool twoWay)
+        {
+            biDirectionalPipe = twoWay;
+        }
+
         /// <summary>
         /// Returns true if this instance will verify received objects are formatted correctly. 
         /// Validating objects requires more CPU time on this side of the connection.
@@ -189,9 +224,9 @@ namespace GitSharp.Core.Transport
         }
 
         /// <param name="canCreate">true to permit create ref commands to be processed.</param>
-        public void  setAllowCreates(bool canCreate)
+        public void setAllowCreates(bool canCreate)
         {
-            allowCreates = canCreate;    
+            allowCreates = canCreate;
         }
 
         /// <summary>
@@ -361,51 +396,55 @@ namespace GitSharp.Core.Transport
 
         private void Service()
         {
-            SendAdvertisedRefs();
+            if (biDirectionalPipe)
+                SendAdvertisedRefs();
+            else
+                refs = db.getAllRefs();
+
             RecvCommands();
-        	if (commands.isEmpty()) return;
-        	EnableCapabilities();
+            if (commands.isEmpty()) return;
+            EnableCapabilities();
 
-        	if (NeedPack())
-        	{
-        		try
-        		{
-        			receivePack();
-        			if (isCheckReceivedObjects())
-        			{
-        				CheckConnectivity();
-        			}
-        			unpackError = null;
-        		}
-        		catch (IOException err)
-        		{
-        			unpackError = err;
-        		}
-        		catch (Exception err)
-        		{
-        			unpackError = err;
-        		}
-        	}
+            if (NeedPack())
+            {
+                try
+                {
+                    receivePack();
+                    if (isCheckReceivedObjects())
+                    {
+                        CheckConnectivity();
+                    }
+                    unpackError = null;
+                }
+                catch (IOException err)
+                {
+                    unpackError = err;
+                }
+                catch (Exception err)
+                {
+                    unpackError = err;
+                }
+            }
 
-        	if (unpackError == null)
-        	{
-        		ValidateCommands();
-        		ExecuteCommands();
-        	}
-        	UnlockPack();
+            if (unpackError == null)
+            {
+                ValidateCommands();
+                ExecuteCommands();
+            }
+            UnlockPack();
 
-        	if (reportStatus)
-        	{
-        		SendStatusReport(true, new ServiceReporter(pckOut));
-        		pckOut.End();
-        	}
-        	else if (msgs != null)
-        	{
-        		SendStatusReport(false, new MessagesReporter(msgs.BaseStream));
-        		msgs.Flush();
-        	}
+            if (reportStatus)
+            {
+                SendStatusReport(true, new ServiceReporter(pckOut));
+                pckOut.End();
+            }
+            else if (msgs != null)
+            {
+                SendStatusReport(false, new MessagesReporter(msgs.BaseStream));
+                msgs.Flush();
+            }
 
-        	postReceive.OnPostReceive(this, FilterCommands(ReceiveCommand.Result.OK));
+            postReceive.OnPostReceive(this, FilterCommands(ReceiveCommand.Result.OK));
         }
 
         private void RecvCommands()
@@ -451,7 +490,16 @@ namespace GitSharp.Core.Transport
                 ObjectId newId = ObjectId.FromString(line.Slice(41, 81));
                 string name = line.Substring(82);
                 var cmd = new ReceiveCommand(oldId, newId, name);
-                cmd.setRef(refs[cmd.getRefName()]);
+                
+                if (name.Equals(Constants.HEAD))
+                {
+                    cmd.setResult(ReceiveCommand.Result.REJECTED_CURRENT_BRANCH);
+                }
+                else
+                {
+                    cmd.setRef(refs[cmd.getRefName()]);
+                }
+                
                 commands.Add(cmd);
             }
         }
@@ -488,7 +536,7 @@ namespace GitSharp.Core.Transport
 
             if (forClient)
             {
-            	rout.SendString("unpack ok");
+                rout.SendString("unpack ok");
             }
             foreach (ReceiveCommand cmd in commands)
             {
@@ -685,20 +733,20 @@ namespace GitSharp.Core.Transport
 
         private void CheckConnectivity()
         {
-            using(var ow = new ObjectWalk(db))
-			{
-	            foreach (ReceiveCommand cmd in commands)
-	            {
-	                if (cmd.getResult() != ReceiveCommand.Result.NOT_ATTEMPTED) continue;
-	                if (cmd.getType() == ReceiveCommand.Type.DELETE) continue;
-	                ow.markStart(ow.parseAny(cmd.getNewId()));
-	            }
-	            foreach (Ref @ref in refs.Values)
-	            {
-	            	ow.markUninteresting(ow.parseAny(@ref.ObjectId));
-	            }
-	            ow.checkConnectivity();
-			}
+            using (var ow = new ObjectWalk(db))
+            {
+                foreach (ReceiveCommand cmd in commands)
+                {
+                    if (cmd.getResult() != ReceiveCommand.Result.NOT_ATTEMPTED) continue;
+                    if (cmd.getType() == ReceiveCommand.Type.DELETE) continue;
+                    ow.markStart(ow.parseAny(cmd.getNewId()));
+                }
+                foreach (Ref @ref in refs.Values)
+                {
+                    ow.markUninteresting(ow.parseAny(@ref.ObjectId));
+                }
+                ow.checkConnectivity();
+            }
         }
 
         private void ValidateCommands()
@@ -794,15 +842,15 @@ namespace GitSharp.Core.Transport
                         continue;
                     }
 
-					RevCommit oldComm = (oldObj as RevCommit);
-					RevCommit newComm = (newObj as RevCommit);
+                    RevCommit oldComm = (oldObj as RevCommit);
+                    RevCommit newComm = (newObj as RevCommit);
                     if (oldComm != null && newComm != null)
                     {
                         try
                         {
                             if (!walk.isMergedInto(oldComm, newComm))
                             {
-                                cmd.setType(ReceiveCommand.Type.UPDATE_NONFASTFORWARD);   
+                                cmd.setType(ReceiveCommand.Type.UPDATE_NONFASTFORWARD);
                             }
                         }
                         catch (MissingObjectException e)
@@ -908,19 +956,19 @@ namespace GitSharp.Core.Transport
                     cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, result.ToString());
                     break;
             }
-		}
-		
-		public void Dispose ()
-		{
-			walk.Dispose();
-			raw.Dispose();
-			msgs.Dispose();
-		}
-		
+        }
 
-		#region Nested Types
+        public void Dispose()
+        {
+            walk.Dispose();
+            raw.Dispose();
+            msgs.Dispose();
+        }
 
-		private abstract class Reporter
+
+        #region Nested Types
+
+        private abstract class Reporter
         {
             public abstract void SendString(string s);
         }
@@ -951,11 +999,11 @@ namespace GitSharp.Core.Transport
 
             public override void SendString(string s)
             {
-            	byte[] data = Constants.encode(s);
+                byte[] data = Constants.encode(s);
                 _stream.Write(data, 0, data.Length);
             }
-		}
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

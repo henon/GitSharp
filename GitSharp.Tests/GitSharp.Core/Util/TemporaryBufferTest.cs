@@ -42,6 +42,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GitSharp.Core.Util;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 using System.IO;
 
@@ -58,7 +59,7 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testEmpty()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            TemporaryBuffer b = new LocalFileBuffer();
             try
             {
                 b.close();
@@ -76,7 +77,7 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testOneByte()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            TemporaryBuffer b = new LocalFileBuffer();
             byte test = (byte)new TestRng(getName()).nextInt();
             try
             {
@@ -95,7 +96,7 @@ namespace GitSharp.Core.Tests.Util
                     {
                         b.writeTo(o, null);
                         r = o.ToArray();
-                    } 
+                    }
                     Assert.AreEqual(1, r.Length);
                     Assert.AreEqual(test, r[0]);
                 }
@@ -109,9 +110,9 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testOneBlock_BulkWrite()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            TemporaryBuffer b = new LocalFileBuffer();
             byte[] test = new TestRng(getName())
-                   .nextBytes(TemporaryBuffer.Block.SZ);
+                   .nextBytes(Block.SZ);
             try
             {
                 b.write(test, 0, 2);
@@ -132,7 +133,7 @@ namespace GitSharp.Core.Tests.Util
                     {
                         b.writeTo(o, null);
                         r = o.ToArray();
-                    } 
+                    }
                     Assert.AreEqual(test.Length, r.Length);
                     Assert.IsTrue(test.SequenceEqual(r));
                 }
@@ -146,8 +147,8 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testOneBlockAndHalf_BulkWrite()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
-            byte[] test = new TestRng(getName()).nextBytes(TemporaryBuffer.Block.SZ * 3 / 2);
+            TemporaryBuffer b = new LocalFileBuffer();
+            byte[] test = new TestRng(getName()).nextBytes(Block.SZ * 3 / 2);
             try
             {
                 b.write(test, 0, 2);
@@ -182,9 +183,9 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testOneBlockAndHalf_SingleWrite()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            TemporaryBuffer b = new LocalFileBuffer();
             byte[] test = new TestRng(getName())
-                   .nextBytes(TemporaryBuffer.Block.SZ * 3 / 2);
+                   .nextBytes(Block.SZ * 3 / 2);
             try
             {
                 for (int i = 0; i < test.Length; i++)
@@ -217,9 +218,9 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testOneBlockAndHalf_Copy()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            TemporaryBuffer b = new LocalFileBuffer();
             byte[] test = new TestRng(getName())
-                   .nextBytes(TemporaryBuffer.Block.SZ * 3 / 2);
+                   .nextBytes(Block.SZ * 3 / 2);
             try
             {
                 var @in = new MemoryStream(test);
@@ -255,7 +256,7 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testLarge_SingleWrite()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            TemporaryBuffer b = new LocalFileBuffer();
             byte[] test = new TestRng(getName()).nextBytes(TemporaryBuffer.DEFAULT_IN_CORE_LIMIT * 3);
             try
             {
@@ -288,7 +289,7 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testInCoreLimit_SwitchOnAppendByte()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            TemporaryBuffer b = new LocalFileBuffer();
             byte[] test = new TestRng(getName())
                    .nextBytes(TemporaryBuffer.DEFAULT_IN_CORE_LIMIT + 1);
             try
@@ -323,7 +324,7 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testInCoreLimit_SwitchBeforeAppendByte()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            TemporaryBuffer b = new LocalFileBuffer();
             byte[] test = new TestRng(getName())
                    .nextBytes(TemporaryBuffer.DEFAULT_IN_CORE_LIMIT * 3);
             try
@@ -358,7 +359,7 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testInCoreLimit_SwitchOnCopy()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            TemporaryBuffer b = new LocalFileBuffer();
             byte[] test = new TestRng(getName())
                    .nextBytes(TemporaryBuffer.DEFAULT_IN_CORE_LIMIT * 2);
             try
@@ -396,7 +397,7 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testDestroyWhileOpen()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            TemporaryBuffer b = new LocalFileBuffer();
             try
             {
                 b.write(new TestRng(getName())
@@ -411,7 +412,7 @@ namespace GitSharp.Core.Tests.Util
         [Test]
         public void testRandomWrites()
         {
-            TemporaryBuffer b = new TemporaryBuffer();
+            TemporaryBuffer b = new LocalFileBuffer();
             TestRng rng = new TestRng(getName());
             int max = TemporaryBuffer.DEFAULT_IN_CORE_LIMIT * 2;
             byte[] expect = new byte[max];
@@ -461,6 +462,20 @@ namespace GitSharp.Core.Tests.Util
             finally
             {
                 b.destroy();
+            }
+        }
+
+        [Test]
+        public void testHeap()
+        {
+            using (TemporaryBuffer b = new HeapBuffer(2 * 8 * 1024))
+            {
+                byte[] r = new byte[8*1024];
+                b.write(r);
+                b.write(r);
+
+                var e = AssertHelper.Throws<IOException>(() => b.write(1), "accepted too many bytes of data");
+                Assert.AreEqual("In-memory buffer limit exceeded", e.Message);
             }
         }
     }

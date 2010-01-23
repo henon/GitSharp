@@ -310,7 +310,7 @@ namespace GitSharp.Core.Patch
 			{
 				for (int i = 0; i < tmp.Length; i++)
 				{
-					tmp[i] = new TemporaryBuffer();
+					tmp[i] = new LocalFileBuffer();
 				}
 
 				foreach (HunkHeader h in Hunks)

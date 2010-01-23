@@ -569,7 +569,7 @@ namespace GitSharp.Core.DirectoryCache
 
 			if (_cacheTree != null)
 			{
-				var bb = new TemporaryBuffer();
+				var bb = new LocalFileBuffer();
 				_cacheTree.write(tmp, bb);
 				bb.close();
 

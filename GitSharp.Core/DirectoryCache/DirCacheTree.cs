@@ -201,13 +201,13 @@ namespace GitSharp.Core.DirectoryCache
 			ptr = RawParseUtils.formatBase10(tmp, ptr, isValid() ? _entrySpan : -1);
 			tmp[--ptr] = 0;
 
-			os.Write(_encodedName, 0, _encodedName.Length);
-			os.Write(tmp, ptr, tmp.Length - ptr);
+			os.write(_encodedName, 0, _encodedName.Length);
+			os.write(tmp, ptr, tmp.Length - ptr);
 
 			if (isValid())
 			{
 				_id.copyRawTo(tmp, 0);
-				os.Write(tmp, 0, Constants.OBJECT_ID_LENGTH);
+				os.write(tmp, 0, Constants.OBJECT_ID_LENGTH);
 			}
 
 			for (int i = 0; i < _childCount; i++)

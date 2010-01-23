@@ -131,7 +131,7 @@ namespace GitSharp.Core.Patch
 
 		private static byte[] ReadFully(Stream stream)
 		{
-			var b = new TemporaryBuffer();
+			var b = new LocalFileBuffer();
 			try
 			{
 				b.copy(stream);

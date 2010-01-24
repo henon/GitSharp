@@ -188,7 +188,7 @@ namespace GitSharp.Core.Transport
             advertiseAny(tag.getObject(), refName);
         }
 
-        private void advertiseId(AnyObjectId id, string refName)
+        public void advertiseId(AnyObjectId id, string refName)
         {
             _tmpLine.Length = 0;
             id.CopyTo(_tmpId, _tmpLine);

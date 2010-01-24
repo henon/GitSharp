@@ -150,6 +150,56 @@ namespace GitSharp.Core.Transport
         private PackLock packLock;
 
         /// <summary>
+        /// Create a new pack receive for an open repository.
+        /// </summary>
+        /// <param name="into">the destination repository.</param>
+        public ReceivePack(Repository into)
+        {
+            db = into;
+            walk = new RevWalk.RevWalk(db);
+
+            ReceiveConfig cfg = db.Config.get(ReceiveConfig.KEY);
+            checkReceivedObjects = cfg._checkReceivedObjects;
+            allowCreates = cfg._allowCreates;
+            allowDeletes = cfg._allowDeletes;
+            allowNonFastForwards = cfg._allowNonFastForwards;
+            allowOfsDelta = cfg._allowOfsDelta;
+            preReceive = PreReceiveHook.NULL;
+            postReceive = PostReceiveHook.NULL;
+        }
+
+        private class ReceiveConfig
+        {
+            public static Config.SectionParser<ReceiveConfig> KEY = new SectionParser();
+
+            private class SectionParser : Config.SectionParser<ReceiveConfig>
+            {
+                public ReceiveConfig parse(Config cfg)
+                {
+                    return new ReceiveConfig(cfg);
+                }
+            }
+
+            public readonly bool _checkReceivedObjects;
+            public readonly bool _allowCreates;
+            public readonly bool _allowDeletes;
+            public readonly bool _allowNonFastForwards;
+            public readonly bool _allowOfsDelta;
+
+            ReceiveConfig(Config config)
+            {
+                _checkReceivedObjects = config.getBoolean("receive", "fsckobjects",
+                        false);
+                _allowCreates = true;
+                _allowDeletes = !config.getBoolean("receive", "denydeletes", false);
+                _allowNonFastForwards = !config.getBoolean("receive",
+                        "denynonfastforwards", false);
+                _allowOfsDelta = config.getBoolean("repack", "usedeltabaseoffset",
+                        true);
+            }
+        }
+
+        /// <summary>
         /// Returns the repository this receive completes into.
         /// </summary>
         /// <returns></returns>
@@ -331,22 +381,44 @@ namespace GitSharp.Core.Transport
         }
 
         /// <summary>
-        /// Create a new pack receive for an open repository.
+        /// Send an error message to the client, if it supports receiving them.
+        /// <para>
+        /// If the client doesn't support receiving messages, the message will be
+        /// discarded, with no other indication to the caller or to the client.
+        /// </para>
+        /// <para>
+        /// <see cref="PreReceiveHook"/>s should always try to use
+        /// <see cref="ReceiveCommand.setResult(GitSharp.Core.Transport.ReceiveCommand.Result,string)"/> with a result status of
+        /// <see cref="ReceiveCommand.Result.REJECTED_OTHER_REASON"/> to indicate any reasons for
+        /// rejecting an update. Messages attached to a command are much more likely
+        /// to be returned to the client.
+        /// </para>
         /// </summary>
-        /// <param name="into">the destination repository.</param>
-        public ReceivePack(Repository into)
+        /// <param name="what">string describing the problem identified by the hook. The string must not end with an LF, and must not contain an LF.</param>
+        public void sendError(string what)
         {
-            db = into;
-            walk = new RevWalk.RevWalk(db);
+            SendMessage("error", what);
+        }
 
-            RepositoryConfig cfg = db.Config;
-            checkReceivedObjects = cfg.getBoolean("receive", "fsckobjects", false);
-            allowCreates = true;
-            allowDeletes = !cfg.getBoolean("receive", "denydeletes", false);
-            allowNonFastForwards = !cfg.getBoolean("receive", "denynonfastforwards", false);
-            allowOfsDelta = cfg.getBoolean("repack", "usedeltabaseoffset", true);
-            preReceive = PreReceiveHook.NULL;
-            postReceive = PostReceiveHook.NULL;
+        /// <summary>
+        /// Send a message to the client, if it supports receiving them.
+        /// <para>
+        /// If the client doesn't support receiving messages, the message will be
+        /// discarded, with no other indication to the caller or to the client.
+        /// </para>
+        /// </summary>
+        /// <param name="what">string describing the problem identified by the hook. The string must not end with an LF, and must not contain an LF.</param>
+        public void sendMessage(string what)
+        {
+            SendMessage("remote", what);
+        }
+
+        private void SendMessage(string type, string what)
+        {
+            if (msgs != null)
+            {
+                msgs.WriteLine(type + ": " + what); // TODO: [nulltoken] This will issue a CRLF on Windows platform instead of a LF only
+            }
         }
 
         /// <summary>
@@ -365,7 +437,7 @@ namespace GitSharp.Core.Transport
 
                 if (messages != null)
                 {
-                    msgs = new StreamWriter(messages);
+                    msgs = new StreamWriter(messages); // TODO : [nulltoken] A derived type should be used which would override WriteLine to output \n instead of \r\n
                 }
 
                 enabledCapabilities = new List<string>();
@@ -382,6 +454,7 @@ namespace GitSharp.Core.Transport
                 }
                 finally
                 {
+                    // TODO : [nulltoken] Aren't we missing some Dispose() love, here ?
                     UnlockPack();
                     raw = null;
                     pckIn = null;
@@ -447,6 +520,36 @@ namespace GitSharp.Core.Transport
             postReceive.OnPostReceive(this, FilterCommands(ReceiveCommand.Result.OK));
         }
 
+        private void UnlockPack()
+        {
+            if (packLock != null)
+            {
+                packLock.Unlock();
+                packLock = null;
+            }
+        }
+
+        private void SendAdvertisedRefs()
+        {
+            RevFlag advertised = walk.newFlag("ADVERTISED");
+            RefAdvertiser adv = new RefAdvertiser(pckOut, walk, advertised);
+            adv.advertiseCapability(CAPABILITY_DELETE_REFS);
+            adv.advertiseCapability(CAPABILITY_REPORT_STATUS);
+            if (allowOfsDelta)
+                adv.advertiseCapability(CAPABILITY_OFS_DELTA);
+            refs = new Dictionary<String, Ref>(db.getAllRefs());
+            Ref head = refs[Constants.HEAD];
+            refs.Remove(Constants.HEAD);
+            adv.send(refs.Values);
+            if (head != null && head.Name.Equals(head.OriginalName))
+                adv.advertiseHave(head.ObjectId);
+            adv.includeAdditionalHaves();
+            if (adv.isEmpty())
+                adv.advertiseId(ObjectId.ZeroId, "capabilities^{}");
+            pckOut.End();
+        }
+
+
         private void RecvCommands()
         {
             while (true)
@@ -465,6 +568,9 @@ namespace GitSharp.Core.Transport
                     throw;
                 }
 
+                if (line == PacketLineIn.END)
+                    break;
+
                 if (commands.isEmpty())
                 {
                     int nul = line.IndexOf('\0');
@@ -478,7 +584,6 @@ namespace GitSharp.Core.Transport
                     }
                 }
 
-                if (line.Length == 0) break;
                 if (line.Length < 83)
                 {
                     string m = "error: invalid protocol: wanted 'old new ref'";
@@ -490,7 +595,7 @@ namespace GitSharp.Core.Transport
                 ObjectId newId = ObjectId.FromString(line.Slice(41, 81));
                 string name = line.Substring(82);
                 var cmd = new ReceiveCommand(oldId, newId, name);
-                
+
                 if (name.Equals(Constants.HEAD))
                 {
                     cmd.setResult(ReceiveCommand.Result.REJECTED_CURRENT_BRANCH);
@@ -499,222 +604,9 @@ namespace GitSharp.Core.Transport
                 {
                     cmd.setRef(refs[cmd.getRefName()]);
                 }
-                
+
                 commands.Add(cmd);
             }
-        }
-
-        private void receivePack()
-        {
-            IndexPack ip = IndexPack.Create(db, raw);
-            ip.setFixThin(true);
-            ip.setObjectChecking(isCheckReceivedObjects());
-            ip.index(new NullProgressMonitor());
-
-            // [caytchen] TODO: reflect gitsharp
-            string lockMsg = "jgit receive-pack";
-            if (getRefLogIdent() != null)
-                lockMsg += " from " + getRefLogIdent().ToExternalString();
-            packLock = ip.renameAndOpenPack(lockMsg);
-        }
-
-        private void SendStatusReport(bool forClient, Reporter rout)
-        {
-            if (unpackError != null)
-            {
-                rout.SendString("unpack error " + unpackError.Message);
-                if (forClient)
-                {
-                    foreach (ReceiveCommand cmd in commands)
-                    {
-                        rout.SendString("ng " + cmd.getRefName() + " n/a (unpacker error)");
-                    }
-                }
-
-                return;
-            }
-
-            if (forClient)
-            {
-                rout.SendString("unpack ok");
-            }
-            foreach (ReceiveCommand cmd in commands)
-            {
-                if (cmd.getResult() == ReceiveCommand.Result.OK)
-                {
-                    if (forClient)
-                        rout.SendString("ok " + cmd.getRefName());
-                    continue;
-                }
-
-                var r = new StringBuilder();
-                r.Append("ng ");
-                r.Append(cmd.getRefName());
-                r.Append(" ");
-
-                switch (cmd.getResult())
-                {
-                    case ReceiveCommand.Result.NOT_ATTEMPTED:
-                        r.Append("server bug; ref not processed");
-                        break;
-
-                    case ReceiveCommand.Result.REJECTED_NOCREATE:
-                        r.Append("creation prohibited");
-                        break;
-
-                    case ReceiveCommand.Result.REJECTED_NODELETE:
-                        r.Append("deletion prohibited");
-                        break;
-
-                    case ReceiveCommand.Result.REJECTED_NONFASTFORWARD:
-                        r.Append("non-fast forward");
-                        break;
-
-                    case ReceiveCommand.Result.REJECTED_CURRENT_BRANCH:
-                        r.Append("branch is currently checked out");
-                        break;
-
-                    case ReceiveCommand.Result.REJECTED_MISSING_OBJECT:
-                        if (cmd.getMessage() == null)
-                            r.Append("missing object(s)");
-                        else if (cmd.getMessage().Length == Constants.OBJECT_ID_STRING_LENGTH)
-                            r.Append("object " + cmd.getMessage() + " missing");
-                        else
-                            r.Append(cmd.getMessage());
-                        break;
-
-                    case ReceiveCommand.Result.REJECTED_OTHER_REASON:
-                        if (cmd.getMessage() == null)
-                            r.Append("unspecified reason");
-                        else
-                            r.Append(cmd.getMessage());
-                        break;
-
-                    case ReceiveCommand.Result.LOCK_FAILURE:
-                        r.Append("failed to lock");
-                        break;
-
-                    case ReceiveCommand.Result.OK:
-                        // We shouldn't have reached this case (see 'ok' case above).
-                        continue;
-                }
-
-                rout.SendString(r.ToString());
-            }
-        }
-
-        private void SendAdvertisedRefs()
-        {
-            refs = db.getAllRefs();
-
-            var m = new StringBuilder(100);
-            char[] idtmp = new char[2 * Constants.OBJECT_ID_LENGTH];
-            IEnumerator<Ref> i = RefComparator.Sort(refs.Values).GetEnumerator();
-            {
-                if (i.MoveNext())
-                {
-                    Ref r = i.Current;
-                    Format(m, idtmp, r.ObjectId, r.OriginalName);
-                }
-                else
-                {
-                    Format(m, idtmp, ObjectId.ZeroId, "capabilities^^{}");
-                }
-                m.Append('\0');
-                m.Append(' ');
-                m.Append(CAPABILITY_DELETE_REFS);
-                m.Append(' ');
-                m.Append(CAPABILITY_REPORT_STATUS);
-                if (allowOfsDelta)
-                {
-                    m.Append(' ');
-                    m.Append(CAPABILITY_OFS_DELTA);
-                }
-                m.Append(' ');
-                WriteAdvertisedRef(m);
-            }
-
-            while (i.MoveNext())
-            {
-                Ref r = i.Current;
-                Format(m, idtmp, r.ObjectId, r.Name);
-                WriteAdvertisedRef(m);
-            }
-            pckOut.End();
-        }
-
-        private void ExecuteCommands()
-        {
-            preReceive.onPreReceive(this, FilterCommands(ReceiveCommand.Result.NOT_ATTEMPTED));
-            foreach (ReceiveCommand cmd in FilterCommands(ReceiveCommand.Result.NOT_ATTEMPTED))
-            {
-                Execute(cmd);
-            }
-        }
-
-
-        /// <summary>
-        /// Send an error message to the client, if it supports receiving them.
-        /// <para>
-        /// If the client doesn't support receiving messages, the message will be
-        /// discarded, with no other indication to the caller or to the client.
-        /// </para>
-        /// <para>
-        /// <see cref="PreReceiveHook"/>s should always try to use
-        /// <see cref="ReceiveCommand.setResult(GitSharp.Core.Transport.ReceiveCommand.Result,string)"/> with a result status of
-        /// <see cref="ReceiveCommand.Result.REJECTED_OTHER_REASON"/> to indicate any reasons for
-        /// rejecting an update. Messages attached to a command are much more likely
-        /// to be returned to the client.
-        /// </para>
-        /// </summary>
-        /// <param name="what">string describing the problem identified by the hook. The string must not end with an LF, and must not contain an LF.</param>
-        public void sendError(string what)
-        {
-            SendMessage("error", what);
-        }
-
-        /// <summary>
-        /// Send a message to the client, if it supports receiving them.
-        /// <para>
-        /// If the client doesn't support receiving messages, the message will be
-        /// discarded, with no other indication to the caller or to the client.
-        /// </para>
-        /// </summary>
-        /// <param name="what">string describing the problem identified by the hook. The string must not end with an LF, and must not contain an LF.</param>
-        public void sendMessage(string what)
-        {
-            SendMessage("remote", what);
-        }
-
-        private void SendMessage(string type, string what)
-        {
-            if (msgs != null)
-            {
-                msgs.WriteLine(type + ": " + what);
-            }
-        }
-
-        private void UnlockPack()
-        {
-            if (packLock != null)
-            {
-                packLock.Unlock();
-                packLock = null;
-            }
-        }
-
-        private static void Format(StringBuilder m, char[] idtmp, AnyObjectId id, string name)
-        {
-            m.Length = 0;
-            id.CopyTo(idtmp, m);
-            m.Append(' ');
-            m.Append(name);
-        }
-
-        private void WriteAdvertisedRef(StringBuilder m)
-        {
-            m.Append('\n');
-            pckOut.WriteString(m.ToString());
         }
 
         private void EnableCapabilities()
@@ -729,6 +621,20 @@ namespace GitSharp.Core.Transport
                 if (cmd.getType() != ReceiveCommand.Type.DELETE) return true;
             }
             return false;
+        }
+
+        private void receivePack()
+        {
+            IndexPack ip = IndexPack.Create(db, raw);
+            ip.setFixThin(true);
+            ip.setObjectChecking(isCheckReceivedObjects());
+            ip.index(NullProgressMonitor.Instance);
+
+            //  TODO: [caytchen] reflect gitsharp
+            string lockMsg = "jgit receive-pack";
+            if (getRefLogIdent() != null)
+                lockMsg += " from " + getRefLogIdent().ToExternalString();
+            packLock = ip.renameAndOpenPack(lockMsg);
         }
 
         private void CheckConnectivity()
@@ -828,7 +734,7 @@ namespace GitSharp.Core.Transport
                     }
                     catch (IOException)
                     {
-                        cmd.setResult(ReceiveCommand.Result.REJECTED_MISSING_OBJECT, cmd.getOldId().ToString());
+                        cmd.setResult(ReceiveCommand.Result.REJECTED_MISSING_OBJECT, cmd.getOldId().Name);
                         continue;
                     }
 
@@ -838,7 +744,7 @@ namespace GitSharp.Core.Transport
                     }
                     catch (IOException)
                     {
-                        cmd.setResult(ReceiveCommand.Result.REJECTED_MISSING_OBJECT, cmd.getNewId().ToString());
+                        cmd.setResult(ReceiveCommand.Result.REJECTED_MISSING_OBJECT, cmd.getNewId().Name);
                         continue;
                     }
 
@@ -855,7 +761,7 @@ namespace GitSharp.Core.Transport
                         }
                         catch (MissingObjectException e)
                         {
-                            cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, e.Message);
+                            cmd.setResult(ReceiveCommand.Result.REJECTED_MISSING_OBJECT, e.Message);
                         }
                         catch (IOException)
                         {
@@ -872,6 +778,15 @@ namespace GitSharp.Core.Transport
                 {
                     cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, "funny refname");
                 }
+            }
+        }
+
+        private void ExecuteCommands()
+        {
+            preReceive.onPreReceive(this, FilterCommands(ReceiveCommand.Result.NOT_ATTEMPTED));
+            foreach (ReceiveCommand cmd in FilterCommands(ReceiveCommand.Result.NOT_ATTEMPTED))
+            {
+                Execute(cmd);
             }
         }
 
@@ -913,16 +828,6 @@ namespace GitSharp.Core.Transport
             }
         }
 
-        private List<ReceiveCommand> FilterCommands(ReceiveCommand.Result want)
-        {
-            var r = new List<ReceiveCommand>(commands.Count);
-            foreach (ReceiveCommand cmd in commands)
-            {
-                if (cmd.getResult() == want)
-                    r.Add(cmd);
-            }
-            return r;
-        }
 
         private static void Status(ReceiveCommand cmd, RefUpdate.RefUpdateResult result)
         {
@@ -957,6 +862,131 @@ namespace GitSharp.Core.Transport
                     break;
             }
         }
+
+        private List<ReceiveCommand> FilterCommands(ReceiveCommand.Result want)
+        {
+            var r = new List<ReceiveCommand>(commands.Count);
+            foreach (ReceiveCommand cmd in commands)
+            {
+                if (cmd.getResult() == want)
+                    r.Add(cmd);
+            }
+            return r;
+        }
+
+        private void SendStatusReport(bool forClient, Reporter rout)
+        {
+            if (unpackError != null)
+            {
+                rout.SendString("unpack error " + unpackError.Message);
+                if (forClient)
+                {
+                    foreach (ReceiveCommand cmd in commands)
+                    {
+                        rout.SendString("ng " + cmd.getRefName() + " n/a (unpacker error)");
+                    }
+                }
+
+                return;
+            }
+
+            if (forClient)
+            {
+                rout.SendString("unpack ok");
+            }
+            foreach (ReceiveCommand cmd in commands)
+            {
+                if (cmd.getResult() == ReceiveCommand.Result.OK)
+                {
+                    if (forClient)
+                        rout.SendString("ok " + cmd.getRefName());
+                    continue;
+                }
+
+                var r = new StringBuilder();
+                r.Append("ng ");
+                r.Append(cmd.getRefName());
+                r.Append(" ");
+
+                switch (cmd.getResult())
+                {
+                    case ReceiveCommand.Result.NOT_ATTEMPTED:
+                        r.Append("server bug; ref not processed");
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_NOCREATE:
+                        r.Append("creation prohibited");
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_NODELETE:
+                        r.Append("deletion prohibited");
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_NONFASTFORWARD:
+                        r.Append("non-fast forward");
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_CURRENT_BRANCH:
+                        r.Append("branch is currently checked out");
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_MISSING_OBJECT:
+                        if (cmd.getMessage() == null)
+                            r.Append("missing object(s)");
+                        else if (cmd.getMessage().Length == Constants.OBJECT_ID_STRING_LENGTH)
+                            r.Append("object " + cmd.getMessage() + " missing");
+                        else
+                            r.Append(cmd.getMessage());
+                        break;
+
+                    case ReceiveCommand.Result.REJECTED_OTHER_REASON:
+                        if (cmd.getMessage() == null)
+                            r.Append("unspecified reason");
+                        else
+                            r.Append(cmd.getMessage());
+                        break;
+
+                    case ReceiveCommand.Result.LOCK_FAILURE:
+                        r.Append("failed to lock");
+                        break;
+
+                    case ReceiveCommand.Result.OK:
+                        // We shouldn't have reached this case (see 'ok' case above).
+                        continue;
+                }
+
+                rout.SendString(r.ToString());
+            }
+        }
+
+
+
+
+
+
+        private static void Format(StringBuilder m, char[] idtmp, AnyObjectId id, string name)
+        {
+            m.Length = 0;
+            id.CopyTo(idtmp, m);
+            m.Append(' ');
+            m.Append(name);
+        }
+
+        private void WriteAdvertisedRef(StringBuilder m)
+        {
+            m.Append('\n');
+            pckOut.WriteString(m.ToString());
+        }
+
+
+
+
+
+
+
+
+
+
 
         public void Dispose()
         {
@@ -1000,7 +1030,7 @@ namespace GitSharp.Core.Transport
             public override void SendString(string s)
             {
                 byte[] data = Constants.encode(s);
-                _stream.Write(data, 0, data.Length);
+                _stream.Write(data, 0, data.Length); //TODO: [nulltoken] is println in Java. We may be missing a line terminator there.
             }
         }
 

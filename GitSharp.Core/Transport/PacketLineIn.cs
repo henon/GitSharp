@@ -45,139 +45,139 @@ using ICSharpCode.SharpZipLib.Tar;
 namespace GitSharp.Core.Transport
 {
 
-    public class PacketLineIn
-    {
-        [Serializable]
-        public enum AckNackResult
-        {
-            NAK,
-            ACK,
-            ACK_CONTINUE,
-            ACK_COMMON,
-            ACK_READY
-        }
+	public class PacketLineIn
+	{
+		[Serializable]
+		public enum AckNackResult
+		{
+			NAK,
+			ACK,
+			ACK_CONTINUE,
+			ACK_COMMON,
+			ACK_READY
+		}
 
-        private readonly Stream ins;
-        private readonly byte[] lenbuffer;
+		private readonly Stream ins;
+		private readonly byte[] lenbuffer;
 
-        public PacketLineIn(Stream i)
-        {
-            ins = i;
-            lenbuffer = new byte[4];
-        }
+		public PacketLineIn(Stream i)
+		{
+			ins = i;
+			lenbuffer = new byte[4];
+		}
 
-        public Stream sideband(ProgressMonitor pm)
-        {
-            return new SideBandInputStream(this, ins, pm);
-        }
+		public Stream sideband(ProgressMonitor pm)
+		{
+			return new SideBandInputStream(this, ins, pm);
+		}
 
-        public AckNackResult readACK(MutableObjectId returnedId)
-        {
-            string line = ReadString();
-            if (line.Length == 0)
-                throw new PackProtocolException("Expected ACK/NAK, found EOF");
-            if ("NAK".Equals(line))
-                return AckNackResult.NAK;
-            if (line.StartsWith("ACK "))
-            {
-                returnedId.FromString(line.Slice(4, 44));
+		public AckNackResult readACK(MutableObjectId returnedId)
+		{
+			string line = ReadString();
+			if (line.Length == 0)
+				throw new PackProtocolException("Expected ACK/NAK, found EOF");
+			if ("NAK".Equals(line))
+				return AckNackResult.NAK;
+			if (line.StartsWith("ACK "))
+			{
+				returnedId.FromString(line.Slice(4, 44));
 
 
-                if (line.Length == 44)
-                    return AckNackResult.ACK;
+				if (line.Length == 44)
+					return AckNackResult.ACK;
 
-                string arg = line.Substring(44);
-                if (arg.Equals(" continue"))
-                    return AckNackResult.ACK_CONTINUE;
-                else if (arg.Equals(" common"))
-                    return AckNackResult.ACK_COMMON;
-                else if (arg.Equals(" ready"))
-                    return AckNackResult.ACK_READY;
-            }
-            throw new PackProtocolException("Expected ACK/NAK, got: " + line);
-        }
+				string arg = line.Substring(44);
+				if (arg.Equals(" continue"))
+					return AckNackResult.ACK_CONTINUE;
+				else if (arg.Equals(" common"))
+					return AckNackResult.ACK_COMMON;
+				else if (arg.Equals(" ready"))
+					return AckNackResult.ACK_READY;
+			}
+			throw new PackProtocolException("Expected ACK/NAK, got: " + line);
+		}
 
-        public string ReadString()
-        {
-            int len = ReadLength();
-            if (len == 0)
-                return string.Empty;
+		public string ReadString()
+		{
+			int len = ReadLength();
+			if (len == 0)
+				return string.Empty;
 
-            len -= 4; // length header (4 bytes)
+			len -= 4; // length header (4 bytes)
 
-            if (len <= 0)
-                return string.Empty;
+			if (len <= 0)
+				return string.Empty;
 
-            byte[] raw = new byte[len];
+			byte[] raw = new byte[len];
 
-            try
-            {
-                IO.ReadFully(ins, raw, 0, len);
-            }
-            catch (IOException e)
-            {
-                throw invalidHeader(lenbuffer, e);
-            }
+			try
+			{
+				IO.ReadFully(ins, raw, 0, len);
+			}
+			catch (IOException e)
+			{
+				throw invalidHeader(lenbuffer, e);
+			}
 
-            if (raw[len - 1] == '\n')
-                len--;
-            return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
-        }
+			if (raw[len - 1] == '\n')
+				len--;
+			return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
+		}
 
-        public string ReadStringRaw()
-        {
-            int len = ReadLength();
-            if (len == 0)
-                return string.Empty;
+		public string ReadStringRaw()
+		{
+			int len = ReadLength();
+			if (len == 0)
+				return string.Empty;
 
-            len -= 4; // length header (4 bytes)
-            if (len == 0)
-                return string.Empty;
+			len -= 4; // length header (4 bytes)
+			if (len == 0)
+				return string.Empty;
 
-            byte[] raw = new byte[len];
+			byte[] raw = new byte[len];
 
-            try
-            {
-                IO.ReadFully(ins, raw, 0, len);
-            }
-            catch (IOException e)
-            {
-                throw invalidHeader(lenbuffer, e);
-            }
+			try
+			{
+				IO.ReadFully(ins, raw, 0, len);
+			}
+			catch (IOException e)
+			{
+				throw invalidHeader(lenbuffer, e);
+			}
 
-            return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
-        }
+			return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
+		}
 
-        public int ReadLength()
-        {
-            try
-            {
-                IO.ReadFully(ins, lenbuffer, 0, 4);
-            }
-            catch (IOException e)
-            {
-                throw invalidHeader(lenbuffer, e);
-            }
+		public int ReadLength()
+		{
+			try
+			{
+				IO.ReadFully(ins, lenbuffer, 0, 4);
+			}
+			catch (IOException e)
+			{
+				throw invalidHeader(lenbuffer, e);
+			}
 
-            try
-            {
-                int len = RawParseUtils.parseHexInt16(lenbuffer, 0);
-                if (len != 0 && len < 4)
-                    throw new IndexOutOfRangeException();
-                return len;
-            }
-            catch (IndexOutOfRangeException e)
-            {
-                throw invalidHeader(lenbuffer, e);
-            }
-        }
+			try
+			{
+				int len = RawParseUtils.parseHexInt16(lenbuffer, 0);
+				if (len != 0 && len < 4)
+					throw new IndexOutOfRangeException();
+				return len;
+			}
+			catch (IndexOutOfRangeException e)
+			{
+				throw invalidHeader(lenbuffer, e);
+			}
+		}
 
-        private static Exception invalidHeader(byte[] lenbuffer, Exception e)
-        {
-            return new IOException("Invalid packet line header: " + (char)lenbuffer[0] +
-                                                    (char)lenbuffer[1] + (char)lenbuffer[2] + (char)lenbuffer[3], e);
-        }
-    }
+		private static Exception invalidHeader(byte[] lenbuffer, Exception e)
+		{
+			return new IOException("Invalid packet line header: " + (char)lenbuffer[0] +
+													(char)lenbuffer[1] + (char)lenbuffer[2] + (char)lenbuffer[3], e);
+		}
+	}
 
 
 }

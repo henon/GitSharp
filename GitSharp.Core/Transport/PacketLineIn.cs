@@ -40,13 +40,13 @@ using System;
 using System.IO;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.Util;
-using ICSharpCode.SharpZipLib.Tar;
 
 namespace GitSharp.Core.Transport
 {
-
 	public class PacketLineIn
 	{
+		public static string END = string.Empty;
+
 		[Serializable]
 		public enum AckNackResult
 		{
@@ -82,7 +82,6 @@ namespace GitSharp.Core.Transport
 			{
 				returnedId.FromString(line.Slice(4, 44));
 
-
 				if (line.Length == 44)
 					return AckNackResult.ACK;
 
@@ -101,23 +100,16 @@ namespace GitSharp.Core.Transport
 		{
 			int len = ReadLength();
 			if (len == 0)
-				return string.Empty;
+				return END;
 
 			len -= 4; // length header (4 bytes)
 
-			if (len <= 0)
+			if (len == 0)
 				return string.Empty;
 
 			byte[] raw = new byte[len];
 
-			try
-			{
-				IO.ReadFully(ins, raw, 0, len);
-			}
-			catch (IOException e)
-			{
-				throw invalidHeader(lenbuffer, e);
-			}
+			IO.ReadFully(ins, raw, 0, len);
 
 			if (raw[len - 1] == '\n')
 				len--;
@@ -128,36 +120,20 @@ namespace GitSharp.Core.Transport
 		{
 			int len = ReadLength();
 			if (len == 0)
-				return string.Empty;
+				return END;
 
 			len -= 4; // length header (4 bytes)
-			if (len == 0)
-				return string.Empty;
 
 			byte[] raw = new byte[len];
 
-			try
-			{
-				IO.ReadFully(ins, raw, 0, len);
-			}
-			catch (IOException e)
-			{
-				throw invalidHeader(lenbuffer, e);
-			}
+			IO.ReadFully(ins, raw, 0, len);
 
 			return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
 		}
 
 		public int ReadLength()
 		{
-			try
-			{
-				IO.ReadFully(ins, lenbuffer, 0, 4);
-			}
-			catch (IOException e)
-			{
-				throw invalidHeader(lenbuffer, e);
-			}
+			IO.ReadFully(ins, lenbuffer, 0, 4);
 
 			try
 			{

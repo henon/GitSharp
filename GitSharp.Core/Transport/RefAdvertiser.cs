@@ -40,7 +40,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using GitSharp.Core.RevWalk;
-using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
@@ -49,10 +48,17 @@ namespace GitSharp.Core.Transport
     /// </summary>
     public abstract class RefAdvertiser : IDisposable
     {
+        /// <summary>
+        /// Advertiser which frames lines in a {@link PacketLineOut} format.
+        /// </summary>
         public class PacketLineOutRefAdvertiser : RefAdvertiser
         {
             private PacketLineOut pckOut;
 
+            /// <summary>
+            /// Create a new advertiser for the supplied stream.
+            /// </summary>
+            /// <param name="out">the output stream.</param>
             public PacketLineOutRefAdvertiser(PacketLineOut @out)
             {
                 pckOut = @out;

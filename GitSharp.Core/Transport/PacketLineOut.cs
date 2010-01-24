@@ -36,28 +36,51 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.IO;
 
 namespace GitSharp.Core.Transport
 {
-
+    /// <summary>
+    /// Write Git style pkt-line formatting to an output stream.
+    /// <para/>
+    /// This class is not thread safe and may issue multiple writes to the underlying
+    /// stream for each method call made.
+    /// <para/>
+    /// This class performs no buffering on its own. This makes it suitable to
+    /// interleave writes performed by this class with writes performed directly
+    /// against the underlying OutputStream.
+    /// </summary>
     public class PacketLineOut
     {
         public Stream Out { get; private set; }
         private byte[] lenbuffer;
 
-        public PacketLineOut(Stream i)
+        /// <summary>
+        /// Create a new packet line writer.
+        /// </summary>
+        /// <param name="outputStream">stream</param>
+        public PacketLineOut(Stream outputStream)
         {
-            Out = i;
+            Out = outputStream;
             lenbuffer = new byte[5];
         }
 
+        /// <summary>
+        /// Write a UTF-8 encoded string as a single length-delimited packet.
+        /// </summary>
+        /// <param name="s">string to write.</param>
         public void WriteString(string s)
         {
             WritePacket(Constants.encode(s));
         }
 
+        /// <summary>
+        /// Write a binary packet to the stream.
+        /// </summary>
+        /// <param name="packet">
+        /// the packet to write; the length of the packet is equal to the
+        /// size of the byte array.
+        /// </param>
         public void WritePacket(byte[] packet)
         {
             formatLength(packet.Length + 4);
@@ -68,11 +91,20 @@ namespace GitSharp.Core.Transport
         public void WriteChannelPacket(int channel, byte[] buf, int off, int len)
         {
             formatLength(len + 5);
-            lenbuffer[4] = (byte) channel;
+            lenbuffer[4] = (byte)channel;
             Out.Write(lenbuffer, 0, 5);
             Out.Write(buf, off, len);
         }
 
+        /// <summary>
+        /// Write a packet end marker, sometimes referred to as a flush command.
+        /// <para/>
+        /// Technically this is a magical packet type which can be detected
+        /// separately from an empty string or an empty packet.
+        /// <para/>
+        /// Implicitly performs a flush on the underlying OutputStream to ensure the
+        /// peer will receive all data written thus far.
+        /// </summary>
         public void End()
         {
             formatLength(0);
@@ -80,6 +112,12 @@ namespace GitSharp.Core.Transport
             Flush();
         }
 
+        /// <summary>
+        /// Flush the underlying OutputStream.
+        /// <para/>
+        /// Performs a flush on the underlying OutputStream to ensure the peer will
+        /// receive all data written thus far.
+        /// </summary>
         public void Flush()
         {
             Out.Flush();
@@ -96,8 +134,8 @@ namespace GitSharp.Core.Transport
             int o = 3;
             while (o >= 0 && w != 0)
             {
-                lenbuffer[o--] = (byte) hexchar[w & 0xf];
-                w = (int)(((uint) w) >> 4);
+                lenbuffer[o--] = (byte)hexchar[w & 0xf];
+                w = (int)(((uint)w) >> 4);
             }
             while (o >= 0)
                 lenbuffer[o--] = (byte)'0';

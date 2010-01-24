@@ -303,23 +303,20 @@ namespace GitSharp.Core
             if (n == null)
                 return defaultValue;
 
-            if (MagicEmptyValue == n || StringUtils.equalsIgnoreCase("yes", n)
-                || StringUtils.equalsIgnoreCase("true", n)
-                || StringUtils.equalsIgnoreCase("1", n)
-                || StringUtils.equalsIgnoreCase("on", n))
+            if (MagicEmptyValue == n)
             {
                 return true;
             }
 
-            if (StringUtils.equalsIgnoreCase("no", n)
-                || StringUtils.equalsIgnoreCase("false", n)
-                || StringUtils.equalsIgnoreCase("0", n)
-                || StringUtils.equalsIgnoreCase("off", n))
+            try
             {
-                return false;
+                return StringUtils.toBoolean(n);
+            }
+            catch (ArgumentException e)
+            {
+                throw new ArgumentException("Invalid boolean value: " + section + "." + name + "=" + n, e);
             }
 
-            throw new ArgumentException("Invalid boolean value: " + section + "." + name + "=" + n);
         }
 
         ///	<summary>

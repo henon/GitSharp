@@ -36,6 +36,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Text;
 
 namespace GitSharp.Core.Util
@@ -114,5 +115,46 @@ namespace GitSharp.Core.Util
             }
             return true;
         }
+
+        /// <summary>
+        /// Parse a string as a standard Git boolean value.
+        /// <para/>
+        /// The terms {@code yes}, {@code true}, {@code 1}, {@code on} can all be
+        /// used to mean {@code true}.
+        /// <para/>
+        /// The terms {@code no}, {@code false}, {@code 0}, {@code off} can all be
+        /// used to mean {@code false}.
+        /// <para/>
+        /// Comparisons ignore case, via <see cref="equalsIgnoreCase"/>.
+        /// </summary>
+        /// <param name="stringValue">the string to parse.</param>
+        /// <returns>the boolean interpretation of <paramref name="stringValue"/>.</returns>
+        public static bool toBoolean(string stringValue)
+        {
+            if (stringValue == null)
+                throw new ArgumentNullException("stringValue", "Expected boolean string value");
+
+            if (equalsIgnoreCase("yes", stringValue)
+                    || equalsIgnoreCase("true", stringValue)
+                    || equalsIgnoreCase("1", stringValue)
+                    || equalsIgnoreCase("on", stringValue))
+            {
+                return true;
+
+            }
+            else if (equalsIgnoreCase("no", stringValue)
+                    || equalsIgnoreCase("false", stringValue)
+                    || equalsIgnoreCase("0", stringValue)
+                    || equalsIgnoreCase("off", stringValue))
+            {
+                return false;
+
+            }
+            else
+            {
+                throw new ArgumentException("Not a boolean: " + stringValue);
+            }
+        }
+
     }
 }

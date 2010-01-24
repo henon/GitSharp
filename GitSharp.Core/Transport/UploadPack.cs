@@ -194,7 +194,7 @@ namespace GitSharp.Core.Transport
         private void Service()
         {
             if (biDirectionalPipe)
-                SendAdvertisedRefs();
+                sendAdvertisedRefs(new RefAdvertiser.PacketLineOutRefAdvertiser(_pckOut));
             else
             {
                 _refs = _db.getAllRefs();
@@ -224,11 +224,13 @@ namespace GitSharp.Core.Transport
                 SendPack();
         }
 
-        private void SendAdvertisedRefs()
+        /// <summary>
+        /// Generate an advertisement of available refs and capabilities.
+        /// </summary>
+        /// <param name="adv">the advertisement formatter.</param>
+        public void sendAdvertisedRefs(RefAdvertiser adv)
         {
-            _refs = _db.getAllRefs();
-
-            var adv = new RefAdvertiser(_pckOut, _walk, ADVERTISED);
+            adv.init(_walk, ADVERTISED);
             adv.advertiseCapability(OptionIncludeTag);
             adv.advertiseCapability(OPTION_MULTI_ACK_DETAILED);
             adv.advertiseCapability(OptionMultiAck);
@@ -240,7 +242,7 @@ namespace GitSharp.Core.Transport
             adv.setDerefTags(true);
             _refs = _db.getAllRefs();
             adv.send(_refs.Values);
-            _pckOut.End();
+            adv.end();
         }
 
         private void RecvWants()

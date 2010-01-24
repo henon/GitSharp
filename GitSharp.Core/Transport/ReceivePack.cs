@@ -470,7 +470,7 @@ namespace GitSharp.Core.Transport
         private void Service()
         {
             if (biDirectionalPipe)
-                SendAdvertisedRefs();
+                SendAdvertisedRefs(new RefAdvertiser.PacketLineOutRefAdvertiser(pckOut));
             else
                 refs = db.getAllRefs();
 
@@ -529,10 +529,14 @@ namespace GitSharp.Core.Transport
             }
         }
 
-        private void SendAdvertisedRefs()
+        /// <summary>
+        /// Generate an advertisement of available refs and capabilities.
+        /// </summary>
+        /// <param name="adv">the advertisement formatter.</param>
+        public void SendAdvertisedRefs(RefAdvertiser adv)
         {
             RevFlag advertised = walk.newFlag("ADVERTISED");
-            RefAdvertiser adv = new RefAdvertiser(pckOut, walk, advertised);
+            adv.init(walk, advertised);
             adv.advertiseCapability(CAPABILITY_DELETE_REFS);
             adv.advertiseCapability(CAPABILITY_REPORT_STATUS);
             if (allowOfsDelta)
@@ -546,7 +550,7 @@ namespace GitSharp.Core.Transport
             adv.includeAdditionalHaves();
             if (adv.isEmpty())
                 adv.advertiseId(ObjectId.ZeroId, "capabilities^{}");
-            pckOut.End();
+            adv.end();
         }
 
 

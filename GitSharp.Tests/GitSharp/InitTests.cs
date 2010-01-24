@@ -100,5 +100,30 @@ namespace GitSharp.API.Tests
                 Assert.IsTrue(Repository.IsValid(repo.Directory, bare));
             }
         }
+		
+		[Test]
+		public void ReinitializeDoesNotResetHead()
+		{
+			setUp();
+			var workingDirectory = Path.Combine(trash.FullName, "test");
+			using (var repo = Repository.Init(workingDirectory, false))
+			{
+				string filepath = Path.Combine(workingDirectory, "for henon.txt");
+				File.WriteAllText(filepath, "Weißbier");
+				repo.Index.Add(filepath);
+				repo.Commit("yargbots", new Author("test author", "test_author@example.com"));
+				Assert.IsNotNull(repo.Head.CurrentCommit);
+				var b = Branch.Create(repo, "foo");
+				
+				repo.CheckoutBranch("foo");
+				
+				Assert.AreEqual(repo.CurrentBranch.Name, "foo");
+				
+				using (var repo2 = Repository.Init(workingDirectory, false))
+				{
+					Assert.AreEqual(repo2.CurrentBranch.Name, "foo");
+				}
+			}
+		}
     }
 }

@@ -212,7 +212,7 @@ namespace GitSharp.Core
         /// Create a new Git repository initializing the necessary files and
         /// directories.
         /// </summary>
-        public void Create()
+        	public void Create()
         {
             Create(false);
         }
@@ -222,26 +222,33 @@ namespace GitSharp.Core
         /// directories.
         /// </summary>
         /// <param name="bare">if true, a bare repository is created.</param>
-        public void Create(bool bare)
+        public bool Create(bool bare)
         {
+			var reinit = false;
+			
             if (Config.getFile().Exists)
             {
-                throw new InvalidOperationException("Repository already exists : " + Directory.FullName);
+                reinit = true;
             }
 
-            Directory.Mkdirs();
-            _refDb.Create();
-            _objectDatabase.create();
+			if (!reinit)
+			{
+            	Directory.Mkdirs();
+            	_refDb.Create();
+            	_objectDatabase.create();
 
-            const string master = Constants.RefsHeads + Constants.Master;
-            _refDb.Link(Constants.HEAD, master);
-
+            	const string master = Constants.RefsHeads + Constants.Master;
+				_refDb.Link(Constants.HEAD, master);
+			}
+			
             Config.setInt("core", null, "repositoryformatversion", 0);
             Config.setBoolean("core", null, "filemode", true);
             Config.setBoolean("core", null, "bare", bare);
             Config.setBoolean("core", null, "logallrefupdates", !bare);
 
             Config.save();
+			
+			return reinit;
         }
 
         public DirectoryInfo ObjectsDirectory

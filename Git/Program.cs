@@ -168,7 +168,14 @@ namespace GitSharp.CLI
                     if (cmd.RequiresRepository)
                     {
                         if (gitdir == null)
+                        {
                             gitdir = Commands.AbstractCommand.FindGitDirectory(null, true, false);
+                            if (gitdir == null)
+                            {
+                                Console.Error.WriteLine("fatal: Not a git repository (or any of the parent directories): .git");
+                                Exit(0);
+                            }
+                        }
 
                         repo = new Core.Repository(new DirectoryInfo(gitdir));
                         cmd.Init(repo, gitdir);

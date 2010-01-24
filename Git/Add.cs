@@ -39,12 +39,15 @@
 using System;
 using System.Collections.Generic;
 using NDesk.Options;
+using GitSharp.Commands;
 
 namespace GitSharp.CLI
 {
-    [Command(complete = false, common = true, usage = "Add file contents to the index")]
+    [Command(complete = false, common = true, requiresRepository = true, usage = "Add file contents to the index")]
     class Add : TextBuiltin
     {
+        private AddCommand cmd = new AddCommand();
+
         private static Boolean isHelp = false;
 
 #if ported
@@ -85,7 +88,17 @@ namespace GitSharp.CLI
                 if (arguments.Count > 0)
                 {
                     //Add the file(s)
-                    DoAdd(arguments);
+                    //DoAdd(arguments);
+                    try
+                    {
+                        cmd.Arguments = arguments;
+                        cmd.Execute();
+                    }
+                    catch (ArgumentException e)
+                    {
+                        Console.WriteLine("Path does not exist: " + e.ParamName);
+                        Console.WriteLine("Adding path(s) has been aborted.");
+                    }
                 }
                 else if (args.Length <= 0)
                 {

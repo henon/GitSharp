@@ -47,50 +47,68 @@ namespace GitSharp.API.Tests
 	class StatusTests : ApiTestCase
 	{
 		[Test]
-		public void IsFileUntracked()
+		public void IsStatusResultAccurate()
 		{
+            //Due to the cumulative nature of these tests, rather than recreate the same 
+            // conditions multiple times, all StatusResult testing has been rolled into one test.
 			bool bare = false;
 			var path = Path.Combine(trash.FullName, "test");
-			using (var repo = Repository.Init(path, bare))
-			{
-				StatusCommand cmd = new StatusCommand();
-				Assert.IsNotNull(cmd);
-				cmd.Repository = repo;
-				Assert.IsNotNull(cmd.Repository);
-				//Verify the file is not already created
-				string filename = "newfile.txt";
-				StatusResults results = Git.Status(cmd);
-				Assert.IsNotNull(results);
-				Assert.IsFalse(results.Contains(filename, StatusState.Untracked));
-				//Create the file and re-populate the status results
-				string filepath = Path.Combine(repo.WorkingDirectory, filename);
-				File.WriteAllText(filepath, "Just a simple test.");
-				StatusResults results1 = Git.Status(cmd);
-				Assert.IsNotNull(results1);
-				Assert.IsTrue(results1.Contains(filename, StatusState.Untracked));
-			}
-		}
+            using (var repo = Repository.Init(path, bare))
+            {
+                StatusCommand cmd = new StatusCommand();
+                Assert.IsNotNull(cmd);
+                cmd.Repository = repo;
+                Assert.IsNotNull(cmd.Repository);
+                //Verify the file has not already been created
+                string filename = "newfile.txt";
+                StatusResults results = Git.Status(cmd);
+                Assert.IsNotNull(results);
+                Assert.IsFalse(results.Contains(filename, StatusState.Untracked));
+                
+                //Create the file and verify the file is untracked
+                string filepath = Path.Combine(repo.WorkingDirectory, filename);
+                File.WriteAllText(filepath, "Just a simple test.");
+                //Re-populate the status results
+                results.Clear();
+                results = Git.Status(cmd);
+                Assert.IsNotNull(results);
+                Assert.IsFalse(results.Contains(filename, StatusState.Staged));
+                Assert.IsFalse(results.Contains(filename, StatusState.Modified));
+                Assert.IsTrue(results.Contains(filename, StatusState.Untracked));
+                
+                //Add the file to the index and verify the file is modified
+                Index index = new Index(repo);
+                index.Add(filepath);
+                //Re-populate the status results
+                results.Clear();
+                results = Git.Status(cmd);
+                Assert.IsNotNull(results);
+                Assert.IsTrue(results.Contains(filename, StatusState.Staged));
+                Assert.IsFalse(results.Contains(filename, StatusState.Modified));
+                Assert.IsFalse(results.Contains(filename, StatusState.Untracked));
+                
+                //Change the modified file status to staged and verify the file is staged.
+                index.Add(filepath);
+                //Re-populate the status results
+                results.Clear();
+                results = Git.Status(cmd);
+                Assert.IsNotNull(results);
+                Assert.IsTrue(results.Contains(filename, StatusState.Staged));
+                Assert.IsFalse(results.Contains(filename, StatusState.Modified));
+                Assert.IsFalse(results.Contains(filename, StatusState.Untracked));
 
-		[Test]
-		public void IsFileModified()
-		{
-			//Requires the add command to implement.
-			Assert.Ignore("This test has not been implemented yet.");
-		}
+                // Modify the staged file and verify the file is both modified 
+                // and staged simultaneously.
+                File.AppendAllText(filepath, "Appended a line.");
+                //Re-populate the status results
+                results.Clear();
+                results = Git.Status(cmd);
+                Assert.IsNotNull(results);
+                Assert.IsTrue(results.Contains(filename, StatusState.Staged));
+                Assert.IsTrue(results.Contains(filename, StatusState.Modified));
+                Assert.IsFalse(results.Contains(filename, StatusState.Untracked));
 
-		[Test]
-		public void IsFileStaged()
-		{
-			//Requires the add command to implement.
-			Assert.Ignore("This test has not been implemented yet.");
-		}
-
-		//Tests if a file can be staged and modified at the same time.
-		//In git, this behavior is allowed. This behavior is still pending in GitSharp.
-		public void IsFileStagedAndModified()
-		{
-			//Requires the add command to implement.
-			Assert.Ignore("This test has not been implemented yet.");
+            }
 		}
 	}
 }

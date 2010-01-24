@@ -96,8 +96,11 @@ namespace GitSharp.Commands
                                 return directory;
 
                             //Get parent directory
-                            directory = Path.Combine(directory, "..");
-                            directory = Path.GetFullPath(directory);
+                            string parentDirectory = Path.Combine(directory, "..");
+                            parentDirectory = Path.GetFullPath(parentDirectory);
+                            if (parentDirectory == directory)
+                                return null;
+                            directory = parentDirectory;
                         }
                     }
                     else

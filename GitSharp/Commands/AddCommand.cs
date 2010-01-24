@@ -40,6 +40,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using GitSharp.Core.FnMatch;
+using GitSharp.Core;
 
 namespace GitSharp.Commands
 {
@@ -177,7 +179,23 @@ namespace GitSharp.Commands
 
         public override void Execute()
         {
-            throw new NotImplementedException();
+            foreach (string arg in Arguments)
+            {   
+                //Todo: Add FileNameMatcher support. To be added when fnmatch is completed.
+                //For now, pattern matching is not allowed. Please specify the files only.               
+                
+                //Gain access to the Git index using the repository determined before command execution
+                Index index = new Index(Repository);
+                
+                //Use full paths only to eliminate platform-based directory differences
+                string path = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), arg));
+
+                //Perform the validity tests outside of the index to handle the error messages
+                if ((new FileInfo(path).Exists) || (new DirectoryInfo(path).Exists))
+                    index.Add(path);
+                else
+                    OutputStream.WriteLine(path + " does not exist.");
+            }
         }
     }
 }

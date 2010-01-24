@@ -49,104 +49,104 @@ using System.Diagnostics;
 
 namespace GitSharp
 {
-    /// <summary>
-    /// AbstractObject is the base class for the classes Blob, Commit, Tag and Tree. It proviedes test methods
-    /// to identify its specialized type (i.e. IsBlob, IsCommit, etc). AbstractObject also defines comparison operators so you can
-    /// safely compare git objects by using the operators == or != which internally efficiently compare the objects hashes. 
-    /// </summary>
-    public abstract class AbstractObject
-    {
-        protected Repository _repo;
-        internal ObjectId _id; // <--- the git object is lazy loaded. only a _id is required until properties are accessed.
+	/// <summary>
+	/// AbstractObject is the base class for the classes Blob, Commit, Tag and Tree. It proviedes test methods
+	/// to identify its specialized type (i.e. IsBlob, IsCommit, etc). AbstractObject also defines comparison operators so you can
+	/// safely compare git objects by using the operators == or != which internally efficiently compare the objects hashes. 
+	/// </summary>
+	public abstract class AbstractObject
+	{
+		protected Repository _repo;
+		internal ObjectId _id; // <--- the git object is lazy loaded. only a _id is required until properties are accessed.
 
-        internal AbstractObject(Repository repo, ObjectId id)
-        {
-            _repo = repo;
-            _id = id;
-        }
+		internal AbstractObject(Repository repo, ObjectId id)
+		{
+			_repo = repo;
+			_id = id;
+		}
 
-        internal AbstractObject(Repository repo, string name)
-        {
-            _repo = repo;
-            _id = _repo._internal_repo.Resolve(name);
-        }
+		internal AbstractObject(Repository repo, string name)
+		{
+			_repo = repo;
+			_id = _repo._internal_repo.Resolve(name);
+		}
 
-        /// <summary>
-        /// The git object's SHA1 hash. This is the long hash, See ShortHash for the abbreviated version.
-        /// </summary>
-        public string Hash
-        {
-            get
-            {
-                return _id.ToString();
-            }
-        }
+		/// <summary>
+		/// The git object's SHA1 hash. This is the long hash, See ShortHash for the abbreviated version.
+		/// </summary>
+		public string Hash
+		{
+			get
+			{
+				return _id.ToString();
+			}
+		}
 
-        /// <summary>
-        /// The git object's abbreviated SHA1 hash. 
-        /// </summary>
-        public string ShortHash
-        {
-            get
-            {
-                return _id.Abbreviate(_repo._internal_repo).name();
-            }
-        }
+		/// <summary>
+		/// The git object's abbreviated SHA1 hash. 
+		/// </summary>
+		public string ShortHash
+		{
+			get
+			{
+				return _id.Abbreviate(_repo._internal_repo).name();
+			}
+		}
 
-        /// <summary>
-        /// True if this object is a Blob (or Leaf which is a subclass of Blob).
-        /// </summary>
-        public bool IsBlob
-        {
-            get
-            {
-                return _repo._internal_repo.MapObject(_id, null) is byte[];
-            }
-        }
+		/// <summary>
+		/// True if this object is a Blob (or Leaf which is a subclass of Blob).
+		/// </summary>
+		public bool IsBlob
+		{
+			get
+			{
+				return _repo._internal_repo.MapObject(_id, null) is byte[];
+			}
+		}
 
-        /// <summary>
-        /// True if this object is a Commit.
-        /// </summary>
-        public bool IsCommit
-        {
-            get
-            {
-                return _repo._internal_repo.MapObject(_id, null) is CoreCommit;
-            }
-        }
+		/// <summary>
+		/// True if this object is a Commit.
+		/// </summary>
+		public bool IsCommit
+		{
+			get
+			{
+				return _repo._internal_repo.MapObject(_id, null) is CoreCommit;
+			}
+		}
 
-        /// <summary>
-        /// True if this object is a Tag.
-        /// </summary>
-        public bool IsTag
-        {
-            get
-            {
-                return _repo._internal_repo.MapObject(_id, null) is CoreTag;
-            }
-        }
+		/// <summary>
+		/// True if this object is a Tag.
+		/// </summary>
+		public bool IsTag
+		{
+			get
+			{
+				return _repo._internal_repo.MapObject(_id, null) is CoreTag;
+			}
+		}
 
-        /// <summary>
-        /// True if the internal object is a Tree.
-        /// </summary>
-        public bool IsTree
-        {
-            get
-            {
-                return _repo._internal_repo.MapObject(_id, null) is CoreTree;
-            }
-        }
+		/// <summary>
+		/// True if the internal object is a Tree.
+		/// </summary>
+		public bool IsTree
+		{
+			get
+			{
+				return _repo._internal_repo.MapObject(_id, null) is CoreTree;
+			}
+		}
 
-        /// <summary>
-        /// The repository where this git object belongs to.
-        /// </summary>
-        public Repository Repository
-        {
-            get
-            {
-                return _repo;
-            }
-        }
+		/// <summary>
+		/// The repository where this git object belongs to.
+		/// </summary>
+		public Repository Repository
+		{
+			get
+			{
+				return _repo;
+			}
+		}
 
 #if implemented
         public Diff Diff(AbstractObject other) { }
@@ -158,65 +158,65 @@ namespace GitSharp
         public long Size { get; }
 #endif
 
-        /// <summary>
-        /// Internal helper function to create the right object instance for a given hash
-        /// </summary>
-        /// <param name="repo"></param>
-        /// <param name="objectId"></param>
-        /// <returns></returns>
-        internal static AbstractObject Wrap(Repository repo, ObjectId objectId)
-        {
-            Debug.Assert(objectId != null);
-            Debug.Assert(repo != null);
-            var obj = repo._internal_repo.MapObject(objectId, null);
-            if (obj is CoreCommit)
-                return new Commit(repo, obj as CoreCommit);
-            else if (obj is CoreTag)
-                return new Tag(repo, obj as CoreTag);
-            else if (obj is CoreTree)
-                return new Tree(repo, obj as CoreTree);
-            else if (obj is byte[])
-                return new Blob(repo, objectId, obj as byte[]);
-            else
-            {
-                //Debug.Assert(false, "What kind of object do we have here?");
-                return null;
-            }
-        }
+		/// <summary>
+		/// Internal helper function to create the right object instance for a given hash
+		/// </summary>
+		/// <param name="repo"></param>
+		/// <param name="objectId"></param>
+		/// <returns></returns>
+		internal static AbstractObject Wrap(Repository repo, ObjectId objectId)
+		{
+			Debug.Assert(objectId != null);
+			Debug.Assert(repo != null);
+			var obj = repo._internal_repo.MapObject(objectId, null);
+			if (obj is CoreCommit)
+				return new Commit(repo, obj as CoreCommit);
+			else if (obj is CoreTag)
+				return new Tag(repo, obj as CoreTag);
+			else if (obj is CoreTree)
+				return new Tree(repo, obj as CoreTree);
+			else if (obj is byte[])
+				return new Blob(repo, objectId, obj as byte[]);
+			else
+			{
+				//Debug.Assert(false, "What kind of object do we have here?");
+				return null;
+			}
+		}
 
-        #region Equality overrides
+		#region Equality overrides
 
-        /// <summary>
-        /// Overriding equals to reflect that different AbstractObject instances with the same hash are in fact equal.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public override bool Equals(object obj)
-        {
-            if (obj is AbstractObject)
-                return _id == (obj as AbstractObject)._id;
-            else
-                return false;
-        }
+		/// <summary>
+		/// Overriding equals to reflect that different AbstractObject instances with the same hash are in fact equal.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public override bool Equals(object obj)
+		{
+			if (obj is AbstractObject)
+				return _id == (obj as AbstractObject)._id;
+			else
+				return false;
+		}
 
-        public static bool operator ==(AbstractObject self, object other)
-        {
-            return Equals(self, other);
-        }
+		public static bool operator ==(AbstractObject self, object other)
+		{
+			return Equals(self, other);
+		}
 
-        public static bool operator !=(AbstractObject self, object other)
-        {
-            return !(self == other);
-        }
+		public static bool operator !=(AbstractObject self, object other)
+		{
+			return !(self == other);
+		}
 
-        public override int GetHashCode()
-        {
-            if (_id != null)
-                return _id.GetHashCode();
-            return base.GetHashCode();
-        }
+		public override int GetHashCode()
+		{
+			if (_id != null)
+				return _id.GetHashCode();
+			return base.GetHashCode();
+		}
 
-        #endregion
+		#endregion
 
-    }
+	}
 }

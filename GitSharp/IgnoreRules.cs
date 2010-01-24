@@ -44,153 +44,153 @@ using System.Text.RegularExpressions;
 
 namespace GitSharp
 {
-    public class IgnoreRules
-    {
-        private struct Rule
-        {
-            public Regex pattern;
-            public bool exclude;
-            public bool isDirectoryOnly;
-        }
+	public class IgnoreRules
+	{
+		private struct Rule
+		{
+			public Regex pattern;
+			public bool exclude;
+			public bool isDirectoryOnly;
+		}
 
-        private IEnumerable<Rule> rules;
+		private IEnumerable<Rule> rules;
 
-        public IgnoreRules(string ignorePath)
-            : this(File.ReadAllLines(ignorePath))
-        {
+		public IgnoreRules(string ignorePath)
+			: this(File.ReadAllLines(ignorePath))
+		{
 
-        }
+		}
 
-        public IgnoreRules(string[] lines)
-        {
-            List<Rule> rules = new List<Rule>();
-            BuildRules(rules, lines);
+		public IgnoreRules(string[] lines)
+		{
+			List<Rule> rules = new List<Rule>();
+			BuildRules(rules, lines);
 
-            this.rules = rules;
-        }
+			this.rules = rules;
+		}
 
-        private void BuildRules(List<Rule> rules, string[] lines)
-        {
-            foreach (string line in lines)
-            {
-                string workingLine = line.Trim();
-                if (workingLine.StartsWith("#") || workingLine.Length == 0)
-                    continue;
+		private void BuildRules(List<Rule> rules, string[] lines)
+		{
+			foreach (string line in lines)
+			{
+				string workingLine = line.Trim();
+				if (workingLine.StartsWith("#") || workingLine.Length == 0)
+					continue;
 
-                Rule r;
-                r.exclude = !workingLine.StartsWith("!");
-                if (!r.exclude)
-                    workingLine = workingLine.Substring(1);
-                r.isDirectoryOnly = !workingLine.Contains(".");
+				Rule r;
+				r.exclude = !workingLine.StartsWith("!");
+				if (!r.exclude)
+					workingLine = workingLine.Substring(1);
+				r.isDirectoryOnly = !workingLine.Contains(".");
 
-                const string regexCharMatch = @"[^/\\]";
-                StringBuilder pattern = new StringBuilder();
-                int i = 0;
-                if (workingLine[0] == '/')
-                {
-                    pattern.Append("^/");
-                    i++;
-                }
-                else
-                {
-                    pattern.Append("/");
-                }
-                for (; i < workingLine.Length; i++)
-                {
-                    switch (workingLine[i])
-                    {
-                        case '?':
-                            pattern.Append(regexCharMatch).Append("?");
-                            break;
-                        case '\\':
-                            i++;
-                            pattern.Append("\\");
-                            break;
-                        case '*':
-                            pattern.Append(regexCharMatch).Append("*");
-                            break;
-                        case '[':
-                            for (; i < workingLine.Length && workingLine[i] != ']'; i++)
-                            {
-                                if (i == 0 && workingLine[i] == '!')
-                                    pattern.Append("^");
-                                else
-                                    pattern.Append(workingLine[i]);
-                            }
-                            pattern.Append(workingLine[i]);
-                            break;
-                        case '.':
-                            pattern.Append("\\.");
-                            break;
-                        default:
-                            pattern.Append(workingLine[i]);
-                            break;
-                    }
-                }
-                if (!r.isDirectoryOnly)
-                {
-                    pattern.Append("$");
-                }
-                r.pattern = new System.Text.RegularExpressions.Regex(pattern.ToString());
-                rules.Add(r);
-            }
-        }
+				const string regexCharMatch = @"[^/\\]";
+				StringBuilder pattern = new StringBuilder();
+				int i = 0;
+				if (workingLine[0] == '/')
+				{
+					pattern.Append("^/");
+					i++;
+				}
+				else
+				{
+					pattern.Append("/");
+				}
+				for (; i < workingLine.Length; i++)
+				{
+					switch (workingLine[i])
+					{
+						case '?':
+							pattern.Append(regexCharMatch).Append("?");
+							break;
+						case '\\':
+							i++;
+							pattern.Append("\\");
+							break;
+						case '*':
+							pattern.Append(regexCharMatch).Append("*");
+							break;
+						case '[':
+							for (; i < workingLine.Length && workingLine[i] != ']'; i++)
+							{
+								if (i == 0 && workingLine[i] == '!')
+									pattern.Append("^");
+								else
+									pattern.Append(workingLine[i]);
+							}
+							pattern.Append(workingLine[i]);
+							break;
+						case '.':
+							pattern.Append("\\.");
+							break;
+						default:
+							pattern.Append(workingLine[i]);
+							break;
+					}
+				}
+				if (!r.isDirectoryOnly)
+				{
+					pattern.Append("$");
+				}
+				r.pattern = new System.Text.RegularExpressions.Regex(pattern.ToString());
+				rules.Add(r);
+			}
+		}
 
-        public bool IgnoreDir(string workingDirectory, string fullDirectory)
-        {
-            string path;
-            workingDirectory = workingDirectory.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
-            path = fullDirectory.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
+		public bool IgnoreDir(string workingDirectory, string fullDirectory)
+		{
+			string path;
+			workingDirectory = workingDirectory.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
+			path = fullDirectory.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
 
-            if (path.StartsWith(workingDirectory))
-            {
-                path = path.Substring(workingDirectory.Length);
-            }
-            else
-            {
-                throw new ArgumentException("fullDirectory must be a subdirectory of workingDirectory", "fullDirectory", null);
-            }
-            string dirPath = Path.GetDirectoryName(path).Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
+			if (path.StartsWith(workingDirectory))
+			{
+				path = path.Substring(workingDirectory.Length);
+			}
+			else
+			{
+				throw new ArgumentException("fullDirectory must be a subdirectory of workingDirectory", "fullDirectory", null);
+			}
+			string dirPath = Path.GetDirectoryName(path).Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
 
-            bool ignore = false;
-            foreach (Rule rule in rules)
-            {
-                if (rule.exclude != ignore)
-                {
-                    if (rule.isDirectoryOnly && rule.pattern.IsMatch(dirPath))
-                        ignore = rule.exclude;
-                }
-            }
-            return ignore;
-        }
+			bool ignore = false;
+			foreach (Rule rule in rules)
+			{
+				if (rule.exclude != ignore)
+				{
+					if (rule.isDirectoryOnly && rule.pattern.IsMatch(dirPath))
+						ignore = rule.exclude;
+				}
+			}
+			return ignore;
+		}
 
-        public bool IgnoreFile(string workingDirectory, string filePath)
-        {
-            string path;
-            workingDirectory = workingDirectory.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
-            path = filePath.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
+		public bool IgnoreFile(string workingDirectory, string filePath)
+		{
+			string path;
+			workingDirectory = workingDirectory.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
+			path = filePath.Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
 
 
-            if (path.StartsWith(workingDirectory))
-            {
-                path = path.Substring(workingDirectory.Length);
-            }
-            else
-            {
-                throw new ArgumentException("filePath must be a subpath of workingDirectory", "filePath", null);
-            }
-            string dirPath = Path.GetDirectoryName(path).Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
+			if (path.StartsWith(workingDirectory))
+			{
+				path = path.Substring(workingDirectory.Length);
+			}
+			else
+			{
+				throw new ArgumentException("filePath must be a subpath of workingDirectory", "filePath", null);
+			}
+			string dirPath = Path.GetDirectoryName(path).Replace(Path.DirectorySeparatorChar, '/').TrimEnd('/');
 
-            bool ignore = false;
-            foreach (Rule rule in rules)
-            {
-                if (rule.exclude != ignore)
-                {
-                    if (!rule.isDirectoryOnly && rule.pattern.IsMatch(path))
-                        ignore = rule.exclude;
-                }
-            }
-            return ignore;
-        }
-    }
+			bool ignore = false;
+			foreach (Rule rule in rules)
+			{
+				if (rule.exclude != ignore)
+				{
+					if (!rule.isDirectoryOnly && rule.pattern.IsMatch(path))
+						ignore = rule.exclude;
+				}
+			}
+			return ignore;
+		}
+	}
 }

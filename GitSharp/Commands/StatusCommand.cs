@@ -51,16 +51,16 @@ namespace GitSharp.Commands
 
         public StatusCommand()
         {
-            AnyDifferences = false;
         }
 
-        public Boolean AnyDifferences { get; set; }
+        public Boolean AnyDifferences { get { return Repository.Status.AnyDifferences; } }
         public int IndexSize { get; private set; }
         public StatusResults Results 
         {
         	get { return results; } 
         	private set { results = value; }
         }
+        public Boolean IsEmptyRepository { get { return IndexSize <= 0; } }
 
         public override void Execute()
         {
@@ -91,154 +91,53 @@ namespace GitSharp.Commands
             
             if (status.AnyDifferences || results.UntrackedList.Count > 0)
             {
-                // Files use the following states: removed, missing, added, and modified.
-                // If a file has been staged, it is also added to the RepositoryStatus.Staged HashSet.
-                //
-                // The StatusState known as "Untracked" is determined by what is *not* staged or modified.
+                // Files use the following StatusTypes: removed, missing, added, and modified, modified w/staged, and merge conflict.
+                // The following StatusStates are defined for each type:
+                //              Modified -> Unstaged
+                //         MergeConflict -> Unstaged
+                //                 Added -> Staged
+                //        ModifiedStaged -> Staged
+                //               Removed -> Staged
+                //               Missing -> Staged
+                // The StatusState known as "Untracked" is determined by what is *not* defined in any state.
                 // It is then intersected with the .gitignore list to determine what should be listed as untracked.
-                // Using intersections will accurately display the "bucket" each file was added to.
 
-                // Note: In standard git, they use cached references so the following scenario is possible. 
-                //    1) Filename = a.txt; StatusState=staged; StatusType=added
-                //    2) Filename = a.txt; StatusState=modified; StatusType=added
-                // Notice that the same filename exists in two separate status's because it points to a reference
-                // Todo: This test has failed so far with this command.
-
-                HashSet<string> stagedRemoved = new HashSet<string>(status.Staged);
-                stagedRemoved.IntersectWith(status.Removed);
-                HashSet<string> stagedMissing = new HashSet<string>(status.Staged);
-                stagedMissing.IntersectWith(status.Missing);
-                HashSet<string> stagedAdded = new HashSet<string>(status.Staged);
-                stagedAdded.IntersectWith(status.Added);
-                HashSet<string> stagedModified = new HashSet<string>(status.Staged);
-                stagedModified.IntersectWith(status.Modified);
-                stagedModified.ExceptWith(status.MergeConflict);
-
-                HashSet<string> Removed = new HashSet<string>(status.Removed);
-                Removed.ExceptWith(status.Staged);
-                HashSet<string> Missing = new HashSet<string>(status.Missing);
-                Missing.ExceptWith(status.Staged);
-                HashSet<string> Added = new HashSet<string>(status.Added);
-                Added.ExceptWith(status.Staged);
-                HashSet<string> Modified = new HashSet<string>(status.Modified);
-                Modified.ExceptWith(status.Staged);
-
-                DoStagedList(status);
-                DoModifiedList(status);
-            }
-            else
-                AnyDifferences = true;
-
-            IndexSize = status.IndexSize;
-            //Leave this in until completed. 
-            //throw new NotImplementedException("The implementation is not yet complete. autocrlf support is not added.");
-        }
-
-        private void DoModifiedList(RepositoryStatus status)
-        {
-            //Create a single list to sort and display the modified (non-staged) files by filename.
-            //Sorting in this manner causes additional speed overhead. Performance enhancements should be considered.
-            HashSet<string> hset = null;
-
-            if (status.MergeConflict.Count > 0)
-            {
-                hset = new HashSet<string>(status.MergeConflict);
+                HashSet<string> hset = new HashSet<string>(status.MergeConflict);
                 foreach (string hash in hset)
                 {
                     results.ModifiedList.Add(hash, StatusType.MergeConflict);
-                    status.Modified.Remove(hash);
                     status.Staged.Remove(hash);
+                    status.Modified.Remove(hash);
                 }
-            }
 
-            if (status.Missing.Count > 0)
-            {
                 hset = new HashSet<string>(status.Missing);
-                hset.ExceptWith(status.Staged);
                 foreach (string hash in hset)
                     results.ModifiedList.Add(hash, StatusType.Missing);
-            }
 
-            if (status.Removed.Count > 0)
-            {
-                hset = new HashSet<string>(status.Removed);
-                hset.ExceptWith(status.Staged);
-                foreach (string hash in hset)
-                    results.ModifiedList.Add(hash, StatusType.Removed);
-            }
-
-            if (status.Modified.Count > 0)
-            {
                 hset = new HashSet<string>(status.Modified);
-                hset.ExceptWith(status.Staged);
                 foreach (string hash in hset)
                     results.ModifiedList.Add(hash, StatusType.Modified);
-            }
 
-            if (status.Added.Count > 0)
-            {
+                hset = new HashSet<string>(status.Staged);
+                foreach (string hash in hset)
+                    results.StagedList.Add(hash, StatusType.ModifiedStaged);
+
                 hset = new HashSet<string>(status.Added);
-                hset.ExceptWith(status.Staged);
-                foreach (string hash in hset)
-                    results.ModifiedList.Add(hash, StatusType.Added);
-            }
-
-            results.ModifiedList.OrderBy(v => v.Key);
-        }
-
-        private void DoStagedList(RepositoryStatus status)
-        {
-            //Create a single list to sort and display the staged files by filename.
-            //Sorting in this manner causes additional speed overhead so should be considered optional.
-            //With all the additional testing currently added, please keep in mind it will run twice as fast
-            //once the tests are removed.
-
-            HashSet<string> hset = null;
-
-            if (status.MergeConflict.Count > 0)
-            {
-                hset = new HashSet<string>(status.MergeConflict);
-                foreach (string hash in hset)
-                {
-                    //Merge conflicts are only displayed in the modified non-staged area.
-                    status.Modified.Remove(hash);
-                    status.Staged.Remove(hash);
-                }
-            }
-            if (status.Missing.Count > 0)
-            {
-                hset = new HashSet<string>(status.Staged);
-                hset.IntersectWith(status.Missing);
-                foreach (string hash in hset)
-                    results.StagedList.Add(hash, StatusType.Missing);
-            }
-
-            if (status.Removed.Count > 0)
-            {
-                hset = new HashSet<string>(status.Staged);
-                hset.IntersectWith(status.Removed);
-                foreach (string hash in hset)
-                    results.StagedList.Add(hash, StatusType.Removed);
-            }
-
-            if (status.Modified.Count > 0)
-            {
-                hset = new HashSet<string>(status.Staged);
-                hset.IntersectWith(status.Modified);
-                foreach (string hash in hset)
-                    results.StagedList.Add(hash, StatusType.Modified);
-            }
-
-            if (status.Added.Count > 0)
-            {
-                hset = new HashSet<string>(status.Staged);
-                hset.IntersectWith(status.Added);
                 foreach (string hash in hset)
                     results.StagedList.Add(hash, StatusType.Added);
+
+                hset = new HashSet<string>(status.Removed);
+                foreach (string hash in hset)
+                    results.StagedList.Add(hash, StatusType.Removed);
+
+                results.UntrackedList.Sort();
+                results.ModifiedList.OrderBy(v => v.Key);
+                results.StagedList.OrderBy(v => v.Key);
             }
 
-            results.StagedList.OrderBy(v => v.Key);
+            IndexSize = status.IndexSize;
         }
+
     }
     #endregion
 
@@ -250,6 +149,13 @@ namespace GitSharp.Commands
         public Dictionary<string, int> StagedList = new Dictionary<string, int>();
         public Dictionary<string, int> ModifiedList = new Dictionary<string, int>();
 
+        public void Clear()
+        {
+        	UntrackedList.Clear();
+        	StagedList.Clear();
+        	ModifiedList.Clear();
+        }
+        
         // Returns all available matches of a file and its status based on filename.
         public Dictionary<string,int> Search(string filepattern)
         {
@@ -301,7 +207,7 @@ namespace GitSharp.Commands
                 {
                     if (key.Contains(filepattern))
                     {
-                        result.Add(key, StatusState.Modified);
+                        return true;
                     }
                 }
             }
@@ -340,6 +246,7 @@ namespace GitSharp.Commands
         public const int Removed = 3;
         public const int Missing = 4;
         public const int MergeConflict = 5;
+        public const int ModifiedStaged = 6;
     }
 
     #endregion

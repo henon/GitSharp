@@ -40,47 +40,47 @@ using NUnit.Framework;
 
 namespace GitSharp.API.Tests
 {
-    [TestFixture]
-    public class ObjectEqualityTests : ApiTestCase
-    {
-        [Test]
-        public void ShouldBeAbleToCompareNullObjects()
-        {
-            AbstractObject obj = null;
+	[TestFixture]
+	public class ObjectEqualityTests : ApiTestCase
+	{
+		[Test]
+		public void ShouldBeAbleToCompareNullObjects()
+		{
+			AbstractObject obj = null;
 
-            Assert.IsTrue(obj == null);
-        }
+			Assert.IsTrue(obj == null);
+		}
 
-        [Test]
-        public void ShouldBeAbleToCompareNullObjectsInverse()
-        {
-            AbstractObject obj = null;
+		[Test]
+		public void ShouldBeAbleToCompareNullObjectsInverse()
+		{
+			AbstractObject obj = null;
 
-            Assert.IsTrue(null == obj);
-        }
+			Assert.IsTrue(null == obj);
+		}
 
-        [Test]
-        public void SameInstanceShouldBeEqual()
-        {
-            using (var repos = GetTrashRepository())
-            {
-                var obj = repos.CurrentBranch.CurrentCommit;
+		[Test]
+		public void SameInstanceShouldBeEqual()
+		{
+			using (var repos = GetTrashRepository())
+			{
+				var obj = repos.CurrentBranch.CurrentCommit;
 #pragma warning disable 1718
-                Assert.IsTrue(obj == obj); // [henon] this equality comparison of the same instance is intended
+				Assert.IsTrue(obj == obj); // [henon] this equality comparison of the same instance is intended
 #pragma warning restore 1718
-            }
-        }
+			}
+		}
 
-        [Test]
-        public void DifferentInstancesShouldntBeEqual()
-        {
-            using (var repos = GetTrashRepository())
-            {
-                var obj = repos.CurrentBranch.CurrentCommit;
-                var obj2 = repos.CurrentBranch.CurrentCommit.Parent;
+		[Test]
+		public void DifferentInstancesShouldntBeEqual()
+		{
+			using (var repos = GetTrashRepository())
+			{
+				var obj = repos.CurrentBranch.CurrentCommit;
+				var obj2 = repos.CurrentBranch.CurrentCommit.Parent;
 
-                Assert.IsTrue(obj != obj2);
-            }
-        }
-    }
+				Assert.IsTrue(obj != obj2);
+			}
+		}
+	}
 }

@@ -42,65 +42,65 @@ using System.Text;
 
 namespace GitSharp
 {
-    /// <summary>
-    /// A summary of changes made to the working directory of a repository with respect to its index.
-    /// </summary>
-    public class RepositoryStatus
-    {
-        private GitSharp.Core.IndexDiff _diff;
+	/// <summary>
+	/// A summary of changes made to the working directory of a repository with respect to its index.
+	/// </summary>
+	public class RepositoryStatus
+	{
+		private GitSharp.Core.IndexDiff _diff;
 
-        public RepositoryStatus(Repository repo)
-        {
-            _diff = new GitSharp.Core.IndexDiff(repo._internal_repo);
-            AnyDifferences = _diff.Diff();
-        }
+		public RepositoryStatus(Repository repo)
+		{
+			_diff = new GitSharp.Core.IndexDiff(repo._internal_repo);
+			AnyDifferences = _diff.Diff();
+		}
 
-        internal RepositoryStatus(GitSharp.Core.IndexDiff diff)
-        {
-            _diff = diff;
-            AnyDifferences = _diff.Diff();
-        }
+		internal RepositoryStatus(GitSharp.Core.IndexDiff diff)
+		{
+			_diff = diff;
+			AnyDifferences = _diff.Diff();
+		}
 
-        public bool AnyDifferences { get; private set; }
+		public bool AnyDifferences { get; private set; }
 
-        /// <summary>
-        /// List of files added to the index, which are not in the current commit
-        /// </summary>
-        public HashSet<string> Added { get { return _diff.Added; } }
+		/// <summary>
+		/// List of files added to the index, which are not in the current commit
+		/// </summary>
+		public HashSet<string> Added { get { return _diff.Added; } }
 
-        /// <summary>
-        /// List of files added to the index, which are already in the current commit with different content
-        /// </summary>
-        public HashSet<string> Staged { get { return _diff.Changed; } }
+		/// <summary>
+		/// List of files added to the index, which are already in the current commit with different content
+		/// </summary>
+		public HashSet<string> Staged { get { return _diff.Changed; } }
 
-        /// <summary>
-        /// List of files removed from the index but are existent in the current commit
-        /// </summary>
-        public HashSet<string> Removed { get { return _diff.Removed; } }
+		/// <summary>
+		/// List of files removed from the index but are existent in the current commit
+		/// </summary>
+		public HashSet<string> Removed { get { return _diff.Removed; } }
 
-        /// <summary>
-        /// List of files existent in the index but are missing in the working directory
-        /// </summary>
-        public HashSet<string> Missing { get { return _diff.Missing; } }
+		/// <summary>
+		/// List of files existent in the index but are missing in the working directory
+		/// </summary>
+		public HashSet<string> Missing { get { return _diff.Missing; } }
 
-        /// <summary>
-        /// List of files with unstaged modifications. A file may be modified and staged at the same time if it has been modified after adding.
-        /// </summary>
-        public HashSet<string> Modified { get { return _diff.Modified; } }
+		/// <summary>
+		/// List of files with unstaged modifications. A file may be modified and staged at the same time if it has been modified after adding.
+		/// </summary>
+		public HashSet<string> Modified { get { return _diff.Modified; } }
 
-         /// <summary>
-         /// List of files existing in the working directory but are neither tracked in the index nor in the current commit.
-         /// </summary>
-        public HashSet<string> Untracked { get { return _diff.Untracked; } }
+		/// <summary>
+		/// List of files existing in the working directory but are neither tracked in the index nor in the current commit.
+		/// </summary>
+		public HashSet<string> Untracked { get { return _diff.Untracked; } }
 
-        /// <summary>
-        /// List of files with staged modifications that conflict.
-        /// </summary>
-        public HashSet<string> MergeConflict { get { return _diff.MergeConflict; } }
+		/// <summary>
+		/// List of files with staged modifications that conflict.
+		/// </summary>
+		public HashSet<string> MergeConflict { get { return _diff.MergeConflict; } }
 
-        /// <summary>
-        /// Returns the number of files checked into the git repository
-        /// </summary>
-        public int IndexSize { get { return _diff.IndexSize; } } 
-    }
+		/// <summary>
+		/// Returns the number of files checked into the git repository
+		/// </summary>
+		public int IndexSize { get { return _diff.IndexSize; } }
+	}
 }

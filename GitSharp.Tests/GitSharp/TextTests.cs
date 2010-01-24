@@ -43,10 +43,10 @@ using NUnit.Framework;
 
 namespace GitSharp.Tests.GitSharp
 {
-    [TestFixture]
-    public class TextTests : ApiTestCase
-    {
-        const string TEXT = @"Player Queen:
+	[TestFixture]
+	public class TextTests : ApiTestCase
+	{
+		const string TEXT = @"Player Queen:
 Both here and hence pursue me lasting strife,
 If once I be a widow, ever I be a wife!
 
@@ -65,54 +65,54 @@ Madam, how like you this play?
 Queen:
 The lady doth protest too much, methinks.";
 
-        [Test]
-        public void GetLineTest()
-        {
-            var text = new Text(TEXT);
-            Assert.AreEqual("Player Queen:\r\n", text.GetLine(1));
-            Assert.AreEqual("\r\n", text.GetLine(4));
-            Assert.AreEqual(new[] { (byte)'P', (byte)'l', (byte)'a', (byte)'y', (byte)'e', (byte)'r', (byte)' ', (byte)'Q', (byte)'u', (byte)'e', (byte)'e', (byte)'n', (byte)':', (byte)'\r', (byte)'\n' }, text.GetRawLine(1));
-            Assert.AreEqual(new[] { (byte)'\r', (byte)'\n' }, text.GetRawLine(4));
-            Assert.AreEqual("The lady doth protest too much, methinks.", text.GetLine(18));
-            Assert.Throws(typeof(ArgumentOutOfRangeException), () => text.GetLine(-1));
-            Assert.Throws(typeof(ArgumentOutOfRangeException), () => text.GetLine(0));
-            Assert.Throws(typeof(ArgumentOutOfRangeException), () => text.GetLine(19));
-            Assert.AreEqual(18, text.NumberOfLines);
-        }
+		[Test]
+		public void GetLineTest()
+		{
+			var text = new Text(TEXT);
+			Assert.AreEqual("Player Queen:\r\n", text.GetLine(1));
+			Assert.AreEqual("\r\n", text.GetLine(4));
+			Assert.AreEqual(new[] { (byte)'P', (byte)'l', (byte)'a', (byte)'y', (byte)'e', (byte)'r', (byte)' ', (byte)'Q', (byte)'u', (byte)'e', (byte)'e', (byte)'n', (byte)':', (byte)'\r', (byte)'\n' }, text.GetRawLine(1));
+			Assert.AreEqual(new[] { (byte)'\r', (byte)'\n' }, text.GetRawLine(4));
+			Assert.AreEqual("The lady doth protest too much, methinks.", text.GetLine(18));
+			Assert.Throws(typeof(ArgumentOutOfRangeException), () => text.GetLine(-1));
+			Assert.Throws(typeof(ArgumentOutOfRangeException), () => text.GetLine(0));
+			Assert.Throws(typeof(ArgumentOutOfRangeException), () => text.GetLine(19));
+			Assert.AreEqual(18, text.NumberOfLines);
+		}
 
-        [Test]
-        public void EncodingTest()
-        {
-            const string s = "üöäß\nÖÄÜ\n";
-            var t = new Text(s, Encoding.GetEncoding("latin1"));
-            Assert.AreEqual("üöäß\n", t.GetLine(1));
-            Assert.AreEqual("ÖÄÜ\n", t.GetLine(2));
-            Assert.Throws(typeof(ArgumentOutOfRangeException), () => t.GetLine(3));
-            Assert.AreEqual(2, t.NumberOfLines);
-            Assert.AreEqual(Encoding.UTF8, new Text("hmm").Encoding);
-            Assert.AreEqual(Encoding.GetEncoding("latin1"), new Text("hmm", Encoding.GetEncoding("latin1")).Encoding);
-            Assert.AreEqual(s, t.ToString());
-            Assert.AreEqual(9, t.Length);
-            Assert.AreEqual(9, new Text(s).Length);
-            Assert.AreEqual(2, new Text("你好").Length);
-            Assert.AreEqual(6, new Text("你好").RawLength);
-            Assert.AreEqual(2, new Text("你好", Encoding.UTF32).Length);
-            Assert.AreEqual(8, new Text("你好", Encoding.UTF32).RawLength);
-        }
+		[Test]
+		public void EncodingTest()
+		{
+			const string s = "üöäß\nÖÄÜ\n";
+			var t = new Text(s, Encoding.GetEncoding("latin1"));
+			Assert.AreEqual("üöäß\n", t.GetLine(1));
+			Assert.AreEqual("ÖÄÜ\n", t.GetLine(2));
+			Assert.Throws(typeof(ArgumentOutOfRangeException), () => t.GetLine(3));
+			Assert.AreEqual(2, t.NumberOfLines);
+			Assert.AreEqual(Encoding.UTF8, new Text("hmm").Encoding);
+			Assert.AreEqual(Encoding.GetEncoding("latin1"), new Text("hmm", Encoding.GetEncoding("latin1")).Encoding);
+			Assert.AreEqual(s, t.ToString());
+			Assert.AreEqual(9, t.Length);
+			Assert.AreEqual(9, new Text(s).Length);
+			Assert.AreEqual(2, new Text("你好").Length);
+			Assert.AreEqual(6, new Text("你好").RawLength);
+			Assert.AreEqual(2, new Text("你好", Encoding.UTF32).Length);
+			Assert.AreEqual(8, new Text("你好", Encoding.UTF32).RawLength);
+		}
 
-        [Test]
-        public void GetBlockTest()
-        {
-            const string block = "Hamlet:\r\nMadam, how like you this play?\r\n";
-            var text = new Text(TEXT);
-            Assert.AreEqual("", text.GetBlock(14, 14));
-            Assert.AreEqual("Hamlet:\r\n", text.GetBlock(14, 15));
-            Assert.AreEqual(block, text.GetBlock(14, 16));
-            Assert.AreEqual(Encoding.UTF8.GetBytes(TEXT), text.GetRawBlock(1, 19));
-            Assert.AreEqual(TEXT, text.GetBlock(1, 19));
-            Assert.Throws(typeof(ArgumentException), () => text.GetBlock(14,13));
-            Assert.Throws(typeof(ArgumentOutOfRangeException), () => text.GetBlock(0, 14));
-            Assert.Throws(typeof(ArgumentOutOfRangeException), () => text.GetBlock(14,20));
-        }
-    }
+		[Test]
+		public void GetBlockTest()
+		{
+			const string block = "Hamlet:\r\nMadam, how like you this play?\r\n";
+			var text = new Text(TEXT);
+			Assert.AreEqual("", text.GetBlock(14, 14));
+			Assert.AreEqual("Hamlet:\r\n", text.GetBlock(14, 15));
+			Assert.AreEqual(block, text.GetBlock(14, 16));
+			Assert.AreEqual(Encoding.UTF8.GetBytes(TEXT), text.GetRawBlock(1, 19));
+			Assert.AreEqual(TEXT, text.GetBlock(1, 19));
+			Assert.Throws(typeof(ArgumentException), () => text.GetBlock(14, 13));
+			Assert.Throws(typeof(ArgumentOutOfRangeException), () => text.GetBlock(0, 14));
+			Assert.Throws(typeof(ArgumentOutOfRangeException), () => text.GetBlock(14, 20));
+		}
+	}
 }

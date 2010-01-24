@@ -42,39 +42,39 @@ using System.Text;
 
 namespace GitSharp
 {
-    /// <summary>
-    /// Represents the Author or Committer of a Commit.
-    /// </summary>
-    public class Author
-    {
+	/// <summary>
+	/// Represents the Author or Committer of a Commit.
+	/// </summary>
+	public class Author
+	{
 
-        /// <summary>
-        /// Creates an uninitialized Author. You may use the object initializer syntax with this constructor, i.e. new Author { Name="henon", EmailAddress="henon@gitsharp.com" }
-        /// </summary>
-        public Author() { }
+		/// <summary>
+		/// Creates an uninitialized Author. You may use the object initializer syntax with this constructor, i.e. new Author { Name="henon", EmailAddress="henon@gitsharp.com" }
+		/// </summary>
+		public Author() { }
 
-        /// <summary>
-        /// Creates an Author.
-        /// </summary>
-        public Author(string name, string email)
-        {
-            Name = name;
-            EmailAddress = email;
-        }
+		/// <summary>
+		/// Creates an Author.
+		/// </summary>
+		public Author(string name, string email)
+		{
+			Name = name;
+			EmailAddress = email;
+		}
 
-        public string Name { get; set; }
+		public string Name { get; set; }
 
-        public string EmailAddress { get; set; }
+		public string EmailAddress { get; set; }
 
-        /// <summary>
-        /// Preconfigured anonymous Author, which may be used by GitSharp if no Author has been configured.
-        /// </summary>
-        public static Author Anonymous
-        {
-            get
-            {
-                return new Author("anonymous", "anonymous@(none).com");
-            }
-        }
-    }
+		/// <summary>
+		/// Preconfigured anonymous Author, which may be used by GitSharp if no Author has been configured.
+		/// </summary>
+		public static Author Anonymous
+		{
+			get
+			{
+				return new Author("anonymous", "anonymous@(none).com");
+			}
+		}
+	}
 }

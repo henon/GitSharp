@@ -42,12 +42,12 @@ using System.Text;
 
 namespace GitSharp
 {
-    /// <summary>
-    /// Interface for objects like Ref and Tag, which point to a different object.
-    /// </summary>
-    public interface IReferenceObject
-    {
-        string Name { get; }
-        AbstractObject Target { get; }
-    }
+	/// <summary>
+	/// Interface for objects like Ref and Tag, which point to a different object.
+	/// </summary>
+	public interface IReferenceObject
+	{
+		string Name { get; }
+		AbstractObject Target { get; }
+	}
 }

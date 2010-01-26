@@ -123,12 +123,10 @@ namespace GitSharp.Commands
         {
             using (var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualDirectory)))
             {
-                repo.Create(Bare);
-                repo.Config.setBoolean("core", null, "bare", Bare);
-                repo.Config.save();
+                var reinit = repo.Create(Bare);
                 if (!Quiet)
                 {
-                    OutputStream.WriteLine("Initialized empty Git repository in " + repo.Directory.FullName);
+                    OutputStream.WriteLine(String.Format("{0} empty Git repository in {1}", reinit ? "Reinitialized" : "Initialized", repo.Directory.FullName));
                     OutputStream.Flush();
                 }
                 Repository = new Repository(repo.Directory.FullName);

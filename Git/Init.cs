@@ -67,6 +67,7 @@ namespace GitSharp.CLI
             {
                 List<String> arguments = ParseOptions(args);
                 cmd.Execute();
+				cmd.OutputStream.WriteLine(cmd.Repository.Directory);
             }
             catch (Exception e)
             {

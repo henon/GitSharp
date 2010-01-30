@@ -43,19 +43,30 @@ namespace GitSharp.Core.Util
     public static class StringExtension
     {
         /// <summary>
-        /// Helper function to easily replace all occurences of the incompatible string.Substring method in ported java code
+        ///   Helper function to easily replace all occurences of the incompatible string.Substring method in ported java code
         /// </summary>
-        /// <param name="longstring">The string from which a part has to extracted.</param>
-        /// <param name="beginIndex">The beginning index, inclusive.</param>
-        /// <param name="endIndex">The ending index, exclusive. </param>
-        /// <returns>The specified substring.</returns>
+        /// <param name="longstring">
+        ///   The string from which a part has to extracted.
+        /// </param>
+        /// <param name="beginIndex">
+        ///   The beginning index, inclusive.
+        /// </param>
+        /// <param name="endIndex">
+        ///   The ending index, exclusive.
+        /// </param>
+        /// <returns>
+        ///   The specified substring.
+        /// </returns>
         public static string Slice(this string longstring, int beginIndex, int endIndex)
         {
             #region Parameters Validation
 
             if (beginIndex > endIndex)
             {
-                throw new ArgumentOutOfRangeException("beginIndex", string.Format("beginIndex has to be less or equal than endIndex. Actual values were beginIndex={0} and endIndex={1}", beginIndex, endIndex));
+                throw new ArgumentOutOfRangeException("beginIndex",
+                                                      string.Format(
+                                                          "beginIndex has to be less or equal than endIndex. Actual values were beginIndex={0} and endIndex={1}",
+                                                          beginIndex, endIndex));
             }
 
             #endregion
@@ -73,13 +84,47 @@ namespace GitSharp.Core.Util
             }
             catch (EncoderFallbackException e)
             {
-                throw new EncoderFallbackException(string.Format("A problem occured while encoding '{0}' using encoder '{1}'.", plainString, encoder.WebName), e);
+                throw new EncoderFallbackException(
+                    string.Format("A problem occured while encoding '{0}' using encoder '{1}'.", plainString,
+                                  encoder.WebName), e);
             }
         }
 
         public static byte[] getBytes(this string plainString)
         {
             return plainString.getBytes("UTF-8");
+        }
+
+        /// <summary>
+        /// Compares two strings lexicographically. (cf. http://java.sun.com/j2se/1.4.2/docs/api/java/lang/String.html#compareTo(java.lang.String))
+        /// </summary>
+        /// <param name="inputString">the reference string</param>
+        /// <param name="stringToCompareTo">the string to be compared</param>
+        /// <returns>the value 0 if the string to compared with is equal to this string; a value less than 0 if this string is lexicographically less than the string to compare with; and a value greater than 0 if this string is lexicographically greater than the string to compare with.</returns>
+        public static int compareTo(this string inputString, string stringToCompareTo)
+        {
+            int aLength = inputString.Length;
+            int anotherLength = stringToCompareTo.Length;
+
+            for (int i = 0; i < Math.Min(aLength, anotherLength); i++)
+            {
+                char aChar = inputString[i];
+                char anotherChar = stringToCompareTo[i];
+
+                if (aChar == anotherChar)
+                {
+                    continue;
+                }
+
+                return aChar - anotherChar;
+            }
+
+            if (aLength != anotherLength)
+            {
+                return (aLength - anotherLength);
+            }
+
+            return 0;
         }
     }
 }

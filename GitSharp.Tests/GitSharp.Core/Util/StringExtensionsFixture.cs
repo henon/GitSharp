@@ -49,5 +49,91 @@ namespace GitSharp.Core.Tests.Util
         {
             AssertHelper.Throws<ArgumentOutOfRangeException>(() => "hamburger".Slice(8, 4));
         }
+
+        [Test]
+        public void DifferentLength_compareTo_1()
+        {
+            Assert.AreEqual(-1, "".compareTo("a"));
+        }
+
+        [Test]
+        public void DifferentLength_compareTo_2()
+        {
+            Assert.AreEqual(-2, "".compareTo("aa"));
+        }
+
+        [Test]
+        public void DifferentLength_compareTo_3()
+        {
+            Assert.AreEqual(1, "a".compareTo(""));
+        }
+
+        [Test]
+        public void DifferentLength_compareTo_4()
+        {
+            Assert.AreEqual(2, "aa".compareTo(""));
+        }
+
+        [Test]
+        public void DifferentLength_compareTo_5()
+        {
+            Assert.AreEqual(2, "bb".compareTo(""));
+        }
+
+        [Test]
+        public void DifferentLength_compareTo_6()
+        {
+            Assert.AreEqual(-1, "AB".compareTo("B"));
+        }
+
+        [Test]
+        public void DifferentLength_compareTo_7()
+        {
+            Assert.AreEqual(1, "B".compareTo("AB"));
+        }
+
+        [Test]
+        public void SameLength_compareTo_1()
+        {
+            Assert.AreEqual(0, "A".compareTo("A"));
+        }
+        [Test]
+        public void SameLength_compareTo_2()
+        {
+            Assert.AreEqual(32, "a".compareTo("A"));
+        }
+        [Test]
+        public void SameLength_compareTo_3()
+        {
+            Assert.AreEqual(-32, "A".compareTo("a"));
+        }
+
+        [Test]
+        public void SameLength_compareTo_4()
+        {
+            Assert.AreEqual(32, "aaa".compareTo("aaA"));
+        }
+        [Test]
+        public void SameLength_compareTo_5()
+        {
+            Assert.AreEqual(-32, "aaA".compareTo("aaa"));
+        }
+
+        [Test]
+        public void SameLength_compareTo_6()
+        {
+            Assert.AreEqual(32, "aaaa".compareTo("aaAB"));
+        }
+        [Test]
+        public void SameLength_compareTo_7()
+        {
+            Assert.AreEqual(31, "aaAb".compareTo("aaAC"));
+        }
+        [Test]
+        public void SameLength_compareTo_8()
+        {
+            Assert.AreEqual(2, "aaCb".compareTo("aaAa"));
+        }
+
     }
 }

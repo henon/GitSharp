@@ -184,6 +184,8 @@
     <Compile Include="GitSharp.Core\Util\RawParseUtils_HexParseTest.cs" />
     <Compile Include="GitSharp.Core\Util\RawParseUtils_LineMapTest.cs" />
     <Compile Include="GitSharp.Core\Util\RawParseUtils_MatchTest.cs" />
+    <Compile Include="GitSharp.Core\Util\RefListTest.cs" />
+    <Compile Include="GitSharp.Core\Util\RefMapTest.cs" />
     <Compile Include="GitSharp.Core\Util\StringExtensionsFixture.cs" />
     <Compile Include="GitSharp.Core\Util\StringUtilsTest.cs" />
     <Compile Include="GitSharp.Core\Util\TemporaryBufferTest.cs" />

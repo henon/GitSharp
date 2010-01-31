@@ -39,40 +39,59 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core
 {
-    /**
-     * Util for sorting (or comparing) Ref instances by name.
-     * <para />
-     * Useful for command line tools or writing out refs to file.
-     */
+    /// <summary>
+    /// Util for sorting (or comparing) Ref instances by name.
+    /// <para />
+    /// Useful for command line tools or writing out refs to file.
+    /// </summary>
     public class RefComparator : IComparer<Ref>
     {
-
-        /** Singleton instance of RefComparator */
+        /// <summary>
+        /// Singleton instance of RefComparator
+        /// </summary>
         public static RefComparator INSTANCE = new RefComparator();
 
         public int Compare(Ref o1, Ref o2)
         {
-            return o1.OriginalName.CompareTo(o2.OriginalName);
+            return compareTo(o1, o2);
         }
 
-
-        /**
-         * Sorts the collection of refs, returning a new collection.
-         * 
-         * @param refs
-         *            collection to be sorted
-         * @return sorted collection of refs
-         */
+        /// <summary>
+        /// Sorts the collection of refs, returning a new collection.
+        /// </summary>
+        /// <param name="refs">collection to be sorted</param>
+        /// <returns>sorted collection of refs</returns>
         public static IEnumerable<Ref> Sort(IEnumerable<Ref> refs)
         {
-            List<Ref> r = new List<Ref>(refs);
+            var r = new List<Ref>(refs);
             r.Sort(INSTANCE);
             return r;
+        }
+
+        /// <summary>
+        /// Compare a reference to a name.
+        /// </summary>
+        /// <param name="o1">the reference instance.</param>
+        /// <param name="o2">the name to compare to.</param>
+        /// <returns>standard Comparator result</returns>
+        public static int compareTo(Ref o1, String o2)
+        {
+            return o1.Name.compareTo(o2);
+        }
+
+        /// <summary>
+        /// Compare two references by name.
+        /// </summary>
+        /// <param name="o1">the reference instance.</param>
+        /// <param name="o2">the other reference instance.</param>
+        /// <returns>standard Comparator result</returns>
+        public static int compareTo(Ref o1, Ref o2)
+        {
+            return o1.Name.compareTo(o2.Name);
         }
     }
 }

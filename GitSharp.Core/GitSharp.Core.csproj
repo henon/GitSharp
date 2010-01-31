@@ -396,6 +396,8 @@
     <Compile Include="RevPlot\PlotLane.cs" />
     <Compile Include="RevPlot\PlotWalk.cs" />
     <Compile Include="Util\LongList.cs" />
+    <Compile Include="Util\RefList.cs" />
+    <Compile Include="Util\RefMap.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

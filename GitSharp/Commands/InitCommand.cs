@@ -129,7 +129,7 @@ namespace GitSharp.Commands
                     OutputStream.WriteLine(String.Format("{0} empty Git repository in {1}", reinit ? "Reinitialized" : "Initialized", repo.Directory.FullName));
                     OutputStream.Flush();
                 }
-                Repository = new Repository(repo.Directory.FullName);
+                Repository = new Repository(repo);
             }
         }
     }

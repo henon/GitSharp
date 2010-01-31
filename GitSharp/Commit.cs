@@ -39,6 +39,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GitSharp.Core.RevWalk;
 using GitSharp.Core.Util;
 
 using ObjectId = GitSharp.Core.ObjectId;
@@ -264,42 +265,44 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		///  Returns all ancestor-commits of this commit. 
-		///  Be careful, in a big repository this can be quite a long list and you might go out of memory. Use for small repo's only.
-		///  
-		/// Todo: reimplement this with an iterator instead of recursion.
+		///  Returns an iterator over all ancestor-commits of this commit. 
 		/// </summary>
 		public IEnumerable<Commit> Ancestors
 		{
 			get
 			{
-				return GetAncestorIds(this);
+				var revwalk = new RevWalk(_repo);
+				revwalk.RevSortStrategy.Add(RevSort.Strategy.COMMIT_TIME_DESC);
+				revwalk.RevSortStrategy.Add(RevSort.Strategy.TOPO);
+				revwalk.markStart(revwalk.parseCommit(_id));
+				foreach(var revcommit in revwalk)
+					yield return new Commit(_repo, revcommit.AsCommit(revwalk));
 			}
 		}
 
-		private static IList<Commit> GetAncestorIds(Commit commit)
-		{
-			Stack<Commit> ancestorsStack = new Stack<Commit>();
-			Dictionary<ObjectId, Commit> ancestors = new Dictionary<ObjectId, Commit>();
+		//private static IList<Commit> GetAncestorIds(Commit commit)
+		//{
+		//   Stack<Commit> ancestorsStack = new Stack<Commit>();
+		//   Dictionary<ObjectId, Commit> ancestors = new Dictionary<ObjectId, Commit>();
 
-			ancestorsStack.Push(commit);
+		//   ancestorsStack.Push(commit);
 
-			while (ancestorsStack.Count > 0)
-			{
-				Commit currentCommit = ancestorsStack.Pop();
-				var parentCommits = currentCommit.InternalCommit.ParentIds
-														  .Where(id => !ancestors.ContainsKey(id))
-														  .Select(id => new Commit(commit._repo, id));
+		//   while (ancestorsStack.Count > 0)
+		//   {
+		//      Commit currentCommit = ancestorsStack.Pop();
+		//      var parentCommits = currentCommit.InternalCommit.ParentIds
+		//                                      .Where(id => !ancestors.ContainsKey(id))
+		//                                      .Select(id => new Commit(commit._repo, id));
 
-				foreach (Commit parentCommit in parentCommits)
-				{
-					ancestorsStack.Push(parentCommit);
-					ancestors[parentCommit._id] = parentCommit;
-				}
-			}
+		//      foreach (Commit parentCommit in parentCommits)
+		//      {
+		//         ancestorsStack.Push(parentCommit);
+		//         ancestors[parentCommit._id] = parentCommit;
+		//      }
+		//   }
 
-			return ancestors.Values.ToList();
-		}
+		//   return ancestors.Values.ToList();
+		//}
 
 		/// <summary>
 		/// Checkout this commit into the repositorie's working directory. Does not reset HEAD.

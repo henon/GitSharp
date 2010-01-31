@@ -36,6 +36,7 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -75,13 +76,127 @@ namespace GitSharp.Core.Util
 
         public virtual void remove()
         {
-            if (index >= list.Count || index == -1 )
-                throw new InvalidOperationException("Index is out of bounds of underlying list! "+index);
-             if (!can_remove)
-                 throw new InvalidOperationException("Can not remove (twice), call next first!");
-             can_remove = false; // <--- remove can only be called once per call to next
+            if (index >= list.Count || index == -1)
+                throw new InvalidOperationException("Index is out of bounds of underlying list! " + index);
+            if (!can_remove)
+                throw new InvalidOperationException("Can not remove (twice), call next first!");
+            can_remove = false; // <--- remove can only be called once per call to next
             list.RemoveAt(index);
             index--;
+        }
+    }
+
+    public interface IIterable<T> : IEnumerable<T>
+    {
+        IteratorBase<T> iterator();
+        int size();
+        T get(int index);
+    }
+
+    public class BasicIterable<T> : IIterable<T>
+    {
+        private readonly IList<T> _entries;
+
+        public BasicIterable(IList<T> entries)
+        {
+            _entries = entries;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return iterator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IteratorBase<T> iterator()
+        {
+            return new BasicIterator<T>(this);
+        }
+
+        public int size()
+        {
+            return _entries.Count;
+        }
+
+        public T get(int index)
+        {
+            return _entries[index];
+        }
+    }
+
+    public class BasicIterator<T> : IteratorBase<T>
+    {
+        private readonly IIterable<T> _iterable;
+        private int _index;
+
+        public BasicIterator(IIterable<T> iterable)
+        {
+            _iterable = iterable;
+        }
+
+        public override bool hasNext()
+        {
+            return _index < _iterable.size();
+        }
+
+        protected override T InnerNext()
+        {
+            return _iterable.get(_index++);
+        }
+    }
+
+    public abstract class IteratorBase<T> : IEnumerator<T>
+    {
+        private T _current;
+
+        public abstract bool hasNext();
+
+        public T next()
+        {
+            _current = InnerNext();
+            return _current;
+        }
+
+        public virtual void remove()
+        {
+            throw new NotSupportedException();
+        }
+
+        protected abstract T InnerNext();
+
+        public bool MoveNext()
+        {
+            if (!hasNext())
+            {
+                return false;
+            }
+
+            next();
+            return true;
+        }
+
+        public virtual void Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        public T Current
+        {
+            get { return _current; }
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public virtual void Dispose()
+        {
+            // nothing to dispose.
         }
     }
 }

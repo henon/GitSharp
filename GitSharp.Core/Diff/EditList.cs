@@ -39,6 +39,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Diff
 {
@@ -47,7 +48,7 @@ namespace GitSharp.Core.Diff
     ///   <seealso cref="Edit" />
     ///   s in a document.
     /// </summary>
-    public class EditList : List<Edit>
+    public class EditList : List<Edit>, IIterable<Edit>
     {
         public int size()
         {
@@ -148,62 +149,12 @@ namespace GitSharp.Core.Diff
             return ToString().GetHashCode();
         }
 
-        public EditListIterator iterator()
+        public IteratorBase<Edit> iterator()
         {
-            return new EditListIterator(this);
+            return new BasicIterator<Edit>(this);
         }
 
-        public class EditListIterator : IEnumerator<Edit>
-        {
-            private readonly EditList _editList;
-            private int _index = -1;
-
-            public EditListIterator(EditList editList)
-            {
-                _editList = editList;
-            }
-
-            public void Dispose()
-            {
-                // Nothing to dispose
-            }
-
-            public bool MoveNext()
-            {
-                if (!hasNext())
-                {
-                    return false;
-                }
-
-                next();
-                return true;
-            }
-
-            public void Reset()
-            {
-                throw new NotImplementedException();
-            }
-
-            public Edit Current
-            {
-                get { return _editList.get(_index); }
-            }
-
-            object IEnumerator.Current
-            {
-                get { return Current; }
-            }
-
-            public bool hasNext()
-            {
-                return _index < _editList.size() - 1;
-            }
-
-            public Edit next()
-            {
-                _index++;
-                return Current;
-            }
-        }
     }
+
+   
 }

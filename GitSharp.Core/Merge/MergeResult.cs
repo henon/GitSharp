@@ -143,65 +143,28 @@ namespace GitSharp.Core.Merge
             return _containsConflicts;
         }
 
-        public class MergeChunkIterator : IEnumerator<MergeChunk>
+        public class MergeChunkIterator : IteratorBase<MergeChunk>
         {
             private readonly MergeResult _mergeResult;
             int idx;
-            private MergeChunk _current;
 
             public MergeChunkIterator(MergeResult mergeResult)
             {
                 _mergeResult = mergeResult;
             }
 
-            public bool hasNext()
+            public override  bool hasNext()
             {
                 return (idx < _mergeResult._chunks.size());
             }
 
-            public MergeChunk next()
+            protected override MergeChunk InnerNext()
             {
                 var state = (MergeChunk.ConflictState)(_mergeResult._chunks.get(idx++));
                 int srcIdx = _mergeResult._chunks.get(idx++);
                 int begin = _mergeResult._chunks.get(idx++);
                 int end = _mergeResult._chunks.get(idx++);
                 return new MergeChunk(srcIdx, begin, end, state);
-            }
-
-            public void remove()
-            {
-                throw new NotSupportedException();
-            }
-
-            public bool MoveNext()
-            {
-                if (!hasNext())
-                {
-                    return false;
-                }
-
-                _current = next();
-                return true;
-            }
-
-            public void Reset()
-            {
-                throw new NotImplementedException();
-            }
-
-            public MergeChunk Current
-            {
-                get { return _current; }
-            }
-
-            object IEnumerator.Current
-            {
-                get { return Current; }
-            }
-
-            public void Dispose()
-            {
-                // Nothing to dispose
             }
         }
     }

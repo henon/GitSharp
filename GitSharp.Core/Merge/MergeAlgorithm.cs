@@ -38,6 +38,7 @@
 using System;
 using System.Collections.Generic;
 using GitSharp.Core.Diff;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Merge
 {
@@ -77,9 +78,9 @@ namespace GitSharp.Core.Merge
             sequences.Add(theirs);
             MergeResult result = new MergeResult(sequences);
             EditList oursEdits = new MyersDiff(@base, ours).getEdits();
-            EditList.EditListIterator baseToOurs = oursEdits.iterator();
+            IteratorBase<Edit> baseToOurs = oursEdits.iterator();
             EditList theirsEdits = new MyersDiff(@base, theirs).getEdits();
-            EditList.EditListIterator baseToTheirs = theirsEdits.iterator();
+            IteratorBase<Edit> baseToTheirs = theirsEdits.iterator();
             int current = 0; // points to the next line (first line is 0) of base
             // which was not handled yet
             Edit oursEdit = nextEdit(baseToOurs);
@@ -233,7 +234,7 @@ namespace GitSharp.Core.Merge
         /// </summary>
         /// <param name="it">the iterator for which the next edit should be returned</param>
         /// <returns>the next edit from the iterator or END_EDIT if there no more edits</returns>
-        private static Edit nextEdit(EditList.EditListIterator it)
+        private static Edit nextEdit(IteratorBase<Edit> it)
         {
             return (it.hasNext() ? it.next() : END_EDIT);
         }

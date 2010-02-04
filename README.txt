@@ -28,15 +28,15 @@ o----------/:      s-----------------------------------------------------------s
 == Git# --> Git for .NET ==
 ... a native Windows version of the fast & free open source version control system
 
-Git# is the most advanced C# implementation of git for the .NET framework and Mono. 
+GitSharp is the most advanced C# implementation of git for the .NET framework and Mono. 
 It is aimed to be fully compatible to the original git for linux and can be used as stand 
 alone command line application or as library for windows applications such as gui 
 frontends or plugins for IDEs.
 
-Git# is released under the BSD license. It is derived from the Java version jgit.
+GitSharp is released under the BSD license. It is derived from the Java version jgit.
 Please refer to the LICENSE.txt files for the complete license.
 
-For more info check out the Git# website at http://www.eqqon.com/index.php/GitSharp
+For more info check out the GitSharp website at http://www.eqqon.com/index.php/GitSharp
 
 == Latest source code ==
   http://github.com/henon/GitSharp
@@ -78,4 +78,4 @@ C based implementation can be obtained from the GIT websites:
   http://progit.org/book/ - free book about Git
 
 More information about the Java implemetation which Git# stems from:
-  http://www.jgit.org/
+  hhttp://www.eclipse.org/jgit

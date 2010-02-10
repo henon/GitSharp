@@ -137,7 +137,9 @@ namespace GitSharp.Core
             if (r == null)
             {
                 r = new Ref(Ref.Storage.New, name, null);
-            }            else if (detach)            {
+            }
+            else if (detach)
+            {
                 r = new Ref(Ref.Storage.New, name, r.ObjectId);
             }
             return new RefUpdate(this, r, FileForRef(r.Name));

@@ -824,7 +824,7 @@ namespace GitSharp.Core.Tests
 		}
 
 		[Test]
-		public void testInvalidTagNoTaggerHeader1()
+		public void testValidTagHasNoTaggerHeader()
 		{
 			var b = new StringBuilder();
 
@@ -835,16 +835,7 @@ namespace GitSharp.Core.Tests
 			b.Append("type commit\n");
 			b.Append("tag foo\n");
 
-			byte[] data = Constants.encodeASCII(b.ToString());
-			try
-			{
-				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
-			}
-			catch (CorruptObjectException e)
-			{
-				Assert.AreEqual("no tagger header", e.Message);
-			}
+            _checker.checkTag(Constants.encodeASCII(b.ToString()));
 		}
 
 		[Test]
@@ -915,30 +906,6 @@ namespace GitSharp.Core.Tests
 			catch (CorruptObjectException e)
 			{
 				Assert.AreEqual("no tag header", e.Message);
-			}
-		}
-
-		[Test]
-		public void testInvalidTagNoTagHeader4()
-		{
-			var b = new StringBuilder();
-
-			b.Append("object ");
-			b.Append("be9bfa841874ccc9f2ef7c48d0c76226f89b7189");
-			b.Append('\n');
-
-			b.Append("type commit\n");
-			b.Append("tag foo");
-
-			byte[] data = Constants.encodeASCII(b.ToString());
-			try
-			{
-				_checker.checkTag(data);
-				Assert.Fail("incorrectly accepted invalid tag");
-			}
-			catch (CorruptObjectException e)
-			{
-				Assert.AreEqual("no tagger header", e.Message);
 			}
 		}
 

@@ -86,7 +86,7 @@ namespace GitSharp.Core.Tests.RevWalk
 
             var rw = new Core.RevWalk.RevWalk(db);
 
-        	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+            var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
             Assert.IsNull(c.getObject());
             Assert.IsNull(c.getTagName());
 
@@ -129,7 +129,7 @@ namespace GitSharp.Core.Tests.RevWalk
 
             var rw = new Core.RevWalk.RevWalk(db);
 
-        	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+            var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
             Assert.IsNull(c.getObject());
             Assert.IsNull(c.getTagName());
 
@@ -148,6 +148,53 @@ namespace GitSharp.Core.Tests.RevWalk
             Assert.AreEqual(taggerEmail, cTagger.EmailAddress);
         }
 
+        [Test]
+        public void testParseOldStyleNoTagger()
+        {
+            ObjectId treeId = Id("9788669ad918b6fcce64af8882fc9a81cb6aba67");
+            string name = "v1.2.3.4.5";
+            string message = "test\n" //
+                    + "\n" //
+                    + "-----BEGIN PGP SIGNATURE-----\n" //
+                    + "Version: GnuPG v1.4.1 (GNU/Linux)\n" //
+                    + "\n" //
+                    + "iD8DBQBC0b9oF3Y\n" //
+                    + "-----END PGP SIGNATURE------n";
+
+            var body = new StringBuilder();
+
+            body.Append("object ");
+            body.Append(treeId.Name);
+            body.Append("\n");
+
+            body.Append("type tree\n");
+
+            body.Append("tag ");
+            body.Append(name);
+            body.Append("\n");
+            body.Append("\n");
+            body.Append(message);
+
+            var rw = new Core.RevWalk.RevWalk(db);
+            RevTag c;
+
+            c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+            Assert.IsNull(c.getObject());
+            Assert.IsNull(c.getTagName());
+
+            c.parseCanonical(rw, body.ToString().getBytes("UTF-8"));
+            Assert.IsNotNull(c.getObject());
+            Assert.AreEqual(treeId, c.getObject().getId());
+            Assert.AreSame(rw.lookupTree(treeId), c.getObject());
+
+            Assert.IsNotNull(c.getTagName());
+            Assert.AreEqual(name, c.getTagName());
+            Assert.AreEqual("test", c.getShortMessage());
+            Assert.AreEqual(message, c.getFullMessage());
+
+            Assert.IsNull(c.getTaggerIdent());
+        }
+
         private RevTag create(string msg)
         {
             var b = new StringBuilder();
@@ -158,7 +205,7 @@ namespace GitSharp.Core.Tests.RevWalk
             b.Append("\n");
             b.Append(msg);
 
-        	var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
+            var c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
 
             c.parseCanonical(new Core.RevWalk.RevWalk(db), b.ToString().getBytes("UTF-8"));
             return c;
@@ -180,7 +227,7 @@ namespace GitSharp.Core.Tests.RevWalk
                 b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream)b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
@@ -203,7 +250,7 @@ namespace GitSharp.Core.Tests.RevWalk
                 b.Write("\u304d\u308c\u3044\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream)b.BaseStream).ToArray());
             }
             AssertHelper.IgnoreOn(AssertedPlatform.Mono, () => Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=549914");
             Assert.AreEqual("Sm\u00f6rg\u00e5sbord", c.getShortMessage());
@@ -234,22 +281,22 @@ namespace GitSharp.Core.Tests.RevWalk
                 b.Write("Hi\n".getBytes("EUC-JP"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream)b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());
             Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
 
-	    /**
-	     * This is a twisted case, but show what we expect here. We can revise the
-	     * expectations provided this case is updated.
-	     *
-	     * What happens here is that an encoding us given, but data is not encoded
-	     * that way (and we can detect it), so we try other encodings.
-	     *
-	     * @throws Exception
-	     */
+        /**
+         * This is a twisted case, but show what we expect here. We can revise the
+         * expectations provided this case is updated.
+         *
+         * What happens here is that an encoding us given, but data is not encoded
+         * that way (and we can detect it), so we try other encodings.
+         *
+         * @throws Exception
+         */
 
         [Test]
         public void testParse_explicit_bad_encoded()
@@ -268,7 +315,7 @@ namespace GitSharp.Core.Tests.RevWalk
                 b.Write("Hi\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream)b.BaseStream).ToArray());
             }
 
             AssertHelper.IgnoreOn(AssertedPlatform.Mono, () => Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name), "Will fail in mono due to https://bugzilla.novell.com/show_bug.cgi?id=547902");
@@ -277,17 +324,17 @@ namespace GitSharp.Core.Tests.RevWalk
             Assert.AreEqual("\u304d\u308c\u3044\n\nHi\n", c.getFullMessage());
         }
 
-	    /**
-	     * This is a twisted case too, but show what we expect here. We can revise
-	     * the expectations provided this case is updated.
-	     *
-	     * What happens here is that an encoding us given, but data is not encoded
-	     * that way (and we can detect it), so we try other encodings. Here data
-	     * could actually be decoded in the stated encoding, but we override using
-	     * UTF-8.
-	     *
-	     * @throws Exception
-	     */
+        /**
+         * This is a twisted case too, but show what we expect here. We can revise
+         * the expectations provided this case is updated.
+         *
+         * What happens here is that an encoding us given, but data is not encoded
+         * that way (and we can detect it), so we try other encodings. Here data
+         * could actually be decoded in the stated encoding, but we override using
+         * UTF-8.
+         *
+         * @throws Exception
+         */
 
         [Test]
         public void testParse_explicit_bad_encoded2()
@@ -306,7 +353,7 @@ namespace GitSharp.Core.Tests.RevWalk
                 b.Write("Hi\n".getBytes("UTF-8"));
 
                 c = new RevTag(Id("9473095c4cb2f12aefe1db8a355fe3fafba42f67"));
-                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream) b.BaseStream).ToArray());
+                c.parseCanonical(new Core.RevWalk.RevWalk(db), ((MemoryStream)b.BaseStream).ToArray());
             }
             Assert.AreEqual("F\u00f6r fattare", c.getTaggerIdent().Name);
             Assert.AreEqual("\u304d\u308c\u3044", c.getShortMessage());

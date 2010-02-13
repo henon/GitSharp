@@ -47,14 +47,14 @@ namespace GitSharp.Core
 {
     /// <summary>
     /// Verifies that an object is formatted correctly.
-	/// <para />
-	/// Verifications made by this class only check that the fields of an object are
-	/// formatted correctly. The ObjectId checksum of the object is not verified, and
-	/// connectivity links between objects are also not verified. Its assumed that
-	/// the caller can provide both of these validations on its own.
-	/// <para />
-	/// Instances of this class are not thread safe, but they may be reused to
-	/// perform multiple object validations.
+    /// <para />
+    /// Verifications made by this class only check that the fields of an object are
+    /// formatted correctly. The ObjectId checksum of the object is not verified, and
+    /// connectivity links between objects are also not verified. Its assumed that
+    /// the caller can provide both of these validations on its own.
+    /// <para />
+    /// Instances of this class are not thread safe, but they may be reused to
+    /// perform multiple object validations.
     /// </summary>
     public class ObjectChecker
     {
@@ -90,18 +90,18 @@ namespace GitSharp.Core
 
         private MutableInteger ptrout = new MutableInteger();
 
-		/// <summary>
-		/// Check an object for parsing errors.
-		/// </summary>
-		/// <param name="objType">
-		/// Type of the object. Must be a valid object type code in
-		/// <see cref="Constants"/>.</param>
-		/// <param name="raw">
-		/// The raw data which comprises the object. This should be in the
-		/// canonical format (that is the format used to generate the
-		/// <see cref="ObjectId"/> of the object). The array is never modified.
-		/// </param>
-		/// <exception cref="CorruptObjectException">If any error is identified.</exception>
+        /// <summary>
+        /// Check an object for parsing errors.
+        /// </summary>
+        /// <param name="objType">
+        /// Type of the object. Must be a valid object type code in
+        /// <see cref="Constants"/>.</param>
+        /// <param name="raw">
+        /// The raw data which comprises the object. This should be in the
+        /// canonical format (that is the format used to generate the
+        /// <see cref="ObjectId"/> of the object). The array is never modified.
+        /// </param>
+        /// <exception cref="CorruptObjectException">If any error is identified.</exception>
         public void check(int objType, byte[] raw)
         {
             switch (objType)
@@ -165,11 +165,11 @@ namespace GitSharp.Core
             return ptrout.value;
         }
 
-		/// <summary>
-		/// Check a commit for errors.
-		/// </summary>
-		/// <param name="raw">The commit data. The array is never modified.</param>
-		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
+        /// <summary>
+        /// Check a commit for errors.
+        /// </summary>
+        /// <param name="raw">The commit data. The array is never modified.</param>
+        /// <exception cref="CorruptObjectException">If any error was detected.</exception>
         public void checkCommit(byte[] raw)
         {
             int ptr = 0;
@@ -197,11 +197,11 @@ namespace GitSharp.Core
                 throw new CorruptObjectException("invalid committer");
         }
 
-		/// <summary>
-		/// Check an annotated tag for errors.
-		/// </summary>
-		/// <param name="raw">The tag data. The array is never modified.</param>
-		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
+        /// <summary>
+        /// Check an annotated tag for errors.
+        /// </summary>
+        /// <param name="raw">The tag data. The array is never modified.</param>
+        /// <exception cref="CorruptObjectException">If any error was detected.</exception>
         public void checkTag(byte[] raw)
         {
             int ptr = 0;
@@ -219,10 +219,11 @@ namespace GitSharp.Core
                 throw new CorruptObjectException("no tag header");
             ptr = RawParseUtils.nextLF(raw, ptr);
 
-            if ((ptr = RawParseUtils.match(raw, ptr, tagger)) < 0)
-                throw new CorruptObjectException("no tagger header");
-            if ((ptr = personIdent(raw, ptr)) < 0 || raw[ptr++] != '\n')
-                throw new CorruptObjectException("invalid tagger");
+            if ((ptr = RawParseUtils.match(raw, ptr, tagger)) > 0)
+            {
+                if ((ptr = personIdent(raw, ptr)) < 0 || raw[ptr++] != '\n')
+                    throw new CorruptObjectException("invalid tagger");
+            }
         }
 
         private static int lastPathChar(int mode)
@@ -230,7 +231,7 @@ namespace GitSharp.Core
             return FileMode.Tree.Equals(mode) ? '/' : '\0';
         }
 
-        private static int pathCompare(byte[] raw, int aPos, int aEnd,                 int aMode, int bPos, int bEnd, int bMode)
+        private static int pathCompare(byte[] raw, int aPos, int aEnd, int aMode, int bPos, int bEnd, int bMode)
         {
             while (aPos < aEnd && bPos < bEnd)
             {
@@ -287,10 +288,10 @@ namespace GitSharp.Core
         }
 
         /// <summary>
-		/// Check a canonical formatted tree for errors.
-		/// </summary>
-		/// <param name="raw">The raw tree data. The array is never modified.</param>
-		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
+        /// Check a canonical formatted tree for errors.
+        /// </summary>
+        /// <param name="raw">The raw tree data. The array is never modified.</param>
+        /// <exception cref="CorruptObjectException">If any error was detected.</exception>
         public void checkTree(byte[] raw)
         {
             int sz = raw.Length;
@@ -360,11 +361,11 @@ namespace GitSharp.Core
             }
         }
 
-		/// <summary>
-		/// Check a blob for errors.
-		/// </summary>
-		/// <param name="raw">The blob data. The array is never modified.</param>
-		/// <exception cref="CorruptObjectException">If any error was detected.</exception>
+        /// <summary>
+        /// Check a blob for errors.
+        /// </summary>
+        /// <param name="raw">The blob data. The array is never modified.</param>
+        /// <exception cref="CorruptObjectException">If any error was detected.</exception>
         public void checkBlob(byte[] raw)
         {
             // We can always assume the blob is valid.

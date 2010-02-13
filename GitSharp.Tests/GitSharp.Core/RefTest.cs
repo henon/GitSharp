@@ -53,6 +53,21 @@ namespace GitSharp.Tests.GitSharp.Core
     [TestFixture]
     public class RefTest : SampleDataRepositoryTestCase
     {
+        private void writeSymref(String src, String dst)
+        {
+            RefUpdate u = db.UpdateRef(src);
+            switch (u.link(dst))
+            {
+                case RefUpdate.RefUpdateResult.NEW:
+                case RefUpdate.RefUpdateResult.FORCED:
+                case RefUpdate.RefUpdateResult.NO_CHANGE:
+                    break;
+                default:
+                    Assert.Fail("link " + src + " to " + dst);
+                    break;
+            }
+        }
+
         [Test]
         public virtual void testReadAllIncludingSymrefs()
         {
@@ -61,7 +76,7 @@ namespace GitSharp.Tests.GitSharp.Core
             updateRef.setNewObjectId(masterId);
             updateRef.setForceUpdate(true);
             updateRef.update();
-            db.WriteSymref("refs/remotes/origin/HEAD", "refs/remotes/origin/master");
+            writeSymref("refs/remotes/origin/HEAD", "refs/remotes/origin/master");
 
             ObjectId r = db.Resolve("refs/remotes/origin/HEAD");
             Assert.AreEqual(masterId, r);
@@ -82,7 +97,7 @@ namespace GitSharp.Tests.GitSharp.Core
         [Test]
         public virtual void testReadSymRefToPacked()
         {
-            db.WriteSymref("HEAD", "refs/heads/b");
+            writeSymref("HEAD", "refs/heads/b");
             global::GitSharp.Core.Ref @ref = db.getRef("HEAD");
             Assert.AreEqual(Storage.Loose, @ref.StorageFormat);
             Assert.IsTrue(@ref.isSymbolic(), "is symref");
@@ -101,7 +116,7 @@ namespace GitSharp.Tests.GitSharp.Core
             RefUpdate.RefUpdateResult update = updateRef.update();
             Assert.AreEqual(RefUpdate.RefUpdateResult.FORCED, update); // internal
 
-            db.WriteSymref("HEAD", "refs/heads/master");
+            writeSymref("HEAD", "refs/heads/master");
             global::GitSharp.Core.Ref @ref = db.getRef("HEAD");
             Assert.AreEqual(Storage.Loose, @ref.StorageFormat);
             @ref = @ref.getTarget();

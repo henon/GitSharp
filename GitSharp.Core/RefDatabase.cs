@@ -109,16 +109,6 @@ namespace GitSharp.Core
         public abstract bool isNameConflicting(string name);
 
         /// <summary>
-        /// Create a symbolic reference from one name to another.
-        /// </summary>
-        /// <param name="name">
-        /// the name of the reference. Should be <see cref="Constants.HEAD"/> or
-        /// starting with <see cref="Constants.R_REFS"/>.
-        /// </param>
-        /// <param name="target"></param>
-        public abstract void link(string name, string target);
-
-        /// <summary>
         /// Create a new update command to create, modify or delete a reference.
         /// </summary>
         /// <param name="name">the name of the reference.</param>

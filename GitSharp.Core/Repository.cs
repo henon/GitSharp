@@ -241,8 +241,9 @@ namespace GitSharp.Core
                 _refDb.create();
                 _objectDatabase.create();
 
-                const string master = Constants.R_HEADS + Constants.MASTER;
-                _refDb.link(Constants.HEAD, master);
+                RefUpdate head = UpdateRef(Constants.HEAD);
+                head.disableRefLog();
+                head.link(Constants.R_HEADS + Constants.MASTER);
             }
 
             Config.setInt("core", null, "repositoryformatversion", 0);
@@ -973,16 +974,6 @@ namespace GitSharp.Core
         }
 
         /// <summary>
-        /// Writes a symref (e.g. HEAD) to disk
-        /// </summary>
-        /// <param name="name">symref name</param>
-        /// <param name="target">pointed to ref</param>
-        public void WriteSymref(string name, string target)
-        {
-            _refDb.link(name, target);
-        }
-
-        /// <summary>
         /// Gets a representation of the index associated with this repo
         /// </summary>
         public GitIndex Index
@@ -1110,20 +1101,20 @@ namespace GitSharp.Core
 
         internal void fireRefsChanged()
         {
-                var @event = new RefsChangedEventArgs(this);
-                List<RepositoryListener> all;
-                lock (listeners)
-                {
-                    all = new List<RepositoryListener>(listeners);
-                }
-                lock (allListeners)
-                {
-                    all.AddRange(allListeners);
-                }
-                foreach (RepositoryListener l in all)
-                {
-                    l.refsChanged(@event);
-                }
+            var @event = new RefsChangedEventArgs(this);
+            List<RepositoryListener> all;
+            lock (listeners)
+            {
+                all = new List<RepositoryListener>(listeners);
+            }
+            lock (allListeners)
+            {
+                all.AddRange(allListeners);
+            }
+            foreach (RepositoryListener l in all)
+            {
+                l.refsChanged(@event);
+            }
         }
 
         internal void fireIndexChanged()
@@ -1254,11 +1245,6 @@ namespace GitSharp.Core
             get { return getRef(Constants.HEAD); }
         }
 
-        public void Link(string name, string target)
-        {
-            _refDb.link(name, target);
-        }
-
         public Ref Peel(Ref pRef)
         {
             try
@@ -1284,7 +1270,7 @@ namespace GitSharp.Core
             foreach (Ref @ref in allRefs.Values)
             {
                 Ref ref2 = @ref;
-                    ref2 = Peel(ref2);
+                ref2 = Peel(ref2);
                 AnyObjectId target = ref2.PeeledObjectId;
                 if (target == null)
                     target = ref2.ObjectId;

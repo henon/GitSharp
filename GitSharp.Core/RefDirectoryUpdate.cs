@@ -43,59 +43,76 @@ namespace GitSharp.Core
     /// <summary>
     /// Updates any reference stored by <see cref="RefDirectory"/>.
     /// </summary>
-    public class RefDirectoryUpdate : RefUpdate {
+    public class RefDirectoryUpdate : RefUpdate
+    {
         private readonly RefDirectory _database;
 
         private LockFile _lock;
 
-        public RefDirectoryUpdate(RefDirectory r, Ref @ref) : base(@ref) {
+        public RefDirectoryUpdate(RefDirectory r, Ref @ref)
+            : base(@ref)
+        {
             _database = r;
         }
 
-        public override RefDatabase getRefDatabase() {
+        public override RefDatabase getRefDatabase()
+        {
             return _database;
         }
 
-        public override Repository getRepository() {
+        public override Repository getRepository()
+        {
             return _database.getRepository();
         }
 
-        protected override bool tryLock() {
-            Ref dst = Ref.getLeaf();
+        protected override bool tryLock(bool deref)
+        {
+            Ref dst = Ref;
+            if (deref)
+                dst = dst.getLeaf();
             string name = dst.getName();
             _lock = new LockFile(_database.fileFor(name));
-            if (_lock.Lock()) {
+            if (_lock.Lock())
+            {
                 dst = _database.getRef(name);
                 OldObjectId = (dst != null ? dst.getObjectId() : null);
                 return true;
-            } else {
+            }
+            else
+            {
                 return false;
             }
         }
 
-        public override void unlock() {
-            if (_lock != null) {
+        public override void unlock()
+        {
+            if (_lock != null)
+            {
                 _lock.Unlock();
                 _lock = null;
             }
         }
 
-        protected override RefUpdateResult doUpdate(RefUpdateResult status) {
+        protected override RefUpdateResult doUpdate(RefUpdateResult status)
+        {
             _lock.setNeedStatInformation(true);
             _lock.Write(NewObjectId);
 
             string msg = getRefLogMessage();
-            if (msg != null) {
-                if (isRefLogIncludingResult()) {
+            if (msg != null)
+            {
+                if (isRefLogIncludingResult())
+                {
                     string strResult = toResultString(status);
-                    if (strResult != null) {
+                    if (strResult != null)
+                    {
                         if (msg.Length > 0)
                             msg = msg + ": " + strResult;
                         else
                             msg = strResult;
                     }
                 }
-                _database.log(this, msg);
+                _database.log(this, msg, true);
             }
             if (!_lock.Commit())
                 return RefUpdateResult.LOCK_FAILURE;
@@ -103,8 +120,10 @@ namespace GitSharp.Core
             return status;
         }
 
-        private static string toResultString(RefUpdateResult status) {
-            switch (status) {
+        private static string toResultString(RefUpdateResult status)
+        {
+            switch (status)
+            {
                 case RefUpdateResult.FORCED:
                     return "forced-update";
                 case RefUpdateResult.FAST_FORWARD:
@@ -116,10 +135,28 @@ namespace GitSharp.Core
             }
         }
 
-        protected override RefUpdateResult doDelete(RefUpdateResult status) {
+        protected override RefUpdateResult doDelete(RefUpdateResult status)
+        {
             if (Ref.getLeaf().getStorage() != Storage.New)
                 _database.delete(this);
             return status;
+        }
+
+        protected override RefUpdateResult doLink(string target)
+        {
+            _lock.setNeedStatInformation(true);
+            _lock.Write(Constants.encode(RefDirectory.SYMREF + target + '\n'));
+
+            string msg = getRefLogMessage();
+            if (msg != null)
+                _database.log(this, msg, false);
+            if (!_lock.Commit())
+                return RefUpdateResult.LOCK_FAILURE;
+            _database.storedSymbolicRef(this, _lock.CommitLastModified.ToMillisecondsSinceEpoch(), target);
+
+            if (Ref.getStorage() == Storage.New)
+                return RefUpdateResult.NEW;
+            return RefUpdateResult.FORCED;
         }
     }
 }

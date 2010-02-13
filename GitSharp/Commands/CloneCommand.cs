@@ -56,8 +56,9 @@ namespace GitSharp
         : AbstractFetchCommand
     {
 
-        public CloneCommand() {
-            Quiet=true;
+        public CloneCommand()
+        {
+            Quiet = true;
         }
 
         // note: the naming of command parameters may not follow .NET conventions in favour of git command line parameter naming conventions.
@@ -108,7 +109,7 @@ namespace GitSharp
         /// unreferenced (or dangling). These objects may be removed by normal git operations (such as git-commit) which automatically call git gc --auto. 
         /// (See git-gc(1).) If these objects are removed and were referenced by the cloned repository, then the cloned repository will become corrupt.
         /// </summary>
-        public bool Shared { get; set; }           
+        public bool Shared { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -150,14 +151,14 @@ namespace GitSharp
         /// <summary>
         /// Instead of using the remote name origin to keep track of the upstream repository, use "name". 
         /// </summary>
-        public string OriginName { get; set; }               
+        public string OriginName { get; set; }
 
         /// <summary>
         /// Not implemented.
         /// 
         /// When given, and the repository to clone from is accessed via ssh, this specifies a non-default path for the command run on the other end. 
         /// </summary>
-        public string UploadPack { get; set; }           
+        public string UploadPack { get; set; }
 
         /// <summary>
         /// Not implemented.
@@ -172,7 +173,7 @@ namespace GitSharp
         /// Create a shallow clone with a history truncated to the specified number of revisions. A shallow repository has a number of limitations (you cannot clone or fetch from it, 
         /// nor push from nor into it), but is adequate if you are only interested in the recent history of a large project with a long history, and would want to send in fixes as patches. 
         /// </summary>
-        public int Depth { get; set; } 
+        public int Depth { get; set; }
 
         /// <summary>
         /// Do it.
@@ -181,7 +182,7 @@ namespace GitSharp
         {
 
             if (Source.Length <= 0)
-                throw new ArgumentNullException("Repository","fatal: You must specify a repository to clone.");
+                throw new ArgumentNullException("Repository", "fatal: You must specify a repository to clone.");
 
             URIish source = new URIish(Source);
 
@@ -207,12 +208,12 @@ namespace GitSharp
                 OutputStream.Flush();
             }
 
-                saveRemote(source);
-                FetchResult r = runFetch();
-                GitSharp.Core.Ref branch = guessHEAD(r);
-                if (!NoCheckout)
-                    doCheckout(branch);
-            }
+            saveRemote(source);
+            FetchResult r = runFetch();
+            GitSharp.Core.Ref branch = guessHEAD(r);
+            if (!NoCheckout)
+                doCheckout(branch);
+        }
 
         private void saveRemote(URIish uri)
         {
@@ -232,10 +233,10 @@ namespace GitSharp
 
             try
             {
-            	if (!Quiet)
-                	r = tn.fetch(new TextProgressMonitor(OutputStream), null);
-            	else
-            		r = tn.fetch(new NullProgressMonitor(),null);
+                if (!Quiet)
+                    r = tn.fetch(new TextProgressMonitor(OutputStream), null);
+                else
+                    r = tn.fetch(new NullProgressMonitor(), null);
             }
             finally
             {
@@ -275,8 +276,14 @@ namespace GitSharp
             if (branch == null)
                 throw new ArgumentNullException("branch", "Cannot checkout; no HEAD advertised by remote");
             var repo = Repository._internal_repo;
-            if (!Constants.HEAD.Equals(branch.Name))
-                repo.WriteSymref(Constants.HEAD, branch.Name);
+
+            if (!Constants.HEAD.Equals(branch.getName()))
+            {
+                RefUpdate u1 = repo.UpdateRef(Constants.HEAD);
+                u1.disableRefLog();
+                u1.link(branch.getName());
+            }
+
             GitSharp.Core.Commit commit = repo.MapCommit(branch.ObjectId);
             RefUpdate u = repo.UpdateRef(Constants.HEAD);
             u.NewObjectId = commit.CommitId;

@@ -158,14 +158,14 @@ namespace GitSharp.Core
             /// </summary>
             FAST_FORWARD,
 
-           /// <summary>
+            /// <summary>
             /// Not a fast-forward and not stored.
             /// <para/>
             /// The tracking ref already existed but its old value was not fully
             /// merged into the new value. The configuration did not allow a forced
             /// update/delete to take place, so ref still contains the old value. No
             /// previous history was lost.
-           /// </summary>
+            /// </summary>
             REJECTED,
 
             /// <summary>
@@ -254,11 +254,16 @@ namespace GitSharp.Core
         /// If the locking was successful the implementor must set the current
         /// identity value by calling <see cref="set_OldObjectId"/>.
         /// </summary>
+        /// <param name="deref">
+        /// true if the lock should be taken against the leaf level
+        /// reference; false if it should be taken exactly against the
+        /// current reference.
+        /// </param>
         /// <returns>
         /// true if the lock was acquired and the reference is likely
         /// protected from concurrent modification; false if it failed.
         /// </returns>
-        protected abstract bool tryLock();
+        protected abstract bool tryLock(bool deref);
 
         /// <summary>
         /// Releases the lock taken by {@link #tryLock} if it succeeded.
@@ -268,6 +273,8 @@ namespace GitSharp.Core
         protected abstract RefUpdateResult doUpdate(RefUpdateResult desiredResult);
 
         protected abstract RefUpdateResult doDelete(RefUpdateResult desiredResult);
+
+        protected abstract RefUpdateResult doLink(string target);
 
         /// <summary>name of the underlying ref this update will operate on.</summary>
         public string Name
@@ -525,6 +532,57 @@ namespace GitSharp.Core
             }
         }
 
+        /// <summary>
+        /// Replace this reference with a symbolic reference to another reference.
+        /// <para/>
+        /// This exact reference (not its traversed leaf) is replaced with a symbolic
+        /// reference to the requested name.
+        /// </summary>
+        /// <param name="target">
+        /// name of the new target for this reference. The new target name
+        /// must be absolute, so it must begin with {@code refs/}.
+        /// </param>
+        /// <returns><see cref="RefUpdateResult.NEW"/> or <see cref="RefUpdateResult.FORCED"/> on success.</returns>
+        public RefUpdateResult link(string target)
+        {
+            if (!target.StartsWith(Constants.R_REFS))
+                throw new ArgumentException("Not " + Constants.R_REFS);
+            if (getRefDatabase().isNameConflicting(Name))
+                return RefUpdateResult.LOCK_FAILURE;
+            try
+            {
+                if (!tryLock(false))
+                    return RefUpdateResult.LOCK_FAILURE;
+
+                Ref old = getRefDatabase().getRef(Name);
+                if (old != null && old.isSymbolic())
+                {
+                    Ref dst = old.getTarget();
+                    if (target.Equals(dst.getName()))
+                        return result = RefUpdateResult.NO_CHANGE;
+                }
+
+                if (old != null && old.getObjectId() != null)
+                    OldObjectId = (old.getObjectId());
+
+                Ref dst2 = getRefDatabase().getRef(target);
+                if (dst2 != null && dst2.getObjectId() != null)
+                    NewObjectId = (dst2.getObjectId());
+
+                return result = doLink(target);
+            }
+            catch (IOException x)
+            {
+                result = RefUpdateResult.IO_FAILURE;
+                throw;
+            }
+            finally
+            {
+                unlock();
+            }
+        }
+
+
         private RefUpdateResult updateImpl(RevWalk.RevWalk walk, Store store)
         {
             RevObject newObj;
@@ -534,7 +592,7 @@ namespace GitSharp.Core
                 return RefUpdateResult.LOCK_FAILURE;
             try
             {
-                if (!tryLock())
+                if (!tryLock(true))
                     return RefUpdateResult.LOCK_FAILURE;
                 if (expValue != null)
                 {

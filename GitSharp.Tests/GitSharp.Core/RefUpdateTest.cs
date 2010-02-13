@@ -47,6 +47,20 @@ namespace GitSharp.Core.Tests
     [TestFixture]
     public class RefUpdateTest : SampleDataRepositoryTestCase
     {
+        private void writeSymref(string src, string dst)
+        {
+            RefUpdate u = db.UpdateRef(src);
+            switch (u.link(dst))
+            {
+                case RefUpdate.RefUpdateResult.NEW:
+                case RefUpdate.RefUpdateResult.FORCED:
+                case RefUpdate.RefUpdateResult.NO_CHANGE:
+                    break;
+                default:
+                    Assert.Fail("link " + src + " to " + dst);
+                    break;
+            }
+        }
 
         private RefUpdate updateRef(string name)
         {
@@ -86,7 +100,7 @@ namespace GitSharp.Core.Tests
             Assert.AreEqual(newRef, r.Name);
             Assert.IsNotNull(r.ObjectId);
             Assert.AreNotSame(newid, r.ObjectId);
-            Assert.AreSame(typeof (ObjectId), r.ObjectId.GetType());
+            Assert.AreSame(typeof(ObjectId), r.ObjectId.GetType());
             Assert.AreEqual(newid.Copy(), r.ObjectId);
             IList<ReflogReader.Entry> reverseEntries1 = db.ReflogReader("refs/heads/abc").getReverseEntries();
             ReflogReader.Entry entry1 = reverseEntries1[0];
@@ -356,7 +370,7 @@ namespace GitSharp.Core.Tests
         public void testUpdateRefDetachedUnbornHead()
         {
             ObjectId ppid = db.Resolve("refs/heads/master^");
-            db.WriteSymref("HEAD", "refs/heads/unborn");
+            writeSymref("HEAD", "refs/heads/unborn");
             RefUpdate updateRef = db.UpdateRef("HEAD", true);
             updateRef.IsForceUpdate = true;
             updateRef.NewObjectId = ppid;
@@ -450,12 +464,13 @@ namespace GitSharp.Core.Tests
             Assert.AreEqual(RefUpdate.RefUpdateResult.FAST_FORWARD, update);
 
             allRefs = db.getAllRefs();
-		    Ref master = allRefs.GetValue("refs/heads/master");
-		    Ref head = allRefs.GetValue("HEAD");
-		    Assert.AreEqual("refs/heads/master", master.Name);
-		    Assert.AreEqual("HEAD", head.Name);
-		    Assert.IsTrue(head.isSymbolic(), "is symbolic reference");
-		    Assert.AreSame(master, head.getTarget());        }
+            Ref master = allRefs.GetValue("refs/heads/master");
+            Ref head = allRefs.GetValue("HEAD");
+            Assert.AreEqual("refs/heads/master", master.Name);
+            Assert.AreEqual("HEAD", head.Name);
+            Assert.IsTrue(head.isSymbolic(), "is symbolic reference");
+            Assert.AreSame(master, head.getTarget());
+        }
 
         /**
         * Test case originating from
@@ -473,7 +488,7 @@ namespace GitSharp.Core.Tests
             // Do not use the defalt repo for this case.
             IDictionary<string, Core.Ref> allRefs = db.getAllRefs();
             ObjectId oldValue = db.Resolve("HEAD");
-            db.WriteSymref(Constants.HEAD, "refs/heads/newref");
+            writeSymref(Constants.HEAD, "refs/heads/newref");
             RefUpdate updateRef = db.UpdateRef(Constants.HEAD);
             updateRef.IsForceUpdate = true;
             updateRef.NewObjectId = oldValue;
@@ -481,12 +496,12 @@ namespace GitSharp.Core.Tests
             Assert.AreEqual(RefUpdate.RefUpdateResult.NEW, update);
 
             allRefs = db.getAllRefs();
-		Ref head = allRefs.GetValue("HEAD");
-		Ref newref = allRefs.GetValue("refs/heads/newref");
-		Assert.AreEqual("refs/heads/newref", newref.Name);
-		Assert.AreEqual("HEAD", head.Name);
-		Assert.IsTrue(head.isSymbolic(), "is symbolic reference");
-		Assert.AreSame(newref, head.getTarget());
+            Ref head = allRefs.GetValue("HEAD");
+            Ref newref = allRefs.GetValue("refs/heads/newref");
+            Assert.AreEqual("refs/heads/newref", newref.Name);
+            Assert.AreEqual("HEAD", head.Name);
+            Assert.IsTrue(head.isSymbolic(), "is symbolic reference");
+            Assert.AreSame(newref, head.getTarget());
         }
 
         /**
@@ -560,7 +575,7 @@ namespace GitSharp.Core.Tests
             Assert.AreEqual(RefUpdate.RefUpdateResult.FAST_FORWARD, update2);
             Assert.AreEqual(pid, db.Resolve("refs/heads/master"));
         }
- 
+
         /**
          * Try modify a ref that is locked
          *
@@ -633,7 +648,7 @@ namespace GitSharp.Core.Tests
             ObjectId oldHead = db.Resolve(Constants.HEAD);
             Assert.IsFalse(rb
                     .Equals(oldHead), "precondition for this test, branch b != HEAD");
-		writeReflog(db, rb, rb, "Just a message", "refs/heads/b");
+            writeReflog(db, rb, rb, "Just a message", "refs/heads/b");
             Assert.IsTrue(new FileInfo(Path.Combine(db.Directory.FullName, "logs/refs/heads/b")).Exists, "log on old branch");
             RefRename renameRef = db.RenameRef("refs/heads/b",
                     "refs/heads/new/name");
@@ -654,7 +669,7 @@ namespace GitSharp.Core.Tests
         public void testRenameCurrentBranch()
         {
             ObjectId rb = db.Resolve("refs/heads/b");
-            db.WriteSymref(Constants.HEAD, "refs/heads/b");
+            writeSymref(Constants.HEAD, "refs/heads/b");
             ObjectId oldHead = db.Resolve(Constants.HEAD);
             Assert.IsTrue(rb.Equals(oldHead), "internal test condition, b == HEAD");
             writeReflog(db, rb, rb, "Just a message", "refs/heads/b");
@@ -715,7 +730,7 @@ namespace GitSharp.Core.Tests
                 string toName, string headPointsTo)
         {
             // setup
-            db.WriteSymref(Constants.HEAD, headPointsTo);
+            writeSymref(Constants.HEAD, headPointsTo);
             ObjectId oldfromId = db.Resolve(fromName);
             ObjectId oldHeadId = db.Resolve(Constants.HEAD);
             writeReflog(db, oldfromId, oldfromId, "Just a message",
@@ -821,7 +836,7 @@ namespace GitSharp.Core.Tests
         {
             // setup
             ObjectId rb = db.Resolve("refs/heads/b");
-            db.WriteSymref(Constants.HEAD, "refs/heads/a");
+            writeSymref(Constants.HEAD, "refs/heads/a");
             RefUpdate updateRef = db.UpdateRef("refs/heads/a");
             updateRef.NewObjectId = rb;
             updateRef.setRefLogMessage("Setup", false);
@@ -844,7 +859,7 @@ namespace GitSharp.Core.Tests
                     .getReverseEntries()[1].getComment());
             Assert.AreEqual("Setup", db.ReflogReader("a/b").getReverseEntries()
                     [2].getComment());
-             // same thing was logged to HEAD
+            // same thing was logged to HEAD
             Assert.AreEqual("Branch: renamed a to a/b", db.ReflogReader("HEAD")
                                .getReverseEntries()[0].getComment());
         }
@@ -854,7 +869,7 @@ namespace GitSharp.Core.Tests
         {
             // setup
             ObjectId rb = db.Resolve("refs/heads/b");
-            db.WriteSymref(Constants.HEAD, "refs/heads/prefix/a");
+            writeSymref(Constants.HEAD, "refs/heads/prefix/a");
             RefUpdate updateRef = db.UpdateRef("refs/heads/prefix/a");
             updateRef.NewObjectId = rb;
             updateRef.setRefLogMessage("Setup", false);
@@ -884,13 +899,14 @@ namespace GitSharp.Core.Tests
                        "HEAD").getReverseEntries()[0].getComment());
         }
 
-	private void writeReflog(Repository db, ObjectId oldId, ObjectId newId,
-			string msg, string refName) {
-		RefDirectory refs = (RefDirectory) db.RefDatabase;
-		RefUpdate update = refs.newUpdate(refName, true);
-		update.setOldObjectId(oldId);
-		update.setNewObjectId(newId);
-		refs.log(update, msg);
-	}
+        private void writeReflog(Repository db, ObjectId oldId, ObjectId newId,
+                string msg, string refName)
+        {
+            RefDirectory refs = (RefDirectory)db.RefDatabase;
+            RefUpdate update = refs.newUpdate(refName, true);
+            update.setOldObjectId(oldId);
+            update.setNewObjectId(newId);
+            refs.log(update, msg, true);
+        }
     }
 }

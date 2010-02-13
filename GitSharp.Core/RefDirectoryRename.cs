@@ -227,8 +227,17 @@ namespace GitSharp.Core
         {
             try
             {
-                _refdb.link(Constants.HEAD, target.getName());
-                return true;
+                RefUpdate u = _refdb.newUpdate(Constants.HEAD, false);
+                u.disableRefLog();
+                switch (u.link(target.getName()))
+                {
+                    case RefUpdate.RefUpdateResult.NEW:
+                    case RefUpdate.RefUpdateResult.FORCED:
+                    case RefUpdate.RefUpdateResult.NO_CHANGE:
+                        return true;
+                    default:
+                        return false;
+                }
             }
             catch (IOException e)
             {

@@ -474,23 +474,9 @@ namespace GitSharp.Core
             return leaf;
         }
 
-        public override void link(string name, string target)
+        public void storedSymbolicRef(RefDirectoryUpdate u, long modified, string target)
         {
-            LockFile lck = new LockFile(fileFor(name));
-            if (!lck.Lock())
-                throw new IOException("Cannot lock " + name);
-            lck.setNeedStatInformation(true);
-            try
-            {
-                lck.Write(Constants.encode(SYMREF + target + '\n'));
-                if (!lck.Commit())
-                    throw new IOException("Cannot write " + name);
-            }
-            finally
-            {
-                lck.Unlock();
-            }
-            putLooseRef(newSymbolicRef(lck.CommitLastModified.ToMillisecondsSinceEpoch(), name, target));
+            putLooseRef(newSymbolicRef(modified, u.getRef().getName(), target));
             fireRefsChanged();
         }
 
@@ -582,7 +568,7 @@ namespace GitSharp.Core
             fireRefsChanged();
         }
 
-        public void log(RefUpdate update, string msg)
+        public void log(RefUpdate update, string msg, bool deref)
         {
             ObjectId oldId = update.getOldObjectId();
             ObjectId newId = update.getNewObjectId();
@@ -605,9 +591,15 @@ namespace GitSharp.Core
             r.Append('\n');
             byte[] rec = Constants.encode(r.ToString());
 
-            if (@ref.isSymbolic())
+            if (deref && @ref.isSymbolic())
+            {
                 log(@ref.getName(), rec);
-            log(@ref.getLeaf().getName(), rec);
+                log(@ref.getLeaf().getName(), rec);
+            }
+            else
+            {
+                log(@ref.getName(), rec);
+            }
         }
 
         private void log(string refName, byte[] rec)

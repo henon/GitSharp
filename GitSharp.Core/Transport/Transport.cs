@@ -78,7 +78,7 @@ namespace GitSharp.Core.Transport
 		public static readonly RefSpec REFSPEC_PUSH_ALL = new RefSpec("refs/heads/*:refs/heads/*");
 
 		private readonly Repository _local;
-		private readonly URIish _uri;
+	    protected readonly URIish _uri;
 		private string _optionUploadPack;
 		private string _optionReceivePack;
 		private TagOpt _tagopt;

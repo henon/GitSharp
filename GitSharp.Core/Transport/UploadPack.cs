@@ -241,7 +241,7 @@ namespace GitSharp.Core.Transport
             adv.advertiseCapability(OptionNoProgress);
             adv.setDerefTags(true);
             _refs = _db.getAllRefs();
-            adv.send(_refs.Values);
+            adv.send(_refs);
             adv.end();
         }
 

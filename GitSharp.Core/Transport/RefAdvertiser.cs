@@ -40,6 +40,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using GitSharp.Core.RevWalk;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
@@ -134,12 +135,12 @@ namespace GitSharp.Core.Transport
         /// </summary>
         /// <param name="refs">
         /// zero or more refs to format for the client. The collection is
-        /// copied and sorted before display and therefore may appear in
-        /// any order.
+        /// sorted before display if necessary, and therefore may appear
+        /// in any order.
         /// </param>
-        public void send(IEnumerable<Ref> refs)
+        public void send(IDictionary<string, Ref> refs)
         {
-            foreach (Ref r in RefComparator.Sort(refs))
+            foreach (Ref r in getSortedRefs(refs))
             {
                 RevObject obj = parseAnyOrNull(r.ObjectId);
                 if (obj != null)
@@ -154,6 +155,14 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        private IEnumerable<Ref> getSortedRefs(IDictionary<string, Ref> all)
+        {
+            if (all is RefMap
+                    || (all is SortedDictionary<string, Ref>))
+                return all.Values;
+            return RefComparator.Sort(all.Values);
+        }
+        
         /// <summary>
         /// Advertise one object is available using the magic <code>.have</code>.
         /// <para/>

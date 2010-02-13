@@ -171,7 +171,7 @@ namespace GitSharp.Core.Transport
 	        //var w = new StreamWriter(os, Constants.CHARSET);
 	        var w = os;
  
-		    writeString(w, Constants.V2_BUNDLE_SIGNATURE);
+		    writeString(w, TransportBundleConstants.V2_BUNDLE_SIGNATURE);
             writeString(w, "\n");
 
             char[] tmp = new char[Constants.OBJECT_ID_STRING_LENGTH];

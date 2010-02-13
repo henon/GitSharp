@@ -149,6 +149,30 @@ namespace GitSharp.Core.Util
         }
     }
 
+    public class LambdaConverterIterator<TInput, TOutput> : IteratorBase<TOutput>
+    {
+        private readonly IteratorBase<TInput> _iterator;
+        private readonly Func<TInput, TOutput> _converter;
+
+        public LambdaConverterIterator(IteratorBase<TInput> iterator, Func<TInput, TOutput> converter)
+        {
+            _iterator = iterator;
+            _converter = converter;
+        }
+
+        public override bool hasNext()
+        {
+            return _iterator.hasNext();
+        }
+
+        protected override TOutput InnerNext()
+        {
+            TInput entry = _iterator.next();
+            TOutput converted = _converter(entry);
+            return converted;
+        }
+    }
+
     public abstract class IteratorBase<T> : IEnumerator<T>
     {
         private T _current;

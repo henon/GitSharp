@@ -201,10 +201,10 @@ namespace GitSharp.Core
                 id = Id;
             }
 
-            RefUpdate ru = Repository.UpdateRef(Constants.RefsTags + TagName);
+            RefUpdate ru = Repository.UpdateRef(Constants.R_TAGS + TagName);
             ru.NewObjectId = id;
-            ru.SetRefLogMessage("tagged " + TagName, false);
-            if (ru.ForceUpdate() == RefUpdate.RefUpdateResult.LockFailure)
+            ru.setRefLogMessage("tagged " + TagName, false);
+            if (ru.forceUpdate() == RefUpdate.RefUpdateResult.LOCK_FAILURE)
                 throw new ObjectWritingException("Unable to lock tag " + TagName);
         }
 

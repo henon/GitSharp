@@ -42,232 +42,193 @@ using GitSharp.Core.Exceptions;
 
 namespace GitSharp.Core.RevWalk
 {
-	/// <summary>
-	/// Base object type accessed during revision walking.
-	/// </summary>
-	public abstract class RevObject : ObjectId
-	{
-		protected const int PARSED = 1;
+    /// <summary>
+    /// Base object type accessed during revision walking.
+    /// </summary>
+    public abstract class RevObject : ObjectId, IEquatable<RevObject>
+    {
+        protected const int PARSED = 1;
 
-		protected RevObject(AnyObjectId name)
-			: base(name)
-		{
-		}
+        protected RevObject(AnyObjectId name)
+            : base(name)
+        {
+        }
 
-		public int Flags { get; set; }
+        public int Flags { get; set; }
 
-		internal virtual void parseHeaders(RevWalk walk)
-		{
-			loadCanonical(walk);
-			Flags |= PARSED;
-		}
-		
-		internal virtual void parseBody(RevWalk walk)
-		{
-			if ((Flags & PARSED) == 0)
-				parseHeaders(walk);
-		}
-        
-		internal byte[] loadCanonical(RevWalk walk)
-		{
-			ObjectLoader ldr = walk.Repository.OpenObject(walk.WindowCursor, this);
-			if (ldr == null)
-			{
-				throw new MissingObjectException(this, Type);
-			}
-			
-			byte[] data = ldr.CachedBytes;
-			if (Type != ldr.Type)
-			{
-				throw new IncorrectObjectTypeException(this, Type);
-			}
+        internal virtual void parseHeaders(RevWalk walk)
+        {
+            loadCanonical(walk);
+            Flags |= PARSED;
+        }
 
-			return data;
-		}
+        internal virtual void parseBody(RevWalk walk)
+        {
+            if ((Flags & PARSED) == 0)
+                parseHeaders(walk);
+        }
 
-		/// <summary>
-		/// Get Git object type. See <see cref="Constants"/>.
-		/// </summary>
-		/// <returns></returns>
-		public abstract int Type { get; }
+        internal byte[] loadCanonical(RevWalk walk)
+        {
+            ObjectLoader ldr = walk.Repository.OpenObject(walk.WindowCursor, this);
+            if (ldr == null)
+            {
+                throw new MissingObjectException(this, Type);
+            }
 
-		/// <summary>
-		/// Get the name of this object.
-		/// </summary>
-		/// <returns>Unique hash of this object.</returns>
-		public ObjectId getId()
-		{
-			return this;
-		}
+            byte[] data = ldr.CachedBytes;
+            if (Type != ldr.Type)
+            {
+                throw new IncorrectObjectTypeException(this, Type);
+            }
 
-		/// <summary>
-		/// Test to see if the flag has been set on this object.
-		/// </summary>
-		/// <param name="flag">the flag to test.</param>
-		/// <returns>
-		/// true if the flag has been added to this object; false if not.
-		/// </returns>
-		public bool has(RevFlag flag)
-		{
-			return (Flags & flag.Mask) != 0;
-		}
+            return data;
+        }
 
-		/// <summary>
-		/// Test to see if any flag in the set has been set on this object.
-		/// </summary>
-		/// <param name="set">the flags to test.</param>
-		/// <returns>
-		/// true if any flag in the set has been added to this object; false
-		/// if not.
-		/// </returns>
-		public bool hasAny(RevFlagSet set)
-		{
-			return (Flags & set.Mask) != 0;
-		}
+        /// <summary>
+        /// Get Git object type. See <see cref="Constants"/>.
+        /// </summary>
+        /// <returns></returns>
+        public abstract int Type { get; }
 
-		/// <summary>
-		/// Test to see if all flags in the set have been set on this object.
-		/// </summary>
-		/// <param name="set">the flags to test.</param>
-		/// <returns>true if all flags of the set have been added to this object;
-		/// false if some or none have been added.
-		/// </returns>
-		public bool hasAll(RevFlagSet set)
-		{
-			return (Flags & set.Mask) == set.Mask;
-		}
+        /// <summary>
+        /// Get the name of this object.
+        /// </summary>
+        /// <returns>Unique hash of this object.</returns>
+        public ObjectId getId()
+        {
+            return this;
+        }
 
-		/// <summary>
-		/// Add a flag to this object.
-		/// <para />
-		/// If the flag is already set on this object then the method has no effect.
-		/// </summary>
-		/// <param name="flag">
-		/// The flag to mark on this object, for later testing.
-		/// </param>
-		public void add(RevFlag flag)
-		{
-			Flags |= flag.Mask;
-		}
+        public new bool Equals(object obj)
+        {
+            return ReferenceEquals(this, obj as RevObject);
+        }
 
-		/// <summary>
-		/// Add a set of flags to this object.
-		/// </summary>
-		/// <param name="set">
-		/// The set of flags to mark on this object, for later testing.
-		/// </param>
-		public void add(RevFlagSet set)
-		{
-			Flags |= set.Mask;
-		}
+        public bool Equals(RevObject obj)
+        {
+            return ReferenceEquals(this, obj);
+        }
 
-		/// <summary>
-		/// Remove a flag from this object.
-		/// <para />
-		/// If the flag is not set on this object then the method has no effect.
-		/// </summary>
-		/// <param name="flag">
-		/// The flag to remove from this object.
-		/// </param>
-		public void remove(RevFlag flag)
-		{
-			Flags &= ~flag.Mask;
-		}
 
-		/// <summary>
-		/// Remove a set of flags from this object.
-		/// </summary>
-		/// <param name="set">
-		/// The flag to remove from this object.
-		/// </param>
-		public void remove(RevFlagSet set)
-		{
-			Flags &= ~set.Mask;
-		}
+        /// <summary>
+        /// Test to see if the flag has been set on this object.
+        /// </summary>
+        /// <param name="flag">the flag to test.</param>
+        /// <returns>
+        /// true if the flag has been added to this object; false if not.
+        /// </returns>
+        public bool has(RevFlag flag)
+        {
+            return (Flags & flag.Mask) != 0;
+        }
 
-		/// <summary>
-		/// Release as much memory as possible from this object.
-		/// </summary>
-		public virtual void DisposeBody()
-		{
-			// Nothing needs to be done for most objects.
-		}
+        /// <summary>
+        /// Test to see if any flag in the set has been set on this object.
+        /// </summary>
+        /// <param name="set">the flags to test.</param>
+        /// <returns>
+        /// true if any flag in the set has been added to this object; false
+        /// if not.
+        /// </returns>
+        public bool hasAny(RevFlagSet set)
+        {
+            return (Flags & set.Mask) != 0;
+        }
 
-		public override string ToString()
-		{
-			var s = new StringBuilder();
-			s.Append(Constants.typeString(Type));
-			s.Append(' ');
-			s.Append(Name);
-			s.Append(' ');
-			appendCoreFlags(s);
-			return s.ToString();
-		}
+        /// <summary>
+        /// Test to see if all flags in the set have been set on this object.
+        /// </summary>
+        /// <param name="set">the flags to test.</param>
+        /// <returns>true if all flags of the set have been added to this object;
+        /// false if some or none have been added.
+        /// </returns>
+        public bool hasAll(RevFlagSet set)
+        {
+            return (Flags & set.Mask) == set.Mask;
+        }
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="s">
-		/// Buffer to Append a debug description of core RevFlags onto.
-		/// </param>
-		internal void appendCoreFlags(StringBuilder s)
-		{
-			s.Append((Flags & RevWalk.TOPO_DELAY) != 0 ? 'o' : '-');
-			s.Append((Flags & RevWalk.TEMP_MARK) != 0 ? 't' : '-');
-			s.Append((Flags & RevWalk.REWRITE) != 0 ? 'r' : '-');
-			s.Append((Flags & RevWalk.UNINTERESTING) != 0 ? 'u' : '-');
-			s.Append((Flags & RevWalk.SEEN) != 0 ? 's' : '-');
-			s.Append((Flags & RevWalk.PARSED) != 0 ? 'p' : '-');
-		}
+        /// <summary>
+        /// Add a flag to this object.
+        /// <para />
+        /// If the flag is already set on this object then the method has no effect.
+        /// </summary>
+        /// <param name="flag">
+        /// The flag to mark on this object, for later testing.
+        /// </param>
+        public void add(RevFlag flag)
+        {
+            Flags |= flag.Mask;
+        }
 
-		public override bool Equals(AnyObjectId obj)
-		{
-            if (obj.GetType() != typeof(RevObject)) return false;
-			return this == obj;
-		}
+        /// <summary>
+        /// Add a set of flags to this object.
+        /// </summary>
+        /// <param name="set">
+        /// The set of flags to mark on this object, for later testing.
+        /// </param>
+        public void add(RevFlagSet set)
+        {
+            Flags |= set.Mask;
+        }
 
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
+        /// <summary>
+        /// Remove a flag from this object.
+        /// <para />
+        /// If the flag is not set on this object then the method has no effect.
+        /// </summary>
+        /// <param name="flag">
+        /// The flag to remove from this object.
+        /// </param>
+        public void remove(RevFlag flag)
+        {
+            Flags &= ~flag.Mask;
+        }
 
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(null, obj))
-			{
-				return false;
-			}
+        /// <summary>
+        /// Remove a set of flags from this object.
+        /// </summary>
+        /// <param name="set">
+        /// The flag to remove from this object.
+        /// </param>
+        public void remove(RevFlagSet set)
+        {
+            Flags &= ~set.Mask;
+        }
 
-			if (ReferenceEquals(this, obj))
-			{
-				return true;
-			}
-			return Equals(obj as RevObject);
-		}
+        /// <summary>
+        /// Release as much memory as possible from this object.
+        /// </summary>
+        public virtual void DisposeBody()
+        {
+            // Nothing needs to be done for most objects.
+        }
 
-		public bool Equals(RevObject other)
-		{
-			if (ReferenceEquals(null, other))
-			{
-				return false;
-			}
+        public override string ToString()
+        {
+            var s = new StringBuilder();
+            s.Append(Constants.typeString(Type));
+            s.Append(' ');
+            s.Append(Name);
+            s.Append(' ');
+            appendCoreFlags(s);
+            return s.ToString();
+        }
 
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
-
-			return base.Equals(other) && other.Flags == Flags;
-		}
-
-		public static bool operator ==(RevObject left, RevObject right)
-		{
-			return Equals(left, right);
-		}
-
-		public static bool operator !=(RevObject left, RevObject right)
-		{
-			return !Equals(left, right);
-		}
-	}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="s">
+        /// Buffer to Append a debug description of core RevFlags onto.
+        /// </param>
+        internal void appendCoreFlags(StringBuilder s)
+        {
+            s.Append((Flags & RevWalk.TOPO_DELAY) != 0 ? 'o' : '-');
+            s.Append((Flags & RevWalk.TEMP_MARK) != 0 ? 't' : '-');
+            s.Append((Flags & RevWalk.REWRITE) != 0 ? 'r' : '-');
+            s.Append((Flags & RevWalk.UNINTERESTING) != 0 ? 'u' : '-');
+            s.Append((Flags & RevWalk.SEEN) != 0 ? 's' : '-');
+            s.Append((Flags & RevWalk.PARSED) != 0 ? 'p' : '-');
+        }
+    }
 }

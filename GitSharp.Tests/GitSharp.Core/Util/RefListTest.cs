@@ -479,7 +479,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
 
         private static global::GitSharp.Core.Ref newRef(string name)
         {
-            return new global::GitSharp.Core.Ref(global::GitSharp.Core.Ref.Storage.Loose, name, ID);
+            return new Unpeeled(Storage.Loose, name, ID);
         }
     }
 }

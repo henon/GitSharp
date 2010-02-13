@@ -52,58 +52,88 @@ namespace GitSharp.Core
     /// with this instance can alter at any time, if this instance is modified to
     /// represent a different object name.
     /// </summary>
-    public abstract class AnyObjectId :
+    public abstract class AnyObjectId : IEquatable<AnyObjectId>,
 #if !__MonoCS__
  IComparable<ObjectId>,
 #endif
  IComparable
     {
-        public static bool operator ==(AnyObjectId a, AnyObjectId b)
+        public static bool operator ==(AnyObjectId one, AnyObjectId another)
         {
-            if ((object)a == null)
-                return (object)b == null;
+            if (ReferenceEquals(one, another))
+            {
+                return true;
+            }
 
-            if ((object)b == null)
+            if (ReferenceEquals(one, null))
+            {
                 return false;
+            }
 
-            return (a.W2 == b.W2) &&
-                   (a.W3 == b.W3) &&
-                   (a.W4 == b.W4) &&
-                   (a.W5 == b.W5) &&
-                   (a.W1 == b.W1);
+            return one.Equals(another);
         }
 
-        public static bool operator !=(AnyObjectId a, AnyObjectId b)
+        public static bool operator !=(AnyObjectId one, AnyObjectId another)
         {
-            return !(a == b);
+            return !(one == another);
         }
 
+        /// <summary>
+        /// Compare to object identifier byte sequences for equality.
+        /// </summary>
+        /// <param name="firstObjectId">the first identifier to compare. Must not be null.</param>
+        /// <param name="secondObjectId">the second identifier to compare. Must not be null.</param>
+        /// <returns></returns>
         public static bool equals(AnyObjectId firstObjectId, AnyObjectId secondObjectId)
         {
-            if (firstObjectId == secondObjectId) return true;
+            if (ReferenceEquals(firstObjectId, secondObjectId))
+            {
+                return true;
+            }
 
+            // We test word 2 first as odds are someone already used our
+            // word 1 as a hash code, and applying that came up with these
+            // two instances we are comparing for equality. Therefore the
+            // first two words are very likely to be identical. We want to
+            // break away from collisions as quickly as possible.
+            //
             return firstObjectId.W2 == secondObjectId.W2
-                   && firstObjectId.W3 == secondObjectId.W3
-                   && firstObjectId.W4 == secondObjectId.W4
-                   && firstObjectId.W5 == secondObjectId.W5
-                   && firstObjectId.W1 == secondObjectId.W1;
+                    && firstObjectId.W3 == secondObjectId.W3
+                    && firstObjectId.W4 == secondObjectId.W4
+                    && firstObjectId.W5 == secondObjectId.W5
+                    && firstObjectId.W1 == secondObjectId.W1;
+
         }
 
-        public virtual bool Equals(AnyObjectId obj)
+        /// <summary>
+        /// Determine if this ObjectId has exactly the same value as another.
+        /// </summary>
+        /// <param name="other">the other id to compare to. May be null.</param>
+        /// <returns>true only if both ObjectIds have identical bits.</returns>
+        public virtual bool Equals(AnyObjectId other)
         {
-            return (obj != null) ? this == obj : false;
+            if (ReferenceEquals(other, null))
+            {
+                return false;
+            }
+
+            return equals(this, other);
         }
 
         public override bool Equals(object obj)
         {
-			AnyObjectId a = (obj as AnyObjectId);
-            if ( a != null)
+            if (obj is AnyObjectId)
             {
-                return Equals(a);
+                return Equals((AnyObjectId)obj);
             }
+
             return false;
         }
 
+        /// <summary>
+        /// Copy this ObjectId to an output writer in hex format.
+        /// </summary>
+        /// <param name="s">the stream to copy to.</param>
         public void CopyTo(BinaryWriter s)
         {
             s.Write(ToHexByteArray());
@@ -124,6 +154,15 @@ namespace GitSharp.Core
             w.Append(tmp, 0, Constants.OBJECT_ID_STRING_LENGTH);
         }
 
+        /// <summary>
+        /// Copy this ObjectId to an output writer in hex format.
+        /// </summary>
+        /// <param name="tmp">
+        /// temporary char array to buffer construct into before writing.
+        /// Must be at least large enough to hold 2 digits for each byte
+        /// of object id (40 characters or larger).
+        /// </param>
+        /// <param name="w">the stream to copy to.</param>
         public void CopyTo(char[] tmp, StreamWriter w)
         {
             ToHexCharArray(tmp);
@@ -137,6 +176,10 @@ namespace GitSharp.Core
             w.Write(data, 0, data.Length);
         }
 
+        /// <summary>
+        /// Copy this ObjectId to an output writer in hex format.
+        /// </summary>
+        /// <param name="s">the stream to copy to.</param>
         public void copyRawTo(Stream s)
         {
             var buf = new byte[20];
@@ -163,7 +206,7 @@ namespace GitSharp.Core
         }
 
         /// <summary>
-        /// Copy this ObjectId to a byte array.
+        /// Copy this ObjectId to a int array.
         /// </summary>
         /// <param name="b">the buffer to copy to.</param>
         /// <param name="offset">the offset within b to write at.</param>
@@ -194,11 +237,27 @@ namespace GitSharp.Core
             return W2;
         }
 
+        /// <summary>
+        /// Return unique abbreviation (prefix) of this object SHA-1.
+        /// <para/>
+        /// This method is a utility for <code>abbreviate(repo, 8)</code>.
+        /// </summary>
+        /// <param name="repo">repository for checking uniqueness within.</param>
+        /// <returns>SHA-1 abbreviation.</returns>
         public AbbreviatedObjectId Abbreviate(Repository repo)
         {
             return Abbreviate(repo, 8);
         }
 
+        /// <summary>
+        /// Return unique abbreviation (prefix) of this object SHA-1.
+        /// <para/>
+        /// Current implementation is not guaranteeing uniqueness, it just returns
+        /// fixed-length prefix of SHA-1 string.
+        /// </summary>
+        /// <param name="repo">repository for checking uniqueness within.</param>
+        /// <param name="len">minimum length of the abbreviated string.</param>
+        /// <returns>SHA-1 abbreviation.</returns>
         public AbbreviatedObjectId Abbreviate(Repository repo, int len)
         {
             int a = AbbreviatedObjectId.Mask(len, 1, W1);
@@ -211,7 +270,7 @@ namespace GitSharp.Core
 
         protected AnyObjectId(AnyObjectId other)
         {
-            if (other == null)
+            if ((ReferenceEquals(other, null)))
             {
                 throw new ArgumentNullException("other");
             }
@@ -238,6 +297,10 @@ namespace GitSharp.Core
         public int W4 { get; protected set; }
         public int W5 { get; protected set; }
 
+        /// <summary>
+        /// For ObjectIdMap
+        /// </summary>
+        /// <returns>A discriminator usable for a fan-out style map</returns>
         public int GetFirstByte()
         {
             return (byte)(((uint)W1) >> 24); // W1 >>> 24 in java
@@ -245,6 +308,14 @@ namespace GitSharp.Core
 
         #region IComparable<ObjectId> Members
 
+        /// <summary>
+        /// Compare this ObjectId to another and obtain a sort ordering.
+        /// </summary>
+        /// <param name="other">the other id to compare to. Must not be null.</param>
+        /// <returns>
+        /// &lt; 0 if this id comes before other; 0 if this id is equal to
+        /// other; &gt; 0 if this id comes after other.
+        /// </returns>
         public int CompareTo(ObjectId other)
         {
             if (this == other)
@@ -350,16 +421,31 @@ namespace GitSharp.Core
             Hex.FillHexCharArray(dest, 32, W5);
         }
 
+        /// <summary>
+        /// string form of the SHA-1, in lower case hexadecimal.
+        /// </summary>
         public string Name
         {
             get { return new string(ToHexCharArray()); }
         }
 
-        public override string ToString()
+        public override String ToString()
         {
-            return new string(ToHexCharArray());
+            return "AnyObjectId[" + Name + "]";
         }
 
+        /// <summary>
+        /// Obtain an immutable copy of this current object name value.
+        /// <para/>
+        /// Only returns <code>this</code> if this instance is an unsubclassed
+        /// instance of {@link ObjectId}; otherwise a new instance is returned
+        /// holding the same value.
+        /// <para/>
+        /// This method is useful to shed any additional memory that may be tied to
+        /// the subclass, yet retain the unique identity of the object id for future
+        /// lookups within maps and repositories.
+        /// </summary>
+        /// <returns>an immutable copy, using the smallest memory footprint possible.</returns>
         public ObjectId Copy()
         {
             if (GetType() == typeof(ObjectId))
@@ -369,6 +455,17 @@ namespace GitSharp.Core
             return new ObjectId(this);
         }
 
+        /// <summary>
+        /// Obtain an immutable copy of this current object name value.
+        /// <para/>
+        /// See <see cref="Copy"/> if <code>this</code> is a possibly subclassed (but
+        /// immutable) identity and the application needs a lightweight identity
+        /// <i>only</i> reference.
+        /// </summary>
+        /// <returns>
+        /// an immutable copy. May be <code>this</code> if this is already
+        /// an immutable instance.
+        /// </returns>
         public abstract ObjectId ToObjectId();
 
         #region Nested Types
@@ -416,6 +513,5 @@ namespace GitSharp.Core
         }
 
         #endregion
-
     }
 }

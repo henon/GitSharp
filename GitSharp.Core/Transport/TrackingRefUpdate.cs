@@ -61,7 +61,7 @@ namespace GitSharp.Core.Transport
             update = db.UpdateRef(localName);
             update.IsForceUpdate = forceUpdate;
             update.NewObjectId = nv.Copy();
-            update.SetRefLogMessage(msg, true);
+            update.setRefLogMessage(msg, true);
         }
 
         public string LocalName
@@ -98,12 +98,12 @@ namespace GitSharp.Core.Transport
 
         public void Update(RevWalk.RevWalk walk)
         {
-            update.Update(walk);
+            update.update(walk);
         }
 
         public void Delete(RevWalk.RevWalk walk)
         {
-            update.Delete(walk);
+            update.delete(walk);
         }
     }
 

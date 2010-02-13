@@ -58,12 +58,12 @@ namespace GitSharp.Core.Tests.Transport
             Assert.AreEqual(sn + ":" + sn, rs.ToString());
             Assert.AreEqual(rs, new RefSpec(rs.ToString()));
 
-            Core.Ref r = new Core.Ref(Core.Ref.Storage.Loose, sn, null);
+            Core.Ref r = new Unpeeled(Storage.Loose, sn, null);
             Assert.IsTrue(rs.MatchSource(r));
             Assert.IsTrue(rs.MatchDestination(r));
             Assert.AreSame(rs, rs.ExpandFromSource(r));
 
-            r = new Core.Ref(Core.Ref.Storage.Loose, sn + "-and-more", null);
+            r = new Unpeeled(Storage.Loose, sn + "-and-more", null);
             Assert.IsFalse(rs.MatchSource(r));
             Assert.IsFalse(rs.MatchDestination(r));
         }
@@ -94,12 +94,12 @@ namespace GitSharp.Core.Tests.Transport
             Assert.AreEqual("+" + sn + ":" + sn, rs.ToString());
             Assert.AreEqual(rs, new RefSpec(rs.ToString()));
 
-            Core.Ref r = new Core.Ref(Core.Ref.Storage.Loose, sn, null);
+            Core.Ref r = new Unpeeled(Storage.Loose, sn, null);
             Assert.IsTrue(rs.MatchSource(r));
             Assert.IsTrue(rs.MatchDestination(r));
             Assert.AreSame(rs, rs.ExpandFromSource(r));
 
-            r = new Core.Ref(Core.Ref.Storage.Loose, sn + "-and-more", null);
+            r = new Unpeeled(Storage.Loose, sn + "-and-more", null);
             Assert.IsFalse(rs.MatchSource(r));
             Assert.IsFalse(rs.MatchDestination(r));
         }
@@ -116,12 +116,12 @@ namespace GitSharp.Core.Tests.Transport
             Assert.AreEqual(sn, rs.ToString());
             Assert.AreEqual(rs, new RefSpec(rs.ToString()));
 
-            Core.Ref r = new Core.Ref(Core.Ref.Storage.Loose, sn, null);
+            Core.Ref r = new Unpeeled(Storage.Loose, sn, null);
             Assert.IsTrue(rs.MatchSource(r));
             Assert.IsFalse(rs.MatchDestination(r));
             Assert.AreSame(rs, rs.ExpandFromSource(r));
 
-            r = new Core.Ref(Core.Ref.Storage.Loose, sn + "-and-more", null);
+            r = new Unpeeled(Storage.Loose, sn + "-and-more", null);
             Assert.IsFalse(rs.MatchSource(r));
             Assert.IsFalse(rs.MatchDestination(r));
         }
@@ -138,12 +138,12 @@ namespace GitSharp.Core.Tests.Transport
             Assert.AreEqual("+" + sn, rs.ToString());
             Assert.AreEqual(rs, new RefSpec(rs.ToString()));
 
-            Core.Ref r = new Core.Ref(Core.Ref.Storage.Loose, sn, null);
+            Core.Ref r = new Unpeeled(Storage.Loose, sn, null);
             Assert.IsTrue(rs.MatchSource(r));
             Assert.IsFalse(rs.MatchDestination(r));
             Assert.AreSame(rs, rs.ExpandFromSource(r));
 
-            r = new Core.Ref(Core.Ref.Storage.Loose, sn + "-and-more", null);
+            r = new Unpeeled(Storage.Loose, sn + "-and-more", null);
             Assert.IsFalse(rs.MatchSource(r));
             Assert.IsFalse(rs.MatchDestination(r));
         }
@@ -160,12 +160,12 @@ namespace GitSharp.Core.Tests.Transport
             Assert.AreEqual(":" + sn, rs.ToString());
             Assert.AreEqual(rs, new RefSpec(rs.ToString()));
 
-            Core.Ref r = new Core.Ref(Core.Ref.Storage.Loose, sn, null);
+            Core.Ref r = new Unpeeled(Storage.Loose, sn, null);
             Assert.IsFalse(rs.MatchSource(r));
             Assert.IsTrue(rs.MatchDestination(r));
             Assert.AreSame(rs, rs.ExpandFromSource(r));
 
-            r = new Core.Ref(Core.Ref.Storage.Loose, sn + "-and-more", null);
+            r = new Unpeeled(Storage.Loose, sn + "-and-more", null);
             Assert.IsFalse(rs.MatchSource(r));
             Assert.IsFalse(rs.MatchDestination(r));
         }
@@ -186,7 +186,7 @@ namespace GitSharp.Core.Tests.Transport
             Core.Ref r;
             RefSpec expanded;
 
-            r = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", null);
+            r = new Unpeeled(Storage.Loose, "refs/heads/master", null);
             Assert.IsTrue(rs.MatchSource(r));
             Assert.IsFalse(rs.MatchDestination(r));
             expanded = rs.ExpandFromSource(r);
@@ -196,11 +196,11 @@ namespace GitSharp.Core.Tests.Transport
             Assert.AreEqual(r.Name, expanded.Source);
             Assert.AreEqual("refs/remotes/origin/master", expanded.Destination);
 
-            r = new Core.Ref(Core.Ref.Storage.Loose, "refs/remotes/origin/next", null);
+            r = new Unpeeled(Storage.Loose, "refs/remotes/origin/next", null);
             Assert.IsFalse(rs.MatchSource(r));
             Assert.IsTrue(rs.MatchDestination(r));
 
-            r = new Core.Ref(Core.Ref.Storage.Loose, "refs/tags/v1.0", null);
+            r = new Unpeeled(Storage.Loose, "refs/tags/v1.0", null);
             Assert.IsFalse(rs.MatchSource(r));
             Assert.IsFalse(rs.MatchDestination(r));
         }
@@ -299,7 +299,5 @@ namespace GitSharp.Core.Tests.Transport
             Assert.AreEqual(src, r.Source);
             Assert.AreEqual(dst, r.Destination);
         }
-
     }
-
 }

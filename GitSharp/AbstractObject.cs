@@ -78,7 +78,7 @@ namespace GitSharp
 		{
 			get
 			{
-				return _id.ToString();
+				return _id.Name;
 			}
 		}
 

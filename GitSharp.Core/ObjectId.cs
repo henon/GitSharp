@@ -51,7 +51,7 @@ namespace GitSharp.Core
 		static ObjectId()
 		{
 			ZeroId = new ObjectId(0, 0, 0, 0, 0);
-			ZeroIdString = ZeroId.ToString();
+			ZeroIdString = ZeroId.Name;
 		}
 
 		internal ObjectId(int w1, int w2, int w3, int w4, int w5)
@@ -103,7 +103,7 @@ namespace GitSharp.Core
 		///	<returns>The hex string conversion of this id's content.</returns>
 		public static string ToString(ObjectId i)
 		{
-			return i != null ? i.ToString() : ZeroIdString;
+			return i != null ? i.Name : ZeroIdString;
 		}
 
 		/// <summary>

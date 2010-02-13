@@ -30,7 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 /* Wrapper to make creating test data easier. */
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,52 +43,53 @@ using GitSharp.Core.RevWalk;
 using GitSharp.Core.TreeWalk;
 using GitSharp.Core.TreeWalk.Filter;
 using GitSharp.Core.Util;
-using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 using FileMode = GitSharp.Core.FileMode;
 
-public class TestRepository
+namespace GitSharp.Tests.GitSharp.Core.Util
 {
-    private static PersonIdent author;
-
-    private static PersonIdent committer;
-
-    static TestRepository()
+    public class TestRepository
     {
-        MockSystemReader m = new MockSystemReader();
-        long now = m.getCurrentTime();
-        int tz = m.getTimezone(now);
+        private static PersonIdent author;
 
-        String an = "J. Author";
-        String ae = "jauthor@example.com";
-        author = new PersonIdent(an, ae, now, tz);
+        private static PersonIdent committer;
 
-        String cn = "J. Committer";
-        String ce = "jcommitter@example.com";
-        committer = new PersonIdent(cn, ce, now, tz);
-    }
+        static TestRepository()
+        {
+            MockSystemReader m = new MockSystemReader();
+            long now = m.getCurrentTime();
+            int tz = m.getTimezone(now);
 
-    private Repository db;
+            String an = "J. Author";
+            String ae = "jauthor@example.com";
+            author = new PersonIdent(an, ae, now, tz);
 
-    private RevWalk pool;
+            String cn = "J. Committer";
+            String ce = "jcommitter@example.com";
+            committer = new PersonIdent(cn, ce, now, tz);
+        }
 
-    private ObjectWriter writer;
+        private global::GitSharp.Core.Repository db;
 
-    private long now;
+        private RevWalk pool;
 
-    /**
+        private ObjectWriter writer;
+
+        private long now;
+
+        /**
      * Wrap a repository with test building tools.
      *
      * @param db
      *            the test repository to write into.
      * @throws Exception
      */
-    public TestRepository(Repository db)
-        : this(db, new RevWalk(db))
-    {
-    }
+        public TestRepository(global::GitSharp.Core.Repository db)
+            : this(db, new RevWalk(db))
+        {
+        }
 
-    /**
+        /**
      * Wrap a repository with test building tools.
      *
      * @param db
@@ -95,44 +98,44 @@ public class TestRepository
      *            the RevObject pool to use for object lookup.
      * @throws Exception
      */
-    public TestRepository(Repository db, RevWalk rw)
-    {
-        this.db = db;
-        this.pool = rw;
-        this.writer = new ObjectWriter(db);
-        this.now = 1236977987000L;
-    }
+        public TestRepository(global::GitSharp.Core.Repository db, RevWalk rw)
+        {
+            this.db = db;
+            this.pool = rw;
+            this.writer = new ObjectWriter(db);
+            this.now = 1236977987000L;
+        }
 
-    /** @return the repository this helper class operates against. */
-    public Repository getRepository()
-    {
-        return db;
-    }
+        /** @return the repository this helper class operates against. */
+        public global::GitSharp.Core.Repository getRepository()
+        {
+            return db;
+        }
 
-    /** @return get the RevWalk pool all objects are allocated through. */
-    public RevWalk getRevWalk()
-    {
-        return pool;
-    }
+        /** @return get the RevWalk pool all objects are allocated through. */
+        public RevWalk getRevWalk()
+        {
+            return pool;
+        }
 
-    /** @return current time adjusted by {@link #tick(int)}. */
-    public DateTime getClock()
-    {
-        return now.MillisToDateTime();
-    }
+        /** @return current time adjusted by {@link #tick(int)}. */
+        public DateTime getClock()
+        {
+            return now.MillisToDateTime();
+        }
 
-    /**
+        /**
      * Adjust the current time that will used by the next commit.
      *
      * @param secDelta
      *            number of seconds to add to the current time.
      */
-    public void tick(int secDelta)
-    {
-        now += secDelta * 1000L;
-    }
+        public void tick(int secDelta)
+        {
+            now += secDelta * 1000L;
+        }
 
-    /**
+        /**
      * Create a new blob object in the repository.
      *
      * @param content
@@ -140,12 +143,12 @@ public class TestRepository
      * @return reference to the blob.
      * @throws Exception
      */
-    public RevBlob blob(String content)
-    {
-        return blob(content.getBytes("UTF-8"));
-    }
+        public RevBlob blob(String content)
+        {
+            return blob(content.getBytes("UTF-8"));
+        }
 
-    /**
+        /**
      * Create a new blob object in the repository.
      *
      * @param content
@@ -153,12 +156,12 @@ public class TestRepository
      * @return reference to the blob.
      * @throws Exception
      */
-    public RevBlob blob(byte[] content)
-    {
-        return pool.lookupBlob(writer.WriteBlob(content));
-    }
+        public RevBlob blob(byte[] content)
+        {
+            return pool.lookupBlob(writer.WriteBlob(content));
+        }
 
-    /**
+        /**
      * Construct a regular file mode tree entry.
      *
      * @param path
@@ -168,15 +171,15 @@ public class TestRepository
      * @return the entry.
      * @throws Exception
      */
-    public DirCacheEntry file(String path, RevBlob blob)
-    {
-        DirCacheEntry e = new DirCacheEntry(path);
-        e.setFileMode(FileMode.RegularFile);
-        e.setObjectId(blob);
-        return e;
-    }
+        public DirCacheEntry file(String path, RevBlob blob)
+        {
+            DirCacheEntry e = new DirCacheEntry(path);
+            e.setFileMode(FileMode.RegularFile);
+            e.setObjectId(blob);
+            return e;
+        }
 
-    /**
+        /**
      * Construct a tree from a specific listing of file entries.
      *
      * @param entries
@@ -185,17 +188,17 @@ public class TestRepository
      * @return reference to the tree specified by the entry list.
      * @throws Exception
      */
-    public RevTree tree(params DirCacheEntry[] entries)
-    {
-        DirCache dc = DirCache.newInCore();
-        DirCacheBuilder b = dc.builder();
-        foreach (DirCacheEntry e in entries)
-            b.add(e);
-        b.finish();
-        return pool.lookupTree(dc.writeTree(writer));
-    }
+        public RevTree tree(params DirCacheEntry[] entries)
+        {
+            DirCache dc = DirCache.newInCore();
+            DirCacheBuilder b = dc.builder();
+            foreach (DirCacheEntry e in entries)
+                b.add(e);
+            b.finish();
+            return pool.lookupTree(dc.writeTree(writer));
+        }
 
-    /**
+        /**
      * Lookup an entry stored in a tree, failing if not present.
      *
      * @param tree
@@ -207,27 +210,27 @@ public class TestRepository
      *             if the path does not exist in the given tree.
      * @throws Exception
      */
-    public RevObject get(RevTree tree, String path)
-    {
-        TreeWalk tw = new TreeWalk(db);
-        tw.setFilter(PathFilterGroup.createFromStrings(new[] { path }));
-        tw.reset(tree);
-        while (tw.next())
+        public RevObject get(RevTree tree, String path)
         {
-            if (tw.isSubtree() && !path.Equals(tw.getPathString()))
+            TreeWalk tw = new TreeWalk(db);
+            tw.setFilter(PathFilterGroup.createFromStrings(new[] { path }));
+            tw.reset(tree);
+            while (tw.next())
             {
-                tw.enterSubtree();
-                continue;
+                if (tw.isSubtree() && !path.Equals(tw.getPathString()))
+                {
+                    tw.enterSubtree();
+                    continue;
+                }
+                ObjectId entid = tw.getObjectId(0);
+                FileMode entmode = tw.getFileMode(0);
+                return pool.lookupAny(entid, (int)entmode.ObjectType);
             }
-            ObjectId entid = tw.getObjectId(0);
-            FileMode entmode = tw.getFileMode(0);
-            return pool.lookupAny(entid, (int)entmode.ObjectType);
+            Assert.Fail("Can't find " + path + " in tree " + tree.Name);
+            return null; // never reached.
         }
-        Assert.Fail("Can't find " + path + " in tree " + tree.Name);
-        return null; // never reached.
-    }
 
-    /*
+        /*
      * Create a new commit.
      * <p>
      * See {@link #commit(int, RevTree, RevCommit...)}. The tree is the empty
@@ -238,12 +241,12 @@ public class TestRepository
      * @return the new commit.
      * @throws Exception
      */
-    public RevCommit commit(params RevCommit[] parents)
-    {
-        return commit(1, tree(), parents);
-    }
+        public RevCommit commit(params RevCommit[] parents)
+        {
+            return commit(1, tree(), parents);
+        }
 
-    /*
+        /*
      * Create a new commit.
      * <p>
      * See {@link #commit(int, RevTree, RevCommit...)}.
@@ -255,12 +258,12 @@ public class TestRepository
      * @return the new commit.
      * @throws Exception
      */
-    public RevCommit commit(RevTree tree, params RevCommit[] parents)
-    {
-        return commit(1, tree, parents);
-    }
+        public RevCommit commit(RevTree tree, params RevCommit[] parents)
+        {
+            return commit(1, tree, parents);
+        }
 
-    /*
+        /*
      * Create a new commit.
      * <p>
      * See {@link #commit(int, RevTree, RevCommit...)}. The tree is the empty
@@ -273,12 +276,12 @@ public class TestRepository
      * @return the new commit.
      * @throws Exception
      */
-    public RevCommit commit(int secDelta, params RevCommit[] parents)
-    {
-        return commit(secDelta, tree(), parents);
-    }
+        public RevCommit commit(int secDelta, params RevCommit[] parents)
+        {
+            return commit(secDelta, tree(), parents);
+        }
 
-    /*
+        /*
      * Create a new commit.
      * <p>
      * The author and committer identities are stored using the current
@@ -294,27 +297,27 @@ public class TestRepository
      * @return the new commit.
      * @throws Exception
      */
-    public RevCommit commit(int secDelta, RevTree tree,
-            params RevCommit[] parents)
-    {
-        tick(secDelta);
+        public RevCommit commit(int secDelta, RevTree tree,
+                                params RevCommit[] parents)
+        {
+            tick(secDelta);
 
-        Commit c = new Commit(db);
-        c.TreeId = (tree);
-        c.ParentIds = (parents);
-        c.Author = (new PersonIdent(author, now.MillisToDateTime()));
-        c.Committer = (new PersonIdent(committer, now.MillisToDateTime()));
-        c.Message = ("");
-        return pool.lookupCommit(writer.WriteCommit(c));
-    }
+            global::GitSharp.Core.Commit c = new global::GitSharp.Core.Commit(db);
+            c.TreeId = (tree);
+            c.ParentIds = (parents);
+            c.Author = (new PersonIdent(author, now.MillisToDateTime()));
+            c.Committer = (new PersonIdent(committer, now.MillisToDateTime()));
+            c.Message = ("");
+            return pool.lookupCommit(writer.WriteCommit(c));
+        }
 
-    /* @return a new commit builder. */
-    public CommitBuilder commit()
-    {
-        return new CommitBuilder(this);
-    }
+        /* @return a new commit builder. */
+        public CommitBuilder commit()
+        {
+            return new CommitBuilder(this);
+        }
 
-    /*
+        /*
      * Construct an annotated tag object pointing at another object.
      * <p>
      * The tagger is the committer identity, at the current time as specified by
@@ -330,18 +333,18 @@ public class TestRepository
      * @return the annotated tag object.
      * @throws Exception
      */
-    public RevTag tag(String name, RevObject dst)
-    {
-        Tag t = new Tag(db);
-        t.TagType = (Constants.typeString(dst.Type));
-        t.Id = (dst.ToObjectId());
-        t.TagName = (name);
-        t.Tagger = (new PersonIdent(committer, now.MillisToDateTime()));
-        t.Message = ("");
-        return (RevTag)pool.lookupAny(writer.WriteTag(t), Constants.OBJ_TAG);
-    }
+        public RevTag tag(String name, RevObject dst)
+        {
+            global::GitSharp.Core.Tag t = new global::GitSharp.Core.Tag(db);
+            t.TagType = (Constants.typeString(dst.Type));
+            t.Id = (dst.ToObjectId());
+            t.TagName = (name);
+            t.Tagger = (new PersonIdent(committer, now.MillisToDateTime()));
+            t.Message = ("");
+            return (RevTag)pool.lookupAny(writer.WriteTag(t), Constants.OBJ_TAG);
+        }
 
-    /**
+        /**
      * Update a reference to point to an object.
      *
      * @param ref
@@ -355,12 +358,12 @@ public class TestRepository
      * @return the target object.
      * @throws Exception
      */
-    public RevCommit update(String @ref, CommitBuilder to)
-    {
-        return update(@ref, to.create());
-    }
+        public RevCommit update(String @ref, CommitBuilder to)
+        {
+            return update(@ref, to.create());
+        }
 
-    /*
+        /*
      * Update a reference to point to an object.
      *
      * @param <T>
@@ -376,84 +379,84 @@ public class TestRepository
      * @return the target object.
      * @throws Exception
      */
-    public T update<T>(String @ref, T obj) where T : ObjectId
-    {
-        if (Constants.HEAD.Equals(@ref))
+        public T update<T>(String @ref, T obj) where T : ObjectId
         {
-        }
-        else if ("FETCH_HEAD".Equals(@ref))
-        {
-        }
-        else if ("MERGE_HEAD".Equals(@ref))
-        {
-        }
-        else if (@ref.StartsWith(Constants.R_REFS))
-        {
-        }
-        else
-            @ref = Constants.R_HEADS + @ref;
-
-        RefUpdate u = db.UpdateRef(@ref);
-        u.NewObjectId = (obj);
-        switch (u.ForceUpdate())
-        {
-            case RefUpdate.RefUpdateResult.FastForward:
-            case RefUpdate.RefUpdateResult.Forced:
-            case RefUpdate.RefUpdateResult.New:
-            case RefUpdate.RefUpdateResult.NoChange:
-                updateServerInfo();
-                return obj;
-
-            default:
-                throw new IOException("Cannot write " + @ref + " " + u.Result);
-        }
-    }
-
-    public class MockRefWriter : RefWriter
-    {
-        private readonly Repository _db;
-
-        public MockRefWriter(Repository db, IEnumerable<Ref> refs)
-            : base(refs)
-        {
-            _db = db;
-        }
-
-        protected override void writeFile(string file, byte[] content)
-        {
-            FileInfo p = PathUtil.CombineFilePath(_db.Directory, file);
-            LockFile lck = new LockFile(p);
-            if (!lck.Lock())
-                throw new ObjectWritingException("Can't write " + p);
-            try
+            if (Constants.HEAD.Equals(@ref))
             {
-                lck.Write(content);
             }
-            catch (IOException ioe)
+            else if ("FETCH_HEAD".Equals(@ref))
             {
-                throw new ObjectWritingException("Can't write " + p);
             }
-            if (!lck.Commit())
-                throw new ObjectWritingException("Can't write " + p);
-        }
-    }
+            else if ("MERGE_HEAD".Equals(@ref))
+            {
+            }
+            else if (@ref.StartsWith(Constants.R_REFS))
+            {
+            }
+            else
+                @ref = Constants.R_HEADS + @ref;
 
-    /*
+            RefUpdate u = db.UpdateRef(@ref);
+            u.NewObjectId = (obj);
+            switch (u.forceUpdate())
+            {
+                case RefUpdate.RefUpdateResult.FAST_FORWARD:
+                case RefUpdate.RefUpdateResult.FORCED:
+                case RefUpdate.RefUpdateResult.NEW:
+                case RefUpdate.RefUpdateResult.NO_CHANGE:
+                    updateServerInfo();
+                    return obj;
+
+                default:
+                    throw new IOException("Cannot write " + @ref + " " + u.Result);
+            }
+        }
+
+        public class MockRefWriter : RefWriter
+        {
+            private readonly global::GitSharp.Core.Repository _db;
+
+            public MockRefWriter(global::GitSharp.Core.Repository db, IEnumerable<global::GitSharp.Core.Ref> refs)
+                : base(refs)
+            {
+                _db = db;
+            }
+
+            protected override void writeFile(string file, byte[] content)
+            {
+                FileInfo p = PathUtil.CombineFilePath(_db.Directory, file);
+                LockFile lck = new LockFile(p);
+                if (!lck.Lock())
+                    throw new ObjectWritingException("Can't write " + p);
+                try
+                {
+                    lck.Write(content);
+                }
+                catch (IOException ioe)
+                {
+                    throw new ObjectWritingException("Can't write " + p);
+                }
+                if (!lck.Commit())
+                    throw new ObjectWritingException("Can't write " + p);
+            }
+        }
+
+        /*
      * Update the dumb client server info files.
      *
      * @throws Exception
      */
-    public void updateServerInfo()
-    {
-        if (db.ObjectDatabase is ObjectDirectory)
+        public void updateServerInfo()
         {
-            RefWriter rw = new MockRefWriter(db, db.getAllRefs().Values);
-            rw.writePackedRefs();
-            rw.writeInfoRefs();
+            if (db.ObjectDatabase is ObjectDirectory)
+            {
+                RefWriter rw = new MockRefWriter(db, db.getAllRefs().Values);
+                rw.writePackedRefs();
+                rw.writeInfoRefs();
+            }
         }
-    }
 
-    /*
+        /*
      * Ensure the body of the given object has been parsed.
      *
      * @param <T>
@@ -464,13 +467,13 @@ public class TestRepository
      * @return {@code object}
      * @throws Exception
      */
-    public T parseBody<T>(T @object) where T : RevObject
-    {
-        pool.parseBody(@object);
-        return @object;
-    }
+        public T parseBody<T>(T @object) where T : RevObject
+        {
+            pool.parseBody(@object);
+            return @object;
+        }
 
-    /*
+        /*
      * Create a new branch builder for this repository.
      *
      * @param ref
@@ -479,32 +482,32 @@ public class TestRepository
      *            be added.
      * @return builder for the named branch.
      */
-    public BranchBuilder branch(String @ref)
-    {
-        if (Constants.HEAD.Equals(@ref))
+        public BranchBuilder branch(String @ref)
         {
-        }
-        else if (@ref.StartsWith(Constants.R_REFS))
-        {
-        }
-        else
-            @ref = Constants.R_HEADS + @ref;
-        return new BranchBuilder(this, @ref);
-    }
-
-    /** Helper to build a branch with one or more commits */
-    public class BranchBuilder
-    {
-        private readonly TestRepository _testRepository;
-        public String @ref;
-
-        public BranchBuilder(TestRepository testRepository, String @ref)
-        {
-            _testRepository = testRepository;
-            this.@ref = @ref;
+            if (Constants.HEAD.Equals(@ref))
+            {
+            }
+            else if (@ref.StartsWith(Constants.R_REFS))
+            {
+            }
+            else
+                @ref = Constants.R_HEADS + @ref;
+            return new BranchBuilder(this, @ref);
         }
 
-        /**
+        /** Helper to build a branch with one or more commits */
+        public class BranchBuilder
+        {
+            private readonly TestRepository _testRepository;
+            public String @ref;
+
+            public BranchBuilder(TestRepository testRepository, String @ref)
+            {
+                _testRepository = testRepository;
+                this.@ref = @ref;
+            }
+
+            /**
          * @return construct a new commit builder that updates this branch. If
          *         the branch already exists, the commit builder will have its
          *         first parent as the current commit and its tree will be
@@ -512,185 +515,188 @@ public class TestRepository
          * @throws Exception
          *             the commit builder can't read the current branch state
          */
-        public CommitBuilder commit()
-        {
-            return new CommitBuilder(_testRepository);
-        }
-
-        /**
-         * Forcefully update this branch to a particular commit.
-         *
-         * @param to
-         *            the commit to update to.
-         * @return {@code to}.
-         * @throws Exception
-         */
-        public RevCommit update(CommitBuilder to)
-        {
-            return update(to.create());
-        }
-
-        /**
-         * Forcefully update this branch to a particular commit.
-         *
-         * @param to
-         *            the commit to update to.
-         * @return {@code to}.
-         * @throws Exception
-         */
-        public RevCommit update(RevCommit to)
-        {
-            return _testRepository.update(@ref, to);
-        }
-    }
-
-    /** Helper to generate a commit. */
-    public class CommitBuilder
-    {
-        private readonly TestRepository _testRepository;
-        private BranchBuilder branch;
-
-        private DirCache tree = DirCache.newInCore();
-
-        private List<RevCommit> parents = new List<RevCommit>();
-
-        private int _tick = 1;
-
-        private String _message = "";
-
-        private RevCommit self;
-
-        public CommitBuilder(TestRepository testRepository)
-        {
-            _testRepository = testRepository;
-            branch = null;
-        }
-
-        CommitBuilder(TestRepository testRepository, BranchBuilder b)
-        {
-            _testRepository = testRepository;
-            branch = b;
-
-            Ref @ref = _testRepository.db.getRef(branch.@ref);
-            if (@ref != null)
+            public CommitBuilder commit()
             {
-                parent(_testRepository.pool.parseCommit(@ref.ObjectId));
+                return new CommitBuilder(_testRepository);
+            }
+
+            /**
+         * Forcefully update this branch to a particular commit.
+         *
+         * @param to
+         *            the commit to update to.
+         * @return {@code to}.
+         * @throws Exception
+         */
+            public RevCommit update(CommitBuilder to)
+            {
+                return update(to.create());
+            }
+
+            /**
+         * Forcefully update this branch to a particular commit.
+         *
+         * @param to
+         *            the commit to update to.
+         * @return {@code to}.
+         * @throws Exception
+         */
+            public RevCommit update(RevCommit to)
+            {
+                return _testRepository.update(@ref, to);
             }
         }
 
-        CommitBuilder(TestRepository testRepository, CommitBuilder prior)
+        /** Helper to generate a commit. */
+        public class CommitBuilder
         {
-            _testRepository = testRepository;
-            branch = prior.branch;
+            private readonly TestRepository _testRepository;
+            private BranchBuilder branch;
 
-            DirCacheBuilder b = tree.builder();
-            for (int i = 0; i < prior.tree.getEntryCount(); i++)
-                b.add(prior.tree.getEntry(i));
-            b.finish();
+            private DirCache tree = DirCache.newInCore();
 
-            parents.Add(prior.create());
-        }
+            private List<RevCommit> parents = new List<RevCommit>();
 
-        public CommitBuilder parent(RevCommit p)
-        {
-            if (parents.isEmpty())
+            private int _tick = 1;
+
+            private String _message = "";
+
+            private RevCommit self;
+
+            public CommitBuilder(TestRepository testRepository)
             {
+                _testRepository = testRepository;
+                branch = null;
+            }
+
+            CommitBuilder(TestRepository testRepository, BranchBuilder b)
+            {
+                _testRepository = testRepository;
+                branch = b;
+
+                global::GitSharp.Core.Ref @ref = _testRepository.db.getRef(branch.@ref);
+                if (@ref != null)
+                {
+                    parent(_testRepository.pool.parseCommit(@ref.ObjectId));
+                }
+            }
+
+            CommitBuilder(TestRepository testRepository, CommitBuilder prior)
+            {
+                _testRepository = testRepository;
+                branch = prior.branch;
+
                 DirCacheBuilder b = tree.builder();
-                _testRepository.parseBody(p);
-                b.addTree(new byte[0], DirCacheEntry.STAGE_0, _testRepository.db, p.Tree);
+                for (int i = 0; i < prior.tree.getEntryCount(); i++)
+                    b.add(prior.tree.getEntry(i));
                 b.finish();
+
+                parents.Add(prior.create());
             }
-            parents.Add(p);
-            return this;
-        }
 
-        public CommitBuilder noParents()
-        {
-            parents.Clear();
-            return this;
-        }
-
-        public CommitBuilder noFiles()
-        {
-            tree.clear();
-            return this;
-        }
-
-        public CommitBuilder add(String path, String content)
-        {
-            return add(path, _testRepository.blob(content));
-        }
-
-        public class MockPathEdit : DirCacheEditor.PathEdit
-        {
-            private readonly RevBlob _id;
-
-            public MockPathEdit(RevBlob id, string entryPath)
-                : base(entryPath)
+            public CommitBuilder parent(RevCommit p)
             {
-                _id = id;
+                if (parents.isEmpty())
+                {
+                    DirCacheBuilder b = tree.builder();
+                    _testRepository.parseBody(p);
+                    b.addTree(new byte[0], DirCacheEntry.STAGE_0, _testRepository.db, p.Tree);
+                    b.finish();
+                }
+                parents.Add(p);
+                return this;
             }
 
-            public override void Apply(DirCacheEntry ent)
+            public CommitBuilder noParents()
             {
-                ent.setFileMode(FileMode.RegularFile);
-                ent.setObjectId(_id);
+                parents.Clear();
+                return this;
             }
-        }
 
-        public CommitBuilder add(String path, RevBlob id)
-        {
-            DirCacheEditor e = tree.editor();
-            e.add(new MockPathEdit(id, path));
-            e.finish();
-            return this;
-        }
-
-        public CommitBuilder rm(String path)
-        {
-            DirCacheEditor e = tree.editor();
-            e.add(new DirCacheEditor.DeletePath(path));
-            e.add(new DirCacheEditor.DeleteTree(path));
-            e.finish();
-            return this;
-        }
-
-        public CommitBuilder message(String m)
-        {
-            _message = m;
-            return this;
-        }
-
-        public CommitBuilder tick(int secs)
-        {
-            _tick = secs;
-            return this;
-        }
-
-        public RevCommit create()
-        {
-            if (self == null)
+            public CommitBuilder noFiles()
             {
-                _testRepository.tick(_tick);
-
-                Commit c = new Commit(_testRepository.db);
-                c.TreeId = (_testRepository.pool.lookupTree(tree.writeTree(_testRepository.writer)));
-                c.ParentIds = (parents.ToArray());
-                c.Author = (new PersonIdent(author, _testRepository.now.MillisToDateTime()));
-                c.Committer = (new PersonIdent(committer, _testRepository.now.MillisToDateTime()));
-                c.Message = (_message);
-
-                self = _testRepository.pool.lookupCommit(_testRepository.writer.WriteCommit((c)));
-
-                if (branch != null)
-                    branch.update(self);
+                tree.clear();
+                return this;
             }
-            return self;
-        }
 
-        public CommitBuilder child()
-        {
-            return new CommitBuilder(_testRepository, this);
+            public CommitBuilder add(String path, String content)
+            {
+                return add(path, _testRepository.blob(content));
+            }
+
+            public class MockPathEdit : DirCacheEditor.PathEdit
+            {
+                private readonly RevBlob _id;
+
+                public MockPathEdit(RevBlob id, string entryPath)
+                    : base(entryPath)
+                {
+                    _id = id;
+                }
+
+                public override void Apply(DirCacheEntry ent)
+                {
+                    ent.setFileMode(FileMode.RegularFile);
+                    ent.setObjectId(_id);
+                }
+            }
+
+            public CommitBuilder add(String path, RevBlob id)
+            {
+                DirCacheEditor e = tree.editor();
+                e.add(new MockPathEdit(id, path));
+                e.finish();
+                return this;
+            }
+
+            public CommitBuilder rm(String path)
+            {
+                DirCacheEditor e = tree.editor();
+                e.add(new DirCacheEditor.DeletePath(path));
+                e.add(new DirCacheEditor.DeleteTree(path));
+                e.finish();
+                return this;
+            }
+
+            public CommitBuilder message(String m)
+            {
+                _message = m;
+                return this;
+            }
+
+            public CommitBuilder tick(int secs)
+            {
+                _tick = secs;
+                return this;
+            }
+
+            public RevCommit create()
+            {
+                if (self == null)
+                {
+                    _testRepository.tick(_tick);
+
+                    global::GitSharp.Core.Commit c = new global::GitSharp.Core.Commit(_testRepository.db);
+                    c.TreeId = (_testRepository.pool.lookupTree(tree.writeTree(_testRepository.writer)));
+                    c.ParentIds = (parents.ToArray());
+                    c.Author = (new PersonIdent(author, _testRepository.now.MillisToDateTime()));
+                    c.Committer = (new PersonIdent(committer, _testRepository.now.MillisToDateTime()));
+                    c.Message = (_message);
+
+                    self = _testRepository.pool.lookupCommit(_testRepository.writer.WriteCommit((c)));
+
+                    if (branch != null)
+                        branch.update(self);
+                }
+                return self;
+            }
+
+            public CommitBuilder child()
+            {
+                return new CommitBuilder(_testRepository, this);
+            }
         }
     }
 }
+
+

@@ -280,7 +280,7 @@ namespace GitSharp
             GitSharp.Core.Commit commit = repo.MapCommit(branch.ObjectId);
             RefUpdate u = repo.UpdateRef(Constants.HEAD);
             u.NewObjectId = commit.CommitId;
-            u.ForceUpdate();
+            u.forceUpdate();
             GitIndex index = new GitIndex(repo);
             GitSharp.Core.Tree tree = commit.TreeEntry;
             WorkDirCheckout co = new WorkDirCheckout(repo, repo.WorkingDirectory, index, tree);

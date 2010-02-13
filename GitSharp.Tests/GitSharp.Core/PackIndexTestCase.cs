@@ -36,12 +36,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Core;
+using GitSharp.Core.Tests;
 using NUnit.Framework;
 
-namespace GitSharp.Core.Tests
+namespace GitSharp.Tests.GitSharp.Core
 {
     public abstract class PackIndexTestCase : RepositoryTestCase
     {
@@ -97,21 +99,21 @@ namespace GitSharp.Core.Tests
         {
             IEnumerator<PackIndex.MutableEntry> iter = smallIdx.GetEnumerator();
             iter.MoveNext();
-            Assert.AreEqual("4b825dc642cb6eb9a060e54bf8d69288fbee4904", iter.Current.ToString());
+            Assert.AreEqual("4b825dc642cb6eb9a060e54bf8d69288fbee4904", iter.Current.Name);
             iter.MoveNext();
-            Assert.AreEqual("540a36d136cf413e4b064c2b0e0a4db60f77feab", iter.Current.ToString());
+            Assert.AreEqual("540a36d136cf413e4b064c2b0e0a4db60f77feab", iter.Current.Name);
             iter.MoveNext();
-            Assert.AreEqual("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259", iter.Current.ToString());
+            Assert.AreEqual("5b6e7c66c276e7610d4a73c70ec1a1f7c1003259", iter.Current.Name);
             iter.MoveNext();
-            Assert.AreEqual("6ff87c4664981e4397625791c8ea3bbb5f2279a3", iter.Current.ToString());
+            Assert.AreEqual("6ff87c4664981e4397625791c8ea3bbb5f2279a3", iter.Current.Name);
             iter.MoveNext();
-            Assert.AreEqual("82c6b885ff600be425b4ea96dee75dca255b69e7", iter.Current.ToString());
+            Assert.AreEqual("82c6b885ff600be425b4ea96dee75dca255b69e7", iter.Current.Name);
             iter.MoveNext();
-            Assert.AreEqual("902d5476fa249b7abc9d84c611577a81381f0327", iter.Current.ToString());
+            Assert.AreEqual("902d5476fa249b7abc9d84c611577a81381f0327", iter.Current.Name);
             iter.MoveNext();
-            Assert.AreEqual("aabf2ffaec9b497f0950352b3e582d73035c2035", iter.Current.ToString());
+            Assert.AreEqual("aabf2ffaec9b497f0950352b3e582d73035c2035", iter.Current.Name);
             iter.MoveNext();
-            Assert.AreEqual("c59759f143fb1fe21c197981df75a7ee00290799", iter.Current.ToString());
+            Assert.AreEqual("c59759f143fb1fe21c197981df75a7ee00290799", iter.Current.Name);
             Assert.IsFalse(iter.MoveNext());
         }
 
@@ -149,11 +151,11 @@ namespace GitSharp.Core.Tests
             }
 
             iter.MoveNext();
-            Assert.AreEqual("1004d0d7ac26fbf63050a234c9b88a46075719d3", iter.Current.ToString()); // same level-1
+            Assert.AreEqual("1004d0d7ac26fbf63050a234c9b88a46075719d3", iter.Current.Name); // same level-1
             iter.MoveNext();
-            Assert.AreEqual("10da5895682013006950e7da534b705252b03be6", iter.Current.ToString()); // same level-1
+            Assert.AreEqual("10da5895682013006950e7da534b705252b03be6", iter.Current.Name); // same level-1
             iter.MoveNext();
-            Assert.AreEqual("1203b03dc816ccbb67773f28b3c19318654b0bc8", iter.Current.ToString());
+            Assert.AreEqual("1203b03dc816ccbb67773f28b3c19318654b0bc8", iter.Current.Name);
         }
     }
 }

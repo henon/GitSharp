@@ -294,7 +294,7 @@ namespace GitSharp.Core.Transport
             try
             {
                 _dest.writeRef(u.RemoteName, u.NewObjectId);
-                _newRefs.Add(u.RemoteName, new Ref(Ref.Storage.Loose, u.RemoteName, u.NewObjectId));
+                _newRefs.Add(u.RemoteName, new Unpeeled(Storage.Loose, u.RemoteName, u.NewObjectId));
                 u.Status = RemoteRefUpdate.UpdateStatus.OK;
             }
             catch (IOException e)

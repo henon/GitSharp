@@ -1,8 +1,5 @@
 /*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
- * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
  * All rights reserved.
  *
@@ -40,576 +37,595 @@
 
 using System;
 using System.IO;
-using GitSharp.Core.RevWalk;
 using GitSharp.Core.Exceptions;
-using GitSharp.Core.Util;
+using GitSharp.Core.RevWalk;
 
 namespace GitSharp.Core
 {
-	public class RefUpdate
-	{
-		[Serializable]
-		public enum RefUpdateResult
-		{
-			/// <summary>
-			/// The ref update/Delete has not been attempted by the caller.
-			/// </summary>
-			NotAttempted,
-
-			/// <summary>
-			/// The ref could not be locked for update/Delete.
-			/// This is generally a transient failure and is usually caused by
-			/// another process trying to access the ref at the same time as this
-			/// process was trying to update it. It is possible a future operation
-			/// will be successful.
-			/// </summary>
-			/// 
-
-			LockFailure,
-			/// <summary>
-			/// Same value already stored.
-			/// 
-			/// Both the old value and the new value are identical. No change was
-			/// necessary for an update. For Delete the branch is removed.
-			/// </summary>
-			NoChange,
-
-			/// <summary>
-			/// The ref was created locally for an update, but ignored for Delete.
-			/// <para />
-			/// The ref did not exist when the update started, but it was created
-			/// successfully with the new value.
-			/// </summary>
-			New,
-
-			/// <summary>
-			/// The ref had to be forcefully updated/deleted.
-			/// <para />
-			/// The ref already existed but its old value was not fully merged into
-			/// the new value. The configuration permitted a forced update to take
-			/// place, so ref now contains the new value. History associated with the
-			/// objects not merged may no longer be reachable.
-			/// </summary>
-			Forced,
-
-			/// <summary>
-			/// The ref was updated/deleted in a fast-forward way.
-			/// <para />
-			/// The tracking ref already existed and its old value was fully merged
-			/// into the new value. No history was made unreachable.
-			/// </summary>
-			FastForward,
-
-			/// <summary>
-			/// Not a fast-forward and not stored.
-			/// <para />
-			/// The tracking ref already existed but its old value was not fully
-			/// merged into the new value. The configuration did not allow a forced
-			/// update/Delete to take place, so ref still contains the old value. No
-			/// previous history was lost.
-			/// </summary>
-			Rejected,
-
-			/// <summary>
-			/// Rejected because trying to Delete the current branch.
-			/// <para>
-			/// Has no meaning for update.
-			/// </para>
-			/// </summary>
-			RejectedCurrentBranch,
-
-			/// <summary>
-			/// The ref was probably not updated/deleted because of I/O error.
-			/// <para />
-			/// Unexpected I/O error occurred when writing new ref. Such error may
-			/// result in uncertain state, but most probably ref was not updated.
-			/// <para />
-			/// This kind of error doesn't include <see cref="LockFailure"/>, 
-			/// which is a different case.
-			/// </summary>
-			IOFailure,
-
-			/// <summary>
-			/// The ref was renamed from another name
-			/// </summary>
-			Renamed
-		}
-
-		// Repository the ref is stored in.
-		private readonly RefDatabase _db;
-
-		// Location of the loose file holding the value of this ref.
-		private readonly FileInfo _looseFile;
-
-		private readonly Ref _ref;
-
-		// New value the caller wants this ref to have.
-		private ObjectId _newValue;
-
-		// Message the caller wants included in the reflog.
-		private string _refLogMessage;
-
-		// Should the Result value be appended to the log message.
-		private bool _refLogIncludeResult;
-
-		// If non-null, the value that the old object id must have to continue.
-		private ObjectId _expValue;
-
-		public RefUpdate(RefDatabase refDb, Ref r, FileInfo f)
-		{
-			_db = refDb;
-			_ref = r;
-			OldObjectId = r.ObjectId;
-			_looseFile = f;
-			_refLogMessage = string.Empty;
-			Result = RefUpdateResult.NotAttempted;
-		}
-
-		/// <summary>
-		/// Gets the repository the updated ref resides in
-		/// </summary>
-		public Repository Repository
-		{
-			get { return _db.Repository; }
-		}
-
-		/// <summary>
-		/// Gets the name of the ref this update will operate on.
-		/// </summary>
-		public string Name
-		{
-			get { return _ref.Name; }
-		}
-
-		/// <summary>
-        /// Get the requested name of the ref thit update will operate on
-		/// </summary>
-		public string OriginalName
-		{
-			get { return _ref.OriginalName; }
-		}
-
-		/// <summary>
-		/// Gets the new value the ref will be (or was) updated to.
-		/// </summary>
-		public ObjectId NewObjectId
-		{
-			get { return _newValue; }
-			set { _newValue = value.Copy(); }
-		}
-
-		/// <summary>
-		/// Gets the expected value of the ref after the lock is taken, but before
-		/// update occurs. Null to avoid the compare and swap test. Use
-		/// <see cref="ObjectId.ZeroId"/> to indicate expectation of a
-		/// non-existant ref.
-		/// </summary>
-		public ObjectId ExpectedOldObjectId
-		{
-			get { return _expValue; }
-			set { _expValue = value != null ? value.ToObjectId() : null; }
-		}
-
-		/// <summary>
-		/// If this update wants to forcefully change the ref.
-		/// </summary>
-		public bool IsForceUpdate { get; set; }
-
-		/// <summary>
-		/// Gets the identity of the user making the change in the reflog.
-		/// </summary>
-		public PersonIdent RefLogIdent { get; set; }
-
-		/// <summary>
-		/// The old value of the ref, prior to the update being attempted.
-		/// <para>
-		/// This value may differ before and after the update method. Initially it is
-		/// populated with the value of the ref before the lock is taken, but the old
-		/// value may change if someone else modified the ref between the time we
-		/// last read it and when the ref was locked for update.
-		/// </para>
-		/// </summary>
-		public ObjectId OldObjectId { get; private set; }
-
-		/// <summary>
-		/// Gets the status of this update.
-		/// </summary>
-		public RefUpdateResult Result { get; private set; }
-
-		public string GetRefLogMessage()
-		{
-			return _refLogMessage;
-		}
-
-		public void SetRefLogMessage(string msg, bool appendStatus)
-		{
-			if (string.IsNullOrEmpty(msg))
-			{
-				if (appendStatus)
-				{
-					_refLogMessage = string.Empty;
-					_refLogIncludeResult = true;
-				}
-				else
-				{
-					DisableRefLog();
-				}
-
-			}
-			else
-			{
-				_refLogMessage = msg;
-				_refLogIncludeResult = appendStatus;
-			}
-		}
-
-		private void RequireCanDoUpdate()
-		{
-			if (_newValue == null)
-			{
-				throw new InvalidOperationException("A NewObjectId is required.");
-			}
-		}
-
-		public void DisableRefLog()
-		{
-			_refLogMessage = null;
-			_refLogIncludeResult = false;
-		}
-
-		public RefUpdateResult ForceUpdate()
-		{
-			IsForceUpdate = true;
-			return Update();
-		}
-
-		/// <summary>
-		/// Gracefully update the ref to the new value.
-		/// <para/>
-		/// Merge test will be performed according to <see cref="ForceUpdate"/>.
-		/// <para />
-		/// This is the same as:
-		/// <example>
-		/// return Update(new RevWalk(repository));
-		/// </example>
-		/// </summary>
-		/// <returns>the result status of the update.</returns>
-		public RefUpdateResult Update()
-		{
-			return Update(new RevWalk.RevWalk(_db.Repository));
-		}
-
-		/// <summary>
-		/// Gracefully update the ref to the new value.
-		/// </summary>
-		/// <param name="walk">
-		/// A <see cref="RevWalk"/> instance this update command can borrow to 
-		/// perform the merge test. The walk will be reset to perform the test.
-		/// </param>
-		/// <returns>The result status of the update.</returns>
-		public RefUpdateResult Update(RevWalk.RevWalk walk)
-		{
-			RequireCanDoUpdate();
-			try
-			{
-				return Result = UpdateImpl(walk, new UpdateStore(this));
-			}
-			catch (IOException)
-			{
-				Result = RefUpdateResult.IOFailure;
-				throw;
-			}
-		}
-
-		private RefUpdateResult UpdateImpl(RevWalk.RevWalk walk, StoreBase store)
-		{
-			if (isNameConflicting())
-			{
-				return RefUpdateResult.LockFailure;
-			}
-
-			using (LockFile @lock = new LockFile(_looseFile))
-			{
-				if (!@lock.Lock())
-				{
-					return RefUpdateResult.LockFailure;
-				}
-	
-				OldObjectId = _db.IdOf(Name);
-				if (_expValue != null)
-				{
-					ObjectId o = OldObjectId ?? ObjectId.ZeroId;
-					if (!AnyObjectId.equals(_expValue, o))
-					{
-						return RefUpdateResult.LockFailure;
-					}
-				}
-
-				if (OldObjectId == null)
-				{
-					return store.Store(@lock, RefUpdateResult.New);
-				}
-
-				RevObject newObj = SafeParse(walk, _newValue);
-				RevObject oldObj = SafeParse(walk, OldObjectId);
-				if (newObj == oldObj)
-				{
-					return store.Store(@lock, RefUpdateResult.NoChange);
-				}
-
-				RevCommit newCom = (newObj as RevCommit);
-				RevCommit oldCom = (oldObj as RevCommit);
-				if (newCom != null && oldCom != null)
-				{
-					if (walk.isMergedInto(oldCom, newCom))
-					{
-						return store.Store(@lock, RefUpdateResult.FastForward);
-					}
-				}
-
-				if (IsForceUpdate)
-				{
-					return store.Store(@lock, RefUpdateResult.Forced);
-				}
-
-				return RefUpdateResult.Rejected;
-			}
-		}
-
-		/// <summary>
-		/// Delete the ref.
-		/// <para />
-		/// This is the same as:
-		/// <example>
-		/// return Delete(new RevWalk(repository));
-		/// </example>
-		/// </summary>
-		/// <returns>The result status of the Delete.</returns>
-		public RefUpdateResult Delete()
-		{
-			return Delete(new RevWalk.RevWalk(_db.Repository));
-		}
-
-		/// <summary>
-		/// Delete the ref.
-		/// </summary>
-		/// <param name="walk">
-		/// A <see cref="RevWalk"/> instance this Delete command can borrow to 
-		/// perform the merge test. The walk will be reset to perform the test.
-		/// </param>
-		/// <returns>The result status of the Delete.</returns>
-		public RefUpdateResult Delete(RevWalk.RevWalk walk)
-		{
-			if (Name.StartsWith(Constants.R_HEADS))
-			{
-				Ref head = _db.ReadRef(Constants.HEAD);
-				if (head != null && Name.Equals(head.Name))
-				{
-					return Result = RefUpdateResult.RejectedCurrentBranch;
-				}
-			}
-
-			try
-			{
-				return Result = UpdateImpl(walk, new DeleteStore(this));
-			}
-			catch (IOException)
-			{
-				Result = RefUpdateResult.IOFailure;
-				throw;
-			}
-		}
-
-	    private bool isNameConflicting()
-	    {
-	        string myName = Name;
-	        int lastSlash = myName.LastIndexOf('/');
-	        if (lastSlash > 0)
-	            if (_db.Repository.getRef(myName.Slice(0, lastSlash)) != null)
-	                return true;
-
-	        string rName = myName + "/";
-	        foreach (Ref r in _db.GetAllRefs().Values)
-	        {
-	            if (r.Name.StartsWith(rName))
-	                return true;
-	        }
-	        return false;
-	    }
-
-		private static RevObject SafeParse(RevWalk.RevWalk rw, AnyObjectId id)
-		{
-			try
-			{
-				return id != null ? rw.parseAny(id) : null;
-			}
-			catch (MissingObjectException)
-			{
-				// We can expect some objects to be missing, like if we are
-				// trying to force a deletion of a branch and the object it
-				// points to has been pruned from the database due to freak
-				// corruption accidents (it happens with 'git new-work-dir').
-				//
-				return null;
-			}
-		}
-
-		private RefUpdateResult UpdateRepositoryStore(LockFile @lock, RefUpdateResult status)
-		{
-			if (status == RefUpdateResult.NoChange) return status;
-
-			@lock.NeedStatInformation = true;
-			@lock.Write(_newValue);
-
-			string msg = GetRefLogMessage();
-
-			if (msg != null)
-			{
-				if (_refLogIncludeResult)
-				{
-					string strResult = ToResultString(status);
-					if (strResult != null)
-					{
-						msg = !string.IsNullOrEmpty(msg) ? msg + ": " + strResult : strResult;
-					}
-				}
-
-				RefLogWriter.append(this, msg);
-			}
-
-			if (!@lock.Commit())
-			{
-				return RefUpdateResult.LockFailure;
-			}
-
-			_db.Stored(_ref.OriginalName, _ref.Name, _newValue, @lock.CommitLastModified);
-			return status;
-		}
-
-		private static string ToResultString(RefUpdateResult status)
-		{
-			switch (status)
-			{
-				case RefUpdateResult.Forced:
-					return "forced-update";
-
-				case RefUpdateResult.FastForward:
-					return "fast forward";
-
-				case RefUpdateResult.New:
-					return "created";
-
-				default:
-					return null;
-			}
-		}
-
-		internal static int Count(string s, char c)
-		{
-			int count = 0;
-			for (int p = s.IndexOf(c); p >= 0; p = s.IndexOf(c, p + 1))
-			{
-				count++;
-			}
-			return count;
-		}
-
-		#region Nested Types
-
-		private abstract class StoreBase
-		{
-			private readonly RefUpdate _refUpdate;
-
-			protected RefUpdate RefUpdate
-			{
-				get { return _refUpdate; }
-			}
-
-			protected StoreBase(RefUpdate refUpdate)
-			{
-				_refUpdate = refUpdate;
-			}
-
-			public abstract RefUpdateResult Store(LockFile lockFile, RefUpdateResult status);
-		}
-
-		private class UpdateStore : StoreBase
-		{
-			public UpdateStore(RefUpdate refUpdate) : base(refUpdate) { }
-
-			public override RefUpdateResult Store(LockFile lockFile, RefUpdateResult status)
-			{
-				return RefUpdate.UpdateRepositoryStore(lockFile, status);
-			}
-		}
-
-		private class DeleteStore : StoreBase
-		{
-			public DeleteStore(RefUpdate refUpdate) : base(refUpdate) { }
-
-			public override RefUpdateResult Store(LockFile @lockFile, RefUpdateResult status)
-			{
-				var storage = RefUpdate._ref.StorageFormat;
-				if (storage == Ref.Storage.New)
-				{
-					return status;
-				}
-
-				if (storage.IsPacked)
-				{
-					RefUpdate._db.RemovePackedRef(RefUpdate._ref.Name);
-				}
-
-				int levels = Count(RefUpdate._ref.Name, '/') - 2;
-
-				// Delete logs _before_ unlocking
-				DirectoryInfo gitDir = RefUpdate._db.Repository.Directory;
-				var logDir = new DirectoryInfo(gitDir + "/" + Constants.LOGS);
-				DeleteFileAndEmptyDir(new FileInfo(logDir + "/" + RefUpdate._ref.Name), levels);
-
-				// We have to unlock before (maybe) deleting the parent directories
-				lockFile.Unlock();
-				if (storage.IsLoose)
-				{
-					DeleteFileAndEmptyDir(RefUpdate._looseFile, levels);
-				}
-				return status;
-			}
-
-			private static void DeleteFileAndEmptyDir(FileInfo file, int depth)
-			{
-				if (!file.Exists) return;
-
-				file.Delete();
-				file.Refresh();
-				if (file.Exists)
-				{
-					throw new IOException("File cannot be deleted: " + file);
-				}
-				DeleteEmptyDir(file.Directory, depth);
-			}
-		}
-
-		#endregion
-
-		internal static void DeleteEmptyDir(DirectoryInfo dir, int depth)
-		{
-			for (; depth > 0 && dir != null; depth--)
-			{
-                if (dir.Exists)
+    public static class RefUpdateExtensions
+    {
+        public static ObjectId getNewObjectId(this RefUpdate refUpdate)
+        {
+            return refUpdate.NewObjectId;
+        }
+
+        public static void setNewObjectId(this RefUpdate refUpdate, AnyObjectId id)
+        {
+            refUpdate.NewObjectId = id.Copy();
+        }
+
+        public static bool isForceUpdate(this RefUpdate refUpdate)
+        {
+            return refUpdate.IsForceUpdate;
+        }
+
+        public static void setForceUpdate(this RefUpdate refUpdate, bool b)
+        {
+            refUpdate.IsForceUpdate = b;
+        }
+        public static string getName(this RefUpdate refUpdate)
+        {
+            return refUpdate.Name;
+        }
+        public static Ref getRef(this RefUpdate refUpdate)
+        {
+            return refUpdate.Ref;
+        }
+
+        public static ObjectId getExpectedOldObjectId(this RefUpdate refUpdate)
+        {
+            return refUpdate.ExpectedOldObjectId;
+        }
+
+        public static void setExpectedOldObjectId(this RefUpdate refUpdate, AnyObjectId id)
+        {
+            refUpdate.ExpectedOldObjectId = id != null ? id.ToObjectId() : null; ;
+        }
+
+        public static ObjectId getOldObjectId(this RefUpdate refUpdate)
+        {
+            return refUpdate.OldObjectId;
+        }
+
+        public static void setOldObjectId(this RefUpdate refUpdate, AnyObjectId id)
+        {
+            refUpdate.OldObjectId = id != null ? id.ToObjectId() : null; ;
+        }
+
+        public static RefUpdate.RefUpdateResult getResult(this RefUpdate refUpdate)
+        {
+            return refUpdate.Result;
+        }
+
+    }
+
+    /// <summary>
+    /// Creates, updates or deletes any reference.
+    /// </summary>
+    public abstract class RefUpdate
+    {
+        /// <summary>
+        /// Status of an update request.
+        /// </summary>
+        public enum RefUpdateResult
+        {
+            /// <summary>
+            /// The ref update/delete has not been attempted by the caller.
+            /// </summary>
+            NOT_ATTEMPTED,
+
+            /// <summary>
+            /// The ref could not be locked for update/delete.
+            /// <para/>
+            /// This is generally a transient failure and is usually caused by
+            /// another process trying to access the ref at the same time as this
+            /// process was trying to update it. It is possible a future operation
+            /// will be successful.
+            /// </summary>
+            LOCK_FAILURE,
+
+            /// <summary>
+            /// Same value already stored.
+            /// <para/>
+            /// Both the old value and the new value are identical. No change was
+            /// necessary for an update. For delete the branch is removed.
+            /// </summary>
+            NO_CHANGE,
+
+            /// <summary>
+            /// The ref was created locally for an update, but ignored for delete.
+            /// <para/>
+            /// The ref did not exist when the update started, but it was created
+            /// successfully with the new value.
+            /// </summary>
+            NEW,
+
+            /// <summary>
+            /// The ref had to be forcefully updated/deleted.
+            /// <para/>
+            /// The ref already existed but its old value was not fully merged into
+            /// the new value. The configuration permitted a forced update to take
+            /// place, so ref now contains the new value. History associated with the
+            /// objects not merged may no longer be reachable.
+            /// </summary>
+            FORCED,
+
+            /// <summary>
+            /// The ref was updated/deleted in a fast-forward way.
+            /// <para/>
+            /// The tracking ref already existed and its old value was fully merged
+            /// into the new value. No history was made unreachable.
+            /// </summary>
+            FAST_FORWARD,
+
+           /// <summary>
+            /// Not a fast-forward and not stored.
+            /// <para/>
+            /// The tracking ref already existed but its old value was not fully
+            /// merged into the new value. The configuration did not allow a forced
+            /// update/delete to take place, so ref still contains the old value. No
+            /// previous history was lost.
+           /// </summary>
+            REJECTED,
+
+            /// <summary>
+            /// Rejected because trying to delete the current branch.
+            /// <para/>
+            /// Has no meaning for update.
+            /// </summary>
+            REJECTED_CURRENT_BRANCH,
+
+            /// <summary>
+            /// The ref was probably not updated/deleted because of I/O error.
+            /// <para/>
+            /// Unexpected I/O error occurred when writing new ref. Such error may
+            /// result in uncertain state, but most probably ref was not updated.
+            /// <para/>
+            /// This kind of error doesn't include {@link #LOCK_FAILURE}, which is a
+            /// different case.
+            /// </summary>
+            IO_FAILURE,
+
+            /// <summary>
+            /// The ref was renamed from another name
+            /// </summary>
+            RENAMED
+        }
+
+        /// <summary>
+        /// New value the caller wants this ref to have.
+        /// </summary>
+        private ObjectId newValue;
+
+        /// <summary>
+        /// Does this specification ask for forced updated (rewind/reset)?
+        /// </summary>
+        private bool force;
+
+        /// <summary>
+        /// Identity to record action as within the reflog.
+        /// </summary>
+        private PersonIdent refLogIdent;
+
+        /// <summary>
+        /// Message the caller wants included in the reflog.
+        /// </summary>
+        private string refLogMessage;
+
+
+        /// <summary>
+        /// Should the Result value be appended to <see cref="refLogMessage"/>.
+        /// </summary>
+        private bool refLogIncludeResult;
+
+        /// <summary>
+        /// Old value of the ref, obtained after we lock it.
+        /// </summary>
+        private ObjectId oldValue;
+
+        /// <summary>
+        /// If non-null, the value {@link #oldValue} must have to continue.
+        /// </summary>
+        private ObjectId expValue;
+
+        /// <summary>
+        /// Result of the update operation.
+        /// </summary>
+        private RefUpdateResult result = RefUpdateResult.NOT_ATTEMPTED;
+
+        private Ref _ref;
+
+        protected RefUpdate(Ref @ref)
+        {
+            _ref = @ref;
+            oldValue = @ref.getObjectId();
+            refLogMessage = "";
+        }
+
+        /// <returns>the reference database this update modifies.</returns>
+        public abstract RefDatabase getRefDatabase();
+
+        /// <returns>the repository storing the database's objects.</returns>
+        public abstract Repository getRepository();
+
+        /// <summary>
+        /// Try to acquire the lock on the reference.
+        /// <para/>
+        /// If the locking was successful the implementor must set the current
+        /// identity value by calling <see cref="set_OldObjectId"/>.
+        /// </summary>
+        /// <returns>
+        /// true if the lock was acquired and the reference is likely
+        /// protected from concurrent modification; false if it failed.
+        /// </returns>
+        protected abstract bool tryLock();
+
+        /// <summary>
+        /// Releases the lock taken by {@link #tryLock} if it succeeded.
+        /// </summary>
+        public abstract void unlock();
+
+        protected abstract RefUpdateResult doUpdate(RefUpdateResult desiredResult);
+
+        protected abstract RefUpdateResult doDelete(RefUpdateResult desiredResult);
+
+        /// <summary>name of the underlying ref this update will operate on.</summary>
+        public string Name
+        {
+            get { return Ref.getName(); }
+        }
+
+        /// <summary>
+        /// the reference this update will create or modify.
+        /// </summary>
+        public Ref Ref
+        {
+            get { return _ref; }
+        }
+
+        /// <summary>new value the ref will be (or was) updated to.</summary>
+        public ObjectId NewObjectId
+        {
+            get { return newValue; }
+            set { newValue = value.Copy(); }
+        }
+
+        /// <summary>
+        /// the expected value of the ref after the lock is taken, but
+        /// before update occurs. Null to avoid the compare and swap test.
+        /// Use <see cref="ObjectId.ZeroId"/> to indicate expectation of a
+        /// non-existant ref.
+        /// </summary>
+        public ObjectId ExpectedOldObjectId
+        {
+            get { return expValue; }
+            set { expValue = value != null ? value.ToObjectId() : null; }
+        }
+
+        /// <summary>
+        /// Will this update want to forcefully change the ref, this ignoring merge results ?
+        /// </summary>
+        public bool IsForceUpdate
+        {
+            get { return force; }
+            set { force = value; }
+        }
+
+        /// <returns>identity of the user making the change in the reflog.</returns>
+        public PersonIdent getRefLogIdent()
+        {
+            return refLogIdent;
+        }
+
+        /// <summary>
+        /// Set the identity of the user appearing in the reflog.
+        /// <para/>
+        /// The timestamp portion of the identity is ignored. A new identity with the
+        /// current timestamp will be created automatically when the update occurs
+        /// and the log record is written.
+        /// </summary>
+        /// <param name="pi">
+        /// identity of the user. If null the identity will be
+        /// automatically determined based on the repository
+        /// configuration.
+        /// </param>
+        public void setRefLogIdent(PersonIdent pi)
+        {
+            refLogIdent = pi;
+        }
+
+        /// <summary>
+        /// Get the message to include in the reflog.
+        /// </summary>
+        /// <returns>
+        /// message the caller wants to include in the reflog; null if the
+        /// update should not be logged.
+        /// </returns>
+        public string getRefLogMessage()
+        {
+            return refLogMessage;
+        }
+
+        /// <returns>{@code true} if the ref log message should show the result.</returns>
+        protected bool isRefLogIncludingResult()
+        {
+            return refLogIncludeResult;
+        }
+
+        /// <summary>
+        /// Set the message to include in the reflog.
+        /// </summary>
+        /// <param name="msg">
+        /// the message to describe this change. It may be null if
+        /// appendStatus is null in order not to append to the reflog
+        /// </param>
+        /// <param name="appendStatus">
+        /// true if the status of the ref change (fast-forward or
+        /// forced-update) should be appended to the user supplied
+        /// message.
+        /// </param>
+        public void setRefLogMessage(string msg, bool appendStatus)
+        {
+            if (msg == null && !appendStatus)
+                disableRefLog();
+            else if (msg == null && appendStatus)
+            {
+                refLogMessage = "";
+                refLogIncludeResult = true;
+            }
+            else
+            {
+                refLogMessage = msg;
+                refLogIncludeResult = appendStatus;
+            }
+        }
+
+        /// <summary>
+        /// Don't record this update in the ref's associated reflog.
+        /// </summary>
+        public void disableRefLog()
+        {
+            refLogMessage = null;
+            refLogIncludeResult = false;
+        }
+
+        ///<summary>
+        /// The old value of the ref, prior to the update being attempted.
+        /// <para/>
+        /// This value may differ before and after the update method. Initially it is
+        /// populated with the value of the ref before the lock is taken, but the old
+        /// value may change if someone else modified the ref between the time we
+        /// last read it and when the ref was locked for update.
+        /// </summary>
+        public ObjectId OldObjectId
+        {
+            get { return oldValue; }
+            set { oldValue = value; }
+        }
+
+
+        /// <summary>
+        /// Get the status of this update.
+        /// <para/>
+        /// The same value that was previously returned from an update method.
+        /// </summary>
+        /// <returns></returns>
+        public RefUpdateResult Result
+        {
+            get { return result; }
+        }
+
+        private void requireCanDoUpdate()
+        {
+            if (newValue == null)
+                throw new InvalidOperationException("A NewObjectId is required.");
+        }
+
+        /// <summary>
+        /// Force the ref to take the new value.
+        /// <para/>
+        /// This is just a convenient helper for setting the force flag, and as such
+        /// the merge test is performed.
+        /// </summary>
+        /// <returns>the result status of the update.</returns>
+        public RefUpdateResult forceUpdate()
+        {
+            force = true;
+            return update();
+        }
+
+        /// <summary>
+        /// Gracefully update the ref to the new value.
+        /// <para/>
+        /// Merge test will be performed according to <see cref="IsForceUpdate"/>.
+        /// <para/>
+        /// This is the same as:
+        /// 
+        /// <pre>
+        /// return update(new RevWalk(getRepository()));
+        /// </pre>
+        /// </summary>
+        /// <returns>the result status of the update.</returns>
+        public RefUpdateResult update()
+        {
+            return update(new RevWalk.RevWalk(getRepository()));
+        }
+
+        /// <summary>
+        /// Gracefully update the ref to the new value.
+        /// <para/>
+        /// Merge test will be performed according to <see cref="IsForceUpdate"/>.
+        /// </summary>
+        /// <param name="walk">
+        /// a RevWalk instance this update command can borrow to perform
+        /// the merge test. The walk will be reset to perform the test.
+        /// </param>
+        /// <returns>
+        /// the result status of the update.
+        /// </returns>
+        public RefUpdateResult update(RevWalk.RevWalk walk)
+        {
+            requireCanDoUpdate();
+            try
+            {
+                return result = updateImpl(walk, new UpdateStore(this));
+            }
+            catch (IOException x)
+            {
+                result = RefUpdateResult.IO_FAILURE;
+                throw x;
+            }
+        }
+
+        /// <summary>
+        /// Delete the ref.
+        /// <para/>
+        /// This is the same as:
+        /// 
+        /// <pre>
+        /// return delete(new RevWalk(getRepository()));
+        /// </pre>
+        /// </summary>
+        /// <returns>the result status of the delete.</returns>
+        public RefUpdateResult delete()
+        {
+            return delete(new RevWalk.RevWalk(getRepository()));
+        }
+
+        /// <summary>
+        /// Delete the ref.
+        /// </summary>
+        /// <param name="walk">
+        /// a RevWalk instance this delete command can borrow to perform
+        /// the merge test. The walk will be reset to perform the test.
+        /// </param>
+        /// <returns>the result status of the delete.</returns>
+        public RefUpdateResult delete(RevWalk.RevWalk walk)
+        {
+            string myName = Ref.getLeaf().getName();
+            if (myName.StartsWith(Constants.R_HEADS))
+            {
+                Ref head = getRefDatabase().getRef(Constants.HEAD);
+                while (head.isSymbolic())
                 {
-                    try
-                    {
-                        dir.Delete();
-                    }
-                    catch (IOException)
-                    {
-                        break;
-                    }
+                    head = head.getTarget();
+                    if (myName.Equals(head.getName()))
+                        return result = RefUpdateResult.REJECTED_CURRENT_BRANCH;
+                }
+            }
+
+            try
+            {
+                return result = updateImpl(walk, new DeleteStore(this));
+            }
+            catch (IOException x)
+            {
+                result = RefUpdateResult.IO_FAILURE;
+                throw;
+            }
+        }
+
+        private RefUpdateResult updateImpl(RevWalk.RevWalk walk, Store store)
+        {
+            RevObject newObj;
+            RevObject oldObj;
+
+            if (getRefDatabase().isNameConflicting(Name))
+                return RefUpdateResult.LOCK_FAILURE;
+            try
+            {
+                if (!tryLock())
+                    return RefUpdateResult.LOCK_FAILURE;
+                if (expValue != null)
+                {
+                    ObjectId o;
+                    o = oldValue != null ? oldValue : ObjectId.ZeroId;
+                    if (!AnyObjectId.equals(expValue, o))
+                        return RefUpdateResult.LOCK_FAILURE;
+                }
+                if (oldValue == null)
+                    return store.execute(RefUpdateResult.NEW);
+
+                newObj = safeParse(walk, newValue);
+                oldObj = safeParse(walk, oldValue);
+                if (newObj == oldObj)
+                    return store.execute(RefUpdateResult.NO_CHANGE);
+
+                if (newObj is RevCommit && oldObj is RevCommit)
+                {
+                    if (walk.isMergedInto((RevCommit)oldObj, (RevCommit)newObj))
+                        return store.execute(RefUpdateResult.FAST_FORWARD);
                 }
 
-				dir = dir.Parent;
-			}
-		}
-	}
+                if (IsForceUpdate)
+                    return store.execute(RefUpdateResult.FORCED);
+                return RefUpdateResult.REJECTED;
+            }
+            finally
+            {
+                unlock();
+            }
+        }
+
+        private static RevObject safeParse(RevWalk.RevWalk rw, AnyObjectId id)
+        {
+            try
+            {
+                return id != null ? rw.parseAny(id) : null;
+            }
+            catch (MissingObjectException e)
+            {
+                // We can expect some objects to be missing, like if we are
+                // trying to force a deletion of a branch and the object it
+                // points to has been pruned from the database due to freak
+                // corruption accidents (it happens with 'git new-work-dir').
+                //
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Handle the abstraction of storing a ref update. This is because both
+        /// updating and deleting of a ref have merge testing in common.
+        /// </summary>
+        private abstract class Store
+        {
+
+            public abstract RefUpdateResult execute(RefUpdateResult status);
+        }
+
+        private class UpdateStore : Store
+        {
+            private readonly RefUpdate _refUpdate;
+
+            public UpdateStore(RefUpdate refUpdate)
+            {
+                _refUpdate = refUpdate;
+            }
+
+            public override RefUpdateResult execute(RefUpdateResult status)
+            {
+                if (status == RefUpdateResult.NO_CHANGE)
+                    return status;
+                return _refUpdate.doUpdate(status);
+            }
+        }
+
+        private class DeleteStore : Store
+        {
+            private readonly RefUpdate _refUpdate;
+
+            public DeleteStore(RefUpdate refUpdate)
+            {
+                _refUpdate = refUpdate;
+            }
+
+            public override RefUpdateResult execute(RefUpdateResult status)
+            {
+                return _refUpdate.doDelete(status);
+            }
+        }
+    }
 }
+
+

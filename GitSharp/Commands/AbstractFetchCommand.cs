@@ -49,7 +49,7 @@ namespace GitSharp.Commands
             bool shownURI = false;
             foreach (TrackingRefUpdate u in r.TrackingRefUpdates)
             {
-                if (!verbose && u.Result == RefUpdate.RefUpdateResult.NoChange)
+                if (!verbose && u.Result == RefUpdate.RefUpdateResult.NO_CHANGE)
                     continue;
 
                 char type = shortTypeOf(u.Result);
@@ -71,16 +71,16 @@ namespace GitSharp.Commands
         private string longTypeOf(TrackingRefUpdate u)
         {
             RefUpdate.RefUpdateResult r = u.Result;
-            if (r == RefUpdate.RefUpdateResult.LockFailure)
+            if (r == RefUpdate.RefUpdateResult.LOCK_FAILURE)
                 return "[lock fail]";
-            if (r == RefUpdate.RefUpdateResult.IOFailure)
+            if (r == RefUpdate.RefUpdateResult.IO_FAILURE)
                 return "[i/o error]";
-            if (r == RefUpdate.RefUpdateResult.Rejected)
+            if (r == RefUpdate.RefUpdateResult.REJECTED)
                 return "[rejected]";
             if (ObjectId.ZeroId.Equals(u.NewObjectId))
                 return "[deleted]";
 
-            if (r == RefUpdate.RefUpdateResult.New)
+            if (r == RefUpdate.RefUpdateResult.NEW)
             {
                 if (u.RemoteName.StartsWith(Constants.R_HEADS))
                     return "[new branch]";
@@ -89,21 +89,21 @@ namespace GitSharp.Commands
                 return "[new]";
             }
 
-            if (r == RefUpdate.RefUpdateResult.Forced)
+            if (r == RefUpdate.RefUpdateResult.FORCED)
             {
                 string aOld = u.OldObjectId.Abbreviate(Repository).name();
                 string aNew = u.NewObjectId.Abbreviate(Repository).name();
                 return aOld + "..." + aNew;
             }
 
-            if (r == RefUpdate.RefUpdateResult.FastForward)
+            if (r == RefUpdate.RefUpdateResult.FAST_FORWARD)
             {
                 string aOld = u.OldObjectId.Abbreviate(Repository).name();
                 string aNew = u.NewObjectId.Abbreviate(Repository).name();
                 return aOld + ".." + aNew;
             }
 
-            if (r == RefUpdate.RefUpdateResult.NoChange)
+            if (r == RefUpdate.RefUpdateResult.NO_CHANGE)
                 return "[up to date]";
 
             return "[" + r + "]";
@@ -113,18 +113,18 @@ namespace GitSharp.Commands
         {
             switch (r)
             {
-                case RefUpdate.RefUpdateResult.LockFailure:
-                case RefUpdate.RefUpdateResult.IOFailure:
-                case RefUpdate.RefUpdateResult.Rejected:
+                case RefUpdate.RefUpdateResult.LOCK_FAILURE:
+                case RefUpdate.RefUpdateResult.IO_FAILURE:
+                case RefUpdate.RefUpdateResult.REJECTED:
                     return '!';
 
-                case RefUpdate.RefUpdateResult.New:
+                case RefUpdate.RefUpdateResult.NEW:
                     return '*';
 
-                case RefUpdate.RefUpdateResult.Forced:
+                case RefUpdate.RefUpdateResult.FORCED:
                     return '+';
 
-                case RefUpdate.RefUpdateResult.NoChange:
+                case RefUpdate.RefUpdateResult.NO_CHANGE:
                     return '=';
 
                 default:

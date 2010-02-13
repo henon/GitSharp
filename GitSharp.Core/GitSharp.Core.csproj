@@ -40,6 +40,7 @@
       <HintPath>..\lib\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -197,9 +198,7 @@
     <Compile Include="PersonIdent.cs" />
     <Compile Include="ProgressMonitor.cs" />
     <Compile Include="Ref.cs" />
-    <Compile Include="RefComparer.cs" />
     <Compile Include="RefDatabase.cs" />
-    <Compile Include="RefLogWriter.cs" />
     <Compile Include="RefUpdate.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="Config.cs" />
@@ -385,16 +384,22 @@
     <Compile Include="Merge\MergeChunk.cs" />
     <Compile Include="Merge\MergeFormatter.cs" />
     <Compile Include="Merge\MergeResult.cs" />
+    <Compile Include="ObjectIdRef.cs" />
     <Compile Include="Platform\Linux.cs" />
     <Compile Include="Platform\Mac.cs" />
     <Compile Include="Platform\Platform.cs" />
     <Compile Include="Platform\PlatformObject.cs" />
     <Compile Include="Platform\Windows.cs" />
+    <Compile Include="RefDirectory.cs" />
+    <Compile Include="RefDirectoryRename.cs" />
+    <Compile Include="RefDirectoryUpdate.cs" />
     <Compile Include="RevPlot\AbstractPlotRenderer.cs" />
     <Compile Include="RevPlot\PlotCommit.cs" />
     <Compile Include="RevPlot\PlotCommitList.cs" />
     <Compile Include="RevPlot\PlotLane.cs" />
     <Compile Include="RevPlot\PlotWalk.cs" />
+    <Compile Include="SymbolicRef.cs" />
+    <Compile Include="Util\AtomicInteger.cs" />
     <Compile Include="Util\LongList.cs" />
     <Compile Include="Util\RefList.cs" />
     <Compile Include="Util\RefMap.cs" />

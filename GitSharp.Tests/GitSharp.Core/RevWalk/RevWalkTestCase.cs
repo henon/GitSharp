@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -41,6 +41,7 @@ using GitSharp.Core;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.DirectoryCache;
 using GitSharp.Core.TreeWalk.Filter;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 using GitSharp.Core.Util;
 

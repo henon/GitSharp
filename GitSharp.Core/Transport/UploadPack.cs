@@ -58,7 +58,7 @@ namespace GitSharp.Core.Transport
 
         private readonly Repository _db;
         private readonly RevWalk.RevWalk _walk;
-        private Dictionary<string, Ref> _refs;
+        private IDictionary<string, Ref> _refs;
 
         private readonly List<string> _options;
         private readonly IList<RevObject> _wantAll;

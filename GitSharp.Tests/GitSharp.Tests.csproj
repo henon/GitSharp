@@ -63,6 +63,9 @@
     </Compile>
     <Compile Include="GitSharp.Core\AbbreviatedObjectIdTest.cs" />
     <Compile Include="GitSharp.Core\CanReadMsysgitIndexFixture.cs" />
+    <Compile Include="GitSharp.Core\SymbolicRefTest.cs" />
+    <Compile Include="GitSharp.Core\RefDirectoryTest.cs" />
+    <Compile Include="GitSharp.Core\ObjectIdRefTest.cs" />
     <Compile Include="GitSharp.Core\ConcurrentRepackTest.cs" />
     <Compile Include="GitSharp.Core\ConstantsEncodingTest.cs" />
     <Compile Include="GitSharp.Core\Crc32Tests.cs" />

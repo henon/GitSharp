@@ -50,7 +50,7 @@ namespace GitSharp.Core.Util
     {
         private MemoryStream _stream;
 
-        public MessageDigest()
+        private MessageDigest()
         {
             this.Reset();
         }
@@ -105,19 +105,16 @@ namespace GitSharp.Core.Util
 		{
 			_stream.Dispose();
 		}
-		
 
-        //public static MessageDigest GetInstance(string algorithm)
-        //{
-        //    return new MessageDigest();
-        //    //switch (algorithm.ToLower())
-        //    //{
-        //    //    case "sha1":
-        //    //        return new MessageDigest(new SHA1CryptoServiceProvider());
-        //    //    default:
-        //    //        throw new NotSupportedException(string.Format("The requested algorithm \"{0}\" is not supported.", algorithm));
-        //    //        break;
-        //    //}
-        //}
+        public static MessageDigest getInstance(string algorithm)
+        {
+            switch (algorithm.ToLower())
+            {
+                case "sha-1":
+                    return new MessageDigest();
+                default:
+                    throw new NotSupportedException(string.Format("The requested algorithm \"{0}\" is not supported.", algorithm));
+            }
+        }
     }
 }

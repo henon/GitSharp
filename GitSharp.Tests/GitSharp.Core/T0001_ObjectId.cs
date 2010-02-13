@@ -37,15 +37,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 using GitSharp.Core;
 using NUnit.Framework;
-using GitSharp;
 
-namespace GitSharp.Core.Tests
+namespace GitSharp.Tests.GitSharp.Core
 {
     [TestFixture]
     public class T0001_ObjectId
@@ -54,7 +50,7 @@ namespace GitSharp.Core.Tests
         public void ObjectIdToStringTest()
         {
             var id = ObjectId.FromString("003ae55c8f6f23aaee66acd2e1c35523fa6ddc33");
-            Assert.AreEqual("003ae55c8f6f23aaee66acd2e1c35523fa6ddc33", id.ToString());
+            Assert.AreEqual("003ae55c8f6f23aaee66acd2e1c35523fa6ddc33", id.Name);
             Assert.AreEqual(0, id.GetFirstByte());
         }
 
@@ -79,7 +75,7 @@ namespace GitSharp.Core.Tests
         {
             string x = "def4c620bc3713bb1bb26b808ec9312548e73946";
             ObjectId oid = ObjectId.FromString(x);
-            Assert.AreEqual(x, oid.ToString());
+            Assert.AreEqual(x, oid.Name);
         }
 
         [Test]
@@ -87,7 +83,7 @@ namespace GitSharp.Core.Tests
         {
             string x = "ff00eedd003713bb1bb26b808ec9312548e73946";
             ObjectId oid = ObjectId.FromString(x);
-            Assert.AreEqual(x, oid.ToString());
+            Assert.AreEqual(x, oid.Name);
         }
 
         [Test]
@@ -154,3 +150,5 @@ namespace GitSharp.Core.Tests
         }
     }
 }
+
+

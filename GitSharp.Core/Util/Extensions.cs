@@ -112,18 +112,27 @@ namespace GitSharp.Core
         /// <param name="dict">dictionary to search</param>
         /// <param name="key">Key to search for</param>
         /// <returns>default(V) or item if Key is found</returns>
-        public static V GetValue<K, V>(this IDictionary<K, V> dict, K key)
+        public static V get<K, V>(this IDictionary<K, V> dict, K key)
         {
-        	V v;
-			if (dict.TryGetValue(key, out v))
-			{
-			    return v;
-			}
+            V v;
+            if (dict.TryGetValue(key, out v))
+            {
+                return v;
+            }
 
-        	return default(V);
+            return default(V);
         }
 
-        public static V RemoveValue<K, V>(this IDictionary<K, V> dict, K key)
+        public static int size<K, V>(this IDictionary<K, V> dict)
+        {
+            return dict.Count();
+        }
+
+        public static V GetValue<K, V>(this IDictionary<K, V> dict, K key)
+        {
+            return dict.get(key);
+        }
+        public static V remove<K, V>(this IDictionary<K, V> dict, K key)
         {
             V v;
             if (dict.TryGetValue(key, out v))
@@ -133,6 +142,11 @@ namespace GitSharp.Core
             }
 
             return default(V);
+        }
+
+        public static V RemoveValue<K, V>(this IDictionary<K, V> dict, K key)
+        {
+            return dict.remove(key);
         }
 
         public static void Write(this BinaryWriter writer, ObjectId o)

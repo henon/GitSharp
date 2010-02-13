@@ -245,7 +245,7 @@ namespace GitSharp.Core.Transport
 							throw DuplicateAdvertisement(name + "^{}");
 						}
 
-						avail.Add(name, new Ref(Ref.Storage.Network, name, prior.ObjectId, id, true));
+						avail.Add(name, new PeeledTag(Storage.Network, name, prior.ObjectId, id));
 					}
 					else
 					{
@@ -253,11 +253,11 @@ namespace GitSharp.Core.Transport
 						if (avail.ContainsKey(name))
 						{
 							prior = avail[name];
-							avail[name] = new Ref(Ref.Storage.Network, name, id);
+							avail[name] = new PeeledNonTag(Storage.Network, name, id);
 						}
 						else
 						{
-							avail.Add(name, new Ref(Ref.Storage.Network, name, id));
+							avail.Add(name, new PeeledNonTag(Storage.Network, name, id));
 						}
 						if (prior != null)
 						{

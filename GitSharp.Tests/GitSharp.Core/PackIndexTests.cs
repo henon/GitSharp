@@ -66,7 +66,7 @@ namespace GitSharp.Core.Tests
 			var i = 0;
 			foreach (var item in index)
 			{
-				Assert.AreEqual(knownObjectIds[i], item.ToString().ToUpper(), "ObjectListId#" + i);
+				Assert.AreEqual(knownObjectIds[i], item.Name.ToUpper(), "ObjectListId#" + i);
 				Assert.AreEqual(knownOffsets[i], item.Offset, "ObjectListOffset#" + i);
 				Assert.AreEqual(knownCrcs[i], index.FindCRC32(item.idBuffer), "ObjectListCRC#" + i);
 				i++;

@@ -50,4 +50,9 @@ namespace GitSharp.Core.Transport
     public interface ITransportBundle : IPackTransport
     {
     }
+
+    public static class TransportBundleConstants
+    {
+        public static string V2_BUNDLE_SIGNATURE = "# v2 git bundle"; 
+    }
 }

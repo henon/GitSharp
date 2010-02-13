@@ -485,10 +485,10 @@ namespace GitSharp.Core.Transport
 
                 switch (u.Result)
                 {
-                    case RefUpdate.RefUpdateResult.New:
-                    case RefUpdate.RefUpdateResult.NoChange:
-                    case RefUpdate.RefUpdateResult.FastForward:
-                    case RefUpdate.RefUpdateResult.Forced:
+                    case RefUpdate.RefUpdateResult.NEW:
+                    case RefUpdate.RefUpdateResult.NO_CHANGE:
+                    case RefUpdate.RefUpdateResult.FAST_FORWARD:
+                    case RefUpdate.RefUpdateResult.FORCED:
                         break;
 
                     default:

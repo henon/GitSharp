@@ -23,7 +23,7 @@ namespace GitSharp.Core.Tests.Transport
         public void ShouldReturnValueForAValidRef()
         {
             var result = new PushResult();
-            var r = new Core.Ref(null, "ref", ObjectId.ZeroId);
+            var r = new Unpeeled(null, "ref", ObjectId.ZeroId);
 
             result.AdvertisedRefs.Add("ref", r);
 

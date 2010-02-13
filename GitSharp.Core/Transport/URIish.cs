@@ -60,7 +60,7 @@ namespace GitSharp.Core.Transport
 		private static readonly Regex ScpUri = new Regex("^(?:([^@]+?)@)?([^:]+?):(.+)$");
 
 		public string Scheme { get; private set; }
-		public string Path { get; private set; }
+		public string Path { get; protected set; }
 		public string User { get; private set; }
 		public string Pass { get; private set; }
 		public int Port { get; private set; }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -38,6 +38,7 @@
 
 using System.IO;
 using GitSharp.Core;
+using GitSharp.Tests.GitSharp.Core;
 using NUnit.Framework;
 
 namespace GitSharp.Core.Tests

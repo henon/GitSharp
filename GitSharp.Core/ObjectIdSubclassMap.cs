@@ -72,7 +72,7 @@ namespace GitSharp.Core
 		/// <returns>the instance mapped to toFind, or null if no mapping exists.</returns>
 		public TObject Get(AnyObjectId toFind)
 		{
-			return this.SingleOrDefault(x => toFind.ToObjectId() == x.ToObjectId());
+			return this.SingleOrDefault(x => AnyObjectId.equals(toFind.ToObjectId(), x.ToObjectId()));
 		}
 	}
 }

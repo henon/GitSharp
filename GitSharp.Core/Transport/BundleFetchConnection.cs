@@ -50,8 +50,6 @@ namespace GitSharp.Core.Transport
 {
     public class BundleFetchConnection : BaseFetchConnection
     {
-        public const string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
-
         private readonly Transport transport;
         private Stream bin;
         private readonly List<ObjectId> prereqs = new List<ObjectId>();
@@ -89,7 +87,7 @@ namespace GitSharp.Core.Transport
         private int readSignature()
         {
             string rev = readLine(new byte[1024]);
-            if (V2_BUNDLE_SIGNATURE.Equals(rev))
+            if (TransportBundleConstants.V2_BUNDLE_SIGNATURE.Equals(rev))
                 return 2;
             throw new TransportException(transport.Uri, "not a bundle");
         }
@@ -112,7 +110,7 @@ namespace GitSharp.Core.Transport
 
                 string name = line.Slice(41, line.Length);
                 ObjectId id = ObjectId.FromString(line.Slice(0, 40));
-                Ref prior = new Ref(Ref.Storage.Network, name, id);
+                Ref prior = new Unpeeled(Storage.Network, name, id);
                 if (avail.ContainsKey(name))
                 {
                     throw duplicateAdvertisement(name);

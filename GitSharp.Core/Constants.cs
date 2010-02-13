@@ -49,77 +49,10 @@ namespace GitSharp.Core
 {
     public static class Constants
     {
-        public const string V2_BUNDLE_SIGNATURE = "# v2 git bundle";
-
-        /// <summary>
-        ///   Special name for the "HEAD" symbolic ref
-        /// </summary>
-        public const string Head = "HEAD";
-
-        public const string Master = "master";
-
-        public static class ObjectTypes
-        {
-            /// <summary>
-            /// Text string that identifies an object as an annotated tag.
-            /// </summary>
-            /// <remarks>
-            /// Annotated tags store a pointer to any other object, and an additional
-            /// message. It is most commonly used to record a stable release of the
-            /// project.
-            /// </remarks>
-            public const string Tag = "tag";
-
-            /// <summary>
-            /// Text string that identifies an object as tree.
-            /// </summary>
-            /// <remarks>
-            /// Trees attach object ids (hashes) to names and file
-            /// modes. The normal use for a tree is to store a
-            /// version of a directory and its contents.
-            /// </remarks>
-            public const string Tree = "tree";
-
-            /// <summary>
-            /// Text string that identifies an object as a blob
-            /// </summary>
-            /// <remarks>
-            /// Blobs store whole file revisions. They are used
-            /// for any user file, as well as for symlinks. Blobs
-            /// form the bulk of any project's storage space.
-            /// </remarks>
-            public const string Blob = "blob";
-
-            /// <summary>
-            ///    Text string that identifies an object as a commit.
-            /// </summary>
-            /// <remarks>
-            /// Commits connect trees into a string of project
-            /// histories, where each commit is an assertion that
-            /// the best way to continue is to use this other tree
-            /// (set of files).
-            /// </remarks>
-            public const string Commit = "commit";
-
-            public static readonly byte[] EncodedCommit = new[] { (byte)'c', (byte)'o', (byte)'m', (byte)'m', (byte)'i', (byte)'t' };
-            public static readonly byte[] EncodedTree = new[] { (byte)'t', (byte)'r', (byte)'e', (byte)'e' };
-            public static readonly byte[] EncodedBlob = new[] { (byte)'b', (byte)'l', (byte)'o', (byte)'b' };
-            public static readonly byte[] EncodedTag = new[] { (byte)'t', (byte)'a', (byte)'g' };
-        }
-
-        public const string Refs = "refs/";
-        public const string RefsTags = Refs + "tags/";
-        public const string RefsHeads = Refs + "heads/";
-        public const string RefsRemotes = Refs + "remotes/";
-
-        public static readonly string[] RefSearchPaths = { string.Empty, Refs, RefsTags, RefsHeads, RefsRemotes };
-
-        /*
         /// <summary>
         /// Hash function used natively by Git for all objects.
         /// </summary>
-        private const string HASH_FUNCTION = "SHA-1"; // [henon] we don't use it anyway
-        */
+        private const string HASH_FUNCTION = "SHA-1";
 
         /// <summary>
         /// A Git object hash is 160 bits, i.e. 20 bytes.
@@ -171,12 +104,12 @@ namespace GitSharp.Core
         /// message. It is most commonly used to record a stable release of the
         /// project.
         /// </summary>
-        public static string TYPE_TAG = "tag";
+        public const string TYPE_TAG = "tag";
 
-        private static readonly byte[] EncodedTypeCommit = encodeASCII(TYPE_COMMIT);
-        private static readonly byte[] EncodedTypeBlob = encodeASCII(TYPE_BLOB);
-        private static readonly byte[] EncodedTypeTree = encodeASCII(TYPE_TREE);
-        private static readonly byte[] EncodedTypeTag = encodeASCII(TYPE_TAG);
+        public static readonly byte[] EncodedTypeCommit = encodeASCII(TYPE_COMMIT);
+        public static readonly byte[] EncodedTypeBlob = encodeASCII(TYPE_BLOB);
+        public static readonly byte[] EncodedTypeTree = encodeASCII(TYPE_TREE);
+        public static readonly byte[] EncodedTypeTag = encodeASCII(TYPE_TAG);
 
         /// <summary>
         /// An unknown or invalid object type code.
@@ -412,13 +345,7 @@ namespace GitSharp.Core
         /// <returns>A new digest object.</returns>
         public static MessageDigest newMessageDigest()
         {
-            //try {
-            //    return MessageDigest.getInstance(HASH_FUNCTION);
-            //} catch (NoSuchAlgorithmException nsae) {
-            //    throw new RuntimeException("Required hash function "
-            //            + HASH_FUNCTION + " not available.", nsae);
-            //}
-            return new MessageDigest();
+            return MessageDigest.getInstance(HASH_FUNCTION);
         }
 
         /// <summary>

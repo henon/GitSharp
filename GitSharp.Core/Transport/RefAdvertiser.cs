@@ -144,11 +144,11 @@ namespace GitSharp.Core.Transport
                 RevObject obj = parseAnyOrNull(r.ObjectId);
                 if (obj != null)
                 {
-                    advertiseAny(obj, r.OriginalName);
+                    advertiseAny(obj, r.Name);
                     RevTag rt = (obj as RevTag);
                     if (_derefTags && rt != null)
                     {
-                        advertiseTag(rt, r.OriginalName + "^{}");
+                        advertiseTag(rt, r.Name + "^{}");
                     }
                 }
             }

@@ -156,14 +156,14 @@ namespace GitSharp.Core.Transport
                     if (prior.PeeledObjectId != null)
                         throw duplicateAdvertisement(name + "^{}");
 
-                    avail[name] = new Ref(Ref.Storage.Network, name, prior.ObjectId, id, true);
+                    avail[name] = new PeeledTag(Storage.Network, name, prior.ObjectId, id);
                 }
                 else
                 {
                     Ref prior = avail.ContainsKey(name) ? avail[name] : null;
                     if (prior != null)
                         throw duplicateAdvertisement(name);
-                    avail.Add(name, new Ref(Ref.Storage.Network, name, id));
+                    avail.Add(name, new PeeledNonTag(Storage.Network, name, id));
                 }
             }
             available(avail);

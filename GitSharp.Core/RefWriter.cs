@@ -43,6 +43,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core
 {
@@ -56,7 +57,7 @@ namespace GitSharp.Core
     public abstract class RefWriter
     {
 
-        private IEnumerable<Ref> refs;
+        private readonly IEnumerable<Ref> refs;
 
         /// <param name="refs">
         /// the complete set of references. This should have been computed
@@ -67,6 +68,23 @@ namespace GitSharp.Core
             this.refs = RefComparator.Sort(refs);
         }
 
+        /// <param name="refs">
+        /// the complete set of references. This should have been computed
+        /// by applying updates to the advertised refs already discovered.
+        /// </param>
+        protected RefWriter(IDictionary<String, Ref> refs)
+        {
+            if (refs is RefMap)
+                this.refs = refs.Values;
+            else
+                this.refs = RefComparator.Sort(refs.Values);
+        }
+
+        protected RefWriter(RefList<Ref> list)
+        {
+            refs = list.asList();
+        }
+
         /// <summary>
         /// Rebuild the <see cref="Constants.INFO_REFS"/>.
         /// <para />
@@ -75,11 +93,11 @@ namespace GitSharp.Core
         /// </summary>
         public void writeInfoRefs()
         {
-            StringBuilder w = new StringBuilder();
-            char[] tmp = new char[Constants.OBJECT_ID_STRING_LENGTH];
+            var w = new StringBuilder();
+            var tmp = new char[Constants.OBJECT_ID_STRING_LENGTH];
             foreach (Ref r in refs)
             {
-                if (Constants.HEAD.Equals(r.OriginalName))
+                if (Constants.HEAD.Equals(r.Name))
                 {
                     // Historically HEAD has never been published through
                     // the INFO_REFS file. This is a mistake, but its the
@@ -109,7 +127,7 @@ namespace GitSharp.Core
         /// <para />
         /// This method rebuilds the contents of the <see cref="Constants.PACKED_REFS"/>
         /// file to match the passed list of references, including only those refs
-        /// that have a storage type of <see cref="Ref.Storage.Packed"/>.
+        /// that have a storage type of <see cref="Storage.Packed"/>.
         /// </summary>
         public void writePackedRefs()
         {
@@ -117,25 +135,26 @@ namespace GitSharp.Core
 
             foreach (Ref r in refs)
             {
-                if (r.StorageFormat != Ref.Storage.Packed)
-                    continue;
-                if (r.PeeledObjectId != null)
+                if (r.StorageFormat.IsPacked && r.IsPeeled)
+                {
                     peeled = true;
+                    break;
+                }
             }
 
-            StringBuilder w = new StringBuilder();
+            var w = new StringBuilder();
             if (peeled)
             {
-                w.Append("# pack-refs with:");
+                w.Append(RefDirectory.PACKED_REFS_HEADER);
                 if (peeled)
-                    w.Append(" peeled");
+                    w.Append(RefDirectory.PACKED_REFS_PEELED);
                 w.Append('\n');
             }
 
-            char[] tmp = new char[Constants.OBJECT_ID_STRING_LENGTH];
+            var tmp = new char[Constants.OBJECT_ID_STRING_LENGTH];
             foreach (Ref r in refs)
             {
-                if (r.StorageFormat != Ref.Storage.Packed)
+                if (r.StorageFormat != Storage.Packed)
                     continue;
 
                 r.ObjectId.CopyTo(tmp, w);

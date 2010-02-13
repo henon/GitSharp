@@ -76,9 +76,9 @@ namespace GitSharp.Core.Transport
 
         public virtual void writeFile(string path, byte[] data)
         {
-			if (data == null)
-				throw new ArgumentNullException("data");
-			
+            if (data == null)
+                throw new ArgumentNullException("data");
+
             using (Stream fs = writeFile(path, null, null))
             {
                 fs.Write(data, 0, data.Length);
@@ -97,8 +97,8 @@ namespace GitSharp.Core.Transport
 
         public void writeRef(string name, ObjectId value)
         {
-			if (value == null)
-				throw new ArgumentNullException ("value");
+            if (value == null)
+                throw new ArgumentNullException("value");
 
             MemoryStream m = new MemoryStream(Constants.OBJECT_ID_STRING_LENGTH + 1);
             BinaryWriter b = new BinaryWriter(m);
@@ -111,9 +111,9 @@ namespace GitSharp.Core.Transport
 
         public void writeInfoPacks(List<string> packNames)
         {
-			if (packNames == null)
-				throw new ArgumentNullException ("packNames");
-			
+            if (packNames == null)
+                throw new ArgumentNullException("packNames");
+
             StringBuilder w = new StringBuilder();
             foreach (string n in packNames)
             {
@@ -127,7 +127,7 @@ namespace GitSharp.Core.Transport
 
         public StreamReader openReader(string path)
         {
-            Stream s  = open(path);
+            Stream s = open(path);
             // StreamReader buffers itself
             return new StreamReader(s, Constants.CHARSET);
         }
@@ -137,7 +137,7 @@ namespace GitSharp.Core.Transport
             using (StreamReader sr = openReader(listPath))
             {
                 List<WalkRemoteObjectDatabase> alts = new List<WalkRemoteObjectDatabase>();
-                for (;;)
+                for (; ; )
                 {
                     string line = sr.ReadLine();
                     if (line == null) break;
@@ -160,7 +160,7 @@ namespace GitSharp.Core.Transport
             }
             catch (FileNotFoundException)
             {
-                
+
             }
             catch (IOException e)
             {
@@ -171,21 +171,29 @@ namespace GitSharp.Core.Transport
         private void readPackedRefsImpl(Dictionary<string, Ref> avail, StreamReader sr)
         {
             Ref last = null;
-            for (;;)
+            bool peeled = false;
+            for (; ; )
             {
                 string line = sr.ReadLine();
 
                 if (line == null)
                     break;
                 if (line[0] == '#')
+                {
+                    if (line.StartsWith(RefDirectory.PACKED_REFS_HEADER))
+                    {
+                        line = line.Substring(RefDirectory.PACKED_REFS_HEADER.Length);
+                        peeled = line.Contains(RefDirectory.PACKED_REFS_PEELED);
+                    }
                     continue;
+                }
 
                 if (line[0] == '^')
                 {
                     if (last == null)
                         throw new TransportException("Peeled line before ref");
                     ObjectId pid = ObjectId.FromString(line.Substring(1));
-                    last = new Ref(Ref.Storage.Packed, last.Name, last.ObjectId, pid, true);
+                    last = new PeeledTag(Storage.Packed, last.Name, last.ObjectId, pid);
                     avail.Add(last.Name, last);
                     continue;
                 }
@@ -195,7 +203,11 @@ namespace GitSharp.Core.Transport
                     throw new TransportException("Unrecognized ref: " + line);
                 ObjectId id = ObjectId.FromString(line.Slice(0, sp));
                 string name = line.Substring(sp + 1);
-                last = new Ref(Ref.Storage.Packed, name, id);
+                if (peeled)
+                    last = new PeeledNonTag(Storage.Packed, name, id);
+                else
+                    last = new Unpeeled(Storage.Packed, name, id);
+
                 avail.Add(last.Name, last);
             }
         }

@@ -65,7 +65,7 @@ namespace GitSharp.Core.Tests.RevWalk
             Assert.IsFalse(a1.Equals((object)a1.Copy()));
             Assert.IsFalse(a1.Equals(string.Empty));
 
-            var rw2 = new GitSharp.Core.RevWalk.RevWalk(db);
+            var rw2 = new Core.RevWalk.RevWalk(db);
             RevCommit a2 = rw2.parseCommit(a1);
             RevCommit b2 = rw2.parseCommit(b1);
             Assert.AreNotSame(a1, a2);

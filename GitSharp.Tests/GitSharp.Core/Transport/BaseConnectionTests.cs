@@ -23,7 +23,7 @@ namespace GitSharp.Core.Tests.Transport
         public void ShouldReturnValueForAValidRef()
         {
             var connection = new StubConnection();
-            var r = new Core.Ref(null, "ref", ObjectId.ZeroId);
+            var r = new Unpeeled(null, "ref", ObjectId.ZeroId);
 
             connection.RefsMap.Add("ref", r);
 

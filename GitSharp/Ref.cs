@@ -39,7 +39,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using GitSharp.Core;
 using ObjectId = GitSharp.Core.ObjectId;
 using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
@@ -94,7 +94,7 @@ namespace GitSharp
 		{
 			get
 			{
-				var branches = _repo._internal_repo._refDb.GetBranches();
+				IDictionary<string, CoreRef> branches = _repo._internal_repo._refDb.getRefs(Constants.R_HEADS);
 				return branches.ContainsKey(Name);
 			}
 		}
@@ -118,7 +118,7 @@ namespace GitSharp
 			var updateRef = db.UpdateRef(this.Name);
 			updateRef.NewObjectId = reference._id;
 			updateRef.IsForceUpdate = true;
-			updateRef.Update();
+			updateRef.update();
 			//db.WriteSymref(Name, other.Name);
 		}
 

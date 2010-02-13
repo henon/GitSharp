@@ -112,7 +112,7 @@ namespace GitSharp
 						var updateRef = _internal_repo.UpdateRef("HEAD");
 						updateRef.NewObjectId = value.Target._id;
 						updateRef.IsForceUpdate = true;
-						updateRef.Update();
+						updateRef.update();
 						_internal_repo.WriteSymref(GitSharp.Core.Constants.HEAD, value.Name);
 					}
 					else
@@ -225,7 +225,7 @@ namespace GitSharp
 		{
 			get
 			{
-				var internal_refs = _internal_repo._refDb.GetBranches();
+				IDictionary<string, Core.Ref> internal_refs = _internal_repo._refDb.getRefs(Constants.R_HEADS);
 				var dict = new Dictionary<string, Branch>(internal_refs.Count);
 				foreach (var pair in internal_refs)
 					dict[pair.Key.TrimStart('/')] = new Branch(this, pair.Value);
@@ -245,7 +245,7 @@ namespace GitSharp
 		{
 			get
 			{
-				var internal_refs = _internal_repo._refDb.GetRemotes();
+				var internal_refs = _internal_repo._refDb.getRefs(Constants.R_REMOTES);
 				var dict = new Dictionary<string, Branch>(internal_refs.Count);
 				foreach (var pair in internal_refs)
 				{

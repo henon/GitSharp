@@ -75,7 +75,7 @@ namespace GitSharp.Core
     /// </summary>
     public class Repository : IDisposable
     {
-        private int _useCnt = 1;
+        private AtomicInteger _useCnt = new AtomicInteger(1);
         internal readonly RefDatabase _refDb; // [henon] need internal for API
 
         private readonly ObjectDirectory _objectDatabase;
@@ -90,6 +90,7 @@ namespace GitSharp.Core
         private DirectoryInfo workDir;
 
         private FileInfo indexFile;
+        private readonly object _padLock = new object();
 
         /// <summary>
         /// Construct a representation of a Git repository.
@@ -182,7 +183,7 @@ namespace GitSharp.Core
                 }
             }
 
-            _refDb = new RefDatabase(this);
+            _refDb = new RefDirectory(this);
             if (objectDir != null)
                 _objectDatabase = new ObjectDirectory(PathUtil.CombineDirectoryPath(objectDir, ""),
                         alternateObjectDir);
@@ -212,9 +213,12 @@ namespace GitSharp.Core
         /// Create a new Git repository initializing the necessary files and
         /// directories.
         /// </summary>
-        	public void Create()
+        public void Create()
         {
-            Create(false);
+            lock (_padLock)
+            {
+                Create(false);
+            }
         }
 
         /// <summary>
@@ -224,31 +228,31 @@ namespace GitSharp.Core
         /// <param name="bare">if true, a bare repository is created.</param>
         public bool Create(bool bare)
         {
-			var reinit = false;
-			
+            var reinit = false;
+
             if (Config.getFile().Exists)
             {
                 reinit = true;
             }
 
-			if (!reinit)
-			{
-            	Directory.Mkdirs();
-            	_refDb.Create();
-            	_objectDatabase.create();
+            if (!reinit)
+            {
+                Directory.Mkdirs();
+                _refDb.create();
+                _objectDatabase.create();
 
-            	const string master = Constants.RefsHeads + Constants.Master;
-				_refDb.Link(Constants.HEAD, master);
-			}
-			
+                const string master = Constants.R_HEADS + Constants.MASTER;
+                _refDb.link(Constants.HEAD, master);
+            }
+
             Config.setInt("core", null, "repositoryformatversion", 0);
             Config.setBoolean("core", null, "filemode", true);
             Config.setBoolean("core", null, "bare", bare);
             Config.setBoolean("core", null, "logallrefupdates", !bare);
 
             Config.save();
-			
-			return reinit;
+
+            return reinit;
         }
 
         public DirectoryInfo ObjectsDirectory
@@ -564,7 +568,7 @@ namespace GitSharp.Core
         /// </returns>
         public RefUpdate UpdateRef(string refName)
         {
-            return _refDb.NewUpdate(refName);
+            return UpdateRef(refName, false);
         }
 
         /// <summary>
@@ -575,7 +579,7 @@ namespace GitSharp.Core
         /// <returns>An update command. The caller must finish populating this command and then invoke one of the update methods to actually make a change.</returns>
         public RefUpdate UpdateRef(string refName, bool detach)
         {
-            return _refDb.NewUpdate(refName, detach);
+            return _refDb.newUpdate(refName, detach);
         }
 
         ///	<summary>
@@ -589,7 +593,7 @@ namespace GitSharp.Core
         ///	<exception cref="IOException">The rename could not be performed.</exception>
         public RefRename RenameRef(string fromRef, string toRef)
         {
-            return _refDb.NewRename(fromRef, toRef);
+            return _refDb.newRename(fromRef, toRef);
         }
 
         ///	<summary>
@@ -914,13 +918,13 @@ namespace GitSharp.Core
             {
                 return ObjectId.FromString(revstr);
             }
-            Ref r = _refDb.ReadRef(revstr);
+            Ref r = _refDb.getRef(revstr);
             return r != null ? r.ObjectId : null;
         }
 
         public void IncrementOpen()
         {
-            Interlocked.Increment(ref _useCnt);
+            _useCnt.incrementAndGet();
         }
 
         /// <summary>
@@ -928,12 +932,13 @@ namespace GitSharp.Core
         /// </summary>
         public void Close()
         {
-            int usageCount = Interlocked.Decrement(ref _useCnt);
+            int usageCount = _useCnt.decrementAndGet();
             if (usageCount == 0)
             {
                 if (_objectDatabase != null)
                 {
                     _objectDatabase.Dispose();
+                    _refDb.Dispose();
                 }
 #if DEBUG
                 GC.SuppressFinalize(this); // Disarm lock-release checker
@@ -960,13 +965,21 @@ namespace GitSharp.Core
         }
 
         /// <summary>
+        /// The reference database which stores the reference namespace.
+        /// </summary>
+        public RefDatabase RefDatabase
+        {
+            get { return _refDb; }
+        }
+
+        /// <summary>
         /// Writes a symref (e.g. HEAD) to disk
         /// </summary>
         /// <param name="name">symref name</param>
         /// <param name="target">pointed to ref</param>
         public void WriteSymref(string name, string target)
         {
-            _refDb.Link(name, target);
+            _refDb.link(name, target);
         }
 
         /// <summary>
@@ -988,14 +1001,6 @@ namespace GitSharp.Core
 
                 return _index;
             }
-        }
-
-        /// <summary>
-        /// Clean up stale caches.
-        /// </summary>
-        public void RefreshFromDisk()
-        {
-            _refDb.ClearCache();
         }
 
         /// <returns>the index file location</returns>
@@ -1103,11 +1108,8 @@ namespace GitSharp.Core
             allListeners.Remove(l);
         }
 
-        internal void fireRefsMaybeChanged()
+        internal void fireRefsChanged()
         {
-            if (_refDb.LastRefModification != _refDb.LastNotifiedRefModification)
-            {
-                _refDb.LastNotifiedRefModification = _refDb.LastRefModification;
                 var @event = new RefsChangedEventArgs(this);
                 List<RepositoryListener> all;
                 lock (listeners)
@@ -1122,7 +1124,6 @@ namespace GitSharp.Core
                 {
                     l.refsChanged(@event);
                 }
-            }
         }
 
         internal void fireIndexChanged()
@@ -1213,34 +1214,64 @@ namespace GitSharp.Core
             }
         }
 
-        public Dictionary<string, Ref> getAllRefs()
+        /// <returns>mutable map of all known refs (heads, tags, remotes).</returns>
+        public IDictionary<string, Ref> getAllRefs()
         {
-            return _refDb.GetAllRefs();
+            try
+            {
+                return _refDb.getRefs(RefDatabase.ALL);
+            }
+            catch (IOException)
+            {
+                return new Dictionary<string, Ref>();
+            }
         }
 
         public Ref getRef(string name)
         {
-            return _refDb.ReadRef(name);
+            return _refDb.getRef(name);
         }
 
-        public Dictionary<string, Ref> getTags()
+        /// <returns>
+        /// mutable map of all tags; key is short tag name ("v1.0") and value
+        /// of the entry contains the ref with the full tag name
+        /// ("refs/tags/v1.0").
+        /// </returns>
+        public IDictionary<string, Ref> getTags()
         {
-            return _refDb.GetTags();
+            try
+            {
+                return _refDb.getRefs(Constants.R_TAGS);
+            }
+            catch (IOException)
+            {
+                return new Dictionary<string, Ref>();
+            }
         }
 
         public Ref Head
         {
-            get { return getRef("HEAD"); }
+            get { return getRef(Constants.HEAD); }
         }
 
         public void Link(string name, string target)
         {
-            _refDb.Link(name, target);
+            _refDb.link(name, target);
         }
 
         public Ref Peel(Ref pRef)
         {
-            return _refDb.Peel(pRef);
+            try
+            {
+                return _refDb.peel(pRef);
+            }
+            catch (IOException e)
+            {
+                // Historical accident; if the reference cannot be peeled due
+                // to some sort of repository access problem we claim that the
+                // same as if the reference was not an annotated tag.
+                return pRef;
+            }
         }
 
         /**
@@ -1248,12 +1279,11 @@ namespace GitSharp.Core
 	     */
         public Dictionary<AnyObjectId, List<Ref>> getAllRefsByPeeledObjectId()
         {
-            Dictionary<String, Ref> allRefs = getAllRefs();
+            IDictionary<string, Ref> allRefs = getAllRefs();
             var ret = new Dictionary<AnyObjectId, List<Ref>>(allRefs.Count);
             foreach (Ref @ref in allRefs.Values)
             {
                 Ref ref2 = @ref;
-                if (!ref2.Peeled)
                     ref2 = Peel(ref2);
                 AnyObjectId target = ref2.PeeledObjectId;
                 if (target == null)
@@ -1314,7 +1344,7 @@ namespace GitSharp.Core
 
             if (len == 0) return false;
 
-            if (refName.EndsWith(".lock")) return false;
+            if (refName.EndsWith(LockFile.SUFFIX)) return false;
 
             int components = 1;
             char p = '\0';
@@ -1376,57 +1406,54 @@ namespace GitSharp.Core
             Close();
         }
 
+        /// <summary>
+        /// Get the name of the reference that {@code HEAD} points to.
+        /// Returns name of current branch (for example {@code refs/heads/master}) or
+        /// an ObjectId in hex format if the current branch is detached.
+        /// <para/>
+        /// This is essentially the same as doing:
+        /// 
+        /// <code>
+        /// return getRef(Constants.HEAD).getTarget().getName()
+        /// </code>
+        /// 
+        /// Except when HEAD is detached, in which case this method returns the
+        /// current ObjectId in hexadecimal string format.
+        /// </summary>
         public string FullBranch
         {
             get
             {
-                var ptr = new FileInfo(Path.Combine(Directory.FullName, Constants.HEAD));
-                string reference;
-                using (var sr = new StreamReader(ptr.FullName))
-                {
-                    reference = sr.ReadLine();
-                }
+                Ref head = getRef(Constants.HEAD);
 
-                if (reference.StartsWith("ref: "))
-                {
-                    reference = reference.Substring(5);
-                }
+                if (head == null)
+                    return null;
+                if (head.isSymbolic())
+                    return head.getTarget().getName();
+                if (head.getObjectId() != null)
+                    return head.getObjectId().Name;
+                return null;
 
-                return reference;
             }
         }
 
+        /// <summary>
+        /// Get the short name of the current branch that {@code HEAD} points to.
+        /// <para/>
+        /// This is essentially the same as {@link #getFullBranch()}, except the
+        /// leading prefix {@code refs/heads/} is removed from the reference before
+        /// it is returned to the caller.
+        /// </summary>
+        /// <returns>
+        /// name of current branch (for example {@code master}), or an
+        /// ObjectId in hex format if the current branch is detached.
+        /// </returns>
         public string getBranch()
         {
-            try
-            {
-                var ptr = new FileInfo(Path.Combine(Directory.FullName, Constants.HEAD));
-                string reference;
-                using (var sr = new StreamReader(ptr.FullName))
-                {
-                    reference = sr.ReadLine();
-                }
-
-                if (reference.StartsWith("ref: "))
-                {
-                    reference = reference.Substring(5);
-                }
-                if (reference.StartsWith("refs/heads/"))
-                {
-                    reference = reference.Substring(11);
-                }
-                return reference;
-            }
-            catch (FileNotFoundException)
-            {
-                var ptr = new FileInfo(Path.Combine(Directory.FullName, "head-name"));
-                string reference;
-                using (var sr = new StreamReader(ptr.FullName))
-                {
-                    reference = sr.ReadLine();
-                }
-                return reference;
-            }
+            string name = FullBranch;
+            if (name != null)
+                return ShortenRefName(name);
+            return name;
         }
 
         /// <summary>
@@ -1434,7 +1461,7 @@ namespace GitSharp.Core
         /// </summary>
         /// <param name="refName"></param>
         /// <returns>A more user friendly ref name</returns>
-        public static string ShortenRefName(string refName)
+        public string ShortenRefName(string refName)
         {
             if (refName.StartsWith(Constants.R_HEADS))
             {
@@ -1468,7 +1495,7 @@ namespace GitSharp.Core
             Ref gitRef = getRef(refName);
             if (gitRef != null)
             {
-                return new ReflogReader(this, gitRef.OriginalName);
+                return new ReflogReader(this, gitRef.Name);
             }
 
             return null;

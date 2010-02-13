@@ -133,7 +133,7 @@ namespace GitSharp.Core.Tests.Transport
         {
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
                                                       "refs/heads/master", false, null, null);
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
             testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, true);
         }
 
@@ -142,7 +142,7 @@ namespace GitSharp.Core.Tests.Transport
         {
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
                                                       "refs/heads/master", false, null, null);
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("0000000000000000000000000000000000000001"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("0000000000000000000000000000000000000001"));
             testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_NONFASTFORWARD, null);
         }
 
@@ -151,7 +151,7 @@ namespace GitSharp.Core.Tests.Transport
         {
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
                                                       "refs/heads/master", false, null, null);
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
             testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_NONFASTFORWARD, null);
         }
 
@@ -160,7 +160,7 @@ namespace GitSharp.Core.Tests.Transport
         {
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "ac7e7e44c1885efb472ad54a78327d66bfc4ecef",
                                           "refs/heads/master", true, null, null);
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
             testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, false);
         }
 
@@ -176,7 +176,7 @@ namespace GitSharp.Core.Tests.Transport
         public void testUpdateDelete()
         {
             RemoteRefUpdate rru = new RemoteRefUpdate(db, null, "refs/heads/master", false, null, null);
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
             testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, true);
         }
 
@@ -191,7 +191,7 @@ namespace GitSharp.Core.Tests.Transport
         public void testUpdateUpToDate()
         {
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9", "refs/heads/master", false, null, null);
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
             testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.UP_TO_DATE, null);
         }
 
@@ -201,7 +201,7 @@ namespace GitSharp.Core.Tests.Transport
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
                                                       "refs/heads/master", false, null,
                                                       ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
             testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.OK, true);
         }
 
@@ -211,7 +211,7 @@ namespace GitSharp.Core.Tests.Transport
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
                                                       "refs/heads/master", false, null,
                                                       ObjectId.FromString("0000000000000000000000000000000000000001"));
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
             testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_REMOTE_CHANGED, null);
         }
 
@@ -221,7 +221,7 @@ namespace GitSharp.Core.Tests.Transport
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
                                           "refs/heads/master", true, null,
                                           ObjectId.FromString("0000000000000000000000000000000000000001"));
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
             testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_REMOTE_CHANGED, null);
         }
 
@@ -231,7 +231,7 @@ namespace GitSharp.Core.Tests.Transport
             connectionUpdateStatus = RemoteRefUpdate.UpdateStatus.REJECTED_OTHER_REASON;
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
                                                       "refs/heads/master", false, null, null);
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
             testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_OTHER_REASON, null);
         }
 
@@ -239,7 +239,7 @@ namespace GitSharp.Core.Tests.Transport
         public void testUpdateMixedCases()
         {
             RemoteRefUpdate rruOk = new RemoteRefUpdate(db, null, "refs/heads/master", false, null, null);
-            Core.Ref refToChange = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            Core.Ref refToChange = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
             RemoteRefUpdate rruReject = new RemoteRefUpdate(db, null, "refs/heads/nonexisting", false, null, null);
             refUpdates.Add(rruOk);
             refUpdates.Add(rruReject);
@@ -254,21 +254,21 @@ namespace GitSharp.Core.Tests.Transport
         public void testTrackingRefUpdateEnabled()
         {
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9", "refs/heads/master", false, "refs/remotes/test/master", null);
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
             refUpdates.Add(rru);
             advertisedRefs.Add(@ref);
             PushResult result = executePush();
             TrackingRefUpdate tru = result.GetTrackingRefUpdate("refs/remotes/test/master");
             Assert.IsNotNull(tru);
             Assert.AreEqual("refs/remotes/test/master", tru.LocalName);
-            Assert.AreEqual(RefUpdate.RefUpdateResult.New, tru.Result);
+            Assert.AreEqual(RefUpdate.RefUpdateResult.NEW, tru.Result);
         }
 
         [Test]
         public void testTrackingRefUpdateDisabled()
         {
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9", "refs/heads/master", false, null, null);
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
             refUpdates.Add(rru);
             advertisedRefs.Add(@ref);
             PushResult result = executePush();
@@ -279,7 +279,7 @@ namespace GitSharp.Core.Tests.Transport
         public void testTrackingRefUpdateOnReject()
         {
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "ac7e7e44c1885efb472ad54a78327d66bfc4ecef", "refs/heads/master", false, null, null);
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("2c349335b7f797072cf729c4f3bb0914ecb6dec9"));
             PushResult result = testOneUpdateStatus(rru, @ref, RemoteRefUpdate.UpdateStatus.REJECTED_NONFASTFORWARD, null);
             Assert.IsTrue(result.TrackingRefUpdates.Count == 0);
         }
@@ -289,7 +289,7 @@ namespace GitSharp.Core.Tests.Transport
         {
             RemoteRefUpdate rru = new RemoteRefUpdate(db, "2c349335b7f797072cf729c4f3bb0914ecb6dec9",
                                                       "refs/heads/master", false, "refs/remotes/test/master", null);
-            Core.Ref @ref = new Core.Ref(Core.Ref.Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
+            Core.Ref @ref = new Unpeeled(Storage.Loose, "refs/heads/master", ObjectId.FromString("ac7e7e44c1885efb472ad54a78327d66bfc4ecef"));
             refUpdates.Add(rru);
             advertisedRefs.Add(@ref);
             PushResult result = executePush();

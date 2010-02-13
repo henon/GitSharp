@@ -185,10 +185,61 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 itr.next();
                 Assert.Fail("iterator allowed next");
             }
-            catch (ArgumentOutOfRangeException err)
+            catch (IndexOutOfRangeException err)
             {
                 // expected
             }
+        }
+
+        [Test]
+        public void testIterator_MissingUnresolvedSymbolicRefIsBug()
+        {
+            global::GitSharp.Core.Ref master = newRef("refs/heads/master", ID_ONE);
+            global::GitSharp.Core.Ref headR = newRef("HEAD", master);
+
+            loose = toList(master);
+            // loose should have added newRef("HEAD", "refs/heads/master")
+            resolved = toList(headR);
+
+            var map = new RefMap("", packed, loose, resolved);
+            IteratorBase<global::GitSharp.Core.Ref> itr = map.values().iterator();
+            
+            try
+            {
+                itr.hasNext();
+                Assert.Fail("iterator did not catch bad input");
+            }
+            catch (InvalidOperationException err)
+            {
+                // expected
+            }
+        }
+
+        [Test]
+        public void testMerge_HeadMaster()
+        {
+            global::GitSharp.Core.Ref master = newRef("refs/heads/master", ID_ONE);
+            global::GitSharp.Core.Ref headU = newRef("HEAD", "refs/heads/master");
+            global::GitSharp.Core.Ref headR = newRef("HEAD", master);
+
+            loose = toList(headU, master);
+            resolved = toList(headR);
+
+            RefMap map = new RefMap("", packed, loose, resolved);
+            Assert.AreEqual(2, map.size());
+            Assert.IsFalse(map.isEmpty());
+            Assert.IsTrue(map.containsKey("refs/heads/master"));
+            Assert.AreSame(master, map.get("refs/heads/master"));
+
+            // resolved overrides loose given same name
+            Assert.AreSame(headR, map.get("HEAD"));
+
+            IteratorBase<global::GitSharp.Core.Ref> itr = map.values().iterator();
+            Assert.IsTrue(itr.hasNext());
+            Assert.AreSame(headR, itr.next());
+            Assert.IsTrue(itr.hasNext());
+            Assert.AreSame(master, itr.next());
+            Assert.IsFalse(itr.hasNext());
         }
 
         [Test]
@@ -331,6 +382,46 @@ namespace GitSharp.Tests.GitSharp.Core.Util
         }
 
         [Test]
+        public void testPut_CollapseResolved()
+        {
+            global::GitSharp.Core.Ref master = newRef("refs/heads/master", ID_ONE);
+            global::GitSharp.Core.Ref headU = newRef("HEAD", "refs/heads/master");
+            global::GitSharp.Core.Ref headR = newRef("HEAD", master);
+            global::GitSharp.Core.Ref a = newRef("refs/heads/A", ID_ONE);
+
+            loose = toList(headU, master);
+            resolved = toList(headR);
+
+            RefMap map = new RefMap("", packed, loose, resolved);
+            Assert.IsNull(map.put(a.getName(), a));
+            Assert.AreSame(a, map.get(a.getName()));
+            Assert.AreSame(headR, map.get("HEAD"));
+        }
+
+        [Test]
+        public void testRemove()
+        {
+            global::GitSharp.Core.Ref master = newRef("refs/heads/master", ID_ONE);
+            global::GitSharp.Core.Ref headU = newRef("HEAD", "refs/heads/master");
+            global::GitSharp.Core.Ref headR = newRef("HEAD", master);
+
+            packed = toList(master);
+            loose = toList(headU, master);
+            resolved = toList(headR);
+
+            RefMap map = new RefMap("", packed, loose, resolved);
+            Assert.IsNull(map.remove("not.a.reference"));
+
+            Assert.AreSame(master, map.remove("refs/heads/master"));
+            Assert.IsNull(map.get("refs/heads/master"));
+
+            Assert.AreSame(headR, map.remove("HEAD"));
+            Assert.IsNull(map.get("HEAD"));
+
+            Assert.IsTrue(map.isEmpty());
+        }
+
+        [Test]
         public void testToString_NoPrefix()
         {
             global::GitSharp.Core.Ref a = newRef("refs/heads/A", ID_ONE);
@@ -418,9 +509,20 @@ namespace GitSharp.Tests.GitSharp.Core.Util
             return b.toRefList();
         }
 
-        private static global::GitSharp.Core.Ref newRef(string name, ObjectId id)
+        private static global::GitSharp.Core.Ref newRef(String name, String dst)
         {
-            return new global::GitSharp.Core.Ref(global::GitSharp.Core.Ref.Storage.Loose, name, id);
+            return newRef(name,
+                    new Unpeeled(Storage.New, dst, null));
+        }
+
+        private static global::GitSharp.Core.Ref newRef(String name, global::GitSharp.Core.Ref dst)
+        {
+            return new SymbolicRef(name, dst);
+        }
+
+        private static global::GitSharp.Core.Ref newRef(String name, ObjectId id)
+        {
+            return new Unpeeled(Storage.Loose, name, id);
         }
     }
 }

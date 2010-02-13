@@ -198,7 +198,7 @@ namespace GitSharp.Core.Transport
 
 		private static ICollection<RefSpec> ExpandPushWildcardsFor(Repository db, IEnumerable<RefSpec> specs)
 		{
-			Dictionary<string, Ref> localRefs = db.getAllRefs();
+			IDictionary<string, Ref> localRefs = db.getAllRefs();
 		    var procRefs = new HashSet<RefSpec>();
 
 			foreach (RefSpec spec in specs)

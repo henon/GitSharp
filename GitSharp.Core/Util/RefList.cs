@@ -70,7 +70,7 @@ namespace GitSharp.Core.Util
 
         private readonly int _cnt;
 
-        RefList(Ref[] list, int cnt)
+        public RefList(Ref[] list, int cnt)
         {
             this._list = list;
             this._cnt = cnt;
@@ -157,7 +157,7 @@ namespace GitSharp.Core.Util
         public T get(string name)
         {
             int idx = find(name);
-            return 0 <= idx ? get(idx) : null;
+            return 0 <= idx ? get(idx) : default(T);
         }
 
         /// <summary>

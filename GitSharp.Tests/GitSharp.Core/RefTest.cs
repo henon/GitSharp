@@ -35,135 +35,152 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Core;
+using GitSharp.Core.Tests;
 using GitSharp.Core.Util;
 using NUnit.Framework;
 
-namespace GitSharp.Core.Tests
+namespace GitSharp.Tests.GitSharp.Core
 {
-	/**
-	 * Misc tests for refs. A lot of things are tested elsewhere so not having a
-	 * test for a ref related method, does not mean it is untested.
-	 */
-	[TestFixture]
-	public class RefTest : SampleDataRepositoryTestCase
-	{
-		[Test]
-		public virtual void testReadAllIncludingSymrefs()
-		{
-			ObjectId masterId = db.Resolve("refs/heads/master");
-			RefUpdate updateRef = db.UpdateRef("refs/remotes/origin/master");
-			updateRef.NewObjectId = masterId;
-			updateRef.IsForceUpdate = true;
-			updateRef.Update();
-			db.WriteSymref("refs/remotes/origin/HEAD", "refs/remotes/origin/master");
+    /**
+     * Misc tests for refs. A lot of things are tested elsewhere so not having a
+     * test for a ref related method, does not mean it is untested.
+     */
+    [TestFixture]
+    public class RefTest : SampleDataRepositoryTestCase
+    {
+        [Test]
+        public virtual void testReadAllIncludingSymrefs()
+        {
+            ObjectId masterId = db.Resolve("refs/heads/master");
+            RefUpdate updateRef = db.UpdateRef("refs/remotes/origin/master");
+            updateRef.setNewObjectId(masterId);
+            updateRef.setForceUpdate(true);
+            updateRef.update();
+            db.WriteSymref("refs/remotes/origin/HEAD", "refs/remotes/origin/master");
 
-			ObjectId r = db.Resolve("refs/remotes/origin/HEAD");
-			Assert.AreEqual(masterId, r);
+            ObjectId r = db.Resolve("refs/remotes/origin/HEAD");
+            Assert.AreEqual(masterId, r);
 
-            IDictionary<string, Core.Ref> allRefs = db.getAllRefs();
-            Core.Ref refHEAD = allRefs["refs/remotes/origin/HEAD"];
-			Assert.IsNotNull(refHEAD);
-			Assert.AreEqual(masterId, refHEAD.ObjectId);
-			Assert.IsTrue(refHEAD.Peeled);
-			Assert.IsNull(refHEAD.PeeledObjectId);
+            IDictionary<string, global::GitSharp.Core.Ref> allRefs = db.getAllRefs();
+            global::GitSharp.Core.Ref refHEAD = allRefs["refs/remotes/origin/HEAD"];
+            Assert.IsNotNull(refHEAD);
+            Assert.AreEqual(masterId, refHEAD.ObjectId);
+            Assert.IsFalse(refHEAD.IsPeeled);
+            Assert.IsNull(refHEAD.PeeledObjectId);
 
-            Core.Ref refmaster = allRefs["refs/remotes/origin/master"];
-			Assert.AreEqual(masterId, refmaster.ObjectId);
-			Assert.IsFalse(refmaster.Peeled);
-			Assert.IsNull(refmaster.PeeledObjectId);
-		}
+            global::GitSharp.Core.Ref refmaster = allRefs["refs/remotes/origin/master"];
+            Assert.AreEqual(masterId, refmaster.ObjectId);
+            Assert.IsFalse(refmaster.IsPeeled);
+            Assert.IsNull(refmaster.PeeledObjectId);
+        }
 
-		[Test]
-		public virtual void testReadSymRefToPacked()
-		{
-			db.WriteSymref("HEAD", "refs/heads/b");
-            Core.Ref @ref = db.getRef("HEAD");
-            Assert.AreEqual(Core.Ref.Storage.LoosePacked, @ref.StorageFormat);
-		}
+        [Test]
+        public virtual void testReadSymRefToPacked()
+        {
+            db.WriteSymref("HEAD", "refs/heads/b");
+            global::GitSharp.Core.Ref @ref = db.getRef("HEAD");
+            Assert.AreEqual(Storage.Loose, @ref.StorageFormat);
+            Assert.IsTrue(@ref.isSymbolic(), "is symref");
+            @ref = @ref.getTarget();
+            Assert.AreEqual("refs/heads/b", @ref.Name);
+            Assert.AreEqual(Storage.Packed, @ref.StorageFormat);
+        }
 
-		[Test]
-		public void testReadSymRefToLoosePacked()
-		{
-			ObjectId pid = db.Resolve("refs/heads/master^");
-			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
-			updateRef.NewObjectId = pid;
-			updateRef.IsForceUpdate = true;
-			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update); // internal
+        [Test]
+        public void testReadSymRefToLoosePacked()
+        {
+            ObjectId pid = db.Resolve("refs/heads/master^");
+            RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+            updateRef.setNewObjectId(pid);
+            updateRef.setForceUpdate(true);
+            RefUpdate.RefUpdateResult update = updateRef.update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.FORCED, update); // internal
 
-			db.WriteSymref("HEAD", "refs/heads/master");
-            Core.Ref @ref = db.getRef("HEAD");
-            Assert.AreEqual(Core.Ref.Storage.LoosePacked, @ref.StorageFormat);
-		}
+            db.WriteSymref("HEAD", "refs/heads/master");
+            global::GitSharp.Core.Ref @ref = db.getRef("HEAD");
+            Assert.AreEqual(Storage.Loose, @ref.StorageFormat);
+            @ref = @ref.getTarget();
+            Assert.AreEqual("refs/heads/master", @ref.Name);
+            Assert.AreEqual(Storage.Loose, @ref.StorageFormat);
+        }
 
-		[Test]
-		public void testReadLooseRef()
-		{
-			RefUpdate updateRef = db.UpdateRef("ref/heads/new");
-			updateRef.NewObjectId = db.Resolve("refs/heads/master");
-			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.New, update);
-            Core.Ref @ref = db.getRef("ref/heads/new");
-            Assert.AreEqual(Core.Ref.Storage.Loose, @ref.StorageFormat);
-		}
+        [Test]
+        public void testReadLooseRef()
+        {
+            RefUpdate updateRef = db.UpdateRef("ref/heads/new");
+            updateRef.setNewObjectId(db.Resolve("refs/heads/master"));
+            RefUpdate.RefUpdateResult update = updateRef.update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.NEW, update);
+            global::GitSharp.Core.Ref @ref = db.getRef("ref/heads/new");
+            Assert.AreEqual(Storage.Loose, @ref.StorageFormat);
+        }
 
-		/// <summary>
-		/// Let an "outsider" Create a loose ref with the same name as a packed one
-		/// </summary>
-		[Test]
-		public void testReadLoosePackedRef()
-		{
-            Core.Ref @ref = db.getRef("refs/heads/master");
-            Assert.AreEqual(Core.Ref.Storage.Packed, @ref.StorageFormat);
-			string path = Path.Combine(db.Directory.FullName, "refs/heads/master");
-			using (FileStream os = new FileStream(path, System.IO.FileMode.OpenOrCreate))
-			{
-			    byte[] buffer = @ref.ObjectId.Name.getBytes();
-			    os.Write(buffer, 0, buffer.Length);
-			    os.WriteByte(Convert.ToByte('\n'));
-			}
+        /// <summary>
+        /// Let an "outsider" Create a loose ref with the same name as a packed one
+        /// </summary>
+        [Test]
+        public void testReadLoosePackedRef()
+        {
+            global::GitSharp.Core.Ref @ref = db.getRef("refs/heads/master");
+            Assert.AreEqual(Storage.Packed, @ref.StorageFormat);
+            string path = Path.Combine(db.Directory.FullName, "refs/heads/master");
+            using (FileStream os = new FileStream(path, System.IO.FileMode.OpenOrCreate))
+            {
+                byte[] buffer = @ref.ObjectId.Name.getBytes();
+                os.Write(buffer, 0, buffer.Length);
+                os.WriteByte(Convert.ToByte('\n'));
+            }
 
-		    @ref = db.getRef("refs/heads/master");
-            Assert.AreEqual(Core.Ref.Storage.LoosePacked, @ref.StorageFormat);
-		}
+            @ref = db.getRef("refs/heads/master");
+            Assert.AreEqual(Storage.Loose, @ref.StorageFormat);
+        }
 
-		///	<summary>
-		/// Modify a packed ref using the API. This creates a loose ref too, ie. LOOSE_PACKED
-		///	</summary>
-		[Test]
-		public void testReadSimplePackedRefSameRepo()
-		{
-            Core.Ref @ref = db.getRef("refs/heads/master");
-			ObjectId pid = db.Resolve("refs/heads/master^");
-            Assert.AreEqual(Core.Ref.Storage.Packed, @ref.StorageFormat);
-			RefUpdate updateRef = db.UpdateRef("refs/heads/master");
-			updateRef.NewObjectId = pid;
-			updateRef.IsForceUpdate = true;
-			RefUpdate.RefUpdateResult update = updateRef.Update();
-			Assert.AreEqual(RefUpdate.RefUpdateResult.Forced, update);
+        ///	<summary>
+        /// Modify a packed ref using the API. This creates a loose ref too, ie. LOOSE_PACKED
+        ///	</summary>
+        [Test]
+        public void testReadSimplePackedRefSameRepo()
+        {
+            global::GitSharp.Core.Ref @ref = db.getRef("refs/heads/master");
+            ObjectId pid = db.Resolve("refs/heads/master^");
+            Assert.AreEqual(Storage.Packed, @ref.StorageFormat);
+            RefUpdate updateRef = db.UpdateRef("refs/heads/master");
+            updateRef.setNewObjectId(pid);
+            updateRef.setForceUpdate(true);
+            RefUpdate.RefUpdateResult update = updateRef.update();
+            Assert.AreEqual(RefUpdate.RefUpdateResult.FORCED, update);
 
-			@ref = db.getRef("refs/heads/master");
-            Assert.AreEqual(Core.Ref.Storage.LoosePacked, @ref.StorageFormat);
-		}
+            @ref = db.getRef("refs/heads/master");
+            Assert.AreEqual(Storage.Loose, @ref.StorageFormat);
+        }
 
-	    [Test]
-	    public void testOrigResolvedNamesBranch()
-	    {
-            Core.Ref @ref = db.getRef("a");
-	        Assert.AreEqual("refs/heads/a", @ref.Name);
-	        Assert.AreEqual("refs/heads/a", @ref.OriginalName);
-	    }
+        [Test]
+        public void testResolvedNamesBranch()
+        {
+            global::GitSharp.Core.Ref @ref = db.getRef("a");
+            Assert.AreEqual("refs/heads/a", @ref.Name);
+        }
 
-	    [Test]
-	    public void testOrigResolvedNamesSymRef()
-	    {
-            Core.Ref @ref = db.getRef("HEAD");
-	        Assert.AreEqual("refs/heads/master", @ref.Name);
-            Assert.AreEqual("HEAD", @ref.OriginalName);
-	    }
-	}
+        [Test]
+        public void testResolvedNamesSymRef()
+        {
+            global::GitSharp.Core.Ref @ref = db.getRef(Constants.HEAD);
+            Assert.AreEqual(Constants.HEAD, @ref.Name);
+            Assert.IsTrue(@ref.isSymbolic(), "is symbolic ref");
+            Assert.AreSame(Storage.Loose, @ref.StorageFormat);
+
+            global::GitSharp.Core.Ref dst = @ref.getTarget();
+            Assert.IsNotNull(dst, "has target");
+            Assert.AreEqual("refs/heads/master", dst.Name);
+
+            Assert.AreSame(dst.ObjectId, @ref.ObjectId);
+            Assert.AreSame(dst.PeeledObjectId, @ref.PeeledObjectId);
+            Assert.AreEqual(dst.IsPeeled, @ref.IsPeeled);
+        }
+    }
 }

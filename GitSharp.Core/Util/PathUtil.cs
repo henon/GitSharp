@@ -77,8 +77,7 @@ namespace GitSharp.Core.Util
         /// <param name="path"></param>
         public static bool DeleteFile(this FileSystemInfo path)
         {
-            DeleteFile(path.FullName);
-            return true;
+            return DeleteFile(path.FullName);
         }
 
         /// <summary>
@@ -91,7 +90,15 @@ namespace GitSharp.Core.Util
             if (!file.Exists) return false;
 
             file.IsReadOnly = false;
-            file.Delete();
+            try
+            {
+                file.Delete();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
             return true;
         }
     }

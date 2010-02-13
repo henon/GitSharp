@@ -151,7 +151,7 @@ namespace GitSharp.Core
         /// </returns>
         public bool hasObject(AnyObjectId objectId)
         {
-            return hasObjectImpl1(objectId) || hasObjectImpl2(objectId.ToString());
+            return hasObjectImpl1(objectId) || hasObjectImpl2(objectId.Name);
         }
 
         private bool hasObjectImpl1(AnyObjectId objectId)

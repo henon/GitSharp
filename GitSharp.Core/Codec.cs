@@ -72,7 +72,7 @@ namespace GitSharp.Core
                             case (byte)'a':
                                 if (typeString[offset + 2] != (byte)'g' || typeString[offset + 2] != endMark)
                                 {
-                                	throw new CorruptObjectException(id, "invalid type");
+                                    throw new CorruptObjectException(id, "invalid type");
                                 }
                                 offset += 4;
                                 return ObjectType.Tag;
@@ -80,7 +80,7 @@ namespace GitSharp.Core
                             case (byte)'r':
                                 if (typeString[offset + 2] != (byte)'e' || typeString[offset + 3] != (byte)'e' || typeString[offset + 4] != endMark)
                                 {
-                                	throw new CorruptObjectException(id, "invalid type");
+                                    throw new CorruptObjectException(id, "invalid type");
                                 }
                                 offset += 5;
                                 return ObjectType.Tree;
@@ -100,16 +100,16 @@ namespace GitSharp.Core
             switch (objectType)
             {
                 case ObjectType.Commit:
-                    return Constants.ObjectTypes.Commit;
+                    return Constants.TYPE_COMMIT;
 
                 case ObjectType.Tree:
-                    return Constants.ObjectTypes.Tree;
+                    return Constants.TYPE_TREE;
 
                 case ObjectType.Blob:
-                    return Constants.ObjectTypes.Blob;
+                    return Constants.TYPE_BLOB;
 
                 case ObjectType.Tag:
-                    return Constants.ObjectTypes.Tag;
+                    return Constants.TYPE_TAG;
 
                 default:
                     throw new ArgumentException("Bad object type was passed", "objectType");
@@ -121,19 +121,19 @@ namespace GitSharp.Core
             switch (objectType)
             {
                 case ObjectType.Commit:
-                    return Constants.ObjectTypes.EncodedCommit;
+                    return Constants.EncodedTypeCommit;
 
                 case ObjectType.Tree:
-                    return Constants.ObjectTypes.EncodedTree;
+                    return Constants.EncodedTypeTree;
 
                 case ObjectType.Blob:
-                    return Constants.ObjectTypes.EncodedBlob;
+                    return Constants.EncodedTypeBlob;
 
                 case ObjectType.Tag:
-                    return Constants.ObjectTypes.EncodedTag;
+                    return Constants.EncodedTypeTag;
 
                 default:
-					throw new ArgumentException("Bad object type was passed", "objectType");
+                    throw new ArgumentException("Bad object type was passed", "objectType");
             }
         }
     }

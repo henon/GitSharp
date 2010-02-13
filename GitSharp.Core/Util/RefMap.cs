@@ -38,6 +38,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 
 namespace GitSharp.Core.Util
@@ -58,7 +59,7 @@ namespace GitSharp.Core.Util
     /// present the unified namespace of the packed-refs file, the loose refs/
     /// directory tree, and the resolved form of any symbolic references.
     /// </summary>
-    public class RefMap
+    public class RefMap : IDictionary<string, Ref>
     {
         /// <summary>
         /// Prefix denoting the reference subspace this map contains.
@@ -230,6 +231,42 @@ namespace GitSharp.Core.Util
             return _entrySet;
         }
 
+        public class RefSet : IIterable<Ref>
+        {
+            private readonly EntrySet _entrySet;
+
+            public RefSet(EntrySet entrySet)
+            {
+                _entrySet = entrySet;
+            }
+
+            public IEnumerator<Ref> GetEnumerator()
+            {
+                return iterator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public IteratorBase<Ref> iterator()
+            {
+                return new LambdaConverterIterator<Ent, Ref>(_entrySet.iterator(), ent => ent.getValue());
+            }
+
+            public int size()
+            {
+                return _entrySet.size();
+            }
+
+            public Ref get(int index)
+            {
+                Ent ent = _entrySet.get(index);
+                return ent.getValue();
+            }
+        }
+
         public class EntrySet : IIterable<Ent>
         {
             private readonly RefMap _refMap;
@@ -289,6 +326,11 @@ namespace GitSharp.Core.Util
             }
         }
 
+        public IEnumerator<KeyValuePair<string, Ref>> GetEnumerator()
+        {
+            return new LambdaConverterIterator<Ent, KeyValuePair<string, Ref>>(entrySet().iterator(), (ent) => new KeyValuePair<string, Ref>(ent.getKey(), ent.getValue()));
+        }
+
         public override string ToString()
         {
             var r = new StringBuilder();
@@ -306,15 +348,14 @@ namespace GitSharp.Core.Util
             return r.ToString();
         }
 
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
         public IIterable<Ref> values()
         {
-            var refs = new List<Ref>();
-            foreach (Ent ent in entrySet())
-            {
-                refs.Add(ent.getValue());
-            }
-
-            return new BasicIterable<Ref>(refs);
+            return new RefSet(entrySet());
         }
 
         private string toRefName(string name)
@@ -372,7 +413,7 @@ namespace GitSharp.Core.Util
                 throw new IndexOutOfRangeException();
             }
 
-            public Ent peek()
+            private Ent peek()
             {
                 if (packedIdx < _refMap._packed.size() && looseIdx < _refMap._loose.size())
                 {
@@ -512,9 +553,80 @@ namespace GitSharp.Core.Util
 
             return new BasicIterable<string>(keys);
         }
+
+        public void Add(KeyValuePair<string, Ref> item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Clear()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(KeyValuePair<string, Ref> item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CopyTo(KeyValuePair<string, Ref>[] array, int arrayIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Remove(KeyValuePair<string, Ref> item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Count
+        {
+            get { return size(); }
+        }
+
+        public bool IsReadOnly
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return containsKey(key);
+        }
+
+        public void Add(string key, Ref value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Remove(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGetValue(string key, out Ref value)
+        {
+            value = get(key);
+            return (value != null);
+        }
+
+        public Ref this[string key]
+        {
+            get { return get(key); }
+            set { throw new NotImplementedException(); }
+        }
+
+        public ICollection<string> Keys
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public ICollection<Ref> Values
+        {
+            get { return new List<Ref>(values()).AsReadOnly(); }
+        }
+
     }
 
 
-
-   
 }

@@ -68,7 +68,7 @@ namespace GitSharp.Core
         {
             _r = repo;
             _buf = new byte[0x2000];
-            _md = new MessageDigest();
+            _md = Constants.newMessageDigest();
         }
 
         ///	<summary>

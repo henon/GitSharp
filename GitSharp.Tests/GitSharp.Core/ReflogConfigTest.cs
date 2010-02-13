@@ -52,7 +52,7 @@ namespace GitSharp.Core.Tests
 
             // check that there are no entries in the reflog and turn off writing
             // reflogs
-            Assert.IsTrue(db.ReflogReader(Constants.HEAD).getReverseEntries().Count == 0, "there should be no entries in reflog");
+            Assert.AreEqual(0, db.ReflogReader(Constants.HEAD).getReverseEntries().Count, "there should be no entries in reflog");
             db.Config.setBoolean("core", null, "logallrefupdates", false);
 
             // do one commit and check that reflog size is 0: no reflogs should be
@@ -135,9 +135,9 @@ namespace GitSharp.Core.Tests
             int nl = commitMsg.IndexOf('\n');
             RefUpdate ru = db.UpdateRef(Constants.HEAD);
             ru.NewObjectId = (commit.CommitId);
-            ru.SetRefLogMessage("commit : "
+            ru.setRefLogMessage("commit : "
                                 + ((nl == -1) ? commitMsg : commitMsg.Slice(0, nl)), false);
-            ru.ForceUpdate();
+            ru.forceUpdate();
                             }
     }
 }

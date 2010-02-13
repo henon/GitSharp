@@ -122,7 +122,7 @@ namespace GitSharp.Core.Transport
         /// <summary>
         /// The refs we advertised as existing at the start of the connection.
         /// </summary>
-        private Dictionary<string, Ref> refs;
+        private IDictionary<string, Ref> refs;
 
         /// <summary>
         /// Capabilities requested by the client.
@@ -221,7 +221,7 @@ namespace GitSharp.Core.Transport
         /// Returns all refs which were advertised to the client.
         /// </summary>
         /// <returns></returns>
-        public Dictionary<string, Ref> getAdvertisedRefs()
+        public IDictionary<string, Ref> getAdvertisedRefs()
         {
             return refs;
         }
@@ -541,11 +541,11 @@ namespace GitSharp.Core.Transport
             adv.advertiseCapability(CAPABILITY_REPORT_STATUS);
             if (allowOfsDelta)
                 adv.advertiseCapability(CAPABILITY_OFS_DELTA);
-            refs = new Dictionary<String, Ref>(db.getAllRefs());
+            refs = db.getAllRefs();
             Ref head = refs[Constants.HEAD];
             refs.Remove(Constants.HEAD);
             adv.send(refs.Values);
-            if (head != null && head.Name.Equals(head.OriginalName))
+            if (!head.IsSymbolic)
                 adv.advertiseHave(head.ObjectId);
             adv.includeAdditionalHaves();
             if (adv.isEmpty())
@@ -799,7 +799,7 @@ namespace GitSharp.Core.Transport
             try
             {
                 RefUpdate ru = db.UpdateRef(cmd.getRefName());
-                ru.RefLogIdent = getRefLogIdent();
+                ru.setRefLogIdent(getRefLogIdent());
                 switch (cmd.getType())
                 {
                     case ReceiveCommand.Type.DELETE:
@@ -809,20 +809,20 @@ namespace GitSharp.Core.Transport
                             // didn't bork its delete request by sending the
                             // wrong zero id rather than the advertised one.
                             //
-                            ru.ExpectedOldObjectId = cmd.getOldId();
+                            ru.setExpectedOldObjectId(cmd.getOldId());
                         }
-                        ru.IsForceUpdate = true;
-                        Status(cmd, ru.Delete(walk));
+                        ru.setForceUpdate(true);
+                        Status(cmd, ru.delete(walk));
                         break;
 
                     case ReceiveCommand.Type.CREATE:
                     case ReceiveCommand.Type.UPDATE:
                     case ReceiveCommand.Type.UPDATE_NONFASTFORWARD:
-                        ru.IsForceUpdate = isAllowNonFastForwards();
-                        ru.ExpectedOldObjectId = cmd.getOldId();
-                        ru.NewObjectId = cmd.getNewId();
-                        ru.SetRefLogMessage("push", true);
-                        Status(cmd, ru.Update(walk));
+                        ru.setForceUpdate(isAllowNonFastForwards());
+                        ru.setExpectedOldObjectId(cmd.getOldId());
+                        ru.setNewObjectId(cmd.getNewId());
+                        ru.setRefLogMessage("push", true);
+                        Status(cmd, ru.update(walk));
                         break;
                 }
             }
@@ -837,27 +837,27 @@ namespace GitSharp.Core.Transport
         {
             switch (result)
             {
-                case RefUpdate.RefUpdateResult.NotAttempted:
+                case RefUpdate.RefUpdateResult.NOT_ATTEMPTED:
                     cmd.setResult(ReceiveCommand.Result.NOT_ATTEMPTED);
                     break;
 
-                case RefUpdate.RefUpdateResult.LockFailure:
-                case RefUpdate.RefUpdateResult.IOFailure:
+                case RefUpdate.RefUpdateResult.LOCK_FAILURE:
+                case RefUpdate.RefUpdateResult.IO_FAILURE:
                     cmd.setResult(ReceiveCommand.Result.LOCK_FAILURE);
                     break;
 
-                case RefUpdate.RefUpdateResult.NoChange:
-                case RefUpdate.RefUpdateResult.New:
-                case RefUpdate.RefUpdateResult.Forced:
-                case RefUpdate.RefUpdateResult.FastForward:
+                case RefUpdate.RefUpdateResult.NO_CHANGE:
+                case RefUpdate.RefUpdateResult.NEW:
+                case RefUpdate.RefUpdateResult.FORCED:
+                case RefUpdate.RefUpdateResult.FAST_FORWARD:
                     cmd.setResult(ReceiveCommand.Result.OK);
                     break;
 
-                case RefUpdate.RefUpdateResult.Rejected:
+                case RefUpdate.RefUpdateResult.REJECTED:
                     cmd.setResult(ReceiveCommand.Result.REJECTED_NONFASTFORWARD);
                     break;
 
-                case RefUpdate.RefUpdateResult.RejectedCurrentBranch:
+                case RefUpdate.RefUpdateResult.REJECTED_CURRENT_BRANCH:
                     cmd.setResult(ReceiveCommand.Result.REJECTED_CURRENT_BRANCH);
                     break;
 

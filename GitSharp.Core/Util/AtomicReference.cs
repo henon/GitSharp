@@ -39,44 +39,47 @@ using System;
 
 namespace GitSharp.Core.Util
 {
-	public class AtomicReference<T>
-	{
-		private T _reference;
-		private Object locker = new Object();
+    public class AtomicReference<T>
+    {
+        private T _reference;
+        private readonly Object _locker = new Object();
 
-		public AtomicReference()
-		{
-		}
+        public AtomicReference()
+        {
+        }
 
-		public AtomicReference(T reference)
-		{
-			_reference = reference;
-		}
+        public AtomicReference(T reference)
+        {
+            _reference = reference;
+        }
 
-		public bool compareAndSet(T expected, T update)
-		{
-			lock (locker)
-			{
-				if ((_reference == null && expected == null) || (_reference != null && _reference.Equals(expected)))
-				{
-					_reference = update;
-					return true;
-				}
-				return false;
-			}
-		}
+        public bool compareAndSet(T expected, T update)
+        {
+            lock (_locker)
+            {
+                if ((Equals(_reference, default(T)) && Equals(expected, default(T))) || (!Equals(_reference, default(T)) && _reference.Equals(expected)))
+                {
+                    _reference = update;
+                    return true;
+                }
+                return false;
+            }
+        }
 
-		public void set(T update)
-		{
-			lock (locker)
-			{
-				_reference = update;
-			}
-		}
+        public void set(T update)
+        {
+            lock (_locker)
+            {
+                _reference = update;
+            }
+        }
 
-		public T get()
-		{
-			return _reference;
-		}
-	}
+        public T get()
+        {
+            lock (_locker)
+            {
+                return _reference;
+            }
+        }
+    }
 }

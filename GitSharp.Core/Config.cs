@@ -720,11 +720,12 @@ namespace GitSharp.Core
 
                     o.Append(e.name);
 
-                    if (e.value != null)
+                    if (MagicEmptyValue != e.value)
                     {
-                        if (MagicEmptyValue != e.value)
+                        o.Append(" =");
+                        if (e.value != null)
                         {
-                            o.Append(" = ");
+                            o.Append(" ");
                             o.Append(EscapeValue(e.value));
                         }
                     }

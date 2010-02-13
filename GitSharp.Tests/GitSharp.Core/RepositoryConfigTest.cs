@@ -38,15 +38,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using GitSharp.Core;
-using GitSharp.Core.Tests.Util;
 using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 
-namespace GitSharp.Core.Tests
+namespace GitSharp.Tests.GitSharp.Core
 {
     [TestFixture]
     public class RepositoryConfigTest
@@ -54,7 +54,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void test001_ReadBareKey()
         {
-            Core.Config c = parse("[foo]\nbar\n");
+            global::GitSharp.Core.Config c = parse("[foo]\nbar\n");
             Assert.AreEqual(true, c.getBoolean("foo", null, "bar", false));
             Assert.AreEqual(string.Empty, c.getString("foo", null, "bar"));
         }
@@ -62,7 +62,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void test002_ReadWithSubsection()
         {
-            Core.Config c = parse("[foo \"zip\"]\nbar\n[foo \"zap\"]\nbar=false\nn=3\n");
+            global::GitSharp.Core.Config c = parse("[foo \"zip\"]\nbar\n[foo \"zap\"]\nbar=false\nn=3\n");
             Assert.AreEqual(true, c.getBoolean("foo", "zip", "bar", false));
             Assert.AreEqual(string.Empty, c.getString("foo", "zip", "bar"));
             Assert.AreEqual(false, c.getBoolean("foo", "zap", "bar", true));
@@ -74,7 +74,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void test003_PutRemote()
         {
-            Core.Config c = new Core.Config();
+            global::GitSharp.Core.Config c = new global::GitSharp.Core.Config();
             c.setString("sec", "ext", "name", "value");
             c.setString("sec", "ext", "name2", "value2");
             string expText = "[sec \"ext\"]\n\tname = value\n\tname2 = value2\n";
@@ -84,7 +84,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void test004_PutGetSimple()
         {
-            Core.Config c = new Core.Config();
+            global::GitSharp.Core.Config c = new global::GitSharp.Core.Config();
             c.setString("my", null, "somename", "false");
             Assert.AreEqual("false", c.getString("my", null, "somename"));
             Assert.AreEqual("[my]\n\tsomename = false\n", c.toText());
@@ -93,7 +93,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void test005_PutGetStringList()
         {
-            Core.Config c = new Core.Config();
+            global::GitSharp.Core.Config c = new global::GitSharp.Core.Config();
             List<string> values = new List<string>();
             values.Add("value1");
             values.Add("value2");
@@ -110,7 +110,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void test006_readCaseInsensitive()
         {
-            Core.Config c = parse("[Foo]\nBar\n");
+            global::GitSharp.Core.Config c = parse("[Foo]\nBar\n");
             Assert.AreEqual(true, c.getBoolean("foo", null, "bar", false));
             Assert.AreEqual(string.Empty, c.getString("foo", null, "bar"));
         }
@@ -121,8 +121,8 @@ namespace GitSharp.Core.Tests
             MockSystemReader mockSystemReader = new MockSystemReader();
             SystemReader.setInstance(mockSystemReader);
             string hostname = mockSystemReader.getHostname();
-            Core.Config userGitConfig = mockSystemReader.openUserConfig();
-            Core.Config localConfig = new Core.Config(userGitConfig);
+            global::GitSharp.Core.Config userGitConfig = mockSystemReader.openUserConfig();
+            global::GitSharp.Core.Config localConfig = new global::GitSharp.Core.Config(userGitConfig);
             mockSystemReader.clearProperties();
 
             string authorName;
@@ -180,7 +180,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void testReadBoolean_TrueFalse1()
         {
-            Core.Config c = parse("[s]\na = true\nb = false\n");
+            global::GitSharp.Core.Config c = parse("[s]\na = true\nb = false\n");
             Assert.AreEqual("true", c.getString("s", null, "a"));
             Assert.AreEqual("false", c.getString("s", null, "b"));
 
@@ -191,7 +191,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void testReadBoolean_TrueFalse2()
         {
-            Core.Config c = parse("[s]\na = TrUe\nb = fAlSe\n");
+            global::GitSharp.Core.Config c = parse("[s]\na = TrUe\nb = fAlSe\n");
             Assert.AreEqual("TrUe", c.getString("s", null, "a"));
             Assert.AreEqual("fAlSe", c.getString("s", null, "b"));
 
@@ -202,7 +202,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void testReadBoolean_YesNo1()
         {
-            Core.Config c = parse("[s]\na = yes\nb = no\n");
+            global::GitSharp.Core.Config c = parse("[s]\na = yes\nb = no\n");
             Assert.AreEqual("yes", c.getString("s", null, "a"));
             Assert.AreEqual("no", c.getString("s", null, "b"));
 
@@ -213,7 +213,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void testReadBoolean_YesNo2()
         {
-            Core.Config c = parse("[s]\na = yEs\nb = NO\n");
+            global::GitSharp.Core.Config c = parse("[s]\na = yEs\nb = NO\n");
             Assert.AreEqual("yEs", c.getString("s", null, "a"));
             Assert.AreEqual("NO", c.getString("s", null, "b"));
 
@@ -224,7 +224,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void testReadBoolean_OnOff1()
         {
-            Core.Config c = parse("[s]\na = on\nb = off\n");
+            global::GitSharp.Core.Config c = parse("[s]\na = on\nb = off\n");
             Assert.AreEqual("on", c.getString("s", null, "a"));
             Assert.AreEqual("off", c.getString("s", null, "b"));
 
@@ -235,7 +235,7 @@ namespace GitSharp.Core.Tests
         [Test]
         public void testReadBoolean_OnOff2()
         {
-            Core.Config c = parse("[s]\na = ON\nb = OFF\n");
+            global::GitSharp.Core.Config c = parse("[s]\na = ON\nb = OFF\n");
             Assert.AreEqual("ON", c.getString("s", null, "a"));
             Assert.AreEqual("OFF", c.getString("s", null, "b"));
 
@@ -265,6 +265,39 @@ namespace GitSharp.Core.Tests
             }
         }
 
+        [Test]
+        public void testBooleanWithNoValue()
+        {
+            global::GitSharp.Core.Config c = parse("[my]\n\tempty\n");
+            Assert.AreEqual("", c.getString("my", null, "empty"));
+            Assert.AreEqual(1, c.getStringList("my", null, "empty").Length);
+            Assert.AreEqual("", c.getStringList("my", null, "empty")[0]);
+            Assert.IsTrue(c.getBoolean("my", "empty", false));
+            Assert.AreEqual("[my]\n\tempty\n", c.toText());
+        }
+
+        [Test]
+        public void testEmptyString()
+        {
+            global::GitSharp.Core.Config c = parse("[my]\n\tempty =\n");
+            Assert.IsNull(c.getString("my", null, "empty"));
+
+            String[] values = c.getStringList("my", null, "empty");
+            Assert.IsNotNull(values);
+            Assert.AreEqual(1, values.Length);
+            Assert.IsNull(values[0]);
+
+            // always matches the default, because its non-boolean
+            Assert.IsTrue(c.getBoolean("my", "empty", true));
+            Assert.IsFalse(c.getBoolean("my", "empty", false));
+
+            Assert.AreEqual("[my]\n\tempty =\n", c.toText());
+
+            c = new global::GitSharp.Core.Config();
+            c.setStringList("my", null, "empty", values.ToList());
+            Assert.AreEqual("[my]\n\tempty =\n", c.toText());
+        }
+
         private void assertReadLong(long exp)
         {
             assertReadLong(exp, exp.ToString());
@@ -272,15 +305,15 @@ namespace GitSharp.Core.Tests
 
         private void assertReadLong(long exp, string act)
         {
-            Core.Config c = parse("[s]\na = " + act + "\n");
+            global::GitSharp.Core.Config c = parse("[s]\na = " + act + "\n");
             Assert.AreEqual(exp, c.getLong("s", null, "a", 0L));
         }
 
-        private Core.Config parse(string content)
+        private global::GitSharp.Core.Config parse(string content)
         {
-            Core.Config c = new Core.Config(null);
+            global::GitSharp.Core.Config c = new global::GitSharp.Core.Config(null);
             c.fromText(content);
             return c;
         }
     }
- }
+}

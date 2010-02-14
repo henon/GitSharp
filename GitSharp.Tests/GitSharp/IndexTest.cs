@@ -148,8 +148,64 @@ namespace GitSharp.API.Tests
 			}
 		}
 
+		/// <summary>
+		/// This testcase shows how to interact with the index without a working directory
+		/// </summary>
+		[Test]
+		public void Add_and_Commit_directly()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var index = repo.Index;
+				index.AddContent("I/am/a.file", "and this is the content\nin me.");
+				Assert.AreEqual("and this is the content\nin me.", index.GetContent("I/am/a.file"));
+				Assert.AreEqual(new[] { "I/am/a.file" }, index.Entries);
+				Assert.IsTrue(index["I/am/a.file"].IsBlob);
+				Assert.AreEqual(index["I/am/a.file"], index["I\\am\\a.file"]); // internal git slash conversion
+				repo.Commit("committing our new file which is not actually present in the working directory.");
+				Assert.AreEqual(new[] { "I/am/a.file" }, index.Entries);
+				repo.CheckoutBranch(repo.CurrentBranch);
+				Assert.IsTrue(new FileInfo(Path.Combine(repo.WorkingDirectory, "I/am/a.file")).Exists);
+			}
+		}
+
+		[Test]
+		public void Access_Index_Members()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				repo.CheckoutBranch("master");
+				var index = repo.Index;
+				Assert.AreEqual(new[] { "a/a1", "a/a1.txt", "a/a2.txt", "b/b1.txt", "b/b2.txt", "c/c1.txt", "c/c2.txt", "master.txt" }, index.Entries);
+				Assert.IsTrue(index["a/a1"].IsBlob);
+				Assert.IsTrue(index["master.txt"].IsBlob);
+			}
+		}
+
+		[Test]
+		public void Stage_Unstage()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var index = repo.Index;
+				index.AddContent("foo/bar", "baz");
+				Assert.AreEqual("baz", index.GetContent("foo/bar"));
+				repo.Commit("committing foo bar baz", Author.Anonymous);
+				index.StageContent("foo/bar", "buzz");
+				Assert.AreEqual("buzz", index.GetContent("foo/bar"));
+				index.Unstage("foo/bar");
+				Assert.AreEqual("baz", index.GetContent("foo/bar"));
+				index.Unstage("foo/bar"); // <--- unstage on committed file has no effect. to remove a file completely from the index we need to use remove
+				Assert.AreEqual("baz", index.GetContent("foo/bar"));
+				index.Remove("foo/bar");
+				Assert.IsNull(index.GetContent("foo/bar"));
+			}
+		}
+
+
 		// TODO: test add's behavior on wrong input data
 		// TODO: test add "."
 		// TODO: test recursive add of directories
+
 	}
 }

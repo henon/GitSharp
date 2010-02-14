@@ -55,9 +55,15 @@ namespace GitSharp
 		public Index(Repository repo)
 		{
 			_repo = repo;
-			GitIndex.FilenameEncoding = repo.PreferredEncoding;
-			if (_repo.PreferredEncoding != Encoding.UTF8 && _repo.PreferredEncoding != Encoding.Default)
-				GitIndex.FilenameEncoding = Encoding.Default;
+			//GitIndex.FilenameEncoding = repo.PreferredEncoding;
+			//if (_repo.PreferredEncoding != Encoding.UTF8 && _repo.PreferredEncoding != Encoding.Default)
+			//   GitIndex.FilenameEncoding = Encoding.Default;
+		}
+
+		static Index()
+		{
+			PathEncoding = Encoding.UTF8;
+			ContentEncoding = Encoding.UTF8;
 		}
 
 		internal GitSharp.Core.GitIndex GitIndex
@@ -100,11 +106,22 @@ namespace GitSharp
 		}
 
 		/// <summary>
+		/// Add a file to index (without relying on the working directory) by specifying the file's content as string. 
+		/// The added file doesn't need to exist in the working directory.
+		/// </summary>
+		/// <param name="path">Relative path in the working directory. Note: the path is encoded using PathEncoding</param>
+		/// <param name="content">The content as string. Note: the content is encoded using ContentEncoding</param>
+		public void AddContent(string path, string content)
+		{
+			AddContent(PathEncoding.GetBytes(path), ContentEncoding.GetBytes(content));
+		}
+
+		/// <summary>
 		/// Add content to the index directly without the need for a file in the working directory.
 		/// </summary>
 		/// <param name="encoded_relative_filepath">encoded file path (relative to working directory)</param>
 		/// <param name="encoded_content">encoded content</param>
-		public void Add(byte[] encoded_relative_filepath, byte[] encoded_content)
+		public void AddContent(byte[] encoded_relative_filepath, byte[] encoded_content)
 		{
 			GitIndex.RereadIfNecessary();
 			GitIndex.add(encoded_relative_filepath, encoded_content);
@@ -143,7 +160,7 @@ namespace GitSharp
 				else if (new DirectoryInfo(path).Exists)
 					RemoveDirectory(new DirectoryInfo(path), false);
 				else
-					throw new ArgumentException("File or directory at <" + path + "> doesn't seem to exist.", "path");
+					GitIndex.Remove(path);
 			}
 			GitIndex.write();
 		}
@@ -186,7 +203,7 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// Stages the given files. Untracked files are added.
+		/// Stages the given files. Untracked files are added. This is an alias for Add.
 		/// </summary>
 		/// <param name="paths"></param>
 		public void Stage(params string[] paths)
@@ -194,10 +211,27 @@ namespace GitSharp
 			Add(paths);
 		}
 
-		public void Unstage(params string[] file)
+		/// <summary>
+		/// This is an alias for AddContent.
+		/// </summary>
+		public void StageContent(string path, string content)
 		{
-			// TODO: make sure it is tracked. then reset to the version in the current commit's tree.
-			throw new NotImplementedException();
+			AddContent(path, content);
+		}
+
+		public void Unstage(params string[] paths)
+		{
+			GitIndex.RereadIfNecessary();
+			foreach (var path in paths)
+			{
+				if (this[path] == null)
+					return;
+				var blob = _repo.Get<Leaf>(path); // <--- we wouldn't want to stage something that is not representing a file
+				if (blob == null)
+					throw new InvalidOperationException("The path does not point to a file! Unstage can not proceed.");
+				AddContent(Core.Repository.GitInternalSlash(PathEncoding.GetBytes(path)), blob.RawData);
+			}
+			GitIndex.write();
 		}
 
 		/// <summary>
@@ -265,5 +299,57 @@ namespace GitSharp
 		{
 			return "Index[" + Path.Combine(_repo.Directory, "index") + "]";
 		}
+
+		/// <summary>
+		/// The encoding to be used to convert file paths from string to byte arrays.
+		/// </summary>
+		public static Encoding PathEncoding
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// The encoding to be used to convert file contents from string to byte arrays.
+		/// </summary>
+		public static Encoding ContentEncoding
+		{
+			get;
+			set;
+		}
+
+
+		public string GetContent(string path)
+		{
+			var blob = this[path];
+			if (blob == null)
+				return null;
+			return ContentEncoding.GetString(blob.RawData);
+		}
+
+		public Blob this[string path]
+		{
+			get
+			{
+				var e = GitIndex.GetEntry(path);
+				if (e == null)
+					return null;
+				return new Blob(_repo, e.ObjectId);
+			}
+			set
+			{
+				//todo
+			}
+		}
+
+		public IEnumerable<string> Entries
+		{
+			get
+			{
+				GitIndex.RereadIfNecessary();
+				return GitIndex.Members.Select(e => e.Name).ToArray();
+			}
+		}
+
 	}
 }

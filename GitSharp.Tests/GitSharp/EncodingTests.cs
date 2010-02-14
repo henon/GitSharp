@@ -148,7 +148,7 @@ namespace GitSharp.API.Tests
 				//File.Copy(Path.Combine(@"Resources\encodingTestData\Shift_JIS", rabbit), filepath);
 
 				// Adding an encoded file to the index without relying on the filesystem
-				repo.Index.Add(UTF8_to_ShiftJIS("ウサギちゃん/Rabbitはウサギです.txt"), new byte[0]);
+				repo.Index.AddContent(UTF8_to_ShiftJIS("ウサギちゃん/Rabbitはウサギです.txt"), new byte[0]);
 
 				var shinjuku_sanchome = UTF8_to_ShiftJIS_filename("東京都/新宿三丁目.txt");
 				var filepath1 = Path.Combine(workingDirectory, shinjuku_sanchome);

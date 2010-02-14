@@ -78,6 +78,8 @@ namespace GitSharp
 		{
 			get
 			{
+				if (_id == null)
+					return null;
 				return _id.Name;
 			}
 		}
@@ -89,6 +91,8 @@ namespace GitSharp
 		{
 			get
 			{
+				if (_id == null)
+					return null;
 				return _id.Abbreviate(_repo._internal_repo).name();
 			}
 		}
@@ -96,10 +100,12 @@ namespace GitSharp
 		/// <summary>
 		/// True if this object is a Blob (or Leaf which is a subclass of Blob).
 		/// </summary>
-		public bool IsBlob
+		public virtual bool IsBlob
 		{
 			get
 			{
+				if (_id == null)
+					return false;
 				return _repo._internal_repo.MapObject(_id, null) is byte[];
 			}
 		}
@@ -107,10 +113,12 @@ namespace GitSharp
 		/// <summary>
 		/// True if this object is a Commit.
 		/// </summary>
-		public bool IsCommit
+		public virtual bool IsCommit
 		{
 			get
 			{
+				if (_id == null)
+					return false;
 				return _repo._internal_repo.MapObject(_id, null) is CoreCommit;
 			}
 		}
@@ -118,10 +126,12 @@ namespace GitSharp
 		/// <summary>
 		/// True if this object is a Tag.
 		/// </summary>
-		public bool IsTag
+		public virtual bool IsTag
 		{
 			get
 			{
+				if (_id == null)
+					return false;
 				return _repo._internal_repo.MapObject(_id, null) is CoreTag;
 			}
 		}
@@ -129,10 +139,12 @@ namespace GitSharp
 		/// <summary>
 		/// True if the internal object is a Tree.
 		/// </summary>
-		public bool IsTree
+		public virtual bool IsTree
 		{
 			get
 			{
+				if (_id == null)
+					return false;
 				return _repo._internal_repo.MapObject(_id, null) is CoreTree;
 			}
 		}

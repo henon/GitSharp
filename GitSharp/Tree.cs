@@ -183,5 +183,33 @@ namespace GitSharp
 		{
 			return "Tree[" + ShortHash + "]";
 		}
+
+		/// <summary>
+		/// Find a Blob or Tree by traversing the tree along the given path. You can access not only direct children
+		/// of the tree but any descendant of this tree.
+		/// <para/>
+		/// The path's directory seperators may be both forward or backslash, it is converted automatically to the internal representation.
+		/// <para/>
+		/// Throws IOException.
+		/// </summary>
+		/// <param name="path">Relative path to a file or directory in the git tree. For directories a trailing slash is allowed</param>
+		/// <returns>A tree or blob object representing the referenced object</returns>
+		public AbstractObject this[string path]
+		{
+			get
+			{
+				var tree_entry = _internal_tree.FindBlobMember(path);
+				if (tree_entry == null)
+					tree_entry = _internal_tree.findTreeMember(path);
+				if (tree_entry == null)
+					return null;
+				if (tree_entry.IsTree)
+					return new Tree(_repo, tree_entry.Id);
+				else if (tree_entry.IsBlob)
+					return new Leaf(_repo, tree_entry as FileTreeEntry);
+				else // if (tree_entry.IsCommit || tree_entry.IsTag)
+					return AbstractObject.Wrap(_repo, tree_entry.Id);
+			}
+		}
 	}
 }

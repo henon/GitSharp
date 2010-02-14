@@ -558,14 +558,20 @@ namespace GitSharp.Core
 
         private class PackList
         {
-            /** Last wall-clock time the directory was read. */
+            /// <summary>
+            /// Last wall-clock time the directory was read.
+            /// </summary>
             private volatile LongWrapper _lastRead = new LongWrapper();
             public long lastRead { get { return _lastRead.Value; } }
 
-            /** Last modification time of {@link ObjectDirectory#packDirectory}. */
+            /// <summary>
+            /// Last modification time of <see cref="ObjectDirectory._packDirectory"/>.
+            /// </summary>
             public readonly long lastModified;
 
-            /** All known packs, sorted by {@link PackFile#SORT}. */
+            /// <summary>
+            /// All known packs, sorted by <see cref="PackFile.PackFileSortComparison"/>.
+            /// </summary>
             public readonly PackFile[] packs;
 
             private bool cannotBeRacilyClean;
@@ -630,6 +636,11 @@ namespace GitSharp.Core
 
                 public long Value { get; set; }
             }
+        }
+
+        public override ObjectDatabase newCachedDatabase()
+        {
+            return new CachedObjectDirectory(this);
         }
     }
 }

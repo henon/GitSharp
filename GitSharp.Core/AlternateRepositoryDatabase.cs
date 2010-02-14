@@ -39,17 +39,28 @@ using System.Collections.Generic;
 
 namespace GitSharp.Core
 {
+    /// <summary>
+    /// An ObjectDatabase of another <see cref="Repository"/>.
+    /// <para/>
+    /// This {@code ObjectDatabase} wraps around another {@code Repository}'s object
+    /// database, providing its contents to the caller, and closing the Repository
+    /// when this database is closed. The primary user of this class is
+    /// <see cref="ObjectDirectory"/> , when the {@code info/alternates} file points at the
+    /// {@code objects/} directory of another repository.
+    /// </summary>
     public sealed class AlternateRepositoryDatabase : ObjectDatabase
     {
         private readonly Repository _repository;
         private readonly ObjectDatabase _objectDatabase;
 
+        /// <param name="alternateRepository">the alternate repository to wrap and export.</param>
         public AlternateRepositoryDatabase(Repository alternateRepository)
         {
             _repository = alternateRepository;
             _objectDatabase = _repository.ObjectDatabase;
         }
 
+        /// <returns>the alternate repository objects are borrowed from.</returns>
         public Repository getRepository()
         {
             return _repository;
@@ -60,12 +71,12 @@ namespace GitSharp.Core
             _repository.Dispose();
         }
 
-		public override void create()
+        public override void create()
         {
             _repository.Create();
         }
 
-		public override bool exists()
+        public override bool exists()
         {
             return _objectDatabase.exists();
         }
@@ -95,9 +106,9 @@ namespace GitSharp.Core
             return _objectDatabase.openObject2(curs, objectName, objectId);
         }
 
-		public override void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
+        public override void OpenObjectInAllPacksImplementation(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
         {
-			_objectDatabase.OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
+            _objectDatabase.OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
         }
 
         protected override ObjectDatabase[] loadAlternates()
@@ -107,6 +118,12 @@ namespace GitSharp.Core
 
         public override void closeAlternates()
         {
+            // Do nothing; these belong to odb to close, not us.
+        }
+
+        public override ObjectDatabase newCachedDatabase()
+        {
+            return _objectDatabase.newCachedDatabase();
         }
     }
 }

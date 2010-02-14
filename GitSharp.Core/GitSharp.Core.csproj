@@ -379,6 +379,8 @@
     <Compile Include="Util\TemporaryBuffer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CachedObjectDirectory.cs" />
+    <Compile Include="CachedObjectDatabase.cs" />
     <Compile Include="Diff\MyersDiff.cs" />
     <Compile Include="Merge\MergeAlgorithm.cs" />
     <Compile Include="Merge\MergeChunk.cs" />

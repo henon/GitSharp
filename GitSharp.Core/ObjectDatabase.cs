@@ -74,10 +74,12 @@ namespace GitSharp.Core
         }
 
         /// <summary>
-        /// Gets if this database is already created; If it returns false, the caller
-        /// should invoke <see cref="create"/> to create this database location.
+        /// Does this database exist yet?
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// true if this database is already created; false if the caller
+        /// should invoke <see cref="create"/> to create this database location.
+        /// </returns>
         public virtual bool exists()
         {
             return true;
@@ -339,7 +341,7 @@ namespace GitSharp.Core
         /// Temporary working space associated with the calling thread.
         /// </param>
         /// <param name="objectId"><see cref="ObjectId"/> of object to search for.</param>
-        public void OpenObjectInAllPacks(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
+        public virtual void OpenObjectInAllPacks(ICollection<PackedObjectLoader> @out, WindowCursor windowCursor, AnyObjectId objectId)
         {
             OpenObjectInAllPacksImplementation(@out, windowCursor, objectId);
             foreach (ObjectDatabase alt in getAlternates())
@@ -428,19 +430,27 @@ namespace GitSharp.Core
             return NoAlternates;
         }
 
-        /**
-         * Close the list of alternates returned by {@link #loadAlternates()}.
-         *
-         * @param alt
-         *            the alternate list, from {@link #loadAlternates()}.
-         */
-
+        /// <summary>
+        /// Close the list of alternates returned by <see cref="loadAlternates"/>.
+        /// </summary>
+        /// <param name="alt">the alternate list, from <see cref="loadAlternates"/>.</param>
         protected void closeAlternates(ObjectDatabase[] alt)
         {
             foreach (ObjectDatabase d in alt)
             {
                 d.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Create a new cached database instance over this database. This instance might
+        /// optimize queries by caching some information about database. So some modifications
+        /// done after instance creation might fail to be noticed.
+        /// </summary>
+        /// <returns>new cached database instance</returns>
+        public virtual ObjectDatabase newCachedDatabase()
+        {
+            return new CachedObjectDatabase(this);
         }
     }
 }

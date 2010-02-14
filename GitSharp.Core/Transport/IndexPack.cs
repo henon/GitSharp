@@ -46,21 +46,46 @@ using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace GitSharp.Core.Transport
 {
+    /// <summary>
+    /// Indexes Git pack files for local use.
+    /// </summary>
     public class IndexPack : IDisposable
     {
+        /// <summary>
+        /// Progress message when reading raw data from the pack.
+        /// </summary>
         public const string PROGRESS_DOWNLOAD = "Receiving objects";
+
+        /// <summary>
+        /// Progress message when computing names of delta compressed objects.
+        /// </summary>
         public const string PROGRESS_RESOLVE_DELTA = "Resolving deltas";
         public const string PackSuffix = ".pack";
         public const string IndexSuffix = ".idx";
+
+        /// <summary>
+        /// Size of the internal stream buffer.
+        /// <para/>
+        /// If callers are going to be supplying IndexPack a BufferedInputStream they
+        /// should use this buffer size as the size of the buffer for that
+        /// BufferedInputStream, and any other its may be wrapping. This way the
+        /// buffers will cascade efficiently and only the IndexPack buffer will be
+        /// receiving the bulk of the data stream.
+        /// </summary>
         public const int BUFFER_SIZE = 8192;
 
         private readonly Repository _repo;
         private readonly FileStream _packOut;
-        private readonly Stream _stream;
+        private Stream _stream;
         private readonly byte[] _buffer;
         private readonly MessageDigest _objectDigest;
         private readonly MutableObjectId _tempObjectId;
         private readonly Crc32 _crc;
+
+        /// <summary>
+        /// Object database used for loading existing objects
+        /// </summary>
+        private readonly ObjectDatabase _objectDatabase;
 
         private Inflater _inflater;
         private long _bBase;
@@ -81,12 +106,25 @@ namespace GitSharp.Core.Transport
         private byte[] _objectData;
         private MessageDigest _packDigest;
         private byte[] _packcsum;
+
+        /// <summary>
+        /// If <see cref="_fixThin"/> this is the last byte of the original checksum.
+        /// </summary>
         private long _originalEof;
         private WindowCursor _windowCursor;
 
+        /// <summary>
+        /// Create a new pack indexer utility.
+        /// </summary>
+        /// <param name="src">
+        /// stream to read the pack data from. If the stream is buffered
+        /// use <see cref="BUFFER_SIZE"/> as the buffer size for the stream.
+        /// </param>
+        /// <param name="dstBase"></param>
         public IndexPack(Repository db, Stream src, FileInfo dstBase)
         {
             _repo = db;
+            _objectDatabase = db.ObjectDatabase.newCachedDatabase();
             _stream = src;
             _crc = new Crc32();
             _inflater = InflaterCache.Instance.get();
@@ -112,31 +150,80 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        /// <summary>
+        /// Set the pack index file format version this instance will create.
+        /// </summary>
+        /// <param name="version">
+        /// the version to write. The special version 0 designates the
+        /// oldest (most compatible) format available for the objects.
+        /// </param>
         public void setIndexVersion(int version)
         {
             _outputVersion = version;
         }
 
+        /// <summary>
+        /// Configure this index pack instance to make a thin pack complete.
+        /// <para/>
+        /// Thin packs are sometimes used during network transfers to allow a delta
+        /// to be sent without a base object. Such packs are not permitted on disk.
+        /// They can be fixed by copying the base object onto the end of the pack.
+        /// </summary>
+        /// <param name="fix">true to enable fixing a thin pack.</param>
         public void setFixThin(bool fix)
         {
             _fixThin = fix;
         }
 
+        /// <summary>
+        /// Configure this index pack instance to keep an empty pack.
+        /// <para/>
+        /// By default an empty pack (a pack with no objects) is not kept, as doing
+        /// so is completely pointless. With no objects in the pack there is no data
+        /// stored by it, so the pack is unnecessary.
+        /// </summary>
+        /// <param name="empty">true to enable keeping an empty pack.</param>
         public void setKeepEmpty(bool empty)
         {
             _keepEmpty = empty;
         }
 
+        /// <summary>
+        /// Configure the checker used to validate received objects.
+        /// <para/>
+        /// Usually object checking isn't necessary, as Git implementations only
+        /// create valid objects in pack files. However, additional checking may be
+        /// useful if processing data from an untrusted source.
+        /// </summary>
+        /// <param name="oc">the checker instance; null to disable object checking.</param>
         public void setObjectChecker(ObjectChecker oc)
         {
             _objCheck = oc;
         }
 
+        /// <summary>
+        /// Configure the checker used to validate received objects.
+        /// <para/>
+        /// Usually object checking isn't necessary, as Git implementations only
+        /// create valid objects in pack files. However, additional checking may be
+        /// useful if processing data from an untrusted source.
+        /// <para/>
+        /// This is shorthand for:
+        /// 
+        /// <pre>
+        /// setObjectChecker(on ? new ObjectChecker() : null);
+        /// </pre>
+        /// </summary>
+        /// <param name="on">true to enable the default checker; false to disable it.</param>
         public void setObjectChecking(bool on)
         {
             setObjectChecker(on ? new ObjectChecker() : null);
         }
 
+        /// <summary>
+        /// Consume data from the input stream until the packfile is indexed.
+        /// </summary>
+        /// <param name="progress">progress feedback</param>
         public void index(ProgressMonitor progress)
         {
             progress.Start(2 /* tasks */);
@@ -207,6 +294,7 @@ namespace GitSharp.Core.Transport
                     finally
                     {
                         _inflater = null;
+                        _objectDatabase.close();
                     }
                     _windowCursor = WindowCursor.Release(_windowCursor);
 
@@ -581,11 +669,18 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        /// <summary>
+        /// Cleanup all resources associated with our input parsing.
+        /// </summary>
         private void EndInput()
         {
+            _stream = null;
             _objectData = null;
         }
 
+        /// <summary>
+        /// Read one entire object or delta from the input.
+        /// </summary>
         private void IndexOneObject()
         {
             long pos = Position();
@@ -677,7 +772,7 @@ namespace GitSharp.Core.Transport
                 }
             }
 
-            ObjectLoader ldr = _repo.OpenObject(_windowCursor, id);
+            ObjectLoader ldr = _objectDatabase.openObject(_windowCursor, id);
             if (ldr != null)
             {
                 byte[] existingData = ldr.CachedBytes;
@@ -688,6 +783,7 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        /// <returns>Current position of <see cref="_bOffset"/> within the entire file.</returns>
         private long Position()
         {
             return _bBase + _bOffset;
@@ -701,6 +797,9 @@ namespace GitSharp.Core.Transport
             _bAvail = 0;
         }
 
+        /// <summary>
+        /// Consume exactly one byte from the buffer and return it.
+        /// </summary>
         private int ReadFromInput()
         {
             if (_bAvail == 0)
@@ -714,6 +813,9 @@ namespace GitSharp.Core.Transport
             return b;
         }
 
+        /// <summary>
+        /// Consume exactly one byte from the buffer and return it.
+        /// </summary>
         private int ReadFromFile()
         {
             if (_bAvail == 0)
@@ -727,12 +829,18 @@ namespace GitSharp.Core.Transport
             return b;
         }
 
+        /// <summary>
+        /// Consume cnt byte from the buffer.
+        /// </summary>
         private void Use(int cnt)
         {
             _bOffset += cnt;
             _bAvail -= cnt;
         }
 
+        /// <summary>
+        /// Ensure at least need bytes are available in in <see cref="_buffer"/>.
+        /// </summary>
         private int FillFromInput(int need)
         {
             while (_bAvail < need)
@@ -757,6 +865,9 @@ namespace GitSharp.Core.Transport
             return _bOffset;
         }
 
+        /// <summary>
+        /// Ensure at least need bytes are available in in <see cref="_buffer"/>.
+        /// </summary>
         private int FillFromFile(int need)
         {
             if (_bAvail < need)
@@ -787,6 +898,9 @@ namespace GitSharp.Core.Transport
             return _bOffset;
         }
 
+        /// <summary>
+        /// Store consumed bytes in <see cref="_buffer"/> up to <see cref="_bOffset"/>.
+        /// </summary>
         private void Sync()
         {
             _packDigest.Update(_buffer, 0, _bOffset);
@@ -942,11 +1056,30 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        /// <summary>
+        /// Rename the pack to it's final name and location and open it.
+        /// <para/>
+        /// If the call completes successfully the repository this IndexPack instance
+        /// was created with will have the objects in the pack available for reading
+        /// and use, without needing to scan for packs.
+        /// </summary>
         public void renameAndOpenPack()
         {
             renameAndOpenPack(null);
         }
 
+        /// <summary>
+        /// Rename the pack to it's final name and location and open it.
+        /// <para/>
+        /// If the call completes successfully the repository this IndexPack instance
+        /// was created with will have the objects in the pack available for reading
+        /// and use, without needing to scan for packs.
+        /// </summary>
+        /// <param name="lockMessage">
+        /// message to place in the pack-*.keep file. If null, no lock
+        /// will be created, and this method returns null.
+        /// </param>
+        /// <returns>the pack lock object, if lockMessage is not null.</returns>
         public PackLock renameAndOpenPack(string lockMessage)
         {
             if (!_keepEmpty && _entryCount == 0)
@@ -972,18 +1105,26 @@ namespace GitSharp.Core.Transport
 
             if (!packDir.Exists && !packDir.Mkdirs() && !packDir.Exists)
             {
+                // The objects/pack directory isn't present, and we are unable
+                // to create it. There is no way to move this pack in.
+                //
                 CleanupTemporaryFiles();
                 throw new IOException("Cannot Create " + packDir);
             }
 
             if (finalPack.Exists)
             {
+                // If the pack is already present we should never replace it.
+                //
                 CleanupTemporaryFiles();
                 return null;
             }
 
             if (lockMessage != null)
             {
+                // If we have a reason to create a keep file for this pack, do
+                // so, or fail fast and don't put the pack in place.
+                //
                 try
                 {
                     if (!keep.Lock(lockMessage))
@@ -1067,6 +1208,20 @@ namespace GitSharp.Core.Transport
             return tail;
         }
 
+        /// <summary>
+        /// Create an index pack instance to load a new pack into a repository.
+        /// <para/>
+        /// The received pack data and generated index will be saved to temporary
+        /// files within the repository's <code>objects</code> directory. To use the
+        /// data contained within them call <see cref="renameAndOpenPack()"/> once the
+        /// indexing is complete.
+        /// </summary>
+        /// <param name="db">the repository that will receive the new pack.</param>
+        /// <param name="stream">
+        /// stream to read the pack data from. If the stream is buffered
+        /// use <see cref="BUFFER_SIZE"/> as the buffer size for the stream.
+        /// </param>
+        /// <returns>a new index pack instance.</returns>
         internal static IndexPack Create(Repository db, Stream stream)
         {
             DirectoryInfo objdir = db.ObjectsDirectory;

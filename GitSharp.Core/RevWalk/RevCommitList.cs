@@ -367,7 +367,9 @@ namespace GitSharp.Core.RevWalk
 		
 		public void Dispose ()
 		{
-			_walker.Dispose();
+			if (_walker != null)			{
+			    _walker.Dispose();
+			}
 		}
 		
 	}

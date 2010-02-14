@@ -42,15 +42,15 @@ using GitSharp.Core;
 using GitSharp.Core.DirectoryCache;
 using GitSharp.Core.Util;
 using NUnit.Framework;
-using FileMode=GitSharp.Core.FileMode;
+using FileMode = GitSharp.Core.FileMode;
 
 
 namespace GitSharp.Core.Tests.DirectoryCache
 {
-	[TestFixture]
-	public class DirCacheCGitCompatabilityTest : RepositoryTestCase
-	{
-		private readonly FileInfo _index = new FileInfo("Resources/gitgit.index");
+    [TestFixture]
+    public class DirCacheCGitCompatabilityTest : RepositoryTestCase
+    {
+        private readonly FileInfo _index = new FileInfo("Resources/gitgit.index");
 
         [Test]
         public void testReadIndex_LsFiles()
@@ -69,147 +69,147 @@ namespace GitSharp.Core.Tests.DirectoryCache
             }
         }
 
-		[Test]
-		public void testTreeWalk_LsFiles()
-		{
-			List<CGitIndexRecord> ls = ReadLsFiles();
-			var dc = new DirCache(_index);
-			Assert.AreEqual(0, dc.getEntryCount());
-			dc.read();
-			Assert.AreEqual(ls.Count, dc.getEntryCount());
+        [Test]
+        public void testTreeWalk_LsFiles()
+        {
+            List<CGitIndexRecord> ls = ReadLsFiles();
+            var dc = new DirCache(_index);
+            Assert.AreEqual(0, dc.getEntryCount());
+            dc.read();
+            Assert.AreEqual(ls.Count, dc.getEntryCount());
 
-			var rItr = ls.GetEnumerator();
-			var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
-			tw.reset();
-			tw.Recursive = true;
-			tw.addTree(new DirCacheIterator(dc));
-			while (rItr.MoveNext())
-			{
-				Assert.IsTrue(tw.next());
-				var dcItr = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
-				Assert.IsNotNull(dcItr);
-				AssertAreEqual(rItr.Current, dcItr.getDirCacheEntry());
-			}
-		}
+            var rItr = ls.GetEnumerator();
+            var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
+            tw.reset();
+            tw.Recursive = true;
+            tw.addTree(new DirCacheIterator(dc));
+            while (rItr.MoveNext())
+            {
+                Assert.IsTrue(tw.next());
+                var dcItr = tw.getTree<DirCacheIterator>(0, typeof(DirCacheIterator));
+                Assert.IsNotNull(dcItr);
+                AssertAreEqual(rItr.Current, dcItr.getDirCacheEntry());
+            }
+        }
 
-		[Test]
-		public void testReadIndex_DirCacheTree()
-		{
-			List<CGitIndexRecord> cList = ReadLsFiles();
-			List<CGitLsTreeRecord> cTree = ReadLsTree();
-			var dc = new DirCache(_index);
-			Assert.AreEqual(0, dc.getEntryCount());
-			dc.read();
-			Assert.AreEqual(cList.Count, dc.getEntryCount());
+        [Test]
+        public void testReadIndex_DirCacheTree()
+        {
+            List<CGitIndexRecord> cList = ReadLsFiles();
+            List<CGitLsTreeRecord> cTree = ReadLsTree();
+            var dc = new DirCache(_index);
+            Assert.AreEqual(0, dc.getEntryCount());
+            dc.read();
+            Assert.AreEqual(cList.Count, dc.getEntryCount());
 
-			DirCacheTree jTree = dc.getCacheTree(false);
-			Assert.IsNotNull(jTree);
-			Assert.AreEqual(string.Empty, jTree.getNameString());
-			Assert.AreEqual(string.Empty, jTree.getPathString());
-			Assert.IsTrue(jTree.isValid());
-			Assert.AreEqual(ObjectId
-					.FromString("698dd0b8d0c299f080559a1cffc7fe029479a408"), jTree
-					.getObjectId());
-			Assert.AreEqual(cList.Count, jTree.getEntrySpan());
+            DirCacheTree jTree = dc.getCacheTree(false);
+            Assert.IsNotNull(jTree);
+            Assert.AreEqual(string.Empty, jTree.getNameString());
+            Assert.AreEqual(string.Empty, jTree.getPathString());
+            Assert.IsTrue(jTree.isValid());
+            Assert.AreEqual(ObjectId
+                    .FromString("698dd0b8d0c299f080559a1cffc7fe029479a408"), jTree
+                    .getObjectId());
+            Assert.AreEqual(cList.Count, jTree.getEntrySpan());
 
-			var subtrees = new List<CGitLsTreeRecord>();
-			foreach (CGitLsTreeRecord r in cTree)
-			{
-				if (FileMode.Tree.Equals(r.Mode))
-					subtrees.Add(r);
-			}
-			Assert.AreEqual(subtrees.Count, jTree.getChildCount());
+            var subtrees = new List<CGitLsTreeRecord>();
+            foreach (CGitLsTreeRecord r in cTree)
+            {
+                if (FileMode.Tree.Equals(r.Mode))
+                    subtrees.Add(r);
+            }
+            Assert.AreEqual(subtrees.Count, jTree.getChildCount());
 
-			for (int i = 0; i < jTree.getChildCount(); i++)
-			{
-				DirCacheTree sj = jTree.getChild(i);
-				CGitLsTreeRecord sc = subtrees[i];
-				Assert.AreEqual(sc.Path, sj.getNameString());
-				Assert.AreEqual(sc.Path + "/", sj.getPathString());
-				Assert.IsTrue(sj.isValid());
-				Assert.AreEqual(sc.Id, sj.getObjectId());
-			}
-		}
+            for (int i = 0; i < jTree.getChildCount(); i++)
+            {
+                DirCacheTree sj = jTree.getChild(i);
+                CGitLsTreeRecord sc = subtrees[i];
+                Assert.AreEqual(sc.Path, sj.getNameString());
+                Assert.AreEqual(sc.Path + "/", sj.getPathString());
+                Assert.IsTrue(sj.isValid());
+                Assert.AreEqual(sc.Id, sj.getObjectId());
+            }
+        }
 
-		private static void AssertAreEqual(CGitIndexRecord c, DirCacheEntry j)
-		{
-			Assert.IsNotNull(c);
-			Assert.IsNotNull(j);
+        private static void AssertAreEqual(CGitIndexRecord c, DirCacheEntry j)
+        {
+            Assert.IsNotNull(c);
+            Assert.IsNotNull(j);
 
-			Assert.AreEqual(c.Path, j.getPathString());
-			Assert.AreEqual(c.Id, j.getObjectId());
-			Assert.AreEqual(c.Mode, j.getRawMode());
-			Assert.AreEqual(c.Stage, j.getStage());
-		}
+            Assert.AreEqual(c.Path, j.getPathString());
+            Assert.AreEqual(c.Id, j.getObjectId());
+            Assert.AreEqual(c.Mode, j.getRawMode());
+            Assert.AreEqual(c.Stage, j.getStage());
+        }
 
-		private static List<CGitIndexRecord> ReadLsFiles()
-		{
-			var r = new List<CGitIndexRecord>();
-			using (var br = new StreamReader(new FileStream("Resources/gitgit.lsfiles", System.IO.FileMode.Open, FileAccess.Read), Constants.CHARSET))
-			{
-				string line;
-				while (!string.IsNullOrEmpty(line = br.ReadLine()))
-				{
-					var cr = new CGitIndexRecord(line);
-					r.Add(cr);
-				}
-			}
-			return r;
-		}
+        private static List<CGitIndexRecord> ReadLsFiles()
+        {
+            var r = new List<CGitIndexRecord>();
+            using (var br = new StreamReader(new FileStream("Resources/gitgit.lsfiles", System.IO.FileMode.Open, FileAccess.Read), Constants.CHARSET))
+            {
+                string line;
+                while (!string.IsNullOrEmpty(line = br.ReadLine()))
+                {
+                    var cr = new CGitIndexRecord(line);
+                    r.Add(cr);
+                }
+            }
+            return r;
+        }
 
-		private static List<CGitLsTreeRecord> ReadLsTree()
-		{
-			var r = new List<CGitLsTreeRecord>();
-			using (var br = new StreamReader(new FileStream("Resources/gitgit.lstree", System.IO.FileMode.Open, System.IO.FileAccess.Read), Constants.CHARSET))
-			{
-				string line;
-				while ((line = br.ReadLine()) != null)
-				{
-					r.Add(new CGitLsTreeRecord(line));
-				}
-			}
-			
-			return r;
-		}
+        private static List<CGitLsTreeRecord> ReadLsTree()
+        {
+            var r = new List<CGitLsTreeRecord>();
+            using (var br = new StreamReader(new FileStream("Resources/gitgit.lstree", System.IO.FileMode.Open, System.IO.FileAccess.Read), Constants.CHARSET))
+            {
+                string line;
+                while ((line = br.ReadLine()) != null)
+                {
+                    r.Add(new CGitLsTreeRecord(line));
+                }
+            }
 
-		#region Nested Types
+            return r;
+        }
 
-		private class CGitIndexRecord
-		{
-			public int Mode { get; private set; }
-			public ObjectId Id { get; private set; }
-			public int Stage { get; private set; }
-			public string Path { get; private set; }
+        #region Nested Types
 
-			public CGitIndexRecord(string line)
-			{
-				int tab = line.IndexOf('\t');
-				int sp1 = line.IndexOf(' ');
-				int sp2 = line.IndexOf(' ', sp1 + 1);
-				Mode = NB.BaseToDecimal(line.Slice(0, sp1), 8);
-				Id = ObjectId.FromString(line.Slice(sp1 + 1, sp2));
-				Stage = int.Parse(line.Slice(sp2 + 1, tab));
-				Path = line.Substring(tab + 1);
-			}
-		}
+        private class CGitIndexRecord
+        {
+            public int Mode { get; private set; }
+            public ObjectId Id { get; private set; }
+            public int Stage { get; private set; }
+            public string Path { get; private set; }
 
-		private class CGitLsTreeRecord
-		{
-			public int Mode { get; private set; }
-			public ObjectId Id { get; private set; }
-			public string Path { get; private set; }
+            public CGitIndexRecord(string line)
+            {
+                int tab = line.IndexOf('\t');
+                int sp1 = line.IndexOf(' ');
+                int sp2 = line.IndexOf(' ', sp1 + 1);
+                Mode = NB.BaseToDecimal(line.Slice(0, sp1), 8);
+                Id = ObjectId.FromString(line.Slice(sp1 + 1, sp2));
+                Stage = int.Parse(line.Slice(sp2 + 1, tab));
+                Path = line.Substring(tab + 1);
+            }
+        }
 
-			public CGitLsTreeRecord(string line)
-			{
-				int tab = line.IndexOf('\t');
-				int sp1 = line.IndexOf(' ');
-				int sp2 = line.IndexOf(' ', sp1 + 1);
-				Mode = NB.BaseToDecimal(line.Slice(0, sp1), 8);
-				Id = ObjectId.FromString(line.Slice(sp2 + 1, tab));
-				Path = line.Substring(tab + 1);
-			}
-		}
+        private class CGitLsTreeRecord
+        {
+            public int Mode { get; private set; }
+            public ObjectId Id { get; private set; }
+            public string Path { get; private set; }
 
-		#endregion
-	}
+            public CGitLsTreeRecord(string line)
+            {
+                int tab = line.IndexOf('\t');
+                int sp1 = line.IndexOf(' ');
+                int sp2 = line.IndexOf(' ', sp1 + 1);
+                Mode = NB.BaseToDecimal(line.Slice(0, sp1), 8);
+                Id = ObjectId.FromString(line.Slice(sp2 + 1, tab));
+                Path = line.Substring(tab + 1);
+            }
+        }
+
+        #endregion
+    }
 }

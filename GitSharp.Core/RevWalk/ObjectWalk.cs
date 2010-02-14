@@ -308,9 +308,9 @@ namespace GitSharp.Core.RevWalk
                         _treeWalk.getEntryObjectId(IdBuffer);
 
                         throw new CorruptObjectException("Invalid mode " + mode
-                                + " for " + IdBuffer + " "
-                                + _treeWalk.EntryPathString + " in " + _currentTree
-                                + ".");
+                                + " for " + IdBuffer.Name + " '"
+                                + _treeWalk.EntryPathString + "' in "
+                                + _currentTree.Name + ".");
                 }
 
                 _treeWalk = _treeWalk.next();

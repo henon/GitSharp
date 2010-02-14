@@ -99,6 +99,16 @@ namespace GitSharp
 			}
 		}
 
+		public override bool IsTag
+		{
+			get
+			{
+				if (InternalTag == null)
+					return false;
+				return true;
+			}
+		}
+
 		/// <summary>
 		/// The tag name.
 		/// </summary>

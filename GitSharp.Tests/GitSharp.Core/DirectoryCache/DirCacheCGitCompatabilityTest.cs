@@ -36,19 +36,21 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Core;
 using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.Tests.Util;
+using GitSharp.Core.TreeWalk;
 using GitSharp.Core.Util;
 using NUnit.Framework;
 using FileMode = GitSharp.Core.FileMode;
 
-
-namespace GitSharp.Core.Tests.DirectoryCache
+namespace GitSharp.Tests.GitSharp.Core.DirectoryCache
 {
     [TestFixture]
-    public class DirCacheCGitCompatabilityTest : RepositoryTestCase
+    public class DirCacheCGitCompatabilityTest : LocalDiskRepositoryTestCase
     {
         private readonly FileInfo _index = new FileInfo("Resources/gitgit.index");
 
@@ -72,6 +74,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
         [Test]
         public void testTreeWalk_LsFiles()
         {
+            global::GitSharp.Core.Repository db = createBareRepository();
             List<CGitIndexRecord> ls = ReadLsFiles();
             var dc = new DirCache(_index);
             Assert.AreEqual(0, dc.getEntryCount());
@@ -79,7 +82,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
             Assert.AreEqual(ls.Count, dc.getEntryCount());
 
             var rItr = ls.GetEnumerator();
-            var tw = new GitSharp.Core.TreeWalk.TreeWalk(db);
+            var tw = new TreeWalk(db);
             tw.reset();
             tw.Recursive = true;
             tw.addTree(new DirCacheIterator(dc));
@@ -108,8 +111,8 @@ namespace GitSharp.Core.Tests.DirectoryCache
             Assert.AreEqual(string.Empty, jTree.getPathString());
             Assert.IsTrue(jTree.isValid());
             Assert.AreEqual(ObjectId
-                    .FromString("698dd0b8d0c299f080559a1cffc7fe029479a408"), jTree
-                    .getObjectId());
+                                .FromString("698dd0b8d0c299f080559a1cffc7fe029479a408"), jTree
+                                                                                             .getObjectId());
             Assert.AreEqual(cList.Count, jTree.getEntrySpan());
 
             var subtrees = new List<CGitLsTreeRecord>();

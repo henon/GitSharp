@@ -59,7 +59,7 @@ namespace GitSharp.API.Tests
 				Assert.IsTrue(core_repo is GitSharp.Core.Repository);
 			}
 		}
-		
+
 		[Test]
 		public void FindRepository()
 		{
@@ -91,10 +91,48 @@ namespace GitSharp.API.Tests
 			{
 				var path = Path.GetRandomFileName();
 				var directory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), path));
-				
+
 				Assert.AreEqual(null, Repository.FindRepository(directory.FullName));
-				
+
 				directory.Delete();
+			}
+		}
+
+		[Test]
+		public void AccessGitObjects()
+		{
+			// standard access of git objects, supported by gitsharp.core
+			using (var repo = this.GetTrashRepository())
+			{
+				Assert.IsTrue(repo.Get<Commit>("master").IsCommit);
+				Assert.NotNull(repo.Get<Branch>("master"));
+				Assert.NotNull(repo.Get<Branch>("master").Target);
+				Assert.IsTrue(repo.Get<Commit>("HEAD^^").IsCommit);
+				Assert.IsTrue(repo.Get<Tag>("A").IsTag);
+				Assert.IsTrue(repo.Get<Branch>("a").Target.IsCommit);
+				Assert.IsTrue(repo.Get<Commit>("a").IsCommit);
+				Assert.IsTrue(repo.Get<Commit>("prefix/a").IsCommit);
+				Assert.IsTrue(repo.Get<Commit>("68cb1f232964f3cd698afc1dafe583937203c587").IsCommit);
+				Assert.NotNull(repo.Get<Blob>("a")); // <--- returns a blob containing the raw representation of tree "a" on master
+				Assert.IsTrue(repo.Get<Tree>("a").IsTree); // <--- there is a directory "a" on master
+				Assert.IsTrue(repo.Get<Tree>("a/").IsTree);
+				Assert.NotNull(repo.Get<Blob>("a/a1"));
+				Assert.NotNull(repo.Get<Leaf>("a/a1"));
+			}
+		}
+
+		[Ignore]
+		[Test]
+		public void AccessGitObjectsMagic()
+		{
+			// not currently supported by gitsharp.core. requires some magic to resolve these cases
+			using (var repo = this.GetTrashRepository())
+			{
+				Assert.IsTrue(repo.Get<Commit>("49322bb1").IsCommit); // abbrev. hashes are not yet supported!
+				Assert.IsTrue(repo.Get<Commit>("68cb1f2").IsCommit);
+				Assert.IsTrue(repo.Get<Tree>("HEAD^^").IsTree); // some magic is required for this
+				Assert.IsNotNull(repo.Get<Blob>("68cb1f232964f3cd698afc1dafe583937203c587")); // <--- returns the commit as blob (i.e. for inspection of the raw contents)
+				Assert.IsTrue(repo.Get<Tree>("68cb1f232964f3cd698afc1dafe583937203c587").IsTree); // <--- returns the commit as blob (i.e. for inspection of the raw contents)
 			}
 		}
 	}

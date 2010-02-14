@@ -46,1119 +46,1119 @@ using ICSharpCode.SharpZipLib.Zip.Compression;
 
 namespace GitSharp.Core.Transport
 {
-	public class IndexPack : IDisposable
-	{
-		public const string PROGRESS_DOWNLOAD = "Receiving objects";
-		public const string PROGRESS_RESOLVE_DELTA = "Resolving deltas";
-		public const string PackSuffix = ".pack";
-		public const string IndexSuffix = ".idx";
-		public const int BUFFER_SIZE = 8192;
+    public class IndexPack : IDisposable
+    {
+        public const string PROGRESS_DOWNLOAD = "Receiving objects";
+        public const string PROGRESS_RESOLVE_DELTA = "Resolving deltas";
+        public const string PackSuffix = ".pack";
+        public const string IndexSuffix = ".idx";
+        public const int BUFFER_SIZE = 8192;
 
-		private readonly Repository _repo;
-		private readonly FileStream _packOut;
-		private readonly Stream _stream;
-		private readonly byte[] _buffer;
-		private readonly MessageDigest _objectDigest;
-		private readonly MutableObjectId _tempObjectId;
-		private readonly Crc32 _crc;
+        private readonly Repository _repo;
+        private readonly FileStream _packOut;
+        private readonly Stream _stream;
+        private readonly byte[] _buffer;
+        private readonly MessageDigest _objectDigest;
+        private readonly MutableObjectId _tempObjectId;
+        private readonly Crc32 _crc;
 
-		private Inflater _inflater;
-		private long _bBase;
-		private int _bOffset;
-		private int _bAvail;
-		private ObjectChecker _objCheck;
-		private bool _fixThin;
-		private bool _keepEmpty;
-		private int _outputVersion;
-		private readonly FileInfo _dstPack;
-		private readonly FileInfo _dstIdx;
-		private long _objectCount;
-		private PackedObjectInfo[] _entries;
-		private int _deltaCount;
-		private int _entryCount;
-		private ObjectIdSubclassMap<DeltaChain> _baseById;
-		private LongMap<UnresolvedDelta> _baseByPos;
-		private byte[] _objectData;
-		private MessageDigest _packDigest;
-		private byte[] _packcsum;
-		private long _originalEof;
-		private WindowCursor _windowCursor;
+        private Inflater _inflater;
+        private long _bBase;
+        private int _bOffset;
+        private int _bAvail;
+        private ObjectChecker _objCheck;
+        private bool _fixThin;
+        private bool _keepEmpty;
+        private int _outputVersion;
+        private readonly FileInfo _dstPack;
+        private readonly FileInfo _dstIdx;
+        private long _objectCount;
+        private PackedObjectInfo[] _entries;
+        private int _deltaCount;
+        private int _entryCount;
+        private ObjectIdSubclassMap<DeltaChain> _baseById;
+        private LongMap<UnresolvedDelta> _baseByPos;
+        private byte[] _objectData;
+        private MessageDigest _packDigest;
+        private byte[] _packcsum;
+        private long _originalEof;
+        private WindowCursor _windowCursor;
 
-		public IndexPack(Repository db, Stream src, FileInfo dstBase)
-		{
-			_repo = db;
-			_stream = src;
-			_crc = new Crc32();
-			_inflater = InflaterCache.Instance.get();
-			_windowCursor = new WindowCursor();
-			_buffer = new byte[BUFFER_SIZE];
-			_objectData = new byte[BUFFER_SIZE];
-			_objectDigest = Constants.newMessageDigest();
-			_tempObjectId = new MutableObjectId();
-			_packDigest = Constants.newMessageDigest();
+        public IndexPack(Repository db, Stream src, FileInfo dstBase)
+        {
+            _repo = db;
+            _stream = src;
+            _crc = new Crc32();
+            _inflater = InflaterCache.Instance.get();
+            _windowCursor = new WindowCursor();
+            _buffer = new byte[BUFFER_SIZE];
+            _objectData = new byte[BUFFER_SIZE];
+            _objectDigest = Constants.newMessageDigest();
+            _tempObjectId = new MutableObjectId();
+            _packDigest = Constants.newMessageDigest();
 
-			if (dstBase != null)
-			{
-				DirectoryInfo dir = dstBase.Directory;
-				string nam = dstBase.Name;
-				_dstPack = new FileInfo(Path.Combine(dir.FullName, GetPackFileName(nam)));
-				_dstIdx = new FileInfo(Path.Combine(dir.FullName, GetIndexFileName(nam)));
-				_packOut = _dstPack.Create();
-			}
-			else
-			{
-				_dstPack = null;
-				_dstIdx = null;
-			}
-		}
+            if (dstBase != null)
+            {
+                DirectoryInfo dir = dstBase.Directory;
+                string nam = dstBase.Name;
+                _dstPack = new FileInfo(Path.Combine(dir.FullName, GetPackFileName(nam)));
+                _dstIdx = new FileInfo(Path.Combine(dir.FullName, GetIndexFileName(nam)));
+                _packOut = _dstPack.Create();
+            }
+            else
+            {
+                _dstPack = null;
+                _dstIdx = null;
+            }
+        }
 
-		public void setIndexVersion(int version)
-		{
-			_outputVersion = version;
-		}
+        public void setIndexVersion(int version)
+        {
+            _outputVersion = version;
+        }
 
-		public void setFixThin(bool fix)
-		{
-			_fixThin = fix;
-		}
+        public void setFixThin(bool fix)
+        {
+            _fixThin = fix;
+        }
 
-		public void setKeepEmpty(bool empty)
-		{
-			_keepEmpty = empty;
-		}
+        public void setKeepEmpty(bool empty)
+        {
+            _keepEmpty = empty;
+        }
 
-		public void setObjectChecker(ObjectChecker oc)
-		{
-			_objCheck = oc;
-		}
+        public void setObjectChecker(ObjectChecker oc)
+        {
+            _objCheck = oc;
+        }
 
-		public void setObjectChecking(bool on)
-		{
-			setObjectChecker(on ? new ObjectChecker() : null);
-		}
+        public void setObjectChecking(bool on)
+        {
+            setObjectChecker(on ? new ObjectChecker() : null);
+        }
 
-		public void index(ProgressMonitor progress)
-		{
-			progress.Start(2 /* tasks */);
-			try
-			{
-				try
-				{
-					ReadPackHeader();
+        public void index(ProgressMonitor progress)
+        {
+            progress.Start(2 /* tasks */);
+            try
+            {
+                try
+                {
+                    ReadPackHeader();
 
-					_entries = new PackedObjectInfo[(int)_objectCount];
-					_baseById = new ObjectIdSubclassMap<DeltaChain>();
-					_baseByPos = new LongMap<UnresolvedDelta>();
+                    _entries = new PackedObjectInfo[(int)_objectCount];
+                    _baseById = new ObjectIdSubclassMap<DeltaChain>();
+                    _baseByPos = new LongMap<UnresolvedDelta>();
 
-					progress.BeginTask(PROGRESS_DOWNLOAD, (int)_objectCount);
-					for (int done = 0; done < _objectCount; done++)
-					{
-						IndexOneObject();
-						progress.Update(1);
-						if (progress.IsCancelled)
-						{
-							throw new IOException("Download cancelled");
-						}
-					}
+                    progress.BeginTask(PROGRESS_DOWNLOAD, (int)_objectCount);
+                    for (int done = 0; done < _objectCount; done++)
+                    {
+                        IndexOneObject();
+                        progress.Update(1);
+                        if (progress.IsCancelled)
+                        {
+                            throw new IOException("Download cancelled");
+                        }
+                    }
 
-					ReadPackFooter();
-					EndInput();
-					progress.EndTask();
+                    ReadPackFooter();
+                    EndInput();
+                    progress.EndTask();
 
-					if (_deltaCount > 0)
-					{
-						if (_packOut == null)
-						{
-							throw new IOException("need packOut");
-						}
+                    if (_deltaCount > 0)
+                    {
+                        if (_packOut == null)
+                        {
+                            throw new IOException("need packOut");
+                        }
 
-						ResolveDeltas(progress);
-						if (_entryCount < _objectCount)
-						{
-							if (!_fixThin)
-							{
-								throw new IOException("pack has " + (_objectCount - _entryCount) + " unresolved deltas");
-							}
+                        ResolveDeltas(progress);
+                        if (_entryCount < _objectCount)
+                        {
+                            if (!_fixThin)
+                            {
+                                throw new IOException("pack has " + (_objectCount - _entryCount) + " unresolved deltas");
+                            }
 
-							FixThinPack(progress);
-						}
-					}
+                            FixThinPack(progress);
+                        }
+                    }
 
-					if (_packOut != null && (_keepEmpty || _entryCount > 0))
-					{
-						_packOut.Flush();
-					}
+                    if (_packOut != null && (_keepEmpty || _entryCount > 0))
+                    {
+                        _packOut.Flush();
+                    }
 
-					_packDigest = null;
-					_baseById = null;
-					_baseByPos = null;
+                    _packDigest = null;
+                    _baseById = null;
+                    _baseByPos = null;
 
-					if (_dstIdx != null && (_keepEmpty || _entryCount > 0))
-					{
-						WriteIdx();
-					}
-				}
-				finally
-				{
-					try
-					{
-						InflaterCache.Instance.release(_inflater);
-					}
-					finally
-					{
-						_inflater = null;
-					}
-					_windowCursor = WindowCursor.Release(_windowCursor);
+                    if (_dstIdx != null && (_keepEmpty || _entryCount > 0))
+                    {
+                        WriteIdx();
+                    }
+                }
+                finally
+                {
+                    try
+                    {
+                        InflaterCache.Instance.release(_inflater);
+                    }
+                    finally
+                    {
+                        _inflater = null;
+                    }
+                    _windowCursor = WindowCursor.Release(_windowCursor);
 
-					progress.EndTask();
-					if (_packOut != null)
-					{
-						_packOut.Dispose();
-					}
-				}
+                    progress.EndTask();
+                    if (_packOut != null)
+                    {
+                        _packOut.Dispose();
+                    }
+                }
 
-				if (_keepEmpty || _entryCount > 0)
-				{
-					if (_dstPack != null)
-					{
-						_dstPack.IsReadOnly = true;
-					}
-					if (_dstIdx != null)
-					{
-						_dstIdx.IsReadOnly = true;
-					}
-				}
-			}
-			catch (IOException)
-			{
-				if (_dstPack != null) _dstPack.Delete();
-				if (_dstIdx != null) _dstIdx.Delete();
-				throw;
-			}
-		}
+                if (_keepEmpty || _entryCount > 0)
+                {
+                    if (_dstPack != null)
+                    {
+                        _dstPack.IsReadOnly = true;
+                    }
+                    if (_dstIdx != null)
+                    {
+                        _dstIdx.IsReadOnly = true;
+                    }
+                }
+            }
+            catch (IOException)
+            {
+                if (_dstPack != null) _dstPack.Delete();
+                if (_dstIdx != null) _dstIdx.Delete();
+                throw;
+            }
+        }
 
-		private void ResolveDeltas(ProgressMonitor progress)
-		{
-			progress.BeginTask(PROGRESS_RESOLVE_DELTA, _deltaCount);
-			int last = _entryCount;
-			for (int i = 0; i < last; i++)
-			{
-				int before = _entryCount;
-				ResolveDeltas(_entries[i]);
-				progress.Update(_entryCount - before);
-				if (progress.IsCancelled)
-				{
-					throw new IOException("Download cancelled during indexing");
-				}
-			}
-			progress.EndTask();
-		}
+        private void ResolveDeltas(ProgressMonitor progress)
+        {
+            progress.BeginTask(PROGRESS_RESOLVE_DELTA, _deltaCount);
+            int last = _entryCount;
+            for (int i = 0; i < last; i++)
+            {
+                int before = _entryCount;
+                ResolveDeltas(_entries[i]);
+                progress.Update(_entryCount - before);
+                if (progress.IsCancelled)
+                {
+                    throw new IOException("Download cancelled during indexing");
+                }
+            }
+            progress.EndTask();
+        }
 
-		private void ResolveDeltas(PackedObjectInfo objectInfo)
-		{
-			if (_baseById.Get(objectInfo) != null || _baseByPos.containsKey(objectInfo.Offset))
-			{
-				int oldCrc = objectInfo.CRC;
-				ResolveDeltas(objectInfo.Offset, oldCrc, Constants.OBJ_BAD, null, objectInfo);
-			}
-		}
+        private void ResolveDeltas(PackedObjectInfo objectInfo)
+        {
+            if (_baseById.Get(objectInfo) != null || _baseByPos.containsKey(objectInfo.Offset))
+            {
+                int oldCrc = objectInfo.CRC;
+                ResolveDeltas(objectInfo.Offset, oldCrc, Constants.OBJ_BAD, null, objectInfo);
+            }
+        }
 
-		private void ResolveDeltas(long pos, int oldCrc, int type, byte[] data, PackedObjectInfo oe)
-		{
-			_crc.Reset();
-			Position(pos);
-			int c = ReadFromFile();
-			int typecode = (c >> 4) & 7;
-			long sz = c & 15;
-			int shift = 4;
-			while ((c & 0x80) != 0)
-			{
-				c = ReadFromFile();
-				sz += (c & 0x7f) << shift;
-				shift += 7;
-			}
+        private void ResolveDeltas(long pos, int oldCrc, int type, byte[] data, PackedObjectInfo oe)
+        {
+            _crc.Reset();
+            Position(pos);
+            int c = ReadFromFile();
+            int typecode = (c >> 4) & 7;
+            long sz = c & 15;
+            int shift = 4;
+            while ((c & 0x80) != 0)
+            {
+                c = ReadFromFile();
+                sz += (c & 0x7f) << shift;
+                shift += 7;
+            }
 
-			switch (typecode)
-			{
-				case Constants.OBJ_COMMIT:
-				case Constants.OBJ_TREE:
-				case Constants.OBJ_BLOB:
-				case Constants.OBJ_TAG:
-					type = typecode;
-					data = InflateFromFile((int)sz);
-					break;
+            switch (typecode)
+            {
+                case Constants.OBJ_COMMIT:
+                case Constants.OBJ_TREE:
+                case Constants.OBJ_BLOB:
+                case Constants.OBJ_TAG:
+                    type = typecode;
+                    data = InflateFromFile((int)sz);
+                    break;
 
-				case Constants.OBJ_OFS_DELTA:
-					c = ReadFromFile() & 0xff;
-					while ((c & 128) != 0)
-					{
-						c = ReadFromFile() & 0xff;
-					}
-					data = BinaryDelta.Apply(data, InflateFromFile((int)sz));
-					break;
+                case Constants.OBJ_OFS_DELTA:
+                    c = ReadFromFile() & 0xff;
+                    while ((c & 128) != 0)
+                    {
+                        c = ReadFromFile() & 0xff;
+                    }
+                    data = BinaryDelta.Apply(data, InflateFromFile((int)sz));
+                    break;
 
-				case Constants.OBJ_REF_DELTA:
-					_crc.Update(_buffer, FillFromFile(20), 20);
-					Use(20);
-					data = BinaryDelta.Apply(data, InflateFromFile((int)sz));
-					break;
+                case Constants.OBJ_REF_DELTA:
+                    _crc.Update(_buffer, FillFromFile(20), 20);
+                    Use(20);
+                    data = BinaryDelta.Apply(data, InflateFromFile((int)sz));
+                    break;
 
-				default:
-					throw new IOException("Unknown object type " + typecode + ".");
-			}
+                default:
+                    throw new IOException("Unknown object type " + typecode + ".");
+            }
 
-			var crc32 = (int)_crc.Value;
-			if (oldCrc != crc32)
-			{
-				throw new IOException("Corruption detected re-reading at " + pos);
-			}
+            var crc32 = (int)_crc.Value;
+            if (oldCrc != crc32)
+            {
+                throw new IOException("Corruption detected re-reading at " + pos);
+            }
 
-			if (oe == null)
-			{
-				_objectDigest.Update(Constants.encodedTypeString(type));
-				_objectDigest.Update((byte)' ');
-				_objectDigest.Update(Constants.encodeASCII(data.Length));
-				_objectDigest.Update(0);
-				_objectDigest.Update(data);
-				_tempObjectId.FromRaw(_objectDigest.Digest(), 0);
+            if (oe == null)
+            {
+                _objectDigest.Update(Constants.encodedTypeString(type));
+                _objectDigest.Update((byte)' ');
+                _objectDigest.Update(Constants.encodeASCII(data.Length));
+                _objectDigest.Update(0);
+                _objectDigest.Update(data);
+                _tempObjectId.FromRaw(_objectDigest.Digest(), 0);
 
-				VerifySafeObject(_tempObjectId, type, data);
-				oe = new PackedObjectInfo(pos, crc32, _tempObjectId);
-				_entries[_entryCount++] = oe;
-			}
+                VerifySafeObject(_tempObjectId, type, data);
+                oe = new PackedObjectInfo(pos, crc32, _tempObjectId);
+                _entries[_entryCount++] = oe;
+            }
 
-			ResolveChildDeltas(pos, type, data, oe);
-		}
+            ResolveChildDeltas(pos, type, data, oe);
+        }
 
-		private UnresolvedDelta RemoveBaseById(AnyObjectId id)
-		{
-			DeltaChain d = _baseById.Get(id);
-			return d != null ? d.Remove() : null;
-		}
+        private UnresolvedDelta RemoveBaseById(AnyObjectId id)
+        {
+            DeltaChain d = _baseById.Get(id);
+            return d != null ? d.Remove() : null;
+        }
 
-		private void ResolveChildDeltas(long pos, int type, byte[] data, AnyObjectId objectId)
-		{
-			UnresolvedDelta a = Reverse(RemoveBaseById(objectId));
+        private void ResolveChildDeltas(long pos, int type, byte[] data, AnyObjectId objectId)
+        {
+            UnresolvedDelta a = Reverse(RemoveBaseById(objectId));
             UnresolvedDelta b = Reverse(_baseByPos.remove(pos));
 
-			while (a != null && b != null)
-			{
-				if (a.HeaderOffset < b.HeaderOffset)
-				{
-					ResolveDeltas(a.HeaderOffset, a.Crc32, type, data, null);
-					a = a.Next;
-				}
-				else
-				{
-					ResolveDeltas(b.HeaderOffset, b.Crc32, type, data, null);
-					b = b.Next;
-				}
-			}
+            while (a != null && b != null)
+            {
+                if (a.HeaderOffset < b.HeaderOffset)
+                {
+                    ResolveDeltas(a.HeaderOffset, a.Crc32, type, data, null);
+                    a = a.Next;
+                }
+                else
+                {
+                    ResolveDeltas(b.HeaderOffset, b.Crc32, type, data, null);
+                    b = b.Next;
+                }
+            }
 
-			ResolveChildDeltaChain(type, data, a);
-			ResolveChildDeltaChain(type, data, b);
-		}
+            ResolveChildDeltaChain(type, data, a);
+            ResolveChildDeltaChain(type, data, b);
+        }
 
-		private void ResolveChildDeltaChain(int type, byte[] data, UnresolvedDelta a)
-		{
-			while (a != null)
-			{
-				ResolveDeltas(a.HeaderOffset, a.Crc32, type, data, null);
-				a = a.Next;
-			}
-		}
+        private void ResolveChildDeltaChain(int type, byte[] data, UnresolvedDelta a)
+        {
+            while (a != null)
+            {
+                ResolveDeltas(a.HeaderOffset, a.Crc32, type, data, null);
+                a = a.Next;
+            }
+        }
 
-		private void FixThinPack(ProgressMonitor progress)
-		{
-			GrowEntries();
+        private void FixThinPack(ProgressMonitor progress)
+        {
+            GrowEntries();
 
-			_packDigest.Reset();
-			_originalEof = _packOut.Length - 20;
-			var def = new Deflater(Deflater.DEFAULT_COMPRESSION, false);
-			var missing = new List<DeltaChain>(64);
-			long end = _originalEof;
+            _packDigest.Reset();
+            _originalEof = _packOut.Length - 20;
+            var def = new Deflater(Deflater.DEFAULT_COMPRESSION, false);
+            var missing = new List<DeltaChain>(64);
+            long end = _originalEof;
 
-			foreach (DeltaChain baseId in _baseById)
-			{
-				if (baseId.Head == null)
-				{
-					continue;
-				}
+            foreach (DeltaChain baseId in _baseById)
+            {
+                if (baseId.Head == null)
+                {
+                    continue;
+                }
 
-				ObjectLoader ldr = _repo.OpenObject(_windowCursor, baseId);
-				if (ldr == null)
-				{
-					missing.Add(baseId);
-					continue;
-				}
+                ObjectLoader ldr = _repo.OpenObject(_windowCursor, baseId);
+                if (ldr == null)
+                {
+                    missing.Add(baseId);
+                    continue;
+                }
 
-				byte[] data = ldr.CachedBytes;
-				int typeCode = ldr.Type;
+                byte[] data = ldr.CachedBytes;
+                int typeCode = ldr.Type;
 
-				_crc.Reset();
-				_packOut.Seek(end, SeekOrigin.Begin);
-				WriteWhole(def, typeCode, data);
-				var oe = new PackedObjectInfo(end, (int)_crc.Value, baseId);
-				_entries[_entryCount++] = oe;
-				end = _packOut.Position;
+                _crc.Reset();
+                _packOut.Seek(end, SeekOrigin.Begin);
+                WriteWhole(def, typeCode, data);
+                var oe = new PackedObjectInfo(end, (int)_crc.Value, baseId);
+                _entries[_entryCount++] = oe;
+                end = _packOut.Position;
 
-				ResolveChildDeltas(oe.Offset, typeCode, data, oe);
-				if (progress.IsCancelled)
-				{
-					throw new IOException("Download cancelled during indexing");
-				}
-			}
+                ResolveChildDeltas(oe.Offset, typeCode, data, oe);
+                if (progress.IsCancelled)
+                {
+                    throw new IOException("Download cancelled during indexing");
+                }
+            }
 
-			def.Finish();
+            def.Finish();
 
-			foreach (DeltaChain baseDeltaChain in missing)
-			{
-				if (baseDeltaChain.Head != null)
-				{
-					throw new MissingObjectException(baseDeltaChain, "delta base");
-				}
-			}
+            foreach (DeltaChain baseDeltaChain in missing)
+            {
+                if (baseDeltaChain.Head != null)
+                {
+                    throw new MissingObjectException(baseDeltaChain, "delta base");
+                }
+            }
 
-			FixHeaderFooter(_packcsum, _packDigest.Digest());
-		}
+            FixHeaderFooter(_packcsum, _packDigest.Digest());
+        }
 
-		private void WriteWhole(Deflater def, int typeCode, byte[] data)
-		{
-			int sz = data.Length;
-			int hdrlen = 0;
-			_buffer[hdrlen++] = (byte)((typeCode << 4) | sz & 15);
-			sz = (int)(((uint)sz) >> 4);
+        private void WriteWhole(Deflater def, int typeCode, byte[] data)
+        {
+            int sz = data.Length;
+            int hdrlen = 0;
+            _buffer[hdrlen++] = (byte)((typeCode << 4) | sz & 15);
+            sz = (int)(((uint)sz) >> 4);
 
-			while (sz > 0)
-			{
-				_buffer[hdrlen - 1] |= 0x80;
-				_buffer[hdrlen++] = (byte)(sz & 0x7f);
-				sz = (int)(((uint)sz) >> 7);
-			}
-			
-			_packDigest.Update(_buffer, 0, hdrlen);
-			_crc.Update(_buffer, 0, hdrlen);
-			_packOut.Write(_buffer, 0, hdrlen);
-			def.Reset();
-			def.SetInput(data);
-			def.Finish();
-			
-			while (!def.IsFinished)
-			{
-				int datlen = def.Deflate(_buffer);
-				_packDigest.Update(_buffer, 0, datlen);
-				_crc.Update(_buffer, 0, datlen);
-				_packOut.Write(_buffer, 0, datlen);
-			}
-		}
+            while (sz > 0)
+            {
+                _buffer[hdrlen - 1] |= 0x80;
+                _buffer[hdrlen++] = (byte)(sz & 0x7f);
+                sz = (int)(((uint)sz) >> 7);
+            }
 
-		private void FixHeaderFooter(IEnumerable<byte> origcsum, IEnumerable<byte> tailcsum)
-		{
-			MessageDigest origDigest = Constants.newMessageDigest();
-			MessageDigest tailDigest = Constants.newMessageDigest();
-			long origRemaining = _originalEof;
+            _packDigest.Update(_buffer, 0, hdrlen);
+            _crc.Update(_buffer, 0, hdrlen);
+            _packOut.Write(_buffer, 0, hdrlen);
+            def.Reset();
+            def.SetInput(data);
+            def.Finish();
 
-			_packOut.Seek(0, SeekOrigin.Begin);
-			_bAvail = 0;
-			_bOffset = 0;
-			FillFromFile(12);
+            while (!def.IsFinished)
+            {
+                int datlen = def.Deflate(_buffer);
+                _packDigest.Update(_buffer, 0, datlen);
+                _crc.Update(_buffer, 0, datlen);
+                _packOut.Write(_buffer, 0, datlen);
+            }
+        }
 
-			{
-				var origCnt = (int)Math.Min(_bAvail, origRemaining);
-				origDigest.Update(_buffer, 0, origCnt);
-				origRemaining -= origCnt;
-				if (origRemaining == 0)
-				{
-					tailDigest.Update(_buffer, origCnt, _bAvail - origCnt);
-				}
-			}
+        private void FixHeaderFooter(IEnumerable<byte> origcsum, IEnumerable<byte> tailcsum)
+        {
+            MessageDigest origDigest = Constants.newMessageDigest();
+            MessageDigest tailDigest = Constants.newMessageDigest();
+            long origRemaining = _originalEof;
 
-			NB.encodeInt32(_buffer, 8, _entryCount);
-			_packOut.Seek(0, SeekOrigin.Begin);
-			_packOut.Write(_buffer, 0, 12);
-			_packOut.Seek(_bAvail, SeekOrigin.Begin);
+            _packOut.Seek(0, SeekOrigin.Begin);
+            _bAvail = 0;
+            _bOffset = 0;
+            FillFromFile(12);
 
-			_packDigest.Reset();
-			_packDigest.Update(_buffer, 0, _bAvail);
+            {
+                var origCnt = (int)Math.Min(_bAvail, origRemaining);
+                origDigest.Update(_buffer, 0, origCnt);
+                origRemaining -= origCnt;
+                if (origRemaining == 0)
+                {
+                    tailDigest.Update(_buffer, origCnt, _bAvail - origCnt);
+                }
+            }
 
-			while (true)
-			{
-				int n = _packOut.Read(_buffer, 0, _buffer.Length);
-				if (n <= 0) break;
+            NB.encodeInt32(_buffer, 8, _entryCount);
+            _packOut.Seek(0, SeekOrigin.Begin);
+            _packOut.Write(_buffer, 0, 12);
+            _packOut.Seek(_bAvail, SeekOrigin.Begin);
 
-				if (origRemaining != 0)
-				{
-					var origCnt = (int)Math.Min(n, origRemaining);
-					origDigest.Update(_buffer, 0, origCnt);
-					origRemaining -= origCnt;
-					if (origRemaining == 0)
-					{
-						tailDigest.Update(_buffer, origCnt, n - origCnt);
-					}
-				}
-				else
-				{
-					tailDigest.Update(_buffer, 0, n);
-				}
+            _packDigest.Reset();
+            _packDigest.Update(_buffer, 0, _bAvail);
 
-				_packDigest.Update(_buffer, 0, n);
-			}
+            while (true)
+            {
+                int n = _packOut.Read(_buffer, 0, _buffer.Length);
+                if (n <= 0) break;
 
-			if (!origDigest.Digest().SequenceEqual(origcsum) || !tailDigest.Digest().SequenceEqual(tailcsum))
-			{
-				throw new IOException("Pack corrupted while writing to filesystem");
-			}
+                if (origRemaining != 0)
+                {
+                    var origCnt = (int)Math.Min(n, origRemaining);
+                    origDigest.Update(_buffer, 0, origCnt);
+                    origRemaining -= origCnt;
+                    if (origRemaining == 0)
+                    {
+                        tailDigest.Update(_buffer, origCnt, n - origCnt);
+                    }
+                }
+                else
+                {
+                    tailDigest.Update(_buffer, 0, n);
+                }
 
-			_packcsum = _packDigest.Digest();
-			_packOut.Write(_packcsum, 0, _packcsum.Length);
-		}
+                _packDigest.Update(_buffer, 0, n);
+            }
 
-		private void GrowEntries()
-		{
-			var newEntries = new PackedObjectInfo[(int)_objectCount + _baseById.Count];
-			Array.Copy(_entries, 0, newEntries, 0, _entryCount);
-			_entries = newEntries;
-		}
+            if (!origDigest.Digest().SequenceEqual(origcsum) || !tailDigest.Digest().SequenceEqual(tailcsum))
+            {
+                throw new IOException("Pack corrupted while writing to filesystem");
+            }
 
-		private void WriteIdx()
-		{
-			Array.Sort(_entries, 0, _entryCount);
-			var list = new List<PackedObjectInfo>(_entries);
-			if (_entryCount < _entries.Length)
-			{
-				list.RemoveRange(_entryCount, _entries.Length - _entryCount);
-			}
+            _packcsum = _packDigest.Digest();
+            _packOut.Write(_packcsum, 0, _packcsum.Length);
+        }
 
-		    using (FileStream os = _dstIdx.Create())
-		    {
-		        PackIndexWriter iw = _outputVersion <= 0 ? PackIndexWriter.CreateOldestPossible(os, list) : PackIndexWriter.CreateVersion(os, _outputVersion);
+        private void GrowEntries()
+        {
+            var newEntries = new PackedObjectInfo[(int)_objectCount + _baseById.Count];
+            Array.Copy(_entries, 0, newEntries, 0, _entryCount);
+            _entries = newEntries;
+        }
 
-		        iw.Write(list, _packcsum);
-		        os.Flush();
-		    }
-		}
+        private void WriteIdx()
+        {
+            Array.Sort(_entries, 0, _entryCount);
+            var list = new List<PackedObjectInfo>(_entries);
+            if (_entryCount < _entries.Length)
+            {
+                list.RemoveRange(_entryCount, _entries.Length - _entryCount);
+            }
 
-		private void ReadPackHeader()
-		{
-			int hdrln = Constants.PACK_SIGNATURE.Length + 4 + 4;
-			int p = FillFromInput(hdrln);
-			for (int k = 0; k < Constants.PACK_SIGNATURE.Length; k++)
-			{
-				if (_buffer[p + k] != Constants.PACK_SIGNATURE[k])
-				{
-					throw new IOException("Not a PACK file.");
-				}
-			}
+            using (FileStream os = _dstIdx.Create())
+            {
+                PackIndexWriter iw = _outputVersion <= 0 ? PackIndexWriter.CreateOldestPossible(os, list) : PackIndexWriter.CreateVersion(os, _outputVersion);
 
-			long vers = NB.DecodeInt32(_buffer, p + 4); // DecodeUInt32!
-			if (vers != 2 && vers != 3)
-			{
-				throw new IOException("Unsupported pack version " + vers + ".");
-			}
+                iw.Write(list, _packcsum);
+                os.Flush();
+            }
+        }
 
-			_objectCount = NB.decodeUInt32(_buffer, p + 8);
-			Use(hdrln);
-		}
+        private void ReadPackHeader()
+        {
+            int hdrln = Constants.PACK_SIGNATURE.Length + 4 + 4;
+            int p = FillFromInput(hdrln);
+            for (int k = 0; k < Constants.PACK_SIGNATURE.Length; k++)
+            {
+                if (_buffer[p + k] != Constants.PACK_SIGNATURE[k])
+                {
+                    throw new IOException("Not a PACK file.");
+                }
+            }
 
-		private void ReadPackFooter()
-		{
-			Sync();
-			byte[] cmpcsum = _packDigest.Digest();
-			int c = FillFromInput(20);
-			_packcsum = new byte[20];
-			Array.Copy(_buffer, c, _packcsum, 0, 20);
+            long vers = NB.DecodeInt32(_buffer, p + 4); // DecodeUInt32!
+            if (vers != 2 && vers != 3)
+            {
+                throw new IOException("Unsupported pack version " + vers + ".");
+            }
 
-			Use(20);
+            _objectCount = NB.decodeUInt32(_buffer, p + 8);
+            Use(hdrln);
+        }
 
-			if (_packOut != null)
-			{
-				_packOut.Write(_packcsum, 0, _packcsum.Length);
-			}
+        private void ReadPackFooter()
+        {
+            Sync();
+            byte[] cmpcsum = _packDigest.Digest();
+            int c = FillFromInput(20);
+            _packcsum = new byte[20];
+            Array.Copy(_buffer, c, _packcsum, 0, 20);
 
-			if (!cmpcsum.ArrayEquals(_packcsum))
-			{
-				throw new CorruptObjectException("Packfile checksum incorrect.");
-			}
-		}
+            Use(20);
 
-		private void EndInput()
-		{
-			_objectData = null;
-		}
+            if (_packOut != null)
+            {
+                _packOut.Write(_packcsum, 0, _packcsum.Length);
+            }
 
-		private void IndexOneObject()
-		{
-			long pos = Position();
-			_crc.Reset();
-			int c = ReadFromInput();
-			int typeCode = (c >> 4) & 7;
-			long sz = c & 15;
-			int shift = 4;
-			while ((c & 0x80) != 0)
-			{
-				c = ReadFromInput();
-				sz += (c & 0x7f) << shift;
-				shift += 7;
-			}
+            if (!cmpcsum.ArrayEquals(_packcsum))
+            {
+                throw new CorruptObjectException("Packfile checksum incorrect.");
+            }
+        }
 
-			switch (typeCode)
-			{
-				case Constants.OBJ_COMMIT:
-				case Constants.OBJ_TREE:
-				case Constants.OBJ_BLOB:
-				case Constants.OBJ_TAG:
-					Whole(typeCode, pos, sz);
-					break;
+        private void EndInput()
+        {
+            _objectData = null;
+        }
 
-				case Constants.OBJ_OFS_DELTA:
-					c = ReadFromInput();
-					long ofs = c & 127;
-					while ((c & 128) != 0)
-					{
-						ofs += 1;
-						c = ReadFromInput();
-						ofs <<= 7;
-						ofs += (c & 127);
-					}
-					long pbase = pos - ofs;
-					SkipInflateFromInput(sz);
-					var n = new UnresolvedDelta(pos, (int)_crc.Value);
+        private void IndexOneObject()
+        {
+            long pos = Position();
+            _crc.Reset();
+            int c = ReadFromInput();
+            int typeCode = (c >> 4) & 7;
+            long sz = c & 15;
+            int shift = 4;
+            while ((c & 0x80) != 0)
+            {
+                c = ReadFromInput();
+                sz += (c & 0x7f) << shift;
+                shift += 7;
+            }
+
+            switch (typeCode)
+            {
+                case Constants.OBJ_COMMIT:
+                case Constants.OBJ_TREE:
+                case Constants.OBJ_BLOB:
+                case Constants.OBJ_TAG:
+                    Whole(typeCode, pos, sz);
+                    break;
+
+                case Constants.OBJ_OFS_DELTA:
+                    c = ReadFromInput();
+                    long ofs = c & 127;
+                    while ((c & 128) != 0)
+                    {
+                        ofs += 1;
+                        c = ReadFromInput();
+                        ofs <<= 7;
+                        ofs += (c & 127);
+                    }
+                    long pbase = pos - ofs;
+                    SkipInflateFromInput(sz);
+                    var n = new UnresolvedDelta(pos, (int)_crc.Value);
                     n.Next = _baseByPos.put(pbase, n);
-					_deltaCount++;
-					break;
+                    _deltaCount++;
+                    break;
 
-				case Constants.OBJ_REF_DELTA:
-					c = FillFromInput(20);
-					_crc.Update(_buffer, c, 20);
-					ObjectId baseId = ObjectId.FromRaw(_buffer, c);
-					Use(20);
-					DeltaChain r = _baseById.Get(baseId);
-					if (r == null)
-					{
-						r = new DeltaChain(baseId);
-						_baseById.Add(r);
-					}
-					SkipInflateFromInput(sz);
-					r.Add(new UnresolvedDelta(pos, (int)_crc.Value));
-					_deltaCount++;
-					break;
+                case Constants.OBJ_REF_DELTA:
+                    c = FillFromInput(20);
+                    _crc.Update(_buffer, c, 20);
+                    ObjectId baseId = ObjectId.FromRaw(_buffer, c);
+                    Use(20);
+                    DeltaChain r = _baseById.Get(baseId);
+                    if (r == null)
+                    {
+                        r = new DeltaChain(baseId);
+                        _baseById.Add(r);
+                    }
+                    SkipInflateFromInput(sz);
+                    r.Add(new UnresolvedDelta(pos, (int)_crc.Value));
+                    _deltaCount++;
+                    break;
 
-				default:
-					throw new IOException("Unknown object type " + typeCode + ".");
-			}
-		}
+                default:
+                    throw new IOException("Unknown object type " + typeCode + ".");
+            }
+        }
 
-		private void Whole(int type, long pos, long sz)
-		{
-			byte[] data = InflateFromInput((int)sz);
-			_objectDigest.Update(Constants.encodedTypeString(type));
-			_objectDigest.Update((byte)' ');
-			_objectDigest.Update(Constants.encodeASCII(sz));
-			_objectDigest.Update(0);
-			_objectDigest.Update(data);
-			_tempObjectId.FromRaw(_objectDigest.Digest(), 0);
+        private void Whole(int type, long pos, long sz)
+        {
+            byte[] data = InflateFromInput((int)sz);
+            _objectDigest.Update(Constants.encodedTypeString(type));
+            _objectDigest.Update((byte)' ');
+            _objectDigest.Update(Constants.encodeASCII(sz));
+            _objectDigest.Update(0);
+            _objectDigest.Update(data);
+            _tempObjectId.FromRaw(_objectDigest.Digest(), 0);
 
-			VerifySafeObject(_tempObjectId, type, data);
-			var crc32 = (int)_crc.Value;
-			_entries[_entryCount++] = new PackedObjectInfo(pos, crc32, _tempObjectId);
-		}
+            VerifySafeObject(_tempObjectId, type, data);
+            var crc32 = (int)_crc.Value;
+            _entries[_entryCount++] = new PackedObjectInfo(pos, crc32, _tempObjectId);
+        }
 
-		private void VerifySafeObject(AnyObjectId id, int type, byte[] data)
-		{
-			if (_objCheck != null)
-			{
-				try
-				{
-					_objCheck.check(type, data);
-				}
-				catch (CorruptObjectException e)
-				{
-					throw new IOException("Invalid " + Constants.typeString(type) + " " + id + ": " + e.Message, e);
-				}
-			}
+        private void VerifySafeObject(AnyObjectId id, int type, byte[] data)
+        {
+            if (_objCheck != null)
+            {
+                try
+                {
+                    _objCheck.check(type, data);
+                }
+                catch (CorruptObjectException e)
+                {
+                    throw new IOException("Invalid " + Constants.typeString(type) + " " + id + ": " + e.Message, e);
+                }
+            }
 
-			ObjectLoader ldr = _repo.OpenObject(_windowCursor, id);
-			if (ldr != null)
-			{
-				byte[] existingData = ldr.CachedBytes;
-				if (ldr.Type != type || !data.ArrayEquals(existingData))
-				{
-					throw new IOException("Collision on " + id);
-				}
-			}
-		}
+            ObjectLoader ldr = _repo.OpenObject(_windowCursor, id);
+            if (ldr != null)
+            {
+                byte[] existingData = ldr.CachedBytes;
+                if (ldr.Type != type || !data.ArrayEquals(existingData))
+                {
+                    throw new IOException("Collision on " + id);
+                }
+            }
+        }
 
-		private long Position()
-		{
-			return _bBase + _bOffset;
-		}
+        private long Position()
+        {
+            return _bBase + _bOffset;
+        }
 
-		private void Position(long pos)
-		{
-			_packOut.Seek(pos, SeekOrigin.Begin);
-			_bBase = pos;
-			_bOffset = 0;
-			_bAvail = 0;
-		}
+        private void Position(long pos)
+        {
+            _packOut.Seek(pos, SeekOrigin.Begin);
+            _bBase = pos;
+            _bOffset = 0;
+            _bAvail = 0;
+        }
 
-		private int ReadFromInput()
-		{
-			if (_bAvail == 0)
-			{
-				FillFromInput(1);
-			}
+        private int ReadFromInput()
+        {
+            if (_bAvail == 0)
+            {
+                FillFromInput(1);
+            }
 
-			_bAvail--;
-			int b = _buffer[_bOffset++] & 0xff;
-			_crc.Update((uint)b);
-			return b;
-		}
+            _bAvail--;
+            int b = _buffer[_bOffset++] & 0xff;
+            _crc.Update((uint)b);
+            return b;
+        }
 
-		private int ReadFromFile()
-		{
-			if (_bAvail == 0)
-			{
-				FillFromFile(1);
-			}
+        private int ReadFromFile()
+        {
+            if (_bAvail == 0)
+            {
+                FillFromFile(1);
+            }
 
-			_bAvail--;
-			int b = _buffer[_bOffset++] & 0xff;
-			_crc.Update((uint)b);
-			return b;
-		}
+            _bAvail--;
+            int b = _buffer[_bOffset++] & 0xff;
+            _crc.Update((uint)b);
+            return b;
+        }
 
-		private void Use(int cnt)
-		{
-			_bOffset += cnt;
-			_bAvail -= cnt;
-		}
+        private void Use(int cnt)
+        {
+            _bOffset += cnt;
+            _bAvail -= cnt;
+        }
 
-		private int FillFromInput(int need)
-		{
-			while (_bAvail < need)
-			{
-				int next = _bOffset + _bAvail;
-				int free = _buffer.Length - next;
-				if (free + _bAvail < need)
-				{
-					Sync();
-					next = _bAvail;
-					free = _buffer.Length - next;
-				}
+        private int FillFromInput(int need)
+        {
+            while (_bAvail < need)
+            {
+                int next = _bOffset + _bAvail;
+                int free = _buffer.Length - next;
+                if (free + _bAvail < need)
+                {
+                    Sync();
+                    next = _bAvail;
+                    free = _buffer.Length - next;
+                }
 
-				next = _stream.Read(_buffer, next, free);
-				if (next <= 0)
-				{
-					throw new EndOfStreamException("Packfile is truncated,");
-				}
+                next = _stream.Read(_buffer, next, free);
+                if (next <= 0)
+                {
+                    throw new EndOfStreamException("Packfile is truncated,");
+                }
 
-				_bAvail += next;
-			}
-			return _bOffset;
-		}
+                _bAvail += next;
+            }
+            return _bOffset;
+        }
 
-		private int FillFromFile(int need)
-		{
-			if (_bAvail < need)
-			{
-				int next = _bOffset + _bAvail;
-				int free = _buffer.Length - next;
-				if (free + _bAvail < need)
-				{
-					if (_bAvail > 0)
-					{
-						Array.Copy(_buffer, _bOffset, _buffer, 0, _bAvail);
-					}
+        private int FillFromFile(int need)
+        {
+            if (_bAvail < need)
+            {
+                int next = _bOffset + _bAvail;
+                int free = _buffer.Length - next;
+                if (free + _bAvail < need)
+                {
+                    if (_bAvail > 0)
+                    {
+                        Array.Copy(_buffer, _bOffset, _buffer, 0, _bAvail);
+                    }
 
-					_bOffset = 0;
-					next = _bAvail;
-					free = _buffer.Length - next;
-				}
+                    _bOffset = 0;
+                    next = _bAvail;
+                    free = _buffer.Length - next;
+                }
 
-				next = _packOut.Read(_buffer, next, free);
-				if (next <= 0)
-				{
-					throw new EndOfStreamException("Packfile is truncated.");
-				}
+                next = _packOut.Read(_buffer, next, free);
+                if (next <= 0)
+                {
+                    throw new EndOfStreamException("Packfile is truncated.");
+                }
 
-				_bAvail += next;
-			}
+                _bAvail += next;
+            }
 
-			return _bOffset;
-		}
+            return _bOffset;
+        }
 
-		private void Sync()
-		{
-			_packDigest.Update(_buffer, 0, _bOffset);
-			if (_packOut != null)
-			{
-				_packOut.Write(_buffer, 0, _bOffset);
-			}
+        private void Sync()
+        {
+            _packDigest.Update(_buffer, 0, _bOffset);
+            if (_packOut != null)
+            {
+                _packOut.Write(_buffer, 0, _bOffset);
+            }
 
-			if (_bAvail > 0)
-			{
-				Array.Copy(_buffer, _bOffset, _buffer, 0, _bAvail);
-			}
+            if (_bAvail > 0)
+            {
+                Array.Copy(_buffer, _bOffset, _buffer, 0, _bAvail);
+            }
 
-			_bBase += _bOffset;
-			_bOffset = 0;
-		}
+            _bBase += _bOffset;
+            _bOffset = 0;
+        }
 
-		private void SkipInflateFromInput(long sz)
-		{
-			Inflater inf = _inflater;
-			try
-			{
-				byte[] dst = _objectData;
-				int n = 0;
-				int p = -1;
-				while (!inf.IsFinished)
-				{
-					if (inf.IsNeedingInput)
-					{
-						if (p >= 0)
-						{
-							_crc.Update(_buffer, p, _bAvail);
-							Use(_bAvail);
-						}
-						p = FillFromInput(1);
-						inf.SetInput(_buffer, p, _bAvail);
-					}
+        private void SkipInflateFromInput(long sz)
+        {
+            Inflater inf = _inflater;
+            try
+            {
+                byte[] dst = _objectData;
+                int n = 0;
+                int p = -1;
+                while (!inf.IsFinished)
+                {
+                    if (inf.IsNeedingInput)
+                    {
+                        if (p >= 0)
+                        {
+                            _crc.Update(_buffer, p, _bAvail);
+                            Use(_bAvail);
+                        }
+                        p = FillFromInput(1);
+                        inf.SetInput(_buffer, p, _bAvail);
+                    }
 
-					int free = dst.Length - n;
-					if (free < 8)
-					{
-						sz -= n;
-						n = 0;
-						free = dst.Length;
-					}
-					n += inf.Inflate(dst, n, free);
-				}
+                    int free = dst.Length - n;
+                    if (free < 8)
+                    {
+                        sz -= n;
+                        n = 0;
+                        free = dst.Length;
+                    }
+                    n += inf.Inflate(dst, n, free);
+                }
 
-				if (n != sz)
-				{
-					throw new IOException("wrong decompressed length");
-				}
+                if (n != sz)
+                {
+                    throw new IOException("wrong decompressed length");
+                }
 
-				n = _bAvail - inf.RemainingInput;
-				if (n > 0)
-				{
-					_crc.Update(_buffer, p, n);
-					Use(n);
-				}
-			}
-			catch (IOException e)
-			{
-				throw Corrupt(e);
-			}
-			finally
-			{
-				inf.Reset();
-			}
-		}
+                n = _bAvail - inf.RemainingInput;
+                if (n > 0)
+                {
+                    _crc.Update(_buffer, p, n);
+                    Use(n);
+                }
+            }
+            catch (IOException e)
+            {
+                throw Corrupt(e);
+            }
+            finally
+            {
+                inf.Reset();
+            }
+        }
 
-		private byte[] InflateFromInput(int size)
-		{
-			var dst = new byte[size];
-			Inflater inf = _inflater;
-			try
-			{
-				int n = 0;
-				int p = -1;
-				while (!inf.IsFinished)
-				{
-					if (inf.IsNeedingInput)
-					{
-						if (p >= 0)
-						{
-							_crc.Update(_buffer, p, _bAvail);
-							Use(_bAvail);
-						}
-						p = FillFromInput(1);
-						inf.SetInput(_buffer, p, _bAvail);
-					}
+        private byte[] InflateFromInput(int size)
+        {
+            var dst = new byte[size];
+            Inflater inf = _inflater;
+            try
+            {
+                int n = 0;
+                int p = -1;
+                while (!inf.IsFinished)
+                {
+                    if (inf.IsNeedingInput)
+                    {
+                        if (p >= 0)
+                        {
+                            _crc.Update(_buffer, p, _bAvail);
+                            Use(_bAvail);
+                        }
+                        p = FillFromInput(1);
+                        inf.SetInput(_buffer, p, _bAvail);
+                    }
 
-					n += inf.Inflate(dst, n, size - n);
-				}
+                    n += inf.Inflate(dst, n, size - n);
+                }
                 if (n != size)
                     throw new Exception("Wrong decrompressed length");
-				n = _bAvail - inf.RemainingInput;
-				if (n > 0)
-				{
-					_crc.Update(_buffer, p, n);
-					Use(n);
-				}
-				return dst;
-			}
-			catch (IOException e)
-			{
-				throw Corrupt(e);
-			}
-			finally
-			{
-				inf.Reset();
-			}
-		}
+                n = _bAvail - inf.RemainingInput;
+                if (n > 0)
+                {
+                    _crc.Update(_buffer, p, n);
+                    Use(n);
+                }
+                return dst;
+            }
+            catch (IOException e)
+            {
+                throw Corrupt(e);
+            }
+            finally
+            {
+                inf.Reset();
+            }
+        }
 
-		private byte[] InflateFromFile(long size)
-		{
-			var dst = new byte[(int)size];
-			Inflater inf = _inflater;
-			try
-			{
-				int n = 0;
-				int p = -1;
-				while (!inf.IsFinished)
-				{
-					if (inf.IsNeedingInput)
-					{
-						if (p >= 0)
-						{
-							_crc.Update(_buffer, p, _bAvail);
-							Use(_bAvail);
-						}
-						p = FillFromFile(1);
-						inf.SetInput(_buffer, p, _bAvail);
-					}
+        private byte[] InflateFromFile(long size)
+        {
+            var dst = new byte[(int)size];
+            Inflater inf = _inflater;
+            try
+            {
+                int n = 0;
+                int p = -1;
+                while (!inf.IsFinished)
+                {
+                    if (inf.IsNeedingInput)
+                    {
+                        if (p >= 0)
+                        {
+                            _crc.Update(_buffer, p, _bAvail);
+                            Use(_bAvail);
+                        }
+                        p = FillFromFile(1);
+                        inf.SetInput(_buffer, p, _bAvail);
+                    }
 
-					n += inf.Inflate(dst, n, dst.Length - n);
-				}
-				
-				n = _bAvail - inf.RemainingInput;
-				if (n > 0)
-				{
-					_crc.Update(_buffer, p, n);
-					Use(n);
-				}
-				return dst;
-			}
-			catch (IOException e)
-			{
-				throw Corrupt(e);
-			}
-			finally
-			{
-				inf.Reset();
-			}
-		}
+                    n += inf.Inflate(dst, n, dst.Length - n);
+                }
 
-		public void renameAndOpenPack()
-		{
-			renameAndOpenPack(null);
-		}
+                n = _bAvail - inf.RemainingInput;
+                if (n > 0)
+                {
+                    _crc.Update(_buffer, p, n);
+                    Use(n);
+                }
+                return dst;
+            }
+            catch (IOException e)
+            {
+                throw Corrupt(e);
+            }
+            finally
+            {
+                inf.Reset();
+            }
+        }
 
-		public PackLock renameAndOpenPack(string lockMessage)
-		{
-			if (!_keepEmpty && _entryCount == 0)
-			{
-				CleanupTemporaryFiles();
-				return null;
-			}
+        public void renameAndOpenPack()
+        {
+            renameAndOpenPack(null);
+        }
 
-			MessageDigest d = Constants.newMessageDigest();
-			var oeBytes = new byte[Constants.OBJECT_ID_LENGTH];
-			for (int i = 0; i < _entryCount; i++)
-			{
-				PackedObjectInfo oe = _entries[i];
-				oe.copyRawTo(oeBytes, 0);
-				d.Update(oeBytes);
-			}
+        public PackLock renameAndOpenPack(string lockMessage)
+        {
+            if (!_keepEmpty && _entryCount == 0)
+            {
+                CleanupTemporaryFiles();
+                return null;
+            }
 
-			string name = ObjectId.FromRaw(d.Digest()).Name;
-			var packDir = new DirectoryInfo(Path.Combine(_repo.ObjectsDirectory.ToString(), "pack"));
-			var finalPack = new FileInfo(Path.Combine(packDir.ToString(), "pack-" + GetPackFileName(name)));
-			var finalIdx = new FileInfo(Path.Combine(packDir.ToString(), "pack-" + GetIndexFileName(name)));
-			var keep = new PackLock(finalPack);
+            MessageDigest d = Constants.newMessageDigest();
+            var oeBytes = new byte[Constants.OBJECT_ID_LENGTH];
+            for (int i = 0; i < _entryCount; i++)
+            {
+                PackedObjectInfo oe = _entries[i];
+                oe.copyRawTo(oeBytes, 0);
+                d.Update(oeBytes);
+            }
 
-		    if (!packDir.Exists && !packDir.Mkdirs() && !packDir.Exists)
-		    {
-		        CleanupTemporaryFiles();
-		        throw new IOException("Cannot Create " + packDir);
-		    }
+            string name = ObjectId.FromRaw(d.Digest()).Name;
+            var packDir = new DirectoryInfo(Path.Combine(_repo.ObjectsDirectory.ToString(), "pack"));
+            var finalPack = new FileInfo(Path.Combine(packDir.ToString(), "pack-" + GetPackFileName(name)));
+            var finalIdx = new FileInfo(Path.Combine(packDir.ToString(), "pack-" + GetIndexFileName(name)));
+            var keep = new PackLock(finalPack);
 
-			if (finalPack.Exists)
-			{
-				CleanupTemporaryFiles();
-				return null;
-			}
+            if (!packDir.Exists && !packDir.Mkdirs() && !packDir.Exists)
+            {
+                CleanupTemporaryFiles();
+                throw new IOException("Cannot Create " + packDir);
+            }
 
-			if (lockMessage != null)
-			{
-				try
-				{
-					if (!keep.Lock(lockMessage))
-					{
-						throw new IOException("Cannot lock pack in " + finalPack);
-					}
-				}
-				catch (IOException)
-				{
-					CleanupTemporaryFiles();
-					throw;
-				}
-			}
+            if (finalPack.Exists)
+            {
+                CleanupTemporaryFiles();
+                return null;
+            }
 
-			if (!_dstPack.RenameTo(finalPack.ToString()))
-			{
-				CleanupTemporaryFiles();
-				keep.Unlock();
-				throw new IOException("Cannot move pack to " + finalPack);
-			}
+            if (lockMessage != null)
+            {
+                try
+                {
+                    if (!keep.Lock(lockMessage))
+                    {
+                        throw new IOException("Cannot lock pack in " + finalPack);
+                    }
+                }
+                catch (IOException)
+                {
+                    CleanupTemporaryFiles();
+                    throw;
+                }
+            }
 
-			if (!_dstIdx.RenameTo(finalIdx.ToString()))
-			{
-				CleanupTemporaryFiles();
-				keep.Unlock();
-				finalPack.Delete();
-				//if (finalPack.Exists)
+            if (!_dstPack.RenameTo(finalPack.ToString()))
+            {
+                CleanupTemporaryFiles();
+                keep.Unlock();
+                throw new IOException("Cannot move pack to " + finalPack);
+            }
+
+            if (!_dstIdx.RenameTo(finalIdx.ToString()))
+            {
+                CleanupTemporaryFiles();
+                keep.Unlock();
+                finalPack.Delete();
+                //if (finalPack.Exists)
                 // TODO: [caytchen]  finalPack.deleteOnExit();
-				throw new IOException("Cannot move index to " + finalIdx);
-			}
+                throw new IOException("Cannot move index to " + finalIdx);
+            }
 
-			try
-			{
-				_repo.OpenPack(finalPack, finalIdx);
-			}
-			catch (IOException)
-			{
-				keep.Unlock();
-				finalPack.Delete();
-				finalIdx.Delete();
-				throw;
-			}
+            try
+            {
+                _repo.OpenPack(finalPack, finalIdx);
+            }
+            catch (IOException)
+            {
+                keep.Unlock();
+                finalPack.Delete();
+                finalIdx.Delete();
+                throw;
+            }
 
-			return lockMessage != null ? keep : null;
-		}
+            return lockMessage != null ? keep : null;
+        }
 
-		private void CleanupTemporaryFiles()
-		{
-			_dstIdx.Delete();
-			//if (_dstIdx.Exists)
+        private void CleanupTemporaryFiles()
+        {
+            _dstIdx.Delete();
+            //if (_dstIdx.Exists)
             //  TODO: [caytchen] _dstIdx.deleteOnExit();
-			_dstPack.Delete();
-			//if (_dstPack.Exists)
+            _dstPack.Delete();
+            //if (_dstPack.Exists)
             //  TODO: [caytchen] _dstPack.deleteOnExit();
-		}
+        }
 
-		private static FileInfo CreateTempFile(string pre, string suf, DirectoryInfo dir)
-		{
-			string p = Path.Combine(dir.FullName, pre + Path.GetRandomFileName() + suf);
-			
-            using (var f = File.Create(p)) 
-            {}
-			return new FileInfo(p);
-		}
+        private static FileInfo CreateTempFile(string pre, string suf, DirectoryInfo dir)
+        {
+            string p = Path.Combine(dir.FullName, pre + Path.GetRandomFileName() + suf);
 
-		private static CorruptObjectException Corrupt(IOException e)
-		{
-			return new CorruptObjectException("Packfile corruption detected: " + e.Message);
-		}
+            using (var f = File.Create(p))
+            { }
+            return new FileInfo(p);
+        }
 
-		private static UnresolvedDelta Reverse(UnresolvedDelta c)
-		{
-			UnresolvedDelta tail = null;
-			while (c != null)
-			{
-				UnresolvedDelta n = c.Next;
-				c.Next = tail;
-				tail = c;
-				c = n;
-			}
-			return tail;
-		}
+        private static CorruptObjectException Corrupt(IOException e)
+        {
+            return new CorruptObjectException("Packfile corruption detected: " + e.Message);
+        }
 
-		internal static IndexPack Create(Repository db, Stream stream)
-		{
-			DirectoryInfo objdir = db.ObjectsDirectory;
-			FileInfo tmp = CreateTempFile("incoming_", PackSuffix, objdir);
-			string n = tmp.Name;
+        private static UnresolvedDelta Reverse(UnresolvedDelta c)
+        {
+            UnresolvedDelta tail = null;
+            while (c != null)
+            {
+                UnresolvedDelta n = c.Next;
+                c.Next = tail;
+                tail = c;
+                c = n;
+            }
+            return tail;
+        }
 
-			var basef = new FileInfo(Path.Combine(objdir.FullName, n.Slice(0, n.Length - PackSuffix.Length)));
-			var ip = new IndexPack(db, stream, basef);
-			ip.setIndexVersion(db.Config.getCore().getPackIndexVersion());
-			return ip;
-		}
+        internal static IndexPack Create(Repository db, Stream stream)
+        {
+            DirectoryInfo objdir = db.ObjectsDirectory;
+            FileInfo tmp = CreateTempFile("incoming_", PackSuffix, objdir);
+            string n = tmp.Name;
 
-		internal static string GetPackFileName(string fileName)
-		{
-			if (string.IsNullOrEmpty(fileName))
-			{
-				throw new ArgumentNullException("fileName");
-			}
-			return fileName + PackSuffix;
-		}
+            var basef = new FileInfo(Path.Combine(objdir.FullName, n.Slice(0, n.Length - PackSuffix.Length)));
+            var ip = new IndexPack(db, stream, basef);
+            ip.setIndexVersion(db.Config.getCore().getPackIndexVersion());
+            return ip;
+        }
 
-		internal static string GetIndexFileName(string fileName)
-		{
-			if (string.IsNullOrEmpty(fileName))
-			{
-				throw new ArgumentNullException("fileName");
-			}
-			return fileName + IndexSuffix;
-		}
-		
-		public void Dispose ()
-		{
-			_packOut.Dispose();
-			_stream.Dispose();
-			_objectDigest.Dispose();
-			_packDigest.Dispose();
-		}
-		
+        internal static string GetPackFileName(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                throw new ArgumentNullException("fileName");
+            }
+            return fileName + PackSuffix;
+        }
 
-		#region Nested Types
+        internal static string GetIndexFileName(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                throw new ArgumentNullException("fileName");
+            }
+            return fileName + IndexSuffix;
+        }
 
-		private class DeltaChain : ObjectId
-		{
-			public UnresolvedDelta Head { get; private set; }
+        public void Dispose()
+        {
+            _packOut.Dispose();
+            _stream.Dispose();
+            _objectDigest.Dispose();
+            _packDigest.Dispose();
+        }
 
-			public DeltaChain(AnyObjectId id)
-				: base(id)
-			{
-			}
 
-			public UnresolvedDelta Remove()
-			{
-				UnresolvedDelta r = Head;
-				if (r != null)
-				{
-					Head = null;
-				}
+        #region Nested Types
 
-				return r;
-			}
+        private class DeltaChain : ObjectId
+        {
+            public UnresolvedDelta Head { get; private set; }
 
-			public void Add(UnresolvedDelta d)
-			{
-				d.Next = Head;
-				Head = d;
-			}
-		}
+            public DeltaChain(AnyObjectId id)
+                : base(id)
+            {
+            }
 
-		private class UnresolvedDelta
-		{
-			private readonly long _headerOffset;
-			private readonly int _crc32;
+            public UnresolvedDelta Remove()
+            {
+                UnresolvedDelta r = Head;
+                if (r != null)
+                {
+                    Head = null;
+                }
 
-			public UnresolvedDelta(long headerOffset, int crc32)
-			{
-				_headerOffset = headerOffset;
-				_crc32 = crc32;
-			}
+                return r;
+            }
 
-			public long HeaderOffset
-			{
-				get { return _headerOffset; }
-			}
+            public void Add(UnresolvedDelta d)
+            {
+                d.Next = Head;
+                Head = d;
+            }
+        }
 
-			public int Crc32
-			{
-				get { return _crc32; }
-			}
+        private class UnresolvedDelta
+        {
+            private readonly long _headerOffset;
+            private readonly int _crc32;
 
-			public UnresolvedDelta Next { get; set; }
-		}
+            public UnresolvedDelta(long headerOffset, int crc32)
+            {
+                _headerOffset = headerOffset;
+                _crc32 = crc32;
+            }
 
-		#endregion
-	}
+            public long HeaderOffset
+            {
+                get { return _headerOffset; }
+            }
+
+            public int Crc32
+            {
+                get { return _crc32; }
+            }
+
+            public UnresolvedDelta Next { get; set; }
+        }
+
+        #endregion
+    }
 }

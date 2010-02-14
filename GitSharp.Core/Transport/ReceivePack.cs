@@ -545,7 +545,7 @@ namespace GitSharp.Core.Transport
             Ref head = refs[Constants.HEAD];
             refs.Remove(Constants.HEAD);
             adv.send(refs);
-            if (!head.IsSymbolic)
+            if (head != null && !head.isSymbolic())
                 adv.advertiseHave(head.ObjectId);
             adv.includeAdditionalHaves();
             if (adv.isEmpty())

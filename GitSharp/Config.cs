@@ -115,7 +115,7 @@ namespace GitSharp
 		{
 			var config = _repo._internal_repo.Config;
 			config.getState();
-			foreach (var entry in config._state.EntryList)
+			foreach (var entry in config._state.get().EntryList)
 			{
 				if (string.IsNullOrEmpty(entry.name))
 					continue;

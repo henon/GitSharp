@@ -298,6 +298,50 @@ namespace GitSharp.Tests.GitSharp.Core
             Assert.AreEqual("[my]\n\tempty =\n", c.toText());
         }
 
+        [Test]
+        public void testUnsetBranchSection()
+        {
+            global::GitSharp.Core.Config c = parse(""
+            + "[branch \"keep\"]\n"
+            + "  merge = master.branch.to.keep.in.the.file\n"
+            + "\n"
+            + "[branch \"remove\"]\n"
+            + "  merge = this.will.get.deleted\n"
+            + "  remote = origin-for-some-long-gone-place\n"
+            + "\n"
+            + "[core-section-not-to-remove-in-test]\n"
+            + "  packedGitLimit = 14\n");
+            c.unsetSection("branch", "does.not.exist");
+            c.unsetSection("branch", "remove");
+            Assert.AreEqual("" //
+                    + "[branch \"keep\"]\n"
+                    + "  merge = master.branch.to.keep.in.the.file\n"
+                    + "\n"
+                    + "[core-section-not-to-remove-in-test]\n"
+                    + "  packedGitLimit = 14\n", c.toText());
+        }
+
+        [Test]
+        public void testUnsetSingleSection()
+        {
+            global::GitSharp.Core.Config c = parse("" //
+                    + "[branch \"keep\"]\n"
+                    + "  merge = master.branch.to.keep.in.the.file\n"
+                    + "\n"
+                    + "[single]\n"
+                    + "  merge = this.will.get.deleted\n"
+                    + "  remote = origin-for-some-long-gone-place\n"
+                    + "\n"
+                    + "[core-section-not-to-remove-in-test]\n"
+                    + "  packedGitLimit = 14\n");
+            c.unsetSection("single", null);
+            Assert.AreEqual("" //
+                    + "[branch \"keep\"]\n"
+                    + "  merge = master.branch.to.keep.in.the.file\n"
+                    + "\n"
+                    + "[core-section-not-to-remove-in-test]\n"
+                    + "  packedGitLimit = 14\n", c.toText());
+        }
         private void assertReadLong(long exp)
         {
             assertReadLong(exp, exp.ToString());
@@ -311,7 +355,7 @@ namespace GitSharp.Tests.GitSharp.Core
 
         private global::GitSharp.Core.Config parse(string content)
         {
-            global::GitSharp.Core.Config c = new global::GitSharp.Core.Config(null);
+            var c = new global::GitSharp.Core.Config(null);
             c.fromText(content);
             return c;
         }

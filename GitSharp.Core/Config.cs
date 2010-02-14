@@ -66,7 +66,7 @@ namespace GitSharp.Core
         /// This state is copy-on-write. It should always contain an immutable list
         /// of the configuration keys/values.
         /// </summary>
-        internal State _state;
+        internal AtomicReference<State> _state;
 
         /// Magic value indicating a missing entry.
         ///	This value is tested for reference equality in some contexts, so we
@@ -94,7 +94,7 @@ namespace GitSharp.Core
         public Config(Config defaultConfig)
         {
             _baseConfig = defaultConfig;
-            _state = newState();
+            _state = new AtomicReference<State>(newState());
         }
 
         ///	<summary>
@@ -369,7 +369,7 @@ namespace GitSharp.Core
         /// configuration and its base configuration; may be empty if no
         /// subsection exists.
         /// </returns>
-        public List<string> getSubsections(string section)
+        public IList<string> getSubsections(string section)
         {
             return get(new SubsectionNames(section));
         }
@@ -390,15 +390,11 @@ namespace GitSharp.Core
         public T get<T>(SectionParser<T> parser)
         {
             State myState = getState();
-            T obj;
-            if (!myState.Cache.ContainsKey(parser))
+            T obj = (T)myState.Cache.get(parser);
+            if (Equals(obj, default(T)))
             {
-                obj = parser.parse(this);
-                myState.Cache.Add(parser, obj);
-            }
-            else
-            {
-                obj = (T)myState.Cache[parser];
+                obj = (T)parser.parse(this);
+                myState.Cache.put(parser, obj);
             }
             return obj;
         }
@@ -413,7 +409,7 @@ namespace GitSharp.Core
         ///	<seealso cref="get{T}"/>
         public void uncache<T>(SectionParser<T> parser)
         {
-            _state.Cache.Remove(parser);
+            _state.get().Cache.Remove(parser);
         }
 
         private string getRawString(string section, string subsection, string name)
@@ -432,7 +428,7 @@ namespace GitSharp.Core
         private List<string> getRawStringList(string section, string subsection, string name)
         {
             List<string> r = null;
-            foreach (Entry e in _state.EntryList)
+            foreach (Entry e in _state.get().EntryList)
             {
                 if (e.match(section, subsection, name))
                     r = add(r, e.value);
@@ -452,20 +448,21 @@ namespace GitSharp.Core
 
         internal State getState()
         {
-            State cur = _state;
-            State @base = getBaseState();
-            if (cur.baseState == @base)
-                return cur;
-
-            var upd = new State(cur.EntryList, @base);
-            _state = upd;
-
+            State cur, upd;
+            do
+            {
+                cur = _state.get();
+                State @base = getBaseState();
+                if (cur.baseState == @base)
+                    return cur;
+                upd = new State(cur.EntryList, @base);
+            } while (!_state.compareAndSet(cur, upd));
             return upd;
         }
 
         private State getBaseState()
         {
-            return _baseConfig != null ? _baseConfig._state : null;
+            return _baseConfig != null ? _baseConfig.getState() : null;
         }
 
         /// <summary>
@@ -561,6 +558,45 @@ namespace GitSharp.Core
             setStringList(section, subsection, name, new List<string>());
         }
 
+        /// <summary>
+        /// Remove all configuration values under a single section.
+        /// </summary>
+        /// <param name="section">section name, e.g "branch"</param>
+        /// <param name="subsection">optional subsection value, e.g. a branch name</param>
+        public void unsetSection(string section, string subsection)
+        {
+            State src, res;
+            do
+            {
+                src = _state.get();
+                res = unsetSection(src, section, subsection);
+            } while (!_state.compareAndSet(src, res));
+        }
+
+        private State unsetSection(State srcState, string section,
+                string subsection)
+        {
+            int max = srcState.EntryList.Count;
+            var r = new List<Entry>(max);
+
+            bool lastWasMatch = false;
+            foreach (Entry e in srcState.EntryList)
+            {
+                if (e.match(section, subsection))
+                {
+                    // Skip this record, it's for the section we are removing.
+                    lastWasMatch = true;
+                    continue;
+                }
+
+                if (lastWasMatch && e.section == null && e.subsection == null)
+                    continue; // skip this padding line in the section.
+                r.Add(e);
+            }
+
+            return newState(r);
+        }
+
         ///	<summary>
         /// Set a configuration value.
         /// <para />
@@ -574,9 +610,12 @@ namespace GitSharp.Core
         /// <param name="values">List of zero or more values for this key.</param>
         public void setStringList(string section, string subsection, string name, List<string> values)
         {
-            State src = _state;
-            State res = replaceStringList(src, section, subsection, name, values);
-            _state = res;
+            State src, res;
+            do
+            {
+                src = _state.get();
+                res = replaceStringList(src, section, subsection, name, values);
+            } while (!_state.compareAndSet(src, res));
         }
 
         private State replaceStringList(State srcState, string section, string subsection, string name, IList<string> values)
@@ -692,7 +731,7 @@ namespace GitSharp.Core
         public string toText()
         {
             var o = new StringBuilder();
-            foreach (Entry e in _state.EntryList)
+            foreach (Entry e in _state.get().EntryList)
             {
                 if (e.prefix != null)
                     o.Append(e.prefix);
@@ -743,11 +782,6 @@ namespace GitSharp.Core
                 }
             }
             return o.ToString();
-        }
-
-        internal void AddEntry(Entry e)
-        {
-            _state.EntryList.Add(e);
         }
 
         /// <summary>
@@ -842,7 +876,7 @@ namespace GitSharp.Core
                 }
             }
 
-            _state = newState(newEntries);
+            _state.set(newState(newEntries));
         }
 
         private static string ReadValue(ConfigReader i, bool quote, int eol)
@@ -952,7 +986,7 @@ namespace GitSharp.Core
 
         protected void clear()
         {
-            _state = newState();
+            _state.set(newState());
         }
 
         private static string readSectionName(ConfigReader i)
@@ -1147,6 +1181,11 @@ namespace GitSharp.Core
                        && eqIgnoreCase(name, aKey);
             }
 
+            public bool match(string aSection, string aSubsection)
+            {
+                return eqIgnoreCase(section, aSection)
+                        && eqSameCase(subsection, aSubsection);
+            }
             private static bool eqIgnoreCase(string a, string b)
             {
                 if (a == null && b == null)
@@ -1217,7 +1256,7 @@ namespace GitSharp.Core
 
         #region Nested type: SubsectionNames
 
-        private class SubsectionNames : SectionParser<List<string>>
+        private class SubsectionNames : SectionParser<IList<string>>
         {
             private readonly string section;
 
@@ -1228,19 +1267,19 @@ namespace GitSharp.Core
 
             #region SectionParser<List<string>> Members
 
-            public List<string> parse(Config cfg)
+            public IList<string> parse(Config cfg)
             {
                 var result = new List<string>();
                 while (cfg != null)
                 {
-                    foreach (Entry e in cfg._state.EntryList)
+                    foreach (Entry e in cfg._state.get().EntryList)
                     {
                         if (e.subsection != null && e.name == null && StringUtils.equalsIgnoreCase(section, e.section))
                             result.Add(e.subsection);
                     }
                     cfg = cfg._baseConfig;
                 }
-                return result;
+                return result.AsReadOnly();
             }
 
             #endregion

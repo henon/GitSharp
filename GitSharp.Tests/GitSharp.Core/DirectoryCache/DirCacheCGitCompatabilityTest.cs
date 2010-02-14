@@ -41,6 +41,7 @@ using System.Collections.Generic;
 using System.IO;
 using GitSharp.Core;
 using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.Exceptions;
 using GitSharp.Core.Tests.Util;
 using GitSharp.Core.TreeWalk;
 using GitSharp.Core.Util;
@@ -52,7 +53,7 @@ namespace GitSharp.Tests.GitSharp.Core.DirectoryCache
     [TestFixture]
     public class DirCacheCGitCompatabilityTest : LocalDiskRepositoryTestCase
     {
-        private readonly FileInfo _index = new FileInfo("Resources/gitgit.index");
+        private readonly FileInfo _index = pathOf("gitgit.index");
 
         [Test]
         public void testReadIndex_LsFiles()
@@ -110,9 +111,7 @@ namespace GitSharp.Tests.GitSharp.Core.DirectoryCache
             Assert.AreEqual(string.Empty, jTree.getNameString());
             Assert.AreEqual(string.Empty, jTree.getPathString());
             Assert.IsTrue(jTree.isValid());
-            Assert.AreEqual(ObjectId
-                                .FromString("698dd0b8d0c299f080559a1cffc7fe029479a408"), jTree
-                                                                                             .getObjectId());
+            Assert.AreEqual(ObjectId.FromString("698dd0b8d0c299f080559a1cffc7fe029479a408"), jTree.getObjectId());
             Assert.AreEqual(cList.Count, jTree.getEntrySpan());
 
             var subtrees = new List<CGitLsTreeRecord>();
@@ -133,6 +132,47 @@ namespace GitSharp.Tests.GitSharp.Core.DirectoryCache
                 Assert.AreEqual(sc.Id, sj.getObjectId());
             }
         }
+
+        [Test]
+        public void testUnsupportedOptionalExtension()
+        {
+            var dc = new DirCache(pathOf("gitgit.index.ZZZZ"));
+            dc.read();
+            Assert.AreEqual(1, dc.getEntryCount());
+            Assert.AreEqual("A", dc.getEntry(0).getPathString());
+        }
+
+        [Test]
+        public void testUnsupportedRequiredExtension()
+        {
+            var dc = new DirCache(pathOf("gitgit.index.aaaa"));
+            try
+            {
+                dc.read();
+                Assert.Fail("Cache loaded an unsupported extension");
+            }
+            catch (CorruptObjectException err)
+            {
+                Assert.AreEqual("DIRC extension 'aaaa'"
+                        + " not supported by this version.", err.Message);
+            }
+        }
+
+        [Test]
+        public void testCorruptChecksumAtFooter()
+        {
+            var dc = new DirCache(pathOf("gitgit.index.badchecksum"));
+            try
+            {
+                dc.read();
+                Assert.Fail("Cache loaded despite corrupt checksum");
+            }
+            catch (CorruptObjectException err)
+            {
+                Assert.AreEqual("DIRC checksum mismatch", err.Message);
+            }
+        }
+
 
         private static void AssertAreEqual(CGitIndexRecord c, DirCacheEntry j)
         {
@@ -160,6 +200,10 @@ namespace GitSharp.Tests.GitSharp.Core.DirectoryCache
             return r;
         }
 
+        private static FileInfo pathOf(string name)
+        {
+            return new FileInfo("Resources/" + name);
+        }
         private static List<CGitLsTreeRecord> ReadLsTree()
         {
             var r = new List<CGitLsTreeRecord>();

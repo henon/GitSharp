@@ -406,21 +406,28 @@ namespace GitSharp.Core.DirectoryCache
                 var pos = inStream.Position;
                 IO.ReadFully(inStream, hdr, 0, 20);
 
-                int nextByte = @in.Read();
-                if (nextByte < 0 || inStream.Position == inStream.Length)
+                if (inStream.ReadByte() < 0)
                 {
                     // No extensions present; the file ended where we expected.
                     //
                     break;
                 }
                 inStream.Seek(pos, SeekOrigin.Begin);
+                md.Update(hdr, 0, 8);
+                IO.skipFully(inStream, 8);
+
+                long sz = NB.decodeUInt32(hdr, 4);
 
                 switch (NB.DecodeInt32(hdr, 0))
                 {
                     case ExtTree:
-                        var raw = new byte[NB.DecodeInt32(hdr, 4)];
-                        md.Update(hdr, 0, 8);
-                        IO.skipFully(inStream, 8);
+                        if (int.MaxValue < sz)
+                        {
+                            throw new CorruptObjectException("DIRC extension "
+                                        + formatExtensionName(hdr) + " is too large at "
+                                        + sz + " bytes.");
+                        }
+                        byte[] raw = new byte[(int)sz];
                         IO.ReadFully(inStream, raw, 0, raw.Length);
                         md.Update(raw, 0, raw.Length);
                         _cacheTree = new DirCacheTree(raw, new MutableInteger(), null);
@@ -431,9 +438,10 @@ namespace GitSharp.Core.DirectoryCache
                         {
                             // The extension is optional and is here only as
                             // a performance optimization. Since we do not
-                            // understand it, we can safely skip past it.
+                            // understand it, we can safely skip past it, after
+                            // we include its data in our checksum.
                             //
-                            IO.skipFully(inStream, NB.decodeUInt32(hdr, 4));
+                            skipOptionalExtension(inStream, md, hdr, sz);
                         }
                         else
                         {
@@ -441,9 +449,9 @@ namespace GitSharp.Core.DirectoryCache
                             // _required_ to understand this index format.
                             // Since we did not trap it above we must abort.
                             //
-                            throw new CorruptObjectException("DIRC extension '"
-                                    + Constants.CHARSET.GetString(hdr.Take(4).ToArray())
-                                    + "' not supported by this version.");
+                            throw new CorruptObjectException("DIRC extension "
+                                    + formatExtensionName(hdr)
+                                    + " not supported by this version.");
                         }
 
                         break;
@@ -455,6 +463,28 @@ namespace GitSharp.Core.DirectoryCache
             {
                 throw new CorruptObjectException("DIRC checksum mismatch");
             }
+        }
+
+        private void skipOptionalExtension(Stream inStream, MessageDigest md, byte[] hdr, long sz)
+        {
+            byte[] b = new byte[4096];
+            while (0 < sz)
+            {
+                int n = inStream.Read(b, 0, (int)Math.Min(b.Length, sz));
+                if (n < 0)
+                {
+                    throw new EndOfStreamException("Short read of optional DIRC extension "
+                            + formatExtensionName(hdr) + "; expected another " + sz
+                            + " bytes within the section.");
+                }
+                md.Update(b, 0, n);
+                sz -= n;
+            }
+        }
+
+        private static String formatExtensionName(byte[] hdr)
+        {
+            return "'" + Charset.forName("ISO-8859-1").GetString(hdr, 0, 4) + "'";
         }
 
         private static bool IsDIRC(byte[] header)

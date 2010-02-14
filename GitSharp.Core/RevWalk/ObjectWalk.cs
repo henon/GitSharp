@@ -72,8 +72,7 @@ namespace GitSharp.Core.RevWalk
         private CanonicalTreeParser _treeWalk;
         private BlockObjQueue _pendingObjects;
         private RevTree _currentTree;
-        private bool _fromTreeWalk;
-        private RevTree _nextSubtree;
+        private RevObject last;
 
         /// <summary>
         /// Create a new revision and object walker for a given repository.
@@ -263,20 +262,17 @@ namespace GitSharp.Core.RevWalk
         /// </exception>
         public RevObject nextObject()
         {
-            _fromTreeWalk = false;
-
-            if (_nextSubtree != null)
+            if (last != null)
             {
-                _treeWalk = _treeWalk.createSubtreeIterator0(Repository, _nextSubtree, WindowCursor);
-                _nextSubtree = null;
+                _treeWalk = last is RevTree ? enter(last) : _treeWalk.next();
             }
+
 
             while (!_treeWalk.eof())
             {
                 FileMode mode = _treeWalk.EntryFileMode;
-                var sType = (int)mode.ObjectType;
 
-                switch (sType)
+                switch ((int)mode.ObjectType)
                 {
                     case Constants.OBJ_BLOB:
                         _treeWalk.getEntryObjectId(IdBuffer);
@@ -287,7 +283,7 @@ namespace GitSharp.Core.RevWalk
                         blob.Flags |= SEEN;
                         if (ShouldSkipObject(blob)) break;
 
-                        _fromTreeWalk = true;
+                        last = blob;
                         return blob;
 
                     case Constants.OBJ_TREE:
@@ -299,8 +295,7 @@ namespace GitSharp.Core.RevWalk
                         tree.Flags |= SEEN;
                         if (ShouldSkipObject(tree)) break;
 
-                        _nextSubtree = tree;
-                        _fromTreeWalk = true;
+                        last = tree;
                         return tree;
 
                     default:
@@ -316,6 +311,7 @@ namespace GitSharp.Core.RevWalk
                 _treeWalk = _treeWalk.next();
             }
 
+            last = null;
             while (true)
             {
                 RevObject obj = _pendingObjects.next();
@@ -334,6 +330,20 @@ namespace GitSharp.Core.RevWalk
 
                 return obj;
             }
+        }
+
+        private CanonicalTreeParser enter(RevObject tree)
+        {
+            CanonicalTreeParser p = _treeWalk.createSubtreeIterator0(Repository, tree, WindowCursor);
+            if (p.eof())
+            {
+                // We can't tolerate the subtree being an empty tree, as
+                // that will break us out early before we visit all names.
+                // If it is, advance to the parent's next record.
+                //
+                return _treeWalk.next();
+            }
+            return p;
         }
 
         private bool ShouldSkipObject(RevObject o)
@@ -401,7 +411,7 @@ namespace GitSharp.Core.RevWalk
         /// </returns>
         public string PathString
         {
-            get { return _fromTreeWalk ? _treeWalk.EntryPathString : null; }
+            get { return last != null ? _treeWalk.EntryPathString : null; }
         }
 
         public override void Dispose()
@@ -409,8 +419,8 @@ namespace GitSharp.Core.RevWalk
             base.Dispose();
             _pendingObjects = new BlockObjQueue();
             _treeWalk = new CanonicalTreeParser();
-            _nextSubtree = null;
             _currentTree = null;
+            last = null;
         }
 
         internal override void reset(int retainFlags)
@@ -418,7 +428,8 @@ namespace GitSharp.Core.RevWalk
             base.reset(retainFlags);
             _pendingObjects = new BlockObjQueue();
             _treeWalk = new CanonicalTreeParser();
-            _nextSubtree = null;
+            _currentTree = null;
+            last = null;
         }
 
         private void AddObject(RevObject obj)
@@ -479,21 +490,6 @@ namespace GitSharp.Core.RevWalk
         public BlockObjQueue PendingObjects
         {
             get { return _pendingObjects; }
-        }
-
-        public RevTree CurrentTree
-        {
-            get { return _currentTree; }
-        }
-
-        public bool FromTreeWalk
-        {
-            get { return _fromTreeWalk; }
-        }
-
-        public RevTree NextSubtree
-        {
-            get { return _nextSubtree; }
         }
     }
 }

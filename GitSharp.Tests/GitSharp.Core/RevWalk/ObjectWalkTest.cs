@@ -35,17 +35,19 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.Core;
 using GitSharp.Core.RevWalk;
+using GitSharp.Core.Tests.RevWalk;
 using NUnit.Framework;
 
-namespace GitSharp.Core.Tests.RevWalk
+namespace GitSharp.Tests.GitSharp.Core.RevWalk
 {
     [TestFixture]
     public class ObjectWalkTest : RevWalkTestCase
     {
         protected ObjectWalk objw;
 
-        protected override GitSharp.Core.RevWalk.RevWalk createRevWalk()
+        protected override global::GitSharp.Core.RevWalk.RevWalk createRevWalk()
         {
             return objw = new ObjectWalk(db);
         }
@@ -207,5 +209,47 @@ namespace GitSharp.Core.Tests.RevWalk
             Assert.AreSame(f2, objw.nextObject());
             Assert.IsNull(objw.nextObject());
         }
+
+        [Test]
+        public void testEmptyTreeCorruption()
+        {
+            ObjectId bId = ObjectId.FromString("abbbfafe3129f85747aba7bfac992af77134c607");
+            RevTree tree_root, tree_A, tree_AB;
+            RevCommit b;
+            {
+                global::GitSharp.Core.Tree root = new global::GitSharp.Core.Tree(db);
+                global::GitSharp.Core.Tree A = root.AddTree("A");
+                FileTreeEntry B = root.AddFile("B");
+                B.Id = (bId);
+
+                global::GitSharp.Core.Tree A_A = A.AddTree("A");
+                global::GitSharp.Core.Tree A_B = A.AddTree("B");
+
+                var ow = new ObjectWriter(db);
+                A_A.Id = (ow.WriteTree(A_A));
+                A_B.Id = (ow.WriteTree(A_B));
+                A.Id = (ow.WriteTree(A));
+                root.Id = (ow.WriteTree(root));
+
+                tree_root = rw.parseTree(root.Id);
+                tree_A = rw.parseTree(A.Id);
+                tree_AB = rw.parseTree(A_A.Id);
+                Assert.AreSame(tree_AB, rw.parseTree(A_B.Id));
+                b = Commit(rw.parseTree(root.Id));
+            }
+
+            MarkStart(b);
+
+            AssertCommit(b, objw.next());
+            Assert.IsNull(objw.next());
+
+            Assert.AreSame(tree_root, objw.nextObject());
+            Assert.AreSame(tree_A, objw.nextObject());
+            Assert.AreSame(tree_AB, objw.nextObject());
+            Assert.AreSame(rw.lookupBlob(bId), objw.nextObject());
+            Assert.IsNull(objw.nextObject());
+        }
     }
 }
+
+

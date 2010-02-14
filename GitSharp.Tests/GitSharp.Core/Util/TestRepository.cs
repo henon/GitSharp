@@ -45,6 +45,7 @@ using GitSharp.Core.TreeWalk.Filter;
 using GitSharp.Core.Util;
 using NUnit.Framework;
 using FileMode = GitSharp.Core.FileMode;
+using CoreRevWalk = GitSharp.Core.RevWalk.RevWalk;
 
 namespace GitSharp.Tests.GitSharp.Core.Util
 {
@@ -71,7 +72,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
 
         private global::GitSharp.Core.Repository db;
 
-        private RevWalk pool;
+        private CoreRevWalk pool;
 
         private ObjectWriter writer;
 
@@ -85,7 +86,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
      * @throws Exception
      */
         public TestRepository(global::GitSharp.Core.Repository db)
-            : this(db, new RevWalk(db))
+            : this(db, new CoreRevWalk(db))
         {
         }
 
@@ -98,7 +99,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
      *            the RevObject pool to use for object lookup.
      * @throws Exception
      */
-        public TestRepository(global::GitSharp.Core.Repository db, RevWalk rw)
+        public TestRepository(global::GitSharp.Core.Repository db, CoreRevWalk rw)
         {
             this.db = db;
             this.pool = rw;
@@ -113,7 +114,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
         }
 
         /** @return get the RevWalk pool all objects are allocated through. */
-        public RevWalk getRevWalk()
+        public CoreRevWalk getRevWalk()
         {
             return pool;
         }

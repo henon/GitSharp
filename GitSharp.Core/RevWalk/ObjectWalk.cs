@@ -408,6 +408,7 @@ namespace GitSharp.Core.RevWalk
         {
             base.Dispose();
             _pendingObjects = new BlockObjQueue();
+            _treeWalk = new CanonicalTreeParser();
             _nextSubtree = null;
             _currentTree = null;
         }
@@ -416,6 +417,7 @@ namespace GitSharp.Core.RevWalk
         {
             base.reset(retainFlags);
             _pendingObjects = new BlockObjQueue();
+            _treeWalk = new CanonicalTreeParser();
             _nextSubtree = null;
         }
 

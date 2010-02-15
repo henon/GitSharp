@@ -163,7 +163,6 @@ namespace GitSharp.Core.TreeWalk
             CanonicalTreeParser iterator = this;
             while (true)
             {
-                iterator.next(1);
                 if (iterator._nextPtr == iterator._raw.Length)
                 {
                     // This parser has reached EOF, return to the parent.

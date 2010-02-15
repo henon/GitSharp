@@ -134,11 +134,14 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// Switch to this branch and check it out into the working directory.
+		/// Check out this branch into the working directory and have HEAD point to it.
 		/// </summary>
 		public void Checkout()
 		{
-			SwitchTo(this);
+			var db = _repo._internal_repo;
+			RefUpdate u = db.UpdateRef(Constants.HEAD);
+			u.link(Constants.R_HEADS + this.Name);
+			Reset(ResetBehavior.Hard);
 		}
 
 		/// <summary>
@@ -270,17 +273,6 @@ namespace GitSharp
 
 		#endregion
 
-		/// <summary>
-		/// Switch to the given branch
-		/// </summary>
-		/// <param name="branch"></param>
-		public static void SwitchTo(Branch branch)
-		{
-			var db = branch._repo._internal_repo;
-			RefUpdate u = db.UpdateRef(Constants.HEAD);
-			u.link(Constants.R_HEADS + branch.Name);
-			branch.Reset(ResetBehavior.Hard);
-		}
 
 		public override string ToString()
 		{

@@ -65,5 +65,15 @@ namespace GitSharp.Tests.GitSharp
 			Assert.AreEqual(content, File.ReadAllText(Path.Combine(wd, path)));
 		}
 
+		protected void AssertRepoIsClean(Repository r)
+		{
+			var status = r.Status;
+			Assert.AreEqual(0, status.Added.Count);
+			Assert.AreEqual(0, status.Modified.Count);
+			Assert.AreEqual(0, status.Missing.Count);
+			Assert.AreEqual(0, status.Removed.Count);
+			Assert.AreEqual(0, status.Staged.Count);
+			Assert.AreEqual(0, status.Untracked.Count);
+		}
 	}
 }

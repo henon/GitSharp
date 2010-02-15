@@ -115,7 +115,7 @@ namespace GitSharp.API.Tests
 				Assert.IsNotNull(repo.Head.CurrentCommit);
 				var b = Branch.Create(repo, "foo");
 				
-				repo.CheckoutBranch("foo");
+				repo.SwitchToBranch("foo");
 				
 				Assert.AreEqual(repo.CurrentBranch.Name, "foo");
 				

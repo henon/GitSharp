@@ -93,7 +93,7 @@ namespace GitSharp.Tests.GitSharp
 				var pa = repo.Branches["pa"];
 				Assert.AreEqual(12, repo.Branches.Count);
 
-				Branch.SwitchTo(a);
+				a.Checkout();
 				Assert.IsTrue(a.IsCurrent);
 				Assert.IsFalse(master.IsCurrent);
 				Assert.IsTrue(GetFile(repo, "master.txt").Exists);
@@ -101,7 +101,7 @@ namespace GitSharp.Tests.GitSharp
 				Assert.IsTrue(GetFile(repo, "a/a2.txt").Exists);
 				AssertRepoIsClean(repo);
 
-				Branch.SwitchTo(b);
+				b.Checkout();
 				Assert.IsTrue(b.IsCurrent);
 				Assert.IsFalse(a.IsCurrent);
 				Assert.IsTrue(GetFile(repo, "master.txt").Exists);
@@ -111,7 +111,7 @@ namespace GitSharp.Tests.GitSharp
 				Assert.IsTrue(GetFile(repo, "b/b2.txt").Exists);
 				AssertRepoIsClean(repo);
 
-				repo.CheckoutBranch("c");
+				repo.SwitchToBranch("c");
 				Assert.IsTrue(c.IsCurrent);
 				Assert.IsTrue(GetFile(repo, "master.txt").Exists);
 				Assert.IsTrue(GetFile(repo, "a/a1.txt").Exists);
@@ -122,7 +122,7 @@ namespace GitSharp.Tests.GitSharp
 				Assert.IsTrue(GetFile(repo, "c/c2.txt").Exists);
 				AssertRepoIsClean(repo);
 
-				repo.CheckoutBranch(d);
+				repo.SwitchToBranch(d);
 				Assert.IsTrue(d.IsCurrent);
 				Assert.IsTrue(GetFile(repo, "master.txt").Exists);
 				Assert.IsTrue(GetFile(repo, "a/a1").Exists);
@@ -130,9 +130,9 @@ namespace GitSharp.Tests.GitSharp
 				Assert.IsTrue(GetFile(repo, "a/a2.txt").Exists);
 				AssertRepoIsClean(repo);
 
-				repo.CheckoutBranch(e);
+				repo.SwitchToBranch(e);
 
-				repo.CheckoutBranch(f);
+				repo.SwitchToBranch(f);
 				Assert.IsTrue(f.IsCurrent);
 				Assert.IsTrue(GetFile(repo, "master.txt").Exists);
 				Assert.IsTrue(GetFile(repo, "f/f").Exists);
@@ -140,7 +140,7 @@ namespace GitSharp.Tests.GitSharp
 				Assert.IsTrue(GetFile(repo, "a/a2.txt").Exists);
 				AssertRepoIsClean(repo);
 
-				repo.CheckoutBranch(prefix_a);
+				repo.SwitchToBranch(prefix_a);
 				Assert.IsTrue(prefix_a.IsCurrent);
 				Assert.IsFalse(f.IsCurrent);
 				Assert.IsTrue(GetFile(repo, "master.txt").Exists);
@@ -149,8 +149,8 @@ namespace GitSharp.Tests.GitSharp
 				Assert.IsTrue(GetFile(repo, "a/a2.txt").Exists);
 				AssertRepoIsClean(repo);
 
-				repo.CheckoutBranch(g);
-				repo.CheckoutBranch(pa);
+				repo.SwitchToBranch(g);
+				repo.SwitchToBranch(pa);
 				AssertRepoIsClean(repo);
 
 				// [henon] not checking branches gitlink and symlink as there are obviously problems with them. these should be moved into their own test, once we understand gitlink and symlink better.
@@ -168,17 +168,6 @@ namespace GitSharp.Tests.GitSharp
 		private FileInfo GetFile(Repository r, string relative_path)
 		{
 			return new FileInfo(Path.Combine(r.WorkingDirectory, relative_path));
-		}
-
-		private void AssertRepoIsClean(Repository r)
-		{
-			var status = r.Status;
-			Assert.AreEqual(0, status.Added.Count);
-			Assert.AreEqual(0, status.Modified.Count);
-			Assert.AreEqual(0, status.Missing.Count);
-			Assert.AreEqual(0, status.Removed.Count);
-			Assert.AreEqual(0, status.Staged.Count);
-			Assert.AreEqual(0, status.Untracked.Count);
 		}
 
 		[Test]

@@ -164,7 +164,7 @@ namespace GitSharp.API.Tests
 				Assert.AreEqual(index["I/am/a.file"], index["I\\am\\a.file"]); // internal git slash conversion
 				repo.Commit("committing our new file which is not actually present in the working directory.");
 				Assert.AreEqual(new[] { "I/am/a.file" }, index.Entries);
-				repo.CheckoutBranch(repo.CurrentBranch);
+				repo.SwitchToBranch(repo.CurrentBranch);
 				Assert.IsTrue(new FileInfo(Path.Combine(repo.WorkingDirectory, "I/am/a.file")).Exists);
 			}
 		}
@@ -174,7 +174,7 @@ namespace GitSharp.API.Tests
 		{
 			using (var repo = GetTrashRepository())
 			{
-				repo.CheckoutBranch("master");
+				repo.SwitchToBranch("master");
 				var index = repo.Index;
 				Assert.AreEqual(new[] { "a/a1", "a/a1.txt", "a/a2.txt", "b/b1.txt", "b/b2.txt", "c/c1.txt", "c/c2.txt", "master.txt" }, index.Entries);
 				Assert.IsTrue(index["a/a1"].IsBlob);
@@ -187,18 +187,19 @@ namespace GitSharp.API.Tests
 		{
 			using (var repo = GetTrashRepository())
 			{
+				var foo_bar = "foo/bar" + Path.GetRandomFileName();
 				var index = repo.Index;
-				index.AddContent("foo/bar", "baz");
-				Assert.AreEqual("baz", index.GetContent("foo/bar"));
-				repo.Commit("committing foo bar baz", Author.Anonymous);
-				index.StageContent("foo/bar", "buzz");
-				Assert.AreEqual("buzz", index.GetContent("foo/bar"));
-				index.Unstage("foo/bar");
-				Assert.AreEqual("baz", index.GetContent("foo/bar"));
-				index.Unstage("foo/bar"); // <--- unstage on committed file has no effect. to remove a file completely from the index we need to use remove
-				Assert.AreEqual("baz", index.GetContent("foo/bar"));
-				index.Remove("foo/bar");
-				Assert.IsNull(index.GetContent("foo/bar"));
+				index.AddContent(foo_bar, "baz");
+				Assert.AreEqual("baz", index.GetContent(foo_bar));
+				repo.Commit("committing ... ", Author.Anonymous);
+				index.StageContent(foo_bar, "buzz");
+				Assert.AreEqual("buzz", index.GetContent(foo_bar));
+				index.Unstage(foo_bar);
+				Assert.AreEqual("baz", index.GetContent(foo_bar));
+				index.Unstage(foo_bar); // <--- unstage on committed file has no effect. to remove a file completely from the index we need to use remove
+				Assert.AreEqual("baz", index.GetContent(foo_bar));
+				index.Remove(foo_bar);
+				Assert.IsNull(index.GetContent(foo_bar));
 			}
 		}
 

@@ -227,7 +227,8 @@ namespace GitSharp.Core.Diff
 		}
 
     	private static byte[] readFile(FileInfo file)
-        {    	    return File.ReadAllBytes(file.FullName);
+        {
+    	    return File.ReadAllBytes(file.FullName);
     	}
 	}
 }

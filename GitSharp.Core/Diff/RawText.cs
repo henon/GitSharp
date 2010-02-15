@@ -111,7 +111,7 @@ namespace GitSharp.Core.Diff
         /// <para>The entire file contents are used.</para>
         /// </summary>
         /// <param name="file">the text file.</param>
-	    public RawText(FileInfo file) : this(readFile(file))
+	    public RawText(FileInfo file) : this(IO.ReadFully(file))
 	    {}
 
 
@@ -225,10 +225,5 @@ namespace GitSharp.Core.Diff
 			}
 			return hash;
 		}
-
-    	private static byte[] readFile(FileInfo file)
-        {
-    	    return File.ReadAllBytes(file.FullName);
-    	}
 	}
 }

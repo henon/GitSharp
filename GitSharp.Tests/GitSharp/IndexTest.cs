@@ -202,6 +202,51 @@ namespace GitSharp.API.Tests
 			}
 		}
 
+		[Test]
+		public void Checkout_From_Index()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var index = repo.Index;
+				// first adding content to the index without relying on the file system
+				index.AddContent("foo/bar", "baz");
+				index.StageContent("foo/bar", "buzz");
+				index.AddContent("hmm.txt", "");
+				// then check out and see if the files exist in the working directory
+				index.Checkout();
+				AssertFileExistsInWD("foo/bar");
+				AssertFileContentInWDEquals("foo/bar", "buzz");
+				AssertFileExistsInWD("hmm.txt");
+				AssertFileContentInWDEquals("hmm.txt", "");
+				// check out again, nothing should change
+				index.Checkout();
+				AssertFileExistsInWD("foo/bar");
+				AssertFileContentInWDEquals("foo/bar", "buzz");
+				AssertFileExistsInWD("hmm.txt");
+				AssertFileContentInWDEquals("hmm.txt", "");
+			}
+		}
+
+
+		[Test]
+		public void Checkout_Single_Files_From_Index()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var index = repo.Index;
+				// first adding content to the index without relying on the file system
+				index.AddContent("foo/bar", "baz");
+				index.StageContent("foo/bar", "buzz");
+				index.AddContent("hmm.txt", "");
+				index.Checkout("foo/bar");
+				AssertFileExistsInWD("foo/bar");
+				AssertFileNotExistentInWD("hmm.txt");
+				AssertFileContentInWDEquals("foo/bar", "buzz");
+				index.Checkout("hmm.txt");
+				AssertFileExistsInWD("hmm.txt");
+				AssertFileContentInWDEquals("hmm.txt", "");
+			}
+		}
 
 		// TODO: test add's behavior on wrong input data
 		// TODO: test add "."

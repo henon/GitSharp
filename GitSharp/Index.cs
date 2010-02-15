@@ -219,6 +219,10 @@ namespace GitSharp
 			AddContent(path, content);
 		}
 
+		/// <summary>
+		/// Unstage overwrites staged files in the index with their current version in HEAD. This has no effect for added files as they are not present in HEAD. See <see cref="Remove"/> for that.
+		/// </summary>
+		/// <param name="paths">Relative paths to files you want to unstage.</param>
 		public void Unstage(params string[] paths)
 		{
 			GitIndex.RereadIfNecessary();
@@ -232,6 +236,40 @@ namespace GitSharp
 				AddContent(Core.Repository.GitInternalSlash(PathEncoding.GetBytes(path)), blob.RawData);
 			}
 			GitIndex.write();
+		}
+
+		/// <summary>
+		/// Check out the index into the working directory. Any modified files will be overwritten.
+		/// <para/>
+		/// <seealso cref="Branch.Checkout"/> to checkout from a commit.
+		/// </summary>
+		public void Checkout()
+		{
+			Checkout(_repo.WorkingDirectory);
+		}
+
+		// [henon] we do not publicly expose checking out into a custom directory, as this is an unrealistic use case and conflicts with checking out paths. 
+		// it is possible anyway by iterating over the Entries and writing the contents of each entry into a custom directory!
+		private void Checkout(string directory)
+		{
+			GitIndex.RereadIfNecessary();
+			GitIndex.checkout(new FileInfo(directory));
+		}
+
+		/// <summary>
+		/// Check out given paths from the index overwriting files in the working directory. Modified files might be overwritten.
+		/// </summary>
+		/// <param name="paths"></param>
+		public void Checkout(params string[] paths)
+		{
+			GitIndex.RereadIfNecessary();
+			foreach (var path in paths)
+			{
+				var e = GitIndex.GetEntry(path);
+				if (e == null)
+					continue;
+				GitIndex.checkoutEntry(new FileInfo(_repo.WorkingDirectory), e);
+			}
 		}
 
 		/// <summary>

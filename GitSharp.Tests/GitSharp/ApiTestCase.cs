@@ -34,7 +34,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+using System.IO;
 using GitSharp.Core.Tests;
+using NUnit.Framework;
 
 namespace GitSharp.Tests.GitSharp
 {
@@ -44,5 +46,24 @@ namespace GitSharp.Tests.GitSharp
 		{
 			return new Repository(db.WorkingDirectory.FullName);
 		}
+
+		protected void AssertFileExistsInWD(string path)
+		{
+			var wd = db.WorkingDirectory.FullName;
+			Assert.IsTrue(new FileInfo(Path.Combine(wd, path)).Exists, "Path '" + path + "' should exist in the working directory");
+		}
+
+		protected void AssertFileNotExistentInWD(string path)
+		{
+			var wd = db.WorkingDirectory.FullName;
+			Assert.IsFalse(new FileInfo(Path.Combine(wd, path)).Exists, "Path '" + path + "' should *not* exist in the working directory");
+		}
+
+		protected void AssertFileContentInWDEquals(string path, string content)
+		{
+			var wd = db.WorkingDirectory.FullName;
+			Assert.AreEqual(content, File.ReadAllText(Path.Combine(wd, path)));
+		}
+
 	}
 }

@@ -114,7 +114,11 @@ namespace GitSharp.Core.TreeWalk
             _raw = treeData;
             _prevPtr = -1;
             _currPtr = 0;
-            if (!eof())
+            if (eof())
+            {
+                _nextPtr = 0;
+            }
+            else
             {
                 ParseEntry();
             }
@@ -160,15 +164,21 @@ namespace GitSharp.Core.TreeWalk
             while (true)
             {
                 iterator.next(1);
-                if (iterator.eof() && iterator.Parent != null)
+                if (iterator._nextPtr == iterator._raw.Length)
                 {
-                    // Parent was left pointing at the entry for us; advance
-                    // the parent to the next entry, possibly unwinding many
-                    // levels up the tree.
-                    //
+                    // This parser has reached EOF, return to the parent.
+                    if (iterator._parent == null)
+                    {
+                        iterator._currPtr = iterator._nextPtr;
+                        return iterator;
+                    }
                     iterator = (CanonicalTreeParser)iterator.Parent;
                     continue;
                 }
+
+                iterator._prevPtr = iterator._currPtr;
+                iterator._currPtr = iterator._nextPtr;
+                iterator.ParseEntry();
                 return iterator;
             }
         }

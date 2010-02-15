@@ -74,8 +74,8 @@ namespace GitSharp.Core.TreeWalk
 		/// A dummy <see cref="ObjectId"/> buffer that matches the zero <see cref="ObjectId"/>.
 		/// </summary>
 		protected static readonly byte[] ZeroId = new byte[Constants.OBJECT_ID_LENGTH];
-        
-		private readonly AbstractTreeIterator _parent;
+
+	    protected readonly AbstractTreeIterator _parent;
 
 		/// <summary>
 		/// Create a new iterator with no parent.

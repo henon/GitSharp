@@ -1,0 +1,508 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>ApplyCommand - GitSharp [local-build] Documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+    <link type="text/css" rel="stylesheet" href="../main.css"/>
+    <script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.scrollTo-min.js"></script>
+    <script type="text/javascript" src="../js/navigation.js"></script>
+  </head>
+  <body>
+<div id="namespaces">
+	<h2 class="fixed">Namespaces</h2>
+	<div class="scroll">
+		<ul><li>
+          <a href="../GitSharp/index.html">GitSharp</a>
+      </li><li>
+          <a href="../GitSharp.Commands/index.html" class="current">GitSharp.Commands</a>
+      </li>
+		</ul>
+	</div>
+</div><div id="types">
+  <h2 class="fixed">Types in GitSharp.Commands</h2>
+	<div class="scroll">
+		<ul><li>
+            <a href="../GitSharp.Commands/AbstractCommand.htm">AbstractCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AbstractFetchCommand.htm">AbstractFetchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AddCommand.htm">AddCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AmCommand.htm">AmCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AnnotateCommand.htm">AnnotateCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ApplyCommand.htm" class="current">ApplyCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ArchiveCommand.htm">ArchiveCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/BlameCommand.htm">BlameCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/BranchCommand.htm">BranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CatFileCommand.htm">CatFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CheckoutCommand.htm">CheckoutCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CheckoutIndexCommand.htm">CheckoutIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CherryCommand.htm">CherryCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CherryPickCommand.htm">CherryPickCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CleanCommand.htm">CleanCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CloneCommand.htm">CloneCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CommitCommand.htm">CommitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CommitTreeCommand.htm">CommitTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ConfigCommand.htm">ConfigCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CountObjectsCommand.htm">CountObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DescribeCommand.htm">DescribeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffCommand.htm">DiffCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffFilesCommand.htm">DiffFilesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffIndexCommand.htm">DiffIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DifftoolCommand.htm">DifftoolCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffTreeCommand.htm">DiffTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FastExportCommand.htm">FastExportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FastimportCommand.htm">FastimportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FetchCommand.htm">FetchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FetchPackCommand.htm">FetchPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FilterBranchCommand.htm">FilterBranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FmtMergeMsgCommand.htm">FmtMergeMsgCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ForEachRefCommand.htm">ForEachRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FormatPatchCommand.htm">FormatPatchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FsckCommand.htm">FsckCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/GcCommand.htm">GcCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/GrepCommand.htm">GrepCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/HashObjectCommand.htm">HashObjectCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/IGitCommand.htm">IGitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/IndexpackCommand.htm">IndexpackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/InitCommand.htm">InitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LogCommand.htm">LogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsFilesCommand.htm">LsFilesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsRemoteCommand.htm">LsRemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsTreeCommand.htm">LsTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MailinfoCommand.htm">MailinfoCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MailsplitCommand.htm">MailsplitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeBaseCommand.htm">MergeBaseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeFileCommand.htm">MergeFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeIndexCommand.htm">MergeIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergetoolCommand.htm">MergetoolCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MktreeCommand.htm">MktreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MvCommand.htm">MvCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/NameRevCommand.htm">NameRevCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/NotesCommand.htm">NotesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackObjectsCommand.htm">PackObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackRedundantCommand.htm">PackRedundantCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackRefsCommand.htm">PackRefsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PatchIdCommand.htm">PatchIdCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PeekRemoteCommand.htm">PeekRemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PruneCommand.htm">PruneCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PrunePackedCommand.htm">PrunePackedCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PushCommand.htm">PushCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/QuiltimportCommand.htm">QuiltimportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReadTreeCommand.htm">ReadTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RebaseCommand.htm">RebaseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReceivePackCommand.htm">ReceivePackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReflogCommand.htm">ReflogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RelinkCommand.htm">RelinkCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RemoteCommand.htm">RemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RepackCommand.htm">RepackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReplaceCommand.htm">ReplaceCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RequestPullCommand.htm">RequestPullCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ResetCommand.htm">ResetCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RevertCommand.htm">RevertCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RevParseCommand.htm">RevParseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RmCommand.htm">RmCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SendPackCommand.htm">SendPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShortlogCommand.htm">ShortlogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowBranchCommand.htm">ShowBranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowCommand.htm">ShowCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowRefCommand.htm">ShowRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusCommand.htm">StatusCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusResults.htm">StatusResults</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusState.htm">StatusState</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusType.htm">StatusType</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StripspaceCommand.htm">StripspaceCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SubmoduleCommand.htm">SubmoduleCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SvnCommand.htm">SvnCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SymbolicRefCommand.htm">SymbolicRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/TagCommand.htm">TagCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/TarTreeCommand.htm">TarTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UnpackFileCommand.htm">UnpackFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UnpackObjectsCommand.htm">UnpackObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UpdateIndexCommand.htm">UpdateIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UpdateServerInfoCommand.htm">UpdateServerInfoCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UploadArchiveCommand.htm">UploadArchiveCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UploadPackCommand.htm">UploadPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VarCommand.htm">VarCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VerifyPackCommand.htm">VerifyPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VerifyTagCommand.htm">VerifyTagCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/WhatchangedCommand.htm">WhatchangedCommand</a>
+        </li>
+		</ul>
+	</div>
+</div>
+    <div class="header">
+		<p class="class"><strong>Type</strong> ApplyCommand</p>
+		<p><strong>Namespace</strong> GitSharp.Commands</p><p><strong>Parent</strong> <a href="../GitSharp.Commands/AbstractCommand.htm">AbstractCommand</a></p>
+	</div>
+    <div class="sub-header">
+
+
+
+			<h3 class="section">Properties</h3>
+			<ul><li><a href="../GitSharp.Commands/ApplyCommand.htm#ActualDirectory">ActualDirectory</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#AllowBinaryReplacement">AllowBinaryReplacement</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Apply">Apply</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Arguments">Arguments</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Binary">Binary</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#BuildFakeAncestor">BuildFakeAncestor</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#C">C</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Cached">Cached</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Check">Check</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Exclude">Exclude</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#GitDirectory">GitDirectory</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#IgnoreSpaceChange">IgnoreSpaceChange</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#IgnoreWhitespace">IgnoreWhitespace</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Include">Include</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Index">Index</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#NoAdd">NoAdd</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Numstat">Numstat</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#OutputStream">OutputStream</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#P">P</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Reject">Reject</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Repository">Repository</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Reverse">Reverse</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Stat">Stat</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Summary">Summary</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#UnidiffZero">UnidiffZero</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Whitespace">Whitespace</a></li><li><a href="../GitSharp.Commands/ApplyCommand.htm#Z">Z</a></li>
+			</ul>
+
+	</div>
+
+
+
+
+  <h3 class="section">Public properties</h3>
+<div id="ActualDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>ActualDirectory</strong> get; </h4>
+    <div class="content">
+
+    </div>
+  </div><div id="AllowBinaryReplacement" class="method">
+    <h4><span title="System.bool">bool</span> <strong>AllowBinaryReplacement</strong> get; set;</h4>
+    <div class="content">Not implemented
+Historically we did not allow binary patch applied
+without an explicit permission from the user, and this
+flag was the way to do so.  Currently we always allow binary
+patch application, so this is a no-op.
+
+    </div>
+  </div><div id="Apply" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Apply</strong> get; set;</h4>
+    <div class="content">Not implemented
+If you use any of the options marked "Turns off
+'apply'" above, 'git-apply' reads and outputs the
+requested information without actually applying the
+patch.  Give this flag after those flags to also apply
+the patch.
+
+    </div>
+  </div><div id="Arguments" class="method">
+    <h4><span title="System.Collections.Generic.List<string>">List&lt;string&gt;</span> <strong>Arguments</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Binary" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Binary</strong> get; set;</h4>
+    <div class="content">Not implemented
+Historically we did not allow binary patch applied
+without an explicit permission from the user, and this
+flag was the way to do so.  Currently we always allow binary
+patch application, so this is a no-op.
+
+    </div>
+  </div><div id="BuildFakeAncestor" class="method">
+    <h4><span title="System.string">string</span> <strong>BuildFakeAncestor</strong> get; set;</h4>
+    <div class="content">Not implemented
+Newer 'git-diff' output has embedded 'index information'
+for each blob to help identify the original version that
+the patch applies to.  When this flag is given, and if
+the original versions of the blobs are available locally,
+builds a temporary index containing those blobs.
++
+When a pure mode change is encountered (which has no index information),
+the information is read from the current index instead.
+
+    </div>
+  </div><div id="C" class="method">
+    <h4><span title="System.string">string</span> <strong>C</strong> get; set;</h4>
+    <div class="content">Not implemented
+Ensure at least <n> lines of surrounding context match before
+and after each change. When fewer lines of surrounding
+context exist they all must match.  By default no context is
+ever ignored.
+
+    </div>
+  </div><div id="Cached" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Cached</strong> get; set;</h4>
+    <div class="content">Not implemented
+Apply a patch without touching the working tree. Instead take the
+cached data, apply the patch, and store the result in the index
+without using the working tree. This implies `--index`.
+
+    </div>
+  </div><div id="Check" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Check</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of applying the patch, see if the patch is
+applicable to the current working tree and/or the index
+file and detects errors.  Turns off "apply".
+
+    </div>
+  </div><div id="Exclude" class="method">
+    <h4><span title="System.string">string</span> <strong>Exclude</strong> get; set;</h4>
+    <div class="content">Not implemented
+Don't apply changes to files matching the given path pattern. This can
+be useful when importing patchsets, where you want to exclude certain
+files or directories.
+
+    </div>
+  </div><div id="GitDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>GitDirectory</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="IgnoreSpaceChange" class="method">
+    <h4><span title="System.bool">bool</span> <strong>IgnoreSpaceChange</strong> get; set;</h4>
+    <div class="content">Not implemented
+When applying a patch, ignore changes in whitespace in context
+lines if necessary.
+Context lines will preserve their whitespace, and they will not
+undergo whitespace fixing regardless of the value of the
+`--whitespace` option. New lines will still be fixed, though.
+
+    </div>
+  </div><div id="IgnoreWhitespace" class="method">
+    <h4><span title="System.bool">bool</span> <strong>IgnoreWhitespace</strong> get; set;</h4>
+    <div class="content">Not implemented
+When applying a patch, ignore changes in whitespace in context
+lines if necessary.
+Context lines will preserve their whitespace, and they will not
+undergo whitespace fixing regardless of the value of the
+`--whitespace` option. New lines will still be fixed, though.
+
+    </div>
+  </div><div id="Include" class="method">
+    <h4><span title="System.string">string</span> <strong>Include</strong> get; set;</h4>
+    <div class="content">Not implemented
+Apply changes to files matching the given path pattern. This can
+be useful when importing patchsets, where you want to include certain
+files or directories.
++
+When `--exclude` and `--include` patterns are used, they are examined in the
+order they appear on the command line, and the first match determines if a
+patch to each path is used.  A patch to a path that does not match any
+on the command line, and ignored if there is any include pattern.
+
+    </div>
+  </div><div id="Index" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Index</strong> get; set;</h4>
+    <div class="content">Not implemented
+When `--check` is in effect, or when applying the patch
+(which is the default when none of the options that
+disables it is in effect), make sure the patch is
+applicable to what the current index file records.  If
+the file to be patched in the working tree is not
+up-to-date, it is flagged as an error.  This flag also
+causes the index file to be updated.
+
+    </div>
+  </div><div id="NoAdd" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NoAdd</strong> get; set;</h4>
+    <div class="content">Not implemented
+When applying a patch, ignore additions made by the
+patch.  This can be used to extract the common part between
+two files by first running 'diff' on them and applying
+the result with this option, which would apply the
+deletion part but not the addition part.
+
+    </div>
+  </div><div id="Numstat" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Numstat</strong> get; set;</h4>
+    <div class="content">Not implemented
+Similar to `--stat`, but shows the number of added and
+deleted lines in decimal notation and the pathname without
+abbreviation, to make it more machine friendly.  For
+binary files, outputs two `-` instead of saying
+`0 0`.  Turns off "apply".
+
+    </div>
+  </div><div id="OutputStream" class="method">
+    <h4><span title="System.IO.StreamWriter">StreamWriter</span> <strong>OutputStream</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="P" class="method">
+    <h4><span title="System.string">string</span> <strong>P</strong> get; set;</h4>
+    <div class="content">Not implemented
+Remove <n> leading slashes from traditional diff paths. The
+default is 1.
+
+    </div>
+  </div><div id="Reject" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Reject</strong> get; set;</h4>
+    <div class="content">Not implemented
+For atomicity, 'git-apply' by default fails the whole patch and
+does not touch the working tree when some of the hunks
+do not apply.  This option makes it apply
+the parts of the patch that are applicable, and leave the
+rejected hunks in corresponding *.rej files.
+
+    </div>
+  </div><div id="Repository" class="method">
+    <h4><a href="../GitSharp/Repository.htm">Repository</a> <strong>Repository</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Reverse" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Reverse</strong> get; set;</h4>
+    <div class="content">Not implemented
+Apply the patch in reverse.
+
+    </div>
+  </div><div id="Stat" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Stat</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of applying the patch, output diffstat for the
+input.  Turns off "apply".
+
+    </div>
+  </div><div id="Summary" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Summary</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of applying the patch, output a condensed
+summary of information obtained from git diff extended
+headers, such as creations, renames and mode changes.
+Turns off "apply".
+
+    </div>
+  </div><div id="UnidiffZero" class="method">
+    <h4><span title="System.bool">bool</span> <strong>UnidiffZero</strong> get; set;</h4>
+    <div class="content">Not implemented
+By default, 'git-apply' expects that the patch being
+applied is a unified diff with at least one line of context.
+This provides good safety measures, but breaks down when
+applying a diff generated with `--unified=0`. To bypass these
+checks use `--unidiff-zero`.
++
+Note, for the reasons stated above usage of context-free patches is
+discouraged.
+
+    </div>
+  </div><div id="Whitespace" class="method">
+    <h4><span title="System.string">string</span> <strong>Whitespace</strong> get; set;</h4>
+    <div class="content">Not implemented
+When applying a patch, detect a new or modified line that has
+whitespace errors.  What are considered whitespace errors is
+controlled by `core.whitespace` configuration.  By default,
+trailing whitespaces (including lines that solely consist of
+whitespaces) and a space character that is immediately followed
+by a tab character inside the initial indent of the line are
+considered whitespace errors.
++
+By default, the command outputs warning messages but applies the patch.
+When `git-apply` is used for statistics and not applying a
+patch, it defaults to `nowarn`.
++
+You can use different `<action>` values to control this
+behavior:
++
+* `nowarn` turns off the trailing whitespace warning.
+* `warn` outputs warnings for a few such errors, but applies the
+
+    </div>
+  </div><div id="Z" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Z</strong> get; set;</h4>
+    <div class="content">Not implemented
+When `--numstat` has been given, do not munge pathnames,
+but use a NUL-terminated machine-readable format.
++
+Without this option, each pathname output will have TAB, LF, double quotes,
+and backslash characters replaced with `\t`, `\n`, `\"`, and `\\`,
+respectively, and the pathname will be enclosed in double quotes if
+any of those replacements occurred.
+
+    </div>
+  </div>
+<div id="footer">
+  <p><b><big>Learn more about <a href="http://www.eqqon.com/index.php/GitSharp"> GitSharp. </a></big></b></p>
+  <p>Based on v0.2.0.0 of GitSharp (GitSharp [local-build])</p>
+  <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
+</div>
+  </body>
+</html>

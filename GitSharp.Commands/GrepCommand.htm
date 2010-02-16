@@ -1,0 +1,520 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>GrepCommand - GitSharp [local-build] Documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+    <link type="text/css" rel="stylesheet" href="../main.css"/>
+    <script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.scrollTo-min.js"></script>
+    <script type="text/javascript" src="../js/navigation.js"></script>
+  </head>
+  <body>
+<div id="namespaces">
+	<h2 class="fixed">Namespaces</h2>
+	<div class="scroll">
+		<ul><li>
+          <a href="../GitSharp/index.html">GitSharp</a>
+      </li><li>
+          <a href="../GitSharp.Commands/index.html" class="current">GitSharp.Commands</a>
+      </li>
+		</ul>
+	</div>
+</div><div id="types">
+  <h2 class="fixed">Types in GitSharp.Commands</h2>
+	<div class="scroll">
+		<ul><li>
+            <a href="../GitSharp.Commands/AbstractCommand.htm">AbstractCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AbstractFetchCommand.htm">AbstractFetchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AddCommand.htm">AddCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AmCommand.htm">AmCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AnnotateCommand.htm">AnnotateCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ApplyCommand.htm">ApplyCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ArchiveCommand.htm">ArchiveCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/BlameCommand.htm">BlameCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/BranchCommand.htm">BranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CatFileCommand.htm">CatFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CheckoutCommand.htm">CheckoutCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CheckoutIndexCommand.htm">CheckoutIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CherryCommand.htm">CherryCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CherryPickCommand.htm">CherryPickCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CleanCommand.htm">CleanCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CloneCommand.htm">CloneCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CommitCommand.htm">CommitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CommitTreeCommand.htm">CommitTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ConfigCommand.htm">ConfigCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CountObjectsCommand.htm">CountObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DescribeCommand.htm">DescribeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffCommand.htm">DiffCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffFilesCommand.htm">DiffFilesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffIndexCommand.htm">DiffIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DifftoolCommand.htm">DifftoolCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffTreeCommand.htm">DiffTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FastExportCommand.htm">FastExportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FastimportCommand.htm">FastimportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FetchCommand.htm">FetchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FetchPackCommand.htm">FetchPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FilterBranchCommand.htm">FilterBranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FmtMergeMsgCommand.htm">FmtMergeMsgCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ForEachRefCommand.htm">ForEachRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FormatPatchCommand.htm">FormatPatchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FsckCommand.htm">FsckCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/GcCommand.htm">GcCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/GrepCommand.htm" class="current">GrepCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/HashObjectCommand.htm">HashObjectCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/IGitCommand.htm">IGitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/IndexpackCommand.htm">IndexpackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/InitCommand.htm">InitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LogCommand.htm">LogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsFilesCommand.htm">LsFilesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsRemoteCommand.htm">LsRemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsTreeCommand.htm">LsTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MailinfoCommand.htm">MailinfoCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MailsplitCommand.htm">MailsplitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeBaseCommand.htm">MergeBaseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeFileCommand.htm">MergeFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeIndexCommand.htm">MergeIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergetoolCommand.htm">MergetoolCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MktreeCommand.htm">MktreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MvCommand.htm">MvCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/NameRevCommand.htm">NameRevCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/NotesCommand.htm">NotesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackObjectsCommand.htm">PackObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackRedundantCommand.htm">PackRedundantCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackRefsCommand.htm">PackRefsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PatchIdCommand.htm">PatchIdCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PeekRemoteCommand.htm">PeekRemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PruneCommand.htm">PruneCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PrunePackedCommand.htm">PrunePackedCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PushCommand.htm">PushCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/QuiltimportCommand.htm">QuiltimportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReadTreeCommand.htm">ReadTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RebaseCommand.htm">RebaseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReceivePackCommand.htm">ReceivePackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReflogCommand.htm">ReflogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RelinkCommand.htm">RelinkCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RemoteCommand.htm">RemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RepackCommand.htm">RepackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReplaceCommand.htm">ReplaceCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RequestPullCommand.htm">RequestPullCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ResetCommand.htm">ResetCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RevertCommand.htm">RevertCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RevParseCommand.htm">RevParseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RmCommand.htm">RmCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SendPackCommand.htm">SendPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShortlogCommand.htm">ShortlogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowBranchCommand.htm">ShowBranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowCommand.htm">ShowCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowRefCommand.htm">ShowRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusCommand.htm">StatusCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusResults.htm">StatusResults</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusState.htm">StatusState</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusType.htm">StatusType</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StripspaceCommand.htm">StripspaceCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SubmoduleCommand.htm">SubmoduleCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SvnCommand.htm">SvnCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SymbolicRefCommand.htm">SymbolicRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/TagCommand.htm">TagCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/TarTreeCommand.htm">TarTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UnpackFileCommand.htm">UnpackFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UnpackObjectsCommand.htm">UnpackObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UpdateIndexCommand.htm">UpdateIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UpdateServerInfoCommand.htm">UpdateServerInfoCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UploadArchiveCommand.htm">UploadArchiveCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UploadPackCommand.htm">UploadPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VarCommand.htm">VarCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VerifyPackCommand.htm">VerifyPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VerifyTagCommand.htm">VerifyTagCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/WhatchangedCommand.htm">WhatchangedCommand</a>
+        </li>
+		</ul>
+	</div>
+</div>
+    <div class="header">
+		<p class="class"><strong>Type</strong> GrepCommand</p>
+		<p><strong>Namespace</strong> GitSharp.Commands</p><p><strong>Parent</strong> <a href="../GitSharp.Commands/AbstractCommand.htm">AbstractCommand</a></p>
+	</div>
+    <div class="sub-header">
+
+
+
+			<h3 class="section">Properties</h3>
+			<ul><li><a href="../GitSharp.Commands/GrepCommand.htm#A">A</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#ActualDirectory">ActualDirectory</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#AllMatch">AllMatch</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#And">And</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#Arguments">Arguments</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#B">B</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#BasicRegexp">BasicRegexp</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#C">C</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#Cached">Cached</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#Color">Color</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#Count">Count</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#E">E</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#ExtendedRegexp">ExtendedRegexp</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#F">F</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#FilesWithMatches">FilesWithMatches</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#FilesWithoutMatch">FilesWithoutMatch</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#FixedStrings">FixedStrings</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#FullName">FullName</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#GitDirectory">GitDirectory</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#H">H</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#I">I</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#IgnoreCase">IgnoreCase</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#InvertMatch">InvertMatch</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#MaxDepth">MaxDepth</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#N">N</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#NameOnly">NameOnly</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#NoColor">NoColor</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#Not">Not</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#Null">Null</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#Or">Or</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#OutputStream">OutputStream</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#Repository">Repository</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#ShowFunction">ShowFunction</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#Text">Text</a></li><li><a href="../GitSharp.Commands/GrepCommand.htm#WordRegexp">WordRegexp</a></li>
+			</ul>
+
+	</div>
+
+
+
+
+  <h3 class="section">Public properties</h3>
+<div id="A" class="method">
+    <h4><span title="System.string">string</span> <strong>A</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show `context` trailing (`A` -- after), or leading (`B`
+-- before), or both (`C` -- context) lines, and place a
+line containing `--` between contiguous groups of
+matches.
+
+    </div>
+  </div><div id="ActualDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>ActualDirectory</strong> get; </h4>
+    <div class="content">
+
+    </div>
+  </div><div id="AllMatch" class="method">
+    <h4><span title="System.bool">bool</span> <strong>AllMatch</strong> get; set;</h4>
+    <div class="content">Not implemented
+When giving multiple pattern expressions combined with `--or`,
+this flag is specified to limit the match to files that
+have lines to match all of them.
+
+    </div>
+  </div><div id="And" class="method">
+    <h4><span title="System.bool">bool</span> <strong>And</strong> get; set;</h4>
+    <div class="content">Not implemented
+( ... )::
+Specify how multiple patterns are combined using Boolean
+expressions.  `--or` is the default operator.  `--and` has
+higher precedence than `--or`.  `-e` has to be used for all
+patterns.
+
+    </div>
+  </div><div id="Arguments" class="method">
+    <h4><span title="System.Collections.Generic.List<string>">List&lt;string&gt;</span> <strong>Arguments</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="B" class="method">
+    <h4><span title="System.string">string</span> <strong>B</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show `context` trailing (`A` -- after), or leading (`B`
+-- before), or both (`C` -- context) lines, and place a
+line containing `--` between contiguous groups of
+matches.
+
+    </div>
+  </div><div id="BasicRegexp" class="method">
+    <h4><span title="System.bool">bool</span> <strong>BasicRegexp</strong> get; set;</h4>
+    <div class="content">Not implemented
+Use POSIX extended/basic regexp for patterns.  Default
+is to use basic regexp.
+
+    </div>
+  </div><div id="C" class="method">
+    <h4><span title="System.string">string</span> <strong>C</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show `context` trailing (`A` -- after), or leading (`B`
+-- before), or both (`C` -- context) lines, and place a
+line containing `--` between contiguous groups of
+matches.
+
+    </div>
+  </div><div id="Cached" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Cached</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of searching in the working tree files, check
+the blobs registered in the index file.
+
+    </div>
+  </div><div id="Color" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Color</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show colored matches.
+
+    </div>
+  </div><div id="Count" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Count</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of showing every matched line, show the number of
+lines that match.
+
+    </div>
+  </div><div id="E" class="method">
+    <h4><span title="System.bool">bool</span> <strong>E</strong> get; set;</h4>
+    <div class="content">Not implemented
+The next parameter is the pattern. This option has to be
+used for patterns starting with - and should be used in
+scripts passing user input to grep.  Multiple patterns are
+combined by 'or'.
+
+    </div>
+  </div><div id="ExtendedRegexp" class="method">
+    <h4><span title="System.bool">bool</span> <strong>ExtendedRegexp</strong> get; set;</h4>
+    <div class="content">Not implemented
+Use POSIX extended/basic regexp for patterns.  Default
+is to use basic regexp.
+
+    </div>
+  </div><div id="F" class="method">
+    <h4><span title="System.string">string</span> <strong>F</strong> get; set;</h4>
+    <div class="content">Not implemented
+Read patterns from <file>, one per line.
+
+    </div>
+  </div><div id="FilesWithMatches" class="method">
+    <h4><span title="System.bool">bool</span> <strong>FilesWithMatches</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of showing every matched line, show only the
+names of files that contain (or do not contain) matches.
+For better compatibility with 'git-diff', --name-only is a
+synonym for --files-with-matches.
+
+    </div>
+  </div><div id="FilesWithoutMatch" class="method">
+    <h4><span title="System.bool">bool</span> <strong>FilesWithoutMatch</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of showing every matched line, show only the
+names of files that contain (or do not contain) matches.
+For better compatibility with 'git-diff', --name-only is a
+synonym for --files-with-matches.
+
+    </div>
+  </div><div id="FixedStrings" class="method">
+    <h4><span title="System.bool">bool</span> <strong>FixedStrings</strong> get; set;</h4>
+    <div class="content">Not implemented
+Use fixed strings for patterns (don't interpret pattern
+as a regex).
+
+    </div>
+  </div><div id="FullName" class="method">
+    <h4><span title="System.bool">bool</span> <strong>FullName</strong> get; set;</h4>
+    <div class="content">Not implemented
+When run from a subdirectory, the command usually
+outputs paths relative to the current directory.  This
+option forces paths to be output relative to the project
+top directory.
+
+    </div>
+  </div><div id="GitDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>GitDirectory</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="H" class="method">
+    <h4><span title="System.bool">bool</span> <strong>H</strong> get; set;</h4>
+    <div class="content">Not implemented
+By default, the command shows the filename for each
+match.  `-h` option is used to suppress this output.
+`-H` is there for completeness and does not do anything
+except it overrides `-h` given earlier on the command
+line.
+
+    </div>
+  </div><div id="I" class="method">
+    <h4><span title="System.bool">bool</span> <strong>I</strong> get; set;</h4>
+    <div class="content">Not implemented
+Don't match the pattern in binary files.
+
+    </div>
+  </div><div id="IgnoreCase" class="method">
+    <h4><span title="System.bool">bool</span> <strong>IgnoreCase</strong> get; set;</h4>
+    <div class="content">Not implemented
+Ignore case differences between the patterns and the
+files.
+
+    </div>
+  </div><div id="InvertMatch" class="method">
+    <h4><span title="System.bool">bool</span> <strong>InvertMatch</strong> get; set;</h4>
+    <div class="content">Not implemented
+Select non-matching lines.
+
+    </div>
+  </div><div id="MaxDepth" class="method">
+    <h4><span title="System.string">string</span> <strong>MaxDepth</strong> get; set;</h4>
+    <div class="content">Not implemented
+For each pathspec given on command line, descend at most <depth>
+levels of directories. A negative value means no limit.
+
+    </div>
+  </div><div id="N" class="method">
+    <h4><span title="System.bool">bool</span> <strong>N</strong> get; set;</h4>
+    <div class="content">Not implemented
+Prefix the line number to matching lines.
+
+    </div>
+  </div><div id="NameOnly" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NameOnly</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of showing every matched line, show only the
+names of files that contain (or do not contain) matches.
+For better compatibility with 'git-diff', --name-only is a
+synonym for --files-with-matches.
+
+    </div>
+  </div><div id="NoColor" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NoColor</strong> get; set;</h4>
+    <div class="content">Not implemented
+Turn off match highlighting, even when the configuration file
+gives the default to color output.
+
+    </div>
+  </div><div id="Not" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Not</strong> get; set;</h4>
+    <div class="content">Not implemented
+( ... )::
+Specify how multiple patterns are combined using Boolean
+expressions.  `--or` is the default operator.  `--and` has
+higher precedence than `--or`.  `-e` has to be used for all
+patterns.
+
+    </div>
+  </div><div id="Null" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Null</strong> get; set;</h4>
+    <div class="content">Not implemented
+Output \0 instead of the character that normally follows a
+file name.
+
+    </div>
+  </div><div id="Or" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Or</strong> get; set;</h4>
+    <div class="content">Not implemented
+( ... )::
+Specify how multiple patterns are combined using Boolean
+expressions.  `--or` is the default operator.  `--and` has
+higher precedence than `--or`.  `-e` has to be used for all
+patterns.
+
+    </div>
+  </div><div id="OutputStream" class="method">
+    <h4><span title="System.IO.StreamWriter">StreamWriter</span> <strong>OutputStream</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Repository" class="method">
+    <h4><a href="../GitSharp/Repository.htm">Repository</a> <strong>Repository</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="ShowFunction" class="method">
+    <h4><span title="System.bool">bool</span> <strong>ShowFunction</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show the preceding line that contains the function name of
+the match, unless the matching line is a function name itself.
+The name is determined in the same way as 'git diff' works out
+patch hunk headers (see 'Defining a custom hunk-header' in
+linkgit:gitattributes[5]).
+
+    </div>
+  </div><div id="Text" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Text</strong> get; set;</h4>
+    <div class="content">Not implemented
+Process binary files as if they were text.
+
+    </div>
+  </div><div id="WordRegexp" class="method">
+    <h4><span title="System.bool">bool</span> <strong>WordRegexp</strong> get; set;</h4>
+    <div class="content">Not implemented
+Match the pattern only at word boundary (either begin at the
+beginning of a line, or preceded by a non-word character; end at
+the end of a line or followed by a non-word character).
+
+    </div>
+  </div>
+<div id="footer">
+  <p><b><big>Learn more about <a href="http://www.eqqon.com/index.php/GitSharp"> GitSharp. </a></big></b></p>
+  <p>Based on v0.2.0.0 of GitSharp (GitSharp [local-build])</p>
+  <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
+</div>
+  </body>
+</html>

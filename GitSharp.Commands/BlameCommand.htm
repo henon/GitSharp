@@ -1,0 +1,465 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>BlameCommand - GitSharp [local-build] Documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+    <link type="text/css" rel="stylesheet" href="../main.css"/>
+    <script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.scrollTo-min.js"></script>
+    <script type="text/javascript" src="../js/navigation.js"></script>
+  </head>
+  <body>
+<div id="namespaces">
+	<h2 class="fixed">Namespaces</h2>
+	<div class="scroll">
+		<ul><li>
+          <a href="../GitSharp/index.html">GitSharp</a>
+      </li><li>
+          <a href="../GitSharp.Commands/index.html" class="current">GitSharp.Commands</a>
+      </li>
+		</ul>
+	</div>
+</div><div id="types">
+  <h2 class="fixed">Types in GitSharp.Commands</h2>
+	<div class="scroll">
+		<ul><li>
+            <a href="../GitSharp.Commands/AbstractCommand.htm">AbstractCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AbstractFetchCommand.htm">AbstractFetchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AddCommand.htm">AddCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AmCommand.htm">AmCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AnnotateCommand.htm">AnnotateCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ApplyCommand.htm">ApplyCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ArchiveCommand.htm">ArchiveCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/BlameCommand.htm" class="current">BlameCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/BranchCommand.htm">BranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CatFileCommand.htm">CatFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CheckoutCommand.htm">CheckoutCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CheckoutIndexCommand.htm">CheckoutIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CherryCommand.htm">CherryCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CherryPickCommand.htm">CherryPickCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CleanCommand.htm">CleanCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CloneCommand.htm">CloneCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CommitCommand.htm">CommitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CommitTreeCommand.htm">CommitTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ConfigCommand.htm">ConfigCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CountObjectsCommand.htm">CountObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DescribeCommand.htm">DescribeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffCommand.htm">DiffCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffFilesCommand.htm">DiffFilesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffIndexCommand.htm">DiffIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DifftoolCommand.htm">DifftoolCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffTreeCommand.htm">DiffTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FastExportCommand.htm">FastExportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FastimportCommand.htm">FastimportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FetchCommand.htm">FetchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FetchPackCommand.htm">FetchPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FilterBranchCommand.htm">FilterBranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FmtMergeMsgCommand.htm">FmtMergeMsgCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ForEachRefCommand.htm">ForEachRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FormatPatchCommand.htm">FormatPatchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FsckCommand.htm">FsckCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/GcCommand.htm">GcCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/GrepCommand.htm">GrepCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/HashObjectCommand.htm">HashObjectCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/IGitCommand.htm">IGitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/IndexpackCommand.htm">IndexpackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/InitCommand.htm">InitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LogCommand.htm">LogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsFilesCommand.htm">LsFilesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsRemoteCommand.htm">LsRemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsTreeCommand.htm">LsTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MailinfoCommand.htm">MailinfoCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MailsplitCommand.htm">MailsplitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeBaseCommand.htm">MergeBaseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeFileCommand.htm">MergeFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeIndexCommand.htm">MergeIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergetoolCommand.htm">MergetoolCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MktreeCommand.htm">MktreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MvCommand.htm">MvCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/NameRevCommand.htm">NameRevCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/NotesCommand.htm">NotesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackObjectsCommand.htm">PackObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackRedundantCommand.htm">PackRedundantCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackRefsCommand.htm">PackRefsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PatchIdCommand.htm">PatchIdCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PeekRemoteCommand.htm">PeekRemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PruneCommand.htm">PruneCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PrunePackedCommand.htm">PrunePackedCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PushCommand.htm">PushCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/QuiltimportCommand.htm">QuiltimportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReadTreeCommand.htm">ReadTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RebaseCommand.htm">RebaseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReceivePackCommand.htm">ReceivePackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReflogCommand.htm">ReflogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RelinkCommand.htm">RelinkCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RemoteCommand.htm">RemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RepackCommand.htm">RepackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReplaceCommand.htm">ReplaceCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RequestPullCommand.htm">RequestPullCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ResetCommand.htm">ResetCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RevertCommand.htm">RevertCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RevParseCommand.htm">RevParseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RmCommand.htm">RmCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SendPackCommand.htm">SendPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShortlogCommand.htm">ShortlogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowBranchCommand.htm">ShowBranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowCommand.htm">ShowCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowRefCommand.htm">ShowRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusCommand.htm">StatusCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusResults.htm">StatusResults</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusState.htm">StatusState</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusType.htm">StatusType</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StripspaceCommand.htm">StripspaceCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SubmoduleCommand.htm">SubmoduleCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SvnCommand.htm">SvnCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SymbolicRefCommand.htm">SymbolicRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/TagCommand.htm">TagCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/TarTreeCommand.htm">TarTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UnpackFileCommand.htm">UnpackFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UnpackObjectsCommand.htm">UnpackObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UpdateIndexCommand.htm">UpdateIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UpdateServerInfoCommand.htm">UpdateServerInfoCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UploadArchiveCommand.htm">UploadArchiveCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UploadPackCommand.htm">UploadPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VarCommand.htm">VarCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VerifyPackCommand.htm">VerifyPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VerifyTagCommand.htm">VerifyTagCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/WhatchangedCommand.htm">WhatchangedCommand</a>
+        </li>
+		</ul>
+	</div>
+</div>
+    <div class="header">
+		<p class="class"><strong>Type</strong> BlameCommand</p>
+		<p><strong>Namespace</strong> GitSharp.Commands</p><p><strong>Parent</strong> <a href="../GitSharp.Commands/AbstractCommand.htm">AbstractCommand</a></p>
+	</div>
+    <div class="sub-header">
+
+
+
+			<h3 class="section">Properties</h3>
+			<ul><li><a href="../GitSharp.Commands/BlameCommand.htm#ActualDirectory">ActualDirectory</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#Arguments">Arguments</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#B">B</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#c">c</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#C">C</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#Contents">Contents</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#Date">Date</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#Encoding">Encoding</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#GitDirectory">GitDirectory</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#Help">Help</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#Incremental">Incremental</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#l">l</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#L">L</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#M">M</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#OutputStream">OutputStream</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#Porcelain">Porcelain</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#Repository">Repository</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#Reverse">Reverse</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#Root">Root</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#s">s</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#S">S</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#ScoreDebug">ScoreDebug</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#ShowName">ShowName</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#ShowNumber">ShowNumber</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#ShowStats">ShowStats</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#T">T</a></li><li><a href="../GitSharp.Commands/BlameCommand.htm#W">W</a></li>
+			</ul>
+
+	</div>
+
+
+
+
+  <h3 class="section">Public properties</h3>
+<div id="ActualDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>ActualDirectory</strong> get; </h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Arguments" class="method">
+    <h4><span title="System.Collections.Generic.List<string>">List&lt;string&gt;</span> <strong>Arguments</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="B" class="method">
+    <h4><span title="System.bool">bool</span> <strong>B</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show blank SHA-1 for boundary commits.  This can also
+be controlled via the `blame.blankboundary` config option.
+
+    </div>
+  </div><div id="c" class="method">
+    <h4><span title="System.bool">bool</span> <strong>c</strong> get; set;</h4>
+    <div class="content">Not implemented
+Use the same output mode as linkgit:git-annotate[1] (Default: off).
+
+    </div>
+  </div><div id="C" class="method">
+    <h4><span title="System.string">string</span> <strong>C</strong> get; set;</h4>
+    <div class="content">Not implemented
+In addition to `-M`, detect lines copied from other
+files that were modified in the same commit.  This is
+useful when you reorganize your program and move code
+around across files.  When this option is given twice,
+the command additionally looks for copies from all other
+files in the parent for the commit that creates the file.
++
+alphanumeric characters that git must detect as moving
+between files for it to associate those lines with the parent
+commit.
+
+    </div>
+  </div><div id="Contents" class="method">
+    <h4><span title="System.string">string</span> <strong>Contents</strong> get; set;</h4>
+    <div class="content">Not implemented
+When <rev> is not specified, the command annotates the
+changes starting backwards from the working tree copy.
+This flag makes the command pretend as if the working
+tree copy has the contents of the named file (specify
+`-` to make the command read from the standard input).
+
+    </div>
+  </div><div id="Date" class="method">
+    <h4><span title="System.string">string</span> <strong>Date</strong> get; set;</h4>
+    <div class="content">Not implemented
+The value is one of the following alternatives:
+{relative,local,default,iso,rfc,short}. If --date is not
+provided, the value of the blame.date config variable is
+used. If the blame.date config variable is also not set, the
+iso format is used. For more information, See the discussion
+of the --date option at linkgit:git-log[1].
+
+    </div>
+  </div><div id="Encoding" class="method">
+    <h4><span title="System.string">string</span> <strong>Encoding</strong> get; set;</h4>
+    <div class="content">Not implemented
+Specifies the encoding used to output author names
+and commit summaries. Setting it to `none` makes blame
+output unconverted data. For more information see the
+discussion about encoding in the linkgit:git-log[1]
+manual page.
+
+    </div>
+  </div><div id="GitDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>GitDirectory</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Help" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Help</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show help message.
+
+    </div>
+  </div><div id="Incremental" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Incremental</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show the result incrementally in a format designed for
+machine consumption.
+
+    </div>
+  </div><div id="l" class="method">
+    <h4><span title="System.bool">bool</span> <strong>l</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show long rev (Default: off).
+
+    </div>
+  </div><div id="L" class="method">
+    <h4><span title="System.string">string</span> <strong>L</strong> get; set;</h4>
+    <div class="content">Not implemented
+Annotate only the given line range.  <start> and <end> can take
+one of these forms:
+
+    </div>
+  </div><div id="M" class="method">
+    <h4><span title="System.string">string</span> <strong>M</strong> get; set;</h4>
+    <div class="content">Not implemented
+Detect moving lines in the file as well.  When a commit
+moves a block of lines in a file (e.g. the original file
+has A and then B, and the commit changes it to B and
+then A), the traditional 'blame' algorithm typically blames
+the lines that were moved up (i.e. B) to the parent and
+assigns blame to the lines that were moved down (i.e. A)
+to the child commit.  With this option, both groups of lines
+are blamed on the parent.
++
+alphanumeric characters that git must detect as moving
+within a file for it to associate those lines with the parent
+commit.
+
+    </div>
+  </div><div id="OutputStream" class="method">
+    <h4><span title="System.IO.StreamWriter">StreamWriter</span> <strong>OutputStream</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Porcelain" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Porcelain</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show in a format designed for machine consumption.
+
+    </div>
+  </div><div id="Repository" class="method">
+    <h4><a href="../GitSharp/Repository.htm">Repository</a> <strong>Repository</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Reverse" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Reverse</strong> get; set;</h4>
+    <div class="content">Not implemented
+Walk history forward instead of backward. Instead of showing
+the revision in which a line appeared, this shows the last
+revision in which a line has existed. This requires a range of
+revision like START..END where the path to blame exists in
+START.
+
+    </div>
+  </div><div id="Root" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Root</strong> get; set;</h4>
+    <div class="content">Not implemented
+Do not treat root commits as boundaries.  This can also be
+controlled via the `blame.showroot` config option.
+
+    </div>
+  </div><div id="s" class="method">
+    <h4><span title="System.bool">bool</span> <strong>s</strong> get; set;</h4>
+    <div class="content">Not implemented
+Suppress the author name and timestamp from the output.
+
+    </div>
+  </div><div id="S" class="method">
+    <h4><span title="System.string">string</span> <strong>S</strong> get; set;</h4>
+    <div class="content">Not implemented
+Use revisions from revs-file instead of calling linkgit:git-rev-list[1].
+
+    </div>
+  </div><div id="ScoreDebug" class="method">
+    <h4><span title="System.bool">bool</span> <strong>ScoreDebug</strong> get; set;</h4>
+    <div class="content">Not implemented
+Include debugging information related to the movement of
+lines between files (see `-C`) and lines moved within a
+file (see `-M`).  The first number listed is the score.
+This is the number of alphanumeric characters detected
+as having been moved between or within files.  This must be above
+a certain threshold for 'git-blame' to consider those lines
+of code to have been moved.
+
+    </div>
+  </div><div id="ShowName" class="method">
+    <h4><span title="System.bool">bool</span> <strong>ShowName</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show the filename in the original commit.  By default
+the filename is shown if there is any line that came from a
+file with a different name, due to rename detection.
+
+    </div>
+  </div><div id="ShowNumber" class="method">
+    <h4><span title="System.bool">bool</span> <strong>ShowNumber</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show the line number in the original commit (Default: off).
+
+    </div>
+  </div><div id="ShowStats" class="method">
+    <h4><span title="System.bool">bool</span> <strong>ShowStats</strong> get; set;</h4>
+    <div class="content">Not implemented
+Include additional statistics at the end of blame output.
+
+    </div>
+  </div><div id="T" class="method">
+    <h4><span title="System.bool">bool</span> <strong>T</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show raw timestamp (Default: off).
+
+    </div>
+  </div><div id="W" class="method">
+    <h4><span title="System.bool">bool</span> <strong>W</strong> get; set;</h4>
+    <div class="content">Not implemented
+Ignore whitespace when comparing the parent's version and
+the child's to find where the lines came from.
+
+    </div>
+  </div>
+<div id="footer">
+  <p><b><big>Learn more about <a href="http://www.eqqon.com/index.php/GitSharp"> GitSharp. </a></big></b></p>
+  <p>Based on v0.2.0.0 of GitSharp (GitSharp [local-build])</p>
+  <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
+</div>
+  </body>
+</html>

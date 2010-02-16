@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
-    <title>Repository -  Documentation</title>
+    <title>Repository - GitSharp [local-build] Documentation</title>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
     <link type="text/css" rel="stylesheet" href="../main.css"/>
     <script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
@@ -35,17 +35,15 @@
         </li><li>
             <a href="../GitSharp/ChangeType.htm">ChangeType</a>
         </li><li>
-            <a href="../GitSharp/CloneCommand.htm">CloneCommand</a>
-        </li><li>
             <a href="../GitSharp/Commit.htm">Commit</a>
         </li><li>
             <a href="../GitSharp/Config.htm">Config</a>
         </li><li>
-            <a href="../GitSharp/FetchCommand.htm">FetchCommand</a>
+            <a href="../GitSharp/Diff.htm">Diff</a>
+        </li><li>
+            <a href="../GitSharp/EditType.htm">EditType</a>
         </li><li>
             <a href="../GitSharp/Git.htm">Git</a>
-        </li><li>
-            <a href="../GitSharp/IGitCommand.htm">IGitCommand</a>
         </li><li>
             <a href="../GitSharp/IgnoreRules.htm">IgnoreRules</a>
         </li><li>
@@ -65,7 +63,13 @@
         </li><li>
             <a href="../GitSharp/ResetBehavior.htm">ResetBehavior</a>
         </li><li>
+            <a href="../GitSharp/Section.htm">Section</a>
+        </li><li>
+            <a href="../GitSharp/SectionStatus.htm">SectionStatus</a>
+        </li><li>
             <a href="../GitSharp/Tag.htm">Tag</a>
+        </li><li>
+            <a href="../GitSharp/Text.htm">Text</a>
         </li><li>
             <a href="../GitSharp/Tree.htm">Tree</a>
         </li><li>
@@ -84,55 +88,23 @@
 
 
 			<h3 class="section">Methods</h3>
-			<ul><li><a href="../GitSharp/Repository.htm#CheckoutBranch">CheckoutBranch</a></li><li><a href="../GitSharp/Repository.htm#CheckoutBranch">CheckoutBranch</a></li><li><a href="../GitSharp/Repository.htm#Close">Close</a></li><li><a href="../GitSharp/Repository.htm#Commit">Commit</a></li><li><a href="../GitSharp/Repository.htm#Commit">Commit</a></li><li><a href="../GitSharp/Repository.htm#Dispose">Dispose</a></li><li><a href="../GitSharp/Repository.htm#FindRepository">FindRepository</a></li><li><a href="../GitSharp/Repository.htm#Init">Init</a></li><li><a href="../GitSharp/Repository.htm#Init">Init</a></li><li><a href="../GitSharp/Repository.htm#Init">Init</a></li><li><a href="../GitSharp/Repository.htm#IsValid">IsValid</a></li><li><a href="../GitSharp/Repository.htm#IsValid">IsValid</a></li>
+			<ul><li><a href="../GitSharp/Repository.htm#Close">Close</a></li><li><a href="../GitSharp/Repository.htm#Commit">Commit</a></li><li><a href="../GitSharp/Repository.htm#Commit">Commit</a></li><li><a href="../GitSharp/Repository.htm#Dispose">Dispose</a></li><li><a href="../GitSharp/Repository.htm#FindRepository">FindRepository</a></li><li><a href="../GitSharp/Repository.htm#Get``1">Get&lt;T&gt;</a></li><li><a href="../GitSharp/Repository.htm#IsValid">IsValid</a></li><li><a href="../GitSharp/Repository.htm#IsValid">IsValid</a></li><li><a href="../GitSharp/Repository.htm#SwitchToBranch">SwitchToBranch</a></li><li><a href="../GitSharp/Repository.htm#SwitchToBranch">SwitchToBranch</a></li>
 			</ul>
 
 			<h3 class="section">Properties</h3>
-			<ul><li><a href="../GitSharp/Repository.htm#Branches">Branches</a></li><li><a href="../GitSharp/Repository.htm#Config">Config</a></li><li><a href="../GitSharp/Repository.htm#CurrentBranch">CurrentBranch</a></li><li><a href="../GitSharp/Repository.htm#Directory">Directory</a></li><li><a href="../GitSharp/Repository.htm#Head">Head</a></li><li><a href="../GitSharp/Repository.htm#Index">Index</a></li><li><a href="../GitSharp/Repository.htm#IsBare">IsBare</a></li><li><a href="../GitSharp/Repository.htm#PreferredEncoding">PreferredEncoding</a></li><li><a href="../GitSharp/Repository.htm#Refs">Refs</a></li><li><a href="../GitSharp/Repository.htm#RemoteBranches">RemoteBranches</a></li><li><a href="../GitSharp/Repository.htm#Status">Status</a></li><li><a href="../GitSharp/Repository.htm#Tags">Tags</a></li><li><a href="../GitSharp/Repository.htm#WorkingDirectory">WorkingDirectory</a></li>
+			<ul><li><a href="../GitSharp/Repository.htm#Branches">Branches</a></li><li><a href="../GitSharp/Repository.htm#Config">Config</a></li><li><a href="../GitSharp/Repository.htm#CurrentBranch">CurrentBranch</a></li><li><a href="../GitSharp/Repository.htm#Directory">Directory</a></li><li><a href="../GitSharp/Repository.htm#Head">Head</a></li><li><a href="../GitSharp/Repository.htm#Index">Index</a></li><li><a href="../GitSharp/Repository.htm#IsBare">IsBare</a></li><li><a href="../GitSharp/Repository.htm#Refs">Refs</a></li><li><a href="../GitSharp/Repository.htm#RemoteBranches">RemoteBranches</a></li><li><a href="../GitSharp/Repository.htm#Status">Status</a></li><li><a href="../GitSharp/Repository.htm#Tags">Tags</a></li><li><a href="../GitSharp/Repository.htm#WorkingDirectory">WorkingDirectory</a></li>
 			</ul>
 
 	</div>
 
 
 	<h3 class="section">Public instance methods</h3>
-<div id="CheckoutBranch" class="method">
-		<h4><span title="System.void">void</span> <strong>CheckoutBranch</strong>(<a href="../GitSharp/Branch.htm">Branch</a> branch)</h4>
-		<div class="content">Check out the given branch
-
-
-
-
-		</div>
-	</div><div id="CheckoutBranch" class="method">
-		<h4><span title="System.void">void</span> <strong>CheckoutBranch</strong>(<span title="System.string">string</span> name)</h4>
-		<div class="content">Check out the branch with the given name
-
-
-
-
-		</div>
-	</div><div id="Close" class="method">
+<div id="Close" class="method">
 		<h4><span title="System.void">void</span> <strong>Close</strong>()</h4>
 		<div class="content">
 
 
 
-
-		</div>
-	</div><div id="Commit" class="method">
-		<h4><a href="../GitSharp/Commit.htm">Commit</a> <strong>Commit</strong>(<span title="System.string">string</span> message)</h4>
-		<div class="content">Commit staged changes and update HEAD. The default git author is used.
-
-<div class="parameters">
-        <h5>Parameters</h5>
-
-          <h6><code><span title="System.string">string</span></code> message</h6><p class="comments">The commit message</p>
-      </div>
-<div class="return">
-        <h5>Return</h5>
-        <h6><code><a href="../GitSharp/Commit.htm">Commit</a></code></h6>
-        <p>Returns the newly created commit</p>
-      </div>
 
 		</div>
 	</div><div id="Commit" class="method">
@@ -152,9 +124,49 @@
       </div>
 
 		</div>
+	</div><div id="Commit" class="method">
+		<h4><a href="../GitSharp/Commit.htm">Commit</a> <strong>Commit</strong>(<span title="System.string">string</span> message)</h4>
+		<div class="content">Commit staged changes and update HEAD. The default git author from the config is used.
+
+<div class="parameters">
+        <h5>Parameters</h5>
+
+          <h6><code><span title="System.string">string</span></code> message</h6><p class="comments">The commit message</p>
+      </div>
+<div class="return">
+        <h5>Return</h5>
+        <h6><code><a href="../GitSharp/Commit.htm">Commit</a></code></h6>
+        <p>Returns the newly created commit</p>
+      </div>
+
+		</div>
 	</div><div id="Dispose" class="method">
 		<h4><span title="System.void">void</span> <strong>Dispose</strong>()</h4>
 		<div class="content">
+
+
+
+
+		</div>
+	</div><div id="Get``1" class="method">
+		<h4><span title="GitSharp.T">T</span> <strong>Get&lt;T&gt;</strong>(<span title="System.string">string</span> identifier)</h4>
+		<div class="content">Access a git object by name, id or path. Use the type parameter to tell what kind of object you like to get. Supported types are<p></p>Branches, Commits or Tags may be accessed by name or reference expression. Currently supported are combinations of these:<p></p>Not supported is<p></p>Tree or Leaf (Blob) objects can be addressed by long hash or by their relative repository path
+
+
+
+
+		</div>
+	</div><div id="SwitchToBranch" class="method">
+		<h4><span title="System.void">void</span> <strong>SwitchToBranch</strong>(<span title="System.string">string</span> name)</h4>
+		<div class="content">Check out the branch with the given name into the working directory and make it the current branch.
+
+
+
+
+		</div>
+	</div><div id="SwitchToBranch" class="method">
+		<h4><span title="System.void">void</span> <strong>SwitchToBranch</strong>(<a href="../GitSharp/Branch.htm">Branch</a> branch)</h4>
+		<div class="content">Check out the given branch into the working directory and make it the current branch.
 
 
 
@@ -180,38 +192,9 @@ Starting at the given path, searches up the file hierarchy for the next .git dir
       </div>
 
 		</div>
-	</div><div id="Init" class="method">
-		<h4><a href="../GitSharp/Repository.htm">Repository</a> <strong>Init</strong>(<span title="System.string">string</span> path)</h4>
-		<div class="content">Initializes a non-bare repository. Use GitDirectory to specify location.
-
-
-<div class="return">
-        <h5>Return</h5>
-        <h6><code><a href="../GitSharp/Repository.htm">Repository</a></code></h6>
-        <p>The initialized repository</p>
-      </div>
-
-		</div>
-	</div><div id="Init" class="method">
-		<h4><a href="../GitSharp/Repository.htm">Repository</a> <strong>Init</strong>(<a href="../GitSharp.Commands/InitCommand.htm">InitCommand</a> cmd)</h4>
-		<div class="content">Initializes a repository in the current location using the provided git command's options.
-
-
-
-
-		</div>
-	</div><div id="Init" class="method">
-		<h4><a href="../GitSharp/Repository.htm">Repository</a> <strong>Init</strong>(<span title="System.string">string</span> path, <span title="System.bool">bool</span> bare)</h4>
-		<div class="content">Initializes a repository. Use GitDirectory to specify the location. Default is the current directory.
-
-
-
-
-		</div>
 	</div><div id="IsValid" class="method">
-		<h4><span title="System.bool">bool</span> <strong>IsValid</strong>(<span title="System.string">string</span> path)</h4>
-		<div class="content">Checks if the directory given by the path is a valid non-bare git repository. The given path may either point to
-the working directory or the repository's .git directory.
+		<h4><span title="System.bool">bool</span> <strong>IsValid</strong>(<span title="System.string">string</span> path, <span title="System.bool">bool</span> bare)</h4>
+		<div class="content">Checks if the directory given by the path is a valid git repository.
 
 
 <div class="return">
@@ -222,8 +205,9 @@ the working directory or the repository's .git directory.
 
 		</div>
 	</div><div id="IsValid" class="method">
-		<h4><span title="System.bool">bool</span> <strong>IsValid</strong>(<span title="System.string">string</span> path, <span title="System.bool">bool</span> bare)</h4>
-		<div class="content">Checks if the directory given by the path is a valid git repository.
+		<h4><span title="System.bool">bool</span> <strong>IsValid</strong>(<span title="System.string">string</span> path)</h4>
+		<div class="content">Checks if the directory given by the path is a valid non-bare git repository. The given path may either point to
+the working directory or the repository's .git directory.
 
 
 <div class="return">
@@ -273,12 +257,6 @@ does not automatically check out that branch into the repositories working direc
     <div class="content">Returns true if this repository is a bare repository. Bare repositories don't have a working directory and thus do not support some operations.
 
     </div>
-  </div><div id="PreferredEncoding" class="method">
-    <h4><span title="System.Text.Encoding">Encoding</span> <strong>PreferredEncoding</strong> get; set;</h4>
-    <div class="content">If data in a repository (i.e. filenames, commit messages, etc. ) is to be decoded with a special encoding
-set this property. Default setting is UTF8
-
-    </div>
   </div><div id="Refs" class="method">
     <h4><span title="System.Collections.Generic.IDictionary<string, Ref>">IDictionary&lt;string, Ref&gt;</span> <strong>Refs</strong> get; </h4>
     <div class="content">
@@ -308,7 +286,7 @@ Returns a data structure containing the results (like "git status").
   </div>
 <div id="footer">
   <p><b><big>Learn more about <a href="http://www.eqqon.com/index.php/GitSharp"> GitSharp. </a></big></b></p>
-  <p>Based on v0.0.0.0 of GitSharp</p>
+  <p>Based on v0.2.0.0 of GitSharp (GitSharp [local-build])</p>
   <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
 </div>
   </body>

@@ -1,0 +1,868 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>DiffTreeCommand - GitSharp [local-build] Documentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+    <link type="text/css" rel="stylesheet" href="../main.css"/>
+    <script type="text/javascript" src="../js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.scrollTo-min.js"></script>
+    <script type="text/javascript" src="../js/navigation.js"></script>
+  </head>
+  <body>
+<div id="namespaces">
+	<h2 class="fixed">Namespaces</h2>
+	<div class="scroll">
+		<ul><li>
+          <a href="../GitSharp/index.html">GitSharp</a>
+      </li><li>
+          <a href="../GitSharp.Commands/index.html" class="current">GitSharp.Commands</a>
+      </li>
+		</ul>
+	</div>
+</div><div id="types">
+  <h2 class="fixed">Types in GitSharp.Commands</h2>
+	<div class="scroll">
+		<ul><li>
+            <a href="../GitSharp.Commands/AbstractCommand.htm">AbstractCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AbstractFetchCommand.htm">AbstractFetchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AddCommand.htm">AddCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AmCommand.htm">AmCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/AnnotateCommand.htm">AnnotateCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ApplyCommand.htm">ApplyCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ArchiveCommand.htm">ArchiveCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/BlameCommand.htm">BlameCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/BranchCommand.htm">BranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CatFileCommand.htm">CatFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CheckoutCommand.htm">CheckoutCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CheckoutIndexCommand.htm">CheckoutIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CherryCommand.htm">CherryCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CherryPickCommand.htm">CherryPickCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CleanCommand.htm">CleanCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CloneCommand.htm">CloneCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CommitCommand.htm">CommitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CommitTreeCommand.htm">CommitTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ConfigCommand.htm">ConfigCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/CountObjectsCommand.htm">CountObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DescribeCommand.htm">DescribeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffCommand.htm">DiffCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffFilesCommand.htm">DiffFilesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffIndexCommand.htm">DiffIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DifftoolCommand.htm">DifftoolCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/DiffTreeCommand.htm" class="current">DiffTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FastExportCommand.htm">FastExportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FastimportCommand.htm">FastimportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FetchCommand.htm">FetchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FetchPackCommand.htm">FetchPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FilterBranchCommand.htm">FilterBranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FmtMergeMsgCommand.htm">FmtMergeMsgCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ForEachRefCommand.htm">ForEachRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FormatPatchCommand.htm">FormatPatchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/FsckCommand.htm">FsckCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/GcCommand.htm">GcCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/GrepCommand.htm">GrepCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/HashObjectCommand.htm">HashObjectCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/IGitCommand.htm">IGitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/IndexpackCommand.htm">IndexpackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/InitCommand.htm">InitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LogCommand.htm">LogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsFilesCommand.htm">LsFilesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsRemoteCommand.htm">LsRemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/LsTreeCommand.htm">LsTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MailinfoCommand.htm">MailinfoCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MailsplitCommand.htm">MailsplitCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeBaseCommand.htm">MergeBaseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeFileCommand.htm">MergeFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergeIndexCommand.htm">MergeIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MergetoolCommand.htm">MergetoolCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MktreeCommand.htm">MktreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/MvCommand.htm">MvCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/NameRevCommand.htm">NameRevCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/NotesCommand.htm">NotesCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackObjectsCommand.htm">PackObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackRedundantCommand.htm">PackRedundantCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PackRefsCommand.htm">PackRefsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PatchIdCommand.htm">PatchIdCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PeekRemoteCommand.htm">PeekRemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PruneCommand.htm">PruneCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PrunePackedCommand.htm">PrunePackedCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/PushCommand.htm">PushCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/QuiltimportCommand.htm">QuiltimportCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReadTreeCommand.htm">ReadTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RebaseCommand.htm">RebaseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReceivePackCommand.htm">ReceivePackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReflogCommand.htm">ReflogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RelinkCommand.htm">RelinkCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RemoteCommand.htm">RemoteCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RepackCommand.htm">RepackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ReplaceCommand.htm">ReplaceCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RequestPullCommand.htm">RequestPullCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ResetCommand.htm">ResetCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RevertCommand.htm">RevertCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RevParseCommand.htm">RevParseCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/RmCommand.htm">RmCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SendPackCommand.htm">SendPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShortlogCommand.htm">ShortlogCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowBranchCommand.htm">ShowBranchCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowCommand.htm">ShowCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/ShowRefCommand.htm">ShowRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusCommand.htm">StatusCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusResults.htm">StatusResults</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusState.htm">StatusState</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StatusType.htm">StatusType</a>
+        </li><li>
+            <a href="../GitSharp.Commands/StripspaceCommand.htm">StripspaceCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SubmoduleCommand.htm">SubmoduleCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SvnCommand.htm">SvnCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/SymbolicRefCommand.htm">SymbolicRefCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/TagCommand.htm">TagCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/TarTreeCommand.htm">TarTreeCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UnpackFileCommand.htm">UnpackFileCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UnpackObjectsCommand.htm">UnpackObjectsCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UpdateIndexCommand.htm">UpdateIndexCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UpdateServerInfoCommand.htm">UpdateServerInfoCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UploadArchiveCommand.htm">UploadArchiveCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/UploadPackCommand.htm">UploadPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VarCommand.htm">VarCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VerifyPackCommand.htm">VerifyPackCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/VerifyTagCommand.htm">VerifyTagCommand</a>
+        </li><li>
+            <a href="../GitSharp.Commands/WhatchangedCommand.htm">WhatchangedCommand</a>
+        </li>
+		</ul>
+	</div>
+</div>
+    <div class="header">
+		<p class="class"><strong>Type</strong> DiffTreeCommand</p>
+		<p><strong>Namespace</strong> GitSharp.Commands</p><p><strong>Parent</strong> <a href="../GitSharp.Commands/AbstractCommand.htm">AbstractCommand</a></p>
+	</div>
+    <div class="sub-header">
+
+
+
+			<h3 class="section">Properties</h3>
+			<ul><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Abbrev">Abbrev</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#AbbrevCommit">AbbrevCommit</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#ActualDirectory">ActualDirectory</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Always">Always</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Arguments">Arguments</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#B">B</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Binary">Binary</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#c">c</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#C">C</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Cc">Cc</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Check">Check</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Color">Color</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#ColorWords">ColorWords</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#DiffFilter">DiffFilter</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Dirstat">Dirstat</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#DirstatByFile">DirstatByFile</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#DstPrefix">DstPrefix</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Encoding">Encoding</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#ExitCode">ExitCode</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#ExtDiff">ExtDiff</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#FindCopiesHarder">FindCopiesHarder</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Format">Format</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#FullIndex">FullIndex</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#GitDirectory">GitDirectory</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#IgnoreAllSpace">IgnoreAllSpace</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#IgnoreSpaceAtEol">IgnoreSpaceAtEol</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#IgnoreSpaceChange">IgnoreSpaceChange</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#IgnoreSubmodules">IgnoreSubmodules</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#InterHunkContext">InterHunkContext</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#L">L</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#m">m</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#M">M</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#NameOnly">NameOnly</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#NameStatus">NameStatus</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#NoColor">NoColor</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#NoCommitId">NoCommitId</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#NoExtDiff">NoExtDiff</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#NoPrefix">NoPrefix</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#NoRenames">NoRenames</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#NoStat">NoStat</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Numstat">Numstat</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#O">O</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Oneline">Oneline</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#OutputStream">OutputStream</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#P">P</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#PatchWithRaw">PatchWithRaw</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#PatchWithStat">PatchWithStat</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Patience">Patience</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#PickaxeAll">PickaxeAll</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#PickaxeRegex">PickaxeRegex</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Pretty">Pretty</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Quiet">Quiet</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#r">r</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#R">R</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Raw">Raw</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Relative">Relative</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Repository">Repository</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Root">Root</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#s">s</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#S">S</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Shortstat">Shortstat</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#SrcPrefix">SrcPrefix</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Stat">Stat</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Stdin">Stdin</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Submodule">Submodule</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Summary">Summary</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#T">T</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Text">Text</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#U">U</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Unified">Unified</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#V">V</a></li><li><a href="../GitSharp.Commands/DiffTreeCommand.htm#Z">Z</a></li>
+			</ul>
+
+	</div>
+
+
+
+
+  <h3 class="section">Public properties</h3>
+<div id="Abbrev" class="method">
+    <h4><span title="System.string">string</span> <strong>Abbrev</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of showing the full 40-byte hexadecimal object
+name in diff-raw format output and diff-tree header
+lines, show only a partial prefix.  This is
+independent of the `--full-index` option above, which controls
+the diff-patch output format.  Non default number of
+digits can be specified with `--abbrev=<n>`.
+
+    </div>
+  </div><div id="AbbrevCommit" class="method">
+    <h4><span title="System.bool">bool</span> <strong>AbbrevCommit</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of showing the full 40-byte hexadecimal commit object
+name, show only a partial prefix.  Non default number of
+digits can be specified with "--abbrev=<n>" (which also modifies
+diff output, if it is displayed).
++
+This should make "--pretty=oneline" a whole lot more readable for
+people using 80-column terminals.
+
+    </div>
+  </div><div id="ActualDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>ActualDirectory</strong> get; </h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Always" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Always</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show the commit itself and the commit log message even
+if the diff itself is empty.
+
+    </div>
+  </div><div id="Arguments" class="method">
+    <h4><span title="System.Collections.Generic.List<string>">List&lt;string&gt;</span> <strong>Arguments</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="B" class="method">
+    <h4><span title="System.bool">bool</span> <strong>B</strong> get; set;</h4>
+    <div class="content">Not implemented
+Break complete rewrite changes into pairs of delete and create.
+
+    </div>
+  </div><div id="Binary" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Binary</strong> get; set;</h4>
+    <div class="content">Not implemented
+In addition to `--full-index`, output a binary diff that
+can be applied with `git-apply`.
+
+    </div>
+  </div><div id="c" class="method">
+    <h4><span title="System.bool">bool</span> <strong>c</strong> get; set;</h4>
+    <div class="content">Not implemented
+This flag changes the way a merge commit is displayed
+(which means it is useful only when the command is given
+one <tree-ish>, or '--stdin').  It shows the differences
+from each of the parents to the merge result simultaneously
+instead of showing pairwise diff between a parent and the
+result one at a time (which is what the '-m' option does).
+Furthermore, it lists only files which were modified
+from all parents.
+
+    </div>
+  </div><div id="C" class="method">
+    <h4><span title="System.bool">bool</span> <strong>C</strong> get; set;</h4>
+    <div class="content">Not implemented
+Detect copies as well as renames.  See also `--find-copies-harder`.
+
+    </div>
+  </div><div id="Cc" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Cc</strong> get; set;</h4>
+    <div class="content">Not implemented
+This flag changes the way a merge commit patch is displayed,
+in a similar way to the '-c' option. It implies the '-c'
+and '-p' options and further compresses the patch output
+by omitting uninteresting hunks whose the contents in the parents
+have only two variants and the merge result picks one of them
+without modification.  When all hunks are uninteresting, the commit
+itself and the commit log message is not shown, just like in any other
+"empty diff" case.
+
+    </div>
+  </div><div id="Check" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Check</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifndef::git-format-patch[]
+Warn if changes introduce trailing whitespace
+or an indent that uses a space before a tab. Exits with
+non-zero status if problems are found. Not compatible with
+--exit-code.
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="Color" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Color</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show colored diff.
+
+    </div>
+  </div><div id="ColorWords" class="method">
+    <h4><span title="System.string">string</span> <strong>ColorWords</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show colored word diff, i.e., color words which have changed.
+By default, words are separated by whitespace.
++
+When a <regex> is specified, every non-overlapping match of the
+considered whitespace and ignored(!) for the purposes of finding
+differences.  You may want to append `|[^[:space:]]` to your regular
+expression to make sure that it matches all non-whitespace characters.
+A match that contains a newline is silently truncated(!) at the
+newline.
++
+The regex can also be set via a diff driver or configuration option, see
+linkgit:gitattributes[1] or linkgit:git-config[1].  Giving it explicitly
+overrides any diff driver or configuration setting.  Diff drivers
+override configuration settings.
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="DiffFilter" class="method">
+    <h4><span title="System.string">string</span> <strong>DiffFilter</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifndef::git-format-patch[]
+Select only files that are Added (`A`), Copied (`C`),
+Deleted (`D`), Modified (`M`), Renamed (`R`), have their
+type (i.e. regular file, symlink, submodule, ...) changed (`T`),
+are Unmerged (`U`), are
+Unknown (`X`), or have had their pairing Broken (`B`).
+Any combination of the filter characters may be used.
+When `*` (All-or-none) is added to the combination, all
+paths are selected if there is any file that matches
+other criteria in the comparison; if there is no file
+that matches other criteria, nothing is selected.
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="Dirstat" class="method">
+    <h4><span title="System.string">string</span> <strong>Dirstat</strong> get; set;</h4>
+    <div class="content">Not implemented
+Output the distribution of relative amount of changes (number of lines added or
+removed) for each sub-directory. Directories with changes below
+a cut-off percent (3% by default) are not shown. The cut-off percent
+can be set with `--dirstat=limit`. Changes in a child directory is not
+counted for the parent directory, unless `--cumulative` is used.
+
+    </div>
+  </div><div id="DirstatByFile" class="method">
+    <h4><span title="System.string">string</span> <strong>DirstatByFile</strong> get; set;</h4>
+    <div class="content">Not implemented
+Same as `--dirstat`, but counts changed files instead of lines.
+
+    </div>
+  </div><div id="DstPrefix" class="method">
+    <h4><span title="System.string">string</span> <strong>DstPrefix</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show the given destination prefix instead of "b/".
+
+    </div>
+  </div><div id="Encoding" class="method">
+    <h4><span title="System.string">string</span> <strong>Encoding</strong> get; set;</h4>
+    <div class="content">Not implemented
+The commit objects record the encoding used for the log message
+in their encoding header; this option can be used to tell the
+command to re-code the commit log message in the encoding
+preferred by the user.  For non plumbing commands this
+defaults to UTF-8.
+
+    </div>
+  </div><div id="ExitCode" class="method">
+    <h4><span title="System.bool">bool</span> <strong>ExitCode</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifndef::git-format-patch[]
+Make the program exit with codes similar to diff(1).
+That is, it exits with 1 if there were differences and
+0 means no differences.
+
+    </div>
+  </div><div id="ExtDiff" class="method">
+    <h4><span title="System.bool">bool</span> <strong>ExtDiff</strong> get; set;</h4>
+    <div class="content">Not implemented
+Allow an external diff helper to be executed. If you set an
+external diff driver with linkgit:gitattributes[5], you need
+to use this option with linkgit:git-log[1] and friends.
+
+    </div>
+  </div><div id="FindCopiesHarder" class="method">
+    <h4><span title="System.bool">bool</span> <strong>FindCopiesHarder</strong> get; set;</h4>
+    <div class="content">Not implemented
+For performance reasons, by default, `-C` option finds copies only
+if the original file of the copy was modified in the same
+changeset.  This flag makes the command
+inspect unmodified files as candidates for the source of
+copy.  This is a very expensive operation for large
+projects, so use it with caution.  Giving more than one
+`-C` option has the same effect.
+
+    </div>
+  </div><div id="Format" class="method">
+    <h4><span title="System.string">string</span> <strong>Format</strong> get; set;</h4>
+    <div class="content">Not implemented
+For more detailed explanation on these common options, see also
+linkgit:gitdiffcore[7].
+
+    </div>
+  </div><div id="FullIndex" class="method">
+    <h4><span title="System.bool">bool</span> <strong>FullIndex</strong> get; set;</h4>
+    <div class="content">Not implemented
+Instead of the first handful of characters, show the full
+pre- and post-image blob object names on the "index"
+line when generating patch format output.
+
+    </div>
+  </div><div id="GitDirectory" class="method">
+    <h4><span title="System.string">string</span> <strong>GitDirectory</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="IgnoreAllSpace" class="method">
+    <h4><span title="System.bool">bool</span> <strong>IgnoreAllSpace</strong> get; set;</h4>
+    <div class="content">Not implemented
+Ignore whitespace when comparing lines.  This ignores
+differences even if one line has whitespace where the other
+line has none.
+
+    </div>
+  </div><div id="IgnoreSpaceAtEol" class="method">
+    <h4><span title="System.bool">bool</span> <strong>IgnoreSpaceAtEol</strong> get; set;</h4>
+    <div class="content">Not implemented
+Ignore changes in whitespace at EOL.
+
+    </div>
+  </div><div id="IgnoreSpaceChange" class="method">
+    <h4><span title="System.bool">bool</span> <strong>IgnoreSpaceChange</strong> get; set;</h4>
+    <div class="content">Not implemented
+Ignore changes in amount of whitespace.  This ignores whitespace
+at line end, and considers all other sequences of one or
+more whitespace characters to be equivalent.
+
+    </div>
+  </div><div id="IgnoreSubmodules" class="method">
+    <h4><span title="System.bool">bool</span> <strong>IgnoreSubmodules</strong> get; set;</h4>
+    <div class="content">Not implemented
+Ignore changes to submodules in the diff generation.
+
+    </div>
+  </div><div id="InterHunkContext" class="method">
+    <h4><span title="System.string">string</span> <strong>InterHunkContext</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show the context between diff hunks, up to the specified number
+of lines, thereby fusing hunks that are close to each other.
+
+    </div>
+  </div><div id="L" class="method">
+    <h4><span title="System.string">string</span> <strong>L</strong> get; set;</h4>
+    <div class="content">Not implemented
+The `-M` and `-C` options require O(n^2) processing time where n
+is the number of potential rename/copy targets.  This
+option prevents rename/copy detection from running if
+the number of rename/copy targets exceeds the specified
+number.
+
+    </div>
+  </div><div id="m" class="method">
+    <h4><span title="System.bool">bool</span> <strong>m</strong> get; set;</h4>
+    <div class="content">Not implemented
+By default, 'git-diff-tree --stdin' does not show
+differences for merge commits.  With this flag, it shows
+differences to that commit from all of its parents. See
+also '-c'.
+
+    </div>
+  </div><div id="M" class="method">
+    <h4><span title="System.bool">bool</span> <strong>M</strong> get; set;</h4>
+    <div class="content">Not implemented
+Detect renames.
+
+    </div>
+  </div><div id="NameOnly" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NameOnly</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show only names of changed files.
+
+    </div>
+  </div><div id="NameStatus" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NameStatus</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show only names and status of changed files. See the description
+of the `--diff-filter` option on what the status letters mean.
+
+    </div>
+  </div><div id="NoColor" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NoColor</strong> get; set;</h4>
+    <div class="content">Not implemented
+Turn off colored diff, even when the configuration file
+gives the default to color output.
+
+    </div>
+  </div><div id="NoCommitId" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NoCommitId</strong> get; set;</h4>
+    <div class="content">Not implemented
+'git-diff-tree' outputs a line with the commit ID when
+applicable.  This flag suppressed the commit ID output.
+
+    </div>
+  </div><div id="NoExtDiff" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NoExtDiff</strong> get; set;</h4>
+    <div class="content">Not implemented
+Disallow external diff drivers.
+
+    </div>
+  </div><div id="NoPrefix" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NoPrefix</strong> get; set;</h4>
+    <div class="content">Not implemented
+Do not show any source or destination prefix.
+
+    </div>
+  </div><div id="NoRenames" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NoRenames</strong> get; set;</h4>
+    <div class="content">Not implemented
+Turn off rename detection, even when the configuration
+file gives the default to do so.
+
+    </div>
+  </div><div id="NoStat" class="method">
+    <h4><span title="System.bool">bool</span> <strong>NoStat</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifdef::git-format-patch[]
+Generate plain patches without any diffstats.
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="Numstat" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Numstat</strong> get; set;</h4>
+    <div class="content">Not implemented
+Similar to `\--stat`, but shows number of added and
+deleted lines in decimal notation and pathname without
+abbreviation, to make it more machine friendly.  For
+binary files, outputs two `-` instead of saying
+`0 0`.
+
+    </div>
+  </div><div id="O" class="method">
+    <h4><span title="System.string">string</span> <strong>O</strong> get; set;</h4>
+    <div class="content">Not implemented
+Output the patch in the order specified in the
+<orderfile>, which has one shell glob pattern per line.
+
+    </div>
+  </div><div id="Oneline" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Oneline</strong> get; set;</h4>
+    <div class="content">Not implemented
+This is a shorthand for "--pretty=oneline --abbrev-commit"
+used together.
+
+    </div>
+  </div><div id="OutputStream" class="method">
+    <h4><span title="System.IO.StreamWriter">StreamWriter</span> <strong>OutputStream</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="P" class="method">
+    <h4><span title="System.bool">bool</span> <strong>P</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifndef::git-format-patch[]
+Generate patch (see section on generating patches).
+{git-diff? This is the default.}
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="PatchWithRaw" class="method">
+    <h4><span title="System.bool">bool</span> <strong>PatchWithRaw</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifndef::git-format-patch[]
+Synonym for `-p --raw`.
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="PatchWithStat" class="method">
+    <h4><span title="System.bool">bool</span> <strong>PatchWithStat</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifndef::git-format-patch[]
+Synonym for `-p --stat`.
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="Patience" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Patience</strong> get; set;</h4>
+    <div class="content">Not implemented
+Generate a diff using the "patience diff" algorithm.
+
+    </div>
+  </div><div id="PickaxeAll" class="method">
+    <h4><span title="System.bool">bool</span> <strong>PickaxeAll</strong> get; set;</h4>
+    <div class="content">Not implemented
+When `-S` finds a change, show all the changes in that
+changeset, not just the files that contain the change
+in <string>.
+
+    </div>
+  </div><div id="PickaxeRegex" class="method">
+    <h4><span title="System.string">string</span> <strong>PickaxeRegex</strong> get; set;</h4>
+    <div class="content">Not implemented
+Make the <string> not a plain string but an extended POSIX
+regex to match.
+
+    </div>
+  </div><div id="Pretty" class="method">
+    <h4><span title="System.string">string</span> <strong>Pretty</strong> get; set;</h4>
+    <div class="content">Not implemented
+For more detailed explanation on these common options, see also
+linkgit:gitdiffcore[7].
+
+    </div>
+  </div><div id="Quiet" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Quiet</strong> get; set;</h4>
+    <div class="content">Not implemented
+Disable all output of the program. Implies `--exit-code`.
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="r" class="method">
+    <h4><span title="System.bool">bool</span> <strong>r</strong> get; set;</h4>
+    <div class="content">Not implemented
+recurse into sub-trees
+
+    </div>
+  </div><div id="R" class="method">
+    <h4><span title="System.bool">bool</span> <strong>R</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifndef::git-format-patch[]
+Swap two inputs; that is, show differences from index or
+on-disk file to tree contents.
+
+    </div>
+  </div><div id="Raw" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Raw</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifndef::git-format-patch[]
+Generate the raw format.
+{git-diff-core? This is the default.}
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="Relative" class="method">
+    <h4><span title="System.string">string</span> <strong>Relative</strong> get; set;</h4>
+    <div class="content">Not implemented
+When run from a subdirectory of the project, it can be
+told to exclude changes outside the directory and show
+pathnames relative to it with this option.  When you are
+not in a subdirectory (e.g. in a bare repository), you
+can name which subdirectory to make the output relative
+to by giving a <path> as an argument.
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="Repository" class="method">
+    <h4><a href="../GitSharp/Repository.htm">Repository</a> <strong>Repository</strong> get; set;</h4>
+    <div class="content">
+
+    </div>
+  </div><div id="Root" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Root</strong> get; set;</h4>
+    <div class="content">Not implemented
+When '--root' is specified the initial commit will be shown as a big
+creation event. This is equivalent to a diff against the NULL tree.
+
+    </div>
+  </div><div id="s" class="method">
+    <h4><span title="System.bool">bool</span> <strong>s</strong> get; set;</h4>
+    <div class="content">Not implemented
+By default, 'git-diff-tree --stdin' shows differences,
+either in machine-readable form (without '-p') or in patch
+form (with '-p').  This output can be suppressed.  It is
+only useful with '-v' flag.
+
+    </div>
+  </div><div id="S" class="method">
+    <h4><span title="System.string">string</span> <strong>S</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifndef::git-format-patch[]
+Look for differences that introduce or remove an instance of
+<string>. Note that this is different than the string simply
+appearing in diff output; see the 'pickaxe' entry in
+linkgit:gitdiffcore[7] for more details.
+
+    </div>
+  </div><div id="Shortstat" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Shortstat</strong> get; set;</h4>
+    <div class="content">Not implemented
+Output only the last line of the `--stat` format containing total
+number of modified files, as well as number of added and deleted
+lines.
+
+    </div>
+  </div><div id="SrcPrefix" class="method">
+    <h4><span title="System.string">string</span> <strong>SrcPrefix</strong> get; set;</h4>
+    <div class="content">Not implemented
+Show the given source prefix instead of "a/".
+
+    </div>
+  </div><div id="Stat" class="method">
+    <h4><span title="System.string">string</span> <strong>Stat</strong> get; set;</h4>
+    <div class="content">Not implemented
+Generate a diffstat.  You can override the default
+output width for 80-column terminal by `--stat=width`.
+The width of the filename part can be controlled by
+giving another width to it separated by a comma.
+
+    </div>
+  </div><div id="Stdin" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Stdin</strong> get; set;</h4>
+    <div class="content">Not implemented
+When '--stdin' is specified, the command does not take
+<tree-ish> arguments from the command line.  Instead, it
+reads lines containing either two <tree>, one <commit>, or a
+list of <commit> from its standard input.  (Use a single space
+as separator.)
++
+When two trees are given, it compares the first tree with the second.
+When a single commit is given, it compares the commit with its
+parents.  The remaining commits, when given, are used as if they are
+parents of the first commit.
++
+When comparing two trees, the ID of both trees (separated by a space
+and terminated by a newline) is printed before the difference.  When
+comparing commits, the ID of the first (or only) commit, followed by a
+newline, is printed.
++
+The following flags further affect the behavior when comparing
+commits (but not trees).
+
+    </div>
+  </div><div id="Submodule" class="method">
+    <h4><span title="System.string">string</span> <strong>Submodule</strong> get; set;</h4>
+    <div class="content">Not implemented
+Chose the output format for submodule differences. <format> can be one of
+'short' and 'log'. 'short' just shows pairs of commit names, this format
+is used when this option is not given. 'log' is the default value for this
+option and lists the commits in that commit range like the 'summary'
+option of linkgit:git-submodule[1] does.
+
+    </div>
+  </div><div id="Summary" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Summary</strong> get; set;</h4>
+    <div class="content">Not implemented
+Output a condensed summary of extended header information
+such as creations, renames and mode changes.
+
+    </div>
+  </div><div id="T" class="method">
+    <h4><span title="System.bool">bool</span> <strong>T</strong> get; set;</h4>
+    <div class="content">Not implemented
+show tree entry itself as well as subtrees.  Implies -r.
+
+    </div>
+  </div><div id="Text" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Text</strong> get; set;</h4>
+    <div class="content">Not implemented
+Treat all files as text.
+
+    </div>
+  </div><div id="U" class="method">
+    <h4><span title="System.bool">bool</span> <strong>U</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifndef::git-format-patch[]
+Generate patch (see section on generating patches).
+{git-diff? This is the default.}
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="Unified" class="method">
+    <h4><span title="System.string">string</span> <strong>Unified</strong> get; set;</h4>
+    <div class="content">Not implemented
+Generate diffs with <n> lines of context instead of
+the usual three.
+ifndef::git-format-patch[]
+Implies `-p`.
+endif::git-format-patch[]
+
+    </div>
+  </div><div id="V" class="method">
+    <h4><span title="System.bool">bool</span> <strong>V</strong> get; set;</h4>
+    <div class="content">Not implemented
+This flag causes 'git-diff-tree --stdin' to also show
+the commit message before the differences.
+
+    </div>
+  </div><div id="Z" class="method">
+    <h4><span title="System.bool">bool</span> <strong>Z</strong> get; set;</h4>
+    <div class="content">Not implemented
+ifdef::git-log[]
+Separate the commits with NULs instead of with new newlines.
++
+Also, when `--raw` or `--numstat` has been given, do not munge
+pathnames and use NULs as output field terminators.
+endif::git-log[]
+ifndef::git-log[]
+When `--raw` or `--numstat` has been given, do not munge
+pathnames and use NULs as output field terminators.
+endif::git-log[]
++
+Without this option, each pathname output will have TAB, LF, double quotes,
+and backslash characters replaced with `\t`, `\n`, `\"`, and `\\`,
+respectively, and the pathname will be enclosed in double quotes if
+any of those replacements occurred.
+
+    </div>
+  </div>
+<div id="footer">
+  <p><b><big>Learn more about <a href="http://www.eqqon.com/index.php/GitSharp"> GitSharp. </a></big></b></p>
+  <p>Based on v0.2.0.0 of GitSharp (GitSharp [local-build])</p>
+  <p>Generated by <a href="http://docu.jagregory.com">docu</a></p>
+</div>
+  </body>
+</html>

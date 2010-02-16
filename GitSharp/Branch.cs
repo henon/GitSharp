@@ -229,7 +229,7 @@ namespace GitSharp
 
 		private void ResetHard(Commit commit)
 		{
-			commit.Checkout(_repo.WorkingDirectory);
+			commit.Checkout();
 			_repo._internal_repo.Index.write();
 			Ref.Update("HEAD", commit);
 		}

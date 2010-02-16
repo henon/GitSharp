@@ -160,25 +160,25 @@ namespace GitSharp
 		#endregion
 
 		/// <summary>
-		/// Check out the branch with the given name
+		/// Check out the branch with the given name into the working directory and make it the current branch.
 		/// </summary>
 		/// <param name="name"></param>
-		public void CheckoutBranch(string name)
+		public void SwitchToBranch(string name)
 		{
-			CheckoutBranch(new Branch(this, name));
+			SwitchToBranch(new Branch(this, name));
 		}
 
 		/// <summary>
-		/// Check out the given branch
+		/// Check out the given branch into the working directory and make it the current branch.
 		/// </summary>
 		/// <param name="branch"></param>
-		public void CheckoutBranch(Branch branch)
+		public void SwitchToBranch(Branch branch)
 		{
-			Branch.SwitchTo(branch);
+			branch.Checkout();
 		}
 
 		/// <summary>
-		/// Commit staged changes and update HEAD. The default git author is used.
+		/// Commit staged changes and update HEAD. The default git author from the config is used.
 		/// </summary>
 		/// <param name="message">The commit message</param>
 		/// <returns>Returns the newly created commit</returns>
@@ -291,16 +291,6 @@ namespace GitSharp
 		{
 			return "Repository[" + Directory + "]";
 		}
-
-		///// <summary>
-		///// If data in a repository (i.e. filenames, commit messages, etc. ) is to be decoded with a special encoding
-		///// set this property. Default setting is UTF8
-		///// </summary>
-		//public Encoding PreferredEncoding
-		//{
-		//   get;
-		//   set;
-		//}
 
 		public void Close()
 		{

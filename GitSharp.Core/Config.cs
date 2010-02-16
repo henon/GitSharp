@@ -390,11 +390,11 @@ namespace GitSharp.Core
         public T get<T>(SectionParser<T> parser)
         {
             State myState = getState();
-            T obj = (T)myState.Cache.get(parser);
+            T obj = (T)myState.Cache.get<object, object>(parser);
             if (Equals(obj, default(T)))
             {
                 obj = (T)parser.parse(this);
-                myState.Cache.put(parser, obj);
+                myState.Cache.put<object, object>(parser, obj);
             }
             return obj;
         }

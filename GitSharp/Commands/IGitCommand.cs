@@ -40,10 +40,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace GitSharp
+namespace GitSharp.Commands
 {
-    public interface IGitCommand
-    {
-        void Execute();
-    }
+	public interface IGitCommand
+	{
+		void Execute();
+	}
 }

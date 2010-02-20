@@ -250,6 +250,7 @@ namespace GitSharp.Core
             Config.setBoolean("core", null, "filemode", true);
             Config.setBoolean("core", null, "bare", bare);
             Config.setBoolean("core", null, "logallrefupdates", !bare);
+            Config.setBoolean("core", null, "autocrlf", false);
 
             Config.save();
 

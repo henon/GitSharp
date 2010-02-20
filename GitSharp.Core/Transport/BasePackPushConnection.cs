@@ -58,7 +58,7 @@ namespace GitSharp.Core.Transport
         private bool _sentCommand;
         private bool _shouldWritePack;
 
-    	protected BasePackPushConnection(IPackTransport packTransport)
+        protected BasePackPushConnection(IPackTransport packTransport)
             : base(packTransport)
         {
             _thinPack = transport.PushThin;

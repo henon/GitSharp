@@ -141,7 +141,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
             Assert.IsTrue(b.commit());
             Assert.AreEqual(1, dc.getEntryCount());
             Assert.AreSame(entOrig, dc.getEntry(0));
-            Assert.IsFalse(new FileInfo(db.Directory+ "/index.lock").Exists);
+            Assert.IsFalse(new FileInfo(db.Directory + "/index.lock").Exists);
 
             dc = DirCache.read(db);
             Assert.AreEqual(1, dc.getEntryCount());

@@ -85,21 +85,21 @@ namespace GitSharp.Core.Tests.DirectoryCache
             Assert.AreEqual(longPath, longEnt.getPathString());
             Assert.AreEqual(shortPath, shortEnt.getPathString());
 
-			DirCache dc1 = DirCache.Lock(db);
-			DirCacheBuilder b = dc1.builder();
-			b.add(longEnt);
-			b.add(shortEnt);
-			Assert.IsTrue(b.commit());
-			Assert.AreEqual(2, dc1.getEntryCount());
-			Assert.AreSame(longEnt, dc1.getEntry(0));
-			Assert.AreSame(shortEnt, dc1.getEntry(1));
+            DirCache dc1 = DirCache.Lock(db);
+            DirCacheBuilder b = dc1.builder();
+            b.add(longEnt);
+            b.add(shortEnt);
+            Assert.IsTrue(b.commit());
+            Assert.AreEqual(2, dc1.getEntryCount());
+            Assert.AreSame(longEnt, dc1.getEntry(0));
+            Assert.AreSame(shortEnt, dc1.getEntry(1));
 
-			DirCache dc2 = DirCache.read(db);
-			Assert.AreEqual(2, dc2.getEntryCount());
-			Assert.AreNotSame(longEnt, dc2.getEntry(0));
-			Assert.AreEqual(longPath, dc2.getEntry(0).getPathString());
-			Assert.AreNotSame(shortEnt, dc2.getEntry(1));
-			Assert.AreEqual(shortPath, dc2.getEntry(1).getPathString());
+            DirCache dc2 = DirCache.read(db);
+            Assert.AreEqual(2, dc2.getEntryCount());
+            Assert.AreNotSame(longEnt, dc2.getEntry(0));
+            Assert.AreEqual(longPath, dc2.getEntry(0).getPathString());
+            Assert.AreNotSame(shortEnt, dc2.getEntry(1));
+            Assert.AreEqual(shortPath, dc2.getEntry(1).getPathString());
         }
 
         private static string makeLongPath(int len)

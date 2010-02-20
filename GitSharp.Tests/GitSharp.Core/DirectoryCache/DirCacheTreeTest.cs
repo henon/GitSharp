@@ -164,9 +164,9 @@ namespace GitSharp.Core.Tests.DirectoryCache
 
         /// <summary>
         /// We had bugs related to buffer size in the DirCache. This test creates an
-		/// index larger than the default BufferedInputStream buffer size. This made
-		/// the DirCache unable to Read the extensions when index size exceeded the
-		/// buffer size (in some cases at least).
+        /// index larger than the default BufferedInputStream buffer size. This made
+        /// the DirCache unable to Read the extensions when index size exceeded the
+        /// buffer size (in some cases at least).
         /// </summary>
         [Test]
         public void testWriteReadTree()
@@ -179,13 +179,13 @@ namespace GitSharp.Core.Tests.DirectoryCache
             var ents = new DirCacheEntry[paths.Length];
             for (int i = 0; i < paths.Length; i++)
             {
-            	ents[i] = new DirCacheEntry(paths[i]);
+                ents[i] = new DirCacheEntry(paths[i]);
             }
 
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
             {
-            	b.add(ents[i]);
+                b.add(ents[i]);
             }
 
             b.commit();

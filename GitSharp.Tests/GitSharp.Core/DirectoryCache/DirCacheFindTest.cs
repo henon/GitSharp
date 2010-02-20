@@ -58,29 +58,29 @@ namespace GitSharp.Core.Tests.DirectoryCache
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
             {
-            	b.add(ents[i]);
+                b.add(ents[i]);
             }
             b.finish();
 
             Assert.AreEqual(paths.Length, dc.getEntryCount());
             for (int i = 0; i < ents.Length; i++)
             {
-            	Assert.AreSame(ents[i], dc.getEntry(i));
+                Assert.AreSame(ents[i], dc.getEntry(i));
             }
 
             DirCacheEntry[] aContents = dc.getEntriesWithin("a");
             Assert.IsNotNull(aContents);
             Assert.AreEqual(aLast - aFirst + 1, aContents.Length);
             for (int i = aFirst, j = 0; i <= aLast; i++, j++)
-			{
-                    Assert.AreSame(ents[i], aContents[j]);
+            {
+                Assert.AreSame(ents[i], aContents[j]);
             }
 
             aContents = dc.getEntriesWithin("a/");
             Assert.IsNotNull(aContents);
             Assert.AreEqual(aLast - aFirst + 1, aContents.Length);
             for (int i = aFirst, j = 0; i <= aLast; i++, j++)
-			{
+            {
                 Assert.AreSame(ents[i], aContents[j]);
             }
 

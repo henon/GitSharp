@@ -78,13 +78,13 @@ namespace GitSharp.Core.Tests.DirectoryCache
 
             for (int i = 0; i < paths.Length; i++)
             {
-            	ents[i] = new DirCacheEntry(paths[i]);
+                ents[i] = new DirCacheEntry(paths[i]);
             }
 
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
             {
-            	b.add(ents[i]);
+                b.add(ents[i]);
             }
 
             b.finish();
@@ -118,7 +118,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
             {
-            	b.add(ents[i]);
+                b.add(ents[i]);
             }
             b.finish();
 
@@ -156,7 +156,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
             {
-            	b.add(ents[i]);
+                b.add(ents[i]);
             }
             b.finish();
 
@@ -209,7 +209,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
             {
-            	b.add(ents[i]);
+                b.add(ents[i]);
             }
             b.finish();
 
@@ -251,7 +251,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
             {
-            	b.add(ents[i]);
+                b.add(ents[i]);
             }
             b.finish();
 
@@ -292,7 +292,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
             {
-            	b.add(ents[i]);
+                b.add(ents[i]);
             }
             b.finish();
 

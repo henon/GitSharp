@@ -151,13 +151,13 @@ namespace GitSharp.Core.Tests.DirectoryCache
             Assert.IsFalse(File.Exists(idx.FullName));
             Assert.IsFalse(File.Exists(lck.FullName));
 
-			DirCache dc = DirCache.Lock(db);
-			dc.write();
-			Assert.IsTrue(dc.commit());
-			Assert.IsTrue(File.Exists(idx.FullName));
+            DirCache dc = DirCache.Lock(db);
+            dc.write();
+            Assert.IsTrue(dc.commit());
+            Assert.IsTrue(File.Exists(idx.FullName));
 
-			dc = DirCache.read(db);
-			Assert.AreEqual(0, dc.getEntryCount());
+            dc = DirCache.read(db);
+            Assert.AreEqual(0, dc.getEntryCount());
         }
 
         [Test]
@@ -186,17 +186,17 @@ namespace GitSharp.Core.Tests.DirectoryCache
             DirCache dc = DirCache.read(db);
 
             string[] paths = { "a.", "a.b", "a/b", "a0b" };
-            
-			var ents = new DirCacheEntry[paths.Length];
+
+            var ents = new DirCacheEntry[paths.Length];
             for (int i = 0; i < paths.Length; i++)
             {
-            	ents[i] = new DirCacheEntry(paths[i]);
+                ents[i] = new DirCacheEntry(paths[i]);
             }
 
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
             {
-            	b.add(ents[i]);
+                b.add(ents[i]);
             }
 
             b.finish();
@@ -206,12 +206,12 @@ namespace GitSharp.Core.Tests.DirectoryCache
             Assert.AreEqual(0, dc.getEntryCount());
         }
 
-		[Test]
-		public void testFindOnEmpty()
-		{
-			DirCache dc = DirCache.newInCore();
-			byte[] path = Constants.encode("a");
-			Assert.AreEqual(-1, dc.findEntry(path, path.Length));
-		}
+        [Test]
+        public void testFindOnEmpty()
+        {
+            DirCache dc = DirCache.newInCore();
+            byte[] path = Constants.encode("a");
+            Assert.AreEqual(-1, dc.findEntry(path, path.Length));
+        }
     }
 }

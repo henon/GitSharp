@@ -161,8 +161,11 @@ namespace GitSharp.API.Tests
 				Assert.AreEqual("and this is the content\nin me.", index.GetContent("I/am/a.file"));
 				Assert.AreEqual(new[] { "I/am/a.file" }, index.Entries);
 				Assert.IsTrue(index["I/am/a.file"].IsBlob);
-				Assert.AreEqual(index["I/am/a.file"], index["I\\am\\a.file"]); // internal git slash conversion
-				repo.Commit("committing our new file which is not actually present in the working directory.");
+
+			    string iAmAFile = string.Format("I{0}am{0}a.file", Path.DirectorySeparatorChar);
+			    Assert.AreEqual(index["I/am/a.file"], index[iAmAFile]); // internal git slash conversion
+				
+                repo.Commit("committing our new file which is not actually present in the working directory.");
 				Assert.AreEqual(new[] { "I/am/a.file" }, index.Entries);
 				repo.SwitchToBranch(repo.CurrentBranch);
 				Assert.IsTrue(new FileInfo(Path.Combine(repo.WorkingDirectory, "I/am/a.file")).Exists);

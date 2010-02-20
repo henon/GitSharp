@@ -401,6 +401,7 @@
     <Compile Include="RevPlot\PlotLane.cs" />
     <Compile Include="RevPlot\PlotWalk.cs" />
     <Compile Include="SymbolicRef.cs" />
+    <Compile Include="Transport\RefFilter.cs" />
     <Compile Include="Util\AtomicInteger.cs" />
     <Compile Include="Util\LongList.cs" />
     <Compile Include="Util\RefList.cs" />

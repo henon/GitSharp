@@ -60,6 +60,11 @@ namespace GitSharp.Core.Transport
         private readonly RevWalk.RevWalk _walk;
         private IDictionary<string, Ref> _refs;
 
+        /// <summary>
+        /// Filter used while advertising the refs to the client.
+        /// </summary>
+        private RefFilter _refFilter;
+
         private readonly List<string> _options;
         private readonly IList<RevObject> _wantAll;
         private readonly IList<RevCommit> _wantCommits;
@@ -113,8 +118,12 @@ namespace GitSharp.Core.Transport
             _walk.carry(PEER_HAS);
 
             SAVE = new RevFlagSet { ADVERTISED, WANT, PEER_HAS };
+            _refFilter = RefFilterContants.DEFAULT;
         }
 
+        /// <summary>
+        /// the repository this upload is reading from.
+        /// </summary>
         public Repository Repository
         {
             get { return _db; }
@@ -152,6 +161,26 @@ namespace GitSharp.Core.Transport
         public void setBiDirectionalPipe(bool twoWay)
         {
             biDirectionalPipe = twoWay;
+        }
+
+        /// <returns>the filter used while advertising the refs to the client</returns>
+        public RefFilter getRefFilter()
+        {
+            return _refFilter;
+        }
+
+        /// <summary>
+        /// Set the filter used while advertising the refs to the client.
+        /// <para/>
+        /// Only refs allowed by this filter will be sent to the client. This can
+        /// be used by a server to restrict the list of references the client can
+        /// obtain through clone or fetch, effectively limiting the access to only
+        /// certain refs.
+        /// </summary>
+        /// <param name="refFilter">the filter; may be null to show all refs.</param>
+        public void setRefFilter(RefFilter refFilter)
+        {
+            _refFilter = refFilter ?? RefFilterContants.DEFAULT;
         }
 
         /// <summary>
@@ -197,7 +226,7 @@ namespace GitSharp.Core.Transport
                 sendAdvertisedRefs(new RefAdvertiser.PacketLineOutRefAdvertiser(_pckOut));
             else
             {
-                _refs = _db.getAllRefs();
+                _refs = _refFilter.filter(_db.getAllRefs());
                 foreach (Ref r in _refs.Values)
                 {
                     try
@@ -240,7 +269,7 @@ namespace GitSharp.Core.Transport
             adv.advertiseCapability(OptionThinPack);
             adv.advertiseCapability(OptionNoProgress);
             adv.setDerefTags(true);
-            _refs = _db.getAllRefs();
+            _refs = _refFilter.filter(_db.getAllRefs());
             adv.send(_refs);
             adv.end();
         }

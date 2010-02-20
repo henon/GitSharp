@@ -106,6 +106,11 @@ namespace GitSharp.Core.Transport
         private PersonIdent refLogIdent;
 
         /// <summary>
+        /// Filter used while advertising the refs to the client.
+        /// </summary>
+        private RefFilter refFilter;
+
+        /// <summary>
         /// Hook to validate the update commands before execution.
         /// </summary>
         private IPreReceiveHook preReceive;
@@ -164,6 +169,7 @@ namespace GitSharp.Core.Transport
             allowDeletes = cfg._allowDeletes;
             allowNonFastForwards = cfg._allowNonFastForwards;
             allowOfsDelta = cfg._allowOfsDelta;
+            refFilter = RefFilterContants.DEFAULT;
             preReceive = PreReceiveHook.NULL;
             postReceive = PostReceiveHook.NULL;
         }
@@ -331,6 +337,26 @@ namespace GitSharp.Core.Transport
             refLogIdent = pi;
         }
 
+        /// <returns>the filter used while advertising the refs to the client</returns>
+        public RefFilter getRefFilter()
+        {
+            return refFilter;
+        }
+
+        /// <summary>
+        /// Set the filter used while advertising the refs to the client.
+        /// <para/>
+        /// Only refs allowed by this filter will be shown to the client.
+        /// Clients may still attempt to create or update a reference hidden
+        /// by the configured {@link RefFilter}. These attempts should be
+        /// rejected by a matching {@link PreReceiveHook}.
+        /// </summary>
+        /// <param name="refFilter">the filter; may be null to show all refs.</param>
+        public void setRefFilter(RefFilter refFilter)
+        {
+            this.refFilter = refFilter ?? RefFilterContants.DEFAULT;
+        }
+
         /// <returns>the hook invoked before updates occur.</returns>
         public IPreReceiveHook getPreReceiveHook()
         {
@@ -472,7 +498,7 @@ namespace GitSharp.Core.Transport
             if (biDirectionalPipe)
                 SendAdvertisedRefs(new RefAdvertiser.PacketLineOutRefAdvertiser(pckOut));
             else
-                refs = db.getAllRefs();
+                refs = refFilter.filter(db.getAllRefs());
 
             RecvCommands();
             if (commands.isEmpty()) return;
@@ -541,7 +567,7 @@ namespace GitSharp.Core.Transport
             adv.advertiseCapability(CAPABILITY_REPORT_STATUS);
             if (allowOfsDelta)
                 adv.advertiseCapability(CAPABILITY_OFS_DELTA);
-            refs = db.getAllRefs();
+            refs = refFilter.filter(db.getAllRefs());
             Ref head = refs[Constants.HEAD];
             refs.Remove(Constants.HEAD);
             adv.send(refs);

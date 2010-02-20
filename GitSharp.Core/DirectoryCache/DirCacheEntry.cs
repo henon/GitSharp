@@ -197,6 +197,13 @@ namespace GitSharp.Core.DirectoryCache
         /// <param name="stage">The stage index of the new entry.</param>
         public DirCacheEntry(byte[] newPath, int stage)
         {
+            if (!isValidPath(newPath))
+                throw new ArgumentException("Invalid path: "
+                        + toString(newPath));
+            if (stage < 0 || 3 < stage)
+                throw new ArgumentException("Invalid stage " + stage
+                    + " for path " + toString(newPath));
+
             _info = new byte[INFO_LEN];
             _infoOffset = 0;
             _path = newPath;
@@ -476,7 +483,7 @@ namespace GitSharp.Core.DirectoryCache
         /// </returns>
         public string getPathString()
         {
-            return Constants.CHARSET.GetString(_path);
+            return toString(_path);
         }
 
         ///	<summary>
@@ -522,6 +529,39 @@ namespace GitSharp.Core.DirectoryCache
         public byte[] Path
         {
             get { return _path; }
+        }
+
+        private static String toString(byte[] path)
+        {
+            return Constants.CHARSET.GetString(path);
+        }
+
+        public static bool isValidPath(byte[] path)
+        {
+            if (path.Length == 0)
+                return false; // empty path is not permitted.
+
+            bool componentHasChars = false;
+            foreach (byte c in path)
+            {
+                switch (c)
+                {
+                    case 0:
+                        return false; // NUL is never allowed within the path.
+
+                    case (byte)'/':
+                        if (componentHasChars)
+                            componentHasChars = false;
+                        else
+                            return false;
+                        break;
+
+                    default:
+                        componentHasChars = true;
+                        break;
+                }
+            }
+            return componentHasChars;
         }
     }
 }

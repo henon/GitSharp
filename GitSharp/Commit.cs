@@ -39,6 +39,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GitSharp.Core;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.Util;
 
@@ -275,50 +276,22 @@ namespace GitSharp
 				revwalk.RevSortStrategy.Add(RevSort.Strategy.COMMIT_TIME_DESC);
 				revwalk.RevSortStrategy.Add(RevSort.Strategy.TOPO);
 				revwalk.markStart(revwalk.parseCommit(_id));
-				foreach(var revcommit in revwalk)
+				foreach (var revcommit in revwalk)
 					yield return new Commit(_repo, revcommit.AsCommit(revwalk));
 			}
 		}
 
-		//private static IList<Commit> GetAncestorIds(Commit commit)
-		//{
-		//   Stack<Commit> ancestorsStack = new Stack<Commit>();
-		//   Dictionary<ObjectId, Commit> ancestors = new Dictionary<ObjectId, Commit>();
-
-		//   ancestorsStack.Push(commit);
-
-		//   while (ancestorsStack.Count > 0)
-		//   {
-		//      Commit currentCommit = ancestorsStack.Pop();
-		//      var parentCommits = currentCommit.InternalCommit.ParentIds
-		//                                      .Where(id => !ancestors.ContainsKey(id))
-		//                                      .Select(id => new Commit(commit._repo, id));
-
-		//      foreach (Commit parentCommit in parentCommits)
-		//      {
-		//         ancestorsStack.Push(parentCommit);
-		//         ancestors[parentCommit._id] = parentCommit;
-		//      }
-		//   }
-
-		//   return ancestors.Values.ToList();
-		//}
-
 		/// <summary>
-		/// Checkout this commit into the repositorie's working directory. Does not reset HEAD.
+		/// Checkout this commit into the working directory. Does not change HEAD.
+		/// <para/>
+		/// <seealso cref="Branch.Checkout"/> and <seealso cref="Index.Checkout()"/>.
 		/// </summary>
 		public void Checkout()
 		{
 			Checkout(_repo.WorkingDirectory);
 		}
 
-		/// <summary>
-		/// Checkout this commit into the given directory. Does not reset HEAD!
-		/// 
-		/// Note: do not confuse this with Branch.Checkout. Commit.Checkout( path)  is for exporting the tree of a commit into a directory.
-		/// </summary>
-		/// <param name="working_directory">The directory to put the sources into</param>
-		public void Checkout(string working_directory)
+		private void Checkout(string working_directory) // [henon] made this private to not confuse with Checkout( paths ). It seems to be not a common use case anyway and could be better exposed via the CheckoutCommand
 		{
 			if (InternalCommit == null)
 				throw new InvalidOperationException("Unable to checkout this commit. It was not initialized properly (i.e. the hash is not pointing to a commit object).");
@@ -332,6 +305,29 @@ namespace GitSharp
 			CoreTree tree = InternalCommit.TreeEntry;
 			var co = new GitSharp.Core.WorkDirCheckout(db, new DirectoryInfo(working_directory), index, tree);
 			co.checkout();
+		}
+
+		/// <summary>
+		/// Check out the given paths into the working directory. Files in the working directory will be overwritten.
+		/// <para/>
+		/// See also <seealso cref="Index.Checkout(string[])"/> to check out paths from the index.
+		/// </summary>
+		/// <param name="paths">Relative paths of the files to check out.</param>
+		/// Throws a lot of IO and Security related exceptions.
+		public void Checkout(params string[] paths)
+		{
+			var tree = this.Tree;
+			if (tree == null || !tree.IsTree)
+				throw new InvalidOperationException("This commit doesn't seem to have a valid tree.");
+			foreach (string path in paths)
+			{
+				var blob = tree[path] as Leaf;
+				if (blob == null)
+					throw new ArgumentException("The given path does not exist in this commit: " + path);
+				var filename = Path.Combine(_repo.WorkingDirectory, path);
+				new FileInfo(filename).Directory.Mkdirs();
+				File.WriteAllBytes(filename, blob.RawData); // todo: hmm, what is with file permissions and other file attributes?
+			}
 		}
 
 		/// <summary>

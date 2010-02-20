@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2008, Caytchen 
  * Copyright (C) 2008, Rolenun
@@ -39,8 +39,7 @@
 
 using System;
 using System.Collections.Generic;
-
-
+using GitSharp.Commands;
 using NDesk.Options;
 
 

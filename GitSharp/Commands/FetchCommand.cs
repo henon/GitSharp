@@ -36,56 +36,53 @@
  */
 
 using System.Collections.Generic;
-using GitSharp.Commands;
 using GitSharp.Core;
 using GitSharp.Core.Transport;
 
-namespace GitSharp
+namespace GitSharp.Commands
 {
+	public class FetchCommand : AbstractFetchCommand
+	{
+		public string Remote { get; set; }
+		public List<RefSpec> RefSpecs { get; set; }
+		public ProgressMonitor ProgressMonitor { get; set; }
 
-    public class FetchCommand : AbstractFetchCommand
-    {
-        public string Remote { get; set; }
-        public List<RefSpec> RefSpecs { get; set; }
-        public ProgressMonitor ProgressMonitor { get; set; }
+		public bool? Prune { get; set; }
+		public bool DryRun { get; set; }
+		public bool? Thin { get; set; }
 
-        public bool? Prune { get; set; }
-        public bool DryRun { get; set; }
-        public bool? Thin { get; set; }
+		public FetchResult Result
+		{
+			get; private set;
+		}
 
-        public FetchResult Result
-        {
-            get; private set;
-        }
+		public FetchCommand()
+		{
+			Remote = Constants.DEFAULT_REMOTE_NAME;
+			ProgressMonitor = NullProgressMonitor.Instance;
+		}
 
-        public FetchCommand()
-        {
-            Remote = Constants.DEFAULT_REMOTE_NAME;
-            ProgressMonitor = NullProgressMonitor.Instance;
-        }
+		public override void Execute()
+		{
+			Transport tn = Transport.Open(Repository._internal_repo, Remote);
 
-        public override void Execute()
-        {
-            Transport tn = Transport.Open(Repository._internal_repo, Remote);
+			if (Prune != null)
+				tn.RemoveDeletedRefs = Prune.Value;
+			if (Thin != null)
+				tn.FetchThin = Thin.Value;
+			tn.DryRun = DryRun;
 
-            if (Prune != null)
-                tn.RemoveDeletedRefs = Prune.Value;
-            if (Thin != null)
-                tn.FetchThin = Thin.Value;
-            tn.DryRun = DryRun;
-
-            try
-            {
-                Result = tn.fetch(ProgressMonitor, RefSpecs);
-                if (Result.TrackingRefUpdates.Count == 0)
-                    return;
-            }
-            finally
-            {
-                tn.Dispose();
-            }
-            showFetchResult(tn, Result);
-        }
-    }
-
+			try
+			{
+				Result = tn.fetch(ProgressMonitor, RefSpecs);
+				if (Result.TrackingRefUpdates.Count == 0)
+					return;
+			}
+			finally
+			{
+				tn.Dispose();
+			}
+			showFetchResult(tn, Result);
+		}
+	}
 }

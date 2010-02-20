@@ -140,9 +140,7 @@ namespace GitSharp.Core.Transport
                 }
 
                 pckOut.WriteString(sb.ToString());
-                rru.Status = _sentCommand
-                                 ? RemoteRefUpdate.UpdateStatus.AWAITING_REPORT
-                                 : RemoteRefUpdate.UpdateStatus.OK;
+                rru.Status = RemoteRefUpdate.UpdateStatus.AWAITING_REPORT;
                 if (!rru.IsDelete)
                     _shouldWritePack = true;
             }

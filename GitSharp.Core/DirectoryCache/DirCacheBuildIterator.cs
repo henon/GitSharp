@@ -131,7 +131,7 @@ namespace GitSharp.Core.DirectoryCache
             }
             else
             {
-            	_builder.add(CurrentEntry);
+            	_builder.keep(Pointer, 1);
             }
             next(1);
         }

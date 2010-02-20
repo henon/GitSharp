@@ -36,10 +36,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.Core;
 using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.Tests;
 using NUnit.Framework;
 
-namespace GitSharp.Core.Tests.DirectoryCache
+namespace GitSharp.Tests.GitSharp.Core.DirectoryCache
 {
     [TestFixture]
     public class DirCacheTreeTest : RepositoryTestCase
@@ -85,7 +87,10 @@ namespace GitSharp.Core.Tests.DirectoryCache
             string[] paths = { "a.", "a/b", "a/c", "a/d", "a0b" };
             DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
             for (int i = 0; i < paths.Length; i++)
+            {
                 ents[i] = new DirCacheEntry(paths[i]);
+                ents[i].setFileMode(FileMode.RegularFile);
+            }
             int aFirst = 1;
             int aLast = 3;
 
@@ -122,7 +127,10 @@ namespace GitSharp.Core.Tests.DirectoryCache
             string[] paths = { "a.", "a/b", "a/c/e", "a/c/f", "a/d", "a0b" };
             DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
             for (int i = 0; i < paths.Length; i++)
+            {
                 ents[i] = new DirCacheEntry(paths[i]);
+                ents[i].setFileMode(FileMode.RegularFile);
+            }
             int aFirst = 1;
             int aLast = 4;
             int acFirst = 2;
@@ -180,6 +188,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
             for (int i = 0; i < paths.Length; i++)
             {
                 ents[i] = new DirCacheEntry(paths[i]);
+                ents[i].setFileMode(FileMode.RegularFile);
             }
 
             DirCacheBuilder b = dc.builder();

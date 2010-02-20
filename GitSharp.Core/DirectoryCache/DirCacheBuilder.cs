@@ -88,6 +88,12 @@ namespace GitSharp.Core.DirectoryCache
         /// <param name="newEntry">the new entry to add.</param>
         public void add(DirCacheEntry newEntry)
         {
+            if (newEntry.getRawMode() == 0)
+            {
+                throw new ArgumentException("FileMode not set for path "
+                    + newEntry.getPathString());
+            }
+
             BeforeAdd(newEntry);
             FastAdd(newEntry);
         }
@@ -193,11 +199,6 @@ namespace GitSharp.Core.DirectoryCache
 
         private void BeforeAdd(DirCacheEntry newEntry)
         {
-            if (FileMode.Tree.Equals(newEntry.getRawMode()))
-            {
-                throw Bad(newEntry, "Adding subtree not allowed");
-            }
-
             if (_sorted && EntryCnt > 0)
             {
                 DirCacheEntry lastEntry = Entries[EntryCnt - 1];

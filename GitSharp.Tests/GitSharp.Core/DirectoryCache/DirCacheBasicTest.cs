@@ -36,12 +36,15 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 using System.IO;
 using GitSharp.Core;
 using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.Tests;
 using NUnit.Framework;
+using FileMode = GitSharp.Core.FileMode;
 
-namespace GitSharp.Core.Tests.DirectoryCache
+namespace GitSharp.Tests.GitSharp.Core.DirectoryCache
 {
     [TestFixture]
     public class DirCacheBasicTest : RepositoryTestCase
@@ -191,6 +194,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
             for (int i = 0; i < paths.Length; i++)
             {
                 ents[i] = new DirCacheEntry(paths[i]);
+                ents[i].setFileMode(FileMode.RegularFile);
             }
 
             DirCacheBuilder b = dc.builder();
@@ -215,3 +219,5 @@ namespace GitSharp.Core.Tests.DirectoryCache
         }
     }
 }
+
+

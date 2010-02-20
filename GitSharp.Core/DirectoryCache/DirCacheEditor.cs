@@ -140,8 +140,20 @@ namespace GitSharp.Core.DirectoryCache
                     continue;
                 }
 
-                DirCacheEntry ent = missing ? new DirCacheEntry(e.Path) : Cache.getEntry(eIdx);
-                e.Apply(ent);
+                DirCacheEntry ent;
+                if (missing)
+                {
+                    ent = new DirCacheEntry(e.Path);
+                    e.Apply(ent);
+                    if (ent.getRawMode() == 0)
+                        throw new ArgumentException("FileMode not set"
+                                + " for path " + ent.getPathString());
+                }
+                else
+                {
+                    ent = Cache.getEntry(eIdx);
+                    e.Apply(ent);
+                }
                 FastAdd(ent);
             }
 

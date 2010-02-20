@@ -36,11 +36,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 using System.Text;
+using GitSharp.Core;
 using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.Tests;
 using NUnit.Framework;
 
-namespace GitSharp.Core.Tests.DirectoryCache
+namespace GitSharp.Tests.GitSharp.Core.DirectoryCache
 {
     [TestFixture]
     public class DirCacheLargePathTest : RepositoryTestCase
@@ -82,6 +85,10 @@ namespace GitSharp.Core.Tests.DirectoryCache
 
             DirCacheEntry longEnt = new DirCacheEntry(longPath);
             DirCacheEntry shortEnt = new DirCacheEntry(shortPath);
+
+            longEnt.setFileMode(FileMode.RegularFile);
+            shortEnt.setFileMode(FileMode.RegularFile);
+
             Assert.AreEqual(longPath, longEnt.getPathString());
             Assert.AreEqual(shortPath, shortEnt.getPathString());
 
@@ -113,3 +120,5 @@ namespace GitSharp.Core.Tests.DirectoryCache
         }
     }
 }
+
+

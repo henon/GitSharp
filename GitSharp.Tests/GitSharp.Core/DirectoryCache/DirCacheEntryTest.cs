@@ -134,6 +134,50 @@ namespace GitSharp.Tests.GitSharp.Core.DirectoryCache
                 Assert.AreEqual("Invalid stage 4 for path a", err.Message);
             }
         }
+
+        [Test]
+        public void testSetFileMode()
+        {
+            DirCacheEntry e = new DirCacheEntry("a");
+
+            Assert.AreEqual(0, e.getRawMode());
+
+            e.setFileMode(FileMode.RegularFile);
+            Assert.AreSame(FileMode.RegularFile, e.getFileMode());
+            Assert.AreEqual(FileMode.RegularFile.Bits, e.getRawMode());
+
+            e.setFileMode(FileMode.ExecutableFile);
+            Assert.AreSame(FileMode.ExecutableFile, e.getFileMode());
+            Assert.AreEqual(FileMode.ExecutableFile.Bits, e.getRawMode());
+
+            e.setFileMode(FileMode.Symlink);
+            Assert.AreSame(FileMode.Symlink, e.getFileMode());
+            Assert.AreEqual(FileMode.Symlink.Bits, e.getRawMode());
+
+            e.setFileMode(FileMode.GitLink);
+            Assert.AreSame(FileMode.GitLink, e.getFileMode());
+            Assert.AreEqual(FileMode.GitLink.Bits, e.getRawMode());
+
+            try
+            {
+                e.setFileMode(FileMode.Missing);
+                Assert.Fail("incorrectly accepted FileMode.MISSING");
+            }
+            catch (ArgumentException err)
+            {
+                Assert.AreEqual("Invalid mode 0 for path a", err.Message);
+            }
+
+            try
+            {
+                e.setFileMode(FileMode.Tree);
+                Assert.Fail("incorrectly accepted FileMode.TREE");
+            }
+            catch (ArgumentException err)
+            {
+                Assert.AreEqual("Invalid mode " + FileMode.TYPE_TREE + " for path a", err.Message);
+            }
+        }
     }
 }
 

@@ -36,12 +36,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+using System;
 using System.IO;
 using GitSharp.Core;
 using GitSharp.Core.DirectoryCache;
+using GitSharp.Core.Tests;
 using NUnit.Framework;
+using FileMode = GitSharp.Core.FileMode;
 
-namespace GitSharp.Core.Tests.DirectoryCache
+namespace GitSharp.Tests.GitSharp.Core.DirectoryCache
 {
     [TestFixture]
     public class DirCacheBuilderTest : RepositoryTestCase
@@ -62,10 +66,29 @@ namespace GitSharp.Core.Tests.DirectoryCache
         }
 
         [Test]
+        public void testBuildRejectsUnsetFileMode()
+        {
+            DirCache dc = DirCache.newInCore();
+            DirCacheBuilder b = dc.builder();
+            Assert.IsNotNull(b);
+
+            DirCacheEntry e = new DirCacheEntry("a");
+            Assert.AreEqual(0, e.getRawMode());
+            try
+            {
+                b.add(e);
+            }
+            catch (ArgumentException err)
+            {
+                Assert.AreEqual("FileMode not set for path a", err.Message);
+            }
+        }
+
+        [Test]
         public void testBuildOneFile_FinishWriteCommit()
         {
             string path = "a-File-path";
-            var mode = GitSharp.Core.FileMode.RegularFile;
+            var mode = FileMode.RegularFile;
             long lastModified = 1218123387057L;
             int Length = 1342;
             DirCacheEntry entOrig;
@@ -114,7 +137,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
         public void testBuildOneFile_Commit()
         {
             string path = "a-File-path";
-            var mode = GitSharp.Core.FileMode.RegularFile;
+            var mode = FileMode.RegularFile;
             long lastModified = 1218123387057L;
             int Length = 1342;
             DirCacheEntry entOrig;
@@ -166,6 +189,7 @@ namespace GitSharp.Core.Tests.DirectoryCache
             Assert.IsNotNull(b);
 
             DirCacheEntry entOrig = new DirCacheEntry(path);
+            entOrig.setFileMode(FileMode.RegularFile);
             Assert.AreNotSame(path, entOrig.getPathString());
             Assert.AreEqual(path, entOrig.getPathString());
             b.add(entOrig);
@@ -192,7 +216,10 @@ namespace GitSharp.Core.Tests.DirectoryCache
             string[] paths = { "a.", "a.b", "a/b", "a0b" };
             DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
             for (int i = 0; i < paths.Length; i++)
+            {
                 ents[i] = new DirCacheEntry(paths[i]);
+                ents[i].setFileMode(FileMode.RegularFile);
+            }
 
             DirCacheBuilder b = dc.builder();
             for (int i = 0; i < ents.Length; i++)
@@ -217,7 +244,10 @@ namespace GitSharp.Core.Tests.DirectoryCache
             string[] paths = { "a.", "a.b", "a/b", "a0b" };
             DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
             for (int i = 0; i < paths.Length; i++)
+            {
                 ents[i] = new DirCacheEntry(paths[i]);
+                ents[i].setFileMode(FileMode.RegularFile);
+            }
 
             DirCacheBuilder b = dc.builder();
             for (int i = ents.Length - 1; i >= 0; i--)
@@ -242,7 +272,10 @@ namespace GitSharp.Core.Tests.DirectoryCache
             string[] paths = { "a.", "a.b", "a/b", "a0b" };
             DirCacheEntry[] ents = new DirCacheEntry[paths.Length];
             for (int i = 0; i < paths.Length; i++)
+            {
                 ents[i] = new DirCacheEntry(paths[i]);
+                ents[i].setFileMode(FileMode.RegularFile);
+            }
             {
                 DirCacheBuilder b = dc.builder();
                 for (int i = 0; i < ents.Length; i++)
@@ -265,3 +298,5 @@ namespace GitSharp.Core.Tests.DirectoryCache
         }
     }
 }
+
+

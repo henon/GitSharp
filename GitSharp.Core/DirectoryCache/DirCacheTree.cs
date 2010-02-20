@@ -416,10 +416,6 @@ namespace GitSharp.Core.DirectoryCache
                 }
 
                 FileMode mode = e.getFileMode();
-                if ((int)mode.ObjectType == Constants.OBJ_BAD)
-                {
-                    throw new InvalidOperationException("Entry \"" + e.getPathString() + "\" has incorrect mode set up.");
-                }
 
                 size += mode.copyToLength();
                 size += ep.Length - pathOffset;

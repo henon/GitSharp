@@ -376,6 +376,14 @@ namespace GitSharp.Core.DirectoryCache
         ///	<param name="mode"> The new mode constant. </param>
         public void setFileMode(FileMode mode)
         {
+            switch (mode.Bits & FileMode.TYPE_MASK)
+            {
+                case FileMode.TYPE_MISSING:
+                case FileMode.TYPE_TREE:
+                    throw new ArgumentException("Invalid mode " + mode.Bits
+                        + " for path " + getPathString());
+            }
+
             NB.encodeInt32(_info, _infoOffset + PMode, mode.Bits);
         }
 

@@ -47,22 +47,22 @@ using NUnit.Framework;
 namespace GitSharp.Core.Tests
 {
     [TestFixture]
-	public class RepositoryCacheTest : RepositoryTestCase
-	{
+    public class RepositoryCacheTest : RepositoryTestCase
+    {
         [Test]
-		public void testNonBareFileKey()
-		{
+        public void testNonBareFileKey()
+        {
             DirectoryInfo gitdir = db.Directory;
             DirectoryInfo parent = gitdir.Parent;
-			Assert.IsNotNull(parent);
+            Assert.IsNotNull(parent);
 
             var other = new DirectoryInfo(Path.Combine(parent.FullName, "notagit"));
-			Assert.AreEqual(gitdir, RepositoryCache.FileKey.exact(gitdir).getFile());
-			Assert.AreEqual(parent, RepositoryCache.FileKey.exact(parent).getFile());
-			Assert.AreEqual(other, RepositoryCache.FileKey.exact(other).getFile());
+            Assert.AreEqual(gitdir, RepositoryCache.FileKey.exact(gitdir).getFile());
+            Assert.AreEqual(parent, RepositoryCache.FileKey.exact(parent).getFile());
+            Assert.AreEqual(other, RepositoryCache.FileKey.exact(other).getFile());
 
             Assert.AreEqual(gitdir, RepositoryCache.FileKey.lenient(gitdir).getFile());
-            
+
             // Test was "fixed" because DirectoryInfo.Equals() compares two different references
             Assert.AreEqual(gitdir.FullName, RepositoryCache.FileKey.lenient(parent).getFile().FullName);
             Assert.AreEqual(other, RepositoryCache.FileKey.lenient(other).getFile());
@@ -74,7 +74,7 @@ namespace GitSharp.Core.Tests
             Core.Repository bare = createBareRepository();
             DirectoryInfo gitdir = bare.Directory;
             DirectoryInfo parent = gitdir.Parent;
-			Assert.IsNotNull(parent);
+            Assert.IsNotNull(parent);
 
             string name = gitdir.Name;
             Assert.IsTrue(name.EndsWith(Constants.DOT_GIT_EXT));
@@ -91,11 +91,11 @@ namespace GitSharp.Core.Tests
         [Test]
         public void testFileKeyOpenExisting()
         {
-			using (Core.Repository r = new RepositoryCache.FileKey(db.Directory).open(true))
-			{
-			    Assert.IsNotNull(r);
-			    Assert.AreEqual(db.Directory.FullName, r.Directory.FullName);
-			}
+            using (Core.Repository r = new RepositoryCache.FileKey(db.Directory).open(true))
+            {
+                Assert.IsNotNull(r);
+                Assert.AreEqual(db.Directory.FullName, r.Directory.FullName);
+            }
 
             using (Core.Repository r = new RepositoryCache.FileKey(db.Directory).open(false))
             {

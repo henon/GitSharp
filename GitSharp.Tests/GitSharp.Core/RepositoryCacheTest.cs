@@ -109,24 +109,23 @@ namespace GitSharp.Core.Tests
         {
             DirectoryInfo gitdir;
 
-            using (Core.Repository n = createBareRepository())
+            using (Repository n = createBareRepository())
             {
                 gitdir = n.Directory;
             }
 
             recursiveDelete(gitdir);
-            gitdir.Refresh();
-            Assert.IsFalse(gitdir.Exists);
+            Assert.IsFalse(Directory.Exists(gitdir.FullName)); // changed from gitdir.Exist in order to work around a Mono bug (cf. DirectoryInfoExist() test method below).
 
             var e =
                 AssertHelper.Throws<RepositoryNotFoundException>(() => new RepositoryCache.FileKey(gitdir).open(true));
             Assert.AreEqual("repository not found: " + gitdir, e.Message);
 
-            using (Core.Repository o = new RepositoryCache.FileKey(gitdir).open(false))
+            using (Repository o = new RepositoryCache.FileKey(gitdir).open(false))
             {
                 Assert.IsNotNull(o);
                 Assert.AreEqual(gitdir.FullName, o.Directory.FullName);
-                Assert.IsFalse(gitdir.Exists);
+                Assert.IsFalse(Directory.Exists(gitdir.FullName));  // changed from gitdir.Exist in order to work around a Mono bug (cf. DirectoryInfoExist() test method below).
             }
         }
 

@@ -131,6 +131,37 @@ namespace GitSharp.Core.Tests
         }
 
         [Test]
+        public void FileInfoExists()
+        {
+            string filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            File.WriteAllText(filePath, "test");
+
+            var file = new FileInfo(filePath);
+            Assert.IsTrue(file.Exists, "File does not exist.");
+
+            File.Delete(filePath);
+
+            file.Refresh();
+            Assert.IsFalse(file.Exists, "File exists.");
+        }
+
+        [Test]
+        public void DirectoryInfoExists()
+        {
+            string dirPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(dirPath);
+
+            var dir = new DirectoryInfo(dirPath);
+            Assert.IsTrue(dir.Exists, "Directory does not exist.");
+
+            Directory.Delete(dirPath);
+
+            dir.Refresh();
+            Assert.IsFalse(dir.Exists, "Directory exists.");
+        }
+
+
+        [Test]
         public void testCacheRegisterOpen()
         {
             DirectoryInfo dir = db.Directory;

@@ -179,6 +179,8 @@
     <Compile Include="GitSharp.Core\Util\ExtensionsFixture.cs" />
     <Compile Include="GitSharp.Core\Util\IntListTest.cs" />
     <Compile Include="GitSharp.Core\Util\LocalDiskRepositoryTestCase.cs" />
+    <Compile Include="GitSharp.Core\Util\Md5MessageDigestTest.cs" />
+    <Compile Include="GitSharp.Core\Util\Sha1MessageDigestTest.cs" />
     <Compile Include="GitSharp.Core\Util\MockFileBasedConfig.cs" />
     <Compile Include="GitSharp.Core\Util\MockSystemReader.cs" />
     <Compile Include="GitSharp.Core\Util\NBTests.cs" />

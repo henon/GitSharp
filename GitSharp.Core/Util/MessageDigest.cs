@@ -38,48 +38,100 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
 using System.IO;
 
 namespace GitSharp.Core.Util
 {
-    public class MessageDigest : ICloneable, IDisposable
+    public class Sha1MessageDigest : MessageDigest
     {
-        private MemoryStream _stream;
-
-        private MessageDigest()
+        public Sha1MessageDigest()
         {
-            this.Reset();
         }
 
-        private MessageDigest(byte[] buffer)
+        public Sha1MessageDigest(byte[] buffer)
+            : base(buffer)
         {
-            _stream = new MemoryStream(buffer, true);
         }
 
         #region ICloneable Members
 
-        public object Clone()
+        public override object Clone()
         {
-            return new MessageDigest(this._stream.ToArray());
+            return new Sha1MessageDigest(Buffer);
         }
 
         #endregion
 
+        public override byte[] Digest(byte[] input)
+        {
+            return new SHA1Managed().ComputeHash(input);
+        }
+    }
+
+    public class Md5MessageDigest : MessageDigest
+    {
+        public Md5MessageDigest()
+        {
+        }
+
+        public Md5MessageDigest(byte[] buffer)
+            : base(buffer)
+        {
+        }
+
+        public override byte[] Digest(byte[] input)
+        {
+            return new MD5CryptoServiceProvider().ComputeHash(input);
+        }
+
+        public override object Clone()
+        {
+            return new Md5MessageDigest(Buffer);
+        }
+    }
+
+    public abstract class MessageDigest : ICloneable, IDisposable
+    {
+        private MemoryStream _stream;
+
+        protected MessageDigest(byte[] buffer)
+        {
+            _stream = new MemoryStream(buffer, true);
+        }
+
+        protected MessageDigest()
+        {
+            Reset();
+        }
+
+        public static MessageDigest getInstance(string algorithm)
+        {
+            switch (algorithm.ToLower())
+            {
+                case "sha-1":
+                    return new Sha1MessageDigest();
+                case "md5":
+                    return new Md5MessageDigest();
+                default:
+                    throw new NotSupportedException(string.Format("The requested algorithm \"{0}\" is not supported.", algorithm));
+            }
+        }
+
+        protected byte[] Buffer
+        {
+            get { return _stream.ToArray(); }
+        }
+
         public byte[] Digest()
         {
-            var ret = new SHA1Managed().ComputeHash(_stream.ToArray());
+            var ret = Digest(_stream.ToArray());
             Reset();
             return ret;
         }
 
-        public byte[] Digest(byte[] input)
-        {
-            return new SHA1Managed().ComputeHash(input);
-        }
+        public abstract byte[] Digest(byte[] input);
+        public abstract object Clone();
 
         public void Reset()
         {
@@ -101,20 +153,11 @@ namespace GitSharp.Core.Util
             _stream.Write(input, index, count);
         }
 
-		public void Dispose ()
-		{
-			_stream.Dispose();
-		}
-
-        public static MessageDigest getInstance(string algorithm)
+        public void Dispose()
         {
-            switch (algorithm.ToLower())
-            {
-                case "sha-1":
-                    return new MessageDigest();
-                default:
-                    throw new NotSupportedException(string.Format("The requested algorithm \"{0}\" is not supported.", algorithm));
-            }
+            _stream.Dispose();
         }
     }
+
+
 }

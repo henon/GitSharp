@@ -35,51 +35,65 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 using System;
 
-namespace GitSharp.Core.Util
+namespace GitSharp.Core.Util.JavaHelper
 {
-    public class AtomicReference<T>
+    public abstract class AtomicValue<T> : AtomicReference<T>
     {
-        private T _reference;
         private readonly Object _locker = new Object();
 
-        public AtomicReference()
+        protected AtomicValue(T init) : base(init)
         {
         }
 
-        public AtomicReference(T reference)
+        protected AtomicValue()
         {
-            _reference = reference;
         }
 
-        public bool compareAndSet(T expected, T update)
+        /// <summary>
+        /// Atomically add the given value to current value.
+        /// </summary>
+        /// <param name="delta">the value to add</param>
+        /// <returns>the updated value</returns>
+        public T addAndGet(T delta)
         {
             lock (_locker)
             {
-                if ((Equals(_reference, default(T)) && Equals(expected, default(T))) || (!Equals(_reference, default(T)) && _reference.Equals(expected)))
-                {
-                    _reference = update;
-                    return true;
-                }
-                return false;
+                T oldValue = get();
+                T newValue = InnerAdd(oldValue, delta);
+                set(newValue);
+                return newValue;
             }
         }
 
-        public void set(T update)
+        /// <summary>
+        /// Atomically increment by one the current value.
+        /// </summary>
+        /// <returns>the updated value</returns>
+        public T incrementAndGet()
         {
             lock (_locker)
             {
-                _reference = update;
+                return addAndGet(One);
             }
         }
 
-        public T get()
+        /// <summary>
+        /// Atomically decrement by one the current value.
+        /// </summary>
+        /// <returns>the updated value</returns>
+        public T decrementAndGet()
         {
             lock (_locker)
             {
-                return _reference;
+                return addAndGet(MinusOne);
             }
         }
+
+        protected abstract T InnerAdd(T value, T delta);
+        protected abstract T One { get; }
+        protected abstract T MinusOne { get; }
     }
 }

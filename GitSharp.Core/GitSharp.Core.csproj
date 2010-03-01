@@ -152,7 +152,7 @@
     <Compile Include="UserConfig.cs" />
     <Compile Include="UserInfoProvider.cs" />
     <Compile Include="Util\ArrayExtensions.cs" />
-    <Compile Include="Util\AtomicReference.cs" />
+    <Compile Include="Util\JavaHelper\AtomicReference.cs" />
     <Compile Include="Util\BigEndianBitConverter.cs" />
     <Compile Include="Util\JavaHelper\Charset.cs" />
     <Compile Include="Util\DateTime.cs" />
@@ -215,7 +215,7 @@
     <Compile Include="TreeVisitorWithCurrentDirectory.cs" />
     <Compile Include="UnpackedObjectLoader.cs" />
     <Compile Include="Util\AtomicReferenceArray.cs" />
-    <Compile Include="Util\AtomicValue.cs" />
+    <Compile Include="Util\JavaHelper\AtomicValue.cs" />
     <Compile Include="Util\IO.cs" />
     <Compile Include="Util\LittleEndianBitConverter.cs" />
     <Compile Include="Util\Stream.cs" />
@@ -403,7 +403,7 @@
     <Compile Include="SymbolicRef.cs" />
     <Compile Include="Util\JavaHelper\Properties.cs" />
     <Compile Include="Transport\RefFilter.cs" />
-    <Compile Include="Util\AtomicInteger.cs" />
+    <Compile Include="Util\JavaHelper\AtomicInteger.cs" />
     <Compile Include="Util\LongList.cs" />
     <Compile Include="Util\RefList.cs" />
     <Compile Include="Util\RefMap.cs" />

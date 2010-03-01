@@ -42,6 +42,7 @@ using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using GitSharp.Core.Util;
+using GitSharp.Core.Util.JavaHelper;
 
 namespace GitSharp.Core
 {
@@ -133,7 +134,7 @@ namespace GitSharp.Core
 		/// <summary>
 		/// Access clock for loose LRU.
 		/// </summary>
-		private readonly AtomicValue<long> _clock;
+		private readonly AtomicLong _clock;
 
 		/// <summary>
 		/// Hash bucket directory; entries are chained below.
@@ -178,7 +179,7 @@ namespace GitSharp.Core
 
 			queue = new Queue();
 			_tableSize = tSize;
-			_clock = new AtomicValue<long>(1);
+			_clock = new AtomicLong(1);
 			_table = new AtomicReferenceArray<Entry<V>>(_tableSize);
 			_locks = new LockTarget[lockCount];
 

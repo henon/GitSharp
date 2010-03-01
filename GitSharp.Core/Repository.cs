@@ -46,6 +46,7 @@ using System.IO;
 using System.Threading;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.Util;
+using GitSharp.Core.Util.JavaHelper;
 using Tamir.SharpSsh.java.util;
 
 namespace GitSharp.Core

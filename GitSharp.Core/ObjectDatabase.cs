@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
@@ -40,6 +40,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Core.Util;
+using GitSharp.Core.Util.JavaHelper;
 
 namespace GitSharp.Core
 {

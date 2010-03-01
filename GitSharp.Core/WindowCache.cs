@@ -40,6 +40,7 @@
 using System;
 using System.Collections;
 using GitSharp.Core.Util;
+using GitSharp.Core.Util.JavaHelper;
 
 namespace GitSharp.Core
 {
@@ -60,8 +61,8 @@ namespace GitSharp.Core
         private readonly bool _memoryMap;
         private readonly int _windowSizeShift;
         private readonly int _windowSize;
-        private readonly AtomicValue<int> _openFiles;
-        private readonly AtomicValue<long> _openBytes;
+        private readonly AtomicInteger _openFiles;
+        private readonly AtomicLong _openBytes;
 
         static WindowCache()
         {
@@ -175,8 +176,8 @@ namespace GitSharp.Core
             _windowSizeShift = Bits(cfg.PackedGitWindowSize);
             _windowSize = 1 << _windowSizeShift;
 
-            _openFiles = new AtomicValue<int>(0);
-            _openBytes = new AtomicValue<long>(0);
+            _openFiles = new AtomicInteger();
+            _openBytes = new AtomicLong();
 
             if (_maxFiles < 1)
             {
@@ -208,8 +209,7 @@ namespace GitSharp.Core
         {
             if (pack.beginWindowCache())
             {
-                int c = _openFiles.get();
-                _openFiles.compareAndSet(c, c+1);
+                _openFiles.incrementAndGet();
             }
             try
             {
@@ -230,23 +230,20 @@ namespace GitSharp.Core
         internal override WindowRef createRef(PackFile p, long o, ByteWindow v)
         {
             var @ref = new WindowRef(p, o, v, queue);
-            long c = _openBytes.get();
-            _openBytes.compareAndSet(c, c + @ref.Size);
+            _openBytes.addAndGet(@ref.Size);
             return @ref;
         }
 
         internal override void clear(WindowRef @ref)
         {
-            long c = _openBytes.get();
-            _openBytes.compareAndSet(c, c - @ref.Size);
+            _openBytes.addAndGet(-@ref.Size);
             Close(@ref.pack);
         }
 
         private void Close(PackFile pack)
         {
             if (!pack.endWindowCache()) return;
-            int c = _openFiles.get();
-            _openFiles.compareAndSet(c, c - 1);
+            _openFiles.decrementAndGet();
         }
 
         internal override bool isFull()

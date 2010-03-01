@@ -47,6 +47,7 @@ using System.Threading;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.Util;
+using GitSharp.Core.Util.JavaHelper;
 using File = System.IO.File;
 
 namespace GitSharp.Core

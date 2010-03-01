@@ -156,7 +156,7 @@ namespace GitSharp.Core.Tests
             Directory.Delete(dirPath);
 
             dir.Refresh();
-            AssertHelper.IgnoreOn(AssertedPlatform.Mono, () => { var doesExist = dir.Exists; }, "As identified by nestalk, DirectoryInfo.Refresh() doesn't seem to refresh the Exist property.");
+            AssertHelper.IgnoreOn(AssertedPlatform.Mono, () => { var doesExist = dir.Exists; }, "As identified by nestalk (http://bugzilla.novell.com/show_bug.cgi?id=582667), DirectoryInfo.Refresh() doesn't seem to refresh the Exist property.");
             Assert.IsFalse(dir.Exists, "Directory exists.");
         }
 

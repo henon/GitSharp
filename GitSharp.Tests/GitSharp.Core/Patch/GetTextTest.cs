@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Google Inc.
  * Copyright (C) 2009, Gil Ran <gilrun@gmail.com>
  *
@@ -39,6 +39,7 @@
 using GitSharp.Core;
 using GitSharp.Core.Patch;
 using GitSharp.Core.Util;
+using GitSharp.Core.Util.JavaHelper;
 using NUnit.Framework;
 using System.IO;
 using System.Text;

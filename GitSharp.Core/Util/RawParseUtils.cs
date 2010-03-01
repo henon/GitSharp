@@ -41,7 +41,7 @@
 
 using System;
 using System.Text;
-using System.Linq;
+using GitSharp.Core.Util.JavaHelper;
 
 namespace GitSharp.Core.Util
 {

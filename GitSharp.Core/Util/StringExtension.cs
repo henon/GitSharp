@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -37,6 +37,7 @@
 
 using System;
 using System.Text;
+using GitSharp.Core.Util.JavaHelper;
 
 namespace GitSharp.Core.Util
 {

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Google Inc.
  *
  * All rights reserved.
@@ -40,6 +40,7 @@ using System.Text;
 using GitSharp.Core;
 using GitSharp.Core.Transport;
 using GitSharp.Core.Util;
+using GitSharp.Core.Util.JavaHelper;
 using NUnit.Framework;
 
 namespace GitSharp.Core.Tests.Transport

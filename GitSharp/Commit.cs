@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -42,7 +42,7 @@ using System.Text;
 using GitSharp.Core;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.Util;
-
+using GitSharp.Core.Util.JavaHelper;
 using ObjectId = GitSharp.Core.ObjectId;
 using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;

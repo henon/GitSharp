@@ -41,6 +41,7 @@ using System.IO;
 using System.Linq;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.Util;
+using GitSharp.Core.Util.JavaHelper;
 
 namespace GitSharp.Core.DirectoryCache
 {

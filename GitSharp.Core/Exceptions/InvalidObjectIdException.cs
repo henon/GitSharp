@@ -42,6 +42,7 @@ using System;
 using System.Text;
 using System.Runtime.Serialization;
 using GitSharp.Core.Util;
+using GitSharp.Core.Util.JavaHelper;
 
 namespace GitSharp.Core.Exceptions
 {

@@ -44,6 +44,7 @@ using System.Text;
 using GitSharp.Core.Exceptions;
 using System.IO;
 using GitSharp.Core.Util;
+using GitSharp.Core.Util.JavaHelper;
 
 namespace GitSharp.Core
 {

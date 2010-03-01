@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -40,6 +40,7 @@
 using System.IO;
 using GitSharp.Core;
 using GitSharp.Core.Tests.Util;
+using GitSharp.Core.Util.JavaHelper;
 using NUnit.Framework;
 using GitSharp.Core.Util;
 

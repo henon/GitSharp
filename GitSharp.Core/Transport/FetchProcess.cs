@@ -151,7 +151,7 @@ namespace GitSharp.Core.Transport
                 {
                     // There are more tags that we want to follow, but
                     // not all were asked for on the initial request.
-                    foreach(ObjectId key in _askFor.Keys)
+                    foreach (ObjectId key in _askFor.Keys)
                     {
                         _have.Add(key);
                     }
@@ -181,7 +181,7 @@ namespace GitSharp.Core.Transport
                 closeConnection();
             }
 
-            using( RevWalk.RevWalk walk = new RevWalk.RevWalk(_transport.Local))
+            using (RevWalk.RevWalk walk = new RevWalk.RevWalk(_transport.Local))
             {
                 if (_transport.RemoveDeletedRefs)
                 {
@@ -297,52 +297,52 @@ namespace GitSharp.Core.Transport
         }
 
         private void updateFETCH_HEAD(FetchResult result)
-		{
-			using(LockFile @lock = new LockFile(new FileInfo(Path.Combine(_transport.Local.Directory.FullName, "FETCH_HEAD"))))
-			{
-				if (@lock.Lock())
-				{
-					using (StreamWriter w = new StreamWriter(@lock.GetOutputStream()))
-					{
-						foreach (FetchHeadRecord h in _fetchHeadUpdates)
-						{
-							h.Write(w);
-							result.Add(h);
-						}
-					}
+        {
+            using (LockFile @lock = new LockFile(new FileInfo(Path.Combine(_transport.Local.Directory.FullName, "FETCH_HEAD"))))
+            {
+                if (@lock.Lock())
+                {
+                    using (StreamWriter w = new StreamWriter(@lock.GetOutputStream()))
+                    {
+                        foreach (FetchHeadRecord h in _fetchHeadUpdates)
+                        {
+                            h.Write(w);
+                            result.Add(h);
+                        }
+                    }
 
-					@lock.Commit();
-				}
-			}
-		}
+                    @lock.Commit();
+                }
+            }
+        }
 
         private bool askForIsComplete()
-		{
-			try
-			{
-				using(ObjectWalk ow = new ObjectWalk(_transport.Local))
-				{
-					foreach (ObjectId want in _askFor.Keys)
-					{
-					    ow.markStart(ow.parseAny(want));
-					}
-					foreach (Ref @ref in _transport.Local.getAllRefs().Values)
-					{
-					    ow.markUninteresting(ow.parseAny(@ref.ObjectId));
-					}
-					ow.checkConnectivity();
-					return true;
-				}
-			}
-			catch (MissingObjectException)
-			{
-				return false;
-			}
-			catch (IOException e)
-			{
-				throw new TransportException("Unable to check connectivity.", e);
-			}
-		}
+        {
+            try
+            {
+                using (ObjectWalk ow = new ObjectWalk(_transport.Local))
+                {
+                    foreach (ObjectId want in _askFor.Keys)
+                    {
+                        ow.markStart(ow.parseAny(want));
+                    }
+                    foreach (Ref @ref in _transport.Local.getAllRefs().Values)
+                    {
+                        ow.markUninteresting(ow.parseAny(@ref.ObjectId));
+                    }
+                    ow.checkConnectivity();
+                    return true;
+                }
+            }
+            catch (MissingObjectException)
+            {
+                return false;
+            }
+            catch (IOException e)
+            {
+                throw new TransportException("Unable to check connectivity.", e);
+            }
+        }
 
         private void expandWildcard(RefSpec spec, HashSet<Ref> matched)
         {
@@ -450,24 +450,24 @@ namespace GitSharp.Core.Transport
         }
 
         private void deleteStaleTrackingRefs(FetchResult result, RevWalk.RevWalk walk)
-		{
-			Repository db = _transport.Local;
-			foreach (Ref @ref in db.getAllRefs().Values)
-			{
-				string refname = @ref.Name;
-				foreach (RefSpec spec in _toFetch)
-				{
-					if (spec.MatchDestination(refname))
-					{
-						RefSpec s = spec.ExpandFromDestination(refname);
-						if (result.GetAdvertisedRef(s.Source) == null)
-						{
-							deleteTrackingRef(result, db, walk, s, @ref);
-						}
-					}
-				}
-			}
-		}
+        {
+            Repository db = _transport.Local;
+            foreach (Ref @ref in db.getAllRefs().Values)
+            {
+                string refname = @ref.Name;
+                foreach (RefSpec spec in _toFetch)
+                {
+                    if (spec.MatchDestination(refname))
+                    {
+                        RefSpec s = spec.ExpandFromDestination(refname);
+                        if (result.GetAdvertisedRef(s.Source) == null)
+                        {
+                            deleteTrackingRef(result, db, walk, s, @ref);
+                        }
+                    }
+                }
+            }
+        }
 
         private void deleteTrackingRef(FetchResult result, Repository db, RevWalk.RevWalk walk, RefSpec spec, Ref localRef)
         {

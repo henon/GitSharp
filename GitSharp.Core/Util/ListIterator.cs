@@ -86,6 +86,53 @@ namespace GitSharp.Core.Util
         }
     }
 
+    public class LinkedListIterator<T> : IIterator<T>
+    {
+        private readonly LinkedList<T> _list;
+        private bool _canRemove;
+        private LinkedListNode<T> _current;
+        private LinkedListNode<T> _next;
+
+        public LinkedListIterator(LinkedList<T> list)
+        {
+            _list = list;
+            _current = null;
+            _next = list.First;
+        }
+
+        public virtual bool hasNext()
+        {
+            if (_next == null)
+                return false;
+
+            return true;
+        }
+
+        public virtual T next()
+        {
+            if (!hasNext())
+                throw new IndexOutOfRangeException();
+            
+            _current = _next;
+
+            _next = _current == null ? null : _current.Next;
+
+            _canRemove = true;
+            return _current.Value;
+        }
+
+        public virtual void remove()
+        {
+            if (_current == null)
+                throw new IndexOutOfRangeException();
+            if (!_canRemove)
+                throw new InvalidOperationException("Can not remove (twice), call next first!");
+            _canRemove = false; // <--- remove can only be called once per call to next
+            _list.Remove(_current);
+            _current = null;
+        }
+    }
+
     public interface IIterable<T> : IEnumerable<T>
     {
         IteratorBase<T> iterator();
@@ -173,7 +220,14 @@ namespace GitSharp.Core.Util
         }
     }
 
-    public abstract class IteratorBase<T> : IEnumerator<T>
+    public interface IIterator<T>
+    {
+        bool hasNext();
+        T next();
+        void remove();
+    }
+
+    public abstract class IteratorBase<T> : IEnumerator<T>, IIterator<T>
     {
         private T _current;
 

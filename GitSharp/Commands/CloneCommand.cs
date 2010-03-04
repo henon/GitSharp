@@ -227,7 +227,7 @@ namespace GitSharp.Commands
 
 		private FetchResult runFetch()
 		{
-			Transport tn = Transport.Open(Repository._internal_repo, OriginName);
+			Transport tn = Transport.open(Repository._internal_repo, OriginName);
 			FetchResult r;
 
 			try
@@ -252,7 +252,7 @@ namespace GitSharp.Commands
 			List<GitSharp.Core.Ref> availableRefs = new List<GitSharp.Core.Ref>();
 			GitSharp.Core.Ref head = null;
 
-			foreach (GitSharp.Core.Ref r in result.AdvertisedRefs.Values)
+			foreach (GitSharp.Core.Ref r in result.AdvertisedRefs)
 			{
 				string n = r.Name;
 				if (!n.StartsWith(Constants.R_HEADS))

@@ -4,7 +4,7 @@ namespace GitSharp.Core.Util
 {
     public static class IListUtil
     {
-        public static bool isEmpty<T>(this IList<T> l)
+        public static bool isEmpty<T>(this ICollection<T> l)
         {
 			if (l == null)
 				throw new System.ArgumentNullException ("l");

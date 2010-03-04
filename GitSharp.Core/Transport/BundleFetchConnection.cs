@@ -48,18 +48,22 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
+    /// <summary>
+    /// Fetch connection for bundle based classes. It used by
+    /// instances of <see cref="ITransportBundle"/>
+    /// </summary>
     public class BundleFetchConnection : BaseFetchConnection
     {
-        private readonly Transport transport;
-        private Stream bin;
-        private readonly List<ObjectId> prereqs = new List<ObjectId>();
-        private string lockMessage;
-        private PackLock packLock;
+        private readonly Transport _transport;
+        private Stream _bin;
+        private readonly IDictionary<ObjectId, string> _prereqs = new Dictionary<ObjectId, string>();
+        private string _lockMessage;
+        private PackLock _packLock;
 
         public BundleFetchConnection(Transport transportBundle, Stream src)
         {
-            transport = transportBundle;
-            bin = new BufferedStream(src, IndexPack.BUFFER_SIZE);
+            _transport = transportBundle;
+            _bin = new BufferedStream(src, IndexPack.BUFFER_SIZE);
             try
             {
                 switch (readSignature())
@@ -69,7 +73,7 @@ namespace GitSharp.Core.Transport
                         break;
 
                     default:
-                        throw new TransportException(transport.Uri, "not a bundle");
+                        throw new TransportException(_transport.Uri, "not a bundle");
                 }
             }
             catch (TransportException)
@@ -80,7 +84,12 @@ namespace GitSharp.Core.Transport
             catch (IOException err)
             {
                 Close();
-                throw new TransportException(transport.Uri, err.Message, err);
+                throw new TransportException(_transport.Uri, err.Message, err);
+            }
+            catch (Exception err)
+            {
+                Close();
+                throw new TransportException(_transport.Uri, err.Message, err);
             }
         }
 
@@ -89,14 +98,14 @@ namespace GitSharp.Core.Transport
             string rev = readLine(new byte[1024]);
             if (TransportBundleConstants.V2_BUNDLE_SIGNATURE.Equals(rev))
                 return 2;
-            throw new TransportException(transport.Uri, "not a bundle");
+            throw new TransportException(_transport.Uri, "not a bundle");
         }
 
         private void readBundleV2()
         {
             byte[] hdrbuf = new byte[1024];
-            Dictionary<string, Ref> avail = new Dictionary<string, Ref>();
-            for (;;)
+            var avail = new Dictionary<string, Ref>();
+            for (; ; )
             {
                 string line = readLine(hdrbuf);
                 if (line.Length == 0)
@@ -104,38 +113,41 @@ namespace GitSharp.Core.Transport
 
                 if (line[0] == '-')
                 {
-                    prereqs.Add(ObjectId.FromString(line.Slice(1, 41)));
+                    ObjectId id = ObjectId.FromString(line.Slice(1, 41));
+                    String shortDesc = null;
+                    if (line.Length > 42)
+                        shortDesc = line.Substring(42);
+                    _prereqs.put(id, shortDesc);
                     continue;
                 }
 
                 string name = line.Slice(41, line.Length);
-                ObjectId id = ObjectId.FromString(line.Slice(0, 40));
-                Ref prior = new Unpeeled(Storage.Network, name, id);
-                if (avail.ContainsKey(name))
+                ObjectId id2 = ObjectId.FromString(line.Slice(0, 40));
+                Ref prior = avail.put(name, new Unpeeled(Storage.Network, name, id2));
+                if (prior != null)
                 {
                     throw duplicateAdvertisement(name);
                 }
-                avail.Add(name, prior);
             }
             available(avail);
         }
 
         private PackProtocolException duplicateAdvertisement(string name)
         {
-            return new PackProtocolException(transport.Uri, "duplicate advertisement of " + name);
+            return new PackProtocolException(_transport.Uri, "duplicate advertisement of " + name);
         }
 
         private string readLine(byte[] hdrbuf)
         {
-            long mark = bin.Position;
-            int cnt = bin.Read(hdrbuf, 0, hdrbuf.Length);
+            long mark = _bin.Position;
+            int cnt = _bin.Read(hdrbuf, 0, hdrbuf.Length);
             int lf = 0;
             while (lf < cnt && hdrbuf[lf] != '\n')
                 lf++;
-            bin.Position = mark;
-            IO.skipFully(bin, lf);
+            _bin.Position = mark;
+            IO.skipFully(_bin, lf);
             if (lf < cnt && hdrbuf[lf] == '\n')
-                IO.skipFully(bin, 1);
+                IO.skipFully(_bin, 1);
 
             return RawParseUtils.decode(Constants.CHARSET, hdrbuf, 0, lf);
         }
@@ -145,139 +157,154 @@ namespace GitSharp.Core.Transport
             get { return false; }
         }
 
-        protected override void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        protected override void doFetch(ProgressMonitor monitor, ICollection<Ref> want, IList<ObjectId> have)
         {
             verifyPrerequisites();
             try
             {
                 IndexPack ip = newIndexPack();
                 ip.index(monitor);
-                packLock = ip.renameAndOpenPack(lockMessage);
+                _packLock = ip.renameAndOpenPack(_lockMessage);
             }
             catch (IOException err)
             {
-                Dispose();
-                throw new TransportException(transport.Uri, err.Message, err);
+                Close();
+                throw new TransportException(_transport.Uri, err.Message, err);
+            }
+            catch (Exception err)
+            {
+                Close();
+                throw new TransportException(_transport.Uri, err.Message, err);
             }
         }
 
         public override void SetPackLockMessage(string message)
         {
-            lockMessage = message;
+            _lockMessage = message;
         }
 
         public override List<PackLock> PackLocks
         {
-            get { return new List<PackLock> { packLock }; }
+            get 
+            {
+                if (_packLock != null)
+                {
+                    return new List<PackLock> { _packLock };
+                } 
+
+                return new List<PackLock>();
+            }
         }
 
         private IndexPack newIndexPack()
         {
-            IndexPack ip = IndexPack.Create(transport.Local, bin);
+            IndexPack ip = IndexPack.Create(_transport.Local, _bin);
             ip.setFixThin(true);
-            ip.setObjectChecking(transport.CheckFetchedObjects);
+            ip.setObjectChecking(_transport.CheckFetchedObjects);
             return ip;
         }
 
         private void verifyPrerequisites()
         {
-            if (prereqs.isEmpty())
+            if (_prereqs.isEmpty())
                 return;
 
-            using(RevWalk.RevWalk rw = new RevWalk.RevWalk(transport.Local))
+            using (var rw = new RevWalk.RevWalk(_transport.Local))
             {
-	            RevFlag PREREQ = rw.newFlag("PREREQ");
-	            RevFlag SEEN = rw.newFlag("SEEN");
-	
-	            List<ObjectId> missing = new List<ObjectId>();
-	            List<RevObject> commits = new List<RevObject>();
-	            foreach (ObjectId p in prereqs)
-	            {
-	                try
-	                {
-	                    RevCommit c = rw.parseCommit(p);
-	                    if (!c.has(PREREQ))
-	                    {
-	                        c.add(PREREQ);
-	                        commits.Add(c);
-	                    }
-	                }
-	                catch (MissingObjectException)
-	                {
-	                    missing.Add(p);
-	                }
-	                catch (IOException err)
-	                {
-	                    throw new TransportException(transport.Uri, "Cannot Read commit " + p.Name, err);
-	                }
-	            }
-	
-	            if (!missing.isEmpty())
-	                throw new MissingBundlePrerequisiteException(transport.Uri, missing);
-	
-	            foreach (Ref r in transport.Local.getAllRefs().Values)
-	            {
-	                try
-	                {
-	                    rw.markStart(rw.parseCommit(r.ObjectId));
-	                }
-	                catch (IOException)
-	                {
-	                }
-	            }
-	
-	            int remaining = commits.Count;
-	            try
-	            {
-	                RevCommit c;
-	                while ((c = rw.next()) != null)
-	                {
-	                    if (c.has(PREREQ))
-	                    {
-	                        c.add(SEEN);
-	                        if (--remaining == 0)
-	                            break;
-	                    }
-	                }
-	            }
-	            catch (IOException err)
-	            {
-	                throw new TransportException(transport.Uri, "Cannot Read object", err);
-	            }
-	
-	            if (remaining > 0)
-	            {
-	                foreach (RevObject o in commits)
-	                {
-	                    if (!o.has(SEEN))
-	                        missing.Add(o);
-	                }
-	                throw new MissingBundlePrerequisiteException(transport.Uri, missing);
-	            }
+                RevFlag PREREQ = rw.newFlag("PREREQ");
+                RevFlag SEEN = rw.newFlag("SEEN");
+
+                IDictionary<ObjectId, string> missing = new Dictionary<ObjectId, string>();
+                var commits = new List<RevObject>();
+                foreach (KeyValuePair<ObjectId, string> e in _prereqs)
+                {
+                    ObjectId p = e.Key;
+                    try
+                    {
+                        RevCommit c = rw.parseCommit(p);
+                        if (!c.has(PREREQ))
+                        {
+                            c.add(PREREQ);
+                            commits.Add(c);
+                        }
+                    }
+                    catch (MissingObjectException)
+                    {
+                        missing.put(p, e.Value);
+                    }
+                    catch (IOException err)
+                    {
+                        throw new TransportException(_transport.Uri, "Cannot Read commit " + p.Name, err);
+                    }
+                }
+
+                if (!missing.isEmpty())
+                    throw new MissingBundlePrerequisiteException(_transport.Uri, missing);
+
+                foreach (Ref r in _transport.Local.getAllRefs().Values)
+                {
+                    try
+                    {
+                        rw.markStart(rw.parseCommit(r.ObjectId));
+                    }
+                    catch (IOException)
+                    {
+                        // If we cannot read the value of the ref skip it.
+                    }
+                }
+
+                int remaining = commits.Count;
+                try
+                {
+                    RevCommit c;
+                    while ((c = rw.next()) != null)
+                    {
+                        if (c.has(PREREQ))
+                        {
+                            c.add(SEEN);
+                            if (--remaining == 0)
+                                break;
+                        }
+                    }
+                }
+                catch (IOException err)
+                {
+                    throw new TransportException(_transport.Uri, "Cannot Read object", err);
+                }
+
+                if (remaining > 0)
+                {
+                    foreach (RevObject o in commits)
+                    {
+                        if (!o.has(SEEN))
+                            missing.put(o, _prereqs.get(o));
+                    }
+                    throw new MissingBundlePrerequisiteException(_transport.Uri, missing);
+                }
             }
         }
 
         public override void Close()
         {
-            if (bin != null)
+            if (_bin != null)
             {
                 try
                 {
-                    bin.Dispose();
+                    _bin.Dispose();
                 }
                 catch (IOException)
                 {
-
+                    // Ignore close failures.
                 }
                 finally
                 {
-                    bin = null;
+                    _bin = null;
                 }
             }
 #if DEBUG
-                GC.SuppressFinalize(this); // Disarm lock-release checker
+            GC.SuppressFinalize(this); // Disarm lock-release checker
 #endif
-			}
+        }
 
 #if DEBUG
         // A debug mode warning if the type has not been disposed properly

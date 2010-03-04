@@ -100,7 +100,7 @@ namespace GitSharp.Core.Transport
             _walk.carry(ADVERTISED);
         }
 
-        public void Fetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        public void Fetch(ProgressMonitor monitor, ICollection<Ref> want, IList<ObjectId> have)
         {
             markStartedOperation();
             doFetch(monitor, want, have);
@@ -126,7 +126,7 @@ namespace GitSharp.Core.Transport
             get { return _packLock != null ? new List<PackLock> { _packLock } : new List<PackLock>(); }
         }
 
-        protected void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        protected void doFetch(ProgressMonitor monitor, ICollection<Ref> want, IList<ObjectId> have)
         {
             try
             {

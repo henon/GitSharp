@@ -45,7 +45,7 @@ namespace GitSharp.Core.Transport
     {
         private readonly FileInfo _bundle;
 
-        public static bool CanHandle(URIish uri)
+        public static bool canHandle(URIish uri)
         {
 			if (uri == null)
 				throw new ArgumentNullException ("uri");

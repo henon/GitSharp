@@ -287,7 +287,7 @@ namespace GitSharp.Core.Util
             return true;
         }
 
-        public void close()
+        public virtual void close()
         {
             if (_overflow != null)
             {

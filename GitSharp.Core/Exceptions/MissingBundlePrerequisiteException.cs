@@ -42,28 +42,43 @@ using System.Runtime.Serialization;
 
 namespace GitSharp.Core.Exceptions
 {
+    /// <summary>
+    /// Indicates a base/common object was required, but is not found.
+    /// </summary>
 	[Serializable]
     public class MissingBundlePrerequisiteException : TransportException
     {
-        private static string format(List<ObjectId> ids)
+        private static long serialVersionUID = 1L;
+
+        private static string format(IDictionary<ObjectId, string> missingCommits)
         {
-            StringBuilder r = new StringBuilder();
+            var r = new StringBuilder();
             r.Append("missing prerequisite commits:");
-            foreach (ObjectId p in ids)
+            foreach (KeyValuePair<ObjectId, string> e in missingCommits)
             {
                 r.Append("\n  ");
-                r.Append(p.Name);
+                r.Append(e.Key.Name);
+                if (e.Value != null)
+                    r.Append(" ").Append(e.Value);
             }
             return r.ToString();
         }
 
-        public MissingBundlePrerequisiteException(URIish uri, List<ObjectId> ids)
-        : base(uri, format(ids))
+        /// <summary>
+        /// Constructs a MissingBundlePrerequisiteException for a set of objects.
+        /// </summary>
+        /// <param name="uri">URI used for transport</param>
+        /// <param name="missingCommits">
+        /// the Map of the base/common object(s) we don't have. Keys are
+        /// ids of the missing objects and values are short descriptions.
+        /// </param>
+        public MissingBundlePrerequisiteException(URIish uri, IDictionary<ObjectId, string> missingCommits)
+        : base(uri, format(missingCommits))
         {
         }
-		
-        public MissingBundlePrerequisiteException(URIish uri, List<ObjectId> ids, Exception inner)
-        : base(uri, format(ids), inner)
+
+        public MissingBundlePrerequisiteException(URIish uri, IDictionary<ObjectId, string> missingCommits, Exception inner)
+        : base(uri, format(missingCommits), inner)
         {
         }
 

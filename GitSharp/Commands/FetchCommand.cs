@@ -64,7 +64,7 @@ namespace GitSharp.Commands
 
 		public override void Execute()
 		{
-			Transport tn = Transport.Open(Repository._internal_repo, Remote);
+			Transport tn = Transport.open(Repository._internal_repo, Remote);
 
 			if (Prune != null)
 				tn.RemoveDeletedRefs = Prune.Value;

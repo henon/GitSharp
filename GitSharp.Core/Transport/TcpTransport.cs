@@ -49,11 +49,11 @@ namespace GitSharp.Core.Transport
         /// </summary>
         /// <param name="local">
         /// The repository this instance will fetch into, or push out of.
-		/// This must be the repository passed to <see cref="Transport.Open(Repository, URIish)"/>.
+		/// This must be the repository passed to <see cref="Transport.open(Repository, URIish)"/>.
         /// </param>
         /// <param name="uri">
         /// the URI used to access the remote repository. This must be the
-		/// URI passed to <see cref="Transport.Open(Repository, URIish)"/>.
+		/// URI passed to <see cref="Transport.open(Repository, URIish)"/>.
         /// </param>
         protected TcpTransport(Repository local, URIish uri)
             : base(local, uri)

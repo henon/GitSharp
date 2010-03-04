@@ -40,15 +40,19 @@ using System.Collections.Generic;
 
 namespace GitSharp.Core.Transport
 {
-
+    /// <summary>
+    /// Final status after a successful fetch from a remote repository.
+    /// </summary>
     public class FetchResult : OperationResult
     {
-        private readonly List<FetchHeadRecord> forMerge = new List<FetchHeadRecord>();
+        private readonly IList<FetchHeadRecord> _forMerge = new List<FetchHeadRecord>();
 
         public void Add(FetchHeadRecord r)
         {
             if (!r.NotForMerge)
-                forMerge.Add(r);
+            {
+                _forMerge.Add(r);
+            }
         }
     }
 

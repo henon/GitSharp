@@ -46,6 +46,20 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
+    /// <summary>
+    /// Transport over HTTP and FTP protocols.
+    /// <para/>
+    /// If the transport is using HTTP and the remote HTTP service is Git-aware
+    /// (speaks the "smart-http protocol") this client will automatically take
+    /// advantage of the additional Git-specific HTTP extensions. If the remote
+    /// service does not support these extensions, the client will degrade to direct
+    /// file fetching.
+    /// <para/>
+    /// If the remote (server side) repository does not have the specialized Git
+    /// support, object files are retrieved directly through standard HTTP GET (or
+    /// binary FTP GET) requests. This make it easy to serve a Git repository through
+    /// a standard web host provider that does not offer specific support for Git.
+    /// </summary>
     public class TransportHttp : HttpTransport, IWalkTransport
     {
         public static bool canHandle(URIish uri)
@@ -99,6 +113,7 @@ namespace GitSharp.Core.Transport
 
         public override void close()
         {
+            // No explicit connections are maintained.
         }
 
         #region Nested Types
@@ -125,6 +140,7 @@ namespace GitSharp.Core.Transport
                 }
                 catch (FileNotFoundException)
                 {
+                    // Fall through.
                 }
 
                 try
@@ -133,6 +149,7 @@ namespace GitSharp.Core.Transport
                 }
                 catch (FileNotFoundException)
                 {
+                    // Fall through.
                 }
 
                 return null;
@@ -177,22 +194,33 @@ namespace GitSharp.Core.Transport
                 var u = new Uri(@base, path);
 
                 var c = (HttpWebRequest)WebRequest.Create(u);
-                var response = (HttpWebResponse)c.GetResponse();
 
-                switch (response.StatusCode)
+                try
                 {
-                    case HttpStatusCode.OK:
-                        return response.GetResponseStream();
+                    var response = (HttpWebResponse)c.GetResponse();
+                    switch (response.StatusCode)
+                    {
+                        case HttpStatusCode.OK:
+                            return response.GetResponseStream();
 
-                    case HttpStatusCode.NotFound:
-                        throw new FileNotFoundException(u.ToString());
-
-                    default:
-                        throw new IOException(u + ": " + response.StatusDescription);
+                        default:
+                            throw new IOException(u + ": " + response.StatusDescription);
+                    }
                 }
+                catch (WebException e)
+                {
+                    var response2 = ((HttpWebResponse)(e.Response));
+                    if (response2.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        throw new FileNotFoundException(u.ToString());
+                    }
+
+                    throw new IOException(u + ": " + response2.StatusDescription, e);
+                }
+
             }
 
-            public Dictionary<string, Ref> ReadAdvertisedRefs()
+            public IDictionary<string, Ref> ReadAdvertisedRefs()
             {
                 try
                 {
@@ -214,9 +242,9 @@ namespace GitSharp.Core.Transport
                 }
             }
 
-            private static Dictionary<string, Ref> ReadAdvertisedImpl(TextReader br)
+            private static IDictionary<string, Ref> ReadAdvertisedImpl(TextReader br)
             {
-                var avail = new Dictionary<string, Ref>();
+                var avail = new SortedDictionary<string, Ref>();
 
                 while (true)
                 {
@@ -234,7 +262,7 @@ namespace GitSharp.Core.Transport
                     if (name.EndsWith("^{}"))
                     {
                         name = name.Slice(0, name.Length - 3);
-                        Ref prior = avail[name];
+                        Ref prior = avail.get(name);
                         if (prior == null)
                         {
                             throw OutOfOrderAdvertisement(name);
@@ -245,20 +273,12 @@ namespace GitSharp.Core.Transport
                             throw DuplicateAdvertisement(name + "^{}");
                         }
 
-                        avail.Add(name, new PeeledTag(Storage.Network, name, prior.ObjectId, id));
+                        avail.put(name, new PeeledTag(Storage.Network, name, prior.ObjectId, id));
                     }
                     else
                     {
-                        Ref prior = null;
-                        if (avail.ContainsKey(name))
-                        {
-                            prior = avail[name];
-                            avail[name] = new PeeledNonTag(Storage.Network, name, id);
-                        }
-                        else
-                        {
-                            avail.Add(name, new PeeledNonTag(Storage.Network, name, id));
-                        }
+                        Ref prior = avail.put(name, new PeeledNonTag(Storage.Network, name, id));
+
                         if (prior != null)
                         {
                             throw DuplicateAdvertisement(name);
@@ -285,6 +305,7 @@ namespace GitSharp.Core.Transport
 
             public override void close()
             {
+                // We do not maintain persistent connections.
             }
         }
 

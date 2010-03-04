@@ -39,15 +39,24 @@ using System.Collections.Generic;
 
 namespace GitSharp.Core.Transport
 {
-
+    /// <summary>
+    /// Base helper class for fetch connection implementations. Provides some common
+    /// typical structures and methods used during fetch connection.
+    /// <para/>
+    /// Implementors of fetch over pack-based protocols should consider using
+    /// <see cref="BasePackFetchConnection"/> instead.
+    /// </summary>
     public abstract class BaseFetchConnection : BaseConnection, IFetchConnection
     {
-        public void Fetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have)
+        public void Fetch(ProgressMonitor monitor, ICollection<Ref> want, IList<ObjectId> have)
         {
             markStartedOperation();
             doFetch(monitor, want, have);
         }
-
+        /// <summary>
+        /// Default implementation of <see cref="IFetchConnection.DidFetchIncludeTags"/> -
+        /// returning false.
+        /// </summary>
         public bool DidFetchIncludeTags
         {
             get
@@ -60,7 +69,14 @@ namespace GitSharp.Core.Transport
         public abstract List<PackLock> PackLocks { get; }
         public abstract void SetPackLockMessage(string message);
 
-        protected abstract void doFetch(ProgressMonitor monitor, List<Ref> want, List<ObjectId> have);
+        /// <summary>
+        /// Implementation of <see cref="Fetch"/>
+        /// without checking for multiple fetch.
+        /// </summary>
+        /// <param name="monitor">as in <see cref="Fetch"/></param>
+        /// <param name="want">as in <see cref="Fetch"/></param>
+        /// <param name="have">as in <see cref="Fetch"/></param>
+        protected abstract void doFetch(ProgressMonitor monitor, ICollection<Ref> want, IList<ObjectId> have);
     }
 
 }

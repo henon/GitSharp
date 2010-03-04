@@ -150,7 +150,7 @@ namespace GitSharp.Core.Transport
             IDictionary<string, RemoteRefUpdate> result = new Dictionary<string, RemoteRefUpdate>();
             foreach (RemoteRefUpdate rru in _toPush.Values)
             {
-                Ref advertisedRef = _connection.Refs.Find(x => x.Name == rru.RemoteName);
+                Ref advertisedRef = _connection.GetRef(rru.RemoteName);
                 ObjectId advertisedOld = (advertisedRef == null ? ObjectId.ZeroId : advertisedRef.ObjectId);
 
                 if (rru.NewObjectId.Equals(advertisedOld))

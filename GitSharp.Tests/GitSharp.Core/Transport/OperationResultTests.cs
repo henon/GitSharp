@@ -25,7 +25,12 @@ namespace GitSharp.Core.Tests.Transport
             var result = new PushResult();
             var r = new Unpeeled(null, "ref", ObjectId.ZeroId);
 
-            result.AdvertisedRefs.Add("ref", r);
+            var refs = result.AdvertisedRefs;
+            var advRefs = refs.ToDictionary(@ref => @ref.Name);
+            
+            advRefs.Add("ref", r);
+
+            result.SetAdvertisedRefs(result.URI, advRefs);
 
             Assert.AreEqual(r, result.GetAdvertisedRef("ref"));
         }

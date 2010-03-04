@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  *
@@ -40,14 +40,57 @@ using System.Collections.Generic;
 
 namespace GitSharp.Core.Transport
 {
-
+    /// <summary>
+    /// Represent connection for operation on a remote repository.
+    /// <para/>
+    /// Currently all operations on remote repository (fetch and push) provide
+    /// information about remote refs. Every connection is able to be closed and
+    /// should be closed - this is a connection client responsibility.
+    /// </summary>
     public interface IConnection
     {
-        Dictionary<string, Ref> RefsMap { get; }
-        List<Ref> Refs { get; }
+        /// <summary>
+        /// Get the complete map of refs advertised as available for fetching or
+        /// pushing.
+        /// <para/>
+        /// Returns available/advertised refs: map of refname to ref. Never null. Not
+        /// modifiable. The collection can be empty if the remote side has no
+        /// refs (it is an empty/newly created repository).
+        /// </summary>
+        IDictionary<string, Ref> RefsMap { get; }
 
+        /// <summary>
+        /// Get the complete list of refs advertised as available for fetching or
+        /// pushing.
+        /// <para/>
+        /// The returned refs may appear in any order. If the caller needs these to
+        /// be sorted, they should be copied into a new array or List and then sorted
+        /// by the caller as necessary.
+        /// 
+        /// Returns available/advertised refs. Never null. Not modifiable. The
+        /// collection can be empty if the remote side has no refs (it is an
+        /// empty/newly created repository).
+        /// </summary>
+        ICollection<Ref> Refs { get; }
+
+        /// <summary>
+        /// Get a single advertised ref by name.
+        /// <para/>
+        /// The name supplied should be valid ref name. To get a peeled value for a
+        /// ref (aka <code>refs/tags/v1.0^{}</code>) use the base name (without
+        /// the <code>^{}</code> suffix) and look at the peeled object id.
+        /// </summary>
+        /// <param name="name">name of the ref to obtain.</param>
+        /// <returns>the requested ref; null if the remote did not advertise this ref.</returns>
         Ref GetRef(string name);
+
+        /// <summary>
+        /// Close any resources used by this connection.
+        /// <para/>
+        /// If the remote repository is contacted by a network socket this method
+        /// must close that network socket, disconnecting the two peers. If the
+        /// remote repository is actually local (same system) this method must close
+        /// any open file handles used to read the "remote" repository.</summary>
         void Close();
     }
-
 }

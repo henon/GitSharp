@@ -94,7 +94,7 @@ namespace GitSharp.Core.Transport
             sw.Write(name);
             sw.Write("' of ");
             sw.Write(SourceURI);
-            sw.WriteLine();
+            sw.Write('\n');
         }
     }
 }

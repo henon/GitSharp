@@ -41,6 +41,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.RevWalk;
 
@@ -91,8 +92,7 @@ namespace GitSharp.Core.Transport
             {
                 foreach (PackLock @lock in _packLocks)
                 {
-                    if (@lock != null)
-                        @lock.Unlock();
+                    @lock.Unlock();
                 }
             }
         }
@@ -220,7 +220,7 @@ namespace GitSharp.Core.Transport
             try
             {
                 _connection.SetPackLockMessage("jgit fetch " + _transport.Uri);
-                _connection.Fetch(monitor, new List<Ref>(_askFor.Values), new List<ObjectId>(_have));
+                _connection.Fetch(monitor, _askFor.Values, _have.ToList());
             }
             finally
             {
@@ -259,24 +259,17 @@ namespace GitSharp.Core.Transport
             IDictionary<ObjectId, Ref> avail = new Dictionary<ObjectId, Ref>();
             foreach (Ref r in _connection.Refs)
             {
-                if (avail.ContainsKey(r.ObjectId))
-                {
-                    avail[r.ObjectId] = r;
-                }
-                else
-                {
-                    avail.Add(r.ObjectId, r);
-                }
+                avail.put(r.getObjectId(), r);
             }
 
             ICollection<Ref> wants = new List<Ref>(_askFor.Values);
             _askFor.Clear();
             foreach (Ref want in wants)
             {
-                Ref newRef = avail[want.ObjectId];
+                Ref newRef = avail.get(want.ObjectId);
                 if (newRef != null)
                 {
-                    _askFor.Add(newRef.ObjectId, newRef);
+                    _askFor.put(newRef.ObjectId, newRef);
                 }
                 else
                 {
@@ -288,12 +281,12 @@ namespace GitSharp.Core.Transport
 
         private void removeTrackingRefUpdate(ObjectId want)
         {
-            _localUpdates.RemoveAll(x => x.NewObjectId == want);
+            _localUpdates.RemoveAll(x => x.NewObjectId.Equals(want));
         }
 
         private void removeFetchHeadRecord(ObjectId want)
         {
-            _fetchHeadUpdates.RemoveAll(x => x.NewValue == want);
+            _fetchHeadUpdates.RemoveAll(x => x.NewValue.Equals(want));
         }
 
         private void updateFETCH_HEAD(FetchResult result)
@@ -355,7 +348,7 @@ namespace GitSharp.Core.Transport
 
         private void expandSingle(RefSpec spec, HashSet<Ref> matched)
         {
-            Ref src = _connection.Refs.Find(x => x.Name == spec.Source);
+            Ref src = _connection.GetRef(spec.Source);
             if (src == null)
             {
                 throw new TransportException("Remote does not have " + spec.Source + " available for fetch.");
@@ -383,7 +376,7 @@ namespace GitSharp.Core.Transport
                     continue;
                 }
 
-                Ref local = haveRefs.ContainsKey(r.Name) ? haveRefs[r.Name] : null;
+                Ref local = haveRefs.get(r.Name);
                 if (local != null)
                 {
                     if (!r.ObjectId.Equals(local.ObjectId))
@@ -406,7 +399,7 @@ namespace GitSharp.Core.Transport
             {
                 if (!isTag(r))
                     continue;
-                Ref local = haveRefs[r.Name];
+                Ref local = haveRefs.get(r.Name);
                 if (local == null || !r.ObjectId.Equals(local.ObjectId))
                     wantTag(r);
             }
@@ -438,7 +431,7 @@ namespace GitSharp.Core.Transport
                 }
             }
 
-            _askFor.Add(newId, src);
+            _askFor.put(newId, src);
 
             FetchHeadRecord fhr = new FetchHeadRecord(newId, spec.Destination != null, src.Name, _transport.Uri);
             _fetchHeadUpdates.Add(fhr);

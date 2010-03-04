@@ -43,47 +43,63 @@ using GitSharp.Core.Exceptions;
 
 namespace GitSharp.Core.Transport
 {
+    /// <summary>
+    /// Base helper class for implementing operations connections.
+    /// </summary>
     public abstract class BaseConnection : IConnection, IDisposable
     {
-        private Dictionary<string, Ref> advertisedRefs = new Dictionary<string, Ref>();
-        private bool startedOperation;
+        private IDictionary<string, Ref> _advertisedRefs = new Dictionary<string, Ref>();
+        private bool _startedOperation;
 
-        public Dictionary<string, Ref> RefsMap
+        public IDictionary<string, Ref> RefsMap
         {
             get
             {
-                return advertisedRefs;
+                return _advertisedRefs;
             }
         }
 
-        public List<Ref> Refs
+        public ICollection<Ref> Refs
         {
             get
             {
-                return new List<Ref>(advertisedRefs.Values);
+                return _advertisedRefs.Values;
             }
         }
 
         public Ref GetRef(string name)
         {
-            if (advertisedRefs.ContainsKey(name))
-                return advertisedRefs[name];
+            return _advertisedRefs.get(name);
 
-            return null;
         }
 
         public abstract void Close();
 
-        public void available(Dictionary<string, Ref> all)
+        /// <summary>
+        /// Denote the list of refs available on the remote repository.
+        /// <para/>
+        /// Implementors should invoke this method once they have obtained the refs
+        /// that are available from the remote repository.
+        /// </summary>
+        /// <param name="all">
+        /// the complete list of refs the remote has to offer. This map
+        /// will be wrapped in an unmodifiable way to protect it, but it
+        /// does not get copied.
+        /// </param>
+        public void available(IDictionary<string, Ref> all)
         {
-            advertisedRefs = all;
+            _advertisedRefs = all;
         }
 
+        /// <summary>
+        /// Helper method for ensuring one-operation per connection. Check whether
+        /// operation was already marked as started, and mark it as started.
+        /// </summary>
         protected void markStartedOperation()
         {
-            if (startedOperation)
+            if (_startedOperation)
                 throw new TransportException("Only one operation call per connection is supported.");
-            startedOperation = true;
+            _startedOperation = true;
         }
 
         public virtual void Dispose()

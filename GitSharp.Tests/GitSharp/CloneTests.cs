@@ -42,28 +42,28 @@ using GitSharp.Core.Tests;
 
 namespace GitSharp.API.Tests
 {
-	[TestFixture]
-	public class CloneTests : RepositoryTestCase
-	{
-		[Test]
-		public void Check_cloned_bare_repo()
-		{
-			Assert.Ignore("This test has not been implemented yet.");
-		}
+    [TestFixture]
+    public class CloneTests : RepositoryTestCase
+    {
+        [Test]
+        public void Check_cloned_bare_repo()
+        {
+            Assert.Ignore("This test has not been implemented yet.");
+        }
 
-		[Test]
-		public void Check_cloned_repo()
-		{
-			string toPath = Path.Combine(trash.FullName, "test");
-			string fromUrl = "git://github.com/henon/test.git";
+        [Test]
+        public void Check_cloned_repo()
+        {
+            string toPath = Path.Combine(trash.FullName, "test");
+            string fromUrl = "git://github.com/henon/test.git";
 
-			using (Repository repo = Git.Clone(fromUrl, toPath))
-			{
-				Assert.IsTrue(Repository.IsValid(repo.Directory));
-				//Verify content is in the proper location
-				var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
-				Assert.IsTrue(new FileInfo(readme).Exists);
-			}
-		}
-	}
+            using (Repository repo = Git.Clone(fromUrl, toPath))
+            {
+                Assert.IsTrue(Repository.IsValid(repo.Directory));
+                //Verify content is in the proper location
+                var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
+                Assert.IsTrue(new FileInfo(readme).Exists);
+            }
+        }
+    }
 }

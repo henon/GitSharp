@@ -360,6 +360,7 @@ namespace Git.Tests.CLI
 		}
 
 		[Test]
+        [Ignore]
 		public void HaltProcessing ()
 		{
 			var p = new OptionSet () {

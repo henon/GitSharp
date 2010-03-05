@@ -3,7 +3,7 @@
 
   <property name="build.config" value="debug" overwrite="false" />
   <property name="build.platform" value="${nant.settings.currentframework}" />
-  <property name="build.defines" value="TRACE;DEBUG" />
+  <property name="build.defines" value="TRACE;LINQ;DEBUG" />
 
   <property name="build.runs.on.mono" value="${(framework::get-family(framework::get-runtime-framework()) == 'mono')}" />
   
@@ -209,7 +209,7 @@
 
   <target name="set-release-project-configuration" >
     <property name="build.optimize"	value="true" />
-    <property name="build.defines" value="TRACE" />
+    <property name="build.defines" value="LINQ;TRACE" />
   </target>
 
   <target name="compile-dll">

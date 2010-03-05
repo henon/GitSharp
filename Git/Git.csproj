@@ -171,6 +171,7 @@
     <Compile Include="TarTree.cs" />
     <Compile Include="TextBuiltin.cs" />
     <Compile Include="Rebase.cs" />
+    <Compile Include="UnitTest.cs" />
     <Compile Include="UnpackFile.cs" />
     <Compile Include="UnpackObjects.cs" />
     <Compile Include="UpdateIndex.cs" />

@@ -143,7 +143,7 @@ namespace GitSharp.CLI
             }
         }
 
-        private static void OfflineHelp()
+        private void OfflineHelp()
         {
             if (!isHelp)
             {
@@ -154,7 +154,7 @@ namespace GitSharp.CLI
             }
         }
 
-        public static void DoCommit(String filepattern)
+        public void DoCommit(String filepattern)
         {
             Console.WriteLine("This command still needs to be implemented.");
         }

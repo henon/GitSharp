@@ -39,12 +39,15 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using NDesk.Options;
+using GitSharp.Commands;
 
 namespace GitSharp.CLI
 {
-    [Command(complete = false, common = true, usage = "Checkout a branch or paths to the working tree")]
-    class Checkout : TextBuiltin
+    [Command(complete = false, common = true, requiresRepository = true, usage = "Checkout a branch or paths to the working tree")]
+    public class Checkout : TextBuiltin
     {
+        private CheckoutCommand cmd = new CheckoutCommand();
+
         private static Boolean isHelp = false;
 
 #if ported
@@ -64,8 +67,8 @@ namespace GitSharp.CLI
             options = new CmdParserOptionSet()
             {
                 { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
+                { "q|quiet", "Quiet, suppress feedback messages", v => cmd.Quiet = false },
 #if ported
-                { "q|quiet", "Suppress feedback messages", v=> {isQuiet = true;}},
                 { "f|force", "Force checkout and ignore unmerged changes", v=>{isForced = true;}},
                 { "ours", "For unmerged paths, checkout stage #2 from the index", v=>{isOurs = true;}},
                 { "theirs", "For unmerged paths, checkout stage #3 from the index", v=>{isTheirs = true;}},
@@ -79,8 +82,6 @@ namespace GitSharp.CLI
                 { "p|patch", "Creates a diff and applies it in reverse order to the working tree", v=>Patch()}
 
                // [Mr Happy] this should be compatible w/ the CommandStub, haven't checked yet tho.
-               //{ "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
-               //{ "q|quiet", "Quiet, suppress feedback messages", v => cmd.Quiet = true },
                //{ "f|force", "When switching branches, proceed even if the index or the working tree differs from HEAD", v => cmd.Force = true },
                //{ "ours", "When checking out paths from the index, check out stage #2 ('ours') or #3 ('theirs') for unmerged paths", v => cmd.Ours = true },
                //{ "theirs", "When checking out paths from the index, check out stage #2 ('ours') or #3 ('theirs') for unmerged paths", v => cmd.Theirs = true },
@@ -97,15 +98,18 @@ namespace GitSharp.CLI
             try
             {
                 List<String> arguments = ParseOptions(args);
-                if (arguments.Count > 0)
+                if ((arguments.Count > 0) || (args.Length <=0))
                 {
                     //Checkout the new repository
-                    DoCheckout(arguments[0]);
-                }
-                else if (args.Length <= 0)
-                {
-                    //Display the modified files for the existing repository
-                    DoViewChanges();
+                    cmd.Arguments = arguments;
+                    cmd.Execute();
+                    
+                    if (!cmd.Quiet)
+                    {
+                        //Display FileNotFound errors, but process checkout request for all found files first.
+                        foreach (string file in cmd.Results.FileNotFoundList)
+                            OutputStream.WriteLine("error: pathspec '" + file + "' did not match any file(s) known to GitSharp.");
+                    }
                 }
                 else
                 {
@@ -116,7 +120,7 @@ namespace GitSharp.CLI
             }
         }
 
-        private static void OfflineHelp()
+        private void OfflineHelp()
         {
             if (!isHelp)
             {
@@ -133,23 +137,12 @@ namespace GitSharp.CLI
             }
         }
 
-        private static void RefLog()
+        private void RefLog()
         {
         }
 
-        private static void Patch(String treeish)
+        private void Patch(String treeish)
         {
         }
-
-        private static void DoCheckout(String repository)
-        {
-            Console.WriteLine("This command still needs to be implemented.");
-        }
-
-        private static void DoViewChanges()
-        {
-            Console.WriteLine("This command still needs to be implemented.");
-        }
-
     }
 }

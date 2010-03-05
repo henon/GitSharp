@@ -43,11 +43,17 @@ using System.Text;
 
 namespace GitSharp.Commands
 {
-    public class CheckoutCommand
-        : AbstractCommand
+    public class CheckoutCommand : AbstractCommand
     {
+        private CheckoutResults results = new CheckoutResults();
 
         public CheckoutCommand() {
+        }
+
+        public CheckoutResults Results
+        {
+            get { return results; }
+            private set { results = value; }
         }
 
         // note: the naming of command parameters is not following .NET conventions in favour of git command line parameter naming conventions.
@@ -55,10 +61,7 @@ namespace GitSharp.Commands
         #region Properties / Options
         public List<string> Arguments { get; set; }
         /// <summary>
-        /// Not implemented
-        /// 
         /// Quiet, suppress feedback messages.
-        /// 
         /// </summary>
         public bool Quiet { get; set; }
 
@@ -100,7 +103,7 @@ namespace GitSharp.Commands
         /// &lt;start_point&gt;; see linkgit:git-branch[1] for details.
         /// 
         /// </summary>
-        public string B { get; set; }
+        public string BranchCreate { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -137,7 +140,7 @@ namespace GitSharp.Commands
         /// details.
         /// 
         /// </summary>
-        public bool L { get; set; }
+        public bool RefLog { get; set; }
 
         /// <summary>
         /// Not implemented
@@ -192,7 +195,63 @@ namespace GitSharp.Commands
 
         public override void Execute()
         {
-            throw new NotImplementedException();
+
+            if (Patch && (Track || BranchCreate.Length > 0 || RefLog || Merge || Force))
+                throw new ArgumentException("--patch is incompatible with all other options");
+
+            if (Force && Merge)
+                throw new ArgumentException("git checkout: -f and -m are incompatible");
+            
+			if (Track && !(BranchCreate.Length > 0))
+				throw new ArgumentException("Missing branch name; try -b");
+			
+            if (Arguments.Count == 0)
+                Arguments.Add("HEAD");
+
+            //Create a new branch and reassign the Repository to the new location before checkout.
+            if (BranchCreate.Length > 0)
+            {
+                Branch.Create(Repository, BranchCreate);
+                Arguments[0] = BranchCreate;
+            }
+
+            if (Arguments.Count == 1)
+            {
+                //Checkout the branch using the SHA1 or the name such as HEAD or master/HEAD
+                Branch b = new Branch(Repository, Arguments[0]);
+                if (b != null)
+                {
+                    b.Checkout();
+                    return;
+                }
+            }
+
+            //Todo: Add FileNameMatcher support. To be added when fnmatch is completed.
+            //For now, pattern matching is not allowed. Please specify the files only.               
+
+            //Gain access to the Git index using the repository determined before command execution
+            Index index = new Index(Repository);
+
+            foreach (string arg in Arguments)
+            {
+                //Use full paths only to eliminate platform-based directory differences
+                string path = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), arg));
+
+                //Perform the validity tests outside of the index to handle the error messages
+                if ((new FileInfo(path).Exists) || (new DirectoryInfo(path).Exists))
+                    index.Checkout(path);
+                else 
+                    results.FileNotFoundList.Add(path);
+            }
         }
     }
+
+    #region Checkout Results
+
+    public class CheckoutResults
+    {
+        public List<string> FileNotFoundList = new List<string>();
+    }
+
+    #endregion
 }

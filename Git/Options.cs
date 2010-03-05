@@ -698,17 +698,64 @@ namespace NDesk.Options
 			return new OptionContext (this);
 		}
 
+        /// <summary>
+        /// Internal Use Only. Used by NDesk.OptionSetTest for unit testing purposes of OptionSet.Parse. 
+        /// </summary>
+        public List<string> Parse(IEnumerable<string> arguments)
+        {
+            List<string> filePaths = null;
+            List<string> remainingArguments = new List<string>();
+
+            Parse(arguments.ToArray<string>(), out filePaths, out remainingArguments);
+            return remainingArguments;
+        }
+
+        /// <summary>
+        /// Used to parse the options (aka arguments) denoted by a "-" or "--" in the command line and return the remaining arguments in a list.
+        /// </summary>
+        /// <param name="arguments">The command line arguments.</param>
+        /// <param name="remainingArguments">Return value for the arguments remaining after parsing is complete.</param>
+        public void Parse(string[] arguments, out List<string> remainingArguments)
+        {
+            List<string> filePaths = null;
+            Parse(arguments, out filePaths, out remainingArguments);
+        }
+
 #if LINQ
-		public List<string> Parse (IEnumerable<string> arguments)
+        /// <summary>
+        /// Used to parse the options (aka arguments) denoted by a "-" or "--" in the command line.
+        /// This method also returns the multiple file references denoted by -- &amp;filepattern> in git.
+        /// </summary>
+        /// <param name="arguments">The command line arguments.</param>
+        /// <param name="filePaths">Return value for multiple file references, if specified. Setting the value to null will disable this option.</param>
+        /// <param name="remainingArguments">Return value for the arguments remaining after parsing is complete.</param>
+        public void Parse(string[] arguments, out List<string> filePaths, out List<string> remainingArguments)
 		{
+            List<string> args = new List<string>();
+            filePaths = new List<string>();
+            
+            foreach (string a in arguments)
+                args.Add(a);
+
 			bool process = true;
 			OptionContext c = CreateOptionContext ();
 			c.OptionIndex = -1;
 			//var def = GetOptionForName ("<>");
 			//Deviation from NDesk's Options.cs to remove the warning message.
 			Option def = Contains("<>") ? base["<>"] : null;
-			var unprocessed = 
-				from argument in arguments
+            
+            int index = args.IndexOf("--");
+            if (index != -1 && args.Count > index)
+            { 
+                //Strip the additional filepaths and return as a separate value
+                for (int x = index+1; x<args.Count;x++)
+                	filePaths.Add(args[x]);
+                //filePaths = (List<String>) arguments.Skip(index);
+               args.RemoveRange(index, args.Count - index);
+            }
+
+			var unprocessed =
+                from argument in args
 				where ++c.OptionIndex >= 0 && (process || def != null)
 					? process
 						? argument == "--" 
@@ -726,17 +773,21 @@ namespace NDesk.Options
 			List<string> r = unprocessed.ToList ();
 			if (c.Option != null)
 				c.Option.Invoke (c);
-			return r;
+			remainingArguments = r;
 		}
 #else
-		public List<string> Parse (IEnumerable<string> arguments)
+		public void Parse (string[] arguments, out List<String> filePaths, out List<String> remainingArguments)
 		{
+            List<string> args = new List<string>();
+            foreach (string a in arguments)
+                args.Add(a);
+
 			OptionContext c = CreateOptionContext ();
 			c.OptionIndex = -1;
 			bool process = true;
 			List<string> unprocessed = new List<string> ();
 			Option def = Contains ("<>") ? this ["<>"] : null;
-			foreach (string argument in arguments) {
+			foreach (string argument in args) {
 				++c.OptionIndex;
 				if (argument == "--") {
 					process = false;
@@ -751,11 +802,11 @@ namespace NDesk.Options
 			}
 			if (c.Option != null)
 				c.Option.Invoke (c);
-			return unprocessed;
+            remainingArguments = r;
 		}
 #endif
 
-		private static bool Unprocessed (ICollection<string> extra, Option def, OptionContext c, string argument)
+        private static bool Unprocessed (ICollection<string> extra, Option def, OptionContext c, string argument)
 		{
 			if (def == null) {
 				extra.Add (argument);

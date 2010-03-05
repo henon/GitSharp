@@ -117,7 +117,7 @@ namespace GitSharp.CLI
             }
         }
 
-        private static void OfflineHelp()
+        private void OfflineHelp()
         {
             if (!isHelp)
             {
@@ -128,17 +128,17 @@ namespace GitSharp.CLI
             }
         }
 
-        private static void DoAdd(List<String> filesAdded)
+        private void DoAdd(List<String> filesAdded)
         {
             Console.WriteLine("This command still needs to be implemented.");
         }
 
-        private static void DoEdit()
+        private void DoEdit()
         {
             Console.WriteLine("This option still needs to be implemented.");
         }
 
-        private static void DoPatch()
+        private void DoPatch()
         {
             Console.WriteLine("This option still needs to be implemented.");
         }

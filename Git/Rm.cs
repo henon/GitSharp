@@ -89,7 +89,7 @@ namespace GitSharp.CLI
             }
         }
 
-        private static void OfflineHelp()
+        private void OfflineHelp()
         {
             if (!isHelp)
             {
@@ -101,7 +101,7 @@ namespace GitSharp.CLI
             }
         }
 
-        private static void DoRm(List<String> args)
+        private void DoRm(List<String> args)
         {
             Console.WriteLine("This command still needs to be implemented.");
         }

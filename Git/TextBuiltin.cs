@@ -95,7 +95,7 @@ namespace GitSharp.CLI
         /// <summary>
         /// Custom OptionSet to allow special option handling rules such as --option dir
         /// </summary>
-        public static CmdParserOptionSet options;
+        public CmdParserOptionSet options;
 
         /// <summary>
         /// Used by CommandCatalog and CommandRef to set the command name during initial creation.
@@ -224,16 +224,35 @@ namespace GitSharp.CLI
         /// <returns>Returns the arguments remaining after the options on the command line. Often, these are directories or paths.</returns>
         public List<String> ParseOptions(string[] args)
         {
+        	List<String> remainingArguments = new List<string>();
             try
             {
-                arguments = options.Parse(args);
+                options.Parse(args, out remainingArguments);
             }
             catch (OptionException err)
             {
                 throw die("fatal: " + err.Message);
             }
+            return remainingArguments;
+        }
 
-            return arguments;
+        /// <summary>
+        /// Parses the options for all subcommands and executes the corresponding code for each option. This function should only be used if supporting -- &amp;filepatterns>
+        /// </summary>
+        /// <param name="args">Specifies the string from the options to the end of the command line.</param>
+        /// <param name="filePaths">Returns a list of files following the -- argument</param>
+        /// <param name="remainingArguments">Returns the arguments remaining after the options on the command line. Often, these are directories or paths.</param>
+        /// <returns>Returns the arguments remaining after the options on the command line. Often, these are directories or paths.</returns>
+        public void ParseOptions(string[] args, out List<String> filePaths, out List<String> remainingArguments)
+        {
+            try
+            {
+                options.Parse(args, out filePaths, out remainingArguments);
+            }
+            catch (OptionException err)
+            {
+                throw die("fatal: " + err.Message);
+            }
         }
 
         /// <summary>

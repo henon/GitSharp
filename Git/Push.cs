@@ -118,7 +118,7 @@ namespace GitSharp.CLI
             }
         }
 
-        private static void OfflineHelp()
+        private void OfflineHelp()
         {
             if (!isHelp)
             {
@@ -129,7 +129,7 @@ namespace GitSharp.CLI
             }
         }
 
-        private static void DoPush(List<String> filesAdded)
+        private void DoPush(List<String> filesAdded)
         {
             Console.WriteLine("This command still needs to be implemented.");
         }

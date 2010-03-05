@@ -213,7 +213,7 @@ namespace GitSharp.CLI
                 // no subcommand has been specified in the command line.
                 try
                 {
-                    arguments = options.Parse(argv);
+                    options.Parse(argv, out arguments);
                 }
                 catch (OptionException err)
                 {

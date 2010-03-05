@@ -115,7 +115,7 @@ namespace GitSharp.CLI
             }
         }
 
-        private static void OfflineHelp()
+        private void OfflineHelp()
         {
             if (!isHelp)
             {
@@ -127,7 +127,7 @@ namespace GitSharp.CLI
             }
         }
 
-        private static void DoMerge(List<String> args)
+        private void DoMerge(List<String> args)
         {
             Console.WriteLine("This command still needs to be implemented.");
         }

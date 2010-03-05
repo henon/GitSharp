@@ -40,7 +40,7 @@ using NUnit.Framework;
 using System.IO;
 using GitSharp.Core.Tests;
 
-namespace GitSharp.API.Tests
+namespace GitSharp.Tests.GitSharp
 {
     [TestFixture]
     public class CloneTests : RepositoryTestCase
@@ -52,10 +52,26 @@ namespace GitSharp.API.Tests
         }
 
         [Test]
-        public void Check_cloned_repo()
+        public void Check_cloned_repo_git()
         {
             string toPath = Path.Combine(trash.FullName, "test");
             string fromUrl = "git://github.com/henon/test.git";
+
+            using (Repository repo = Git.Clone(fromUrl, toPath))
+            {
+                Assert.IsTrue(Repository.IsValid(repo.Directory));
+                //Verify content is in the proper location
+                var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
+                Assert.IsTrue(new FileInfo(readme).Exists);
+            }
+        }
+
+        [Test]
+        [Ignore]
+        public void Check_cloned_repo_http()
+        {
+            string toPath = Path.Combine(trash.FullName, "test");
+            string fromUrl = "http://github.com/henon/test.git";
 
             using (Repository repo = Git.Clone(fromUrl, toPath))
             {

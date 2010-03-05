@@ -45,6 +45,25 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
+    /// <summary>
+    /// Push implementation using the native Git pack transfer service.
+    /// <para/>
+    /// This is the canonical implementation for transferring objects to the remote
+    /// repository from the local repository by talking to the 'git-receive-pack'
+    /// service. Objects are packed on the local side into a pack file and then sent
+    /// to the remote repository.
+    /// <para/>
+    /// This connection requires only a bi-directional pipe or socket, and thus is
+    /// easily wrapped up into a local process pipe, anonymous TCP socket, or a
+    /// command executed through an SSH tunnel.
+    /// <para/>
+    /// This implementation honors <see cref="Transport.get_PushThin"/> option.
+    /// <para/>
+    /// Concrete implementations should just call
+    /// <see cref="BasePackConnection.init(System.IO.Stream,System.IO.Stream)"/> and
+    /// <see cref="BasePackConnection.readAdvertisedRefs"/> methods in constructor or before any use. They
+    /// should also handle resources releasing in <see cref="BasePackConnection.Close"/> method if needed.
+    /// </summary>
     public abstract class BasePackPushConnection : BasePackConnection, IPushConnection
     {
         public const string CAPABILITY_REPORT_STATUS = "report-status";
@@ -57,6 +76,11 @@ namespace GitSharp.Core.Transport
         private bool _capableOfsDelta;
         private bool _sentCommand;
         private bool _shouldWritePack;
+
+        /// <summary>
+        /// Time in milliseconds spent transferring the pack data.
+        /// </summary>
+        private long packTransferTime;
 
         protected BasePackPushConnection(IPackTransport packTransport)
             : base(packTransport)
@@ -72,19 +96,30 @@ namespace GitSharp.Core.Transport
 
         protected override TransportException noRepository()
         {
+            // Sadly we cannot tell the "invalid URI" case from "push not allowed".
+            // Opening a fetch connection can help us tell the difference, as any
+            // useful repository is going to support fetch if it also would allow
+            // push. So if fetch throws NoRemoteRepositoryException we know the
+            // URI is wrong. Otherwise we can correctly state push isn't allowed
+            // as the fetch connection opened successfully.
+            //
             try
             {
                 transport.openFetch().Close();
             }
             catch (NotSupportedException)
             {
+                // Fall through.
             }
             catch (NoRemoteRepositoryException e)
             {
+                // Fetch concluded the repository doesn't exist.
+                //
                 return e;
             }
             catch (TransportException)
             {
+                // Fall through.
             }
 
             return new TransportException(uri, "push not permitted");
@@ -94,7 +129,7 @@ namespace GitSharp.Core.Transport
         {
             try
             {
-                WriteCommands(new List<RemoteRefUpdate>(refUpdates.Values), monitor);
+                WriteCommands(refUpdates.Values, monitor);
                 if (_shouldWritePack)
                     writePack(refUpdates, monitor);
                 if (_sentCommand && _capableReport)
@@ -181,12 +216,14 @@ namespace GitSharp.Core.Transport
             writer.Thin = _thinPack;
             writer.DeltaBaseAsOffset = _capableOfsDelta;
             writer.preparePack(newObjects, remoteObjects);
+            long start = SystemReader.getInstance().getCurrentTime();
             writer.writePack(outStream);
+            packTransferTime = SystemReader.getInstance().getCurrentTime() - start;
         }
 
         private void readStatusReport(IDictionary<string, RemoteRefUpdate> refUpdates)
         {
-            string unpackLine = pckIn.ReadString();
+            string unpackLine = readStringLongTimeout();
             if (!unpackLine.StartsWith("unpack "))
             {
                 throw new PackProtocolException(uri, "unexpected report line: " + unpackLine);
@@ -198,7 +235,7 @@ namespace GitSharp.Core.Transport
             }
 
             String refLine;
-            for (refLine = pckIn.ReadString(); refLine.Length > 0; refLine = pckIn.ReadString())
+            while ((refLine = pckIn.ReadString()) != PacketLineIn.END)
             {
                 bool ok = false;
                 int refNameEnd = -1;
@@ -217,12 +254,10 @@ namespace GitSharp.Core.Transport
                 }
                 string refName = refLine.Slice(3, refNameEnd);
                 string message = (ok ? null : refLine.Substring(refNameEnd + 1));
-                RemoteRefUpdate rru;
-                if (!refUpdates.ContainsKey(refName))
-                {
-                    throw new PackProtocolException(uri + ": unexpected ref report: " + refName);
-                }
-                rru = refUpdates[refName];
+                RemoteRefUpdate rru = refUpdates.get(refName);
+                if (rru == null)
+                    throw new PackProtocolException(uri
+                            + ": unexpected ref report: " + refName);
                 if (ok)
                 {
                     rru.Status = RemoteRefUpdate.UpdateStatus.OK;
@@ -243,6 +278,10 @@ namespace GitSharp.Core.Transport
                 }
             }
         }
-    }
 
+        private String readStringLongTimeout()
+        {
+            return pckIn.ReadString();
+        }
+    }
 }

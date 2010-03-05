@@ -6,6 +6,8 @@ namespace GitSharp.Core.Exceptions
 	[Serializable]
 	public class CancelledException : Exception
 	{
+        private static long serialVersionUID = 1L;
+
 		//
 		// For guidelines regarding the creation of new exception types, see
 		//    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp

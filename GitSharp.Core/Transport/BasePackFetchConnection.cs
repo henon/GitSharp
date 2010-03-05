@@ -43,12 +43,46 @@ using System.Text;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.RevWalk.Filter;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
-    public class BasePackFetchConnection : BasePackConnection, IFetchConnection, IDisposable
+    /// <summary>
+    /// Fetch implementation using the native Git pack transfer service.
+    /// <para/>
+    /// This is the canonical implementation for transferring objects from the remote
+    /// repository to the local repository by talking to the 'git-upload-pack'
+    /// service. Objects are packed on the remote side into a pack file and then sent
+    /// down the pipe to us.
+    /// <para/>
+    /// This connection requires only a bi-directional pipe or socket, and thus is
+    /// easily wrapped up into a local process pipe, anonymous TCP socket, or a
+    /// command executed through an SSH tunnel.
+    /// <para/>
+    /// Concrete implementations should just call
+    /// <see cref="BasePackConnection.init(System.IO.Stream,System.IO.Stream)"/> and
+    /// <see cref="BasePackConnection.readAdvertisedRefs"/> methods in constructor or before any use. They
+    /// should also handle resources releasing in <see cref="BasePackConnection.Close"/> method if needed.
+    /// </summary>
+    public class BasePackFetchConnection : BasePackConnection, IFetchConnection
     {
+        /// <summary>
+        /// Maximum number of 'have' lines to send before giving up.
+        /// <para/>
+        /// During <see cref="Negotiate"/> we send at most this many
+        /// commits to the remote peer as 'have' lines without an ACK response before
+        /// we give up.
+        /// </summary>
         private const int MAX_HAVES = 256;
+
+        /// <summary>
+        /// Amount of data the client sends before starting to read.
+        /// <para/>
+        /// Any output stream given to the client must be able to buffer this many
+        /// bytes before the client will stop writing and start reading from the
+        /// input stream. If the output stream blocks before this many bytes are in
+        /// the send queue, the system will deadlock.
+        /// </summary>
         protected const int MIN_CLIENT_BUFFER = 2 * 32 * 46 + 8;
         public const string OPTION_INCLUDE_TAG = "include-tag";
         public const string OPTION_MULTI_ACK = "multi_ack";
@@ -68,12 +102,29 @@ namespace GitSharp.Core.Transport
         }
 
         private readonly RevWalk.RevWalk _walk;
+
+        /// <summary>
+        /// All commits that are immediately reachable by a local ref.
+        /// </summary>
+        private RevCommitList<RevCommit> _reachableCommits;
+
         private readonly bool _allowOfsDelta;
 
+        /// <summary>
+        /// Marks an object as having all its dependencies.
+        /// </summary>
         public readonly RevFlag REACHABLE;
+
+        /// <summary>
+        /// Marks a commit known to both sides of the connection.
+        /// </summary>
         public readonly RevFlag COMMON;
+
+        /// <summary>
+        /// Marks a commit listed in the advertised refs.
+        /// </summary>
         public readonly RevFlag ADVERTISED;
-        private RevCommitList<RevCommit> _reachableCommits;
+
         private MultiAck _multiAck = MultiAck.OFF;
         private bool _thinPack;
         private bool _sideband;
@@ -84,10 +135,10 @@ namespace GitSharp.Core.Transport
         public BasePackFetchConnection(IPackTransport packTransport)
             : base(packTransport)
         {
-            RepositoryConfig cfg = local.Config;
+            FetchConfig cfg = local.Config.get(FetchConfig.KEY);
             _includeTags = transport.TagOpt != TagOpt.NO_TAGS;
             _thinPack = transport.FetchThin;
-            _allowOfsDelta = cfg.getBoolean("repack", "usedeltabaseoffset", true);
+            _allowOfsDelta = cfg.AllowOfsDelta;
 
             _walk = new RevWalk.RevWalk(local);
             _reachableCommits = new RevCommitList<RevCommit>();
@@ -98,6 +149,31 @@ namespace GitSharp.Core.Transport
             _walk.carry(COMMON);
             _walk.carry(REACHABLE);
             _walk.carry(ADVERTISED);
+        }
+
+        private class FetchConfig
+        {
+            public static Config.SectionParser<FetchConfig> KEY = new FetchConfigSectionParser();
+
+            readonly bool _allowOfsDelta;
+
+            FetchConfig(Config c)
+            {
+                _allowOfsDelta = c.getBoolean("repack", "usedeltabaseoffset", true);
+            }
+
+            private class FetchConfigSectionParser : Config.SectionParser<FetchConfig>
+            {
+                public FetchConfig parse(Config cfg)
+                {
+                    return new FetchConfig(cfg);
+                }
+            }
+
+            public bool AllowOfsDelta
+            {
+                get { return _allowOfsDelta; }
+            }
         }
 
         public void Fetch(ProgressMonitor monitor, ICollection<Ref> want, IList<ObjectId> have)
@@ -123,7 +199,15 @@ namespace GitSharp.Core.Transport
 
         public List<PackLock> PackLocks
         {
-            get { return _packLock != null ? new List<PackLock> { _packLock } : new List<PackLock>(); }
+            get
+            {
+                if (_packLock != null)
+                {
+                    return new List<PackLock> { _packLock };
+                }
+
+                return new List<PackLock>();
+            }
         }
 
         protected void doFetch(ProgressMonitor monitor, ICollection<Ref> want, IList<ObjectId> have)
@@ -146,9 +230,14 @@ namespace GitSharp.Core.Transport
             catch (CancelledException)
             {
                 Dispose();
-                return;
+                return; // Caller should test (or just know) this themselves.
             }
             catch (IOException err)
+            {
+                Dispose();
+                throw new TransportException(err.Message, err);
+            }
+            catch (Exception err)
             {
                 Dispose();
                 throw new TransportException(err.Message, err);
@@ -162,7 +251,7 @@ namespace GitSharp.Core.Transport
             {
                 try
                 {
-                    RevCommit obj = (_walk.parseAny(r.ObjectId) as RevCommit);
+                    var obj = (_walk.parseAny(r.ObjectId) as RevCommit);
                     if (obj != null)
                     {
                         int cTime = obj.CommitTime;
@@ -172,6 +261,7 @@ namespace GitSharp.Core.Transport
                 }
                 catch (IOException)
                 {
+                    // We don't have it, but we want to fetch (thus fixing error).
                 }
             }
 
@@ -190,6 +280,7 @@ namespace GitSharp.Core.Transport
                 }
                 catch (IOException)
                 {
+                    // If we cannot read the value of the ref skip it.
                 }
             }
 
@@ -203,12 +294,17 @@ namespace GitSharp.Core.Transport
                 }
                 catch (IOException)
                 {
+                    // If we cannot read the value of the ref skip it.
                 }
             }
 
             if (maxTime > 0)
             {
-                DateTime maxWhen = new DateTime(1970, 1, 1) + TimeSpan.FromSeconds(maxTime);
+                // Mark reachable commits until we reach maxTime. These may
+                // wind up later matching up against things we want and we
+                // can avoid asking for something we already happen to have.
+                //
+                DateTime maxWhen = (maxTime * 1000L).MillisToDateTime();
                 _walk.sort(RevSort.COMMIT_TIME_DESC);
                 _walk.markStart(_reachableCommits);
                 _walk.setRevFilter(CommitTimeRevFilter.After(maxWhen));
@@ -236,11 +332,16 @@ namespace GitSharp.Core.Transport
                 {
                     if (_walk.parseAny(r.ObjectId).has(REACHABLE))
                     {
+                        // We already have this object. Asking for it is
+                        // not a very good idea.
+                        //
                         continue;
                     }
                 }
                 catch (IOException)
                 {
+                    // Its OK, we don't have it, but we want to fix that
+                    // by fetching the object from the other side.
                 }
 
                 var line = new StringBuilder(46);
@@ -307,6 +408,10 @@ namespace GitSharp.Core.Transport
 
                 if ((31 & havesSent) != 0)
                 {
+                    // We group the have lines into blocks of 32, each marked
+                    // with a flush (aka end). This one is within a block so
+                    // continue with another have line.
+                    //
                     continue;
                 }
 
@@ -314,10 +419,15 @@ namespace GitSharp.Core.Transport
                     throw new CancelledException();
 
                 pckOut.End();
-                resultsPending++;
+                resultsPending++; // Each end will cause a result to come back.
 
                 if (havesSent == 32)
                 {
+                    // On the first block we race ahead and try to send
+                    // more of the second block while waiting for the
+                    // remote to respond to our first block request.
+                    // This keeps us one block ahead of the peer.
+                    //
                     continue;
                 }
 
@@ -367,12 +477,19 @@ namespace GitSharp.Core.Transport
             END_READ_RESULT:
                 if (receivedContinue && havesSinceLastContinue > MAX_HAVES)
                 {
+                    // Our history must be really different from the remote's.
+                    // We just sent a whole slew of have lines, and it did not
+                    // recognize any of them. Avoid sending our entire history
+                    // to them by giving up early.
+                    //
                     break;
                 }
             }
 
         END_SEND_HAVES:
 
+            // Tell the remote side we have run out of things to talk about.
+            //
             if (monitor.IsCancelled)
                 throw new CancelledException();
             pckOut.WriteString("done\n");
@@ -380,6 +497,10 @@ namespace GitSharp.Core.Transport
 
             if (!receivedAck)
             {
+                // Apparently if we have never received an ACK earlier
+                // there is one more result expected from the done we
+                // just sent to the remote.
+                //
                 _multiAck = MultiAck.OFF;
                 resultsPending++;
             }
@@ -420,7 +541,7 @@ namespace GitSharp.Core.Transport
             ;
         }
 
-        private class NegotiateBeginRevFilter : RevFilter, IDisposable
+        private class NegotiateBeginRevFilter : RevFilter
         {
             private readonly RevFlag _common;
             private readonly RevFlag _advertised;
@@ -436,22 +557,20 @@ namespace GitSharp.Core.Transport
                 return this;
             }
 
-            public override bool include(GitSharp.Core.RevWalk.RevWalk walker, RevCommit cmit)
+            public override bool include(RevWalk.RevWalk walker, RevCommit cmit)
             {
                 bool remoteKnowsIsCommon = cmit.has(_common);
                 if (cmit.has(_advertised))
                 {
+                    // Remote advertised this, and we have it, hence common.
+                    // Whether or not the remote knows that fact is tested
+                    // before we added the flag. If the remote doesn't know
+                    // we have to still send them this object.
+                    //
                     cmit.add(_common);
                 }
                 return !remoteKnowsIsCommon;
             }
-
-            public void Dispose()
-            {
-                _advertised.Dispose();
-                _common.Dispose();
-            }
-
         }
 
         private void NegotiateBegin()
@@ -480,14 +599,14 @@ namespace GitSharp.Core.Transport
             }
             catch (IOException)
             {
-
+                // We probably just do not have this object locally.
             }
         }
 
         private void MarkCommon(RevObject obj)
         {
             obj.add(COMMON);
-            RevCommit oComm = (obj as RevCommit);
+            var oComm = (obj as RevCommit);
             if (oComm != null)
             {
                 oComm.carry(COMMON);

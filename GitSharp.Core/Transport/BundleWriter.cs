@@ -45,21 +45,21 @@ namespace GitSharp.Core.Transport
 {
     public class BundleWriter : IDisposable
     {
-	    private readonly PackWriter _packWriter;
-	    private readonly Dictionary<String, ObjectId> _include;
-	    private readonly HashSet<RevCommit> _assume;
+        private readonly PackWriter _packWriter;
+        private readonly Dictionary<String, ObjectId> _include;
+        private readonly HashSet<RevCommit> _assume;
 
         /// <summary>
         /// Create a writer for a bundle.
         /// </summary>
         /// <param name="repo">repository where objects are stored.</param>
         /// <param name="monitor">operations progress monitor.</param>
-        public BundleWriter(Repository repo, ProgressMonitor monitor) 
+        public BundleWriter(Repository repo, ProgressMonitor monitor)
         {
-		    _packWriter = new PackWriter(repo, monitor);
+            _packWriter = new PackWriter(repo, monitor);
             _include = new Dictionary<String, ObjectId>();
-		    _assume = new HashSet<RevCommit>();
-	    }
+            _assume = new HashSet<RevCommit>();
+        }
 
         /// <summary>
         /// Include an object (and everything reachable from it) in the bundle.
@@ -73,22 +73,22 @@ namespace GitSharp.Core.Transport
         /// <param name="id">
         /// object to pack. Multiple refs may point to the same object.
         /// </param>
-	    public void include(String name, AnyObjectId id) 
+        public void include(String name, AnyObjectId id)
         {
-			if (id == null)
-				throw new ArgumentNullException ("id");
-		    if (!Repository.IsValidRefName(name))
-		    {
-		    	throw new ArgumentException("Invalid ref name: " + name);
-		    }
+            if (id == null)
+                throw new ArgumentNullException("id");
+            if (!Repository.IsValidRefName(name))
+            {
+                throw new ArgumentException("Invalid ref name: " + name);
+            }
 
-		    if (_include.ContainsKey(name))
-		    {
-		    	throw new InvalidOperationException("Duplicate ref: " + name);
-		    }
+            if (_include.ContainsKey(name))
+            {
+                throw new InvalidOperationException("Duplicate ref: " + name);
+            }
 
             _include[name] = id.ToObjectId();
-	    }
+        }
 
         /// <summary>
         /// Include a single ref (a name/object pair) in the bundle.
@@ -96,13 +96,13 @@ namespace GitSharp.Core.Transport
         /// <code>include(r.getName(), r.getObjectId())</code>.
         /// </summary>
         /// <param name="r">the ref to include.</param>
-	    public void include(Ref r) 
+        public void include(Ref r)
         {
-			if (r == null)
-				throw new ArgumentNullException ("r");
-			
-		    include(r.Name, r.ObjectId);
-	    }
+            if (r == null)
+                throw new ArgumentNullException("r");
+
+            include(r.Name, r.ObjectId);
+        }
 
         /// <summary>
         /// Assume a commit is available on the recipient's side.
@@ -116,13 +116,13 @@ namespace GitSharp.Core.Transport
         /// parsed and not disposed in order to maximize the amount of
         /// debugging information available in the bundle stream.
         /// </param>
-	    public void assume(RevCommit c)
+        public void assume(RevCommit c)
         {
-		    if (c != null)
-		    {
-		    	_assume.Add(c);
-		    }
-	    }
+            if (c != null)
+            {
+                _assume.Add(c);
+            }
+        }
 
         private static void writeString(Stream os, string data)
         {
@@ -130,64 +130,64 @@ namespace GitSharp.Core.Transport
             os.Write(val, 0, val.Length);
         }
 
-	    /**
-	     * Generate and write the bundle to the output stream.
-	     * <para />
-	     * This method can only be called once per BundleWriter instance.
-	     *
-	     * @param os
-	     *            the stream the bundle is written to. If the stream is not
-	     *            buffered it will be buffered by the writer. Caller is
-	     *            responsible for closing the stream.
-	     * @throws IOException
-	     *             an error occurred reading a local object's data to include in
-	     *             the bundle, or writing compressed object data to the output
-	     *             stream.
-	     */
-	    public void writeBundle(Stream os)
+        /**
+         * Generate and write the bundle to the output stream.
+         * <para />
+         * This method can only be called once per BundleWriter instance.
+         *
+         * @param os
+         *            the stream the bundle is written to. If the stream is not
+         *            buffered it will be buffered by the writer. Caller is
+         *            responsible for closing the stream.
+         * @throws IOException
+         *             an error occurred reading a local object's data to include in
+         *             the bundle, or writing compressed object data to the output
+         *             stream.
+         */
+        public void writeBundle(Stream os)
         {
-		    if (!(os is BufferedStream))
-		    {
-		        os = new BufferedStream(os);
-		    }
+            if (!(os is BufferedStream))
+            {
+                os = new BufferedStream(os);
+            }
 
-		    var inc = new HashSet<ObjectId>();
-		    var exc = new HashSet<ObjectId>();
+            var inc = new HashSet<ObjectId>();
+            var exc = new HashSet<ObjectId>();
 
-            foreach(ObjectId objectId in _include.Values)
+            foreach (ObjectId objectId in _include.Values)
             {
                 inc.Add(objectId);
             }
-		    
-		    foreach(RevCommit r in _assume)
-		    {
-		        exc.Add(r.getId());
-		    }
 
-		    _packWriter.Thin = exc.Count > 0;
-		    _packWriter.preparePack(inc, exc);
+            foreach (RevCommit r in _assume)
+            {
+                exc.Add(r.getId());
+            }
+
+            _packWriter.Thin = exc.Count > 0;
+            _packWriter.preparePack(inc, exc);
 
             //var w = new BinaryWriter(os);
-	        //var w = new StreamWriter(os, Constants.CHARSET);
-	        var w = os;
- 
-		    writeString(w, TransportBundleConstants.V2_BUNDLE_SIGNATURE);
+            //var w = new StreamWriter(os, Constants.CHARSET);
+            var w = os;
+
+            writeString(w, TransportBundleConstants.V2_BUNDLE_SIGNATURE);
             writeString(w, "\n");
 
             char[] tmp = new char[Constants.OBJECT_ID_STRING_LENGTH];
-		    foreach (RevCommit a in _assume) 
+            foreach (RevCommit a in _assume)
             {
                 writeString(w, "-");
                 a.CopyTo(tmp, Constants.CHARSET, w);
-			    if (a.RawBuffer != null)
+                if (a.RawBuffer != null)
                 {
                     writeString(w, " ");
                     writeString(w, a.getShortMessage());
-			    }
+                }
                 writeString(w, "\n");
-		    }
+            }
 
-            foreach(var entry in _include)
+            foreach (var entry in _include)
             {
                 entry.Value.CopyTo(tmp, Constants.CHARSET, w);
                 writeString(w, " ");
@@ -196,15 +196,15 @@ namespace GitSharp.Core.Transport
             }
 
             writeString(w, "\n");
-		    w.Flush();
+            w.Flush();
 
-		    _packWriter.writePack(os);
-	    }
-		
-		public void Dispose ()
-		{
-			_packWriter.Dispose();
-		}
-		
+            _packWriter.writePack(os);
+        }
+
+        public void Dispose()
+        {
+            _packWriter.Dispose();
+        }
+
     }
 }

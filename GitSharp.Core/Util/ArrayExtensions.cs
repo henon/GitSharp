@@ -41,16 +41,6 @@ namespace GitSharp.Core.Util
 {
     public static class ArrayExtension
     {
-        public static bool ArrayEquals<T>(this T[] a, T[] b)
-        {
-            if (a.Length != b.Length) return false;
-            for (int i = 0; i < a.Length; i++)
-            {
-                if (!a[i].Equals(b[i])) return false;
-            }
-            return true;
-        }
-
 		/// <summary>
 		/// Assigns the specified int value to each element of the specified array of ints.
 		/// </summary>

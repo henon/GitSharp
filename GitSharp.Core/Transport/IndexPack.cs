@@ -74,13 +74,40 @@ namespace GitSharp.Core.Transport
         /// </summary>
         public const int BUFFER_SIZE = 8192;
 
+
+        /// <summary>
+        /// Create an index pack instance to load a new pack into a repository.
+        /// <para/>
+        /// The received pack data and generated index will be saved to temporary
+        /// files within the repository's <code>objects</code> directory. To use the
+        /// data contained within them call <see cref="renameAndOpenPack()"/> once the
+        /// indexing is complete.
+        /// </summary>
+        /// <param name="db">the repository that will receive the new pack.</param>
+        /// <param name="stream">
+        /// stream to read the pack data from. If the stream is buffered
+        /// use <see cref="BUFFER_SIZE"/> as the buffer size for the stream.
+        /// </param>
+        /// <returns>a new index pack instance.</returns>
+        internal static IndexPack Create(Repository db, Stream stream)
+        {
+            DirectoryInfo objdir = db.ObjectsDirectory;
+            FileInfo tmp = CreateTempFile("incoming_", PackSuffix, objdir);
+            string n = tmp.Name;
+
+            var basef = PathUtil.CombineFilePath(objdir, n.Slice(0, n.Length - PackSuffix.Length));
+            var ip = new IndexPack(db, stream, basef);
+            ip.setIndexVersion(db.Config.getCore().getPackIndexVersion());
+            return ip;
+        }
+
         private readonly Repository _repo;
         private readonly FileStream _packOut;
         private Stream _stream;
         private readonly byte[] _buffer;
         private readonly MessageDigest _objectDigest;
         private readonly MutableObjectId _tempObjectId;
-        private readonly Crc32 _crc;
+        private readonly Crc32 _crc = new Crc32();
 
         /// <summary>
         /// Object database used for loading existing objects
@@ -126,7 +153,6 @@ namespace GitSharp.Core.Transport
             _repo = db;
             _objectDatabase = db.ObjectDatabase.newCachedDatabase();
             _stream = src;
-            _crc = new Crc32();
             _inflater = InflaterCache.Instance.get();
             _windowCursor = new WindowCursor();
             _buffer = new byte[BUFFER_SIZE];
@@ -139,8 +165,8 @@ namespace GitSharp.Core.Transport
             {
                 DirectoryInfo dir = dstBase.Directory;
                 string nam = dstBase.Name;
-                _dstPack = new FileInfo(Path.Combine(dir.FullName, GetPackFileName(nam)));
-                _dstIdx = new FileInfo(Path.Combine(dir.FullName, GetIndexFileName(nam)));
+                _dstPack = PathUtil.CombineFilePath(dir, GetPackFileName(nam));
+                _dstIdx = PathUtil.CombineFilePath(dir, GetIndexFileName(nam));
                 _packOut = _dstPack.Create();
             }
             else
@@ -319,8 +345,8 @@ namespace GitSharp.Core.Transport
             }
             catch (IOException)
             {
-                if (_dstPack != null) _dstPack.Delete();
-                if (_dstIdx != null) _dstIdx.Delete();
+                if (_dstPack != null) _dstPack.DeleteFile();
+                if (_dstIdx != null) _dstIdx.DeleteFile();
                 throw;
             }
         }
@@ -424,6 +450,19 @@ namespace GitSharp.Core.Transport
             return d != null ? d.Remove() : null;
         }
 
+        private static UnresolvedDelta Reverse(UnresolvedDelta c)
+        {
+            UnresolvedDelta tail = null;
+            while (c != null)
+            {
+                UnresolvedDelta n = c.Next;
+                c.Next = tail;
+                tail = c;
+                c = n;
+            }
+            return tail;
+        }
+
         private void ResolveChildDeltas(long pos, int type, byte[] data, AnyObjectId objectId)
         {
             UnresolvedDelta a = Reverse(RemoveBaseById(objectId));
@@ -431,14 +470,14 @@ namespace GitSharp.Core.Transport
 
             while (a != null && b != null)
             {
-                if (a.HeaderOffset < b.HeaderOffset)
+                if (a.Position < b.Position)
                 {
-                    ResolveDeltas(a.HeaderOffset, a.Crc32, type, data, null);
+                    ResolveDeltas(a.Position, a.Crc, type, data, null);
                     a = a.Next;
                 }
                 else
                 {
-                    ResolveDeltas(b.HeaderOffset, b.Crc32, type, data, null);
+                    ResolveDeltas(b.Position, b.Crc, type, data, null);
                     b = b.Next;
                 }
             }
@@ -451,7 +490,7 @@ namespace GitSharp.Core.Transport
         {
             while (a != null)
             {
-                ResolveDeltas(a.HeaderOffset, a.Crc32, type, data, null);
+                ResolveDeltas(a.Position, a.Crc, type, data, null);
                 a = a.Next;
             }
         }
@@ -638,7 +677,7 @@ namespace GitSharp.Core.Transport
                 }
             }
 
-            long vers = NB.DecodeInt32(_buffer, p + 4); // DecodeUInt32!
+            long vers = NB.DecodeUInt32(_buffer, p + 4);
             if (vers != 2 && vers != 3)
             {
                 throw new IOException("Unsupported pack version " + vers + ".");
@@ -663,7 +702,7 @@ namespace GitSharp.Core.Transport
                 _packOut.Write(_packcsum, 0, _packcsum.Length);
             }
 
-            if (!cmpcsum.ArrayEquals(_packcsum))
+            if (!cmpcsum.SequenceEqual(_packcsum))
             {
                 throw new CorruptObjectException("Packfile checksum incorrect.");
             }
@@ -768,7 +807,7 @@ namespace GitSharp.Core.Transport
                 }
                 catch (CorruptObjectException e)
                 {
-                    throw new IOException("Invalid " + Constants.typeString(type) + " " + id + ": " + e.Message, e);
+                    throw new IOException("Invalid " + Constants.typeString(type) + " " + id.Name + ": " + e.Message, e);
                 }
             }
 
@@ -776,9 +815,9 @@ namespace GitSharp.Core.Transport
             if (ldr != null)
             {
                 byte[] existingData = ldr.CachedBytes;
-                if (ldr.Type != type || !data.ArrayEquals(existingData))
+                if (ldr.Type != type || !data.SequenceEqual(existingData))
                 {
-                    throw new IOException("Collision on " + id);
+                    throw new IOException("Collision on " + id.Name);
                 }
             }
         }
@@ -992,10 +1031,10 @@ namespace GitSharp.Core.Transport
                         inf.SetInput(_buffer, p, _bAvail);
                     }
 
-                    n += inf.Inflate(dst, n, size - n);
+                    n += inf.Inflate(dst, n, dst.Length - n);
                 }
                 if (n != size)
-                    throw new Exception("Wrong decrompressed length");
+                    throw new IOException("Wrong decrompressed length");
                 n = _bAvail - inf.RemainingInput;
                 if (n > 0)
                 {
@@ -1014,7 +1053,7 @@ namespace GitSharp.Core.Transport
             }
         }
 
-        private byte[] InflateFromFile(long size)
+        private byte[] InflateFromFile(int size)
         {
             var dst = new byte[(int)size];
             Inflater inf = _inflater;
@@ -1035,7 +1074,7 @@ namespace GitSharp.Core.Transport
                         inf.SetInput(_buffer, p, _bAvail);
                     }
 
-                    n += inf.Inflate(dst, n, dst.Length - n);
+                    n += inf.Inflate(dst, n, size - n);
                 }
 
                 n = _bAvail - inf.RemainingInput;
@@ -1054,6 +1093,11 @@ namespace GitSharp.Core.Transport
             {
                 inf.Reset();
             }
+        }
+
+        private static CorruptObjectException Corrupt(IOException e)
+        {
+            return new CorruptObjectException("Packfile corruption detected: " + e.Message);
         }
 
         /// <summary>
@@ -1098,9 +1142,9 @@ namespace GitSharp.Core.Transport
             }
 
             string name = ObjectId.FromRaw(d.Digest()).Name;
-            var packDir = new DirectoryInfo(Path.Combine(_repo.ObjectsDirectory.ToString(), "pack"));
-            var finalPack = new FileInfo(Path.Combine(packDir.ToString(), "pack-" + GetPackFileName(name)));
-            var finalIdx = new FileInfo(Path.Combine(packDir.ToString(), "pack-" + GetIndexFileName(name)));
+            var packDir = PathUtil.CombineDirectoryPath(_repo.ObjectsDirectory, "pack");
+            var finalPack = PathUtil.CombineFilePath(packDir, "pack-" + GetPackFileName(name));
+            var finalIdx = PathUtil.CombineFilePath(packDir, "pack-" + GetIndexFileName(name));
             var keep = new PackLock(finalPack);
 
             if (!packDir.Exists && !packDir.Mkdirs() && !packDir.Exists)
@@ -1150,7 +1194,7 @@ namespace GitSharp.Core.Transport
             {
                 CleanupTemporaryFiles();
                 keep.Unlock();
-                finalPack.Delete();
+                finalPack.DeleteFile();
                 //if (finalPack.Exists)
                 // TODO: [caytchen]  finalPack.deleteOnExit();
                 throw new IOException("Cannot move index to " + finalIdx);
@@ -1163,8 +1207,8 @@ namespace GitSharp.Core.Transport
             catch (IOException)
             {
                 keep.Unlock();
-                finalPack.Delete();
-                finalIdx.Delete();
+                finalPack.DeleteFile();
+                finalIdx.DeleteFile();
                 throw;
             }
 
@@ -1173,10 +1217,10 @@ namespace GitSharp.Core.Transport
 
         private void CleanupTemporaryFiles()
         {
-            _dstIdx.Delete();
+            _dstIdx.DeleteFile();
             //if (_dstIdx.Exists)
             //  TODO: [caytchen] _dstIdx.deleteOnExit();
-            _dstPack.Delete();
+            _dstPack.DeleteFile();
             //if (_dstPack.Exists)
             //  TODO: [caytchen] _dstPack.deleteOnExit();
         }
@@ -1190,49 +1234,6 @@ namespace GitSharp.Core.Transport
             return new FileInfo(p);
         }
 
-        private static CorruptObjectException Corrupt(IOException e)
-        {
-            return new CorruptObjectException("Packfile corruption detected: " + e.Message);
-        }
-
-        private static UnresolvedDelta Reverse(UnresolvedDelta c)
-        {
-            UnresolvedDelta tail = null;
-            while (c != null)
-            {
-                UnresolvedDelta n = c.Next;
-                c.Next = tail;
-                tail = c;
-                c = n;
-            }
-            return tail;
-        }
-
-        /// <summary>
-        /// Create an index pack instance to load a new pack into a repository.
-        /// <para/>
-        /// The received pack data and generated index will be saved to temporary
-        /// files within the repository's <code>objects</code> directory. To use the
-        /// data contained within them call <see cref="renameAndOpenPack()"/> once the
-        /// indexing is complete.
-        /// </summary>
-        /// <param name="db">the repository that will receive the new pack.</param>
-        /// <param name="stream">
-        /// stream to read the pack data from. If the stream is buffered
-        /// use <see cref="BUFFER_SIZE"/> as the buffer size for the stream.
-        /// </param>
-        /// <returns>a new index pack instance.</returns>
-        internal static IndexPack Create(Repository db, Stream stream)
-        {
-            DirectoryInfo objdir = db.ObjectsDirectory;
-            FileInfo tmp = CreateTempFile("incoming_", PackSuffix, objdir);
-            string n = tmp.Name;
-
-            var basef = new FileInfo(Path.Combine(objdir.FullName, n.Slice(0, n.Length - PackSuffix.Length)));
-            var ip = new IndexPack(db, stream, basef);
-            ip.setIndexVersion(db.Config.getCore().getPackIndexVersion());
-            return ip;
-        }
 
         internal static string GetPackFileName(string fileName)
         {
@@ -1292,23 +1293,23 @@ namespace GitSharp.Core.Transport
 
         private class UnresolvedDelta
         {
-            private readonly long _headerOffset;
-            private readonly int _crc32;
+            private readonly long _position;
+            private readonly int _crc;
 
             public UnresolvedDelta(long headerOffset, int crc32)
             {
-                _headerOffset = headerOffset;
-                _crc32 = crc32;
+                _position = headerOffset;
+                _crc = crc32;
             }
 
-            public long HeaderOffset
+            public long Position
             {
-                get { return _headerOffset; }
+                get { return _position; }
             }
 
-            public int Crc32
+            public int Crc
             {
-                get { return _crc32; }
+                get { return _crc; }
             }
 
             public UnresolvedDelta Next { get; set; }

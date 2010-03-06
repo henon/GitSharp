@@ -36,6 +36,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.Core.Util;
+
 namespace GitSharp.Core.Transport
 {
     /// <summary>
@@ -66,7 +68,19 @@ namespace GitSharp.Core.Transport
         {
         }
 
+        /// <summary>
+        /// offset in pack when object has been already written, or 0 if it
+        /// has not been written yet
+        /// </summary>
         public long Offset { get; set; }
+
+        /// <summary>
+        /// the 32 bit CRC checksum for the packed data.
+        /// <para/>
+        /// checksum of all packed data (including object type code,
+        /// inflated length and delta base reference) as computed by
+        /// <see cref="Crc32"/>
+        /// </summary>
         public int CRC { get; set; }
     }
 }

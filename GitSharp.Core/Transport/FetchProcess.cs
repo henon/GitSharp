@@ -37,6 +37,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -44,6 +45,7 @@ using System.IO;
 using System.Linq;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.RevWalk;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
@@ -291,7 +293,7 @@ namespace GitSharp.Core.Transport
 
         private void updateFETCH_HEAD(FetchResult result)
         {
-            using (LockFile @lock = new LockFile(new FileInfo(Path.Combine(_transport.Local.Directory.FullName, "FETCH_HEAD"))))
+            using (LockFile @lock = new LockFile(PathUtil.CombineFilePath(_transport.Local.Directory, "FETCH_HEAD")))
             {
                 if (@lock.Lock())
                 {
@@ -485,10 +487,10 @@ namespace GitSharp.Core.Transport
                         break;
 
                     default:
-                        throw new TransportException(_transport.Uri, "Cannot delete stale tracking ref " + name + ": " + u.Result.ToString());
+                        throw new TransportException(_transport.Uri, "Cannot delete stale tracking ref " + name + ": " + Enum.GetName(typeof(RefUpdate.RefUpdateResult), u.Result));
                 }
             }
-            catch (System.IO.IOException e)
+            catch (IOException e)
             {
                 throw new TransportException(_transport.Uri, "Cannot delete stale tracking ref " + name, e);
             }

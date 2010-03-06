@@ -436,7 +436,7 @@ namespace GitSharp.Core
 		/// Gets the number of members in this tree.
 		/// </summary>
 		///	<exception cref="IOException"></exception>
-		public int MemberCount
+		public virtual  int MemberCount
 		{
 			get
 			{
@@ -459,7 +459,7 @@ namespace GitSharp.Core
 		///	</summary>
 		///	<returns>All entries in this Tree, sorted.</returns>
 		///	<exception cref="IOException"></exception>
-		public TreeEntry[] Members
+		public virtual TreeEntry[] Members
 		{
 			get
 			{

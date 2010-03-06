@@ -1,5 +1,8 @@
-﻿/*
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+/*
+ * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
+ * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
+ * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -35,72 +38,145 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
+using GitSharp.Core;
 
 namespace GitSharp
 {
-	/// <summary>
-	/// A summary of changes made to the working directory of a repository with respect to its index.
-	/// </summary>
 	public class RepositoryStatus
 	{
-		private GitSharp.Core.IndexDiff _diff;
 
-		public RepositoryStatus(Repository repo)
+		private readonly GitIndex _index;
+		private readonly Core.Tree _tree;
+
+		public RepositoryStatus(Repository repository)
 		{
-			_diff = new GitSharp.Core.IndexDiff(repo._internal_repo);
-			AnyDifferences = _diff.Diff();
+			AnyDifferences = false;
+			Added = new HashSet<string>();
+			Staged = new HashSet<string>();
+			Removed = new HashSet<string>();
+			Missing = new HashSet<string>();
+			Modified = new HashSet<string>();
+			Untracked = new HashSet<string>();
+			MergeConflict = new HashSet<string>();
+			Repository = repository;
+			var commit = Repository.Head.CurrentCommit;
+			_tree = (commit != null ? commit.Tree : new Core.Tree(Repository));
+			_index = Repository.Index.GitIndex;
+
+			Diff();
 		}
 
-		internal RepositoryStatus(GitSharp.Core.IndexDiff diff)
+		public Repository Repository
 		{
-			_diff = diff;
-			AnyDifferences = _diff.Diff();
+			get;
+			private set;
 		}
-
-		public bool AnyDifferences { get; private set; }
 
 		/// <summary>
 		/// List of files added to the index, which are not in the current commit
 		/// </summary>
-		public HashSet<string> Added { get { return _diff.Added; } }
+		public HashSet<string> Added { get; private set; }
 
 		/// <summary>
 		/// List of files added to the index, which are already in the current commit with different content
 		/// </summary>
-		public HashSet<string> Staged { get { return _diff.Changed; } }
+		public HashSet<string> Staged { get; private set; }
 
 		/// <summary>
 		/// List of files removed from the index but are existent in the current commit
 		/// </summary>
-		public HashSet<string> Removed { get { return _diff.Removed; } }
+		public HashSet<string> Removed { get; private set; }
 
 		/// <summary>
 		/// List of files existent in the index but are missing in the working directory
 		/// </summary>
-		public HashSet<string> Missing { get { return _diff.Missing; } }
+		public HashSet<string> Missing { get; private set; }
 
 		/// <summary>
 		/// List of files with unstaged modifications. A file may be modified and staged at the same time if it has been modified after adding.
 		/// </summary>
-		public HashSet<string> Modified { get { return _diff.Modified; } }
+		public HashSet<string> Modified { get; private set; }
 
 		/// <summary>
 		/// List of files existing in the working directory but are neither tracked in the index nor in the current commit.
 		/// </summary>
-		public HashSet<string> Untracked { get { return _diff.Untracked; } }
+		public HashSet<string> Untracked { get; private set; }
 
 		/// <summary>
 		/// List of files with staged modifications that conflict.
 		/// </summary>
-		public HashSet<string> MergeConflict { get { return _diff.MergeConflict; } }
+		public HashSet<string> MergeConflict { get; private set; }
+
+		///// <summary>
+		///// Returns the number of files checked into the git repository
+		///// </summary>
+		//public int IndexSize { get { return _index.Members.Count; } }
+
+		public bool AnyDifferences { get; private set; }
 
 		/// <summary>
-		/// Returns the number of files checked into the git repository
+		/// Run the diff operation. Until this is called, all lists will be empty
 		/// </summary>
-		public int IndexSize { get { return _diff.IndexSize; } }
+		/// <returns>true if anything is different between index, tree, and workdir</returns>
+		private bool Diff()
+		{
+			DirectoryInfo root = _index.Repository.WorkingDirectory;
+			var visitor = new AbstractIndexTreeVisitor { VisitEntryAux = OnVisitEntry };
+			new IndexTreeWalker(_index, _tree, new DirectoryTree(Repository), root, visitor).Walk();
+			return AnyDifferences;
+		}
+
+		private void OnVisitEntry(TreeEntry treeEntry, TreeEntry wdirEntry, GitIndex.Entry indexEntry, FileInfo file)
+		{
+			//Console.WriteLine(" ----------- ");
+			//if (treeEntry != null)
+			//   Console.WriteLine("tree: " + treeEntry.Name);
+			//if (wdirEntry != null)
+			//   Console.WriteLine("w-dir: " + wdirEntry.Name);
+			//if (indexEntry != null)
+			//   Console.WriteLine("index: " + indexEntry.Name);
+			//Console.WriteLine("file: " + file.Name);
+			if (indexEntry != null)
+			{
+				if (treeEntry == null)
+				{
+					Added.Add(indexEntry.Name);
+					AnyDifferences = true;
+				}
+				if (treeEntry != null && !treeEntry.Id.Equals(indexEntry.ObjectId))
+				{
+					Staged.Add(indexEntry.Name);
+					AnyDifferences = true;
+				}
+				if (wdirEntry == null)
+				{
+					Missing.Add(indexEntry.Name);
+					AnyDifferences = true;
+				}
+				if (wdirEntry != null && indexEntry.IsModified(new DirectoryInfo(Repository.WorkingDirectory), true))
+				{
+					Modified.Add(indexEntry.Name);
+					AnyDifferences = true;
+				}
+				if (indexEntry.Stage != 0)
+				{
+					MergeConflict.Add(indexEntry.Name);
+					AnyDifferences = true;
+				}
+			}
+			else // <-- index entry == null
+			{
+				if (treeEntry != null && !(treeEntry is Tree))
+				{
+					Removed.Add(treeEntry.FullName);
+					AnyDifferences = true;
+				}
+				if (treeEntry == null && wdirEntry != null)
+					Untracked.Add(wdirEntry.FullName);
+			}
+		}
+
 	}
 }

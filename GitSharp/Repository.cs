@@ -271,14 +271,13 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// Get the differences between the working directory and the index.
-		/// Returns a data structure containing the results (like "git status").
+		/// Get a report about the differences between the working directory, the index and the current commit.
 		/// </summary>
 		public RepositoryStatus Status
 		{
 			get
 			{
-				return Index.Status;
+				return new RepositoryStatus(this);
 			}
 		}
 

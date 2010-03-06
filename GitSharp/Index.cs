@@ -143,11 +143,7 @@ namespace GitSharp
 
 		/// <summary>
 		/// Removes files or directories from the index which are no longer to be tracked. 
-		/// Does not delete files from the working directory. Use Delete to remove and delete files.
-		/// 
-		/// Note: Remove requires the files and directories to be removed to be present in the working
-		/// directory in order to find out. TODO: make this not dependent of the working directory by
-		/// looking into the tree of the current commit.
+		/// Does not delete files from the working directory. Use <seealso cref="Delete"/> to remove and delete files.
 		/// </summary>
 		/// <param name="paths"></param>
 		public void Remove(params string[] paths)
@@ -294,12 +290,7 @@ namespace GitSharp
 		{
 			get
 			{
-				//if (honor_ignore_rules)
-				//    throw new NotImplementedException("Ignore rules are not implemented");
-				var commit = _repo.Head.CurrentCommit;
-				var tree = commit != null ? commit.Tree.InternalTree : new GitSharp.Core.Tree(_repo._internal_repo);
-				var diff = new GitSharp.Core.IndexDiff(tree, GitIndex);
-				return new RepositoryStatus(diff);
+				return _repo.Status;
 			}
 		}
 
@@ -389,5 +380,12 @@ namespace GitSharp
 			}
 		}
 
+		/// <summary>
+		/// The number of files tracked by the repository 
+		/// </summary>
+		public int Size
+		{
+			get { return GitIndex.Members.Count; }
+		}
 	}
 }

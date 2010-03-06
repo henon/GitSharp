@@ -135,7 +135,7 @@ namespace GitSharp.Commands
                 results.StagedList.OrderBy(v => v.Key);
             }
 
-            IndexSize = status.IndexSize;
+            IndexSize = Repository.Index.Size;
         }
 
     }

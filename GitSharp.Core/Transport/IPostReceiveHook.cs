@@ -39,22 +39,49 @@ using System.Collections.Generic;
 
 namespace GitSharp.Core.Transport
 {
-
+    /// <summary>
+    /// A simple no-op hook.
+    /// </summary>
     internal class NULLReceiveHook : IPostReceiveHook
     {
-        public void OnPostReceive(ReceivePack rp, List<ReceiveCommand> commands)
+        public void OnPostReceive(ReceivePack rp, ICollection<ReceiveCommand> commands)
         {
         }
     }
 
     public static class PostReceiveHook
     {
-        public static IPostReceiveHook NULL = new NULLReceiveHook();    
+        public static IPostReceiveHook NULL = new NULLReceiveHook();
     }
 
+    /// <summary>
+    /// Hook invoked by {@link ReceivePack} after all updates are executed.
+    /// <para/>
+    /// The hook is called after all commands have been processed. Only commands with
+    /// a status of {@link ReceiveCommand.Result#OK} are passed into the hook. To get
+    /// all commands within the hook, see {@link ReceivePack#getAllCommands()}.
+    /// <para/>
+    /// Any post-receive hook implementation should not update the status of a
+    /// command, as the command has already completed or failed, and the status has
+    /// already been returned to the client.
+    /// <para/>
+    /// Hooks should execute quickly, as they block the server and the client from
+    /// completing the connection.
+    /// </summary>
     public interface IPostReceiveHook
     {
-        void OnPostReceive(ReceivePack rp, List<ReceiveCommand> commands);
+        /// <summary>
+        /// Invoked after all commands are executed and status has been returned.
+        /// </summary>
+        /// <param name="rp">
+        /// the process handling the current receive. Hooks may obtain
+        /// details about the destination repository through this handle.
+        /// </param>
+        /// <param name="commands">
+        /// unmodifiable set of successfully completed commands. May be
+        /// the empty set.
+        /// </param>
+        void OnPostReceive(ReceivePack rp, ICollection<ReceiveCommand> commands);
     }
 
 }

@@ -52,8 +52,8 @@ namespace GitSharp.Core.Transport
     /// </summary>
     public class PacketLineOut
     {
-        public Stream Out { get; private set; }
-        private byte[] lenbuffer;
+        private readonly Stream _out;
+        private readonly byte[] _lenbuffer;
 
         /// <summary>
         /// Create a new packet line writer.
@@ -61,8 +61,8 @@ namespace GitSharp.Core.Transport
         /// <param name="outputStream">stream</param>
         public PacketLineOut(Stream outputStream)
         {
-            Out = outputStream;
-            lenbuffer = new byte[5];
+            _out = outputStream;
+            _lenbuffer = new byte[5];
         }
 
         /// <summary>
@@ -84,16 +84,16 @@ namespace GitSharp.Core.Transport
         public void WritePacket(byte[] packet)
         {
             formatLength(packet.Length + 4);
-            Out.Write(lenbuffer, 0, 4);
-            Out.Write(packet, 0, packet.Length);
+            _out.Write(_lenbuffer, 0, 4);
+            _out.Write(packet, 0, packet.Length);
         }
 
         public void WriteChannelPacket(int channel, byte[] buf, int off, int len)
         {
             formatLength(len + 5);
-            lenbuffer[4] = (byte)channel;
-            Out.Write(lenbuffer, 0, 5);
-            Out.Write(buf, off, len);
+            _lenbuffer[4] = (byte)channel;
+            _out.Write(_lenbuffer, 0, 5);
+            _out.Write(buf, off, len);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace GitSharp.Core.Transport
         public void End()
         {
             formatLength(0);
-            Out.Write(lenbuffer, 0, 4);
+            _out.Write(_lenbuffer, 0, 4);
             Flush();
         }
 
@@ -120,7 +120,7 @@ namespace GitSharp.Core.Transport
         /// </summary>
         public void Flush()
         {
-            Out.Flush();
+            _out.Flush();
         }
 
         private static readonly char[] hexchar = new[]
@@ -134,11 +134,11 @@ namespace GitSharp.Core.Transport
             int o = 3;
             while (o >= 0 && w != 0)
             {
-                lenbuffer[o--] = (byte)hexchar[w & 0xf];
+                _lenbuffer[o--] = (byte)hexchar[w & 0xf];
                 w = (int)(((uint)w) >> 4);
             }
             while (o >= 0)
-                lenbuffer[o--] = (byte)'0';
+                _lenbuffer[o--] = (byte)'0';
         }
     }
 

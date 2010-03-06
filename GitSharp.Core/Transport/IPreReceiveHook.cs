@@ -39,20 +39,66 @@ using System.Collections.Generic;
 
 namespace GitSharp.Core.Transport
 {
+    /// <summary>
+    /// A simple no-op hook.
+    /// </summary>
     internal class NULLPreReceiveHook : IPreReceiveHook
     {
-        public void onPreReceive(ReceivePack rp, List<ReceiveCommand> commands)
+        public void onPreReceive(ReceivePack rp, ICollection<ReceiveCommand> commands)
         {
         }
     }
-    
+
     public static class PreReceiveHook
     {
         public static IPreReceiveHook NULL = new NULLPreReceiveHook();
     }
-
+ 
+    /// <summary>
+    /// Hook invoked by <see cref="ReceivePack"/> before any updates are executed.
+    /// <para/>
+    /// The hook is called with any commands that are deemed valid after parsing them
+    /// from the client and applying the standard receive configuration options to
+    /// them:
+    /// <ul>
+    /// <li><code>receive.denyDenyDeletes</code></li>
+    /// <li><code>receive.denyNonFastForwards</code></li>
+    /// </ul>
+    /// This means the hook will not receive a non-fast-forward update command if
+    /// denyNonFastForwards is set to true in the configuration file. To get all
+    /// commands within the hook, see <see cref="ReceivePack.getAllCommands"/>.
+    /// <para/>
+    /// As the hook is invoked prior to the commands being executed, the hook may
+    /// choose to block any command by setting its result status with
+    /// <see cref="ReceiveCommand.setResult(GitSharp.Core.Transport.ReceiveCommand.Result)"/>.
+    /// <para/>
+    /// The hook may also choose to perform the command itself (or merely pretend
+    /// that it has performed the command), by setting the result status to
+    /// <see cref="ReceiveCommand.Result.OK"/>.
+    /// <para/>
+    /// Hooks should run quickly, as they block the caller thread and the client
+    /// process from completing.
+    /// <para/>
+    /// Hooks may send optional messages back to the client via methods on
+    /// <see cref="ReceivePack"/>. Implementors should be aware that not all network
+    /// transports support this output, so some (or all) messages may simply be
+    /// discarded. These messages should be advisory only.
+    /// </summary>
     public interface IPreReceiveHook
     {
-        void onPreReceive(ReceivePack rp, List<ReceiveCommand> commands);   
+        /// <summary>
+        /// Invoked just before commands are executed.
+        /// <para/>
+        /// See the class description for how this method can impact execution.
+        /// </summary>
+        /// <param name="rp">
+        /// the process handling the current receive. Hooks may obtain
+        /// details about the destination repository through this handle.
+        /// </param>
+        /// <param name="commands">
+        /// unmodifiable set of valid commands still pending execution.
+        /// May be the empty set.
+        /// </param>
+        void onPreReceive(ReceivePack rp, ICollection<ReceiveCommand> commands);
     }
 }

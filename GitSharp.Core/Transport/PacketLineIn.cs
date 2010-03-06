@@ -50,10 +50,29 @@ namespace GitSharp.Core.Transport
         [Serializable]
         public enum AckNackResult
         {
+            /// <summary>
+            /// NAK
+            /// </summary>
             NAK,
+
+            /// <summary>
+            /// ACK
+            /// </summary>
             ACK,
+
+            /// <summary>
+            /// ACK + continue
+            /// </summary>
             ACK_CONTINUE,
+
+            /// <summary>
+            /// ACK + common
+            /// </summary>
             ACK_COMMON,
+
+            /// <summary>
+            /// ACK + ready
+            /// </summary>
             ACK_READY
         }
 
@@ -144,14 +163,9 @@ namespace GitSharp.Core.Transport
             }
             catch (IndexOutOfRangeException e)
             {
-                throw invalidHeader(lenbuffer, e);
+                throw new IOException("Invalid packet line header: " + (char)lenbuffer[0] +
+                                      (char)lenbuffer[1] + (char)lenbuffer[2] + (char)lenbuffer[3], e);
             }
-        }
-
-        private static Exception invalidHeader(byte[] lenbuffer, Exception e)
-        {
-            return new IOException("Invalid packet line header: " + (char)lenbuffer[0] +
-                                                    (char)lenbuffer[1] + (char)lenbuffer[2] + (char)lenbuffer[3], e);
         }
     }
 

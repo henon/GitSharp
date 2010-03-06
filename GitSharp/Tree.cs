@@ -211,5 +211,10 @@ namespace GitSharp
 					return AbstractObject.Wrap(_repo, tree_entry.Id);
 			}
 		}
+
+		public static implicit operator CoreTree(Tree t)
+		{
+			return t._internal_tree;
+		}
 	}
 }

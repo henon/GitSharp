@@ -178,8 +178,8 @@ namespace GitSharp
 		/// <returns></returns>
 		internal static AbstractObject Wrap(Repository repo, ObjectId objectId)
 		{
-			Debug.Assert(objectId != null);
-			Debug.Assert(repo != null);
+			Debug.Assert(objectId != null, "ObjectId is null");
+			Debug.Assert(repo != null, "Repository is null");
 			var obj = repo._internal_repo.MapObject(objectId, null);
 			if (obj is CoreCommit)
 				return new Commit(repo, obj as CoreCommit);

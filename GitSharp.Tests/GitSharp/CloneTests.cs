@@ -70,6 +70,7 @@ namespace GitSharp.Tests.GitSharp
         }
 
         [Test]
+        [Ignore("TransportLocal is not completely ported yet.")]
         public void Checked_cloned_local_dotGit_suffixed_repo()
         {
             //setup of .git directory

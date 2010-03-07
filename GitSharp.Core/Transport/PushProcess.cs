@@ -63,14 +63,16 @@ namespace GitSharp.Core.Transport
         /// <summary> Revision walker for checking some updates properties.  </summary>
         private readonly RevWalk.RevWalk _walker;
 
-        ///	 <summary> * Create process for specified transport and refs updates specification.
-        ///	 * </summary>
-        ///	 * <param name="transport">
-        ///	 *            transport between remote and local repository, used to Create
-        ///	 *            connection. </param>
-        ///	 * <param name="toPush">
-        ///	 *            specification of refs updates (and local tracking branches). </param>
-        ///	 * <exception cref="TransportException"> </exception>
+        /// <summary>
+        /// Create process for specified transport and refs updates specification.
+        /// </summary>
+        /// <param name="transport">
+        /// transport between remote and local repository, used to Create
+        /// connection. </param>
+        /// <param name="toPush">
+        /// specification of refs updates (and local tracking branches).
+        /// </param>
+        /// <exception cref="TransportException"> </exception>
         public PushProcess(Transport transport, IEnumerable<RemoteRefUpdate> toPush)
         {
             if (transport == null)
@@ -83,12 +85,10 @@ namespace GitSharp.Core.Transport
             _toPush = new Dictionary<string, RemoteRefUpdate>();
             foreach (RemoteRefUpdate rru in toPush)
             {
-                if (_toPush.ContainsKey(rru.RemoteName))
+                if (_toPush.put(rru.RemoteName, rru) != null)
                 {
                     throw new TransportException("Duplicate remote ref update is illegal. Affected remote name: " + rru.RemoteName);
                 }
-
-                _toPush.Add(rru.RemoteName, rru);
             }
         }
 
@@ -155,7 +155,16 @@ namespace GitSharp.Core.Transport
 
                 if (rru.NewObjectId.Equals(advertisedOld))
                 {
-                    rru.Status = rru.IsDelete ? RemoteRefUpdate.UpdateStatus.NON_EXISTING : RemoteRefUpdate.UpdateStatus.UP_TO_DATE;
+                    if (rru.IsDelete)
+                    {
+                        // ref does exist neither locally nor remotely
+                        rru.Status = RemoteRefUpdate.UpdateStatus.NON_EXISTING;
+                    }
+                    else
+                    {
+                        // same object - nothing to do
+                        rru.Status = RemoteRefUpdate.UpdateStatus.UP_TO_DATE;
+                    }
                     continue;
                 }
 
@@ -172,7 +181,7 @@ namespace GitSharp.Core.Transport
                 if (advertisedOld.Equals(ObjectId.ZeroId) || rru.IsDelete)
                 {
                     rru.FastForward = true;
-                    result.Add(rru.RemoteName, rru);
+                    result.put(rru.RemoteName, rru);
                     continue;
                 }
 
@@ -203,7 +212,7 @@ namespace GitSharp.Core.Transport
                 }
                 else
                 {
-                    result.Add(rru.RemoteName, rru);
+                    result.put(rru.RemoteName, rru);
                 }
             }
             return result;

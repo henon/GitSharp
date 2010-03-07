@@ -348,8 +348,8 @@ namespace GitSharp.Core.Transport
         /// <para/>
         /// Only refs allowed by this filter will be shown to the client.
         /// Clients may still attempt to create or update a reference hidden
-        /// by the configured {@link RefFilter}. These attempts should be
-        /// rejected by a matching {@link PreReceiveHook}.
+        /// by the configured <see cref="RefFilter"/>. These attempts should be
+        /// rejected by a matching <see cref="PreReceiveHook"/>.
         /// </summary>
         /// <param name="refFilter">the filter; may be null to show all refs.</param>
         public void setRefFilter(RefFilter refFilter)
@@ -401,9 +401,9 @@ namespace GitSharp.Core.Transport
         }
 
         /// <returns>all of the command received by the current request.</returns>
-        public List<ReceiveCommand> getAllCommands()
+        public IList<ReceiveCommand> getAllCommands()
         {
-            return commands;
+            return commands.AsReadOnly();
         }
 
         /// <summary>
@@ -463,7 +463,7 @@ namespace GitSharp.Core.Transport
 
                 if (messages != null)
                 {
-                    msgs = new StreamWriter(messages); // TODO : [nulltoken] A derived type should be used which would override WriteLine to output \n instead of \r\n
+                    msgs = new StreamWriter(messages, Constants.CHARSET); // TODO : [nulltoken] A derived type should be used which would override WriteLine to output \n instead of \r\n
                 }
 
                 enabledCapabilities = new List<string>();
@@ -568,8 +568,7 @@ namespace GitSharp.Core.Transport
             if (allowOfsDelta)
                 adv.advertiseCapability(CAPABILITY_OFS_DELTA);
             refs = refFilter.filter(db.getAllRefs());
-            Ref head = refs[Constants.HEAD];
-            refs.Remove(Constants.HEAD);
+            Ref head = refs.remove(Constants.HEAD);
             adv.send(refs);
             if (head != null && !head.isSymbolic())
                 adv.advertiseHave(head.ObjectId);
@@ -632,7 +631,7 @@ namespace GitSharp.Core.Transport
                 }
                 else
                 {
-                    cmd.setRef(refs[cmd.getRefName()]);
+                    cmd.setRef(refs.get(cmd.getRefName()));
                 }
 
                 commands.Add(cmd);
@@ -695,6 +694,8 @@ namespace GitSharp.Core.Transport
 
                 if (cmd.getType() == ReceiveCommand.Type.DELETE && !isAllowDeletes())
                 {
+                    // Deletes are not supported on this repository.
+                    //
                     cmd.setResult(ReceiveCommand.Result.REJECTED_NODELETE);
                     continue;
                 }
@@ -778,8 +779,8 @@ namespace GitSharp.Core.Transport
                         continue;
                     }
 
-                    RevCommit oldComm = (oldObj as RevCommit);
-                    RevCommit newComm = (newObj as RevCommit);
+                    var oldComm = (oldObj as RevCommit);
+                    var newComm = (newObj as RevCommit);
                     if (oldComm != null && newComm != null)
                     {
                         try
@@ -888,7 +889,7 @@ namespace GitSharp.Core.Transport
                     break;
 
                 default:
-                    cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, result.ToString());
+                    cmd.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, Enum.GetName(typeof(RefUpdate.RefUpdateResult), result));
                     break;
             }
         }
@@ -989,42 +990,12 @@ namespace GitSharp.Core.Transport
             }
         }
 
-
-
-
-
-
-        private static void Format(StringBuilder m, char[] idtmp, AnyObjectId id, string name)
-        {
-            m.Length = 0;
-            id.CopyTo(idtmp, m);
-            m.Append(' ');
-            m.Append(name);
-        }
-
-        private void WriteAdvertisedRef(StringBuilder m)
-        {
-            m.Append('\n');
-            pckOut.WriteString(m.ToString());
-        }
-
-
-
-
-
-
-
-
-
-
-
         public void Dispose()
         {
             walk.Dispose();
             raw.Dispose();
             msgs.Dispose();
         }
-
 
         #region Nested Types
 

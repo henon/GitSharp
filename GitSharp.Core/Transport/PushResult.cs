@@ -36,26 +36,41 @@
  */
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace GitSharp.Core.Transport
 {
+    /// <summary>
+    /// Result of push operation to the remote repository. Holding information of
+    /// <see cref="OperationResult"/> and remote refs updates status.
+    /// <para/>
+    /// see <see cref="Transport.push"/>
+    /// </summary>
     public class PushResult : OperationResult
     {
-        private IDictionary<string, RemoteRefUpdate> remoteUpdates = new Dictionary<string, RemoteRefUpdate>();
+        private IDictionary<string, RemoteRefUpdate> _remoteUpdates = new Dictionary<string, RemoteRefUpdate>();
 
-        public List<RemoteRefUpdate> RemoteUpdates
+        public ICollection<RemoteRefUpdate> RemoteUpdates
         {
-            get { return new List<RemoteRefUpdate>(remoteUpdates.Values); }
+            get { return new ReadOnlyCollection<RemoteRefUpdate>(_remoteUpdates.Values.ToList()); }
         }
 
+        /// <summary>
+        /// Get status of specific remote ref update by remote ref name. Together
+        /// with <see cref="OperationResult.GetAdvertisedRef"/> it provide full description/status
+        /// of this ref update.
+        /// </summary>
+        /// <param name="refName">remote ref name</param>
+        /// <returns>status of remote ref update</returns>
         public RemoteRefUpdate GetRemoteUpdate(string refName)
         {
-            return remoteUpdates[refName];
+            return _remoteUpdates.get(refName);
         }
 
         public void SetRemoteUpdates(IDictionary<string, RemoteRefUpdate> remoteUpdates)
         {
-            this.remoteUpdates = remoteUpdates;
+            _remoteUpdates = remoteUpdates;
         }
     }
 }

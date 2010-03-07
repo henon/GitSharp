@@ -93,8 +93,11 @@ namespace GitSharp
 		public void Add(params string[] paths)
 		{
 			GitIndex.RereadIfNecessary();
-			foreach (var path in paths)
+			foreach (var absolute_or_relative_path in paths)
 			{
+				string path = absolute_or_relative_path;
+				if (!Path.IsPathRooted(absolute_or_relative_path))
+					path = Path.Combine(_repo.WorkingDirectory, path);
 				if (new FileInfo(path).Exists)
 					AddFile(new FileInfo(path));
 				else if (new DirectoryInfo(path).Exists)
@@ -149,14 +152,20 @@ namespace GitSharp
 		public void Remove(params string[] paths)
 		{
 			GitIndex.RereadIfNecessary();
-			foreach (var path in paths)
+			foreach (var absolute_or_relative_path in paths)
 			{
+				string path = absolute_or_relative_path;
+				string relative_path = absolute_or_relative_path;
+				if (!Path.IsPathRooted(absolute_or_relative_path))
+					path = Path.Combine(_repo.WorkingDirectory, absolute_or_relative_path);
+				else
+					relative_path = Core.Util.PathUtil.RelativePath(_repo.WorkingDirectory, absolute_or_relative_path);
 				if (new FileInfo(path).Exists)
 					RemoveFile(new FileInfo(path), false);
 				else if (new DirectoryInfo(path).Exists)
 					RemoveDirectory(new DirectoryInfo(path), false);
 				else
-					GitIndex.Remove(path);
+					GitIndex.Remove(relative_path);
 			}
 			GitIndex.write();
 		}
@@ -169,8 +178,11 @@ namespace GitSharp
 		public void Delete(params string[] paths)
 		{
 			GitIndex.RereadIfNecessary();
-			foreach (var path in paths)
+			foreach (var absolute_or_relative_path in paths)
 			{
+				string path = absolute_or_relative_path;
+				if (!Path.IsPathRooted(absolute_or_relative_path))
+					path = Path.Combine(_repo.WorkingDirectory, path);
 				if (new FileInfo(path).Exists)
 					RemoveFile(new FileInfo(path), true);
 				else if (new DirectoryInfo(path).Exists)
@@ -183,7 +195,7 @@ namespace GitSharp
 
 		private void RemoveFile(FileInfo path, bool delete_file)
 		{
-			GitIndex.remove((FileSystemInfo)_repo._internal_repo.WorkingDirectory, (FileSystemInfo)path); // Todo: change GitIndex.Remove to remove(DirectoryInfo , FileInfo) ??
+			GitIndex.remove(_repo._internal_repo.WorkingDirectory, path); // Todo: change GitIndex.Remove to remove(DirectoryInfo , FileInfo) ??
 			if (delete_file)
 				path.Delete();
 		}
@@ -222,8 +234,11 @@ namespace GitSharp
 		public void Unstage(params string[] paths)
 		{
 			GitIndex.RereadIfNecessary();
-			foreach (var path in paths)
+			foreach (var absolute_or_relative_path in paths)
 			{
+				string path = absolute_or_relative_path;
+				if (Path.IsPathRooted(absolute_or_relative_path))
+					path = Core.Util.PathUtil.RelativePath(_repo.WorkingDirectory, absolute_or_relative_path);
 				if (this[path] == null)
 					return;
 				var blob = _repo.Get<Leaf>(path); // <--- we wouldn't want to stage something that is not representing a file
@@ -259,8 +274,11 @@ namespace GitSharp
 		public void Checkout(params string[] paths)
 		{
 			GitIndex.RereadIfNecessary();
-			foreach (var path in paths)
+			foreach (var absolute_or_relative_path in paths)
 			{
+				string path = absolute_or_relative_path;
+				if (Path.IsPathRooted(absolute_or_relative_path))
+					path = Core.Util.PathUtil.RelativePath(_repo.WorkingDirectory, absolute_or_relative_path);
 				var e = GitIndex.GetEntry(path);
 				if (e == null)
 					continue;

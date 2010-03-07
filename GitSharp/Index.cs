@@ -228,7 +228,7 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// Unstage overwrites staged files in the index with their current version in HEAD. This has no effect for added files as they are not present in HEAD. See <see cref="Remove"/> for that.
+		/// Unstage overwrites staged files in the index with their current version in HEAD. In case of newly added files they are removed from the index.
 		/// </summary>
 		/// <param name="paths">Relative paths to files you want to unstage.</param>
 		public void Unstage(params string[] paths)
@@ -243,8 +243,9 @@ namespace GitSharp
 					return;
 				var blob = _repo.Get<Leaf>(path); // <--- we wouldn't want to stage something that is not representing a file
 				if (blob == null)
-					throw new InvalidOperationException("The path does not point to a file! Unstage can not proceed.");
-				AddContent(Core.Repository.GitInternalSlash(PathEncoding.GetBytes(path)), blob.RawData);
+					GitIndex.Remove(path);
+				else
+					GitIndex.add(Core.Repository.GitInternalSlash(PathEncoding.GetBytes(path)), blob.RawData);
 			}
 			GitIndex.write();
 		}

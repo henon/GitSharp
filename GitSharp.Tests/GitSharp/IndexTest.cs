@@ -203,6 +203,10 @@ namespace GitSharp.API.Tests
 				Assert.AreEqual("baz", index.GetContent(foo_bar));
 				index.Remove(foo_bar);
 				Assert.IsNull(index.GetContent(foo_bar));
+				var added_file = "some/new/content/Added.txt";
+				index.AddContent(added_file, "");
+				index.Unstage(added_file);
+				Assert.IsNull(index.GetContent(added_file));
 			}
 		}
 

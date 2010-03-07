@@ -38,9 +38,7 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace GitSharp.Core
 {
@@ -144,7 +142,7 @@ namespace GitSharp.Core
 
 		private bool Step()
 		{
-			if (_tree == null) return false; 
+			if (_tree == null) return false;
 			if (_sub != null)
 			{
 				if (_sub.Step()) return true;
@@ -180,114 +178,16 @@ namespace GitSharp.Core
 		}
 
 
-	    public bool hasNext()
-	    {
-	       return HasNextTreeEntry();
-	    }
-
-	    public TreeEntry next()
-	    {
-            TreeEntry ret = NextTreeEntry();
-            Step();
-            return ret;
-	    }
-	}
-
-
-	/// <summary>
-	/// [henon] bloddy hack to utilize treeiterator for iterating over the file system. will need to clear these things out later
-	/// </summary>
-	public class DirectoryTree : GitSharp.Core.Tree
-	{
-		public DirectoryTree(Repository repo)
-			: base(repo)
+		public bool hasNext()
 		{
-			Repository = repo;
-			IgnoreHandler = new IgnoreHandler(repo);
-			CreateMembers();
+			return HasNextTreeEntry();
 		}
 
-		public DirectoryTree(DirectoryTree parent, string name)
-			: base(parent, Core.Repository.GitInternalSlash(Constants.encode(name)))
+		public TreeEntry next()
 		{
-			Repository = parent.Repository;
-			IgnoreHandler = parent.IgnoreHandler;
-			CreateMembers();
-		}
-
-		public Repository Repository
-		{
-			get;
-			private set;
-		}
-
-		private TreeEntry[] m_members;
-
-		public override TreeEntry[] Members
-		{
-			get { return m_members; }
-			//private set { m_members = value; }
-		}
-
-		public override int MemberCount
-		{
-			get
-			{
-				return Members.Length;
-			}
-		}
-
-		private void CreateMembers()
-		{
-			string prefix = Repository.WorkingDirectory.FullName;
-			if (Parent != null && Parent.Name != null)
-				prefix = Path.Combine(prefix, Parent.FullName);
-			var dir = Name==null ? Repository.WorkingDirectory : new DirectoryInfo( Path.Combine(prefix, Name));
-			var subtrees = dir.GetDirectories().Where(d => d.Name != Constants.DOT_GIT && !IgnoreHandler.IsIgnored(d.Name)).Select(d => new DirectoryTree(this, d.Name) as TreeEntry);
-			var file_entries = dir.GetFiles().Where(f => !IgnoreHandler.IsIgnored(f.Name)).Select(f => new DirectoryTreeEntry(this, f.Name) as TreeEntry);
-			m_members = subtrees.Concat(file_entries).ToArray();
-		}
-
-		public IgnoreHandler IgnoreHandler { get; private set; }
-
-		public override void Accept(TreeVisitor tv, int flags)
-		{
-			tv.StartVisitTree(this);
-			foreach (var entry in Members)
-			{
-				entry.Accept(tv, flags);
-			}
-			tv.EndVisitTree(this);
+			TreeEntry ret = NextTreeEntry();
+			Step();
+			return ret;
 		}
 	}
-
-
-	/// <summary>
-	/// [henon] bloody hack to utilize treeiterator for iterating over the file system. will need to clear these things out later
-	/// </summary>
-	public class DirectoryTreeEntry : GitSharp.Core.FileTreeEntry
-	{
-		public DirectoryTreeEntry(DirectoryTree parent, string name)
-			: base(parent, ObjectId.ZeroId, Core.Repository.GitInternalSlash(Constants.encode(name)), false)
-		{
-			Repository = parent.Repository;
-		}
-
-		public override FileMode Mode
-		{
-			get { return FileMode.RegularFile; }
-		}
-
-		public Repository Repository
-		{
-			get;
-			private set;
-		}
-
-		public override void Accept(TreeVisitor tv, int flags)
-		{
-			tv.VisitFile(this);
-		}
-	}
-
 }

@@ -232,6 +232,7 @@ namespace GitSharp.Tests.GitSharp
 
 
 		[Test]
+        [Ignore]
 		public void ResetSoft()
 		{
 			using (var repo = GetTrashRepository())

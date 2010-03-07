@@ -36,6 +36,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
+using GitSharp.Core;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 using System.IO;
 using GitSharp.Core.Tests;
@@ -63,6 +66,38 @@ namespace GitSharp.Tests.GitSharp
                 //Verify content is in the proper location
                 var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
                 Assert.IsTrue(new FileInfo(readme).Exists);
+            }
+        }
+
+        [Test]
+        public void Checked_cloned_local_dotGit_suffixed_repo()
+        {
+            //setup of .git directory
+            var resource =
+                new DirectoryInfo(PathUtil.Combine(Path.Combine(Environment.CurrentDirectory, "Resources"),
+                                               "OneFileRepository"));
+            var tempRepository =
+                new DirectoryInfo(Path.Combine(trash.FullName, "OneFileRepository" + Path.GetRandomFileName() + Constants.DOT_GIT_EXT));
+            CopyDirectory(resource.FullName, tempRepository.FullName);
+
+            var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, Constants.DOT_GIT));
+            Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
+
+
+            using (var repo = new Repository(repositoryPath.FullName))
+            {
+                Assert.IsTrue(Repository.IsValid(repo.Directory));
+                Commit headCommit = repo.Head.CurrentCommit;
+                Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", headCommit.Hash);
+            }
+
+            string toPath = Path.Combine(trash.FullName, "to.git");
+
+            using (var repo = Git.Clone(repositoryPath.FullName, toPath))
+            {
+                Assert.IsTrue(Repository.IsValid(repo.Directory));
+                Commit headCommit = repo.Head.CurrentCommit;
+                Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", headCommit.Hash);
             }
         }
 

@@ -190,18 +190,34 @@ namespace GitSharp.API.Tests
 				Assert.AreEqual(0, diff.Staged.Count);
 				Assert.AreEqual(0, diff.Modified.Count);
 				Assert.AreEqual(0, diff.Added.Count);
-				// Assert.AreEqual(2, diff.Untracked.Count); TODO: verify!
-				//Assert.IsTrue(diff.Untracked.Contains("file2"));
-				//Assert.IsTrue(diff.Untracked.Contains("dir/file3"));
-				Assert.AreEqual(0, diff.Untracked.Count);
+				Assert.AreEqual(2, diff.Untracked.Count);
+				Assert.IsTrue(diff.Untracked.Contains("file2"));
+				//Assert.IsTrue(diff.Untracked.Contains("dir/")); // <--- verified this against msysgit.
 
 				repo.Commit("committing staged changes, this does not delete removed files from the working directory. they should be untracked now.", Author.Anonymous);
 				diff = repo.Status;
 
 				Assert.AreEqual(0, diff.Removed.Count);
 				Assert.AreEqual(2, diff.Untracked.Count);
+				Assert.IsTrue(diff.Untracked.Contains("file2")); // note: this looks like a bug (actually the file is tracked but only missing in the index) but complies to cgit
+				//Assert.IsTrue(diff.Untracked.Contains("dir/")); // <--- verified this against msysgit.
+			}
+		}
+
+		[Ignore("Gitsharp is not yet clever enough to collapse directories containing only untracked files!")]
+		[Test]
+		public void UntrackedDirectory()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var index = repo.Index;
+				index.Stage(writeTrashFile("file2", "file2").FullName, writeTrashFile("dir/file3", "dir/file3").FullName);
+				index.CommitChanges("...", Author.Anonymous);
+				index.Remove(Path.Combine(trash.FullName, "file2"), Path.Combine(trash.FullName, "dir"));
+
+				var diff = index.Status;
 				Assert.IsTrue(diff.Untracked.Contains("file2"));
-				Assert.IsTrue(diff.Untracked.Contains("dir/file3"));
+				Assert.IsTrue(diff.Untracked.Contains("dir/")); // <--- verified this against msysgit.
 			}
 		}
 
@@ -269,6 +285,40 @@ namespace GitSharp.API.Tests
 				Assert.NotNull(iter.next());
 				Assert.NotNull(iter.next());
 				Assert.NotNull(iter.next());
+			}
+		}
+
+		[Test]
+		public void IgnoreUntrackedFilesAndDirectories()
+		{
+			using (var repo = new Repository(trash.FullName))
+			{
+				repo.Head.Reset(ResetBehavior.Hard);
+				writeTrashFile("untracked.txt", "");
+				writeTrashFile("image.png", "");
+				writeTrashFile("someDirectory/untracked2.txt", "");
+				writeTrashFile("someDirectory/untracked", "");
+				writeTrashFile("some/other/directory/.svn/format", "");
+				writeTrashFile("some/other/README.txt", "");
+				writeTrashFile("some/other/directory/README.txt", "");
+				// ignore patterns:
+				writeTrashFile(".gitignore", "*.txt\n.svn");
+				writeTrashFile("some/other/.gitignore", "!*.txt");
+				var status = repo.Status;
+				Assert.IsTrue(status.Untracked.Contains("image.png"));
+				Assert.IsTrue(status.Untracked.Contains("someDirectory/untracked"));
+				Assert.AreEqual(0, status.Added.Count);
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+				Assert.AreEqual(0, status.MergeConflict.Count);
+				writeTrashFile(".gitignore", "other");
+				status.Update();
+				Assert.IsTrue(status.Untracked.Contains("untracked.txt"));
+				Assert.IsTrue(status.Untracked.Contains("someDirectory/untracked2.txt"));
+				Assert.IsTrue(status.Untracked.Contains("someDirectory/untracked"));
+				Assert.IsTrue(status.Untracked.Contains("image.png"));
 			}
 		}
 	}

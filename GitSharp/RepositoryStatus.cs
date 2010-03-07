@@ -47,25 +47,13 @@ namespace GitSharp
 	public class RepositoryStatus
 	{
 
-		private readonly GitIndex _index;
-		private readonly Core.Tree _tree;
+		private GitIndex _index;
+		private Core.Tree _tree;
 
 		public RepositoryStatus(Repository repository)
 		{
-			AnyDifferences = false;
-			Added = new HashSet<string>();
-			Staged = new HashSet<string>();
-			Removed = new HashSet<string>();
-			Missing = new HashSet<string>();
-			Modified = new HashSet<string>();
-			Untracked = new HashSet<string>();
-			MergeConflict = new HashSet<string>();
 			Repository = repository;
-			var commit = Repository.Head.CurrentCommit;
-			_tree = (commit != null ? commit.Tree : new Core.Tree(Repository));
-			_index = Repository.Index.GitIndex;
-
-			Diff();
+			Update();
 		}
 
 		public Repository Repository
@@ -122,12 +110,22 @@ namespace GitSharp
 		/// <returns>true if anything is different between index, tree, and workdir</returns>
 		private bool Diff()
 		{
+			var commit = Repository.Head.CurrentCommit;
+			_tree = (commit != null ? commit.Tree : new Core.Tree(Repository));
+			_index = Repository.Index.GitIndex;
 			DirectoryInfo root = _index.Repository.WorkingDirectory;
 			var visitor = new AbstractIndexTreeVisitor { VisitEntryAux = OnVisitEntry };
 			new IndexTreeWalker(_index, _tree, new DirectoryTree(Repository), root, visitor).Walk();
 			return AnyDifferences;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="treeEntry"></param>
+		/// <param name="wdirEntry">Note: wdirEntry is the gitignored working directory entry.</param>
+		/// <param name="indexEntry"></param>
+		/// <param name="file">Note: gitignore patterns do not influence this parameter</param>
 		private void OnVisitEntry(TreeEntry treeEntry, TreeEntry wdirEntry, GitIndex.Entry indexEntry, FileInfo file)
 		{
 			//Console.WriteLine(" ----------- ");
@@ -150,12 +148,12 @@ namespace GitSharp
 					Staged.Add(indexEntry.Name);
 					AnyDifferences = true;
 				}
-				if (wdirEntry == null)
+				if (!file.Exists)
 				{
 					Missing.Add(indexEntry.Name);
 					AnyDifferences = true;
 				}
-				if (wdirEntry != null && indexEntry.IsModified(new DirectoryInfo(Repository.WorkingDirectory), true))
+				if (file.Exists && indexEntry.IsModified(new DirectoryInfo(Repository.WorkingDirectory), true))
 				{
 					Modified.Add(indexEntry.Name);
 					AnyDifferences = true;
@@ -173,10 +171,25 @@ namespace GitSharp
 					Removed.Add(treeEntry.FullName);
 					AnyDifferences = true;
 				}
-				if (treeEntry == null && wdirEntry != null)
+				if (wdirEntry != null) // actually, we should enforce (treeEntry == null ) here too but original git does not, may be a bug. 
 					Untracked.Add(wdirEntry.FullName);
 			}
 		}
 
+		/// <summary>
+		/// Recalculates the status
+		/// </summary>
+		public void Update()
+		{
+			AnyDifferences = false;
+			Added = new HashSet<string>();
+			Staged = new HashSet<string>();
+			Removed = new HashSet<string>();
+			Missing = new HashSet<string>();
+			Modified = new HashSet<string>();
+			Untracked = new HashSet<string>();
+			MergeConflict = new HashSet<string>();
+			Diff();
+		}
 	}
 }

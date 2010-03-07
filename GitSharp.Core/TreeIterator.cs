@@ -203,6 +203,7 @@ namespace GitSharp.Core
 			: base(repo)
 		{
 			Repository = repo;
+			IgnoreHandler = new IgnoreHandler(repo);
 			CreateMembers();
 		}
 
@@ -210,6 +211,7 @@ namespace GitSharp.Core
 			: base(parent, Core.Repository.GitInternalSlash(Constants.encode(name)))
 		{
 			Repository = parent.Repository;
+			IgnoreHandler = parent.IgnoreHandler;
 			CreateMembers();
 		}
 
@@ -239,12 +241,14 @@ namespace GitSharp.Core
 		{
 			string prefix = Repository.WorkingDirectory.FullName;
 			if (Parent != null && Parent.Name != null)
-				prefix = Path.Combine(prefix, Parent.Name);
+				prefix = Path.Combine(prefix, Parent.FullName);
 			var dir = Name==null ? Repository.WorkingDirectory : new DirectoryInfo( Path.Combine(prefix, Name));
-			var subtrees = dir.GetDirectories().Where(d => d.Name != Constants.DOT_GIT).Select(d => new DirectoryTree(this, d.Name) as TreeEntry);
-			var file_entries = dir.GetFiles().Select(f => new DirectoryTreeEntry(this, f.Name) as TreeEntry);
+			var subtrees = dir.GetDirectories().Where(d => d.Name != Constants.DOT_GIT && !IgnoreHandler.IsIgnored(d.Name)).Select(d => new DirectoryTree(this, d.Name) as TreeEntry);
+			var file_entries = dir.GetFiles().Where(f => !IgnoreHandler.IsIgnored(f.Name)).Select(f => new DirectoryTreeEntry(this, f.Name) as TreeEntry);
 			m_members = subtrees.Concat(file_entries).ToArray();
 		}
+
+		public IgnoreHandler IgnoreHandler { get; private set; }
 
 		public override void Accept(TreeVisitor tv, int flags)
 		{

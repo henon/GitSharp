@@ -259,36 +259,6 @@ namespace GitSharp.API.Tests
 		}
 
 		[Test]
-		public void DirectoryTreeTest() // <--  tests the working directory iterator substitution used for untrackt file detection and ignore handling ...
-		{
-			using (var repo = GetTrashRepository())
-			{
-				repo.CurrentBranch.Reset(ResetBehavior.Hard);
-				var dir = new DirectoryTree(repo);
-				Assert.AreEqual(null, dir.Name);
-				var members = dir.Members.ToDictionary(m => m.Name);
-				Assert.IsTrue(members.ContainsKey("master.txt"));
-				Assert.AreEqual("master.txt", members["master.txt"].FullName);
-				Assert.IsTrue(members.ContainsKey("a"));
-				Assert.AreEqual("a", members["a"].FullName);
-				var a = members["a"] as DirectoryTree;
-				Assert.NotNull(a);
-				var a_members = a.Members.ToDictionary(m => m.Name);
-				Assert.AreEqual("a/a1", a_members["a1"].FullName);
-				var iter = new TreeIterator(dir, TreeIterator.Order.POSTORDER);
-				Assert.IsTrue(iter.hasNext());
-				var entry = iter.next();
-				Assert.NotNull(iter.next());
-				Assert.NotNull(iter.next());
-				Assert.NotNull(iter.next());
-				Assert.NotNull(iter.next());
-				Assert.NotNull(iter.next());
-				Assert.NotNull(iter.next());
-				Assert.NotNull(iter.next());
-			}
-		}
-
-		[Test]
 		public void IgnoreUntrackedFilesAndDirectories()
 		{
 			using (var repo = new Repository(trash.FullName))

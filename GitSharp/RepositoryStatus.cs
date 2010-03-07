@@ -38,9 +38,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using GitSharp.Core;
+using GitSharp.Core.TreeWalk;
 
 namespace GitSharp
 {
@@ -113,10 +116,42 @@ namespace GitSharp
 			var commit = Repository.Head.CurrentCommit;
 			_tree = (commit != null ? commit.Tree : new Core.Tree(Repository));
 			_index = Repository.Index.GitIndex;
+			_index.RereadIfNecessary();
 			DirectoryInfo root = _index.Repository.WorkingDirectory;
 			var visitor = new AbstractIndexTreeVisitor { VisitEntryAux = OnVisitEntry };
-			new IndexTreeWalker(_index, _tree, new DirectoryTree(Repository), root, visitor).Walk();
+			new IndexTreeWalker(_index, _tree, CreateWorkingDirectoryTree(Repository), root, visitor).Walk();
 			return AnyDifferences;
+		}
+
+		private GitSharp.Core.Tree CreateWorkingDirectoryTree(Repository repo)
+		{
+			var root = repo._internal_repo.WorkingDirectory;
+			var tree = new Core.Tree(repo._internal_repo);
+			IgnoreHandler = new IgnoreHandler(repo);
+			FillTree(root, tree);
+			return tree;
+		}
+
+		private IgnoreHandler IgnoreHandler
+		{
+			get; set;
+		}
+
+		private void FillTree(DirectoryInfo dir, Core.Tree tree)
+		{
+			foreach (var subdir in dir.GetDirectories())
+			{
+				if (subdir.Name == Constants.DOT_GIT || IgnoreHandler.IsIgnored(subdir.Name))
+					continue;
+				var t = tree.AddTree(subdir.Name);
+				FillTree(subdir, t);
+			}
+			foreach (var file in dir.GetFiles())
+			{
+				if (IgnoreHandler.IsIgnored(file.Name))
+					continue;
+				tree.AddFile(( file.Name));
+			}
 		}
 
 		/// <summary>
@@ -145,6 +180,7 @@ namespace GitSharp
 				}
 				if (treeEntry != null && !treeEntry.Id.Equals(indexEntry.ObjectId))
 				{
+					Debug.Assert(treeEntry.FullName == indexEntry.Name);
 					Staged.Add(indexEntry.Name);
 					AnyDifferences = true;
 				}

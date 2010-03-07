@@ -43,6 +43,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace GitSharp.Core.Util
 {
@@ -115,8 +116,8 @@ namespace GitSharp.Core.Util
 				  throw new ArgumentNullException("reference_path");
 			  if (path == null)
 				  throw new ArgumentNullException("path");
-			  reference_path = reference_path.Replace('/', '\\');
-			  path = path.Replace('/', '\\');
+			  //reference_path = reference_path.Replace('/', '\\');
+			  //path = path.Replace('/', '\\');
 			  bool isRooted = Path.IsPathRooted(reference_path) && Path.IsPathRooted(path);
 			  if (isRooted)
 			  {
@@ -125,8 +126,8 @@ namespace GitSharp.Core.Util
 					  return path;
 			  }
 			  var relativePath = new StringCollection();
-			  string[] fromDirectories = reference_path.Split(Path.DirectorySeparatorChar);
-			  string[] toDirectories = path.Split(Path.DirectorySeparatorChar);
+			  string[] fromDirectories = Regex.Split(reference_path, @"[/\\]+");
+			  string[] toDirectories = Regex.Split( path, @"[/\\]+");
 			  int length = Math.Min(fromDirectories.Length, toDirectories.Length);
 			  int lastCommonRoot = -1;
 			  // find common root
@@ -138,7 +139,7 @@ namespace GitSharp.Core.Util
 				  lastCommonRoot = x;
 			  }
 			  if (lastCommonRoot == -1)
-				  return path;
+				  return string.Join(Path.DirectorySeparatorChar.ToString(), toDirectories);
 			  // add relative folders in from path
 			  for (int x = lastCommonRoot + 1; x < fromDirectories.Length; x++)
 				  if (fromDirectories[x].Length > 0)

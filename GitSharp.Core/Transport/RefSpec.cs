@@ -41,26 +41,80 @@ using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
-    /**
- * Describes how refs in one repository copy into another repository.
- * <para />
- * A ref specification provides matching support and limited rules to rewrite a
- * reference in one repository to another reference in another repository.
- */
+    /// <summary>
+    /// Describes how refs in one repository copy into another repository.
+    /// <para />
+    /// A ref specification provides matching support and limited rules to rewrite a
+    /// reference in one repository to another reference in another repository.
+    /// </summary>
     public class RefSpec
     {
+        /// <summary>
+        /// Suffix for wildcard ref spec component, that indicate matching all refs
+        /// with specified prefix.                                                 
+        /// </summary>
         public const string WILDCARD_SUFFIX = "/*";
 
+        /// <summary>
+        /// Check whether provided string is a wildcard ref spec component.
+        /// </summary>
+        /// <param name="s">ref spec component - string to test. Can be null.</param>
+        /// <returns>true if provided string is a wildcard ref spec component.</returns>
         public static bool IsWildcard(string s)
         {
             return s != null && s.EndsWith(WILDCARD_SUFFIX);
         }
 
+        /// <summary>
+        /// Check if this specification wants to forcefully update the destination.
+        /// <para/>
+        /// Returns true if this specification asks for updates without merge tests.
+        /// </summary>
         public bool Force { get; private set; }
+
+        /// <summary>
+        /// Check if this specification is actually a wildcard pattern.
+        /// <para/>
+        /// If this is a wildcard pattern then the source and destination names
+        /// returned by <see cref="Source"/> and <see cref="Destination"/> will not
+        /// be actual ref names, but instead will be patterns.
+        /// <para/>
+        /// Returns true if this specification could match more than one ref.</summary>
         public bool Wildcard { get; private set; }
+
+        /// <summary>
+        /// Get the source ref description.
+        /// <para/>
+        /// During a fetch this is the name of the ref on the remote repository we
+        /// are fetching from. During a push this is the name of the ref on the local
+        /// repository we are pushing out from.
+        /// <para/>
+        /// Returns name (or wildcard pattern) to match the source ref.
+        /// </summary>
         public string Source { get; private set; }
+
+        /// <summary>
+        /// Get the destination ref description.
+        /// <para/>
+        /// During a fetch this is the local tracking branch that will be updated
+        /// with the new ObjectId after fetching is complete. During a push this is
+        /// the remote ref that will be updated by the remote's receive-pack process.
+        /// <para/>
+        /// If null during a fetch no tracking branch should be updated and the
+        /// ObjectId should be stored transiently in order to prepare a merge.
+        /// <para/>
+        /// If null during a push, use <see cref="Source"/> instead.
+        /// <para/>
+        /// Returns name (or wildcard) pattern to match the destination ref.
+        /// </summary>
         public string Destination { get; private set; }
 
+        /// <summary>
+        /// Construct an empty RefSpec.
+        /// <para/>
+        /// A newly created empty RefSpec is not suitable for use in most
+        /// applications, as at least one field must be set to match a source name.
+        /// </summary>
         public RefSpec()
         {
             Force = false;
@@ -76,6 +130,21 @@ namespace GitSharp.Core.Transport
             Destination = destination;
         }
 
+        /// <summary>
+        /// Parse a ref specification for use during transport operations.
+        /// <para/>
+        /// Specifications are typically one of the following forms:
+        /// <ul>
+        /// <li><code>refs/head/master</code></li>
+        /// <li><code>refs/head/master:refs/remotes/origin/master</code></li>
+        /// <li><code>refs/head/*:refs/remotes/origin/*</code></li>
+        /// <li><code>+refs/head/master</code></li>
+        /// <li><code>+refs/head/master:refs/remotes/origin/master</code></li>
+        /// <li><code>+refs/head/*:refs/remotes/origin/*</code></li>
+        /// <li><code>:refs/head/master</code></li>
+        /// </ul>
+        /// </summary>
+        /// <param name="spec">string describing the specification.</param>
         public RefSpec(string spec)
         {
             string s = spec;
@@ -126,16 +195,37 @@ namespace GitSharp.Core.Transport
             Destination = p.Destination;
         }
 
+        /// <summary>
+        /// Create a new RefSpec with a different force update setting.
+        /// </summary>
+        /// <param name="force">new value for force update in the returned instance.</param>
+        /// <returns>a new RefSpec with force update as specified.</returns>
         public RefSpec SetForce(bool force)
         {
             return new RefSpec(this) { Force = force };
         }
 
+        /// <summary>
+        /// Create a new RefSpec with a different source name setting.
+        /// </summary>
+        /// <param name="source">new value for source in the returned instance.</param>
+        /// <returns>a new RefSpec with source as specified.</returns>
         public RefSpec SetSource(string source)
         {
-            return new RefSpec(this) { Source = source };
+            var r = new RefSpec(this);
+            r.Source = source;
+            if (IsWildcard(r.Source) && r.Destination == null)
+                throw new InvalidOperationException("Destination is not a wildcard.");
+            if (IsWildcard(r.Source) != IsWildcard(r.Destination))
+                throw new InvalidOperationException("Source/Destination must match.");
+            return r;
         }
 
+        /// <summary>
+        /// Create a new RefSpec with a different destination name setting.
+        /// </summary>
+        /// <param name="destination">new value for destination in the returned instance.</param>
+        /// <returns>a new RefSpec with destination as specified.</returns>
         public RefSpec SetDestination(string destination)
         {
             RefSpec r = new RefSpec(this);
@@ -143,15 +233,21 @@ namespace GitSharp.Core.Transport
 
             if (IsWildcard(r.Destination) && r.Source == null)
             {
-                throw new ArgumentException("Source is not a wildcard.");
+                throw new InvalidOperationException("Source is not a wildcard.");
             }
             if (IsWildcard(r.Source) != IsWildcard(r.Destination))
             {
-                throw new ArgumentException("Source/Destination must match.");
+                throw new InvalidOperationException("Source/Destination must match.");
             }
             return r;
         }
 
+        /// <summary>
+        /// Create a new RefSpec with a different source/destination name setting.
+        /// </summary>
+        /// <param name="source">new value for source in the returned instance.</param>
+        /// <param name="destination">new value for destination in the returned instance.</param>
+        /// <returns>a new RefSpec with destination as specified.</returns>
         public RefSpec SetSourceDestination(string source, string destination)
         {
             if (IsWildcard(source) != IsWildcard(destination))
@@ -162,26 +258,61 @@ namespace GitSharp.Core.Transport
             return new RefSpec(this) { Wildcard = IsWildcard(source), Source = source, Destination = destination };
         }
 
+        /// <summary>
+        /// Does this specification's source description match the ref name?
+        /// </summary>
+        /// <param name="r">ref name that should be tested.</param>
+        /// <returns>true if the names match; false otherwise.</returns>
         public bool MatchSource(string r)
         {
             return match(r, Source);
         }
 
+        /// <summary>
+        /// Does this specification's source description match the ref?
+        /// </summary>
+        /// <param name="r">ref whose name should be tested.</param>
+        /// <returns>true if the names match; false otherwise.</returns>
         public bool MatchSource(Ref r)
         {
             return match(r.Name, Source);
         }
 
+        /// <summary>
+        /// Does this specification's destination description match the ref name?
+        /// </summary>
+        /// <param name="r">ref name that should be tested.</param>
+        /// <returns>true if the names match; false otherwise.</returns>
         public bool MatchDestination(string r)
         {
             return match(r, Destination);
         }
 
+        /// <summary>
+        /// Does this specification's destination description match the ref?
+        /// </summary>
+        /// <param name="r">ref whose name should be tested.</param>
+        /// <returns>true if the names match; false otherwise.</returns>
         public bool MatchDestination(Ref r)
         {
             return match(r.Name, Destination);
         }
 
+        /// <summary>
+        /// Expand this specification to exactly match a ref name.
+        /// <para/>
+        /// Callers must first verify the passed ref name matches this specification,
+        /// otherwise expansion results may be unpredictable.
+        /// </summary>
+        /// <param name="r">
+        /// a ref name that matched our source specification. Could be a
+        /// wildcard also.
+        /// </param>
+        /// <returns>
+        /// a new specification expanded from provided ref name. Result
+        /// specification is wildcard if and only if provided ref name is
+        /// wildcard.
+        /// </returns>
         public RefSpec ExpandFromSource(string r)
         {
             return Wildcard ? new RefSpec(this).expandFromSourceImp(r) : this;
@@ -196,19 +327,44 @@ namespace GitSharp.Core.Transport
             return this;
         }
 
+        /// <summary>
+        /// Expand this specification to exactly match a ref.
+        /// <para/>
+        /// Callers must first verify the passed ref matches this specification,
+        /// otherwise expansion results may be unpredictable.
+        /// </summary>
+        /// <param name="r">
+        /// a ref that matched our source specification. Could be a
+        /// wildcard also.
+        /// </param>
+        /// <returns>
+        /// a new specification expanded from provided ref name. Result
+        /// specification is wildcard if and only if provided ref name is
+        /// wildcard.
+        /// </returns>
         public RefSpec ExpandFromSource(Ref r)
         {
             return ExpandFromSource(r.Name);
         }
 
+        /// <summary>
+        /// Expand this specification to exactly match a ref name.
+        /// <para/>
+        /// Callers must first verify the passed ref name matches this specification,
+        /// otherwise expansion results may be unpredictable.
+        /// </summary>
+        /// <param name="r">
+        /// a ref name that matched our destination specification. Could
+        /// be a wildcard also.
+        /// </param>
+        /// <returns>
+        /// a new specification expanded from provided ref name. Result
+        /// specification is wildcard if and only if provided ref name is
+        /// wildcard.
+        /// </returns>
         public RefSpec ExpandFromDestination(string r)
         {
             return Wildcard ? new RefSpec(this).expandFromDstImp(r) : this;
-        }
-
-        public RefSpec ExpandFromDestination(Ref r)
-        {
-            return ExpandFromDestination(r.Name);
         }
 
         private RefSpec expandFromDstImp(string name)
@@ -220,9 +376,26 @@ namespace GitSharp.Core.Transport
             return this;
         }
 
+        /// <summary>
+        /// Expand this specification to exactly match a ref.
+        /// <para/>
+        /// Callers must first verify the passed ref matches this specification,
+        /// otherwise expansion results may be unpredictable.
+        /// </summary>
+        /// <param name="r">a ref that matched our destination specification.</param>
+        /// <returns>
+        /// a new specification expanded from provided ref name. Result
+        /// specification is wildcard if and only if provided ref name is
+        /// wildcard.
+        /// </returns>
+        public RefSpec ExpandFromDestination(Ref r)
+        {
+            return ExpandFromDestination(r.Name);
+        }
+
         private bool match(string refName, string s)
         {
-            if (string.IsNullOrEmpty(s))
+            if (s == null)
             {
                 return false;
             }
@@ -235,26 +408,6 @@ namespace GitSharp.Core.Transport
             return refName.Equals(s);
         }
 
-        private static bool eq(string a, string b)
-        {
-            if (a == b) return true;
-            if (a == null || b == null) return false;
-            return a.Equals(b);
-        }
-
-        public override bool Equals(object obj)
-        {
-            RefSpec b = (obj as RefSpec);
-            if (b == null)
-                return false;
-
-            if (Force != b.Force) return false;
-            if (Wildcard != b.Wildcard) return false;
-            if (!eq(Source, b.Source)) return false;
-            if (!eq(Destination, b.Destination)) return false;
-            return true;
-        }
-
         public override int GetHashCode()
         {
             int hc = 0;
@@ -265,9 +418,29 @@ namespace GitSharp.Core.Transport
             return hc;
         }
 
+        public override bool Equals(object obj)
+        {
+            var b = (obj as RefSpec);
+            if (b == null)
+                return false;
+
+            if (Force != b.Force) return false;
+            if (Wildcard != b.Wildcard) return false;
+            if (!eq(Source, b.Source)) return false;
+            if (!eq(Destination, b.Destination)) return false;
+            return true;
+        }
+        
+        private static bool eq(string a, string b)
+        {
+            if (a == b) return true;
+            if (a == null || b == null) return false;
+            return a.Equals(b);
+        }
+        
         public override string ToString()
         {
-            StringBuilder r = new StringBuilder();
+            var r = new StringBuilder();
             if (Force)
                 r.Append('+');
             if (Source != null)

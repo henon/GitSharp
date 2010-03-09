@@ -95,7 +95,7 @@ namespace GitSharp.API.Tests
 				writeTrashFile(filepath, "c");
 				repository.Index.Add(filepath);
 
-				status = repository.Status;
+				status.Update();
 
 				Assert.IsTrue(status.AnyDifferences);
 				Assert.AreEqual(2, status.Added.Count);
@@ -108,7 +108,7 @@ namespace GitSharp.API.Tests
 				Assert.AreEqual(0, status.Untracked.Count);
 
 				repository.Commit("after that no added files should remain", Author.Anonymous);
-				status = repository.Status;
+				status.Update();
 
 				Assert.AreEqual(0, status.Added.Count);
 				Assert.AreEqual(0, status.Staged.Count);
@@ -165,7 +165,7 @@ namespace GitSharp.API.Tests
 				Assert.AreEqual(0, status.Untracked.Count);
 
 				repo.Commit("committing staged changes, modified files should still be modified", Author.Anonymous);
-				status = repo.Status;
+				status.Update();
 
 				Assert.AreEqual(0, status.Staged.Count);
 				Assert.AreEqual(1, status.Modified.Count);
@@ -269,11 +269,11 @@ namespace GitSharp.API.Tests
 				writeTrashFile("someDirectory/untracked2.txt", "");
 				writeTrashFile("someDirectory/untracked", "");
 				writeTrashFile("some/other/directory/.svn/format", "");
-				writeTrashFile("some/other/README.txt", "");
-				writeTrashFile("some/other/directory/README.txt", "");
+				writeTrashFile("some/other/README", "");
+				writeTrashFile("some/other/directory/README", "");
 				// ignore patterns:
 				writeTrashFile(".gitignore", "*.txt\n.svn");
-				writeTrashFile("some/other/.gitignore", "!*.txt");
+				writeTrashFile("some/other/.gitignore", "README\n");
 				var status = repo.Status;
 				Assert.IsTrue(status.Untracked.Contains("image.png"));
 				Assert.IsTrue(status.Untracked.Contains("someDirectory/untracked"));
@@ -283,12 +283,21 @@ namespace GitSharp.API.Tests
 				Assert.AreEqual(0, status.Modified.Count);
 				Assert.AreEqual(0, status.Removed.Count);
 				Assert.AreEqual(0, status.MergeConflict.Count);
+				Assert.AreEqual(4, status.Untracked.Count);
 				writeTrashFile(".gitignore", "other");
+				writeTrashFile("some/other/.gitignore", "");
 				status.Update();
 				Assert.IsTrue(status.Untracked.Contains("untracked.txt"));
 				Assert.IsTrue(status.Untracked.Contains("someDirectory/untracked2.txt"));
 				Assert.IsTrue(status.Untracked.Contains("someDirectory/untracked"));
 				Assert.IsTrue(status.Untracked.Contains("image.png"));
+				Assert.AreEqual(0, status.Added.Count);
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+				Assert.AreEqual(0, status.MergeConflict.Count);
+				Assert.AreEqual(5, status.Untracked.Count);
 			}
 		}
 	}

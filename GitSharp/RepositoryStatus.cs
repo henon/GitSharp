@@ -53,9 +53,14 @@ namespace GitSharp
 		private GitIndex _index;
 		private Core.Tree _tree;
 
-		public RepositoryStatus(Repository repository)
+		public RepositoryStatus(Repository repository) : this(repository, new RepositoryStatusOptions { ForceContentCheck = true})
+		{
+		}
+
+		public RepositoryStatus(Repository repository, RepositoryStatusOptions options)
 		{
 			Repository = repository;
+			Options = options; 
 			Update();
 		}
 
@@ -64,6 +69,11 @@ namespace GitSharp
 			get;
 			private set;
 		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public RepositoryStatusOptions Options { get; set; }
 
 		/// <summary>
 		/// List of files added to the index, which are not in the current commit
@@ -141,14 +151,14 @@ namespace GitSharp
 		{
 			foreach (var subdir in dir.GetDirectories())
 			{
-				if (subdir.Name == Constants.DOT_GIT || IgnoreHandler.IsIgnored(subdir.Name))
+				if (subdir.Name == Constants.DOT_GIT || IgnoreHandler.IsIgnored(tree.FullName + "/" + subdir.Name))
 					continue;
 				var t = tree.AddTree(subdir.Name);
 				FillTree(subdir, t);
 			}
 			foreach (var file in dir.GetFiles())
 			{
-				if (IgnoreHandler.IsIgnored(file.Name))
+				if (IgnoreHandler.IsIgnored(tree.FullName + "/" + file.Name))
 					continue;
 				tree.AddFile(( file.Name));
 			}
@@ -189,7 +199,7 @@ namespace GitSharp
 					Missing.Add(indexEntry.Name);
 					AnyDifferences = true;
 				}
-				if (file.Exists && indexEntry.IsModified(new DirectoryInfo(Repository.WorkingDirectory), true))
+				if (file.Exists && indexEntry.IsModified(new DirectoryInfo(Repository.WorkingDirectory), Options.ForceContentCheck))
 				{
 					Modified.Add(indexEntry.Name);
 					AnyDifferences = true;
@@ -228,4 +238,16 @@ namespace GitSharp
 			Diff();
 		}
 	}
+
+	/// <summary>
+	/// RepositoryStatus options allow customizing of the status checking routines. 
+	/// </summary>
+	public class RepositoryStatusOptions
+	{
+		/// <summary>
+		/// If filetime and index entry time are equal forces a full content check. This can be costly for large repositories.
+		/// </summary>
+		public bool ForceContentCheck { get; set; }
+	}
+
 }

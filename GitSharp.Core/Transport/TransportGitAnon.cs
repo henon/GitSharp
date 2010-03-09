@@ -49,9 +49,9 @@ namespace GitSharp.Core.Transport
 
         public static bool canHandle(URIish uri)
         {
-			if (uri == null)
-				throw new System.ArgumentNullException ("uri");
-			
+            if (uri == null)
+                throw new System.ArgumentNullException("uri");
+
             return "git".Equals(uri.Scheme);
         }
 
@@ -74,124 +74,124 @@ namespace GitSharp.Core.Transport
         {
         }
 
-    	private Socket OpenConnection()
+        private Socket OpenConnection()
         {
-			int port = Uri.Port > 0 ? Uri.Port : GIT_PORT;
+            int port = Uri.Port > 0 ? Uri.Port : GIT_PORT;
             try
             {
                 var ret = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-				ret.Connect(Uri.Host, port);
+                ret.Connect(Uri.Host, port);
                 return ret;
             }
             catch (SocketException e)
             {
-				throw new TransportException(Uri, "Connection failed", e);
+                throw new TransportException(Uri, "Connection failed", e);
             }
         }
 
-    	private void Service(string name, PacketLineOut pckOut)
+        private void Service(string name, PacketLineOut pckOut)
         {
             var cmd = new StringBuilder();
             cmd.Append(name);
             cmd.Append(' ');
-			cmd.Append(Uri.Path);
+            cmd.Append(Uri.Path);
             cmd.Append('\0');
             cmd.Append("host=");
-			cmd.Append(Uri.Host);
-			if (Uri.Port > 0 && Uri.Port != GIT_PORT)
+            cmd.Append(Uri.Host);
+            if (Uri.Port > 0 && Uri.Port != GIT_PORT)
             {
                 cmd.Append(":");
-				cmd.Append(Uri.Port);
+                cmd.Append(Uri.Port);
             }
             cmd.Append('\0');
             pckOut.WriteString(cmd.ToString());
             pckOut.Flush();
         }
 
-    	#region Nested Types
+        #region Nested Types
 
-    	private class TcpFetchConnection : BasePackFetchConnection
-    	{
-    		private Socket _sock;
+        private class TcpFetchConnection : BasePackFetchConnection
+        {
+            private Socket _sock;
 
-    		public TcpFetchConnection(TransportGitAnon instance)
-    			: base(instance)
-    		{
-    			_sock = instance.OpenConnection();
-    			try
-    			{
-    				init(new NetworkStream(_sock));
-    				instance.Service("git-upload-pack", pckOut);
-    			}
-    			catch (SocketException err)
-    			{
-    				Close();
-    				throw new TransportException(uri, "remote hung up unexpectedly", err);
-    			}
-    			readAdvertisedRefs();
-    		}
+            public TcpFetchConnection(TransportGitAnon instance)
+                : base(instance)
+            {
+                _sock = instance.OpenConnection();
+                try
+                {
+                    init(new NetworkStream(_sock));
+                    instance.Service("git-upload-pack", pckOut);
+                }
+                catch (SocketException err)
+                {
+                    Close();
+                    throw new TransportException(uri, "remote hung up unexpectedly", err);
+                }
+                readAdvertisedRefs();
+            }
 
-    		public override void Close()
-    		{
-    			base.Close();
+            public override void Close()
+            {
+                base.Close();
 
-    			if (_sock == null) return;
+                if (_sock == null) return;
 
-    			try
-    			{
-    				_sock.Close();
-    			}
-    			catch (SocketException)
-    			{
-    			}
-    			finally
-    			{
-    				_sock = null;
-    			}
-    		}
-    	}
+                try
+                {
+                    _sock.Close();
+                }
+                catch (SocketException)
+                {
+                }
+                finally
+                {
+                    _sock = null;
+                }
+            }
+        }
 
-    	private class TcpPushConnection : BasePackPushConnection
-    	{
-    		private Socket _sock;
+        private class TcpPushConnection : BasePackPushConnection
+        {
+            private Socket _sock;
 
-    		public TcpPushConnection(TransportGitAnon instance)
-    			: base(instance)
-    		{
-    			_sock = instance.OpenConnection();
-    			try
-    			{
-    				init(new NetworkStream(_sock));
-    				instance.Service("git-receive-pack", pckOut);
-    			}
-    			catch (SocketException err)
-    			{
-    				Close();
-    				throw new TransportException(uri, "remote hung up unexpectedly", err);
-    			}
-    			readAdvertisedRefs();
-    		}
+            public TcpPushConnection(TransportGitAnon instance)
+                : base(instance)
+            {
+                _sock = instance.OpenConnection();
+                try
+                {
+                    init(new NetworkStream(_sock));
+                    instance.Service("git-receive-pack", pckOut);
+                }
+                catch (SocketException err)
+                {
+                    Close();
+                    throw new TransportException(uri, "remote hung up unexpectedly", err);
+                }
+                readAdvertisedRefs();
+            }
 
-    		public override void Close()
-    		{
-    			base.Close();
+            public override void Close()
+            {
+                base.Close();
 
-    			if (_sock == null) return;
+                if (_sock == null) return;
 
-    			try
-    			{
-    				_sock.Close();
-    			}
-    			catch (SocketException)
-    			{
-    			}
-    			finally
-    			{
-    				_sock = null;
-    			}
-    		}
-    	}
+                try
+                {
+                    _sock.Close();
+                }
+                catch (SocketException)
+                {
+                }
+                finally
+                {
+                    _sock = null;
+                }
+            }
+        }
 
-    	#endregion
+        #endregion
     }
 }

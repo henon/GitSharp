@@ -177,8 +177,8 @@ namespace GitSharp.CLI
             {
                 OutputStream.WriteLine("# nothing to commit (working directory clean)");
             }
-            //Leave this in until completed.
-            throw new NotImplementedException("The implementation is not yet complete. autocrlf support is not added.");
+            // [henon] we do not throw here, instead we mention this in the docs.
+            //throw new NotImplementedException("The implementation is not yet complete. autocrlf support is not added."); 
         }
 
         private void displayStatusList(Dictionary<string, int> statusList)

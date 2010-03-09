@@ -38,19 +38,18 @@
 
 namespace GitSharp.Core.Transport
 {
-
-    /**
-     * Marker interface for an object transport walking transport.
-     * <para />
-     * Implementations of WalkTransport transfer individual objects one at a time
-     * from the loose objects directory, or entire packs if the source side does not
-     * have the object as a loose object.
-     * <para />
-     * WalkTransports are not as efficient as {@link PackTransport} instances, but
-     * can be useful in situations where a pack transport is not acceptable.
-     * 
-     * @see WalkFetchConnection
-     */
+    /// <summary>
+    /// Marker interface for an object transport walking transport.
+    /// <para />
+    /// Implementations of WalkTransport transfer individual objects one at a time
+    /// from the loose objects directory, or entire packs if the source side does not
+    /// have the object as a loose object.
+    /// <para />
+    /// WalkTransports are not as efficient as {@link PackTransport} instances, but
+    /// can be useful in situations where a pack transport is not acceptable.
+    /// <para/>
+    /// see <see cref="WalkFetchConnection"/>
+    /// </summary>
     public interface IWalkTransport
     {
         // no methods in marker interface

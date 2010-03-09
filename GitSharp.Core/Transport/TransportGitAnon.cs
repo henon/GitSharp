@@ -37,12 +37,20 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using System;
 using System.Net.Sockets;
 using System.Text;
 using GitSharp.Core.Exceptions;
 
 namespace GitSharp.Core.Transport
 {
+    /// <summary>
+    /// Transport through a git-daemon waiting for anonymous TCP connections.
+    /// <para/>
+    /// This transport supports the <code>git://</code> protocol, usually run on
+    /// the IANA registered port 9418. It is a popular means for distributing open
+    /// source projects, as there are no authentication or authorization overheads.
+    /// </summary>
     public class TransportGitAnon : TcpTransport, IPackTransport
     {
         public const int GIT_PORT = Daemon.DEFAULT_PORT;
@@ -72,20 +80,30 @@ namespace GitSharp.Core.Transport
 
         public override void close()
         {
+            // Resources must be established per-connection.
         }
 
         private Socket OpenConnection()
         {
             int port = Uri.Port > 0 ? Uri.Port : GIT_PORT;
+            Socket ret = null;
             try
             {
-                var ret = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                ret = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 ret.Connect(Uri.Host, port);
                 return ret;
             }
             catch (SocketException e)
             {
-                throw new TransportException(Uri, "Connection failed", e);
+                try
+                {
+                    if (ret != null) ret.Close();
+                }
+                catch (Exception)
+                {
+                    // ignore a failure during close, we're already failing
+                }
+                throw new TransportException(Uri, e.Message, e);
             }
         }
 
@@ -141,8 +159,9 @@ namespace GitSharp.Core.Transport
                 {
                     _sock.Close();
                 }
-                catch (SocketException)
+                catch (Exception)
                 {
+                    // Ignore errors during close.
                 }
                 finally
                 {
@@ -182,8 +201,9 @@ namespace GitSharp.Core.Transport
                 {
                     _sock.Close();
                 }
-                catch (SocketException)
+                catch (Exception)
                 {
+                    // Ignore errors during close.
                 }
                 finally
                 {

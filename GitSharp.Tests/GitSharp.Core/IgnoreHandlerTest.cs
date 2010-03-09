@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -42,63 +43,91 @@ using NUnit.Framework;
 namespace GitSharp.Core.Tests
 {
 
-    [TestFixture]
-    public class IgnoreHandlerTests : RepositoryTestCase
-    {
-        private IgnoreHandler _handler;
+	[TestFixture]
+	public class IgnoreHandlerTests : RepositoryTestCase
+	{
+		private IgnoreHandler _handler;
 
-        [Test]
-        public void HonorsExcludeFile()
-        {
-            WriteExclude("*.html");
-            _handler = new IgnoreHandler(db);
+		[Test]
+		public void HonorsExcludeFile()
+		{
+			WriteExclude("*.html");
+			_handler = new IgnoreHandler(db);
 
-            Assert.IsTrue(_handler.IsIgnored("test.html"));
-        }
+			Assert.IsTrue(_handler.IsIgnored("test.html"));
+		}
 
-        [Test]
-        public void HonorsConfigExcludes()
-        {
-            WriteConfigExcludes("ignoreHandler", "*.a");
-            _handler = new IgnoreHandler(db);
+		[Test]
+		public void HonorsConfigExcludes()
+		{
+			WriteConfigExcludes("ignoreHandler", "*.a");
+			_handler = new IgnoreHandler(db);
 
-            Assert.IsTrue(_handler.IsIgnored("test.a"));
-        }
+			Assert.IsTrue(_handler.IsIgnored("test.a"));
+		}
 
-        [Test]
-        public void HonorsTopLevelIgnore()
-        {
-            WriteIgnore(".", "*.o");
-            _handler = new IgnoreHandler(db);
+		[Test]
+		public void HonorsTopLevelIgnore()
+		{
+			WriteIgnore(".", "*.o");
+			_handler = new IgnoreHandler(db);
 
-            Assert.IsTrue(_handler.IsIgnored("test.o"));
-        }
+			Assert.IsTrue(_handler.IsIgnored("test.o"));
+		}
 
-        [Test]
-        public void TestNegated()
-        {
-            WriteIgnore(".", "*.o");
-            WriteIgnore("test", "!*.o");
-            _handler = new IgnoreHandler(db);
+		[Test]
+		public void TestNegated()
+		{
+			WriteIgnore(".", "*.o");
+			WriteIgnore("test", "!*.o");
+			_handler = new IgnoreHandler(db);
 
-            Assert.IsFalse(_handler.IsIgnored("test/test.o"));
-        }
+			Assert.IsFalse(_handler.IsIgnored("test/test.o"));
+		}
 
-        private void WriteExclude(string data)
-        {
-            writeTrashFile(".git/info/exclude", data);
-        }
+		[Test]
+		public void MultipleIgnoreFiles()
+		{
+			WriteIgnore(".", "*.o");
+			WriteIgnore("./foo/bar", "baz");
+			_handler = new IgnoreHandler(db);
 
-        private void WriteConfigExcludes(string path, string data)
-        {
-            db.Config.setString("core", null, "excludesfile", path);
-            writeTrashFile(path, data);
-        }
+			Assert.IsTrue(_handler.IsIgnored("test.o"));
+			Assert.IsTrue(_handler.IsIgnored("a/file/somewhere/down/the/hierarchy/test.o"));
+			Assert.IsTrue(_handler.IsIgnored("foo/bar/down/the/hierarchy/baz"));
+			Assert.IsTrue(_handler.IsIgnored("foo/bar/baz"));
+			Assert.IsFalse(_handler.IsIgnored("baz"));
+			Assert.IsFalse(_handler.IsIgnored("a/file/somewhere/down/the/hierarchy/baz"));
+		}
 
-        private void WriteIgnore(string dir, string data)
-        {
-            writeTrashFile(Path.Combine(dir, Constants.GITIGNORE_FILENAME), data);
-        }
-    }
+		[Ignore("Patterns with path components are not yet implemented!")]
+		[Test]
+		public void PatternsWithPathComponent()
+		{
+			WriteIgnore(".", "foo/bar/*.o"); // <--- should ignore all o files only in foo/bar
+			_handler = new IgnoreHandler(db);
+
+			Assert.IsFalse(_handler.IsIgnored("test.o"));
+			Assert.IsFalse(_handler.IsIgnored("a/file/somewhere/down/the/hierarchy/test.o"));
+			Assert.IsTrue(_handler.IsIgnored("foo/bar/down/the/hierarchy/test.o"));
+			Assert.IsTrue(_handler.IsIgnored("foo/bar/baz.o"));
+		}
+
+		private void WriteExclude(string data)
+		{
+			writeTrashFile(".git/info/exclude", data);
+		}
+
+		private void WriteConfigExcludes(string path, string data)
+		{
+			db.Config.setString("core", null, "excludesfile", path);
+			writeTrashFile(path, data);
+		}
+
+		private void WriteIgnore(string dir, string data)
+		{
+			writeTrashFile(Path.Combine(dir, Constants.GITIGNORE_FILENAME), data);
+		}
+	}
 
 }

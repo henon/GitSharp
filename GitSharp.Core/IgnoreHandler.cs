@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -43,190 +44,195 @@ using GitSharp.Core.FnMatch;
 
 namespace GitSharp.Core
 {
-    public interface IPattern
-    {
-        bool IsIgnored(string path);
-    }
+	public interface IPattern
+	{
+		bool IsIgnored(string path);
+	}
 
-    public class IgnoreHandler
-    {
-        private readonly Repository _repo;
-        private readonly List<IPattern> _commandLinePatterns = new List<IPattern>();
-        private readonly List<IPattern> _excludePatterns = new List<IPattern>();
-        private readonly Dictionary<string, List<IPattern>> _directoryPatterns = new Dictionary<string, List<IPattern>>();
+	public class IgnoreHandler
+	{
+		private readonly Repository _repo;
+		private readonly List<IPattern> _commandLinePatterns = new List<IPattern>();
+		private readonly List<IPattern> _excludePatterns = new List<IPattern>();
+		private readonly Dictionary<string, List<IPattern>> _directoryPatterns = new Dictionary<string, List<IPattern>>();
 
-        public IgnoreHandler(Repository repo)
-        {
-			if ( repo == null)
+		public IgnoreHandler(Repository repo)
+		{
+			if (repo == null)
 			{
 				throw new ArgumentNullException("repo");
 			}
-			
-            _repo = repo;
 
-            try
-            {
-                string excludeFile = repo.Config.getCore().getExcludesFile();
-                if (!string.IsNullOrEmpty(excludeFile))
-                {
-                    ReadPatternsFromFile(Path.Combine(repo.WorkingDirectory.FullName, excludeFile), _excludePatterns);
-                }
-            }
-            catch (Exception)
-            {
-                //optional
-            }
+			_repo = repo;
 
-            try
-            {
-                ReadPatternsFromFile(Path.Combine(repo.Directory.FullName, "info/exclude"), _excludePatterns);
-            }
-            catch (Exception)
-            {
-                // optional
-            }
-        }
+			try
+			{
+				string excludeFile = repo.Config.getCore().getExcludesFile();
+				if (!string.IsNullOrEmpty(excludeFile))
+				{
+					ReadPatternsFromFile(Path.Combine(repo.WorkingDirectory.FullName, excludeFile), _excludePatterns);
+				}
+			}
+			catch (Exception)
+			{
+				//optional
+			}
 
-        private static List<string> GetPathDirectories(string path)
-        {
-            if (path.StartsWith("/"))
-                path = path.Substring(1);
+			try
+			{
+				ReadPatternsFromFile(Path.Combine(repo.Directory.FullName, "info/exclude"), _excludePatterns);
+			}
+			catch (Exception)
+			{
+				// optional
+			}
+		}
 
-            // always check our repository directory since path is relative to this
-            var ret = new List<string> {"."};
+		private static List<string> GetPathDirectories(string path)
+		{
+			if (path.StartsWith("/"))
+				path = path.Substring(1);
 
-            // this ensures top down
-            for (int i = 0; i < path.Length; i++)
-            {
-                char c = path[i];
-                if (c == '/')
-                    ret.Add(path.Substring(0, i));
-            }
-            return ret;
-        }
+			// always check our repository directory since path is relative to this
+			var ret = new List<string> { "." };
 
-        private void LoadDirectoryPatterns(IEnumerable<string> dirs)
-        {
-            foreach (string p in dirs)
-            {
-                if (_directoryPatterns.ContainsKey(p))
-                    continue;
+			// this ensures top down
+			for (int i = 0; i < path.Length; i++)
+			{
+				char c = path[i];
+				if (c == '/')
+					ret.Add(path.Substring(0, i));
+			}
+			return ret;
+		}
 
-                _directoryPatterns.Add(p, new List<IPattern>());
-                string ignorePath = Path.Combine(_repo.WorkingDirectory.FullName, p);
-                ignorePath = Path.Combine(ignorePath, Constants.GITIGNORE_FILENAME);
-                if (File.Exists(ignorePath))
-                {
-                    ReadPatternsFromFile(ignorePath, _directoryPatterns[p]);
-                }
-            }
-        }
+		private void LoadDirectoryPatterns(IEnumerable<string> dirs)
+		{
+			foreach (string p in dirs)
+			{
+				if (_directoryPatterns.ContainsKey(p))
+					continue;
 
-        private static void ReadPatternsFromFile(string path, ICollection<IPattern> to)
-        {
-            if (!File.Exists(path))
-                throw new FileNotFoundException("File not found", path);
+				_directoryPatterns.Add(p, new List<IPattern>());
+				string ignorePath = Path.Combine(_repo.WorkingDirectory.FullName, p);
+				ignorePath = Path.Combine(ignorePath, Constants.GITIGNORE_FILENAME);
+				if (File.Exists(ignorePath))
+				{
+					ReadPatternsFromFile(ignorePath, _directoryPatterns[p]);
+				}
+			}
+		}
 
-            try
-            {
-                using (var s = new FileStream(path, System.IO.FileMode.Open, FileAccess.Read))
-                {
-                    var reader = new StreamReader(s);
-                    while (!reader.EndOfStream)
-                        AddPattern(reader.ReadLine(), to);
-                }
-            }
-            catch (IOException inner)
-            {
-                throw new InvalidOperationException("Can't read from " + path, inner);
-            }
-        }
+		private static void ReadPatternsFromFile(string path, ICollection<IPattern> to)
+		{
+			if (!File.Exists(path))
+				throw new FileNotFoundException("File not found", path);
 
-        private static bool IsIgnored(string path, IEnumerable<IPattern> patterns, bool ret)
-        {
-            // if ret is true, path was marked as ignored by a previous pattern, so only NegatedPatterns can still change this
-            if (ret)
-            {
-                return !patterns.Any(p => (p is NegatedPattern) && p.IsIgnored(path));
-            }
+			try
+			{
+				using (var s = new FileStream(path, System.IO.FileMode.Open, FileAccess.Read))
+				{
+					var reader = new StreamReader(s);
+					while (!reader.EndOfStream)
+						AddPattern(reader.ReadLine(), to);
+				}
+			}
+			catch (IOException inner)
+			{
+				throw new InvalidOperationException("Can't read from " + path, inner);
+			}
+		}
 
-            return patterns.Any(p => !(p is NegatedPattern) && p.IsIgnored(path));
-        }
+		private static bool IsIgnored(string path, IEnumerable<IPattern> patterns, bool ret)
+		{
+			// if ret is true, path was marked as ignored by a previous pattern, so only NegatedPatterns can still change this
+			if (ret)
+			{
+				return !patterns.Any(p => (p is NegatedPattern) && p.IsIgnored(path));
+			}
 
-        public void AddCommandLinePattern(string pattern)
-        {
-            AddPattern(pattern, _commandLinePatterns);
-        }
+			return patterns.Any(p => !(p is NegatedPattern) && p.IsIgnored(path));
+		}
 
-        public bool IsIgnored(string path)
-        {
-            bool ret = false;
+		public void AddCommandLinePattern(string pattern)
+		{
+			AddPattern(pattern, _commandLinePatterns);
+		}
 
-            ret = IsIgnored(path, _excludePatterns, ret);
+		/// <summary>
+		/// Evaluate if the given path is ignored. If not yet loaded this loads all .gitignore files on the path and respects them.
+		/// </summary>
+		/// <param name="path">relative path to a file in the repository</param>
+		/// <returns></returns>
+		public bool IsIgnored(string path)
+		{
+			bool ret = false;
+			string filename = System.IO.Path.GetFileName(path);
+			ret = IsIgnored(filename, _excludePatterns, ret);
 
-            var dirs = GetPathDirectories(path);
-            LoadDirectoryPatterns(dirs);
-            
-            foreach (string p in dirs)
-            {
-                ret = IsIgnored(path, _directoryPatterns[p], ret);
-            }
+			var dirs = GetPathDirectories(path);
+			LoadDirectoryPatterns(dirs);
 
-            ret = IsIgnored(path, _commandLinePatterns, ret);
+			foreach (string p in dirs)
+			{
+				ret = IsIgnored(filename, _directoryPatterns[p], ret);
+			}
 
-            return ret;
-        }
+			ret = IsIgnored(filename, _commandLinePatterns, ret);
 
-        private static void AddPattern(string line, ICollection<IPattern> to)
-        {
-            if (line.Length == 0)
-                return;
+			return ret;
+		}
 
-            // Comment
-            if (line.StartsWith("#"))
-                return;
+		private static void AddPattern(string line, ICollection<IPattern> to)
+		{
+			if (line.Length == 0)
+				return;
 
-            // Negated
-            if (line.StartsWith("!"))
-            {
-                line = line.Substring(1);
-                to.Add(new NegatedPattern(new FnMatchPattern(line)));
-                return;
-            }
+			// Comment
+			if (line.StartsWith("#"))
+				return;
 
-            to.Add(new FnMatchPattern(line));
-        }
+			// Negated
+			if (line.StartsWith("!"))
+			{
+				line = line.Substring(1);
+				to.Add(new NegatedPattern(new FnMatchPattern(line)));
+				return;
+			}
 
-        private class FnMatchPattern : IPattern
-        {
-            private readonly FileNameMatcher _matcher;
+			to.Add(new FnMatchPattern(line));
+		}
 
-            public FnMatchPattern(string line)
-            {
-                _matcher = new FileNameMatcher(line, null);
-            }
+		private class FnMatchPattern : IPattern
+		{
+			private readonly FileNameMatcher _matcher;
 
-            public bool IsIgnored(string path)
-            {
-                _matcher.Reset();
-                _matcher.Append(path);
-                return _matcher.IsMatch();
-            }
-        }
+			public FnMatchPattern(string line)
+			{
+				_matcher = new FileNameMatcher(line, null);
+			}
 
-        private class NegatedPattern : IPattern
-        {
-            private readonly IPattern _original;
+			public bool IsIgnored(string path)
+			{
+				_matcher.Reset();
+				_matcher.Append(path);
+				return _matcher.IsMatch();
+			}
+		}
 
-            public NegatedPattern(IPattern pattern)
-            {
-                _original = pattern;
-            }
+		private class NegatedPattern : IPattern
+		{
+			private readonly IPattern _original;
 
-            public bool IsIgnored(string path)
-            {
-                return _original.IsIgnored(path);
-            }
-        }
-    }
+			public NegatedPattern(IPattern pattern)
+			{
+				_original = pattern;
+			}
+
+			public bool IsIgnored(string path)
+			{
+				return _original.IsIgnored(path);
+			}
+		}
+	}
 }

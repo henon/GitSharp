@@ -38,7 +38,9 @@
 
 using System;
 using GitSharp.Core;
+using GitSharp.Core.Exceptions;
 using GitSharp.Core.Util;
+using GitSharp.Tests.GitSharp.Core.Util;
 using NUnit.Framework;
 using System.IO;
 using GitSharp.Core.Tests;
@@ -67,6 +69,14 @@ namespace GitSharp.Tests.GitSharp
                 var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
                 Assert.IsTrue(new FileInfo(readme).Exists);
             }
+        }
+
+        [Test]
+        public void Try_cloning_non_existing_repo_git()
+        {
+            string toPath = Path.Combine(trash.FullName, "test");
+            string fromUrl = "git://github.com/henon/nonExistingRepo.git";
+            AssertHelper.Throws<NoRemoteRepositoryException>(() => { using (Repository repo = Git.Clone(fromUrl, toPath)) { } }, "Repository shouldn't exist.");
         }
 
         [Test]

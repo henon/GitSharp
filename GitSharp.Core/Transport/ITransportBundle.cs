@@ -42,7 +42,7 @@ namespace GitSharp.Core.Transport
     /// <summary>
     /// Marker interface for transports that supports fetching from a git bundle
     /// (sneaker-net object transport).
-    /// 
+    /// <para/>
     /// Push support for a bundle is complex, as one does not have a peer to
     /// communicate with to decide what the peer already knows. So push is not
     /// supported by the bundle transport.

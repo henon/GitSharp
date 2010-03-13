@@ -45,7 +45,7 @@ namespace GitSharp.Core.Transport
 {
     /// <summary>
     /// Single shot fetch from a streamed Git bundle.
-    /// 
+    /// <para/>
     /// The bundle is Read from an unbuffered input stream, which limits the
     /// transport to opening at most one FetchConnection before needing to recreate
     /// the transport instance.
@@ -56,11 +56,11 @@ namespace GitSharp.Core.Transport
 
         /// <summary>
         /// Create a new transport to fetch objects from a streamed bundle.
-        /// 
+        /// <para/>
         /// The stream can be unbuffered (buffering is automatically provided
         /// internally to smooth out short reads) and unpositionable (the stream is
         /// Read from only once, sequentially).
-        /// 
+        /// <para/>
         /// When the FetchConnection or the this instance is closed the supplied
         /// input stream is also automatically closed. This frees callers from
         /// needing to keep track of the supplied stream.
@@ -94,7 +94,7 @@ namespace GitSharp.Core.Transport
 
         public override IPushConnection openPush()
         {
-            throw new InvalidOperationException("Push is not supported for bundle transport");
+            throw new NotSupportedException("Push is not supported for bundle transport");
         }
 
         public override void close()

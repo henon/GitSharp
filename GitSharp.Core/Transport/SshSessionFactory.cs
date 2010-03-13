@@ -59,9 +59,9 @@ namespace GitSharp.Core.Transport
 
         public void releaseSession(Session session)
         {
-			if (session == null)
-				throw new System.ArgumentNullException ("session");
-			
+            if (session == null)
+                throw new System.ArgumentNullException("session");
+
             if (session.isConnected())
                 session.disconnect();
         }

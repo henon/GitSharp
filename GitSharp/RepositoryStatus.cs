@@ -42,7 +42,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using GitSharp.Core;
-using GitSharp.Core.TreeWalk;
 
 namespace GitSharp
 {
@@ -169,7 +168,7 @@ namespace GitSharp
 		/// 
 		/// </summary>
 		/// <param name="treeEntry"></param>
-		/// <param name="wdirEntry">Note: wdirEntry is the gitignored working directory entry.</param>
+		/// <param name="wdirEntry">Note: wdirEntry is the non-ignored working directory entry.</param>
 		/// <param name="indexEntry"></param>
 		/// <param name="file">Note: gitignore patterns do not influence this parameter</param>
 		private void OnVisitEntry(TreeEntry treeEntry, TreeEntry wdirEntry, GitIndex.Entry indexEntry, FileInfo file)

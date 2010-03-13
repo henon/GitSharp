@@ -41,16 +41,28 @@
 using System.Collections.Generic;
 using System.IO;
 using GitSharp.Core.Util;
+using Tamir.SharpSsh.java.util;
 using Tamir.SharpSsh.jsch;
 
 namespace GitSharp.Core.Transport
 {
-
+    /// <summary>
+    /// The base session factory that loads known hosts and private keys from
+    /// <code>$HOME/.ssh</code>.
+    /// <para/>
+    /// This is the default implementation used by JGit and provides most of the
+    /// compatibility necessary to match OpenSSH, a popular implementation of SSH
+    /// used by C Git.
+    /// <para/>
+    /// The factory does not provide UI behavior. Override the method
+    /// <see cref="configure"/>
+    /// to supply appropriate {@link UserInfo} to the session.
+    /// </summary>
     public abstract class SshConfigSessionFactory : SshSessionFactory
     {
-        private OpenSshConfig config;
-        private readonly Dictionary<string, JSch> byIdentityFile = new Dictionary<string, JSch>();
-        private JSch defaultJSch;
+        private OpenSshConfig _config;
+        private readonly Dictionary<string, JSch> _byIdentityFile = new Dictionary<string, JSch>();
+        private JSch _defaultJSch;
 
         public override Session getSession(string user, string pass, string host, int port)
         {
@@ -65,19 +77,49 @@ namespace GitSharp.Core.Transport
             if (pass != null)
                 session.setPassword(pass);
             string strictHostKeyCheckingPolicy = hc.getStrictHostKeyChecking();
-            //if (strictHostKeyCheckingPolicy != null)
-            //    session.setConfig();
+            if (strictHostKeyCheckingPolicy != null)
+            {
+                var ht = new Hashtable();
+                ht.put("StrictHostKeyChecking", strictHostKeyCheckingPolicy);
+                session.setConfig(ht);
+            }
+            string pauth = hc.getPreferredAuthentications();
+            if (pauth != null)
+            {
+                var ht = new Hashtable();
+                ht.put("PreferredAuthentications", pauth);
+                session.setConfig(ht);
+            }
             configure(hc, session);
             return session;
         }
 
+        /// <summary>
+        /// Create a new JSch session for the requested address.
+        /// </summary>
+        /// <param name="hc">host configuration</param>
+        /// <param name="user">login to authenticate as.</param>
+        /// <param name="host">server name to connect to.</param>
+        /// <param name="port">port number of the SSH daemon (typically 22).</param>
+        /// <returns>new session instance, but otherwise unconfigured.</returns>
         protected Session createSession(OpenSshConfig.Host hc, string user, string host, int port)
         {
             return getJSch(hc).getSession(user, host, port);
         }
 
+        /// <summary>
+        /// Provide additional configuration for the session based on the host
+        /// information. This method could be used to supply {@link UserInfo}.
+        /// </summary>
+        /// <param name="hc">host configuration</param>
+        /// <param name="session">session to configure</param>
         protected abstract void configure(OpenSshConfig.Host hc, Session session);
 
+        /// <summary>
+        /// Obtain the JSch used to create new sessions.
+        /// </summary>
+        /// <param name="hc">host configuration</param>
+        /// <returns>the JSch instance to use.</returns>
         protected JSch getJSch(OpenSshConfig.Host hc)
         {
             if (hc == null)
@@ -88,28 +130,35 @@ namespace GitSharp.Core.Transport
             if (identityFile == null)
                 return def;
 
-            string identityKey = Path.GetFullPath(identityFile.ToString());
-            JSch jsch = byIdentityFile[identityKey];
+            string identityKey = identityFile.FullName;
+            JSch jsch = _byIdentityFile[identityKey];
             if (jsch == null)
             {
                 jsch = new JSch();
                 jsch.setHostKeyRepository(def.getHostKeyRepository());
                 jsch.addIdentity(identityKey);
-                byIdentityFile.Add(identityKey, jsch);
+                _byIdentityFile.Add(identityKey, jsch);
             }
             return jsch;
         }
 
         private JSch getDefaultJSch()
         {
-            if (defaultJSch == null)
+            if (_defaultJSch == null)
             {
-                defaultJSch = createDefaultJSch();
-                // no identity file support
+                _defaultJSch = createDefaultJSch();
+                foreach (object name in _defaultJSch.getIdentityNames())
+                {
+                    _byIdentityFile.put((string)name, _defaultJSch);
+                }
             }
-            return defaultJSch;
+            return _defaultJSch;
         }
 
+        /// <summary>
+        /// Returns the new default JSch implementation
+        /// </summary>
+        /// <returns>the new default JSch implementation</returns>
         protected static JSch createDefaultJSch()
         {
             JSch jsch = new JSch();
@@ -120,9 +169,9 @@ namespace GitSharp.Core.Transport
 
         private OpenSshConfig getConfig()
         {
-            if (config == null)
-                config = OpenSshConfig.get();
-            return config;
+            if (_config == null)
+                _config = OpenSshConfig.get();
+            return _config;
         }
 
 
@@ -131,21 +180,21 @@ namespace GitSharp.Core.Transport
             DirectoryInfo home = FS.userHome();
             if (home == null)
                 return;
-            FileInfo known_hosts = new FileInfo(Path.Combine(home.ToString(), ".ssh/known_hosts"));
+            var known_hosts = new FileInfo(Path.Combine(home.ToString(), ".ssh/known_hosts"));
             try
             {
-                using (FileStream s = new FileStream(known_hosts.ToString(), System.IO.FileMode.Open, FileAccess.Read))
+                using (var s = new StreamReader(known_hosts.FullName))
                 {
-                    sch.setKnownHosts(new StreamReader(s));
+                    sch.setKnownHosts(s);
                 }
             }
             catch (FileNotFoundException)
             {
-
+                // Oh well. They don't have a known hosts in home.
             }
             catch (IOException)
             {
-
+                // Oh well. They don't have a known hosts in home.
             }
         }
 
@@ -154,26 +203,35 @@ namespace GitSharp.Core.Transport
             DirectoryInfo home = FS.userHome();
             if (home == null)
                 return;
-            DirectoryInfo sshdir = new DirectoryInfo(Path.Combine(home.ToString(), ".ssh"));
-            if (sshdir.Exists)
+            var sshdir = PathUtil.CombineDirectoryPath(home, ".ssh");
+            if (sshdir.IsDirectory())
             {
-                loadIdentity(sch, new FileInfo(Path.Combine(sshdir.ToString(), "identity")));
-                loadIdentity(sch, new FileInfo(Path.Combine(sshdir.ToString(), "id_rsa")));
-                loadIdentity(sch, new FileInfo(Path.Combine(sshdir.ToString(), "id_dsa")));
+                loadIdentity(sch, PathUtil.CombineFilePath(sshdir, "identity"));
+                loadIdentity(sch, PathUtil.CombineFilePath(sshdir, "id_rsa"));
+                loadIdentity(sch, PathUtil.CombineFilePath(sshdir, "id_dsa"));
             }
         }
 
         private static void loadIdentity(JSch sch, FileInfo priv)
         {
-            if (!File.Exists(priv.ToString())) return;
+            if (!priv.IsFile()) return;
             try
             {
-                sch.addIdentity(Path.GetFullPath(priv.ToString()));
+                sch.addIdentity(priv.FullName);
             }
             catch (JSchException)
             {
-
+                // Instead, pretend the key doesn't exist.
             }
+        }
+    }
+
+    public static class JSchExtensions
+    {
+        public static IEnumerable<object> getIdentityNames(this JSch jSch)
+        {
+            //TODO: [nulltoken] Implement JSch.getIdentityNames with the help of reflection.
+            return new string[]{};
         }
     }
 

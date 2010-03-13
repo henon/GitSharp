@@ -38,82 +38,85 @@
 using System;
 using System.IO;
 using System.Text;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core.Transport
 {
-
+    /// <summary>
+    /// Write progress messages out to the sideband channel.
+    /// </summary>
     public class SideBandProgressMonitor : ProgressMonitor, IDisposable
     {
-        private readonly StreamWriter writer;
-        private bool output;
-        private DateTime taskBeganAt;
-        private DateTime lastOutput;
-        private string msg;
-        private int lastWorked;
-        private int totalWork;
+        private readonly StreamWriter _writer;
+        private bool _output;
+        private long _taskBeganAt;
+        private long _lastOutput;
+        private string _msg;
+        private int _lastWorked;
+        private int _totalWork;
 
         public SideBandProgressMonitor(PacketLineOut pckOut)
         {
             int bufsz = SideBandOutputStream.SMALL_BUF - SideBandOutputStream.HDR_SIZE;
-            writer = new StreamWriter(new BufferedStream(new SideBandOutputStream(SideBandOutputStream.CH_PROGRESS, pckOut), bufsz), Constants.CHARSET);
+            _writer = new StreamWriter(new BufferedStream(new SideBandOutputStream(SideBandOutputStream.CH_PROGRESS, pckOut), bufsz), Constants.CHARSET);
         }
 
         public override void Start(int totalTasks)
         {
-            taskBeganAt = DateTime.Now;
-            lastOutput = taskBeganAt;
+            _taskBeganAt = DateTime.Now.ToMillisecondsSinceEpoch();
+            _lastOutput = _taskBeganAt;
         }
 
         public override void BeginTask(string title, int totalWork)
         {
             EndTask();
-            msg = title;
-            lastWorked = 0;
-            this.totalWork = totalWork;
+            _msg = title;
+            _lastWorked = 0;
+            this._totalWork = totalWork;
         }
 
         public override void Update(int completed)
         {
-            if (msg == null)
+            if (_msg == null)
                 return;
 
-            int cmp = lastWorked + completed;
-            DateTime now = DateTime.Now;
-            if (!output && (now - taskBeganAt).TotalMilliseconds < 500)
+            int cmp = _lastWorked + completed;
+            long now = DateTime.Now.ToMillisecondsSinceEpoch();
+            if (!_output && now - _taskBeganAt < 500)
                 return;
-            if (totalWork < 0)
+            if (_totalWork == UNKNOWN)
             {
-                if ((now - lastOutput).TotalMilliseconds >= 500)
+                if (now - _lastOutput >= 500)
                 {
                     display(cmp, null);
-                    lastOutput = now;
+                    _lastOutput = now;
                 }
             }
             else
             {
-                if ((cmp * 100 / totalWork) != (lastWorked * 100) / totalWork || (now - lastOutput).TotalMilliseconds >= 500)
+                if ((cmp * 100 / _totalWork) != (_lastWorked * 100) / _totalWork || now - _lastOutput >= 500)
                 {
                     display(cmp, null);
-                    lastOutput = now;
+                    _lastOutput = now;
                 }
             }
-            lastWorked = cmp;
-            output = true;
+            _lastWorked = cmp;
+            _output = true;
         }
 
         private void display(int cmp, string eol)
         {
-            StringBuilder m = new StringBuilder();
-            m.Append(msg);
+            var m = new StringBuilder();
+            m.Append(_msg);
             m.Append(": ");
 
-            if (totalWork < 0)
+            if (_totalWork == UNKNOWN)
             {
                 m.Append(cmp);
             }
             else
             {
-                int pcnt = (cmp*100/totalWork);
+                int pcnt = (cmp * 100 / _totalWork);
                 if (pcnt < 100)
                     m.Append(' ');
                 if (pcnt < 10)
@@ -122,7 +125,7 @@ namespace GitSharp.Core.Transport
                 m.Append("% (");
                 m.Append(cmp);
                 m.Append("/");
-                m.Append(totalWork);
+                m.Append(_totalWork);
                 m.Append(")");
             }
             if (eol != null)
@@ -131,8 +134,8 @@ namespace GitSharp.Core.Transport
             {
                 m.Append("   \r");
             }
-            writer.Write(m.ToString());
-            writer.Flush();
+            _writer.Write(m.ToString());
+            _writer.Flush();
         }
 
         public override bool IsCancelled
@@ -142,22 +145,22 @@ namespace GitSharp.Core.Transport
 
         public override void EndTask()
         {
-            if (output)
+            if (_output)
             {
-                if (totalWork < 0)
-                    display(lastWorked, ", done\n");
+                if (_totalWork == UNKNOWN)
+                    display(_lastWorked, ", done\n");
                 else
-                    display(totalWork, "\n");
+                    display(_totalWork, "\n");
             }
-            output = false;
-            msg = null;
+            _output = false;
+            _msg = null;
         }
-		
-		public void Dispose ()
-		{
-			writer.Dispose();
-		}
-		
+
+        public void Dispose()
+        {
+            _writer.Dispose();
+        }
+
     }
 
 }

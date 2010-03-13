@@ -40,40 +40,118 @@ using System.IO;
 
 namespace GitSharp.Core.Transport
 {
-
+    /// <summary>
+    /// Represent request and status of a remote ref update. Specification is
+    /// provided by client, while status is handled by <see cref="PushProcess"/> class,
+    /// being read-only for client.
+    /// <para/>
+    /// Client can create instances of this class directly, basing on user
+    /// specification and advertised refs ({@link Connection} or through
+    /// <see cref="Transport"/> helper methods. Apply this specification on remote
+    /// repository using <see cref="Transport.push"/>
+    /// method.</summary>
     public class RemoteRefUpdate
     {
+        /// <summary>
+        /// Represent current status of a remote ref update.
+        /// </summary>
         [Serializable]
         public enum UpdateStatus
         {
+            /// <summary>
+            /// Push process hasn't yet attempted to update this ref. This is the
+            /// default status, prior to push process execution.
+            /// </summary>
             NOT_ATTEMPTED,
+
+            /// <summary>
+            /// Remote ref was up to date, there was no need to update anything.
+            /// </summary>
             UP_TO_DATE,
+
+            /// <summary>
+            /// Remote ref update was rejected, as it would cause non fast-forward
+            /// update.
+            /// </summary>
             REJECTED_NONFASTFORWARD,
+
+            /// <summary>
+            /// Remote ref update was rejected, because remote side doesn't
+            /// support/allow deleting refs.
+            /// </summary>
             REJECTED_NODELETE,
+
+            /// <summary>
+            /// Remote ref update was rejected, because old object id on remote
+            /// repository wasn't the same as defined expected old object.
+            /// </summary>
             REJECTED_REMOTE_CHANGED,
+
+            /// <summary>
+            /// Remote ref update was rejected for other reason, possibly described
+            /// in <see cref="RemoteRefUpdate.get_Message"/>.
+            /// </summary>
             REJECTED_OTHER_REASON,
+
+            /// <summary>
+            /// Remote ref didn't exist. Can occur on delete request of a non
+            /// existing ref.
+            /// </summary>
             NON_EXISTING,
+
+            /// <summary>
+            /// Push process is awaiting update report from remote repository. This
+            /// is a temporary state or state after critical error in push process.
+            /// </summary>
             AWAITING_REPORT,
+
+            /// <summary>
+            /// Remote ref was successfully updated.
+            /// </summary>
             OK
         }
 
-        public UpdateStatus Status { get; set; }
-        public ObjectId ExpectedOldObjectId { get; private set; }
-        public ObjectId NewObjectId { get; private set; }
-        public string RemoteName { get; private set; }
-        public TrackingRefUpdate TrackingRefUpdate { get; private set; }
-        public string SourceRef { get; private set; }
-        public bool ForceUpdate { get; private set; }
-        public bool FastForward { get; set; }
-        public string Message { get; set; }
-        private Repository _localDb;
+        private readonly Repository _localDb;
 
+        /// <summary>
+        /// Construct remote ref update request by providing an update specification.
+        /// Object is created with default {@link Status#NOT_ATTEMPTED} status and no
+        /// message.
+        /// </summary>
+        /// <param name="localDb">local repository to push from.</param>
+        /// <param name="srcRef">
+        /// source revision - any string resolvable by
+        /// <see cref="Repository.Resolve"/>. This resolves to the new
+        /// object that the caller want remote ref to be after update. Use
+        /// null or <see cref="ObjectId.ZeroId"/> string for delete request.
+        /// </param>
+        /// <param name="remoteName">
+        /// full name of a remote ref to update, e.g. "refs/heads/master"
+        /// (no wildcard, no short name).
+        /// </param>
+        /// <param name="forceUpdate">
+        /// true when caller want remote ref to be updated regardless
+        /// whether it is fast-forward update (old object is ancestor of
+        /// new object).
+        /// </param>
+        /// <param name="localName">
+        /// optional full name of a local stored tracking branch, to
+        /// update after push, e.g. "refs/remotes/zawir/dirty" (no
+        /// wildcard, no short name); null if no local tracking branch
+        /// should be updated.
+        /// </param>
+        /// <param name="expectedOldObjectId">
+        /// optional object id that caller is expecting, requiring to be
+        /// advertised by remote side before update; update will take
+        /// place ONLY if remote side advertise exactly this expected id;
+        /// null if caller doesn't care what object id remote side
+        /// advertise. Use {@link ObjectId#zeroId()} when expecting no
+        /// remote ref with this name.
+        /// </param>
         public RemoteRefUpdate(Repository localDb, string srcRef, string remoteName, bool forceUpdate, string localName, ObjectId expectedOldObjectId)
         {
-            if (localDb == null)
-                throw new ArgumentNullException("localDb");
             if (remoteName == null)
-                throw new ArgumentException("Remote name can't be null.");
+                throw new ArgumentNullException("remoteName", "Remote name can't be null.");
 
             SourceRef = srcRef;
             NewObjectId = (srcRef == null ? ObjectId.ZeroId : localDb.Resolve(srcRef));
@@ -91,18 +169,36 @@ namespace GitSharp.Core.Transport
             {
                 TrackingRefUpdate = null;
             }
-            this._localDb = localDb;
+            _localDb = localDb;
             ExpectedOldObjectId = expectedOldObjectId;
             Status = UpdateStatus.NOT_ATTEMPTED;
         }
 
+        /// <summary>
+        /// Create a new instance of this object basing on existing instance for
+        /// configuration. State (like <see cref="get_Message"/>, <see cref="get_Status"/>)
+        /// of base object is not shared. Expected old object id is set up from
+        /// scratch, as this constructor may be used for 2-stage push: first one
+        /// being dry run, second one being actual push.
+        /// </summary>
+        /// <param name="baseUpdate">configuration base.</param>
+        /// <param name="newExpectedOldObjectId">new expected object id value.</param>
         public RemoteRefUpdate(RemoteRefUpdate baseUpdate, ObjectId newExpectedOldObjectId)
             : this(baseUpdate._localDb, baseUpdate.SourceRef, baseUpdate.RemoteName, baseUpdate.ForceUpdate, (baseUpdate.TrackingRefUpdate == null ? null : baseUpdate.TrackingRefUpdate.LocalName), newExpectedOldObjectId)
         {
-            if (baseUpdate == null)
-                throw new ArgumentNullException("baseUpdate");
+
         }
 
+        /// <summary>
+        /// expectedOldObjectId required to be advertised by remote side, as
+        /// set in constructor; may be null.
+        /// </summary>
+        public ObjectId ExpectedOldObjectId { get; private set; }
+
+        /// <summary>
+        /// true if some object is required to be advertised by remote side,
+        /// as set in constructor; false otherwise.
+        /// </summary>
         public bool IsExpectingOldObjectId
         {
             get
@@ -111,6 +207,14 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        /// <summary>
+        /// newObjectId for remote ref, as set in constructor.
+        /// </summary>
+        public ObjectId NewObjectId { get; private set; }
+
+        /// <summary>
+        /// true if this update is deleting update; false otherwise.
+        /// </summary>
         public bool IsDelete
         {
             get
@@ -119,6 +223,28 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        /// <summary>
+        /// name of remote ref to update, as set in constructor.
+        /// </summary>
+        public string RemoteName { get; private set; }
+
+        /// <summary>
+        /// local tracking branch update if localName was set in constructor.
+        /// </summary>
+        public TrackingRefUpdate TrackingRefUpdate { get; private set; }
+
+        /// <summary>
+        /// source revision as specified by user (in constructor), could be
+        /// any string parseable by <see cref="Repository.Resolve"/>; can
+        /// be null if specified that way in constructor - this stands for
+        /// delete request.
+        /// </summary>
+        public string SourceRef { get; private set; }
+
+        /// <summary>
+        /// true if user specified a local tracking branch for remote update;
+        /// false otherwise.
+        /// </summary>
         public bool HasTrackingRefUpdate
         {
             get
@@ -127,6 +253,34 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        /// <summary>
+        /// true if user specified a local tracking branch for remote update;
+        /// false otherwise.
+        /// </summary>
+        public bool ForceUpdate { get; private set; }
+
+        /// <summary>
+        /// status of remote ref update operation.
+        /// </summary>
+        public UpdateStatus Status { get; set; }
+
+        /// <summary>
+        /// Check whether update was fast-forward. Note that this result is
+        /// meaningful only after successful update (when status is <see cref="UpdateStatus.OK"/>.
+        /// <para/>
+        /// true if update was fast-forward; false otherwise.
+        /// </summary>
+        public bool FastForward { get; set; }
+
+        /// <summary>
+        /// message describing reasons of status when needed/possible; may be null.
+        /// </summary>
+        public string Message { get; set; }
+
+        /// <summary>
+        /// Update locally stored tracking branch with the new object.
+        /// </summary>
+        /// <param name="walk">walker used for checking update properties.</param>
         protected internal void updateTrackingRef(RevWalk.RevWalk walk)
         {
             if (IsDelete)

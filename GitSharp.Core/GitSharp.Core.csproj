@@ -229,7 +229,7 @@
     <Compile Include="Util\CRC32.cs" />
     <Compile Include="Util\MessageDigest.cs" />
     <Compile Include="Util\StringUtils.cs" />
-    <Compile Include="Util\TimeoutStream.cs" />
+    <Compile Include="Util\JavaHelper\TimeoutStream.cs" />
     <Compile Include="Util\WeakReference.cs" />
     <Compile Include="WholePackedObjectLoader.cs" />
     <Compile Include="WindowCache.cs" />

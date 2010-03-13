@@ -41,9 +41,13 @@ using System.IO;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.Util;
+using GitSharp.Core.Util.JavaHelper;
 
 namespace GitSharp.Core.Transport
 {
+    /// <summary>
+    /// Implements the server side of a fetch connection, transmitting objects.
+    /// </summary>
     public class UploadPack : IDisposable
     {
         private const string OptionIncludeTag = BasePackFetchConnection.OPTION_INCLUDE_TAG;
@@ -56,32 +60,20 @@ namespace GitSharp.Core.Transport
         private const string OptionOfsDelta = BasePackFetchConnection.OPTION_OFS_DELTA;
         private const string OptionNoProgress = BasePackFetchConnection.OPTION_NO_PROGRESS;
 
+        /// <summary>
+        /// Database we read the objects from.
+        /// </summary>
         private readonly Repository _db;
-        private readonly RevWalk.RevWalk _walk;
-        private IDictionary<string, Ref> _refs;
 
         /// <summary>
-        /// Filter used while advertising the refs to the client.
+        /// Revision traversal support over <see cref="_db"/>.
         /// </summary>
-        private RefFilter _refFilter;
+        private readonly RevWalk.RevWalk _walk;
 
-        private readonly List<string> _options;
-        private readonly IList<RevObject> _wantAll;
-        private readonly IList<RevCommit> _wantCommits;
-        private readonly IList<RevObject> _commonBase;
-
-        private readonly RevFlag ADVERTISED;
-        private readonly RevFlag WANT;
-        private readonly RevFlag PEER_HAS;
-        private readonly RevFlag COMMON;
-        private readonly RevFlagSet SAVE;
-
-        private BasePackFetchConnection.MultiAck _multiAck = BasePackFetchConnection.MultiAck.OFF;
-        private Stream _rawIn;
-        private Stream _rawOut;
+        /// <summary>
+        /// Timeout in seconds to wait for client interaction.
+        /// </summary>
         private int _timeout;
-        private PacketLineIn _pckIn;
-        private PacketLineOut _pckOut;
 
         /// <summary>
         /// Is the client connection a bi-directional socket or pipe?
@@ -96,17 +88,76 @@ namespace GitSharp.Core.Transport
         /// </summary>
         private bool biDirectionalPipe = true;
 
+        private Stream _rawIn;
+        private Stream _rawOut;
+
+        private PacketLineIn _pckIn;
+        private PacketLineOut _pckOut;
+
+        /// <summary>
+        /// The refs we advertised as existing at the start of the connection.
+        /// </summary>
+        private IDictionary<string, Ref> _refs;
+
+        /// <summary>
+        /// Filter used while advertising the refs to the client.
+        /// </summary>
+        private RefFilter _refFilter;
+
+        /// <summary>
+        /// Capabilities requested by the client.
+        /// </summary>
+        private readonly List<string> _options = new List<string>();
+
+        /// <summary>
+        /// Objects the client wants to obtain.
+        /// </summary>
+        private readonly IList<RevObject> _wantAll = new List<RevObject>();
+
+        /// <summary>
+        /// Objects the client wants to obtain.
+        /// </summary>
+        private readonly List<RevCommit> _wantCommits = new List<RevCommit>();
+
+        /// <summary>
+        /// Objects on both sides, these don't have to be sent.
+        /// </summary>
+        private readonly IList<RevObject> _commonBase = new List<RevObject>();
+
+        /// <summary>
+        /// null if <see cref="_commonBase"/> should be examined again.
+        /// </summary>
+        private bool? okToGiveUp;
+
+        /// <summary>
+        /// Marked on objects we sent in our advertisement list.
+        /// </summary>
+        private readonly RevFlag ADVERTISED;
+
+        /// <summary>
+        /// Marked on objects the client has asked us to give them.
+        /// </summary>
+        private readonly RevFlag WANT;
+
+        /// <summary>
+        /// Marked on objects both we and the client have.
+        /// </summary>
+        private readonly RevFlag PEER_HAS;
+
+        /// <summary>
+        /// Marked on objects in <see cref="_commonBase"/>.
+        /// </summary>
+        private readonly RevFlag COMMON;
+        private readonly RevFlagSet SAVE;
+
+        private BasePackFetchConnection.MultiAck _multiAck = BasePackFetchConnection.MultiAck.OFF;
+
         ///	<summary>
         /// Create a new pack upload for an open repository.
         /// </summary>
         /// <param name="copyFrom">the source repository.</param>
         public UploadPack(Repository copyFrom)
         {
-            _options = new List<string>();
-            _wantAll = new List<RevObject>();
-            _wantCommits = new List<RevCommit>();
-            _commonBase = new List<RevObject>();
-
             _db = copyFrom;
             _walk = new RevWalk.RevWalk(_db);
             _walk.setRetainBody(false);
@@ -129,11 +180,19 @@ namespace GitSharp.Core.Transport
             get { return _db; }
         }
 
+        /// <summary>
+        /// the RevWalk instance used by this connection.
+        /// </summary>
         public RevWalk.RevWalk RevWalk
         {
             get { return _walk; }
         }
 
+        /// <summary>
+        /// number of seconds to wait (with no data transfer occurring)
+        /// before aborting an IO read or write operation with the
+        /// connected client.
+        /// </summary>
         public int Timeout
         {
             get { return _timeout; }
@@ -290,25 +349,23 @@ namespace GitSharp.Core.Transport
                     throw;
                 }
 
-                if (line.Length == 0) break;
+                if (line == PacketLineIn.END) break;
                 if (!line.StartsWith("want ") || line.Length < 45)
                 {
                     throw new PackProtocolException("expected want; got " + line);
                 }
 
-                if (isFirst)
+                if (isFirst && line.Length > 45)
                 {
-                    int sp = line.IndexOf(' ', 45);
-                    if (sp >= 0)
-                    {
-                        foreach (string c in line.Substring(sp + 1).Split(' '))
-                            _options.Add(c);
-                        line = line.Slice(0, sp);
-                    }
+                    string opt = line.Substring(45);
+                    if (opt.StartsWith(" "))
+                        opt = opt.Substring(1);
+                    foreach (string c in opt.Split(' '))
+                        _options.Add(c);
+                    line = line.Slice(0, 45);
                 }
 
-                string name = line.Substring(5);
-                ObjectId id = ObjectId.FromString(name);
+                ObjectId id = ObjectId.FromString(line.Substring(5));
                 RevObject o;
                 try
                 {
@@ -316,11 +373,11 @@ namespace GitSharp.Core.Transport
                 }
                 catch (IOException e)
                 {
-                    throw new PackProtocolException(name + " not valid", e);
+                    throw new PackProtocolException(id.Name + " not valid", e);
                 }
                 if (!o.has(ADVERTISED))
                 {
-                    throw new PackProtocolException(name + " not valid");
+                    throw new PackProtocolException(id.Name + " not valid");
                 }
 
                 Want(o);
@@ -334,30 +391,30 @@ namespace GitSharp.Core.Transport
             o.add(WANT);
             _wantAll.Add(o);
 
-            RevTag oTag = (o as RevTag);
-            while (oTag != null)
-            {
-                o = oTag.getObject();
-                oTag = (o as RevTag);
-            }
+            if (o is RevCommit)
+                _wantCommits.Add((RevCommit)o);
 
-            RevCommit oComm = (o as RevCommit);
-            if (oComm != null)
+            else if (o is RevTag)
             {
-                _wantCommits.Add(oComm);
+                do
+                {
+                    o = ((RevTag)o).getObject();
+                } while (o is RevTag);
+                if (o is RevCommit)
+                    Want(o);
             }
 
         }
 
         private bool Negotiate()
         {
-            string lastName = string.Empty;
+            ObjectId last = ObjectId.ZeroId;
 
             while (true)
             {
                 string line = _pckIn.ReadString();
 
-                if (line.Length == 0)
+                if (line == PacketLineIn.END)
                 {
                     if (_commonBase.Count == 0 || _multiAck != BasePackFetchConnection.MultiAck.OFF)
                     {
@@ -370,29 +427,29 @@ namespace GitSharp.Core.Transport
                 }
                 else if (line.StartsWith("have ") && line.Length == 45)
                 {
-                    string name = line.Substring(5);
-                    ObjectId id = ObjectId.FromString(name);
+                    ObjectId id = ObjectId.FromString(line.Substring(5));
                     if (MatchHave(id))
                     {
-                        lastName = name;
+                        // Both sides have the same object; let the client know.
+                        //
+                        last = id;
                         switch (_multiAck)
                         {
                             case BasePackFetchConnection.MultiAck.OFF:
                                 if (_commonBase.Count == 1)
-                                    _pckOut.WriteString("ACK " + name + "\n");
+                                    _pckOut.WriteString("ACK " + id.Name + "\n");
                                 break;
                             case BasePackFetchConnection.MultiAck.CONTINUE:
 
-                                _pckOut.WriteString("ACK " + name + " continue\n");
+                                _pckOut.WriteString("ACK " + id.Name + " continue\n");
                                 break;
                             case BasePackFetchConnection.MultiAck.DETAILED:
-                                _pckOut.WriteString("ACK " + name + " common\n");
+                                _pckOut.WriteString("ACK " + id.Name + " common\n");
                                 break;
                         }
                     }
                     else if (OkToGiveUp())
                     {
-
                         // They have this object; we don't.
                         //
                         switch (_multiAck)
@@ -400,10 +457,10 @@ namespace GitSharp.Core.Transport
                             case BasePackFetchConnection.MultiAck.OFF:
                                 break;
                             case BasePackFetchConnection.MultiAck.CONTINUE:
-                                _pckOut.WriteString("ACK " + name + " continue\n");
+                                _pckOut.WriteString("ACK " + id.Name + " continue\n");
                                 break;
                             case BasePackFetchConnection.MultiAck.DETAILED:
-                                _pckOut.WriteString("ACK " + name + " ready\n");
+                                _pckOut.WriteString("ACK " + id.Name + " ready\n");
                                 break;
                         }
                     }
@@ -416,7 +473,7 @@ namespace GitSharp.Core.Transport
                     }
                     else if (_multiAck != BasePackFetchConnection.MultiAck.OFF)
                     {
-                        _pckOut.WriteString("ACK " + lastName + "\n");
+                        _pckOut.WriteString("ACK " + last.Name + "\n");
                     }
 
                     return true;
@@ -458,22 +515,24 @@ namespace GitSharp.Core.Transport
             if (o.has(COMMON)) return;
             o.add(COMMON);
             _commonBase.Add(o);
+            okToGiveUp = null;
         }
 
         private bool OkToGiveUp()
+        {
+            if (okToGiveUp == null)
+            {
+                okToGiveUp = OkToGiveUpImp();
+            }
+            return okToGiveUp.Value;
+        }
+        private bool OkToGiveUpImp()
         {
             if (_commonBase.Count == 0) return false;
 
             try
             {
-                for (var i = _wantCommits.GetEnumerator(); i.MoveNext(); )
-                {
-                    RevCommit want = i.Current;
-                    if (WantSatisfied(want))
-                    {
-                        _wantCommits.Remove(want);
-                    }
-                }
+                _wantCommits.RemoveAll(WantSatisfied);
             }
             catch (IOException e)
             {
@@ -525,7 +584,7 @@ namespace GitSharp.Core.Transport
                     pm = new SideBandProgressMonitor(_pckOut);
             }
 
-            var pw = new PackWriter(_db, pm, new NullProgressMonitor())
+            var pw = new PackWriter(_db, pm, NullProgressMonitor.Instance)
                         {
                             DeltaBaseAsOffset = _options.Contains(OptionOfsDelta),
                             Thin = thin

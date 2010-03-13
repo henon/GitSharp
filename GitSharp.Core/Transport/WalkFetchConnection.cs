@@ -442,7 +442,7 @@ namespace GitSharp.Core.Transport
                 {
                     WalkRemoteObjectDatabase wrr = _noPacksYet.First.Value;
                     _noPacksYet.RemoveFirst();
-                    List<string> packNameList;
+                    ICollection<string> packNameList;
                     try
                     {
                         pm.BeginTask("Listing packs", ProgressMonitor.UNKNOWN);
@@ -477,7 +477,7 @@ namespace GitSharp.Core.Transport
 
                 // Try to expand the first alternate we haven't expanded yet.
                 //
-                List<WalkRemoteObjectDatabase> al = ExpandOneAlternate(id, pm);
+                ICollection<WalkRemoteObjectDatabase> al = ExpandOneAlternate(id, pm);
                 if (al != null && al.Count > 0)
                 {
                     foreach (WalkRemoteObjectDatabase alt in al)
@@ -725,7 +725,7 @@ namespace GitSharp.Core.Transport
             throw new ObjectWritingException("Unable to store " + id.Name + ".");
         }
 
-        private List<WalkRemoteObjectDatabase> ExpandOneAlternate(AnyObjectId id, ProgressMonitor pm)
+        private ICollection<WalkRemoteObjectDatabase> ExpandOneAlternate(AnyObjectId id, ProgressMonitor pm)
         {
             while (_noAlternatesYet.Count > 0)
             {
@@ -734,7 +734,7 @@ namespace GitSharp.Core.Transport
                 try
                 {
                     pm.BeginTask("Listing alternates", ProgressMonitor.UNKNOWN);
-                    List<WalkRemoteObjectDatabase> altList = wrr.getAlternates();
+                    ICollection<WalkRemoteObjectDatabase> altList = wrr.getAlternates();
                     if (altList != null && altList.Count > 0)
                         return altList;
                 }

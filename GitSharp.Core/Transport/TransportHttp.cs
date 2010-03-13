@@ -132,7 +132,7 @@ namespace GitSharp.Core.Transport
                 return new URIish(_objectsUrl);
             }
 
-            public override List<WalkRemoteObjectDatabase> getAlternates()
+            public override ICollection<WalkRemoteObjectDatabase> getAlternates()
             {
                 try
                 {
@@ -160,7 +160,7 @@ namespace GitSharp.Core.Transport
                 return new HttpObjectDatabase(new Uri(_objectsUrl, location));
             }
 
-            public override List<string> getPackNames()
+            public override ICollection<string> getPackNames()
             {
                 var packs = new List<string>();
                 try

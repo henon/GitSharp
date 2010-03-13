@@ -153,7 +153,7 @@ namespace GitSharp.Core.Transport
                 }
             }
 
-            public override List<string> getPackNames()
+            public override ICollection<string> getPackNames()
             {
                 var packs = new List<string>();
                 try
@@ -335,7 +335,7 @@ namespace GitSharp.Core.Transport
                 return avail;
             }
 
-            public override List<WalkRemoteObjectDatabase> getAlternates()
+            public override ICollection<WalkRemoteObjectDatabase> getAlternates()
             {
                 try
                 {

@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 2007, Dave Watson <dwatson@mimvista.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
- * Copyright (C) 2008, Kevin Thompson <kevin.thompson@theautomaters.com>
  * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -43,7 +42,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using GitSharp.Core;
-using GitSharp.Core.TreeWalk;
 
 namespace GitSharp
 {
@@ -53,14 +51,15 @@ namespace GitSharp
 		private GitIndex _index;
 		private Core.Tree _tree;
 
-		public RepositoryStatus(Repository repository) : this(repository, new RepositoryStatusOptions { ForceContentCheck = true})
+		public RepositoryStatus(Repository repository)
+			: this(repository, new RepositoryStatusOptions { ForceContentCheck = true })
 		{
 		}
 
 		public RepositoryStatus(Repository repository, RepositoryStatusOptions options)
 		{
 			Repository = repository;
-			Options = options; 
+			Options = options;
 			Update();
 		}
 
@@ -144,7 +143,8 @@ namespace GitSharp
 
 		private IgnoreHandler IgnoreHandler
 		{
-			get; set;
+			get;
+			set;
 		}
 
 		private void FillTree(DirectoryInfo dir, Core.Tree tree)
@@ -160,7 +160,7 @@ namespace GitSharp
 			{
 				if (IgnoreHandler.IsIgnored(tree.FullName + "/" + file.Name))
 					continue;
-				tree.AddFile(( file.Name));
+				tree.AddFile((file.Name));
 			}
 		}
 
@@ -168,7 +168,7 @@ namespace GitSharp
 		/// 
 		/// </summary>
 		/// <param name="treeEntry"></param>
-		/// <param name="wdirEntry">Note: wdirEntry is the gitignored working directory entry.</param>
+		/// <param name="wdirEntry">Note: wdirEntry is the non-ignored working directory entry.</param>
 		/// <param name="indexEntry"></param>
 		/// <param name="file">Note: gitignore patterns do not influence this parameter</param>
 		private void OnVisitEntry(TreeEntry treeEntry, TreeEntry wdirEntry, GitIndex.Entry indexEntry, FileInfo file)
@@ -181,46 +181,135 @@ namespace GitSharp
 			//if (indexEntry != null)
 			//   Console.WriteLine("index: " + indexEntry.Name);
 			//Console.WriteLine("file: " + file.Name);
+			PathStatus path_status = null;
 			if (indexEntry != null)
 			{
 				if (treeEntry == null)
 				{
-					Added.Add(indexEntry.Name);
-					AnyDifferences = true;
+					path_status = OnAdded(indexEntry.Name, path_status);
 				}
 				if (treeEntry != null && !treeEntry.Id.Equals(indexEntry.ObjectId))
 				{
 					Debug.Assert(treeEntry.FullName == indexEntry.Name);
-					Staged.Add(indexEntry.Name);
-					AnyDifferences = true;
+					path_status = OnStaged(indexEntry.Name, path_status);
 				}
 				if (!file.Exists)
 				{
-					Missing.Add(indexEntry.Name);
-					AnyDifferences = true;
+					path_status = OnMissing(indexEntry.Name, path_status);
 				}
 				if (file.Exists && indexEntry.IsModified(new DirectoryInfo(Repository.WorkingDirectory), Options.ForceContentCheck))
 				{
-					Modified.Add(indexEntry.Name);
-					AnyDifferences = true;
+					path_status = OnModified(indexEntry.Name, path_status);
 				}
 				if (indexEntry.Stage != 0)
 				{
-					MergeConflict.Add(indexEntry.Name);
-					AnyDifferences = true;
+					path_status = OnMergeConflict(indexEntry.Name, path_status);
 				}
 			}
 			else // <-- index entry == null
 			{
 				if (treeEntry != null && !(treeEntry is Tree))
 				{
-					Removed.Add(treeEntry.FullName);
-					AnyDifferences = true;
+					path_status = OnRemoved(treeEntry.FullName, path_status);
 				}
 				if (wdirEntry != null) // actually, we should enforce (treeEntry == null ) here too but original git does not, may be a bug. 
-					Untracked.Add(wdirEntry.FullName);
+					path_status = OnUntracked(wdirEntry.FullName, path_status);
 			}
+			if (Options.PerPathNotificationCallback != null && path_status != null)
+				Options.PerPathNotificationCallback(path_status);
 		}
+
+		private PathStatus OnAdded(string path, PathStatus status)
+		{
+			if (Options.PerPathNotificationCallback != null)
+			{
+				if (status == null)
+					status = new PathStatus(Repository, path);
+				status.IndexPathStatus = IndexPathStatus.Added;
+			}
+			Added.Add(path);
+			AnyDifferences = true;
+			return status;
+		}
+
+		private PathStatus OnStaged(string path, PathStatus status)
+		{
+			if (Options.PerPathNotificationCallback != null)
+			{
+				if (status == null)
+					status = new PathStatus(Repository, path);
+				status.IndexPathStatus = IndexPathStatus.Staged;
+			}
+			Staged.Add(path);
+			AnyDifferences = true;
+			return status;
+		}
+
+		private PathStatus OnMissing(string path, PathStatus status)
+		{
+			if (Options.PerPathNotificationCallback != null)
+			{
+				if (status == null)
+					status = new PathStatus(Repository, path);
+				status.WorkingPathStatus = WorkingPathStatus.Missing;
+			}
+			Missing.Add(path);
+			AnyDifferences = true;
+			return status;
+		}
+
+		private PathStatus OnModified(string path, PathStatus status)
+		{
+			if (Options.PerPathNotificationCallback != null)
+			{
+				if (status == null)
+					status = new PathStatus(Repository, path);
+				status.WorkingPathStatus = WorkingPathStatus.Modified;
+			}
+			Modified.Add(path);
+			AnyDifferences = true;
+			return status;
+		}
+
+		private PathStatus OnMergeConflict(string path, PathStatus status)
+		{
+			if (Options.PerPathNotificationCallback != null)
+			{
+				if (status == null)
+					status = new PathStatus(Repository, path);
+				status.IndexPathStatus = IndexPathStatus.MergeConflict;
+			}
+			MergeConflict.Add(path);
+			AnyDifferences = true;
+			return status;
+		}
+
+		private PathStatus OnRemoved(string path, PathStatus status)
+		{
+			if (Options.PerPathNotificationCallback != null)
+			{
+				if (status == null)
+					status = new PathStatus(Repository, path);
+				status.IndexPathStatus = IndexPathStatus.Removed;
+			}
+			Removed.Add(path);
+			AnyDifferences = true;
+			return status;
+		}
+
+		private PathStatus OnUntracked(string path, PathStatus status)
+		{
+			if (Options.PerPathNotificationCallback != null)
+			{
+				if (status == null)
+					status = new PathStatus(Repository, path);
+				status.WorkingPathStatus = WorkingPathStatus.Untracked;
+			}
+			Untracked.Add(path);
+			AnyDifferences = true;
+			return status;
+		}
+
 
 		/// <summary>
 		/// Recalculates the status
@@ -248,6 +337,47 @@ namespace GitSharp
 		/// If filetime and index entry time are equal forces a full content check. This can be costly for large repositories.
 		/// </summary>
 		public bool ForceContentCheck { get; set; }
+		/// <summary>
+		/// If you want to get instant per path status info while the algorithm traverses working directry, index and commit tree set this callback. Note,
+		/// that it is fired only if RepositoryStatus detects differences.
+		/// </summary>
+		public Action<PathStatus> PerPathNotificationCallback { get; set; }
 	}
 
+	/// <summary>
+	/// Status information for a single path in the working directry or index. See RepositoryStatusOptions.PerPathNotification for more information.
+	/// </summary>
+	public class PathStatus
+	{
+		public PathStatus(Repository repo, string path)
+		{
+			Repository = repo;
+			Path = path;
+			WorkingPathStatus = WorkingPathStatus.Unchanged;
+			IndexPathStatus = IndexPathStatus.Unchanged;
+		}
+
+		public Repository Repository { get; set; }
+		/// <summary>
+		/// Relative repository path.
+		/// </summary>
+		public string Path { get; set; }
+		/// <summary>
+		/// Name of the file
+		/// </summary>
+		public string Name
+		{
+			get
+			{
+				if (Path == null)
+					return null;
+				return System.IO.Path.GetFileName(Path);
+			}
+		}
+		public WorkingPathStatus WorkingPathStatus { get; set; }
+		public IndexPathStatus IndexPathStatus { get; set; }
+	}
+
+	public enum WorkingPathStatus { Unchanged, Modified, Missing, Untracked }
+	public enum IndexPathStatus { Unchanged, Added, Removed, Staged, MergeConflict }
 }

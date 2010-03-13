@@ -300,5 +300,65 @@ namespace GitSharp.API.Tests
 				Assert.AreEqual(5, status.Untracked.Count);
 			}
 		}
+
+		[Test]
+		public void AlternativeCallbackApiTest()
+		{
+			using (var repo = new Repository(trash.FullName))
+			{
+				repo.Head.Reset(ResetBehavior.Mixed);
+				writeTrashFile("untracked", "");
+				writeTrashFile("added", "");
+				repo.Index.Add("added");
+				writeTrashFile("a/a1", "modified");
+				repo.Index.AddContent("a/a1.txt", "staged");
+				repo.Index.Remove("b/b2.txt");
+				var status = repo.Status;
+				Assert.AreEqual(1, status.Added.Count);
+				Assert.AreEqual(1, status.Staged.Count);
+				Assert.AreEqual(6, status.Missing.Count);
+				Assert.AreEqual(1, status.Modified.Count);
+				Assert.AreEqual(1, status.Removed.Count);
+				Assert.AreEqual(1, status.Untracked.Count);
+				var stati = new List<PathStatus>();
+				var s = new RepositoryStatus(repo, new RepositoryStatusOptions
+				{
+					PerPathNotificationCallback = path_status =>
+					{
+						stati.Add(path_status);
+						switch (path_status.WorkingPathStatus)
+						{
+							case WorkingPathStatus.Missing:
+								Assert.IsTrue(status.Missing.Contains(path_status.Path));
+								break;
+							case WorkingPathStatus.Modified:
+								Assert.IsTrue(status.Modified.Contains(path_status.Path));
+								break;
+							case WorkingPathStatus.Untracked:
+								Assert.IsTrue(status.Untracked.Contains(path_status.Path));
+								break;
+						}
+						switch (path_status.IndexPathStatus)
+						{
+							case IndexPathStatus.Added:
+								Assert.IsTrue(status.Added.Contains(path_status.Path));
+								break;
+							case IndexPathStatus.Removed:
+								Assert.IsTrue(status.Removed.Contains(path_status.Path));
+								break;
+							case IndexPathStatus.Staged:
+								Assert.IsTrue(status.Staged.Contains(path_status.Path));
+								break;
+						}
+					}
+				});
+				var dict = stati.ToDictionary(p => p.Path);
+				Assert.IsTrue(dict.ContainsKey("untracked"));
+				Assert.IsTrue(dict.ContainsKey("added"));
+				Assert.IsTrue(dict.ContainsKey("a/a1"));
+				Assert.IsTrue(dict.ContainsKey("a/a1.txt"));
+				Assert.IsTrue(dict.ContainsKey("b/b2.txt"));
+			}
+		}
 	}
 }

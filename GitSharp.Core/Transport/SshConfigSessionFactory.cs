@@ -80,9 +80,9 @@ namespace GitSharp.Core.Transport
 
         protected JSch getJSch(OpenSshConfig.Host hc)
         {
-			if (hc == null)
-				throw new System.ArgumentNullException ("hc");
-			
+            if (hc == null)
+                throw new System.ArgumentNullException("hc");
+
             JSch def = getDefaultJSch();
             FileInfo identityFile = hc.getIdentityFile();
             if (identityFile == null)
@@ -124,7 +124,7 @@ namespace GitSharp.Core.Transport
                 config = OpenSshConfig.get();
             return config;
         }
-           
+
 
         private static void knownHosts(JSch sch)
         {
@@ -141,11 +141,11 @@ namespace GitSharp.Core.Transport
             }
             catch (FileNotFoundException)
             {
-                
+
             }
             catch (IOException)
             {
-                
+
             }
         }
 
@@ -172,7 +172,7 @@ namespace GitSharp.Core.Transport
             }
             catch (JSchException)
             {
-                
+
             }
         }
     }

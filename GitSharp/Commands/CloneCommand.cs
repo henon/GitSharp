@@ -43,6 +43,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using GitSharp.Core.Exceptions;
 using GitSharp.Core.Transport;
 using GitSharp.Core;
 
@@ -208,7 +209,17 @@ namespace GitSharp.Commands
 			}
 
 			saveRemote(source);
-			FetchResult r = runFetch();
+
+            FetchResult r;
+		    try
+		    {
+		        r = runFetch();
+		    }
+		    catch (NoRemoteRepositoryException)
+		    {
+		        Repository.Dispose();
+		        throw;
+		    }
 			GitSharp.Core.Ref branch = guessHEAD(r);
 			if (!NoCheckout)
 				doCheckout(branch);

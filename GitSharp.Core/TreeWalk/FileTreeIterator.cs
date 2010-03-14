@@ -174,7 +174,7 @@ namespace GitSharp.Core.TreeWalk
                 {
                     if (_lastModified == 0)
                     {
-                        _lastModified = _file.LastWriteTime.Ticks;
+                        _lastModified = _file.LastWriteTime.ToMillisecondsSinceEpoch();
                     }
 
                     return _lastModified;

@@ -145,7 +145,8 @@ namespace GitSharp.Core
 		///	<exception cref="IOException"> </exception>
 		public void RereadIfNecessary()
 		{
-			if (_cacheFile.Exists && _cacheFile.LastWriteTime.Ticks != _lastCacheTime)
+            _cacheFile.Refresh();
+			if (_cacheFile.Exists && _cacheFile.LastWriteTime.ToMillisecondsSinceEpoch() != _lastCacheTime)
 			{
 				Read();
 				Repository.fireIndexChanged();
@@ -266,7 +267,7 @@ namespace GitSharp.Core
 					_entries[Constants.encode(entry.Name)] = entry;
 				}
 
-				_lastCacheTime = _cacheFile.LastWriteTime.Ticks;
+				_lastCacheTime = _cacheFile.LastWriteTime.ToMillisecondsSinceEpoch();
 			}
 		}
 
@@ -341,7 +342,8 @@ namespace GitSharp.Core
 
 				_changed = false;
 				_statDirty = false;
-				_lastCacheTime = _cacheFile.LastWriteTime.Ticks;
+			    _cacheFile.Refresh();
+				_lastCacheTime = _cacheFile.LastWriteTime.ToMillisecondsSinceEpoch();
 				Repository.fireIndexChanged();
 			}
 			finally
@@ -535,7 +537,7 @@ namespace GitSharp.Core
 				}
 			}
 
-			e.Mtime = file.LastWriteTime.Ticks * 1000000L;
+			e.Mtime = file.LastWriteTime.ToMillisecondsSinceEpoch() * 1000000L;
 			e.Ctime = e.Mtime;
 		}
 
@@ -839,7 +841,7 @@ namespace GitSharp.Core
 			/// <exception cref="IOException"></exception>
 			public bool update(FileInfo f)
 			{
-				long lm = f.LastWriteTime.Ticks * 1000000L;
+				long lm = f.LastWriteTime.ToMillisecondsSinceEpoch() * 1000000L;
 				bool modified = Mtime != lm;
 				Mtime = lm;
 
@@ -1048,12 +1050,11 @@ namespace GitSharp.Core
 				{
 					lastm = lastm - lastm % 1000;
 				}
-				if (lastm != javamtime && !forceContentCheck)
+				if (lastm != javamtime)
 				{
+                    if (!forceContentCheck)
 					return true;
-				}
-				if (forceContentCheck) // [henon] if forced we check, no matter what the file time says.
-				{
+
 					try
 					{
 						using (Stream @is = new FileStream(file.FullName, System.IO.FileMode.Open, FileAccess.Read))
@@ -1089,7 +1090,7 @@ namespace GitSharp.Core
 						e.printStackTrace();
 						throw;
 					}
-				}
+                }
 				return false;
 			}
 

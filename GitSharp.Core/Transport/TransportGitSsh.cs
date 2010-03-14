@@ -167,7 +167,7 @@ namespace GitSharp.Core.Transport
         private ChannelExec Exec(string exe)
         {
             InitSession();
-
+            
             try
             {
                 var channel = (ChannelExec)Sock.openChannel("exec");

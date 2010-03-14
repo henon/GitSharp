@@ -40,44 +40,47 @@ using System;
 namespace GitSharp.Core.Transport
 {
 
-    /** Specification of annotated tag behavior during fetch. */
+    /// <summary>
+    /// Specification of annotated tag behavior during fetch.
+    /// </summary>
     public class TagOpt
     {
-        /**
- * Automatically follow tags if we fetch the thing they point at.
- * <para />
- * This is the default behavior and tries to balance the benefit of having
- * an annotated tag against the cost of possibly objects that are only on
- * branches we care nothing about. Annotated tags are fetched only if we can
- * prove that we already have (or will have when the fetch completes) the
- * object the annotated tag peels (dereferences) to.
- */
+        /// <summary>
+        /// Automatically follow tags if we fetch the thing they point at.
+        /// <para />
+        /// This is the default behavior and tries to balance the benefit of having
+        /// an annotated tag against the cost of possibly objects that are only on
+        /// branches we care nothing about. Annotated tags are fetched only if we can
+        /// prove that we already have (or will have when the fetch completes) the
+        /// object the annotated tag peels (dereferences) to.
+        /// </summary>
         public static readonly TagOpt AUTO_FOLLOW = new TagOpt(string.Empty);
 
-        /**
- * Never fetch tags, even if we have the thing it points at.
- * <para />
- * This option must be requested by the user and always avoids fetching
- * annotated tags. It is most useful if the location you are fetching from
- * publishes annotated tags, but you are not interested in the tags and only
- * want their branches.
- */
+        /// <summary>
+        /// Never fetch tags, even if we have the thing it points at.
+        /// <para />
+        /// This option must be requested by the user and always avoids fetching
+        /// annotated tags. It is most useful if the location you are fetching from
+        /// publishes annotated tags, but you are not interested in the tags and only
+        /// want their branches.
+        /// </summary>
         public static readonly TagOpt NO_TAGS = new TagOpt("--no-tags");
 
-        /**
- * Always fetch tags, even if we do not have the thing it points at.
- * <para />
- * Unlike {@link #AUTO_FOLLOW} the tag is always obtained. This may cause
- * hundreds of megabytes of objects to be fetched if the receiving
- * repository does not yet have the necessary dependencies.
- */
+        /// <summary>
+        /// Always fetch tags, even if we do not have the thing it points at.
+        /// <para />
+        /// Unlike {@link #AUTO_FOLLOW} the tag is always obtained. This may cause
+        /// hundreds of megabytes of objects to be fetched if the receiving
+        /// repository does not yet have the necessary dependencies.
+        /// 
+        /// </summary>
         public static readonly TagOpt FETCH_TAGS = new TagOpt("--tags");
 
-        /**
-         * workaround to match java style
-         */
-        private static readonly TagOpt[] values = new[] { NO_TAGS, FETCH_TAGS };
+        private static readonly TagOpt[] values = new[] { AUTO_FOLLOW, NO_TAGS, FETCH_TAGS };
 
+        /// <summary>
+        /// Command line/configuration file text for this value.
+        /// </summary>
         public string Option { get; private set; }
 
         private TagOpt(string o)
@@ -85,6 +88,11 @@ namespace GitSharp.Core.Transport
             Option = o;
         }
 
+        /// <summary>
+        /// Convert a command line/configuration file text into a value instance.
+        /// </summary>
+        /// <param name="o">the configuration file text value.</param>
+        /// <returns>the option that matches the passed parameter.</returns>
         public static TagOpt fromOption(string o)
         {
             if (string.IsNullOrEmpty(o))
@@ -100,5 +108,4 @@ namespace GitSharp.Core.Transport
             throw new ArgumentException("Invalid tag option: " + o);
         }
     }
-
 }

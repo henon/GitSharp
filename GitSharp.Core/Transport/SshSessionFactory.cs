@@ -40,11 +40,34 @@ using Tamir.SharpSsh.jsch;
 
 namespace GitSharp.Core.Transport
 {
-
+    /// <summary>
+    /// Creates and destroys SSH connections to a remote system.
+    /// <para/>
+    /// Different implementations of the session factory may be used to control
+    /// communicating with the end-user as well as reading their personal SSH
+    /// configuration settings, such as known hosts and private keys.
+    /// <para/>
+    /// A <see cref="Session"/> must be returned to the factory that created it. Callers
+    /// are encouraged to retain the SshSessionFactory for the duration of the period
+    /// they are using the Session.
+    /// </summary>
     public abstract class SshSessionFactory
     {
+        /// <summary>
+        /// Get the currently configured factory.
+        /// <para/>
+        /// A factory is always available. By default the factory will read from the
+        /// user's <code>$HOME/.ssh</code> and assume OpenSSH compatibility.
+        /// </summary>
         public static SshSessionFactory Instance = new DefaultSshSessionFactory();
 
+        /// <summary>
+        /// Change the JVM-wide factory to a different implementation.
+        /// </summary>
+        /// <param name="newFactory">
+        /// factory for future sessions to be created through. If null the
+        /// default factory will be restored.
+        /// </param>
         public static void setInstance(SshSessionFactory newFactory)
         {
             if (newFactory != null)
@@ -55,8 +78,40 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        /// <summary>
+        /// Open (or reuse) a session to a host.
+        /// <para/>
+        /// A reasonable UserInfo that can interact with the end-user (if necessary)
+        /// is installed on the returned session by this method.
+        /// <para/>
+        /// The caller must connect the session by invoking <code>connect()</code>
+        /// if it has not already been connected.
+        /// </summary>
+        /// <param name="user">
+        /// username to authenticate as. If null a reasonable default must
+        /// be selected by the implementation. This may be
+        /// <code>System.getProperty("user.name")</code>.
+        /// </param>
+        /// <param name="pass">
+        /// optional user account password or passphrase. If not null a
+        /// UserInfo that supplies this value to the SSH library will be
+        /// configured.
+        /// </param>
+        /// <param name="host">hostname (or IP address) to connect to. Must not be null.</param>
+        /// <param name="port">
+        /// port number the server is listening for connections on. May be <=
+        /// 0 to indicate the IANA registered port of 22 should be used.
+        /// </param>
+        /// <returns>a session that can contact the remote host.</returns>
         public abstract Session getSession(string user, string pass, string host, int port);
 
+        /// <summary>
+        /// Close (or recycle) a session to a host.
+        /// </summary>
+        /// <param name="session">
+        /// a session previously obtained from this factory's
+        /// <see cref="getSession"/> method.
+        /// </param>
         public void releaseSession(Session session)
         {
             if (session == null)

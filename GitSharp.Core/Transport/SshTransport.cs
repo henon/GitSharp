@@ -43,60 +43,86 @@ using Tamir.SharpSsh.jsch;
 
 namespace GitSharp.Core.Transport
 {
+    /// <summary>
+    /// The base class for transports that use SSH protocol. This class allows
+    /// customizing SSH connection settings.
+    /// </summary>
     public abstract class SshTransport : TcpTransport
     {
         private SshSessionFactory _sch;
         private Session _sock;
 
-    	protected SshTransport(Repository local, URIish uri)
+        /// <summary>
+        /// The open SSH session
+        /// </summary>
+        public Session Sock
+        {
+            get { return _sock; }
+        }
+
+        /// <summary>
+        /// Create a new transport instance.
+        /// </summary>
+        /// <param name="local">
+        /// the repository this instance will fetch into, or push out of.
+        /// This must be the repository passed to
+        /// <see cref="Transport.open(GitSharp.Core.Repository,GitSharp.Core.Transport.URIish)"/>.
+        /// </param>
+        /// <param name="uri">
+        /// the URI used to access the remote repository. This must be the
+        /// URI passed to {@link #open(Repository, URIish)}.
+        /// </param>
+        protected SshTransport(Repository local, URIish uri)
             : base(local, uri)
         {
             _sch = SshSessionFactory.Instance;
         }
 
-		public Session Sock
-		{
-			get { return _sock; }
-		}
+        /// <summary>
+        /// the SSH session factory that will be used for creating SSH sessions
+        /// </summary>
+        public SshSessionFactory SshSessionFactory
+        {
+            get { return _sch; }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentException("The factory must not be null");
+                }
 
-    	public SshSessionFactory SshSessionFactory
-    	{
-			get { return _sch; }
-			set
-			{
-				if (value == null)
-				{
-					throw new ArgumentException("The factory must not be null");
-				}
+                if (_sock != null)
+                {
+                    throw new ApplicationException("An SSH session has already been created");
+                }
 
-				if (_sock != null)
-				{
-					throw new ApplicationException("An SSH session has already been created");
-				}
+                _sch = value;
+            }
+        }
 
-				_sch = value;
-			}
-    	}
-
+        /// <summary>
+        /// Initialize SSH session
+        /// </summary>
         protected void InitSession()
         {
             if (_sock != null) return;
 
-			string user = Uri.User;
-			string pass = Uri.Pass;
-			string host = Uri.Host;
-			int port = Uri.Port;
+            int tms = Timeout > 0 ? Timeout * 1000 : 0;
+            string user = Uri.User;
+            string pass = Uri.Pass;
+            string host = Uri.Host;
+            int port = Uri.Port;
             try
             {
                 _sock = _sch.getSession(user, pass, host, port);
                 if (!_sock.isConnected())
                 {
-                	_sock.connect();
+                    _sock.connect(tms);
                 }
             }
             catch (JSchException je)
             {
-				throw new TransportException(Uri, je.Message, je.InnerException);
+                throw new TransportException(Uri, je.Message, je.InnerException);
             }
             catch (SocketException e)
             {
@@ -108,14 +134,14 @@ namespace GitSharp.Core.Transport
         {
             if (_sock == null) return;
 
-			try
-			{
-				_sch.releaseSession(_sock);
-			}
-			finally
-			{
-				_sock = null;
-			}
+            try
+            {
+                _sch.releaseSession(_sock);
+            }
+            finally
+            {
+                _sock = null;
+            }
 
 #if DEBUG
             GC.SuppressFinalize(this); // Disarm lock-release checker

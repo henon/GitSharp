@@ -38,25 +38,26 @@
 
 namespace GitSharp.Core.Transport
 {
-
+    /// <summary>
+    /// Update of a locally stored tracking branch.
+    /// </summary>
     public class TrackingRefUpdate
     {
-        public string RemoteName { get; private set; }
         private readonly RefUpdate update;
 
         public TrackingRefUpdate(Repository db, RefSpec spec, AnyObjectId nv, string msg)
             : this(db, spec.Destination, spec.Source, spec.Force, nv, msg)
         {
-			if (spec == null)
-				throw new System.ArgumentNullException ("spec");
+            if (spec == null)
+                throw new System.ArgumentNullException("spec");
         }
 
         public TrackingRefUpdate(Repository db, string localName, string remoteName, bool forceUpdate, AnyObjectId nv, string msg)
         {
-			if (db == null)
-				throw new System.ArgumentNullException ("db");
-        	if (nv == null)
-				throw new System.ArgumentNullException ("nv");
+            if (db == null)
+                throw new System.ArgumentNullException("db");
+            if (nv == null)
+                throw new System.ArgumentNullException("nv");
             RemoteName = remoteName;
             update = db.UpdateRef(localName);
             update.IsForceUpdate = forceUpdate;
@@ -64,6 +65,18 @@ namespace GitSharp.Core.Transport
             update.setRefLogMessage(msg, true);
         }
 
+        /// <summary>
+        /// the name of the remote ref.
+        /// <para/>
+        /// Usually this is of the form "refs/heads/master".
+        /// </summary>
+        public string RemoteName { get; private set; }
+
+        /// <summary>
+        /// Get the name of the local tracking ref.
+        /// <para/>
+        /// Usually this is of the form "refs/remotes/origin/master".
+        /// </summary>
         public string LocalName
         {
             get
@@ -72,6 +85,9 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        /// <summary>
+        /// Get the new value the ref will be (or was) updated to. Null if the caller has not configured it.
+        /// </summary>
         public ObjectId NewObjectId
         {
             get
@@ -80,6 +96,17 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        /// <summary>
+        /// The old value of the ref, prior to the update being attempted.
+        /// <para/>
+        /// This value may differ before and after the update method. Initially it is
+        /// populated with the value of the ref before the lock is taken, but the old
+        /// value may change if someone else modified the ref between the time we
+        /// last read it and when the ref was locked for update.
+        /// <para/>
+        /// Returns the value of the ref prior to the update being attempted; null if
+        /// the updated has not been attempted yet.
+        /// </summary>
         public ObjectId OldObjectId
         {
             get
@@ -88,6 +115,9 @@ namespace GitSharp.Core.Transport
             }
         }
 
+        /// <summary>
+        /// the status of this update.
+        /// </summary>
         public RefUpdate.RefUpdateResult Result
         {
             get
@@ -106,5 +136,4 @@ namespace GitSharp.Core.Transport
             update.delete(walk);
         }
     }
-
 }

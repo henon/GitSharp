@@ -95,11 +95,6 @@ namespace GitSharp.Core.RevWalk.Filter
 			return this;
 		}
 
-		public override string ToString()
-		{
-			return base.ToString() + "(" + ((long)_when).UnixTimeToDateTime() + ")";
-		}
-
 		#region Nested Types
 
 		private class BeforeCommitTimeRevFilter : CommitTimeRevFilter
@@ -117,6 +112,11 @@ namespace GitSharp.Core.RevWalk.Filter
 			{
 				return cmit.CommitTime <= _when;
 			}
+
+            public override string ToString()
+            {
+                return base.ToString() + "(" + ((long)_when * 1000).MillisToUtcDateTime() + ")";
+            }
 		}
 
 		private class AfterCommitTimeRevFilter : CommitTimeRevFilter
@@ -144,10 +144,10 @@ namespace GitSharp.Core.RevWalk.Filter
 				return true;
 			}
 
-			public override string ToString()
-			{
-                return base.ToString() + "(" + ((long)_when).UnixTimeToDateTime() + ")";
-			}
+            public override string ToString()
+            {
+                return base.ToString() + "(" + ((long)_when * 1000).MillisToUtcDateTime() + ")";
+            }
 		}
 
 		private class BetweenCommitTimeRevFilter : CommitTimeRevFilter
@@ -167,7 +167,7 @@ namespace GitSharp.Core.RevWalk.Filter
 
 			public override string ToString()
 			{
-                return base.ToString() + "(" + ((long)_when).UnixTimeToDateTime() + " - " + ((long)_until).UnixTimeToDateTime() + ")";
+                return base.ToString() + "(" + ((long)_when * 1000).MillisToUtcDateTime() + " - " + ((long)_until * 1000).MillisToUtcDateTime() + ")";
 			}
 		}
 

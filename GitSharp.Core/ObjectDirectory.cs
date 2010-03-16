@@ -323,7 +323,7 @@ namespace GitSharp.Core
         {
             PackList old = _packList.get();
             _packDirectory.Refresh();
-            if (old.tryAgain(_packDirectory.LastWriteTime.ToMillisecondsSinceEpoch()))
+            if (old.tryAgain(_packDirectory.lastModified()))
                 return old != ScanPacks(old);
 
             return false;
@@ -399,7 +399,7 @@ namespace GitSharp.Core
         {
             Dictionary<string, PackFile> forReuse = ReuseMap(old);
             long lastRead = SystemReader.getInstance().getCurrentTime();
-            long lastModified = _packDirectory.LastWriteTime.ToMillisecondsSinceEpoch();
+            long lastModified = _packDirectory.lastModified();
             HashSet<String> names = listPackDirectory();
             var list = new List<PackFile>(names.Count >> 2);
             bool foundNew = false;

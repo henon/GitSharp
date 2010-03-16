@@ -880,10 +880,10 @@ namespace GitSharp.Tests.GitSharp.Core
 	 */
         private void BUG_WorkAroundRacyGitIssues(string name) {
             FileInfo path = PathUtil.CombineFilePath(db.Directory, name);
-            long old = path.LastWriteTime.ToMillisecondsSinceEpoch();
+            long old = path.lastModified();
             long set = 1250379778668L; // Sat Aug 15 20:12:58 GMT-03:30 2009
-            path.LastWriteTime = (set.MillisToDateTime());
-            Assert.IsTrue(old != path.LastWriteTime.ToMillisecondsSinceEpoch(), "time changed");
+            path.LastWriteTime = (set.MillisToUtcDateTime());
+            Assert.IsTrue(old != path.lastModified(), "time changed");
         }
 
         [Test]

@@ -51,17 +51,17 @@ namespace GitSharp.Core.Tests
         [Test]
         public void GitTimeToDateTimeOffset()
         {
-            Assert.AreEqual("06/21/2009 15:04:53 +02:00", 1245589493L.UnixTimeToDateTimeOffset(2 * 60).ToString(CultureInfo.InvariantCulture));
-            Assert.AreEqual("04/29/2009 18:41:17 -07:00", 1241055677L.UnixTimeToDateTimeOffset(-7 * 60).ToString(CultureInfo.InvariantCulture));
-            Assert.AreEqual(1245589493L, new DateTimeOffset(2009, 06, 21, 15, 04, 53, new TimeSpan(2, 0, 0)).ToUnixTime());
-            Assert.AreEqual(1241055677L, new DateTimeOffset(2009, 04, 29, 18, 41, 17, new TimeSpan(-7, 0, 0)).ToUnixTime());
+            Assert.AreEqual("06/21/2009 15:04:53 +02:00", 1245589493000L.MillisToDateTimeOffset(2 * 60).ToString(CultureInfo.InvariantCulture));
+            Assert.AreEqual("04/29/2009 18:41:17 -07:00", 1241055677000L.MillisToDateTimeOffset(-7 * 60).ToString(CultureInfo.InvariantCulture));
+            Assert.AreEqual(1245589493000L, new DateTimeOffset(2009, 06, 21, 15, 04, 53, new TimeSpan(2, 0, 0)).ToMillisecondsSinceEpoch());
+            Assert.AreEqual(1241055677000L, new DateTimeOffset(2009, 04, 29, 18, 41, 17, new TimeSpan(-7, 0, 0)).ToMillisecondsSinceEpoch());
         }
 
         [Test]
         public void test001_NewIdent()
         {
             PersonIdent p;
-            p = new PersonIdent("A U Thor", "author@example.com", 1142878501L.UnixTimeToDateTime(),
+            p = new PersonIdent("A U Thor", "author@example.com", 1142878501000L.MillisToUtcDateTime(),
                                     (int)new TimeSpan(-5, 0, 0).TotalMinutes);
 
             Assert.AreEqual("A U Thor", p.Name);

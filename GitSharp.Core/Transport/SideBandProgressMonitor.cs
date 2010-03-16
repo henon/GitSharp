@@ -63,7 +63,7 @@ namespace GitSharp.Core.Transport
 
         public override void Start(int totalTasks)
         {
-            _taskBeganAt = DateTime.Now.ToMillisecondsSinceEpoch();
+            _taskBeganAt = SystemReader.getInstance().getCurrentTime();
             _lastOutput = _taskBeganAt;
         }
 
@@ -72,7 +72,7 @@ namespace GitSharp.Core.Transport
             EndTask();
             _msg = title;
             _lastWorked = 0;
-            this._totalWork = totalWork;
+            _totalWork = totalWork;
         }
 
         public override void Update(int completed)
@@ -81,7 +81,7 @@ namespace GitSharp.Core.Transport
                 return;
 
             int cmp = _lastWorked + completed;
-            long now = DateTime.Now.ToMillisecondsSinceEpoch();
+            long now = SystemReader.getInstance().getCurrentTime();
             if (!_output && now - _taskBeganAt < 500)
                 return;
             if (_totalWork == UNKNOWN)

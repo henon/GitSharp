@@ -145,13 +145,12 @@ namespace GitSharp.Core
 
             public override long getCurrentTime()
             {
-                return DateTime.Now.ToMillisecondsSinceEpoch();
+                return DateTime.UtcNow.ToMillisecondsSinceEpoch();
             }
-
 
             public override int getTimezone(long when)
             {
-                return (int)TimeZone.CurrentTimeZone.GetUtcOffset(when.MillisToDateTime()).TotalMinutes;
+                return (int)TimeZone.CurrentTimeZone.GetUtcOffset(when.MillisToUtcDateTime()).TotalMinutes;
             }
 
             public override PlatformType getOperatingSystem()

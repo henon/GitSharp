@@ -68,7 +68,7 @@ namespace GitSharp.Core.Tests.Util
         public void getCurrentTime()
         {
             Assert.AreEqual(new DateTimeOffset(2009, 08, 15, 20, 12, 58, 668, new TimeSpan(-3, -30, 0)), 1250379778668L.MillisToDateTimeOffset((int)new TimeSpan(-3, -30, 0).TotalMinutes));
-            Assert.AreEqual(new DateTime(2009, 08, 15, 23, 42, 58, 668), 1250379778668L.MillisToDateTime());
+            Assert.AreEqual(new DateTime(2009, 08, 15, 23, 42, 58, 668), 1250379778668L.MillisToUtcDateTime());
         }
 
         [Test]

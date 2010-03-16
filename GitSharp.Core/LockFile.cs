@@ -70,7 +70,7 @@ namespace GitSharp.Core
         private readonly string _lockFilePath;
 
 
-        public DateTime CommitLastModified { get; private set; }
+        public long CommitLastModified { get; private set; }
         public bool NeedStatInformation { get; set; }
 
         /// <summary>
@@ -303,13 +303,13 @@ namespace GitSharp.Core
             _lockFile.Refresh();
             if (_refFile.Length == _lockFile.Length)
             {
-                long otime = _refFile.LastWriteTime.ToMillisecondsSinceEpoch();
-                long ntime = _lockFile.LastWriteTime.ToMillisecondsSinceEpoch();
+                long otime = _refFile.lastModified();
+                long ntime = _lockFile.lastModified();
                 while (otime == ntime)
                 {
                     Thread.Sleep(25 /* milliseconds */);
                     _lockFile.LastWriteTime = DateTime.Now;
-                    ntime = _lockFile.LastWriteTime.ToMillisecondsSinceEpoch();
+                    ntime = _lockFile.lastModified();
                 }
             }
         }
@@ -352,7 +352,7 @@ namespace GitSharp.Core
             if (NeedStatInformation)
             {
                 _lockFile.Refresh();
-                CommitLastModified = _lockFile.LastWriteTime;
+                CommitLastModified = _lockFile.lastModified();
             }
         }
 

@@ -39,6 +39,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security;
+using GitSharp.Core.Util;
 
 namespace GitSharp.Core
 {
@@ -230,6 +231,42 @@ namespace GitSharp.Core
             }
 
             return Directory.GetFileSystemEntries(fileInfo.FullName).Select(x => new FileInfo(x)).ToArray();
+        }
+
+        /// <summary>
+        /// Returns the time that the file denoted by this abstract pathname was last modified.
+        /// </summary>
+        /// <param name="fi">A file</param>
+        /// <returns>A long value representing the time the file was last modified, measured in milliseconds since the epoch (00:00:00 GMT, January 1, 1970), or 0L if the file does not exist or if an I/O error occurs.</returns>
+        public static long lastModified(this FileInfo fi)
+        {
+            return InternalLastModified(fi, fsi => fsi.IsFile());
+        }
+
+        /// <summary>
+        /// Returns the time that the directory denoted by this abstract pathname was last modified.
+        /// </summary>
+        /// <param name="di">A directory</param>
+        /// <returns>A long value representing the time the directory was last modified, measured in milliseconds since the epoch (00:00:00 GMT, January 1, 1970), or 0L if the directory does not exist or if an I/O error occurs.</returns>
+        public static long lastModified(this DirectoryInfo di)
+        {
+            return InternalLastModified(di, fsi => fsi.IsDirectory());
+        }
+
+        private static long InternalLastModified(FileSystemInfo fsi, Func<FileSystemInfo, bool> typeAndExistenceChecker)
+        {
+            if (fsi == null)
+            {
+                return 0;
+            }
+
+            if (!typeAndExistenceChecker(fsi))
+            {
+                return 0;
+            }
+
+            fsi.Refresh();
+            return fsi.LastWriteTimeUtc.ToMillisecondsSinceEpoch();
         }
 
         public static bool Mkdirs(this DirectoryInfo directoryInfo)

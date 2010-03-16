@@ -117,7 +117,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 Assert.Fail("No -03:30 TimeZone has been found");
             }
 
-            return (int)newFoundLandTimeZoneInfo.GetUtcOffset(when.MillisToDateTime()).TotalMinutes;
+            return (int)newFoundLandTimeZoneInfo.GetUtcOffset(when.MillisToUtcDateTime()).TotalMinutes;
         }
 
         public override FileBasedConfig getConfigFile(ConfigFileType fileType)

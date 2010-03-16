@@ -304,7 +304,7 @@ namespace GitSharp.Core.Transport
                 // wind up later matching up against things we want and we
                 // can avoid asking for something we already happen to have.
                 //
-                DateTime maxWhen = (maxTime * 1000L).MillisToDateTime();
+                DateTime maxWhen = (maxTime * 1000L).MillisToUtcDateTime();
                 _walk.sort(RevSort.COMMIT_TIME_DESC);
                 _walk.markStart(_reachableCommits);
                 _walk.setRevFilter(CommitTimeRevFilter.After(maxWhen));

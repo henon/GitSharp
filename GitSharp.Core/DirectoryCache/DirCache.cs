@@ -237,7 +237,7 @@ namespace GitSharp.Core.DirectoryCache
         private readonly FileInfo _liveFile;
 
         // Modification time of the file at the last Read/write we did.
-        private DateTime _lastModified;
+        private long _lastModified;
 
         // Individual file index entries, sorted by path name.
         private DirCacheEntry[] _sortedEntries;
@@ -320,7 +320,7 @@ namespace GitSharp.Core.DirectoryCache
             {
                 clear();
             }
-            else if (_liveFile.LastWriteTime != _lastModified)
+            else if (_liveFile.lastModified() != _lastModified)
             {
                 try
                 {
@@ -357,7 +357,7 @@ namespace GitSharp.Core.DirectoryCache
         /// </summary>
         public void clear()
         {
-            _lastModified = DateTime.MinValue;
+            _lastModified = 0;
             _sortedEntries = NoEntries;
             _entryCnt = 0;
             _cacheTree = null;
@@ -398,7 +398,7 @@ namespace GitSharp.Core.DirectoryCache
             {
                 _sortedEntries[i] = new DirCacheEntry(infos, i * InfoLen, inStream, md);
             }
-            _lastModified = _liveFile.LastWriteTime;
+            _lastModified = _liveFile.lastModified();
 
             // After the file entries are index extensions, and then a footer.
             //
@@ -576,7 +576,7 @@ namespace GitSharp.Core.DirectoryCache
 
             // Write the individual file entries.
             //
-            if (_lastModified == DateTime.MinValue)
+            if (_lastModified <= 0) 
             {
                 // Write a new index, as no entries require smudging.
                 //
@@ -587,8 +587,8 @@ namespace GitSharp.Core.DirectoryCache
             }
             else
             {
-                var smudge_s = _lastModified.ToUnixTime();
-                var smudge_ns = _lastModified.Millisecond * 1000000; // [henon] <--- this could be done with much more precision in C# since DateTime has 100 nanosec ticks
+                int smudge_s = (int)(_lastModified / 1000);
+                int smudge_ns = ((int)(_lastModified % 1000)) * 1000000;
                 for (int i = 0; i < _entryCnt; i++)
                 {
                     DirCacheEntry e = _sortedEntries[i];

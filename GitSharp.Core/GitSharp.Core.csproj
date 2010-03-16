@@ -155,7 +155,7 @@
     <Compile Include="Util\JavaHelper\AtomicReference.cs" />
     <Compile Include="Util\BigEndianBitConverter.cs" />
     <Compile Include="Util\JavaHelper\Charset.cs" />
-    <Compile Include="Util\DateTime.cs" />
+    <Compile Include="Util\DateTimeExtensions.cs" />
     <Compile Include="Util\EndianBinaryReader.cs" />
     <Compile Include="Util\EndianBinaryWriter.cs" />
     <Compile Include="Util\EndianBitConverter.cs" />

@@ -687,7 +687,7 @@ namespace GitSharp.Core
                 size = packedRefsFile.Length;
             }
 
-            long mtime = size != 0 ? packedRefsFile.LastWriteTime.ToMillisecondsSinceEpoch() : 0;
+            long mtime = size != 0 ? packedRefsFile.lastModified() : 0;
 
             PackedRefList curList = packedRefs.get();
             if (size == curList.lastSize && mtime == curList.lastModified)
@@ -818,7 +818,7 @@ namespace GitSharp.Core
                     throw new ObjectWritingException("Unable to write " + name);
 
                 _packedRefs.compareAndSet(_oldPackedList, new PackedRefList(_refs,
-                                                                            content.Length, _lck.CommitLastModified.ToMillisecondsSinceEpoch()));
+                                                                            content.Length, _lck.CommitLastModified));
             }
         }
         private Ref readRef(string name, RefList<Ref> packed)
@@ -856,10 +856,7 @@ namespace GitSharp.Core
             FileInfo path = fileFor(name);
             long modified = 0;
 
-            if (File.Exists(path.FullName))
-            {
-                modified = path.LastWriteTime.ToMillisecondsSinceEpoch();
-            }
+            modified = path.lastModified();
 
             if (@ref != null)
             {

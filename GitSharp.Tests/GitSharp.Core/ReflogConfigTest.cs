@@ -102,16 +102,11 @@ namespace GitSharp.Core.Tests
 
             SystemReader mockSystemReader = SystemReader.getInstance();
             long fakeCurrentTime = mockSystemReader.getCurrentTime();
-            fakeCurrentTime = ConvertToUnixTime(fakeCurrentTime); // Second based Unix time format is used to store timetamps in the log. Thus, milliseconds are truncated.
-            fakeCurrentTime *= 1000;
+            long  remainder = fakeCurrentTime % 1000;
+            fakeCurrentTime -= remainder; // Second based Unix time format is used to store timetamps in the log. Thus, milliseconds are truncated.
 
             Assert.AreEqual(fakeCurrentTime, entry.getWho().When);
             Assert.AreEqual(mockSystemReader.getTimezone(fakeCurrentTime), entry.getWho().TimeZoneOffset);
-        }
-
-        private long ConvertToUnixTime(long fakeCurrentTime)
-        {
-            return fakeCurrentTime.MillisToDateTime().ToUnixTime();
         }
 
         private void addFileToTree(Core.Tree t, string filename, string content)

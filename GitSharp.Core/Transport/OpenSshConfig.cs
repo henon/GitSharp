@@ -148,7 +148,7 @@ namespace GitSharp.Core.Transport
         {
             lock (_locker)
             {
-                long mtime = _configFile.LastWriteTime.ToMillisecondsSinceEpoch();
+                long mtime = _configFile.lastModified();
                 if (mtime != _lastModified)
                 {
                     try

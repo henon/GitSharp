@@ -51,53 +51,15 @@ namespace GitSharp.Core.Util
 
         public static long ToMillisecondsSinceEpoch(this DateTime dateTime)
         {
+            if (dateTime.Kind != DateTimeKind.Utc)
+            {
+                throw new ArgumentException("dateTime is expected to be expressed as a UTC DateTime", "dateTime");
+            }
+
             return new DateTimeOffset(DateTime.SpecifyKind(dateTime, DateTimeKind.Utc), TimeSpan.Zero).ToMillisecondsSinceEpoch();
         }
 
-        /// <summary>
-        /// Calculates the Unix time representation of a given DateTime.
-        /// Unix time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
-        /// </summary>
-        /// <returns></returns>
-        public static int ToUnixTime(this DateTime datetime)
-        {
-            return new DateTimeOffset(DateTime.SpecifyKind(datetime, DateTimeKind.Utc), TimeSpan.Zero).ToUnixTime();
-        }
-
-        /// <summary>
-        /// Calculates the Unix time representation of a given DateTimeOffset.
-        /// Unix time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
-        /// </summary>
-        /// <returns></returns>
-        public static int ToUnixTime(this DateTimeOffset dateTimeOffset)
-        {
-            return (int)(dateTimeOffset.ToMillisecondsSinceEpoch() / 1000);
-        }
-
-        /// <summary>
-        /// Calculates the DateTimeOffset of a given Unix time and time zone offset in minutes.
-        /// Unix time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
-        /// </summary>
-		/// <param name="secondsSinceEpoch"></param>
-		/// <param name="offsetMinutes"></param>
-        /// <returns></returns>
-        public static DateTimeOffset UnixTimeToDateTimeOffset(this long secondsSinceEpoch, long offsetMinutes)
-        {
-            return (secondsSinceEpoch*1000).MillisToDateTimeOffset(offsetMinutes);
-        }
-
-        /// <summary>
-        /// Calculates the DateTime of a given Unix time and time zone offset in minutes.
-        /// Unix time representation are the seconds since 1970.1.1 00:00:00 GMT. C# has a different representation: 100 nanosecs since 0001.1.1 12:00:00. 
-        /// </summary>
-        /// <param name="secondsSinceEpoch"></param>
-        /// <returns></returns>
-        public static DateTime UnixTimeToDateTime(this long secondsSinceEpoch)
-        {
-            return (secondsSinceEpoch*1000).MillisToDateTime();
-        }
-
-        public static DateTime MillisToDateTime(this long milliSecondsSinceEpoch)
+        public static DateTime MillisToUtcDateTime(this long milliSecondsSinceEpoch)
         {
             return milliSecondsSinceEpoch.MillisToDateTimeOffset(0).UtcDateTime;
         }

@@ -69,7 +69,7 @@ namespace GitSharp.Core.Tests.TreeWalk
             {
                 string s = Paths[i];
                 FileInfo fi = writeTrashFile(s, s);
-                _mtime[i] = fi.LastWriteTime.ToMillisecondsSinceEpoch();
+                _mtime[i] = fi.lastModified();
             }
         }
 

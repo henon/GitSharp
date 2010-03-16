@@ -125,22 +125,27 @@ namespace GitSharp.Core.TreeWalk
         {
             private readonly FileSystemInfo _file;
             private readonly FileMode _mode;
-            private long _fileLength;
+            private long _fileLength = -1;
             private long _lastModified;
+
+            private readonly bool _isADirectory = false;
 
             public FileEntry(FileSystemInfo f)
             {
 				_file = f;
-            	_fileLength = -1;
-
-				if (_file.IsDirectory())
+                
+                if (f.IsDirectory())
                 {
-					_mode = PathUtil.CombineDirectoryPath((DirectoryInfo)_file, Constants.DOT_GIT).Exists ? FileMode.GitLink : FileMode.Tree;
+                    _isADirectory = true;
+                    if (PathUtil.CombineDirectoryPath((DirectoryInfo)f, Constants.DOT_GIT).IsDirectory())
+                        _mode = FileMode.GitLink;
+                    else
+                        _mode = FileMode.Tree;
                 }
-				else if (_file.IsFile())
-                {
-					_mode = FS.canExecute(_file) ? FileMode.ExecutableFile : FileMode.RegularFile;
-                }
+                else if (FS.canExecute(_file))
+                    _mode = FileMode.ExecutableFile;
+                else
+                    _mode = FileMode.RegularFile;
             }
 
             public override FileMode Mode
@@ -174,7 +179,11 @@ namespace GitSharp.Core.TreeWalk
                 {
                     if (_lastModified == 0)
                     {
-                        _lastModified = _file.LastWriteTime.ToMillisecondsSinceEpoch();
+                        if (_isADirectory)                        {
+                            _lastModified = ((DirectoryInfo)_file).lastModified();
+                        }                        else
+                        {
+                            _lastModified = ((FileInfo)_file).lastModified();                        }
                     }
 
                     return _lastModified;

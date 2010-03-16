@@ -116,7 +116,7 @@ namespace GitSharp.Core
             }
             if (!_lock.Commit())
                 return RefUpdateResult.LOCK_FAILURE;
-            _database.stored(this, _lock.CommitLastModified.ToMillisecondsSinceEpoch());
+            _database.stored(this, _lock.CommitLastModified);
             return status;
         }
 
@@ -152,7 +152,7 @@ namespace GitSharp.Core
                 _database.log(this, msg, false);
             if (!_lock.Commit())
                 return RefUpdateResult.LOCK_FAILURE;
-            _database.storedSymbolicRef(this, _lock.CommitLastModified.ToMillisecondsSinceEpoch(), target);
+            _database.storedSymbolicRef(this, _lock.CommitLastModified, target);
 
             if (Ref.getStorage() == Storage.New)
                 return RefUpdateResult.NEW;

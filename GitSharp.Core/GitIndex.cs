@@ -146,7 +146,7 @@ namespace GitSharp.Core
 		public void RereadIfNecessary()
 		{
             _cacheFile.Refresh();
-			if (_cacheFile.Exists && _cacheFile.LastWriteTime.ToMillisecondsSinceEpoch() != _lastCacheTime)
+			if (_cacheFile.Exists && _cacheFile.lastModified() != _lastCacheTime)
 			{
 				Read();
 				Repository.fireIndexChanged();
@@ -267,7 +267,7 @@ namespace GitSharp.Core
 					_entries[Constants.encode(entry.Name)] = entry;
 				}
 
-				_lastCacheTime = _cacheFile.LastWriteTime.ToMillisecondsSinceEpoch();
+				_lastCacheTime = _cacheFile.lastModified();
 			}
 		}
 
@@ -343,7 +343,7 @@ namespace GitSharp.Core
 				_changed = false;
 				_statDirty = false;
 			    _cacheFile.Refresh();
-				_lastCacheTime = _cacheFile.LastWriteTime.ToMillisecondsSinceEpoch();
+				_lastCacheTime = _cacheFile.lastModified();
 				Repository.fireIndexChanged();
 			}
 			finally
@@ -537,7 +537,7 @@ namespace GitSharp.Core
 				}
 			}
 
-			e.Mtime = file.LastWriteTime.ToMillisecondsSinceEpoch() * 1000000L;
+			e.Mtime = file.lastModified() * 1000000L;
 			e.Ctime = e.Mtime;
 		}
 
@@ -715,13 +715,9 @@ namespace GitSharp.Core
 			{
 				if (newContent == null && f == null)
 					throw new ArgumentException("either file or newContent must be non-null");
-				if (f == null)
-				{
-					Ctime = DateTime.Now.ToMillisecondsSinceEpoch() * 1000000L;
-				}
-				else
-					Ctime = f.LastWriteTime.ToMillisecondsSinceEpoch() * 1000000L;
-				Mtime = Ctime; // we use same here
+
+				Ctime = f.lastModified() * 1000000L;
+			    Mtime = Ctime; // we use same here
 				_dev = -1;
 				_ino = -1;
 
@@ -841,7 +837,7 @@ namespace GitSharp.Core
 			/// <exception cref="IOException"></exception>
 			public bool update(FileInfo f)
 			{
-				long lm = f.LastWriteTime.ToMillisecondsSinceEpoch() * 1000000L;
+				long lm = f.lastModified() * 1000000L;
 				bool modified = Mtime != lm;
 				Mtime = lm;
 
@@ -1044,7 +1040,7 @@ namespace GitSharp.Core
 				// Java gives us if it looks like the timestamp in index is seconds
 				// only. Otherwise we compare the timestamp at millisecond prevision.
 				long javamtime = Mtime / 1000000L;
-				long lastm = file.LastWriteTime.ToMillisecondsSinceEpoch();
+				long lastm = file.lastModified();
 
 				if (javamtime % 1000 == 0)
 				{
@@ -1109,8 +1105,8 @@ namespace GitSharp.Core
 			{
 				return Name + "/SHA-1(" +
 						 ObjectId.Name + ")/M:" +
-						 (Ctime / 1000000L).MillisToDateTime() + "/C:" +
-						 (Mtime / 1000000L).MillisToDateTime() + "/d" +
+                         (Ctime / 1000000L).MillisToUtcDateTime() + "/C:" +
+                         (Mtime / 1000000L).MillisToUtcDateTime() + "/d" +
 						 _dev +
 						 "/i" + _ino +
 						 "/m" + Convert.ToString(Mode, 8) +

@@ -122,7 +122,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
         /** @return current time adjusted by {@link #tick(int)}. */
         public DateTime getClock()
         {
-            return now.MillisToDateTime();
+            return now.MillisToUtcDateTime();
         }
 
         /**
@@ -306,8 +306,8 @@ namespace GitSharp.Tests.GitSharp.Core.Util
             global::GitSharp.Core.Commit c = new global::GitSharp.Core.Commit(db);
             c.TreeId = (tree);
             c.ParentIds = (parents);
-            c.Author = (new PersonIdent(author, now.MillisToDateTime()));
-            c.Committer = (new PersonIdent(committer, now.MillisToDateTime()));
+            c.Author = (new PersonIdent(author, now.MillisToUtcDateTime()));
+            c.Committer = (new PersonIdent(committer, now.MillisToUtcDateTime()));
             c.Message = ("");
             return pool.lookupCommit(writer.WriteCommit(c));
         }
@@ -340,7 +340,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
             t.TagType = (Constants.typeString(dst.Type));
             t.Id = (dst.ToObjectId());
             t.TagName = (name);
-            t.Tagger = (new PersonIdent(committer, now.MillisToDateTime()));
+            t.Tagger = (new PersonIdent(committer, now.MillisToUtcDateTime()));
             t.Message = ("");
             return (RevTag)pool.lookupAny(writer.WriteTag(t), Constants.OBJ_TAG);
         }
@@ -680,8 +680,8 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                     global::GitSharp.Core.Commit c = new global::GitSharp.Core.Commit(_testRepository.db);
                     c.TreeId = (_testRepository.pool.lookupTree(tree.writeTree(_testRepository.writer)));
                     c.ParentIds = (parents.ToArray());
-                    c.Author = (new PersonIdent(author, _testRepository.now.MillisToDateTime()));
-                    c.Committer = (new PersonIdent(committer, _testRepository.now.MillisToDateTime()));
+                    c.Author = (new PersonIdent(author, _testRepository.now.MillisToUtcDateTime()));
+                    c.Committer = (new PersonIdent(committer, _testRepository.now.MillisToUtcDateTime()));
                     c.Message = (_message);
 
                     self = _testRepository.pool.lookupCommit(_testRepository.writer.WriteCommit((c)));

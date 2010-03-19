@@ -44,145 +44,159 @@ using NUnit.Framework;
 
 namespace GitSharp.Tests.GitSharp.Core.Diff
 {
-    /*
-     * Test cases for the performance of the diff implementation. The tests test
-     * that the performance of the MyersDiff algorithm is really O(N*D). Means the
-     * time for computing the diff between a and b should depend on the product of
-     * a.length+b.length and the number of found differences. The tests compute
-     * diffs between chunks of different length, measure the needed time and check
-     * that time/(N*D) does not differ more than a certain factor (currently 10)
-     */
-    [TestFixture]
-    public class MyersDiffPerformanceTest  {
-        private static long longTaskBoundary = 5000000000L;
-
-        private static int minCPUTimerTicks = 10;
-
-        private static int maxFactor = 15;
-
-        private CPUTimeStopWatch stopwatch=CPUTimeStopWatch.createInstance();
-
-        public class PerfData : IComparable<PerfData>
-        {
-            private Func<double, string> fmt = d => d.ToString("#.##E0");
-
-            public long runningTime;
-
-            public long D;
-
-            public long N;
-
-            private double p1 = -1;
-
-            private double p2 = -1;
-
-            public double perf1() {
-                if (p1 < 0)
-                    p1 = runningTime / ((double) N * D);
-                return p1;
-            }
-
-            public double perf2() {
-                if (p2 < 0)
-                    p2 = runningTime / ((double) N * D * D);
-                return p2;
-            }
-
-            public string toString() {
-                return ("diffing " + N / 2 + " bytes took " + runningTime
-                        + " ns. N=" + N + ", D=" + D + ", time/(N*D):"
-                        + fmt(perf1()) + ", time/(N*D^2):" + fmt
-                                                                 (perf2()));
-            }
-
-            public int CompareTo(PerfData o2)
-            {
-                int _whichPerf = 1;
-                PerfData o1 = this;
-
-                double p1 = (_whichPerf == 1) ? o1.perf1() : o1.perf2();
-                double p2 = (_whichPerf == 1) ? o2.perf1() : o2.perf2();
-                return (p1 < p2) ? -1 : (p1 > p2) ? 1 : 0;
-            }
-        }
-
-        [Test]
-        public void test() {
-            if (stopwatch!=null) {
-                var perfData = new List<PerfData>();
-                perfData.Add(test(10000));
-                perfData.Add(test(20000));
-                perfData.Add(test(50000));
-                perfData.Add(test(80000));
-                perfData.Add(test(99999));
-                perfData.Add(test(999999));
-
-                double factor = perfData.Max().perf1()
-                                / perfData.Min().perf1();
-                Assert.IsTrue(factor < maxFactor, 
-                              "minimun and maximum of performance-index t/(N*D) differed too much. Measured factor of "
-                              + factor
-                              + " (maxFactor="
-                              + maxFactor
-                              + "). Perfdata=<" + perfData.ToString() + ">");
-            }
-        }
-
-        /**
-	 * Tests the performance of MyersDiff for texts which are similar (not
-	 * random data). The CPU time is measured and returned. Because of bad
-	 * accuracy of CPU time information the diffs are repeated. During each
-	 * repetition the interim CPU time is checked. The diff operation is
-	 * repeated until we have seen the CPU time clock changed its value at least
-	 * {@link #minCPUTimerTicks} times.
-	 *
-	 * @param characters
-	 *            the size of the diffed character sequences.
-	 * @return performance data
+	/*
+	 * Test cases for the performance of the diff implementation. The tests test
+	 * that the performance of the MyersDiff algorithm is really O(N*D). Means the
+	 * time for computing the diff between a and b should depend on the product of
+	 * a.length+b.length and the number of found differences. The tests compute
+	 * diffs between chunks of different length, measure the needed time and check
+	 * that time/(N*D) does not differ more than a certain factor (currently 10)
 	 */
-        private PerfData test(int characters) {
-            PerfData ret = new PerfData();
-            string a = DiffTestDataGenerator.generateSequence(characters, 971, 3);
-            string b = DiffTestDataGenerator.generateSequence(characters, 1621, 5);
-            CharArray ac = new CharArray(a);
-            CharArray bc = new CharArray(b);
-            MyersDiff myersDiff = null;
-            int cpuTimeChanges = 0;
-            long lastReadout = 0;
-            long interimTime = 0;
-            int repetitions = 0;
-            stopwatch.start();
-            while (cpuTimeChanges < minCPUTimerTicks && interimTime < longTaskBoundary) {
-                myersDiff = new MyersDiff(ac, bc);
-                repetitions++;
-                interimTime = stopwatch.readout();
-                if (interimTime != lastReadout) {
-                    cpuTimeChanges++;
-                    lastReadout = interimTime;
-                }
-            }
-            ret.runningTime = stopwatch.stop() / repetitions;
-            ret.N = (ac.size() + bc.size());
-            ret.D = myersDiff.getEdits().size();
+	[TestFixture]
+	public class MyersDiffPerformanceTest
+	{
+		private static long longTaskBoundary = 5000000000L;
 
-            return ret;
-        }
+		private static int minCPUTimerTicks = 10;
 
-        private class CharArray : Sequence {
-            private char[] array;
+		private static int maxFactor = 15;
 
-            public CharArray(string s) {
-                array = s.ToCharArray();
-            }
+		private CPUTimeStopWatch stopwatch = CPUTimeStopWatch.createInstance();
 
-            public int size() {
-                return array.Length;
-            }
+		public class PerfData : IComparable<PerfData>
+		{
+			private Func<double, string> fmt = d => d.ToString("#.##E0");
 
-            public bool equals(int i, Sequence other, int j) {
-                CharArray o = (CharArray) other;
-                return array[i] == o.array[j];
-            }
-        }
-    }
+			public long runningTime;
+
+			public long D;
+
+			public long N;
+
+			private double p1 = -1;
+
+			private double p2 = -1;
+
+			public double perf1()
+			{
+				if (p1 < 0)
+					p1 = runningTime / ((double)N * D);
+				return p1;
+			}
+
+			public double perf2()
+			{
+				if (p2 < 0)
+					p2 = runningTime / ((double)N * D * D);
+				return p2;
+			}
+
+			public string toString()
+			{
+				return ("diffing " + N / 2 + " bytes took " + runningTime
+						  + " ns. N=" + N + ", D=" + D + ", time/(N*D):"
+						  + fmt(perf1()) + ", time/(N*D^2):" + fmt
+																				 (perf2()));
+			}
+
+			public int CompareTo(PerfData o2)
+			{
+				int _whichPerf = 1;
+				PerfData o1 = this;
+
+				double p1 = (_whichPerf == 1) ? o1.perf1() : o1.perf2();
+				double p2 = (_whichPerf == 1) ? o2.perf1() : o2.perf2();
+				return (p1 < p2) ? -1 : (p1 > p2) ? 1 : 0;
+			}
+		}
+
+		[Ignore("This runs too long and hinders development. It can be run in case of changes to the diff algorithm.")]
+		[Test]
+		public void test()
+		{
+			if (stopwatch != null)
+			{
+				var perfData = new List<PerfData>();
+				perfData.Add(test(10000));
+				perfData.Add(test(20000));
+				perfData.Add(test(50000));
+				perfData.Add(test(80000));
+				perfData.Add(test(99999));
+				perfData.Add(test(999999));
+
+				double factor = perfData.Max().perf1()
+									 / perfData.Min().perf1();
+				Assert.IsTrue(factor < maxFactor,
+								  "minimun and maximum of performance-index t/(N*D) differed too much. Measured factor of "
+								  + factor
+								  + " (maxFactor="
+								  + maxFactor
+								  + "). Perfdata=<" + perfData.ToString() + ">");
+			}
+		}
+
+		/**
+		  * Tests the performance of MyersDiff for texts which are similar (not
+		  * random data). The CPU time is measured and returned. Because of bad
+		  * accuracy of CPU time information the diffs are repeated. During each
+		  * repetition the interim CPU time is checked. The diff operation is
+		  * repeated until we have seen the CPU time clock changed its value at least
+		  * {@link #minCPUTimerTicks} times.
+		  *
+		  * @param characters
+		  *            the size of the diffed character sequences.
+		  * @return performance data
+		  */
+		private PerfData test(int characters)
+		{
+			PerfData ret = new PerfData();
+			string a = DiffTestDataGenerator.generateSequence(characters, 971, 3);
+			string b = DiffTestDataGenerator.generateSequence(characters, 1621, 5);
+			CharArray ac = new CharArray(a);
+			CharArray bc = new CharArray(b);
+			MyersDiff myersDiff = null;
+			int cpuTimeChanges = 0;
+			long lastReadout = 0;
+			long interimTime = 0;
+			int repetitions = 0;
+			stopwatch.start();
+			while (cpuTimeChanges < minCPUTimerTicks && interimTime < longTaskBoundary)
+			{
+				myersDiff = new MyersDiff(ac, bc);
+				repetitions++;
+				interimTime = stopwatch.readout();
+				if (interimTime != lastReadout)
+				{
+					cpuTimeChanges++;
+					lastReadout = interimTime;
+				}
+			}
+			ret.runningTime = stopwatch.stop() / repetitions;
+			ret.N = (ac.size() + bc.size());
+			ret.D = myersDiff.getEdits().size();
+
+			return ret;
+		}
+
+		private class CharArray : Sequence
+		{
+			private char[] array;
+
+			public CharArray(string s)
+			{
+				array = s.ToCharArray();
+			}
+
+			public int size()
+			{
+				return array.Length;
+			}
+
+			public bool equals(int i, Sequence other, int j)
+			{
+				CharArray o = (CharArray)other;
+				return array[i] == o.array[j];
+			}
+		}
+	}
 }

@@ -326,7 +326,7 @@ namespace GitSharp
 		{
 			var f = new FileInfo(path);
 			if (!f.Exists)
-				throw new IOException("File does not exist");
+				throw new IOException("File does not exist: " + path);
 			using (var stream = f.OpenRead())
 			{
 				return IsBinary(stream);

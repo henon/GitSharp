@@ -223,7 +223,6 @@ blah blah.";
 		public void IsBinary()
 		{
 			Assert.AreEqual(true, Diff.IsBinary("GitSharp.dll"));
-			Assert.AreEqual(false, Diff.IsBinary("GitSharp.xml"));
 			Assert.AreEqual(true, Diff.IsBinary("GitSharp.Core.dll"));
 			Assert.AreEqual(true, Diff.IsBinary("Resources/pack-3280af9c07ee18a87705ef50b0cc4cd20266cf12.idx"));
 			Assert.AreEqual(false, Diff.IsBinary("Resources/Diff/E.patch"));

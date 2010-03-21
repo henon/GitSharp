@@ -40,6 +40,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.IO;
@@ -148,7 +149,7 @@ namespace GitSharp.CLI
                             {
                                 if (args[x].Length > 10)
                                 {
-                                    gitdir = args[x].Substring(11);
+                                    gitdir = args[x].Substring(10);
                                     args.RemoveAt(x);
                                     break;
                                 }

@@ -193,6 +193,17 @@ namespace GitSharp
 
 		#endregion
 
+		#region Merge
+
+
+		public static MergeResult Merge(MergeOptions options)
+		{
+			return MergeCommand.Execute(options);
+		}
+
+
+		#endregion
+
 		#region Status
 
 		public static StatusResults Status(StatusCommand command)

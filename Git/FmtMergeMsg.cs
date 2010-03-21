@@ -46,7 +46,7 @@ namespace GitSharp.CLI
     [Command(common=true, requiresRepository=true, usage = "")]
     public class Fmtmergemsg : TextBuiltin
     {
-        private FmtMergeMsgCommand cmd = new FmtMergeMsgCommand();
+		 private MergeOptions cmd = new MergeOptions();
         private static Boolean isHelp;
 
         public override void Run(string[] args)
@@ -55,10 +55,15 @@ namespace GitSharp.CLI
             {
                { "h|help", "Display this help information. To see online help, use: git help <command>", v=>OfflineHelp()},
                { "log", "In addition to branch names, populate the log message with one-line descriptions from the actual commits that are being merged", v => cmd.Log = true },
-               { "no-log", "Do not list one-line descriptions from the actual commits being merged", v => cmd.NoLog = true },
-               { "summary", "Synonyms to --log and --no-log; these are deprecated and will be removed in the future", v => cmd.Summary = true },
-               { "no-summary", "Synonyms to --log and --no-log; these are deprecated and will be removed in the future", v => cmd.NoSummary = true },
-               { "F|file=", "Take the list of merged objects from <file> instead of stdin", v => cmd.File = v },
+               { "no-log", "Do not list one-line descriptions from the actual commits being merged", v => cmd.Log = false },
+					// [obsolete]
+               //{ "summary", "Synonyms to --log and --no-log; these are deprecated and will be removed in the future", v => cmd.Summary = true },
+               //{ "no-summary", "Synonyms to --log and --no-log; these are deprecated and will be removed in the future", v => cmd.NoSummary = true },
+               { "F|file=", "Take the list of merged objects from <file> instead of stdin", v =>
+               	{
+               		//cmd.File = v 
+               	}
+               },
             };
 
             try
@@ -66,8 +71,8 @@ namespace GitSharp.CLI
                 List<String> Arguments = ParseOptions(args);
                 if (arguments.Count > 0)
                 {
-                    cmd.Arguments = arguments;
-                    cmd.Execute();
+						  //cmd.Arguments = arguments;
+						  //cmd.Execute();
                 }
                 else
                 {
@@ -76,7 +81,7 @@ namespace GitSharp.CLI
             }
             catch (Exception e)            
             {
-                cmd.OutputStream.WriteLine(e.Message);
+					 //cmd.OutputStream.WriteLine(e.Message);
             }
         }
 
@@ -85,10 +90,10 @@ namespace GitSharp.CLI
             if (!isHelp)
             {
                 isHelp = true;
-                cmd.OutputStream.WriteLine("Here should be the usage...");
-                cmd.OutputStream.WriteLine();
-                options.WriteOptionDescriptions(Console.Out);
-                cmd.OutputStream.WriteLine();
+					 OutputStream.WriteLine("Here should be the usage...");
+					 OutputStream.WriteLine();
+					 options.WriteOptionDescriptions(OutputStream);
+					 OutputStream.WriteLine();
             }
         }
     }

@@ -37,6 +37,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
@@ -216,6 +217,15 @@ blah blah.";
 				Console.WriteLine("\"" + s.TextB + "\"");
 				Console.WriteLine("-------------------\n");
 			}
+		}
+
+		[Test]
+		public void IsBinary()
+		{
+			Assert.AreEqual(true, Diff.IsBinary("GitSharp.dll"));
+			Assert.AreEqual(true, Diff.IsBinary("GitSharp.Core.dll"));
+			Assert.AreEqual(true, Diff.IsBinary("Resources/pack-3280af9c07ee18a87705ef50b0cc4cd20266cf12.idx"));
+			Assert.AreEqual(false, Diff.IsBinary("Resources/Diff/E.patch"));
 		}
 	}
 }

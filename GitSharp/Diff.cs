@@ -38,6 +38,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using GitSharp.Core.Diff;
@@ -312,6 +313,48 @@ namespace GitSharp
 
 		#endregion
 
+		#region --> Binary file detection
+
+		const int SCAN_RANGE = 4000;
+
+		/// <summary>
+		/// Returns true if the given file seems to be a binary file. The heuristic used is similar to that of diff on unix: it looks for 0 bytes. Of course this classifies Unicode files as binaries too.
+		/// </summary>
+		/// <param name="path">path to the file to check (absolute or relative to the current directory)</param>
+		/// <returns>True if the file seems to be binary, false if it seems to be text and null if no decision can't be made</returns>
+		public static bool? IsBinary(string path)
+		{
+			var f = new FileInfo(path);
+			if (!f.Exists)
+				throw new IOException("File does not exist: " + path);
+			using (var stream = f.OpenRead())
+			{
+				return IsBinary(stream);
+			}
+		}
+
+		public static bool? IsBinary(byte[] data)
+		{
+			using (var stream = new MemoryStream(data))
+			{
+				return IsBinary(stream);
+			}
+		}
+
+		private static bool? IsBinary(Stream stream)
+		{
+			int null_count = 0;
+			long length = stream.Length;
+			for (int i = 0; i < Math.Min(length, SCAN_RANGE); i++)
+			{
+				var b = stream.ReadByte();
+				if (b == 0)
+					null_count++;
+			}
+			return null_count > 0;
+		}
+
+		#endregion
 
 	}
 }

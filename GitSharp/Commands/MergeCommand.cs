@@ -51,14 +51,16 @@ namespace GitSharp.Commands
 					return Core.Merge.MergeStrategy.Ours.NewMerger(options.Repository);
 				case MergeStrategy.Theirs:
 					return Core.Merge.MergeStrategy.Theirs.NewMerger(options.Repository);
+				case MergeStrategy.Recursive:
+					return Core.Merge.MergeStrategy.SimpleTwoWayInCore.NewMerger(options.Repository);
 			}
-			return Core.Merge.MergeStrategy.SimpleTwoWayInCore.NewMerger(options.Repository);
+			throw new ArgumentException("Invalid merge option: "+options.MergeStrategy);
 		}
 
 	}
 
 
-	public enum MergeStrategy { Ours, Theirs, TwoWay }
+	public enum MergeStrategy { Ours, Theirs, Recursive }
 
 	public class MergeOptions
 	{

@@ -133,7 +133,7 @@ namespace GitSharp
 					return null;
 				if (InternalTag.TagId == InternalTag.Id) // <--- it can happen!
 					return this;
-				return AbstractObject.Wrap(_repo, InternalTag.TagId);
+				return AbstractObject.Wrap(_repo, InternalTag.Id);
 			}
 		}
 

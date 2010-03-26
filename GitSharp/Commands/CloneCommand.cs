@@ -64,15 +64,9 @@ namespace GitSharp.Commands
 		// note: the naming of command parameters may not follow .NET conventions in favour of git command line parameter naming conventions.
 
 		/// <summary>
-		/// Get the directory where the Init command will initialize the repository. if GitDirectory is null ActualDirectory is used to initialize the repository.
+        /// The name of a new directory to clone into.
 		/// </summary>
-		public override string ActualDirectory
-		{
-			get
-			{
-				return FindGitDirectory(GitDirectory, false, Bare);
-			}
-		}
+		public string Directory { get; set; }
 
 		/// <summary>
 		/// The (possibly remote) repository to clone from.
@@ -180,11 +174,34 @@ namespace GitSharp.Commands
 		/// </summary>
 		public override void Execute()
 		{
-
 			if (Source.Length <= 0)
-				throw new ArgumentNullException("Repository", "fatal: You must specify a repository to clone.");
+			{
+                throw new ArgumentException("fatal: You must specify a repository to clone.");
+			}
 
-			URIish source = new URIish(Source);
+            if (Directory != null && GitDirectory != null)
+            {
+                throw new ArgumentException("conflicting usage of --git-dir and arguments");
+            }
+
+			var source = new URIish(Source);
+
+            if (Directory == null)
+            {
+                try
+                {
+                    Directory = source.getHumanishName();
+                }
+                catch (InvalidOperationException e)
+                {
+                    throw new ArgumentException("cannot guess local name from " + source, e);
+                }
+            }
+
+            if (GitDirectory == null)
+            {
+                GitDirectory = Path.Combine(Directory, Constants.DOT_GIT);
+            }
 
 			if (Mirror)
 				Bare = true;
@@ -197,7 +214,7 @@ namespace GitSharp.Commands
 			if (OriginName == null)
 				OriginName = Constants.DEFAULT_REMOTE_NAME;
 
-			var repo = new GitSharp.Core.Repository(new DirectoryInfo(ActualDirectory));
+			var repo = new Core.Repository(new DirectoryInfo(GitDirectory));
 			repo.Create(Bare);
 			repo.Config.setBoolean("core", null, "bare", Bare);
 			repo.Config.save();

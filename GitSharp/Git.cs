@@ -157,7 +157,7 @@ namespace GitSharp
 			CloneCommand cmd = new CloneCommand()
 			{
 				Source = fromUrl,
-				GitDirectory = toPath,
+				Directory = toPath,
 				Bare = bare,
 			};
 			return Clone(cmd);

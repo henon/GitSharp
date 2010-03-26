@@ -46,7 +46,7 @@ using NDesk.Options;
 namespace GitSharp.CLI
 {
 
-    [Command(common=true, requiresRepository=true, usage = "Clone a repository into a new directory")]
+    [Command(common=true, requiresRepository=false, usage = "Clone a repository into a new directory")]
     public class Clone : TextBuiltin
     {
         private CloneCommand cmd = new CloneCommand();
@@ -95,15 +95,19 @@ namespace GitSharp.CLI
             try
             {
                 List<String> arguments = ParseOptions(args);
-                if (arguments.Count > 0)
-                {
-                    cmd.Source = arguments[0];
-                    cmd.Execute();
-                }
-                else
+                if (arguments.Count != 1 && arguments.Count != 2)
                 {
                     OfflineHelp();
+                    return;
                 }
+
+                cmd.Source = arguments[0];
+
+                if (arguments.Count == 2) // <directory> parameter is optional                {
+                    cmd.Directory = arguments[1];
+                }
+                
+                cmd.Execute();
             }
             catch (Exception e)            
             {

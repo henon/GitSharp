@@ -39,13 +39,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GitSharp.Commands;
 using GitSharp.Core;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.Util;
 using GitSharp.Core.Util.JavaHelper;
 using ObjectId = GitSharp.Core.ObjectId;
 using CoreRef = GitSharp.Core.Ref;
-using CoreCommit = GitSharp.Core.Commit;
 using CoreTree = GitSharp.Core.Tree;
 using System.IO;
 using GitSharp.Core.TreeWalk;
@@ -71,7 +71,7 @@ namespace GitSharp
 		{
 		}
 
-		internal Commit(Repository repo, CoreCommit internal_commit)
+		internal Commit(Repository repo, Core.Commit internal_commit)
 			: base(repo, internal_commit.CommitId)
 		{
 			_internal_commit = internal_commit;
@@ -82,9 +82,9 @@ namespace GitSharp
 		{
 		}
 
-		private CoreCommit _internal_commit;
+		private Core.Commit _internal_commit;
 
-		private CoreCommit InternalCommit
+		private Core.Commit InternalCommit
 		{
 			get
 			{
@@ -101,11 +101,14 @@ namespace GitSharp
 			}
 		}
 
+		#region --> Commit Properties
+
+
 		public bool IsValid
 		{
 			get
 			{
-				return InternalCommit is CoreCommit;
+				return InternalCommit is Core.Commit;
 			}
 		}
 
@@ -281,6 +284,12 @@ namespace GitSharp
 			}
 		}
 
+
+		#endregion
+
+		#region --> Checkout
+
+
 		/// <summary>
 		/// Checkout this commit into the working directory. Does not change HEAD.
 		/// <para/>
@@ -329,6 +338,12 @@ namespace GitSharp
 				File.WriteAllBytes(filename, blob.RawData); // todo: hmm, what is with file permissions and other file attributes?
 			}
 		}
+
+
+		#endregion
+
+		#region --> Diffing commits
+
 
 		/// <summary>
 		/// Compare reference commit against compared commit. You may pass in a null commit (i.e. for getting the changes of the first commit)
@@ -455,12 +470,18 @@ namespace GitSharp
 			}
 		}
 
+
+		#endregion
+
+		#region --> Committing
+
+
 		public static Commit Create(string message, Commit parent, Tree tree)
 		{
 			if (tree == null)
 				throw new ArgumentException("tree must not be null");
 			var repo = tree.Repository;
-			var author = new Author(repo.Config["user.name"], repo.Config["user.email"]);
+			var author = Author.GetDefaultAuthor(parent._repo);
 			return Create(message, parent, tree, author, author, DateTimeOffset.Now);
 		}
 
@@ -471,34 +492,45 @@ namespace GitSharp
 
 		public static Commit Create(string message, Commit parent, Tree tree, Author author, Author committer, DateTimeOffset time)
 		{
+			return Create(message, (parent == null ? new Commit[0] : new[] { parent }), tree, author, committer, time);
+		}
+
+		public static Commit Create(string message, IEnumerable<Commit> parents, Tree tree, Author author, Author committer, DateTimeOffset time)
+		{
 			if (string.IsNullOrEmpty(message))
 				throw new ArgumentException("message must not be null or empty");
 			if (tree == null)
 				throw new ArgumentException("tree must not be null");
 			var repo = tree.Repository;
-			var corecommit = new CoreCommit(repo._internal_repo);
-			if (parent != null)
-				corecommit.ParentIds = new GitSharp.Core.ObjectId[] { parent._id };
-			corecommit.Author = new GitSharp.Core.PersonIdent(author.Name, author.EmailAddress, time.ToMillisecondsSinceEpoch(), (int)time.Offset.TotalMinutes);
-			corecommit.Committer = new GitSharp.Core.PersonIdent(committer.Name, committer.EmailAddress, time.ToMillisecondsSinceEpoch(), (int)time.Offset.TotalMinutes);
+			var corecommit = new Core.Commit(repo._internal_repo);
+			if (parents != null)
+				corecommit.ParentIds = parents.Select(parent => parent._id).ToArray();
+			corecommit.Author = new Core.PersonIdent(author.Name, author.EmailAddress, time.ToMillisecondsSinceEpoch(), (int)time.Offset.TotalMinutes);
+			corecommit.Committer = new Core.PersonIdent(committer.Name, committer.EmailAddress, time.ToMillisecondsSinceEpoch(), (int)time.Offset.TotalMinutes);
 			corecommit.Message = message;
 			corecommit.TreeEntry = tree.InternalTree;
-			corecommit.Encoding = ExtractOverridenEncodingCommitFromConfig(repo);
+			corecommit.Encoding = GetCommitEncoding(repo);
 			corecommit.Save();
 			return new Commit(repo, corecommit);
 		}
 
-		private static Encoding ExtractOverridenEncodingCommitFromConfig(Repository repository)
+		private static Encoding GetCommitEncoding(Repository repository)
 		{
 			string encodingAlias = repository.Config["i18n.commitencoding"];
-
 			if (encodingAlias == null)
 			{
 				// No commitencoding has been specified in the config
 				return null;
 			}
-
 			return Charset.forName(encodingAlias);
+		}
+
+
+		#endregion
+
+		public static implicit operator Core.Commit(Commit c)
+		{
+			return c._internal_commit;
 		}
 
 		public override string ToString()

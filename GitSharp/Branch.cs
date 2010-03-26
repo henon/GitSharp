@@ -38,6 +38,7 @@
 
 
 using System;
+using GitSharp.Commands;
 using GitSharp.Core;
 using CoreRef = GitSharp.Core.Ref;
 using CoreCommit = GitSharp.Core.Commit;
@@ -112,16 +113,20 @@ namespace GitSharp
 			internal set;
 		}
 
+		#region --> Merging
+
+
 		/// <summary>
-		/// Merge the given branch into this Branch. 
-		/// 
-		/// Not yet implemented!
+		/// Merge the given branch into this Branch using the given merge strategy. 
 		/// </summary>
 		/// <param name="other"></param>
-		public void Merge(Branch other)
+		public MergeResult Merge(Branch other, MergeStrategy strategy)
 		{
-			throw new NotImplementedException();
+			return MergeCommand.Execute(new MergeOptions { Branches = new[] { this, other }, MergeStrategy = strategy });
 		}
+
+
+		#endregion
 
 		/// <summary>
 		/// Delete this branch

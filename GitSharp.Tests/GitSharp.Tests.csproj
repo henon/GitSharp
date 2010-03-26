@@ -217,6 +217,7 @@
     <Compile Include="GitSharp\IgnoreTests.cs" />
     <Compile Include="GitSharp\IndexTest.cs" />
     <Compile Include="GitSharp\InitTests.cs" />
+    <Compile Include="GitSharp\MergeTests.cs" />
     <Compile Include="GitSharp\ObjectEqualityTests.cs" />
     <Compile Include="GitSharp\RefModelTests.cs" />
     <Compile Include="GitSharp\RepositoryConfigTest.cs" />

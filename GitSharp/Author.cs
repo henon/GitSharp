@@ -76,5 +76,10 @@ namespace GitSharp
 				return new Author("anonymous", "anonymous@(none).com");
 			}
 		}
+
+		public static Author GetDefaultAuthor(Repository repo)
+		{
+			return new Author(repo.Config["user.name"], repo.Config["user.email"]);
+		}
 	}
 }

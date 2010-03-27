@@ -64,6 +64,7 @@
     <Compile Include="GitSharp.Core\AbbreviatedObjectIdTest.cs" />
     <Compile Include="GitSharp.Core\CanReadMsysgitIndexFixture.cs" />
     <Compile Include="GitSharp.Core\DirectoryCache\DirCacheEntryTest.cs" />
+    <Compile Include="GitSharp.Core\RevWalk\MergeBaseDetectionTest.cs" />
     <Compile Include="GitSharp.Core\SymbolicRefTest.cs" />
     <Compile Include="GitSharp.Core\RefDirectoryTest.cs" />
     <Compile Include="GitSharp.Core\ObjectIdRefTest.cs" />

@@ -214,7 +214,12 @@ namespace GitSharp.Commands
 			if (OriginName == null)
 				OriginName = Constants.DEFAULT_REMOTE_NAME;
 
-			var repo = new Core.Repository(new DirectoryInfo(GitDirectory));
+			if (System.IO.Directory.Exists(Directory) && System.IO.Directory.GetFileSystemEntries(Directory).Length != 0)
+			{
+                throw new InvalidOperationException(string.Format("destination path '{0}' already exists and is not an empty directory.", new DirectoryInfo(Directory).FullName));
+			}
+            
+            var repo = new Core.Repository(new DirectoryInfo(GitDirectory));
 			repo.Create(Bare);
 			repo.Config.setBoolean("core", null, "bare", Bare);
 			repo.Config.save();

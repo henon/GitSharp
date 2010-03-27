@@ -252,7 +252,7 @@ namespace GitSharp.Core.Transport
                         continue;
                     bool contains = inWorkQueue.Contains(id);
                     inWorkQueue.Add(id);
-                    if (contains)
+                    if (!contains)
                     {
                         obj.add(IN_WORK_QUEUE);
                         _workQueue.AddLast(obj);
@@ -262,7 +262,7 @@ namespace GitSharp.Core.Transport
                 {
                     bool contains = inWorkQueue.Contains(id);
                     inWorkQueue.Add(id);
-                    if (contains)
+                    if (!contains)
                         _workQueue.AddLast(id);
                 }
                 catch (IOException e)
@@ -948,15 +948,15 @@ namespace GitSharp.Core.Transport
 
                 using (Stream s = _connection.open("pack/" + _idxName))
                 {
-                    pm.BeginTask("Get " + _idxName.Slice(0, 12) + "..idx", s.Length < 0 ? ProgressMonitor.UNKNOWN : (int)(s.Length / 1024));
+                    pm.BeginTask("Get " + _idxName.Slice(0, 12) + "..idx", !s.CanSeek ? ProgressMonitor.UNKNOWN : (int)(s.Length / 1024));
 
                     try
                     {
-                        using (var fos = new FileStream(TmpIdx.ToString(), System.IO.FileMode.Open, FileAccess.ReadWrite))
+                        using (var fos = new FileStream(TmpIdx.FullName, System.IO.FileMode.CreateNew, FileAccess.Write))
                         {
                             var buf = new byte[2048];
                             int cnt;
-                            while (!pm.IsCancelled && (cnt = s.Read(buf, 0, buf.Length)) >= 0)
+                            while (!pm.IsCancelled && (cnt = s.Read(buf, 0, buf.Length)) > 0)
                             {
                                 fos.Write(buf, 0, cnt);
                                 pm.Update(cnt / 1024);

@@ -237,9 +237,12 @@ namespace GitSharp.Core.Transport
         {
             private readonly StringBuilder _all = new StringBuilder();
 
-            /* [nulltoken] Do we need this override ? Or is WriteByte sufficient ?
             public override void Write(byte[] buffer, int offset, int count)
             {
+                //TODO: [nulltoken] Do we need this override ? Or is WriteByte sufficient ?
+                throw new NotImplementedException(); 
+
+                /*
                 for (int i = offset; i < count + offset; i++)
                 {
                     if (buffer[i] == '\n')
@@ -253,8 +256,8 @@ namespace GitSharp.Core.Transport
                     WriteByte(buffer[i]);
                 }
                 base.Write(buffer, offset, count);
+                */ 
             }
-            */
 
             public override void WriteByte(byte b)
             {

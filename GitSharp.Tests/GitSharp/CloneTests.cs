@@ -60,7 +60,7 @@ namespace GitSharp.Tests.GitSharp
         public void Check_cloned_repo_git()
         {
             string toPath = Path.Combine(trash.FullName, "test");
-            string fromUrl = "git://github.com/henon/test.git";
+            string fromUrl = "git://github.com/henon/TestGitRepository.git";
 
             using (Repository repo = Git.Clone(fromUrl, toPath))
             {
@@ -72,7 +72,7 @@ namespace GitSharp.Tests.GitSharp
 
                 Assert.IsTrue(Repository.IsValid(repo.Directory));
                 //Verify content is in the proper location
-                var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
+                var readme = Path.Combine(repo.WorkingDirectory, "master.txt");
                 Assert.IsTrue(new FileInfo(readme).Exists);
             }
         }
@@ -123,13 +123,13 @@ namespace GitSharp.Tests.GitSharp
         public void Check_cloned_repo_http()
         {
             string toPath = Path.Combine(trash.FullName, "test");
-            string fromUrl = "http://github.com/henon/test.git";
+            string fromUrl = "http://github.com/henon/TestGitRepository.git";
 
             using (Repository repo = Git.Clone(fromUrl, toPath))
             {
                 Assert.IsTrue(Repository.IsValid(repo.Directory));
                 //Verify content is in the proper location
-                var readme = Path.Combine(repo.WorkingDirectory, "README.txt");
+                var readme = Path.Combine(repo.WorkingDirectory, "master.txt");
                 Assert.IsTrue(new FileInfo(readme).Exists);
             }
         }

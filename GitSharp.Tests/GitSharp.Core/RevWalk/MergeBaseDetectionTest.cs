@@ -41,6 +41,7 @@ using System.Linq;
 using System.Text;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.Tests;
+using GitSharp.Core.Util;
 using NUnit.Framework;
 
 namespace GitSharp.Core.Tests.RevWalk
@@ -51,6 +52,8 @@ namespace GitSharp.Core.Tests.RevWalk
 		[Test]
 		public void IsMergedIntoTest()
 		{
+			var userhome= FS.userHome();
+
 			var rw = new GitSharp.Core.RevWalk.RevWalk(db);
 			Assert.IsTrue( rw.isMergedInto(new RevCommit(db.Resolve("a")), new RevCommit(db.Resolve("c"))));
 		}

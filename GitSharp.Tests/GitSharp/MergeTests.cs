@@ -44,17 +44,37 @@ namespace GitSharp.Tests.GitSharp
 		/// When not allowing a fast forward merge, a new commit is created the merged commits as parent.
 		/// </summary>
 		[Test]
-		public void MergeStrategyRecursive_FastForwardOff()
+		public void MergeStrategyRecursive_FastForward()
 		{
 			using (var repo = GetTrashRepository())
 			{
 				var a = repo.Get<Branch>("a");
 				var c = repo.Get<Branch>("c");
-				var result = Git.Merge(new MergeOptions { NoFastForward = true, Branches = new[]{ a, c }, MergeStrategy = MergeStrategy.Recursive }); 
+				var result = a.Merge(c, MergeStrategy.Recursive);
+				Assert.IsTrue(result.Success);
+				var a_commit = repo.Get<Branch>("a").CurrentCommit;
+				var c_commit = repo.Get<Branch>("c").CurrentCommit;
+				Assert.AreEqual(c_commit, result.Commit);
+				Assert.AreEqual(c_commit, a_commit);
+			}
+		}
+
+		/// <summary>
+		/// When not allowing a fast forward merge, a new commit is created the merged commits as parent.
+		/// </summary>
+		[Test]
+		public void MergeStrategyRecursive_No_FastForward()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var a = repo.Get<Branch>("a");
+				var c = repo.Get<Branch>("c");
+				var result = Git.Merge(new MergeOptions { NoFastForward = true, Branches = new[] { a, c }, MergeStrategy = MergeStrategy.Recursive });
 				Assert.IsTrue(result.Success);
 				Assert.AreEqual(repo.Get<Branch>("c").CurrentCommit.Tree, a.CurrentCommit.Tree);
 				var a_commit = repo.Get<Branch>("a").CurrentCommit;
 				var c_commit = repo.Get<Branch>("c").CurrentCommit;
+				Assert.AreNotEqual(c_commit, result.Commit);
 				Assert.IsTrue(a_commit.Parents.Contains(c_commit));
 				Assert.IsTrue(a_commit.Parents.Contains(repo.Tags["A"].Target as Commit));
 				Assert.AreEqual(2, a.CurrentCommit.Parents.Count());

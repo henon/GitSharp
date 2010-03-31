@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GitSharp.Core.Merge;
+using GitSharp.Core.RevWalk;
 
 namespace GitSharp.Commands
 {
@@ -13,26 +14,49 @@ namespace GitSharp.Commands
 		{
 			options.Validate();
 
-			var merger = SelectMerger(options);
-			bool success = merger.Merge(options.Commits.Select(c => ((Core.Commit)c).CommitId).ToArray());
-			var result = new MergeResult { Success = success };
-			result.Tree = new Tree(options.Repository, merger.GetResultTreeId());
-			if (options.NoCommit)
+			var result = new MergeResult();
+			if (CanFastForward(options))
 			{
-
+				result.Success=true;
+				result.Commit = options.Commits[1];
+				result.Tree = result.Commit.Tree;
+				UpdateBranch(options, result);
 			}
 			else
 			{
-				if (string.IsNullOrEmpty(options.Message))
+				var merger = SelectMerger(options);
+				result.Success = merger.Merge(options.Commits.Select(c => ((Core.Commit)c).CommitId).ToArray());
+				result.Tree = new Tree(options.Repository, merger.GetResultTreeId());
+				if (options.NoCommit)
 				{
-					options.Message = FormatMergeMessage(options);
+					// this is empty on purpose
 				}
-				var author = Author.GetDefaultAuthor(options.Repository);
-				result.Commit = Commit.Create(options.Message, options.Commits, result.Tree, author, author, DateTimeOffset.Now);
-				if (options.Branches.Length >= 1 && options.Branches[0] is Branch)
-					Ref.Update("refs/heads/" + options.Branches[0].Name, result.Commit);
+				else
+				{
+					if (string.IsNullOrEmpty(options.Message))
+					{
+						options.Message = FormatMergeMessage(options);
+					}
+					var author = Author.GetDefaultAuthor(options.Repository);
+					result.Commit = Commit.Create(options.Message, options.Commits, result.Tree, author, author, DateTimeOffset.Now);
+					UpdateBranch(options, result);
+				}
 			}
 			return result;
+		}
+
+		private static void UpdateBranch(MergeOptions options, MergeResult result)
+		{
+			if (options.Branches.Length >= 1 && options.Branches[0] is Branch)
+				Ref.Update("refs/heads/" + options.Branches[0].Name, result.Commit);
+		}
+
+		private static bool CanFastForward(MergeOptions options)
+		{
+			if (options.MergeStrategy != MergeStrategy.Recursive || options.NoFastForward || options.Commits.Length != 2)
+				return false;
+			var rw = new RevWalk(options.Repository);
+			return rw.isMergedInto(new RevCommit(options.Commits[0]._id), new RevCommit(options.Commits[1]._id));
 		}
 
 		private static string FormatMergeMessage(MergeOptions options)
@@ -54,7 +78,7 @@ namespace GitSharp.Commands
 				case MergeStrategy.Recursive:
 					return Core.Merge.MergeStrategy.SimpleTwoWayInCore.NewMerger(options.Repository);
 			}
-			throw new ArgumentException("Invalid merge option: "+options.MergeStrategy);
+			throw new ArgumentException("Invalid merge option: " + options.MergeStrategy);
 		}
 
 	}

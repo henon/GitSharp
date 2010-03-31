@@ -177,13 +177,14 @@ namespace GitSharp.Core.Util
          */
         public static DirectoryInfo userHome()
         {
-            return USER_HOME.home;
+			  return UserHomeStrategy();
+            //return USER_HOME.home;
         }
 
-        private static class USER_HOME
-        {
-            public static DirectoryInfo home = userHomeImpl();
-        }
+		  //private static class USER_HOME
+		  //{
+		  //   public static DirectoryInfo home = userHomeStrategy();
+		  //}
 
         /**
          * Determine the user's home directory (location where preferences are).
@@ -209,7 +210,15 @@ namespace GitSharp.Core.Util
             return new DirectoryInfo(userHomeFolderPath);
         }
 
-        /**
+		  public static Func<DirectoryInfo> UserHomeStrategy = userHomeImpl;
+
+		  public static Func<DirectoryInfo> StandardUserHomeStrategy
+		  {
+			  get { return userHomeImpl; }
+		  }
+
+
+		  	/**
          * Determine the global application directory (location where preferences are).
          * Also known as the "all users" directory.
          * <para />

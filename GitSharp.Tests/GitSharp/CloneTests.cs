@@ -37,6 +37,7 @@
  */
 
 using System;
+using GitSharp.Commands;
 using GitSharp.Core;
 using GitSharp.Core.Exceptions;
 using GitSharp.Core.Util;
@@ -47,91 +48,125 @@ using GitSharp.Core.Tests;
 
 namespace GitSharp.Tests.GitSharp
 {
-    [TestFixture]
-    public class CloneTests : RepositoryTestCase
-    {
-        [Test]
-        public void Check_cloned_bare_repo()
-        {
-            Assert.Ignore("This test has not been implemented yet.");
-        }
+	[TestFixture]
+	public class CloneTests : RepositoryTestCase
+	{
+		[Test]
+		public void Check_cloned_bare_repo()
+		{
+			Assert.Ignore("This test has not been implemented yet.");
+		}
 
-        [Test]
-        public void Check_cloned_repo_git()
-        {
-            string toPath = Path.Combine(trash.FullName, "test");
-            string fromUrl = "git://github.com/henon/TestGitRepository.git";
+		[Test]
+		public void Check_cloned_repo_git()
+		{
+			string toPath = Path.Combine(trash.FullName, "test");
+			string fromUrl = "git://github.com/henon/TestGitRepository.git";
 
-            using (Repository repo = Git.Clone(fromUrl, toPath))
-            {
-                var status = new RepositoryStatus(repo, new RepositoryStatusOptions { ForceContentCheck = false });
-                Assert.IsFalse(status.AnyDifferences);
+			using (Repository repo = Git.Clone(fromUrl, toPath))
+			{
+				var status = new RepositoryStatus(repo, new RepositoryStatusOptions { ForceContentCheck = false });
+				Assert.IsFalse(status.AnyDifferences);
 
-                status = new RepositoryStatus(repo, new RepositoryStatusOptions { ForceContentCheck = true });
-                Assert.IsFalse(status.AnyDifferences);
+				status = new RepositoryStatus(repo, new RepositoryStatusOptions { ForceContentCheck = true });
+				Assert.IsFalse(status.AnyDifferences);
 
-                Assert.IsTrue(Repository.IsValid(repo.Directory));
-                //Verify content is in the proper location
-                var readme = Path.Combine(repo.WorkingDirectory, "master.txt");
-                Assert.IsTrue(new FileInfo(readme).Exists);
-            }
-        }
+				Assert.IsTrue(Repository.IsValid(repo.Directory));
+				//Verify content is in the proper location
+				var readme = Path.Combine(repo.WorkingDirectory, "master.txt");
+				Assert.IsTrue(new FileInfo(readme).Exists);
+			}
+		}
 
-        [Test]
-        public void Try_cloning_non_existing_repo_git()
-        {
-            string toPath = Path.Combine(trash.FullName, "test");
-            string fromUrl = "git://github.com/henon/nonExistingRepo.git";
-            AssertHelper.Throws<NoRemoteRepositoryException>(() => { using (Repository repo = Git.Clone(fromUrl, toPath)) { } }, "Repository shouldn't exist.");
-        }
+		[Test]
+		public void Try_cloning_non_existing_repo_git()
+		{
+			string toPath = Path.Combine(trash.FullName, "test");
+			string fromUrl = "git://github.com/henon/nonExistingRepo.git";
+			AssertHelper.Throws<NoRemoteRepositoryException>(() => { using (Repository repo = Git.Clone(fromUrl, toPath)) { } }, "Repository shouldn't exist.");
+		}
 
-        [Test]
-        [Ignore("TransportLocal is not completely ported yet.")]
-        public void Checked_cloned_local_dotGit_suffixed_repo()
-        {
-            //setup of .git directory
-            var resource =
-                new DirectoryInfo(PathUtil.Combine(Path.Combine(Environment.CurrentDirectory, "Resources"),
-                                               "OneFileRepository"));
-            var tempRepository =
-                new DirectoryInfo(Path.Combine(trash.FullName, "OneFileRepository" + Path.GetRandomFileName() + Constants.DOT_GIT_EXT));
-            CopyDirectory(resource.FullName, tempRepository.FullName);
+		[Test]
+		[Ignore("TransportLocal is not completely ported yet.")]
+		public void Checked_cloned_local_dotGit_suffixed_repo()
+		{
+			//setup of .git directory
+			var resource =
+				 new DirectoryInfo(PathUtil.Combine(Path.Combine(Environment.CurrentDirectory, "Resources"),
+														  "OneFileRepository"));
+			var tempRepository =
+				 new DirectoryInfo(Path.Combine(trash.FullName, "OneFileRepository" + Path.GetRandomFileName() + Constants.DOT_GIT_EXT));
+			CopyDirectory(resource.FullName, tempRepository.FullName);
 
-            var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, Constants.DOT_GIT));
-            Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
+			var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, Constants.DOT_GIT));
+			Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
 
 
-            using (var repo = new Repository(repositoryPath.FullName))
-            {
-                Assert.IsTrue(Repository.IsValid(repo.Directory));
-                Commit headCommit = repo.Head.CurrentCommit;
-                Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", headCommit.Hash);
-            }
+			using (var repo = new Repository(repositoryPath.FullName))
+			{
+				Assert.IsTrue(Repository.IsValid(repo.Directory));
+				Commit headCommit = repo.Head.CurrentCommit;
+				Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", headCommit.Hash);
+			}
 
-            string toPath = Path.Combine(trash.FullName, "to.git");
+			string toPath = Path.Combine(trash.FullName, "to.git");
 
-            using (var repo = Git.Clone(repositoryPath.FullName, toPath))
-            {
-                Assert.IsTrue(Repository.IsValid(repo.Directory));
-                Commit headCommit = repo.Head.CurrentCommit;
-                Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", headCommit.Hash);
-            }
-        }
+			using (var repo = Git.Clone(repositoryPath.FullName, toPath))
+			{
+				Assert.IsTrue(Repository.IsValid(repo.Directory));
+				Commit headCommit = repo.Head.CurrentCommit;
+				Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", headCommit.Hash);
+			}
+		}
 
-        [Test]
-        [Ignore]
-        public void Check_cloned_repo_http()
-        {
-            string toPath = Path.Combine(trash.FullName, "test");
-            string fromUrl = "http://github.com/henon/TestGitRepository.git";
+		[Test]
+		[Ignore]
+		public void Check_cloned_repo_http()
+		{
+			string toPath = Path.Combine(trash.FullName, "test");
+			string fromUrl = "http://github.com/henon/TestGitRepository.git";
 
-            using (Repository repo = Git.Clone(fromUrl, toPath))
-            {
-                Assert.IsTrue(Repository.IsValid(repo.Directory));
-                //Verify content is in the proper location
-                var readme = Path.Combine(repo.WorkingDirectory, "master.txt");
-                Assert.IsTrue(new FileInfo(readme).Exists);
-            }
-        }
-    }
+			using (Repository repo = Git.Clone(fromUrl, toPath))
+			{
+				Assert.IsTrue(Repository.IsValid(repo.Directory));
+				//Verify content is in the proper location
+				var readme = Path.Combine(repo.WorkingDirectory, "master.txt");
+				Assert.IsTrue(new FileInfo(readme).Exists);
+			}
+		}
+
+		[Test]
+		public void CloneWithPrivateKeyAuthentication()
+		{
+			string toPath = Path.Combine(trash.FullName, "test");
+			string fromUrl = "git@github.com:author/TestGitRepository.git";
+
+			var ssh_dir = Path.Combine(trash.FullName, ".ssh");
+			Directory.CreateDirectory(ssh_dir);
+			new FileInfo("Resources/ssh/id_rsa").CopyTo(Path.Combine(ssh_dir, "id_rsa"));
+			new FileInfo("Resources/ssh/known_hosts").CopyTo(Path.Combine(ssh_dir, "known_hosts"));
+
+			FS.UserHomeStrategy = () => new DirectoryInfo(trash.FullName);
+			try
+			{
+				using (var repo = Git.Clone(fromUrl, toPath))
+				{
+					var status = new RepositoryStatus(repo, new RepositoryStatusOptions { ForceContentCheck = false });
+					Assert.IsFalse(status.AnyDifferences);
+
+					status = new RepositoryStatus(repo, new RepositoryStatusOptions { ForceContentCheck = true });
+					Assert.IsFalse(status.AnyDifferences);
+
+					Assert.IsTrue(Repository.IsValid(repo.Directory));
+					//Verify content is in the proper location
+					var readme = Path.Combine(repo.WorkingDirectory, "master.txt");
+					Assert.IsTrue(new FileInfo(readme).Exists);
+				}
+			}
+			finally
+			{
+				FS.UserHomeStrategy = FS.StandardUserHomeStrategy;
+			}
+		}
+	}
 }

@@ -42,7 +42,6 @@ using System.IO;
 
 namespace GitSharp.Core.Util
 {
-
     public static class FileStreamExtensions
     {
         public static byte[] toArray(this Stream stream)
@@ -60,8 +59,8 @@ namespace GitSharp.Core.Util
                     }
                 }
 
-                MemoryStream m = new MemoryStream();
-                byte[] buf = new byte[2048];
+                var m = new MemoryStream();
+                var buf = new byte[2048];
                 int n;
                 while ((n = stream.Read(buf, 0, buf.Length)) > 0)
                     m.Write(buf, 0, n);
@@ -79,6 +78,43 @@ namespace GitSharp.Core.Util
             ms.Write(new byte[ms.Length], 0, Convert.ToInt32(ms.Length));
             ms.Seek(0, SeekOrigin.Begin);
         }
-    }
 
+        public static long available(this Stream stream)
+        {
+            if (!stream.CanSeek)
+            {
+                throw new NotSupportedException();
+            }
+
+            return stream.Length - stream.Position;
+        }
+
+        public static long skip(this Stream stream, long numberOfBytesToSkip)
+        {
+            if (numberOfBytesToSkip < 0)
+            {
+                return 0;
+            }
+
+            int totalReadBytes = 0;
+
+            int bufSize = numberOfBytesToSkip <= int.MaxValue ? (int)numberOfBytesToSkip : int.MaxValue;
+
+            var buf = new byte[bufSize];
+
+            int readBytes;
+
+            do
+            {
+                var numberOfBytesToRead = (int) Math.Min(bufSize, numberOfBytesToSkip);
+                readBytes = stream.Read(buf, totalReadBytes, numberOfBytesToRead);
+
+                totalReadBytes += readBytes;
+                numberOfBytesToSkip -= readBytes;
+            } while (numberOfBytesToSkip > 0 && readBytes > 0);
+
+
+            return totalReadBytes;
+        }
+    }
 }

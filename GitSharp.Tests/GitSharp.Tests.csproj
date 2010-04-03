@@ -175,6 +175,7 @@
     <Compile Include="GitSharp.Core\Util\AssertHelper.cs" />
     <Compile Include="GitSharp.Core\Util\AssertHelperFixture.cs" />
     <Compile Include="GitSharp.Core\Util\ByteArrayExtensionsFixture.cs" />
+    <Compile Include="GitSharp.Core\Util\UnionInputStreamTest.cs" />
     <Compile Include="GitSharp.Core\Util\LinkedListFixture.cs" />
     <Compile Include="GitSharp.Core\Util\CPUTimeStopWatch.cs" />
     <Compile Include="GitSharp.Core\Util\ExtensionsFixture.cs" />

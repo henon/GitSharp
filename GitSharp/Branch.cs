@@ -120,6 +120,7 @@ namespace GitSharp
 		/// Merge the given branch into this Branch using the given merge strategy. 
 		/// </summary>
 		/// <param name="other"></param>
+		/// <param name="strategy"></param>
 		public MergeResult Merge(Branch other, MergeStrategy strategy)
 		{
 			return MergeCommand.Execute(new MergeOptions { Branches = new[] { this, other }, MergeStrategy = strategy });

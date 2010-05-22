@@ -239,7 +239,7 @@ namespace GitSharp.Core
                         return false;
                 }
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 return false;
             }

@@ -333,7 +333,7 @@ namespace GitSharp.Core.Util
                 {
                     _overflow.Close();
                 }
-                catch (IOException err)
+                catch (IOException)
                 {
                     // We shouldn't encounter an error closing the file.
                 }

@@ -57,8 +57,6 @@ namespace GitSharp.Core.RevPlot
     /// </summary>
     public class PlotCommitList :
         RevCommitList<PlotCommit> {
-        static int MAX_LENGTH = 25;
-
         private int lanesAllocated;
 
         private SortedList<int, int> freeLanes = new SortedList<int, int>();

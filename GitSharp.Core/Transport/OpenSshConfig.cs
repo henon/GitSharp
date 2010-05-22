@@ -238,7 +238,7 @@ namespace GitSharp.Core.Transport
                             if (c.port == 0)
                                 c.port = port;
                     }
-                    catch (FormatException nfe)
+                    catch (FormatException)
                     {
                         // Bad port number. Don't set it.
                     }

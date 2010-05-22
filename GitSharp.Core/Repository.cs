@@ -1253,7 +1253,7 @@ namespace GitSharp.Core
             {
                 return _refDb.peel(pRef);
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 // Historical accident; if the reference cannot be peeled due
                 // to some sort of repository access problem we claim that the

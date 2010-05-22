@@ -76,7 +76,7 @@ namespace GitSharp.Core
                         continue;
                     try {
                         _unpackedObjects.Add(ObjectId.FromString(d + e));
-                    } catch (ArgumentException notAnObject) {
+                    } catch (ArgumentException) {
                         // ignoring the file that does not represent loose object
                     }
                 }

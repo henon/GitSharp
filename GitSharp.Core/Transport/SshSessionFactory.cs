@@ -99,7 +99,7 @@ namespace GitSharp.Core.Transport
         /// </param>
         /// <param name="host">hostname (or IP address) to connect to. Must not be null.</param>
         /// <param name="port">
-        /// port number the server is listening for connections on. May be <=
+        /// port number the server is listening for connections on. May be &lt;=
         /// 0 to indicate the IANA registered port of 22 should be used.
         /// </param>
         /// <returns>a session that can contact the remote host.</returns>

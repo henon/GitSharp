@@ -525,7 +525,7 @@ namespace GitSharp.Core
             {
                 return result = updateImpl(walk, new DeleteStore(this));
             }
-            catch (IOException x)
+            catch (IOException)
             {
                 result = RefUpdateResult.IO_FAILURE;
                 throw;
@@ -571,7 +571,7 @@ namespace GitSharp.Core
 
                 return result = doLink(target);
             }
-            catch (IOException x)
+            catch (IOException)
             {
                 result = RefUpdateResult.IO_FAILURE;
                 throw;
@@ -631,7 +631,7 @@ namespace GitSharp.Core
             {
                 return id != null ? rw.parseAny(id) : null;
             }
-            catch (MissingObjectException e)
+            catch (MissingObjectException)
             {
                 // We can expect some objects to be missing, like if we are
                 // trying to force a deletion of a branch and the object it

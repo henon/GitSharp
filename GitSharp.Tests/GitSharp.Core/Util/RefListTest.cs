@@ -70,7 +70,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 list.get(0);
                 Assert.Fail("RefList.emptyList should have 0 element array");
             }
-            catch (IndexOutOfRangeException err)
+            catch (IndexOutOfRangeException)
             {
                 // expected
             }
@@ -96,7 +96,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 list.get(16);
                 Assert.Fail("default RefList should have 16 element array");
             }
-            catch (IndexOutOfRangeException err)
+            catch (IndexOutOfRangeException)
             {
                 // expected
             }
@@ -423,7 +423,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 i.next();
                 Assert.Fail("did not throw NoSuchElementException");
             }
-            catch (IndexOutOfRangeException err)
+            catch (IndexOutOfRangeException)
             {
                 // expected
             }
@@ -436,7 +436,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 i.remove();
                 Assert.Fail("did not throw UnsupportedOperationException");
             }
-            catch (NotSupportedException err)
+            catch (NotSupportedException)
             {
                 // expected
             }

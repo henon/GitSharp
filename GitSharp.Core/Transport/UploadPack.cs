@@ -292,7 +292,7 @@ namespace GitSharp.Core.Transport
                     {
                         _walk.parseAny(r.ObjectId).add(ADVERTISED);
                     }
-                    catch (IOException e)
+                    catch (IOException)
                     {
                         // Skip missing/corrupt objects
                     }

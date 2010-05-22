@@ -164,7 +164,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 itr.remove();
                 Assert.Fail("iterator allowed remove");
             }
-            catch (NotSupportedException err)
+            catch (NotSupportedException)
             {
                 // expected
             }
@@ -185,7 +185,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 itr.next();
                 Assert.Fail("iterator allowed next");
             }
-            catch (IndexOutOfRangeException err)
+            catch (IndexOutOfRangeException)
             {
                 // expected
             }
@@ -209,7 +209,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 itr.hasNext();
                 Assert.Fail("iterator did not catch bad input");
             }
-            catch (InvalidOperationException err)
+            catch (InvalidOperationException)
             {
                 // expected
             }
@@ -317,7 +317,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 map.put("FOO", refA);
                 Assert.Fail("map accepted invalid key/value pair");
             }
-            catch (ArgumentException err)
+            catch (ArgumentException)
             {
                 // expected
             }
@@ -333,7 +333,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 map.put("FOO", refA);
                 Assert.Fail("map accepted invalid key/value pair");
             }
-            catch (ArgumentException err)
+            catch (ArgumentException)
             {
                 // expected
             }

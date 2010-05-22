@@ -140,7 +140,7 @@ namespace GitSharp.Core
             try {
                 result = doRename();
                 return result;
-            } catch (IOException err) {
+            } catch (IOException) {
                 result = RefUpdate.RefUpdateResult.IO_FAILURE;
                 throw;
             }

@@ -507,7 +507,6 @@ namespace GitSharp
 		/// <para/>
 		/// Tree or Leaf (Blob) objects can be addressed by long hash or by their relative repository path
 		/// </summary>
-		/// <param name="name"></param>
 		/// <returns></returns>
 		public T Get<T>(string identifier) where T : class
 		{

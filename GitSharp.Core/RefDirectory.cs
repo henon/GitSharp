@@ -396,7 +396,7 @@ namespace GitSharp.Core
                 {
                     n = _refDirectory.scanRef(cur, name);
                 }
-                catch (IOException notValid)
+                catch (IOException)
                 {
                     n = null;
                 }
@@ -808,7 +808,7 @@ namespace GitSharp.Core
                 {
                     _lck.waitForStatChange();
                 }
-                catch (ThreadAbortException e)
+                catch (ThreadAbortException)
                 {
                     _lck.Unlock();
                     throw new ObjectWritingException("Interrupted writing "
@@ -872,11 +872,11 @@ namespace GitSharp.Core
             {
                 buf = IO.ReadFully(path, 4096);
             }
-            catch (FileNotFoundException noFile)
+            catch (FileNotFoundException)
             {
                 return null; // doesn't exist; not a reference.
             }
-            catch (DirectoryNotFoundException noDir)
+            catch (DirectoryNotFoundException)
             {
                 return null; // doesn't exist; not a reference.
             }
@@ -907,7 +907,7 @@ namespace GitSharp.Core
             {
                 id = ObjectId.FromString(buf, 0);
             }
-            catch (ArgumentException notRef)
+            catch (ArgumentException)
             {
                 while (0 < n && Char.IsWhiteSpace((char)buf[n - 1]))
                     n--;

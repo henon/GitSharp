@@ -48,7 +48,7 @@ namespace GitSharp.Core.Exceptions
 	[Serializable]
     public class MissingBundlePrerequisiteException : TransportException
     {
-        private static long serialVersionUID = 1L;
+        private const long serialVersionUID = 1L;
 
         private static string format(IDictionary<ObjectId, string> missingCommits)
         {

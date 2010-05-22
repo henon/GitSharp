@@ -433,7 +433,7 @@ namespace GitSharp.Tests.GitSharp.Core.Util
                 {
                     lck.Write(content);
                 }
-                catch (IOException ioe)
+                catch (IOException)
                 {
                     throw new ObjectWritingException("Can't write " + p);
                 }

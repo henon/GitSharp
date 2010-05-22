@@ -6,7 +6,7 @@ namespace GitSharp.Core.Exceptions
 	[Serializable]
 	public class CancelledException : Exception
 	{
-        private static long serialVersionUID = 1L;
+        private const long serialVersionUID = 1L;
 
 		//
 		// For guidelines regarding the creation of new exception types, see

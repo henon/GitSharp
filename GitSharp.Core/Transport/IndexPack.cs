@@ -143,6 +143,7 @@ namespace GitSharp.Core.Transport
         /// <summary>
         /// Create a new pack indexer utility.
         /// </summary>
+        /// <param name="db"></param>
         /// <param name="src">
         /// stream to read the pack data from. If the stream is buffered
         /// use <see cref="BUFFER_SIZE"/> as the buffer size for the stream.

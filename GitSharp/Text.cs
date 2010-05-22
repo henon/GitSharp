@@ -67,6 +67,7 @@ namespace GitSharp
 		/// Create a text instance from a string. The encoding is used for generating the underlying byte array. 
 		/// </summary>
 		/// <param name="text"></param>
+		/// <param name="encoding"></param>
 		public Text(string text, Encoding encoding)
 			: this(new RawText(encoding.GetBytes(text)), encoding)
 		{

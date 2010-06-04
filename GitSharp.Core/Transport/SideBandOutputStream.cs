@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2008-2010, Google Inc.
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -41,81 +42,182 @@ using System.IO;
 namespace GitSharp.Core.Transport
 {
 
-    public class SideBandOutputStream : Stream
-    {
-        public const int CH_DATA = SideBandInputStream.CH_DATA;
-        public const int CH_PROGRESS = SideBandInputStream.CH_PROGRESS;
-        public const int CH_ERROR = SideBandInputStream.CH_ERROR;
-        public const int SMALL_BUF = 1000;
-        public const int MAX_BUF = 65520;
-        public const int HDR_SIZE = 5;
+	/// <summary>
+	/// Multiplexes data and progress messages.
+	/// <para/>
+	/// This stream is buffered at packet sizes, so the caller doesn't need to wrap
+	/// it in yet another buffered stream.
+	/// </summary>
+	public class SideBandOutputStream : Stream
+	{
+		public const int CH_DATA = SideBandInputStream.CH_DATA;
+		public const int CH_PROGRESS = SideBandInputStream.CH_PROGRESS;
+		public const int CH_ERROR = SideBandInputStream.CH_ERROR;
+		public const int SMALL_BUF = 1000;
+		public const int MAX_BUF = 65520;
+		public const int HDR_SIZE = 5;
 
-        private readonly int channel;
-        private readonly PacketLineOut pckOut;
+		private readonly Stream _out;
+		private readonly byte[] _buffer;
 
-        public SideBandOutputStream(int chan, PacketLineOut outPLO)
-        {
-            channel = chan;
-            pckOut = outPLO;
-        }
+		/// <summary>
+		/// Number of bytes in <see cref="_buffer"/> that are valid data.
+		/// <para/>
+		/// Initialized to <see cref="HDR_SIZE"/> if there is no application data in the
+		/// buffer, as the packet header always appears at the start of the buffer.
+		/// </summary>
+		private int cnt;
 
-        public override void Flush()
-        {
-            if (channel != CH_DATA)
-                pckOut.Flush();
-        }
+		/// <summary>
+		/// Create a new stream to write side band packets.
+		/// </summary>
+		/// <param name="chan">channel number to prefix all packets with, so the remote side
+		/// can demultiplex the stream and get back the original data.
+		/// Must be in the range [0, 255].</param>
+		/// <param name="sz">maximum size of a data packet within the stream. The remote
+		/// side needs to agree to the packet size to prevent buffer
+		/// overflows. Must be in the range [HDR_SIZE + 1, MAX_BUF).</param>
+		/// <param name="os">stream that the packets are written onto. This stream should
+		/// be attached to a SideBandInputStream on the remote side.</param>
+		public SideBandOutputStream(int chan, int sz, Stream os)
+		{
+			if (chan <= 0 || chan > 255)
+				throw new ArgumentException("channel " + chan
+						+ " must be in range [0, 255]");
+			if (sz <= HDR_SIZE)
+				throw new ArgumentException("packet size " + sz
+						+ " must be >= " + HDR_SIZE);
+			else if (MAX_BUF < sz)
+				throw new ArgumentException("packet size " + sz
+						+ " must be <= " + MAX_BUF);
 
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            pckOut.WriteChannelPacket(channel, buffer, offset, count);
-        }
+			_out = os;
+			_buffer = new byte[sz];
+			_buffer[4] = (byte)chan;
+			cnt = HDR_SIZE;
+		}
 
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException();
-        }
+		public override void Flush()
+		{
+			if (HDR_SIZE < cnt)
+				WriteBuffer();
+			_out.Flush();
+		}
 
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException();
-        }
+		public override void Write(byte[] b, int off, int len)
+		{
+			while (0 < len)
+			{
+				int capacity = _buffer.Length - cnt;
+				if (cnt == HDR_SIZE && capacity < len)
+				{
+					// Our block to write is bigger than the packet size,
+					// stream it out as-is to avoid unnecessary copies.
+					PacketLineOut.FormatLength(_buffer, _buffer.Length);
+					_out.Write(_buffer, 0, HDR_SIZE);
+					_out.Write(b, off, capacity);
+					off += capacity;
+					len -= capacity;
 
-        public override bool CanRead
-        {
-            get { return false; }
-        }
+				}
+				else
+				{
+					if (capacity == 0)
+						WriteBuffer();
 
-        public override bool CanWrite
-        {
-            get { return true; }
-        }
+					int n = Math.Min(len, capacity);
+					Array.Copy(b, off, _buffer, cnt, n);
+					cnt += n;
+					off += n;
+					len -= n;
+				}
+			}
+		}
 
-        public override bool CanSeek
-        {
-            get { return false; }
-        }
+		public void Write(int b)
+		{
+			if (cnt == _buffer.Length)
+				WriteBuffer();
+			_buffer[cnt++] = (byte)b;
+		}
 
-        public override long Length
-        {
-            get { throw new NotSupportedException(); }
-        }
+		private void WriteBuffer()
+		{
+			PacketLineOut.FormatLength(_buffer, cnt);
+			_out.Write(_buffer, 0, cnt);
+			cnt = HDR_SIZE;
+		}
 
-        public override long Position
-        {
-            get
-            {
-                throw new NotSupportedException();
-            }
-            set
-            {
-                throw new NotSupportedException();
-            }
-        }
+		/// <summary>
+		/// We are forced to implement this interface member even though we don't need it
+		/// </summary>
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			throw new NotSupportedException();
+		}
 
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException();
-        }
-    }
+		/// <summary>
+		/// We are forced to implement this interface member even though we don't need it
+		/// </summary>
+		public override void SetLength(long value)
+		{
+			throw new NotSupportedException();
+		}
+
+		/// <summary>
+		/// We are forced to implement this interface member even though we don't need it
+		/// </summary>
+		public override bool CanRead
+		{
+			get { return false; }
+		}
+
+		/// <summary>
+		/// We are forced to implement this interface member even though we don't need it
+		/// </summary>
+		public override bool CanWrite
+		{
+			get { return true; }
+		}
+
+		/// <summary>
+		/// We are forced to implement this interface member even though we don't need it
+		/// </summary>
+		public override bool CanSeek
+		{
+			get { return false; }
+		}
+
+		/// <summary>
+		/// We are forced to implement this interface member even though we don't need it
+		/// </summary>
+		public override long Length
+		{
+			get { throw new NotSupportedException(); }
+		}
+
+		/// <summary>
+		/// We are forced to implement this interface member even though we don't need it
+		/// </summary>
+		public override long Position
+		{
+			get
+			{
+				throw new NotSupportedException();
+			}
+			set
+			{
+				throw new NotSupportedException();
+			}
+		}
+
+		/// <summary>
+		/// We are forced to implement this interface member even though we don't need it
+		/// </summary>
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			throw new NotSupportedException();
+		}
+	}
 
 }

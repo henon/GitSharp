@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2008-2010, Google Inc.
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -55,11 +56,10 @@ namespace GitSharp.Core.Transport
         private int _lastWorked;
         private int _totalWork;
 
-        public SideBandProgressMonitor(PacketLineOut pckOut)
+		  public SideBandProgressMonitor(Stream os)
         {
-            int bufsz = SideBandOutputStream.SMALL_BUF - SideBandOutputStream.HDR_SIZE;
-            _writer = new StreamWriter(new BufferedStream(new SideBandOutputStream(SideBandOutputStream.CH_PROGRESS, pckOut), bufsz), Constants.CHARSET);
-        }
+				_writer = new StreamWriter(os, Constants.CHARSET);
+		  }
 
         public override void Start(int totalTasks)
         {

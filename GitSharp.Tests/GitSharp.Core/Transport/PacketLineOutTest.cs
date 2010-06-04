@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2009, Google Inc.
+ * Copyright (C) 2009-2010, Google Inc.
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -45,152 +46,131 @@ using NUnit.Framework;
 
 namespace GitSharp.Core.Tests.Transport
 {
-    
-    [TestFixture]
-    public class PacketLineOutTest
-    {
-        private MemoryStream rawOut;
-        private PacketLineOut o;
 
-        [SetUp]
-        protected void setUp()
-        {
-            rawOut = new MemoryStream();
-            o = new PacketLineOut(rawOut);
-        }
+	[TestFixture]
+	public class PacketLineOutTest
+	{
+		private MemoryStream rawOut;
+		private PacketLineOut o;
 
-        [Test]
-        public void testWriteString1()
-        {
-            o.WriteString("a");
-            o.WriteString("bc");
-            assertBuffer("0005a0006bc");
-        }
+		[SetUp]
+		protected void setUp()
+		{
+			rawOut = new MemoryStream();
+			o = new PacketLineOut(rawOut);
+		}
 
-        [Test]
-        public void testWriteString2()
-        {
-            o.WriteString("a\n");
-            o.WriteString("bc\n");
-            assertBuffer("0006a\n0007bc\n");
-        }
+		[Test]
+		public void testWriteString1()
+		{
+			o.WriteString("a");
+			o.WriteString("bc");
+			assertBuffer("0005a0006bc");
+		}
 
-        [Test]
-        public void testWriteString3()
-        {
-            o.WriteString(string.Empty);
-            assertBuffer("0004");
-        }
+		[Test]
+		public void testWriteString2()
+		{
+			o.WriteString("a\n");
+			o.WriteString("bc\n");
+			assertBuffer("0006a\n0007bc\n");
+		}
 
-        [Test]
-        public void testWriteEnd()
-        {
-            var flushCnt = new int[1];
-            var mockout = new FlushCounterStream(rawOut, flushCnt);
+		[Test]
+		public void testWriteString3()
+		{
+			o.WriteString(string.Empty);
+			assertBuffer("0004");
+		}
 
-            new PacketLineOut(mockout).End();
-            assertBuffer("0000");
-            Assert.AreEqual(1, flushCnt[0]);
-        }
+		[Test]
+		public void testWriteEnd()
+		{
+			var flushCnt = new int[1];
+			var mockout = new FlushCounterStream(rawOut, flushCnt);
 
-        internal class FlushCounterStream : MemoryStream
-        {
-            private readonly Stream _rawout;
-            private readonly int[] _flushCnt;
+			new PacketLineOut(mockout).End();
+			assertBuffer("0000");
+			Assert.AreEqual(1, flushCnt[0]);
+		}
 
-            public FlushCounterStream(Stream rawout, int[] flushCnt)
-            {
-                _rawout = rawout;
-                _flushCnt = flushCnt;
-            }
+		internal class FlushCounterStream : MemoryStream
+		{
+			private readonly Stream _rawout;
+			private readonly int[] _flushCnt;
 
-            public override void WriteByte(byte value)
-            {
-                _rawout.WriteByte(value);
-            }
+			public FlushCounterStream(Stream rawout, int[] flushCnt)
+			{
+				_rawout = rawout;
+				_flushCnt = flushCnt;
+			}
 
-            public override void Write(byte[] buffer, int offset, int count)
-            {
-                _rawout.Write(buffer, offset, count);
-            }
+			public override void WriteByte(byte value)
+			{
+				_rawout.WriteByte(value);
+			}
 
-            public override void Flush()
-            {
-                _flushCnt[0]++;
-            }
-        }
+			public override void Write(byte[] buffer, int offset, int count)
+			{
+				_rawout.Write(buffer, offset, count);
+			}
 
-        [Test]
-        public void testWritePacket1()
-        {
-            o.WritePacket(new[] { (byte)'a' });
-            assertBuffer("0005a");
-        }
+			public override void Flush()
+			{
+				_flushCnt[0]++;
+			}
+		}
 
-        [Test]
-        public void testWritePacket2()
-        {
-            o.WritePacket(new[] { (byte)'a', (byte)'b', (byte)'c', (byte)'d' });
-            assertBuffer("0008abcd");
-        }
+		[Test]
+		public void testWritePacket1()
+		{
+			o.WritePacket(new[] { (byte)'a' });
+			assertBuffer("0005a");
+		}
 
-        [Test]
-        public void testWritePacket3()
-        {
-            const int buflen = SideBandOutputStream.MAX_BUF - SideBandOutputStream.HDR_SIZE;
-            byte[] buf = new byte[buflen];
-            for (int i = 0; i < buf.Length; i++)
-            {
-                buf[i] = (byte) i;
-            }
-            o.WritePacket(buf);
-            o.Flush();
+		[Test]
+		public void testWritePacket2()
+		{
+			o.WritePacket(new[] { (byte)'a', (byte)'b', (byte)'c', (byte)'d' });
+			assertBuffer("0008abcd");
+		}
 
-            byte[] act = rawOut.ToArray();
-            string explen = NB.DecimalToBase(buf.Length + 4, 16);
-            Assert.AreEqual(4 + buf.Length, act.Length);
-            Assert.AreEqual(Charset.forName("UTF-8").GetString(act, 0, 4), explen);
-            for (int i = 0, j = 4; i < buf.Length; i++, j++)
-                Assert.AreEqual(buf[i], act[j]);
-        }
+		[Test]
+		public void testWritePacket3()
+		{
+			const int buflen = SideBandOutputStream.MAX_BUF - 5;
+			byte[] buf = new byte[buflen];
+			for (int i = 0; i < buf.Length; i++)
+			{
+				buf[i] = (byte)i;
+			}
+			o.WritePacket(buf);
+			o.Flush();
 
-        [Test]
-        public void testWriteChannelPacket1()
-        {
-            o.WriteChannelPacket(1, new[] { (byte)'a' }, 0, 1);
-            assertBuffer("0006\x01" + "a");
-        }
+			byte[] act = rawOut.ToArray();
+			string explen = NB.DecimalToBase(buf.Length + 4, 16);
+			Assert.AreEqual(4 + buf.Length, act.Length);
+			Assert.AreEqual(Charset.forName("UTF-8").GetString(act, 0, 4), explen);
+			for (int i = 0, j = 4; i < buf.Length; i++, j++)
+				Assert.AreEqual(buf[i], act[j]);
+		}
 
-        [Test]
-        public void testWriteChannelPacket2()
-        {
-            o.WriteChannelPacket(2, new[] { (byte)'b' }, 0, 1);
-            assertBuffer("0006\x02" + "b");
-        }
+		[Test]
+		public void testFlush()
+		{
+			var flushCnt = new int[1];
+			var mockout = new FlushCounterFailWriterStream(flushCnt);
 
-        [Test]
-        public void testWriteChannelPacket3()
-        {
-            o.WriteChannelPacket(3, new[] { (byte)'c' }, 0, 1);
-            assertBuffer("0006\x03" + "c");
-        }
+			new PacketLineOut(mockout).Flush();
+			Assert.AreEqual(1, flushCnt[0]);
+		}
 
-        [Test]
-        public void testFlush()
-        {
-            var flushCnt = new int[1];
-            var mockout = new FlushCounterFailWriterStream(flushCnt);
-
-            new PacketLineOut(mockout).Flush();
-            Assert.AreEqual(1, flushCnt[0]);
-        }
-
-        private void assertBuffer(string exp)
-        {
-            byte[] resb = rawOut.ToArray();
-            string res = Constants.CHARSET.GetString(resb);
-            Assert.AreEqual(exp, res);
-        }
-    }
+		private void assertBuffer(string exp)
+		{
+			byte[] resb = rawOut.ToArray();
+			string res = Constants.CHARSET.GetString(resb);
+			Assert.AreEqual(exp, res);
+		}
+	}
 
 }

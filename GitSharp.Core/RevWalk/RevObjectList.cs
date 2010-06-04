@@ -1,5 +1,7 @@
 /*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2009, Google Inc.
+ * Copyright (C) 2009, Jonas Fonseca <fonseca@diku.dk>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -55,17 +57,18 @@ namespace GitSharp.Core.RevWalk
 		public static int BLOCK_SHIFT = 8;
 		public static int BLOCK_SIZE = 1 << BLOCK_SHIFT;
 
-        /// <summary>
-        /// Items stored in this list.
-        /// <para>
-        /// If <see cref="Block.Shift"/> = 0 this block holds the list elements; otherwise
-        /// it holds pointers to other {@link Block} instances which use a shift that
-        /// is <see cref="BLOCK_SHIFT"/> smaller.
-        /// </para>
-        /// </summary>
+		/// <summary>
+		/// Items stored in this list.
+		/// <para>
+		/// If <see cref="Block.Shift"/> = 0 this block holds the list elements; otherwise
+		/// it holds pointers to other {@link Block} instances which use a shift that
+		/// is <see cref="BLOCK_SHIFT"/> smaller.
+		/// </para>
+		/// </summary>
 		protected Block Contents
 		{
-			get; set;
+			get;
+			set;
 		}
 
 		/// <summary>
@@ -76,12 +79,13 @@ namespace GitSharp.Core.RevWalk
 			clear();
 		}
 
-        /// <summary>
-        /// Current number of elements in the list.
-        /// </summary>
+		/// <summary>
+		/// Current number of elements in the list.
+		/// </summary>
 		protected int Size
 		{
-			get; set;
+			get;
+			set;
 		}
 
 		public void add(int index, T element)
@@ -106,7 +110,7 @@ namespace GitSharp.Core.RevWalk
 			while (index >> s.Shift >= BLOCK_SIZE)
 			{
 				s = new Block(s.Shift + BLOCK_SHIFT);
-			    s.Contents[0] = Contents;
+				s.Contents[0] = Contents;
 				Contents = s;
 			}
 
@@ -114,7 +118,7 @@ namespace GitSharp.Core.RevWalk
 			{
 				int i = index >> s.Shift;
 				index -= i << s.Shift;
-				
+
 				if (s.Contents[i] == null)
 				{
 					s.Contents[i] = new Block(s.Shift - BLOCK_SHIFT);
@@ -152,9 +156,9 @@ namespace GitSharp.Core.RevWalk
 			Size = 0;
 		}
 
-        /// <summary>
-        /// One level of contents, either an intermediate level or a leaf level.
-        /// </summary>
+		/// <summary>
+		/// One level of contents, either an intermediate level or a leaf level.
+		/// </summary>
 		public class Block : IEnumerable<T>
 		{
 			public object[] Contents { get; private set; }
@@ -177,23 +181,23 @@ namespace GitSharp.Core.RevWalk
 			/// <filterpriority>1</filterpriority>
 			public IEnumerator<T> GetEnumerator()
 			{
-			    foreach (object o in Contents)
-			    {
-                    if (o == null) continue;
-                    if (o is Block)
-                    {
-                        Block s = (Block) o;
-                        foreach (object os in s.Contents)
-                        {
-                            if (os == null) continue;
-                            yield return (T) os;
-                        }
-                    }
-                    else
-                    {
-                        yield return (T) o;
-                    }
-			    }
+				foreach (object o in Contents)
+				{
+					if (o == null) continue;
+					if (o is Block)
+					{
+						Block s = (Block)o;
+						foreach (object os in s.Contents)
+						{
+							if (os == null) continue;
+							yield return (T)os;
+						}
+					}
+					else
+					{
+						yield return (T)o;
+					}
+				}
 			}
 
 			#endregion
@@ -219,7 +223,7 @@ namespace GitSharp.Core.RevWalk
 
 		public IEnumerator<T> GetEnumerator()
 		{
-		    return Contents.GetEnumerator();
+			return Contents.GetEnumerator();
 		}
 
 		#endregion

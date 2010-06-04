@@ -1,7 +1,10 @@
 /*
+ * Copyright (C) 2009, Constantine Plotnikov <constantine.plotnikov@gmail.com>
+ * Copyright (C) 2008-2009, Google Inc.
+ * Copyright (C) 2009, Matthias Sohn <matthias.sohn@sap.com>
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
+ * Copyright (C) 2009, Sasa Zivkov <sasa.zivkov@sap.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2008, Google Inc.
  *
  * All rights reserved.
  *
@@ -36,6 +39,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+// [henon] Verified against jgit commit 96690904f53241e825a29be9558be319a0bbfba1
 
 using System;
 using System.Collections.Generic;

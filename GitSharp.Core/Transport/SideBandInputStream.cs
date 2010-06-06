@@ -68,8 +68,8 @@ namespace GitSharp.Core.Transport
 		public const int CH_PROGRESS = 2;
 		public const int CH_ERROR = 3;
 
-		private static readonly Regex P_UNBOUNDED = new Regex("^([\\w ]+): (\\d+)( |, done)?.*", RegexOptions.Singleline);
-		private static readonly Regex P_BOUNDED = new Regex("^([\\w ]+):.*\\((\\d+)/(\\d+)\\).*", RegexOptions.Singleline);
+		private static readonly Regex P_UNBOUNDED = new Regex("^([\\w ]+): +(\\d+)(?:, done\\.)? *$", RegexOptions.Singleline);
+		private static readonly Regex P_BOUNDED = new Regex("^([\\w ]+): +\\d+% +\\( *(\\d+)/ *(\\d+)\\)(?:, done\\.)? *$", RegexOptions.Singleline);
 
 		private readonly Stream rawIn;
 		private readonly PacketLineIn pckIn;

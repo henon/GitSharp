@@ -2,6 +2,7 @@
  * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Stefan Schake <caytchen@gmail.com>
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -69,6 +70,7 @@ namespace GitSharp.Core.Transport
         public const string CAPABILITY_REPORT_STATUS = "report-status";
         public const string CAPABILITY_DELETE_REFS = "delete-refs";
         public const string CAPABILITY_OFS_DELTA = "ofs-delta";
+		  public const string CAPABILITY_SIDE_BAND_64K = "side-band-64k";
 
         private readonly bool _thinPack;
         private bool _capableDeleteRefs;

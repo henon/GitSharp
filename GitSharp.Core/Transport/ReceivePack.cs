@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Google Inc.
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -51,9 +52,6 @@ namespace GitSharp.Core.Transport
 	/// </summary>
 	public class ReceivePack : IDisposable
 	{
-		private const string CAPABILITY_REPORT_STATUS = BasePackPushConnection.CAPABILITY_REPORT_STATUS;
-		private const string CAPABILITY_DELETE_REFS = BasePackPushConnection.CAPABILITY_DELETE_REFS;
-		private const string CAPABILITY_OFS_DELTA = BasePackPushConnection.CAPABILITY_OFS_DELTA;
 
 		/// <summary>
 		/// Database we write the stored objects into.
@@ -147,9 +145,14 @@ namespace GitSharp.Core.Transport
 		private Exception unpackError;
 
 		/// <summary>
-		/// if <see cref="enabledCapabilities"/> has <see cref="CAPABILITY_REPORT_STATUS"/>
+		/// If <see cref="BasePackPushConnection.CAPABILITY_REPORT_STATUS"/> is enabled./>
 		/// </summary>
 		private bool reportStatus;
+
+		/// <summary>
+		/// If <see cref="BasePackPushConnection.CAPABILITY_SIDE_BAND_64K"/> is enabled./>
+		/// </summary>
+		private bool sideBand;
 
 		/// <summary>
 		/// Lock around the received pack file, while updating refs.
@@ -469,7 +472,15 @@ namespace GitSharp.Core.Transport
 		/// <param name="what">string describing the problem identified by the hook. The string must not end with an LF, and must not contain an LF.</param>
 		public void sendError(string what)
 		{
-			SendMessage("error", what);
+			try
+			{
+				if (msgs != null)
+					msgs.Write("error: " + what + "\n");
+			}
+			catch (IOException)
+			{
+				// Ignore write failures.
+			}
 		}
 
 		/// <summary>
@@ -482,14 +493,14 @@ namespace GitSharp.Core.Transport
 		/// <param name="what">string describing the problem identified by the hook. The string must not end with an LF, and must not contain an LF.</param>
 		public void sendMessage(string what)
 		{
-			SendMessage("remote", what);
-		}
-
-		private void SendMessage(string type, string what)
-		{
-			if (msgs != null)
+			try
 			{
-				msgs.WriteLine(type + ": " + what); // TODO: [nulltoken] This will issue a CRLF on Windows platform instead of a LF only
+				if (msgs != null)
+					msgs.Write(what + "\n");
+			}
+			catch (IOException)
+			{
+				// Ignore write failures.
 			}
 		}
 
@@ -502,15 +513,15 @@ namespace GitSharp.Core.Transport
 		{
 			try
 			{
-				raw = stream;
+				raw = stream; // NOTE: [henon] raw represents both rawIn and rawOut in jgit
 
 				pckIn = new PacketLineIn(raw);
 				pckOut = new PacketLineOut(raw);
 
+				// TODO: [henon] port jgit's timeout behavior which is obviously missing here
+
 				if (messages != null)
-				{
-					msgs = new StreamWriter(messages, Constants.CHARSET); // TODO : [nulltoken] A derived type should be used which would override WriteLine to output \n instead of \r\n
-				}
+					msgs = new StreamWriter(messages, Constants.CHARSET);
 
 				enabledCapabilities = new List<string>();
 				commands = new List<ReceiveCommand>();
@@ -521,8 +532,19 @@ namespace GitSharp.Core.Transport
 			{
 				try
 				{
+					if (pckOut != null)
+						pckOut.Flush();
 					if (msgs != null)
 						msgs.Flush();
+					if (sideBand)
+											// If we are using side band, we need to send a final
+											// flush-pkt to tell the remote peer the side band is
+											// complete and it should stop decoding. We need to
+											// use the original output stream as rawOut is now the
+											// side band data channel.
+											//
+						new PacketLineOut(stream).End();
+
 				}
 				finally
 				{
@@ -586,7 +608,6 @@ namespace GitSharp.Core.Transport
 			else if (msgs != null)
 			{
 				SendStatusReport(false, new MessagesReporter(msgs.BaseStream));
-				msgs.Flush();
 			}
 
 			postReceive.OnPostReceive(this, FilterCommands(ReceiveCommand.Result.OK));
@@ -609,10 +630,11 @@ namespace GitSharp.Core.Transport
 		{
 			RevFlag advertised = walk.newFlag("ADVERTISED");
 			adv.init(walk, advertised);
-			adv.advertiseCapability(CAPABILITY_DELETE_REFS);
-			adv.advertiseCapability(CAPABILITY_REPORT_STATUS);
+			adv.advertiseCapability(BasePackPushConnection.CAPABILITY_SIDE_BAND_64K);
+			adv.advertiseCapability(BasePackPushConnection.CAPABILITY_DELETE_REFS);
+			adv.advertiseCapability(BasePackPushConnection.CAPABILITY_REPORT_STATUS);
 			if (allowOfsDelta)
-				adv.advertiseCapability(CAPABILITY_OFS_DELTA);
+				adv.advertiseCapability(BasePackPushConnection.CAPABILITY_OFS_DELTA);
 			refs = refFilter.filter(db.getAllRefs());
 			Ref head = refs.remove(Constants.HEAD);
 			adv.send(refs);
@@ -686,7 +708,18 @@ namespace GitSharp.Core.Transport
 
 		private void EnableCapabilities()
 		{
-			reportStatus = enabledCapabilities.Contains(CAPABILITY_REPORT_STATUS);
+			reportStatus = enabledCapabilities.Contains(BasePackPushConnection.CAPABILITY_REPORT_STATUS);
+
+			sideBand = enabledCapabilities.Contains(BasePackPushConnection.CAPABILITY_SIDE_BAND_64K);
+			if (sideBand)
+			{
+				Stream @out = raw;
+
+				raw = new SideBandOutputStream(SideBandOutputStream.CH_DATA, SideBandOutputStream.MAX_BUF, @out);
+				pckOut = new PacketLineOut(raw);
+				msgs = new StreamWriter(new SideBandOutputStream(SideBandOutputStream.CH_PROGRESS,
+					SideBandOutputStream.MAX_BUF, @out), Constants.CHARSET);
+			}
 		}
 
 		private bool NeedPack()
@@ -1078,8 +1111,8 @@ namespace GitSharp.Core.Transport
 
 			public override void SendString(string s)
 			{
-				byte[] data = Constants.encode(s);
-				_stream.Write(data, 0, data.Length); //TODO: [nulltoken] is println in Java. We may be missing a line terminator there.
+				byte[] data = Constants.encode(s+"\n");
+				_stream.Write(data, 0, data.Length); 
 			}
 		}
 

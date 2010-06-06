@@ -216,7 +216,7 @@ namespace GitSharp.Core.Transport
 					return;
 				}
 
-				channel = rawIn.ReadByte();
+				channel = rawIn.ReadByte() & 0xff;
 				available -= SideBandOutputStream.HDR_SIZE; // length header plus channel indicator
 				if (available == 0)
 					continue;

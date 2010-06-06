@@ -63,6 +63,7 @@ namespace GitSharp.Core.Transport
 	///</summary>
 	public class SideBandInputStream : Stream
 	{
+		private const string PFX_REMOTE = "remote: ";
 		public const int CH_DATA = 1;
 		public const int CH_PROGRESS = 2;
 		public const int CH_ERROR = 3;
@@ -230,7 +231,7 @@ namespace GitSharp.Core.Transport
 						continue;
 					case CH_ERROR:
 						eof = true;
-						throw new TransportException("remote: " + readString(available));
+						throw new TransportException(PFX_REMOTE + readString(available));
 					default:
 						throw new TransportException("Invalid channel " + channel);
 				}
@@ -273,8 +274,7 @@ namespace GitSharp.Core.Transport
 				{
 					currentTask = taskname;
 					lastCnt = 0;
-					int tot = int.Parse(matcher.Groups[3].Value);
-					monitor.BeginTask(currentTask, tot);
+					beginTask(int.Parse(matcher.Groups[3].Value));
 				}
 				int cnt = int.Parse(matcher.Groups[2].Value);
 				monitor.Update(cnt - lastCnt);
@@ -290,7 +290,7 @@ namespace GitSharp.Core.Transport
 				{
 					currentTask = taskname;
 					lastCnt = 0;
-					monitor.BeginTask(currentTask, ProgressMonitor.UNKNOWN);
+					beginTask(ProgressMonitor.UNKNOWN);
 				}
 				int cnt = int.Parse(matcher.Groups[2].Value);
 				monitor.Update(cnt - lastCnt);
@@ -299,6 +299,11 @@ namespace GitSharp.Core.Transport
 			}
 
 			return false;
+		}
+
+		private void beginTask(int totalWorkUnits)
+		{
+			monitor.BeginTask(PFX_REMOTE + currentTask, totalWorkUnits);
 		}
 
 		private string readString(int len)

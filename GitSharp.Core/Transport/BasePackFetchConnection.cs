@@ -1,6 +1,8 @@
 /*
+ * Copyright (C) 2008-2010, Google Inc.
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -615,7 +617,10 @@ namespace GitSharp.Core.Transport
 
         private void ReceivePack(ProgressMonitor monitor)
         {
-            IndexPack ip = IndexPack.Create(local, _sideband ? pckIn.sideband(monitor) : inStream);
+			  Stream input = inStream;
+			  if (_sideband)
+				  input = new SideBandInputStream(input, monitor);
+            IndexPack ip = IndexPack.Create(local, input);
             ip.setFixThin(_thinPack);
             ip.setObjectChecking(transport.CheckFetchedObjects);
             ip.index(monitor);

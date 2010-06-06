@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -83,11 +84,6 @@ namespace GitSharp.Core.Transport
         {
             ins = i;
             lenbuffer = new byte[4];
-        }
-
-        public Stream sideband(ProgressMonitor pm)
-        {
-            return new SideBandInputStream(this, ins, pm);
         }
 
         public AckNackResult readACK(MutableObjectId returnedId)

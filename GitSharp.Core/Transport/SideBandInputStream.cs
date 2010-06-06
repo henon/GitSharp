@@ -1,6 +1,7 @@
 ﻿/*
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
+ * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -45,220 +46,266 @@ using GitSharp.Core.Util;
 namespace GitSharp.Core.Transport
 {
 
-    public class SideBandInputStream : Stream
-    {
-        public const int CH_DATA = 1;
-        public const int CH_PROGRESS = 2;
-        public const int CH_ERROR = 3;
+	/// <summary>
+	/// Unmultiplexes the data portion of a side-band channel.
+	/// <para/>
+	/// Reading from this input stream obtains data from channel 1, which is
+	/// typically the bulk data stream.
+	/// <para/>
+	/// Channel 2 is transparently unpacked and "scraped" to update a progress
+	/// monitor. The scraping is performed behind the scenes as part of any of the
+	/// read methods offered by this stream.
+	/// <para/>
+	/// Channel 3 results in an exception being thrown, as the remote side has issued
+	/// an unrecoverable error.
+	///
+	/// <see cref="SideBandOutputStream"/>
+	///</summary>
+	public class SideBandInputStream : Stream
+	{
+		public const int CH_DATA = 1;
+		public const int CH_PROGRESS = 2;
+		public const int CH_ERROR = 3;
 
-        private static readonly Regex P_UNBOUNDED = new Regex("^([\\w ]+): (\\d+)( |, done)?.*", RegexOptions.Singleline);
-        private static readonly Regex P_BOUNDED = new Regex("^([\\w ]+):.*\\((\\d+)/(\\d+)\\).*", RegexOptions.Singleline);
+		private static readonly Regex P_UNBOUNDED = new Regex("^([\\w ]+): (\\d+)( |, done)?.*", RegexOptions.Singleline);
+		private static readonly Regex P_BOUNDED = new Regex("^([\\w ]+):.*\\((\\d+)/(\\d+)\\).*", RegexOptions.Singleline);
 
-        private readonly PacketLineIn pckIn;
-        private readonly Stream ins;
-        private readonly ProgressMonitor monitor;
-        private string progressBuffer;
-        private string currentTask;
-        private int lastCnt;
-        private bool eof;
-        private int channel;
-        private int available;
+		private readonly Stream rawIn;
+		private readonly PacketLineIn pckIn;
+		private readonly ProgressMonitor monitor;
+		private string progressBuffer;
+		private string currentTask;
+		private int lastCnt;
+		private bool eof;
+		private int channel;
+		private int available;
 
-        public SideBandInputStream(PacketLineIn aPckIn, Stream aIns, ProgressMonitor aProgress)
-        {
-            pckIn = aPckIn;
-            ins = aIns;
-            monitor = aProgress;
-            currentTask = string.Empty;
-        	progressBuffer = string.Empty;
-        }
+		public SideBandInputStream(Stream @in, ProgressMonitor progress)
+		{
+			rawIn = @in;
+			pckIn = new PacketLineIn(rawIn);
+			monitor = progress;
+			currentTask = string.Empty;
+			progressBuffer = string.Empty;
+		}
 
-        public override void Flush()
-        {
-            throw new NotSupportedException();
-        }
+		#region --> Not supported stream interface members
 
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException();
-        }
+		/// <summary>
+		/// This is not needed, but we are forced to implement the interface
+		/// </summary>
+		public override void Flush()
+		{
+			throw new NotSupportedException();
+		}
 
-        public override void SetLength(long value)
-        {
-            throw new NotSupportedException();
-        }
+		/// <summary>
+		/// This is not needed, but we are forced to implement the interface
+		/// </summary>
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			throw new NotSupportedException();
+		}
 
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException();
-        }
+		/// <summary>
+		/// This is not needed, but we are forced to implement the interface
+		/// </summary>
+		public override void SetLength(long value)
+		{
+			throw new NotSupportedException();
+		}
 
-        public override bool CanRead
-        {
-            get { return true; }
-        }
+		/// <summary>
+		/// This is not needed, but we are forced to implement the interface
+		/// </summary>
+		public override void Write(byte[] buffer, int offset, int count)
+		{
+			throw new NotSupportedException();
+		}
 
-        public override bool CanSeek
-        {
-            get { return false; }
-        }
+		/// <summary>
+		/// This is not needed, but we are forced to implement the interface
+		/// </summary>
+		public override bool CanRead
+		{
+			get { return true; }
+		}
 
-        public override bool CanWrite
-        {
-            get
-            {
-                return false;
-            }
-        }
+		/// <summary>
+		/// This is not needed, but we are forced to implement the interface
+		/// </summary>
+		public override bool CanSeek
+		{
+			get { return false; }
+		}
 
-        public override long Length
-        {
-            get { throw new NotSupportedException(); }
-        }
+		/// <summary>
+		/// This is not needed, but we are forced to implement the interface
+		/// </summary>
+		public override bool CanWrite
+		{
+			get
+			{
+				return false;
+			}
+		}
 
-        public override long Position
-        {
-            get
-            {
-                throw new NotSupportedException();
-            }
-            set
-            {
-                throw new NotSupportedException();
-            }
-        }
+		/// <summary>
+		/// This is not needed, but we are forced to implement the interface
+		/// </summary>
+		public override long Length
+		{
+			get { throw new NotSupportedException(); }
+		}
 
-        public override int ReadByte()
-        {
-            needDataPacket();
-            if (eof)
-                return -1;
-            available--;
-            return ins.ReadByte();
-        }
+		/// <summary>
+		/// This is not needed, but we are forced to implement the interface
+		/// </summary>
+		public override long Position
+		{
+			get
+			{
+				throw new NotSupportedException();
+			}
+			set
+			{
+				throw new NotSupportedException();
+			}
+		}
 
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            int r = 0;
-            while (count > 0)
-            {
-                needDataPacket();
-                if (eof)
-                    break;
-                int n = ins.Read(buffer, offset, Math.Min(count, available));
-                if (n < 0)
-                    break;
-                r += n;
-                offset += n;
-                count -= n;
-                available -= n;
-            }
-            return eof && r == 0 ? -1 : r;
-        }
+#endregion
 
-        private void needDataPacket()
-        {
-            if (eof || (channel == CH_DATA && available > 0))
-                return;
-            for (;;)
-            {
-                available = pckIn.ReadLength();
-                if (available == 0)
-                {
-                    eof = true;
-                    return;
-                }
+		public override int ReadByte()
+		{
+			needDataPacket();
+			if (eof)
+				return -1;
+			available--;
+			return rawIn.ReadByte();
+		}
 
-                channel = ins.ReadByte();
-                available -= 5; // length header plus channel indicator
-                if (available == 0)
-                    continue;
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			int r = 0;
+			while (count > 0)
+			{
+				needDataPacket();
+				if (eof)
+					break;
+				int n = rawIn.Read(buffer, offset, Math.Min(count, available));
+				if (n < 0)
+					break;
+				r += n;
+				offset += n;
+				count -= n;
+				available -= n;
+			}
+			return eof && r == 0 ? -1 : r;
+		}
 
-                switch (channel)
-                {
-                    case CH_DATA:
-                        return;
-                    case CH_PROGRESS:
-                        progress(readString(available));
-                        continue;
-                    case CH_ERROR:
-                        eof = true;
-                        throw new TransportException("remote: " + readString(available));
-                    default:
-                        throw new TransportException("Invalid channel " + channel);
-                }
-            }
-        }
+		private void needDataPacket()
+		{
+			if (eof || (channel == CH_DATA && available > 0))
+				return;
+			for (; ; )
+			{
+				available = pckIn.ReadLength();
+				if (available == 0)
+				{
+					eof = true;
+					return;
+				}
 
-        private void progress(string pkt)
-        {
-            pkt = progressBuffer + pkt;
-            for (;;)
-            {
-                int lf = pkt.IndexOf('\n');
-                int cr = pkt.IndexOf('\r');
-                int s;
-                if (0 <= lf && 0 <= cr)
-                    s = Math.Min(lf, cr);
-                else if (0 <= lf)
-                    s = lf;
-                else if (0 <= cr)
-                    s = cr;
-                else
-                    break;
+				channel = rawIn.ReadByte();
+				available -= SideBandOutputStream.HDR_SIZE; // length header plus channel indicator
+				if (available == 0)
+					continue;
 
-                string msg = pkt.Slice(0, s);
-                if (doProgressLine(msg))
-                    pkt = pkt.Substring(s + 1);
-                else
-                    break;
-            }
-            progressBuffer = pkt;
-        }
+				switch (channel)
+				{
+					case CH_DATA:
+						return;
+					case CH_PROGRESS:
+						progress(readString(available));
+						continue;
+					case CH_ERROR:
+						eof = true;
+						throw new TransportException("remote: " + readString(available));
+					default:
+						throw new TransportException("Invalid channel " + channel);
+				}
+			}
+		}
 
-        private bool doProgressLine(string msg)
-        {
-            Match matcher = P_BOUNDED.Match(msg);
-            if (matcher.Success)
-            {
-                string taskname = matcher.Groups[1].Value;
-                if (!currentTask.Equals(taskname))
-                {
-                    currentTask = taskname;
-                    lastCnt = 0;
-                    int tot = int.Parse(matcher.Groups[3].Value);
-                    monitor.BeginTask(currentTask, tot);
-                }
-                int cnt = int.Parse(matcher.Groups[2].Value);
-                monitor.Update(cnt - lastCnt);
-                lastCnt = cnt;
-                return true;
-            }
+		private void progress(string pkt)
+		{
+			pkt = progressBuffer + pkt;
+			for (; ; )
+			{
+				int lf = pkt.IndexOf('\n');
+				int cr = pkt.IndexOf('\r');
+				int s;
+				if (0 <= lf && 0 <= cr)
+					s = Math.Min(lf, cr);
+				else if (0 <= lf)
+					s = lf;
+				else if (0 <= cr)
+					s = cr;
+				else
+					break;
 
-            matcher = P_UNBOUNDED.Match(msg);
-            if (matcher.Success)
-            {
-                string taskname = matcher.Groups[1].Value;
-                if (!currentTask.Equals(taskname))
-                {
-                    currentTask = taskname;
-                    lastCnt = 0;
-                    monitor.BeginTask(currentTask, ProgressMonitor.UNKNOWN);
-                }
-                int cnt = int.Parse(matcher.Groups[2].Value);
-                monitor.Update(cnt - lastCnt);
-                lastCnt = cnt;
-                return true;
-            }
+				string msg = pkt.Slice(0, s);
+				if (doProgressLine(msg))
+					pkt = pkt.Substring(s + 1);
+				else
+					break;
+			}
+			progressBuffer = pkt;
+		}
 
-            return false;
-        }
+		private bool doProgressLine(string msg)
+		{
+			Match matcher = P_BOUNDED.Match(msg);
+			if (matcher.Success)
+			{
+				string taskname = matcher.Groups[1].Value;
+				if (!currentTask.Equals(taskname))
+				{
+					currentTask = taskname;
+					lastCnt = 0;
+					int tot = int.Parse(matcher.Groups[3].Value);
+					monitor.BeginTask(currentTask, tot);
+				}
+				int cnt = int.Parse(matcher.Groups[2].Value);
+				monitor.Update(cnt - lastCnt);
+				lastCnt = cnt;
+				return true;
+			}
 
-        private string readString(int len)
-        {
-            byte[] raw = new byte[len];
-            IO.ReadFully(ins, raw, 0, len);
-            return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
-        }
-    }
+			matcher = P_UNBOUNDED.Match(msg);
+			if (matcher.Success)
+			{
+				string taskname = matcher.Groups[1].Value;
+				if (!currentTask.Equals(taskname))
+				{
+					currentTask = taskname;
+					lastCnt = 0;
+					monitor.BeginTask(currentTask, ProgressMonitor.UNKNOWN);
+				}
+				int cnt = int.Parse(matcher.Groups[2].Value);
+				monitor.Update(cnt - lastCnt);
+				lastCnt = cnt;
+				return true;
+			}
+
+			return false;
+		}
+
+		private string readString(int len)
+		{
+			byte[] raw = new byte[len];
+			IO.ReadFully(rawIn, raw, 0, len);
+			return RawParseUtils.decode(Constants.CHARSET, raw, 0, len);
+		}
+	}
 }

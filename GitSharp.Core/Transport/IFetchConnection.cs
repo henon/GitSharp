@@ -59,10 +59,9 @@ namespace GitSharp.Core.Transport
     {
         /// <summary>
         /// Fetch objects we don't have but that are reachable from advertised refs.
-        /// <p>
+        /// <para/>
         /// Only one call per connection is allowed. Subsequent calls will result in
         /// <see cref="TransportException"/>.
-        /// </p>
         /// <para/>
         /// Implementations are free to use network connections as necessary to
         /// efficiently (for both client and server) transfer objects from the remote

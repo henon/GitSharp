@@ -401,6 +401,7 @@
     <Compile Include="RevPlot\PlotLane.cs" />
     <Compile Include="RevPlot\PlotWalk.cs" />
     <Compile Include="SymbolicRef.cs" />
+    <Compile Include="Util\IO\InterruptTimer.cs" />
     <Compile Include="Util\IO\UnionInputStream.cs" />
     <Compile Include="Util\JavaHelper\Properties.cs" />
     <Compile Include="Transport\RefFilter.cs" />

@@ -38,7 +38,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Tamir.SharpSsh.java.io;
 
 namespace GitSharp.Core.Util
 {

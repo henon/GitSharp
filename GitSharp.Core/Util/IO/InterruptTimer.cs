@@ -47,6 +47,10 @@ using Thread = Tamir.SharpSsh.java.lang.Thread;
 
 namespace GitSharp.Core.Util
 {
+
+	// TODO: [henon] this approach does not work in .net. Either the calling thread must be aborted (which is problematic) or the IO stream closed. 
+	// See how TimeoutStream uses a timer to abort IO.
+
 	/// <summary>
 	///  Triggers an interrupt on the calling thread if it doesn't complete a block.
 	///  <para/>

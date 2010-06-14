@@ -269,8 +269,10 @@ namespace GitSharp.Core.Transport
 
             if (_timeout > 0)
             {
-                var i = new TimeoutStream(_rawIn, _timeout * 1000);
-                var o = new TimeoutStream(_rawOut, _timeout * 1000);
+                var i = new TimeoutStream(_rawIn);
+					i.setTimeout(_timeout * 1000);
+                var o = new TimeoutStream(_rawOut );
+					 o.setTimeout(_timeout * 1000);
                 _rawIn = i;
                 _rawOut = o;
             }

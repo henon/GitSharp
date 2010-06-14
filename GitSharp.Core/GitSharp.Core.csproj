@@ -229,7 +229,6 @@
     <Compile Include="Util\CRC32.cs" />
     <Compile Include="Util\MessageDigest.cs" />
     <Compile Include="Util\StringUtils.cs" />
-    <Compile Include="Util\JavaHelper\TimeoutStream.cs" />
     <Compile Include="Util\WeakReference.cs" />
     <Compile Include="WholePackedObjectLoader.cs" />
     <Compile Include="WindowCache.cs" />
@@ -387,6 +386,7 @@
     <Compile Include="Merge\MergeFormatter.cs" />
     <Compile Include="Merge\MergeResult.cs" />
     <Compile Include="ObjectIdRef.cs" />
+    <Compile Include="Util\PipeStream.cs" />
     <Compile Include="Platform\Linux.cs" />
     <Compile Include="Platform\Mac.cs" />
     <Compile Include="Platform\Platform.cs" />
@@ -402,6 +402,7 @@
     <Compile Include="RevPlot\PlotWalk.cs" />
     <Compile Include="SymbolicRef.cs" />
     <Compile Include="Util\IO\InterruptTimer.cs" />
+    <Compile Include="Util\IO\TimeoutStream.cs" />
     <Compile Include="Util\IO\UnionInputStream.cs" />
     <Compile Include="Util\JavaHelper\Properties.cs" />
     <Compile Include="Transport\RefFilter.cs" />

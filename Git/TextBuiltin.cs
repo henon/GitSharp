@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  *
@@ -45,6 +45,7 @@ using GitSharp.Core;
 using GitSharp.Core.RevWalk;
 using NDesk.Options;
 using Repository = GitSharp.Core.Repository;
+using System.Diagnostics;
 
 namespace GitSharp.CLI
 {
@@ -96,6 +97,11 @@ namespace GitSharp.CLI
         /// Custom OptionSet to allow special option handling rules such as --option dir
         /// </summary>
         public CmdParserOptionSet options;
+
+        /// <summary>
+        /// If the command is using a pager, this represents that child process.
+        /// </summary>
+        private Process _pager;
 
         /// <summary>
         /// Used by CommandCatalog and CommandRef to set the command name during initial creation.
@@ -207,6 +213,27 @@ namespace GitSharp.CLI
             }
         }
 
+        /// <summary>
+        /// Starts a child process to paginate the command output.
+        /// </summary>
+        protected void SetupPager()
+        {
+            try
+            {
+                _pager = new Process();
+                _pager.StartInfo.FileName = @"C:\Windows\System32\more.com";
+                _pager.StartInfo.UseShellExecute = false;
+                _pager.StartInfo.RedirectStandardInput = true;
+                _pager.Start();
+                Git.DefaultOutputStream = _pager.StandardInput;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Failed to create pager");
+                Console.Error.WriteLine(ex.ToString());
+                _pager = null;
+            }
+        }
 
         /// <summary>
         /// Parses the command line and runs the corresponding subcommand 
@@ -215,6 +242,12 @@ namespace GitSharp.CLI
         public void Execute(String[] args)
         {
             Run(args);
+            if (_pager != null)
+            {
+                Git.DefaultOutputStream = null;
+                _pager.StandardInput.Close();
+                _pager.WaitForExit();
+			}
         }
 
         /// <summary>

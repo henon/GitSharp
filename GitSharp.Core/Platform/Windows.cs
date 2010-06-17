@@ -38,6 +38,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.IO;
@@ -125,7 +126,16 @@ namespace GitSharp.Core
 	
 			return false;
 		}
-		
+
+		public override Process GetTextPager()
+		{
+			var pager = new Process();
+			pager.StartInfo.FileName = @"C:\Windows\System32\more.com";
+			pager.StartInfo.UseShellExecute = false;
+			pager.StartInfo.RedirectStandardInput = true;
+			return pager;
+		}
+
 		public Win32()
 		{
 			Win32VersionInfo osvi = new Win32VersionInfo();

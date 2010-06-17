@@ -96,7 +96,13 @@ namespace GitSharp.Core
 
 			return true;
 		}
-		
+
+		public override Process GetTextPager()
+		{
+			// TODO: instantiate "more" or "less"
+			return null;
+		}
+
 		public Linux()
 		{
 			System.IO.DirectoryInfo di = new System.IO.DirectoryInfo("/etc");

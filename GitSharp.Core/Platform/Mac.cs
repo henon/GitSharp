@@ -91,6 +91,12 @@ namespace GitSharp.Core
 
 			return true;
 		}
+
+		public override Process GetTextPager()
+		{
+			// TODO: instantiate "more" or "less"
+			return null;
+		}
 		
 		public Mac()
 		{

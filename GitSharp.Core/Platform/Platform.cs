@@ -37,89 +37,95 @@
  */
 
 using System;
+using System.Diagnostics;
 
 namespace GitSharp.Core
 {
-    public abstract class Platform
-    {
-        enum GitPlatformID
-        {
-          Win32S = PlatformID.Win32S,
-          Win32Windows = PlatformID.Win32Windows,
-          Win32NT = PlatformID.Win32NT,
-          WinCE = PlatformID.WinCE,
-          Unix = PlatformID.Unix,
-          Xbox,
-          MacOSX,
-        }
+	public abstract class Platform
+	{
+		enum GitPlatformID
+		{
+			Win32S = PlatformID.Win32S,
+			Win32Windows = PlatformID.Win32Windows,
+			Win32NT = PlatformID.Win32NT,
+			WinCE = PlatformID.WinCE,
+			Unix = PlatformID.Unix,
+			Xbox,
+			MacOSX,
+		}
 
-		  public enum PlatformId
-		  {
-			  Windows = 1,
-			  Linux = 2,
-			  Mac = 3
-		  }
-	
-        public static Platform GetCurrentPlatform()
-        {
-           System.OperatingSystem os = Environment.OSVersion;
-           GitPlatformID pid = (GitPlatformID)os.Platform;
-            Platform obj;
-			
-            switch (pid)
-            {
-               case GitPlatformID.Unix:
-                    obj = new Linux();
-                    break;
-               case GitPlatformID.MacOSX:
-                    obj = new Mac();
-                    break;
-               case GitPlatformID.Win32NT:
-               case GitPlatformID.Win32S:
-               case GitPlatformID.Win32Windows:
-               case GitPlatformID.WinCE:
-                    obj = new Win32();
-                    break;
-                default:
-                    throw new NotSupportedException("Platform could not be detected!");
-            }
-		
-            return obj;
-        }
-		
-        public abstract bool IsHardlinkSupported();
+		public enum PlatformId
+		{
+			Windows = 1,
+			Linux = 2,
+			Mac = 3
+		}
+
+		public static Platform GetCurrentPlatform()
+		{
+			System.OperatingSystem os = Environment.OSVersion;
+			GitPlatformID pid = (GitPlatformID)os.Platform;
+			Platform obj;
+
+			switch (pid)
+			{
+				case GitPlatformID.Unix:
+					obj = new Linux();
+					break;
+				case GitPlatformID.MacOSX:
+					obj = new Mac();
+					break;
+				case GitPlatformID.Win32NT:
+				case GitPlatformID.Win32S:
+				case GitPlatformID.Win32Windows:
+				case GitPlatformID.WinCE:
+					obj = new Win32();
+					break;
+				default:
+					throw new NotSupportedException("Platform could not be detected!");
+			}
+
+			return obj;
+		}
+
+		public abstract bool IsHardlinkSupported();
 
 
-		  public abstract bool IsSymlinkSupported();
+		public abstract bool IsSymlinkSupported();
 
-		  public abstract bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory);
+		public abstract bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory);
 
-		  public abstract bool CreateHardlink(string hardlinkFilename, string exisitingFilename);
+		public abstract bool CreateHardlink(string hardlinkFilename, string exisitingFilename);
 
-    	protected Platform()
+
+		public abstract Process GetTextPager();
+
+		protected Platform()
 		{
 		}
 
-    	public string ClassName { get; set; }
+		public string ClassName { get; set; }
 
-    	public PlatformId Id { get; set; }
+		public PlatformId Id { get; set; }
 
-    	public string PlatformType { get; set; }
+		public string PlatformType { get; set; }
 
-    	public string PlatformSubType { get; set; }
+		public string PlatformSubType { get; set; }
 
-    	public string Edition { get; set; }
+		public string Edition { get; set; }
 
-    	public string Version { get; set; }
+		public string Version { get; set; }
 
-    	public string VersionFile { get; set; }
+		public string VersionFile { get; set; }
 
-    	public string ProductName
+		public string ProductName
 		{
 			get
 			{
-				return PlatformType+" "+PlatformSubType + " " + Edition + "(" + Version +")";
+				return PlatformType + " " + PlatformSubType + " " + Edition + "(" + Version + ")";
 			}
 		}
-    }
+
+
+	}
 }

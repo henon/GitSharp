@@ -1,5 +1,6 @@
-﻿/*
+/*
  * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
+ * Copyrigth (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -34,26 +35,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace GitSharp.Platform.Macintosh
+namespace GitSharp.Core
 {
-	public static class Mac
+	public class Mac : Platform
 	{
-		public static bool IsSymlinkSupported()
+		public override bool IsSymlinkSupported()
 		{
 			return true;
 		}
-		
-		public static bool IsHardlinkSupported()
+
+		public override bool IsHardlinkSupported()
 		{
 			return true;
 		}
-		
-		public static bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory)
+
+		public override bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory)
 		{
 			ProcessStartInfo info = new ProcessStartInfo();
 			info.FileName = "ln";
@@ -71,8 +72,8 @@ namespace GitSharp.Platform.Macintosh
 
 			return true;
 		}
-		
-		public static bool CreateHardlink(string hardlinkFilename, string existingFilename)
+
+		public override bool CreateHardlink(string hardlinkFilename, string existingFilename)
 		{
 			ProcessStartInfo info = new ProcessStartInfo();
 			info.FileName = "ln";
@@ -91,7 +92,7 @@ namespace GitSharp.Platform.Macintosh
 			return true;
 		}
 		
-		public static PlatformObject Load()
+		public Mac()
 		{
 			//Version list available at http://fedoraproject.org/wiki/Releases
 			//Unique version variations for parsing include:
@@ -113,16 +114,10 @@ namespace GitSharp.Platform.Macintosh
 					int pt2 = result.IndexOf(" ",pt+1);
 					int pt3 = pt2+1; 
 					
-					PlatformObject obj = new PlatformObject();
-					obj.ClassName = "Macintosh.Macosx";
-					obj.PlatformSubType = "";
-					obj.Version = result.Substring(pt2, pt3).Trim();
-					obj.Edition = result.Substring(0,pt).Trim();
-					
-					//Add project namespace
-					obj.ClassName = "GitSharp.Platform."+obj.ClassName;
-					
-					return obj;
+					ClassName = "Macintosh.Macosx";
+					PlatformSubType = "";
+					Version = result.Substring(pt2, pt3).Trim();
+					Edition = result.Substring(0,pt).Trim();
 				}
 			}
 		}

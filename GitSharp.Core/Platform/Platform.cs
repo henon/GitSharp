@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
+ * Copyrigth (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -36,11 +37,10 @@
  */
 
 using System;
-using GitSharp.Platform;
 
-namespace GitSharp.Core.Platform
+namespace GitSharp.Core
 {
-    public static class Platform1
+    public abstract class Platform
     {
         enum GitPlatformID
         {
@@ -52,141 +52,74 @@ namespace GitSharp.Core.Platform
           Xbox,
           MacOSX,
         }
-        
+
+		  public enum PlatformId
+		  {
+			  Windows = 1,
+			  Linux = 2,
+			  Mac = 3
+		  }
 	
-        public static PlatformObject Load()
+        public static Platform GetCurrentPlatform()
         {
            System.OperatingSystem os = Environment.OSVersion;
            GitPlatformID pid = (GitPlatformID)os.Platform;
-            PlatformObject obj;
+            Platform obj;
 			
             switch (pid)
             {
                case GitPlatformID.Unix:
-                    obj = GitSharp.Platform.OSS.Linux.Load();
+                    obj = new Linux();
                     break;
                case GitPlatformID.MacOSX:
-                    obj = GitSharp.Platform.Macintosh.Mac.Load();
+                    obj = new Mac();
                     break;
                case GitPlatformID.Win32NT:
                case GitPlatformID.Win32S:
                case GitPlatformID.Win32Windows:
                case GitPlatformID.WinCE:
-                    obj = GitSharp.Platform.Windows.Win32.Load();
+                    obj = new Win32();
                     break;
                 default:
-                    throw new NotImplementedException();
+                    throw new NotSupportedException("Platform could not be detected!");
             }
 		
             return obj;
         }
 		
-        public static bool IsHardlinkSupported()
-        {
-            System.OperatingSystem os = Environment.OSVersion;
-            GitPlatformID pid = (GitPlatformID)os.Platform;
-            bool isSupported = false;
-			
-            switch (pid)
-            {
-               case GitPlatformID.Unix:
-                    isSupported = GitSharp.Platform.OSS.Linux.IsHardlinkSupported();
-                    break;
-               case GitPlatformID.MacOSX:
-                    isSupported = GitSharp.Platform.Macintosh.Mac.IsHardlinkSupported();
-                    break;
-                case GitPlatformID.Win32NT:
-                case GitPlatformID.Win32S:
-                case GitPlatformID.Win32Windows:
-                case GitPlatformID.WinCE:
-                    isSupported = GitSharp.Platform.Windows.Win32.IsHardlinkSupported();
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-		
-            return isSupported;
-        }
-	
-        public static bool IsSymlinkSupported()
-        {
-            System.OperatingSystem os = Environment.OSVersion;
-            GitPlatformID pid = (GitPlatformID)os.Platform;
-            bool isSupported = false;
-		
-            switch (pid)
-            {
-               case GitPlatformID.Unix:
-                    isSupported = GitSharp.Platform.OSS.Linux.IsSymlinkSupported();
-                    break;
-               case GitPlatformID.MacOSX:
-                    isSupported = GitSharp.Platform.Macintosh.Mac.IsSymlinkSupported();
-                    break;
-               case GitPlatformID.Win32NT:
-               case GitPlatformID.Win32S:
-               case GitPlatformID.Win32Windows:
-               case GitPlatformID.WinCE:
-                    isSupported = GitSharp.Platform.Windows.Win32.IsSymlinkSupported();
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-		
-            return isSupported;
-        }
-	
-        public static bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory)
-        {
-            System.OperatingSystem os = Environment.OSVersion;
-            GitPlatformID pid = (GitPlatformID)os.Platform;
-            bool success = false;
-			
-            switch (pid)
-            {
-               case GitPlatformID.Unix:
-                    success = GitSharp.Platform.OSS.Linux.CreateSymlink(symlinkFilename, existingFilename, isSymlinkDirectory);
-                    break;
-               case GitPlatformID.MacOSX:
-                    success = GitSharp.Platform.Macintosh.Mac.CreateSymlink(symlinkFilename, existingFilename, isSymlinkDirectory);
-                    break;
-               case GitPlatformID.Win32NT:
-               case GitPlatformID.Win32S:
-               case GitPlatformID.Win32Windows:
-               case GitPlatformID.WinCE:
-                    success = GitSharp.Platform.Windows.Win32.CreateSymlink(symlinkFilename, existingFilename, isSymlinkDirectory);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-		
-            return success;
-        }
-	
-        public static bool CreateHardlink(string hardlinkFilename, string exisitingFilename)
-        {
-            System.OperatingSystem os = Environment.OSVersion;
-            GitPlatformID pid = (GitPlatformID)os.Platform;
-            bool success = false;
-		
-            switch (pid)
-            {
-               case GitPlatformID.Unix:
-                    success = GitSharp.Platform.OSS.Linux.CreateHardlink(hardlinkFilename, exisitingFilename);
-                    break;
-               case GitPlatformID.MacOSX:
-                    success = GitSharp.Platform.Macintosh.Mac.CreateHardlink(hardlinkFilename, exisitingFilename);
-                    break;
-               case GitPlatformID.Win32NT:
-               case GitPlatformID.Win32S:
-               case GitPlatformID.Win32Windows:
-               case GitPlatformID.WinCE:
-                    success = GitSharp.Platform.Windows.Win32.CreateHardlink(hardlinkFilename, exisitingFilename);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-		
-            return success;
-        }
+        public abstract bool IsHardlinkSupported();
+
+
+		  public abstract bool IsSymlinkSupported();
+
+		  public abstract bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory);
+
+		  public abstract bool CreateHardlink(string hardlinkFilename, string exisitingFilename);
+
+    	protected Platform()
+		{
+		}
+
+    	public string ClassName { get; set; }
+
+    	public PlatformId Id { get; set; }
+
+    	public string PlatformType { get; set; }
+
+    	public string PlatformSubType { get; set; }
+
+    	public string Edition { get; set; }
+
+    	public string Version { get; set; }
+
+    	public string VersionFile { get; set; }
+
+    	public string ProductName
+		{
+			get
+			{
+				return PlatformType+" "+PlatformSubType + " " + Edition + "(" + Version +")";
+			}
+		}
     }
 }

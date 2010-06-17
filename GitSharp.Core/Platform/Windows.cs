@@ -1,5 +1,6 @@
-﻿/*
+/*
  * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
+ * Copyrigth (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -43,10 +44,10 @@ using System.IO;
 using GitSharp.Core;
 using System.Runtime.InteropServices;
 
-namespace GitSharp.Platform.Windows
+namespace GitSharp.Core
 {
 
-	public static class Win32
+	public class Win32 : Platform
 	{
 		
 		[DllImport("kernel32.dll")]
@@ -76,7 +77,7 @@ namespace GitSharp.Platform.Windows
 		[DllImport("kernel32.dll", EntryPoint="CreateHardLinkW", CharSet=CharSet.Unicode)]
 		private static extern int CreateHardLink([In] string lpHardlinkFileName, [In] string lpExistingFileName, SecurityAttributes attribs);
 		
-		public static bool IsSymlinkSupported()
+		public override bool  IsSymlinkSupported()
 		{
 			System.OperatingSystem os = Environment.OSVersion;
 			if (os.Version.Major >= 6)
@@ -85,7 +86,7 @@ namespace GitSharp.Platform.Windows
 				return false;
 		}
 		
-		public static bool IsHardlinkSupported()
+		public override bool IsHardlinkSupported()
 		{
 			System.OperatingSystem os = Environment.OSVersion;
 			if (os.Version.Major >= 6)
@@ -94,7 +95,7 @@ namespace GitSharp.Platform.Windows
 				return false;
 		}
 		
-		public static bool CreateSymlink(string symlinkFilename, string exisitingFilename, bool isSymlinkDirectory)
+		public override bool CreateSymlink(string symlinkFilename, string exisitingFilename, bool isSymlinkDirectory)
 		{
 			if (IsSymlinkSupported())
 			{
@@ -112,7 +113,7 @@ namespace GitSharp.Platform.Windows
 			return false;
 		}
 		
-		public static bool CreateHardlink(string hardlinkFilename, string exisitingFilename)
+		public override bool CreateHardlink(string hardlinkFilename, string exisitingFilename)
 		{
 			if (IsHardlinkSupported())
 			{
@@ -125,7 +126,7 @@ namespace GitSharp.Platform.Windows
 			return false;
 		}
 		
-		public static PlatformObject Load()
+		public Win32()
 		{
 			Win32VersionInfo osvi = new Win32VersionInfo();
 			osvi.dwOSVersionInfoSize = Marshal.SizeOf(osvi);
@@ -133,12 +134,11 @@ namespace GitSharp.Platform.Windows
 			
 			Win32SystemInfo sysInfo = new Win32SystemInfo();
 			GetSystemInfo(ref sysInfo);
-			PlatformObject obj = new PlatformObject();
-			obj.ClassName = null;
-			obj.PlatformType = "Windows";
+			ClassName = null;
+			PlatformType = "Windows";
 			
 			System.OperatingSystem os = Environment.OSVersion;
-			obj.Version = os.Version.Major + "."+os.Version.Minor;
+			Version = os.Version.Major + "."+os.Version.Minor;
 			switch (os.Platform)
 			{
 				case PlatformID.Win32Windows:
@@ -151,35 +151,35 @@ namespace GitSharp.Platform.Windows
 									if (osvi.szCSDVersion == "B" ||
 									    osvi.szCSDVersion == "C")
 									{
-										obj.ClassName = "Windows.v95";
-										obj.PlatformSubType = "95";
-										obj.Edition = "OSR2";
+										ClassName = "Windows.v95";
+										PlatformSubType = "95";
+										Edition = "OSR2";
 									}
 									else
 									{
-										obj.ClassName = "Windows.v95";
-										obj.PlatformSubType = "95";
-										obj.Edition = "";
+										ClassName = "Windows.v95";
+										PlatformSubType = "95";
+										Edition = "";
 									}
 									break;
 								case 10:
 									if (osvi.szCSDVersion == "A")
 									{
-										obj.ClassName = "Windows.v98";
-										obj.PlatformSubType = "98";
-										obj.Edition = "SE";
+										ClassName = "Windows.v98";
+										PlatformSubType = "98";
+										Edition = "SE";
 									}
 									else
 									{
-										obj.ClassName = "Windows.v98";
-										obj.PlatformSubType = "98";
-										obj.Edition = "";
+										ClassName = "Windows.v98";
+										PlatformSubType = "98";
+										Edition = "";
 									}
 									break;
 								case 90:
-									obj.ClassName = "Windows.ME";
-									obj.PlatformSubType = "ME";
-									obj.Edition = "";
+									ClassName = "Windows.ME";
+									PlatformSubType = "ME";
+									Edition = "";
 									break;
 							}
 							break;
@@ -190,30 +190,30 @@ namespace GitSharp.Platform.Windows
 					switch (os.Version.Major)
 					{
 						case 3:
-							obj.ClassName = "Windows.NT";
-							obj.PlatformSubType = "NT";
-							obj.Edition = "3.51";
+							ClassName = "Windows.NT";
+							PlatformSubType = "NT";
+							Edition = "3.51";
 							break;
 						case 4:
 							switch (osvi.wProductType)
 							{
 								case 1:
-									obj.ClassName = "Windows.NT";
-									obj.PlatformSubType = "NT";
-									obj.Edition = "4.0 Workstation";
+									ClassName = "Windows.NT";
+									PlatformSubType = "NT";
+									Edition = "4.0 Workstation";
 									break;
 								case 3:
 									if (osvi.wSuiteMask == SuiteVersion.Enterprise)
 									{
-										obj.ClassName = "Windows.NT";
-										obj.PlatformSubType = "NT";
-										obj.Edition = "4.0 Server Enterprise";
+										ClassName = "Windows.NT";
+										PlatformSubType = "NT";
+										Edition = "4.0 Server Enterprise";
 									}
 									else
 									{
-										obj.ClassName = "Windows.NT";
-										obj.PlatformSubType = "NT";
-										obj.Edition = "4.0 Server Standard";
+										ClassName = "Windows.NT";
+										PlatformSubType = "NT";
+										Edition = "4.0 Server Standard";
 									}
 									break;
 							}
@@ -225,82 +225,82 @@ namespace GitSharp.Platform.Windows
 									switch (osvi.wSuiteMask)
 									{
 										case SuiteVersion.DataCenter:
-											obj.ClassName = "Windows.v2000";
-											obj.PlatformSubType = "2000";
-											obj.Edition = "Data Center";
+											ClassName = "Windows.v2000";
+											PlatformSubType = "2000";
+											Edition = "Data Center";
 											break;
 										case SuiteVersion.Enterprise:
-											obj.ClassName = "Windows.v2000";
-											obj.PlatformSubType = "2000";
-											obj.Edition = "Advanced";
+											ClassName = "Windows.v2000";
+											PlatformSubType = "2000";
+											Edition = "Advanced";
 											break;
 										default:
-											obj.ClassName = "Windows.v2000";
-											obj.PlatformSubType = "2000";
-											obj.Edition = "Standard";
+											ClassName = "Windows.v2000";
+											PlatformSubType = "2000";
+											Edition = "Standard";
 											break;
 									}
 									break;
 								case 1:
 									if (osvi.wSuiteMask == SuiteVersion.Personal)
 									{
-										obj.ClassName = "Windows.XP";
-										obj.PlatformSubType = "XP";
-										obj.Edition = "Professional";
+										ClassName = "Windows.XP";
+										PlatformSubType = "XP";
+										Edition = "Professional";
 									}
 									else
 									{
-										obj.ClassName = "Windows.XP";
-										obj.PlatformSubType = "XP";
-										obj.Edition = "Home";
+										ClassName = "Windows.XP";
+										PlatformSubType = "XP";
+										Edition = "Home";
 									}
 									break;
 								case 2:
 									if ((osvi.wProductType == NTVersion.Workstation) &&
 									    (sysInfo.processorArchitecture == ProcessorArchitecture.AMD64))
 									{
-										obj.ClassName = "Windows.XP";
-										obj.PlatformSubType = "XP";
-										obj.Edition = "Professional x64";
+										ClassName = "Windows.XP";
+										PlatformSubType = "XP";
+										Edition = "Professional x64";
 									}
 									else if ((osvi.wProductType == NTVersion.Server) &&
 									         (GetSystemMetrics(SystemMetrics.ServerR2) == 0) &&
 									         (osvi.wSuiteMask == SuiteVersion.Enterprise))
 									{
-										obj.ClassName = "Windows.v2003";
-										obj.PlatformSubType = "Server";
-										obj.Edition = "2003 Enterprise";
+										ClassName = "Windows.v2003";
+										PlatformSubType = "Server";
+										Edition = "2003 Enterprise";
 									}
 									else if ((osvi.wProductType == NTVersion.Server) &&
 									         GetSystemMetrics(SystemMetrics.ServerR2) != 0)
 									{
-										obj.ClassName = "Windows.v2003";
-										obj.PlatformSubType = "Server";
-										obj.Edition = "2003 R2";
+										ClassName = "Windows.v2003";
+										PlatformSubType = "Server";
+										Edition = "2003 R2";
 									}
 									else
 									{
 										switch (osvi.wSuiteMask)
 										{
 											case SuiteVersion.DataCenter:
-												obj.ClassName = "Windows.v2003";
-												obj.PlatformSubType = "Server";
-												obj.Edition = "2003 Data Center";
+												ClassName = "Windows.v2003";
+												PlatformSubType = "Server";
+												Edition = "2003 Data Center";
 												break;
 											case SuiteVersion.Blade:
-												obj.ClassName = "Windows.v2003";
-												obj.PlatformSubType = "Server";
-												obj.Edition = "2003 Web Edition";
+												ClassName = "Windows.v2003";
+												PlatformSubType = "Server";
+												Edition = "2003 Web Edition";
 												break;
 											case SuiteVersion.WHServer:
-												obj.ClassName = "Windows.v2003";
-												obj.PlatformSubType = "2003";
-												obj.Edition = "Home Server";
+												ClassName = "Windows.v2003";
+												PlatformSubType = "2003";
+												Edition = "Home Server";
 												break;
 											default:
-												obj.ClassName = "Windows.v2003";
-												obj.PlatformSubType = "Server";
-												obj.Edition = "2003 Standard";
+												ClassName = "Windows.v2003";
+												PlatformSubType = "Server";
+												Edition = "2003 Standard";
 												break;
 										}
 									}
@@ -316,7 +316,7 @@ namespace GitSharp.Platform.Windows
 							ospi.dwSpMinorVersion = 0;
 							
 							GetProductInfo(ospi);
-							obj.Version = obj.Version+"."+ospi.dwOSEdition;
+							Version = Version+"."+ospi.dwOSEdition;
 							switch (os.Version.Minor)
 							{
 								case 0:
@@ -326,74 +326,74 @@ namespace GitSharp.Platform.Windows
 										switch (ospi.dwOSEdition)
 										{
 											case ProductType.Undefined:
-												obj.ClassName = "Windows.Undefined";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "is not defined!";
+												ClassName = "Windows.Undefined";
+												PlatformSubType = "Vista";
+												Edition = "is not defined!";
 												break;
 											case ProductType.Ultimate: //    1
-												obj.ClassName = "Windows.Vista";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Ultimate Edition";
+												ClassName = "Windows.Vista";
+												PlatformSubType = "Vista";
+												Edition = "Ultimate Edition";
 												break;
 											case ProductType.HomeBasic: // 2
-												obj.ClassName = "Windows.Vista";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Home Basic Edition";
+												ClassName = "Windows.Vista";
+												PlatformSubType = "Vista";
+												Edition = "Home Basic Edition";
 												break;
 											case ProductType.HomePremium: // 3
-												obj.ClassName = "Windows.Vista";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Home Premium Edition";
+												ClassName = "Windows.Vista";
+												PlatformSubType = "Vista";
+												Edition = "Home Premium Edition";
 												break;
 											case ProductType.Enterprise: // 4
-												obj.ClassName = "Windows.Vista";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Enterprise Edition";
+												ClassName = "Windows.Vista";
+												PlatformSubType = "Vista";
+												Edition = "Enterprise Edition";
 												break;
 											case ProductType.HomeBasicN: // 5
-												obj.ClassName = "Windows.Vista";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Home Basic N Edition (EU Only)";
+												ClassName = "Windows.Vista";
+												PlatformSubType = "Vista";
+												Edition = "Home Basic N Edition (EU Only)";
 												break;
 											case ProductType.Business: // 6
-												obj.ClassName = "Windows.Vista";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Business Edition";
+												ClassName = "Windows.Vista";
+												PlatformSubType = "Vista";
+												Edition = "Business Edition";
 												break;
 											case ProductType.Starter:// B
-												obj.ClassName = "Windows.Vista";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Starter Edition";
+												ClassName = "Windows.Vista";
+												PlatformSubType = "Vista";
+												Edition = "Starter Edition";
 												break;
 											case ProductType.BusinessN: // 10
-												obj.ClassName = "Windows.Vista";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Business N Edition (EU Only)";
+												ClassName = "Windows.Vista";
+												PlatformSubType = "Vista";
+												Edition = "Business N Edition (EU Only)";
 												break;
 											case ProductType.HomePremiumN: // 1A
-												obj.ClassName = "Windows.Vista";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Home Premium N Edition (EU Only)";
+												ClassName = "Windows.Vista";
+												PlatformSubType = "Vista";
+												Edition = "Home Premium N Edition (EU Only)";
 												break;
 											case ProductType.EnterpriseN: // 1B
-												obj.ClassName = "Windows.Vista";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Enterprise N Edition (EU Only)";
+												ClassName = "Windows.Vista";
+												PlatformSubType = "Vista";
+												Edition = "Enterprise N Edition (EU Only)";
 												break;
 											case ProductType.UltimateN: // 1C
-												obj.ClassName = "Windows.Vista";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Ultimate N Edition (EU Only)";
+												ClassName = "Windows.Vista";
+												PlatformSubType = "Vista";
+												Edition = "Ultimate N Edition (EU Only)";
 												break;
 											case ProductType.Unlicensed: // 0xABCDABCD
-												obj.ClassName = "Windows.Unlicensed";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "Unlicensed";
+												ClassName = "Windows.Unlicensed";
+												PlatformSubType = "Vista";
+												Edition = "Unlicensed";
 												break;
 											default:
-												obj.ClassName = "Windows.Unknown";
-												obj.PlatformSubType = "Vista";
-												obj.Edition = "is not defined!";
+												ClassName = "Windows.Unknown";
+												PlatformSubType = "Vista";
+												Edition = "is not defined!";
 												break;
 										}
 									}
@@ -404,194 +404,194 @@ namespace GitSharp.Platform.Windows
 												//Windows 2008 Detection
 												
 											case ProductType.Undefined:
-												obj.ClassName = "Windows.Undefined";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "is not defined!";
+												ClassName = "Windows.Undefined";
+												PlatformSubType = "2008";
+												Edition = "is not defined!";
 												break;
 											case ProductType.StandardServer: // 7
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Standard Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Standard Server";
 												break;
 											case ProductType.DataCenterServer://8
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Data Center Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Data Center Server";
 												break;
 											case ProductType.SmallBusinessServer://9
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Small Business Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Small Business Server";
 												break;
 											case ProductType.EnterpriseServer:// A
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Enterprise Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Enterprise Server";
 												break;
 											case ProductType.DataCenterServerCore: // C
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Data Center Server Core";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Data Center Server Core";
 												break;
 											case ProductType.StandardServerCore: // D
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Standard Server Core";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Standard Server Core";
 												break;
 											case ProductType.EnterpriseServerCore: // E
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Enterprise Server Core";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Enterprise Server Core";
 												break;
 											case ProductType.EnterpriseServerIA64: // F
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Enterprise Server IA64";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Enterprise Server IA64";
 												break;
 											case ProductType.WebServer: // 11
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Web Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Web Server";
 												break;
 											case ProductType.ClusterServer: // 12
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Cluster Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Cluster Server";
 												break;
 											case ProductType.HomeServer: // 13
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Home Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Home Server";
 												break;
 											case ProductType.StorageExpressServer: // 14
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Storage Express Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Storage Express Server";
 												break;
 											case ProductType.StorageStandardServer: // 15
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Storage Standard Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Storage Standard Server";
 												break;
 											case ProductType.StorageWorkgroupServer: // 16
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Storage Workgroup Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Storage Workgroup Server";
 												break;
 											case ProductType.StorageEnterpriseServer: // 17
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Storage Enterprise Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Storage Enterprise Server";
 												break;
 											case ProductType.ServerForSmallBusiness: // 18
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Server for Small Businesses";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Server for Small Businesses";
 												break;
 											case ProductType.SmallBusinessServerPremium: // 19
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Small Business Server Premium";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Small Business Server Premium";
 												break;
 											case ProductType.WebServerCore: // 1D
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Web Server Core";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Web Server Core";
 												break;
 											case ProductType.MediumBusinessServerManagement: // 1E
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Medium Business Server Management";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Medium Business Server Management";
 												break;
 											case ProductType.MediumBusinessServerSecurity: // 1F
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Medium Business Server Security";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Medium Business Server Security";
 												break;
 											case ProductType.MediumBusinessServerMessaging: // 20
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Medium Business Server Messaging";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Medium Business Server Messaging";
 												break;
 											case ProductType.SmallBusinessServerPrime: // 21
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Small Business Server Prime";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Small Business Server Prime";
 												break;
 											case ProductType.HomePremiumServer: // 22
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Home Premium Server";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Home Premium Server";
 												break;
 											case ProductType.ServerForSmallBusinessV: // 23
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Server for Small Business (Hyper-V)";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Server for Small Business (Hyper-V)";
 												break;
 											case ProductType.StandardServerV: // 24
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Standard Server (Hyper-V)";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Standard Server (Hyper-V)";
 												break;
 											case ProductType.DataCenterServerV: // 25
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Data Center Server (Hyper-V)";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Data Center Server (Hyper-V)";
 												break;
 											case ProductType.EnterpriseServerV: // 26
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Enterprise Server (Hyper-V)";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Enterprise Server (Hyper-V)";
 												break;
 											case ProductType.DataCenterServerCoreV: // 27
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Data Center Server Core (Hyper-V)";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Data Center Server Core (Hyper-V)";
 												break;
 											case ProductType.StandardServerCoreV: // 28
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Standard Server Core (Hyper-V)";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Standard Server Core (Hyper-V)";
 												break;
 											case ProductType.EnterpriseServerCoreV: // 29
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Enterprise Server Core (Hyper-V)";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Enterprise Server Core (Hyper-V)";
 												break;
 											case ProductType.HyperV: // 2A
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "(Hyper-V)";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "(Hyper-V)";
 												break;
 											case ProductType.StorageExpressServerCore: // 2B
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Storage Express Server Core";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Storage Express Server Core";
 												break;
 											case ProductType.StorageStandardServerCore: // 2C
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Storage Standard Server Core";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Storage Standard Server Core";
 												break;
 											case ProductType.StorageWorkgroupServerCore: // 2D
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Storage Workgroup Server Core";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Storage Workgroup Server Core";
 												break;
 											case ProductType.StorageEnterpriseServerCore: // 2E
-												obj.ClassName = "Windows.v2008";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Storage Enterprise Server Core";
+												ClassName = "Windows.v2008";
+												PlatformSubType = "2008";
+												Edition = "Storage Enterprise Server Core";
 												break;
 											case ProductType.Unlicensed: // 0xABCDABCD
-												obj.ClassName = "Windows.Unlicensed";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "Unlicensed";
+												ClassName = "Windows.Unlicensed";
+												PlatformSubType = "2008";
+												Edition = "Unlicensed";
 												break;
 											default:
-												obj.ClassName = "Windows.Unknown";
-												obj.PlatformSubType = "2008";
-												obj.Edition = "is unknown!";
+												ClassName = "Windows.Unknown";
+												PlatformSubType = "2008";
+												Edition = "is unknown!";
 												break;
 										}
 									}
@@ -600,44 +600,44 @@ namespace GitSharp.Platform.Windows
 									switch (ospi.dwOSEdition)
 									{
 										case ProductType.Undefined:
-											obj.ClassName = "Windows.Undefined";
-											obj.PlatformSubType = "7";
-											obj.Edition = "is undefined";
+											ClassName = "Windows.Undefined";
+											PlatformSubType = "7";
+											Edition = "is undefined";
 											break;
 										case ProductType.Ultimate: //    1
-											obj.ClassName = "Windows.v7";
-											obj.PlatformSubType = "7";
-											obj.Edition = "Ultimate Edition";
+											ClassName = "Windows.v7";
+											PlatformSubType = "7";
+											Edition = "Ultimate Edition";
 											break;
 										case ProductType.HomeBasic: // 2
-											obj.ClassName = "Windows.v7";
-											obj.PlatformSubType = "7";
-											obj.Edition = "Home Basic Edition";
+											ClassName = "Windows.v7";
+											PlatformSubType = "7";
+											Edition = "Home Basic Edition";
 											break;
 										case ProductType.HomePremium: // 3
-											obj.ClassName = "Windows.v7";
-											obj.PlatformSubType = "7";
-											obj.Edition = "Home Premium Edition";
+											ClassName = "Windows.v7";
+											PlatformSubType = "7";
+											Edition = "Home Premium Edition";
 											break;
 										case ProductType.Enterprise: // 4
-											obj.ClassName = "Windows.v7";
-											obj.PlatformSubType = "7";
-											obj.Edition = "Enterprise Edition";
+											ClassName = "Windows.v7";
+											PlatformSubType = "7";
+											Edition = "Enterprise Edition";
 											break;
 										case ProductType.HomeBasicN: // 5
-											obj.ClassName = "Windows.v7";
-											obj.PlatformSubType = "7";
-											obj.Edition = "Home Basic N Edition (EU only)";
+											ClassName = "Windows.v7";
+											PlatformSubType = "7";
+											Edition = "Home Basic N Edition (EU only)";
 											break;
 										case ProductType.Business: // 6
-											obj.ClassName = "Windows.v7";
-											obj.PlatformSubType = "7";
-											obj.Edition = "Business Edition";
+											ClassName = "Windows.v7";
+											PlatformSubType = "7";
+											Edition = "Business Edition";
 											break;
 										case ProductType.BusinessN: // 10
-											obj.ClassName = "Windows.v7";
-											obj.PlatformSubType = "7";
-											obj.Edition = "Business N Edition (EU only)";
+											ClassName = "Windows.v7";
+											PlatformSubType = "7";
+											Edition = "Business N Edition (EU only)";
 											break;
 									}
 									break;
@@ -647,13 +647,8 @@ namespace GitSharp.Platform.Windows
 					break;
 			} // End os.Platform
 			
-			if (obj.ClassName == null)
+			if (ClassName == null)
 				throw new ArgumentNullException("ClassName was not defined. Please report this bug.");
-			
-			//Add project namespace
-			obj.ClassName = "GitSharp.Platform."+obj.ClassName;
-			
-			return obj;
 		}
 	}
 

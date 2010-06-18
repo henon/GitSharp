@@ -136,20 +136,17 @@ namespace GitSharp.Core
 		public override Process GetTextPager(string corePagerConfig)
 		{
 			var pager = new Process();
-			var corePager = System.Environment.GetEnvironmentVariable("GIT_PAGER");
-			if (corePager == null)
-				corePager = corePagerConfig;
-			if (corePager != null)
-			{
-				//TODO: need to support separating out the arguments
-				pager.StartInfo.FileName = corePager;
-			}
-			else
-			{
-				pager.StartInfo.FileName = System.IO.Path.Combine(System.Environment.SystemDirectory,"more.com");
-			}
-			pager.StartInfo.UseShellExecute = false;
-			pager.StartInfo.RedirectStandardInput = true;
+			var pagerVar = System.Environment.GetEnvironmentVariable("GIT_PAGER");
+			if (pagerVar == null)
+				pagerVar = corePagerConfig;
+			if (pagerVar == null)
+                pagerVar = System.IO.Path.Combine(System.Environment.SystemDirectory,"more.com");
+            var tokens = pagerVar.Split();
+            pager.StartInfo.FileName = tokens[0];
+            pager.StartInfo.UseShellExecute = false;
+            pager.StartInfo.RedirectStandardInput = true;
+            if (tokens.Length > 1)
+                pager.StartInfo.Arguments = pagerVar.Substring(tokens[0].Length);
 			return pager;
 		}
 

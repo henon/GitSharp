@@ -104,12 +104,14 @@ namespace GitSharp.Core
             var pagerVar = System.Environment.GetEnvironmentVariable ("GIT_PAGER");
             if (pagerVar == null)
                 pagerVar = corePagerConfig;
-            if (pagerVar == null)
+            if ((pagerVar == null) || (pagerVar.Length == 0))
                 pagerVar = "less";
-            //TODO: need to support separating out the arguments
-            pager.StartInfo.FileName = pagerVar;
+            var tokens = pagerVar.Split();
+            pager.StartInfo.FileName = tokens[0];
             pager.StartInfo.UseShellExecute = false;
             pager.StartInfo.RedirectStandardInput = true;
+            if (tokens.Length > 1)
+                pager.StartInfo.Arguments = pagerVar.Substring(tokens[0].Length);
 
             // Apply LESS environment behavior
             var lessVar = System.Environment.GetEnvironmentVariable ("LESS");

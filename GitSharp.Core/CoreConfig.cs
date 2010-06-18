@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  *
@@ -56,6 +56,7 @@ namespace GitSharp.Core
         private readonly int packIndexVersion;
         private readonly bool logAllRefUpdates;
         private readonly string excludesFile;
+        private readonly string pager;
 
         private CoreConfig(Config rc)
         {
@@ -63,6 +64,7 @@ namespace GitSharp.Core
             packIndexVersion = rc.getInt("pack", "indexversion", 2);
             logAllRefUpdates = rc.getBoolean("core", "logallrefupdates", true);
             excludesFile = rc.getString("core", null, "excludesfile");
+            pager = rc.getString("core", null, "pager");
         }
 
         public string getExcludesFile()
@@ -86,6 +88,11 @@ namespace GitSharp.Core
         public bool isLogAllRefUpdates()
         {
             return logAllRefUpdates;
+        }
+
+        public string Pager
+        {
+            get { return pager; }
         }
     }
 }

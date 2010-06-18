@@ -176,18 +176,6 @@ namespace GitSharp.CLI
 		{
 			try
 			{
-
-#if ported
-			String outputEncoding = repo != null ? repo.Config.getString("i18n", null, "logOutputEncoding") : null;
-
-			if (outputEncoding != null)
-            {
-                streamOut = new StreamWriter(Console.OpenStandardOutput(), outputEncoding);
-                Console.SetOut(streamOut);
-            }
-			else
-            {
-#endif
 				//Initialize the output stream for all console-based messages.
 				Git.DefaultOutputStream = new StreamWriter(Console.OpenStandardOutput());
 				Console.SetOut(Git.DefaultOutputStream);
@@ -207,7 +195,6 @@ namespace GitSharp.CLI
 			{
 				GitRepository = null;
 				GitDirectory = path;
-
 			}
 		}
 
@@ -218,7 +205,7 @@ namespace GitSharp.CLI
 		{
 			try
 			{
-				_pager = Platform.Instance.GetTextPager();
+				_pager = Platform.Instance.GetTextPager(GitRepository.Config);
 				if (_pager == null)
 					return;
 				_pager.Start();
@@ -374,6 +361,5 @@ namespace GitSharp.CLI
 		}
 
 		public string GitDirectory { get; set; }
-
 	}
 }

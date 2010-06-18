@@ -133,10 +133,21 @@ namespace GitSharp.Core
 			return false;
 		}
 
-		public override Process GetTextPager()
+		public override Process GetTextPager(RepositoryConfig config)
 		{
 			var pager = new Process();
-			pager.StartInfo.FileName = @"C:\Windows\System32\more.com";
+			var corePager = System.Environment.GetEnvironmentVariable("GIT_PAGER");
+			if (corePager == null)
+				corePager = config.getCore().Pager;
+			if (corePager != null)
+			{
+				//TODO: need to support separating out the arguments
+				pager.StartInfo.FileName = corePager;
+			}
+			else
+			{
+				pager.StartInfo.FileName = System.IO.Path.Combine(System.Environment.SystemDirectory,"more.com");
+			}
 			pager.StartInfo.UseShellExecute = false;
 			pager.StartInfo.RedirectStandardInput = true;
 			return pager;

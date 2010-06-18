@@ -78,27 +78,33 @@ namespace GitSharp.Core
 		[DllImport("kernel32.dll", EntryPoint="CreateHardLinkW", CharSet=CharSet.Unicode)]
 		private static extern int CreateHardLink([In] string lpHardlinkFileName, [In] string lpExistingFileName, SecurityAttributes attribs);
 		
-		public override bool  IsSymlinkSupported()
+		public override bool IsSymlinkSupported
 		{
-			System.OperatingSystem os = Environment.OSVersion;
-			if (os.Version.Major >= 6)
-				return true;
-			else 
-				return false;
+			get
+			{
+				System.OperatingSystem os = Environment.OSVersion;
+				if (os.Version.Major >= 6)
+					return true;
+				else 
+					return false;
+			}
 		}
 		
-		public override bool IsHardlinkSupported()
+		public override bool IsHardlinkSupported
 		{
-			System.OperatingSystem os = Environment.OSVersion;
-			if (os.Version.Major >= 6)
-				return true;
-			else 
-				return false;
+			get
+			{
+				System.OperatingSystem os = Environment.OSVersion;
+				if (os.Version.Major >= 6)
+					return true;
+				else 
+					return false;
+			}
 		}
 		
 		public override bool CreateSymlink(string symlinkFilename, string exisitingFilename, bool isSymlinkDirectory)
 		{
-			if (IsSymlinkSupported())
+			if (IsSymlinkSupported)
 			{
 				int success;
 				
@@ -116,7 +122,7 @@ namespace GitSharp.Core
 		
 		public override bool CreateHardlink(string hardlinkFilename, string exisitingFilename)
 		{
-			if (IsHardlinkSupported())
+			if (IsHardlinkSupported)
 			{
 				SecurityAttributes attribs = null;
 				int success = CreateHardLink(hardlinkFilename, exisitingFilename, attribs);
@@ -781,6 +787,7 @@ namespace GitSharp.Core
     	public uint dwOSEdition;
 	}
 	
+#pragma warning disable 169
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct Win32SystemInfo
 	{
@@ -796,6 +803,7 @@ namespace GitSharp.Core
     	public ushort processorLevel;
     	public ushort processorRevision;
     }
+#pragma warning restore 169
 	
 	[StructLayout(LayoutKind.Sequential)]
 	internal class Win32VersionInfo

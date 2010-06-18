@@ -48,14 +48,14 @@ namespace GitSharp.Core
 	public class Linux : Platform
 	{
 		
-		public override bool IsSymlinkSupported()
+		public override bool IsSymlinkSupported
 		{
-			return true;
+			get { return true; }
 		}
 
-		public override bool IsHardlinkSupported()
+		public override bool IsHardlinkSupported
 		{
-			return true;
+			get { return true; }
 		}
 
 		public override bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory)
@@ -171,7 +171,7 @@ namespace GitSharp.Core
 			
 		}
 		
-		public static void GetArchPlatform(Platform obj, string unitTestContent)
+		public static void GetArchPlatform(Linux obj, string unitTestContent)
 		{
 			// Arch is not versioned. It is a single rolling version.
 			// The existance of the arch-release file determines arch
@@ -182,7 +182,7 @@ namespace GitSharp.Core
 			obj.Version = "Current";
 		}
 		
-		public static void GetDefaultLinuxPlatform(Platform obj, string unitTestContent)
+		public static void GetDefaultLinuxPlatform(Linux obj, string unitTestContent)
 		{
 			obj.ClassName = "Linux.Default";
 			obj.PlatformSubType = "Generic";
@@ -190,7 +190,7 @@ namespace GitSharp.Core
 			obj.Version = "";
 		}
 		
-		public static void GetDebianPlatform(Platform obj, string unitTestContent)
+		public static void GetDebianPlatform(Linux obj, string unitTestContent)
 		{
 			//Version list available at: http://www.debian.org/releases/
 			//There is no accurate way to determine the version information
@@ -208,7 +208,7 @@ namespace GitSharp.Core
 			obj.Version = "";
 		}
 		
-		public static void GetFedoraPlatform(Platform obj, string unitTestContent)
+		public static void GetFedoraPlatform(Linux obj, string unitTestContent)
 		{
 			//Version list available at http://fedoraproject.org/wiki/Releases
 			//Unique version variations for parsing include:
@@ -232,7 +232,7 @@ namespace GitSharp.Core
 			
 		}
 		
-		public static void GetGentooPlatform( Platform obj, string unitTestContent)
+		public static void GetGentooPlatform(Linux obj, string unitTestContent)
 		{
 			//Version list available at http://gentest.neysx.org/proj/en/releng/#doc_chap6
 			//Versioning is primarily based on date.
@@ -252,7 +252,7 @@ namespace GitSharp.Core
 			obj.Version = lines[0].Substring(pt+1,lines[0].Length - pt +1);
 		}
 		
-		public static void GetMandrivaPlatform( Platform obj, string unitTestContent)
+		public static void GetMandrivaPlatform(Linux obj, string unitTestContent)
 		{
 			//Formerly known as Mandrake Linux
 			//Version list is available at http://en.wikipedia.org/wiki/Mandriva_Linux
@@ -355,7 +355,7 @@ namespace GitSharp.Core
 			}
 		}
 		
-		public static void GetRedHatPlatform( Platform obj, string unitTestContent)
+		public static void GetRedHatPlatform(Linux obj, string unitTestContent)
 		{
 			//Version list is available at ...
 			//Unique version variations for parsing include:
@@ -382,7 +382,7 @@ namespace GitSharp.Core
 			
 		}
 		
-		public static void GetSlackwarePlatform( Platform obj, string unitTestContent)
+		public static void GetSlackwarePlatform(Linux obj, string unitTestContent)
 		{
 			//Version list is available at ...
 			//Unique version variations for parsing include:
@@ -401,12 +401,12 @@ namespace GitSharp.Core
 			obj.Version = lines[0].Substring(pt+1, lines[0].Length - 1);
 		}
 
-		public static void GetSusePlatform( Platform obj)
+		public static void GetSusePlatform(Linux obj)
 		{
 			GetSusePlatform( obj, null);
 		}
 		
-		public static void GetSusePlatform( Platform obj, string unitTestContent)
+		public static void GetSusePlatform(Linux obj, string unitTestContent)
 		{
 			//Version list is available at http://en.wikipedia.org/wiki/SUSE_Linux
 			//Unique version variations for parsing include (multi-line):
@@ -427,12 +427,12 @@ namespace GitSharp.Core
 			obj.Version = lines[1].Substring(11, lines[1].Length - 11);
 		}
 		
-		public static void GetUbuntuPlatform( Platform obj)
+		public static void GetUbuntuPlatform(Linux obj)
 		{
 			GetUbuntuPlatform( obj, null);
 		}
 		
-		public static void GetUbuntuPlatform( Platform obj, string unitTestContent)
+		public static void GetUbuntuPlatform(Linux obj, string unitTestContent)
 		{
 			//Version list is available at http://en.wikipedia.org/wiki/Ubuntu_(Linux_distribution)
 			//Unique version variations for parsing include (multi-line):

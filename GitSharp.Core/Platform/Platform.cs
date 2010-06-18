@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  * Copyrigth (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
@@ -41,8 +41,15 @@ using System.Diagnostics;
 
 namespace GitSharp.Core
 {
+	/// <summary>
+	/// Base class for a singleton object that provides capabilities that
+	/// require a different implementation per platform. 
+	/// </summary>
 	public abstract class Platform
 	{
+		/// <summary>
+		/// Extension of System.PlatformID to add plaforms. 
+		/// </summary>
 		enum GitPlatformID
 		{
 			Win32S = PlatformID.Win32S,
@@ -54,6 +61,9 @@ namespace GitSharp.Core
 			MacOSX,
 		}
 
+		/// <summary>
+		/// Enumeration of the known concrete implementation families. 
+		/// </summary>
 		public enum PlatformId
 		{
 			Windows = 1,
@@ -61,37 +71,44 @@ namespace GitSharp.Core
 			Mac = 3
 		}
 
-		public static Platform GetCurrentPlatform()
+		/// <summary>
+		/// Access to the singleton object.  Will create the object on first get. 
+		/// </summary>
+		public static Platform Instance
 		{
-			System.OperatingSystem os = Environment.OSVersion;
-			GitPlatformID pid = (GitPlatformID)os.Platform;
-			Platform obj;
-
-			switch (pid)
+			get
 			{
-				case GitPlatformID.Unix:
-					obj = new Linux();
-					break;
-				case GitPlatformID.MacOSX:
-					obj = new Mac();
-					break;
-				case GitPlatformID.Win32NT:
-				case GitPlatformID.Win32S:
-				case GitPlatformID.Win32Windows:
-				case GitPlatformID.WinCE:
-					obj = new Win32();
-					break;
-				default:
-					throw new NotSupportedException("Platform could not be detected!");
-			}
+				if (_instance == null)
+				{
+					System.OperatingSystem os = Environment.OSVersion;
+					GitPlatformID pid = (GitPlatformID)os.Platform;
+		
+					switch (pid)
+					{
+						case GitPlatformID.Unix:
+							_instance = new Linux();
+							break;
+						case GitPlatformID.MacOSX:
+							_instance = new Mac();
+							break;
+						case GitPlatformID.Win32NT:
+						case GitPlatformID.Win32S:
+						case GitPlatformID.Win32Windows:
+						case GitPlatformID.WinCE:
+							_instance = new Win32();
+							break;
+						default:
+							throw new NotSupportedException("Platform could not be detected!");
+					}
+				}
 
-			return obj;
+				return _instance;
+			}
 		}
 
-		public abstract bool IsHardlinkSupported();
+		public abstract bool IsHardlinkSupported { get; }
 
-
-		public abstract bool IsSymlinkSupported();
+		public abstract bool IsSymlinkSupported { get; }
 
 		public abstract bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory);
 
@@ -104,19 +121,19 @@ namespace GitSharp.Core
 		{
 		}
 
-		public string ClassName { get; set; }
+		public string ClassName { get; protected set; }
 
-		public PlatformId Id { get; set; }
+		public PlatformId Id { get; protected set; }
 
-		public string PlatformType { get; set; }
+		public string PlatformType { get; protected set; }
 
-		public string PlatformSubType { get; set; }
+		public string PlatformSubType { get; protected set; }
 
-		public string Edition { get; set; }
+		public string Edition { get; protected set; }
 
-		public string Version { get; set; }
+		public string Version { get; protected set; }
 
-		public string VersionFile { get; set; }
+		public string VersionFile { get; protected set; }
 
 		public string ProductName
 		{
@@ -126,6 +143,6 @@ namespace GitSharp.Core
 			}
 		}
 
-
+		private static Platform _instance;
 	}
 }

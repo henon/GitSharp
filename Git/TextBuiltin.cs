@@ -218,7 +218,7 @@ namespace GitSharp.CLI
 		{
 			try
 			{
-				_pager = Platform.GetCurrentPlatform().GetTextPager();
+				_pager = Platform.Instance.GetTextPager();
 				if (_pager == null)
 					return;
 				_pager.Start();

@@ -44,14 +44,14 @@ namespace GitSharp.Core
 {
 	public class Mac : Platform
 	{
-		public override bool IsSymlinkSupported()
+		public override bool IsSymlinkSupported
 		{
-			return true;
+			get { return true; }
 		}
 
-		public override bool IsHardlinkSupported()
+		public override bool IsHardlinkSupported
 		{
-			return true;
+			get { return true; }
 		}
 
 		public override bool CreateSymlink(string symlinkFilename, string existingFilename, bool isSymlinkDirectory)

@@ -40,6 +40,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 
 namespace GitSharp.Core
@@ -97,11 +98,27 @@ namespace GitSharp.Core
 			return true;
 		}
 
-		public override Process GetTextPager(RepositoryConfig config)
-		{
-			// TODO: instantiate "more" or "less"
-			return null;
-		}
+        public override Process GetTextPager(RepositoryConfig config)
+        {
+            var pager = new Process ();
+            var pagerVar = System.Environment.GetEnvironmentVariable ("GIT_PAGER");
+            if (pagerVar == null)
+                pagerVar = config.getCore ().Pager;
+            if (pagerVar == null)
+                pagerVar = "less";
+            //TODO: need to support separating out the arguments
+            pager.StartInfo.FileName = pagerVar;
+            pager.StartInfo.UseShellExecute = false;
+            pager.StartInfo.RedirectStandardInput = true;
+
+            // Apply LESS environment behavior
+            var lessVar = System.Environment.GetEnvironmentVariable ("LESS");
+            if (lessVar == null)
+                lessVar = "FRSX";
+            pager.StartInfo.EnvironmentVariables["LESS"] = lessVar;
+
+            return pager;
+        }
 
 		public Linux()
 		{
@@ -121,7 +138,7 @@ namespace GitSharp.Core
 			{
 				string str = release[0].ToString();
 				string platformType = str.Substring(5,str.Length-13);
-				VersionFile = "/etc/" + str;
+				VersionFile = str;
 				
 				switch (platformType)
 				{
@@ -243,13 +260,12 @@ namespace GitSharp.Core
 			if (unitTestContent != null)
 				lines = ParseString(unitTestContent);
 			else
-				lines = ParseFile("/etc/" + obj.VersionFile);
+				lines = ParseFile(obj.VersionFile);
 			
 			obj.ClassName = "Linux.Gentoo";
 			obj.PlatformSubType = "Gentoo";
 			obj.Edition = "";
-			int pt = lines[0].LastIndexOf(" ");
-			obj.Version = lines[0].Substring(pt+1,lines[0].Length - pt +1);
+			obj.Version = lines[0].Split().Last();
 		}
 		
 		public static void GetMandrivaPlatform(Linux obj, string unitTestContent)

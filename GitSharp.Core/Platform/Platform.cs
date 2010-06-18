@@ -115,7 +115,7 @@ namespace GitSharp.Core
 		public abstract bool CreateHardlink(string hardlinkFilename, string exisitingFilename);
 
 
-		public abstract Process GetTextPager(RepositoryConfig config);
+		public abstract Process GetTextPager(string corePagerConfig);
 
 		protected Platform()
 		{

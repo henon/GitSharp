@@ -172,7 +172,7 @@ namespace GitSharp.CLI
 		/// </summary>
 		/// <param name="repo">Specifies the repository to use.</param>
 		/// <param name="path"></param>
-		public void Init(Core.Repository repo, string path)
+		public void Init(GitSharp.Repository repo, string path)
 		{
 			try
 			{
@@ -189,7 +189,7 @@ namespace GitSharp.CLI
 			if (repo != null)
 			{
 				GitRepository = repo;
-				GitDirectory = repo.Directory.FullName;
+				GitDirectory = (repo as Core.Repository).Directory.FullName;
 			}
 			else
 			{
@@ -205,7 +205,7 @@ namespace GitSharp.CLI
 		{
 			try
 			{
-				_pager = Platform.Instance.GetTextPager(GitRepository.Config);
+				_pager = Platform.Instance.GetTextPager(GitRepository.Config["core.pager"]);
 				if (_pager == null)
 					return;
 				_pager.Start();
@@ -343,7 +343,7 @@ namespace GitSharp.CLI
 			}
 		}
 
-		public Core.Repository GitRepository
+		public GitSharp.Repository GitRepository
 		{
 			get
 			{
@@ -351,12 +351,7 @@ namespace GitSharp.CLI
 			}
 			set
 			{
-				if (value == null)
-				{
-					Git.DefaultRepository = null;
-					return;
-				}
-				Git.DefaultRepository = new GitSharp.Repository(value.Directory.FullName);
+				Git.DefaultRepository = value;
 			}
 		}
 

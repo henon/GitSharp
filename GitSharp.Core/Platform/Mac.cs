@@ -92,7 +92,7 @@ namespace GitSharp.Core
 			return true;
 		}
 
-		public override Process GetTextPager(RepositoryConfig config)
+		public override Process GetTextPager(string corePagerConfig)
 		{
 			// TODO: instantiate "more" or "less"
 			return null;

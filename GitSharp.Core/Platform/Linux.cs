@@ -98,12 +98,12 @@ namespace GitSharp.Core
 			return true;
 		}
 
-        public override Process GetTextPager(RepositoryConfig config)
+        public override Process GetTextPager(string corePagerConfig)
         {
             var pager = new Process ();
             var pagerVar = System.Environment.GetEnvironmentVariable ("GIT_PAGER");
             if (pagerVar == null)
-                pagerVar = config.getCore ().Pager;
+                pagerVar = corePagerConfig;
             if (pagerVar == null)
                 pagerVar = "less";
             //TODO: need to support separating out the arguments

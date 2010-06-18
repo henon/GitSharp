@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2006, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
@@ -139,7 +139,7 @@ namespace GitSharp.CLI
                 {
                     TextBuiltin cmd = subcommand.Create();
                     List<String> args = argv.ToList();
-                    GitSharp.Core.Repository repo = null;
+                    GitSharp.Repository repo = null;
 
                     try
                     {
@@ -178,7 +178,7 @@ namespace GitSharp.CLI
                             }
                         }
 
-                        repo = new Core.Repository(new DirectoryInfo(gitdir));
+                        repo = new GitSharp.Repository(gitdir);
                         cmd.Init(repo, gitdir);
                     }
                     else

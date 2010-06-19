@@ -517,7 +517,7 @@ namespace GitSharp
 			if (typeof(T) == typeof(Commit))
 				return GetCommit(identifier) as T;
 			if (typeof(T) == typeof(Leaf))
-				return GetBlob(identifier) as T;
+				return GetLeaf(identifier) as T;
 			if (typeof(T) == typeof(Tag))
 				return GetTag(identifier) as T;
 			if (typeof(T) == typeof(Tree))
@@ -532,14 +532,26 @@ namespace GitSharp
 			return AbstractObject.Wrap(this, id);
 		}
 
+		internal Leaf GetLeaf(string path)
+		{
+			var obj = Head.CurrentCommit.Tree[path];
+			if (obj == null)
+				return null;
+			if (obj is Leaf)
+				return obj as Leaf;
+			return null;
+		}
+
 		internal Blob GetBlob(string path)
 		{
 			//if (path.Length==Constants.OBJECT_ID_LENGTH)
 			var obj = Head.CurrentCommit.Tree[path];
 			if (obj == null)
 				return null;
+			if (obj is Leaf)
+				return (obj as Leaf).Blob;
 			if (obj.IsBlob)
-				return obj as Blob;
+				return (Blob)obj;
 			return new Blob(this, obj._id);
 		}
 

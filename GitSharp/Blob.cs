@@ -53,15 +53,14 @@ namespace GitSharp
 	/// Represents a specific version of the content of a file tracked by git. Using a Blob you can access the contents of 
 	/// any git object as string or byte array. For tracked files (leaves of a git tree) it returns the content of the file. For git objects 
 	/// such as Commit, Tag or Tree the Blob API may be used to inspect the the uncompressed internal representation.
-	/// 
+	/// <para/>
 	/// To open a git object instantiate a Blob with the object's Hash or another valid reference (see Ref).
-	/// 
-	/// var b=new Blob(repo, "e287f54");
-	/// 
+	/// <code>var b=new Blob(repo, "e287f54");</code>
+	/// <para/>
 	/// Note, that new Blob( ...) does not create a new blob in the repository but rather constructs the object to manipulate an existing blob.
-	/// 
-	/// Advanced: To create a new Blob inside the repository you can use the static create function, however, you are advised to use 
-	/// higher level functionality to create new revisions of files, i.e. by using the Commit.Create API (see Commit).
+	/// <para/>
+	/// Advanced: To create a new Blob inside the repository you can use the static <see cref="Create(GitSharp.Repository,byte[])"/> function, however, you are advised to use 
+	/// higher level functionality to create new revisions of files, i.e. by using the <see cref="Commit"/> API, for instance <see cref="Commit.Create(string,GitSharp.Commit,GitSharp.Tree)"/>.
 	/// </summary>
 	public class Blob : AbstractObject
 	{

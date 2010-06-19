@@ -1,5 +1,6 @@
 ﻿/*
  * Copyright (C) 2009-2010, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2010, Carlo Kok <carlokok@gmail.com>
  *
  * All rights reserved.
  *
@@ -39,102 +40,69 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using FileTreeEntry = GitSharp.Core.FileTreeEntry;
+using GitSharp.Core;
 
 namespace GitSharp
 {
 
 	/// <summary>
-	/// Leaf represents a tracked file in a directory tracked by git.
+	/// Represents a <see cref="Tree"/> (directory) or <see cref="Leaf"/> (file) in the <see cref="Repository"/>.
 	/// </summary>
-	public class Leaf : AbstractTreeNode
+	public abstract class AbstractTreeNode : AbstractObject
 	{
-		internal Leaf(Repository repo, FileTreeEntry entry)
-			: base(repo, entry.Id)
-		{
-			_internal_file_tree_entry = entry;
-		}
+		internal AbstractTreeNode(Repository repo, ObjectId id) : base(repo, id) { }
 
-		private FileTreeEntry _internal_file_tree_entry;
+		public abstract string Name { get; }
+		public abstract string Path { get; }
+		public abstract Tree Parent { get; }
+		public abstract int Permissions { get; }
 
 		/// <summary>
-		/// True if the file is executable (unix).
+		/// Returns all commits this file or directory was changed in
 		/// </summary>
-		public bool IsExecutable
+		/// <returns>commits in the order "most recent first"</returns>
+		public IEnumerable<Commit> GetHistory()
 		{
-			get
-			{
-				return _internal_file_tree_entry.IsExecutable;
-			}
+			return GetHistoryBefore(_repo.CurrentBranch.CurrentCommit);
 		}
 
 		/// <summary>
-		/// The file name
+		/// Returns all commits this file or directory was changed in before the given commit
 		/// </summary>
-		public override string Name
+		/// <param name="commit">The commit in whose ancestors should be searched</param>
+		/// <returns>commits in the order "most recent first"</returns>
+		public IEnumerable<Commit> GetHistoryBefore(Commit commit)
 		{
-			get
-			{
-				return _internal_file_tree_entry.Name;
-			}
+			if (commit == null)
+				yield break;
+			foreach(var c in new[] {commit}.Concat(commit.Ancestors))
+				foreach (var change in c.Changes)
+				{
+					if (change.Path == this.Name) // Todo: here, renaming of this file should be detected and tracked
+					{
+						yield return c;
+						break; // <--- we found a change we can exit early
+					}
+					// TODO: optimize to not search any further if we find the point of creation of this file
+				}
 		}
 
 		/// <summary>
-		/// The full path relative to repostiory root
+		/// Find the commit this file or tree was last changed in
 		/// </summary>
-		public override string Path
+		public Commit GetLastCommit()
 		{
-			get
-			{
-				return _internal_file_tree_entry.FullName;
-			}
+			return GetLastCommitBefore(_repo.CurrentBranch.CurrentCommit);
 		}
 
 		/// <summary>
-		/// The unix file permissions.
-		/// 
-		/// Todo: model this with a permission object
+		/// Find the commit this file or tree was last changed in before the given commit
 		/// </summary>
-		public override int Permissions
+		/// <param name="commit">commit to start at</param>
+		public Commit GetLastCommitBefore(Commit commit)
 		{
-			get
-			{
-				return _internal_file_tree_entry.Mode.Bits;
-			}
+			return GetHistoryBefore(commit).FirstOrDefault();
 		}
 
-		/// <summary>
-		/// The parent <see cref="Tree"/>.
-		/// </summary>
-		public override Tree Parent
-		{
-			get
-			{
-				return new Tree(_repo, _internal_file_tree_entry.Parent);
-			}
-		}
-
-		/// <summary>
-		/// Return a <see cref="Blob"/> containing the data of this file
-		/// </summary>
-		public Blob Blob
-		{
-			get { return new Blob(_repo, _id); }
-		}
-
-		public static implicit operator Blob(Leaf self)
-		{
-			return self.Blob;
-		}
-
-		public string Data
-		{
-			get { return Blob.Data; }
-		}
-
-		public byte[] RawData
-		{
-			get { return Blob.RawData; }
-		}
 	}
 }

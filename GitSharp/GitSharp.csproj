@@ -156,7 +156,7 @@
     <Compile Include="Index.cs" />
     <Compile Include="Commands\InitCommand.cs" />
     <Compile Include="IReferenceObject.cs" />
-    <Compile Include="ITreeNode.cs" />
+    <Compile Include="AbstractTreeNode.cs" />
     <Compile Include="Leaf.cs" />
     <Compile Include="Git.cs" />
     <Compile Include="Commands\PushCommand.cs" />

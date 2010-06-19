@@ -61,8 +61,8 @@ namespace GitSharp
 	public class Commit : AbstractObject
 	{
 
-		public Commit(Repository repo, string name)
-			: base(repo, name)
+		public Commit(Repository repo, string hash_or_name)
+			: base(repo, hash_or_name)
 		{
 		}
 
@@ -330,12 +330,12 @@ namespace GitSharp
 				throw new InvalidOperationException("This commit doesn't seem to have a valid tree.");
 			foreach (string path in paths)
 			{
-				var blob = tree[path] as Leaf;
-				if (blob == null)
+				var leaf = tree[path] as Leaf;
+				if (leaf == null)
 					throw new ArgumentException("The given path does not exist in this commit: " + path);
 				var filename = Path.Combine(_repo.WorkingDirectory, path);
 				new FileInfo(filename).Directory.Mkdirs();
-				File.WriteAllBytes(filename, blob.RawData); // todo: hmm, what is with file permissions and other file attributes?
+				File.WriteAllBytes(filename, leaf.Blob.RawData); // todo: hmm, what is with file permissions and other file attributes?
 			}
 		}
 
@@ -530,7 +530,7 @@ namespace GitSharp
 
 		public static implicit operator Core.Commit(Commit c)
 		{
-			return c._internal_commit;
+			return c.InternalCommit;
 		}
 
 		public override string ToString()

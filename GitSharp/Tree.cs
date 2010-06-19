@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009-2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -52,7 +52,7 @@ namespace GitSharp
 	/// <summary>
 	/// Represents a directory in the git repository.
 	/// </summary>
-	public class Tree : AbstractObject, ITreeNode
+	public class Tree : AbstractTreeNode
 	{
 		internal Tree(Repository repo, ObjectId id) : base(repo, id) { }
 
@@ -81,7 +81,7 @@ namespace GitSharp
 			}
 		}
 
-		public string Name
+		public override string Name
 		{
 			get
 			{
@@ -104,11 +104,13 @@ namespace GitSharp
 			}
 		}
 
-		public Tree Parent
+		public override Tree Parent
 		{
 			get
 			{
 				if (InternalTree == null)
+					return null;
+				if (InternalTree.Parent == null)
 					return null;
 				return new Tree(_repo, InternalTree.Parent);
 			}
@@ -158,7 +160,7 @@ namespace GitSharp
 			}
 		}
 
-		public string Path
+		public override string Path
 		{
 			get
 			{
@@ -168,7 +170,7 @@ namespace GitSharp
 			}
 		}
 
-		public int Permissions
+		public override int Permissions
 		{
 
 			get
@@ -216,5 +218,7 @@ namespace GitSharp
 		{
 			return t._internal_tree;
 		}
+
+
 	}
 }

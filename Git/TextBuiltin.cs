@@ -189,7 +189,7 @@ namespace GitSharp.CLI
 			if (repo != null)
 			{
 				GitRepository = repo;
-				GitDirectory = (repo as Core.Repository).Directory.FullName;
+				GitDirectory = ((Core.Repository)repo).Directory.FullName;
 			}
 			else
 			{

@@ -117,7 +117,7 @@
     <Compile Include="Commands\Help.cs" />
     <Compile Include="Stubs\IndexPack.cs" />
     <Compile Include="Commands\Init.cs" />
-    <Compile Include="Stubs\Log.cs" />
+    <Compile Include="Commands\Log.cs" />
     <Compile Include="Stubs\LsFiles.cs" />
     <Compile Include="Stubs\LsRemote.cs" />
     <Compile Include="Stubs\LsTree.cs" />

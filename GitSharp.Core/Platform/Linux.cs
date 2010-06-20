@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
  * Copyrigth (C) 2010, Henon <meinrad.recheis@gmail.com>
+ * Copyrigth (C) 2010, Andrew Cooper <andymancooper@gmail.com>
  *
  * All rights reserved.
  *

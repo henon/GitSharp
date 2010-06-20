@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2010, Andrew Cooper <andymancooper@gmail.com>
  *
  * All rights reserved.
  *
@@ -522,15 +523,27 @@ namespace GitSharp
 				return GetTag(identifier) as T;
 			if (typeof(T) == typeof(Tree))
 				return GetTree(identifier) as T;
+            if (typeof(T) == typeof(AbstractTreeNode))
+                return GetTreeNode(identifier) as T;
 			if (typeof(T) == typeof(AbstractObject))
 				return Get(_internal_repo.Resolve(identifier)) as T;
-			throw new ArgumentException("Type parameter " + typeof(T).GetType().Name + " is not supported by Get<T>!");
+			throw new ArgumentException("Type parameter " + typeof(T).Name + " is not supported by Get<T>!");
 		}
 
 		internal AbstractObject Get(ObjectId id)
 		{
 			return AbstractObject.Wrap(this, id);
 		}
+
+        internal AbstractTreeNode GetTreeNode(string path)
+        {
+            var obj = Head.CurrentCommit.Tree[path];
+            if (obj == null)
+                return null;
+            if (obj is AbstractTreeNode)
+                return obj as AbstractTreeNode;
+            return null;
+        }
 
 		internal Leaf GetLeaf(string path)
 		{

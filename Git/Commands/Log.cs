@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010, Dominique van de Vorle <dvdvorle@gmail.com>
+ * Copyright (C) 2010, Andrew Cooper <andymancooper@gmail.com>
  *
  * All rights reserved.
  *
@@ -63,7 +64,7 @@ namespace GitSharp.CLI
                { "follow", "Continue listing the history of a file beyond renames", v => cmd.Follow = true },
                { "log-size", "Before the log message print out its size in bytes", v => cmd.LogSize = true },
                { "p|no-stat", "ifdef::git-format-patch[] Generate plain patches without any diffstats", v => cmd.NoStat = true },
-               { "p", "ifndef::git-format-patch[] Generate patch (see section on generating patches)", v => cmd.P = true },
+               { "P", "ifndef::git-format-patch[] Generate patch (see section on generating patches)", v => cmd.P = true },
                { "u", "ifndef::git-format-patch[] Generate patch (see section on generating patches)", v => cmd.U = true },
                { "U|unified=", "Generate diffs with <n> lines of context instead of the usual three", v => cmd.Unified = v },
                { "raw", "ifndef::git-format-patch[] Generate the raw format", v => cmd.Raw = true },
@@ -117,9 +118,12 @@ namespace GitSharp.CLI
 
             try
             {
-                List<String> Arguments = ParseOptions(args);
+                List<String> arguments = ParseOptions(args);
                 if (arguments.Count > 0)
                 {
+                    // log always uses a pager
+                    SetupPager();
+
                     cmd.Arguments = arguments;
                     cmd.Execute();
                 }
@@ -128,9 +132,14 @@ namespace GitSharp.CLI
                     OfflineHelp();
                 }
             }
+            catch (System.IO.IOException)
+            {
+                // user closed pager
+            }
             catch (Exception e)            
             {
-                cmd.OutputStream.WriteLine(e.Message);
+                Console.Error.WriteLine(e.ToString());
+                cmd.OutputStream.WriteLine(e.ToString());
             }
         }
 

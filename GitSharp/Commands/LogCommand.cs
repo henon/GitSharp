@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010, Dominique van de Vorle <dvdvorle@gmail.com>
+ * Copyright (C) 2010, Andrew Cooper <andymancooper@gmail.com>
  *
  * All rights reserved.
  *
@@ -657,7 +658,22 @@ namespace GitSharp.Commands
 
         public override void Execute()
         {
-            throw new NotImplementedException();
+            // Just to play, try out just finding the log for the first argument
+            foreach (var commit in Repository.Get<AbstractTreeNode>(Arguments[0]).GetHistory())
+            {
+                ShowCommit(commit);
+            }
+        }
+
+        private void ShowCommit(Commit commit)
+        {
+            OutputStream.WriteLine("commit {0}", commit.Hash);
+            OutputStream.WriteLine("Author: {0} <{1}>", commit.Author.Name, commit.Author.EmailAddress);
+            OutputStream.WriteLine("Date: {0}", commit.AuthorDate);
+            OutputStream.WriteLine();
+            foreach (var line in commit.Message.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None))
+                OutputStream.WriteLine("    {0}", line);
+            OutputStream.WriteLine();
         }
     }
 }

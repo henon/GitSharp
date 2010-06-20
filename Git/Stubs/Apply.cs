@@ -80,7 +80,7 @@ namespace GitSharp.CLI
 
             try
             {
-                List<String> Arguments = ParseOptions(args);
+                List<String> arguments = ParseOptions(args);
                 if (arguments.Count > 0)
                 {
                     cmd.Arguments = arguments;

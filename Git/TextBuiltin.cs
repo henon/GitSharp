@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2009, Rolenun <rolenun@gmail.com>
- * Copyright (C) 2010, Andy <andymancooper@gmail.com>
+ * Copyright (C) 2010, Andrew Cooper <andymancooper@gmail.com>
  * Copyright (C) 2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -85,11 +85,6 @@ namespace GitSharp.CLI
 		/// RevWalk used during command line parsing, if it was required.
 		/// </summary>
 		protected GitSharp.Core.RevWalk.RevWalk argWalk;
-
-		/// <summary>
-		/// Contains the remaining arguments after the options listed in the command line.
-		/// </summary>
-		public List<String> arguments = new List<String>();
 
 		/// <summary>
 		/// Custom OptionSet to allow special option handling rules such as --option dir
@@ -229,8 +224,14 @@ namespace GitSharp.CLI
 			if (_pager != null)
 			{
 				Git.DefaultOutputStream = null;
-				_pager.StandardInput.Close();
-				_pager.WaitForExit();
+                try
+                {
+                    _pager.StandardInput.Close();
+                    _pager.WaitForExit();
+                }
+                catch
+                {
+                }
 			}
 		}
 

@@ -160,7 +160,7 @@
     <Compile Include="Leaf.cs" />
     <Compile Include="Git.cs" />
     <Compile Include="Commands\PushCommand.cs" />
-    <Compile Include="Stubs\LogCommand.cs" />
+    <Compile Include="Commands\LogCommand.cs" />
     <Compile Include="Ref.cs" />
     <Compile Include="Repository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

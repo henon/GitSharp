@@ -1,6 +1,5 @@
 ﻿/*
  * Copyright (C) 2009-2010, Henon <meinrad.recheis@gmail.com>
- * Copyright (C) 2010, Carlo Kok <carlokok@gmail.com>
  *
  * All rights reserved.
  *
@@ -75,16 +74,18 @@ namespace GitSharp
 		{
 			if (commit == null)
 				yield break;
-			foreach(var c in new[] {commit}.Concat(commit.Ancestors))
+			foreach (var c in new[] { commit }.Concat(commit.Ancestors))
+			{
 				foreach (var change in c.Changes)
 				{
-					if (change.Path == this.Name) // Todo: here, renaming of this file should be detected and tracked
+					if ((this is Leaf && change.Path == this.Path) || (this is Tree && change.Path.StartsWith(this.Path))) // <--- [henon] normally this is bad style but here I prefer it over polymorphism for sake of readability
 					{
 						yield return c;
 						break; // <--- we found a change we can exit early
 					}
 					// TODO: optimize to not search any further if we find the point of creation of this file
 				}
+			}
 		}
 
 		/// <summary>

@@ -62,7 +62,7 @@ namespace GitSharp.API.Tests
 				var previous = new Commit(repo, "HEAD^");
 				Assert.IsTrue(previous.IsCommit);
 				Assert.AreEqual(previous, commit.Parent);
-				var changes = previous.CompareAgainst(commit).ToDictionary(change => change.Name);
+				var changes = commit.CompareAgainst(previous).ToDictionary(change => change.Name);
 				Assert.AreEqual(ChangeType.Added, changes["README"].ChangeType);
 				Assert.AreEqual("This is a really short readme file\n\nWill write up some text here.",
 									 (changes["README"].ComparedObject as Blob).Data);
@@ -75,6 +75,39 @@ namespace GitSharp.API.Tests
 				Assert.AreEqual(ChangeType.Deleted, changes["c2.txt"].ChangeType);
 				Assert.AreEqual(ChangeType.Deleted, changes["master.txt"].ChangeType);
 				Assert.AreEqual(9, changes.Count);
+
+			}
+		}
+
+		[Test]
+		public void Commit_changes_to_existing_commit1()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var commit = repo.Get<Commit>("f73b95671f326616d66b2afb3bdfcdbbce110b44");
+				var changes = commit.Changes.ToDictionary(change => change.Name);
+				Assert.AreEqual(ChangeType.Added, changes["a1"].ChangeType);
+				Assert.AreEqual(1, changes.Count);
+
+			}
+		}
+
+		[Test]
+		public void Commit_changes_against_multiple_parents()
+		{
+			using (var repo = GetTrashRepository())
+			{ 
+				// this commit has three parents (three branches were merged together but actually nothing has changed!
+				var commit = repo.Get<Branch>("master").CurrentCommit;
+				Assert.AreEqual(3, commit.Parents.Count());
+				var changes = commit.Changes.ToArray();
+				Assert.AreEqual(0, changes.Length);
+
+				// two parents
+				commit = repo.Get<Commit>("0966a434eb1a025db6b71485ab63a3bfbea520b6");
+				Assert.AreEqual(2, commit.Parents.Count());
+				changes = commit.Changes.ToArray();
+				Assert.AreEqual(0, changes.Length);
 			}
 		}
 
@@ -123,5 +156,6 @@ namespace GitSharp.API.Tests
 				AssertFileExistsInWD("c/c1.txt");
 			}
 		}
+
 	}
 }

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2009, Henon <meinrad.recheis@gmail.com>
+ * Copyright (C) 2009-2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
  *
@@ -160,6 +160,11 @@ namespace GitSharp
 			{
 				return new int[] { ReferencePermissions, ComparedPermissions };
 			}
+		}
+
+		public override string ToString()
+		{
+			return string.Format("{0} [{1}]", ChangeType, Path);
 		}
 
 	}

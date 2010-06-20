@@ -348,102 +348,114 @@ namespace GitSharp
 		/// <summary>
 		/// Compare reference commit against compared commit. You may pass in a null commit (i.e. for getting the changes of the first commit)
 		/// </summary>
-		/// <param name="reference"></param>
-		/// <param name="compared"></param>
-		/// <returns></returns>
+		/// <param name="reference">Usually the more recent commit</param>
+		/// <param name="compared">Usually an ancestor of the reference commit</param>
+		/// <returns>a list of changes (<see cref="Change"/>)</returns>
 		public static IEnumerable<Change> CompareCommits(Commit reference, Commit compared)
 		{
 			var changes = new List<Change>();
 			if (reference == null && compared == null)
 				return changes;
 			var repo = (reference ?? compared).Repository;
-			if (compared.Repository.Directory != repo.Directory)
-				throw new InvalidOperationException("Can not compare commits from different repositories");
 			var ref_tree = (reference != null ? reference.Tree._id : ObjectId.ZeroId);
 			var compared_tree = (compared != null ? compared.Tree._id : ObjectId.ZeroId);
 			var db = repo._internal_repo;
-			var pathFilter = TreeFilter.ALL;
 			var walk = new TreeWalk(db);
-			//new GitSharp.Core.ObjectWriter(repo).WriteTree( new CoreTree(repo)); // <--- writing an empty tree object. very ugly hack that is necessary to get an empty tree into the treewalker.
 			if (reference == null || compared == null)
 				walk.reset((reference ?? compared).Tree._id);
 			else
-				walk.reset(new GitSharp.Core.AnyObjectId[] { ref_tree, compared_tree });
-			//if (ref_tree == ObjectId.ZeroId)
-			//    walk.addTree(new EmptyTreeIterator());
-			//else
-			//    walk.addTree(ref_tree);
-			//if (compared_tree == ObjectId.ZeroId)
-			//    walk.addTree(new EmptyTreeIterator());
-			//else
-			//    walk.addTree(compared_tree);
+				walk.reset(new GitSharp.Core.AnyObjectId[] {ref_tree, compared_tree});
 			walk.Recursive = true;
-			walk.setFilter(AndTreeFilter.create(TreeFilter.ANY_DIFF, pathFilter));
+			walk.setFilter(AndTreeFilter.create(TreeFilter.ANY_DIFF, TreeFilter.ALL));
 
+			return CalculateCommitDiff(repo, walk, new[] { reference, compared });
+		}
+
+		/// <summary>
+		/// compare the given commits and return the changes.
+		/// </summary>
+		/// <param name="repo"></param>
+		/// <param name="walk"></param>
+		/// <param name="commits">first commit in the array is the commit that is compared against the others which are his ancestors (i.e. from different branches)</param>
+		/// <returns></returns>
+		private static IEnumerable<Change> CalculateCommitDiff(Repository repo, TreeWalk walk, Commit[] commits)
+		{
 			while (walk.next())
 			{
+				int m0 = walk.getRawMode(0);
 				if (walk.getTreeCount() == 2)
 				{
-					int m0 = walk.getRawMode(0);
 					int m1 = walk.getRawMode(1);
-					var change = new Change()
+					var change = new Change
 					{
-						ReferenceCommit = reference,
-						ComparedCommit = compared,
+						ReferenceCommit = commits[0],
+						ComparedCommit = commits[1],
 						ReferencePermissions = walk.getFileMode(0).Bits,
 						ComparedPermissions = walk.getFileMode(1).Bits,
 						Name = walk.getNameString(),
 						Path = walk.getPathString(),
 					};
-					changes.Add(change);
-					if (m0 == 0 && m1 != 0)
+					if (m0 != 0 && m1 == 0)
 					{
 						change.ChangeType = ChangeType.Added;
-						change.ComparedObject = AbstractObject.Wrap(repo, walk.getObjectId(1));
+						change.ComparedObject = Wrap(repo, walk.getObjectId(0));
 					}
-					else if (m0 != 0 && m1 == 0)
+					else if (m0 == 0 && m1 != 0)
 					{
 						change.ChangeType = ChangeType.Deleted;
-						change.ReferenceObject = AbstractObject.Wrap(repo, walk.getObjectId(0));
+						change.ReferenceObject = Wrap(repo, walk.getObjectId(0));
 					}
 					else if (m0 != m1 && walk.idEqual(0, 1))
 					{
 						change.ChangeType = ChangeType.TypeChanged;
-						change.ReferenceObject = AbstractObject.Wrap(repo, walk.getObjectId(0));
-						change.ComparedObject = AbstractObject.Wrap(repo, walk.getObjectId(1));
+						change.ReferenceObject = Wrap(repo, walk.getObjectId(0));
+						change.ComparedObject = Wrap(repo, walk.getObjectId(1));
 					}
 					else
 					{
 						change.ChangeType = ChangeType.Modified;
-						change.ReferenceObject = AbstractObject.Wrap(repo, walk.getObjectId(0));
-						change.ComparedObject = AbstractObject.Wrap(repo, walk.getObjectId(1));
+						change.ReferenceObject = Wrap(repo, walk.getObjectId(0));
+						change.ComparedObject = Wrap(repo, walk.getObjectId(1));
 					}
+					yield return change;
 				}
 				else
 				{
-					var change = new Change()
+					var raw_modes = new int[walk.getTreeCount()-1];
+					for(int i = 0;i<walk.getTreeCount()-1; i++)
+						raw_modes[i] = walk.getRawMode(i+1);
+					var change = new Change
 					{
-						ReferenceCommit = reference,
-						ComparedCommit = compared,
+						ReferenceCommit = commits[0],
+						//ComparedCommit = compared,
 						Name = walk.getNameString(),
 						Path = walk.getPathString(),
 					};
-					changes.Add(change);
-					if (reference != null)
+					if (m0 != 0 && raw_modes.All(m1 => m1 == 0))
 					{
-						change.ReferencePermissions = walk.getFileMode(0).Bits;
-						change.ChangeType = ChangeType.Deleted;
-						change.ReferenceObject = AbstractObject.Wrap(repo, walk.getObjectId(0));
-					}
-					else
-					{
-						change.ComparedPermissions = walk.getFileMode(0).Bits;
 						change.ChangeType = ChangeType.Added;
-						change.ComparedObject = AbstractObject.Wrap(repo, walk.getObjectId(0));
+						change.ComparedObject = Wrap(repo, walk.getObjectId(0));
+						yield return change;
+					}
+					else if (m0 == 0 && raw_modes.Any(m1 => m1 != 0))
+					{
+						change.ChangeType = ChangeType.Deleted;
+						yield return change;
+					}
+					else if (raw_modes.Select((m1, i) => new { Mode = m1, Index = i + 1 }).All(x => !walk.idEqual(0, x.Index))) // TODO: not sure if this condition suffices in some special cases.
+					{
+						change.ChangeType = ChangeType.Modified;
+						change.ReferenceObject = Wrap(repo, walk.getObjectId(0));
+						yield return change;
+					}
+					else if (raw_modes.Select((m1, i) => new { Mode = m1, Index = i + 1 }).Any(x => m0 != x.Mode && walk.idEqual(0, x.Index)))
+					{
+						change.ChangeType = ChangeType.TypeChanged;
+						change.ReferenceObject = Wrap(repo, walk.getObjectId(0));
+						yield return change;
 					}
 				}
 			}
-			return changes;
 		}
 
 		/// <summary>
@@ -464,10 +476,26 @@ namespace GitSharp
 			get
 			{
 				if (this.Parents.Count() == 0)
-					return CompareCommits(null, this);
+					return CompareCommits(this, null);
 				else
-					return Parents.SelectMany(parent => parent.CompareAgainst(this)).ToArray();
+					return CompareAgainstParents();
 			}
+		}
+
+		/// <summary>
+		/// Compare a commit against (one or multiple) parents (merge scenario)
+		/// </summary>
+		/// <returns>Changes of the commit</returns>
+		private IEnumerable<Change> CompareAgainstParents()
+		{
+			var db = _repo._internal_repo;
+			var tree_ids = new[] { this }.Concat(Parents).Select(c => c.Tree._id).ToArray();
+			var walk = new TreeWalk(db);
+			walk.reset(tree_ids);
+			walk.Recursive = true;
+			walk.setFilter(AndTreeFilter.create(TreeFilter.ANY_DIFF, TreeFilter.ALL));
+
+			return CalculateCommitDiff(_repo, walk, new[] { this }.Concat(Parents).ToArray());
 		}
 
 

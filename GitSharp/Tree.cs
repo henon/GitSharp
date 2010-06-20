@@ -87,6 +87,8 @@ namespace GitSharp
 			{
 				if (InternalTree == null)
 					return null;
+				if (InternalTree.IsRoot)
+					return "";
 				return InternalTree.Name;
 			}
 		}
@@ -166,6 +168,8 @@ namespace GitSharp
 			{
 				if (InternalTree == null)
 					return null;
+				if (InternalTree.IsRoot)
+					return "";
 				return InternalTree.FullName;
 			}
 		}
@@ -206,7 +210,7 @@ namespace GitSharp
 				if (tree_entry == null)
 					return null;
 				if (tree_entry.IsTree)
-					return new Tree(_repo, tree_entry.Id);
+					return new Tree(_repo, tree_entry as CoreTree);
 				else if (tree_entry.IsBlob)
 					return new Leaf(_repo, tree_entry as FileTreeEntry);
 				else // if (tree_entry.IsCommit || tree_entry.IsTag)

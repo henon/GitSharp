@@ -488,13 +488,14 @@ namespace GitSharp
 		/// <summary>
 		/// Access a git object by name, id or path. Use the type parameter to tell what kind of object you like to get. Supported types are
 		/// <ul>
-		///   <il>Blob</il>
-		///   <il>Branch</il>
-		///   <il>Commit</il>
-		///   <il>Leaf</il>
-		///   <il>Tag</il>
-		///   <il>Tree</il>
-		///   <il>AbstractObject - use this if you are not sure about the type yourself. You will get back an object of the correct type (Blob, Commit, Tag or Tree).</il>
+		///   <il><see cref="Blob"/></il>
+		///   <il><see cref="Branch"/></il>
+		///   <il><see cref="GitSharp.Commit"/></il>
+		///   <il><see cref="Leaf"/></il>
+		///   <il><see cref="Tag"/></il>
+		///   <il><see cref="Tree"/></il>
+		///   <il><see cref="AbstractTreeNode"/> - use this if you are not sure about the type of a path (Tree or Leaf)</il>
+		///   <il><see cref="AbstractObject"/> - use this if you are not sure about the type yourself. You will get back an object of the correct type (Blob, Commit, Tag or Tree).</il>
 		/// </ul>
 		///	<para />
 		/// Branches, Commits or Tags may be accessed by name or reference expression. Currently supported are combinations of these:
@@ -514,7 +515,7 @@ namespace GitSharp
 		///	  <li>timestamps in reflogs, ref@{full or relative timestamp}</li>
 		///	</ul>		
 		/// <para/>
-		/// Tree or Leaf (Blob) objects can be addressed by long hash or by their relative repository path
+		/// Tree or Leaf objects can be addressed by long hash or by their absolute or relative repository path
 		/// </summary>
 		/// <returns></returns>
 		public T Get<T>(string identifier) where T : class
@@ -531,8 +532,8 @@ namespace GitSharp
 				return GetTag(identifier) as T;
 			if (typeof(T) == typeof(Tree))
 				return GetTree(identifier) as T;
-            if (typeof(T) == typeof(AbstractTreeNode))
-                return GetTreeNode(identifier) as T;
+			if (typeof(T) == typeof(AbstractTreeNode))
+				return GetTreeNode(identifier) as T;
 			if (typeof(T) == typeof(AbstractObject))
 				return Get(_internal_repo.Resolve(identifier)) as T;
 			throw new ArgumentException("Type parameter " + typeof(T).Name + " is not supported by Get<T>!");
@@ -543,19 +544,19 @@ namespace GitSharp
 			return AbstractObject.Wrap(this, id);
 		}
 
-        internal AbstractTreeNode GetTreeNode(string path)
-        {
-            var obj = Head.CurrentCommit.Tree[path];
-            if (obj == null)
-                return null;
-            if (obj is AbstractTreeNode)
-                return obj as AbstractTreeNode;
-            return null;
-        }
+		internal AbstractTreeNode GetTreeNode(string path)
+		{
+			var obj = Head.CurrentCommit.Tree[GetRelativePath(path)];
+			if (obj == null)
+				return null;
+			if (obj is AbstractTreeNode)
+				return obj as AbstractTreeNode;
+			return null;
+		}
 
 		internal Leaf GetLeaf(string path)
 		{
-			var obj = Head.CurrentCommit.Tree[path];
+			var obj = Head.CurrentCommit.Tree[GetRelativePath(path)];
 			if (obj == null)
 				return null;
 			if (obj is Leaf)
@@ -566,7 +567,7 @@ namespace GitSharp
 		internal Blob GetBlob(string path)
 		{
 			//if (path.Length==Constants.OBJECT_ID_LENGTH)
-			var obj = Head.CurrentCommit.Tree[path];
+			var obj = Head.CurrentCommit.Tree[GetRelativePath(path)];
 			if (obj == null)
 				return null;
 			if (obj is Leaf)
@@ -593,7 +594,7 @@ namespace GitSharp
 
 		internal Tree GetTree(string path)
 		{
-			return Head.CurrentCommit.Tree[path] as Tree;
+			return Head.CurrentCommit.Tree[GetRelativePath(path)] as Tree;
 		}
 
 

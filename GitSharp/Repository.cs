@@ -93,8 +93,7 @@ namespace GitSharp
 		}
 
 		/// <summary>
-		/// Gets or sets Head which is a symbolic reference to the active branch. Note that setting head 
-		/// does not automatically check out that branch into the repositories working directory. 
+		/// Get the repository's head which is a symbolic reference to the active branch.
 		/// </summary>
 		public Branch Head
 		{
@@ -103,9 +102,10 @@ namespace GitSharp
 				Debug.Assert(_internal_repo != null, "Repository not initialized correctly.");
 				return new Branch(this, "HEAD");
 			}
-			set
+			internal set // <-- Note that setting head does not automatically check out that branch into the repository's working directory. 
 			{
-				// Todo: what should we do with null?
+				if (value == null)
+					throw new ArgumentException("Value can not be null.");
 				if (Head.Name != value.Name)
 				{
 					if (Branches.ContainsKey(value.Name))

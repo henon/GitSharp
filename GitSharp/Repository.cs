@@ -475,6 +475,14 @@ namespace GitSharp
 			return new FileInfo(path).Exists;
 		}
 
+		/// <summary>
+		/// Converts a given absolute or relative path into a repository relative path. 
+		/// </summary>
+		protected string GetRelativePath(string path)
+		{
+			return Core.Util.PathUtil.RelativePath(WorkingDirectory, path);
+		}
+
 		#region Accessing git Objects
 
 		/// <summary>

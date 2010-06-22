@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2009-2010, Henon <meinrad.recheis@gmail.com>
  *
  * All rights reserved.
@@ -204,6 +204,8 @@ namespace GitSharp
 		{
 			get
 			{
+				if (path == "")
+					return this;
 				var tree_entry = _internal_tree.FindBlobMember(path);
 				if (tree_entry == null)
 					tree_entry = _internal_tree.findTreeMember(path);

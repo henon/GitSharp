@@ -157,5 +157,15 @@ namespace GitSharp.API.Tests
 			}
 		}
 
+		[Test]
+		public void Commit_ancestors()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var commit = repo.Get<Branch>("master").CurrentCommit;
+				var ancestors = commit.Ancestors;
+				Assert.AreNotEqual(ancestors.First().Hash, commit.Hash);
+			}
+		}
 	}
 }

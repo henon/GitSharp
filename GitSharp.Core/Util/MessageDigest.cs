@@ -43,121 +43,89 @@ using System.IO;
 
 namespace GitSharp.Core.Util
 {
-    public class Sha1MessageDigest : MessageDigest
+    public abstract class MessageDigest : IDisposable
     {
-        public Sha1MessageDigest()
-        {
-        }
-
-        public Sha1MessageDigest(byte[] buffer)
-            : base(buffer)
-        {
-        }
-
-        #region ICloneable Members
-
-        public override object Clone()
-        {
-            return new Sha1MessageDigest(Buffer);
-        }
-
-        #endregion
-
-        public override byte[] Digest(byte[] input)
-        {
-            return new SHA1Managed().ComputeHash(input);
-        }
-    }
-
-    public class Md5MessageDigest : MessageDigest
-    {
-        public Md5MessageDigest()
-        {
-        }
-
-        public Md5MessageDigest(byte[] buffer)
-            : base(buffer)
-        {
-        }
-
-        public override byte[] Digest(byte[] input)
-        {
-            return new MD5CryptoServiceProvider().ComputeHash(input);
-        }
-
-        public override object Clone()
-        {
-            return new Md5MessageDigest(Buffer);
-        }
-    }
-
-    public abstract class MessageDigest : ICloneable, IDisposable
-    {
-        private MemoryStream _stream;
-
-        protected MessageDigest(byte[] buffer)
-        {
-            _stream = new MemoryStream(buffer, true);
-        }
-
-        protected MessageDigest()
-        {
-            Reset();
-        }
-
         public static MessageDigest getInstance(string algorithm)
         {
             switch (algorithm.ToLower())
             {
                 case "sha-1":
-                    return new Sha1MessageDigest();
+                    return new MessageDigest<SHA1Managed>();
                 case "md5":
-                    return new Md5MessageDigest();
+                    return new MessageDigest<MD5CryptoServiceProvider>();
                 default:
                     throw new NotSupportedException(string.Format("The requested algorithm \"{0}\" is not supported.", algorithm));
             }
         }
 
-        protected byte[] Buffer
+        public abstract byte[] Digest();
+        public abstract byte[] Digest(byte[] input);
+        public abstract void Reset();
+        public abstract void Update(byte input);
+        public abstract void Update(byte[] input);
+        public abstract void Update(byte[] input, int index, int count);
+        public abstract void Dispose();
+    }
+
+    public class MessageDigest<TAlgorithm> : MessageDigest where TAlgorithm : HashAlgorithm, new()
+    {
+        private CryptoStream _stream;
+        private TAlgorithm _hash;
+
+        public MessageDigest()
         {
-            get { return _stream.ToArray(); }
+            Init();
         }
 
-        public byte[] Digest()
+        private void Init()
         {
-            var ret = Digest(_stream.ToArray());
+            _hash = new TAlgorithm();
+            _stream = new CryptoStream(Stream.Null, _hash, CryptoStreamMode.Write);
+        }
+
+        public override byte[] Digest()
+        {
+            _stream.FlushFinalBlock();
+            var ret = _hash.Hash;
             Reset();
             return ret;
         }
 
-        public abstract byte[] Digest(byte[] input);
-        public abstract object Clone();
-
-        public void Reset()
+        public override byte[] Digest(byte[] input)
         {
-            _stream = new MemoryStream();
+            using (var me = new MessageDigest<TAlgorithm>())
+            {
+                me.Update(input);
+                return me.Digest();
+            }
         }
 
-        public void Update(byte input)
+        public override void Reset()
+        {
+            Dispose();
+            Init();
+        }
+
+        public override void Update(byte input)
         {
             _stream.WriteByte(input);
         }
 
-        public void Update(byte[] input)
+        public override void Update(byte[] input)
         {
             _stream.Write(input, 0, input.Length);
         }
 
-        public void Update(byte[] input, int index, int count)
+        public override void Update(byte[] input, int index, int count)
         {
             _stream.Write(input, index, count);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
-            _stream.Dispose();
+            if (_stream != null)
+                _stream.Dispose();
+            _stream = null;
         }
     }
-
-
 }

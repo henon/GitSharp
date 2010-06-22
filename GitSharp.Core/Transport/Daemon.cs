@@ -391,7 +391,7 @@ namespace GitSharp.Core.Transport
 				const string name = "anonymous";
 				string email = name + "@" + host;
 				rp.setRefLogIdent(new PersonIdent(name, email));
-				rp.receive(stream, null);
+				rp.receive(stream, stream, null);
 			}
 		}
 

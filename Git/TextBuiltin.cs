@@ -205,6 +205,7 @@ namespace GitSharp.CLI
 					return;
 				_pager.Start();
 				Git.DefaultOutputStream = _pager.StandardInput;
+				//TODO: should handle _pager.Exited event
 			}
 			catch (Exception ex)
 			{
@@ -224,14 +225,9 @@ namespace GitSharp.CLI
 			if (_pager != null)
 			{
 				Git.DefaultOutputStream = null;
-                try
-                {
-                    _pager.StandardInput.Close();
-                    _pager.WaitForExit();
-                }
-                catch
-                {
-                }
+				try { _pager.StandardInput.Close(); } catch { }
+				_pager.WaitForExit();
+				_pager.Close();
 			}
 		}
 

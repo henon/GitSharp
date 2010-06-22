@@ -119,18 +119,12 @@ namespace GitSharp.CLI
             try
             {
                 List<String> arguments = ParseOptions(args);
-                if (arguments.Count > 0)
-                {
-                    // log always uses a pager
-                    SetupPager();
 
-                    cmd.Arguments = arguments;
-                    cmd.Execute();
-                }
-                else
-                {
-                    OfflineHelp();
-                }
+                // log always uses a pager
+                SetupPager();
+
+                cmd.Arguments = arguments;
+                cmd.Execute();
             }
             catch (System.IO.IOException)
             {

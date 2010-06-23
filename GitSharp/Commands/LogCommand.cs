@@ -659,7 +659,7 @@ namespace GitSharp.Commands
         public override void Execute()
         {
             if (Arguments.Count == 0)
-                Arguments.Add(".");
+                Arguments.Add(Directory.GetCurrentDirectory());
             foreach (var commit in Repository.Get<AbstractTreeNode>(Arguments[0]).GetHistory())
             {
                 ShowCommit(commit);

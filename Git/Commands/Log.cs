@@ -36,10 +36,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+using GitSharp.Commands;
 using System;
 using System.Collections.Generic;
-using NDesk.Options;
-using GitSharp.Commands;
+using System.IO;
+using System.Linq;
 
 namespace GitSharp.CLI
 {
@@ -123,7 +124,9 @@ namespace GitSharp.CLI
                 // log always uses a pager
                 SetupPager();
 
-                cmd.Arguments = arguments;
+                cmd.Arguments = arguments
+                                    .Select(path => Path.GetFullPath(path))
+                                    .ToList();
                 cmd.Execute();
             }
             catch (System.IO.IOException)

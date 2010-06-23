@@ -117,7 +117,10 @@ namespace GitSharp.Core.Transport
 		/// Hook to report on the commands after execution.
 		/// </summary>
 		private IPostReceiveHook postReceive;
-		private Stream raw;
+
+		private Stream rawInput;
+		private Stream rawOutput;
+
 		private PacketLineIn pckIn;
 		private PacketLineOut pckOut;
 		private StreamWriter msgs;
@@ -507,16 +510,17 @@ namespace GitSharp.Core.Transport
 		/// <summary>
 		/// Execute the receive task on the socket.
 		/// </summary>
-		/// <param name="stream">Raw input to read client commands and pack data from. Caller must ensure the input is buffered, otherwise read performance may suffer. Response back to the Git network client. Caller must ensure the output is buffered, otherwise write performance may suffer.</param>
+		/// <param name="input">Raw input to read client commands and pack data from. Caller must ensure the input is buffered, otherwise read performance may suffer. Response back to the Git network client. Caller must ensure the output is buffered, otherwise write performance may suffer.</param>
 		/// <param name="messages">Secondary "notice" channel to send additional messages out through. When run over SSH this should be tied back to the standard error channel of the command execution. For most other network connections this should be null.</param>
-		public void receive(Stream stream, Stream messages)
+		public void receive(Stream input, Stream output, Stream messages)
 		{
 			try
 			{
-				raw = stream; // NOTE: [henon] raw represents both rawIn and rawOut in jgit
+				rawInput = input;
+				rawOutput = output;
 
-				pckIn = new PacketLineIn(raw);
-				pckOut = new PacketLineOut(raw);
+				pckIn = new PacketLineIn(rawInput);
+				pckOut = new PacketLineOut(rawOutput);
 
 				// TODO: [henon] port jgit's timeout behavior which is obviously missing here
 
@@ -543,14 +547,15 @@ namespace GitSharp.Core.Transport
 											// use the original output stream as rawOut is now the
 											// side band data channel.
 											//
-						new PacketLineOut(stream).End();
+						new PacketLineOut(output).End();
 
 				}
 				finally
 				{
 					// TODO : [nulltoken] Aren't we missing some Dispose() love, here ?
 					UnlockPack();
-					raw = null;
+					rawInput = null;
+					rawOutput = null;
 					pckIn = null;
 					pckOut = null;
 					msgs = null;
@@ -713,10 +718,10 @@ namespace GitSharp.Core.Transport
 			sideBand = enabledCapabilities.Contains(BasePackPushConnection.CAPABILITY_SIDE_BAND_64K);
 			if (sideBand)
 			{
-				Stream @out = raw;
+				Stream @out = rawOutput;
 
-				raw = new SideBandOutputStream(SideBandOutputStream.CH_DATA, SideBandOutputStream.MAX_BUF, @out);
-				pckOut = new PacketLineOut(raw);
+				rawOutput = new SideBandOutputStream(SideBandOutputStream.CH_DATA, SideBandOutputStream.MAX_BUF, @out);
+				pckOut = new PacketLineOut(rawOutput);
 				msgs = new StreamWriter(new SideBandOutputStream(SideBandOutputStream.CH_PROGRESS,
 					SideBandOutputStream.MAX_BUF, @out), Constants.CHARSET);
 			}
@@ -733,7 +738,7 @@ namespace GitSharp.Core.Transport
 
 		private void receivePack()
 		{
-			indexPack = IndexPack.Create(db, raw);
+			indexPack = IndexPack.Create(db, rawInput);
 			indexPack.setFixThin(true);
 			indexPack.setNeedNewObjectIds(needNewObjectIds);
 			indexPack.setNeedBaseObjectIds(needBaseObjectIds);
@@ -1074,7 +1079,8 @@ namespace GitSharp.Core.Transport
 		public void Dispose()
 		{
 			walk.Dispose();
-			raw.Dispose();
+			rawInput.Dispose();
+			rawOutput.Dispose();
 			msgs.Dispose();
 		}
 

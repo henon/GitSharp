@@ -601,7 +601,15 @@ namespace GitSharp.Core.Util
 
         public bool Remove(string key)
         {
-            throw new NotImplementedException();
+        	Ref val;
+
+			if(TryGetValue(key, out val))
+			{
+				remove(key);
+				return true;
+			}
+
+        	return false;
         }
 
         public bool TryGetValue(string key, out Ref value)

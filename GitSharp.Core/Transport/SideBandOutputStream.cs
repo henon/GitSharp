@@ -211,12 +211,9 @@ namespace GitSharp.Core.Transport
 			}
 		}
 
-		/// <summary>
-		/// We are forced to implement this interface member even though we don't need it
-		/// </summary>
 		public override int Read(byte[] buffer, int offset, int count)
 		{
-			throw new NotSupportedException();
+			return 	_out.Read(buffer, offset, count);
 		}
 	}
 

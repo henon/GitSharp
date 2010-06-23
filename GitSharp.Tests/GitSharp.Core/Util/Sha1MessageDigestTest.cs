@@ -70,6 +70,20 @@ namespace GitSharp.Tests.GitSharp.Core.Util
             Assert.IsTrue(expected.SequenceEqual(result));
         }
 
+        [Test]
+        public void BlowTheHeap()
+        {
+            Assert.DoesNotThrow(() =>
+            {
+                MessageDigest md = CreateSUT();
+                var bytes = new byte[10000];
+                for (int i = 0; i < 100000; i++)
+                {
+                    md.Update(bytes);
+                }
+            });
+        }
+
         private static MessageDigest CreateSUT()
         {
             return MessageDigest.getInstance("SHA-1");

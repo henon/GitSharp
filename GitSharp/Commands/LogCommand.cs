@@ -658,7 +658,8 @@ namespace GitSharp.Commands
 
         public override void Execute()
         {
-            // Just to play, try out just finding the log for the first argument
+            if (Arguments.Count == 0)
+                Arguments.Add(".");
             foreach (var commit in Repository.Get<AbstractTreeNode>(Arguments[0]).GetHistory())
             {
                 ShowCommit(commit);

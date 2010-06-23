@@ -279,8 +279,9 @@ namespace GitSharp
 				revwalk.RevSortStrategy.Add(RevSort.Strategy.COMMIT_TIME_DESC);
 				revwalk.RevSortStrategy.Add(RevSort.Strategy.TOPO);
 				revwalk.markStart(revwalk.parseCommit(_id));
-				foreach (var revcommit in revwalk)
-					yield return new Commit(_repo, revcommit.AsCommit(revwalk));
+				return
+					from revcommit in revwalk.Skip(1) // skip this commit
+					select new Commit(_repo, revcommit.AsCommit(revwalk));
 			}
 		}
 

@@ -172,12 +172,17 @@ blah blah.";
 			var secs = diff.Sections.ToArray();
 			var section = secs[0];
 			Assert.AreEqual(Diff.SectionStatus.Unchanged, section.Status);
-			Assert.AreEqual("Player Queen:\r\n", section.TextA);
-			Assert.AreEqual("Player Queen:\r\n", section.TextB);
+			Assert.AreEqual(@"Player Queen:
+", section.TextA);
+			Assert.AreEqual(@"Player Queen:
+", section.TextB);
 			section = secs[1];
 			Assert.AreEqual(Diff.SectionStatus.Different, section.Status);
-			Assert.AreEqual("Both here and hence pursue me lasting strife,\r\nIf once I be a widow, ever I be a wife!\r\n", section.TextA);
-			Assert.AreEqual("blah blah\r\n", section.TextB);
+			Assert.AreEqual(@"Both here and hence pursue me lasting strife,
+If once I be a widow, ever I be a wife!
+", section.TextA);
+			Assert.AreEqual(@"blah blah
+", section.TextB);
 			section = secs[9];
 			Assert.AreEqual(Diff.SectionStatus.Different, section.Status);
 			Assert.AreEqual("The lady doth protest too much, methinks.", section.TextA);

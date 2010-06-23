@@ -46,24 +46,24 @@ namespace GitSharp.Tests.GitSharp
 	[TestFixture]
 	public class TextTests : ApiTestCase
 	{
-		const string TEXT = @"Player Queen:
-Both here and hence pursue me lasting strife,
-If once I be a widow, ever I be a wife!
-
-Player King:
-'Tis deeply sworn. Sweet, leave me here a while,
-My spirits grow dull, and fain I would beguile
-The tedious day with sleep.
-
-Player Queen:
-Sleep rock thy brain,
-And never come mischance between us twain!
-
-Hamlet:
-Madam, how like you this play?
-
-Queen:
-The lady doth protest too much, methinks.";
+		private readonly string TEXT = string.Join("\r\n", new[] { "Player Queen:",
+"Both here and hence pursue me lasting strife,",
+"If once I be a widow, ever I be a wife!",
+"",
+"Player King:",
+"'Tis deeply sworn. Sweet, leave me here a while,",
+"My spirits grow dull, and fain I would beguile",
+"The tedious day with sleep.",
+"",
+"Player Queen:",
+"Sleep rock thy brain,",
+"And never come mischance between us twain!",
+"",
+"Hamlet:",
+"Madam, how like you this play?",
+"",
+"Queen:",
+"The lady doth protest too much, methinks." });
 
 		[Test]
 		public void GetLineTest()

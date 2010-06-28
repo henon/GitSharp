@@ -436,6 +436,8 @@ namespace GitSharp.API.Tests
 				var ignoreFilePath = Path.Combine(repo.WorkingDirectory, GitSharp.Core.Constants.GITIGNORE_FILENAME);
 				// add the name of the test file to the ignore list
 				File.WriteAllText(ignoreFilePath, "*.txt");
+				repo.Index.Add(ignoreFilePath);
+				repo.Commit("Committing .gitignore file so it won't show up as untracked file");
 				var filePath = Path.Combine(repo.WorkingDirectory, "testfile.txt");
 				File.WriteAllText(filePath, "Unadded file");
 				repo.Index.AddAll();

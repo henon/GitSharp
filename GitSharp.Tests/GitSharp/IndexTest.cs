@@ -162,10 +162,10 @@ namespace GitSharp.API.Tests
 				Assert.AreEqual(new[] { "I/am/a.file" }, index.Entries);
 				Assert.IsTrue(index["I/am/a.file"].IsBlob);
 
-			    string iAmAFile = string.Format("I{0}am{0}a.file", Path.DirectorySeparatorChar);
-			    Assert.AreEqual(index["I/am/a.file"], index[iAmAFile]); // internal git slash conversion
-				
-                repo.Commit("committing our new file which is not actually present in the working directory.");
+				string iAmAFile = string.Format("I{0}am{0}a.file", Path.DirectorySeparatorChar);
+				Assert.AreEqual(index["I/am/a.file"], index[iAmAFile]); // internal git slash conversion
+
+				repo.Commit("committing our new file which is not actually present in the working directory.");
 				Assert.AreEqual(new[] { "I/am/a.file" }, index.Entries);
 				repo.SwitchToBranch(repo.CurrentBranch);
 				Assert.IsTrue(new FileInfo(Path.Combine(repo.WorkingDirectory, "I/am/a.file")).Exists);
@@ -256,9 +256,203 @@ namespace GitSharp.API.Tests
 			}
 		}
 
-		// TODO: test add's behavior on wrong input data
-		// TODO: test add "."
-		// TODO: test recursive add of directories
+		// AddAll tests
 
+		[Test]
+		public void AddAll_No_New_Files()
+		{
+			// test AddAll with empty directory results in no differences
+			var workingDirectory = Path.Combine(trash.FullName, "test");
+			using (var repo = Repository.Init(workingDirectory))
+			{
+				var status = new RepositoryStatus(repo);
+				Assert.IsFalse(status.AnyDifferences);
+				// verify AddAll does nothing as there have been no changes made
+				repo.Index.AddAll();
+				Assert.IsFalse(status.AnyDifferences);
+				Assert.AreEqual(0, status.Added.Count);
+				Assert.AreEqual(0, status.Untracked.Count);
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+			}
+		}
+
+		[Test]
+		public void AddAll_New_Files()
+		{
+			// test AddAll with one new file in the directory retults in one added file and is flagged as a difference
+			var workingDirectory = Path.Combine(trash.FullName, "test");
+			using (var repo = Repository.Init(workingDirectory))
+			{
+				var filePath = Path.Combine(repo.WorkingDirectory, "testfile.txt");
+				File.WriteAllText(filePath, "Unadded file");
+				repo.Index.AddAll();
+				var status = new RepositoryStatus(repo);
+				Assert.IsTrue(status.AnyDifferences);
+				// there should be 1 added file
+				Assert.AreEqual(1, status.Added.Count);
+				// the added file must be the file that was just added
+				status.Added.Contains(filePath);
+				// no other changes
+				Assert.AreEqual(0, status.Untracked.Count);
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+			}
+		}
+
+		[Test]
+		public void AddAll_New_Directory()
+		{
+			// test AddAll with one new direcotry is flagged as a new add
+			var workingDirectory = Path.Combine(trash.FullName, "test");
+			using (var repo = Repository.Init(workingDirectory))
+			{
+				var dirPath = Path.Combine(repo.WorkingDirectory, "testdir");
+				Directory.CreateDirectory(dirPath);
+				repo.Index.AddAll();
+				var status = new RepositoryStatus(repo);
+				Assert.IsFalse(status.AnyDifferences);
+				// there should be 0 added file
+				Assert.AreEqual(0, status.Added.Count);
+				// the added direcotry must be the directory that was just added
+				status.Added.Contains(dirPath);
+				// no other changes
+				Assert.AreEqual(0, status.Untracked.Count);
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+			}
+		}
+
+		[Test]
+		public void AddAll_New_Directory_With_File()
+		{
+			// test AddAll with one new directory and a new file inside the directory
+			var workingDirectory = Path.Combine(trash.FullName, "test");
+			using (var repo = Repository.Init(workingDirectory))
+			{
+				var dirPath = Path.Combine(repo.WorkingDirectory, "testdir");
+				Directory.CreateDirectory(dirPath);
+				var filePath = Path.Combine(dirPath, "testfile.txt");
+				File.WriteAllText(filePath, "Unadded file");
+				repo.Index.AddAll();
+				var status = new RepositoryStatus(repo);
+				Assert.IsTrue(status.AnyDifferences);
+				// there should be 1 added files
+				Assert.AreEqual(1, status.Added.Count);
+				// the added file must be the file that was just added
+				status.Added.Contains(filePath);
+				status.Added.Contains(dirPath);
+				// no other changes
+				Assert.AreEqual(0, status.Untracked.Count);
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+			}
+		}
+
+		[Test]
+		public void AddAll_New_File_And_New_Directory_With_File()
+		{
+			// test AddAll with one file, one new directory and a new file inside that directory
+			var workingDirectory = Path.Combine(trash.FullName, "test");
+			using (var repo = Repository.Init(workingDirectory))
+			{
+				var filePath = Path.Combine(repo.WorkingDirectory, "testfile.txt");
+				var dirPath = Path.Combine(repo.WorkingDirectory, "testdir");
+				var filePath2 = Path.Combine(dirPath, "testfile.txt");
+				File.WriteAllText(filePath, "Unadded file");
+				Directory.CreateDirectory(dirPath);
+				File.WriteAllText(filePath2, "Unadded file");
+				repo.Index.AddAll();
+				var status = new RepositoryStatus(repo);
+				Assert.IsTrue(status.AnyDifferences);
+				// there should be 2 added files
+				Assert.AreEqual(2, status.Added.Count);
+				// the added file must be the file that was just added
+				status.Added.Contains(filePath);
+				status.Added.Contains(filePath2);
+				status.Added.Contains(dirPath);
+				// no other changes
+				Assert.AreEqual(0, status.Untracked.Count);
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+			}
+		}
+
+		[Test]
+		public void AddAll_Directory_Recursive()
+		{
+			// test AddAll with one new directory with a directory within it and each these directories containing a new file within it
+			// root folder also contains one new file
+			var workingDirectory = Path.Combine(trash.FullName, "test");
+			using (var repo = Repository.Init(workingDirectory))
+			{
+				var dirPath = Path.Combine(repo.WorkingDirectory, "testdir");
+				var dirPath2 = Path.Combine(dirPath, "testdir2");
+				var filePath = Path.Combine(repo.WorkingDirectory, "testfile.txt");
+				var filePath2 = Path.Combine(dirPath, "testfile.txt");
+				var filePath3 = Path.Combine(dirPath2, "testfile.txt");
+				Directory.CreateDirectory(dirPath);
+				Directory.CreateDirectory(dirPath2);
+				File.WriteAllText(filePath, "Unadded file");
+				File.WriteAllText(filePath2, "Unadded file");
+				File.WriteAllText(filePath3, "Unadded file");
+				repo.Index.AddAll();
+				var status = new RepositoryStatus(repo);
+				Assert.IsTrue(status.AnyDifferences);
+				// there should be 3 added files
+				Assert.AreEqual(3, status.Added.Count);
+				// the added file must be the file that was just added
+				status.Added.Contains(dirPath);
+				status.Added.Contains(dirPath2);
+				status.Added.Contains(filePath);
+				status.Added.Contains(filePath2);
+				status.Added.Contains(filePath3);
+				// no other changes
+				Assert.AreEqual(0, status.Untracked.Count);
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+			}
+		}
+
+		[Test]
+		public void AddAll_Ignore_Files()
+		{
+			// test AddAll files added to the DOT_IGNORE file
+			var workingDirectory = Path.Combine(trash.FullName, "test");
+			using (var repo = Repository.Init(workingDirectory))
+			{
+				var ignoreFilePath = Path.Combine(repo.WorkingDirectory, GitSharp.Core.Constants.GITIGNORE_FILENAME);
+				// add the name of the test file to the ignore list
+				File.WriteAllText(ignoreFilePath, "*.txt");
+				var filePath = Path.Combine(repo.WorkingDirectory, "testfile.txt");
+				File.WriteAllText(filePath, "Unadded file");
+				repo.Index.AddAll();
+				var status = new RepositoryStatus(repo);
+				// no changes are the file should be ignored
+				Assert.IsFalse(status.AnyDifferences);
+				// there should be 0 added file
+				Assert.AreEqual(0, status.Added.Count);
+				// no other changes
+				Assert.AreEqual(0, status.Untracked.Count);
+				Assert.AreEqual(0, status.Staged.Count);
+				Assert.AreEqual(0, status.Missing.Count);
+				Assert.AreEqual(0, status.Modified.Count);
+				Assert.AreEqual(0, status.Removed.Count);
+			}
+		}
+
+		// TODO: test add's behavior on wrong input data
 	}
 }

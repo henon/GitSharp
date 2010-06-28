@@ -136,12 +136,25 @@ namespace GitSharp
 			GitIndex.add(_repo._internal_repo.WorkingDirectory, path);
 		}
 
+		private GitSharp.Core.IgnoreHandler _ignoreHandler;
+		public GitSharp.Core.IgnoreHandler IgnoreHandler
+		{
+			get
+			{
+				if (_ignoreHandler == null)
+					_ignoreHandler = new Core.IgnoreHandler(_repo);
+				return _ignoreHandler;
+			}
+		}
+
 		private void AddDirectory(DirectoryInfo dir)
 		{
 			foreach (var file in dir.GetFiles())
-				AddFile(file);
+				if (!IgnoreHandler.IsIgnored(file.FullName))
+					AddFile(file);
 			foreach (var subdir in dir.GetDirectories())
-				AddDirectory(subdir);
+				if (subdir.Name != GitSharp.Core.Constants.DOT_GIT && !IgnoreHandler.IsIgnored(subdir.FullName))
+					AddDirectory(subdir);
 		}
 
 		/// <summary>

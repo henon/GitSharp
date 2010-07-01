@@ -44,7 +44,7 @@ using NUnit.Framework;
 namespace GitSharp.API.Tests
 {
 	[TestFixture]
-	class StatusTests : ApiTestCase
+	public class StatusTests : ApiTestCase
 	{
 		[Test]
 		public void IsStatusResultAccurate()

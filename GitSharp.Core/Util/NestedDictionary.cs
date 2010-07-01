@@ -73,7 +73,9 @@ namespace GitSharp.Core.Util
 
         public static bool operator !(NestedDictionary<K, V> value)
         {
-            if (value)
+			// TODO:  Throws exception compiling under Mono https://bugzilla.novell.com/show_bug.cgi?id=618539
+            //if (value)
+			if (!(value.Value.Equals(default(V))))
                 return false;
             else
                 return true;

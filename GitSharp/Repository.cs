@@ -198,7 +198,150 @@ namespace GitSharp
 		{
 			return Index.CommitChanges(message, author);
 		}
+		
+		/// <summary>
+		/// Commit changes in the specified files and update HEAD
+		/// </summary>
+		/// <param name='message'>The commit message</param>
+		/// <param name="paths">List of files to commit</param>
+		/// <returns>Returns the newly created commit</returns>
+		public Commit Commit(string message, params string[] paths)
+		{
+			return Commit(message, new Author(Config["user.name"] ?? "unknown", Config["user.email"] ?? "unknown@(none)."), paths);
+		}
+		
+		/// <summary>
+		/// Commit changes in the specified files and update HEAD
+		/// </summary>
+		/// <param name='message'>The commit message</param>
+		/// <param name="author">The author of the content to be committed</param>
+		/// <param name="paths">List of files to commit</param>
+		/// <returns>Returns the newly created commit</returns>
+		public Commit Commit(string message, Author author, params string[] paths)
+		{
+			if (string.IsNullOrEmpty(message))
+				throw new ArgumentException("Commit message must not be null or empty!", "message");
+			if (string.IsNullOrEmpty(author.Name))
+				throw new ArgumentException("Author name must not be null or empty!", "author");
+			
+			int basePathLength = Path.GetFullPath (WorkingDirectory).TrimEnd ('/','\\').Length;
+			
+			// Expand directory paths into file paths. Convert paths to full paths.
+			List<string> filePaths = new List<string> ();
+			foreach (var path in paths) {
+				string fullPath = path;
+				if (!Path.IsPathRooted (fullPath))
+					fullPath = Path.Combine (WorkingDirectory, fullPath);
+				fullPath = Path.GetFullPath (fullPath).TrimEnd ('/','\\');
+				DirectoryInfo dir = new DirectoryInfo (fullPath);
+				if (dir.Exists)
+					filePaths.AddRange (GetDirectoryFiles (dir));
+				else
+					filePaths.Add (fullPath);
+			}
+			
+			// Read the tree of the last commit. We are going to update it.
+			GitSharp.Core.Tree tree = _internal_repo.MapTree (CurrentBranch.CurrentCommit._id);
 
+			// Keep a list of trees that have been modified, since they have to be written.
+			HashSet<GitSharp.Core.Tree> modifiedTrees = new HashSet<GitSharp.Core.Tree> ();
+			
+			// Update the tree
+			foreach (string fullPath in filePaths) {
+				string relPath = fullPath.Substring (basePathLength + 1).Replace ('\\','/');				
+				TreeEntry treeEntry = tree.FindBlobMember (relPath);
+				
+				if (File.Exists (fullPath)) {
+					// Looks like an old directory is now a file. Delete the subtree and create a new entry for the file.
+					if (!(treeEntry is FileTreeEntry))
+						treeEntry.Delete ();
+
+					FileTreeEntry fileEntry = treeEntry as FileTreeEntry;
+					var writer = new ObjectWriter (_internal_repo);
+					bool executable = GitSharp.Core.Util.FS.canExecute (new FileInfo (fullPath));
+					ObjectId id = writer.WriteBlob (new FileInfo (fullPath));
+					if (fileEntry == null) {
+						// It's a new file. Add it.
+						fileEntry = (FileTreeEntry) tree.AddFile (relPath);
+						treeEntry = fileEntry;
+					} else if (fileEntry.Id == id && executable == fileEntry.IsExecutable) {
+						// Same file, ignore it
+						continue;
+					}
+					
+					fileEntry.Id = id;
+					fileEntry.SetExecutable (executable);
+				}
+				else {
+					// Deleted file or directory. Remove from the tree
+					if (treeEntry != null) {
+						GitSharp.Core.Tree ptree = treeEntry.Parent;
+						treeEntry.Delete ();
+						// Remove the subtree if it's now empty
+						while (ptree != null && ptree.MemberCount == 0) {
+							GitSharp.Core.Tree nextParent = ptree.Parent;
+							ptree.Delete ();
+							ptree = nextParent;
+						}
+					}
+					else
+						continue; // Already deleted.
+				}
+				modifiedTrees.Add (treeEntry.Parent);
+			}
+
+			// check if tree is different from current commit's tree
+			if (modifiedTrees.Count == 0)
+				throw new InvalidOperationException("There are no changes to commit");
+			
+			// Create new trees if there is any change
+			ObjectId tree_id = SaveTree (tree, modifiedTrees);
+
+			// Create the commit
+			var parent = CurrentBranch.CurrentCommit;
+			var commit = GitSharp.Commit.Create(message, parent, new Tree(this, tree_id), author);
+			Ref.Update("HEAD", commit);
+			
+			// Unstage updated files
+			Index.Unstage (paths);
+			
+			return commit;
+		}
+		
+		IEnumerable<string> GetDirectoryFiles (DirectoryInfo dir)
+		{
+			// Recursively get the list of files in the directory (which are not ignored)
+			return dir.GetFiles ()
+						.Where (f => !Index.IgnoreHandler.IsIgnored (f.FullName))
+						.Select (f => f.FullName)
+				   .Concat (dir.GetDirectories ()
+						.Where (di => !Index.IgnoreHandler.IsIgnored (di.FullName) && di.Name != GitSharp.Core.Constants.DOT_GIT)
+						.SelectMany (di => GetDirectoryFiles (di)));
+		}
+		
+		ObjectId SaveTree (GitSharp.Core.Tree tree, HashSet<GitSharp.Core.Tree> modifiedTrees)
+		{
+			// Saves tree that have been modified (that is, which are in the provided list or
+			// which have child trees that have been modified)
+			
+			bool childModified = false;
+			foreach (var te in tree.Members) {
+				GitSharp.Core.Tree childTree = te as GitSharp.Core.Tree;
+				if (childTree != null) {
+					ObjectId newId = SaveTree (childTree, modifiedTrees);
+					if (newId != null) {
+						childTree.Id = newId;
+						childModified = true;
+					}
+				}
+			}
+			if (childModified || modifiedTrees.Contains (tree)) {
+				ObjectWriter writer = new ObjectWriter (_internal_repo);
+				return writer.WriteTree (tree);
+			} else
+				return null;
+		}
+		
 		public IDictionary<string, Ref> Refs
 		{
 			get

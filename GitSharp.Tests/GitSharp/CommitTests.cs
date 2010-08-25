@@ -167,5 +167,49 @@ namespace GitSharp.API.Tests
 				Assert.AreNotEqual(ancestors.First().Hash, commit.Hash);
 			}
 		}
+
+		[Test]
+		public void Commit_file_list()
+		{
+			using (var repo = GetTrashRepository())
+			{
+				var workingDirectory = repo.WorkingDirectory;
+				string file1 = Path.Combine(workingDirectory, "file1");
+				string file2 = Path.Combine(workingDirectory, "file2");
+				File.WriteAllText(file1, "This is a really short readme file\n\nWill write up some text here.");
+				File.WriteAllText(file2, "This is a really short readme file\n\nWill write up some text here.");
+				repo.Index.Add(file1);
+				repo.Index.Add(file2);
+
+				var status = repo.Status;
+				Assert.IsTrue (status.Added.Contains("file1"));
+				Assert.IsTrue (status.Added.Contains("file2"));
+				
+				var commit = repo.Commit("Adding ä README\n\n", new Author("müller", "müller@gitsharp.org"), file2);
+				Assert.NotNull(commit);
+				Assert.IsTrue(commit.IsCommit);
+				Assert.AreEqual(commit.Parent.Hash, "49322bb17d3acc9146f98c97d078513228bbf3c0");
+				Assert.AreEqual("müller", commit.Author.Name);
+				Assert.AreEqual("müller@gitsharp.org", commit.Author.EmailAddress);
+				Assert.AreEqual("Adding ä README\n\n", commit.Message);
+				
+				// Check that file1 was not committed
+				status = repo.Status;
+				Assert.IsTrue (status.Added.Contains("file1"));
+				Assert.IsFalse (status.Added.Contains("file2"));
+				
+				// check if tree contains the new file, get the blob and check  the content.
+				Assert.AreEqual(commit, repo.Head.CurrentCommit);
+				var previous = new Commit(repo, "HEAD^");
+				Assert.IsTrue(previous.IsCommit);
+				Assert.AreEqual(previous, commit.Parent);
+				var changes = commit.CompareAgainst(previous).ToDictionary(change => change.Name);
+				Assert.AreEqual(ChangeType.Added, changes["file2"].ChangeType);
+				Assert.IsFalse(changes.ContainsKey ("file1"));
+				Assert.AreEqual("This is a really short readme file\n\nWill write up some text here.",
+									 (changes["file2"].ComparedObject as Blob).Data);
+
+			}
+		}
 	}
 }

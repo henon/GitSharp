@@ -55,8 +55,10 @@ namespace GitSharp.Tests.GitSharp
 				Assert.AreEqual("master", repo.CurrentBranch.Name); // creating a new branch does not switch to it by default.
 				Assert.AreEqual(repo.Head.CurrentCommit, b.CurrentCommit);
 				Assert.IsTrue(repo.Branches.ContainsKey("foo"));
+				Branch b2 = repo.Branches["foo"];
+				Assert.AreEqual(b.Name, b2.Name);
 				Assert.AreEqual(new Branch(repo, "foo"), b);
-				Assert.AreEqual(b, repo.Branches["foo"]);
+				Assert.AreEqual(b, b2);
 			}
 		}
 
@@ -356,6 +358,39 @@ namespace GitSharp.Tests.GitSharp
 				Assert.AreEqual(0, repo.Status.Added.Count);
 				Assert.AreEqual(0, repo.Status.Staged.Count);
 				Assert.AreEqual(c1.Parent.Parent, repo.Head.CurrentCommit);
+			}
+		}
+
+		[Test]
+		public void Rename()
+		{
+			using (Repository repo = GetTrashRepository())
+			{
+				var foo = Branch.Create(repo, "foo");
+				Assert.AreEqual("foo", foo.Name);
+				
+				foo.Rename ("bar");
+				Assert.AreEqual("bar", foo.Name);
+				Assert.IsFalse (repo.Branches.ContainsKey ("foo"));
+				Assert.IsTrue (repo.Branches.ContainsKey ("bar"));
+				
+				Branch bar = repo.Branches ["bar"];
+				Assert.AreEqual("bar", bar.Name);
+			}
+		}
+
+		[Test]
+		public void Delete()
+		{
+			using (Repository repo = GetTrashRepository())
+			{
+				var foo = Branch.Create(repo, "foo");
+				Assert.AreEqual("foo", foo.Name);
+				Assert.IsTrue (repo.Branches.ContainsKey ("foo"));
+				
+				foo.Delete ();
+				
+				Assert.IsFalse (repo.Branches.ContainsKey ("foo"));
 			}
 		}
 	}

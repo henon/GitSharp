@@ -72,7 +72,11 @@ namespace GitSharp
 		public string Name
 		{
 			get;
-			private set;
+			protected set;
+		}
+		
+		protected virtual string RefName {
+			get { return Name; }
 		}
 
 		/// <summary>
@@ -115,7 +119,7 @@ namespace GitSharp
 		public void Update(AbstractObject reference)
 		{
 			var db = _repo._internal_repo;
-			var updateRef = db.UpdateRef(this.Name);
+			var updateRef = db.UpdateRef(RefName);
 			updateRef.NewObjectId = reference._id;
 			updateRef.IsForceUpdate = true;
 			updateRef.update();

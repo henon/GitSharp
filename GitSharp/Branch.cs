@@ -55,14 +55,16 @@ namespace GitSharp
 	/// </summary>
 	public class Branch : Ref
 	{
-
+		string _ref_name;
+		
 		/// <summary>
 		/// Open a branch by resolving a reference (such as HEAD)
 		/// </summary>
 		/// <param name="ref"></param>
 		public Branch(Ref @ref)
-			: base(@ref._repo, @ref.Name)
+			: base(@ref._repo, GetBranchName (@ref.Name))
 		{
+			_ref_name = GetRefName (_ref_name);
 		}
 
 		/// <summary>
@@ -71,13 +73,39 @@ namespace GitSharp
 		/// <param name="repo"></param>
 		/// <param name="name"></param>
 		public Branch(Repository repo, string name)
-			: base(repo, name)
+			: base(repo, GetBranchName (name))
 		{
+			_ref_name = GetRefName (name);
 		}
 
 		internal Branch(Repository repo, CoreRef @ref)
-			: this(repo, @ref.Name)
+			: this(repo, GetBranchName (@ref.Name))
 		{
+			_ref_name = GetRefName (@ref.Name);
+		}
+		
+		static string GetBranchName (string name)
+		{
+			if (name.StartsWith (Constants.R_HEADS))
+				return name.Substring (Constants.R_HEADS.Length);
+			else if (name.StartsWith (Constants.R_REMOTES))
+				return name.Substring (Constants.R_REMOTES.Length);
+			else
+				return name;
+		}
+		
+		static string GetRefName (string name)
+		{
+			if (name.StartsWith (Constants.R_HEADS))
+				return name;
+			else if (name.StartsWith (Constants.R_REMOTES))
+				return name;
+			else
+				return Constants.R_HEADS + name;
+		}
+		
+		protected override string RefName {
+			get { return _ref_name; }
 		}
 
 		/// <summary>
@@ -85,7 +113,7 @@ namespace GitSharp
 		/// </summary>
 		public string Fullname
 		{
-			get { return Constants.R_HEADS + Name; }
+			get { return RefName; }
 		}
 
 		/// <summary>
@@ -112,6 +140,43 @@ namespace GitSharp
 			get;
 			internal set;
 		}
+		
+		public string UpstreamSource {
+			get {
+				string remote = _repo._internal_repo.Config.getString ("branch", Name, "remote");
+				string branch = _repo._internal_repo.Config.getString ("branch", Name, "merge");
+				if (string.IsNullOrEmpty (branch))
+					return null;
+				if (branch.StartsWith (Constants.R_HEADS))
+					branch = branch.Substring (Constants.R_HEADS.Length);
+				else if (branch.StartsWith (Constants.R_TAGS))
+					branch = branch.Substring (Constants.R_TAGS.Length);
+				if (!string.IsNullOrEmpty (remote) && remote != ".")
+					return remote + "/" + branch;
+				else
+					return branch;
+			}
+			set {
+				if (string.IsNullOrEmpty (value)) {
+					_repo._internal_repo.Config.unsetSection ("branch", Name);
+					return;
+				}
+				
+				int i = value.IndexOf ('/');
+				string branch;
+				if (i == -1) {
+					if (_repo.Tags.ContainsKey (value))
+						branch = Constants.R_TAGS + value;
+					else
+						branch = Constants.R_HEADS + value;
+					_repo._internal_repo.Config.setString ("branch", Name, "remote", ".");
+				} else {
+					branch = Constants.R_HEADS + value.Substring (i + 1);
+					_repo._internal_repo.Config.setString ("branch", Name, "remote", value.Substring (0, i));
+				}
+				_repo._internal_repo.Config.setString ("branch", Name, "merge", branch);
+			}
+		}
 
 		#region --> Merging
 
@@ -131,12 +196,13 @@ namespace GitSharp
 
 		/// <summary>
 		/// Delete this branch
-		/// 
-		/// Not yet implemented!
 		/// </summary>
 		public void Delete()
 		{
-			throw new NotImplementedException();
+			var db = _repo._internal_repo;
+			var updateRef = db.UpdateRef(RefName);
+			updateRef.IsForceUpdate = true;
+			updateRef.delete ();
 		}
 
 		/// <summary>
@@ -146,18 +212,19 @@ namespace GitSharp
 		{
 			var db = _repo._internal_repo;
 			RefUpdate u = db.UpdateRef(Constants.HEAD);
-			u.link(Constants.R_HEADS + this.Name);
+			u.link(RefName);
 			Reset(ResetBehavior.Hard);
 		}
 
 		/// <summary>
 		/// Rename the Branch. 
-		/// 
-		/// Not yet implemented!
 		/// </summary>
-		public void Rename(string name)
+		public void Rename (string name)
 		{
-			throw new NotImplementedException();
+			var db = _repo._internal_repo;
+			var renameRef = db.RenameRef(RefName, GetRefName (name));
+			renameRef.rename ();
+			Name = name;
 		}
 
 		#region --> Reset
@@ -255,7 +322,7 @@ namespace GitSharp
 		{
 			if (string.IsNullOrEmpty(name))
 				throw new ArgumentException("Branch name must not be null or empty");
-			Ref.Update("refs/heads/" + name, repo.Head.CurrentCommit);
+			Ref.Update(GetRefName (name), repo.Head.CurrentCommit);
 			return new Branch(repo, name);
 		}
 
@@ -272,7 +339,7 @@ namespace GitSharp
 				throw new ArgumentException("Branch name must not be null or empty", "name");
 			if (commit == null || !commit.IsCommit)
 				throw new ArgumentException("Invalid commit", "commit");
-			Ref.Update("refs/heads/" + name, commit);
+			Ref.Update(GetRefName (name), commit);
 			return new Branch(repo, name);
 		}
 

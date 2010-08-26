@@ -65,6 +65,20 @@ namespace GitSharp
 			Repository = repository;
 			Options = options;
 			IgnoreHandler = new IgnoreHandler(Repository);
+			_root_path = string.Empty;
+			_recursive = true;
+			Update();
+		}
+
+		internal RepositoryStatus(Repository repository, RepositoryStatusOptions options, string singleFile, string rootDir, bool recursive)
+		{
+			Repository = repository;
+			Options = options ?? new RepositoryStatusOptions { ForceContentCheck = true };
+			IgnoreHandler = new IgnoreHandler(Repository);
+			_root_path = Repository.ToGitPath (rootDir);
+			_recursive = recursive;
+			_file_path = Repository.ToGitPath (singleFile);
+			Update();
 		}
 
 		public Repository Repository
@@ -73,21 +87,6 @@ namespace GitSharp
 			private set;
 		}
 		
-		internal void DiffDirectory (string path, bool recursive)
-		{
-			_root_path = Repository.ToGitPath (path);
-			_recursive = recursive;
-			_file_path = null;
-			Update();
-		}
-
-		internal void DiffFile (string filePath)
-		{
-			_file_path = Repository.ToGitPath (filePath);
-			_root_path = null;
-			Update();
-		}
-
 		/// <summary>
 		/// 
 		/// </summary>

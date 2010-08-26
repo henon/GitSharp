@@ -65,7 +65,6 @@ namespace GitSharp.Commands
         public override void Execute()
         {
             RepositoryStatus status = new RepositoryStatus(Repository);
-			status.DiffDirectory ("", true);
             
             IgnoreRules rules;
 

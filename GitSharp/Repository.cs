@@ -421,49 +421,40 @@ namespace GitSharp
 		{
 			get
 			{
-				RepositoryStatus rs = new RepositoryStatus(this);
-				rs.DiffDirectory ("", true);
-				return rs;
+				return new RepositoryStatus(this, null, null, "", true);
 			}
 		}
 		
 		public RepositoryStatus GetStatus (RepositoryStatusOptions options)
 		{
-			RepositoryStatus rs = new RepositoryStatus(this, options);
-			rs.DiffDirectory ("", true);
-			return rs;
+			return new RepositoryStatus(this, options, null, "", true);
 		}
 
 		public RepositoryStatus GetDirectoryStatus (string path, bool recursive)
 		{
-			RepositoryStatus rs = new RepositoryStatus(this);
-			rs.DiffDirectory (path, recursive);
-			return rs;
+			return new RepositoryStatus(this, null, null, path, recursive);
 		}
 
 		public RepositoryStatus GetDirectoryStatus (string path, bool recursive, RepositoryStatusOptions options)
 		{
-			RepositoryStatus rs = new RepositoryStatus(this, options);
-			rs.DiffDirectory (path, recursive);
-			return rs;
+			return new RepositoryStatus(this, options, null, path, recursive);
 		}
 
 		public RepositoryStatus GetFileStatus (string path)
 		{
-			RepositoryStatus rs = new RepositoryStatus(this);
-			rs.DiffFile (path);
-			return rs;
+			return new RepositoryStatus(this, null, path, null, false);
 		}
 		
 		public RepositoryStatus GetFileStatus (string path, RepositoryStatusOptions options)
 		{
-			RepositoryStatus rs = new RepositoryStatus(this, options);
-			rs.DiffFile (path);
-			return rs;
+			return new RepositoryStatus(this, options, path, null, false);
 		}
 		
 		public string ToGitPath (string path)
 		{
+			if (path == null)
+				return null;
+			
 			// If the path is absolute, make it relative to the working dir
 			if (Path.IsPathRooted (path)) {
 				string repoPath = WorkingDirectory.TrimEnd (Path.DirectorySeparatorChar);
@@ -481,7 +472,10 @@ namespace GitSharp
 		
 		public string FromGitPath (string path)
 		{
-			if (string.IsNullOrEmpty (path))
+			if (path == null)
+				return null;
+			
+			if (path.Length == 0)
 				return WorkingDirectory;
 			if (Path.DirectorySeparatorChar != '/')
 				path = path.Replace ('/', Path.DirectorySeparatorChar);

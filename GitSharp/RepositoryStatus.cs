@@ -232,13 +232,12 @@ namespace GitSharp
 			
 			// Finally, visit remaining index entries which are not in the working dir nor in the commit
 			
-			string subdir_prefix = !string.IsNullOrEmpty (_root_path) ? _root_path + "/" : string.Empty;
-			
 			foreach (var ie in _index.Members) {
 				string file = ie.Name;
 				// Exclude entries in subdirectories of _root_path 
-				int i = file.IndexOf ('/', subdir_prefix.Length + 1);
-				if (i == -1 && !visited.Contains (file))
+				int i = file.LastIndexOf ('/');
+				string fdir = i != -1 ? file.Substring (0, i) : string.Empty;
+				if (fdir == _root_path && !visited.Contains (file))
 					OnVisitEntry (null, null, ie, new FileInfo (Repository.FromGitPath (file)));
 			}
 		}

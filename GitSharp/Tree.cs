@@ -222,7 +222,7 @@ namespace GitSharp
 
 		public static implicit operator CoreTree(Tree t)
 		{
-			return t._internal_tree;
+			return t != null ? t._internal_tree : null;
 		}
 
 

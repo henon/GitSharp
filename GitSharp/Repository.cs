@@ -58,7 +58,7 @@ namespace GitSharp
 		#region Constructors
 
 		internal CoreRepository _internal_repo;
-
+		
 		internal Repository(CoreRepository repo)
 		{
 			//PreferredEncoding = Encoding.UTF8;
@@ -253,7 +253,7 @@ namespace GitSharp
 				
 				if (File.Exists (fullPath)) {
 					// Looks like an old directory is now a file. Delete the subtree and create a new entry for the file.
-					if (!(treeEntry is FileTreeEntry))
+					if (treeEntry != null && !(treeEntry is FileTreeEntry))
 						treeEntry.Delete ();
 
 					FileTreeEntry fileEntry = treeEntry as FileTreeEntry;
@@ -401,7 +401,7 @@ namespace GitSharp
 				return dict;
 			}
 		}
-
+		
 		/// <summary>
 		/// Returns the git configuration containing repository-specific, user-specific and global 
 		/// settings.
@@ -421,8 +421,71 @@ namespace GitSharp
 		{
 			get
 			{
-				return new RepositoryStatus(this);
+				RepositoryStatus rs = new RepositoryStatus(this);
+				rs.DiffDirectory ("", true);
+				return rs;
 			}
+		}
+		
+		public RepositoryStatus GetStatus (RepositoryStatusOptions options)
+		{
+			RepositoryStatus rs = new RepositoryStatus(this, options);
+			rs.DiffDirectory ("", true);
+			return rs;
+		}
+
+		public RepositoryStatus GetDirectoryStatus (string path, bool recursive)
+		{
+			RepositoryStatus rs = new RepositoryStatus(this);
+			rs.DiffDirectory (path, recursive);
+			return rs;
+		}
+
+		public RepositoryStatus GetDirectoryStatus (string path, bool recursive, RepositoryStatusOptions options)
+		{
+			RepositoryStatus rs = new RepositoryStatus(this, options);
+			rs.DiffDirectory (path, recursive);
+			return rs;
+		}
+
+		public RepositoryStatus GetFileStatus (string path)
+		{
+			RepositoryStatus rs = new RepositoryStatus(this);
+			rs.DiffFile (path);
+			return rs;
+		}
+		
+		public RepositoryStatus GetFileStatus (string path, RepositoryStatusOptions options)
+		{
+			RepositoryStatus rs = new RepositoryStatus(this, options);
+			rs.DiffFile (path);
+			return rs;
+		}
+		
+		public string ToGitPath (string path)
+		{
+			// If the path is absolute, make it relative to the working dir
+			if (Path.IsPathRooted (path)) {
+				string repoPath = WorkingDirectory.TrimEnd (Path.DirectorySeparatorChar);
+				path = Path.GetFullPath (path).TrimEnd (Path.DirectorySeparatorChar);
+				if (path != repoPath) {
+					if (!path.StartsWith (repoPath + Path.DirectorySeparatorChar))
+						throw new InvalidOperationException ("Path does not belong to the repository");
+					path = path.Substring (repoPath.Length + 1);
+				}
+			}
+			if (Path.DirectorySeparatorChar != '/')
+				path = path.Replace (Path.DirectorySeparatorChar, '/');
+			return path;
+		}
+		
+		public string FromGitPath (string path)
+		{
+			if (string.IsNullOrEmpty (path))
+				return WorkingDirectory;
+			if (Path.DirectorySeparatorChar != '/')
+				path = path.Replace ('/', Path.DirectorySeparatorChar);
+			return Path.Combine (WorkingDirectory, path);
 		}
 
 		public static implicit operator CoreRepository(Repository repo)

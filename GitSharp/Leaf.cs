@@ -57,6 +57,10 @@ namespace GitSharp
 
 		private FileTreeEntry _internal_file_tree_entry;
 
+		internal FileTreeEntry InternalEntry {
+			get { return _internal_file_tree_entry; }
+		}
+		
 		/// <summary>
 		/// True if the file is executable (unix).
 		/// </summary>

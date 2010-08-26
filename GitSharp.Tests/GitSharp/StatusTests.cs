@@ -40,75 +40,260 @@ using GitSharp.Core.Tests;
 using GitSharp.Commands;
 using GitSharp.Tests.GitSharp;
 using NUnit.Framework;
+using System.Collections.Generic;
+using System;
+using System.Collections;
 
 namespace GitSharp.API.Tests
 {
 	[TestFixture]
 	public class StatusTests : ApiTestCase
 	{
-		[Test]
-		public void IsStatusResultAccurate()
+		const string filename = "newfile.txt";
+		const string filenameSubdir1 = "subdir1/newfile.txt";
+		const string filenameSubdir2 = "subdir1/subdir2/newfile.txt";
+		
+		int repCount;
+		
+		delegate RepositoryStatus StatusOperation (Repository repo, List<string> outFilesToCheck);
+
+		void RunStatusTests(StatusOperation oper)
 		{
             //Due to the cumulative nature of these tests, rather than recreate the same 
             // conditions multiple times, all StatusResult testing has been rolled into one test.
-			bool bare = false;
-			var path = Path.Combine(trash.FullName, "test");
-            using (var repo = Repository.Init(path, bare))
+			
+			var path = Path.Combine(trash.FullName, "test" + ++repCount);
+			if (Directory.Exists (path)) {
+				Directory.Delete (path, true);
+				Directory.CreateDirectory (path);
+			}
+            using (var repo = Repository.Init(path, false))
             {
-                StatusCommand cmd = new StatusCommand();
-                Assert.IsNotNull(cmd);
-                cmd.Repository = repo;
-                Assert.IsNotNull(cmd.Repository);
+				List<string> filesToCheck = new List<string> ();
+				
                 //Verify the file has not already been created
-                string filename = "newfile.txt";
-                StatusResults results = Git.Status(cmd);
-                Assert.IsNotNull(results);
-                Assert.IsFalse(results.Contains(filename, StatusState.Untracked));
-                
-                //Create the file and verify the file is untracked
-                string filepath = Path.Combine(repo.WorkingDirectory, filename);
-                File.WriteAllText(filepath, "Just a simple test.");
-                //Re-populate the status results
-                results.Clear();
-                results = Git.Status(cmd);
-                Assert.IsNotNull(results);
-                Assert.IsFalse(results.Contains(filename, StatusState.Staged));
-                Assert.IsFalse(results.Contains(filename, StatusState.Modified));
-                Assert.IsTrue(results.Contains(filename, StatusState.Untracked));
-                
-                //Add the file to the index and verify the file is modified
-                Index index = new Index(repo);
-                index.Add(filepath);
-                //Re-populate the status results
-                results.Clear();
-                results = Git.Status(cmd);
-                Assert.IsNotNull(results);
-                Assert.IsTrue(results.Contains(filename, StatusState.Staged));
-                Assert.IsFalse(results.Contains(filename, StatusState.Modified));
-                Assert.IsFalse(results.Contains(filename, StatusState.Untracked));
-                
-                //Change the modified file status to staged and verify the file is staged.
-                index.Add(filepath);
-                //Re-populate the status results
-                results.Clear();
-                results = Git.Status(cmd);
-                Assert.IsNotNull(results);
-                Assert.IsTrue(results.Contains(filename, StatusState.Staged));
-                Assert.IsFalse(results.Contains(filename, StatusState.Modified));
-                Assert.IsFalse(results.Contains(filename, StatusState.Untracked));
+				filesToCheck.Clear ();
+				RepositoryStatus results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename);
+                AssertStatus (results, filesToCheck, filenameSubdir1);
+                AssertStatus (results, filesToCheck, filenameSubdir2);
 
-                // Modify the staged file and verify the file is both modified 
-                // and staged simultaneously.
-                File.AppendAllText(filepath, "Appended a line.");
-                //Re-populate the status results
-                results.Clear();
-                results = Git.Status(cmd);
-                Assert.IsNotNull(results);
-                Assert.IsTrue(results.Contains(filename, StatusState.Staged));
-                Assert.IsTrue(results.Contains(filename, StatusState.Modified));
-                Assert.IsFalse(results.Contains(filename, StatusState.Untracked));
+	            //Create the files and verify the files are untracked
+				if (!Directory.Exists (repo.FromGitPath ("subdir1/subdir2")))
+					Directory.CreateDirectory (repo.FromGitPath ("subdir1/subdir2"));
+	            File.WriteAllText(repo.FromGitPath (filename), "Just a simple test.");
+	            File.WriteAllText(repo.FromGitPath (filenameSubdir1), "Just a simple test.");
+	            File.WriteAllText(repo.FromGitPath (filenameSubdir2), "Just a simple test.");
+				
+				filesToCheck.Clear ();
+				results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir1, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
+				
+				// Modify a file
+				File.WriteAllText(repo.FromGitPath (filenameSubdir1), "Just a simple modified test.");
+				
+				filesToCheck.Clear ();
+				results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir1, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
+				
+				//Add an unmodified file to the index
+	            File.WriteAllText(repo.FromGitPath (filenameSubdir1), "Just a simple test.");
+				Index index = new Index(repo);
+				index.Add(filenameSubdir1);
+				
+				filesToCheck.Clear ();
+				results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir1, results.Added);
+                AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
 
-            }
+				//Modify file in the index
+				File.WriteAllText(repo.FromGitPath (filenameSubdir1), "Just a simple modified test.");
+				
+				filesToCheck.Clear ();
+				results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir1, results.Modified, results.Added);
+                AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
+
+				// Commit the added file
+				repo.Commit ("test 1");
+				
+				filesToCheck.Clear ();
+				results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir1, results.Modified);
+                AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
+
+				// Commit the modification
+				index.Add (filenameSubdir1);
+				repo.Commit ("test 2");
+				
+				filesToCheck.Clear ();
+				results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir1);
+                AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
+
+				// Modify the committed file
+				File.WriteAllText(repo.FromGitPath (filenameSubdir1), "Modified after commit.");
+				
+				filesToCheck.Clear ();
+				results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir1, results.Modified);
+                AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
+
+				// Remove the committed file
+				File.Delete (repo.FromGitPath (filenameSubdir1));
+				
+				filesToCheck.Clear ();
+				results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir1, results.Removed);
+                AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
+
+				// Stage the file removal
+				index.Remove (filenameSubdir1);
+				
+				filesToCheck.Clear ();
+				results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir1, results.Removed);
+                AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
+				
+				// Commit changes
+				repo.Commit ("test 3");
+				filesToCheck.Clear ();
+				results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir1);
+                AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
+				
+				// Modify the committed file, stage it and delete it
+				File.WriteAllText(repo.FromGitPath (filenameSubdir1), "Modified before delete.");
+				index.Add (filenameSubdir1);
+				File.Delete (repo.FromGitPath (filenameSubdir1));
+				filesToCheck.Clear ();
+				results = oper (repo, filesToCheck);
+                AssertStatus (results, filesToCheck, filename, results.Untracked);
+                AssertStatus (results, filesToCheck, filenameSubdir1, results.Added, results.Removed);
+                AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
+			}
+		}
+		
+		void AssertStatus (RepositoryStatus results, List<string> filesToCheck, string file, params HashSet<string>[] fileStatuses)
+		{
+			Assert.IsNotNull(results);
+			
+			var allStatus = new HashSet<string> [] {
+				results.Added,
+				results.MergeConflict,
+				results.Missing,
+				results.Modified,
+				results.Removed,
+				results.Staged,
+				results.Untracked
+			};
+			
+			var allStatusName = new string[] {
+				"Added",
+				"MergeConflict",
+				"Missing",
+				"Modified",
+				"Removed",
+				"Staged",
+				"Untracked"
+			};
+			
+			if (!filesToCheck.Contains (file))
+				fileStatuses = new HashSet<string>[0];
+			
+			for (int n=0; n<allStatus.Length; n++) {
+				var status = allStatus [n];
+				if (((IList)fileStatuses).Contains (status))
+					Assert.IsTrue (status.Contains (file), "File " + file + " not found in " + allStatusName[n] + " collection");
+				else
+					Assert.IsFalse (status.Contains (file), "File " + file + " should no be in " + allStatusName[n] + " collection");
+			}
+		}
+		
+		[Test]
+		public void TestRecursiveDirectoryRoot ()
+		{
+			RunStatusTests (delegate (Repository repo, List<string> outFilesToCheck) {
+				outFilesToCheck.Add (filename);
+				outFilesToCheck.Add (filenameSubdir1);
+				outFilesToCheck.Add (filenameSubdir2);
+				return repo.GetDirectoryStatus ("", true);
+			});
+		}
+
+		[Test]
+		public void TestRecursiveDirectorySubdir1 ()
+		{
+			RunStatusTests (delegate (Repository repo, List<string> outFilesToCheck) {
+				outFilesToCheck.Add (filenameSubdir1);
+				outFilesToCheck.Add (filenameSubdir2);
+				return repo.GetDirectoryStatus ("subdir1", true);
+			});
+		}
+
+		[Test]
+		public void TestRecursiveDirectorySubdir2 ()
+		{
+			RunStatusTests (delegate (Repository repo, List<string> outFilesToCheck) {
+				outFilesToCheck.Add (filenameSubdir2);
+				return repo.GetDirectoryStatus ("subdir1/subdir2", true);
+			});
+		}
+
+		[Test]
+		public void TestNonrecursiveDirectoryRoot ()
+		{
+			RunStatusTests (delegate (Repository repo, List<string> outFilesToCheck) {
+				outFilesToCheck.Add (filename);
+				return repo.GetDirectoryStatus ("", false);
+			});
+		}
+
+		[Test]
+		public void TestNonrecursiveDirectorySubdir1 ()
+		{
+			RunStatusTests (delegate (Repository repo, List<string> outFilesToCheck) {
+				outFilesToCheck.Add (filenameSubdir1);
+				return repo.GetDirectoryStatus ("subdir1", false);
+			});
+		}
+
+		[Test]
+		public void TestNonrecursiveDirectorySubdir2 ()
+		{
+			RunStatusTests (delegate (Repository repo, List<string> outFilesToCheck) {
+				outFilesToCheck.Add (filenameSubdir2);
+				return repo.GetDirectoryStatus ("subdir1/subdir2", false);
+			});
+		}
+
+		[Test]
+		public void TestFileStatus ()
+		{
+			RunStatusTests (delegate (Repository repo, List<string> outFilesToCheck) {
+				outFilesToCheck.Add (filename);
+				return repo.GetFileStatus (filename);
+			});
+			RunStatusTests (delegate (Repository repo, List<string> outFilesToCheck) {
+				outFilesToCheck.Add (filenameSubdir1);
+				return repo.GetFileStatus (filenameSubdir1);
+			});
+			RunStatusTests (delegate (Repository repo, List<string> outFilesToCheck) {
+				outFilesToCheck.Add (filenameSubdir2);
+				return repo.GetFileStatus (filenameSubdir2);
+			});
 		}
 	}
 }

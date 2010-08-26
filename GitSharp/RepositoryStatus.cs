@@ -38,6 +38,7 @@
  */
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -50,6 +51,9 @@ namespace GitSharp
 
 		private GitIndex _index;
 		private Core.Tree _tree;
+		private string _root_path;
+		private bool _recursive;
+		private string _file_path;
 
 		public RepositoryStatus(Repository repository)
 			: this(repository, new RepositoryStatusOptions { ForceContentCheck = true })
@@ -60,13 +64,28 @@ namespace GitSharp
 		{
 			Repository = repository;
 			Options = options;
-			Update();
+			IgnoreHandler = new IgnoreHandler(Repository);
 		}
 
 		public Repository Repository
 		{
 			get;
 			private set;
+		}
+		
+		internal void DiffDirectory (string path, bool recursive)
+		{
+			_root_path = Repository.ToGitPath (path);
+			_recursive = recursive;
+			_file_path = null;
+			Update();
+		}
+
+		internal void DiffFile (string filePath)
+		{
+			_file_path = Repository.ToGitPath (filePath);
+			_root_path = null;
+			Update();
 		}
 
 		/// <summary>
@@ -117,10 +136,32 @@ namespace GitSharp
 		public bool AnyDifferences { get; private set; }
 
 		/// <summary>
+		/// Recalculates the status
+		/// </summary>
+		public void Update()
+		{
+			AnyDifferences = false;
+			Added = new HashSet<string>();
+			Staged = new HashSet<string>();
+			Removed = new HashSet<string>();
+			Missing = new HashSet<string>();
+			Modified = new HashSet<string>();
+			Untracked = new HashSet<string>();
+			MergeConflict = new HashSet<string>();
+			
+			if (_file_path != null)
+				UpdateSingleFile (_file_path);
+			else if (_recursive)
+				UpdateDirectoryRecursive (_root_path);
+			else
+				UpdateDirectoryNotRecursive (_root_path);
+		}
+
+		/// <summary>
 		/// Run the diff operation. Until this is called, all lists will be empty
 		/// </summary>
 		/// <returns>true if anything is different between index, tree, and workdir</returns>
-		private bool Diff()
+		private void UpdateDirectoryRecursive (string path)
 		{
 			var commit = Repository.Head.CurrentCommit;
 			_tree = (commit != null ? commit.Tree : new Core.Tree(Repository));
@@ -128,17 +169,115 @@ namespace GitSharp
 			_index.RereadIfNecessary();
 			DirectoryInfo root = _index.Repository.WorkingDirectory;
 			var visitor = new AbstractIndexTreeVisitor { VisitEntryAux = OnVisitEntry };
-			new IndexTreeWalker(_index, _tree, CreateWorkingDirectoryTree(Repository), root, visitor).Walk();
-			return AnyDifferences;
+			new IndexTreeWalker(_index, _tree, CreateWorkingDirectoryTree(path), root, visitor).Walk();
 		}
 
-		private GitSharp.Core.Tree CreateWorkingDirectoryTree(Repository repo)
+		private void UpdateDirectoryNotRecursive (string path)
 		{
-			var root = repo._internal_repo.WorkingDirectory;
-			var tree = new Core.Tree(repo._internal_repo);
-			IgnoreHandler = new IgnoreHandler(repo);
-			FillTree(root, tree);
-			return tree;
+			_index = Repository.Index.GitIndex;
+			
+			// Tree that will hold the working dir file entries
+			var wtree = new Core.Tree(Repository._internal_repo);
+			
+			// Get a list of a leaves in the path
+			
+			Tree commitTree = null;
+			var commit = Repository.Head.CurrentCommit;
+			commitTree = commit != null ? commit.Tree : null;
+			if (commitTree != null)
+				commitTree = commitTree[path] as Tree;
+			
+			Dictionary<string,Leaf> commitEntries;
+			if (commitTree != null)
+				commitEntries = commitTree.Leaves.ToDictionary (l => l.Path);
+			else
+				commitEntries = new Dictionary<string, Leaf> ();
+			
+			HashSet<string> visited = new HashSet<string> ();
+
+			// Compare commited files and working tree files
+			
+			DirectoryInfo dir = new DirectoryInfo (Repository.FromGitPath (path));
+			if (dir.Exists) {
+				foreach (FileInfo fileInfo in dir.GetFiles ()) {
+					string file = path + "/" + fileInfo.Name;
+					
+					Leaf lf;
+					if (commitEntries.TryGetValue (file, out lf)) {
+						// Remove from the collection. At the end of the loop, entries still remaining in the
+						// collection will be processed as not having a corresponding working dir file
+						commitEntries.Remove (file);
+					}
+					
+					TreeEntry wdirEntry = null;
+					if (!IgnoreHandler.IsIgnored (file) && fileInfo.Exists)
+						wdirEntry = wtree.AddFile (file);
+					
+					GitIndex.Entry indexEntry = _index.GetEntry (file);
+					
+					OnVisitEntry (lf != null ? lf.InternalEntry : null, wdirEntry, indexEntry, fileInfo);
+					visited.Add (file);
+				}
+			}
+			
+			// Now visit entries for which a working dir file was not found
+			
+			foreach (var lf in commitEntries) {
+				string file = lf.Key;
+				FileInfo fileInfo = new FileInfo (Repository.FromGitPath (file));
+				GitIndex.Entry indexEntry = _index.GetEntry (file);
+				OnVisitEntry (lf.Value.InternalEntry, null, indexEntry, fileInfo);
+				visited.Add (file);
+			}
+			
+			// Finally, visit remaining index entries which are not in the working dir nor in the commit
+			
+			string subdir_prefix = !string.IsNullOrEmpty (_root_path) ? _root_path + "/" : string.Empty;
+			
+			foreach (var ie in _index.Members) {
+				string file = ie.Name;
+				// Exclude entries in subdirectories of _root_path 
+				int i = file.IndexOf ('/', subdir_prefix.Length + 1);
+				if (i == -1 && !visited.Contains (file))
+					OnVisitEntry (null, null, ie, new FileInfo (Repository.FromGitPath (file)));
+			}
+		}
+		
+		private void UpdateSingleFile (string file)
+		{
+			TreeEntry treeEntry = null;
+			var commit = Repository.Head.CurrentCommit;
+			_tree = commit != null ? commit.Tree : null;
+			if (_tree != null)
+				treeEntry = _tree.FindBlobMember (file);
+			
+			_index = Repository.Index.GitIndex;
+			_index.RereadIfNecessary();
+			GitIndex.Entry indexEntry = _index.GetEntry (file);
+			
+			TreeEntry wdirEntry = null;
+			FileInfo fileInfo = new FileInfo (Path.Combine (Repository.WorkingDirectory, file.Replace ('/', Path.DirectorySeparatorChar)));
+			if (fileInfo.Exists && !IgnoreHandler.IsIgnored(file)) {
+				var tree = new Core.Tree(Repository._internal_repo);
+				wdirEntry = tree.AddFile (file);
+			}
+			
+			OnVisitEntry (treeEntry, wdirEntry, indexEntry, fileInfo);
+		}
+
+		private GitSharp.Core.Tree CreateWorkingDirectoryTree(string subdir)
+		{
+			var mainTree = new Core.Tree(Repository._internal_repo);
+			var tree = mainTree;
+			
+			// Create the subdir branch
+			foreach (string sdir in subdir.Split (new char[] {'/'}, StringSplitOptions.RemoveEmptyEntries))
+				tree = tree.AddTree (sdir);
+			
+			DirectoryInfo root = new DirectoryInfo (Repository.FromGitPath (subdir));
+			if (root.Exists)
+				FillTree(root, tree);
+			return mainTree;
 		}
 
 		private IgnoreHandler IgnoreHandler
@@ -181,9 +320,15 @@ namespace GitSharp
 			//if (indexEntry != null)
 			//   Console.WriteLine("index: " + indexEntry.Name);
 			//Console.WriteLine("file: " + file.Name);
+			
+			string subdir_prefix = !string.IsNullOrEmpty (_root_path) ? _root_path + "/" : null;
+			
 			PathStatus path_status = null;
 			if (indexEntry != null)
 			{
+				if (subdir_prefix != null && !indexEntry.Name.StartsWith (subdir_prefix))
+					return; // File outside the directory
+				
 				if (treeEntry == null)
 				{
 					path_status = OnAdded(indexEntry.Name, path_status);
@@ -195,7 +340,11 @@ namespace GitSharp
 				}
 				if (!file.Exists)
 				{
-					path_status = OnMissing(indexEntry.Name, path_status);
+					// If the file is not stagged, it's a removed file, not a missing file
+					if (indexEntry.Mtime != indexEntry.Ctime)
+						path_status = OnMissing(indexEntry.Name, path_status);
+					else
+						path_status = OnRemoved(indexEntry.Name, path_status);
 				}
 				if (file.Exists && indexEntry.IsModified(new DirectoryInfo(Repository.WorkingDirectory), Options.ForceContentCheck))
 				{
@@ -208,7 +357,10 @@ namespace GitSharp
 			}
 			else // <-- index entry == null
 			{
-				if (treeEntry != null && !(treeEntry is Tree))
+				if (treeEntry != null && subdir_prefix != null && !treeEntry.FullName.StartsWith (subdir_prefix))
+					return; // File outside the directory
+				
+				if (treeEntry != null && !(treeEntry is Core.Tree))
 				{
 					path_status = OnRemoved(treeEntry.FullName, path_status);
 				}
@@ -308,23 +460,6 @@ namespace GitSharp
 			Untracked.Add(path);
 			AnyDifferences = true;
 			return status;
-		}
-
-
-		/// <summary>
-		/// Recalculates the status
-		/// </summary>
-		public void Update()
-		{
-			AnyDifferences = false;
-			Added = new HashSet<string>();
-			Staged = new HashSet<string>();
-			Removed = new HashSet<string>();
-			Missing = new HashSet<string>();
-			Modified = new HashSet<string>();
-			Untracked = new HashSet<string>();
-			MergeConflict = new HashSet<string>();
-			Diff();
 		}
 	}
 

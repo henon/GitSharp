@@ -64,7 +64,6 @@ namespace GitSharp
 		{
 			Repository = repository;
 			Options = options;
-			IgnoreHandler = new IgnoreHandler(Repository);
 			_root_path = string.Empty;
 			_recursive = true;
 			Update();
@@ -147,6 +146,7 @@ namespace GitSharp
 			Modified = new HashSet<string>();
 			Untracked = new HashSet<string>();
 			MergeConflict = new HashSet<string>();
+			IgnoreHandler = new IgnoreHandler(Repository);
 			
 			if (_file_path != null)
 				UpdateSingleFile (_file_path);
@@ -338,11 +338,7 @@ namespace GitSharp
 				}
 				if (!file.Exists)
 				{
-					// If the file is not stagged, it's a removed file, not a missing file
-					if (indexEntry.Mtime != indexEntry.Ctime)
-						path_status = OnMissing(indexEntry.Name, path_status);
-					else
-						path_status = OnRemoved(indexEntry.Name, path_status);
+					path_status = OnMissing(indexEntry.Name, path_status);
 				}
 				if (file.Exists && indexEntry.IsModified(new DirectoryInfo(Repository.WorkingDirectory), Options.ForceContentCheck))
 				{

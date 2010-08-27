@@ -154,7 +154,7 @@ namespace GitSharp.API.Tests
 				filesToCheck.Clear ();
 				results = oper (repo, filesToCheck);
                 AssertStatus (results, filesToCheck, filename, results.Untracked);
-                AssertStatus (results, filesToCheck, filenameSubdir1, results.Removed);
+                AssertStatus (results, filesToCheck, filenameSubdir1, results.Missing);  // FIXME: should be Removed??
                 AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
 
 				// Stage the file removal
@@ -181,7 +181,7 @@ namespace GitSharp.API.Tests
 				filesToCheck.Clear ();
 				results = oper (repo, filesToCheck);
                 AssertStatus (results, filesToCheck, filename, results.Untracked);
-                AssertStatus (results, filesToCheck, filenameSubdir1, results.Added, results.Removed);
+                AssertStatus (results, filesToCheck, filenameSubdir1, results.Added, results.Missing);  // FIXME: should be Removed??
                 AssertStatus (results, filesToCheck, filenameSubdir2, results.Untracked);
 			}
 		}

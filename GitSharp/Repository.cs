@@ -59,6 +59,8 @@ namespace GitSharp
 
 		internal CoreRepository _internal_repo;
 		
+		RemoteCollection _remoteCollection;
+
 		internal Repository(CoreRepository repo)
 		{
 			//PreferredEncoding = Encoding.UTF8;
@@ -402,6 +404,14 @@ namespace GitSharp
 			}
 		}
 		
+		public RemoteCollection Remotes {
+			get {
+				if (_remoteCollection == null)
+					_remoteCollection = new RemoteCollection (this);
+				return _remoteCollection;
+			}
+		}
+
 		/// <summary>
 		/// Returns the git configuration containing repository-specific, user-specific and global 
 		/// settings.

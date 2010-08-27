@@ -72,6 +72,8 @@ namespace GitSharp.Core.Transport
 		/// Default value for <see cref="ReceivePack"/> if not specified.
 		/// </summary>
 		public const string DEFAULT_RECEIVE_PACK = "git-receive-pack";
+		
+		string oldName;
 
 		/// <summary>
 		/// Parse all remote blocks in an existing configuration file, looking for
@@ -105,7 +107,7 @@ namespace GitSharp.Core.Transport
         /// <summary>
         /// local name this remote configuration is recognized as
         /// </summary>
-		public string Name { get; private set; }
+		public string Name { get; set; }
 
         /// <summary>
         /// all configured URIs under this remote
@@ -184,6 +186,7 @@ namespace GitSharp.Core.Transport
 			if (rc == null)
 				throw new ArgumentNullException ("rc");
 			Name = remoteName;
+			oldName = Name;
 
 			string[] vlst = rc.getStringList(Section, Name, KeyUrl);
 			URIs = new List<URIish>(vlst.Length);
@@ -267,6 +270,22 @@ namespace GitSharp.Core.Transport
 			Set(rc, KeyTagopt, TagOpt.Option, TagOpt.AUTO_FOLLOW.Option);
 			Set(rc, KeyMirror, Mirror, DefaultMirror);
 			Set(rc, KeyTimeout, Timeout, 0);
+			
+			if (oldName != Name) {
+				rc.unsetSection (Section, oldName);
+				oldName = Name;
+			}
+		}
+		
+        /// <summary>
+        /// Remove this remote's definition from the configuration.
+        /// </summary>
+        /// <param name="rc">the configuration from which to remove ourselves.</param>
+		public void Delete (Config rc)
+		{
+			if (rc == null)
+				throw new ArgumentNullException ("rc");
+			rc.unsetSection (Section, Name);
 		}
 
 		private void Set(Config rc, string key, string currentValue, IEquatable<string> defaultValue)

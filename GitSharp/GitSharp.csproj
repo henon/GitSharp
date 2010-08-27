@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -17,17 +17,23 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\build\mono-2.0-debug\bin</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\GitSharp.XML</DocumentationFile>
     <NoWarn>1591</NoWarn>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="BeforeBuild" command="nant -D:project.sources.path=${ProjectDir} init create-assembly-info" workingdir="${SolutionDir}" externalConsole="true" />
+        <Command type="AfterBuild" command="nant -D:project.sources.path=${ProjectDir} init cleanup-assembly-info" workingdir="${SolutionDir}" externalConsole="true" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\build\mono-2.0-release\bin</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -39,15 +45,12 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Tamir.SharpSSH, Version=1.1.1.13, Culture=neutral">
+    <Reference Include="Tamir.SharpSSH, Version=1.1.1.13, Culture=neutral, PublicKeyToken=null">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Tamir.SharpSSH.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\SharedAssemblyInfo.cs">
-      <Link>Properties\SharedAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="Commands\AbstractFetchCommand.cs" />
     <Compile Include="Author.cs" />
     <Compile Include="Commands\AbstractCommand.cs" />
@@ -171,6 +174,7 @@
     <Compile Include="Tree.cs" />
     <Compile Include="RepositoryStatus.cs" />
     <Compile Include="UserInfoProvider.cs" />
+    <Compile Include="Remote.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GitSharp.Core\GitSharp.Core.csproj">
@@ -189,4 +193,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
 </Project>

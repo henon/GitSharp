@@ -44,6 +44,7 @@ using GitSharp.Core;
 using GitSharp.Core.RevWalk;
 using GitSharp.Core.Util;
 using GitSharp.Core.Util.JavaHelper;
+using GitSharp.Core.Diff;
 using ObjectId = GitSharp.Core.ObjectId;
 using CoreRef = GitSharp.Core.Ref;
 using CoreTree = GitSharp.Core.Tree;
@@ -343,6 +344,53 @@ namespace GitSharp
 
 		#endregion
 
+		#region --> Blame
+		
+		public Commit[] Blame (string path)
+		{
+			Leaf leaf = Tree [path] as Leaf;
+			if (leaf == null)
+				throw new ArgumentException("The given path does not exist in this commit: " + path);
+			byte[] data = leaf.RawData;
+			int lineCount = RawParseUtils.lineMap (data, 0, data.Length).size ();
+			Commit[] lines = new Commit [lineCount];
+			var curText = new RawText (data);
+			Commit prevAncestor = this;
+			
+			Leaf prevLeaf = null;
+			Commit prevCommit = null;
+			int emptyLines = lineCount;
+			
+			foreach (Commit ancestor in Ancestors) {
+				Leaf cleaf = ancestor.Tree [path] as Leaf;
+				if (prevCommit != null && (cleaf == null || cleaf.Hash != prevLeaf.Hash)) {
+					byte[] prevData = prevLeaf.RawData;
+					if (prevData == null)
+						break;
+					var prevText = new RawText (prevData);
+					var differ = new MyersDiff (prevText, curText);
+					foreach (Edit e in differ.getEdits ()) {
+						for (int n = e.BeginB; n < e.EndB; n++) {
+							if (lines [n] == null) {
+								lines [n] = prevCommit;
+								emptyLines--;
+							}
+						}
+					}
+					if (cleaf == null || emptyLines <= 0)
+						break;
+				}
+				prevCommit = ancestor;
+				prevLeaf = cleaf;
+			}
+			for (int n=0; n<lines.Length; n++)
+				if (lines [n] == null)
+					lines [n] = prevAncestor;
+			return lines;
+		}
+		
+		#endregion
+		
 		#region --> Diffing commits
 
 

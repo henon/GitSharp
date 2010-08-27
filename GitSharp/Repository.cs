@@ -60,6 +60,7 @@ namespace GitSharp
 		internal CoreRepository _internal_repo;
 		
 		RemoteCollection _remoteCollection;
+		StashCollection _stashCollection;
 
 		internal Repository(CoreRepository repo)
 		{
@@ -409,6 +410,14 @@ namespace GitSharp
 				if (_remoteCollection == null)
 					_remoteCollection = new RemoteCollection (this);
 				return _remoteCollection;
+			}
+		}
+		
+		public StashCollection Stashes {
+			get {
+				if (_stashCollection == null)
+					_stashCollection = new StashCollection (this);
+				return _stashCollection;
 			}
 		}
 

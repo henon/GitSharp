@@ -175,6 +175,7 @@
     <Compile Include="RepositoryStatus.cs" />
     <Compile Include="UserInfoProvider.cs" />
     <Compile Include="Remote.cs" />
+    <Compile Include="Stash.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GitSharp.Core\GitSharp.Core.csproj">

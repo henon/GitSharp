@@ -369,7 +369,6 @@
     <Compile Include="Util\RawCharSequence.cs" />
     <Compile Include="Util\RawSubstringPattern.cs" />
     <Compile Include="Util\TemporaryBuffer.cs" />
-    <Compile Include="VersionAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CachedObjectDirectory.cs" />

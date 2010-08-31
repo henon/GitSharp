@@ -19,23 +19,17 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\build\mono-2.0-debug\bin</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\GitSharp.Core.XML</DocumentationFile>
     <NoWarn>1591</NoWarn>
-    <CustomCommands>
-      <CustomCommands>
-        <Command type="BeforeBuild" command="nant -D:project.sources.path=${ProjectDir} init create-assembly-info" workingdir="${SolutionDir}" externalConsole="true" />
-        <Command type="AfterBuild" command="nant -D:project.sources.path=${ProjectDir} init cleanup-assembly-info" workingdir="${SolutionDir}" externalConsole="true" />
-      </CustomCommands>
-    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\build\mono-2.0-debug\bin</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -54,10 +48,6 @@
     <Reference Include="Tamir.SharpSSH, Version=1.1.1.13, Culture=neutral, PublicKeyToken=null">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Tamir.SharpSSH.dll</HintPath>
-    </Reference>
-    <Reference Include="Winterdom.IO.FileMap, Version=2.0.2.0, Culture=neutral, PublicKeyToken=4982617362e1edb5">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\Winterdom.IO.FileMap.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

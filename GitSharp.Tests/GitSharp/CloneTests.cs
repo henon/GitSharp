@@ -119,7 +119,6 @@ namespace GitSharp.Tests.GitSharp
         }
 
         [Test]
-        [Ignore]
         public void Check_cloned_repo_http()
         {
             string toPath = Path.Combine(trash.FullName, "test");
@@ -127,6 +126,13 @@ namespace GitSharp.Tests.GitSharp
 
             using (Repository repo = Git.Clone(fromUrl, toPath))
             {
+
+                var status = new RepositoryStatus(repo, new RepositoryStatusOptions { ForceContentCheck = false });
+                Assert.IsFalse(status.AnyDifferences);
+
+                status = new RepositoryStatus(repo, new RepositoryStatusOptions { ForceContentCheck = true });
+                Assert.IsFalse(status.AnyDifferences);
+
                 Assert.IsTrue(Repository.IsValid(repo.Directory));
                 //Verify content is in the proper location
                 var readme = Path.Combine(repo.WorkingDirectory, "master.txt");

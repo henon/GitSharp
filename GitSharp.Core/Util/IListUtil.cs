@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace GitSharp.Core.Util
 {
+    [DebuggerStepThrough]
     public static class IListUtil
     {
         public static bool isEmpty<T>(this ICollection<T> l)

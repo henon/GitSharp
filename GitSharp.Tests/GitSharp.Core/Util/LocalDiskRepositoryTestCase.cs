@@ -157,6 +157,14 @@ namespace GitSharp.Core.Tests.Util
             if (fs.IsFile())
             {
                 fs.DeleteFile();
+
+                // Deleting a file only marks it for deletion, following code blocks until
+                // the file is actually deleted. For a more thorough explanation see the
+                // comment below @ the directory.Delete()
+                while (File.Exists(fs.FullName))
+                {
+                    Thread.Sleep(0);
+                }
                 return;
             }
 
@@ -173,6 +181,7 @@ namespace GitSharp.Core.Tests.Util
                 }
                 
                 dir.Delete();
+
                 // dir.Delete() only marks the directory for deletion (see also: http://social.msdn.microsoft.com/Forums/en/csharpgeneral/thread/a2fcc569-1835-471f-b731-3fe9c6bcd2d9),
                 // so it creates a race condition between the actual deletion of this directory, and the 
                 // deletion of the parent directory. If this directory is not deleted when the parent directory

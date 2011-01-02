@@ -86,7 +86,6 @@ namespace GitSharp.Tests.GitSharp
         }
 
         [Test]
-        [Ignore("TransportLocal is not completely ported yet.")]
         public void Checked_cloned_local_dotGit_suffixed_repo()
         {
             //setup of .git directory
@@ -100,10 +99,8 @@ namespace GitSharp.Tests.GitSharp
             var repositoryPath = new DirectoryInfo(Path.Combine(tempRepository.FullName, Constants.DOT_GIT));
             Directory.Move(repositoryPath.FullName + "ted", repositoryPath.FullName);
 
-
             using (var repo = new Repository(repositoryPath.FullName))
             {
-                Assert.IsTrue(Repository.IsValid(repo.Directory));
                 Commit headCommit = repo.Head.CurrentCommit;
                 Assert.AreEqual("f3ca78a01f1baa4eaddcc349c97dcab95a379981", headCommit.Hash);
             }

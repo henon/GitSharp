@@ -156,7 +156,10 @@ namespace GitSharp.Core.Tests.Util
         {
             if (fs.IsFile())
             {
-                fs.DeleteFile();
+                if (!fs.DeleteFile())
+                {
+                    throw new IOException("Unable to delete file: " + fs.FullName);
+                }
 
                 // Deleting a file only marks it for deletion, following code blocks until
                 // the file is actually deleted. For a more thorough explanation see the

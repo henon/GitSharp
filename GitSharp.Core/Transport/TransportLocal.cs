@@ -2,7 +2,7 @@
  * Copyright (C) 2008, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
  * Copyright (C) 2008, Marek Zawirski <marek.zawirski@gmail.com>
- * Copyright (C) 2010, Dominique van de Vorle <dvdvorle@gmail.com>
+ * Copyright (C) 2011, Dominique van de Vorle <dvdvorle@gmail.com>
  *
  * All rights reserved.
  *

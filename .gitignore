@@ -16,5 +16,4 @@ Reports
 test-results
 dist
 build
-SharedAssemblyInfo.cs
 VersionAssemblyInfo.cs

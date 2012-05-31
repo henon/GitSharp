@@ -281,26 +281,25 @@ namespace GitSharp.Commands
 
 		private static GitSharp.Core.Ref guessHEAD(FetchResult result)
 		{
-			GitSharp.Core.Ref idHEAD = result.GetAdvertisedRef(Constants.HEAD);
-			List<GitSharp.Core.Ref> availableRefs = new List<GitSharp.Core.Ref>();
-			GitSharp.Core.Ref head = null;
+            // Some transports allow us to see where HEAD points to. If that is not so,
+            // we'll have to guess.
+			GitSharp.Core.Ref head = result.GetAdvertisedRef(Constants.HEAD);
+            if (head != null)
+            {
+                return head;
+            }
 
-			foreach (GitSharp.Core.Ref r in result.AdvertisedRefs)
-			{
-				string n = r.Name;
-				if (!n.StartsWith(Constants.R_HEADS))
-					continue;
-				availableRefs.Add(r);
-				if (idHEAD == null || head != null)
-					continue;
+            var availableHeads = result.AdvertisedRefs.Where(r => r.Name.StartsWith(Constants.R_HEADS));
 
-				if (r.ObjectId.Equals(idHEAD.ObjectId))
-					head = r;
-			}
-			availableRefs.Sort(RefComparator.INSTANCE);
-			if (idHEAD != null && head == null)
-				head = idHEAD;
-			return head;
+            // master is our preferred guess, so if it's advertised, return that.
+            GitSharp.Core.Ref guessedHead = result.GetAdvertisedRef(Constants.R_HEADS + Constants.MASTER);
+            if (guessedHead == null && availableHeads.Count() > 0)
+            {
+                // if master is not advertised, return any other head.
+                guessedHead = availableHeads.First();
+            }
+
+            return guessedHead;
 		}
 
 		private void doCheckout(GitSharp.Core.Ref branch)

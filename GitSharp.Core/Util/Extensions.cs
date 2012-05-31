@@ -213,11 +213,21 @@ namespace GitSharp.Core
             return fileSystemInfo.FullName;
         }
 
+        /// <summary>
+        /// Checks if a directory exists with the FullName of the FileSystemInfo.
+        /// </summary>
+        /// <param name="fileSystemInfo">The FileSystemInfo wich needs to be checked.</param>
+        /// <returns>True if a directry exists with the FullName of the FileSystemInfo, false otherwise</returns>
         public static bool IsDirectory(this FileSystemInfo fileSystemInfo)
         {
             return Directory.Exists(fileSystemInfo.FullName);
         }
 
+        /// <summary>
+        /// Checks if a file exists with the FullName of the FileSystemInfo.
+        /// </summary>
+        /// <param name="fileSystemInfo">The FileSystemInfo wich needs to be checked.</param>
+        /// <returns>True if a file exists with the FullName of the FileSystemInfo, false otherwise</returns>
         public static bool IsFile(this FileSystemInfo fileSystemInfo)
         {
             return File.Exists(fileSystemInfo.FullName);

@@ -47,7 +47,7 @@ namespace GitSharp.Commands
     /// <summary>
     /// Abstract base class of all git commands. It provides basic infrastructure
     /// </summary>
-    public abstract class AbstractCommand : IGitCommand
+    public abstract class AbstractCommand : IGitCommand, IDisposable
     {
         /// <summary>
         /// Abbreviates a ref-name, used in internal output
@@ -212,5 +212,17 @@ namespace GitSharp.Commands
         /// </summary>
         public abstract void Execute();
 
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            if (_repository != null)
+            {
+                _repository.Dispose();
+            }
+        }
+
+        #endregion
     }
 }

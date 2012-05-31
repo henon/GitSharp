@@ -340,7 +340,7 @@ namespace GitSharp.CLI
                 Git.DefaultRepository.Close();
 
 #if DEBUG
-            Console.WriteLine("\n\nrunning in DEBUG mode, press any key to exit.");
+            Console.WriteLine("\n\nrunning in DEBUG mode, press [ENTER] to exit.");
             Console.In.ReadLine();
 #endif
             Environment.Exit(exit_code);

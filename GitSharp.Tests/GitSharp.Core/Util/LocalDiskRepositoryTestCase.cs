@@ -56,6 +56,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using GitSharp.Core;
 using GitSharp.Core.Util;
 using GitSharp.Core.Util.JavaHelper;
@@ -85,7 +86,7 @@ namespace GitSharp.Core.Tests.Util
 
         [SetUp]
         public virtual void setUp(){
-            recursiveDelete(testName() + " (SetUp)", trash, false, true);
+            recursiveDelete(testName() + " (SetUp)", trash, true);
 
             mockSystemReader = new MockSystemReader();
             mockSystemReader.userGitConfig = new FileBasedConfig(new FileInfo(Path.Combine(trash.FullName, "usergitconfig")));
@@ -121,14 +122,14 @@ namespace GitSharp.Core.Tests.Util
             if (useMMAP)
                 System.GC.Collect();
 
-            recursiveDelete(testName() + " (TearDown)", trash, false, true);
+            recursiveDelete(testName() + " (TearDown)", trash, true);
 
         }
 
         [TestFixtureTearDown]
         public virtual void FixtureTearDown()
         {
-            recursiveDelete(testName() + " (FixtureTearDown)", trash, false, true);
+            recursiveDelete(testName() + " (FixtureTearDown)", trash, true);
         }
 
         /** Increment the {@link #author} and {@link #committer} times. */
@@ -148,21 +149,30 @@ namespace GitSharp.Core.Tests.Util
 	 *            the recursively directory to delete, if present.
 	 */
         protected void recursiveDelete(FileSystemInfo dir) {
-            recursiveDelete(testName(), dir, false, true);
+            recursiveDelete(testName(), dir, true);
         }
 
-        private static bool recursiveDelete(string testName, FileSystemInfo fs, bool silent,  bool failOnError)
+        private static void recursiveDelete(string testName, FileSystemInfo fs,  bool failOnError)
         {
-            Debug.Assert(!(silent && failOnError));
-
             if (fs.IsFile())
             {
-                fs.DeleteFile();
-                return silent;
+                if (!fs.DeleteFile())
+                {
+                    throw new IOException("Unable to delete file: " + fs.FullName);
+                }
+
+                // Deleting a file only marks it for deletion, following code blocks until
+                // the file is actually deleted. For a more thorough explanation see the
+                // comment below @ the directory.Delete()
+                while (File.Exists(fs.FullName))
+                {
+                    Thread.Sleep(0);
+                }
+                return;
             }
 
             var dir = new DirectoryInfo(fs.FullName);
-            if (!dir.Exists) return silent;
+            if (!Directory.Exists(dir.FullName)) return;
 
             try
             {
@@ -170,17 +180,27 @@ namespace GitSharp.Core.Tests.Util
 
                 foreach (FileSystemInfo e in ls)
                 {
-                    silent = recursiveDelete(testName, e, silent, failOnError);
+                    recursiveDelete(testName, e, failOnError);
                 }
-
+                
                 dir.Delete();
-            }
-            catch (IOException e)
-            {
-                ReportDeleteFailure(testName, failOnError, fs, e.Message);
-            }
 
-            return silent;
+                // dir.Delete() only marks the directory for deletion (see also: http://social.msdn.microsoft.com/Forums/en/csharpgeneral/thread/a2fcc569-1835-471f-b731-3fe9c6bcd2d9),
+                // so it creates a race condition between the actual deletion of this directory, and the 
+                // deletion of the parent directory. If this directory is not deleted when the parent directory
+                // is tried to be deleted, an IOException ("Directory not empty") will be thrown.
+                // The following code blocks untill the directory is actually deleted.
+                // (btw, dir.Exists keeps returning true on my (Windows 7) machine, even if the Explorer and Command
+                // say otherwise)
+                while (Directory.Exists(dir.FullName))
+                {
+                    Thread.Sleep(0);
+                }
+            }
+            catch (IOException ex)
+            {
+                ReportDeleteFailure(testName, failOnError, fs, ex.ToString());
+            }
         }
 
         private static void ReportDeleteFailure(string name, bool failOnError, FileSystemInfo fsi, string message)

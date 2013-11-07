@@ -131,8 +131,8 @@ namespace GitSharp.Core.Transport
                 return def;
 
             string identityKey = identityFile.FullName;
-            JSch jsch = _byIdentityFile[identityKey];
-            if (jsch == null)
+            JSch jsch;
+            if(!_byIdentityFile.TryGetValue(identityKey, out jsch))
             {
                 jsch = new JSch();
                 jsch.setHostKeyRepository(def.getHostKeyRepository());

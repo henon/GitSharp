@@ -108,9 +108,14 @@ namespace GitSharp
 				i2 += 2;
 				i = line.IndexOf (' ', i2);
 				int secs = int.Parse (line.Substring (i2, i - i2));
-				DateTime t = new DateTime (1970, 1, 1) + TimeSpan.FromSeconds (secs);
-				string st = t.ToString ("yyyy-MM-ddTHH:mm:ss") + line.Substring (i + 1, 3) + ":" + line.Substring (i + 4, 2);
-				s.DateTime = DateTimeOffset.Parse (st);
+
+				string stUtcOffset = line.Substring (i + 1, 3) + ":" + line.Substring (i + 4, 2);
+				if (stUtcOffset[0] == '+') stUtcOffset = stUtcOffset.Remove(0, 1);
+				TimeSpan utcOffset = TimeSpan.Parse(stUtcOffset);
+
+				DateTime t = new DateTime (1970, 1, 1) + TimeSpan.FromSeconds (secs) + utcOffset;
+				s.DateTime = new DateTimeOffset(t, utcOffset);
+
 				s.Comment = line.Substring (i + 7);
 			}
 			s.FullLine = line;

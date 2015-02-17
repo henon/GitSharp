@@ -77,5 +77,5 @@ C based implementation can be obtained from the GIT websites:
   http://git-scm.com/ 
   http://progit.org/book/ - free book about Git
 
-More information about the Java implemetation which Git# stems from:
+More information about the Java implemetation which Git# steps from:
   hhttp://www.eclipse.org/jgit
